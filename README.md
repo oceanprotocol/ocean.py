@@ -13,7 +13,7 @@
 
 This stripped-down flow shows the essence of Ocean. Just downloading, no metadata.
 
-[Go to simple flow](README_simpleflow.md)
+[Go to simple flow](README_simple_flow.md)
 
 ## Quickstart: Marketplace Flow
 
