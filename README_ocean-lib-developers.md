@@ -50,18 +50,17 @@ This usually happens automatically. Here's the manual way, if needed:
 brownie compile
 ```
 
-## Usage: Testing
+## Usage: Testing / Quickstart
 
+Test all
 ```bash
-brownie test
+pytest
 ```
 
-## Usage : Does quickstart work?
-
-```console
-python quickstart.py
+Test simple flow quickstart
+```bash
+pytest -k simpleflow
 ```
-
 
 ## Usage : Playing
 
@@ -87,21 +86,4 @@ Transaction sent: 0x9d20d3239d5c8b8a029f037fe573c343efd9361efd4d99307e0f5be74993
 
 Change .sol, then update or add new tests.
 
-# Quickstart snippet
 
-## 1. Alice publishes a dataset (= publishes a datatoken contract)
-
-For now, you're Alice:) Let's proceed.
-
-```python
-from ocean_lib import Ocean
-config = {
-   'network' : 'rinkeby',
-   'privateKey' : '8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f',
-}
-ocean = Ocean(config)
-account = ocean.accounts.list()[0]
-token = ocean.datatoken.create('localhost:8030',account)
-dt_address = token.getAddress()
-print(dt_address)
-```
