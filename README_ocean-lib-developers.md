@@ -1,24 +1,32 @@
 # ocean-lib-py
 
-Compile, test, and deploy Ocean datatokens with the help of [Brownie](https://eth-brownie.readthedocs.io). Datatokens are ERC20 tokens with an extra 'blob' parameter.
+Compile, test, and deploy Ocean datatokens with the help of [Brownie](https://eth-brownie.readthedocs.io). 
 
-Note: we don't use a Factory contract here. It just deploys the tokens individually.
+"Make" Steps:
+1. Git clone ocean contracts (Factory.sol, etc)
+1. `brownie compile` the contracts
+1. if the previous step didn't result in an ABI for the proxy contract / ERC20 contract, put one in (in interfaces/)
+1. Anything else such that library will "just work"
 
-# Setup
+How library will work:
+* ocean.createDataToken() calls Factory's ABI. The Factory contract will deploy a new proxy contract, using the blockchain (It *won't* use Brownie to deploy the proxy contract)
+
+This is currently a "developer version" of ocean-lib-py. Its user version be more stripped down: it won't have .sol contracts, or need Brownie.
 
 ## New Session: Installation
+
+Get a local copy of `contracts` repo.
+```console
+git clone https://github.com/oceanprotocol/ocean-contracts
+```
 
 [Install Brownie](https://medium.com/@iamdefinitelyahuman/getting-started-with-brownie-part-1-9b2181f4cb99). It can be tricky; [here's steps](https://github.com/trentmc/brownie-instrs/blob/master/README_install.md) that I followed.
 
 Then `git clone` this repo, and `cd` into it.
 
-Initalize virtual env't:
+Initalize virtual env't. Activate env't. Update modules in env't.
 ```console
 python -m venv myenv
-```
-
-Activate environment, update it:
-```console
 source myenv/bin/activate 
 pip install -r requirements.txt 
 ```
