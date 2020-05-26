@@ -32,8 +32,12 @@ os.mkdir('contracts')
 os.system('cp ../ocean-contracts/contracts/*.sol contracts/')
 os.system('cp ../ocean-contracts/contracts/*/*.sol contracts/')
 os.system('cp ../ocean-contracts/contracts/*/*/*.sol contracts/')
+
 os.system('cp ../openzeppelin-contracts/contracts/token/ERC20/ERC20.sol contracts/')
-os.system('cp ../openzeppelin-contracts/contracts/math/SafeMath.sol contracts/')
+os.system('cp ../openzeppelin-contracts/contracts/token/ERC20/../../GSN/Context.sol contracts/')
+os.system('cp ../openzeppelin-contracts/contracts/token/ERC20/./IERC20.sol contracts/')
+os.system('cp ../openzeppelin-contracts/contracts/token/ERC20/../../math/SafeMath.sol contracts/')
+os.system('cp ../openzeppelin-contracts/contracts/token/ERC20/../../utils/Address.sol contracts/')
 
 def inplace_change(filename, old_s, new_s):
     with open(filename) as f:
@@ -60,5 +64,5 @@ for f in glob.glob("contracts/*.sol"):
 print('brownie compile')
 os.system('brownie compile')
 
-#print('final test')
+print('final test')
 #os.system('pytest')
