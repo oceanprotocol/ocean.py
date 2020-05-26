@@ -9,9 +9,12 @@ This is currently a "developer version" of ocean-lib-py. Its user version be mor
 
 ## Installation
 
-Get a local copy of `contracts` repo.
+Get a local copy of `contracts` repo, ensure it's up to date.
 ```console
 git clone https://github.com/oceanprotocol/ocean-contracts
+cd ocean contracts
+git pull
+cd -
 ```
 
 [Install Brownie](https://medium.com/@iamdefinitelyahuman/getting-started-with-brownie-part-1-9b2181f4cb99). It can be tricky; [here's steps](https://github.com/trentmc/brownie-instrs/blob/master/README_install.md) that I followed.
