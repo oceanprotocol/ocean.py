@@ -28,16 +28,37 @@ if not os.path.exists('../openzeppelin-contracts'):
 print('populate ./contracts')
 if os.path.exists('./contracts'):
     os.system('rm -rf contracts')
-shutil.copytree('../ocean-contracts/contracts', './contracts')
-shutil.copyfile('../openzeppelin-contracts/contracts/token/ERC20/ERC20.sol', 'contracts/ERC20.sol')
-shutil.copyfile('../openzeppelin-contracts/contracts/math/SafeMath.sol', 'contracts/SafeMath.sol')
+os.mkdir('contracts')
+os.system('cp ../ocean-contracts/contracts/*.sol contracts/')
+os.system('cp ../ocean-contracts/contracts/*/*.sol contracts/')
+os.system('cp ../ocean-contracts/contracts/*/*/*.sol contracts/')
+os.system('cp ../openzeppelin-contracts/contracts/token/ERC20/ERC20.sol contracts/')
+os.system('cp ../openzeppelin-contracts/contracts/math/SafeMath.sol contracts/')
 
-print('clean up imports in .sol files')
-os.system("cd contracts; find . -type f -exec sed -i 's/openzeppelin-solidity\/contracts\/math\//bar/g' {} +; cd -")
-os.system("cd contracts; find . -type f -exec sed -i 's/openzeppelin-solidity\/contracts\/token\/ERC20\//bar/g' {} +; cd -")
+def inplace_change(filename, old_s, new_s):
+    with open(filename) as f:
+        s = f.read()
+        if old_s not in s:
+            return
+    with open(filename, 'w') as f:
+        s = s.replace(old_s, new_s)
+        f.write(s)
+
+print('flatten imports in .sol files')
+import glob
+for f in glob.glob("contracts/*.sol"):
+    inplace_change(f, 'openzeppelin-solidity/contracts/', './')
+    inplace_change(f, '../../', './')
+    inplace_change(f, '../', './')
+    inplace_change(f, 'fee/', '')
+    inplace_change(f, 'GSN/', '')
+    inplace_change(f, 'math/', '')
+    inplace_change(f, 'token/', '')
+    inplace_change(f, 'utils/', '')
+    inplace_change(f, 'ERC20/', '')
 
 print('brownie compile')
 os.system('brownie compile')
 
-print('final test')
-os.system('pytest')
+#print('final test')
+#os.system('pytest')
