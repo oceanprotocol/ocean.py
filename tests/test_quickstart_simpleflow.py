@@ -1,10 +1,13 @@
+#!/usr/bin/python3
+
 import os
 
-def main():
+def test_quickstart_simpleflow(token):
+
     alice_private_key = os.getenv('OCEAN_PRIVATE_KEY1')
     bob_private_key = os.getenv('OCEAN_PRIVATE_KEY2')
     
-    #1. Alice publishes a dataset (= publishes a datatoken contract)
+    #1. Alice publishes a dataset (= publishes a datatoken
     from ocean_lib import Ocean
     config = {
         'network' : 'development', #see 'brownie network lists'
@@ -25,6 +28,3 @@ def main():
     #4. Alice transfers 1 token to Bob
     bob_account = ocean.accountFromKey(bob_private_key)
     token.transfer(bob_account.address, 1)
-
-if __name__ == '__main__':
-    main()
