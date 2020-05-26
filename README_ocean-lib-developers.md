@@ -41,17 +41,19 @@ source ~/.ocean_vars
 
 ## New Session / 'make' work
 
-Ensure repos are up to date
-```console
-cd ../ocean-contracts; git pull; cd -
-git pull; 
-```
-
 Set up env't, ensure it's up to date
 ```console
 source myenv/bin/activate
 pip install -r requirements.txt 
 source  ~/.ocean_vars
+```
+
+'Make' this repo. It will
+* grab files from other repos
+* alter them as needed for here
+* compile (with the help of brownie)
+```console
+./make.py
 ```
 
 Compile
