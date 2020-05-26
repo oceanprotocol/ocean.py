@@ -22,8 +22,8 @@ pip install -r requirements.txt""")
 print('git clone .sol sources')
 if not os.path.exists('../ocean-contracts'):
     os.system('cd ..; git clone https://github.com/oceanprotocol/ocean-contracts; cd -')
-if not os.path.exists('../openzeppelin-contracts'):
-    os.system('cd ..; git clone https://github.com/OpenZeppelin/openzeppelin-contracts.git; cd -')
+if not os.path.exists('../openzeppelin-contracts'): #note that we use v0.2.5 
+    os.system('cd ..; git clone --branch v2.5.0 https://github.com/OpenZeppelin/openzeppelin-contracts.git; cd -')
 
 print('populate ./contracts')
 if os.path.exists('./contracts'):
