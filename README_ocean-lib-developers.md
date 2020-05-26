@@ -9,6 +9,8 @@ This is currently a "developer version" of ocean-lib-py. Its user version be mor
 
 ## Installation
 
+[Install Brownie](https://medium.com/@iamdefinitelyahuman/getting-started-with-brownie-part-1-9b2181f4cb99). It can be tricky; [here's steps](https://github.com/trentmc/brownie-instrs/blob/master/README_install.md) that I followed.
+
 Get a local copy of `contracts` repo, ensure it's up to date.
 ```console
 git clone https://github.com/oceanprotocol/ocean-contracts
@@ -17,9 +19,11 @@ git pull
 cd -
 ```
 
-[Install Brownie](https://medium.com/@iamdefinitelyahuman/getting-started-with-brownie-part-1-9b2181f4cb99). It can be tricky; [here's steps](https://github.com/trentmc/brownie-instrs/blob/master/README_install.md) that I followed.
-
-Then `git clone` this repo, and `cd` into it.
+Clone this repo, and `cd` into it.
+```console
+git clone https://github.com/oceanprotocol/ocean-lib-py
+cd ocean-lib-py
+```
 
 Initalize virtual env't. Activate env't. Update modules in env't.
 ```console
@@ -37,9 +41,16 @@ source ~/.ocean_vars
 
 ## New Session / 'make' work
 
-Set up env't.
+Ensure repos are up to date
 ```console
-source myenv/bin/activate 
+cd ../ocean-contracts; git pull; cd -
+git pull; 
+```
+
+Set up env't, ensure it's up to date
+```console
+source myenv/bin/activate
+pip install -r requirements.txt 
 source  ~/.ocean_vars
 ```
 
