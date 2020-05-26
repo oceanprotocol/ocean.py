@@ -2,18 +2,12 @@
 
 Compile, test, and deploy Ocean datatokens with the help of [Brownie](https://eth-brownie.readthedocs.io). 
 
-"Make" Steps:
-1. Git clone ocean contracts (Factory.sol, etc)
-1. `brownie compile` the contracts
-1. if the previous step didn't result in an ABI for the proxy contract / ERC20 contract, put one in (in interfaces/)
-1. Anything else such that library will "just work"
-
 How library will work:
 * ocean.createDataToken() calls Factory's ABI. The Factory contract will deploy a new proxy contract, using the blockchain (It *won't* use Brownie to deploy the proxy contract)
 
 This is currently a "developer version" of ocean-lib-py. Its user version be more stripped down: it won't have .sol contracts, or need Brownie.
 
-## New Session: Installation
+## Installation
 
 Get a local copy of `contracts` repo.
 ```console
@@ -38,24 +32,25 @@ cp ocean_vars_template ~/.ocean_vars
 source ~/.ocean_vars
 ```
 
-## New Session: Already Installed
+## New Session / 'make' work
 
+Set up env't.
 ```console
 source myenv/bin/activate 
 source  ~/.ocean_vars
 ```
 
+Compile
+```console
+brownie compile
+```
+
+If the previous step didn't result in an ABI for the proxy contract / ERC20 contract, put one in (in interfaces/). WIP.
+
 ## End Session
 To deactivate environment:
 ```console
 deactivate
-```
-
-## Usage: Compilation
-
-This usually happens automatically. Here's the manual way, if needed:
-```bash
-brownie compile
 ```
 
 ## Usage: Testing / Quickstart
