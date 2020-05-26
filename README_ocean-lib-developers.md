@@ -12,7 +12,7 @@ This is currently a "developer version" of ocean-lib-py. Its user version be mor
 Get a local copy of `contracts` repo, ensure it's up to date.
 ```console
 git clone https://github.com/oceanprotocol/ocean-contracts
-cd ocean contracts
+cd ocean-contracts
 git pull
 cd -
 ```
