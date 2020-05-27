@@ -22,7 +22,7 @@ git clone https://github.com/oceanprotocol/ocean-lib-py
 cd ocean-lib-py
 ```
 
-Initalize virtual env't. Activate env't. Update modules in env't.
+Initalize virtual env't. Activate env't. Update modules in env't. (BTW use `deactivate` to, well, deactivate.)
 ```console
 python -m venv myenv
 source myenv/bin/activate 
@@ -41,11 +41,6 @@ Then open `~/.ocean_vars` and update the values as needed.
 Then, update the env't vars:
 ```console
 source ~/.ocean_vars
-```
-
-BTW, here's how to deactivate the env't at the end of a session:
-```console
-deactivate
 ```
 
 ## 1. Copy contracts
