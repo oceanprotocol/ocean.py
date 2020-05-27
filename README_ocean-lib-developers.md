@@ -3,7 +3,7 @@
 This README is how to further *develop* ocean-lib-py. (Compare to the quickstarts which show how to *use* ocean-lib-py.)
 
 Here, you can:
-1. **Make** `contracts/` directory with .sol code from other repos
+1. **Make "contracts"** directory with .sol code from other repos
 1. **Compile** the contracts into ABIs etc
 1. **Deploy** the contracts to {local, rinkeby, mainnet}
 1. **Test** ocean-lib-py
