@@ -1,4 +1,4 @@
-# ocean-lib-py
+# Developers on ocean-lib-py
 
 Compile, test, and deploy Ocean datatokens with the help of [Brownie](https://eth-brownie.readthedocs.io). 
 
@@ -6,7 +6,7 @@ How library works: ocean.createDataToken() calls Factory's ABI. The Factory cont
 
 This is currently a "developer version" of ocean-lib-py. Its user version be more stripped down: it won't have .sol contracts, or need Brownie.
 
-Also not working yet: blob, transfer(), mint(), marketplace flow (metadata, >1 service).
+Also not working yet: blob, transfer(), mint(), marketplace flow (metadata, >1 service). 
 
 ## Installation
 
@@ -61,8 +61,6 @@ Compile
 ```console
 brownie compile
 ```
-
-If the previous step didn't result in an ABI for the proxy contract / ERC20 contract, put one in (in interfaces/). WIP.
 
 ## End Session
 To deactivate environment:
