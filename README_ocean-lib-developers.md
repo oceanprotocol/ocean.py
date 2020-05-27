@@ -31,17 +31,14 @@ pip install -r requirements.txt
 
 If you don't have an Infura account and you aim to deploy to `rinkeby` or `mainnet`, go to www.infura.io and sign up.
 
-Set up private data that we can't have living on GitHub. This includes sets private keys and `WEB3_INFURA_PROJECT_ID`. First, start with the pre-set template:
+Private keys etc can't live on GitHub. To handle this, ocean-lib-py tools read ~/ocean.conf. (It does *not* use environmental variables.)
+
+First, start with the pre-set template:
 ```console
-cp ocean_vars_template ~/.ocean_vars
+cp sample_ocean.conf ~/ocean.conf
 ```
 
-Then open `~/.ocean_vars` and update the values as needed.
-
-Then, update the env't vars:
-```console
-source ~/.ocean_vars
-```
+Then open `~/ocean.conf` and update the values as needed. This may include the infura id.
 
 ## 1. Copy contracts
 Outcome: the .sol files from other repos are in a freshly-created `contracts/` subdirectory here.
@@ -50,7 +47,6 @@ Set up env't, ensure it's up to date:
 ```console
 source myenv/bin/activate
 pip install -r requirements.txt 
-source  ~/.ocean_vars
 ```
 
 Create new directory, copy .sol files from other repos, and alter as needed:
@@ -69,10 +65,7 @@ brownie compile
 ## 3. Deploy the contracts
 Outcome: ERC20Template and Factory are deployed. 
 
-First, ensure that envvars OPF_PRIVATE_KEY and OCEAN_COMMUNITY_ADDRESS are set. Typically, update `~/.ocean_vars`, then:
-```console
-source ~/.ocean_vars
-```
+First, update `~/ocean.conf` so that OPF_PRIVATE_KEY and OCEAN_COMMUNITY_ADDRESS are correct.
 
 Then, call the deploy script. Do this for each target NETWORK: `development` (ganache), `rinkeby`, or `mainnet`:
 ```console
