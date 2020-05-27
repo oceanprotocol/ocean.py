@@ -35,7 +35,7 @@ source ~/.ocean_vars
 ```
 
 ## 1. Copy contracts
-Goal: Copy .sol files from other repos to here.
+Outcome: the .sol files from other repos are in a freshly-created `contracts/` subdirectory here.
 
 Set up env't, ensure it's up to date.
 ```console
@@ -44,7 +44,7 @@ pip install -r requirements.txt
 source  ~/.ocean_vars
 ```
 
-Copy .sol files from other repos here, and alter them as needed.
+Create new directory, opy .sol files from other repos, and alter as needed to make compilation work (e.g. change import paths).
 ```console
 ./copy_contracts.py
 ```
@@ -52,13 +52,20 @@ Copy .sol files from other repos here, and alter them as needed.
 ## 2. Compile the contracts 
 Goal: from .sol files, create ABIs etc.
 
+Get Brownie to look in the `contracts/` directory and perform its magic.
 ```console
 brownie compile
 ```
 
 ## 3. Deploy the contracts
-Goal: deploy ERC20Template and Factory to NETWORK = 'development' (ganache), 'rinkeby', or 'mainnet'
+Goal: ERC20Template and Factory are deployed to ganache (`development`), `rinkeby`, or `mainnet` network.
 
+First, ensure that envvars OPF_PRIVATE_KEY and OCEAN_COMMUNITY_ADDRESS are set. Typically, update `~/.ocean_vars`, then:
+```console
+source ~/.ocean_vars
+```
+
+Then, call the deploy script. Do this for each target NETWORK.
 ```console
 ./deploy.py NETWORK
 ```
