@@ -7,13 +7,13 @@ import os
 from ocean_lib import Ocean
 
 def test_quickstart_simpleflow():
-
+    
     #Config for both Deployment and Quickstart flow
+    opf_private_key   = os.getenv('OPF_PRIVATE_KEY')
+    community_addr = os.getenv('OCEAN_COMMUNITY_ADDRESS')
+    
     alice_private_key = os.getenv('OCEAN_PRIVATE_KEY1')
     bob_private_key   = os.getenv('OCEAN_PRIVATE_KEY2')
-    opf_private_key   = os.getenv('OCEAN_PRIVATE_KEY3')
-    
-    community_addr = os.getenv('OCEAN_COMMUNITY_ADDRESS')
 
     config = {
         'network' : 'development', #see 'brownie network lists'
