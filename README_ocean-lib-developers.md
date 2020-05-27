@@ -12,14 +12,6 @@ Also not working yet: blob, transfer(), mint(), marketplace flow (metadata, >1 s
 
 [Install Brownie](https://medium.com/@iamdefinitelyahuman/getting-started-with-brownie-part-1-9b2181f4cb99). It can be tricky; [here's steps](https://github.com/trentmc/brownie-instrs/blob/master/README_install.md) that I followed.
 
-Get a local copy of `contracts` repo, ensure it's up to date.
-```console
-git clone https://github.com/oceanprotocol/ocean-contracts
-cd ocean-contracts
-git pull
-cd -
-```
-
 Clone this repo, and `cd` into it.
 ```console
 git clone https://github.com/oceanprotocol/ocean-lib-py
@@ -49,17 +41,9 @@ pip install -r requirements.txt
 source  ~/.ocean_vars
 ```
 
-'Make' this repo. It will
-* grab files from other repos
-* alter them as needed for here
-* compile (with the help of brownie)
+'Make' this repo. It will grab files from other repos, alter them as needed, and compile (with the help of brownie)
 ```console
 ./make.py
-```
-
-Compile
-```console
-brownie compile
 ```
 
 ## End Session
@@ -81,7 +65,6 @@ pytest tests/test_quickstart_simpleflow.py
 ```
 
 ## Usage : Playing
-
 
 Start brownie console:
 ```bash
