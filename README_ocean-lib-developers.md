@@ -11,7 +11,7 @@ Here, you can:
 
 These steps are detailed below. But first, installation. 
 
-## Installation 
+## 0. Installation 
 We use [Brownie](https://eth-brownie.readthedocs.io) to help in compiling, deploying, testing, and debugging. It's not needed for *using* ocean-lib-py.
 
 [Install Brownie](https://medium.com/@iamdefinitelyahuman/getting-started-with-brownie-part-1-9b2181f4cb99). It can be tricky; [here's steps](https://github.com/trentmc/brownie-instrs/blob/master/README_install.md) that I followed.
