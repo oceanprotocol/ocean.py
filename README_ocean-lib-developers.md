@@ -7,6 +7,8 @@ How library will work:
 
 This is currently a "developer version" of ocean-lib-py. Its user version be more stripped down: it won't have .sol contracts, or need Brownie.
 
+Also not working yet: blob, transfer(), mint(), marketplace flow (metadata, >1 service). 
+
 ## Installation
 
 [Install Brownie](https://medium.com/@iamdefinitelyahuman/getting-started-with-brownie-part-1-9b2181f4cb99). It can be tricky; [here's steps](https://github.com/trentmc/brownie-instrs/blob/master/README_install.md) that I followed.
@@ -60,8 +62,6 @@ Compile
 ```console
 brownie compile
 ```
-
-If the previous step didn't result in an ABI for the proxy contract / ERC20 contract, put one in (in interfaces/). WIP.
 
 ## End Session
 To deactivate environment:
