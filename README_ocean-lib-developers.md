@@ -7,10 +7,14 @@ Here, you can:
 1. **Compile** the contracts into ABIs etc
 1. **Deploy** the contracts to {local, rinkeby, mainnet}
 1. **Test** ocean-lib-py
+1. (Along the way) **Debug** at the contract or py level.
 
-It uses the help of [Brownie](https://eth-brownie.readthedocs.io). Brownie is only needed for developing the library, not using it.
+These steps are detailed below. But first, installation. 
+
 
 ## Installation 
+
+We use [Brownie](https://eth-brownie.readthedocs.io) to help in compiling, deploying, testing, and debugging. It's not needed for *using* ocean-lib-py.
 
 [Install Brownie](https://medium.com/@iamdefinitelyahuman/getting-started-with-brownie-part-1-9b2181f4cb99). It can be tricky; [here's steps](https://github.com/trentmc/brownie-instrs/blob/master/README_install.md) that I followed.
 
@@ -89,11 +93,11 @@ To deactivate environment:
 deactivate
 ```
 
-## Interactive Debugging With Brownie
+## 5. Debugging
 
-Brownie docs are [here](https://eth-brownie.readthedocs.io). Here's some things you can do.
+Brownie reduces pain in Solidity debugging: it makes it feel like Python debugging, including Python-style tracebacks in Solidity. [Here's a walk-through](https://medium.com/better-programming/getting-started-with-brownie-part-3-ef6bfa9867d7) of key features. [Here are Brownie docs](https://eth-brownie.readthedocs.io). 
 
-Start brownie console:
+Lets's do some stuff with it. First, start the console.
 ```bash
 brownie console
 ```
