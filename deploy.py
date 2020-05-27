@@ -8,6 +8,10 @@ import os
 
 ALLOWED_NETWORKS = ["development", "mainnet", "rinkeby"] #see 'brownie network lists'
 ALLOWED_NETWORKS_STR = str(ALLOWED_NETWORKS)[1:-1]
+
+def brownieAccount(private_key):
+    assert brownie.network.is_connected()
+    return brownie.network.accounts.add(priv_key=private_key)
     
 if __name__ == '__main__':
 
@@ -59,17 +63,18 @@ Notes:
     # ****DEPLOY****
     if not brownie.network.is_connected():
         brownie.network.connect(network)
+    opf_account = brownieAccount(opf_private_key)
 
-    print("Deploy ERC20Template...")
-    from brownie import *
-    import pdb; pdb.set_trace()
-    ERC20_template = ERC20Template.deploy(
+    print("****Deploy ERC20Template: begin****")
+    p = brownie.project.load('./', name='FooProject')
+    ERC20_template = p.ERC20Template.deploy(
         'Template', 'TEMPLATE', opf_account.address,
-        community_addr, {'from': alice_account})
-    print("... deployed.")
+        community_addr, {'from': opf_account})
+    print(ERC20_template.tx)
+    print("****Deploy ERC20Template: done****")
         
-    print("Deploy Factory...")
-    factory = Factory.deploy(
+    print("****Deploy Factory: begin****")
+    factory = p.Factory.deploy(
         ERC20_template.address, community_addr, {'from': opf_account})
-    print("... deployed.")
-        
+    print(factory.tx)
+    print("****Deploy Factory: done****")

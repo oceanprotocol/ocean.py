@@ -21,9 +21,5 @@ class Ocean:
         # FIXME: add blob
         return token
 
-def account(private_key):
-    assert brownie.network.is_connected()
-    return brownie.network.accounts.add(priv_key=private_key)
-
 def address(private_key):
     return eth_account.Account().privateKeyToAccount(private_key).address
