@@ -11,9 +11,7 @@ Here, you can:
 
 These steps are detailed below. But first, installation. 
 
-
 ## Installation 
-
 We use [Brownie](https://eth-brownie.readthedocs.io) to help in compiling, deploying, testing, and debugging. It's not needed for *using* ocean-lib-py.
 
 [Install Brownie](https://medium.com/@iamdefinitelyahuman/getting-started-with-brownie-part-1-9b2181f4cb99). It can be tricky; [here's steps](https://github.com/trentmc/brownie-instrs/blob/master/README_install.md) that I followed.
@@ -38,63 +36,61 @@ cp ocean_vars_template ~/.ocean_vars
 source ~/.ocean_vars
 ```
 
+BTW, here's how to deactivate the env't at the end of a session:
+```console
+deactivate
+```
+
 ## 1. Copy contracts
 Outcome: the .sol files from other repos are in a freshly-created `contracts/` subdirectory here.
 
-Set up env't, ensure it's up to date.
+Set up env't, ensure it's up to date:
 ```console
 source myenv/bin/activate
 pip install -r requirements.txt 
 source  ~/.ocean_vars
 ```
 
-Create new directory, opy .sol files from other repos, and alter as needed to make compilation work (e.g. change import paths).
+Create new directory, copy .sol files from other repos, and alter as needed:
 ```console
 ./copy_contracts.py
 ```
 
 ## 2. Compile the contracts 
-Goal: from .sol files, create ABIs etc.
+Outcome: ABIs, from .sol files.
 
-Get Brownie to look in the `contracts/` directory and perform its magic.
+Get Brownie to look in `contracts/` and perform its magic:
 ```console
 brownie compile
 ```
 
 ## 3. Deploy the contracts
-Goal: ERC20Template and Factory are deployed to ganache (`development`), `rinkeby`, or `mainnet` network.
+Outcome: ERC20Template and Factory are deployed. 
 
 First, ensure that envvars OPF_PRIVATE_KEY and OCEAN_COMMUNITY_ADDRESS are set. Typically, update `~/.ocean_vars`, then:
 ```console
 source ~/.ocean_vars
 ```
 
-Then, call the deploy script. Do this for each target NETWORK.
+Then, call the deploy script. Do this for each target NETWORK: ganache (`development`), `rinkeby`, or `mainnet`:
 ```console
 ./deploy.py NETWORK
 ```
 
 ## 4. Test ocean-lib-py
-Goal: ensure that ocean-lib-py works as expected on {local, rinkeby, mainnet}
+Outcome: ocean-lib-py works as expected on ganache, rinkeby, and mainnet.
 
-Start by testing simple quickstart locally.
+Start by testing simple quickstart locally:
 ```console
 pytest tests/test_quickstart_simpleflow.py
 ```
 
-Then test everything.
+Then test everything:
 ```console
 pytest
 ```
 
-## End Session
-To deactivate environment:
-```console
-deactivate
-```
-
 ## 5. Debugging
-
 Brownie reduces pain in Solidity debugging: it makes it feel like Python debugging, including Python-style tracebacks in Solidity. [Here's a walk-through](https://medium.com/better-programming/getting-started-with-brownie-part-3-ef6bfa9867d7) of key features. [Here are Brownie docs](https://eth-brownie.readthedocs.io). 
 
 Lets's do some stuff with it. First, start the console.
@@ -125,6 +121,4 @@ Transaction sent: 0xa6704ce76db2030177c547473e7f990d1c5e0182f54adfaa488db6db28cb
 
 <Factory Contract '0x602C71e4DAC47a042Ee7f46E0aee17F94A3bA0B6'>
 ```
-
-
 
