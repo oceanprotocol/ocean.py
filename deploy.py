@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#!/usr/bin/myenv
 
 import os
 import sys
@@ -29,7 +29,7 @@ import sys
 print(sys.path)
 #['/home/trentmc/code/ocean-lib-py', '/usr/lib/python36.zip', '/usr/lib/python3.6', '/usr/lib/python3.6/lib-dynload', '/usr/lib/python3.6/site-packages', '/usr/local/lib/python3.6/dist-packages', '/usr/lib/python3/dist-packages']
 
-sys.exit(0)
+#sys.exit(0)
 
 #from . import brownie
 import brownie
