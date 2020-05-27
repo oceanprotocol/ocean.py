@@ -67,5 +67,5 @@ for f in glob.glob("contracts/*.sol"):
 print('brownie compile')
 os.system('brownie compile')
 
-print('final test')
-os.system('pytest')
+#print('final test')
+#os.system('pytest')

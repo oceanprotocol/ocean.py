@@ -1,5 +1,37 @@
 #!/usr/bin/python3
 
+import os
+import sys
+
+#Various ways to find the location of the source of brownie:
+
+# > pip show eth-brownie
+# ...
+# Location: /home/trentmc/code/ocean-lib-py/myenv/lib/python3.6/site-packages
+
+# > python
+# >>> import brownie
+# >>> brownie.__file__
+# '/home/trentmc/code/ocean-lib-py/myenv/lib/python3.6/site-packages/brownie/__init__.py'
+#
+# >>> help(brownie)
+# ...
+# FILE
+#  /home/trentmc/code/ocean-lib-py/myenv/lib/python3.6/site-packages/brownie/__init__.py
+#
+#
+# >>> import sys
+# >>> sys.path
+# ['', '/usr/lib/python36.zip', '/usr/lib/python3.6', '/usr/lib/python3.6/lib-dynload', '/home/trentmc/code/ocean-lib-py/myenv/lib/python3.6/site-packages']
+#
+
+
+print(sys.path)
+#['/home/trentmc/code/ocean-lib-py', '/usr/lib/python36.zip', '/usr/lib/python3.6', '/usr/lib/python3.6/lib-dynload', '/usr/lib/python3.6/site-packages', '/usr/local/lib/python3.6/dist-packages', '/usr/lib/python3/dist-packages']
+
+sys.exit(0)
+
+#from . import brownie
 import brownie
 from brownie import ERC20Template, Factory
 import os
