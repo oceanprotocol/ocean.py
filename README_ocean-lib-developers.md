@@ -57,7 +57,7 @@ Create new directory, copy .sol files from other repos, and alter as needed:
 ```
 
 ## 2. Compile the contracts 
-Outcome: ABIs, from .sol files.
+Outcome: ABIs and easy brownie debugging, from .sol files.
 
 Get Brownie to look in `contracts/` and perform its magic:
 ```console
