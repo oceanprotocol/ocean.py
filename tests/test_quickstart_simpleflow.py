@@ -2,6 +2,7 @@
 
 import brownie
 from brownie import ERC20Template, Factory
+import configparser
 import os
 
 from ocean_lib import Ocean
@@ -9,11 +10,13 @@ from ocean_lib import Ocean
 def test_quickstart_simpleflow():
     
     #Config for both Deployment and Quickstart flow
-    opf_private_key   = os.getenv('OPF_PRIVATE_KEY')
-    community_addr = os.getenv('OCEAN_COMMUNITY_ADDRESS')
+    cp = configparser.ConfigParser()
+    config.read(os.path.expanduser('~/ocean.conf'))
+    opf_private_key = cp['private']['OPF_PRIVATE_KEY']
+    community_addr = cp['public']['OCEAN_COMMUNITY_ADDRESS']
     
-    alice_private_key = os.getenv('OCEAN_PRIVATE_KEY1')
-    bob_private_key   = os.getenv('OCEAN_PRIVATE_KEY2')
+    alice_private_key = cp['private']['TEST_PRIVATE_KEY1']
+    bob_private_key   = cp['private']['TEST_PRIVATE_KEY2']
 
     config = {
         'network' : 'development', #see 'brownie network lists'

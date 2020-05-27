@@ -1,10 +1,10 @@
 #! ./myenv/bin/python3
 
+import brownie
+import configparser
 import os
 import sys
 
-import brownie
-import os
 
 ALLOWED_NETWORKS = ["development", "mainnet", "rinkeby"] #see 'brownie network lists'
 ALLOWED_NETWORKS_STR = str(ALLOWED_NETWORKS)[1:-1]
@@ -12,6 +12,12 @@ ALLOWED_NETWORKS_STR = str(ALLOWED_NETWORKS)[1:-1]
 def brownieAccount(private_key):
     assert brownie.network.is_connected()
     return brownie.network.accounts.add(priv_key=private_key)
+
+def invalidKey(private_key_str): #super basic check
+    return len(private_key_str) < 10
+
+def invalidAddr(addr_str): #super basic check
+    return len(addr_str) < 10
     
 if __name__ == '__main__':
 
@@ -49,15 +55,17 @@ Notes:
 
     # ****SET ENVT****
     #grab vars
-    opf_private_key = os.getenv('OPF_PRIVATE_KEY')
-    community_addr = os.getenv('OCEAN_COMMUNITY_ADDRESS')
+    cp = configparser.ConfigParser()
+    config.read(os.path.expanduser('~/ocean.conf'))
+    opf_private_key = cp['private']['OPF_PRIVATE_KEY']
+    community_addr = cp['public']['OCEAN_COMMUNITY_ADDRESS']
 
     #corner cases 
-    if opf_private_key is None:
-        print("Need environmental var OPF_PRIVATE_KEY")
+    if invalidKey(opf_private_key):
+        print("Need valid OPF_PRIVATE_KEY")
         sys.exit(0)
-    if community_addr is None:
-        print("Need environmental var OCEAN_COMMUNITY_ADDRESS")
+    if invalidAddr(community_addr)
+        print("Need valid OCEAN_COMMUNITY_ADDRESS")
         sys.exit(0)
 
     # ****DEPLOY****
