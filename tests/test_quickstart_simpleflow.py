@@ -1,20 +1,45 @@
 #!/usr/bin/python3
 
+import brownie
+from brownie import ERC20Template, Factory
 import os
 
-def test_quickstart_simpleflow(token):
+from ocean_lib import Ocean
 
+def test_quickstart_simpleflow():
+
+    #Config for both Deployment and Quickstart flow
     alice_private_key = os.getenv('OCEAN_PRIVATE_KEY1')
-    bob_private_key = os.getenv('OCEAN_PRIVATE_KEY2')
+    bob_private_key   = os.getenv('OCEAN_PRIVATE_KEY2')
+    opf_private_key   = os.getenv('OCEAN_PRIVATE_KEY3')
     
-    #1. Alice publishes a dataset (= publishes a datatoken
-    from ocean_lib import Ocean
+    community_addr = os.getenv('OCEAN_COMMUNITY_ADDRESS')
+
     config = {
         'network' : 'development', #see 'brownie network lists'
         'privateKey' : alice_private_key,
     }
-    ocean = Ocean.Ocean(config)
-    alice_account = ocean.accountFromKey(alice_private_key)
+
+    #==============DEPLOYMENT=======================
+    if not brownie.network.is_connected():
+        brownie.network.connect(config['network'])
+    
+    alice_account = Ocean.account(alice_private_key)
+    bob_account = Ocean.account(bob_private_key)
+    opf_account = Ocean.account(opf_private_key)
+    
+    ERC20_template = ERC20Template.deploy(
+        'Template', 'TEMPLATE', alice_account.address,
+        community_addr, {'from': alice_account})
+        
+    factory = Factory.deploy(
+        ERC20_template.address, community_addr, {'from': opf_account})
+    
+    #==============QUICKSTART FLOW=======================
+    #1. Alice publishes a dataset (= publishes a datatoken)
+    
+    ocean = Ocean.Ocean(config, factory) 
+    
     token = ocean.createDatatoken('localhost:8030')
     dt_address = token.address
     print(dt_address)
@@ -23,8 +48,9 @@ def test_quickstart_simpleflow(token):
     #(FIXME)
     
     #3. Alice mints 100 tokens
-    #(FIXME)
+    import pdb; pdb.set_trace()
+    token.mint(alice_account, 100, {'from': alice_account})
 
     #4. Alice transfers 1 token to Bob
-    bob_account = ocean.accountFromKey(bob_private_key)
-    token.transfer(bob_account.address, 1)
+    import pdb; pdb.set_trace()
+    token.transfer(bob_account.address, 1, {'from': alice_account})

@@ -1,4 +1,9 @@
-#
+#custom
+contracts/
+.history
+.hypothesis/
+build/
+reports/
 myenv/
 *~
 
