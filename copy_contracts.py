@@ -63,9 +63,3 @@ for f in glob.glob("contracts/*.sol"):
     inplace_change(f, 'token/', '')
     inplace_change(f, 'utils/', '')
     inplace_change(f, 'ERC20/', '')
-
-print('brownie compile')
-os.system('brownie compile')
-
-#print('final test')
-#os.system('pytest')
