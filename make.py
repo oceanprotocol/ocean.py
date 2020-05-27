@@ -1,12 +1,15 @@
 #!/usr/bin/python3
 
+import re
 import os
 import shutil
+import subprocess
 import sys
 
 print("Check Python version")
-version = sys.version_info
-if not (version[0] >= 3 and version[1] >= 6):
+s = subprocess.check_output("python --version", shell=True) #eg "Python 2.7.17"
+version = float(re.findall(' \d\.[\d|\d\d]', str(s))[0]) #eg 2.7
+if version < 3.6:
     print("Need >= Python 3.6")
     sys.exit(0)
 
@@ -65,4 +68,4 @@ print('brownie compile')
 os.system('brownie compile')
 
 print('final test')
-#os.system('pytest')
+os.system('pytest')
