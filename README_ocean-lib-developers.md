@@ -1,4 +1,4 @@
-# ocean-lib-py
+# Developers on ocean-lib-py
 
 Compile, test, and deploy Ocean datatokens with the help of [Brownie](https://eth-brownie.readthedocs.io). 
 
