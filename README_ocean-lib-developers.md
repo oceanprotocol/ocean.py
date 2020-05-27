@@ -78,7 +78,7 @@ pytest
 
 Test simple flow quickstart
 ```bash
-pytest -k simpleflow
+pytest tests/test_quickstart_simpleflow.py 
 ```
 
 ## Usage : Playing
