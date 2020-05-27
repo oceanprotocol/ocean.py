@@ -72,7 +72,7 @@ First, ensure that envvars OPF_PRIVATE_KEY and OCEAN_COMMUNITY_ADDRESS are set. 
 source ~/.ocean_vars
 ```
 
-Then, call the deploy script. Do this for each target NETWORK: ganache (`development`), `rinkeby`, or `mainnet`:
+Then, call the deploy script. Do this for each target NETWORK: `development` (ganache), `rinkeby`, or `mainnet`:
 ```console
 ./deploy.py NETWORK
 ```
