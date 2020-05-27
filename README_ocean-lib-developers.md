@@ -1,14 +1,16 @@
-# Developers on ocean-lib-py
+# Developing ocean-lib-py
 
-Compile, test, and deploy Ocean datatokens with the help of [Brownie](https://eth-brownie.readthedocs.io). 
+This README is how to further *develop* ocean-lib-py. (Compare to the quickstarts which show how to *use* ocean-lib-py.)
 
-How library works: ocean.createDataToken() calls Factory's ABI. The Factory contract deploys a new proxy contract, using the blockchain (It *won't* use Brownie to deploy the proxy contract)
+Here, you can:
+1. **Copy contracts** from other repos to here
+1. **Compile** the contracts into ABIs etc
+1. **Deploy** the contracts to {local, rinkeby, mainnet}
+1. **Test** ocean-lib-py
 
-This is currently a "developer version" of ocean-lib-py. Its user version be more stripped down: it won't have .sol contracts, or need Brownie.
+It uses the help of [Brownie](https://eth-brownie.readthedocs.io). Brownie is only needed for developing the library, not using it.
 
-Also not working yet: blob, transfer(), mint(), marketplace flow (metadata, >1 service). 
-
-## Installation
+## Installation 
 
 [Install Brownie](https://medium.com/@iamdefinitelyahuman/getting-started-with-brownie-part-1-9b2181f4cb99). It can be tricky; [here's steps](https://github.com/trentmc/brownie-instrs/blob/master/README_install.md) that I followed.
 
@@ -32,18 +34,53 @@ cp ocean_vars_template ~/.ocean_vars
 source ~/.ocean_vars
 ```
 
-## New Session / 'make' work
+## 1. Copy contracts
+Outcome: the .sol files from other repos are in a freshly-created `contracts/` subdirectory here.
 
-Set up env't, ensure it's up to date
+Set up env't, ensure it's up to date.
 ```console
 source myenv/bin/activate
 pip install -r requirements.txt 
 source  ~/.ocean_vars
 ```
 
-'Make' this repo. It will grab files from other repos, alter them as needed, and compile (with the help of brownie)
+Create new directory, opy .sol files from other repos, and alter as needed to make compilation work (e.g. change import paths).
 ```console
-./make.py
+./copy_contracts.py
+```
+
+## 2. Compile the contracts 
+Goal: from .sol files, create ABIs etc.
+
+Get Brownie to look in the `contracts/` directory and perform its magic.
+```console
+brownie compile
+```
+
+## 3. Deploy the contracts
+Goal: ERC20Template and Factory are deployed to ganache (`development`), `rinkeby`, or `mainnet` network.
+
+First, ensure that envvars OPF_PRIVATE_KEY and OCEAN_COMMUNITY_ADDRESS are set. Typically, update `~/.ocean_vars`, then:
+```console
+source ~/.ocean_vars
+```
+
+Then, call the deploy script. Do this for each target NETWORK.
+```console
+./deploy.py NETWORK
+```
+
+## 4. Test ocean-lib-py
+Goal: ensure that ocean-lib-py works as expected on {local, rinkeby, mainnet}
+
+Start by testing simple quickstart locally.
+```console
+pytest tests/test_quickstart_simpleflow.py
+```
+
+Then test everything.
+```console
+pytest
 ```
 
 ## End Session
@@ -52,19 +89,9 @@ To deactivate environment:
 deactivate
 ```
 
-## Usage: Testing / Quickstart
+## Interactive Debugging With Brownie
 
-Test all
-```bash
-pytest
-```
-
-Test simple flow quickstart
-```bash
-pytest tests/test_quickstart_simpleflow.py 
-```
-
-## Usage : Playing
+Brownie docs are [here](https://eth-brownie.readthedocs.io). Here's some things you can do.
 
 Start brownie console:
 ```bash
@@ -95,8 +122,5 @@ Transaction sent: 0xa6704ce76db2030177c547473e7f990d1c5e0182f54adfaa488db6db28cb
 <Factory Contract '0x602C71e4DAC47a042Ee7f46E0aee17F94A3bA0B6'>
 ```
 
-## Making changes
-
-Change .sol, then update or add new tests.
 
 
