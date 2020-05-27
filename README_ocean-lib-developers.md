@@ -3,7 +3,7 @@
 This README is how to further *develop* ocean-lib-py. (Compare to the quickstarts which show how to *use* ocean-lib-py.)
 
 Here, you can:
-1. **Make "contracts"** directory with .sol code from other repos
+1. **Copy contracts** from other repos to here
 1. **Compile** the contracts into ABIs etc
 1. **Deploy** the contracts to {local, rinkeby, mainnet}
 1. **Test** ocean-lib-py
@@ -34,8 +34,8 @@ cp ocean_vars_template ~/.ocean_vars
 source ~/.ocean_vars
 ```
 
-## 1. Make contracts
-Goal: make "contracts/" directory with .sol code from other repos.
+## 1. Copy contracts
+Goal: Copy .sol files from other repos to here.
 
 Set up env't, ensure it's up to date.
 ```console
@@ -46,7 +46,7 @@ source  ~/.ocean_vars
 
 Copy .sol files from other repos here, and alter them as needed.
 ```console
-./make_contracts.py
+./copy_contracts.py
 ```
 
 ## 2. Compile the contracts 
