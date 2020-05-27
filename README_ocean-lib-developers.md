@@ -29,10 +29,17 @@ source myenv/bin/activate
 pip install -r requirements.txt 
 ```
 
-Set up private data that we can't have living on GitHub. It sets in `OCEAN_PRIVATE_KEY1`, `OCEAN_PRIVATE_KEY2`, and `WEB3_INFURA_PROJECT_ID`. If you plan to use infura and don't yet have an account, get one. 
+If you don't have an Infura account and you aim to deploy to `rinkeby` or `mainnet`, go to www.infura.io and sign up.
+
+Set up private data that we can't have living on GitHub. This includes sets private keys and `WEB3_INFURA_PROJECT_ID`. First, start with the pre-set template:
 ```console
 cp ocean_vars_template ~/.ocean_vars
-<<change values of the env't vars>>
+```
+
+Then open `~/.ocean_vars` and update the values as needed.
+
+Then, update the env't vars:
+```console
 source ~/.ocean_vars
 ```
 
