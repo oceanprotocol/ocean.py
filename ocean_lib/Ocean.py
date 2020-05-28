@@ -23,6 +23,9 @@ class Ocean:
         
     def createDatatoken(self, blob):
         return self._factory.createDatatoken(blob)
+
+    def getAsset(self, address):
+        raise NotImplementedError()     
         
 class _Factory:
     def __init__(self, network, web3):
@@ -77,6 +80,13 @@ class DataToken:
         path = './build/contracts/IERC20Template.json' #FIXME magic number
         abi = json.loads(path)['abi']
         return abi
+
+class Asset:
+    def __init__(self):
+        pass
+
+    def download(self, address):
+        raise NotImplementedError()   
         
 def privateKeyToAddress(private_key):
     return account(private_key).address
@@ -84,7 +94,7 @@ def privateKeyToAddress(private_key):
 def privateKeyToAccount(private_key):
     return eth_account.Account().from_key(private_key)
 
-def _confFileValue(network, key):
+def confFileValue(network, key):
     cp = configparser.ConfigParser()
     cp.read(os.path.expanduser(constants.CONF_FILE_PATH))
     return cp[network][key]
