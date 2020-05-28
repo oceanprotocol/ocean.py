@@ -3,7 +3,7 @@
 This README is how to further *develop* ocean-lib-py. (Compare to the quickstarts which show how to *use* ocean-lib-py.)
 
 Here, you can:
-1. **Copy contracts** from other repos to here
+1. **Make contracts**: copy from other repos to here, tweak imports
 1. **Compile** the contracts into ABIs etc
 1. **Deploy** the contracts to {local, rinkeby, mainnet}
 1. **Test** ocean-lib-py
@@ -40,7 +40,7 @@ cp sample_ocean.conf ~/ocean.conf
 
 Then open `~/ocean.conf` and update the values as needed. This may include the infura id.
 
-## 1. Copy contracts
+## 1. Make contracts
 Outcome: the .sol files from other repos are in a freshly-created `contracts/` subdirectory here.
 
 Set up env't, ensure it's up to date:
@@ -49,9 +49,9 @@ source myenv/bin/activate
 pip install -r requirements.txt 
 ```
 
-Create new directory, copy .sol files from other repos, and alter as needed:
+Create new directory, copy .sol files from other repos, and alter as needed (e.g. change import paths):
 ```console
-./copy_contracts.py
+./make_contracts.py
 ```
 
 ## 2. Compile the contracts 
