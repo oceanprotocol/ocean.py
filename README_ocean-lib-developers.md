@@ -73,11 +73,13 @@ Then, call the deploy script. Do this for each target NETWORK: `development` (ga
 ```
 
 ## 4. Test ocean-lib-py
-Outcome: ocean-lib-py works as expected on ganache, rinkeby, and mainnet.
+Outcome: ocean-lib-py works as expected.
 
-Start by testing simple quickstart locally:
+Start by testing simple quickstart on ganache, then on other networks:
 ```console
-pytest tests/test_quickstart_simpleflow.py
+pytest tests/test_quickstart_simpleflow.py::test_on_development
+pytest tests/test_quickstart_simpleflow.py::test_on_rinkeby
+pytest tests/test_quickstart_simpleflow.py::test_on_mainnet
 ```
 
 Then test everything:
