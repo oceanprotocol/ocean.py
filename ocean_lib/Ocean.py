@@ -32,7 +32,6 @@ class _Factory:
         self._web3 = web3
         
         addr = confFileValue(network, 'FACTORY_ADDRESS')
-        import pdb; pdb.set_trace()
         abi = self._abi()
         self._contract = web3.eth.contract(address=addr, abi=abi)
         
@@ -42,7 +41,7 @@ class _Factory:
         cap = constants.DEFAULT_MINTING_CAP
         minter = self._web3.eth.defaultAccount
         
-        tx_hash = self._contract.createToken(name, symbol, cap, blob, minter).transact()
+        tx_hash = self._contract.functions.createToken(name, symbol, cap, blob, minter).transact()
         tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
 
         #set token_addr. FIXME. How js unit tests do it:
@@ -69,11 +68,11 @@ class DataToken:
 
     def mint(self, value):
         account = self._web3.eth.defaultAccount
-        tx_hash = self._contract.mint(account, value).transact()
+        tx_hash = self._contract.functions.mint(account, value).transact()
         tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
         
     def transfer(self, recipient, amount):
-        tx_hash = self._contract.transfer(recipient, amount).transact()
+        tx_hash = self._contract.functions.transfer(recipient, amount).transact()
         tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
 
     def _abi(self):
