@@ -13,8 +13,8 @@ def test_quickstart_simpleflow():
     #Config for both Deployment and Quickstart flow
     cp = configparser.ConfigParser()
     cp.read(os.path.expanduser('~/ocean.conf'))
-    opf_private_key = cp[network]['OPF_PRIVATE_KEY']
-    community_addr = cp[network]['OCEAN_COMMUNITY_ADDRESS']
+    factory_deployer_private_key = cp[network]['FACTORY_DEPLOYER_PRIVATE_KEY']
+    fee_manager_addr = cp[network]['FEE_MANAGER_ADDRESS']
     
     alice_private_key = cp[network]['TEST_PRIVATE_KEY1']
     bob_private_key   = cp[network]['TEST_PRIVATE_KEY2']
@@ -30,14 +30,14 @@ def test_quickstart_simpleflow():
     
     alice_account = Ocean.account(alice_private_key)
     bob_account = Ocean.account(bob_private_key)
-    opf_account = Ocean.account(opf_private_key)
+    opf_account = Ocean.account(factory_deployer_private_key)
     
     ERC20_template = ERC20Template.deploy(
         'Template', 'TEMPLATE', alice_account.address,
-        community_addr, {'from': alice_account})
+        fee_manager_addr, {'from': alice_account})
         
     factory = Factory.deploy(
-        ERC20_template.address, community_addr, {'from': opf_account})
+        ERC20_template.address, fee_manager_addr, {'from': opf_account})
     
     #==============QUICKSTART FLOW=======================
     #1. Alice publishes a dataset (= publishes a datatoken)

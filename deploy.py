@@ -30,8 +30,7 @@ Usage: deploy.py NETWORK
 
 Notes:
  -'development' means ganache 
- -It gets OPF_PRIVATE_KEY and OCEAN_COMMUNITY_ADDRESS from the enviroment, 
-  e.g. from ~/.ocean_vars
+ -It gets FACTORY_DEPLOYER_PRIVATE_KEY and FEE_MANAGER_ADDRESS from ~/ocean.conf
  """
 
     # ****SET INPUT ARGS****
@@ -57,32 +56,32 @@ Notes:
     #grab vars
     cp = configparser.ConfigParser()
     cp.read(os.path.expanduser('~/ocean.conf'))
-    opf_private_key = cp[network]['OPF_PRIVATE_KEY']
-    community_addr = cp[network]['OCEAN_COMMUNITY_ADDRESS']
+    factory_deployer_private_key = cp[network]['FACTORY_DEPLOYER_PRIVATE_KEY']
+    fee_manager_addr = cp[network]['FEE_MANAGER_ADDRESS']
 
     #corner cases 
-    if invalidKey(opf_private_key):
-        print("Need valid OPF_PRIVATE_KEY")
+    if invalidKey(factory_deployer_private_key):
+        print("Need valid FACTORY_DEPLOYER_PRIVATE_KEY")
         sys.exit(0)
-    if invalidAddr(community_addr):
-        print("Need valid OCEAN_COMMUNITY_ADDRESS")
+    if invalidAddr(fee_manager_addr):
+        print("Need valid OCEAN_FEE_MANAGER_ADDRESS")
         sys.exit(0)
 
     # ****DEPLOY****
     if not brownie.network.is_connected():
         brownie.network.connect(network)
-    opf_account = brownieAccount(opf_private_key)
+    factory_deployer_account = brownieAccount(factory_deployer_private_key)
 
     print("****Deploy ERC20Template: begin****")
     p = brownie.project.load('./', name='FooProject')
     ERC20_template = p.ERC20Template.deploy(
-        'Template', 'TEMPLATE', opf_account.address,
-        community_addr, {'from': opf_account})
+        'Template', 'TEMPLATE', factory_deployer_account.address,
+        fee_manager_addr, {'from': factory_deployer_account})
     print(ERC20_template.tx)
     print("****Deploy ERC20Template: done****")
         
     print("****Deploy Factory: begin****")
     factory = p.Factory.deploy(
-        ERC20_template.address, community_addr, {'from': opf_account})
+        ERC20_template.address, fee_manager_addr, {'from': factory_deployer_account})
     print(factory.tx)
     print("****Deploy Factory: done****")
