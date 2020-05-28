@@ -1,5 +1,5 @@
 
-CONF_FILE_PATH = '~/.ocean.conf'
+CONF_FILE_PATH = '~/ocean.conf'
 
 ALLOWED_NETWORKS = ['development', 'mainnet', 'rinkeby'] #see 'brownie network lists'
 

@@ -1,11 +1,11 @@
 #! ./myenv/bin/python3
 
 import brownie
-import configparser
 import os
 import sys
 
-from . import constants
+from ocean_lib import constants
+from ocean_lib.Ocean import confFileValue
 
 ALLOWED_NETWORKS_STR = str(constants.ALLOWED_NETWORKS)[1:-1]
 
@@ -48,16 +48,14 @@ Notes:
     print("Arguments: NETWORK=%s\n" % network)
 
     #corner cases
-    if network not in ALLOWED_NETWORKS:
+    if network not in constants.ALLOWED_NETWORKS:
         print(f"Invalid network. Allowed networks: {ALLOWED_NETWORKS_STR}")
         sys.exit(0)
 
     # ****SET ENVT****
     #grab vars
-    cp = configparser.ConfigParser()
-    cp.read(os.path.expanduser(constants.CONF_FILE_PATH))
-    factory_deployer_private_key = cp[network]['FACTORY_DEPLOYER_PRIVATE_KEY']
-    fee_manager_addr = cp[network]['FEE_MANAGER_ADDRESS']
+    factory_deployer_private_key = confFileValue(network, 'FACTORY_DEPLOYER_PRIVATE_KEY')
+    fee_manager_addr = confFileValue(network, 'FEE_MANAGER_ADDRESS')
 
     #corner cases 
     if invalidKey(factory_deployer_private_key):
@@ -74,13 +72,10 @@ Notes:
 
     print("****Deploy IERC20Template: begin****")
     p = brownie.project.load('./', name='FooProject')
-    name = 'Template'
-    symbol = 'TEMPLATE'
-    minter = factory_deployer_account.address
-    cap = constants.DEFAULT_MINTING_CAP
+    name, symbol = 'Template', 'TEMPLATE'
     IERC20_template = p.IERC20Template.deploy(
-        'Template', 'TEMPLATE', ,
-        fee_manager_addr, {'from': factory_deployer_account})
+        name, symbol, fee_manager_addr, 
+        {'from': factory_deployer_account})
     print(IERC20_template.tx)
     print("****Deploy IERC20Template: done****")
         

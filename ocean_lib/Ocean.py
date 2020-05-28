@@ -11,7 +11,7 @@ class Ocean:
     def __init__(self, config):
         self._network = config['network']
         if self._network == 'development': 
-            network_url = _confFileValue(self._network, 'GANACHE_URL']
+            network_url = confFileValue(self._network, 'GANACHE_URL')
         else:
             raise NotImplementedError(self._network)
         self._web3 = Web3(Web3.HTTPProvider(network_url))
@@ -31,7 +31,7 @@ class _Factory:
     def __init__(self, network, web3):
         self._web3 = web3
         
-        addr = _confFileValue(network, 'FACTORY_ADDRESS')
+        addr = confFileValue(network, 'FACTORY_ADDRESS')
         abi = self._abi()
         self._contract = web3.eth.contract(address=addr, abi=abi)
         
@@ -95,6 +95,7 @@ def privateKeyToAccount(private_key):
     return eth_account.Account().from_key(private_key)
 
 def confFileValue(network, key):
-    cp = configparser.ConfigParser()
-    cp.read(os.path.expanduser(constants.CONF_FILE_PATH))
-    return cp[network][key]
+    conf = configparser.ConfigParser()
+    path = os.path.expanduser(constants.CONF_FILE_PATH)
+    conf.read(path)
+    return conf[network][key]
