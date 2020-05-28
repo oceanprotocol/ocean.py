@@ -19,8 +19,8 @@ def test_mainnet():
     
 def _test_on_network(network):
     #choose accounts with ETH, for gas. Needed for rinkeby & mainnet.
-    alice_private_key = Ocean.confFileValue(network, TEST_PRIVATE_KEY1)
-    bob_private_key = Ocean.confFileValue(network, TEST_PRIVATE_KEY2)
+    alice_private_key = Ocean.confFileValue(network, 'TEST_PRIVATE_KEY1')
+    bob_private_key = Ocean.confFileValue(network, 'TEST_PRIVATE_KEY2')
     bob_address = Ocean.privateKeyToAddress(bob_private_key)
 
     #1. Alice publishes a dataset (= publishes a datatoken)

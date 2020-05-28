@@ -51,9 +51,8 @@ class _Factory:
         return token
     
     def _abi(self):
-        path = './build/contracts/Factory.json' #FIXME magic number
-        abi = json.loads(path)['abi']
-        return abi
+        filename = './build/contracts/Factory.json' #FIXME magic number
+        return _abi(filename)
         
 class DataToken:
     def __init__(self, token_addr, web3):
@@ -77,9 +76,8 @@ class DataToken:
         tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
 
     def _abi(self):
-        path = './build/contracts/IERC20Template.json' #FIXME magic number
-        abi = json.loads(path)['abi']
-        return abi
+        filename = './build/contracts/IERC20Template.json' #FIXME magic number
+        return _abi(filename)
 
 class Asset:
     def __init__(self):
@@ -89,7 +87,7 @@ class Asset:
         raise NotImplementedError()   
         
 def privateKeyToAddress(private_key):
-    return account(private_key).address
+    return privateKeyToAccount(private_key).address
 
 def privateKeyToAccount(private_key):
     return eth_account.Account().from_key(private_key)
@@ -99,3 +97,10 @@ def confFileValue(network, key):
     path = os.path.expanduser(constants.CONF_FILE_PATH)
     conf.read(path)
     return conf[network][key]
+
+def _abi(filename):
+    with open(filename, 'r') as f:
+        text = f.read()
+    abi = json.loads(text)['abi']
+    return abi
+    
