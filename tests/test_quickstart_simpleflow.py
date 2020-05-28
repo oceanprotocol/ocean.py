@@ -1,7 +1,6 @@
 #!/usr/bin/python3
 
-import brownie
-from brownie import ERC20Template, Factory
+#do *not* import brownie, that's too much dependency here
 import configparser
 import os
 
@@ -30,8 +29,7 @@ def _test_on_network(network):
         'network' : network, 
         'privateKey' : alice_private_key,
     }
-    ocean = Ocean.Ocean(config, factory) 
-    
+    ocean = Ocean.Ocean(config)
     token = ocean.createDatatoken('localhost:8030')
     dt_address = token.address
     print(dt_address)
@@ -40,9 +38,7 @@ def _test_on_network(network):
     #(FIXME)
     
     #3. Alice mints 100 tokens
-    import pdb; pdb.set_trace()
-    token.mint(alice_account, 100, {'from': alice_account})
+    token.mint(100)
 
     #4. Alice transfers 1 token to Bob
-    import pdb; pdb.set_trace()
-    token.transfer(bob_account.address, 1, {'from': alice_account})
+    token.transfer(bob_account.address, 1)
