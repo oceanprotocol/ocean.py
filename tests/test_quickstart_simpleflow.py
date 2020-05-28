@@ -18,7 +18,7 @@ def test_mainnet():
     _test_on_network('mainnet')
     
 def _test_on_network(network):
-    #choose accounts with ETH, for gas. Needed for rinkeby & mainnet.
+    #set accounts. For each network, these need ETH with gas.
     alice_private_key = Ocean.confFileValue(network, 'TEST_PRIVATE_KEY1')
     bob_private_key = Ocean.confFileValue(network, 'TEST_PRIVATE_KEY2')
     bob_address = Ocean.privateKeyToAddress(bob_private_key)
