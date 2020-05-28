@@ -30,4 +30,4 @@ def privateKeyToAddress(private_key):
     return account(private_key).address
 
 def privateKeyToAccount(private_key):
-    return eth_account.Account().privateKeyToAccount(private_key)
+    return eth_account.Account().from_key(private_key)
