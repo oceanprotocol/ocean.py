@@ -74,9 +74,10 @@ Notes:
     p = brownie.project.load('./', name='FooProject')
     name, symbol = 'Template', 'TEMPLATE'
     minter_addr = factory_deployer_account.address
+    cap = constants.DEFAULT_MINTING_CAP
     # args to deploy = args for ERC20Template constructor & {'from':addr}
     ERC20_template = p.ERC20Template.deploy(
-        name, symbol, minter_addr, fee_manager_addr, 
+        name, symbol, minter_addr, cap, fee_manager_addr, 
         {'from': factory_deployer_account})
     print(ERC20_template.tx)
     print("****Deploy ERC20Template: done****")
