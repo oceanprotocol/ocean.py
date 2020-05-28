@@ -9,6 +9,10 @@
 
 `ocean-lib` is part of the [Ocean Protocol](www.oceanprotocol.com) toolset.
 
+## Quick Install
+
+```pip install ocean-lib```
+
 ## Quickstart: Simple Flow
 
 This stripped-down flow shows the essence of Ocean. Just downloading, no metadata.
