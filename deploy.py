@@ -5,9 +5,9 @@ import configparser
 import os
 import sys
 
+from . import constants
 
-ALLOWED_NETWORKS = ["development", "mainnet", "rinkeby"] #see 'brownie network lists'
-ALLOWED_NETWORKS_STR = str(ALLOWED_NETWORKS)[1:-1]
+ALLOWED_NETWORKS_STR = str(constants.ALLOWED_NETWORKS)[1:-1]
 
 def brownieAccount(private_key):
     assert brownie.network.is_connected()
@@ -23,14 +23,14 @@ if __name__ == '__main__':
 
     #set help message
     help = f"""
-Deploy ERC20Template and Factory to a target network. 
+Deploy IERC20Template and Factory to a target network. 
 
 Usage: deploy.py NETWORK
   NETWORK -- one of: {ALLOWED_NETWORKS_STR}
 
 Notes:
  -'development' means ganache 
- -It gets FACTORY_DEPLOYER_PRIVATE_KEY and FEE_MANAGER_ADDRESS from ~/ocean.conf
+ -It gets FACTORY_DEPLOYER_PRIVATE_KEY and FEE_MANAGER_ADDRESS from {constants.CONF_FILE_PATH}
  """
 
     # ****SET INPUT ARGS****
@@ -55,7 +55,7 @@ Notes:
     # ****SET ENVT****
     #grab vars
     cp = configparser.ConfigParser()
-    cp.read(os.path.expanduser('~/ocean.conf'))
+    cp.read(os.path.expanduser(constants.CONF_FILE_PATH))
     factory_deployer_private_key = cp[network]['FACTORY_DEPLOYER_PRIVATE_KEY']
     fee_manager_addr = cp[network]['FEE_MANAGER_ADDRESS']
 
@@ -72,16 +72,20 @@ Notes:
         brownie.network.connect(network)
     factory_deployer_account = brownieAccount(factory_deployer_private_key)
 
-    print("****Deploy ERC20Template: begin****")
+    print("****Deploy IERC20Template: begin****")
     p = brownie.project.load('./', name='FooProject')
-    ERC20_template = p.ERC20Template.deploy(
-        'Template', 'TEMPLATE', factory_deployer_account.address,
+    name = 'Template'
+    symbol = 'TEMPLATE'
+    minter = factory_deployer_account.address
+    cap = constants.DEFAULT_MINTING_CAP
+    IERC20_template = p.IERC20Template.deploy(
+        'Template', 'TEMPLATE', ,
         fee_manager_addr, {'from': factory_deployer_account})
-    print(ERC20_template.tx)
-    print("****Deploy ERC20Template: done****")
+    print(IERC20_template.tx)
+    print("****Deploy IERC20Template: done****")
         
     print("****Deploy Factory: begin****")
     factory = p.Factory.deploy(
-        ERC20_template.address, fee_manager_addr, {'from': factory_deployer_account})
+        IERC20_template.address, fee_manager_addr, {'from': factory_deployer_account})
     print(factory.tx)
     print("****Deploy Factory: done****")

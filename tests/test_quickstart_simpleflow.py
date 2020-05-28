@@ -4,7 +4,7 @@
 import configparser
 import os
 
-from ocean_lib import Ocean
+from ocean_lib import Ocean, constants
 
 #note: we could have used @pytest.mark.parametrize, but this hurts our
 # ability to run these tests individually
@@ -20,7 +20,7 @@ def test_mainnet():
 def _test_on_network(network):
     #setup specific to this unit test
     cp = configparser.ConfigParser()
-    cp.read(os.path.expanduser('~/ocean.conf'))
+    cp.read(os.path.expanduser(constants.CONF_FILE_PATH))
     alice_private_key = cp[network]['TEST_PRIVATE_KEY1']
     bob_private_key   = cp[network]['TEST_PRIVATE_KEY2']
 
@@ -31,7 +31,7 @@ def _test_on_network(network):
     }
     ocean = Ocean.Ocean(config)
     token = ocean.createDatatoken('localhost:8030')
-    dt_address = token.address
+    dt_address = token.getAddress()
     print(dt_address)
 
     #2. Alice hosts the dataset
