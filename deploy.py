@@ -57,8 +57,8 @@ Notes:
     #grab vars
     cp = configparser.ConfigParser()
     cp.read(os.path.expanduser('~/ocean.conf'))
-    opf_private_key = cp['private']['OPF_PRIVATE_KEY']
-    community_addr = cp['public']['OCEAN_COMMUNITY_ADDRESS']
+    opf_private_key = cp[network]['OPF_PRIVATE_KEY']
+    community_addr = cp[network]['OCEAN_COMMUNITY_ADDRESS']
 
     #corner cases 
     if invalidKey(opf_private_key):

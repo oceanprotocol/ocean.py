@@ -8,18 +8,19 @@ import os
 from ocean_lib import Ocean
 
 def test_quickstart_simpleflow():
+    network = 'development' #see 'brownie network lists'
     
     #Config for both Deployment and Quickstart flow
     cp = configparser.ConfigParser()
     cp.read(os.path.expanduser('~/ocean.conf'))
-    opf_private_key = cp['private']['OPF_PRIVATE_KEY']
-    community_addr = cp['public']['OCEAN_COMMUNITY_ADDRESS']
+    opf_private_key = cp[network]['OPF_PRIVATE_KEY']
+    community_addr = cp[network]['OCEAN_COMMUNITY_ADDRESS']
     
-    alice_private_key = cp['private']['TEST_PRIVATE_KEY1']
-    bob_private_key   = cp['private']['TEST_PRIVATE_KEY2']
+    alice_private_key = cp[network]['TEST_PRIVATE_KEY1']
+    bob_private_key   = cp[network]['TEST_PRIVATE_KEY2']
 
     config = {
-        'network' : 'development', #see 'brownie network lists'
+        'network' : network, 
         'privateKey' : alice_private_key,
     }
 
