@@ -36,6 +36,7 @@ os.system('cp ../ocean-contracts/contracts/*.sol contracts/')
 os.system('cp ../ocean-contracts/contracts/*/*.sol contracts/')
 os.system('cp ../ocean-contracts/contracts/*/*/*.sol contracts/')
 
+os.system('cp ../openzeppelin-contracts/contracts/ownership/Ownable.sol contracts/')
 os.system('cp ../openzeppelin-contracts/contracts/token/ERC20/ERC20.sol contracts/')
 os.system('cp ../openzeppelin-contracts/contracts/token/ERC20/../../GSN/Context.sol contracts/')
 os.system('cp ../openzeppelin-contracts/contracts/token/ERC20/./IERC20.sol contracts/')
@@ -63,3 +64,5 @@ for f in glob.glob("contracts/*.sol"):
     inplace_change(f, 'token/', '')
     inplace_change(f, 'utils/', '')
     inplace_change(f, 'ERC20/', '')
+    inplace_change(f, 'interfaces/', '')
+    inplace_change(f, 'ownership/', '')

@@ -32,6 +32,7 @@ class _Factory:
         self._web3 = web3
         
         addr = confFileValue(network, 'FACTORY_ADDRESS')
+        import pdb; pdb.set_trace()
         abi = self._abi()
         self._contract = web3.eth.contract(address=addr, abi=abi)
         
@@ -76,7 +77,7 @@ class DataToken:
         tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
 
     def _abi(self):
-        filename = './build/contracts/IERC20Template.json' #FIXME magic number
+        filename = './build/contracts/ERC20Template.json' #FIXME magic number
         return _abi(filename)
 
 class Asset:
