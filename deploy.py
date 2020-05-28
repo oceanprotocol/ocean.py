@@ -56,7 +56,7 @@ Notes:
     # ****SET ENVT****
     #grab vars
     cp = configparser.ConfigParser()
-    config.read(os.path.expanduser('~/ocean.conf'))
+    cp.read(os.path.expanduser('~/ocean.conf'))
     opf_private_key = cp['private']['OPF_PRIVATE_KEY']
     community_addr = cp['public']['OCEAN_COMMUNITY_ADDRESS']
 
@@ -64,7 +64,7 @@ Notes:
     if invalidKey(opf_private_key):
         print("Need valid OPF_PRIVATE_KEY")
         sys.exit(0)
-    if invalidAddr(community_addr)
+    if invalidAddr(community_addr):
         print("Need valid OCEAN_COMMUNITY_ADDRESS")
         sys.exit(0)
 
