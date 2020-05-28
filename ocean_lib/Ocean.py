@@ -76,7 +76,7 @@ class DataToken:
         tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
 
     def _abi(self):
-        filename = './build/contracts/ERC20Template.json' #FIXME magic number
+        filename = './build/contracts/DataTokenTemplate.json' #FIXME magic number
         return _abi(filename)
 
 class Asset:

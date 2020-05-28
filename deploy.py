@@ -23,7 +23,7 @@ if __name__ == '__main__':
 
     #set help message
     help = f"""
-Deploy ERC20Template and Factory to a target network. 
+Deploy DataTokenTemplate and Factory to a target network. 
 
 Usage: deploy.py NETWORK
   NETWORK -- one of: {ALLOWED_NETWORKS_STR}
@@ -70,17 +70,18 @@ Notes:
         brownie.network.connect(network)
     factory_deployer_account = brownieAccount(factory_deployer_private_key)
 
-    print("****Deploy ERC20Template: begin****")
+    print("****Deploy DataTokenTemplate: begin****")
     p = brownie.project.load('./', name='FooProject')
     name, symbol = 'Template', 'TEMPLATE'
     minter_addr = factory_deployer_account.address
     cap = constants.DEFAULT_MINTING_CAP
-    # args to deploy = args for ERC20Template constructor & {'from':addr}
-    ERC20_template = p.ERC20Template.deploy(
-        name, symbol, minter_addr, cap, fee_manager_addr, 
+    blob = 'blob_string'
+    # args to deploy = args for DataTokenTemplate constructor & {'from':addr}
+    ERC20_template = p.DataTokenTemplate.deploy(
+        name, symbol, minter_addr, cap, blob, fee_manager_addr, 
         {'from': factory_deployer_account})
     print(ERC20_template.tx)
-    print("****Deploy ERC20Template: done****")
+    print("****Deploy DataTokenTemplate: done****")
         
     print("****Deploy Factory: begin****")
     factory = p.Factory.deploy(
