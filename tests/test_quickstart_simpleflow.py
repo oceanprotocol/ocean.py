@@ -30,7 +30,7 @@ def _test_on_network(network):
         'privateKey' : alice_private_key
     }
     ocean = Ocean.Ocean(config)
-    token = ocean.createDatatoken('localhost:8030')
+    token = ocean.createToken('localhost:8030')
     dt_address = token.getAddress()
     print(dt_address)
 
