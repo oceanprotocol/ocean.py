@@ -46,6 +46,7 @@ class _Factory:
             address=factory_addr, abi=factory_abi)
         
     def createToken(self, blob):
+        print("==createToken: start")
         #set function
         name, symbol = "Test Token", "TST" #FIXME make random
         cap = constants.DEFAULT_MINTING_CAP
@@ -55,14 +56,39 @@ class _Factory:
 
         #build and send tx
         gas_limit = constants.DEFAULT_GAS_LIMIT__CREATE_TOKEN
+        import pdb; pdb.set_trace()
         (tx_hash, tx_receipt) = _buildAndSendTx(self._c, function, gas_limit)
 
-        #grab token_addr. FIXME. How js unit tests do it:
-        #  grab eventEmitted 'ev', then token_address = ev.param1
+        #grab token_addr
+        events = self._factory_contract.events #web3.contract.ContractEvents object
+        event = events.TokenCreated() #web3._utils.datatypes.TokenCreated object
+        
+        #event_filter = events.TokenCreated.createFilter(fromBlock=0)
+        #entries = event_filter.get_new_entries()
+
+        #**the problem: tx_receipt['logs'] = []. Then I have no data to grab logs from.
+        # Similar: tx_receipt.logs = []
+        ##logs = events.TokenCreated.processReceipt(tx_receipt)
+        
+        #processReceipt() calls _parse_logs() which has a bug!
+        #TypeError: _parse_logs() missing 1 required positional argument: 'errors'
+        #workaround: it uses web3._utils.events.get_event_data(), so we
+        # will simply use that directly, following the pattern of
+        # how _parse_logs() uses it
+        from web3._utils.events import get_event_data
+        log = tx_receipt['logs']
+        contract = self._factory_contract
+        event_abi = event._get_event_abi()
+        import pdb; pdb.set_trace()
+        rich_log = get_event_data(contract.web3.codec, event_abi, log)
+        
+        #log = tx_receipt['logs'][0]
+        import pdb; pdb.set_trace()
         token_addr = FIXME
 
         #compute return object
         token = _DataToken(self._c, token_addr)
+        print("==createToken: done")
         return token
     
     def _abi(self):
@@ -131,6 +157,7 @@ def _abi(filename):
     return abi
     
 def _buildAndSendTx(c: _Context, function, gas_limit, num_eth=0):
+    print("==_buildAndSendTx: begin")
     tx_params = { 
         "from": c.address,
         "gas": constants.DEFAULT_GAS_LIMIT__TRANSFER_TOKENS,
@@ -149,4 +176,5 @@ def _buildAndSendTx(c: _Context, function, gas_limit, num_eth=0):
     if tx_receipt['status'] == 0: #did tx fail?
         print("Eek, the tx failed")
         import pdb; pdb.set_trace()
+    print(f"==_buildAndSendTx: done. tx_hash={tx_hash}")
     return (tx_hash, tx_receipt)
