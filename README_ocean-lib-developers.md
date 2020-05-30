@@ -75,17 +75,31 @@ Then, call the deploy script. Do this for each target NETWORK: `development` (ga
 ## 4. Test ocean-lib-py
 Outcome: ocean-lib-py works as expected.
 
-Start by testing simple quickstart on ganache, then on other networks:
+We'll start by testing on ganache. We need to invoke it manually. (Brownie starts it automatically, but we don't employ Brownie here to mimic a production setting). 
+
+Open a separate terminal, and start ganache-cli:
+```console
+ganache-cli
+```
+
+It will print several private keys to stdout. Copy the first two into `~/ocean.conf` -> `[development]` -> `TEST_PRIVATE_KEY_1` & `TEST_PRIVATE_KEY_2`.
+
+Back to your main terminal. Let's test simple quickstart on ganache:
 ```console
 pytest tests/test_quickstart_simpleflow.py::test_on_development
+```
+
+Then, test simple quickstart on rinkeby then mainnet:
+```console
 pytest tests/test_quickstart_simpleflow.py::test_on_rinkeby
 pytest tests/test_quickstart_simpleflow.py::test_on_mainnet
 ```
 
-Then test everything:
+Then, test everything:
 ```console
 pytest
 ```
+
 
 ## 5. Debugging
 Brownie reduces pain in Solidity debugging: it makes it feel like Python debugging, including Python-style tracebacks in Solidity. [Here's a walk-through](https://medium.com/better-programming/getting-started-with-brownie-part-3-ef6bfa9867d7) of key features. [Here are Brownie docs](https://eth-brownie.readthedocs.io). 
