@@ -141,7 +141,7 @@ def _buildAndSendTx(c: _Context, function, gas_limit, num_eth=0):
     tx_params = { 
         "from": c.address,
         "gas": constants.DEFAULT_GAS_LIMIT__TRANSFER_TOKENS,
-        "value": num_eth, 
+        "value": c.web3.utils.toWei(num_eth, 'ether'), 
         "nonce": c.web3.eth.getTransactionCount(c.address),
     }
 
