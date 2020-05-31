@@ -72,13 +72,13 @@ class _Factory:
         filename = './build/contracts/Factory.json' 
         return _abi(filename)
         
-class DataToken:
+class _DataToken:
     def __init__(self, c: _Context, token_addr):
         self._c: _Context = c
         self._token_address = token_addr
         
         token_abi = self._abi()
-        self._token_contract = web3.eth.contract(
+        self._token_contract = c.web3.eth.contract(
             address=token_addr, abi=token_abi)
 
     def getAddress(self):
