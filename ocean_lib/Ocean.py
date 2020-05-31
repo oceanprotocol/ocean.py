@@ -90,7 +90,7 @@ class _DataToken:
     def mint(self, num_tokens):
         #set function
         function = self._token_contract.functions.mint(
-            self._c.account, num_tokens)
+            self._c.account.address, num_tokens)
 
         #build and send tx
         print("==Build & send tx for mint()")
