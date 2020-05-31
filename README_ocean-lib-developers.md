@@ -59,23 +59,28 @@ The run make! It git clones ,copies, tweaks imports, and finally does a `brownie
 ```
 
 ## 2. Deploy the contracts
-Outcome: ERC20Template and Factory are deployed. Works for target NETWORK = `development` (ganache), `rinkeby`, or `mainnet`.
+Outcome: ERC20Template and Factory are deployed to ganache, rinkeby, or mainnet.
 
-If on `mainnet` network: ensure `~/ocean.conf` has correct `FACTORY_DEPLOYER_PRIVATE_KEY` (= an OPF key) and `FEE_MANAGER_ADDRESS` (= Ocean community address).
+If mainnet: ensure `~/ocean.conf` has correct `FACTORY_DEPLOYER_PRIVATE_KEY` (= an OPF key) and `FEE_MANAGER_ADDRESS` (= Ocean community address).
 
-If on `development` network: open a separate terminal, and run ganache-cli. Keep this running for other steps too. It generates 10 accounts using the mnenomic-based seed `brownie`, where each account has pre-seeded ETH. 
+If ganache: open a separate terminal, and run ganache-cli as follows. Keep it running for other steps too. It generates 10 accounts using the mnenomic-based seed `brownie`, where each account has pre-seeded ETH. 
 ```console
 ganache-cli --port 8545 --gasLimit 6721975 --accounts 10 --hardfork istanbul --mnemonic brownie
 ```
 
-Also if on `development` network: the previous step will print several private keys to stdout. Copy the first two into `~/ocean.conf` -> `[development]` -> `TEST_PRIVATE_KEY_1` & `TEST_PRIVATE_KEY_2`.
+If ganache: the previous step will print several private keys to stdout. Copy the first two into `~/ocean.conf` -> `[ganache-cli-live]` -> `TEST_PRIVATE_KEY_1` & `TEST_PRIVATE_KEY_2`.
 
-Call the deploy script. It uses Brownie, which will auto-attach to the target NETWORK.
+If ganache: add `ganache-cli-live` as a network to Brownie:
+```console
+brownie networks add Ethereum "ganache-cli-live" host=127.0.0.1:8545 chainid=1234
+```
+
+Call the deploy script with NETWORK = `ganache-cli-live`, `rinkeby`, or `mainnet`. Brownie will attach to the network.
 ```console
 ./deploy.py NETWORK
 ```
 
-Finally: deploy.py outputs something like `"Factory deployed at: 0x9sf..373"`. Update `ocean.conf`'s `FACTORY_ADDRESS` with that value.
+Finally: update `ocean.conf`'s `FACTORY_ADDRESS` with the factory address output in the previous step.
 
 ## 3. Test ocean-lib-py
 Outcome: ocean-lib-py works as expected.
@@ -84,7 +89,7 @@ First, ensure that ganache-cli is running like in step 2: `ganache-cli --port ..
 
 Then, test simple quickstart on it:
 ```console
-pytest tests/test_quickstart_simpleflow.py::test_on_development
+pytest tests/test_quickstart_simpleflow.py::test_on_ganache
 ```
 
 Then, test simple quickstart on the other networks:
