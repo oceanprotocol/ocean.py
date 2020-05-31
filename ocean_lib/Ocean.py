@@ -25,8 +25,8 @@ class Ocean:
             network_url = confFileValue('DEFAULT', 'GANACHE_URL')
         else:
             infura_id = confFileValue('DEFAULT', 'WEB3_INFURA_PROJECT_ID')
-            infura_url = util.getInfuraUrl(infura_id, network)
-        web3 = util.web3(url)
+            network_url = util.getInfuraUrl(infura_id, network)
+        web3 = util.web3(network_url)
             
         private_key = config['privateKey']
         
