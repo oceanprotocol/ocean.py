@@ -61,7 +61,7 @@ The run make! It git clones ,copies, tweaks imports, and finally does a `brownie
 ## 2. Deploy the contracts
 Outcome: ERC20Template and Factory are deployed. Works for target NETWORK = `development` (ganache), `rinkeby`, or `mainnet`.
 
-If on `mainnet` network: ensure `~/ocean.conf` has correct FACTORY_DEPLOYER_PRIVATE_KEY (= an OPF key) and FEE_MANAGER_ADDRESS (= Ocean community address).
+If on `mainnet` network: ensure `~/ocean.conf` has correct `FACTORY_DEPLOYER_PRIVATE_KEY` (= an OPF key) and `FEE_MANAGER_ADDRESS` (= Ocean community address).
 
 If on `development` network: open a separate terminal, and run ganache-cli. Keep this running for other steps too. It generates 10 accounts using the mnenomic-based seed `brownie`, where each account has pre-seeded ETH. 
 ```console
