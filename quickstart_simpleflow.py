@@ -7,7 +7,7 @@ import os
 from ocean_lib import Ocean, constants
     
 if __name__ == '__main__':
-    network = 'ganache'
+    network = 'rinkeby'
     
     #set accounts. For each network, these need ETH with gas.
     alice_private_key = Ocean.confFileValue(network, 'TEST_PRIVATE_KEY1')
