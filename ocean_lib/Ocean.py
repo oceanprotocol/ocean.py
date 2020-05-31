@@ -140,8 +140,7 @@ def _buildAndSendTx(c: _Context, function, gas_limit, num_eth=0):
 
     tx = function.buildTransaction(tx_params)
     signed_tx = c.web3.eth.account.sign_transaction(tx, private_key=c.private_key)
-    tx_hash = c.web3.eth.sendRawTransaction(signed_tx.rawTransaction) 
-    print(f"tx_hash={tx_hash}")
+    tx_hash = c.web3.eth.sendRawTransaction(signed_tx.rawTransaction)
 
     tx_receipt = c.web3.eth.waitForTransactionReceipt(tx_hash)
     print(f"tx_receipt={tx_receipt}")
