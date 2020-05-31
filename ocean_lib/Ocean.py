@@ -58,7 +58,7 @@ class _Factory:
         (tx_hash, tx_receipt) = _buildAndSendTx(self._c, function, gas_limit)
 
         #grab token_addr
-        token_addr = FIXME
+        token_addr = self._factory_contract.functions.getTokenAddress(symbol).call()
 
         #compute return object
         token = _DataToken(self._c, token_addr)
