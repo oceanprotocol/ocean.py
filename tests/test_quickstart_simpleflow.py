@@ -8,8 +8,8 @@ from ocean_lib import Ocean, constants
 
 #note: we could have used @pytest.mark.parametrize, but this hurts our
 # ability to run these tests individually
-def test_on_development():
-    _test_on_network('development')
+def test_on_ganache():
+    _test_on_network('ganache')
     
 def test_on_rinkeby():
     _test_on_network('rinkeby')

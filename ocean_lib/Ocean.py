@@ -19,7 +19,8 @@ class _Context:
 class Ocean:
     def __init__(self, config):
         network = config['network']
-        if network == 'development': 
+        
+        if network == 'ganache': 
             network_url = confFileValue(network, 'GANACHE_URL')
         else:
             raise NotImplementedError(network)

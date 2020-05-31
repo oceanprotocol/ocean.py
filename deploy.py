@@ -7,7 +7,8 @@ import sys
 from ocean_lib import constants
 from ocean_lib.Ocean import confFileValue
 
-ALLOWED_NETWORKS_STR = str(constants.ALLOWED_NETWORKS)[1:-1]
+ALLOWED_NETWORKS = ['ganache', 'rinkeby', 'mainnet']
+ALLOWED_NETWORKS_STR = str(ALLOWED_NETWORKS)[1:-1]
 
 def brownieAccount(private_key):
     assert brownie.network.is_connected()
@@ -29,7 +30,6 @@ Usage: deploy.py NETWORK
   NETWORK -- one of: {ALLOWED_NETWORKS_STR}
 
 Notes:
- -'development' means ganache 
  -It gets FACTORY_DEPLOYER_PRIVATE_KEY and FEE_MANAGER_ADDRESS from {constants.CONF_FILE_PATH}
  """
 
@@ -48,7 +48,7 @@ Notes:
     print("Arguments: NETWORK=%s\n" % network)
 
     #corner cases
-    if network not in constants.ALLOWED_NETWORKS:
+    if network not in ALLOWED_NETWORKS:
         print(f"Invalid network. Allowed networks: {ALLOWED_NETWORKS_STR}")
         sys.exit(0)
 
@@ -65,10 +65,14 @@ Notes:
         print("Need valid OCEAN_FEE_MANAGER_ADDRESS")
         sys.exit(0)
 
+    # ****CONNECT TO EXISTING RUNNING CHAIN****
+    assert not brownie.network.is_connected()
+    assert network != 'development', "can't have network='development' because brownie reverts that"
+    brownie.network.connect(network)
+        
     # ****DEPLOY****
-    if not brownie.network.is_connected():
-        brownie.network.connect(network)
     factory_deployer_account = brownieAccount(factory_deployer_private_key)
+    import pdb; pdb.set_trace()
 
     print("****Deploy DataTokenTemplate: begin****")
     p = brownie.project.load('./', name='FooProject')
