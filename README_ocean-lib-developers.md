@@ -41,7 +41,12 @@ cp sample_ocean.conf ~/ocean.conf
 Then open `~/ocean.conf` and update the values as needed. This may include the infura id.
 
 ## 1. Make contracts
-Outcome: the .sol files from other repos are in a freshly-created `contracts/` subdirectory here.
+Outcomes: 
+- `.sol` files from other repos in a freshly-created `contracts/` subdirectory with imports tweaked as needed.
+- `.abi` files, compiled from the `.sol` with brownie
+- ready for easy debugging via `brownie console`
+
+Let's do it! 
 
 Set up env't, ensure it's up to date:
 ```console
@@ -49,17 +54,9 @@ source myenv/bin/activate
 pip install -r requirements.txt 
 ```
 
-Create new directory, copy .sol files from other repos, and alter as needed (e.g. change import paths):
+The run make! It git clones ,copies, tweaks imports, and finally does a `brownie compile'.
 ```console
 ./make_contracts.py
-```
-
-## 2. Compile the contracts 
-Outcome: ABIs and easy brownie debugging, from .sol files.
-
-Get Brownie to look in `contracts/` and perform its magic:
-```console
-brownie compile
 ```
 
 ## 3. Deploy the contracts
