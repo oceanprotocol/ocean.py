@@ -63,17 +63,10 @@ Outcome: ERC20Template and Factory are deployed to ganache, rinkeby, or mainnet.
 
 If mainnet: ensure `~/ocean.conf` has correct `FACTORY_DEPLOYER_PRIVATE_KEY` (= an OPF key) and `FEE_MANAGER_ADDRESS` (= Ocean community address).
 
-If ganache: open a separate terminal, and run ganache-cli as follows. Keep it running for other steps too. It generates 10 accounts using the mnenomic-based seed `brownie`, where each account has pre-seeded ETH. 
-```console
-ganache-cli --port 8545 --gasLimit 6721975 --accounts 10 --hardfork istanbul --mnemonic brownie
-```
-
-If ganache: the previous step will print several private keys to stdout. Copy the first two into `~/ocean.conf` -> `[ganache]` -> `TEST_PRIVATE_KEY_1` & `TEST_PRIVATE_KEY_2`.
-
-If ganache: add `ganache` as a network to Brownie:
-```console
-brownie networks add Ethereum ganache host=http://127.0.0.1:8545 chainid=1234
-```
+If ganache: open a separate terminal, set the env't, and run `ganachye.py`. The latter will add `ganache` as a network to brownie if needed, then start `ganache-cli` and pre-populate ETH into the private keys set in `~/ocean.conf`.
+- `cd <this dir>`
+- `source myenv/bin/activate`
+- `./ganache.py`
 
 Call the deploy script with NETWORK = `ganache`, `rinkeby`, or `mainnet`. Brownie will attach to the network.
 ```console
