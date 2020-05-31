@@ -6,6 +6,7 @@ import sys
 
 from ocean_lib import constants
 from ocean_lib.Ocean import confFileValue
+from ocean_lib.util import printAccountInfo
 
 ALLOWED_NETWORKS = ['ganache', 'rinkeby', 'mainnet']
 ALLOWED_NETWORKS_STR = str(ALLOWED_NETWORKS)[1:-1]
@@ -19,7 +20,11 @@ def invalidKey(private_key_str): #super basic check
 
 def invalidAddr(addr_str): #super basic check
     return len(addr_str) < 10
-    
+
+def setenv(key, value):
+    #os.putenv(key, value) #Do *not* use putenv(), it doesn't work
+    os.environ[key] = value
+
 if __name__ == '__main__':
 
     #set help message
@@ -69,7 +74,16 @@ Notes:
     # ****CONNECT TO EXISTING RUNNING CHAIN****
     assert not brownie.network.is_connected()
     assert network != 'development', "can't have network='development' because brownie reverts that"
+    if network in ['rinkeby', 'main']: #set os envvar for infura
+        id_ = confFileValue('DEFAULT', 'WEB3_INFURA_PROJECT_ID')
+        setenv('WEB3_INFURA_PROJECT_ID', id_)
+        
     brownie.network.connect(network)
+    
+    # ****SEE FUNDS****
+    #import pdb; pdb.set_trace()
+    web3 = brownie.network.web3
+    printAccountInfo(web3, 'factory_deployer', factory_deployer_private_key)
         
     # ****DEPLOY****
     if network == 'ganache': #past deployments cause errors, so delete them
