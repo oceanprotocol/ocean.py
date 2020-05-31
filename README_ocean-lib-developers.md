@@ -3,8 +3,7 @@
 This README is how to further *develop* ocean-lib-py. (Compare to the quickstarts which show how to *use* ocean-lib-py.)
 
 Here, you can:
-1. **Make contracts**: copy from other repos to here, tweak imports
-1. **Compile** the contracts into ABIs etc
+1. **Copy & compile contracts**: copy .sol from other repos, tweak imports, compile into ABIs etc
 1. **Deploy** the contracts to {local, rinkeby, mainnet}
 1. **Test** ocean-lib-py
 1. (Along the way) **Debug** at the contract or py level.
@@ -40,7 +39,7 @@ cp sample_ocean.conf ~/ocean.conf
 
 Then open `~/ocean.conf` and update the values as needed. This may include the infura id.
 
-## 1. Make contracts
+## 1. Copy & compile contracts
 Outcomes: 
 - `.sol` files from other repos in a freshly-created `contracts/` subdirectory with imports tweaked as needed.
 - `.abi` files, compiled from the `.sol` with brownie
@@ -56,10 +55,10 @@ pip install -r requirements.txt
 
 The run make! It git clones ,copies, tweaks imports, and finally does a `brownie compile'.
 ```console
-./make_contracts.py
+./make.py
 ```
 
-## 3. Deploy the contracts
+## 2. Deploy the contracts
 Outcome: ERC20Template and Factory are deployed. 
 
 First, update `~/ocean.conf` so that OPF_PRIVATE_KEY and OCEAN_COMMUNITY_ADDRESS are correct.
@@ -69,7 +68,7 @@ Then, call the deploy script. Do this for each target NETWORK: `development` (ga
 ./deploy.py NETWORK
 ```
 
-## 4. Test ocean-lib-py
+## 3. Test ocean-lib-py
 Outcome: ocean-lib-py works as expected.
 
 We'll start by testing on ganache. We need to invoke it manually. (Brownie starts it automatically, but we don't employ Brownie here to mimic a production setting). 
@@ -97,8 +96,7 @@ Then, test everything:
 pytest
 ```
 
-
-## 5. Debugging
+## 4. Debugging
 Brownie reduces pain in Solidity debugging: it makes it feel like Python debugging, including Python-style tracebacks in Solidity. [Here's a walk-through](https://medium.com/better-programming/getting-started-with-brownie-part-3-ef6bfa9867d7) of key features. [Here are Brownie docs](https://eth-brownie.readthedocs.io). 
 
 Lets's do some stuff with it. First, start the console.
