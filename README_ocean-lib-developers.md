@@ -68,14 +68,14 @@ If ganache: open a separate terminal, and run ganache-cli as follows. Keep it ru
 ganache-cli --port 8545 --gasLimit 6721975 --accounts 10 --hardfork istanbul --mnemonic brownie
 ```
 
-If ganache: the previous step will print several private keys to stdout. Copy the first two into `~/ocean.conf` -> `[ganache-cli-live]` -> `TEST_PRIVATE_KEY_1` & `TEST_PRIVATE_KEY_2`.
+If ganache: the previous step will print several private keys to stdout. Copy the first two into `~/ocean.conf` -> `[ganache]` -> `TEST_PRIVATE_KEY_1` & `TEST_PRIVATE_KEY_2`.
 
-If ganache: add `ganache-cli-live` as a network to Brownie:
+If ganache: add `ganache` as a network to Brownie:
 ```console
-brownie networks add Ethereum "ganache-cli-live" host=127.0.0.1:8545 chainid=1234
+brownie networks add Ethereum ganache host=http://127.0.0.1:8545 chainid=1234
 ```
 
-Call the deploy script with NETWORK = `ganache-cli-live`, `rinkeby`, or `mainnet`. Brownie will attach to the network.
+Call the deploy script with NETWORK = `ganache`, `rinkeby`, or `mainnet`. Brownie will attach to the network.
 ```console
 ./deploy.py NETWORK
 ```
