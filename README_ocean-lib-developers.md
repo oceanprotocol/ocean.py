@@ -75,6 +75,8 @@ Call the deploy script. It uses Brownie, which will auto-attach to the target NE
 ./deploy.py NETWORK
 ```
 
+Finally: deploy.py outputs something like `"Factory deployed at: 0x9sf..373"`. Update `ocean.conf`'s `FACTORY_ADDRESS` with that value.
+
 ## 3. Test ocean-lib-py
 Outcome: ocean-lib-py works as expected.
 
