@@ -65,17 +65,20 @@ Notes:
         print("Need valid OCEAN_FEE_MANAGER_ADDRESS")
         sys.exit(0)
 
+    
     # ****CONNECT TO EXISTING RUNNING CHAIN****
     assert not brownie.network.is_connected()
     assert network != 'development', "can't have network='development' because brownie reverts that"
     brownie.network.connect(network)
         
     # ****DEPLOY****
+    if network == 'ganache': #past deployments cause errors, so delete them
+        os.system('rm -rf ./build/deployments/1234')
+        
     factory_deployer_account = brownieAccount(factory_deployer_private_key)
-    import pdb; pdb.set_trace()
 
     print("****Deploy DataTokenTemplate: begin****")
-    p = brownie.project.load('./', name='FooProject')
+    p = brownie.project.load('./', name='DataTokenTemplate')
     name, symbol = 'Template', 'TEMPLATE'
     minter_addr = factory_deployer_account.address
     cap = constants.DEFAULT_MINTING_CAP
