@@ -62,7 +62,7 @@ Notes:
         print("Need valid FACTORY_DEPLOYER_PRIVATE_KEY")
         sys.exit(0)
     if invalidAddr(fee_manager_addr):
-        print("Need valid OCEAN_FEE_MANAGER_ADDRESS")
+        print("Need valid FEE_MANAGER_ADDRESS")
         sys.exit(0)
 
     
