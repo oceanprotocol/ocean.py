@@ -149,7 +149,11 @@ def _buildAndSendTx(c: _Context, function, gas_limit, num_eth=0):
 
     tx = function.buildTransaction(tx_params)
     signed_tx = c.web3.eth.account.sign_transaction(tx, private_key=c.private_key)
-    tx_hash = c.web3.eth.sendRawTransaction(signed_tx.rawTransaction)
+    try:
+        tx_hash = c.web3.eth.sendRawTransaction(signed_tx.rawTransaction)
+    except ValueError as err:
+        print(f"Error: {err}")
+        import pdb; pdb.set_trace()
 
     tx_receipt = c.web3.eth.waitForTransactionReceipt(tx_hash)
     print(f"tx_receipt={tx_receipt}")
