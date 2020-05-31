@@ -81,7 +81,6 @@ Notes:
     brownie.network.connect(network)
     
     # ****SEE FUNDS****
-    #import pdb; pdb.set_trace()
     web3 = brownie.network.web3
     printAccountInfo(web3, 'factory_deployer', factory_deployer_private_key)
         
