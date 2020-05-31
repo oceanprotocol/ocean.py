@@ -6,6 +6,7 @@ import os
 from web3 import Web3
 
 from . import constants
+from . import util
 
 class _Context:
     def __init__(self, network, web3, private_key):
@@ -21,10 +22,11 @@ class Ocean:
         network = config['network']
         
         if network == 'ganache': 
-            network_url = confFileValue(network, 'GANACHE_URL')
+            network_url = confFileValue('DEFAULT', 'GANACHE_URL')
         else:
-            raise NotImplementedError(network)
-        web3 = Web3(Web3.HTTPProvider(network_url))
+            infura_id = confFileValue('DEFAULT', 'WEB3_INFURA_PROJECT_ID')
+            infura_url = util.getInfuraUrl(infura_id, network)
+        web3 = util.web3(url)
             
         private_key = config['privateKey']
         
