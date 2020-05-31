@@ -59,38 +59,33 @@ The run make! It git clones ,copies, tweaks imports, and finally does a `brownie
 ```
 
 ## 2. Deploy the contracts
-Outcome: ERC20Template and Factory are deployed. 
+Outcome: ERC20Template and Factory are deployed. Works for target NETWORK = `development` (ganache), `rinkeby`, or `mainnet`.
 
-First, update `~/ocean.conf` so that OPF_PRIVATE_KEY and OCEAN_COMMUNITY_ADDRESS are correct.
+If on `mainnet` network: ensure `~/ocean.conf` has correct FACTORY_DEPLOYER_PRIVATE_KEY (= an OPF key) and FEE_MANAGER_ADDRESS (= Ocean community address).
 
-Then, call the deploy script. Do this for each target NETWORK: `development` (ganache), `rinkeby`, or `mainnet`:
-```console
-./deploy.py NETWORK
-```
-
-Note: for `development`, here's how Brownie launches ganache. It generates 10 accounts using the mnenomic-based seed `brownie`, where each account has pre-seeded ETH. 
+If on `development` network: open a separate terminal, and run ganache-cli. Keep this running for other steps too. It generates 10 accounts using the mnenomic-based seed `brownie`, where each account has pre-seeded ETH. 
 ```console
 ganache-cli --port 8545 --gasLimit 6721975 --accounts 10 --hardfork istanbul --mnemonic brownie
+```
+
+Also if on `development` network: the previous step will print several private keys to stdout. Copy the first two into `~/ocean.conf` -> `[development]` -> `TEST_PRIVATE_KEY_1` & `TEST_PRIVATE_KEY_2`.
+
+Call the deploy script. It uses Brownie, which will auto-attach to the target NETWORK.
+```console
+./deploy.py NETWORK
 ```
 
 ## 3. Test ocean-lib-py
 Outcome: ocean-lib-py works as expected.
 
-We'll start by testing on ganache. We need to invoke it manually. (Brownie starts it automatically, but we don't employ Brownie here to mimic a production setting). 
+First, ensure that ganache-cli is running like in step 2: `ganache-cli --port ...`.
 
-Open a separate terminal and start ganache-cli, using the same setup as earlier:
-```console
-ganache-cli --port 8545 --gasLimit 6721975 --accounts 10 --hardfork istanbul --mnemonic brownie
-```
-
-It will print several private keys to stdout. Copy the first two into `~/ocean.conf` -> `[development]` -> `TEST_PRIVATE_KEY_1` & `TEST_PRIVATE_KEY_2`.
-
-Back to your main terminal. Let's test simple quickstart on ganache:
+Then, test simple quickstart on it:
 ```console
 pytest tests/test_quickstart_simpleflow.py::test_on_development
 ```
 
-Then, test simple quickstart on rinkeby then mainnet:
+Then, test simple quickstart on the other networks:
 ```console
 pytest tests/test_quickstart_simpleflow.py::test_on_rinkeby
 pytest tests/test_quickstart_simpleflow.py::test_on_mainnet
