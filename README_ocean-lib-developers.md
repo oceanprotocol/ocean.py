@@ -53,7 +53,7 @@ source myenv/bin/activate
 pip install -r requirements.txt 
 ```
 
-The run make! It git clones ,copies, tweaks imports, and finally does a `brownie compile'.
+The run make! It git clones ,copies, tweaks imports, and finally does a `brownie compile`.
 ```console
 ./make.py
 ```
