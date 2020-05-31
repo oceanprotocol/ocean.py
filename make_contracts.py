@@ -77,4 +77,8 @@ for f in glob.glob('contracts/*.sol'):
     inplace_change(f, 'interfaces/', '')
     inplace_change(f, 'ownership/', '')
 
+
+print('===Compile')
+os.system('brownie compile')
+
 print('===Done!')
