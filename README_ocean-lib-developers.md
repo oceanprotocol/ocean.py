@@ -109,27 +109,28 @@ Lets's do some stuff with it. First, start the console.
 brownie console
 ```
 
-In brownie console:
+Play in brownie console! Here's an end-to-end example that deploys a factory (and token template), creates a token, then retreives the token address:
 ```python
->>> dir()                                                                                                                                                                                                        
-[Address, Contract, Deployer, ERC20, ERC20Pausable, ERC20Template, Factory, FeeCalculator, FeeCollector, FeeManager, Fixed, Migrations, Registry, SafeMath, Wei, a, accounts, alert, compile_source, config, dir, exit, history, interface, network, project, quit, rpc, run, web3]
->>> dir(ERC20Template)                                                                                                                                                                                           
-[abi, at, bytecode, deploy, get_method, info, remove, selectors, signatures, topics, tx]
->>> dir(Factory)                                                                                                                                                                                                 
-[abi, at, bytecode, deploy, get_method, info, remove, selectors, signatures, topics, tx]
->>> ERC20Template.deploy('Template', 'TEMPLATE', accounts[0].address, accounts[1].address, {'from': accounts[0]})                                                                                                
-Transaction sent: 0xb8073c4a749a5cf8bfc9d9ebccc6aa07ec2376eea913723d656766ed0122451e
+>>> ERC20_template = DataTokenTemplate.deploy("Template","TEMPLATE", factory_deployer_account.address, 1000, "blob", factory_deployer_account.address, {'from':factory_deployer_account
+})                                                                                                                                                                                     
+Transaction sent: 0xc17f63a24aac9e906ee7847f8a21c13f00e937a6e0ad1eebf32b412f347f380b
   Gas price: 0.0 gwei   Gas limit: 6721975
-  ERC20Template.constructor confirmed - Block: 1   Gas used: 1455550 (21.65%)
-  ERC20Template deployed at: 0x3194cBDC3dbcd3E11a07892e7bA5c3394048Cc87
+  DataTokenTemplate.constructor confirmed - Block: 1   Gas used: 1616110 (24.04%)
+  DataTokenTemplate deployed at: 0xE7b2aEceba7367057287980187A0477D8012C4F9
 
-<ERC20Template Contract '0x3194cBDC3dbcd3E11a07892e7bA5c3394048Cc87'>
->>> Factory.deploy(ERC20Template[0].address, accounts[1].address, {'from': accounts[0]})                                                                                                                         
-Transaction sent: 0xa6704ce76db2030177c547473e7f990d1c5e0182f54adfaa488db6db28cb23a5
+>>> factory = Factory.deploy(ERC20_template.address, factory_deployer_account.address, {'from':factory_deployer_account})                                                              
+Transaction sent: 0x9785143287fb92add792923478946b299701d2bce9a6074fbe7e1d0a1b77bd93
   Gas price: 0.0 gwei   Gas limit: 6721975
-  Factory.constructor confirmed - Block: 2   Gas used: 426269 (6.34%)
-  Factory deployed at: 0x602C71e4DAC47a042Ee7f46E0aee17F94A3bA0B6
+  Factory.constructor confirmed - Block: 2   Gas used: 692655 (10.30%)
+  Factory deployed at: 0x6a7eaF9c068C9742646C121e66625aeeE1CE6A02
 
-<Factory Contract '0x602C71e4DAC47a042Ee7f46E0aee17F94A3bA0B6'>
+>>> factory.createToken("Test Token", "TST", 1000, "test blob", accounts[0].address, {'from':accounts[0]})                                                                             
+Transaction sent: 0x09ad403c6aa481596de03c5a9d662ab46799154a0f857c8b09d5efd3bc4f06bf
+  Gas price: 0.0 gwei   Gas limit: 6721975
+  Factory.createToken confirmed - Block: 3   Gas used: 254228 (3.78%)
+
+<Transaction '0x09ad403c6aa481596de03c5a9d662ab46799154a0f857c8b09d5efd3bc4f06bf'>
+>>> factory.getTokenAddress("TST")                                                                                                                                                     
+'0x9f5C0E5080890F00Cf7Df7AD1D112503d1bf6c14'
 ```
 
