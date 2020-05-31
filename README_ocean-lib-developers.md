@@ -68,14 +68,19 @@ Then, call the deploy script. Do this for each target NETWORK: `development` (ga
 ./deploy.py NETWORK
 ```
 
+Note: for `development`, here's how Brownie launches ganache. It generates 10 accounts using the mnenomic-based seed `brownie`, where each account has pre-seeded ETH. 
+```console
+ganache-cli --port 8545 --gasLimit 6721975 --accounts 10 --hardfork istanbul --mnemonic brownie
+```
+
 ## 3. Test ocean-lib-py
 Outcome: ocean-lib-py works as expected.
 
 We'll start by testing on ganache. We need to invoke it manually. (Brownie starts it automatically, but we don't employ Brownie here to mimic a production setting). 
 
-Open a separate terminal, and start ganache-cli:
+Open a separate terminal and start ganache-cli, using the same setup as earlier:
 ```console
-ganache-cli
+ganache-cli --port 8545 --gasLimit 6721975 --accounts 10 --hardfork istanbul --mnemonic brownie
 ```
 
 It will print several private keys to stdout. Copy the first two into `~/ocean.conf` -> `[development]` -> `TEST_PRIVATE_KEY_1` & `TEST_PRIVATE_KEY_2`.
