@@ -57,11 +57,14 @@ class _Factory:
             name, symbol, cap, blob, minter)
 
         #build and send tx
+        print("==Build & send tx for createToken()")
         gas_limit = constants.DEFAULT_GAS_LIMIT__CREATE_TOKEN
         (tx_hash, tx_receipt) = _buildAndSendTx(self._c, function, gas_limit)
 
         #grab token_addr
+        print("==Grab token address")
         token_addr = self._factory_contract.functions.getTokenAddress(symbol).call()
+        print(f"==token_addr={token_addr}")
 
         #compute return object
         token = _DataToken(self._c, token_addr)
@@ -90,6 +93,7 @@ class _DataToken:
             self._c.account, num_tokens)
 
         #build and send tx
+        print("==Build & send tx for mint()")
         gas_limit = constants.DEFAULT_GAS_LIMIT__MINT_TOKENS
         (tx_hash, tx_receipt) = _buildAndSendTx(self._c, function, gas_limit)
         
@@ -99,6 +103,7 @@ class _DataToken:
             recipient_addr, num_tokens)
 
         #build and send tx
+        print("==Build & send tx for transfer()")
         gas_limit = constants.DEFAULT_GAS_LIMIT__TRANSFER_TOKENS
         (tx_hash, tx_receipt) = _buildAndSendTx(self._c, function, gas_limit)
 
