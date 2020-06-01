@@ -1,6 +1,7 @@
 oceanbrownie/
 .history
 myenv/
-*~
+__pycache__
 .pytest_cache/
-*.py[cod~]
+*.pyc
+*.py~
