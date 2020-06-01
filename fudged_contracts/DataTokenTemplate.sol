@@ -178,12 +178,12 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
 	uint256 fee_in_wei = _dataFooFunction();
 	//uint256 fee_in_wei = _feeManager.fooFunction();
 	//uint256 fee_in_wei = _feeManager.calculateFee(num_tokens_minted, _cap);
-        //require(
-        //    msg.value >= _feeManager.calculateFee(num_tokens_minted, _cap), 
-        //    'DataTokenTemplate: invalid data token minting fee'
-        //);
+        require(
+           msg.value >= fee_in_wei, 
+           'DataTokenTemplate: invalid data token minting fee'
+        );
         _mint(account, num_tokens_minted);
-        //address(_feeManager).transfer(msg.value);
+        address(_feeManager).transfer(fee_in_wei);
     }
 
     function _dataFooFunction() private pure returns (uint256) {
