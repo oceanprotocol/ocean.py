@@ -25,9 +25,6 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
     address private _minter;
     address payable private _feeAddress;
     
-    uint256 constant private BASE_TX_COST = 44000;
-    uint256 constant private BASE = 10;
-    
     modifier onlyNotInitialized() {
         require(
             !initialized,
@@ -176,21 +173,23 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
     function _calculateFee(uint256 num_tokens_minted)
         public view returns (uint256)
     {
-      uint256 tokensRange = _calculateRange(num_tokens_minted);
-      uint256 tokensRangeToll = tokensRange.mul(BASE_TX_COST);
-      return tokensRangeToll.div(_calculateRange(_cap)).div(BASE);
+      uint256 BASE_TX_COST = 44000;
+      uint256 num_zeroes_minting = _numZeroes(num_tokens_minted);
+      uint256 num_zeroes_cap = _numZeroes(_cap);
+      uint256 base_toll = num_zeroes_minting.mul(BASE_TX_COST);
+      return base_toll.div(num_zeroes_cap).div(10);
     }
     
-    function _calculateRange(uint256 num_tokens_minted) 
+    function _numZeroes(uint256 num_tokens_minted) 
         private pure returns (uint256)
     {
         uint256 remainder = num_tokens_minted;
-        uint256 zeros = 0;
-        for(uint256 i = 0 ; remainder >= BASE; i++){
-            remainder = remainder.div(BASE);
-            zeros += 1;
+        uint256 num_zeroes = 0;
+        for(uint256 i = 0 ; remainder >= 10; i++){
+            remainder = remainder.div(10);
+            num_zeroes += 1;
         }
-        return zeros;
+        return num_zeroes;
     }
     
     
