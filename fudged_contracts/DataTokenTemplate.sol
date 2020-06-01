@@ -3,6 +3,7 @@ pragma solidity ^0.5.7;
 // SPDX-License-Identifier: (Apache-2.0 AND CC-BY-4.0)
 // Code is Apache-2.0 and docs are CC-BY-4.0
 
+import "./SafeMath.sol"
 import './ERC20Pausable.sol';
 import './IERC20Template.sol';
 
