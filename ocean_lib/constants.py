@@ -1,5 +1,9 @@
 
+#configuration file
 CONF_FILE_PATH = '~/ocean.conf'
+
+#temp directory to set up the brownie project to compile etc
+BROWNIEDIR = 'oceanbrownie'
 
 DEFAULT_MINTING_CAP = 1000
 

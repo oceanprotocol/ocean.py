@@ -5,6 +5,7 @@ import os
 import sys
 
 from ocean_lib import constants
+from ocean_lib.constants import BROWNIEDIR
 from ocean_lib.Ocean import confFileValue
 from ocean_lib.util import printAccountInfo
 
@@ -86,12 +87,12 @@ Notes:
         
     # ****DEPLOY****
     if network == 'ganache': #past deployments cause errors, so delete them
-        os.system('rm -rf ./build/deployments/1234')
+        os.system(f'rm -rf ./{BROWNIEDIR}/build/deployments/1234')
         
     factory_deployer_account = brownieAccount(factory_deployer_private_key)
 
     print("****Deploy DataTokenTemplate: begin****")
-    p = brownie.project.load('./', name='OceanLibPyProject')
+    p = brownie.project.load('./oceanbrownie', name='oceanbrownieProject')
     name, symbol = 'Template', 'TEMPLATE'
     minter_addr = factory_deployer_account.address
     cap = constants.DEFAULT_MINTING_CAP

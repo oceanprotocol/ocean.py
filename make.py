@@ -1,10 +1,18 @@
-#!/usr/bin/python3
+#! ./myenv/bin/python3
 
 import re
 import os
 import shutil
 import subprocess
 import sys
+
+from ocean_lib.constants import BROWNIEDIR
+
+print('===Begin make.py')
+CONTRACTDIR = f'./{BROWNIEDIR}/contracts'
+print(f'  BROWNIEDIR: {BROWNIEDIR}')
+print(f'  CONTRACTDIR: {CONTRACTDIR}')
+assert '/' not in BROWNIEDIR
 
 print('===Check Python version')
 s = subprocess.check_output('python --version', shell=True) #eg 'Python 2.7.17'
@@ -36,26 +44,28 @@ if not os.path.exists('../openzeppelin-contracts'): #note that we use v0.2.5
     #don't need to ever update them, since it's an old version
 print('===Clone/update .sol sources: done')
 
-print('===Populate ./contracts')
-if os.path.exists('./contracts'):
-    os.system('rm -rf contracts')
-os.mkdir('contracts')
-os.system('cp ../ocean-contracts/contracts/*.sol contracts/')
-os.system('cp ../ocean-contracts/contracts/*/*.sol contracts/')
-os.system('cp ../ocean-contracts/contracts/*/*/*.sol contracts/')
+print(f'===Initialize {BROWNIEDIR}/')
+if os.path.exists(f'./{BROWNIEDIR}'):
+    os.system(f'rm -rf {BROWNIEDIR}')
+os.system(f'brownie init {BROWNIEDIR}')
 
-os.system('cp ../openzeppelin-contracts/contracts/ownership/Ownable.sol contracts/')
-os.system('cp ../openzeppelin-contracts/contracts/token/ERC20/ERC20.sol contracts/')
-os.system('cp ../openzeppelin-contracts/contracts/token/ERC20/../../GSN/Context.sol contracts/')
-os.system('cp ../openzeppelin-contracts/contracts/token/ERC20/./IERC20.sol contracts/')
-os.system('cp ../openzeppelin-contracts/contracts/token/ERC20/../../math/SafeMath.sol contracts/')
-os.system('cp ../openzeppelin-contracts/contracts/token/ERC20/../../utils/Address.sol contracts/')
+print(f'===Populate {CONTRACTDIR}')
+os.system(f'cp ../ocean-contracts/contracts/*.sol {CONTRACTDIR}')
+os.system(f'cp ../ocean-contracts/contracts/*/*.sol {CONTRACTDIR}')
+os.system(f'cp ../ocean-contracts/contracts/*/*/*.sol {CONTRACTDIR}')
 
-os.system('cp fudged_contracts/*.sol contracts/')
+os.system(f'cp ../openzeppelin-contracts/contracts/ownership/Ownable.sol {CONTRACTDIR}/')
+os.system(f'cp ../openzeppelin-contracts/contracts/token/ERC20/ERC20.sol {CONTRACTDIR}/')
+os.system(f'cp ../openzeppelin-contracts/contracts/token/ERC20/../../GSN/Context.sol {CONTRACTDIR}/')
+os.system(f'cp ../openzeppelin-contracts/contracts/token/ERC20/./IERC20.sol {CONTRACTDIR}')
+os.system(f'cp ../openzeppelin-contracts/contracts/token/ERC20/../../math/SafeMath.sol {CONTRACTDIR}')
+os.system(f'cp ../openzeppelin-contracts/contracts/token/ERC20/../../utils/Address.sol {CONTRACTDIR}')
+
+os.system(f'cp fudged_contracts/*.sol {CONTRACTDIR}')
 
 #delete unwanted contracts
-os.system('rm contracts/FeeManager.sol')
-os.system('rm contracts/FeeCalculator.sol')
+os.system(f'rm {CONTRACTDIR}/FeeManager.sol')
+os.system(f'rm {CONTRACTDIR}/FeeCalculator.sol')
 
 print('===Flatten imports in .sol files')
 def inplace_change(filename, old_s, new_s):
@@ -68,7 +78,7 @@ def inplace_change(filename, old_s, new_s):
         f.write(s)
 
 import glob
-for f in glob.glob('contracts/*.sol'):
+for f in glob.glob(f'{CONTRACTDIR}/*.sol'):
     inplace_change(f, 'openzeppelin-solidity/contracts/', './')
     inplace_change(f, '../../', './')
     inplace_change(f, '../', './')
@@ -83,6 +93,6 @@ for f in glob.glob('contracts/*.sol'):
 
 
 print('===Compile')
-os.system('brownie compile')
+os.system(f'cd {CONTRACTDIR}; brownie compile; cd -')
 
 print('===Done!')
