@@ -174,7 +174,8 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
             totalSupply().add(num_tokens_minted) <= _cap, 
             'DataTokenTemplate: cap exceeded'
         );
-	uint256 fee_in_wei = 11;
+	//uint256 fee_in_wei = 11;
+	uint256 fee_in_wei = _dataFooFunction();
 	//uint256 fee_in_wei = _feeManager.fooFunction();
 	//uint256 fee_in_wei = _feeManager.calculateFee(num_tokens_minted, _cap);
         //require(
@@ -185,6 +186,10 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
         //address(_feeManager).transfer(msg.value);
     }
 
+    function _dataFooFunction() private pure returns (uint256) {
+      return 12;
+    }
+    
     /**
      * @dev pause
      *      Function that pauses the contract.
