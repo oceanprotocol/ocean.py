@@ -94,7 +94,7 @@ class DataToken:
 
         #build and send tx
         print("==Build & send tx for mint()")
-        gas_limit = 10000000000  #HACK constants.DEFAULT_GAS_LIMIT__MINT_TOKENS
+        gas_limit = constants.DEFAULT_GAS_LIMIT__MINT_TOKENS
         num_eth = 1.0 #HACK
         (tx_hash, tx_receipt) = _buildAndSendTx(self._c, function, gas_limit, num_eth)
         
@@ -105,7 +105,7 @@ class DataToken:
 
         #build and send tx
         print("==Build & send tx for transfer()")
-        gas_limit = 10000000000 #HACK constants.DEFAULT_GAS_LIMIT__TRANSFER_TOKENS
+        gas_limit = constants.DEFAULT_GAS_LIMIT__TRANSFER_TOKENS
         (tx_hash, tx_receipt) = _buildAndSendTx(self._c, function, gas_limit)
 
     def download(self):
