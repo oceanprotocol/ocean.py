@@ -106,7 +106,7 @@ Then, test everything:
 pytest
 ```
 
-## 6. Debugging
+## 6a. Debugging: Directly on Solidity Objects
 Brownie reduces pain in Solidity debugging: it makes it feel like Python debugging, including Python-style tracebacks in Solidity. [Here's a walk-through](https://medium.com/better-programming/getting-started-with-brownie-part-3-ef6bfa9867d7) of key features. [Here are Brownie docs](https://eth-brownie.readthedocs.io). 
 
 Lets's do some stuff with it. First, start the console. We specify the network so it doesn't default to 'development'.
@@ -116,9 +116,8 @@ brownie console --network ganache
 
 Play in brownie console! Here's an end-to-end example that deploys a factory (and token template), creates a token, then retreives the token address:
 ```python
->>> import brownie #not needed, but clarifies the usage of brownie modules
 
->>> factory_deployer_account = brownie.network.accounts.add(priv_key='0x904365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a')
+>>> factory_deployer_account = network.accounts.add(priv_key='0x904365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a')
 
 >>> ERC20_template = DataTokenTemplate.deploy("Template","TEMPLATE", factory_deployer_account.address, 1000, "blob", factory_deployer_account.address, {'from':factory_deployer_account
 })                                                                                                                                                                                     
@@ -144,3 +143,37 @@ Transaction sent: 0x09ad403c6aa481596de03c5a9d662ab46799154a0f857c8b09d5efd3bc4f
 
 ```
 
+## 6a. Debugging: Via Ocean.py
+First:
+```bash
+brownie console --network ganache
+```
+
+Then inside brownie:
+```python
+
+#copy and paste the following to >>>
+import brownie #not needed, but clarifies the usage of brownie modules
+
+alice_private_key = Ocean.confFileValue(network, 'TEST_PRIVATE_KEY1')
+bob_private_key = Ocean.confFileValue(network, 'TEST_PRIVATE_KEY2')
+bob_address = Ocean.privateKeyToAddress(bob_private_key)
+
+config = {'network' : network, 'privateKey' : alice_private_key}
+ocean = Ocean.Ocean(config)
+token = ocean.createToken('localhost:8030')
+dt_address = token.getAddress()
+print(dt_address)
+```
+
+So far so good. Let's keep going.
+```python
+token.mint(100)
+
+token.transfer(bob_address, 1)
+
+bob_config = {'network' : network, 'privateKey' : bob_private_key}
+bob_ocean = Ocean.Ocean(bob_config)
+token = bob_ocean.getToken(dt_address)
+_file = token.download()
+```
