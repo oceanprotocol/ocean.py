@@ -116,6 +116,8 @@ brownie console
 
 Play in brownie console! Here's an end-to-end example that deploys a factory (and token template), creates a token, then retreives the token address:
 ```python
+>>> factory_deployer_account = brownie.network.accounts.add(priv_key='0x904365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a')
+
 >>> ERC20_template = DataTokenTemplate.deploy("Template","TEMPLATE", factory_deployer_account.address, 1000, "blob", factory_deployer_account.address, {'from':factory_deployer_account
 })                                                                                                                                                                                     
 Transaction sent: 0xc17f63a24aac9e906ee7847f8a21c13f00e937a6e0ad1eebf32b412f347f380b
