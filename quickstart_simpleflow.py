@@ -1,9 +1,6 @@
 #! ./myenv/bin/python3
 
 #do *not* import brownie, that's too much dependency here
-import configparser
-import os
-
 from ocean_lib import Ocean
     
 if __name__ == '__main__':  
