@@ -96,17 +96,7 @@ First, run simple quickstart on ganache.
 python quickstart_simpleflow.py
 ```
 
-Then, run pytest version of quickstart. Replace "ganche" with "rinkeby" or "mainnet" for the other networks:
-```console
-pytest tests/test_quickstart_simpleflow.py::test_on_ganache
-pytest tests/test_quickstart_simpleflow.py::test_on_rinkeby
-pytest tests/test_quickstart_simpleflow.py::test_on_mainnet
-```
-
-Then, test everything:
-```console
-pytest
-```
+To test on other networks, change the .py file contents (near the top).
 
 ## 6a. (Optional) Brownie Debugging, Directly on Solidity Objects
 
