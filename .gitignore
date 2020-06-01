@@ -1,8 +1,6 @@
 oceanbrownie/
 .history
-.hypothesis/
 myenv/
 *~
-__pycache__/
 .pytest_cache/
 *.py[cod~]
