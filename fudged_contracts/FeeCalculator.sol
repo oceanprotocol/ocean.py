@@ -35,17 +35,15 @@ contract FeeCalculator {
         pure
         returns (uint256)
     {
-      uint256 fee_in_wei = 10;
-      return fee_in_wei;
-        /* require( */
-        /*     cap >= num_tokens_minted, */
-        /*     'FeeCalculator: Invalid cap' */
-        /* ); */
+        require(
+            cap >= num_tokens_minted,
+            'FeeCalculator: Invalid cap'
+        );
         
-        /* uint256 tokensRange = calculateRange(num_tokens_minted); */
-        /* uint256 tokensRangeToll = tokensRange.mul(BASE_TX_COST); */
-        /* return tokensRangeToll.div( */
-        /*         calculateRange(cap) */
-        /*     ).div(BASE); */
+        uint256 tokensRange = calculateRange(num_tokens_minted);
+        uint256 tokensRangeToll = tokensRange.mul(BASE_TX_COST);
+        return tokensRangeToll.div(
+                calculateRange(cap)
+            ).div(BASE);
     }
 }

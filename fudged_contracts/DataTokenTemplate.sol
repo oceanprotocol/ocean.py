@@ -153,52 +153,30 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
     }
 
     /**
-     * @dev mint
-     *      Function that takes the fee as msg.value and mints new DataTokens.
-            Can be called only if the contract is not paused.
+     * @dev mint Mint new tokens, charge a fee (paid in msg.value > 0).
+     *      Can be called only if the contract is not paused.
             Can be called only by the minter address.
-            Msg.value should be higher than zero. 
-     * @param account refers to a an address that token is going to be minted to.
-     * @param num_tokens_minted refers to amount of tokens that is going to be minted.
+     * @param address_to -- send minted tokens to this address
+     * @param num_tokens_minted -- # tokens to be minted
      */
-    function mint(
-        address account,
-        uint256 num_tokens_minted
-    ) 
-    public 
-    payable 
-    onlyNotPaused 
-    onlyMinter 
+    function mint(address address_to, uint256 num_tokens_minted) 
+    public payable onlyNotPaused onlyMinter 
     {
-        require(
-            totalSupply().add(num_tokens_minted) <= _cap, 
-            'DataTokenTemplate: cap exceeded'
-        );
-	uint256 fee_in_wei = _calculateFee(num_tokens_minted, _cap);
-	//uint256 fee_in_wei = _feeManager.calculateFee(num_tokens_minted, _cap);
-        require(
-           msg.value >= fee_in_wei, 
-           'DataTokenTemplate: invalid data token minting fee'
-        );
-        _mint(account, num_tokens_minted);
+        require(totalSupply().add(num_tokens_minted) <= _cap, 'cap exceeded');
+	uint256 fee_in_wei = _calculateFee(num_tokens_minted);
+	
+        require(msg.value >= fee_in_wei, 'not enough funds to mint');
+        _mint(address_to, num_tokens_minted);
         address(_feeManager).transfer(fee_in_wei);
     }
 
-    function _calculateFee(uint256 num_tokens_minted, uint256 cap)
+    function _calculateFee(uint256 num_tokens_minted)
         public pure returns (uint256)
     {
-      uint256 fee_in_wei = 10;
-      return fee_in_wei;
-        /* require( */
-        /*     cap >= num_tokens_minted, */
-        /*     'FeeCalculator: Invalid cap' */
-        /* ); */
-        
-        /* uint256 tokensRange = calculateRange(num_tokens_minted); */
-        /* uint256 tokensRangeToll = tokensRange.mul(BASE_TX_COST); */
-        /* return tokensRangeToll.div( */
-        /*         calculateRange(cap) */
-        /*     ).div(BASE); */
+      return 11;
+      //uint256 tokensRange = calculateRange(num_tokens_minted);
+      //uint256 tokensRangeToll = tokensRange.mul(BASE_TX_COST);
+      //return tokensRangeToll.div(calculateRange(_cap)).div(BASE);
     }
     
     
