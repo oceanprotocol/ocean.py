@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#! ./myenv/bin/python3
 
 def test_transfer(token, accounts):
     assert token.totalSupply() == 1e21

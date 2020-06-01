@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#! ./myenv/bin/python3
 
 #do *not* import brownie, that's too much dependency here
 import configparser

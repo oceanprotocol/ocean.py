@@ -1,7 +1,6 @@
-#!/usr/bin/python3
+#! ./myenv/bin/python3
 
 import pytest
-
 
 @pytest.fixture(scope="function", autouse=True)
 def isolate(fn_isolation):

@@ -1,4 +1,4 @@
-#!/usr/bin/python3
+#! ./myenv/bin/python3
 
 import pytest
 
