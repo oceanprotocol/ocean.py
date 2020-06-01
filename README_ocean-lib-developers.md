@@ -182,6 +182,8 @@ _file = token.download()
 
 We can also combine objects from 6a, for richer debugging. For example:
 ```python
+factory_deployer_account = brownie.network.accounts.add(priv_key='0x904365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a')
+
 brownie_datatoken = DataTokenTemplate.deploy("Template2","TEMPLATE2", factory_deployer_account.address, 1000, "blob", factory_deployer_account.address, {'from' : factory_deployer_account.address}) 
 brownie_datatoken.mint(factory_deployer_account.address, 10, {'from': factory_deployer_account, 'value':100000000000})
 ```
