@@ -30,14 +30,14 @@ class Ocean:
             
         private_key = config['privateKey']
         
-        c = _Context(network, web3, private_key)
-        self._factory = _Factory(c)
+        self._c = _Context(network, web3, private_key)
+        self._factory = _Factory(self._c)
         
     def createToken(self, blob):
         return self._factory.createToken(blob)
 
-    def getAsset(self, address):
-        raise NotImplementedError()     
+    def getToken(self, token_addr):
+        return DataToken(self._c, token_addr)
         
 class _Factory:
     def __init__(self, c: _Context):
@@ -67,7 +67,7 @@ class _Factory:
         print(f"==token_addr={token_addr}")
 
         #compute return object
-        token = _DataToken(self._c, token_addr)
+        token = DataToken(self._c, token_addr)
         return token
     
     def _abi(self):
@@ -75,7 +75,7 @@ class _Factory:
         filename = './build/contracts/Factory.json' 
         return _abi(filename)
         
-class _DataToken:
+class DataToken:
     def __init__(self, c: _Context, token_addr):
         self._c: _Context = c
         self._token_address = token_addr
@@ -90,23 +90,27 @@ class _DataToken:
     def mint(self, num_tokens):
         #set function
         function = self._token_contract.functions.mint(
-            self._c.account.address, num_tokens)
+            self._c.address, num_tokens)
 
         #build and send tx
         print("==Build & send tx for mint()")
-        gas_limit = constants.DEFAULT_GAS_LIMIT__MINT_TOKENS
-        (tx_hash, tx_receipt) = _buildAndSendTx(self._c, function, gas_limit)
+        gas_limit = 10000000000  #HACK constants.DEFAULT_GAS_LIMIT__MINT_TOKENS
+        num_eth = 0.1 #HACK
+        (tx_hash, tx_receipt) = _buildAndSendTx(self._c, function, gas_limit, num_eth)
         
     def transfer(self, recipient_addr, num_tokens):
         #set function
-        function = self._contract.functions.transfer(
+        function = self._token_contract.functions.transfer(
             recipient_addr, num_tokens)
 
         #build and send tx
         print("==Build & send tx for transfer()")
-        gas_limit = constants.DEFAULT_GAS_LIMIT__TRANSFER_TOKENS
+        gas_limit = 10000000000 #HACK constants.DEFAULT_GAS_LIMIT__TRANSFER_TOKENS
         (tx_hash, tx_receipt) = _buildAndSendTx(self._c, function, gas_limit)
 
+    def download(self):
+        print("FIXME need to implement when provider-py is ready")
+        
     def _abi(self):
         #FIXME: don't rely on brownie output directory 'build/contracts'
         filename = './build/contracts/DataTokenTemplate.json' 
@@ -140,11 +144,13 @@ def _abi(filename):
 def _buildAndSendTx(c: _Context, function, gas_limit, num_eth=0):
     num_wei = c.web3.toWei(num_eth, 'ether')
     nonce = c.web3.eth.getTransactionCount(c.address)
+    gas_price = int(confFileValue(c.network, 'GAS_PRICE'))
     tx_params = { 
         "from": c.address,
-        "gas": gas_limit,
         "value": num_wei, 
         "nonce": nonce,
+        "gas": gas_limit,
+        "gasPrice": gas_price,
     }
 
     tx = function.buildTransaction(tx_params)

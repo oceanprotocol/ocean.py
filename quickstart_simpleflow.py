@@ -6,8 +6,8 @@ import os
 
 from ocean_lib import Ocean, constants
     
-if __name__ == '__main__':
-    network = 'rinkeby'
+if __name__ == '__main__':  
+    network = 'ganache'
     
     #set accounts. For each network, these need ETH with gas.
     alice_private_key = Ocean.confFileValue(network, 'TEST_PRIVATE_KEY1')
@@ -44,5 +44,5 @@ if __name__ == '__main__':
         'privateKey' : bob_private_key,
     }
     bob_ocean = Ocean.Ocean(bob_config)
-    asset = bob_ocean.getAsset(dt_address)
-    _file = asset.download(bob_address)
+    token = bob_ocean.getToken(dt_address)
+    _file = token.download()

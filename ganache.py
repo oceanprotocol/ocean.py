@@ -24,5 +24,5 @@ factory_deployer_private_key = confFileValue(network, 'FACTORY_DEPLOYER_PRIVATE_
 #launch ganache-cli and give each private account 100 eth. Port must match that of ganache_url
 amount_eth = 100
 amount_wei = eth_utils.to_wei(amount_eth, 'ether')
-os.system(f'ganache-cli --port 8545 --gasLimit 6721975 ---hardfork istanbul --account="{alice_private_key},{amount_wei}" --account="{bob_private_key},{amount_wei}" --account="{factory_deployer_private_key},{amount_wei}"')
+os.system(f'ganache-cli --port 8545 --gasLimit 10000000000 --gasPrice 1 ---hardfork istanbul --account="{alice_private_key},{amount_wei}" --account="{bob_private_key},{amount_wei}" --account="{factory_deployer_private_key},{amount_wei}"')
     
