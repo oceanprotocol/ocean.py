@@ -77,7 +77,3 @@ bob_ocean = Ocean(bob_config)
 token = bob_ocean.getToken(dt_address)
 _file = token.download(account)
 ```
-
-## Web3 Fun 
-
-Since data tokens are ERC20-based, we can use the [ERC20 functions in web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-with-an-erc20-token-contract) (Python Ethereum library). Have fun!
