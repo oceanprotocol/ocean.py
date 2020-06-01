@@ -93,10 +93,10 @@ Outcome: ocean-lib-py works as expected.
 
 First, run simple quickstart on ganache. 
 ```console
-python quickstart_simpleflow.py
+./quickstart_simpleflow.py ganache
 ```
 
-To test on other networks, change the .py file contents (near the top).
+And repeat on rinkeby etc.
 
 ## 6a. (Optional) Brownie Debugging, Directly on Solidity Objects
 
