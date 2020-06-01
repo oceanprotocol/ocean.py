@@ -13,9 +13,6 @@ Steps:
 These steps are detailed below. But first, installation. 
 
 ## 1. Install dependencies 
-We use [Brownie](https://eth-brownie.readthedocs.io) to help in compiling, deploying, testing, and debugging. It's not needed for *using* ocean-lib-py.
-
-[Install Brownie](https://medium.com/@iamdefinitelyahuman/getting-started-with-brownie-part-1-9b2181f4cb99). It can be tricky; [here's steps](https://github.com/trentmc/brownie-instrs/blob/master/README_install.md) that I followed.
 
 Clone this repo, and `cd` into it.
 ```console
@@ -23,10 +20,14 @@ git clone https://github.com/oceanprotocol/ocean-lib-py
 cd ocean-lib-py
 ```
 
-Initalize virtual env't. Activate env't. Update modules in env't. (BTW use `deactivate` to, well, deactivate.)
+Initalize virtual env't. Activate env't.(BTW use `deactivate` to, well, deactivate.)
 ```console
 python -m venv myenv
 source myenv/bin/activate 
+```
+
+Install modules in the env't. Notably, it installs [Brownie](https://eth-brownie.readthedocs.io). Brownie helps in compiling, deploying, testing, and debugging. Brownie is not needed for *using* ocean-lib-py.
+```
 pip install -r requirements.txt 
 ```
 
@@ -106,10 +107,13 @@ Then, test everything:
 pytest
 ```
 
-## 6a. Debugging: Directly on Solidity Objects
+## 6a. (Optional) Brownie Debugging, Directly on Solidity Objects
+
 Brownie reduces pain in Solidity debugging: it makes it feel like Python debugging, including Python-style tracebacks in Solidity. [Here's a walk-through](https://medium.com/better-programming/getting-started-with-brownie-part-3-ef6bfa9867d7) of key features. [Here are Brownie docs](https://eth-brownie.readthedocs.io). 
 
-Lets's do some stuff with it. First, start the console. We specify the network so it doesn't default to 'development'.
+You may need more than the pip-installed brownie pip from step 1. If you do: here's [how to install Brownie](https://medium.com/@iamdefinitelyahuman/getting-started-with-brownie-part-1-9b2181f4cb99). It can be tricky; [here's steps](https://github.com/trentmc/brownie-instrs/blob/master/README_install.md) that I followed.
+
+Lets's do some stuff with Brownie. First, start the console. We specify the network so it doesn't default to 'development'.
 ```bash
 brownie console --network ganache
 ```
@@ -143,7 +147,10 @@ Transaction sent: 0x09ad403c6aa481596de03c5a9d662ab46799154a0f857c8b09d5efd3bc4f
 
 ```
 
-## 6b. Debugging: Via Ocean.py
+## 6b. (Optional) Brownie Debugging, using Ocean.py libraries
+
+Above, we used Brownie to directly deploy .sol-derived objects. Here, we go through the Ocean interface but still draw on Brownie's traceback abilities.
+
 First:
 ```bash
 brownie console --network ganache
