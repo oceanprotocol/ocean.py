@@ -1,7 +1,7 @@
 
 CONF_FILE_PATH = '~/ocean.conf'
 
-DEFAULT_MINTING_CAP = 2**256 - 1
+DEFAULT_MINTING_CAP = 1000
 
 #V3 // Datatokens slides "Gas Cost Tests on Eth mainnet, Apr 27 2020" measured:
 # -245000 gas to create new token.

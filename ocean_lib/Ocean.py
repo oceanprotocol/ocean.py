@@ -95,7 +95,7 @@ class DataToken:
         #build and send tx
         print("==Build & send tx for mint()")
         gas_limit = 10000000000  #HACK constants.DEFAULT_GAS_LIMIT__MINT_TOKENS
-        num_eth = 0.1 #HACK
+        num_eth = 1.0 #HACK
         (tx_hash, tx_receipt) = _buildAndSendTx(self._c, function, gas_limit, num_eth)
         
     def transfer(self, recipient_addr, num_tokens):
@@ -155,7 +155,7 @@ def _buildAndSendTx(c: _Context, function, gas_limit, num_eth=0):
 
     tx = function.buildTransaction(tx_params)
     signed_tx = c.web3.eth.account.sign_transaction(tx, private_key=c.private_key)
-    try:
+    try: #foo
         tx_hash = c.web3.eth.sendRawTransaction(signed_tx.rawTransaction)
     except ValueError as err:
         print(f"Error: {err}")

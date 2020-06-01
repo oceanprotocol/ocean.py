@@ -23,7 +23,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
     uint256 private _decimals;
     address private _minter;
 
-    FeeManager serviceFeeManager;
+    FeeManager _feeManager;
     
     modifier onlyNotInitialized() {
         require(
@@ -47,7 +47,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
      * @param name refers to a template DataToken name.
      * @param symbol refers to a template DataToken symbol.
      * @param minter refers to an address that has minter rights.
-     * @param feeManager refers to an address of a FeeManager contract.
+     * @param feeManagerAddress refers to an address of a FeeManager contract.
      */
     constructor(
         string memory name,
@@ -55,7 +55,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
         address minter,
         uint256 cap,
         string memory blob,
-        address payable feeManager
+        address payable feeManagerAddress
 
     )
         public
@@ -66,7 +66,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
             minter,
             cap,
             blob,
-            feeManager
+            feeManagerAddress
         );
     }
     
@@ -77,7 +77,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
      * @param name refers to a new DataToken name.
      * @param symbol refers to a nea DataToken symbol.
      * @param minter refers to an address that has minter rights.
-     * @param feeManager refers to an address of a FeeManager contract.
+     * @param feeManagerAddress refers to an address of a FeeManager contract.
      */
     function initialize(
         string memory name,
@@ -85,7 +85,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
         address minter,
         uint256 cap,
         string memory blob,
-        address payable feeManager
+        address payable feeManagerAddress
     ) 
         public
         onlyNotInitialized
@@ -97,7 +97,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
             minter,
             cap,
             blob,
-            feeManager
+            feeManagerAddress
         );
     }
 
@@ -108,7 +108,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
      * @param name refers to a new DataToken name.
      * @param symbol refers to a nea DataToken symbol.
      * @param minter refers to an address that has minter rights.
-     * @param feeManager refers to an address of a FeeManager contract.
+     * @param feeManagerAddress refers to an address of a FeeManager contract.
      */
     function _initialize(
         string memory name,
@@ -116,7 +116,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
         address minter,
         uint256 cap,
         string memory blob,
-        address payable feeManager
+        address payable feeManagerAddress
     )
         private
         returns(bool)
@@ -127,8 +127,8 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
         );
         
         require(
-            feeManager != address(0), 
-            'DataTokenTemplate: Invalid feeManager, zero address'
+            feeManagerAddress != address(0), 
+            'DataTokenTemplate: Invalid feeManagerAddress, zero address'
         );
 
         require(
@@ -147,7 +147,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
         _blob = blob;
         _symbol = symbol;
         _minter = minter;
-        serviceFeeManager = FeeManager(feeManager);
+        _feeManager = FeeManager(feeManagerAddress);
         initialized = true;
         return initialized;
     }
@@ -159,11 +159,11 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
             Can be called only by the minter address.
             Msg.value should be higher than zero. 
      * @param account refers to a an address that token is going to be minted to.
-     * @param value refers to amount of tokens that is going to be minted.
+     * @param num_tokens_minted refers to amount of tokens that is going to be minted.
      */
     function mint(
         address account,
-        uint256 value
+        uint256 num_tokens_minted
     ) 
     public 
     payable 
@@ -171,15 +171,18 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
     onlyMinter 
     {
         require(
-            totalSupply().add(value) <= _cap, 
+            totalSupply().add(num_tokens_minted) <= _cap, 
             'DataTokenTemplate: cap exceeded'
         );
+	uint256 fee_in_wei = 11;
+	//uint256 fee_in_wei = _feeManager.fooFunction();
+	//uint256 fee_in_wei = _feeManager.calculateFee(num_tokens_minted, _cap);
         //require(
-        //    msg.value >= serviceFeeManager.calculateFee(value, _cap), 
+        //    msg.value >= _feeManager.calculateFee(num_tokens_minted, _cap), 
         //    'DataTokenTemplate: invalid data token minting fee'
         //);
-        _mint(account, value);
-        //address(serviceFeeManager).transfer(msg.value);
+        _mint(account, num_tokens_minted);
+        //address(_feeManager).transfer(msg.value);
     }
 
     /**
