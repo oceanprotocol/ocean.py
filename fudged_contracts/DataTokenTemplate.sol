@@ -5,7 +5,6 @@ pragma solidity ^0.5.7;
 
 import './ERC20Pausable.sol';
 import './IERC20Template.sol';
-import './SafeMath.sol';
 
 /**
 * @title DataTokenTemplate
@@ -126,19 +125,25 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
     public payable onlyNotPaused onlyMinter 
     {
         require(totalSupply().add(num_tokens_minted) <= _cap, 'cap exceeded');
-	uint256 fee_in_wei = _calculateFee(num_tokens_minted);
-        require(msg.value >= fee_in_wei, 'not enough funds to mint');
+
+	uint256 gas_before = gasleft();
         _mint(address_to, num_tokens_minted);
-        _feeAddress.transfer(fee_in_wei);
+	uint256 gas_after = gasleft();
+	
+	uint256 gas_used = gas_before - gas_after;
+	uint256 max_fee = gas_used * tx.gasprice;
+	uint256 fee = _calculateFee(num_tokens_minted, max_fee);
+	
+        require(msg.value >= fee, 'not enough funds to mint');
+        _feeAddress.transfer(fee);
     }
 
-    function _calculateFee(uint256 num_tokens_minted)
+    function _calculateFee(uint256 num_tokens_minted, uint256 max_fee)
         public view returns (uint256)
     {
-      uint256 BASE_TX_COST = 44000;
-      if (num_tokens_minted < 10)       { return BASE_TX_COST.div(100); }
-      else if (num_tokens_minted < 100) { return BASE_TX_COST.div(10);  }
-      else                              { return BASE_TX_COST; }
+      if (num_tokens_minted < 10)       { return max_fee.div(20); }
+      else if (num_tokens_minted < 100) { return max_fee.div(5);  }
+      else                              { return max_fee; }
     }
     
     
