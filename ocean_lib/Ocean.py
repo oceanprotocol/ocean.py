@@ -95,8 +95,10 @@ class DataToken:
         #build and send tx
         print("==Build & send tx for mint()")
         gas_limit = constants.DEFAULT_GAS_LIMIT__MINT_TOKENS
-        num_eth = 1.0 #HACK
-        (tx_hash, tx_receipt) = _buildAndSendTx(self._c, function, gas_limit, num_eth)
+        gas_price = int(confFileValue(self._c.network, 'GAS_PRICE'))
+        max_fees_wei = gas_limit * gas_price
+        (tx_hash, tx_receipt) = _buildAndSendTx(
+            self._c, function, gas_limit, max_fees_wei)
         
     def transfer(self, recipient_addr, num_tokens):
         #set function
@@ -141,8 +143,7 @@ def _abi(filename):
     abi = json.loads(text)['abi']
     return abi
     
-def _buildAndSendTx(c: _Context, function, gas_limit, num_eth=0):
-    num_wei = c.web3.toWei(num_eth, 'ether')
+def _buildAndSendTx(c: _Context, function, gas_limit, num_wei=0):
     nonce = c.web3.eth.getTransactionCount(c.address)
     gas_price = int(confFileValue(c.network, 'GAS_PRICE'))
     tx_params = { 
