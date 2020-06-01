@@ -3,9 +3,12 @@ pragma solidity ^0.5.7;
 // SPDX-License-Identifier: (Apache-2.0 AND CC-BY-4.0)
 // Code is Apache-2.0 and docs are CC-BY-4.0
 
-import './FeeManager.sol';
 import './ERC20Pausable.sol';
 import './IERC20Template.sol';
+import './SafeMath.sol';
+
+import './FeeManager.sol';
+
 /**
 * @title DataTokenTemplate
 *  
@@ -22,8 +25,11 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
     uint256 private _cap;
     uint256 private _decimals;
     address private _minter;
-
+    
     FeeManager _feeManager;
+
+    uint256 constant private BASE_TX_COST = 44000;
+    uint256 constant private BASE = 10;
     
     modifier onlyNotInitialized() {
         require(
@@ -171,12 +177,24 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
     }
 
     function _calculateFee(uint256 num_tokens_minted)
-        public pure returns (uint256)
+        public view returns (uint256)
     {
       return 11;
-      //uint256 tokensRange = calculateRange(num_tokens_minted);
-      //uint256 tokensRangeToll = tokensRange.mul(BASE_TX_COST);
-      //return tokensRangeToll.div(calculateRange(_cap)).div(BASE);
+      uint256 tokensRange = _calculateRange(num_tokens_minted);
+      uint256 tokensRangeToll = tokensRange.mul(BASE_TX_COST);
+      return tokensRangeToll.div(_calculateRange(_cap)).div(BASE);
+    }
+    
+    function _calculateRange(uint256 num_tokens_minted) 
+        private pure returns (uint256)
+    {
+        uint256 remainder = num_tokens_minted;
+        uint256 zeros = 0;
+        for(uint256 i = 0 ; remainder >= BASE; i++){
+            remainder = remainder.div(BASE);
+            zeros += 1;
+        }
+        return zeros;
     }
     
     
