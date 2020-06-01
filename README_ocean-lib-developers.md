@@ -109,13 +109,15 @@ pytest
 ## 6. Debugging
 Brownie reduces pain in Solidity debugging: it makes it feel like Python debugging, including Python-style tracebacks in Solidity. [Here's a walk-through](https://medium.com/better-programming/getting-started-with-brownie-part-3-ef6bfa9867d7) of key features. [Here are Brownie docs](https://eth-brownie.readthedocs.io). 
 
-Lets's do some stuff with it. First, start the console.
+Lets's do some stuff with it. First, start the console. We specify the network so it doesn't default to 'development'.
 ```bash
-brownie console
+brownie console --network ganache
 ```
 
 Play in brownie console! Here's an end-to-end example that deploys a factory (and token template), creates a token, then retreives the token address:
 ```python
+>>> import brownie #not needed, but clarifies the usage of brownie modules
+
 >>> factory_deployer_account = brownie.network.accounts.add(priv_key='0x904365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a')
 
 >>> ERC20_template = DataTokenTemplate.deploy("Template","TEMPLATE", factory_deployer_account.address, 1000, "blob", factory_deployer_account.address, {'from':factory_deployer_account
