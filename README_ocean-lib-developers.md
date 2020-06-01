@@ -139,7 +139,8 @@ Transaction sent: 0x09ad403c6aa481596de03c5a9d662ab46799154a0f857c8b09d5efd3bc4f
   Factory.createToken confirmed - Block: 3   Gas used: 254228 (3.78%)
 
 <Transaction '0x09ad403c6aa481596de03c5a9d662ab46799154a0f857c8b09d5efd3bc4f06bf'>
->>> factory.getTokenAddress("TST")                                                                                                                                                     
+>>> token_address = factory.getTokenAddress("TST")
 '0x9f5C0E5080890F00Cf7Df7AD1D112503d1bf6c14'
+
 ```
 
