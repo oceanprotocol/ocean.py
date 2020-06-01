@@ -26,18 +26,12 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
     address payable private _feeAddress;
     
     modifier onlyNotInitialized() {
-        require(
-            !initialized,
-            'DataTokenTemplate: token instance already initialized'
-        );
+      require(!initialized, 'DataTokenTemplate: already initialized');
         _;
     }
     
     modifier onlyMinter() {
-        require(
-            msg.sender == _minter,
-            'DataTokenTemplate: invalid minter' 
-        );
+        require(msg.sender == _minter, 'DataTokenTemplate: invalid minter');
         _;
     }
 
@@ -55,19 +49,10 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
         address minter,
         uint256 cap,
         string memory blob,
-        address payable feeAddress
-
-    )
+        address payable feeAddress)
         public
     {
-        _initialize(
-            name,
-            symbol,
-            minter,
-            cap,
-            blob,
-            feeAddress
-        );
+        _initialize(name, symbol, minter, cap, blob, feeAddress);
     }
     
     /**
@@ -87,18 +72,10 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
         string memory blob,
         address payable feeAddress
     ) 
-        public
-        onlyNotInitialized
-        returns(bool)
+        public onlyNotInitialized
+        returns (bool)
     {
-        return _initialize(
-            name,
-            symbol,
-            minter,
-            cap,
-            blob,
-            feeAddress
-        );
+      return _initialize(name, symbol, minter, cap, blob, feeAddress);
     }
 
     /**
@@ -119,27 +96,12 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
         address payable feeAddress
     )
         private
-        returns(bool)
+        returns (bool)
     {
-        require(
-            minter != address(0), 
-            'DataTokenTemplate: Invalid minter,  zero address'
-        );
-        
-        require(
-            feeAddress != address(0), 
-            'DataTokenTemplate: Invalid feeAddress, zero address'
-        );
-
-        require(
-            _minter == address(0), 
-            'DataTokenTemplate: Invalid minter, access denied'
-        );
-
-        require(
-            cap > 0,
-            'DataTokenTemplate: Invalid cap value'
-        );
+      require(minter != address(0), 'DataTokenTemplate: Minter address was 0');
+      require(feeAddress != address(0), 'DataTokenTemplate: feeAddress was 0');
+      require(_minter == address(0), 'DataTokenTemplate: Invalid minter, access denied');
+      require(cap > 0, 'DataTokenTemplate: Cap was <= 0');
         
         _decimals = 0;
         _cap = cap;
@@ -153,9 +115,10 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
     }
 
     /**
-     * @dev mint Mint new tokens, charge a fee (paid in msg.value > 0).
+     * @dev mint Mint new tokens, charge a fee.
      *      Can be called only if the contract is not paused.
             Can be called only by the minter address.
+            Fee is paid via msg.value which must be >0
      * @param address_to -- send minted tokens to this address
      * @param num_tokens_minted -- # tokens to be minted
      */
@@ -164,7 +127,6 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
     {
         require(totalSupply().add(num_tokens_minted) <= _cap, 'cap exceeded');
 	uint256 fee_in_wei = _calculateFee(num_tokens_minted);
-	
         require(msg.value >= fee_in_wei, 'not enough funds to mint');
         _mint(address_to, num_tokens_minted);
         _feeAddress.transfer(fee_in_wei);
@@ -174,22 +136,9 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
         public view returns (uint256)
     {
       uint256 BASE_TX_COST = 44000;
-      uint256 num_zeroes_minting = _numZeroes(num_tokens_minted);
-      uint256 num_zeroes_cap = _numZeroes(_cap);
-      uint256 base_toll = num_zeroes_minting.mul(BASE_TX_COST);
-      return base_toll.div(num_zeroes_cap).div(10);
-    }
-    
-    function _numZeroes(uint256 num_tokens_minted) 
-        private pure returns (uint256)
-    {
-        uint256 remainder = num_tokens_minted;
-        uint256 num_zeroes = 0;
-        for(uint256 i = 0 ; remainder >= 10; i++){
-            remainder = remainder.div(10);
-            num_zeroes += 1;
-        }
-        return num_zeroes;
+      if (num_tokens_minted < 10)       { return BASE_TX_COST.div(100); }
+      else if (num_tokens_minted < 100) { return BASE_TX_COST.div(10);  }
+      else                              { return BASE_TX_COST; }
     }
     
     
