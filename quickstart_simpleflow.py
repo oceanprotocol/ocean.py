@@ -4,7 +4,7 @@
 import configparser
 import os
 
-from ocean_lib import Ocean, constants
+from ocean_lib import Ocean
     
 if __name__ == '__main__':  
     network = 'ganache'
