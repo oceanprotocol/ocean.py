@@ -155,13 +155,13 @@ Then inside brownie:
 #copy and paste the following to >>>
 import brownie #not needed, but clarifies the usage of brownie modules
 from ocean_lib import Ocean
-network = 'ganache' #note: will override the brownie.network object. That's ok!
+network_str = 'ganache' 
 
-alice_private_key = Ocean.confFileValue(network, 'TEST_PRIVATE_KEY1')
-bob_private_key = Ocean.confFileValue(network, 'TEST_PRIVATE_KEY2')
+alice_private_key = Ocean.confFileValue(network_str, 'TEST_PRIVATE_KEY1')
+bob_private_key = Ocean.confFileValue(network_str, 'TEST_PRIVATE_KEY2')
 bob_address = Ocean.privateKeyToAddress(bob_private_key)
 
-config = {'network' : network, 'privateKey' : alice_private_key}
+config = {'network' : network_str, 'privateKey' : alice_private_key}
 ocean = Ocean.Ocean(config)
 token = ocean.createToken('localhost:8030')
 dt_address = token.getAddress()
@@ -174,7 +174,7 @@ token.mint(100)
 
 token.transfer(bob_address, 1)
 
-bob_config = {'network' : network, 'privateKey' : bob_private_key}
+bob_config = {'network' : network_str, 'privateKey' : bob_private_key}
 bob_ocean = Ocean.Ocean(bob_config)
 token = bob_ocean.getToken(dt_address)
 _file = token.download()
@@ -182,7 +182,7 @@ _file = token.download()
 
 We can also combine objects from 6a, for richer debugging. For example:
 ```python
-factory_deployer_account = brownie.network.accounts.add(priv_key='0x904365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a')
+factory_deployer_account = network.accounts.add(priv_key='0x904365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a')
 
 brownie_datatoken = DataTokenTemplate.deploy("Template2","TEMPLATE2", factory_deployer_account.address, 1000, "blob", factory_deployer_account.address, {'from' : factory_deployer_account.address}) 
 brownie_datatoken.mint(factory_deployer_account.address, 10, {'from': factory_deployer_account, 'value':100000000000})
