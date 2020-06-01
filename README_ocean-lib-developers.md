@@ -33,9 +33,7 @@ pip install -r requirements.txt
 
 If you don't have an Infura account and you aim to deploy to `rinkeby` or `mainnet`, go to www.infura.io and sign up.
 
-Private keys etc can't live on GitHub. To handle this, ocean-lib-py tools read ~/ocean.conf. (It does *not* use environmental variables.)
-
-First, start with the pre-set template:
+Private keys etc can't live on GitHub. To handle this, ocean-lib-py tools read ~/ocean.conf. (It does *not* use environmental variables.) Start with the pre-set template:
 ```console
 cp sample_ocean.conf ~/ocean.conf
 ```
@@ -69,6 +67,8 @@ Set up env't, ensure it's up to date:
 source myenv/bin/activate
 pip install -r requirements.txt 
 ```
+
+For the next step, you may need more than the pip-installed brownie pip from step 1. If you do: here's [how to install Brownie](https://medium.com/@iamdefinitelyahuman/getting-started-with-brownie-part-1-9b2181f4cb99). It can be tricky; [here's steps](https://github.com/trentmc/brownie-instrs/blob/master/README_install.md) that I followed.
 
 The run make! It git clones ,copies, tweaks imports, and finally does a `brownie compile`.
 ```console
@@ -110,8 +110,6 @@ pytest
 ## 6a. (Optional) Brownie Debugging, Directly on Solidity Objects
 
 Brownie reduces pain in Solidity debugging: it makes it feel like Python debugging, including Python-style tracebacks in Solidity. [Here's a walk-through](https://medium.com/better-programming/getting-started-with-brownie-part-3-ef6bfa9867d7) of key features. [Here are Brownie docs](https://eth-brownie.readthedocs.io). 
-
-You may need more than the pip-installed brownie pip from step 1. If you do: here's [how to install Brownie](https://medium.com/@iamdefinitelyahuman/getting-started-with-brownie-part-1-9b2181f4cb99). It can be tricky; [here's steps](https://github.com/trentmc/brownie-instrs/blob/master/README_install.md) that I followed.
 
 Lets's do some stuff with Brownie. First, start the console. We specify the network so it doesn't default to 'development'.
 ```bash
