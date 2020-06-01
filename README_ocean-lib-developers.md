@@ -143,7 +143,7 @@ Transaction sent: 0x09ad403c6aa481596de03c5a9d662ab46799154a0f857c8b09d5efd3bc4f
 
 ```
 
-## 6a. Debugging: Via Ocean.py
+## 6b. Debugging: Via Ocean.py
 First:
 ```bash
 brownie console --network ganache
@@ -178,4 +178,10 @@ bob_config = {'network' : network, 'privateKey' : bob_private_key}
 bob_ocean = Ocean.Ocean(bob_config)
 token = bob_ocean.getToken(dt_address)
 _file = token.download()
+```
+
+We can also combine objects from 6a, for richer debugging. For example:
+```python
+brownie_datatoken = DataTokenTemplate.deploy("Template2","TEMPLATE2", factory_deployer_account.address, 1000, "blob", factory_deployer_account.address, {'from' : factory_deployer_account.address}) 
+brownie_datatoken.mint(factory_deployer_account.address, 10, {'from': factory_deployer_account, 'value':100000000000})
 ```
