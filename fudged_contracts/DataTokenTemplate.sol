@@ -7,8 +7,6 @@ import './ERC20Pausable.sol';
 import './IERC20Template.sol';
 import './SafeMath.sol';
 
-import './FeeManager.sol';
-
 /**
 * @title DataTokenTemplate
 *  
@@ -25,9 +23,8 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
     uint256 private _cap;
     uint256 private _decimals;
     address private _minter;
+    address payable private _feeAddress;
     
-    FeeManager _feeManager;
-
     uint256 constant private BASE_TX_COST = 44000;
     uint256 constant private BASE = 10;
     
@@ -50,10 +47,10 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
     /**
      * @dev constructor
      *      Called on contract deployment.  Could not be called with zero address parameters.
-     * @param name refers to a template DataToken name.
-     * @param symbol refers to a template DataToken symbol.
-     * @param minter refers to an address that has minter rights.
-     * @param feeManagerAddress refers to an address of a FeeManager contract.
+     * @param name -- token name
+     * @param symbol -- token symbol
+     * @param minter -- address with the right to mint()
+     * @param feeAddress -- address that receives fees
      */
     constructor(
         string memory name,
@@ -61,7 +58,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
         address minter,
         uint256 cap,
         string memory blob,
-        address payable feeManagerAddress
+        address payable feeAddress
 
     )
         public
@@ -72,7 +69,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
             minter,
             cap,
             blob,
-            feeManagerAddress
+            feeAddress
         );
     }
     
@@ -80,10 +77,10 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
      * @dev initialize
      *      Called on contract initialization. Used on new DataToken instance setup.
             Calls private _initialize function. Only if contract is not initialized.
-     * @param name refers to a new DataToken name.
-     * @param symbol refers to a nea DataToken symbol.
-     * @param minter refers to an address that has minter rights.
-     * @param feeManagerAddress refers to an address of a FeeManager contract.
+     * @param name -- token name
+     * @param symbol -- token symbol
+     * @param minter -- address with the right to mint()
+     * @param feeAddress -- address that receives fees
      */
     function initialize(
         string memory name,
@@ -91,7 +88,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
         address minter,
         uint256 cap,
         string memory blob,
-        address payable feeManagerAddress
+        address payable feeAddress
     ) 
         public
         onlyNotInitialized
@@ -103,7 +100,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
             minter,
             cap,
             blob,
-            feeManagerAddress
+            feeAddress
         );
     }
 
@@ -111,10 +108,10 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
      * @dev _initialize
      *      Private function called on contract initialization.
             No of the parameters can be a zero address. 
-     * @param name refers to a new DataToken name.
-     * @param symbol refers to a nea DataToken symbol.
-     * @param minter refers to an address that has minter rights.
-     * @param feeManagerAddress refers to an address of a FeeManager contract.
+     * @param name -- token name
+     * @param symbol -- token symbol
+     * @param minter -- address with the right to mint()
+     * @param feeAddress -- address that receives fees
      */
     function _initialize(
         string memory name,
@@ -122,7 +119,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
         address minter,
         uint256 cap,
         string memory blob,
-        address payable feeManagerAddress
+        address payable feeAddress
     )
         private
         returns(bool)
@@ -133,8 +130,8 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
         );
         
         require(
-            feeManagerAddress != address(0), 
-            'DataTokenTemplate: Invalid feeManagerAddress, zero address'
+            feeAddress != address(0), 
+            'DataTokenTemplate: Invalid feeAddress, zero address'
         );
 
         require(
@@ -153,7 +150,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
         _blob = blob;
         _symbol = symbol;
         _minter = minter;
-        _feeManager = FeeManager(feeManagerAddress);
+	_feeAddress = feeAddress;
         initialized = true;
         return initialized;
     }
@@ -173,7 +170,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
 	
         require(msg.value >= fee_in_wei, 'not enough funds to mint');
         _mint(address_to, num_tokens_minted);
-        address(_feeManager).transfer(fee_in_wei);
+        _feeAddress.transfer(fee_in_wei);
     }
 
     function _calculateFee(uint256 num_tokens_minted)
