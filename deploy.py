@@ -9,31 +9,17 @@ from ocean_lib.constants import BROWNIEDIR
 from ocean_lib.Ocean import confFileValue
 from ocean_lib.util import printAccountInfo
 
-ALLOWED_NETWORKS = ['ganache', 'rinkeby', 'mainnet']
-ALLOWED_NETWORKS_STR = str(ALLOWED_NETWORKS)[1:-1]
-
-def brownieAccount(private_key):
-    assert brownie.network.is_connected()
-    return brownie.network.accounts.add(priv_key=private_key)
-
-def invalidKey(private_key_str): #super basic check
-    return len(private_key_str) < 10
-
-def invalidAddr(addr_str): #super basic check
-    return len(addr_str) < 10
-
-def setenv(key, value):
-    #os.putenv(key, value) #Do *not* use putenv(), it doesn't work
-    os.environ[key] = value
-
-if __name__ == '__main__':
-
+def main():
+    network = processArgs()
+    deploy(network)
+    
+def processArgs():
     #set help message
     help = f"""
 Deploy DataTokenTemplate and Factory to a target network. 
 
 Usage: deploy.py NETWORK
-  NETWORK -- one of: {ALLOWED_NETWORKS_STR}
+  NETWORK -- one of: {constants.ALLOWED_NETWORKS_STR}
 
 Notes:
  -It gets FACTORY_DEPLOYER_PRIVATE_KEY and FEE_MANAGER_ADDRESS from {constants.CONF_FILE_PATH}
@@ -54,9 +40,13 @@ Notes:
     print("Arguments: NETWORK=%s\n" % network)
 
     #corner cases
-    if network not in ALLOWED_NETWORKS:
-        print(f"Invalid network. Allowed networks: {ALLOWED_NETWORKS_STR}")
+    if network not in constants.ALLOWED_NETWORKS:
+        print(f"Invalid network. Allowed networks: {constants.ALLOWED_NETWORKS_STR}")
         sys.exit(0)
+
+    return network
+
+def deploy(network):
 
     # ****SET ENVT****
     #grab vars
@@ -109,3 +99,20 @@ Notes:
         ERC20_template.address, fee_manager_addr, {'from': factory_deployer_account})
     print(factory.tx)
     print("****Deploy Factory: done****")
+
+def brownieAccount(private_key):
+    assert brownie.network.is_connected()
+    return brownie.network.accounts.add(priv_key=private_key)
+
+def invalidKey(private_key_str): #super basic check
+    return len(private_key_str) < 10
+
+def invalidAddr(addr_str): #super basic check
+    return len(addr_str) < 10
+
+def setenv(key, value):
+    #os.putenv(key, value) #Do *not* use putenv(), it doesn't work
+    os.environ[key] = value
+
+if __name__ == '__main__':
+    main()
