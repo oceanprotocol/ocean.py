@@ -71,7 +71,7 @@ Now, you're Bob:)
 ```python
 const bob_config={
    network: 'rinkeby',
-   privateKey:'1234ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f' #corresponds to address above 
+   privateKey:'1234ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f' #corresponds to bob_address 
 }
 bob_ocean = Ocean(bob_config)
 token = bob_ocean.getToken(dt_address)
