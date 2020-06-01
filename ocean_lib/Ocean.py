@@ -71,8 +71,7 @@ class _Factory:
         return token
     
     def _abi(self):
-        #FIXME: don't rely on brownie output directory
-        filename = f'./{constants.BROWNIEDIR}/build/contracts/Factory.json' 
+        filename = f'./abi/Factory.json' 
         return _abi(filename)
         
 class DataToken:
@@ -114,8 +113,7 @@ class DataToken:
         print("FIXME need to implement when provider-py is ready")
         
     def _abi(self):
-        #FIXME: don't rely on brownie output directory
-        filename = f'./{constants.BROWNIEDIR}/build/contracts/DataTokenTemplate.json' 
+        filename = f'./abi/DataTokenTemplate.json' 
         return _abi(filename)
 
 class Asset:

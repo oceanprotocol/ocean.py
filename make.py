@@ -95,4 +95,9 @@ for f in glob.glob(f'{CONTRACTDIR}/*.sol'):
 print('===Compile')
 os.system(f'cd {CONTRACTDIR}; brownie compile; cd -')
 
+print('===Update abi/')
+#these needed for ocean_lib/Ocean.py to be independent of brownie
+os.system(f'cp {BROWNIEDIR}/build/contracts/DataTokenTemplate.json abi/')
+os.system(f'cp {BROWNIEDIR}/build/contracts/Factory.json abi/')
+
 print('===Done!')
