@@ -92,7 +92,7 @@ Notes:
     factory_deployer_account = brownieAccount(factory_deployer_private_key)
 
     print("****Deploy DataTokenTemplate: begin****")
-    p = brownie.project.load('./oceanbrownie', name='oceanbrownieProject')
+    p = brownie.project.load(f'./{BROWNIEDIR}', name=f'{BROWNIEDIR}Project')
     name, symbol = 'Template', 'TEMPLATE'
     minter_addr = factory_deployer_account.address
     cap = constants.DEFAULT_MINTING_CAP
