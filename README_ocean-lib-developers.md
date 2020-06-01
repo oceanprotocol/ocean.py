@@ -155,6 +155,7 @@ Then inside brownie:
 #copy and paste the following to >>>
 import brownie #not needed, but clarifies the usage of brownie modules
 from ocean_lib import Ocean
+network = 'ganache' #note: will override the brownie.network object. That's ok!
 
 alice_private_key = Ocean.confFileValue(network, 'TEST_PRIVATE_KEY1')
 bob_private_key = Ocean.confFileValue(network, 'TEST_PRIVATE_KEY2')
