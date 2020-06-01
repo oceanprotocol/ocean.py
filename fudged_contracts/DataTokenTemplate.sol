@@ -176,7 +176,6 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
     function _calculateFee(uint256 num_tokens_minted)
         public view returns (uint256)
     {
-      return 11;
       uint256 tokensRange = _calculateRange(num_tokens_minted);
       uint256 tokensRangeToll = tokensRange.mul(BASE_TX_COST);
       return tokensRangeToll.div(_calculateRange(_cap)).div(BASE);
