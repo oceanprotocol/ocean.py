@@ -2,7 +2,9 @@
 
 This README is how to further *develop* ocean-lib-py. (Compare to the quickstarts which show how to *use* ocean-lib-py.)
 
-Here, you can:
+Steps:
+1. **Install dependencies**
+1. **Start blockchain service** (only needed for ganache)
 1. **Copy & compile contracts**: copy .sol from other repos, tweak imports, compile into ABIs etc
 1. **Deploy** the contracts to {local, rinkeby, mainnet}
 1. **Test** ocean-lib-py
@@ -10,7 +12,7 @@ Here, you can:
 
 These steps are detailed below. But first, installation. 
 
-## 0. Installation 
+## 1. Install dependencies 
 We use [Brownie](https://eth-brownie.readthedocs.io) to help in compiling, deploying, testing, and debugging. It's not needed for *using* ocean-lib-py.
 
 [Install Brownie](https://medium.com/@iamdefinitelyahuman/getting-started-with-brownie-part-1-9b2181f4cb99). It can be tricky; [here's steps](https://github.com/trentmc/brownie-instrs/blob/master/README_install.md) that I followed.
@@ -39,7 +41,21 @@ cp sample_ocean.conf ~/ocean.conf
 
 Then open `~/ocean.conf` and update the values as needed. This may include the infura id.
 
-## 1. Copy & compile contracts
+## 2. Start blockchain service (ganache only)
+
+Outcome: ganache running as a live blockchain network service, just like mainnet and rinkeby.
+
+Open a separate terminal and set the env't. and run the ganache script. 
+- `cd <this dir>`
+- `source myenv/bin/activate`
+
+Run the ganache script. It adds `ganache` as a network to brownie (if needed), then starts `ganache-cli` including putting ETH into the private keys set in `~/ocean.conf`.
+```console
+./ganache.py
+```
+
+## 3. Copy & compile contracts
+
 Outcomes: 
 - `.sol` files from other repos in a freshly-created `contracts/` subdirectory with imports tweaked as needed.
 - `.abi` files, compiled from the `.sol` with brownie
@@ -58,17 +74,10 @@ The run make! It git clones ,copies, tweaks imports, and finally does a `brownie
 ./make.py
 ```
 
-## 2. Deploy the contracts
+## 4. Deploy the contracts
 Outcome: ERC20Template and Factory are deployed to ganache, rinkeby, or mainnet.
 
 If mainnet: ensure `~/ocean.conf` has correct `FACTORY_DEPLOYER_PRIVATE_KEY` (= an OPF key) and `FEE_MANAGER_ADDRESS` (= Ocean community address).
-
-If ganache: open a separate terminal, set the env't, and run the ganache script. 
-- `cd <this dir>`
-- `source myenv/bin/activate`
-- `./ganache.py`
-
-The ganache script has added `ganache` as a network to brownie (if needed), then started `ganache-cli` and pre-populate ETH into the private keys set in `~/ocean.conf`.
 
 Call the deploy script with NETWORK = `ganache`, `rinkeby`, or `mainnet`. Brownie will attach to the network.
 ```console
@@ -77,18 +86,17 @@ Call the deploy script with NETWORK = `ganache`, `rinkeby`, or `mainnet`. Browni
 
 Finally: update `ocean.conf`'s `FACTORY_ADDRESS` with the factory address output in the previous step.
 
-## 3. Test ocean-lib-py
+## 5. Test ocean-lib-py
 Outcome: ocean-lib-py works as expected.
 
-First, ensure that ganache-cli is running like in step 2: `ganache-cli --port ...`.
-
-Then, test simple quickstart on it:
+First, run simple quickstart on ganache. 
 ```console
-pytest tests/test_quickstart_simpleflow.py::test_on_ganache
+python quickstart_simpleflow.py
 ```
 
-Then, test simple quickstart on the other networks:
+Then, run pytest version of quickstart. Replace "ganche" with "rinkeby" or "mainnet" for the other networks:
 ```console
+pytest tests/test_quickstart_simpleflow.py::test_on_ganache
 pytest tests/test_quickstart_simpleflow.py::test_on_rinkeby
 pytest tests/test_quickstart_simpleflow.py::test_on_mainnet
 ```
@@ -98,7 +106,7 @@ Then, test everything:
 pytest
 ```
 
-## 4. Debugging
+## 6. Debugging
 Brownie reduces pain in Solidity debugging: it makes it feel like Python debugging, including Python-style tracebacks in Solidity. [Here's a walk-through](https://medium.com/better-programming/getting-started-with-brownie-part-3-ef6bfa9867d7) of key features. [Here are Brownie docs](https://eth-brownie.readthedocs.io). 
 
 Lets's do some stuff with it. First, start the console.
