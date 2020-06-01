@@ -14,10 +14,6 @@ contract FeeManager is FeeCalculator, FeeCollector, Ownable {
         Ownable()
     {
     }
-
-    function fooFunction() public pure returns (uint256) {
-      return 12;
-    }
     
     function withdraw() 
         public

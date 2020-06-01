@@ -174,9 +174,7 @@ contract DataTokenTemplate is IERC20Template, ERC20Pausable {
             totalSupply().add(num_tokens_minted) <= _cap, 
             'DataTokenTemplate: cap exceeded'
         );
-	//uint256 fee_in_wei = 11;
 	uint256 fee_in_wei = _dataFooFunction();
-	//uint256 fee_in_wei = _feeManager.fooFunction();
 	//uint256 fee_in_wei = _feeManager.calculateFee(num_tokens_minted, _cap);
         require(
            msg.value >= fee_in_wei, 
