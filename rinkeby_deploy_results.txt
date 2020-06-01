@@ -1,0 +1,26 @@
+(myenv) trentmc@trentmcLnv:~/code/ocean-lib-py$ ./deploy.py rinkeby
+Arguments: NETWORK=rinkeby
+
+Account factory_deployer:
+  private key: cc9ecbe21eb30b7d9dd2808024b4f0da5876e7c7216b28ab6ecb0ccd1d4c76b7
+  public key: 0xfd5d83e8bd11447f3ffad90395ceac10ea4b78cfbbe02c7a8d209247a825c4960ec8bbac584f0b8ffb78d5c3ba3fab2caf00876586930e2ba1dfb65829cbdf2e
+  address: 0x39Cd844DE27f20349CA2876E0E588c75107e0dA1
+  balance: 119755047000000000 Wei (0.119755047 Ether)
+****Deploy DataTokenTemplate: begin****
+Transaction sent: 0x7e7f761f67fc3ffc7e0efa8e2853797c072c4aa1270b65ce017ce7a375619362
+  Gas price: 1.0 gwei   Gas limit: 1638022
+Waiting for confirmation...
+  DataTokenTemplate.constructor confirmed - Block: 6590321   Gas used: 1638022 (100.00%)
+  DataTokenTemplate deployed at: 0xB51ABa0cA6169c1142A18F40eaD2C41FbE14E8c2
+
+<Transaction '0x7e7f761f67fc3ffc7e0efa8e2853797c072c4aa1270b65ce017ce7a375619362'>
+****Deploy DataTokenTemplate: done****
+****Deploy Factory: begin****
+Transaction sent: 0xc5b2c9c7e1554ebc5c9c7fd898b5ab6dec162cfa9bdb5feb4b43bffdeeb44912
+  Gas price: 1.0 gwei   Gas limit: 683565
+Waiting for confirmation...
+  Factory.constructor confirmed - Block: 6590322   Gas used: 683565 (100.00%)
+  Factory deployed at: 0xcBbcE0e8124cD9C1b334e3504d9cB4A2692501cF
+
+<Transaction '0xc5b2c9c7e1554ebc5c9c7fd898b5ab6dec162cfa9bdb5feb4b43bffdeeb44912'>
+****Deploy Factory: done****

@@ -28,8 +28,7 @@ config = {
    'network' : 'rinkeby',
    'privateKey' : '8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f',
 }
-ocean = Ocean(config)
-account = ocean.accounts.list()[0]
+ocean = Ocean.Ocean(config)
 token = ocean.datatoken.create('localhost:8030',account)
 dt_address = token.getAddress()
 print(dt_address)
@@ -61,8 +60,8 @@ token.mint(100)
 ## 4. Alice transfers 1 token to Bob
 
 ```python
-bob_address = FIXME
-token.transfer(1, bob_address)
+bob_address = '0x0ecd5f934768df296EfB58802418fD68B53873C0'
+token.transfer(bob_address, 1)
 ```
 
 ## 5. Bob consumes dataset
@@ -70,18 +69,11 @@ token.transfer(1, bob_address)
 Now, you're Bob:)
 
 ```python
-
 const bob_config={
    network: 'rinkeby',
-   privateKey:'1234ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f'  
+   privateKey:'1234ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f' #corresponds to bob_address 
 }
 bob_ocean = Ocean(bob_config)
-
-account = bob_ocean.accounts.list()[0]
-asset = bob_ocean.assets.get(dt_address)
-file = asset.download(account)
+token = bob_ocean.getToken(dt_address)
+_file = token.download(account)
 ```
-
-## Web3 Fun 
-
-Since data tokens are ERC20-based, we can use the [ERC20 functions in web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-with-an-erc20-token-contract) (Python Ethereum library). Have fun!
