@@ -3,6 +3,7 @@ import configparser
 import eth_account
 import json
 import os
+import warnings
 
 from . import constants
 from . import util
@@ -61,11 +62,13 @@ class _Factory:
 
         # grab token_addr
         print("==Grab token address")
-        import pdb; pdb.set_trace()
+
+        #grabbing this event log gives an unwarranted warning. Ignore it
+        warnings.filterwarnings("ignore")
         rich_logs = self._factory_contract.events.TokenCreated().processReceipt(tx_receipt)
-        import pdb; pdb.set_trace()
+        warnings.filterwarnings("ignore")
         
-        #token_addr = self._factory_contract.functions.getTokenAddress(symbol).call()
+        token_addr = rich_logs[0]['args']['newTokenAddress']
         print(f"==token_addr={token_addr}")
 
         # compute return object
@@ -73,7 +76,7 @@ class _Factory:
         return token
 
     def _abi(self):
-        filename = f'./abi/Factory.abi'
+        filename = './abi/Factory.abi'
         return _abi(filename)
 
 
@@ -116,7 +119,7 @@ class DataToken:
         print("FIXME need to implement when provider-py is ready")
 
     def _abi(self):
-        filename = f'./abi/DataTokenTemplate.abi'
+        filename = './abi/DataTokenTemplate.abi'
         return _abi(filename)
 
 
