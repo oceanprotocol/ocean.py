@@ -62,12 +62,9 @@ class _Factory:
 
         # grab token_addr
         print("==Grab token address")
-
-        #grabbing this event log gives an unwarranted warning. Ignore it
-        warnings.filterwarnings("ignore")
+        warnings.filterwarnings("ignore") #ignore unwarranted warning up next
         rich_logs = self._factory_contract.events.TokenCreated().processReceipt(tx_receipt)
-        warnings.filterwarnings("ignore")
-        
+        warnings.resetwarnings()
         token_addr = rich_logs[0]['args']['newTokenAddress']
         print(f"==token_addr={token_addr}")
 
