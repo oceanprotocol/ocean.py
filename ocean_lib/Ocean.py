@@ -72,7 +72,7 @@ class _Factory:
         return token
 
     def _abi(self):
-        filename = f'./abi/Factory.json'
+        filename = f'./abi/Factory.abi'
         return _abi(filename)
 
 
@@ -115,7 +115,7 @@ class DataToken:
         print("FIXME need to implement when provider-py is ready")
 
     def _abi(self):
-        filename = f'./abi/DataTokenTemplate.json'
+        filename = f'./abi/DataTokenTemplate.abi'
         return _abi(filename)
 
 
