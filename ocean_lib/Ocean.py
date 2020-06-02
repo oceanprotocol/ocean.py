@@ -52,11 +52,7 @@ class _Factory:
 
     def createToken(self, blob):
         # set function
-        name, symbol = "Test Token", "TST"  # FIXME make random
-        cap = constants.DEFAULT_MINTING_CAP
-        minter = self._c.address
-        function = self._factory_contract.functions.createToken(
-            name, symbol, cap, blob, minter)
+        function = self._factory_contract.functions.createToken(blob)
 
         # build and send tx
         print("==Build & send tx for createToken()")
@@ -65,7 +61,10 @@ class _Factory:
 
         # grab token_addr
         print("==Grab token address")
-        token_addr = self._factory_contract.functions.getTokenAddress(symbol).call()
+        rich_logs = self._factory_contract.events.tokenCreated().processReceipt(tx_receipt)
+        import pdb; pdb.set_trace()
+        
+        #token_addr = self._factory_contract.functions.getTokenAddress(symbol).call()
         print(f"==token_addr={token_addr}")
 
         # compute return object

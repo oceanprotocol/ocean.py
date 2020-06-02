@@ -1,5 +1,6 @@
 #! ./myenv/bin/python3
 
+import json
 import re
 import os
 import shutil
@@ -100,8 +101,19 @@ print('===Compile')
 os.system(f'cd {CONTRACTDIR}; brownie compile; cd -')
 
 print('===Update abi/')
-# these needed for ocean_lib/Ocean.py to be independent of brownie
-os.system(f'cp {BROWNIEDIR}/build/contracts/DataTokenTemplate.json abi/')
-os.system(f'cp {BROWNIEDIR}/build/contracts/Factory.json abi/')
+# these are needed for ocean_lib/Ocean.py to be independent of brownie
+assert os.path.exists('abi/')
+jsondir = f'{BROWNIEDIR}/build/contracts/'
+modules = ['DataTokenTemplate', 'Factory']
+for module in modules:
+    json_filename = f'{jsondir}{module}.json'
+    with open(json_filename, 'r') as f:
+        json_string = f.read()
+    json_dict = json.loads(json_string)
+    abi_dict = json_dict['abi']
+    abi_string = json.dumps(abi_dict, indent=4)
+    abi_filename = f'abi/{module}.abi'
+    with open(abi_filename, 'w') as f:
+        f.write(abi_string)
 
 print('===Done!')
