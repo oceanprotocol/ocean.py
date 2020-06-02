@@ -1,5 +1,6 @@
 #! ./myenv/bin/python3
 
+import json
 import re
 import os
 import shutil
@@ -33,7 +34,9 @@ pip install -r requirements.txt""")
 print('===Clone/update .sol sources: begin')
 if not os.path.exists('../ocean-contracts'):
     print('===  Clone ocean-contracts')
-    os.system('cd ..; git clone https://github.com/oceanprotocol/ocean-contracts; cd -')
+    #os.system('cd ..; git clone https://github.com/oceanprotocol/ocean-contracts; cd -')
+    #os.system('cd ..; git clone --branch develop https://github.com/oceanprotocol/ocean-contracts; cd -')
+    os.system('cd ..; git clone --branch issue72 https://github.com/oceanprotocol/ocean-contracts; cd -')
 else:
     print('===  Update ocean-contracts')
     os.system('cd ../ocean-contracts; git pull; cd -')
@@ -60,12 +63,6 @@ os.system(f'cp ../openzeppelin-contracts/contracts/token/ERC20/../../GSN/Context
 os.system(f'cp ../openzeppelin-contracts/contracts/token/ERC20/./IERC20.sol {CONTRACTDIR}')
 os.system(f'cp ../openzeppelin-contracts/contracts/token/ERC20/../../math/SafeMath.sol {CONTRACTDIR}')
 os.system(f'cp ../openzeppelin-contracts/contracts/token/ERC20/../../utils/Address.sol {CONTRACTDIR}')
-
-os.system(f'cp fudged_contracts/*.sol {CONTRACTDIR}')
-
-# delete unwanted contracts
-os.system(f'rm {CONTRACTDIR}/FeeManager.sol')
-os.system(f'rm {CONTRACTDIR}/FeeCalculator.sol')
 
 print('===Flatten imports in .sol files')
 
@@ -99,8 +96,11 @@ print('===Compile')
 os.system(f'cd {CONTRACTDIR}; brownie compile; cd -')
 
 print('===Update abi/')
-# these needed for ocean_lib/Ocean.py to be independent of brownie
-os.system(f'cp {BROWNIEDIR}/build/contracts/DataTokenTemplate.json abi/')
-os.system(f'cp {BROWNIEDIR}/build/contracts/Factory.json abi/')
+# these are needed for ocean_lib/Ocean.py to be independent of brownie
+for module in ['DataTokenTemplate', 'Factory']:
+    with open(f'{BROWNIEDIR}/build/contracts/{module}.json', 'r') as f:
+        json_dict = json.loads(f.read())
+    with open(f'abi/{module}.abi', 'w') as f:
+        f.write(json.dumps(json_dict['abi'], indent=4))
 
 print('===Done!')

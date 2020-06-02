@@ -3,6 +3,7 @@ import configparser
 import eth_account
 import json
 import os
+import warnings
 
 from . import constants
 from . import util
@@ -52,11 +53,7 @@ class _Factory:
 
     def createToken(self, blob):
         # set function
-        name, symbol = "Test Token", "TST"  # FIXME make random
-        cap = constants.DEFAULT_MINTING_CAP
-        minter = self._c.address
-        function = self._factory_contract.functions.createToken(
-            name, symbol, cap, blob, minter)
+        function = self._factory_contract.functions.createToken(blob)
 
         # build and send tx
         print("==Build & send tx for createToken()")
@@ -65,7 +62,10 @@ class _Factory:
 
         # grab token_addr
         print("==Grab token address")
-        token_addr = self._factory_contract.functions.getTokenAddress(symbol).call()
+        warnings.filterwarnings("ignore") #ignore unwarranted warning up next
+        rich_logs = self._factory_contract.events.TokenCreated().processReceipt(tx_receipt)
+        warnings.resetwarnings()
+        token_addr = rich_logs[0]['args']['newTokenAddress']
         print(f"==token_addr={token_addr}")
 
         # compute return object
@@ -73,7 +73,7 @@ class _Factory:
         return token
 
     def _abi(self):
-        filename = f'./abi/Factory.json'
+        filename = './abi/Factory.abi'
         return _abi(filename)
 
 
@@ -116,7 +116,7 @@ class DataToken:
         print("FIXME need to implement when provider-py is ready")
 
     def _abi(self):
-        filename = f'./abi/DataTokenTemplate.json'
+        filename = './abi/DataTokenTemplate.abi'
         return _abi(filename)
 
 
@@ -145,10 +145,7 @@ def confFileValue(network, key):
 
 def _abi(filename):
     with open(filename, 'r') as f:
-        text = f.read()
-    abi = json.loads(text)['abi']
-    return abi
-
+        return json.loads(f.read())
 
 def _buildAndSendTx(c: _Context, function, gas_limit, num_wei=0):
     nonce = c.web3.eth.getTransactionCount(c.address)
@@ -171,7 +168,7 @@ def _buildAndSendTx(c: _Context, function, gas_limit, num_wei=0):
         pdb.set_trace()
 
     tx_receipt = c.web3.eth.waitForTransactionReceipt(tx_hash)
-    print(f"tx_receipt={tx_receipt}")
+    #print(f"tx_receipt={tx_receipt}")
     print("Tx has completed.")
     if tx_receipt['status'] == 0:  # did tx fail?
         print("Eek, the tx failed")
