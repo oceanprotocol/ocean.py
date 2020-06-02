@@ -144,10 +144,7 @@ def confFileValue(network, key):
 
 def _abi(filename):
     with open(filename, 'r') as f:
-        text = f.read()
-    abi = json.loads(text)['abi']
-    return abi
-
+        return json.loads(f.read())
 
 def _buildAndSendTx(c: _Context, function, gas_limit, num_wei=0):
     nonce = c.web3.eth.getTransactionCount(c.address)
