@@ -63,12 +63,6 @@ os.system(f'cp ../openzeppelin-contracts/contracts/token/ERC20/./IERC20.sol {CON
 os.system(f'cp ../openzeppelin-contracts/contracts/token/ERC20/../../math/SafeMath.sol {CONTRACTDIR}')
 os.system(f'cp ../openzeppelin-contracts/contracts/token/ERC20/../../utils/Address.sol {CONTRACTDIR}')
 
-#os.system(f'cp fudged_contracts/*.sol {CONTRACTDIR}')
-
-# delete unwanted contracts
-#os.system(f'rm {CONTRACTDIR}/FeeManager.sol')
-#os.system(f'rm {CONTRACTDIR}/FeeCalculator.sol')
-
 print('===Flatten imports in .sol files')
 
 

@@ -28,7 +28,7 @@
             },
             {
                 "internalType": "address payable",
-                "name": "feeManager",
+                "name": "feeAddress",
                 "type": "address"
             }
         ],
@@ -85,6 +85,32 @@
         ],
         "name": "Transfer",
         "type": "event"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "num_tokens_minted",
+                "type": "uint256"
+            },
+            {
+                "internalType": "uint256",
+                "name": "max_fee",
+                "type": "uint256"
+            }
+        ],
+        "name": "_calculateFee",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
     },
     {
         "constant": true,
@@ -286,7 +312,7 @@
             },
             {
                 "internalType": "address payable",
-                "name": "feeManager",
+                "name": "feeAddress",
                 "type": "address"
             }
         ],
