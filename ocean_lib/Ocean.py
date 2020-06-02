@@ -168,7 +168,7 @@ def _buildAndSendTx(c: _Context, function, gas_limit, num_wei=0):
         pdb.set_trace()
 
     tx_receipt = c.web3.eth.waitForTransactionReceipt(tx_hash)
-    print(f"tx_receipt={tx_receipt}")
+    #print(f"tx_receipt={tx_receipt}")
     print("Tx has completed.")
     if tx_receipt['status'] == 0:  # did tx fail?
         print("Eek, the tx failed")
