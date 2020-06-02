@@ -35,7 +35,8 @@ print('===Clone/update .sol sources: begin')
 if not os.path.exists('../ocean-contracts'):
     print('===  Clone ocean-contracts')
     #os.system('cd ..; git clone https://github.com/oceanprotocol/ocean-contracts; cd -')
-    os.system('cd ..; git clone --branch develop https://github.com/oceanprotocol/ocean-contracts; cd -')
+    #os.system('cd ..; git clone --branch develop https://github.com/oceanprotocol/ocean-contracts; cd -')
+    os.system('cd ..; git clone --branch issue72 https://github.com/oceanprotocol/ocean-contracts; cd -')
 else:
     print('===  Update ocean-contracts')
     os.system('cd ../ocean-contracts; git pull; cd -')
