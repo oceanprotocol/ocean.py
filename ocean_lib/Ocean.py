@@ -62,7 +62,7 @@ class _Factory:
         # grab token_addr
         print("==Grab token address")
         import pdb; pdb.set_trace()
-        rich_logs = self._factory_contract.events.tokenCreated().processReceipt(tx_receipt)
+        rich_logs = self._factory_contract.events.TokenCreated().processReceipt(tx_receipt)
         import pdb; pdb.set_trace()
         
         #token_addr = self._factory_contract.functions.getTokenAddress(symbol).call()
