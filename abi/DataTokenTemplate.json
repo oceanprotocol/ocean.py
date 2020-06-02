@@ -572,7 +572,7 @@
         "id": 186,
         "nodeType": "ImportDirective",
         "scope": 588,
-        "sourceUnit": 1700,
+        "sourceUnit": 1680,
         "src": "186:24:3",
         "symbolAliases": [],
         "unitAlias": ""
@@ -594,7 +594,7 @@
         "id": 188,
         "nodeType": "ImportDirective",
         "scope": 588,
-        "sourceUnit": 1775,
+        "sourceUnit": 1755,
         "src": "241:30:3",
         "symbolAliases": [],
         "unitAlias": ""
@@ -608,10 +608,10 @@
               "id": 189,
               "name": "IERC20Template",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 1774,
+              "referencedDeclaration": 1754,
               "src": "492:14:3",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_IERC20Template_$1774",
+                "typeIdentifier": "t_contract$_IERC20Template_$1754",
                 "typeString": "contract IERC20Template"
               }
             },
@@ -642,8 +642,8 @@
           101,
           1020,
           1141,
-          1394,
-          1774
+          1374,
+          1754
         ],
         "contractKind": "contract",
         "documentation": "@title DataTokenTemplate\n \n@dev DataTokenTemplate is a DataToken ERC20 compliant template\n     Used by the factory contract as a bytecode reference to deploy new DataTokens.",
@@ -653,9 +653,9 @@
           587,
           1141,
           1020,
-          1394,
+          1374,
           101,
-          1774
+          1754
         ],
         "name": "DataTokenTemplate",
         "nodeType": "ContractDefinition",
@@ -667,10 +667,10 @@
               "id": 193,
               "name": "SafeMath",
               "nodeType": "UserDefinedTypeName",
-              "referencedDeclaration": 1699,
+              "referencedDeclaration": 1679,
               "src": "534:8:3",
               "typeDescriptions": {
-                "typeIdentifier": "t_contract$_SafeMath_$1699",
+                "typeIdentifier": "t_contract$_SafeMath_$1679",
                 "typeString": "library SafeMath"
               }
             },
@@ -987,10 +987,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1792,
-                        1793
+                        1772,
+                        1773
                       ],
-                      "referencedDeclaration": 1793,
+                      "referencedDeclaration": 1773,
                       "src": "859:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -1064,7 +1064,7 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1789,
+                            "referencedDeclaration": 1769,
                             "src": "990:3:3",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -1140,10 +1140,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1792,
-                        1793
+                        1772,
+                        1773
                       ],
-                      "referencedDeclaration": 1793,
+                      "referencedDeclaration": 1773,
                       "src": "982:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -1895,7 +1895,7 @@
             "scope": 587,
             "src": "2062:333:3",
             "stateMutability": "nonpayable",
-            "superFunction": 1718,
+            "superFunction": 1698,
             "visibility": "public"
           },
           {
@@ -2030,10 +2030,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1792,
-                        1793
+                        1772,
+                        1773
                       ],
-                      "referencedDeclaration": 1793,
+                      "referencedDeclaration": 1773,
                       "src": "2989:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -2184,10 +2184,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1792,
-                        1793
+                        1772,
+                        1773
                       ],
-                      "referencedDeclaration": 1793,
+                      "referencedDeclaration": 1773,
                       "src": "3069:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -2338,10 +2338,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1792,
-                        1793
+                        1772,
+                        1773
                       ],
-                      "referencedDeclaration": 1793,
+                      "referencedDeclaration": 1773,
                       "src": "3149:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -2454,10 +2454,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1792,
-                        1793
+                        1772,
+                        1773
                       ],
-                      "referencedDeclaration": 1793,
+                      "referencedDeclaration": 1773,
                       "src": "3239:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -3174,7 +3174,7 @@
                             "lValueRequested": false,
                             "memberName": "add",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 1539,
+                            "referencedDeclaration": 1519,
                             "src": "4018:17:3",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -3250,10 +3250,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1792,
-                        1793
+                        1772,
+                        1773
                       ],
-                      "referencedDeclaration": 1793,
+                      "referencedDeclaration": 1773,
                       "src": "4010:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -3320,7 +3320,7 @@
                       "name": "gasleft",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1782,
+                      "referencedDeclaration": 1762,
                       "src": "4104:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_gasleft_view$__$returns$_t_uint256_$",
@@ -3457,7 +3457,7 @@
                       "name": "gasleft",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [],
-                      "referencedDeclaration": 1782,
+                      "referencedDeclaration": 1762,
                       "src": "4182:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_gasleft_view$__$returns$_t_uint256_$",
@@ -3629,7 +3629,7 @@
                         "name": "tx",
                         "nodeType": "Identifier",
                         "overloadedDeclarations": [],
-                        "referencedDeclaration": 1801,
+                        "referencedDeclaration": 1781,
                         "src": "4269:2:3",
                         "typeDescriptions": {
                           "typeIdentifier": "t_magic_transaction",
@@ -3784,7 +3784,7 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 1789,
+                            "referencedDeclaration": 1769,
                             "src": "4358:3:3",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -3860,10 +3860,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        1792,
-                        1793
+                        1772,
+                        1773
                       ],
-                      "referencedDeclaration": 1793,
+                      "referencedDeclaration": 1773,
                       "src": "4350:7:3",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -4075,7 +4075,7 @@
             "scope": 587,
             "src": "3889:556:3",
             "stateMutability": "payable",
-            "superFunction": 1725,
+            "superFunction": 1705,
             "visibility": "public"
           },
           {
@@ -4270,7 +4270,7 @@
                               "lValueRequested": false,
                               "memberName": "div",
                               "nodeType": "MemberAccess",
-                              "referencedDeclaration": 1632,
+                              "referencedDeclaration": 1612,
                               "src": "4679:11:3",
                               "typeDescriptions": {
                                 "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -4357,7 +4357,7 @@
                             "lValueRequested": false,
                             "memberName": "div",
                             "nodeType": "MemberAccess",
-                            "referencedDeclaration": 1632,
+                            "referencedDeclaration": 1612,
                             "src": "4611:11:3",
                             "typeDescriptions": {
                               "typeIdentifier": "t_function_internal_pure$_t_uint256_$_t_uint256_$returns$_t_uint256_$bound_to$_t_uint256_$",
@@ -4613,7 +4613,7 @@
             "scope": 587,
             "src": "4983:79:3",
             "stateMutability": "nonpayable",
-            "superFunction": 1728,
+            "superFunction": 1708,
             "visibility": "public"
           },
           {
@@ -4736,7 +4736,7 @@
             "scope": 587,
             "src": "5265:79:3",
             "stateMutability": "nonpayable",
-            "superFunction": 1731,
+            "superFunction": 1711,
             "visibility": "public"
           },
           {
@@ -4882,7 +4882,7 @@
             "scope": 587,
             "src": "5611:100:3",
             "stateMutability": "nonpayable",
-            "superFunction": 1736,
+            "superFunction": 1716,
             "visibility": "public"
           },
           {
@@ -4961,7 +4961,7 @@
             "scope": 587,
             "src": "5836:80:3",
             "stateMutability": "view",
-            "superFunction": 1741,
+            "superFunction": 1721,
             "visibility": "public"
           },
           {
@@ -5040,7 +5040,7 @@
             "scope": 587,
             "src": "6047:84:3",
             "stateMutability": "view",
-            "superFunction": 1746,
+            "superFunction": 1726,
             "visibility": "public"
           },
           {
@@ -5198,7 +5198,7 @@
             "scope": 587,
             "src": "6473:82:3",
             "stateMutability": "view",
-            "superFunction": 1751,
+            "superFunction": 1731,
             "visibility": "public"
           },
           {
@@ -5277,7 +5277,7 @@
             "scope": 587,
             "src": "6677:73:3",
             "stateMutability": "view",
-            "superFunction": 1756,
+            "superFunction": 1736,
             "visibility": "public"
           },
           {
@@ -5433,7 +5433,7 @@
             "scope": 587,
             "src": "6992:105:3",
             "stateMutability": "view",
-            "superFunction": 1763,
+            "superFunction": 1743,
             "visibility": "public"
           },
           {
@@ -5512,7 +5512,7 @@
             "scope": 587,
             "src": "7279:86:3",
             "stateMutability": "view",
-            "superFunction": 1768,
+            "superFunction": 1748,
             "visibility": "public"
           },
           {
@@ -5591,7 +5591,7 @@
             "scope": 587,
             "src": "7531:76:3",
             "stateMutability": "view",
-            "superFunction": 1773,
+            "superFunction": 1753,
             "visibility": "public"
           }
         ],
