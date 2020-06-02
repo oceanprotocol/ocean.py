@@ -102,18 +102,10 @@ os.system(f'cd {CONTRACTDIR}; brownie compile; cd -')
 
 print('===Update abi/')
 # these are needed for ocean_lib/Ocean.py to be independent of brownie
-assert os.path.exists('abi/')
-jsondir = f'{BROWNIEDIR}/build/contracts/'
-modules = ['DataTokenTemplate', 'Factory']
-for module in modules:
-    json_filename = f'{jsondir}{module}.json'
-    with open(json_filename, 'r') as f:
-        json_string = f.read()
-    json_dict = json.loads(json_string)
-    abi_dict = json_dict['abi']
-    abi_string = json.dumps(abi_dict, indent=4)
-    abi_filename = f'abi/{module}.abi'
-    with open(abi_filename, 'w') as f:
-        f.write(abi_string)
+for module in ['DataTokenTemplate', 'Factory']:
+    with open(f'{BROWNIEDIR}/build/contracts/{module}.json', 'r') as f:
+        json_dict = json.loads(f.read())
+    with open(f'abi/{module}.abi', 'w') as f:
+        f.write(json.dumps(json_dict['abi'], indent=4))
 
 print('===Done!')
