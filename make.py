@@ -15,8 +15,8 @@ print(f'  CONTRACTDIR: {CONTRACTDIR}')
 assert '/' not in BROWNIEDIR
 
 print('===Check Python version')
-s = subprocess.check_output('python --version', shell=True) #eg 'Python 2.7.17'
-version = float(re.findall(' \d\.[\d|\d\d]', str(s))[0]) #eg 2.7
+s = subprocess.check_output('python --version', shell=True)  # eg 'Python 2.7.17'
+version = float(re.findall(' \d\.[\d|\d\d]', str(s))[0])  # eg 2.7
 if version < 3.6:
     print('===Need >= Python 3.6')
     sys.exit(0)
@@ -29,7 +29,7 @@ python -m venv myenv
 source myenv/bin/activate
 pip install -r requirements.txt""")
     sys.exit(0)
-    
+
 print('===Clone/update .sol sources: begin')
 if not os.path.exists('../ocean-contracts'):
     print('===  Clone ocean-contracts')
@@ -37,11 +37,11 @@ if not os.path.exists('../ocean-contracts'):
 else:
     print('===  Update ocean-contracts')
     os.system('cd ../ocean-contracts; git pull; cd -')
-    
-if not os.path.exists('../openzeppelin-contracts'): #note that we use v0.2.5 
+
+if not os.path.exists('../openzeppelin-contracts'):  # note that we use v0.2.5
     print('===  Clone openzeppelin-contracts')
     os.system('cd ..; git clone --branch v2.5.0 https://github.com/OpenZeppelin/openzeppelin-contracts.git; cd -')
-    #don't need to ever update them, since it's an old version
+    # don't need to ever update them, since it's an old version
 print('===Clone/update .sol sources: done')
 
 print(f'===Initialize {BROWNIEDIR}/')
@@ -63,11 +63,13 @@ os.system(f'cp ../openzeppelin-contracts/contracts/token/ERC20/../../utils/Addre
 
 os.system(f'cp fudged_contracts/*.sol {CONTRACTDIR}')
 
-#delete unwanted contracts
+# delete unwanted contracts
 os.system(f'rm {CONTRACTDIR}/FeeManager.sol')
 os.system(f'rm {CONTRACTDIR}/FeeCalculator.sol')
 
 print('===Flatten imports in .sol files')
+
+
 def inplace_change(filename, old_s, new_s):
     with open(filename) as f:
         s = f.read()
@@ -77,7 +79,9 @@ def inplace_change(filename, old_s, new_s):
         s = s.replace(old_s, new_s)
         f.write(s)
 
+
 import glob
+
 for f in glob.glob(f'{CONTRACTDIR}/*.sol'):
     inplace_change(f, 'openzeppelin-solidity/contracts/', './')
     inplace_change(f, '../../', './')
@@ -91,12 +95,11 @@ for f in glob.glob(f'{CONTRACTDIR}/*.sol'):
     inplace_change(f, 'interfaces/', '')
     inplace_change(f, 'ownership/', '')
 
-
 print('===Compile')
 os.system(f'cd {CONTRACTDIR}; brownie compile; cd -')
 
 print('===Update abi/')
-#these needed for ocean_lib/Ocean.py to be independent of brownie
+# these needed for ocean_lib/Ocean.py to be independent of brownie
 os.system(f'cp {BROWNIEDIR}/build/contracts/DataTokenTemplate.json abi/')
 os.system(f'cp {BROWNIEDIR}/build/contracts/Factory.json abi/')
 
