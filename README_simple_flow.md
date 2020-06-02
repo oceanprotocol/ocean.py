@@ -29,9 +29,8 @@ config = {
    'privateKey' : '8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f',
 }
 ocean = Ocean.Ocean(config)
-token = ocean.datatoken.create('localhost:8030',account)
+token = ocean.createToken('localhost:8030',account)
 dt_address = token.getAddress()
-print(dt_address)
 ```
 
 ## 2. Alice hosts the dataset
@@ -49,7 +48,6 @@ Run the providerService:
 ENV DT="{'0x1234':'/var/mydata/myFolder1'}"
 docker run @oceanprotocol/provider-py -e CONFIG=DT
 ```
-
 
 ## 3. Alice mints 100 tokens
 
