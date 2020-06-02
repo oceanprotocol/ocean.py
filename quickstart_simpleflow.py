@@ -57,7 +57,6 @@ def runQuickstart(network):
     ocean = Ocean.Ocean(config)
     token = ocean.createToken('localhost:8030')
     dt_address = token.getAddress()
-    print(dt_address)
 
     # 2. Alice hosts the dataset
     # Do from console:
