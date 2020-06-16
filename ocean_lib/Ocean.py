@@ -97,10 +97,7 @@ class DataToken:
         # build and send tx
         print("==Build & send tx for mint()")
         gas_limit = constants.DEFAULT_GAS_LIMIT__MINT_TOKENS
-        gas_price = int(confFileValue(self._c.network, 'GAS_PRICE'))
-        max_fees_wei = gas_limit * gas_price
-        (tx_hash, tx_receipt) = _buildAndSendTx(
-            self._c, function, gas_limit, max_fees_wei)
+        (tx_hash, tx_receipt) = _buildAndSendTx(self._c, function, gas_limit)
 
     def transfer(self, recipient_addr, num_tokens):
         # set function

@@ -1,13 +1,13 @@
-# Developing ocean-lib-py
+# Developing lib-py
 
-This README is how to further *develop* ocean-lib-py. (Compare to the quickstarts which show how to *use* ocean-lib-py.)
+This README is how to further *develop* lib-py. (Compare to the quickstarts which show how to *use* it.)
 
 Steps:
 1. **Install dependencies**
 1. **Start blockchain service** (only needed for ganache)
 1. **Copy & compile contracts**: copy .sol from other repos, tweak imports, compile into ABIs etc
 1. **Deploy** the contracts to {local, rinkeby, mainnet}
-1. **Test** ocean-lib-py
+1. **Test** lib-py
 1. (Along the way) **Debug** at the contract or py level.
 
 These steps are detailed below. But first, installation. 
@@ -16,8 +16,8 @@ These steps are detailed below. But first, installation.
 
 Clone this repo, and `cd` into it.
 ```console
-git clone https://github.com/oceanprotocol/ocean-lib-py
-cd ocean-lib-py
+git clone https://github.com/oceanprotocol/lib-py
+cd lib-py
 ```
 
 Initalize virtual env't. Activate env't.(BTW use `deactivate` to, well, deactivate.)
@@ -26,14 +26,14 @@ python -m venv myenv
 source myenv/bin/activate 
 ```
 
-Install modules in the env't. Notably, it installs [Brownie](https://eth-brownie.readthedocs.io). Brownie helps in compiling, deploying, testing, and debugging. Brownie is not needed for *using* ocean-lib-py.
+Install modules in the env't. Notably, it installs [Brownie](https://eth-brownie.readthedocs.io). Brownie helps in compiling, deploying, testing, and debugging. Brownie is not needed for *using* lib-py.
 ```
 pip install -r requirements.txt 
 ```
 
 If you don't have an Infura account and you aim to deploy to `rinkeby` or `mainnet`, go to www.infura.io and sign up.
 
-Private keys etc can't live on GitHub. To handle this, ocean-lib-py tools read ~/ocean.conf. (It does *not* use environmental variables.) Start with the pre-set template:
+Private keys etc can't live on GitHub. To handle this, lib-py tools read ~/ocean.conf. (It does *not* use environmental variables.) Start with the pre-set template:
 ```console
 cp sample_ocean.conf ~/ocean.conf
 ```
@@ -45,8 +45,10 @@ Then open `~/ocean.conf` and update the values as needed. This may include the i
 Outcome: ganache running as a live blockchain network service, just like mainnet and rinkeby.
 
 Open a separate terminal and set the env't. and run the ganache script. 
-- `cd <this dir>`
-- `source myenv/bin/activate`
+```console
+cd <this dir>`
+source myenv/bin/activate
+```
 
 Run the ganache script. It adds `ganache` as a network to brownie (if needed), then starts `ganache-cli` including putting ETH into the private keys set in `~/ocean.conf`.
 ```console
@@ -88,8 +90,8 @@ Call the deploy script with NETWORK = `ganache`, `rinkeby`, or `mainnet`. Browni
 
 Finally: update `ocean.conf`'s `FACTORY_ADDRESS` with the factory address output in the previous step.
 
-## 5. Test ocean-lib-py
-Outcome: ocean-lib-py works as expected.
+## 5. Test 
+Outcome: lib-py works as expected.
 
 First, run simple quickstart on ganache. 
 ```console
@@ -110,7 +112,7 @@ brownie console --network ganache
 Play in brownie console! Here's an end-to-end example that deploys a factory (and token template), creates a token, then retreives the token address:
 ```python
 
->>> factory_deployer_account = network.accounts.add(priv_key='0x904365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a')
+>>> factory_deployer_account = network.accounts.add(private_key='0x904365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a')
 
 >>> ERC20_template = DataTokenTemplate.deploy("Template","TEMPLATE", factory_deployer_account.address, 1000, "blob", factory_deployer_account.address, {'from':factory_deployer_account
 })                                                                                                                                                                                     
@@ -178,7 +180,7 @@ _file = token.download()
 
 We can also combine objects from 6a, for richer debugging. For example:
 ```python
-factory_deployer_account = network.accounts.add(priv_key='0x904365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a')
+factory_deployer_account = network.accounts.add(private_key='0x904365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a')
 
 brownie_datatoken = DataTokenTemplate.deploy("Template2","TEMPLATE2", factory_deployer_account.address, 1000, "blob", factory_deployer_account.address, {'from' : factory_deployer_account}) 
 brownie_datatoken.mint(factory_deployer_account.address, 10, {'from': factory_deployer_account, 'value':100000000000})
