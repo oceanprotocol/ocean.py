@@ -112,7 +112,7 @@ brownie console --network ganache
 Play in brownie console! Here's an end-to-end example that deploys a factory (and token template), creates a token, then retreives the token address:
 ```python
 
->>> factory_deployer_account = network.accounts.add(priv_key='0x904365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a')
+>>> factory_deployer_account = network.accounts.add(private_key='0x904365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a')
 
 >>> ERC20_template = DataTokenTemplate.deploy("Template","TEMPLATE", factory_deployer_account.address, 1000, "blob", factory_deployer_account.address, {'from':factory_deployer_account
 })                                                                                                                                                                                     
@@ -180,7 +180,7 @@ _file = token.download()
 
 We can also combine objects from 6a, for richer debugging. For example:
 ```python
-factory_deployer_account = network.accounts.add(priv_key='0x904365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a')
+factory_deployer_account = network.accounts.add(private_key='0x904365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a')
 
 brownie_datatoken = DataTokenTemplate.deploy("Template2","TEMPLATE2", factory_deployer_account.address, 1000, "blob", factory_deployer_account.address, {'from' : factory_deployer_account}) 
 brownie_datatoken.mint(factory_deployer_account.address, 10, {'from': factory_deployer_account, 'value':100000000000})

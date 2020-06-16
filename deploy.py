@@ -102,7 +102,7 @@ def deploy(network):
 
 def brownieAccount(private_key):
     assert brownie.network.is_connected()
-    return brownie.network.accounts.add(priv_key=private_key)
+    return brownie.network.accounts.add(private_key=private_key)
 
 def invalidKey(private_key_str): #super basic check
     return len(private_key_str) < 10
