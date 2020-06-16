@@ -5,11 +5,6 @@
                 "internalType": "address",
                 "name": "_template",
                 "type": "address"
-            },
-            {
-                "internalType": "address payable",
-                "name": "_feeManager",
-                "type": "address"
             }
         ],
         "payable": false,
@@ -33,19 +28,19 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "address",
                 "name": "newTokenAddress",
                 "type": "address"
             },
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "address",
                 "name": "templateAddress",
                 "type": "address"
             },
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "string",
                 "name": "tokenName",
                 "type": "string"
@@ -58,19 +53,19 @@
         "anonymous": false,
         "inputs": [
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "address",
                 "name": "tokenAddress",
                 "type": "address"
             },
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "string",
                 "name": "tokenName",
                 "type": "string"
             },
             {
-                "indexed": true,
+                "indexed": false,
                 "internalType": "string",
                 "name": "tokenSymbol",
                 "type": "string"
@@ -82,19 +77,19 @@
                 "type": "uint256"
             },
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "address",
-                "name": "RegisteredBy",
+                "name": "registeredBy",
                 "type": "address"
             },
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "uint256",
-                "name": "RegisteredAt",
+                "name": "registeredAt",
                 "type": "uint256"
             },
             {
-                "indexed": false,
+                "indexed": true,
                 "internalType": "string",
                 "name": "blob",
                 "type": "string"
@@ -102,6 +97,32 @@
         ],
         "name": "TokenRegistered",
         "type": "event"
+    },
+    {
+        "constant": true,
+        "inputs": [
+            {
+                "internalType": "string",
+                "name": "str1",
+                "type": "string"
+            },
+            {
+                "internalType": "string",
+                "name": "str2",
+                "type": "string"
+            }
+        ],
+        "name": "concatenateStrings",
+        "outputs": [
+            {
+                "internalType": "string",
+                "name": "",
+                "type": "string"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "pure",
+        "type": "function"
     },
     {
         "constant": false,
@@ -122,6 +143,36 @@
         ],
         "payable": false,
         "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "getCurrentTokenIndex",
+        "outputs": [
+            {
+                "internalType": "uint256",
+                "name": "",
+                "type": "uint256"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
+        "type": "function"
+    },
+    {
+        "constant": true,
+        "inputs": [],
+        "name": "getTokenTemplate",
+        "outputs": [
+            {
+                "internalType": "address",
+                "name": "",
+                "type": "address"
+            }
+        ],
+        "payable": false,
+        "stateMutability": "view",
         "type": "function"
     },
     {

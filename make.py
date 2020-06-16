@@ -33,13 +33,12 @@ pip install -r requirements.txt""")
 
 print('===Clone/update .sol sources: begin')
 if not os.path.exists('../ocean-contracts'):
-    print('===  Clone ocean-contracts')
-    #os.system('cd ..; git clone https://github.com/oceanprotocol/ocean-contracts; cd -')
-    #os.system('cd ..; git clone --branch develop https://github.com/oceanprotocol/ocean-contracts; cd -')
-    os.system('cd ..; git clone --branch issue72 https://github.com/oceanprotocol/ocean-contracts; cd -')
+    print('===  Clone oceanprotocol/contracts')
+    os.system('cd ..; git clone https://github.com/oceanprotocol/contracts; cd -')
+    
 else:
-    print('===  Update ocean-contracts')
-    os.system('cd ../ocean-contracts; git pull; cd -')
+    print('===  Update ocean contracts')
+    os.system('cd ../contracts; git pull; cd -')
 
 if not os.path.exists('../openzeppelin-contracts'):  # note that we use v0.2.5
     print('===  Clone openzeppelin-contracts')
@@ -53,9 +52,9 @@ if os.path.exists(f'./{BROWNIEDIR}'):
 os.system(f'brownie init {BROWNIEDIR}')
 
 print(f'===Populate {CONTRACTDIR}')
-os.system(f'cp ../ocean-contracts/contracts/*.sol {CONTRACTDIR}')
-os.system(f'cp ../ocean-contracts/contracts/*/*.sol {CONTRACTDIR}')
-os.system(f'cp ../ocean-contracts/contracts/*/*/*.sol {CONTRACTDIR}')
+os.system(f'cp ../contracts/contracts/*.sol {CONTRACTDIR}')
+os.system(f'cp ../contracts/contracts/*/*.sol {CONTRACTDIR}')
+os.system(f'cp ../contracts/contracts/*/*/*.sol {CONTRACTDIR}')
 
 os.system(f'cp ../openzeppelin-contracts/contracts/ownership/Ownable.sol {CONTRACTDIR}/')
 os.system(f'cp ../openzeppelin-contracts/contracts/token/ERC20/ERC20.sol {CONTRACTDIR}/')

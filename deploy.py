@@ -22,7 +22,7 @@ Usage: deploy.py NETWORK
   NETWORK -- one of: {constants.ALLOWED_NETWORKS_STR}
 
 Notes:
- -It gets FACTORY_DEPLOYER_PRIVATE_KEY and FEE_MANAGER_ADDRESS from {constants.CONF_FILE_PATH}
+ -It gets FACTORY_DEPLOYER_PRIVATE_KEY from {constants.CONF_FILE_PATH}
  """
 
     # ****SET INPUT ARGS****
@@ -51,16 +51,11 @@ def deploy(network):
     # ****SET ENVT****
     #grab vars
     factory_deployer_private_key = confFileValue(network, 'FACTORY_DEPLOYER_PRIVATE_KEY')
-    fee_manager_addr = confFileValue(network, 'FEE_MANAGER_ADDRESS')
 
     #corner cases 
     if invalidKey(factory_deployer_private_key):
         print("Need valid FACTORY_DEPLOYER_PRIVATE_KEY")
         sys.exit(0)
-    if invalidAddr(fee_manager_addr):
-        print("Need valid FEE_MANAGER_ADDRESS")
-        sys.exit(0)
-
     
     # ****CONNECT TO EXISTING RUNNING CHAIN****
     assert not brownie.network.is_connected()
@@ -89,14 +84,14 @@ def deploy(network):
     blob = 'blob_string'
     # args to deploy = args for DataTokenTemplate constructor & {'from':addr}
     ERC20_template = p.DataTokenTemplate.deploy(
-        name, symbol, minter_addr, cap, blob, fee_manager_addr, 
+        name, symbol, minter_addr, cap, blob, 
         {'from': factory_deployer_account})
     print(ERC20_template.tx)
     print("****Deploy DataTokenTemplate: done****")
         
     print("****Deploy Factory: begin****")
     factory = p.Factory.deploy(
-        ERC20_template.address, fee_manager_addr, {'from': factory_deployer_account})
+        ERC20_template.address, {'from': factory_deployer_account})
     print(factory.tx)
     print("****Deploy Factory: done****")
 
