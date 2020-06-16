@@ -16,7 +16,7 @@ These steps are detailed below. But first, installation.
 
 Clone this repo, and `cd` into it.
 ```console
-git clone https://github.com/oceanprotocol/ocean-lib-py
+git clone https://github.com/oceanprotocol/lib-py
 cd ocean-lib-py
 ```
 
