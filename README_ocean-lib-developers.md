@@ -45,8 +45,10 @@ Then open `~/ocean.conf` and update the values as needed. This may include the i
 Outcome: ganache running as a live blockchain network service, just like mainnet and rinkeby.
 
 Open a separate terminal and set the env't. and run the ganache script. 
-- `cd <this dir>`
-- `source myenv/bin/activate`
+```console
+cd <this dir>`
+source myenv/bin/activate
+```
 
 Run the ganache script. It adds `ganache` as a network to brownie (if needed), then starts `ganache-cli` including putting ETH into the private keys set in `~/ocean.conf`.
 ```console
