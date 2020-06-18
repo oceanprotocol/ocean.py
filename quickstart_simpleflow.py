@@ -3,7 +3,10 @@
 # do *not* import brownie, that's too much dependency here
 import sys
 
-from ocean_lib import Ocean, constants
+from ocean_lib import Ocean
+
+ALLOWED_NETWORKS = ['ganache', 'rinkeby', 'mainnet']
+ALLOWED_NETWORKS_STR = str(ALLOWED_NETWORKS)[1:-1]
 
 
 def main():
@@ -13,19 +16,19 @@ def main():
 
 def processArgs():
     # set help message
-    help = f"""
+    help_text = f"""
 Run quickstart on simple flow.
 
 Usage: quickstart_simpleflow.py NETWORK
-  NETWORK -- one of: {constants.ALLOWED_NETWORKS_STR}
+  NETWORK -- one of: {ALLOWED_NETWORKS_STR}
  """
 
     # ****SET INPUT ARGS****
-    # got the right number of args?  If not, output help
+    # got the right number of args?  If not, output help_text
     num_args = len(sys.argv) - 1
     num_args_needed = 1
     if num_args != num_args_needed:
-        print(help)
+        print(help_text)
         if num_args > 0:
             print("Got %d argument(s), need %s.\n" % (num_args, num_args_needed))
         sys.exit(0)
@@ -35,8 +38,8 @@ Usage: quickstart_simpleflow.py NETWORK
     print("Arguments: NETWORK=%s\n" % network)
 
     # corner cases
-    if network not in constants.ALLOWED_NETWORKS:
-        print(f"Invalid network. Allowed networks: {constants.ALLOWED_NETWORKS_STR}")
+    if network not in ALLOWED_NETWORKS:
+        print(f"Invalid network. Allowed networks: {ALLOWED_NETWORKS_STR}")
         sys.exit(0)
 
     return network
@@ -57,12 +60,6 @@ def runQuickstart(network):
     ocean = Ocean.Ocean(config)
     token = ocean.createToken('localhost:8030')
     dt_address = token.getAddress()
-
-    # 2. Alice hosts the dataset
-    # Do from console:
-    # >> touch /var/mydata/myFolder1/file
-    # >> ENV DT="{'0x1234':'/var/mydata/myFolder1'}"
-    # >> docker run @oceanprotocol/provider-py -e CONFIG=DT
 
     # 3. Alice mints 100 tokens
     token.mint(100)

@@ -1,0 +1,47 @@
+{
+  "attributes": {
+    "main": {
+      "author": "John Doe",
+      "dateCreated": "2019-02-08T08:13:49Z",
+      "license": "CC-BY",
+      "name": "My super algorithm",
+      "price": "1",
+      "type": "algorithm",
+      "algorithm": {
+        "language": "scala",
+        "format": "docker-image",
+        "version": "0.1",
+        "entrypoint": "ocean-entrypoint.sh",
+        "requirements": [],
+        "container": {
+          "entrypoint": "node $ALGO",
+          "image": "node",
+          "tag": "10"
+        }
+      },
+      "files": [
+        {
+          "name": "build_model",
+          "url": "https://raw.githubusercontent.com/oceanprotocol/test-algorithm/master/javascript/algo.js",
+          "index": 0,
+          "checksum": "efb2c764274b745f5fc37f97c6b0e761",
+          "contentLength": "4535431",
+          "contentType": "text/plain",
+          "encoding": "UTF-8",
+          "compression": "zip"
+        }
+      ]
+    },
+    "additionalInformation": {
+      "description": "Workflow to aggregate weather information",
+      "tags": [
+        "weather",
+        "uk",
+        "2011",
+        "workflow",
+        "aggregation"
+      ],
+      "copyrightHolder": "John Doe"
+    }
+  }
+}

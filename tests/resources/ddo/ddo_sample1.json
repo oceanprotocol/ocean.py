@@ -1,0 +1,298 @@
+{
+  "@context": "https://w3id.org/did/v1",
+  "authentication": [
+    {
+      "type": "RsaSignatureAuthentication2018",
+      "publicKey": "did:op:0c184915b07b44c888d468be85a9b28253e80070e5294b1aaed81c2f0264e429"
+    }
+  ],
+  "created": "2019-02-08T08:13:49Z",
+  "updated": "2019-03-08T08:13:49Z",
+  "id": "did:op:0c184915b07b44c888d468be85a9b28253e80070e5294b1aaed81c2f0264e429",
+  "proof": {
+    "created": "2019-02-08T08:13:41Z",
+    "creator": "0x37BB53e3d293494DE59fBe1FF78500423dcFd43B",
+    "signatureValue": "did:op:0bc278fee025464f8012b811d1bce8e22094d0984e4e49139df5d5ff7a028bdf",
+    "type": "DDOIntegritySignature",
+    "checksum": {
+      "0": "0x52b5c93b82dd9e7ecc3d9fdf4755f7f69a54484941897dc517b4adfe3bbc3377",
+      "1": "0x999999952b5c93b82dd9e7ecc3d9fdf4755f7f69a54484941897dc517b4adfe3"
+    }
+  },
+  "publicKey": [
+    {
+      "id": "did:op:b6e2eb5eff1a093ced9826315d5a4ef6c5b5c8bd3c49890ee284231d7e1d0aaa#keys-1",
+      "type": "RsaVerificationKey2018",
+      "owner": "did:op:6027c1e7cbae06a91fce0557ee53195284825f56a7100be0c53cbf4391aa26cc",
+      "publicKeyPem": "-----BEGIN PUBLIC KEY...END PUBLIC KEY-----\r\n"
+    },
+    {
+      "id": "did:op:b6e2eb5eff1a093ced9826315d5a4ef6c5b5c8bd3c49890ee284231d7e1d0aaa#keys-2",
+      "type": "Ed25519VerificationKey2018",
+      "owner": "did:op:4c27a254e607cdf91a1206480e7eb8c74856102316c1a462277d4f21c02373b6",
+      "publicKeyBase58": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"
+    },
+    {
+      "id": "did:op:b6e2eb5eff1a093ced9826315d5a4ef6c5b5c8bd3c49890ee284231d7e1d0aaa#keys-3",
+      "type": "RsaPublicKeyExchangeKey2018",
+      "owner": "did:op:5f6b885202ffb9643874be529302eb00d55e226959f1fbacaeda592c5b5c9484",
+      "publicKeyPem": "-----BEGIN PUBLIC KEY...END PUBLIC KEY-----\r\n"
+    }
+  ],
+  "verifiableCredential": [
+    {
+      "@context": [
+        "https://www.w3.org/2018/credentials/v1",
+        "https://www.w3.org/2018/credentials/examples/v1"
+      ],
+      "id": "1872",
+      "type": [
+        "read",
+        "update",
+        "deactivate"
+      ],
+      "issuer": "0x610D9314EDF2ced7681BA1633C33fdb8cF365a12",
+      "issuanceDate": "2019-01-01T19:73:24Z",
+      "credentialSubject": {
+        "id": "0x89328493849328493284932"
+      },
+      "proof": {
+        "type": "RsaSignature2018",
+        "created": "2019-01-01T19:73:24Z",
+        "proofPurpose": "assertionMethod",
+        "signatureValue": "ABCJSDAO23...1tzjn4w=="
+      }
+    }
+  ],
+  "service": [
+    {
+      "index": 0,
+      "serviceEndpoint": "http://localhost:5000/api/v1/aquarius/assets/ddo/{did}",
+      "type": "metadata",
+      "attributes": {
+        "encryptedFiles": "0x2e48ceefcca7abb024f90c87c676fce8f7913f889605a349c08c0c4a822c69ad651e122cc81db4fbb52938ac627786491514f37a2ebfd04fd98ec726f1d9061ed52f13fde132222af34d9af8ec358429cf45fc669f81a607185cb9a8150df3cbb2b4e3e382fb16429be228ddd920f061b78dd54701025fac8aab976239fb31a5b60a57393e96a338324c5ac8a5600a1247339c4835533cecdb5b53caf6b6f9d6478b579b7426f650a4154a20d18a9d49f509770af62647a57fc174741b47af3c8beeaaa76bee276cce8fba1f3fec0e1c",
+        "main": {
+          "author": "Met Office",
+          "dateCreated": "2019-02-08T08:13:49Z",
+          "files": [
+            {
+              "index": 0,
+              "checksum": "efb2c764274b745f5fc37f97c6b0e761",
+              "contentLength": "4535431",
+              "contentType": "text/csv",
+              "encoding": "UTF-8",
+              "compression": "zip"
+            }
+          ],
+          "license": "CC-BY",
+          "name": "UK Weather information 2011",
+          "price": "1",
+          "type": "dataset"
+        },
+        "additionalInformation": {
+          "description": "Weather information of UK including temperature and humidity",
+          "tags": [
+            "weather",
+            "uk",
+            "2011",
+            "temperature",
+            "humidity"
+          ],
+          "workExample": "423432fsd,51.509865,-0.118092,2011-01-01T10:55:11+00:00,7.2,68",
+          "copyrightHolder": "Met Office",
+          "links": [
+            {
+              "name": "Sample of Asset Data",
+              "type": "sample",
+              "url": "https://foo.com/sample.csv"
+            },
+            {
+              "name": "Data Format Definition",
+              "type": "format",
+              "url": "https://foo.com/sampl2.csv"
+            }
+          ],
+          "inLanguage": "en",
+          "updateFrecuency": "yearly",
+          "structuredMarkup": [
+            {
+              "uri": "http://skos.um.es/unescothes/C01194/jsonld",
+              "mediaType": "application/ld+json"
+            },
+            {
+              "uri": "http://skos.um.es/unescothes/C01194/turtle",
+              "mediaType": "text/turtle"
+            }
+          ]
+        },
+        "curation": {
+          "numVotes": 123,
+          "rating": 0.0,
+          "schema": "Binary Votting",
+          "isListed": true
+        }
+      }
+    },
+    {
+      "type": "access",
+      "index": 1,
+      "serviceEndpoint": "http://localhost:8030/api/v1/brizo/services/consume",
+      "templateId": "",
+      "attributes": {
+        "main": {
+          "name": "dataAssetAccessServiceAgreement",
+          "creator": "",
+          "datePublished": "2019-02-08T08:13:49Z",
+          "price": "10",
+          "timeout": 36000
+        },
+        "additionalInformation": {
+          "description": ""
+        },
+        "serviceAgreementTemplate": {
+          "contractName": "EscrowAccessSecretStoreTemplate",
+          "events": [
+            {
+              "name": "AgreementCreated",
+              "actorType": "consumer",
+              "handler": {
+                "moduleName": "escrowAccessSecretStoreTemplate",
+                "functionName": "fulfillLockRewardCondition",
+                "version": "0.1"
+              }
+            }
+          ],
+          "fulfillmentOrder": [
+            "lockReward.fulfill",
+            "accessSecretStore.fulfill",
+            "escrowReward.fulfill"
+          ],
+          "conditionDependency": {
+            "lockReward": [],
+            "grantSecretStoreAccess": [],
+            "releaseReward": [
+              "lockReward",
+              "accessSecretStore"
+            ]
+          },
+          "conditions": [
+            {
+              "name": "lockReward",
+              "timelock": 0,
+              "timeout": 0,
+              "contractName": "LockRewardCondition",
+              "functionName": "fulfill",
+              "parameters": [
+                {
+                  "name": "_rewardAddress",
+                  "type": "address",
+                  "value": ""
+                },
+                {
+                  "name": "_amount",
+                  "type": "uint256",
+                  "value": "1"
+                }
+              ],
+              "events": [
+                {
+                  "name": "Fulfilled",
+                  "actorType": "publisher",
+                  "handler": {
+                    "moduleName": "lockRewardCondition",
+                    "functionName": "fulfillAccessSecretStoreCondition",
+                    "version": "0.1"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "accessSecretStore",
+              "timelock": 0,
+              "timeout": 0,
+              "contractName": "AccessSecretStoreCondition",
+              "functionName": "fulfill",
+              "parameters": [
+                {
+                  "name": "_documentId",
+                  "type": "bytes32",
+                  "value": ""
+                },
+                {
+                  "name": "_grantee",
+                  "type": "address",
+                  "value": ""
+                }
+              ],
+              "events": [
+                {
+                  "name": "Fulfilled",
+                  "actorType": "publisher",
+                  "handler": {
+                    "moduleName": "accessSecretStore",
+                    "functionName": "fulfillEscrowRewardCondition",
+                    "version": "0.1"
+                  }
+                },
+                {
+                  "name": "TimedOut",
+                  "actorType": "consumer",
+                  "handler": {
+                    "moduleName": "accessSecretStore",
+                    "functionName": "fulfillEscrowRewardCondition",
+                    "version": "0.1"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "escrowReward",
+              "timelock": 0,
+              "timeout": 0,
+              "contractName": "EscrowReward",
+              "functionName": "fulfill",
+              "parameters": [
+                {
+                  "name": "_amount",
+                  "type": "uint256",
+                  "value": "1"
+                },
+                {
+                  "name": "_receiver",
+                  "type": "address",
+                  "value": ""
+                },
+                {
+                  "name": "_sender",
+                  "type": "address",
+                  "value": ""
+                },
+                {
+                  "name": "_lockCondition",
+                  "type": "bytes32",
+                  "value": ""
+                },
+                {
+                  "name": "_releaseCondition",
+                  "type": "bytes32",
+                  "value": ""
+                }
+              ],
+              "events": [
+                {
+                  "name": "Fulfilled",
+                  "actorType": "publisher",
+                  "handler": {
+                    "moduleName": "escrowRewardCondition",
+                    "functionName": "verifyRewardTokens",
+                    "version": "0.1"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}

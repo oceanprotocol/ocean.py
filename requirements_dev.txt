@@ -1,0 +1,12 @@
+# pip install ocean-lib
+# is for end users. That will install the packages
+# listed in the install_requires list of setup.py.
+
+# pip install -r requirements_dev.txt
+# is for the developers of ocean-lib, so doing that should
+# install all the Python packages listed
+# in the install_requires list of setup.py
+# and also the 'dev' list in the extras_require dict
+
+-e .[dev]
+
