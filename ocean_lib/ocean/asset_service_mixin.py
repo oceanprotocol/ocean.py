@@ -1,6 +1,5 @@
 import logging
 
-from eth.exceptions import InsufficientFunds
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -27,9 +26,9 @@ class AssetServiceMixin:
         dt = DataToken(dt_address)
         balance = dt.contract_concise.balanceOf(consumer_account.address)
         if balance < num_tokens:
-            raise InsufficientFunds(f'Your token balance {balance} is not sufficient '
-                                    f'to execute the requested service. This service '
-                                    f'requires {num_tokens} number of tokens.')
+            raise AssertionError(f'Your token balance {balance} is not sufficient '
+                                 f'to execute the requested service. This service '
+                                 f'requires {num_tokens} number of tokens.')
 
         tx_hash = dt.transfer(receiver, num_tokens, consumer_account)
         try:
