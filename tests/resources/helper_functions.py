@@ -11,10 +11,10 @@ import logging.config
 import coloredlogs
 import yaml
 
-from squid_py.web3_stuff.utils import get_account
+from ocean_lib.web3_stuff.utils import get_account
 from ocean_utils.ddo.ddo import DDO
 
-from squid_py.ocean.ocean import Ocean
+from ocean_lib.ocean.ocean import Ocean
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 
 PUBLISHER_INDEX = 1

@@ -6,20 +6,20 @@ import logging
 import os
 
 import eth_account
-from squid_py.web3_stuff.contract_handler import ContractHandler
-from squid_py.web3_stuff.utils import get_account
-from squid_py.web3_stuff.web3_provider import Web3Provider
-from squid_py import Config
+from ocean_lib.web3_stuff.contract_handler import ContractHandler
+from ocean_lib.web3_stuff.utils import get_account
+from ocean_lib.web3_stuff.web3_provider import Web3Provider
+from ocean_lib import Config
 
-from squid_py.data_provider.data_service_provider import DataServiceProvider
-from squid_py.config_provider import ConfigProvider
-from squid_py.models.datatoken import DataToken
-from squid_py.models.factory import FactoryContract
-from squid_py.ocean.ocean_assets import OceanAssets
-from squid_py.ocean.ocean_auth import OceanAuth
-from squid_py.ocean.ocean_compute import OceanCompute
-from squid_py.ocean.ocean_services import OceanServices
-from squid_py.ocean.util import GANACHE_URL, get_infura_url, WEB3_INFURA_PROJECT_ID, get_web3_provider
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.models.datatoken import DataToken
+from ocean_lib.models.factory import FactoryContract
+from ocean_lib.ocean.ocean_assets import OceanAssets
+from ocean_lib.ocean.ocean_auth import OceanAuth
+from ocean_lib.ocean.ocean_compute import OceanCompute
+from ocean_lib.ocean.ocean_services import OceanServices
+from ocean_lib.ocean.util import GANACHE_URL, get_infura_url, WEB3_INFURA_PROJECT_ID, get_web3_provider
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 

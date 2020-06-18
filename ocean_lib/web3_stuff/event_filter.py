@@ -1,7 +1,7 @@
 import logging
 import time
 
-from squid_py.web3_stuff.web3_provider import Web3Provider
+from ocean_lib.web3_stuff.web3_provider import Web3Provider
 
 logger = logging.getLogger(__name__)
 

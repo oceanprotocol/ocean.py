@@ -7,7 +7,7 @@ from web3.middleware.pythonic import (
     to_hexbytes,
 )
 
-from squid_py.web3_stuff.web3.http_provider import CustomHTTPProvider
+from ocean_lib.web3_stuff.web3.http_provider import CustomHTTPProvider
 
 
 class Web3Provider(object):

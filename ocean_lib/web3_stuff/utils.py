@@ -13,8 +13,8 @@ from web3.contract import ContractEvent
 from web3.utils.encoding import to_bytes
 from web3.utils.threads import Timeout
 
-from squid_py.web3_stuff.account import Account
-from squid_py.web3_stuff.web3_provider import Web3Provider
+from ocean_lib.web3_stuff.account import Account
+from ocean_lib.web3_stuff.web3_provider import Web3Provider
 
 Signature = namedtuple('Signature', ('v', 'r', 's'))
 

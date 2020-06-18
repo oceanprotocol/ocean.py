@@ -15,7 +15,7 @@ DEFAULT_NETWORK_URL = 'http://localhost:8545'
 DEFAULT_ARTIFACTS_PATH = 'artifacts'
 DEFAULT_GAS_LIMIT = 4000000
 DEFAULT_NAME_AQUARIUS_URL = 'http://localhost:5000'
-DEFAULT_STORAGE_PATH = 'squid_py.db'
+DEFAULT_STORAGE_PATH = 'ocean_lib.db'
 
 NAME_NETWORK_URL = 'network'
 NAME_ARTIFACTS_PATH = 'artifacts.path'
@@ -69,7 +69,7 @@ config_defaults = {
 
 
 class Config(configparser.ConfigParser):
-    """Class to manage the squid-py configuration."""
+    """Class to manage the ocean-lib configuration."""
 
     def __init__(self, filename=None, options_dict=None, **kwargs):
         """
@@ -86,7 +86,7 @@ class Config(configparser.ConfigParser):
         [resources]
         aquarius.url = http://localhost:5000                          # Aquarius url.
         brizo.url = http://localhost:8030                             # Brizo url.
-        storage.path = squid_py.db                                    # Path of sla back-up storage.
+        storage.path = ocean_lib.db                                    # Path of sla back-up storage.
 
         :param filename: Path of the config file, str.
         :param options_dict: Python dict with the config, dict.

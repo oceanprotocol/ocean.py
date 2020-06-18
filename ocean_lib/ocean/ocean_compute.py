@@ -4,9 +4,9 @@ from ocean_utils.agreements.service_factory import ServiceDescriptor
 from ocean_utils.agreements.service_types import ServiceTypes
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 
-from squid_py.assets.asset_resolver import resolve_asset
-from squid_py import ConfigProvider
-from squid_py.ocean.asset_service_mixin import AssetServiceMixin
+from ocean_lib.assets.asset_resolver import resolve_asset
+from ocean_lib import ConfigProvider
+from ocean_lib.ocean.asset_service_mixin import AssetServiceMixin
 
 logger = logging.getLogger('ocean')
 

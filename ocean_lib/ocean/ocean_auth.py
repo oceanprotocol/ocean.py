@@ -5,12 +5,12 @@
 import logging
 from datetime import datetime
 
-from squid_py.web3_stuff import Web3Helper
-from squid_py.web3_stuff.utils import add_ethereum_prefix_and_hash_msg
-from squid_py.web3_stuff.web3_provider import Web3Provider
+from ocean_lib.web3_stuff import Web3Helper
+from ocean_lib.web3_stuff.utils import add_ethereum_prefix_and_hash_msg
+from ocean_lib.web3_stuff.web3_provider import Web3Provider
 
-from squid_py import ConfigProvider
-from squid_py.data_store.auth_tokens import AuthTokensStorage
+from ocean_lib import ConfigProvider
+from ocean_lib.data_store.auth_tokens import AuthTokensStorage
 
 
 class OceanAuth:

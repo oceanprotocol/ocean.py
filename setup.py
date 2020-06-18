@@ -17,7 +17,7 @@ with open('README.md') as readme_file:
 with open('CHANGELOG.md') as history_file:
     history = history_file.read()
 
-# Installed by pip install squid-py
+# Installed by pip install ocean-lib
 # or pip install -e .
 install_requirements = [
     'coloredlogs',

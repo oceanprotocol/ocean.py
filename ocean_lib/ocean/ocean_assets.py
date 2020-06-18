@@ -8,8 +8,8 @@ import os
 
 from deprecated import deprecated
 
-from squid_py.web3_stuff import Web3Helper
-from squid_py.web3_stuff.utils import add_ethereum_prefix_and_hash_msg
+from ocean_lib.web3_stuff import Web3Helper
+from ocean_lib.web3_stuff.utils import add_ethereum_prefix_and_hash_msg
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_utils.agreements.service_factory import ServiceDescriptor, ServiceFactory
 from ocean_utils.agreements.service_types import ServiceTypes
@@ -24,10 +24,10 @@ from ocean_utils.exceptions import (
 )
 from ocean_utils.utils.utilities import checksum
 
-from squid_py.assets.asset_downloader import download_asset_files
-from squid_py.assets.asset_resolver import resolve_asset
-from squid_py.models.factory import FactoryContract
-from squid_py.ocean.asset_service_mixin import AssetServiceMixin
+from ocean_lib.assets.asset_downloader import download_asset_files
+from ocean_lib.assets.asset_resolver import resolve_asset
+from ocean_lib.models.factory import FactoryContract
+from ocean_lib.ocean.asset_service_mixin import AssetServiceMixin
 
 logger = logging.getLogger('ocean')
 

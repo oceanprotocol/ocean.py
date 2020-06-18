@@ -6,8 +6,8 @@ import time
 from datetime import datetime
 from threading import Thread
 
-from squid_py.web3_stuff.contract_handler import ContractHandler
-from squid_py.web3_stuff.event_filter import EventFilter
+from ocean_lib.web3_stuff.contract_handler import ContractHandler
+from ocean_lib.web3_stuff.event_filter import EventFilter
 
 logger = logging.getLogger(__name__)
 

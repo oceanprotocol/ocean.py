@@ -5,8 +5,8 @@ import logging
 import os
 import sys
 
-from squid_py import Config
-from squid_py.ocean.util import get_infura_url, WEB3_INFURA_PROJECT_ID
+from ocean_lib import Config
+from ocean_lib.ocean.util import get_infura_url, WEB3_INFURA_PROJECT_ID
 
 logging.basicConfig(level=logging.INFO)
 
@@ -36,7 +36,7 @@ class ExampleConfig:
                 "aquarius.url": "http://aquarius:5000",
                 "provider.url": "http://localhost:8030",
                 "provider.address": '0x068Ed00cF0441e4829D9784fCBe7b9e26D4BD8d0',
-                "storage.path": "squid_py.db",
+                "storage.path": "ocean_lib.db",
                 "downloads.path": "consume-downloads"
             }
         }
@@ -54,7 +54,7 @@ class ExampleConfig:
                 "aquarius.url": "https://aquarius.marketplace.dev-ocean.com",
                 "provider.url": "http://localhost:8030",
                 "provider.address": '0x068Ed00cF0441e4829D9784fCBe7b9e26D4BD8d0',
-                "storage.path": "squid_py.db",
+                "storage.path": "ocean_lib.db",
                 "downloads.path": "consume-downloads"
             }
         }

@@ -35,7 +35,7 @@ clean-build: ## remove build artifacts
 	rm -fr .eggs/
 	rm -fr *.log
 	rm -fr coverage.xml
-	rm -fr squid_py.db
+	rm -fr ocean_lib.db
 	rm -fr .python-version
 	find . -name '*.egg-info' -exec rm -fr {} +
 	find . -name '*.egg' -exec rm -f {} +
@@ -53,7 +53,7 @@ clean-test: ## remove test and coverage artifacts
 	rm -fr .pytest_cache
 
 lint: ## check style with PyLint
-	pylint --errors-only squid_py tests
+	pylint --errors-only ocean_lib tests
 
 test: ## run tests quickly with the default Python
 	py.test
@@ -62,7 +62,7 @@ test-all: ## run tests on every Python version with tox
 	tox
 
 coverage: ## check code coverage quickly with the default Python
-	coverage run --source squid_py -m pytest
+	coverage run --source ocean_lib -m pytest
 	coverage report -m
 	coverage html
 	$(BROWSER) htmlcov/index.html

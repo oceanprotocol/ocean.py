@@ -1,12 +1,12 @@
 import os
 import time
 
-from squid_py.web3_stuff import ContractBase
-from squid_py.web3_stuff.event_filter import EventFilter
-from squid_py.web3_stuff.web3_provider import Web3Provider
+from ocean_lib.web3_stuff import ContractBase
+from ocean_lib.web3_stuff.event_filter import EventFilter
+from ocean_lib.web3_stuff.web3_provider import Web3Provider
 from ocean_utils.http_requests.requests_session import get_requests_session
 
-from squid_py.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 
 class DataToken(ContractBase):

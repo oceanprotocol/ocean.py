@@ -1,5 +1,5 @@
-from squid_py.models.datatoken import DataToken
-from squid_py.web3_stuff import ContractBase
+from ocean_lib.models.datatoken import DataToken
+from ocean_lib.web3_stuff import ContractBase
 
 
 class FactoryContract(ContractBase):

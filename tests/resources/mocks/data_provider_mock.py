@@ -3,7 +3,7 @@
 
 import os
 
-from squid_py.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 
 class DataProviderMock(object):

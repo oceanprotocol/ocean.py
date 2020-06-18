@@ -4,14 +4,14 @@
 
 from eth_utils import big_endian_to_int
 
-from squid_py.web3_stuff.utils import (
+from ocean_lib.web3_stuff.utils import (
     add_ethereum_prefix_and_hash_msg,
     generate_multi_value_hash,
     split_signature
 )
-from squid_py.web3_stuff.wallet import Wallet
-from squid_py.web3_stuff.web3.signature import SignatureFix
-from squid_py.web3_stuff.web3_provider import Web3Provider
+from ocean_lib.web3_stuff.wallet import Wallet
+from ocean_lib.web3_stuff.web3.signature import SignatureFix
+from ocean_lib.web3_stuff.web3_provider import Web3Provider
 
 
 class Web3Helper(object):

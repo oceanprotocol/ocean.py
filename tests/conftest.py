@@ -4,12 +4,12 @@
 import uuid
 
 import pytest
-from squid_py.web3_stuff.contract_handler import ContractHandler
-from squid_py.web3_stuff.web3_provider import Web3Provider
+from ocean_lib.web3_stuff.contract_handler import ContractHandler
+from ocean_lib.web3_stuff.web3_provider import Web3Provider
 from ocean_utils.aquarius import AquariusProvider
 
 from examples import ExampleConfig
-from squid_py.ocean.util import get_web3_provider
+from ocean_lib.ocean.util import get_web3_provider
 from tests.resources.helper_functions import (get_consumer_ocean_instance,
                                               get_metadata, get_publisher_account,
                                               get_publisher_ocean_instance, get_registered_ddo,

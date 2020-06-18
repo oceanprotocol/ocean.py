@@ -3,8 +3,8 @@ import logging
 from eth.exceptions import InsufficientFunds
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 
-from squid_py.data_provider.data_service_provider import DataServiceProvider
-from squid_py.models.datatoken import DataToken
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.models.datatoken import DataToken
 
 
 logger = logging.getLogger(__name__)

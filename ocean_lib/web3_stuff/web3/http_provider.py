@@ -1,6 +1,6 @@
 from web3 import HTTPProvider
 
-from squid_py.web3_stuff.web3.request import make_post_request
+from ocean_lib.web3_stuff.web3.request import make_post_request
 
 
 class CustomHTTPProvider(HTTPProvider):

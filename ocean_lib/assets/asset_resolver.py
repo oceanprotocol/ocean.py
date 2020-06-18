@@ -5,7 +5,7 @@
 import logging
 
 from ocean_utils.aquarius.aquarius_provider import AquariusProvider
-from squid_py.models.datatoken import DataToken
+from ocean_lib.models.datatoken import DataToken
 
 logger = logging.getLogger('keeper')
 

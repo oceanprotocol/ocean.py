@@ -9,13 +9,13 @@ import os
 import re
 from json import JSONDecodeError
 
-from squid_py.web3_stuff import Web3Helper
-from squid_py.web3_stuff.utils import add_ethereum_prefix_and_hash_msg
+from ocean_lib.web3_stuff import Web3Helper
+from ocean_lib.web3_stuff.utils import add_ethereum_prefix_and_hash_msg
 from ocean_utils.agreements.service_types import ServiceTypes
 from ocean_utils.exceptions import OceanEncryptAssetUrlsError
 from ocean_utils.http_requests.requests_session import get_requests_session
 
-from squid_py.models.algorithm_metadata import AlgorithmMetadata
+from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 
 logger = logging.getLogger(__name__)
 

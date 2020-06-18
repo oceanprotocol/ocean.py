@@ -1,7 +1,7 @@
-from squid_py.web3_stuff.utils import get_account
+from ocean_lib.web3_stuff.utils import get_account
 
-from squid_py import Ocean
-from squid_py.models.factory import FactoryContract
+from ocean_lib import Ocean
+from ocean_lib.models.factory import FactoryContract
 
 
 def test_simple_flow():
