@@ -10,9 +10,9 @@ import logging
 from web3 import Web3
 from web3.contract import ConciseContract
 
-from ocean_lib.web3_stuff.contract_handler import ContractHandler
-from ocean_lib.web3_stuff.web3.contract import CustomContractFunction
-from ocean_lib.web3_stuff.web3_provider import Web3Provider
+from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
+from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 logger = logging.getLogger('keeper')
 
@@ -97,7 +97,7 @@ class ContractBase(object):
         :param to_block: int or None
         :return: event if blocking is True and an event is received, otherwise returns None
         """
-        from ocean_lib.web3_stuff.event_listener import EventListener
+        from ocean_lib.web3_internal.event_listener import EventListener
         return EventListener(
             self.CONTRACT_NAME,
             event_name,

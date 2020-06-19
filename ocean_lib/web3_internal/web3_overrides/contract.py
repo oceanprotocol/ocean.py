@@ -2,7 +2,7 @@ import logging
 
 from web3.utils.contracts import prepare_transaction
 
-from ocean_lib.web3_stuff.wallet import Wallet
+from ocean_lib.web3_internal.wallet import Wallet
 
 
 class CustomContractFunction:

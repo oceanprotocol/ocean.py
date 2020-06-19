@@ -2,12 +2,8 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 from web3 import Web3
-from web3.middleware.pythonic import (
-    pythonic_middleware,
-    to_hexbytes,
-)
 
-from ocean_lib.web3_stuff.web3.http_provider import CustomHTTPProvider
+from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
 
 
 class Web3Provider(object):

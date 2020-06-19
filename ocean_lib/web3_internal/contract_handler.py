@@ -8,7 +8,7 @@ import os
 from web3 import Web3
 from web3.contract import ConciseContract
 
-from ocean_lib.web3_stuff.web3_provider import Web3Provider
+from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 logger = logging.getLogger(__name__)
 

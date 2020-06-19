@@ -1,7 +1,7 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
-from ocean_lib.web3_stuff.utils import get_account
+from ocean_lib.web3_internal.utils import get_account
 
 from ocean_lib import Ocean
 from ocean_lib.models.factory import FactoryContract

@@ -1,4 +1,4 @@
-from ocean_lib.web3_stuff.web3.http_provider import CustomHTTPProvider
+from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
 from web3 import WebsocketProvider
 
 WEB3_INFURA_PROJECT_ID = '357f2fe737db4304bd2f7285c5602d0d'

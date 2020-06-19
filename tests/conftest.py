@@ -6,8 +6,8 @@ import uuid
 import pytest
 
 from ocean_lib import ConfigProvider
-from ocean_lib.web3_stuff.contract_handler import ContractHandler
-from ocean_lib.web3_stuff.web3_provider import Web3Provider
+from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 from examples import ExampleConfig
 from ocean_lib.ocean.util import get_web3_provider

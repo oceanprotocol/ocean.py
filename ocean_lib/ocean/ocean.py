@@ -6,9 +6,8 @@ import logging
 import os
 
 import eth_account
-from ocean_lib.web3_stuff.contract_handler import ContractHandler
-from ocean_lib.web3_stuff.utils import get_account
-from ocean_lib.web3_stuff.web3_provider import Web3Provider
+from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib import Config
 
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider

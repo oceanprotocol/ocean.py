@@ -1,6 +1,6 @@
 from web3 import HTTPProvider
 
-from ocean_lib.web3_stuff.web3.request import make_post_request
+from ocean_lib.web3_internal.web3_overrides.request import make_post_request
 
 
 class CustomHTTPProvider(HTTPProvider):

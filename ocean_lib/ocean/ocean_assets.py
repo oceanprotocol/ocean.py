@@ -8,8 +8,8 @@ import os
 
 from deprecated import deprecated
 
-from ocean_lib.web3_stuff import Web3Helper
-from ocean_lib.web3_stuff.utils import add_ethereum_prefix_and_hash_msg
+from ocean_lib.web3_internal import Web3Helper
+from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_utils.agreements.service_factory import ServiceDescriptor, ServiceFactory
 from ocean_utils.agreements.service_types import ServiceTypes

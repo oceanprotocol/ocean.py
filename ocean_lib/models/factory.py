@@ -1,5 +1,5 @@
 from ocean_lib.models.datatoken import DataToken
-from ocean_lib.web3_stuff import ContractBase
+from ocean_lib.web3_internal import ContractBase
 
 
 class FactoryContract(ContractBase):

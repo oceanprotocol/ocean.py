@@ -11,7 +11,7 @@ import logging.config
 import coloredlogs
 import yaml
 
-from ocean_lib.web3_stuff.utils import get_account
+from ocean_lib.web3_internal.utils import get_account
 from ocean_utils.ddo.ddo import DDO
 
 from ocean_lib.ocean.ocean import Ocean
