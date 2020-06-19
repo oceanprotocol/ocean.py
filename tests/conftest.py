@@ -4,6 +4,8 @@
 import uuid
 
 import pytest
+
+from ocean_lib import ConfigProvider
 from ocean_lib.web3_stuff.contract_handler import ContractHandler
 from ocean_lib.web3_stuff.web3_provider import Web3Provider
 from ocean_utils.aquarius import AquariusProvider
@@ -21,28 +23,9 @@ setup_logging()
 @pytest.fixture
 def setup_all():
     config = ExampleConfig.get_config()
+    ConfigProvider.set_config(config)
     Web3Provider.init_web3(provider=get_web3_provider(config.network_url))
     ContractHandler.set_artifacts_path(config.artifacts_path)
-
-
-@pytest.fixture
-def publisher_ocean_instance():
-    return get_publisher_ocean_instance()
-
-
-@pytest.fixture
-def consumer_ocean_instance():
-    return get_consumer_ocean_instance()
-
-
-@pytest.fixture
-def registered_ddo():
-    ocn = get_publisher_ocean_instance()
-    aqua = AquariusProvider.get_aquarius(ocn.config.aquarius_url)
-    for did in aqua.list_assets():
-        aqua.retire_asset_ddo(did)
-
-    return get_registered_ddo(ocn, get_publisher_account())
 
 
 @pytest.fixture
