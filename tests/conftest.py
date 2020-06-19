@@ -8,14 +8,13 @@ import pytest
 from ocean_lib import ConfigProvider
 from ocean_lib.web3_stuff.contract_handler import ContractHandler
 from ocean_lib.web3_stuff.web3_provider import Web3Provider
-from ocean_utils.aquarius import AquariusProvider
 
 from examples import ExampleConfig
 from ocean_lib.ocean.util import get_web3_provider
-from tests.resources.helper_functions import (get_consumer_ocean_instance,
-                                              get_metadata, get_publisher_account,
-                                              get_publisher_ocean_instance, get_registered_ddo,
-                                              setup_logging)
+from tests.resources.helper_functions import (
+    get_metadata,
+    setup_logging
+)
 
 setup_logging()
 
