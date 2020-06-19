@@ -1,3 +1,5 @@
+import logging
+
 from ocean_lib.models.datatoken import DataToken
 from ocean_lib.web3_internal import ContractBase
 
@@ -16,13 +18,13 @@ class FactoryContract(ContractBase):
                       'account_key': account.key},
         )
         tx_receipt = self.get_tx_receipt(tx_hash)
+        if not tx_receipt:
+            logging.warning(f'Cannot get the transaction receipt for tx {tx_hash}.')
+            return None
+
         logs = getattr(self.events, 'TokenRegistered')().processReceipt(tx_receipt)
-        # event_log = self.get_token_registered_event(
-        #     tx_receipt.blockNumber,
-        #     metadata_url,
-        #     account.address
-        # )
         if not logs:
+            logging.warning(f'No logs where found for tx {tx_hash}.')
             return None
 
         return DataToken(logs[0].args.tokenAddress)
