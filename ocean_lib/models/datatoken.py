@@ -71,9 +71,9 @@ class DataToken(ContractBase):
 
         return tx_id
 
-    def mint(self, to, value, account):
+    def _send_token_tx(self, method, to, value, account):
         tx_hash = self.send_transaction(
-            'mint',
+            method,
             (to,
              value),
             transact={'from': account.address,
@@ -82,16 +82,14 @@ class DataToken(ContractBase):
         )
         return tx_hash
 
+    def mint(self, to, value, account):
+        return self._send_token_tx('mint', to, value, account)
+
+    def approve(self, spender, value, account):
+        return self._send_token_tx('approve', spender, value, account)
+
     def transfer(self, to, value, account):
-        tx_hash = self.send_transaction(
-            'transfer',
-            (to,
-             value),
-            transact={'from': account.address,
-                      'passphrase': account.password,
-                      'account_key': account.key},
-        )
-        return tx_hash
+        return self._send_token_tx('transfer', to, value, account)
 
     def set_minter(self, new_minter, current_minter_account):
         tx_hash = self.send_transaction(

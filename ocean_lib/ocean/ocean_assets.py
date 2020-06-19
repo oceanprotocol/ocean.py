@@ -8,6 +8,7 @@ import os
 
 from deprecated import deprecated
 
+from ocean_lib.assets.asset import Asset
 from ocean_lib.web3_internal import Web3Helper
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_utils.agreements.service_agreement import ServiceAgreement
@@ -15,7 +16,6 @@ from ocean_utils.agreements.service_factory import ServiceDescriptor, ServiceFac
 from ocean_utils.agreements.service_types import ServiceTypes
 from ocean_utils.aquarius.aquarius_provider import AquariusProvider
 from ocean_utils.aquarius.exceptions import AquariusGenericError
-from ocean_utils.ddo.ddo import DDO
 from ocean_utils.ddo.metadata import MetadataMain
 from ocean_utils.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
 from ocean_utils.did import DID
@@ -118,12 +118,12 @@ class OceanAssets(AssetServiceMixin):
             checksum_dict[str(service.index)] = checksum(service.main)
 
         # Create a DDO object
-        ddo = DDO()
+        asset = Asset()
         # Adding proof to the ddo.
-        ddo.add_proof(checksum_dict, publisher_account)
+        asset.add_proof(checksum_dict, publisher_account)
 
         # Generating the did and adding to the ddo.
-        did = ddo.assign_did(DID.did(ddo.proof['checksum']))
+        did = asset.assign_did(DID.did(asset.proof['checksum']))
         logger.debug(f'Generating new did: {did}')
         # Check if it's already registered first!
         if did in self._get_aquarius().list_assets():
@@ -137,25 +137,25 @@ class OceanAssets(AssetServiceMixin):
             md_service.set_service_endpoint(ddo_service_endpoint)
 
         # Populate the ddo services
-        ddo.add_service(md_service)
+        asset.add_service(md_service)
         access_service = stype_to_service.get(ServiceTypes.ASSET_ACCESS, None)
         compute_service = stype_to_service.get(ServiceTypes.CLOUD_COMPUTE, None)
 
         if access_service:
-            ddo.add_service(access_service)
+            asset.add_service(access_service)
         if compute_service:
-            ddo.add_service(compute_service)
+            asset.add_service(compute_service)
 
         publisher_signature = Web3Helper.sign_hash(
-            add_ethereum_prefix_and_hash_msg(ddo.asset_id),
+            add_ethereum_prefix_and_hash_msg(asset.asset_id),
             publisher_account
         )
-        ddo.proof['signatureValue'] = publisher_signature
+        asset.proof['signatureValue'] = publisher_signature
 
         # Add public key and authentication
-        ddo.add_public_key(did, publisher_account.address)
+        asset.add_public_key(did, publisher_account.address)
 
-        ddo.add_authentication(did, PUBLIC_KEY_TYPE_RSA)
+        asset.add_authentication(did, PUBLIC_KEY_TYPE_RSA)
 
         # Setup metadata service
         # First compute files_encrypted
@@ -167,7 +167,7 @@ class OceanAssets(AssetServiceMixin):
         files_encrypted = self._data_provider.encrypt_files_dict(
             metadata_copy['main']['files'],
             encrypt_endpoint,
-            ddo.asset_id,
+            asset.asset_id,
             publisher_account.address,
             publisher_signature
         )
@@ -185,7 +185,7 @@ class OceanAssets(AssetServiceMixin):
             raise AssertionError('Encrypting the files failed.')
 
         logger.debug(
-            f'Generated ddo and services, DID is {ddo.did},'
+            f'Generated asset and services, DID is {asset.did},'
             f' metadata service @{ddo_service_endpoint}.')
         response = None
 
@@ -209,13 +209,12 @@ class OceanAssets(AssetServiceMixin):
             if owner_address:
                 data_token.set_minter(owner_address, publisher_account)
 
-        # Set datatoken address in the ddo
-        # TODO: use proper setter after the ocean-utils lib gets updated
-        ddo._other_values['dataTokenAddress'] = data_token_address
+        # Set datatoken address in the asset
+        asset.data_token_address = data_token_address
 
         try:
             # publish the new ddo in ocean-db/Aquarius
-            response = self._get_aquarius().publish_asset_ddo(ddo)
+            response = self._get_aquarius().publish_asset_ddo(asset)
             logger.info('Asset/ddo published successfully in aquarius.')
         except ValueError as ve:
             raise ValueError(f'Invalid value to publish in the metadata: {str(ve)}')
@@ -223,7 +222,7 @@ class OceanAssets(AssetServiceMixin):
             logger.error(f'Publish asset in aquarius failed: {str(e)}')
         if not response:
             return None
-        return ddo
+        return asset
 
     def retire(self, did):
         """
@@ -233,8 +232,8 @@ class OceanAssets(AssetServiceMixin):
         :return: bool
         """
         try:
-            ddo = self.resolve(did)
-            metadata_service = ddo.get_service(ServiceTypes.METADATA)
+            asset = self.resolve(did)
+            metadata_service = asset.get_service(ServiceTypes.METADATA)
             self._get_aquarius(metadata_service.service_endpoint).retire_asset_ddo(did)
             return True
         except AquariusGenericError as err:
@@ -246,7 +245,7 @@ class OceanAssets(AssetServiceMixin):
         When you pass a did retrieve the ddo associated.
 
         :param did: DID, str
-        :return: DDO instance
+        :return: Asset instance
         """
         return resolve_asset(did, metadata_store_url=self._config.aquarius_url)
 
@@ -264,7 +263,7 @@ class OceanAssets(AssetServiceMixin):
         """
         assert page >= 1, f'Invalid page value {page}. Required page >= 1.'
         logger.info(f'Searching asset containing: {text}')
-        return [DDO(dictionary=ddo_dict) for ddo_dict in
+        return [Asset(dictionary=ddo_dict) for ddo_dict in
                 self._get_aquarius(aquarius_url).text_search(text, sort, offset, page)['results']]
 
     def query(self, query, sort=None, offset=100, page=1, aquarius_url=None):
@@ -282,7 +281,7 @@ class OceanAssets(AssetServiceMixin):
         """
         logger.info(f'Searching asset query: {query}')
         aquarius = self._get_aquarius(aquarius_url)
-        return [DDO(dictionary=ddo_dict) for ddo_dict in
+        return [Asset(dictionary=ddo_dict) for ddo_dict in
                 aquarius.query_search(query, sort, offset, page)['results']]
 
     @deprecated('This function is obsolete, please use Ocean.download()')
@@ -343,8 +342,8 @@ class OceanAssets(AssetServiceMixin):
         :param did: DID, str
         :return: the ethereum address of the owner/publisher of given asset did, hex-str
         """
-        ddo = self.resolve(did)
-        return ddo.publisher
+        asset = self.resolve(did)
+        return asset.publisher
 
     def owner_assets(self, owner_address):
         """
@@ -353,7 +352,7 @@ class OceanAssets(AssetServiceMixin):
         :param owner_address: ethereum address of owner/publisher, hex-str
         :return: list of dids
         """
-        return [ddo.did for ddo in self.query({"query": {"proof.creator": [owner_address]}})]
+        return [asset.did for asset in self.query({"query": {"proof.creator": [owner_address]}})]
 
     # def transfer_ownership(self, did, new_owner_address, account):
     #     """

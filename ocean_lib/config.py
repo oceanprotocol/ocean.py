@@ -159,6 +159,10 @@ class Config(configparser.ConfigParser):
         return self.get('resources', NAME_AQUARIUS_URL)
 
     @property
+    def metadata_store_url(self):
+        return self.get('resources', NAME_AQUARIUS_URL)
+
+    @property
     def parity_url(self):
         """URL of parity client. (e.g.): http://myparity:8545."""
         return self.get(self._section_name, NAME_PARITY_URL)

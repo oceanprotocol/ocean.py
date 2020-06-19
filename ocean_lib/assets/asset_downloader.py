@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 def download_asset_files(
         service_index,
-        ddo,
+        asset,
         consumer_account,
         destination,
         token_address,
@@ -24,7 +24,7 @@ def download_asset_files(
     Download asset data files or result files from a compute job.
 
     :param service_index: identifier of the service inside the asset DDO, str
-    :param ddo: DDO
+    :param asset: Asset instance
     :param consumer_account: Account instance of the consumer
     :param destination: Path, str
     :param token_address: hex str the address of the DataToken smart contract
@@ -33,8 +33,8 @@ def download_asset_files(
     :param index: Index of the document that is going to be downloaded, int
     :return: Asset folder path, str
     """
-    _files = ddo.metadata['main']['files']
-    sa = ServiceAgreement.from_ddo(ServiceTypes.ASSET_ACCESS, ddo)
+    _files = asset.metadata['main']['files']
+    sa = ServiceAgreement.from_ddo(ServiceTypes.ASSET_ACCESS, asset)
     service_endpoint = sa.service_endpoint
     if not service_endpoint:
         logger.error(
@@ -49,7 +49,7 @@ def download_asset_files(
 
     asset_folder = os.path.join(
         destination,
-        f'datafile.{ddo.asset_id}.{service_index}'
+        f'datafile.{asset.asset_id}.{service_index}'
     )
     if not os.path.exists(asset_folder):
         os.mkdir(asset_folder)
@@ -65,7 +65,7 @@ def download_asset_files(
 
     for i in indexes:
         data_provider.download_service(
-            ddo.did,
+            asset.did,
             service_endpoint,
             consumer_account,
             _files,

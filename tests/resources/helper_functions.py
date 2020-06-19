@@ -11,8 +11,8 @@ import logging.config
 import coloredlogs
 import yaml
 
+from ocean_lib.assets.asset import Asset
 from ocean_lib.web3_internal.utils import get_account
-from ocean_utils.ddo.ddo import DDO
 
 from ocean_lib.ocean.ocean import Ocean
 from tests.resources.mocks.data_provider_mock import DataProviderMock
@@ -56,7 +56,7 @@ def get_consumer_ocean_instance(use_provider_mock=False):
 
 
 def get_ddo_sample():
-    return DDO(json_filename=get_resource_path('ddo', 'ddo_sa_sample.json'))
+    return Asset(json_filename=get_resource_path('ddo', 'ddo_sa_sample.json'))
 
 
 def get_sample_ddo_with_compute_service():
@@ -86,8 +86,8 @@ def get_computing_metadata():
 def get_registered_ddo(ocean_instance, account):
     metadata = get_metadata()
     metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
-    ddo = ocean_instance.assets.create(metadata, account)
-    return ddo
+    asset = ocean_instance.assets.create(metadata, account)
+    return asset
 
 
 def log_event(event_name):

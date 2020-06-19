@@ -41,19 +41,10 @@ class Ocean:
             * The DID is registered on-chain with a URL of the metadata store
               to retrieve the DDO from
 
-            >> ddo = ocean.assets.create(metadata, publisher_account)
+            >> asset = ocean.assets.create(metadata, publisher_account)
 
          * Discover/Search assets via the current configured metadata store (Aquarius)
             >> assets_list = ocean.assets.search('search text')
-
-         * Purchase asset services by choosing a service agreement from the
-           asset's DDO. Purchase goes through the service agreements interface
-           and starts by signing a service agreement then sending the signature
-           to the publisher's Brizo server via the `purchaseEndpoint` in the service
-           definition:
-
-           >> service_def_id = ddo.get_service(ServiceTypes.ASSET_ACCESS).service_definition_id
-           >> service_agreement_id = ocean.assets.order(did, service_def_id, consumer_account)
 
         An instance of Ocean is parameterized by a `Config` instance.
 
@@ -72,13 +63,15 @@ class Ocean:
                 os.environ['PARITY_KEY'] = private_key
                 os.environ['PARITY_ADDRESS'] = account.address
 
+            aqua_url = config.get('metadataStoreUri', config.get('aquarius.url', 'http://localhost:5000'))
             config_dict = {
                 'eth-network': {
                     'network': config['network'],
                     'factory.address': config.get('factory.address')
                 },
                 'resources': {
-                    'aquarius.url': config.get('aquarius.url', 'http://localhost:5000')
+                    'aquarius.url': aqua_url,
+                    'provider.url': config.get('providerUri', 'http://localhost:8030')
                 }
             }
             config = Config(options_dict=config_dict)
