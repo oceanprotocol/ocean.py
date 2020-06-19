@@ -72,24 +72,13 @@ class Ocean:
                 os.environ['PARITY_KEY'] = private_key
                 os.environ['PARITY_ADDRESS'] = account.address
 
-            network = config['network']
-            if network == 'ganache':
-                network_url = GANACHE_URL
-            elif not network.startswith('http'):
-                network_url = get_infura_url(WEB3_INFURA_PROJECT_ID, network)
-            else:
-                network_url = network
-
-            rinkeby_url = get_infura_url(WEB3_INFURA_PROJECT_ID, 'rinkeby')
-            print(f'rinkeby url: {rinkeby_url}')
-
             config_dict = {
                 'eth-network': {
-                    'network': network_url,
+                    'network': config['network'],
                     'factory.address': config.get('factory.address')
                 },
                 'resources': {
-                    'aquarius.url': config.get('aquarius.url')
+                    'aquarius.url': config.get('aquarius.url', 'http://localhost:5000')
                 }
             }
             config = Config(options_dict=config_dict)

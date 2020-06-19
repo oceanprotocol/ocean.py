@@ -6,6 +6,9 @@ WEB3_INFURA_PROJECT_ID = '357f2fe737db4304bd2f7285c5602d0d'
 GANACHE_URL = 'http://127.0.0.1:8545'
 
 
+SUPPORTED_NETWORK_NAMES = {'rinkeby', 'kovan', 'ganache', 'mainnet', 'robsten'}
+
+
 def get_infura_url(infura_id, network):
     return f"wss://{network}.infura.io/ws/v3/{infura_id}"
 
@@ -32,11 +35,17 @@ def get_web3_provider(network_url):
     :param network_url:
     :return:
     """
+    if network_url == 'ganache':
+        network_url = GANACHE_URL
+
     if network_url.startswith('http'):
         provider = CustomHTTPProvider(network_url)
-    elif network_url.startswith('ws'):
-        provider = WebsocketProvider(network_url, {'subprotocols': ['ISYSUB']})
     else:
-        raise AssertionError(f'Unsupported network url {network_url}. Must start with http or wss.')
+        if not network_url.startswith('ws'):
+            assert network_url in SUPPORTED_NETWORK_NAMES
+
+            network_url = get_infura_url(WEB3_INFURA_PROJECT_ID, network_url)
+
+        provider = WebsocketProvider(network_url)
 
     return provider

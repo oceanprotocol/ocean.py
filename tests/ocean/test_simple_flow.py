@@ -11,17 +11,15 @@ def test_simple_flow():
 
     alice_account = get_account(0)
     bob_account = get_account(1)
+    dataset_download_endpoint = 'http://localhost:8030/api/v1/services'
 
     # 1. Alice publishes a dataset (= publishes a datatoken)
     config = {
         'network': 'rinkeby',  # https://rinkeby.infura.io/v3/357f2fe737db4304bd2f7285c5602d0d
-        # 'network': 'http://nile.dev-ocean.com',
-        'aquarius.url': 'https://aquarius.marketplace.dev-ocean.com',
-        # 'factory.address': '0x68F6826989619f60F748367240f815288b36D213',  # nile
         'factory.address': '0xB9d406D24B310A7D821D0b782a36909e8c925471',  # rinkeby
     }
     ocean = Ocean(config)
-    token = ocean.create_data_token('http://localhost:8030/api/v1/services', alice_account)
+    token = ocean.create_data_token(dataset_download_endpoint, alice_account)
     dt_address = token.address
 
     # 3. Alice mints 100 tokens
