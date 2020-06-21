@@ -6,6 +6,8 @@ import logging
 import os
 
 import eth_account
+
+from ocean_lib.ocean.ocean_market import OceanMarket
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib import Config
@@ -18,7 +20,7 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_auth import OceanAuth
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.ocean_services import OceanServices
-from ocean_lib.ocean.util import GANACHE_URL, get_infura_url, WEB3_INFURA_PROJECT_ID, get_web3_provider
+from ocean_lib.ocean.util import get_web3_provider
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 
@@ -83,6 +85,7 @@ class Ocean:
 
         if not data_provider:
             data_provider = DataServiceProvider
+
         self.assets = OceanAssets(
             self._config,
             data_provider
@@ -94,6 +97,7 @@ class Ocean:
             self._config,
             data_provider
         )
+        self.ocean_market = OceanMarket(self._config, data_provider)
 
         logger.debug('Squid Ocean instance initialized: ')
 

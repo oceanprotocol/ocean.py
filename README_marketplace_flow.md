@@ -95,7 +95,7 @@ service = asset.get_service('access')
 num_dt_needed = service.get_price()
 
 (price, currency) = ocean.marketplace.get_data_token_price(num_dt_needed, asset.data_token_address)
-ocean.marketplace.buy(num_dt_needed, asset.data_token_address, price, currency)
+ocean.marketplace.buy_data_tokens(num_dt_needed, asset.data_token_address, price, currency)
 ```
 
 ## 5. Bob uses a service he just purchased (download)
