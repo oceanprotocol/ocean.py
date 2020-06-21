@@ -1,4 +1,4 @@
-# Quickstart: Simple Flow 
+from ocean_lib.models.factory import FactoryContractfrom ocean_lib.models.factory import FactoryContractfrom ocean_lib.web3_internal.utils import get_account# Quickstart: Simple Flow 
 
 This stripped-down flow shows the essence of Ocean. Just downloading, no metadata.
 
@@ -20,16 +20,19 @@ pip install ocean-lib
 
 ## 1. Alice publishes a dataset (= publishes a datatoken contract)
 
-For now, you're Alice:) Let's proceed.
-
 ```python
 from ocean_lib import Ocean
+from ocean_lib.web3_internal.utils import get_account
+
 config = {
    'network' : 'rinkeby',
    'privateKey' : '8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f',
 }
-ocean = Ocean.Ocean(config)
-token = ocean.createToken('localhost:8030',account)
+ocean = Ocean(config)
+alice_account = get_account(0)
+assert alice_account.key == config['privateKey']
+
+token = ocean.create_data_token('http://localhost:8030/api/v1/services', alice_account)
 dt_address = token.getAddress()
 ```
 
@@ -39,14 +42,14 @@ A local providerService is required, which will serve just one file for this dem
 Let's create the file to be shared:
 ```
 touch /var/mydata/myFolder1/file
-````
+```
 
 Run the providerService:
 (given that ERC20 contract address from the above is 0x1234)
 
 ```
-ENV DT="{'0x1234':'/var/mydata/myFolder1'}"
-docker run @oceanprotocol/provider-py -e CONFIG=DT
+export CONFIG='{"0x1234":"/var/mydata/myFolder1"}'
+docker run @oceanprotocol/provider-py
 ```
 
 ## 3. Alice mints 100 tokens
@@ -67,11 +70,21 @@ token.transfer(bob_address, 1)
 Now, you're Bob:)
 
 ```python
-const bob_config={
-   network: 'rinkeby',
-   privateKey:'1234ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f' #corresponds to bob_address 
+from ocean_lib import Ocean
+from ocean_lib.web3_internal.utils import get_account
+from ocean_lib.models.factory import FactoryContract
+
+dt_address = ''  # From first step
+bob_config = {
+   'network': 'rinkeby',
+   'privateKey':'1234ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f' #corresponds to bob_address 
 }
-bob_ocean = Ocean(bob_config)
-token = bob_ocean.getToken(dt_address)
-_file = token.download(account)
+ocean = Ocean(bob_config)
+bob_account = get_account(0)
+
+token = ocean.get_data_token(dt_address)
+alice_address = FactoryContract().get_token_minter(dt_address)
+
+tx_id = token.transfer(alice_address, 1, bob_account)
+_file_path = token.download(bob_account, tx_id, '~/my-dataset-downloads')
 ```

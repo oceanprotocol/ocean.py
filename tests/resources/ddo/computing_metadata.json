@@ -1,0 +1,21 @@
+{
+  "main": {
+    "name": "10 Monkey Species Small",
+    "dateCreated": "2012-02-01T10:55:11Z",
+    "author": "Mario",
+    "license": "CC0: Public Domain",
+    "price": "10",
+    "files": [
+      {
+        "index": 0,
+        "checksum": "efb2c764274b745f5fc37f97c6b0e761",
+        "contentLength": "4535431",
+        "contentType": "text/csv",
+        "encoding": "UTF-8",
+        "compression": "zip",
+        "url": "file/url"
+      }
+    ],
+    "type": "dataset"
+  }
+}

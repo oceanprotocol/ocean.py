@@ -1,0 +1,251 @@
+{
+  "@context": "https://w3id.org/future-method/v1",
+  "authentication": [],
+  "created": "2019-04-09T19:02:11Z",
+  "id": "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019755e444090fd392c8ec9c3f4",
+  "proof": {
+    "created": "2019-04-09T19:02:11Z",
+    "creator": "0x00Bd138aBD70e2F00903268F3Db08f2D25677C9e",
+    "signatureValue": "1cd57300733bcbcda0beb59b3e076de6419c0d7674e7befb77820b53c79e3aa8f1776effc64cf088bad8cb694cc4d71ebd74a13b2f75893df5a53f3f318f6cf828",
+    "type": "DDOIntegritySignature"
+  },
+  "publicKey": [
+    {
+      "id": "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019755e444090fd392c8ec9c3f4",
+      "owner": "0x00Bd138aBD70e2F00903268F3Db08f2D25677C9e",
+      "type": "EthereumECDSAKey"
+    }
+  ],
+  "service": [
+    {
+      "type": "metadata",
+      "index": 0,
+      "serviceEndpoint": "http://myaquarius.org/api/v1/provider/assets/metadata/{did}",
+      "attributes": {
+        "main": {
+          "author": "Met Office",
+          "dateCreated": "2019-02-08T08:13:49Z",
+          "files": [
+            {
+              "url": "https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt",
+              "index": 0,
+              "checksum": "efb2c764274b745f5fc37f97c6b0e764",
+              "contentLength": "4535431",
+              "contentType": "text/csv",
+              "encoding": "UTF-8",
+              "compression": "zip"
+            }
+          ],
+          "license": "CC-BY",
+          "name": "UK Weather information 2011",
+          "price": "1",
+          "type": "dataset"
+        },
+        "additionalInformation": {}
+      }
+    },
+    {
+      "type": "compute",
+      "index": 2,
+      "serviceEndpoint": "http://mybrizo.org/api/v1/brizo/services/compute",
+      "templateId": "",
+      "attributes": {
+        "main": {
+          "name": "dataAssetComputingServiceAgreement",
+          "creator": "0x00Bd138aBD70e2F00903268F3Db08f2D25677C9e",
+          "datePublished": "2019-04-09T19:02:11Z",
+          "price": "10",
+          "timeout": 86400,
+          "provider": {
+            "type": "Azure",
+            "description": "",
+            "environment": {
+              "cluster": {
+                "type": "Kubernetes",
+                "url": "http://10.0.0.17/xxx"
+              },
+              "supportedContainers": [
+                {
+                  "image": "tensorflow/tensorflow",
+                  "tag": "latest",
+                  "checksum": "sha256:cb57ecfa6ebbefd8ffc7f75c0f00e57a7fa739578a429b6f72a0df19315deadc"
+                },
+                {
+                  "image": "tensorflow/tensorflow",
+                  "tag": "latest",
+                  "checksum": "sha256:cb57ecfa6ebbefd8ffc7f75c0f00e57a7fa739578a429b6f72a0df19315deadc"
+                }
+              ],
+              "supportedServers": [
+                {
+                  "serverId": "1",
+                  "serverType": "xlsize",
+                  "price": "50",
+                  "cpu": "16",
+                  "gpu": "0",
+                  "memory": "128gb",
+                  "disk": "160gb",
+                  "maxExecutionTime": 86400
+                },
+                {
+                  "serverId": "2",
+                  "serverType": "medium",
+                  "price": "10",
+                  "cpu": "2",
+                  "gpu": "0",
+                  "memory": "8gb",
+                  "disk": "80gb",
+                  "maxExecutionTime": 86400
+                }
+              ]
+            }
+          }
+        },
+        "additionalInformation": {},
+        "serviceAgreementTemplate": {
+          "contractName": "EscrowComputeExecutionTemplate",
+          "events": [
+            {
+              "name": "AgreementActorAdded",
+              "actorType": "provider",
+              "handler": {
+                "moduleName": "",
+                "functionName": "fulfillLockRewardCondition",
+                "version": "0.1"
+              }
+            }
+          ],
+          "fulfillmentOrder": [
+            "lockReward.fulfill",
+            "computeExecution.fulfill",
+            "escrowReward.fulfill"
+          ],
+          "conditionDependency": {
+            "lockReward": [],
+            "computeExecution": [],
+            "releaseReward": [
+              "lockReward",
+              "computeExecution"
+            ]
+          },
+          "conditions": [
+            {
+              "name": "lockReward",
+              "timelock": 0,
+              "timeout": 0,
+              "contractName": "LockRewardCondition",
+              "functionName": "fulfill",
+              "parameters": [
+                {
+                  "name": "_rewardAddress",
+                  "type": "address",
+                  "value": ""
+                },
+                {
+                  "name": "_amount",
+                  "type": "uint256",
+                  "value": ""
+                }
+              ],
+              "events": [
+                {
+                  "name": "Fulfilled",
+                  "actorType": "publisher",
+                  "handler": {
+                    "moduleName": "lockRewardExecutionCondition",
+                    "functionName": "fulfillComputeExecutionCondition",
+                    "version": "0.1"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "computeExecution",
+              "timelock": 0,
+              "timeout": 0,
+              "contractName": "ComputeExecutionCondition",
+              "functionName": "fulfill",
+              "parameters": [
+                {
+                  "name": "_documentId",
+                  "type": "bytes32",
+                  "value": ""
+                },
+                {
+                  "name": "_grantee",
+                  "type": "address",
+                  "value": ""
+                }
+              ],
+              "events": [
+                {
+                  "name": "Fulfilled",
+                  "actorType": "publisher",
+                  "handler": {
+                    "moduleName": "accessSecretStore",
+                    "functionName": "fulfillEscrowRewardCondition",
+                    "version": "0.1"
+                  }
+                },
+                {
+                  "name": "TimedOut",
+                  "actorType": "consumer",
+                  "handler": {
+                    "moduleName": "accessSecretStore",
+                    "functionName": "refundReward",
+                    "version": "0.1"
+                  }
+                }
+              ]
+            },
+            {
+              "name": "escrowReward",
+              "timelock": 0,
+              "timeout": 0,
+              "contractName": "EscrowReward",
+              "functionName": "fulfill",
+              "parameters": [
+                {
+                  "name": "_amount",
+                  "type": "uint256",
+                  "value": ""
+                },
+                {
+                  "name": "_receiver",
+                  "type": "address",
+                  "value": ""
+                },
+                {
+                  "name": "_sender",
+                  "type": "address",
+                  "value": ""
+                },
+                {
+                  "name": "_lockCondition",
+                  "type": "bytes32",
+                  "value": ""
+                },
+                {
+                  "name": "_releaseCondition",
+                  "type": "bytes32",
+                  "value": ""
+                }
+              ],
+              "events": [
+                {
+                  "name": "Fulfilled",
+                  "actorType": "publisher",
+                  "handler": {
+                    "moduleName": "escrowRewardCondition",
+                    "functionName": "verifyRewardTokens",
+                    "version": "0.1"
+                  }
+                }
+              ]
+            }
+          ]
+        }
+      }
+    }
+  ]
+}
