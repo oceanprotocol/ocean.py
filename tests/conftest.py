@@ -13,18 +13,28 @@ from examples import ExampleConfig
 from ocean_lib.ocean.util import get_web3_provider
 from tests.resources.helper_functions import (
     get_metadata,
-    setup_logging
-)
+    setup_logging,
+    get_publisher_ocean_instance, get_consumer_ocean_instance)
 
 setup_logging()
 
 
-@pytest.fixture
+@pytest.fixture(autouse=True)
 def setup_all():
     config = ExampleConfig.get_config()
     ConfigProvider.set_config(config)
     Web3Provider.init_web3(provider=get_web3_provider(config.network_url))
     ContractHandler.set_artifacts_path(config.artifacts_path)
+
+
+@pytest.fixture
+def publisher_ocean_instance():
+    return get_publisher_ocean_instance()
+
+
+@pytest.fixture
+def consumer_ocean_instance():
+    return get_consumer_ocean_instance()
 
 
 @pytest.fixture
