@@ -94,8 +94,9 @@ asset = ocean.assets.resolve(did)
 service = asset.get_service('access')
 num_dt_needed = service.get_price()
 
-(price, currency) = ocean.marketplace.get_data_token_price(num_dt_needed, asset.data_token_address)
-ocean.marketplace.buy_data_tokens(num_dt_needed, asset.data_token_address, price, currency)
+//<inside marketplace's own code, Bob sends the marketplace USD or DAI or OCEAN or other>, to pay
+marketplace_data_token = marketplace_ocean.getDataToken(datatoken_address)
+marketplace_data_token.transfer(dst_address=bob_address, 1.0)
 ```
 
 ## 5. Bob uses a service he just purchased (download)
