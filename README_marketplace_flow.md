@@ -1,4 +1,4 @@
-from ocean_lib.web3_internal.utils import get_account# Quickstart: Marketplace Flow
+# Quickstart: Marketplace Flow
 
 This batteries-included flow includes metadata, multiple services for one datatoken, and compute-to-data.
 
