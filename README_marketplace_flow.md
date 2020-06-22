@@ -96,7 +96,7 @@ price = 10.0 #marketplace-set price of 10 USD / datatoken
 
 #Display key asset information, such as the cost of each service
 print(f"Service 1 costs {service1.get_num_dt_needed() * price} USD") # 1.5 * 10 = 15
-print(f"Service 2 costs {service1.get_num_dt_needed() * price} USD") # 2.5 * 10 = 25
+print(f"Service 2 costs {service2.get_num_dt_needed() * price} USD") # 2.5 * 10 = 25
 ```
 
 ## 6. Value swap: Bob buys datatokens from marketplace
