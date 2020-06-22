@@ -78,7 +78,7 @@ data_token.approve(marketplace_address, 20)
 
 ## 4. Bob buys datatokens from marketplace, marketplace sends datatokens
 
-//<inside marketplace's own code, Bob sends the marketplace USD or DAI or OCEAN or other>, to pay
+<inside marketplace's own code, Bob sends the marketplace USD or DAI or OCEAN or other>, to pay
 
 ```python
 from ocean_lib import Ocean
@@ -88,10 +88,10 @@ config = {
    'privateKey':'1234ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f',
    'providerUri': 'localhost:8030'
 }
-ocean = Ocean(config)
+market_ocean = Ocean(config)
 
-token = ocean.get_data_token(dt_address)
-token.transfer(dst_address=bob_address, 1.0)
+market_token = market_ocean.get_data_token(dt_address)
+market_ token.transfer(dst_address=bob_address, 1.0)
 ```
 
 ## 5. Bob uses a service he just purchased (download)
