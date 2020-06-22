@@ -82,10 +82,10 @@ Now, you're the marketplace:)
 ```python
 from ocean_lib import Ocean
 
+#Market's config
 config = {
    'network': 'rinkeby',
    'privateKey':'1234ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f',
-   'providerUri': 'localhost:8030'
 }
 market_ocean = Ocean(config)
 
@@ -112,6 +112,14 @@ market_token.transfer(dst_address=bob_address, 1.0)
 Now, you're Bob:)
 
 ```python
+
+#Bob's config
+config = {
+   'network': 'rinkeby',
+   'privateKey':'1234ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8o',
+}
+market_ocean = Ocean(config)
+
 service = asset.get_service('access')
-file_path = ocean.assets.download(asset.did, service.index, bob_account, '~/my-datasets')
+file_path = bob_ocean.assets.download(asset.did, service.index, bob_account, '~/my-datasets')
 ```
