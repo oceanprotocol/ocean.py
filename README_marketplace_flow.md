@@ -92,11 +92,11 @@ market_ocean = Ocean(config)
 asset = ocean.assets.resolve(did)
 service1 = asset.get_service('download')
 service2 = asset.get_service('access')
-price = 10.0 //marketplace-set price of $10 / datatoken
+price = 10.0 //marketplace-set price of 10 USD / datatoken
 
 //Display key asset information, such as the cost of each service
-print(f"Service 1 costs {service1.get_num_dt_needed() * price}")
-print(f"Service 2 costs {service1.get_num_dt_needed() * price}")
+print(f"Service 1 costs {service1.get_num_dt_needed() * price}") // 1.5 * 10 = 15
+print(f"Service 2 costs {service1.get_num_dt_needed() * price}") // 2.5 * 10 = 25
 ```
 
 ## 6. Value swap: Bob buys datatokens from marketplace
