@@ -69,16 +69,15 @@ did = asset.did
 data_token.mint(account.address, 100, account)
 ```
 
-## 3. Alice allows marketplace to sell her datatokens
+## 4. Alice allows marketplace to sell her datatokens
 
 ```python
 marketplace_address = '0x068ed00cf0441e4829d9784fcbe7b9e26d4bd8d0'
 data_token.approve(marketplace_address, 20)
 ```
 
-## 4. Bob buys datatokens from marketplace, marketplace sends datatokens
-
-<inside marketplace's own code, Bob sends the marketplace USD or DAI or OCEAN or other>, to pay
+## 5. Marketplace posts asset for sale
+Now, you're the marketplace:)
 
 ```python
 from ocean_lib import Ocean
@@ -90,14 +89,29 @@ config = {
 }
 market_ocean = Ocean(config)
 
-market_token = market_ocean.get_data_token(dt_address)
-market_ token.transfer(dst_address=bob_address, 1.0)
+asset = ocean.assets.resolve(did)
+service1 = asset.get_service('download')
+service2 = asset.get_service('access')
+price = 10.0 //marketplace-set price of $10 / datatoken
+
+//Display key asset information, such as the cost of each service
+print(f"Service 1 costs {service1.get_num_dt_needed() * price}")
+print(f"Service 2 costs {service1.get_num_dt_needed() * price}")
 ```
 
-## 5. Bob uses a service he just purchased (download)
+## 6. Value swap: Bob buys datatokens from marketplace
 
 ```python
+//Not shown: in marketplace GUI, Bob uses Stripe to send USD to marketplace (or other methods / currencies).
 
+market_token = market_ocean.get_data_token(token_address)
+market_token.transfer(dst_address=bob_address, 1.0)
+```
+   
+## 7. Bob uses a service he just purchased (download)
+Now, you're Bob:)
+
+```python
 service = asset.get_service('access')
 file_path = ocean.assets.download(asset.did, service.index, bob_account, '~/my-datasets')
 ```
