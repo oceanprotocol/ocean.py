@@ -82,7 +82,6 @@ data_token.approve(marketplace_address, 20)
 
 ```python
 from ocean_lib import Ocean
-from ocean_lib.web3_internal.utils import get_account
 
 config = {
    'network': 'rinkeby',
@@ -90,10 +89,6 @@ config = {
    'providerUri': 'localhost:8030'
 }
 ocean = Ocean(config)
-market_account = get_account(0)
-
-asset = ocean.assets.resolve(did)
-service = asset.get_service('access')
 
 token = ocean.get_data_token(dt_address)
 token.transfer(dst_address=bob_address, 1.0)
