@@ -52,23 +52,14 @@ account = get_account(0)
 data_token = ocean.create_data_token(ocean.config.metadata_store_url, account)
 token_address = data_token.address
 
-# `ocean.assets.create` will encrypt the URLs using the provider's encrypt service endpoint and update 
-# the asset before pushing to metadata store
 # `ocean.assets.create` will require that token_address is a valid DataToken contract address, unless token_address
-# is not provided then the `create` method will first create a new data token and use it in the new
-# asset.
-metadata =  {"main":
-  "main": {
-    "name": "10 Monkey Species Small", "author": "Mario", "dateCreated": "2012-02-01T10:55:11Z", 
-    "license": "CC0: Public Domain",
-    "files": [
-      { "index": 0, "contentType": "application/zip",
-        "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/training.zip"},
-      { "index": 1, "contentType": "text/text",
-        "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/monkey_labels.txt"},
-      { "index": 2, "contentType": "application/zip",
-        "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/validation.zip"}],
-    "type": "dataset"}}
+# is not provided then the `create` method will first create a new data token and use it in the new asset.
+metadata =  {"main": {
+    "type": "dataset", "name": "10 Monkey Species Small", "author": "Mario", 
+    "license": "CC0: Public Domain", "dateCreated": "2012-02-01T10:55:11Z", 
+    "files": [{ "index": 0, "contentType": "application/zip", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/training.zip"},
+              { "index": 1, "contentType": "text/text", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/monkey_labels.txt"},
+              { "index": 2, "contentType": "application/zip", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/validation.zip"}]}}
 asset = ocean.assets.create(metadata, account, data_token_address=token_address)
 assert token_address == asset._other_values['dataTokenAddress']
 
