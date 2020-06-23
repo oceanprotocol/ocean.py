@@ -52,8 +52,6 @@ account = get_account(0)
 data_token = ocean.create_data_token(ocean.config.metadata_store_url, account)
 token_address = data_token.address
 
-# `ocean.assets.create` will require that token_address is a valid DataToken contract address, unless token_address
-# is not provided then the `create` method will first create a new data token and use it in the new asset.
 metadata =  {"main": {
     "type": "dataset", "name": "10 Monkey Species Small", "author": "Mario", 
     "license": "CC0: Public Domain", "dateCreated": "2012-02-01T10:55:11Z", 
