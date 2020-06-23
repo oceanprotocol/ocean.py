@@ -37,7 +37,7 @@ docker run @oceanprotocol/marketplace:latest
 
 ```python
 from ocean_lib import Ocean
-from ocean_lib.web3_internal.utils import get_account\
+from ocean_lib.web3_internal.utils import get_account
 
 #Alice's config
 config = {
