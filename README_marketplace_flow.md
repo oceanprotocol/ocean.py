@@ -37,8 +37,7 @@ docker run @oceanprotocol/marketplace:latest
 
 ```python
 from ocean_lib import Ocean
-from ocean_lib.web3_internal.utils import get_account
-from ocean_lib.models.metadata_example import METADATA_EXAMPLE
+from ocean_lib.web3_internal.utils import get_account\
 
 #Alice's config
 config = {
@@ -58,7 +57,19 @@ token_address = data_token.address
 # `ocean.assets.create` will require that token_address is a valid DataToken contract address, unless token_address
 # is not provided then the `create` method will first create a new data token and use it in the new
 # asset.
-asset = ocean.assets.create(METADATA_EXAMPLE, account, data_token_address=token_address)
+metadata =  {"main":
+  "main": {
+    "name": "10 Monkey Species Small", "author": "Mario", "dateCreated": "2012-02-01T10:55:11Z", 
+    "license": "CC0: Public Domain",
+    "files": [
+      { "index": 0, "contentType": "application/zip",
+        "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/training.zip"},
+      { "index": 1, "contentType": "text/text",
+        "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/monkey_labels.txt"},
+      { "index": 2, "contentType": "application/zip",
+        "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/validation.zip"}],
+    "type": "dataset"}}
+asset = ocean.assets.create(metadata, account, data_token_address=token_address)
 assert token_address == asset._other_values['dataTokenAddress']
 
 did = asset.did
