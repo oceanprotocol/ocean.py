@@ -9,7 +9,8 @@ Here's the steps.
 1. Alice publishes assets for data services (= publishes a datatoken contract and metadata)
 1. Alice mints 100 tokens
 1. Alice allows marketplace to sell her datatokens
-1. Bob buys datatokens from marketplace
+1. Marketplace posts asset for sale
+1. Value swap: Bob buys datatokens from marketplace
 1. Bob uses a service he just purchased (download)
 
 Let's go through each step.
