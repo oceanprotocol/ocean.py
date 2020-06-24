@@ -97,10 +97,10 @@ class OceanCompute(AssetServiceMixin):
 
     @staticmethod
     def create_compute_service_attributes(
-            price, timeout, creator, date_published, provider_attributes):
+            dtCost, timeout, creator, date_published, provider_attributes):
         """
 
-        :param price:
+        :param dtCost:
         :param timeout:
         :param creator:
         :param date_published:
@@ -112,7 +112,7 @@ class OceanCompute(AssetServiceMixin):
                 "name": "dataAssetComputingServiceAgreement",
                 "creator": creator,
                 "datePublished": date_published,
-                "price": str(price),
+                "dtCost": str(dtCost),
                 "timeout": timeout,
                 "provider": provider_attributes
             }
@@ -192,7 +192,7 @@ class OceanCompute(AssetServiceMixin):
             consumer_account.address,
             self._auth.get(consumer_account),
             sa.index,
-            asset.as_dictionary()['dataTokenAddress'],
+            asset.as_dictionary()['dtAddress'],
             tx_id,
             algorithm_did,
             algorithm_meta,

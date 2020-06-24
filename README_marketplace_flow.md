@@ -59,7 +59,7 @@ metadata =  {"main": {
               { "index": 1, "contentType": "text/text", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/monkey_labels.txt"},
               { "index": 2, "contentType": "application/zip", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/validation.zip"}]}}
 asset = ocean.assets.create(metadata, account, data_token_address=token_address)
-assert token_address == asset._other_values['dataTokenAddress']
+assert token_address == asset._other_values['dtAddress']
 
 did = asset.did
 ```

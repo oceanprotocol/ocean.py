@@ -3,4 +3,4 @@ from ocean_utils.agreements.service_agreement import ServiceAgreement as BaseSer
 
 class ServiceAgreement(BaseServiceAgreement):
     def get_price(self):
-        return self.main.get('price', self.attributes.get('price', 0))
+        return self.main.get('dtCost', self.attributes.get('dtCost', 0))

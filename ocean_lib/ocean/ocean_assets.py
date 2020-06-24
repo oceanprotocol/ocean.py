@@ -320,7 +320,7 @@ class OceanAssets(AssetServiceMixin):
             asset,
             consumer_account,
             destination,
-            asset.as_dictionary()['dataTokenAddress'],
+            asset.as_dictionary()['dtAddress'],
             tx_id,
             self._data_provider,
             index
@@ -371,9 +371,9 @@ class OceanAssets(AssetServiceMixin):
     def _build_access_service(metadata, publisher_account):
         return {
             "main": {
-                "name": "dataAssetAccessServiceAgreement",
+                "name": "dataAssetAccessService",
                 "creator": publisher_account.address,
-                "price": metadata[MetadataMain.KEY]['price'],
+                "dtCost": metadata[MetadataMain.KEY]['dtCost'],
                 "timeout": 3600,
                 "datePublished": metadata[MetadataMain.KEY]['dateCreated']
             }
@@ -382,10 +382,10 @@ class OceanAssets(AssetServiceMixin):
     def _build_compute_service(self, metadata, publisher_account):
         return {
             "main": {
-                "name": "dataAssetComputeServiceAgreement",
+                "name": "dataAssetComputeService",
                 "creator": publisher_account.address,
                 "datePublished": metadata[MetadataMain.KEY]['dateCreated'],
-                "price": metadata[MetadataMain.KEY]['price'],
+                "dtCost": metadata[MetadataMain.KEY]['dtCost'],
                 "timeout": 86400,
                 "provider": self._build_provider_config()
             }
@@ -420,7 +420,6 @@ class OceanAssets(AssetServiceMixin):
                     {
                         "serverId": "1",
                         "serverType": "xlsize",
-                        "price": "50",
                         "cpu": "16",
                         "gpu": "0",
                         "memory": "128gb",
@@ -430,7 +429,6 @@ class OceanAssets(AssetServiceMixin):
                     {
                         "serverId": "2",
                         "serverType": "medium",
-                        "price": "10",
                         "cpu": "2",
                         "gpu": "0",
                         "memory": "8gb",
