@@ -21,17 +21,17 @@ using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-wi
 
 This stripped-down flow shows the essence of Ocean. Just downloading, no metadata.
 
-[Go to simple flow](README_simple_flow.md)
+[Go to simple flow](READMEs/simple_flow.md)
 
 ## Quickstart: Marketplace Flow
 
 This batteries-included flow includes metadata, multiple services for one datatoken, and compute-to-data.
 
-[Go to marketplace flow](README_marketplace_flow.md)
+[Go to marketplace flow](READMEs/marketplace_flow.md)
 
 ## For ocean-lib Developers
 
-[Go to ocean-lib-developers flow](README_ocean-lib-developers.md)
+[Go to developers flow](READMEs/developers.md)
 
 ## License
 
