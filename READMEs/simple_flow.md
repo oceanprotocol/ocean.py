@@ -1,4 +1,4 @@
-from ocean_lib.models.factory import FactoryContractfrom ocean_lib.models.factory import FactoryContractfrom ocean_lib.web3_internal.utils import get_account# Quickstart: Simple Flow 
+# Quickstart: Simple Flow 
 
 This stripped-down flow shows the essence of Ocean. Just downloading, no metadata.
 
