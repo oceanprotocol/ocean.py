@@ -1,13 +1,13 @@
-# Developing lib-py
+# Developing ocean-lib-py
 
-This README is how to further *develop* lib-py. (Compare to the quickstarts which show how to *use* it.)
+This README is how to further *develop* ocean-lib-py. (Compare to the quickstarts which show how to *use* it.)
 
 Steps:
 1. **Install dependencies**
 1. **Start blockchain service** (only needed for ganache)
 1. **Copy & compile contracts**: copy .sol from other repos, tweak imports, compile into ABIs etc
 1. **Deploy** the contracts to {local, rinkeby, mainnet}
-1. **Test** lib-py
+1. **Test** 
 1. (Along the way) **Debug** at the contract or py level.
 
 These steps are detailed below. But first, installation. 
@@ -16,8 +16,8 @@ These steps are detailed below. But first, installation.
 
 Clone this repo, and `cd` into it.
 ```console
-git clone https://github.com/oceanprotocol/lib-py
-cd lib-py
+git clone https://github.com/oceanprotocol/ocean-lib-py
+cd ocean-lib-py
 ```
 
 Initalize virtual env't. Activate env't.(BTW use `deactivate` to, well, deactivate.)
@@ -26,14 +26,14 @@ python -m venv myenv
 source myenv/bin/activate 
 ```
 
-Install modules in the env't. Notably, it installs [Brownie](https://eth-brownie.readthedocs.io). Brownie helps in compiling, deploying, testing, and debugging. Brownie is not needed for *using* lib-py.
+Install modules in the env't. Notably, it installs [Brownie](https://eth-brownie.readthedocs.io). Brownie helps in compiling, deploying, testing, and debugging. Brownie is not needed for *using* ocean-lib-py.
 ```
 pip install -r requirements.txt 
 ```
 
 If you don't have an Infura account and you aim to deploy to `rinkeby` or `mainnet`, go to www.infura.io and sign up.
 
-Private keys etc can't live on GitHub. To handle this, lib-py tools read ~/ocean.conf. (It does *not* use environmental variables.) Start with the pre-set template:
+Private keys etc can't live on GitHub. To handle this, ocean-lib-py tools read ~/ocean.conf. (It does *not* use environmental variables.) Start with the pre-set template:
 ```console
 cp sample_ocean.conf ~/ocean.conf
 ```
@@ -91,7 +91,7 @@ Call the deploy script with NETWORK = `ganache`, `rinkeby`, or `mainnet`. Browni
 Finally: update `ocean.conf`'s `FACTORY_ADDRESS` with the factory address output in the previous step.
 
 ## 5. Test 
-Outcome: lib-py works as expected.
+Outcome: ocean-lib-py works as expected.
 
 First, run simple quickstart on ganache. 
 ```console
