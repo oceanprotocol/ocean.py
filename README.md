@@ -11,7 +11,7 @@ data token for each data service or set of services.
 * **Transfer** data tokens to another owner, and **all other ERC20 actions** 
 using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-with-an-erc20-token-contract) etc.
 
-`ocean-lib` is part of the [Ocean Protocol](www.oceanprotocol.com) toolset.
+`ocean-lib` is part of the [Ocean Protocol](https://www.oceanprotocol.com) toolset.
 
 ## Quick Install
 
