@@ -1,7 +1,7 @@
-"""Keeper module to call keeper-contracts."""
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
+import eth_account
 import logging
 import os
 from collections import namedtuple
@@ -10,8 +10,7 @@ from eth_keys import KeyAPI
 from eth_utils import big_endian_to_int
 from web3 import Web3
 from web3.contract import ContractEvent
-from web3.utils.encoding import to_bytes
-from web3.utils.threads import Timeout
+from web3.exceptions import TimeExhausted
 
 from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.web3_provider import Web3Provider
@@ -70,7 +69,7 @@ def get_public_key_from_address(web3, account):
     """
     _hash = web3.sha3(text='verify signature.')
     signature = web3.personal.sign(_hash, account.address, account.password)
-    signature = split_signature(web3, to_bytes(hexstr=signature))
+    signature = split_signature(web3, web3.toBytes(hexstr=signature))
     signature_vrs = Signature(signature.v % 27,
                               big_endian_to_int(signature.r),
                               big_endian_to_int(signature.s))
@@ -128,7 +127,6 @@ def get_account(index):
 
     return Account(Web3.toChecksumAddress(address), pswrd, key_file, encr_key, key)
 
-
 def process_tx_receipt(tx_hash, event_instance, event_name, agreement_id=None):
     """
     Wait until the tx receipt is processed.
@@ -148,7 +146,7 @@ def process_tx_receipt(tx_hash, event_instance, event_name, agreement_id=None):
     web3 = Web3Provider.get_web3()
     try:
         web3.eth.waitForTransactionReceipt(tx_hash, timeout=20)
-    except Timeout:
+    except TimeExhausted:
         logger.info(f'Waiting for {event_name} transaction receipt timed out. '
                     f'Cannot verify receipt and event.')
         return False

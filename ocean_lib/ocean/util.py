@@ -49,3 +49,12 @@ def get_web3_provider(network_url):
         provider = WebsocketProvider(network_url)
 
     return provider
+
+#FIXME: deprecate this
+import configparser, os
+CONF_FILE_PATH = '~/ocean.conf'
+def confFileValue(network: str, key: str) -> str:
+    conf = configparser.ConfigParser()
+    path = os.path.expanduser(CONF_FILE_PATH)
+    conf.read(path)
+    return conf[network][key]

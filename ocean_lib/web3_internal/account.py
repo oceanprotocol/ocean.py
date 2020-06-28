@@ -3,6 +3,7 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
+import eth_account
 import logging
 import os
 
@@ -12,7 +13,7 @@ logger = logging.getLogger('account')
 class Account:
     """Class representing an account."""
 
-    def __init__(self, address, password=None, key_file=None, encrypted_key=None, private_key=None):
+    def __init__(self, address=None, password=None, key_file=None, encrypted_key=None, private_key=None):
         """
         Hold account address, password and either keyfile path, encrypted key or private key
 
@@ -39,6 +40,10 @@ class Account:
                 encrypted_key = _file.read()
         self._encrypted_key = encrypted_key
         self._private_key = private_key
+
+        if self.address is None and self._private_key is not None:
+            self.address = eth_account.Account().from_key(private_key).address
+        assert self.address is not None
 
     @property
     def key_file(self):

@@ -1,6 +1,6 @@
 import logging
 
-from web3.utils.contracts import prepare_transaction
+from web3.contract import prepare_transaction
 
 from ocean_lib.web3_internal.wallet import Wallet
 
