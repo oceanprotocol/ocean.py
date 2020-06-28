@@ -66,9 +66,7 @@ def deploy(network):
     brownie.network.connect(network)
     
     # ****SEE FUNDS****
-    web3 = brownie.network.web3
-    account = Account(private_key=factory_deployer_private_key)
-    print("Keys:\n%s" % account.keysStr())
+    print("Keys:\n%s" % Account(private_key=factory_deployer_private_key).keysStr())
     print("")
         
     # ****DEPLOY****
