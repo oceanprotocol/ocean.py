@@ -28,7 +28,7 @@ source myenv/bin/activate
 
 Install modules in the env't. Notably, it installs [Brownie](https://eth-brownie.readthedocs.io). Brownie helps in compiling, deploying, testing, and debugging. Brownie is not needed for *using* ocean-lib-py.
 ```
-pip install -r requirements.txt 
+pip install -r requirements_dev.txt 
 ```
 
 If you don't have an Infura account and you aim to deploy to `rinkeby` or `mainnet`, go to www.infura.io and sign up.
