@@ -1,6 +1,7 @@
 import enforce
 import logging
 import typing
+import warnings
 
 from ocean_lib.models.datatoken import DataToken
 from ocean_lib.web3_internal import ContractBase
@@ -25,12 +26,16 @@ class DTFactoryContract(ContractBase):
             logging.warning(f'Cannot get the transaction receipt for tx {tx_hash}.')
             return None
 
-        logs = getattr(self.events, 'TokenRegistered')().processReceipt(tx_receipt)
-        if not logs:
-            logging.warning(f'No logs where found for tx {tx_hash}.')
+        warnings.filterwarnings("ignore") #ignore unwarranted warning up next
+        rich_logs = getattr(self.events, 'TokenCreated')().processReceipt(tx_receipt)
+        token_addr = rich_logs[0]['args']['newTokenAddress'] 
+        warnings.resetwarnings()
+        
+        if not rich_logs:
+            logging.warning(f'No logs were found for tx {tx_hash}.')
             return None
 
-        return DataToken(logs[0].args.tokenAddress)
+        return DataToken(token_addr)
 
     @enforce.runtime_validation
     def get_token_registered_event(self, block_number:int, metadata_url:str, sender):
