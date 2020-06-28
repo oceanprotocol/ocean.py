@@ -16,7 +16,7 @@ def test_simple_flow():
     # 1. Alice publishes a dataset (= publishes a datatoken)
     config = {
         'network': 'rinkeby',  # https://rinkeby.infura.io/v3/357f2fe737db4304bd2f7285c5602d0d
-        'factory.address': '0xB9d406D24B310A7D821D0b782a36909e8c925471',  # rinkeby
+        'dtfactory.address': '0xB9d406D24B310A7D821D0b782a36909e8c925471',  # rinkeby
     }
     ocean = Ocean(config)
     token = ocean.create_data_token(dataset_download_endpoint, alice_account)

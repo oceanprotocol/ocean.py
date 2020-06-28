@@ -69,7 +69,7 @@ class Ocean:
             config_dict = {
                 'eth-network': {
                     'network': config['network'],
-                    'factory.address': config.get('factory.address')
+                    'dtfactory.address': config.get('dtfactory.address')
                 },
                 'resources': {
                     'aquarius.url': aqua_url,

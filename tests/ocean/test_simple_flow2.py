@@ -19,7 +19,7 @@ def test_simple_flow():
     dataset_download_endpoint = 'http://localhost:8030/api/v1/services'
 
     # 1. Alice publishes a dataset (= publishes a datatoken)
-    config = {'network': network, 'factory.address': dtfactory_address}
+    config = {'network': network, 'dtfactory.address': dtfactory_address}
     ocean = Ocean(config)
     token = ocean.create_data_token(dataset_download_endpoint, alice_account)
     dt_address = token.address

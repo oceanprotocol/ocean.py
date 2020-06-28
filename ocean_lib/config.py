@@ -24,7 +24,7 @@ NAME_AQUARIUS_URL = 'aquarius.url'
 NAME_STORAGE_PATH = 'storage.path'
 NAME_AUTH_TOKEN_MESSAGE = 'auth_token_message'
 NAME_AUTH_TOKEN_EXPIRATION = 'auth_token_expiration'
-NAME_DATA_TOKEN_FACTORY_ADDRESS = 'factory.address'
+NAME_DATA_TOKEN_FACTORY_ADDRESS = 'dtfactory.address'
 
 NAME_PARITY_URL = 'parity.url'
 NAME_PARITY_ADDRESS = 'parity.address'
