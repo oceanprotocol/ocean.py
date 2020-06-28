@@ -61,7 +61,7 @@ class Ocean:
 
             private_key = config.get('privateKey', None)
             if private_key:
-                account = eth_account.Account.privateKeyToAccount(private_key)
+                account = eth_account.Account.from_key(private_key)
                 os.environ['PARITY_KEY'] = private_key
                 os.environ['PARITY_ADDRESS'] = account.address
 
