@@ -22,8 +22,8 @@ cd ocean-lib-py
 
 Initalize virtual env't. Activate env't.(BTW use `deactivate` to, well, deactivate.)
 ```console
-python -m venv myenv
-source myenv/bin/activate 
+python -m venv venv
+source venv/bin/activate 
 ```
 
 Install modules in the env't. Notably, it installs [Brownie](https://eth-brownie.readthedocs.io). Brownie helps in compiling, deploying, testing, and debugging. Brownie is not needed for *using* ocean-lib-py.
@@ -47,7 +47,7 @@ Outcome: ganache running as a live blockchain network service, just like mainnet
 Open a separate terminal and set the env't. and run the ganache script. 
 ```console
 cd <this dir>`
-source myenv/bin/activate
+source venv/bin/activate
 ```
 
 Run the ganache script. It adds `ganache` as a network to brownie (if needed), then starts `ganache-cli` including putting ETH into the private keys set in `~/ocean.conf`.
@@ -67,7 +67,7 @@ Let's do it!
 
 Set up env't, ensure it's up to date:
 ```console
-source myenv/bin/activate
+source venv/bin/activate
 pip install -r requirements.txt 
 ```
 
