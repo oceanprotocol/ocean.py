@@ -1,13 +1,13 @@
-from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
+import eth_account
 from web3 import WebsocketProvider
+
+from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
 
 WEB3_INFURA_PROJECT_ID = '357f2fe737db4304bd2f7285c5602d0d'
 
 GANACHE_URL = 'http://127.0.0.1:8545'
 
-
 SUPPORTED_NETWORK_NAMES = {'rinkeby', 'kovan', 'ganache', 'mainnet', 'ropsten'}
-
 
 def get_infura_url(infura_id, network):
     return f"wss://{network}.infura.io/ws/v3/{infura_id}"

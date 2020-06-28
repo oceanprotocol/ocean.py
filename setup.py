@@ -31,6 +31,8 @@ install_requirements = [
     'tqdm',
     'pytz',
     'eth-account',
+    'eth-keys',
+    'eth-utils',
     'web3',
     # web3 requires eth-abi, requests, and more,
     # so those will be installed too.
@@ -59,8 +61,6 @@ dev_requirements = [
     'watchdog',
     'eth-brownie>=1.8.3,<2.0.0',
     #for the following: maybe needed, maybe not
-    'eth-keys',
-    'eth-utils',
     'enforce',
     'pytest',
 

@@ -1,12 +1,14 @@
-#! ./myenv/bin/python3
+#! ./venv/bin/python3
 
 import brownie
 import os
 import sys
 
-from src.ocean_lib import Ocean
-from src.ocean_lib.Ocean import confFileValue
-from src.util import constants, util
+from ocean_lib import Ocean
+from ocean_lib.ocean import util
+from ocean_lib.web3_internal.account import Account
+
+SUPPORTED_NETWORKS_STR = str(util.SUPPORTED_NETWORK_NAMES)[1:-1]
 
 def main():
     network = processArgs()
@@ -19,7 +21,7 @@ def processArgs():
 Deploy DataTokenTemplate and more to a target network. 
 
 Usage: deploy.py NETWORK
-  NETWORK -- one of: {constants.ALLOWED_NETWORKS_STR}
+  NETWORK -- one of: {SUPPORTED_NETWORKS_STR}
  """
 
     # ****SET INPUT ARGS****
@@ -37,8 +39,8 @@ Usage: deploy.py NETWORK
     print("Arguments: NETWORK=%s\n" % network)
 
     #corner cases
-    if network not in constants.ALLOWED_NETWORKS:
-        print(f"Invalid network. Allowed networks: {constants.ALLOWED_NETWORKS_STR}")
+    if network not in util.SUPPORTED_NETWORK_NAMES:
+        print(f"Invalid network. Supported networks: {SUPPORTED_NETWORKS_STR}")
         sys.exit(0)
 
     return network
@@ -47,7 +49,7 @@ def deploy(network):
 
     # ****SET ENVT****
     #grab vars
-    factory_deployer_private_key = confFileValue(network, 'FACTORY_DEPLOYER_PRIVATE_KEY')
+    factory_deployer_private_key = util.confFileValue(network, 'FACTORY_DEPLOYER_PRIVATE_KEY')
 
     #corner cases 
     if invalidKey(factory_deployer_private_key):
@@ -58,15 +60,15 @@ def deploy(network):
     assert not brownie.network.is_connected()
     assert network != 'development', "can't have network='development' because brownie reverts that"
     if network in ['rinkeby', 'main']: #set os envvar for infura
-        id_ = confFileValue('DEFAULT', 'WEB3_INFURA_PROJECT_ID')
+        id_ = util.confFileValue('DEFAULT', 'WEB3_INFURA_PROJECT_ID')
         setenv('WEB3_INFURA_PROJECT_ID', id_)
         
     brownie.network.connect(network)
     
     # ****SEE FUNDS****
     web3 = brownie.network.web3
-    c = util.Context(network, web3, private_key=factory_deployer_private_key)
-    print("Keys:\n%s" % util.keysStr(factory_deployer_private_key))
+    account = Account(private_key=factory_deployer_private_key)
+    print("Keys:\n%s" % account.keysStr())
     print("")
         
     # ****DEPLOY****
@@ -126,7 +128,7 @@ def deploy(network):
         amt_distribute = 1000
         amt_distribute_base = util.OCEANtoBase(float(amt_distribute))
         for key_label in ['TEST_PRIVATE_KEY1', 'TEST_PRIVATE_KEY2']:
-            key = util.confFileValue(network, key_label)
+            key = util.util.confFileValue(network, key_label)
             dst_address = util.privateKeyToAddress(key)
             OCEAN_token.transfer(dst_address, amt_distribute_base,
                                  {'from': deployer_account})
