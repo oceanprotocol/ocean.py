@@ -6,7 +6,7 @@ import sys
 
 from ocean_lib import Ocean
 from ocean_lib.ocean import util
-from ocean_lib.web3_internal.account import Account
+from ocean_lib.web3_internal.account import Account, privateKeyToAddress
 
 SUPPORTED_NETWORKS_STR = str(util.SUPPORTED_NETWORK_NAMES)[1:-1]
 
@@ -80,7 +80,7 @@ def deploy(network):
 
     print("****Deploy DataTokenTemplate: begin****")
     minter_addr = deployer_account.address
-    cap = constants.DEFAULT_MINTING_CAP
+    cap = 2**255
     dt_template = p.DataTokenTemplate.deploy(
         'Template', 'TEM', minter_addr, cap, 'blob', {'from': deployer_account})
     print("****Deploy DataTokenTemplate: done****\n")
@@ -99,22 +99,12 @@ def deploy(network):
                                  {'from': deployer_account})
     print("****Deploy 'SFactory': done****\n")
 
-    print("****Deploy 'MPool': begin****")
-    mpool_template = p.MPool.deploy(spool_template.address, 
-                                            {'from': deployer_account})
-    print("****Deploy 'MPool': done****\n")
-    
-    print("****Deploy 'MFactory': begin****")
-    mfactory = p.MFactory.deploy(mpool_template.address, sfactory.address,
-                                 {'from': deployer_account})
-    print("****Deploy 'MFactory': done****\n")    
-
     if network == 'ganache':
         print("****Deploy fake OCEAN: begin****")
         #For simplicity, hijack DataTokenTemplate.
         minter_addr = deployer_account.address
         OCEAN_cap = 1410 * 10**6 #1.41B
-        OCEAN_cap_base = util.OCEANtoBase(float(OCEAN_cap))
+        OCEAN_cap_base = util.toBase18(float(OCEAN_cap))
         OCEAN_token = p.DataTokenTemplate.deploy(
             'Ocean', 'OCEAN', minter_addr, OCEAN_cap_base, '', 
             {'from': deployer_account}) 
@@ -126,18 +116,17 @@ def deploy(network):
 
         print("****Distribute fake OCEAN: begin****")
         amt_distribute = 1000
-        amt_distribute_base = util.OCEANtoBase(float(amt_distribute))
+        amt_distribute_base = util.toBase18(float(amt_distribute))
         for key_label in ['TEST_PRIVATE_KEY1', 'TEST_PRIVATE_KEY2']:
-            key = util.util.confFileValue(network, key_label)
-            dst_address = util.privateKeyToAddress(key)
+            key = util.confFileValue(network, key_label)
+            dst_address = privateKeyToAddress(key)
             OCEAN_token.transfer(dst_address, amt_distribute_base,
                                  {'from': deployer_account})
         print("****Distribute fake OCEAN: done****\n")
 
     s = f"""****Things to update in ~/ocean.conf****"
 DTFACTORY_ADDRESS = {dtfactory.address}
-SFACTORY_ADDRESS = {sfactory.address}
-MFACTORY_ADDRESS = {mfactory.address}"""
+SFACTORY_ADDRESS = {sfactory.address}"""
     if network == "ganache":
         s += f"""
 OCEAN_ADDRESS = {OCEAN_token.address}"""

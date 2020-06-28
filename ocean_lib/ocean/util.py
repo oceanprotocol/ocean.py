@@ -1,3 +1,4 @@
+import enforce
 import eth_account
 from web3 import WebsocketProvider
 
@@ -49,6 +50,24 @@ def get_web3_provider(network_url):
         provider = WebsocketProvider(network_url)
 
     return provider
+
+@enforce.runtime_validation
+def toBase18(amt: float) -> int:
+    return toBase(amt, 18)
+
+@enforce.runtime_validation
+def toBase(amt: float, dec: int) -> int:
+    """returns value in e.g. wei (taking e.g. ETH as input)"""
+    return int(amt * 1*10**dec)
+       
+@enforce.runtime_validation
+def fromBase18(num_base: int) -> float:
+    return fromBase(num_base, 18)
+
+@enforce.runtime_validation
+def fromBase(num_base: int, dec: int) -> float:
+    """returns value in e.g. ETH (taking e.g. wei as input)"""
+    return float(num_base / (10**dec))
 
 #FIXME: deprecate this
 import configparser, os
