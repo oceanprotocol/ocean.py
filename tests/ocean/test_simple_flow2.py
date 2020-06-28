@@ -9,7 +9,7 @@ from ocean_lib.web3_internal.account import Account
 def test_simple_flow():
     #set values
     network = 'ganache'
-    factory_address = confFileValue(network, 'DTFACTORY_ADDRESS')
+    dtfactory_address = confFileValue(network, 'DTFACTORY_ADDRESS')
     alice_private_key = confFileValue(network, 'TEST_PRIVATE_KEY1') 
     bob_private_key = confFileValue(network, 'TEST_PRIVATE_KEY2')
     
@@ -18,7 +18,7 @@ def test_simple_flow():
     dataset_download_endpoint = 'http://localhost:8030/api/v1/services'
 
     # 1. Alice publishes a dataset (= publishes a datatoken)
-    config = {'network': network, 'factory.address': factory_address}
+    config = {'network': network, 'factory.address': dtfactory_address}
     ocean = Ocean(config)
     token = ocean.create_data_token(dataset_download_endpoint, alice_account)
     dt_address = token.address
