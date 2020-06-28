@@ -3,7 +3,7 @@
 
 from ocean_lib import Ocean
 from ocean_lib.models.factory import FactoryContract
-from ocean_lib.ocean.util import confFileValue #FIXME: deprecate this
+from ocean_lib.ocean.util import confFileValue, toBase18, fromBase18
 from ocean_lib.web3_internal.account import Account
 
 def test_simple_flow():
@@ -24,7 +24,7 @@ def test_simple_flow():
     dt_address = token.address
 
     # 3. Alice mints 100 tokens
-    tx_id = token.mint(alice_account.address, 100, alice_account)
+    tx_id = token.mint(alice_account.address, toBase18(100.0), alice_account)
     token.get_tx_receipt(tx_id)
 
     # 4. Alice transfers 1 token to Bob
@@ -35,7 +35,7 @@ def test_simple_flow():
     token = bob_ocean.get_data_token(dt_address)
     token_owner = FactoryContract(ocean.config.factory_address).get_token_minter(token.address)
 
-    tx_id = token.transfer(token_owner, 1, bob_account)
+    tx_id = token.transfer(token_owner, toBase18(1.0), bob_account)
 
     # This is disabled for now because the token transfer sometimes fail on `rinkeby`
     # try:
