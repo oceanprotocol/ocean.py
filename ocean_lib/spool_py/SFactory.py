@@ -1,7 +1,7 @@
 import enforce
 import warnings
 from . import bconstants
-from ..util import util
+from ocean_lib.ocean import util
     
 @enforce.runtime_validation
 class SFactory:    

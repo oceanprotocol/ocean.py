@@ -1,6 +1,6 @@
 import enforce
 
-from ..util import util
+from ocean_lib.ocean import util
 
 @enforce.runtime_validation
 class BToken:

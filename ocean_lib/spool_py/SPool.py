@@ -2,8 +2,7 @@ import enforce
 import typing
 
 from .BToken import BToken
-from ..util import util
-from ..util.util import ETHfromBase, ETHtoBase
+from ocean_lib.ocean import util
 
 @enforce.runtime_validation
 class SPool(BToken):    
@@ -28,7 +27,7 @@ class SPool(BToken):
         s += [f"  isPublicSwap = {self.isPublicSwap()}"]
         s += [f"  isFinalized = {self.isFinalized()}"]
 
-        swap_fee = ETHfromBase(self.getSwapFee_base())
+        swap_fee = util.fromBase18(self.getSwapFee_base())
         s += ["  swapFee = %.2f%%" % (swap_fee * 100.0)]
         
         s += [f"  numTokens = {self.getNumTokens()}"]
@@ -47,11 +46,11 @@ class SPool(BToken):
 
         s += [f"  weights (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
-            denorm_w = ETHfromBase(self.getDenormalizedWeight_base(addr))
-            norm_w = ETHfromBase(self.getNormalizedWeight_base(addr))
+            denorm_w = util.fromBase18(self.getDenormalizedWeight_base(addr))
+            norm_w = util.fromBase18(self.getNormalizedWeight_base(addr))
             s += [f"    {symbol}: denorm_w={denorm_w}, norm_w={norm_w} "]
 
-        total_denorm_w = ETHfromBase(self.getTotalDenormalizedWeight_base())
+        total_denorm_w = util.fromBase18(self.getTotalDenormalizedWeight_base())
         s += [f"    total_denorm_w={total_denorm_w}"]
         
         s += [f"  balances (fromBase):"]
