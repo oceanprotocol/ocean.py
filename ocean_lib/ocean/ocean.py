@@ -99,7 +99,7 @@ class Ocean:
         )
         self.ocean_market = OceanMarket(self._config, data_provider)
 
-        logger.debug('Squid Ocean instance initialized: ')
+        logger.debug('Ocean instance initialized: ')
 
     @property
     def config(self):
