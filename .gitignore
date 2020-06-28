@@ -2,9 +2,13 @@
 __pycache__
 .pytest_cache/
 *.pyc
-*.py~
+*~
 .eggs/
-venv/
+/venv/
 ocean_lib.egg-info/
-
+/build/
+/contracts/
+/interfaces/
+/reports/
+/scripts/
 
