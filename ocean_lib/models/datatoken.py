@@ -1,13 +1,14 @@
+import enforce
 import os
 import time
 
 from ocean_lib.web3_internal import ContractBase
+from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.event_filter import EventFilter
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_utils.http_requests.requests_session import get_requests_session
 
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-
 
 class DataToken(ContractBase):
 
@@ -15,7 +16,8 @@ class DataToken(ContractBase):
     def contract_name(self):
         return 'DataTokenTemplate'
 
-    def get_transfer_event(self, block_number, sender, receiver):
+    @enforce.runtime_validation
+    def get_transfer_event(self, block_number: int, sender: str, receiver: str):
         event = getattr(self.events, 'Transfer')
         filter_params = {'from': sender, 'to': receiver}
         event_filter = EventFilter(
@@ -36,7 +38,8 @@ class DataToken(ContractBase):
 
         return logs[0]
 
-    def verify_transfer_tx(self, tx_id, sender, receiver):
+    @enforce.runtime_validation
+    def verify_transfer_tx(self, tx_id: int, sender: str, receiver: str):
         w3 = Web3Provider.get_web3()
         tx = w3.eth.getTransaction(tx_id)
         if not tx:
@@ -71,7 +74,7 @@ class DataToken(ContractBase):
 
         return tx_id
 
-    def _send_token_tx(self, method, to, value, account):
+    def _send_token_tx(self, method, to: str, value: int, account: Account):
         tx_hash = self.send_transaction(
             method,
             (to,
@@ -82,16 +85,20 @@ class DataToken(ContractBase):
         )
         return tx_hash
 
-    def mint(self, to, value, account):
+    @enforce.runtime_validation
+    def mint(self, to: str, value: int, account: Account):
         return self._send_token_tx('mint', to, value, account)
 
-    def approve(self, spender, value, account):
+    @enforce.runtime_validation
+    def approve(self, spender: str, value: int, account: Account):
         return self._send_token_tx('approve', spender, value, account)
 
-    def transfer(self, to, value, account):
+    @enforce.runtime_validation
+    def transfer(self, to: str, value: int, account: Account):
         return self._send_token_tx('transfer', to, value, account)
 
-    def set_minter(self, new_minter, current_minter_account):
+    @enforce.runtime_validation
+    def set_minter(self, new_minter: str, current_minter_account: Account):
         tx_hash = self.send_transaction(
             'setMinter',
             (new_minter, ),
@@ -101,11 +108,13 @@ class DataToken(ContractBase):
         )
         return tx_hash
 
-    def get_metadata_url(self):
+    @enforce.runtime_validation
+    def get_metadata_url(self) -> str:
         # grab the metadatastore URL from the DataToken contract (@token_address)
         return self.contract_concise.blob()
 
-    def download(self, account, tx_id, destination_folder):
+    @enforce.runtime_validation
+    def download(self, account: Account, tx_id: str, destination_folder: str):
         url = self.get_metadata_url()
         download_url = (
             f'{url}?'

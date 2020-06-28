@@ -2,12 +2,13 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
+import enforce
+import eth_account
 import logging
 import os
 
-import eth_account
-
 from ocean_lib.ocean.ocean_market import OceanMarket
+from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib import Config
@@ -15,7 +16,7 @@ from ocean_lib import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.datatoken import DataToken
-from ocean_lib.models.factory import FactoryContract
+from ocean_lib.models.dtfactory import DTFactoryContract
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_auth import OceanAuth
 from ocean_lib.ocean.ocean_compute import OceanCompute
@@ -25,7 +26,6 @@ from ocean_lib.ocean.util import get_web3_provider
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 
 logger = logging.getLogger('ocean')
-
 
 class Ocean:
     """The Ocean class is the entry point into Ocean Protocol."""
@@ -105,9 +105,10 @@ class Ocean:
     def config(self):
         return self._config
 
-    def create_data_token(self, blob, account):
-        return FactoryContract(self._config.factory_address).create_data_token(account, blob)
+    @enforce.runtime_validation
+    def create_data_token(self, blob:str, account: Account) -> DataToken:
+        return DTFactoryContract(self._config.factory_address).create_data_token(account, blob)
 
     @staticmethod
-    def get_data_token(token_address):
+    def get_data_token(token_address: str) -> DataToken:
         return DataToken(token_address)

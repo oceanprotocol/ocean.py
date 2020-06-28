@@ -79,7 +79,7 @@ The run make! It git clones ,copies, tweaks imports, and finally does a `brownie
 ```
 
 ## 4. Deploy the contracts
-Outcome: ERC20Template and Factory are deployed to ganache, rinkeby, or mainnet.
+Outcome: DataTokenTemplate and DTFactory are deployed to ganache, rinkeby, or mainnet.
 
 If mainnet: ensure `~/ocean.conf` has correct `FACTORY_DEPLOYER_PRIVATE_KEY` (= an OPF key) and `FEE_MANAGER_ADDRESS` (= Ocean community address).
 
@@ -121,16 +121,16 @@ Transaction sent: 0xc17f63a24aac9e906ee7847f8a21c13f00e937a6e0ad1eebf32b412f347f
   DataTokenTemplate.constructor confirmed - Block: 1   Gas used: 1616110 (24.04%)
   DataTokenTemplate deployed at: 0xE7b2aEceba7367057287980187A0477D8012C4F9
 
->>> factory = Factory.deploy(ERC20_template.address, factory_deployer_account.address, {'from':factory_deployer_account})                                                              
+>>> factory = DTFactory.deploy(ERC20_template.address, factory_deployer_account.address, {'from':factory_deployer_account})                                                              
 Transaction sent: 0x9785143287fb92add792923478946b299701d2bce9a6074fbe7e1d0a1b77bd93
   Gas price: 0.0 gwei   Gas limit: 6721975
-  Factory.constructor confirmed - Block: 2   Gas used: 692655 (10.30%)
-  Factory deployed at: 0x6a7eaF9c068C9742646C121e66625aeeE1CE6A02
+  DTFactory.constructor confirmed - Block: 2   Gas used: 692655 (10.30%)
+  DTFactory deployed at: 0x6a7eaF9c068C9742646C121e66625aeeE1CE6A02
 
 >>> factory.createToken("Test Token", "TST", 1000, "test blob", accounts[0].address, {'from':accounts[0]})                                                                             
 Transaction sent: 0x09ad403c6aa481596de03c5a9d662ab46799154a0f857c8b09d5efd3bc4f06bf
   Gas price: 0.0 gwei   Gas limit: 6721975
-  Factory.createToken confirmed - Block: 3   Gas used: 254228 (3.78%)
+  DTFactory.createToken confirmed - Block: 3   Gas used: 254228 (3.78%)
 
 <Transaction '0x09ad403c6aa481596de03c5a9d662ab46799154a0f857c8b09d5efd3bc4f06bf'>
 >>> token_address = factory.getTokenAddress("TST")

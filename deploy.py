@@ -83,10 +83,10 @@ def deploy(network):
         'Template', 'TEM', minter_addr, cap, 'blob', {'from': deployer_account})
     print("****Deploy DataTokenTemplate: done****\n")
         
-    print("****Deploy DT 'Factory': begin****")
-    dtfactory = p.Factory.deploy(
+    print("****Deploy 'DTFactory': begin****")
+    dtfactory = p.DTFactory.deploy(
         dt_template.address, {'from': deployer_account})
-    print("****Deploy DT 'Factory': done****\n")
+    print("****Deploy 'DTFactory': done****\n")
     
     print("****Deploy SPool: begin****")
     spool_template = p.SPool.deploy({'from': deployer_account})

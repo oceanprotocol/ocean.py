@@ -4,7 +4,7 @@
 from ocean_lib.web3_internal.utils import get_account
 
 from ocean_lib import Ocean
-from ocean_lib.models.factory import FactoryContract
+from ocean_lib.models.dtfactory import DTFactoryContract
 
 
 def test_simple_flow():
@@ -32,7 +32,7 @@ def test_simple_flow():
     # 5. Bob consumes dataset
     bob_ocean = Ocean(config)
     token = bob_ocean.get_data_token(dt_address)
-    token_owner = FactoryContract(ocean.config.factory_address).get_token_minter(token.address)
+    token_owner = DTFactoryContract(ocean.config.factory_address).get_token_minter(token.address)
 
     tx_id = token.transfer(token_owner, 1, bob_account)
 

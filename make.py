@@ -84,8 +84,12 @@ os.system(f'cp /tmp/balancer-core/contracts/Migrations.sol {CONTRACTDIR}')
 os.system(f'cp ./ocean_lib/balancer_contracts/SFactory.sol {CONTRACTDIR}')
 os.system(f'cp ./ocean_lib/balancer_contracts/SPool.sol {CONTRACTDIR}')
 
-print('===Flatten imports in .sol files')
+#rename datatoken factory from Factory -> DTFactory, to help distinguish SFactory
+os.system(f'mv {CONTRACTDIR}/Factory.sol {CONTRACTDIR}/DTFactory.sol')
 
+
+#----------------------
+print('===In-place change .sol files: flatten imports, more')
 
 def inplace_change(filename, old_s, new_s):
     with open(filename) as f:
@@ -96,6 +100,9 @@ def inplace_change(filename, old_s, new_s):
         s = s.replace(old_s, new_s)
         f.write(s)
 
+inplace_change(f'{CONTRACTDIR}/DTFactory.sol', 'TokenFactory', 'Factory')
+inplace_change(f'{CONTRACTDIR}/DTFactory.sol', 'Factory', 'DTFactory')
+    
 #Fix imports
 for f in glob.glob(f'{CONTRACTDIR}/*.sol'):
     inplace_change(f, 'IERC20.sol', 'BToken.sol')
@@ -118,7 +125,7 @@ os.system(f'cd {CONTRACTDIR}; brownie compile; cd -')
 
 print('===Update abi/')
 # these are needed for ocean_lib/Ocean.py to be independent of brownie
-for module in ['DataTokenTemplate', 'Factory', \
+for module in ['DataTokenTemplate', 'DTFactory', \
                'SFactory', 'SPool', 'BToken']: 
     with open(f'{BUILDDIR}/contracts/{module}.json', 'r') as f:
         json_dict = json.loads(f.read())
