@@ -38,13 +38,6 @@ def test_simple_flow():
     minter_address = alice_address #the above returns None, so do this for now
     tx_id = token.transfer(minter_address, toBase18(1.0), bob_account)
 
-    # This is disabled for now because the token transfer sometimes fail on `rinkeby`
-    # try:
-    #     _tx_id = token.verify_transfer_tx(tx_id, bob_account.address, minter_address)
-    # except (Exception, AssertionError) as e:
-    #     print(f'token transfer failed: {e}')
-    #     raise
-
     #FIXME: uncomment and make this work
     #_file = token.download(bob_account, tx_id, '/tmp')
     #assert _file and _file.startswith('/tmp') and len(_file) > len('/tmp')
