@@ -6,7 +6,7 @@ WEB3_INFURA_PROJECT_ID = '357f2fe737db4304bd2f7285c5602d0d'
 GANACHE_URL = 'http://127.0.0.1:8545'
 
 
-SUPPORTED_NETWORK_NAMES = {'rinkeby', 'kovan', 'ganache', 'mainnet', 'robsten'}
+SUPPORTED_NETWORK_NAMES = {'rinkeby', 'kovan', 'ganache', 'mainnet', 'ropsten'}
 
 
 def get_infura_url(infura_id, network):
