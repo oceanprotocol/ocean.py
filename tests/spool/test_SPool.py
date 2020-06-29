@@ -59,9 +59,12 @@ def test_setPublicSwap(alice_context):
     assert not pool.isPublicSwap()
 
 def test_2tokens_basic(alice_context, alice_view):
+    import pdb; pdb.set_trace()
     T1 = _deployBToken(alice_context)
     T2 = _deployBToken(alice_context)
     pool = _deploySPool(alice_context)
+    assert T1.address != T2.address
+    assert T1.address != pool.address
 
     with pytest.raises(Exception): #can't bind until we approve
         pool.bind(T1.address, toBase18(90.0), toBase18(9.0))
@@ -71,6 +74,9 @@ def test_2tokens_basic(alice_context, alice_view):
     T2.approve(pool.address, toBase18(10.0))
 
     print(alice_view) #HACK
+    allowance = fromBase18(T1.allowance_base(alice_context.address, pool.address))
+    print(f"Allowance of T1 from Alice to pool: {allowance}")
+    import pdb; pdb.set_trace()
     
     assert not pool.isBound(T1.address) and not pool.isBound(T1.address)
     pool.bind(T1.address, toBase18(90.0), toBase18(9.0))
