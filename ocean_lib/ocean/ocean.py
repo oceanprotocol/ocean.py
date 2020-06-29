@@ -7,6 +7,8 @@ import eth_account
 import logging
 import os
 
+from ocean_lib.ocean import constants #import here to toggle type-checking
+
 from ocean_lib.ocean.ocean_market import OceanMarket
 from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.contract_handler import ContractHandler
@@ -107,7 +109,9 @@ class Ocean:
 
     @enforce.runtime_validation
     def create_data_token(self, blob:str, account: Account) -> DataToken:
-        return DTFactoryContract(self._config.factory_address).create_data_token(account, blob)
+        dtfactory = DTFactoryContract(self._config.factory_address)
+        dt = dtfactory.create_data_token(account, blob)
+        return dt
 
     @staticmethod
     def get_data_token(token_address: str) -> DataToken:
