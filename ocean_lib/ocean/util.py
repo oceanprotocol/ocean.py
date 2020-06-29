@@ -101,6 +101,84 @@ class Context:
             self.address = privateKeyToAddress(private_key)
 
 #FIXME: maybe deprecate this
+@enforce.runtime_validation
+class AccountView:
+    def __init__(self, network: str, address: str, descr_s: str):
+        self._c = Context(network, address=address)
+        self._descr_s = descr_s #e.g. "Alice"
+        self.dt_address = None
+        self.pool_address = None
+
+    def __str__(self) -> str:
+        s = []
+        s += [f"Balances for {self._descr_s}:"]
+        s += [self.ETHstr()]
+        s += [self.OCEANstr()]
+        if self.dt_address is not None:
+            s += [self.DTstr()]
+        if self.pool_address is not None:
+            s += [self.BPTstr()]
+        s += [""]
+        return "\n".join(s)
+    
+    def ETHstr(self) -> str:
+        return f"  {self.ETH()} ETH ({self.ETH_base()} base, aka wei)"
+
+    def ETH(self) -> float:
+        """Balance of ETH, in units of ETH (not wei)"""
+        return fromBase18(self.ETH_base())
+
+    def ETH_base(self) -> int:
+        """Balance of ETH, in units of its base (wei)"""
+        return self._c.web3.eth.getBalance(self._c.address) 
+
+    def OCEANstr(self) -> str:
+        return f"  {self.OCEAN()} OCEAN ({self.OCEAN_base()} base)"
+
+    def OCEAN(self) -> float:
+        """Balance of OCEAN, in units of OCEAN"""
+        OCEAN_base = self.OCEAN_base()
+        return fromBase18(OCEAN_base)
+    
+    def OCEAN_base(self) -> int:
+        """Balance of OCEAN, in units of its base"""
+        token_address = confFileValue(self._c.network, 'OCEAN_ADDRESS')
+        return tokenBalance_base(self._c.network, self._c.address, token_address)        
+    def DTstr(self) -> str:
+        return f"  {self.DT()} DT ({self.DT_base()} base)"
+
+    def DT(self) -> float:
+        """Balance of data token, in units of that token (not its base)"""
+        return fromBase18(self.DT_base())
+
+    def DT_base(self) -> int:
+        """Balance of data token, in units of its base"""
+        return tokenBalance_base(
+            self._c.network, self._c.address, self.dt_address)
+        
+    def BPTstr(self) -> str:
+        return f"  {self.BPT()} BPT ({self.BPT_base()} base)"
+
+    def BPT(self) -> float:
+        """Balance of balancer pool token, in units of that token (not base)"""
+        return fromBase18(self.BPT_base())
+
+    def BPT_base(self) -> int:
+        """Balance of data token, in units of its base"""
+        return tokenBalance_base(
+            self._c.network, self._c.address, self.pool_address)
+
+#FIXME: maybe deprecate this
+@enforce.runtime_validation
+def tokenBalance_base(network: str, balance_address: str, token_address: str) -> int:
+    min_abi = [{'constant': True, 'inputs': [{'internalType': 'address', 'name': 'whom', 'type': 'address'}], 'name': 'balanceOf', 'outputs': [{'internalType': 'uint256', 'name': '', 'type': 'uint256'}], 'payable': False, 'stateMutability': 'view', 'type': 'function'}]
+    web3 = Web3(get_web3_provider(network))
+    contract = web3.eth.contract(token_address, abi=min_abi)
+    func = contract.functions.balanceOf(balance_address)
+    return func.call()
+
+
+#FIXME: maybe deprecate this
 # (or deprecate the similar but more complex version in contract_handler)
 @enforce.runtime_validation
 def abi(filename: str):

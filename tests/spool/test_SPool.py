@@ -58,7 +58,7 @@ def test_setPublicSwap(alice_context):
     pool.setPublicSwap(False)
     assert not pool.isPublicSwap()
 
-def test_2tokens_basic(alice_context):
+def test_2tokens_basic(alice_context, alice_view):
     T1 = _deployBToken(alice_context)
     T2 = _deployBToken(alice_context)
     pool = _deploySPool(alice_context)
@@ -69,6 +69,8 @@ def test_2tokens_basic(alice_context):
     #Bind two tokens to the pool
     T1.approve(pool.address, toBase18(90.0))
     T2.approve(pool.address, toBase18(10.0))
+
+    print(alice_view) #HACK
     
     assert not pool.isBound(T1.address) and not pool.isBound(T1.address)
     pool.bind(T1.address, toBase18(90.0), toBase18(9.0))

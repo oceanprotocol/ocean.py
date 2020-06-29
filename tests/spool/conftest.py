@@ -35,6 +35,7 @@ def make_info(name, private_key_name):
     info.private_key = util.confFileValue(_NETWORK, private_key_name)
     info.address = util.privateKeyToAddress(info.private_key)
     info.context = util.Context(_NETWORK, private_key=info.private_key)
+    info.view = util.AccountView(_NETWORK, info.address, name)
     info.config = {'network': _NETWORK,
                    'privateKey': info.private_key,
                    'dtfactory.address': dtfactory_address()}
@@ -52,6 +53,10 @@ def alice_address():
 @pytest.fixture
 def alice_context():
     return alice_info().context
+
+@pytest.fixture
+def alice_view():
+    return alice_info().view
 
 @pytest.fixture
 def alice_config():
@@ -72,6 +77,10 @@ def bob_address():
 @pytest.fixture
 def bob_context():
     return bob_info().context
+
+@pytest.fixture
+def bob_view():
+    return bob_info().view
 
 @pytest.fixture
 def bob_config():
