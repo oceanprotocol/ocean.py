@@ -35,7 +35,9 @@ class DTFactoryContract(ContractBase):
             logging.warning(f'No logs were found for tx {tx_hash}.')
             return None
 
-        return DataToken(token_addr)
+        dt = DataToken(token_addr)
+        assert dt.address == token_addr
+        return dt
 
     @enforce.runtime_validation
     def get_token_registered_event(self, block_number:int, metadata_url:str, sender):
