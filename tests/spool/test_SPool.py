@@ -59,8 +59,8 @@ def test_setPublicSwap(alice_context):
     assert not pool.isPublicSwap()
 
 def test_2tokens_basic(alice_context, alice_view):
-    T1 = _deployBToken(alice_context)
-    T2 = _deployBToken(alice_context)
+    T1 = _deployToken(alice_context)
+    T2 = _deployToken(alice_context)
     pool = _deploySPool(alice_context)
     assert T1.address != T2.address
     assert T1.address != pool.address
@@ -214,7 +214,7 @@ def test_rebind_more_tokens(alice_context):
     pool.rebind(T1.address, toBase18(120.0), toBase18(9.0))
     
 def test_gulp(alice_context):
-    T1 = _deployBToken(alice_context)
+    T1 = _deployToken(alice_context)
     pool = _deploySPool(alice_context)
     
     #bind T1 to the pool, with a balance of 2.0
@@ -421,8 +421,8 @@ def _getPoolWith2Tokens(c:util.Context,
 def _createPoolWith2Tokens(c: util.Context,
                            bal1:float, bal2:float, w1:float, w2:float,
                            num_mint1=1000.0, num_mint2=1000.0):
-    T1 = _deployBToken(c, num_mint=num_mint1)
-    T2 = _deployBToken(c, num_mint=num_mint2)
+    T1 = _deployToken(c, num_mint=num_mint1)
+    T2 = _deployToken(c, num_mint=num_mint2)
     pool = _deploySPool(c)
     
     T1.approve(pool.address, toBase18(bal1))
@@ -439,7 +439,7 @@ def _deploySPool(c: util.Context) -> SPool.SPool:
     return SPool.SPool(c, address)
 
 @enforce.runtime_validation
-def _deployBToken(c: util.Context, num_mint:float=1000.0) -> BToken.BToken:
+def _deployToken(c: util.Context, num_mint:float=1000.0) -> BToken.BToken:
     account = Account(private_key=c.private_key)
     dtfactory_address = util.confFileValue(c.network, 'DTFACTORY_ADDRESS')
     config = {'network': c.network, 'privateKey': c.private_key,
