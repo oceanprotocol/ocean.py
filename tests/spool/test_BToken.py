@@ -1,5 +1,5 @@
-from src.spool_py import BToken
-from src.util import util
+from ocean_lib.spool_py import BToken
+from ocean_lib.ocean import util
 
 def test1(network, alice_context, alice_view, bob_context, bob_view,
           OCEAN_address):
@@ -10,10 +10,11 @@ def test1(network, alice_context, alice_view, bob_context, bob_view,
 
     assert btoken.symbol() == 'OCEAN'
     assert btoken.decimals() == 18
-    assert btoken.balanceOfSelf_base() > util.OCEANtoBase(10.0)
+    assert btoken.balanceOfSelf_base() > util.toBase18(10.0)
     
-    assert btoken.balanceOf_base(bob_context.address) > util.OCEANtoBase(10.0)
+    assert btoken.balanceOf_base(bob_context.address) > util.toBase18(10.0)
 
+    assert btoken.allowance_base(alice_context.address,bob_context.address) == 0
     assert btoken.allowanceFromSelf_base(bob_context.address) == 0
     btoken.approve(bob_context.address, int(1e18))
     assert btoken.allowanceFromSelf_base(bob_context.address) == int(1e18)

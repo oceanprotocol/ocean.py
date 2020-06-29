@@ -17,8 +17,11 @@ class BToken:
         return util.abi(filename='./abi/BToken.abi')
     
     def balanceOfSelf_base(self) -> int:
-        func = self.contract.functions.balanceOf(self._c.address)
-        return func.call()
+        return self.balanceOf_base(self._c.address)
+
+    def allowanceFromSelf_base(self, dst_address: str) -> int:
+        src_address = self._c.address
+        return self.allowance_base(src_address, dst_address)
         
     #============================================================
     #reflect BToken Solidity methods
@@ -40,7 +43,6 @@ class BToken:
         func = self.contract.functions.transfer(dst_address, amt_base)
         util.buildAndSendTx(self._c, func)
 
-    def allowanceFromSelf_base(self, dst_address: str) -> int:
-        src_address = self._c.address
+    def allowance_base(self, src_address:str, dst_address: str) -> int:
         func = self.contract.functions.allowance(src_address, dst_address)
         return func.call()
