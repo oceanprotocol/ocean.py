@@ -1,6 +1,7 @@
 import brownie
 import pytest
 
+from ocean_lib.ocean import constants #import here to toggle type-checking
 from ocean_lib import Ocean
 from ocean_lib.ocean import util
 
