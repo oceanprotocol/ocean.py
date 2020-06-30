@@ -8,6 +8,7 @@ import typing
 from web3 import Web3, WebsocketProvider
 
 from ocean_lib.web3_internal.account import privateKeyToAddress
+from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
 
 WEB3_INFURA_PROJECT_ID = '357f2fe737db4304bd2f7285c5602d0d'
@@ -195,17 +196,19 @@ def abi(filename: str):
 # (or deprecate the similar functionality in ocean_lib/web3_internal/contract_base.py?)
 GASLIMIT_DEFAULT = 5000000 #FIXME: put in better place
 @enforce.runtime_validation
-def buildAndSendTx(c: Context,
-                   function,
+def buildAndSendTx(function,
+                   from_wallet: Wallet,
                    gaslimit: int = GASLIMIT_DEFAULT,
                    num_wei: int = 0):
-    assert isinstance(c.address, str)
-    assert isinstance(c.private_key, str)
-    
-    nonce = c.web3.eth.getTransactionCount(c.address)
-    gas_price = int(confFileValue(c.network, 'GAS_PRICE'))
+    assert isinstance(from_wallet.address, str)
+    assert isinstance(from_wallet.private_key, str)
+
+    web3 = from_wallet.web3
+    nonce = web3.eth.getTransactionCount(from_wallet.address)
+    network =  web3_to_network(web3)
+    gas_price = int(confFileValue(network, 'GAS_PRICE'))
     tx_params = {
-        "from": c.address,
+        "from": from_wallet.address,
         "value": num_wei,
         "nonce": nonce,
         "gas": gaslimit,
@@ -213,11 +216,21 @@ def buildAndSendTx(c: Context,
     }
 
     tx = function.buildTransaction(tx_params)
-    signed_tx = c.web3.eth.account.sign_transaction(tx, private_key=c.private_key)
-    tx_hash = c.web3.eth.sendRawTransaction(signed_tx.rawTransaction)
+    signed_tx = web3.eth.account.sign_transaction(
+        tx, private_key=from_wallet.private_key)
+    tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
 
-    tx_receipt = c.web3.eth.waitForTransactionReceipt(tx_hash)
+    tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
     if tx_receipt['status'] == 0:  # did tx fail?
         raise Exception("The tx failed. tx_receipt: {tx_receipt}")
     return (tx_hash, tx_receipt)
+
+def web3_to_network(web3):
+    s = str(web3.provider)
+    if '127.0.0.1' in s:
+        return 'ganache'
+    for n in ['rinkeby', 'ropsten', 'kovan']:
+        if n in s:
+            return n
+    return 'mainnet'
     

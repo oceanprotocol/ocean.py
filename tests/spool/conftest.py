@@ -4,6 +4,8 @@ import pytest
 from ocean_lib.ocean import constants #import here to toggle type-checking
 from ocean_lib import Ocean
 from ocean_lib.ocean import util
+from ocean_lib.web3_internal.account import Account
+from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.spool_py import BToken
 
 from tests.resources.helper_functions import brownieAccount
@@ -38,16 +40,38 @@ def make_info(name, private_key_name):
     class _Info:
         pass
     info = _Info()
+    web3 = brownie.network.web3
+    
+    info.web3 = web3
+    info.brownie_project = _BROWNIE_PROJECT
+    
     info.private_key = util.confFileValue(_NETWORK, private_key_name)
     info.address = util.privateKeyToAddress(info.private_key)
-    info.context = util.Context(_NETWORK, private_key=info.private_key)
-    info.context.brownie_project = _BROWNIE_PROJECT
+    info.account = Account(private_key=info.private_key)
+    info.wallet = Wallet(web3, key=info.private_key)
     info.view = util.AccountView(_NETWORK, info.address, name)
     info.config = {'network': _NETWORK,
                    'privateKey': info.private_key,
                    'dtfactory.address': dtfactory_address()}
     info.ocean = Ocean(info.config)
+    info.T1 = _deployAndMintToken('TOK1', info.address)
+    info.T2 = _deployAndMintToken('TOK2', info.address)    
+
     return info
+
+def _deployAndMintToken(symbol: str, to_address: str) -> BToken.BToken:
+    p = _BROWNIE_PROJECT
+    private_key = util.confFileValue(_NETWORK, 'FACTORY_DEPLOYER_PRIVATE_KEY')
+    account = brownieAccount(private_key)
+    token = p.DataTokenTemplate.deploy(
+        symbol, symbol, account.address, HUGEINT, '',
+        {'from': account})
+    
+    token.mint(to_address, util.toBase18(1000.0), {'from': account})
+    
+    btoken = BToken.BToken(brownie.network.web3, token.address)
+    
+    return btoken
 
 @pytest.fixture
 def alice_private_key():
@@ -58,8 +82,12 @@ def alice_address():
     return alice_info().address
 
 @pytest.fixture
-def alice_context():
-    return alice_info().context
+def alice_wallet():
+    return alice_info().wallet
+
+@pytest.fixture
+def alice_account():
+    return alice_info().account
 
 @pytest.fixture
 def alice_view():
@@ -82,8 +110,12 @@ def bob_address():
     return bob_info().address
 
 @pytest.fixture
-def bob_context():
-    return bob_info().context
+def bob_wallet():
+    return bob_info().wallet
+
+@pytest.fixture
+def bob_account():
+    return bob_info().account
 
 @pytest.fixture
 def bob_view():
@@ -99,63 +131,10 @@ def bob_ocean():
 
 
 @pytest.fixture
-def brownie_account():
-    return brownie_info().account
+def T1():  #'TOK1' with 1000.0 held by Alice
+    return alice_info().T1
 
 @pytest.fixture
-def brownie_token1():
-    return brownie_info().token1
+def T2():  #'TOK2' with 1000.0 held by Alice
+    return alice_info().T2
 
-@pytest.fixture
-def brownie_token2():
-    return brownie_info().token2
-
-@pytest.fixture
-def T1(): #'TOK1' with 1000.0 minted by Alice
-    c = make_info('Alice', 'TEST_PRIVATE_KEY1').context
-    token_address = brownie_info().token1.address
-    return BToken.BToken(c, token_address)
-
-@pytest.fixture
-def T2():  #'TOK2' with 1000.0 minted by Alice
-    c = make_info('Alice', 'TEST_PRIVATE_KEY1').context
-    token_address = brownie_info().token2.address
-    return BToken.BToken(c, token_address)
-
-@pytest.fixture
-def brownie_sfactory():
-    return brownie_info().sfactory
-
-@pytest.fixture
-def brownie_spool():
-    return brownie_info().spool
-
-def brownie_info():
-    web3 = brownie.network.web3
-    private_key = util.confFileValue('ganache', 'FACTORY_DEPLOYER_PRIVATE_KEY')
-    account = brownieAccount(private_key)
-    p = _BROWNIE_PROJECT
-    
-    token1 = p.DataTokenTemplate.deploy('token1', 'TOK1', account.address, HUGEINT, '', {'from': account})
-    token2 = p.DataTokenTemplate.deploy('token2', 'TOK2', account.address, HUGEINT, '', {'from': account})
-
-    token1.mint(account.address, util.toBase18(1000.0))
-    token2.mint(account.address, util.toBase18(1000.0))
-
-    spool_template = p.SPool.deploy({'from': account})
-    
-    sfactory = p.SFactory.deploy(spool_template.address, {'from': account})
-    
-    tx = sfactory.newSPool(account.address, {'from': account}) 
-    spool1_address = tx.events['SPoolCreated']['newSPoolAddress']
-    spool1 = brownie.Contract.from_abi("SPool", spool1_address, abi=spool_template.abi)
-    
-    class _BrownieInfo:
-        pass
-    bi = _BrownieInfo()
-    bi.account = account
-    bi.token1 = token1
-    bi.token2 = token2
-    bi.sfactory = sfactory
-    bi.spool = spool1
-    return bi

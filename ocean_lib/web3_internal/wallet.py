@@ -2,13 +2,14 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+from ocean_lib.web3_internal.account import privateKeyToAddress
 
 class Wallet:
     """
     The wallet is responsible for signing transactions and messages by using an account's
     private key.
 
-    The private key is always red from the encrypted keyfile and is never saved in memory beyond
+    The private key is always read from the encrypted keyfile and is never saved in memory beyond
     the life span of the signing function.
 
     The use of this wallet allows Ocean tools to send rawTransactions which keeps the user
@@ -33,6 +34,21 @@ class Wallet:
         self._password = password
         self._address = address
         self._key = key
+
+        if self._address is None and self._key is not None:
+            self._address = privateKeyToAddress(self._key)
+
+    @property
+    def web3(self):
+        return self._web3
+    
+    @property
+    def address(self):
+        return self._address
+
+    @property
+    def private_key(self):
+        return self._key
 
     @staticmethod
     def reset_tx_count():

@@ -1,13 +1,14 @@
 import enforce
 
 from ocean_lib.ocean import util
+from ocean_lib.web3_internal.wallet import Wallet
 
 @enforce.runtime_validation
 class BToken:
-    def __init__(self, c: util.Context, address: str):
-        self._c: util.Context = c
+    def __init__(self, web3, contract_address: str):
+        self.web3 = web3
         abi = self._abi()
-        self.contract = c.web3.eth.contract(address, abi=abi)
+        self.contract = web3.eth.contract(contract_address, abi=abi)
         
     @property
     def address(self):
@@ -15,13 +16,6 @@ class BToken:
     
     def _abi(self):
         return util.abi(filename='./abi/BToken.abi')
-    
-    def balanceOfSelf_base(self) -> int:
-        return self.balanceOf_base(self._c.address)
-
-    def allowanceFromSelf_base(self, dst_address: str) -> int:
-        src_address = self._c.address
-        return self.allowance_base(src_address, dst_address)
         
     #============================================================
     #reflect BToken Solidity methods
@@ -35,14 +29,15 @@ class BToken:
         func = self.contract.functions.balanceOf(address)
         return func.call()
 
-    def approve(self, spender_address: str, amt_base: int):
-        func = self.contract.functions.approve(spender_address, amt_base)
-        util.buildAndSendTx(self._c, func)
+    def approve(self, spender_address: str, amt_base: int,
+                from_wallet: Wallet):
+        f = self.contract.functions.approve(spender_address, amt_base)
+        util.buildAndSendTx(f, from_wallet)
 
-    def transfer(self, dst_address: str, amt_base: int):
-        func = self.contract.functions.transfer(dst_address, amt_base)
-        util.buildAndSendTx(self._c, func)
+    def transfer(self, dst_address: str, amt_base: int, from_wallet: Wallet):
+        f = self.contract.functions.transfer(dst_address, amt_base)
+        util.buildAndSendTx(f, from_wallet)
 
     def allowance_base(self, src_address:str, dst_address: str) -> int:
-        func = self.contract.functions.allowance(src_address, dst_address)
-        return func.call()
+        f = self.contract.functions.allowance(src_address, dst_address)
+        return f.call()
