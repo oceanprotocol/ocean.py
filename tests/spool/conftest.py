@@ -4,6 +4,7 @@ import pytest
 from ocean_lib.ocean import constants #import here to toggle type-checking
 from ocean_lib import Ocean
 from ocean_lib.ocean import util
+from ocean_lib.spool_py import BToken
 
 from tests.resources.helper_functions import brownieAccount
     
@@ -14,6 +15,10 @@ _BROWNIE_PROJECT = brownie.project.load(f'./', name=f'MyProject')
 @pytest.fixture
 def network():
     return _NETWORK
+
+@pytest.fixture
+def brownie_project():
+    return _BROWNIE_PROJECT
 
 @pytest.fixture
 def OCEAN_address():
@@ -36,6 +41,7 @@ def make_info(name, private_key_name):
     info.private_key = util.confFileValue(_NETWORK, private_key_name)
     info.address = util.privateKeyToAddress(info.private_key)
     info.context = util.Context(_NETWORK, private_key=info.private_key)
+    info.context.brownie_project = _BROWNIE_PROJECT
     info.view = util.AccountView(_NETWORK, info.address, name)
     info.config = {'network': _NETWORK,
                    'privateKey': info.private_key,
@@ -105,20 +111,24 @@ def brownie_token2():
     return brownie_info().token2
 
 @pytest.fixture
+def T1(): #'TOK1' with 1000.0 minted by Alice
+    c = make_info('Alice', 'TEST_PRIVATE_KEY1').context
+    token_address = brownie_info().token1.address
+    return BToken.BToken(c, token_address)
+
+@pytest.fixture
+def T2():  #'TOK2' with 1000.0 minted by Alice
+    c = make_info('Alice', 'TEST_PRIVATE_KEY1').context
+    token_address = brownie_info().token2.address
+    return BToken.BToken(c, token_address)
+
+@pytest.fixture
 def brownie_sfactory():
     return brownie_info().sfactory
 
 @pytest.fixture
 def brownie_spool():
     return brownie_info().spool
-
-@pytest.fixture
-def brownie_mfactory():
-    return brownie_info().mfactory
-
-@pytest.fixture
-def brownie_mpool():
-    return brownie_info().mpool
 
 def brownie_info():
     web3 = brownie.network.web3
@@ -140,14 +150,6 @@ def brownie_info():
     spool1_address = tx.events['SPoolCreated']['newSPoolAddress']
     spool1 = brownie.Contract.from_abi("SPool", spool1_address, abi=spool_template.abi)
     
-    mpool_template = p.MPool.deploy(spool_template.address, {'from': account})
-
-    mfactory = p.MFactory.deploy(mpool_template.address, sfactory.address, {'from': account})
-
-    tx = mfactory.newMPool({'from': account}) #Useful: tx.traceback(), tx.error()
-    mpool1_address = tx.events['MPoolCreated']['newMPoolAddress']
-    mpool1 = brownie.Contract.from_abi("MPool", mpool1_address, abi=mpool_template.abi)
-    
     class _BrownieInfo:
         pass
     bi = _BrownieInfo()
@@ -155,7 +157,5 @@ def brownie_info():
     bi.token1 = token1
     bi.token2 = token2
     bi.sfactory = sfactory
-    bi.mfactory = mfactory
     bi.spool = spool1
-    bi.mpool = mpool1
     return bi

@@ -1,8 +1,8 @@
+import brownie
 import enforce
 import pytest
 import sys
 
-from ocean_lib import Ocean
 from ocean_lib.spool_py import SFactory, SPool, BToken
 from ocean_lib.ocean import util
 from ocean_lib.ocean.util import fromBase18, toBase18
@@ -58,9 +58,7 @@ def test_setPublicSwap(alice_context):
     pool.setPublicSwap(False)
     assert not pool.isPublicSwap()
 
-def test_2tokens_basic(alice_context, alice_view):
-    T1 = _deployToken(alice_context)
-    T2 = _deployToken(alice_context)
+def test_2tokens_basic(alice_context, alice_address, alice_view, T1, T2):
     pool = _deploySPool(alice_context)
     assert T1.address != T2.address
     assert T1.address != pool.address
@@ -71,6 +69,14 @@ def test_2tokens_basic(alice_context, alice_view):
     #Bind two tokens to the pool
     T1.approve(pool.address, toBase18(90.0))
     T2.approve(pool.address, toBase18(10.0))
+
+    allowance1 = fromBase18(T1.allowance_base(alice_address, pool.address))
+    allowance2 = fromBase18(T2.allowance_base(alice_address, pool.address))
+    assert allowance1 == 90.0
+    assert allowance2 == 10.0
+    print(f"T1 allowance from alice to pool: {allowance1}")
+    print(f"T2 allowance from alice to pool: {allowance2}")
+    import pdb; pdb.set_trace()
     
     assert not pool.isBound(T1.address) and not pool.isBound(T1.address)
     pool.bind(T1.address, toBase18(90.0), toBase18(9.0))
@@ -92,8 +98,8 @@ def test_2tokens_basic(alice_context, alice_view):
     
     assert str(pool)
 
-def test_unbind(alice_context):
-    (pool, T1, T2) = _createPoolWith2Tokens(alice_context,1.0,1.0,1.0,1.0)
+def test_unbind(alice_context, T1, T2):
+    pool = _createPoolWith2Tokens(alice_context,T1,T2,1.0,1.0,1.0,1.0)
     
     pool.unbind(T1.address)
     
@@ -101,8 +107,8 @@ def test_unbind(alice_context):
     assert pool.getCurrentTokens() == [T2.address]
     assert fromBase18(pool.getBalance_base(T2.address)) == 1.0
 
-def test_finalize(alice_address, alice_context):
-    (pool, T1, T2) = _createPoolWith2Tokens(alice_context,90.0,10.0,9.0,1.0)
+def test_finalize(alice_address, alice_context, T1, T2):
+    pool = _createPoolWith2Tokens(alice_context,T1,T2,90.0,10.0,9.0,1.0)
 
     assert not pool.isPublicSwap()
     assert not pool.isFinalized()
@@ -121,9 +127,9 @@ def test_finalize(alice_address, alice_context):
     assert pool.getFinalTokens() == [T1.address, T2.address]
     assert pool.getCurrentTokens() == [T1.address, T2.address]
     
-def test_public_pool(alice_address, alice_context, bob_address, bob_context):
-    (pool, T1, T2) = _createPoolWith2Tokens(
-        alice_context, 90.0, 10.0, 9.0, 1.0, 1000.0, 1000.0)
+def test_public_pool(alice_address, alice_context, bob_address, bob_context,
+                     T1,T2):
+    pool = _createPoolWith2Tokens(alice_context,T1,T2,90.0,10.0,9.0,1.0)
     BPT = pool
         
     #alice give Bob some tokens
@@ -202,8 +208,8 @@ def test_public_pool(alice_address, alice_context, bob_address, bob_context):
     assert fromBase18(BPT.balanceOf_base(bob_address)) == 0.0
 
 
-def test_rebind_more_tokens(alice_context):
-    (pool, T1, T2) = _createPoolWith2Tokens(alice_context,90.0,10.0,9.0,1.0)
+def test_rebind_more_tokens(alice_context,T1,T2):
+    pool = _createPoolWith2Tokens(alice_context,T1,T2,90.0,10.0,9.0,1.0)
     
     #insufficient allowance
     with pytest.raises(Exception): 
@@ -213,8 +219,7 @@ def test_rebind_more_tokens(alice_context):
     T1.approve(pool.address, toBase18(30.0))
     pool.rebind(T1.address, toBase18(120.0), toBase18(9.0))
     
-def test_gulp(alice_context):
-    T1 = _deployToken(alice_context)
+def test_gulp(alice_context, T1):
     pool = _deploySPool(alice_context)
     
     #bind T1 to the pool, with a balance of 2.0
@@ -246,28 +251,28 @@ def test_spot_price(alice_context):
     assert p_sans == 1.0
     assert round(p,8) == 1.000001
     
-    (p, p_sans) = _spotPrices(alice_context, 1.0, 2.0, 1.0, 1.0)
+    (p, p_sans) = _spotPrices(alice_context, T1, T2, 1.0, 2.0, 1.0, 1.0)
     assert p_sans == 0.5
     assert round(p,8) == 0.5000005
     
-    (p, p_sans) = _spotPrices(alice_context, 2.0, 1.0, 1.0, 1.0)
+    (p, p_sans) = _spotPrices(alice_context, T1, T2, 2.0, 1.0, 1.0, 1.0)
     assert p_sans == 2.0
     assert round(p,8) == 2.000002
 
-    (p, p_sans) = _spotPrices(alice_context, 9.0, 10.0, 9.0, 1.0)
+    (p, p_sans) = _spotPrices(alice_context, T1, T2, 9.0, 10.0, 9.0, 1.0)
     assert p_sans == 0.1
     assert round(p,8) == 0.1000001
 
 @enforce.runtime_validation
-def _spotPrices(c: util.Context, bal1:float, bal2:float, w1:float, w2:float):
-    (pool, T1, T2) = _createPoolWith2Tokens(c, bal1, bal2, w1, w2)
+def _spotPrices(c: util.Context, T1:BToken.BToken, T2:BToken.BToken,
+                bal1:float, bal2:float, w1:float, w2:float):
+    pool = _createPoolWith2Tokens(c, T1, T2, bal1, bal2, w1, w2)
     a1, a2 = T1.address, T2.address
     return (fromBase18(pool.getSpotPrice_base(a1, a2)),
             fromBase18(pool.getSpotPriceSansFee_base(a1, a2))) 
     
-def test_joinSwapExternAmountIn(alice_address, alice_context): 
-    (pool, T1, T2) = _createPoolWith2Tokens(
-        alice_context,90.0,10.0, 9.0,1.0, 1000.0,1000.0)
+def test_joinSwapExternAmountIn(alice_address, alice_context, T1, T2): 
+    pool = _createPoolWith2Tokens(alice_context,T1,T2,90.0,10.0, 9.0,1.0)
     T1.approve(pool.address, toBase18(100.0))
 
     #pool's not public
@@ -290,9 +295,8 @@ def test_joinSwapExternAmountIn(alice_address, alice_context):
     assert 908.94 <= fromBase18(T1.balanceOf_base(alice_address)) <= 908.95
     assert fromBase18(T2.balanceOf_base(alice_address)) == (1000.0 - 9.0)
     
-def test_joinswapPoolAmountOut(alice_address, alice_context):
-    (pool, T1, T2) = _createPoolWith2Tokens(
-        alice_context, 90.0, 10.0, 9.0, 1.0, 1000.0, 1000.0)
+def test_joinswapPoolAmountOut(alice_address, alice_context, T1, T2):
+    pool = _createPoolWith2Tokens(alice_context,T1,T2,90.0,10.0,9.0,1.0)
     BPT = pool    
     pool.finalize()
     T1.approve(pool.address, toBase18(90.0))
@@ -304,9 +308,8 @@ def test_joinswapPoolAmountOut(alice_address, alice_context):
     assert fromBase18(T1.balanceOf_base(alice_address)) >= (910.0 - 90.0)
     assert fromBase18(BPT.balanceOf_base(alice_address)) == (100.0 + 10.0)
 
-def test_exitswapPoolAmountIn(alice_address, alice_context):
-    (pool, T1, T2) = _createPoolWith2Tokens(
-        alice_context, 90.0, 10.0, 9.0, 1.0, 1000.0, 1000.0)
+def test_exitswapPoolAmountIn(alice_address, alice_context, T1, T2):
+    pool = _createPoolWith2Tokens(alice_context,T1,T2,90.0,10.0,9.0,1.0)
     BPT = pool    
     pool.finalize()
     assert fromBase18(T1.balanceOf_base(alice_address)) == 910.0
@@ -317,9 +320,8 @@ def test_exitswapPoolAmountIn(alice_address, alice_context):
     assert fromBase18(T1.balanceOf_base(alice_address)) >= (910.0 + 1.0)
     assert fromBase18(BPT.balanceOf_base(alice_address)) == (100.0 - 10.0)
 
-def test_exitswapExternAmountOut(alice_address, alice_context):
-    (pool, T1, T2) = _createPoolWith2Tokens(
-        alice_context, 90.0, 10.0, 9.0, 1.0, 1000.0, 1000.0)
+def test_exitswapExternAmountOut(alice_address, alice_context, T1, T2):
+    pool = _createPoolWith2Tokens(alice_context,T1,T2,90.0,10.0,9.0,1.0)
     BPT = pool    
     pool.finalize()
     assert fromBase18(T1.balanceOf_base(alice_address)) == 910.0
@@ -419,10 +421,8 @@ def _getPoolWith2Tokens(c:util.Context,
 
 @enforce.runtime_validation
 def _createPoolWith2Tokens(c: util.Context,
-                           bal1:float, bal2:float, w1:float, w2:float,
-                           num_mint1=1000.0, num_mint2=1000.0):
-    T1 = _deployToken(c, num_mint=num_mint1)
-    T2 = _deployToken(c, num_mint=num_mint2)
+                           T1: BToken.BToken, T2: BToken.BToken,
+                           bal1:float, bal2:float, w1:float, w2:float):
     pool = _deploySPool(c)
     
     T1.approve(pool.address, toBase18(bal1))
@@ -437,15 +437,3 @@ def _createPoolWith2Tokens(c: util.Context,
 def _deploySPool(c: util.Context) -> SPool.SPool:
     address = SFactory.SFactory(c).newSPool(c.address)
     return SPool.SPool(c, address)
-
-@enforce.runtime_validation
-def _deployToken(c: util.Context, num_mint:float=1000.0) -> BToken.BToken:
-    account = Account(private_key=c.private_key)
-    dtfactory_address = util.confFileValue(c.network, 'DTFACTORY_ADDRESS')
-    config = {'network': c.network, 'privateKey': c.private_key,
-              'dtfactory.address': dtfactory_address}
-    ocean = Ocean(config)
-    dt = ocean.create_data_token('', account)
-    dt.mint(to=c.address, value=toBase18(num_mint), account=account) 
-    btoken = BToken.BToken(c, dt.address)
-    return btoken

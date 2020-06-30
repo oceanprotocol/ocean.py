@@ -1,3 +1,4 @@
+import brownie
 import configparser
 import enforce
 import eth_account
@@ -74,6 +75,10 @@ def fromBase(num_base: int, dec: int) -> float:
     """returns value in e.g. ETH (taking e.g. wei as input)"""
     return float(num_base / (10**dec))
 
+def brownie_account(private_key):
+    assert brownie.network.is_connected()
+    return brownie.network.accounts.add(private_key=private_key)
+
 #FIXME: deprecate this
 CONF_FILE_PATH = '~/ocean.conf'
 @enforce.runtime_validation
@@ -99,6 +104,7 @@ class Context:
             self.web3 = Web3(get_web3_provider(network))
         if private_key is not None:
             self.address = privateKeyToAddress(private_key)
+        self.brownie_project = None
 
 #FIXME: maybe deprecate this
 @enforce.runtime_validation

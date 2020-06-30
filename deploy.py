@@ -73,7 +73,7 @@ def deploy(network):
     if network == 'ganache': #past deployments cause errors, so delete them
         os.system(f'rm -rf ./build/deployments/1234')
         
-    deployer_account = brownieAccount(factory_deployer_private_key)
+    deployer_account = util.brownie_account(factory_deployer_private_key)
     p = brownie.project.load(f'./', name=f'MyProject')
 
     print("****Deploy DataTokenTemplate: begin****")
