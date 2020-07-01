@@ -29,7 +29,6 @@ CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 
 logger = logging.getLogger('ocean')
 
-@enforce.runtime_validation
 class Ocean:
     """The Ocean class is the entry point into Ocean Protocol."""
 
@@ -86,16 +85,19 @@ class Ocean:
     @property
     def config(self):
         return self._config
+    
+    @property
+    def web3(self):
+        return self._web3
 
     @enforce.runtime_validation
     def create_data_token(self, blob:str, from_wallet: Wallet) -> DataToken:
         dtfactory = DTFactory(self._web3, self._config.dtfactory_address)
         dt_address = dtfactory.createToken(blob, from_wallet=from_wallet)
-
         dt = DataToken(self._web3, dt_address)
         assert dt.address == dt_address        
         return dt
 
-    @staticmethod
-    def get_data_token(token_address: str) -> DataToken:
-        return DataToken(token_address)
+    @enforce.runtime_validation
+    def get_data_token(self, token_address: str) -> DataToken:
+        return DataToken(self._web3, token_address)
