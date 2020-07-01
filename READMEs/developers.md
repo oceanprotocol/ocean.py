@@ -93,9 +93,19 @@ Finally: update `ocean.conf`'s `FACTORY_ADDRESS` with the factory address output
 ## 5. Test 
 Outcome: ocean-lib-py works as expected.
 
-First, run simple quickstart on ganache. 
+Some tests don't need other services running. Let's run one:
 ```console
-./quickstart_simpleflow.py ganache
+pytest tests/spool/test_BToken.py
+```
+
+Some tests need an Ocean Provider running. Follow [these steps](https://github.com/oceanprotocol/provider-py/blob/master/README.md) to set up Provider. Then run test(s) that uses Provider (but not other services). For example:
+```console
+pytest tests/ocean/test_simple_flow.py
+```
+
+Some tests need an Ocean Provider *and* Aquarius (database service) running. Follow [these steps](https://github.com/oceanprotocol/aquarius) to set up Aquarius. Then run test(s) that use Provider and Aquarius. For example:
+```console
+pytest 
 ```
 
 And repeat on rinkeby etc.
