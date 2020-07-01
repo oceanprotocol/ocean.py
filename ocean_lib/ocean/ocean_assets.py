@@ -3,13 +3,13 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 import copy
+import enforce
 import logging
 import os
 
-from deprecated import deprecated
-
 from ocean_lib.assets.asset import Asset
 from ocean_lib.web3_internal import Web3Helper
+from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_utils.agreements.service_agreement import ServiceAgreement
@@ -33,7 +33,6 @@ from ocean_lib.ocean.asset_service_mixin import AssetServiceMixin
 
 logger = logging.getLogger('ocean')
 
-
 class OceanAssets(AssetServiceMixin):
     """Ocean assets class."""
 
@@ -50,7 +49,9 @@ class OceanAssets(AssetServiceMixin):
     def _get_aquarius(self, url=None):
         return AquariusProvider.get_aquarius(url or self._aquarius_url)
 
-    def _process_service_descriptors(self, service_descriptors, metadata, account):
+    @enforce.runtime_validation
+    def _process_service_descriptors(
+            self, service_descriptors, metadata, account: Account):
         ddo_service_endpoint = self._get_aquarius().get_service_endpoint()
 
         service_type_to_descriptor = {sd[0]: sd for sd in service_descriptors}
@@ -85,7 +86,9 @@ class OceanAssets(AssetServiceMixin):
         _service_descriptors.extend(service_type_to_descriptor.values())
         return ServiceFactory.build_services(_service_descriptors)
 
-    def create(self, metadata, publisher_wallet: Wallet, service_descriptors=None,
+    @enforce.runtime_validation
+    def create(self, metadata, publisher_wallet: Wallet,
+               service_descriptors=None,
                owner_address=None, data_token_address=None):
         """
         Register an asset on-chain by creating/deploying a DataToken contract
@@ -227,7 +230,8 @@ class OceanAssets(AssetServiceMixin):
             return None
         return asset
 
-    def retire(self, did):
+    @enforce.runtime_validation
+    def retire(self, did: str) -> bool:
         """
         Retire this did of Aquarius
 
@@ -243,7 +247,8 @@ class OceanAssets(AssetServiceMixin):
             logger.error(err)
             return False
 
-    def resolve(self, did):
+    @enforce.runtime_validation
+    def resolve(self, did: str):
         """
         When you pass a did retrieve the ddo associated.
 
@@ -252,7 +257,8 @@ class OceanAssets(AssetServiceMixin):
         """
         return resolve_asset(did, metadata_store_url=self._config.aquarius_url)
 
-    def search(self, text, sort=None, offset=100, page=1, aquarius_url=None):
+    @enforce.runtime_validation
+    def search(self, text: str, sort=None, offset=100, page=1, aquarius_url=None):
         """
         Search an asset in oceanDB using aquarius.
 
@@ -269,7 +275,8 @@ class OceanAssets(AssetServiceMixin):
         return [Asset(dictionary=ddo_dict) for ddo_dict in
                 self._get_aquarius(aquarius_url).text_search(text, sort, offset, page)['results']]
 
-    def query(self, query, sort=None, offset=100, page=1, aquarius_url=None):
+    @enforce.runtime_validation
+    def query(self, query: dict, sort=None, offset=100, page=1, aquarius_url=None):
         """
         Search an asset in oceanDB using search query.
 
@@ -287,13 +294,9 @@ class OceanAssets(AssetServiceMixin):
         return [Asset(dictionary=ddo_dict) for ddo_dict in
                 aquarius.query_search(query, sort, offset, page)['results']]
 
-    @deprecated('This function is obsolete, please use Ocean.download()')
-    def consume(self, did, service_index, consumer_account,
-                destination, index=None):
-        return self.download(did, service_index, consumer_account, destination, index)
-
-    def download(self, did, service_index, consumer_account,
-                 destination, index=None):
+    @enforce.runtime_validation
+    def download(self, did: str, service_index: str, consumer_account: Account,
+                 destination: str, index=None) -> str:
         """
         Consume the asset data.
 
@@ -329,7 +332,8 @@ class OceanAssets(AssetServiceMixin):
             index
         )
 
-    def validate(self, metadata):
+    @enforce.runtime_validation
+    def validate(self, metadata: dict) -> bool:
         """
         Validate that the metadata is ok to be stored in aquarius.
 
@@ -338,7 +342,8 @@ class OceanAssets(AssetServiceMixin):
         """
         return self._get_aquarius(self._aquarius_url).validate_metadata(metadata)
 
-    def owner(self, did):
+    @enforce.runtime_validation
+    def owner(self, did: str) -> str:
         """
         Return the owner of the asset.
 
@@ -348,7 +353,8 @@ class OceanAssets(AssetServiceMixin):
         asset = self.resolve(did)
         return asset.publisher
 
-    def owner_assets(self, owner_address):
+    @enforce.runtime_validation
+    def owner_assets(self, owner_address: str):
         """
         List of Asset objects published by ownerAddress
 
@@ -357,21 +363,8 @@ class OceanAssets(AssetServiceMixin):
         """
         return [asset.did for asset in self.query({"query": {"proof.creator": [owner_address]}})]
 
-    # def transfer_ownership(self, did, new_owner_address, account):
-    #     """
-    #     Transfer did ownership to an address.
-    #
-    #     :param did: the id of an asset on-chain, hex str
-    #     :param new_owner_address: ethereum account address, hex str
-    #     :param account: Account executing the action
-    #     :return: bool
-    #     """
-    #     asset_id = add_0x_prefix(did_to_id(did))
-    #     return .did_registry.transfer_did_ownership(asset_id, new_owner_address,
-    #                                                             account)
-
     @staticmethod
-    def _build_access_service(metadata, address: str):
+    def _build_access_service(metadata, address: str) -> dict:
         return {
             "main": {
                 "name": "dataAssetAccessServiceAgreement",
@@ -382,7 +375,8 @@ class OceanAssets(AssetServiceMixin):
             }
         }
 
-    def _build_compute_service(self, metadata, address: str):
+    @enforce.runtime_validation
+    def _build_compute_service(self, metadata, address: str) -> dict:
         return {
             "main": {
                 "name": "dataAssetComputeServiceAgreement",
@@ -395,7 +389,7 @@ class OceanAssets(AssetServiceMixin):
         }
 
     @staticmethod
-    def _build_provider_config():
+    def _build_provider_config() -> dict:
         # TODO manage this as different class and get all the info for different services
         return {
             "type": "Azure",

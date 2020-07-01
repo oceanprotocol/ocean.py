@@ -13,7 +13,7 @@ class DataToken(BToken):
     def _abi(self):
         return util.abi(filename='./abi/DataTokenTemplate.abi')
 
-    def download(self, tx_id: str, destination_folder: str,
+    def download(self, tx_id, destination_folder: str,
                  consumer_address: str) -> str:
         url = self.blob()
         download_url = (

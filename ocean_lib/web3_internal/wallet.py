@@ -1,9 +1,12 @@
+import enforce
 import logging
+import typing
 
 logger = logging.getLogger(__name__)
 
 from ocean_lib.web3_internal.account import Account, privateKeyToAddress
 
+@enforce.runtime_validation
 class Wallet:
     """
     The wallet is responsible for signing transactions and messages by using an account's
@@ -28,7 +31,10 @@ class Wallet:
     _last_tx_count = dict()
     MIN_GAS_PRICE = 1000000000
 
-    def __init__(self, web3, key=None, password=None, address=None):
+    def __init__(self, web3,
+                 key: typing.Union[str,None] = None,
+                 password: typing.Union[str,None] = None,
+                 address: typing.Union[str,None] = None):
         self._web3 = web3
 
         self._password = password
