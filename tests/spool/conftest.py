@@ -50,10 +50,10 @@ def make_info(name, private_key_name):
     info.account = Account(private_key=info.private_key)
     info.wallet = Wallet(web3, key=info.private_key)
     info.view = util.AccountView(_NETWORK, info.address, name)
-    info.config = {'network': _NETWORK,
-                   'privateKey': info.private_key,
-                   'dtfactory.address': dtfactory_address()}
-    info.ocean = Ocean(info.config)
+    config = {'network': _NETWORK,
+              'privateKey': info.private_key,
+              'dtfactory.address': dtfactory_address()}
+    info.ocean = Ocean(config)
     info.T1 = _deployAndMintToken('TOK1', info.address)
     info.T2 = _deployAndMintToken('TOK2', info.address)    
 
@@ -94,10 +94,6 @@ def alice_view():
     return alice_info().view
 
 @pytest.fixture
-def alice_config():
-    return alice_info().config
-
-@pytest.fixture
 def alice_ocean():
     return alice_info().ocean
 
@@ -120,10 +116,6 @@ def bob_account():
 @pytest.fixture
 def bob_view():
     return bob_info().view
-
-@pytest.fixture
-def bob_config():
-    return bob_info().config
 
 @pytest.fixture
 def bob_ocean():
