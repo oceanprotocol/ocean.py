@@ -28,7 +28,7 @@ pip install -r requirements.txt""")
 
 if not os.path.exists('/tmp/ocean-contracts'):
     print('===  Clone ocean-contracts')
-    os.system('cd /tmp; git clone --branch libpy-issue19 https://github.com/oceanprotocol/ocean-contracts; cd -')
+    os.system('cd /tmp; git clone https://github.com/oceanprotocol/ocean-contracts; cd -')
 else:
     print('===  Update ocean-contracts')
     os.system('cd /tmp/ocean-contracts; git pull; cd -')
