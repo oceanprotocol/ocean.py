@@ -11,7 +11,6 @@ from ocean_lib.web3_internal.wallet import Wallet
 def test_simple_flow():
     #set values
     network = 'ganache'
-    dtfactory_address = confFileValue(network, 'DTFACTORY_ADDRESS')
     alice_private_key = get_account(0).private_key
     alice_address = privateKeyToAddress(alice_private_key)
     bob_private_key = get_account(1).private_key
@@ -19,7 +18,8 @@ def test_simple_flow():
     dataset_download_endpoint = 'http://localhost:8030/api/v1/services'
 
     # 1. Alice publishes a dataset (= publishes a datatoken)
-    config = {'network': network, 'dtfactory.address': dtfactory_address}
+    config = {'network': network,
+              'dtfactory.address': confFileValue(network, 'DTFACTORY_ADDRESS')}
     ocean = Ocean(config)
     alice_wallet = Wallet(ocean.web3, key=alice_private_key)
     token = ocean.create_data_token(dataset_download_endpoint, alice_wallet)

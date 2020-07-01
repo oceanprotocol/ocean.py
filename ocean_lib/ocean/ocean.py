@@ -53,10 +53,10 @@ class Ocean:
             aqua_url = config.get('metadataStoreUri', config.get('aquarius.url', 'http://localhost:5000'))
             config_dict = {
                 'eth-network': {
-                    'network': config['network'],
-                    'dtfactory.address': config.get('dtfactory.address'),
-                    'sfactory.address': config.get('sfactory.address'),
-                    'OCEAN.address': config.get('OCEAN.address'),
+                    'network': config.get('network',''),
+                    'dtfactory.address': config.get('dtfactory.address',''),
+                    'sfactory.address': config.get('sfactory.address',''),
+                    'OCEAN.address': config.get('OCEAN.address',''),
                 },
                 'resources': {
                     'aquarius.url': aqua_url,

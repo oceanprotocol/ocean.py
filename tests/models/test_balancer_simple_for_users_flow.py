@@ -9,8 +9,7 @@ from ocean_lib.models import bconstants
 from ocean_lib.ocean import util
 from ocean_lib.ocean.util import toBase18, fromBase18
 
-def test_quickstart(network, OCEAN_address,
-                    alice_ocean, alice_wallet, alice_address,
+def test_quickstart(alice_ocean, alice_wallet, alice_address,
                     bob_ocean, bob_wallet):        
     #===============================================================
     # 1. Alice publishes a dataset (= publishes a datatoken)
@@ -89,45 +88,27 @@ def test_quickstart(network, OCEAN_address,
 
 #===============================================================
 # Test helper functions for the quickstart stuff above
-def test_OCEAN_address(OCEAN_address, alice_ocean):
-    assert alice_ocean.OCEAN_address == OCEAN_address
+def test_ocean_balancer_helpers(
+        OCEAN_address, alice_ocean, alice_wallet, alice_address, bob_ocean):
 
-def test_DT_address(OCEAN_address, alice_ocean, alice_wallet, alice_address):
     DT = alice_ocean.create_data_token('foo', alice_wallet)
     DT.mint(alice_address, toBase18(1000.0), alice_wallet)
+
+    with pytest.raises(Exception): #not enough liquidity
+        pool = alice_ocean.create_pool(
+            DT.address, num_DT_base=0, num_OCEAN_base=0,
+            from_wallet=alice_wallet)
+        
     pool = alice_ocean.create_pool(
         DT.address, num_DT_base=toBase18(90.0), num_OCEAN_base=toBase18(10.0),
         from_wallet=alice_wallet)
+    pool_address = pool.address
 
     assert alice_ocean.OCEAN_address == OCEAN_address
     assert alice_ocean._DT_address(pool.address) == DT.address
 
-def test_get_pool(alice_ocean, alice_wallet, alice_address, bob_ocean):
-    DT = alice_ocean.create_data_token('foo', alice_wallet)
-    DT.mint(alice_address, toBase18(1000.0), alice_wallet)
-    pool = alice_ocean.create_pool(
-        DT.address, num_DT_base=toBase18(90.0), num_OCEAN_base=toBase18(10.0),
-        from_wallet=alice_wallet)
-    pool_address = pool.address
     assert alice_ocean.get_pool(pool_address).address == pool_address
     assert bob_ocean.get_pool(pool_address).address == pool_address
-
-def test_min_liquidity_needed(alice_ocean, alice_wallet):
-    DT = alice_ocean.create_data_token('foo', alice_wallet)
-    with pytest.raises(Exception): 
-        pool = alice_ocean.create_pool(
-            DT.address, num_DT_base=0, num_OCEAN_base=0,
-            from_wallet=alice_wallet)
     
-def test_get_DT_price(alice_ocean, alice_wallet, bob_ocean, bob_wallet):
-    #you're alice
-    DT = alice_ocean.create_data_token('foo', alice_wallet)
-    DT.mint(alice_wallet.address, toBase18(1000.0), alice_wallet)
-    pool = alice_ocean.create_pool(
-        DT.address, num_DT_base=toBase18(90.0), num_OCEAN_base=toBase18(10.0),
-        from_wallet=alice_wallet)
-    pool_address = pool.address
-
-    #now you're bob
     DT_price = fromBase18(bob_ocean.get_DT_price_base(pool_address))
     assert DT_price > 0.0
