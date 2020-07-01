@@ -2,7 +2,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 from ocean_lib import Ocean
-from ocean_lib.models.dtfactory import DTFactoryContract
+from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.util import confFileValue, toBase18
 from ocean_lib.web3_internal.utils import get_account
 
@@ -32,7 +32,7 @@ def test_simple_flow():
     # 5. Bob consumes dataset
     bob_ocean = Ocean(config)
     token = bob_ocean.get_data_token(dt_address)
-    #minter_address = DTFactoryContract(ocean.config.factory_address).get_token_minter(token.address)
+    #minter_address = DTFactory(ocean.config.factory_address).get_token_minter(token.address)
     minter_address = alice_address #the above returns None, so do this for now
     tx_id = token.transfer(minter_address, toBase18(1.0), bob_account)
 

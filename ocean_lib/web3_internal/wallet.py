@@ -2,7 +2,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-from ocean_lib.web3_internal.account import privateKeyToAddress
+from ocean_lib.web3_internal.account import Account, privateKeyToAddress
 
 class Wallet:
     """
@@ -50,6 +50,10 @@ class Wallet:
     def private_key(self):
         return self._key
 
+    @property
+    def account(self):
+        return Account(private_key=self.private_key)
+    
     @staticmethod
     def reset_tx_count():
         Wallet._last_tx_count = dict()

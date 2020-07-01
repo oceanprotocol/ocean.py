@@ -1,7 +1,7 @@
 import enforce
 import typing
 
-from .BToken import BToken
+from .btoken import BToken
 from ocean_lib.ocean import util
 from ocean_lib.web3_internal.wallet import Wallet
 

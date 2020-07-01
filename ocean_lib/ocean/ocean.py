@@ -10,15 +10,15 @@ import os
 from ocean_lib.ocean import constants #import here to toggle type-checking
 
 from ocean_lib.ocean.ocean_market import OceanMarket
-from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib import Config
 
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.datatoken import DataToken
-from ocean_lib.models.dtfactory import DTFactoryContract
+from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_auth import OceanAuth
 from ocean_lib.ocean.ocean_compute import OceanCompute
@@ -29,31 +29,11 @@ CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 
 logger = logging.getLogger('ocean')
 
+@enforce.runtime_validation
 class Ocean:
     """The Ocean class is the entry point into Ocean Protocol."""
 
     def __init__(self, config=None, data_provider=None):
-        """
-        Initialize Ocean class.
-           >> # Make a new Ocean instance
-           >> ocean = Ocean({...})
-
-        This class provides the main top-level functions in ocean protocol:
-         * Publish assets metadata and associated services
-            * Each asset is assigned a unique DID and a DID Document (DDO)
-            * The DDO contains the asset's services including the metadata
-            * The DID is registered on-chain with a URL of the metadata store
-              to retrieve the DDO from
-
-            >> asset = ocean.assets.create(metadata, publisher_account)
-
-         * Discover/Search assets via the current configured metadata store (Aquarius)
-            >> assets_list = ocean.assets.search('search text')
-
-        An instance of Ocean is parameterized by a `Config` instance.
-
-        :param config: Config instance
-        """
         # Configuration information for the market is stored in the Config class
         # config = Config(filename=config_file, options_dict=config_dict)
         if not config:
@@ -108,9 +88,12 @@ class Ocean:
         return self._config
 
     @enforce.runtime_validation
-    def create_data_token(self, blob:str, account: Account) -> DataToken:
-        dtfactory = DTFactoryContract(self._config.factory_address)
-        dt = dtfactory.create_data_token(account, blob)
+    def create_data_token(self, blob:str, from_wallet: Wallet) -> DataToken:
+        dtfactory = DTFactory(self._web3, self._config.dtfactory_address)
+        dt_address = dtfactory.createToken(blob, from_wallet=from_wallet)
+
+        dt = DataToken(self._web3, dt_address)
+        assert dt.address == dt_address        
         return dt
 
     @staticmethod

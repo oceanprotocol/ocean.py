@@ -10,6 +10,7 @@ from deprecated import deprecated
 
 from ocean_lib.assets.asset import Asset
 from ocean_lib.web3_internal import Web3Helper
+from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_utils.agreements.service_factory import ServiceDescriptor, ServiceFactory
@@ -26,7 +27,8 @@ from ocean_utils.utils.utilities import checksum
 
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
-from ocean_lib.models.dtfactory import DTFactoryContract
+from ocean_lib.models.datatoken import DataToken
+from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.asset_service_mixin import AssetServiceMixin
 
 logger = logging.getLogger('ocean')
@@ -65,7 +67,7 @@ class OceanAssets(AssetServiceMixin):
         access_service_descriptor = service_type_to_descriptor.pop(
             ServiceTypes.ASSET_ACCESS,
             ServiceDescriptor.access_service_descriptor(
-                self._build_access_service(metadata, account),
+                self._build_access_service(metadata, account.address),
                 self._data_provider.get_download_endpoint(self._config),
                 0
             )
@@ -83,14 +85,14 @@ class OceanAssets(AssetServiceMixin):
         _service_descriptors.extend(service_type_to_descriptor.values())
         return ServiceFactory.build_services(_service_descriptors)
 
-    def create(self, metadata, publisher_account, service_descriptors=None,
+    def create(self, metadata, publisher_wallet: Wallet, service_descriptors=None,
                owner_address=None, data_token_address=None):
         """
         Register an asset on-chain by creating/deploying a DataToken contract
         and in the Metadata store (Aquarius).
 
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
-        :param publisher_account: Account of the publisher registering this asset
+        :param publisher_wallet: Wallet of the publisher registering this asset
         :param service_descriptors: list of ServiceDescriptor tuples of length 2.
             The first item must be one of ServiceTypes and the second
             item is a dict of parameters and values required by the service
@@ -111,7 +113,8 @@ class OceanAssets(AssetServiceMixin):
 
         service_descriptors = service_descriptors or []
 
-        services = self._process_service_descriptors(service_descriptors, metadata_copy, publisher_account)
+        services = self._process_service_descriptors(
+            service_descriptors, metadata_copy, publisher_wallet.account)
         stype_to_service = {s.type: s for s in services}
         checksum_dict = dict()
         for service in services:
@@ -120,7 +123,7 @@ class OceanAssets(AssetServiceMixin):
         # Create a DDO object
         asset = Asset()
         # Adding proof to the ddo.
-        asset.add_proof(checksum_dict, publisher_account)
+        asset.add_proof(checksum_dict, publisher_wallet.account)
 
         # Generating the did and adding to the ddo.
         did = asset.assign_did(DID.did(asset.proof['checksum']))
@@ -148,12 +151,12 @@ class OceanAssets(AssetServiceMixin):
 
         publisher_signature = Web3Helper.sign_hash(
             add_ethereum_prefix_and_hash_msg(asset.asset_id),
-            publisher_account
+            publisher_wallet.account
         )
         asset.proof['signatureValue'] = publisher_signature
 
         # Add public key and authentication
-        asset.add_public_key(did, publisher_account.address)
+        asset.add_public_key(did, publisher_wallet.address)
 
         asset.add_authentication(did, PUBLIC_KEY_TYPE_RSA)
 
@@ -168,7 +171,7 @@ class OceanAssets(AssetServiceMixin):
             metadata_copy['main']['files'],
             encrypt_endpoint,
             asset.asset_id,
-            publisher_account.address,
+            publisher_wallet.address,
             publisher_signature
         )
 
@@ -191,11 +194,11 @@ class OceanAssets(AssetServiceMixin):
 
         if not data_token_address:
             # register on-chain
-            factory = DTFactoryContract(self._config.factory_address)
-            data_token = factory.create_data_token(
-                publisher_account,
-                metadata_url=ddo_service_endpoint
-            )
+            web3 = publisher_wallet.web3
+            dtfactory = DTFactory(web3, self._config.dtfactory_address)
+            dt_address = dtfactory.createToken(blob=ddo_service_endpoint,
+                                               from_wallet=publisher_wallet)
+            data_token = DataToken(web3, dt_address)
             if not data_token:
                 logger.warning(f'Creating new data token failed.')
                 return None
@@ -207,7 +210,7 @@ class OceanAssets(AssetServiceMixin):
             # owner_address is set as minter only if creating new data token. So if
             # `data_token_address` is set `owner_address` has no effect.
             if owner_address:
-                data_token.set_minter(owner_address, publisher_account)
+                data_token.setMinter(owner_address, from_wallet=publisher_wallet)
 
         # Set datatoken address in the asset
         asset.data_token_address = data_token_address
@@ -368,22 +371,22 @@ class OceanAssets(AssetServiceMixin):
     #                                                             account)
 
     @staticmethod
-    def _build_access_service(metadata, publisher_account):
+    def _build_access_service(metadata, address: str):
         return {
             "main": {
                 "name": "dataAssetAccessServiceAgreement",
-                "creator": publisher_account.address,
+                "creator": address,
                 "price": metadata[MetadataMain.KEY]['price'],
                 "timeout": 3600,
                 "datePublished": metadata[MetadataMain.KEY]['dateCreated']
             }
         }
 
-    def _build_compute_service(self, metadata, publisher_account):
+    def _build_compute_service(self, metadata, address: str):
         return {
             "main": {
                 "name": "dataAssetComputeServiceAgreement",
-                "creator": publisher_account.address,
+                "creator": address,
                 "datePublished": metadata[MetadataMain.KEY]['dateCreated'],
                 "price": metadata[MetadataMain.KEY]['price'],
                 "timeout": 86400,

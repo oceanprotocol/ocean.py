@@ -1,73 +1,33 @@
 import enforce
-import logging
-import typing
 import warnings
 
 from ocean_lib.models.datatoken import DataToken
-from ocean_lib.web3_internal import ContractBase
-from ocean_lib.web3_internal.account import Account
+from ocean_lib.ocean import util
+from ocean_lib.web3_internal.wallet import Wallet
 
-class DTFactoryContract(ContractBase):
-    
+@enforce.runtime_validation
+class DTFactory:
+    def __init__(self, web3, contract_address: str):
+        self.web3 = web3
+        abi = self._abi()
+        self.contract = web3.eth.contract(contract_address, abi=abi)
+        
     @property
-    def contract_name(self):
-        return 'DTFactory'
-
-    def create_data_token(self, account: Account, metadata_url: str) -> typing.Union[DataToken, None]:
-        tx_hash = self.send_transaction(
-            'createToken',
-            (metadata_url,),
-            transact={'from': account.address,
-                      'passphrase': account.password,
-                      'account_key': account.key},
-        )
-        tx_receipt = self.get_tx_receipt(tx_hash)
-        if not tx_receipt:
-            logging.warning(f'Cannot get the transaction receipt for tx {tx_hash}.')
-            return None
+    def address(self):
+        return self.contract.address
+    
+    def _abi(self):
+        return util.abi(filename='./abi/DTFactory.abi')
+    
+    #============================================================
+    #reflect DTFactory Solidity methods
+    def createToken(self, blob: str, from_wallet: Wallet) -> str:
+        f = self.contract.functions.createToken(blob)
+        (tx_hash, tx_receipt) = util.buildAndSendTx(f, from_wallet)
 
         warnings.filterwarnings("ignore") #ignore unwarranted warning up next
-        rich_logs = getattr(self.events, 'TokenCreated')().processReceipt(tx_receipt)
-        token_addr = rich_logs[0]['args']['newTokenAddress'] 
+        rich_logs = getattr(self.contract.events, 'TokenCreated')().processReceipt(tx_receipt)
+        token_address = rich_logs[0]['args']['newTokenAddress'] 
         warnings.resetwarnings()
-        
-        if not rich_logs:
-            logging.warning(f'No logs were found for tx {tx_hash}.')
-            return None
 
-        dt = DataToken(token_addr)
-        assert dt.address == token_addr
-        return dt
-
-    @enforce.runtime_validation
-    def get_token_registered_event(self, block_number:int, metadata_url:str, sender):
-        event = getattr(self.events, 'TokenRegistered')
-        filter_params = {}
-        event_filter = event().createFilter(
-            fromBlock=block_number,
-            toBlock=block_number,
-            argument_filters=filter_params
-        )
-        logs = event_filter.get_all_entries()
-        for log in logs:
-            if log.args.blob == metadata_url and sender == log.args.RegisteredBy:
-                return log
-
-        return None
-
-    @enforce.runtime_validation
-    def get_token_minter(self, token_address: str) -> typing.Union[str, None]:
-        """Returns the address of the token minter"""
-        event = getattr(self.events, 'TokenRegistered')
-        filter_params = {'tokenAddress': token_address}
-        event_filter = event().createFilter(
-            fromBlock=0,
-            toBlock='latest',
-            argument_filters=filter_params
-        )
-        logs = event_filter.get_all_entries()
-        for log in logs:
-            assert log.args.tokenAddress == token_address
-            return log.args.RegisteredBy
-
-        return None
+        return token_address

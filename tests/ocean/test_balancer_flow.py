@@ -1,7 +1,7 @@
 import sys
 
 from ocean_lib import Ocean
-from ocean_lib.spool_py import SFactory, SPool, BToken, bconstants
+from ocean_lib.models import SFactory, SPool, BToken, bconstants
 from ocean_lib.ocean import util
 from ocean_lib.ocean.util import toBase18
 
