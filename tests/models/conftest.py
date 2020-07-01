@@ -23,13 +23,16 @@ def brownie_project():
     return _BROWNIE_PROJECT
 
 @pytest.fixture
-def OCEAN_address():
-    return util.confFileValue(_NETWORK, 'OCEAN_ADDRESS')
-
-@pytest.fixture
 def dtfactory_address():
     return _dtfactory_address()
 
+@pytest.fixture
+def sfactory_address():
+    return _sfactory_address()
+
+@pytest.fixture
+def OCEAN_address():
+    return _OCEAN_address()
 
 @pytest.fixture
 def alice_private_key():
@@ -79,9 +82,6 @@ def T1():  #'TOK1' with 1000.0 held by Alice
 def T2():  #'TOK2' with 1000.0 held by Alice
     return alice_info().T2
 
-def _dtfactory_address():
-    return util.confFileValue(_NETWORK, 'DTFACTORY_ADDRESS')
-
 def alice_info():
     return make_info('Alice', 'TEST_PRIVATE_KEY1')
 
@@ -104,7 +104,10 @@ def make_info(name, private_key_name):
     info.wallet = Wallet(web3, key=info.private_key)
     config = {'network': _NETWORK,
               'privateKey': info.private_key,
-              'dtfactory.address': _dtfactory_address()}
+              'dtfactory.address': _dtfactory_address(),
+              'sfactory.address': _sfactory_address(),
+              'OCEAN.address': _OCEAN_address(),
+    }
     info.ocean = Ocean(config)
     info.T1 = _deployAndMintToken('TOK1', info.address)
     info.T2 = _deployAndMintToken('TOK2', info.address)    
@@ -125,3 +128,9 @@ def _deployAndMintToken(symbol: str, to_address: str) -> btoken.BToken:
 
 def _dtfactory_address():
     return util.confFileValue(_NETWORK, 'DTFACTORY_ADDRESS')
+
+def _sfactory_address():
+    return util.confFileValue(_NETWORK, 'SFACTORY_ADDRESS')
+
+def _OCEAN_address():
+    return util.confFileValue(_NETWORK, 'OCEAN_ADDRESS')

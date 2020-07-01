@@ -65,10 +65,6 @@ os.system(f'cp /tmp/openzeppelin-contracts/contracts/token/ERC20/../../GSN/Conte
 os.system(f'cp /tmp/openzeppelin-contracts/contracts/token/ERC20/../../math/SafeMath.sol {CONTRACTDIR}')
 os.system(f'cp /tmp/openzeppelin-contracts/contracts/token/ERC20/../../utils/Address.sol {CONTRACTDIR}')
 
-#rename datatoken factory from Factory -> DTFactory, to help distinguish SFactory
-os.system(f'mv {CONTRACTDIR}/Factory.sol {CONTRACTDIR}/DTFactory.sol')
-
-
 #----------------------
 print('===In-place change .sol files: flatten imports, more')
 
@@ -80,13 +76,11 @@ def inplace_change(filename, old_s, new_s):
     with open(filename, 'w') as f:
         s = s.replace(old_s, new_s)
         f.write(s)
-
-inplace_change(f'{CONTRACTDIR}/DTFactory.sol', 'TokenFactory', 'Factory')
-inplace_change(f'{CONTRACTDIR}/DTFactory.sol', 'Factory', 'DTFactory')
     
 #Fix imports
 for f in glob.glob(f'{CONTRACTDIR}/*.sol'):
     inplace_change(f, 'IERC20.sol', 'BToken.sol')
+    inplace_change(f, 'solidity 0.5.7', 'solidity <0.6.0')
     inplace_change(f, 'solidity 0.5.12', 'solidity <0.6.0')
     inplace_change(f, 'solidity >= 0.4.22 <0.7.0', 'solidity <0.6.0')
     inplace_change(f, 'openzeppelin-solidity/contracts/', './')
