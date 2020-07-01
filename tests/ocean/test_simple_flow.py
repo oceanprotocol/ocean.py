@@ -3,19 +3,17 @@
 
 from ocean_lib import Ocean
 from ocean_lib.models.dtfactory import DTFactoryContract
-from ocean_lib.ocean.util import confFileValue, toBase18, fromBase18
-from ocean_lib.web3_internal.account import Account
+from ocean_lib.ocean.util import confFileValue, toBase18
+from ocean_lib.web3_internal.utils import get_account
 
 def test_simple_flow():
     #set values
     network = 'ganache'
     dtfactory_address = confFileValue(network, 'DTFACTORY_ADDRESS')
-    alice_private_key = confFileValue(network, 'TEST_PRIVATE_KEY1') 
-    bob_private_key = confFileValue(network, 'TEST_PRIVATE_KEY2')
     
-    alice_account = Account(private_key=alice_private_key)
+    alice_account = get_account(0)
     alice_address = alice_account.address
-    bob_account = Account(private_key=bob_private_key)
+    bob_account = get_account(1)
     dataset_download_endpoint = 'http://localhost:8030/api/v1/services'
 
     # 1. Alice publishes a dataset (= publishes a datatoken)

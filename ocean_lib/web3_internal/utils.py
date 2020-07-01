@@ -12,6 +12,7 @@ from web3 import Web3
 from web3.contract import ContractEvent
 from web3.exceptions import TimeExhausted
 
+from ocean_lib.ocean import util
 from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
@@ -108,13 +109,14 @@ def split_signature(web3, signature):
 
     return Signature(v, r, s)
 
-def get_account(index):
+def get_account(index: int) -> Account:
     #for testing
     network = 'ganache'
     assert index in [0,1]
     label = 'TEST_PRIVATE_KEY' + str(index+1)
-    private_key = confFileValue(network, label)
+    private_key = util.confFileValue(network, label)
     account = Account(private_key=private_key)
+    return account
     
 def process_tx_receipt(tx_hash, event_instance, event_name, agreement_id=None):
     """
