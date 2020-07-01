@@ -37,5 +37,5 @@ def test_simple_flow():
     tx_id = token.transfer(minter_address, toBase18(1.0), bob_account)
 
     #FIXME: uncomment and make this work
-    #_file = token.download(bob_account, tx_id, '/tmp')
-    #assert _file and _file.startswith('/tmp') and len(_file) > len('/tmp')
+    _file = token.download(bob_account, tx_id, '/tmp')
+    assert _file and _file.startswith('/tmp') and len(_file) > len('/tmp')
