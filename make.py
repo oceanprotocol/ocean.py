@@ -79,11 +79,6 @@ os.system(f'cp /tmp/balancer-core/contracts/BNum.sol {CONTRACTDIR}')
 os.system(f'cp /tmp/balancer-core/contracts/BToken.sol {CONTRACTDIR}')
 os.system(f'cp /tmp/balancer-core/contracts/Migrations.sol {CONTRACTDIR}')
 
-#note: below we're skipping M*.sol. and these B*.sol will overwrite some 
-# some .sol files from balancer-core/contracts
-os.system(f'cp ./ocean_lib/spool_contracts/SFactory.sol {CONTRACTDIR}')
-os.system(f'cp ./ocean_lib/spool_contracts/SPool.sol {CONTRACTDIR}')
-
 #rename datatoken factory from Factory -> DTFactory, to help distinguish SFactory
 os.system(f'mv {CONTRACTDIR}/Factory.sol {CONTRACTDIR}/DTFactory.sol')
 
