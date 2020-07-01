@@ -90,16 +90,6 @@ def confFileValue(network: str, key: str) -> str:
     return conf[network][key]
 
 #FIXME: maybe deprecate this
-@enforce.runtime_validation
-def tokenBalance_base(network: str, balance_address: str, token_address: str) -> int:
-    min_abi = [{'constant': True, 'inputs': [{'internalType': 'address', 'name': 'whom', 'type': 'address'}], 'name': 'balanceOf', 'outputs': [{'internalType': 'uint256', 'name': '', 'type': 'uint256'}], 'payable': False, 'stateMutability': 'view', 'type': 'function'}]
-    web3 = Web3(get_web3_provider(network))
-    contract = web3.eth.contract(token_address, abi=min_abi)
-    func = contract.functions.balanceOf(balance_address)
-    return func.call()
-
-
-#FIXME: maybe deprecate this
 # (or deprecate the similar but more complex version in contract_handler)
 @enforce.runtime_validation
 def abi(filename: str):
