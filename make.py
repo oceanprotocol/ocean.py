@@ -39,13 +39,6 @@ if not os.path.exists('/tmp/openzeppelin-contracts'):  # note that we use v0.2.5
     # don't need to ever update them, since it's an old version
 print('===Clone/update .sol sources: done')
 
-if not os.path.exists('/tmp/balancer-core'):
-    print('===  Clone balancer-core contracts')
-    os.system('cd /tmp; git clone https://github.com/balancer-labs/balancer-core; cd -')
-else:
-    print('===  Update balancer-core contracts')
-    os.system('cd /tmp/balancer-core; git pull; cd -')
-
 SUBDIRS = ['build', 'contracts', 'interfaces', 'reports', 'scripts']#no 'tests'
 print(f'===Initialize brownie dirs {SUBDIRS} (but keep tests/):')
 #Let 'brownie init' do the work, and preserve 'tests/'  
@@ -71,13 +64,6 @@ os.system(f'cp /tmp/openzeppelin-contracts/contracts/token/ERC20/../../GSN/Conte
 #os.system(f'cp /tmp/openzeppelin-contracts/contracts/token/ERC20/./IERC20.sol {CONTRACTDIR}') #use BToken
 os.system(f'cp /tmp/openzeppelin-contracts/contracts/token/ERC20/../../math/SafeMath.sol {CONTRACTDIR}')
 os.system(f'cp /tmp/openzeppelin-contracts/contracts/token/ERC20/../../utils/Address.sol {CONTRACTDIR}')
-
-os.system(f'cp /tmp/balancer-core/contracts/BColor.sol {CONTRACTDIR}')
-os.system(f'cp /tmp/balancer-core/contracts/BConst.sol {CONTRACTDIR}')
-os.system(f'cp /tmp/balancer-core/contracts/BMath.sol {CONTRACTDIR}')
-os.system(f'cp /tmp/balancer-core/contracts/BNum.sol {CONTRACTDIR}')
-os.system(f'cp /tmp/balancer-core/contracts/BToken.sol {CONTRACTDIR}')
-os.system(f'cp /tmp/balancer-core/contracts/Migrations.sol {CONTRACTDIR}')
 
 #rename datatoken factory from Factory -> DTFactory, to help distinguish SFactory
 os.system(f'mv {CONTRACTDIR}/Factory.sol {CONTRACTDIR}/DTFactory.sol')
