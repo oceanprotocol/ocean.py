@@ -108,25 +108,14 @@ def split_signature(web3, signature):
 
     return Signature(v, r, s)
 
-
 def get_account(index):
-    name = 'PARITY_ADDRESS' if not index else f'PARITY_ADDRESS{index}'
-    pswrd_name = 'PARITY_PASSWORD' if not index else f'PARITY_PASSWORD{index}'
-    key_name = 'PARITY_KEY' if not index else f'PARITY_KEY{index}'
-    encrypted_key_name = 'PARITY_ENCRYPTED_KEY' if not index else f'PARITY_ENCRYPTED_KEY{index}'
-    keyfile_name = 'PARITY_KEYFILE' if not index else f'PARITY_KEYFILE{index}'
-
-    address = os.getenv(name)
-    if not address:
-        return None
-
-    pswrd = os.getenv(pswrd_name)
-    key = os.getenv(key_name)
-    encr_key = os.getenv(encrypted_key_name)
-    key_file = os.getenv(keyfile_name)
-
-    return Account(Web3.toChecksumAddress(address), pswrd, key_file, encr_key, key)
-
+    #for testing
+    network = 'ganache'
+    assert index in [0,1]
+    label = 'TEST_PRIVATE_KEY' + str(index+1)
+    private_key = confFileValue(network, label)
+    account = Account(private_key=private_key)
+    
 def process_tx_receipt(tx_hash, event_instance, event_name, agreement_id=None):
     """
     Wait until the tx receipt is processed.
