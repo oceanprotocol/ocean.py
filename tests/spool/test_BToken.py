@@ -3,13 +3,10 @@ from ocean_lib.ocean import util
 from web3 import Web3
 
 def test1(network,
-          alice_wallet, alice_view, alice_address,
-          bob_wallet, bob_view, bob_address,
+          alice_wallet, alice_address,
+          bob_wallet, bob_address,
           OCEAN_address):
     web3 = Web3(util.get_web3_provider(network))
-    assert alice_view.OCEAN() > 10.0
-    assert bob_view.OCEAN() > 10.0
-
     btoken = BToken.BToken(web3, OCEAN_address)
 
     assert btoken.symbol() == 'OCEAN'
