@@ -17,8 +17,12 @@ from ocean_lib import Config
 
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.models import bconstants
+from ocean_lib.models.btoken import BToken
 from ocean_lib.models.datatoken import DataToken
 from ocean_lib.models.dtfactory import DTFactory
+from ocean_lib.models.sfactory import SFactory
+from ocean_lib.models.spool import SPool
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_auth import OceanAuth
 from ocean_lib.ocean.ocean_compute import OceanCompute
@@ -50,7 +54,9 @@ class Ocean:
             config_dict = {
                 'eth-network': {
                     'network': config['network'],
-                    'dtfactory.address': config.get('dtfactory.address')
+                    'dtfactory.address': config.get('dtfactory.address'),
+                    'sfactory.address': config.get('sfactory.address'),
+                    'OCEAN.address': config.get('OCEAN.address'),
                 },
                 'resources': {
                     'aquarius.url': aqua_url,
@@ -93,11 +99,43 @@ class Ocean:
     @enforce.runtime_validation
     def create_data_token(self, blob:str, from_wallet: Wallet) -> DataToken:
         dtfactory = DTFactory(self._web3, self._config.dtfactory_address)
-        dt_address = dtfactory.createToken(blob, from_wallet=from_wallet)
-        dt = DataToken(self._web3, dt_address)
-        assert dt.address == dt_address        
-        return dt
+        DT_address = dtfactory.createToken(blob, from_wallet=from_wallet)
+        DT = DataToken(self._web3, DT_address)
+        assert dt.address == DT_address        
+        return DT
 
     @enforce.runtime_validation
     def get_data_token(self, token_address: str) -> DataToken:
         return DataToken(self._web3, token_address)
+
+    @enforce.runtime_validation
+    def create_pool(self,
+                    DT_address: str,
+                    num_DT_base: int,
+                    num_OCEAN_base:int,
+                    from_wallet: Wallet) -> SPool:
+        sfactory_address = self._config.sfactory_address
+        OCEAN_address = self._config.OCEAN_address
+        
+        sfactory = SFactory(self._web3, sfactory_address)
+
+        pool_address = sfactory.newSPool(from_wallet)
+        pool = SPool(self._web3, pool_address)
+        pool.setPublicSwap(True, from_wallet=from_wallet)
+        pool.setSwapFee(bconstants.DEFAULT_SWAP_FEE, from_wallet) 
+
+        DT = BToken(self._web3, DT_address)
+        assert DT.balanceOf_base(from_wallet.address) >= num_DT_base, \
+            "insufficient DT"
+        DT.approve(pool_address, num_DT_base, from_wallet=from_wallet)
+        pool.bind(DT_address, num_DT_base, bconstants.INIT_WEIGHT_DT,
+                  from_wallet)
+
+        OCEAN = BToken(self._web3, OCEAN_address)
+        assert OCEAN.balanceOf_base(from_wallet.address) >= num_OCEAN_base, \
+            "insufficient OCEAN"
+        OCEAN.approve(pool_address, num_OCEAN_base, from_wallet)
+        pool.bind(OCEAN_address, num_OCEAN_base, bconstants.INIT_WEIGHT_OCEAN,
+                  from_wallet)
+
+        return pool

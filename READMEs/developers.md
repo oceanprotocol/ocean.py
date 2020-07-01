@@ -68,7 +68,7 @@ Let's do it!
 Set up env't, ensure it's up to date:
 ```console
 source venv/bin/activate
-pip install -r requirements.txt 
+pip install -r requirements_dev.txt 
 ```
 
 For the next step, you may need more than the pip-installed brownie pip from step 1. If you do: here's [how to install Brownie](https://medium.com/@iamdefinitelyahuman/getting-started-with-brownie-part-1-9b2181f4cb99). It can be tricky; [here's steps](https://github.com/trentmc/brownie-instrs/blob/master/README_install.md) that I followed.

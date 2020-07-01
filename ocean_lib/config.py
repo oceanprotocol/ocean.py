@@ -22,7 +22,10 @@ NAME_AQUARIUS_URL = 'aquarius.url'
 NAME_STORAGE_PATH = 'storage.path'
 NAME_AUTH_TOKEN_MESSAGE = 'auth_token_message'
 NAME_AUTH_TOKEN_EXPIRATION = 'auth_token_expiration'
+
 NAME_DATA_TOKEN_FACTORY_ADDRESS = 'dtfactory.address'
+NAME_SFACTORY_ADDRESS = 'sfactory.address'
+NAME_OCEAN_ADDRESS = 'OCEAN.address'
 
 NAME_PARITY_URL = 'parity.url'
 NAME_PARITY_ADDRESS = 'parity.address'
@@ -32,6 +35,8 @@ NAME_PROVIDER_ADDRESS = 'provider.address'
 
 environ_names = {
     NAME_DATA_TOKEN_FACTORY_ADDRESS: ['DATA_TOKEN_FACTORY_ADDRESS', 'Data token factory address'],
+    NAME_SFACTORY_ADDRESS: ['SFACTORY_ADDRESS', 'SPool factory address'],
+    NAME_OCEAN_ADDRESS: ['OCEAN_ADDRESS', 'OCEAN address'],
     NAME_NETWORK_URL: ['NETWORK_URL', 'Network URL'],
     NAME_ARTIFACTS_PATH: ['ARTIFACTS_PATH', 'Path to the abi artifacts of the deployed smart contracts'],
     NAME_GAS_LIMIT: ['GAS_LIMIT', 'Gas limit'],
@@ -151,11 +156,16 @@ class Config(configparser.ConfigParser):
 
     @property
     def dtfactory_address(self):
-        return self.get(
-            'eth-network',
-            NAME_DATA_TOKEN_FACTORY_ADDRESS,
-            fallback=None
-        )
+        return self.get('eth-network', NAME_DATA_TOKEN_FACTORY_ADDRESS,
+                        fallback=None)
+    
+    @property
+    def sfactory_address(self):
+        return self.get('eth-network', NAME_SFACTORY_ADDRESS, fallback=None)
+    
+    @property
+    def OCEAN_address(self):
+        return self.get('eth-network', NAME_OCEAN_ADDRESS, fallback=None)
 
     @property
     def downloads_path(self):
