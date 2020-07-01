@@ -19,8 +19,8 @@ class ContractHandler(object):
 
     Retrieval of deployed keeper contracts must use this `ContractHandler`.
     Example:
-        contract = ContractHandler.get('Factory')
-        concise_contract = ContractHandler.get_concise_contract('Factory')
+        contract = ContractHandler.get('DTFactory')
+        concise_contract = ContractHandler.get_concise_contract('DTFactory')
 
     """
     _contracts = dict()
@@ -83,15 +83,9 @@ class ContractHandler(object):
         :return: web3.eth.Contract instance
         """
         assert ContractHandler.artifacts_path is not None, 'artifacts_path should be already set.'
-        contract_definition = ContractHandler.read_abi_from_file(
+        abi = ContractHandler.read_abi_from_file(
             contract_name, ContractHandler.artifacts_path)
 
-        if not address:
-            address = contract_definition.get('address')
-            assert address, 'Cannot find contract address in the abi file.'
-            address = Web3.toChecksumAddress(address)
-
-        abi = contract_definition['abi']
         contract = Web3Provider.get_web3().eth.contract(address=address, abi=abi)
         ContractHandler._contracts[contract_name] = (
             contract,
@@ -102,7 +96,7 @@ class ContractHandler(object):
     @staticmethod
     def read_abi_from_file(contract_name, abi_path):
         path = None
-        contract_name = contract_name + '.json'
+        contract_name = contract_name + '.abi'
         for name in os.listdir(abi_path):
             if name.lower() == contract_name.lower():
                 path = os.path.join(abi_path, contract_name)

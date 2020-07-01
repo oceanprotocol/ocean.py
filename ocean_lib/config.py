@@ -24,7 +24,7 @@ NAME_AQUARIUS_URL = 'aquarius.url'
 NAME_STORAGE_PATH = 'storage.path'
 NAME_AUTH_TOKEN_MESSAGE = 'auth_token_message'
 NAME_AUTH_TOKEN_EXPIRATION = 'auth_token_expiration'
-NAME_DATA_TOKEN_FACTORY_ADDRESS = 'factory.address'
+NAME_DATA_TOKEN_FACTORY_ADDRESS = 'dtfactory.address'
 
 NAME_PARITY_URL = 'parity.url'
 NAME_PARITY_ADDRESS = 'parity.address'
@@ -79,7 +79,7 @@ class Config(configparser.ConfigParser):
 
         [eth-network]
         network = http://localhost:8545                            # ethereum network url.
-        artifacts.path = artifacts                                       # Path of json abis.
+        artifacts.path = abi                                       # Path of json abis.
         parity.url = http://localhost:8545                            # Parity client url.
         parity.address = 0x00bd138abd70e2f00903268f3db08f2d25677c9e   # Partity account address.
         parity.password = node0                                       # Parity account password.
@@ -124,19 +124,7 @@ class Config(configparser.ConfigParser):
 
     @property
     def artifacts_path(self):
-        """Path where the contracts artifacts are allocated."""
-        _path_string = self.get(self._section_name, NAME_ARTIFACTS_PATH)
-        path = Path(_path_string).expanduser().resolve()
-        # TODO: Handle the default case and make default empty string
-        # assert path.exists(), "Can't find the keeper path: {} ({})"..format(_path_string,
-        # path)
-        if os.path.exists(path):
-            pass
-        elif os.getenv('VIRTUAL_ENV'):
-            path = os.path.join(os.getenv('VIRTUAL_ENV'), 'artifacts')
-        else:
-            path = os.path.join(site.PREFIXES[0], 'artifacts')
-        return path
+        return './abi'
 
     @property
     def storage_path(self):

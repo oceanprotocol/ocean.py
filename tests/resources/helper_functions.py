@@ -1,12 +1,14 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
+import brownie
+import enforce
 import json
+import logging
+import logging.config
 import os
 import pathlib
 import uuid
-import logging
-import logging.config
 
 import coloredlogs
 import yaml
@@ -126,3 +128,8 @@ def setup_logging(default_path='logging.yaml', default_level=logging.INFO, env_k
     else:
         logging.basicConfig(level=default_level)
         coloredlogs.install(level=default_level)
+
+@enforce.runtime_validation
+def brownieAccount(private_key: str):
+    assert brownie.network.is_connected()
+    return brownie.network.accounts.add(private_key=private_key)

@@ -3,6 +3,9 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
+import eth_account
+import eth_utils
+import eth_keys
 import logging
 import os
 
@@ -12,7 +15,7 @@ logger = logging.getLogger('account')
 class Account:
     """Class representing an account."""
 
-    def __init__(self, address, password=None, key_file=None, encrypted_key=None, private_key=None):
+    def __init__(self, address=None, password=None, key_file=None, encrypted_key=None, private_key=None):
         """
         Hold account address, password and either keyfile path, encrypted key or private key
 
@@ -40,6 +43,11 @@ class Account:
         self._encrypted_key = encrypted_key
         self._private_key = private_key
 
+        if self.address is None and self._private_key is not None:
+            self.address = privateKeyToAddress(private_key)
+        
+        assert self.address is not None
+
     @property
     def key_file(self):
         if self._key_file:
@@ -47,8 +55,29 @@ class Account:
         return None
 
     @property
+    def private_key(self):
+        return self._private_key
+
+    @property
     def key(self):
         if self._private_key:
             return self._private_key
 
         return self._encrypted_key
+
+    def keysStr(self):
+        s = []
+        s += [f"address: {self.address}"]
+        if self._private_key is not None:
+            s += [f"private key: {self._private_key}"]
+            s += [f"public key: {privateKeyToPublicKey(self._private_key)}"]
+        s += [""]
+        return "\n".join(s)
+
+def privateKeyToAddress(private_key: str) -> str:
+    return eth_account.Account().from_key(private_key).address
+
+def privateKeyToPublicKey(private_key: str):
+    private_key_bytes = eth_utils.decode_hex(private_key)
+    private_key_object = eth_keys.keys.PrivateKey(private_key_bytes)
+    return private_key_object.public_key

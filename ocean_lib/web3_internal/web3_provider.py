@@ -25,17 +25,11 @@ class Web3Provider(object):
             provider = CustomHTTPProvider(keeper_url)
 
         Web3Provider._web3 = Web3(provider)
-        from web3.middleware import geth_poa_middleware
-        Web3Provider._web3.middleware_stack.inject(geth_poa_middleware, layer=0)
 
         # Reset attributes to avoid lint issue about no attribute
         Web3Provider._web3.eth = getattr(Web3Provider._web3, 'eth')
         Web3Provider._web3.net = getattr(Web3Provider._web3, 'net')
-        Web3Provider._web3.personal = getattr(Web3Provider._web3, 'personal')
         Web3Provider._web3.version = getattr(Web3Provider._web3, 'version')
-        Web3Provider._web3.txpool = getattr(Web3Provider._web3, 'txpool')
-        Web3Provider._web3.miner = getattr(Web3Provider._web3, 'miner')
-        Web3Provider._web3.admin = getattr(Web3Provider._web3, 'admin')
         Web3Provider._web3.parity = getattr(Web3Provider._web3, 'parity')
         Web3Provider._web3.testing = getattr(Web3Provider._web3, 'testing')
 

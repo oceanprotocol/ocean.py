@@ -26,7 +26,7 @@ from ocean_utils.utils.utilities import checksum
 
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
-from ocean_lib.models.factory import FactoryContract
+from ocean_lib.models.dtfactory import DTFactoryContract
 from ocean_lib.ocean.asset_service_mixin import AssetServiceMixin
 
 logger = logging.getLogger('ocean')
@@ -191,7 +191,7 @@ class OceanAssets(AssetServiceMixin):
 
         if not data_token_address:
             # register on-chain
-            factory = FactoryContract(self._config.factory_address)
+            factory = DTFactoryContract(self._config.factory_address)
             data_token = factory.create_data_token(
                 publisher_account,
                 metadata_url=ddo_service_endpoint

@@ -1,15 +1,19 @@
+import enforce
 import logging
+import typing
+import warnings
 
 from ocean_lib.models.datatoken import DataToken
 from ocean_lib.web3_internal import ContractBase
+from ocean_lib.web3_internal.account import Account
 
-
-class FactoryContract(ContractBase):
+class DTFactoryContract(ContractBase):
+    
     @property
     def contract_name(self):
-        return 'Factory'
+        return 'DTFactory'
 
-    def create_data_token(self, account, metadata_url):
+    def create_data_token(self, account: Account, metadata_url: str) -> typing.Union[DataToken, None]:
         tx_hash = self.send_transaction(
             'createToken',
             (metadata_url,),
@@ -22,14 +26,21 @@ class FactoryContract(ContractBase):
             logging.warning(f'Cannot get the transaction receipt for tx {tx_hash}.')
             return None
 
-        logs = getattr(self.events, 'TokenRegistered')().processReceipt(tx_receipt)
-        if not logs:
-            logging.warning(f'No logs where found for tx {tx_hash}.')
+        warnings.filterwarnings("ignore") #ignore unwarranted warning up next
+        rich_logs = getattr(self.events, 'TokenCreated')().processReceipt(tx_receipt)
+        token_addr = rich_logs[0]['args']['newTokenAddress'] 
+        warnings.resetwarnings()
+        
+        if not rich_logs:
+            logging.warning(f'No logs were found for tx {tx_hash}.')
             return None
 
-        return DataToken(logs[0].args.tokenAddress)
+        dt = DataToken(token_addr)
+        assert dt.address == token_addr
+        return dt
 
-    def get_token_registered_event(self, block_number, metadata_url, sender):
+    @enforce.runtime_validation
+    def get_token_registered_event(self, block_number:int, metadata_url:str, sender):
         event = getattr(self.events, 'TokenRegistered')
         filter_params = {}
         event_filter = event().createFilter(
@@ -44,7 +55,9 @@ class FactoryContract(ContractBase):
 
         return None
 
-    def get_token_minter(self, token_address):
+    @enforce.runtime_validation
+    def get_token_minter(self, token_address: str) -> typing.Union[str, None]:
+        """Returns the address of the token minter"""
         event = getattr(self.events, 'TokenRegistered')
         filter_params = {'tokenAddress': token_address}
         event_filter = event().createFilter(

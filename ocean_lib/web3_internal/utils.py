@@ -1,7 +1,7 @@
-"""Keeper module to call keeper-contracts."""
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
+import eth_account
 import logging
 import os
 from collections import namedtuple
@@ -10,9 +10,9 @@ from eth_keys import KeyAPI
 from eth_utils import big_endian_to_int
 from web3 import Web3
 from web3.contract import ContractEvent
-from web3.utils.encoding import to_bytes
-from web3.utils.threads import Timeout
+from web3.exceptions import TimeExhausted
 
+from ocean_lib.ocean import util
 from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
@@ -70,7 +70,7 @@ def get_public_key_from_address(web3, account):
     """
     _hash = web3.sha3(text='verify signature.')
     signature = web3.personal.sign(_hash, account.address, account.password)
-    signature = split_signature(web3, to_bytes(hexstr=signature))
+    signature = split_signature(web3, web3.toBytes(hexstr=signature))
     signature_vrs = Signature(signature.v % 27,
                               big_endian_to_int(signature.r),
                               big_endian_to_int(signature.s))
@@ -109,26 +109,15 @@ def split_signature(web3, signature):
 
     return Signature(v, r, s)
 
-
-def get_account(index):
-    name = 'PARITY_ADDRESS' if not index else f'PARITY_ADDRESS{index}'
-    pswrd_name = 'PARITY_PASSWORD' if not index else f'PARITY_PASSWORD{index}'
-    key_name = 'PARITY_KEY' if not index else f'PARITY_KEY{index}'
-    encrypted_key_name = 'PARITY_ENCRYPTED_KEY' if not index else f'PARITY_ENCRYPTED_KEY{index}'
-    keyfile_name = 'PARITY_KEYFILE' if not index else f'PARITY_KEYFILE{index}'
-
-    address = os.getenv(name)
-    if not address:
-        return None
-
-    pswrd = os.getenv(pswrd_name)
-    key = os.getenv(key_name)
-    encr_key = os.getenv(encrypted_key_name)
-    key_file = os.getenv(keyfile_name)
-
-    return Account(Web3.toChecksumAddress(address), pswrd, key_file, encr_key, key)
-
-
+def get_account(index: int) -> Account:
+    #for testing
+    network = 'ganache'
+    assert index in [0,1]
+    label = 'TEST_PRIVATE_KEY' + str(index+1)
+    private_key = util.confFileValue(network, label)
+    account = Account(private_key=private_key)
+    return account
+    
 def process_tx_receipt(tx_hash, event_instance, event_name, agreement_id=None):
     """
     Wait until the tx receipt is processed.
@@ -148,7 +137,7 @@ def process_tx_receipt(tx_hash, event_instance, event_name, agreement_id=None):
     web3 = Web3Provider.get_web3()
     try:
         web3.eth.waitForTransactionReceipt(tx_hash, timeout=20)
-    except Timeout:
+    except TimeExhausted:
         logger.info(f'Waiting for {event_name} transaction receipt timed out. '
                     f'Cannot verify receipt and event.')
         return False
