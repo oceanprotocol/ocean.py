@@ -49,7 +49,6 @@ def make_info(name, private_key_name):
     info.address = util.privateKeyToAddress(info.private_key)
     info.account = Account(private_key=info.private_key)
     info.wallet = Wallet(web3, key=info.private_key)
-    info.view = util.AccountView(_NETWORK, info.address, name)
     config = {'network': _NETWORK,
               'privateKey': info.private_key,
               'dtfactory.address': dtfactory_address()}
@@ -90,10 +89,6 @@ def alice_account():
     return alice_info().account
 
 @pytest.fixture
-def alice_view():
-    return alice_info().view
-
-@pytest.fixture
 def alice_ocean():
     return alice_info().ocean
 
@@ -112,10 +107,6 @@ def bob_wallet():
 @pytest.fixture
 def bob_account():
     return bob_info().account
-
-@pytest.fixture
-def bob_view():
-    return bob_info().view
 
 @pytest.fixture
 def bob_ocean():

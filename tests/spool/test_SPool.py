@@ -63,7 +63,7 @@ def test_setPublicSwap(network, alice_wallet):
     assert not pool.isPublicSwap()
 
 def test_2tokens_basic(network, T1, T2,
-                       alice_wallet, alice_address, alice_view):
+                       alice_wallet, alice_address):
     pool = _deploySPool(network, alice_wallet)
     assert T1.address != T2.address
     assert T1.address != pool.address
@@ -424,17 +424,6 @@ def test_calcPoolInGivenSingleOut_base(network, alice_wallet):
             tokenAmountOut_base = toBase18(0.1),
             swapFee_base = 0)
     assert round(fromBase18(x),3) == 0.005
-
-@enforce.runtime_validation
-def _getPoolWith2Tokens(c:util.Context,
-                        pool_address:str,
-                        T1_address:str, T2_address:str):
-    """Create objects pointing to pre-existing pool and tokens,
-    from the supplied context / view """
-    T1 = BToken.BToken(c, T1_address)
-    T2 = BToken.BToken(c, T2_address)
-    pool = SPool.SPool(c, pool_address)
-    return (pool, T1, T2)
 
 @enforce.runtime_validation
 def _createPoolWith2Tokens(network: str,
