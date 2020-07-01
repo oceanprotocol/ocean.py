@@ -1,20 +1,23 @@
 import sys
 
 from ocean_lib import Ocean
-from ocean_lib.spool_py import SFactory, SPool, BToken, bconstants
+from ocean_lib.models.sfactory import SFactory
+from ocean_lib.models.spool import SPool
+from ocean_lib.models.btoken import BToken
+from ocean_lib.models import bconstants
 from ocean_lib.ocean import util
 from ocean_lib.ocean.util import toBase18
 
 def test1(network, OCEAN_address,
-          alice_wallet, alice_ocean, alice_account, alice_address,
-          bob_wallet, bob_ocean):
+          alice_wallet, alice_ocean, alice_address,
+          bob_wallet):
     web3 = alice_wallet.web3
     sfactory_address = util.confFileValue(network, 'SFACTORY_ADDRESS')
         
     #===============================================================
     # 1. Alice publishes a dataset (= publishes a datatoken)
     # For now, you're Alice:) Let's proceed.
-    DT = alice_ocean.create_data_token('localhost:8030', alice_account)
+    DT = alice_ocean.create_data_token('localhost:8030', alice_wallet)
     DT_address = DT.address
     
     #===============================================================
@@ -26,40 +29,39 @@ def test1(network, OCEAN_address,
     
     #===============================================================
     # 3. Alice mints DTs
-    DT.mint(alice_address, toBase18(1000.0), alice_account)
+    DT.mint(alice_address, toBase18(1000.0), alice_wallet)
     
     #===============================================================
     # 4. Alice creates an OCEAN-DT pool (=a Balancer Pool)
-    sfactory = SFactory.SFactory(web3, sfactory_address)
+    sfactory = SFactory(web3, sfactory_address)
     pool_address = sfactory.newSPool(from_wallet=alice_wallet)
-    pool = SPool.SPool(web3, pool_address)
+    pool = SPool(web3, pool_address)
 
     pool.setPublicSwap(True, from_wallet=alice_wallet)
 
     pool.setSwapFee(toBase18(0.1), from_wallet=alice_wallet) #set 10% fee
 
-    DT_erc20 = BToken.BToken(web3, DT_address) #FIXME: datatoken does 'approve'
-    DT_erc20.approve(pool_address, toBase18(90.0), from_wallet=alice_wallet)
+    DT.approve(pool_address, toBase18(90.0), from_wallet=alice_wallet)
     pool.bind(DT_address, toBase18(90.0), bconstants.INIT_WEIGHT_DT,
               from_wallet=alice_wallet)
 
-    OCEAN_erc20 = BToken.BToken(web3, OCEAN_address)
-    OCEAN_erc20.approve(pool_address, toBase18(10.0), from_wallet=alice_wallet)
+    OCEAN_token = BToken(web3, OCEAN_address)
+    OCEAN_token.approve(pool_address, toBase18(10.0), from_wallet=alice_wallet)
     pool.bind(OCEAN_address, toBase18(10.0), bconstants.INIT_WEIGHT_OCEAN,
               from_wallet=alice_wallet)
     
     #===============================================================
     # 5. Alice adds liquidity to pool
-    DT_erc20.approve(pool_address, toBase18(9.0), from_wallet=alice_wallet)
+    DT.approve(pool_address, toBase18(9.0), from_wallet=alice_wallet)
     pool.rebind(DT_address, toBase18(90.0+9.0), bconstants.INIT_WEIGHT_DT,
                 from_wallet=alice_wallet)
     
-    OCEAN_erc20.approve(pool_address, toBase18(1.0), from_wallet=alice_wallet)
+    OCEAN_token.approve(pool_address, toBase18(1.0), from_wallet=alice_wallet)
     pool.rebind(OCEAN_address, toBase18(10.0+1.0), bconstants.INIT_WEIGHT_OCEAN,
                 from_wallet=alice_wallet)
     
     # 6. Bob buys a DT from pool
-    OCEAN_erc20.approve(pool_address, toBase18(2.0), from_wallet=bob_wallet)
+    OCEAN_token.approve(pool_address, toBase18(2.0), from_wallet=bob_wallet)
     pool.swapExactAmountOut(
         tokenIn_address = OCEAN_address,
         maxAmountIn_base = toBase18(2.0),
@@ -84,7 +86,7 @@ def test1(network, OCEAN_address,
     
     #===============================================================
     # 9. Alice sells data tokens
-    DT_erc20.approve(pool_address, toBase18(1.0), from_wallet=alice_wallet)
+    DT.approve(pool_address, toBase18(1.0), from_wallet=alice_wallet)
     pool.swapExactAmountIn(
         tokenIn_address = DT_address,
         tokenAmountIn_base = toBase18(1.0),
@@ -100,14 +102,14 @@ def test1(network, OCEAN_address,
     
     #===============================================================
     # 11. Bob adds liquidity
-    DT_erc20.approve(pool_address, toBase18(1.0), from_wallet=bob_wallet)
-    OCEAN_erc20.approve(pool_address, toBase18(1.0), from_wallet=bob_wallet)
+    DT.approve(pool_address, toBase18(1.0), from_wallet=bob_wallet)
+    OCEAN_token.approve(pool_address, toBase18(1.0), from_wallet=bob_wallet)
     pool.joinPool(toBase18(0.1), [toBase18(1.0), toBase18(1.0)],
                   from_wallet=bob_wallet)
     
     #===============================================================
     # 12. Bob adds liquidity AGAIN
-    DT_erc20.approve(pool_address, toBase18(1.0), from_wallet=bob_wallet)
-    OCEAN_erc20.approve(pool_address, toBase18(1.0), from_wallet=bob_wallet)
+    DT.approve(pool_address, toBase18(1.0), from_wallet=bob_wallet)
+    OCEAN_token.approve(pool_address, toBase18(1.0), from_wallet=bob_wallet)
     pool.joinPool(toBase18(0.1), [toBase18(1.0), toBase18(1.0)],
                   from_wallet=bob_wallet)

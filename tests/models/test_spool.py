@@ -3,7 +3,9 @@ import enforce
 import pytest
 import sys
 
-from ocean_lib.spool_py import SFactory, SPool, BToken
+from ocean_lib.models.btoken import BToken
+from ocean_lib.models.sfactory import SFactory
+from ocean_lib.models.spool import SPool
 from ocean_lib.ocean import util
 from ocean_lib.ocean.util import fromBase18, toBase18
 from ocean_lib.web3_internal.account import Account
@@ -37,9 +39,9 @@ def test_setSwapFee_fails(network,
                           alice_wallet, alice_address,
                           bob_wallet, bob_address):
     web3 = alice_wallet.web3
-    factory = SFactory.SFactory(web3, _sfactory_address(network))
+    factory = SFactory(web3, _sfactory_address(network))
     pool_address = factory.newSPool(alice_wallet)
-    pool = SPool.SPool(web3, pool_address)
+    pool = SPool(web3, pool_address)
     with pytest.raises(Exception):
         pool.setSwapFee(toBase18(0.011), from_wallet=bob_wallet) #not ok, bob isn't controller
     pool.setController(bob_address, from_wallet=alice_wallet)
@@ -155,7 +157,7 @@ def test_public_pool(network, T1, T2,
     assert fromBase18(BPT.balanceOf_base(pool.address)) == 0
 
     #finalize
-    pool = SPool.SPool(web3, pool.address)
+    pool = SPool(web3, pool.address)
     pool.finalize(from_wallet=alice_wallet)
 
     #verify holdings
@@ -275,7 +277,7 @@ def test_spot_price(network, T1, T2, alice_wallet):
 
 @enforce.runtime_validation
 def _spotPrices(network: str,
-                T1: BToken.BToken, T2: BToken.BToken,
+                T1: BToken, T2: BToken,
                 wallet: Wallet, 
                 bal1:float, bal2:float, w1:float, w2:float):
     pool = _createPoolWith2Tokens(network,T1,T2,wallet, bal1, bal2, w1, w2)
@@ -427,7 +429,7 @@ def test_calcPoolInGivenSingleOut_base(network, alice_wallet):
 
 @enforce.runtime_validation
 def _createPoolWith2Tokens(network: str,
-                           T1: BToken.BToken, T2: BToken.BToken,
+                           T1: BToken, T2: BToken,
                            wallet: Wallet, 
                            bal1:float, bal2:float, w1:float, w2:float):
     pool = _deploySPool(network, wallet)
@@ -441,12 +443,12 @@ def _createPoolWith2Tokens(network: str,
     return pool
 
 @enforce.runtime_validation
-def _deploySPool(network: str, from_wallet: Wallet) -> SPool.SPool:
+def _deploySPool(network: str, from_wallet: Wallet) -> SPool:
     web3 = from_wallet.web3
     factory_address = util.confFileValue(network, 'SFACTORY_ADDRESS')
-    factory = SFactory.SFactory(web3, factory_address)
+    factory = SFactory(web3, factory_address)
     pool_address = factory.newSPool(from_wallet=from_wallet)
-    pool = SPool.SPool(web3, pool_address)
+    pool = SPool(web3, pool_address)
     return pool
 
 @enforce.runtime_validation

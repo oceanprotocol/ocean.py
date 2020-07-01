@@ -1,5 +1,3 @@
-"""Config data."""
-
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
@@ -72,27 +70,6 @@ class Config(configparser.ConfigParser):
     """Class to manage the ocean-lib configuration."""
 
     def __init__(self, filename=None, options_dict=None, **kwargs):
-        """
-        Initialize Config class.
-
-        Options available:
-
-        [eth-network]
-        network = http://localhost:8545                            # ethereum network url.
-        artifacts.path = abi                                       # Path of json abis.
-        parity.url = http://localhost:8545                            # Parity client url.
-        parity.address = 0x00bd138abd70e2f00903268f3db08f2d25677c9e   # Partity account address.
-        parity.password = node0                                       # Parity account password.
-        [resources]
-        aquarius.url = http://localhost:5000                          # Aquarius url.
-        brizo.url = http://localhost:8030                             # Brizo url.
-        storage.path = ocean_lib.db                                    # Path of sla back-up storage.
-
-        :param filename: Path of the config file, str.
-        :param options_dict: Python dict with the config, dict.
-        :param kwargs: Additional args. If you pass text, you have to pass the plain text
-        configuration.
-        """
         configparser.ConfigParser.__init__(self)
 
         self.read_dict(config_defaults)
@@ -173,7 +150,7 @@ class Config(configparser.ConfigParser):
         return self.get(self._section_name, NAME_PARITY_PASSWORD)
 
     @property
-    def factory_address(self):
+    def dtfactory_address(self):
         return self.get(
             'eth-network',
             NAME_DATA_TOKEN_FACTORY_ADDRESS,
