@@ -112,7 +112,7 @@ class OceanCompute(AssetServiceMixin):
                 "name": "dataAssetComputingServiceAgreement",
                 "creator": creator,
                 "datePublished": date_published,
-                "price": str(price),
+                "cost": str(price),
                 "timeout": timeout,
                 "provider": provider_attributes
             }
@@ -192,7 +192,7 @@ class OceanCompute(AssetServiceMixin):
             consumer_account.address,
             self._auth.get(consumer_account),
             sa.index,
-            asset.as_dictionary()['dataTokenAddress'],
+            asset.as_dictionary()['dataToken'],
             tx_id,
             algorithm_did,
             algorithm_meta,

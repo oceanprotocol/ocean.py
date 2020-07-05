@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 class AssetServiceMixin:
     @staticmethod
     def initiate_service(asset, service, consumer_account):
-        dt_address = asset.as_dictionary()['dataTokenAddress']
+        dt_address = asset.as_dictionary()['dataToken']
         sa = ServiceAgreement.from_ddo(service.type, asset)
         initialize_url = DataServiceProvider.get_initialize_endpoint(sa.service_endpoint)
         response = DataServiceProvider.check_service_availability(
@@ -22,7 +22,7 @@ class AssetServiceMixin:
 
         num_tokens = response['numTokens']
         receiver = response['to']
-        assert dt_address == response['dataTokenAddress']
+        assert dt_address == response['dataToken']
         dt = DataToken(dt_address)
         balance = dt.contract_concise.balanceOf(consumer_account.address)
         if balance < num_tokens:

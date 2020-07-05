@@ -49,9 +49,10 @@ class ExampleConfig:
                 "artifacts.path": "artifacts",
                 "factory.address": "0xB9d406D24B310A7D821D0b782a36909e8c925471"
 
-        },
+            },
             "resources": {
-                "aquarius.url": "https://aquarius.marketplace.dev-ocean.com",
+                "aquarius.url": "http://aquarius:5000",
+                # "aquarius.url": "https://aquarius.marketplace.dev-ocean.com",
                 "provider.url": "http://localhost:8030",
                 "provider.address": '0x068Ed00cF0441e4829D9784fCBe7b9e26D4BD8d0',
                 "storage.path": "ocean_lib.db",

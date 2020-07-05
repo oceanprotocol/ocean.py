@@ -71,7 +71,7 @@ class DataServiceProvider:
             f'?documentId={did}'
             f'&serviceId={service_id}'
             f'&serviceType={service_type}'
-            f'&tokenAddress={token_address}'
+            f'&dataToken={token_address}'
             f'&consumerAddress={account.address}'
         )
 
@@ -122,7 +122,7 @@ class DataServiceProvider:
             f'?documentId={did}'
             f'&serviceId={service_id}'
             f'&serviceType={ServiceTypes.ASSET_ACCESS}'
-            f'&tokenAddress={token_address}'
+            f'&dataToken={token_address}'
             f'&transferTxId={token_transfer_tx_id}'
             f'&consumerAddress={account.address}'
             f'&signature={signature}'
@@ -387,7 +387,7 @@ class DataServiceProvider:
             'jobId': job_id or "",
             'serviceId': service_id,
             'serviceType': service_type,
-            'tokenAddress': token_address,
+            'dataToken': token_address,
             'transferTxId': tx_id,
 
         }

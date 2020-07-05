@@ -163,7 +163,7 @@ def test_create_asset_with_different_secret_store(publisher_ocean_instance):
         {"main": {
             "name": "dataAssetAccessServiceAgreement",
             "creator": '0x1234',
-            "price": '1',
+            "cost": '1',
             "timeout": 3600,
             "datePublished": '2019-08-30T12:19:54Z'
         }},

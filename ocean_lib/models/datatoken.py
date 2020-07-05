@@ -110,7 +110,7 @@ class DataToken(ContractBase):
         download_url = (
             f'{url}?'
             f'consumerAddress={account.address}'
-            f'&tokenAddress={self.address}'
+            f'&dataToken={self.address}'
             f'&transferTxId={tx_id}'
         )
         response = get_requests_session().get(download_url, stream=True)

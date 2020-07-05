@@ -144,7 +144,7 @@
           "name": "dataAssetAccessServiceAgreement",
           "creator": "",
           "datePublished": "2019-02-08T08:13:49Z",
-          "price": "10",
+          "cost": "10",
           "timeout": 36000
         },
         "additionalInformation": {

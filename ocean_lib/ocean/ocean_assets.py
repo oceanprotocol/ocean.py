@@ -3,6 +3,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 import copy
+import json
 import logging
 import os
 
@@ -65,7 +66,7 @@ class OceanAssets(AssetServiceMixin):
         access_service_descriptor = service_type_to_descriptor.pop(
             ServiceTypes.ASSET_ACCESS,
             ServiceDescriptor.access_service_descriptor(
-                self._build_access_service(metadata, account),
+                self._build_access_service(metadata, metadata[MetadataMain.KEY]['price'], account),
                 self._data_provider.get_download_endpoint(self._config),
                 0
             )
@@ -112,6 +113,8 @@ class OceanAssets(AssetServiceMixin):
         service_descriptors = service_descriptors or []
 
         services = self._process_service_descriptors(service_descriptors, metadata_copy, publisher_account)
+        metadata_copy[MetadataMain.KEY].pop('price', None)
+
         stype_to_service = {s.type: s for s in services}
         checksum_dict = dict()
         for service in services:
@@ -190,11 +193,12 @@ class OceanAssets(AssetServiceMixin):
         response = None
 
         if not data_token_address:
+            blob = json.dumps({'t': 1, 'url': ddo_service_endpoint})
             # register on-chain
             factory = FactoryContract(self._config.factory_address)
             data_token = factory.create_data_token(
                 publisher_account,
-                metadata_url=ddo_service_endpoint
+                metadata_url=blob
             )
             if not data_token:
                 logger.warning(f'Creating new data token failed.')
@@ -320,7 +324,7 @@ class OceanAssets(AssetServiceMixin):
             asset,
             consumer_account,
             destination,
-            asset.as_dictionary()['dataTokenAddress'],
+            asset.as_dictionary()['dataToken'],
             tx_id,
             self._data_provider,
             index
@@ -368,24 +372,24 @@ class OceanAssets(AssetServiceMixin):
     #                                                             account)
 
     @staticmethod
-    def _build_access_service(metadata, publisher_account):
+    def _build_access_service(metadata, cost, publisher_account):
         return {
             "main": {
                 "name": "dataAssetAccessServiceAgreement",
                 "creator": publisher_account.address,
-                "price": metadata[MetadataMain.KEY]['price'],
+                "cost": cost,
                 "timeout": 3600,
                 "datePublished": metadata[MetadataMain.KEY]['dateCreated']
             }
         }
 
-    def _build_compute_service(self, metadata, publisher_account):
+    def _build_compute_service(self, metadata, cost, publisher_account):
         return {
             "main": {
                 "name": "dataAssetComputeServiceAgreement",
                 "creator": publisher_account.address,
                 "datePublished": metadata[MetadataMain.KEY]['dateCreated'],
-                "price": metadata[MetadataMain.KEY]['price'],
+                "cost": cost,
                 "timeout": 86400,
                 "provider": self._build_provider_config()
             }
