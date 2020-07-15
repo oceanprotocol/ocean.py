@@ -10,8 +10,11 @@ import logging.config
 
 import coloredlogs
 import yaml
+from web3 import Web3
 
 from ocean_lib.assets.asset import Asset
+from ocean_lib.models.factory import FactoryContract
+from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.utils import get_account
 
 from ocean_lib.ocean.ocean import Ocean
@@ -35,6 +38,16 @@ def get_publisher_account():
 
 def get_consumer_account():
     return get_account(1)
+
+
+def new_factory_contract():
+    factory = FactoryContract(address=None)
+    address = factory.deploy(
+        ContractHandler.artifacts_path,
+        Web3.toChecksumAddress(os.environ.get('MINTER_ADDRESS', '0xe2DD09d719Da89e5a3D0F2549c7E24566e947260'))
+    )
+
+    return FactoryContract(address=address)
 
 
 def get_publisher_ocean_instance(use_provider_mock=False):

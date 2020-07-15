@@ -18,8 +18,7 @@ class OceanServices:
         """
         service = ServiceDescriptor.access_service_descriptor(
             attributes,
-            service_endpoint,
-            ''
+            service_endpoint
         )
         return service
 
@@ -27,6 +26,5 @@ class OceanServices:
     def create_compute_service(attributes, service_endpoint):
         return ServiceDescriptor.compute_service_descriptor(
             attributes,
-            service_endpoint,
-            ''
+            service_endpoint
         )

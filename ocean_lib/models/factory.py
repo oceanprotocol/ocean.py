@@ -3,6 +3,7 @@ import logging
 from ocean_lib.models.datatokencontract import DataTokenContract
 from ocean_lib.web3_internal import ContractBase
 from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.event_filter import EventFilter
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 
@@ -80,15 +81,19 @@ class FactoryContract(ContractBase):
 
     def get_token_minter(self, token_address):
         event = getattr(self.events, 'TokenRegistered')
-        filter_params = {'tokenAddress': token_address}
-        event_filter = event().createFilter(
-            fromBlock=0,
-            toBlock='latest',
-            argument_filters=filter_params
+        # TODO: use the filter on tokenAddress when it is set as indexed in the contract event.
+        filter_params = {}  # {'tokenAddress': token_address}
+        event_filter = EventFilter(
+            'TokenRegistered',
+            event,
+            filter_params,
+            from_block=0,
+            to_block='latest'
         )
-        logs = event_filter.get_all_entries()
+        logs = event_filter.get_all_entries(max_tries=10)
         for log in logs:
-            assert log.args.tokenAddress == token_address
-            return log.args.RegisteredBy
+            # assert log.args.tokenAddress == token_address
+            if log.args.tokenAddress == token_address:
+                return log.args.registeredBy
 
         return None

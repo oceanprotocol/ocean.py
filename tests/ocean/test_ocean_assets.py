@@ -42,13 +42,6 @@ def test_register_asset(publisher_ocean_instance):
     ##########################################################
     publisher = publisher_ocean_instance.main_account
 
-    # # ensure Ocean token balance
-    # if publisher_ocean_instance.accounts.balance(publisher).ocn == 0:
-    #     publisher_ocean_instance.accounts.request_tokens(publisher, 200)
-
-    # # You will need some token to make this transfer!
-    # assert publisher_ocean_instance.accounts.balance(publisher).ocn > 0
-
     ##########################################################
     # Create an asset DDO with valid metadata
     ##########################################################
@@ -83,12 +76,12 @@ def test_resolve_did(publisher_ocean_instance, metadata):
 
     # Can't resolve unregistered asset
     unregistered_did = DID.did({"0": "0x00112233445566"})
-    with pytest.raises(OceanDIDNotFound):
+    with pytest.raises(ValueError):
         publisher_ocean_instance.assets.resolve(unregistered_did)
 
     # Raise error on bad did
     invalid_did = "did:op:0123456789"
-    with pytest.raises(OceanDIDNotFound):
+    with pytest.raises(ValueError):
         publisher_ocean_instance.assets.resolve(invalid_did)
     publisher_ocean_instance.assets.retire(did)
 

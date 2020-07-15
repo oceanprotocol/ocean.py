@@ -10,10 +10,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 
 class DataTokenContract(ContractBase):
-
-    @property
-    def contract_name(self):
-        return 'DataTokenTemplate'
+    CONTRACT_NAME = 'DataTokenTemplate'
 
     def get_transfer_event(self, block_number, sender, receiver):
         event = getattr(self.events, 'Transfer')

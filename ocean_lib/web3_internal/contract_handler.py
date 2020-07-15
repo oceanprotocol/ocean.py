@@ -100,7 +100,7 @@ class ContractHandler(object):
         contract_definition = ContractHandler.read_abi_from_file(
             contract_name, ContractHandler.artifacts_path)
 
-        if not address:
+        if not address and 'address' in contract_definition:
             address = contract_definition.get('address')
             assert address, 'Cannot find contract address in the abi file.'
             address = Web3.toChecksumAddress(address)

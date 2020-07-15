@@ -67,8 +67,7 @@ class OceanAssets(AssetServiceMixin):
             ServiceTypes.ASSET_ACCESS,
             ServiceDescriptor.access_service_descriptor(
                 self._build_access_service(metadata, metadata[MetadataMain.KEY]['price'], account),
-                self._data_provider.get_download_endpoint(self._config),
-                0
+                self._data_provider.get_download_endpoint(self._config)
             )
         )
         compute_service_descriptor = service_type_to_descriptor.pop(
