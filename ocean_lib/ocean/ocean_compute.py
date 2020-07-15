@@ -7,6 +7,8 @@ from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib import ConfigProvider
 from ocean_lib.ocean.asset_service_mixin import AssetServiceMixin
+from ocean_lib.web3_internal import Web3Helper
+from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 logger = logging.getLogger('ocean')
 
@@ -112,7 +114,7 @@ class OceanCompute(AssetServiceMixin):
                 "name": "dataAssetComputingServiceAgreement",
                 "creator": creator,
                 "datePublished": date_published,
-                "cost": str(price),
+                "cost": Web3Helper.to_wei(price),
                 "timeout": timeout,
                 "provider": provider_attributes
             }

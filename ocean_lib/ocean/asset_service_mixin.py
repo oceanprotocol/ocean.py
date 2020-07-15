@@ -24,13 +24,13 @@ class AssetServiceMixin:
         receiver = response['to']
         assert dt_address == response['dataToken']
         dt = DataTokenContract(dt_address)
-        balance = dt.contract_concise.balanceOf(consumer_account.address)
+        balance = dt.wei_balance(consumer_account.address)
         if balance < num_tokens:
             raise AssertionError(f'Your token balance {balance} is not sufficient '
                                  f'to execute the requested service. This service '
                                  f'requires {num_tokens} number of tokens.')
 
-        tx_hash = dt.transfer(receiver, num_tokens, consumer_account)
+        tx_hash = dt.transfer_wei(receiver, num_tokens, consumer_account)
         try:
             return dt.verify_transfer_tx(tx_hash, consumer_account.address, receiver)
         except (AssertionError, Exception) as e:

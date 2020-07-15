@@ -4,7 +4,6 @@ METADATA_EXAMPLE = {
     "dateCreated": "2012-02-01T10:55:11Z",
     "author": "Mario",
     "license": "CC0: Public Domain",
-    "price": "10",
     "files": [
       {
         "index": 0,

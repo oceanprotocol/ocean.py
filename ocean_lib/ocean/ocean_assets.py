@@ -29,6 +29,7 @@ from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.models.factory import FactoryContract
 from ocean_lib.ocean.asset_service_mixin import AssetServiceMixin
+from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 logger = logging.getLogger('ocean')
 
@@ -66,7 +67,7 @@ class OceanAssets(AssetServiceMixin):
         access_service_descriptor = service_type_to_descriptor.pop(
             ServiceTypes.ASSET_ACCESS,
             ServiceDescriptor.access_service_descriptor(
-                self._build_access_service(metadata, metadata[MetadataMain.KEY]['price'], account),
+                self._build_access_service(metadata, Web3Helper.to_wei(1), account),
                 self._data_provider.get_download_endpoint(self._config)
             )
         )
@@ -112,7 +113,6 @@ class OceanAssets(AssetServiceMixin):
         service_descriptors = service_descriptors or []
 
         services = self._process_service_descriptors(service_descriptors, metadata_copy, publisher_account)
-        metadata_copy[MetadataMain.KEY].pop('price', None)
 
         stype_to_service = {s.type: s for s in services}
         checksum_dict = dict()

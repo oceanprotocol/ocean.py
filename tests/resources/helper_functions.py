@@ -10,14 +10,18 @@ import logging.config
 
 import coloredlogs
 import yaml
+from ocean_utils.agreements.service_factory import ServiceDescriptor
 from web3 import Web3
 
 from ocean_lib.assets.asset import Asset
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.factory import FactoryContract
+from ocean_lib.web3_internal import Web3Helper
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.utils import get_account
 
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.web3_internal.web3_provider import Web3Provider
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 
 PUBLISHER_INDEX = 1
@@ -99,6 +103,15 @@ def get_computing_metadata():
 def get_registered_ddo(ocean_instance, account):
     metadata = get_metadata()
     metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
+    ServiceDescriptor.access_service_descriptor(
+        ocean_instance.assets._build_access_service(
+            metadata,
+            Web3Helper.to_wei(1),
+            account
+        ),
+        DataServiceProvider.get_download_endpoint(ocean_instance.config)
+    )
+
     asset = ocean_instance.assets.create(metadata, account)
     return asset
 

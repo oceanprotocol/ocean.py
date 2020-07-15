@@ -2,6 +2,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 import logging
+import uuid
 from datetime import datetime
 
 import pytest
@@ -27,6 +28,7 @@ def create_asset(publisher_ocean_instance):
     acct = ocn.main_account
 
     asset = DDO(json_filename=sample_ddo_path)
+    asset.metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
     my_secret_store = 'http://myownsecretstore.com'
     auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
     return ocn.assets.create(asset.metadata, acct, [auth_service])
@@ -46,10 +48,7 @@ def test_register_asset(publisher_ocean_instance):
     # Create an asset DDO with valid metadata
     ##########################################################
     asset = DDO(json_filename=sample_ddo_path)
-
-    ##########################################################
-    # Register using high-level interface
-    ##########################################################
+    asset.metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
     ddo = publisher_ocean_instance.assets.create(asset.metadata, publisher)
     publisher_ocean_instance.assets.retire(ddo.did)
 
@@ -106,6 +105,7 @@ def test_create_data_asset(publisher_ocean_instance, consumer_ocean_instance):
     # Create an Asset with valid metadata
     ##########################################################
     asset = DDO(json_filename=sample_ddo_path)
+    asset.metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
 
     ##########################################################
     # List currently published assets
@@ -131,53 +131,6 @@ def test_create_data_asset(publisher_ocean_instance, consumer_ocean_instance):
     publisher_ocean_instance.assets.retire(new_asset.did)
 
 
-def test_create_asset_with_different_secret_store(publisher_ocean_instance):
-    ocn = publisher_ocean_instance
-
-    sample_ddo_path = get_resource_path('ddo', 'ddo_sa_sample.json')
-    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
-
-    acct = ocn.main_account
-
-    aqua = AquariusProvider.get_aquarius(ocn.config.aquarius_url)
-    aqua.retire_all_assets()
-
-    asset = DDO(json_filename=sample_ddo_path)
-    my_secret_store = 'http://myownsecretstore.com'
-    auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
-    asset.metadata['main']['name'] += str(datetime.now().timestamp())
-    new_asset = ocn.assets.create(asset.metadata, acct, [auth_service])
-    assert new_asset.get_service(ServiceTypes.AUTHORIZATION).service_endpoint == my_secret_store
-    assert new_asset.get_service(ServiceTypes.ASSET_ACCESS)
-    assert new_asset.get_service(ServiceTypes.METADATA)
-    publisher_ocean_instance.assets.retire(new_asset.did)
-
-    access_service = ServiceDescriptor.access_service_descriptor(
-        {"main": {
-            "name": "dataAssetAccessServiceAgreement",
-            "creator": '0x1234',
-            "cost": '1',
-            "timeout": 3600,
-            "datePublished": '2019-08-30T12:19:54Z'
-        }},
-        'service/endpoint',
-        '0x0011001100110011'
-    )
-    asset.metadata['main']['name'] += str(datetime.now().timestamp())
-    new_asset = ocn.assets.create(asset.metadata, acct, [access_service])
-    assert new_asset.get_service(ServiceTypes.AUTHORIZATION)
-    assert new_asset.get_service(ServiceTypes.ASSET_ACCESS)
-    assert new_asset.get_service(ServiceTypes.METADATA)
-    publisher_ocean_instance.assets.retire(new_asset.did)
-
-    asset.metadata['main']['name'] += str(datetime.now().timestamp())
-    new_asset = ocn.assets.create(asset.metadata, acct)
-    assert new_asset.get_service(ServiceTypes.AUTHORIZATION)
-    assert new_asset.get_service(ServiceTypes.ASSET_ACCESS)
-    assert new_asset.get_service(ServiceTypes.METADATA)
-    publisher_ocean_instance.assets.retire(new_asset.did)
-
-
 def test_asset_owner(publisher_ocean_instance):
     ocn = publisher_ocean_instance
 
@@ -187,6 +140,7 @@ def test_asset_owner(publisher_ocean_instance):
     acct = ocn.main_account
 
     asset = DDO(json_filename=sample_ddo_path)
+    asset.metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
     my_secret_store = 'http://myownsecretstore.com'
     auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
     new_asset = ocn.assets.create(asset.metadata, acct, [auth_service])
@@ -227,6 +181,7 @@ def test_ocean_assets_algorithm(publisher_ocean_instance):
     # Allow publish an algorithm
     publisher = publisher_ocean_instance.main_account
     metadata = get_algorithm_ddo()['service'][0]
+    metadata['attributes']['main']['files'][0]['checksum'] = str(uuid.uuid4())
     ddo = publisher_ocean_instance.assets.create(metadata['attributes'], publisher)
     assert ddo
     publisher_ocean_instance.assets.retire(ddo.did)
@@ -235,6 +190,7 @@ def test_ocean_assets_algorithm(publisher_ocean_instance):
 def test_ocean_assets_compute(publisher_ocean_instance):
     publisher = publisher_ocean_instance.main_account
     metadata = get_computing_metadata()
+    metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
     ddo = publisher_ocean_instance.assets.create(metadata, publisher)
     assert ddo
     publisher_ocean_instance.assets.retire(ddo.did)

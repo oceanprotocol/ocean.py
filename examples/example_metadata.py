@@ -8,7 +8,6 @@ metadata = {
         "dateCreated": "2012-02-01T10:55:11Z",
         "author": "Mario",
         "license": "CC0: Public Domain",
-        "price": "0",
         "files": [
             {
                 "index": 0,

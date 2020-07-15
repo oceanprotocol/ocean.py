@@ -37,11 +37,11 @@ def setup_all():
         account = Account(web3.eth.accounts[0], private_key='0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58')
 
         provider = get_publisher_account()
-        if web3.fromWei(Web3Helper.get_ether_balance(provider.address), 'ether') < 10:
+        if Web3Helper.from_wei(Web3Helper.get_ether_balance(provider.address)) < 10:
             Web3Helper.send_ether(account, provider.address, 25)
 
         consumer = get_consumer_account()
-        if web3.fromWei(Web3Helper.get_ether_balance(consumer.address), 'ether') < 10:
+        if Web3Helper.from_wei(Web3Helper.get_ether_balance(consumer.address)) < 10:
             Web3Helper.send_ether(account, consumer.address, 25)
 
 

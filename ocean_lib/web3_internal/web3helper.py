@@ -106,6 +106,14 @@ class Web3Helper(object):
         return Web3Provider.get_web3().eth.getBalance(address, block_identifier='latest')
 
     @staticmethod
+    def to_wei(ether_value):
+        return Web3Provider.get_web3().toWei(ether_value, 'ether')
+
+    @staticmethod
+    def from_wei(wei_value):
+        return Web3Provider.get_web3().fromWei(wei_value, 'ether')
+
+    @staticmethod
     def generate_multi_value_hash(types, values):
         return generate_multi_value_hash(types, values)
 
@@ -118,7 +126,7 @@ class Web3Helper(object):
         tx = {
             'from': from_account.address,
             'to': to_address,
-            'value': w3.toWei(ether_amount, 'ether'),
+            'value': Web3Helper.to_wei(ether_amount),
             'gas': 500000}
         wallet = Wallet(w3, from_account.key, from_account.password, from_account.address)
         raw_tx = wallet.sign_tx(tx)

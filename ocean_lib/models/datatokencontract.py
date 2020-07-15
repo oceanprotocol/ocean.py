@@ -1,7 +1,9 @@
 import os
 import time
 
-from ocean_lib.web3_internal import ContractBase
+from web3 import Web3
+
+from ocean_lib.web3_internal import ContractBase, Web3Helper
 from ocean_lib.web3_internal.event_filter import EventFilter
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_utils.http_requests.requests_session import get_requests_session
@@ -80,13 +82,19 @@ class DataTokenContract(ContractBase):
         return tx_hash
 
     def mint(self, to, value, account):
-        return self._send_token_tx('mint', to, value, account)
+        return self._send_token_tx('mint', to, Web3Helper.to_wei(value), account)
 
     def approve(self, spender, value, account):
-        return self._send_token_tx('approve', spender, value, account)
+        return self._send_token_tx('approve', spender, Web3Helper.to_wei(value), account)
+
+    def transfer_wei(self, to, value, account):
+        return self._send_token_tx('transfer', to, value, account)
 
     def transfer(self, to, value, account):
-        return self._send_token_tx('transfer', to, value, account)
+        return self.transfer_token(to, value, account)
+
+    def transfer_token(self, to, value, account):
+        return self.transfer_wei(to, Web3Helper.to_wei(value), account)
 
     def set_minter(self, new_minter, current_minter_account):
         tx_hash = self.send_transaction(
@@ -97,6 +105,15 @@ class DataTokenContract(ContractBase):
                       'account_key': current_minter_account.key},
         )
         return tx_hash
+
+    def token_balance(self, address):
+        return self.balance(address)
+
+    def balance(self, address):
+        return Web3Helper.from_wei(self.wei_balance(address))
+
+    def wei_balance(self, address):
+        return self.contract_concise.balanceOf(address)
 
     def get_metadata_url(self):
         # grab the metadatastore URL from the DataToken contract (@token_address)

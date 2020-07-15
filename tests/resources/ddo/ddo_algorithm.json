@@ -74,7 +74,6 @@
           "dateCreated": "2019-02-08T08:13:49Z",
           "license": "CC-BY",
           "name": "My super algorithm",
-          "price": "1",
           "type": "algorithm",
           "algorithm": {
             "language": "scala",
