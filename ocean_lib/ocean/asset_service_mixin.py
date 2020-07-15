@@ -20,7 +20,7 @@ class AssetServiceMixin:
         if not response:
             raise AssertionError('Data service provider or service is not available.')
 
-        num_tokens = response['numTokens']
+        num_tokens = int(response['numTokens'])
         receiver = response['to']
         assert dt_address == response['dataToken']
         dt = DataToken(dt_address)
