@@ -14,7 +14,7 @@ from ocean_lib import Config
 
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.config_provider import ConfigProvider
-from ocean_lib.models.datatoken import DataToken
+from ocean_lib.models.datatokencontract import DataTokenContract
 from ocean_lib.models.factory import FactoryContract
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_auth import OceanAuth
@@ -110,4 +110,4 @@ class Ocean:
 
     @staticmethod
     def get_data_token(token_address):
-        return DataToken(token_address)
+        return DataTokenContract(token_address)

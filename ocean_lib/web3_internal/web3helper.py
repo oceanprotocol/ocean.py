@@ -1,4 +1,4 @@
-"""Keeper module to call keeper-contracts."""
+"""Web3Helper module to provide convenient functions."""
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
@@ -24,15 +24,13 @@ class Web3Helper(object):
         3: 'Ropsten',
         4: 'Rinkeby',
         42: 'Kovan',
-        77: 'POA_Sokol',
-        99: 'POA_Core',
         100: 'xDai',
     }
 
     @staticmethod
     def get_network_name(network_id=None):
         """
-        Return the keeper network name based on the current ethereum network id.
+        Return the network name based on the current ethereum network id.
         Return `development` for every network id that is not mapped.
 
         :param network_id: Network id, int
@@ -110,3 +108,20 @@ class Web3Helper(object):
     @staticmethod
     def generate_multi_value_hash(types, values):
         return generate_multi_value_hash(types, values)
+
+    @staticmethod
+    def send_ether(from_account, to_address, ether_amount):
+        w3 = Web3Provider.get_web3()
+        if not w3.isChecksumAddress(to_address):
+            to_address = w3.toChecksumAddress(to_address)
+
+        tx = {
+            'from': from_account.address,
+            'to': to_address,
+            'value': w3.toWei(ether_amount, 'ether'),
+            'gas': 500000}
+        wallet = Wallet(w3, from_account.key, from_account.password, from_account.address)
+        raw_tx = wallet.sign_tx(tx)
+        tx_hash = w3.eth.sendRawTransaction(raw_tx)
+        receipt = w3.eth.waitForTransactionReceipt(tx_hash, timeout=30)
+        return receipt

@@ -17,7 +17,6 @@ class ContractHandler(object):
     """
     Manages loading contracts and also keeps a cache of loaded contracts.
 
-    Retrieval of deployed keeper contracts must use this `ContractHandler`.
     Example:
         contract = ContractHandler.get('Factory')
         concise_contract = ContractHandler.get_concise_contract('Factory')
@@ -33,6 +32,12 @@ class ContractHandler(object):
             ContractHandler._contracts.clear()
 
     @staticmethod
+    def _get(name, address=None):
+        if address:
+            return ContractHandler._contracts.get((name, address)) or ContractHandler._load(name, address)
+        return ContractHandler._contracts.get(name) or ContractHandler._load(name, address)
+
+    @staticmethod
     def get(name, address=None):
         """
         Return the Contract instance for a given name.
@@ -41,7 +46,7 @@ class ContractHandler(object):
         :param address: hex str -- address of smart contract
         :return: Contract instance
         """
-        return (ContractHandler._contracts.get(name) or ContractHandler._load(name, address))[0]
+        return ContractHandler._get(name, address)[0]
 
     @staticmethod
     def get_concise_contract(name, address=None):
@@ -52,7 +57,12 @@ class ContractHandler(object):
         :param address: hex str -- address of smart contract
         :return: Concise Contract instance
         """
-        return (ContractHandler._contracts.get(name) or ContractHandler._load(name, address))[1]
+        return ContractHandler._get(name, address)[1]
+
+    @staticmethod
+    def _set(name, contract):
+        ContractHandler._contracts[(name, contract.address)] = (contract, ConciseContract(contract))
+        ContractHandler._contracts[name] = ContractHandler._contracts[(name, contract.address)]
 
     @staticmethod
     def set(name, contract):
@@ -62,24 +72,28 @@ class ContractHandler(object):
         :param name: Contract name, str
         :param contract: Contract instance
         """
-        ContractHandler._contracts[name] = (contract, ConciseContract(contract))
+        ContractHandler._set(name, contract)
 
     @staticmethod
-    def has(name):
+    def has(name, address=None):
         """
         Check if a contract is the ContractHandler contracts.
 
         :param name: Contract name, str
+        :param address: hex str -- address of smart contract
         :return: True if the contract is there, bool
         """
+        if address:
+            return (name, address) in ContractHandler._contracts
         return name in ContractHandler._contracts
 
     @staticmethod
     def _load(contract_name, address=None):
         """Retrieve the contract instance for `contract_name` that represent the smart
-        contract in the keeper network.
+        contract in the ethereum network.
 
-        :param contract_name: str name of the solidity keeper contract without the network name.
+        :param contract_name: str name of the solidity smart contract.
+        :param address: hex str -- address of smart contract
         :return: web3.eth.Contract instance
         """
         assert ContractHandler.artifacts_path is not None, 'artifacts_path should be already set.'
@@ -92,12 +106,10 @@ class ContractHandler(object):
             address = Web3.toChecksumAddress(address)
 
         abi = contract_definition['abi']
-        contract = Web3Provider.get_web3().eth.contract(address=address, abi=abi)
-        ContractHandler._contracts[contract_name] = (
-            contract,
-            ConciseContract(contract),
-        )
-        return ContractHandler._contracts[contract_name]
+        bytecode = contract_definition['bytecode']
+        contract = Web3Provider.get_web3().eth.contract(address=address, abi=abi, bytecode=bytecode)
+        ContractHandler._set(contract_name, contract)
+        return ContractHandler._contracts[(contract_name, address)]
 
     @staticmethod
     def read_abi_from_file(contract_name, abi_path):

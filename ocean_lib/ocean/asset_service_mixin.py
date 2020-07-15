@@ -3,7 +3,7 @@ import logging
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.datatoken import DataToken
+from ocean_lib.models.datatokencontract import DataTokenContract
 
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class AssetServiceMixin:
         num_tokens = int(response['numTokens'])
         receiver = response['to']
         assert dt_address == response['dataToken']
-        dt = DataToken(dt_address)
+        dt = DataTokenContract(dt_address)
         balance = dt.contract_concise.balanceOf(consumer_account.address)
         if balance < num_tokens:
             raise AssertionError(f'Your token balance {balance} is not sufficient '

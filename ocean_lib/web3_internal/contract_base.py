@@ -1,41 +1,47 @@
 """
-    Keeper Contract Base
+    Contract Base
 
-    All keeper contract inherit from this base class
+    All contract classes inherit from this base class
 """
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 import logging
 
 from web3 import Web3
-from web3.contract import ConciseContract
 
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
-logger = logging.getLogger('keeper')
+logger = logging.getLogger(__name__)
 
 
 class ContractBase(object):
     """Base class for all contract objects."""
     CONTRACT_NAME = None
 
-    def __init__(self, address):
-        name = self.contract_name
-        assert name, 'contract_name property needs to be implemented in subclasses.'
+    def __init__(self, address, abi_path=None):
+        self.name = self.contract_name
+        assert self.name, 'contract_name property needs to be implemented in subclasses.'
+        if not abi_path:
+            abi_path = ContractHandler.artifacts_path
 
-        self.contract = ContractHandler.get(name, address)
-        self.contract_concise = ContractHandler.get_concise_contract(name, address)
+        assert abi_path, f'abi_path is required, got {abi_path}'
+
+        self.contract_concise = ContractHandler.get_concise_contract(self.name, address)
+        self.contract = ContractHandler.get(self.name, address)
+
+        assert not address or (self.contract.address == address and self.address == address)
+        assert self.contract_concise is not None
 
     @property
     def contract_name(self):
-        return ''
+        return self.CONTRACT_NAME
 
     @property
     def address(self):
         """Return the ethereum address of the solidity contract deployed
-        in current keeper network.
+        in current network.
         """
         return self.contract.address
 
@@ -58,15 +64,16 @@ class ContractBase(object):
         return Web3.toChecksumAddress(address)
 
     @staticmethod
-    def get_tx_receipt(tx_hash):
+    def get_tx_receipt(tx_hash, timeout=20):
         """
         Get the receipt of a tx.
 
         :param tx_hash: hash of the transaction
+        :param timeout: int in seconds to wait for transaction receipt
         :return: Tx receipt
         """
         try:
-            Web3Provider.get_web3().eth.waitForTransactionReceipt(tx_hash, timeout=20)
+            Web3Provider.get_web3().eth.waitForTransactionReceipt(tx_hash, timeout=timeout)
         except ValueError as e:
             logger.error(f'Waiting for transaction receipt failed: {e}')
             return

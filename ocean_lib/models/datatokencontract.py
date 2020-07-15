@@ -9,7 +9,7 @@ from ocean_utils.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 
-class DataToken(ContractBase):
+class DataTokenContract(ContractBase):
 
     @property
     def contract_name(self):
