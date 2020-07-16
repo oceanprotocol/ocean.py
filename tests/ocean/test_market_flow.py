@@ -6,23 +6,18 @@ import time
 
 from ocean_utils.agreements.service_types import ServiceTypes
 
-from examples import ExampleConfig
-from ocean_lib import ConfigProvider
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.service_agreement import ServiceAgreement
-from ocean_lib.config import NAME_DATA_TOKEN_FACTORY_ADDRESS
 from tests.resources.helper_functions import (
     get_consumer_account,
     get_publisher_account,
     get_registered_ddo,
     get_publisher_ocean_instance,
-    get_consumer_ocean_instance,
-    new_factory_contract)
+    get_consumer_ocean_instance
+)
 
 
 def test_market_flow():
-    config = ConfigProvider.get_config()
-
     pub_acc = get_publisher_account()
 
     publisher_ocean_instance = get_publisher_ocean_instance()

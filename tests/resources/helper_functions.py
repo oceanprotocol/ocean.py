@@ -4,6 +4,7 @@
 import json
 import os
 import pathlib
+import time
 import uuid
 import logging
 import logging.config
@@ -152,3 +153,26 @@ def setup_logging(default_path='logging.yaml', default_level=logging.INFO, env_k
     else:
         logging.basicConfig(level=default_level)
         coloredlogs.install(level=default_level)
+
+
+def mint_tokens_and_wait(data_token_contract, receiver_address, minter_account):
+    dtc = data_token_contract
+    tx_id = dtc.mint(receiver_address, 50, minter_account)
+    dtc.get_tx_receipt(tx_id)
+    time.sleep(2)
+
+    def verify_supply(mint_amount=50):
+        supply = dtc.contract_concise.totalSupply()
+        if supply <= 0:
+            _tx_id = dtc.mint(receiver_address, mint_amount, minter_account)
+            dtc.get_tx_receipt(_tx_id)
+            supply = dtc.contract_concise.totalSupply()
+        return supply
+
+    while True:
+        try:
+            s = verify_supply()
+            if s > 0:
+                break
+        except (ValueError, Exception):
+            pass
