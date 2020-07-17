@@ -23,8 +23,8 @@ class OceanCompute:
     def build_cluster_attributes(cluster_type, url):
         """
 
-        :param cluster_type:
-        :param url:
+        :param cluster_type: str (e.g. Kubernetes)
+        :param url: str (e.g. http://10.0.0.17/xxx)
         :return:
         """
         return {
@@ -33,18 +33,18 @@ class OceanCompute:
         }
 
     @staticmethod
-    def build_container_attributes(image, tag, checksum):
+    def build_container_attributes(image, tag, entrypoint):
         """
 
-        :param image:
-        :param tag:
-        :param checksum:
+        :param image: str name of Docker image (e.g. node)
+        :param tag: str the Docker image tag (e.g. latest or a specific version number)
+        :param entrypoint: str executable file (e.g. node $ALGO)
         :return:
         """
         return {
             "image": image,
             "tag": tag,
-            "checksum": checksum
+            "entrypoint": entrypoint
         }
 
     @staticmethod
@@ -53,13 +53,13 @@ class OceanCompute:
     ):
         """
 
-        :param server_id:
-        :param server_type:
-        :param cpu:
-        :param gpu:
-        :param memory:
-        :param disk:
-        :param max_run_time:
+        :param server_id: str
+        :param server_type: str
+        :param cpu: integer number of available cpu units
+        :param gpu: integer number of available gpu units
+        :param memory: str amount of RAM memory (in mb or gb)
+        :param disk: str storage capacity (in gb, tb, etc.)
+        :param max_run_time: integer maximum allowed run time in seconds
         :return:
         """
         return {
@@ -77,12 +77,13 @@ class OceanCompute:
             provider_type, description, cluster, containers, servers
     ):
         """
+        Return a dict with attributes describing the details of compute resources in this service
 
-        :param provider_type:
-        :param description:
-        :param cluster:
-        :param containers:
-        :param servers:
+        :param provider_type: str type of resource provider such as Azure or AWS
+        :param description: str details describing the resource provider
+        :param cluster: dict attributes describing the cluster (see `build_cluster_attributes`)
+        :param containers: list of dicts each has attributes describing the container (see `build_container_attributes`)
+        :param servers: list of dicts each has attributes to describe server (see `build_server_attributes`)
         :return:
         """
         return {
@@ -97,22 +98,24 @@ class OceanCompute:
 
     @staticmethod
     def create_compute_service_attributes(
-            price, timeout, creator, date_published, provider_attributes):
+            cost, timeout, creator, date_published, provider_attributes):
         """
 
-        :param price:
-        :param timeout:
-        :param creator:
-        :param date_published:
-        :param provider_attributes:
-        :return:
+        :param cost: float the price of this compute service expressed in amount of
+            DataTokens. This will be converted to the integer equivalent (Wei) to be stored
+            in the DDO service.
+        :param timeout: integer maximum amount of running compute service in seconds
+        :param creator: str ethereum address
+        :param date_published: str timestamp (datetime.utcnow().replace(microsecond=0).isoformat() + "Z")
+        :param provider_attributes: dict describing the details of the compute resources (see `build_service_provider_attributes`)
+        :return: dict with `main` key and value contain the minimum required attributes of a compute service
         """
         return {
             "main": {
                 "name": "dataAssetComputingServiceAgreement",
                 "creator": creator,
                 "datePublished": date_published,
-                "cost": Web3Helper.to_wei(price),
+                "cost": Web3Helper.to_wei(str(cost)),
                 "timeout": timeout,
                 "provider": provider_attributes
             }
@@ -120,6 +123,11 @@ class OceanCompute:
 
     @staticmethod
     def _status_from_job_info(job_info):
+        """
+        Helper function to extract the status dict with an added boolean for quick validation
+        :param job_info: dict having status and statusText keys
+        :return:
+        """
         return {
             'ok': job_info['status'] not in (31, 32),
             'status': job_info['status'],
@@ -128,6 +136,15 @@ class OceanCompute:
 
     @staticmethod
     def check_output_dict(output_def, consumer_account, data_provider, config=None):
+        """
+        Validate the `output_def` dict and fills in defaults for missing values.
+
+        :param output_def: dict
+        :param consumer_account: Account instance
+        :param data_provider:  DataServiceProvider class or similar interface
+        :param config: Config instance
+        :return: dict a valid `output_def` object
+        """
         if not config:
             config = ConfigProvider.get_config()
 
@@ -149,8 +166,10 @@ class OceanCompute:
 
     def create_compute_service_descriptor(self, attributes):
         """
+        Return a service descriptor (tuple) for service of type ServiceTypes.CLOUD_COMPUTE
+        and having the required attributes and service endpoint.
 
-        :param attributes:
+        :param attributes: dict as created in `create_compute_service_attributes`
         """
         compute_endpoint = self._data_provider.get_compute_endpoint(self._config)
         return ServiceDescriptor.compute_service_descriptor(
@@ -201,6 +220,12 @@ class OceanCompute:
         return job_info['jobId']
 
     def status(self, did, job_id, account):
+        """
+        :param did: str id of the asset offering the compute service of this job
+        :param job_id: str id of the compute job
+        :param account: Account instance
+        :return: dict the status for an existing compute job, keys are (ok, status, statusText)
+        """
         return OceanCompute._status_from_job_info(
             self._data_provider.compute_job_status(
                 did,
@@ -212,6 +237,12 @@ class OceanCompute:
         )
 
     def result(self, did, job_id, account):
+        """
+        :param did: str id of the asset offering the compute service of this job
+        :param job_id: str id of the compute job
+        :param account: Account instance
+        :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
+        """
         info_dict = self._data_provider.compute_job_result(
             did,
             job_id,
@@ -226,6 +257,14 @@ class OceanCompute:
         }
 
     def stop(self, did, job_id, account):
+        """
+        Attempt to stop the running compute job
+
+        :param did: str id of the asset offering the compute service of this job
+        :param job_id: str id of the compute job
+        :param account: Account instance
+        :return: dict the status for the stopped compute job, keys are (ok, status, statusText)
+        """
         return self._status_from_job_info(
             self._data_provider.stop_compute_job(
                 did,
@@ -237,26 +276,22 @@ class OceanCompute:
         )
 
     def restart(self, did, job_id, account):
-        return self._status_from_job_info(
-            self._data_provider.restart_compute_job(
-                did,
-                job_id,
-                self._get_service_endpoint(did),
-                account.address,
-                self._auth.get(account),
-            )
-        )
+        """
+        Attempt to restart the compute job by stopping it first, then starting a new job.
 
-    def delete(self, did, job_id, account):
-        return self._status_from_job_info(
-            self._data_provider.delete_compute_job(
+        :param did: str id of the asset offering the compute service of this job
+        :param job_id: str id of the compute job
+        :param account: Account instance
+        :return: str -- id of the new compute job
+        """
+        job_info = self._data_provider.restart_compute_job(
                 did,
                 job_id,
                 self._get_service_endpoint(did),
                 account.address,
                 self._auth.get(account),
-            )
         )
+        return job_info['jobId']
 
     def _get_service_endpoint(self, did, asset=None):
         if not asset:

@@ -27,8 +27,6 @@ NAME_AUTH_TOKEN_EXPIRATION = 'auth_token_expiration'
 NAME_DATA_TOKEN_FACTORY_ADDRESS = 'factory.address'
 
 NAME_PARITY_URL = 'parity.url'
-NAME_PARITY_ADDRESS = 'parity.address'
-NAME_PARITY_PASSWORD = 'parity.password'
 NAME_PROVIDER_ADDRESS = 'provider.address'
 
 
@@ -44,8 +42,6 @@ environ_names = {
     NAME_AUTH_TOKEN_EXPIRATION: ['AUTH_TOKEN_EXPIRATION',
                                  'Auth token expiration time expressed in seconds'],
     NAME_PARITY_URL: ['PARITY_URL', 'Parity URL'],
-    NAME_PARITY_ADDRESS: ['PARITY_ADDRESS', 'Parity address'],
-    NAME_PARITY_PASSWORD: ['PARITY_PASSWORD', 'Parity password'],
     NAME_PROVIDER_ADDRESS: ['PROVIDER_ADDRESS', 'Provider (Brizo) ethereum address']
 }
 
@@ -55,8 +51,6 @@ config_defaults = {
         NAME_ARTIFACTS_PATH: DEFAULT_ARTIFACTS_PATH,
         NAME_GAS_LIMIT: DEFAULT_GAS_LIMIT,
         NAME_PARITY_URL: '',
-        NAME_PARITY_ADDRESS: '',
-        NAME_PARITY_PASSWORD: '',
         NAME_PROVIDER_ADDRESS: '',
     },
     'resources': {
@@ -81,8 +75,6 @@ class Config(configparser.ConfigParser):
         network = http://localhost:8545                            # ethereum network url.
         artifacts.path = artifacts                                       # Path of json abis.
         parity.url = http://localhost:8545                            # Parity client url.
-        parity.address = 0x00bd138abd70e2f00903268f3db08f2d25677c9e   # Partity account address.
-        parity.password = node0                                       # Parity account password.
         [resources]
         aquarius.url = http://localhost:5000                          # Aquarius url.
         brizo.url = http://localhost:8030                             # Brizo url.
@@ -173,16 +165,6 @@ class Config(configparser.ConfigParser):
         ethereum address of service provider (Brizo)
         """
         return self.get('resources', NAME_PROVIDER_ADDRESS)
-
-    @property
-    def parity_address(self):
-        """Parity address. (e.g.): 0x00bd138abd70e2f00903268f3db08f2d25677c9e."""
-        return self.get(self._section_name, NAME_PARITY_ADDRESS)
-
-    @property
-    def parity_password(self):
-        """Parity password for your address. (e.g.): Mypass."""
-        return self.get(self._section_name, NAME_PARITY_PASSWORD)
 
     @property
     def factory_address(self):

@@ -14,9 +14,6 @@ from setuptools import setup
 with open('README.md') as readme_file:
     readme = readme_file.read()
 
-with open('CHANGELOG.md') as history_file:
-    history = history_file.read()
-
 # Installed by pip install ocean-lib
 # or pip install -e .
 install_requirements = [
@@ -78,7 +75,7 @@ setup(
         'Natural Language :: English',
         'Programming Language :: Python :: 3.6',
     ],
-    description="🐳 Ocean/Web3py wrapper.",
+    description="🐳 Ocean protocol library.",
     extras_require={
         'test': test_requirements,
         'dev': dev_requirements + test_requirements + docs_requirements,
@@ -95,7 +92,7 @@ setup(
     setup_requires=setup_requirements,
     test_suite='tests',
     tests_require=test_requirements,
-    url='https://github.com/oceanprotocol/lib-py',
-    version='0.9.3',
+    url='https://github.com/oceanprotocol/ocean-lib-py',
+    version='0.1.0',
     zip_safe=False,
 )

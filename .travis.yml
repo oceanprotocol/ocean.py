@@ -1,0 +1,34 @@
+language: python
+
+
+python:
+  - "3.6"
+
+dist: xenial
+
+sudo: false
+
+services:
+  - docker
+
+before_install:
+  - git clone https://github.com/oceanprotocol/barge
+  - cd barge
+  - export AQUARIUS_VERSION=v3
+  - bash -x start_ocean.sh --no-dashboard --no-provider 2>&1 > start_ocean.log &
+  - cd ..
+  - sleep 30
+
+install: pip install -U tox-travis
+
+script: tox
+
+deploy:
+  provider: pypi
+  distributions: sdist bdist_wheel
+  user: ${PYPI_USER}
+  password: ${PYPI_PASSWORD}
+  on:
+    tags: true
+    repo: oceanprotocol/ocean-lib-py
+    python: 3.6
