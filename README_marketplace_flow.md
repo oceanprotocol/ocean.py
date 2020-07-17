@@ -58,7 +58,7 @@ token_address = data_token.address
 # is not provided then the `create` method will first create a new data token and use it in the new
 # asset.
 asset = ocean.assets.create(METADATA_EXAMPLE, account, data_token_address=token_address)
-assert token_address == asset._other_values['dataToken']
+assert token_address == asset.data_token_address
 
 did = asset.did
 ```

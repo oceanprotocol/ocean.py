@@ -10,6 +10,7 @@ import os
 from deprecated import deprecated
 
 from ocean_lib.assets.asset import Asset
+from ocean_lib.models.datatokencontract import DataTokenContract
 from ocean_lib.web3_internal import Web3Helper
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_utils.agreements.service_agreement import ServiceAgreement
@@ -28,13 +29,11 @@ from ocean_utils.utils.utilities import checksum
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.models.factory import FactoryContract
-from ocean_lib.ocean.asset_service_mixin import AssetServiceMixin
-from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 logger = logging.getLogger('ocean')
 
 
-class OceanAssets(AssetServiceMixin):
+class OceanAssets:
     """Ocean assets class."""
 
     def __init__(self, config, data_provider):
@@ -225,6 +224,7 @@ class OceanAssets(AssetServiceMixin):
             logger.error(f'Publish asset in aquarius failed: {str(e)}')
         if not response:
             return None
+
         return asset
 
     def retire(self, did):
@@ -287,13 +287,71 @@ class OceanAssets(AssetServiceMixin):
         return [Asset(dictionary=ddo_dict) for ddo_dict in
                 aquarius.query_search(query, sort, offset, page)['results']]
 
+    def order(self, did, consumer_account, service_index=None, service_type=None):
+        """
+        Request a specific service from an asset, returns the service requirements that
+        must be met prior to consuming the service.
+
+        :param did:
+        :param consumer_account:
+        :param service_index:
+        :param service_type:
+        :return: OrderRequirements instance -- named tuple (amount, data_token_address, receiver_address),
+        """
+        assert service_type or service_index, f'One of service_index or service_type is required.'
+        asset = self.resolve(did)
+        service = ServiceAgreement.from_ddo(ServiceTypes.ASSET_ACCESS, asset)
+
+        dt_address = asset.data_token_address
+        sa = ServiceAgreement.from_ddo(service.type, asset)
+        initialize_url = self._data_provider.get_initialize_endpoint(sa.service_endpoint)
+        order_requirements = self._data_provider.get_order_requirements(
+            asset.did, initialize_url, consumer_account, sa.index, sa.type, dt_address
+        )
+        if not order_requirements:
+            raise AssertionError('Data service provider or service is not available.')
+
+        assert dt_address == order_requirements.data_token_address
+        return order_requirements
+
+    @staticmethod
+    def pay_for_service(amount, token_address, receiver_address, from_account):
+        """
+        Submits the payment for chosen service in DataTokens.
+
+        :param amount:
+        :param token_address:
+        :param receiver_address:
+        :param from_account:
+        :return: hex str id of transfer transaction
+        """
+        tokens_amount = int(amount)
+        receiver = receiver_address
+        dt = DataTokenContract(token_address)
+        balance = dt.wei_balance(from_account.address)
+        if balance < tokens_amount:
+            raise AssertionError(f'Your token balance {balance} is not sufficient '
+                                 f'to execute the requested service. This service '
+                                 f'requires {amount} number of tokens.')
+
+        tx_hash = dt.transfer_wei(receiver, tokens_amount, from_account)
+        try:
+            return dt.verify_transfer_tx(tx_hash, from_account.address, receiver)
+        except (AssertionError, Exception) as e:
+            msg = (
+                f'Downloading asset files failed. The problem is related to '
+                f'the transfer of the data tokens required for the download '
+                f'service: {e}'
+            )
+            logger.error(msg)
+            raise AssertionError(msg)
+
     @deprecated('This function is obsolete, please use Ocean.download()')
     def consume(self, did, service_index, consumer_account,
                 destination, index=None):
         return self.download(did, service_index, consumer_account, destination, index)
 
-    def download(self, did, service_index, consumer_account,
-                 destination, index=None):
+    def download(self, did, service_index, consumer_account, transfer_tx_id, destination, index=None):
         """
         Consume the asset data.
 
@@ -307,6 +365,7 @@ class OceanAssets(AssetServiceMixin):
         :param did: DID, str
         :param service_index: identifier of the service inside the asset DDO, str
         :param consumer_account: Account instance of the consumer
+        :param transfer_tx_id: hex str id of the token transfer transaction
         :param destination: str path
         :param index: Index of the document that is going to be downloaded, int
         :return: str path to saved files
@@ -316,15 +375,17 @@ class OceanAssets(AssetServiceMixin):
             assert isinstance(index, int), logger.error('index has to be an integer.')
             assert index >= 0, logger.error('index has to be 0 or a positive integer.')
 
-        service = ServiceAgreement.from_ddo(ServiceTypes.ASSET_ACCESS, asset)
-        tx_id = self.initiate_service(asset, service, consumer_account)
+        service = asset.get_service_by_index(service_index)
+        assert service and service.type == ServiceTypes.ASSET_ACCESS, \
+            f'Service with index {service_index} and type {ServiceTypes.ASSET_ACCESS} is not found.'
+
         return download_asset_files(
             service_index,
             asset,
             consumer_account,
             destination,
-            asset.as_dictionary()['dataToken'],
-            tx_id,
+            asset.data_token_address,
+            transfer_tx_id,
             self._data_provider,
             index
         )
@@ -356,19 +417,6 @@ class OceanAssets(AssetServiceMixin):
         :return: list of dids
         """
         return [asset.did for asset in self.query({"query": {"proof.creator": [owner_address]}})]
-
-    # def transfer_ownership(self, did, new_owner_address, account):
-    #     """
-    #     Transfer did ownership to an address.
-    #
-    #     :param did: the id of an asset on-chain, hex str
-    #     :param new_owner_address: ethereum account address, hex str
-    #     :param account: Account executing the action
-    #     :return: bool
-    #     """
-    #     asset_id = add_0x_prefix(did_to_id(did))
-    #     return .did_registry.transfer_did_ownership(asset_id, new_owner_address,
-    #                                                             account)
 
     @staticmethod
     def _build_access_service(metadata, cost, publisher_account):

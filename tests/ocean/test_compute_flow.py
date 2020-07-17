@@ -36,7 +36,7 @@ def test_compute_flow():
 
     # Dataset with compute service
     sample_ddo_path = get_resource_path('ddo', 'ddo_with_compute_service.json')
-    old_ddo = DDO(json_filename=sample_ddo_path)
+    old_ddo = Asset(json_filename=sample_ddo_path)
     metadata = old_ddo.metadata
     metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
     service = old_ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
@@ -54,7 +54,7 @@ def test_compute_flow():
 
     # algorithm with download service
     algorithm_ddo_path = get_resource_path('ddo', 'ddo_sample_algorithm.json')
-    algo_main = DDO(json_filename=algorithm_ddo_path).metadata['main']
+    algo_main = Asset(json_filename=algorithm_ddo_path).metadata['main']
     algo_meta_dict = algo_main['algorithm'].copy()
     algo_meta_dict['url'] = algo_main['files'][0]['url']
     algorithm_meta = AlgorithmMetadata(algo_meta_dict)
@@ -66,26 +66,33 @@ def test_compute_flow():
     mint_tokens_and_wait(dt, pub_acc.address, pub_acc)
 
     ######
-    # Order compute service from the dataset asset
-    # TODO: implement the ocean.compute.order method
-    order_requirements = cons_ocn.compute.order(
-        compute_ddo.did,
-        consumer_account,
-        None,
-        None
-    )
-
-    ######
-    # Transfer tokens to the provider as specified in the `order` requirements
+    # Give the consumer some datatokens so they can order the service
     try:
-        tx_id = dt.transfer(consumer_account.address, order_requirements['numTokens'], pub_acc)
+        tx_id = dt.transfer(consumer_account.address, 10, pub_acc)
         dt.verify_transfer_tx(tx_id, pub_acc.address, consumer_account.address)
     except (AssertionError, Exception) as e:
         print(e)
         raise
 
     ######
-    job_id = cons_ocn.compute.start(did, consumer_account, algorithm_meta=algorithm_meta)
+    # Order compute service from the dataset asset
+    order_requirements = cons_ocn.assets.order(
+        compute_ddo.did,
+        consumer_account,
+        service_type=ServiceTypes.CLOUD_COMPUTE
+    )
+
+    ######
+    # Transfer tokens to the provider as specified in the `order` requirements
+    try:
+        tx_id = dt.transfer_wei(order_requirements.receiver_address, order_requirements.amount, consumer_account)
+        dt.verify_transfer_tx(tx_id, consumer_account.address, order_requirements.receiver_address)
+    except (AssertionError, Exception) as e:
+        print(e)
+        raise
+
+    ######
+    job_id = cons_ocn.compute.start(did, consumer_account, tx_id, algorithm_meta=algorithm_meta)
     assert job_id, f'expected a job id, got {job_id}'
 
     status = cons_ocn.compute.status(did, job_id, consumer_account)

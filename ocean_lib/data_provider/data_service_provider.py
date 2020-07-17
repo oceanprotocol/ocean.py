@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import re
+from collections import namedtuple
 from json import JSONDecodeError
 
 from ocean_lib.web3_internal import Web3Helper
@@ -18,6 +19,9 @@ from ocean_utils.http_requests.requests_session import get_requests_session
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 
 logger = logging.getLogger(__name__)
+
+
+OrderRequirements = namedtuple('OrderRequirements', ('amount', 'data_token_address', 'receiver_address'))
 
 
 class DataServiceProvider:
@@ -64,8 +68,17 @@ class DataServiceProvider:
             return response.json()['encryptedDocument']
 
     @staticmethod
-    def check_service_availability(did, service_endpoint, account, service_id, service_type,
-                                   token_address):
+    def get_order_requirements(did, service_endpoint, account, service_id, service_type, token_address):
+        """
+
+        :param did:
+        :param service_endpoint:
+        :param account:
+        :param service_id:
+        :param service_type:
+        :param token_address:
+        :return: OrderRequirements instance -- named tuple (amount, data_token_address, receiver_address),
+        """
         initialize_url = (
             f'{service_endpoint}'
             f'?documentId={did}'
@@ -82,8 +95,9 @@ class DataServiceProvider:
         # the returned json is empty.
         if response.status_code != 200:
             return None
+        order = dict(response.json())
 
-        return response.json()
+        return OrderRequirements(order['numTokens'], order['dataToken'], order['to'])
 
     @staticmethod
     def download_service(did, service_endpoint, account, files,
@@ -135,15 +149,18 @@ class DataServiceProvider:
             DataServiceProvider.write_file(response, destination_folder, file_name or f'file-{i}')
 
     @staticmethod
-    def start_compute_job(agreement_id, service_endpoint, account_address, signature,
+    def start_compute_job(did, service_endpoint, account_address, signature,
                           service_id, token_address, token_transfer_tx_id,
                           algorithm_did=None, algorithm_meta=None, output=None, job_id=None):
         """
 
-        :param agreement_id: Service Agreement Id, hex str
+        :param did: id of asset starting with `did:op:` and a hex str without 0x prefix
         :param service_endpoint:
         :param account_address: hex str the ethereum address of the consumer executing the compute job
         :param signature: hex str signed message to allow the provider to authorize the consumer
+        :param service_id:
+        :param token_address:
+        :param token_transfer_tx_id:
         :param algorithm_did: str -- the asset did (of `algorithm` type) which consist of `did:op:` and
             the assetId hex str (without `0x` prefix)
         :param algorithm_meta: see `OceanCompute.execute`
@@ -156,17 +173,17 @@ class DataServiceProvider:
         assert algorithm_did or algorithm_meta, 'either an algorithm did or an algorithm meta must be provided.'
 
         payload = DataServiceProvider._prepare_compute_payload(
-            agreement_id,
+            did,
             account_address,
-            signature,
-            algorithm_did,
-            algorithm_meta,
-            output,
             service_id,
             ServiceTypes.CLOUD_COMPUTE,
             token_address,
             token_transfer_tx_id,
-            job_id
+            signature=signature,
+            algorithm_did=algorithm_did,
+            algorithm_meta=algorithm_meta,
+            output=output,
+            job_id=job_id
         )
         logger.info(f'invoke start compute endpoint with this url: {payload}')
         response = DataServiceProvider._http_client.post(
@@ -367,7 +384,7 @@ class DataServiceProvider:
 
     @staticmethod
     def _prepare_compute_payload(
-            agreement_id, account_address, service_id, service_type, token_address, tx_id,
+            did, account_address, service_id, service_type, token_address, tx_id,
             signature=None, algorithm_did=None, algorithm_meta=None,
             output=None, job_id=None):
         assert algorithm_did or algorithm_meta, 'either an algorithm did or an algorithm meta must be provided.'
@@ -379,7 +396,7 @@ class DataServiceProvider:
 
         return {
             'signature': signature,
-            'serviceAgreementId': agreement_id,
+            'documentId': did,
             'consumerAddress': account_address,
             'algorithmDID': algorithm_did,
             'algorithmMeta': algorithm_meta,

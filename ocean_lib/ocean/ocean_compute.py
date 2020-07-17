@@ -6,14 +6,12 @@ from ocean_utils.agreements.service_agreement import ServiceAgreement
 
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib import ConfigProvider
-from ocean_lib.ocean.asset_service_mixin import AssetServiceMixin
 from ocean_lib.web3_internal import Web3Helper
-from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 logger = logging.getLogger('ocean')
 
 
-class OceanCompute(AssetServiceMixin):
+class OceanCompute:
     """Ocean assets class."""
 
     def __init__(self, ocean_auth, config, data_provider):
@@ -139,7 +137,6 @@ class OceanCompute(AssetServiceMixin):
             'brizoAddress': config.provider_address,
             'metadata': dict(),
             'metadataUri': config.aquarius_url,
-            'secretStoreUri': config.secret_store_url,
             'owner': consumer_account.address,
             'publishOutput': 0,
             'publishAlgorithmLog': 0,
@@ -158,11 +155,10 @@ class OceanCompute(AssetServiceMixin):
         compute_endpoint = self._data_provider.get_compute_endpoint(self._config)
         return ServiceDescriptor.compute_service_descriptor(
             attributes=attributes,
-            service_endpoint=compute_endpoint,
-            template_id=0
+            service_endpoint=compute_endpoint
         )
 
-    def start(self, did, consumer_account, algorithm_did=None,
+    def start(self, did, consumer_account, transfer_tx_id, algorithm_did=None,
               algorithm_meta=None, output=None, job_id=None):
         """Start a remote compute job on the asset files identified by `did` after
         verifying that the provider service is active and transferring the
@@ -170,6 +166,7 @@ class OceanCompute(AssetServiceMixin):
 
         :param did: str -- id of asset that has the compute service
         :param consumer_account: Account instance of the consumer ordering the service
+        :param transfer_tx_id: hex str -- id of the datatokens transfer transaction
         :param algorithm_did: str -- the asset did (of `algorithm` type) which consist of `did:op:` and
             the assetId hex str (without `0x` prefix)
         :param algorithm_meta: `AlgorithmMetadata` instance -- metadata about the algorithm being run if
@@ -186,7 +183,7 @@ class OceanCompute(AssetServiceMixin):
         service_endpoint = self._get_service_endpoint(did, asset)
 
         sa = ServiceAgreement.from_ddo(ServiceTypes.CLOUD_COMPUTE, asset)
-        tx_id = self.initiate_service(asset, sa, consumer_account)
+        tx_id = transfer_tx_id
 
         job_info = self._data_provider.start_compute_job(
             did,
@@ -194,7 +191,7 @@ class OceanCompute(AssetServiceMixin):
             consumer_account.address,
             self._auth.get(consumer_account),
             sa.index,
-            asset.as_dictionary()['dataToken'],
+            asset.data_token_address,
             tx_id,
             algorithm_did,
             algorithm_meta,
