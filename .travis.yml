@@ -16,7 +16,7 @@ before_install:
   - cd barge
   - git checkout v3
   - export AQUARIUS_VERSION=v3
-  - bash -x start_ocean.sh --no-dashboard --no-provider 2>&1 > start_ocean.log &
+  - bash -x start_ocean.sh --no-dashboard 2>&1 > start_ocean.log &
   - cd ..
   - sleep 30
 
