@@ -3,14 +3,11 @@
 
 import logging
 import uuid
-from datetime import datetime
 
 import pytest
 from ocean_lib.web3_internal.exceptions import OceanDIDNotFound
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_utils.agreements.service_factory import ServiceDescriptor
-from ocean_utils.agreements.service_types import ServiceTypes
-from ocean_utils.aquarius import AquariusProvider
 from ocean_utils.ddo.ddo import DDO
 from ocean_utils.did import DID
 
