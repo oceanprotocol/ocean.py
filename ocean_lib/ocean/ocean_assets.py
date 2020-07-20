@@ -115,8 +115,8 @@ class OceanAssets:
 
         service_descriptors = service_descriptors or []
 
-        services = self._process_service_descriptors(
-            service_descriptors, metadata_copy, publisher_wallet.account)
+        services = self._process_service_descriptors(service_descriptors, metadata_copy, publisher_wallet)
+
         stype_to_service = {s.type: s for s in services}
         checksum_dict = dict()
         for service in services:
@@ -125,7 +125,7 @@ class OceanAssets:
         # Create a DDO object
         asset = Asset()
         # Adding proof to the ddo.
-        asset.add_proof(checksum_dict, publisher_wallet.account)
+        asset.add_proof(checksum_dict, publisher_wallet)
 
         # Generating the did and adding to the ddo.
         did = asset.assign_did(DID.did(asset.proof['checksum']))
@@ -153,7 +153,7 @@ class OceanAssets:
 
         publisher_signature = Web3Helper.sign_hash(
             add_ethereum_prefix_and_hash_msg(asset.asset_id),
-            publisher_wallet.account
+            publisher_wallet
         )
         asset.proof['signatureValue'] = publisher_signature
 
@@ -213,7 +213,7 @@ class OceanAssets:
             # owner_address is set as minter only if creating new data token. So if
             # `data_token_address` is set `owner_address` has no effect.
             if owner_address:
-                data_token.setMinter(owner_address, from_wallet=publisher_wallet)
+                data_token.set_minter(owner_address, from_wallet=publisher_wallet)
 
         # Set datatoken address in the asset
         asset.data_token_address = data_token_address
@@ -291,13 +291,13 @@ class OceanAssets:
         return [Asset(dictionary=ddo_dict) for ddo_dict in
                 aquarius.query_search(query, sort, offset, page)['results']]
 
-    def order(self, did, consumer_account, service_index=None, service_type=None):
+    def order(self, did, consumer_address, service_index=None, service_type=None):
         """
         Request a specific service from an asset, returns the service requirements that
         must be met prior to consuming the service.
 
         :param did:
-        :param consumer_account:
+        :param consumer_address:
         :param service_index:
         :param service_type:
         :return: OrderRequirements instance -- named tuple (amount, data_token_address, receiver_address),
@@ -310,7 +310,7 @@ class OceanAssets:
         sa = ServiceAgreement.from_ddo(service.type, asset)
         initialize_url = self._data_provider.get_initialize_endpoint(sa.service_endpoint)
         order_requirements = self._data_provider.get_order_requirements(
-            asset.did, initialize_url, consumer_account, sa.index, sa.type, dt_address
+            asset.did, initialize_url, consumer_address, sa.index, sa.type, dt_address
         )
         if not order_requirements:
             raise AssertionError('Data service provider or service is not available.')

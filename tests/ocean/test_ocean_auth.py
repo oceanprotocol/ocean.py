@@ -1,11 +1,11 @@
 from ocean_lib.ocean.ocean_auth import OceanAuth
-from tests.resources.helper_functions import get_publisher_account
+from tests.resources.helper_functions import get_publisher_wallet
 
 
 def test_get_token():
     ocn_auth = OceanAuth(':memory:')
-    acc = get_publisher_account()
-    token = ocn_auth.get(acc)
+    wallet = get_publisher_wallet()
+    token = ocn_auth.get(wallet)
     assert isinstance(token, str), 'Invalid auth token type.'
     assert token.startswith('0x'), 'Invalid auth token.'
     parts = token.split('-')
@@ -17,9 +17,9 @@ def test_get_token():
 
 def test_check_token(web3_instance):
     ocn_auth = OceanAuth(':memory:')
-    acc = get_publisher_account()
+    wallet = get_publisher_wallet()
 
-    token = ocn_auth.get(acc)
+    token = ocn_auth.get(wallet)
     address = ocn_auth.check(token)
     assert address != '0x0', 'Verifying token failed.'
 
@@ -31,22 +31,22 @@ def test_check_token(web3_instance):
 
 def test_store_token():
     ocn_auth = OceanAuth(':memory:')
-    acc = get_publisher_account()
-    token = ocn_auth.store(acc)
-    assert ocn_auth.check(token) == acc.address, 'invalid token, check failed.'
+    wallet = get_publisher_wallet()
+    token = ocn_auth.store(wallet)
+    assert ocn_auth.check(token) == wallet.address, 'invalid token, check failed.'
     # verify it is saved
-    assert ocn_auth.restore(acc) == token, 'Restoring token failed.'
+    assert ocn_auth.restore(wallet) == token, 'Restoring token failed.'
 
 
 def test_restore_token():
     ocn_auth = OceanAuth(':memory:')
-    acc = get_publisher_account()
-    assert ocn_auth.restore(acc) is None, 'Expecting None when restoring non-existing token.'
+    wallet = get_publisher_wallet()
+    assert ocn_auth.restore(wallet) is None, 'Expecting None when restoring non-existing token.'
 
-    token = ocn_auth.store(acc)
-    assert ocn_auth.check(token) == acc.address, 'invalid token, check failed.'
+    token = ocn_auth.store(wallet)
+    assert ocn_auth.check(token) == wallet.address, 'invalid token, check failed.'
     # verify it is saved
-    assert ocn_auth.restore(acc) == token, 'Restoring token failed.'
+    assert ocn_auth.restore(wallet) == token, 'Restoring token failed.'
 
 
 def test_known_token():

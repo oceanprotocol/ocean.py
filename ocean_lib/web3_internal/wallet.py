@@ -17,15 +17,8 @@ class Wallet:
 
     The use of this wallet allows Ocean tools to send rawTransactions which keeps the user
     key and password safe and they are never sent outside. Another advantage of this is that
-    we can interact directly with remote keeper nodes without having to run a local parity
+    we can interact directly with remote network nodes without having to run a local parity
     node since we only send the raw transaction hash so the user info is safe.
-
-    Note that currently a local node is still necessary for completing the consume flow because
-    the secretstore needs a parity node to encrypt/decrypt the asset urls. We could eliminate
-    this dependency on local parity node by using Brizo's publish endpoint for encryption and
-    sending url index to Brizo's consume endpoint instead of decrypting locally first.
-    The secretstore also uses the parity node to sign the document key id which is necessary
-    for communicating with the secret store nodes.
 
     """
     _last_tx_count = dict()

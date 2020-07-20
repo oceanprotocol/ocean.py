@@ -48,7 +48,7 @@ def test_market_flow():
 
     ######
     # Place order for the download service
-    order_requirements = consumer_ocean.assets.order(asset.did, consumer_wallet, sa.index)
+    order_requirements = consumer_ocean.assets.order(asset.did, consumer_wallet.address, sa.index)
 
     ######
     # Pay for the service

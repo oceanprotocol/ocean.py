@@ -86,16 +86,6 @@ class Web3Helper(object):
         return Web3Helper.ec_recover(prefixed_hash, signed_message)
 
     @staticmethod
-    def unlock_account(account):
-        """
-        Unlock the account.
-
-        :param account: Account
-        :return:
-        """
-        return Web3Provider.get_web3().personal.unlockAccount(account.address, account.password)
-
-    @staticmethod
     def get_ether_balance(address):
         """
         Get balance of an ethereum address.
@@ -118,17 +108,17 @@ class Web3Helper(object):
         return generate_multi_value_hash(types, values)
 
     @staticmethod
-    def send_ether(from_account, to_address, ether_amount):
+    def send_ether(from_wallet, to_address, ether_amount):
         w3 = Web3Provider.get_web3()
         if not w3.isChecksumAddress(to_address):
             to_address = w3.toChecksumAddress(to_address)
 
         tx = {
-            'from': from_account.address,
+            'from': from_wallet.address,
             'to': to_address,
             'value': Web3Helper.to_wei(ether_amount),
             'gas': 500000}
-        wallet = Wallet(w3, from_account.key, from_account.password, from_account.address)
+        wallet = Wallet(w3, from_wallet.key, from_wallet.password, from_wallet.address)
         raw_tx = wallet.sign_tx(tx)
         tx_hash = w3.eth.sendRawTransaction(raw_tx)
         receipt = w3.eth.waitForTransactionReceipt(tx_hash, timeout=30)

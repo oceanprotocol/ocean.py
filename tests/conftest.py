@@ -17,7 +17,7 @@ from ocean_lib.ocean.util import get_web3_provider
 from tests.resources.helper_functions import (
     get_metadata,
     setup_logging,
-    get_publisher_ocean_instance, get_consumer_ocean_instance, get_publisher_account, get_consumer_account, new_factory_contract)
+    get_publisher_ocean_instance, get_consumer_ocean_instance, get_publisher_wallet, get_consumer_wallet, new_factory_contract)
 
 setup_logging()
 
@@ -36,11 +36,11 @@ def setup_all():
     if web3.eth.accounts and web3.eth.accounts[0].lower() == '0xe2DD09d719Da89e5a3D0F2549c7E24566e947260'.lower():
         account = Account(web3.eth.accounts[0], private_key='0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58')
 
-        provider = get_publisher_account()
+        provider = get_publisher_wallet()
         if Web3Helper.from_wei(Web3Helper.get_ether_balance(provider.address)) < 10:
             Web3Helper.send_ether(account, provider.address, 25)
 
-        consumer = get_consumer_account()
+        consumer = get_consumer_wallet()
         if Web3Helper.from_wei(Web3Helper.get_ether_balance(consumer.address)) < 10:
             Web3Helper.send_ether(account, consumer.address, 25)
 

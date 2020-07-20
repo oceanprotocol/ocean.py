@@ -97,13 +97,13 @@ class DataTokenContract(ContractBase):
     def transfer_token(self, to, value, account):
         return self.transfer_wei(to, Web3Helper.to_wei(value), account)
 
-    def set_minter(self, new_minter, current_minter_account):
+    def set_minter(self, new_minter, current_minter_wallet):
         tx_hash = self.send_transaction(
             'setMinter',
             (new_minter, ),
-            transact={'from': current_minter_account.address,
-                      'passphrase': current_minter_account.password,
-                      'account_key': current_minter_account.key},
+            transact={'from': current_minter_wallet.address,
+                      'passphrase': current_minter_wallet.password,
+                      'account_key': current_minter_wallet.key},
         )
         return tx_hash
 

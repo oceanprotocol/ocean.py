@@ -14,8 +14,8 @@ from ocean_utils.did import DID
 from tests.resources.helper_functions import (
     get_algorithm_ddo,
     get_computing_metadata,
-    get_resource_path
-)
+    get_resource_path,
+    get_publisher_wallet)
 
 
 def create_asset(publisher_ocean_instance):
@@ -23,13 +23,13 @@ def create_asset(publisher_ocean_instance):
     sample_ddo_path = get_resource_path('ddo', 'ddo_sa_sample.json')
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
 
-    acct = ocn.main_account
+    publisher = get_publisher_wallet()
 
     asset = DDO(json_filename=sample_ddo_path)
     asset.metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
     my_secret_store = 'http://myownsecretstore.com'
     auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
-    return ocn.assets.create(asset.metadata, acct, [auth_service])
+    return ocn.assets.create(asset.metadata, publisher, [auth_service])
 
 
 def test_register_asset(publisher_ocean_instance):
@@ -40,8 +40,7 @@ def test_register_asset(publisher_ocean_instance):
     ##########################################################
     # Setup account
     ##########################################################
-    publisher = Wallet(publisher_ocean_instance.web3,
-                       publisher_ocean_instance.main_account)
+    publisher = get_publisher_wallet()
 
     ##########################################################
     # Create an asset DDO with valid metadata
@@ -55,8 +54,7 @@ def test_register_asset(publisher_ocean_instance):
 def test_resolve_did(publisher_ocean_instance, metadata):
     # prep ddo
     # metadata = Metadata.get_example()
-    publisher = Wallet(publisher_ocean_instance.web3,
-                       publisher_ocean_instance.main_account.private_key)
+    publisher = get_publisher_wallet()
     # happy path
     original_ddo = publisher_ocean_instance.assets.create(metadata, publisher)
     did = original_ddo.did
@@ -99,7 +97,7 @@ def test_create_data_asset(publisher_ocean_instance, consumer_ocean_instance):
     ##########################################################
     # Setup 2 accounts
     ##########################################################
-    aquarius_acct = pub_ocn.main_account
+    aquarius_acct = get_publisher_wallet()
 
     ##########################################################
     # Create an Asset with valid metadata
@@ -137,30 +135,29 @@ def test_asset_owner(publisher_ocean_instance):
     sample_ddo_path = get_resource_path('ddo', 'ddo_sa_sample.json')
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
 
-    acct = ocn.main_account
+    publisher = get_publisher_wallet()
 
     asset = DDO(json_filename=sample_ddo_path)
     asset.metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
     my_secret_store = 'http://myownsecretstore.com'
     auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
-    new_asset = ocn.assets.create(asset.metadata, acct, [auth_service])
+    new_asset = ocn.assets.create(asset.metadata, publisher, [auth_service])
 
-    assert ocn.assets.owner(new_asset.did) == acct.address
+    assert ocn.assets.owner(new_asset.did) == publisher.address
     publisher_ocean_instance.assets.retire(new_asset.did)
 
 
 def test_owner_assets(publisher_ocean_instance):
     ocn = publisher_ocean_instance
-    acct = ocn.main_account
-    assets_owned = len(ocn.assets.owner_assets(acct.address))
+    publisher = get_publisher_wallet()
+    assets_owned = len(ocn.assets.owner_assets(publisher.address))
     asset = create_asset(publisher_ocean_instance)
-    assert len(ocn.assets.owner_assets(acct.address)) == assets_owned + 1
+    assert len(ocn.assets.owner_assets(publisher.address)) == assets_owned + 1
     publisher_ocean_instance.assets.retire(asset.did)
 
 
 def test_ocean_assets_resolve(publisher_ocean_instance, metadata):
-    publisher = Wallet(publisher_ocean_instance.web3,
-                       publisher_ocean_instance.main_account.private_key)
+    publisher = get_publisher_wallet()
     ddo = publisher_ocean_instance.assets.create(metadata, publisher)
     ddo_resolved = publisher_ocean_instance.assets.resolve(ddo.did)
     assert ddo.did == ddo_resolved.did
@@ -168,8 +165,7 @@ def test_ocean_assets_resolve(publisher_ocean_instance, metadata):
 
 
 def test_ocean_assets_search(publisher_ocean_instance, metadata):
-    publisher = Wallet(publisher_ocean_instance.web3,
-                       publisher_ocean_instance.main_account.private_key)
+    publisher = get_publisher_wallet()
     ddo = publisher_ocean_instance.assets.create(metadata, publisher)
     assert len(publisher_ocean_instance.assets.search('Monkey')) > 0
     publisher_ocean_instance.assets.retire(ddo.did)
@@ -181,8 +177,7 @@ def test_ocean_assets_validate(publisher_ocean_instance, metadata):
 
 def test_ocean_assets_algorithm(publisher_ocean_instance):
     # Allow publish an algorithm
-    publisher = Wallet(publisher_ocean_instance.web3,
-                       publisher_ocean_instance.main_account.private_key)
+    publisher = get_publisher_wallet()
     metadata = get_algorithm_ddo()['service'][0]
     metadata['attributes']['main']['files'][0]['checksum'] = str(uuid.uuid4())
     ddo = publisher_ocean_instance.assets.create(metadata['attributes'], publisher)
@@ -191,8 +186,7 @@ def test_ocean_assets_algorithm(publisher_ocean_instance):
 
 
 def test_ocean_assets_compute(publisher_ocean_instance):
-    publisher = Wallet(publisher_ocean_instance.web3,
-                       publisher_ocean_instance.main_account.private_key)
+    publisher = get_publisher_wallet()
     metadata = get_computing_metadata()
     metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
     ddo = publisher_ocean_instance.assets.create(metadata, publisher)

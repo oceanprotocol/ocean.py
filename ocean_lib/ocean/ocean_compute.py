@@ -135,12 +135,12 @@ class OceanCompute:
         }
 
     @staticmethod
-    def check_output_dict(output_def, consumer_account, data_provider, config=None):
+    def check_output_dict(output_def, consumer_address, data_provider, config=None):
         """
         Validate the `output_def` dict and fills in defaults for missing values.
 
         :param output_def: dict
-        :param consumer_account: Account instance
+        :param consumer_address: hex str the consumer ethereum address
         :param data_provider:  DataServiceProvider class or similar interface
         :param config: Config instance
         :return: dict a valid `output_def` object
@@ -154,7 +154,7 @@ class OceanCompute:
             'brizoAddress': config.provider_address,
             'metadata': dict(),
             'metadataUri': config.aquarius_url,
-            'owner': consumer_account.address,
+            'owner': consumer_address,
             'publishOutput': 0,
             'publishAlgorithmLog': 0,
             'whitelist': [],
@@ -177,14 +177,14 @@ class OceanCompute:
             service_endpoint=compute_endpoint
         )
 
-    def start(self, did, consumer_account, transfer_tx_id, algorithm_did=None,
+    def start(self, did, consumer_wallet, transfer_tx_id, algorithm_did=None,
               algorithm_meta=None, output=None, job_id=None):
         """Start a remote compute job on the asset files identified by `did` after
         verifying that the provider service is active and transferring the
         number of data-tokens required for using this compute service.
 
         :param did: str -- id of asset that has the compute service
-        :param consumer_account: Account instance of the consumer ordering the service
+        :param consumer_wallet: Wallet instance of the consumer ordering the service
         :param transfer_tx_id: hex str -- id of the datatokens transfer transaction
         :param algorithm_did: str -- the asset did (of `algorithm` type) which consist of `did:op:` and
             the assetId hex str (without `0x` prefix)
@@ -197,7 +197,7 @@ class OceanCompute:
         """
         assert algorithm_did or algorithm_meta, 'either an algorithm did or an algorithm meta must be provided.'
 
-        output = OceanCompute.check_output_dict(output, consumer_account, data_provider=self._data_provider)
+        output = OceanCompute.check_output_dict(output, consumer_wallet.address, data_provider=self._data_provider)
         asset = resolve_asset(did, metadata_store_url=self._config.aquarius_url)
         service_endpoint = self._get_service_endpoint(did, asset)
 
@@ -207,8 +207,8 @@ class OceanCompute:
         job_info = self._data_provider.start_compute_job(
             did,
             service_endpoint,
-            consumer_account.address,
-            self._auth.get(consumer_account),
+            consumer_wallet.address,
+            self._auth.get(consumer_wallet),
             sa.index,
             asset.data_token_address,
             tx_id,
@@ -219,11 +219,11 @@ class OceanCompute:
         )
         return job_info['jobId']
 
-    def status(self, did, job_id, account):
+    def status(self, did, job_id, wallet):
         """
         :param did: str id of the asset offering the compute service of this job
         :param job_id: str id of the compute job
-        :param account: Account instance
+        :param wallet: Wallet instance
         :return: dict the status for an existing compute job, keys are (ok, status, statusText)
         """
         return OceanCompute._status_from_job_info(
@@ -231,24 +231,24 @@ class OceanCompute:
                 did,
                 job_id,
                 self._get_service_endpoint(did),
-                account.address,
-                self._auth.get(account)
+                wallet.address,
+                self._auth.get(wallet)
             )
         )
 
-    def result(self, did, job_id, account):
+    def result(self, did, job_id, wallet):
         """
         :param did: str id of the asset offering the compute service of this job
         :param job_id: str id of the compute job
-        :param account: Account instance
+        :param wallet: Wallet instance
         :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
         """
         info_dict = self._data_provider.compute_job_result(
             did,
             job_id,
             self._get_service_endpoint(did),
-            account.address,
-            self._auth.get(account),
+            wallet.address,
+            self._auth.get(wallet),
         )
         return {
             'did': info_dict.get('resultsDid', ''),
@@ -256,13 +256,13 @@ class OceanCompute:
             'logs': info_dict.get('algorithmLogUrl', [])
         }
 
-    def stop(self, did, job_id, account):
+    def stop(self, did, job_id, wallet):
         """
         Attempt to stop the running compute job
 
         :param did: str id of the asset offering the compute service of this job
         :param job_id: str id of the compute job
-        :param account: Account instance
+        :param wallet: Wallet instance
         :return: dict the status for the stopped compute job, keys are (ok, status, statusText)
         """
         return self._status_from_job_info(
@@ -270,26 +270,26 @@ class OceanCompute:
                 did,
                 job_id,
                 self._get_service_endpoint(did),
-                account.address,
-                self._auth.get(account)
+                wallet.address,
+                self._auth.get(wallet)
             )
         )
 
-    def restart(self, did, job_id, account):
+    def restart(self, did, job_id, wallet):
         """
         Attempt to restart the compute job by stopping it first, then starting a new job.
 
         :param did: str id of the asset offering the compute service of this job
         :param job_id: str id of the compute job
-        :param account: Account instance
+        :param wallet: Wallet instance
         :return: str -- id of the new compute job
         """
         job_info = self._data_provider.restart_compute_job(
                 did,
                 job_id,
                 self._get_service_endpoint(did),
-                account.address,
-                self._auth.get(account),
+                wallet.address,
+                self._auth.get(wallet),
         )
         return job_info['jobId']
 

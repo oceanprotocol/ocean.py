@@ -21,7 +21,7 @@ class OceanAuth:
     apps. The advantage of using the auth token is to reduce the number of confirmation
     prompts requiring user action.
 
-    The auth token works with a provider service such as Brizo which also uses this
+    The auth token works with a provider service such as Ocean provider-py which also uses this
     ocean module to handle auth tokens.
 
     Token format is "signature-timestamp".
@@ -55,15 +55,15 @@ class OceanAuth:
     def is_token_valid(token):
         return isinstance(token, str) and token.startswith('0x') and len(token.split('-')) == 2
 
-    def get(self, account):
+    def get(self, wallet):
         """
-        :param account: Account instance signing the token
-        :return: hex str the token generated/signed by account
+        :param wallet: Wallet instance signing the token
+        :return: hex str the token generated/signed by the users wallet
         """
         _message, _time = self._get_message_and_time()
         try:
             prefixed_msg_hash = Web3Helper.sign_hash(
-                add_ethereum_prefix_and_hash_msg(_message), account)
+                add_ethereum_prefix_and_hash_msg(_message), wallet)
             return f'{prefixed_msg_hash}-{_time}'
         except Exception as e:
             logging.error(f'Error signing token: {str(e)}')
@@ -85,35 +85,35 @@ class OceanAuth:
         address = Web3Helper.personal_ec_recover(message, sig)
         return Web3Provider.get_web3().toChecksumAddress(address)
 
-    def store(self, account):
+    def store(self, wallet):
         """
-        :param account: Account instance signing the token
+        :param wallet: Wallet instance signing the token
         :return:
-            token that was generated and stored for this account
+            token that was generated and stored for this users wallet
         """
-        token = self.get(account)
+        token = self.get(wallet)
         timestamp = token.split('-')[1]
-        self._tokens_storage.write_token(account.address, token, timestamp)
+        self._tokens_storage.write_token(wallet.address, token, timestamp)
         return token
 
-    def restore(self, account):
+    def restore(self, wallet):
         """
-        :param account: Account instance to fetch the saved token
+        :param wallet: Wallet instance to fetch the saved token
         :return:
             hex str the token retreived from storage
-            None if no token found for this account
+            None if no token found for this users wallet
         """
-        token = self._tokens_storage.read_token(account.address)[0]
+        token = self._tokens_storage.read_token(wallet.address)[0]
         if not token:
             return None
 
         address = self.check(token)
 
-        return token if address == account.address else None
+        return token if address == wallet.address else None
 
-    def is_stored(self, account):
+    def is_stored(self, wallet):
         """
-        :param account: Account instance
-        :return: bool whether this account has a stored token
+        :param wallet: Wallet instance
+        :return: bool whether this wallet has a stored token
         """
-        return self.restore(account) is not None
+        return self.restore(wallet) is not None

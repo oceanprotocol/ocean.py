@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 def download_asset_files(
         service_index,
         asset,
-        consumer_account,
+        consumer_wallet,
         destination,
         token_address,
         token_transfer_tx_id,
@@ -25,7 +25,7 @@ def download_asset_files(
 
     :param service_index: identifier of the service inside the asset DDO, str
     :param asset: Asset instance
-    :param consumer_account: Account instance of the consumer
+    :param consumer_wallet: Wallet instance of the consumer
     :param destination: Path, str
     :param token_address: hex str the address of the DataToken smart contract
     :param token_transfer_tx_id: hex str the token transfer transaction id (hash)
@@ -67,7 +67,7 @@ def download_asset_files(
         data_provider.download_service(
             asset.did,
             service_endpoint,
-            consumer_account,
+            consumer_wallet,
             _files,
             asset_folder,
             service_index,

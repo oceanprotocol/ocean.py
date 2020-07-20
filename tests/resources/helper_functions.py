@@ -20,7 +20,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.factory import FactoryContract
 from ocean_lib.web3_internal import Web3Helper
 from ocean_lib.web3_internal.contract_handler import ContractHandler
-from ocean_lib.web3_internal.utils import get_account
+from ocean_lib.web3_internal.utils import get_wallet
 
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.web3_provider import Web3Provider
@@ -30,7 +30,6 @@ PUBLISHER_INDEX = 1
 CONSUMER_INDEX = 0
 
 
-@enforce.runtime_validation
 def get_resource_path(dir_name, file_name):
     base = os.path.realpath(__file__).split(os.path.sep)[1:-1]
     if dir_name:
@@ -39,28 +38,23 @@ def get_resource_path(dir_name, file_name):
         return pathlib.Path(os.path.join(os.path.sep, *base, file_name))
 
 
-@enforce.runtime_validation
 def get_publisher_wallet() -> Wallet:
     web3 = get_web3()
     key = get_publisher_account().private_key
     wallet = Wallet(web3, key)
     return wallet
 
-@enforce.runtime_validation
 def get_consumer_wallet() -> Wallet:
     web3 = get_web3()
     key = get_consumer_account().private_key
     return Wallet(web3, key)
 
-@enforce.runtime_validation
 def get_publisher_account() -> Account:
     return get_account(0)
 
-@enforce.runtime_validation
 def get_consumer_account() -> Account:
     return get_account(1)
 
-@enforce.runtime_validation
 def get_web3():
     return get_publisher_ocean_instance().web3
 
@@ -77,7 +71,7 @@ def new_factory_contract():
 def get_publisher_ocean_instance(use_provider_mock=False) -> Ocean:
     data_provider = DataProviderMock if use_provider_mock else None
     ocn = Ocean(data_provider=data_provider)
-    account = get_publisher_account()
+    account = get_publisher_wallet()
     ocn.main_account = account
     return ocn
 
@@ -85,7 +79,7 @@ def get_publisher_ocean_instance(use_provider_mock=False) -> Ocean:
 def get_consumer_ocean_instance(use_provider_mock:bool=False) -> Ocean:
     data_provider = DataProviderMock if use_provider_mock else None
     ocn = Ocean(data_provider=data_provider)
-    account = get_consumer_account()
+    account = get_consumer_wallet()
     ocn.main_account = account
     return ocn
 

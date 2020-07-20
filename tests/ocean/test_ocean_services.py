@@ -3,6 +3,8 @@
 from ocean_utils.agreements.service_types import ServiceTypes
 from ocean_utils.utils.utilities import get_timestamp
 
+from tests.resources.helper_functions import get_publisher_wallet
+
 
 def test_create_access_service(publisher_ocean_instance):
     service = publisher_ocean_instance.services.create_access_service({'a': 1}, 'service_endpoint')
@@ -39,7 +41,7 @@ def test_create_compute_service(publisher_ocean_instance):
     attributes = ocn_compute.create_compute_service_attributes(
         "10",
         3600*24,
-        publisher_ocean_instance.main_account.address,
+        get_publisher_wallet().address,
         get_timestamp(),
         provider_attributes
     )

@@ -7,7 +7,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 
 class DataProviderMock(object):
-    def __init__(self, ocean_instance=None, account=None):
+    def __init__(self, ocean_instance=None, wallet=None):
         if not ocean_instance:
             from tests.resources.helper_functions import get_publisher_ocean_instance
             ocean_instance = get_publisher_ocean_instance(
@@ -15,17 +15,17 @@ class DataProviderMock(object):
             )
 
         self.ocean_instance = ocean_instance
-        self.account = account
-        if not account:
-            from tests.resources.helper_functions import get_publisher_account
-            self.account = get_publisher_account()
+        self.wallet = wallet
+        if not wallet:
+            from tests.resources.helper_functions import get_publisher_wallet
+            self.wallet = get_publisher_wallet()
 
     @staticmethod
-    def consume_service(service_agreement_id, service_endpoint, account_address, files,
+    def consume_service(service_agreement_id, service_endpoint, wallet_address, files,
                         destination_folder, *_, **__):
         for f in files:
             with open(os.path.join(destination_folder, os.path.basename(f['url'])), 'w') as of:
-                of.write(f'mock data {service_agreement_id}.{service_endpoint}.{account_address}')
+                of.write(f'mock data {service_agreement_id}.{service_endpoint}.{wallet_address}')
 
     @staticmethod
     def start_compute_job(*args, **kwargs):
