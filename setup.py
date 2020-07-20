@@ -27,7 +27,10 @@ install_requirements = [
     'pycryptodomex',
     'tqdm',
     'pytz',
-    'web3==4.5.0'
+    'eth-account',
+    'eth-keys',
+    'eth-utils',
+    'web3',
     # web3 requires eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
@@ -53,6 +56,11 @@ dev_requirements = [
     'pkginfo',
     'twine',
     'watchdog',
+    'eth-brownie>=1.8.3,<2.0.0',
+    #for the following: maybe needed, maybe not
+    'enforce',
+    'pytest',
+
 ]
 
 docs_requirements = [

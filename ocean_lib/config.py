@@ -1,5 +1,3 @@
-"""Config data."""
-
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
@@ -24,7 +22,10 @@ NAME_AQUARIUS_URL = 'aquarius.url'
 NAME_STORAGE_PATH = 'storage.path'
 NAME_AUTH_TOKEN_MESSAGE = 'auth_token_message'
 NAME_AUTH_TOKEN_EXPIRATION = 'auth_token_expiration'
-NAME_DATA_TOKEN_FACTORY_ADDRESS = 'factory.address'
+
+NAME_DATA_TOKEN_FACTORY_ADDRESS = 'dtfactory.address'
+NAME_SFACTORY_ADDRESS = 'sfactory.address'
+NAME_OCEAN_ADDRESS = 'OCEAN.address'
 
 NAME_PARITY_URL = 'parity.url'
 NAME_PROVIDER_ADDRESS = 'provider.address'
@@ -32,6 +33,8 @@ NAME_PROVIDER_ADDRESS = 'provider.address'
 
 environ_names = {
     NAME_DATA_TOKEN_FACTORY_ADDRESS: ['DATA_TOKEN_FACTORY_ADDRESS', 'Data token factory address'],
+    NAME_SFACTORY_ADDRESS: ['SFACTORY_ADDRESS', 'SPool factory address'],
+    NAME_OCEAN_ADDRESS: ['OCEAN_ADDRESS', 'OCEAN address'],
     NAME_NETWORK_URL: ['NETWORK_URL', 'Network URL'],
     NAME_ARTIFACTS_PATH: ['ARTIFACTS_PATH', 'Path to the abi artifacts of the deployed smart contracts'],
     NAME_GAS_LIMIT: ['GAS_LIMIT', 'Gas limit'],
@@ -116,19 +119,7 @@ class Config(configparser.ConfigParser):
 
     @property
     def artifacts_path(self):
-        """Path where the contracts artifacts are allocated."""
-        _path_string = self.get(self._section_name, NAME_ARTIFACTS_PATH)
-        path = Path(_path_string).expanduser().resolve()
-        # TODO: Handle the default case and make default empty string
-        # assert path.exists(), "Can't find the keeper path: {} ({})"..format(_path_string,
-        # path)
-        if os.path.exists(path):
-            pass
-        elif os.getenv('VIRTUAL_ENV'):
-            path = os.path.join(os.getenv('VIRTUAL_ENV'), 'artifacts')
-        else:
-            path = os.path.join(site.PREFIXES[0], 'artifacts')
-        return path
+        return './abi'
 
     @property
     def storage_path(self):
@@ -167,12 +158,17 @@ class Config(configparser.ConfigParser):
         return self.get('resources', NAME_PROVIDER_ADDRESS)
 
     @property
-    def factory_address(self):
-        return self.get(
-            'eth-network',
-            NAME_DATA_TOKEN_FACTORY_ADDRESS,
-            fallback=None
-        )
+    def dtfactory_address(self):
+        return self.get('eth-network', NAME_DATA_TOKEN_FACTORY_ADDRESS,
+                        fallback=None)
+
+    @property
+    def sfactory_address(self):
+        return self.get('eth-network', NAME_SFACTORY_ADDRESS, fallback=None)
+
+    @property
+    def OCEAN_address(self):
+        return self.get('eth-network', NAME_OCEAN_ADDRESS, fallback=None)
 
     @property
     def downloads_path(self):

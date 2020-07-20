@@ -1,4 +1,4 @@
-from ocean_lib.models.factory import FactoryContractfrom ocean_lib.models.factory import FactoryContractfrom ocean_lib.web3_internal.utils import get_account# Quickstart: Simple Flow 
+# Quickstart: Simple Flow 
 
 This stripped-down flow shows the essence of Ocean. Just downloading, no metadata.
 
@@ -72,7 +72,7 @@ Now, you're Bob:)
 ```python
 from ocean_lib import Ocean
 from ocean_lib.web3_internal.utils import get_account
-from ocean_lib.models.factory import FactoryContract
+from ocean_lib.models.dtfactory import DTFactory
 
 dt_address = ''  # From first step
 bob_config = {
@@ -83,7 +83,7 @@ ocean = Ocean(bob_config)
 bob_account = get_account(0)
 
 token = ocean.get_data_token(dt_address)
-alice_address = FactoryContract().get_token_minter(dt_address)
+alice_address = DTFactory().get_token_minter(dt_address)
 
 tx_id = token.transfer(alice_address, 1, bob_account)
 _file_path = token.download(bob_account, tx_id, '~/my-dataset-downloads')

@@ -1,3 +1,4 @@
+import enforce
 import os
 import time
 
@@ -119,7 +120,7 @@ class DataTokenContract(ContractBase):
         # grab the metadatastore URL from the DataToken contract (@token_address)
         return self.contract_concise.blob()
 
-    def download(self, account, tx_id, destination_folder):
+    def download(self, account: Account, tx_id: str, destination_folder: str):
         url = self.get_metadata_url()
         download_url = (
             f'{url}?'
@@ -131,3 +132,18 @@ class DataTokenContract(ContractBase):
         file_name = f'file-{self.address}'
         DataServiceProvider.write_file(response, destination_folder, file_name)
         return os.path.join(destination_folder, file_name)
+
+    #============================================================
+    #reflect DataToken Solidity methods (new ones beyond BToken)
+    def blob(self) -> str:
+        return self.contract.functions.blob().call()
+
+    def mint(self, account: str, value_base: int, from_wallet: Wallet):
+        f = self.contract.functions.mint(account, value_base)
+        return util.buildAndSendTx(f, from_wallet)
+
+    def setMinter(self, minter: str, from_wallet: Wallet):
+        f = self.contract.functions.setMinter(minter)
+        return util.buildAndSendTx(f, from_wallet)
+
+

@@ -1,11 +1,9 @@
-"""
-    Contract Base
-
-    All contract classes inherit from this base class
-"""
+"""All contracts inherit from this base class"""
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
+import enforce
 import logging
+import typing
 
 from web3 import Web3
 
@@ -15,12 +13,11 @@ from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 logger = logging.getLogger(__name__)
 
-
 class ContractBase(object):
     """Base class for all contract objects."""
     CONTRACT_NAME = None
 
-    def __init__(self, address, abi_path=None):
+    def __init__(self, address: str, abi_path=None):
         self.name = self.contract_name
         assert self.name, 'contract_name property needs to be implemented in subclasses.'
         if not abi_path:
@@ -35,11 +32,11 @@ class ContractBase(object):
         assert self.contract_concise is not None
 
     @property
-    def contract_name(self):
+    def contract_name(self) -> str:
         return self.CONTRACT_NAME
 
     @property
-    def address(self):
+    def address(self) -> str:
         """Return the ethereum address of the solidity contract deployed
         in current network.
         """
@@ -54,7 +51,7 @@ class ContractBase(object):
         return self.contract.events
 
     @staticmethod
-    def to_checksum_address(address):
+    def to_checksum_address(address: str):
         """
         Validate the address provided.
 
@@ -64,7 +61,7 @@ class ContractBase(object):
         return Web3.toChecksumAddress(address)
 
     @staticmethod
-    def get_tx_receipt(tx_hash, timeout=20):
+    def get_tx_receipt(tx_hash: str, timeout=20):
         """
         Get the receipt of a tx.
 
@@ -76,18 +73,19 @@ class ContractBase(object):
             Web3Provider.get_web3().eth.waitForTransactionReceipt(tx_hash, timeout=timeout)
         except ValueError as e:
             logger.error(f'Waiting for transaction receipt failed: {e}')
-            return
+            return None
         except Exception:
             logger.info('Waiting for transaction receipt may have timed out.')
-            return
+            return None
 
         return Web3Provider.get_web3().eth.getTransactionReceipt(tx_hash)
 
-    def is_tx_successful(self, tx_hash):
+    def is_tx_successful(self, tx_hash: str) -> bool:
         receipt = self.get_tx_receipt(tx_hash)
         return bool(receipt and receipt.status == 1)
 
-    def subscribe_to_event(self, event_name, timeout, event_filter, callback=None,
+    @enforce.runtime_validation
+    def subscribe_to_event(self, event_name: str, timeout, event_filter, callback=None,
                            timeout_callback=None, args=None, wait=False,
                            from_block='latest', to_block='latest'):
         """
@@ -119,7 +117,8 @@ class ContractBase(object):
             blocking=wait
         )
 
-    def send_transaction(self, fn_name, fn_args, transact=None):
+    @enforce.runtime_validation
+    def send_transaction(self, fn_name: str, fn_args, transact=None):
         """Calls a smart contract function using either `personal_sendTransaction` (if
         passphrase is available) or `ether_sendTransaction`.
 
@@ -135,13 +134,14 @@ class ContractBase(object):
         transact.update({'gas': 500000})
         return contract_function.transact(transact).hex()
 
-    def get_event_argument_names(self, event_name):
+    @enforce.runtime_validation
+    def get_event_argument_names(self, event_name:str):
         event = getattr(self.contract.events, event_name, None)
         if event:
             return event().argument_names
 
     @property
-    def function_names(self):
+    def function_names(self) -> typing.List[str]:
         return list(self.contract.function_names)
 
     def __str__(self):

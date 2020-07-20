@@ -2,73 +2,68 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 import os
-import time
 
 from ocean_utils.agreements.service_types import ServiceTypes
 
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.service_agreement import ServiceAgreement
 from tests.resources.helper_functions import (
-    get_consumer_account,
-    get_publisher_account,
+    get_consumer_wallet,
+    get_publisher_wallet,
     get_registered_ddo,
     get_publisher_ocean_instance,
     get_consumer_ocean_instance,
-    mint_tokens_and_wait)
+    mint_tokens_and_wait,
+)
 
 
 def test_market_flow():
-    pub_acc = get_publisher_account()
+    pub_wallet = get_publisher_wallet()
 
-    publisher_ocean_instance = get_publisher_ocean_instance()
-    consumer_ocean_instance = get_consumer_ocean_instance()
+    publisher_ocean = get_publisher_ocean_instance()
+    consumer_ocean = get_consumer_ocean_instance()
 
     # Register Asset
-    asset = get_registered_ddo(publisher_ocean_instance, pub_acc)
+    asset = get_registered_ddo(publisher_ocean, pub_wallet)
     assert isinstance(asset, Asset)
     assert asset.data_token_address
 
-    cons_ocn = consumer_ocean_instance
-    consumer_account = get_consumer_account()
-    config = cons_ocn.config
-
-    contents_count = len(
-        os.listdir(config.downloads_path)) if os.path.exists(config.downloads_path) else 0
+    consumer_wallet = get_consumer_wallet()
 
     # sign agreement using the registered asset did above
     service = asset.get_service(service_type=ServiceTypes.ASSET_ACCESS)
     sa = ServiceAgreement.from_json(service.as_dictionary())
 
-    dt = publisher_ocean_instance.get_data_token(asset.data_token_address)
-    mint_tokens_and_wait(dt, pub_acc.address, pub_acc)
+    dt = publisher_ocean.get_data_token(asset.data_token_address)
+    mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
 
     ######
     # Give the consumer some datatokens so they can order the service
     try:
-        tx_id = dt.transfer(consumer_account.address, 10, pub_acc)
-        dt.verify_transfer_tx(tx_id, pub_acc.address, consumer_account.address)
+        tx_id = dt.transfer(consumer_wallet.address, 10, pub_wallet)
+        dt.verify_transfer_tx(tx_id, pub_wallet.address, consumer_wallet.address)
     except (AssertionError, Exception) as e:
         print(e)
         raise
 
     ######
     # Place order for the download service
-    order_requirements = cons_ocn.assets.order(asset.did, consumer_account, sa.index)
+    order_requirements = consumer_ocean.assets.order(asset.did, consumer_wallet, sa.index)
 
     ######
     # Pay for the service
-    payment_tx_id = cons_ocn.assets.pay_for_service(
+    payment_tx_id = consumer_ocean.assets.pay_for_service(
         order_requirements.amount,
         order_requirements.data_token_address,
         order_requirements.receiver_address,
-        consumer_account
+        consumer_wallet
     )
-    asset_folder = cons_ocn.assets.download(
+    asset_folder = consumer_ocean.assets.download(
         asset.did,
         sa.index,
-        consumer_account,
+        consumer_wallet,
         payment_tx_id,
-        config.downloads_path
+        consumer_ocean.config.downloads_path
     )
 
     assert len(os.listdir(asset_folder)) > 1

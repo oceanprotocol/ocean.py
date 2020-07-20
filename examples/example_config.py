@@ -47,7 +47,7 @@ class ExampleConfig:
             "eth-network": {
                 "network": get_infura_url(WEB3_INFURA_PROJECT_ID, 'rinkeby'),
                 "artifacts.path": "artifacts",
-                "factory.address": "0xB9d406D24B310A7D821D0b782a36909e8c925471"
+                "dtfactory.address": "0xB9d406D24B310A7D821D0b782a36909e8c925471"
 
             },
             "resources": {

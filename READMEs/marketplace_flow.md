@@ -1,4 +1,4 @@
-from ocean_lib.web3_internal.utils import get_account# Quickstart: Marketplace Flow
+# Quickstart: Marketplace Flow
 
 This batteries-included flow includes metadata, multiple services for one datatoken, and compute-to-data.
 
@@ -9,7 +9,8 @@ Here's the steps.
 1. Alice publishes assets for data services (= publishes a datatoken contract and metadata)
 1. Alice mints 100 tokens
 1. Alice allows marketplace to sell her datatokens
-1. Bob buys datatokens from marketplace
+1. Marketplace posts asset for sale
+1. Value swap: Bob buys datatokens from marketplace
 1. Bob uses a service he just purchased (download)
 
 Let's go through each step.
@@ -37,7 +38,6 @@ docker run @oceanprotocol/marketplace:latest
 ```python
 from ocean_lib import Ocean
 from ocean_lib.web3_internal.utils import get_account
-from ocean_lib.models.metadata_example import METADATA_EXAMPLE
 
 #Alice's config
 config = {
@@ -57,8 +57,14 @@ token_address = data_token.address
 # `ocean.assets.create` will require that token_address is a valid DataToken contract address, unless token_address
 # is not provided then the `create` method will first create a new data token and use it in the new
 # asset.
-asset = ocean.assets.create(METADATA_EXAMPLE, account, data_token_address=token_address)
-assert token_address == asset.data_token_address
+metadata =  {"main": {
+    "type": "dataset", "name": "10 Monkey Species Small", "author": "Mario", 
+    "license": "CC0: Public Domain", "dateCreated": "2012-02-01T10:55:11Z", 
+    "files": [{ "index": 0, "contentType": "application/zip", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/training.zip"},
+              { "index": 1, "contentType": "text/text", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/monkey_labels.txt"},
+              { "index": 2, "contentType": "application/zip", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/validation.zip"}]}}
+asset = ocean.assets.create(metadata, account, data_token_address=token_address)
+assert token_address == asset._other_values['dataTokenAddress']
 
 did = asset.did
 ```
@@ -69,39 +75,57 @@ did = asset.did
 data_token.mint(account.address, 100, account)
 ```
 
-## 3. Alice allows marketplace to sell her datatokens
+## 4. Alice allows marketplace to sell her datatokens
 
 ```python
 marketplace_address = '0x068ed00cf0441e4829d9784fcbe7b9e26d4bd8d0'
 data_token.approve(marketplace_address, 20)
 ```
 
-## 4. Bob buys datatokens from marketplace
+## 5. Marketplace posts asset for sale
+Now, you're the marketplace:)
 
 ```python
 from ocean_lib import Ocean
-from ocean_lib.web3_internal.utils import get_account
 
+#Market's config
 config = {
    'network': 'rinkeby',
    'privateKey':'1234ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f',
-   'providerUri': 'localhost:8030'
 }
-ocean = Ocean(config)
-bob_account = get_account(0)
+market_ocean = Ocean(config)
 
 asset = ocean.assets.resolve(did)
-service = asset.get_service('access')
-num_dt_needed = service.get_price()
+service1 = asset.get_service('download')
+service2 = asset.get_service('access')
+price = 10.0 #marketplace-set price of 10 USD / datatoken
 
-(price, currency) = ocean.marketplace.get_data_token_price(num_dt_needed, asset.data_token_address)
-ocean.marketplace.buy_data_tokens(num_dt_needed, asset.data_token_address, price, currency)
+#Display key asset information, such as the cost of each service
+print(f"Service 1 costs {service1.get_num_dt_needed() * price} USD") # 1.5 * 10 = 15
+print(f"Service 2 costs {service2.get_num_dt_needed() * price} USD") # 2.5 * 10 = 25
 ```
 
-## 5. Bob uses a service he just purchased (download)
+## 6. Value swap: Bob buys datatokens from marketplace
+
+```python
+#Not shown: in marketplace GUI, Bob uses Stripe to send USD to marketplace (or other methods / currencies).
+
+market_token = market_ocean.get_data_token(token_address)
+market_token.transfer(dst_address=bob_address, 1.0)
+```
+   
+## 7. Bob uses a service he just purchased (download)
+Now, you're Bob:)
 
 ```python
 
+#Bob's config
+config = {
+   'network': 'rinkeby',
+   'privateKey':'1234ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8o',
+}
+market_ocean = Ocean(config)
+
 service = asset.get_service('access')
-file_path = ocean.assets.download(asset.did, service.index, bob_account, '~/my-datasets')
+file_path = bob_ocean.assets.download(asset.did, service.index, bob_account, '~/my-datasets')
 ```
