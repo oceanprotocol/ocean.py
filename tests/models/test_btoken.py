@@ -3,6 +3,7 @@ from web3 import Web3
 from ocean_lib.models.btoken import BToken
 from ocean_lib.ocean import util
 
+
 def test_ERC20(network,
                alice_wallet, alice_address,
                bob_wallet, bob_address,

@@ -1,11 +1,11 @@
-import enforce
+
 import warnings
 
-from . import bconstants
+from . import balancer_constants
 from ocean_lib.ocean import util
 from ocean_lib.web3_internal.wallet import Wallet
     
-@enforce.runtime_validation
+
 class SFactory:    
     def __init__(self, web3, contract_address: str):
         abi = self._abi()
@@ -20,7 +20,7 @@ class SFactory:
         print("SPool.newSPool(). Begin.")
         controller_address = from_wallet.address
         func = self.contract.functions.newSPool(controller_address)
-        gaslimit = bconstants.GASLIMIT_SFACTORY_NEWSPOOL
+        gaslimit = balancer_constants.GASLIMIT_SFACTORY_NEWSPOOL
         (_, tx_receipt) = util.buildAndSendTx(func, from_wallet, gaslimit)
 
         # grab pool_address

@@ -1,23 +1,24 @@
 """All contracts inherit from this base class"""
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
-import enforce
 import logging
 import typing
 
 from web3 import Web3
 
 from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 logger = logging.getLogger(__name__)
 
+
 class ContractBase(object):
     """Base class for all contract objects."""
     CONTRACT_NAME = None
 
-    def __init__(self, address: str, abi_path=None):
+    def __init__(self, address: [str, None], abi_path=None):
         self.name = self.contract_name
         assert self.name, 'contract_name property needs to be implemented in subclasses.'
         if not abi_path:
@@ -84,7 +85,6 @@ class ContractBase(object):
         receipt = self.get_tx_receipt(tx_hash)
         return bool(receipt and receipt.status == 1)
 
-    @enforce.runtime_validation
     def subscribe_to_event(self, event_name: str, timeout, event_filter, callback=None,
                            timeout_callback=None, args=None, wait=False,
                            from_block='latest', to_block='latest'):
@@ -117,13 +117,13 @@ class ContractBase(object):
             blocking=wait
         )
 
-    @enforce.runtime_validation
-    def send_transaction(self, fn_name: str, fn_args, transact=None):
+    def send_transaction(self, fn_name: str, fn_args, from_wallet: Wallet, transact: dict =None) -> str:
         """Calls a smart contract function using either `personal_sendTransaction` (if
         passphrase is available) or `ether_sendTransaction`.
 
         :param fn_name: str the smart contract function name
         :param fn_args: tuple arguments to pass to function above
+        :param from_wallet:
         :param transact: dict arguments for the transaction such as from, gas, etc.
         :return:
         """
@@ -131,10 +131,16 @@ class ContractBase(object):
         contract_function = CustomContractFunction(
             contract_fn
         )
-        transact.update({'gas': 500000})
-        return contract_function.transact(transact).hex()
+        _transact = {
+            'from': from_wallet.address,
+            'passphrase': from_wallet.password,
+            'account_key': from_wallet.key
+        }
+        _transact.update({'gas': 500000})
+        if transact:
+            _transact.update(transact)
+        return contract_function.transact(_transact).hex()
 
-    @enforce.runtime_validation
     def get_event_argument_names(self, event_name:str):
         event = getattr(self.contract.events, event_name, None)
         if event:

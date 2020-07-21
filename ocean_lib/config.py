@@ -119,7 +119,19 @@ class Config(configparser.ConfigParser):
 
     @property
     def artifacts_path(self):
-        return './abi'
+        """Path where the contracts artifacts are allocated."""
+        _path_string = self.get(self._section_name, NAME_ARTIFACTS_PATH)
+        path = Path(_path_string).expanduser().resolve()
+        # TODO: Handle the default case and make default empty string
+        # assert path.exists(), "Can't find the keeper path: {} ({})"..format(_path_string,
+        # path)
+        if os.path.exists(path):
+            pass
+        elif os.getenv('VIRTUAL_ENV'):
+            path = os.path.join(os.getenv('VIRTUAL_ENV'), 'artifacts')
+        else:
+            path = os.path.join(site.PREFIXES[0], 'artifacts')
+        return path
 
     @property
     def storage_path(self):
@@ -167,7 +179,7 @@ class Config(configparser.ConfigParser):
         return self.get('eth-network', NAME_SFACTORY_ADDRESS, fallback=None)
 
     @property
-    def OCEAN_address(self):
+    def ocean_token_address(self):
         return self.get('eth-network', NAME_OCEAN_ADDRESS, fallback=None)
 
     @property

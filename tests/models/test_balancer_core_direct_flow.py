@@ -4,7 +4,7 @@ from ocean_lib import Ocean
 from ocean_lib.models.sfactory import SFactory
 from ocean_lib.models.spool import SPool
 from ocean_lib.models.btoken import BToken
-from ocean_lib.models import bconstants
+from ocean_lib.models import balancer_constants
 from ocean_lib.ocean import util
 from ocean_lib.ocean.util import toBase18
 
@@ -42,22 +42,22 @@ def test1(network, OCEAN_address,
     pool.setSwapFee(toBase18(0.1), from_wallet=alice_wallet) #set 10% fee
 
     DT.approve(pool_address, toBase18(90.0), from_wallet=alice_wallet)
-    pool.bind(DT_address, toBase18(90.0), bconstants.INIT_WEIGHT_DT,
+    pool.bind(DT_address, toBase18(90.0), balancer_constants.INIT_WEIGHT_DT,
               from_wallet=alice_wallet)
 
     OCEAN_token = BToken(web3, OCEAN_address)
     OCEAN_token.approve(pool_address, toBase18(10.0), from_wallet=alice_wallet)
-    pool.bind(OCEAN_address, toBase18(10.0), bconstants.INIT_WEIGHT_OCEAN,
+    pool.bind(OCEAN_address, toBase18(10.0), balancer_constants.INIT_WEIGHT_OCEAN,
               from_wallet=alice_wallet)
     
     #===============================================================
     # 5. Alice adds liquidity to pool
     DT.approve(pool_address, toBase18(9.0), from_wallet=alice_wallet)
-    pool.rebind(DT_address, toBase18(90.0+9.0), bconstants.INIT_WEIGHT_DT,
+    pool.rebind(DT_address, toBase18(90.0+9.0), balancer_constants.INIT_WEIGHT_DT,
                 from_wallet=alice_wallet)
     
     OCEAN_token.approve(pool_address, toBase18(1.0), from_wallet=alice_wallet)
-    pool.rebind(OCEAN_address, toBase18(10.0+1.0), bconstants.INIT_WEIGHT_OCEAN,
+    pool.rebind(OCEAN_address, toBase18(10.0+1.0), balancer_constants.INIT_WEIGHT_OCEAN,
                 from_wallet=alice_wallet)
     
     # 6. Bob buys a DT from pool
@@ -78,10 +78,10 @@ def test1(network, OCEAN_address,
     #===============================================================
     # 8. Alice removes liquidity
     pool.rebind(DT_address, toBase18(90.0+9.0-2.0),
-                bconstants.INIT_WEIGHT_DT,
+                balancer_constants.INIT_WEIGHT_DT,
                 from_wallet=alice_wallet)
     pool.rebind(OCEAN_address, toBase18(10.0+1.0-3.0),
-                bconstants.INIT_WEIGHT_OCEAN,
+                balancer_constants.INIT_WEIGHT_OCEAN,
                 from_wallet=alice_wallet)
     
     #===============================================================

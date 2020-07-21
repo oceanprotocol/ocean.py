@@ -7,7 +7,7 @@ import logging
 from ocean_utils.aquarius.aquarius_provider import AquariusProvider
 
 from ocean_lib.assets.asset import Asset
-from ocean_lib.models.datatokencontract import DataTokenContract
+from ocean_lib.models.data_token import DataToken
 
 logger = logging.getLogger('keeper')
 
@@ -29,7 +29,7 @@ def resolve_asset(did, metadata_store_url=None, token_address=None):
 
     metadata_url = metadata_store_url
     if not metadata_store_url and token_address:
-        metadata_url = DataTokenContract(token_address).get_metadata_url()
+        metadata_url = DataToken(token_address).get_metadata_url()
 
     logger.debug(f'found did {did} -> url={metadata_url}')
     ddo = AquariusProvider.get_aquarius(metadata_url).get_asset_ddo(did)

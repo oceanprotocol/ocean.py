@@ -3,11 +3,10 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
-import eth_account
-import eth_utils
-import eth_keys
 import logging
 import os
+
+from ocean_lib.web3_internal.web3helper import Web3Helper
 
 logger = logging.getLogger('account')
 
@@ -44,7 +43,7 @@ class Account:
         self._private_key = private_key
 
         if self.address is None and self._private_key is not None:
-            self.address = privateKeyToAddress(private_key)
+            self.address = Web3Helper.privateKeyToAddress(private_key)
         
         assert self.address is not None
 
@@ -64,20 +63,3 @@ class Account:
             return self._private_key
 
         return self._encrypted_key
-
-    def keysStr(self):
-        s = []
-        s += [f"address: {self.address}"]
-        if self._private_key is not None:
-            s += [f"private key: {self._private_key}"]
-            s += [f"public key: {privateKeyToPublicKey(self._private_key)}"]
-        s += [""]
-        return "\n".join(s)
-
-def privateKeyToAddress(private_key: str) -> str:
-    return eth_account.Account().from_key(private_key).address
-
-def privateKeyToPublicKey(private_key: str):
-    private_key_bytes = eth_utils.decode_hex(private_key)
-    private_key_object = eth_keys.keys.PrivateKey(private_key_bytes)
-    return private_key_object.public_key

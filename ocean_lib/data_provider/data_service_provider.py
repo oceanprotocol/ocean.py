@@ -10,13 +10,13 @@ import re
 from collections import namedtuple
 from json import JSONDecodeError
 
-from ocean_lib.web3_internal import Web3Helper
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_utils.agreements.service_types import ServiceTypes
 from ocean_utils.exceptions import OceanEncryptAssetUrlsError
 from ocean_utils.http_requests.requests_session import get_requests_session
 
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
+from ocean_lib.web3_internal.web3helper import Web3Helper
 
 logger = logging.getLogger(__name__)
 

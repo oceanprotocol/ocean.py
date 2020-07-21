@@ -63,7 +63,7 @@ def test_compute_flow():
     ######
     # Give the consumer some datatokens so they can order the service
     try:
-        tx_id = dt.transfer(consumer_wallet.address, 10, pub_wallet)
+        tx_id = dt.transfer_tokens(consumer_wallet.address, 10, pub_wallet)
         dt.verify_transfer_tx(tx_id, pub_wallet.address, consumer_wallet.address)
     except (AssertionError, Exception) as e:
         print(e)
@@ -80,7 +80,7 @@ def test_compute_flow():
     ######
     # Transfer tokens to the provider as specified in the `order` requirements
     try:
-        tx_id = dt.transfer_wei(order_requirements.receiver_address, order_requirements.amount, consumer_wallet)
+        tx_id = dt.transfer(order_requirements.receiver_address, order_requirements.amount, consumer_wallet)
         dt.verify_transfer_tx(tx_id, consumer_wallet.address, order_requirements.receiver_address)
     except (AssertionError, Exception) as e:
         print(e)

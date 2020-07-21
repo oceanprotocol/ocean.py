@@ -4,17 +4,20 @@ import brownie
 import os
 import sys
 
-from ocean_lib import Ocean
 from ocean_lib.ocean import util
-from ocean_lib.web3_internal.account import Account, privateKeyToAddress
+from ocean_lib.web3_internal.utils import privateKeyToAddress
+from ocean_lib.web3_internal.wallet import Wallet
+from tests.resources.helper_functions import get_web3, brownie_account
 
 SUPPORTED_NETWORKS_STR = str(util.SUPPORTED_NETWORK_NAMES)[1:-1]
+
 
 def main():
     network = processArgs()
     s = deploy(network)
     print(s)
-    
+
+
 def processArgs():
     #set help message
     help = f"""
@@ -45,6 +48,7 @@ Usage: deploy.py NETWORK
 
     return network
 
+
 def deploy(network):
 
     # ****SET ENVT****
@@ -66,14 +70,14 @@ def deploy(network):
     brownie.network.connect(network)
     
     # ****SEE FUNDS****
-    print("Keys:\n%s" % Account(private_key=factory_deployer_private_key).keysStr())
+    print("Keys:\n%s" % Wallet(web3=get_web3(), key=factory_deployer_private_key).keysStr())
     print("")
         
     # ****DEPLOY****
     if network == 'ganache': #past deployments cause errors, so delete them
         os.system(f'rm -rf ./build/deployments/1234')
         
-    deployer_account = util.brownie_account(factory_deployer_private_key)
+    deployer_account = brownie_account(factory_deployer_private_key)
     p = brownie.project.load(f'./', name=f'MyProject')
 
     print("****Deploy DataTokenTemplate: begin****")
@@ -130,19 +134,24 @@ SFACTORY_ADDRESS = {sfactory.address}"""
 OCEAN_ADDRESS = {OCEAN_token.address}"""
     return s
 
+
 def brownieAccount(private_key):
     assert brownie.network.is_connected()
     return brownie.network.accounts.add(private_key=private_key)
 
+
 def invalidKey(private_key_str): #super basic check
     return len(private_key_str) < 10
+
 
 def invalidAddr(addr_str): #super basic check
     return len(addr_str) < 10
 
+
 def setenv(key, value):
     #os.putenv(key, value) #Do *not* use putenv(), it doesn't work
     os.environ[key] = value
+
 
 if __name__ == '__main__':
     main()

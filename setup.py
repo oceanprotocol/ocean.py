@@ -58,7 +58,6 @@ dev_requirements = [
     'watchdog',
     'eth-brownie>=1.8.3,<2.0.0',
     #for the following: maybe needed, maybe not
-    'enforce',
     'pytest',
 
 ]

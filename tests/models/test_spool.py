@@ -1,17 +1,16 @@
 import brownie
-import enforce
+
 import pytest
-import sys
 
 from ocean_lib.models.btoken import BToken
 from ocean_lib.models.sfactory import SFactory
 from ocean_lib.models.spool import SPool
 from ocean_lib.ocean import util
 from ocean_lib.ocean.util import fromBase18, toBase18
-from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.wallet import Wallet
 
 HUGEINT = 2**255
+
 
 def test_notokens_basic(OCEAN_address, network, alice_wallet, alice_address):
     pool = _deploySPool(network, alice_wallet)
@@ -30,11 +29,13 @@ def test_notokens_basic(OCEAN_address, network, alice_wallet, alice_address):
     with pytest.raises(Exception): 
         pool.finalize() #can't finalize if no tokens
 
+
 def test_setSwapFee_works(network, alice_wallet):
     pool = _deploySPool(network, alice_wallet)
     pool.setSwapFee(toBase18(0.011), from_wallet=alice_wallet)
     assert fromBase18(pool.getSwapFee_base()) == 0.011
     
+
 def test_setSwapFee_fails(network,
                           alice_wallet, alice_address,
                           bob_wallet, bob_address):
@@ -47,6 +48,7 @@ def test_setSwapFee_fails(network,
     pool.setController(bob_address, from_wallet=alice_wallet)
     pool.setSwapFee(toBase18(0.011), from_wallet=bob_wallet) #ok now
 
+
 def test_setController(network, alice_wallet, alice_address,
                        bob_wallet, bob_address):
     web3 = alice_wallet.web3
@@ -57,12 +59,14 @@ def test_setController(network, alice_wallet, alice_address,
     pool.setController(alice_address, from_wallet=bob_wallet)
     assert pool.getController() == alice_address
 
+
 def test_setPublicSwap(network, alice_wallet):
     pool = _deploySPool(network, alice_wallet)
     pool.setPublicSwap(True, from_wallet=alice_wallet)
     assert pool.isPublicSwap()
     pool.setPublicSwap(False, from_wallet=alice_wallet)
     assert not pool.isPublicSwap()
+
 
 def test_2tokens_basic(network, T1, T2,
                        alice_wallet, alice_address):
@@ -103,6 +107,7 @@ def test_2tokens_basic(network, T1, T2,
     
     assert str(pool)
 
+
 def test_unbind(network, T1, T2, alice_wallet):
     pool = _createPoolWith2Tokens(network,T1,T2,alice_wallet,1.0,1.0,1.0,1.0)
     
@@ -111,6 +116,7 @@ def test_unbind(network, T1, T2, alice_wallet):
     assert pool.getNumTokens() == 1
     assert pool.getCurrentTokens() == [T2.address]
     assert fromBase18(pool.getBalance_base(T2.address)) == 1.0
+
 
 def test_finalize(network, T1, T2, alice_address, alice_wallet):
     pool = _createPoolWith2Tokens(network,T1,T2,alice_wallet,90.0,10.0,9.0,1.0)
@@ -132,6 +138,7 @@ def test_finalize(network, T1, T2, alice_address, alice_wallet):
     assert pool.getFinalTokens() == [T1.address, T2.address]
     assert pool.getCurrentTokens() == [T1.address, T2.address]
     
+
 def test_public_pool(network, T1, T2,
                      alice_address, alice_wallet,
                      bob_address, bob_wallet):
@@ -225,6 +232,7 @@ def test_rebind_more_tokens(network, T1, T2, alice_wallet):
     pool.rebind(T1.address, toBase18(120.0), toBase18(9.0),
                 from_wallet=alice_wallet)
     
+
 def test_gulp(network, T1, alice_wallet):
     pool = _deploySPool(network, alice_wallet)
     
@@ -248,6 +256,7 @@ def test_gulp(network, T1, alice_wallet):
     pool.gulp(T1.address, from_wallet=alice_wallet)
     assert T1.balanceOf_base(pool.address) == toBase18(2.0+5.0) #ERC20
     assert pool.getBalance_base(T1.address) == toBase18(2.0+5.0) #records[]
+
 
 def test_spot_price(network, T1, T2, alice_wallet):
     (p, p_sans) = _spotPrices(network, T1, T2, alice_wallet,
@@ -275,7 +284,7 @@ def test_spot_price(network, T1, T2, alice_wallet):
     assert p_sans == 0.1
     assert round(p,8) == 0.1000001
 
-@enforce.runtime_validation
+
 def _spotPrices(network: str,
                 T1: BToken, T2: BToken,
                 wallet: Wallet, 
@@ -285,7 +294,8 @@ def _spotPrices(network: str,
     return (fromBase18(pool.getSpotPrice_base(a1, a2)),
             fromBase18(pool.getSpotPriceSansFee_base(a1, a2))) 
     
-def test_joinSwapExternAmountIn(network, T1, T2, alice_wallet, alice_address): 
+
+def test_joinSwapExternAmountIn(network, T1, T2, alice_wallet, alice_address):
     pool = _createPoolWith2Tokens(network,T1,T2,alice_wallet,90.0,10.0,9.0,1.0)
     T1.approve(pool.address, toBase18(100.0), from_wallet=alice_wallet)
 
@@ -311,6 +321,7 @@ def test_joinSwapExternAmountIn(network, T1, T2, alice_wallet, alice_address):
     assert 908.94 <= fromBase18(T1.balanceOf_base(alice_address)) <= 908.95
     assert fromBase18(T2.balanceOf_base(alice_address)) == (1000.0 - 9.0)
     
+
 def test_joinswapPoolAmountOut(network, T1, T2, alice_address, alice_wallet):
     pool = _createPoolWith2Tokens(network,T1,T2,alice_wallet,90.0,10.0,9.0,1.0)
     BPT = pool    
@@ -325,6 +336,7 @@ def test_joinswapPoolAmountOut(network, T1, T2, alice_address, alice_wallet):
     assert fromBase18(T1.balanceOf_base(alice_address)) >= (910.0 - 90.0)
     assert fromBase18(BPT.balanceOf_base(alice_address)) == (100.0 + 10.0)
 
+
 def test_exitswapPoolAmountIn(network, T1, T2, alice_address, alice_wallet):
     pool = _createPoolWith2Tokens(network,T1,T2,alice_wallet,90.0,10.0,9.0,1.0)
     BPT = pool    
@@ -337,6 +349,7 @@ def test_exitswapPoolAmountIn(network, T1, T2, alice_address, alice_wallet):
             from_wallet=alice_wallet)
     assert fromBase18(T1.balanceOf_base(alice_address)) >= (910.0 + 1.0)
     assert fromBase18(BPT.balanceOf_base(alice_address)) == (100.0 - 10.0)
+
 
 def test_exitswapExternAmountOut(network, T1, T2, alice_address, alice_wallet):
     pool = _createPoolWith2Tokens(network,T1,T2,alice_wallet,90.0,10.0,9.0,1.0)
@@ -351,6 +364,7 @@ def test_exitswapExternAmountOut(network, T1, T2, alice_address, alice_wallet):
     assert fromBase18(T1.balanceOf_base(alice_address)) == (910.0 + 2.0)
     assert fromBase18(BPT.balanceOf_base(alice_address)) >= (100.0 - 10.0)
 
+
 def test_calcSpotPrice_base(network, T1, T2, alice_address, alice_wallet):
     pool = _deploySPool(network, alice_wallet)
     x = pool.calcSpotPrice_base(
@@ -360,6 +374,7 @@ def test_calcSpotPrice_base(network, T1, T2, alice_address, alice_wallet):
         tokenWeightOut_base = toBase18(1.0),
         swapFee_base = 0)
     assert round(fromBase18(x),3) == 0.909
+
 
 def test_calcOutGivenIn_base(network, alice_wallet):
     pool = _deploySPool(network, alice_wallet)
@@ -372,6 +387,7 @@ def test_calcOutGivenIn_base(network, alice_wallet):
             swapFee_base = 0)
     assert round(fromBase18(x),3) == 0.918
 
+
 def test_calcInGivenOut_base(network, alice_wallet):
     pool = _deploySPool(network, alice_wallet)
     x = pool.calcInGivenOut_base(
@@ -382,6 +398,7 @@ def test_calcInGivenOut_base(network, alice_wallet):
             tokenAmountOut_base = toBase18(1.0),
             swapFee_base = 0)
     assert round(fromBase18(x),3) == 1.099
+
 
 def test_calcPoolOutGivenSingleIn_base(network, alice_wallet):
     pool = _deploySPool(network, alice_wallet)
@@ -394,6 +411,7 @@ def test_calcPoolOutGivenSingleIn_base(network, alice_wallet):
             swapFee_base = 0)
     assert round(fromBase18(x),3) == 0.599    
 
+
 def test_calcSingleInGivenPoolOut_base(network, alice_wallet):
     pool = _deploySPool(network, alice_wallet)
     x = pool.calcSingleInGivenPoolOut_base(
@@ -404,6 +422,7 @@ def test_calcSingleInGivenPoolOut_base(network, alice_wallet):
             poolAmountOut_base = toBase18(10.0),
             swapFee_base = 0)
     assert round(fromBase18(x),3) == 1.736
+
 
 def test_calcSingleOutGivenPoolIn_base(network, alice_wallet):
     pool = _deploySPool(network, alice_wallet)
@@ -416,6 +435,7 @@ def test_calcSingleOutGivenPoolIn_base(network, alice_wallet):
             swapFee_base = 0)
     assert round(fromBase18(x),3) == 1.597
 
+
 def test_calcPoolInGivenSingleOut_base(network, alice_wallet):
     pool = _deploySPool(network, alice_wallet)
     x = pool.calcPoolInGivenSingleOut(
@@ -427,7 +447,7 @@ def test_calcPoolInGivenSingleOut_base(network, alice_wallet):
             swapFee_base = 0)
     assert round(fromBase18(x),3) == 0.005
 
-@enforce.runtime_validation
+
 def _createPoolWith2Tokens(network: str,
                            T1: BToken, T2: BToken,
                            wallet: Wallet, 
@@ -442,7 +462,7 @@ def _createPoolWith2Tokens(network: str,
 
     return pool
 
-@enforce.runtime_validation
+
 def _deploySPool(network: str, from_wallet: Wallet) -> SPool:
     web3 = from_wallet.web3
     factory_address = util.confFileValue(network, 'SFACTORY_ADDRESS')
@@ -451,6 +471,6 @@ def _deploySPool(network: str, from_wallet: Wallet) -> SPool:
     pool = SPool(web3, pool_address)
     return pool
 
-@enforce.runtime_validation
+
 def _sfactory_address(network: str) -> str:
     return util.confFileValue(network, 'SFACTORY_ADDRESS')

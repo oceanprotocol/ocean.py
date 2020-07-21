@@ -7,9 +7,9 @@ import pytest
 
 from ocean_lib import ConfigProvider
 from ocean_lib.config import NAME_DATA_TOKEN_FACTORY_ADDRESS
-from ocean_lib.web3_internal import Web3Helper
-from ocean_lib.web3_internal.account import Account
+from ocean_lib.web3_internal.web3helper import Web3Helper
 from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 from examples import ExampleConfig
@@ -34,15 +34,15 @@ def setup_all():
 
     web3 = Web3Provider.get_web3()
     if web3.eth.accounts and web3.eth.accounts[0].lower() == '0xe2DD09d719Da89e5a3D0F2549c7E24566e947260'.lower():
-        account = Account(web3.eth.accounts[0], private_key='0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58')
+        wallet = Wallet(web3, key='0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58', address=web3.eth.accounts[0])
 
         provider = get_publisher_wallet()
         if Web3Helper.from_wei(Web3Helper.get_ether_balance(provider.address)) < 10:
-            Web3Helper.send_ether(account, provider.address, 25)
+            Web3Helper.send_ether(wallet, provider.address, 25)
 
         consumer = get_consumer_wallet()
         if Web3Helper.from_wei(Web3Helper.get_ether_balance(consumer.address)) < 10:
-            Web3Helper.send_ether(account, consumer.address, 25)
+            Web3Helper.send_ether(wallet, consumer.address, 25)
 
 
 @pytest.fixture

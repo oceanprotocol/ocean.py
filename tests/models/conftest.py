@@ -1,15 +1,13 @@
 import brownie
 import pytest
 
-from ocean_lib.ocean import constants #import here to toggle type-checking
 from ocean_lib import Ocean
 from ocean_lib.ocean import util
 from ocean_lib.web3_internal.account import Account
+from ocean_lib.web3_internal.utils import privateKeyToAddress
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.models import btoken
 
-from tests.resources.helper_functions import brownieAccount
-    
 _NETWORK = "ganache"
 HUGEINT = 2**255
 _BROWNIE_PROJECT = brownie.project.load(f'./', name=f'MyProject')
@@ -99,7 +97,7 @@ def make_info(name, private_key_name):
     info.brownie_project = _BROWNIE_PROJECT
     
     info.private_key = util.confFileValue(_NETWORK, private_key_name)
-    info.address = util.privateKeyToAddress(info.private_key)
+    info.address = privateKeyToAddress(info.private_key)
     info.account = Account(private_key=info.private_key)
     info.wallet = Wallet(web3, key=info.private_key)
     config = {'network': _NETWORK,

@@ -1,9 +1,8 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
-import brownie
 import coloredlogs
-import enforce
+
 import json
 import logging
 import logging.config
@@ -17,13 +16,14 @@ from web3 import Web3
 
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.factory import FactoryContract
-from ocean_lib.web3_internal import Web3Helper
+from ocean_lib.models.data_token import DataToken
+from ocean_lib.models.dt_factory import DTFactory
+from ocean_lib.web3_internal.web3helper import Web3Helper
 from ocean_lib.web3_internal.contract_handler import ContractHandler
-from ocean_lib.web3_internal.utils import get_wallet
 
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.web3_internal.web3_provider import Web3Provider
+from ocean_lib.web3_internal.utils import get_wallet
+from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 
 PUBLISHER_INDEX = 1
@@ -39,33 +39,27 @@ def get_resource_path(dir_name, file_name):
 
 
 def get_publisher_wallet() -> Wallet:
-    web3 = get_web3()
-    key = get_publisher_account().private_key
-    wallet = Wallet(web3, key)
-    return wallet
+    return get_wallet(0)
+
 
 def get_consumer_wallet() -> Wallet:
-    web3 = get_web3()
-    key = get_consumer_account().private_key
-    return Wallet(web3, key)
+    return get_wallet(1)
 
-def get_publisher_account() -> Account:
-    return get_account(0)
-
-def get_consumer_account() -> Account:
-    return get_account(1)
 
 def get_web3():
     return get_publisher_ocean_instance().web3
 
+
 def new_factory_contract():
-    factory = FactoryContract(address=None)
+    factory = DTFactory(address=None)
+    minter = os.environ.get('MINTER_ADDRESS', '0xe2DD09d719Da89e5a3D0F2549c7E24566e947260')
     address = factory.deploy(
+        get_web3(),
         ContractHandler.artifacts_path,
-        Web3.toChecksumAddress(os.environ.get('MINTER_ADDRESS', '0xe2DD09d719Da89e5a3D0F2549c7E24566e947260'))
+        Web3.toChecksumAddress(minter)
     )
 
-    return FactoryContract(address=address)
+    return DTFactory(address=address)
 
 
 def get_publisher_ocean_instance(use_provider_mock=False) -> Ocean:
@@ -75,7 +69,7 @@ def get_publisher_ocean_instance(use_provider_mock=False) -> Ocean:
     ocn.main_account = account
     return ocn
 
-@enforce.runtime_validation
+
 def get_consumer_ocean_instance(use_provider_mock:bool=False) -> Ocean:
     data_provider = DataProviderMock if use_provider_mock else None
     ocn = Ocean(data_provider=data_provider)
@@ -83,11 +77,11 @@ def get_consumer_ocean_instance(use_provider_mock:bool=False) -> Ocean:
     ocn.main_account = account
     return ocn
 
-@enforce.runtime_validation
+
 def get_ddo_sample() -> Asset:
     return Asset(json_filename=get_resource_path('ddo', 'ddo_sa_sample.json'))
 
-@enforce.runtime_validation
+
 def get_sample_ddo_with_compute_service() -> dict:
     path = get_resource_path('ddo', 'ddo_with_compute_service.json')  # 'ddo_sa_sample.json')
     assert path.exists(), f"{path} does not exist!"
@@ -95,7 +89,7 @@ def get_sample_ddo_with_compute_service() -> dict:
         metadata = file_handle.read()
     return json.loads(metadata)
 
-@enforce.runtime_validation
+
 def get_algorithm_ddo() -> dict:
     path = get_resource_path('ddo', 'ddo_algorithm.json')
     assert path.exists(), f"{path} does not exist!"
@@ -103,7 +97,7 @@ def get_algorithm_ddo() -> dict:
         metadata = file_handle.read()
     return json.loads(metadata)
 
-@enforce.runtime_validation
+
 def get_computing_metadata() -> dict:
     path = get_resource_path('ddo', 'computing_metadata.json')
     assert path.exists(), f"{path} does not exist!"
@@ -111,7 +105,7 @@ def get_computing_metadata() -> dict:
         metadata = file_handle.read()
     return json.loads(metadata)
 
-@enforce.runtime_validation
+
 def get_registered_ddo(ocean_instance, wallet: Wallet):
     metadata = get_metadata()
     metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
@@ -119,21 +113,21 @@ def get_registered_ddo(ocean_instance, wallet: Wallet):
         ocean_instance.assets._build_access_service(
             metadata,
             Web3Helper.to_wei(1),
-            account
+            wallet
         ),
         DataServiceProvider.get_download_endpoint(ocean_instance.config)
     )
 
-    asset = ocean_instance.assets.create(metadata, account)
+    asset = ocean_instance.assets.create(metadata, wallet)
     return asset
 
-@enforce.runtime_validation
+
 def log_event(event_name: str):
     def _process_event(event):
         print(f'Received event {event_name}: {event}')
     return _process_event
 
-@enforce.runtime_validation
+
 def get_metadata() -> dict:
     path = get_resource_path('ddo', 'valid_metadata.json')
     assert path.exists(), f"{path} does not exist!"
@@ -141,7 +135,7 @@ def get_metadata() -> dict:
         metadata = file_handle.read()
     return json.loads(metadata)
 
-@enforce.runtime_validation
+
 def setup_logging(default_path:str='logging.yaml', default_level=logging.INFO, env_key:str='LOG_CFG'):
     """Logging setup."""
     path = default_path
@@ -165,16 +159,16 @@ def setup_logging(default_path:str='logging.yaml', default_level=logging.INFO, e
         coloredlogs.install(level=default_level)
 
 
-def mint_tokens_and_wait(data_token_contract, receiver_address, minter_account):
+def mint_tokens_and_wait(data_token_contract: DataToken, receiver_address: str, minter_wallet: Wallet):
     dtc = data_token_contract
-    tx_id = dtc.mint(receiver_address, 50, minter_account)
+    tx_id = dtc.mint_tokens(receiver_address, 50, minter_wallet)
     dtc.get_tx_receipt(tx_id)
     time.sleep(2)
 
     def verify_supply(mint_amount=50):
         supply = dtc.contract_concise.totalSupply()
         if supply <= 0:
-            _tx_id = dtc.mint(receiver_address, mint_amount, minter_account)
+            _tx_id = dtc.mint_tokens(receiver_address, mint_amount, minter_wallet)
             dtc.get_tx_receipt(_tx_id)
             supply = dtc.contract_concise.totalSupply()
         return supply
@@ -187,7 +181,8 @@ def mint_tokens_and_wait(data_token_contract, receiver_address, minter_account):
         except (ValueError, Exception):
             pass
 
-@enforce.runtime_validation
-def brownieAccount(private_key: str):
+
+def brownie_account(private_key: str):
+    import brownie
     assert brownie.network.is_connected()
     return brownie.network.accounts.add(private_key=private_key)

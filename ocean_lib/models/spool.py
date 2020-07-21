@@ -1,11 +1,11 @@
-import enforce
+
 import typing
 
 from .btoken import BToken
 from ocean_lib.ocean import util
 from ocean_lib.web3_internal.wallet import Wallet
 
-@enforce.runtime_validation
+
 class SPool(BToken):    
     def __init__(self, web3, contract_address: str):
         self.web3 = web3

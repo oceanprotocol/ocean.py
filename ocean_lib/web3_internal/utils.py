@@ -1,19 +1,17 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
-import eth_account
 import logging
 import os
 from collections import namedtuple
 
+import eth_account
+import eth_keys
+import eth_utils
 from eth_keys import KeyAPI
 from eth_utils import big_endian_to_int
 from web3 import Web3
 from web3.contract import ContractEvent
-from web3.exceptions import TimeExhausted
-
-from ocean_lib.ocean import util
-from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 Signature = namedtuple('Signature', ('v', 'r', 's'))
@@ -125,8 +123,13 @@ def get_wallet(index):
     key = os.getenv(key_name)
     encr_key = os.getenv(encrypted_key_name)
     key_file = os.getenv(keyfile_name)
+    if key_file and not encr_key:
+        with open(key_file) as _file:
+            encr_key = _file.read()
 
-    return Account(Web3.toChecksumAddress(address), pswrd, key_file, encr_key, key)
+    _key = key or encr_key
+    from ocean_lib.web3_internal.wallet import Wallet
+    return Wallet(Web3Provider.get_web3(), key=_key, address=Web3.toChecksumAddress(address), password=pswrd)
 
 
 def process_tx_receipt(tx_hash, event_instance, event_name, agreement_id=None):
@@ -148,7 +151,7 @@ def process_tx_receipt(tx_hash, event_instance, event_name, agreement_id=None):
     web3 = Web3Provider.get_web3()
     try:
         web3.eth.waitForTransactionReceipt(tx_hash, timeout=20)
-    except TimeExhausted:
+    except Exception:
         logger.info(f'Waiting for {event_name} transaction receipt timed out. '
                     f'Cannot verify receipt and event.')
         return False
@@ -171,3 +174,13 @@ def process_tx_receipt(tx_hash, event_instance, event_name, agreement_id=None):
         return False
 
     return True
+
+
+def privateKeyToAddress(private_key: str) -> str:
+    return eth_account.Account().privateKeyToAccount(private_key).address
+
+
+def privateKeyToPublicKey(private_key: str):
+    private_key_bytes = eth_utils.decode_hex(private_key)
+    private_key_object = eth_keys.keys.PrivateKey(private_key_bytes)
+    return private_key_object.public_key

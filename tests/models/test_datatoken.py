@@ -1,9 +1,7 @@
 import pytest
-from web3 import Web3
 
-from ocean_lib.models.datatoken import DataToken
-from ocean_lib.ocean import util
 from ocean_lib.ocean.util import toBase18, fromBase18
+
 
 def test_ERC20(alice_ocean, alice_wallet, alice_address,
                bob_wallet, bob_address):
@@ -28,9 +26,11 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address,
     assert fromBase18(token.balanceOf_base(alice_address)) == 98.0
     assert fromBase18(token.balanceOf_base(bob_address)) == 2.0   
 
+
 def test_blob(alice_ocean, alice_wallet):
     token = alice_ocean.create_data_token('foo_blob', alice_wallet)
     assert token.blob() == 'foo_blob'
+
 
 def test_setMinter(alice_ocean,
                    alice_wallet, alice_address,

@@ -8,8 +8,6 @@ import logging
 import os
 
 from ocean_lib.assets.asset import Asset
-from ocean_lib.models.datatokencontract import DataTokenContract
-from ocean_lib.web3_internal import Web3Helper
 from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
@@ -28,9 +26,9 @@ from ocean_utils.utils.utilities import checksum
 
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
-from ocean_lib.models.factory import FactoryContract
-from ocean_lib.models.datatoken import DataToken
-from ocean_lib.models.dtfactory import DTFactory
+from ocean_lib.models.data_token import DataToken
+from ocean_lib.models.dt_factory import DTFactory
+from ocean_lib.web3_internal.web3helper import Web3Helper
 
 logger = logging.getLogger('ocean')
 
@@ -197,11 +195,9 @@ class OceanAssets:
         if not data_token_address:
             blob = json.dumps({'t': 1, 'url': ddo_service_endpoint})
             # register on-chain
-            web3 = publisher_wallet.web3
-            dtfactory = DTFactory(web3, self._config.dtfactory_address)
-            dt_address = dtfactory.create_data_token(blob=ddo_service_endpoint,
-                                                     from_wallet=publisher_wallet)
-            data_token = DataToken(web3, dt_address)
+            dtfactory = DTFactory(self._config.dtfactory_address)
+            tx_id = dtfactory.createToken(blob=blob, from_wallet=publisher_wallet)
+            data_token = DataToken(dtfactory.get_token_address(tx_id))
             if not data_token:
                 logger.warning(f'Creating new data token failed.')
                 return None
@@ -213,7 +209,7 @@ class OceanAssets:
             # owner_address is set as minter only if creating new data token. So if
             # `data_token_address` is set `owner_address` has no effect.
             if owner_address:
-                data_token.set_minter(owner_address, from_wallet=publisher_wallet)
+                data_token.setMinter(owner_address, from_wallet=publisher_wallet)
 
         # Set datatoken address in the asset
         asset.data_token_address = data_token_address
@@ -331,14 +327,14 @@ class OceanAssets:
         """
         tokens_amount = int(amount)
         receiver = receiver_address
-        dt = DataTokenContract(token_address)
-        balance = dt.wei_balance(from_account.address)
+        dt = DataToken(token_address)
+        balance = dt.balanceOf(from_account.address)
         if balance < tokens_amount:
             raise AssertionError(f'Your token balance {balance} is not sufficient '
                                  f'to execute the requested service. This service '
                                  f'requires {amount} number of tokens.')
 
-        tx_hash = dt.transfer_wei(receiver, tokens_amount, from_account)
+        tx_hash = dt.transfer(receiver, tokens_amount, from_account)
         try:
             return dt.verify_transfer_tx(tx_hash, from_account.address, receiver)
         except (AssertionError, Exception) as e:
@@ -415,7 +411,7 @@ class OceanAssets:
         :param owner_address: ethereum address of owner/publisher, hex-str
         :return: list of dids
         """
-        return [asset.did for asset in self.query({"query": {"proof.creator": [owner_address]}})]
+        return [asset.did for asset in self.query({"query": {"proof.creator": [owner_address]}}, offset=1000)]
 
     @staticmethod
     def _build_access_service(metadata, cost: int, address: str) -> dict:

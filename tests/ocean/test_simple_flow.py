@@ -1,10 +1,9 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
-
+from ocean_lib.models.dt_factory import DTFactory
 from ocean_lib.web3_internal.utils import get_wallet
 
 from ocean_lib import Ocean, ConfigProvider
-from ocean_lib.models.factory import FactoryContract
 
 
 def test_simple_flow():
@@ -23,18 +22,18 @@ def test_simple_flow():
     dt_address = token.address
 
     # 3. Alice mints 100 tokens
-    tx_id = token.mint(alice_wallet.address, 100, alice_wallet)
+    tx_id = token.mint_tokens(alice_wallet.address, 100, alice_wallet)
     token.get_tx_receipt(tx_id)
 
     # 4. Alice transfers 1 token to Bob
-    token.transfer(bob_wallet.address, 1, alice_wallet)
+    token.transfer_tokens(bob_wallet.address, 1, alice_wallet)
 
     # 5. Bob consumes dataset
     bob_ocean = Ocean(config)
     token = bob_ocean.get_data_token(dt_address)
-    token_owner = FactoryContract(ocean.config.factory_address).get_token_minter(token.address)
+    token_owner = DTFactory(ocean.config.dtfactory_address).get_token_minter(token.address)
 
-    tx_id = token.transfer(token_owner, 1, bob_wallet)
+    tx_id = token.transfer_tokens(token_owner, 1, bob_wallet)
 
     try:
         _tx_id = token.verify_transfer_tx(tx_id, bob_wallet.address, token_owner)

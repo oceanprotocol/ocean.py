@@ -6,7 +6,7 @@ from ocean_utils.agreements.service_agreement import ServiceAgreement
 
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib import ConfigProvider
-from ocean_lib.web3_internal import Web3Helper
+from ocean_lib.web3_internal.web3helper import Web3Helper
 
 logger = logging.getLogger('ocean')
 

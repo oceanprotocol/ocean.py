@@ -1,12 +1,12 @@
-import enforce
 import logging
 import typing
 
+from ocean_lib.web3_internal.utils import privateKeyToAddress
+from ocean_lib.web3_internal.utils import privateKeyToPublicKey
+
 logger = logging.getLogger(__name__)
 
-from ocean_lib.web3_internal.account import Account, privateKeyToAddress
 
-@enforce.runtime_validation
 class Wallet:
     """
     The wallet is responsible for signing transactions and messages by using an account's
@@ -35,7 +35,7 @@ class Wallet:
         self._key = key
 
         if self._address is None and self._key is not None:
-            self._address = privateKeyToAddress(self._key)
+            self._address = privateKeyToAddress(self.private_key)
 
     @property
     def web3(self):
@@ -46,13 +46,17 @@ class Wallet:
         return self._address
 
     @property
-    def private_key(self):
-        return self._key
+    def password(self):
+        return self._password
 
     @property
-    def account(self):
-        return Account(private_key=self.private_key)
-    
+    def private_key(self):
+        return self.__get_key()
+
+    @property
+    def key(self):
+        return self._key
+
     @staticmethod
     def reset_tx_count():
         Wallet._last_tx_count = dict()
@@ -65,7 +69,7 @@ class Wallet:
 
     def validate(self):
         key = self.__get_key()
-        account = self._web3.eth.account.from_key(key)
+        account = self._web3.eth.account.privateKeyToAccount(key)
         return account.address == self._address
 
     @staticmethod
@@ -83,7 +87,7 @@ class Wallet:
 
     def sign_tx(self, tx):
         private_key = self.__get_key()
-        account = self._web3.eth.account.from_key(private_key)
+        account = self._web3.eth.account.privateKeyToAccount(private_key)
         nonce = Wallet._get_nonce(self._web3, account.address)
         logger.debug(f'`Wallet` signing tx: sender address: {account.address} nonce: {nonce}, '
                      f'gasprice: {self._web3.eth.gasPrice}')
@@ -91,11 +95,21 @@ class Wallet:
         gas_price = max(gas_price, self.MIN_GAS_PRICE)
         tx['nonce'] = nonce
         tx['gasPrice'] = gas_price
-        signed_tx = self._web3.eth.account.sign_transaction(tx, private_key)
+        signed_tx = self._web3.eth.account.signTransaction(tx, private_key)
         logger.debug(f'`Wallet` signed tx is {signed_tx}')
         return signed_tx.rawTransaction
 
     def sign(self, msg_hash):
         private_key = self.__get_key()
-        account = self._web3.eth.account.from_key(private_key)
+        account = self._web3.eth.account.privateKeyToAccount(private_key)
         return account.signHash(msg_hash)
+
+    def keysStr(self):
+        s = []
+        s += [f"address: {self.address}"]
+        if self.private_key is not None:
+            s += [f"private key: {self.private_key}"]
+            s += [f"public key: {privateKeyToPublicKey(self.private_key)}"]
+        s += [""]
+        return "\n".join(s)
+
