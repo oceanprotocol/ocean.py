@@ -3,10 +3,10 @@
 
 import os
 
+from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_utils.agreements.service_types import ServiceTypes
 
 from ocean_lib.assets.asset import Asset
-from ocean_lib.assets.service_agreement import ServiceAgreement
 from tests.resources.helper_functions import (
     get_consumer_wallet,
     get_publisher_wallet,

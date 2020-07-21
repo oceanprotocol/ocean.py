@@ -7,10 +7,6 @@ import json
 import logging
 import os
 
-from ocean_lib.assets.asset import Asset
-from ocean_lib.web3_internal.account import Account
-from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_utils.agreements.service_factory import ServiceDescriptor, ServiceFactory
 from ocean_utils.agreements.service_types import ServiceTypes
@@ -24,6 +20,10 @@ from ocean_utils.exceptions import (
 )
 from ocean_utils.utils.utilities import checksum
 
+from ocean_lib.assets.asset import Asset
+from ocean_lib.web3_internal.account import Account
+from ocean_lib.web3_internal.wallet import Wallet
+from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.models.data_token import DataToken
