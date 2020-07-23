@@ -5,8 +5,7 @@ import uuid
 
 import pytest
 
-from ocean_lib import ConfigProvider
-from ocean_lib.config import NAME_DATA_TOKEN_FACTORY_ADDRESS
+from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.web3_internal.web3helper import Web3Helper
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
@@ -17,7 +16,11 @@ from ocean_lib.ocean.util import get_web3_provider
 from tests.resources.helper_functions import (
     get_metadata,
     setup_logging,
-    get_publisher_ocean_instance, get_consumer_ocean_instance, get_publisher_wallet, get_consumer_wallet, new_factory_contract)
+    get_publisher_ocean_instance,
+    get_consumer_ocean_instance,
+    get_publisher_wallet,
+    get_consumer_wallet,
+    get_ganache_wallet)
 
 setup_logging()
 
@@ -29,20 +32,23 @@ def setup_all():
     Web3Provider.init_web3(provider=get_web3_provider(config.network_url))
     ContractHandler.set_artifacts_path(config.artifacts_path)
 
-    factory_contract = new_factory_contract()
-    config.set('eth-network', NAME_DATA_TOKEN_FACTORY_ADDRESS, factory_contract.address)
+    # factory_contract = new_factory_contract()
+    # config.set('eth-network', NAME_DATA_TOKEN_FACTORY_ADDRESS, factory_contract.address)
 
-    web3 = Web3Provider.get_web3()
-    if web3.eth.accounts and web3.eth.accounts[0].lower() == '0xe2DD09d719Da89e5a3D0F2549c7E24566e947260'.lower():
-        wallet = Wallet(web3, key='0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58', address=web3.eth.accounts[0])
+    network = Web3Helper.get_network_name()
+    wallet = get_ganache_wallet()
+    if network in ['ganache', 'development'] and wallet:
 
         provider = get_publisher_wallet()
-        if Web3Helper.from_wei(Web3Helper.get_ether_balance(provider.address)) < 10:
-            Web3Helper.send_ether(wallet, provider.address, 25)
+        print(f'sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keysStr()}')
+        print(f'sender balance: {Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address))}')
+        assert Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address)) > 4
+        if Web3Helper.from_wei(Web3Helper.get_ether_balance(provider.address)) < 2:
+            Web3Helper.send_ether(wallet, provider.address, 4)
 
         consumer = get_consumer_wallet()
-        if Web3Helper.from_wei(Web3Helper.get_ether_balance(consumer.address)) < 10:
-            Web3Helper.send_ether(wallet, consumer.address, 25)
+        if Web3Helper.from_wei(Web3Helper.get_ether_balance(consumer.address)) < 20:
+            Web3Helper.send_ether(wallet, consumer.address, 4)
 
 
 @pytest.fixture

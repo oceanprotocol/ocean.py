@@ -12,47 +12,6 @@ class DTFactory(ContractBase):
     CAP = 1400000000
     FIRST_BLOB = 'https://example.com/dataset-1'
 
-    def deploy(self, web3, abi_path, minter_address):
-        """
-        Deploy the DataTokenTemplate and DTFactory contracts to the current network.
-
-        :param web3:
-        :param abi_path:
-        :param minter_address:
-
-        :return: smartcontract address of the DTFactory contract
-        """
-        if not abi_path:
-            abi_path = ContractHandler.artifacts_path
-
-        assert abi_path, f'abi_path is required, got {abi_path}'
-
-        w3 = web3
-        w3.eth.defaultAccount = w3.toChecksumAddress(minter_address)
-        print(f'default account: {w3.eth.defaultAccount}')
-        factory_json = ContractHandler.read_abi_from_file(
-            DTFactory.CONTRACT_NAME,
-            abi_path
-        )
-        dt_contract_json = ContractHandler.read_abi_from_file(
-            DataToken.CONTRACT_NAME,
-            abi_path
-        )
-
-        # First deploy the DataTokenTemplate contract
-        dt_contract = w3.eth.contract(abi=dt_contract_json['abi'], bytecode=dt_contract_json['bytecode'])
-        tx_hash = dt_contract.constructor(
-            'Template Contract', 'TEMPLATE', minter_address, DTFactory.CAP, DTFactory.FIRST_BLOB
-        ).transact()
-        dt_template_address = self.get_tx_receipt(tx_hash, timeout=60).contractAddress
-
-        factory_contract = w3.eth.contract(abi=factory_json['abi'], bytecode=factory_json['bytecode'])
-        tx_hash = factory_contract.constructor(
-            dt_template_address
-        ).transact({'from': minter_address})
-
-        return self.get_tx_receipt(tx_hash, timeout=60).contractAddress
-
     def get_token_registered_event(self, block_number, metadata_url, sender):
         event = getattr(self.events, 'TokenRegistered')
         filter_params = {}

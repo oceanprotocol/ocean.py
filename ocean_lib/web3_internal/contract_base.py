@@ -32,6 +32,9 @@ class ContractBase(object):
         assert not address or (self.contract.address == address and self.address == address)
         assert self.contract_concise is not None
 
+    def __str__(self):
+        return f'{self.contract_name} @ {self.address}'
+
     @property
     def contract_name(self) -> str:
         return self.CONTRACT_NAME
@@ -50,6 +53,10 @@ class ContractBase(object):
         :return:
         """
         return self.contract.events
+
+    @property
+    def function_names(self) -> typing.List[str]:
+        return list(self.contract.function_names)
 
     @staticmethod
     def to_checksum_address(address: str):
@@ -146,9 +153,32 @@ class ContractBase(object):
         if event:
             return event().argument_names
 
-    @property
-    def function_names(self) -> typing.List[str]:
-        return list(self.contract.function_names)
+    @classmethod
+    def deploy(cls, web3, deployer_address: str, abi_path: str='', *args):
+        """
+        Deploy the DataTokenTemplate and DTFactory contracts to the current network.
 
-    def __str__(self):
-        return f'{self.contract_name} @ {self.address}'
+        :param web3:
+        :param abi_path:
+        :param deployer_address:
+
+        :return: smartcontract address of this contract
+        """
+        if not abi_path:
+            abi_path = ContractHandler.artifacts_path
+
+        assert abi_path, f'abi_path is required, got {abi_path}'
+
+        w3 = web3
+        w3.eth.defaultAccount = w3.toChecksumAddress(deployer_address)
+        _json = ContractHandler.read_abi_from_file(
+            cls.CONTRACT_NAME,
+            abi_path
+        )
+
+        _contract = w3.eth.contract(abi=_json['abi'], bytecode=_json['bytecode'])
+        tx_hash = _contract.constructor(*args)\
+            .transact({'from': deployer_address})
+
+        return cls.get_tx_receipt(tx_hash, timeout=60).contractAddress
+

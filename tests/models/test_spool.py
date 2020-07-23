@@ -1,13 +1,11 @@
-import brownie
-
 import pytest
 
 from ocean_lib.models.btoken import BToken
 from ocean_lib.models.sfactory import SFactory
 from ocean_lib.models.spool import SPool
-from ocean_lib.ocean import util
-from ocean_lib.ocean.util import fromBase18, toBase18
+from ocean_lib.ocean.util import fromBase18, toBase18, get_sfactory_address
 from ocean_lib.web3_internal.wallet import Wallet
+from tests.models.conftest import alice_info
 
 HUGEINT = 2**255
 
@@ -22,7 +20,7 @@ def test_notokens_basic(OCEAN_address, network, alice_wallet, alice_address):
     assert pool.getCurrentTokens() == []
     with pytest.raises(Exception):
         pool.getFinalTokens() #pool's not finalized
-    assert pool.getSwapFee_base() == toBase18(1e-6)
+    assert pool.getSwapFee() == toBase18(1e-6)
     assert pool.getController() == alice_address
     assert str(pool)
     
@@ -33,16 +31,15 @@ def test_notokens_basic(OCEAN_address, network, alice_wallet, alice_address):
 def test_setSwapFee_works(network, alice_wallet):
     pool = _deploySPool(network, alice_wallet)
     pool.setSwapFee(toBase18(0.011), from_wallet=alice_wallet)
-    assert fromBase18(pool.getSwapFee_base()) == 0.011
+    assert fromBase18(pool.getSwapFee()) == 0.011
     
 
 def test_setSwapFee_fails(network,
                           alice_wallet, alice_address,
                           bob_wallet, bob_address):
-    web3 = alice_wallet.web3
-    factory = SFactory(web3, _sfactory_address(network))
+    factory = SFactory(get_sfactory_address(network))
     pool_address = factory.newSPool(alice_wallet)
-    pool = SPool(web3, pool_address)
+    pool = SPool(pool_address)
     with pytest.raises(Exception):
         pool.setSwapFee(toBase18(0.011), from_wallet=bob_wallet) #not ok, bob isn't controller
     pool.setController(bob_address, from_wallet=alice_wallet)
@@ -74,8 +71,8 @@ def test_2tokens_basic(network, T1, T2,
     assert T1.address != T2.address
     assert T1.address != pool.address
 
-    assert fromBase18(T1.balanceOf_base(alice_address)) >= 90.0
-    bal2 = fromBase18(T2.balanceOf_base(alice_address)) >= 10.0
+    assert fromBase18(T1.balanceOf(alice_address)) >= 90.0
+    bal2 = fromBase18(T2.balanceOf(alice_address)) >= 10.0
 
     with pytest.raises(Exception): #can't bind until we approve
         pool.bind(T1.address, toBase18(90.0), toBase18(9.0))
@@ -84,8 +81,8 @@ def test_2tokens_basic(network, T1, T2,
     T1.approve(pool.address, toBase18(90.0), from_wallet=alice_wallet)
     T2.approve(pool.address, toBase18(10.0), from_wallet=alice_wallet)
 
-    assert fromBase18(T1.allowance_base(alice_address, pool.address)) == 90.0
-    assert fromBase18(T2.allowance_base(alice_address, pool.address)) == 10.0
+    assert fromBase18(T1.allowance(alice_address, pool.address)) == 90.0
+    assert fromBase18(T2.allowance(alice_address, pool.address)) == 10.0
     
     assert not pool.isBound(T1.address) and not pool.isBound(T1.address)
     pool.bind(T1.address,toBase18(90.0),toBase18(9.0),from_wallet=alice_wallet)
@@ -95,15 +92,15 @@ def test_2tokens_basic(network, T1, T2,
     assert pool.getNumTokens() == 2
     assert pool.getCurrentTokens() == [T1.address, T2.address]
 
-    assert pool.getDenormalizedWeight_base(T1.address) == toBase18(9.0)
-    assert pool.getDenormalizedWeight_base(T2.address) == toBase18(1.0)
-    assert pool.getTotalDenormalizedWeight_base() == toBase18(9.0+1.0)
+    assert pool.getDenormalizedWeight(T1.address) == toBase18(9.0)
+    assert pool.getDenormalizedWeight(T2.address) == toBase18(1.0)
+    assert pool.getTotalDenormalizedWeight() == toBase18(9.0 + 1.0)
     
-    assert pool.getNormalizedWeight_base(T1.address) == toBase18(0.9)
-    assert pool.getNormalizedWeight_base(T2.address) == toBase18(0.1)
+    assert pool.getNormalizedWeight(T1.address) == toBase18(0.9)
+    assert pool.getNormalizedWeight(T2.address) == toBase18(0.1)
 
-    assert pool.getBalance_base(T1.address) == toBase18(90.0)
-    assert pool.getBalance_base(T2.address) == toBase18(10.0)
+    assert pool.getBalance(T1.address) == toBase18(90.0)
+    assert pool.getBalance(T2.address) == toBase18(10.0)
     
     assert str(pool)
 
@@ -115,7 +112,7 @@ def test_unbind(network, T1, T2, alice_wallet):
     
     assert pool.getNumTokens() == 1
     assert pool.getCurrentTokens() == [T2.address]
-    assert fromBase18(pool.getBalance_base(T2.address)) == 1.0
+    assert fromBase18(pool.getBalance(T2.address)) == 1.0
 
 
 def test_finalize(network, T1, T2, alice_address, alice_wallet):
@@ -123,58 +120,63 @@ def test_finalize(network, T1, T2, alice_address, alice_wallet):
 
     assert not pool.isPublicSwap()
     assert not pool.isFinalized()
-    assert pool.totalSupply_base() == 0
-    assert pool.balanceOf_base(alice_address) == 0
-    assert pool.allowance_base(alice_address, pool.address) == 0
+    assert pool.totalSupply() == 0
+    assert pool.balanceOf(alice_address) == 0
+    assert pool.allowance(alice_address, pool.address) == 0
     
     pool.finalize(from_wallet=alice_wallet)
     
     assert pool.isPublicSwap()
     assert pool.isFinalized()
-    assert pool.totalSupply_base() == toBase18(100.0)
-    assert pool.balanceOf_base(alice_address) == toBase18(100.0)
-    assert pool.allowance_base(alice_address, pool.address) == 0
+    assert pool.totalSupply() == toBase18(100.0)
+    assert pool.balanceOf(alice_address) == toBase18(100.0)
+    assert pool.allowance(alice_address, pool.address) == 0
 
     assert pool.getFinalTokens() == [T1.address, T2.address]
     assert pool.getCurrentTokens() == [T1.address, T2.address]
     
 
-def test_public_pool(network, T1, T2,
-                     alice_address, alice_wallet,
-                     bob_address, bob_wallet):
-    pool = _createPoolWith2Tokens(network,T1,T2,alice_wallet,90.0,10.0,9.0,1.0)
+def test_public_pool(network, bob_wallet):
+    alice = alice_info()
+    alice_address = alice.address
+    alice_wallet = alice.wallet
+    bob_address = bob_wallet.address
+    T1 = alice.T1
+    T2 = alice.T2
+
+    pool = _createPoolWith2Tokens(network, alice.T1, alice.T2, alice.wallet, 90.0, 10.0, 9.0, 1.0)
     BPT = pool
-    web3 = alice_wallet.web3
-        
+    web3 = alice.wallet.web3
+
     #alice give Bob some tokens
-    T1.transfer(bob_address, toBase18(100.0), from_wallet=alice_wallet)
-    T2.transfer(bob_address, toBase18(100.0), from_wallet=alice_wallet)
+    alice.T1.transfer(bob_wallet.address, toBase18(100.0), from_wallet=alice.wallet)
+    alice.T2.transfer(bob_wallet.address, toBase18(100.0), from_wallet=alice.wallet)
 
     #verify holdings
-    assert fromBase18(T1.balanceOf_base(alice_address)) == (1000.0-90.0-100.0)
-    assert fromBase18(T2.balanceOf_base(alice_address)) == (1000.0-10.0-100.0)
-    assert fromBase18(BPT.balanceOf_base(alice_address)) == 0
+    assert fromBase18(alice.T1.balanceOf(alice.address)) == (1000.0-90.0-100.0)
+    assert fromBase18(alice.T2.balanceOf(alice.address)) == (1000.0-10.0-100.0)
+    assert fromBase18(BPT.balanceOf(alice.address)) == 0
     
-    assert fromBase18(T1.balanceOf_base(bob_address)) == 100.0
-    assert fromBase18(T2.balanceOf_base(bob_address)) == 100.0
-    assert fromBase18(BPT.balanceOf_base(bob_address)) == 0
+    assert fromBase18(alice.T1.balanceOf(bob_address)) == 100.0
+    assert fromBase18(alice.T2.balanceOf(bob_address)) == 100.0
+    assert fromBase18(BPT.balanceOf(bob_address)) == 0
     
-    assert fromBase18(T1.balanceOf_base(pool.address))== 90.0
-    assert fromBase18(T2.balanceOf_base(pool.address)) == 10.0
-    assert fromBase18(BPT.balanceOf_base(pool.address)) == 0
+    assert fromBase18(T1.balanceOf(pool.address))== 90.0
+    assert fromBase18(T2.balanceOf(pool.address)) == 10.0
+    assert fromBase18(BPT.balanceOf(pool.address)) == 0
 
     #finalize
-    pool = SPool(web3, pool.address)
-    pool.finalize(from_wallet=alice_wallet)
+    pool = SPool(pool.address)
+    pool.finalize(from_wallet=alice.wallet)
 
     #verify holdings
-    assert fromBase18(T1.balanceOf_base(alice_address)) == (1000.0-90.0-100.0)
-    assert fromBase18(T2.balanceOf_base(alice_address)) == (1000.0-10.0-100.0)
-    assert fromBase18(BPT.balanceOf_base(alice_address)) == 100.0 #new!
+    assert fromBase18(alice.T1.balanceOf(alice.address)) == (1000.0-90.0-100.0)
+    assert fromBase18(alice.T2.balanceOf(alice.address)) == (1000.0-10.0-100.0)
+    assert fromBase18(BPT.balanceOf(alice.address)) == 100.0 #new!
     
-    assert fromBase18(T1.balanceOf_base(pool.address))== 90.0
-    assert fromBase18(T2.balanceOf_base(pool.address)) == 10.0
-    assert fromBase18(BPT.balanceOf_base(pool.address)) == 0
+    assert fromBase18(T1.balanceOf(pool.address))== 90.0
+    assert fromBase18(T2.balanceOf(pool.address)) == 10.0
+    assert fromBase18(BPT.balanceOf(pool.address)) == 0
 
     #bob join pool. Wants 10 BPT
     T1.approve(pool.address, toBase18(100.0), from_wallet=bob_wallet)
@@ -184,38 +186,38 @@ def test_public_pool(network, T1, T2,
                   from_wallet=bob_wallet)
 
     #verify holdings
-    assert fromBase18(T1.balanceOf_base(alice_address)) == (1000.0-90.0-100.0)
-    assert fromBase18(T2.balanceOf_base(alice_address)) == (1000.0-10.0-100.0)
-    assert fromBase18(BPT.balanceOf_base(alice_address))== 100.0 
+    assert fromBase18(T1.balanceOf(alice_address)) == (1000.0-90.0-100.0)
+    assert fromBase18(T2.balanceOf(alice_address)) == (1000.0-10.0-100.0)
+    assert fromBase18(BPT.balanceOf(alice_address))== 100.0
     
-    assert fromBase18(T1.balanceOf_base(bob_address)) == (100.0-9.0)
-    assert fromBase18(T2.balanceOf_base(bob_address)) == (100.0-1.0)
-    assert fromBase18(BPT.balanceOf_base(bob_address)) == 10.0 
+    assert fromBase18(T1.balanceOf(bob_address)) == (100.0-9.0)
+    assert fromBase18(T2.balanceOf(bob_address)) == (100.0-1.0)
+    assert fromBase18(BPT.balanceOf(bob_address)) == 10.0
     
-    assert fromBase18(T1.balanceOf_base(pool.address)) == (90.0+9.0)
-    assert fromBase18(T2.balanceOf_base(pool.address)) == (10.0+1.0)
-    assert fromBase18(BPT.balanceOf_base(pool.address)) == 0
+    assert fromBase18(T1.balanceOf(pool.address)) == (90.0+9.0)
+    assert fromBase18(T2.balanceOf(pool.address)) == (10.0+1.0)
+    assert fromBase18(BPT.balanceOf(pool.address)) == 0
     
     #bob sells 2 BPT
     # -this is where BLabs fee kicks in. But the fee is currently set to 0.
     pool.exitPool(poolAmountIn_base=toBase18(2.0), 
                   minAmountsOut_base=[toBase18(0.0),toBase18(0.0)],
                   from_wallet=bob_wallet)
-    assert fromBase18(T1.balanceOf_base(bob_address)) == 92.8
-    assert fromBase18(T2.balanceOf_base(bob_address)) == 99.2
-    assert fromBase18(BPT.balanceOf_base(bob_address)) == 8.0 
+    assert fromBase18(T1.balanceOf(bob_address)) == 92.8
+    assert fromBase18(T2.balanceOf(bob_address)) == 99.2
+    assert fromBase18(BPT.balanceOf(bob_address)) == 8.0
     
     #bob buys 5 more BPT
     pool.joinPool(poolAmountOut_base=toBase18(5.0), 
                   maxAmountsIn_base=[toBase18(90.0),toBase18(90.0)],
                   from_wallet=bob_wallet)
-    assert fromBase18(BPT.balanceOf_base(bob_address)) == 13.0
+    assert fromBase18(BPT.balanceOf(bob_address)) == 13.0
     
     #bob fully exits
     pool.exitPool(poolAmountIn_base=toBase18(13.0), 
                   minAmountsOut_base=[toBase18(0.0),toBase18(0.0)],
                   from_wallet=bob_wallet)
-    assert fromBase18(BPT.balanceOf_base(bob_address)) == 0.0
+    assert fromBase18(BPT.balanceOf(bob_address)) == 0.0
 
 
 def test_rebind_more_tokens(network, T1, T2, alice_wallet):
@@ -242,20 +244,20 @@ def test_gulp(network, T1, alice_wallet):
               from_wallet=alice_wallet)
 
     #T1 is now pool's (a) ERC20 balance (b) _records[token].balance 
-    assert T1.balanceOf_base(pool.address) == toBase18(2.0) #ERC20 balance
-    assert pool.getBalance_base(T1.address) == toBase18(2.0) #records[]
+    assert T1.balanceOf(pool.address) == toBase18(2.0) #ERC20 balance
+    assert pool.getBalance(T1.address) == toBase18(2.0) #records[]
 
     #but then some joker accidentally sends 5.0 tokens to the pool's address
     #  rather than binding / rebinding. So it's in ERC20 bal but not records[]
     T1.transfer(pool.address, toBase18(5.0), from_wallet=alice_wallet)
-    assert T1.balanceOf_base(pool.address) == toBase18(2.0+5.0) #ERC20 bal
-    assert pool.getBalance_base(T1.address) == toBase18(2.0) #records[]
+    assert T1.balanceOf(pool.address) == toBase18(2.0+5.0) #ERC20 bal
+    assert pool.getBalance(T1.address) == toBase18(2.0) #records[]
 
     #so, 'gulp' gets the pool to absorb the tokens into its balances.
     # i.e. to update _records[token].balance to be in sync with ERC20 balance
     pool.gulp(T1.address, from_wallet=alice_wallet)
-    assert T1.balanceOf_base(pool.address) == toBase18(2.0+5.0) #ERC20
-    assert pool.getBalance_base(T1.address) == toBase18(2.0+5.0) #records[]
+    assert T1.balanceOf(pool.address) == toBase18(2.0+5.0) #ERC20
+    assert pool.getBalance(T1.address) == toBase18(2.0 + 5.0) #records[]
 
 
 def test_spot_price(network, T1, T2, alice_wallet):
@@ -291,8 +293,8 @@ def _spotPrices(network: str,
                 bal1:float, bal2:float, w1:float, w2:float):
     pool = _createPoolWith2Tokens(network,T1,T2,wallet, bal1, bal2, w1, w2)
     a1, a2 = T1.address, T2.address
-    return (fromBase18(pool.getSpotPrice_base(a1, a2)),
-            fromBase18(pool.getSpotPriceSansFee_base(a1, a2))) 
+    return (fromBase18(pool.getSpotPrice(a1, a2)),
+            fromBase18(pool.getSpotPriceSansFee(a1, a2)))
     
 
 def test_joinSwapExternAmountIn(network, T1, T2, alice_wallet, alice_address):
@@ -318,8 +320,8 @@ def test_joinSwapExternAmountIn(network, T1, T2, alice_wallet, alice_address):
             tokenAmountOut_base = toBase18(1.0),
             maxPrice_base = HUGEINT,
             from_wallet=alice_wallet)
-    assert 908.94 <= fromBase18(T1.balanceOf_base(alice_address)) <= 908.95
-    assert fromBase18(T2.balanceOf_base(alice_address)) == (1000.0 - 9.0)
+    assert 908.94 <= fromBase18(T1.balanceOf(alice_address)) <= 908.95
+    assert fromBase18(T2.balanceOf(alice_address)) == (1000.0 - 9.0)
     
 
 def test_joinswapPoolAmountOut(network, T1, T2, alice_address, alice_wallet):
@@ -327,47 +329,47 @@ def test_joinswapPoolAmountOut(network, T1, T2, alice_address, alice_wallet):
     BPT = pool    
     pool.finalize(from_wallet=alice_wallet)
     T1.approve(pool.address, toBase18(90.0), from_wallet=alice_wallet)
-    assert fromBase18(T1.balanceOf_base(alice_address)) == 910.0
+    assert fromBase18(T1.balanceOf(alice_address)) == 910.0
     pool.joinswapPoolAmountOut(
             tokenIn_address = T1.address,
             poolAmountOut_base = toBase18(10.0), #BPT wanted
             maxAmountIn_base = toBase18(90.0),  #max T1 to spend
             from_wallet=alice_wallet) 
-    assert fromBase18(T1.balanceOf_base(alice_address)) >= (910.0 - 90.0)
-    assert fromBase18(BPT.balanceOf_base(alice_address)) == (100.0 + 10.0)
+    assert fromBase18(T1.balanceOf(alice_address)) >= (910.0 - 90.0)
+    assert fromBase18(BPT.balanceOf(alice_address)) == (100.0 + 10.0)
 
 
 def test_exitswapPoolAmountIn(network, T1, T2, alice_address, alice_wallet):
     pool = _createPoolWith2Tokens(network,T1,T2,alice_wallet,90.0,10.0,9.0,1.0)
     BPT = pool    
     pool.finalize(from_wallet=alice_wallet)
-    assert fromBase18(T1.balanceOf_base(alice_address)) == 910.0
+    assert fromBase18(T1.balanceOf(alice_address)) == 910.0
     pool.exitswapPoolAmountIn(
             tokenOut_address = T1.address,
             poolAmountIn_base = toBase18(10.0), #BPT spent
             minAmountOut_base = toBase18(1.0),  #min T1 wanted
             from_wallet=alice_wallet)
-    assert fromBase18(T1.balanceOf_base(alice_address)) >= (910.0 + 1.0)
-    assert fromBase18(BPT.balanceOf_base(alice_address)) == (100.0 - 10.0)
+    assert fromBase18(T1.balanceOf(alice_address)) >= (910.0 + 1.0)
+    assert fromBase18(BPT.balanceOf(alice_address)) == (100.0 - 10.0)
 
 
 def test_exitswapExternAmountOut(network, T1, T2, alice_address, alice_wallet):
     pool = _createPoolWith2Tokens(network,T1,T2,alice_wallet,90.0,10.0,9.0,1.0)
     BPT = pool    
     pool.finalize(from_wallet=alice_wallet)
-    assert fromBase18(T1.balanceOf_base(alice_address)) == 910.0
+    assert fromBase18(T1.balanceOf(alice_address)) == 910.0
     pool.exitswapExternAmountOut(
             tokenOut_address = T1.address,
             tokenAmountOut_base = toBase18(2.0), #T1 wanted
             maxPoolAmountIn_base = toBase18(10.0), #max BPT spent 
             from_wallet=alice_wallet)
-    assert fromBase18(T1.balanceOf_base(alice_address)) == (910.0 + 2.0)
-    assert fromBase18(BPT.balanceOf_base(alice_address)) >= (100.0 - 10.0)
+    assert fromBase18(T1.balanceOf(alice_address)) == (910.0 + 2.0)
+    assert fromBase18(BPT.balanceOf(alice_address)) >= (100.0 - 10.0)
 
 
 def test_calcSpotPrice_base(network, T1, T2, alice_address, alice_wallet):
     pool = _deploySPool(network, alice_wallet)
-    x = pool.calcSpotPrice_base(
+    x = pool.calcSpotPrice(
         tokenBalanceIn_base = toBase18(10.0),
         tokenWeightIn_base = toBase18(1.0),
         tokenBalanceOut_base = toBase18(11.0),
@@ -378,7 +380,7 @@ def test_calcSpotPrice_base(network, T1, T2, alice_address, alice_wallet):
 
 def test_calcOutGivenIn_base(network, alice_wallet):
     pool = _deploySPool(network, alice_wallet)
-    x = pool.calcOutGivenIn_base(
+    x = pool.calcOutGivenIn(
             tokenBalanceIn_base = toBase18(10.0),
             tokenWeightIn_base = toBase18(1.0),
             tokenBalanceOut = toBase18(10.1),
@@ -390,7 +392,7 @@ def test_calcOutGivenIn_base(network, alice_wallet):
 
 def test_calcInGivenOut_base(network, alice_wallet):
     pool = _deploySPool(network, alice_wallet)
-    x = pool.calcInGivenOut_base(
+    x = pool.calcInGivenOut(
             tokenBalanceIn_base = toBase18(10.0),
             tokenWeightIn_base = toBase18(1.0),
             tokenBalanceOut_base = toBase18(10.1),
@@ -402,7 +404,7 @@ def test_calcInGivenOut_base(network, alice_wallet):
 
 def test_calcPoolOutGivenSingleIn_base(network, alice_wallet):
     pool = _deploySPool(network, alice_wallet)
-    x = pool.calcPoolOutGivenSingleIn_base(
+    x = pool.calcPoolOutGivenSingleIn(
             tokenBalanceIn_base = toBase18(10.0),
             tokenWeightIn_base = toBase18(1.0),
             poolSupply_base = toBase18(120.0),
@@ -414,7 +416,7 @@ def test_calcPoolOutGivenSingleIn_base(network, alice_wallet):
 
 def test_calcSingleInGivenPoolOut_base(network, alice_wallet):
     pool = _deploySPool(network, alice_wallet)
-    x = pool.calcSingleInGivenPoolOut_base(
+    x = pool.calcSingleInGivenPoolOut(
             tokenBalanceIn_base = toBase18(10.0),
             tokenWeightIn_base = toBase18(1.0),
             poolSupply_base = toBase18(120.0),
@@ -426,7 +428,7 @@ def test_calcSingleInGivenPoolOut_base(network, alice_wallet):
 
 def test_calcSingleOutGivenPoolIn_base(network, alice_wallet):
     pool = _deploySPool(network, alice_wallet)
-    x = pool.calcSingleOutGivenPoolIn_base(
+    x = pool.calcSingleOutGivenPoolIn(
             tokenBalanceOut_base = toBase18(10.0),
             tokenWeightOut_base = toBase18(1.0),
             poolSupply_base = toBase18(120.0),
@@ -454,8 +456,14 @@ def _createPoolWith2Tokens(network: str,
                            bal1:float, bal2:float, w1:float, w2:float):
     pool = _deploySPool(network, wallet)
     
-    T1.approve(pool.address, toBase18(bal1), from_wallet=wallet)
-    T2.approve(pool.address, toBase18(bal2), from_wallet=wallet)
+    T1.get_tx_receipt(T1.approve(pool.address, toBase18(bal1), from_wallet=wallet))
+    T2.get_tx_receipt(T2.approve(pool.address, toBase18(bal2), from_wallet=wallet))
+
+    if pool.isBound(T1.address):
+        pool.unbind(T1.address, wallet)
+
+    if pool.isBound(T2.address):
+        pool.unbind(T2.address, wallet)
 
     pool.bind(T1.address, toBase18(bal1), toBase18(w1), from_wallet=wallet)
     pool.bind(T2.address, toBase18(bal2), toBase18(w2), from_wallet=wallet)
@@ -464,13 +472,8 @@ def _createPoolWith2Tokens(network: str,
 
 
 def _deploySPool(network: str, from_wallet: Wallet) -> SPool:
-    web3 = from_wallet.web3
-    factory_address = util.confFileValue(network, 'SFACTORY_ADDRESS')
-    factory = SFactory(web3, factory_address)
+    factory_address = get_sfactory_address(network)
+    factory = SFactory(factory_address)
     pool_address = factory.newSPool(from_wallet=from_wallet)
-    pool = SPool(web3, pool_address)
+    pool = SPool(pool_address)
     return pool
-
-
-def _sfactory_address(network: str) -> str:
-    return util.confFileValue(network, 'SFACTORY_ADDRESS')

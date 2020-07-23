@@ -9,22 +9,22 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address,
 
     assert token.symbol()[:2] == 'DT'
     assert token.decimals() == 18
-    assert token.balanceOf_base(alice_address) == 0
+    assert token.balanceOf(alice_address) == 0
 
     token.mint(alice_address, toBase18(100.0), from_wallet=alice_wallet)
-    assert fromBase18(token.balanceOf_base(alice_address)) == 100.0
+    assert fromBase18(token.balanceOf(alice_address)) == 100.0
     
-    assert token.allowance_base(alice_address, bob_address) == 0
+    assert token.allowance(alice_address, bob_address) == 0
     token.approve(bob_address, toBase18(1.0), from_wallet=alice_wallet)
-    assert token.allowance_base(alice_address, bob_address) == int(1e18)
+    assert token.allowance(alice_address, bob_address) == int(1e18)
 
     token.transfer(bob_address, toBase18(5.0), from_wallet=alice_wallet)
-    assert fromBase18(token.balanceOf_base(alice_address)) == 95.0
-    assert fromBase18(token.balanceOf_base(bob_address)) == 5.0
+    assert fromBase18(token.balanceOf(alice_address)) == 95.0
+    assert fromBase18(token.balanceOf(bob_address)) == 5.0
     
     token.transfer(alice_address, toBase18(3.0), from_wallet=bob_wallet)
-    assert fromBase18(token.balanceOf_base(alice_address)) == 98.0
-    assert fromBase18(token.balanceOf_base(bob_address)) == 2.0   
+    assert fromBase18(token.balanceOf(alice_address)) == 98.0
+    assert fromBase18(token.balanceOf(bob_address)) == 2.0
 
 
 def test_blob(alice_ocean, alice_wallet):

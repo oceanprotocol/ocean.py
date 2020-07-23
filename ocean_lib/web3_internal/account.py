@@ -6,6 +6,7 @@
 import logging
 import os
 
+from ocean_lib.web3_internal.utils import privateKeyToAddress
 from ocean_lib.web3_internal.web3helper import Web3Helper
 
 logger = logging.getLogger('account')
@@ -43,7 +44,7 @@ class Account:
         self._private_key = private_key
 
         if self.address is None and self._private_key is not None:
-            self.address = Web3Helper.privateKeyToAddress(private_key)
+            self.address = privateKeyToAddress(private_key)
         
         assert self.address is not None
 

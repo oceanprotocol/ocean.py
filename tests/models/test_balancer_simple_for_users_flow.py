@@ -1,12 +1,5 @@
 import pytest
-import sys
 
-from ocean_lib import Ocean
-from ocean_lib.models.sfactory import SFactory
-from ocean_lib.models.spool import SPool
-from ocean_lib.models.btoken import BToken
-from ocean_lib.models import balancer_constants
-from ocean_lib.ocean import util
 from ocean_lib.ocean.util import toBase18, fromBase18
 
 def test_quickstart(alice_ocean, alice_wallet, alice_address,

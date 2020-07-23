@@ -70,7 +70,7 @@ def deploy(network):
     brownie.network.connect(network)
     
     # ****SEE FUNDS****
-    print("Keys:\n%s" % Wallet(web3=get_web3(), key=factory_deployer_private_key).keysStr())
+    print("Keys:\n%s" % Wallet(web3=get_web3(), private_key=factory_deployer_private_key).keysStr())
     print("")
         
     # ****DEPLOY****

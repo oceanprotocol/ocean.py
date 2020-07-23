@@ -17,11 +17,9 @@ from web3 import Web3
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_token import DataToken
-from ocean_lib.models.dt_factory import DTFactory
 from ocean_lib.web3_internal.web3helper import Web3Helper
-from ocean_lib.web3_internal.contract_handler import ContractHandler
 
-from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.ocean import Ocean
 from ocean_lib.web3_internal.utils import get_wallet
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
@@ -50,16 +48,13 @@ def get_web3():
     return get_publisher_ocean_instance().web3
 
 
-def new_factory_contract():
-    factory = DTFactory(address=None)
-    minter = os.environ.get('MINTER_ADDRESS', '0xe2DD09d719Da89e5a3D0F2549c7E24566e947260')
-    address = factory.deploy(
-        get_web3(),
-        ContractHandler.artifacts_path,
-        Web3.toChecksumAddress(minter)
-    )
+def get_ganache_wallet():
+    web3 = get_web3()
+    if web3.eth.accounts and web3.eth.accounts[0].lower() == '0xe2DD09d719Da89e5a3D0F2549c7E24566e947260'.lower():
+        address = Web3.toChecksumAddress('0xe2DD09d719Da89e5a3D0F2549c7E24566e947260')
+        return Wallet(web3, private_key='0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58', address=address)
 
-    return DTFactory(address=address)
+    return None
 
 
 def get_publisher_ocean_instance(use_provider_mock=False) -> Ocean:

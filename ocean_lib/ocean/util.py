@@ -3,8 +3,13 @@ import json
 import os
 from web3 import WebsocketProvider
 
+from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.models.dt_factory import DTFactory
+from ocean_lib.models.sfactory import SFactory
+
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
+from ocean_lib.web3_internal.web3helper import Web3Helper
 
 WEB3_INFURA_PROJECT_ID = '357f2fe737db4304bd2f7285c5602d0d'
 
@@ -54,6 +59,16 @@ def get_web3_provider(network_url):
         provider = WebsocketProvider(network_url)
 
     return provider
+
+
+def get_contracts_addresses(network, config):
+    _file = config.address_file
+    if not _file or not os.path.exists(_file):
+        return None
+    with open(_file) as f:
+        addresses = json.load(f)
+
+    return addresses.get(network, None)
 
 
 def toBase18(amt: float) -> int:
@@ -131,3 +146,21 @@ def web3_to_network(web3):
         if n in s:
             return n
     return 'mainnet'
+
+
+def get_dtfactory_address(network=None):
+    if network is None:
+        network = Web3Helper.get_network_name()
+    return get_contracts_addresses(network, ConfigProvider.get_config()).get(DTFactory.CONTRACT_NAME)
+
+
+def get_sfactory_address(network=None):
+    if network is None:
+        network = Web3Helper.get_network_name()
+    return get_contracts_addresses(network, ConfigProvider.get_config()).get(SFactory.CONTRACT_NAME)
+
+
+def get_OCEAN_address(network=None):
+    if network is None:
+        network = Web3Helper.get_network_name()
+    return get_contracts_addresses(network, ConfigProvider.get_config()).get('Ocean')

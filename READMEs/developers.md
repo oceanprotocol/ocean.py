@@ -162,7 +162,7 @@ Then inside brownie:
 
 #copy and paste the following to >>>
 import brownie #not needed, but clarifies the usage of brownie modules
-from ocean_lib import Ocean
+from ocean_lib.ocean import Ocean
 network_str = 'ganache' 
 
 alice_private_key = Ocean.confFileValue(network_str, 'TEST_PRIVATE_KEY1')

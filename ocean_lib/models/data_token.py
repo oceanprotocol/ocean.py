@@ -111,6 +111,15 @@ class DataToken(ContractBase):
     def blob(self) -> str:
         return self.contract_concise.blob()
 
+    def symbol(self) -> str:
+        return self.contract_concise.symbol()
+
+    def decimals(self) -> str:
+        return self.contract_concise.decimals()
+
+    def allowance(self, owner_address: str, spender_address: str) -> str:
+        return self.contract_concise.allowance(owner_address, spender_address)
+
     def balanceOf(self, account: str) -> int:
         return self.contract_concise.balanceOf(account)
 

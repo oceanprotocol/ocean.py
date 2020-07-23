@@ -5,7 +5,7 @@ import logging
 import os
 import sys
 
-from ocean_lib import Config
+from ocean_lib.config import Config
 from ocean_lib.ocean.util import get_infura_url, WEB3_INFURA_PROJECT_ID
 
 logging.basicConfig(level=logging.INFO)
@@ -31,6 +31,7 @@ class ExampleConfig:
             "eth-network": {
                 "network": "http://localhost:8545",
                 "artifacts.path": "artifacts",
+                "address.file": "artifacts/addresses.json"
             },
             "resources": {
                 "aquarius.url": "http://aquarius:5000",

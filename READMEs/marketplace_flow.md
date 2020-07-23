@@ -36,7 +36,7 @@ docker run @oceanprotocol/marketplace:latest
 ## 2. Alice publishes assets for data services (= publishes a datatoken contract)
 
 ```python
-from ocean_lib import Ocean
+from ocean_lib.ocean import Ocean
 from ocean_lib.web3_internal.utils import get_account
 
 #Alice's config
@@ -86,7 +86,7 @@ data_token.approve(marketplace_address, 20)
 Now, you're the marketplace:)
 
 ```python
-from ocean_lib import Ocean
+from ocean_lib.ocean import Ocean
 
 #Market's config
 config = {

@@ -29,6 +29,7 @@ from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dt_factory import DTFactory
 from ocean_lib.web3_internal.web3helper import Web3Helper
+from ocean_lib.ocean.util import get_dtfactory_address
 
 logger = logging.getLogger('ocean')
 
@@ -195,7 +196,7 @@ class OceanAssets:
         if not data_token_address:
             blob = json.dumps({'t': 1, 'url': ddo_service_endpoint})
             # register on-chain
-            dtfactory = DTFactory(self._config.dtfactory_address)
+            dtfactory = DTFactory(get_dtfactory_address(Web3Helper.get_network_name()))
             tx_id = dtfactory.createToken(blob=blob, from_wallet=publisher_wallet)
             data_token = DataToken(dtfactory.get_token_address(tx_id))
             if not data_token:

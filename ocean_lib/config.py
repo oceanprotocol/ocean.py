@@ -11,12 +11,14 @@ DEFAULT_NETWORK_HOST = 'localhost'
 DEFAULT_NETWORK_PORT = 8545
 DEFAULT_NETWORK_URL = 'http://localhost:8545'
 DEFAULT_ARTIFACTS_PATH = 'artifacts'
+DEFAULT_ADDRESS_FILE = 'addresses.json'
 DEFAULT_GAS_LIMIT = 4000000
 DEFAULT_NAME_AQUARIUS_URL = 'http://localhost:5000'
 DEFAULT_STORAGE_PATH = 'ocean_lib.db'
 
 NAME_NETWORK_URL = 'network'
 NAME_ARTIFACTS_PATH = 'artifacts.path'
+NAME_ADDRESS_FILE = 'address.file'
 NAME_GAS_LIMIT = 'gas_limit'
 NAME_AQUARIUS_URL = 'aquarius.url'
 NAME_STORAGE_PATH = 'storage.path'
@@ -37,6 +39,7 @@ environ_names = {
     NAME_OCEAN_ADDRESS: ['OCEAN_ADDRESS', 'OCEAN address'],
     NAME_NETWORK_URL: ['NETWORK_URL', 'Network URL'],
     NAME_ARTIFACTS_PATH: ['ARTIFACTS_PATH', 'Path to the abi artifacts of the deployed smart contracts'],
+    NAME_ADDRESS_FILE: ['ADDRESS_FILE', 'Path to json file of deployed contracts addresses'],
     NAME_GAS_LIMIT: ['GAS_LIMIT', 'Gas limit'],
     NAME_AQUARIUS_URL: ['AQUARIUS_URL', 'Aquarius URL'],
     NAME_STORAGE_PATH: ['STORAGE_PATH', 'Path to the local database file'],
@@ -52,6 +55,7 @@ config_defaults = {
     'eth-network': {
         NAME_NETWORK_URL: DEFAULT_NETWORK_URL,
         NAME_ARTIFACTS_PATH: DEFAULT_ARTIFACTS_PATH,
+        NAME_ADDRESS_FILE: DEFAULT_ADDRESS_FILE,
         NAME_GAS_LIMIT: DEFAULT_GAS_LIMIT,
         NAME_PARITY_URL: '',
         NAME_PROVIDER_ADDRESS: '',
@@ -132,6 +136,11 @@ class Config(configparser.ConfigParser):
         else:
             path = os.path.join(site.PREFIXES[0], 'artifacts')
         return path
+
+    @property
+    def address_file(self):
+        file_path = self.get(self._section_name, NAME_ADDRESS_FILE)
+        return Path(file_path).expanduser().resolve()
 
     @property
     def storage_path(self):

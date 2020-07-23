@@ -5,10 +5,10 @@
 import logging
 from datetime import datetime
 
+from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
-from ocean_lib import ConfigProvider
 from ocean_lib.data_store.auth_tokens import AuthTokensStorage
 from ocean_lib.web3_internal.web3helper import Web3Helper
 

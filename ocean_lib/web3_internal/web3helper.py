@@ -19,7 +19,7 @@ from ocean_lib.web3_internal.web3_provider import Web3Provider
 class Web3Helper(object):
     """This class provides convenient web3 functions"""
 
-    DEFAULT_NETWORK_NAME = 'development'
+    DEFAULT_NETWORK_NAME = 'ganache'
     _network_name_map = {
         1: 'Main',
         2: 'Morden',
@@ -33,7 +33,7 @@ class Web3Helper(object):
     def get_network_name(network_id=None):
         """
         Return the network name based on the current ethereum network id.
-        Return `development` for every network id that is not mapped.
+        Return `ganache` for every network id that is not mapped.
 
         :param network_id: Network id, int
         :return: Network name, str
@@ -52,17 +52,15 @@ class Web3Helper(object):
         return int(Web3Provider.get_web3().version.network)
 
     @staticmethod
-    def sign_hash(msg_hash, account):
+    def sign_hash(msg_hash, wallet: Wallet):
         """
         This method use `personal_sign`for signing a message. This will always prepend the
         `\x19Ethereum Signed Message:\n32` prefix before signing.
 
         :param msg_hash:
-        :param account: Account
+        :param wallet: Wallet instance
         :return: signature
         """
-        wallet = Wallet(Web3Provider.get_web3(), account.key, account.password,
-                        account.address)
         s = wallet.sign(msg_hash)
         return s.signature.hex()
 
@@ -120,7 +118,7 @@ class Web3Helper(object):
             'to': to_address,
             'value': Web3Helper.to_wei(ether_amount),
             'gas': 500000}
-        wallet = Wallet(w3, from_wallet.key, from_wallet.password, from_wallet.address)
+        wallet = Wallet(w3, private_key=from_wallet.key, address=from_wallet.address)
         raw_tx = wallet.sign_tx(tx)
         tx_hash = w3.eth.sendRawTransaction(raw_tx)
         receipt = w3.eth.waitForTransactionReceipt(tx_hash, timeout=30)

@@ -1,6 +1,6 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
-
+import json
 import logging
 import os
 from collections import namedtuple
@@ -125,11 +125,16 @@ def get_wallet(index):
     key_file = os.getenv(keyfile_name)
     if key_file and not encr_key:
         with open(key_file) as _file:
-            encr_key = _file.read()
+            encr_key = json.loads(_file.read())
 
-    _key = key or encr_key
     from ocean_lib.web3_internal.wallet import Wallet
-    return Wallet(Web3Provider.get_web3(), key=_key, address=Web3.toChecksumAddress(address), password=pswrd)
+    return Wallet(
+        Web3Provider.get_web3(),
+        private_key=key,
+        encrypted_key=encr_key,
+        address=Web3.toChecksumAddress(address),
+        password=pswrd
+    )
 
 
 def process_tx_receipt(tx_hash, event_instance, event_name, agreement_id=None):

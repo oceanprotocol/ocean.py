@@ -1,4 +1,5 @@
 import logging
+import traceback
 import typing
 
 from ocean_lib.web3_internal.utils import privateKeyToAddress
@@ -25,17 +26,25 @@ class Wallet:
     MIN_GAS_PRICE = 1000000000
 
     def __init__(self, web3,
-                 key: typing.Union[str,None] = None,
-                 password: typing.Union[str,None] = None,
-                 address: typing.Union[str,None] = None):
+                 private_key: typing.Union[str, None] = None,
+                 encrypted_key: dict = None,
+                 password: typing.Union[str, None] = None,
+                 address: typing.Union[str, None] = None):
         self._web3 = web3
+        self._last_tx_count.clear()
 
         self._password = password
         self._address = address
-        self._key = key
+        self._key = private_key
+        if encrypted_key and not private_key:
+            assert self._password
+            self._key = self._web3.eth.account.decrypt(encrypted_key, self._password)
 
-        if self._address is None and self._key is not None:
-            self._address = privateKeyToAddress(self.private_key)
+        if self._key:
+            address = privateKeyToAddress(self._key)
+            assert self._address is None or self._address == address
+            self._address = address
+            self._password = None
 
     @property
     def web3(self):
@@ -51,7 +60,7 @@ class Wallet:
 
     @property
     def private_key(self):
-        return self.__get_key()
+        return self._key
 
     @property
     def key(self):
@@ -62,14 +71,10 @@ class Wallet:
         Wallet._last_tx_count = dict()
 
     def __get_key(self):
-        if not self._password:
-            return self._key
-
-        return self._web3.eth.account.decrypt(self._key, self._password)
+        return self._key
 
     def validate(self):
-        key = self.__get_key()
-        account = self._web3.eth.account.privateKeyToAccount(key)
+        account = self._web3.eth.account.privateKeyToAccount(self._key)
         return account.address == self._address
 
     @staticmethod
@@ -86,8 +91,7 @@ class Wallet:
         return Wallet._last_tx_count[address]
 
     def sign_tx(self, tx):
-        private_key = self.__get_key()
-        account = self._web3.eth.account.privateKeyToAccount(private_key)
+        account = self._web3.eth.account.privateKeyToAccount(self.private_key)
         nonce = Wallet._get_nonce(self._web3, account.address)
         logger.debug(f'`Wallet` signing tx: sender address: {account.address} nonce: {nonce}, '
                      f'gasprice: {self._web3.eth.gasPrice}')
@@ -95,13 +99,12 @@ class Wallet:
         gas_price = max(gas_price, self.MIN_GAS_PRICE)
         tx['nonce'] = nonce
         tx['gasPrice'] = gas_price
-        signed_tx = self._web3.eth.account.signTransaction(tx, private_key)
+        signed_tx = self._web3.eth.account.signTransaction(tx, self.private_key)
         logger.debug(f'`Wallet` signed tx is {signed_tx}')
         return signed_tx.rawTransaction
 
     def sign(self, msg_hash):
-        private_key = self.__get_key()
-        account = self._web3.eth.account.privateKeyToAccount(private_key)
+        account = self._web3.eth.account.privateKeyToAccount(self.private_key)
         return account.signHash(msg_hash)
 
     def keysStr(self):
