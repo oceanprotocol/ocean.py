@@ -1,9 +1,6 @@
 """Web3Helper module to provide convenient functions."""
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
-import eth_account
-import eth_keys
-import eth_utils
 from eth_utils import big_endian_to_int
 
 from ocean_lib.web3_internal.utils import (

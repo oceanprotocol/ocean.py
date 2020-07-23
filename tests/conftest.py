@@ -8,7 +8,6 @@ import pytest
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.web3_internal.web3helper import Web3Helper
 from ocean_lib.web3_internal.contract_handler import ContractHandler
-from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 from examples import ExampleConfig
@@ -31,9 +30,6 @@ def setup_all():
     ConfigProvider.set_config(config)
     Web3Provider.init_web3(provider=get_web3_provider(config.network_url))
     ContractHandler.set_artifacts_path(config.artifacts_path)
-
-    # factory_contract = new_factory_contract()
-    # config.set('eth-network', NAME_DATA_TOKEN_FACTORY_ADDRESS, factory_contract.address)
 
     network = Web3Helper.get_network_name()
     wallet = get_ganache_wallet()
