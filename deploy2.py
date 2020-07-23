@@ -25,10 +25,8 @@ SUPPORTED_NETWORKS_STR = str(util.SUPPORTED_NETWORK_NAMES)[1:-1]
 def main():
     network, address_file = processArgs()
     addresses = deploy(network, address_file)
-    _s = json.dumps(addresses)
-    s = f""" **** Things to update in ~/config.ini ****
-            {_s}
-    """
+    _s = json.dumps(addresses, indent=4)
+    s = '**** deployed contracts with the following addresses ****\n' + _s
     print(s)
 
 
@@ -158,14 +156,7 @@ def deploy(network, addresses_file):
     with open(addresses_file, 'w') as f:
         json.dump(network_addresses, f, indent=2)
 
-    s = f"""****Things to update in ~/config.ini****"
-DTFACTORY_ADDRESS = {dtfactory.address}
-SFACTORY_ADDRESS = {sfactory.address}"""
-    if network == "ganache":
-        s += f"""
-OCEAN_ADDRESS = {OCEAN_token.address}"""
-
-    return s
+    return addresses
 
 
 def invalidKey(private_key_str): #super basic check
