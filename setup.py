@@ -27,6 +27,9 @@ install_requirements = [
     'pycryptodomex',
     'tqdm',
     'pytz',
+    'eth-account',
+    'eth-keys',
+    'eth-utils',
     'web3==4.5.0',
     # web3 requires eth-abi, requests, and more,
     # so those will be installed too.
