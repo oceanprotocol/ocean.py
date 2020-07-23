@@ -1,10 +1,10 @@
 {
   "ganache": {
-    "Ocean": "0x9F0C56D88008d4B1C2c57E35563f11Bd5434295c",
-    "DataTokenTemplate": "0xe9FF00B06d1b7EE37703cc0C96a04B8d5A541c1b",
-    "DTFactory": "0x219EB860518d6EF16E9D84C3ED6B5Dd3907c2A3E",
-    "SFactory": "0x559e2Bef6f13a42D23A70b969BD4873890c03b8f",
-    "SPool": "0x4d7909405A81AD200a1204CB9Ef7Cf827d6b5287",
+    "Ocean": "",
+    "DataTokenTemplate": "",
+    "DTFactory": "",
+    "SFactory": "",
+    "SPool": "",
     "BToken": ""
   },
   "rinkeby": {

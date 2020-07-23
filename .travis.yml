@@ -18,6 +18,7 @@ before_install:
   - export AQUARIUS_VERSION=v3
   - bash -x start_ocean.sh --no-dashboard 2>&1 > start_ocean.log &
   - cd ..
+  - ./deploy2.py ganache ./artifacts/addresses.json
   - sleep 30
 
 install: pip install -U tox-travis
