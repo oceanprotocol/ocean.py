@@ -139,7 +139,10 @@ def deploy(network, addresses_file):
         amt_distribute = 1000
         amt_distribute_base = util.toBase18(float(amt_distribute))
         for key_label in ['TEST_PRIVATE_KEY1', 'TEST_PRIVATE_KEY2']:
-            key = util.confFileValue(network, key_label)
+            key = os.environ.get(key_label)
+            if not key:
+                continue
+
             dst_address = privateKeyToAddress(key)
             OCEAN_token.transfer(dst_address, amt_distribute_base, from_wallet=deployer_wallet)
 

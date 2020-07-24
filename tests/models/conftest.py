@@ -1,3 +1,5 @@
+import os
+
 import pytest
 
 from ocean_lib.models.data_token import DataToken
@@ -113,7 +115,7 @@ def make_info(name, private_key_name):
 
     info.web3 = web3
 
-    info.private_key = util.confFileValue(_NETWORK, private_key_name)
+    info.private_key = os.environ.get(private_key_name)
     info.address = privateKeyToAddress(info.private_key)
     info.account = Account(private_key=info.private_key)
     info.wallet = Wallet(web3, private_key=info.private_key)

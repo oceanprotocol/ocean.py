@@ -117,8 +117,7 @@ def buildAndSendTx(function,
 
     web3 = from_wallet.web3
     nonce = web3.eth.getTransactionCount(from_wallet.address)
-    network = web3_to_network(web3)
-    gas_price = int(confFileValue(network, 'GAS_PRICE'))
+    gas_price = int(os.environ.get('GAS_PRICE'))
     tx_params = {
         "from": from_wallet.address,
         "value": num_wei,
