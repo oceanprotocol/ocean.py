@@ -3,7 +3,7 @@ import os
 import pytest
 
 from ocean_lib.models.data_token import DataToken
-from ocean_lib.models.dt_factory import DTFactory
+from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean import util
 from ocean_lib.ocean.util import get_dtfactory_address, get_sfactory_address, get_OCEAN_address, toBase18
 from ocean_lib.web3_internal.account import Account

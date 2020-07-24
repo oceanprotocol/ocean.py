@@ -1,4 +1,4 @@
-# Quickstart: Simple Flow 
+from ocean_lib.ocean.util import get_dtfactory_addressfrom ocean_lib.ocean.util import get_dtfactory_address# Quickstart: Simple Flow 
 
 This stripped-down flow shows the essence of Ocean. Just downloading, no metadata.
 
@@ -18,22 +18,22 @@ If you haven't installed yet:
 pip install ocean-lib
 ```
 
-## 1. Alice publishes a dataset (= publishes a datatoken contract)
+## 1. Alice publishes a dataset (= publishes a DataToken contract)
 
 ```python
 from ocean_lib.ocean import Ocean
-from ocean_lib.web3_internal.utils import get_account
+from ocean_lib.web3_internal.utils import get_wallet
 
 config = {
    'network' : 'rinkeby',
    'privateKey' : '8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f',
 }
 ocean = Ocean(config)
-alice_account = get_account(0)
-assert alice_account.key == config['privateKey']
+alice_wallet = get_wallet(0)
+assert alice_wallet.key == config['privateKey']
 
-token = ocean.create_data_token('http://localhost:8030/api/v1/services', alice_account)
-dt_address = token.getAddress()
+token = ocean.create_data_token(blob='http://localhost:8030/api/v1/services', from_wallet=alice_wallet)
+dt_address = token.address
 ```
 
 ## 2. Alice hosts the dataset
@@ -55,24 +55,33 @@ docker run @oceanprotocol/provider-py
 ## 3. Alice mints 100 tokens
 
 ```python
+from ocean_lib.models.data_token import DataToken
+# From first step above
+dt_address = ''
+token = DataToken(dt_address)
+
 token.mint(100)
 ```
 
 ## 4. Alice transfers 1 token to Bob
 
 ```python
+from ocean_lib.models.data_token import DataToken
+# From first step above
+dt_address = ''
+token = DataToken(dt_address)
+
 bob_address = '0x0ecd5f934768df296EfB58802418fD68B53873C0'
-token.transfer(bob_address, 1)
+token.transfer_tokens(bob_address, 1.0)
 ```
 
 ## 5. Bob consumes dataset
 
-Now, you're Bob:)
-
 ```python
 from ocean_lib.ocean import Ocean
-from ocean_lib.web3_internal.utils import get_account
+from ocean_lib.web3_internal.utils import get_wallet
 from ocean_lib.models.dtfactory import DTFactory
+from ocean_lib.ocean.util import get_dtfactory_address
 
 dt_address = ''  # From first step
 bob_config = {
@@ -80,11 +89,12 @@ bob_config = {
    'privateKey':'1234ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f' #corresponds to bob_address 
 }
 ocean = Ocean(bob_config)
-bob_account = get_account(0)
+bob_account = get_wallet(0)
 
 token = ocean.get_data_token(dt_address)
-alice_address = DTFactory().get_token_minter(dt_address)
+token_factory = ocean.get_dtfactory()
+alice_address = token_factory.get_token_minter(token.address)
 
-tx_id = token.transfer(alice_address, 1, bob_account)
+tx_id = token.transfer_tokens(alice_address, 1, bob_account)
 _file_path = token.download(bob_account, tx_id, '~/my-dataset-downloads')
 ```

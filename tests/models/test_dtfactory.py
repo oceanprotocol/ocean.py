@@ -1,5 +1,5 @@
 from ocean_lib.models.data_token import DataToken
-from ocean_lib.models.dt_factory import DTFactory
+from ocean_lib.models.dtfactory import DTFactory
 
 
 def test1(network, alice_wallet, dtfactory_address):

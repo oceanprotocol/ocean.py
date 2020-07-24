@@ -2,7 +2,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.ocean import Ocean
-from ocean_lib.models.dt_factory import DTFactory
+from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.web3_internal.utils import get_wallet
 
 from ocean_lib.ocean.util import get_dtfactory_address

@@ -4,7 +4,7 @@ import os
 from web3 import WebsocketProvider
 
 from ocean_lib.config_provider import ConfigProvider
-from ocean_lib.models.dt_factory import DTFactory
+from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.sfactory import SFactory
 
 from ocean_lib.web3_internal.wallet import Wallet

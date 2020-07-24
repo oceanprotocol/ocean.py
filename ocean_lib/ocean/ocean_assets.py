@@ -27,7 +27,7 @@ from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.models.data_token import DataToken
-from ocean_lib.models.dt_factory import DTFactory
+from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.web3_internal.web3helper import Web3Helper
 from ocean_lib.ocean.util import get_dtfactory_address
 

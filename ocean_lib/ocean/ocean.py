@@ -18,7 +18,7 @@ from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.btoken import BToken
 
-from ocean_lib.models.dt_factory import DTFactory
+from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.sfactory import SFactory
 from ocean_lib.models.spool import SPool
 from ocean_lib.ocean.ocean_assets import OceanAssets
@@ -120,12 +120,16 @@ class Ocean:
         return get_OCEAN_address(Web3Helper.get_network_name())
 
     def create_data_token(self, blob: str, from_wallet: Wallet) -> DataToken:
-        dtfactory = DTFactory(get_dtfactory_address(Web3Helper.get_network_name()))
+        dtfactory = self.get_dtfactory()
         tx_id = dtfactory.createToken(blob, from_wallet=from_wallet)
         return DataToken(dtfactory.get_token_address(tx_id))
 
     def get_data_token(self, token_address: str) -> DataToken:
         return DataToken(token_address)
+
+    def get_dtfactory(self, dtfactory_address: str='') -> DTFactory:
+        dtf_address = dtfactory_address or get_dtfactory_address(Web3Helper.get_network_name())
+        return DTFactory(dtf_address)
 
     def create_pool(self,
                     DT_address: str,

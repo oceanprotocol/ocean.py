@@ -7,7 +7,7 @@ import sys
 from examples import ExampleConfig
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.data_token import DataToken
-from ocean_lib.models.dt_factory import DTFactory
+from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.sfactory import SFactory
 from ocean_lib.models.spool import SPool
 from ocean_lib.ocean import util
