@@ -10,7 +10,7 @@ from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.sfactory import SFactory
 from ocean_lib.models.spool import SPool
 from ocean_lib.ocean import util
-from ocean_lib.ocean.util import get_web3_provider
+from ocean_lib.ocean.util import get_web3_connection_provider
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.utils import privateKeyToAddress
 from ocean_lib.web3_internal.wallet import Wallet
@@ -64,7 +64,7 @@ Usage: deploy.py NETWORK ADDRESSES_FILE_PATH
 def deploy(network, addresses_file):
     config = ExampleConfig.get_config()
     ConfigProvider.set_config(config)
-    Web3Provider.init_web3(provider=get_web3_provider(config.network_url))
+    Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
     ContractHandler.set_artifacts_path(config.artifacts_path)
 
     ocean = get_publisher_ocean_instance()
@@ -93,25 +93,25 @@ def deploy(network, addresses_file):
 
     print("****Deploy DataTokenTemplate: begin****")
     dt_address = DataToken.deploy(
-        web3, minter_addr, artifacts_path,
+        web3, deployer_wallet, artifacts_path,
         'Template Contract', 'TEMPLATE', minter_addr, DTFactory.CAP, DTFactory.FIRST_BLOB
     )
     addresses[DataToken.CONTRACT_NAME] = dt_address
     print("****Deploy DataTokenTemplate: done****\n")
 
     print("****Deploy DTFactory: begin****")
-    dtfactory = DTFactory(DTFactory.deploy(web3, minter_addr, artifacts_path, dt_address))
+    dtfactory = DTFactory(DTFactory.deploy(web3, deployer_wallet, artifacts_path, dt_address))
     addresses[DTFactory.CONTRACT_NAME] = dtfactory.address
     print("****Deploy DTFactory: done****\n")
 
     print("****Deploy SPool: begin****")
-    spool_address = SPool.deploy(web3, minter_addr, artifacts_path)
+    spool_address = SPool.deploy(web3, deployer_wallet, artifacts_path)
     spool_template = SPool(spool_address)
     addresses[SPool.CONTRACT_NAME] = spool_address
     print("****Deploy SPool: done****\n")
 
     print("****Deploy 'SFactory': begin****")
-    sfactory_address = SFactory.deploy(web3, minter_addr, artifacts_path, spool_template.address)
+    sfactory_address = SFactory.deploy(web3, deployer_wallet, artifacts_path, spool_template.address)
     sfactory = SFactory(sfactory_address)
     addresses[SFactory.CONTRACT_NAME] = sfactory_address
     print("****Deploy 'SFactory': done****\n")
@@ -121,9 +121,9 @@ def deploy(network, addresses_file):
         # For simplicity, hijack DataTokenTemplate.
         minter_addr = deployer_wallet.address
         OCEAN_cap = 1410 * 10 ** 6  # 1.41B
-        OCEAN_cap_base = util.toBase18(float(OCEAN_cap))
+        OCEAN_cap_base = util.to_base_18(float(OCEAN_cap))
         OCEAN_token = DataToken(DataToken.deploy(
-            web3, deployer_wallet.address, artifacts_path,
+            web3, deployer_wallet, artifacts_path,
             'Ocean', 'OCEAN', minter_addr, OCEAN_cap_base, ''
         ))
         addresses["Ocean"] = OCEAN_token.address
@@ -135,7 +135,7 @@ def deploy(network, addresses_file):
 
         print("****Distribute fake OCEAN: begin****")
         amt_distribute = 1000
-        amt_distribute_base = util.toBase18(float(amt_distribute))
+        amt_distribute_base = util.to_base_18(float(amt_distribute))
         for key_label in ['TEST_PRIVATE_KEY1', 'TEST_PRIVATE_KEY2']:
             key = os.environ.get(key_label)
             if not key:

@@ -21,7 +21,7 @@ class SPool(BToken):
         s += [f"  isPublicSwap = {self.isPublicSwap()}"]
         s += [f"  isFinalized = {self.isFinalized()}"]
 
-        swap_fee = util.fromBase18(self.getSwapFee())
+        swap_fee = util.from_base_18(self.getSwapFee())
         s += ["  swapFee = %.2f%%" % (swap_fee * 100.0)]
         
         s += [f"  numTokens = {self.getNumTokens()}"]
@@ -42,18 +42,18 @@ class SPool(BToken):
 
         s += [f"  weights (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
-            denorm_w = util.fromBase18(self.getDenormalizedWeight(addr))
-            norm_w = util.fromBase18(self.getNormalizedWeight(addr))
+            denorm_w = util.from_base_18(self.getDenormalizedWeight(addr))
+            norm_w = util.from_base_18(self.getNormalizedWeight(addr))
             s += [f"    {symbol}: denorm_w={denorm_w}, norm_w={norm_w} "]
 
-        total_denorm_w = util.fromBase18(self.getTotalDenormalizedWeight())
+        total_denorm_w = util.from_base_18(self.getTotalDenormalizedWeight())
         s += [f"    total_denorm_w={total_denorm_w}"]
         
         s += [f"  balances (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
             balance_base = self.getBalance(addr)
             dec = BToken(addr).decimals()
-            balance = util.fromBase(balance_base, dec)
+            balance = util.from_base(balance_base, dec)
             s += [f"    {symbol}: {balance}"]
 
         return "\n".join(s)

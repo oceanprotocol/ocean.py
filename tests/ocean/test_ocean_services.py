@@ -39,7 +39,7 @@ def test_create_compute_service(publisher_ocean_instance):
         [server]
     )
     attributes = ocn_compute.create_compute_service_attributes(
-        "10",
+        10,
         3600*24,
         get_publisher_wallet().address,
         get_timestamp(),

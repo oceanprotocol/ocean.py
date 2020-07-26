@@ -2,10 +2,13 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 import logging
+import os
 import typing
 
 from web3 import Web3
+from web3.utils.threads import Timeout
 
+from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
@@ -82,8 +85,8 @@ class ContractBase(object):
         except ValueError as e:
             logger.error(f'Waiting for transaction receipt failed: {e}')
             return None
-        except Exception:
-            logger.info('Waiting for transaction receipt may have timed out.')
+        except (Timeout, Exception) as e:
+            logger.info(f'Waiting for transaction receipt may have timed out: {e}.')
             return None
 
         return Web3Provider.get_web3().eth.getTransactionReceipt(tx_hash)
@@ -141,26 +144,32 @@ class ContractBase(object):
         _transact = {
             'from': from_wallet.address,
             'passphrase': from_wallet.password,
-            'account_key': from_wallet.key
+            'account_key': from_wallet.key,
+            # 'gas': GAS_LIMIT_DEFAULT
         }
-        _transact.update({'gas': 500000})
+
+        gas_price = os.environ.get('GAS_PRICE', None)
+        if gas_price:
+            _transact['gasPrice'] = gas_price
+
         if transact:
             _transact.update(transact)
+
         return contract_function.transact(_transact).hex()
 
-    def get_event_argument_names(self, event_name:str):
+    def get_event_argument_names(self, event_name: str):
         event = getattr(self.contract.events, event_name, None)
         if event:
             return event().argument_names
 
     @classmethod
-    def deploy(cls, web3, deployer_address: str, abi_path: str='', *args):
+    def deploy(cls, web3, deployer_wallet: Wallet, abi_path: str= '', *args):
         """
         Deploy the DataTokenTemplate and DTFactory contracts to the current network.
 
         :param web3:
         :param abi_path:
-        :param deployer_address:
+        :param deployer_wallet: Wallet instance
 
         :return: smartcontract address of this contract
         """
@@ -170,15 +179,20 @@ class ContractBase(object):
         assert abi_path, f'abi_path is required, got {abi_path}'
 
         w3 = web3
-        w3.eth.defaultAccount = w3.toChecksumAddress(deployer_address)
         _json = ContractHandler.read_abi_from_file(
             cls.CONTRACT_NAME,
             abi_path
         )
 
         _contract = w3.eth.contract(abi=_json['abi'], bytecode=_json['bytecode'])
-        tx_hash = _contract.constructor(*args)\
-            .transact({'from': deployer_address})
+        built_tx = _contract.constructor(*args)\
+            .buildTransaction({'from': deployer_wallet.address})
+
+        if 'gas' not in built_tx:
+            built_tx['gas'] = web3.eth.estimateGas(built_tx)
+
+        raw_tx = deployer_wallet.sign_tx(built_tx)
+        logging.debug(f'Sending raw tx to deploy contract {cls.CONTRACT_NAME}, signed tx hash: {raw_tx.hex()}')
+        tx_hash = web3.eth.sendRawTransaction(raw_tx)
 
         return cls.get_tx_receipt(tx_hash, timeout=60).contractAddress
-

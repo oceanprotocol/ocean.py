@@ -13,8 +13,8 @@ def test_ERC20(network,
     token.approve(bob_address, 0, from_wallet=alice_wallet)
     assert token.symbol() == 'OCEAN'
     assert token.decimals() == 18
-    assert token.balanceOf(alice_address) > util.toBase18(10.0)
-    assert token.balanceOf(bob_address) > util.toBase18(10.0)
+    assert token.balanceOf(alice_address) > util.to_base_18(10.0)
+    assert token.balanceOf(bob_address) > util.to_base_18(10.0)
 
     assert token.allowance(alice_address, bob_address) == 0
     token.approve(bob_address, int(1e18), from_wallet=alice_wallet)

@@ -1,8 +1,6 @@
 import logging
 
-from ocean_lib.models.data_token import DataToken
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.event_filter import EventFilter
 from ocean_lib.web3_internal.wallet import Wallet
 

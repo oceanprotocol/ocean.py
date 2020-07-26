@@ -93,10 +93,6 @@ class Web3Helper(object):
         return Web3Provider.get_web3().eth.getBalance(address, block_identifier='latest')
 
     @staticmethod
-    def to_wei(ether_value):
-        return Web3Provider.get_web3().toWei(ether_value, 'ether')
-
-    @staticmethod
     def from_wei(wei_value):
         return Web3Provider.get_web3().fromWei(wei_value, 'ether')
 
@@ -113,7 +109,7 @@ class Web3Helper(object):
         tx = {
             'from': from_wallet.address,
             'to': to_address,
-            'value': Web3Helper.to_wei(ether_amount),
+            'value': w3.toWei(ether_amount, 'ether'),
             'gas': 500000}
         wallet = Wallet(w3, private_key=from_wallet.key, address=from_wallet.address)
         raw_tx = wallet.sign_tx(tx)

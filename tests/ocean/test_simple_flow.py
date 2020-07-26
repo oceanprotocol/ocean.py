@@ -3,16 +3,16 @@
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.ocean import Ocean
 from ocean_lib.models.dtfactory import DTFactory
-from ocean_lib.web3_internal.utils import get_wallet
 
 from ocean_lib.ocean.util import get_dtfactory_address
 from ocean_lib.web3_internal.web3helper import Web3Helper
+from tests.resources.helper_functions import get_publisher_wallet, get_consumer_wallet
 
 
 def test_simple_flow():
     network = Web3Helper.get_network_name()
-    alice_wallet = get_wallet(0)
-    bob_wallet = get_wallet(1)
+    alice_wallet = get_publisher_wallet()
+    bob_wallet = get_consumer_wallet()
     dataset_download_endpoint = 'http://localhost:8030/api/v1/services'
     _config = ConfigProvider.get_config()
     # 1. Alice publishes a dataset (= publishes a datatoken)

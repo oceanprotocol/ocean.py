@@ -11,7 +11,7 @@ from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 from examples import ExampleConfig
-from ocean_lib.ocean.util import get_web3_provider
+from ocean_lib.ocean.util import get_web3_connection_provider
 from tests.resources.helper_functions import (
     get_metadata,
     setup_logging,
@@ -28,23 +28,20 @@ setup_logging()
 def setup_all():
     config = ExampleConfig.get_config()
     ConfigProvider.set_config(config)
-    Web3Provider.init_web3(provider=get_web3_provider(config.network_url))
+    Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
     ContractHandler.set_artifacts_path(config.artifacts_path)
 
     network = Web3Helper.get_network_name()
     wallet = get_ganache_wallet()
     if network in ['ganache', 'development'] and wallet:
 
-        provider = get_publisher_wallet()
         print(f'sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keysStr()}')
         print(f'sender balance: {Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address))}')
-        assert Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address)) > 4
-        if Web3Helper.from_wei(Web3Helper.get_ether_balance(provider.address)) < 2:
-            Web3Helper.send_ether(wallet, provider.address, 4)
+        assert Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address)) > 50
 
-        consumer = get_consumer_wallet()
-        if Web3Helper.from_wei(Web3Helper.get_ether_balance(consumer.address)) < 20:
-            Web3Helper.send_ether(wallet, consumer.address, 4)
+        for w in (get_publisher_wallet(), get_consumer_wallet()):
+            if Web3Helper.from_wei(Web3Helper.get_ether_balance(w.address)) < 2:
+                Web3Helper.send_ether(wallet, w.address, 4)
 
 
 @pytest.fixture

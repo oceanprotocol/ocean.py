@@ -12,20 +12,16 @@ import time
 import uuid
 import yaml
 from ocean_utils.agreements.service_factory import ServiceDescriptor
-from web3 import Web3
 
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_token import DataToken
-from ocean_lib.web3_internal.web3helper import Web3Helper
+from ocean_lib.ocean.util import to_base_18
+from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 from ocean_lib.ocean import Ocean
-from ocean_lib.web3_internal.utils import get_wallet
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
-
-PUBLISHER_INDEX = 1
-CONSUMER_INDEX = 0
 
 
 def get_resource_path(dir_name, file_name):
@@ -36,23 +32,33 @@ def get_resource_path(dir_name, file_name):
         return pathlib.Path(os.path.join(os.path.sep, *base, file_name))
 
 
+def get_web3():
+    return Web3Provider.get_web3()
+
+
 def get_publisher_wallet() -> Wallet:
-    return get_wallet(0)
+    return Wallet(get_web3(), private_key=os.environ.get('TEST_PRIVATE_KEY1'))
 
 
 def get_consumer_wallet() -> Wallet:
-    return get_wallet(1)
+    return Wallet(get_web3(), private_key=os.environ.get('TEST_PRIVATE_KEY2'))
 
 
-def get_web3():
-    return get_publisher_ocean_instance().web3
+def get_factory_deployer_wallet(network):
+    if network == 'ganache':
+        return get_ganache_wallet()
+
+    private_key = os.environ.get('FACTORY_DEPLOYER_PRIVATE_KEY')
+    if not private_key:
+        return None
+
+    return Wallet(get_web3(), private_key=private_key)
 
 
 def get_ganache_wallet():
     web3 = get_web3()
     if web3.eth.accounts and web3.eth.accounts[0].lower() == '0xe2DD09d719Da89e5a3D0F2549c7E24566e947260'.lower():
-        address = Web3.toChecksumAddress('0xe2DD09d719Da89e5a3D0F2549c7E24566e947260')
-        return Wallet(web3, private_key='0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58', address=address)
+        return Wallet(web3, private_key='0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58')
 
     return None
 
@@ -107,7 +113,7 @@ def get_registered_ddo(ocean_instance, wallet: Wallet):
     ServiceDescriptor.access_service_descriptor(
         ocean_instance.assets._build_access_service(
             metadata,
-            Web3Helper.to_wei(1),
+            to_base_18(1),
             wallet
         ),
         DataServiceProvider.get_download_endpoint(ocean_instance.config)

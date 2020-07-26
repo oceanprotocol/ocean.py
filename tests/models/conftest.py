@@ -4,14 +4,12 @@ import pytest
 
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
-from ocean_lib.ocean import util
-from ocean_lib.ocean.util import get_dtfactory_address, get_sfactory_address, get_OCEAN_address, toBase18
+from ocean_lib.ocean.util import get_dtfactory_address, get_sfactory_address, get_ocean_token_address, to_base_18
 from ocean_lib.web3_internal.account import Account
-from ocean_lib.web3_internal.utils import privateKeyToAddress
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.models import btoken
 from ocean_lib.web3_internal.web3helper import Web3Helper
-from tests.resources.helper_functions import get_web3, get_publisher_wallet, get_ganache_wallet
+from tests.resources.helper_functions import get_web3, get_ganache_wallet, get_factory_deployer_wallet
 
 _NETWORK = "ganache"
 HUGEINT = 2 ** 255
@@ -34,7 +32,7 @@ def sfactory_address():
 
 @pytest.fixture
 def OCEAN_address():
-    return get_OCEAN_address(_NETWORK)
+    return get_ocean_token_address(_NETWORK)
 
 
 @pytest.fixture
@@ -116,9 +114,9 @@ def make_info(name, private_key_name):
     info.web3 = web3
 
     info.private_key = os.environ.get(private_key_name)
-    info.address = privateKeyToAddress(info.private_key)
-    info.account = Account(private_key=info.private_key)
     info.wallet = Wallet(web3, private_key=info.private_key)
+    info.address = info.wallet.address
+    info.account = Account(private_key=info.private_key)
     config = {'network': _NETWORK,
               'privateKey': info.private_key,
               'address.file': 'artifacts/addresses.json',
@@ -139,14 +137,14 @@ def make_info(name, private_key_name):
 
 
 def _deployAndMintToken(symbol: str, to_address: str) -> btoken.BToken:
-    wallet = get_ganache_wallet()
+    wallet = get_factory_deployer_wallet(_NETWORK)
     dt_address = DataToken.deploy(
-        wallet.web3, wallet.address, None,
+        wallet.web3, wallet, None,
         'Template Contract', 'TEMPLATE', wallet.address, DTFactory.CAP, DTFactory.FIRST_BLOB
     )
-    dt_factory = DTFactory(DTFactory.deploy(wallet.web3, wallet.address, None, dt_address))
+    dt_factory = DTFactory(DTFactory.deploy(wallet.web3, wallet, None, dt_address))
     token_address = dt_factory.get_token_address(dt_factory.createToken(symbol, wallet))
     token = DataToken(token_address)
-    token.mint(to_address, toBase18(1000), wallet)
+    token.mint(to_address, to_base_18(1000), wallet)
 
     return btoken.BToken(token.address)

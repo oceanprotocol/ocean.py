@@ -1,4 +1,4 @@
-from ocean_lib.data_provider.data_service_provider import DataServiceProviderfrom ocean_lib.data_provider.data_service_provider import DataServiceProviderfrom ocean_lib.data_provider.data_service_provider import DataServiceProviderfrom ocean_lib.data_provider.data_service_provider import DataServiceProvider# Quickstart: Marketplace Flow
+from ocean_lib.ocean.util import to_base_18from ocean_lib.data_provider.data_service_provider import DataServiceProviderfrom ocean_lib.data_provider.data_service_provider import DataServiceProviderfrom ocean_lib.data_provider.data_service_provider import DataServiceProviderfrom ocean_lib.data_provider.data_service_provider import DataServiceProvider# Quickstart: Marketplace Flow
 
 This batteries-included flow includes metadata, multiple services for one datatoken, and compute-to-data.
 
@@ -40,7 +40,7 @@ from ocean_utils.agreements.service_factory import ServiceDescriptor
 
 from ocean_lib.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.web3helper import Web3Helper
+from ocean_lib.ocean.util import to_base_18
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 #Alice's config
@@ -75,7 +75,7 @@ service_attributes = {
         "main": {
             "name": "dataAssetAccessServiceAgreement",
             "creator": alice_wallet.address,
-            "cost": Web3Helper.to_wei(1.5), # service cost is 1.5 tokens, must be converted to 
+            "cost": to_base_18(1.5), # service cost is 1.5 tokens, must be converted to 
             "timeout": 3600 * 24,
             "datePublished": metadata["main"]['dateCreated']
         }
@@ -113,6 +113,7 @@ Now, you're the marketplace:)
 from ocean_utils.agreements.service_types import ServiceTypes
 
 from ocean_lib.ocean import Ocean
+from ocean_lib.ocean.util import from_base_18
 from ocean_lib.web3_internal.web3helper import Web3Helper
 
 #Market's config
@@ -127,7 +128,7 @@ service1 = asset.get_service(ServiceTypes.ASSET_ACCESS)
 price = 10.0  # marketplace-set price of 10 USD / datatoken
 
 # Display key asset information, such as the cost of each service
-tokens_amount = Web3Helper.from_wei(service1.get_cost())
+tokens_amount = from_base_18(service1.get_cost())
 print(f"Service 1 costs {tokens_amount * price} USD") # 1.5 * 10 = 15
 ```
 

@@ -2,6 +2,7 @@ import json
 import os
 import time
 
+from ocean_lib.ocean.util import to_base_18, from_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.event_filter import EventFilter
 from ocean_lib.web3_internal.wallet import Wallet
@@ -85,7 +86,7 @@ class DataToken(ContractBase):
         return os.path.join(destination_folder, file_name)
 
     def token_balance(self, account: str):
-        return Web3Helper.from_wei(self.balanceOf(account))
+        return from_base_18(self.balanceOf(account))
 
     def get_metadata_url(self):
         # grab the metadatastore URL from the DataToken contract (@token_address)
@@ -98,13 +99,13 @@ class DataToken(ContractBase):
     # amount of tokens will be converted to the base value before sending
     # the transaction
     def approve_tokens(self, spender: str, value: int, from_wallet: Wallet):
-        return self.approve(spender, Web3Helper.to_wei(value), from_wallet)
+        return self.approve(spender, to_base_18(value), from_wallet)
 
     def mint_tokens(self, to_account: str, value: float, from_wallet: Wallet):
-        return self.mint(to_account, Web3Helper.to_wei(value), from_wallet)
+        return self.mint(to_account, to_base_18(value), from_wallet)
 
     def transfer_tokens(self, to: str, value: float, from_wallet: Wallet):
-        return self.transfer(to, Web3Helper.to_wei(value), from_wallet)
+        return self.transfer(to, to_base_18(value), from_wallet)
 
     # ============================================================
     # reflect DataToken Solidity methods

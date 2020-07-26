@@ -2,9 +2,7 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
-import eth_account
 import logging
-import os
 
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.ocean_market import OceanMarket
@@ -25,7 +23,7 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_auth import OceanAuth
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.ocean_services import OceanServices
-from ocean_lib.ocean.util import get_web3_provider, get_contracts_addresses, get_dtfactory_address, get_sfactory_address, get_OCEAN_address
+from ocean_lib.ocean.util import get_web3_connection_provider, get_dtfactory_address, get_sfactory_address, get_ocean_token_address
 from ocean_lib.web3_internal.web3helper import Web3Helper
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
@@ -65,17 +63,12 @@ class Ocean:
 
         if isinstance(config, dict):
 
-            private_key = config.get('privateKey', None)
-            if private_key:
-                account = eth_account.Account.privateKeyToAccount(private_key)
-                os.environ['PARITY_KEY'] = private_key
-                os.environ['PARITY_ADDRESS'] = account.address
+            aqua_url = config.get('metadataStoreUrl', config.get('aquarius.url', 'http://localhost:5000'))
 
-            aqua_url = config.get('metadataStoreUri', config.get('aquarius.url', 'http://localhost:5000'))
             config_dict = {
                 'eth-network': {
-                    'network': config.get('network',''),
-                    'address.file': 'artifacts/addresses.json',
+                    'network': config.get('network', ''),
+                    'address.file': config.get('address.file', 'artifacts/addresses.json'),
                 },
                 'resources': {
                     'aquarius.url': aqua_url,
@@ -86,7 +79,7 @@ class Ocean:
             ConfigProvider.set_config(config)
 
         self._config = config
-        self._web3 = Web3Provider.get_web3(provider=get_web3_provider(self._config.network_url))
+        self._web3 = Web3Provider.get_web3(provider=get_web3_connection_provider(self._config.network_url))
         ContractHandler.set_artifacts_path(self._config.artifacts_path)
 
         if not data_provider:
@@ -117,7 +110,7 @@ class Ocean:
 
     @property
     def OCEAN_address(self):
-        return get_OCEAN_address(Web3Helper.get_network_name())
+        return get_ocean_token_address(Web3Helper.get_network_name())
 
     def create_data_token(self, blob: str, from_wallet: Wallet) -> DataToken:
         dtfactory = self.get_dtfactory()

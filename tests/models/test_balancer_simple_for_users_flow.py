@@ -1,6 +1,6 @@
 import pytest
 
-from ocean_lib.ocean.util import toBase18, fromBase18
+from ocean_lib.ocean.util import to_base_18, from_base_18
 
 def test_quickstart(alice_ocean, alice_wallet, alice_address,
                     bob_ocean, bob_wallet):        
@@ -19,26 +19,26 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address,
     
     #===============================================================
     # 3. Alice mints DTs
-    DT.mint(alice_address, toBase18(1000.0), alice_wallet)
+    DT.mint(alice_address, to_base_18(1000.0), alice_wallet)
     
     #===============================================================
     # 4. Alice creates an OCEAN-DT pool (=a Balancer Pool)
     pool = alice_ocean.create_pool(
-        DT_address, num_DT_base=toBase18(90.0), num_OCEAN_base=toBase18(10.0),
+        DT_address, num_DT_base=to_base_18(90.0), num_OCEAN_base=to_base_18(10.0),
         from_wallet=alice_wallet)
     pool_address = pool.address
     
     #===============================================================
     # 5. Alice adds liquidity to pool
     alice_ocean.addLiquidity(
-        pool_address, num_DT_base=toBase18(9.0), num_OCEAN_base=toBase18(1.0),
+        pool_address, num_DT_base=to_base_18(9.0), num_OCEAN_base=to_base_18(1.0),
         from_wallet=alice_wallet)
         
     #===============================================================
     # 6. Bob buys a DT from pool
     alice_ocean.buy_data_tokens(pool_address,
-                                num_DT_base=toBase18(1.0),
-                                max_num_OCEAN_base=toBase18(2.0),
+                                num_DT_base=to_base_18(1.0),
+                                max_num_OCEAN_base=to_base_18(2.0),
                                 from_wallet=bob_wallet)
     
     #===============================================================
@@ -48,15 +48,15 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address,
     #===============================================================
     # 8. Alice removes liquidity
     alice_ocean.remove_liquidity(pool_address,
-                                 num_DT_base=toBase18(2.0),
-                                 num_OCEAN_base=toBase18(3.0),
+                                 num_DT_base=to_base_18(2.0),
+                                 num_OCEAN_base=to_base_18(3.0),
                                  from_wallet=alice_wallet)
     
     #===============================================================
     # 9. Alice sells data tokens
     alice_ocean.sell_data_tokens(pool_address,
-                                 num_DT_base=toBase18(1.0),
-                                 min_num_OCEAN_base=toBase18(0.0001),
+                                 num_DT_base=to_base_18(1.0),
+                                 min_num_OCEAN_base=to_base_18(0.0001),
                                  from_wallet=alice_wallet)
     
     #===============================================================
@@ -67,16 +67,16 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address,
     # 11. Bob adds liquidity
     bob_ocean.add_liquidity_finalized(
         pool_address,
-        num_BPT_base=toBase18(0.1), max_num_DT_base=toBase18(1.0),
-        max_num_OCEAN_base=toBase18(1.0),
+        num_BPT_base=to_base_18(0.1), max_num_DT_base=to_base_18(1.0),
+        max_num_OCEAN_base=to_base_18(1.0),
         from_wallet=bob_wallet)
     
     #===============================================================
     # 12. Bob adds liquidity AGAIN
     bob_ocean.add_liquidity_finalized(
         pool_address,
-        num_BPT_base=toBase18(0.1), max_num_DT_base=toBase18(1.0),
-        max_num_OCEAN_base=toBase18(1.0),
+        num_BPT_base=to_base_18(0.1), max_num_DT_base=to_base_18(1.0),
+        max_num_OCEAN_base=to_base_18(1.0),
         from_wallet=bob_wallet)
 
 #===============================================================
@@ -85,7 +85,7 @@ def test_ocean_balancer_helpers(
         OCEAN_address, alice_ocean, alice_wallet, alice_address, bob_ocean):
 
     DT = alice_ocean.create_data_token('foo', alice_wallet)
-    DT.mint(alice_address, toBase18(1000.0), alice_wallet)
+    DT.mint(alice_address, to_base_18(1000.0), alice_wallet)
 
     with pytest.raises(Exception): #not enough liquidity
         pool = alice_ocean.create_pool(
@@ -93,7 +93,7 @@ def test_ocean_balancer_helpers(
             from_wallet=alice_wallet)
         
     pool = alice_ocean.create_pool(
-        DT.address, num_DT_base=toBase18(90.0), num_OCEAN_base=toBase18(10.0),
+        DT.address, num_DT_base=to_base_18(90.0), num_OCEAN_base=to_base_18(10.0),
         from_wallet=alice_wallet)
     pool_address = pool.address
 
@@ -103,5 +103,5 @@ def test_ocean_balancer_helpers(
     assert alice_ocean.get_pool(pool_address).address == pool_address
     assert bob_ocean.get_pool(pool_address).address == pool_address
     
-    DT_price = fromBase18(bob_ocean.get_DT_price_base(pool_address))
+    DT_price = from_base_18(bob_ocean.get_DT_price_base(pool_address))
     assert DT_price > 0.0

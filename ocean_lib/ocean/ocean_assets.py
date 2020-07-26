@@ -29,7 +29,7 @@ from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.web3_internal.web3helper import Web3Helper
-from ocean_lib.ocean.util import get_dtfactory_address
+from ocean_lib.ocean.util import get_dtfactory_address, to_base_18
 
 logger = logging.getLogger('ocean')
 
@@ -68,7 +68,7 @@ class OceanAssets:
         access_service_descriptor = service_type_to_descriptor.pop(
             ServiceTypes.ASSET_ACCESS,
             ServiceDescriptor.access_service_descriptor(
-                self._build_access_service(metadata, Web3Helper.to_wei(1), account.address),
+                self._build_access_service(metadata, to_base_18(1), account.address),
                 self._data_provider.get_download_endpoint(self._config)
             )
         )

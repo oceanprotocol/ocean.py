@@ -7,12 +7,13 @@ import os
 import site
 from pathlib import Path
 
+from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
+
 DEFAULT_NETWORK_HOST = 'localhost'
 DEFAULT_NETWORK_PORT = 8545
 DEFAULT_NETWORK_URL = 'http://localhost:8545'
 DEFAULT_ARTIFACTS_PATH = 'artifacts'
 DEFAULT_ADDRESS_FILE = 'addresses.json'
-DEFAULT_GAS_LIMIT = 4000000
 DEFAULT_NAME_AQUARIUS_URL = 'http://localhost:5000'
 DEFAULT_STORAGE_PATH = 'ocean_lib.db'
 
@@ -56,7 +57,7 @@ config_defaults = {
         NAME_NETWORK_URL: DEFAULT_NETWORK_URL,
         NAME_ARTIFACTS_PATH: DEFAULT_ARTIFACTS_PATH,
         NAME_ADDRESS_FILE: DEFAULT_ADDRESS_FILE,
-        NAME_GAS_LIMIT: DEFAULT_GAS_LIMIT,
+        NAME_GAS_LIMIT: GAS_LIMIT_DEFAULT,
         NAME_PARITY_URL: '',
         NAME_PROVIDER_ADDRESS: '',
     },

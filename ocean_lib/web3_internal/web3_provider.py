@@ -11,18 +11,18 @@ class Web3Provider(object):
     _web3 = None
 
     @staticmethod
-    def init_web3(keeper_url=None, provider=None):
+    def init_web3(network_url=None, provider=None):
         """
-        One of `keeper_url` or `provider` is required. If `provider` is
-        given, `keeper_url` will be ignored.
+        One of `network_url` or `provider` is required. If `provider` is
+        given, `network_url` will be ignored.
 
-        :param keeper_url:
+        :param network_url:
         :param provider:
         :return:
         """
         if not provider:
-            assert keeper_url, 'keeper_url or a provider instance is required.'
-            provider = CustomHTTPProvider(keeper_url)
+            assert network_url, 'network_url or a provider instance is required.'
+            provider = CustomHTTPProvider(network_url)
 
         Web3Provider._web3 = Web3(provider)
 
@@ -34,10 +34,10 @@ class Web3Provider(object):
         Web3Provider._web3.testing = getattr(Web3Provider._web3, 'testing')
 
     @staticmethod
-    def get_web3(keeper_url=None, provider=None):
+    def get_web3(network_url=None, provider=None):
         """Return the web3 instance to interact with the ethereum client."""
         if Web3Provider._web3 is None:
-            Web3Provider.init_web3(keeper_url, provider)
+            Web3Provider.init_web3(network_url, provider)
         return Web3Provider._web3
 
     @staticmethod

@@ -2,6 +2,7 @@ import logging
 import traceback
 import typing
 
+from ocean_lib.web3_internal.constants import MIN_GAS_PRICE
 from ocean_lib.web3_internal.utils import privateKeyToAddress
 from ocean_lib.web3_internal.utils import privateKeyToPublicKey
 
@@ -23,7 +24,6 @@ class Wallet:
 
     """
     _last_tx_count = dict()
-    MIN_GAS_PRICE = 1000000000
 
     def __init__(self, web3,
                  private_key: typing.Union[str, None] = None,
@@ -96,9 +96,9 @@ class Wallet:
         logger.debug(f'`Wallet` signing tx: sender address: {account.address} nonce: {nonce}, '
                      f'gasprice: {self._web3.eth.gasPrice}')
         gas_price = int(self._web3.eth.gasPrice / 100)
-        gas_price = max(gas_price, self.MIN_GAS_PRICE)
-        tx['nonce'] = nonce
+        gas_price = max(gas_price, MIN_GAS_PRICE)
         tx['gasPrice'] = gas_price
+        tx['nonce'] = nonce
         signed_tx = self._web3.eth.account.signTransaction(tx, self.private_key)
         logger.debug(f'`Wallet` signed tx is {signed_tx}')
         return signed_tx.rawTransaction

@@ -7,7 +7,6 @@ import logging
 import os
 
 from ocean_lib.web3_internal.utils import privateKeyToAddress
-from ocean_lib.web3_internal.web3helper import Web3Helper
 
 logger = logging.getLogger('account')
 

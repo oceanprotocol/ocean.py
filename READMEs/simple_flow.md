@@ -22,14 +22,15 @@ pip install ocean-lib
 
 ```python
 from ocean_lib.ocean import Ocean
-from ocean_lib.web3_internal.utils import get_wallet
+from ocean_lib.web3_internal.wallet import Wallet
+from ocean_lib.web3_internal.web3_provider import Web3Provider
+
 
 config = {
    'network' : 'rinkeby',
-   'privateKey' : '8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f',
 }
 ocean = Ocean(config)
-alice_wallet = get_wallet(0)
+alice_wallet = Wallet(ocean.web3, private_key='8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f')
 assert alice_wallet.key == config['privateKey']
 
 token = ocean.create_data_token(blob='http://localhost:8030/api/v1/services', from_wallet=alice_wallet)
@@ -79,17 +80,15 @@ token.transfer_tokens(bob_address, 1.0)
 
 ```python
 from ocean_lib.ocean import Ocean
-from ocean_lib.web3_internal.utils import get_wallet
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.util import get_dtfactory_address
 
 dt_address = ''  # From first step
 bob_config = {
    'network': 'rinkeby',
-   'privateKey':'1234ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f' #corresponds to bob_address 
 }
 ocean = Ocean(bob_config)
-bob_account = get_wallet(0)
+bob_account = Wallet(get_web3(), private_key='1234ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f')
 
 token = ocean.get_data_token(dt_address)
 token_factory = ocean.get_dtfactory()

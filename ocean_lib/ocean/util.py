@@ -1,4 +1,3 @@
-import configparser
 import json
 import os
 from web3 import WebsocketProvider
@@ -7,7 +6,6 @@ from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.sfactory import SFactory
 
-from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
 from ocean_lib.web3_internal.web3helper import Web3Helper
 
@@ -22,7 +20,7 @@ def get_infura_url(infura_id, network):
     return f"wss://{network}.infura.io/ws/v3/{infura_id}"
 
 
-def get_web3_provider(network_url):
+def get_web3_connection_provider(network_url):
     """
     Return the suitable web3 provider based on the network_url
 
@@ -52,7 +50,10 @@ def get_web3_provider(network_url):
         
     else:
         if not network_url.startswith('ws'):
-            assert network_url in SUPPORTED_NETWORK_NAMES
+            assert network_url in SUPPORTED_NETWORK_NAMES, \
+                f'The given network_url *{network_url}* does not start with either ' \
+                f'`http` or `wss`, in this case a network name is expected and must ' \
+                f'be one of the supported networks {SUPPORTED_NETWORK_NAMES}.'
 
             network_url = get_infura_url(WEB3_INFURA_PROJECT_ID, network_url)
 
@@ -71,80 +72,22 @@ def get_contracts_addresses(network, config):
     return addresses.get(network, None)
 
 
-def toBase18(amt: float) -> int:
-    return toBase(amt, 18)
+def to_base_18(amt: float) -> int:
+    return to_base(amt, 18)
 
 
-def toBase(amt: float, dec: int) -> int:
+def to_base(amt: float, dec: int) -> int:
     """returns value in e.g. wei (taking e.g. ETH as input)"""
     return int(amt * 1*10**dec)
        
 
-def fromBase18(num_base: int) -> float:
-    return fromBase(num_base, 18)
+def from_base_18(num_base: int) -> float:
+    return from_base(num_base, 18)
 
 
-def fromBase(num_base: int, dec: int) -> float:
+def from_base(num_base: int, dec: int) -> float:
     """returns value in e.g. ETH (taking e.g. wei as input)"""
     return float(num_base / (10**dec))
-
-
-#FIXME: maybe deprecate this
-CONF_FILE_PATH = '~/ocean.conf'
-def confFileValue(network: str, key: str) -> str:
-    conf = configparser.ConfigParser()
-    path = os.path.expanduser(CONF_FILE_PATH)
-    conf.read(path)
-    return conf[network][key]
-
-
-#FIXME: maybe deprecate this
-# (or deprecate the similar but more complex version in contract_handler)
-def abi(filename: str):
-    with open(filename, 'r') as f:
-        return json.loads(f.read())
-
-
-#FIXME: maybe deprecate this
-# (or deprecate the similar functionality in ocean_lib/web3_internal/contract_base.py?)
-GASLIMIT_DEFAULT = 5000000 #FIXME: put in better place
-def buildAndSendTx(function,
-                   from_wallet: Wallet,
-                   gaslimit: int = GASLIMIT_DEFAULT,
-                   num_wei: int = 0):
-    assert isinstance(from_wallet.address, str)
-    assert isinstance(from_wallet.private_key, str)
-
-    web3 = from_wallet.web3
-    nonce = web3.eth.getTransactionCount(from_wallet.address)
-    gas_price = int(os.environ.get('GAS_PRICE'))
-    tx_params = {
-        "from": from_wallet.address,
-        "value": num_wei,
-        "nonce": nonce,
-        "gas": gaslimit,
-        "gasPrice": gas_price,
-    }
-
-    tx = function.buildTransaction(tx_params)
-    signed_tx = web3.eth.account.sign_transaction(
-        tx, private_key=from_wallet.private_key)
-    tx_hash = web3.eth.sendRawTransaction(signed_tx.rawTransaction)
-
-    tx_receipt = web3.eth.waitForTransactionReceipt(tx_hash)
-    if tx_receipt['status'] == 0:  # did tx fail?
-        raise Exception("The tx failed. tx_receipt: {tx_receipt}")
-    return (tx_hash, tx_receipt)
-
-
-def web3_to_network(web3):
-    s = str(web3.provider)
-    if '127.0.0.1' in s:
-        return 'ganache'
-    for n in ['rinkeby', 'ropsten', 'kovan']:
-        if n in s:
-            return n
-    return 'mainnet'
 
 
 def get_dtfactory_address(network=None):
@@ -159,7 +102,7 @@ def get_sfactory_address(network=None):
     return get_contracts_addresses(network, ConfigProvider.get_config()).get(SFactory.CONTRACT_NAME)
 
 
-def get_OCEAN_address(network=None):
+def get_ocean_token_address(network=None):
     if network is None:
         network = Web3Helper.get_network_name()
     return get_contracts_addresses(network, ConfigProvider.get_config()).get('Ocean')
