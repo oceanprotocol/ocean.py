@@ -181,9 +181,3 @@ def mint_tokens_and_wait(data_token_contract: DataToken, receiver_address: str, 
                 break
         except (ValueError, Exception):
             pass
-
-
-def brownie_account(private_key: str):
-    import brownie
-    assert brownie.network.is_connected()
-    return brownie.network.accounts.add(private_key=private_key)
