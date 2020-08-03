@@ -87,7 +87,8 @@ def test_compute_flow():
         raise
 
     ######
-    job_id = cons_ocn.compute.start(did, consumer_wallet, tx_id, algorithm_meta=algorithm_meta)
+    job_id = cons_ocn.compute.start(did, consumer_wallet, tx_id,
+                                    nonce=order_requirements.nonce, algorithm_meta=algorithm_meta)
     assert job_id, f'expected a job id, got {job_id}'
 
     status = cons_ocn.compute.status(did, job_id, consumer_wallet)
