@@ -297,7 +297,7 @@ class OceanAssets:
         :param consumer_address:
         :param service_index:
         :param service_type:
-        :return: OrderRequirements instance -- named tuple (amount, data_token_address, receiver_address),
+        :return: OrderRequirements instance -- named tuple (amount, data_token_address, receiver_address, nonce),
         """
         assert service_type or service_index, f'One of service_index or service_type is required.'
         asset = self.resolve(did)
@@ -347,7 +347,8 @@ class OceanAssets:
             logger.error(msg)
             raise AssertionError(msg)
 
-    def download(self, did, service_index, consumer_account, transfer_tx_id, destination, index=None):
+    def download(self, did, service_index, consumer_account,
+                 transfer_tx_id, destination, nonce=None, index=None):
         """
         Consume the asset data.
 
@@ -363,6 +364,7 @@ class OceanAssets:
         :param consumer_account: Account instance of the consumer
         :param transfer_tx_id: hex str id of the token transfer transaction
         :param destination: str path
+        :param nonce: int value to use in the signature
         :param index: Index of the document that is going to be downloaded, int
         :return: str path to saved files
         """
@@ -370,6 +372,9 @@ class OceanAssets:
         if index is not None:
             assert isinstance(index, int), logger.error('index has to be an integer.')
             assert index >= 0, logger.error('index has to be 0 or a positive integer.')
+
+        if nonce is None:
+            nonce = self._data_provider.get_nonce(consumer_account.address, self._config)
 
         service = asset.get_service_by_index(service_index)
         assert service and service.type == ServiceTypes.ASSET_ACCESS, \
@@ -383,6 +388,7 @@ class OceanAssets:
             asset.data_token_address,
             transfer_tx_id,
             self._data_provider,
+            nonce,
             index
         )
 

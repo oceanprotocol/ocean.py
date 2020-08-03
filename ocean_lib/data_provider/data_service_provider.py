@@ -21,7 +21,7 @@ from ocean_lib.web3_internal.web3helper import Web3Helper
 logger = logging.getLogger(__name__)
 
 
-OrderRequirements = namedtuple('OrderRequirements', ('amount', 'data_token_address', 'receiver_address'))
+OrderRequirements = namedtuple('OrderRequirements', ('amount', 'data_token_address', 'receiver_address', 'nonce'))
 
 
 class DataServiceProvider:
@@ -68,6 +68,16 @@ class DataServiceProvider:
             return response.json()['encryptedDocument']
 
     @staticmethod
+    def get_nonce(user_address, config):
+        response = DataServiceProvider._http_client.get(
+            f'{DataServiceProvider.get_url(config)}/services/nonce?userAddress={user_address}'
+        )
+        if response.status_code != 200:
+            return None
+
+        return response.json()['nonce']
+
+    @staticmethod
     def get_order_requirements(did, service_endpoint, consumer_address, service_id, service_type, token_address):
         """
 
@@ -77,7 +87,7 @@ class DataServiceProvider:
         :param service_id:
         :param service_type:
         :param token_address:
-        :return: OrderRequirements instance -- named tuple (amount, data_token_address, receiver_address),
+        :return: OrderRequirements instance -- named tuple (amount, data_token_address, receiver_address, nonce),
         """
         initialize_url = (
             f'{service_endpoint}'
@@ -89,7 +99,7 @@ class DataServiceProvider:
         )
 
         logger.info(f'invoke the initialize endpoint with this url: {initialize_url}')
-        response = DataServiceProvider._http_client.get(initialize_url, stream=True)
+        response = DataServiceProvider._http_client.get(initialize_url)
         # The returned json should contain information about the required number of tokens
         # to consume `service_id`. If service is not available there will be an error or
         # the returned json is empty.
@@ -97,13 +107,13 @@ class DataServiceProvider:
             return None
         order = dict(response.json())
 
-        return OrderRequirements(order['numTokens'], order['dataToken'], order['to'])
+        return OrderRequirements(order['numTokens'], order['dataToken'], order['to'], order['nonce'])
 
     @staticmethod
     def download_service(did, service_endpoint, wallet, files,
                          destination_folder, service_id,
                          token_address, token_transfer_tx_id,
-                         index=None):
+                         nonce, index=None):
         """
         Call the provider endpoint to get access to the different files that form the asset.
 
@@ -116,11 +126,12 @@ class DataServiceProvider:
         :param token_address: hex str the data token address associated with this asset/service
         :param token_transfer_tx_id: hex str the transaction hash for the required data token
             transfer (tokens of the same token address above)
+        :param nonce: int value to use in the signature
         :param index: Index of the document that is going to be downloaded, int
         :return: True if was downloaded, bool
         """
         signature = Web3Helper.sign_hash(
-            add_ethereum_prefix_and_hash_msg(did),
+            add_ethereum_prefix_and_hash_msg(f'{did}{nonce}'),
             wallet)
 
         indexes = range(len(files))
