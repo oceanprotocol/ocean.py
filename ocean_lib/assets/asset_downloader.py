@@ -75,7 +75,6 @@ def download_asset_files(
             service_index,
             token_address,
             token_transfer_tx_id,
-            nonce,
             i
         )
     return asset_folder

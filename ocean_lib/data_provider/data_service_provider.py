@@ -10,6 +10,7 @@ import re
 from collections import namedtuple
 from json import JSONDecodeError
 
+from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_utils.agreements.service_types import ServiceTypes
 from ocean_utils.exceptions import OceanEncryptAssetUrlsError
@@ -122,7 +123,7 @@ class DataServiceProvider:
     def download_service(did, service_endpoint, wallet, files,
                          destination_folder, service_id,
                          token_address, token_transfer_tx_id,
-                         nonce, index=None):
+                         index=None):
         """
         Call the provider endpoint to get access to the different files that form the asset.
 
@@ -135,14 +136,9 @@ class DataServiceProvider:
         :param token_address: hex str the data token address associated with this asset/service
         :param token_transfer_tx_id: hex str the transaction hash for the required data token
             transfer (tokens of the same token address above)
-        :param nonce: int value to use in the signature
         :param index: Index of the document that is going to be downloaded, int
         :return: True if was downloaded, bool
         """
-        signature = Web3Helper.sign_hash(
-            add_ethereum_prefix_and_hash_msg(f'{did}{nonce}'),
-            wallet)
-
         indexes = range(len(files))
         if index is not None:
             assert isinstance(index, int), logger.error('index has to be an integer.')
@@ -159,10 +155,11 @@ class DataServiceProvider:
             f'&dataToken={token_address}'
             f'&transferTxId={token_transfer_tx_id}'
             f'&consumerAddress={wallet.address}'
-            f'&signature={signature}'
         )
+        config = ConfigProvider.get_config()
         for i in indexes:
-            download_url = base_url + f'&fileIndex={i}'
+            signature = DataServiceProvider.sign_message(wallet, did, config)
+            download_url = base_url + f'&signature={signature}&fileIndex={i}'
             logger.info(f'invoke consume endpoint with this url: {download_url}')
             response = DataServiceProvider._http_client.get(download_url, stream=True)
             file_name = DataServiceProvider._get_file_name(response)
