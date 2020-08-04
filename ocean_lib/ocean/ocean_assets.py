@@ -150,11 +150,10 @@ class OceanAssets:
         if compute_service:
             asset.add_service(compute_service)
 
-        publisher_signature = Web3Helper.sign_hash(
+        asset.proof['signatureValue'] = Web3Helper.sign_hash(
             add_ethereum_prefix_and_hash_msg(asset.asset_id),
             publisher_wallet
         )
-        asset.proof['signatureValue'] = publisher_signature
 
         # Add public key and authentication
         asset.add_public_key(did, publisher_wallet.address)
@@ -167,6 +166,7 @@ class OceanAssets:
             'files is required in the metadata main attributes.'
         logger.debug('Encrypting content urls in the metadata.')
 
+        publisher_signature = self._data_provider.sign_message(publisher_wallet, asset.asset_id, self._config)
         encrypt_endpoint = self._data_provider.get_encrypt_endpoint(self._config)
         files_encrypted = self._data_provider.encrypt_files_dict(
             metadata_copy['main']['files'],

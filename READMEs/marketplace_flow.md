@@ -114,7 +114,6 @@ from ocean_utils.agreements.service_types import ServiceTypes
 
 from ocean_lib.ocean import Ocean
 from ocean_lib.ocean.util import from_base_18
-from ocean_lib.web3_internal.web3helper import Web3Helper
 
 #Market's config
 config = {

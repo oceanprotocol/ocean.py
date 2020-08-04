@@ -68,6 +68,15 @@ class DataServiceProvider:
             return response.json()['encryptedDocument']
 
     @staticmethod
+    def sign_message(wallet, msg, config, nonce=None):
+        if nonce is None:
+            nonce = DataServiceProvider.get_nonce(wallet.address, config)
+        return Web3Helper.sign_hash(
+            add_ethereum_prefix_and_hash_msg(f'{msg}{nonce}'),
+            wallet
+        )
+
+    @staticmethod
     def get_nonce(user_address, config):
         response = DataServiceProvider._http_client.get(
             f'{DataServiceProvider.get_url(config)}/services/nonce?userAddress={user_address}'
@@ -119,7 +128,7 @@ class DataServiceProvider:
 
         :param did: str id of the asset
         :param service_endpoint: Url to consume, str
-        :param wallet: hex str Wallet instance of the consumer signing this agreement
+        :param wallet: hex str Wallet instance of the consumer signing this request
         :param files: List containing the files to be consumed, list
         :param destination_folder: Path, str
         :param service_id: integer the id of the service inside the DDO's service dict
@@ -220,10 +229,10 @@ class DataServiceProvider:
             raise
 
     @staticmethod
-    def stop_compute_job(agreement_id, job_id, service_endpoint, consumer_address, signature):
+    def stop_compute_job(did, job_id, service_endpoint, consumer_address, signature):
         """
 
-        :param agreement_id: hex str Service Agreement Id
+        :param did: hex str the asset/DDO id
         :param job_id: str id of compute job that was returned from `start_compute_job`
         :param service_endpoint: str url of the provider service endpoint for compute service
         :param consumer_address: hex str the ethereum address of the consumer's account
@@ -232,13 +241,13 @@ class DataServiceProvider:
         :return: bool whether the job was stopped successfully
         """
         return DataServiceProvider._send_compute_request(
-            'put', agreement_id, job_id, service_endpoint, consumer_address, signature)
+            'put', did, job_id, service_endpoint, consumer_address, signature)
 
     @staticmethod
-    def restart_compute_job(agreement_id, job_id, service_endpoint, consumer_address, signature):
+    def restart_compute_job(did, job_id, service_endpoint, consumer_address, signature):
         """
 
-        :param agreement_id: hex str Service Agreement Id
+        :param did: hex str the asset/DDO id
         :param job_id: str id of compute job that was returned from `start_compute_job`
         :param service_endpoint: str url of the provider service endpoint for compute service
         :param consumer_address: hex str the ethereum address of the consumer's account
@@ -246,14 +255,14 @@ class DataServiceProvider:
 
         :return: bool whether the job was restarted successfully
         """
-        DataServiceProvider.stop_compute_job(agreement_id, job_id, service_endpoint, consumer_address, signature)
-        return DataServiceProvider.start_compute_job(agreement_id, service_endpoint, consumer_address, signature, job_id=job_id)
+        DataServiceProvider.stop_compute_job(did, job_id, service_endpoint, consumer_address, signature)
+        return DataServiceProvider.start_compute_job(did, service_endpoint, consumer_address, signature, job_id=job_id)
 
     @staticmethod
-    def delete_compute_job(agreement_id, job_id, service_endpoint, consumer_address, signature):
+    def delete_compute_job(did, job_id, service_endpoint, consumer_address, signature):
         """
 
-        :param agreement_id: hex str Service Agreement Id
+        :param did: hex str the asset/DDO id
         :param job_id: str id of compute job that was returned from `start_compute_job`
         :param service_endpoint: str url of the provider service endpoint for compute service
         :param consumer_address: hex str the ethereum address of the consumer's account
@@ -262,39 +271,39 @@ class DataServiceProvider:
         :return: bool whether the job was deleted successfully
         """
         return DataServiceProvider._send_compute_request(
-            'delete', agreement_id, job_id, service_endpoint, consumer_address, signature)
+            'delete', did, job_id, service_endpoint, consumer_address, signature)
 
     @staticmethod
-    def compute_job_status(agreement_id, job_id, service_endpoint, consumer_address, signature):
+    def compute_job_status(did, job_id, service_endpoint, consumer_address, signature):
         """
 
-        :param agreement_id: hex str Service Agreement Id
+        :param did: hex str the asset/DDO id
         :param job_id: str id of compute job that was returned from `start_compute_job`
         :param service_endpoint: str url of the provider service endpoint for compute service
         :param consumer_address: hex str the ethereum address of the consumer's account
         :param signature: hex str signed message to allow the provider to authorize the consumer
 
         :return: dict of job_id to status info. When job_id is not provided, this will return
-            status for each job_id that exist for the agreement_id
+            status for each job_id that exist for the did
         """
         return DataServiceProvider._send_compute_request(
-            'get', agreement_id, job_id, service_endpoint, consumer_address, signature)
+            'get', did, job_id, service_endpoint, consumer_address, signature)
 
     @staticmethod
-    def compute_job_result(agreement_id, job_id, service_endpoint, consumer_address, signature):
+    def compute_job_result(did, job_id, service_endpoint, consumer_address, signature):
         """
 
-        :param agreement_id: hex str Service Agreement Id
+        :param did: hex str the asset/DDO id
         :param job_id: str id of compute job that was returned from `start_compute_job`
         :param service_endpoint: str url of the provider service endpoint for compute service
         :param consumer_address: hex str the ethereum address of the consumer's account
         :param signature: hex str signed message to allow the provider to authorize the consumer
 
         :return: dict of job_id to result urls. When job_id is not provided, this will return
-            result for each job_id that exist for the agreement_id
+            result for each job_id that exist for the did
         """
         return DataServiceProvider._send_compute_request(
-            'get', agreement_id, job_id, service_endpoint, consumer_address, signature
+            'get', did, job_id, service_endpoint, consumer_address, signature
         )
 
     @staticmethod
@@ -365,11 +374,11 @@ class DataServiceProvider:
             logger.warning(f'consume failed: {response.reason}')
 
     @staticmethod
-    def _send_compute_request(http_method, agreement_id, job_id, service_endpoint, consumer_address, signature):
+    def _send_compute_request(http_method, did, job_id, service_endpoint, consumer_address, signature):
         compute_url = (
             f'{service_endpoint}'
             f'?signature={signature}'
-            f'&serviceAgreementId={agreement_id}'
+            f'&documentId={did}'
             f'&consumerAddress={consumer_address}'
             f'&jobId={job_id or ""}'
         )

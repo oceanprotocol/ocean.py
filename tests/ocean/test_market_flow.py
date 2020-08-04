@@ -30,10 +30,10 @@ def test_market_flow():
 
     consumer_wallet = get_consumer_wallet()
 
-    # sign agreement using the registered asset did above
     service = asset.get_service(service_type=ServiceTypes.ASSET_ACCESS)
     sa = ServiceAgreement.from_json(service.as_dictionary())
 
+    # Mint data tokens and assign to publisher
     dt = publisher_ocean.get_data_token(asset.data_token_address)
     mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
 
@@ -58,6 +58,8 @@ def test_market_flow():
         order_requirements.receiver_address,
         consumer_wallet
     )
+    ######
+    # Download the asset files
     asset_folder = consumer_ocean.assets.download(
         asset.did,
         sa.index,

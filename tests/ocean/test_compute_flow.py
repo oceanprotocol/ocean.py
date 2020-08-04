@@ -56,7 +56,6 @@ def test_compute_flow():
 
     ######
     # Mint tokens for dataset and assign to publisher
-    # sa = ServiceAgreement.from_ddo(ServiceTypes.CLOUD_COMPUTE, compute_ddo)
     dt = publisher_ocean_instance.get_data_token(compute_ddo.data_token_address)
     mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
 
