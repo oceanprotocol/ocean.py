@@ -13,6 +13,8 @@ from tests.resources.helper_functions import get_web3, get_ganache_wallet, get_f
 
 _NETWORK = "ganache"
 HUGEINT = 2 ** 255
+BobInfo = None
+AliceInfo = None
 
 
 @pytest.fixture
@@ -96,11 +98,17 @@ def T2():  # 'TOK2' with 1000.0 held by Alice
 
 
 def alice_info():
-    return make_info('Alice', 'TEST_PRIVATE_KEY1')
+    global AliceInfo
+    if AliceInfo is None:
+        AliceInfo = make_info('Alice', 'TEST_PRIVATE_KEY1')
+    return AliceInfo
 
 
 def bob_info():
-    return make_info('Bob', 'TEST_PRIVATE_KEY2')
+    global BobInfo
+    if BobInfo is None:
+        BobInfo = make_info('Bob', 'TEST_PRIVATE_KEY2')
+    return BobInfo
 
 
 def make_info(name, private_key_name):

@@ -145,7 +145,7 @@ class Config(configparser.ConfigParser):
 
     @property
     def storage_path(self):
-        """Path to save the current execution of the service agreements and restart if needed."""
+        """Path to local storage (database file)."""
         return self.get('resources', NAME_STORAGE_PATH)
 
     @property

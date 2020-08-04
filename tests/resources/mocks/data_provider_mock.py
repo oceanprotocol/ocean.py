@@ -21,11 +21,11 @@ class DataProviderMock(object):
             self.wallet = get_publisher_wallet()
 
     @staticmethod
-    def consume_service(service_agreement_id, service_endpoint, wallet_address, files,
+    def consume_service(did, service_endpoint, wallet_address, files,
                         destination_folder, *_, **__):
         for f in files:
             with open(os.path.join(destination_folder, os.path.basename(f['url'])), 'w') as of:
-                of.write(f'mock data {service_agreement_id}.{service_endpoint}.{wallet_address}')
+                of.write(f'mock data {did}.{service_endpoint}.{wallet_address}')
 
     @staticmethod
     def start_compute_job(*args, **kwargs):

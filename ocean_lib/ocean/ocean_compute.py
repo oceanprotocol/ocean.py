@@ -7,6 +7,8 @@ from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.ocean.util import to_base_18
+from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
+from ocean_lib.web3_internal.web3helper import Web3Helper
 
 logger = logging.getLogger('ocean')
 
@@ -177,7 +179,15 @@ class OceanCompute:
             service_endpoint=compute_endpoint
         )
 
-    def start(self, did, consumer_wallet, transfer_tx_id, algorithm_did=None,
+    def _sign_message(self, wallet, msg, nonce=None):
+        if nonce is None:
+            nonce = self._data_provider.get_nonce(wallet.address, self._config)
+        return Web3Helper.sign_hash(
+            add_ethereum_prefix_and_hash_msg(f'{msg}{nonce}'),
+            wallet
+        )
+
+    def start(self, did, consumer_wallet, transfer_tx_id, nonce=None, algorithm_did=None,
               algorithm_meta=None, output=None, job_id=None):
         """Start a remote compute job on the asset files identified by `did` after
         verifying that the provider service is active and transferring the
@@ -186,6 +196,7 @@ class OceanCompute:
         :param did: str -- id of asset that has the compute service
         :param consumer_wallet: Wallet instance of the consumer ordering the service
         :param transfer_tx_id: hex str -- id of the datatokens transfer transaction
+        :param nonce: int value to use in the signature
         :param algorithm_did: str -- the asset did (of `algorithm` type) which consist of `did:op:` and
             the assetId hex str (without `0x` prefix)
         :param algorithm_meta: `AlgorithmMetadata` instance -- metadata about the algorithm being run if
@@ -204,11 +215,13 @@ class OceanCompute:
         sa = ServiceAgreement.from_ddo(ServiceTypes.CLOUD_COMPUTE, asset)
         tx_id = transfer_tx_id
 
+        signature = self._sign_message(consumer_wallet, f'{consumer_wallet.address}{did}', nonce=nonce)
+
         job_info = self._data_provider.start_compute_job(
             did,
             service_endpoint,
             consumer_wallet.address,
-            self._auth.get(consumer_wallet),
+            signature,
             sa.index,
             asset.data_token_address,
             tx_id,
@@ -226,13 +239,14 @@ class OceanCompute:
         :param wallet: Wallet instance
         :return: dict the status for an existing compute job, keys are (ok, status, statusText)
         """
+        msg = f'{wallet.address}{job_id or ""}{did}'
         return OceanCompute._status_from_job_info(
             self._data_provider.compute_job_status(
                 did,
                 job_id,
                 self._get_service_endpoint(did),
                 wallet.address,
-                self._auth.get(wallet)
+                self._sign_message(wallet, msg)
             )
         )
 
@@ -243,12 +257,13 @@ class OceanCompute:
         :param wallet: Wallet instance
         :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
         """
+        msg = f'{wallet.address}{job_id or ""}{did}'
         info_dict = self._data_provider.compute_job_result(
             did,
             job_id,
             self._get_service_endpoint(did),
             wallet.address,
-            self._auth.get(wallet),
+            self._sign_message(wallet, msg)
         )
         return {
             'did': info_dict.get('resultsDid', ''),
@@ -265,13 +280,14 @@ class OceanCompute:
         :param wallet: Wallet instance
         :return: dict the status for the stopped compute job, keys are (ok, status, statusText)
         """
+        msg = f'{wallet.address}{job_id or ""}{did}'
         return self._status_from_job_info(
             self._data_provider.stop_compute_job(
                 did,
                 job_id,
                 self._get_service_endpoint(did),
                 wallet.address,
-                self._auth.get(wallet)
+                self._sign_message(wallet, msg)
             )
         )
 
@@ -284,12 +300,13 @@ class OceanCompute:
         :param wallet: Wallet instance
         :return: str -- id of the new compute job
         """
+        msg = f'{wallet.address}{job_id or ""}{did}'
         job_info = self._data_provider.restart_compute_job(
                 did,
                 job_id,
                 self._get_service_endpoint(did),
                 wallet.address,
-                self._auth.get(wallet),
+                self._sign_message(wallet, msg)
         )
         return job_info['jobId']
 

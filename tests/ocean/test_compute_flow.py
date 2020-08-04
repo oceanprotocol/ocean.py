@@ -56,7 +56,6 @@ def test_compute_flow():
 
     ######
     # Mint tokens for dataset and assign to publisher
-    # sa = ServiceAgreement.from_ddo(ServiceTypes.CLOUD_COMPUTE, compute_ddo)
     dt = publisher_ocean_instance.get_data_token(compute_ddo.data_token_address)
     mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
 
@@ -87,7 +86,8 @@ def test_compute_flow():
         raise
 
     ######
-    job_id = cons_ocn.compute.start(did, consumer_wallet, tx_id, algorithm_meta=algorithm_meta)
+    job_id = cons_ocn.compute.start(did, consumer_wallet, tx_id,
+                                    nonce=order_requirements.nonce, algorithm_meta=algorithm_meta)
     assert job_id, f'expected a job id, got {job_id}'
 
     status = cons_ocn.compute.status(did, job_id, consumer_wallet)

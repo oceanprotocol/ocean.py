@@ -298,6 +298,8 @@ def _spotPrices(network: str,
     
 
 def test_joinSwapExternAmountIn(network, T1, T2, alice_wallet, alice_address):
+    init_T1balance = from_base_18(T1.balanceOf(alice_address))
+    T2balance = from_base_18(T2.balanceOf(alice_address))
     pool = _createPoolWith2Tokens(network,T1,T2,alice_wallet,90.0,10.0,9.0,1.0)
     T1.approve(pool.address, to_base_18(100.0), from_wallet=alice_wallet)
 
@@ -320,51 +322,59 @@ def test_joinSwapExternAmountIn(network, T1, T2, alice_wallet, alice_address):
             tokenAmountOut_base = to_base_18(1.0),
             maxPrice_base = HUGEINT,
             from_wallet=alice_wallet)
-    assert 908.94 <= from_base_18(T1.balanceOf(alice_address)) <= 908.95
-    assert from_base_18(T2.balanceOf(alice_address)) == (1000.0 - 9.0)
+    new_balance = init_T1balance - 91.055
+    assert (new_balance-0.005) <= from_base_18(T1.balanceOf(alice_address)) <= (new_balance+0.005)
+    assert from_base_18(T2.balanceOf(alice_address)) == (T2balance - 9.0)
     
 
 def test_joinswapPoolAmountOut(network, T1, T2, alice_address, alice_wallet):
+    T1balance = from_base_18(T1.balanceOf(alice_address))
     pool = _createPoolWith2Tokens(network,T1,T2,alice_wallet,90.0,10.0,9.0,1.0)
     BPT = pool    
     pool.finalize(from_wallet=alice_wallet)
+    pool_balance = from_base_18(BPT.balanceOf(alice_address))
     T1.approve(pool.address, to_base_18(90.0), from_wallet=alice_wallet)
-    assert from_base_18(T1.balanceOf(alice_address)) == 910.0
+    assert from_base_18(T1.balanceOf(alice_address)) == (T1balance-90)
+    T1balance = from_base_18(T1.balanceOf(alice_address))
     pool.joinswapPoolAmountOut(
             tokenIn_address = T1.address,
             poolAmountOut_base = to_base_18(10.0), #BPT wanted
             maxAmountIn_base = to_base_18(90.0),  #max T1 to spend
             from_wallet=alice_wallet) 
-    assert from_base_18(T1.balanceOf(alice_address)) >= (910.0 - 90.0)
-    assert from_base_18(BPT.balanceOf(alice_address)) == (100.0 + 10.0)
+    assert from_base_18(T1.balanceOf(alice_address)) >= (T1balance - 90.0)
+    assert from_base_18(BPT.balanceOf(alice_address)) == (pool_balance + 10.0)
 
 
 def test_exitswapPoolAmountIn(network, T1, T2, alice_address, alice_wallet):
+    T1balance = from_base_18(T1.balanceOf(alice_address))
     pool = _createPoolWith2Tokens(network,T1,T2,alice_wallet,90.0,10.0,9.0,1.0)
     BPT = pool    
     pool.finalize(from_wallet=alice_wallet)
-    assert from_base_18(T1.balanceOf(alice_address)) == 910.0
+    pool_balance = from_base_18(BPT.balanceOf(alice_address))
+    assert from_base_18(T1.balanceOf(alice_address)) == (T1balance - 90)
     pool.exitswapPoolAmountIn(
             tokenOut_address = T1.address,
             poolAmountIn_base = to_base_18(10.0), #BPT spent
             minAmountOut_base = to_base_18(1.0),  #min T1 wanted
             from_wallet=alice_wallet)
-    assert from_base_18(T1.balanceOf(alice_address)) >= (910.0 + 1.0)
-    assert from_base_18(BPT.balanceOf(alice_address)) == (100.0 - 10.0)
+    assert from_base_18(T1.balanceOf(alice_address)) >= (T1balance - 90 + 1.0)
+    assert from_base_18(BPT.balanceOf(alice_address)) == (pool_balance - 10.0)
 
 
 def test_exitswapExternAmountOut(network, T1, T2, alice_address, alice_wallet):
+    T1balance = from_base_18(T1.balanceOf(alice_address))
     pool = _createPoolWith2Tokens(network,T1,T2,alice_wallet,90.0,10.0,9.0,1.0)
     BPT = pool    
     pool.finalize(from_wallet=alice_wallet)
-    assert from_base_18(T1.balanceOf(alice_address)) == 910.0
+    pool_balance = from_base_18(BPT.balanceOf(alice_address))
+    assert from_base_18(T1.balanceOf(alice_address)) == T1balance - 90
     pool.exitswapExternAmountOut(
             tokenOut_address = T1.address,
             tokenAmountOut_base = to_base_18(2.0), #T1 wanted
             maxPoolAmountIn_base = to_base_18(10.0), #max BPT spent
             from_wallet=alice_wallet)
-    assert from_base_18(T1.balanceOf(alice_address)) == (910.0 + 2.0)
-    assert from_base_18(BPT.balanceOf(alice_address)) >= (100.0 - 10.0)
+    assert from_base_18(T1.balanceOf(alice_address)) == (T1balance - 90 + 2.0)
+    assert from_base_18(BPT.balanceOf(alice_address)) >= (pool_balance - 10.0)
 
 
 def test_calcSpotPrice_base(network, T1, T2, alice_address, alice_wallet):
