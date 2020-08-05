@@ -38,6 +38,11 @@ class ContractBase(object):
     def __str__(self):
         return f'{self.contract_name} @ {self.address}'
 
+    @classmethod
+    def configured_address(cls, network, address_file):
+        return ContractHandler.get_contracts_addresses(
+            network, address_file).get(cls.CONTRACT_NAME)
+
     @property
     def contract_name(self) -> str:
         return self.CONTRACT_NAME

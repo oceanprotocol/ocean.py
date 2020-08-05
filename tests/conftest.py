@@ -37,7 +37,7 @@ def setup_all():
 
         print(f'sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keysStr()}')
         print(f'sender balance: {Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address))}')
-        assert Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address)) > 50
+        assert Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address)) > 10
 
         for w in (get_publisher_wallet(), get_consumer_wallet()):
             if Web3Helper.from_wei(Web3Helper.get_ether_balance(w.address)) < 2:

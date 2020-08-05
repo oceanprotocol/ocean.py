@@ -4,7 +4,6 @@ from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.ocean import Ocean
 from ocean_lib.models.dtfactory import DTFactory
 
-from ocean_lib.ocean.util import get_dtfactory_address
 from ocean_lib.web3_internal.web3helper import Web3Helper
 from tests.resources.helper_functions import get_publisher_wallet, get_consumer_wallet
 
@@ -18,7 +17,7 @@ def test_simple_flow():
     # 1. Alice publishes a dataset (= publishes a datatoken)
     config = {
         'network': _config.network_url,
-        'factory.address': get_dtfactory_address(network),
+        'factory.address': DTFactory.configured_address(network, _config.address_file),
     }
     ocean = Ocean(config)
     token = ocean.create_data_token(dataset_download_endpoint, alice_wallet)
@@ -34,7 +33,8 @@ def test_simple_flow():
     # 5. Bob consumes dataset
     bob_ocean = Ocean(config)
     token = bob_ocean.get_data_token(dt_address)
-    token_owner = DTFactory(get_dtfactory_address(network)).get_token_minter(token.address)
+    address = DTFactory.configured_address(network, _config.address_file)
+    token_owner = DTFactory(address).get_token_minter(token.address)
 
     tx_id = token.transfer_tokens(token_owner, 1, bob_wallet)
 

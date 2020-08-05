@@ -1,7 +1,7 @@
 # configuration file
 CONF_FILE_PATH = '~/ocean.conf'
 
-#Toggle runtime type-checking
+# Toggle runtime type-checking
 import configparser, os
 config = configparser.ConfigParser()
 config.read(os.path.expanduser(CONF_FILE_PATH))

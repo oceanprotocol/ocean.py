@@ -5,6 +5,7 @@ from web3 import WebsocketProvider
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.sfactory import SFactory
+from ocean_lib.web3_internal.contract_handler import ContractHandler
 
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
 from ocean_lib.web3_internal.web3helper import Web3Helper
@@ -63,13 +64,7 @@ def get_web3_connection_provider(network_url):
 
 
 def get_contracts_addresses(network, config):
-    _file = config.address_file
-    if not _file or not os.path.exists(_file):
-        return None
-    with open(_file) as f:
-        addresses = json.load(f)
-
-    return addresses.get(network, None)
+    return ContractHandler.get_contracts_addresses(network, config.address_file)
 
 
 def to_base_18(amt: float) -> int:
@@ -91,18 +86,18 @@ def from_base(num_base: int, dec: int) -> float:
 
 
 def get_dtfactory_address(network=None):
-    if network is None:
-        network = Web3Helper.get_network_name()
-    return get_contracts_addresses(network, ConfigProvider.get_config()).get(DTFactory.CONTRACT_NAME)
+    return DTFactory.configured_address(
+        network or Web3Helper.get_network_name(), ConfigProvider.get_config().address_file
+    )
 
 
 def get_sfactory_address(network=None):
-    if network is None:
-        network = Web3Helper.get_network_name()
-    return get_contracts_addresses(network, ConfigProvider.get_config()).get(SFactory.CONTRACT_NAME)
+    return SFactory.configured_address(
+        network or Web3Helper.get_network_name(), ConfigProvider.get_config().address_file
+    )
 
 
 def get_ocean_token_address(network=None):
-    if network is None:
-        network = Web3Helper.get_network_name()
-    return get_contracts_addresses(network, ConfigProvider.get_config()).get('Ocean')
+    return get_contracts_addresses(
+        network or Web3Helper.get_network_name(), ConfigProvider.get_config()
+    ).get('Ocean')

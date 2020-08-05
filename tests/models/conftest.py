@@ -2,9 +2,11 @@ import os
 
 import pytest
 
+from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
-from ocean_lib.ocean.util import get_dtfactory_address, get_sfactory_address, get_ocean_token_address, to_base_18
+from ocean_lib.models.sfactory import SFactory
+from ocean_lib.ocean.util import get_ocean_token_address, to_base_18
 from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.models import btoken
@@ -24,12 +26,12 @@ def network():
 
 @pytest.fixture
 def dtfactory_address():
-    return get_dtfactory_address(_NETWORK)
+    return DTFactory.configured_address(_NETWORK, ConfigProvider.get_config().address_file)
 
 
 @pytest.fixture
 def sfactory_address():
-    return get_sfactory_address(_NETWORK)
+    return SFactory.configured_address(_NETWORK, ConfigProvider.get_config().address_file)
 
 
 @pytest.fixture

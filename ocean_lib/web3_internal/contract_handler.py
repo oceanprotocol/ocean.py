@@ -26,6 +26,15 @@ class ContractHandler(object):
     artifacts_path = None
 
     @staticmethod
+    def get_contracts_addresses(network, address_file):
+        if not address_file or not os.path.exists(address_file):
+            return None
+        with open(address_file) as f:
+            addresses = json.load(f)
+
+        return addresses.get(network, None)
+
+    @staticmethod
     def set_artifacts_path(artifacts_path):
         if artifacts_path != ContractHandler.artifacts_path:
             ContractHandler.artifacts_path = artifacts_path

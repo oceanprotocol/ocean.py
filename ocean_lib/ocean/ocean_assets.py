@@ -21,7 +21,6 @@ from ocean_utils.exceptions import (
 from ocean_utils.utils.utilities import checksum
 
 from ocean_lib.assets.asset import Asset
-from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.assets.asset_downloader import download_asset_files
@@ -29,7 +28,7 @@ from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.web3_internal.web3helper import Web3Helper
-from ocean_lib.ocean.util import get_dtfactory_address, to_base_18
+from ocean_lib.ocean.util import to_base_18
 
 logger = logging.getLogger('ocean')
 
@@ -51,7 +50,7 @@ class OceanAssets:
         return AquariusProvider.get_aquarius(url or self._aquarius_url)
 
     def _process_service_descriptors(
-            self, service_descriptors, metadata, account: Account):
+            self, service_descriptors, metadata, wallet: Wallet):
         ddo_service_endpoint = self._get_aquarius().get_service_endpoint()
 
         service_type_to_descriptor = {sd[0]: sd for sd in service_descriptors}
@@ -68,7 +67,7 @@ class OceanAssets:
         access_service_descriptor = service_type_to_descriptor.pop(
             ServiceTypes.ASSET_ACCESS,
             ServiceDescriptor.access_service_descriptor(
-                self._build_access_service(metadata, to_base_18(1), account.address),
+                self._build_access_service(metadata, to_base_18(1), wallet.address),
                 self._data_provider.get_download_endpoint(self._config)
             )
         )
@@ -196,7 +195,8 @@ class OceanAssets:
         if not data_token_address:
             blob = json.dumps({'t': 1, 'url': ddo_service_endpoint})
             # register on-chain
-            dtfactory = DTFactory(get_dtfactory_address(Web3Helper.get_network_name()))
+            address = DTFactory.configured_address(Web3Helper.get_network_name(), self._config.address_file)
+            dtfactory = DTFactory(address)
             tx_id = dtfactory.createToken(blob=blob, from_wallet=publisher_wallet)
             data_token = DataToken(dtfactory.get_token_address(tx_id))
             if not data_token:
@@ -348,7 +348,7 @@ class OceanAssets:
             raise AssertionError(msg)
 
     def download(self, did, service_index, consumer_account,
-                 transfer_tx_id, destination, nonce=None, index=None):
+                 transfer_tx_id, destination, index=None):
         """
         Consume the asset data.
 
@@ -373,9 +373,6 @@ class OceanAssets:
             assert isinstance(index, int), logger.error('index has to be an integer.')
             assert index >= 0, logger.error('index has to be 0 or a positive integer.')
 
-        if nonce is None:
-            nonce = self._data_provider.get_nonce(consumer_account.address, self._config)
-
         service = asset.get_service_by_index(service_index)
         assert service and service.type == ServiceTypes.ASSET_ACCESS, \
             f'Service with index {service_index} and type {ServiceTypes.ASSET_ACCESS} is not found.'
@@ -388,7 +385,6 @@ class OceanAssets:
             asset.data_token_address,
             transfer_tx_id,
             self._data_provider,
-            nonce,
             index
         )
 
