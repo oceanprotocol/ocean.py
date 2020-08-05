@@ -1,4 +1,4 @@
-from ocean_lib.ocean.util import to_base_18from ocean_lib.data_provider.data_service_provider import DataServiceProviderfrom ocean_lib.data_provider.data_service_provider import DataServiceProviderfrom ocean_lib.data_provider.data_service_provider import DataServiceProviderfrom ocean_lib.data_provider.data_service_provider import DataServiceProvider# Quickstart: Marketplace Flow
+# Quickstart: Marketplace Flow
 
 This batteries-included flow includes metadata, multiple services for one datatoken, and compute-to-data.
 
