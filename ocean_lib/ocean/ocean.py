@@ -92,7 +92,7 @@ class Ocean:
             self._config,
             data_provider
         )
-        self.pool = OceanPool(self._config.ocean_token_address)
+        self.pool = OceanPool(get_ocean_token_address(Web3Helper.get_network_name()))
 
         logger.debug('Ocean instance initialized: ')
 

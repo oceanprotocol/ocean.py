@@ -11,7 +11,7 @@ from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 from examples import ExampleConfig
-from ocean_lib.ocean.util import get_web3_connection_provider
+from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18, get_ocean_token_address
 from tests.resources.helper_functions import (
     get_metadata,
     setup_logging,
@@ -39,9 +39,16 @@ def setup_all():
         print(f'sender balance: {Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address))}')
         assert Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address)) > 10
 
+        from ocean_lib.models.data_token import DataToken
+        OCEAN_token = DataToken(get_ocean_token_address(network))
+        amt_distribute = 1000
+        amt_distribute_base = to_base_18(float(amt_distribute))
         for w in (get_publisher_wallet(), get_consumer_wallet()):
             if Web3Helper.from_wei(Web3Helper.get_ether_balance(w.address)) < 2:
                 Web3Helper.send_ether(wallet, w.address, 4)
+
+            if OCEAN_token.token_balance(w.address) < 100:
+                OCEAN_token.transfer(w.address, amt_distribute_base, from_wallet=wallet)
 
 
 @pytest.fixture
