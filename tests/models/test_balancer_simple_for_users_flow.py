@@ -24,22 +24,29 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address,
 
     # ===============================================================
     # 4. Alice creates an OCEAN-DT pool (=a Balancer Pool)
-    pool = alice_ocean.pool.create_pool(
-        DT_address, num_dt_base=to_base_18(90.0), num_OCEAN_base=to_base_18(10.0),
+    pool = alice_ocean.pool.create(
+        DT_address, data_token_amount_base=to_base_18(90.0), OCEAN_amount_base=to_base_18(10.0),
         from_wallet=alice_wallet)
     pool_address = pool.address
 
+    assert pool.isFinalized(), f'create pool should finalize the pool.'
+    assert pool.isPublicSwap(), f'create pool should have publicSwap enabled.'
+
     # ===============================================================
     # 5. Alice adds liquidity to pool
-    alice_ocean.pool.addLiquidity(
-        pool_address, num_dt_base=to_base_18(9.0), num_OCEAN_base=to_base_18(1.0),
-        from_wallet=alice_wallet)
+    alice_ocean.pool.add_data_token_liquidity(
+        pool_address, amount_base=to_base_18(9.0), from_wallet=alice_wallet)
+    dt_pool_shares = pool.balanceOf(alice_wallet.address)
+
+    alice_ocean.pool.add_OCEAN_liquidity(
+        pool_address, amount_base=to_base_18(1.0), from_wallet=alice_wallet)
+    ocn_pool_shares = pool.balanceOf(alice_wallet.address)
 
     # ===============================================================
     # 6. Bob buys a DT from pool
     alice_ocean.pool.buy_data_tokens(pool_address,
-                                     num_dt_base=to_base_18(1.0),
-                                     max_num_OCEAN_base=to_base_18(2.0),
+                                     amount_base=to_base_18(1.0),
+                                     max_OCEAN_amount_base=to_base_18(2.0),
                                      from_wallet=bob_wallet)
 
     # ===============================================================
@@ -48,36 +55,43 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address,
 
     # ===============================================================
     # 8. Alice removes liquidity
-    alice_ocean.pool.remove_liquidity(pool_address,
-                                      num_dt_base=to_base_18(2.0),
-                                      num_OCEAN_base=to_base_18(3.0),
-                                      from_wallet=alice_wallet)
+    alice_ocean.pool.remove_data_token_liquidity(pool_address,
+                                                 amount_base=to_base_18(2.0),
+                                                 max_pool_shares_base=dt_pool_shares,
+                                                 from_wallet=alice_wallet)
+
+    alice_ocean.pool.remove_OCEAN_liquidity(pool_address,
+                                            amount_base=to_base_18(3.0),
+                                            max_pool_shares_base=ocn_pool_shares,
+                                            from_wallet=alice_wallet)
 
     # ===============================================================
     # 9. Alice sells data tokens
     alice_ocean.pool.sell_data_tokens(pool_address,
-                                      num_dt_base=to_base_18(1.0),
-                                      min_num_OCEAN_base=to_base_18(0.0001),
+                                      amount_base=to_base_18(1.0),
+                                      min_OCEAN_amount_base=to_base_18(0.0001),
                                       from_wallet=alice_wallet)
 
     # ===============================================================
-    # 10. Alice finalizes pool. Now others can add liquidity.
-    pool.finalize(from_wallet=alice_wallet)
-
-    # ===============================================================
     # 11. Bob adds liquidity
-    bob_ocean.pool.add_liquidity_finalized(
+    bob_ocean.pool.add_data_token_liquidity(
         pool_address,
-        num_bpt_base=to_base_18(0.1), max_num_dt_base=to_base_18(1.0),
-        max_num_OCEAN_base=to_base_18(1.0),
+        amount_base=to_base_18(0.1),
+        from_wallet=bob_wallet)
+    bob_ocean.pool.add_OCEAN_liquidity(
+        pool_address,
+        amount_base=to_base_18(1.0),
         from_wallet=bob_wallet)
 
     # ===============================================================
     # 12. Bob adds liquidity AGAIN
-    bob_ocean.pool.add_liquidity_finalized(
+    bob_ocean.pool.add_data_token_liquidity(
         pool_address,
-        num_bpt_base=to_base_18(0.1), max_num_dt_base=to_base_18(1.0),
-        max_num_OCEAN_base=to_base_18(1.0),
+        amount_base=to_base_18(0.2),
+        from_wallet=bob_wallet)
+    bob_ocean.pool.add_OCEAN_liquidity(
+        pool_address,
+        amount_base=to_base_18(0.1),
         from_wallet=bob_wallet)
 
 
@@ -89,20 +103,20 @@ def test_ocean_balancer_helpers(
     DT.mint(alice_address, to_base_18(1000.0), alice_wallet)
 
     with pytest.raises(Exception):  # not enough liquidity
-        pool = alice_ocean.pool.create_pool(
-            DT.address, num_dt_base=0, num_OCEAN_base=0,
+        pool = alice_ocean.pool.create(
+            DT.address, data_token_amount_base=0, OCEAN_amount_base=0,
             from_wallet=alice_wallet)
 
-    pool = alice_ocean.pool.create_pool(
-        DT.address, num_dt_base=to_base_18(90.0), num_OCEAN_base=to_base_18(10.0),
+    pool = alice_ocean.pool.create(
+        DT.address, data_token_amount_base=to_base_18(90.0), OCEAN_amount_base=to_base_18(10.0),
         from_wallet=alice_wallet)
     pool_address = pool.address
 
     assert alice_ocean.pool.ocean_address == OCEAN_address
-    assert alice_ocean.pool._dt_address(pool.address) == DT.address
+    assert alice_ocean.pool.get_token_address(pool.address) == DT.address
 
-    assert alice_ocean.pool.get_pool(pool_address).address == pool_address
-    assert bob_ocean.pool.get_pool(pool_address).address == pool_address
+    assert alice_ocean.pool.get(pool_address).address == pool_address
+    assert bob_ocean.pool.get(pool_address).address == pool_address
 
-    DT_price = from_base_18(bob_ocean.pool.get_dt_price_base(pool_address))
+    DT_price = from_base_18(bob_ocean.pool.get_token_price_base(pool_address))
     assert DT_price > 0.0
