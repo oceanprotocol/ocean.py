@@ -10,6 +10,7 @@ import os
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_utils.agreements.service_factory import ServiceDescriptor, ServiceFactory
 from ocean_utils.agreements.service_types import ServiceTypes
+from ocean_utils.aquarius.aquarius import Aquarius
 from ocean_utils.aquarius.aquarius_provider import AquariusProvider
 from ocean_utils.aquarius.exceptions import AquariusGenericError
 from ocean_utils.ddo.metadata import MetadataMain
@@ -21,6 +22,7 @@ from ocean_utils.exceptions import (
 from ocean_utils.utils.utilities import checksum
 
 from ocean_lib.assets.asset import Asset
+from ocean_lib.data_provider.data_service_provider import OrderRequirements
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.assets.asset_downloader import download_asset_files
@@ -46,11 +48,10 @@ class OceanAssets:
             downloads_path = self._config.get('resources', 'downloads.path') or downloads_path
         self._downloads_path = downloads_path
 
-    def _get_aquarius(self, url=None):
+    def _get_aquarius(self, url=None) -> Aquarius:
         return AquariusProvider.get_aquarius(url or self._aquarius_url)
 
-    def _process_service_descriptors(
-            self, service_descriptors, metadata, wallet: Wallet):
+    def _process_service_descriptors(self, service_descriptors, metadata, wallet: Wallet) -> list:
         ddo_service_endpoint = self._get_aquarius().get_service_endpoint()
 
         service_type_to_descriptor = {sd[0]: sd for sd in service_descriptors}
@@ -84,9 +85,9 @@ class OceanAssets:
         _service_descriptors.extend(service_type_to_descriptor.values())
         return ServiceFactory.build_services(_service_descriptors)
 
-    def create(self, metadata, publisher_wallet: Wallet,
-               service_descriptors=None,
-               owner_address=None, data_token_address=None):
+    def create(self, metadata: dict, publisher_wallet: Wallet,
+               service_descriptors: list=None, owner_address: str=None,
+               data_token_address: str=None) -> Asset:
         """
         Register an asset on-chain by creating/deploying a DataToken contract
         and in the Metadata store (Aquarius).
@@ -244,7 +245,7 @@ class OceanAssets:
             logger.error(err)
             return False
 
-    def resolve(self, did: str):
+    def resolve(self, did: str) -> Asset:
         """
         When you pass a did retrieve the ddo associated.
 
@@ -253,7 +254,7 @@ class OceanAssets:
         """
         return resolve_asset(did, metadata_store_url=self._config.aquarius_url)
 
-    def search(self, text: str, sort=None, offset=100, page=1, aquarius_url=None):
+    def search(self, text: str, sort=None, offset=100, page=1, aquarius_url=None) -> list:
         """
         Search an asset in oceanDB using aquarius.
 
@@ -270,7 +271,7 @@ class OceanAssets:
         return [Asset(dictionary=ddo_dict) for ddo_dict in
                 self._get_aquarius(aquarius_url).text_search(text, sort, offset, page)['results']]
 
-    def query(self, query: dict, sort=None, offset=100, page=1, aquarius_url=None):
+    def query(self, query: dict, sort=None, offset=100, page=1, aquarius_url=None) -> []:
         """
         Search an asset in oceanDB using search query.
 
@@ -288,7 +289,8 @@ class OceanAssets:
         return [Asset(dictionary=ddo_dict) for ddo_dict in
                 aquarius.query_search(query, sort, offset, page)['results']]
 
-    def order(self, did, consumer_address, service_index=None, service_type=None):
+    def order(self, did: str, consumer_address: str,
+              service_index: [int, None]=None, service_type: str=None) -> OrderRequirements:
         """
         Request a specific service from an asset, returns the service requirements that
         must be met prior to consuming the service.
@@ -316,28 +318,29 @@ class OceanAssets:
         return order_requirements
 
     @staticmethod
-    def pay_for_service(amount, token_address, receiver_address, from_account):
+    def pay_for_service(amount: int, token_address: str,
+                        receiver_address: str, from_wallet: Wallet) -> str:
         """
         Submits the payment for chosen service in DataTokens.
 
         :param amount:
         :param token_address:
         :param receiver_address:
-        :param from_account:
+        :param from_wallet: Wallet instance
         :return: hex str id of transfer transaction
         """
         tokens_amount = int(amount)
         receiver = receiver_address
         dt = DataToken(token_address)
-        balance = dt.balanceOf(from_account.address)
+        balance = dt.balanceOf(from_wallet.address)
         if balance < tokens_amount:
             raise AssertionError(f'Your token balance {balance} is not sufficient '
                                  f'to execute the requested service. This service '
                                  f'requires {amount} number of tokens.')
 
-        tx_hash = dt.transfer(receiver, tokens_amount, from_account)
+        tx_hash = dt.transfer(receiver, tokens_amount, from_wallet)
         try:
-            return dt.verify_transfer_tx(tx_hash, from_account.address, receiver)
+            return dt.verify_transfer_tx(tx_hash, from_wallet.address, receiver)
         except (AssertionError, Exception) as e:
             msg = (
                 f'Downloading asset files failed. The problem is related to '
@@ -347,8 +350,8 @@ class OceanAssets:
             logger.error(msg)
             raise AssertionError(msg)
 
-    def download(self, did, service_index, consumer_account,
-                 transfer_tx_id, destination, index=None):
+    def download(self, did: str, service_index: int, consumer_wallet: Wallet,
+                 transfer_tx_id: str, destination: str, index: [int, None]=None) -> str:
         """
         Consume the asset data.
 
@@ -361,7 +364,7 @@ class OceanAssets:
 
         :param did: DID, str
         :param service_index: identifier of the service inside the asset DDO, str
-        :param consumer_account: Account instance of the consumer
+        :param consumer_wallet: Wallet instance of the consumer
         :param transfer_tx_id: hex str id of the token transfer transaction
         :param destination: str path
         :param nonce: int value to use in the signature
@@ -380,7 +383,7 @@ class OceanAssets:
         return download_asset_files(
             service_index,
             asset,
-            consumer_account,
+            consumer_wallet,
             destination,
             asset.data_token_address,
             transfer_tx_id,
@@ -407,7 +410,7 @@ class OceanAssets:
         asset = self.resolve(did)
         return asset.publisher
 
-    def owner_assets(self, owner_address: str):
+    def owner_assets(self, owner_address: str) -> list:
         """
         List of Asset objects published by ownerAddress
 
@@ -417,7 +420,7 @@ class OceanAssets:
         return [asset.did for asset in self.query({"query": {"proof.creator": [owner_address]}}, offset=1000)]
 
     @staticmethod
-    def _build_access_service(metadata, cost: int, address: str) -> dict:
+    def _build_access_service(metadata: dict, cost: int, address: str) -> dict:
         return {
             "main": {
                 "name": "dataAssetAccessServiceAgreement",
