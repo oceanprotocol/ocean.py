@@ -72,6 +72,7 @@ class DataServiceProvider:
     def sign_message(wallet, msg, config, nonce=None):
         if nonce is None:
             nonce = DataServiceProvider.get_nonce(wallet.address, config)
+        print(f'signing message with nonce {nonce}: {msg}, account={wallet.address}')
         return Web3Helper.sign_hash(
             add_ethereum_prefix_and_hash_msg(f'{msg}{nonce}'),
             wallet

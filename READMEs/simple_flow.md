@@ -1,4 +1,4 @@
-from ocean_lib.ocean.util import get_dtfactory_addressfrom ocean_lib.ocean.util import get_dtfactory_address# Quickstart: Simple Flow 
+# Quickstart: Simple Flow 
 
 This stripped-down flow shows the essence of Ocean. Just downloading, no metadata.
 
@@ -80,8 +80,6 @@ token.transfer_tokens(bob_address, 1.0)
 
 ```python
 from ocean_lib.ocean import Ocean
-from ocean_lib.models.dtfactory import DTFactory
-from ocean_lib.ocean.util import get_dtfactory_address
 
 dt_address = ''  # From first step
 bob_config = {

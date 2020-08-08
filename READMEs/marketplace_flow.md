@@ -95,27 +95,36 @@ did = asset.did
 
 alice_wallet = Wallet()  # From step 2
 data_token = DataToken()  # From step 2
-data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
+data_token.mint_tokens(alice_wallet.address, 1000.0, alice_wallet)
 ```
 
-## 4. Alice allows marketplace to sell her datatokens
+## 4. Alice creates a pool for trading her new data tokens
 
 ```python
-data_token = DataToken()  # From step 2
-marketplace_address = '0x068ed00cf0441e4829d9784fcbe7b9e26d4bd8d0'
-data_token.approve_tokens(marketplace_address, 20.0)
+from ocean_lib.ocean.util import to_base_18
+
+token_address = ''  # From step 2
+
+pool = ocean.pool.create(
+   token_address,
+   data_token_amount_base=to_base_18(500.0),
+   OCEAN_amount_base=to_base_18(5.0),
+   from_wallet=alice_wallet
+)
+pool_address = pool.address
+print(f'DataToken @{data_token.address} has a `pool` available @{pool_address}')
 ```
 
-## 5. Marketplace posts asset for sale
-Now, you're the marketplace:)
+## 5. Marketplace posts asset for sale using price obtained from balancer pool
 
 ```python
 from ocean_utils.agreements.service_types import ServiceTypes
 
 from ocean_lib.ocean import Ocean
 from ocean_lib.ocean.util import from_base_18
+from ocean_lib.models.spool import SPool
 
-#Market's config
+# Market's config
 config = {
    'network': 'rinkeby',
 }
@@ -124,24 +133,44 @@ market_ocean = Ocean(config)
 did = ''  # from step 2
 asset = market_ocean.assets.resolve(did)
 service1 = asset.get_service(ServiceTypes.ASSET_ACCESS)
-price = 10.0  # marketplace-set price of 10 USD / datatoken
+pool_address = ''
+pool = market_ocean.pool.get(pool_address)
+# price in OCEAN tokens per data token
+price_in_OCEAN = from_base_18(market_ocean.pool.get_token_price_base(pool_address))
 
 # Display key asset information, such as the cost of each service
-tokens_amount = from_base_18(service1.get_cost())
-print(f"Service 1 costs {tokens_amount * price} USD") # 1.5 * 10 = 15
+# Each access to an assets service requires ONE datatoken
+tokens_amount = 1.0
+print(f"Service 1 costs {tokens_amount * price_in_OCEAN} OCEAN")
+OCEAN_address = market_ocean.pool.ocean_address
+OCEAN_usd_pool_address = ''
+USDT_token_address = ''
+ocn_pool = SPool(OCEAN_usd_pool_address)
+OCEAN_price = from_base_18(ocn_pool.getSpotPrice(
+    tokenIn_address=USDT_token_address,
+    tokenOut_address=OCEAN_address
+))
+print(f"Service 1 costs {tokens_amount * price_in_OCEAN * OCEAN_price} USD")
 ```
 
-## 6. Value swap: Bob buys datatokens from marketplace
+## 6. Value swap: Bob buys datatokens from marketplace (using datatoken <> OCEAN balancer pool)
 
 ```python
-# Not shown: in marketplace GUI, Bob uses Stripe to send USD to marketplace (or other methods / currencies).
 
 data_token = market_ocean.get_data_token(token_address)
-data_token.transfer_tokens(dst_address=bob_address, 1.0)
+# This assumes bob_wallet already has sufficient OCEAN tokens to buy the data token. OCEAN tokens 
+# can be obtained through a crypto exchange or an on-chain pool such as balancer or uniswap
+market_ocean.pool.buy_data_tokens(
+    pool_address, 
+    amount_base=to_base_18(1.0), # buy one data token
+    max_OCEAN_amount_base=to_base_18(0.1), # pay maximum 0.1 OCEAN tokens
+    from_wallet=bob_wallet
+)
+
+
 ```
    
 ## 7. Bob uses a service he just purchased (download)
-Now, you're Bob:)
 
 ```python
 
@@ -154,6 +183,13 @@ bob_ocean = Ocean(config)
 bob_wallet = Wallet(bob_ocean.web3, private_key='1234ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8o')
 service = asset.get_service(ServiceTypes.ASSET_ACCESS)
 quote = bob_ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
-bob_ocean.assets.pay_for_service(quote.amount, quote.data_token_address, quote.receiver_address, bob_wallet)
-file_path = bob_ocean.assets.download(asset.did, service.index, bob_wallet, '~/my-datasets')
+transfer_tx_id = bob_ocean.assets.pay_for_service(quote.amount, quote.data_token_address, quote.receiver_address, bob_wallet)
+file_path = bob_ocean.assets.download(
+    asset.did, 
+    service.index, 
+    bob_wallet, 
+    transfer_tx_id, 
+    destination='~/my-datasets', 
+    index=0
+)
 ```

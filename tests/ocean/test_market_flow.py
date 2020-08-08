@@ -65,8 +65,7 @@ def test_market_flow():
         sa.index,
         consumer_wallet,
         payment_tx_id,
-        consumer_ocean.config.downloads_path,
-        nonce=order_requirements.nonce
+        consumer_ocean.config.downloads_path
     )
 
     assert len(os.listdir(asset_folder)) > 1
