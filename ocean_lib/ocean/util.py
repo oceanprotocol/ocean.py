@@ -98,6 +98,7 @@ def get_sfactory_address(network=None):
 
 
 def get_ocean_token_address(network=None):
-    return get_contracts_addresses(
+    addresses = get_contracts_addresses(
         network or Web3Helper.get_network_name(), ConfigProvider.get_config()
-    ).get('Ocean')
+    )
+    return addresses.get('Ocean') if addresses else None

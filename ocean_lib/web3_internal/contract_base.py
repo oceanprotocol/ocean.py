@@ -40,8 +40,9 @@ class ContractBase(object):
 
     @classmethod
     def configured_address(cls, network, address_file):
-        return ContractHandler.get_contracts_addresses(
-            network, address_file).get(cls.CONTRACT_NAME)
+        addresses = ContractHandler.get_contracts_addresses(
+            network, address_file)
+        return addresses.get(cls.CONTRACT_NAME) if addresses else None
 
     @property
     def contract_name(self) -> str:
