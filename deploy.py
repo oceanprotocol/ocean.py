@@ -2,6 +2,7 @@
 import json
 import os
 import sys
+from pathlib import Path
 
 from examples import ExampleConfig
 from ocean_lib.config_provider import ConfigProvider
@@ -66,6 +67,8 @@ def deploy(network, addresses_file):
     ConfigProvider.set_config(config)
     Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
     ContractHandler.set_artifacts_path(config.artifacts_path)
+
+    addresses_file = Path(addresses_file).expanduser().resolve()
 
     ocean = get_publisher_ocean_instance()
     web3 = ocean.web3

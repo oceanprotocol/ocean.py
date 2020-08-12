@@ -125,23 +125,34 @@ class Config(configparser.ConfigParser):
     @property
     def artifacts_path(self):
         """Path where the contracts artifacts are allocated."""
+        path = None
         _path_string = self.get(self._section_name, NAME_ARTIFACTS_PATH)
-        path = Path(_path_string).expanduser().resolve()
+        if _path_string:
+            path = Path(_path_string).expanduser().resolve()
+
         # TODO: Handle the default case and make default empty string
         # assert path.exists(), "Can't find the keeper path: {} ({})"..format(_path_string,
         # path)
-        if os.path.exists(path):
-            pass
-        elif os.getenv('VIRTUAL_ENV'):
+        if path and os.path.exists(path):
+            return path
+
+        if os.getenv('VIRTUAL_ENV'):
             path = os.path.join(os.getenv('VIRTUAL_ENV'), 'artifacts')
         else:
             path = os.path.join(site.PREFIXES[0], 'artifacts')
+
         return path
 
     @property
     def address_file(self):
         file_path = self.get(self._section_name, NAME_ADDRESS_FILE)
-        return Path(file_path).expanduser().resolve()
+        if file_path:
+            file_path = Path(file_path).expanduser().resolve()
+
+        if not file_path or not os.path.exists(file_path):
+            return None
+
+        return file_path
 
     @property
     def storage_path(self):
