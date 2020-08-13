@@ -38,18 +38,18 @@ def test1(network, OCEAN_address,
     pool.setSwapFee(to_base_18(0.1), from_wallet=alice_wallet)  # set 10% fee
 
     DT.approve(pool_address, to_base_18(90.0), from_wallet=alice_wallet)
-    pool.bind(DT_address, to_base_18(90.0), balancer_constants.INIT_WEIGHT_DT,
+    pool.bind(DT_address, to_base_18(90.0), balancer_constants.INIT_WEIGHT_DT_BASE,
               from_wallet=alice_wallet)
 
     OCEAN_token = BToken(OCEAN_address)
     OCEAN_token.approve(pool_address, to_base_18(10.0), from_wallet=alice_wallet)
-    pool.bind(OCEAN_address, to_base_18(10.0), balancer_constants.INIT_WEIGHT_OCEAN,
+    pool.bind(OCEAN_address, to_base_18(10.0), balancer_constants.INIT_WEIGHT_OCEAN_BASE,
               from_wallet=alice_wallet)
 
     # ===============================================================
     # 5. Alice adds liquidity to pool
     DT.approve(pool_address, to_base_18(9.0), from_wallet=alice_wallet)
-    pool.rebind(DT_address, to_base_18(90.0 + 9.0), balancer_constants.INIT_WEIGHT_DT,
+    pool.rebind(DT_address, to_base_18(90.0 + 9.0), balancer_constants.INIT_WEIGHT_DT_BASE,
                 from_wallet=alice_wallet)
 
     OCEAN_token.approve(pool_address, to_base_18(1.0), from_wallet=alice_wallet)
@@ -74,10 +74,10 @@ def test1(network, OCEAN_address,
     # ===============================================================
     # 8. Alice removes liquidity
     pool.rebind(DT_address, to_base_18(90.0 + 9.0 - 2.0),
-                balancer_constants.INIT_WEIGHT_DT,
+                balancer_constants.INIT_WEIGHT_DT_BASE,
                 from_wallet=alice_wallet)
     pool.rebind(OCEAN_address, to_base_18(10.0 + 1.0 - 3.0),
-                balancer_constants.INIT_WEIGHT_OCEAN,
+                balancer_constants.INIT_WEIGHT_OCEAN_BASE,
                 from_wallet=alice_wallet)
 
     # ===============================================================

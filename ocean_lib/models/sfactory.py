@@ -28,5 +28,5 @@ class SFactory(ContractBase):
         pool_address = rich_logs[0]['args']['newSPoolAddress']
         print(f"  pool_address = {pool_address}")
 
-        print("SPool.newSPool(). Done.")
+        print("SFactory.newSPool(). Done.")
         return pool_address

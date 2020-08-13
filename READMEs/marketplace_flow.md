@@ -107,8 +107,8 @@ token_address = ''  # From step 2
 
 pool = ocean.pool.create(
    token_address,
-   data_token_amount_base=to_base_18(500.0),
-   OCEAN_amount_base=to_base_18(5.0),
+   data_token_amount=500.0,
+   OCEAN_amount=5.0,
    from_wallet=alice_wallet
 )
 pool_address = pool.address

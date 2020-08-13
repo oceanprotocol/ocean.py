@@ -1,8 +1,13 @@
+import logging
+
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.btoken import BToken
 from ocean_lib.models.sfactory import SFactory
 from ocean_lib.models.spool import SPool
+from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.wallet import Wallet
+
+logger = logging.getLogger(__name__)
 
 
 class OceanPool:
@@ -27,9 +32,12 @@ class OceanPool:
 
     def create(self,
                data_token_address: str,
-               data_token_amount_base: int,
-               OCEAN_amount_base: int,
-               from_wallet: Wallet) -> SPool:
+               data_token_amount: float,
+               OCEAN_amount: float,
+               from_wallet: Wallet,
+               data_token_weight: float=balancer_constants.INIT_WEIGHT_DT,
+               swap_fee: float=balancer_constants.DEFAULT_SWAP_FEE
+               ) -> SPool:
         """
         Create a new pool with bound datatoken and OCEAN token then finalize it.
         The pool will have publicSwap enabled and swap fee is set
@@ -38,42 +46,29 @@ class OceanPool:
         `from_wallet`, otherwise this will fail.
 
         :param data_token_address: str address of the DataToken contract
-        :param data_token_amount_base: int amount of initial liquidity of data tokens
-        :param OCEAN_amount_base: int amount of initial liquidity of OCEAN tokens
+        :param data_token_amount: float amount of initial liquidity of data tokens
+        :param OCEAN_amount: float amount of initial liquidity of OCEAN tokens
         :param from_wallet: Wallet instance of pool owner
+        :param data_token_weight: float weight of the data token to be set in the new pool must be >= 1 & <= 9
+        :param swap_fee: float the fee taken by the pool on each swap transaction
         :return: SPool instance
         """
 
         sfactory = SFactory(self.sfactory_address)
-
         pool_address = sfactory.newSPool(from_wallet)
         pool = SPool(pool_address)
-        pool.setPublicSwap(True, from_wallet=from_wallet)
-        pool.setSwapFee(balancer_constants.DEFAULT_SWAP_FEE, from_wallet)
+        logger.debug(f'pool created with address {pool_address}.')
 
-        dt = BToken(data_token_address)
-        assert dt.balanceOf(from_wallet.address) >= data_token_amount_base, \
-            f'insufficient DataTokens balance {dt.balanceOf(from_wallet.address)}'
-        dt.approve(pool_address, data_token_amount_base, from_wallet=from_wallet)
-        pool.bind(
-            data_token_address,
-            data_token_amount_base,
-            balancer_constants.INIT_WEIGHT_DT,
+        assert 1 <= data_token_weight <= 9
+        base_weight = 10.0 - data_token_weight
+
+        tx_id = pool.setup(
+            data_token_address, to_base_18(data_token_amount),
+            self.ocean_address, to_base_18(OCEAN_amount), to_base_18(swap_fee),
+            to_base_18(data_token_weight), to_base_18(base_weight),
             from_wallet
         )
-
-        ocean_token = BToken(self.ocean_address)
-        assert ocean_token.balanceOf(from_wallet.address) >= OCEAN_amount_base, \
-            f'insufficient OCEAN tokens balance {ocean_token.balanceOf(from_wallet.address)}'
-        ocean_token.approve(pool_address, OCEAN_amount_base, from_wallet)
-        pool.bind(
-            self.ocean_address,
-            OCEAN_amount_base,
-            balancer_constants.INIT_WEIGHT_OCEAN,
-            from_wallet
-        )
-
-        pool.finalize(from_wallet)
+        logger.debug(f'create pool completed: poolAddress={pool_address}, pool setup TxId={tx_id}')
 
         return pool
 
