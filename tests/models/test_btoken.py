@@ -1,4 +1,3 @@
-from web3 import Web3
 
 from ocean_lib.models.btoken import BToken
 from ocean_lib.ocean import util

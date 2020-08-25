@@ -98,7 +98,7 @@ class DataToken(ContractBase):
     # Token transactions using amount of tokens as a float instead of int
     # amount of tokens will be converted to the base value before sending
     # the transaction
-    def approve_tokens(self, spender: str, value: int, from_wallet: Wallet):
+    def approve_tokens(self, spender: str, value: float, from_wallet: Wallet):
         return self.approve(spender, to_base_18(value), from_wallet)
 
     def mint_tokens(self, to_account: str, value: float, from_wallet: Wallet):

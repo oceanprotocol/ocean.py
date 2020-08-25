@@ -1,6 +1,7 @@
 
 import typing
 
+from ocean_lib.models import balancer_constants
 from .btoken import BToken
 from ocean_lib.ocean import util
 from ocean_lib.web3_internal.wallet import Wallet
@@ -57,6 +58,23 @@ class SPool(BToken):
             s += [f"    {symbol}: {balance}"]
 
         return "\n".join(s)
+
+    def setup(self,
+              data_token: str, data_token_amount: int, data_token_weight: int,
+              base_token: str, base_token_amount: int, base_token_weight: int,
+              swap_fee: int,
+              from_wallet: Wallet) -> str:
+
+        tx_id = self.send_transaction(
+            'setup',
+            (data_token, data_token_amount, data_token_weight,
+             base_token, base_token_amount, base_token_weight,
+             swap_fee),
+            from_wallet,
+            {"gas": balancer_constants.GASLIMIT_SFACTORY_NEWSPOOL}
+        )
+
+        return tx_id
 
     # ============================================================
     # reflect SPool Solidity methods: everything at Balancer Interfaces "SPool"

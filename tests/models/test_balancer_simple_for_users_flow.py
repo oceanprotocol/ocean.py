@@ -24,8 +24,9 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address,
 
     # ===============================================================
     # 4. Alice creates an OCEAN-DT pool (=a Balancer Pool)
+
     pool = alice_ocean.pool.create(
-        DT_address, data_token_amount_base=to_base_18(90.0), OCEAN_amount_base=to_base_18(10.0),
+        DT_address, data_token_amount=90.0, OCEAN_amount=10.0,
         from_wallet=alice_wallet)
     pool_address = pool.address
 
@@ -104,11 +105,11 @@ def test_ocean_balancer_helpers(
 
     with pytest.raises(Exception):  # not enough liquidity
         pool = alice_ocean.pool.create(
-            DT.address, data_token_amount_base=0, OCEAN_amount_base=0,
+            DT.address, data_token_amount=0, OCEAN_amount=0,
             from_wallet=alice_wallet)
 
     pool = alice_ocean.pool.create(
-        DT.address, data_token_amount_base=to_base_18(90.0), OCEAN_amount_base=to_base_18(10.0),
+        DT.address, data_token_amount=90.0, OCEAN_amount=10.0,
         from_wallet=alice_wallet)
     pool_address = pool.address
 
