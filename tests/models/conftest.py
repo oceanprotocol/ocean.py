@@ -8,6 +8,7 @@ from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.sfactory import SFactory
 from ocean_lib.ocean.util import get_ocean_token_address, to_base_18
 from ocean_lib.web3_internal.account import Account
+from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.models import btoken
 from ocean_lib.web3_internal.web3helper import Web3Helper
@@ -32,6 +33,14 @@ def dtfactory_address():
 @pytest.fixture
 def sfactory_address():
     return SFactory.configured_address(_NETWORK, ConfigProvider.get_config().address_file)
+
+
+@pytest.fixture
+def contracts_addresses():
+    return ContractHandler.get_contracts_addresses(
+        _NETWORK,
+        ConfigProvider.get_config().address_file
+    )
 
 
 @pytest.fixture
