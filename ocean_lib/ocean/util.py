@@ -1,10 +1,7 @@
-import json
-import os
 from web3 import WebsocketProvider
 
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.dtfactory import DTFactory
-from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.sfactory import SFactory
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 
@@ -97,11 +94,6 @@ def get_sfactory_address(network=None):
         network or Web3Helper.get_network_name(), ConfigProvider.get_config().address_file
     )
 
-
-def get_exchange_address(network=None):
-    return FixedRateExchange.configured_address(
-        network or Web3Helper.get_network_name(), ConfigProvider.get_config().address_file
-    )
 
 def get_ocean_token_address(network=None):
     addresses = get_contracts_addresses(

@@ -5,7 +5,8 @@
 import logging
 
 from ocean_lib.models.data_token import DataToken
-from ocean_lib.ocean.exchange import OceanExchange
+from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.ocean_pool import OceanPool
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
@@ -20,7 +21,7 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_auth import OceanAuth
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.ocean_services import OceanServices
-from ocean_lib.ocean.util import get_web3_connection_provider, get_ocean_token_address, get_sfactory_address, get_exchange_address
+from ocean_lib.ocean.util import get_web3_connection_provider, get_ocean_token_address, get_sfactory_address
 from ocean_lib.web3_internal.web3helper import Web3Helper
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
@@ -96,7 +97,11 @@ class Ocean:
         network = Web3Helper.get_network_name()
         ocean_address = get_ocean_token_address(network)
         self.pool = OceanPool(ocean_address, get_sfactory_address(network))
-        self.exchange = OceanExchange(ocean_address, get_exchange_address(network), self.config)
+        self.exchange = OceanExchange(ocean_address,
+                                      FixedRateExchange.configured_address(
+                                          network or Web3Helper.get_network_name(), ConfigProvider.get_config().address_file
+                                      ),
+                                      self.config)
 
         logger.debug('Ocean instance initialized: ')
 

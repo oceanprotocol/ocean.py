@@ -1,6 +1,6 @@
 from collections import namedtuple
 
-from ocean_lib.ocean.util import from_base_18, to_base_18
+from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -28,8 +28,7 @@ class FixedRateExchange(ContractBase):
     def get_base_token_quote(self, base_token: str, data_token: str, exchange_owner: str, data_token_amount: int):
         ex_id = self.generateExchangeId(base_token, data_token, exchange_owner)
         rate = self.getRate(ex_id)
-        baseTokenAmount = (data_token_amount * rate) / (10 ** 18)
-        return baseTokenAmount
+        return int(data_token_amount * rate / to_base_18(1.0))
 
     #########################
     # Transaction methods
@@ -68,7 +67,7 @@ class FixedRateExchange(ContractBase):
     def getExchange(self, exchange_id: str):
         values = self.contract_concise.getExchange(exchange_id)
         if values and len(values) == 5:
-            return FixedExchangeData(values)
+            return FixedExchangeData(*values)
         return None
 
     def getExchanges(self) -> list:

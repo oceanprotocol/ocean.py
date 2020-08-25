@@ -8,6 +8,7 @@ from examples import ExampleConfig
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
+from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.sfactory import SFactory
 from ocean_lib.models.spool import SPool
 from ocean_lib.ocean import util
@@ -118,6 +119,10 @@ def deploy(network, addresses_file):
     sfactory = SFactory(sfactory_address)
     addresses[SFactory.CONTRACT_NAME] = sfactory_address
     print("****Deploy 'SFactory': done****\n")
+
+    print("****Deploy 'FixedRateExchange': begin****")
+    addresses[FixedRateExchange.CONTRACT_NAME] = FixedRateExchange.deploy(web3, deployer_wallet, artifacts_path)
+    print("****Deploy 'FixedRateExchange': done****\n")
 
     if network == 'ganache':
         print("****Deploy fake OCEAN: begin****")
