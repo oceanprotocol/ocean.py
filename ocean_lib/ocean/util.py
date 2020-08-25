@@ -1,5 +1,3 @@
-import json
-import os
 from web3 import WebsocketProvider
 
 from ocean_lib.config_provider import ConfigProvider
