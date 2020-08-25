@@ -53,7 +53,7 @@ def test1(network, OCEAN_address,
                 from_wallet=alice_wallet)
 
     OCEAN_token.approve(pool_address, to_base_18(1.0), from_wallet=alice_wallet)
-    pool.rebind(OCEAN_address, to_base_18(10.0 + 1.0), balancer_constants.INIT_WEIGHT_OCEAN,
+    pool.rebind(OCEAN_address, to_base_18(10.0 + 1.0), to_base_18(balancer_constants.INIT_WEIGHT_OCEAN),
                 from_wallet=alice_wallet)
 
     # 6. Bob buys a DT from pool

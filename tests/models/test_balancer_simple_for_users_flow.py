@@ -24,6 +24,7 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address,
 
     # ===============================================================
     # 4. Alice creates an OCEAN-DT pool (=a Balancer Pool)
+
     pool = alice_ocean.pool.create(
         DT_address, data_token_amount=90.0, OCEAN_amount=10.0,
         from_wallet=alice_wallet)

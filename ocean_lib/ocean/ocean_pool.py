@@ -2,6 +2,7 @@ import logging
 
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.btoken import BToken
+from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.sfactory import SFactory
 from ocean_lib.models.spool import SPool
 from ocean_lib.ocean.util import to_base_18
@@ -62,10 +63,20 @@ class OceanPool:
         assert 1 <= data_token_weight <= 9
         base_weight = 10.0 - data_token_weight
 
+        # Must approve datatoken and Ocean tokens to the new pool as spender
+        dt = DataToken(data_token_address)
+        dt.approve_tokens(pool_address, data_token_amount, from_wallet)
+        ot = DataToken(self.ocean_address)
+        ot.approve_tokens(pool_address, OCEAN_amount, from_wallet)
+
         tx_id = pool.setup(
-            data_token_address, to_base_18(data_token_amount),
-            self.ocean_address, to_base_18(OCEAN_amount), to_base_18(swap_fee),
-            to_base_18(data_token_weight), to_base_18(base_weight),
+            data_token_address,
+            to_base_18(data_token_amount),
+            to_base_18(data_token_weight),
+            self.ocean_address,
+            to_base_18(OCEAN_amount),
+            to_base_18(base_weight),
+            to_base_18(swap_fee),
             from_wallet
         )
         logger.debug(f'create pool completed: poolAddress={pool_address}, pool setup TxId={tx_id}')

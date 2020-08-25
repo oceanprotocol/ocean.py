@@ -59,15 +59,17 @@ class SPool(BToken):
 
         return "\n".join(s)
 
-    def setup(self, data_token: str, data_token_amount: int,
-              base_token: str, base_token_amount: int, swap_fee: int,
-              data_token_weight: int, base_token_weight: int,
+    def setup(self,
+              data_token: str, data_token_amount: int, data_token_weight: int,
+              base_token: str, base_token_amount: int, base_token_weight: int,
+              swap_fee: int,
               from_wallet: Wallet) -> str:
 
         tx_id = self.send_transaction(
             'setup',
-            (data_token, data_token_amount, base_token, base_token_amount,
-             swap_fee, data_token_weight, base_token_weight),
+            (data_token, data_token_amount, data_token_weight,
+             base_token, base_token_amount, base_token_weight,
+             swap_fee),
             from_wallet,
             {"gas": balancer_constants.GASLIMIT_SFACTORY_NEWSPOOL}
         )
