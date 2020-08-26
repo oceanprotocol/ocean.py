@@ -11,22 +11,22 @@ class SFactory(ContractBase):
 
     # ============================================================
     # reflect SFactory Solidity methods
-    def newSPool(self, from_wallet: Wallet) -> str:
-        print("SPool.newSPool(). Begin.")
+    def newBPool(self, from_wallet: Wallet) -> str:
+        print("BPool.newBPool(). Begin.")
         tx_id = self.send_transaction(
-            'newSPool',
+            'newBPool',
             (),
             from_wallet,
-            {"gas": balancer_constants.GASLIMIT_SFACTORY_NEWSPOOL}
+            {"gas": balancer_constants.GASLIMIT_SFACTORY_NEWBPOOL}
         )
         tx_receipt = self.get_tx_receipt(tx_id)
 
         # grab pool_address
         warnings.filterwarnings("ignore")  # ignore unwarranted warning up next
-        rich_logs = self.contract.events.SPoolCreated().processReceipt(tx_receipt)
+        rich_logs = self.contract.events.BPoolCreated().processReceipt(tx_receipt)
         warnings.resetwarnings()
-        pool_address = rich_logs[0]['args']['newSPoolAddress']
+        pool_address = rich_logs[0]['args']['newBPoolAddress']
         print(f"  pool_address = {pool_address}")
 
-        print("SFactory.newSPool(). Done.")
+        print("SFactory.newBPool(). Done.")
         return pool_address

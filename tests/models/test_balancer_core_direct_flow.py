@@ -1,5 +1,5 @@
 from ocean_lib.models.sfactory import SFactory
-from ocean_lib.models.spool import SPool
+from ocean_lib.models.bpool import BPool
 from ocean_lib.models.btoken import BToken
 from ocean_lib.models import balancer_constants
 from ocean_lib.ocean.util import to_base_18, get_sfactory_address
@@ -30,8 +30,8 @@ def test1(network, OCEAN_address,
     # ===============================================================
     # 4. Alice creates an OCEAN-DT pool (=a Balancer Pool)
     sfactory = SFactory(sfactory_address)
-    pool_address = sfactory.newSPool(from_wallet=alice_wallet)
-    pool = SPool(pool_address)
+    pool_address = sfactory.newBPool(from_wallet=alice_wallet)
+    pool = BPool(pool_address)
 
     pool.setPublicSwap(True, from_wallet=alice_wallet)
 

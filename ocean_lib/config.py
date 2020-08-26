@@ -36,7 +36,7 @@ NAME_PROVIDER_ADDRESS = 'provider.address'
 
 environ_names = {
     NAME_DATA_TOKEN_FACTORY_ADDRESS: ['DATA_TOKEN_FACTORY_ADDRESS', 'Data token factory address'],
-    NAME_SFACTORY_ADDRESS: ['SFACTORY_ADDRESS', 'SPool factory address'],
+    NAME_SFACTORY_ADDRESS: ['SFACTORY_ADDRESS', 'BPool factory address'],
     NAME_OCEAN_ADDRESS: ['OCEAN_ADDRESS', 'OCEAN address'],
     NAME_NETWORK_URL: ['NETWORK_URL', 'Network URL'],
     NAME_ARTIFACTS_PATH: ['ARTIFACTS_PATH', 'Path to the abi artifacts of the deployed smart contracts'],
