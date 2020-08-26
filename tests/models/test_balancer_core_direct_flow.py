@@ -1,14 +1,14 @@
-from ocean_lib.models.sfactory import SFactory
+from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.btoken import BToken
 from ocean_lib.models import balancer_constants
-from ocean_lib.ocean.util import to_base_18, get_sfactory_address
+from ocean_lib.ocean.util import to_base_18, get_bfactory_address
 
 
 def test1(network, OCEAN_address,
           alice_wallet, alice_ocean, alice_address,
           bob_wallet):
-    sfactory_address = get_sfactory_address(network)
+    bfactory_address = get_bfactory_address(network)
 
     # ===============================================================
     # 1. Alice publishes a dataset (= publishes a datatoken)
@@ -29,8 +29,8 @@ def test1(network, OCEAN_address,
 
     # ===============================================================
     # 4. Alice creates an OCEAN-DT pool (=a Balancer Pool)
-    sfactory = SFactory(sfactory_address)
-    pool_address = sfactory.newBPool(from_wallet=alice_wallet)
+    bfactory = BFactory(bfactory_address)
+    pool_address = bfactory.newBPool(from_wallet=alice_wallet)
     pool = BPool(pool_address)
 
     pool.setPublicSwap(True, from_wallet=alice_wallet)

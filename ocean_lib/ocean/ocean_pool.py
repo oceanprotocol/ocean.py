@@ -3,7 +3,7 @@ import logging
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.btoken import BToken
 from ocean_lib.models.data_token import DataToken
-from ocean_lib.models.sfactory import SFactory
+from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.wallet import Wallet
@@ -27,9 +27,9 @@ class OceanPool:
 
     """
 
-    def __init__(self, ocean_token_address: str, sfactory_address: str):
+    def __init__(self, ocean_token_address: str, bfactory_address: str):
         self.ocean_address = ocean_token_address
-        self.sfactory_address = sfactory_address
+        self.bfactory_address = bfactory_address
 
     def create(self,
                data_token_address: str,
@@ -55,8 +55,8 @@ class OceanPool:
         :return: BPool instance
         """
 
-        sfactory = SFactory(self.sfactory_address)
-        pool_address = sfactory.newBPool(from_wallet)
+        bfactory = BFactory(self.bfactory_address)
+        pool_address = bfactory.newBPool(from_wallet)
         pool = BPool(pool_address)
         logger.debug(f'pool created with address {pool_address}.')
 

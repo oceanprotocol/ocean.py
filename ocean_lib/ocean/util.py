@@ -2,7 +2,7 @@ from web3 import WebsocketProvider
 
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.dtfactory import DTFactory
-from ocean_lib.models.sfactory import SFactory
+from ocean_lib.models.bfactory import BFactory
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
@@ -89,8 +89,8 @@ def get_dtfactory_address(network=None):
     )
 
 
-def get_sfactory_address(network=None):
-    return SFactory.configured_address(
+def get_bfactory_address(network=None):
+    return BFactory.configured_address(
         network or Web3Helper.get_network_name(), ConfigProvider.get_config().address_file
     )
 

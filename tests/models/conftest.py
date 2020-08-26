@@ -5,7 +5,7 @@ import pytest
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
-from ocean_lib.models.sfactory import SFactory
+from ocean_lib.models.bfactory import BFactory
 from ocean_lib.ocean.util import get_ocean_token_address, to_base_18
 from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.contract_handler import ContractHandler
@@ -31,8 +31,8 @@ def dtfactory_address():
 
 
 @pytest.fixture
-def sfactory_address():
-    return SFactory.configured_address(_NETWORK, ConfigProvider.get_config().address_file)
+def bfactory_address():
+    return BFactory.configured_address(_NETWORK, ConfigProvider.get_config().address_file)
 
 
 @pytest.fixture

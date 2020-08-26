@@ -9,7 +9,7 @@ from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.sfactory import SFactory
+from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
 from ocean_lib.ocean import util
 from ocean_lib.ocean.util import get_web3_connection_provider
@@ -114,11 +114,11 @@ def deploy(network, addresses_file):
     addresses[BPool.CONTRACT_NAME] = bpool_address
     print("****Deploy BPool: done****\n")
 
-    print("****Deploy 'SFactory': begin****")
-    sfactory_address = SFactory.deploy(web3, deployer_wallet, artifacts_path, bpool_template.address)
-    sfactory = SFactory(sfactory_address)
-    addresses[SFactory.CONTRACT_NAME] = sfactory_address
-    print("****Deploy 'SFactory': done****\n")
+    print("****Deploy 'BFactory': begin****")
+    bfactory_address = BFactory.deploy(web3, deployer_wallet, artifacts_path, bpool_template.address)
+    bfactory = BFactory(bfactory_address)
+    addresses[BFactory.CONTRACT_NAME] = bfactory_address
+    print("****Deploy 'BFactory': done****\n")
 
     print("****Deploy 'FixedRateExchange': begin****")
     addresses[FixedRateExchange.CONTRACT_NAME] = FixedRateExchange.deploy(web3, deployer_wallet, artifacts_path)

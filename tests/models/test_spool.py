@@ -1,9 +1,9 @@
 import pytest
 
 from ocean_lib.models.btoken import BToken
-from ocean_lib.models.sfactory import SFactory
+from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
-from ocean_lib.ocean.util import from_base_18, to_base_18, get_sfactory_address
+from ocean_lib.ocean.util import from_base_18, to_base_18, get_bfactory_address
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.models.conftest import alice_info
 
@@ -37,7 +37,7 @@ def test_setSwapFee_works(network, alice_wallet):
 def test_setSwapFee_fails(network,
                           alice_wallet, alice_address,
                           bob_wallet, bob_address):
-    factory = SFactory(get_sfactory_address(network))
+    factory = BFactory(get_bfactory_address(network))
     pool_address = factory.newBPool(alice_wallet)
     pool = BPool(pool_address)
     with pytest.raises(Exception):
@@ -482,8 +482,8 @@ def _createPoolWith2Tokens(network: str,
 
 
 def _deployBPool(network: str, from_wallet: Wallet) -> BPool:
-    factory_address = get_sfactory_address(network)
-    factory = SFactory(factory_address)
+    factory_address = get_bfactory_address(network)
+    factory = BFactory(factory_address)
     pool_address = factory.newBPool(from_wallet=from_wallet)
     pool = BPool(pool_address)
     return pool

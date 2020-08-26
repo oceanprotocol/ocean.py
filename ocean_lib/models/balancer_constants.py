@@ -1,7 +1,7 @@
 
 # ref: https://bankless.substack.com/p/how-to-create-your-own-balancer-pool
-GASLIMIT_SFACTORY_NEWBPOOL = 5000000  # from ref above
-GASLIMIT_SFACTORY_NEWMPOOL = 5000000  # from ref above
+GASLIMIT_BFACTORY_NEWBPOOL = 5000000  # from ref above
+GASLIMIT_BFACTORY_NEWMPOOL = 5000000  # from ref above
 
 # from contracts/BConst.sol
 # FIXME: grab info directly from contract

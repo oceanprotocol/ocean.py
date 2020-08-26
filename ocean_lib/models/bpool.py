@@ -71,7 +71,7 @@ class BPool(BToken):
              base_token, base_token_amount, base_token_weight,
              swap_fee),
             from_wallet,
-            {"gas": balancer_constants.GASLIMIT_SFACTORY_NEWBPOOL}
+            {"gas": balancer_constants.GASLIMIT_BFACTORY_NEWBPOOL}
         )
 
         return tx_id
