@@ -21,7 +21,7 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_auth import OceanAuth
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.ocean_services import OceanServices
-from ocean_lib.ocean.util import get_web3_connection_provider, get_ocean_token_address, get_sfactory_address
+from ocean_lib.ocean.util import get_web3_connection_provider, get_ocean_token_address, get_bfactory_address
 from ocean_lib.web3_internal.web3helper import Web3Helper
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
@@ -96,7 +96,7 @@ class Ocean:
         )
         network = Web3Helper.get_network_name()
         ocean_address = get_ocean_token_address(network)
-        self.pool = OceanPool(ocean_address, get_sfactory_address(network))
+        self.pool = OceanPool(ocean_address, get_bfactory_address(network))
         self.exchange = OceanExchange(ocean_address,
                                       FixedRateExchange.configured_address(
                                           network or Web3Helper.get_network_name(), ConfigProvider.get_config().address_file

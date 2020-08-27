@@ -73,7 +73,7 @@ Outcome: ocean-lib-py works as expected.
 
 Some tests don't need other services running. Let's run one:
 ```console
-pytest tests/spool/test_BToken.py
+pytest tests/bpool/test_BToken.py
 ```
 
 Some tests need an Ocean Provider running. Follow [these steps](https://github.com/oceanprotocol/provider-py/blob/master/README.md) to set up Provider. Then run test(s) that uses Provider (but not other services). For example:

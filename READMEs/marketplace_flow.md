@@ -122,7 +122,7 @@ from ocean_utils.agreements.service_types import ServiceTypes
 
 from ocean_lib.ocean import Ocean
 from ocean_lib.ocean.util import from_base_18
-from ocean_lib.models.spool import SPool
+from ocean_lib.models.bpool import BPool
 
 # Market's config
 config = {
@@ -145,7 +145,7 @@ print(f"Service 1 costs {tokens_amount * price_in_OCEAN} OCEAN")
 OCEAN_address = market_ocean.pool.ocean_address
 OCEAN_usd_pool_address = ''
 USDT_token_address = ''
-ocn_pool = SPool(OCEAN_usd_pool_address)
+ocn_pool = BPool(OCEAN_usd_pool_address)
 OCEAN_price = from_base_18(ocn_pool.getSpotPrice(
     tokenIn_address=USDT_token_address,
     tokenOut_address=OCEAN_address
