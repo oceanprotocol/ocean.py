@@ -76,7 +76,7 @@ class ExampleConfig:
         return config_dict
 
     @staticmethod
-    def get_config():
+    def get_config(network=None):
         logging.debug("Configuration loaded for environment '{}'"
-                      .format(ExampleConfig.get_config_net()))
+                      .format(network or ExampleConfig.get_config_net()))
         return Config(options_dict=ExampleConfig.get_config_dict())
