@@ -5,7 +5,7 @@ from ocean_lib.ocean.util import to_base_18, from_base_18
 
 def test_ERC20(alice_ocean, alice_wallet, alice_address,
                bob_wallet, bob_address):
-    token = alice_ocean.create_data_token('foo_blob', from_wallet=alice_wallet)
+    token = alice_ocean.create_data_token('foo_blob', 'DataToken1', 'DT1', from_wallet=alice_wallet)
 
     assert token.symbol()[:2] == 'DT'
     assert token.decimals() == 18
@@ -28,7 +28,7 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address,
 
 
 def test_blob(alice_ocean, alice_wallet):
-    token = alice_ocean.create_data_token('foo_blob', alice_wallet)
+    token = alice_ocean.create_data_token('foo_blob', 'DataToken1', 'DT1', alice_wallet)
     assert token.blob() == 'foo_blob'
 
 
@@ -36,7 +36,7 @@ def test_setMinter(alice_ocean,
                    alice_wallet, alice_address,
                    bob_wallet, bob_address):
     ocean = alice_ocean
-    token = ocean.create_data_token('foo_blob', from_wallet=alice_wallet)
+    token = ocean.create_data_token('foo_blob', 'DataToken1', 'DT1', from_wallet=alice_wallet)
 
     #alice is the minter
     token.mint(alice_address, to_base_18(10.0), from_wallet=alice_wallet)

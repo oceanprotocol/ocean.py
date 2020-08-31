@@ -10,11 +10,11 @@ from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_utils.http_requests.requests_session import get_requests_session
 
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.web3_internal.web3helper import Web3Helper
 
 
 class DataToken(ContractBase):
     CONTRACT_NAME = 'DataTokenTemplate'
+    DEFAULT_CAP = 1000000000
 
     def get_transfer_event(self, block_number, sender, receiver):
         event = getattr(self.events, 'Transfer')

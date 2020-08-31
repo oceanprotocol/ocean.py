@@ -20,7 +20,7 @@ def test_simple_flow():
         'factory.address': DTFactory.configured_address(network, _config.address_file),
     }
     ocean = Ocean(config)
-    token = ocean.create_data_token(dataset_download_endpoint, alice_wallet)
+    token = ocean.create_data_token(dataset_download_endpoint, 'DataToken1', 'DT1', alice_wallet)
     dt_address = token.address
 
     # 3. Alice mints 100 tokens

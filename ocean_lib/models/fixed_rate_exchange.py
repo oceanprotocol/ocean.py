@@ -20,14 +20,11 @@ class FixedRateExchange(ContractBase):
     """
     CONTRACT_NAME = 'FixedRateExchange'
 
-    def buy_data_token(self, base_token: str, data_token: str, exchange_owner: str,
-                       data_token_amount: int, from_wallet: Wallet):
-        ex_id = self.generateExchangeId(base_token, data_token, exchange_owner)
-        return self.swap(ex_id, data_token_amount, from_wallet)
+    def buy_data_token(self, exchange_id: str, data_token_amount: int, from_wallet: Wallet):
+        return self.swap(exchange_id, data_token_amount, from_wallet)
 
-    def get_base_token_quote(self, base_token: str, data_token: str, exchange_owner: str, data_token_amount: int):
-        ex_id = self.generateExchangeId(base_token, data_token, exchange_owner)
-        rate = self.getRate(ex_id)
+    def get_base_token_quote(self, exchange_id: str, data_token_amount: int):
+        rate = self.getRate(exchange_id)
         return int(data_token_amount * rate / to_base_18(1.0))
 
     #########################

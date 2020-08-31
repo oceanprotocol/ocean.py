@@ -33,7 +33,7 @@ ocean = Ocean(config)
 alice_wallet = Wallet(ocean.web3, private_key='8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f')
 assert alice_wallet.key == config['privateKey']
 
-token = ocean.create_data_token(blob='http://localhost:8030/api/v1/services', from_wallet=alice_wallet)
+token = ocean.create_data_token(blob='http://localhost:8030/api/v1/services', 'DataToken1', 'DT1', from_wallet=alice_wallet)
 dt_address = token.address
 ```
 

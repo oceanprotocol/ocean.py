@@ -8,7 +8,7 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address,
     # ===============================================================
     # 1. Alice publishes a dataset (= publishes a datatoken)
     # For now, you're Alice:) Let's proceed.
-    DT = alice_ocean.create_data_token('localhost:8030', alice_wallet)
+    DT = alice_ocean.create_data_token('localhost:8030', 'DataToken1', 'DT1', alice_wallet)
     DT_address = DT.address
 
     # ===============================================================
@@ -100,7 +100,7 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address,
 # Test helper functions for the quickstart stuff above
 def test_ocean_balancer_helpers(
         OCEAN_address, alice_ocean, alice_wallet, alice_address, bob_ocean):
-    DT = alice_ocean.create_data_token('foo', alice_wallet)
+    DT = alice_ocean.create_data_token('foo', 'DataToken1', 'DT1', alice_wallet)
     DT.mint(alice_address, to_base_18(1000.0), alice_wallet)
 
     with pytest.raises(Exception):  # not enough liquidity

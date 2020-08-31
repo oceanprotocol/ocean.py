@@ -16,22 +16,11 @@ class OceanExchange:
     def _exchange_contract(self):
         return FixedRateExchange(self._exchange_address)
 
-    def get_quote(self, amount: float, data_token: str='', exchange_owner: str='', exchange_id: str=''):
+    def get_quote(self, amount: float, exchange_id: str):
         exchange = self._exchange_contract()
-        if exchange_id:
-            x = exchange.getExchange(exchange_id)
-            if not x:
-                raise ValueError(f'exchange with id {exchange_id} is not found.')
-            exchange_owner = x.exchangeOwner
-            data_token = x.dataToken
-            assert x.baseToken == self.ocean_address
-
-        elif not exchange_owner or not data_token:
-            raise AssertionError(f'Must provide both exchange_owner and data_token, or exchange_id.')
-
         amount_base = to_base_18(amount)
         ocean_amount_base = exchange.get_base_token_quote(
-            self.ocean_address, data_token, exchange_owner, amount_base
+            exchange_id, amount_base
         )
         return from_base_18(ocean_amount_base)
 
@@ -40,32 +29,21 @@ class OceanExchange:
             max_OCEAN_amount: float, exchange_id: str='', data_token: str='', exchange_owner: str='') -> bool:
 
         exchange = self._exchange_contract()
-        if exchange_id:
-            x = exchange.getExchange(exchange_id)
-            if not x:
-                raise ValueError(f'exchange with id {exchange_id} is not found.')
-
-            exchange_owner = x.exchangeOwner
-            data_token = x.dataToken
-            assert x.baseToken == self.ocean_address
-
-        elif not exchange_owner or not data_token:
-            raise AssertionError(f'Must provide both exchange_owner and data_token, or exchange_id.')
+        if not exchange_id:
+            assert exchange_owner and data_token, f'exchange_owner and data_token are required when exchange_id is not given.'
+            exchange_id = exchange.generateExchangeId(self.ocean_address, data_token, exchange_owner)
 
         amount_base = to_base_18(amount)
         max_OCEAN_amount_base = to_base_18(max_OCEAN_amount)
 
         # Figure out the amount of ocean tokens to approve before triggering the exchange function to do the swap
-        ocean_amount_base = exchange.get_base_token_quote(self.ocean_address, data_token, exchange_owner, amount_base)
+        ocean_amount_base = exchange.get_base_token_quote(exchange_id, amount_base)
         if ocean_amount_base > max_OCEAN_amount_base:
             raise AssertionError(f'Buying {amount} datatokens requires {from_base_18(ocean_amount_base)} OCEAN '
                                  f'tokens which exceeds the max_OCEAN_amount {max_OCEAN_amount}.')
         ocean_token = DataToken(self.ocean_address)
         ocean_token.get_tx_receipt(ocean_token.approve(self._exchange_address, ocean_amount_base, wallet))
-        tx_id = exchange.buy_data_token(
-            self.ocean_address, data_token, exchange_owner,
-            data_token_amount=amount_base, from_wallet=wallet
-        )
+        tx_id = exchange.buy_data_token( exchange_id, data_token_amount=amount_base, from_wallet=wallet)
         return bool(exchange.get_tx_receipt(tx_id).status)
 
     def create(self, data_token: str, exchange_rate: float, wallet: Wallet) -> str:
