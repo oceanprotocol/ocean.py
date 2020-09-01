@@ -7,7 +7,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 FixedExchangeData = namedtuple(
     'FixedExchangeData',
-    ('exchangeOwner', 'dataToken', 'baseToken', 'fixedRate', 'active')
+    ('exchangeOwner', 'dataToken', 'baseToken', 'fixedRate', 'active', 'supply')
 )
 
 
@@ -63,7 +63,7 @@ class FixedRateExchange(ContractBase):
 
     def getExchange(self, exchange_id: str):
         values = self.contract_concise.getExchange(exchange_id)
-        if values and len(values) == 5:
+        if values and len(values) == 6:
             return FixedExchangeData(*values)
         return None
 

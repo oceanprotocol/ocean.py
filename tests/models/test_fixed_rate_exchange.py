@@ -51,7 +51,7 @@ def test_fixed_rate_exchange(alice_ocean, alice_wallet, T1, bob_wallet, T2, cont
 
     ex_id = fixed_ex.generateExchangeId(ocean_t, T1.address, alice_wallet.address).hex()
     ex_data = fixed_ex.getExchange(ex_id)
-    expected_values = (alice_wallet.address, T1.address, ocean_t, rate, True)
+    expected_values = (alice_wallet.address, T1.address, ocean_t, rate, True, 0)
     assert ex_data == expected_values, f'fixed rate exchange {ex_id} with values {ex_data} ' \
                                        f'does not match the expected values {expected_values}'
 
@@ -140,7 +140,7 @@ def test_fixed_rate_exchange(alice_ocean, alice_wallet, T1, bob_wallet, T2, cont
 
     # now buy tokens should succeed
     assert T2.get_tx_receipt(T2.approve(fixed_ex.address, amount*3, alice_wallet)).status == 1, f'approve failed'
-    assert fixed_ex.get_tx_receipt(fixed_ex.buy_data_token(ocean_t, T2.address, alice_wallet.address, amount, bob_wallet)).status == 1, \
+    assert fixed_ex.get_tx_receipt(fixed_ex.buy_data_token(t2_ex_id, amount, bob_wallet)).status == 1, \
         f'buy_data_token/swap on EX {ex_id} failed, '
     assert ocn_token.allowance(bob_wallet.address, fixed_ex.address) == 0, f''
 
