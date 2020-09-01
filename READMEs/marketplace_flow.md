@@ -38,7 +38,7 @@ docker run @oceanprotocol/marketplace:latest
 ```python
 from ocean_utils.agreements.service_factory import ServiceDescriptor
 
-from ocean_lib.ocean import Ocean
+from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -52,7 +52,7 @@ config = {
 ocean = Ocean(config)
 alice_wallet = Wallet(ocean.web3, private_key='8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f')
 
-data_token = ocean.create_data_token(ocean.config.metadata_store_url, alice_wallet)
+data_token = ocean.create_data_token(ocean.config.metadata_store_url, 'DataToken1', 'DT1', alice_wallet)
 token_address = data_token.address
 
 # `ocean.assets.create` will encrypt the URLs using the provider's encrypt service endpoint and update 
@@ -120,7 +120,7 @@ print(f'DataToken @{data_token.address} has a `pool` available @{pool_address}')
 ```python
 from ocean_utils.agreements.service_types import ServiceTypes
 
-from ocean_lib.ocean import Ocean
+from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import from_base_18
 from ocean_lib.models.bpool import BPool
 

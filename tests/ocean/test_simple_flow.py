@@ -1,7 +1,7 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 from ocean_lib.config_provider import ConfigProvider
-from ocean_lib.ocean import Ocean
+from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.models.dtfactory import DTFactory
 
 from ocean_lib.web3_internal.web3helper import Web3Helper
@@ -20,7 +20,7 @@ def test_simple_flow():
         'factory.address': DTFactory.configured_address(network, _config.address_file),
     }
     ocean = Ocean(config)
-    token = ocean.create_data_token(dataset_download_endpoint, alice_wallet)
+    token = ocean.create_data_token(dataset_download_endpoint, 'DataToken1', 'DT1', alice_wallet)
     dt_address = token.address
 
     # 3. Alice mints 100 tokens

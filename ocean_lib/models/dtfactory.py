@@ -7,7 +7,6 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 class DTFactory(ContractBase):
     CONTRACT_NAME = 'DTFactory'
-    CAP = 1400000000
     FIRST_BLOB = 'https://example.com/dataset-1'
 
     def get_token_registered_event(self, block_number, metadata_url, sender):
@@ -59,6 +58,6 @@ class DTFactory(ContractBase):
 
     # ============================================================
     # reflect DataToken Solidity methods
-    def createToken(self, blob: str, from_wallet: Wallet) -> str:
-        return self.send_transaction('createToken', (blob,), from_wallet)
+    def createToken(self, blob: str, name: str, symbol: str, cap: int, from_wallet: Wallet) -> str:
+        return self.send_transaction('createToken', (blob, name, symbol, cap), from_wallet)
 

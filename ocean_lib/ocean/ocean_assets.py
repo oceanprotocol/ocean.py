@@ -87,7 +87,7 @@ class OceanAssets:
 
     def create(self, metadata: dict, publisher_wallet: Wallet,
                service_descriptors: list=None, owner_address: str=None,
-               data_token_address: str=None) -> Asset:
+               data_token_address: str=None) -> (Asset, None):
         """
         Register an asset on-chain by creating/deploying a DataToken contract
         and in the Metadata store (Aquarius).
@@ -195,10 +195,13 @@ class OceanAssets:
 
         if not data_token_address:
             blob = json.dumps({'t': 1, 'url': ddo_service_endpoint})
+            name = metadata['main']['name']
+            symbol = name
             # register on-chain
             address = DTFactory.configured_address(Web3Helper.get_network_name(), self._config.address_file)
             dtfactory = DTFactory(address)
-            tx_id = dtfactory.createToken(blob=blob, from_wallet=publisher_wallet)
+            tx_id = dtfactory.createToken(
+                blob, name, symbol, DataToken.DEFAULT_CAP_BASE, from_wallet=publisher_wallet)
             data_token = DataToken(dtfactory.get_token_address(tx_id))
             if not data_token:
                 logger.warning(f'Creating new data token failed.')

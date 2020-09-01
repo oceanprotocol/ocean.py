@@ -1,6 +1,6 @@
 """Ocean module."""
 #  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
+#  SPDX-Lic;ense-Identifier: Apache-2.0
 
 import logging
 
@@ -21,7 +21,7 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_auth import OceanAuth
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.ocean_services import OceanServices
-from ocean_lib.ocean.util import get_web3_connection_provider, get_ocean_token_address, get_bfactory_address
+from ocean_lib.ocean.util import get_web3_connection_provider, get_ocean_token_address, get_bfactory_address, to_base_18
 from ocean_lib.web3_internal.web3helper import Web3Helper
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
@@ -117,9 +117,10 @@ class Ocean:
     def OCEAN_address(self):
         return get_ocean_token_address(Web3Helper.get_network_name())
 
-    def create_data_token(self, blob: str, from_wallet: Wallet) -> DataToken:
+    def create_data_token(self, blob: str, name: str, symbol: str,
+                          from_wallet: Wallet, cap: int=DataToken.DEFAULT_CAP) -> DataToken:
         dtfactory = self.get_dtfactory()
-        tx_id = dtfactory.createToken(blob, from_wallet=from_wallet)
+        tx_id = dtfactory.createToken(blob, name, symbol, to_base_18(cap), from_wallet=from_wallet)
         return DataToken(dtfactory.get_token_address(tx_id))
 
     def get_data_token(self, token_address: str) -> DataToken:

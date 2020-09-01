@@ -12,7 +12,7 @@ from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
 from ocean_lib.ocean import util
-from ocean_lib.ocean.util import get_web3_connection_provider
+from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.utils import privateKeyToAddress
 from ocean_lib.web3_internal.wallet import Wallet
@@ -98,13 +98,16 @@ def deploy(network, addresses_file):
     print("****Deploy DataTokenTemplate: begin****")
     dt_address = DataToken.deploy(
         web3, deployer_wallet, artifacts_path,
-        'Template Contract', 'TEMPLATE', minter_addr, DTFactory.CAP, DTFactory.FIRST_BLOB
+        'Template Contract', 'TEMPLATE',
+        minter_addr, DataToken.DEFAULT_CAP_BASE,
+        DTFactory.FIRST_BLOB, minter_addr
     )
     addresses[DataToken.CONTRACT_NAME] = dt_address
     print("****Deploy DataTokenTemplate: done****\n")
 
     print("****Deploy DTFactory: begin****")
-    dtfactory = DTFactory(DTFactory.deploy(web3, deployer_wallet, artifacts_path, dt_address))
+    dtfactory = DTFactory(DTFactory.deploy(
+        web3, deployer_wallet, artifacts_path, dt_address, minter_addr))
     addresses[DTFactory.CONTRACT_NAME] = dtfactory.address
     print("****Deploy DTFactory: done****\n")
 
@@ -132,7 +135,7 @@ def deploy(network, addresses_file):
         OCEAN_cap_base = util.to_base_18(float(OCEAN_cap))
         OCEAN_token = DataToken(DataToken.deploy(
             web3, deployer_wallet, artifacts_path,
-            'Ocean', 'OCEAN', minter_addr, OCEAN_cap_base, ''
+            'Ocean', 'OCEAN', minter_addr, OCEAN_cap_base, '', minter_addr
         ))
         addresses["Ocean"] = OCEAN_token.address
         print("****Deploy fake OCEAN: done****\n")

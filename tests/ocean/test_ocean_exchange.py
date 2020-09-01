@@ -17,7 +17,7 @@ def test_ocean_exchange(publisher_ocean_instance):
     ocn = publisher_ocean_instance
     alice_wallet = get_publisher_wallet()
     bob_wallet = get_consumer_wallet()
-    dt = ocn.create_data_token('DT1', alice_wallet)
+    dt = ocn.create_data_token('http://example.com', 'DataToken1', 'DT1', alice_wallet)
     dt.mint_tokens(bob_wallet.address, 100.0, alice_wallet)
     ox = OceanExchange(ocn.OCEAN_address, _get_exchange_address(), ocn.config)
     rate = 0.9
@@ -44,12 +44,6 @@ def test_ocean_exchange(publisher_ocean_instance):
     # get_quote
     base_token_amount = ox.get_quote(2.0, exchange_id=x_id)
     assert base_token_amount == 2.0*rate, f'unexpected quote of base token {base_token_amount}, should be {2.0*rate}.'
-    # get quote without using the exchangeId
-    base_token_amount = ox.get_quote(2.0, data_token=dt.address, exchange_owner=bob_wallet.address)
-    assert base_token_amount == 2.0*rate, f'unexpected quote of base token {base_token_amount}, should be {2.0*rate}.'
-    # get quote without using the exchangeId and without exchangeOwner
-    with pytest.raises(AssertionError):
-        ox.get_quote(2.0, data_token=dt.address)
 
     #############
     # test buying datatokens

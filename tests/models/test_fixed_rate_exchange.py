@@ -51,7 +51,7 @@ def test_fixed_rate_exchange(alice_ocean, alice_wallet, T1, bob_wallet, T2, cont
 
     ex_id = fixed_ex.generateExchangeId(ocean_t, T1.address, alice_wallet.address).hex()
     ex_data = fixed_ex.getExchange(ex_id)
-    expected_values = (alice_wallet.address, T1.address, ocean_t, rate, True)
+    expected_values = (alice_wallet.address, T1.address, ocean_t, rate, True, 0)
     assert ex_data == expected_values, f'fixed rate exchange {ex_id} with values {ex_data} ' \
                                        f'does not match the expected values {expected_values}'
 
@@ -61,26 +61,26 @@ def test_fixed_rate_exchange(alice_ocean, alice_wallet, T1, bob_wallet, T2, cont
     ###################
     # Test quote and buy datatokens
     amount = to_base_18(10.0)  # 10 data tokens
-    base_token_quote = fixed_ex.get_base_token_quote(ocean_t, T1.address, alice_wallet.address, amount)
+    base_token_quote = fixed_ex.get_base_token_quote(ex_id, amount)
     # quote = from_base_18(base_token_quote)
     assert base_token_quote == (amount * rate / base_unit), f'quote does not seem correct: expected {amount*rate/base_unit}, got {base_token_quote}'
     assert from_base_18(base_token_quote) == 1.0, f''
     # buy without approving OCEAN tokens, should fail
     assert run_failing_tx(
-        fixed_ex, fixed_ex.buy_data_token, ocean_t, T1.address, alice_wallet.address, amount, bob_wallet
+        fixed_ex, fixed_ex.buy_data_token, ex_id, amount, bob_wallet
     ) == 0, f'buy_data_token/swap on EX {ex_id} is expected to fail but did not, ' \
             f'maybe the FixedRateExchange is already approved as spender for bob_wallet.'
     # approve ocean tokens, buying should still fail because datatokens are not approved by exchange owner
     assert ocn_token.get_tx_receipt(ocn_token.approve(fixed_ex.address, base_token_quote, bob_wallet)).status == 1, f'approve failed'
     assert run_failing_tx(
-        fixed_ex, fixed_ex.buy_data_token, ocean_t, T1.address, alice_wallet.address, amount, bob_wallet
+        fixed_ex, fixed_ex.buy_data_token, ex_id, amount, bob_wallet
     ) == 0, f'buy_data_token/swap on EX {ex_id} is expected to fail but did not, ' \
             f'maybe the FixedRateExchange is already approved as spender for bob_wallet.'
 
     # approve data token, now buying should succeed
     assert T1.get_tx_receipt(T1.approve(fixed_ex.address, amount, alice_wallet)).status == 1, f'approve failed'
     assert ocn_token.allowance(bob_wallet.address, fixed_ex.address) == base_token_quote, f''
-    tx_id = fixed_ex.buy_data_token(ocean_t, T1.address, alice_wallet.address, amount, bob_wallet)
+    tx_id = fixed_ex.buy_data_token(ex_id, amount, bob_wallet)
     r = fixed_ex.get_tx_receipt(tx_id)
     assert r.status == 1, f'buy_data_token/swap on EX {ex_id} failed with status 0: amount {amount}.'
     # verify bob's datatokens balance
@@ -118,13 +118,13 @@ def test_fixed_rate_exchange(alice_ocean, alice_wallet, T1, bob_wallet, T2, cont
     ###################################
     # try buying from deactivated ex
     amount = to_base_18(4.0)  # num data tokens
-    base_token_quote = fixed_ex.get_base_token_quote(ocean_t, T2.address, alice_wallet.address, amount)  # num base token (OCEAN tokens
+    base_token_quote = fixed_ex.get_base_token_quote(t2_ex_id, amount)  # num base token (OCEAN tokens
     assert base_token_quote == (amount * rate2 / base_unit), \
         f'quote does not seem correct: expected {amount*rate2/base_unit}, got {base_token_quote}'
     ocn_token.get_tx_receipt(ocn_token.approve(fixed_ex.address, base_token_quote, bob_wallet))
     # buy should fail (deactivated exchange)
     assert run_failing_tx(
-        fixed_ex, fixed_ex.buy_data_token, ocean_t, T2.address, alice_wallet.address, amount, bob_wallet
+        fixed_ex, fixed_ex.buy_data_token, t2_ex_id, amount, bob_wallet
     ) == 0, f'buy_data_token/swap on EX {t2_ex_id} is expected to fail but did not, ' \
             f'maybe the FixedRateExchange is already approved as spender for bob_wallet.'
     assert ocn_token.allowance(bob_wallet.address, fixed_ex.address) == base_token_quote, f''
@@ -134,27 +134,27 @@ def test_fixed_rate_exchange(alice_ocean, alice_wallet, T1, bob_wallet, T2, cont
     ##############################
     # buy should still fail as datatokens are not approved to spend by the exchange contract
     assert run_failing_tx(
-        fixed_ex, fixed_ex.buy_data_token, ocean_t, T2.address, alice_wallet.address, amount, bob_wallet
+        fixed_ex, fixed_ex.buy_data_token, t2_ex_id, amount, bob_wallet
     ) == 0, f'buy_data_token/swap on EX {t2_ex_id} is expected to fail but did not, ' \
             f'maybe the FixedRateExchange is already approved as spender for bob_wallet.'
 
     # now buy tokens should succeed
     assert T2.get_tx_receipt(T2.approve(fixed_ex.address, amount*3, alice_wallet)).status == 1, f'approve failed'
-    assert fixed_ex.get_tx_receipt(fixed_ex.buy_data_token(ocean_t, T2.address, alice_wallet.address, amount, bob_wallet)).status == 1, \
+    assert fixed_ex.get_tx_receipt(fixed_ex.buy_data_token(t2_ex_id, amount, bob_wallet)).status == 1, \
         f'buy_data_token/swap on EX {ex_id} failed, '
     assert ocn_token.allowance(bob_wallet.address, fixed_ex.address) == 0, f''
 
     # approve again for another purchase
     ocn_token.get_tx_receipt(ocn_token.approve(fixed_ex.address, base_token_quote, bob_wallet))
     assert run_failing_tx(
-        fixed_ex, fixed_ex.buy_data_token, ocean_t, T2.address, alice_wallet.address, to_base_18(5.0), bob_wallet
+        fixed_ex, fixed_ex.buy_data_token, t2_ex_id, to_base_18(5.0), bob_wallet
     ) == 0, f'buy_data_token/swap on EX {t2_ex_id} should fail because not enough Ocean tokens are approved by buyer.'
 
     # get new quote for new amount
-    base_token_quote = fixed_ex.get_base_token_quote(ocean_t, T2.address, alice_wallet.address, to_base_18(5.0))  # num base token (OCEAN tokens
+    base_token_quote = fixed_ex.get_base_token_quote(t2_ex_id, to_base_18(5.0))  # num base token (OCEAN tokens
     ocn_token.get_tx_receipt(ocn_token.approve(fixed_ex.address, base_token_quote, bob_wallet))
     assert fixed_ex.get_tx_receipt(
-        fixed_ex.buy_data_token(ocean_t, T2.address, alice_wallet.address, to_base_18(5.0), bob_wallet)
+        fixed_ex.buy_data_token(t2_ex_id, to_base_18(5.0), bob_wallet)
     ).status == 1, f'buy_data_token/swap on EX {t2_ex_id} failed.'
     assert ocn_token.allowance(bob_wallet.address, fixed_ex.address) == 0, f''
 
