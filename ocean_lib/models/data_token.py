@@ -15,6 +15,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 class DataToken(ContractBase):
     CONTRACT_NAME = 'DataTokenTemplate'
     DEFAULT_CAP = 1000000000
+    DEFAULT_CAP_BASE = to_base_18(DEFAULT_CAP)
 
     def get_transfer_event(self, block_number, sender, receiver):
         event = getattr(self.events, 'Transfer')
@@ -66,11 +67,13 @@ class DataToken(ContractBase):
         # transfer_event = self.get_transfer_event(tx['blockNumber'], sender, receiver)
         if not transfer_event:
             raise AssertionError(f'Cannot find the event for the transfer transaction with tx id {tx_id}.')
+        assert len(logs) == 1, \
+            f'Multiple Transfer events in the same transaction !!! {logs}'
 
         if transfer_event.args['from'] != sender or transfer_event.args['to'] != receiver:
             raise AssertionError(f'The transfer event from/to do not match the expected values.')
 
-        return tx_id
+        return tx, transfer_event
 
     def download(self, wallet: Wallet, tx_id: str, destination_folder: str):
         url = self.blob()
@@ -92,6 +95,11 @@ class DataToken(ContractBase):
         # grab the metadatastore URL from the DataToken contract (@token_address)
         url_object = json.loads(self.blob())
         assert url_object['t'] == 1, f'This datatoken does not appear to have a metadata store url.'
+        return url_object['url']
+
+    def get_simple_url(self):
+        url_object = json.loads(self.blob())
+        assert url_object['t'] == 0, f'This datatoken does not appear to have a direct consume url.'
         return url_object['url']
 
     # ============================================================

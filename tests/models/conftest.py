@@ -147,7 +147,7 @@ def make_info(name, private_key_name):
         if Web3Helper.from_wei(Web3Helper.get_ether_balance(info.address)) < 2:
             Web3Helper.send_ether(wallet, info.address, 4)
 
-    from ocean_lib.ocean import Ocean
+    from ocean_lib.ocean.ocean import Ocean
     info.ocean = Ocean(config)
     info.T1 = _deployAndMintToken('TOK1', info.address)
     info.T2 = _deployAndMintToken('TOK2', info.address)
@@ -160,12 +160,12 @@ def _deployAndMintToken(symbol: str, to_address: str) -> btoken.BToken:
     dt_address = DataToken.deploy(
         wallet.web3, wallet, None,
         'Template Contract', 'TEMPLATE',
-        wallet.address, to_base_18(DataToken.DEFAULT_CAP),
+        wallet.address, DataToken.DEFAULT_CAP_BASE,
         DTFactory.FIRST_BLOB, to_address
     )
     dt_factory = DTFactory(DTFactory.deploy(wallet.web3, wallet, None, dt_address, to_address))
     token_address = dt_factory.get_token_address(dt_factory.createToken(
-        symbol, symbol, symbol, to_base_18(DataToken.DEFAULT_CAP), wallet))
+        symbol, symbol, symbol, DataToken.DEFAULT_CAP_BASE, wallet))
     token = DataToken(token_address)
     token.mint(to_address, to_base_18(1000), wallet)
 

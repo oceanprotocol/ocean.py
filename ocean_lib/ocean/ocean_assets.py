@@ -201,7 +201,7 @@ class OceanAssets:
             address = DTFactory.configured_address(Web3Helper.get_network_name(), self._config.address_file)
             dtfactory = DTFactory(address)
             tx_id = dtfactory.createToken(
-                blob, name, symbol, to_base_18(DataToken.DEFAULT_CAP), from_wallet=publisher_wallet)
+                blob, name, symbol, DataToken.DEFAULT_CAP_BASE, from_wallet=publisher_wallet)
             data_token = DataToken(dtfactory.get_token_address(tx_id))
             if not data_token:
                 logger.warning(f'Creating new data token failed.')

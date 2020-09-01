@@ -99,7 +99,7 @@ def deploy(network, addresses_file):
     dt_address = DataToken.deploy(
         web3, deployer_wallet, artifacts_path,
         'Template Contract', 'TEMPLATE',
-        minter_addr, to_base_18(DataToken.DEFAULT_CAP),
+        minter_addr, DataToken.DEFAULT_CAP_BASE,
         DTFactory.FIRST_BLOB, minter_addr
     )
     addresses[DataToken.CONTRACT_NAME] = dt_address

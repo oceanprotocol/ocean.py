@@ -21,7 +21,7 @@ pip install ocean-lib
 ## 1. Alice publishes a dataset (= publishes a DataToken contract)
 
 ```python
-from ocean_lib.ocean import Ocean
+from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
@@ -79,7 +79,7 @@ token.transfer_tokens(bob_address, 1.0)
 ## 5. Bob consumes dataset
 
 ```python
-from ocean_lib.ocean import Ocean
+from ocean_lib.ocean.ocean import Ocean
 
 dt_address = ''  # From first step
 bob_config = {

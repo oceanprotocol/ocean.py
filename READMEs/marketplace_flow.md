@@ -38,7 +38,7 @@ docker run @oceanprotocol/marketplace:latest
 ```python
 from ocean_utils.agreements.service_factory import ServiceDescriptor
 
-from ocean_lib.ocean import Ocean
+from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -120,7 +120,7 @@ print(f'DataToken @{data_token.address} has a `pool` available @{pool_address}')
 ```python
 from ocean_utils.agreements.service_types import ServiceTypes
 
-from ocean_lib.ocean import Ocean
+from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import from_base_18
 from ocean_lib.models.bpool import BPool
 
