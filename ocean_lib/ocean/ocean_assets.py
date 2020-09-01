@@ -343,7 +343,8 @@ class OceanAssets:
 
         tx_hash = dt.transfer(receiver, tokens_amount, from_wallet)
         try:
-            return dt.verify_transfer_tx(tx_hash, from_wallet.address, receiver)
+            dt.verify_transfer_tx(tx_hash, from_wallet.address, receiver)
+            return tx_hash
         except (AssertionError, Exception) as e:
             msg = (
                 f'Downloading asset files failed. The problem is related to '

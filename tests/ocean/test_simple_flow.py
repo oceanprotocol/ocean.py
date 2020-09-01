@@ -39,7 +39,7 @@ def test_simple_flow():
     tx_id = token.transfer_tokens(token_owner, 1, bob_wallet)
 
     try:
-        _tx_id = token.verify_transfer_tx(tx_id, bob_wallet.address, token_owner)
+        token.verify_transfer_tx(tx_id, bob_wallet.address, token_owner)
     except (Exception, AssertionError) as e:
         print(f'token transfer failed: {e}')
         raise
