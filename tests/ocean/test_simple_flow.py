@@ -17,7 +17,7 @@ def test_simple_flow():
     # 1. Alice publishes a dataset (= publishes a datatoken)
     config = {
         'network': _config.network_url,
-        'factory.address': DTFactory.configured_address(network, _config.address_file),
+        'dtfactory.address': DTFactory.configured_address(network, _config.address_file),
     }
     ocean = Ocean(config)
     token = ocean.create_data_token(dataset_download_endpoint, 'DataToken1', 'DT1', alice_wallet)
