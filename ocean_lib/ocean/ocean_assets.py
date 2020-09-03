@@ -5,6 +5,7 @@
 import copy
 import json
 import logging
+import lzma
 import os
 
 from ocean_utils.agreements.service_agreement import ServiceAgreement
@@ -23,6 +24,7 @@ from ocean_utils.utils.utilities import checksum
 
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import OrderRequirements
+from ocean_lib.models.ddo import DDOContract
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.assets.asset_downloader import download_asset_files
@@ -38,15 +40,19 @@ logger = logging.getLogger('ocean')
 class OceanAssets:
     """Ocean assets class."""
 
-    def __init__(self, config, data_provider):
+    def __init__(self, config, data_provider, ddo_registry_address):
         self._config = config
         self._aquarius_url = config.aquarius_url
         self._data_provider = data_provider
+        self._ddo_registry_address = ddo_registry_address
 
         downloads_path = os.path.join(os.getcwd(), 'downloads')
         if self._config.has_option('resources', 'downloads.path'):
             downloads_path = self._config.get('resources', 'downloads.path') or downloads_path
         self._downloads_path = downloads_path
+
+    def _ddo_registry(self):
+        return DDOContract(self._ddo_registry_address)
 
     def _get_aquarius(self, url=None) -> Aquarius:
         return AquariusProvider.get_aquarius(url or self._aquarius_url)
@@ -221,7 +227,10 @@ class OceanAssets:
 
         try:
             # publish the new ddo in ocean-db/Aquarius
-            response = self._get_aquarius().publish_asset_ddo(asset)
+            ddo_registry = self._ddo_registry()
+            tx_id = ddo_registry.create(asset.asset_id, '', lzma.compress(asset.as_text()), publisher_wallet)
+            if not ddo_registry.verify_tx(tx_id):
+                raise AssertionError(f'create DDO on-chain failed, transaction status is 0. Transaction hash is {tx_id}')
             logger.info('Asset/ddo published successfully in aquarius.')
         except ValueError as ve:
             raise ValueError(f'Invalid value to publish in the metadata: {str(ve)}')
@@ -232,21 +241,19 @@ class OceanAssets:
 
         return asset
 
-    def retire(self, did: str) -> bool:
-        """
-        Retire this did of Aquarius
-
-        :param did: DID, str
-        :return: bool
-        """
+    def update(self, asset: Asset, publisher_wallet: Wallet) -> bool:
         try:
-            asset = self.resolve(did)
-            metadata_service = asset.get_service(ServiceTypes.METADATA)
-            self._get_aquarius(metadata_service.service_endpoint).retire_asset_ddo(did)
-            return True
-        except AquariusGenericError as err:
-            logger.error(err)
-            return False
+            # publish the new ddo in ocean-db/Aquarius
+            ddo_registry = self._ddo_registry()
+            tx_id = ddo_registry.update(asset.asset_id, '', lzma.compress(asset.as_text()), publisher_wallet)
+            if not ddo_registry.verify_tx(tx_id):
+                raise AssertionError(f'update DDO on-chain failed, transaction status is 0. Transaction hash is {tx_id}')
+            logger.info('Asset/ddo published successfully in aquarius.')
+        except ValueError as ve:
+            raise ValueError(f'Invalid value to publish in the metadata: {str(ve)}')
+        except Exception as e:
+            logger.error(f'Publish asset in aquarius failed: {str(e)}')
+
 
     def resolve(self, did: str) -> Asset:
         """
