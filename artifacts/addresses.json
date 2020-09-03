@@ -1,12 +1,13 @@
 {
   "ganache": {
-    "Ocean": "0xBb0911124E680D65358Ac46C5404D4dF01F03e80",
+    "Ocean": "0x98b6901cE7C9fc65dBeeC98598136593EB7b4c6C",
     "DataTokenTemplate": "0x2473f4F7bf40ed9310838edFCA6262C17A59DF64",
     "DTFactory": "0xaF6AaaA5B8D12F7d7dD4e2BE1d1B087544f585d0",
     "BFactory": "0x2fC1fd21cb222Dc180Ef817dE4c426fd9230b5A5",
     "BPool": "0x053aE1FeCdc2f391753E2Bf2AAe301E75CC0aac9",
     "BToken": "",
-    "FixedRateExchange": "0x1e6d9207241DbDca82B0D9546490c97B24B1a9f6"
+    "FixedRateExchange": "0x1e6d9207241DbDca82B0D9546490c97B24B1a9f6",
+    "DDO": "0xBb0911124E680D65358Ac46C5404D4dF01F03e80"
   },
   "rinkeby": {
     "Ocean": "",
@@ -15,6 +16,7 @@
     "BFactory": "",
     "BPool": "",
     "BToken": "",
-    "FixedRateExchange": ""
+    "FixedRateExchange": "",
+    "DDO": ""
   }
 }

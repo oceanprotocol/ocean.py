@@ -5,6 +5,7 @@
 import logging
 
 from ocean_lib.models.data_token import DataToken
+from ocean_lib.models.ddo import DDOContract
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.ocean_pool import OceanPool
@@ -21,7 +22,7 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_auth import OceanAuth
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.ocean_services import OceanServices
-from ocean_lib.ocean.util import get_web3_connection_provider, get_ocean_token_address, get_bfactory_address, to_base_18
+from ocean_lib.ocean.util import get_web3_connection_provider, get_ocean_token_address, get_bfactory_address, to_base_18, get_contracts_addresses
 from ocean_lib.web3_internal.web3helper import Web3Helper
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
@@ -83,9 +84,11 @@ class Ocean:
         if not data_provider:
             data_provider = DataServiceProvider
 
+        network = Web3Helper.get_network_name()
         self.assets = OceanAssets(
             self._config,
-            data_provider
+            data_provider,
+            get_contracts_addresses(network, self._config)[DDOContract.CONTRACT_NAME]
         )
         self.services = OceanServices()
         self.auth = OceanAuth(self._config.storage_path)
@@ -94,7 +97,7 @@ class Ocean:
             self._config,
             data_provider
         )
-        network = Web3Helper.get_network_name()
+
         ocean_address = get_ocean_token_address(network)
         self.pool = OceanPool(ocean_address, get_bfactory_address(network))
         self.exchange = OceanExchange(ocean_address,

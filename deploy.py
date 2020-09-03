@@ -7,12 +7,13 @@ from pathlib import Path
 from examples import ExampleConfig
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.data_token import DataToken
+from ocean_lib.models.ddo import DDOContract
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
 from ocean_lib.ocean import util
-from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18
+from ocean_lib.ocean.util import get_web3_connection_provider
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.utils import privateKeyToAddress
 from ocean_lib.web3_internal.wallet import Wallet
@@ -126,6 +127,10 @@ def deploy(network, addresses_file):
     print("****Deploy 'FixedRateExchange': begin****")
     addresses[FixedRateExchange.CONTRACT_NAME] = FixedRateExchange.deploy(web3, deployer_wallet, artifacts_path)
     print("****Deploy 'FixedRateExchange': done****\n")
+
+    print("****Deploy 'DDO': begin****")
+    addresses[DDOContract.CONTRACT_NAME] = DDOContract.deploy(web3, deployer_wallet, artifacts_path)
+    print("****Deploy 'DDO': done****\n")
 
     if network == 'ganache':
         print("****Deploy fake OCEAN: begin****")
