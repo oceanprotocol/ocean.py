@@ -14,7 +14,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 class DataToken(ContractBase):
     CONTRACT_NAME = 'DataTokenTemplate'
-    DEFAULT_CAP = 1000000000
+    DEFAULT_CAP = 1000
     DEFAULT_CAP_BASE = to_base_18(DEFAULT_CAP)
 
     def get_transfer_event(self, block_number, sender, receiver):
