@@ -104,4 +104,3 @@ def test_ddo_on_chain():
     txid = ddo_registry.transferOwnership(asset.asset_id, bob.address, wallet)
     assert ddo_registry.verify_tx(txid), f'ddo transferOwnership failed: txid={txid}'
     assert ddo_registry.didOwner(asset.asset_id) == bob.address, f'new owner not matching.'
-
