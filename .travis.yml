@@ -18,11 +18,12 @@ before_install:
   - export AQUARIUS_VERSION=decentralized
   - bash -x start_ocean.sh --no-dashboard 2>&1 > start_ocean.log &
   - cd ..
-  - sleep 60
 
 install: pip install -U tox-travis
 
-script: tox
+script:
+  - sleep 30
+  - tox
 
 deploy:
   provider: pypi
