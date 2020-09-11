@@ -17,6 +17,9 @@ class DataToken(ContractBase):
     DEFAULT_CAP = 1000
     DEFAULT_CAP_BASE = to_base_18(DEFAULT_CAP)
 
+    ORDER_STARTED_EVENT = 'OrderStarted'
+    ORDER_FINISHED_EVENT = 'OrderFinished'
+
     def get_transfer_event(self, block_number, sender, receiver):
         event = getattr(self.events, 'Transfer')
         filter_params = {'from': sender, 'to': receiver}
@@ -143,3 +146,19 @@ class DataToken(ContractBase):
 
     def setMinter(self, minter, from_wallet) -> str:
         return self.send_transaction('setMinter', (minter, ), from_wallet)
+
+    def startOrder(self, receiver: str, amount: int, did: str, serviceId: int,
+                   feeCollector: str, feePercentage: int, from_wallet: Wallet):
+        return self.send_transaction(
+            'startOrder',
+            (receiver, amount, did, serviceId, feeCollector, feePercentage),
+            from_wallet
+        )
+
+    def finishOrder(self, orderTxId: str, consumer: str, amount: int, did: str,
+                    serviceId: int, from_wallet: Wallet):
+        return self.send_transaction(
+            'finishOrder',
+            (orderTxId, consumer, amount, did, serviceId),
+            from_wallet
+        )

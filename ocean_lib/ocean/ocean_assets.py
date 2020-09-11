@@ -339,18 +339,23 @@ class OceanAssets:
         return order_requirements
 
     @staticmethod
-    def pay_for_service(amount: int, token_address: str,
-                        receiver_address: str, from_wallet: Wallet) -> str:
+    def pay_for_service(amount: float, token_address: str, did: str, service_id: int,
+                        receiver_address: str, fee_receiver: str, fee_percentage: float,
+                        from_wallet: Wallet) -> str:
         """
         Submits the payment for chosen service in DataTokens.
 
         :param amount:
         :param token_address:
+        :param did:
+        :param service_id:
         :param receiver_address:
+        :param fee_receiver:
+        :param fee_percentage:
         :param from_wallet: Wallet instance
         :return: hex str id of transfer transaction
         """
-        tokens_amount = int(amount)
+        tokens_amount = to_base_18(amount)
         receiver = receiver_address
         dt = DataToken(token_address)
         balance = dt.balanceOf(from_wallet.address)
@@ -358,8 +363,12 @@ class OceanAssets:
             raise AssertionError(f'Your token balance {balance} is not sufficient '
                                  f'to execute the requested service. This service '
                                  f'requires {amount} number of tokens.')
+        if fee_receiver:
+            assert fee_percentage > 0, f'fee_percentage should be > 0.'
 
-        tx_hash = dt.transfer(receiver, tokens_amount, from_wallet)
+        tx_hash = dt.startOrder(
+            receiver, tokens_amount, did, service_id,
+            fee_receiver, to_base_18(fee_percentage), from_wallet)
         try:
             dt.verify_transfer_tx(tx_hash, from_wallet.address, receiver)
             return tx_hash
@@ -373,7 +382,7 @@ class OceanAssets:
             raise AssertionError(msg)
 
     def download(self, did: str, service_index: int, consumer_wallet: Wallet,
-                 transfer_tx_id: str, destination: str, index: [int, None]=None) -> str:
+                 destination: str, index: [int, None]=None) -> str:
         """
         Consume the asset data.
 
@@ -387,9 +396,7 @@ class OceanAssets:
         :param did: DID, str
         :param service_index: identifier of the service inside the asset DDO, str
         :param consumer_wallet: Wallet instance of the consumer
-        :param transfer_tx_id: hex str id of the token transfer transaction
         :param destination: str path
-        :param nonce: int value to use in the signature
         :param index: Index of the document that is going to be downloaded, int
         :return: str path to saved files
         """
@@ -408,7 +415,6 @@ class OceanAssets:
             consumer_wallet,
             destination,
             asset.data_token_address,
-            transfer_tx_id,
             self._data_provider,
             index
         )

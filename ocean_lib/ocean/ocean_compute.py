@@ -187,7 +187,7 @@ class OceanCompute:
             wallet
         )
 
-    def start(self, did, consumer_wallet, transfer_tx_id, nonce=None, algorithm_did=None,
+    def start(self, did, consumer_wallet, nonce=None, algorithm_did=None,
               algorithm_meta=None, output=None, job_id=None):
         """Start a remote compute job on the asset files identified by `did` after
         verifying that the provider service is active and transferring the
@@ -195,7 +195,6 @@ class OceanCompute:
 
         :param did: str -- id of asset that has the compute service
         :param consumer_wallet: Wallet instance of the consumer ordering the service
-        :param transfer_tx_id: hex str -- id of the datatokens transfer transaction
         :param nonce: int value to use in the signature
         :param algorithm_did: str -- the asset did (of `algorithm` type) which consist of `did:op:` and
             the assetId hex str (without `0x` prefix)
@@ -213,7 +212,6 @@ class OceanCompute:
         service_endpoint = self._get_service_endpoint(did, asset)
 
         sa = ServiceAgreement.from_ddo(ServiceTypes.CLOUD_COMPUTE, asset)
-        tx_id = transfer_tx_id
 
         signature = self._sign_message(consumer_wallet, f'{consumer_wallet.address}{did}', nonce=nonce)
 
@@ -224,7 +222,6 @@ class OceanCompute:
             signature,
             sa.index,
             asset.data_token_address,
-            tx_id,
             algorithm_did,
             algorithm_meta,
             output,

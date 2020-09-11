@@ -123,8 +123,8 @@ class DataServiceProvider:
     @staticmethod
     def download_service(did, service_endpoint, wallet, files,
                          destination_folder, service_id,
-                         token_address, token_transfer_tx_id,
-                         index=None):
+                         token_address, index=None
+                         ):
         """
         Call the provider endpoint to get access to the different files that form the asset.
 
@@ -135,8 +135,6 @@ class DataServiceProvider:
         :param destination_folder: Path, str
         :param service_id: integer the id of the service inside the DDO's service dict
         :param token_address: hex str the data token address associated with this asset/service
-        :param token_transfer_tx_id: hex str the transaction hash for the required data token
-            transfer (tokens of the same token address above)
         :param index: Index of the document that is going to be downloaded, int
         :return: True if was downloaded, bool
         """
@@ -154,7 +152,6 @@ class DataServiceProvider:
             f'&serviceId={service_id}'
             f'&serviceType={ServiceTypes.ASSET_ACCESS}'
             f'&dataToken={token_address}'
-            f'&transferTxId={token_transfer_tx_id}'
             f'&consumerAddress={wallet.address}'
         )
         config = ConfigProvider.get_config()
@@ -168,8 +165,8 @@ class DataServiceProvider:
 
     @staticmethod
     def start_compute_job(did, service_endpoint, consumer_address, signature,
-                          service_id, token_address, token_transfer_tx_id,
-                          algorithm_did=None, algorithm_meta=None, output=None, job_id=None):
+                          service_id, token_address, algorithm_did=None,
+                          algorithm_meta=None, output=None, job_id=None):
         """
 
         :param did: id of asset starting with `did:op:` and a hex str without 0x prefix
@@ -178,7 +175,6 @@ class DataServiceProvider:
         :param signature: hex str signed message to allow the provider to authorize the consumer
         :param service_id:
         :param token_address:
-        :param token_transfer_tx_id:
         :param algorithm_did: str -- the asset did (of `algorithm` type) which consist of `did:op:` and
             the assetId hex str (without `0x` prefix)
         :param algorithm_meta: see `OceanCompute.execute`
@@ -196,7 +192,6 @@ class DataServiceProvider:
             service_id,
             ServiceTypes.CLOUD_COMPUTE,
             token_address,
-            token_transfer_tx_id,
             signature=signature,
             algorithm_did=algorithm_did,
             algorithm_meta=algorithm_meta,
@@ -402,7 +397,7 @@ class DataServiceProvider:
 
     @staticmethod
     def _prepare_compute_payload(
-            did, consumer_address, service_id, service_type, token_address, tx_id,
+            did, consumer_address, service_id, service_type, token_address,
             signature=None, algorithm_did=None, algorithm_meta=None,
             output=None, job_id=None):
         assert algorithm_did or algorithm_meta, 'either an algorithm did or an algorithm meta must be provided.'
@@ -422,7 +417,5 @@ class DataServiceProvider:
             'jobId': job_id or "",
             'serviceId': service_id,
             'serviceType': service_type,
-            'dataToken': token_address,
-            'transferTxId': tx_id,
-
+            'dataToken': token_address
         }

@@ -16,7 +16,6 @@ def download_asset_files(
         consumer_wallet,
         destination,
         token_address,
-        token_transfer_tx_id,
         data_provider,
         index=None
 ):
@@ -28,7 +27,6 @@ def download_asset_files(
     :param consumer_wallet: Wallet instance of the consumer
     :param destination: Path, str
     :param token_address: hex str the address of the DataToken smart contract
-    :param token_transfer_tx_id: hex str the token transfer transaction id (hash)
     :param data_provider: DataServiceProvider instance
     :param index: Index of the document that is going to be downloaded, int
     :return: Asset folder path, str
@@ -72,7 +70,6 @@ def download_asset_files(
             asset_folder,
             service_index,
             token_address,
-            token_transfer_tx_id,
             i
         )
     return asset_folder
