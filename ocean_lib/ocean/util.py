@@ -62,7 +62,13 @@ def get_web3_connection_provider(network_url):
 
 
 def get_contracts_addresses(network, config):
-    return ContractHandler.get_contracts_addresses(network, config.address_file)
+    print(f'get_contracts_addresses: artifacts in {ContractHandler.artifacts_path}, address in {config.address_file}')
+    try:
+        return ContractHandler.get_contracts_addresses(network, config.address_file)
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        print(f'error reading contract addresses: {e}.\n'
+              f'artifacts path is {ContractHandler.artifacts_path}, address file is {config.address_file}')
 
 
 def to_base_18(amt: float) -> int:
