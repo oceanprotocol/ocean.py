@@ -84,10 +84,11 @@ class Ocean:
             data_provider = DataServiceProvider
 
         network = Web3Helper.get_network_name()
+        addresses = get_contracts_addresses(network, self._config)
         self.assets = OceanAssets(
             self._config,
             data_provider,
-            get_contracts_addresses(network, self._config).get(DDOContract.CONTRACT_NAME)
+            addresses.get(DDOContract.CONTRACT_NAME)
         )
         self.services = OceanServices()
         self.auth = OceanAuth(self._config.storage_path)
