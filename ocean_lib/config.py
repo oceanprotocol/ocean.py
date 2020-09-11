@@ -127,7 +127,6 @@ class Config(configparser.ConfigParser):
         """Path where the contracts artifacts are allocated."""
         path = None
         _path_string = self.get(self._section_name, NAME_ARTIFACTS_PATH)
-        print(f'artifacts path: {_path_string}')
         if _path_string:
             path = Path(_path_string).expanduser().resolve()
 
@@ -150,7 +149,6 @@ class Config(configparser.ConfigParser):
     @property
     def address_file(self):
         file_path = self.get(self._section_name, NAME_ADDRESS_FILE)
-        print(f'address file: {file_path}')
         if file_path:
             file_path = Path(file_path).expanduser().resolve()
 
