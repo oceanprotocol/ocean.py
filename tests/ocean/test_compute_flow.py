@@ -14,16 +14,16 @@ from tests.resources.helper_functions import (
     get_publisher_wallet,
     get_publisher_ocean_instance,
     get_consumer_ocean_instance,
-    mint_tokens_and_wait, get_resource_path)
+    mint_tokens_and_wait, get_resource_path, wait_for_ddo)
 
 
 def test_compute_flow():
     ######
     # setup
     pub_wallet = get_publisher_wallet()
-    publisher_ocean_instance = get_publisher_ocean_instance()
-    consumer_ocean_instance = get_consumer_ocean_instance()
-    cons_ocn = consumer_ocean_instance
+    p_ocean_instance = get_publisher_ocean_instance()
+    c_ocean_instance = get_consumer_ocean_instance()
+    cons_ocn = c_ocean_instance
     consumer_wallet = get_consumer_wallet()
 
     ######
@@ -37,15 +37,24 @@ def test_compute_flow():
     service = old_ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
     compute_service = ServiceDescriptor.compute_service_descriptor(
         service.attributes,
-        DataServiceProvider.get_compute_endpoint(publisher_ocean_instance.config)
+        DataServiceProvider.get_compute_endpoint(p_ocean_instance.config)
     )
-    compute_ddo = publisher_ocean_instance.assets.create(
+    block = p_ocean_instance.web3.eth.blockNumber
+    compute_ddo = p_ocean_instance.assets.create(
         metadata,
         pub_wallet,
         service_descriptors=[compute_service],
     )
     did = compute_ddo.did
-    _compute_ddo = publisher_ocean_instance.assets.resolve(compute_ddo.did)
+
+    ddo_reg = p_ocean_instance.assets.ddo_registry()
+    log = ddo_reg.get_event_log(ddo_reg.EVENT_DDO_CREATED, block, compute_ddo.asset_id, 30)
+    assert log, f'no ddo created event.'
+
+    ddo = wait_for_ddo(p_ocean_instance, compute_ddo.did, 15)
+    assert ddo, f'resolve did {compute_ddo.did} failed.'
+
+    _compute_ddo = p_ocean_instance.assets.resolve(compute_ddo.did)
 
     # algorithm with download service
     algorithm_ddo_path = get_resource_path('ddo', 'ddo_sample_algorithm.json')
@@ -56,7 +65,7 @@ def test_compute_flow():
 
     ######
     # Mint tokens for dataset and assign to publisher
-    dt = publisher_ocean_instance.get_data_token(compute_ddo.data_token_address)
+    dt = p_ocean_instance.get_data_token(compute_ddo.data_token_address)
     mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
 
     ######

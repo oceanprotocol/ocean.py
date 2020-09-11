@@ -1,3 +1,5 @@
+import os
+
 from web3 import WebsocketProvider
 
 from ocean_lib.config_provider import ConfigProvider
@@ -62,7 +64,21 @@ def get_web3_connection_provider(network_url):
 
 
 def get_contracts_addresses(network, config):
-    return ContractHandler.get_contracts_addresses(network, config.address_file)
+    addresses = {}
+    try:
+        addresses = ContractHandler.get_contracts_addresses(network, config.address_file)
+    except Exception as e:
+        print(f'error reading contract addresses: {e}.\n'
+              f'artifacts path is {ContractHandler.artifacts_path}, address file is {config.address_file}')
+
+    if not addresses:
+        print(f'cannot find contract addresses: \n'
+              f'artifacts path is {ContractHandler.artifacts_path}, address file is {config.address_file}')
+        print(f'address file exists? {os.path.exists(config.address_file)}')
+        print(f'artifacts path exists? {os.path.exists(ContractHandler.artifacts_path)}')
+        print(f'contents of artifacts folder: \n'
+              f'{os.listdir(ContractHandler.artifacts_path)}')
+    return addresses or {}
 
 
 def to_base_18(amt: float) -> int:

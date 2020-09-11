@@ -42,7 +42,9 @@ def test1(network, OCEAN_address,
               from_wallet=alice_wallet)
 
     OCEAN_token = BToken(OCEAN_address)
-    OCEAN_token.approve(pool_address, to_base_18(10.0), from_wallet=alice_wallet)
+    txid = OCEAN_token.approve(pool_address, to_base_18(10.0), from_wallet=alice_wallet)
+    r = OCEAN_token.get_tx_receipt(txid)
+    assert r and r.status == 1, f'approve failed, receipt={r}'
     pool.bind(OCEAN_address, to_base_18(10.0), balancer_constants.INIT_WEIGHT_OCEAN_BASE,
               from_wallet=alice_wallet)
 

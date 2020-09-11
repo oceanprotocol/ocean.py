@@ -7,12 +7,13 @@ from pathlib import Path
 from examples import ExampleConfig
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.data_token import DataToken
+from ocean_lib.models.ddo import DDOContract
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
 from ocean_lib.ocean import util
-from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18
+from ocean_lib.ocean.util import get_web3_connection_provider
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.utils import privateKeyToAddress
 from ocean_lib.web3_internal.wallet import Wallet
@@ -44,7 +45,7 @@ Usage: deploy.py NETWORK ADDRESSES_FILE_PATH
     # ****SET INPUT ARGS****
     # got the right number of args?  If not, output help
     num_args = len(sys.argv) - 1
-    num_args_needed = 2
+    num_args_needed = 1
     if num_args != num_args_needed:
         print(help)
         if num_args > 0:
@@ -60,7 +61,7 @@ Usage: deploy.py NETWORK ADDRESSES_FILE_PATH
         print(f"Invalid network. Supported networks: {SUPPORTED_NETWORKS_STR}")
         sys.exit(0)
 
-    return network, sys.argv[2]
+    return network, sys.argv[2] if len(sys.argv) > 2 else ''
 
 
 def deploy(network, addresses_file):
@@ -69,13 +70,24 @@ def deploy(network, addresses_file):
     Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
     ContractHandler.set_artifacts_path(config.artifacts_path)
 
-    addresses_file = Path(addresses_file).expanduser().resolve()
+    artifacts_path = ContractHandler.artifacts_path
+    if not addresses_file:
+        addresses_file = config.address_file
+    else:
+        addresses_file = Path(addresses_file).expanduser().resolve()
 
     ocean = get_publisher_ocean_instance()
     web3 = ocean.web3
-    artifacts_path = ContractHandler.artifacts_path
 
     addresses = dict()
+
+    if os.path.exists(addresses_file):
+        with open(addresses_file) as f:
+            network_addresses = json.load(f)
+    else:
+        network_addresses = {network: {}}
+
+    _addresses = network_addresses[network]
 
     # ****SET ENVT****
     # grab vars
@@ -95,39 +107,47 @@ def deploy(network, addresses_file):
     minter_addr = deployer_wallet.address
     cap = 2 ** 255
 
-    print("****Deploy DataTokenTemplate: begin****")
-    dt_address = DataToken.deploy(
-        web3, deployer_wallet, artifacts_path,
-        'Template Contract', 'TEMPLATE',
-        minter_addr, DataToken.DEFAULT_CAP_BASE,
-        DTFactory.FIRST_BLOB, minter_addr
-    )
-    addresses[DataToken.CONTRACT_NAME] = dt_address
-    print("****Deploy DataTokenTemplate: done****\n")
+    if DTFactory.CONTRACT_NAME not in _addresses:
+        print("****Deploy DataTokenTemplate: begin****")
+        dt_address = DataToken.deploy(
+            web3, deployer_wallet, artifacts_path,
+            'Template Contract', 'TEMPLATE',
+            minter_addr, DataToken.DEFAULT_CAP_BASE,
+            DTFactory.FIRST_BLOB, minter_addr
+        )
+        addresses[DataToken.CONTRACT_NAME] = dt_address
+        print("****Deploy DataTokenTemplate: done****\n")
 
-    print("****Deploy DTFactory: begin****")
-    dtfactory = DTFactory(DTFactory.deploy(
-        web3, deployer_wallet, artifacts_path, dt_address, minter_addr))
-    addresses[DTFactory.CONTRACT_NAME] = dtfactory.address
-    print("****Deploy DTFactory: done****\n")
+        print("****Deploy DTFactory: begin****")
+        dtfactory = DTFactory(DTFactory.deploy(
+            web3, deployer_wallet, artifacts_path, dt_address, minter_addr))
+        addresses[DTFactory.CONTRACT_NAME] = dtfactory.address
+        print("****Deploy DTFactory: done****\n")
 
-    print("****Deploy BPool: begin****")
-    bpool_address = BPool.deploy(web3, deployer_wallet, artifacts_path)
-    bpool_template = BPool(bpool_address)
-    addresses[BPool.CONTRACT_NAME] = bpool_address
-    print("****Deploy BPool: done****\n")
+    if BFactory.CONTRACT_NAME not in _addresses:
+        print("****Deploy BPool: begin****")
+        bpool_address = BPool.deploy(web3, deployer_wallet, artifacts_path)
+        bpool_template = BPool(bpool_address)
+        addresses[BPool.CONTRACT_NAME] = bpool_address
+        print("****Deploy BPool: done****\n")
 
-    print("****Deploy 'BFactory': begin****")
-    bfactory_address = BFactory.deploy(web3, deployer_wallet, artifacts_path, bpool_template.address)
-    bfactory = BFactory(bfactory_address)
-    addresses[BFactory.CONTRACT_NAME] = bfactory_address
-    print("****Deploy 'BFactory': done****\n")
+        print("****Deploy 'BFactory': begin****")
+        bfactory_address = BFactory.deploy(web3, deployer_wallet, artifacts_path, bpool_template.address)
+        bfactory = BFactory(bfactory_address)
+        addresses[BFactory.CONTRACT_NAME] = bfactory_address
+        print("****Deploy 'BFactory': done****\n")
 
-    print("****Deploy 'FixedRateExchange': begin****")
-    addresses[FixedRateExchange.CONTRACT_NAME] = FixedRateExchange.deploy(web3, deployer_wallet, artifacts_path)
-    print("****Deploy 'FixedRateExchange': done****\n")
+    if FixedRateExchange.CONTRACT_NAME not in _addresses:
+        print("****Deploy 'FixedRateExchange': begin****")
+        addresses[FixedRateExchange.CONTRACT_NAME] = FixedRateExchange.deploy(web3, deployer_wallet, artifacts_path)
+        print("****Deploy 'FixedRateExchange': done****\n")
 
-    if network == 'ganache':
+    if DDOContract.CONTRACT_NAME not in _addresses:
+        print("****Deploy 'DDO': begin****")
+        addresses[DDOContract.CONTRACT_NAME] = DDOContract.deploy(web3, deployer_wallet, artifacts_path)
+        print("****Deploy 'DDO': done****\n")
+
+    if network == 'ganache' and 'Ocean' not in _addresses:
         print("****Deploy fake OCEAN: begin****")
         # For simplicity, hijack DataTokenTemplate.
         minter_addr = deployer_wallet.address
@@ -156,12 +176,6 @@ def deploy(network, addresses_file):
             OCEAN_token.transfer(dst_address, amt_distribute_base, from_wallet=deployer_wallet)
 
         print("****Distribute fake OCEAN: done****\n")
-
-    if os.path.exists(addresses_file):
-        with open(addresses_file) as f:
-            network_addresses = json.load(f)
-    else:
-        network_addresses = {network: {}}
 
     network_addresses[network].update(addresses)
 

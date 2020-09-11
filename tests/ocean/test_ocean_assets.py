@@ -1,188 +1,129 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
-import logging
+import time
 import uuid
 
 import pytest
-from ocean_lib.web3_internal.exceptions import OceanDIDNotFound
-from ocean_lib.web3_internal.wallet import Wallet
 from ocean_utils.agreements.service_factory import ServiceDescriptor
 from ocean_utils.ddo.ddo import DDO
-from ocean_utils.did import DID
+from ocean_utils.did import DID, did_to_id_bytes
 
 from tests.resources.helper_functions import (
     get_algorithm_ddo,
     get_computing_metadata,
     get_resource_path,
-    get_publisher_wallet)
+    get_publisher_wallet, get_consumer_wallet, wait_for_ddo)
 
 
-def create_asset(publisher_ocean_instance):
-    ocn = publisher_ocean_instance
+def create_asset(ocean, publisher):
     sample_ddo_path = get_resource_path('ddo', 'ddo_sa_sample.json')
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
-
-    publisher = get_publisher_wallet()
 
     asset = DDO(json_filename=sample_ddo_path)
     asset.metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
     my_secret_store = 'http://myownsecretstore.com'
     auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
-    return ocn.assets.create(asset.metadata, publisher, [auth_service])
+    return ocean.assets.create(asset.metadata, publisher, [auth_service])
 
 
 def test_register_asset(publisher_ocean_instance):
-    logging.debug("".format())
-    sample_ddo_path = get_resource_path('ddo', 'ddo_sa_sample.json')
-    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
+    ocn = publisher_ocean_instance
+    ddo_reg = ocn.assets.ddo_registry()
+    block = ocn.web3.eth.blockNumber
+    alice = get_publisher_wallet()
+    bob = get_consumer_wallet()
+    num_assets_owned = len([
+        a for a in ocn.assets.owner_assets(alice.address)
+        if ddo_reg.didOwner(did_to_id_bytes(a))
+    ])
 
-    ##########################################################
-    # Setup account
-    ##########################################################
-    publisher = get_publisher_wallet()
+    original_ddo = create_asset(ocn, alice)
+    assert original_ddo, f'create asset failed.'
 
-    ##########################################################
-    # Create an asset DDO with valid metadata
-    ##########################################################
-    asset = DDO(json_filename=sample_ddo_path)
-    asset.metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
-    ddo = publisher_ocean_instance.assets.create(asset.metadata, publisher)
-    publisher_ocean_instance.assets.retire(ddo.did)
-
-
-def test_resolve_did(publisher_ocean_instance, metadata):
-    # prep ddo
-    # metadata = Metadata.get_example()
-    publisher = get_publisher_wallet()
-    # happy path
-    original_ddo = publisher_ocean_instance.assets.create(metadata, publisher)
+    # try to resolve new asset
     did = original_ddo.did
-    ddo = publisher_ocean_instance.assets.resolve(did).as_dictionary()
+    asset_id = original_ddo.asset_id
+    log = ddo_reg.get_event_log(ddo_reg.EVENT_DDO_CREATED, block, asset_id, 30)
+    assert log, f'no ddo created event.'
+
+    ddo = wait_for_ddo(ocn, did, 15)
+    ddo_dict = ddo.as_dictionary()
     original = original_ddo.as_dictionary()
-    assert ddo['publicKey'] == original['publicKey']
-    assert ddo['authentication'] == original['authentication']
-    assert ddo['service']
+    assert ddo_dict['publicKey'] == original['publicKey']
+    assert ddo_dict['authentication'] == original['authentication']
+    assert ddo_dict['service']
     assert original['service']
-    metadata = ddo['service'][0]['attributes']
+    metadata = ddo_dict['service'][0]['attributes']
     if 'datePublished' in metadata['main']:
         metadata['main'].pop('datePublished')
-    assert ddo['service'][0]['attributes']['main']['name'] == \
+    assert ddo_dict['service'][0]['attributes']['main']['name'] == \
         original['service'][0]['attributes']['main']['name']
-    assert ddo['service'][1] == original['service'][1]
+    assert ddo_dict['service'][1] == original['service'][1]
 
     # Can't resolve unregistered asset
     unregistered_did = DID.did({"0": "0x00112233445566"})
     with pytest.raises(ValueError):
-        publisher_ocean_instance.assets.resolve(unregistered_did)
+        ocn.assets.resolve(unregistered_did)
 
     # Raise error on bad did
     invalid_did = "did:op:0123456789"
     with pytest.raises(ValueError):
-        publisher_ocean_instance.assets.resolve(invalid_did)
-    publisher_ocean_instance.assets.retire(did)
+        ocn.assets.resolve(invalid_did)
 
-
-def test_create_data_asset(publisher_ocean_instance, consumer_ocean_instance):
-    """
-    Setup accounts and asset, register this asset on Aquarius (MetaData store)
-    """
-    pub_ocn = publisher_ocean_instance
-    cons_ocn = consumer_ocean_instance
-
-    logging.debug("".format())
-    sample_ddo_path = get_resource_path('ddo', 'ddo_sa_sample.json')
-    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
-
-    ##########################################################
-    # Setup 2 accounts
-    ##########################################################
-    aquarius_acct = get_publisher_wallet()
-
-    ##########################################################
-    # Create an Asset with valid metadata
-    ##########################################################
-    asset = DDO(json_filename=sample_ddo_path)
-    asset.metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
-
-    ##########################################################
-    # List currently published assets
-    ##########################################################
-    meta_data_assets = pub_ocn.assets.search('')
+    meta_data_assets = ocn.assets.search('')
     if meta_data_assets:
         print("Currently registered assets:")
         print(meta_data_assets)
 
-    if asset.did in meta_data_assets:
-        pub_ocn.assets.resolve(asset.did)
-        pub_ocn.assets.retire(asset.did)
     # Publish the metadata
-    new_asset = pub_ocn.assets.create(asset.metadata, aquarius_acct)
+    _ = ddo.metadata['main']['name']
+    _name = 'updated name'
+    ddo.metadata['main']['name'] = _name
+    assert ddo.metadata['main']['name'] == _name
+    try:
+        ocn.assets.update(ddo, bob)
+        assert False, f'this asset update should fail, but did not.'
+    except Exception:
+        pass
 
-    # get_asset_metadata only returns 'main' key, is this correct?
-    published_metadata = cons_ocn.assets.resolve(new_asset.did)
+    _ = ocn.assets.update(ddo, alice)
+    log = ddo_reg.get_event_log(ddo_reg.EVENT_DDO_UPDATED, block, asset_id, 30)
+    assert log, f'no ddo updated event'
+    time.sleep(5)
+    _asset = wait_for_ddo(ocn, ddo.did, 15)
+    assert _asset, f'Cannot read asset after update.'
+    assert _asset.metadata['main']['name'] == _name, f'updated asset does not have the new updated name !!!'
 
-    assert published_metadata
-    # only compare top level keys
-    assert sorted(list(asset.metadata['main'].keys())).remove('files') == sorted(
-        list(published_metadata.metadata.keys())).remove('encryptedFiles')
-    publisher_ocean_instance.assets.retire(new_asset.did)
+    assert ocn.assets.owner(ddo.did) == alice.address, f'asset owner does not seem correct.'
 
-
-def test_asset_owner(publisher_ocean_instance):
-    ocn = publisher_ocean_instance
-
-    sample_ddo_path = get_resource_path('ddo', 'ddo_sa_sample.json')
-    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
-
-    publisher = get_publisher_wallet()
-
-    asset = DDO(json_filename=sample_ddo_path)
-    asset.metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
-    my_secret_store = 'http://myownsecretstore.com'
-    auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
-    new_asset = ocn.assets.create(asset.metadata, publisher, [auth_service])
-
-    assert ocn.assets.owner(new_asset.did) == publisher.address
-    publisher_ocean_instance.assets.retire(new_asset.did)
-
-
-def test_owner_assets(publisher_ocean_instance):
-    ocn = publisher_ocean_instance
-    publisher = get_publisher_wallet()
-    assets_owned = len(ocn.assets.owner_assets(publisher.address))
-    asset = create_asset(publisher_ocean_instance)
-    assert len(ocn.assets.owner_assets(publisher.address)) == assets_owned + 1
-    publisher_ocean_instance.assets.retire(asset.did)
-
-
-def test_ocean_assets_resolve(publisher_ocean_instance, metadata):
-    publisher = get_publisher_wallet()
-    ddo = publisher_ocean_instance.assets.create(metadata, publisher)
-    ddo_resolved = publisher_ocean_instance.assets.resolve(ddo.did)
-    assert ddo.did == ddo_resolved.did
-    publisher_ocean_instance.assets.retire(ddo.did)
+    ddo_reg = ocn.assets.ddo_registry()
+    owner_assets = [
+        a for a in ocn.assets.owner_assets(alice.address)
+        if ddo_reg.didOwner(did_to_id_bytes(a))
+    ]
+    assert len(owner_assets) == num_assets_owned + 1
 
 
 def test_ocean_assets_search(publisher_ocean_instance, metadata):
     publisher = get_publisher_wallet()
     ddo = publisher_ocean_instance.assets.create(metadata, publisher)
+    wait_for_ddo(publisher_ocean_instance, ddo.did, 25)
     assert len(publisher_ocean_instance.assets.search('Monkey')) > 0
-    publisher_ocean_instance.assets.retire(ddo.did)
 
 
 def test_ocean_assets_validate(publisher_ocean_instance, metadata):
-    assert publisher_ocean_instance.assets.validate(metadata)
+    assert publisher_ocean_instance.assets.validate(metadata), f'metadata should be valid, unless the schema changed.'
 
 
 def test_ocean_assets_algorithm(publisher_ocean_instance):
-    # Allow publish an algorithm
     publisher = get_publisher_wallet()
     metadata = get_algorithm_ddo()['service'][0]
     metadata['attributes']['main']['files'][0]['checksum'] = str(uuid.uuid4())
     ddo = publisher_ocean_instance.assets.create(metadata['attributes'], publisher)
     assert ddo
-    publisher_ocean_instance.assets.retire(ddo.did)
+    _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did, 20)
+    assert _ddo, f'assets.resolve failed for did {ddo.did}'
 
 
 def test_ocean_assets_compute(publisher_ocean_instance):
@@ -191,4 +132,5 @@ def test_ocean_assets_compute(publisher_ocean_instance):
     metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
     ddo = publisher_ocean_instance.assets.create(metadata, publisher)
     assert ddo
-    publisher_ocean_instance.assets.retire(ddo.did)
+    _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did, 20)
+    assert _ddo, f'assets.resolve failed for did {ddo.did}'

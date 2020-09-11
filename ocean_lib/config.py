@@ -12,8 +12,8 @@ from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
 DEFAULT_NETWORK_HOST = 'localhost'
 DEFAULT_NETWORK_PORT = 8545
 DEFAULT_NETWORK_URL = 'http://localhost:8545'
-DEFAULT_ARTIFACTS_PATH = 'artifacts'
-DEFAULT_ADDRESS_FILE = 'addresses.json'
+DEFAULT_ARTIFACTS_PATH = ''
+DEFAULT_ADDRESS_FILE = ''
 DEFAULT_NAME_AQUARIUS_URL = 'http://localhost:5000'
 DEFAULT_STORAGE_PATH = 'ocean_lib.db'
 
@@ -136,10 +136,13 @@ class Config(configparser.ConfigParser):
         if path and os.path.exists(path):
             return path
 
-        if os.getenv('VIRTUAL_ENV'):
+        if os.getenv('VIRTUAL_ENV') and os.path.exists(os.path.join(os.getenv('VIRTUAL_ENV'), 'artifacts')):
             path = os.path.join(os.getenv('VIRTUAL_ENV'), 'artifacts')
         else:
             path = os.path.join(site.PREFIXES[0], 'artifacts')
+
+        if not os.path.exists(path):
+            path = Path('~/.ocean/ocean-contracts/artifacts').expanduser().resolve()
 
         return path
 
@@ -150,7 +153,7 @@ class Config(configparser.ConfigParser):
             file_path = Path(file_path).expanduser().resolve()
 
         if not file_path or not os.path.exists(file_path):
-            return None
+            file_path = os.path.join(self.artifacts_path, 'address.json')
 
         return file_path
 

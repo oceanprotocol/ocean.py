@@ -14,11 +14,16 @@ services:
 before_install:
   - git clone https://github.com/oceanprotocol/barge
   - cd barge
-  - git checkout v3
-  - export AQUARIUS_VERSION=v3
+  - git checkout feature/ocean-contracts
+  - export AQUARIUS_VERSION=decentralized
   - bash -x start_ocean.sh --no-dashboard 2>&1 > start_ocean.log &
   - cd ..
-  - sleep 30
+  - |
+      for i in $(seq 1 50); do
+        sleep 5
+        [ -f "${HOME}/.ocean/ocean-contracts/artifacts/ready" ] && break
+      done
+      ls -la "${HOME}/.ocean/ocean-contracts/artifacts/"
 
 install: pip install -U tox-travis
 

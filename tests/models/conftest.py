@@ -138,7 +138,6 @@ def make_info(name, private_key_name):
     info.account = Account(private_key=info.private_key)
     config = {'network': _NETWORK,
               'privateKey': info.private_key,
-              'address.file': 'artifacts/addresses.json',
               }
 
     wallet = get_ganache_wallet()
