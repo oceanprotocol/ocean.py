@@ -7,31 +7,13 @@ import uuid
 import pytest
 from ocean_utils.agreements.service_factory import ServiceDescriptor
 from ocean_utils.ddo.ddo import DDO
-from ocean_utils.did import DID
+from ocean_utils.did import DID, did_to_id_bytes
 
 from tests.resources.helper_functions import (
     get_algorithm_ddo,
     get_computing_metadata,
     get_resource_path,
-    get_publisher_wallet, get_consumer_wallet)
-
-
-def wait_for_ddo(ocean, did, timeout=30):
-    start = time.time()
-    ddo = None
-    while not ddo:
-        try:
-            ddo = ocean.assets.resolve(did)
-        except ValueError:
-            pass
-
-        if not ddo:
-            time.sleep(0.2)
-
-        if time.time() - start > timeout:
-            break
-
-    return ddo
+    get_publisher_wallet, get_consumer_wallet, wait_for_ddo)
 
 
 def create_asset(ocean, publisher):
@@ -47,11 +29,15 @@ def create_asset(ocean, publisher):
 
 def test_register_asset(publisher_ocean_instance):
     ocn = publisher_ocean_instance
-    ddo_reg = ocn.assets._ddo_registry()
+    ddo_reg = ocn.assets.ddo_registry()
     block = ocn.web3.eth.blockNumber
     alice = get_publisher_wallet()
     bob = get_consumer_wallet()
-    num_assets_owned = len(ocn.assets.owner_assets(alice.address))
+    num_assets_owned = len([
+        a for a in ocn.assets.owner_assets(alice.address)
+        if ddo_reg.didOwner(did_to_id_bytes(a))
+    ])
+
     original_ddo = create_asset(ocn, alice)
     assert original_ddo, f'create asset failed.'
 
@@ -111,7 +97,12 @@ def test_register_asset(publisher_ocean_instance):
 
     assert ocn.assets.owner(ddo.did) == alice.address, f'asset owner does not seem correct.'
 
-    assert len(ocn.assets.owner_assets(alice.address)) == num_assets_owned + 1
+    ddo_reg = ocn.assets.ddo_registry()
+    owner_assets = [
+        a for a in ocn.assets.owner_assets(alice.address)
+        if ddo_reg.didOwner(did_to_id_bytes(a))
+    ]
+    assert len(owner_assets) == num_assets_owned + 1
 
 
 def test_ocean_assets_search(publisher_ocean_instance, metadata):

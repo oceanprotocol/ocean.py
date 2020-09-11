@@ -30,8 +30,8 @@ class ExampleConfig:
         return {
             "eth-network": {
                 "network": "http://localhost:8545",
-                "artifacts.path": "artifacts",
-                "address.file": "artifacts/addresses.json"
+                "artifacts.path": "~/.ocean/ocean-contracts/artifacts",
+                "address.file": ""
             },
             "resources": {
                 "aquarius.url": "http://aquarius:5000",

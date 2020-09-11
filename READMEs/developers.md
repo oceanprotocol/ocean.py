@@ -60,10 +60,10 @@ Outcome: DataTokenTemplate and DTFactory are deployed to ganache, rinkeby, or ma
 If mainnet: ensure the `FACTORY_DEPLOYER_PRIVATE_KEY` is correct (= an OPF key).
 
 Call the deploy script with (NETWORK = `ganache`, `rinkeby`, or `mainnet`) and (ADDRESSES_FILE_PATH to hold the deployed contracts addresses). 
-When using already deployed contracts you can skip this, but make sure the `artifacts/addresses.json` file has the up-to-date contracts 
+When using already deployed contracts you can skip this, but make sure the `artifacts/address.json` file has the up-to-date contracts 
 addresses for the target network.
 ```console
-./deploy.py ganache artifacts/addresses.json
+./deploy.py ganache artifacts/address.json
 ```
 
 Finally: update `config.ini`'s `address.file` with the ADDRESSES_FILE_PATH from the previous step.

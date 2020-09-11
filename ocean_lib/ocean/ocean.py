@@ -67,7 +67,6 @@ class Ocean:
             config_dict = {
                 'eth-network': {
                     'network': config.get('network', ''),
-                    'address.file': config.get('address.file', 'artifacts/addresses.json'),
                 },
                 'resources': {
                     'aquarius.url': aqua_url,
@@ -88,7 +87,7 @@ class Ocean:
         self.assets = OceanAssets(
             self._config,
             data_provider,
-            get_contracts_addresses(network, self._config)[DDOContract.CONTRACT_NAME]
+            get_contracts_addresses(network, self._config).get(DDOContract.CONTRACT_NAME)
         )
         self.services = OceanServices()
         self.auth = OceanAuth(self._config.storage_path)

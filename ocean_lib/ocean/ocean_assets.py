@@ -52,7 +52,7 @@ class OceanAssets:
             downloads_path = self._config.get('resources', 'downloads.path') or downloads_path
         self._downloads_path = downloads_path
 
-    def _ddo_registry(self):
+    def ddo_registry(self):
         return DDOContract(self._ddo_registry_address)
 
     def _get_aquarius(self, url=None) -> Aquarius:
@@ -227,7 +227,7 @@ class OceanAssets:
 
         try:
             # publish the new ddo in ocean-db/Aquarius
-            ddo_registry = self._ddo_registry()
+            ddo_registry = self.ddo_registry()
             web3 = Web3Provider.get_web3()
             tx_id = ddo_registry.create(
                 asset.asset_id,
@@ -249,7 +249,7 @@ class OceanAssets:
     def update(self, asset: Asset, publisher_wallet: Wallet) -> bool:
         try:
             # publish the new ddo in ocean-db/Aquarius
-            ddo_registry = self._ddo_registry()
+            ddo_registry = self.ddo_registry()
             web3 = Web3Provider.get_web3()
             tx_id = ddo_registry.update(
                 asset.asset_id,

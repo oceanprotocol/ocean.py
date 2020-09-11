@@ -119,7 +119,15 @@ def get_registered_ddo(ocean_instance, wallet: Wallet):
         DataServiceProvider.get_download_endpoint(ocean_instance.config)
     )
 
+    block = ocean_instance.web3.eth.blockNumber
     asset = ocean_instance.assets.create(metadata, wallet)
+    ddo_reg = ocean_instance.assets.ddo_registry()
+    log = ddo_reg.get_event_log(ddo_reg.EVENT_DDO_CREATED, block, asset.asset_id, 30)
+    assert log, f'no ddo created event.'
+
+    ddo = wait_for_ddo(ocean_instance, asset.did, 15)
+    assert ddo, f'resolve did {asset.did} failed.'
+
     return asset
 
 
@@ -181,3 +189,21 @@ def mint_tokens_and_wait(data_token_contract: DataToken, receiver_address: str, 
                 break
         except (ValueError, Exception):
             pass
+
+
+def wait_for_ddo(ocean, did, timeout=30):
+    start = time.time()
+    ddo = None
+    while not ddo:
+        try:
+            ddo = ocean.assets.resolve(did)
+        except ValueError:
+            pass
+
+        if not ddo:
+            time.sleep(0.2)
+
+        if time.time() - start > timeout:
+            break
+
+    return ddo
