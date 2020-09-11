@@ -18,12 +18,16 @@ before_install:
   - export AQUARIUS_VERSION=decentralized
   - bash -x start_ocean.sh --no-dashboard 2>&1 > start_ocean.log &
   - cd ..
+  - |
+      for i in $(seq 1 50); do
+        sleep 5
+        [ -f "${HOME}/.ocean/ocean-contracts/artifacts/ready" ] && break
+      done
+      ls -la "${HOME}/.ocean/ocean-contracts/artifacts/"
 
 install: pip install -U tox-travis
 
-script:
-  - sleep 90
-  - tox
+script: tox
 
 deploy:
   provider: pypi
