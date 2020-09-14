@@ -13,7 +13,6 @@ from ocean_utils.agreements.service_factory import ServiceDescriptor, ServiceFac
 from ocean_utils.agreements.service_types import ServiceTypes
 from ocean_utils.aquarius.aquarius import Aquarius
 from ocean_utils.aquarius.aquarius_provider import AquariusProvider
-from ocean_utils.aquarius.exceptions import AquariusGenericError
 from ocean_utils.ddo.metadata import MetadataMain
 from ocean_utils.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
 from ocean_utils.did import DID
@@ -339,13 +338,13 @@ class OceanAssets:
         return order_requirements
 
     @staticmethod
-    def pay_for_service(amount: float, token_address: str, did: str, service_id: int,
+    def pay_for_service(amount_base: int, token_address: str, did: str, service_id: int,
                         receiver_address: str, fee_receiver: str, fee_percentage: float,
                         from_wallet: Wallet) -> str:
         """
         Submits the payment for chosen service in DataTokens.
 
-        :param amount:
+        :param amount_base:
         :param token_address:
         :param did:
         :param service_id:
@@ -355,20 +354,21 @@ class OceanAssets:
         :param from_wallet: Wallet instance
         :return: hex str id of transfer transaction
         """
-        tokens_amount = to_base_18(amount)
+        amount_base = int(amount_base)
         receiver = receiver_address
         dt = DataToken(token_address)
         balance = dt.balanceOf(from_wallet.address)
-        if balance < tokens_amount:
+        if balance < amount_base:
             raise AssertionError(f'Your token balance {balance} is not sufficient '
                                  f'to execute the requested service. This service '
-                                 f'requires {amount} number of tokens.')
+                                 f'requires {amount_base} number of tokens.')
         if fee_receiver:
             assert fee_percentage > 0, f'fee_percentage should be > 0.'
 
         tx_hash = dt.startOrder(
-            receiver, tokens_amount, did, service_id,
+            receiver, amount_base, did, service_id,
             fee_receiver, to_base_18(fee_percentage), from_wallet)
+
         try:
             dt.verify_transfer_tx(tx_hash, from_wallet.address, receiver)
             return tx_hash
@@ -382,7 +382,7 @@ class OceanAssets:
             raise AssertionError(msg)
 
     def download(self, did: str, service_index: int, consumer_wallet: Wallet,
-                 destination: str, index: [int, None]=None) -> str:
+                 order_tx_id: str, destination: str, index: [int, None]=None) -> str:
         """
         Consume the asset data.
 
@@ -396,6 +396,7 @@ class OceanAssets:
         :param did: DID, str
         :param service_index: identifier of the service inside the asset DDO, str
         :param consumer_wallet: Wallet instance of the consumer
+        :param order_tx_id: hex str id of the token transfer transaction
         :param destination: str path
         :param index: Index of the document that is going to be downloaded, int
         :return: str path to saved files
@@ -415,6 +416,7 @@ class OceanAssets:
             consumer_wallet,
             destination,
             asset.data_token_address,
+            order_tx_id,
             self._data_provider,
             index
         )
