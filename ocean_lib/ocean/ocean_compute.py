@@ -6,8 +6,10 @@ from ocean_utils.agreements.service_agreement import ServiceAgreement
 
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
+from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3helper import Web3Helper
 
 logger = logging.getLogger('ocean')
@@ -187,15 +189,17 @@ class OceanCompute:
             wallet
         )
 
-    def start(self, did, consumer_wallet, transfer_tx_id, nonce=None, algorithm_did=None,
-              algorithm_meta=None, output=None, job_id=None):
+    def start(self, did: str, consumer_wallet: Wallet, order_tx_id: str,
+              nonce: [int, None]=None, algorithm_did: [str, None]=None,
+              algorithm_meta: [AlgorithmMetadata, None]=None,
+              output: dict=None, job_id: str=None):
         """Start a remote compute job on the asset files identified by `did` after
         verifying that the provider service is active and transferring the
         number of data-tokens required for using this compute service.
 
         :param did: str -- id of asset that has the compute service
         :param consumer_wallet: Wallet instance of the consumer ordering the service
-        :param transfer_tx_id: hex str -- id of the datatokens transfer transaction
+        :param order_tx_id: hex str -- id of the startOrder transaction (tx hash)
         :param nonce: int value to use in the signature
         :param algorithm_did: str -- the asset did (of `algorithm` type) which consist of `did:op:` and
             the assetId hex str (without `0x` prefix)
@@ -213,7 +217,6 @@ class OceanCompute:
         service_endpoint = self._get_service_endpoint(did, asset)
 
         sa = ServiceAgreement.from_ddo(ServiceTypes.CLOUD_COMPUTE, asset)
-        tx_id = transfer_tx_id
 
         signature = self._sign_message(consumer_wallet, f'{consumer_wallet.address}{did}', nonce=nonce)
 
@@ -224,7 +227,7 @@ class OceanCompute:
             signature,
             sa.index,
             asset.data_token_address,
-            tx_id,
+            order_tx_id,
             algorithm_did,
             algorithm_meta,
             output,

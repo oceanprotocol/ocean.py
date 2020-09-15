@@ -52,10 +52,14 @@ def test_market_flow():
 
     ######
     # Pay for the service
-    payment_tx_id = consumer_ocean.assets.pay_for_service(
+    _order_tx_id = consumer_ocean.assets.pay_for_service(
         order_requirements.amount,
         order_requirements.data_token_address,
+        asset.did,
+        service.index,
         order_requirements.receiver_address,
+        '0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9',
+        0.001,
         consumer_wallet
     )
     ######
@@ -64,7 +68,7 @@ def test_market_flow():
         asset.did,
         sa.index,
         consumer_wallet,
-        payment_tx_id,
+        _order_tx_id,
         consumer_ocean.config.downloads_path
     )
 

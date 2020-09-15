@@ -86,17 +86,29 @@ def test_compute_flow():
     )
 
     ######
-    # Transfer tokens to the provider as specified in the `order` requirements
-    try:
-        tx_id = dt.transfer(order_requirements.receiver_address, order_requirements.amount, consumer_wallet)
-        dt.verify_transfer_tx(tx_id, consumer_wallet.address, order_requirements.receiver_address)
-    except (AssertionError, Exception) as e:
-        print(e)
-        raise
+    # Start the order on-chain using the `order` requirements from previous step
+    service = compute_ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
+    _order_tx_id = cons_ocn.assets.pay_for_service(
+        order_requirements.amount,
+        order_requirements.data_token_address,
+        compute_ddo.did,
+        service.index,
+        order_requirements.receiver_address,
+        '0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9',
+        0.001,
+        consumer_wallet
+    )
+    # try:
+    #     tx_id = dt.transfer(order_requirements.receiver_address, order_requirements.amount, consumer_wallet)
+    #     dt.verify_transfer_tx(tx_id, consumer_wallet.address, order_requirements.receiver_address)
+    # except (AssertionError, Exception) as e:
+    #     print(e)
+    #     raise
 
     ######
-    job_id = cons_ocn.compute.start(did, consumer_wallet, tx_id,
-                                    nonce=order_requirements.nonce, algorithm_meta=algorithm_meta)
+    job_id = cons_ocn.compute.start(
+        did, consumer_wallet, _order_tx_id,
+        nonce=order_requirements.nonce, algorithm_meta=algorithm_meta)
     assert job_id, f'expected a job id, got {job_id}'
 
     status = cons_ocn.compute.status(did, job_id, consumer_wallet)
