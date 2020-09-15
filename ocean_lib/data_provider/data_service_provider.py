@@ -165,7 +165,7 @@ class DataServiceProvider:
 
     @staticmethod
     def start_compute_job(did, service_endpoint, consumer_address, signature,
-                          service_id, token_address, algorithm_did=None,
+                          service_id, token_address, order_tx_id, algorithm_did=None,
                           algorithm_meta=None, output=None, job_id=None):
         """
 
@@ -175,6 +175,7 @@ class DataServiceProvider:
         :param signature: hex str signed message to allow the provider to authorize the consumer
         :param service_id:
         :param token_address:
+        :param order_tx_id: hex str id of the token transfer transaction
         :param algorithm_did: str -- the asset did (of `algorithm` type) which consist of `did:op:` and
             the assetId hex str (without `0x` prefix)
         :param algorithm_meta: see `OceanCompute.execute`
@@ -192,6 +193,7 @@ class DataServiceProvider:
             service_id,
             ServiceTypes.CLOUD_COMPUTE,
             token_address,
+            order_tx_id,
             signature=signature,
             algorithm_did=algorithm_did,
             algorithm_meta=algorithm_meta,
@@ -237,19 +239,34 @@ class DataServiceProvider:
             'put', did, job_id, service_endpoint, consumer_address, signature)
 
     @staticmethod
-    def restart_compute_job(did, job_id, service_endpoint, consumer_address, signature):
+    def restart_compute_job(did, job_id, service_endpoint, consumer_address, signature,
+                            service_id, token_address, order_tx_id, algorithm_did=None,
+                            algorithm_meta=None, output=None
+        ):
         """
 
-        :param did: hex str the asset/DDO id
-        :param job_id: str id of compute job that was returned from `start_compute_job`
-        :param service_endpoint: str url of the provider service endpoint for compute service
-        :param consumer_address: hex str the ethereum address of the consumer's account
+        :param did: id of asset starting with `did:op:` and a hex str without 0x prefix
+        :param job_id: str id of compute job that was started and stopped (optional, use it
+            here to start a job after it was stopped)
+        :param service_endpoint:
+        :param consumer_address: hex str the ethereum address of the consumer executing the compute job
         :param signature: hex str signed message to allow the provider to authorize the consumer
+        :param service_id:
+        :param token_address:
+        :param order_tx_id: hex str id of the token transfer transaction
+        :param algorithm_did: str -- the asset did (of `algorithm` type) which consist of `did:op:` and
+            the assetId hex str (without `0x` prefix)
+        :param algorithm_meta: see `OceanCompute.execute`
+        :param output: see `OceanCompute.execute`
 
         :return: bool whether the job was restarted successfully
         """
         DataServiceProvider.stop_compute_job(did, job_id, service_endpoint, consumer_address, signature)
-        return DataServiceProvider.start_compute_job(did, service_endpoint, consumer_address, signature, job_id=job_id)
+        return DataServiceProvider.start_compute_job(
+            did, service_endpoint, consumer_address, signature,
+            service_id, token_address, order_tx_id, algorithm_did,
+            algorithm_meta, output, job_id=job_id
+        )
 
     @staticmethod
     def delete_compute_job(did, job_id, service_endpoint, consumer_address, signature):
@@ -397,7 +414,7 @@ class DataServiceProvider:
 
     @staticmethod
     def _prepare_compute_payload(
-            did, consumer_address, service_id, service_type, token_address,
+            did, consumer_address, service_id, service_type, token_address, order_tx_id,
             signature=None, algorithm_did=None, algorithm_meta=None,
             output=None, job_id=None):
         assert algorithm_did or algorithm_meta, 'either an algorithm did or an algorithm meta must be provided.'
@@ -417,5 +434,6 @@ class DataServiceProvider:
             'jobId': job_id or "",
             'serviceId': service_id,
             'serviceType': service_type,
-            'dataToken': token_address
+            'dataToken': token_address,
+            'transferTxId': order_tx_id
         }
