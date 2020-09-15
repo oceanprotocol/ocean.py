@@ -58,7 +58,7 @@ def test_market_flow():
         asset.did,
         service.index,
         order_requirements.receiver_address,
-        order_requirements.receiver_address,
+        '0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9',
         0.001,
         consumer_wallet
     )
