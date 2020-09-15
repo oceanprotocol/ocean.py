@@ -376,7 +376,7 @@ class OceanAssets:
         try:
             dt.verify_order_tx(
                 Web3Provider.get_web3(), tx_hash, did, service_id,
-                amount_base, from_wallet.address, receiver, 0.001)
+                amount_base, from_wallet.address, receiver, (0.001 + fee_percentage))
             return tx_hash
         except (AssertionError, Exception) as e:
             msg = (
