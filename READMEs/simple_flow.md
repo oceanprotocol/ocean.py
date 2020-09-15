@@ -1,8 +1,9 @@
-# Quickstart: Simple Flow 
+# Quickstart: Simple Flow
 
 This stripped-down flow shows the essence of Ocean. Just downloading, no metadata.
 
 Here's the steps.
+
 1. Alice publishes a dataset (= publishes a datatoken contract)
 1. Alice hosts the dataset
 1. Alice mints 100 tokens
@@ -14,6 +15,7 @@ Let's go through each step.
 ## 0. Installation
 
 If you haven't installed yet:
+
 ```console
 pip install ocean-lib
 ```
@@ -41,6 +43,7 @@ dt_address = token.address
 
 A local providerService is required, which will serve just one file for this demo.
 Let's create the file to be shared:
+
 ```
 touch /var/mydata/myFolder1/file
 ```
@@ -50,7 +53,7 @@ Run the providerService:
 
 ```
 export CONFIG='{"0x1234":"/var/mydata/myFolder1"}'
-docker run @oceanprotocol/provider-py
+docker run oceanprotocol/provider-py
 ```
 
 ## 3. Alice mints 100 tokens

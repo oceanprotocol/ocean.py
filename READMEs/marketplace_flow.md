@@ -5,6 +5,7 @@ This batteries-included flow includes metadata, multiple services for one datato
 It focuses on Alice's experience as a publisher, and Bob's experience as a buyer & consumer. The rest are services used by Alice and Bob.
 
 Here's the steps.
+
 1. Initialize services
 1. Alice publishes assets for data services (= publishes a datatoken contract and metadata)
 1. Alice mints 100 tokens
@@ -18,19 +19,20 @@ Let's go through each step.
 ## 0. Installation
 
 If you haven't installed yet:
+
 ```console
 pip install ocean-lib
 ```
 
 ## 1. Initialize services
 
-This quickstart treats the publisher service, metadata store, and marketplace as 
+This quickstart treats the publisher service, metadata store, and marketplace as
 externally-run services. For convenience, we run them locally in default settings.
 
 ```
-docker run @oceanprotocol/provider-py:latest
-docker run @oceanprotocol/aquarius:latest
-docker run @oceanprotocol/marketplace:latest
+docker run oceanprotocol/provider-py:latest
+docker run oceanprotocol/aquarius:latest
+docker run oceanprotocol/marketplace:latest
 ```
 
 ## 2. Alice publishes assets for data services (= publishes a DataToken contract)
@@ -55,15 +57,15 @@ alice_wallet = Wallet(ocean.web3, private_key='8da4ef21b864d2cc526dbdb2a120bd287
 data_token = ocean.create_data_token(ocean.config.metadata_store_url, 'DataToken1', 'DT1', alice_wallet)
 token_address = data_token.address
 
-# `ocean.assets.create` will encrypt the URLs using the provider's encrypt service endpoint and update 
+# `ocean.assets.create` will encrypt the URLs using the provider's encrypt service endpoint and update
 # the asset before pushing to metadata store
 # `ocean.assets.create` will require that token_address is a valid DataToken contract address, unless token_address
 # is not provided then the `create` method will first create a new data token and use it in the new
 # asset.
 metadata =  {
     "main": {
-        "type": "dataset", "name": "10 Monkey Species Small", "author": "Mario", 
-        "license": "CC0: Public Domain", "dateCreated": "2012-02-01T10:55:11Z", 
+        "type": "dataset", "name": "10 Monkey Species Small", "author": "Mario",
+        "license": "CC0: Public Domain", "dateCreated": "2012-02-01T10:55:11Z",
         "files": [
             { "index": 0, "contentType": "application/zip", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/training.zip"},
             { "index": 1, "contentType": "text/text", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/monkey_labels.txt"},
@@ -75,7 +77,7 @@ service_attributes = {
         "main": {
             "name": "dataAssetAccessServiceAgreement",
             "creator": alice_wallet.address,
-            "cost": to_base_18(1.5), # service cost is 1.5 tokens, must be converted to 
+            "cost": to_base_18(1.5), # service cost is 1.5 tokens, must be converted to
             "timeout": 3600 * 24,
             "datePublished": metadata["main"]['dateCreated']
         }
@@ -158,10 +160,10 @@ print(f"Service 1 costs {tokens_amount * price_in_OCEAN * OCEAN_price} USD")
 ```python
 
 data_token = market_ocean.get_data_token(token_address)
-# This assumes bob_wallet already has sufficient OCEAN tokens to buy the data token. OCEAN tokens 
+# This assumes bob_wallet already has sufficient OCEAN tokens to buy the data token. OCEAN tokens
 # can be obtained through a crypto exchange or an on-chain pool such as balancer or uniswap
 market_ocean.pool.buy_data_tokens(
-    pool_address, 
+    pool_address,
     amount_base=to_base_18(1.0), # buy one data token
     max_OCEAN_amount_base=to_base_18(0.1), # pay maximum 0.1 OCEAN tokens
     from_wallet=bob_wallet
@@ -169,7 +171,7 @@ market_ocean.pool.buy_data_tokens(
 
 
 ```
-   
+
 ## 7. Bob uses a service he just purchased (download)
 
 ```python
@@ -185,11 +187,11 @@ service = asset.get_service(ServiceTypes.ASSET_ACCESS)
 quote = bob_ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
 transfer_tx_id = bob_ocean.assets.pay_for_service(quote.amount, quote.data_token_address, quote.receiver_address, bob_wallet)
 file_path = bob_ocean.assets.download(
-    asset.did, 
-    service.index, 
-    bob_wallet, 
-    transfer_tx_id, 
-    destination='~/my-datasets', 
+    asset.did,
+    service.index,
+    bob_wallet,
+    transfer_tx_id,
+    destination='~/my-datasets',
     index=0
 )
 ```
