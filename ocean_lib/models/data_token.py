@@ -110,7 +110,7 @@ class DataToken(ContractBase):
         assert len(event_logs) == 1, \
             f'Multiple order events in the same transaction !!! {event_logs}'
 
-        asset_id = did_to_id_bytes(did).hex()
+        asset_id = did
         if order_log.args.did.hex() != asset_id or str(order_log.args.serviceId) != str(service_id):
             raise AssertionError(f'The asset id (DID) or service id in the event does '
                                  f'not match the requested asset. \n'

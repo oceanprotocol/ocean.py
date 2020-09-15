@@ -8,6 +8,7 @@ import logging
 import lzma
 import os
 
+from eth_utils import add_0x_prefix
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_utils.agreements.service_factory import ServiceDescriptor, ServiceFactory
 from ocean_utils.agreements.service_types import ServiceTypes
@@ -15,7 +16,7 @@ from ocean_utils.aquarius.aquarius import Aquarius
 from ocean_utils.aquarius.aquarius_provider import AquariusProvider
 from ocean_utils.ddo.metadata import MetadataMain
 from ocean_utils.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
-from ocean_utils.did import DID
+from ocean_utils.did import DID, did_to_id
 from ocean_utils.exceptions import (
     OceanDIDAlreadyExist,
 )
@@ -364,6 +365,9 @@ class OceanAssets:
                                  f'requires {amount_base} number of tokens.')
         if fee_receiver:
             assert fee_percentage > 0, f'fee_percentage should be > 0.'
+
+        if did.startswith('did:'):
+            did = add_0x_prefix(did_to_id(did))
 
         tx_hash = dt.startOrder(
             receiver, amount_base, did, service_id,
