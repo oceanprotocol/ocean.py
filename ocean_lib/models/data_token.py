@@ -23,6 +23,9 @@ class DataToken(ContractBase):
     ORDER_STARTED_EVENT = 'OrderStarted'
     ORDER_FINISHED_EVENT = 'OrderFinished'
 
+    OPF_FEE_PERCENTAGE = 0.001
+    MAX_MARKET_FEE_PERCENTAGE = 0.001
+
     def get_transfer_event(self, block_number, sender, receiver):
         event = getattr(self.events, 'Transfer')
         filter_params = {'from': sender, 'to': receiver}
@@ -98,7 +101,7 @@ class DataToken(ContractBase):
 
         return logs[0]
 
-    def verify_order_tx(self, web3, tx_id, did, service_id, amount_base, sender, receiver, fee_percentage):
+    def verify_order_tx(self, web3, tx_id, did, service_id, amount_base, sender, receiver):
         event = getattr(self.events, self.ORDER_STARTED_EVENT)
         tx_receipt = self.get_tx_receipt(tx_id)
         if tx_receipt.status == 0:
@@ -127,18 +130,22 @@ class DataToken(ContractBase):
             raise AssertionError(f'sender of order transaction is not the same as the requesting account.')
 
         transfer_logs = self.events.Transfer().processReceipt(tx_receipt)
-        receiver_to_tr = {tr.args.to: tr for tr in transfer_logs}
-        if receiver not in receiver_to_tr:
-            raise AssertionError(f'receiver {receiver} is not found in the transfer events.')
+        receiver_to_transfers = {}
+        for tr in transfer_logs:
+            if tr.args.to not in receiver_to_transfers:
+                receiver_to_transfers[tr.args.to] = []
 
-        transfer = receiver_to_tr[receiver]
-        fee = to_base_18(fee_percentage)
-        target_value = amount_base - int(amount_base * fee / to_base_18(1.0))
-        if abs(transfer.args.value - target_value) > 5:
+            receiver_to_transfers[tr.args.to].append(tr)
+
+        if receiver not in receiver_to_transfers:
+            raise AssertionError(f'receiver {receiver} is not found in the transfer events.')
+        transfers = sorted(receiver_to_transfers[receiver], key=lambda x: x.args.value)
+        total = sum(tr.args.value for tr in transfers)
+        if total < (amount_base - 5):
             raise ValueError(f'transferred value does meet the service cost: '
-                             f'service.cost-fee={from_base_18(target_value)}, '
-                             f'transferred value={from_base_18(transfer.args.value)}')
-        return tx, order_log, transfer
+                             f'service.cost-fee={from_base_18(amount_base)}, '
+                             f'transferred value={from_base_18(total)}')
+        return tx, order_log, transfers[-1]
 
     def download(self, wallet: Wallet, tx_id: str, destination_folder: str):
         url = self.blob()
@@ -166,6 +173,14 @@ class DataToken(ContractBase):
         url_object = json.loads(self.blob())
         assert url_object['t'] == 0, f'This datatoken does not appear to have a direct consume url.'
         return url_object['url']
+
+    @staticmethod
+    def get_max_fee_percentage():
+        return DataToken.OPF_FEE_PERCENTAGE + DataToken.MAX_MARKET_FEE_PERCENTAGE
+
+    @staticmethod
+    def calculate_max_fee(amount):
+        return int(amount * to_base_18(DataToken.get_max_fee_percentage()) / to_base_18(1.0))
 
     # ============================================================
     # Token transactions using amount of tokens as a float instead of int

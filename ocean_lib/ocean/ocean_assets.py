@@ -374,9 +374,10 @@ class OceanAssets:
             fee_receiver, to_base_18(fee_percentage), from_wallet)
 
         try:
+            target_amount = amount_base - dt.calculate_max_fee(amount_base)
             dt.verify_order_tx(
                 Web3Provider.get_web3(), tx_hash, did, service_id,
-                amount_base, from_wallet.address, receiver, (0.001 + fee_percentage))
+                target_amount, from_wallet.address, receiver)
             return tx_hash
         except (AssertionError, Exception) as e:
             msg = (

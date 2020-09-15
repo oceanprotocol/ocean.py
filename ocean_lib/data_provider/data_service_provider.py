@@ -123,8 +123,8 @@ class DataServiceProvider:
     @staticmethod
     def download_service(did, service_endpoint, wallet, files,
                          destination_folder, service_id,
-                         token_address, index=None
-                         ):
+                         token_address, order_tx_id,
+                         index=None):
         """
         Call the provider endpoint to get access to the different files that form the asset.
 
@@ -135,6 +135,8 @@ class DataServiceProvider:
         :param destination_folder: Path, str
         :param service_id: integer the id of the service inside the DDO's service dict
         :param token_address: hex str the data token address associated with this asset/service
+        :param order_tx_id: hex str the transaction hash for the required data token
+            transfer (tokens of the same token address above)
         :param index: Index of the document that is going to be downloaded, int
         :return: True if was downloaded, bool
         """
@@ -152,6 +154,7 @@ class DataServiceProvider:
             f'&serviceId={service_id}'
             f'&serviceType={ServiceTypes.ASSET_ACCESS}'
             f'&dataToken={token_address}'
+            f'&transferTxId={order_tx_id}'
             f'&consumerAddress={wallet.address}'
         )
         config = ConfigProvider.get_config()
