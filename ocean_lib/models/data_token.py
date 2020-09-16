@@ -124,7 +124,10 @@ class DataToken(ContractBase):
 
         target_amount = amount_base - self.calculate_fee(amount_base, self.OPF_FEE_PERCENTAGE)
         if order_log.args.mrktFeeCollector and order_log.args.marketFee > 0:
-            assert order_log.args.marketFee <= (self.calculate_fee(amount_base, self.MAX_MARKET_FEE_PERCENTAGE) + 5)
+            assert order_log.args.marketFee <= (self.calculate_fee(amount_base, self.MAX_MARKET_FEE_PERCENTAGE) + 5), \
+                f'marketFee {order_log.args.marketFee} exceeds the expected maximum ' \
+                f'of {self.calculate_fee(amount_base, self.MAX_MARKET_FEE_PERCENTAGE)} ' \
+                f'based on feePercentage={self.MAX_MARKET_FEE_PERCENTAGE} .'
             target_amount = target_amount - order_log.args.marketFee
 
         # verify sender of the tx using the Tx record
