@@ -179,16 +179,16 @@ config = {
    'network': 'rinkeby',
 }
 bob_ocean = Ocean(config)
-
+market_address = '0x111111'
 bob_wallet = Wallet(bob_ocean.web3, private_key='1234ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8o')
 service = asset.get_service(ServiceTypes.ASSET_ACCESS)
 quote = bob_ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
-transfer_tx_id = bob_ocean.assets.pay_for_service(quote.amount, quote.data_token_address, quote.receiver_address, bob_wallet)
+order_tx_id = bob_ocean.assets.pay_for_service(quote.amount, quote.data_token_address, asset.did, service.index, market_address, bob_wallet)
 file_path = bob_ocean.assets.download(
     asset.did, 
     service.index, 
     bob_wallet, 
-    transfer_tx_id, 
+    order_tx_id, 
     destination='~/my-datasets', 
     index=0
 )

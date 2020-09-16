@@ -101,12 +101,13 @@ class DataToken(ContractBase):
 
         return logs[0]
 
-    def verify_order_tx(self, web3, tx_id, did, service_id, amount_base, sender, receiver):
+    def verify_order_tx(self, web3, tx_id, did, service_id, amount_base, sender):
         event = getattr(self.events, self.ORDER_STARTED_EVENT)
         tx_receipt = self.get_tx_receipt(tx_id)
         if tx_receipt.status == 0:
             raise AssertionError(f'order transaction failed.')
 
+        receiver = self.contract_concise.minter()
         event_logs = event().processReceipt(tx_receipt)
         order_log = event_logs[0] if event_logs else None
         if not order_log:
@@ -121,8 +122,13 @@ class DataToken(ContractBase):
                                  f'requested: (did={did}, serviceId={service_id}\n'
                                  f'event: (did={order_log.args.did.hex()}, serviceId={order_log.args.serviceId}')
 
-        if order_log.args.receiver != receiver:
-            raise AssertionError(f'The order event receiver does not match the expected value.')
+        target_amount = amount_base - self.calculate_fee(amount_base, self.OPF_FEE_PERCENTAGE)
+        if order_log.args.mrktFeeCollector and order_log.args.marketFee > 0:
+            assert order_log.args.marketFee <= (self.calculate_fee(amount_base, self.MAX_MARKET_FEE_PERCENTAGE) + 5), \
+                f'marketFee {order_log.args.marketFee} exceeds the expected maximum ' \
+                f'of {self.calculate_fee(amount_base, self.MAX_MARKET_FEE_PERCENTAGE)} ' \
+                f'based on feePercentage={self.MAX_MARKET_FEE_PERCENTAGE} .'
+            target_amount = target_amount - order_log.args.marketFee
 
         # verify sender of the tx using the Tx record
         tx = web3.eth.getTransaction(tx_id)
@@ -141,9 +147,9 @@ class DataToken(ContractBase):
             raise AssertionError(f'receiver {receiver} is not found in the transfer events.')
         transfers = sorted(receiver_to_transfers[receiver], key=lambda x: x.args.value)
         total = sum(tr.args.value for tr in transfers)
-        if total < (amount_base - 5):
+        if total < (target_amount - 5):
             raise ValueError(f'transferred value does meet the service cost: '
-                             f'service.cost-fee={from_base_18(amount_base)}, '
+                             f'service.cost - fees={from_base_18(target_amount)}, '
                              f'transferred value={from_base_18(total)}')
         return tx, order_log, transfers[-1]
 
@@ -174,14 +180,6 @@ class DataToken(ContractBase):
         assert url_object['t'] == 0, f'This datatoken does not appear to have a direct consume url.'
         return url_object['url']
 
-    @staticmethod
-    def get_max_fee_percentage():
-        return DataToken.OPF_FEE_PERCENTAGE + DataToken.MAX_MARKET_FEE_PERCENTAGE
-
-    @staticmethod
-    def calculate_max_fee(amount):
-        return int(amount * to_base_18(DataToken.get_max_fee_percentage()) / to_base_18(1.0))
-
     # ============================================================
     # Token transactions using amount of tokens as a float instead of int
     # amount of tokens will be converted to the base value before sending
@@ -194,6 +192,20 @@ class DataToken(ContractBase):
 
     def transfer_tokens(self, to: str, value: float, from_wallet: Wallet):
         return self.transfer(to, to_base_18(value), from_wallet)
+
+    ################
+    # Helpers
+    @staticmethod
+    def get_max_fee_percentage():
+        return DataToken.OPF_FEE_PERCENTAGE + DataToken.MAX_MARKET_FEE_PERCENTAGE
+
+    @staticmethod
+    def calculate_max_fee(amount):
+        return DataToken.calculate_fee(amount, DataToken.get_max_fee_percentage())
+
+    @staticmethod
+    def calculate_fee(amount, percentage):
+        return int(amount * to_base_18(percentage) / to_base_18(1.0))
 
     # ============================================================
     # reflect DataToken Solidity methods
@@ -224,11 +236,10 @@ class DataToken(ContractBase):
     def setMinter(self, minter, from_wallet) -> str:
         return self.send_transaction('setMinter', (minter, ), from_wallet)
 
-    def startOrder(self, receiver: str, amount: int, did: str, serviceId: int,
-                   feeCollector: str, feePercentage: int, from_wallet: Wallet):
+    def startOrder(self, amount: int, did: str, serviceId: int, mrktFeeCollector: str, from_wallet: Wallet):
         return self.send_transaction(
             'startOrder',
-            (receiver, amount, did, serviceId, feeCollector, feePercentage),
+            (amount, did, serviceId, mrktFeeCollector),
             from_wallet
         )
 
