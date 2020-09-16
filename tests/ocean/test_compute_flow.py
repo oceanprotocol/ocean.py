@@ -93,17 +93,9 @@ def test_compute_flow():
         order_requirements.data_token_address,
         compute_ddo.did,
         service.index,
-        order_requirements.receiver_address,
         '0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9',
-        0.001,
         consumer_wallet
     )
-    # try:
-    #     tx_id = dt.transfer(order_requirements.receiver_address, order_requirements.amount, consumer_wallet)
-    #     dt.verify_transfer_tx(tx_id, consumer_wallet.address, order_requirements.receiver_address)
-    # except (AssertionError, Exception) as e:
-    #     print(e)
-    #     raise
 
     ######
     job_id = cons_ocn.compute.start(

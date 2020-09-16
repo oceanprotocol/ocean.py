@@ -324,10 +324,14 @@ class OceanAssets:
         """
         assert service_type or service_index, f'One of service_index or service_type is required.'
         asset = self.resolve(did)
-        service = ServiceAgreement.from_ddo(ServiceTypes.ASSET_ACCESS, asset)
+        if service_type:
+            sa = ServiceAgreement.from_ddo(service_type, asset)
+        else:
+            service = asset.get_service_by_index(service_index)
+            sa = ServiceAgreement.from_ddo(service.type, asset)
 
         dt_address = asset.data_token_address
-        sa = ServiceAgreement.from_ddo(service.type, asset)
+
         initialize_url = self._data_provider.get_initialize_endpoint(sa.service_endpoint)
         order_requirements = self._data_provider.get_order_requirements(
             asset.did, initialize_url, consumer_address, sa.index, sa.type, dt_address
@@ -340,8 +344,7 @@ class OceanAssets:
 
     @staticmethod
     def pay_for_service(amount_base: int, token_address: str, did: str, service_id: int,
-                        receiver_address: str, fee_receiver: str, fee_percentage: float,
-                        from_wallet: Wallet) -> str:
+                        fee_receiver: str, from_wallet: Wallet) -> str:
         """
         Submits the payment for chosen service in DataTokens.
 
@@ -349,35 +352,25 @@ class OceanAssets:
         :param token_address:
         :param did:
         :param service_id:
-        :param receiver_address:
         :param fee_receiver:
-        :param fee_percentage:
         :param from_wallet: Wallet instance
         :return: hex str id of transfer transaction
         """
         amount_base = int(amount_base)
-        receiver = receiver_address
         dt = DataToken(token_address)
         balance = dt.balanceOf(from_wallet.address)
         if balance < amount_base:
             raise AssertionError(f'Your token balance {balance} is not sufficient '
                                  f'to execute the requested service. This service '
                                  f'requires {amount_base} number of tokens.')
-        if fee_receiver:
-            assert fee_percentage > 0, f'fee_percentage should be > 0.'
-
         if did.startswith('did:'):
             did = add_0x_prefix(did_to_id(did))
 
-        tx_hash = dt.startOrder(
-            receiver, amount_base, did, service_id,
-            fee_receiver, to_base_18(fee_percentage), from_wallet)
+        tx_hash = dt.startOrder(amount_base, did, service_id, fee_receiver, from_wallet)
 
         try:
-            target_amount = amount_base - dt.calculate_max_fee(amount_base)
-            dt.verify_order_tx(
-                Web3Provider.get_web3(), tx_hash, did, service_id,
-                target_amount, from_wallet.address, receiver)
+            dt.verify_order_tx(Web3Provider.get_web3(), tx_hash, did, service_id,
+                               amount_base, from_wallet.address)
             return tx_hash
         except (AssertionError, Exception) as e:
             msg = (
