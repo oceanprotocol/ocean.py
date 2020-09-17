@@ -102,12 +102,11 @@ class OceanCompute:
 
     @staticmethod
     def create_compute_service_attributes(
-            cost, timeout, creator, date_published, provider_attributes):
+            cost: float, timeout: int, creator: str, date_published: str, provider_attributes: dict):
         """
 
         :param cost: float the price of this compute service expressed in amount of
-            DataTokens. This will be converted to the integer equivalent (Wei) to be stored
-            in the DDO service.
+            DataTokens
         :param timeout: integer maximum amount of running compute service in seconds
         :param creator: str ethereum address
         :param date_published: str timestamp (datetime.utcnow().replace(microsecond=0).isoformat() + "Z")
@@ -119,7 +118,7 @@ class OceanCompute:
                 "name": "dataAssetComputingServiceAgreement",
                 "creator": creator,
                 "datePublished": date_published,
-                "cost": to_base_18(cost),
+                "cost": cost,
                 "timeout": timeout,
                 "provider": provider_attributes
             }

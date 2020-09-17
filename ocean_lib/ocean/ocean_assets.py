@@ -75,7 +75,7 @@ class OceanAssets:
         access_service_descriptor = service_type_to_descriptor.pop(
             ServiceTypes.ASSET_ACCESS,
             ServiceDescriptor.access_service_descriptor(
-                self._build_access_service(metadata, to_base_18(1), wallet.address),
+                self._build_access_service(metadata, 1.0, wallet.address),
                 self._data_provider.get_download_endpoint(self._config)
             )
         )
@@ -343,12 +343,12 @@ class OceanAssets:
         return order_requirements
 
     @staticmethod
-    def pay_for_service(amount_base: int, token_address: str, did: str, service_id: int,
+    def pay_for_service(amount: float, token_address: str, did: str, service_id: int,
                         fee_receiver: str, from_wallet: Wallet) -> str:
         """
         Submits the payment for chosen service in DataTokens.
 
-        :param amount_base:
+        :param amount:
         :param token_address:
         :param did:
         :param service_id:
@@ -356,7 +356,7 @@ class OceanAssets:
         :param from_wallet: Wallet instance
         :return: hex str id of transfer transaction
         """
-        amount_base = int(amount_base)
+        amount_base = to_base_18(amount)
         dt = DataToken(token_address)
         balance = dt.balanceOf(from_wallet.address)
         if balance < amount_base:
@@ -450,7 +450,7 @@ class OceanAssets:
         return [asset.did for asset in self.query({"query": {"proof.creator": [owner_address]}}, offset=1000)]
 
     @staticmethod
-    def _build_access_service(metadata: dict, cost: int, address: str) -> dict:
+    def _build_access_service(metadata: dict, cost: float, address: str) -> dict:
         return {
             "main": {
                 "name": "dataAssetAccessServiceAgreement",
