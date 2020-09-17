@@ -118,7 +118,7 @@ class DataServiceProvider:
             return None
         order = dict(response.json())
 
-        return OrderRequirements(order['numTokens'], order['dataToken'], order['to'], order['nonce'])
+        return OrderRequirements(float(order['numTokens']), order['dataToken'], order['to'], int(order['nonce']))
 
     @staticmethod
     def download_service(did, service_endpoint, wallet, files,
