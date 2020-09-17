@@ -1,5 +1,4 @@
 import logging
-import traceback
 import typing
 
 from ocean_lib.web3_internal.constants import MIN_GAS_PRICE

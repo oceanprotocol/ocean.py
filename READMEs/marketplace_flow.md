@@ -75,7 +75,7 @@ service_attributes = {
         "main": {
             "name": "dataAssetAccessServiceAgreement",
             "creator": alice_wallet.address,
-            "cost": to_base_18(1.5), # service cost is 1.5 tokens, must be converted to 
+            "cost": 1.0, # service cost is 1.0 tokens 
             "timeout": 3600 * 24,
             "datePublished": metadata["main"]['dateCreated']
         }
