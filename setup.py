@@ -22,8 +22,8 @@ install_requirements = [
     'pyopenssl',
     'PyJWT',  # not jwt
     'PyYAML==5.3.1',
-    'ocean-utils==0.4.1',
-    'requests>=2.23.0',
+    'ocean-utils==0.4.2',
+    'requests>=2.21.0',
     'deprecated',
     'pycryptodomex',
     'tqdm',
