@@ -94,7 +94,8 @@ class OceanAssets:
 
     def create(self, metadata: dict, publisher_wallet: Wallet,
                service_descriptors: list=None, owner_address: str=None,
-               data_token_address: str=None) -> (Asset, None):
+               data_token_address: str=None,
+               dt_name: str=None, dt_symbol: str=None, dt_blob: str=None) -> (Asset, None):
         """
         Register an asset on-chain by creating/deploying a DataToken contract
         and in the Metadata store (Aquarius).
@@ -133,9 +134,46 @@ class OceanAssets:
         # Adding proof to the ddo.
         asset.add_proof(checksum_dict, publisher_wallet)
 
+        #################
+        # DataToken
+        address = DTFactory.configured_address(Web3Helper.get_network_name(), self._config.address_file)
+        dtfactory = DTFactory(address)
+        if not data_token_address:
+            blob = dt_blob or ''
+            name = dt_name or metadata['main']['name']
+            symbol = dt_symbol or name
+            # register on-chain
+            tx_id = dtfactory.createToken(
+                blob, name, symbol, DataToken.DEFAULT_CAP_BASE, from_wallet=publisher_wallet)
+            data_token = DataToken(dtfactory.get_token_address(tx_id))
+            if not data_token:
+                logger.warning(f'Creating new data token failed.')
+                return None
+
+            data_token_address = data_token.address
+
+            logger.info(f'Successfully created data token with address '
+                        f'{data_token.address} for new dataset asset with did {did}.')
+            # owner_address is set as minter only if creating new data token. So if
+            # `data_token_address` is set `owner_address` has no effect.
+            if owner_address:
+                data_token.setMinter(owner_address, from_wallet=publisher_wallet)
+        else:
+            # verify data_token_address
+            dt = DataToken(data_token_address)
+            minter = dt.contract_concise.minter()
+            if not minter:
+                raise AssertionError(f'datatoken address {data_token_address} does not seem to be a valid DataToken contract.')
+            elif minter.lower() != publisher_wallet.address.lower():
+                raise AssertionError(f'Minter of datatoken {data_token_address} is not the same as the publisher.')
+            elif not dtfactory.verify_data_token(data_token_address):
+                raise AssertionError(f'datatoken address {data_token_address} is not found in the DTFactory events.')
+
+        assert data_token_address, f'data_token_address is required for publishing a dataset asset.'
+
         # Generating the did and adding to the ddo.
-        did = asset.assign_did(DID.did(asset.proof['checksum']))
-        logger.debug(f'Generating new did: {did}')
+        did = asset.assign_did(data_token_address)
+        logger.debug(f'Using datatoken address as did: {did}')
         # Check if it's already registered first!
         if did in self._get_aquarius().list_assets():
             raise OceanDIDAlreadyExist(
@@ -198,29 +236,6 @@ class OceanAssets:
         logger.debug(
             f'Generated asset and services, DID is {asset.did},'
             f' metadata service @{ddo_service_endpoint}.')
-
-        if not data_token_address:
-            blob = json.dumps({'t': 1, 'url': ddo_service_endpoint})
-            name = metadata['main']['name']
-            symbol = name
-            # register on-chain
-            address = DTFactory.configured_address(Web3Helper.get_network_name(), self._config.address_file)
-            dtfactory = DTFactory(address)
-            tx_id = dtfactory.createToken(
-                blob, name, symbol, DataToken.DEFAULT_CAP_BASE, from_wallet=publisher_wallet)
-            data_token = DataToken(dtfactory.get_token_address(tx_id))
-            if not data_token:
-                logger.warning(f'Creating new data token failed.')
-                return None
-
-            data_token_address = data_token.address
-
-            logger.info(f'Successfully created data token with address '
-                        f'{data_token.address} for new dataset asset with did {did}.')
-            # owner_address is set as minter only if creating new data token. So if
-            # `data_token_address` is set `owner_address` has no effect.
-            if owner_address:
-                data_token.setMinter(owner_address, from_wallet=publisher_wallet)
 
         # Set datatoken address in the asset
         asset.data_token_address = data_token_address

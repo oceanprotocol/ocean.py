@@ -9,6 +9,17 @@ class DTFactory(ContractBase):
     CONTRACT_NAME = 'DTFactory'
     FIRST_BLOB = 'https://example.com/dataset-1'
 
+    def verify_data_token(self, dt_address):
+        event = getattr(self.events, 'TokenRegistered')
+        filter_params = {'tokenAddress': dt_address}
+        event_filter = event().createFilter(
+            fromBlock=0,
+            argument_filters=filter_params
+        )
+        logs = event_filter.get_all_entries()
+
+        return logs and logs[0].args.tokenAddress == dt_address
+
     def get_token_registered_event(self, block_number, metadata_url, sender):
         event = getattr(self.events, 'TokenRegistered')
         filter_params = {}
