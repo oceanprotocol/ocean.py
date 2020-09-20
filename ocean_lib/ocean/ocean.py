@@ -70,7 +70,7 @@ class Ocean:
                 },
                 'resources': {
                     'aquarius.url': aqua_url,
-                    'provider.url': config.get('providerUri', 'http://localhost:8030')
+                    'provider.url': config.get('providerUri', 'http://localhost:8030/api/v1')
                 }
             }
             config = Config(options_dict=config_dict)

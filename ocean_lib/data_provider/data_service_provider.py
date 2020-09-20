@@ -327,12 +327,11 @@ class DataServiceProvider:
         :param config: Config
         :return: Url, str
         """
-        _url = 'http://localhost:8030'
+        _url = 'http://localhost:8030/api/v1'
         if config.has_option('resources', 'provider.url'):
             _url = config.get('resources', 'provider.url') or _url
 
-        _path = '/api/v1'
-        return f'{_url}{_path}'
+        return _url
 
     @staticmethod
     def get_initialize_endpoint(service_endpoint):
