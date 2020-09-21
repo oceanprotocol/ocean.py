@@ -58,7 +58,7 @@ class OceanAssets:
     def _get_aquarius(self, url=None) -> Aquarius:
         return AquariusProvider.get_aquarius(url or self._aquarius_url)
 
-    def _process_service_descriptors(self, service_descriptors, metadata, wallet: Wallet) -> list:
+    def _process_service_descriptors(self, service_descriptors: list, metadata: dict, provider_uri: str, wallet: Wallet) -> list:
         ddo_service_endpoint = self._get_aquarius().get_service_endpoint()
 
         service_type_to_descriptor = {sd[0]: sd for sd in service_descriptors}
@@ -72,17 +72,14 @@ class OceanAssets:
         _service_descriptors = [metadata_service_desc, ]
 
         # Always dafault to creating a ServiceTypes.ASSET_ACCESS service if no services are specified
-        access_service_descriptor = service_type_to_descriptor.pop(
-            ServiceTypes.ASSET_ACCESS,
-            ServiceDescriptor.access_service_descriptor(
+        access_service_descriptor = service_type_to_descriptor.pop(ServiceTypes.ASSET_ACCESS, None)
+        compute_service_descriptor = service_type_to_descriptor.pop(ServiceTypes.CLOUD_COMPUTE, None)
+        # Make an access service only if no services are given by the user.
+        if not access_service_descriptor and not compute_service_descriptor:
+            access_service_descriptor = ServiceDescriptor.access_service_descriptor(
                 self._build_access_service(metadata, 1.0, wallet.address),
-                self._data_provider.get_download_endpoint(self._config)
+                self._data_provider.build_download_endpoint(provider_uri)
             )
-        )
-        compute_service_descriptor = service_type_to_descriptor.pop(
-            ServiceTypes.CLOUD_COMPUTE,
-            None
-        )
 
         if access_service_descriptor:
             _service_descriptors.append(access_service_descriptor)
@@ -94,7 +91,7 @@ class OceanAssets:
 
     def create(self, metadata: dict, publisher_wallet: Wallet,
                service_descriptors: list=None, owner_address: str=None,
-               data_token_address: str=None,
+               data_token_address: str=None, provider_uri=None,
                dt_name: str=None, dt_symbol: str=None, dt_blob: str=None) -> (Asset, None):
         """
         Register an asset on-chain by creating/deploying a DataToken contract
@@ -109,6 +106,13 @@ class OceanAssets:
             registering the asset on-chain, the ownership is transferred to this address
         :param data_token_address: hex str the address of the data token smart contract. The new
             asset will be associated with this data token address.
+        :param provider_uri: str URL of service provider. This will be used as base to
+            construct the serviceEndpoint for the `access` (download) service
+        :param dt_name: str name of DataToken if creating a new one
+        :param dt_symbol: str symbol of DataToken if creating a new one
+        :param dt_blob: str blob of DataToken if creating a new one. A `blob` is any text
+            to be stored with the ERC20 DataToken contract for any purpose.
+
         :return: DDO instance
         """
         assert isinstance(metadata, dict), f'Expected metadata of type dict, got {type(metadata)}'
@@ -212,7 +216,7 @@ class OceanAssets:
         logger.debug('Encrypting content urls in the metadata.')
 
         publisher_signature = self._data_provider.sign_message(publisher_wallet, asset.asset_id, self._config)
-        encrypt_endpoint = self._data_provider.get_encrypt_endpoint(self._config)
+        encrypt_endpoint = self._data_provider.build_encrypt_endpoint(provider_uri)
         files_encrypted = self._data_provider.encrypt_files_dict(
             metadata_copy['main']['files'],
             encrypt_endpoint,

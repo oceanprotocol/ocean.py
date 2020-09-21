@@ -334,8 +334,36 @@ class DataServiceProvider:
         return _url
 
     @staticmethod
+    def build_endpoint(service_name, provider_uri=None):
+        if not provider_uri:
+            config = ConfigProvider.get_config()
+            provider_uri = DataServiceProvider.get_url(config)
+        return f'{provider_uri}/services/{service_name}'
+
+    @staticmethod
+    def build_encrypt_endpoint(provider_uri=None):
+        return DataServiceProvider.build_endpoint('encrypt', provider_uri)
+
+    @staticmethod
+    def build_initialize_endpoint(provider_uri=None):
+        return DataServiceProvider.build_endpoint('initialize', provider_uri)
+
+    @staticmethod
+    def build_download_endpoint(provider_uri=None):
+        return DataServiceProvider.build_endpoint('download', provider_uri)
+
+    @staticmethod
+    def build_compute_endpoint(provider_uri=None):
+        return DataServiceProvider.build_endpoint('compute', provider_uri)
+
+    @staticmethod
     def get_initialize_endpoint(service_endpoint):
-        base_url = '/'.join(service_endpoint.split('/')[:-1])
+        parts = service_endpoint.split('/')
+        if parts[-2] == 'services':
+            base_url = '/'.join(parts[:-2])
+            return f'{base_url}/services/initialize'
+
+        base_url = '/'.join(parts[:-1])
         return f'{base_url}/initialize'
 
     @staticmethod
