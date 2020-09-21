@@ -5,9 +5,10 @@ import time
 import uuid
 
 import pytest
+from ocean_lib.models.data_token import DataToken
 from ocean_utils.agreements.service_factory import ServiceDescriptor
 from ocean_utils.ddo.ddo import DDO
-from ocean_utils.did import DID, did_to_id_bytes
+from ocean_utils.did import DID, did_to_id
 
 from tests.resources.helper_functions import (
     get_algorithm_ddo,
@@ -35,7 +36,7 @@ def test_register_asset(publisher_ocean_instance):
     bob = get_consumer_wallet()
     num_assets_owned = len([
         a for a in ocn.assets.owner_assets(alice.address)
-        if ddo_reg.didOwner(did_to_id_bytes(a))
+        if DataToken(did_to_id(a)).contract_concise.isMinter(alice.address)
     ])
 
     original_ddo = create_asset(ocn, alice)
@@ -97,10 +98,9 @@ def test_register_asset(publisher_ocean_instance):
 
     assert ocn.assets.owner(ddo.did) == alice.address, f'asset owner does not seem correct.'
 
-    ddo_reg = ocn.assets.ddo_registry()
     owner_assets = [
         a for a in ocn.assets.owner_assets(alice.address)
-        if ddo_reg.didOwner(did_to_id_bytes(a))
+        if DataToken(did_to_id(a)).contract_concise.isMinter(alice.address)
     ]
     assert len(owner_assets) == num_assets_owned + 1
 

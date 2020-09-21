@@ -24,7 +24,7 @@ from ocean_utils.utils.utilities import checksum
 
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import OrderRequirements
-from ocean_lib.models.ddo import DDOContract
+from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.assets.asset_downloader import download_asset_files
@@ -45,7 +45,7 @@ class OceanAssets:
         self._config = config
         self._aquarius_url = config.aquarius_url
         self._data_provider = data_provider
-        self._ddo_registry_address = ddo_registry_address
+        self._metadata_registry_address = ddo_registry_address
 
         downloads_path = os.path.join(os.getcwd(), 'downloads')
         if self._config.has_option('resources', 'downloads.path'):
@@ -53,7 +53,7 @@ class OceanAssets:
         self._downloads_path = downloads_path
 
     def ddo_registry(self):
-        return DDOContract(self._ddo_registry_address)
+        return MetadataContract(self._metadata_registry_address)
 
     def _get_aquarius(self, url=None) -> Aquarius:
         return AquariusProvider.get_aquarius(url or self._aquarius_url)
