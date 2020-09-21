@@ -17,13 +17,15 @@ using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-wi
 
 ```pip install ocean-lib```
 
-## Quickstart: Simple Flow
+## Quickstart
+
+### Simple Flow
 
 This stripped-down flow shows the essence of Ocean. Just downloading, no metadata.
 
 [Go to simple flow](READMEs/simple_flow.md)
 
-## Quickstart: Marketplace Flow
+### Marketplace Flow
 
 This batteries-included flow includes metadata, multiple services for one datatoken, and compute-to-data.
 
