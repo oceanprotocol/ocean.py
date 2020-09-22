@@ -3,12 +3,12 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 import copy
-import json
 import logging
 import lzma
 import os
 
 from eth_utils import add_0x_prefix
+from eth_utils import remove_0x_prefix
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_utils.agreements.service_factory import ServiceDescriptor, ServiceFactory
 from ocean_utils.agreements.service_types import ServiceTypes
@@ -126,7 +126,7 @@ class OceanAssets:
 
         service_descriptors = service_descriptors or []
 
-        services = self._process_service_descriptors(service_descriptors, metadata_copy, publisher_wallet)
+        services = self._process_service_descriptors(service_descriptors, metadata_copy, provider_uri, publisher_wallet)
 
         stype_to_service = {s.type: s for s in services}
         checksum_dict = dict()
@@ -157,7 +157,7 @@ class OceanAssets:
             data_token_address = data_token.address
 
             logger.info(f'Successfully created data token with address '
-                        f'{data_token.address} for new dataset asset with did {did}.')
+                        f'{data_token.address} for new dataset asset.')
             # owner_address is set as minter only if creating new data token. So if
             # `data_token_address` is set `owner_address` has no effect.
             if owner_address:
@@ -176,7 +176,7 @@ class OceanAssets:
         assert data_token_address, f'data_token_address is required for publishing a dataset asset.'
 
         # Generating the did and adding to the ddo.
-        did = asset.assign_did(data_token_address)
+        did = asset.assign_did(f'did:op:{remove_0x_prefix(data_token_address)}')
         logger.debug(f'Using datatoken address as did: {did}')
         # Check if it's already registered first!
         if did in self._get_aquarius().list_assets():

@@ -115,12 +115,16 @@ class DataToken(ContractBase):
         assert len(event_logs) == 1, \
             f'Multiple order events in the same transaction !!! {event_logs}'
 
-        asset_id = remove_0x_prefix(did)
-        if order_log.args.did.hex() != asset_id or str(order_log.args.serviceId) != str(service_id):
+        asset_id = remove_0x_prefix(did).lower()
+        log_did = remove_0x_prefix(order_log.args.did.hex().lower())
+        if len(log_did) > 40:
+            log_did = log_did[: 40]
+
+        if log_did != asset_id or str(order_log.args.serviceId) != str(service_id):
             raise AssertionError(f'The asset id (DID) or service id in the event does '
                                  f'not match the requested asset. \n'
                                  f'requested: (did={did}, serviceId={service_id}\n'
-                                 f'event: (did={order_log.args.did.hex()}, serviceId={order_log.args.serviceId}')
+                                 f'event: (did={log_did}, serviceId={order_log.args.serviceId}')
 
         target_amount = amount_base - self.calculate_fee(amount_base, self.OPF_FEE_PERCENTAGE)
         if order_log.args.mrktFeeCollector and order_log.args.marketFee > 0:

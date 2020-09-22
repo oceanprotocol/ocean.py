@@ -37,7 +37,7 @@ class MetadataContract(ContractBase):
 
         _log = None
         for log in logs:
-            if log.args.did.hex() == did:
+            if remove_0x_prefix(log.args.dataToken) == did:
                 _log = log
                 break
         return _log

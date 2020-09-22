@@ -60,7 +60,7 @@ def test_ddo_on_chain():
     logs = ddo_registry.event_MetadataCreated().processReceipt(ddo_registry.get_tx_receipt(txid))
     assert logs, f'no logs found for create ddo tx {txid}'
     log = logs[0]
-    assert add_0x_prefix(log.args.did.hex()) == asset.asset_id
+    assert add_0x_prefix(log.args.dataToken) == asset.asset_id
     # read back the asset ddo from the event log
     ddo_text = web3.toText(lzma.decompress(log.args.data))
     assert ddo_text == asset.as_text(), f'ddo text does not match original.'
@@ -82,7 +82,7 @@ def test_ddo_on_chain():
     logs = ddo_registry.event_MetadataUpdated().processReceipt(ddo_registry.get_tx_receipt(txid))
     assert logs, f'no logs found for update ddo tx {txid}'
     log = logs[0]
-    assert add_0x_prefix(log.args.did.hex()) == asset.asset_id
+    assert add_0x_prefix(log.args.dataToken) == asset.asset_id
     # read back the asset ddo from the event log
     ddo_text = web3.toText(lzma.decompress(log.args.data))
     assert ddo_text == asset.as_text(), f'ddo text does not match original.'
