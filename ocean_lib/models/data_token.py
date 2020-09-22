@@ -3,7 +3,6 @@ import os
 import time
 
 from eth_utils import remove_0x_prefix
-from ocean_utils.did import did_to_id_bytes
 
 from ocean_lib.ocean.util import to_base_18, from_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -116,15 +115,12 @@ class DataToken(ContractBase):
             f'Multiple order events in the same transaction !!! {event_logs}'
 
         asset_id = remove_0x_prefix(did).lower()
-        log_did = remove_0x_prefix(order_log.args.did.hex().lower())
-        if len(log_did) > 40:
-            log_did = log_did[: 40]
-
-        if log_did != asset_id or str(order_log.args.serviceId) != str(service_id):
+        assert asset_id == remove_0x_prefix(self.address).lower(), f'asset-id does not match the datatoken id.'
+        if str(order_log.args.serviceId) != str(service_id):
             raise AssertionError(f'The asset id (DID) or service id in the event does '
                                  f'not match the requested asset. \n'
                                  f'requested: (did={did}, serviceId={service_id}\n'
-                                 f'event: (did={log_did}, serviceId={order_log.args.serviceId}')
+                                 f'event: (serviceId={order_log.args.serviceId}')
 
         target_amount = amount_base - self.calculate_fee(amount_base, self.OPF_FEE_PERCENTAGE)
         if order_log.args.mrktFeeCollector and order_log.args.marketFee > 0:
@@ -240,17 +236,17 @@ class DataToken(ContractBase):
     def setMinter(self, minter, from_wallet) -> str:
         return self.send_transaction('setMinter', (minter, ), from_wallet)
 
-    def startOrder(self, amount: int, did: str, serviceId: int, mrktFeeCollector: str, from_wallet: Wallet):
+    def startOrder(self, amount: int, serviceId: int, mrktFeeCollector: str, from_wallet: Wallet):
         return self.send_transaction(
             'startOrder',
-            (amount, did, serviceId, mrktFeeCollector),
+            (amount, serviceId, mrktFeeCollector),
             from_wallet
         )
 
-    def finishOrder(self, orderTxId: str, consumer: str, amount: int, did: str,
+    def finishOrder(self, orderTxId: str, consumer: str, amount: int,
                     serviceId: int, from_wallet: Wallet):
         return self.send_transaction(
             'finishOrder',
-            (orderTxId, consumer, amount, did, serviceId),
+            (orderTxId, consumer, amount, serviceId),
             from_wallet
         )
