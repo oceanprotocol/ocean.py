@@ -14,7 +14,7 @@ services:
 before_install:
   - git clone https://github.com/oceanprotocol/barge
   - cd barge
-  - git checkout v3
+  - git checkout feature/did-datatoken
   - export AQUARIUS_VERSION=decentralized
   - export PROVIDER_VERSION=v0.3.0
   - export CONTRACTS_VERSION=v0.4.3
