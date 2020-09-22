@@ -2,7 +2,7 @@
   "@context": "https://w3id.org/future-method/v1",
   "authentication": [],
   "created": "2019-04-09T19:02:11Z",
-  "id": "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019755e444090fd392c8ec9c3f4",
+  "id": "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019",
   "proof": {
     "created": "2019-04-09T19:02:11Z",
     "creator": "0x00Bd138aBD70e2F00903268F3Db08f2D25677C9e",
@@ -11,7 +11,7 @@
   },
   "publicKey": [
     {
-      "id": "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019755e444090fd392c8ec9c3f4",
+      "id": "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019",
       "owner": "0x00Bd138aBD70e2F00903268F3Db08f2D25677C9e",
       "type": "EthereumECDSAKey"
     }

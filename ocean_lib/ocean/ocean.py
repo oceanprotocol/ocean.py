@@ -5,7 +5,7 @@
 import logging
 
 from ocean_lib.models.data_token import DataToken
-from ocean_lib.models.ddo import DDOContract
+from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.ocean_pool import OceanPool
@@ -70,7 +70,7 @@ class Ocean:
                 },
                 'resources': {
                     'aquarius.url': aqua_url,
-                    'provider.url': config.get('providerUri', 'http://localhost:8030')
+                    'provider.url': config.get('providerUri', 'http://localhost:8030/api/v1')
                 }
             }
             config = Config(options_dict=config_dict)
@@ -88,7 +88,7 @@ class Ocean:
         self.assets = OceanAssets(
             self._config,
             data_provider,
-            addresses.get(DDOContract.CONTRACT_NAME)
+            addresses.get(MetadataContract.CONTRACT_NAME)
         )
         self.services = OceanServices()
         self.auth = OceanAuth(self._config.storage_path)

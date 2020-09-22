@@ -122,7 +122,7 @@ def get_registered_ddo(ocean_instance, wallet: Wallet):
     block = ocean_instance.web3.eth.blockNumber
     asset = ocean_instance.assets.create(metadata, wallet)
     ddo_reg = ocean_instance.assets.ddo_registry()
-    log = ddo_reg.get_event_log(ddo_reg.EVENT_DDO_CREATED, block, asset.asset_id, 30)
+    log = ddo_reg.get_event_log(ddo_reg.EVENT_METADATA_CREATED, block, asset.asset_id, 30)
     assert log, f'no ddo created event.'
 
     ddo = wait_for_ddo(ocean_instance, asset.did, 15)

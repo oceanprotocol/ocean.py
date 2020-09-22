@@ -6,11 +6,18 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-class DDOContract(ContractBase):
-    CONTRACT_NAME = 'DDO'
-    EVENT_DDO_CREATED = 'DDOCreated'
-    EVENT_DDO_UPDATED = 'DDOCreated'
-    EVENT_OWNERSHIP_TRANSFERRED = 'DDOOwnershipTransferred'
+class MetadataContract(ContractBase):
+    CONTRACT_NAME = 'Metadata'
+    EVENT_METADATA_CREATED = 'MetadataCreated'
+    EVENT_METADATA_UPDATED = 'MetadataUpdated'
+
+    @property
+    def event_MetadataCreated(self):
+        return getattr(self.events, self.EVENT_METADATA_CREATED)
+
+    @property
+    def event_MetadataUpdated(self):
+        return getattr(self.events, self.EVENT_METADATA_UPDATED)
 
     def get_event_log(self, event_name, block, did, timeout=45):
         did = remove_0x_prefix(did)
@@ -30,7 +37,7 @@ class DDOContract(ContractBase):
 
         _log = None
         for log in logs:
-            if log.args.did.hex() == did:
+            if remove_0x_prefix(log.args.dataToken) == did:
                 _log = log
                 break
         return _log
@@ -38,14 +45,8 @@ class DDOContract(ContractBase):
     def verify_tx(self, tx_hash: str) -> bool:
         return self.get_tx_receipt(tx_hash).status == 1
 
-    def didOwner(self, did: str) -> str:
-        return self.contract_concise.didOwners(did)
-
     def create(self, did: str, flags: bytes, data: bytes, from_wallet: Wallet) -> str:
         return self.send_transaction('create', (did, flags, data), from_wallet)
 
     def update(self, did: str, flags: bytes, data: bytes, from_wallet: Wallet) -> str:
         return self.send_transaction('update', (did, flags, data), from_wallet)
-
-    def transferOwnership(self, did: str, owner: str, from_wallet: Wallet) -> str:
-        return self.send_transaction('transferOwnership', (did, owner), from_wallet)

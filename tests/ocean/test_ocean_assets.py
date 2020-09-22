@@ -5,9 +5,12 @@ import time
 import uuid
 
 import pytest
+from eth_utils import add_0x_prefix
+
+from ocean_lib.models.data_token import DataToken
 from ocean_utils.agreements.service_factory import ServiceDescriptor
 from ocean_utils.ddo.ddo import DDO
-from ocean_utils.did import DID, did_to_id_bytes
+from ocean_utils.did import DID, did_to_id
 
 from tests.resources.helper_functions import (
     get_algorithm_ddo,
@@ -33,10 +36,14 @@ def test_register_asset(publisher_ocean_instance):
     block = ocn.web3.eth.blockNumber
     alice = get_publisher_wallet()
     bob = get_consumer_wallet()
-    num_assets_owned = len([
-        a for a in ocn.assets.owner_assets(alice.address)
-        if ddo_reg.didOwner(did_to_id_bytes(a))
-    ])
+
+    def _get_num_assets(_minter):
+        dids = [add_0x_prefix(did_to_id(a))
+                for a in ocn.assets.owner_assets(_minter)]
+        dids = [a for a in dids if len(a) == 42]
+        return len([a for a in dids if DataToken(a).contract_concise.isMinter(_minter)])
+
+    num_assets_owned = _get_num_assets(alice.address)
 
     original_ddo = create_asset(ocn, alice)
     assert original_ddo, f'create asset failed.'
@@ -44,7 +51,7 @@ def test_register_asset(publisher_ocean_instance):
     # try to resolve new asset
     did = original_ddo.did
     asset_id = original_ddo.asset_id
-    log = ddo_reg.get_event_log(ddo_reg.EVENT_DDO_CREATED, block, asset_id, 30)
+    log = ddo_reg.get_event_log(ddo_reg.EVENT_METADATA_CREATED, block, asset_id, 30)
     assert log, f'no ddo created event.'
 
     ddo = wait_for_ddo(ocn, did, 15)
@@ -88,7 +95,7 @@ def test_register_asset(publisher_ocean_instance):
         pass
 
     _ = ocn.assets.update(ddo, alice)
-    log = ddo_reg.get_event_log(ddo_reg.EVENT_DDO_UPDATED, block, asset_id, 30)
+    log = ddo_reg.get_event_log(ddo_reg.EVENT_METADATA_UPDATED, block, asset_id, 30)
     assert log, f'no ddo updated event'
     time.sleep(5)
     _asset = wait_for_ddo(ocn, ddo.did, 15)
@@ -97,12 +104,7 @@ def test_register_asset(publisher_ocean_instance):
 
     assert ocn.assets.owner(ddo.did) == alice.address, f'asset owner does not seem correct.'
 
-    ddo_reg = ocn.assets.ddo_registry()
-    owner_assets = [
-        a for a in ocn.assets.owner_assets(alice.address)
-        if ddo_reg.didOwner(did_to_id_bytes(a))
-    ]
-    assert len(owner_assets) == num_assets_owned + 1
+    assert _get_num_assets(alice.address) == num_assets_owned + 1
 
 
 def test_ocean_assets_search(publisher_ocean_instance, metadata):

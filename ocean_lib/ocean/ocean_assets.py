@@ -3,12 +3,12 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 import copy
-import json
 import logging
 import lzma
 import os
 
 from eth_utils import add_0x_prefix
+from eth_utils import remove_0x_prefix
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_utils.agreements.service_factory import ServiceDescriptor, ServiceFactory
 from ocean_utils.agreements.service_types import ServiceTypes
@@ -24,7 +24,7 @@ from ocean_utils.utils.utilities import checksum
 
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import OrderRequirements
-from ocean_lib.models.ddo import DDOContract
+from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.assets.asset_downloader import download_asset_files
@@ -45,7 +45,7 @@ class OceanAssets:
         self._config = config
         self._aquarius_url = config.aquarius_url
         self._data_provider = data_provider
-        self._ddo_registry_address = ddo_registry_address
+        self._metadata_registry_address = ddo_registry_address
 
         downloads_path = os.path.join(os.getcwd(), 'downloads')
         if self._config.has_option('resources', 'downloads.path'):
@@ -53,12 +53,12 @@ class OceanAssets:
         self._downloads_path = downloads_path
 
     def ddo_registry(self):
-        return DDOContract(self._ddo_registry_address)
+        return MetadataContract(self._metadata_registry_address)
 
     def _get_aquarius(self, url=None) -> Aquarius:
         return AquariusProvider.get_aquarius(url or self._aquarius_url)
 
-    def _process_service_descriptors(self, service_descriptors, metadata, wallet: Wallet) -> list:
+    def _process_service_descriptors(self, service_descriptors: list, metadata: dict, provider_uri: str, wallet: Wallet) -> list:
         ddo_service_endpoint = self._get_aquarius().get_service_endpoint()
 
         service_type_to_descriptor = {sd[0]: sd for sd in service_descriptors}
@@ -72,17 +72,14 @@ class OceanAssets:
         _service_descriptors = [metadata_service_desc, ]
 
         # Always dafault to creating a ServiceTypes.ASSET_ACCESS service if no services are specified
-        access_service_descriptor = service_type_to_descriptor.pop(
-            ServiceTypes.ASSET_ACCESS,
-            ServiceDescriptor.access_service_descriptor(
+        access_service_descriptor = service_type_to_descriptor.pop(ServiceTypes.ASSET_ACCESS, None)
+        compute_service_descriptor = service_type_to_descriptor.pop(ServiceTypes.CLOUD_COMPUTE, None)
+        # Make an access service only if no services are given by the user.
+        if not access_service_descriptor and not compute_service_descriptor:
+            access_service_descriptor = ServiceDescriptor.access_service_descriptor(
                 self._build_access_service(metadata, 1.0, wallet.address),
-                self._data_provider.get_download_endpoint(self._config)
+                self._data_provider.build_download_endpoint(provider_uri)
             )
-        )
-        compute_service_descriptor = service_type_to_descriptor.pop(
-            ServiceTypes.CLOUD_COMPUTE,
-            None
-        )
 
         if access_service_descriptor:
             _service_descriptors.append(access_service_descriptor)
@@ -94,7 +91,8 @@ class OceanAssets:
 
     def create(self, metadata: dict, publisher_wallet: Wallet,
                service_descriptors: list=None, owner_address: str=None,
-               data_token_address: str=None) -> (Asset, None):
+               data_token_address: str=None, provider_uri=None,
+               dt_name: str=None, dt_symbol: str=None, dt_blob: str=None) -> (Asset, None):
         """
         Register an asset on-chain by creating/deploying a DataToken contract
         and in the Metadata store (Aquarius).
@@ -108,6 +106,13 @@ class OceanAssets:
             registering the asset on-chain, the ownership is transferred to this address
         :param data_token_address: hex str the address of the data token smart contract. The new
             asset will be associated with this data token address.
+        :param provider_uri: str URL of service provider. This will be used as base to
+            construct the serviceEndpoint for the `access` (download) service
+        :param dt_name: str name of DataToken if creating a new one
+        :param dt_symbol: str symbol of DataToken if creating a new one
+        :param dt_blob: str blob of DataToken if creating a new one. A `blob` is any text
+            to be stored with the ERC20 DataToken contract for any purpose.
+
         :return: DDO instance
         """
         assert isinstance(metadata, dict), f'Expected metadata of type dict, got {type(metadata)}'
@@ -121,7 +126,7 @@ class OceanAssets:
 
         service_descriptors = service_descriptors or []
 
-        services = self._process_service_descriptors(service_descriptors, metadata_copy, publisher_wallet)
+        services = self._process_service_descriptors(service_descriptors, metadata_copy, provider_uri, publisher_wallet)
 
         stype_to_service = {s.type: s for s in services}
         checksum_dict = dict()
@@ -133,9 +138,46 @@ class OceanAssets:
         # Adding proof to the ddo.
         asset.add_proof(checksum_dict, publisher_wallet)
 
+        #################
+        # DataToken
+        address = DTFactory.configured_address(Web3Helper.get_network_name(), self._config.address_file)
+        dtfactory = DTFactory(address)
+        if not data_token_address:
+            blob = dt_blob or ''
+            name = dt_name or metadata['main']['name']
+            symbol = dt_symbol or name
+            # register on-chain
+            tx_id = dtfactory.createToken(
+                blob, name, symbol, DataToken.DEFAULT_CAP_BASE, from_wallet=publisher_wallet)
+            data_token = DataToken(dtfactory.get_token_address(tx_id))
+            if not data_token:
+                logger.warning(f'Creating new data token failed.')
+                return None
+
+            data_token_address = data_token.address
+
+            logger.info(f'Successfully created data token with address '
+                        f'{data_token.address} for new dataset asset.')
+            # owner_address is set as minter only if creating new data token. So if
+            # `data_token_address` is set `owner_address` has no effect.
+            if owner_address:
+                data_token.setMinter(owner_address, from_wallet=publisher_wallet)
+        else:
+            # verify data_token_address
+            dt = DataToken(data_token_address)
+            minter = dt.contract_concise.minter()
+            if not minter:
+                raise AssertionError(f'datatoken address {data_token_address} does not seem to be a valid DataToken contract.')
+            elif minter.lower() != publisher_wallet.address.lower():
+                raise AssertionError(f'Minter of datatoken {data_token_address} is not the same as the publisher.')
+            elif not dtfactory.verify_data_token(data_token_address):
+                raise AssertionError(f'datatoken address {data_token_address} is not found in the DTFactory events.')
+
+        assert data_token_address, f'data_token_address is required for publishing a dataset asset.'
+
         # Generating the did and adding to the ddo.
-        did = asset.assign_did(DID.did(asset.proof['checksum']))
-        logger.debug(f'Generating new did: {did}')
+        did = asset.assign_did(f'did:op:{remove_0x_prefix(data_token_address)}')
+        logger.debug(f'Using datatoken address as did: {did}')
         # Check if it's already registered first!
         if did in self._get_aquarius().list_assets():
             raise OceanDIDAlreadyExist(
@@ -174,7 +216,7 @@ class OceanAssets:
         logger.debug('Encrypting content urls in the metadata.')
 
         publisher_signature = self._data_provider.sign_message(publisher_wallet, asset.asset_id, self._config)
-        encrypt_endpoint = self._data_provider.get_encrypt_endpoint(self._config)
+        encrypt_endpoint = self._data_provider.build_encrypt_endpoint(provider_uri)
         files_encrypted = self._data_provider.encrypt_files_dict(
             metadata_copy['main']['files'],
             encrypt_endpoint,
@@ -198,29 +240,6 @@ class OceanAssets:
         logger.debug(
             f'Generated asset and services, DID is {asset.did},'
             f' metadata service @{ddo_service_endpoint}.')
-
-        if not data_token_address:
-            blob = json.dumps({'t': 1, 'url': ddo_service_endpoint})
-            name = metadata['main']['name']
-            symbol = name
-            # register on-chain
-            address = DTFactory.configured_address(Web3Helper.get_network_name(), self._config.address_file)
-            dtfactory = DTFactory(address)
-            tx_id = dtfactory.createToken(
-                blob, name, symbol, DataToken.DEFAULT_CAP_BASE, from_wallet=publisher_wallet)
-            data_token = DataToken(dtfactory.get_token_address(tx_id))
-            if not data_token:
-                logger.warning(f'Creating new data token failed.')
-                return None
-
-            data_token_address = data_token.address
-
-            logger.info(f'Successfully created data token with address '
-                        f'{data_token.address} for new dataset asset with did {did}.')
-            # owner_address is set as minter only if creating new data token. So if
-            # `data_token_address` is set `owner_address` has no effect.
-            if owner_address:
-                data_token.setMinter(owner_address, from_wallet=publisher_wallet)
 
         # Set datatoken address in the asset
         asset.data_token_address = data_token_address

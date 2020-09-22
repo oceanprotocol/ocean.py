@@ -7,7 +7,7 @@ from pathlib import Path
 from examples import ExampleConfig
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.data_token import DataToken
-from ocean_lib.models.ddo import DDOContract
+from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.bfactory import BFactory
@@ -142,10 +142,10 @@ def deploy(network, addresses_file):
         addresses[FixedRateExchange.CONTRACT_NAME] = FixedRateExchange.deploy(web3, deployer_wallet, artifacts_path)
         print("****Deploy 'FixedRateExchange': done****\n")
 
-    if DDOContract.CONTRACT_NAME not in _addresses:
-        print("****Deploy 'DDO': begin****")
-        addresses[DDOContract.CONTRACT_NAME] = DDOContract.deploy(web3, deployer_wallet, artifacts_path)
-        print("****Deploy 'DDO': done****\n")
+    if MetadataContract.CONTRACT_NAME not in _addresses:
+        print("****Deploy 'Metadata': begin****")
+        addresses[MetadataContract.CONTRACT_NAME] = MetadataContract.deploy(web3, deployer_wallet, artifacts_path)
+        print("****Deploy 'Metadata': done****\n")
 
     if network == 'ganache' and 'Ocean' not in _addresses:
         print("****Deploy fake OCEAN: begin****")

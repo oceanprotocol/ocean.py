@@ -48,7 +48,7 @@ def test_compute_flow():
     did = compute_ddo.did
 
     ddo_reg = p_ocean_instance.assets.ddo_registry()
-    log = ddo_reg.get_event_log(ddo_reg.EVENT_DDO_CREATED, block, compute_ddo.asset_id, 30)
+    log = ddo_reg.get_event_log(ddo_reg.EVENT_METADATA_CREATED, block, compute_ddo.asset_id, 30)
     assert log, f'no ddo created event.'
 
     ddo = wait_for_ddo(p_ocean_instance, compute_ddo.did, 15)
