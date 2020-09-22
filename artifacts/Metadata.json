@@ -572,7 +572,7 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 6740,
+                            "referencedDeclaration": 6716,
                             "src": "994:3:11",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -633,10 +633,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6743,
-                        6744
+                        6719,
+                        6720
                       ],
-                      "referencedDeclaration": 6744,
+                      "referencedDeclaration": 6720,
                       "src": "955:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -772,7 +772,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6740,
+                          "referencedDeclaration": 6716,
                           "src": "1617:3:11",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1040,7 +1040,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6740,
+                          "referencedDeclaration": 6716,
                           "src": "2199:3:11",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -1743,7 +1743,7 @@
                             "name": "msg",
                             "nodeType": "Identifier",
                             "overloadedDeclarations": [],
-                            "referencedDeclaration": 6740,
+                            "referencedDeclaration": 6716,
                             "src": "994:3:11",
                             "typeDescriptions": {
                               "typeIdentifier": "t_magic_message",
@@ -1804,10 +1804,10 @@
                       "name": "require",
                       "nodeType": "Identifier",
                       "overloadedDeclarations": [
-                        6743,
-                        6744
+                        6719,
+                        6720
                       ],
-                      "referencedDeclaration": 6744,
+                      "referencedDeclaration": 6720,
                       "src": "955:7:11",
                       "typeDescriptions": {
                         "typeIdentifier": "t_function_require_pure$_t_bool_$_t_string_memory_ptr_$returns$__$",
@@ -1943,7 +1943,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6740,
+                          "referencedDeclaration": 6716,
                           "src": "1617:3:11",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -2211,7 +2211,7 @@
                           "name": "msg",
                           "nodeType": "Identifier",
                           "overloadedDeclarations": [],
-                          "referencedDeclaration": 6740,
+                          "referencedDeclaration": 6716,
                           "src": "2199:3:11",
                           "typeDescriptions": {
                             "typeIdentifier": "t_magic_message",
@@ -2460,8 +2460,8 @@
     "version": "0.5.7+commit.6da8b019.Emscripten.clang"
   },
   "networks": {},
-  "schemaVersion": "3.2.0",
-  "updatedAt": "2020-09-21T09:41:09.386Z",
+  "schemaVersion": "3.2.4",
+  "updatedAt": "2020-09-21T11:28:22.535Z",
   "devdoc": {
     "details": "Metadata stands for Decentralized Document. It allows publishers     to publish their dataset metadata in decentralized way.     It follows the Ocean DID Document standard:      https://github.com/oceanprotocol/OEPs/blob/master/7/v0.2/README.md",
     "methods": {
