@@ -17,6 +17,7 @@ before_install:
   - git checkout v3
   - export AQUARIUS_VERSION=decentralized
   - export PROVIDER_VERSION=v0.3.0
+  - export CONTRACTS_VERSION=v0.4.3
   - bash -x start_ocean.sh --no-dashboard 2>&1 > start_ocean.log &
   - cd ..
   - |
