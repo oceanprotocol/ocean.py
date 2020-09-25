@@ -269,7 +269,7 @@ class OceanCompute:
         )
         return {
             'did': info_dict.get('resultsDid', ''),
-            'urls': info_dict.get('resultsUrls', []),
+            'urls': info_dict.get('resultsUrl', []),
             'logs': info_dict.get('algorithmLogUrl', [])
         }
 
