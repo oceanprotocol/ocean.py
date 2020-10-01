@@ -135,13 +135,14 @@ class Ocean:
             Web3Helper.get_network_name(), self._config.address_file)
         return DTFactory(dtf_address)
 
-    def get_user_orders(self, address, datatoken=None):
+    def get_user_orders(self, address, datatoken=None, service_id=None):
         dt = DataToken(datatoken)
         _orders = []
         for log in dt.get_start_order_logs(self._web3, address, from_all=not bool(datatoken)):
             order = OrderValues(log.args)
-            order.amount = from_base_18(int(order.amount))
-            order.marketFee = from_base_18(int(order.marketFee))
-            _orders.append(order)
+            if service_id is None or order.args.serviceId == service_id:
+                order.amount = from_base_18(int(order.amount))
+                order.marketFee = from_base_18(int(order.marketFee))
+                _orders.append(order)
 
         return _orders
