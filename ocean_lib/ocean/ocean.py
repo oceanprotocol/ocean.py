@@ -4,7 +4,7 @@
 
 import logging
 
-from ocean_lib.models.data_token import DataToken
+from ocean_lib.models.data_token import DataToken, OrderValues
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_exchange import OceanExchange
@@ -22,7 +22,8 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_auth import OceanAuth
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.ocean_services import OceanServices
-from ocean_lib.ocean.util import get_web3_connection_provider, get_ocean_token_address, get_bfactory_address, to_base_18, get_contracts_addresses
+from ocean_lib.ocean.util import get_web3_connection_provider, get_ocean_token_address, get_bfactory_address, to_base_18, \
+    get_contracts_addresses, from_base_18
 from ocean_lib.web3_internal.web3helper import Web3Helper
 
 CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
@@ -134,3 +135,13 @@ class Ocean:
             Web3Helper.get_network_name(), self._config.address_file)
         return DTFactory(dtf_address)
 
+    def get_user_orders(self, address, datatoken=None):
+        dt = DataToken(datatoken)
+        _orders = []
+        for log in dt.get_start_order_logs(self._web3, address, from_all=not bool(datatoken)):
+            order = OrderValues(log)
+            order.amount = from_base_18(int(order.amount))
+            order.marketFee = from_base_18(int(order.marketFee))
+            _orders.append(order)
+
+        return _orders

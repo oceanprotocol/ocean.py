@@ -161,7 +161,7 @@ class OceanAssets:
             # owner_address is set as minter only if creating new data token. So if
             # `data_token_address` is set `owner_address` has no effect.
             if owner_address:
-                data_token.setMinter(owner_address, from_wallet=publisher_wallet)
+                data_token.proposeMinter(owner_address, from_wallet=publisher_wallet)
         else:
             # verify data_token_address
             dt = DataToken(data_token_address)

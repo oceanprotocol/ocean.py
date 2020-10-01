@@ -1,8 +1,10 @@
 import json
 import os
 import time
+from collections import namedtuple
 
 from eth_utils import remove_0x_prefix
+from web3 import Web3
 
 from ocean_lib.ocean.util import to_base_18, from_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -12,6 +14,11 @@ from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_utils.http_requests.requests_session import get_requests_session
 
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+
+OrderValues = namedtuple(
+    'OrderValues',
+    ('consumer', 'amount', 'serviceId', 'startedAt', 'marketFeeCollector', 'marketFee')
+)
 
 
 class DataToken(ContractBase):
@@ -24,6 +31,30 @@ class DataToken(ContractBase):
 
     OPF_FEE_PERCENTAGE = 0.001
     MAX_MARKET_FEE_PERCENTAGE = 0.001
+
+    def get_event_signature(self, event_name):
+        e = getattr(self.events, event_name)
+        if not e:
+            raise ValueError(f'Event {event_name} not found in {self.CONTRACT_NAME} contract.')
+
+        abi = e().abi
+        types = [param['type'] for param in abi['inputs']]
+        sig_str = f'{event_name}({",".join(types)})'
+        return Web3.sha3(text=sig_str).hex()
+
+    def get_start_order_logs(self, web3, consumer_address, from_block=0, to_block='latest', from_all=False):
+        topic0 = self.get_event_signature(self.ORDER_STARTED_EVENT)
+        topic1 = f'0x000000000000000000000000{consumer_address[2:]}'
+        filter_params = {
+            'fromBlock': from_block,
+            'toBlock': to_block,
+            'topics': [topic0, topic1],
+
+        }
+        if not from_all:
+            filter_params['address'] = self.address
+
+        return web3.eth.getLogs(filter_params)
 
     def get_transfer_event(self, block_number, sender, receiver):
         event = getattr(self.events, 'Transfer')
@@ -233,8 +264,11 @@ class DataToken(ContractBase):
     def transfer(self, to: str, value_base: int, from_wallet: Wallet) -> str:
         return self.send_transaction('transfer', (to, value_base), from_wallet)
 
-    def setMinter(self, minter, from_wallet) -> str:
-        return self.send_transaction('setMinter', (minter, ), from_wallet)
+    def proposeMinter(self, new_minter, from_wallet) -> str:
+        return self.send_transaction('proposeMinter', (new_minter, ), from_wallet)
+
+    def approveMinter(self, from_wallet) -> str:
+        return self.send_transaction('approveMinter', (), from_wallet)
 
     def startOrder(self, amount: int, serviceId: int, mrktFeeCollector: str, from_wallet: Wallet):
         return self.send_transaction(
