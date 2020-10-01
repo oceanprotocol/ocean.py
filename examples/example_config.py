@@ -6,7 +6,7 @@ import os
 import sys
 
 from ocean_lib.config import Config
-from ocean_lib.ocean.util import get_infura_url, WEB3_INFURA_PROJECT_ID
+from ocean_lib.ocean.util import get_infura_url, get_infura_id
 
 logging.basicConfig(level=logging.INFO)
 
@@ -43,40 +43,27 @@ class ExampleConfig:
         }
 
     @staticmethod
-    def get_rinkeby_config():
-        return {
-            "eth-network": {
-                "network": get_infura_url(WEB3_INFURA_PROJECT_ID, 'rinkeby'),
-                "artifacts.path": "artifacts",
-                "dtfactory.address": "0xB9d406D24B310A7D821D0b782a36909e8c925471"
-
-            },
-            "resources": {
-                "aquarius.url": "http://aquarius:5000",
-                # "aquarius.url": "https://aquarius.marketplace.dev-ocean.com",
-                "provider.url": "http://localhost:8030/api/v1",
-                "provider.address": '0x068Ed00cF0441e4829D9784fCBe7b9e26D4BD8d0',
-                "storage.path": "ocean_lib.db",
-                "downloads.path": "consume-downloads"
-            }
-        }
+    def get_network_config(network_name):
+        config = ExampleConfig.get_base_config()
+        config['eth-network']['network'] = get_infura_url(get_infura_id(), network_name)
+        config['eth-network']['artifacts.path'] = 'artifacts'
+        return config
 
     @staticmethod
     def _get_config(local_node=True, net_name=None):
         if local_node:
             return ExampleConfig.get_base_config()
 
-        return ExampleConfig.get_rinkeby_config()
+        return ExampleConfig.get_network_config(net_name)
 
     @staticmethod
-    def get_config_dict():
-        test_net = ExampleConfig.get_config_net()
+    def get_config_dict(network_name=None):
+        test_net = network_name or ExampleConfig.get_config_net()
         local_node = not test_net or test_net in {'local', 'ganache'}
         config_dict = ExampleConfig._get_config(local_node, test_net)
+        logging.debug(f'Configuration loaded for environment `{network_name}`: {config_dict}')
         return config_dict
 
     @staticmethod
-    def get_config(network=None):
-        logging.debug("Configuration loaded for environment '{}'"
-                      .format(network or ExampleConfig.get_config_net()))
-        return Config(options_dict=ExampleConfig.get_config_dict())
+    def get_config(network_name=None):
+        return Config(options_dict=ExampleConfig.get_config_dict(network_name))

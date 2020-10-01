@@ -89,16 +89,23 @@ class Wallet:
 
         return Wallet._last_tx_count[address]
 
-    def sign_tx(self, tx):
+    def sign_tx(self, tx, fixed_nonce=None, gas_price=None):
         account = self._web3.eth.account.privateKeyToAccount(self.private_key)
-        nonce = Wallet._get_nonce(self._web3, account.address)
+        if fixed_nonce is not None:
+            nonce = fixed_nonce
+            logger.debug(f'Signing transaction using a fixed nonce {fixed_nonce}, tx params are: {tx}')
+        else:
+            nonce = Wallet._get_nonce(self._web3, account.address)
+
+        if not gas_price:
+            gas_price = int(self._web3.eth.gasPrice * 1.1)
+            gas_price = max(gas_price, MIN_GAS_PRICE)
         logger.debug(f'`Wallet` signing tx: sender address: {account.address} nonce: {nonce}, '
-                     f'gasprice: {self._web3.eth.gasPrice}')
-        gas_price = int(self._web3.eth.gasPrice / 100)
-        gas_price = max(gas_price, MIN_GAS_PRICE)
+                     f'eth.gasPrice: {self._web3.eth.gasPrice}')
         tx['gasPrice'] = gas_price
         tx['nonce'] = nonce
         signed_tx = self._web3.eth.account.signTransaction(tx, self.private_key)
+        logger.debug(f'Using gasPrice: {gas_price}')
         logger.debug(f'`Wallet` signed tx is {signed_tx}')
         return signed_tx.rawTransaction
 
