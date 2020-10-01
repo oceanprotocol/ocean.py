@@ -5,6 +5,7 @@ from collections import namedtuple
 
 from eth_utils import remove_0x_prefix
 from web3 import Web3
+from web3.utils.events import get_event_data
 
 from ocean_lib.ocean.util import to_base_18, from_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -54,7 +55,13 @@ class DataToken(ContractBase):
         if not from_all:
             filter_params['address'] = self.address
 
-        return web3.eth.getLogs(filter_params)
+        e = getattr(self.events, self.ORDER_STARTED_EVENT)
+        event_abi = e().abi
+        logs = web3.eth.getLogs(filter_params)
+        parsed_logs = []
+        for l in logs:
+            parsed_logs.append(get_event_data(event_abi, l))
+        return parsed_logs
 
     def get_transfer_event(self, block_number, sender, receiver):
         event = getattr(self.events, 'Transfer')

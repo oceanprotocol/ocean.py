@@ -139,7 +139,7 @@ class Ocean:
         dt = DataToken(datatoken)
         _orders = []
         for log in dt.get_start_order_logs(self._web3, address, from_all=not bool(datatoken)):
-            order = OrderValues(log)
+            order = OrderValues(log.args)
             order.amount = from_base_18(int(order.amount))
             order.marketFee = from_base_18(int(order.marketFee))
             _orders.append(order)
