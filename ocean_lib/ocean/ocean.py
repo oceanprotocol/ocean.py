@@ -148,9 +148,13 @@ class Ocean:
             a['marketFee'] = from_base_18(int(log.args.marketFee))
             a = AttributeDict(a.items())
 
-            # 'datatoken', 'amount', 'timestamp', 'transactionId', 'did', 'serviceId', 'serviceType'
-            order = Order(log.address, a.amount, a.timestamp, log.transactionHash,
-                          f'did:op:{remove_0x_prefix(log.address)}', a.serviceId, None)
+            # 'datatoken', 'amount', 'timestamp', 'transactionId', 'did', 'payer', 'consumer', 'serviceId', 'serviceType'
+            order = Order(
+                log.address, a.amount, a.timestamp, log.transactionHash,
+                f'did:op:{remove_0x_prefix(log.address)}',
+                a.payer, a.consumer,
+                a.serviceId, None
+            )
             if service_id is None or order.serviceId == service_id:
                 _orders.append(order)
 
