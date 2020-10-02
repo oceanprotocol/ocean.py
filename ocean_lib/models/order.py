@@ -1,0 +1,8 @@
+from collections import namedtuple
+
+Order = namedtuple(
+    'Order',
+    (
+        'datatoken', 'amount', 'timestamp', 'transactionId', 'did', 'serviceId', 'serviceType'
+    )
+)
