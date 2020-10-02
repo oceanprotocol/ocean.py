@@ -277,10 +277,10 @@ class DataToken(ContractBase):
     def approveMinter(self, from_wallet) -> str:
         return self.send_transaction('approveMinter', (), from_wallet)
 
-    def startOrder(self, amount: int, serviceId: int, mrktFeeCollector: str, from_wallet: Wallet):
+    def startOrder(self, consumer: str, amount: int, serviceId: int, mrktFeeCollector: str, from_wallet: Wallet):
         return self.send_transaction(
             'startOrder',
-            (amount, serviceId, mrktFeeCollector),
+            (consumer, amount, serviceId, mrktFeeCollector),
             from_wallet
         )
 
