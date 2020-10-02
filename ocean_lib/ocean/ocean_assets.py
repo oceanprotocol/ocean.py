@@ -385,7 +385,7 @@ class OceanAssets:
         if did.startswith('did:'):
             did = add_0x_prefix(did_to_id(did))
 
-        tx_hash = dt.startOrder(from_wallet, amount_base, service_id, fee_receiver, from_wallet)
+        tx_hash = dt.startOrder(from_wallet.address, amount_base, service_id, fee_receiver, from_wallet)
 
         try:
             dt.verify_order_tx(Web3Provider.get_web3(), tx_hash, did, service_id,
