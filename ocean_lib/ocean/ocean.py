@@ -4,6 +4,8 @@
 
 import logging
 
+from web3.datastructures import AttributeDict
+
 from ocean_lib.models.data_token import DataToken, OrderValues
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
@@ -139,10 +141,14 @@ class Ocean:
         dt = DataToken(datatoken)
         _orders = []
         for log in dt.get_start_order_logs(self._web3, address, from_all=not bool(datatoken)):
-            order = OrderValues(log.args)
-            if service_id is None or order.args.serviceId == service_id:
-                order.amount = from_base_18(int(order.amount))
-                order.marketFee = from_base_18(int(order.marketFee))
+            a = dict(log.args.items())
+            a['amount'] = from_base_18(int(log.args.amount))
+            a['marketFee'] = from_base_18(int(log.args.marketFee))
+            a = AttributeDict(a.items())
+            order = OrderValues(
+                a.consumer, a.amount, a.serviceId, a.timestamp, a.mrktFeeCollector, a.marketFee
+            )
+            if service_id is None or order.serviceId == service_id:
                 _orders.append(order)
 
         return _orders

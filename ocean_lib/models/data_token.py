@@ -45,7 +45,7 @@ class DataToken(ContractBase):
 
     def get_start_order_logs(self, web3, consumer_address, from_block=0, to_block='latest', from_all=False):
         topic0 = self.get_event_signature(self.ORDER_STARTED_EVENT)
-        topic1 = f'0x000000000000000000000000{consumer_address[2:]}'
+        topic1 = f'0x000000000000000000000000{consumer_address[2:].lower()}'
         filter_params = {
             'fromBlock': from_block,
             'toBlock': to_block,

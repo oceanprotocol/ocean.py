@@ -71,3 +71,12 @@ def test_market_flow():
     )
 
     assert len(os.listdir(asset_folder)) > 1
+
+    orders = consumer_ocean.get_user_orders(consumer_wallet.address, asset.asset_id)
+    assert orders, f'no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}'
+
+    orders = consumer_ocean.get_user_orders(consumer_wallet.address, consumer_ocean.web3.toChecksumAddress(asset.asset_id))
+    assert orders, f'no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}'
+
+    orders = consumer_ocean.get_user_orders(consumer_wallet.address)
+    assert orders, f'no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}'
