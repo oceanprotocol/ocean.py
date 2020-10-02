@@ -10,11 +10,16 @@ from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
 from ocean_lib.web3_internal.web3helper import Web3Helper
 
+ENV_VAR_INFURA_PROJECT_ID = 'INFURA_PROJECT_ID'
 WEB3_INFURA_PROJECT_ID = '357f2fe737db4304bd2f7285c5602d0d'
 
 GANACHE_URL = 'http://127.0.0.1:8545'
 
 SUPPORTED_NETWORK_NAMES = {'rinkeby', 'kovan', 'ganache', 'mainnet', 'ropsten'}
+
+
+def get_infura_id():
+    return os.getenv(ENV_VAR_INFURA_PROJECT_ID, WEB3_INFURA_PROJECT_ID)
 
 
 def get_infura_url(infura_id, network):
@@ -56,7 +61,7 @@ def get_web3_connection_provider(network_url):
                 f'`http` or `wss`, in this case a network name is expected and must ' \
                 f'be one of the supported networks {SUPPORTED_NETWORK_NAMES}.'
 
-            network_url = get_infura_url(WEB3_INFURA_PROJECT_ID, network_url)
+            network_url = get_infura_url(get_infura_id(), network_url)
 
         provider = WebsocketProvider(network_url)
 

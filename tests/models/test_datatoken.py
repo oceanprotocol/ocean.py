@@ -1,3 +1,5 @@
+import time
+
 import pytest
 
 from ocean_lib.ocean.util import to_base_18, from_base_18
@@ -45,7 +47,9 @@ def test_setMinter(alice_ocean,
         token.mint(alice_address, to_base_18(10.0), from_wallet=bob_wallet)
 
     #switch minter to bob
-    token.setMinter(bob_address, from_wallet=alice_wallet)
+    token.proposeMinter(bob_address, from_wallet=alice_wallet)
+    time.sleep(5)
+    token.approveMinter(from_wallet=bob_wallet)
     token.mint(alice_address, to_base_18(10.0), from_wallet=bob_wallet)
     with pytest.raises(Exception):
         token.mint(alice_address, to_base_18(10.0), from_wallet=alice_wallet)
@@ -53,7 +57,9 @@ def test_setMinter(alice_ocean,
         token.mint(bob_address, to_base_18(10.0), from_wallet=alice_wallet)
 
     #switch minter back to alice
-    token.setMinter(alice_address, from_wallet=bob_wallet)
+    token.proposeMinter(alice_address, from_wallet=bob_wallet)
+    time.sleep(5)
+    token.approveMinter(from_wallet=alice_wallet)
     token.mint(alice_address, to_base_18(10.0), from_wallet=alice_wallet)
     with pytest.raises(Exception):
         token.mint(alice_address, to_base_18(10.0), from_wallet=bob_wallet)

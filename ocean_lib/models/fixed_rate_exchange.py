@@ -38,11 +38,17 @@ class FixedRateExchange(ContractBase):
     def setRate(self, exchange_id: str, new_rate: int, from_wallet: Wallet) -> str:
         return self.send_transaction('setRate', (exchange_id, new_rate), from_wallet)
 
-    def activate(self, exchange_id: str, from_wallet: Wallet) -> str:
-        return self.send_transaction('activate', (exchange_id, ), from_wallet)
+    def activate(self, exchange_id: str, from_wallet: Wallet) -> [str, None]:
+        if self.isActive(exchange_id):
+            return
 
-    def deactivate(self, exchange_id: str, from_wallet: Wallet) -> str:
-        return self.send_transaction('deactivate', (exchange_id, ), from_wallet)
+        return self.send_transaction('toggleExchangeState', (exchange_id, ), from_wallet)
+
+    def deactivate(self, exchange_id: str, from_wallet: Wallet) -> [str, None]:
+        if not self.isActive(exchange_id):
+            return
+
+        return self.send_transaction('toggleExchangeState', (exchange_id, ), from_wallet)
 
     #########################
     # Helper methods
