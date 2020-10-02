@@ -49,8 +49,7 @@ class DataToken(ContractBase):
         filter_params = {
             'fromBlock': from_block,
             'toBlock': to_block,
-            'topics': [topic0, topic1],
-
+            'topics': [topic0, None, topic1],
         }
         if not from_all:
             filter_params['address'] = self.address
