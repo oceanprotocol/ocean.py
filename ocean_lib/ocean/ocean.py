@@ -4,11 +4,13 @@
 
 import logging
 
+from eth_utils import remove_0x_prefix
 from web3.datastructures import AttributeDict
 
 from ocean_lib.models.data_token import DataToken, OrderValues
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+from ocean_lib.models.order import Order
 from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.ocean_pool import OceanPool
 from ocean_lib.web3_internal.contract_handler import ContractHandler
@@ -145,9 +147,10 @@ class Ocean:
             a['amount'] = from_base_18(int(log.args.amount))
             a['marketFee'] = from_base_18(int(log.args.marketFee))
             a = AttributeDict(a.items())
-            order = OrderValues(
-                a.consumer, a.amount, a.serviceId, a.timestamp, a.mrktFeeCollector, a.marketFee
-            )
+
+            # 'datatoken', 'amount', 'timestamp', 'transactionId', 'did', 'serviceId', 'serviceType'
+            order = Order(log.address, a.amount, a.timestamp, log.transactionHash,
+                          f'did:op:{remove_0x_prefix(log.address)}', a.serviceId, None)
             if service_id is None or order.serviceId == service_id:
                 _orders.append(order)
 
