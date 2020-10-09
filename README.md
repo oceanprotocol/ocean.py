@@ -5,10 +5,10 @@
 and consume data. With it, you can:
 * **Publish** data services: downloadable files or compute-to-data. 
 Ocean creates a new [ERC20](https://github.com/ethereum/EIPs/blob/7f4f0377730f5fc266824084188cc17cf246932e/EIPS/eip-20.md) 
-data token for each data service or set of services.
-* **Mint** data tokens for the service
-* **Consume** data tokens, to access the service
-* **Transfer** data tokens to another owner, and **all other ERC20 actions** 
+datatoken for each data service or set of services.
+* **Mint** datatokens for the service
+* **Consume** datatokens, to access the service
+* **Transfer** datatokens to another owner, and **all other ERC20 actions** 
 using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-with-an-erc20-token-contract) etc.
 
 `ocean-lib` is part of the [Ocean Protocol](https://www.oceanprotocol.com) toolset.
