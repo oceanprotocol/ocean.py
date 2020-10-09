@@ -46,8 +46,8 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 #Alice's config
 config = {
    'network' : 'rinkeby',
-   'metadataStoreUri' : 'localhost:5000',
-   'providerUri' : 'localhost:8030'
+   'metadataStoreUri' : 'http://127.0.0.1:5000',
+   'providerUri' : 'http://127.0.0.1:8030'
 }
 ocean = Ocean(config)
 alice_wallet = Wallet(ocean.web3, private_key='8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f')
