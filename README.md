@@ -5,7 +5,7 @@
 and consume data. With it, you can:
 * **Publish** data services: downloadable files or compute-to-data. 
 Ocean creates a new [ERC20](https://github.com/ethereum/EIPs/blob/7f4f0377730f5fc266824084188cc17cf246932e/EIPS/eip-20.md) 
-datatoken for each data service or set of services.
+datatoken for each data service.
 * **Mint** datatokens for the service
 * **Consume** datatokens, to access the service
 * **Transfer** datatokens to another owner, and **all other ERC20 actions** 
