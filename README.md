@@ -3,7 +3,7 @@
 
 `ocean-lib` is a Python library to privately & securely publish, exchange, 
 and consume data. With it, you can:
-* **Publish** data services: downloadable files, streaming data, or compute-to-data. 
+* **Publish** data services: downloadable files or compute-to-data. 
 Ocean creates a new [ERC20](https://github.com/ethereum/EIPs/blob/7f4f0377730f5fc266824084188cc17cf246932e/EIPS/eip-20.md) 
 data token for each data service or set of services.
 * **Mint** data tokens for the service
