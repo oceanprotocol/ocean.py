@@ -17,7 +17,7 @@ with open('README.md') as readme_file:
 # Installed by pip install ocean-lib
 # or pip install -e .
 install_requirements = [
-    'ocean-contracts==0.5.3',
+    'ocean-contracts==0.5.4',
     'coloredlogs',
     'pyopenssl',
     'PyJWT',  # not jwt
