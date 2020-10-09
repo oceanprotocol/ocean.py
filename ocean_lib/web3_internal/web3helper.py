@@ -37,7 +37,7 @@ class Web3Helper(object):
         """
         if not network_id:
             network_id = Web3Helper.get_network_id()
-        return Web3Helper._network_name_map.get(network_id, Web3Helper.DEFAULT_NETWORK_NAME)
+        return Web3Helper._network_name_map.get(network_id, Web3Helper.DEFAULT_NETWORK_NAME).lower()
 
     @staticmethod
     def get_network_id():
