@@ -67,7 +67,7 @@ class Ocean:
 
         if isinstance(config, dict):
 
-            aqua_url = config.get('metadataStoreUrl', config.get('aquarius.url', 'http://localhost:5000'))
+            aqua_url = config.get('metadataStoreUri', config.get('aquarius.url', 'http://localhost:5000'))
 
             config_dict = {
                 'eth-network': {
