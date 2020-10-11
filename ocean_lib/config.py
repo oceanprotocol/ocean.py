@@ -140,6 +140,12 @@ class Config(configparser.ConfigParser):
             path = os.path.join(os.getenv('VIRTUAL_ENV'), 'artifacts')
         else:
             path = os.path.join(site.PREFIXES[0], 'artifacts')
+            if not os.path.exists(path):
+                # try to find 'artifacts' in a subfolder of site.PREFIXES[0]
+                for s in os.listdir(site.PREFIXES[0]):
+                    path = os.path.join(site.PREFIXES[0], s, 'artifacts')
+                    if os.path.exists(path):
+                        break
 
         if not os.path.exists(path):
             path = Path('~/.ocean/ocean-contracts/artifacts').expanduser().resolve()

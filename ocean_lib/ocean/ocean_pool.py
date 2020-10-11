@@ -65,9 +65,9 @@ class OceanPool:
 
         # Must approve datatoken and Ocean tokens to the new pool as spender
         dt = DataToken(data_token_address)
-        dt.approve_tokens(pool_address, data_token_amount, from_wallet)
+        dt.approve_tokens(pool_address, data_token_amount, from_wallet, wait=True)
         ot = DataToken(self.ocean_address)
-        ot.approve_tokens(pool_address, OCEAN_amount, from_wallet)
+        ot.approve_tokens(pool_address, OCEAN_amount, from_wallet, wait=True)
 
         tx_id = pool.setup(
             data_token_address,
