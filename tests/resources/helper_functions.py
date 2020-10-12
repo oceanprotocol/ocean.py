@@ -125,7 +125,7 @@ def get_registered_ddo(ocean_instance, wallet: Wallet):
     log = ddo_reg.get_event_log(ddo_reg.EVENT_METADATA_CREATED, block, asset.asset_id, 30)
     assert log, f'no ddo created event.'
 
-    ddo = wait_for_ddo(ocean_instance, asset.did, 15)
+    ddo = wait_for_ddo(ocean_instance, asset.did)
     assert ddo, f'resolve did {asset.did} failed.'
 
     return asset
@@ -190,6 +190,25 @@ def mint_tokens_and_wait(data_token_contract: DataToken, receiver_address: str, 
         except (ValueError, Exception):
             pass
 
+
+def wait_for_update(ocean, did, updated_attr, value, timeout=30):
+    start = time.time()
+    ddo = None
+    while True:
+        try:
+            ddo = ocean.assets.resolve(did)
+        except ValueError:
+            pass
+
+        if not ddo:
+            time.sleep(0.2)
+        elif ddo.metadata['main'][updated_attr] == value:
+                break
+
+        if time.time() - start > timeout:
+            break
+
+    return ddo
 
 def wait_for_ddo(ocean, did, timeout=30):
     start = time.time()

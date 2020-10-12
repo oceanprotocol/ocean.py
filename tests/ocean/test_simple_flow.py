@@ -15,11 +15,7 @@ def test_simple_flow():
     dataset_download_endpoint = 'http://localhost:8030/api/v1/services'
     _config = ConfigProvider.get_config()
     # 1. Alice publishes a dataset (= publishes a datatoken)
-    config = {
-        'network': _config.network_url,
-        'dtfactory.address': DTFactory.configured_address(network, _config.address_file),
-    }
-    ocean = Ocean(config)
+    ocean = Ocean()
     token = ocean.create_data_token(dataset_download_endpoint, 'DataToken1', 'DT1', alice_wallet)
     dt_address = token.address
 
@@ -31,7 +27,7 @@ def test_simple_flow():
     token.transfer_tokens(bob_wallet.address, 1, alice_wallet)
 
     # 5. Bob consumes dataset
-    bob_ocean = Ocean(config)
+    bob_ocean = Ocean()
     token = bob_ocean.get_data_token(dt_address)
     address = DTFactory.configured_address(network, _config.address_file)
     token_owner = DTFactory(address).get_token_minter(token.address)
