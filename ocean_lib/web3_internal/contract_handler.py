@@ -24,6 +24,9 @@ class ContractHandler(object):
     """
     _contracts = dict()
     artifacts_path = None
+    network_alias = {
+        'ganache': 'development',
+    }
 
     @staticmethod
     def get_contracts_addresses(network, address_file):
@@ -32,7 +35,11 @@ class ContractHandler(object):
         with open(address_file) as f:
             addresses = json.load(f)
 
-        return addresses.get(network, None)
+        network_addresses = addresses.get(network, None)
+        if network_addresses is None and network in ContractHandler.network_alias:
+            network_addresses = addresses.get(ContractHandler.network_alias[network], None)
+
+        return network_addresses
 
     @staticmethod
     def set_artifacts_path(artifacts_path):
