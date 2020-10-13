@@ -5,7 +5,7 @@ from ocean_lib.models.btoken import BToken
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
-from ocean_lib.ocean.util import to_base_18
+from ocean_lib.ocean.util import to_base_18, from_base_18
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger(__name__)
@@ -314,3 +314,126 @@ class OceanPool:
         if pool.getCurrentTokens()[1] != self.ocean_address:
             return False
         return True
+
+    ###########################################################################
+    # convenient functions
+
+    def getReserve(self, pool_address: str, token_address: str):
+        return from_base_18(BPool(pool_address).getBalance(token_address))
+
+    def getMaxBuyQuantity(self, pool_address, token_address):
+        return self.getReserve(pool_address, token_address) / 3.0
+
+    def getOceanMaxBuyQuantity(self, pool_address):
+        return self.getMaxBuyQuantity(pool_address, self.ocean_address)
+
+    def getDTMaxBuyQuantity(self, pool_address):
+        return self.getMaxBuyQuantity(pool_address, self.get_token_address(pool_address))
+
+    def calcInGivenOut(self, pool_address: str, token_in_address: str, token_out_address: str, token_out_amount: float):
+        pool = BPool(pool_address)
+        in_amount = pool.calcInGivenOut(
+            pool.getBalance(token_in_address),
+            pool.getDenormalizedWeight(token_in_address),
+            pool.getBalance(token_out_address),
+            pool.getDenormalizedWeight(token_out_address),
+            to_base_18(token_out_amount),
+            pool.getSwapFee()
+        )
+        return from_base_18(in_amount)
+
+    def calcOutGivenIn(self, pool_address: str, token_in_address: str, token_out_address: str, token_in_amount: float):
+        pool = BPool(pool_address)
+        out_amount = pool.calcOutGivenIn(
+            pool.getBalance(token_in_address),
+            pool.getDenormalizedWeight(token_in_address),
+            pool.getBalance(token_out_address),
+            pool.getDenormalizedWeight(token_out_address),
+            to_base_18(token_in_amount),
+            pool.getSwapFee()
+        )
+        return from_base_18(out_amount)
+
+    def calcPoolOutGivenSingleIn(self, pool_address: str, token_in_address: str, token_in_amount: float):
+        pool = BPool(pool_address)
+        return from_base_18(
+            pool.calcPoolOutGivenSingleIn(
+                pool.getBalance(token_in_address),
+                pool.getDenormalizedWeight(token_in_address),
+                pool.totalSupply(),
+                pool.getTotalDenormalizedWeight(),
+                to_base_18(token_in_amount),
+                pool.getSwapFee()
+            )
+        )
+
+    def calcSingleInGivenPoolOut(self, pool_address: str, token_in_address: str, pool_shares: float):
+        pool = BPool(pool_address)
+        return from_base_18(
+            pool.calcSingleInGivenPoolOut(
+                pool.getBalance(token_in_address),
+                pool.getDenormalizedWeight(token_in_address),
+                pool.totalSupply(),
+                pool.getTotalDenormalizedWeight(),
+                to_base_18(pool_shares),
+                pool.getSwapFee()
+            )
+        )
+
+    def calcSingleOutGivenPoolIn(self, pool_address: str, token_out_address: str, pool_shares: float):
+        pool = BPool(pool_address)
+        return from_base_18(
+            pool.calcSingleInGivenPoolOut(
+                pool.getBalance(token_out_address),
+                pool.getDenormalizedWeight(token_out_address),
+                pool.totalSupply(),
+                pool.getTotalDenormalizedWeight(),
+                to_base_18(pool_shares),
+                pool.getSwapFee()
+            )
+        )
+
+    def calcPoolInGivenSingleOut(self, pool_address: str, token_out_address: str, token_out_amount: float):
+        pool = BPool(pool_address)
+        return from_base_18(
+            pool.calcPoolInGivenSingleOut(
+                pool.getBalance(token_out_address),
+                pool.getDenormalizedWeight(token_out_address),
+                pool.totalSupply(),
+                pool.getTotalDenormalizedWeight(),
+                to_base_18(token_out_amount),
+                pool.getSwapFee()
+            )
+        )
+
+    def getPoolSharesRequiredToRemoveDT(self, pool_address: str, dt_amount: float):
+        dt = self.get_token_address(pool_address)
+        return self.calcPoolInGivenSingleOut(pool_address, dt, dt_amount)
+
+    # def getPoolSharesForRemoveDT(self, pool_address: str, pool_shares: float):
+    #     dt = self.get_token_address(pool_address)
+    #     return self.calcSingleOutGivenPoolIn(pool_address, dt, pool_shares)
+
+    def getPoolSharesRequiredToRemoveOcean(self, pool_address: str, ocean_amount: float):
+        return self.calcPoolInGivenSingleOut(pool_address, self.ocean_address, ocean_amount)
+
+    # def getPoolSharesForRemoveOcean(self, pool_address: str, pool_shares: float):
+    #     return self.calcSingleOutGivenPoolIn(pool_address, )
+
+    def getDTMaxAddLiquidity(self, pool_address: str):
+        return self.getMaxAddLiquidity(pool_address, self.get_token_address(pool_address))
+
+    def getOceanMaxAddLiquidity(self, pool_address: str):
+        return self.getMaxAddLiquidity(pool_address, self.ocean_address)
+
+    def getMaxAddLiquidity(self, pool_address, token_address):
+        return self.getReserve(pool_address, token_address) / 2.0
+
+    def getMaxRemoveLiquidity(self, pool_address: str, token_address: str):
+        return self.getReserve(pool_address, token_address) / 3.0
+
+    def getDTMaxRemoveLiquidity(self, pool_address):
+        return self.getMaxRemoveLiquidity(pool_address, self.get_token_address(pool_address))
+
+    def getOceanMaxRemoveLiquidity(self, pool_address):
+        return self.getMaxRemoveLiquidity(pool_address, self.ocean_address)
