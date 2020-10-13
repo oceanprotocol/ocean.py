@@ -87,6 +87,9 @@ def deploy(network, addresses_file):
     else:
         network_addresses = {network: {}}
 
+    if network == 'ganache' and network not in network_addresses:
+        network = 'development'
+
     _addresses = network_addresses[network]
 
     # ****SET ENVT****
@@ -147,7 +150,7 @@ def deploy(network, addresses_file):
         addresses[MetadataContract.CONTRACT_NAME] = MetadataContract.deploy(web3, deployer_wallet, artifacts_path)
         print("****Deploy 'Metadata': done****\n")
 
-    if network == 'ganache' and 'Ocean' not in _addresses:
+    if network in ('ganache', 'development'):
         print("****Deploy fake OCEAN: begin****")
         # For simplicity, hijack DataTokenTemplate.
         minter_addr = deployer_wallet.address
