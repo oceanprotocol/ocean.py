@@ -136,10 +136,6 @@ def make_info(name, private_key_name):
     info.wallet = Wallet(web3, private_key=info.private_key)
     info.address = info.wallet.address
     info.account = Account(private_key=info.private_key)
-    config = {'network': _NETWORK,
-              'privateKey': info.private_key,
-              }
-
     wallet = get_ganache_wallet()
     if wallet:
         assert Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address)) > 4
@@ -147,7 +143,7 @@ def make_info(name, private_key_name):
             Web3Helper.send_ether(wallet, info.address, 4)
 
     from ocean_lib.ocean.ocean import Ocean
-    info.ocean = Ocean(config)
+    info.ocean = Ocean()
     info.T1 = _deployAndMintToken('TOK1', info.address)
     info.T2 = _deployAndMintToken('TOK2', info.address)
 

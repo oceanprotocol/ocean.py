@@ -16,7 +16,7 @@ from tests.resources.helper_functions import (
     get_algorithm_ddo,
     get_computing_metadata,
     get_resource_path,
-    get_publisher_wallet, get_consumer_wallet, wait_for_ddo)
+    get_publisher_wallet, get_consumer_wallet, wait_for_ddo, wait_for_update)
 
 
 def create_asset(ocean, publisher):
@@ -54,7 +54,7 @@ def test_register_asset(publisher_ocean_instance):
     log = ddo_reg.get_event_log(ddo_reg.EVENT_METADATA_CREATED, block, asset_id, 30)
     assert log, f'no ddo created event.'
 
-    ddo = wait_for_ddo(ocn, did, 15)
+    ddo = wait_for_ddo(ocn, did)
     ddo_dict = ddo.as_dictionary()
     original = original_ddo.as_dictionary()
     assert ddo_dict['publicKey'] == original['publicKey']
@@ -97,8 +97,7 @@ def test_register_asset(publisher_ocean_instance):
     _ = ocn.assets.update(ddo, alice)
     log = ddo_reg.get_event_log(ddo_reg.EVENT_METADATA_UPDATED, block, asset_id, 30)
     assert log, f'no ddo updated event'
-    time.sleep(5)
-    _asset = wait_for_ddo(ocn, ddo.did, 15)
+    _asset = wait_for_update(ocn, ddo.did, 'name', _name)
     assert _asset, f'Cannot read asset after update.'
     assert _asset.metadata['main']['name'] == _name, f'updated asset does not have the new updated name !!!'
 
@@ -110,7 +109,7 @@ def test_register_asset(publisher_ocean_instance):
 def test_ocean_assets_search(publisher_ocean_instance, metadata):
     publisher = get_publisher_wallet()
     ddo = publisher_ocean_instance.assets.create(metadata, publisher)
-    wait_for_ddo(publisher_ocean_instance, ddo.did, 25)
+    wait_for_ddo(publisher_ocean_instance, ddo.did)
     assert len(publisher_ocean_instance.assets.search('Monkey')) > 0
 
 
@@ -124,7 +123,7 @@ def test_ocean_assets_algorithm(publisher_ocean_instance):
     metadata['attributes']['main']['files'][0]['checksum'] = str(uuid.uuid4())
     ddo = publisher_ocean_instance.assets.create(metadata['attributes'], publisher)
     assert ddo
-    _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did, 20)
+    _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did)
     assert _ddo, f'assets.resolve failed for did {ddo.did}'
 
 
@@ -134,5 +133,5 @@ def test_ocean_assets_compute(publisher_ocean_instance):
     metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
     ddo = publisher_ocean_instance.assets.create(metadata, publisher)
     assert ddo
-    _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did, 20)
+    _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did)
     assert _ddo, f'assets.resolve failed for did {ddo.did}'
