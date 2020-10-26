@@ -155,7 +155,7 @@ def _deployAndMintToken(symbol: str, to_address: str) -> btoken.BToken:
     dt_address = DataToken.deploy(
         wallet.web3, wallet, None,
         'Template Contract', 'TEMPLATE',
-        wallet.address, DataToken.DEFAULT_CAP_BASE,
+        wallet.address, to_base_18(1000),
         DTFactory.FIRST_BLOB, to_address
     )
     dt_factory = DTFactory(DTFactory.deploy(wallet.web3, wallet, None, dt_address, to_address))
