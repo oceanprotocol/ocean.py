@@ -81,8 +81,9 @@ class DataServiceProvider:
 
     @staticmethod
     def get_nonce(user_address, config):
+        url = DataServiceProvider.build_endpoint('nonce')
         response = DataServiceProvider._http_client.get(
-            f'{DataServiceProvider.get_url(config)}/services/nonce?userAddress={user_address}'
+            f'{url}?userAddress={user_address}'
         )
         if response.status_code != 200:
             return None
@@ -346,9 +347,9 @@ class DataServiceProvider:
         return DataServiceProvider._remove_slash(os.getenv('PROVIDER_API_VERSION', DataServiceProvider.API_VERSION))
 
     @staticmethod
-    def build_endpoint(service_name, provider_uri=None):
+    def build_endpoint(service_name, provider_uri=None, config=None):
         if not provider_uri:
-            config = ConfigProvider.get_config()
+            config = config or ConfigProvider.get_config()
             provider_uri = DataServiceProvider.get_url(config)
 
         provider_uri = DataServiceProvider._remove_slash(provider_uri)
