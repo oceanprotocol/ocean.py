@@ -13,7 +13,7 @@ def test1(network, OCEAN_address,
     # ===============================================================
     # 1. Alice publishes a dataset (= publishes a datatoken)
     # For now, you're Alice:) Let's proceed.
-    DT = alice_ocean.create_data_token('localhost:8030', 'DataToken1', 'DT1', alice_wallet)
+    DT = alice_ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob='localhost:8030')
     DT_address = DT.address
 
     # ===============================================================

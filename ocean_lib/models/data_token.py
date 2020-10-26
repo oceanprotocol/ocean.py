@@ -24,7 +24,7 @@ OrderValues = namedtuple(
 
 class DataToken(ContractBase):
     CONTRACT_NAME = 'DataTokenTemplate'
-    DEFAULT_CAP = 100.0
+    DEFAULT_CAP = 1000.0
     DEFAULT_CAP_BASE = to_base_18(DEFAULT_CAP)
 
     ORDER_STARTED_EVENT = 'OrderStarted'

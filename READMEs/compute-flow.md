@@ -70,7 +70,7 @@ config = {
 ocean = Ocean(config)
 alice_wallet = Wallet(ocean.web3, private_key='8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f')
 
-data_token = ocean.create_data_token(ocean.config.metadata_store_url, 'DataToken1', 'DT1', alice_wallet)
+data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_store_url)
 token_address = data_token.address
 
 # `ocean.assets.create` will encrypt the URLs using the provider's encrypt service endpoint and update 
@@ -183,8 +183,8 @@ data_token = market_ocean.get_data_token(token_address)
 # can be obtained through a crypto exchange or an on-chain pool such as balancer or uniswap
 market_ocean.pool.buy_data_tokens(
     pool_address, 
-    amount_base=to_base_18(1.0), # buy one data token
-    max_OCEAN_amount_base=to_base_18(price_in_OCEAN), # pay maximum 0.1 OCEAN tokens
+    amount=1.0, # buy one data token
+    max_OCEAN_amount=price_in_OCEAN, # pay maximum 0.1 OCEAN tokens
     from_wallet=bob_wallet
 )
 

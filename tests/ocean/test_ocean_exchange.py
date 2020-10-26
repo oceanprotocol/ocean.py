@@ -17,7 +17,7 @@ def test_ocean_exchange(publisher_ocean_instance):
     ocn = publisher_ocean_instance
     alice_wallet = get_publisher_wallet()
     bob_wallet = get_consumer_wallet()
-    dt = ocn.create_data_token('http://example.com', 'DataToken1', 'DT1', alice_wallet)
+    dt = ocn.create_data_token('DataToken1', 'DT1', alice_wallet, blob='http://example.com')
     dt.mint_tokens(bob_wallet.address, 100.0, alice_wallet)
     ox = OceanExchange(ocn.OCEAN_address, _get_exchange_address(), ocn.config)
     rate = 0.9
