@@ -119,5 +119,5 @@ def test_ocean_balancer_helpers(
     assert alice_ocean.pool.get(pool_address).address == pool_address
     assert bob_ocean.pool.get(pool_address).address == pool_address
 
-    DT_price = from_base_18(bob_ocean.pool.get_token_price_base(pool_address))
+    DT_price = bob_ocean.pool.get_token_price(pool_address)
     assert DT_price > 0.0

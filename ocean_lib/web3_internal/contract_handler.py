@@ -43,7 +43,7 @@ class ContractHandler(object):
 
     @staticmethod
     def set_artifacts_path(artifacts_path):
-        if artifacts_path != ContractHandler.artifacts_path:
+        if artifacts_path and artifacts_path != ContractHandler.artifacts_path:
             ContractHandler.artifacts_path = artifacts_path
             ContractHandler._contracts.clear()
 

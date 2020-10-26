@@ -37,7 +37,7 @@ def test_compute_flow():
     service = old_ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
     compute_service = ServiceDescriptor.compute_service_descriptor(
         service.attributes,
-        DataServiceProvider.get_compute_endpoint(p_ocean_instance.config)
+        DataServiceProvider.get_url(p_ocean_instance.config)
     )
     block = p_ocean_instance.web3.eth.blockNumber
     compute_ddo = p_ocean_instance.assets.create(

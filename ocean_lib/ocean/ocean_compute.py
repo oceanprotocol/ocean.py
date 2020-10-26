@@ -102,11 +102,9 @@ class OceanCompute:
 
     @staticmethod
     def create_compute_service_attributes(
-            cost: float, timeout: int, creator: str, date_published: str, provider_attributes: dict):
+            timeout: int, creator: str, date_published: str, provider_attributes: dict):
         """
 
-        :param cost: float the price of this compute service expressed in amount of
-            DataTokens
         :param timeout: integer maximum amount of running compute service in seconds
         :param creator: str ethereum address
         :param date_published: str timestamp (datetime.utcnow().replace(microsecond=0).isoformat() + "Z")
@@ -118,7 +116,7 @@ class OceanCompute:
                 "name": "dataAssetComputingServiceAgreement",
                 "creator": creator,
                 "datePublished": date_published,
-                "cost": cost,
+                "cost": 1.0,
                 "timeout": timeout,
                 "provider": provider_attributes
             }
@@ -174,7 +172,7 @@ class OceanCompute:
 
         :param attributes: dict as created in `create_compute_service_attributes`
         """
-        compute_endpoint = self._data_provider.get_compute_endpoint(self._config)
+        compute_endpoint = self._data_provider.get_url(self._config)
         return ServiceDescriptor.compute_service_descriptor(
             attributes=attributes,
             service_endpoint=compute_endpoint
@@ -316,4 +314,6 @@ class OceanCompute:
         if not asset:
             asset = resolve_asset(did, self._config.aquarius_url)
 
-        return ServiceAgreement.from_ddo(ServiceTypes.CLOUD_COMPUTE, asset).service_endpoint
+        return self._data_provider.build_compute_endpoint(
+            ServiceAgreement.from_ddo(ServiceTypes.CLOUD_COMPUTE, asset).service_endpoint
+        )

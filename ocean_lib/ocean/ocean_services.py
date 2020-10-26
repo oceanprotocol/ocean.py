@@ -1,6 +1,7 @@
 """Ocean module."""
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
+from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_utils.agreements.service_factory import ServiceDescriptor
 
@@ -18,7 +19,7 @@ class OceanServices:
             construct the serviceEndpoint for the `access` (download) service
         :return: Service instance or None
         """
-        service_endpoint = DataServiceProvider.build_download_endpoint(provider_uri)
+        service_endpoint = provider_uri or DataServiceProvider.get_url(ConfigProvider.get_config())
         service = ServiceDescriptor.access_service_descriptor(
             attributes,
             service_endpoint
@@ -27,7 +28,7 @@ class OceanServices:
 
     @staticmethod
     def create_compute_service(attributes, provider_uri=None):
-        service_endpoint = DataServiceProvider.build_compute_endpoint(provider_uri)
+        service_endpoint = provider_uri or DataServiceProvider.get_url(ConfigProvider.get_config())
         return ServiceDescriptor.compute_service_descriptor(
             attributes,
             service_endpoint

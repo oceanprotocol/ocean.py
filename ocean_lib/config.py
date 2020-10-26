@@ -14,7 +14,8 @@ DEFAULT_NETWORK_PORT = 8545
 DEFAULT_NETWORK_URL = 'http://localhost:8545'
 DEFAULT_ARTIFACTS_PATH = ''
 DEFAULT_ADDRESS_FILE = ''
-DEFAULT_NAME_AQUARIUS_URL = 'http://localhost:5000'
+DEFAULT_AQUARIUS_URL = 'http://localhost:5000'
+DEFAULT_PROVIDER_URL = ''
 DEFAULT_STORAGE_PATH = 'ocean_lib.db'
 
 NAME_NETWORK_URL = 'network'
@@ -22,6 +23,7 @@ NAME_ARTIFACTS_PATH = 'artifacts.path'
 NAME_ADDRESS_FILE = 'address.file'
 NAME_GAS_LIMIT = 'gas_limit'
 NAME_AQUARIUS_URL = 'aquarius.url'
+NAME_PROVIDER_URL = 'provider.url'
 NAME_STORAGE_PATH = 'storage.path'
 NAME_AUTH_TOKEN_MESSAGE = 'auth_token_message'
 NAME_AUTH_TOKEN_EXPIRATION = 'auth_token_expiration'
@@ -30,7 +32,6 @@ NAME_DATA_TOKEN_FACTORY_ADDRESS = 'dtfactory.address'
 NAME_BFACTORY_ADDRESS = 'bfactory.address'
 NAME_OCEAN_ADDRESS = 'OCEAN.address'
 
-NAME_PARITY_URL = 'parity.url'
 NAME_PROVIDER_ADDRESS = 'provider.address'
 
 
@@ -43,12 +44,12 @@ environ_names = {
     NAME_ADDRESS_FILE: ['ADDRESS_FILE', 'Path to json file of deployed contracts addresses'],
     NAME_GAS_LIMIT: ['GAS_LIMIT', 'Gas limit'],
     NAME_AQUARIUS_URL: ['AQUARIUS_URL', 'Aquarius URL'],
+    NAME_PROVIDER_URL: ['PROVIDER_URL', 'URL of data services provider'],
     NAME_STORAGE_PATH: ['STORAGE_PATH', 'Path to the local database file'],
     NAME_AUTH_TOKEN_MESSAGE: ['AUTH_TOKEN_MESSAGE',
                               'Message to use for generating user auth token'],
     NAME_AUTH_TOKEN_EXPIRATION: ['AUTH_TOKEN_EXPIRATION',
                                  'Auth token expiration time expressed in seconds'],
-    NAME_PARITY_URL: ['PARITY_URL', 'Parity URL'],
     NAME_PROVIDER_ADDRESS: ['PROVIDER_ADDRESS', 'Provider (Brizo) ethereum address']
 }
 
@@ -57,15 +58,15 @@ config_defaults = {
         NAME_NETWORK_URL: DEFAULT_NETWORK_URL,
         NAME_ARTIFACTS_PATH: DEFAULT_ARTIFACTS_PATH,
         NAME_ADDRESS_FILE: DEFAULT_ADDRESS_FILE,
-        NAME_GAS_LIMIT: GAS_LIMIT_DEFAULT,
-        NAME_PARITY_URL: '',
-        NAME_PROVIDER_ADDRESS: '',
+        NAME_GAS_LIMIT: GAS_LIMIT_DEFAULT
     },
     'resources': {
-        NAME_AQUARIUS_URL: DEFAULT_NAME_AQUARIUS_URL,
+        NAME_AQUARIUS_URL: DEFAULT_AQUARIUS_URL,
+        NAME_PROVIDER_URL: DEFAULT_PROVIDER_URL,
         NAME_STORAGE_PATH: DEFAULT_STORAGE_PATH,
         NAME_AUTH_TOKEN_MESSAGE: '',
-        NAME_AUTH_TOKEN_EXPIRATION: ''
+        NAME_AUTH_TOKEN_EXPIRATION: '',
+        NAME_PROVIDER_ADDRESS: '',
     }
 }
 
@@ -80,18 +81,21 @@ class Config(configparser.ConfigParser):
         Options available:
 
         [eth-network]
-        network = http://localhost:8545                            # ethereum network url.
-        artifacts.path = artifacts                                       # Path of json abis.
-        parity.url = http://localhost:8545                            # Parity client url.
+        ; ethereum network url
+        network = rinkeby
+        ; Path of json abis, this defaults to the artifacts installed with `pip install ocean-contracts`
+        artifacts.path = artifacts
+
         [resources]
-        aquarius.url = http://localhost:5000                          # Aquarius url.
-        brizo.url = http://localhost:8030                             # Brizo url.
-        storage.path = ocean_lib.db                                    # Path of sla back-up storage.
+        aquarius.url = http://localhost:5000
+        provider.url = http://localhost:8030
+        ; Path of back-up storage
+        storage.path = ocean_lib.db
+
 
         :param filename: Path of the config file, str.
         :param options_dict: Python dict with the config, dict.
-        :param kwargs: Additional args. If you pass text, you have to pass the plain text
-        configuration.
+        :param kwargs: Additional args. If you pass text, you have to pass the plain text configuration.
         """
         configparser.ConfigParser.__init__(self)
 
@@ -179,18 +183,17 @@ class Config(configparser.ConfigParser):
         return int(self.get(self._section_name, NAME_GAS_LIMIT))
 
     @property
+    def metadata_store_url(self):
+        return self.get('resources', NAME_AQUARIUS_URL)
+
+    @property
     def aquarius_url(self):
         """URL of aquarius component. (e.g.): http://myaquarius:5000."""
         return self.get('resources', NAME_AQUARIUS_URL)
 
     @property
-    def metadata_store_url(self):
-        return self.get('resources', NAME_AQUARIUS_URL)
-
-    @property
-    def parity_url(self):
-        """URL of parity client. (e.g.): http://myparity:8545."""
-        return self.get(self._section_name, NAME_PARITY_URL)
+    def provider_url(self):
+        return self.get('resources', NAME_PROVIDER_URL)
 
     @property
     def provider_address(self):
@@ -198,19 +201,6 @@ class Config(configparser.ConfigParser):
         ethereum address of service provider (Brizo)
         """
         return self.get('resources', NAME_PROVIDER_ADDRESS)
-
-    @property
-    def dtfactory_address(self):
-        return self.get('eth-network', NAME_DATA_TOKEN_FACTORY_ADDRESS,
-                        fallback=None)
-
-    @property
-    def bfactory_address(self):
-        return self.get('eth-network', NAME_BFACTORY_ADDRESS, fallback=None)
-
-    @property
-    def ocean_token_address(self):
-        return self.get('eth-network', NAME_OCEAN_ADDRESS, fallback=None)
 
     @property
     def downloads_path(self):
@@ -224,12 +214,3 @@ class Config(configparser.ConfigParser):
     @property
     def auth_token_expiration(self):
         return self.get('resources', NAME_AUTH_TOKEN_EXPIRATION)
-
-    @property
-    def web3_provider(self):
-        """Web3 provider"""
-        return self._web3_provider
-
-    @web3_provider.setter
-    def web3_provider(self, web3_provider):
-        self._web3_provider = web3_provider

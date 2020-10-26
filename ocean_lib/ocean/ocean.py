@@ -3,11 +3,12 @@
 #  SPDX-Lic;ense-Identifier: Apache-2.0
 
 import logging
+import os
 
 from eth_utils import remove_0x_prefix
 from web3.datastructures import AttributeDict
 
-from ocean_lib.models.data_token import DataToken, OrderValues
+from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.order import Order
@@ -59,31 +60,36 @@ class Ocean:
         An instance of Ocean is parameterized by a `Config` instance.
 
         :param config: Config instance
+        :param data_provider: DataServiceProvider instance
         """
         # Configuration information for the market is stored in the Config class
         # config = Config(filename=config_file, options_dict=config_dict)
         if not config:
-            config = ConfigProvider.get_config()
+            try:
+                config = ConfigProvider.get_config()
+            except AssertionError:
+                config = Config(os.getenv('CONFIG_FILE'))
+                ConfigProvider.set_config(config)
 
         if isinstance(config, dict):
-
             aqua_url = config.get('metadataStoreUri', config.get('aquarius.url', 'http://localhost:5000'))
-
             config_dict = {
                 'eth-network': {
                     'network': config.get('network', ''),
                 },
                 'resources': {
                     'aquarius.url': aqua_url,
-                    'provider.url': config.get('providerUri', 'http://localhost:8030/api/v1')
+                    'provider.url': config.get('providerUri', 'http://localhost:8030')
                 }
             }
             config = Config(options_dict=config_dict)
-            ConfigProvider.set_config(config)
 
+        ConfigProvider.set_config(config)
         self._config = config
-        self._web3 = Web3Provider.get_web3(provider=get_web3_connection_provider(self._config.network_url))
         ContractHandler.set_artifacts_path(self._config.artifacts_path)
+        Web3Provider.init_web3(provider=get_web3_connection_provider(self._config.network_url))
+
+        self._web3 = Web3Provider.get_web3()
 
         if not data_provider:
             data_provider = DataServiceProvider
@@ -125,8 +131,8 @@ class Ocean:
     def OCEAN_address(self):
         return get_ocean_token_address(Web3Helper.get_network_name())
 
-    def create_data_token(self, blob: str, name: str, symbol: str,
-                          from_wallet: Wallet, cap: int=DataToken.DEFAULT_CAP) -> DataToken:
+    def create_data_token(self, name: str, symbol: str, from_wallet: Wallet,
+                          cap: float=DataToken.DEFAULT_CAP, blob: str='') -> DataToken:
         dtfactory = self.get_dtfactory()
         tx_id = dtfactory.createToken(blob, name, symbol, to_base_18(cap), from_wallet=from_wallet)
         return DataToken(dtfactory.get_token_address(tx_id))

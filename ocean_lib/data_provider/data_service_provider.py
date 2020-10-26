@@ -35,6 +35,7 @@ class DataServiceProvider:
 
     """
     _http_client = get_requests_session()
+    API_VERSION = '/api/v1'
 
     @staticmethod
     def set_http_client(http_client):
@@ -320,6 +321,14 @@ class DataServiceProvider:
         )
 
     @staticmethod
+    def _remove_slash(path):
+        if path.endswith('/'):
+            path = path[:-1]
+        if path.startswith('/'):
+            path = path[1:]
+        return path
+
+    @staticmethod
     def get_url(config):
         """
         Return the DataProvider component url.
@@ -327,17 +336,28 @@ class DataServiceProvider:
         :param config: Config
         :return: Url, str
         """
-        _url = 'http://localhost:8030/api/v1'
-        if config.has_option('resources', 'provider.url'):
-            _url = config.get('resources', 'provider.url') or _url
+        return DataServiceProvider._remove_slash(config.provider_url or 'http://localhost:8030')
 
-        return _url
+    @staticmethod
+    def get_api_version():
+        return DataServiceProvider._remove_slash(os.getenv('PROVIDER_API_VERSION', DataServiceProvider.API_VERSION))
 
     @staticmethod
     def build_endpoint(service_name, provider_uri=None):
         if not provider_uri:
             config = ConfigProvider.get_config()
             provider_uri = DataServiceProvider.get_url(config)
+
+        provider_uri = DataServiceProvider._remove_slash(provider_uri)
+        parts = provider_uri.split('/')
+        if parts[-2] == 'services':
+            base_url = '/'.join(parts[:-2])
+            return f'{base_url}/services/initialize'
+
+        api_version = DataServiceProvider.get_api_version()
+        if api_version not in provider_uri:
+            provider_uri = f'{provider_uri}/{api_version}'
+
         return f'{provider_uri}/services/{service_name}'
 
     @staticmethod
@@ -363,8 +383,7 @@ class DataServiceProvider:
             base_url = '/'.join(parts[:-2])
             return f'{base_url}/services/initialize'
 
-        base_url = '/'.join(parts[:-1])
-        return f'{base_url}/initialize'
+        return DataServiceProvider.build_initialize_endpoint(service_endpoint)
 
     @staticmethod
     def get_download_endpoint(config):
@@ -374,7 +393,7 @@ class DataServiceProvider:
         :param config: Config
         :return: Url, str
         """
-        return f'{DataServiceProvider.get_url(config)}/services/download'
+        return DataServiceProvider.build_download_endpoint(DataServiceProvider.get_url(config))
 
     @staticmethod
     def get_compute_endpoint(config):
@@ -384,7 +403,7 @@ class DataServiceProvider:
         :param config: Config
         :return: Url, str
         """
-        return f'{DataServiceProvider.get_url(config)}/services/compute'
+        return DataServiceProvider.build_compute_endpoint(DataServiceProvider.get_url(config))
 
     @staticmethod
     def get_encrypt_endpoint(config):
@@ -394,7 +413,7 @@ class DataServiceProvider:
         :param config: Config
         :return: Url, str
         """
-        return f'{DataServiceProvider.get_url(config)}/services/encrypt'
+        return DataServiceProvider.build_encrypt_endpoint(DataServiceProvider.get_url(config))
 
     @staticmethod
     def write_file(response, destination_folder, file_name):

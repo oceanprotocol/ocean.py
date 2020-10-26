@@ -2,12 +2,14 @@ import os
 
 from web3 import WebsocketProvider
 
+from ocean_lib.config import Config
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
+from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib.web3_internal.web3helper import Web3Helper
 
 ENV_VAR_INFURA_PROJECT_ID = 'INFURA_PROJECT_ID'
@@ -121,3 +123,12 @@ def get_ocean_token_address(network=None):
         network or Web3Helper.get_network_name(), ConfigProvider.get_config()
     )
     return addresses.get('Ocean') if addresses else None
+
+
+def init_components(config=None):
+    if config is None:
+        config = Config(os.getenv('CONFIG_FILE'))
+
+    ConfigProvider.set_config(config)
+    Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
+    ContractHandler.set_artifacts_path(config.artifacts_path)

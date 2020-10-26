@@ -116,7 +116,7 @@ def get_registered_ddo(ocean_instance, wallet: Wallet):
             to_base_18(1),
             wallet
         ),
-        DataServiceProvider.get_download_endpoint(ocean_instance.config)
+        DataServiceProvider.get_url(ocean_instance.config)
     )
 
     block = ocean_instance.web3.eth.blockNumber

@@ -9,7 +9,8 @@ class ConfigProvider:
     @staticmethod
     def get_config():
         """ Get a Config instance."""
-        assert ConfigProvider._config, 'set_config first.'
+        if not ConfigProvider._config:
+            raise AssertionError(f'set_config first.')
         return ConfigProvider._config
 
     @staticmethod

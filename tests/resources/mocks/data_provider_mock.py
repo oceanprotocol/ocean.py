@@ -57,8 +57,8 @@ class DataProviderMock(object):
 
     @staticmethod
     def get_consume_endpoint(config):
-        return f'{DataServiceProvider.get_url(config)}/services/download'
+        return f'{DataServiceProvider.get_download_endpoint(config)}'
 
     @staticmethod
     def get_compute_endpoint(config):
-        return f'{DataServiceProvider.get_url(config)}/services/compute'
+        return f'{DataServiceProvider.get_compute_endpoint(config)}'

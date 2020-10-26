@@ -21,6 +21,7 @@ from ocean_utils.exceptions import (
     OceanDIDAlreadyExist,
 )
 from ocean_utils.utils.utilities import checksum
+from plecos import plecos
 
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import OrderRequirements
@@ -78,7 +79,7 @@ class OceanAssets:
         if not access_service_descriptor and not compute_service_descriptor:
             access_service_descriptor = ServiceDescriptor.access_service_descriptor(
                 self._build_access_service(metadata, 1.0, wallet.address),
-                self._data_provider.build_download_endpoint(provider_uri)
+                self._data_provider.get_url(self._config)
             )
 
         if access_service_descriptor:
@@ -92,7 +93,8 @@ class OceanAssets:
     def create(self, metadata: dict, publisher_wallet: Wallet,
                service_descriptors: list=None, owner_address: str=None,
                data_token_address: str=None, provider_uri=None,
-               dt_name: str=None, dt_symbol: str=None, dt_blob: str=None) -> (Asset, None):
+               dt_name: str=None, dt_symbol: str=None,
+               dt_blob: str=None, dt_cap: float=None) -> (Asset, None):
         """
         Register an asset on-chain by creating/deploying a DataToken contract
         and in the Metadata store (Aquarius).
@@ -112,7 +114,7 @@ class OceanAssets:
         :param dt_symbol: str symbol of DataToken if creating a new one
         :param dt_blob: str blob of DataToken if creating a new one. A `blob` is any text
             to be stored with the ERC20 DataToken contract for any purpose.
-
+        :param dt_cap: float
         :return: DDO instance
         """
         assert isinstance(metadata, dict), f'Expected metadata of type dict, got {type(metadata)}'
@@ -123,6 +125,11 @@ class OceanAssets:
         metadata_copy = copy.deepcopy(metadata)
         asset_type = metadata_copy['main']['type']
         assert asset_type in ('dataset', 'algorithm'), f'Invalid/unsupported asset type {asset_type}'
+        if not plecos.is_valid_dict_local(metadata_copy):
+            errors = plecos.list_errors_dict_local(metadata_copy)
+            msg = f'Metadata has validation errors: {errors}'
+            logger.error(msg)
+            raise ValueError(msg)
 
         service_descriptors = service_descriptors or []
 
@@ -147,8 +154,9 @@ class OceanAssets:
             name = dt_name or metadata['main']['name']
             symbol = dt_symbol or name
             # register on-chain
+            _cap = dt_cap if dt_cap else DataToken.DEFAULT_CAP
             tx_id = dtfactory.createToken(
-                blob, name, symbol, DataToken.DEFAULT_CAP_BASE, from_wallet=publisher_wallet)
+                blob, name, symbol, to_base_18(_cap), from_wallet=publisher_wallet)
             data_token = DataToken(dtfactory.get_token_address(tx_id))
             if not data_token:
                 logger.warning(f'Creating new data token failed.')

@@ -1,12 +1,12 @@
-# Quickstart: Marketplace Flow
+# Quickstart: Marketplace Flow with compute-to-data
 
-This batteries-included flow includes metadata and a download service for one datatoken.
+This tutorial demonstrates publishing a dataset with `compute` service
 
-It focuses on Alice's experience as a publisher, and Bob's experience as a buyer & consumer. 
-The rest are services used by Alice and Bob.
+We will be connecting to the `rinkeby` test net and the Ocean Protocol 
+supporting services.
 
 Here's the steps:
-1. Initialize services
+1. Setup
 1. Alice publishes assets for data services (= publishes a datatoken contract and metadata)
 1. Alice mints 100 tokens
 1. Alice makes datatokens available for sale in a Balancer pool

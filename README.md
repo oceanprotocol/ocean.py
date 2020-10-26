@@ -5,11 +5,16 @@
 and consume data. With it, you can:
 * **Publish** data services: downloadable files or compute-to-data. 
 Ocean creates a new [ERC20](https://github.com/ethereum/EIPs/blob/7f4f0377730f5fc266824084188cc17cf246932e/EIPS/eip-20.md) 
-datatoken for each data service.
-* **Mint** datatokens for the service
+datatoken for each data set.
+* **Mint** datatokens to allow buying/consuming the data service
 * **Consume** datatokens, to access the service
 * **Transfer** datatokens to another owner, and **all other ERC20 actions** 
 using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-with-an-erc20-token-contract) etc.
+* **Price** datatokens in terms of OCEAN tokens by creating a Balancer pool of `datatoken <> OCEAN`
+* **Stake** OCEAN tokens on specific datatokens (by adding OCEAN liquidity into a datatoken Balancer pool)
+* Buy datatokens from available Balancer pools or from fixed price exchange if available
+* And much more ...
+
 
 `ocean-lib` is part of the [Ocean Protocol](https://www.oceanprotocol.com) toolset.
 
@@ -19,15 +24,17 @@ using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-wi
 
 ## Quickstart
 
-### Simple Flow
+### Setup config file and env't variables
 
-This stripped-down flow shows the essence of Ocean. Just downloading, no metadata.
+This guide demonstrates how to [setup the config file and environment variables](READMEs/setup.md)
 
-[Go to simple flow](READMEs/simple_flow.md)
+### ocean-lib overview
+
+[Description of ocean-lib modules and functions](READMEs/overview.md)
 
 ### Marketplace Flow
 
-This batteries-included flow includes metadata, multiple services for one datatoken, and compute-to-data.
+This batteries-included flow includes metadata, download service and datatoken.
 
 [Go to marketplace flow](READMEs/marketplace_flow.md)
 

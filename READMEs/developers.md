@@ -7,7 +7,6 @@ Steps:
 1. **Start blockchain service** (only needed for ganache)
 1. **Deploy** the contracts to {local, rinkeby, mainnet}
 1. **Test** 
-1. (Along the way) **Debug** at the contract or py level.
 
 These steps are detailed below. But first, installation. 
 
@@ -19,7 +18,7 @@ git clone https://github.com/oceanprotocol/ocean-lib-py
 cd ocean-lib-py
 ```
 
-Initalize virtual env't. Activate env't.(BTW use `deactivate` to, well, deactivate.)
+Initialize virtual env't. Activate env't.(BTW use `deactivate` to, well, deactivate.)
 ```console
 python -m venv venv
 source venv/bin/activate 
@@ -30,71 +29,80 @@ Install modules in the env't.
 pip install -r requirements_dev.txt 
 ```
 
-If you don't have an Infura account and you aim to deploy to `rinkeby` or `mainnet`, go to www.infura.io and sign up.
-
-Private keys etc can't live on GitHub. To handle this, ocean-lib-py tools read from environment variables:
-```console
-    
-```
-
-Then open `~/ocean.conf` and update the values as needed. This may include the infura id.
+If you don't have an Infura account and you aim to deploy to `rinkeby`, go to www.infura.io and sign up.
 
 ## 2. Start blockchain service (ganache only)
 
-Outcome: ganache running as a live blockchain network service, just like mainnet and rinkeby.
+Outcome: ganache running as a live blockchain network service, just like rinkeby.
 
-Open a separate terminal and set the env't. and run the ganache script. 
+Open a separate terminal and run ganache-cli (using docker)
 ```console
-cd <this dir>`
-source venv/bin/activate
+docker run -d -p 8545:8545 trufflesuite/ganache-cli:latest \
+  --mnemonic "taxi music thumb unique chat sand crew more leg another off lamp"
 ```
 
-Run the ganache script. It starts `ganache-cli` including putting ETH into the private keys set in the environment
-```console
-./ganache.py
-```
+The comand above starts `ganache-cli` with accounts derived from that `mnemonic` seed phrase. 
+You can see 10 accounts including addresses and private keys in the console. Use one of those 
+accounts for doing on-chain transactions. 
+Example, first account from the ganache run: 
+  address=0xe2DD09d719Da89e5a3D0F2549c7E24566e947260
+  privateKey=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 
 ## 3. Deploy the contracts
-Outcome: DataTokenTemplate and DTFactory are deployed to ganache, rinkeby, or mainnet.
+Outcome: DataTokenTemplate, DTFactory, BFactory, etc. are deployed to ganache.
 
-If mainnet: ensure the `FACTORY_DEPLOYER_PRIVATE_KEY` is correct (= an OPF key).
+Setup env't: private keys etc can't live on GitHub. To handle this, ocean-lib-py tools read from environment variables:
+```console
+export CONFIG_FILE=config_local.ini
+export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+export ARTIFACTS_PATH=artifacts
 
-Call the deploy script with (NETWORK = `ganache`, `rinkeby`, or `mainnet`) and (ADDRESSES_FILE_PATH to hold the deployed contracts addresses). 
-When using already deployed contracts you can skip this, but make sure the `artifacts/address.json` file has the up-to-date contracts 
-addresses for the target network.
+```
+
+Call the deploy script with (NETWORK = `ganache` or `rinkeby`) and 
+(ADDRESSES_FILE_PATH to hold the deployed contracts addresses). When using already deployed 
+contracts you can skip this, but make sure the `artifacts/address.json` file has the up-to-date 
+contracts addresses for the target network.
 ```console
 ./deploy.py ganache artifacts/address.json
 ```
 
-Finally: update `config.ini`'s `address.file` with the ADDRESSES_FILE_PATH from the previous step.
+Finally: update `config_local.ini`'s `address.file` with the ADDRESSES_FILE_PATH from the previous step.
 
 ## 4. Test 
 Outcome: ocean-lib-py works as expected.
 
 Some tests don't need other services running. Let's run one:
 ```console
-pytest tests/bpool/test_BToken.py
+pytest tests/bpool/test_btoken.py
 ```
 
-Some tests need an Ocean Provider running. Follow [these steps](https://github.com/oceanprotocol/provider-py/blob/master/README.md) to set up Provider. Then run test(s) that uses Provider (but not other services). For example:
+Some tests need an Ocean Provider running. Follow 
+[these steps](https://github.com/oceanprotocol/provider-py/blob/master/README.md) 
+to set up Provider. Then run test(s) that use Provider (but not other services). 
+For example:
 ```console
-pytest tests/ocean/test_simple_flow.py
+pytest tests/ocean/test_market_flow.py
 ```
 
-Some tests need an Ocean Provider *and* Aquarius (database service) running. Follow [these steps](https://github.com/oceanprotocol/aquarius) to set up Aquarius. Then run test(s) that use Provider and Aquarius. For example:
+Some tests need an Ocean Provider *and* Aquarius (database service) running. Follow 
+[these steps](https://github.com/oceanprotocol/aquarius) to set up Aquarius. Then run 
+test(s) that use Provider and Aquarius. For example:
 ```console
 pytest 
 ```
 
-And repeat on rinkeby etc.
+Alternatively, you can run `barge` to start all required services: ganache, provider, 
+aquarius and deploy the contracts. To start `barge` do this in a separate terminal:
+```console
+git clone https://github.com/oceanprotocol/barge
+cd barge
+git checkout v3
+bash -x start_ocean.sh 2>&1 > start_ocean.log &
 
-## 5a. (Optional) Brownie Debugging, Directly on Solidity Objects
+```
 
-Brownie reduces pain in Solidity debugging: it makes it feel like Python debugging, including Python-style tracebacks in Solidity. [Here's a walk-through](https://medium.com/better-programming/getting-started-with-brownie-part-3-ef6bfa9867d7) of key features. [Here are Brownie docs](https://eth-brownie.readthedocs.io). 
-
-COMING SOON ..
-
-
-## 5b. (Optional) Brownie Debugging, using Ocean.py libraries
-
-COMING SOON ..
+Now you can run all tests since all services are running:
+```console
+pytest
+```

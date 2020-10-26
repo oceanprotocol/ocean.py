@@ -20,6 +20,8 @@ class BFactory(ContractBase):
             {"gas": balancer_constants.GASLIMIT_BFACTORY_NEWBPOOL}
         )
         tx_receipt = self.get_tx_receipt(tx_id)
+        if tx_receipt.status != 1:
+            raise ValueError(f'Create BPool failed: tx_id {tx_id}, tx receipt is {tx_receipt}')
 
         # grab pool_address
         warnings.filterwarnings("ignore")  # ignore unwarranted warning up next

@@ -65,9 +65,14 @@ class OceanPool:
 
         # Must approve datatoken and Ocean tokens to the new pool as spender
         dt = DataToken(data_token_address)
-        dt.approve_tokens(pool_address, data_token_amount, from_wallet, wait=True)
+        tx_id = dt.approve_tokens(pool_address, data_token_amount, from_wallet, wait=True)
+        if dt.get_tx_receipt(tx_id).status != 1:
+            raise AssertionError(f'Approve datatokens failed, pool was created at {pool_address}')
+
         ot = DataToken(self.ocean_address)
-        ot.approve_tokens(pool_address, OCEAN_amount, from_wallet, wait=True)
+        tx_id = ot.approve_tokens(pool_address, OCEAN_amount, from_wallet, wait=True)
+        if ot.get_tx_receipt(tx_id).status != 1:
+            raise AssertionError(f'Approve OCEAN tokens failed, pool was created at {pool_address}')
 
         tx_id = pool.setup(
             data_token_address,
@@ -79,6 +84,9 @@ class OceanPool:
             to_base_18(swap_fee),
             from_wallet
         )
+        if pool.get_tx_receipt(tx_id).status != 1:
+            raise AssertionError(f'pool.setup failed: txId={tx_id}, receipt={pool.get_tx_receipt(tx_id)}')
+
         logger.debug(f'create pool completed: poolAddress={pool_address}, pool setup TxId={tx_id}')
 
         return pool
@@ -202,8 +210,8 @@ class OceanPool:
 
         return pool.exitswapExternAmountOut(token_address, amount_base, max_pool_shares_base, from_wallet)
 
-    def buy_data_tokens(self, pool_address: str, amount_base: int,
-                        max_OCEAN_amount_base: int, from_wallet: Wallet) -> str:
+    def buy_data_tokens(self, pool_address: str, amount: float,
+                        max_OCEAN_amount: float, from_wallet: Wallet) -> str:
         """
         Buy data tokens from this pool, paying `max_OCEAN_amount_base` of OCEAN tokens.
         If total spent <= max_OCEAN_amount_base.
@@ -213,21 +221,21 @@ class OceanPool:
         The transaction fails if total spent exceeds `max_OCEAN_amount_base`.
 
         :param pool_address: str address of pool contract
-        :param amount_base: int number of data tokens to add to this pool in *base*
-        :param max_OCEAN_amount_base:
+        :param amount: int number of data tokens to add to this pool in *base*
+        :param max_OCEAN_amount:
         :param from_wallet:
         :return: str transaction id/hash
         """
-        ocean_tok = BToken(self.ocean_address)
-        ocean_tok.approve(pool_address, max_OCEAN_amount_base, from_wallet)
+        ocean_tok = DataToken(self.ocean_address)
+        ocean_tok.approve_tokens(pool_address, max_OCEAN_amount, from_wallet, wait=True)
 
         dtoken_address = self.get_token_address(pool_address)
         pool = BPool(pool_address)
         return pool.swapExactAmountOut(
             tokenIn_address=self.ocean_address,  # entering pool
-            maxAmountIn_base=max_OCEAN_amount_base,  # ""
+            maxAmountIn_base=to_base_18(max_OCEAN_amount),  # ""
             tokenOut_address=dtoken_address,  # leaving pool
-            tokenAmountOut_base=amount_base,  # ""
+            tokenAmountOut_base=to_base_18(amount),  # ""
             maxPrice_base=2 ** 255,  # here we limit by max_num_OCEAN, not price
             from_wallet=from_wallet,
         )
@@ -262,7 +270,7 @@ class OceanPool:
             from_wallet=from_wallet,
         )
 
-    def get_token_price_base(self, pool_address: str) -> int:
+    def get_token_price(self, pool_address: str) -> float:
         """
 
         :param pool_address: str the address of the pool contract
@@ -270,10 +278,10 @@ class OceanPool:
         """
         dtoken_address = self.get_token_address(pool_address)
         pool = BPool(pool_address)
-        return pool.getSpotPrice(
+        return from_base_18(pool.getSpotPrice(
             tokenIn_address=self.ocean_address,
             tokenOut_address=dtoken_address
-        )
+        ))
 
     def add_liquidity_finalized(
             self, pool_address: str, bpt_amount_base: int, max_data_token_amount_base: int,
