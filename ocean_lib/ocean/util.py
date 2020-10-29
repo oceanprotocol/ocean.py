@@ -79,7 +79,10 @@ def get_web3_connection_provider(network_url):
 
             network_url = get_infura_url(get_infura_id(), network_url)
 
-        provider = WebsocketProvider(network_url)
+        if network_url.startswith('http'):
+            provider = CustomHTTPProvider(network_url)
+        else:
+            provider = WebsocketProvider(network_url)
 
     return provider
 
