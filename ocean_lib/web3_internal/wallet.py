@@ -2,8 +2,7 @@ import logging
 import os
 import typing
 
-from ocean_lib.ocean.constants import ENV_MAX_GAS_PRICE
-from ocean_lib.web3_internal.constants import MIN_GAS_PRICE
+from ocean_lib.web3_internal.constants import MIN_GAS_PRICE, ENV_MAX_GAS_PRICE
 from ocean_lib.web3_internal.utils import privateKeyToAddress
 from ocean_lib.web3_internal.utils import privateKeyToPublicKey
 

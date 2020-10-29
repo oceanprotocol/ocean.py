@@ -9,7 +9,7 @@ from web3 import Web3
 from web3.utils.threads import Timeout
 from websockets import ConnectionClosed
 
-from ocean_lib.ocean.constants import ENV_GAS_PRICE
+from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
