@@ -11,6 +11,7 @@ from collections import namedtuple
 from json import JSONDecodeError
 
 from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.ocean.constants import ENV_PROVIDER_API_VERSION
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_utils.agreements.service_types import ServiceTypes
 from ocean_utils.exceptions import OceanEncryptAssetUrlsError
@@ -344,7 +345,7 @@ class DataServiceProvider:
 
     @staticmethod
     def get_api_version():
-        return DataServiceProvider._remove_slash(os.getenv('PROVIDER_API_VERSION', DataServiceProvider.API_VERSION))
+        return DataServiceProvider._remove_slash(os.getenv(ENV_PROVIDER_API_VERSION, DataServiceProvider.API_VERSION))
 
     @staticmethod
     def build_endpoint(service_name, provider_uri=None, config=None):

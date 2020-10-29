@@ -6,26 +6,40 @@ from ocean_lib.config import Config
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.bfactory import BFactory
+from ocean_lib.ocean.constants import ENV_INFURA_PROJECT_ID, ENV_INFURA_CONNECTION_TYPE, ENV_CONFIG_FILE
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib.web3_internal.web3helper import Web3Helper
 
-ENV_VAR_INFURA_PROJECT_ID = 'INFURA_PROJECT_ID'
+
 WEB3_INFURA_PROJECT_ID = '357f2fe737db4304bd2f7285c5602d0d'
-
 GANACHE_URL = 'http://127.0.0.1:8545'
-
 SUPPORTED_NETWORK_NAMES = {'rinkeby', 'kovan', 'ganache', 'mainnet', 'ropsten'}
 
 
+def get_infura_connection_type():
+    _type = os.getenv(ENV_INFURA_CONNECTION_TYPE, 'http')
+    if _type not in ('http', 'websocket'):
+        _type = 'http'
+
+    return _type
+
+
 def get_infura_id():
-    return os.getenv(ENV_VAR_INFURA_PROJECT_ID, WEB3_INFURA_PROJECT_ID)
+    return os.getenv(ENV_INFURA_PROJECT_ID, WEB3_INFURA_PROJECT_ID)
 
 
 def get_infura_url(infura_id, network):
-    return f"wss://{network}.infura.io/ws/v3/{infura_id}"
+    conn_type = get_infura_connection_type()
+    if conn_type == 'http':
+        return f'https://{network}.infura.io/v3/{infura_id}'
+
+    if conn_type == 'websocket':
+        return f'wss://{network}.infura.io/ws/v3/{infura_id}'
+
+    raise AssertionError(f'Unknown connection type {conn_type}')
 
 
 def get_web3_connection_provider(network_url):
@@ -127,7 +141,7 @@ def get_ocean_token_address(network=None):
 
 def init_components(config=None):
     if config is None:
-        config = Config(os.getenv('CONFIG_FILE'))
+        config = Config(os.getenv(ENV_CONFIG_FILE))
 
     ConfigProvider.set_config(config)
     Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))

@@ -103,12 +103,6 @@ def transact_with_contract_function(
             account_key = transaction['account_key']
             transact_transaction.pop('account_key')
 
-    # Restrict transactions to raw transactions for now (security first)
-    # if not (passphrase and key_file):
-    #     raise AssertionError(
-    #         'password and key file are required for signing transactions locally.'
-    #     )
-
     if account_key:
         raw_tx = Wallet(web3, private_key=account_key).sign_tx(transact_transaction)
         logging.debug(f'sending raw tx: function: {function_name}, tx hash: {raw_tx.hex()}')

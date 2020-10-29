@@ -1,6 +1,8 @@
 import logging
+import os
 import typing
 
+from ocean_lib.ocean.constants import ENV_MAX_GAS_PRICE
 from ocean_lib.web3_internal.constants import MIN_GAS_PRICE
 from ocean_lib.web3_internal.utils import privateKeyToAddress
 from ocean_lib.web3_internal.utils import privateKeyToPublicKey
@@ -44,6 +46,7 @@ class Wallet:
             assert self._address is None or self._address == address
             self._address = address
             self._password = None
+        self._max_gas_price = os.getenv(ENV_MAX_GAS_PRICE, None)
 
     @property
     def web3(self):
@@ -98,8 +101,12 @@ class Wallet:
             nonce = Wallet._get_nonce(self._web3, account.address)
 
         if not gas_price:
-            gas_price = int(self._web3.eth.gasPrice * 1.1)
+            gas_price = int(self._web3.eth.gasPrice * 1.05)
             gas_price = max(gas_price, MIN_GAS_PRICE)
+
+        if gas_price and self._max_gas_price:
+            gas_price = min(gas_price, self._max_gas_price)
+
         logger.debug(f'`Wallet` signing tx: sender address: {account.address} nonce: {nonce}, '
                      f'eth.gasPrice: {self._web3.eth.gasPrice}')
         tx['gasPrice'] = gas_price

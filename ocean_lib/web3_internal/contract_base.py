@@ -7,8 +7,9 @@ import typing
 
 from web3 import Web3
 from web3.utils.threads import Timeout
+from websockets import ConnectionClosed
 
-from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
+from ocean_lib.ocean.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
@@ -91,9 +92,15 @@ class ContractBase(object):
         except ValueError as e:
             logger.error(f'Waiting for transaction receipt failed: {e}')
             return None
-        except (Timeout, Exception) as e:
+        except Timeout as e:
             logger.info(f'Waiting for transaction receipt may have timed out: {e}.')
             return None
+        except ConnectionClosed as e:
+            logger.info(f'ConnectionClosed error waiting for transaction receipt failed: {e}.')
+            raise
+        except Exception as e:
+            logger.info(f'Unknown error waiting for transaction receipt: {e}.')
+            raise
 
         return Web3Provider.get_web3().eth.getTransactionReceipt(tx_hash)
 
@@ -154,7 +161,7 @@ class ContractBase(object):
             # 'gas': GAS_LIMIT_DEFAULT
         }
 
-        gas_price = os.environ.get('GAS_PRICE', None)
+        gas_price = os.environ.get(ENV_GAS_PRICE, None)
         if gas_price:
             _transact['gasPrice'] = gas_price
 

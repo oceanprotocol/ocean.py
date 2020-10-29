@@ -6,6 +6,7 @@ from collections import namedtuple
 from eth_utils import remove_0x_prefix
 from web3 import Web3
 from web3.utils.events import get_event_data
+from websockets import ConnectionClosed
 
 from ocean_lib.ocean.util import to_base_18, from_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -139,7 +140,15 @@ class DataToken(ContractBase):
 
     def verify_order_tx(self, web3, tx_id, did, service_id, amount_base, sender):
         event = getattr(self.events, self.ORDER_STARTED_EVENT)
-        tx_receipt = self.get_tx_receipt(tx_id)
+        try:
+            tx_receipt = self.get_tx_receipt(tx_id)
+        except ConnectionClosed:
+            # try again in this case
+            tx_receipt = self.get_tx_receipt(tx_id)
+
+        if tx_receipt is None:
+            raise AssertionError(f'Failed to get tx receipt for the `startOrder` transaction..')
+
         if tx_receipt.status == 0:
             raise AssertionError(f'order transaction failed.')
 
