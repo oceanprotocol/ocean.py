@@ -1,6 +1,12 @@
 # configuration file
 CONF_FILE_PATH = '~/ocean.conf'
 
+# Env var names
+ENV_CONFIG_FILE = 'CONFIG_FILE'
+ENV_PROVIDER_API_VERSION = 'PROVIDER_API_VERSION'
+ENV_INFURA_CONNECTION_TYPE = 'INFURA_CONNECTION_TYPE'
+ENV_INFURA_PROJECT_ID = 'INFURA_PROJECT_ID'
+
 # Toggle runtime type-checking
 import configparser, os
 config = configparser.ConfigParser()
@@ -14,10 +20,3 @@ if not TYPECHECK:
     # do nothing, just return the original function
     def noop(f):
         return f
-
-# Env var names
-ENV_CONFIG_FILE = 'CONFIG_FILE'
-ENV_PROVIDER_API_VERSION = 'PROVIDER_API_VERSION'
-ENV_INFURA_CONNECTION_TYPE = 'INFURA_CONNECTION_TYPE'
-ENV_INFURA_PROJECT_ID = 'INFURA_PROJECT_ID'
-
