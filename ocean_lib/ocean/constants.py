@@ -1,6 +1,8 @@
 # configuration file
 CONF_FILE_PATH = '~/ocean.conf'
 
+# Env var names
+
 # Toggle runtime type-checking
 import configparser, os
 config = configparser.ConfigParser()

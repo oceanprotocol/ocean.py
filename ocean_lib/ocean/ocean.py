@@ -12,6 +12,7 @@ from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.order import Order
+from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.ocean_pool import OceanPool
 from ocean_lib.web3_internal.contract_handler import ContractHandler
@@ -30,8 +31,6 @@ from ocean_lib.ocean.ocean_services import OceanServices
 from ocean_lib.ocean.util import get_web3_connection_provider, get_ocean_token_address, get_bfactory_address, to_base_18, \
     get_contracts_addresses, from_base_18
 from ocean_lib.web3_internal.web3helper import Web3Helper
-
-CONFIG_FILE_ENVIRONMENT_NAME = 'CONFIG_FILE'
 
 logger = logging.getLogger('ocean')
 
@@ -68,7 +67,7 @@ class Ocean:
             try:
                 config = ConfigProvider.get_config()
             except AssertionError:
-                config = Config(os.getenv('CONFIG_FILE'))
+                config = Config(os.getenv(ENV_CONFIG_FILE))
                 ConfigProvider.set_config(config)
 
         if isinstance(config, dict):

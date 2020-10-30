@@ -18,7 +18,7 @@ class Web3Helper(object):
 
     DEFAULT_NETWORK_NAME = 'ganache'
     _network_name_map = {
-        1: 'Main',
+        1: 'Mainnet',
         2: 'Morden',
         3: 'Ropsten',
         4: 'Rinkeby',
