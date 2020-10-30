@@ -25,9 +25,9 @@ sys.path.insert(0, os.path.abspath('../../'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'ocean-lib-py'
-copyright = 'ocean-lib-py contributors'
-author = 'ocean-lib-py contributors'
+project = 'ocean.py'
+copyright = 'ocean.py contributors'
+author = 'ocean.py contributors'
 
 # The full version, including alpha/beta/rc tags
 release = '0.5.1'

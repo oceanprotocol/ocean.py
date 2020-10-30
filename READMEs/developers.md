@@ -1,6 +1,6 @@
-# Developing ocean-lib-py
+# Developing ocean.py
 
-This README is how to further *develop* ocean-lib-py. (Compare to the quickstarts which show how to *use* it.)
+This README is how to further *develop* ocean.py. (Compare to the quickstarts which show how to *use* it.)
 
 Steps:
 1. **Install dependencies**
@@ -14,8 +14,8 @@ These steps are detailed below. But first, installation.
 
 Clone this repo, and `cd` into it.
 ```console
-git clone https://github.com/oceanprotocol/ocean-lib-py
-cd ocean-lib-py
+git clone https://github.com/oceanprotocol/ocean.py
+cd ocean.py
 ```
 
 Initialize virtual env't. Activate env't.(BTW use `deactivate` to, well, deactivate.)
@@ -51,7 +51,7 @@ Example, first account from the ganache run:
 ## 3. Deploy the contracts
 Outcome: DataTokenTemplate, DTFactory, BFactory, etc. are deployed to ganache.
 
-Setup env't: private keys etc can't live on GitHub. To handle this, ocean-lib-py tools read from environment variables:
+Setup env't: private keys etc can't live on GitHub. To handle this, ocean.py tools read from environment variables:
 ```console
 export CONFIG_FILE=config_local.ini
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
@@ -70,7 +70,7 @@ contracts addresses for the target network.
 Finally: update `config_local.ini`'s `address.file` with the ADDRESSES_FILE_PATH from the previous step.
 
 ## 4. Test 
-Outcome: ocean-lib-py works as expected.
+Outcome: ocean.py works as expected.
 
 Some tests don't need other services running. Let's run one:
 ```console
