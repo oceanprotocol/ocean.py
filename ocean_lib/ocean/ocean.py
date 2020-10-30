@@ -12,7 +12,7 @@ from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.order import Order
-from ocean_lib.ocean.constants import ENV_CONFIG_FILE
+from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.ocean_pool import OceanPool
 from ocean_lib.web3_internal.contract_handler import ContractHandler

@@ -6,7 +6,7 @@ from ocean_lib.config import Config
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.bfactory import BFactory
-from ocean_lib.ocean.constants import ENV_INFURA_PROJECT_ID, ENV_INFURA_CONNECTION_TYPE, ENV_CONFIG_FILE
+from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE, ENV_INFURA_CONNECTION_TYPE, ENV_INFURA_PROJECT_ID
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
