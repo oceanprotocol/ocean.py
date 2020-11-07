@@ -21,6 +21,10 @@ Use an ethereum account with some eth balance on rinkeby. You can get rinkeby et
 this [faucet](https://www.rinkeby.io/#faucet). Otherwise, run `ganache-cli` and replace 
 `rinkeby` with `ganache` when following the steps below.
 
+Once you have rinkeby eth, get some Rinkeby Ocean Tokens by visiting 
+http://faucet.rinkeby.oceanprotocol.com/ and entering your ethereum 
+address. 
+
 If you haven't installed yet:
 ```console
 pip install ocean-lib
