@@ -9,7 +9,7 @@ from web3 import Web3
 from web3.utils.threads import Timeout
 from websockets import ConnectionClosed
 
-from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
+from ocean_lib.web3_internal.constants import ENV_GAS_PRICE, GAS_LIMIT_DEFAULT
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
@@ -107,6 +107,24 @@ class ContractBase(object):
     def is_tx_successful(self, tx_hash: str) -> bool:
         receipt = self.get_tx_receipt(tx_hash)
         return bool(receipt and receipt.status == 1)
+
+    def get_event_signature(self, event_name):
+        """Return signature of event definition to use in the call to eth_getLogs
+
+        The event signature is used as topic0 (first topic) in the eth_getLogs arguments
+        The signature reflects the event name and argument types.
+
+        :param event_name:
+        :return:
+        """
+        e = getattr(self.events, event_name)
+        if not e:
+            raise ValueError(f'Event {event_name} not found in {self.CONTRACT_NAME} contract.')
+
+        abi = e().abi
+        types = [param['type'] for param in abi['inputs']]
+        sig_str = f'{event_name}({",".join(types)})'
+        return Web3.sha3(text=sig_str).hex()
 
     def subscribe_to_event(self, event_name: str, timeout, event_filter, callback=None,
                            timeout_callback=None, args=None, wait=False,

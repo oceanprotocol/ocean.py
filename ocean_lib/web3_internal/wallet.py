@@ -100,7 +100,7 @@ class Wallet:
             nonce = Wallet._get_nonce(self._web3, account.address)
 
         if not gas_price:
-            gas_price = int(self._web3.eth.gasPrice * 1.05)
+            gas_price = int(self._web3.eth.gasPrice * 1.1)
             gas_price = max(gas_price, MIN_GAS_PRICE)
 
         if gas_price and self._max_gas_price:

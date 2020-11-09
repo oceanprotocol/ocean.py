@@ -81,7 +81,7 @@ class EventListener(object):
             while not events:
                 time.sleep(0.2)
 
-            return events[0]
+            return events
 
         return None
 

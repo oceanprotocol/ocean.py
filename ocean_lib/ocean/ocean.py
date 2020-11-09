@@ -147,7 +147,7 @@ class Ocean:
     def get_user_orders(self, address, datatoken=None, service_id=None):
         dt = DataToken(datatoken)
         _orders = []
-        for log in dt.get_start_order_logs(self._web3, address, from_all=not bool(datatoken)):
+        for log in dt.get_start_order_logs(self._web3, address, from_all_tokens=not bool(datatoken)):
             a = dict(log.args.items())
             a['amount'] = from_base_18(int(log.args.amount))
             a['marketFee'] = from_base_18(int(log.args.marketFee))
