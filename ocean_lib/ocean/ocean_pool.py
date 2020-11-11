@@ -579,15 +579,16 @@ class OceanPool:
         dt_reserve = from18(pool.getBalance(dt_address))
 
         swap_fee = from18(pool.getSwapFee())
-        # taxable_ocn = sum(ocean_in)
-        # taxable_ocn += sum(ocean_additions[1:])
-        # taxable_dt = sum(dt_in)
-        # taxable_dt += sum(dt_additions[1:])
         sum_ocean_additions = sum(ocean_additions)
         sum_ocean_removals = sum(ocean_removals)
-        ocean_fees = ocn_reserve - (sum_ocean_additions - sum_ocean_removals)
+        sum_ocn_swap_in = sum(ocean_in)
+        sum_ocn_swap_out = sum(ocean_out)
         sum_dt_additions = sum(dt_additions)
         sum_dt_removals = sum(dt_removals)
+        sum_dt_swap_in = sum(dt_in)
+        sum_dt_swap_out = sum(dt_out)
+        taxable_ocn = sum_ocn_swap_in + sum_ocn_swap_out + sum_ocean_additions + sum_ocean_removals - ocean_additions[0]
+        taxable_dt = sum_dt_swap_in + sum_dt_swap_out + sum_dt_additions + sum_dt_removals - dt_additions[0]
 
         info_dict = {
             'address': pool.address,
@@ -610,12 +611,12 @@ class OceanPool:
             'dtReserve': dt_reserve,
             'spotPrice1DT': from18(pool.getSpotPrice(self.ocean_address, dt_address)),
             'totalPrice1DT': self.getOceanRequiredToBuyDT(pool_address, dt_amount=1.0),
-            'totalSwapFeesDT': 0,  # swap_fee*sum(taxable_dt),
-            'totalSwapFeesOcean': 0,  # swap_fee*sum(taxable_ocn),
-            'totalOceanSwapIn': sum(ocean_in),
-            'totalOceanSwapOut': sum(ocean_in),
-            'totalDTSwapIn': sum(dt_in),
-            'totalDTSwapOut': sum(dt_out),
+            'totalSwapFeesDT': swap_fee*sum(taxable_dt),
+            'totalSwapFeesOcean': swap_fee*sum(taxable_ocn),
+            'totalOceanSwapIn': sum_ocn_swap_in,
+            'totalOceanSwapOut': sum_ocn_swap_out,
+            'totalDTSwapIn': sum_dt_swap_in,
+            'totalDTSwapOut': sum_dt_swap_out,
             'totalOceanAdditions': total_ocn_additions,
             'totalOceanRemovals': total_ocn_removals
         }
