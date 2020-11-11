@@ -2,16 +2,11 @@ import json
 import os
 import time
 from collections import namedtuple
-from typing import Optional, Dict, Any
 
 import requests
-from eth_typing import BlockIdentifier
 from eth_utils import remove_0x_prefix
-from hexbytes import HexBytes
 from web3 import Web3
-from web3.exceptions import ValidationError
 from web3.utils.events import get_event_data
-from web3.utils.filters import construct_event_filter_params
 from websockets import ConnectionClosed
 
 from ocean_lib.ocean.util import to_base_18, from_base_18
@@ -106,91 +101,6 @@ class DataToken(ContractBase):
                 break
 
         return transfer_records, min(_to, end_block)  # can have duplicates
-
-    def getLogs(self, event, web3,
-                argument_filters: Optional[Dict[str, Any]] = None,
-                fromBlock: Optional[BlockIdentifier] = None,
-                toBlock: Optional[BlockIdentifier] = None,
-                blockHash: Optional[HexBytes] = None):
-        """Get events for this contract instance using eth_getLogs API.
-        This is a stateless method, as opposed to createFilter.
-        It can be safely called against nodes which do not provide
-        eth_newFilter API, like Infura nodes.
-        If there are many events,
-        like ``Transfer`` events for a popular token,
-        the Ethereum node might be overloaded and timeout
-        on the underlying JSON-RPC call.
-        Example - how to get all ERC-20 token transactions
-        for the latest 10 blocks:
-        .. code-block:: python
-            from = max(mycontract.web3.eth.blockNumber - 10, 1)
-            to = mycontract.web3.eth.blockNumber
-            events = mycontract.events.Transfer.getLogs(fromBlock=from, toBlock=to)
-            for e in events:
-                print(e["args"]["from"],
-                    e["args"]["to"],
-                    e["args"]["value"])
-        The returned processed log values will look like:
-        .. code-block:: python
-            (
-                AttributeDict({
-                 'args': AttributeDict({}),
-                 'event': 'LogNoArguments',
-                 'logIndex': 0,
-                 'transactionIndex': 0,
-                 'transactionHash': HexBytes('...'),
-                 'address': '0xF2E246BB76DF876Cef8b38ae84130F4F55De395b',
-                 'blockHash': HexBytes('...'),
-                 'blockNumber': 3
-                }),
-                AttributeDict(...),
-                ...
-            )
-        See also: :func:`web3.middleware.filter.local_filter_middleware`.
-        :param argument_filters:
-        :param fromBlock: block number or "latest", defaults to "latest"
-        :param toBlock: block number or "latest". Defaults to "latest"
-        :param blockHash: block hash. blockHash cannot be set at the
-          same time as fromBlock or toBlock
-        :yield: Tuple of :class:`AttributeDict` instances
-        """
-
-        if not self.address:
-            raise TypeError("This method can be only called on "
-                            "an instated contract with an address")
-
-        abi = event._get_event_abi()
-
-        if argument_filters is None:
-            argument_filters = dict()
-
-        _filters = dict(**argument_filters)
-
-        blkhash_set = blockHash is not None
-        blknum_set = fromBlock is not None or toBlock is not None
-        if blkhash_set and blknum_set:
-            raise ValidationError(
-                'blockHash cannot be set at the same'
-                ' time as fromBlock or toBlock')
-
-        # Construct JSON-RPC raw filter presentation based on human readable Python descriptions
-        # Namely, convert event names to their keccak signatures
-        data_filter_set, event_filter_params = construct_event_filter_params(
-            abi,
-            contract_address=self.address,
-            argument_filters=_filters,
-            fromBlock=fromBlock,
-            toBlock=toBlock,
-        )
-
-        if blockHash is not None:
-            event_filter_params['blockHash'] = blockHash
-
-        # Call JSON-RPC API
-        logs = web3.eth.getLogs(event_filter_params)
-
-        # Convert raw binary data to Python proxy objects as described by ABI
-        return tuple(get_event_data(abi, entry) for entry in logs)
 
     def get_transfer_event(self, block_number, sender, receiver):
         event = getattr(self.events, 'Transfer')

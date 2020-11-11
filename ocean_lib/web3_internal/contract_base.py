@@ -4,12 +4,19 @@
 import logging
 import os
 import typing
+from typing import Optional, Dict, Any
 
+import requests
 from web3 import Web3
+from web3.exceptions import ValidationError
+from web3.utils.events import get_event_data
+from web3.utils.filters import construct_event_filter_params
 from web3.utils.threads import Timeout
 from websockets import ConnectionClosed
+from eth_typing import BlockIdentifier
+from hexbytes import HexBytes
 
-from ocean_lib.web3_internal.constants import ENV_GAS_PRICE, GAS_LIMIT_DEFAULT
+from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
@@ -227,3 +234,119 @@ class ContractBase(object):
         tx_hash = web3.eth.sendRawTransaction(raw_tx)
 
         return cls.get_tx_receipt(tx_hash, timeout=60).contractAddress
+
+    def get_event_logs(self, event_name, from_block, to_block, filters, web3=None, chunk_size=1000):
+        event = getattr(self.events, event_name)
+        if not web3:
+            web3 = Web3Provider.get_web3()
+
+        chunk = chunk_size
+        _from = from_block
+        _to = _from + chunk - 1
+
+        all_logs = []
+        error_count = 0
+        _to = min(_to, to_block)
+        while _from <= to_block:
+            try:
+                logs = self.getLogs(event, web3, argument_filters=filters, fromBlock=_from, toBlock=_to)
+                all_logs.extend(logs)
+                _from = _to + 1
+                _to = min(_from + chunk - 1, to_block)
+                error_count = 0
+                if (_from-from_block) % 1000 == 0:
+                    print(f'    So far processed {len(all_logs)} Transfer events from {_from-from_block} blocks.')
+            except requests.exceptions.ReadTimeout as err:
+                print(f'ReadTimeout ({_from}, {_to}): {err}')
+                error_count += 1
+
+            if error_count > 1:
+                break
+
+        return all_logs
+
+    def getLogs(self, event, web3,
+                argument_filters: Optional[Dict[str, Any]] = None,
+                fromBlock: Optional[BlockIdentifier] = None,
+                toBlock: Optional[BlockIdentifier] = None,
+                blockHash: Optional[HexBytes] = None):
+        """Get events for this contract instance using eth_getLogs API.
+        This is a stateless method, as opposed to createFilter.
+        It can be safely called against nodes which do not provide
+        eth_newFilter API, like Infura nodes.
+        If there are many events,
+        like ``Transfer`` events for a popular token,
+        the Ethereum node might be overloaded and timeout
+        on the underlying JSON-RPC call.
+        Example - how to get all ERC-20 token transactions
+        for the latest 10 blocks:
+        .. code-block:: python
+            from = max(mycontract.web3.eth.blockNumber - 10, 1)
+            to = mycontract.web3.eth.blockNumber
+            events = mycontract.events.Transfer.getLogs(fromBlock=from, toBlock=to)
+            for e in events:
+                print(e["args"]["from"],
+                    e["args"]["to"],
+                    e["args"]["value"])
+        The returned processed log values will look like:
+        .. code-block:: python
+            (
+                AttributeDict({
+                 'args': AttributeDict({}),
+                 'event': 'LogNoArguments',
+                 'logIndex': 0,
+                 'transactionIndex': 0,
+                 'transactionHash': HexBytes('...'),
+                 'address': '0xF2E246BB76DF876Cef8b38ae84130F4F55De395b',
+                 'blockHash': HexBytes('...'),
+                 'blockNumber': 3
+                }),
+                AttributeDict(...),
+                ...
+            )
+        See also: :func:`web3.middleware.filter.local_filter_middleware`.
+        :param argument_filters:
+        :param fromBlock: block number or "latest", defaults to "latest"
+        :param toBlock: block number or "latest". Defaults to "latest"
+        :param blockHash: block hash. blockHash cannot be set at the
+          same time as fromBlock or toBlock
+        :yield: Tuple of :class:`AttributeDict` instances
+        """
+
+        if not self.address:
+            raise TypeError("This method can be only called on "
+                            "an instated contract with an address")
+
+        abi = event._get_event_abi()
+
+        if argument_filters is None:
+            argument_filters = dict()
+
+        _filters = dict(**argument_filters)
+
+        blkhash_set = blockHash is not None
+        blknum_set = fromBlock is not None or toBlock is not None
+        if blkhash_set and blknum_set:
+            raise ValidationError(
+                'blockHash cannot be set at the same'
+                ' time as fromBlock or toBlock')
+
+        # Construct JSON-RPC raw filter presentation based on human readable Python descriptions
+        # Namely, convert event names to their keccak signatures
+        data_filter_set, event_filter_params = construct_event_filter_params(
+            abi,
+            contract_address=self.address,
+            argument_filters=_filters,
+            fromBlock=fromBlock,
+            toBlock=toBlock,
+        )
+
+        if blockHash is not None:
+            event_filter_params['blockHash'] = blockHash
+
+        # Call JSON-RPC API
+        logs = web3.eth.getLogs(event_filter_params)
+
+        # Convert raw binary data to Python proxy objects as described by ABI
+        return tuple(get_event_data(abi, entry) for entry in logs)
+

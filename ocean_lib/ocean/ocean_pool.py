@@ -1,7 +1,7 @@
 import logging
 
+from scipy.interpolate import interp1d
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-
 from ocean_lib.models.dtfactory import DTFactory
 
 from ocean_lib.models import balancer_constants
@@ -478,7 +478,25 @@ class OceanPool:
         )
         return from_base_18(in_amount)
 
-    def _get_all_liquidity_records(self, action, web3, pool_address, block_number=None):
+    def get_all_pools(self, from_block=0, chunk_size=1000):
+        web3 = Web3Provider.get_web3()
+        current_block = web3.eth.blockNumber
+
+        bfactory = BFactory(self.bfactory_address)
+        logs = bfactory.get_event_logs('BPoolRegistered', from_block, current_block, {}, web3=web3, chunk_size=chunk_size)
+        pools = sorted([(l.args.bpoolAddress, from_base_18(BPool(l.args.bpoolAddress).getBalance(self.ocean_address)))
+                        for l in logs], key=lambda x: x[1], reverse=True)
+
+        return pools
+
+    def get_account_to_liquidity_records_map(self, records):
+        lps = {r[0] for r in records}
+        a_to_token_amount = {a: [] for a in lps}
+        for r in records:
+            a_to_token_amount[r[0]].append(r)
+        return a_to_token_amount
+
+    def _get_all_liquidity_records(self, action, web3, pool_address, block_number=None, raw_result=True):
         action_to_fn = {
             'join': 'get_join_logs',
             'exit': 'get_exit_logs',
@@ -491,29 +509,30 @@ class OceanPool:
         if block_number is None:
             block_number = factory.get_token_registered_event(0, current_block, token_address=dt_address).blockNumber
         logs = getattr(pool, action_to_fn[action])(web3, block_number, current_block)
-        lps = {l.args.caller for l in logs}
-        a_to_token_amount = {a: [] for a in lps}
+        if raw_result:
+            return logs
+
         _all = []
         for l in logs:
             if action == 'join':
-                record = (l.args.caller, l.args.tokenIn, l.args.tokenAmountIn, l.blockNumber, l.transactionHash)
+                record = (l.args.caller, l.args.tokenIn, l.args.tokenAmountIn, 0, 0, l.blockNumber, l.transactionHash, 'join')
             elif action == 'exit':
-                record = (l.args.caller, l.args.tokenOut, l.args.tokenAmountOut, l.blockNumber, l.transactionHash)
+                record = (l.args.caller, l.args.tokenOut, l.args.tokenAmountOut, 0, 0, l.blockNumber, l.transactionHash, 'exit')
             else:
                 assert action == 'swap', f'Unknown pool action {action}'
-                record = (l.args.caller, l.args.tokenIn, l.args.tokenAmountIn, l.args.tokenOut, l.args.tokenAmountOut, l.blockNumber, l.transactionHash)
+                record = (l.args.caller, l.args.tokenIn, l.args.tokenAmountIn, l.args.tokenOut, l.args.tokenAmountOut, l.blockNumber, l.transactionHash, 'swap')
+
             _all.append(record)
-            a_to_token_amount[l.args.caller].append(record)
-        return a_to_token_amount, _all
+        return _all
 
-    def get_all_liquidity_additions(self, web3, pool_address, block_number=None):
-        return self._get_all_liquidity_records('join', web3, pool_address, block_number)
+    def get_all_liquidity_additions(self, web3, pool_address, block_number=None, raw_result=True):
+        return self._get_all_liquidity_records('join', web3, pool_address, block_number, raw_result)
 
-    def get_all_liquidity_removals(self, web3, pool_address, block_number=None):
-        return self._get_all_liquidity_records('exit', web3, pool_address, block_number)
+    def get_all_liquidity_removals(self, web3, pool_address, block_number=None, raw_result=True):
+        return self._get_all_liquidity_records('exit', web3, pool_address, block_number, raw_result)
 
-    def get_all_swaps(self, web3, pool_address, block_number=None):
-        return self._get_all_liquidity_records('swap', web3, pool_address, block_number)
+    def get_all_swaps(self, web3, pool_address, block_number=None, raw_result=True):
+        return self._get_all_liquidity_records('swap', web3, pool_address, block_number, raw_result)
 
     def getPoolInfo(self, pool_address):
         web3 = Web3Provider.get_web3()
@@ -530,18 +549,21 @@ class OceanPool:
         creator_shares = from18(pool.balanceOf(pool_creator))
         creator_shares_percent = creator_shares/shares
 
-        account_to_join_record, all_join_records = self.get_all_liquidity_additions(web3, pool_address, token_block)
+        all_join_records = self.get_all_liquidity_additions(web3, pool_address, token_block, raw_result=False)
+        account_to_join_record = self.get_account_to_liquidity_records_map(all_join_records)
         ocean_additions = [from18(r[2]) for r in account_to_join_record[pool_creator] if r[1] == self.ocean_address]
         dt_additions = [from18(r[2]) for r in account_to_join_record[pool_creator] if r[1] == dt_address]
         total_ocn_additions = from18(sum(r[2] for r in all_join_records if r[1] == self.ocean_address))
 
-        account_to_exit_record, all_exit_records = self.get_all_liquidity_removals(web3, pool_address, token_block)
+        all_exit_records = self.get_all_liquidity_removals(web3, pool_address, token_block, raw_result=False)
+        account_to_exit_record = self.get_account_to_liquidity_records_map(all_exit_records)
         ocean_removals = [from18(r[2]) for r in account_to_exit_record.get(pool_creator, []) if r[1] == self.ocean_address]
         dt_removals = [from18(r[2]) for r in account_to_exit_record.get(pool_creator, []) if r[1] == dt_address]
 
         total_ocn_removals = from18(sum(r[2] for r in all_exit_records if r[1] == self.ocean_address))
 
-        account_to_swap_record, all_exit_records = self.get_all_swaps(web3, pool_address, token_block)
+        all_swap_records = self.get_all_swaps(web3, pool_address, token_block, raw_result=False)
+        account_to_swap_record = self.get_account_to_liquidity_records_map(all_swap_records)
         ocean_in = [from18(r[2]) for r in account_to_swap_record.get(pool_creator, []) if r[1] == self.ocean_address]
         dt_in = [from18(r[2]) for r in account_to_swap_record.get(pool_creator, []) if r[1] == dt_address]
         ocean_out = [from18(r[4]) for r in account_to_swap_record.get(pool_creator, []) if r[3] == self.ocean_address]
@@ -553,7 +575,19 @@ class OceanPool:
         _min = to_base_18(0.001)
         pool_holders = sorted([(a, from_base_18(b)) for a, b in a_to_balance.items() if b > _min], key=lambda x: x[1], reverse=True)
 
+        ocn_reserve = from18(pool.getBalance(self.ocean_address))
+        dt_reserve = from18(pool.getBalance(dt_address))
+
         swap_fee = from18(pool.getSwapFee())
+        # taxable_ocn = sum(ocean_in)
+        # taxable_ocn += sum(ocean_additions[1:])
+        # taxable_dt = sum(dt_in)
+        # taxable_dt += sum(dt_additions[1:])
+        sum_ocean_additions = sum(ocean_additions)
+        sum_ocean_removals = sum(ocean_removals)
+        ocean_fees = ocn_reserve - (sum_ocean_additions - sum_ocean_removals)
+        sum_dt_additions = sum(dt_additions)
+        sum_dt_removals = sum(dt_removals)
 
         info_dict = {
             'address': pool.address,
@@ -571,13 +605,13 @@ class OceanPool:
             'creatorTotalOceanUnstake': sum(ocean_removals),
             'creatorTotalDTUnstake': sum(dt_removals),
             'oceanWeight': from18(pool.getDenormalizedWeight(self.ocean_address)),
-            'oceanReserve': from18(pool.getBalance(self.ocean_address)),
+            'oceanReserve': ocn_reserve,
             'dtWeight': from18(pool.getDenormalizedWeight(dt_address)),
-            'dtReserve': from18(pool.getBalance(dt_address)),
+            'dtReserve': dt_reserve,
             'spotPrice1DT': from18(pool.getSpotPrice(self.ocean_address, dt_address)),
             'totalPrice1DT': self.getOceanRequiredToBuyDT(pool_address, dt_amount=1.0),
-            'totalSwapFeesDT': swap_fee*sum(dt_in),
-            'totalSwapFeesOcean': swap_fee*sum(ocean_in),
+            'totalSwapFeesDT': 0,  # swap_fee*sum(taxable_dt),
+            'totalSwapFeesOcean': 0,  # swap_fee*sum(taxable_ocn),
             'totalOceanSwapIn': sum(ocean_in),
             'totalOceanSwapOut': sum(ocean_in),
             'totalDTSwapIn': sum(dt_in),
@@ -586,3 +620,74 @@ class OceanPool:
             'totalOceanRemovals': total_ocn_removals
         }
         return info_dict
+
+    def get_liquidity_history(self, pool_address):
+        web3 = Web3Provider.get_web3()
+        current_block = web3.eth.blockNumber
+
+        bfactory = BFactory(self.bfactory_address)
+        logs = bfactory.get_event_logs('BPoolCreated', 0, current_block, {'newBPoolAddress': pool_address}, web3=web3, chunk_size=current_block)
+        if not logs:
+            return
+        assert len(logs) == 1, 'cannot happen'
+
+        boolCreated_log = logs[0]
+        # pool_creator = pool.getController()
+        join_records = self.get_all_liquidity_additions(web3, pool_address, boolCreated_log.blockNumber)
+        exit_records = self.get_all_liquidity_removals(web3, pool_address, boolCreated_log.blockNumber)
+        swap_records = self.get_all_swaps(web3, pool_address, boolCreated_log.blockNumber)
+
+        from18 = from_base_18
+        ocn_address = self.ocean_address
+        # Liquidity Additions
+        ocn_liq_add_list = [(from18(r.args.tokenAmountIn), r.blockNumber)
+                            for r in join_records if r.args.tokenIn == ocn_address]
+        dt_liq_add_list = [(from18(r.args.tokenAmountIn), r.blockNumber)
+                           for r in join_records if r.args.tokenIn != ocn_address]
+
+        # Liquidity removals
+        ocn_liq_rem_list = [(from18(r.args.tokenAmountOut), r.blockNumber)
+                            for r in exit_records if r.args.tokenOut == ocn_address]
+        dt_liq_rem_list = [(from18(r.args.tokenAmountOut), r.blockNumber)
+                           for r in exit_records if r.args.tokenOut != ocn_address]
+
+        # l.args.caller, l.args.tokenIn, l.args.tokenAmountIn, l.args.tokenOut, l.args.tokenAmountOut, l.blockNumber, l.transactionHash
+        for r in swap_records:
+            block_no = r.blockNumber
+            if r.args.tokenIn == ocn_address:
+                # ocn is the tokenIn
+                ocn_liq_add_list.append((from18(r.args.tokenAmountIn), block_no))
+                dt_liq_rem_list.append((from18(r.args.tokenAmountOut), block_no))
+            else:  # ocn is the tokenOut
+                ocn_liq_rem_list.append((from18(r.args.tokenAmountOut), block_no))
+                dt_liq_add_list.append((from18(r.args.tokenAmountIn), block_no))
+
+        ocn_liq_rem_list = [(-v, t) for v, t in ocn_liq_rem_list]
+        dt_liq_rem_list = [(-v, t) for v, t in dt_liq_rem_list]
+
+        ocn_add_remove_list = ocn_liq_add_list + ocn_liq_rem_list
+        ocn_add_remove_list.sort(key=lambda x: x[1])
+
+        dt_add_remove_list = dt_liq_add_list + dt_liq_rem_list
+        dt_add_remove_list.sort(key=lambda x: x[1])
+
+        firstblock, lastblock = ocn_add_remove_list[0][1], ocn_add_remove_list[-1][1]
+        if dt_add_remove_list[0][1] < firstblock:
+            firstblock = dt_add_remove_list[0][1]
+        if dt_add_remove_list[-1][1] > lastblock:
+            lastblock = dt_add_remove_list[-1][1]
+
+        # get timestamps for blocknumber every 4 hours, assuming there is
+        # 240 blocks/hour (on average) or 15 seconds block time..
+        # use interpolation to fill in the other timestamps
+        timestamps = []
+        blocks = list(range(firstblock, lastblock, 240*4)) + [lastblock]
+        for b in blocks:
+            timestamps.append(web3.eth.getBlock(b).timestamp)
+
+        f = interp1d(blocks, timestamps)
+        times = f([a[1] for a in ocn_add_remove_list])
+        ocn_add_remove_list = [(a[0], times[i]) for i, a in enumerate(ocn_add_remove_list)]
+        times = f([a[1] for a in dt_add_remove_list])
+        dt_add_remove_list = [(a[0], times[i]) for i, a in enumerate(dt_add_remove_list)]
+        return ocn_add_remove_list, dt_add_remove_list
