@@ -31,6 +31,12 @@ class OceanPool:
 
     """
 
+    POOL_INFO_FLAGS = {
+        'datatokenInfo', 'price', 'reserve', 'shares', 'shareHolders',
+        'liquidity', 'creator', 'dtHolders'
+
+    }
+
     def __init__(self, ocean_token_address: str, bfactory_address: str):
         self.ocean_address = ocean_token_address
         self.bfactory_address = bfactory_address
@@ -99,10 +105,12 @@ class OceanPool:
     def get(pool_address: str) -> BPool:
         return BPool(pool_address)
 
-    def get_token_address(self, pool_address: str, pool: BPool=None) -> str:
+    def get_token_address(self, pool_address: str, pool: BPool=None, validate=True) -> str:
         """Returns the address of this pool's datatoken."""
         if not pool:
-            assert self._is_valid_pool(pool_address)
+            if validate:
+                assert self._is_valid_pool(pool_address)
+
             pool = BPool(pool_address)
 
         tokens = pool.getCurrentTokens()
@@ -478,14 +486,17 @@ class OceanPool:
         )
         return from_base_18(in_amount)
 
-    def get_all_pools(self, from_block=0, chunk_size=1000):
+    def get_all_pools(self, from_block=0, chunk_size=1000, include_balance=False):
         web3 = Web3Provider.get_web3()
         current_block = web3.eth.blockNumber
 
         bfactory = BFactory(self.bfactory_address)
         logs = bfactory.get_event_logs('BPoolRegistered', from_block, current_block, {}, web3=web3, chunk_size=chunk_size)
-        pools = sorted([(l.args.bpoolAddress, from_base_18(BPool(l.args.bpoolAddress).getBalance(self.ocean_address)))
-                        for l in logs], key=lambda x: x[1], reverse=True)
+        if include_balance:
+            pools = sorted([(l.args.bpoolAddress, from_base_18(BPool(l.args.bpoolAddress).getBalance(self.ocean_address)))
+                            for l in logs], key=lambda x: x[1], reverse=True)
+        else:
+            pools = {l.args.bpoolAddress for l in logs}
 
         return pools
 
@@ -496,15 +507,15 @@ class OceanPool:
             a_to_token_amount[r[0]].append(r)
         return a_to_token_amount
 
-    def _get_all_liquidity_records(self, action, web3, pool_address, block_number=None, raw_result=True):
+    def _get_all_liquidity_records(self, action, web3, pool_address, block_number=None, to_block=None, token_address=None, raw_result=True):
         action_to_fn = {
             'join': 'get_join_logs',
             'exit': 'get_exit_logs',
             'swap': 'get_swap_logs'
         }
-        current_block = web3.eth.blockNumber
+        current_block = to_block if to_block is not None else web3.eth.blockNumber
         pool = BPool(pool_address)
-        dt_address = self.get_token_address(pool_address, pool)
+        dt_address = token_address or self.get_token_address(pool_address, pool)
         factory = DTFactory(get_dtfactory_address())
         if block_number is None:
             block_number = factory.get_token_registered_event(0, current_block, token_address=dt_address).blockNumber
@@ -525,118 +536,147 @@ class OceanPool:
             _all.append(record)
         return _all
 
-    def get_all_liquidity_additions(self, web3, pool_address, block_number=None, raw_result=True):
-        return self._get_all_liquidity_records('join', web3, pool_address, block_number, raw_result)
+    def get_all_liquidity_additions(self, web3, pool_address, block_number=None, to_block=None, token_address=None, raw_result=True):
+        return self._get_all_liquidity_records('join', web3, pool_address, block_number, to_block, token_address, raw_result)
 
-    def get_all_liquidity_removals(self, web3, pool_address, block_number=None, raw_result=True):
-        return self._get_all_liquidity_records('exit', web3, pool_address, block_number, raw_result)
+    def get_all_liquidity_removals(self, web3, pool_address, block_number=None, to_block=None, token_address=None, raw_result=True):
+        return self._get_all_liquidity_records('exit', web3, pool_address, block_number, to_block, token_address, raw_result)
 
-    def get_all_swaps(self, web3, pool_address, block_number=None, raw_result=True):
-        return self._get_all_liquidity_records('swap', web3, pool_address, block_number, raw_result)
+    def get_all_swaps(self, web3, pool_address, block_number=None, to_block=None, token_address=None, raw_result=True):
+        return self._get_all_liquidity_records('swap', web3, pool_address, block_number, to_block, token_address, raw_result)
 
-    def getPoolInfo(self, pool_address):
-        web3 = Web3Provider.get_web3()
-        current_block = web3.eth.blockNumber
-        pool = BPool(pool_address)
-        dt_address = self.get_token_address(pool_address, pool)
-        token = DataToken(dt_address)
-        factory = DTFactory(get_dtfactory_address())
-        token_block = factory.get_token_registered_event(0, current_block, token_address=dt_address).blockNumber
+    def get_short_pool_info(self, pool_address, dt_address=None, from_block=None, to_block=None):
+        return self.get_pool_info(pool_address, dt_address, from_block, to_block, ['price', 'reserve', 'liquidityTotals'])
+
+    def get_pool_info(self, pool_address, dt_address=None, from_block=None, to_block=None, flags=None):
+        if not flags:
+            flags = self.POOL_INFO_FLAGS
+
         from18 = from_base_18
-        pool_creator = pool.getController()
+        web3 = Web3Provider.get_web3()
+        current_block = to_block if to_block is not None else web3.eth.blockNumber  # RPC_CALL
+        pool = BPool(pool_address)
+        dt_address = dt_address if dt_address else self.get_token_address(pool_address, pool, validate=False)  # RPC_CALL
+        from_block = from_block if from_block is not None else self.get_creation_block(pool_address)  # RPC_CALL
 
-        shares = from18(pool.totalSupply())
-        creator_shares = from18(pool.balanceOf(pool_creator))
-        creator_shares_percent = creator_shares/shares
-
-        all_join_records = self.get_all_liquidity_additions(web3, pool_address, token_block, raw_result=False)
-        account_to_join_record = self.get_account_to_liquidity_records_map(all_join_records)
-        ocean_additions = [from18(r[2]) for r in account_to_join_record[pool_creator] if r[1] == self.ocean_address]
-        dt_additions = [from18(r[2]) for r in account_to_join_record[pool_creator] if r[1] == dt_address]
-        total_ocn_additions = from18(sum(r[2] for r in all_join_records if r[1] == self.ocean_address))
-
-        all_exit_records = self.get_all_liquidity_removals(web3, pool_address, token_block, raw_result=False)
-        account_to_exit_record = self.get_account_to_liquidity_records_map(all_exit_records)
-        ocean_removals = [from18(r[2]) for r in account_to_exit_record.get(pool_creator, []) if r[1] == self.ocean_address]
-        dt_removals = [from18(r[2]) for r in account_to_exit_record.get(pool_creator, []) if r[1] == dt_address]
-
-        total_ocn_removals = from18(sum(r[2] for r in all_exit_records if r[1] == self.ocean_address))
-
-        all_swap_records = self.get_all_swaps(web3, pool_address, token_block, raw_result=False)
-        account_to_swap_record = self.get_account_to_liquidity_records_map(all_swap_records)
-        ocean_in = [from18(r[2]) for r in account_to_swap_record.get(pool_creator, []) if r[1] == self.ocean_address]
-        dt_in = [from18(r[2]) for r in account_to_swap_record.get(pool_creator, []) if r[1] == dt_address]
-        ocean_out = [from18(r[4]) for r in account_to_swap_record.get(pool_creator, []) if r[3] == self.ocean_address]
-        dt_out = [from18(r[4]) for r in account_to_swap_record.get(pool_creator, []) if r[3] == dt_address]
-
-        pool_erc20 = DataToken(pool_address)
-        all_transfers, block = pool_erc20.get_all_transfers_from_events(token_block, current_block)
-        a_to_balance = DataToken.calculate_balances(all_transfers)
-        _min = to_base_18(0.001)
-        pool_holders = sorted([(a, from_base_18(b)) for a, b in a_to_balance.items() if b > _min], key=lambda x: x[1], reverse=True)
-
-        ocn_reserve = from18(pool.getBalance(self.ocean_address))
-        dt_reserve = from18(pool.getBalance(dt_address))
-
-        swap_fee = from18(pool.getSwapFee())
-        sum_ocean_additions = sum(ocean_additions)
-        sum_ocean_removals = sum(ocean_removals)
-        sum_ocn_swap_in = sum(ocean_in)
-        sum_ocn_swap_out = sum(ocean_out)
-        sum_dt_additions = sum(dt_additions)
-        sum_dt_removals = sum(dt_removals)
-        sum_dt_swap_in = sum(dt_in)
-        sum_dt_swap_out = sum(dt_out)
-        taxable_ocn = sum_ocn_swap_in + sum_ocn_swap_out + sum_ocean_additions + sum_ocean_removals - ocean_additions[0]
-        taxable_dt = sum_dt_swap_in + sum_dt_swap_out + sum_dt_additions + sum_dt_removals - dt_additions[0]
-
+        pool_creator = None
+        shares = None
         info_dict = {
             'address': pool.address,
-            'creator': pool_creator,
-            'dataToken': token.getInfo(web3, token_block, current_block),
-            'numShareHolders': len(pool_holders),
-            'shareHolders': pool_holders,
-            'totalShares': shares,
-            'creatorShares': creator_shares,
-            'creatorSharesPercentage': creator_shares_percent,
-            'creatorFirstOceanStake': ocean_additions[0],
-            'creatorFirstDTStake': dt_additions[0],
-            'creatorTotalOceanStake': sum(ocean_additions),
-            'creatorTotalDTStake': sum(dt_additions),
-            'creatorTotalOceanUnstake': sum(ocean_removals),
-            'creatorTotalDTUnstake': sum(dt_removals),
-            'oceanWeight': from18(pool.getDenormalizedWeight(self.ocean_address)),
-            'oceanReserve': ocn_reserve,
-            'dtWeight': from18(pool.getDenormalizedWeight(dt_address)),
-            'dtReserve': dt_reserve,
-            'spotPrice1DT': from18(pool.getSpotPrice(self.ocean_address, dt_address)),
-            'totalPrice1DT': self.getOceanRequiredToBuyDT(pool_address, dt_amount=1.0),
-            'totalSwapFeesDT': swap_fee*sum(taxable_dt),
-            'totalSwapFeesOcean': swap_fee*sum(taxable_ocn),
-            'totalOceanSwapIn': sum_ocn_swap_in,
-            'totalOceanSwapOut': sum_ocn_swap_out,
-            'totalDTSwapIn': sum_dt_swap_in,
-            'totalDTSwapOut': sum_dt_swap_out,
-            'totalOceanAdditions': total_ocn_additions,
-            'totalOceanRemovals': total_ocn_removals
+            'dataTokenAddress': dt_address
         }
+        if 'datatokenInfo' in flags:
+            info_dict['dataToken'] = DataToken(dt_address).get_info(web3, from_block, current_block, include_holders=bool('dtHolders' in flags))
+
+        if 'price' in flags:
+            info_dict.update({
+                'spotPrice1DT': from18(pool.getSpotPrice(self.ocean_address, dt_address)),
+                'totalPrice1DT': self.getOceanRequiredToBuyDT(pool_address, dt_amount=1.0),
+            })
+
+        if 'reserve' in flags:
+            ocn_reserve = from18(pool.getBalance(self.ocean_address))
+            dt_reserve = from18(pool.getBalance(dt_address))
+            info_dict.update({
+                'oceanWeight': from18(pool.getDenormalizedWeight(self.ocean_address)),
+                'oceanReserve': ocn_reserve,
+                'dtWeight': from18(pool.getDenormalizedWeight(dt_address)),
+                'dtReserve': dt_reserve,
+
+            })
+        if 'shares' in flags or 'creator' in flags:
+            pool_creator = pool.getController()
+            shares = from18(pool.totalSupply())
+            info_dict.update({
+                'creator': pool_creator,
+            })
+
+        if 'shareHolders' in flags:
+            pool_erc20 = DataToken(pool_address)
+            all_transfers, block = pool_erc20.get_all_transfers_from_events(from_block, current_block)
+            a_to_balance = DataToken.calculate_balances(all_transfers)
+            _min = to_base_18(0.001)
+            pool_holders = sorted([(a, from_base_18(b)) for a, b in a_to_balance.items() if b > _min], key=lambda x: x[1], reverse=True)
+            info_dict.update({
+                'numShareHolders': len(pool_holders),
+                'shareHolders': pool_holders
+            })
+
+        all_join_records = []
+        all_exit_records = []
+        if 'liquidityTotals' in flags or 'liquidity' in flags:
+            all_join_records = self.get_all_liquidity_additions(web3, pool_address, from_block, current_block, dt_address, raw_result=False)  # RPC_CALL
+            total_ocn_additions = from18(sum(r[2] for r in all_join_records if r[1] == self.ocean_address))
+            all_exit_records = self.get_all_liquidity_removals(web3, pool_address, from_block, current_block, dt_address, raw_result=False)  # RPC_CALL
+            total_ocn_removals = from18(sum(r[2] for r in all_exit_records if r[1] == self.ocean_address))
+            info_dict.update({
+                'totalOceanAdditions': total_ocn_additions,
+                'totalOceanRemovals': total_ocn_removals,
+            })
+
+        if 'liquidity' in flags:
+            creator_shares = from18(pool.balanceOf(pool_creator))
+            creator_shares_percent = creator_shares/shares
+
+            account_to_join_record = self.get_account_to_liquidity_records_map(all_join_records)
+            ocean_additions = [from18(r[2]) for r in account_to_join_record[pool_creator] if r[1] == self.ocean_address]
+            dt_additions = [from18(r[2]) for r in account_to_join_record[pool_creator] if r[1] == dt_address]
+
+            account_to_exit_record = self.get_account_to_liquidity_records_map(all_exit_records)
+            ocean_removals = [from18(r[2]) for r in account_to_exit_record.get(pool_creator, []) if r[1] == self.ocean_address]
+            dt_removals = [from18(r[2]) for r in account_to_exit_record.get(pool_creator, []) if r[1] == dt_address]
+
+            all_swap_records = self.get_all_swaps(web3, pool_address, from_block, current_block, dt_address, raw_result=False)
+            account_to_swap_record = self.get_account_to_liquidity_records_map(all_swap_records)
+            ocean_in = [from18(r[2]) for r in account_to_swap_record.get(pool_creator, []) if r[1] == self.ocean_address]
+            dt_in = [from18(r[2]) for r in account_to_swap_record.get(pool_creator, []) if r[1] == dt_address]
+            ocean_out = [from18(r[4]) for r in account_to_swap_record.get(pool_creator, []) if r[3] == self.ocean_address]
+            dt_out = [from18(r[4]) for r in account_to_swap_record.get(pool_creator, []) if r[3] == dt_address]
+
+            swap_fee = from18(pool.getSwapFee())
+            sum_ocean_additions = sum(ocean_additions)
+            sum_ocean_removals = sum(ocean_removals)
+            sum_ocn_swap_in = sum(ocean_in)
+            sum_ocn_swap_out = sum(ocean_out)
+            sum_dt_additions = sum(dt_additions)
+            sum_dt_removals = sum(dt_removals)
+            sum_dt_swap_in = sum(dt_in)
+            sum_dt_swap_out = sum(dt_out)
+            taxable_ocn = sum_ocn_swap_in + sum_ocn_swap_out + sum_ocean_additions + sum_ocean_removals - ocean_additions[0]
+            taxable_dt = sum_dt_swap_in + sum_dt_swap_out + sum_dt_additions + sum_dt_removals - dt_additions[0]
+
+            info_dict.update({
+                'totalShares': shares,
+                'creator': pool_creator,
+                'creatorShares': creator_shares,
+                'creatorSharesPercentage': creator_shares_percent,
+                'creatorFirstOceanStake': ocean_additions[0],
+                'creatorFirstDTStake': dt_additions[0],
+                'creatorTotalOceanStake': sum(ocean_additions),
+                'creatorTotalDTStake': sum(dt_additions),
+                'creatorTotalOceanUnstake': sum(ocean_removals),
+                'creatorTotalDTUnstake': sum(dt_removals),
+                'totalOceanSwapIn': sum_ocn_swap_in,
+                'totalOceanSwapOut': sum_ocn_swap_out,
+                'totalDTSwapIn': sum_dt_swap_in,
+                'totalDTSwapOut': sum_dt_swap_out,
+                'totalSwapFeesDT': swap_fee*taxable_dt,
+                'totalSwapFeesOcean': swap_fee*taxable_ocn,
+            })
+
+        info_dict.update({
+            'fromBlockNumber': from_block,
+            'latestBlockNumber': current_block
+        })
         return info_dict
 
     def get_liquidity_history(self, pool_address):
         web3 = Web3Provider.get_web3()
-        current_block = web3.eth.blockNumber
+        pool_block = self.get_creation_block(pool_address)
 
-        bfactory = BFactory(self.bfactory_address)
-        logs = bfactory.get_event_logs('BPoolCreated', 0, current_block, {'newBPoolAddress': pool_address}, web3=web3, chunk_size=current_block)
-        if not logs:
-            return
-        assert len(logs) == 1, 'cannot happen'
-
-        boolCreated_log = logs[0]
-        # pool_creator = pool.getController()
-        join_records = self.get_all_liquidity_additions(web3, pool_address, boolCreated_log.blockNumber)
-        exit_records = self.get_all_liquidity_removals(web3, pool_address, boolCreated_log.blockNumber)
-        swap_records = self.get_all_swaps(web3, pool_address, boolCreated_log.blockNumber)
+        join_records = self.get_all_liquidity_additions(web3, pool_address, pool_block)
+        exit_records = self.get_all_liquidity_removals(web3, pool_address, pool_block)
+        swap_records = self.get_all_swaps(web3, pool_address, pool_block)
 
         from18 = from_base_18
         ocn_address = self.ocean_address
@@ -692,3 +732,26 @@ class OceanPool:
         times = f([a[1] for a in dt_add_remove_list])
         dt_add_remove_list = [(a[0], times[i]) for i, a in enumerate(dt_add_remove_list)]
         return ocn_add_remove_list, dt_add_remove_list
+
+    def get_user_balances(self, user_address, from_block):
+        web3 = Web3Provider.get_web3()
+        current_block = web3.eth.blockNumber
+        pool = BPool(None)
+
+        pools = self.get_all_pools(from_block, chunk_size=5000, include_balance=False)
+        join_logs = pool.get_join_logs(web3, from_block, current_block, user_address, this_pool_only=False)
+        join_logs = [l for l in join_logs if l.address in pools]
+
+        balances = {l.address: DataToken(l.address).token_balance(user_address) for l in join_logs}
+        return balances
+
+    def get_creation_block(self, pool_address):
+        web3 = Web3Provider.get_web3()
+        bfactory = BFactory(self.bfactory_address)
+        current_block = web3.eth.blockNumber
+        logs = bfactory.get_event_logs('BPoolCreated', 0, current_block, {'newBPoolAddress': pool_address}, web3=web3, chunk_size=current_block)
+        if not logs:
+            return {}
+        assert len(logs) == 1, 'cannot happen'
+
+        return logs[0].blockNumber

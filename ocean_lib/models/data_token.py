@@ -311,14 +311,17 @@ class DataToken(ContractBase):
 
         return a_to_value
 
-    def getInfo(self, web3, from_block, to_block):
+    def get_info(self, web3, from_block, to_block, include_holders=False):
         contract = self.contract_concise
         minter = contract.minter()
         all_transfers, block = self.get_all_transfers_from_events(from_block, to_block)
-        a_to_balance = DataToken.calculate_balances(all_transfers)
-        _min = to_base_18(0.000001)
-        holders = sorted([(a, from_base_18(b)) for a, b in a_to_balance.items() if b > _min], key=lambda x: x[1], reverse=True)
         order_logs = self.get_start_order_logs(web3, from_block=from_block, to_block=to_block)
+        holders = []
+        if include_holders:
+            a_to_balance = DataToken.calculate_balances(all_transfers)
+            _min = to_base_18(0.000001)
+            holders = sorted([(a, from_base_18(b)) for a, b in a_to_balance.items() if b > _min], key=lambda x: x[1], reverse=True)
+
         return {
             'address': self.address,
             'name': contract.name(),

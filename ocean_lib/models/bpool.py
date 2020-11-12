@@ -1,6 +1,7 @@
 import logging
 import typing
 
+from eth_utils import remove_0x_prefix
 from web3.utils.events import get_event_data
 
 from ocean_lib.models import balancer_constants
@@ -473,7 +474,7 @@ class BPool(BToken):
 
     # ===== Events
 
-    def get_liquidity_logs(self, event_name, web3, from_block, to_block=None, this_pool_only=True):
+    def get_liquidity_logs(self, event_name, web3, from_block, to_block=None, user_address=None, this_pool_only=True):
         """
         :param event_name: str, one of LOG_JOIN, LOG_EXIT, LOG_SWAP
         """
@@ -487,6 +488,10 @@ class BPool(BToken):
         if this_pool_only:
             _filter['address'] = self.address
 
+        if user_address:
+            assert web3.isChecksumAddress(user_address)
+            _filter['topics'].append(f'0x000000000000000000000000{remove_0x_prefix(user_address).lower()}')
+
         event = getattr(self.events, event_name)
         event_abi = event().abi
         try:
@@ -499,11 +504,11 @@ class BPool(BToken):
 
         return logs
 
-    def get_join_logs(self, web3, from_block, to_block=None, this_pool_only=True):
-        return self.get_liquidity_logs('LOG_JOIN', web3, from_block, to_block, this_pool_only)
+    def get_join_logs(self, web3, from_block, to_block=None, user_address=None, this_pool_only=True):
+        return self.get_liquidity_logs('LOG_JOIN', web3, from_block, to_block, user_address, this_pool_only)
 
-    def get_exit_logs(self, web3, from_block, to_block=None, this_pool_only=True):
-        return self.get_liquidity_logs('LOG_EXIT', web3, from_block, to_block, this_pool_only)
+    def get_exit_logs(self, web3, from_block, to_block=None, user_address=None, this_pool_only=True):
+        return self.get_liquidity_logs('LOG_EXIT', web3, from_block, to_block, user_address, this_pool_only)
 
-    def get_swap_logs(self, web3, from_block, to_block=None, this_pool_only=True):
-        return self.get_liquidity_logs('LOG_SWAP', web3, from_block, to_block, this_pool_only)
+    def get_swap_logs(self, web3, from_block, to_block=None, user_address=None, this_pool_only=True):
+        return self.get_liquidity_logs('LOG_SWAP', web3, from_block, to_block, user_address, this_pool_only)
