@@ -3,6 +3,7 @@ import os
 import time
 from collections import namedtuple
 
+import requests
 from eth_utils import remove_0x_prefix
 from web3 import Web3
 from web3.utils.events import get_event_data
@@ -44,15 +45,20 @@ class DataToken(ContractBase):
         sig_str = f'{event_name}({",".join(types)})'
         return Web3.sha3(text=sig_str).hex()
 
-    def get_start_order_logs(self, web3, consumer_address, from_block=0, to_block='latest', from_all=False):
+    def get_start_order_logs(self, web3, consumer_address=None, from_block=0, to_block='latest', from_all_tokens=False):
         topic0 = self.get_event_signature(self.ORDER_STARTED_EVENT)
-        topic1 = f'0x000000000000000000000000{consumer_address[2:].lower()}'
+        topics = [topic0]
+        if consumer_address:
+            topic1 = f'0x000000000000000000000000{consumer_address[2:].lower()}'
+            topics = [topic0, None, topic1]
+
         filter_params = {
             'fromBlock': from_block,
             'toBlock': to_block,
-            'topics': [topic0, None, topic1],
+            'topics': topics,
         }
-        if not from_all:
+        if not from_all_tokens:
+            # get logs only for this token address
             filter_params['address'] = self.address
 
         e = getattr(self.events, self.ORDER_STARTED_EVENT)
@@ -62,6 +68,39 @@ class DataToken(ContractBase):
         for l in logs:
             parsed_logs.append(get_event_data(event_abi, l))
         return parsed_logs
+
+    def get_transfer_events_in_range(self, from_block, to_block):
+        name = 'Transfer'
+        event = getattr(self.events, name)
+
+        return self.getLogs(event, Web3Provider.get_web3(), fromBlock=from_block, toBlock=to_block)
+
+    def get_all_transfers_from_events(self, start_block: int, end_block: int, chunk: int=1000) -> tuple:
+        _from = start_block
+        _to = _from + chunk - 1
+
+        transfer_records = []
+        error_count = 0
+        _to = min(_to, end_block)
+        while _from <= end_block:
+            try:
+                logs = self.get_transfer_events_in_range(_from, _to)
+                transfer_records.extend(
+                    [(l.args['from'], l.args.to, l.args.value, l.blockNumber, l.transactionHash.hex(), l.logIndex, l.transactionIndex)
+                     for l in logs])
+                _from = _to + 1
+                _to = min(_from + chunk - 1, end_block)
+                error_count = 0
+                if (_from-start_block) % 1000 == 0:
+                    print(f'    So far processed {len(transfer_records)} Transfer events from {_from-start_block} blocks.')
+            except requests.exceptions.ReadTimeout as err:
+                print(f'ReadTimeout ({_from}, {_to}): {err}')
+                error_count += 1
+
+            if error_count > 1:
+                break
+
+        return transfer_records, min(_to, end_block)  # can have duplicates
 
     def get_transfer_event(self, block_number, sender, receiver):
         event = getattr(self.events, 'Transfer')
@@ -136,7 +175,7 @@ class DataToken(ContractBase):
         if not logs:
             return []
 
-        return logs[0]
+        return logs
 
     def verify_order_tx(self, web3, tx_id, did, service_id, amount_base, sender):
         event = getattr(self.events, self.ORDER_STARTED_EVENT)
@@ -257,16 +296,65 @@ class DataToken(ContractBase):
     def calculate_fee(amount, percentage):
         return int(amount * to_base_18(percentage) / to_base_18(1.0))
 
+    @staticmethod
+    def calculate_balances(transfers):
+        _from = [t[0].lower() for t in transfers]
+        _to = [t[1].lower() for t in transfers]
+        _value = [t[2] for t in transfers]
+        a_to_value = dict()
+        a_to_value.update({a: 0 for a in _from})
+        a_to_value.update({a: 0 for a in _to})
+        for i, acc_f in enumerate(_from):
+            v = int(_value[i])
+            a_to_value[acc_f] -= v
+            a_to_value[_to[i]] += v
+
+        return a_to_value
+
+    def get_info(self, web3, from_block, to_block, include_holders=False):
+        contract = self.contract_concise
+        minter = contract.minter()
+        all_transfers, block = self.get_all_transfers_from_events(from_block, to_block)
+        order_logs = self.get_start_order_logs(web3, from_block=from_block, to_block=to_block)
+        holders = []
+        if include_holders:
+            a_to_balance = DataToken.calculate_balances(all_transfers)
+            _min = to_base_18(0.000001)
+            holders = sorted([(a, from_base_18(b)) for a, b in a_to_balance.items() if b > _min], key=lambda x: x[1], reverse=True)
+
+        return {
+            'address': self.address,
+            'name': contract.name(),
+            'symbol': contract.symbol(),
+            'decimals': contract.decimals(),
+            'cap': from_base_18(contract.cap()),
+            'totalSupply': from_base_18(contract.totalSupply()),
+            'minter': minter,
+            'minterBalance': self.token_balance(minter),
+            'numHolders': len(holders),
+            'holders': holders,
+            'numOrders': len(order_logs)
+        }
+
     # ============================================================
     # reflect DataToken Solidity methods
     def blob(self) -> str:
         return self.contract_concise.blob()
 
+    def name(self) -> str:
+        return self.contract_concise.name()
+
     def symbol(self) -> str:
         return self.contract_concise.symbol()
 
+    def cap(self) -> str:
+        return self.contract_concise.cap()
+
     def decimals(self) -> str:
         return self.contract_concise.decimals()
+
+    def totalSupply(self) -> str:
+        return self.contract_concise.totalSupply()
 
     def allowance(self, owner_address: str, spender_address: str) -> str:
         return self.contract_concise.allowance(owner_address, spender_address)

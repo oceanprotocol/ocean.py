@@ -137,7 +137,6 @@
       "type": "access",
       "index": 1,
       "serviceEndpoint": "http://localhost:8030",
-      "templateId": "0x1234",
       "attributes": {
         "main": {
           "name": "dataAssetAccessServiceAgreement",
