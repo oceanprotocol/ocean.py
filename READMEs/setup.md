@@ -89,13 +89,13 @@ You need to point to an Ethereum network via an Ethereum node. Here, we will use
 
 1. Go to https://infura.io and sign up 
 2. At Infura site, create a new project
-3. Within the project settings page, copy the Infura "project id". We'll use it in the next step
+3. Within the project settings page, note the "project id". Copy this. We'll use it in Part C.
 
 ## C. Config file
 In the project's root folder there is a `config.ini` file. The following config values are a must have:
 ```
 [eth-network]
-network = https://rinkeby.infura.io/v3/<your Infura "project id">
+network = https://rinkeby.infura.io/v3/<your Infura project id>
 
 [resources]
 
@@ -117,7 +117,7 @@ export CONFIG_FILE=my_config.ini
 
 Envvars override config file values. Therefore, you can do the following instead of using the config file. Your choice:)
 ```console
-export NETWORK_URL=rinkeby
+export NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
 export AQUARIUS_URL=https://aquarius.rinkeby.v3.dev-ocean.com
 export PROVIDER_URL=https://provider.rinkeby.v3.dev-ocean.com
 
