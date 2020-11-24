@@ -3,13 +3,14 @@
 This page describes how to set up each of the following.
 
 * A. Ethereum account
-* B. Config file
-* C. Environment variables
-* D. Initialize components
+* B. Ethereum node (e.g. Infura)
+* C. Config file
+* D. Environment variables
+* E. Initialize components
 
 Culminating in...
 
-* E. Start using ocean-lib
+* F. Start using ocean-lib
 
 ## A. Ethereum account
 
@@ -82,11 +83,19 @@ web3 = Web3Provider.get_web3()
 wallet = Wallet(web3, encrypted_key=os.getenv('MY_TEST_ENCRYPTED_KEY'), password=os.getenv('MY_TEST_PASSWORD'))
 ```
 
-## B. Config file
+## B. Ethereum node (e.g. Infura)
+
+You need to point to an Ethereum network via an Ethereum node. Here, we will use the Rinkeby test network, and use Infura third-party node.
+
+1. Go to https://infura.io and sign up 
+2. At Infura site, create a new project
+3. Within the project settings page, copy the Infura "project id". We'll use it in the next step
+
+## C. Config file
 In the project's root folder there is a `config.ini` file. The following config values are a must have:
 ```
 [eth-network]
-network = 'rinkeby'
+network = https://rinkeby.infura.io/v3/<your Infura "project id">
 
 [resources]
 
@@ -99,7 +108,7 @@ provider.url = https://provider.rinkeby.v3.dev-ocean.com
 
 The example above already has values that work with the ocean contracts deployed to the `Rinkeby` test net.
 
-## C. Environment variables
+## D. Environment variables
 
 Set the following envvars, in addition to the privatekey setup described above.
 ```console
@@ -114,7 +123,7 @@ export PROVIDER_URL=https://provider.rinkeby.v3.dev-ocean.com
 
 ```
 
-## D. Initialize components
+## E. Initialize components
 Apply the following initializations once:
 ```python
 import os
@@ -130,7 +139,7 @@ Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url)
 ContractHandler.set_artifacts_path(config.artifacts_path)
 ```
 
-## E. Start using ocean-lib
+## F. Start using ocean-lib
 
 This example creates an Ocean instance, a wallet, and your first datatoken. 
 ```python
