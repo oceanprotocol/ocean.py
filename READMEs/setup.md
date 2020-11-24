@@ -132,17 +132,19 @@ ContractHandler.set_artifacts_path(config.artifacts_path)
 ```
 
 ## E. Start using ocean-lib
-Now you can create an Ocean instance.
+
+This example lines up a wallet, creates an Ocean instance, and publishes your first datatoken.
 ```python
 #line up wallet, like above
 import os
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.ocean.ocean import Ocean
-ocean = Ocean()
 wallet = Wallet(ocean.web3, private_key=os.getenv('MY_TEST_KEY'))
 
-#play! In this example, create your first datatoken.
+#create an Ocean instance
+ocean = Ocean()
+
+#create a datatoken
 datatoken = ocean.create_data_token('Dataset name', 'dtsymbol', from_wallet=wallet)
 print(f'created new datatoken with address {datatoken.address}')
-
 ``` 
