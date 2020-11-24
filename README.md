@@ -24,23 +24,21 @@ using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-wi
 
 ## Quickstart
 
-### Setup config file and env't variables
+### 1. Setup config file and env't variables
 
-This guide demonstrates how to [setup the config file and environment variables](READMEs/setup.md)
+[Use this guide](READMEs/setup.md) to set up the Ocean config file and envvars. It also gets you going with a test Ethereum account, a test network, and test ETH if needed.
 
-### ocean-lib overview
+### 2. Get an overview of ocean-lib
 
-[Description of ocean-lib modules and functions](READMEs/overview.md)
+[Here's](READMEs/overview.md) a short description of key ocean-lib modules and functions.
 
-### Marketplace Flow
+### 3. Quickstart marketplace flow
 
-This batteries-included flow includes metadata, download service and datatoken.
-
-[Go to marketplace flow](READMEs/marketplace_flow.md)
+[This batteries-included quickstart](READMEs/marketplace_flow.md) describes how to publish data assets as datatokens (including metadata), post the datatokens to a marketplace, buy datatokens, and consume datatokens (including download).
 
 ## For ocean-lib Developers
 
-[Go to developers flow](READMEs/developers.md)
+If you want to further develop ocean-lib, then [please go here](READMEs/developers.md).
 
 ## License
 
