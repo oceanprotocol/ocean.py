@@ -159,4 +159,8 @@ datatoken = ocean.create_data_token('Dataset name', 'dtsymbol', from_wallet=wall
 print(f'created new datatoken with address {datatoken.address}')
 ``` 
 
-Note: the example does imports "just in time" to help understandability.
+It's successfully completed if it says "created new datatoken...". Congrats!
+
+Or, if you got an error like "insufficient funds for gas", it's because your account doesn't have ETH to pay for gas. The example key that we provide doesn't, sorry, it would get eaten too quickly. ᗧ···ᗣ···ᗣ·· . But no worries! You can get some Rinkeby ETH from [this faucet](https://faucet.rinkeby.io/). 
+
+One final thing: sometimes you will need Rinkeby OCEAN. [Here's](https://faucet.rinkeby.oceanprotocol.com/) a faucet. Have fun!
