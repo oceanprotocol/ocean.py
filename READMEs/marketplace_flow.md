@@ -31,13 +31,13 @@ its own requirements and make sure they all point to `rinkeby` testnet.
 
 [Provider service](https://github.com/oceanprotocol/provider-py)
 ```
-docker run @oceanprotocol/provider-py:latest
+docker run oceanprotocol/provider:latest
 ```
 
 [Aquarius (Metadata cache)](https://github.com/oceanprotocol/aquarius)
 
 ```
-docker run @oceanprotocol/aquarius:latest
+docker run oceanprotocol/aquarius:latest
 ```
 
 [Market app](https://github.com/oceanprotocol/market)
