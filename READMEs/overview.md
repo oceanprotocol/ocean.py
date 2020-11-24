@@ -1,4 +1,4 @@
-At the high level, the main ocean-lib features are accessible via the Ocean instance. Here is a 
+At the high level, the main ocean-lib features are accessible via the `Ocean` instance. Here is a 
 quick overview of the main functions and submodules: 
 ```python
 from ocean_lib.ocean.ocean import Ocean
