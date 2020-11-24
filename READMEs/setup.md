@@ -7,13 +7,13 @@ To start with you will need an ethereum account. Here are some options:
 
 ### 1. Define account via private key
 
-First, make your key available as an envvar. Here's an example key. (You'll want your own, of course).
+First, make your key available as an envvar. Here's an example key (you'll want your own, of course). From your console:
 
-```bash
+```console
 export MY_TEST_KEY=0xaefd8bc8725c4b3d15fbe058d0f58f4d852e8caea2bf68e0f73acb1aeec19baa
 ```
 
-Then, import your private key while creating your web3 wallet.
+Then, in your Python code, create a Wallet object and specify your private key.
 
 ```python
 import os
@@ -29,7 +29,7 @@ Note: Don't store your private key directly in code or deploy the example key in
 
 ### 2. Define account via **keyfile json object**
 
-Here's an example JSON object aka EncryptedKey. This example has the same private key as above, and password `OceanProtocol` to encrypt/decrypt. See how the private key is stored in *encrypted* form, as parameter `"ciphertext"`.
+Here's an example JSON object aka EncryptedKey. This example has the same private key as above, and password `OceanProtocol` to encrypt/decrypt. The private key is stored in *encrypted* form, as parameter `ciphertext`.
 
 ```
 {
@@ -54,14 +54,14 @@ Here's an example JSON object aka EncryptedKey. This example has the same privat
 }
 ```
 
-Here's how you use the JSON object. First, export the EncryptedKey and password:
+Here's how you use the JSON object. In your console, export the EncryptedKey and password:
 
-```bash
+```console
 export MY_TEST_ENCRYPTED_KEY='{"address": "281269c18376010b196a928c335e495bd05ec32f", "crypto": {"cipher": "aes-128-ctr", "cipherparams": {"iv": "ac0b74c5100bd319030d983029256250"}, "ciphertext": "6e003d25869a8f84c3d055d4bda3fd0e83b89769b6513b58b2b76d0738f2ab1c", "kdf": "pbkdf2", "kdfparams": {"c": 1000000, "dklen": 32, "prf": "hmac-sha256", "salt": "423c1be88c1fadd926c1b668a5d93f74"}, "mac": "6b90720ddc10d457c2e3e7e1b61550d7a7fa75e6051cb1ed4f1516fba4f0a45f"}, "id": "7954ec59-6819-4e3c-b065-e6f3a9c1fe6c", "version": 3}'
 export MY_TEST_PASSWORD=OceanProtocol
 ```
 
-Then, create the wallet object:
+Then, in your Python code, create a Wallet object and specify the EncyptedKey and password:
 ```python
 import os
 from ocean_lib.web3_internal.web3_provider import Web3Provider
