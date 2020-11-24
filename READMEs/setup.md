@@ -135,6 +135,7 @@ ContractHandler.set_artifacts_path(config.artifacts_path)
 This example lines up a wallet, creates an Ocean instance, and publishes your first datatoken. 
 ```python
 #<include the code from previous step>
+#..
 
 #line up wallet
 from ocean_lib.web3_internal.wallet import Wallet
