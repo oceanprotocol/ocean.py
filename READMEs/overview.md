@@ -5,6 +5,7 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.config import Config
 
 config = Config('config_local.ini')
+
 # Ocean instance: create/get datatoken, get dtfactory, user orders (history)
 ocean = Ocean(config)
 
