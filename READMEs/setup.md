@@ -101,12 +101,13 @@ The example above already has values that work with the ocean contracts deployed
 
 ## C. Environment variables
 
-Set the following env't variables, in addition to the privatekey setup described above.
-```bash
+Set the following envvars, in addition to the privatekey setup described above.
+```console
 export CONFIG_FILE=my_config.ini
 ```
-Env't vars override config file values so you can set the following env't if its more convenient
-```bash
+
+Envvars override config file values. Therefore, you can do the following instead of using the config file. Your choice:)
+```console
 export NETWORK_URL=rinkeby
 export AQUARIUS_URL=https://aquarius.rinkeby.v3.dev-ocean.com
 export PROVIDER_URL=https://provider.rinkeby.v3.dev-ocean.com
