@@ -1,7 +1,19 @@
+# Overview
 
-## Ethereum account
+This page describes how to set up each of the following.
 
-To start with you will need an ethereum account. Here are some options:
+* A. Ethereum account
+* B. Config file
+* C. Environment variables
+* D. Initialize components
+
+Culminating in...
+
+* E. Start using ocean-lib
+
+## A. Ethereum account
+
+To start with you will need an Ethereum account. Here are some options:
 1. Define account via **private key**, *or*
 2. Define account via **keyfile json object**. This stores the private key in json format, encrypted with a password.
 
@@ -70,7 +82,7 @@ web3 = Web3Provider.get_web3()
 wallet = Wallet(web3, encrypted_key=os.getenv('MY_TEST_ENCRYPTED_KEY'), password=os.getenv('MY_TEST_PASSWORD'))
 ```
 
-## Config file
+## B. Config file
 In the project's root folder there is a `config.ini` file. The following config values are a must have:
 ```
 [eth-network]
@@ -87,7 +99,7 @@ provider.url = https://provider.rinkeby.v3.dev-ocean.com
 
 The example above already has values that work with the ocean contracts deployed to the `Rinkeby` test net.
 
-## Environment variables
+## C. Environment variables
 
 Set the following env't variables, in addition to the privatekey setup described above.
 ```bash
@@ -101,7 +113,7 @@ export PROVIDER_URL=https://provider.rinkeby.v3.dev-ocean.com
 
 ```
 
-## Initialize components
+## D. Initialize components
 Apply the following initializations once:
 ```python
 import os
@@ -118,7 +130,7 @@ ContractHandler.set_artifacts_path(config.artifacts_path)
 
 ```
 
-## Start using ocean-lib
+## E. Start using ocean-lib
 Now you can create an Ocean instance
 ```python
 import os
