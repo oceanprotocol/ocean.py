@@ -1,11 +1,10 @@
 # Quickstart: Marketplace Flow
 
-This batteries-included flow includes metadata and a download service for one datatoken.
+This quickstart describes how to publish data assets as datatokens (including metadata), post the datatokens to a marketplace, buy datatokens, and consume datatokens (including download).
 
-It focuses on Alice's experience as a publisher, and Bob's experience as a buyer & consumer. 
-The rest are services used by Alice and Bob.
+It focuses on Alice's experience as a publisher, and Bob's experience as a buyer & consumer. The rest are services used by Alice and Bob.
 
-Here's the steps:
+Here are the steps:
 1. Initialize services
 1. Alice publishes assets for data services (= publishes a datatoken contract and metadata)
 1. Alice mints 100 tokens
