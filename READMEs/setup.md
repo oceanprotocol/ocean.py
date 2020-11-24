@@ -5,9 +5,9 @@ To start with you will need an ethereum account. Use one of the following option
 - Keyfile json object (encrypted key in json format). Need the password to go with this to allow decryption
 
 You can generate your own private key or use this test key (please don't use it in production or to hold any real value) 
-Address: `0x281269C18376010B196a928c335E495bd05eC32F`
-PrivateKey: `0xaefd8bc8725c4b3d15fbe058d0f58f4d852e8caea2bf68e0f73acb1aeec19baa`
-EncryptedKey:
+- Address: `0x281269C18376010B196a928c335E495bd05eC32F`
+- PrivateKey: `0xaefd8bc8725c4b3d15fbe058d0f58f4d852e8caea2bf68e0f73acb1aeec19baa`
+- EncryptedKey:
 ```
 {
   "address": "281269c18376010b196a928c335e495bd05ec32f",
