@@ -34,7 +34,7 @@ using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-wi
 
 ### 3. Quickstart marketplace flow
 
-[This batteries-included quickstart](READMEs/marketplace_flow.md) describes how to publish data assets as datatokens (including metadata), post the datatokens to a marketplace, buy datatokens, and consume datatokens (including download).
+[This quickstart](READMEs/marketplace_flow.md) describes how to publish data assets as datatokens (including metadata), post the datatokens to a marketplace, buy datatokens, and consume datatokens (including download).
 
 ## For ocean-lib Developers
 
