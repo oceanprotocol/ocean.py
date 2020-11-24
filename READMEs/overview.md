@@ -13,15 +13,14 @@ ocean = Ocean(config)
 # Assets: publish, get, list, search, order, consume/download
 ocean.assets
 
-# Compute-to-data: consume/start, stop, results, status, define-service
-ocean.compute
-
 # Datatoken Pool: create, add/remove liquidity, check liquidity, price, buy datatokens
 ocean.pool
 
 # Fixed rate exchange: create, price, buy datatokens  
 ocean.exchange
 
+# Compute-to-data: consume/start, stop, results, status, define-service
+ocean.compute
 ```
 
 To access functions that are not supported in the above classes, you can directly use the lower 
