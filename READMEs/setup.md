@@ -105,6 +105,7 @@ Ocean uses two more services:
 * [Provider](https://github.com/oceanprotocol/provider) - REST API run to serve download and compute service requests. Run by marketplace or the data publiser.
 
 **C1. Point to existing services**
+
 The simplest is to point to services that are already running. Here are the ones for Rinkeby. (There are also ones for Ethereum mainnet.)
 
 ```console
