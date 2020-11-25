@@ -6,7 +6,7 @@ Here are the steps:
 1. Installation, account setup, initialize services 
 1. Alice publishes data asset (including metadata)
 1. Alice mints 100 tokens
-1. Alice makes datatokens available for sale in a Balancer pool
+1. Alice creates a pool for trading her new datatokens
 1. Marketplace displays the asset with the available services and price of datatoken
 1. Value swap: Bob buys datatokens from marketplace
 1. Bob uses a service by spending datatoken he just purchased (download)
@@ -96,7 +96,7 @@ service_endpoint = DataServiceProvider.get_url(ocean.config)
 download_service = ServiceDescriptor.access_service_descriptor(service_attributes, service_endpoint)
 ```
 
-Metadata is information about the data asset. Ocean store it on-chain, enabling permissionless access by anyone.
+Metadata is information about the data asset. Ocean stores it on-chain, enabling permissionless access by anyone.
 
 We also want a convenient place for the Provider to store the service urls without requiring a separate storage facility, while making the urls available only to datatoken owners. To solve this, the Provider *encrypts* the urls and lumps them in with the rest of the metadata (the plaintext part), to be stored on-chain. The Provider will decrypt as part of the data provisioning.
 
@@ -119,14 +119,14 @@ assert token_address == asset.data_token_address
 did = asset.did  # did contains the datatoken address
 ```
 
-## 3. Alice mints 100 tokens
+## 3. Alice mints 100 datatokens
 
 ```python
 
 data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
 ```
 
-## 4. Alice creates a Balancer pool for trading her new data tokens
+## 4. Alice creates a pool for trading her new datatokens
 
 ```python
 pool = ocean.pool.create(
@@ -139,9 +139,15 @@ pool_address = pool.address
 print(f'DataToken @{data_token.address} has a `pool` available @{pool_address}')
 ```
 
-## 5. Marketplace posts asset for sale using price obtained from pool
+## 5. Marketplace displays asset for sale 
 
+Up til now, all the actions have been by Alice. Let's switch now to the perspective to that of the Marketplace operator. They can display for sale whatever data assets they see on chain which are in a pool (or a fixed-price exchange). 
+
+Here, we show how the marketplace might grab info about the data asset, price info from the pool, and show it in text form. It can also be in the webapp of course.
+
+First, the market creates its own `Ocean` instance.
 ```python
+import os
 from ocean_utils.agreements.service_types import ServiceTypes
 
 from ocean_lib.ocean.ocean import Ocean
@@ -150,49 +156,46 @@ from ocean_lib.models.bpool import BPool
 
 # Market's config
 config = {
-   'network': 'rinkeby',
+   'network': os.getenv('NETWORK_URL'),
 }
 market_ocean = Ocean(config)
+```
 
+Next, the market creates an object pointing to the pool.
+```python
 did = ''  # from step 3
 pool_address = ''  # from step 4
 asset = market_ocean.assets.resolve(did)
 service1 = asset.get_service(ServiceTypes.ASSET_ACCESS)
 pool = market_ocean.pool.get(pool_address)
-# price in OCEAN tokens per data token
+```
+
+To access a data service, you need 1.0 datatokens. Here, the market retrieves the datatoken price denominated in OCEAN.
+```python
 OCEAN_address = market_ocean.pool.ocean_address
 price_in_OCEAN = market_ocean.pool.calcInGivenOut(
     pool_address, OCEAN_address, token_address, token_out_amount=1.0
 )
-
-# Display key asset information, such as the cost of each service
-# Each access to an assets service requires ONE datatoken
-tokens_amount = 1.0
-print(f"Service 1 costs {tokens_amount * price_in_OCEAN} OCEAN")
-OCEAN_usd_pool_address = ''
-USDT_token_address = ''
-ocn_pool = BPool(OCEAN_usd_pool_address)
-OCEAN_price = from_base_18(ocn_pool.calcInGivenOut(
-    ocn_pool.getBalance(USDT_token_address), 
-    ocn_pool.getDenormalizedWeight(USDT_token_address),
-    ocn_pool.getBalance(OCEAN_address), 
-    ocn_pool.getDenormalizedWeight(OCEAN_address),
-    tokenAmountOut_base=to_base_18(price_in_OCEAN),
-    swapFee_base=ocn_pool.getSwapFee()
-))
-print(f"Service 1 costs {tokens_amount * price_in_OCEAN * OCEAN_price} USD")
+print(f"Price of 1 datatoken is {price_in_OCEAN} OCEAN")
 ```
 
 ## 6. Value swap: Bob buys datatokens from marketplace (using datatoken <> OCEAN balancer pool)
 
+Now, we're going to be Bob. Bob wants to buy datatokens from Alice, through the marketplace. For that, Bob needs some Rinkeby ETH and his own private key. You can follow the same steps like in step 0. It culminates in (from terminal): `export BOB_KEY=<Bob_private_key>`
+
+Next, Bob will need OCEAN to buy the datatoken. [Here's](https://faucet.rinkeby.oceanprotocol.com/) a Rinkeby faucet for OCEAN. More information is [here](https://docs.oceanprotocol.com/tutorials/get-ether-and-ocean-tokens/).
+
+Then, here's the Python from Bob's perspective.
 ```python
+# <FIRST: copy and paste the code from step 5 here>
+
+import os
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.wallet import Wallet
 
-bob_wallet = Wallet(ocean.web3, private_key="PASTE BOB'S TEST PRIVATE KEY HERE")
+bob_wallet = Wallet(ocean.web3, private_key=os.getenv('BOB_KEY'))
 data_token = market_ocean.get_data_token(token_address)
-# This assumes bob_wallet already has sufficient OCEAN tokens to buy the data token. OCEAN tokens 
-# can be obtained through a crypto exchange or an on-chain pool such as balancer or uniswap
+
 market_ocean.pool.buy_data_tokens(
     pool_address, 
     amount=1.0, # buy one data token
@@ -206,7 +209,6 @@ print(f'bob has {data_token.token_balance(bob_wallet.address} datatokens.')
 ## 7. Bob uses a service from the asset he just purchased (download)
 
 ```python
-
 market_address = '0x<markets ethereum address to receive service fee'
 service = asset.get_service(ServiceTypes.ASSET_ACCESS)  # asset from step 5
 quote = market_ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
@@ -235,3 +237,21 @@ Bonus round time! So far, we've used third-party services for Provider and Aquar
 - Go to [Ocean Provider's repo](https://github.com/oceanprotocol/provider), check its requirements, and make sure it points to Rinkeby.
 - In another new terminal: `docker run oceanprotocol/provider:latest` (or other ways, as repo describes)
 - Point the appropriate envvar to it. In your terminal: `export PROVIDER_URL=<the url that it says "Listening at">`
+
+## 9. Bonus round: get price of datatoken in USD
+
+This extends step 5. Whereas step 5 showed the price of a datatoken in OCEAN, we could also get it in USD. How? Find the USDT : OCEAN exchange from another pool.
+
+```python
+OCEAN_usd_pool_address = '' #get externally
+USDT_token_address = '' #get externally
+ocn_pool = BPool(OCEAN_usd_pool_address)
+OCEAN_price = from_base_18(ocn_pool.calcInGivenOut(
+    ocn_pool.getBalance(USDT_token_address), 
+    ocn_pool.getDenormalizedWeight(USDT_token_address),
+    ocn_pool.getBalance(OCEAN_address), 
+    ocn_pool.getDenormalizedWeight(OCEAN_address),
+    tokenAmountOut_base=to_base_18(price_in_OCEAN),
+    swapFee_base=ocn_pool.getSwapFee()
+))
+print(f"1 datatoken costs {price_in_OCEAN * OCEAN_price} USD")
