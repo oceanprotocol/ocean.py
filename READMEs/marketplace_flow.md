@@ -11,6 +11,7 @@ Here are the steps:
 1. Value swap: Bob buys datatokens from marketplace
 1. Bob uses a service by spending datatoken he just purchased (download)
 1. Bonus: run your own local Provider or Metadata cache (Aquarius)
+1. Bonus: Get datatoken price in USD
 
 Let's go through each step.
 
