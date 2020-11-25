@@ -2,15 +2,14 @@
 
 This guide describes how to set up each of the following.
 
-* A. Ethereum network & node
-* B. Metadata cache and data provider
-* C. Config file
-* D. Initialize components in Python
-* E. Ethereum account
+* A. Set Ethereum network & node
+* B. Set metadata cache and data provider
+* C. Set config file
+* D. Define Ethereum account
 
 Culminating in...
 
-* F. Start using ocean-lib
+* E. Start using ocean-lib
 
 ## A. Set Ethereum network (e.g. Rinkeby) & Ethereum node (e.g. Infura)
 
@@ -33,8 +32,6 @@ Ocean uses two more services:
 * [Aquarius (Metadata cache)](https://github.com/oceanprotocol/aquarius) - REST API that caches on-chain metadata, to aid search. Typically run by a marketplace.
 * [Provider](https://github.com/oceanprotocol/provider) - REST API run to serve download and compute service requests. Run by marketplace or the data publiser.
 
-**B1. Point to existing services**
-
 The simplest is to point to services that are already running. Here are the ones for Rinkeby. (There are also ones for Ethereum mainnet.)
 
 ```console
@@ -42,13 +39,11 @@ export AQUARIUS_URL=https://aquarius.rinkeby.v3.dev-ocean.com
 export PROVIDER_URL=https://provider.rinkeby.v3.dev-ocean.com
 ```
 
-**B2. Or, run your own services**
+Alternatively, you can run your own services. We're not going to do that in the main flow here, but here's how you would.
 
-Alternatively, you can run your own services.
 * In a new terminal: `docker run oceanprotocol/provider:latest`
 * In another new terminal: `docker run oceanprotocol/aquarius:latest`
-
-You'll need to point to them.
+* In your main terminal, set envvars to point to them:
 ```console
 export AQUARIUS_URL=http://127.0.0.1:5000
 export PROVIDER_URL=http://127.0.0.1:8030
@@ -58,7 +53,7 @@ export PROVIDER_URL=http://127.0.0.1:8030
 
 You need to set `NETWORK_URL`, `AQUARIUS_URL`, and `PROVIDER_URL` somehow. 
 
-Above, you set these values using envvars. However, you can also set them in a config file. Let's do that.
+Above, you set these values using envvars. However, you can also set them in a config file. Let's do that!
 
 1. Create a file, named e.g. `config.ini`
 2. Create just one envvar to point to the config file. In your terminal: `export CONFIG_FILE=config.ini`
@@ -73,7 +68,9 @@ aquarius.url = https://aquarius.rinkeby.v3.dev-ocean.com
 provider.url = https://provider.rinkeby.v3.dev-ocean.com
 ```
 
-4. Values set by envvars override values set in config files (good to understand!!). Since we set the envvars above, we'll need to get rid of them.
+**Important:** Values set by envvars override values set in config files. 
+
+4. Therefore, to use the config file values, we need to get rid of the envvars we'd set above.
 
 ```console
 unset NETWORK_URL
