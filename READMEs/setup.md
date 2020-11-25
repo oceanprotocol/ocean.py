@@ -2,17 +2,86 @@
 
 This guide describes how to set up each of the following.
 
-* A. Ethereum account
-* B. Ethereum network & node
-* C. Metadata cache and data provider
-* D. Config file
-* E. Initialize components in Python
+* A. Ethereum network & node
+* B. Metadata cache and data provider
+* C. Config file
+* D. Initialize components in Python
+* E. Ethereum account
 
 Culminating in...
 
 * F. Start using ocean-lib
 
-## A. Ethereum account
+## A. Set Ethereum network (e.g. Rinkeby) & Ethereum node (e.g. Infura)
+
+You need to point to an Ethereum network via an Ethereum node. Here, we will use `Rinkeby` test network, by connecting to it via third-party service `Infura`.
+
+1. Go to https://infura.io and sign up 
+
+2. At Infura site, create a new project
+
+3. Within the project settings page, copy the "project id" value. We'll use it in the next section.
+
+4. Finally, create an envvar that points to the network via Infura: 
+```console
+export NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
+```
+
+## B. Set Aquarius metadata cache and data provider services
+
+Ocean uses two more services:
+* [Aquarius (Metadata cache)](https://github.com/oceanprotocol/aquarius) - REST API that caches on-chain metadata, to aid search. Typically run by a marketplace.
+* [Provider](https://github.com/oceanprotocol/provider) - REST API run to serve download and compute service requests. Run by marketplace or the data publiser.
+
+**B1. Point to existing services**
+
+The simplest is to point to services that are already running. Here are the ones for Rinkeby. (There are also ones for Ethereum mainnet.)
+
+```console
+export AQUARIUS_URL=https://aquarius.rinkeby.v3.dev-ocean.com
+export PROVIDER_URL=https://provider.rinkeby.v3.dev-ocean.com
+```
+
+**B2. Or, run your own services**
+
+Alternatively, you can run your own services.
+* In a new terminal: `docker run oceanprotocol/provider:latest`
+* In another new terminal: `docker run oceanprotocol/aquarius:latest`
+
+You'll need to point to them.
+```console
+export AQUARIUS_URL=http://127.0.0.1:5000
+export PROVIDER_URL=http://127.0.0.1:8030
+```
+
+## C. Create a config file
+
+You need to set `NETWORK_URL`, `AQUARIUS_URL`, and `PROVIDER_URL` somehow. 
+
+Above, you set these values using envvars. However, you can also set them in a config file. Let's do that.
+
+1. Create a file, named e.g. `config.ini`
+2. Create just one envvar to point to the config file. In your terminal: `export CONFIG_FILE=config.ini`
+3. Fill the new file like the following. 
+
+```bash
+[eth-network]
+network = https://rinkeby.infura.io/v3/<your Infura project id>
+
+[resources]
+aquarius.url = https://aquarius.rinkeby.v3.dev-ocean.com
+provider.url = https://provider.rinkeby.v3.dev-ocean.com
+```
+
+4. Values set by envvars override values set in config files (good to understand!!). Since we set the envvars above, we'll need to get rid of them.
+
+```console
+unset NETWORK_URL
+unset AQUARIUS_URL
+unset PROVIDER_URL`
+```
+
+## D. Define Ethereum account
 
 To start with you will need an Ethereum account. Here are some options:
 1. Define account via **private key**, *or*
@@ -83,78 +152,10 @@ web3 = Web3Provider.get_web3()
 wallet = Wallet(web3, encrypted_key=os.getenv('MY_TEST_ENCRYPTED_KEY'), password=os.getenv('MY_TEST_PASSWORD'))
 ```
 
-## B. Set Ethereum network (e.g. Rinkeby) & Ethereum node (e.g. Infura)
+## E. Start using ocean-lib
 
-You need to point to an Ethereum network via an Ethereum node. Here, we will use `Rinkeby` test network, by connecting to it via third-party service `Infura`.
+This example configures the components, creates an Ocean instance, a wallet, and your first datatoken. 
 
-1. Go to https://infura.io and sign up 
-
-2. At Infura site, create a new project
-
-3. Within the project settings page, note the "project id". Copy this. We'll use it in Part C.
-
-4. Finally, create an envvar that points to the network via Infura: 
-```console
-export NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
-```
-
-## C. Set Aquarius metadata cache and data provider services
-
-Ocean uses two more services:
-* [Aquarius (Metadata cache)](https://github.com/oceanprotocol/aquarius) - REST API that caches on-chain metadata, to aid search. Typically run by a marketplace.
-* [Provider](https://github.com/oceanprotocol/provider) - REST API run to serve download and compute service requests. Run by marketplace or the data publiser.
-
-**C1. Point to existing services**
-
-The simplest is to point to services that are already running. Here are the ones for Rinkeby. (There are also ones for Ethereum mainnet.)
-
-```console
-export AQUARIUS_URL=https://aquarius.rinkeby.v3.dev-ocean.com
-export PROVIDER_URL=https://provider.rinkeby.v3.dev-ocean.com
-```
-
-**C2. Or, run your own services**
-
-Alternatively, you can run your own services.
-* In a new terminal: `docker run oceanprotocol/provider:latest`
-* In another new terminal: `docker run oceanprotocol/aquarius:latest`
-
-You'll need to point to them.
-```console
-export AQUARIUS_URL=http://127.0.0.1:5000
-export PROVIDER_URL=http://127.0.0.1:8030
-```
-
-## D. Your own config file
-
-You need to set `NETWORK_URL`, `AQUARIUS_URL`, and `PROVIDER_URL` somehow. 
-
-Above, you set these values using envvars. Alternatively, you can set them in a config file. Here's how.
-
-1. Create a file, named e.g. `config.ini`
-2. Create just one envvar to point to the config file. In your terminal: `export CONFIG_FILE=config.ini`
-2. Fill the new file like the following. 
-
-```bash
-[eth-network]
-network = https://rinkeby.infura.io/v3/<your Infura project id>
-
-[resources]
-aquarius.url = https://aquarius.rinkeby.v3.dev-ocean.com
-provider.url = https://provider.rinkeby.v3.dev-ocean.com
-```
-
-**Envvars vs Config Files**
-
-Values set by envvars override values set in config files. 
-
-So if you're wondering why Ocean isn't seeing your config file changes, it could be that an envvar is overriding it. To handle:
-* To see if an envvar exists and its value: `set | grep <envvar name>`
-* To remove an envvar: `unset <envvar name>`
-
-## E. Initialize components in Python
-
-Apply the following initializations once:
 ```python
 import os
 from ocean_lib.config import Config
@@ -163,18 +164,11 @@ from ocean_lib.ocean.util import get_web3_connection_provider
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 
+#configure the components
 config = Config(os.getenv('CONFIG_FILE'))
 ConfigProvider.set_config(config)
 Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
 ContractHandler.set_artifacts_path(config.artifacts_path)
-```
-
-## F. Start using ocean-lib
-
-This example creates an Ocean instance, a wallet, and your first datatoken. 
-```python
-#<include the code from previous step>
-#..
 
 #create Ocean instance
 from ocean_lib.ocean.ocean import Ocean
