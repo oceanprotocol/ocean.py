@@ -24,9 +24,9 @@ using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-wi
 
 ## Quickstart
 
-### 1. Setup config file and env't variables
+### 1. Basic setup
 
-[Use this guide](READMEs/setup.md) to set up the Ocean config file and envvars. It also gets you going with a test Ethereum account, a test network, and test ETH if needed.
+[Use this guide](READMEs/setup.md) to connect to Ethereum network and Ocean service providers, set variables (as envvars or config file). Finally, publish your very first datatoken.
 
 ### 2. Get an overview of ocean-lib
 
