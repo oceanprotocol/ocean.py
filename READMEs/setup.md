@@ -1,6 +1,6 @@
 # Overview
 
-This page describes how to set up each of the following.
+This guide describes how to set up each of the following.
 
 * A. Ethereum account
 * B. Ethereum node (e.g. Infura)
