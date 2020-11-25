@@ -68,15 +68,7 @@ aquarius.url = https://aquarius.rinkeby.v3.dev-ocean.com
 provider.url = https://provider.rinkeby.v3.dev-ocean.com
 ```
 
-**Important:** Values set by envvars override values set in config files. 
-
-4. Therefore, to use the config file values, we need to get rid of the envvars we'd set above. In your terminal:
-
-```console
-unset NETWORK_URL
-unset AQUARIUS_URL
-unset PROVIDER_URL
-```
+4. Values set by envvars override values set in config files (important!). Therefore, to use the config file values, we need to get rid of the envvars we'd set above. In your terminal: ```unset NETWORK_URL AQUARIUS_URL PROVIDER_URL```
 
 ## D. Define Ethereum account
 
