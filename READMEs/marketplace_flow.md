@@ -3,7 +3,7 @@
 This quickstart describes how to publish data assets as datatokens (including metadata), post the datatokens to a marketplace, buy datatokens, and consume datatokens (including download). It focuses on Alice's experience as a publisher, and Bob's experience as a buyer & consumer. The rest are services used by Alice and Bob.
 
 Here are the steps:
-1. Initialize services
+1. Initialize services & account
 1. Alice publishes assets for data services (= publishes a datatoken contract and metadata)
 1. Alice mints 100 tokens
 1. Alice makes datatokens available for sale in a Balancer pool
@@ -45,8 +45,15 @@ npm start
 ```
 Access the market app in the browser at `http://localhost:8000`.
 
+Also, you'll also this account setup:
+* An account with a private key available as an envvar, i.e.: `export MY_TEST_KEY=<my_private_key>`
+* ETH in the account on the Rinkeby network
+
+If you don't have these yet, please do the steps in the [setup README](setup.md) to get them. Then come back here.
+
 ## 2. Alice publishes assets for data services (= publishes a DataToken contract)
 
+Now
 ```python
 from ocean_utils.agreements.service_factory import ServiceDescriptor
 
