@@ -92,19 +92,15 @@ First, make your key available as an envvar. Here's an example key (you'll want 
 export MY_TEST_KEY=0xaefd8bc8725c4b3d15fbe058d0f58f4d852e8caea2bf68e0f73acb1aeec19baa
 ```
 
-Then, in your Python code, create a Wallet object and specify your private key.
+The Ethereum address that gets computed from the example key is `0x281269C18376010B196a928c335E495bd05eC32F`.
+
+In Python, you'd create a wallet from this private key with a line like the following. (We'll use it in the full example farther down.)
 
 ```python
-import os
-from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_lib.web3_internal.wallet import Wallet
-web3 = Web3Provider.get_web3()
 wallet = Wallet(web3, private_key=os.getenv('MY_TEST_KEY'))
 ```
 
-The Ethereum address that gets computed from the example key is `0x281269C18376010B196a928c335E495bd05eC32F`.
-
-Note: Don't store your private key directly in code or deploy the example key in production, unless you want to see someone steal your funds.
+Note: Don't store your private key directly in code or deploy the example key in production, unless you want to see someone steal your funds. That's why we have it as an envvar.
 
 ### 2. Define account via **keyfile json object**
 
@@ -140,12 +136,8 @@ export MY_TEST_ENCRYPTED_KEY='{"address": "281269c18376010b196a928c335e495bd05ec
 export MY_TEST_PASSWORD=OceanProtocol
 ```
 
-Then, in your Python code, create a Wallet object and specify the EncyptedKey and password:
+In Python, you'd create a wallet from this info with a line like:
 ```python
-import os
-from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_lib.web3_internal.wallet import Wallet
-web3 = Web3Provider.get_web3()
 wallet = Wallet(web3, encrypted_key=os.getenv('MY_TEST_ENCRYPTED_KEY'), password=os.getenv('MY_TEST_PASSWORD'))
 ```
 
