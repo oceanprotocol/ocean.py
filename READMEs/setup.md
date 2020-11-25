@@ -55,9 +55,9 @@ You need to set `NETWORK_URL`, `AQUARIUS_URL`, and `PROVIDER_URL` somehow.
 
 Above, you set these values using envvars. However, you can also set them in a config file. Let's do that!
 
-1. Create a file, named e.g. `config.ini`
-2. Create just one envvar to point to the config file. In your terminal: `export CONFIG_FILE=config.ini`
-3. Fill the new file like the following. 
+1. Create an envvar to point to the config file. In your terminal: `export CONFIG_FILE=config.ini`
+1. Create the file itself, named e.g. `config.ini`
+3. Fill the new file like the following:
 
 ```bash
 [eth-network]
@@ -70,12 +70,12 @@ provider.url = https://provider.rinkeby.v3.dev-ocean.com
 
 **Important:** Values set by envvars override values set in config files. 
 
-4. Therefore, to use the config file values, we need to get rid of the envvars we'd set above.
+4. Therefore, to use the config file values, we need to get rid of the envvars we'd set above. In your terminal:
 
 ```console
 unset NETWORK_URL
 unset AQUARIUS_URL
-unset PROVIDER_URL`
+unset PROVIDER_URL
 ```
 
 ## D. Define Ethereum account
