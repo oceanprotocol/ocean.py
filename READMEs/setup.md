@@ -42,7 +42,7 @@ Note: Don't store your private key directly in code or deploy the example key in
 
 ### 2. Define account via **keyfile json object**
 
-Here's an example JSON object aka EncryptedKey. This example has the same private key as above, and password `OceanProtocol` to encrypt/decrypt the private key. The private key is stored as parameter `ciphertext` (in encrypted form, of course).
+Here's an example keyfile JSON object, aka EncryptedKey. This example has the same private key as above, and password `OceanProtocol` to encrypt/decrypt the private key. The private key is stored as parameter `ciphertext` (in encrypted form, of course).
 
 ```
 {
