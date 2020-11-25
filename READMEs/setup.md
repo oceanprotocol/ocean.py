@@ -135,8 +135,9 @@ wallet = Wallet(web3, encrypted_key=os.getenv('MY_TEST_ENCRYPTED_KEY'), password
 
 ## E. Start using ocean-lib
 
-This example configures the components, creates an Ocean instance, a wallet, and your first datatoken. 
+Let's put it all together in Python. 
 
+First, configure the components.
 ```python
 import os
 from ocean_lib.config import Config
@@ -150,16 +151,23 @@ config = Config(os.getenv('CONFIG_FILE'))
 ConfigProvider.set_config(config)
 Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
 ContractHandler.set_artifacts_path(config.artifacts_path)
+```
 
-#create Ocean instance
+Then, create an `Ocean` instance.
+```python
 from ocean_lib.ocean.ocean import Ocean
 ocean = Ocean()
+```
 
+Then, create a `Wallet`. It will leverage the `web3` instance in the Ocean instance.
+```python
 #create wallet, leveraging ocean.web3
 from ocean_lib.web3_internal.wallet import Wallet
 wallet = Wallet(ocean.web3, private_key=os.getenv('MY_TEST_KEY')) #or use keyfile approach
+```
 
-#create a datatoken
+Finally, create a datatoken. As it's a transaction on the network, it will take several seconds to go through.
+```
 datatoken = ocean.create_data_token('Dataset name', 'dtsymbol', from_wallet=wallet)
 print(f'created new datatoken with address {datatoken.address}')
 ``` 
