@@ -134,6 +134,14 @@ aquarius.url = https://aquarius.rinkeby.v3.dev-ocean.com
 provider.url = https://provider.rinkeby.v3.dev-ocean.com
 ```
 
+**Envvars vs Config Files**
+
+Values set by envvars override values set in config files. 
+
+So if you're wondering why Ocean isn't seeing your config file changes, it could be that an envvar is overriding it. To handle:
+* To see if an envvar exists and its value: `set | grep <envvar name>`
+* To remove an envvar: `unset <envvar name>`
+
 ## E. Initialize components in Python
 
 Apply the following initializations once:
