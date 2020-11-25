@@ -3,7 +3,8 @@
 This quickstart describes how to publish data assets as datatokens (including metadata), post the datatokens to a marketplace, buy datatokens, and consume datatokens (including download). It focuses on Alice's experience as a publisher, and Bob's experience as a buyer & consumer. The rest are services used by Alice and Bob.
 
 Here are the steps:
-1. Initialize services & account
+1. Installation & account setup
+1. Initialize services 
 1. Alice publishes assets for data services (= publishes a datatoken contract and metadata)
 1. Alice mints 100 tokens
 1. Alice makes datatokens available for sale in a Balancer pool
@@ -13,15 +14,18 @@ Here are the steps:
 
 Let's go through each step.
 
-## 0. Prerequisites and Installation
-Use an ethereum account with some eth balance on rinkeby. You can get rinkeby eth using 
-this [faucet](https://www.rinkeby.io/#faucet). Otherwise, run `ganache-cli` and replace 
-`rinkeby` with `ganache` when following the steps below.
+## 0. Installation 
 
 If you haven't installed yet:
 ```console
 pip install ocean-lib
 ```
+
+This quickstart will use Rinkeby network. You'll need:
+* An account on Rinkeby, holding ETH to pay for transactions
+* The account's private key available as an envvar: `export MY_TEST_KEY=<my_private_key>`
+
+If you don't have these yet, please do the steps in the [setup README](setup.md) to get them. Then come back here.
 
 ## 1. Initialize services
 
@@ -44,12 +48,6 @@ npm install
 npm start
 ```
 Access the market app in the browser at `http://localhost:8000`.
-
-Also, you'll also this account setup:
-* An account with a private key available as an envvar, i.e.: `export MY_TEST_KEY=<my_private_key>`
-* ETH in the account on the Rinkeby network
-
-If you don't have these yet, please do the steps in the [setup README](setup.md) to get them. Then come back here.
 
 ## 2. Alice publishes assets for data services (= publishes a DataToken contract)
 
