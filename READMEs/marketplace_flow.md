@@ -3,18 +3,18 @@
 This quickstart describes how to publish data assets as datatokens (including metadata), post the datatokens to a marketplace, buy datatokens, and consume datatokens (including download). It focuses on Alice's experience as a publisher, and Bob's experience as a buyer & consumer. The rest are services used by Alice and Bob.
 
 Here are the steps:
-1. Installation & account setup
-1. Initialize services 
+1. Installation, account setup, initialize services 
 1. Alice publishes data asset (including metadata)
 1. Alice mints 100 tokens
 1. Alice makes datatokens available for sale in a Balancer pool
 1. Marketplace displays the asset with the available services and price of datatoken
 1. Value swap: Bob buys datatokens from marketplace
 1. Bob uses a service by spending datatoken he just purchased (download)
+1. Bonus: run your own local Provider or Metadata cache (Aquarius)
 
 Let's go through each step.
 
-## 0. Installation & account setup
+## 0. Installation, account setup, initialize services
 
 If you haven't installed yet:
 ```console
@@ -28,21 +28,18 @@ This quickstart will use Rinkeby network. You'll need:
 
 If you don't have these yet, please do the steps in the [setup README](setup.md) to get them. Then come back here.
 
-## 1. Initialize services
+Ocean uses these services:
+- [Aquarius (Metadata cache)](https://github.com/oceanprotocol/aquarius) - REST API that caches on-chain metadata, to aid search. Typically run by a marketplace.
+- [Provider](https://github.com/oceanprotocol/provider) - REST API run to serve download and compute service requests. Run by marketplace or the data publiser.
 
-This quickstart treats the publisher/provider service, metadata cache, and marketplace as 
-externally-run services. For convenience, we run them locally. Refer to each repo for 
-its own requirements and make sure they all point to `rinkeby` testnet.
+The simplest is to point to services that are already running. Here are the ones for Rinkeby. (There are also ones for Ethereum mainnet.)
 
-1a. [Aquarius (Metadata cache)](https://github.com/oceanprotocol/aquarius) - REST API that caches on-chain metadata, to aid search. Typically run by a marketplace.
-* In a new terminal: `docker run oceanprotocol/aquarius:latest`
-* Make an envvar pointing to it. In your terminal: `export AQUARIUS_URL=<the url that it says "Listening at">`
+```console
+export AQUARIUS_URL=https://aquarius.rinkeby.v3.dev-ocean.com
+export PROVIDER_URL=https://provider.rinkeby.v3.dev-ocean.com
+```
 
-1b. [Provider](https://github.com/oceanprotocol/provider) - REST API run to serve download and compute service requests. Run by marketplace or the data publiser.
-* In another new terminal: `docker run oceanprotocol/provider:latest`
-* Make an envvar pointing to it. In your terminal: `export PROVIDER_URL=<the url that it says "Listening at">`
-
-1c. [Market app](https://github.com/oceanprotocol/market)
+Finally, set up the service for the [Market app](https://github.com/oceanprotocol/market)
 * In another new terminal:
 ```
 git clone https://github.com/oceanprotocol/market.git
@@ -50,7 +47,7 @@ cd market
 npm install
 npm start
 ```
-Access the market app in the browser at `http://localhost:8000`.
+* You can access the market app in the browser at `http://localhost:8000`.
 
 ## 2. Alice publishes data asset (including metadata)
 
@@ -225,3 +222,17 @@ file_path = market_ocean.assets.download(
     destination='~/my-datasets'
 )
 ```
+
+## 8. Bonus round: run Provider and Aquarius locally
+
+Bonus round time! So far, we've used third-party services for Provider and Aquarius (Metadata cache). Now, let's run them locally.
+
+### Aquarius (Metadata cache)
+- Go to [Aquarius' repo](https://github.com/oceanprotocol/aquarius), check its requirements, and make sure it points to Rinkeby.
+- In a new terminal: `docker run oceanprotocol/aquarius:latest` (or other ways, as repo describes)
+- Point the appropriate envvar to it. In your terminal: `export AQUARIUS_URL=<the url that it says "Listening at">`
+
+### Provider
+- Go to [Ocean Provider's repo](https://github.com/oceanprotocol/provider), check its requirements, and make sure it points to Rinkeby.
+- In another new terminal: `docker run oceanprotocol/provider:latest` (or other ways, as repo describes)
+- Point the appropriate envvar to it. In your terminal: `export PROVIDER_URL=<the url that it says "Listening at">`
