@@ -14,7 +14,7 @@ Here are the steps:
 
 Let's go through each step.
 
-## 0. Installation 
+## 0. Installation & account setup
 
 If you haven't installed yet:
 ```console
