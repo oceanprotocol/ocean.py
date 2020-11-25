@@ -92,7 +92,7 @@ You need to point to an Ethereum network via an Ethereum node. Here, we will use
 3. Within the project settings page, note the "project id". Copy this. We'll use it in Part C.
 
 ## C. Config file
-In the project's root folder there is a `config.ini` file. The following config values are a must have:
+In your project's root folder, you'll want to have a `config.ini` file (or whatever you name it). The following config values are a must-have:
 ```
 [eth-network]
 network = https://rinkeby.infura.io/v3/<your Infura project id>
@@ -112,7 +112,7 @@ The example above already has values that work with the ocean contracts deployed
 
 Set the following envvars, in addition to the privatekey setup described above.
 ```console
-export CONFIG_FILE=my_config.ini
+export CONFIG_FILE=config.ini
 ```
 
 Envvars override config file values. Therefore, you can do the following instead of using the config file. Your choice:)
