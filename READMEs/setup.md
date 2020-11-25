@@ -115,7 +115,7 @@ Set the following envvars, in addition to the privatekey setup described above.
 export CONFIG_FILE=config.ini
 ```
 
-Envvars override config file values. Therefore, you can do the following instead of using the config file. Your choice:)
+Envvars override config file values. So, as an alternative to using the config file, you can do the following. 
 ```console
 export NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
 export AQUARIUS_URL=https://aquarius.rinkeby.v3.dev-ocean.com
