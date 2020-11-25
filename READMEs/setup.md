@@ -70,11 +70,24 @@ provider.url = https://provider.rinkeby.v3.dev-ocean.com
 
 4. Values set by envvars override values set in config files (important!). Therefore, to use the config file values, we need to get rid of the envvars we'd set above. In your terminal: ```unset NETWORK_URL AQUARIUS_URL PROVIDER_URL```
 
-## D. Define Ethereum account
+## D. Set Ethereum account
 
-To start with you will need an Ethereum account. Here are some options:
-1. Define account via **private key**, *or*
-2. Define account via **keyfile json object**. This stores the private key in json format, encrypted with a password.
+1. **Get private key.** First, you'll need an account. At its core, this is defined by its private key.
+2. **Choose key's access.** Once you have a private key, you can choose how it's accessed in the code
+
+### 1. Get private key
+
+If you're testing on Rinkeby, you may already have an Ethereum wallet holding some Rinkeby ETH. If you do, great, use that! Use the wallet's built-in functionality to export the private key.
+
+If you don't yet have an account, you can generate one with code using web3.py. Conveniently, it's included in ocean-lib.
+```python
+from ocean_lib.ocean.ocean import Ocean
+ocean = Ocean()
+new_account = ocean.web3.eth.account.create()
+private_key = new_account.privateKey
+```
+
+Web3.py's docs have more info on Web3 account management, [here](https://web3py.readthedocs.io/en/stable/web3.eth.html#web3.eth.Eth.accounts).
 
 ### 1. Define account via private key
 
