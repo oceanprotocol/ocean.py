@@ -51,7 +51,6 @@ Access the market app in the browser at `http://localhost:8000`.
 
 ## 2. Alice publishes assets for data services (= publishes a DataToken contract)
 
-Now
 ```python
 from ocean_utils.agreements.service_factory import ServiceDescriptor
 
