@@ -98,7 +98,7 @@ In your project's root folder, you'll want to have a `config.ini` file (or whate
 network = https://rinkeby.infura.io/v3/<your Infura project id>
 
 [resources]
-; Each published asset has metadata stored on-chain. Aquarius is a REST API service that caches metadata locally for easy search.
+; Each published asset has metadata stored on-chain. Aquarius is a REST API that caches metadata to aid search.
 aquarius.url = https://aquarius.rinkeby.v3.dev-ocean.com
 
 ; Provider is the REST API run by a data provider to serve download and compute service requests
