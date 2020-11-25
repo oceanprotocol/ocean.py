@@ -14,7 +14,7 @@ Here are the steps:
 
 Let's go through each step.
 
-## 0. Installation, account setup, initialize services
+## 1. Installation, account setup, initialize services
 
 If you haven't installed yet:
 ```console
