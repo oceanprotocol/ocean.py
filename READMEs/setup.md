@@ -73,7 +73,7 @@ provider.url = https://provider.rinkeby.v3.dev-ocean.com
 ## D. Set Ethereum account
 
 1. **Get private key.** First, you'll need an account. At its core, this is defined by its private key.
-2. **Choose key's access.** Once you have a private key, you can choose how it's accessed in the code
+2. **Choose key's access.** Once you have a private key, you can choose how it's accessed in the code. This can be (a) directly, or (b) encrypted in a JSON file.
 
 ### 1. Get private key
 
@@ -89,7 +89,7 @@ private_key = new_account.privateKey
 
 Web3.py's docs have more info on Web3 account management, [here](https://web3py.readthedocs.io/en/stable/web3.eth.html#web3.eth.Eth.accounts).
 
-### 1. Define account via private key
+### 2a. Choose key's access, directly for private key
 
 First, make your key available as an envvar. Here's an example key (you'll want your own, of course). From your console:
 
@@ -107,7 +107,7 @@ wallet = Wallet(web3, private_key=os.getenv('MY_TEST_KEY'))
 
 Note: Don't store your private key directly in code or deploy the example key in production, unless you want to see someone steal your funds. That's why we have it as an envvar.
 
-### 2. Define account via **keyfile json object**
+### 2b. Choose key's access, via keyfile json object
 
 Here's an example keyfile JSON object, aka EncryptedKey. This example has the same private key as above, and password `OceanProtocol` to encrypt/decrypt the private key. The private key is stored as parameter `ciphertext` (in encrypted form, of course).
 
