@@ -29,18 +29,14 @@ This quickstart treats the publisher/provider service, metadata cache, and marke
 externally-run services. For convenience, we run them locally. Refer to each repo for 
 its own requirements and make sure they all point to `rinkeby` testnet.
 
-[Provider service](https://github.com/oceanprotocol/provider-py)
-```
-docker run oceanprotocol/provider:latest
-```
+1a. [Aquarius (Metadata cache)](https://github.com/oceanprotocol/aquarius) - REST API that caches on-chain metadata, to aid search. Typically run by a marketplace.
+* In a new terminal: `docker run oceanprotocol/provider:latest`
 
-[Aquarius (Metadata cache)](https://github.com/oceanprotocol/aquarius)
+1b. [Provider](https://github.com/oceanprotocol/provider) - REST API run to serve download and compute service requests. Run by marketplace or the data publiser.
+* In another new terminal: `docker run oceanprotocol/aquarius:latest`
 
-```
-docker run oceanprotocol/aquarius:latest
-```
-
-[Market app](https://github.com/oceanprotocol/market)
+1c. [Market app](https://github.com/oceanprotocol/market)
+* In another new terminal:
 ```
 git clone https://github.com/oceanprotocol/market.git
 cd market
