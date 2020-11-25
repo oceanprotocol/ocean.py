@@ -37,26 +37,26 @@ Outcome: ganache running as a live blockchain network service, just like rinkeby
 
 Open a separate terminal and run ganache-cli (using docker)
 ```console
-docker run -d -p 8545:8545 trufflesuite/ganache-cli:latest \
-  --mnemonic "taxi music thumb unique chat sand crew more leg another off lamp"
+docker run -d -p 8545:8545 trufflesuite/ganache-cli:latest --mnemonic "taxi music thumb unique chat sand crew more leg another off lamp"
 ```
 
 The comand above starts `ganache-cli` with accounts derived from that `mnemonic` seed phrase. 
 You can see 10 accounts including addresses and private keys in the console. Use one of those 
 accounts for doing on-chain transactions. 
-Example, first account from the ganache run: 
-  address=0xe2DD09d719Da89e5a3D0F2549c7E24566e947260
-  privateKey=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+
+For example, here's the first account from the ganache run: 
+- address=0xe2DD09d719Da89e5a3D0F2549c7E24566e947260
+-  privateKey=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 
 ## 3. Deploy the contracts
+
 Outcome: DataTokenTemplate, DTFactory, BFactory, etc. are deployed to ganache.
 
 Setup env't: private keys etc can't live on GitHub. To handle this, ocean.py tools read from environment variables:
 ```console
-export CONFIG_FILE=config_local.ini
+export CONFIG_FILE=config.ini
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 export ARTIFACTS_PATH=artifacts
-
 ```
 
 Call the deploy script with (NETWORK = `ganache` or `rinkeby`) and 
@@ -67,7 +67,7 @@ contracts addresses for the target network.
 ./deploy.py ganache artifacts/address.json
 ```
 
-Finally: update `config_local.ini`'s `address.file` with the ADDRESSES_FILE_PATH from the previous step.
+Finally: update `config.ini`'s `address.file` with the ADDRESSES_FILE_PATH from the previous step.
 
 ## 4. Test 
 Outcome: ocean.py works as expected.
