@@ -3,10 +3,10 @@
 This guide describes how to set up each of the following.
 
 * A. Ethereum account
-* B. Ethereum node (e.g. Infura)
-* C. Config file
-* D. Environment variables
-* E. Initialize components
+* B. Ethereum network & node
+* C. Metadata cache and data provider
+* D. Config file
+* E. Initialize components in Python
 
 Culminating in...
 
@@ -83,47 +83,59 @@ web3 = Web3Provider.get_web3()
 wallet = Wallet(web3, encrypted_key=os.getenv('MY_TEST_ENCRYPTED_KEY'), password=os.getenv('MY_TEST_PASSWORD'))
 ```
 
-## B. Ethereum node (e.g. Infura)
+## B. Set Ethereum network (e.g. Rinkeby) & Ethereum node (e.g. Infura)
 
-You need to point to an Ethereum network via an Ethereum node. Here, we will use the Rinkeby test network, and use Infura third-party node.
+You need to point to an Ethereum network via an Ethereum node. Here, we will use `Rinkeby` test network, by connecting to it via third-party service `Infura`.
 
 1. Go to https://infura.io and sign up 
+
 2. At Infura site, create a new project
+
 3. Within the project settings page, note the "project id". Copy this. We'll use it in Part C.
 
-## C. Config file
-In your project's root folder, you'll want to have a `config.ini` file (or whatever you name it). The following config values are a must-have:
+4. Finally, create an envvar that points to the network via Infura: 
+```console
+export NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
 ```
+
+## C. Set Aquarius metadata cache and data provider services
+
+Ocean uses two more services:
+* [Aquarius (Metadata cache)](https://github.com/oceanprotocol/aquarius) - REST API that caches on-chain metadata, to aid search. Typically run by a marketplace.
+* [Provider](https://github.com/oceanprotocol/provider) - REST API run to serve download and compute service requests. Run by marketplace or the data publiser.
+
+The simplest is to point to services that are already running. Here are the ones for Rinkeby. (There are also ones for Ethereum mainnet.)
+
+```console
+export AQUARIUS_URL=https://aquarius.rinkeby.v3.dev-ocean.com
+export PROVIDER_URL=https://provider.rinkeby.v3.dev-ocean.com
+```
+
+Alternatively, you can run your own services.
+* In a new terminal: `docker run oceanprotocol/provider:latest`
+* In another new terminal: `docker run oceanprotocol/aquarius:latest`
+
+## D. Your own config file
+
+You need to set `NETWORK_URL`, `AQUARIUS_URL`, and `PROVIDER_URL` somehow. 
+
+Above, you set these values using envvars. Alternatively, you can set them in a config file. Here's how.
+
+1. Create a file, named e.g. `config.ini`
+2. Create just one envvar to point to the config file. In your terminal: `export CONFIG_FILE=config.ini`
+2. Fill the new file like the following. 
+
+```bash
 [eth-network]
 network = https://rinkeby.infura.io/v3/<your Infura project id>
 
 [resources]
-; Each published asset has metadata stored on-chain. Aquarius is a REST API that caches metadata to aid search.
 aquarius.url = https://aquarius.rinkeby.v3.dev-ocean.com
-
-; Provider is the REST API run by a data provider to serve download and compute service requests
 provider.url = https://provider.rinkeby.v3.dev-ocean.com
-
 ```
 
-The example above already has values that work with the ocean contracts deployed to the `Rinkeby` test net.
+## E. Initialize components in Python
 
-## D. Environment variables
-
-Set the following envvars, in addition to the privatekey setup described above.
-```console
-export CONFIG_FILE=config.ini
-```
-
-Envvars override config file values. So, as an alternative to using the config file, you can do the following. 
-```console
-export NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
-export AQUARIUS_URL=https://aquarius.rinkeby.v3.dev-ocean.com
-export PROVIDER_URL=https://provider.rinkeby.v3.dev-ocean.com
-
-```
-
-## E. Initialize components
 Apply the following initializations once:
 ```python
 import os
