@@ -24,6 +24,7 @@ pip install ocean-lib
 This quickstart will use Rinkeby network. You'll need:
 * An account on Rinkeby, holding ETH to pay for transactions
 * The account's private key available as an envvar: `export MY_TEST_KEY=<my_private_key>`
+* The network url available as an envvar: `export NETWORK_URL=https://rinkeby.infura.io/v3/<your infura id>`
 
 If you don't have these yet, please do the steps in the [setup README](setup.md) to get them. Then come back here.
 
@@ -35,9 +36,11 @@ its own requirements and make sure they all point to `rinkeby` testnet.
 
 1a. [Aquarius (Metadata cache)](https://github.com/oceanprotocol/aquarius) - REST API that caches on-chain metadata, to aid search. Typically run by a marketplace.
 * In a new terminal: `docker run oceanprotocol/provider:latest`
+* Make an envvar pointing to it. In your terminal: `export AQUARIUS_URL=http://127.0.0.1:5000`
 
 1b. [Provider](https://github.com/oceanprotocol/provider) - REST API run to serve download and compute service requests. Run by marketplace or the data publiser.
 * In another new terminal: `docker run oceanprotocol/aquarius:latest`
+* Make an envvar pointing to it. In your terminal: `export PROVIDER_URL=http://127.0.0.1:8030`
 
 1c. [Market app](https://github.com/oceanprotocol/market)
 * In another new terminal:
@@ -58,14 +61,14 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
-#Alice's config
+#Alice's config.  
 config = {
-   'network' : 'rinkeby',
-   'metadataStoreUri' : 'http://127.0.0.1:5000',
-   'providerUri' : 'http://127.0.0.1:8030'
+   'network' : os.getenv('NETWORK_URL'),
+   'metadataStoreUri' : os.getenv('AQUARIUS_URL'),
+   'providerUri' : os.getenv('PROVIDER_URL'),
 }
 ocean = Ocean(config)
-alice_wallet = Wallet(ocean.web3, private_key='8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f')
+alice_wallet = Wallet(ocean.web3, private_key=os.getenv('MY_TEST_KEY')) 
 
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_store_url)
 token_address = data_token.address
