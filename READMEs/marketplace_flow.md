@@ -35,12 +35,12 @@ externally-run services. For convenience, we run them locally. Refer to each rep
 its own requirements and make sure they all point to `rinkeby` testnet.
 
 1a. [Aquarius (Metadata cache)](https://github.com/oceanprotocol/aquarius) - REST API that caches on-chain metadata, to aid search. Typically run by a marketplace.
-* In a new terminal: `docker run oceanprotocol/provider:latest`
-* Make an envvar pointing to it. In your terminal: `export AQUARIUS_URL=http://127.0.0.1:5000`
+* In a new terminal: `docker run oceanprotocol/aquarius:latest`
+* Make an envvar pointing to it. In your terminal: `export AQUARIUS_URL=<the url that it says "Listening at">`
 
 1b. [Provider](https://github.com/oceanprotocol/provider) - REST API run to serve download and compute service requests. Run by marketplace or the data publiser.
-* In another new terminal: `docker run oceanprotocol/aquarius:latest`
-* Make an envvar pointing to it. In your terminal: `export PROVIDER_URL=http://127.0.0.1:8030`
+* In another new terminal: `docker run oceanprotocol/provider:latest`
+* Make an envvar pointing to it. In your terminal: `export PROVIDER_URL=<the url that it says "Listening at">`
 
 1c. [Market app](https://github.com/oceanprotocol/market)
 * In another new terminal:
