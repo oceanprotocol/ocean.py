@@ -5,7 +5,7 @@ This quickstart describes how to publish data assets as datatokens (including me
 Here are the steps:
 1. Installation & account setup
 1. Initialize services 
-1. Alice publishes assets for data services (= publishes a datatoken contract and metadata)
+1. Alice publishes data asset (including metadata)
 1. Alice mints 100 tokens
 1. Alice makes datatokens available for sale in a Balancer pool
 1. Marketplace displays the asset with the available services and price of datatoken
@@ -52,8 +52,9 @@ npm start
 ```
 Access the market app in the browser at `http://localhost:8000`.
 
-## 2. Alice publishes assets for data services (= publishes a DataToken contract)
+## 2. Alice publishes data asset (including metadata)
 
+What follows is in Python. First, configure the components and create an `Ocean` instance.
 ```python
 import os
 
@@ -69,39 +70,53 @@ config = {
    'providerUri' : os.getenv('PROVIDER_URL'),
 }
 ocean = Ocean(config)
-alice_wallet = Wallet(ocean.web3, private_key=os.getenv('MY_TEST_KEY')) 
+```
 
+Next, create a `Wallet` for Alice.
+```python
+alice_wallet = Wallet(ocean.web3, private_key=os.getenv('MY_TEST_KEY'))
+```
+
+Publish a datatoken.
+```
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_store_url)
 token_address = data_token.address
+```
 
-# `ocean.assets.create` will encrypt the URLs using the provider's encrypt service endpoint and update 
-# the asset before pushing to metadata store
-# `ocean.assets.create` will require that token_address is a valid DataToken contract address, unless token_address
-# is not provided then the `create` method will first create a new data token and use it in the new
-# asset.
+Specify the service attributes, and connect that to `service_endpoint` and `download_service`.
+```python
+date_created = "2012-02-01T10:55:11Z"
+service_attributes = {
+        "main": {
+            "name": "dataAssetAccessServiceAgreement",
+            "creator": alice_wallet.address,
+            "timeout": 3600 * 24,
+            "datePublished": date_created,
+            "cost": 1.0, # <don't change, this is obsolete>
+        }
+    }
+
+service_endpoint = DataServiceProvider.get_url(ocean.config)
+download_service = ServiceDescriptor.access_service_descriptor(service_attributes, service_endpoint)
+```
+
+Metadata is information about the data asset. Ocean store it on-chain, enabling permissionless access by anyone.
+
+We also want a convenient place for the Provider to store the service urls without requiring a separate storage facility, while making the urls available only to datatoken owners. To solve this, the Provider *encrypts* the urls and lumps them in with the rest of the metadata (the plaintext part), to be stored on-chain. The Provider will decrypt as part of the data provisioning.
+
+```python
 metadata =  {
     "main": {
         "type": "dataset", "name": "10 Monkey Species Small", "author": "Mario", 
-        "license": "CC0: Public Domain", "dateCreated": "2012-02-01T10:55:11Z", 
+        "license": "CC0: Public Domain", "dateCreated": date_created, 
         "files": [
             { "index": 0, "contentType": "application/zip", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/training.zip"},
             { "index": 1, "contentType": "text/text", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/monkey_labels.txt"},
             { "index": 2, "contentType": "application/zip", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/validation.zip"}]}
 }
 
-# Prepare attributes for the download service including the cost in DataTokens
-service_attributes = {
-        "main": {
-            "name": "dataAssetAccessServiceAgreement",
-            "creator": alice_wallet.address,
-            "cost": 1.0, # service cost is 1.0 tokens 
-            "timeout": 3600 * 24,
-            "datePublished": metadata["main"]['dateCreated']
-        }
-    }
-
-service_endpoint = DataServiceProvider.get_url(ocean.config)
-download_service = ServiceDescriptor.access_service_descriptor(service_attributes, service_endpoint)
+#ocean.assets.create will encrypt URLs using Provider's encrypt service endpoint, and update asset before putting on-chain.
+#It requires that token_address is a valid DataToken contract address. If that isn't provided, it will create a new token.
 asset = ocean.assets.create(metadata, alice_wallet, service_descriptors=[download_service], data_token_address=token_address)
 assert token_address == asset.data_token_address
 
@@ -115,7 +130,7 @@ did = asset.did  # did contains the datatoken address
 data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
 ```
 
-## 4. Alice creates a pool for trading her new data tokens
+## 4. Alice creates a Balancer pool for trading her new data tokens
 
 ```python
 pool = ocean.pool.create(
@@ -128,7 +143,7 @@ pool_address = pool.address
 print(f'DataToken @{data_token.address} has a `pool` available @{pool_address}')
 ```
 
-## 5. Marketplace posts asset for sale using price obtained from balancer pool
+## 5. Marketplace posts asset for sale using price obtained from pool
 
 ```python
 from ocean_utils.agreements.service_types import ServiceTypes
