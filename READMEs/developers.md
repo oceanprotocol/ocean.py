@@ -37,37 +37,35 @@ Outcome: ganache running as a live blockchain network service, just like rinkeby
 
 Open a separate terminal and run ganache-cli (using docker)
 ```console
-docker run -d -p 8545:8545 trufflesuite/ganache-cli:latest \
-  --mnemonic "taxi music thumb unique chat sand crew more leg another off lamp"
+docker run -d -p 8545:8545 trufflesuite/ganache-cli:latest --mnemonic "taxi music thumb unique chat sand crew more leg another off lamp"
 ```
 
 The comand above starts `ganache-cli` with accounts derived from that `mnemonic` seed phrase. 
 You can see 10 accounts including addresses and private keys in the console. Use one of those 
 accounts for doing on-chain transactions. 
-Example, first account from the ganache run: 
-  address=0xe2DD09d719Da89e5a3D0F2549c7E24566e947260
-  privateKey=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+
+For example, here's the first account from the ganache run: 
+- address=0xe2DD09d719Da89e5a3D0F2549c7E24566e947260
+-  privateKey=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 
 ## 3. Deploy the contracts
-Outcome: DataTokenTemplate, DTFactory, BFactory, etc. are deployed to ganache.
 
-Setup env't: private keys etc can't live on GitHub. To handle this, ocean.py tools read from environment variables:
+First, set envvars (since we don't want private keys on GitHub):
 ```console
-export CONFIG_FILE=config_local.ini
+export CONFIG_FILE=config.ini
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 export ARTIFACTS_PATH=artifacts
-
 ```
 
-Call the deploy script with (NETWORK = `ganache` or `rinkeby`) and 
-(ADDRESSES_FILE_PATH to hold the deployed contracts addresses). When using already deployed 
-contracts you can skip this, but make sure the `artifacts/address.json` file has the up-to-date 
-contracts addresses for the target network.
-```console
-./deploy.py ganache artifacts/address.json
-```
+If you already have contracts deployed to the network, then:
+- Check that `artifacts/address.json` holds the up-to-date addresses for your target network.
 
-Finally: update `config_local.ini`'s `address.file` with the ADDRESSES_FILE_PATH from the previous step.
+If you don't yet have contracts deployed, then:
+- Call: `./deploy.py NETWORK` where NETWORK = `ganache` or `rinkeby`. 
+- This will deploy DataTokenTemplate, DTFactory, BFactory, etc to NETWORK
+- Double-check that it updated the file `artifacts/address.json` with the addresses
+
+Finally, open `./config.ini` file, and make sure there's a line to set address.file: `address.file = artifacts/address.json`.
 
 ## 4. Test 
 Outcome: ocean.py works as expected.
