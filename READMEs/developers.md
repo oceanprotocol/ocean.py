@@ -18,7 +18,7 @@ git clone https://github.com/oceanprotocol/ocean.py
 cd ocean.py
 ```
 
-Initialize virtual env't. Activate env't.(BTW use `deactivate` to, well, deactivate.)
+Initialize virtual env't. Activate env't. (BTW use `deactivate` to, well, deactivate.)
 ```console
 python -m venv venv
 source venv/bin/activate 
@@ -31,24 +31,32 @@ pip install -r requirements_dev.txt
 
 If you don't have an Infura account and you aim to deploy to `rinkeby`, go to www.infura.io and sign up.
 
-## 2. Start blockchain service (ganache only)
+## 2. Start network, deploy to network (Local only) 
 
-Outcome: ganache running as a live blockchain network service, just like rinkeby.
+Follow the directions in [Ocean contracts repo](https://github.com/oceanprotocol/contracts) to:
+* Clone the repo locally, e.g. to `./contracts`
+* Start a local ganache network
+* Deploy to it
 
-Open a separate terminal and run ganache-cli (using docker)
-```console
-docker run -d -p 8545:8545 trufflesuite/ganache-cli:latest --mnemonic "taxi music thumb unique chat sand crew more leg another off lamp"
+These steps will have updated the file `artifacts/address.json` in the _contracts_ directory, in the `development` section. 
+
+As a final step: copy the values from that section the into your local _ocean.py_'s artifacts file, e.g. at `./ocean.py/artifacts/address.json`. The result should look something like:
+```
+{"Rinkeby":  {
+    "DTFactory": "0x3fd7A00106038Fb5c802c6d63fa7147Fe429E83a",
+    ...
+},
+ "development": {
+    "DTFactory": "0xC36D83c8b8E31D7dBe47f7f887BF1C567ff75DD7",
+    "BFactory": "0x5FcC55C678FEad140487959bB73a3f3B6949DdE5",
+    "FixedRateExchange": "0x143027A9705e4Fe24734D99c7458aBe5A6b38D8e",
+    "Metadata": "0xdA00aD9ae0ABD347eaFCbFCe078bEFCB30eD59cD",
+    "Ocean": "0x83c74A95e42244CA84DbEB01C5Bfd5b2Cd2691c2"
+ }
+}
 ```
 
-The comand above starts `ganache-cli` with accounts derived from that `mnemonic` seed phrase. 
-You can see 10 accounts including addresses and private keys in the console. Use one of those 
-accounts for doing on-chain transactions. 
-
-For example, here's the first account from the ganache run: 
-- address=0xe2DD09d719Da89e5a3D0F2549c7E24566e947260
--  privateKey=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
-
-## 3. Deploy the contracts
+## 3. Connect to the deployed contracts (Local or Rinkeby)
 
 First, set envvars (since we don't want private keys on GitHub):
 ```console
@@ -58,11 +66,10 @@ export ARTIFACTS_PATH=artifacts
 ```
 
 If you already have contracts deployed to the network, then:
-- Check that `artifacts/address.json` holds the up-to-date addresses for your target network.
+- Double-check that `artifacts/address.json` holds the up-to-date addresses for your target network.
 
 If you don't yet have contracts deployed, then:
 - Call: `./deploy.py NETWORK` where NETWORK = `ganache` or `rinkeby`. 
-- This will deploy DataTokenTemplate, DTFactory, BFactory, etc to NETWORK
 - Double-check that it updated the file `artifacts/address.json` with the addresses
 
 Finally, open `./config.ini` file, and make sure there's a line to set address.file: `address.file = artifacts/address.json`.
