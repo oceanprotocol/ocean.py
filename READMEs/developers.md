@@ -83,12 +83,16 @@ export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f43
 export TEST_PRIVATE_KEY2=0xaefd8bc8725c4b3d15fbe058d0f58f4d852e8caea2bf68e0f73acb1aeec19bab
 ```
 
+If you're on ganache, then you also need to deploy fake OCEAN:
+* In terminal: `./deploy.py ganache`
+* It will output the address of OCEAN. Update the `artifacts/address.json` file with that address.
+
 Some tests don't need other services running. Let's run one:
 ```console
 pytest tests/models/bpool/test_btoken.py::test_notokens_basic
 ```
 
-Some tests need an Ocean Provider running. Follow [these steps](https://github.com/oceanprotocol/provider-py/blob/master/README.md) to set up Provider. Then run testa that use Provider (but not other services). For example:
+Some tests need an Ocean Provider running. Follow [these steps](https://github.com/oceanprotocol/provider-py/blob/master/README.md) to set up Provider. Then run tests that use Provider (but not other services). For example:
 ```console
 pytest tests/ocean/test_market_flow.py
 ```
