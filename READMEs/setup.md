@@ -82,7 +82,8 @@ If you're testing on Rinkeby, you may already have an Ethereum wallet holding so
 If you don't yet have an account, you can generate one with code using web3.py. Conveniently, it's included in ocean-lib.
 ```python
 from ocean_lib.ocean.ocean import Ocean
-private_key = Ocean().web3.eth.account.create().privateKey #or: Ocean().web3.eth.account.create().privateKey, for some versions of web3.py
+private_key = Ocean().web3.eth.account.create().privateKey 
+#or: Ocean().web3.eth.account.create().privateKey, for some versions of web3.py
 ```
 
 Web3.py's docs have more info on Web3 account management, [here](https://web3py.readthedocs.io/en/stable/web3.eth.html#web3.eth.Eth.accounts).
