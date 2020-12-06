@@ -71,6 +71,27 @@ class DataServiceProvider:
             return response.json()['encryptedDocument']
 
     @staticmethod
+    def check_url_dict(url, check_url_endpoint):
+        payload = json.dumps({'url': url})
+
+        response = DataServiceProvider._http_client.post(
+            check_url_endpoint, data=payload,
+            headers={'content-type': 'application/json'}
+        )
+        if response and hasattr(response, 'status_code'):
+            if response.status_code != 200:
+                msg = (f'Could not determine Content-Length and Content-Type '
+                       f'{check_url_endpoint}, status {response.status_code}')
+                logger.error(msg)
+                raise OceanEncryptAssetUrlsError(msg)
+
+            logger.info(
+                f'Check URL was successful, content type: {response.result.contentType},'
+                f' content length {response.result.contentLength}')
+
+            return response.json()['result']
+
+    @staticmethod
     def sign_message(wallet, msg, config, nonce=None):
         if nonce is None:
             nonce = DataServiceProvider.get_nonce(wallet.address, config)
@@ -370,6 +391,10 @@ class DataServiceProvider:
         return DataServiceProvider.build_endpoint('encrypt', provider_uri)
 
     @staticmethod
+    def build_check_url_endpoint(provider_uri=None):
+        return DataServiceProvider.build_endpoint('checkURL', provider_uri)
+
+    @staticmethod
     def build_initialize_endpoint(provider_uri=None):
         return DataServiceProvider.build_endpoint('initialize', provider_uri)
 
@@ -419,6 +444,18 @@ class DataServiceProvider:
         :return: Url, str
         """
         return DataServiceProvider.build_encrypt_endpoint(DataServiceProvider.get_url(config))
+
+    @staticmethod
+    def get_check_url_endpoint(config):
+        """
+        Returns the url to check an URL for ContentType and ContentLength
+
+        :param config: Config
+        :return: Url, str
+        """
+        return DataServiceProvider.build_check_url_endpoint(
+            DataServiceProvider.get_url(config)
+        )
 
     @staticmethod
     def write_file(response, destination_folder, file_name):
