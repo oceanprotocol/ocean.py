@@ -345,11 +345,6 @@ class DataServiceProvider:
         """
         return DataServiceProvider._remove_slash(config.provider_url or 'http://localhost:8030')
 
-    @staticmethod
-    def build_check_url_endpoint(config, provider_uri=None):
-        url = DataServiceProvider.get_url(config)
-        return DataServiceProvider.build_endpoint('checkURL', provider_uri)
-
 
     @staticmethod
     def get_api_version():
@@ -372,6 +367,11 @@ class DataServiceProvider:
             provider_uri = f'{provider_uri}/{api_version}'
 
         return f'{provider_uri}/services/{service_name}'
+
+    @staticmethod
+    def build_checkURL_endpoint(config, provider_uri=None):
+        url = DataServiceProvider.get_url(config)
+        return DataServiceProvider.build_endpoint('checkURL', provider_uri)
 
     @staticmethod
     def build_encrypt_endpoint(provider_uri=None):
@@ -431,7 +431,7 @@ class DataServiceProvider:
 
     @staticmethod
     def get_check_url_endpoint(config):
-        return DataServiceProvider.build_check_url_endpoint(DataServiceProvider.get_url(config))
+        return DataServiceProvider.build_checkURL_endpoint(DataServiceProvider.get_url(config))
 
     @staticmethod
     def write_file(response, destination_folder, file_name):
