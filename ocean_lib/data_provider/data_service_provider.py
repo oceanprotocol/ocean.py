@@ -10,6 +10,8 @@ import re
 from collections import namedtuple
 from json import JSONDecodeError
 
+from ocean_lib.data_provider import data_service_provider
+
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
@@ -344,6 +346,12 @@ class DataServiceProvider:
         return DataServiceProvider._remove_slash(config.provider_url or 'http://localhost:8030')
 
     @staticmethod
+    def build_check_url_endpoint(config, provider_uri=None):
+        url = DataServiceProvider.get_url(config)
+        return DataServiceProvider.build_endpoint('checkURL', provider_uri)
+
+
+    @staticmethod
     def get_api_version():
         return DataServiceProvider._remove_slash(os.getenv(ENV_PROVIDER_API_VERSION, DataServiceProvider.API_VERSION))
 
@@ -419,6 +427,11 @@ class DataServiceProvider:
         :return: Url, str
         """
         return DataServiceProvider.build_encrypt_endpoint(DataServiceProvider.get_url(config))
+
+
+    @staticmethod
+    def get_check_url_endpoint(config):
+        return DataServiceProvider.build_check_url_endpoint(DataServiceProvider.get_url(config))
 
     @staticmethod
     def write_file(response, destination_folder, file_name):
