@@ -1,9 +1,30 @@
-{"Rinkeby":
-  {
+{
+  "rinkeby": {
     "DTFactory": "0x3fd7A00106038Fb5c802c6d63fa7147Fe429E83a",
-    "Ocean": "0x8967BCF84170c91B0d24D4302C2376283b0B3a07",
     "BFactory": "0x53eDF9289B0898e1652Ce009AACf8D25fA9A42F8",
     "FixedRateExchange": "0xeD1DfC5F3a589CfC4E8B91C1fbfC18FC6699Fbde",
-    "Metadata": "0xFD8a7b6297153397B7eb4356C47dbd381d58bFF4"
+    "Metadata": "0xFD8a7b6297153397B7eb4356C47dbd381d58bFF4",
+    "Ocean": "0x8967BCF84170c91B0d24D4302C2376283b0B3a07"
+  },
+  "ropsten": {
+    "DTFactory": "0x6ebcCa6df2CAba986FCF44E64Ee82251c1455Dcc",
+    "BFactory": "0x75be6e18c80A487C8b49663bf14f80A6495045B2",
+    "FixedRateExchange": "0xA7a711A09396DF82D9be46A26B48BafdB9BB4fA6",
+    "Metadata": "0x3cd7Ef1F207E1a46AAd7D5d7F5f0A5cF081Fc726",
+    "Ocean": "0x5e8DCB2AfA23844bcc311B00Ad1A0C30025aADE9"
+  },
+  "development": {
+    "DTFactory": "0x626aD26c7Ea494b11DbFd5dD487fA98BA32CaA42",
+    "BFactory": "0x5eb4bcA8C86Cba7176eCc014A6D7B44c31aC9460",
+    "FixedRateExchange": "0x879a308bD4b73425a03cd63ae1Fe03F3EF93BaF1",
+    "Metadata": "0xb49cE3689D956417BEDc9F7d848885F8085B1064",
+    "Ocean": "0x10345ffBE11e8724b67ee4bB4d70dD4f8a940D84"
+  },
+  "mainnet": {
+    "DTFactory": "0x57317f97E9EA49eBd19f7c9bB7c180b8cDcbDeB9",
+    "BFactory": "0xbe0083053744ECb871510C88dC0f6b77Da162706",
+    "FixedRateExchange": "0x608d05214E42722B94a54cF6114d4840FCfF84e1",
+    "Metadata": "0x1a4b70d8c9DcA47cD6D0Fb3c52BB8634CA1C0Fdf",
+    "Ocean": "0x967da4048cD07aB37855c090aAF366e4ce1b9F48"
   }
 }
