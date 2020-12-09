@@ -369,8 +369,7 @@ class DataServiceProvider:
         return f'{provider_uri}/services/{service_name}'
 
     @staticmethod
-    def build_checkURL_endpoint(config, provider_uri=None):
-        url = DataServiceProvider.get_url(config)
+    def build_checkURL_endpoint(provider_uri=None):
         return DataServiceProvider.build_endpoint('checkURL', provider_uri)
 
     @staticmethod
@@ -430,7 +429,7 @@ class DataServiceProvider:
 
 
     @staticmethod
-    def get_check_url_endpoint(config):
+    def get_checkURL_endpoint(config):
         return DataServiceProvider.build_checkURL_endpoint(DataServiceProvider.get_url(config))
 
     @staticmethod
