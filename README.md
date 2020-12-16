@@ -1,5 +1,6 @@
+[![banner](https://raw.githubusercontent.com/oceanprotocol/art/master/github/repo-banner%402x.png)](https://oceanprotocol.com)
 
-# ocean-lib
+<h1 align="center">ocean-lib</h1>
 
 `ocean-lib` is a Python library to privately & securely publish, exchange, 
 and consume data. With it, you can:
