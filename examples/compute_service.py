@@ -25,10 +25,10 @@ def get_config_dict():
 
 def build_compute_descriptor(ocean, publisher):
     # build compute service metadata
-    cluster_attributes = ocean.compute.build_cluster_attributes(cluster_type='Kubernetes', url='https://192.168.49.2:8443')
+    cluster_attributes = ocean.compute.build_cluster_attributes(cluster_type='Kubernetes', url='https://localhost:8050')
     supported_containers = [ocean.compute.build_container_attributes(image='huggingface/transformers-pytorch-gpu', tag='latest', entrypoint='python $ALGO')]
-    servers = [ocean.compute.build_server_attributes(server_id='1', server_type='xlsize', cpu=16, gpu=0, memory='16gb', disk='1tb', max_run_time=3600)]
-    provider_attributes = ocean.compute.build_service_provider_attributes(provider_type='Azure', description='Compute power 1',
+    servers = [ocean.compute.build_server_attributes(server_id='1', server_type='xlsize', cpu=8, gpu=1, memory='16gb', disk='200gb', max_run_time=3600)]
+    provider_attributes = ocean.compute.build_service_provider_attributes(provider_type='AWS', description='Compute power 1',
                                                                           cluster=cluster_attributes,
                                                                           containers=supported_containers,
                                                                           servers=servers)
@@ -161,3 +161,19 @@ if __name__ == '__main__':
     pool_address = ''
     order_tx_id = ''
     main(did, pool_address, order_tx_id)
+
+#[eth-network]
+#network = https://rinkeby.infura.io/v3/6ba6f1f72b954dc894e9d117fa37e013
+#created new datatoken with address 0x2f7Bf183212a5Ac181614113636d7f9757b63d5a
+
+pip install -r requirements_dev.txt
+export FLASK_APP=ocean_provider/run.py
+export CONFIG_FILE=config.ini
+export PROVIDER_ADDRESS="068ed00cf0441e4829d9784fcbe7b9e26d4bd8d0"
+export PROVIDER_PASSWORD="secret"
+export PROVIDER_KEYFILE="tests/resources/provider_key_file.json"
+export AQUARIUS_URL="https://aquarius.marketplace.dev-ocean.com"
+
+export PARITY_ADDRESS1="0x00bd138abd70e2f00903268f3db08f2d25677c9e"
+export PARITY_PASSWORD1="node0"
+export PARITY_KEYFILE1="tests/resources/consumer_key_file.json"
