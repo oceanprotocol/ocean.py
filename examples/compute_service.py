@@ -25,8 +25,8 @@ def get_config_dict():
 
 def build_compute_descriptor(ocean, publisher):
     # build compute service metadata
-    cluster_attributes = ocean.compute.build_cluster_attributes(cluster_type='Kubernetes', url='/cluster/url')
-    supported_containers = [ocean.compute.build_container_attributes(image='tensorflow/tensorflow', tag='latest', entrypoint='python $ALGO')]
+    cluster_attributes = ocean.compute.build_cluster_attributes(cluster_type='Kubernetes', url='https://192.168.49.2:8443')
+    supported_containers = [ocean.compute.build_container_attributes(image='huggingface/transformers-pytorch-gpu', tag='latest', entrypoint='python $ALGO')]
     servers = [ocean.compute.build_server_attributes(server_id='1', server_type='xlsize', cpu=16, gpu=0, memory='16gb', disk='1tb', max_run_time=3600)]
     provider_attributes = ocean.compute.build_service_provider_attributes(provider_type='Azure', description='Compute power 1',
                                                                           cluster=cluster_attributes,
