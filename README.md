@@ -1,4 +1,25 @@
 
+
+# Posthuman : Ocean Marketplace for Pretrained Transformer Models
+
+Posthuman Marketplace is a fork of the ocean marketplace, aimed at the following functionality:
+1. Verifiably Training, Evaluating, and utilising models in Zero-Knowledge using Compute-to-Data
+2. Reward contributors to training to incentivise large-scale federated training.
+
+Posthuman Marketplace contracts are currently deployed on Rinkerby. The code is complete for the above functionality. Additional functionality will be added in the next two months.
+
+Refer to the following files for a demonstration of the functionality:
+Custom_Marketplace_flow: Demonstrates how a consumer (Bob) can train and use the model in zero knowledge using datatokens and computute to data. [Rinkerby]
+Custom_Reward_Mechanism: shows how a trainer (Charlie) can get rewarded PH coins for improving the loss score. PH coins will eventually be bought back with a share of marketplace revenue, giving them value. [Rinkerby]
+
+Computing Cluster:
+We've set up a V100 GPU based kubernetes cluster for optimial efficiency in training and inference from large transformers. We will eventually expand this to 100s of GPUs to support GPT-3 scale models.
+
+Algorithims:
+We've included versatile training, evaluation, and inference algorithims from huggingface for use on our marketplace. Small modifications to these templates will cover virtually all transformer fine-tuning and inference use cases.
+
+
+
 # ocean-lib
 
 `ocean-lib` is a Python library to privately & securely publish, exchange, 

@@ -9,12 +9,13 @@ from ocean_lib.models.bpool import BPool
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
+import os
 
 
 def get_config_dict():
     return {
         'eth-network': {
-            'network': 'rinkeby',
+            'network': 'rinkerby',
         },
         'resources': {
             'aquarius.url': 'https://aquarius.rinkeby.v3.dev-ocean.com',
@@ -28,14 +29,13 @@ def build_compute_descriptor(ocean, publisher):
     cluster_attributes = ocean.compute.build_cluster_attributes(cluster_type='Kubernetes', url='https://localhost:8050')
     supported_containers = [ocean.compute.build_container_attributes(image='huggingface/transformers-pytorch-gpu', tag='latest', entrypoint='python $ALGO')]
     servers = [ocean.compute.build_server_attributes(server_id='1', server_type='xlsize', cpu=8, gpu=1, memory='16gb', disk='200gb', max_run_time=3600)]
-    provider_attributes = ocean.compute.build_service_provider_attributes(provider_type='AWS', description='Compute power 1',
+    provider_attributes = ocean.compute.build_service_provider_attributes(provider_type='AWS', description='GPU-V100 compute',
                                                                           cluster=cluster_attributes,
                                                                           containers=supported_containers,
                                                                           servers=servers)
     compute_attributes = ocean.compute.create_compute_service_attributes(timeout=3600, creator=publisher,
                                                                          date_published=get_timestamp(),
                                                                          provider_attributes=provider_attributes)
-
     return ocean.compute.create_compute_service_descriptor(compute_attributes)
 
 
@@ -106,9 +106,9 @@ def publish_asset(metadata, publisher_wallet):
 
     # create asset DDO and datatoken
     try:
-        asset = ocean.assets.create(metadata, publisher_wallet, [compute_descriptor],
-                        dt_name='Dataset with Compute', dt_symbol='DT-Compute')
+        asset = ocean.assets.create(metadata, publisher_wallet, [compute_descriptor], dt_name='Compute with data5', dt_symbol='DT-Testx6')
         print(f'Dataset asset created successfully: did={asset.did}, datatoken={asset.data_token_address}')
+        #Dataset asset created successfully: did=did:op:2cbDb0Aaa1F546829E31267d1a7F74d926Bb5B1B, datatoken=0x2cbDb0Aaa1F546829E31267d1a7F74d926Bb5B1B
     except Exception as e:
         print(f'Publishing asset failed: {e}')
         return None, None
@@ -121,7 +121,7 @@ def publish_asset(metadata, publisher_wallet):
     # Create datatoken liquidity pool for the new asset
     pool = ocean.pool.create(asset.data_token_address, 50, 50, publisher_wallet, 5)
     print(f'datatoken liquidity pool was created at address {pool.address}')
-
+    #datatoken liquidity pool was created at address 0xeaD638506951B4a4c3575bbC0c7D1491c17B7A08
     # Now the asset can be discovered and consumed
     dt_cost = ocean.pool.calcInGivenOut(pool.address, ocean.OCEAN_address, asset.data_token_address, 1.0)
     print(f'Asset {asset.did} can now be purchased from pool @{pool.address} '
@@ -130,11 +130,11 @@ def publish_asset(metadata, publisher_wallet):
 
 
 def main(did, pool_address, order_tx_id=None):
-    ocean = Ocean(config=Config(options_dict=get_config_dict()))
-    publisher = Wallet(ocean.web3,
-                       private_key='0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58')  # 0xe2DD09d719Da89e5a3D0F2549c7E24566e947260
-    consumer = Wallet(ocean.web3,
-                      private_key='0x9bf5d7e4978ed5206f760e6daded34d657572bd49fa5b3fe885679329fb16b16')  # 0x068Ed00cF0441e4829D9784fCBe7b9e26D4BD8d0
+ocean = Ocean(config=Config(options_dict=get_config_dict()))
+#publisher = Wallet(ocean.web3, private_key='0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58')  # 0xe2DD09d719Da89e5a3D0F2549c7E24566e947260
+#consumer = Wallet(ocean.web3, private_key='0x9bf5d7e4978ed5206f760e6daded34d657572bd49fa5b3fe885679329fb16b16')  # 0x068Ed00cF0441e4829D9784fCBe7b9e26D4BD8d0
+publisher_wallet = Wallet(ocean.web3, private_key=os.getenv('Publisher_Key')) #addr: 0xc966Ba2a41888B6B4c5273323075B98E27B9F364
+consumer = Wallet(ocean.web3, private_key=os.getenv('Consumer_Key')) #addr: 0xEF5dc33A53DD2ED3F670B53F07cEc5ADD4D80504
 
     if not (did and pool_address):
         metadata_file = './examples/data/metadata.json'
