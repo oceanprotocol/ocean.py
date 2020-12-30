@@ -10,9 +10,12 @@ Posthuman Marketplace is currently deployed on Rinkeby. The code is complete for
 
 We've implemented three separate, customized compute-to-data services:
 
-   compute_service_train [with reward mechanism]
-   compute_service_inference
-   compute_service_evaluate
+   - compute_service_train [with reward mechanism]
+   
+   - compute_service_inference
+   
+   - compute_service_evaluate
+   
 
 Which together give Posthuman PoC the following functionality:
 
@@ -28,6 +31,8 @@ Which together give Posthuman PoC the following functionality:
    7. Elena is unsure if the model she is using (M3) is worth what she is paying. She runs an ‘evaluation.py’ C2D request and learns that the model she’s using does indeed have better performance on her dataset than the published SoTA. [compute_service_inference]
 
 This mechanism serves as a basic pay-it-forward method of rewarding intermediate trainers before a model reaches commercial utility. Crucially, all model updates are performed in zero-knowledge to Bob, Charlie and Derek - they simply stake funds on further training and are rewarded with tokens of the updated model.
+
+Interestingly, while technically 'owners' of the model, Bob, Charlie etc. cannot see the model they ostensibly owned. This gives rises to new incentive dynamics of zk-ownership, which are discussed more fully in a separate document.
 
 Alice is the only trusted party in this setup as the model resides on her hardware. In our scenario, Alice represents the PostHuman Marketplace. Posthuman provides the trusted computing backend on which model training and inference occurs. Posthuman is incentivised to protect privacy of each model to ensure all value stays in the ocean ecosystem, and the marketplace as a whole succeeds.
 
