@@ -2,21 +2,36 @@
 
 # Posthuman : Ocean Marketplace for Pretrained Transformer Models
 
-Posthuman Marketplace is a fork of the ocean marketplace, aimed at the following functionality:
+Posthuman Marketplace is a fork of ocean lib, aimed at implementing the following functionality:
 1. Verifiably Training, Evaluating, and utilising models in Zero-Knowledge using Compute-to-Data
 2. Reward contributors to training to incentivise large-scale federated training.
 
-Posthuman Marketplace contracts are currently deployed on Rinkerby. The code is complete for the above functionality. Additional functionality will be added in the next two months.
+Posthuman Marketplace is currently deployed on Rinkeby. The code is complete for the above functionality. Additional functionality will be added in the next two months.
 
-Refer to the following files for a demonstration of the functionality:
-Custom_Marketplace_flow: Demonstrates how a consumer (Bob) can train and use the model in zero knowledge using datatokens and computute to data. [Rinkerby]
-Custom_Reward_Mechanism: shows how a trainer (Charlie) can get rewarded PH coins for improving the loss score. PH coins will eventually be bought back with a share of marketplace revenue, giving them value. [Rinkerby]
+More specifically, the Posthuman PoC enables the following functionality:
+
+1. Alice publishes a GPT-2 model in a compute to data environment. There are two approved algorithims: train_lm.py and inference_lm.py. [publish_model_with_compute.py]
+2. Bob buys datatokens and runs further training on the WikiText-2 dataset, using the train_lm.py algorithim. [Consume_Compute_Train.py]
+3. The updated model (M2) 
+i) remains on alice's machine;
+ii) is published as an asset on ocean
+iii) Bob is rewarded with datatokens of the newly trained model
+4. Charlie decides to train the model further, purchasing datatokens from Bob, creating demand. [Consume_Compute_Train.py]
+5. The second updated model (M3) is likewise published as an asset, and a datatoken reward issued to Charlie
+6. Derek finds M3 to be sufficiently trained for his commercial use-case. He buys access to the inference endpoints using the DataTokens in Chalie's Possession, completing the demand loop. [[Consume_Compute_Inference.py]]
+
+This mechanism serves as a basic pay-it-forward method of rewarding intermediate trainers before a model reaches commercial utility. Crucially, all model updates are performed in zero-knowledge to Bob, Charlie and Derek - they simply stake funds on further training and are rewarded with tokens of the updated model.
+
+Alice is the only trusted party in this setup as the model resides on her hardware. In our scenario, Alice represents the PostHuman Marketplace. Posthuman provides the trusted computing backend on which model training and inference occurs. Posthuman is incentivised to protect privacy of each model to ensure all value stays in the ocean ecosystem, and the marketplace as a whole succeeds.
+
+More complex incentive mechanisms can be structured along similar lines - for eg. 50% of datatokens to last trainer, 25% to the one before, 12.5% and so on.
+
 
 Computing Cluster:
 We've set up a V100 GPU based kubernetes cluster for optimial efficiency in training and inference from large transformers. We will eventually expand this to 100s of GPUs to support GPT-3 scale models.
 
 Algorithims:
-We've included versatile training, evaluation, and inference algorithims from huggingface for use on our marketplace. Small modifications to these templates will cover virtually all transformer fine-tuning and inference use cases.
+We've included versatile training and inference algorithims from huggingface for use on our marketplace. Small modifications to these templates will cover virtually all transformer fine-tuning and inference use cases.
 
 
 

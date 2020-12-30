@@ -39,8 +39,8 @@ def build_compute_descriptor(ocean, publisher):
     return ocean.compute.create_compute_service_descriptor(compute_attributes)
 
 
-def run_compute(did, consumer_wallet, algorithm_file, pool_address, order_id=None):
-    ocean = Ocean(config=Config(options_dict=get_config_dict()))
+def run_compute(ocean, did, consumer_wallet, algorithm_file, pool_address, order_id=None):
+    #ocean = Ocean(config=Config(options_dict=get_config_dict()))
 
     # Get asset DDO/metadata and service
     asset = ocean.assets.resolve(did)
@@ -112,10 +112,11 @@ def publish_asset(metadata, publisher_wallet):
 
     # create asset DDO and datatoken
     try:
-        asset = ocean.assets.create(metadata, publisher_wallet, [compute_descriptor], dt_name='Compute with data6', dt_symbol='DT-Testx7')
+        asset = ocean.assets.create(metadata, publisher_wallet, [compute_descriptor], dt_name='GPT-2 Pretrained', dt_symbol='GPT-2A')
         print(f'Dataset asset created successfully: did={asset.did}, datatoken={asset.data_token_address}')
-        #Dataset asset created successfully: did=did:op:2cbDb0Aaa1F546829E31267d1a7F74d926Bb5B1B, datatoken=0x2cbDb0Aaa1F546829E31267d1a7F74d926Bb5B1B
-        #Dataset asset created successfully: did=did:op:76D54fF1dE0753c99B788Bf3dAdf51b71bc944C1, datatoken=0x76D54fF1dE0753c99B788Bf3dAdf51b71bc944C1
+        #Test1 Dataset asset created successfully: did=did:op:2cbDb0Aaa1F546829E31267d1a7F74d926Bb5B1B, datatoken=0x2cbDb0Aaa1F546829E31267d1a7F74d926Bb5B1B
+        #Test2 Dataset asset created successfully: did=did:op:76D54fF1dE0753c99B788Bf3dAdf51b71bc944C1, datatoken=0x76D54fF1dE0753c99B788Bf3dAdf51b71bc944C1
+        #GPT-2 Pretrained: Dataset asset created successfully: did=did:op:1015D1c5a047FF84B5157b982E8993F8b1e2FDA6, datatoken=0x1015D1c5a047FF84B5157b982E8993F8b1e2FDA6
 
     except Exception as e:
         print(f'Publishing asset failed: {e}')
@@ -130,8 +131,9 @@ def publish_asset(metadata, publisher_wallet):
     # Create datatoken liquidity pool for the new asset
     pool = ocean.pool.create(asset.data_token_address, 10, 5, publisher_wallet, 5) #50 datatokens - 5 ocean in pool
     print(f'datatoken liquidity pool was created at address {pool.address}')
-    #datatoken liquidity pool was created at address 0xeaD638506951B4a4c3575bbC0c7D1491c17B7A08
-    #datatoken liquidity pool was created at address 0x8229E15DaB16d9AaaDF0E1998C389020B9C973e2
+    #Test1 datatoken liquidity pool was created at address 0xeaD638506951B4a4c3575bbC0c7D1491c17B7A08
+    #Test2 datatoken liquidity pool was created at address 0x8229E15DaB16d9AaaDF0E1998C389020B9C973e2
+    #GPT-2 datatoken liquidity pool was created at address 0xfd2E8e39EC0770b8e0427a395Fa7fd85EF03252C
     # Now the asset can be discovered and consumed
     dt_cost = ocean.pool.calcInGivenOut(pool.address, ocean.OCEAN_address, asset.data_token_address, 1.0)
     print(f'Asset {asset.did} can now be purchased from pool @{pool.address} '
@@ -152,8 +154,7 @@ def main(did, pool_address, order_tx_id=None):
             metadata = json.load(f)
 
         asset, pool = publish_asset(metadata, publisher)
-        #Dataset asset created successfully: did=did:op:784Cc17176533cc962cf659B9f49349ba6F9df3b, datatoken=0x784Cc17176533cc962cf659B9f49349ba6F9df3b
-        #pool_address = 0x3490DDd035B2e1DA30Af09AB6090Bf71fdb94898
+        
     else:
         asset = ocean.assets.resolve(did)
         pool = BPool(pool_address)
@@ -163,10 +164,10 @@ def main(did, pool_address, order_tx_id=None):
         return
 
     print(f'Requesting compute using asset {asset.did} and pool {pool.address}')
-    algo_file = './examples/data/algorithm.py'
-    #order_tx_id=
-    order_tx_id=''
-    job_id, status = run_compute(asset.did, consumer, algo_file, pool.address, order_tx_id)
+algo_file = './examples/data/algorithm.py'
+#order_tx_id=
+order_tx_id=''
+job_id, status = run_compute(ocean, asset.did, consumer, algo_file, pool.address, order_tx_id)
     print(f'Compute started on asset {asset.did}: job_id={job_id}, status={status}')
 
 

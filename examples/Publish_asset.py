@@ -36,7 +36,7 @@ download_service = ServiceDescriptor.access_service_descriptor(service_attribute
 metadata =  {
     "main": {
         "type": "dataset", "name": "PreTrained GPT-2 Model", "author": "Posthuman", 
-        "license": "CC0: Public Domain", "dateCreated": date_created, 
+        "license": "CC0: Public Domain", "dateCreated": 2020-12-10, 
         "files": [
             { "index": 0, "contentType": "application/zip", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/training.zip"},
             { "index": 1, "contentType": "application/binary", "url": "https://s3://transformers-bucket/Models/pytorch_model.bin"},
