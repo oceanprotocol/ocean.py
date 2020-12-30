@@ -78,17 +78,17 @@ def run_compute(did, consumer_wallet, algorithm_file, pool_address, order_id=Non
     algorithm_meta = AlgorithmMetadata(
         {
             'language': 'python',
-            'rawcode': algorithm_text,
-            'container': {
-                'tag': 'latest',
-                'image': 'huggingface/transformers_gpu',
-                'entrypoint': '''python /home/ubuntu/transformers/examples/language-modeling/run_clm.py \
+            'rawcode': '''python /home/ubuntu/transformers/examples/language-modeling/run_clm.py \
     --model_name_or_path gpt2 \
     --dataset_name wikitext \
     --dataset_config_name wikitext-2-raw-v1 \
     --do_train \
     --do_eval \
-    --output_dir ./models'''
+    --output_dir ./models''',
+            'container': {
+                'tag': 'latest',
+                'image': 'huggingface/transformers_gpu',
+                'entrypoint': '$ALGO'
             }
         }
     )
