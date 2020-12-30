@@ -71,8 +71,8 @@ def run_compute(did, consumer_wallet, algorithm_file, pool_address, order_id=Non
 
     # whether to publish the algorithm results as an Ocean assets
     output_dict = {
-        'publishOutput': False,
-        'publishAlgorithmLog': False,
+        'publishOutput': True,
+        'publishAlgorithmLog': True,
     }
     # start the compute job (submit the compute service request)
     algorithm_meta = AlgorithmMetadata(
@@ -81,8 +81,14 @@ def run_compute(did, consumer_wallet, algorithm_file, pool_address, order_id=Non
             'rawcode': algorithm_text,
             'container': {
                 'tag': 'latest',
-                'image': 'amancevice/pandas',
-                'entrypoint': 'python $ALGO'
+                'image': 'huggingface/transformers_gpu',
+                'entrypoint': '''python /home/ubuntu/transformers/examples/language-modeling/run_clm.py \
+    --model_name_or_path gpt2 \
+    --dataset_name wikitext \
+    --dataset_config_name wikitext-2-raw-v1 \
+    --do_train \
+    --do_eval \
+    --output_dir ./models'''
             }
         }
     )
@@ -109,6 +115,8 @@ def publish_asset(metadata, publisher_wallet):
         asset = ocean.assets.create(metadata, publisher_wallet, [compute_descriptor], dt_name='Compute with data6', dt_symbol='DT-Testx7')
         print(f'Dataset asset created successfully: did={asset.did}, datatoken={asset.data_token_address}')
         #Dataset asset created successfully: did=did:op:2cbDb0Aaa1F546829E31267d1a7F74d926Bb5B1B, datatoken=0x2cbDb0Aaa1F546829E31267d1a7F74d926Bb5B1B
+        #Dataset asset created successfully: did=did:op:76D54fF1dE0753c99B788Bf3dAdf51b71bc944C1, datatoken=0x76D54fF1dE0753c99B788Bf3dAdf51b71bc944C1
+
     except Exception as e:
         print(f'Publishing asset failed: {e}')
         return None, None
@@ -120,9 +128,10 @@ def publish_asset(metadata, publisher_wallet):
 
 
     # Create datatoken liquidity pool for the new asset
-    pool = ocean.pool.create(asset.data_token_address, 50, 5, publisher_wallet, 5) #50 datatokens - 5 ocean in pool
+    pool = ocean.pool.create(asset.data_token_address, 10, 5, publisher_wallet, 5) #50 datatokens - 5 ocean in pool
     print(f'datatoken liquidity pool was created at address {pool.address}')
     #datatoken liquidity pool was created at address 0xeaD638506951B4a4c3575bbC0c7D1491c17B7A08
+    #datatoken liquidity pool was created at address 0x8229E15DaB16d9AaaDF0E1998C389020B9C973e2
     # Now the asset can be discovered and consumed
     dt_cost = ocean.pool.calcInGivenOut(pool.address, ocean.OCEAN_address, asset.data_token_address, 1.0)
     print(f'Asset {asset.did} can now be purchased from pool @{pool.address} '
@@ -156,7 +165,7 @@ def main(did, pool_address, order_tx_id=None):
     print(f'Requesting compute using asset {asset.did} and pool {pool.address}')
     algo_file = './examples/data/algorithm.py'
     #order_tx_id=
-
+    order_tx_id=''
     job_id, status = run_compute(asset.did, consumer, algo_file, pool.address, order_tx_id)
     print(f'Compute started on asset {asset.did}: job_id={job_id}, status={status}')
 
