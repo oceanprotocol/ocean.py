@@ -106,7 +106,7 @@ def publish_asset(metadata, publisher_wallet):
 
     # create asset DDO and datatoken
     try:
-        asset = ocean.assets.create(metadata, publisher_wallet, [compute_descriptor], dt_name='Compute with data5', dt_symbol='DT-Testx6')
+        asset = ocean.assets.create(metadata, publisher_wallet, [compute_descriptor], dt_name='Compute with data6', dt_symbol='DT-Testx7')
         print(f'Dataset asset created successfully: did={asset.did}, datatoken={asset.data_token_address}')
         #Dataset asset created successfully: did=did:op:2cbDb0Aaa1F546829E31267d1a7F74d926Bb5B1B, datatoken=0x2cbDb0Aaa1F546829E31267d1a7F74d926Bb5B1B
     except Exception as e:
@@ -118,8 +118,9 @@ def publish_asset(metadata, publisher_wallet):
     receipt = dt.get_tx_receipt(txid)
     assert receipt and receipt.status == 1, f'datatoken mint failed: tx={txid}, txReceipt={receipt}'
 
+
     # Create datatoken liquidity pool for the new asset
-    pool = ocean.pool.create(asset.data_token_address, 50, 50, publisher_wallet, 5)
+    pool = ocean.pool.create(asset.data_token_address, 50, 5, publisher_wallet, 5) #50 datatokens - 5 ocean in pool
     print(f'datatoken liquidity pool was created at address {pool.address}')
     #datatoken liquidity pool was created at address 0xeaD638506951B4a4c3575bbC0c7D1491c17B7A08
     # Now the asset can be discovered and consumed
@@ -131,7 +132,7 @@ def publish_asset(metadata, publisher_wallet):
 
 def main(did, pool_address, order_tx_id=None):
 ocean = Ocean(config=Config(options_dict=get_config_dict()))
-#publisher = Wallet(ocean.web3, private_key='0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58')  # 0xe2DD09d719Da89e5a3D0F2549c7E24566e947260
+publisher = Wallet(ocean.web3, private_key='0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58')  # 0xe2DD09d719Da89e5a3D0F2549c7E24566e947260
 #consumer = Wallet(ocean.web3, private_key='0x9bf5d7e4978ed5206f760e6daded34d657572bd49fa5b3fe885679329fb16b16')  # 0x068Ed00cF0441e4829D9784fCBe7b9e26D4BD8d0
 publisher_wallet = Wallet(ocean.web3, private_key=os.getenv('Publisher_Key')) #addr: 0xc966Ba2a41888B6B4c5273323075B98E27B9F364
 consumer = Wallet(ocean.web3, private_key=os.getenv('Consumer_Key')) #addr: 0xEF5dc33A53DD2ED3F670B53F07cEc5ADD4D80504
@@ -142,6 +143,8 @@ consumer = Wallet(ocean.web3, private_key=os.getenv('Consumer_Key')) #addr: 0xEF
             metadata = json.load(f)
 
         asset, pool = publish_asset(metadata, publisher)
+        #Dataset asset created successfully: did=did:op:784Cc17176533cc962cf659B9f49349ba6F9df3b, datatoken=0x784Cc17176533cc962cf659B9f49349ba6F9df3b
+        #pool_address = 0x3490DDd035B2e1DA30Af09AB6090Bf71fdb94898
     else:
         asset = ocean.assets.resolve(did)
         pool = BPool(pool_address)
@@ -152,6 +155,8 @@ consumer = Wallet(ocean.web3, private_key=os.getenv('Consumer_Key')) #addr: 0xEF
 
     print(f'Requesting compute using asset {asset.did} and pool {pool.address}')
     algo_file = './examples/data/algorithm.py'
+    order_tx_id=
+
     job_id, status = run_compute(asset.did, consumer, algo_file, pool.address, order_tx_id)
     print(f'Compute started on asset {asset.did}: job_id={job_id}, status={status}')
 
