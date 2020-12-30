@@ -1,0 +1,28 @@
+{
+  "main": {
+    "type": "dataset",
+    "name": "GPT-2 Pretrained Model",
+    "dateCreated": "2020-12-13T10:17:09Z",
+    "author": "Posthuman",
+    "license": "CC0: Public Domain Dedication",
+    "files": [
+      {
+        "contentType": "text/json",
+        "compression": "plain",
+        "index": 0,
+        "url": "s3://transformers-bucket/Models/config.json"
+      }
+      {
+          "contentType": "application/binary",
+        "compression": "plain",
+        "index": 0,
+        "url": "s3://transformers-bucket/Models/pytorch_model.bin"
+      }
+    ]
+  },
+  "additionalInformation": {
+    "description": "Pre-Trained Model parameters for gpt-2.",
+    "copyrightHolder": "Posthuman",
+    "categories": ["AI"]
+  }
+}

@@ -30,10 +30,10 @@ ocean = Ocean(config)
 
 alice_wallet = Wallet(ocean.web3, private_key=os.getenv('Publisher_Key'))
 
-data_token = ocean.create_data_token('DToxen2', 'DTX2', alice_wallet, blob=ocean.config.metadata_store_url)
+data_token = ocean.create_data_token('GPT-Coin', 'GPT2A', alice_wallet, blob=ocean.config.metadata_store_url)
 token_address = data_token.address
 
-date_created = "2020-02-01T10:55:11Z"
+date_created = "2020-12-01T10:55:11Z"
 service_attributes = {
         "main": {
             "name": "dataAssetAccessServiceAgreement",
@@ -47,7 +47,7 @@ service_attributes = {
 service_endpoint = DataServiceProvider.get_url(ocean.config)
 download_service = ServiceDescriptor.access_service_descriptor(service_attributes, service_endpoint)
 
-metadata =  {
+"""metadata =  {
     "main": {
         "type": "dataset", "name": "PreTrained GPT-2 Model", "author": "Posthuman", 
         "license": "CC0: Public Domain", "dateCreated": date_created, 
@@ -55,7 +55,8 @@ metadata =  {
             { "index": 0, "contentType": "application/zip", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/training.zip"},
             { "index": 1, "contentType": "text/text", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/monkey_labels.txt"},
             { "index": 2, "contentType": "application/zip", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/validation.zip"}]}
-}
+}"""
+
 
 #ocean.assets.create will encrypt URLs using Provider's encrypt service endpoint, and update asset before putting on-chain.
 #It requires that token_address is a valid DataToken contract address. If that isn't provided, it will create a new token.
@@ -77,14 +78,14 @@ pool_address = pool.address
 print(f'DataToken @{data_token.address} has a `pool` available @{pool_address}')
 
 def main(did, pool_address, order_tx_id=None):
-    ocean = Ocean(config=Config(options_dict=get_config_dict()))
+ocean = Ocean(config=Config(options_dict=get_config_dict()))
 publisher = Wallet(ocean.web3, private_key='0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58')  # 0xe2DD09d719Da89e5a3D0F2549c7E24566e947260
 #consumer = Wallet(ocean.web3, private_key='0x9bf5d7e4978ed5206f760e6daded34d657572bd49fa5b3fe885679329fb16b16')  # 0x068Ed00cF0441e4829D9784fCBe7b9e26D4BD8d0
 publisher_wallet = Wallet(ocean.web3, private_key=os.getenv('Publisher_Key')) #addr: 0xc966Ba2a41888B6B4c5273323075B98E27B9F364
 consumer = Wallet(ocean.web3, private_key=os.getenv('Consumer_Key')) #addr: 0xEF5dc33A53DD2ED3F670B53F07cEc5ADD4D80504
 
         if not (did and pool_address):
-            metadata_file = './examples/data/metadata.json'
+            metadata_file = './examples/data/metadata_custom.json' #GPT-2 Pretrained Meta Data
             with open(metadata_file) as f:
                 metadata = json.load(f)
 
