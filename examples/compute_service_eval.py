@@ -78,17 +78,11 @@ def run_compute(ocean, did, consumer_wallet, algorithm_file, pool_address, order
     algorithm_meta = AlgorithmMetadata(
         {
             'language': 'python',
-            'rawcode': '''python /home/ubuntu/transformers/examples/language-modeling/run_clm.py \
-    --model_name_or_path gpt2 \
-    --dataset_name wikitext \
-    --dataset_config_name wikitext-2-raw-v1 \
-    --do_train \
-    --do_eval \
-    --output_dir ./models''',
+            'rawcode': algorithim_text,
             'container': {
                 'tag': 'latest',
                 'image': 'huggingface/transformers_gpu',
-                'entrypoint': '$ALGO'
+                'entrypoint': 'python $ALGO'
             }
         }
     )
@@ -149,7 +143,7 @@ def main(did, pool_address, order_tx_id=None):
     consumer = Wallet(ocean.web3, private_key=os.getenv('Consumer_Key')) #addr: 0xEF5dc33A53DD2ED3F670B53F07cEc5ADD4D80504
 
     if not (did and pool_address):
-        metadata_file = './examples/data/metadata.json'
+        metadata_file = './examples/data/metadata_original_model.json'
         with open(metadata_file) as f:
             metadata = json.load(f)
 
@@ -164,8 +158,9 @@ def main(did, pool_address, order_tx_id=None):
         return
 
     print(f'Requesting compute using asset {asset.did} and pool {pool.address}')
-algo_file = './examples/data/algorithm.py'
-#order_tx_id=
+algo_file = './examples/data/Algo_evaluation_custom.py'
+#A prompt can be provided to Algo_evaluation as sys.argv[1]
+
 order_tx_id=''
 job_id, status = run_compute(ocean, asset.did, consumer, algo_file, pool.address, order_tx_id)
     print(f'Compute started on asset {asset.did}: job_id={job_id}, status={status}')

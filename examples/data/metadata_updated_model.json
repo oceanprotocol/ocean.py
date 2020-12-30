@@ -1,0 +1,8 @@
+metadata =  {
+    "main": {
+        "type": "dataset", "name": "PreTrained GPT-2 Model", "author": "Posthuman", 
+        "license": "CC0: Public Domain", "dateCreated": '2020-12-10', 
+        "files": [
+            { "index": 1, "contentType": "application/binary", "url": "https://s3://transformers-bucket/Models/new_models/pytorch_model.bin"},
+            { "index": 2, "contentType": "text/json", "url": "https://s3://transformers-bucket/Models/new_models//config.json"}]}
+    }

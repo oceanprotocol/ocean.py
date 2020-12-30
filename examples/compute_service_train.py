@@ -25,7 +25,7 @@ def get_config_dict():
 
 
 def build_compute_descriptor(ocean, publisher):
-    # build compute service metadata
+    #  Custom GPU cluster config for large transformers
     cluster_attributes = ocean.compute.build_cluster_attributes(cluster_type='Kubernetes', url='https://localhost:8050')
     supported_containers = [ocean.compute.build_container_attributes(image='huggingface/transformers-pytorch-gpu', tag='latest', entrypoint='python $ALGO')]
     servers = [ocean.compute.build_server_attributes(server_id='1', server_type='xlsize', cpu=8, gpu=1, memory='16gb', disk='200gb', max_run_time=3600)]
@@ -78,13 +78,7 @@ def run_compute(ocean, did, consumer_wallet, algorithm_file, pool_address, order
     algorithm_meta = AlgorithmMetadata(
         {
             'language': 'python',
-            'rawcode': '''python /home/ubuntu/transformers/examples/language-modeling/run_clm.py \
-    --model_name_or_path gpt2 \
-    --dataset_name wikitext \
-    --dataset_config_name wikitext-2-raw-v1 \
-    --do_train \
-    --do_eval \
-    --output_dir ./models''',
+            'rawcode': algorithim_text,
             'container': {
                 'tag': 'latest',
                 'image': 'huggingface/transformers_gpu',
@@ -101,7 +95,19 @@ def run_compute(ocean, did, consumer_wallet, algorithm_file, pool_address, order
     # get the result of the compute run
     result = ocean.compute.result(did, job_id, consumer_wallet)
     print(f'got result of compute job {job_id}: {result}')
-    return job_id, status, result
+
+    # Post resulting model as a new ocean asset
+    # updated model automatically over-writes this path: https://s3://transformers-bucket/Models/new_models/, as stored in metadata_updated_model.json
+    metadata_file = './examples/data/metadata_updated_model.json'
+    with open(metadata_file) as f:
+            metadata = json.load(f)
+
+    #This rewards the trainer with datatokens of the updated model        
+    asset, pool = publish_asset(metadata, consumer_wallet)
+    data_token = ocean.create_data_token('GPT-Coin '+consumer_wallet.address, 'GPT2A', alice_wallet, blob=ocean.config.metadata_store_url)
+    token_address = data_token.address
+
+    return job_id, status
 
 
 def publish_asset(metadata, publisher_wallet):
@@ -123,7 +129,9 @@ def publish_asset(metadata, publisher_wallet):
         return None, None
 
     dt = DataToken(asset.data_token_address)
-    txid = dt.mint_tokens(publisher_wallet.address, 100, publisher_wallet)
+
+    #Mint 200 tokens as reward to publisher
+    txid = dt.mint_tokens(publisher_wallet.address, 200, publisher_wallet)
     receipt = dt.get_tx_receipt(txid)
     assert receipt and receipt.status == 1, f'datatoken mint failed: tx={txid}, txReceipt={receipt}'
 
@@ -164,8 +172,9 @@ def main(did, pool_address, order_tx_id=None):
         return
 
     print(f'Requesting compute using asset {asset.did} and pool {pool.address}')
-algo_file = './examples/data/algorithm.py'
-#order_tx_id=
+algo_file = './examples/data/training_script.sh'
+#Script to train GPT-2 on WikiText-2, Publish the updated model, 
+#and reward Consumer with datatokens of new model
 order_tx_id=''
 job_id, status = run_compute(ocean, asset.did, consumer, algo_file, pool.address, order_tx_id)
     print(f'Compute started on asset {asset.did}: job_id={job_id}, status={status}')

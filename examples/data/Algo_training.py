@@ -1,3 +1,5 @@
+
+#WIP. Refer training_script.sh for working code
 from transformers import Trainer
 
 
