@@ -15,7 +15,7 @@ import os
 def get_config_dict():
     return {
         'eth-network': {
-            'network': 'rinkerby',
+            'network': 'rinkeby',
         },
         'resources': {
             'aquarius.url': 'https://aquarius.rinkeby.v3.dev-ocean.com',
