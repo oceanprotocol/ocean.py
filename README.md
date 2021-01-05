@@ -3,14 +3,14 @@
 
 `ocean-lib` is a Python library to privately & securely publish, exchange, 
 and consume data. With it, you can:
-* **Publish** data services: downloadable files or compute-to-data. 
+- **Publish** data services: downloadable files or compute-to-data. 
 Ocean creates a new [ERC20](https://github.com/ethereum/EIPs/blob/7f4f0377730f5fc266824084188cc17cf246932e/EIPS/eip-20.md) 
-datatoken for each data set.
-* **Mint** datatokens to allow buying/consuming the data service
-* **Sell** datatokens via an OCEAN-datatoken Balancer pool (for auto price discovery), or for a fixed price
-* **Stake** OCEAN on datatoken pools
-* **Consume** datatokens, to access the service
-* **Transfer** datatokens to another owner, and **all other ERC20 actions** 
+datatoken for each dataset / data service.
+- **Mint** datatokens for the service
+- **Sell** datatokens via an OCEAN-datatoken Balancer pool (for auto price discovery), or for a fixed price
+- **Stake** OCEAN on datatoken pools
+- **Consume** datatokens, to access the service
+- **Transfer** datatokens to another owner, and **all other ERC20 actions** 
 using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-with-an-erc20-token-contract) etc.
 
 
