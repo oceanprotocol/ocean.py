@@ -26,11 +26,13 @@ using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-wi
 
 2. **[Get an overview of ocean-lib](READMEs/overview.md)** - key modules and functions.
 
-3. **[Learn more about Ocean off-chain services](READMEs/services.md)** - Ocean Provider for data services, Aquarius metadata store
+3. **[See parameter setting options](READMEs/parameters.md)** - envvars vs. config files
 
-4. **[Learn more about wallets](READMEs/wallets.md)** - on generating, storing, and accessing private keys.
+4. **[Learn about off-chain services](READMEs/services.md)** - Ocean Provider for data services, Aquarius metadata store
 
-5. **[Create a marketplace and sell data](READMEs/marketplace_flow.md)** - batteries-included flow including metadata and consuming datatokens.
+5. **[Learn about wallets](READMEs/wallets.md)** - on generating, storing, and accessing private keys.
+
+6. **[Create a marketplace and sell data](READMEs/marketplace_flow.md)** - batteries-included flow including metadata and consuming datatokens.
 
 ## For ocean-lib Developers
 

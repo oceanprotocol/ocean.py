@@ -6,17 +6,11 @@
 
 2. At Infura site, create a new project
 
-3. Within the project settings page, note your Infura `project id` value. We will use it in the next step. 
+3. Within the project settings page, note your Infura `project id` value. We will use it in the next step.
 
-4. In your working directory, create a file `config.ini` and fill it as follows:
+4. Make the network available as an envvar. In console:
 ```
-[eth-network]
-network = https://rinkeby.infura.io/v3/<your Infura project id>
-```
-
-5. Create an envvar to point to the new file. In the console:
-```console
-export CONFIG_FILE=config.ini
+export NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
 ```
 
 ## B. Set Ethereum account and get Rinkeby ETH
@@ -26,6 +20,11 @@ export CONFIG_FILE=config.ini
 2. [Export the private key from Metamask](https://metamask.zendesk.com/hc/en-us/articles/360015289632-How-to-Export-an-Account-Private-Key). Write it down.
 
 3. [Get Rinkeby ETH from a faucet](https://faucet.rinkeby.io/). Have it sent to  the your Metamask's Ethereum account address.
+
+4. Make your private key available as an envvar. In console:
+```
+export MY_TEST_KEY=<my_private_key>
+```
 
 ## C. Install ocean-lib
 
@@ -44,12 +43,13 @@ pip install ocean-lib
 
 In Python:
 ```python
+import os
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
 
-private_key = "<your private key from above>"
-
-ocean = Ocean()
+private_key = os.getenv('MY_TEST_KEY')
+config = {'network': os.getenv('NETWORK_URL')}
+ocean = Ocean(config)
 
 print("create wallet: begin")
 wallet = Wallet(ocean.web3, private_key=private_key)

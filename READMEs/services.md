@@ -3,8 +3,8 @@
 ## Introduction
 
 Ocean uses these off-chain services:
-* [Ocean Provider](https://github.com/oceanprotocol/provider) for data services. A REST API run to serve download and compute service requests. Run by marketplace or the data publisher.
-* [Ocean Aquarius](https://github.com/oceanprotocol/aquarius) metadata cache. A REST API that caches on-chain metadata, to aid search. Typically run by a marketplace.
+* [Ocean Provider](https://github.com/oceanprotocol/provider) is for data services. Specifically, it's a REST API serving download and compute service requests. Run by marketplace or the data publisher.
+* [Ocean Aquarius](https://github.com/oceanprotocol/aquarius) is metadata cache REST API. This helps to aid search in marketplaces.
 
 We now describe how to use these.
 
@@ -70,28 +70,3 @@ docker run oceanprotocol/aquarius:latest
 Here are the urls for the local services, for use in `config.ini` etc.
 * Provider url: `http://127.0.0.1:8030`
 * Aquarius url: `http://127.0.0.1:5000`
-
-## Alternatives on Parameter Setting
-
-We can set any parameter as an envvar, rather than with `config.ini'. Here's an example.
-
-First, in console:
-```console
-export NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
-export AQUARIUS_URL=<your aquarius url>
-export PROVIDER_URL=<your provider url>
-```
-
-Then, do the following in Python. In this case, the `Ocean` constructor takes a `config` dict, which in turn is set by envvars.
-```python
-import os
-from ocean_lib.ocean.ocean import Ocean
-config = {
-   'network' : os.getenv('NETWORK_URL'),
-   'metadataStoreUri' : os.getenv('AQUARIUS_URL'),
-   'providerUri' : os.getenv('PROVIDER_URL'),
-}
-ocean = Ocean(config)
-```
-
-Note: Values set by envvars override values set in config files (important!). Therefore, to use the config file values, we need to get rid of the envvars, in the console: `unset NETWORK_URL AQUARIUS_URL PROVIDER_URL`.
