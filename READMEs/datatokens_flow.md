@@ -35,7 +35,7 @@ python -m venv venv
 source venv/bin/activate 
 ```
 
-In the console:
+Then install! In the console:
 ```console
 pip install ocean-lib
 ```
