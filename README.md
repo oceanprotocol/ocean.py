@@ -22,15 +22,15 @@ using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-wi
 
 ## Getting Started
 
-1. **[Publish your first datatoken](READMEs/datatokens_flow.md)**. Connect to Ethereum, create an Ocean instance, and publish your first datatoken.
+1. **[Publish your first datatoken](READMEs/datatokens_flow.md)** - connect to Ethereum, create an Ocean instance, and publish 
 
-2. **[Get an overview of ocean-lib](READMEs/overview.md)** key modules and functions.
+2. **[Get an overview of ocean-lib](READMEs/overview.md)** - key modules and functions.
 
-3. **[Learn more about Ocean service providers](READMEs/providers.md)**
+3. **[Learn more about off-chain services](READMEs/providers.md)** - Ocean Provider for data services, Aquarius metadata store
 
-4. **[Learn more about wallets](READMEs/wallets.md)** - other ways to connect wallets.
+4. **[Learn more about wallets](READMEs/wallets.md)** - on generating, storing, and accessing private keys.
 
-5. **[Create a marketplace and sell data](READMEs/marketplace_flow.md)**. Batteries-included flow including metadata and consuming datatokens.
+5. **[Create a marketplace and sell data](READMEs/marketplace_flow.md)** - batteries-included flow including metadata and consuming datatokens.
 
 ## For ocean-lib Developers
 
