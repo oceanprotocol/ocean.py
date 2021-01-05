@@ -20,19 +20,17 @@ using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-wi
 
 ```pip install ocean-lib```
 
-## Quickstart
+## Getting Started
 
-### 1. Basic setup
+1. **[Publish your first datatoken](READMEs/datatokens_flow.md)**. Connect to Ethereum, create an Ocean instance, and publish your first datatoken.
 
-[Use this guide](READMEs/setup.md) to connect to Ethereum network and Ocean service providers, configure your Ethereum account / private key, and publish your very first datatoken.
+2. **[Get an overview of ocean-lib](READMEs/overview.md)** key modules and functions.
 
-### 2. Get an overview of ocean-lib
+3. **[Learn more about Ocean service providers](READMEs/providers.md)**
 
-[Here's](READMEs/overview.md) a short description of key ocean-lib modules and functions.
+4. **[Learn more about wallets](READMEs/wallets.md)** - other ways to connect wallets.
 
-### 3. Quickstart marketplace flow
-
-[This quickstart](READMEs/marketplace_flow.md) describes how to publish data assets as datatokens (including metadata), post the datatokens to a marketplace, buy datatokens, and consume datatokens (including download).
+5. **[Create a marketplace and sell data](READMEs/marketplace_flow.md)**. Batteries-included flow including metadata and consuming datatokens.
 
 ## For ocean-lib Developers
 

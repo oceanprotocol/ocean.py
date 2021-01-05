@@ -129,6 +129,9 @@ data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
 
 ## 4. Alice creates a pool for trading her new datatokens
 
+First, [first get Rinkeby OCEAN via this faucet](https://faucet.rinkeby.oceanprotocol.com/).
+
+Then, in Python:
 ```python
 pool = ocean.pool.create(
    token_address,
