@@ -1,4 +1,4 @@
-# About Ocean service providers
+# About Ocean off-chain services
 
 ## Introduction
 
@@ -27,12 +27,7 @@ export CONFIG_FILE=config.ini
 
 ## 2. Use the services within Python
 
-In the console, start Python:
-```console
-python
-```
-
-In Python, import and configure the components / services. 
+In Python, import and configure the components / services:
 ```python
 import os
 from ocean_lib.config import Config
@@ -50,11 +45,11 @@ ContractHandler.set_artifacts_path(config.artifacts_path)
 
 Now you're ready to use the serivces. The marketplace tutorial will use them in more detail.
 
-## Alternatives
+## Alternatives on Services
 
 Above, we described a flow to go through configuring services. Here are some variants.
 
-### Point to different services
+### Point to services in other networks
 
 The service urls above are for rinkeby. [Ocean docs list other supported networks](https://docs.oceanprotocol.com/concepts/networks-overview/) like Ethereum mainnet and ropsten, along with associated urls.
 
@@ -76,6 +71,27 @@ Here are the urls for the local services, for use in `config.ini` etc.
 * Provider url: `http://127.0.0.1:8030`
 * Aquarius url: `http://127.0.0.1:5000`
 
-### Use envvars, not config.ini
+## Alternatives on Parameter Setting
 
-You can set envvars `NETWORK_URL`, `AQUARIUS_URL`, and `PROVIDER_URL` for the respective services. In most cases the config.ini file will be the best choice.
+We can set any parameter as an envvar, rather than with `config.ini'. Here's an example.
+
+First, in console:
+```console
+export NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
+export AQUARIUS_URL=<your aquarius url>
+export PROVIDER_URL=<your provider url>
+```
+
+Then, do the following in Python. In this case, the `Ocean` constructor takes a `config` dict, which in turn is set by envvars.
+```python
+import os
+from ocean_lib.ocean.ocean import Ocean
+config = {
+   'network' : os.getenv('NETWORK_URL'),
+   'metadataStoreUri' : os.getenv('AQUARIUS_URL'),
+   'providerUri' : os.getenv('PROVIDER_URL'),
+}
+ocean = Ocean(config)
+```
+
+Note: Values set by envvars override values set in config files (important!). Therefore, to use the config file values, we need to get rid of the envvars, in the console: `unset NETWORK_URL AQUARIUS_URL PROVIDER_URL`.

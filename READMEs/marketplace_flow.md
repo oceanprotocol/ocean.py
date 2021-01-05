@@ -3,7 +3,7 @@
 This quickstart describes how to publish data assets as datatokens (including metadata), post the datatokens to a marketplace, buy datatokens, and consume datatokens (including download). It focuses on Alice's experience as a publisher, and Bob's experience as a buyer & consumer. The rest are services used by Alice and Bob.
 
 Here are the steps:
-1. Installation, account setup, initialize services 
+1. Setup
 1. Alice publishes data asset (including metadata)
 1. Alice mints 100 tokens
 1. Alice creates a pool for trading her new datatokens
@@ -15,39 +15,39 @@ Here are the steps:
 
 Let's go through each step.
 
-## 1. Installation, account setup, initialize services
+## 1. Setup
 
-If you haven't installed yet:
-```console
-pip install ocean-lib
+Please do the datatokens tutorial before this one, so that you've...
+* installed ocean-lib
+* got an Ethereum account on rinkeby that holds ETH. You've exported its private key.
+* got an infura account, with your infura project id
+* set up a `config.ini` file. It has:
+```
+[eth-network]
+network = https://rinkeby.infura.io/v3/<your infura project id>
 ```
 
-This quickstart will use Rinkeby network. You'll need:
-* An account on Rinkeby, holding ETH to pay for transactions
-* The account's private key available as an envvar: `export MY_TEST_KEY=<my_private_key>`
-* The network url available as an envvar: `export NETWORK_URL=https://rinkeby.infura.io/v3/<your infura id>`
-
-If you don't have these yet, please do the steps in the [setup README](setup.md) to get them. Then come back here.
-
-Ocean uses these services:
-- [Aquarius (Metadata cache)](https://github.com/oceanprotocol/aquarius) - REST API that caches on-chain metadata, to aid search. Typically run by a marketplace.
-- [Provider](https://github.com/oceanprotocol/provider) - REST API run to serve download and compute service requests. Run by marketplace or the data publiser.
-
-The simplest is to point to services that are already running. Here are the ones for Rinkeby. (There are also ones for Ethereum mainnet.)
-
-```console
-export AQUARIUS_URL=https://aquarius.rinkeby.v3.dev-ocean.com
-export PROVIDER_URL=https://provider.rinkeby.v3.dev-ocean.com
+Then, in `config.ini` file, add:
+```
+[resources]
+aquarius.url = https://provider.rinkeby.v3.dev-ocean.com
+provider.url = https://aquarius.rinkeby.v3.dev-ocean.com
 ```
 
-Finally, set up the service for the [Market app](https://github.com/oceanprotocol/market). Open another new terminal and enter:
+Then, in console:
+```
+export MY_TEST_KEY=<my_private_key>
+```
+
+Finally, set up the service for the [Market app](https://github.com/oceanprotocol/market). In a new console:
 ```
 git clone https://github.com/oceanprotocol/market.git
 cd market
 npm install
 npm start
 ```
-* You can access the market app in the browser at `http://localhost:8000`.
+
+The market app can be seen as a webapp at `http://localhost:8000`.  
 
 ## 2. Alice publishes data asset (including metadata)
 

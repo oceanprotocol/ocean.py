@@ -26,7 +26,7 @@ using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-wi
 
 2. **[Get an overview of ocean-lib](READMEs/overview.md)** - key modules and functions.
 
-3. **[Learn more about off-chain services](READMEs/providers.md)** - Ocean Provider for data services, Aquarius metadata store
+3. **[Learn more about Ocean off-chain services](READMEs/services.md)** - Ocean Provider for data services, Aquarius metadata store
 
 4. **[Learn more about wallets](READMEs/wallets.md)** - on generating, storing, and accessing private keys.
 
