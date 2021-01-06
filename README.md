@@ -30,7 +30,7 @@ using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-wi
    - **[Learn about off-chain services](READMEs/services.md)** - Ocean Provider for data services, Aquarius metadata store
    - **[Learn about wallets](READMEs/wallets.md)** - on generating, storing, and accessing private keys
 
-3. **Full-featured quickstart: [create a marketplace and sell data](READMEs/marketplace_flow.md)** - batteries-included flow including metadata and consuming datatokens.
+3. **Full-featured quickstart: [create a marketplace and sell data](READMEs/marketplace_flow.md)** - batteries-included flow including using off-chain services for metadata and consuming datasets.
 
 ## For ocean-lib Developers
 
