@@ -3,12 +3,14 @@
 ## Introduction
 
 Ocean uses these off-chain services:
-* [Ocean Provider](https://github.com/oceanprotocol/provider) is for data services. Specifically, it's a REST API serving download and compute service requests. Run by marketplace or the data publisher.
+* [Ocean Provider](https://github.com/oceanprotocol/provider) is for data services. Specifically, it's a REST API serving requests for two types of data services: static urls (for downloading data) and compute services. It's run by the marketplace or the data publisher.
 * [Ocean Aquarius](https://github.com/oceanprotocol/aquarius) is metadata cache REST API. This helps to aid search in marketplaces.
 
 We now describe how to use these.
 
-## 1. Create a config file
+## 1. Set config values
+
+You can set config values as envvars or via a file. Here we use a file. 
 
 In your working directory, create a file `config.ini` and fill it with the following. It points to the infura id that you created in the previous tutorial, and the urls for off-chain services (Provider, Aquarius).
 ```
@@ -47,7 +49,7 @@ Now you're ready to use the serivces. The marketplace tutorial will use them in 
 
 ## Alternatives on Services
 
-Above, we described a flow to go through configuring services. Here are some variants.
+Above, we described a specific flow to go through configuring services. Here are some variants of that flow.
 
 ### Point to services in other networks
 

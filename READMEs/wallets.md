@@ -32,9 +32,9 @@ private_key = ocean.web3.eth.account.create().privateKey #other web3.py versions
 
 ## 2. Where to store private keys
 
-The *whole point* of crypto wallets is store private keys. Wallets have various tradeoffs of cost, convienence, and security.
+The *whole point* of crypto wallets is store private keys. Wallets have various tradeoffs of cost, convienence, and security. For example, hardware wallets tend to be more secure but less convenient and not free.
 
-It can also be useful to store private keys locally on your machine, for testing, with a small amount of value at stake.
+It can also be useful to store private keys locally on your machine, for testing, though only with a small amount of value at stake (keep the risk down 🐙). 
 
 Do *not* store your private keys on anything public, unless you want your tokens to disappear. For example, don't store your private keys in GitHub or expose them on frontend webpage code.
 
