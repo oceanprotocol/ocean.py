@@ -1,8 +1,11 @@
 
-# ocean-lib
+[![banner](https://raw.githubusercontent.com/oceanprotocol/art/master/github/repo-banner%402x.png)](https://oceanprotocol.com)
 
-`ocean-lib` is a Python library to privately & securely publish, exchange, 
-and consume data. With it, you can:
+<h1 align="center">ocean.py</h1>
+
+> Python library to privately & securely publish, exchange, and consume data.
+
+With ocean.py, you can:
 - **Publish** data services: downloadable files or compute-to-data. 
 Ocean creates a new [ERC20](https://github.com/ethereum/EIPs/blob/7f4f0377730f5fc266824084188cc17cf246932e/EIPS/eip-20.md) 
 datatoken for each dataset / data service.
@@ -13,30 +16,44 @@ datatoken for each dataset / data service.
 - **Transfer** datatokens to another owner, and **all other ERC20 actions** 
 using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-with-an-erc20-token-contract) etc.
 
+ocean.py is part of the [Ocean Protocol](https://www.oceanprotocol.com) toolset.
 
-`ocean-lib` is part of the [Ocean Protocol](https://www.oceanprotocol.com) toolset.
+This is in beta state and you can expect running into problems. If you run into them, please open up a [new issue](/issues).
 
-## Quick Install
+- [🏗 Installation](#-installation)
+- [🏄 Quickstart](#-quickstart)
+  - [Simple Flow](#simple-flow)
+  - [Learn more](#learn-more)
+  - [Marketplace Flow](#marketplace-flow)
+- [🦑 Development](#-development)
+- [🏛 License](#-license)
+
+## 🏗 Installation
 
 ```pip install ocean-lib```
 
-## Getting Started
+## 🏄 Quickstart
 
-1. **Simple quickstart: [publish your first datatoken](READMEs/datatokens_flow.md)** - connect to Ethereum, create an Ocean instance, and publish 
+### Simple Flow
 
-2. **Learn:**
-   - **[Understand config parameters](READMEs/parameters.md)** - envvars vs files 
-   - **[Learn about off-chain services](READMEs/services.md)** - Ocean Provider for data services, Aquarius metadata store
-   - **[Learn about wallets](READMEs/wallets.md)** - on generating, storing, and accessing private keys
-   - **[Get an overview of ocean-lib](READMEs/overview.md)** - key modules and functions
+[Publish your first datatoken](READMEs/datatokens_flow.md) - connect to Ethereum, create an Ocean instance, and publish.
 
-3. **Full-featured quickstart: [create a marketplace and sell data](READMEs/marketplace_flow.md)** - batteries-included flow including using off-chain services for metadata and consuming datasets.
+### Learn more
 
-## For ocean-lib Developers
+- [Understand config parameters](READMEs/parameters.md) - envvars vs files 
+- [Learn about off-chain services](READMEs/services.md) - Ocean Provider for data services, Aquarius metadata store
+- [Learn about wallets](READMEs/wallets.md) - on generating, storing, and accessing private keys
+- [Get an overview of ocean-lib](READMEs/overview.md) - key modules and functions
 
-If you want to further develop ocean-lib, then [please go here](READMEs/developers.md).
+### Marketplace flow
 
-## License
+[Create a marketplace and sell data](READMEs/marketplace_flow.md) - batteries-included flow including using off-chain services for metadata and consuming datasets.
+
+## 🦑 Development
+
+If you want to further develop ocean.py, then [please go here](READMEs/developers.md).
+
+## 🏛 License
 
 ```
 Copyright ((C)) 2021 Ocean Protocol Foundation
