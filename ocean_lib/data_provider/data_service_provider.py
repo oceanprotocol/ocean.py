@@ -170,9 +170,10 @@ class DataServiceProvider:
             DataServiceProvider.write_file(response, destination_folder, file_name or f'file-{i}')
 
     @staticmethod
-    def start_compute_job(did, service_endpoint, consumer_address, signature,
-                          service_id, token_address, order_tx_id, algorithm_did=None,
-                          algorithm_meta=None, output=None, job_id=None):
+    def start_compute_job(did: str, service_endpoint: str, consumer_address: str, signature: str,
+                          service_id: int, token_address: str, order_tx_id: str, algorithm_did: str=None,
+                          algorithm_meta: AlgorithmMetadata=None, algorithm_tx_id: str='',
+                          algorithm_data_token: str='', output: dict=None, job_id: str=None):
         """
 
         :param did: id of asset starting with `did:op:` and a hex str without 0x prefix
@@ -185,6 +186,8 @@ class DataServiceProvider:
         :param algorithm_did: str -- the asset did (of `algorithm` type) which consist of `did:op:` and
             the assetId hex str (without `0x` prefix)
         :param algorithm_meta: see `OceanCompute.execute`
+        :param algorithm_tx_id: transaction hash of algorithm StartOrder tx (Required when using `algorithm_did`)
+        :param algorithm_data_token: datatoken address of this algorithm (Required when using `algorithm_did`)
         :param output: see `OceanCompute.execute`
         :param job_id: str id of compute job that was started and stopped (optional, use it
             here to start a job after it was stopped)
@@ -203,6 +206,8 @@ class DataServiceProvider:
             signature=signature,
             algorithm_did=algorithm_did,
             algorithm_meta=algorithm_meta,
+            algorithm_tx_id=algorithm_tx_id,
+            algorithm_data_token=algorithm_data_token,
             output=output,
             job_id=job_id
         )
@@ -468,9 +473,10 @@ class DataServiceProvider:
 
     @staticmethod
     def _prepare_compute_payload(
-            did, consumer_address, service_id, service_type, token_address, order_tx_id,
-            signature=None, algorithm_did=None, algorithm_meta=None,
-            output=None, job_id=None):
+            did: str, consumer_address: str, service_id: int, service_type: str,
+            token_address: str, order_tx_id: str, signature: str=None,
+            algorithm_did: str=None, algorithm_meta=None, algorithm_tx_id: str='',
+            algorithm_data_token: str='', output: dict=None, job_id: str=None):
         assert algorithm_did or algorithm_meta, 'either an algorithm did or an algorithm meta must be provided.'
 
         if algorithm_meta:
@@ -482,8 +488,10 @@ class DataServiceProvider:
             'signature': signature,
             'documentId': did,
             'consumerAddress': consumer_address,
-            'algorithmDID': algorithm_did,
+            'algorithmDid': algorithm_did,
             'algorithmMeta': algorithm_meta,
+            'algorithmDataToken': algorithm_data_token,
+            'algorithmTransferTxId': algorithm_tx_id,
             'output': output or dict(),
             'jobId': job_id or "",
             'serviceId': service_id,
