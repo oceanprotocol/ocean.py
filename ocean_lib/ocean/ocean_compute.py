@@ -7,7 +7,6 @@ from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3helper import Web3Helper
@@ -189,6 +188,7 @@ class OceanCompute:
     def start(self, did: str, consumer_wallet: Wallet, order_tx_id: str,
               nonce: [int, None]=None, algorithm_did: [str, None]=None,
               algorithm_meta: [AlgorithmMetadata, None]=None,
+              algorithm_tx_id: str='', algorithm_data_token: str='',
               output: dict=None, job_id: str=None):
         """Start a remote compute job on the asset files identified by `did` after
         verifying that the provider service is active and transferring the
@@ -202,6 +202,8 @@ class OceanCompute:
             the assetId hex str (without `0x` prefix)
         :param algorithm_meta: `AlgorithmMetadata` instance -- metadata about the algorithm being run if
             `algorithm` is being used. This is ignored when `algorithm_did` is specified.
+        :param algorithm_tx_id: transaction hash of algorithm StartOrder tx (Required when using `algorithm_did`)
+        :param algorithm_data_token: datatoken address of this algorithm (Required when using `algorithm_did`)
         :param output: dict object to be used in publishing mechanism, must define
         :param job_id: str identifier of a compute job that was previously started and
             stopped (if supported by the provider's  backend)
@@ -227,6 +229,8 @@ class OceanCompute:
             order_tx_id,
             algorithm_did,
             algorithm_meta,
+            algorithm_tx_id,
+            algorithm_data_token,
             output,
             job_id
         )
