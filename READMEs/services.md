@@ -8,21 +8,26 @@ Ocean uses these off-chain services:
 
 We now describe how to use these.
 
-## 1. Set config values
+## 1. Set config values for services
 
-You can set config values as envvars or via a file. Here we use a file. 
+Here we use a file to set config values.
 
-In your working directory, create a file `config.ini` and fill it with the following. It points to the infura id that you created in the previous tutorial, and the urls for off-chain services (Provider, Aquarius).
+In your working directory, create a file `config.ini` and fill it with the following. It will use pre-existing services running for rinkeby testnet.
 ```
 [eth-network]
 network = https://rinkeby.infura.io/v3/<your Infura project id>
 
 [resources]
-aquarius.url = <your aquarius url>
-provider.url = <your provider url>
+aquarius.url = AQUARIUS_URL=https://aquarius.rinkeby.v3.dev-ocean.com
+provider.url = PROVIDER_URL=https://provider.rinkeby.v3.dev-ocean.com
 ```
 
-Create an envvar to point to the new file. In the console:
+Ensure that envvars don't override the config file values:
+```console
+unset NETWORK_URL AQUARIUS_URL PROVIDER_URL
+```
+
+Create an envvar to point to the new config file. In the console:
 ```console
 export CONFIG_FILE=config.ini
 ```
@@ -45,7 +50,7 @@ Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url)
 ContractHandler.set_artifacts_path(config.artifacts_path)
 ```
 
-Now you're ready to use the serivces. The marketplace tutorial will use them in more detail.
+Now you're ready to use the services! 🐳 The marketplace tutorial will use them in more detail.
 
 ## Alternatives on Services
 
@@ -53,7 +58,7 @@ Above, we described a specific flow to go through configuring services. Here are
 
 ### Point to services in other networks
 
-The service urls above are for rinkeby. [Ocean docs list other supported networks](https://docs.oceanprotocol.com/concepts/networks-overview/) like Ethereum mainnet and ropsten, along with associated urls.
+The service urls above are for rinkeby. [Ocean's docs have urls](https://docs.oceanprotocol.com/concepts/networks-overview/) for Ethereum mainnet and other supported networks.
 
 ### Run your own services
 

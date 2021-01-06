@@ -24,10 +24,8 @@ ocean-lib includes the [web3.py library](https://web3py.readthedocs.io/en/stable
 
 Here's how. In Python:
 ```python
-from ocean_lib.ocean.ocean import Ocean
-ocean = Ocean()
-private_key = ocean.web3.eth.account.create().privateKey #some web3.py versions
-private_key = ocean.web3.eth.account.create().privateKey #other web3.py versions
+import web3
+private_key = web3.Web3().eth.account.create().privateKey
 ```
 
 ## 2. Where to store private keys
@@ -58,10 +56,9 @@ In Python, you'd create a wallet from this private key with a line like:
 
 ```python
 import os
-from ocean_lib.ocean.ocean import Ocean
+import web3
 from ocean_lib.web3_internal.wallet import Wallet
-ocean = Ocean()
-wallet = Wallet(ocean.web3, private_key=os.getenv('MY_TEST_KEY'))
+wallet = Wallet(web3, private_key=os.getenv('MY_TEST_KEY'))
 ```
 
 ### 3b. Keyfile JSON object, aka EncryptedKey
@@ -101,9 +98,8 @@ export MY_TEST_PASSWORD=OceanProtocol
 In Python, you'd create a wallet from this info with a line like:
 ```python
 import os
-from ocean_lib.ocean.ocean import Ocean
+import web3
 from ocean_lib.web3_internal.wallet import Wallet
-ocean = Ocean()
-wallet = Wallet(ocean.web3, encrypted_key=os.getenv('MY_TEST_ENCRYPTED_KEY'), password=os.getenv('MY_TEST_PASSWORD'))
+wallet = Wallet(web3, encrypted_key=os.getenv('MY_TEST_ENCRYPTED_KEY'), password=os.getenv('MY_TEST_PASSWORD'))
 ```
 

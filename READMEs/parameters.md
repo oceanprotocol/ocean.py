@@ -1,33 +1,46 @@
-# Parameter Setting Options: Envvars vs config files
+# On Config Parameters
 
-We can set any parameter as
-1. an envvar, *or*
-1. with a config file like `config.ini`
+We can set any config parameter (a) via an envvar, or (b) via a config file. Envvar values override config file values.
 
-Values set by envvars override values set in config files (important!). Therefore, to use the a config file value, we need to get rid of its envvar. E.g. in the console: `unset NETWORK_URL`.
+An `Ocean` instance will hold a `Config` instance that holds various config parameters. These parameters need to get set. This is set based on what's input to `Ocean` constructor:
 
-## 1. Example with envvars
+1. dict input: ```Ocean({'network':..})```
+1. Config object input: ```Ocean(Config('config.ini'))```
+1. no input, so it uses CONFIG_FILE envvar
+
+Here are examples.
+
+## 1. dict input, filled from envvars
 
 First, in console:
 ```console
 export NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
-export AQUARIUS_URL=<your aquarius url>
-export PROVIDER_URL=<your provider url>
+export AQUARIUS_URL=https://aquarius.rinkeby.v3.dev-ocean.com
+export PROVIDER_URL=https://provider.rinkeby.v3.dev-ocean.com
 ```
 
-Then, do the following in Python. In this case, the `Ocean` constructor takes a `config` dict, which in turn is set by envvars.
+Then, do the following in Python. The `Ocean` constructor takes a `dict`, which in turn is set by envvars.
 ```python
 import os
 from ocean_lib.ocean.ocean import Ocean
-config = {
+d = {
    'network' : os.getenv('NETWORK_URL'),
    'metadataStoreUri' : os.getenv('AQUARIUS_URL'),
    'providerUri' : os.getenv('PROVIDER_URL'),
 }
-ocean = Ocean(config)
+ocean = Ocean(d)
 ```
 
-## 2. Example with config.ini
+## 1a. Unsetting envvars
+
+Recall that parameters set by envvars override config file values. So, to use a config value in a file, we must remove its envvar.
+
+Here's how. In the console:
+```
+unset NETWORK_URL AQUARIUS_URL PROVIDER_URL
+```
+
+## 2. Config object input, filled from config file
 
 First, in your working directory, create `config.ini` file and fill as follows:
 ```
@@ -39,8 +52,30 @@ aquarius.url = https://provider.rinkeby.v3.dev-ocean.com
 provider.url = https://aquarius.rinkeby.v3.dev-ocean.com
 ```
 
-Then, do the following in Python. In this case, the `Ocean` constructor takes no arguments.
+Then, in Python:
+
+```python
+from ocean_lib.config import Config
+from ocean_lib.ocean.ocean import Ocean
+c = Config('config.ini')
+ocean = Ocean(c)
+```
+
+## 3. No input, so it uses CONFIG_FILE envvar
+
+We'll use the `config.ini` file created from the previous example.
+
+Then, set an envvar for the config file. In the console:
+```console
+export CONFIG_FILE=config.ini
+```
+
+Then, in Python:
 ```python
 from ocean_lib.ocean.ocean import Ocean
 ocean = Ocean()
 ```
+
+## Implementation
+
+For the most precise description of config parameter logic, see the [Ocean() constructor implementation](https://github.com/oceanprotocol/ocean.py/blob/master/ocean_lib/ocean/ocean.py).

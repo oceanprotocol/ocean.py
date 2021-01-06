@@ -1,45 +1,45 @@
 # Quickstart: Marketplace Flow
 
-This quickstart describes how to publish data assets as datatokens (including metadata), post the datatokens to a marketplace, buy datatokens, and consume datatokens (including download). It focuses on Alice's experience as a publisher, and Bob's experience as a buyer & consumer. The rest are services used by Alice and Bob.
+This quickstart describes a batteries-included flow including using off-chain services for metadata (Aquarius) and consuming datasets (Provider).
+
+It focuses on Alice's experience as a publisher, and Bob's experience as a buyer & consumer. 
 
 Here are the steps:
 1. Setup
 1. Alice publishes data asset (including metadata)
 1. Alice mints 100 tokens
 1. Alice creates a pool for trading her new datatokens
-1. Marketplace displays the asset with the available services and price of datatoken
-1. Value swap: Bob buys datatokens from marketplace
+1. Market displays the asset for sale
+1. Value swap: Bob buys datatokens from market
 1. Bob uses a service by spending datatoken he just purchased (download)
-1. Bonus: run your own local Provider or Metadata cache (Aquarius)
+
+Bonus rounds:
+1. Bonus: run your own local Provider or Aquarius
 1. Bonus: Get datatoken price in USD
 
 Let's go through each step.
 
 ## 1. Setup
 
-Please do the datatokens tutorial before this one, so that you've...
-* installed ocean-lib
-* got an Ethereum account on rinkeby that holds ETH. You've exported its private key.
-* got an infura account, with your infura project id
-* set up a `config.ini` file. It has:
+First, please make sure you've got the following. The [datatokens tutorial](datatokens_flow.md) has further info, as needed.
+* Got a virtualenv running (optional)
+* Installed ocean-lib
+* Got an Ethereum account on rinkeby that holds ETH. You've exported its private key.
+* Got an infura account, with your infura project id
+
+Then, set Alice's config vals as envvars. In the console:
 ```
-[eth-network]
-network = https://rinkeby.infura.io/v3/<your infura project id>
+export NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
+export AQUARIUS_URL=https://aquarius.rinkeby.v3.dev-ocean.com
+export PROVIDER_URL=https://provider.rinkeby.v3.dev-ocean.com
 ```
 
-Then, in `config.ini` file, add:
+Then, set Alice's private key. In the console:
 ```
-[resources]
-aquarius.url = https://provider.rinkeby.v3.dev-ocean.com
-provider.url = https://aquarius.rinkeby.v3.dev-ocean.com
+export ALICE_KEY=<alice private key>
 ```
 
-Then, in console:
-```
-export MY_TEST_KEY=<my_private_key>
-```
-
-Finally, set up the service for the [Market app](https://github.com/oceanprotocol/market). In a new console:
+Then, set up the service for the [Market app](https://github.com/oceanprotocol/market). In a *new* console:
 ```
 git clone https://github.com/oceanprotocol/market.git
 cd market
@@ -47,11 +47,11 @@ npm install
 npm start
 ```
 
-The market app can be seen as a webapp at `http://localhost:8000`.  
+Finally, check out the market app as a webapp, at `http://localhost:8000`. 
 
 ## 2. Alice publishes data asset (including metadata)
 
-What follows is in Python. First, configure the components and create an `Ocean` instance.
+What follows is in Python, from your main console. First, configure the components and create an `Ocean` instance.
 ```python
 import os
 
@@ -71,7 +71,7 @@ ocean = Ocean(config)
 
 Next, create a `Wallet` for Alice.
 ```python
-alice_wallet = Wallet(ocean.web3, private_key=os.getenv('MY_TEST_KEY'))
+alice_wallet = Wallet(ocean.web3, private_key=os.getenv('ALICE_KEY'))
 ```
 
 Publish a datatoken.
@@ -228,7 +228,9 @@ file_path = market_ocean.assets.download(
 )
 ```
 
-## 8. Bonus round: run Provider and Aquarius locally
+# Bonus Rounds
+
+## Bonus round 1: run Provider and Aquarius locally
 
 Bonus round time! So far, we've used third-party services for Provider and Aquarius (Metadata cache). Now, let's run them locally.
 
@@ -242,7 +244,7 @@ Bonus round time! So far, we've used third-party services for Provider and Aquar
 - In another new terminal: `docker run oceanprotocol/provider:latest` (or other ways, as repo describes)
 - Point the appropriate envvar to it. In your terminal: `export PROVIDER_URL=<the url that it says "Listening at">`
 
-## 9. Bonus round: get price of datatoken in USD
+## Bonus round 2: get price of datatoken in USD
 
 This extends step 5. Whereas step 5 showed the price of a datatoken in OCEAN, we could also get it in USD. How? Find the USDT : OCEAN exchange from another pool.
 
