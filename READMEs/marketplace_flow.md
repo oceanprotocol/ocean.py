@@ -101,6 +101,8 @@ Metadata is information about the data asset. Ocean stores it on-chain, enabling
 
 We also want a convenient place for the Provider to store the service urls without requiring a separate storage facility, while making the urls available only to datatoken owners. To solve this, the Provider *encrypts* the urls and lumps them in with the rest of the metadata (the plaintext part), to be stored on-chain. The Provider will decrypt as part of the data provisioning.
 
+- NOTE: as of Jan 6, 2020, the call below to `ocean.assets.create()` is failing [Github issue](https://github.com/oceanprotocol/ocean.py/issues/89) You can skip the rest of step 2, and successfully do steps 3 and 4 below. We are working to fix the issue.
+
 ```python
 metadata =  {
     "main": {
