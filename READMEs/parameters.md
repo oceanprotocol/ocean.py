@@ -29,7 +29,7 @@ ocean = Ocean(config)
 
 ## 2. Example with config.ini
 
-First, in your working directory, create `config.ini' file and fill as follows:
+First, in your working directory, create `config.ini` file and fill as follows:
 ```
 [eth-network]
 network = https://rinkeby.infura.io/v3/<your infura project id>
