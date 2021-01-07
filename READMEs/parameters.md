@@ -15,8 +15,8 @@ Here are examples.
 First, in console:
 ```console
 export NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
-export AQUARIUS_URL=https://aquarius.rinkeby.v3.dev-ocean.com
-export PROVIDER_URL=https://provider.rinkeby.v3.dev-ocean.com
+export AQUARIUS_URL=https://aquarius.rinkeby.v3.oceanprotocol.com
+export PROVIDER_URL=https://provider.rinkeby.v3.oceanprotocol.com
 ```
 
 Then, do the following in Python. The `Ocean` constructor takes a `dict`, which in turn is set by envvars.
@@ -48,8 +48,8 @@ First, in your working directory, create `config.ini` file and fill as follows:
 network = https://rinkeby.infura.io/v3/<your infura project id>
 
 [resources]
-aquarius.url = https://provider.rinkeby.v3.dev-ocean.com
-provider.url = https://aquarius.rinkeby.v3.dev-ocean.com
+aquarius.url = https://provider.rinkeby.v3.oceanprotocol.com
+provider.url = https://aquarius.rinkeby.v3.oceanprotocol.com
 ```
 
 Then, in Python:

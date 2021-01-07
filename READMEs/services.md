@@ -18,8 +18,8 @@ In your working directory, create a file `config.ini` and fill it with the follo
 network = https://rinkeby.infura.io/v3/<your Infura project id>
 
 [resources]
-aquarius.url = AQUARIUS_URL=https://aquarius.rinkeby.v3.dev-ocean.com
-provider.url = PROVIDER_URL=https://provider.rinkeby.v3.dev-ocean.com
+aquarius.url = AQUARIUS_URL=https://aquarius.rinkeby.v3.oceanprotocol.com
+provider.url = PROVIDER_URL=https://provider.rinkeby.v3.oceanprotocol.com
 ```
 
 Ensure that envvars don't override the config file values:
