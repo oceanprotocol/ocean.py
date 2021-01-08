@@ -1,4 +1,5 @@
 import logging
+import time
 
 from web3.contract import prepare_transaction
 
@@ -112,4 +113,20 @@ def transact_with_contract_function(
     else:
         txn_hash = web3.eth.sendTransaction(transact_transaction)
 
+    wait_for_tx(txn_hash, web3, 5)
     return txn_hash
+
+
+def wait_for_tx(tx_hash, web3, timeout=30):
+    start = time.time()
+    while True:
+        try:
+            web3.eth.waitForTransactionReceipt(tx_hash, timeout=timeout)
+            break
+        except Exception:
+            time.sleep(0.2)
+
+        if time.time() - start > timeout:
+            break
+
+    return

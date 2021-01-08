@@ -30,7 +30,7 @@ copyright = 'ocean.py contributors'
 author = 'ocean.py contributors'
 
 # The full version, including alpha/beta/rc tags
-release = '0.5.1'
+release = '0.5.4'
 # The short X.Y version
 release_parts = release.split('.')  # a list
 version = release_parts[0] + '.' + release_parts[1]

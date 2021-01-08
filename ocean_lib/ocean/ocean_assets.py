@@ -392,7 +392,8 @@ class OceanAssets:
                                  f'requires {amount_base} number of tokens.')
         if did.startswith('did:'):
             did = add_0x_prefix(did_to_id(did))
-
+        if fee_receiver is None:
+            fee_receiver = '0x0000000000000000000000000000000000000000'
         tx_hash = dt.startOrder(from_wallet.address, amount_base, service_id, fee_receiver, from_wallet)
 
         try:

@@ -20,15 +20,21 @@ class DTFactory(ContractBase):
 
         return logs and logs[0].args.tokenAddress == dt_address
 
-    def get_token_registered_event(self, block_number, metadata_url, sender):
+    def get_token_registered_event(self, from_block, to_block, metadata_url=None, sender=None, token_address=None):
         event = getattr(self.events, 'TokenRegistered')
         filter_params = {}
+        if token_address:
+            filter_params['tokenAddress'] = token_address
+
         event_filter = event().createFilter(
-            fromBlock=block_number,
-            toBlock=block_number,
+            fromBlock=from_block,
+            toBlock=to_block,
             argument_filters=filter_params
         )
         logs = event_filter.get_all_entries()
+        if logs and token_address:
+            return logs[0]
+
         for log in logs:
             if log.args.blob == metadata_url and sender == log.args.RegisteredBy:
                 return log

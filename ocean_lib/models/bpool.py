@@ -1,10 +1,15 @@
-
+import logging
 import typing
+
+from eth_utils import remove_0x_prefix
+from web3.utils.events import get_event_data
 
 from ocean_lib.models import balancer_constants
 from .btoken import BToken
 from ocean_lib.ocean import util
 from ocean_lib.web3_internal.wallet import Wallet
+
+logger = logging.getLogger(__name__)
 
 
 class BPool(BToken):
@@ -466,3 +471,44 @@ class BPool(BToken):
         return self._ccontract.calcPoolInGivenSingleOut(
             tokenBalanceOut_base, tokenWeightOut_base, poolSupply_base,
             totalWeight_base, tokenAmountOut_base, swapFee_base)
+
+    # ===== Events
+
+    def get_liquidity_logs(self, event_name, web3, from_block, to_block=None, user_address=None, this_pool_only=True):
+        """
+        :param event_name: str, one of LOG_JOIN, LOG_EXIT, LOG_SWAP
+        """
+        topic0 = self.get_event_signature(event_name)
+        to_block = to_block or 'latest'
+        _filter = {
+                'fromBlock': from_block,
+                'toBlock': to_block,
+                'topics': [topic0,]
+        }
+        if this_pool_only:
+            _filter['address'] = self.address
+
+        if user_address:
+            assert web3.isChecksumAddress(user_address)
+            _filter['topics'].append(f'0x000000000000000000000000{remove_0x_prefix(user_address).lower()}')
+
+        event = getattr(self.events, event_name)
+        event_abi = event().abi
+        try:
+            logs = web3.eth.getLogs(_filter)
+            logs = [get_event_data(event_abi, l) for l in logs]
+        except ValueError as e:
+            logger.error(f'get_join_logs failed -> web3.eth.getLogs (filter={_filter}) failed: '
+                         f'{e}..')
+            logs = []
+
+        return logs
+
+    def get_join_logs(self, web3, from_block, to_block=None, user_address=None, this_pool_only=True):
+        return self.get_liquidity_logs('LOG_JOIN', web3, from_block, to_block, user_address, this_pool_only)
+
+    def get_exit_logs(self, web3, from_block, to_block=None, user_address=None, this_pool_only=True):
+        return self.get_liquidity_logs('LOG_EXIT', web3, from_block, to_block, user_address, this_pool_only)
+
+    def get_swap_logs(self, web3, from_block, to_block=None, user_address=None, this_pool_only=True):
+        return self.get_liquidity_logs('LOG_SWAP', web3, from_block, to_block, user_address, this_pool_only)
