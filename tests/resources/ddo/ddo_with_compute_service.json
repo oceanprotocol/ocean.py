@@ -46,7 +46,7 @@
     {
       "type": "compute",
       "index": 2,
-      "serviceEndpoint": "http://mybrizo.org",
+      "serviceEndpoint": "http://myprovider.org",
       "templateId": "",
       "attributes": {
         "main": {

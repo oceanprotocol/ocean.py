@@ -46,10 +46,10 @@ def test_create_compute_service(publisher_ocean_instance):
     )
     service = publisher_ocean_instance.services.create_compute_service(
         attributes,
-        'http://brizo.com:8030'
+        'http://provider.com:8030'
     )
     assert isinstance(service, tuple) and len(service) == 2
     assert service[0] == ServiceTypes.CLOUD_COMPUTE
     assert isinstance(service[1], dict)
     assert service[1]['attributes'] == attributes
-    assert service[1]['serviceEndpoint'] == 'http://brizo.com:8030'
+    assert service[1]['serviceEndpoint'] == 'http://provider.com:8030'
