@@ -50,7 +50,7 @@ environ_names = {
                               'Message to use for generating user auth token'],
     NAME_AUTH_TOKEN_EXPIRATION: ['AUTH_TOKEN_EXPIRATION',
                                  'Auth token expiration time expressed in seconds'],
-    NAME_PROVIDER_ADDRESS: ['PROVIDER_ADDRESS', 'Provider (Brizo) ethereum address']
+    NAME_PROVIDER_ADDRESS: ['PROVIDER_ADDRESS', 'Provider ethereum address']
 }
 
 config_defaults = {
@@ -198,7 +198,7 @@ class Config(configparser.ConfigParser):
     @property
     def provider_address(self):
         """Provider address. (e.g.): 0x00bd138abd70e2f00903268f3db08f2d25677c9e.
-        ethereum address of service provider (Brizo)
+        ethereum address of service provider
         """
         return self.get('resources', NAME_PROVIDER_ADDRESS)
 

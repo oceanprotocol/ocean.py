@@ -1,4 +1,4 @@
-"""Brizo module."""
+"""Provider module."""
 
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
@@ -28,8 +28,6 @@ OrderRequirements = namedtuple('OrderRequirements', ('amount', 'data_token_addre
 
 class DataServiceProvider:
     """
-    `Brizo` is the name chosen for the asset service provider.
-
     The main functions available are:
     - consume_service
     - run_compute_service (not implemented yet)
@@ -454,7 +452,7 @@ class DataServiceProvider:
         logger.info(f'invoke compute endpoint with this url: {compute_url}')
         method = getattr(DataServiceProvider._http_client, http_method)
         response = method(compute_url)
-        print(f'got brizo execute response: {response.content} with status-code {response.status_code} ')
+        logger.debug(f'got provider execute response: {response.content} with status-code {response.status_code} ')
         if response.status_code != 200:
             raise Exception(response.content.decode('utf-8'))
 
