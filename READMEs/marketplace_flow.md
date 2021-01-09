@@ -76,8 +76,11 @@ alice_wallet = Wallet(ocean.web3, private_key=os.getenv('ALICE_KEY'))
 
 Publish a datatoken.
 ```
+print("create datatoken: begin")
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_store_url)
 token_address = data_token.address
+print("create datatoken: done")
+print(f"datatoken address: {token_address}")
 ```
 
 Specify the service attributes, and connect that to `service_endpoint` and `download_service`.
