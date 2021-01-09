@@ -1,3 +1,5 @@
+Note: this README is out of date and will not work. [Here's the issue to fix it](https://github.com/oceanprotocol/ocean.py/issues/101)
+
 # Quickstart: Marketplace Flow with compute-to-data
 
 This tutorial demonstrates publishing a dataset with `compute` service
