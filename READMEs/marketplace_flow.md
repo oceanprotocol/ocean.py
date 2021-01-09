@@ -30,8 +30,8 @@ First, please make sure you've got the following. The [datatokens tutorial](data
 Then, set Alice's config vals as envvars. In the console:
 ```
 export NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
-export AQUARIUS_URL=https://aquarius.rinkeby.v3.oceanprotocol.com
-export PROVIDER_URL=https://provider.rinkeby.v3.oceanprotocol.com
+export AQUARIUS_URL=https://aquarius.rinkeby.oceanprotocol.com
+export PROVIDER_URL=https://provider.rinkeby.oceanprotocol.com
 ```
 
 Then, set Alice's private key. In the console:

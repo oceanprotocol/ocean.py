@@ -17,8 +17,8 @@ def get_config_dict():
             'network': 'rinkeby',
         },
         'resources': {
-            'aquarius.url': 'https://aquarius.rinkeby.v3.oceanprotocol.com',
-            'provider.url': 'https://provider.rinkeby.v3.oceanprotocol.com'
+            'aquarius.url': 'https://aquarius.rinkeby.oceanprotocol.com',
+            'provider.url': 'https://provider.rinkeby.oceanprotocol.com'
         }
     }
 
