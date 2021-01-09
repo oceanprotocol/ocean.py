@@ -230,16 +230,17 @@ Fill in values printed earlier. Bob will know these. For this quickstart, paste 
 ```python
 token_address = '<printed earlier>'
 pool_address = '<printed earlier>'
+did_address = '<printed earlier>'
 ```
 
-Bob buys 0.01 datatokens. (Note: he'd need 1.0 if he wanted to consume the data.)
+Buy 1.0 datatokens - the amount needed to consume the dataset.
 ```python
 data_token = bob_ocean.get_data_token(token_address)
 
 bob_ocean.pool.buy_data_tokens(
     pool_address, 
-    amount=0.01, # buy 0.01 datatoken
-    max_OCEAN_amount=0.01, # pay maximum 0.01 OCEAN tokens
+    amount=1.0, # buy 1.0 datatoken
+    max_OCEAN_amount=10.0, # pay maximum 10.0 OCEAN tokens
     from_wallet=bob_wallet
 )
 
@@ -248,13 +249,21 @@ print(f"Bob has {data_token.token_balance(bob_wallet.address)} datatokens.")
    
 ## 7. Bob uses a service from the asset he just purchased (download)
 
+NOTE: as of Jan 9, 2020, this works up until `pay_for_service()`. Working on it as part of [this github issue](https://github.com/oceanprotocol/ocean.py/issues/89).
+
 ```python
-market_address = '0x<markets ethereum address to receive service fee'
-service = asset.get_service(ServiceTypes.ASSET_ACCESS)  # asset from step 5
-quote = market_ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
-order_tx_id = market_ocean.assets.pay_for_service(
-    quote.amount, quote.data_token_address, asset.did, service.index, market_address, bob_wallet
-)
+#this is the address to receive the fee. Here we just insert an arbitary one
+market_address = '0x15f8a84B184A62bD3fC5Ad575F85560C72BAFB23'
+
+#asset from step 5
+from ocean_utils.agreements.service_types import ServiceTypes
+asset = bob_ocean.assets.resolve(did)
+service = asset.get_service(ServiceTypes.ASSET_ACCESS)
+
+#get quote, pay, download
+quote = bob_ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
+order_tx_id = bob_ocean.assets.pay_for_service(
+    quote.amount, quote.data_token_address, asset.did, service.index, market_address, bob_wallet)
 file_path = market_ocean.assets.download(
     asset.did, 
     service.index, 
