@@ -71,9 +71,16 @@ print("create datatoken: done")
 print(f"token_address = '{token_address}'")
 ```
 
-Specify the service attributes, and connect that to `service_endpoint` and `download_service`.
+Specify metadata and service attributes. We use a dataset based on the [Branin test function](https://github.com/trentmc/branin).
 ```python
-date_created = "2012-02-01T10:55:11Z"
+date_created = "2019-12-28T10:55:11Z"
+metadata =  {
+    "main": {
+        "type": "dataset", "name": "branin", "author": "Trent", 
+        "license": "CC0: Public Domain", "dateCreated": date_created, 
+        "files": [{"index": 0, "contentType": "text/text",
+	           "url": "https://raw.githubusercontent.com/trentmc/branin/master/branin.arff"}]}
+}
 service_attributes = {
         "main": {
             "name": "dataAssetAccessServiceAgreement",
@@ -83,29 +90,17 @@ service_attributes = {
             "cost": 1.0, # <don't change, this is obsolete>
         }
     }
-
-service_endpoint = DataServiceProvider.get_url(ocean.config)
-download_service = ServiceDescriptor.access_service_descriptor(service_attributes, service_endpoint)
 ```
 
-Metadata is information about the data asset. Ocean stores it on-chain, enabling permissionless access by anyone.
-
-We also want a convenient place for the Provider to store the service urls without requiring a separate storage facility, while making the urls available only to datatoken owners. To solve this, the Provider *encrypts* the urls and lumps them in with the rest of the metadata (the plaintext part), to be stored on-chain. The Provider will decrypt as part of the data provisioning.
-
+Publish metadata and service attributes on-chain. The publisher encrypts the service urls. These are only encrypted for datatoken owners upon consume actions.
 ```python
-metadata =  {
-    "main": {
-        "type": "dataset", "name": "10 Monkey Species Small", "author": "Mario", 
-        "license": "CC0: Public Domain", "dateCreated": date_created, 
-        "files": [
-            { "index": 0, "contentType": "application/zip", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/training.zip"},
-            { "index": 1, "contentType": "text/text", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/monkey_labels.txt"},
-            { "index": 2, "contentType": "application/zip", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/validation.zip"}]}
-}
-
-#ocean.assets.create will encrypt URLs using Provider's encrypt service endpoint, and update asset before putting on-chain.
-#It requires that token_address is a valid DataToken contract address. If that isn't provided, it will create a new token.
-asset = ocean.assets.create(metadata, alice_wallet, service_descriptors=[download_service], data_token_address=token_address)
+service_endpoint = DataServiceProvider.get_url(ocean.config)
+download_service = ServiceDescriptor.access_service_descriptor(service_attributes, service_endpoint)
+asset = ocean.assets.create(
+  metadata,
+  alice_wallet,
+  service_descriptors=[download_service],
+  data_token_address=token_address)
 assert token_address == asset.data_token_address
 
 did = asset.did  # did contains the datatoken address
@@ -230,48 +225,81 @@ Fill in values printed earlier. Bob will know these. For this quickstart, paste 
 ```python
 token_address = '<printed earlier>'
 pool_address = '<printed earlier>'
-did_address = '<printed earlier>'
+did = '<printed earlier>'
 ```
 
-Buy 1.0 datatokens - the amount needed to consume the dataset.
+Bob buys 1.0 datatokens - the amount needed to consume the dataset.
 ```python
 data_token = bob_ocean.get_data_token(token_address)
 
 bob_ocean.pool.buy_data_tokens(
     pool_address, 
     amount=1.0, # buy 1.0 datatoken
-    max_OCEAN_amount=10.0, # pay maximum 10.0 OCEAN tokens
+    max_OCEAN_amount=10.0, # pay up to 10.0 OCEAN
     from_wallet=bob_wallet
 )
 
 print(f"Bob has {data_token.token_balance(bob_wallet.address)} datatokens.")
+
+assert data_token.balanceOf(bob_wallet.address) >= 1.0, "Bob didn't get 1.0 datatokens"
 ```
+
+If the previous assertion fails, the first check is to wait a few seconds and try again.
    
 ## 7. Bob uses a service from the asset he just purchased (download)
 
-NOTE: as of Jan 9, 2020, this works up until `pay_for_service()`. Working on it as part of [this github issue](https://github.com/oceanprotocol/ocean.py/issues/89).
-
 ```python
-#this is the address to receive the fee. Here we just insert an arbitary one
-market_address = '0x15f8a84B184A62bD3fC5Ad575F85560C72BAFB23'
+fee_receiver = None # could also be market address
 
 #asset from step 5
 from ocean_utils.agreements.service_types import ServiceTypes
 asset = bob_ocean.assets.resolve(did)
 service = asset.get_service(ServiceTypes.ASSET_ACCESS)
 
-#get quote, pay, download
+#order the asset, and send over the datatoken
 quote = bob_ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
 order_tx_id = bob_ocean.assets.pay_for_service(
-    quote.amount, quote.data_token_address, asset.did, service.index, market_address, bob_wallet)
-file_path = market_ocean.assets.download(
+    quote.amount, quote.data_token_address, asset.did, service.index, fee_receiver, bob_wallet)
+print(f"order_tx_id = '{order_tx_id}'")
+```
+
+Now, download to current working directory `./`. If the connection breaks, Bob can request again by showing the `order_tx_id`.
+```
+file_path = bob_ocean.assets.download(
     asset.did, 
     service.index, 
     bob_wallet, 
     order_tx_id, 
-    destination='~/my-datasets'
+    destination='./' 
 )
+print(f"file_path = '{file_path}'") #e.g. datafile.0xAf07...
 ```
+
+In console, verify that the file downloaded:
+```console
+cd ./<your file_path, e.g. datafile.0xAf07...>
+more branin.arff
+```
+
+It should output the following. It follows the ARFF format, which is sometimes used in AI/ML tools. In this case there are two input variables (x0, x1) and one output.
+```console
+% 1. Title: Branin Function
+% 3. Number of instances: 225
+% 6. Number of attributes: 2
+
+@relation branin
+
+@attribute 'x0' numeric
+@attribute 'x1' numeric
+@attribute 'y' numeric
+
+@data
+-5.0000,0.0000,308.1291
+-3.9286,0.0000,206.1783
+...
+```
+
+
 
 # Bonus Rounds
 
