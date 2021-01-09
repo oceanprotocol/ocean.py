@@ -21,22 +21,14 @@ Let's go through each step.
 
 ## 1. Setup
 
-First, please make sure you've got the following. The [datatokens tutorial](datatokens_flow.md) has further info, as needed.
-* Got a virtualenv running (optional)
-* Installed ocean-lib
-* Got an Ethereum account on rinkeby that holds ETH. You've exported its private key.
-* Got an infura account, with your infura project id
+This builds on the setups in the following. Please do them first.
+ * [Datatokens tutorial](datatokens_flow.md)
+ * [Get test OCEAN](get_test_OCEAN.md)
 
-Then, set Alice's config vals as envvars. In the console:
+Then, set urls for metadata and provider services as envvars. In the console:
 ```
-export NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
 export AQUARIUS_URL=https://aquarius.rinkeby.oceanprotocol.com
 export PROVIDER_URL=https://provider.rinkeby.oceanprotocol.com
-```
-
-Then, set Alice's private key. In the console:
-```
-export ALICE_KEY=<alice private key>
 ```
 
 Then, set up the service for the [Market app](https://github.com/oceanprotocol/market). In a *new* console:
@@ -51,27 +43,23 @@ Finally, check out the market app as a webapp, at `http://localhost:8000`.
 
 ## 2. Alice publishes data asset (including metadata)
 
-What follows is in Python, from your main console. First, configure the components and create an `Ocean` instance.
+What follows is in Python, from your main console. 
 ```python
+#setup Alice's ocean instance
 import os
-
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_utils.agreements.service_factory import ServiceDescriptor
-
-#Alice's config
 config = {
    'network' : os.getenv('NETWORK_URL'),
    'metadataStoreUri' : os.getenv('AQUARIUS_URL'),
    'providerUri' : os.getenv('PROVIDER_URL'),
 }
 ocean = Ocean(config)
-```
 
-Next, create a `Wallet` for Alice.
-```python
-alice_wallet = Wallet(ocean.web3, private_key=os.getenv('ALICE_KEY'))
+#Alice's wallet
+from ocean_lib.web3_internal.wallet import Wallet
+alice_wallet = Wallet(ocean.web3, private_key=os.getenv('MY_TEST_KEY'))
 ```
 
 Publish a datatoken.
@@ -80,7 +68,7 @@ print("create datatoken: begin")
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_store_url)
 token_address = data_token.address
 print("create datatoken: done")
-print(f"datatoken address: {token_address}")
+print(f"token_address = '{token_address}'")
 ```
 
 Specify the service attributes, and connect that to `service_endpoint` and `download_service`.
@@ -104,8 +92,6 @@ Metadata is information about the data asset. Ocean stores it on-chain, enabling
 
 We also want a convenient place for the Provider to store the service urls without requiring a separate storage facility, while making the urls available only to datatoken owners. To solve this, the Provider *encrypts* the urls and lumps them in with the rest of the metadata (the plaintext part), to be stored on-chain. The Provider will decrypt as part of the data provisioning.
 
-- NOTE: as of Jan 6, 2021, the call below to `ocean.assets.create()` is failing [Github issue](https://github.com/oceanprotocol/ocean.py/issues/89) You can skip the rest of step 2, and successfully do steps 3 and 4 below. We are working to fix the issue.
-
 ```python
 metadata =  {
     "main": {
@@ -123,6 +109,7 @@ asset = ocean.assets.create(metadata, alice_wallet, service_descriptors=[downloa
 assert token_address == asset.data_token_address
 
 did = asset.did  # did contains the datatoken address
+print(f"did = '{did}'") 
 ```
 
 ## 3. Alice mints 100 datatokens
@@ -134,9 +121,14 @@ data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
 
 ## 4. Alice creates a pool for trading her new datatokens
 
-First, [first get Rinkeby OCEAN via this faucet](https://faucet.rinkeby.oceanprotocol.com/).
+Alice needs Rinkeby OCEAN for this step. Let's check. If this fails, the tutorial to [get test OCEAN](get_test_OCEAN.md) will help.
+```python
+from ocean_lib.models.btoken import BToken #BToken is ERC20
+OCEAN_token = BToken(ocean.OCEAN_address)
+assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need Rinkeby OCEAN"
+```
 
-Then, in Python:
+Let's do the actual work to create the pool. It will do several blockchain transactions: create the base pool, bind OCEAN and datatoken, add OCEAN and datatoken liquidity, and finalize the pool. 
 ```python
 pool = ocean.pool.create(
    token_address,
@@ -145,46 +137,52 @@ pool = ocean.pool.create(
    from_wallet=alice_wallet
 )
 pool_address = pool.address
-print(f'DataToken @{data_token.address} has a `pool` available @{pool_address}')
+print(f"pool_address = '{pool_address}'")
 ```
 
 ## 5. Marketplace displays asset for sale 
 
-Up til now, all the actions have been by Alice. Let's switch now to the perspective to that of the Marketplace operator. They can display for sale whatever data assets they see on chain which are in a pool (or a fixed-price exchange). 
+Up until now, all the actions have been by Alice. Let's switch now to the perspective to that of the Marketplace operator. They can display for sale whatever data assets they see on chain which are in a pool (or a fixed-price exchange). 
 
 Here, we show how the marketplace might grab info about the data asset, price info from the pool, and show it in text form. It can also be in the webapp of course.
 
-First, the market creates its own `Ocean` instance.
+Stop and re-start your Python console. What follows is in Python.
+
 ```python
+#setup market's ocean instance
 import os
-from ocean_utils.agreements.service_types import ServiceTypes
-
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.util import from_base_18
-from ocean_lib.models.bpool import BPool
-
-# Market's config
 config = {
-   'network': os.getenv('NETWORK_URL'),
+   'network' : os.getenv('NETWORK_URL'),
+   'metadataStoreUri' : os.getenv('AQUARIUS_URL'),
+   'providerUri' : os.getenv('PROVIDER_URL'),
 }
 market_ocean = Ocean(config)
 ```
 
-Next, the market creates an object pointing to the pool.
+The market will know the token, etc that it's looking for. For this quickstart, we simply paste in the values that were printed in previous steps.
 ```python
-did = ''  # from step 3
-pool_address = ''  # from step 4
+token_address = '<printed earlier>'
+did = '<printed earlier>'
+pool_address = '<printed earlier>'
+```
+
+Next, create objects pointing to the service and pool
+```python
+#point to service
+from ocean_utils.agreements.service_types import ServiceTypes
 asset = market_ocean.assets.resolve(did)
 service1 = asset.get_service(ServiceTypes.ASSET_ACCESS)
+
+#point to pool
 pool = market_ocean.pool.get(pool_address)
 ```
 
 To access a data service, you need 1.0 datatokens. Here, the market retrieves the datatoken price denominated in OCEAN.
 ```python
-OCEAN_address = market_ocean.pool.ocean_address
+OCEAN_address = market_ocean.OCEAN_address
 price_in_OCEAN = market_ocean.pool.calcInGivenOut(
-    pool_address, OCEAN_address, token_address, token_out_amount=1.0
-)
+    pool_address, OCEAN_address, token_address, token_out_amount=1.0)
 print(f"Price of 1 datatoken is {price_in_OCEAN} OCEAN")
 ```
 
@@ -254,6 +252,9 @@ Bonus round time! So far, we've used third-party services for Provider and Aquar
 This extends step 5. Whereas step 5 showed the price of a datatoken in OCEAN, we could also get it in USD. How? Find the USDT : OCEAN exchange from another pool.
 
 ```python
+from ocean_lib.models.bpool import BPool
+from ocean_lib.ocean.util import from_base_18
+
 OCEAN_usd_pool_address = '' #get externally
 USDT_token_address = '' #get externally
 ocn_pool = BPool(OCEAN_usd_pool_address)

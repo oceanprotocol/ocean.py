@@ -43,6 +43,7 @@ pip install ocean-lib
 
 In Python:
 ```python
+#setup
 import os
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet

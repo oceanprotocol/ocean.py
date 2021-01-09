@@ -40,6 +40,7 @@ This is in beta state and you can expect running into problems. If you run into 
 
 ### Learn more
 
+- [Get test OCEAN](READMEs/get_test_OCEAN.md) - from rinkeby
 - [Understand config parameters](READMEs/parameters.md) - envvars vs files 
 - [Learn about off-chain services](READMEs/services.md) - Ocean Provider for data services, Aquarius metadata store
 - [Learn about wallets](READMEs/wallets.md) - on generating, storing, and accessing private keys
