@@ -92,7 +92,7 @@ service_attributes = {
     }
 ```
 
-Publish metadata and service attributes on-chain. The publisher encrypts the service urls. These are only decrypted for datatoken owners upon consume actions.
+Publish metadata and service attributes on-chain. The service urls will be encrypted before going on-chain. These are only decrypted for datatoken owners upon consume actions.
 ```python
 service_endpoint = DataServiceProvider.get_url(ocean.config)
 download_service = ServiceDescriptor.access_service_descriptor(service_attributes, service_endpoint)
