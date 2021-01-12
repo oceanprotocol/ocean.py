@@ -123,7 +123,7 @@ Let's do the actual work to create the pool. It will do several blockchain trans
 ```python
 import time
 
-time.sleep(30) #if you are using a .py file to run as etherium contracts take time to be created. So, include this only if you are using a .py file
+time.sleep(30) #if you are using a .py file, running etherium contracts take time to be created. So, include this only if you are using a .py file
 pool = ocean.pool.create(
    token_address,
    data_token_amount=100.0,
