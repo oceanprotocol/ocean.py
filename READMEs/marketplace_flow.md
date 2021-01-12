@@ -119,11 +119,9 @@ OCEAN_token = BToken(ocean.OCEAN_address)
 assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need Rinkeby OCEAN"
 ```
 
-Let's do the actual work to create the pool. It will do several blockchain transactions: create the base pool, bind OCEAN and datatoken, add OCEAN and datatoken liquidity, and finalize the pool. 
-```python
-import time
+Let's do the actual work to create the pool. It will do several blockchain transactions: create the base pool, bind OCEAN and datatoken, add OCEAN and datatoken liquidity, and finalize the pool.
 
-time.sleep(30) #if you are using a .py file, running etherium contracts take time to be created. So, include this only if you are using a .py file
+```python
 pool = ocean.pool.create(
    token_address,
    data_token_amount=100.0,
@@ -133,6 +131,8 @@ pool = ocean.pool.create(
 pool_address = pool.address
 print(f"pool_address = '{pool_address}'")
 ```
+
+Note: if you put the steps of this README into a .py file, then `create()` above may fail. This happens when previous txs haven't yet gone through on Rinkeby. Ways to address: check that the previous tx went through (cleanest), repeatedly call `create()` until it succeeds (general, and robust), and call `sleep(time_s)` first (simple, but less clean and different for each Ethereum network).
 
 ## 5. Marketplace displays asset for sale 
 
