@@ -80,20 +80,21 @@ class DataServiceProvider:
         if (
             not response or
             not hasattr(response, 'status_code') or
-            not response.status_code != 200
+            response.status_code != 200
         ):
             msg = (f'Could not determine Content-Length and Content-Type '
                    f'{check_url_endpoint}, status {response.status_code}')
             logger.error(msg)
             raise OceanEncryptAssetUrlsError(msg)
 
-        result = response.result
+        result = response.json()['result']
 
         logger.info(
-            f'Check URL was successful, content type: {result.contentType},'
-            f' content length {result.contentLength}')
+            f"Check URL was successful, content type: {result['contentType']},"
+            f" content length {result['contentLength']}')"
+        )
 
-        return response.json()['result']
+        return result
 
     @staticmethod
     def sign_message(wallet, msg, config, nonce=None):
