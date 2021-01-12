@@ -121,6 +121,9 @@ assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need Rinkeby OCEAN"
 
 Let's do the actual work to create the pool. It will do several blockchain transactions: create the base pool, bind OCEAN and datatoken, add OCEAN and datatoken liquidity, and finalize the pool. 
 ```python
+import time
+
+time.sleep(30) #if you are using a .py file to run as etherium contracts take time to be created. So, include this only if you are using a .py file
 pool = ocean.pool.create(
    token_address,
    data_token_amount=100.0,
