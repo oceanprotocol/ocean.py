@@ -17,6 +17,16 @@ from tests.resources.helper_functions import (
     mint_tokens_and_wait, get_resource_path, wait_for_ddo)
 
 
+def test_check_url():
+    check_url_endpoint = DataServiceProvider.build_check_url_endpoint()
+    result = DataServiceProvider.check_url(
+        'http://xkcd.com/349/info.0.json', check_url_endpoint
+    )
+
+    assert result['contentLength'] == '629'
+    assert result['contentType'] == 'application/json'
+
+
 def test_compute_flow():
     ######
     # setup
