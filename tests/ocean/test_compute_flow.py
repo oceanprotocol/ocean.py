@@ -20,7 +20,7 @@ from tests.resources.helper_functions import (
 def test_check_url():
     check_url_endpoint = DataServiceProvider.build_check_url_endpoint()
     result = DataServiceProvider.check_url(
-        'http://xkcd.com/349/info.0.json', check_url_endpoint
+        'https://s3.amazonaws.com/testfiles.oceanprotocol.com/info.0.json', check_url_endpoint
     )
 
     assert result['contentLength'] == '629'
