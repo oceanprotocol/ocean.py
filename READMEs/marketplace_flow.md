@@ -13,10 +13,6 @@ Here are the steps:
 1. Value swap: Bob buys datatokens from market
 1. Bob uses a service by spending datatoken he just purchased (download)
 
-Bonus rounds:
-1. Bonus: run your own local Provider or Aquarius
-1. Bonus: Get datatoken price in USD
-
 Let's go through each step.
 
 ## 1. Setup
@@ -299,41 +295,3 @@ It should output the following. It follows the ARFF format, which is sometimes u
 ...
 ```
 
-
-
-# Bonus Rounds
-
-## Bonus round 1: run Provider and Aquarius locally
-
-Bonus round time! So far, we've used third-party services for Provider and Aquarius (Metadata cache). Now, let's run them locally.
-
-### Aquarius (Metadata cache)
-- Go to [Aquarius' repo](https://github.com/oceanprotocol/aquarius), check its requirements, and make sure it points to Rinkeby.
-- In a new terminal: `docker run oceanprotocol/aquarius:latest` (or other ways, as repo describes)
-- Point the appropriate envvar to it. In your terminal: `export AQUARIUS_URL=<the url that it says "Listening at">`
-
-### Provider
-- Go to [Ocean Provider's repo](https://github.com/oceanprotocol/provider), check its requirements, and make sure it points to Rinkeby.
-- In another new terminal: `docker run oceanprotocol/provider:latest` (or other ways, as repo describes)
-- Point the appropriate envvar to it. In your terminal: `export PROVIDER_URL=<the url that it says "Listening at">`
-
-## Bonus round 2: get price of datatoken in USD
-
-This extends step 5. Whereas step 5 showed the price of a datatoken in OCEAN, we could also get it in USD. How? Find the USDT : OCEAN exchange from another pool.
-
-```python
-from ocean_lib.models.bpool import BPool
-from ocean_lib.ocean.util import from_base_18
-
-OCEAN_usd_pool_address = '' #get externally
-USDT_token_address = '' #get externally
-ocn_pool = BPool(OCEAN_usd_pool_address)
-OCEAN_price = from_base_18(ocn_pool.calcInGivenOut(
-    ocn_pool.getBalance(USDT_token_address), 
-    ocn_pool.getDenormalizedWeight(USDT_token_address),
-    ocn_pool.getBalance(OCEAN_address), 
-    ocn_pool.getDenormalizedWeight(OCEAN_address),
-    tokenAmountOut_base=to_base_18(price_in_OCEAN),
-    swapFee_base=ocn_pool.getSwapFee()
-))
-print(f"1 datatoken costs {price_in_OCEAN * OCEAN_price} USD")
