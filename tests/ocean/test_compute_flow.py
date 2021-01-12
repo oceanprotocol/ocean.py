@@ -23,7 +23,7 @@ def test_check_url():
         'https://s3.amazonaws.com/testfiles.oceanprotocol.com/info.0.json', check_url_endpoint
     )
 
-    assert result['contentLength'] == '629'
+    assert result['contentLength'] == '1161'
     assert result['contentType'] == 'application/json'
 
 
