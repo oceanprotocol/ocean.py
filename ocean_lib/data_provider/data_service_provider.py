@@ -93,15 +93,14 @@ class DataServiceProvider:
 
         if (
             not response or
-            not hasattr(response, 'status_code') or
-            response.status_code != 200
+            not hasattr(response, 'status_code')
         ):
             msg = (f'Could not determine Content-Length and Content-Type '
                    f'{check_url_endpoint}, status {response.status_code}')
             logger.error(msg)
             raise OceanEncryptAssetUrlsError(msg)
 
-        result = response.json()['result']
+        result = response.json()
 
         logger.info(
             f"Check URL was successful, content type: {result['contentType']},"
