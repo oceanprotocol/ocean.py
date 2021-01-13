@@ -69,8 +69,22 @@ class DataServiceProvider:
             return response.json()['encryptedDocument']
 
     @staticmethod
-    def check_url(url, check_url_endpoint):
+    def check_url(url, check_url_endpoint=None):
+        """
+        Uses the checkURL endpoint from provider to check contentLength
+        and contentType of a given URL. Returns a dictionary with said
+        contentLength and contentType keys. The values of the dictionary are
+        empty if the url is invalid.
+
+        :param url: URL to be checked in http or ipfs protocol
+        :param check_url_endpoint: (optional) custom checkURL endpoint
+
+        return: dict
+        """
         payload = json.dumps({'url': url})
+
+        if not check_url_endpoint:
+            check_url_endpoint = DataServiceProvider.build_check_url_endpoint()
 
         response = DataServiceProvider._http_client.post(
             check_url_endpoint, data=payload,
