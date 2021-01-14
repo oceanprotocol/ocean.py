@@ -69,25 +69,25 @@ class DataServiceProvider:
             return response.json()['encryptedDocument']
 
     @staticmethod
-    def check_url(url, check_url_endpoint=None):
+    def fileinfo_url(url, fileinfo_endpoint=None):
         """
-        Uses the checkURL endpoint from provider to check contentLength
+        Uses the fileinfo endpoint from provider to check contentLength
         and contentType of a given URL. Returns a dictionary with said
         contentLength and contentType keys. The values of the dictionary are
         empty if the url is invalid.
 
         :param url: URL to be checked in http or ipfs protocol
-        :param check_url_endpoint: (optional) custom checkURL endpoint
+        :param fileinfo_endpoint: (optional) custom checkURL endpoint
 
         return: dict
         """
         payload = json.dumps({'url': url})
 
-        if not check_url_endpoint:
-            check_url_endpoint = DataServiceProvider.build_check_url_endpoint()
+        if not fileinfo_endpoint:
+            fileinfo_endpoint = DataServiceProvider.build_fileinfo_endpoint()
 
         response = DataServiceProvider._http_client.post(
-            check_url_endpoint, data=payload,
+            fileinfo_endpoint, data=payload,
             headers={'content-type': 'application/json'}
         )
 
@@ -96,11 +96,11 @@ class DataServiceProvider:
             not hasattr(response, 'status_code')
         ):
             msg = (f'Could not determine Content-Length and Content-Type '
-                   f'{check_url_endpoint}, status {response.status_code}')
+                   f'{fileinfo_endpoint}, status {response.status_code}')
             logger.error(msg)
             raise OceanEncryptAssetUrlsError(msg)
 
-        result = response.json()
+        result = response.json()[0]
 
         logger.info(
             f"Check URL was successful, content type: {result['contentType']},"
@@ -414,8 +414,8 @@ class DataServiceProvider:
         return DataServiceProvider.build_endpoint('encrypt', provider_uri)
 
     @staticmethod
-    def build_check_url_endpoint(provider_uri=None):
-        return DataServiceProvider.build_endpoint('checkURL', provider_uri)
+    def build_fileinfo_endpoint(provider_uri=None):
+        return DataServiceProvider.build_endpoint('fileinfo', provider_uri)
 
     @staticmethod
     def build_initialize_endpoint(provider_uri=None):
@@ -469,13 +469,13 @@ class DataServiceProvider:
         return DataServiceProvider.build_encrypt_endpoint(DataServiceProvider.get_url(config))
 
     @staticmethod
-    def get_check_url_endpoint(config):
+    def get_fileinfo_endpoint(config):
         """
         Returns the url to check an URL for ContentType and ContentLength
         :param config: Config
         :return: Url, str
         """
-        return DataServiceProvider.build_check_url_endpoint(
+        return DataServiceProvider.build_fileinfo_endpoint(
             DataServiceProvider.get_url(config)
         )
 

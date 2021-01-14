@@ -17,8 +17,8 @@ from tests.resources.helper_functions import (
     mint_tokens_and_wait, get_resource_path, wait_for_ddo)
 
 
-def test_check_url():
-    result = DataServiceProvider.check_url(
+def test_fileinfo_url():
+    result = DataServiceProvider.fileinfo_url(
         'https://s3.amazonaws.com/testfiles.oceanprotocol.com/info.0.json'
     )
 
