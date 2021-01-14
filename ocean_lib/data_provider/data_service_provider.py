@@ -69,7 +69,7 @@ class DataServiceProvider:
             return response.json()['encryptedDocument']
 
     @staticmethod
-    def fileinfo_url(url, fileinfo_endpoint=None):
+    def fileinfo(identifier, fileinfo_endpoint=None):
         """
         Uses the fileinfo endpoint from provider to check contentLength
         and contentType of a given URL. Returns a dictionary with said
@@ -77,11 +77,12 @@ class DataServiceProvider:
         empty if the url is invalid.
 
         :param url: URL to be checked in http or ipfs protocol
-        :param fileinfo_endpoint: (optional) custom checkURL endpoint
+        :param fileinfo_endpoint: (optional) custom fileinfo endpoint
 
         return: dict
         """
-        payload = json.dumps({'url': url})
+        key_name = 'did' if identifier.startswith('did:op:') else 'url'
+        payload = json.dumps({key_name: identifier})
 
         if not fileinfo_endpoint:
             fileinfo_endpoint = DataServiceProvider.build_fileinfo_endpoint()
@@ -93,21 +94,26 @@ class DataServiceProvider:
 
         if (
             not response or
-            not hasattr(response, 'status_code')
+            not hasattr(response, 'status_code') or
+            response.status_code != 200
         ):
+            status_code = getattr(response, 'status_code', '500')
             msg = (f'Could not determine Content-Length and Content-Type '
-                   f'{fileinfo_endpoint}, status {response.status_code}')
+                   f'{fileinfo_endpoint}, status {status_code}')
             logger.error(msg)
             raise OceanEncryptAssetUrlsError(msg)
 
-        result = response.json()[0]
+        result = response.json()
 
         logger.info(
-            f"Check URL was successful, content type: {result['contentType']},"
-            f" content length {result['contentLength']}')"
+            'Call to fileinfo endpoint was successful, retrieved {} results, {} valid'.format(
+                len(result),
+                len([r for r in result if r['valid']])
+            )
         )
 
         return result
+
 
     @staticmethod
     def sign_message(wallet, msg, config, nonce=None):

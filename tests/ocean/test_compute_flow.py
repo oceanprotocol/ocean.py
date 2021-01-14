@@ -18,13 +18,13 @@ from tests.resources.helper_functions import (
 
 
 def test_fileinfo_url():
-    result = DataServiceProvider.fileinfo_url(
+    result = DataServiceProvider.fileinfo(
         'https://s3.amazonaws.com/testfiles.oceanprotocol.com/info.0.json'
     )
-
-    assert result['valid'] == True
-    assert result['contentLength'] == '1161'
-    assert result['contentType'] == 'application/json'
+    for item in result:
+        assert item['valid'] == True
+        assert item['contentLength'] == '1161'
+        assert item['contentType'] == 'application/json'
 
 
 def test_compute_flow():
@@ -120,3 +120,10 @@ def test_compute_flow():
     status = cons_ocn.compute.stop(did, job_id, consumer_wallet)
     print(f'got job status after requesting stop: {status}')
     assert status, f'something not right about the compute job, got status: {status}'
+
+    fileinfo_result = DataServiceProvider.fileinfo(did)
+
+    for item in fileinfo_result:
+        assert item['valid'] == True
+        assert item['contentLength'] == '1161'
+        assert item['contentType'] == 'application/json'
