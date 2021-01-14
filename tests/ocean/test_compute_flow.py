@@ -126,4 +126,4 @@ def test_compute_flow():
     for item in fileinfo_result:
         assert item['valid'] == True
         assert item['contentLength'] == '138486'
-        assert item['contentType'] == 'application/json'
+        assert item['contentType'] == 'text/plain; charset=utf-8'
