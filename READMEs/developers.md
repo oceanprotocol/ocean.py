@@ -6,11 +6,11 @@ Steps:
 1. **Install dependencies**
 1. **Start blockchain service** (only needed for ganache)
 1. **Deploy** the contracts to {local, rinkeby, mainnet}
-1. **Test** 
+1. **Test**
 
-These steps are detailed below. But first, installation. 
+These steps are detailed below. But first, installation.
 
-## 1. Install dependencies 
+## 1. Install dependencies
 
 Clone this repo, and `cd` into it.
 ```console
@@ -21,17 +21,17 @@ cd ocean.py
 Initialize virtual env't. Activate env't. (BTW use `deactivate` to, well, deactivate.)
 ```console
 python -m venv venv
-source venv/bin/activate 
+source venv/bin/activate
 ```
 
 Install modules in the env't.
 ```
-pip install -r requirements_dev.txt 
+pip install -r requirements_dev.txt
 ```
 
 If you don't have an Infura account and you aim to deploy to `rinkeby`, go to www.infura.io and sign up.
 
-## 2. Start network, deploy to network (Local only) 
+## 2. Start network, deploy to network (Local only)
 
 Open a new terminal. In it, start a local ganache network with the following mnemomic. (The tests need private keys from this mnemomic.)
 ```console
@@ -43,7 +43,7 @@ Open another new terminal. In it:
 * Go to the new repo directory: `cd ocean.py`
 * Deploy to the local network: `npm run deploy`
 
-These steps will have updated the file `artifacts/address.json` in the _contracts_ directory, in the `development` section. 
+These steps will have updated the file `artifacts/address.json` in the _contracts_ directory, in the `development` section.
 
 As a final step: copy the values from that section the into your local _ocean.py_'s artifacts file, e.g. at `./ocean.py/artifacts/address.json`. The result should look something like:
 ```
@@ -75,7 +75,7 @@ Finally, set envvars.
 export CONFIG_FILE=config.ini
 ```
 
-## 4. Test 
+## 4. Test
 
 First, set private key values that the tests will need. The first key's value lines up with the ganache mnemomic setting above.
 ```console
@@ -99,7 +99,7 @@ pytest tests/ocean/test_market_flow.py
 
 Some tests need an Ocean Provider *and* Aquarius (metadata cache) running. Follow [these steps](https://github.com/oceanprotocol/aquarius) to set up Aquarius. Then run tests that use Provider and Aquarius. For example:
 ```console
-pytest 
+pytest
 ```
 
 Alternatively, you can run `barge` to start all required services: ganache, provider, aquarius and deploy the contracts. To start `barge` do this in a separate terminal:
@@ -114,3 +114,10 @@ Now you can run all tests since all services are running:
 ```console
 pytest
 ```
+
+#### Installing the git pre-commit hook (recommended)
+`flake8 --install-hook git`
+
+`git config --bool flake8.strict true`
+
+You can also run isort to order imports `isort {file_path}`
