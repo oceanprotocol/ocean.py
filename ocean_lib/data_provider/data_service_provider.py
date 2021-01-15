@@ -351,6 +351,25 @@ class DataServiceProvider:
         return DataServiceProvider._remove_slash(os.getenv(ENV_PROVIDER_API_VERSION, DataServiceProvider.API_VERSION))
 
     @staticmethod
+    def get_valid_endpoints():
+        service_endpoints = {
+            "download": "/api/v1/services/download",
+            "computeStart": "/api/v1/services/compute",
+            "computeDelete": "/api/v1/services/compute",
+            "computeStop": "/api/v1/services/compute",
+            "computeStatus": "/api/v1/services/compute",
+            "nonce": "/api/v1/services/nonce",
+            "encrypt": "/api/v1/services/encrypt",
+            "initialize": "/api/v1/services/initialize",
+        }
+        valid_names = list()
+        for (key, value) in service_endpoints.items():
+            valid_names.append(tuple([key, value]))
+        return valid_names
+
+    valid_services = get_valid_endpoints()
+
+    @staticmethod
     def build_endpoint(service_name, provider_uri=None, config=None):
         if not provider_uri:
             config = config or ConfigProvider.get_config()
@@ -365,24 +384,39 @@ class DataServiceProvider:
         api_version = DataServiceProvider.get_api_version()
         if api_version not in provider_uri:
             provider_uri = f'{provider_uri}/{api_version}'
-
         return f'{provider_uri}/services/{service_name}'
 
     @staticmethod
     def build_encrypt_endpoint(provider_uri=None):
-        return DataServiceProvider.build_endpoint('encrypt', provider_uri)
+        for i in range(0, len(DataServiceProvider.valid_services)):
+            if DataServiceProvider.valid_services[i][0] == 'encrypt':
+                return DataServiceProvider.build_endpoint(DataServiceProvider.valid_services[i][0],
+                                                          DataServiceProvider.valid_services[i][1])
+        # return DataServiceProvider.build_endpoint('encrypt', provider_uri)
 
     @staticmethod
     def build_initialize_endpoint(provider_uri=None):
-        return DataServiceProvider.build_endpoint('initialize', provider_uri)
+        for i in range(0, len(DataServiceProvider.valid_services)):
+            if DataServiceProvider.valid_services[i][0] == 'initialize':
+                return DataServiceProvider.build_endpoint(DataServiceProvider.valid_services[i][0],
+                                                          DataServiceProvider.valid_services[i][1])
+        # return DataServiceProvider.build_endpoint('initialize', provider_uri)
 
     @staticmethod
     def build_download_endpoint(provider_uri=None):
-        return DataServiceProvider.build_endpoint('download', provider_uri)
+        for i in range(0, len(DataServiceProvider.valid_services)):
+            if DataServiceProvider.valid_services[i][0] == 'download':
+                return DataServiceProvider.build_endpoint(DataServiceProvider.valid_services[i][0],
+                                                          DataServiceProvider.valid_services[i][1])
+        # return DataServiceProvider.build_endpoint('download', provider_uri)
 
     @staticmethod
     def build_compute_endpoint(provider_uri=None):
-        return DataServiceProvider.build_endpoint('compute', provider_uri)
+        for i in range(0, len(DataServiceProvider.valid_services)):
+            if DataServiceProvider.valid_services[i][0] == 'compute':
+                return DataServiceProvider.build_endpoint(DataServiceProvider.valid_services[i][0],
+                                                          DataServiceProvider.valid_services[i][1])
+        # return DataServiceProvider.build_endpoint('compute', provider_uri)
 
     @staticmethod
     def get_initialize_endpoint(service_endpoint):
