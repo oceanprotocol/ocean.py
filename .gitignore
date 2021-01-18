@@ -12,3 +12,6 @@ ocean_lib.egg-info/
 /reports/
 /scripts/
 
+.coverage
+.idea/
+.tox/
