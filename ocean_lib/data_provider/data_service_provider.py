@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import re
+import requests
 from collections import namedtuple
 from json import JSONDecodeError
 
@@ -34,6 +35,7 @@ class DataServiceProvider:
     """
     _http_client = get_requests_session()
     API_VERSION = '/api/v1'
+    provider_info = None
 
     @staticmethod
     def set_http_client(http_client):
@@ -350,19 +352,11 @@ class DataServiceProvider:
         return DataServiceProvider._remove_slash(os.getenv(ENV_PROVIDER_API_VERSION, DataServiceProvider.API_VERSION))
 
     @staticmethod
-    def get_valid_endpoints():
-        service_endpoints = {
-            "download": ["GET", "/api/v1/services/download"],
-            "computeStart": ["POST", "/api/v1/services/compute"],
-            "computeDelete": ["DELETE", "/api/v1/services/compute"],
-            "computeStop": ["PUT", "/api/v1/services/compute"],
-            "computeStatus": ["GET", "/api/v1/services/compute"],
-            "nonce": ["GET", "/api/v1/services/nonce"],
-            "encrypt": ["POST", "/api/v1/services/encrypt"],
-            "initialize": ["GET", "/api/v1/services/initialize"],
-            "checkURL": ["POST", "/api/v1/services/checkURL"],
-        }
-        return service_endpoints
+    def get_provider_information():
+        if DataServiceProvider.provider_info is None:
+            DataServiceProvider.provider_info = requests.get('/')
+            DataServiceProvider.provider_info = DataServiceProvider.provider_info.json()
+        return DataServiceProvider.provider_info
 
     @staticmethod
     def build_endpoint(service_name, provider_uri=None, config=None):
@@ -374,14 +368,16 @@ class DataServiceProvider:
         parts = provider_uri.split('/')
         if parts[-2] == 'services':
             base_url = '/'.join(parts[:-2])
-            return f'{base_url}/services/initialize'
+            return "GET", f'{base_url}/services/initialize'
 
         api_version = DataServiceProvider.get_api_version()
         if api_version not in provider_uri:
             provider_uri = f'{provider_uri}/{api_version}'
-        valid_services = DataServiceProvider.get_valid_endpoints()
-        method, url = valid_services[service_name]
-        return method, f'{provider_uri}/services/{url}'
+
+        valid_provider_info = DataServiceProvider.get_provider_information()
+        method, url = valid_provider_info['serviceEndpoints'][service_name]
+        url = url.replace('api/v1/', '')
+        return method, f'{provider_uri}{url}'
 
     @staticmethod
     def build_encrypt_endpoint(provider_uri=None):

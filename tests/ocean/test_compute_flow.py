@@ -18,8 +18,8 @@ from tests.resources.helper_functions import (
 
 
 def test_expose_endpoints():
-    valid_endpoints = DataServiceProvider.get_valid_endpoints()
-    assert len(valid_endpoints) == 9
+    valid_endpoints = DataServiceProvider.get_provider_information()
+    assert len(valid_endpoints['serviceEndpoints']) == 9
 
     
 def test_compute_flow():
