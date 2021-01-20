@@ -354,7 +354,7 @@ class DataServiceProvider:
     @staticmethod
     def get_provider_information():
         if DataServiceProvider.provider_info is None:
-            DataServiceProvider.provider_info = requests.get('/')
+            DataServiceProvider.provider_info = requests.get('http://localhost:8030')
             DataServiceProvider.provider_info = DataServiceProvider.provider_info.json()
         return DataServiceProvider.provider_info
 
@@ -368,7 +368,7 @@ class DataServiceProvider:
         parts = provider_uri.split('/')
         if parts[-2] == 'services':
             base_url = '/'.join(parts[:-2])
-            return "GET", f'{base_url}/services/initialize'
+            return f'{base_url}/services/initialize'
 
         api_version = DataServiceProvider.get_api_version()
         if api_version not in provider_uri:
@@ -377,7 +377,7 @@ class DataServiceProvider:
         valid_provider_info = DataServiceProvider.get_provider_information()
         method, url = valid_provider_info['serviceEndpoints'][service_name]
         url = url.replace('api/v1/', '')
-        return method, f'{provider_uri}{url}'
+        return f'{provider_uri}{url}'
 
     @staticmethod
     def build_encrypt_endpoint(provider_uri=None):
@@ -393,7 +393,7 @@ class DataServiceProvider:
 
     @staticmethod
     def build_compute_endpoint(provider_uri=None):
-        return DataServiceProvider.build_endpoint('compute', provider_uri)
+        return DataServiceProvider.build_endpoint('computeStatus', provider_uri)
 
     @staticmethod
     def get_initialize_endpoint(service_endpoint):
