@@ -352,9 +352,10 @@ class DataServiceProvider:
         return DataServiceProvider._remove_slash(os.getenv(ENV_PROVIDER_API_VERSION, DataServiceProvider.API_VERSION))
 
     @staticmethod
-    def get_provider_information():
+    def get_service_endpoints():
         if DataServiceProvider.provider_info is None:
-            DataServiceProvider.provider_info = requests.get('http://localhost:8030')
+            config = ConfigProvider.get_config()
+            DataServiceProvider.provider_info = requests.get(config.provider_url)
             DataServiceProvider.provider_info = DataServiceProvider.provider_info.json()
         return DataServiceProvider.provider_info
 
@@ -374,7 +375,7 @@ class DataServiceProvider:
         if api_version not in provider_uri:
             provider_uri = f'{provider_uri}/{api_version}'
 
-        valid_provider_info = DataServiceProvider.get_provider_information()
+        valid_provider_info = DataServiceProvider.get_service_endpoints()
         method, url = valid_provider_info['serviceEndpoints'][service_name]
         url = url.replace('api/v1/', '')
         return f'{provider_uri}{url}'
@@ -394,6 +395,22 @@ class DataServiceProvider:
     @staticmethod
     def build_compute_endpoint(provider_uri=None):
         return DataServiceProvider.build_endpoint('computeStatus', provider_uri)
+
+    @staticmethod
+    def build_stop_compute(provider_uri=None):
+        return DataServiceProvider.build_endpoint('computeStop', provider_uri)
+
+    @staticmethod
+    def build_start_compute(provider_uri=None):
+        return DataServiceProvider.build_endpoint('computeStart', provider_uri)
+
+    @staticmethod
+    def build_delete_compute(provider_uri=None):
+        return DataServiceProvider.build_endpoint('computeDelete', provider_uri)
+
+    @staticmethod
+    def build_fileinfo(provider_uri=None):
+        return DataServiceProvider.build_endpoint('fileinfo', provider_uri)
 
     @staticmethod
     def get_initialize_endpoint(service_endpoint):

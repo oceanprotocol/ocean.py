@@ -18,7 +18,7 @@ from tests.resources.helper_functions import (
 
 
 def test_expose_endpoints():
-    valid_endpoints = DataServiceProvider.get_provider_information()
+    valid_endpoints = DataServiceProvider.get_service_endpoints()
     assert len(valid_endpoints['serviceEndpoints']) == 9
     assert 'serviceEndpoints' in valid_endpoints
     assert 'software' in valid_endpoints
