@@ -14,8 +14,7 @@ services:
 before_install:
   - git clone https://github.com/oceanprotocol/barge
   - cd barge
-  - git checkout v3
-  - export CONTRACTS_VERSION=latest
+  - export CONTRACTS_VERSION=v0.5.6
   - bash -x start_ocean.sh --no-dashboard 2>&1 > start_ocean.log &
   - cd ..
   - |
