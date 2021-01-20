@@ -20,6 +20,11 @@ from tests.resources.helper_functions import (
 def test_expose_endpoints():
     valid_endpoints = DataServiceProvider.get_provider_information()
     assert len(valid_endpoints['serviceEndpoints']) == 9
+    assert 'serviceEndpoints' in valid_endpoints
+    assert 'software' in valid_endpoints
+    assert 'version' in valid_endpoints
+    assert 'network-url' in valid_endpoints
+    assert 'provider-address' in valid_endpoints
 
     
 def test_compute_flow():
