@@ -81,7 +81,7 @@ class DataServiceProvider:
 
     @staticmethod
     def get_nonce(user_address, config):
-        url = DataServiceProvider.build_endpoint('nonce')
+        method, url = DataServiceProvider.build_endpoint('nonce')
         response = DataServiceProvider._http_client.get(
             f'{url}?userAddress={user_address}'
         )
@@ -353,11 +353,14 @@ class DataServiceProvider:
 
     @staticmethod
     def get_service_endpoints():
+        """
+        Return the service endpoints from the provider URL.
+        """
         if DataServiceProvider.provider_info is None:
             config = ConfigProvider.get_config()
             DataServiceProvider.provider_info = requests.get(config.provider_url)
             DataServiceProvider.provider_info = DataServiceProvider.provider_info.json()
-        return DataServiceProvider.provider_info
+        return DataServiceProvider.provider_info['serviceEndpoints']
 
     @staticmethod
     def build_endpoint(service_name, provider_uri=None, config=None):
@@ -369,16 +372,16 @@ class DataServiceProvider:
         parts = provider_uri.split('/')
         if parts[-2] == 'services':
             base_url = '/'.join(parts[:-2])
-            return f'{base_url}/services/initialize'
+            return "GET", f'{base_url}/services/initialize'
 
         api_version = DataServiceProvider.get_api_version()
         if api_version not in provider_uri:
             provider_uri = f'{provider_uri}/{api_version}'
 
-        valid_provider_info = DataServiceProvider.get_service_endpoints()
-        method, url = valid_provider_info['serviceEndpoints'][service_name]
+        service_endpoints = DataServiceProvider.get_service_endpoints()
+        method, url = service_endpoints[service_name]
         url = url.replace('api/v1/', '')
-        return f'{provider_uri}{url}'
+        return method, f'{provider_uri}{url}'
 
     @staticmethod
     def build_encrypt_endpoint(provider_uri=None):
@@ -417,7 +420,7 @@ class DataServiceProvider:
         parts = service_endpoint.split('/')
         if parts[-2] == 'services':
             base_url = '/'.join(parts[:-2])
-            return f'{base_url}/services/initialize'
+            return "GET", f'{base_url}/services/initialize'
 
         return DataServiceProvider.build_initialize_endpoint(service_endpoint)
 

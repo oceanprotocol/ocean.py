@@ -46,7 +46,7 @@ def download_asset_files(
         raise AssertionError(
             'Consume asset failed, service definition is missing the "serviceEndpoint".')
 
-    service_endpoint = data_provider.build_download_endpoint(service_endpoint)
+    download_method, service_endpoint = data_provider.build_download_endpoint(service_endpoint)
     if not os.path.isabs(destination):
         destination = os.path.abspath(destination)
     if not os.path.exists(destination):
