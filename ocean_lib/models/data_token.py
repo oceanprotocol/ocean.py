@@ -382,7 +382,7 @@ class DataToken(ContractBase):
                    from_wallet: Wallet):
         return self.send_transaction(
             'startOrder',
-            (consumer, amount, serviceId, mrktFeeCollector, from_wallet.address),
+            (consumer, amount, serviceId, mrktFeeCollector),
             from_wallet,
         )
 
