@@ -43,6 +43,9 @@ def get_publisher_wallet() -> Wallet:
 def get_consumer_wallet() -> Wallet:
     return Wallet(get_web3(), private_key=os.environ.get('TEST_PRIVATE_KEY2'))
 
+def get_another_consumer_wallet() -> Wallet:
+    return Wallet(get_web3(), private_key=os.environ.get('TEST_PRIVATE_KEY3'))
+
 
 def get_factory_deployer_wallet(network):
     if network == 'ganache':
@@ -75,6 +78,13 @@ def get_consumer_ocean_instance(use_provider_mock:bool=False) -> Ocean:
     data_provider = DataProviderMock if use_provider_mock else None
     ocn = Ocean(data_provider=data_provider)
     account = get_consumer_wallet()
+    ocn.main_account = account
+    return ocn
+
+def get_another_consumer_ocean_instance(use_provider_mock:bool=False) -> Ocean:
+    data_provider = DataProviderMock if use_provider_mock else None
+    ocn = Ocean(data_provider=data_provider)
+    account = get_another_consumer_wallet()
     ocn.main_account = account
     return ocn
 
