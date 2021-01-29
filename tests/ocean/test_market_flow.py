@@ -9,10 +9,12 @@ from ocean_utils.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from tests.resources.helper_functions import (
     get_consumer_wallet,
+    get_another_consumer_wallet,
     get_publisher_wallet,
     get_registered_ddo,
     get_publisher_ocean_instance,
     get_consumer_ocean_instance,
+    get_another_consumer_ocean_instance,
     mint_tokens_and_wait,
 )
 
@@ -96,7 +98,7 @@ def test_payer_market_flow():
     assert asset.data_token_address
 
     another_consumer_wallet = get_another_consumer_wallet()
-    consumer_wallet = get_another_consumer_wallet()
+    consumer_wallet = get_consumer_wallet()
 
     service = asset.get_service(service_type=ServiceTypes.ASSET_ACCESS)
     sa = ServiceAgreement.from_json(service.as_dictionary())
@@ -119,15 +121,15 @@ def test_payer_market_flow():
     order_requirements = consumer_ocean.assets.order(asset.did, another_consumer_wallet.address, sa.index)
 
     ######
-    # Pay for the service
+    # Pay for the service and have another_consumer_wallet as consumer
     _order_tx_id = consumer_ocean.assets.pay_for_service(
         order_requirements.amount,
         order_requirements.data_token_address,
         asset.did,
         service.index,
         '0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9',
-        another_consumer_wallet,
-        consumer_wallet.address
+        consumer_wallet,
+        another_consumer_wallet.address
     )
 
     # Download the asset files
