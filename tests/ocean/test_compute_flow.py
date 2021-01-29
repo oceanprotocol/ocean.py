@@ -94,7 +94,8 @@ def test_compute_flow():
         compute_ddo.did,
         service.index,
         '0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9',
-        consumer_wallet
+        consumer_wallet,
+        consumer_wallet.address
     )
 
     ######

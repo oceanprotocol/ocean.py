@@ -223,11 +223,12 @@ class DataToken(ContractBase):
         transfer_logs = self.events.Transfer().processReceipt(tx_receipt)
         receiver_to_transfers = {}
         for tr in transfer_logs:
-            if tr.args.to not in receiver_to_transfers:
-                receiver_to_transfers[tr.args.to] = []
-
-            receiver_to_transfers[tr.args.to].append(tr)
-
+            if order_log.args.consumer == sender or order_log.args.payer == sender:
+                if tr.args.to not in receiver_to_transfers:
+                    receiver_to_transfers[tr.args.to] = []
+                receiver_to_transfers[tr.args.to].append(tr)
+            else:
+                raise AssertionError(f'the sender {sender} is neither consumer, neither payer. Access denied.')
         if receiver not in receiver_to_transfers:
             raise AssertionError(f'receiver {receiver} is not found in the transfer events.')
         transfers = sorted(receiver_to_transfers[receiver], key=lambda x: x.args.value)
@@ -377,11 +378,12 @@ class DataToken(ContractBase):
     def approveMinter(self, from_wallet) -> str:
         return self.send_transaction('approveMinter', (), from_wallet)
 
-    def startOrder(self, consumer: str, amount: int, serviceId: int, mrktFeeCollector: str, from_wallet: Wallet):
+    def startOrder(self, consumer: str, amount: int, serviceId: int, mrktFeeCollector: str,
+                   from_wallet: Wallet, payer):
         return self.send_transaction(
             'startOrder',
-            (consumer, amount, serviceId, mrktFeeCollector),
-            from_wallet
+            (consumer, amount, serviceId, mrktFeeCollector, payer),
+            from_wallet,
         )
 
     def finishOrder(self, orderTxId: str, consumer: str, amount: int,
