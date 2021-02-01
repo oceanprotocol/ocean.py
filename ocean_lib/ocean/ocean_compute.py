@@ -213,7 +213,7 @@ class OceanCompute:
 
         output = OceanCompute.check_output_dict(output, consumer_wallet.address, data_provider=self._data_provider)
         asset = resolve_asset(did, metadata_store_url=self._config.aquarius_url)
-        method, service_endpoint = self._get_service_endpoint(did, asset)
+        _, service_endpoint = self._get_service_endpoint(did, asset)
 
         sa = ServiceAgreement.from_ddo(ServiceTypes.CLOUD_COMPUTE, asset)
 
@@ -243,7 +243,7 @@ class OceanCompute:
         :param wallet: Wallet instance
         :return: dict the status for an existing compute job, keys are (ok, status, statusText)
         """
-        method, service_endpoint = self._get_service_endpoint(did)
+        _, service_endpoint = self._get_service_endpoint(did)
         msg = f'{wallet.address}{job_id or ""}{did}'
         return OceanCompute._status_from_job_info(
             self._data_provider.compute_job_status(
@@ -262,7 +262,7 @@ class OceanCompute:
         :param wallet: Wallet instance
         :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
         """
-        method, service_endpoint = self._get_service_endpoint(did)
+        _, service_endpoint = self._get_service_endpoint(did)
         msg = f'{wallet.address}{job_id or ""}{did}'
         info_dict = self._data_provider.compute_job_result(
             did,
@@ -286,7 +286,7 @@ class OceanCompute:
         :param wallet: Wallet instance
         :return: dict the status for the stopped compute job, keys are (ok, status, statusText)
         """
-        method, service_endpoint = self._get_service_endpoint(did)
+        _, service_endpoint = self._get_service_endpoint(did)
         msg = f'{wallet.address}{job_id or ""}{did}'
         return self._status_from_job_info(
             self._data_provider.stop_compute_job(
@@ -307,7 +307,7 @@ class OceanCompute:
         :param wallet: Wallet instance
         :return: str -- id of the new compute job
         """
-        method, service_endpoint = self._get_service_endpoint(did)
+        _, service_endpoint = self._get_service_endpoint(did)
         msg = f'{wallet.address}{job_id or ""}{did}'
         job_info = self._data_provider.restart_compute_job(
                 did,

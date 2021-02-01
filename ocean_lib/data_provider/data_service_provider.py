@@ -81,7 +81,7 @@ class DataServiceProvider:
 
     @staticmethod
     def get_nonce(user_address, config):
-        method, url = DataServiceProvider.build_endpoint('nonce')
+        _, url = DataServiceProvider.build_endpoint('nonce')
         response = DataServiceProvider._http_client.get(
             f'{url}?userAddress={user_address}'
         )
@@ -358,8 +358,8 @@ class DataServiceProvider:
         """
         if DataServiceProvider.provider_info is None:
             config = ConfigProvider.get_config()
-            DataServiceProvider.provider_info = requests.get(config.provider_url)
-            DataServiceProvider.provider_info = DataServiceProvider.provider_info.json()
+            DataServiceProvider.provider_info = requests.get(config.provider_url).json()
+
         return DataServiceProvider.provider_info['serviceEndpoints']
 
     @staticmethod
@@ -380,7 +380,8 @@ class DataServiceProvider:
 
         service_endpoints = DataServiceProvider.get_service_endpoints()
         method, url = service_endpoints[service_name]
-        url = url.replace('api/v1/', '')
+        url = url.replace(api_version, '')
+
         return method, f'{provider_uri}{url}'
 
     @staticmethod

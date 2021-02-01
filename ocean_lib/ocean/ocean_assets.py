@@ -224,7 +224,7 @@ class OceanAssets:
         logger.debug('Encrypting content urls in the metadata.')
 
         publisher_signature = self._data_provider.sign_message(publisher_wallet, asset.asset_id, self._config)
-        encrypt_endpoint_method, encrypt_endpoint = self._data_provider.build_encrypt_endpoint(provider_uri)
+        _, encrypt_endpoint = self._data_provider.build_encrypt_endpoint(provider_uri)
         files_encrypted = self._data_provider.encrypt_files_dict(
             metadata_copy['main']['files'],
             encrypt_endpoint,
@@ -359,7 +359,7 @@ class OceanAssets:
 
         dt_address = asset.data_token_address
 
-        initialize_method, initialize_url = self._data_provider.get_initialize_endpoint(sa.service_endpoint)
+        _, initialize_url = self._data_provider.get_initialize_endpoint(sa.service_endpoint)
         order_requirements = self._data_provider.get_order_requirements(
             asset.did, initialize_url, consumer_address, sa.index, sa.type, dt_address
         )
