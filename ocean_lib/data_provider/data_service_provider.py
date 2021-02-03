@@ -39,7 +39,7 @@ class DataServiceProvider:
 
     @staticmethod
     def get_http_client():
-        """Get the http client"""
+        """Get the http client."""
         return DataServiceProvider._http_client
 
     @staticmethod
