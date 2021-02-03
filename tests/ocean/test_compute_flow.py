@@ -17,6 +17,13 @@ from tests.resources.helper_functions import (
     mint_tokens_and_wait, get_resource_path, wait_for_ddo)
 
 
+def test_expose_endpoints():
+    valid_endpoints = DataServiceProvider.get_service_endpoints()
+    assert len(valid_endpoints) == len(DataServiceProvider.provider_info['serviceEndpoints'])
+    assert [valid_endpoints[key] for key in set(DataServiceProvider.provider_info['serviceEndpoints']) &
+            set(valid_endpoints)]
+
+    
 def test_compute_flow():
     ######
     # setup

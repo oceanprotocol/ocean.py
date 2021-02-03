@@ -75,7 +75,7 @@ class DataProviderMock(object):
     def build_download_endpoint(service_name):
         service_name = 'download'
         provider_uri = 'http://localhost:8030'
-        return f'{provider_uri}/services/{service_name}'
+        return "GET", f'{provider_uri}/services/{service_name}'
 
     @staticmethod
     def _get_file_name(response):

@@ -7,6 +7,7 @@ import json
 import logging
 import os
 import re
+import requests
 from collections import namedtuple
 from json import JSONDecodeError
 
@@ -34,6 +35,7 @@ class DataServiceProvider:
     """
     _http_client = get_requests_session()
     API_VERSION = '/api/v1'
+    provider_info = None
 
     @staticmethod
     def get_http_client():
@@ -84,7 +86,7 @@ class DataServiceProvider:
 
     @staticmethod
     def get_nonce(user_address, config):
-        url = DataServiceProvider.build_endpoint('nonce')
+        _, url = DataServiceProvider.build_endpoint('nonce')
         response = DataServiceProvider._http_client.get(
             f'{url}?userAddress={user_address}'
         )
@@ -355,6 +357,17 @@ class DataServiceProvider:
         return DataServiceProvider._remove_slash(os.getenv(ENV_PROVIDER_API_VERSION, DataServiceProvider.API_VERSION))
 
     @staticmethod
+    def get_service_endpoints():
+        """
+        Return the service endpoints from the provider URL.
+        """
+        if DataServiceProvider.provider_info is None:
+            config = ConfigProvider.get_config()
+            DataServiceProvider.provider_info = requests.get(config.provider_url).json()
+
+        return DataServiceProvider.provider_info['serviceEndpoints']
+
+    @staticmethod
     def build_endpoint(service_name, provider_uri=None, config=None):
         if not provider_uri:
             config = config or ConfigProvider.get_config()
@@ -364,13 +377,17 @@ class DataServiceProvider:
         parts = provider_uri.split('/')
         if parts[-2] == 'services':
             base_url = '/'.join(parts[:-2])
-            return f'{base_url}/services/initialize'
+            return "GET", f'{base_url}/services/initialize'
 
         api_version = DataServiceProvider.get_api_version()
         if api_version not in provider_uri:
             provider_uri = f'{provider_uri}/{api_version}'
 
-        return f'{provider_uri}/services/{service_name}'
+        service_endpoints = DataServiceProvider.get_service_endpoints()
+        method, url = service_endpoints[service_name]
+        url = url.replace(api_version, '')
+
+        return method, f'{provider_uri}{url}'
 
     @staticmethod
     def build_encrypt_endpoint(provider_uri=None):
@@ -386,14 +403,30 @@ class DataServiceProvider:
 
     @staticmethod
     def build_compute_endpoint(provider_uri=None):
-        return DataServiceProvider.build_endpoint('compute', provider_uri)
+        return DataServiceProvider.build_endpoint('computeStatus', provider_uri)
+
+    @staticmethod
+    def build_stop_compute(provider_uri=None):
+        return DataServiceProvider.build_endpoint('computeStop', provider_uri)
+
+    @staticmethod
+    def build_start_compute(provider_uri=None):
+        return DataServiceProvider.build_endpoint('computeStart', provider_uri)
+
+    @staticmethod
+    def build_delete_compute(provider_uri=None):
+        return DataServiceProvider.build_endpoint('computeDelete', provider_uri)
+
+    @staticmethod
+    def build_fileinfo(provider_uri=None):
+        return DataServiceProvider.build_endpoint('fileinfo', provider_uri)
 
     @staticmethod
     def get_initialize_endpoint(service_endpoint):
         parts = service_endpoint.split('/')
         if parts[-2] == 'services':
             base_url = '/'.join(parts[:-2])
-            return f'{base_url}/services/initialize'
+            return "GET", f'{base_url}/services/initialize'
 
         return DataServiceProvider.build_initialize_endpoint(service_endpoint)
 
