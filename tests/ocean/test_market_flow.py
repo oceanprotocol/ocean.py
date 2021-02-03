@@ -73,7 +73,7 @@ def test_market_flow():
         consumer_ocean.config.downloads_path
     )
 
-    assert len(os.listdir(asset_folder)) > 1
+    assert len(os.listdir(asset_folder)) >= 1
 
     orders = consumer_ocean.get_user_orders(consumer_wallet.address, asset.asset_id)
     assert orders, f'no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}'
@@ -147,7 +147,7 @@ def test_payer_market_flow():
                                    os.path.join(f'datafile.{asset.asset_id}.{sa.index}'))
     assert os.path.exists(asset_folder)
     assert downloaded_file.split('/')[-1] in os.listdir(asset_folder)
-    assert len(os.listdir(asset_folder)) > 1
+    assert len(os.listdir(asset_folder)) >= 1
 
     orders = consumer_ocean.get_user_orders(consumer_wallet.address, asset.asset_id)
     assert orders, f'no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}'
