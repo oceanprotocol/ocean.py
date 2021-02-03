@@ -90,7 +90,7 @@ def test_payer_market_flow():
 
     publisher_ocean = get_publisher_ocean_instance()
     consumer_ocean = get_consumer_ocean_instance()
-    another_consumer_ocean = get_another_consumer_ocean_instance()
+    another_consumer_ocean = get_another_consumer_ocean_instance(use_provider_mock=True)
 
     # Register Asset
     asset = get_registered_ddo(publisher_ocean, pub_wallet)
@@ -131,16 +131,22 @@ def test_payer_market_flow():
         consumer_wallet,
         another_consumer_wallet.address
     )
+    asset_folder = None
+    assert asset_folder is None
+    if asset_folder is None:
+        # Download the asset files
+        asset_folder = another_consumer_ocean.assets.download(
+            asset.did,
+            sa.index,
+            another_consumer_wallet,
+            _order_tx_id,
+            another_consumer_ocean.config.downloads_path
+        )
 
-    # Download the asset files
-    asset_folder = consumer_ocean.assets.download(
-        asset.did,
-        sa.index,
-        another_consumer_wallet,
-        _order_tx_id,
-        consumer_ocean.config.downloads_path
-    )
-
+    downloaded_file = os.path.join(asset_folder,
+                                   os.path.join(f'datafile.{asset.asset_id}.{sa.index}'))
+    assert os.path.exists(asset_folder)
+    assert downloaded_file.split('/')[-1] in os.listdir(asset_folder)
     assert len(os.listdir(asset_folder)) > 1
 
     orders = consumer_ocean.get_user_orders(consumer_wallet.address, asset.asset_id)

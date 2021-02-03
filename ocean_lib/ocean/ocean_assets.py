@@ -351,15 +351,27 @@ class OceanAssets:
         """
         assert service_type or service_index, f'One of service_index or service_type is required.'
         asset = self.resolve(did)
+        print("Asset: ", asset)
         if service_type:
             sa = ServiceAgreement.from_ddo(service_type, asset)
+            print("If service_type is not None, then sa is: ", sa)
         else:
+            print("The service_type is None")
             service = asset.get_service_by_index(service_index)
+            print("The default service is: ", service)
             sa = ServiceAgreement.from_ddo(service.type, asset)
+            print("The default sa is: ", sa)
+            print("The default type of the sa is: ", sa.type)
 
         dt_address = asset.data_token_address
+        print("DataToken address is: ", dt_address)
 
         initialize_url = self._data_provider.get_initialize_endpoint(sa.service_endpoint)
+        # import pdb; pdb.set_trace()
+        print("Initialize URL is: ", initialize_url)
+        print("Consumer_address is: ", consumer_address)
+        print("Asset_id is: ", asset.did)
+        print("sa index is: ", sa.index)
         order_requirements = self._data_provider.get_order_requirements(
             asset.did, initialize_url, consumer_address, sa.index, sa.type, dt_address
         )

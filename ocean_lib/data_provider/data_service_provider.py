@@ -22,7 +22,6 @@ from ocean_lib.web3_internal.web3helper import Web3Helper
 
 logger = logging.getLogger(__name__)
 
-
 OrderRequirements = namedtuple('OrderRequirements', ('amount', 'data_token_address', 'receiver_address', 'nonce'))
 
 
@@ -35,6 +34,11 @@ class DataServiceProvider:
     """
     _http_client = get_requests_session()
     API_VERSION = '/api/v1'
+
+    @staticmethod
+    def get_http_client():
+        """Get the http client"""
+        return DataServiceProvider._http_client
 
     @staticmethod
     def set_http_client(http_client):
@@ -472,9 +476,9 @@ class DataServiceProvider:
     @staticmethod
     def _prepare_compute_payload(
             did: str, consumer_address: str, service_id: int, service_type: str,
-            token_address: str, order_tx_id: str, signature: str=None,
-            algorithm_did: str=None, algorithm_meta=None, algorithm_tx_id: str='',
-            algorithm_data_token: str='', output: dict=None, job_id: str=None):
+            token_address: str, order_tx_id: str, signature: str = None,
+            algorithm_did: str = None, algorithm_meta=None, algorithm_tx_id: str = '',
+            algorithm_data_token: str = '', output: dict = None, job_id: str = None):
         assert algorithm_did or algorithm_meta, 'either an algorithm did or an algorithm meta must be provided.'
 
         if algorithm_meta:
