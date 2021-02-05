@@ -217,7 +217,7 @@ class DataToken(ContractBase):
 
         # verify sender of the tx using the Tx record
         tx = web3.eth.getTransaction(tx_id)
-        if sender not in [order_log.args.consumer, order_log.args.payer]:
+        if sender not in [order_log.args.consumer, order_log.args.payer]: 
             raise AssertionError(f'sender of order transaction is not the same as the requesting account.')
 
         transfer_logs = self.events.Transfer().processReceipt(tx_receipt)
