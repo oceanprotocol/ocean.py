@@ -106,7 +106,6 @@ Alternatively, you can run `barge` to start all required services: ganache, prov
 ```console
 git clone https://github.com/oceanprotocol/barge
 cd barge
-git checkout v3
 bash -x start_ocean.sh 2>&1 > start_ocean.log &
 ```
 
