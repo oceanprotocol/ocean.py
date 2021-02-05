@@ -23,6 +23,13 @@ def test_expose_endpoints():
     assert [valid_endpoints[key] for key in set(DataServiceProvider.provider_info['serviceEndpoints']) &
             set(valid_endpoints)]
 
+def test_provider_address():
+    provider_address = DataServiceProvider.get_provider_address()
+    assert provider_address, f'Failed to get provider addres.'
+
+def test_provider_address_with_url():
+    provider_address = DataServiceProvider.get_provider_address(DataServiceProvider.get_url())
+    assert provider_address, f'Failed to get provider addres.'
     
 def test_compute_flow():
     ######
