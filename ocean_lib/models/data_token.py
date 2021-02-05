@@ -217,18 +217,15 @@ class DataToken(ContractBase):
 
         # verify sender of the tx using the Tx record
         tx = web3.eth.getTransaction(tx_id)
-        if order_log.args.consumer != sender and order_log.args.payer != sender:
+        if sender not in [order_log.args.consumer, order_log.args.payer]:
             raise AssertionError(f'sender of order transaction is not the same as the requesting account.')
 
         transfer_logs = self.events.Transfer().processReceipt(tx_receipt)
         receiver_to_transfers = {}
         for tr in transfer_logs:
-            if order_log.args.consumer == sender or order_log.args.payer == sender:
-                if tr.args.to not in receiver_to_transfers:
-                    receiver_to_transfers[tr.args.to] = []
-                receiver_to_transfers[tr.args.to].append(tr)
-            else:
-                raise AssertionError(f'the sender {sender} is neither consumer, neither payer. Access denied.')
+            if tr.args.to not in receiver_to_transfers:
+                receiver_to_transfers[tr.args.to] = []
+            receiver_to_transfers[tr.args.to].append(tr)
         if receiver not in receiver_to_transfers:
             raise AssertionError(f'receiver {receiver} is not found in the transfer events.')
         transfers = sorted(receiver_to_transfers[receiver], key=lambda x: x.args.value)
