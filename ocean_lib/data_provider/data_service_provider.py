@@ -372,7 +372,6 @@ class DataServiceProvider:
                 config = ConfigProvider.get_config()
                 DataServiceProvider.provider_info = requests.get(config.provider_url).json()
             return DataServiceProvider.provider_info['provider-address']
-        
         provider_info = requests.get(provider_uri).json()
         return provider_info['provider-address']
 

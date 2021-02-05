@@ -25,11 +25,11 @@ def test_expose_endpoints():
 
 def test_provider_address():
     provider_address = DataServiceProvider.get_provider_address()
-    assert provider_address, f'Failed to get provider addres.'
+    assert provider_address, 'Failed to get provider address.'
 
 def test_provider_address_with_url():
-    provider_address = DataServiceProvider.get_provider_address(DataServiceProvider.get_url())
-    assert provider_address, f'Failed to get provider addres.'
+    provider_address = DataServiceProvider.get_provider_address(DataServiceProvider.get_url(None))
+    assert provider_address, 'Failed to get provider address.'
     
 def test_compute_flow():
     ######
