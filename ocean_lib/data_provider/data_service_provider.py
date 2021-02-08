@@ -363,6 +363,19 @@ class DataServiceProvider:
         return DataServiceProvider.provider_info['serviceEndpoints']
 
     @staticmethod
+    def get_provider_address(provider_uri=None):
+        """
+        Return the provider address
+        """
+        if not provider_uri:
+            if DataServiceProvider.provider_info is None:
+                config = ConfigProvider.get_config()
+                DataServiceProvider.provider_info = requests.get(config.provider_url).json()
+            return DataServiceProvider.provider_info['provider-address']
+        provider_info = requests.get(provider_uri).json()
+        return provider_info['provider-address']
+
+    @staticmethod
     def build_endpoint(service_name, provider_uri=None, config=None):
         if not provider_uri:
             config = config or ConfigProvider.get_config()
