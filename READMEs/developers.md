@@ -114,9 +114,5 @@ Now you can run all tests since all services are running:
 pytest
 ```
 
-#### Installing the git pre-commit hook (recommended)
-`flake8 --install-hook git`
-
-`git config --bool flake8.strict true`
-
-You can also run isort to order imports `isort {file_path}`
+#### Installing the pre-commit hooks (recommended)
+Run `pre-commit install` to automatically apply isort (import sorting), flake8 (linting) and black (automatic code formatting) to commits. Black formatting is the standard and is checked as part of pull requests.
