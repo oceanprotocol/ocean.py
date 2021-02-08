@@ -21,7 +21,7 @@ install_requirements = [
     'coloredlogs',
     'pyopenssl',
     'PyJWT',  # not jwt
-    'PyYAML==5.3.1',
+    'PyYAML==5.4.1',
     'ocean-utils==0.4.2',
     'requests>=2.21.0',
     'deprecated',
