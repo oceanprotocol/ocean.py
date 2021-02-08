@@ -2,7 +2,7 @@ language: python
 
 
 python:
-  - "3.6"
+  - "3.8"
 
 dist: xenial
 
@@ -35,4 +35,4 @@ deploy:
   on:
     tags: true
     repo: oceanprotocol/ocean.py
-    python: 3.6
+    python: 3.8
