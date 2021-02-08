@@ -12,7 +12,6 @@ services:
   - docker
 
 before_install:
-  - curl https://sh.rustup.rs -sSf | sh -s -- --default-toolchain stable -y
   - git clone https://github.com/oceanprotocol/barge
   - cd barge
   - bash -x start_ocean.sh --no-dashboard 2>&1 > start_ocean.log &
