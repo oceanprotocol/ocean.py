@@ -1,13 +1,13 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
-from web3 import Web3
-
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
+from web3 import Web3
 
 
 class Web3Provider(object):
     """Provides the Web3 instance."""
+
     _web3 = None
 
     @staticmethod
@@ -21,17 +21,17 @@ class Web3Provider(object):
         :return:
         """
         if not provider:
-            assert network_url, 'network_url or a provider instance is required.'
+            assert network_url, "network_url or a provider instance is required."
             provider = CustomHTTPProvider(network_url)
 
         Web3Provider._web3 = Web3(provider)
 
         # Reset attributes to avoid lint issue about no attribute
-        Web3Provider._web3.eth = getattr(Web3Provider._web3, 'eth')
-        Web3Provider._web3.net = getattr(Web3Provider._web3, 'net')
-        Web3Provider._web3.version = getattr(Web3Provider._web3, 'version')
-        Web3Provider._web3.parity = getattr(Web3Provider._web3, 'parity')
-        Web3Provider._web3.testing = getattr(Web3Provider._web3, 'testing')
+        Web3Provider._web3.eth = getattr(Web3Provider._web3, "eth")
+        Web3Provider._web3.net = getattr(Web3Provider._web3, "net")
+        Web3Provider._web3.version = getattr(Web3Provider._web3, "version")
+        Web3Provider._web3.parity = getattr(Web3Provider._web3, "parity")
+        Web3Provider._web3.testing = getattr(Web3Provider._web3, "testing")
 
     @staticmethod
     def get_web3(network_url=None, provider=None):

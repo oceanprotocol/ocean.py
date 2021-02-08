@@ -1,18 +1,21 @@
 import os
 
 import pytest
-
 from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.models import btoken
+from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
-from ocean_lib.models.bfactory import BFactory
 from ocean_lib.ocean.util import get_ocean_token_address, to_base_18
 from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.models import btoken
 from ocean_lib.web3_internal.web3helper import Web3Helper
-from tests.resources.helper_functions import get_web3, get_ganache_wallet, get_factory_deployer_wallet
+from tests.resources.helper_functions import (
+    get_factory_deployer_wallet,
+    get_ganache_wallet,
+    get_web3,
+)
 
 _NETWORK = "ganache"
 HUGEINT = 2 ** 255
@@ -27,19 +30,22 @@ def network():
 
 @pytest.fixture
 def dtfactory_address():
-    return DTFactory.configured_address(_NETWORK, ConfigProvider.get_config().address_file)
+    return DTFactory.configured_address(
+        _NETWORK, ConfigProvider.get_config().address_file
+    )
 
 
 @pytest.fixture
 def bfactory_address():
-    return BFactory.configured_address(_NETWORK, ConfigProvider.get_config().address_file)
+    return BFactory.configured_address(
+        _NETWORK, ConfigProvider.get_config().address_file
+    )
 
 
 @pytest.fixture
 def contracts_addresses():
     return ContractHandler.get_contracts_addresses(
-        _NETWORK,
-        ConfigProvider.get_config().address_file
+        _NETWORK, ConfigProvider.get_config().address_file
     )
 
 
@@ -111,14 +117,14 @@ def T2():  # 'TOK2' with 1000.0 held by Alice
 def alice_info():
     global AliceInfo
     if AliceInfo is None:
-        AliceInfo = make_info('Alice', 'TEST_PRIVATE_KEY1')
+        AliceInfo = make_info("Alice", "TEST_PRIVATE_KEY1")
     return AliceInfo
 
 
 def bob_info():
     global BobInfo
     if BobInfo is None:
-        BobInfo = make_info('Bob', 'TEST_PRIVATE_KEY2')
+        BobInfo = make_info("Bob", "TEST_PRIVATE_KEY2")
     return BobInfo
 
 
@@ -143,9 +149,10 @@ def make_info(name, private_key_name):
             Web3Helper.send_ether(wallet, info.address, 4)
 
     from ocean_lib.ocean.ocean import Ocean
+
     info.ocean = Ocean()
-    info.T1 = _deployAndMintToken('TOK1', info.address)
-    info.T2 = _deployAndMintToken('TOK2', info.address)
+    info.T1 = _deployAndMintToken("TOK1", info.address)
+    info.T2 = _deployAndMintToken("TOK2", info.address)
 
     return info
 
@@ -153,14 +160,24 @@ def make_info(name, private_key_name):
 def _deployAndMintToken(symbol: str, to_address: str) -> btoken.BToken:
     wallet = get_factory_deployer_wallet(_NETWORK)
     dt_address = DataToken.deploy(
-        wallet.web3, wallet, None,
-        'Template Contract', 'TEMPLATE',
-        wallet.address, to_base_18(1000),
-        DTFactory.FIRST_BLOB, to_address
+        wallet.web3,
+        wallet,
+        None,
+        "Template Contract",
+        "TEMPLATE",
+        wallet.address,
+        to_base_18(1000),
+        DTFactory.FIRST_BLOB,
+        to_address,
     )
-    dt_factory = DTFactory(DTFactory.deploy(wallet.web3, wallet, None, dt_address, to_address))
-    token_address = dt_factory.get_token_address(dt_factory.createToken(
-        symbol, symbol, symbol, DataToken.DEFAULT_CAP_BASE, wallet))
+    dt_factory = DTFactory(
+        DTFactory.deploy(wallet.web3, wallet, None, dt_address, to_address)
+    )
+    token_address = dt_factory.get_token_address(
+        dt_factory.createToken(
+            symbol, symbol, symbol, DataToken.DEFAULT_CAP_BASE, wallet
+        )
+    )
     token = DataToken(token_address)
     token.mint(to_address, to_base_18(1000), wallet)
 

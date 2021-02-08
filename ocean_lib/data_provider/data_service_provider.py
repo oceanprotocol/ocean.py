@@ -7,23 +7,24 @@ import json
 import logging
 import os
 import re
-import requests
 from collections import namedtuple
 from json import JSONDecodeError
 
+import requests
 from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
+from ocean_lib.web3_internal.web3helper import Web3Helper
 from ocean_utils.agreements.service_types import ServiceTypes
 from ocean_utils.exceptions import OceanEncryptAssetUrlsError
 from ocean_utils.http_requests.requests_session import get_requests_session
 
-from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.web3_internal.web3helper import Web3Helper
-
 logger = logging.getLogger(__name__)
 
-OrderRequirements = namedtuple('OrderRequirements', ('amount', 'data_token_address', 'receiver_address', 'nonce'))
+OrderRequirements = namedtuple(
+    "OrderRequirements", ("amount", "data_token_address", "receiver_address", "nonce")
+)
 
 
 class DataServiceProvider:
@@ -33,8 +34,9 @@ class DataServiceProvider:
     - run_compute_service (not implemented yet)
 
     """
+
     _http_client = get_requests_session()
-    API_VERSION = '/api/v1'
+    API_VERSION = "/api/v1"
     provider_info = None
 
     @staticmethod
@@ -48,55 +50,61 @@ class DataServiceProvider:
         DataServiceProvider._http_client = http_client
 
     @staticmethod
-    def encrypt_files_dict(files_dict, encrypt_endpoint, asset_id, publisher_address, signed_did):
-        payload = json.dumps({
-            'documentId': asset_id,
-            'signature': signed_did,
-            'document': json.dumps(files_dict),
-            'publisherAddress': publisher_address
-        })
+    def encrypt_files_dict(
+        files_dict, encrypt_endpoint, asset_id, publisher_address, signed_did
+    ):
+        payload = json.dumps(
+            {
+                "documentId": asset_id,
+                "signature": signed_did,
+                "document": json.dumps(files_dict),
+                "publisherAddress": publisher_address,
+            }
+        )
 
         response = DataServiceProvider._http_client.post(
-            encrypt_endpoint, data=payload,
-            headers={'content-type': 'application/json'}
+            encrypt_endpoint, data=payload, headers={"content-type": "application/json"}
         )
-        if response and hasattr(response, 'status_code'):
+        if response and hasattr(response, "status_code"):
             if response.status_code != 201:
-                msg = (f'Encrypt file urls failed at the encryptEndpoint '
-                       f'{encrypt_endpoint}, reason {response.text}, status {response.status_code}'
-                       )
+                msg = (
+                    f"Encrypt file urls failed at the encryptEndpoint "
+                    f"{encrypt_endpoint}, reason {response.text}, status {response.status_code}"
+                )
                 logger.error(msg)
                 raise OceanEncryptAssetUrlsError(msg)
 
             logger.info(
-                f'Asset urls encrypted successfully, encrypted urls str: {response.text},'
-                f' encryptedEndpoint {encrypt_endpoint}')
+                f"Asset urls encrypted successfully, encrypted urls str: {response.text},"
+                f" encryptedEndpoint {encrypt_endpoint}"
+            )
 
-            return response.json()['encryptedDocument']
+            return response.json()["encryptedDocument"]
 
     @staticmethod
     def sign_message(wallet, msg, config, nonce=None):
         if nonce is None:
             nonce = DataServiceProvider.get_nonce(wallet.address, config)
-        print(f'signing message with nonce {nonce}: {msg}, account={wallet.address}')
+        print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
         return Web3Helper.sign_hash(
-            add_ethereum_prefix_and_hash_msg(f'{msg}{nonce}'),
-            wallet
+            add_ethereum_prefix_and_hash_msg(f"{msg}{nonce}"), wallet
         )
 
     @staticmethod
     def get_nonce(user_address, config):
-        _, url = DataServiceProvider.build_endpoint('nonce')
+        _, url = DataServiceProvider.build_endpoint("nonce")
         response = DataServiceProvider._http_client.get(
-            f'{url}?userAddress={user_address}'
+            f"{url}?userAddress={user_address}"
         )
         if response.status_code != 200:
             return None
 
-        return response.json()['nonce']
+        return response.json()["nonce"]
 
     @staticmethod
-    def get_order_requirements(did, service_endpoint, consumer_address, service_id, service_type, token_address):
+    def get_order_requirements(
+        did, service_endpoint, consumer_address, service_id, service_type, token_address
+    ):
         """
 
         :param did:
@@ -108,15 +116,15 @@ class DataServiceProvider:
         :return: OrderRequirements instance -- named tuple (amount, data_token_address, receiver_address, nonce),
         """
         initialize_url = (
-            f'{service_endpoint}'
-            f'?documentId={did}'
-            f'&serviceId={service_id}'
-            f'&serviceType={service_type}'
-            f'&dataToken={token_address}'
-            f'&consumerAddress={consumer_address}'
+            f"{service_endpoint}"
+            f"?documentId={did}"
+            f"&serviceId={service_id}"
+            f"&serviceType={service_type}"
+            f"&dataToken={token_address}"
+            f"&consumerAddress={consumer_address}"
         )
 
-        logger.info(f'invoke the initialize endpoint with this url: {initialize_url}')
+        logger.info(f"invoke the initialize endpoint with this url: {initialize_url}")
         response = DataServiceProvider._http_client.get(initialize_url)
         # The returned json should contain information about the required number of tokens
         # to consume `service_id`. If service is not available there will be an error or
@@ -125,13 +133,25 @@ class DataServiceProvider:
             return None
         order = dict(response.json())
 
-        return OrderRequirements(float(order['numTokens']), order['dataToken'], order['to'], int(order['nonce']))
+        return OrderRequirements(
+            float(order["numTokens"]),
+            order["dataToken"],
+            order["to"],
+            int(order["nonce"]),
+        )
 
     @staticmethod
-    def download_service(did, service_endpoint, wallet, files,
-                         destination_folder, service_id,
-                         token_address, order_tx_id,
-                         index=None):
+    def download_service(
+        did,
+        service_endpoint,
+        wallet,
+        files,
+        destination_folder,
+        service_id,
+        token_address,
+        order_tx_id,
+        index=None,
+    ):
         """
         Call the provider endpoint to get access to the different files that form the asset.
 
@@ -149,35 +169,49 @@ class DataServiceProvider:
         """
         indexes = range(len(files))
         if index is not None:
-            assert isinstance(index, int), logger.error('index has to be an integer.')
-            assert index >= 0, logger.error('index has to be 0 or a positive integer.')
+            assert isinstance(index, int), logger.error("index has to be an integer.")
+            assert index >= 0, logger.error("index has to be 0 or a positive integer.")
             assert index < len(files), logger.error(
-                'index can not be bigger than the number of files')
+                "index can not be bigger than the number of files"
+            )
             indexes = [index]
 
         base_url = (
-            f'{service_endpoint}'
-            f'?documentId={did}'
-            f'&serviceId={service_id}'
-            f'&serviceType={ServiceTypes.ASSET_ACCESS}'
-            f'&dataToken={token_address}'
-            f'&transferTxId={order_tx_id}'
-            f'&consumerAddress={wallet.address}'
+            f"{service_endpoint}"
+            f"?documentId={did}"
+            f"&serviceId={service_id}"
+            f"&serviceType={ServiceTypes.ASSET_ACCESS}"
+            f"&dataToken={token_address}"
+            f"&transferTxId={order_tx_id}"
+            f"&consumerAddress={wallet.address}"
         )
         config = ConfigProvider.get_config()
         for i in indexes:
             signature = DataServiceProvider.sign_message(wallet, did, config)
-            download_url = base_url + f'&signature={signature}&fileIndex={i}'
-            logger.info(f'invoke consume endpoint with this url: {download_url}')
+            download_url = base_url + f"&signature={signature}&fileIndex={i}"
+            logger.info(f"invoke consume endpoint with this url: {download_url}")
             response = DataServiceProvider._http_client.get(download_url, stream=True)
             file_name = DataServiceProvider._get_file_name(response)
-            DataServiceProvider.write_file(response, destination_folder, file_name or f'file-{i}')
+            DataServiceProvider.write_file(
+                response, destination_folder, file_name or f"file-{i}"
+            )
 
     @staticmethod
-    def start_compute_job(did: str, service_endpoint: str, consumer_address: str, signature: str,
-                          service_id: int, token_address: str, order_tx_id: str, algorithm_did: str=None,
-                          algorithm_meta: AlgorithmMetadata=None, algorithm_tx_id: str='',
-                          algorithm_data_token: str='', output: dict=None, job_id: str=None):
+    def start_compute_job(
+        did: str,
+        service_endpoint: str,
+        consumer_address: str,
+        signature: str,
+        service_id: int,
+        token_address: str,
+        order_tx_id: str,
+        algorithm_did: str = None,
+        algorithm_meta: AlgorithmMetadata = None,
+        algorithm_tx_id: str = "",
+        algorithm_data_token: str = "",
+        output: dict = None,
+        job_id: str = None,
+    ):
         """
 
         :param did: id of asset starting with `did:op:` and a hex str without 0x prefix
@@ -198,7 +232,9 @@ class DataServiceProvider:
 
         :return: job_info dict with jobId, status, and other values
         """
-        assert algorithm_did or algorithm_meta, 'either an algorithm did or an algorithm meta must be provided.'
+        assert (
+            algorithm_did or algorithm_meta
+        ), "either an algorithm did or an algorithm meta must be provided."
 
         payload = DataServiceProvider._prepare_compute_payload(
             did,
@@ -213,32 +249,36 @@ class DataServiceProvider:
             algorithm_tx_id=algorithm_tx_id,
             algorithm_data_token=algorithm_data_token,
             output=output,
-            job_id=job_id
+            job_id=job_id,
         )
-        logger.info(f'invoke start compute endpoint with this url: {payload}')
+        logger.info(f"invoke start compute endpoint with this url: {payload}")
         response = DataServiceProvider._http_client.post(
             service_endpoint,
             data=json.dumps(payload),
-            headers={'content-type': 'application/json'}
+            headers={"content-type": "application/json"},
         )
-        logger.debug(f'got DataProvider execute response: {response.content} with status-code {response.status_code} ')
+        logger.debug(
+            f"got DataProvider execute response: {response.content} with status-code {response.status_code} "
+        )
         if not response:
-            raise AssertionError(f'Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}')
+            raise AssertionError(
+                f"Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}"
+            )
 
         if response.status_code not in (201, 200):
-            raise ValueError(response.content.decode('utf-8'))
+            raise ValueError(response.content.decode("utf-8"))
 
         try:
-            job_info = json.loads(response.content.decode('utf-8'))
+            job_info = json.loads(response.content.decode("utf-8"))
             if isinstance(job_info, list):
                 return job_info[0]
             return job_info
 
         except KeyError as err:
-            logger.error(f'Failed to extract jobId from response: {err}')
-            raise KeyError(f'Failed to extract jobId from response: {err}')
+            logger.error(f"Failed to extract jobId from response: {err}")
+            raise KeyError(f"Failed to extract jobId from response: {err}")
         except JSONDecodeError as err:
-            logger.error(f'Failed to parse response json: {err}')
+            logger.error(f"Failed to parse response json: {err}")
             raise
 
     @staticmethod
@@ -254,13 +294,23 @@ class DataServiceProvider:
         :return: bool whether the job was stopped successfully
         """
         return DataServiceProvider._send_compute_request(
-            'put', did, job_id, service_endpoint, consumer_address, signature)
+            "put", did, job_id, service_endpoint, consumer_address, signature
+        )
 
     @staticmethod
-    def restart_compute_job(did, job_id, service_endpoint, consumer_address, signature,
-                            service_id, token_address, order_tx_id, algorithm_did=None,
-                            algorithm_meta=None, output=None
-        ):
+    def restart_compute_job(
+        did,
+        job_id,
+        service_endpoint,
+        consumer_address,
+        signature,
+        service_id,
+        token_address,
+        order_tx_id,
+        algorithm_did=None,
+        algorithm_meta=None,
+        output=None,
+    ):
         """
 
         :param did: id of asset starting with `did:op:` and a hex str without 0x prefix
@@ -279,11 +329,21 @@ class DataServiceProvider:
 
         :return: bool whether the job was restarted successfully
         """
-        DataServiceProvider.stop_compute_job(did, job_id, service_endpoint, consumer_address, signature)
+        DataServiceProvider.stop_compute_job(
+            did, job_id, service_endpoint, consumer_address, signature
+        )
         return DataServiceProvider.start_compute_job(
-            did, service_endpoint, consumer_address, signature,
-            service_id, token_address, order_tx_id, algorithm_did,
-            algorithm_meta, output, job_id=job_id
+            did,
+            service_endpoint,
+            consumer_address,
+            signature,
+            service_id,
+            token_address,
+            order_tx_id,
+            algorithm_did,
+            algorithm_meta,
+            output,
+            job_id=job_id,
         )
 
     @staticmethod
@@ -299,7 +359,8 @@ class DataServiceProvider:
         :return: bool whether the job was deleted successfully
         """
         return DataServiceProvider._send_compute_request(
-            'delete', did, job_id, service_endpoint, consumer_address, signature)
+            "delete", did, job_id, service_endpoint, consumer_address, signature
+        )
 
     @staticmethod
     def compute_job_status(did, job_id, service_endpoint, consumer_address, signature):
@@ -315,7 +376,8 @@ class DataServiceProvider:
             status for each job_id that exist for the did
         """
         return DataServiceProvider._send_compute_request(
-            'get', did, job_id, service_endpoint, consumer_address, signature)
+            "get", did, job_id, service_endpoint, consumer_address, signature
+        )
 
     @staticmethod
     def compute_job_result(did, job_id, service_endpoint, consumer_address, signature):
@@ -331,14 +393,14 @@ class DataServiceProvider:
             result for each job_id that exist for the did
         """
         return DataServiceProvider._send_compute_request(
-            'get', did, job_id, service_endpoint, consumer_address, signature
+            "get", did, job_id, service_endpoint, consumer_address, signature
         )
 
     @staticmethod
     def _remove_slash(path):
-        if path.endswith('/'):
+        if path.endswith("/"):
             path = path[:-1]
-        if path.startswith('/'):
+        if path.startswith("/"):
             path = path[1:]
         return path
 
@@ -350,11 +412,15 @@ class DataServiceProvider:
         :param config: Config
         :return: Url, str
         """
-        return DataServiceProvider._remove_slash(config.provider_url or 'http://localhost:8030')
+        return DataServiceProvider._remove_slash(
+            config.provider_url or "http://localhost:8030"
+        )
 
     @staticmethod
     def get_api_version():
-        return DataServiceProvider._remove_slash(os.getenv(ENV_PROVIDER_API_VERSION, DataServiceProvider.API_VERSION))
+        return DataServiceProvider._remove_slash(
+            os.getenv(ENV_PROVIDER_API_VERSION, DataServiceProvider.API_VERSION)
+        )
 
     @staticmethod
     def get_service_endpoints():
@@ -365,7 +431,7 @@ class DataServiceProvider:
             config = ConfigProvider.get_config()
             DataServiceProvider.provider_info = requests.get(config.provider_url).json()
 
-        return DataServiceProvider.provider_info['serviceEndpoints']
+        return DataServiceProvider.provider_info["serviceEndpoints"]
 
     @staticmethod
     def get_provider_address(provider_uri=None):
@@ -375,10 +441,12 @@ class DataServiceProvider:
         if not provider_uri:
             if DataServiceProvider.provider_info is None:
                 config = ConfigProvider.get_config()
-                DataServiceProvider.provider_info = requests.get(config.provider_url).json()
-            return DataServiceProvider.provider_info['provider-address']
+                DataServiceProvider.provider_info = requests.get(
+                    config.provider_url
+                ).json()
+            return DataServiceProvider.provider_info["provider-address"]
         provider_info = requests.get(provider_uri).json()
-        return provider_info['provider-address']
+        return provider_info["provider-address"]
 
     @staticmethod
     def build_endpoint(service_name, provider_uri=None, config=None):
@@ -387,59 +455,59 @@ class DataServiceProvider:
             provider_uri = DataServiceProvider.get_url(config)
 
         provider_uri = DataServiceProvider._remove_slash(provider_uri)
-        parts = provider_uri.split('/')
-        if parts[-2] == 'services':
-            base_url = '/'.join(parts[:-2])
-            return "GET", f'{base_url}/services/initialize'
+        parts = provider_uri.split("/")
+        if parts[-2] == "services":
+            base_url = "/".join(parts[:-2])
+            return "GET", f"{base_url}/services/initialize"
 
         api_version = DataServiceProvider.get_api_version()
         if api_version not in provider_uri:
-            provider_uri = f'{provider_uri}/{api_version}'
+            provider_uri = f"{provider_uri}/{api_version}"
 
         service_endpoints = DataServiceProvider.get_service_endpoints()
         method, url = service_endpoints[service_name]
-        url = url.replace(api_version, '')
+        url = url.replace(api_version, "")
 
-        return method, f'{provider_uri}{url}'
+        return method, f"{provider_uri}{url}"
 
     @staticmethod
     def build_encrypt_endpoint(provider_uri=None):
-        return DataServiceProvider.build_endpoint('encrypt', provider_uri)
+        return DataServiceProvider.build_endpoint("encrypt", provider_uri)
 
     @staticmethod
     def build_initialize_endpoint(provider_uri=None):
-        return DataServiceProvider.build_endpoint('initialize', provider_uri)
+        return DataServiceProvider.build_endpoint("initialize", provider_uri)
 
     @staticmethod
     def build_download_endpoint(provider_uri=None):
-        return DataServiceProvider.build_endpoint('download', provider_uri)
+        return DataServiceProvider.build_endpoint("download", provider_uri)
 
     @staticmethod
     def build_compute_endpoint(provider_uri=None):
-        return DataServiceProvider.build_endpoint('computeStatus', provider_uri)
+        return DataServiceProvider.build_endpoint("computeStatus", provider_uri)
 
     @staticmethod
     def build_stop_compute(provider_uri=None):
-        return DataServiceProvider.build_endpoint('computeStop', provider_uri)
+        return DataServiceProvider.build_endpoint("computeStop", provider_uri)
 
     @staticmethod
     def build_start_compute(provider_uri=None):
-        return DataServiceProvider.build_endpoint('computeStart', provider_uri)
+        return DataServiceProvider.build_endpoint("computeStart", provider_uri)
 
     @staticmethod
     def build_delete_compute(provider_uri=None):
-        return DataServiceProvider.build_endpoint('computeDelete', provider_uri)
+        return DataServiceProvider.build_endpoint("computeDelete", provider_uri)
 
     @staticmethod
     def build_fileinfo(provider_uri=None):
-        return DataServiceProvider.build_endpoint('fileinfo', provider_uri)
+        return DataServiceProvider.build_endpoint("fileinfo", provider_uri)
 
     @staticmethod
     def get_initialize_endpoint(service_endpoint):
-        parts = service_endpoint.split('/')
-        if parts[-2] == 'services':
-            base_url = '/'.join(parts[:-2])
-            return "GET", f'{base_url}/services/initialize'
+        parts = service_endpoint.split("/")
+        if parts[-2] == "services":
+            base_url = "/".join(parts[:-2])
+            return "GET", f"{base_url}/services/initialize"
 
         return DataServiceProvider.build_initialize_endpoint(service_endpoint)
 
@@ -451,7 +519,9 @@ class DataServiceProvider:
         :param config: Config
         :return: Url, str
         """
-        return DataServiceProvider.build_download_endpoint(DataServiceProvider.get_url(config))
+        return DataServiceProvider.build_download_endpoint(
+            DataServiceProvider.get_url(config)
+        )
 
     @staticmethod
     def get_compute_endpoint(config):
@@ -461,7 +531,9 @@ class DataServiceProvider:
         :param config: Config
         :return: Url, str
         """
-        return DataServiceProvider.build_compute_endpoint(DataServiceProvider.get_url(config))
+        return DataServiceProvider.build_compute_endpoint(
+            DataServiceProvider.get_url(config)
+        )
 
     @staticmethod
     def get_encrypt_endpoint(config):
@@ -471,7 +543,9 @@ class DataServiceProvider:
         :param config: Config
         :return: Url, str
         """
-        return DataServiceProvider.build_encrypt_endpoint(DataServiceProvider.get_url(config))
+        return DataServiceProvider.build_encrypt_endpoint(
+            DataServiceProvider.get_url(config)
+        )
 
     @staticmethod
     def write_file(response, destination_folder, file_name):
@@ -483,30 +557,34 @@ class DataServiceProvider:
         :return: bool
         """
         if response.status_code == 200:
-            with open(os.path.join(destination_folder, file_name), 'wb') as f:
+            with open(os.path.join(destination_folder, file_name), "wb") as f:
                 for chunk in response.iter_content(chunk_size=None):
                     f.write(chunk)
-            logger.info(f'Saved downloaded file in {f.name}')
+            logger.info(f"Saved downloaded file in {f.name}")
         else:
-            logger.warning(f'consume failed: {response.reason}')
+            logger.warning(f"consume failed: {response.reason}")
 
     @staticmethod
-    def _send_compute_request(http_method, did, job_id, service_endpoint, consumer_address, signature):
+    def _send_compute_request(
+        http_method, did, job_id, service_endpoint, consumer_address, signature
+    ):
         compute_url = (
-            f'{service_endpoint}'
-            f'?signature={signature}'
-            f'&documentId={did}'
-            f'&consumerAddress={consumer_address}'
+            f"{service_endpoint}"
+            f"?signature={signature}"
+            f"&documentId={did}"
+            f"&consumerAddress={consumer_address}"
             f'&jobId={job_id or ""}'
         )
-        logger.info(f'invoke compute endpoint with this url: {compute_url}')
+        logger.info(f"invoke compute endpoint with this url: {compute_url}")
         method = getattr(DataServiceProvider._http_client, http_method)
         response = method(compute_url)
-        logger.debug(f'got provider execute response: {response.content} with status-code {response.status_code} ')
+        logger.debug(
+            f"got provider execute response: {response.content} with status-code {response.status_code} "
+        )
         if response.status_code != 200:
-            raise Exception(response.content.decode('utf-8'))
+            raise Exception(response.content.decode("utf-8"))
 
-        resp_content = json.loads(response.content.decode('utf-8'))
+        resp_content = json.loads(response.content.decode("utf-8"))
         if isinstance(resp_content, list):
             return resp_content[0]
         return resp_content
@@ -514,36 +592,51 @@ class DataServiceProvider:
     @staticmethod
     def _get_file_name(response):
         try:
-            return re.match(r'attachment;filename=(.+)',
-                            response.headers.get('content-disposition'))[1]
+            return re.match(
+                r"attachment;filename=(.+)", response.headers.get("content-disposition")
+            )[1]
         except Exception as e:
-            logger.warning(f'It was not possible to get the file name. {e}')
+            logger.warning(f"It was not possible to get the file name. {e}")
 
     @staticmethod
     def _prepare_compute_payload(
-            did: str, consumer_address: str, service_id: int, service_type: str,
-            token_address: str, order_tx_id: str, signature: str = None,
-            algorithm_did: str = None, algorithm_meta=None, algorithm_tx_id: str = '',
-            algorithm_data_token: str = '', output: dict = None, job_id: str = None):
-        assert algorithm_did or algorithm_meta, 'either an algorithm did or an algorithm meta must be provided.'
+        did: str,
+        consumer_address: str,
+        service_id: int,
+        service_type: str,
+        token_address: str,
+        order_tx_id: str,
+        signature: str = None,
+        algorithm_did: str = None,
+        algorithm_meta=None,
+        algorithm_tx_id: str = "",
+        algorithm_data_token: str = "",
+        output: dict = None,
+        job_id: str = None,
+    ):
+        assert (
+            algorithm_did or algorithm_meta
+        ), "either an algorithm did or an algorithm meta must be provided."
 
         if algorithm_meta:
-            assert isinstance(algorithm_meta, AlgorithmMetadata), f'expecting a AlgorithmMetadata type ' \
-                                                                  f'for `algorithm_meta`, got {type(algorithm_meta)}'
+            assert isinstance(algorithm_meta, AlgorithmMetadata), (
+                f"expecting a AlgorithmMetadata type "
+                f"for `algorithm_meta`, got {type(algorithm_meta)}"
+            )
             algorithm_meta = algorithm_meta.as_dictionary()
 
         return {
-            'signature': signature,
-            'documentId': did,
-            'consumerAddress': consumer_address,
-            'algorithmDid': algorithm_did,
-            'algorithmMeta': algorithm_meta,
-            'algorithmDataToken': algorithm_data_token,
-            'algorithmTransferTxId': algorithm_tx_id,
-            'output': output or dict(),
-            'jobId': job_id or "",
-            'serviceId': service_id,
-            'serviceType': service_type,
-            'dataToken': token_address,
-            'transferTxId': order_tx_id
+            "signature": signature,
+            "documentId": did,
+            "consumerAddress": consumer_address,
+            "algorithmDid": algorithm_did,
+            "algorithmMeta": algorithm_meta,
+            "algorithmDataToken": algorithm_data_token,
+            "algorithmTransferTxId": algorithm_tx_id,
+            "output": output or dict(),
+            "jobId": job_id or "",
+            "serviceId": service_id,
+            "serviceType": service_type,
+            "dataToken": token_address,
+            "transferTxId": order_tx_id,
         }

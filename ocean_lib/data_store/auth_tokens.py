@@ -8,7 +8,7 @@ logger = logging.getLogger(__name__)
 
 
 class AuthTokensStorage(StorageBase):
-    AUTH_TOKENS_TABLE = 'auth_tokens'
+    AUTH_TOKENS_TABLE = "auth_tokens"
 
     def write_token(self, address, signed_token, created_at):
         """
@@ -18,16 +18,18 @@ class AuthTokensStorage(StorageBase):
         :param signed_token: hex str the signed token
         :param created_at: date-time of token creation
         """
-        logger.debug(f'Writing token to `auth_tokens` storage: '
-                     f'account={address}, token={signed_token}')
-        self._run_query(
-            f'''CREATE TABLE IF NOT EXISTS {self.AUTH_TOKENS_TABLE}
-               (address VARCHAR PRIMARY KEY, signed_token VARCHAR, created VARCHAR);'''
+        logger.debug(
+            f"Writing token to `auth_tokens` storage: "
+            f"account={address}, token={signed_token}"
         )
         self._run_query(
-            f'''INSERT OR REPLACE
+            f"""CREATE TABLE IF NOT EXISTS {self.AUTH_TOKENS_TABLE}
+               (address VARCHAR PRIMARY KEY, signed_token VARCHAR, created VARCHAR);"""
+        )
+        self._run_query(
+            f"""INSERT OR REPLACE
                 INTO {self.AUTH_TOKENS_TABLE}
-                VALUES (?,?,?)''',
+                VALUES (?,?,?)""",
             [address, signed_token, created_at],
         )
 
@@ -39,12 +41,14 @@ class AuthTokensStorage(StorageBase):
         :param signed_token: hex str the signed token
         :param created_at: date-time of token creation
         """
-        logger.debug(f'Updating token already in `auth_tokens` storage: '
-                     f'account={address}, token={signed_token}')
+        logger.debug(
+            f"Updating token already in `auth_tokens` storage: "
+            f"account={address}, token={signed_token}"
+        )
         self._run_query(
-            f'''UPDATE {self.AUTH_TOKENS_TABLE}
+            f"""UPDATE {self.AUTH_TOKENS_TABLE}
                 SET signed_token=?, created=?
-                WHERE address=?''',
+                WHERE address=?""",
             (signed_token, created_at, address),
         )
 
@@ -56,17 +60,22 @@ class AuthTokensStorage(StorageBase):
         :return: tuple (signed_token, created_at)
         """
         try:
-            rows = [row for row in self._run_query(
-                f'''SELECT signed_token, created
+            rows = [
+                row
+                for row in self._run_query(
+                    f"""SELECT signed_token, created
                     FROM {self.AUTH_TOKENS_TABLE}
-                    WHERE address=?;''',
-                (address,))
-                    ]
+                    WHERE address=?;""",
+                    (address,),
+                )
+            ]
             token, timestamp = rows[0] if rows else (None, None)
-            logger.debug(f'Read auth token from `auth_tokens` storage: '
-                         f'account={address}, token={token}')
+            logger.debug(
+                f"Read auth token from `auth_tokens` storage: "
+                f"account={address}, token={token}"
+            )
             return token, timestamp
 
         except Exception as e:
-            logging.error(f'Error reading token: {e}')
+            logging.error(f"Error reading token: {e}")
             return None, None

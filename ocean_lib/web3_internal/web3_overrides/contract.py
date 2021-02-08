@@ -1,13 +1,11 @@
 import logging
 import time
 
-from web3.contract import prepare_transaction
-
 from ocean_lib.web3_internal.wallet import Wallet
+from web3.contract import prepare_transaction
 
 
 class CustomContractFunction:
-
     def __init__(self, contract_function):
         self._contract_function = contract_function
 
@@ -29,16 +27,16 @@ class CustomContractFunction:
         else:
             transact_transaction = dict(**transaction)
 
-        if 'data' in transact_transaction:
+        if "data" in transact_transaction:
             raise ValueError("Cannot set data in transact transaction")
 
         cf = self._contract_function
         if cf.address is not None:
-            transact_transaction.setdefault('to', cf.address)
+            transact_transaction.setdefault("to", cf.address)
         # if cf.web3.eth.defaultAccount is not empty:
         #     transact_transaction.setdefault('from', cf.web3.eth.defaultAccount)
 
-        if 'to' not in transact_transaction:
+        if "to" not in transact_transaction:
             if isinstance(self, type):
                 raise ValueError(
                     "When using `Contract.transact` from a contract factory you "
@@ -49,14 +47,14 @@ class CustomContractFunction:
                     "Please ensure that this contract instance has an address."
                 )
 
-        if 'gas' not in transact_transaction:
+        if "gas" not in transact_transaction:
             tx = transaction.copy()
-            if 'passphrase' in tx:
-                tx.pop('passphrase')
-            if 'account_key' in tx:
-                tx.pop('account_key')
+            if "passphrase" in tx:
+                tx.pop("passphrase")
+            if "account_key" in tx:
+                tx.pop("account_key")
             gas = cf.estimateGas(tx)
-            transact_transaction['gas'] = gas
+            transact_transaction["gas"] = gas
 
         return transact_with_contract_function(
             cf.address,
@@ -66,19 +64,20 @@ class CustomContractFunction:
             cf.contract_abi,
             cf.abi,
             *cf.args,
-            **cf.kwargs
+            **cf.kwargs,
         )
 
 
 def transact_with_contract_function(
-        address,
-        web3,
-        function_name=None,
-        transaction=None,
-        contract_abi=None,
-        fn_abi=None,
-        *args,
-        **kwargs):
+    address,
+    web3,
+    function_name=None,
+    transaction=None,
+    contract_abi=None,
+    fn_abi=None,
+    *args,
+    **kwargs,
+):
     """
     Helper function for interacting with a contract function by sending a
     transaction. This is copied from web3 `transact_with_contract_function`
@@ -97,16 +96,18 @@ def transact_with_contract_function(
 
     passphrase = None
     account_key = None
-    if transaction and 'passphrase' in transaction:
-        passphrase = transaction['passphrase']
-        transact_transaction.pop('passphrase')
-        if 'account_key' in transaction:
-            account_key = transaction['account_key']
-            transact_transaction.pop('account_key')
+    if transaction and "passphrase" in transaction:
+        passphrase = transaction["passphrase"]
+        transact_transaction.pop("passphrase")
+        if "account_key" in transaction:
+            account_key = transaction["account_key"]
+            transact_transaction.pop("account_key")
 
     if account_key:
         raw_tx = Wallet(web3, private_key=account_key).sign_tx(transact_transaction)
-        logging.debug(f'sending raw tx: function: {function_name}, tx hash: {raw_tx.hex()}')
+        logging.debug(
+            f"sending raw tx: function: {function_name}, tx hash: {raw_tx.hex()}"
+        )
         txn_hash = web3.eth.sendRawTransaction(raw_tx)
     elif passphrase:
         txn_hash = web3.personal.sendTransaction(transact_transaction, passphrase)

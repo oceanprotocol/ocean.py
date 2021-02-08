@@ -4,12 +4,11 @@
 
 import logging
 
-from ocean_utils.aquarius.aquarius_provider import AquariusProvider
-
 from ocean_lib.assets.asset import Asset
 from ocean_lib.models.data_token import DataToken
+from ocean_utils.aquarius.aquarius_provider import AquariusProvider
 
-logger = logging.getLogger('keeper')
+logger = logging.getLogger("keeper")
 
 
 def resolve_asset(did, metadata_store_url=None, token_address=None):
@@ -25,12 +24,14 @@ def resolve_asset(did, metadata_store_url=None, token_address=None):
     :return None: if the DID cannot be resolved
     :raises OceanDIDNotFound: if no DID can be found to resolve.
     """
-    assert metadata_store_url or token_address, f'One of metadata_store_url or token_address is required.'
+    assert (
+        metadata_store_url or token_address
+    ), "One of metadata_store_url or token_address is required."
 
     metadata_url = metadata_store_url
     if not metadata_store_url and token_address:
         metadata_url = DataToken(token_address).get_metadata_url()
 
-    logger.debug(f'found did {did} -> url={metadata_url}')
+    logger.debug(f"found did {did} -> url={metadata_url}")
     ddo = AquariusProvider.get_aquarius(metadata_url).get_asset_ddo(did)
     return Asset(dictionary=ddo.as_dictionary())

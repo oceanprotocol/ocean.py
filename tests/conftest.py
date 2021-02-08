@@ -4,22 +4,25 @@
 import uuid
 
 import pytest
-
+from examples import ExampleConfig
 from ocean_lib.config_provider import ConfigProvider
-from ocean_lib.web3_internal.web3helper import Web3Helper
+from ocean_lib.ocean.util import (
+    get_ocean_token_address,
+    get_web3_connection_provider,
+    to_base_18,
+)
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-
-from examples import ExampleConfig
-from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18, get_ocean_token_address
+from ocean_lib.web3_internal.web3helper import Web3Helper
 from tests.resources.helper_functions import (
-    get_metadata,
-    setup_logging,
-    get_publisher_ocean_instance,
     get_consumer_ocean_instance,
-    get_publisher_wallet,
     get_consumer_wallet,
-    get_ganache_wallet)
+    get_ganache_wallet,
+    get_metadata,
+    get_publisher_ocean_instance,
+    get_publisher_wallet,
+    setup_logging,
+)
 
 setup_logging()
 
@@ -33,13 +36,18 @@ def setup_all():
 
     network = Web3Helper.get_network_name()
     wallet = get_ganache_wallet()
-    if network in ['ganache', 'development'] and wallet:
+    if network in ["ganache", "development"] and wallet:
 
-        print(f'sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keysStr()}')
-        print(f'sender balance: {Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address))}')
+        print(
+            f"sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keysStr()}"
+        )
+        print(
+            f"sender balance: {Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address))}"
+        )
         assert Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address)) > 10
 
         from ocean_lib.models.data_token import DataToken
+
         OCEAN_token = DataToken(get_ocean_token_address(network))
         amt_distribute = 1000
         amt_distribute_base = to_base_18(float(amt_distribute))
@@ -70,5 +78,5 @@ def web3_instance():
 @pytest.fixture
 def metadata():
     metadata = get_metadata()
-    metadata['main']['files'][0]['checksum'] = str(uuid.uuid4())
+    metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     return metadata

@@ -5,10 +5,9 @@ import json
 import logging
 import os
 
+from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3 import Web3
 from web3.contract import ConciseContract
-
-from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 logger = logging.getLogger(__name__)
 
@@ -22,11 +21,10 @@ class ContractHandler(object):
         concise_contract = ContractHandler.get_concise_contract('DTFactory')
 
     """
+
     _contracts = dict()
     artifacts_path = None
-    network_alias = {
-        'ganache': 'development',
-    }
+    network_alias = {"ganache": "development"}
 
     @staticmethod
     def get_contracts_addresses(network, address_file):
@@ -37,7 +35,9 @@ class ContractHandler(object):
 
         network_addresses = addresses.get(network, None)
         if network_addresses is None and network in ContractHandler.network_alias:
-            network_addresses = addresses.get(ContractHandler.network_alias[network], None)
+            network_addresses = addresses.get(
+                ContractHandler.network_alias[network], None
+            )
 
         return network_addresses
 
@@ -50,8 +50,12 @@ class ContractHandler(object):
     @staticmethod
     def _get(name, address=None):
         if address:
-            return ContractHandler._contracts.get((name, address)) or ContractHandler._load(name, address)
-        return ContractHandler._contracts.get(name) or ContractHandler._load(name, address)
+            return ContractHandler._contracts.get(
+                (name, address)
+            ) or ContractHandler._load(name, address)
+        return ContractHandler._contracts.get(name) or ContractHandler._load(
+            name, address
+        )
 
     @staticmethod
     def get(name, address=None):
@@ -77,8 +81,13 @@ class ContractHandler(object):
 
     @staticmethod
     def _set(name, contract):
-        ContractHandler._contracts[(name, contract.address)] = (contract, ConciseContract(contract))
-        ContractHandler._contracts[name] = ContractHandler._contracts[(name, contract.address)]
+        ContractHandler._contracts[(name, contract.address)] = (
+            contract,
+            ConciseContract(contract),
+        )
+        ContractHandler._contracts[name] = ContractHandler._contracts[
+            (name, contract.address)
+        ]
 
     @staticmethod
     def set(name, contract):
@@ -112,29 +121,34 @@ class ContractHandler(object):
         :param address: hex str -- address of smart contract
         :return: web3.eth.Contract instance
         """
-        assert ContractHandler.artifacts_path is not None, 'artifacts_path should be already set.'
+        assert (
+            ContractHandler.artifacts_path is not None
+        ), "artifacts_path should be already set."
         contract_definition = ContractHandler.read_abi_from_file(
-            contract_name, ContractHandler.artifacts_path)
+            contract_name, ContractHandler.artifacts_path
+        )
 
-        if not address and 'address' in contract_definition:
-            address = contract_definition.get('address')
-            assert address, 'Cannot find contract address in the abi file.'
+        if not address and "address" in contract_definition:
+            address = contract_definition.get("address")
+            assert address, "Cannot find contract address in the abi file."
             address = Web3.toChecksumAddress(address)
 
-        abi = contract_definition['abi']
-        bytecode = contract_definition['bytecode']
-        contract = Web3Provider.get_web3().eth.contract(address=address, abi=abi, bytecode=bytecode)
+        abi = contract_definition["abi"]
+        bytecode = contract_definition["bytecode"]
+        contract = Web3Provider.get_web3().eth.contract(
+            address=address, abi=abi, bytecode=bytecode
+        )
         ContractHandler._set(contract_name, contract)
         return ContractHandler._contracts[(contract_name, address)]
 
     @staticmethod
     def read_abi_from_file(contract_name, abi_path):
         path = None
-        contract_name = contract_name + '.json'
+        contract_name = contract_name + ".json"
         names = os.listdir(abi_path)
         # :HACK: temporary workaround to handle an extra folder that contain the artifact files.
-        if len(names) == 1 and names[0] == '*':
-            abi_path = os.path.join(abi_path, '*')
+        if len(names) == 1 and names[0] == "*":
+            abi_path = os.path.join(abi_path, "*")
 
         for name in os.listdir(abi_path):
             if name.lower() == contract_name.lower():

@@ -10,11 +10,10 @@ import eth_keys
 import eth_utils
 from eth_keys import KeyAPI
 from eth_utils import big_endian_to_int
-from web3 import Web3
-from web3.contract import ContractEvent
 from ocean_lib.web3_internal.web3_provider import Web3Provider
+from web3 import Web3
 
-Signature = namedtuple('Signature', ('v', 'r', 's'))
+Signature = namedtuple("Signature", ("v", "r", "s"))
 
 logger = logging.getLogger(__name__)
 
@@ -30,10 +29,7 @@ def generate_multi_value_hash(types, values):
     :return: bytes
     """
     assert len(types) == len(values)
-    return Web3.soliditySha3(
-        types,
-        values
-    )
+    return Web3.soliditySha3(types, values)
 
 
 def prepare_prefixed_hash(msg_hash):
@@ -43,8 +39,7 @@ def prepare_prefixed_hash(msg_hash):
     :return:
     """
     return generate_multi_value_hash(
-        ['string', 'bytes32'],
-        ["\x19Ethereum Signed Message:\n32", msg_hash]
+        ["string", "bytes32"], ["\x19Ethereum Signed Message:\n32", msg_hash]
     )
 
 
@@ -66,17 +61,19 @@ def get_public_key_from_address(web3, account):
     :param account:
     :return:
     """
-    _hash = web3.sha3(text='verify signature.')
+    _hash = web3.sha3(text="verify signature.")
     signature = web3.personal.sign(_hash, account.address, account.password)
     signature = split_signature(web3, web3.toBytes(hexstr=signature))
-    signature_vrs = Signature(signature.v % 27,
-                              big_endian_to_int(signature.r),
-                              big_endian_to_int(signature.s))
+    signature_vrs = Signature(
+        signature.v % 27, big_endian_to_int(signature.r), big_endian_to_int(signature.s)
+    )
     prefixed_hash = prepare_prefixed_hash(_hash)
-    pub_key = KeyAPI.PublicKey.recover_from_msg_hash(prefixed_hash,
-                                                     KeyAPI.Signature(vrs=signature_vrs))
-    assert pub_key.to_checksum_address() == account.address, \
-        'recovered address does not match signing address.'
+    pub_key = KeyAPI.PublicKey.recover_from_msg_hash(
+        prefixed_hash, KeyAPI.Signature(vrs=signature_vrs)
+    )
+    assert (
+        pub_key.to_checksum_address() == account.address
+    ), "recovered address does not match signing address."
     return pub_key
 
 
@@ -87,7 +84,7 @@ def to_32byte_hex(web3, val):
     :param val:
     :return:
     """
-    return web3.toBytes(val).rjust(32, b'\0')
+    return web3.toBytes(val).rjust(32, b"\0")
 
 
 def split_signature(web3, signature):
@@ -97,11 +94,12 @@ def split_signature(web3, signature):
     :param signature: signed message hash, hex str
     :return:
     """
-    assert len(signature) == 65, f'invalid signature, ' \
-                                 f'expecting bytes of length 65, got {len(signature)}'
+    assert len(signature) == 65, (
+        f"invalid signature, " f"expecting bytes of length 65, got {len(signature)}"
+    )
     v = web3.toInt(signature[-1])
-    r = to_32byte_hex(web3, int.from_bytes(signature[:32], 'big'))
-    s = to_32byte_hex(web3, int.from_bytes(signature[32:64], 'big'))
+    r = to_32byte_hex(web3, int.from_bytes(signature[:32], "big"))
+    s = to_32byte_hex(web3, int.from_bytes(signature[32:64], "big"))
     if v != 27 and v != 28:
         v = 27 + v % 2
 
@@ -109,11 +107,13 @@ def split_signature(web3, signature):
 
 
 def get_wallet(index):
-    name = 'PARITY_ADDRESS' if not index else f'PARITY_ADDRESS{index}'
-    pswrd_name = 'PARITY_PASSWORD' if not index else f'PARITY_PASSWORD{index}'
-    key_name = 'PARITY_KEY' if not index else f'PARITY_KEY{index}'
-    encrypted_key_name = 'PARITY_ENCRYPTED_KEY' if not index else f'PARITY_ENCRYPTED_KEY{index}'
-    keyfile_name = 'PARITY_KEYFILE' if not index else f'PARITY_KEYFILE{index}'
+    name = "PARITY_ADDRESS" if not index else f"PARITY_ADDRESS{index}"
+    pswrd_name = "PARITY_PASSWORD" if not index else f"PARITY_PASSWORD{index}"
+    key_name = "PARITY_KEY" if not index else f"PARITY_KEY{index}"
+    encrypted_key_name = (
+        "PARITY_ENCRYPTED_KEY" if not index else f"PARITY_ENCRYPTED_KEY{index}"
+    )
+    keyfile_name = "PARITY_KEYFILE" if not index else f"PARITY_KEYFILE{index}"
 
     address = os.getenv(name)
     if not address:
@@ -128,12 +128,13 @@ def get_wallet(index):
             encr_key = json.loads(_file.read())
 
     from ocean_lib.web3_internal.wallet import Wallet
+
     return Wallet(
         Web3Provider.get_web3(),
         private_key=key,
         encrypted_key=encr_key,
         address=Web3.toChecksumAddress(address),
-        password=pswrd
+        password=pswrd,
     )
 
 

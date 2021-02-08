@@ -2,11 +2,10 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 from eth_utils import big_endian_to_int
-
 from ocean_lib.web3_internal.utils import (
     add_ethereum_prefix_and_hash_msg,
     generate_multi_value_hash,
-    split_signature
+    split_signature,
 )
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.signature import SignatureFix
@@ -16,14 +15,14 @@ from ocean_lib.web3_internal.web3_provider import Web3Provider
 class Web3Helper(object):
     """This class provides convenient web3 functions"""
 
-    DEFAULT_NETWORK_NAME = 'ganache'
+    DEFAULT_NETWORK_NAME = "ganache"
     _network_name_map = {
-        1: 'Mainnet',
-        2: 'Morden',
-        3: 'Ropsten',
-        4: 'Rinkeby',
-        42: 'Kovan',
-        100: 'xDai',
+        1: "Mainnet",
+        2: "Morden",
+        3: "Ropsten",
+        4: "Rinkeby",
+        42: "Kovan",
+        100: "xDai",
     }
 
     @staticmethod
@@ -37,7 +36,9 @@ class Web3Helper(object):
         """
         if not network_id:
             network_id = Web3Helper.get_network_id()
-        return Web3Helper._network_name_map.get(network_id, Web3Helper.DEFAULT_NETWORK_NAME).lower()
+        return Web3Helper._network_name_map.get(
+            network_id, Web3Helper.DEFAULT_NETWORK_NAME
+        ).lower()
 
     @staticmethod
     def get_network_id():
@@ -74,8 +75,12 @@ class Web3Helper(object):
         """
         w3 = Web3Provider.get_web3()
         v, r, s = split_signature(w3, w3.toBytes(hexstr=signed_message))
-        signature_object = SignatureFix(vrs=(v, big_endian_to_int(r), big_endian_to_int(s)))
-        return w3.eth.account.recoverHash(message, signature=signature_object.to_hex_v_hacked())
+        signature_object = SignatureFix(
+            vrs=(v, big_endian_to_int(r), big_endian_to_int(s))
+        )
+        return w3.eth.account.recoverHash(
+            message, signature=signature_object.to_hex_v_hacked()
+        )
 
     @staticmethod
     def personal_ec_recover(message, signed_message):
@@ -90,11 +95,13 @@ class Web3Helper(object):
         :param address: address, bytes32
         :return: balance, int
         """
-        return Web3Provider.get_web3().eth.getBalance(address, block_identifier='latest')
+        return Web3Provider.get_web3().eth.getBalance(
+            address, block_identifier="latest"
+        )
 
     @staticmethod
     def from_wei(wei_value):
-        return Web3Provider.get_web3().fromWei(wei_value, 'ether')
+        return Web3Provider.get_web3().fromWei(wei_value, "ether")
 
     @staticmethod
     def generate_multi_value_hash(types, values):
@@ -107,16 +114,17 @@ class Web3Helper(object):
             to_address = w3.toChecksumAddress(to_address)
 
         tx = {
-            'from': from_wallet.address,
-            'to': to_address,
-            'value': w3.toWei(ether_amount, 'ether')
+            "from": from_wallet.address,
+            "to": to_address,
+            "value": w3.toWei(ether_amount, "ether"),
         }
-        gas = w3.eth.estimateGas(tx)
+        _ = w3.eth.estimateGas(tx)
         tx = {
-            'from': from_wallet.address,
-            'to': to_address,
-            'value': w3.toWei(ether_amount, 'ether'),
-            'gas': 500000}
+            "from": from_wallet.address,
+            "to": to_address,
+            "value": w3.toWei(ether_amount, "ether"),
+            "gas": 500000,
+        }
         wallet = Wallet(w3, private_key=from_wallet.key, address=from_wallet.address)
         raw_tx = wallet.sign_tx(tx)
         tx_hash = w3.eth.sendRawTransaction(raw_tx)
@@ -124,19 +132,18 @@ class Web3Helper(object):
         return receipt
 
     @staticmethod
-    def cancel_or_replace_transaction(from_wallet, nonce_value, gas_price=None, gas_limit=None):
+    def cancel_or_replace_transaction(
+        from_wallet, nonce_value, gas_price=None, gas_limit=None
+    ):
         w3 = Web3Provider.get_web3()
-        tx = {
-            'from': from_wallet.address,
-            'to': from_wallet.address,
-            'value': 0
-        }
+        tx = {"from": from_wallet.address, "to": from_wallet.address, "value": 0}
         gas = gas_limit if gas_limit is not None else w3.eth.estimateGas(tx)
         tx = {
-            'from': from_wallet.address,
-            'to': from_wallet.address,
-            'value': 0,
-            'gas': gas + 1}
+            "from": from_wallet.address,
+            "to": from_wallet.address,
+            "value": 0,
+            "gas": gas + 1,
+        }
 
         wallet = Wallet(w3, private_key=from_wallet.key, address=from_wallet.address)
         raw_tx = wallet.sign_tx(tx, fixed_nonce=nonce_value, gas_price=gas_price)

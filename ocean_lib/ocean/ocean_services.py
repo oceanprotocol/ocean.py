@@ -19,17 +19,19 @@ class OceanServices:
             construct the serviceEndpoint for the `access` (download) service
         :return: Service instance or None
         """
-        service_endpoint = provider_uri or DataServiceProvider.get_url(ConfigProvider.get_config())
+        service_endpoint = provider_uri or DataServiceProvider.get_url(
+            ConfigProvider.get_config()
+        )
         service = ServiceDescriptor.access_service_descriptor(
-            attributes,
-            service_endpoint
+            attributes, service_endpoint
         )
         return service
 
     @staticmethod
     def create_compute_service(attributes, provider_uri=None):
-        service_endpoint = provider_uri or DataServiceProvider.get_url(ConfigProvider.get_config())
+        service_endpoint = provider_uri or DataServiceProvider.get_url(
+            ConfigProvider.get_config()
+        )
         return ServiceDescriptor.compute_service_descriptor(
-            attributes,
-            service_endpoint
+            attributes, service_endpoint
         )
