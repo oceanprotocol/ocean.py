@@ -23,6 +23,14 @@ def test_expose_endpoints():
     assert [valid_endpoints[key] for key in set(DataServiceProvider.provider_info['serviceEndpoints']) &
             set(valid_endpoints)]
 
+def test_provider_address():
+    provider_address = DataServiceProvider.get_provider_address()
+    assert provider_address, 'Failed to get provider address.'
+
+def test_provider_address_with_url():
+    p_ocean_instance = get_publisher_ocean_instance()
+    provider_address = DataServiceProvider.get_provider_address(DataServiceProvider.get_url(p_ocean_instance.config))
+    assert provider_address, 'Failed to get provider address.'
     
 def test_compute_flow():
     ######
