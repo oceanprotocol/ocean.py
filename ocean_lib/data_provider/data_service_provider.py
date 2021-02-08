@@ -38,6 +38,11 @@ class DataServiceProvider:
     provider_info = None
 
     @staticmethod
+    def get_http_client():
+        """Get the http client."""
+        return DataServiceProvider._http_client
+
+    @staticmethod
     def set_http_client(http_client):
         """Set the http client to something other than the default `requests`"""
         DataServiceProvider._http_client = http_client
@@ -517,9 +522,9 @@ class DataServiceProvider:
     @staticmethod
     def _prepare_compute_payload(
             did: str, consumer_address: str, service_id: int, service_type: str,
-            token_address: str, order_tx_id: str, signature: str=None,
-            algorithm_did: str=None, algorithm_meta=None, algorithm_tx_id: str='',
-            algorithm_data_token: str='', output: dict=None, job_id: str=None):
+            token_address: str, order_tx_id: str, signature: str = None,
+            algorithm_did: str = None, algorithm_meta=None, algorithm_tx_id: str = '',
+            algorithm_data_token: str = '', output: dict = None, job_id: str = None):
         assert algorithm_did or algorithm_meta, 'either an algorithm did or an algorithm meta must be provided.'
 
         if algorithm_meta:

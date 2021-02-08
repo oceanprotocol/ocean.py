@@ -80,4 +80,5 @@ def download_asset_files(
             order_tx_id,
             i
         )
-    return asset_folder
+
+    return destination

@@ -217,7 +217,7 @@ class DataToken(ContractBase):
 
         # verify sender of the tx using the Tx record
         tx = web3.eth.getTransaction(tx_id)
-        if tx['from'] != sender:
+        if sender not in [order_log.args.consumer, order_log.args.payer]:
             raise AssertionError(f'sender of order transaction is not the same as the requesting account.')
 
         transfer_logs = self.events.Transfer().processReceipt(tx_receipt)
@@ -225,9 +225,7 @@ class DataToken(ContractBase):
         for tr in transfer_logs:
             if tr.args.to not in receiver_to_transfers:
                 receiver_to_transfers[tr.args.to] = []
-
             receiver_to_transfers[tr.args.to].append(tr)
-
         if receiver not in receiver_to_transfers:
             raise AssertionError(f'receiver {receiver} is not found in the transfer events.')
         transfers = sorted(receiver_to_transfers[receiver], key=lambda x: x.args.value)
@@ -377,11 +375,12 @@ class DataToken(ContractBase):
     def approveMinter(self, from_wallet) -> str:
         return self.send_transaction('approveMinter', (), from_wallet)
 
-    def startOrder(self, consumer: str, amount: int, serviceId: int, mrktFeeCollector: str, from_wallet: Wallet):
+    def startOrder(self, consumer: str, amount: int, serviceId: int, mrktFeeCollector: str,
+                   from_wallet: Wallet):
         return self.send_transaction(
             'startOrder',
             (consumer, amount, serviceId, mrktFeeCollector),
-            from_wallet
+            from_wallet,
         )
 
     def finishOrder(self, orderTxId: str, consumer: str, amount: int,

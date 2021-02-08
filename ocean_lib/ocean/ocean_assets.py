@@ -371,7 +371,7 @@ class OceanAssets:
 
     @staticmethod
     def pay_for_service(amount: float, token_address: str, did: str, service_id: int,
-                        fee_receiver: str, from_wallet: Wallet) -> str:
+                        fee_receiver: str, from_wallet: Wallet, consumer: str) -> str:
         """
         Submits the payment for chosen service in DataTokens.
 
@@ -394,8 +394,10 @@ class OceanAssets:
             did = add_0x_prefix(did_to_id(did))
         if fee_receiver is None:
             fee_receiver = '0x0000000000000000000000000000000000000000'
-        tx_hash = dt.startOrder(from_wallet.address, amount_base, service_id, fee_receiver, from_wallet)
-
+        if consumer is None:
+            tx_hash = dt.startOrder(from_wallet.address, amount_base, service_id, fee_receiver, from_wallet)
+        else:
+            tx_hash = dt.startOrder(consumer, amount_base, service_id, fee_receiver, from_wallet)
         try:
             dt.verify_order_tx(Web3Provider.get_web3(), tx_hash, did, service_id,
                                amount_base, from_wallet.address)
