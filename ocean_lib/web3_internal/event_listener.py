@@ -15,14 +15,21 @@ logger = logging.getLogger(__name__)
 class EventListener(object):
     """Class representing an event listener."""
 
-    def __init__(self, contract_name, event_name, args=None, from_block=None, to_block=None,
-                 filters=None):
+    def __init__(
+        self,
+        contract_name,
+        event_name,
+        args=None,
+        from_block=None,
+        to_block=None,
+        filters=None,
+    ):
         contract = ContractHandler.get(contract_name)
         self.event_name = event_name
         self.event = getattr(contract.events, event_name)
         self.filters = filters if filters else {}
-        self.from_block = from_block if from_block is not None else 'latest'
-        self.to_block = to_block if to_block is not None else 'latest'
+        self.from_block = from_block if from_block is not None else "latest"
+        self.to_block = to_block if to_block is not None else "latest"
         self.event_filter = self.make_event_filter()
         self.event_filter.poll_interval = 0.5
         self.timeout = 600  # seconds
@@ -35,13 +42,19 @@ class EventListener(object):
             self.event,
             self.filters,
             from_block=self.from_block,
-            to_block=self.to_block
+            to_block=self.to_block,
         )
         event_filter.set_poll_interval(0.5)
         return event_filter
 
-    def listen_once(self, callback, timeout=None, timeout_callback=None, start_time=None,
-                    blocking=False):
+    def listen_once(
+        self,
+        callback,
+        timeout=None,
+        timeout_callback=None,
+        start_time=None,
+        blocking=False,
+    ):
         """
 
         :param callback: a callback function that takes one argument the event dict
@@ -53,7 +66,9 @@ class EventListener(object):
         :return: event if blocking is True and an event is received, otherwise returns None
         """
         if blocking:
-            assert timeout is not None, '`timeout` argument is required when `blocking` is True.'
+            assert (
+                timeout is not None
+            ), "`timeout` argument is required when `blocking` is True."
 
         events = []
         original_callback = callback
@@ -69,12 +84,14 @@ class EventListener(object):
         # TODO Review where to close this threads.
         Thread(
             target=self.watch_one_event,
-            args=(self.event_filter,
-                  callback,
-                  timeout_callback,
-                  timeout if timeout is not None else self.timeout,
-                  self.args,
-                  start_time),
+            args=(
+                self.event_filter,
+                callback,
+                timeout_callback,
+                timeout if timeout is not None else self.timeout,
+                self.args,
+                start_time,
+            ),
             daemon=True,
         ).start()
         if blocking:
@@ -86,8 +103,9 @@ class EventListener(object):
         return None
 
     @staticmethod
-    def watch_one_event(event_filter, callback, timeout_callback, timeout, args,
-                        start_time=None):
+    def watch_one_event(
+        event_filter, callback, timeout_callback, timeout, args, start_time=None
+    ):
         """
         Start to watch one event.
 
@@ -114,7 +132,7 @@ class EventListener(object):
 
             except (ValueError, Exception) as err:
                 # ignore error, but log it
-                logger.debug(f'Got error grabbing keeper events: {str(err)}')
+                logger.debug(f"Got error grabbing keeper events: {str(err)}")
 
             time.sleep(0.5)
             if timeout:

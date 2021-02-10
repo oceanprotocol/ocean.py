@@ -7,8 +7,19 @@ import logging
 import lzma
 import os
 
-from eth_utils import add_0x_prefix
-from eth_utils import remove_0x_prefix
+from eth_utils import add_0x_prefix, remove_0x_prefix
+from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.asset_downloader import download_asset_files
+from ocean_lib.assets.asset_resolver import resolve_asset
+from ocean_lib.data_provider.data_service_provider import OrderRequirements
+from ocean_lib.models.data_token import DataToken
+from ocean_lib.models.dtfactory import DTFactory
+from ocean_lib.models.metadata import MetadataContract
+from ocean_lib.ocean.util import to_base_18
+from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
+from ocean_lib.web3_internal.wallet import Wallet
+from ocean_lib.web3_internal.web3_provider import Web3Provider
+from ocean_lib.web3_internal.web3helper import Web3Helper
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_utils.agreements.service_factory import ServiceDescriptor, ServiceFactory
 from ocean_utils.agreements.service_types import ServiceTypes
@@ -16,27 +27,12 @@ from ocean_utils.aquarius.aquarius import Aquarius
 from ocean_utils.aquarius.aquarius_provider import AquariusProvider
 from ocean_utils.ddo.metadata import MetadataMain
 from ocean_utils.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
-from ocean_utils.did import DID, did_to_id
-from ocean_utils.exceptions import (
-    OceanDIDAlreadyExist,
-)
+from ocean_utils.did import did_to_id
+from ocean_utils.exceptions import OceanDIDAlreadyExist
 from ocean_utils.utils.utilities import checksum
 from plecos import plecos
 
-from ocean_lib.assets.asset import Asset
-from ocean_lib.data_provider.data_service_provider import OrderRequirements
-from ocean_lib.models.metadata import MetadataContract
-from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
-from ocean_lib.assets.asset_downloader import download_asset_files
-from ocean_lib.assets.asset_resolver import resolve_asset
-from ocean_lib.models.data_token import DataToken
-from ocean_lib.models.dtfactory import DTFactory
-from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_lib.web3_internal.web3helper import Web3Helper
-from ocean_lib.ocean.util import to_base_18
-
-logger = logging.getLogger('ocean')
+logger = logging.getLogger("ocean")
 
 
 class OceanAssets:
@@ -48,9 +44,11 @@ class OceanAssets:
         self._data_provider = data_provider
         self._metadata_registry_address = ddo_registry_address
 
-        downloads_path = os.path.join(os.getcwd(), 'downloads')
-        if self._config.has_option('resources', 'downloads.path'):
-            downloads_path = self._config.get('resources', 'downloads.path') or downloads_path
+        downloads_path = os.path.join(os.getcwd(), "downloads")
+        if self._config.has_option("resources", "downloads.path"):
+            downloads_path = (
+                self._config.get("resources", "downloads.path") or downloads_path
+            )
         self._downloads_path = downloads_path
 
     def ddo_registry(self):
@@ -59,7 +57,13 @@ class OceanAssets:
     def _get_aquarius(self, url=None) -> Aquarius:
         return AquariusProvider.get_aquarius(url or self._aquarius_url)
 
-    def _process_service_descriptors(self, service_descriptors: list, metadata: dict, provider_uri: str, wallet: Wallet) -> list:
+    def _process_service_descriptors(
+        self,
+        service_descriptors: list,
+        metadata: dict,
+        provider_uri: str,
+        wallet: Wallet,
+    ) -> list:
         ddo_service_endpoint = self._get_aquarius().get_service_endpoint()
 
         service_type_to_descriptor = {sd[0]: sd for sd in service_descriptors}
@@ -67,19 +71,23 @@ class OceanAssets:
         metadata_service_desc = service_type_to_descriptor.pop(
             ServiceTypes.METADATA,
             ServiceDescriptor.metadata_service_descriptor(
-                    metadata, ddo_service_endpoint
-            )
+                metadata, ddo_service_endpoint
+            ),
         )
-        _service_descriptors = [metadata_service_desc, ]
+        _service_descriptors = [metadata_service_desc]
 
         # Always dafault to creating a ServiceTypes.ASSET_ACCESS service if no services are specified
-        access_service_descriptor = service_type_to_descriptor.pop(ServiceTypes.ASSET_ACCESS, None)
-        compute_service_descriptor = service_type_to_descriptor.pop(ServiceTypes.CLOUD_COMPUTE, None)
+        access_service_descriptor = service_type_to_descriptor.pop(
+            ServiceTypes.ASSET_ACCESS, None
+        )
+        compute_service_descriptor = service_type_to_descriptor.pop(
+            ServiceTypes.CLOUD_COMPUTE, None
+        )
         # Make an access service only if no services are given by the user.
         if not access_service_descriptor and not compute_service_descriptor:
             access_service_descriptor = ServiceDescriptor.access_service_descriptor(
                 self._build_access_service(metadata, 1.0, wallet.address),
-                self._data_provider.get_url(self._config)
+                self._data_provider.get_url(self._config),
             )
 
         if access_service_descriptor:
@@ -90,11 +98,19 @@ class OceanAssets:
         _service_descriptors.extend(service_type_to_descriptor.values())
         return ServiceFactory.build_services(_service_descriptors)
 
-    def create(self, metadata: dict, publisher_wallet: Wallet,
-               service_descriptors: list=None, owner_address: str=None,
-               data_token_address: str=None, provider_uri=None,
-               dt_name: str=None, dt_symbol: str=None,
-               dt_blob: str=None, dt_cap: float=None) -> (Asset, None):
+    def create(
+        self,
+        metadata: dict,
+        publisher_wallet: Wallet,
+        service_descriptors: list = None,
+        owner_address: str = None,
+        data_token_address: str = None,
+        provider_uri=None,
+        dt_name: str = None,
+        dt_symbol: str = None,
+        dt_blob: str = None,
+        dt_cap: float = None,
+    ) -> (Asset, None):
         """
         Register an asset on-chain by creating/deploying a DataToken contract
         and in the Metadata store (Aquarius).
@@ -117,23 +133,31 @@ class OceanAssets:
         :param dt_cap: float
         :return: DDO instance
         """
-        assert isinstance(metadata, dict), f'Expected metadata of type dict, got {type(metadata)}'
-        assert service_descriptors is None or isinstance(service_descriptors, list), \
-            f'bad type of `service_descriptors` {type(service_descriptors)}'
+        assert isinstance(
+            metadata, dict
+        ), f"Expected metadata of type dict, got {type(metadata)}"
+        assert service_descriptors is None or isinstance(
+            service_descriptors, list
+        ), f"bad type of `service_descriptors` {type(service_descriptors)}"
 
         # copy metadata so we don't change the original
         metadata_copy = copy.deepcopy(metadata)
-        asset_type = metadata_copy['main']['type']
-        assert asset_type in ('dataset', 'algorithm'), f'Invalid/unsupported asset type {asset_type}'
+        asset_type = metadata_copy["main"]["type"]
+        assert asset_type in (
+            "dataset",
+            "algorithm",
+        ), f"Invalid/unsupported asset type {asset_type}"
         if not plecos.is_valid_dict_local(metadata_copy):
             errors = plecos.list_errors_dict_local(metadata_copy)
-            msg = f'Metadata has validation errors: {errors}'
+            msg = f"Metadata has validation errors: {errors}"
             logger.error(msg)
             raise ValueError(msg)
 
         service_descriptors = service_descriptors or []
 
-        services = self._process_service_descriptors(service_descriptors, metadata_copy, provider_uri, publisher_wallet)
+        services = self._process_service_descriptors(
+            service_descriptors, metadata_copy, provider_uri, publisher_wallet
+        )
 
         stype_to_service = {s.type: s for s in services}
         checksum_dict = dict()
@@ -147,25 +171,30 @@ class OceanAssets:
 
         #################
         # DataToken
-        address = DTFactory.configured_address(Web3Helper.get_network_name(), self._config.address_file)
+        address = DTFactory.configured_address(
+            Web3Helper.get_network_name(), self._config.address_file
+        )
         dtfactory = DTFactory(address)
         if not data_token_address:
-            blob = dt_blob or ''
-            name = dt_name or metadata['main']['name']
+            blob = dt_blob or ""
+            name = dt_name or metadata["main"]["name"]
             symbol = dt_symbol or name
             # register on-chain
             _cap = dt_cap if dt_cap else DataToken.DEFAULT_CAP
             tx_id = dtfactory.createToken(
-                blob, name, symbol, to_base_18(_cap), from_wallet=publisher_wallet)
+                blob, name, symbol, to_base_18(_cap), from_wallet=publisher_wallet
+            )
             data_token = DataToken(dtfactory.get_token_address(tx_id))
             if not data_token:
-                logger.warning(f'Creating new data token failed.')
+                logger.warning("Creating new data token failed.")
                 return None
 
             data_token_address = data_token.address
 
-            logger.info(f'Successfully created data token with address '
-                        f'{data_token.address} for new dataset asset.')
+            logger.info(
+                f"Successfully created data token with address "
+                f"{data_token.address} for new dataset asset."
+            )
             # owner_address is set as minter only if creating new data token. So if
             # `data_token_address` is set `owner_address` has no effect.
             if owner_address:
@@ -175,26 +204,35 @@ class OceanAssets:
             dt = DataToken(data_token_address)
             minter = dt.contract_concise.minter()
             if not minter:
-                raise AssertionError(f'datatoken address {data_token_address} does not seem to be a valid DataToken contract.')
+                raise AssertionError(
+                    f"datatoken address {data_token_address} does not seem to be a valid DataToken contract."
+                )
             elif minter.lower() != publisher_wallet.address.lower():
-                raise AssertionError(f'Minter of datatoken {data_token_address} is not the same as the publisher.')
+                raise AssertionError(
+                    f"Minter of datatoken {data_token_address} is not the same as the publisher."
+                )
             elif not dtfactory.verify_data_token(data_token_address):
-                raise AssertionError(f'datatoken address {data_token_address} is not found in the DTFactory events.')
+                raise AssertionError(
+                    f"datatoken address {data_token_address} is not found in the DTFactory events."
+                )
 
-        assert data_token_address, f'data_token_address is required for publishing a dataset asset.'
+        assert (
+            data_token_address
+        ), "data_token_address is required for publishing a dataset asset."
 
         # Generating the did and adding to the ddo.
-        did = asset.assign_did(f'did:op:{remove_0x_prefix(data_token_address)}')
-        logger.debug(f'Using datatoken address as did: {did}')
+        did = asset.assign_did(f"did:op:{remove_0x_prefix(data_token_address)}")
+        logger.debug(f"Using datatoken address as did: {did}")
         # Check if it's already registered first!
         if did in self._get_aquarius().list_assets():
             raise OceanDIDAlreadyExist(
-                f'Asset id {did} is already registered to another asset.')
+                f"Asset id {did} is already registered to another asset."
+            )
 
         md_service = stype_to_service[ServiceTypes.METADATA]
         ddo_service_endpoint = md_service.service_endpoint
-        if '{did}' in ddo_service_endpoint:
-            ddo_service_endpoint = ddo_service_endpoint.replace('{did}', did)
+        if "{did}" in ddo_service_endpoint:
+            ddo_service_endpoint = ddo_service_endpoint.replace("{did}", did)
             md_service.set_service_endpoint(ddo_service_endpoint)
 
         # Populate the ddo services
@@ -207,9 +245,8 @@ class OceanAssets:
         if compute_service:
             asset.add_service(compute_service)
 
-        asset.proof['signatureValue'] = Web3Helper.sign_hash(
-            add_ethereum_prefix_and_hash_msg(asset.asset_id),
-            publisher_wallet
+        asset.proof["signatureValue"] = Web3Helper.sign_hash(
+            add_ethereum_prefix_and_hash_msg(asset.asset_id), publisher_wallet
         )
 
         # Add public key and authentication
@@ -219,35 +256,39 @@ class OceanAssets:
 
         # Setup metadata service
         # First compute files_encrypted
-        assert metadata_copy['main']['files'], \
-            'files is required in the metadata main attributes.'
-        logger.debug('Encrypting content urls in the metadata.')
+        assert metadata_copy["main"][
+            "files"
+        ], "files is required in the metadata main attributes."
+        logger.debug("Encrypting content urls in the metadata.")
 
-        publisher_signature = self._data_provider.sign_message(publisher_wallet, asset.asset_id, self._config)
+        publisher_signature = self._data_provider.sign_message(
+            publisher_wallet, asset.asset_id, self._config
+        )
         _, encrypt_endpoint = self._data_provider.build_encrypt_endpoint(provider_uri)
         files_encrypted = self._data_provider.encrypt_files_dict(
-            metadata_copy['main']['files'],
+            metadata_copy["main"]["files"],
             encrypt_endpoint,
             asset.asset_id,
             publisher_wallet.address,
-            publisher_signature
+            publisher_signature,
         )
 
         # only assign if the encryption worked
         if files_encrypted:
-            logger.debug(f'Content urls encrypted successfully {files_encrypted}')
+            logger.debug(f"Content urls encrypted successfully {files_encrypted}")
             index = 0
-            for file in metadata_copy['main']['files']:
-                file['index'] = index
+            for file in metadata_copy["main"]["files"]:
+                file["index"] = index
                 index = index + 1
-                del file['url']
-            metadata_copy['encryptedFiles'] = files_encrypted
+                del file["url"]
+            metadata_copy["encryptedFiles"] = files_encrypted
         else:
-            raise AssertionError('Encrypting the files failed.')
+            raise AssertionError("Encrypting the files failed.")
 
         logger.debug(
-            f'Generated asset and services, DID is {asset.did},'
-            f' metadata service @{ddo_service_endpoint}.')
+            f"Generated asset and services, DID is {asset.did},"
+            f" metadata service @{ddo_service_endpoint}."
+        )
 
         # Set datatoken address in the asset
         asset.data_token_address = data_token_address
@@ -260,15 +301,17 @@ class OceanAssets:
                 asset.asset_id,
                 bytes([1]),
                 lzma.compress(web3.toBytes(text=asset.as_text())),
-                publisher_wallet
+                publisher_wallet,
             )
             if not ddo_registry.verify_tx(tx_id):
-                raise AssertionError(f'create DDO on-chain failed, transaction status is 0. Transaction hash is {tx_id}')
-            logger.info('Asset/ddo published on-chain successfully.')
+                raise AssertionError(
+                    f"create DDO on-chain failed, transaction status is 0. Transaction hash is {tx_id}"
+                )
+            logger.info("Asset/ddo published on-chain successfully.")
         except ValueError as ve:
-            raise ValueError(f'Invalid value to publish in the metadata: {str(ve)}')
+            raise ValueError(f"Invalid value to publish in the metadata: {str(ve)}")
         except Exception as e:
-            logger.error(f'Publish asset on-chain failed: {str(e)}')
+            logger.error(f"Publish asset on-chain failed: {str(e)}")
             raise
 
         return asset
@@ -282,15 +325,17 @@ class OceanAssets:
                 asset.asset_id,
                 bytes([1]),
                 lzma.compress(web3.toBytes(text=asset.as_text())),
-                publisher_wallet
+                publisher_wallet,
             )
             if not ddo_registry.verify_tx(tx_id):
-                raise AssertionError(f'update DDO on-chain failed, transaction status is 0. Transaction hash is {tx_id}')
-            logger.info('Asset/ddo updated on-chain successfully.')
+                raise AssertionError(
+                    f"update DDO on-chain failed, transaction status is 0. Transaction hash is {tx_id}"
+                )
+            logger.info("Asset/ddo updated on-chain successfully.")
         except ValueError as ve:
-            raise ValueError(f'Invalid value to publish in the metadata: {str(ve)}')
+            raise ValueError(f"Invalid value to publish in the metadata: {str(ve)}")
         except Exception as e:
-            logger.error(f'Publish asset on-chain failed: {str(e)}')
+            logger.error(f"Publish asset on-chain failed: {str(e)}")
             raise
 
     def resolve(self, did: str) -> Asset:
@@ -302,7 +347,9 @@ class OceanAssets:
         """
         return resolve_asset(did, metadata_store_url=self._config.aquarius_url)
 
-    def search(self, text: str, sort=None, offset=100, page=1, aquarius_url=None) -> list:
+    def search(
+        self, text: str, sort=None, offset=100, page=1, aquarius_url=None
+    ) -> list:
         """
         Search an asset in oceanDB using aquarius.
 
@@ -314,12 +361,18 @@ class OceanAssets:
             provided take the default
         :return: List of assets that match with the query
         """
-        assert page >= 1, f'Invalid page value {page}. Required page >= 1.'
-        logger.info(f'Searching asset containing: {text}')
-        return [Asset(dictionary=ddo_dict) for ddo_dict in
-                self._get_aquarius(aquarius_url).text_search(text, sort, offset, page)['results']]
+        assert page >= 1, f"Invalid page value {page}. Required page >= 1."
+        logger.info(f"Searching asset containing: {text}")
+        return [
+            Asset(dictionary=ddo_dict)
+            for ddo_dict in self._get_aquarius(aquarius_url).text_search(
+                text, sort, offset, page
+            )["results"]
+        ]
 
-    def query(self, query: dict, sort=None, offset=100, page=1, aquarius_url=None) -> []:
+    def query(
+        self, query: dict, sort=None, offset=100, page=1, aquarius_url=None
+    ) -> []:
         """
         Search an asset in oceanDB using search query.
 
@@ -332,13 +385,20 @@ class OceanAssets:
             provided take the default
         :return: List of assets that match with the query.
         """
-        logger.info(f'Searching asset query: {query}')
+        logger.info(f"Searching asset query: {query}")
         aquarius = self._get_aquarius(aquarius_url)
-        return [Asset(dictionary=ddo_dict) for ddo_dict in
-                aquarius.query_search(query, sort, offset, page)['results']]
+        return [
+            Asset(dictionary=ddo_dict)
+            for ddo_dict in aquarius.query_search(query, sort, offset, page)["results"]
+        ]
 
-    def order(self, did: str, consumer_address: str,
-              service_index: [int, None]=None, service_type: str=None) -> OrderRequirements:
+    def order(
+        self,
+        did: str,
+        consumer_address: str,
+        service_index: [int, None] = None,
+        service_type: str = None,
+    ) -> OrderRequirements:
         """
         Request a specific service from an asset, returns the service requirements that
         must be met prior to consuming the service.
@@ -349,7 +409,9 @@ class OceanAssets:
         :param service_type:
         :return: OrderRequirements instance -- named tuple (amount, data_token_address, receiver_address, nonce),
         """
-        assert service_type or service_index, f'One of service_index or service_type is required.'
+        assert (
+            service_type or service_index
+        ), "One of service_index or service_type is required."
         asset = self.resolve(did)
         if service_type:
             sa = ServiceAgreement.from_ddo(service_type, asset)
@@ -359,19 +421,28 @@ class OceanAssets:
 
         dt_address = asset.data_token_address
 
-        _, initialize_url = self._data_provider.get_initialize_endpoint(sa.service_endpoint)
+        _, initialize_url = self._data_provider.get_initialize_endpoint(
+            sa.service_endpoint
+        )
         order_requirements = self._data_provider.get_order_requirements(
             asset.did, initialize_url, consumer_address, sa.index, sa.type, dt_address
         )
         if not order_requirements:
-            raise AssertionError('Data service provider or service is not available.')
+            raise AssertionError("Data service provider or service is not available.")
 
         assert dt_address == order_requirements.data_token_address
         return order_requirements
 
     @staticmethod
-    def pay_for_service(amount: float, token_address: str, did: str, service_id: int,
-                        fee_receiver: str, from_wallet: Wallet, consumer: str) -> str:
+    def pay_for_service(
+        amount: float,
+        token_address: str,
+        did: str,
+        service_id: int,
+        fee_receiver: str,
+        from_wallet: Wallet,
+        consumer: str,
+    ) -> str:
         """
         Submits the payment for chosen service in DataTokens.
 
@@ -387,32 +458,51 @@ class OceanAssets:
         dt = DataToken(token_address)
         balance = dt.balanceOf(from_wallet.address)
         if balance < amount_base:
-            raise AssertionError(f'Your token balance {balance} is not sufficient '
-                                 f'to execute the requested service. This service '
-                                 f'requires {amount_base} number of tokens.')
-        if did.startswith('did:'):
+            raise AssertionError(
+                f"Your token balance {balance} is not sufficient "
+                f"to execute the requested service. This service "
+                f"requires {amount_base} number of tokens."
+            )
+        if did.startswith("did:"):
             did = add_0x_prefix(did_to_id(did))
         if fee_receiver is None:
-            fee_receiver = '0x0000000000000000000000000000000000000000'
+            fee_receiver = "0x0000000000000000000000000000000000000000"
         if consumer is None:
-            tx_hash = dt.startOrder(from_wallet.address, amount_base, service_id, fee_receiver, from_wallet)
+            tx_hash = dt.startOrder(
+                from_wallet.address, amount_base, service_id, fee_receiver, from_wallet
+            )
         else:
-            tx_hash = dt.startOrder(consumer, amount_base, service_id, fee_receiver, from_wallet)
+            tx_hash = dt.startOrder(
+                consumer, amount_base, service_id, fee_receiver, from_wallet
+            )
         try:
-            dt.verify_order_tx(Web3Provider.get_web3(), tx_hash, did, service_id,
-                               amount_base, from_wallet.address)
+            dt.verify_order_tx(
+                Web3Provider.get_web3(),
+                tx_hash,
+                did,
+                service_id,
+                amount_base,
+                from_wallet.address,
+            )
             return tx_hash
         except (AssertionError, Exception) as e:
             msg = (
-                f'Downloading asset files failed. The problem is related to '
-                f'the transfer of the data tokens required for the download '
-                f'service: {e}'
+                f"Downloading asset files failed. The problem is related to "
+                f"the transfer of the data tokens required for the download "
+                f"service: {e}"
             )
             logger.error(msg)
             raise AssertionError(msg)
 
-    def download(self, did: str, service_index: int, consumer_wallet: Wallet,
-                 order_tx_id: str, destination: str, index: [int, None]=None) -> str:
+    def download(
+        self,
+        did: str,
+        service_index: int,
+        consumer_wallet: Wallet,
+        order_tx_id: str,
+        destination: str,
+        index: [int, None] = None,
+    ) -> str:
         """
         Consume the asset data.
 
@@ -433,12 +523,13 @@ class OceanAssets:
         """
         asset = self.resolve(did)
         if index is not None:
-            assert isinstance(index, int), logger.error('index has to be an integer.')
-            assert index >= 0, logger.error('index has to be 0 or a positive integer.')
+            assert isinstance(index, int), logger.error("index has to be an integer.")
+            assert index >= 0, logger.error("index has to be 0 or a positive integer.")
 
         service = asset.get_service_by_index(service_index)
-        assert service and service.type == ServiceTypes.ASSET_ACCESS, \
-            f'Service with index {service_index} and type {ServiceTypes.ASSET_ACCESS} is not found.'
+        assert (
+            service and service.type == ServiceTypes.ASSET_ACCESS
+        ), f"Service with index {service_index} and type {ServiceTypes.ASSET_ACCESS} is not found."
 
         return download_asset_files(
             service_index,
@@ -448,7 +539,7 @@ class OceanAssets:
             asset.data_token_address,
             order_tx_id,
             self._data_provider,
-            index
+            index,
         )
 
     def validate(self, metadata: dict) -> bool:
@@ -477,7 +568,12 @@ class OceanAssets:
         :param owner_address: ethereum address of owner/publisher, hex-str
         :return: list of dids
         """
-        return [asset.did for asset in self.query({"query": {"proof.creator": [owner_address]}}, offset=1000)]
+        return [
+            asset.did
+            for asset in self.query(
+                {"query": {"proof.creator": [owner_address]}}, offset=1000
+            )
+        ]
 
     @staticmethod
     def _build_access_service(metadata: dict, cost: float, address: str) -> dict:
@@ -487,6 +583,6 @@ class OceanAssets:
                 "creator": address,
                 "cost": cost,
                 "timeout": 3600,
-                "datePublished": metadata[MetadataMain.KEY]['dateCreated']
+                "datePublished": metadata[MetadataMain.KEY]["dateCreated"],
             }
         }

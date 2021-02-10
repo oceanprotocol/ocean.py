@@ -1,28 +1,29 @@
 import os
 
-from web3 import WebsocketProvider
-
 from ocean_lib.config import Config
 from ocean_lib.config_provider import ConfigProvider
-from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.bfactory import BFactory
-from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE, ENV_INFURA_CONNECTION_TYPE, ENV_INFURA_PROJECT_ID
+from ocean_lib.models.dtfactory import DTFactory
+from ocean_lib.ocean.env_constants import (
+    ENV_CONFIG_FILE,
+    ENV_INFURA_CONNECTION_TYPE,
+    ENV_INFURA_PROJECT_ID,
+)
 from ocean_lib.web3_internal.contract_handler import ContractHandler
-
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib.web3_internal.web3helper import Web3Helper
+from web3 import WebsocketProvider
 
-
-WEB3_INFURA_PROJECT_ID = '357f2fe737db4304bd2f7285c5602d0d'
-GANACHE_URL = 'http://127.0.0.1:8545'
-SUPPORTED_NETWORK_NAMES = {'rinkeby', 'kovan', 'ganache', 'mainnet', 'ropsten'}
+WEB3_INFURA_PROJECT_ID = "357f2fe737db4304bd2f7285c5602d0d"
+GANACHE_URL = "http://127.0.0.1:8545"
+SUPPORTED_NETWORK_NAMES = {"rinkeby", "kovan", "ganache", "mainnet", "ropsten"}
 
 
 def get_infura_connection_type():
-    _type = os.getenv(ENV_INFURA_CONNECTION_TYPE, 'http')
-    if _type not in ('http', 'websocket'):
-        _type = 'http'
+    _type = os.getenv(ENV_INFURA_CONNECTION_TYPE, "http")
+    if _type not in ("http", "websocket"):
+        _type = "http"
 
     return _type
 
@@ -33,13 +34,13 @@ def get_infura_id():
 
 def get_infura_url(infura_id, network):
     conn_type = get_infura_connection_type()
-    if conn_type == 'http':
-        return f'https://{network}.infura.io/v3/{infura_id}'
+    if conn_type == "http":
+        return f"https://{network}.infura.io/v3/{infura_id}"
 
-    if conn_type == 'websocket':
-        return f'wss://{network}.infura.io/ws/v3/{infura_id}'
+    if conn_type == "websocket":
+        return f"wss://{network}.infura.io/ws/v3/{infura_id}"
 
-    raise AssertionError(f'Unknown connection type {conn_type}')
+    raise AssertionError(f"Unknown connection type {conn_type}")
 
 
 def get_web3_connection_provider(network_url):
@@ -64,22 +65,23 @@ def get_web3_connection_provider(network_url):
     :param network_url:
     :return:
     """
-    if network_url == 'ganache':
+    if network_url == "ganache":
         network_url = GANACHE_URL
 
-    if network_url.startswith('http'):
+    if network_url.startswith("http"):
         provider = CustomHTTPProvider(network_url)
-        
+
     else:
-        if not network_url.startswith('ws'):
-            assert network_url in SUPPORTED_NETWORK_NAMES, \
-                f'The given network_url *{network_url}* does not start with either ' \
-                f'`http` or `wss`, in this case a network name is expected and must ' \
-                f'be one of the supported networks {SUPPORTED_NETWORK_NAMES}.'
+        if not network_url.startswith("ws"):
+            assert network_url in SUPPORTED_NETWORK_NAMES, (
+                f"The given network_url *{network_url}* does not start with either "
+                f"`http` or `wss`, in this case a network name is expected and must "
+                f"be one of the supported networks {SUPPORTED_NETWORK_NAMES}."
+            )
 
             network_url = get_infura_url(get_infura_id(), network_url)
 
-        if network_url.startswith('http'):
+        if network_url.startswith("http"):
             provider = CustomHTTPProvider(network_url)
         else:
             provider = WebsocketProvider(network_url)
@@ -90,18 +92,28 @@ def get_web3_connection_provider(network_url):
 def get_contracts_addresses(network, config):
     addresses = {}
     try:
-        addresses = ContractHandler.get_contracts_addresses(network, config.address_file)
+        addresses = ContractHandler.get_contracts_addresses(
+            network, config.address_file
+        )
     except Exception as e:
-        print(f'error reading contract addresses: {e}.\n'
-              f'artifacts path is {ContractHandler.artifacts_path}, address file is {config.address_file}')
+        print(
+            f"error reading contract addresses: {e}.\n"
+            f"artifacts path is {ContractHandler.artifacts_path}, address file is {config.address_file}"
+        )
 
     if not addresses:
-        print(f'cannot find contract addresses: \n'
-              f'artifacts path is {ContractHandler.artifacts_path}, address file is {config.address_file}')
-        print(f'address file exists? {os.path.exists(config.address_file)}')
-        print(f'artifacts path exists? {os.path.exists(ContractHandler.artifacts_path)}')
-        print(f'contents of artifacts folder: \n'
-              f'{os.listdir(ContractHandler.artifacts_path)}')
+        print(
+            f"cannot find contract addresses: \n"
+            f"artifacts path is {ContractHandler.artifacts_path}, address file is {config.address_file}"
+        )
+        print(f"address file exists? {os.path.exists(config.address_file)}")
+        print(
+            f"artifacts path exists? {os.path.exists(ContractHandler.artifacts_path)}"
+        )
+        print(
+            f"contents of artifacts folder: \n"
+            f"{os.listdir(ContractHandler.artifacts_path)}"
+        )
     return addresses or {}
 
 
@@ -111,8 +123,8 @@ def to_base_18(amt: float) -> int:
 
 def to_base(amt: float, dec: int) -> int:
     """returns value in e.g. wei (taking e.g. ETH as input)"""
-    return int(amt * 1*10**dec)
-       
+    return int(amt * 1 * 10 ** dec)
+
 
 def from_base_18(num_base: int) -> float:
     return from_base(num_base, 18)
@@ -120,18 +132,20 @@ def from_base_18(num_base: int) -> float:
 
 def from_base(num_base: int, dec: int) -> float:
     """returns value in e.g. ETH (taking e.g. wei as input)"""
-    return float(num_base / (10**dec))
+    return float(num_base / (10 ** dec))
 
 
 def get_dtfactory_address(network=None):
     return DTFactory.configured_address(
-        network or Web3Helper.get_network_name(), ConfigProvider.get_config().address_file
+        network or Web3Helper.get_network_name(),
+        ConfigProvider.get_config().address_file,
     )
 
 
 def get_bfactory_address(network=None):
     return BFactory.configured_address(
-        network or Web3Helper.get_network_name(), ConfigProvider.get_config().address_file
+        network or Web3Helper.get_network_name(),
+        ConfigProvider.get_config().address_file,
     )
 
 
@@ -139,7 +153,7 @@ def get_ocean_token_address(network=None):
     addresses = get_contracts_addresses(
         network or Web3Helper.get_network_name(), ConfigProvider.get_config()
     )
-    return addresses.get('Ocean') if addresses else None
+    return addresses.get("Ocean") if addresses else None
 
 
 def init_components(config=None):

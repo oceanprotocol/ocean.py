@@ -8,13 +8,20 @@ import os
 
 from ocean_lib.web3_internal.utils import privateKeyToAddress
 
-logger = logging.getLogger('account')
+logger = logging.getLogger("account")
 
 
 class Account:
     """Class representing an account."""
 
-    def __init__(self, address=None, password=None, key_file=None, encrypted_key=None, private_key=None):
+    def __init__(
+        self,
+        address=None,
+        password=None,
+        key_file=None,
+        encrypted_key=None,
+        private_key=None,
+    ):
         """
         Hold account address, password and either keyfile path, encrypted key or private key
 
@@ -25,10 +32,13 @@ class Account:
         :param encrypted_key:
         :param private_key:
         """
-        assert key_file or encrypted_key or private_key, \
-            'Account requires one of `key_file`, `encrypted_key`, or `private_key`.'
+        assert (
+            key_file or encrypted_key or private_key
+        ), "Account requires one of `key_file`, `encrypted_key`, or `private_key`."
         if key_file or encrypted_key:
-            assert password, '`password` is required when using `key_file` or `encrypted_key`.'
+            assert (
+                password
+            ), "`password` is required when using `key_file` or `encrypted_key`."
 
         if private_key:
             password = None
@@ -44,7 +54,7 @@ class Account:
 
         if self.address is None and self._private_key is not None:
             self.address = privateKeyToAddress(private_key)
-        
+
         assert self.address is not None
 
     @property

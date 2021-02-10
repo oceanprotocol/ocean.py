@@ -3,18 +3,17 @@
 
 import os
 
+from ocean_lib.assets.asset import Asset
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_utils.agreements.service_types import ServiceTypes
-
-from ocean_lib.assets.asset import Asset
 from tests.resources.helper_functions import (
-    get_consumer_wallet,
+    get_another_consumer_ocean_instance,
     get_another_consumer_wallet,
+    get_consumer_ocean_instance,
+    get_consumer_wallet,
+    get_publisher_ocean_instance,
     get_publisher_wallet,
     get_registered_ddo,
-    get_publisher_ocean_instance,
-    get_consumer_ocean_instance,
-    get_another_consumer_ocean_instance,
     mint_tokens_and_wait,
 )
 
@@ -50,7 +49,9 @@ def test_market_flow():
 
     ######
     # Place order for the download service
-    order_requirements = consumer_ocean.assets.order(asset.did, consumer_wallet.address, sa.index)
+    order_requirements = consumer_ocean.assets.order(
+        asset.did, consumer_wallet.address, sa.index
+    )
 
     ######
     # Pay for the service
@@ -59,9 +60,9 @@ def test_market_flow():
         order_requirements.data_token_address,
         asset.did,
         service.index,
-        '0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9',
+        "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",
         consumer_wallet,
-        consumer_wallet.address
+        consumer_wallet.address,
     )
     ######
     # Download the asset files
@@ -70,19 +71,27 @@ def test_market_flow():
         sa.index,
         consumer_wallet,
         _order_tx_id,
-        consumer_ocean.config.downloads_path
+        consumer_ocean.config.downloads_path,
     )
 
     assert len(os.listdir(asset_folder)) >= 1
 
     orders = consumer_ocean.get_user_orders(consumer_wallet.address, asset.asset_id)
-    assert orders, f'no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}'
+    assert (
+        orders
+    ), f"no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}"
 
-    orders = consumer_ocean.get_user_orders(consumer_wallet.address, consumer_ocean.web3.toChecksumAddress(asset.asset_id))
-    assert orders, f'no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}'
+    orders = consumer_ocean.get_user_orders(
+        consumer_wallet.address, consumer_ocean.web3.toChecksumAddress(asset.asset_id)
+    )
+    assert (
+        orders
+    ), f"no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}"
 
     orders = consumer_ocean.get_user_orders(consumer_wallet.address)
-    assert orders, f'no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}'
+    assert (
+        orders
+    ), f"no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}"
 
 
 def test_payer_market_flow():
@@ -118,7 +127,9 @@ def test_payer_market_flow():
 
     ######
     # Place order for the download service
-    order_requirements = consumer_ocean.assets.order(asset.did, another_consumer_wallet.address, sa.index)
+    order_requirements = consumer_ocean.assets.order(
+        asset.did, another_consumer_wallet.address, sa.index
+    )
 
     ######
     # Pay for the service and have another_consumer_wallet as consumer
@@ -127,9 +138,9 @@ def test_payer_market_flow():
         order_requirements.data_token_address,
         asset.did,
         service.index,
-        '0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9',
+        "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",
         consumer_wallet,
-        another_consumer_wallet.address
+        another_consumer_wallet.address,
     )
     asset_folder = None
     assert asset_folder is None
@@ -140,20 +151,29 @@ def test_payer_market_flow():
             sa.index,
             another_consumer_wallet,
             _order_tx_id,
-            another_consumer_ocean.config.downloads_path
+            another_consumer_ocean.config.downloads_path,
         )
 
-    downloaded_file = os.path.join(asset_folder,
-                                   os.path.join(f'datafile.{asset.asset_id}.{sa.index}'))
+    downloaded_file = os.path.join(
+        asset_folder, os.path.join(f"datafile.{asset.asset_id}.{sa.index}")
+    )
     assert os.path.exists(asset_folder)
-    assert downloaded_file.split('/')[-1] in os.listdir(asset_folder)
+    assert downloaded_file.split("/")[-1] in os.listdir(asset_folder)
     assert len(os.listdir(asset_folder)) >= 1
 
     orders = consumer_ocean.get_user_orders(consumer_wallet.address, asset.asset_id)
-    assert orders, f'no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}'
+    assert (
+        orders
+    ), f"no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}"
 
-    orders = consumer_ocean.get_user_orders(consumer_wallet.address, consumer_ocean.web3.toChecksumAddress(asset.asset_id))
-    assert orders, f'no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}'
+    orders = consumer_ocean.get_user_orders(
+        consumer_wallet.address, consumer_ocean.web3.toChecksumAddress(asset.asset_id)
+    )
+    assert (
+        orders
+    ), f"no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}"
 
     orders = consumer_ocean.get_user_orders(consumer_wallet.address)
-    assert orders, f'no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}'
+    assert (
+        orders
+    ), f"no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}"

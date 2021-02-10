@@ -2,9 +2,8 @@ import logging
 import os
 import typing
 
-from ocean_lib.web3_internal.constants import MIN_GAS_PRICE, ENV_MAX_GAS_PRICE
-from ocean_lib.web3_internal.utils import privateKeyToAddress
-from ocean_lib.web3_internal.utils import privateKeyToPublicKey
+from ocean_lib.web3_internal.constants import ENV_MAX_GAS_PRICE, MIN_GAS_PRICE
+from ocean_lib.web3_internal.utils import privateKeyToAddress, privateKeyToPublicKey
 
 logger = logging.getLogger(__name__)
 
@@ -23,13 +22,17 @@ class Wallet:
     node since we only send the raw transaction hash so the user info is safe.
 
     """
+
     _last_tx_count = dict()
 
-    def __init__(self, web3,
-                 private_key: typing.Union[str, None] = None,
-                 encrypted_key: dict = None,
-                 password: typing.Union[str, None] = None,
-                 address: typing.Union[str, None] = None):
+    def __init__(
+        self,
+        web3,
+        private_key: typing.Union[str, None] = None,
+        encrypted_key: dict = None,
+        password: typing.Union[str, None] = None,
+        address: typing.Union[str, None] = None,
+    ):
         self._web3 = web3
         self._last_tx_count.clear()
 
@@ -50,7 +53,7 @@ class Wallet:
     @property
     def web3(self):
         return self._web3
-    
+
     @property
     def address(self):
         return self._address
@@ -95,7 +98,9 @@ class Wallet:
         account = self._web3.eth.account.privateKeyToAccount(self.private_key)
         if fixed_nonce is not None:
             nonce = fixed_nonce
-            logger.debug(f'Signing transaction using a fixed nonce {fixed_nonce}, tx params are: {tx}')
+            logger.debug(
+                f"Signing transaction using a fixed nonce {fixed_nonce}, tx params are: {tx}"
+            )
         else:
             nonce = Wallet._get_nonce(self._web3, account.address)
 
@@ -106,13 +111,15 @@ class Wallet:
         if gas_price and self._max_gas_price:
             gas_price = min(gas_price, self._max_gas_price)
 
-        logger.debug(f'`Wallet` signing tx: sender address: {account.address} nonce: {nonce}, '
-                     f'eth.gasPrice: {self._web3.eth.gasPrice}')
-        tx['gasPrice'] = gas_price
-        tx['nonce'] = nonce
+        logger.debug(
+            f"`Wallet` signing tx: sender address: {account.address} nonce: {nonce}, "
+            f"eth.gasPrice: {self._web3.eth.gasPrice}"
+        )
+        tx["gasPrice"] = gas_price
+        tx["nonce"] = nonce
         signed_tx = self._web3.eth.account.signTransaction(tx, self.private_key)
-        logger.debug(f'Using gasPrice: {gas_price}')
-        logger.debug(f'`Wallet` signed tx is {signed_tx}')
+        logger.debug(f"Using gasPrice: {gas_price}")
+        logger.debug(f"`Wallet` signed tx is {signed_tx}")
         return signed_tx.rawTransaction
 
     def sign(self, msg_hash):
@@ -127,4 +134,3 @@ class Wallet:
             s += [f"public key: {privateKeyToPublicKey(self.private_key)}"]
         s += [""]
         return "\n".join(s)
-

@@ -4,25 +4,24 @@
 import logging
 import os
 
-from ocean_utils.agreements.service_agreement import ServiceAgreement
-from ocean_utils.agreements.service_types import ServiceTypes
-
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.web3_internal.wallet import Wallet
+from ocean_utils.agreements.service_agreement import ServiceAgreement
+from ocean_utils.agreements.service_types import ServiceTypes
 
 logger = logging.getLogger(__name__)
 
 
 def download_asset_files(
-        service_index: int,
-        asset: Asset,
-        consumer_wallet: Wallet,
-        destination: str,
-        token_address: str,
-        order_tx_id: str,
-        data_provider: DataServiceProvider,
-        index: [int, None]=None
+    service_index: int,
+    asset: Asset,
+    consumer_wallet: Wallet,
+    destination: str,
+    token_address: str,
+    order_tx_id: str,
+    data_provider: DataServiceProvider,
+    index: [int, None] = None,
 ):
     """
     Download asset data files or result files from a compute job.
@@ -37,14 +36,16 @@ def download_asset_files(
     :param index: Index of the document that is going to be downloaded, int
     :return: Asset folder path, str
     """
-    _files = asset.metadata['main']['files']
+    _files = asset.metadata["main"]["files"]
     sa = ServiceAgreement.from_ddo(ServiceTypes.ASSET_ACCESS, asset)
     service_endpoint = sa.service_endpoint
     if not service_endpoint:
         logger.error(
-            'Consume asset failed, service definition is missing the "serviceEndpoint".')
+            'Consume asset failed, service definition is missing the "serviceEndpoint".'
+        )
         raise AssertionError(
-            'Consume asset failed, service definition is missing the "serviceEndpoint".')
+            'Consume asset failed, service definition is missing the "serviceEndpoint".'
+        )
 
     _, service_endpoint = data_provider.build_download_endpoint(service_endpoint)
     if not os.path.isabs(destination):
@@ -53,17 +54,17 @@ def download_asset_files(
         os.mkdir(destination)
 
     asset_folder = os.path.join(
-        destination,
-        f'datafile.{asset.asset_id}.{service_index}'
+        destination, f"datafile.{asset.asset_id}.{service_index}"
     )
     if not os.path.exists(asset_folder):
         os.mkdir(asset_folder)
 
     if index is not None:
-        assert isinstance(index, int), logger.error('index has to be an integer.')
-        assert index >= 0, logger.error('index has to be 0 or a positive integer.')
+        assert isinstance(index, int), logger.error("index has to be an integer.")
+        assert index >= 0, logger.error("index has to be 0 or a positive integer.")
         assert index < len(_files), logger.error(
-            'index can not be bigger than the number of files')
+            "index can not be bigger than the number of files"
+        )
         indexes = [index]
     else:
         indexes = range(len(_files))
@@ -78,7 +79,7 @@ def download_asset_files(
             service_index,
             token_address,
             order_tx_id,
-            i
+            i,
         )
 
     return destination

@@ -5,32 +5,30 @@ from collections import namedtuple
 
 import requests
 from eth_utils import remove_0x_prefix
-from web3 import Web3
-from web3.utils.events import get_event_data
-from websockets import ConnectionClosed
-
-from ocean_lib.ocean.util import to_base_18, from_base_18
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.event_filter import EventFilter
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_utils.http_requests.requests_session import get_requests_session
-
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from web3 import Web3
+from web3.utils.events import get_event_data
+from websockets import ConnectionClosed
 
 OrderValues = namedtuple(
-    'OrderValues',
-    ('consumer', 'amount', 'serviceId', 'startedAt', 'marketFeeCollector', 'marketFee')
+    "OrderValues",
+    ("consumer", "amount", "serviceId", "startedAt", "marketFeeCollector", "marketFee"),
 )
 
 
 class DataToken(ContractBase):
-    CONTRACT_NAME = 'DataTokenTemplate'
+    CONTRACT_NAME = "DataTokenTemplate"
     DEFAULT_CAP = 1000.0
     DEFAULT_CAP_BASE = to_base_18(DEFAULT_CAP)
 
-    ORDER_STARTED_EVENT = 'OrderStarted'
-    ORDER_FINISHED_EVENT = 'OrderFinished'
+    ORDER_STARTED_EVENT = "OrderStarted"
+    ORDER_FINISHED_EVENT = "OrderFinished"
 
     OPF_FEE_PERCENTAGE = 0.001
     MAX_MARKET_FEE_PERCENTAGE = 0.001
@@ -38,28 +36,33 @@ class DataToken(ContractBase):
     def get_event_signature(self, event_name):
         e = getattr(self.events, event_name)
         if not e:
-            raise ValueError(f'Event {event_name} not found in {self.CONTRACT_NAME} contract.')
+            raise ValueError(
+                f"Event {event_name} not found in {self.CONTRACT_NAME} contract."
+            )
 
         abi = e().abi
-        types = [param['type'] for param in abi['inputs']]
+        types = [param["type"] for param in abi["inputs"]]
         sig_str = f'{event_name}({",".join(types)})'
         return Web3.sha3(text=sig_str).hex()
 
-    def get_start_order_logs(self, web3, consumer_address=None, from_block=0, to_block='latest', from_all_tokens=False):
+    def get_start_order_logs(
+        self,
+        web3,
+        consumer_address=None,
+        from_block=0,
+        to_block="latest",
+        from_all_tokens=False,
+    ):
         topic0 = self.get_event_signature(self.ORDER_STARTED_EVENT)
         topics = [topic0]
         if consumer_address:
-            topic1 = f'0x000000000000000000000000{consumer_address[2:].lower()}'
+            topic1 = f"0x000000000000000000000000{consumer_address[2:].lower()}"
             topics = [topic0, None, topic1]
 
-        filter_params = {
-            'fromBlock': from_block,
-            'toBlock': to_block,
-            'topics': topics,
-        }
+        filter_params = {"fromBlock": from_block, "toBlock": to_block, "topics": topics}
         if not from_all_tokens:
             # get logs only for this token address
-            filter_params['address'] = self.address
+            filter_params["address"] = self.address
 
         e = getattr(self.events, self.ORDER_STARTED_EVENT)
         event_abi = e().abi
@@ -70,12 +73,16 @@ class DataToken(ContractBase):
         return parsed_logs
 
     def get_transfer_events_in_range(self, from_block, to_block):
-        name = 'Transfer'
+        name = "Transfer"
         event = getattr(self.events, name)
 
-        return self.getLogs(event, Web3Provider.get_web3(), fromBlock=from_block, toBlock=to_block)
+        return self.getLogs(
+            event, Web3Provider.get_web3(), fromBlock=from_block, toBlock=to_block
+        )
 
-    def get_all_transfers_from_events(self, start_block: int, end_block: int, chunk: int=1000) -> tuple:
+    def get_all_transfers_from_events(
+        self, start_block: int, end_block: int, chunk: int = 1000
+    ) -> tuple:
         _from = start_block
         _to = _from + chunk - 1
 
@@ -86,15 +93,28 @@ class DataToken(ContractBase):
             try:
                 logs = self.get_transfer_events_in_range(_from, _to)
                 transfer_records.extend(
-                    [(l.args['from'], l.args.to, l.args.value, l.blockNumber, l.transactionHash.hex(), l.logIndex, l.transactionIndex)
-                     for l in logs])
+                    [
+                        (
+                            l.args["from"],
+                            l.args.to,
+                            l.args.value,
+                            l.blockNumber,
+                            l.transactionHash.hex(),
+                            l.logIndex,
+                            l.transactionIndex,
+                        )
+                        for l in logs
+                    ]
+                )
                 _from = _to + 1
                 _to = min(_from + chunk - 1, end_block)
                 error_count = 0
-                if (_from-start_block) % 1000 == 0:
-                    print(f'    So far processed {len(transfer_records)} Transfer events from {_from-start_block} blocks.')
+                if (_from - start_block) % 1000 == 0:
+                    print(
+                        f"    So far processed {len(transfer_records)} Transfer events from {_from-start_block} blocks."
+                    )
             except requests.exceptions.ReadTimeout as err:
-                print(f'ReadTimeout ({_from}, {_to}): {err}')
+                print(f"ReadTimeout ({_from}, {_to}): {err}")
                 error_count += 1
 
             if error_count > 1:
@@ -103,14 +123,14 @@ class DataToken(ContractBase):
         return transfer_records, min(_to, end_block)  # can have duplicates
 
     def get_transfer_event(self, block_number, sender, receiver):
-        event = getattr(self.events, 'Transfer')
-        filter_params = {'from': sender, 'to': receiver}
+        event = getattr(self.events, "Transfer")
+        filter_params = {"from": sender, "to": receiver}
         event_filter = EventFilter(
-            'Transfer',
+            "Transfer",
             event,
             filter_params,
-            from_block=block_number-1,
-            to_block=block_number+10
+            from_block=block_number - 1,
+            to_block=block_number + 10,
         )
 
         logs = event_filter.get_all_entries(max_tries=10)
@@ -118,8 +138,10 @@ class DataToken(ContractBase):
             return None
 
         if len(logs) > 1:
-            raise AssertionError(f'Expected a single transfer event at '
-                                 f'block {block_number}, but found {len(logs)} events.')
+            raise AssertionError(
+                f"Expected a single transfer event at "
+                f"block {block_number}, but found {len(logs)} events."
+            )
 
         return logs[0]
 
@@ -127,16 +149,16 @@ class DataToken(ContractBase):
         w3 = Web3Provider.get_web3()
         tx = w3.eth.getTransaction(tx_id)
         if not tx:
-            raise AssertionError('Transaction is not found, or is not yet verified.')
+            raise AssertionError("Transaction is not found, or is not yet verified.")
 
-        if tx['from'] != sender or tx['to'] != self.address:
+        if tx["from"] != sender or tx["to"] != self.address:
             raise AssertionError(
-                f'Sender and receiver in the transaction {tx_id} '
-                f'do not match the expected consumer and contract addresses.'
+                f"Sender and receiver in the transaction {tx_id} "
+                f"do not match the expected consumer and contract addresses."
             )
 
         _iter = 0
-        while tx['blockNumber'] is None:
+        while tx["blockNumber"] is None:
             time.sleep(0.1)
             tx = w3.eth.getTransaction(tx_id)
             _iter = _iter + 1
@@ -145,30 +167,36 @@ class DataToken(ContractBase):
 
         tx_receipt = self.get_tx_receipt(tx_id)
         if tx_receipt.status == 0:
-            raise AssertionError(f'Transfer transaction failed.')
+            raise AssertionError("Transfer transaction failed.")
 
-        logs = getattr(self.events, 'Transfer')().processReceipt(tx_receipt)
+        logs = getattr(self.events, "Transfer")().processReceipt(tx_receipt)
         transfer_event = logs[0] if logs else None
         # transfer_event = self.get_transfer_event(tx['blockNumber'], sender, receiver)
         if not transfer_event:
-            raise AssertionError(f'Cannot find the event for the transfer transaction with tx id {tx_id}.')
-        assert len(logs) == 1, \
-            f'Multiple Transfer events in the same transaction !!! {logs}'
+            raise AssertionError(
+                f"Cannot find the event for the transfer transaction with tx id {tx_id}."
+            )
+        assert (
+            len(logs) == 1
+        ), f"Multiple Transfer events in the same transaction !!! {logs}"
 
-        if transfer_event.args['from'] != sender or transfer_event.args['to'] != receiver:
-            raise AssertionError(f'The transfer event from/to do not match the expected values.')
+        if (
+            transfer_event.args["from"] != sender
+            or transfer_event.args["to"] != receiver
+        ):
+            raise AssertionError(
+                "The transfer event from/to do not match the expected values."
+            )
 
         return tx, transfer_event
 
-    def get_event_logs(self, event_name, filter_args=None, from_block=0, to_block='latest'):
+    def get_event_logs(
+        self, event_name, filter_args=None, from_block=0, to_block="latest"
+    ):
         event = getattr(self.events, event_name)
         filter_params = filter_args or {}
         event_filter = EventFilter(
-            event_name,
-            event,
-            filter_params,
-            from_block=from_block,
-            to_block=to_block
+            event_name, event, filter_params, from_block=from_block, to_block=to_block
         )
 
         logs = event_filter.get_all_entries(max_tries=10)
@@ -186,39 +214,55 @@ class DataToken(ContractBase):
             tx_receipt = self.get_tx_receipt(tx_id)
 
         if tx_receipt is None:
-            raise AssertionError(f'Failed to get tx receipt for the `startOrder` transaction..')
+            raise AssertionError(
+                "Failed to get tx receipt for the `startOrder` transaction.."
+            )
 
         if tx_receipt.status == 0:
-            raise AssertionError(f'order transaction failed.')
+            raise AssertionError("order transaction failed.")
 
         receiver = self.contract_concise.minter()
         event_logs = event().processReceipt(tx_receipt)
         order_log = event_logs[0] if event_logs else None
         if not order_log:
-            raise AssertionError(f'Cannot find the event for the order transaction with tx id {tx_id}.')
-        assert len(event_logs) == 1, \
-            f'Multiple order events in the same transaction !!! {event_logs}'
+            raise AssertionError(
+                f"Cannot find the event for the order transaction with tx id {tx_id}."
+            )
+        assert (
+            len(event_logs) == 1
+        ), f"Multiple order events in the same transaction !!! {event_logs}"
 
         asset_id = remove_0x_prefix(did).lower()
-        assert asset_id == remove_0x_prefix(self.address).lower(), f'asset-id does not match the datatoken id.'
+        assert (
+            asset_id == remove_0x_prefix(self.address).lower()
+        ), "asset-id does not match the datatoken id."
         if str(order_log.args.serviceId) != str(service_id):
-            raise AssertionError(f'The asset id (DID) or service id in the event does '
-                                 f'not match the requested asset. \n'
-                                 f'requested: (did={did}, serviceId={service_id}\n'
-                                 f'event: (serviceId={order_log.args.serviceId}')
+            raise AssertionError(
+                f"The asset id (DID) or service id in the event does "
+                f"not match the requested asset. \n"
+                f"requested: (did={did}, serviceId={service_id}\n"
+                f"event: (serviceId={order_log.args.serviceId}"
+            )
 
-        target_amount = amount_base - self.calculate_fee(amount_base, self.OPF_FEE_PERCENTAGE)
+        target_amount = amount_base - self.calculate_fee(
+            amount_base, self.OPF_FEE_PERCENTAGE
+        )
         if order_log.args.mrktFeeCollector and order_log.args.marketFee > 0:
-            assert order_log.args.marketFee <= (self.calculate_fee(amount_base, self.MAX_MARKET_FEE_PERCENTAGE) + 5), \
-                f'marketFee {order_log.args.marketFee} exceeds the expected maximum ' \
-                f'of {self.calculate_fee(amount_base, self.MAX_MARKET_FEE_PERCENTAGE)} ' \
-                f'based on feePercentage={self.MAX_MARKET_FEE_PERCENTAGE} .'
+            assert order_log.args.marketFee <= (
+                self.calculate_fee(amount_base, self.MAX_MARKET_FEE_PERCENTAGE) + 5
+            ), (
+                f"marketFee {order_log.args.marketFee} exceeds the expected maximum "
+                f"of {self.calculate_fee(amount_base, self.MAX_MARKET_FEE_PERCENTAGE)} "
+                f"based on feePercentage={self.MAX_MARKET_FEE_PERCENTAGE} ."
+            )
             target_amount = target_amount - order_log.args.marketFee
 
         # verify sender of the tx using the Tx record
         tx = web3.eth.getTransaction(tx_id)
         if sender not in [order_log.args.consumer, order_log.args.payer]:
-            raise AssertionError(f'sender of order transaction is not the same as the requesting account.')
+            raise AssertionError(
+                "sender of order transaction is not the same as the requesting account."
+            )
 
         transfer_logs = self.events.Transfer().processReceipt(tx_receipt)
         receiver_to_transfers = {}
@@ -227,25 +271,29 @@ class DataToken(ContractBase):
                 receiver_to_transfers[tr.args.to] = []
             receiver_to_transfers[tr.args.to].append(tr)
         if receiver not in receiver_to_transfers:
-            raise AssertionError(f'receiver {receiver} is not found in the transfer events.')
+            raise AssertionError(
+                f"receiver {receiver} is not found in the transfer events."
+            )
         transfers = sorted(receiver_to_transfers[receiver], key=lambda x: x.args.value)
         total = sum(tr.args.value for tr in transfers)
         if total < (target_amount - 5):
-            raise ValueError(f'transferred value does meet the service cost: '
-                             f'service.cost - fees={from_base_18(target_amount)}, '
-                             f'transferred value={from_base_18(total)}')
+            raise ValueError(
+                f"transferred value does meet the service cost: "
+                f"service.cost - fees={from_base_18(target_amount)}, "
+                f"transferred value={from_base_18(total)}"
+            )
         return tx, order_log, transfers[-1]
 
     def download(self, wallet: Wallet, tx_id: str, destination_folder: str):
         url = self.blob()
         download_url = (
-            f'{url}?'
-            f'consumerAddress={wallet.address}'
-            f'&dataToken={self.address}'
-            f'&transferTxId={tx_id}'
+            f"{url}?"
+            f"consumerAddress={wallet.address}"
+            f"&dataToken={self.address}"
+            f"&transferTxId={tx_id}"
         )
         response = get_requests_session().get(download_url, stream=True)
-        file_name = f'file-{self.address}'
+        file_name = f"file-{self.address}"
         DataServiceProvider.write_file(response, destination_folder, file_name)
         return os.path.join(destination_folder, file_name)
 
@@ -255,19 +303,25 @@ class DataToken(ContractBase):
     def get_metadata_url(self):
         # grab the metadatastore URL from the DataToken contract (@token_address)
         url_object = json.loads(self.blob())
-        assert url_object['t'] == 1, f'This datatoken does not appear to have a metadata store url.'
-        return url_object['url']
+        assert (
+            url_object["t"] == 1
+        ), "This datatoken does not appear to have a metadata store url."
+        return url_object["url"]
 
     def get_simple_url(self):
         url_object = json.loads(self.blob())
-        assert url_object['t'] == 0, f'This datatoken does not appear to have a direct consume url.'
-        return url_object['url']
+        assert (
+            url_object["t"] == 0
+        ), "This datatoken does not appear to have a direct consume url."
+        return url_object["url"]
 
     # ============================================================
     # Token transactions using amount of tokens as a float instead of int
     # amount of tokens will be converted to the base value before sending
     # the transaction
-    def approve_tokens(self, spender: str, value: float, from_wallet: Wallet, wait: bool=False):
+    def approve_tokens(
+        self, spender: str, value: float, from_wallet: Wallet, wait: bool = False
+    ):
         txid = self.approve(spender, to_base_18(value), from_wallet)
         if wait:
             self.get_tx_receipt(txid)
@@ -313,25 +367,31 @@ class DataToken(ContractBase):
         contract = self.contract_concise
         minter = contract.minter()
         all_transfers, block = self.get_all_transfers_from_events(from_block, to_block)
-        order_logs = self.get_start_order_logs(web3, from_block=from_block, to_block=to_block)
+        order_logs = self.get_start_order_logs(
+            web3, from_block=from_block, to_block=to_block
+        )
         holders = []
         if include_holders:
             a_to_balance = DataToken.calculate_balances(all_transfers)
             _min = to_base_18(0.000001)
-            holders = sorted([(a, from_base_18(b)) for a, b in a_to_balance.items() if b > _min], key=lambda x: x[1], reverse=True)
+            holders = sorted(
+                [(a, from_base_18(b)) for a, b in a_to_balance.items() if b > _min],
+                key=lambda x: x[1],
+                reverse=True,
+            )
 
         return {
-            'address': self.address,
-            'name': contract.name(),
-            'symbol': contract.symbol(),
-            'decimals': contract.decimals(),
-            'cap': from_base_18(contract.cap()),
-            'totalSupply': from_base_18(contract.totalSupply()),
-            'minter': minter,
-            'minterBalance': self.token_balance(minter),
-            'numHolders': len(holders),
-            'holders': holders,
-            'numOrders': len(order_logs)
+            "address": self.address,
+            "name": contract.name(),
+            "symbol": contract.symbol(),
+            "decimals": contract.decimals(),
+            "cap": from_base_18(contract.cap()),
+            "totalSupply": from_base_18(contract.totalSupply()),
+            "minter": minter,
+            "minterBalance": self.token_balance(minter),
+            "numHolders": len(holders),
+            "holders": holders,
+            "numOrders": len(order_logs),
         }
 
     # ============================================================
@@ -361,32 +421,40 @@ class DataToken(ContractBase):
         return self.contract_concise.balanceOf(account)
 
     def mint(self, to_account: str, value_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction('mint', (to_account, value_base), from_wallet)
+        return self.send_transaction("mint", (to_account, value_base), from_wallet)
 
     def approve(self, spender: str, value_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction('approve', (spender, value_base), from_wallet)
+        return self.send_transaction("approve", (spender, value_base), from_wallet)
 
     def transfer(self, to: str, value_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction('transfer', (to, value_base), from_wallet)
+        return self.send_transaction("transfer", (to, value_base), from_wallet)
 
     def proposeMinter(self, new_minter, from_wallet) -> str:
-        return self.send_transaction('proposeMinter', (new_minter, ), from_wallet)
+        return self.send_transaction("proposeMinter", (new_minter,), from_wallet)
 
     def approveMinter(self, from_wallet) -> str:
-        return self.send_transaction('approveMinter', (), from_wallet)
+        return self.send_transaction("approveMinter", (), from_wallet)
 
-    def startOrder(self, consumer: str, amount: int, serviceId: int, mrktFeeCollector: str,
-                   from_wallet: Wallet):
+    def startOrder(
+        self,
+        consumer: str,
+        amount: int,
+        serviceId: int,
+        mrktFeeCollector: str,
+        from_wallet: Wallet,
+    ):
         return self.send_transaction(
-            'startOrder',
-            (consumer, amount, serviceId, mrktFeeCollector),
-            from_wallet,
+            "startOrder", (consumer, amount, serviceId, mrktFeeCollector), from_wallet
         )
 
-    def finishOrder(self, orderTxId: str, consumer: str, amount: int,
-                    serviceId: int, from_wallet: Wallet):
+    def finishOrder(
+        self,
+        orderTxId: str,
+        consumer: str,
+        amount: int,
+        serviceId: int,
+        from_wallet: Wallet,
+    ):
         return self.send_transaction(
-            'finishOrder',
-            (orderTxId, consumer, amount, serviceId),
-            from_wallet
+            "finishOrder", (orderTxId, consumer, amount, serviceId), from_wallet
         )

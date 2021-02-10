@@ -1,17 +1,16 @@
 import logging
 
-from ocean_utils.agreements.service_factory import ServiceDescriptor
-from ocean_utils.agreements.service_types import ServiceTypes
-from ocean_utils.agreements.service_agreement import ServiceAgreement
-
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3helper import Web3Helper
+from ocean_utils.agreements.service_agreement import ServiceAgreement
+from ocean_utils.agreements.service_factory import ServiceDescriptor
+from ocean_utils.agreements.service_types import ServiceTypes
 
-logger = logging.getLogger('ocean')
+logger = logging.getLogger("ocean")
 
 
 class OceanCompute:
@@ -30,10 +29,7 @@ class OceanCompute:
         :param url: str (e.g. http://10.0.0.17/xxx)
         :return:
         """
-        return {
-            "type": cluster_type,
-            "url": url
-        }
+        return {"type": cluster_type, "url": url}
 
     @staticmethod
     def build_container_attributes(image, tag, entrypoint):
@@ -44,15 +40,11 @@ class OceanCompute:
         :param entrypoint: str executable file (e.g. node $ALGO)
         :return:
         """
-        return {
-            "image": image,
-            "tag": tag,
-            "entrypoint": entrypoint
-        }
+        return {"image": image, "tag": tag, "entrypoint": entrypoint}
 
     @staticmethod
     def build_server_attributes(
-            server_id, server_type, cpu, gpu, memory, disk, max_run_time
+        server_id, server_type, cpu, gpu, memory, disk, max_run_time
     ):
         """
 
@@ -72,12 +64,12 @@ class OceanCompute:
             "gpu": gpu,
             "memory": memory,
             "disk": disk,
-            "maxExecutionTime": max_run_time
+            "maxExecutionTime": max_run_time,
         }
 
     @staticmethod
     def build_service_provider_attributes(
-            provider_type, description, cluster, containers, servers
+        provider_type, description, cluster, containers, servers
     ):
         """
         Return a dict with attributes describing the details of compute resources in this service
@@ -95,13 +87,14 @@ class OceanCompute:
             "environment": {
                 "cluster": cluster,
                 "supportedContainers": containers,
-                "supportedServers": servers
-            }
+                "supportedServers": servers,
+            },
         }
 
     @staticmethod
     def create_compute_service_attributes(
-            timeout: int, creator: str, date_published: str, provider_attributes: dict):
+        timeout: int, creator: str, date_published: str, provider_attributes: dict
+    ):
         """
 
         :param timeout: integer maximum amount of running compute service in seconds
@@ -117,7 +110,7 @@ class OceanCompute:
                 "datePublished": date_published,
                 "cost": 1.0,
                 "timeout": timeout,
-                "provider": provider_attributes
+                "provider": provider_attributes,
             }
         }
 
@@ -129,9 +122,9 @@ class OceanCompute:
         :return:
         """
         return {
-            'ok': job_info['status'] not in (31, 32),
-            'status': job_info['status'],
-            'statusText': job_info['statusText']
+            "ok": job_info["status"] not in (31, 32),
+            "status": job_info["status"],
+            "statusText": job_info["statusText"],
         }
 
     @staticmethod
@@ -149,15 +142,15 @@ class OceanCompute:
             config = ConfigProvider.get_config()
 
         default_output_def = {
-            'nodeUri': config.network_url,
-            'brizoUri': data_provider.get_url(config),
-            'brizoAddress': config.provider_address,
-            'metadata': dict(),
-            'metadataUri': config.aquarius_url,
-            'owner': consumer_address,
-            'publishOutput': 0,
-            'publishAlgorithmLog': 0,
-            'whitelist': [],
+            "nodeUri": config.network_url,
+            "brizoUri": data_provider.get_url(config),
+            "brizoAddress": config.provider_address,
+            "metadata": dict(),
+            "metadataUri": config.aquarius_url,
+            "owner": consumer_address,
+            "publishOutput": 0,
+            "publishAlgorithmLog": 0,
+            "whitelist": [],
         }
 
         output_def = output_def if isinstance(output_def, dict) else dict()
@@ -173,23 +166,29 @@ class OceanCompute:
         """
         compute_endpoint = self._data_provider.get_url(self._config)
         return ServiceDescriptor.compute_service_descriptor(
-            attributes=attributes,
-            service_endpoint=compute_endpoint
+            attributes=attributes, service_endpoint=compute_endpoint
         )
 
     def _sign_message(self, wallet, msg, nonce=None):
         if nonce is None:
             nonce = self._data_provider.get_nonce(wallet.address, self._config)
         return Web3Helper.sign_hash(
-            add_ethereum_prefix_and_hash_msg(f'{msg}{nonce}'),
-            wallet
+            add_ethereum_prefix_and_hash_msg(f"{msg}{nonce}"), wallet
         )
 
-    def start(self, did: str, consumer_wallet: Wallet, order_tx_id: str,
-              nonce: [int, None]=None, algorithm_did: [str, None]=None,
-              algorithm_meta: [AlgorithmMetadata, None]=None,
-              algorithm_tx_id: str='', algorithm_data_token: str='',
-              output: dict=None, job_id: str=None):
+    def start(
+        self,
+        did: str,
+        consumer_wallet: Wallet,
+        order_tx_id: str,
+        nonce: [int, None] = None,
+        algorithm_did: [str, None] = None,
+        algorithm_meta: [AlgorithmMetadata, None] = None,
+        algorithm_tx_id: str = "",
+        algorithm_data_token: str = "",
+        output: dict = None,
+        job_id: str = None,
+    ):
         """Start a remote compute job on the asset files identified by `did` after
         verifying that the provider service is active and transferring the
         number of data-tokens required for using this compute service.
@@ -209,15 +208,21 @@ class OceanCompute:
             stopped (if supported by the provider's  backend)
         :return: str -- id of compute job being executed
         """
-        assert algorithm_did or algorithm_meta, 'either an algorithm did or an algorithm meta must be provided.'
+        assert (
+            algorithm_did or algorithm_meta
+        ), "either an algorithm did or an algorithm meta must be provided."
 
-        output = OceanCompute.check_output_dict(output, consumer_wallet.address, data_provider=self._data_provider)
+        output = OceanCompute.check_output_dict(
+            output, consumer_wallet.address, data_provider=self._data_provider
+        )
         asset = resolve_asset(did, metadata_store_url=self._config.aquarius_url)
         _, service_endpoint = self._get_service_endpoint(did, asset)
 
         sa = ServiceAgreement.from_ddo(ServiceTypes.CLOUD_COMPUTE, asset)
 
-        signature = self._sign_message(consumer_wallet, f'{consumer_wallet.address}{did}', nonce=nonce)
+        signature = self._sign_message(
+            consumer_wallet, f"{consumer_wallet.address}{did}", nonce=nonce
+        )
 
         job_info = self._data_provider.start_compute_job(
             did,
@@ -232,9 +237,9 @@ class OceanCompute:
             algorithm_tx_id,
             algorithm_data_token,
             output,
-            job_id
+            job_id,
         )
-        return job_info['jobId']
+        return job_info["jobId"]
 
     def status(self, did, job_id, wallet):
         """
@@ -251,7 +256,7 @@ class OceanCompute:
                 job_id,
                 service_endpoint,
                 wallet.address,
-                self._sign_message(wallet, msg)
+                self._sign_message(wallet, msg),
             )
         )
 
@@ -269,12 +274,12 @@ class OceanCompute:
             job_id,
             service_endpoint,
             wallet.address,
-            self._sign_message(wallet, msg)
+            self._sign_message(wallet, msg),
         )
         return {
-            'did': info_dict.get('resultsDid', ''),
-            'urls': info_dict.get('resultsUrl', []),
-            'logs': info_dict.get('algorithmLogUrl', [])
+            "did": info_dict.get("resultsDid", ""),
+            "urls": info_dict.get("resultsUrl", []),
+            "logs": info_dict.get("algorithmLogUrl", []),
         }
 
     def stop(self, did, job_id, wallet):
@@ -294,7 +299,7 @@ class OceanCompute:
                 job_id,
                 service_endpoint,
                 wallet.address,
-                self._sign_message(wallet, msg)
+                self._sign_message(wallet, msg),
             )
         )
 
@@ -310,18 +315,20 @@ class OceanCompute:
         _, service_endpoint = self._get_service_endpoint(did)
         msg = f'{wallet.address}{job_id or ""}{did}'
         job_info = self._data_provider.restart_compute_job(
-                did,
-                job_id,
-                service_endpoint,
-                wallet.address,
-                self._sign_message(wallet, msg)
+            did,
+            job_id,
+            service_endpoint,
+            wallet.address,
+            self._sign_message(wallet, msg),
         )
-        return job_info['jobId']
+        return job_info["jobId"]
 
     def _get_service_endpoint(self, did, asset=None):
         if not asset:
             asset = resolve_asset(did, self._config.aquarius_url)
 
         return self._data_provider.build_compute_endpoint(
-            ServiceAgreement.from_ddo(ServiceTypes.CLOUD_COMPUTE, asset).service_endpoint
+            ServiceAgreement.from_ddo(
+                ServiceTypes.CLOUD_COMPUTE, asset
+            ).service_endpoint
         )

@@ -1,15 +1,14 @@
 import time
 
 from eth_utils import remove_0x_prefix
-
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 
 class MetadataContract(ContractBase):
-    CONTRACT_NAME = 'Metadata'
-    EVENT_METADATA_CREATED = 'MetadataCreated'
-    EVENT_METADATA_UPDATED = 'MetadataUpdated'
+    CONTRACT_NAME = "Metadata"
+    EVENT_METADATA_CREATED = "MetadataCreated"
+    EVENT_METADATA_UPDATED = "MetadataUpdated"
 
     @property
     def event_MetadataCreated(self):
@@ -46,7 +45,7 @@ class MetadataContract(ContractBase):
         return self.get_tx_receipt(tx_hash).status == 1
 
     def create(self, did: str, flags: bytes, data: bytes, from_wallet: Wallet) -> str:
-        return self.send_transaction('create', (did, flags, data), from_wallet)
+        return self.send_transaction("create", (did, flags, data), from_wallet)
 
     def update(self, did: str, flags: bytes, data: bytes, from_wallet: Wallet) -> str:
-        return self.send_transaction('update', (did, flags, data), from_wallet)
+        return self.send_transaction("update", (did, flags, data), from_wallet)

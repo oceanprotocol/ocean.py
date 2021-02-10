@@ -4,10 +4,9 @@ from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
-
 FixedExchangeData = namedtuple(
-    'FixedExchangeData',
-    ('exchangeOwner', 'dataToken', 'baseToken', 'fixedRate', 'active', 'supply')
+    "FixedExchangeData",
+    ("exchangeOwner", "dataToken", "baseToken", "fixedRate", "active", "supply"),
 )
 
 
@@ -18,9 +17,12 @@ class FixedRateExchange(ContractBase):
     Its up to the caller to convert to/from base 18 as necessary.
 
     """
-    CONTRACT_NAME = 'FixedRateExchange'
 
-    def buy_data_token(self, exchange_id: str, data_token_amount: int, from_wallet: Wallet):
+    CONTRACT_NAME = "FixedRateExchange"
+
+    def buy_data_token(
+        self, exchange_id: str, data_token_amount: int, from_wallet: Wallet
+    ):
         return self.swap(exchange_id, data_token_amount, from_wallet)
 
     def get_base_token_quote(self, exchange_id: str, data_token_amount: int):
@@ -29,34 +31,40 @@ class FixedRateExchange(ContractBase):
 
     #########################
     # Transaction methods
-    def create(self, base_token: str, data_token: str, exchange_rate: int, from_wallet: Wallet):
-        return self.send_transaction('create', (base_token, data_token, exchange_rate), from_wallet)
+    def create(
+        self, base_token: str, data_token: str, exchange_rate: int, from_wallet: Wallet
+    ):
+        return self.send_transaction(
+            "create", (base_token, data_token, exchange_rate), from_wallet
+        )
 
     def swap(self, exchange_id: str, data_token_amount: int, from_wallet: Wallet):
-        return self.send_transaction('swap', (exchange_id, data_token_amount), from_wallet)
+        return self.send_transaction(
+            "swap", (exchange_id, data_token_amount), from_wallet
+        )
 
     def setRate(self, exchange_id: str, new_rate: int, from_wallet: Wallet) -> str:
-        return self.send_transaction('setRate', (exchange_id, new_rate), from_wallet)
+        return self.send_transaction("setRate", (exchange_id, new_rate), from_wallet)
 
     def activate(self, exchange_id: str, from_wallet: Wallet) -> [str, None]:
         if self.isActive(exchange_id):
             return
 
-        return self.send_transaction('toggleExchangeState', (exchange_id, ), from_wallet)
+        return self.send_transaction("toggleExchangeState", (exchange_id,), from_wallet)
 
     def deactivate(self, exchange_id: str, from_wallet: Wallet) -> [str, None]:
         if not self.isActive(exchange_id):
             return
 
-        return self.send_transaction('toggleExchangeState', (exchange_id, ), from_wallet)
+        return self.send_transaction("toggleExchangeState", (exchange_id,), from_wallet)
 
     #########################
     # Helper methods
-    def generateExchangeId(self, base_token: str, data_token: str, exchange_owner: str) -> str:
+    def generateExchangeId(
+        self, base_token: str, data_token: str, exchange_owner: str
+    ) -> str:
         return self.contract_concise.generateExchangeId(
-            base_token,
-            data_token,
-            exchange_owner
+            base_token, data_token, exchange_owner
         )
 
     #########################

@@ -6,10 +6,9 @@ import logging
 from datetime import datetime
 
 from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.data_store.auth_tokens import AuthTokensStorage
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-
-from ocean_lib.data_store.auth_tokens import AuthTokensStorage
 from ocean_lib.web3_internal.web3helper import Web3Helper
 
 
@@ -27,6 +26,7 @@ class OceanAuth:
     Token format is "signature-timestamp".
 
     """
+
     DEFAULT_EXPIRATION_TIME = 30 * 24 * 60 * 60  # in seconds
     DEFAULT_MESSAGE = "Ocean Protocol Authentication"
 
@@ -38,14 +38,16 @@ class OceanAuth:
         return int(datetime.now().timestamp())
 
     def _get_expiration(self):
-        return int(ConfigProvider.get_config().auth_token_expiration
-                   or self.DEFAULT_EXPIRATION_TIME)
+        return int(
+            ConfigProvider.get_config().auth_token_expiration
+            or self.DEFAULT_EXPIRATION_TIME
+        )
 
     def _get_raw_message(self):
         return ConfigProvider.get_config().auth_token_message or self.DEFAULT_MESSAGE
 
     def _get_message(self, timestamp):
-        return f'{self._get_raw_message()}\n{timestamp}'
+        return f"{self._get_raw_message()}\n{timestamp}"
 
     def _get_message_and_time(self):
         timestamp = self._get_timestamp()
@@ -53,7 +55,11 @@ class OceanAuth:
 
     @staticmethod
     def is_token_valid(token):
-        return isinstance(token, str) and token.startswith('0x') and len(token.split('-')) == 2
+        return (
+            isinstance(token, str)
+            and token.startswith("0x")
+            and len(token.split("-")) == 2
+        )
 
     def get(self, wallet):
         """
@@ -63,23 +69,24 @@ class OceanAuth:
         _message, _time = self._get_message_and_time()
         try:
             prefixed_msg_hash = Web3Helper.sign_hash(
-                add_ethereum_prefix_and_hash_msg(_message), wallet)
-            return f'{prefixed_msg_hash}-{_time}'
+                add_ethereum_prefix_and_hash_msg(_message), wallet
+            )
+            return f"{prefixed_msg_hash}-{_time}"
         except Exception as e:
-            logging.error(f'Error signing token: {str(e)}')
+            logging.error(f"Error signing token: {str(e)}")
 
     def check(self, token):
         """
         :param token: hex str consist of signature and timestamp
         :return: hex str ethereum address
         """
-        parts = token.split('-')
+        parts = token.split("-")
         if len(parts) < 2:
-            return '0x0'
+            return "0x0"
 
         sig, timestamp = parts
         if self._get_timestamp() > (int(timestamp) + self._get_expiration()):
-            return '0x0'
+            return "0x0"
 
         message = self._get_message(timestamp)
         address = Web3Helper.personal_ec_recover(message, sig)
@@ -92,7 +99,7 @@ class OceanAuth:
             token that was generated and stored for this users wallet
         """
         token = self.get(wallet)
-        timestamp = token.split('-')[1]
+        timestamp = token.split("-")[1]
         self._tokens_storage.write_token(wallet.address, token, timestamp)
         return token
 
