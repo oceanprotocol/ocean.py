@@ -21,7 +21,7 @@ install_requirements = [
     'coloredlogs',
     'pyopenssl',
     'PyJWT',  # not jwt
-    'PyYAML==5.3.1',
+    'PyYAML==5.4.1',
     'ocean-utils==0.4.2',
     'requests>=2.21.0',
     'deprecated',
@@ -102,6 +102,6 @@ setup(
     test_suite='tests',
     tests_require=test_requirements,
     url='https://github.com/oceanprotocol/ocean.py',
-    version='0.5.6',
+    version='0.5.7',
     zip_safe=False,
 )
