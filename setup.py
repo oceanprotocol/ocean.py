@@ -21,7 +21,7 @@ install_requirements = [
     "coloredlogs",
     "pyopenssl",
     "PyJWT",  # not jwt
-    "PyYAML==5.3.1",
+    "PyYAML==5.4.1",
     "ocean-utils==0.4.2",
     "requests>=2.21.0",
     "deprecated",
@@ -31,7 +31,7 @@ install_requirements = [
     "web3==4.7.1",
     "plecos",
     "cryptography==3.3.1",
-    "scipy"
+    "scipy",
     # web3 requires eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
@@ -100,6 +100,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/oceanprotocol/ocean.py",
-    version="0.5.6",
+    version="0.5.7",
     zip_safe=False,
 )
