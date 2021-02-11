@@ -5,7 +5,6 @@ __pycache__
 *~
 .eggs/
 /venv/
-/venv3.8/
 ocean_lib.egg-info/
 /build/
 /contracts/
