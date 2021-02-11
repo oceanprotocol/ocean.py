@@ -399,7 +399,7 @@ class DataToken(ContractBase):
     def blob(self) -> str:
         return self.contract_concise.blob()
 
-    def name(self) -> str:
+    def contract_concise_name(self) -> str:
         return self.contract_concise.name()
 
     def symbol(self) -> str:

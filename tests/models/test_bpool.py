@@ -24,7 +24,7 @@ def test_notokens_basic(OCEAN_address, network, alice_wallet, alice_address):
     assert str(pool)
 
     with pytest.raises(Exception):
-        pool.finalize()  # can't finalize if no tokens
+        pool.finalize(from_wallet=alice_wallet)  # can't finalize if no tokens
 
 
 def test_setSwapFee_works(network, alice_wallet):
@@ -73,7 +73,7 @@ def test_2tokens_basic(network, T1, T2, alice_wallet, alice_address):
     _ = from_base_18(T2.balanceOf(alice_address)) >= 10.0
 
     with pytest.raises(Exception):  # can't bind until we approve
-        pool.bind(T1.address, to_base_18(90.0), to_base_18(9.0))
+        pool.bind(T1.address, to_base_18(90.0), to_base_18(9.0), from_wallet=alice_wallet)
 
     # Bind two tokens to the pool
     T1.approve(pool.address, to_base_18(90.0), from_wallet=alice_wallet)
