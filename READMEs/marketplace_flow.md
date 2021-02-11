@@ -48,7 +48,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_utils.agreements.service_factory import ServiceDescriptor
 config = {
    'network' : os.getenv('NETWORK_URL'),
-   'metadataStoreUri' : os.getenv('AQUARIUS_URL'),
+   'metadataCacheUri' : os.getenv('AQUARIUS_URL'),
    'providerUri' : os.getenv('PROVIDER_URL'),
 }
 ocean = Ocean(config)
@@ -148,7 +148,7 @@ import os
 from ocean_lib.ocean.ocean import Ocean
 config = {
    'network' : os.getenv('NETWORK_URL'),
-   'metadataStoreUri' : os.getenv('AQUARIUS_URL'),
+   'metadataCacheUri' : os.getenv('AQUARIUS_URL'),
    'providerUri' : os.getenv('PROVIDER_URL'),
 }
 market_ocean = Ocean(config)
@@ -197,7 +197,7 @@ import os
 from ocean_lib.ocean.ocean import Ocean
 config = {
    'network' : os.getenv('NETWORK_URL'),
-   'metadataStoreUri' : os.getenv('AQUARIUS_URL'),
+   'metadataCacheUri' : os.getenv('AQUARIUS_URL'),
    'providerUri' : os.getenv('PROVIDER_URL'),
 }
 bob_ocean = Ocean(config)

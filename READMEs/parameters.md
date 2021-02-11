@@ -25,7 +25,7 @@ import os
 from ocean_lib.ocean.ocean import Ocean
 d = {
    'network' : os.getenv('NETWORK_URL'),
-   'metadataStoreUri' : os.getenv('AQUARIUS_URL'),
+   'metadataCacheUri' : os.getenv('AQUARIUS_URL'),
    'providerUri' : os.getenv('PROVIDER_URL'),
 }
 ocean = Ocean(d)

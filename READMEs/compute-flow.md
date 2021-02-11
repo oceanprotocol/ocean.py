@@ -66,7 +66,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 #Alice's config
 config = {
    'network' : 'rinkeby',
-   'metadataStoreUri' : 'http://127.0.0.1:5000',
+   'metadataCacheUri' : 'http://127.0.0.1:5000',
    'providerUri' : 'http://127.0.0.1:8030'
 }
 ocean = Ocean(config)
