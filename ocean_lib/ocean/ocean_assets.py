@@ -87,7 +87,7 @@ class OceanAssets:
         if not access_service_descriptor and not compute_service_descriptor:
             access_service_descriptor = ServiceDescriptor.access_service_descriptor(
                 self._build_access_service(metadata, 1.0, wallet.address),
-                self._data_provider.get_url(self._config),
+                provider_uri if provider_uri else self._data_provider.get_url(self._config),
             )
 
         if access_service_descriptor:
