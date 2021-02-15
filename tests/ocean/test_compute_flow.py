@@ -8,6 +8,8 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_utils.agreements.service_factory import ServiceDescriptor
 from ocean_utils.agreements.service_types import ServiceTypes
+
+from ocean_lib.ocean.ocean_compute import ComputeInput
 from tests.resources.helper_functions import (
     get_consumer_ocean_instance,
     get_consumer_wallet,
@@ -126,9 +128,8 @@ def test_compute_flow():
 
     ######
     job_id = cons_ocn.compute.start(
-        did,
+        [ComputeInput(did, _order_tx_id, service.index)],
         consumer_wallet,
-        _order_tx_id,
         nonce=order_requirements.nonce,
         algorithm_meta=algorithm_meta,
     )
@@ -143,3 +144,15 @@ def test_compute_flow():
     status = cons_ocn.compute.stop(did, job_id, consumer_wallet)
     print(f"got job status after requesting stop: {status}")
     assert status, f"something not right about the compute job, got status: {status}"
+
+
+def test_compute_multi_inputs():
+    pass
+
+
+def test_compute_different_algorithm_provider():
+    pass
+
+
+def test_compute_multi_inputs_access_service():
+    pass

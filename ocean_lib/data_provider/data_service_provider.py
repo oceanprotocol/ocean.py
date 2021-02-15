@@ -23,7 +23,10 @@ from ocean_utils.http_requests.requests_session import get_requests_session
 logger = logging.getLogger(__name__)
 
 OrderRequirements = namedtuple(
-    "OrderRequirements", ("amount", "data_token_address", "receiver_address", "nonce")
+    "OrderRequirements",
+    (
+        "amount", "data_token_address", "receiver_address", "nonce", ""
+    )
 )
 
 
@@ -203,13 +206,13 @@ class DataServiceProvider:
         consumer_address: str,
         signature: str,
         service_id: int,
-        token_address: str,
         order_tx_id: str,
         algorithm_did: str = None,
         algorithm_meta: AlgorithmMetadata = None,
         algorithm_tx_id: str = "",
         algorithm_data_token: str = "",
         output: dict = None,
+        input_datasets: list = None,
         job_id: str = None,
     ):
         """
@@ -219,7 +222,6 @@ class DataServiceProvider:
         :param consumer_address: hex str the ethereum address of the consumer executing the compute job
         :param signature: hex str signed message to allow the provider to authorize the consumer
         :param service_id:
-        :param token_address:
         :param order_tx_id: hex str id of the token transfer transaction
         :param algorithm_did: str -- the asset did (of `algorithm` type) which consist of `did:op:` and
             the assetId hex str (without `0x` prefix)
@@ -227,6 +229,7 @@ class DataServiceProvider:
         :param algorithm_tx_id: transaction hash of algorithm StartOrder tx (Required when using `algorithm_did`)
         :param algorithm_data_token: datatoken address of this algorithm (Required when using `algorithm_did`)
         :param output: see `OceanCompute.execute`
+        :param input_datasets: list of ComputeInput
         :param job_id: str id of compute job that was started and stopped (optional, use it
             here to start a job after it was stopped)
 
@@ -240,8 +243,6 @@ class DataServiceProvider:
             did,
             consumer_address,
             service_id,
-            ServiceTypes.CLOUD_COMPUTE,
-            token_address,
             order_tx_id,
             signature=signature,
             algorithm_did=algorithm_did,
@@ -249,6 +250,7 @@ class DataServiceProvider:
             algorithm_tx_id=algorithm_tx_id,
             algorithm_data_token=algorithm_data_token,
             output=output,
+            input_datasets=input_datasets,
             job_id=job_id,
         )
         logger.info(f"invoke start compute endpoint with this url: {payload}")
@@ -305,11 +307,11 @@ class DataServiceProvider:
         consumer_address,
         signature,
         service_id,
-        token_address,
         order_tx_id,
         algorithm_did=None,
         algorithm_meta=None,
         output=None,
+        input_datasets=None
     ):
         """
 
@@ -326,6 +328,7 @@ class DataServiceProvider:
             the assetId hex str (without `0x` prefix)
         :param algorithm_meta: see `OceanCompute.execute`
         :param output: see `OceanCompute.execute`
+        :param input_datasets: list of ComputeInput
 
         :return: bool whether the job was restarted successfully
         """
@@ -338,11 +341,11 @@ class DataServiceProvider:
             consumer_address,
             signature,
             service_id,
-            token_address,
             order_tx_id,
             algorithm_did,
             algorithm_meta,
             output,
+            input_datasets=input_datasets,
             job_id=job_id,
         )
 
@@ -603,8 +606,6 @@ class DataServiceProvider:
         did: str,
         consumer_address: str,
         service_id: int,
-        service_type: str,
-        token_address: str,
         order_tx_id: str,
         signature: str = None,
         algorithm_did: str = None,
@@ -612,6 +613,7 @@ class DataServiceProvider:
         algorithm_tx_id: str = "",
         algorithm_data_token: str = "",
         output: dict = None,
+        input_datasets: list = None,
         job_id: str = None,
     ):
         assert (
@@ -625,6 +627,15 @@ class DataServiceProvider:
             )
             algorithm_meta = algorithm_meta.as_dictionary()
 
+        if input_datasets:
+            _input_datasets = []
+            for _input in input_datasets:
+                assert _input.did
+                assert _input.transferTxId
+                assert _input.serviceId
+                if _input.did != did:
+                    _input_datasets.append(_input)
+
         return {
             "signature": signature,
             "documentId": did,
@@ -636,7 +647,6 @@ class DataServiceProvider:
             "output": output or dict(),
             "jobId": job_id or "",
             "serviceId": service_id,
-            "serviceType": service_type,
-            "dataToken": token_address,
             "transferTxId": order_tx_id,
+            "additionalInputs": input_datasets or []
         }

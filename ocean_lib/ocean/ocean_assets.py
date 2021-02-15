@@ -16,6 +16,7 @@ from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.util import to_base_18
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
@@ -452,6 +453,7 @@ class OceanAssets:
         :param service_id:
         :param fee_receiver:
         :param from_wallet: Wallet instance
+        :param consumer: str the address of consumer of the service, defaults to the payer (the `from_wallet` address)
         :return: hex str id of transfer transaction
         """
         amount_base = to_base_18(amount)
@@ -463,18 +465,20 @@ class OceanAssets:
                 f"to execute the requested service. This service "
                 f"requires {amount_base} number of tokens."
             )
+
         if did.startswith("did:"):
             did = add_0x_prefix(did_to_id(did))
+
         if fee_receiver is None:
-            fee_receiver = "0x0000000000000000000000000000000000000000"
+            fee_receiver = ZERO_ADDRESS
+
         if consumer is None:
-            tx_hash = dt.startOrder(
-                from_wallet.address, amount_base, service_id, fee_receiver, from_wallet
-            )
-        else:
-            tx_hash = dt.startOrder(
-                consumer, amount_base, service_id, fee_receiver, from_wallet
-            )
+            consumer = from_wallet.address
+
+        tx_hash = dt.startOrder(
+            consumer, amount_base, service_id, fee_receiver, from_wallet
+        )
+
         try:
             dt.verify_order_tx(
                 Web3Provider.get_web3(),
