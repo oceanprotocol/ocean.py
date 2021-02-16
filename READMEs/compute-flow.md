@@ -108,6 +108,7 @@ assert token_address == asset.data_token_address
 
 did = asset.did  # did contains the datatoken address
 ```
+For legacy support, you can also use `metadataStoreUri` instead of `metadataCacheUri`.
 
 ## 3. Alice mints 100 tokens
 

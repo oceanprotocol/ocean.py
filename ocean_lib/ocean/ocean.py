@@ -72,10 +72,15 @@ class Ocean:
             except AssertionError:
                 config = Config(os.getenv(ENV_CONFIG_FILE))
                 ConfigProvider.set_config(config)
-
         if isinstance(config, dict):
+            # fallback to metadataStoreUri
+            cache_key = (
+                "metadataStoreUri"
+                if "metadataStoreUri" in config and "metadataCacheUri" not in config
+                else "metadataCacheUri"
+            )
             aqua_url = config.get(
-                "metadataCacheUri", config.get("aquarius.url", "http://localhost:5000")
+                cache_key, config.get("aquarius.url", "http://localhost:5000")
             )
             config_dict = {
                 "eth-network": {"network": config.get("network", "")},
@@ -85,7 +90,6 @@ class Ocean:
                 },
             }
             config = Config(options_dict=config_dict)
-
         ConfigProvider.set_config(config)
         self._config = config
         ContractHandler.set_artifacts_path(self._config.artifacts_path)
