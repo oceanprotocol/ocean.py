@@ -6,6 +6,8 @@ import logging
 import os
 
 from eth_utils import remove_0x_prefix
+from web3.datastructures import AttributeDict
+
 from ocean_lib.config import Config
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -33,7 +35,6 @@ from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib.web3_internal.web3helper import Web3Helper
-from web3.datastructures import AttributeDict
 
 logger = logging.getLogger("ocean")
 
@@ -75,9 +76,9 @@ class Ocean:
         if isinstance(config, dict):
             # fallback to metadataStoreUri
             cache_key = (
-                "metadataStoreUri"
-                if "metadataStoreUri" in config and "metadataCacheUri" not in config
-                else "metadataCacheUri"
+                "metadataCacheUri"
+                if ("metadataCacheUri" in config)
+                else "metadataStoreUri"
             )
             aqua_url = config.get(
                 cache_key, config.get("aquarius.url", "http://localhost:5000")
