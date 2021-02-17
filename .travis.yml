@@ -14,7 +14,7 @@ services:
 before_install:
   - git clone https://github.com/oceanprotocol/barge
   - cd barge
-  - bash -x start_ocean.sh --no-dashboard 2>&1 > start_ocean.log &
+  - bash -x start_ocean.sh --no-dashboard --with-provider2 2>&1 > start_ocean.log &
   - cd ..
   - |
       for i in $(seq 1 50); do
