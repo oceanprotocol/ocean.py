@@ -1,24 +1,30 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
-import uuid
-
-from ocean_lib.assets.asset import Asset
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
-from ocean_utils.agreements.service_factory import ServiceDescriptor
 from ocean_utils.agreements.service_types import ServiceTypes
 
+from ocean_lib.models.data_token import DataToken
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean.ocean_compute import ComputeInput
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import (
     get_consumer_ocean_instance,
     get_consumer_wallet,
     get_publisher_ocean_instance,
     get_publisher_wallet,
-    get_resource_path,
-    mint_tokens_and_wait,
-    wait_for_ddo,
 )
+from tests.resources.ddo_helpers import (
+    get_registered_ddo_with_compute_service, get_algorithm_meta, get_registered_ddo_with_access_service,
+    get_registered_algorithm_ddo_different_provider,
+)
+
+
+class Setup:
+    def __init__(self):
+        self.publisher_wallet = get_publisher_wallet()
+        self.consumer_wallet = get_consumer_wallet()
+        self.publisher_ocean_instance = get_publisher_ocean_instance()
+        self.consumer_ocean_instance = get_consumer_ocean_instance()
 
 
 def test_expose_endpoints():
@@ -46,113 +52,120 @@ def test_provider_address_with_url():
     assert provider_address, "Failed to get provider address."
 
 
-def test_compute_flow():
-    ######
-    # setup
-    pub_wallet = get_publisher_wallet()
-    p_ocean_instance = get_publisher_ocean_instance()
-    c_ocean_instance = get_consumer_ocean_instance()
-    cons_ocn = c_ocean_instance
-    consumer_wallet = get_consumer_wallet()
-
-    ######
-    # Publish Assets
-
-    # Dataset with compute service
-    sample_ddo_path = get_resource_path("ddo", "ddo_with_compute_service.json")
-    old_ddo = Asset(json_filename=sample_ddo_path)
-    metadata = old_ddo.metadata
-    metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    service = old_ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
-    compute_service = ServiceDescriptor.compute_service_descriptor(
-        service.attributes, DataServiceProvider.get_url(p_ocean_instance.config)
-    )
-    block = p_ocean_instance.web3.eth.blockNumber
-    compute_ddo = p_ocean_instance.assets.create(
-        metadata, pub_wallet, service_descriptors=[compute_service]
-    )
-    did = compute_ddo.did
-
-    ddo_reg = p_ocean_instance.assets.ddo_registry()
-    log = ddo_reg.get_event_log(
-        ddo_reg.EVENT_METADATA_CREATED, block, compute_ddo.asset_id, 30
-    )
-    assert log, "no ddo created event."
-
-    ddo = wait_for_ddo(p_ocean_instance, compute_ddo.did)
-    assert ddo, f"resolve did {compute_ddo.did} failed."
-
-    _ = p_ocean_instance.assets.resolve(compute_ddo.did)
-
-    # algorithm with download service
-    algorithm_ddo_path = get_resource_path("ddo", "ddo_sample_algorithm.json")
-    algo_main = Asset(json_filename=algorithm_ddo_path).metadata["main"]
-    algo_meta_dict = algo_main["algorithm"].copy()
-    algo_meta_dict["url"] = algo_main["files"][0]["url"]
-    algorithm_meta = AlgorithmMetadata(algo_meta_dict)
-
-    ######
-    # Mint tokens for dataset and assign to publisher
-    dt = p_ocean_instance.get_data_token(compute_ddo.data_token_address)
-    mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
-
-    ######
+def process_order(ocean_instance, publisher_wallet, consumer_wallet, ddo, service_type):
     # Give the consumer some datatokens so they can order the service
     try:
-        tx_id = dt.transfer_tokens(consumer_wallet.address, 10, pub_wallet)
-        dt.verify_transfer_tx(tx_id, pub_wallet.address, consumer_wallet.address)
+        dt = DataToken(ddo.data_token_address)
+        tx_id = dt.transfer_tokens(consumer_wallet.address, 10, publisher_wallet)
+        dt.verify_transfer_tx(tx_id, publisher_wallet.address, consumer_wallet.address)
     except (AssertionError, Exception) as e:
         print(e)
         raise
 
-    ######
     # Order compute service from the dataset asset
-    order_requirements = cons_ocn.assets.order(
-        compute_ddo.did,
+    order_requirements = ocean_instance.assets.order(
+        ddo.did,
         consumer_wallet.address,
-        service_type=ServiceTypes.CLOUD_COMPUTE,
+        service_type=service_type,
     )
 
-    ######
     # Start the order on-chain using the `order` requirements from previous step
-    service = compute_ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
-    _order_tx_id = cons_ocn.assets.pay_for_service(
+    service = ddo.get_service(service_type)
+    _order_tx_id = ocean_instance.assets.pay_for_service(
         order_requirements.amount,
         order_requirements.data_token_address,
-        compute_ddo.did,
+        ddo.did,
         service.index,
-        "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",
+        ZERO_ADDRESS,
         consumer_wallet,
         consumer_wallet.address,
     )
+    return _order_tx_id, order_requirements, service
 
-    ######
-    job_id = cons_ocn.compute.start(
-        [ComputeInput(did, _order_tx_id, service.index)],
-        consumer_wallet,
-        nonce=order_requirements.nonce,
-        algorithm_meta=algorithm_meta,
+
+def run_compute_test(ocean_instance, publisher_wallet, consumer_wallet,
+                     input_ddos, algo_ddo=None, algo_meta=None):
+    compute_ddo = input_ddos[0]
+    did = compute_ddo.did
+    _order_tx_id, order_quote, service = process_order(
+        ocean_instance, publisher_wallet, consumer_wallet,
+        compute_ddo, ServiceTypes.CLOUD_COMPUTE
     )
-    assert job_id, f"expected a job id, got {job_id}"
 
-    status = cons_ocn.compute.status(did, job_id, consumer_wallet)
+    if algo_ddo:
+        # order the algo download service
+        algo_tx_id, algo_order_quote, algo_service = process_order(
+            ocean_instance, publisher_wallet, consumer_wallet,
+            algo_ddo, ServiceTypes.ASSET_ACCESS
+        )
+        job_id = ocean_instance.compute.start(
+            [ComputeInput(did, _order_tx_id, service.index)],
+            consumer_wallet,
+            algorithm_did=algo_ddo.did,
+            algorithm_tx_id=algo_tx_id,
+            algorithm_data_token=algo_ddo.data_token_address
+        )
+        assert job_id, f"expected a job id, got {job_id}"
+
+    else:
+        assert algo_meta, "algo_meta is required when not using algo_ddo."
+        job_id = ocean_instance.compute.start(
+            [ComputeInput(did, _order_tx_id, service.index)],
+            consumer_wallet,
+            algorithm_meta=algo_meta,
+        )
+        assert job_id, f"expected a job id, got {job_id}"
+
+    status = ocean_instance.compute.status(did, job_id, consumer_wallet)
     print(f"got job status: {status}")
     assert (
         status and status["ok"]
     ), f"something not right about the compute job, got status: {status}"
 
-    status = cons_ocn.compute.stop(did, job_id, consumer_wallet)
+    status = ocean_instance.compute.stop(did, job_id, consumer_wallet)
     print(f"got job status after requesting stop: {status}")
     assert status, f"something not right about the compute job, got status: {status}"
 
 
+def test_compute_raw_algo():
+    setup = Setup()
+
+    # Dataset with compute service
+    compute_ddo = get_registered_ddo_with_compute_service(
+        setup.publisher_ocean_instance, setup.publisher_wallet)
+    # verify the ddo is available in Aquarius
+    _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
+
+    # Setup algorithm meta to run raw algorithm
+    algorithm_meta = get_algorithm_meta()
+    run_compute_test(
+        setup.consumer_ocean_instance, setup.publisher_wallet, setup.consumer_wallet,
+        [compute_ddo], algo_meta=algorithm_meta
+    )
+
+
 def test_compute_multi_inputs():
-    pass
+    setup = Setup()
 
+    # Dataset with compute service
+    compute_ddo = get_registered_ddo_with_compute_service(
+        setup.publisher_ocean_instance, setup.publisher_wallet)
+    # verify the ddo is available in Aquarius
+    _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
 
-def test_compute_different_algorithm_provider():
-    pass
+    # Another dataset, this time with download service
+    access_ddo = get_registered_ddo_with_access_service(
+        setup.publisher_ocean_instance, setup.publisher_wallet)
+    # verify the ddo is available in Aquarius
+    _ = setup.publisher_ocean_instance.assets.resolve(access_ddo.did)
 
+    # Setup algorithm meta to run raw algorithm
+    algorithm_ddo = get_registered_algorithm_ddo_different_provider(
+        setup.publisher_ocean_instance, setup.publisher_wallet
+    )
+    _ = setup.publisher_ocean_instance.assets.resolve(algorithm_ddo.did)
 
-def test_compute_multi_inputs_access_service():
-    pass
+    run_compute_test(
+        setup.consumer_ocean_instance, setup.publisher_wallet, setup.consumer_wallet,
+        [compute_ddo, access_ddo], algo_ddo=algorithm_ddo
+    )

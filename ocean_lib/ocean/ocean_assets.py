@@ -87,7 +87,7 @@ class OceanAssets:
         # Make an access service only if no services are given by the user.
         if not access_service_descriptor and not compute_service_descriptor:
             access_service_descriptor = ServiceDescriptor.access_service_descriptor(
-                self._build_access_service(metadata, 1.0, wallet.address),
+                self.build_access_service(metadata[MetadataMain.KEY]["dateCreated"], 1.0, wallet.address),
                 provider_uri if provider_uri else self._data_provider.get_url(self._config),
             )
 
@@ -580,13 +580,13 @@ class OceanAssets:
         ]
 
     @staticmethod
-    def _build_access_service(metadata: dict, cost: float, address: str) -> dict:
+    def build_access_service(date_created: str, cost: float, address: str, timeout=3600) -> dict:
         return {
             "main": {
                 "name": "dataAssetAccessServiceAgreement",
                 "creator": address,
                 "cost": cost,
-                "timeout": 3600,
-                "datePublished": metadata[MetadataMain.KEY]["dateCreated"],
+                "timeout": timeout,
+                "datePublished": date_created,
             }
         }

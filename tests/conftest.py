@@ -18,11 +18,11 @@ from tests.resources.helper_functions import (
     get_consumer_ocean_instance,
     get_consumer_wallet,
     get_ganache_wallet,
-    get_metadata,
     get_publisher_ocean_instance,
     get_publisher_wallet,
     setup_logging,
 )
+from tests.resources.ddo_helpers import get_metadata
 
 setup_logging()
 
