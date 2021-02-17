@@ -14,7 +14,9 @@ from tests.resources.helper_functions import (
     get_publisher_wallet,
 )
 from tests.resources.ddo_helpers import (
-    get_registered_ddo_with_compute_service, get_algorithm_meta, get_registered_ddo_with_access_service,
+    get_registered_ddo_with_compute_service,
+    get_algorithm_meta,
+    get_registered_ddo_with_access_service,
     get_registered_algorithm_ddo_different_provider,
 )
 
@@ -87,13 +89,22 @@ def process_order(ocean_instance, publisher_wallet, consumer_wallet, ddo, servic
     return _order_tx_id, order_requirements, service
 
 
-def run_compute_test(ocean_instance, publisher_wallet, consumer_wallet,
-                     input_ddos, algo_ddo=None, algo_meta=None):
+def run_compute_test(
+    ocean_instance,
+    publisher_wallet,
+    consumer_wallet,
+    input_ddos,
+    algo_ddo=None,
+    algo_meta=None,
+):
     compute_ddo = input_ddos[0]
     did = compute_ddo.did
     order_tx_id, order_quote, service = process_order(
-        ocean_instance, publisher_wallet, consumer_wallet,
-        compute_ddo, ServiceTypes.CLOUD_COMPUTE
+        ocean_instance,
+        publisher_wallet,
+        consumer_wallet,
+        compute_ddo,
+        ServiceTypes.CLOUD_COMPUTE,
     )
     compute_inputs = [ComputeInput(did, order_tx_id, service.index)]
     for ddo in input_ddos[1:]:
@@ -102,23 +113,25 @@ def run_compute_test(ocean_instance, publisher_wallet, consumer_wallet,
             service_type = ServiceTypes.CLOUD_COMPUTE
 
         _order_tx_id, _order_quote, _service = process_order(
-            ocean_instance, publisher_wallet, consumer_wallet,
-            ddo, service_type
+            ocean_instance, publisher_wallet, consumer_wallet, ddo, service_type
         )
         compute_inputs.append(ComputeInput(ddo.did, _order_tx_id, _service.index))
 
     if algo_ddo:
         # order the algo download service
         algo_tx_id, algo_order_quote, algo_service = process_order(
-            ocean_instance, publisher_wallet, consumer_wallet,
-            algo_ddo, ServiceTypes.ASSET_ACCESS
+            ocean_instance,
+            publisher_wallet,
+            consumer_wallet,
+            algo_ddo,
+            ServiceTypes.ASSET_ACCESS,
         )
         job_id = ocean_instance.compute.start(
             compute_inputs,
             consumer_wallet,
             algorithm_did=algo_ddo.did,
             algorithm_tx_id=algo_tx_id,
-            algorithm_data_token=algo_ddo.data_token_address
+            algorithm_data_token=algo_ddo.data_token_address,
         )
         assert job_id, f"expected a job id, got {job_id}"
 
@@ -147,15 +160,19 @@ def test_compute_raw_algo():
 
     # Dataset with compute service
     compute_ddo = get_registered_ddo_with_compute_service(
-        setup.publisher_ocean_instance, setup.publisher_wallet)
+        setup.publisher_ocean_instance, setup.publisher_wallet
+    )
     # verify the ddo is available in Aquarius
     _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
 
     # Setup algorithm meta to run raw algorithm
     algorithm_meta = get_algorithm_meta()
     run_compute_test(
-        setup.consumer_ocean_instance, setup.publisher_wallet, setup.consumer_wallet,
-        [compute_ddo], algo_meta=algorithm_meta
+        setup.consumer_ocean_instance,
+        setup.publisher_wallet,
+        setup.consumer_wallet,
+        [compute_ddo],
+        algo_meta=algorithm_meta,
     )
 
 
@@ -164,13 +181,15 @@ def test_compute_multi_inputs():
 
     # Dataset with compute service
     compute_ddo = get_registered_ddo_with_compute_service(
-        setup.publisher_ocean_instance, setup.publisher_wallet)
+        setup.publisher_ocean_instance, setup.publisher_wallet
+    )
     # verify the ddo is available in Aquarius
     _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
 
     # Another dataset, this time with download service
     access_ddo = get_registered_ddo_with_access_service(
-        setup.publisher_ocean_instance, setup.publisher_wallet)
+        setup.publisher_ocean_instance, setup.publisher_wallet
+    )
     # verify the ddo is available in Aquarius
     _ = setup.publisher_ocean_instance.assets.resolve(access_ddo.did)
 
@@ -181,6 +200,9 @@ def test_compute_multi_inputs():
     _ = setup.publisher_ocean_instance.assets.resolve(algorithm_ddo.did)
 
     run_compute_test(
-        setup.consumer_ocean_instance, setup.publisher_wallet, setup.consumer_wallet,
-        [compute_ddo, access_ddo], algo_ddo=algorithm_ddo
+        setup.consumer_ocean_instance,
+        setup.publisher_wallet,
+        setup.consumer_wallet,
+        [compute_ddo, access_ddo],
+        algo_ddo=algorithm_ddo,
     )

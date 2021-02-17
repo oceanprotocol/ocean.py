@@ -13,7 +13,10 @@ from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.wallet import Wallet
-from tests.resources.helper_functions import get_publisher_ocean_instance, mint_tokens_and_wait
+from tests.resources.helper_functions import (
+    get_publisher_ocean_instance,
+    mint_tokens_and_wait,
+)
 
 
 def get_resource_path(dir_name, file_name):
@@ -37,7 +40,9 @@ def get_sample_ddo() -> Asset:
 
 
 def get_sample_ddo_with_compute_service() -> Asset:
-    return Asset(json_filename=get_resource_path("ddo", "ddo_with_compute_service.json"))
+    return Asset(
+        json_filename=get_resource_path("ddo", "ddo_with_compute_service.json")
+    )
 
 
 def get_sample_algorithm_ddo() -> dict:
@@ -56,13 +61,15 @@ def get_algorithm_meta():
     return AlgorithmMetadata(algo_meta_dict)
 
 
-def get_access_service_descriptor(ocean_instance, address, date_created, provider_uri=None, timeout=3600):
+def get_access_service_descriptor(
+    ocean_instance, address, date_created, provider_uri=None, timeout=3600
+):
     if not provider_uri:
         provider_uri = DataServiceProvider.get_url(ocean_instance.config)
 
     return ServiceDescriptor.access_service_descriptor(
         ocean_instance.assets.build_access_service(date_created, 1.0, address, timeout),
-        DataServiceProvider.build_download_endpoint(provider_uri)[1]
+        DataServiceProvider.build_download_endpoint(provider_uri)[1],
     )
 
 
@@ -75,13 +82,21 @@ def get_computing_metadata() -> dict:
 
 
 def get_registered_ddo(
-        ocean_instance, metadata, wallet: Wallet, service_descriptor=None,
-        datatoken=None, provider_uri=None
+    ocean_instance,
+    metadata,
+    wallet: Wallet,
+    service_descriptor=None,
+    datatoken=None,
+    provider_uri=None,
 ):
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     if not service_descriptor:
         service_descriptor = get_access_service_descriptor(
-            ocean_instance, wallet.address, metadata[MetadataMain.KEY]["dateCreated"], provider_uri)
+            ocean_instance,
+            wallet.address,
+            metadata[MetadataMain.KEY]["dateCreated"],
+            provider_uri,
+        )
 
     block = ocean_instance.web3.eth.blockNumber
     asset = ocean_instance.assets.create(
@@ -89,7 +104,7 @@ def get_registered_ddo(
         wallet,
         service_descriptors=[service_descriptor],
         data_token_address=datatoken,
-        provider_uri=provider_uri
+        provider_uri=provider_uri,
     )
     ddo_reg = ocean_instance.assets.ddo_registry()
     log = ddo_reg.get_event_log(
@@ -112,11 +127,15 @@ def get_registered_ddo_with_access_service(ocean_instance, wallet, provider_uri=
     metadata = old_ddo.metadata
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     service_descriptor = get_access_service_descriptor(
-        ocean_instance, wallet.address,
-        metadata[MetadataMain.KEY]["dateCreated"], provider_uri
+        ocean_instance,
+        wallet.address,
+        metadata[MetadataMain.KEY]["dateCreated"],
+        provider_uri,
     )
 
-    return get_registered_ddo(ocean_instance, metadata, wallet, service_descriptor, provider_uri=provider_uri)
+    return get_registered_ddo(
+        ocean_instance, metadata, wallet, service_descriptor, provider_uri=provider_uri
+    )
 
 
 def get_registered_ddo_with_compute_service(ocean_instance, wallet, provider_uri=None):
@@ -128,17 +147,25 @@ def get_registered_ddo_with_compute_service(ocean_instance, wallet, provider_uri
         service.attributes, DataServiceProvider.get_url(ocean_instance.config)
     )
 
-    return get_registered_ddo(ocean_instance, metadata, wallet, compute_service, provider_uri=provider_uri)
+    return get_registered_ddo(
+        ocean_instance, metadata, wallet, compute_service, provider_uri=provider_uri
+    )
 
 
 def get_registered_algorithm_ddo(ocean_instance, wallet, provider_uri=None):
     metadata = get_sample_algorithm_ddo()["service"][0]["attributes"]
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     service_descriptor = get_access_service_descriptor(
-        ocean_instance, wallet.address, metadata[MetadataMain.KEY]["dateCreated"], provider_uri)
+        ocean_instance,
+        wallet.address,
+        metadata[MetadataMain.KEY]["dateCreated"],
+        provider_uri,
+    )
     if "cost" in metadata[MetadataMain.KEY]:
         metadata[MetadataMain.KEY].pop("cost")
-    return get_registered_ddo(ocean_instance, metadata, wallet, service_descriptor, provider_uri=provider_uri)
+    return get_registered_ddo(
+        ocean_instance, metadata, wallet, service_descriptor, provider_uri=provider_uri
+    )
 
 
 def get_registered_algorithm_ddo_different_provider(ocean_instance, wallet):

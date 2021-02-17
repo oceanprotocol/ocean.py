@@ -12,7 +12,13 @@ from tests.resources.helper_functions import (
     get_consumer_wallet,
     get_publisher_wallet,
 )
-from tests.resources.ddo_helpers import get_sample_algorithm_ddo, get_computing_metadata, get_resource_path, wait_for_update, wait_for_ddo
+from tests.resources.ddo_helpers import (
+    get_sample_algorithm_ddo,
+    get_computing_metadata,
+    get_resource_path,
+    wait_for_update,
+    wait_for_ddo,
+)
 
 
 def create_asset(ocean, publisher):

@@ -24,9 +24,7 @@ logger = logging.getLogger(__name__)
 
 OrderRequirements = namedtuple(
     "OrderRequirements",
-    (
-        "amount", "data_token_address", "receiver_address", "nonce", "computeAddress"
-    )
+    ("amount", "data_token_address", "receiver_address", "nonce", "computeAddress"),
 )
 
 
@@ -311,7 +309,7 @@ class DataServiceProvider:
         algorithm_did=None,
         algorithm_meta=None,
         output=None,
-        input_datasets=None
+        input_datasets=None,
     ):
         """
 
@@ -644,16 +642,17 @@ class DataServiceProvider:
             "jobId": job_id or "",
             "serviceId": service_id,
             "transferTxId": order_tx_id,
-            "additionalInputs": _input_datasets or []
+            "additionalInputs": _input_datasets or [],
         }
         if algorithm_did:
-            payload.update({
-                "algorithmDid": algorithm_did,
-                "algorithmDataToken": algorithm_data_token,
-                "algorithmTransferTxId": algorithm_tx_id
-            })
+            payload.update(
+                {
+                    "algorithmDid": algorithm_did,
+                    "algorithmDataToken": algorithm_data_token,
+                    "algorithmTransferTxId": algorithm_tx_id,
+                }
+            )
         else:
             payload["algorithmMeta"] = algorithm_meta
 
         return payload
-
