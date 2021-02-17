@@ -88,7 +88,7 @@ class OceanAssets:
         if not access_service_descriptor and not compute_service_descriptor:
             access_service_descriptor = ServiceDescriptor.access_service_descriptor(
                 self.build_access_service(metadata[MetadataMain.KEY]["dateCreated"], 1.0, wallet.address),
-                provider_uri if provider_uri else self._data_provider.get_url(self._config),
+                self._data_provider.build_download_endpoint(provider_uri)[1],
             )
 
         if access_service_descriptor:

@@ -1,9 +1,9 @@
 import logging
-from collections import namedtuple
 
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
+from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3helper import Web3Helper
@@ -12,11 +12,6 @@ from ocean_utils.agreements.service_factory import ServiceDescriptor
 from ocean_utils.agreements.service_types import ServiceTypes
 
 logger = logging.getLogger("ocean")
-
-ComputeInput = namedtuple(
-    "ComputeInput",
-    ["did", "transferTxId", "serviceId"]
-)
 
 
 class OceanCompute:
@@ -184,13 +179,13 @@ class OceanCompute:
 
     def start(
         self,
-        input_datasets: list[ComputeInput],
+        input_datasets: list,
         consumer_wallet: Wallet,
         nonce: [int, None] = None,
         algorithm_did: [str, None] = None,
         algorithm_meta: [AlgorithmMetadata, None] = None,
-        algorithm_tx_id: str = "",
-        algorithm_data_token: str = "",
+        algorithm_tx_id: str = None,
+        algorithm_data_token: str = None,
         output: dict = None,
         job_id: str = None,
     ):
@@ -217,10 +212,13 @@ class OceanCompute:
             algorithm_did or algorithm_meta
         ), "either an algorithm did or an algorithm meta must be provided."
 
+        for i in input_datasets:
+            assert isinstance(i, ComputeInput)
+
         first_input = input_datasets[0]
         did = first_input.did
-        order_tx_id = first_input.transferTxId
-        service_id = first_input.serviceId
+        order_tx_id = first_input.transfer_tx_id
+        service_id = first_input.service_id
 
         output = OceanCompute.check_output_dict(
             output, consumer_wallet.address, data_provider=self._data_provider

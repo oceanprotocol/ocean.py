@@ -5,7 +5,7 @@ from ocean_utils.agreements.service_types import ServiceTypes
 
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.ocean.ocean_compute import ComputeInput
+from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import (
     get_consumer_ocean_instance,
@@ -71,6 +71,10 @@ def process_order(ocean_instance, publisher_wallet, consumer_wallet, ddo, servic
 
     # Start the order on-chain using the `order` requirements from previous step
     service = ddo.get_service(service_type)
+    consumer = consumer_wallet.address
+    if service_type == ServiceTypes.ASSET_ACCESS and order_requirements.computeAddress:
+        consumer = order_requirements.computeAddress
+
     _order_tx_id = ocean_instance.assets.pay_for_service(
         order_requirements.amount,
         order_requirements.data_token_address,
@@ -78,7 +82,7 @@ def process_order(ocean_instance, publisher_wallet, consumer_wallet, ddo, servic
         service.index,
         ZERO_ADDRESS,
         consumer_wallet,
-        consumer_wallet.address,
+        consumer,
     )
     return _order_tx_id, order_requirements, service
 
@@ -87,10 +91,21 @@ def run_compute_test(ocean_instance, publisher_wallet, consumer_wallet,
                      input_ddos, algo_ddo=None, algo_meta=None):
     compute_ddo = input_ddos[0]
     did = compute_ddo.did
-    _order_tx_id, order_quote, service = process_order(
+    order_tx_id, order_quote, service = process_order(
         ocean_instance, publisher_wallet, consumer_wallet,
         compute_ddo, ServiceTypes.CLOUD_COMPUTE
     )
+    compute_inputs = [ComputeInput(did, order_tx_id, service.index)]
+    for ddo in input_ddos[1:]:
+        service_type = ServiceTypes.ASSET_ACCESS
+        if not ddo.get_service(service_type):
+            service_type = ServiceTypes.CLOUD_COMPUTE
+
+        _order_tx_id, _order_quote, _service = process_order(
+            ocean_instance, publisher_wallet, consumer_wallet,
+            ddo, service_type
+        )
+        compute_inputs.append(ComputeInput(ddo.did, _order_tx_id, _service.index))
 
     if algo_ddo:
         # order the algo download service
@@ -99,7 +114,7 @@ def run_compute_test(ocean_instance, publisher_wallet, consumer_wallet,
             algo_ddo, ServiceTypes.ASSET_ACCESS
         )
         job_id = ocean_instance.compute.start(
-            [ComputeInput(did, _order_tx_id, service.index)],
+            compute_inputs,
             consumer_wallet,
             algorithm_did=algo_ddo.did,
             algorithm_tx_id=algo_tx_id,
@@ -110,7 +125,7 @@ def run_compute_test(ocean_instance, publisher_wallet, consumer_wallet,
     else:
         assert algo_meta, "algo_meta is required when not using algo_ddo."
         job_id = ocean_instance.compute.start(
-            [ComputeInput(did, _order_tx_id, service.index)],
+            compute_inputs,
             consumer_wallet,
             algorithm_meta=algo_meta,
         )

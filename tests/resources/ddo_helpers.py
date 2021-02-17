@@ -61,8 +61,8 @@ def get_access_service_descriptor(ocean_instance, address, date_created, provide
         provider_uri = DataServiceProvider.get_url(ocean_instance.config)
 
     return ServiceDescriptor.access_service_descriptor(
-        ocean_instance.assets.build_access_service(date_created, to_base_18(1), address, timeout),
-        DataServiceProvider.build_download_endpoint(provider_uri)
+        ocean_instance.assets.build_access_service(date_created, 1.0, address, timeout),
+        DataServiceProvider.build_download_endpoint(provider_uri)[1]
     )
 
 
@@ -80,7 +80,8 @@ def get_registered_ddo(
 ):
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     if not service_descriptor:
-        service_descriptor = get_access_service_descriptor(ocean_instance, wallet.address, metadata, provider_uri)
+        service_descriptor = get_access_service_descriptor(
+            ocean_instance, wallet.address, metadata[MetadataMain.KEY]["dateCreated"], provider_uri)
 
     block = ocean_instance.web3.eth.blockNumber
     asset = ocean_instance.assets.create(
@@ -133,9 +134,11 @@ def get_registered_ddo_with_compute_service(ocean_instance, wallet, provider_uri
 def get_registered_algorithm_ddo(ocean_instance, wallet, provider_uri=None):
     metadata = get_sample_algorithm_ddo()["service"][0]["attributes"]
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    service_descriptor = get_access_service_descriptor(ocean_instance, wallet.address, metadata, provider_uri)
-    metadata[MetadataMain.KEY].pop("cost")
-    return get_registered_ddo(get_publisher_ocean_instance(), metadata, wallet, service_descriptor)
+    service_descriptor = get_access_service_descriptor(
+        ocean_instance, wallet.address, metadata[MetadataMain.KEY]["dateCreated"], provider_uri)
+    if "cost" in metadata[MetadataMain.KEY]:
+        metadata[MetadataMain.KEY].pop("cost")
+    return get_registered_ddo(ocean_instance, metadata, wallet, service_descriptor, provider_uri=provider_uri)
 
 
 def get_registered_algorithm_ddo_different_provider(ocean_instance, wallet):

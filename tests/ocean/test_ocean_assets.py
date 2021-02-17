@@ -50,6 +50,7 @@ def test_register_asset(publisher_ocean_instance):
     assert log, "no ddo created event."
 
     ddo = wait_for_ddo(ocn, did)
+    assert ddo, f"ddo is not found in cache."
     ddo_dict = ddo.as_dictionary()
     original = original_ddo.as_dictionary()
     assert ddo_dict["publicKey"] == original["publicKey"]

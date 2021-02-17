@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 OrderRequirements = namedtuple(
     "OrderRequirements",
     (
-        "amount", "data_token_address", "receiver_address", "nonce", ""
+        "amount", "data_token_address", "receiver_address", "nonce", "computeAddress"
     )
 )
 
@@ -209,8 +209,8 @@ class DataServiceProvider:
         order_tx_id: str,
         algorithm_did: str = None,
         algorithm_meta: AlgorithmMetadata = None,
-        algorithm_tx_id: str = "",
-        algorithm_data_token: str = "",
+        algorithm_tx_id: str = None,
+        algorithm_data_token: str = None,
         output: dict = None,
         input_datasets: list = None,
         job_id: str = None,
@@ -447,9 +447,9 @@ class DataServiceProvider:
                 DataServiceProvider.provider_info = requests.get(
                     config.provider_url
                 ).json()
-            return DataServiceProvider.provider_info["provider-address"]
+            return DataServiceProvider.provider_info["providerAddress"]
         provider_info = requests.get(provider_uri).json()
-        return provider_info["provider-address"]
+        return provider_info["providerAddress"]
 
     @staticmethod
     def build_endpoint(service_name, provider_uri=None, config=None):
@@ -610,8 +610,8 @@ class DataServiceProvider:
         signature: str = None,
         algorithm_did: str = None,
         algorithm_meta=None,
-        algorithm_tx_id: str = "",
-        algorithm_data_token: str = "",
+        algorithm_tx_id: str = None,
+        algorithm_data_token: str = None,
         output: dict = None,
         input_datasets: list = None,
         job_id: str = None,
@@ -627,26 +627,33 @@ class DataServiceProvider:
             )
             algorithm_meta = algorithm_meta.as_dictionary()
 
+        _input_datasets = []
         if input_datasets:
-            _input_datasets = []
             for _input in input_datasets:
                 assert _input.did
-                assert _input.transferTxId
-                assert _input.serviceId
+                assert _input.transfer_tx_id
+                assert _input.service_id
                 if _input.did != did:
-                    _input_datasets.append(_input)
+                    _input_datasets.append(_input.as_dictionary())
 
-        return {
+        payload = {
             "signature": signature,
             "documentId": did,
             "consumerAddress": consumer_address,
-            "algorithmDid": algorithm_did,
-            "algorithmMeta": algorithm_meta,
-            "algorithmDataToken": algorithm_data_token,
-            "algorithmTransferTxId": algorithm_tx_id,
             "output": output or dict(),
             "jobId": job_id or "",
             "serviceId": service_id,
             "transferTxId": order_tx_id,
-            "additionalInputs": input_datasets or []
+            "additionalInputs": _input_datasets or []
         }
+        if algorithm_did:
+            payload.update({
+                "algorithmDid": algorithm_did,
+                "algorithmDataToken": algorithm_data_token,
+                "algorithmTransferTxId": algorithm_tx_id
+            })
+        else:
+            payload["algorithmMeta"] = algorithm_meta
+
+        return payload
+
