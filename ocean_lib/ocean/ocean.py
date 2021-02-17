@@ -6,6 +6,8 @@ import logging
 import os
 
 from eth_utils import remove_0x_prefix
+from web3.datastructures import AttributeDict
+
 from ocean_lib.config import Config
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -33,7 +35,6 @@ from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib.web3_internal.web3helper import Web3Helper
-from web3.datastructures import AttributeDict
 
 logger = logging.getLogger("ocean")
 
@@ -72,10 +73,15 @@ class Ocean:
             except AssertionError:
                 config = Config(os.getenv(ENV_CONFIG_FILE))
                 ConfigProvider.set_config(config)
-
         if isinstance(config, dict):
+            # fallback to metadataStoreUri
+            cache_key = (
+                "metadataCacheUri"
+                if ("metadataCacheUri" in config)
+                else "metadataStoreUri"
+            )
             aqua_url = config.get(
-                "metadataStoreUri", config.get("aquarius.url", "http://localhost:5000")
+                cache_key, config.get("aquarius.url", "http://localhost:5000")
             )
             config_dict = {
                 "eth-network": {"network": config.get("network", "")},
@@ -85,7 +91,6 @@ class Ocean:
                 },
             }
             config = Config(options_dict=config_dict)
-
         ConfigProvider.set_config(config)
         self._config = config
         ContractHandler.set_artifacts_path(self._config.artifacts_path)
