@@ -48,7 +48,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_utils.agreements.service_factory import ServiceDescriptor
 config = {
    'network' : os.getenv('NETWORK_URL'),
-   'metadataStoreUri' : os.getenv('AQUARIUS_URL'),
+   'metadataCacheUri' : os.getenv('AQUARIUS_URL'),
    'providerUri' : os.getenv('PROVIDER_URL'),
 }
 ocean = Ocean(config)
@@ -148,7 +148,7 @@ import os
 from ocean_lib.ocean.ocean import Ocean
 config = {
    'network' : os.getenv('NETWORK_URL'),
-   'metadataStoreUri' : os.getenv('AQUARIUS_URL'),
+   'metadataCacheUri' : os.getenv('AQUARIUS_URL'),
    'providerUri' : os.getenv('PROVIDER_URL'),
 }
 market_ocean = Ocean(config)
@@ -197,7 +197,7 @@ import os
 from ocean_lib.ocean.ocean import Ocean
 config = {
    'network' : os.getenv('NETWORK_URL'),
-   'metadataStoreUri' : os.getenv('AQUARIUS_URL'),
+   'metadataCacheUri' : os.getenv('AQUARIUS_URL'),
    'providerUri' : os.getenv('PROVIDER_URL'),
 }
 bob_ocean = Ocean(config)
@@ -207,6 +207,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 bob_wallet = Wallet(bob_ocean.web3, private_key=os.getenv('BOB_KEY'))
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 ```
+For legacy support, you can also use `metadataStoreUri` instead of `metadataCacheUri`.
 
 Verify that Bob has Rinkeby ETH. If it fails, the [datatokens tutorial](datatokens_tutorial.md) can help.
 ```python
