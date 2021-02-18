@@ -14,8 +14,8 @@ from ocean_utils.utils.utilities import checksum
 from tests.resources.helper_functions import (
     get_consumer_wallet,
     get_publisher_wallet,
-    get_resource_path,
 )
+from tests.resources.ddo_helpers import get_resource_path
 
 
 def get_ddo_sample(datatoken_address):

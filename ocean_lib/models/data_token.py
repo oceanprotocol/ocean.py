@@ -2,19 +2,20 @@ import json
 import os
 import time
 from collections import namedtuple
+from websockets import ConnectionClosed
 
-import requests
 from eth_utils import remove_0x_prefix
+import requests
+from ocean_utils.http_requests.requests_session import get_requests_session
+from web3 import Web3
+from web3.utils.events import get_event_data
+
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.event_filter import EventFilter
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_utils.http_requests.requests_session import get_requests_session
-from web3 import Web3
-from web3.utils.events import get_event_data
-from websockets import ConnectionClosed
 
 OrderValues = namedtuple(
     "OrderValues",
@@ -261,7 +262,7 @@ class DataToken(ContractBase):
         tx = web3.eth.getTransaction(tx_id)
         if sender not in [order_log.args.consumer, order_log.args.payer]:
             raise AssertionError(
-                "sender of order transaction is not the same as the requesting account."
+                "sender of order transaction is not the consumer/payer."
             )
 
         transfer_logs = self.events.Transfer().processReceipt(tx_receipt)

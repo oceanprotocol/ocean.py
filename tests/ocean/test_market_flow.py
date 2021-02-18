@@ -13,9 +13,9 @@ from tests.resources.helper_functions import (
     get_consumer_wallet,
     get_publisher_ocean_instance,
     get_publisher_wallet,
-    get_registered_ddo,
     mint_tokens_and_wait,
 )
+from tests.resources.ddo_helpers import get_registered_ddo, get_metadata
 
 
 def test_market_flow():
@@ -25,7 +25,7 @@ def test_market_flow():
     consumer_ocean = get_consumer_ocean_instance()
 
     # Register Asset
-    asset = get_registered_ddo(publisher_ocean, pub_wallet)
+    asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
     assert isinstance(asset, Asset)
     assert asset.data_token_address
 
@@ -102,7 +102,7 @@ def test_payer_market_flow():
     another_consumer_ocean = get_another_consumer_ocean_instance(use_provider_mock=True)
 
     # Register Asset
-    asset = get_registered_ddo(publisher_ocean, pub_wallet)
+    asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
     assert isinstance(asset, Asset)
     assert asset.data_token_address
 
