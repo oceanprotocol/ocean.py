@@ -139,7 +139,7 @@ class DataServiceProvider:
             order["dataToken"],
             order["to"],
             int(order["nonce"]),
-            order.get("computeAddress")
+            order.get("computeAddress"),
         )
 
     @staticmethod
@@ -460,17 +460,17 @@ class DataServiceProvider:
         parts = provider_uri.split("/")
         if parts[-2] == "services":
             base_url = "/".join(parts[:-2])
-            return "GET", f"{base_url}/services/initialize"
+            return "GET", urljoin(base_url, "services/initialize")
 
         api_version = DataServiceProvider.get_api_version()
         if api_version not in provider_uri:
-            provider_uri = f"{provider_uri}/{api_version}"
+            provider_uri = urljoin(provider_uri, api_version)
 
         service_endpoints = DataServiceProvider.get_service_endpoints()
         method, url = service_endpoints[service_name]
         url = url.replace(api_version, "")
 
-        return method, f"{provider_uri}{url}"
+        return method, urljoin(provider_uri, url)
 
     @staticmethod
     def build_encrypt_endpoint(provider_uri=None):
@@ -657,3 +657,8 @@ class DataServiceProvider:
             payload["algorithmMeta"] = algorithm_meta
 
         return payload
+
+
+def urljoin(*args):
+    trailing_slash = "/" if args[-1].endswith("/") else ""
+    return "/".join(map(lambda x: str(x).strip("/"), args)) + trailing_slash

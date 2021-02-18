@@ -230,7 +230,7 @@ class OceanCompute:
         sa = ServiceAgreement.from_json(service.as_dictionary())
         assert (
             ServiceTypes.CLOUD_COMPUTE == sa.type
-        ), f"service at serviceId is not of type compute service."
+        ), "service at serviceId is not of type compute service."
 
         signature = self._sign_message(
             consumer_wallet, f"{consumer_wallet.address}{did}", nonce=nonce

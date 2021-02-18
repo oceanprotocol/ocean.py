@@ -1,29 +1,29 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
-from ocean_utils.agreements.service_types import ServiceTypes
-
-from ocean_lib.models.data_token import DataToken
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.compute_input import ComputeInput
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_utils.agreements.service_types import ServiceTypes
+from tests.resources.ddo_helpers import (
+    get_algorithm_meta,
+    get_registered_algorithm_ddo_different_provider,
+    get_registered_ddo_with_access_service,
+    get_registered_ddo_with_compute_service,
+)
 from tests.resources.helper_functions import (
     get_consumer_ocean_instance,
     get_consumer_wallet,
     get_publisher_ocean_instance,
     get_publisher_wallet,
 )
-from tests.resources.ddo_helpers import (
-    get_registered_ddo_with_compute_service,
-    get_algorithm_meta,
-    get_registered_ddo_with_access_service,
-    get_registered_algorithm_ddo_different_provider,
-)
 
 
 class Setup:
     def __init__(self):
+        """Initialise shared variables."""
         self.publisher_wallet = get_publisher_wallet()
         self.consumer_wallet = get_consumer_wallet()
         self.publisher_ocean_instance = get_publisher_ocean_instance()
@@ -31,19 +31,13 @@ class Setup:
 
 
 def test_metadaCacheUri_version():
-    config_dict = {
-        "metadataCacheUri": "http://ItWorked.com",
-        "network": "rinkeby",
-    }
+    config_dict = {"metadataCacheUri": "http://ItWorked.com", "network": "rinkeby"}
     ocean_instance = Ocean(config=config_dict)
     assert "http://ItWorked.com" == ocean_instance.config.aquarius_url
 
 
 def test_metadataStoreUri_version():
-    config_dict = {
-        "metadataStoreUri": "http://ItWorked.com",
-        "network": "rinkeby",
-    }
+    config_dict = {"metadataStoreUri": "http://ItWorked.com", "network": "rinkeby"}
     ocean_instance = Ocean(config=config_dict)
     assert "http://ItWorked.com" == ocean_instance.config.aquarius_url
 
@@ -85,9 +79,7 @@ def process_order(ocean_instance, publisher_wallet, consumer_wallet, ddo, servic
 
     # Order compute service from the dataset asset
     order_requirements = ocean_instance.assets.order(
-        ddo.did,
-        consumer_wallet.address,
-        service_type=service_type,
+        ddo.did, consumer_wallet.address, service_type=service_type
     )
 
     # Start the order on-chain using the `order` requirements from previous step
@@ -118,7 +110,7 @@ def run_compute_test(
 ):
     compute_ddo = input_ddos[0]
     did = compute_ddo.did
-    order_tx_id, order_quote, service = process_order(
+    order_tx_id, _, service = process_order(
         ocean_instance,
         publisher_wallet,
         consumer_wallet,
@@ -138,7 +130,7 @@ def run_compute_test(
 
     if algo_ddo:
         # order the algo download service
-        algo_tx_id, algo_order_quote, algo_service = process_order(
+        algo_tx_id, _, algo_service = process_order(
             ocean_instance,
             publisher_wallet,
             consumer_wallet,
@@ -157,9 +149,7 @@ def run_compute_test(
     else:
         assert algo_meta, "algo_meta is required when not using algo_ddo."
         job_id = ocean_instance.compute.start(
-            compute_inputs,
-            consumer_wallet,
-            algorithm_meta=algo_meta,
+            compute_inputs, consumer_wallet, algorithm_meta=algo_meta
         )
         assert job_id, f"expected a job id, got {job_id}"
 

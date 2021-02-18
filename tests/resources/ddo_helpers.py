@@ -4,19 +4,14 @@ import pathlib
 import time
 import uuid
 
+from ocean_lib.assets.asset import Asset
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
+from ocean_lib.web3_internal.wallet import Wallet
 from ocean_utils.agreements.service_factory import ServiceDescriptor
 from ocean_utils.agreements.service_types import ServiceTypes
 from ocean_utils.ddo.metadata import MetadataMain
-
-from ocean_lib.assets.asset import Asset
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.ocean.util import to_base_18
-from ocean_lib.web3_internal.wallet import Wallet
-from tests.resources.helper_functions import (
-    get_publisher_ocean_instance,
-    mint_tokens_and_wait,
-)
+from tests.resources.helper_functions import mint_tokens_and_wait
 
 
 def get_resource_path(dir_name, file_name):
@@ -169,7 +164,9 @@ def get_registered_algorithm_ddo(ocean_instance, wallet, provider_uri=None):
 
 
 def get_registered_algorithm_ddo_different_provider(ocean_instance, wallet):
-    return get_registered_algorithm_ddo(ocean_instance, wallet, "http://172.15.0.7:8030")
+    return get_registered_algorithm_ddo(
+        ocean_instance, wallet, "http://172.15.0.7:8030"
+    )
 
 
 def wait_for_update(ocean, did, updated_attr, value, timeout=30):

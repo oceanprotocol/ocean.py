@@ -1,5 +1,6 @@
 class ComputeInput:
     def __init__(self, did, transfer_tx_id, service_id):
+        """Initialise and validate arguments."""
         assert (
             did and transfer_tx_id and service_id is not None
         ), f"bad argument values: did={did}, transfer_ts_id={transfer_tx_id}, service_id={service_id}"
