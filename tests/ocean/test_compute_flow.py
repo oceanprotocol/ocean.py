@@ -3,11 +3,13 @@
 
 import uuid
 
+from ocean_utils.agreements.service_factory import ServiceDescriptor
+from ocean_utils.agreements.service_types import ServiceTypes
+
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
-from ocean_utils.agreements.service_factory import ServiceDescriptor
-from ocean_utils.agreements.service_types import ServiceTypes
+from ocean_lib.ocean.ocean import Ocean
 from tests.resources.helper_functions import (
     get_consumer_ocean_instance,
     get_consumer_wallet,
@@ -17,6 +19,24 @@ from tests.resources.helper_functions import (
     mint_tokens_and_wait,
     wait_for_ddo,
 )
+
+
+def test_metadaCacheUri_version():
+    config_dict = {
+        "metadataCacheUri": "http://ItWorked.com",
+        "network": "rinkeby",
+    }
+    ocean_instance = Ocean(config=config_dict)
+    assert "http://ItWorked.com" == ocean_instance.config.aquarius_url
+
+
+def test_metadataStoreUri_version():
+    config_dict = {
+        "metadataStoreUri": "http://ItWorked.com",
+        "network": "rinkeby",
+    }
+    ocean_instance = Ocean(config=config_dict)
+    assert "http://ItWorked.com" == ocean_instance.config.aquarius_url
 
 
 def test_expose_endpoints():
