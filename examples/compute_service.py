@@ -92,6 +92,7 @@ def run_compute(did, consumer_wallet, algorithm_file, pool_address, order_id=Non
             service.index,
             fee_receiver=asset.publisher,
             from_wallet=consumer_wallet,
+            consumer=consumer_wallet.address,
         )
 
     # load python algorithm to run in the compute job

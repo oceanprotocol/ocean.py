@@ -58,7 +58,7 @@ def test_ddo_on_chain():
         asset.asset_id, b"", lzma.compress(web3.toBytes(text=asset.as_text())), wallet
     )
     assert ddo_registry.verify_tx(txid), f"create ddo failed: txid={txid}"
-    logs = ddo_registry.event_MetadataCreated().processReceipt(
+    logs = ddo_registry.event_MetadataCreated.processReceipt(
         ddo_registry.get_tx_receipt(txid)
     )
     assert logs, f"no logs found for create ddo tx {txid}"
@@ -79,7 +79,7 @@ def test_ddo_on_chain():
         asset.asset_id, b"", lzma.compress(web3.toBytes(text=asset.as_text())), wallet
     )
     assert ddo_registry.verify_tx(txid), f"update ddo failed: txid={txid}"
-    logs = ddo_registry.event_MetadataUpdated().processReceipt(
+    logs = ddo_registry.event_MetadataUpdated.processReceipt(
         ddo_registry.get_tx_receipt(txid)
     )
     assert logs, f"no logs found for update ddo tx {txid}"
@@ -101,7 +101,7 @@ def test_ddo_on_chain():
             asset.asset_id, b"", lzma.compress(web3.toBytes(text=asset.as_text())), bob
         )
         assert ddo_registry.verify_tx(txid) is False, f"update ddo failed: txid={txid}"
-        logs = ddo_registry.event_MetadataUpdated().processReceipt(
+        logs = ddo_registry.event_MetadataUpdated.processReceipt(
             ddo_registry.get_tx_receipt(txid)
         )
         assert (
