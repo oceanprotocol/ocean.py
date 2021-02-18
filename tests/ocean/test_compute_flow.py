@@ -130,7 +130,7 @@ def run_compute_test(
 
     if algo_ddo:
         # order the algo download service
-        algo_tx_id, _, algo_service = process_order(
+        algo_tx_id, _, _ = process_order(
             ocean_instance,
             publisher_wallet,
             consumer_wallet,
