@@ -18,8 +18,8 @@ before_install:
   - bash -x start_ocean.sh --no-dashboard 2>&1 > start_ocean.log &
   - cd ..
   - |
-      for i in $(seq 1 5000); do
-        sleep 5
+      for i in $(seq 1 150); do
+        sleep 6
         [ -f "${HOME}/.ocean/ocean-contracts/artifacts/ready" ] && break
       done
       ls -la "${HOME}/.ocean/ocean-contracts/artifacts/"
