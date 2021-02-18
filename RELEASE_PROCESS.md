@@ -33,4 +33,4 @@
   ```
 
 - Go to Travis and check the Travis job. It should deploy a new release to PyPI.
-- Check PyPI for the new release at [https://pypi.org/project/ocean.py/](https://pypi.org/project/ocean.py/)
+- Check PyPI for the new release at [https://pypi.org/project/ocean-lib/](https://pypi.org/project/ocean-lib/)
