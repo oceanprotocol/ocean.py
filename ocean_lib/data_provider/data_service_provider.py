@@ -139,6 +139,7 @@ class DataServiceProvider:
             order["dataToken"],
             order["to"],
             int(order["nonce"]),
+            order.get("computeAddress")
         )
 
     @staticmethod

@@ -169,7 +169,7 @@ def get_registered_algorithm_ddo(ocean_instance, wallet, provider_uri=None):
 
 
 def get_registered_algorithm_ddo_different_provider(ocean_instance, wallet):
-    return get_registered_algorithm_ddo(ocean_instance, wallet, "http://localhost:8031")
+    return get_registered_algorithm_ddo(ocean_instance, wallet, "http://172.15.0.7:8030")
 
 
 def wait_for_update(ocean, did, updated_attr, value, timeout=30):
