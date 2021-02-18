@@ -12,11 +12,11 @@ class MetadataContract(ContractBase):
 
     @property
     def event_MetadataCreated(self):
-        return getattr(self.events, self.EVENT_METADATA_CREATED)
+        return getattr(self.events, self.EVENT_METADATA_CREATED)()
 
     @property
     def event_MetadataUpdated(self):
-        return getattr(self.events, self.EVENT_METADATA_UPDATED)
+        return getattr(self.events, self.EVENT_METADATA_UPDATED)()
 
     def get_event_log(self, event_name, block, did, timeout=45):
         did = remove_0x_prefix(did)
