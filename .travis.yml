@@ -18,7 +18,7 @@ before_install:
   - bash -x start_ocean.sh --no-dashboard 2>&1 > start_ocean.log &
   - cd ..
   - |
-      for i in $(seq 1 50); do
+      for i in $(seq 1 5000); do
         sleep 5
         [ -f "${HOME}/.ocean/ocean-contracts/artifacts/ready" ] && break
       done
