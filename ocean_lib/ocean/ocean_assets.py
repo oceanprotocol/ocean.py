@@ -3,6 +3,8 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 import copy
+import hashlib
+import json
 import logging
 import lzma
 import os
@@ -64,6 +66,7 @@ class OceanAssets:
         metadata: dict,
         provider_uri: str,
         wallet: Wallet,
+        trusted_algorithms: list,
     ) -> list:
         ddo_service_endpoint = self._get_aquarius().get_service_endpoint()
 
@@ -96,6 +99,31 @@ class OceanAssets:
         if access_service_descriptor:
             _service_descriptors.append(access_service_descriptor)
         if compute_service_descriptor:
+            if trusted_algorithms:
+                trusted_algo_list = []
+                for trusted_algorithm_did in trusted_algorithms:
+                    trusted_algorithm_ddo = self.resolve(
+                        trusted_algorithm_did
+                    )  # but what if served by different provider?
+                    alg_crt_service = trusted_algorithm_ddo.get_service(
+                        ServiceTypes.METADATA
+                    )
+                    trusted_algo_list.append(
+                        {
+                            "did": trusted_algorithm_did,
+                            "filesChecksum": hashlib.sha256(
+                                (
+                                    alg_crt_service.attributes["encryptedFiles"]
+                                    + json.dumps(alg_crt_service.main["files"])
+                                ).encode("utf-8")
+                            ).hexdigest(),
+                        }
+                    )
+
+                compute_service_descriptor[1]["attributes"]["main"]["privacy"] = {
+                    "publisherTrustedAlgorithms": trusted_algo_list
+                }
+
             _service_descriptors.append(compute_service_descriptor)
 
         _service_descriptors.extend(service_type_to_descriptor.values())
@@ -109,6 +137,7 @@ class OceanAssets:
         owner_address: str = None,
         data_token_address: str = None,
         provider_uri=None,
+        trusted_algorithms=None,
         dt_name: str = None,
         dt_symbol: str = None,
         dt_blob: str = None,
@@ -159,7 +188,11 @@ class OceanAssets:
         service_descriptors = service_descriptors or []
 
         services = self._process_service_descriptors(
-            service_descriptors, metadata_copy, provider_uri, publisher_wallet
+            service_descriptors,
+            metadata_copy,
+            provider_uri,
+            publisher_wallet,
+            trusted_algorithms=trusted_algorithms,
         )
 
         stype_to_service = {s.type: s for s in services}

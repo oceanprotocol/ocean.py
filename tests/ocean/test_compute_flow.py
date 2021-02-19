@@ -231,7 +231,7 @@ def test_compute_trusted_algorithms():
     compute_ddo = get_registered_ddo_with_compute_service(
         setup.publisher_ocean_instance,
         setup.publisher_wallet,
-        trusted_algorithms=[algorithm_ddo],
+        trusted_algorithms=[algorithm_ddo.did],
     )
     # verify the ddo is available in Aquarius
     _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
