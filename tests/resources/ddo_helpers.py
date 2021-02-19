@@ -1,3 +1,4 @@
+import hashlib
 import json
 import os
 import pathlib
@@ -133,7 +134,9 @@ def get_registered_ddo_with_access_service(ocean_instance, wallet, provider_uri=
     )
 
 
-def get_registered_ddo_with_compute_service(ocean_instance, wallet, provider_uri=None):
+def get_registered_ddo_with_compute_service(
+    ocean_instance, wallet, provider_uri=None, trusted_algorithms=[]
+):
     old_ddo = get_sample_ddo_with_compute_service()
     metadata = old_ddo.metadata
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
@@ -141,6 +144,25 @@ def get_registered_ddo_with_compute_service(ocean_instance, wallet, provider_uri
     compute_service = ServiceDescriptor.compute_service_descriptor(
         service.attributes, DataServiceProvider.get_url(ocean_instance.config)
     )
+
+    trusted_algo_list = []
+    for trusted_algorithm in trusted_algorithms:
+        alg_crt_service = trusted_algorithm.get_service(ServiceTypes.METADATA)
+        trusted_algo_list.append(
+            {
+                "did": trusted_algorithm.did,
+                "filesChecksum": hashlib.sha256(
+                    (
+                        alg_crt_service.attributes["encryptedFiles"]
+                        + json.dumps(alg_crt_service.main["files"])
+                    ).encode("utf-8")
+                ).hexdigest(),
+            }
+        )
+
+    compute_service[1]["attributes"]["main"]["privacy"] = {
+        "publisherTrustedAlgorithms": trusted_algo_list
+    }
 
     return get_registered_ddo(
         ocean_instance, metadata, wallet, compute_service, provider_uri=provider_uri

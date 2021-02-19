@@ -9,6 +9,7 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_utils.agreements.service_types import ServiceTypes
 from tests.resources.ddo_helpers import (
     get_algorithm_meta,
+    get_registered_algorithm_ddo,
     get_registered_algorithm_ddo_different_provider,
     get_registered_ddo_with_access_service,
     get_registered_ddo_with_compute_service,
@@ -213,5 +214,32 @@ def test_compute_multi_inputs():
         setup.publisher_wallet,
         setup.consumer_wallet,
         [compute_ddo, access_ddo],
+        algo_ddo=algorithm_ddo,
+    )
+
+
+def test_compute_trusted_algorithms():
+    setup = Setup()
+
+    # Setup algorithm meta to run raw algorithm
+    algorithm_ddo = get_registered_algorithm_ddo(
+        setup.publisher_ocean_instance, setup.publisher_wallet
+    )
+    _ = setup.publisher_ocean_instance.assets.resolve(algorithm_ddo.did)
+
+    # Dataset with compute service
+    compute_ddo = get_registered_ddo_with_compute_service(
+        setup.publisher_ocean_instance,
+        setup.publisher_wallet,
+        trusted_algorithms=[algorithm_ddo],
+    )
+    # verify the ddo is available in Aquarius
+    _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
+
+    run_compute_test(
+        setup.consumer_ocean_instance,
+        setup.publisher_wallet,
+        setup.consumer_wallet,
+        [compute_ddo],
         algo_ddo=algorithm_ddo,
     )
