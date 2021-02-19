@@ -135,7 +135,7 @@ def get_registered_ddo_with_access_service(ocean_instance, wallet, provider_uri=
 
 
 def get_registered_ddo_with_compute_service(
-    ocean_instance, wallet, provider_uri=None, trusted_algorithms=[]
+    ocean_instance, wallet, provider_uri=None, trusted_algorithms=None
 ):
     old_ddo = get_sample_ddo_with_compute_service()
     metadata = old_ddo.metadata
@@ -145,24 +145,25 @@ def get_registered_ddo_with_compute_service(
         service.attributes, DataServiceProvider.get_url(ocean_instance.config)
     )
 
-    trusted_algo_list = []
-    for trusted_algorithm in trusted_algorithms:
-        alg_crt_service = trusted_algorithm.get_service(ServiceTypes.METADATA)
-        trusted_algo_list.append(
-            {
-                "did": trusted_algorithm.did,
-                "filesChecksum": hashlib.sha256(
-                    (
-                        alg_crt_service.attributes["encryptedFiles"]
-                        + json.dumps(alg_crt_service.main["files"])
-                    ).encode("utf-8")
-                ).hexdigest(),
-            }
-        )
+    if trusted_algorithms:
+        trusted_algo_list = []
+        for trusted_algorithm in trusted_algorithms:
+            alg_crt_service = trusted_algorithm.get_service(ServiceTypes.METADATA)
+            trusted_algo_list.append(
+                {
+                    "did": trusted_algorithm.did,
+                    "filesChecksum": hashlib.sha256(
+                        (
+                            alg_crt_service.attributes["encryptedFiles"]
+                            + json.dumps(alg_crt_service.main["files"])
+                        ).encode("utf-8")
+                    ).hexdigest(),
+                }
+            )
 
-    compute_service[1]["attributes"]["main"]["privacy"] = {
-        "publisherTrustedAlgorithms": trusted_algo_list
-    }
+        compute_service[1]["attributes"]["main"]["privacy"] = {
+            "publisherTrustedAlgorithms": trusted_algo_list
+        }
 
     return get_registered_ddo(
         ocean_instance, metadata, wallet, compute_service, provider_uri=provider_uri
