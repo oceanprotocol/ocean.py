@@ -18,7 +18,7 @@ Let's go through each step.
 ## 1. Setup
 
 This builds on the setups in the following. Please do them first.
- * [Datatokens tutorial](datatokens_flow.md)
+ * [Datatokens tutorial](datatokens_flow.md). Includes setting `NETWORK_URL` and `MY_TEST_KEY`. 
  * [Get test OCEAN](get_test_OCEAN.md)
 
 Then, set urls for metadata and provider services as envvars. In the console:
