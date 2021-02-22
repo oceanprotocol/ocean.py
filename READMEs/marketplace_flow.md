@@ -259,7 +259,7 @@ service = asset.get_service(ServiceTypes.ASSET_ACCESS)
 #order the asset, and send over the datatoken
 quote = bob_ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
 order_tx_id = bob_ocean.assets.pay_for_service(
-    quote.amount, quote.data_token_address, asset.did, service.index, fee_receiver, bob_wallet)
+    quote.amount, quote.data_token_address, asset.did, service.index, fee_receiver, bob_wallet, None)
 print(f"order_tx_id = '{order_tx_id}'")
 ```
 
