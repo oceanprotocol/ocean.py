@@ -28,14 +28,12 @@ export MY_TEST_KEY=<my_private_key>
 
 ## C. Install ocean-lib
 
-If you want, create a python virtualenv. In the console:
 ```console
+#create a python virtualenv
 python -m venv venv
 source venv/bin/activate 
-```
 
-Then install! In the console:
-```console
+#install!
 pip install ocean-lib
 ```
 
@@ -43,7 +41,6 @@ pip install ocean-lib
 
 In Python:
 ```python
-#setup
 import os
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
