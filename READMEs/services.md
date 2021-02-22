@@ -60,7 +60,7 @@ Above, we described a specific flow to go through configuring services. Here are
 
 The service urls above are for rinkeby. [Ocean's docs have urls](https://docs.oceanprotocol.com/concepts/networks) for Ethereum mainnet and other supported networks.
 
-### Run your own services
+### Run your own services, separately 
 
 Above, we pointed to existing services. Alternatively, you can run your own. Here's how.
 
@@ -77,3 +77,7 @@ docker run oceanprotocol/aquarius:latest
 Here are the urls for the local services, for use in `config.ini` etc.
 * Provider url: `http://127.0.0.1:8030`
 * Aquarius url: `http://127.0.0.1:5000`
+
+### Run your own services, all at once 
+
+Above, we ran all services separately. You can also run [Ocean Barge](https://github.com/oceanprotocol/barge) to conveniently run them all at once.
