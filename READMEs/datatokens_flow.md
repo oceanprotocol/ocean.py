@@ -28,6 +28,7 @@ export MY_TEST_KEY=<my_private_key>
 
 ## C. Install ocean-lib
 
+In bash console:
 ```console
 #create a python virtualenv
 python -m venv venv
@@ -39,7 +40,7 @@ pip install ocean-lib
 
 ## D. Publish datatokens
 
-In Python:
+In Python console:
 ```python
 import os
 from ocean_lib.ocean.ocean import Ocean
