@@ -58,7 +58,7 @@ Above, we described a specific flow to go through configuring services. Here are
 
 ### Point to services in other networks
 
-The service urls above are for rinkeby. [Ocean's docs have urls](https://docs.oceanprotocol.com/concepts/networks-overview/) for Ethereum mainnet and other supported networks.
+The service urls above are for rinkeby. [Ocean's docs have urls](https://docs.oceanprotocol.com/concepts/networks) for Ethereum mainnet and other supported networks.
 
 ### Run your own services
 
