@@ -35,7 +35,7 @@ npm install
 npm start
 ```
 
-Finally, check out the market app as a webapp, at `http://localhost:8000`. 
+Finally, check out the market app as a webapp, at http://localhost:8000. 
 
 ## 2. Alice publishes data asset (including metadata)
 
