@@ -6,6 +6,7 @@ import os
 from ocean_lib.assets.asset import Asset
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_utils.agreements.service_types import ServiceTypes
+from tests.resources.ddo_helpers import get_metadata, get_registered_ddo
 from tests.resources.helper_functions import (
     get_another_consumer_ocean_instance,
     get_another_consumer_wallet,
@@ -15,7 +16,6 @@ from tests.resources.helper_functions import (
     get_publisher_wallet,
     mint_tokens_and_wait,
 )
-from tests.resources.ddo_helpers import get_registered_ddo, get_metadata
 
 
 def test_market_flow():
@@ -62,7 +62,6 @@ def test_market_flow():
         service.index,
         "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",
         consumer_wallet,
-        consumer_wallet.address,
     )
     ######
     # Download the asset files
