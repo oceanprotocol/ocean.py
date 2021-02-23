@@ -7,6 +7,7 @@ Steps:
 1. **Start blockchain service** (only needed for ganache)
 1. **Deploy** the contracts to {local, rinkeby, mainnet}
 1. **Test**
+1. **Release** 
 
 These steps are detailed below. But first, installation.
 
@@ -116,3 +117,7 @@ pytest
 
 #### Installing the pre-commit hooks (recommended)
 Run `pre-commit install` to automatically apply isort (import sorting), flake8 (linting) and black (automatic code formatting) to commits. Black formatting is the standard and is checked as part of pull requests.
+
+## 5. Release
+
+Release for pip etc using the [Release Process instructions](../RELEASE_PROCESS.md).
