@@ -120,4 +120,4 @@ Run `pre-commit install` to automatically apply isort (import sorting), flake8 (
 
 ## 5. Release
 
-Release for pip etc using the [Release Process instructions](RELEASE_PROCESS.md).
+Release for pip etc using the [Release Process instructions](../RELEASE_PROCESS.md).
