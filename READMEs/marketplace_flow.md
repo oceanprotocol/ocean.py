@@ -27,7 +27,7 @@ export AQUARIUS_URL=https://aquarius.rinkeby.oceanprotocol.com
 export PROVIDER_URL=https://provider.rinkeby.oceanprotocol.com
 ```
 
-Then, set up the service for the [Market app](https://github.com/oceanprotocol/market). In a *new* console:
+Then, set up the service for the [Ocean Market app](https://github.com/oceanprotocol/market). In a *new* console:
 ```
 git clone https://github.com/oceanprotocol/market.git
 cd market
