@@ -1,14 +1,16 @@
 # Developing ocean.py
 
 This README is how to further *develop* ocean.py. (Compare to the quickstarts which show how to *use* it.)
-
 Steps:
 1. **Install dependencies**
-1. **Start blockchain service** (only needed for ganache)
-1. **Deploy** the contracts to {local, rinkeby, mainnet}
-1. **Test**
+2. **Configure the services**
+3. **Test**
 
-These steps are detailed below. But first, installation.
+## Prerequisites
+
+1. Linux/MacOS
+2. Docker
+3. Python 3.8.5
 
 ## 1. Install dependencies
 
@@ -17,56 +19,77 @@ Clone this repo, and `cd` into it.
 git clone https://github.com/oceanprotocol/ocean.py
 cd ocean.py
 ```
+Install OS dependencies (e.g. Linux)
+```console
+sudo apt-get install -y python3-dev gcc python-pytest
+```
 
-Initialize virtual env't. Activate env't. (BTW use `deactivate` to, well, deactivate.)
+Initialize virtual environment and activate it.
 ```console
 python -m venv venv
 source venv/bin/activate
 ```
 
-Install modules in the env't.
+Install modules in the environment.
 ```
 pip install -r requirements_dev.txt
 ```
 
-If you don't have an Infura account and you aim to deploy to `rinkeby`, go to www.infura.io and sign up.
 
 ## 2. Start network, deploy to network (Local only)
+To use Ocean.py, following services should be running: Aquarius, Ethereum node with contracts, Provider.
+You can run `barge` to start all the required services or run each component individually.  
 
-Open a new terminal. In it, start a local ganache network with the following mnemomic. (The tests need private keys from this mnemomic.)
+### Option 1: Use Barge (recommended)
+To start all required services: ganache, provider, aquarius and deploy the contracts, do this in a separate terminal:
+```console
+git clone https://github.com/oceanprotocol/barge
+cd barge
+./start_ocean.sh
+```
+
+### Option 2: Run each component separately
+
+1. Start ganache: Open a new terminal. In it, start a local ganache network with the following mnemomic. (The tests need private keys from this mnemomic.)
 ```console
 docker run -d -p 8545:8545 trufflesuite/ganache-cli:latest --mnemonic "taxi music thumb unique chat sand crew more leg another off lamp"
 ```
 
-Open another new terminal. In it:
+2. Open another new terminal. In it:
 * Clone the [Ocean contracts repo](https://github.com/oceanprotocol/contracts): `git clone https://github.com/oceanprotocol/contracts`
 * Go to the new repo directory: `cd ocean.py`
 * Deploy to the local network: `npm run deploy`
 
 These steps will have updated the file `artifacts/address.json` in the _contracts_ directory, in the `development` section.
 
-As a final step: copy the values from that section the into your local _ocean.py_'s artifacts file, e.g. at `./ocean.py/artifacts/address.json`. The result should look something like:
-```
-{"Rinkeby":  {
-    "DTFactory": "0x3fd7A00106038Fb5c802c6d63fa7147Fe429E83a",
-    ...
-},
- "development": {
+3. Start [aquarius](https://github.com/oceanprotocol/aquarius/blob/master/README.md)
+4. Start [provider](https://github.com/oceanprotocol/provider)
+
+## 3. Set contract addresses
+1. If using barge, the generated addresses will be available at path `~/.ocean/ocean-contracts/artifacts/address.json`.
+Copy the values from that section the into your local _ocean.py_'s artifacts file, e.g. at `./ocean.py/artifacts/address.json`. The result should look something like:
+```json
+{
+  "development": {
     "DTFactory": "0xC36D83c8b8E31D7dBe47f7f887BF1C567ff75DD7",
     "BFactory": "0x5FcC55C678FEad140487959bB73a3f3B6949DdE5",
     "FixedRateExchange": "0x143027A9705e4Fe24734D99c7458aBe5A6b38D8e",
     "Metadata": "0xdA00aD9ae0ABD347eaFCbFCe078bEFCB30eD59cD",
     "Ocean": "0x83c74A95e42244CA84DbEB01C5Bfd5b2Cd2691c2"
- }
+ } 
 }
 ```
+2. Deploy fake OCEAN:
+* In terminal: `./deploy.py ganache`
+* It will output the address of OCEAN. Update the `artifacts/address.json` file with that address.
 
-## 3. Connect to the deployed contracts (Local or Rinkeby)
 
-First, open `artifacts/address.json` and check that:
-* does it have up-to-date addresses for your target network?
+Similarly. the deployed contracts on other networks can be found [here](https://github.com/oceanprotocol/contracts/blob/master/artifacts/address.json).
 
-Then, open `./config.ini` and check that these lines exist (under `[eth-network]`):
+
+## 4. Connect to the deployed contracts (Local or Rinkeby)
+
+Open `./config.ini` and check that these lines exist (under `[eth-network]`):
 * `address.file = artifacts/address.json`
 * `artifacts.path = artifacts`
 
@@ -80,33 +103,12 @@ export CONFIG_FILE=config.ini
 First, set private key values that the tests will need. The first key's value lines up with the ganache mnemomic setting above.
 ```console
 export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
-export TEST_PRIVATE_KEY2=0xaefd8bc8725c4b3d15fbe058d0f58f4d852e8caea2bf68e0f73acb1aeec19bab
+export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
 ```
-
-If you're on ganache, then you also need to deploy fake OCEAN:
-* In terminal: `./deploy.py ganache`
-* It will output the address of OCEAN. Update the `artifacts/address.json` file with that address.
 
 Some tests don't need other services running. Let's run one:
 ```console
 pytest tests/models/bpool/test_btoken.py::test_notokens_basic
-```
-
-Some tests need an Ocean Provider running. Follow [these steps](https://github.com/oceanprotocol/provider-py/blob/master/README.md) to set up Provider. Then run tests that use Provider (but not other services). For example:
-```console
-pytest tests/ocean/test_market_flow.py
-```
-
-Some tests need an Ocean Provider *and* Aquarius (metadata cache) running. Follow [these steps](https://github.com/oceanprotocol/aquarius) to set up Aquarius. Then run tests that use Provider and Aquarius. For example:
-```console
-pytest
-```
-
-Alternatively, you can run `barge` to start all required services: ganache, provider, aquarius and deploy the contracts. To start `barge` do this in a separate terminal:
-```console
-git clone https://github.com/oceanprotocol/barge
-cd barge
-bash -x start_ocean.sh 2>&1 > start_ocean.log &
 ```
 
 Now you can run all tests since all services are running:
