@@ -21,11 +21,11 @@ def test_get_contracts_addresses__real_path(tmp_path):
     d = tmp_path / "sub"
     d.mkdir()
     address_file = d / "address.json"
-    file_content = '{"%s" : "my address values"}' % _NETWORK
+    file_content = '{"%s" : "myvals"}' % _NETWORK
     address_file.write_text(file_content)
 
     #the main test
     network_addresses = ContractHandler.get_contracts_addresses(
         _NETWORK, address_file=address_file)
-    assert network_addresses == "my address values"
+    assert network_addresses == "myvals"
 
