@@ -30,7 +30,7 @@ install_requirements = [
     "pytz",
     "web3==4.7.1",
     "plecos",
-    "cryptography==3.3.1",
+    "cryptography==3.3.2",
     "scipy",
     # web3 requires eth-abi, requests, and more,
     # so those will be installed too.
