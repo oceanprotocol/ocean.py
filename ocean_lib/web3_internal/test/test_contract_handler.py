@@ -5,6 +5,8 @@ from ocean_lib.web3_internal.contract_handler import ContractHandler
 
 _NETWORK = "ganache"
 
+#======================================================================
+#test get_contracts_addresses()
 def test_get_contracts_addresses__bad_path():
     assert ContractHandler.get_contracts_addresses(
         _NETWORK, address_file=None) is None
@@ -58,3 +60,8 @@ def test_get_contracts_addresses__bad_url(tmp_path):
     address_file = "https://foobar"
     assert ContractHandler.get_contracts_addresses(
         network="rinkeby", address_file=address_file) is None
+
+#======================================================================
+#test ABIs & artifacts
+
+#FIXME
