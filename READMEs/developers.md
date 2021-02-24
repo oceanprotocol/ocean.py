@@ -91,7 +91,7 @@ If you're on ganache, then you also need to deploy fake OCEAN:
 
 Some tests don't need other services running. Let's run one:
 ```console
-pytest tests/models/bpool/test_btoken.py::test_notokens_basic
+pytest tests/models/test_btoken.py
 ```
 
 Some tests need an Ocean Provider running. Follow [these steps](https://github.com/oceanprotocol/provider-py/blob/master/README.md) to set up Provider. Then run tests that use Provider (but not other services). For example:
