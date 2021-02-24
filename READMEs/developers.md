@@ -3,8 +3,10 @@
 This README is how to further *develop* ocean.py. (Compare to the quickstarts which show how to *use* it.)
 Steps:
 1. **Install dependencies**
-2. **Configure the services**
-3. **Test**
+1. **Configure the services**
+1. **Test**
+1. **Merge** the changes via a PR
+1. **Release** 
 
 ## Prerequisites
 
@@ -57,7 +59,7 @@ docker run -d -p 8545:8545 trufflesuite/ganache-cli:latest --mnemonic "taxi musi
 
 2. Open another new terminal. In it:
 * Clone the [Ocean contracts repo](https://github.com/oceanprotocol/contracts): `git clone https://github.com/oceanprotocol/contracts`
-* Go to the new repo directory: `cd ocean.py`
+* Go to the new repo directory: `cd contracts`
 * Deploy to the local network: `npm run deploy`
 
 These steps will have updated the file `artifacts/address.json` in the _contracts_ directory, in the `development` section.
@@ -108,7 +110,7 @@ export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7
 
 Some tests don't need other services running. Let's run one:
 ```console
-pytest tests/models/bpool/test_btoken.py::test_notokens_basic
+pytest tests/models/test_btoken.py
 ```
 
 Now you can run all tests since all services are running:
@@ -118,3 +120,15 @@ pytest
 
 #### Installing the pre-commit hooks (recommended)
 Run `pre-commit install` to automatically apply isort (import sorting), flake8 (linting) and black (automatic code formatting) to commits. Black formatting is the standard and is checked as part of pull requests.
+
+## 5. Merge
+
+Merge the changes via a pull request (PR) etc. 
+
+Specifically, [follow this workflow](https://docs.oceanprotocol.com/concepts/contributing/#fix-or-improve-core-software).
+
+## 6. Release
+
+Release for pip etc.
+
+Specifically, [follow the Release Process instructions](../RELEASE_PROCESS.md).

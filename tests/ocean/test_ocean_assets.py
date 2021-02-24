@@ -8,15 +8,14 @@ from ocean_lib.models.data_token import DataToken
 from ocean_utils.agreements.service_factory import ServiceDescriptor
 from ocean_utils.ddo.ddo import DDO
 from ocean_utils.did import DID, did_to_id
-from tests.resources.helper_functions import (
-    get_algorithm_ddo,
+from tests.resources.ddo_helpers import (
     get_computing_metadata,
-    get_consumer_wallet,
-    get_publisher_wallet,
     get_resource_path,
+    get_sample_algorithm_ddo,
     wait_for_ddo,
     wait_for_update,
 )
+from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
 
 
 def create_asset(ocean, publisher):
@@ -54,6 +53,7 @@ def test_register_asset(publisher_ocean_instance):
     assert log, "no ddo created event."
 
     ddo = wait_for_ddo(ocn, did)
+    assert ddo, "ddo is not found in cache."
     ddo_dict = ddo.as_dictionary()
     original = original_ddo.as_dictionary()
     assert ddo_dict["publicKey"] == original["publicKey"]
@@ -126,7 +126,7 @@ def test_ocean_assets_validate(publisher_ocean_instance, metadata):
 
 def test_ocean_assets_algorithm(publisher_ocean_instance):
     publisher = get_publisher_wallet()
-    metadata = get_algorithm_ddo()["service"][0]
+    metadata = get_sample_algorithm_ddo()["service"][0]
     metadata["attributes"]["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     ddo = publisher_ocean_instance.assets.create(metadata["attributes"], publisher)
     assert ddo

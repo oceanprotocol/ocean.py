@@ -3,6 +3,7 @@ import logging
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
+from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3helper import Web3Helper
@@ -178,14 +179,13 @@ class OceanCompute:
 
     def start(
         self,
-        did: str,
+        input_datasets: list,
         consumer_wallet: Wallet,
-        order_tx_id: str,
         nonce: [int, None] = None,
         algorithm_did: [str, None] = None,
         algorithm_meta: [AlgorithmMetadata, None] = None,
-        algorithm_tx_id: str = "",
-        algorithm_data_token: str = "",
+        algorithm_tx_id: str = None,
+        algorithm_data_token: str = None,
         output: dict = None,
         job_id: str = None,
     ):
@@ -193,9 +193,9 @@ class OceanCompute:
         verifying that the provider service is active and transferring the
         number of data-tokens required for using this compute service.
 
-        :param did: str -- id of asset that has the compute service
+        :param input_datasets: list of ComputeInput -- list of input datasets to the compute job. A dataset is
+            represented with ComputeInput struct
         :param consumer_wallet: Wallet instance of the consumer ordering the service
-        :param order_tx_id: hex str -- id of the startOrder transaction (tx hash)
         :param nonce: int value to use in the signature
         :param algorithm_did: str -- the asset did (of `algorithm` type) which consist of `did:op:` and
             the assetId hex str (without `0x` prefix)
@@ -212,13 +212,25 @@ class OceanCompute:
             algorithm_did or algorithm_meta
         ), "either an algorithm did or an algorithm meta must be provided."
 
+        for i in input_datasets:
+            assert isinstance(i, ComputeInput)
+
+        first_input = input_datasets[0]
+        did = first_input.did
+        order_tx_id = first_input.transfer_tx_id
+        service_id = first_input.service_id
+
         output = OceanCompute.check_output_dict(
             output, consumer_wallet.address, data_provider=self._data_provider
         )
         asset = resolve_asset(did, metadata_store_url=self._config.aquarius_url)
         _, service_endpoint = self._get_service_endpoint(did, asset)
 
-        sa = ServiceAgreement.from_ddo(ServiceTypes.CLOUD_COMPUTE, asset)
+        service = asset.get_service_by_index(service_id)
+        sa = ServiceAgreement.from_json(service.as_dictionary())
+        assert (
+            ServiceTypes.CLOUD_COMPUTE == sa.type
+        ), "service at serviceId is not of type compute service."
 
         signature = self._sign_message(
             consumer_wallet, f"{consumer_wallet.address}{did}", nonce=nonce
@@ -230,13 +242,13 @@ class OceanCompute:
             consumer_wallet.address,
             signature,
             sa.index,
-            asset.data_token_address,
             order_tx_id,
             algorithm_did,
             algorithm_meta,
             algorithm_tx_id,
             algorithm_data_token,
             output,
+            input_datasets,
             job_id,
         )
         return job_info["jobId"]

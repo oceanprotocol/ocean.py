@@ -3,9 +3,11 @@
 
 import os
 
+import pytest
 from ocean_lib.assets.asset import Asset
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_utils.agreements.service_types import ServiceTypes
+from tests.resources.ddo_helpers import get_metadata, get_registered_ddo
 from tests.resources.helper_functions import (
     get_another_consumer_ocean_instance,
     get_another_consumer_wallet,
@@ -13,19 +15,19 @@ from tests.resources.helper_functions import (
     get_consumer_wallet,
     get_publisher_ocean_instance,
     get_publisher_wallet,
-    get_registered_ddo,
     mint_tokens_and_wait,
 )
 
 
-def test_market_flow():
+@pytest.mark.parametrize("order_type", ["implicit_none", "explicit_none"])
+def test_market_flow(order_type):
     pub_wallet = get_publisher_wallet()
 
     publisher_ocean = get_publisher_ocean_instance()
     consumer_ocean = get_consumer_ocean_instance()
 
     # Register Asset
-    asset = get_registered_ddo(publisher_ocean, pub_wallet)
+    asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
     assert isinstance(asset, Asset)
     assert asset.data_token_address
 
@@ -55,15 +57,20 @@ def test_market_flow():
 
     ######
     # Pay for the service
-    _order_tx_id = consumer_ocean.assets.pay_for_service(
+    args = [
         order_requirements.amount,
         order_requirements.data_token_address,
         asset.did,
         service.index,
         "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",
         consumer_wallet,
-        consumer_wallet.address,
-    )
+    ]
+
+    if order_type == "explicit_none":
+        args.append(None)
+
+    _order_tx_id = consumer_ocean.assets.pay_for_service(*args)
+
     ######
     # Download the asset files
     asset_folder = consumer_ocean.assets.download(
@@ -75,6 +82,10 @@ def test_market_flow():
     )
 
     assert len(os.listdir(asset_folder)) >= 1
+
+    if order_type == "explicit_none":
+        # no need to continue, order worked
+        return
 
     orders = consumer_ocean.get_user_orders(consumer_wallet.address, asset.asset_id)
     assert (
@@ -102,7 +113,7 @@ def test_payer_market_flow():
     another_consumer_ocean = get_another_consumer_ocean_instance(use_provider_mock=True)
 
     # Register Asset
-    asset = get_registered_ddo(publisher_ocean, pub_wallet)
+    asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
     assert isinstance(asset, Asset)
     assert asset.data_token_address
 

@@ -1,33 +1,18 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
-import json
 import logging
 import logging.config
 import os
-import pathlib
 import time
-import uuid
 
 import coloredlogs
 import yaml
-from ocean_lib.assets.asset import Asset
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_utils.agreements.service_factory import ServiceDescriptor
 from tests.resources.mocks.data_provider_mock import DataProviderMock
-
-
-def get_resource_path(dir_name, file_name):
-    base = os.path.realpath(__file__).split(os.path.sep)[1:-1]
-    if dir_name:
-        return pathlib.Path(os.path.join(os.path.sep, *base, dir_name, file_name))
-    else:
-        return pathlib.Path(os.path.join(os.path.sep, *base, file_name))
 
 
 def get_web3():
@@ -96,71 +81,11 @@ def get_another_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocea
     return ocn
 
 
-def get_ddo_sample() -> Asset:
-    return Asset(json_filename=get_resource_path("ddo", "ddo_sa_sample.json"))
-
-
-def get_sample_ddo_with_compute_service() -> dict:
-    path = get_resource_path(
-        "ddo", "ddo_with_compute_service.json"
-    )  # 'ddo_sa_sample.json')
-    assert path.exists(), f"{path} does not exist!"
-    with open(path, "r") as file_handle:
-        metadata = file_handle.read()
-    return json.loads(metadata)
-
-
-def get_algorithm_ddo() -> dict:
-    path = get_resource_path("ddo", "ddo_algorithm.json")
-    assert path.exists(), f"{path} does not exist!"
-    with open(path, "r") as file_handle:
-        metadata = file_handle.read()
-    return json.loads(metadata)
-
-
-def get_computing_metadata() -> dict:
-    path = get_resource_path("ddo", "computing_metadata.json")
-    assert path.exists(), f"{path} does not exist!"
-    with open(path, "r") as file_handle:
-        metadata = file_handle.read()
-    return json.loads(metadata)
-
-
-def get_registered_ddo(ocean_instance, wallet: Wallet):
-    metadata = get_metadata()
-    metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    ServiceDescriptor.access_service_descriptor(
-        ocean_instance.assets._build_access_service(metadata, to_base_18(1), wallet),
-        DataServiceProvider.get_url(ocean_instance.config),
-    )
-
-    block = ocean_instance.web3.eth.blockNumber
-    asset = ocean_instance.assets.create(metadata, wallet)
-    ddo_reg = ocean_instance.assets.ddo_registry()
-    log = ddo_reg.get_event_log(
-        ddo_reg.EVENT_METADATA_CREATED, block, asset.asset_id, 30
-    )
-    assert log, "no ddo created event."
-
-    ddo = wait_for_ddo(ocean_instance, asset.did)
-    assert ddo, f"resolve did {asset.did} failed."
-
-    return asset
-
-
 def log_event(event_name: str):
     def _process_event(event):
         print(f"Received event {event_name}: {event}")
 
     return _process_event
-
-
-def get_metadata() -> dict:
-    path = get_resource_path("ddo", "valid_metadata.json")
-    assert path.exists(), f"{path} does not exist!"
-    with open(path, "r") as file_handle:
-        metadata = file_handle.read()
-    return json.loads(metadata)
 
 
 def setup_logging(
@@ -213,41 +138,3 @@ def mint_tokens_and_wait(
                 break
         except (ValueError, Exception):
             pass
-
-
-def wait_for_update(ocean, did, updated_attr, value, timeout=30):
-    start = time.time()
-    ddo = None
-    while True:
-        try:
-            ddo = ocean.assets.resolve(did)
-        except ValueError:
-            pass
-
-        if not ddo:
-            time.sleep(0.2)
-        elif ddo.metadata["main"][updated_attr] == value:
-            break
-
-        if time.time() - start > timeout:
-            break
-
-    return ddo
-
-
-def wait_for_ddo(ocean, did, timeout=30):
-    start = time.time()
-    ddo = None
-    while not ddo:
-        try:
-            ddo = ocean.assets.resolve(did)
-        except ValueError:
-            pass
-
-        if not ddo:
-            time.sleep(0.2)
-
-        if time.time() - start > timeout:
-            break
-
-    return ddo

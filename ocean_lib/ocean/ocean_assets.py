@@ -16,6 +16,7 @@ from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.util import to_base_18
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
@@ -86,8 +87,10 @@ class OceanAssets:
         # Make an access service only if no services are given by the user.
         if not access_service_descriptor and not compute_service_descriptor:
             access_service_descriptor = ServiceDescriptor.access_service_descriptor(
-                self._build_access_service(metadata, 1.0, wallet.address),
-                self._data_provider.get_url(self._config),
+                self.build_access_service(
+                    metadata[MetadataMain.KEY]["dateCreated"], 1.0, wallet.address
+                ),
+                self._data_provider.build_download_endpoint(provider_uri)[1],
             )
 
         if access_service_descriptor:
@@ -441,7 +444,7 @@ class OceanAssets:
         service_id: int,
         fee_receiver: str,
         from_wallet: Wallet,
-        consumer: str,
+        consumer: str = None,
     ) -> str:
         """
         Submits the payment for chosen service in DataTokens.
@@ -452,6 +455,7 @@ class OceanAssets:
         :param service_id:
         :param fee_receiver:
         :param from_wallet: Wallet instance
+        :param consumer: str the address of consumer of the service, defaults to the payer (the `from_wallet` address)
         :return: hex str id of transfer transaction
         """
         amount_base = to_base_18(amount)
@@ -463,18 +467,20 @@ class OceanAssets:
                 f"to execute the requested service. This service "
                 f"requires {amount_base} number of tokens."
             )
+
         if did.startswith("did:"):
             did = add_0x_prefix(did_to_id(did))
+
         if fee_receiver is None:
-            fee_receiver = "0x0000000000000000000000000000000000000000"
+            fee_receiver = ZERO_ADDRESS
+
         if consumer is None:
-            tx_hash = dt.startOrder(
-                from_wallet.address, amount_base, service_id, fee_receiver, from_wallet
-            )
-        else:
-            tx_hash = dt.startOrder(
-                consumer, amount_base, service_id, fee_receiver, from_wallet
-            )
+            consumer = from_wallet.address
+
+        tx_hash = dt.startOrder(
+            consumer, amount_base, service_id, fee_receiver, from_wallet
+        )
+
         try:
             dt.verify_order_tx(
                 Web3Provider.get_web3(),
@@ -576,13 +582,15 @@ class OceanAssets:
         ]
 
     @staticmethod
-    def _build_access_service(metadata: dict, cost: float, address: str) -> dict:
+    def build_access_service(
+        date_created: str, cost: float, address: str, timeout=3600
+    ) -> dict:
         return {
             "main": {
                 "name": "dataAssetAccessServiceAgreement",
                 "creator": address,
                 "cost": cost,
-                "timeout": 3600,
-                "datePublished": metadata[MetadataMain.KEY]["dateCreated"],
+                "timeout": timeout,
+                "datePublished": date_created,
             }
         }
