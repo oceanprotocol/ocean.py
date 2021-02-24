@@ -30,7 +30,7 @@ install_requirements = [
     "pytz",
     "web3==4.7.1",
     "plecos",
-    "cryptography==3.3.1",
+    "cryptography==3.3.2",
     "scipy",
     # web3 requires eth-abi, requests, and more,
     # so those will be installed too.
@@ -100,6 +100,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/oceanprotocol/ocean.py",
-    version="0.5.10",
+    version="0.5.11",
     zip_safe=False,
 )
