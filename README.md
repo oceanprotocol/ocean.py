@@ -44,7 +44,7 @@ This is in beta state and you can expect running into problems. If you run into 
 - [Understand config parameters](READMEs/parameters.md) - envvars vs files 
 - [Learn about off-chain services](READMEs/services.md) - Ocean Provider for data services, Aquarius metadata store
 - [Learn about wallets](READMEs/wallets.md) - on generating, storing, and accessing private keys
-- [Get an overview of ocean-lib](READMEs/overview.md) - key modules and functions
+- [Get an overview of ocean.py](READMEs/overview.md) - key modules and functions
 
 ### Marketplace flow
 

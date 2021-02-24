@@ -7,6 +7,8 @@ Steps:
 1. **Start blockchain service** (only needed for ganache)
 1. **Deploy** the contracts to {local, rinkeby, mainnet}
 1. **Test**
+1. **Merge** the changes via a PR
+1. **Release** 
 
 These steps are detailed below. But first, installation.
 
@@ -40,7 +42,7 @@ docker run -d -p 8545:8545 trufflesuite/ganache-cli:latest --mnemonic "taxi musi
 
 Open another new terminal. In it:
 * Clone the [Ocean contracts repo](https://github.com/oceanprotocol/contracts): `git clone https://github.com/oceanprotocol/contracts`
-* Go to the new repo directory: `cd ocean.py`
+* Go to the new repo directory: `cd contracts`
 * Deploy to the local network: `npm run deploy`
 
 These steps will have updated the file `artifacts/address.json` in the _contracts_ directory, in the `development` section.
@@ -89,7 +91,7 @@ If you're on ganache, then you also need to deploy fake OCEAN:
 
 Some tests don't need other services running. Let's run one:
 ```console
-pytest tests/models/bpool/test_btoken.py::test_notokens_basic
+pytest tests/models/test_btoken.py
 ```
 
 Some tests need an Ocean Provider running. Follow [these steps](https://github.com/oceanprotocol/provider-py/blob/master/README.md) to set up Provider. Then run tests that use Provider (but not other services). For example:
@@ -116,3 +118,15 @@ pytest
 
 #### Installing the pre-commit hooks (recommended)
 Run `pre-commit install` to automatically apply isort (import sorting), flake8 (linting) and black (automatic code formatting) to commits. Black formatting is the standard and is checked as part of pull requests.
+
+## 5. Merge
+
+Merge the changes via a pull request (PR) etc. 
+
+Specifically, [follow this workflow](https://docs.oceanprotocol.com/concepts/contributing/#fix-or-improve-core-software).
+
+## 6. Release
+
+Release for pip etc.
+
+Specifically, [follow the Release Process instructions](../RELEASE_PROCESS.md).

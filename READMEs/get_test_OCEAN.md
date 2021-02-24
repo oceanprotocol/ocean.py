@@ -15,7 +15,7 @@ This builds on the setup in the following. Please do it first.
 
 It will tell you that test OCEAN are on the way, and report the transaction id (txid). Copy this txid.
 
-Go to https://rinkeby.etherscan.com, and search for the txid. You will see the tx that sent you OCEAN.
+Go to https://rinkeby.etherscan.io, and search for the txid. You will see the tx that sent you OCEAN.
 
 ## Verify in Python
 
