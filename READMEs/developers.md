@@ -42,7 +42,7 @@ docker run -d -p 8545:8545 trufflesuite/ganache-cli:latest --mnemonic "taxi musi
 
 Open another new terminal. In it:
 * Clone the [Ocean contracts repo](https://github.com/oceanprotocol/contracts): `git clone https://github.com/oceanprotocol/contracts`
-* Go to the new repo directory: `cd ocean.py`
+* Go to the new repo directory: `cd contracts`
 * Deploy to the local network: `npm run deploy`
 
 These steps will have updated the file `artifacts/address.json` in the _contracts_ directory, in the `development` section.
