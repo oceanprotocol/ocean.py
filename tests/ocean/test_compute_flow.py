@@ -108,6 +108,7 @@ def run_compute_test(
     input_ddos,
     algo_ddo=None,
     algo_meta=None,
+    expect_failure=False,
 ):
     compute_ddo = input_ddos[0]
     did = compute_ddo.did
@@ -156,13 +157,19 @@ def run_compute_test(
 
     status = ocean_instance.compute.status(did, job_id, consumer_wallet)
     print(f"got job status: {status}")
-    assert (
-        status and status["ok"]
-    ), f"something not right about the compute job, got status: {status}"
+    if not expect_failure:
+        assert (
+            status and status["ok"]
+        ), f"something not right about the compute job, got status: {status}"
 
-    status = ocean_instance.compute.stop(did, job_id, consumer_wallet)
-    print(f"got job status after requesting stop: {status}")
-    assert status, f"something not right about the compute job, got status: {status}"
+        status = ocean_instance.compute.stop(did, job_id, consumer_wallet)
+        print(f"got job status after requesting stop: {status}")
+        assert (
+            status
+        ), f"something not right about the compute job, got status: {status}"
+    else:
+        assert status["status"] == 400
+        f"something not right about the compute job, got status: {status}"
 
 
 def test_compute_raw_algo():
@@ -235,11 +242,27 @@ def test_compute_trusted_algorithms():
     )
     # verify the ddo is available in Aquarius
     _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
-
     run_compute_test(
         setup.consumer_ocean_instance,
         setup.publisher_wallet,
         setup.consumer_wallet,
         [compute_ddo],
         algo_ddo=algorithm_ddo,
+        expect_failure=False,
+    )
+    # test for incorrect checksum
+    algorithm_ddo.__dict__["_proof"]["checksum"]["0"] = "computeToData114"
+    algorithm_ddo.__dict__["_proof"]["checksum"]["3"] = "itWorked114"
+    # I need to use the update_trusted_algorithms here
+    is_updated = setup.publisher_ocean_instance.assets.update(
+        algorithm_ddo, setup.publisher_wallet
+    )
+    assert is_updated is True
+    run_compute_test(
+        setup.consumer_ocean_instance,
+        setup.publisher_wallet,
+        setup.consumer_wallet,
+        [compute_ddo],
+        algo_ddo=algorithm_ddo,
+        expect_failure=True,
     )

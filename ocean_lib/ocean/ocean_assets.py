@@ -117,6 +117,13 @@ class OceanAssets:
                                     + json.dumps(alg_crt_service.main["files"])
                                 ).encode("utf-8")
                             ).hexdigest(),
+                            "containerSectionChecksum": hashlib.sha256(
+                                (
+                                    json.dumps(
+                                        alg_crt_service.main["algorithm"]["container"]
+                                    )
+                                ).encode("utf-8")
+                            ).hexdigest(),
                         }
                     )
 
@@ -351,6 +358,17 @@ class OceanAssets:
             raise
 
         return asset
+
+    # I need an update function for trusted_algorithms
+    # that I will call in test_compute_flow.py
+    def update_trusted_algorithms(self, trusted_algorithms=None):
+        services = self._process_service_descriptors(
+            self.service_descriptors,
+            self.metadata_copy,
+            self.provider_uri,
+            self.publisher_wallet,
+            trusted_algorithms=trusted_algorithms,
+        )
 
     def update(self, asset: Asset, publisher_wallet: Wallet) -> bool:
         try:
