@@ -444,7 +444,7 @@ class OceanAssets:
         service_id: int,
         fee_receiver: str,
         from_wallet: Wallet,
-        consumer: str,
+        consumer: str = None,
     ) -> str:
         """
         Submits the payment for chosen service in DataTokens.
