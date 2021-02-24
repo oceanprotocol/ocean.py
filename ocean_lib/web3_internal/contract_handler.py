@@ -4,6 +4,7 @@
 import json
 import logging
 import os
+import urllib.request
 
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3 import Web3
@@ -28,10 +29,20 @@ class ContractHandler(object):
 
     @staticmethod
     def get_contracts_addresses(network, address_file):
-        if not address_file or not os.path.exists(address_file):
+        if not address_file:
             return None
-        with open(address_file) as f:
-            addresses = json.load(f)
+        elif str(address_file)[:8] == "https://":
+            try:
+                url = urllib.request.urlopen(address_file)
+                s = url.read().decode()
+                addresses = json.loads(s)
+            except:
+                return None
+        elif not os.path.exists(address_file):
+            return None
+        else:
+            with open(address_file) as f:
+                addresses = json.load(f)
 
         network_addresses = addresses.get(network, None)
         if network_addresses is None and network in ContractHandler.network_alias:
