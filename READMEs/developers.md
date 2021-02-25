@@ -4,17 +4,22 @@ This README is how to further *develop* ocean.py. (Compare to the quickstarts wh
 Steps:
 1. **Install dependencies**
 1. **Run the services**
+1. **Set up contracts**
 1. **Test**
 1. **Merge** the changes via a PR
 1. **Release** 
 
-## Prerequisites
 
-1. Linux/MacOS
-2. Docker
-3. Python 3.8.5
 
 ## 1. Install dependencies
+
+### 1.1 Prerequisites
+
+* Linux/MacOS
+* Docker
+* Python 3.8.5
+
+### 1.2 Do Install
 
 In a console:
 ```console
@@ -40,20 +45,61 @@ Use Ocean Barge to run local Ethereum node with Ocean contracts, Aquarius, and P
 
 In a new console:
 ```console
+#grab repo
 git clone https://github.com/oceanprotocol/barge
 cd barge
-./start_ocean.sh
+
+#clean up old containers (to be sure)
+docker system prune -a --volumes
+
+#run barge with provider on
+./start_ocean.sh  --with-provider2 
 ```
 
 (Or, [run services separately](services.md).)
 
-## 3. Test
+## 3. Set up contracts
 
-First, set private key values that the tests will need. These values line up with values inside `start_ocean.sh` above.
+### 3.1 Update `address.json`
+
+Running barge has written addresses to `~/.ocean/ocean-contracts/artifacts/address.json`. Copy those into your local ocean.py's file `artifacts/address.json`. The result should look something like:
+```json
+{
+  "development": {
+    "DTFactory": "0xC36D83c8b8E31D7dBe47f7f887BF1C567ff75DD7",
+    "BFactory": "0x5FcC55C678FEad140487959bB73a3f3B6949DdE5",
+    "FixedRateExchange": "0x143027A9705e4Fe24734D99c7458aBe5A6b38D8e",
+    "Metadata": "0xdA00aD9ae0ABD347eaFCbFCe078bEFCB30eD59cD",
+    "Ocean": "0x83c74A95e42244CA84DbEB01C5Bfd5b2Cd2691c2"
+ } 
+}
+```
+
+### 3.2 Set private keys
+
 ```console
 export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
 ```
+
+### 3.3 Deploy fake OCEAN
+
+* In terminal: `./deploy.py ganache`
+* It will output the address of OCEAN. In `artifacts/address.json`, update the "development" : "Ocean" value with that address.
+
+### 3.4 Connect to the deployed contracts
+
+Open `./config.ini` and check that these lines exist (under `[eth-network]`):
+* `address.file = artifacts/address.json`
+* `artifacts.path = artifacts`
+
+Finally, set envvars.
+```console
+export CONFIG_FILE=config.ini
+```
+
+
+## 4. Test
 
 Some tests don't need other services running. Let's run one:
 ```console
