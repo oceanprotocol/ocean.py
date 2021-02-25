@@ -33,7 +33,9 @@ class Wallet:
         password: typing.Union[str, None] = None,
         address: typing.Union[str, None] = None,
     ):
-        assert private_key or (encrypted_key and password), "private_key or encrypted_key and password is required."
+        assert private_key or (
+            encrypted_key and password
+        ), "private_key or encrypted_key and password is required."
 
         self._web3 = web3
         self._last_tx_count.clear()
@@ -51,8 +53,10 @@ class Wallet:
             self._address = address
             self._password = None
 
-        assert self.private_key, "something is not right, private key is not available. " \
-                                 "please check the arguments are valid."
+        assert self.private_key, (
+            "something is not right, private key is not available. "
+            "please check the arguments are valid."
+        )
 
         self._max_gas_price = os.getenv(ENV_MAX_GAS_PRICE, None)
 
