@@ -47,7 +47,9 @@ class Wallet:
             assert self._password
             self._key = self._web3.eth.account.decrypt(
                 encrypted_key, self._password
-            ).hex()
+            )
+            if not isinstance(self._key, str):
+                self._key = self._key.hex()
 
         if self._key:
             address = privateKeyToAddress(self._key)

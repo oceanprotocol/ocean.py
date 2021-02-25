@@ -38,7 +38,7 @@ def test_wallet_arguments():
 
     # Create wallet with invalid private_key
     invalid_key = "332233444332"
-    with pytest.raises(TypeError):
+    with pytest.raises(ValueError):
         Wallet(web3, private_key=invalid_key)
 
     with pytest.raises(AssertionError):
