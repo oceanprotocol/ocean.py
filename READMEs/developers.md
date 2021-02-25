@@ -132,3 +132,20 @@ Specifically, [follow this workflow](https://docs.oceanprotocol.com/concepts/con
 Release for pip etc.
 
 Specifically, [follow the Release Process instructions](../RELEASE_PROCESS.md).
+
+
+## Bonus: Test code quality
+
+We use Codacy to test for quality of code. Here's how.
+
+Export Codacy project token. If needed, [generate your own](https://docs.codacy.com/repositories-configure/integrations/project-api/)
+```console
+export CODACY_PROJECT_TOKEN=2f4be1e422ca43b19c506ec97bebd9eb
+```
+
+Run tests locally, and see results.
+```console
+bash <(curl -Ls https://coverage.codacy.com/get.sh)
+```
+
+You can also see results of remotely-run tests, [here](https://app.codacy.com/gh/oceanprotocol/ocean.py/dashboard). (You may need special permissions.)
