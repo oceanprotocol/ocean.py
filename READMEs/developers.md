@@ -10,7 +10,6 @@ Steps:
 1. **Release** 
 
 
-
 ## 1. Install dependencies
 
 ### 1.1 Prerequisites
@@ -101,37 +100,15 @@ export CONFIG_FILE=config.ini
 
 ## 4. Test
 
-### 4.1 Unit Tests
-
-Some tests don't need other services running. Let's run one:
 ```console
+#run a single test
 pytest tests/models/test_btoken.py
-```
 
-Now you can run all tests since all services are running:
-```console
+#run all tests
 pytest
 ```
 
-
-### 4.2 Bonus: Codacy code quality tests
-
-First, export Codacy project token. If needed, [generate your own](https://docs.codacy.com/repositories-configure/integrations/project-api/)
-```console
-export CODACY_PROJECT_TOKEN=2f4be1e422ca43b19c506ec97bebd9eb
-```
-
-Then run tests locally, and see results.
-```console
-bash <(curl -Ls https://coverage.codacy.com/get.sh)
-```
-
-You can also see results of remotely-run tests, [here](https://app.codacy.com/gh/oceanprotocol/ocean.py/dashboard). (You may need special permissions.)
-
-
-### 4.3 Bonus: Pre-commit hooks
-
-Run `pre-commit install` to automatically apply isort (import sorting), flake8 (linting) and black (automatic code formatting) to commits. Black formatting is the standard and is checked as part of pull requests.
+Bonus: see the [appendix](developers.md#7-appendix-more-tests) for even more tests.
 
 ## 5. Merge
 
@@ -144,3 +121,53 @@ Specifically, [follow this workflow](https://docs.oceanprotocol.com/concepts/con
 Release for pip etc.
 
 Specifically, [follow the Release Process instructions](../RELEASE_PROCESS.md).
+
+
+## 7. Appendix: More tests
+
+### 7.1 Pre-commit hooks
+
+In main console (with venv on):
+```console
+pre-commit install
+```
+
+Now, this will auto-apply isort (import sorting), flake8 (linting) and black (automatic code formatting) to commits. Black formatting is the standard and is checked as part of pull requests.
+
+### 7.2 Code quality tests
+
+Use [codacy-analysis-cli](https://github.com/codacy/codacy-analysis-cli).
+
+First, install once. In a new console:
+```console
+curl -L https://github.com/codacy/codacy-analysis-cli/archive/master.tar.gz | tar xvz
+cd codacy-analysis-cli-* && sudo make install
+```
+
+In main console (with venv on):
+```console
+#run all tools, plus Metrics and Clones data. 
+codacy-analysis-cli analyze --directory ~/code/ocean.py/ocean_lib/ocean
+
+#run tools individually
+codacy-analysis-cli analyze --directory ~/code/ocean.py/ocean_lib/ocean --tool Pylint
+codacy-analysis-cli analyze --directory ~/code/ocean.py/ocean_lib/ocean --tool Prospector
+codacy-analysis-cli analyze --directory ~/code/ocean.py/ocean_lib/ocean --tool Bandit
+```
+
+You'll get a report that looks like this. 
+```
+Found [Info] `First line should end with a period (D415)` in ocean_compute.py:50 (Prospector_pep257)
+Found [Info] `Missing docstring in __init__ (D107)` in ocean_assets.py:42 (Prospector_pep257)
+Found [Info] `Method could be a function` in ocean_pool.py:473 (PyLint_R0201)
+Found [Warning] `Possible hardcoded password: ''` in ocean_exchange.py:23 (Bandit_B107)
+Found [Metrics] in ocean_exchange.py:
+  LOC - 68
+  CLOC - 4
+  #methods - 6
+```
+
+(C)LOC = (Commented) Lines Of Code.
+
+Finally, you can [go here](https://app.codacy.com/gh/oceanprotocol/ocean.py/dashboard) to see results of remotely-run tests. (You may need special permissions.)
+
