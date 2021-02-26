@@ -144,4 +144,3 @@ Specifically, [follow this workflow](https://docs.oceanprotocol.com/concepts/con
 Release for pip etc.
 
 Specifically, [follow the Release Process instructions](../RELEASE_PROCESS.md).
-
