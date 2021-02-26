@@ -122,7 +122,6 @@ Release for pip etc.
 
 Specifically, [follow the Release Process instructions](../RELEASE_PROCESS.md).
 
-
 ## 7. Appendix: More tests
 
 ### 7.1 Pre-commit hooks
@@ -156,7 +155,7 @@ codacy-analysis-cli analyze --directory ~/code/ocean.py/ocean_lib/ocean --tool B
 ```
 
 You'll get a report that looks like this. 
-```
+```console
 Found [Info] `First line should end with a period (D415)` in ocean_compute.py:50 (Prospector_pep257)
 Found [Info] `Missing docstring in __init__ (D107)` in ocean_assets.py:42 (Prospector_pep257)
 Found [Info] `Method could be a function` in ocean_pool.py:473 (PyLint_R0201)
@@ -170,4 +169,3 @@ Found [Metrics] in ocean_exchange.py:
 (C)LOC = (Commented) Lines Of Code.
 
 Finally, you can [go here](https://app.codacy.com/gh/oceanprotocol/ocean.py/dashboard) to see results of remotely-run tests. (You may need special permissions.)
-
