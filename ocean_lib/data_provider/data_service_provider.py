@@ -10,7 +10,6 @@ import re
 from collections import namedtuple
 from json import JSONDecodeError
 
-import requests
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
@@ -63,8 +62,11 @@ class DataServiceProvider:
             }
         )
 
-        response = DataServiceProvider._http_client.post(
-            encrypt_endpoint, data=payload, headers={"content-type": "application/json"}
+        response = DataServiceProvider._http_method(
+            "post",
+            encrypt_endpoint,
+            data=payload,
+            headers={"content-type": "application/json"},
         )
         if response and hasattr(response, "status_code"):
             if response.status_code != 201:
@@ -94,8 +96,8 @@ class DataServiceProvider:
     @staticmethod
     def get_nonce(user_address, config):
         _, url = DataServiceProvider.build_endpoint("nonce")
-        response = DataServiceProvider._http_client.get(
-            f"{url}?userAddress={user_address}"
+        response = DataServiceProvider._http_method(
+            "get", f"{url}?userAddress={user_address}"
         )
         if response.status_code != 200:
             return None
@@ -126,7 +128,7 @@ class DataServiceProvider:
         )
 
         logger.info(f"invoke the initialize endpoint with this url: {initialize_url}")
-        response = DataServiceProvider._http_client.get(initialize_url)
+        response = DataServiceProvider._http_method("get", initialize_url)
         # The returned json should contain information about the required number of tokens
         # to consume `service_id`. If service is not available there will be an error or
         # the returned json is empty.
@@ -192,7 +194,9 @@ class DataServiceProvider:
             signature = DataServiceProvider.sign_message(wallet, did, config)
             download_url = base_url + f"&signature={signature}&fileIndex={i}"
             logger.info(f"invoke consume endpoint with this url: {download_url}")
-            response = DataServiceProvider._http_client.get(download_url, stream=True)
+            response = DataServiceProvider._http_method(
+                "get", download_url, stream=True
+            )
             file_name = DataServiceProvider._get_file_name(response)
             DataServiceProvider.write_file(
                 response, destination_folder, file_name or f"file-{i}"
@@ -256,7 +260,8 @@ class DataServiceProvider:
             job_id=job_id,
         )
         logger.info(f"invoke start compute endpoint with this url: {payload}")
-        response = DataServiceProvider._http_client.post(
+        response = DataServiceProvider._http_method(
+            "post",
             service_endpoint,
             data=json.dumps(payload),
             headers={"content-type": "application/json"},
@@ -438,7 +443,9 @@ class DataServiceProvider:
         """
         if DataServiceProvider.provider_info is None:
             config = ConfigProvider.get_config()
-            DataServiceProvider.provider_info = requests.get(config.provider_url).json()
+            DataServiceProvider.provider_info = DataServiceProvider._http_method(
+                "get", config.provider_url
+            ).json()
 
         return DataServiceProvider.provider_info["serviceEndpoints"]
 
@@ -450,11 +457,11 @@ class DataServiceProvider:
         if not provider_uri:
             if DataServiceProvider.provider_info is None:
                 config = ConfigProvider.get_config()
-                DataServiceProvider.provider_info = requests.get(
-                    config.provider_url
+                DataServiceProvider.provider_info = DataServiceProvider._http_method(
+                    "get", config.provider_url
                 ).json()
             return DataServiceProvider.provider_info["providerAddress"]
-        provider_info = requests.get(provider_uri).json()
+        provider_info = DataServiceProvider._http_method("get", provider_uri).json()
         return provider_info["providerAddress"]
 
     @staticmethod
@@ -585,8 +592,7 @@ class DataServiceProvider:
             f'&jobId={job_id or ""}'
         )
         logger.info(f"invoke compute endpoint with this url: {compute_url}")
-        method = getattr(DataServiceProvider._http_client, http_method)
-        response = method(compute_url)
+        response = DataServiceProvider._http_method(http_method, compute_url)
         logger.debug(
             f"got provider execute response: {response.content} with status-code {response.status_code} "
         )
@@ -663,6 +669,16 @@ class DataServiceProvider:
         else:
             payload["algorithmMeta"] = algorithm_meta
         return payload
+
+    @staticmethod
+    def _http_method(method, *args, **kwargs):
+        try:
+            return getattr(DataServiceProvider._http_client, method)(*args, **kwargs)
+        except Exception:
+            logger.error(
+                f"Error invoking http method {method}: args={str(args)}, kwargs={str(kwargs)}"
+            )
+            raise
 
 
 def urljoin(*args):
