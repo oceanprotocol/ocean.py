@@ -10,7 +10,6 @@ import re
 from collections import namedtuple
 from json import JSONDecodeError
 
-import requests
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
@@ -669,8 +668,7 @@ class DataServiceProvider:
     def _http_method(method, *args, **kwargs):
         try:
             return getattr(DataServiceProvider._http_client, method)(*args, **kwargs)
-        except Exception as e:
-            _args = ", ".join([str(arg) for arg in args])
+        except Exception:
             logger.error(
                 f"Error invoking http method {method}: args={str(args)}, kwargs={str(kwargs)}"
             )
