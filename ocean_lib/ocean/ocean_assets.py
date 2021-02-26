@@ -359,17 +359,6 @@ class OceanAssets:
 
         return asset
 
-    # I need an update function for trusted_algorithms
-    # that I will call in test_compute_flow.py
-    def update_trusted_algorithms(self, trusted_algorithms=None):
-        services = self._process_service_descriptors(
-            self.service_descriptors,
-            self.metadata_copy,
-            self.provider_uri,
-            self.publisher_wallet,
-            trusted_algorithms=trusted_algorithms,
-        )
-
     def update(self, asset: Asset, publisher_wallet: Wallet) -> bool:
         try:
             # publish the new ddo in ocean-db/Aquarius

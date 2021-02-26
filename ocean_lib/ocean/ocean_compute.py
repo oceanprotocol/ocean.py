@@ -188,6 +188,7 @@ class OceanCompute:
         algorithm_data_token: str = None,
         output: dict = None,
         job_id: str = None,
+        raw_response: bool = False,
     ):
         """Start a remote compute job on the asset files identified by `did` after
         verifying that the provider service is active and transferring the
@@ -206,6 +207,7 @@ class OceanCompute:
         :param output: dict object to be used in publishing mechanism, must define
         :param job_id: str identifier of a compute job that was previously started and
             stopped (if supported by the provider's  backend)
+        :param raw_response: bool object to be used when the response status is different from "200 OK"
         :return: str -- id of compute job being executed
         """
         assert (
@@ -250,7 +252,12 @@ class OceanCompute:
             output,
             input_datasets,
             job_id,
+            raw_response=raw_response,
         )
+
+        if raw_response:
+            return job_info
+
         return job_info["jobId"]
 
     def status(self, did, job_id, wallet):
