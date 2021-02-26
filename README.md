@@ -1,4 +1,5 @@
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/2f4be1e422ca43b19c506ec97bebd9eb)](https://app.codacy.com/gh/oceanprotocol/ocean.py?utm_source=github.com&utm_medium=referral&utm_content=oceanprotocol/ocean.py&utm_campaign=Badge_Grade_Settings)
 [![banner](https://raw.githubusercontent.com/oceanprotocol/art/master/github/repo-banner%402x.png)](https://oceanprotocol.com)
 
 <h1 align="center">ocean.py</h1>
