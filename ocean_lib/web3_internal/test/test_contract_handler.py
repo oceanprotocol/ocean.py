@@ -2,6 +2,7 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 import copy
+import os
 
 import pytest
 from ocean_lib.web3_internal.contract_handler import ContractHandler
@@ -250,8 +251,10 @@ def test_remote_path_and_file_agree(remote_artifacts_path, remote_address_file):
     assert remote_artifacts_path == remote_address_file[:path_len]
 
 
-def test_read_abi_from_file__example_config(example_config):
-    assert "https" not in str(ContractHandler.artifacts_path)  # ensure local
+def test_read_abi_from_file__example_config__happy_path(example_config):
+    # ensure local. If this changes, then update the tests to use local
+    assert "https" not in str(ContractHandler.artifacts_path)
+
     contract_definition = ContractHandler.read_abi_from_file(
         "DTFactory", ContractHandler.artifacts_path
     )
@@ -259,7 +262,20 @@ def test_read_abi_from_file__example_config(example_config):
     assert "createToken" in str(contract_definition["abi"])
 
 
-@pytest.mark.skip(reason="FIXME: need to implement code for this")
+def test_read_abi_from_file__example_config__bad_contract_name(example_config):
+    # ensure local. If this changes, then update the tests to use local
+    assert "https" not in str(ContractHandler.artifacts_path)
+
+    base_path = ContractHandler.artifacts_path
+    target_filename = os.path.join(base_path, "DTFactoryFOO.json")
+    assert not os.path.exists(target_filename)  # should fail due to this
+
+    contract_definition = ContractHandler.read_abi_from_file(
+        "DTFactoryFOO", ContractHandler.artifacts_path
+    )
+    assert contract_definition is None
+
+
 def test_read_abi_from_file__remote_url(remote_artifacts_path):
     contract_definition = ContractHandler.read_abi_from_file(
         "DTFactory", remote_artifacts_path

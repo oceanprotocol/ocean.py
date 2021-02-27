@@ -160,20 +160,40 @@ class ContractHandler(object):
     def read_abi_from_file(contract_name, abi_path):
         full_path = None
         target_filename = contract_name + ".json"
-        dir_filenames = os.listdir(abi_path)
-        # :HACK: temporary workaround to handle an extra folder that contain the artifact files.
-        # Done in 008f9e14 to read artifacts from published ocean-contracts pkg
-        if len(dir_filenames) == 1 and dir_filenames[0] == "*":
-            abi_path = os.path.join(abi_path, "*")
+
+        if str(abi_path)[:8] == "https://":
+            full_path = os.path.join(abi_path, target_filename)
+
+            try:
+                with urllib.request.urlopen(full_path) as url:
+                    s = url.read().decode()
+                    return json.loads(s)
+            except urllib.error.URLError:  # can't find service
+                return None
+
+        else:
             dir_filenames = os.listdir(abi_path)
 
-        for cand_filename in dir_filenames:
-            if cand_filename.lower() == target_filename.lower():
-                full_path = os.path.join(abi_path, target_filename)
-                break
+            # Corner case: handle an extra folder that contain
+            # the artifact files, as in published ocean-contracts pkg.
+            # Introduced in commit 008f9e14.
+            if len(dir_filenames) == 1 and dir_filenames[0] == "*":
+                abi_path = os.path.join(abi_path, "*")
+                dir_filenames = os.listdir(abi_path)
 
-        if full_path:
-            with open(full_path) as f:
-                return json.loads(f.read())
+            for cand_filename in dir_filenames:
+                if cand_filename.lower() == target_filename.lower():
+                    full_path = os.path.join(abi_path, target_filename)
+                    break
 
-        return None
+            # if contract_name[:3] == "DTF":
+            #    import pdb; pdb.set_trace()
+            if full_path:
+                try:
+                    with open(full_path) as f:
+                        s = f.read()
+                        return json.loads(s)
+                except:  # noqa: E722
+                    return None
+
+            return None
