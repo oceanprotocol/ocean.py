@@ -139,22 +139,52 @@ def test_set_artifacts_path__allow_change():
     assert not ContractHandler._contracts  # cache should have reset
 
 
-def test_get__just_name():
+def test_get_has__name_only():
+    # test get() and has() from name-only queries,
+    # which also call _load() and read_abi_from_file()
     contract = ContractHandler.get("DataTokenTemplate")
     assert contract.address[:2] == "0x"
     assert "totalSupply" in str(contract.abi)
 
+    assert ContractHandler.has("DataTokenTemplate")
+    assert not ContractHandler.has("foo name")
 
-def test_get__from_address(network, example_config):
+
+def test_get_has__name_and_address(network, example_config):
+    # test get() and has() from (name, address) queries,
+    # which also call _load() and read_abi_from_file()
     addresses = ContractHandler.get_contracts_addresses(
         network, example_config.address_file
     )
+    target_address = addresses["DTFactory"]
 
-    contract = ContractHandler.get("DTFactory", addresses["DTFactory"])
-    assert "createToken" in str(contract.abi)  # sanity test
+    contract = ContractHandler.get("DTFactory", target_address)
+    assert "createToken" in str(contract.abi)
     assert contract.address == addresses["DTFactory"]
+
+    assert ContractHandler.has("DTFactory", target_address)
+    assert not ContractHandler.has("foo name", "foo address")
+    assert not ContractHandler.has("foo name", contract.address)
+    assert not ContractHandler.has("DTFactory", "foo address")
 
 
 def test_get_concise_contract(network):
     contract_concise = ContractHandler.get_concise_contract("DataTokenTemplate")
     assert isinstance(contract_concise, ConciseContract)
+
+
+def test_set():
+    contract = ContractHandler.get("DataTokenTemplate")
+    address = contract.address
+
+    ContractHandler.set("second_name", contract)
+
+    # did it store in (name) key?
+    tup = ContractHandler._contracts["second_name"]  # (contract, contract_concise)
+    assert len(tup) == 2
+    assert tup[0].address == address
+    assert isinstance(tup[1], ConciseContract)
+
+    # did it store in (name, address) key?
+    tup2 = ContractHandler._contracts[("second_name", address)]
+    assert tup2 == tup
