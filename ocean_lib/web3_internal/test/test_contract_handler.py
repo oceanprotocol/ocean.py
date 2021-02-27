@@ -1,7 +1,10 @@
 #  Copyright 2021 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
+import copy
+
 from ocean_lib.web3_internal.contract_handler import ContractHandler
+from web3.contract import ConciseContract
 
 _NETWORK = "ganache"
 
@@ -82,7 +85,76 @@ def test_get_contracts_addresses__good_url_json_ready(remote_address_file):
     assert addresses["DTFactory"][:2] == "0x"
 
 
+def test_get_contracts_addresses__example_config(network, example_config):
+    # ensure we're testing locally
+    assert network in ["ganache", "development"]
+
+    # do we get addresses for every contract?
+    addresses = ContractHandler.get_contracts_addresses(
+        network, example_config.address_file
+    )
+    assert set(addresses.keys()) == set(
+        ["DTFactory", "BFactory", "FixedRateExchange", "Metadata", "Ocean"]
+    )
+
+    # are address values sane?
+    for address in addresses.values():
+        assert address[0:2] == "0x"
+
+
 # ======================================================================
 # test ABIs & artifacts
 
-# FIXME
+
+def test_set_artifacts_path__deny_change_to_empty():
+    path_before = copy.copy(ContractHandler.artifacts_path)
+    assert path_before is not None
+    assert ContractHandler._contracts
+
+    ContractHandler.set_artifacts_path(None)  # it should deny this
+
+    assert ContractHandler.artifacts_path == path_before
+    assert ContractHandler._contracts  # cache should *not* have reset
+
+
+def test_set_artifacts_path__deny_change_to_same():
+    path_before = copy.copy(ContractHandler.artifacts_path)
+    assert path_before is not None
+    assert ContractHandler._contracts
+
+    ContractHandler.set_artifacts_path(path_before)
+
+    assert ContractHandler.artifacts_path == path_before
+    assert ContractHandler._contracts  # cache should *not* have reset
+
+
+def test_set_artifacts_path__allow_change():
+    path_before = copy.copy(ContractHandler.artifacts_path)
+    assert path_before is not None
+    assert ContractHandler._contracts
+
+    ContractHandler.set_artifacts_path("new path")
+
+    assert ContractHandler.artifacts_path == "new path"
+    assert not ContractHandler._contracts  # cache should have reset
+
+
+def test_get__just_name():
+    contract = ContractHandler.get("DataTokenTemplate")
+    assert contract.address[:2] == "0x"
+    assert "totalSupply" in str(contract.abi)
+
+
+def test_get__from_address(network, example_config):
+    addresses = ContractHandler.get_contracts_addresses(
+        network, example_config.address_file
+    )
+
+    contract = ContractHandler.get("DTFactory", addresses["DTFactory"])
+    assert "createToken" in str(contract.abi)  # sanity test
+    assert contract.address == addresses["DTFactory"]
+
+
+def test_get_concise_contract(network):
+    contract_concise = ContractHandler.get_concise_contract("DataTokenTemplate")
+    assert isinstance(contract_concise, ConciseContract)
