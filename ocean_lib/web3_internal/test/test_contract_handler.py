@@ -141,7 +141,7 @@ def test_set_artifacts_path__allow_change():
     assert not ContractHandler._contracts  # cache should have reset
 
 
-def test_get_unhappy_path():
+def test_get_unhappy_paths():
     with pytest.raises(TypeError):
         ContractHandler.get("foo name")
 
@@ -203,6 +203,23 @@ def test_set():
     assert tup2 == tup
 
 
+def test_load__fail_empty_artifacts_path():
+    ContractHandler.artifacts_path = None
+    with pytest.raises(AssertionError):
+        ContractHandler._load("DTFactory")
+
+
+def test_load__fail_malformed_eth_address():
+    with pytest.raises(InvalidAddress):
+        ContractHandler._load("DTFactory", "foo address")
+
+
+def test_load__fail_wrong_eth_address():
+    random_eth_address = "0x0daA8DBE3f6760990c886F37E39A5696A4a911F0"
+    with pytest.raises(InvalidAddress):
+        ContractHandler._load("DTFactory", random_eth_address)
+
+
 def test_load__name_only():
     assert "DTFactory" not in ContractHandler._contracts
 
@@ -212,12 +229,15 @@ def test_load__name_only():
 
 
 def test_load__name_and_address(network, example_config):
-    assert "DTFactory" not in ContractHandler._contracts
-
     addresses = ContractHandler.get_contracts_addresses(
         network, example_config.address_file
     )
     target_address = addresses["DTFactory"]
+
+    tup = ("DTFactory", target_address)
+
+    assert tup not in ContractHandler._contracts
+
     contract = ContractHandler._load("DTFactory", target_address)
 
-    assert ContractHandler._contracts["DTFactory"] == contract
+    assert ContractHandler._contracts[tup] == contract
