@@ -29,6 +29,7 @@ class ContractHandler(object):
 
     @staticmethod
     def get_contracts_addresses(network, address_file):
+        # fill addresses - across all networks
         if not address_file:
             return None
         elif str(address_file)[:8] == "https://":
@@ -46,6 +47,7 @@ class ContractHandler(object):
             with open(address_file) as f:
                 addresses = json.load(f)
 
+        # fill addressses for *this* network
         network_addresses = addresses.get(network, None)
         if network_addresses is None and network in ContractHandler.network_alias:
             network_addresses = addresses.get(
