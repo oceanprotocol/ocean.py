@@ -162,8 +162,10 @@ class ContractHandler(object):
         target_filename = contract_name + ".json"
         dir_filenames = os.listdir(abi_path)
         # :HACK: temporary workaround to handle an extra folder that contain the artifact files.
+        # Done in 008f9e14 to read artifacts from published ocean-contracts pkg
         if len(dir_filenames) == 1 and dir_filenames[0] == "*":
             abi_path = os.path.join(abi_path, "*")
+            dir_filenames = os.listdir(abi_path)
 
         for cand_filename in dir_filenames:
             if cand_filename.lower() == target_filename.lower():
