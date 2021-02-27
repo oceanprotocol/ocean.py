@@ -186,14 +186,12 @@ class ContractHandler(object):
                     full_path = os.path.join(abi_path, target_filename)
                     break
 
-            # if contract_name[:3] == "DTF":
-            #    import pdb; pdb.set_trace()
             if full_path:
                 try:
                     with open(full_path) as f:
                         s = f.read()
                         return json.loads(s)
-                except:  # noqa: E722
+                except IOError:
                     return None
 
             return None
