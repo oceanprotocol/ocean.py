@@ -33,10 +33,12 @@ class ContractHandler(object):
             return None
         elif str(address_file)[:8] == "https://":
             try:
-                url = urllib.request.urlopen(address_file)
-                s = url.read().decode()
-                addresses = json.loads(s)
-            except:
+                with urllib.request.urlopen(address_file) as url:
+                    s = url.read().decode()
+                    addresses = json.loads(s)
+            except urllib.error.URLError:  # can't find service
+                return None
+            except json.decoder.JSONDecodeError:  # json is structured wrong
                 return None
         elif not os.path.exists(address_file):
             return None
