@@ -243,3 +243,26 @@ def test_load__name_and_address(network, example_config):
     contract = ContractHandler._load("DTFactory", target_address)
 
     assert ContractHandler._contracts[tup] == contract
+
+
+def test_remote_path_and_file_agree(remote_artifacts_path, remote_address_file):
+    path_len = len(remote_artifacts_path)
+    assert remote_artifacts_path == remote_address_file[:path_len]
+
+
+def test_read_abi_from_file__example_config(example_config):
+    assert "https" not in str(ContractHandler.artifacts_path)  # ensure local
+    contract_definition = ContractHandler.read_abi_from_file(
+        "DTFactory", ContractHandler.artifacts_path
+    )
+    assert contract_definition["contractName"] == "DTFactory"
+    assert "createToken" in str(contract_definition["abi"])
+
+
+@pytest.mark.skip(reason="FIXME: need to implement code for this")
+def test_read_abi_from_file__remote_url(remote_artifacts_path):
+    contract_definition = ContractHandler.read_abi_from_file(
+        "DTFactory", remote_artifacts_path
+    )
+    assert contract_definition["contractName"] == "DTFactory"
+    assert "createToken" in str(contract_definition["abi"])
