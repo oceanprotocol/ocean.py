@@ -3,8 +3,10 @@
 
 import copy
 
+import pytest
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from web3.contract import ConciseContract
+from web3.exceptions import InvalidAddress
 
 _NETWORK = "ganache"
 
@@ -139,7 +141,18 @@ def test_set_artifacts_path__allow_change():
     assert not ContractHandler._contracts  # cache should have reset
 
 
-def test_get_has__name_only():
+def test_get_unhappy_path():
+    with pytest.raises(TypeError):
+        ContractHandler.get("foo name")
+
+    with pytest.raises(TypeError):
+        ContractHandler.get("foo name", "foo address")
+
+    with pytest.raises(InvalidAddress):
+        ContractHandler.get("DataTokenTemplate", "foo address")
+
+
+def test_get_and_has__name_only():
     # test get() and has() from name-only queries,
     # which also call _load() and read_abi_from_file()
     contract = ContractHandler.get("DataTokenTemplate")
@@ -150,7 +163,7 @@ def test_get_has__name_only():
     assert not ContractHandler.has("foo name")
 
 
-def test_get_has__name_and_address(network, example_config):
+def test_get_and_has__name_and_address(network, example_config):
     # test get() and has() from (name, address) queries,
     # which also call _load() and read_abi_from_file()
     addresses = ContractHandler.get_contracts_addresses(
@@ -168,7 +181,7 @@ def test_get_has__name_and_address(network, example_config):
     assert not ContractHandler.has("DTFactory", "foo address")
 
 
-def test_get_concise_contract(network):
+def test_get_concise_contract():
     contract_concise = ContractHandler.get_concise_contract("DataTokenTemplate")
     assert isinstance(contract_concise, ConciseContract)
 
@@ -188,3 +201,23 @@ def test_set():
     # did it store in (name, address) key?
     tup2 = ContractHandler._contracts[("second_name", address)]
     assert tup2 == tup
+
+
+def test_load__name_only():
+    assert "DTFactory" not in ContractHandler._contracts
+
+    contract = ContractHandler._load("DTFactory")
+
+    assert ContractHandler._contracts["DTFactory"] == contract
+
+
+def test_load__name_and_address(network, example_config):
+    assert "DTFactory" not in ContractHandler._contracts
+
+    addresses = ContractHandler.get_contracts_addresses(
+        network, example_config.address_file
+    )
+    target_address = addresses["DTFactory"]
+    contract = ContractHandler._load("DTFactory", target_address)
+
+    assert ContractHandler._contracts["DTFactory"] == contract
