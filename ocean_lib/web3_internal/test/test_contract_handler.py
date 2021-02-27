@@ -221,6 +221,7 @@ def test_load__fail_wrong_eth_address():
 
 
 def test_load__name_only():
+    # test load() from name-only query
     assert "DTFactory" not in ContractHandler._contracts
 
     contract = ContractHandler._load("DTFactory")
@@ -229,6 +230,7 @@ def test_load__name_only():
 
 
 def test_load__name_and_address(network, example_config):
+    # test load() from (name, address) query
     addresses = ContractHandler.get_contracts_addresses(
         network, example_config.address_file
     )
