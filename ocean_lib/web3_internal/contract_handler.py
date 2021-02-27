@@ -158,20 +158,20 @@ class ContractHandler(object):
 
     @staticmethod
     def read_abi_from_file(contract_name, abi_path):
-        path = None
-        contract_filename = contract_name + ".json"
-        names = os.listdir(abi_path)
+        full_path = None
+        target_filename = contract_name + ".json"
+        dir_filenames = os.listdir(abi_path)
         # :HACK: temporary workaround to handle an extra folder that contain the artifact files.
-        if len(names) == 1 and names[0] == "*":
+        if len(dir_filenames) == 1 and dir_filenames[0] == "*":
             abi_path = os.path.join(abi_path, "*")
 
-        for name in os.listdir(abi_path):
-            if name.lower() == contract_filename.lower():
-                path = os.path.join(abi_path, contract_filename)
+        for cand_filename in dir_filenames:
+            if cand_filename.lower() == target_filename.lower():
+                full_path = os.path.join(abi_path, target_filename)
                 break
 
-        if path:
-            with open(path) as f:
+        if full_path:
+            with open(full_path) as f:
                 return json.loads(f.read())
 
         return None
