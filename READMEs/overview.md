@@ -1,3 +1,7 @@
+<!--
+Copyright 2021 Ocean Protocol Foundation
+SPDX-License-Identifier: Apache-2.0
+-->
 At the high level, the main ocean-lib features are accessible via the `Ocean` instance. Here is a 
 quick overview of the main functions and submodules: 
 ```python

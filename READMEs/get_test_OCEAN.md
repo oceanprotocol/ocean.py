@@ -1,3 +1,7 @@
+<!--
+Copyright 2021 Ocean Protocol Foundation
+SPDX-License-Identifier: Apache-2.0
+-->
 # Get Test OCEAN and Verify It
 
 As you develop on Ocean, you'll often need to use the OCEAN token. It's an ERC20 token on Ethereum mainnet, along with testnet deployments.

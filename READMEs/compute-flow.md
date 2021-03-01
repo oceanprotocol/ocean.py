@@ -1,3 +1,7 @@
+<!--
+Copyright 2021 Ocean Protocol Foundation
+SPDX-License-Identifier: Apache-2.0
+-->
 Note: this README is out of date and will not work. [Here's the issue to fix it](https://github.com/oceanprotocol/ocean.py/issues/101).
 
 # Quickstart: Marketplace Flow with compute-to-data

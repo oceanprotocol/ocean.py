@@ -1,3 +1,7 @@
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 import codecs
 
 from eth_keys.datatypes import Signature
