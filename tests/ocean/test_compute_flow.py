@@ -167,11 +167,11 @@ def run_compute_test(
 
     if expect_failure:
         response = job_id.json()
-        assert "error" in response, f"expected failure in job creation, but it succeed."
+        assert "error" in response, "expected failure in job creation, but it succeed."
 
         assert (
             expect_failure_message == response["error"]
-        ), f"expected failure message in job creation, but it has a different message."
+        ), "expected failure message in job creation, but it has a different message."
         return
 
     status = ocean_instance.compute.status(did, job_id, consumer_wallet)
@@ -246,11 +246,13 @@ def test_compute_trusted_algorithms():
     algorithm_ddo = get_registered_algorithm_ddo(
         setup.publisher_ocean_instance, setup.publisher_wallet
     )
+    # verify the ddo is available in Aquarius
     _ = setup.publisher_ocean_instance.assets.resolve(algorithm_ddo.did)
 
     algorithm_ddo_v2 = get_registered_algorithm_ddo(
         setup.publisher_ocean_instance, setup.publisher_wallet
     )
+    # verify the ddo is available in Aquarius
     _ = setup.publisher_ocean_instance.assets.resolve(algorithm_ddo_v2.did)
 
     # Dataset with compute service
@@ -263,13 +265,13 @@ def test_compute_trusted_algorithms():
     _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
 
     # For debugging.
-    # run_compute_test(
-    #     setup.consumer_ocean_instance,
-    #     setup.publisher_wallet,
-    #     setup.consumer_wallet,
-    #     [compute_ddo],
-    #     algo_ddo=algorithm_ddo,
-    # )
+    run_compute_test(
+        setup.consumer_ocean_instance,
+        setup.publisher_wallet,
+        setup.consumer_wallet,
+        [compute_ddo],
+        algo_ddo=algorithm_ddo,
+    )
 
     # Expect to fail with another algorithm ddo that is not trusted.
     run_compute_test(

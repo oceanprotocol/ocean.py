@@ -662,6 +662,7 @@ class DataServiceProvider:
             )
         else:
             payload["algorithmMeta"] = algorithm_meta
+
         return payload
 
 
