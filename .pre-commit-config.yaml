@@ -1,3 +1,7 @@
+##
+## Copyright 2021 Ocean Protocol Foundation
+## SPDX-License-Identifier: Apache-2.0
+##
 repos:
 -   repo: https://github.com/pre-commit/mirrors-isort
     rev: v4.3.21
@@ -11,3 +15,8 @@ repos:
     rev: 3.7.9
     hooks:
     - id: flake8
+-   repo: https://github.com/johann-petrak/licenseheaders.git
+    rev: master
+    hooks:
+    - id: licenseheaders
+      args: ["-t", ".copyright.tmpl", "-f"]

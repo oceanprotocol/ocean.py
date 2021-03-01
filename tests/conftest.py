@@ -1,5 +1,7 @@
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 
 import uuid
 
@@ -14,6 +16,7 @@ from ocean_lib.ocean.util import (
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib.web3_internal.web3helper import Web3Helper
+from tests.resources.ddo_helpers import get_metadata
 from tests.resources.helper_functions import (
     get_consumer_ocean_instance,
     get_consumer_wallet,
@@ -22,7 +25,6 @@ from tests.resources.helper_functions import (
     get_publisher_wallet,
     setup_logging,
 )
-from tests.resources.ddo_helpers import get_metadata
 
 setup_logging()
 

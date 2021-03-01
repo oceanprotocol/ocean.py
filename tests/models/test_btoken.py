@@ -1,3 +1,7 @@
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 from ocean_lib.models.btoken import BToken
 from ocean_lib.ocean import util
 
