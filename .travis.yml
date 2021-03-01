@@ -33,7 +33,7 @@ install: pip install -U tox-travis
 script: tox
 
 after_script:
-  - bash <(curl -Ls https://coverage.codacy.com/get.sh) report coverage.xml --partial && bash <(curl -Ls https://coverage.codacy.com/get.sh) final
+  - bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.xml --partial && bash <(curl -Ls https://coverage.codacy.com/get.sh) final
  
 deploy:
   provider: pypi
