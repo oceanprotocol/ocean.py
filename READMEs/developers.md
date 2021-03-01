@@ -59,19 +59,17 @@ docker system prune -a --volumes
 
 ## 3. Set up contracts
 
-### 3.1 Update `address.json`
+### 3.1 Connect to the deployed contracts
 
-Running barge has written addresses to `~/.ocean/ocean-contracts/artifacts/address.json`. Copy those into your local ocean.py's file `artifacts/address.json`. The result should look something like:
-```json
-{
-  "development": {
-    "DTFactory": "0xC36D83c8b8E31D7dBe47f7f887BF1C567ff75DD7",
-    "BFactory": "0x5FcC55C678FEad140487959bB73a3f3B6949DdE5",
-    "FixedRateExchange": "0x143027A9705e4Fe24734D99c7458aBe5A6b38D8e",
-    "Metadata": "0xdA00aD9ae0ABD347eaFCbFCe078bEFCB30eD59cD",
-    "Ocean": "0x83c74A95e42244CA84DbEB01C5Bfd5b2Cd2691c2"
- } 
-}
+Specify our config file as an envvar. In console:
+```console
+export CONFIG_FILE=config.ini
+```
+
+Running barge already deployed contracts for us. Let's point to them. Open the config file `./config.ini`, and in the `[eth-network]` section, set these values:
+```
+address.file = ~/.ocean/ocean-contracts/artifacts/address.json
+artifacts.path = ~/.ocean/ocean-contracts/artifacts
 ```
 
 ### 3.2 Set private keys
@@ -81,22 +79,14 @@ export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f43
 export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
 ```
 
-### 3.3 Deploy fake OCEAN
+### 3.3 Deploy fake OCEAN, and connect to it
 
-* In terminal: `./deploy.py ganache`
-* It will output the address of OCEAN. In `artifacts/address.json`, update the "development" : "Ocean" value with that address.
-
-### 3.4 Connect to the deployed contracts
-
-Open `./config.ini` and check that these lines exist (under `[eth-network]`):
-* `address.file = artifacts/address.json`
-* `artifacts.path = artifacts`
-
-Finally, set envvars.
-```console
-export CONFIG_FILE=config.ini
+In console:
+```
+./deploy.py ganache
 ```
 
+This will output the address of OCEAN, and auto-update the "development" : "Ocean" value in  `~/.ocean/ocean-contracts/artifacts/address.json`.
 
 ## 4. Test
 
