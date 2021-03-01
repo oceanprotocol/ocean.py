@@ -1,3 +1,7 @@
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 import lzma
 import uuid
 
@@ -11,11 +15,8 @@ from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_utils.ddo.ddo import DDO
 from ocean_utils.utils.utilities import checksum
-from tests.resources.helper_functions import (
-    get_consumer_wallet,
-    get_publisher_wallet,
-)
 from tests.resources.ddo_helpers import get_resource_path
+from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
 
 
 def get_ddo_sample(datatoken_address):

@@ -1,3 +1,8 @@
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
+
 # configuration file
 CONF_FILE_PATH = "~/ocean.conf"
 

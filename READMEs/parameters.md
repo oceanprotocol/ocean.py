@@ -1,3 +1,7 @@
+<!--
+Copyright 2021 Ocean Protocol Foundation
+SPDX-License-Identifier: Apache-2.0
+-->
 # On Config Parameters
 
 We can set any config parameter (a) via an envvar, or (b) via a config file. Envvar values override config file values.

@@ -1,3 +1,7 @@
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool

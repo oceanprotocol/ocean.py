@@ -1,3 +1,7 @@
+<!--
+Copyright 2021 Ocean Protocol Foundation
+SPDX-License-Identifier: Apache-2.0
+-->
 # Developing ocean.py
 
 This README is how to further *develop* ocean.py. (Compare to the quickstarts which show how to *use* it.)

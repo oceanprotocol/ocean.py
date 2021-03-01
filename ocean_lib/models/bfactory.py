@@ -1,3 +1,7 @@
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 import warnings
 
 from ocean_lib.web3_internal.contract_base import ContractBase

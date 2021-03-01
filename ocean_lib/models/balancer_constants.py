@@ -1,3 +1,8 @@
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
+
 # ref: https://bankless.substack.com/p/how-to-create-your-own-balancer-pool
 GASLIMIT_BFACTORY_NEWBPOOL = 5000000  # from ref above
 GASLIMIT_BFACTORY_NEWMPOOL = 5000000  # from ref above
