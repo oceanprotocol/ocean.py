@@ -23,24 +23,21 @@ Let's go through each step.
 
 ## 1. Setup
 
-This builds on the setups in the following. Please do them first.
+### 1.1 Do Datatokens tutorial
 
--   [Datatokens tutorial](datatokens_flow.md). Includes setting `NETWORK_URL` and `MY_TEST_KEY`.
--   [Get test OCEAN](get_test_OCEAN.md)
+This builds on the setup from [Datatokens tutorial](datatokens_flow.md). Please do it first.
 
-In this quickstart, you'll be using Aquarius and Provider services that are already running for Rinkeby. Point to them by setting urls as envvars. In the console:
+### 1.2 Run Ocean Market locally
 
-    export AQUARIUS_URL=https://aquarius.rinkeby.oceanprotocol.com
-    export PROVIDER_URL=https://provider.rinkeby.oceanprotocol.com
+Then, set up the service for the [Ocean Market app](https://github.com/oceanprotocol/market). In a new console:
+```console
+git clone https://github.com/oceanprotocol/market.git
+cd market
+npm install
+npm start
+```
 
-Then, set up the service for the [Ocean Market app](https://github.com/oceanprotocol/market). In a _new_ console:
-
-    git clone https://github.com/oceanprotocol/market.git
-    cd market
-    npm install
-    npm start
-
-Finally, check out the market app as a webapp, at http://localhost:8000.
+You can now see your locally-running Ocean Market app as a webapp! In your browser, go to http://localhost:8000.
 
 ## 2. Alice publishes data asset (including metadata)
 
