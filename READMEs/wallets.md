@@ -2,6 +2,7 @@
 Copyright 2021 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
+
 # Wallets
 
 This page describes some basic approaches to Ethereum wallets and accounts.
@@ -12,9 +13,9 @@ A "wallet" is a thing that stores private keys (and maybe signs transactions). T
 
 Here we describe:
 
-1. How to generate private keys
-1. Where to store private keys
-1. How your software might access accounts
+1.  How to generate private keys
+2.  Where to store private keys
+3.  How your software might access accounts
 
 ## 1. How to generate private keys
 
@@ -22,11 +23,12 @@ Here we describe:
 
 The datatokens tutorial described how to install Metamask, then use one the Ethereum accounts it auto-generates (along with the private key).
 
-### Generate in Python 
+### Generate in Python
 
 ocean-lib includes the [web3.py library](https://web3py.readthedocs.io/en/stable/) which can generate private keys. (Part of its [web3.py account management](https://web3py.readthedocs.io/en/stable/web3.eth.html#web3.eth.Eth.accounts)).
 
 Here's how. In Python:
+
 ```python
 import web3
 private_key = web3.Web3().eth.account.create().privateKey
@@ -34,11 +36,11 @@ private_key = web3.Web3().eth.account.create().privateKey
 
 ## 2. Where to store private keys
 
-The *whole point* of crypto wallets is store private keys. Wallets have various tradeoffs of cost, convienence, and security. For example, hardware wallets tend to be more secure but less convenient and not free.
+The _whole point_ of crypto wallets is store private keys. Wallets have various tradeoffs of cost, convienence, and security. For example, hardware wallets tend to be more secure but less convenient and not free.
 
-It can also be useful to store private keys locally on your machine, for testing, though only with a small amount of value at stake (keep the risk down 🐙). 
+It can also be useful to store private keys locally on your machine, for testing, though only with a small amount of value at stake (keep the risk down 🐙).
 
-Do *not* store your private keys on anything public, unless you want your tokens to disappear. For example, don't store your private keys in GitHub or expose them on frontend webpage code.
+Do _not_ store your private keys on anything public, unless you want your tokens to disappear. For example, don't store your private keys in GitHub or expose them on frontend webpage code.
 
 ## 3. How your software might access Ethereum accounts
 
@@ -69,27 +71,27 @@ wallet = Wallet(web3, private_key=os.getenv('MY_TEST_KEY'))
 
 Here's an example JSON object. This example has the same private key as above, and password `OceanProtocol` to encrypt/decrypt the private key. The private key is stored as parameter `ciphertext` (in encrypted form, of course).
 
-```
-{
-  "address": "281269c18376010b196a928c335e495bd05ec32f",
-  "crypto": {
-    "cipher": "aes-128-ctr",
-    "cipherparams": {
-      "iv": "ac0b74c5100bd319030d983029256250"
-    },
-    "ciphertext": "6e003d25869a8f84c3d055d4bda3fd0e83b89769b6513b58b2b76d0738f2ab1c",
-    "kdf": "pbkdf2",
-    "kdfparams": {
-      "c": 1000000,
-      "dklen": 32,
-      "prf": "hmac-sha256",
-      "salt": "423c1be88c1fadd926c1b668a5d93f74"
-    },
-    "mac": "6b90720ddc10d457c2e3e7e1b61550d7a7fa75e6051cb1ed4f1516fba4f0a45f"
-  },
-  "id": "7954ec59-6819-4e3c-b065-e6f3a9c1fe6c",
-  "version": 3
-}
+```json
+    {
+      "address": "281269c18376010b196a928c335e495bd05ec32f",
+      "crypto": {
+        "cipher": "aes-128-ctr",
+        "cipherparams": {
+          "iv": "ac0b74c5100bd319030d983029256250"
+        },
+        "ciphertext": "6e003d25869a8f84c3d055d4bda3fd0e83b89769b6513b58b2b76d0738f2ab1c",
+        "kdf": "pbkdf2",
+        "kdfparams": {
+          "c": 1000000,
+          "dklen": 32,
+          "prf": "hmac-sha256",
+          "salt": "423c1be88c1fadd926c1b668a5d93f74"
+        },
+        "mac": "6b90720ddc10d457c2e3e7e1b61550d7a7fa75e6051cb1ed4f1516fba4f0a45f"
+      },
+      "id": "7954ec59-6819-4e3c-b065-e6f3a9c1fe6c",
+      "version": 3
+    }
 ```
 
 Here's how you use the JSON object. In your console, export the EncryptedKey and password:
@@ -100,10 +102,10 @@ export MY_TEST_PASSWORD=OceanProtocol
 ```
 
 In Python, you'd create a wallet from this info with a line like:
+
 ```python
 import os
 import web3
 from ocean_lib.web3_internal.wallet import Wallet
 wallet = Wallet(web3, encrypted_key=os.getenv('MY_TEST_ENCRYPTED_KEY'), password=os.getenv('MY_TEST_PASSWORD'))
 ```
-
