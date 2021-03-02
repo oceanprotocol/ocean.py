@@ -13,7 +13,7 @@
 import os
 from os.path import join
 
-from setuptools import setup
+from setuptools import setup, find_namespace_packages
 
 with open("README.md", encoding="utf8") as readme_file:
     readme = readme_file.read()
@@ -72,10 +72,7 @@ dev_requirements = [
 
 docs_requirements = ["Sphinx", "sphinxcontrib-apidoc"]
 
-packages = []
-for d, _, _ in os.walk("ocean_lib"):
-    if os.path.exists(join(d, "__init__.py")):
-        packages.append(d.replace(os.path.sep, "."))
+packages = find_namespace_packages(include=['ocean_lib*'], exclude=['*test*'])
 
 setup(
     author="leucothia",
