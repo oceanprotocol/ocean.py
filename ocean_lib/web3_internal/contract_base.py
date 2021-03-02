@@ -365,7 +365,7 @@ class ContractBase(object):
 
         # Construct JSON-RPC raw filter presentation based on human readable Python descriptions
         # Namely, convert event names to their keccak signatures
-        data_filter_set, event_filter_params = construct_event_filter_params(
+        _, event_filter_params = construct_event_filter_params(
             abi,
             contract_address=self.address,
             argument_filters=_filters,
