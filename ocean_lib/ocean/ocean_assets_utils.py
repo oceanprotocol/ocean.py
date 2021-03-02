@@ -16,14 +16,14 @@ def format_publisher_trusted_algorithms(ocean_asset, trusted_algorithms=None) ->
                 "did": trusted_algorithm_did,
                 "filesChecksum": hashlib.sha256(
                     (
-                            alg_crt_service.attributes["encryptedFiles"]
-                            + json.dumps(alg_crt_service.main["files"])
+                        alg_crt_service.attributes["encryptedFiles"]
+                        + json.dumps(alg_crt_service.main["files"])
                     ).encode("utf-8")
                 ).hexdigest(),
                 "containerSectionChecksum": hashlib.sha256(
-                    (
-                        json.dumps(alg_crt_service.main["algorithm"]["container"])
-                    ).encode("utf-8")
+                    (json.dumps(alg_crt_service.main["algorithm"]["container"])).encode(
+                        "utf-8"
+                    )
                 ).hexdigest(),
             }
         )

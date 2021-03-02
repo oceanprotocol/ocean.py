@@ -100,8 +100,7 @@ class OceanAssets:
         if compute_service_descriptor:
             if trusted_algorithms:
                 trusted_algorithms_list = format_publisher_trusted_algorithms(
-                    self,
-                    trusted_algorithms=trusted_algorithms
+                    self, trusted_algorithms=trusted_algorithms
                 )
                 compute_service_descriptor[1]["attributes"]["main"]["privacy"] = {
                     "publisherTrustedAlgorithms": trusted_algorithms_list
