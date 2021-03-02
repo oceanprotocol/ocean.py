@@ -11,7 +11,7 @@ Steps:
 1. **Set up contracts**
 1. **Test**
 1. **Merge** the changes via a PR
-1. **Release** 
+1. **Release**
 
 
 ## 1. Install dependencies
@@ -56,7 +56,7 @@ cd barge
 docker system prune -a --volumes
 
 #run barge with provider on
-./start_ocean.sh  --with-provider2 
+./start_ocean.sh  --with-provider2
 ```
 
 (Or, [run services separately](services.md).)
@@ -74,7 +74,7 @@ Running barge has written addresses to `~/.ocean/ocean-contracts/artifacts/addre
     "FixedRateExchange": "0x143027A9705e4Fe24734D99c7458aBe5A6b38D8e",
     "Metadata": "0xdA00aD9ae0ABD347eaFCbFCe078bEFCB30eD59cD",
     "Ocean": "0x83c74A95e42244CA84DbEB01C5Bfd5b2Cd2691c2"
- } 
+ }
 }
 ```
 
@@ -116,7 +116,7 @@ Bonus: see the [appendix](developers.md#7-appendix-more-tests) for even more tes
 
 ## 5. Merge
 
-Merge the changes via a pull request (PR) etc. 
+Merge the changes via a pull request (PR) etc.
 
 Specifically, [follow this workflow](https://docs.oceanprotocol.com/concepts/contributing/#fix-or-improve-core-software).
 
@@ -124,7 +124,7 @@ Specifically, [follow this workflow](https://docs.oceanprotocol.com/concepts/con
 
 Release for pip etc.
 
-Specifically, [follow the Release Process instructions](../RELEASE_PROCESS.md).
+Specifically, [follow the Release Process instructions](../RELEASE\-PROCESS.md).
 
 ## 7. Appendix: More tests
 
@@ -149,7 +149,7 @@ cd codacy-analysis-cli-* && sudo make install
 
 In main console (with venv on):
 ```console
-#run all tools, plus Metrics and Clones data. 
+#run all tools, plus Metrics and Clones data.
 codacy-analysis-cli analyze --directory ~/code/ocean.py/ocean_lib/ocean
 
 #run tools individually
@@ -158,7 +158,7 @@ codacy-analysis-cli analyze --directory ~/code/ocean.py/ocean_lib/ocean --tool P
 codacy-analysis-cli analyze --directory ~/code/ocean.py/ocean_lib/ocean --tool Bandit
 ```
 
-You'll get a report that looks like this. 
+You'll get a report that looks like this.
 ```console
 Found [Info] `First line should end with a period (D415)` in ocean_compute.py:50 (Prospector_pep257)
 Found [Info] `Missing docstring in __init__ (D107)` in ocean_assets.py:42 (Prospector_pep257)

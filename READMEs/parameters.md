@@ -83,6 +83,6 @@ ocean = Ocean()
 
 ## Further details
 
-The file [config.py](https://github.com/oceanprotocol/ocean.py/blob/master/ocean_lib/config.py) lists all the config parameters.
+The file [config.py](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/config.py) lists all the config parameters.
 
-For the most precise description of config parameter logic, see the [Ocean() constructor implementation](https://github.com/oceanprotocol/ocean.py/blob/master/ocean_lib/ocean/ocean.py).
+For the most precise description of config parameter logic, see the [Ocean() constructor implementation](https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/ocean/ocean.py).
