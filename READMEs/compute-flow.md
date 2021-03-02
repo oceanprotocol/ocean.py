@@ -2,60 +2,61 @@
 Copyright 2021 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
+
 Note: this README is out of date and will not work. [Here's the issue to fix it](https://github.com/oceanprotocol/ocean.py/issues/101).
 
 # Quickstart: Marketplace Flow with compute-to-data
 
 This tutorial demonstrates publishing a dataset with `compute` service
 
-We will be connecting to the `rinkeby` test net and the Ocean Protocol 
+We will be connecting to the `rinkeby` test net and the Ocean Protocol
 supporting services.
 
 Here's the steps:
-1. Setup
-1. Alice publishes assets for data services (= publishes a datatoken contract and metadata)
-1. Alice mints 100 tokens
-1. Alice makes datatokens available for sale in a Balancer pool
-1. Marketplace displays the asset with the available services and price of datatoken
-1. Value swap: Bob buys datatokens from marketplace
-1. Bob uses a service by spending datatoken he just purchased (download)
+
+1.  Setup
+2.  Alice publishes assets for data services (= publishes a datatoken contract and metadata)
+3.  Alice mints 100 tokens
+4.  Alice makes datatokens available for sale in a Balancer pool
+5.  Marketplace displays the asset with the available services and price of datatoken
+6.  Value swap: Bob buys datatokens from marketplace
+7.  Bob uses a service by spending datatoken he just purchased (download)
 
 Let's go through each step.
 
 ## 0. Prerequisites and Installation
-Use an ethereum account with some eth balance on rinkeby. You can get rinkeby eth using 
-this [faucet](https://www.rinkeby.io/#faucet). Otherwise, run `ganache-cli` and replace 
+
+Use an ethereum account with some eth balance on rinkeby. You can get rinkeby eth using
+this [faucet](https://www.rinkeby.io/#faucet). Otherwise, run `ganache-cli` and replace
 `rinkeby` with `ganache` when following the steps below.
 
 If you haven't installed yet:
+
 ```console
 pip install ocean-lib
 ```
 
 ## 1. Initialize services
 
-This quickstart treats the publisher/provider service, metadata cache, and marketplace as 
-externally-run services. For convenience, we run them locally. Refer to each repo for 
+This quickstart treats the publisher/provider service, metadata cache, and marketplace as
+externally-run services. For convenience, we run them locally. Refer to each repo for
 its own requirements and make sure they all point to `rinkeby` testnet.
 
 [Provider service](https://github.com/oceanprotocol/provider-py)
-```
-docker run oceanprotocol/provider-py:latest
-```
+
+    docker run oceanprotocol/provider-py:latest
 
 [Aquarius (Metadata cache)](https://github.com/oceanprotocol/aquarius)
 
-```
-docker run oceanprotocol/aquarius:latest
-```
+    docker run oceanprotocol/aquarius:latest
 
 [Market app](https://github.com/oceanprotocol/market)
-```
-git clone https://github.com/oceanprotocol/market.git
-cd market
-npm install
-npm start
-```
+
+    git clone https://github.com/oceanprotocol/market.git
+    cd market
+    npm install
+    npm start
+
 Access the market app in the browser at `http://localhost:8000`.
 
 ## 2. Alice publishes assets for data services (= publishes a DataToken contract)
@@ -112,6 +113,7 @@ assert token_address == asset.data_token_address
 
 did = asset.did  # did contains the datatoken address
 ```
+
 For legacy support, you can also use `metadataStoreUri` instead of `metadataCacheUri`.
 
 ## 3. Alice mints 100 tokens
@@ -197,7 +199,7 @@ market_ocean.pool.buy_data_tokens(
 
 print(f'bob has {data_token.token_balance(bob_wallet.address} datatokens.')
 ```
-   
+
 ## 7. Bob uses a service from the asset he just purchased (download)
 
 ```python

@@ -2,8 +2,10 @@
 Copyright 2021 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
-At the high level, the main ocean-lib features are accessible via the `Ocean` instance. Here is a 
-quick overview of the main functions and submodules: 
+
+At the high level, the main ocean-lib features are accessible via the `Ocean` instance. Here is a
+quick overview of the main functions and submodules:
+
 ```python
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.config import Config
@@ -28,8 +30,9 @@ ocean.exchange
 ocean.compute
 ```
 
-To access functions that are not supported in the above classes, you can directly use the lower 
+To access functions that are not supported in the above classes, you can directly use the lower
 level objects:
+
 ```python
 # DataToken -- ERC20 datatoken
 from ocean_lib.models.data_token import DataToken
@@ -47,4 +50,3 @@ BPool(pool_address)
 from ocean_lib.models.bfactory import BFactory
 BFactory(bfactory_address)
 ```
-
