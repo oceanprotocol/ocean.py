@@ -46,18 +46,22 @@ Recall that parameters set by envvars override config file values. So, to use a 
 
 Here's how. In the console:
 
+```console
     unset NETWORK_URL AQUARIUS_URL PROVIDER_URL
+```
 
 ## 2. Config object input, filled from config file
 
 First, in your working directory, create `config.ini` file and fill as follows:
 
+```console
     [eth-network]
     network = https://rinkeby.infura.io/v3/<your infura project id>
 
     [resources]
     aquarius.url = https://provider.rinkeby.oceanprotocol.com
     provider.url = https://aquarius.rinkeby.oceanprotocol.com
+```
 
 Then, in Python:
 

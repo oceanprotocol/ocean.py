@@ -44,18 +44,24 @@ its own requirements and make sure they all point to `rinkeby` testnet.
 
 [Provider service](https://github.com/oceanprotocol/provider-py)
 
+```console
     docker run oceanprotocol/provider-py:latest
+```
 
 [Aquarius (Metadata cache)](https://github.com/oceanprotocol/aquarius)
 
+```console
     docker run oceanprotocol/aquarius:latest
+```
 
 [Market app](https://github.com/oceanprotocol/market)
 
+```console
     git clone https://github.com/oceanprotocol/market.git
     cd market
     npm install
     npm start
+```
 
 Access the market app in the browser at `http://localhost:8000`.
 
@@ -80,15 +86,15 @@ alice_wallet = Wallet(ocean.web3, private_key='8da4ef21b864d2cc526dbdb2a120bd287
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_store_url)
 token_address = data_token.address
 
-# `ocean.assets.create` will encrypt the URLs using the provider's encrypt service endpoint and update 
+# `ocean.assets.create` will encrypt the URLs using the provider's encrypt service endpoint and update
 # the asset before pushing to metadata store
 # `ocean.assets.create` will require that token_address is a valid DataToken contract address, unless token_address
 # is not provided then the `create` method will first create a new data token and use it in the new
 # asset.
 metadata =  {
     "main": {
-        "type": "dataset", "name": "10 Monkey Species Small", "author": "Mario", 
-        "license": "CC0: Public Domain", "dateCreated": "2012-02-01T10:55:11Z", 
+        "type": "dataset", "name": "10 Monkey Species Small", "author": "Mario",
+        "license": "CC0: Public Domain", "dateCreated": "2012-02-01T10:55:11Z",
         "files": [
             { "index": 0, "contentType": "application/zip", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/training.zip"},
             { "index": 1, "contentType": "text/text", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/monkey_labels.txt"},
@@ -100,7 +106,7 @@ service_attributes = {
         "main": {
             "name": "dataAssetAccessServiceAgreement",
             "creator": alice_wallet.address,
-            "cost": 1.0, # service cost is 1.0 tokens 
+            "cost": 1.0, # service cost is 1.0 tokens
             "timeout": 3600 * 24,
             "datePublished": metadata["main"]['dateCreated']
         }
@@ -170,9 +176,9 @@ OCEAN_usd_pool_address = ''
 USDT_token_address = ''
 ocn_pool = BPool(OCEAN_usd_pool_address)
 OCEAN_price = from_base_18(ocn_pool.calcInGivenOut(
-    ocn_pool.getBalance(USDT_token_address), 
+    ocn_pool.getBalance(USDT_token_address),
     ocn_pool.getDenormalizedWeight(USDT_token_address),
-    ocn_pool.getBalance(OCEAN_address), 
+    ocn_pool.getBalance(OCEAN_address),
     ocn_pool.getDenormalizedWeight(OCEAN_address),
     tokenAmountOut_base=to_base_18(price_in_OCEAN),
     swapFee_base=ocn_pool.getSwapFee()
@@ -188,10 +194,10 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 bob_wallet = Wallet(ocean.web3, private_key="PASTE BOB'S TEST PRIVATE KEY HERE")
 data_token = market_ocean.get_data_token(token_address)
-# This assumes bob_wallet already has sufficient OCEAN tokens to buy the data token. OCEAN tokens 
+# This assumes bob_wallet already has sufficient OCEAN tokens to buy the data token. OCEAN tokens
 # can be obtained through a crypto exchange or an on-chain pool such as balancer or uniswap
 market_ocean.pool.buy_data_tokens(
-    pool_address, 
+    pool_address,
     amount=1.0, # buy one data token
     max_OCEAN_amount=price_in_OCEAN, # pay maximum 0.1 OCEAN tokens
     from_wallet=bob_wallet
@@ -211,10 +217,10 @@ order_tx_id = market_ocean.assets.pay_for_service(
     quote.amount, quote.data_token_address, asset.did, service.index, market_address, bob_wallet
 )
 file_path = market_ocean.assets.download(
-    asset.did, 
-    service.index, 
-    bob_wallet, 
-    order_tx_id, 
+    asset.did,
+    service.index,
+    bob_wallet,
+    order_tx_id,
     destination='~/my-datasets'
 )
 ```

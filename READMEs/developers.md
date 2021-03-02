@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Developing ocean.py
 
-This README is how to further *develop* ocean.py. (Compare to the quickstarts which show how to *use* it.)
+This README is how to further _develop_ ocean.py. (Compare to the quickstarts which show how to _use_ it.)
 Steps:
 
 1.  **Install dependencies**
@@ -19,9 +19,9 @@ Steps:
 
 ### 1.1 Prerequisites
 
-*   Linux/MacOS
-*   Docker
-*   Python 3.8.5
+-   Linux/MacOS
+-   Docker
+-   Python 3.8.5
 
 ### 1.2 Do Install
 
@@ -90,15 +90,15 @@ export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7
 
 ### 3.3 Deploy fake OCEAN
 
-*   In terminal: `./deploy.py ganache`
-*   It will output the address of OCEAN. In `artifacts/address.json`, update the "development" : "Ocean" value with that address.
+-   In terminal: `./deploy.py ganache`
+-   It will output the address of OCEAN. In `artifacts/address.json`, update the "development" : "Ocean" value with that address.
 
 ### 3.4 Connect to the deployed contracts
 
 Open `./config.ini` and check that these lines exist (under `[eth-network]`):
 
-*   `address.file = artifacts/address.json`
-*   `artifacts.path = artifacts`
+-   `address.file = artifacts/address.json`
+-   `artifacts.path = artifacts`
 
 Finally, set envvars.
 

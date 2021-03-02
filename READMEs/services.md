@@ -9,8 +9,8 @@ SPDX-License-Identifier: Apache-2.0
 
 Ocean uses these off-chain services:
 
-*   [Ocean Provider](https://github.com/oceanprotocol/provider) is for data services. Specifically, it's a REST API serving requests for two types of data services: static urls (for downloading data) and compute services. It's run by the marketplace or the data publisher.
-*   [Ocean Aquarius](https://github.com/oceanprotocol/aquarius) is metadata cache REST API. This helps to aid search in marketplaces.
+-   [Ocean Provider](https://github.com/oceanprotocol/provider) is for data services. Specifically, it's a REST API serving requests for two types of data services: static urls (for downloading data) and compute services. It's run by the marketplace or the data publisher.
+-   [Ocean Aquarius](https://github.com/oceanprotocol/aquarius) is metadata cache REST API. This helps to aid search in marketplaces.
 
 We now describe how to use these.
 
@@ -86,8 +86,8 @@ docker run oceanprotocol/aquarius:latest
 
 Here are the urls for the local services, for use in `config.ini` etc.
 
-*   Provider url: `http://127.0.0.1:8030`
-*   Aquarius url: `http://127.0.0.1:5000`
+-   Provider url: `http://127.0.0.1:8030`
+-   Aquarius url: `http://127.0.0.1:5000`
 
 ### Run your own services, all at once
 

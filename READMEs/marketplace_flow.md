@@ -25,15 +25,15 @@ Let's go through each step.
 
 This builds on the setups in the following. Please do them first.
 
-*   [Datatokens tutorial](datatokens_flow.md). Includes setting `NETWORK_URL` and `MY_TEST_KEY`.
-*   [Get test OCEAN](get_test_OCEAN.md)
+-   [Datatokens tutorial](datatokens_flow.md). Includes setting `NETWORK_URL` and `MY_TEST_KEY`.
+-   [Get test OCEAN](get_test_OCEAN.md)
 
 In this quickstart, you'll be using Aquarius and Provider services that are already running for Rinkeby. Point to them by setting urls as envvars. In the console:
 
     export AQUARIUS_URL=https://aquarius.rinkeby.oceanprotocol.com
     export PROVIDER_URL=https://provider.rinkeby.oceanprotocol.com
 
-Then, set up the service for the [Ocean Market app](https://github.com/oceanprotocol/market). In a *new* console:
+Then, set up the service for the [Ocean Market app](https://github.com/oceanprotocol/market). In a _new_ console:
 
     git clone https://github.com/oceanprotocol/market.git
     cd market
@@ -197,8 +197,8 @@ Now, we're going to be Bob. Bob wants to buy datatokens from Alice, through the 
 
 First, Bob will need his own Rinkeby Ethereum account / private key, Rinkeby ETH, and Rinkeby OCEAN.
 
-*   Get account and ETH with help from the [datatokens tutorial](datatokens_flow.md). Then, in console: `export BOB_KEY=<Bob_private_key>`
-*   Get OCEAN with help from [test OCEAN tutorial](get_test_OCEAN.md)
+-   Get account and ETH with help from the [datatokens tutorial](datatokens_flow.md). Then, in console: `export BOB_KEY=<Bob_private_key>`
+-   Get OCEAN with help from [test OCEAN tutorial](get_test_OCEAN.md)
 
 Stop and re-start your Python console. What follows is in Python.
 

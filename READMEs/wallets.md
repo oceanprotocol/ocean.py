@@ -36,11 +36,11 @@ private_key = web3.Web3().eth.account.create().privateKey
 
 ## 2. Where to store private keys
 
-The *whole point* of crypto wallets is store private keys. Wallets have various tradeoffs of cost, convienence, and security. For example, hardware wallets tend to be more secure but less convenient and not free.
+The _whole point_ of crypto wallets is store private keys. Wallets have various tradeoffs of cost, convienence, and security. For example, hardware wallets tend to be more secure but less convenient and not free.
 
 It can also be useful to store private keys locally on your machine, for testing, though only with a small amount of value at stake (keep the risk down 🐙).
 
-Do *not* store your private keys on anything public, unless you want your tokens to disappear. For example, don't store your private keys in GitHub or expose them on frontend webpage code.
+Do _not_ store your private keys on anything public, unless you want your tokens to disappear. For example, don't store your private keys in GitHub or expose them on frontend webpage code.
 
 ## 3. How your software might access Ethereum accounts
 
@@ -71,6 +71,7 @@ wallet = Wallet(web3, private_key=os.getenv('MY_TEST_KEY'))
 
 Here's an example JSON object. This example has the same private key as above, and password `OceanProtocol` to encrypt/decrypt the private key. The private key is stored as parameter `ciphertext` (in encrypted form, of course).
 
+```json
     {
       "address": "281269c18376010b196a928c335e495bd05ec32f",
       "crypto": {
@@ -91,6 +92,7 @@ Here's an example JSON object. This example has the same private key as above, a
       "id": "7954ec59-6819-4e3c-b065-e6f3a9c1fe6c",
       "version": 3
     }
+```
 
 Here's how you use the JSON object. In your console, export the EncryptedKey and password:
 

@@ -13,7 +13,7 @@ Here, let's get some OCEAN for the Rinkeby testnet, and verify in Python that we
 
 This builds on the setup in the following. Please do it first.
 
-*   [Datatokens tutorial](datatokens_flow.md)
+-   [Datatokens tutorial](datatokens_flow.md)
 
 ## Get OCEAN
 
@@ -60,11 +60,13 @@ Let's see that we hold the OCEAN, in Etherscan.
 
 Open this url in your browser to see your account's OCEAN balance. (If you need, the Python code above printed both addresses).
 
+```console
     https://rinkeby.etherscan.io/token/<OCEAN address>?a=<your account address>
+```
 
 Both Python and Etherscan give views of the same data: your OCEAN balance on the Rinkeby blockchain.
 
 ## Further reading
 
-*   [Ocean homepage - OCEAN token info](https://oceanprotocol.com/token)
-*   [Developer docs - networks overview](https://docs.oceanprotocol.com/concepts/networks-overview/)
+-   [Ocean homepage - OCEAN token info](https://oceanprotocol.com/token)
+-   [Developer docs - networks overview](https://docs.oceanprotocol.com/concepts/networks-overview/)
