@@ -181,3 +181,9 @@ Found [Metrics] in ocean_exchange.py:
 (C)LOC = (Commented) Lines Of Code.
 
 Finally, you can [go here](https://app.codacy.com/gh/oceanprotocol/ocean.py/dashboard) to see results of remotely-run tests. (You may need special permissions.)
+
+### 8. Contributing to the documentation
+
+You are welcome to contribute to ocean.py! For clean markdowns, we use the `remark` tool for automatic markdown formatting.
+See instructions here: [remark](https://github.com/remarkjs/remark-lint) and use [this configuration file](https://github.com/codacy/codacy\-remark\-lint/blob/master/.remarkrc.js).
+
