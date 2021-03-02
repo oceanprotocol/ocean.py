@@ -1,3 +1,7 @@
+<!--
+Copyright 2021 Ocean Protocol Foundation
+SPDX-License-Identifier: Apache-2.0
+-->
 # Wallets
 
 This page describes some basic approaches to Ethereum wallets and accounts.
