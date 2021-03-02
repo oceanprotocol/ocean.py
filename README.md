@@ -11,6 +11,8 @@ SPDX-License-Identifier: Apache-2.0
 
 [![Codacy Badge](https://app.codacy.com/project/badge/Grade/3abc62f24f0a4fe78c6aeb7dc16399a8)](https://www.codacy.com/gh/oceanprotocol/ocean.py/dashboard?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=oceanprotocol/ocean.py&amp;utm_campaign=Badge_Grade)
 
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/3abc62f24f0a4fe78c6aeb7dc16399a8)](https://www.codacy.com/gh/oceanprotocol/ocean.py/dashboard?utm_source=github.com&utm_medium=referral&utm_content=oceanprotocol/ocean.py&utm_campaign=Badge_Coverage)
+
 With ocean.py, you can:
 - **Publish** data services: downloadable files or compute-to-data. 
 Ocean creates a new [ERC20](https://github.com/ethereum/EIPs/blob/7f4f0377730f5fc266824084188cc17cf246932e/EIPS/eip-20.md) 
