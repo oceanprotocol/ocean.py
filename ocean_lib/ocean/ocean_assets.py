@@ -3,8 +3,6 @@
 #  SPDX-License-Identifier: Apache-2.0
 
 import copy
-import hashlib
-import json
 import logging
 import lzma
 import os
@@ -18,6 +16,7 @@ from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.util import to_base_18
+from ocean_lib.ocean.ocean_assets_utils import format_publisher_trusted_algorithms
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
@@ -60,31 +59,6 @@ class OceanAssets:
     def _get_aquarius(self, url=None) -> Aquarius:
         return AquariusProvider.get_aquarius(url or self._aquarius_url)
 
-    def add_trusted_algorithms(self, trusted_algorithms=None) -> list:
-        trusted_algo_list = []
-        for trusted_algorithm_did in trusted_algorithms:
-            trusted_algorithm_ddo = self.resolve(
-                trusted_algorithm_did
-            )  # but what if served by different provider?
-            alg_crt_service = trusted_algorithm_ddo.get_service(ServiceTypes.METADATA)
-            trusted_algo_list.append(
-                {
-                    "did": trusted_algorithm_did,
-                    "filesChecksum": hashlib.sha256(
-                        (
-                            alg_crt_service.attributes["encryptedFiles"]
-                            + json.dumps(alg_crt_service.main["files"])
-                        ).encode("utf-8")
-                    ).hexdigest(),
-                    "containerSectionChecksum": hashlib.sha256(
-                        (
-                            json.dumps(alg_crt_service.main["algorithm"]["container"])
-                        ).encode("utf-8")
-                    ).hexdigest(),
-                }
-            )
-        return trusted_algo_list
-
     def _process_service_descriptors(
         self,
         service_descriptors: list,
@@ -125,7 +99,8 @@ class OceanAssets:
             _service_descriptors.append(access_service_descriptor)
         if compute_service_descriptor:
             if trusted_algorithms:
-                trusted_algorithms_list = self.add_trusted_algorithms(
+                trusted_algorithms_list = format_publisher_trusted_algorithms(
+                    self,
                     trusted_algorithms=trusted_algorithms
                 )
                 compute_service_descriptor[1]["attributes"]["main"]["privacy"] = {
