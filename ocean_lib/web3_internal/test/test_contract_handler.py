@@ -59,35 +59,6 @@ def test_get_contracts_addresses__good_path_use_network_alias(tmp_path):
     assert addresses == "myvals"
 
 
-# ======================================================================
-# test get_contracts_addresses() - remote file specified by url
-
-
-def test_get_contracts_addresses__good_url_but_not_json():
-    # the url exists, but content isn't structured for json
-    address_file = "https://raw.githubusercontent.com/oceanprotocol/ocean.py/master/READMEs/developers.md"
-    addresses = ContractHandler.get_contracts_addresses(
-        network="rinkeby", address_file=address_file
-    )
-    assert addresses is None
-
-
-def test_get_contracts_addresses__bad_url():
-    address_file = "https://foobar"
-    addresses = ContractHandler.get_contracts_addresses(
-        network="rinkeby", address_file=address_file
-    )
-    assert addresses is None
-
-
-def test_get_contracts_addresses__good_url_json_ready(remote_address_file):
-    # get data from the actual 'contracts' repo
-    addresses = ContractHandler.get_contracts_addresses(
-        network="rinkeby", address_file=remote_address_file
-    )
-    assert addresses["DTFactory"][:2] == "0x"
-
-
 def test_get_contracts_addresses__example_config(network, example_config):
     # ensure we're testing locally
     assert network in ["ganache", "development"]
@@ -246,13 +217,7 @@ def test_load__name_and_address(network, example_config):
     assert ContractHandler._contracts[tup] == contract
 
 
-def test_remote_path_and_file_agree(remote_artifacts_path, remote_address_file):
-    path_len = len(remote_artifacts_path)
-    assert remote_artifacts_path == remote_address_file[:path_len]
-
-
 def test_read_abi_from_file__example_config__happy_path(example_config):
-    # ensure local. If this changes, then update the tests to use local
     assert "https" not in str(ContractHandler.artifacts_path)
 
     contract_definition = ContractHandler.read_abi_from_file(
@@ -263,7 +228,6 @@ def test_read_abi_from_file__example_config__happy_path(example_config):
 
 
 def test_read_abi_from_file__example_config__bad_contract_name(example_config):
-    # ensure local. If this changes, then update the tests to use local
     assert "https" not in str(ContractHandler.artifacts_path)
 
     base_path = ContractHandler.artifacts_path
@@ -275,10 +239,3 @@ def test_read_abi_from_file__example_config__bad_contract_name(example_config):
     )
     assert contract_definition is None
 
-
-def test_read_abi_from_file__remote_url(remote_artifacts_path):
-    contract_definition = ContractHandler.read_abi_from_file(
-        "DTFactory", remote_artifacts_path
-    )
-    assert contract_definition["contractName"] == "DTFactory"
-    assert "createToken" in str(contract_definition["abi"])

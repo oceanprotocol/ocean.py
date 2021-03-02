@@ -6,7 +6,6 @@
 import json
 import logging
 import os
-import urllib.request
 
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3 import Web3
@@ -31,25 +30,11 @@ class ContractHandler(object):
 
     @staticmethod
     def get_contracts_addresses(network, address_file):
-        # fill addresses - across all networks
-        if not address_file:
+        if not address_file or not os.path.exists(address_file):
             return None
-        elif str(address_file)[:8] == "https://":
-            try:
-                with urllib.request.urlopen(address_file) as url:
-                    s = url.read().decode()
-                    addresses = json.loads(s)
-            except urllib.error.URLError:  # can't find service
-                return None
-            except json.decoder.JSONDecodeError:  # json is structured wrong
-                return None
-        elif not os.path.exists(address_file):
-            return None
-        else:
-            with open(address_file) as f:
-                addresses = json.load(f)
+        with open(address_file) as f:
+            addresses = json.load(f)
 
-        # fill addressses for *this* network
         network_addresses = addresses.get(network, None)
         if network_addresses is None and network in ContractHandler.network_alias:
             network_addresses = addresses.get(
@@ -160,40 +145,20 @@ class ContractHandler(object):
 
     @staticmethod
     def read_abi_from_file(contract_name, abi_path):
-        full_path = None
-        target_filename = contract_name + ".json"
+        path = None
+        contract_name = contract_name + ".json"
+        names = os.listdir(abi_path)
+        # :HACK: temporary workaround to handle an extra folder that contain the artifact files.
+        if len(names) == 1 and names[0] == "*":
+            abi_path = os.path.join(abi_path, "*")
 
-        if str(abi_path)[:8] == "https://":
-            full_path = os.path.join(abi_path, target_filename)
+        for name in os.listdir(abi_path):
+            if name.lower() == contract_name.lower():
+                path = os.path.join(abi_path, contract_name)
+                break
 
-            try:
-                with urllib.request.urlopen(full_path) as url:
-                    s = url.read().decode()
-                    return json.loads(s)
-            except urllib.error.URLError:  # can't find service
-                return None
+        if path:
+            with open(path) as f:
+                return json.loads(f.read())
 
-        else:
-            dir_filenames = os.listdir(abi_path)
-
-            # Corner case: handle an extra folder that contain
-            # the artifact files, as in published ocean-contracts pkg.
-            # Introduced in commit 008f9e14.
-            if len(dir_filenames) == 1 and dir_filenames[0] == "*":
-                abi_path = os.path.join(abi_path, "*")
-                dir_filenames = os.listdir(abi_path)
-
-            for cand_filename in dir_filenames:
-                if cand_filename.lower() == target_filename.lower():
-                    full_path = os.path.join(abi_path, target_filename)
-                    break
-
-            if full_path:
-                try:
-                    with open(full_path) as f:
-                        s = f.read()
-                        return json.loads(s)
-                except IOError:
-                    return None
-
-            return None
+        return None

@@ -41,9 +41,7 @@ def test_nochild():
         ContractBase(None)
 
 
-def test_main(
-    network, alice_wallet, alice_address, dtfactory_address, remote_address_file
-):
+def test_main(network, alice_wallet, alice_address, dtfactory_address):
 
     # test super-simple functionality of child
     factory = MyFactory(dtfactory_address)
@@ -56,7 +54,7 @@ def test_main(
     assert factory.contract.address == dtfactory_address
 
     # test methods
-    assert factory.configured_address(network, remote_address_file)[:2] == "0x"
+    assert 'configured_address' in dir(factory)
     assert factory.contract_name == "DTFactory"
     assert factory.address == dtfactory_address
     assert factory.events
