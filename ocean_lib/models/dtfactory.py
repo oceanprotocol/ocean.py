@@ -67,7 +67,7 @@ class DTFactory(ContractBase):
 
         logs = getattr(self.events, "TokenRegistered")().processReceipt(tx_receipt)
         if not logs:
-            logging.warning(f"No logs where found for tx {transaction_id}.")
+            logging.warning(f"No logs were found for tx {transaction_id}.")
             return ""
 
         return logs[0].args.tokenAddress
