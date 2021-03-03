@@ -128,7 +128,8 @@ class ContractBase(object):
         return bool(receipt and receipt.status == 1)
 
     def get_event_signature(self, event_name):
-        """Return signature of event definition to use in the call to eth_getLogs.
+        """
+        Return signature of event definition to use in the call to eth_getLogs.
 
         The event signature is used as topic0 (first topic) in the eth_getLogs arguments
         The signature reflects the event name and argument types.

@@ -198,7 +198,8 @@ class OceanCompute:
         output: dict = None,
         job_id: str = None,
     ):
-        """Start a remote compute job on the asset files.
+        """
+        Start a remote compute job on the asset files.
 
         Files are identified by `did` after verifying that the provider service is active and transferring the
         number of data-tokens required for using this compute service.

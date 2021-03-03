@@ -48,7 +48,8 @@ def get_infura_url(infura_id, network):
 
 
 def get_web3_connection_provider(network_url):
-    """Return the suitable web3 provider based on the network_url.
+    """
+    Return the suitable web3 provider based on the network_url.
 
     When connecting to a public ethereum network (mainnet or a test net) without
     running a local node requires going through some gateway such as `infura`.
