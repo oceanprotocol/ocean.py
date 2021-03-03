@@ -13,6 +13,7 @@ from tests.models.conftest import *  # noqa: F401 F403
 
 # Other things to set up, specific to here...
 
+
 @pytest.fixture
 def example_config():
     return ExampleConfig.get_config()

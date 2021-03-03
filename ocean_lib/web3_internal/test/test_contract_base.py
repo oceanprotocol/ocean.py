@@ -54,7 +54,7 @@ def test_main(network, alice_wallet, alice_address, dtfactory_address):
     assert factory.contract.address == dtfactory_address
 
     # test methods
-    assert 'configured_address' in dir(factory)
+    assert "configured_address" in dir(factory)
     assert factory.contract_name == "DTFactory"
     assert factory.address == dtfactory_address
     assert factory.events

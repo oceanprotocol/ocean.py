@@ -238,4 +238,3 @@ def test_read_abi_from_file__example_config__bad_contract_name(example_config):
         "DTFactoryFOO", ContractHandler.artifacts_path
     )
     assert contract_definition is None
-
