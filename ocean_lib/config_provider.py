@@ -19,7 +19,10 @@ class ConfigProvider:
 
     @staticmethod
     def set_config(config):
-        """Set a Config instance.
+        """
+        Set a Config instance.
+
+        Creates a ConfigProvider object using the config parameter.
 
         :param config: Config
         :return:  New Config instance.
