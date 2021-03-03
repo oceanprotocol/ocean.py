@@ -1,3 +1,9 @@
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
+
+
 class OceanKeeperContractsNotFound(Exception):
     """Raised when is not possible to find the keeper contracts abi."""
 

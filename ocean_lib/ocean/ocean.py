@@ -1,3 +1,7 @@
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 """Ocean module."""
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-Lic;ense-Identifier: Apache-2.0
@@ -6,8 +10,6 @@ import logging
 import os
 
 from eth_utils import remove_0x_prefix
-from web3.datastructures import AttributeDict
-
 from ocean_lib.config import Config
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -35,6 +37,7 @@ from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib.web3_internal.web3helper import Web3Helper
+from web3.datastructures import AttributeDict
 
 logger = logging.getLogger("ocean")
 

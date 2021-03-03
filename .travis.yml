@@ -1,3 +1,7 @@
+##
+## Copyright 2021 Ocean Protocol Foundation
+## SPDX-License-Identifier: Apache-2.0
+##
 language: python
 
 
@@ -29,6 +33,9 @@ install: pip install -U tox-travis
 
 script: tox
 
+after_script:
+  - bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.xml --partial && bash <(curl -Ls https://coverage.codacy.com/get.sh) final
+ 
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel

@@ -1,3 +1,7 @@
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 import logging
 
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -63,7 +67,7 @@ class DTFactory(ContractBase):
 
         logs = getattr(self.events, "TokenRegistered")().processReceipt(tx_receipt)
         if not logs:
-            logging.warning(f"No logs where found for tx {transaction_id}.")
+            logging.warning(f"No logs were found for tx {transaction_id}.")
             return ""
 
         return logs[0].args.tokenAddress
