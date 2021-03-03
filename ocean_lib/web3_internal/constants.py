@@ -1,3 +1,7 @@
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 ENV_GAS_PRICE = "GAS_PRICE"
 ENV_MAX_GAS_PRICE = "MAX_GAS_PRICE"
 

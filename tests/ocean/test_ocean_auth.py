@@ -1,3 +1,7 @@
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 from ocean_lib.ocean.ocean_auth import OceanAuth
 from tests.resources.helper_functions import get_publisher_wallet
 

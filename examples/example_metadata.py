@@ -1,5 +1,7 @@
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 import uuid
 
 metadata = {
@@ -15,7 +17,7 @@ metadata = {
                 "checksum": str(uuid.uuid4()),
                 "checksumType": "MD5",
                 "contentLength": "12057507",
-                "url": "https://raw.githubusercontent.com/oceanprotocol/barge/master/README.md",
+                "url": "https://raw.githubusercontent.com/oceanprotocol/barge/main/README.md",
             }
         ],
         "type": "dataset",
