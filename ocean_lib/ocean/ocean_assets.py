@@ -16,7 +16,7 @@ from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.util import to_base_18
-from ocean_lib.ocean.ocean_assets_utils import format_publisher_trusted_algorithms
+from ocean_lib.ocean.ocean_assets_utils import create_publisher_trusted_algorithms
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
@@ -99,7 +99,7 @@ class OceanAssets:
             _service_descriptors.append(access_service_descriptor)
         if compute_service_descriptor:
             if trusted_algorithms:
-                trusted_algorithms_list = format_publisher_trusted_algorithms(
+                trusted_algorithms_list = create_publisher_trusted_algorithms(
                     self, trusted_algorithms=trusted_algorithms
                 )
                 compute_service_descriptor[1]["attributes"]["main"]["privacy"] = {
@@ -333,6 +333,24 @@ class OceanAssets:
             raise
 
         return asset
+
+    def update_trusted_algorithms_shallow(
+        self, asset: Asset, publisher_wallet: Wallet, trusted_algorithms: list = None
+    ):
+        compute_service_descriptor = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
+        assert (
+            compute_service_descriptor
+        ), "update trusted algorithms failed, compute service does not exist."
+
+        if compute_service_descriptor:
+            if trusted_algorithms:
+                trusted_algorithms_list = create_publisher_trusted_algorithms(
+                    self, trusted_algorithms=trusted_algorithms
+                )
+                compute_service_descriptor[1]["attributes"]["main"]["privacy"] = {
+                    "publisherTrustedAlgorithms": trusted_algorithms_list
+                }
+        self.update(asset=asset, publisher_wallet=publisher_wallet)
 
     def update(self, asset: Asset, publisher_wallet: Wallet) -> bool:
         try:

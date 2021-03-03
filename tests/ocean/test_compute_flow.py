@@ -130,7 +130,6 @@ def run_compute_test(
             ocean_instance, publisher_wallet, consumer_wallet, ddo, service_type
         )
         compute_inputs.append(ComputeInput(ddo.did, _order_tx_id, _service.index))
-
     if algo_ddo:
         # order the algo download service
         algo_tx_id, _, _ = process_order(
@@ -173,7 +172,6 @@ def run_compute_test(
             expect_failure_message == response["error"]
         ), "expected failure message in job creation, but it has a different message."
         return
-
     status = ocean_instance.compute.status(did, job_id, consumer_wallet)
     print(f"got job status: {status}")
 
@@ -282,4 +280,35 @@ def test_compute_trusted_algorithms():
         algo_ddo=algorithm_ddo_v2,
         expect_failure=True,
         expect_failure_message=f"this algorithm did {algorithm_ddo_v2.did} is not trusted.",
+    )
+
+
+def test_update_trusted_algorithms():
+    setup = Setup()
+
+    # Setup algorithm meta to run raw algorithm
+    algorithm_ddo = get_registered_algorithm_ddo(
+        setup.publisher_ocean_instance, setup.publisher_wallet
+    )
+    # verify the ddo is available in Aquarius
+    _ = setup.publisher_ocean_instance.assets.resolve(algorithm_ddo.did)
+
+    # Dataset with compute service
+    compute_ddo = get_registered_ddo_with_compute_service(
+        setup.publisher_ocean_instance,
+        setup.publisher_wallet,
+        trusted_algorithms=[algorithm_ddo.did],
+    )
+    # verify the ddo is available in Aquarius
+    _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
+    setup.publisher_ocean_instance.assets.update_trusted_algorithms_shallow(
+        compute_ddo, setup.publisher_wallet, trusted_algorithms=[algorithm_ddo.did]
+    )
+    run_compute_test(
+        setup.consumer_ocean_instance,
+        setup.publisher_wallet,
+        setup.consumer_wallet,
+        [compute_ddo],
+        algo_ddo=algorithm_ddo,
+        expect_failure=True,
     )
