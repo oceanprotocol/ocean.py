@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class Wallet:
+
     """
     The wallet is responsible for signing transactions and messages by using an account's
     private key.
