@@ -426,8 +426,14 @@ class BPool(BToken):
     def totalSupply(self) -> int:
         return self._ccontract.totalSupply()
 
+    def balanceOf(self, whom_address: str) -> int:
+        return self._ccontract.balanceOf(whom_address)
+
     def allowance(self, src_address: str, dst_address: str) -> int:
         return self._ccontract.allowance(src_address, dst_address)
+
+    def approve(self, dst_address: str, amt_base: int, from_wallet: Wallet):
+        return self.send_transaction("approve", (dst_address, amt_base), from_wallet)
 
     def transfer(self, dst_address: str, amt_base: int, from_wallet: Wallet):
         return self.send_transaction("transfer", (dst_address, amt_base), from_wallet)
