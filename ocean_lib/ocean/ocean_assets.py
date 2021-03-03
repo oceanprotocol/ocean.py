@@ -41,6 +41,7 @@ logger = logging.getLogger("ocean")
 
 
 class OceanAssets:
+
     """Ocean assets class."""
 
     def __init__(self, config, data_provider, ddo_registry_address):
@@ -119,8 +120,9 @@ class OceanAssets:
         dt_cap: float = None,
     ) -> (Asset, None):
         """
-        Register an asset on-chain by creating/deploying a DataToken contract
-        and in the Metadata store (Aquarius).
+        Register an asset on-chain.
+
+        Creating/deploying a DataToken contract and in the Metadata store (Aquarius).
 
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
         :param publisher_wallet: Wallet of the publisher registering this asset

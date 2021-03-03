@@ -11,6 +11,7 @@ from ocean_utils.agreements.service_factory import ServiceDescriptor
 
 
 class OceanServices:
+
     """Ocean services class."""
 
     @staticmethod
