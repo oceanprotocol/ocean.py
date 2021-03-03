@@ -90,7 +90,8 @@ class Config(configparser.ConfigParser):
     """Class to manage the ocean-lib configuration."""
 
     def __init__(self, filename=None, options_dict=None, **kwargs):
-        """Initialize Config class.
+        """
+        Initialize Config class.
 
         Options available:
 

@@ -25,7 +25,8 @@ def download_asset_files(
     data_provider: DataServiceProvider,
     index: [int, None] = None,
 ):
-    """Download asset data files or result files from a compute job.
+    """
+    Download asset data files or result files from a compute job.
 
     :param service_index: identifier of the service inside the asset DDO, str
     :param asset: Asset instance
