@@ -45,6 +45,7 @@ class OceanAssets:
     """Ocean assets class."""
 
     def __init__(self, config, data_provider, ddo_registry_address):
+        """Initialises OceanAssets object."""
         self._config = config
         self._aquarius_url = config.aquarius_url
         self._data_provider = data_provider

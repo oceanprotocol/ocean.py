@@ -18,7 +18,7 @@ from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 class Web3Helper(object):
 
-    """This class provides convenient web3 functions"""
+    """This class provides convenient web3 functions."""
 
     DEFAULT_NETWORK_NAME = "ganache"
     _network_name_map = {
