@@ -2,9 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+
 """All contracts inherit from this base class"""
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
 import logging
 import os
 import typing
@@ -52,6 +51,7 @@ class ContractBase(object):
         assert self.contract_concise is not None
 
     def __str__(self):
+        """Returns contract name @ address."""
         return f"{self.contract_name} @ {self.address}"
 
     @classmethod
@@ -85,7 +85,8 @@ class ContractBase(object):
 
     @staticmethod
     def to_checksum_address(address: str):
-        """Validate the address provided.
+        """
+        Validate the address provided.
 
         :param address: Address, hex str
         :return: address, hex str
@@ -301,6 +302,7 @@ class ContractBase(object):
         blockHash: Optional[HexBytes] = None,
     ):
         """Get events for this contract instance using eth_getLogs API.
+
         This is a stateless method, as opposed to createFilter.
         It can be safely called against nodes which do not provide
         eth_newFilter API, like Infura nodes.
@@ -342,7 +344,6 @@ class ContractBase(object):
           same time as fromBlock or toBlock
         :yield: Tuple of :class:`AttributeDict` instances
         """
-
         if not self.address:
             raise TypeError(
                 "This method can be only called on "

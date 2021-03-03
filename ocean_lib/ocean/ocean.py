@@ -46,6 +46,7 @@ class Ocean:
     def __init__(self, config=None, data_provider=None):
         """
         Initialize Ocean class.
+
            >> # Make a new Ocean instance
            >> ocean = Ocean({...})
 

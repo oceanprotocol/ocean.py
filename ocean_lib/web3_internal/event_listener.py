@@ -26,6 +26,7 @@ class EventListener(object):
         to_block=None,
         filters=None,
     ):
+        """Initialises EventListener object."""
         contract = ContractHandler.get(contract_name)
         self.event_name = event_name
         self.event = getattr(contract.events, event_name)
@@ -58,6 +59,7 @@ class EventListener(object):
         blocking=False,
     ):
         """
+        Listens once for event.
 
         :param callback: a callback function that takes one argument the event dict
         :param timeout: float timeout in seconds
