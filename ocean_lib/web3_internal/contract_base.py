@@ -72,7 +72,8 @@ class ContractBase(object):
 
     @property
     def events(self):
-        """Expose the underlying contract's events.
+        """
+        Expose the underlying contract's events.
 
         :return:
         """
@@ -84,8 +85,7 @@ class ContractBase(object):
 
     @staticmethod
     def to_checksum_address(address: str):
-        """
-        Validate the address provided.
+        """Validate the address provided.
 
         :param address: Address, hex str
         :return: address, hex str
@@ -127,7 +127,7 @@ class ContractBase(object):
         return bool(receipt and receipt.status == 1)
 
     def get_event_signature(self, event_name):
-        """Return signature of event definition to use in the call to eth_getLogs
+        """Return signature of event definition to use in the call to eth_getLogs.
 
         The event signature is used as topic0 (first topic) in the eth_getLogs arguments
         The signature reflects the event name and argument types.

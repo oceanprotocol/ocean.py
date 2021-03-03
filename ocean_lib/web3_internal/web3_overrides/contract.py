@@ -11,6 +11,7 @@ from web3.contract import prepare_transaction
 
 class CustomContractFunction:
     def __init__(self, contract_function):
+        """Initializes CustomContractFunction."""
         self._contract_function = contract_function
 
     def transact(self, transaction=None):
