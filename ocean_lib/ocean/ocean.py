@@ -2,10 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-"""Ocean module."""
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-Lic;ense-Identifier: Apache-2.0
 
+"""Ocean module."""
 import logging
 import os
 

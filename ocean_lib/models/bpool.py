@@ -454,7 +454,7 @@ class BPool(BToken):
         tokenWeightOut_base: int,
         swapFee_base: int,
     ) -> int:
-        """Returns spotPrice_base"""
+        """Returns spotPrice_base."""
         return self._ccontract.calcSpotPrice(
             tokenBalanceIn_base,
             tokenWeightIn_base,
@@ -472,7 +472,7 @@ class BPool(BToken):
         tokenAmountIn_base: int,
         swapFee_base: int,
     ) -> int:
-        """Returns tokenAmountOut_base"""
+        """Returns tokenAmountOut_base."""
         return self._ccontract.calcOutGivenIn(
             tokenBalanceIn_base,
             tokenWeightIn_base,
@@ -491,7 +491,7 @@ class BPool(BToken):
         tokenAmountOut_base: int,
         swapFee_base: int,
     ) -> int:
-        """Returns tokenAmountIn_base"""
+        """Returns tokenAmountIn_base."""
         return self._ccontract.calcInGivenOut(
             tokenBalanceIn_base,
             tokenWeightIn_base,
@@ -510,7 +510,7 @@ class BPool(BToken):
         tokenAmountIn_base: int,
         swapFee_base: int,
     ) -> int:
-        """Returns poolAmountOut_base"""
+        """Returns poolAmountOut_base."""
         return self._ccontract.calcPoolOutGivenSingleIn(
             tokenBalanceIn_base,
             tokenWeightIn_base,
@@ -529,7 +529,7 @@ class BPool(BToken):
         poolAmountOut_base: int,
         swapFee_base: int,
     ) -> int:
-        """Returns tokenAmountIn_base"""
+        """Returns tokenAmountIn_base."""
         return self._ccontract.calcSingleInGivenPoolOut(
             tokenBalanceIn_base,
             tokenWeightIn_base,
@@ -548,7 +548,7 @@ class BPool(BToken):
         poolAmountIn_base: int,
         swapFee_base: int,
     ) -> int:
-        """Returns tokenAmountOut_base"""
+        """Returns tokenAmountOut_base."""
         return self._ccontract.calcSingleOutGivenPoolIn(
             tokenBalanceOut_base,
             tokenWeightOut_base,
@@ -567,7 +567,7 @@ class BPool(BToken):
         tokenAmountOut_base: int,
         swapFee_base: int,
     ) -> int:
-        """Returns poolAmountIn_base"""
+        """Returns poolAmountIn_base."""
         return self._ccontract.calcPoolInGivenSingleOut(
             tokenBalanceOut_base,
             tokenWeightOut_base,
