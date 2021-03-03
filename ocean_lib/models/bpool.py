@@ -44,11 +44,11 @@ class BPool(BToken):
             final_symbols = [BToken(addr).symbol() for addr in final_addrs]
             s += [f"  finalTokens (as symbols) = {final_symbols}"]
 
-        s += [f"  is bound:"]
+        s += ["  is bound:"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
             s += [f"    {symbol}: {self.isBound(addr)}"]
 
-        s += [f"  weights (fromBase):"]
+        s += ["  weights (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
             denorm_w = util.from_base_18(self.getDenormalizedWeight(addr))
             norm_w = util.from_base_18(self.getNormalizedWeight(addr))
@@ -57,7 +57,7 @@ class BPool(BToken):
         total_denorm_w = util.from_base_18(self.getTotalDenormalizedWeight())
         s += [f"    total_denorm_w={total_denorm_w}"]
 
-        s += [f"  balances (fromBase):"]
+        s += ["  balances (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
             balance_base = self.getBalance(addr)
             dec = BToken(addr).decimals()
