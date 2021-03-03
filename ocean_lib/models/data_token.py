@@ -370,7 +370,7 @@ class DataToken(ContractBase):
     def get_info(self, web3, from_block, to_block, include_holders=False):
         contract = self.contract_concise
         minter = contract.minter()
-        all_transfers, block = self.get_all_transfers_from_events(from_block, to_block)
+        all_transfers, _ = self.get_all_transfers_from_events(from_block, to_block)
         order_logs = self.get_start_order_logs(
             web3, from_block=from_block, to_block=to_block
         )

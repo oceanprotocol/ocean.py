@@ -91,11 +91,8 @@ def test_register_asset(publisher_ocean_instance):
     _name = "updated name"
     ddo.metadata["main"]["name"] = _name
     assert ddo.metadata["main"]["name"] == _name
-    try:
+    with pytest.raises(ValueError):
         ocn.assets.update(ddo, bob)
-        assert False, "this asset update should fail, but did not."
-    except Exception:
-        pass
 
     _ = ocn.assets.update(ddo, alice)
     log = ddo_reg.get_event_log(ddo_reg.EVENT_METADATA_UPDATED, block, asset_id, 30)
