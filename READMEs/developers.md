@@ -73,7 +73,7 @@ export CONFIG_FILE=config.ini
 ```
 
 Running barge already deployed contracts for us. Let's point to them. Open the config file `./config.ini`, and in the `[eth-network]` section, set these values:
-```
+```console
 address.file = ~/.ocean/ocean-contracts/artifacts/address.json
 artifacts.path = ~/.ocean/ocean-contracts/artifacts
 ```
