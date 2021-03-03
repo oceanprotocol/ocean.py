@@ -38,6 +38,7 @@ class Wallet:
         password: typing.Union[str, None] = None,
         address: typing.Union[str, None] = None,
     ):
+        """Initialises Wallet object."""
         assert private_key or (
             encrypted_key and password
         ), "private_key or encrypted_key and password is required."

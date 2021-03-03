@@ -25,6 +25,7 @@ class BPool(BToken):
         self._ccontract = self.contract_concise
 
     def __str__(self):
+        """Formats with attributes as key, value pairs."""
         s = []
         s += ["BPool:"]
         s += [f"  pool_address={self.address}"]
