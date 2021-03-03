@@ -10,10 +10,7 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
-import os
-from os.path import join
-
-from setuptools import setup, find_namespace_packages
+from setuptools import find_namespace_packages, setup
 
 with open("README.md", encoding="utf8") as readme_file:
     readme = readme_file.read()
