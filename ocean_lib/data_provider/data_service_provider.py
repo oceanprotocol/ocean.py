@@ -32,6 +32,7 @@ OrderRequirements = namedtuple(
 
 
 class DataServiceProvider:
+
     """The main functions available are:
     - consume_service
     - run_compute_service (not implemented yet)

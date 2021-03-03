@@ -16,7 +16,8 @@ logger = logging.getLogger("keeper")
 
 
 def resolve_asset(did, metadata_store_url=None, token_address=None):
-    """Resolve a DID to an URL/DDO or later an internal/external DID.
+    """
+    Resolve a DID to an URL/DDO or later an internal/external DID.
 
     :param did: the asset id to resolve, this is part of the ocean
         DID did:op:<32 byte value>
