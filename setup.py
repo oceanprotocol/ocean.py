@@ -72,7 +72,7 @@ dev_requirements = [
 
 docs_requirements = ["Sphinx", "sphinxcontrib-apidoc"]
 
-packages = find_namespace_packages(include=['ocean_lib*'], exclude=['*test*'])
+packages = find_namespace_packages(include=["ocean_lib*"], exclude=["*test*"])
 
 setup(
     author="leucothia",
