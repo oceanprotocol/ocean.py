@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-"""All contracts inherit from this base class"""
+"""All contracts inherit from this base class."""
 import logging
 import os
 import typing

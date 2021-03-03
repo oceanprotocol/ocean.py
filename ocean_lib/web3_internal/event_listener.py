@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class EventListener(object):
+
     """Class representing an event listener."""
 
     def __init__(

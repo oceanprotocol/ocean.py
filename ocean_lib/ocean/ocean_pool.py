@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class OceanPool:
+
     """
     This pool is based on the Balancer protocol contracts with slight
     modifications (https://github.com/balancer-labs). This class wraps the main

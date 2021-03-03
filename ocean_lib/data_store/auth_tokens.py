@@ -13,8 +13,7 @@ class AuthTokensStorage(StorageBase):
     AUTH_TOKENS_TABLE = "auth_tokens"
 
     def write_token(self, address, signed_token, created_at):
-        """
-        Store signed token for session management.
+        """Store signed token for session management.
 
         :param address: hex str the ethereum address that signed the token
         :param signed_token: hex str the signed token
@@ -36,8 +35,7 @@ class AuthTokensStorage(StorageBase):
         )
 
     def update_token(self, address, signed_token, created_at):
-        """
-        Update/replace the stored signed token for the given ethereum address
+        """Update/replace the stored signed token for the given ethereum address.
 
         :param address: hex str the ethereum address that signed the token
         :param signed_token: hex str the signed token
