@@ -17,6 +17,7 @@ class SignatureFix(Signature):
     """
 
     def __init__(self, signature_bytes=None, vrs=None, backend=None) -> None:
+        """Initialises SignatureFix object."""
         v, r, s = vrs
         if v == 27 or v == 28:
             v -= 27

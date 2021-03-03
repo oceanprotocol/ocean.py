@@ -20,6 +20,7 @@ class BPool(BToken):
     CONTRACT_NAME = "BPool"
 
     def __init__(self, *args, **kwargs):
+        """Initialises BPool object."""
         BToken.__init__(self, *args, **kwargs)
         self._ccontract = self.contract_concise
 

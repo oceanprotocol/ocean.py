@@ -8,6 +8,7 @@ from web3 import Web3
 
 
 class Web3Provider(object):
+
     """Provides the Web3 instance."""
 
     _web3 = None
