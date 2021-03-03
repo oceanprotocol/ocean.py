@@ -28,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class ContractBase(object):
+
     """Base class for all contract objects."""
 
     CONTRACT_NAME = None
@@ -65,9 +66,7 @@ class ContractBase(object):
 
     @property
     def address(self) -> str:
-        """Return the ethereum address of the solidity contract deployed
-        in current network.
-        """
+        """Return the ethereum address of the solidity contract deployed in current network."""
         return self.contract.address
 
     @property
