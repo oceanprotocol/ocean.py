@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class ContractHandler(object):
+
     """
     Manages loading contracts and also keeps a cache of loaded contracts.
 

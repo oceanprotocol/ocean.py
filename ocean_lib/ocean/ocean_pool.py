@@ -46,6 +46,7 @@ class OceanPool:
     }
 
     def __init__(self, ocean_token_address: str, bfactory_address: str):
+        """Initialises Ocean Pool."""
         self.ocean_address = ocean_token_address
         self.bfactory_address = bfactory_address
 
