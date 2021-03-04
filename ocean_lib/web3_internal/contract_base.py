@@ -34,6 +34,10 @@ class ContractBase(object):
     CONTRACT_NAME = None
 
     def __init__(self, address: [str, None], abi_path=None):
+        """Initialises Contract Base object.
+
+        The contract name attribute and abi_path are required.
+        """
         self.name = self.contract_name
         assert (
             self.name
