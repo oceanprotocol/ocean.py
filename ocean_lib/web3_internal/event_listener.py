@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class EventListener(object):
+
     """Class representing an event listener."""
 
     def __init__(
@@ -57,7 +58,9 @@ class EventListener(object):
         start_time=None,
         blocking=False,
     ):
-        """
+        """Starts a thread for listening for an event, once.
+
+        Supports a callback function and other customisation.
 
         :param callback: a callback function that takes one argument the event dict
         :param timeout: float timeout in seconds

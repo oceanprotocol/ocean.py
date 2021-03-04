@@ -11,6 +11,7 @@ from eth_utils import int_to_big_endian
 
 
 class SignatureFix(Signature):
+
     """
     Hack the Signature class to allow rebuilding of signature with a
     v value of 27 or 28 instead of 0 or 1

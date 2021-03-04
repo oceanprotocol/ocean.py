@@ -109,6 +109,7 @@ class BPool(BToken):
         The `finalized` state lets users know that the weights, balances, and
         fees of this pool are immutable. In the `finalized` state, `SWAP`,
         `JOIN`, and `EXIT` are public. `CONTROL` capabilities are disabled.
+
         (https://docs.balancer.finance/smart-contracts/api#access-control)
         """
         return self._ccontract.isFinalized()
@@ -130,11 +131,11 @@ class BPool(BToken):
         return self._ccontract.getNumTokens()
 
     def getCurrentTokens(self) -> typing.List[str]:
-        """@return -- list of [token_addr:str]"""
+        """@return -- list of [token_addr:str]."""
         return self._ccontract.getCurrentTokens()
 
     def getFinalTokens(self) -> typing.List[str]:
-        """@return -- list of [token_addr:str]"""
+        """@return -- list of [token_addr:str]."""
         return self._ccontract.getFinalTokens()
 
     def getDenormalizedWeight(self, token_address: str) -> int:

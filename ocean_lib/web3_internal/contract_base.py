@@ -29,11 +29,16 @@ logger = logging.getLogger(__name__)
 
 
 class ContractBase(object):
+
     """Base class for all contract objects."""
 
     CONTRACT_NAME = None
 
     def __init__(self, address: [str, None], abi_path=None):
+        """Initialises ContractBase.
+
+        The contract_name attribute must exist.
+        """
         self.name = self.contract_name
         assert (
             self.name
@@ -65,9 +70,7 @@ class ContractBase(object):
 
     @property
     def address(self) -> str:
-        """Return the ethereum address of the solidity contract deployed
-        in current network.
-        """
+        """Return the ethereum address of the solidity contract deployed in current network."""
         return self.contract.address
 
     @property
@@ -301,6 +304,7 @@ class ContractBase(object):
         blockHash: Optional[HexBytes] = None,
     ):
         """Get events for this contract instance using eth_getLogs API.
+
         This is a stateless method, as opposed to createFilter.
         It can be safely called against nodes which do not provide
         eth_newFilter API, like Infura nodes.
@@ -342,7 +346,6 @@ class ContractBase(object):
           same time as fromBlock or toBlock
         :yield: Tuple of :class:`AttributeDict` instances
         """
-
         if not self.address:
             raise TypeError(
                 "This method can be only called on "

@@ -2,9 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+
 """Web3Helper module to provide convenient functions."""
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
 from eth_utils import big_endian_to_int
 from ocean_lib.web3_internal.utils import (
     add_ethereum_prefix_and_hash_msg,
@@ -31,8 +30,8 @@ class Web3Helper(object):
 
     @staticmethod
     def get_network_name(network_id=None):
-        """
-        Return the network name based on the current ethereum network id.
+        """Return the network name based on the current ethereum network id.
+
         Return `ganache` for every network id that is not mapped.
 
         :param network_id: Network id, int

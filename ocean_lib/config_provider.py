@@ -5,13 +5,14 @@
 
 
 class ConfigProvider:
+
     """Provides the Config instance."""
 
     _config = None
 
     @staticmethod
     def get_config():
-        """ Get a Config instance."""
+        """Get a Config instance."""
         if not ConfigProvider._config:
             raise AssertionError("set_config first.")
         return ConfigProvider._config

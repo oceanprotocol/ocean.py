@@ -2,10 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-"""Ocean module."""
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
 
+"""Ocean module."""
 import logging
 from datetime import datetime
 
@@ -17,6 +15,7 @@ from ocean_lib.web3_internal.web3helper import Web3Helper
 
 
 class OceanAuth:
+
     """Ocean auth class.
     Provide basic management of a user auth token. This token can be used to emulate
     sign-in behaviour. The token can be stored and associated with an expiry time.

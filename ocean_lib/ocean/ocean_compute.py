@@ -19,7 +19,8 @@ logger = logging.getLogger("ocean")
 
 
 class OceanCompute:
-    """Ocean assets class."""
+
+    """Ocean compute class."""
 
     def __init__(self, ocean_auth, config, data_provider):
         self._auth = ocean_auth

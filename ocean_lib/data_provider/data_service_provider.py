@@ -2,11 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+
 """Provider module."""
-
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
-
 import json
 import logging
 import os
@@ -32,6 +29,7 @@ OrderRequirements = namedtuple(
 
 
 class DataServiceProvider:
+
     """
     The main functions available are:
     - consume_service
