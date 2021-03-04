@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 
 
 class OceanPool:
+
     """
     This pool is based on the Balancer protocol contracts with slight
     modifications (https://github.com/balancer-labs). This class wraps the main
@@ -46,6 +47,7 @@ class OceanPool:
     }
 
     def __init__(self, ocean_token_address: str, bfactory_address: str):
+        """Initialises Ocean Pool."""
         self.ocean_address = ocean_token_address
         self.bfactory_address = bfactory_address
 

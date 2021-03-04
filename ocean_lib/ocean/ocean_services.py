@@ -2,15 +2,15 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+
 """Ocean module."""
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_utils.agreements.service_factory import ServiceDescriptor
 
 
 class OceanServices:
+
     """Ocean services class."""
 
     @staticmethod

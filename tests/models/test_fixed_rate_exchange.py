@@ -22,6 +22,8 @@ def test_fixed_rate_exchange(
     alice_ocean, alice_wallet, T1, bob_wallet, T2, contracts_addresses
 ):
     """
+    Tests for fixed rate exchange.
+
     tests:
         create
         generateExchangeId

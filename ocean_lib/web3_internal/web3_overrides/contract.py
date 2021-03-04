@@ -11,13 +11,15 @@ from web3.contract import prepare_transaction
 
 class CustomContractFunction:
     def __init__(self, contract_function):
+        """Initializes CustomContractFunction."""
         self._contract_function = contract_function
 
     def transact(self, transaction=None):
         """
         Customize calling smart contract transaction functions to use `personal_sendTransaction`
-        instead of `eth_sendTransaction` and to estimate gas limit. This function
-        is largely copied from web3 ContractFunction with important addition.
+        instead of `eth_sendTransaction` and to estimate gas limit.
+
+        This function is largely copied from web3 ContractFunction with an important addition.
 
         Note: will fallback to `eth_sendTransaction` if `passphrase` is not provided in the
         `transaction` dict.

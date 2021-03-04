@@ -19,9 +19,11 @@ logger = logging.getLogger("ocean")
 
 
 class OceanCompute:
+
     """Ocean assets class."""
 
     def __init__(self, ocean_auth, config, data_provider):
+        """Initialises OceanCompute class."""
         self._auth = ocean_auth
         self._config = config
         self._data_provider = data_provider
@@ -29,6 +31,7 @@ class OceanCompute:
     @staticmethod
     def build_cluster_attributes(cluster_type, url):
         """
+        Builds cluster attributes.
 
         :param cluster_type: str (e.g. Kubernetes)
         :param url: str (e.g. http://10.0.0.17/xxx)
@@ -39,6 +42,7 @@ class OceanCompute:
     @staticmethod
     def build_container_attributes(image, tag, entrypoint):
         """
+        Builds container attributes.
 
         :param image: str name of Docker image (e.g. node)
         :param tag: str the Docker image tag (e.g. latest or a specific version number)
@@ -52,6 +56,7 @@ class OceanCompute:
         server_id, server_type, cpu, gpu, memory, disk, max_run_time
     ):
         """
+        Builds server attributes.
 
         :param server_id: str
         :param server_type: str
@@ -101,6 +106,7 @@ class OceanCompute:
         timeout: int, creator: str, date_published: str, provider_attributes: dict
     ):
         """
+        Creates compute service attributes.
 
         :param timeout: integer maximum amount of running compute service in seconds
         :param creator: str ethereum address
@@ -193,8 +199,10 @@ class OceanCompute:
         output: dict = None,
         job_id: str = None,
     ):
-        """Start a remote compute job on the asset files identified by `did` after
-        verifying that the provider service is active and transferring the
+        """
+        Start a remote compute job on the asset files.
+
+        Files are identified by `did` after verifying that the provider service is active and transferring the
         number of data-tokens required for using this compute service.
 
         :param input_datasets: list of ComputeInput -- list of input datasets to the compute job. A dataset is
@@ -259,6 +267,8 @@ class OceanCompute:
 
     def status(self, did, job_id, wallet):
         """
+        Gets job status.
+
         :param did: str id of the asset offering the compute service of this job
         :param job_id: str id of the compute job
         :param wallet: Wallet instance
@@ -278,6 +288,8 @@ class OceanCompute:
 
     def result(self, did, job_id, wallet):
         """
+        Gets job result.
+
         :param did: str id of the asset offering the compute service of this job
         :param job_id: str id of the compute job
         :param wallet: Wallet instance
@@ -300,7 +312,7 @@ class OceanCompute:
 
     def stop(self, did, job_id, wallet):
         """
-        Attempt to stop the running compute job
+        Attempt to stop the running compute job.
 
         :param did: str id of the asset offering the compute service of this job
         :param job_id: str id of the compute job

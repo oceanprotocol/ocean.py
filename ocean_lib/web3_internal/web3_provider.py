@@ -8,6 +8,7 @@ from web3 import Web3
 
 
 class Web3Provider(object):
+
     """Provides the Web3 instance."""
 
     _web3 = None
@@ -15,8 +16,9 @@ class Web3Provider(object):
     @staticmethod
     def init_web3(network_url=None, provider=None):
         """
-        One of `network_url` or `provider` is required. If `provider` is
-        given, `network_url` will be ignored.
+        One of `network_url` or `provider` is required.
+
+        If `provider` is given, `network_url` will be ignored.
 
         :param network_url:
         :param provider:

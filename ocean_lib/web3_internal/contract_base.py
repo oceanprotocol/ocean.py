@@ -2,9 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-"""All contracts inherit from this base class"""
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
+
+"""All contracts inherit from this base class."""
 import logging
 import os
 import typing
@@ -29,6 +28,7 @@ logger = logging.getLogger(__name__)
 
 
 class ContractBase(object):
+
     """Base class for all contract objects."""
 
     CONTRACT_NAME = None
@@ -52,6 +52,7 @@ class ContractBase(object):
         assert self.contract_concise is not None
 
     def __str__(self):
+        """Returns contract name @ address."""
         return f"{self.contract_name} @ {self.address}"
 
     @classmethod
@@ -65,14 +66,13 @@ class ContractBase(object):
 
     @property
     def address(self) -> str:
-        """Return the ethereum address of the solidity contract deployed
-        in current network.
-        """
+        """Return the ethereum address of the solidity contract deployed in current network."""
         return self.contract.address
 
     @property
     def events(self):
-        """Expose the underlying contract's events.
+        """
+        Expose the underlying contract's events.
 
         :return:
         """
@@ -127,7 +127,8 @@ class ContractBase(object):
         return bool(receipt and receipt.status == 1)
 
     def get_event_signature(self, event_name):
-        """Return signature of event definition to use in the call to eth_getLogs
+        """
+        Return signature of event definition to use in the call to eth_getLogs.
 
         The event signature is used as topic0 (first topic) in the eth_getLogs arguments
         The signature reflects the event name and argument types.
@@ -301,6 +302,7 @@ class ContractBase(object):
         blockHash: Optional[HexBytes] = None,
     ):
         """Get events for this contract instance using eth_getLogs API.
+
         This is a stateless method, as opposed to createFilter.
         It can be safely called against nodes which do not provide
         eth_newFilter API, like Infura nodes.
@@ -342,7 +344,6 @@ class ContractBase(object):
           same time as fromBlock or toBlock
         :yield: Tuple of :class:`AttributeDict` instances
         """
-
         if not self.address:
             raise TypeError(
                 "This method can be only called on "

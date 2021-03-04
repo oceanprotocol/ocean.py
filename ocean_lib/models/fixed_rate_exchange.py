@@ -15,6 +15,7 @@ FixedExchangeData = namedtuple(
 
 
 class FixedRateExchange(ContractBase):
+
     """
 
     Note: all operations accept and return integer values in base 18 format.
