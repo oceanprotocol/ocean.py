@@ -88,7 +88,8 @@ export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7
 ### 3.3 Deploy fake OCEAN, and connect to it
 
 In console:
-```
+
+```console
 ./deploy.py ganache
 ```
 
