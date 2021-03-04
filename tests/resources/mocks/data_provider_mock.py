@@ -13,6 +13,7 @@ from ocean_utils.agreements.service_types import ServiceTypes
 
 class DataProviderMock(object):
     def __init__(self, ocean_instance=None, wallet=None):
+        """Initialises DataProviderMock object."""
         if not ocean_instance:
             from tests.resources.helper_functions import get_publisher_ocean_instance
 

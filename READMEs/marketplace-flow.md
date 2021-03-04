@@ -25,7 +25,7 @@ Let's go through each step.
 
 ### 1.1 Do Datatokens tutorial
 
-This builds on the setup from [Datatokens tutorial](datatokens_flow.md). Please do it first.
+This builds on the setup from [Datatokens tutorial](datatokens\-flow.md). Please do it first.
 
 ### 1.2 Run Ocean Market locally
 
@@ -75,8 +75,8 @@ Specify metadata and service attributes. We use a dataset based on the [Branin t
 date_created = "2019-12-28T10:55:11Z"
 metadata =  {
     "main": {
-        "type": "dataset", "name": "branin", "author": "Trent", 
-        "license": "CC0: Public Domain", "dateCreated": date_created, 
+        "type": "dataset", "name": "branin", "author": "Trent",
+        "license": "CC0: Public Domain", "dateCreated": date_created,
         "files": [{"index": 0, "contentType": "text/text",
 	           "url": "https://raw.githubusercontent.com/trentmc/branin/master/branin.arff"}]}
 }
@@ -104,7 +104,7 @@ asset = ocean.assets.create(
 assert token_address == asset.data_token_address
 
 did = asset.did  # did contains the datatoken address
-print(f"did = '{did}'") 
+print(f"did = '{did}'")
 ```
 
 ## 3. Alice mints 100 datatokens
@@ -116,7 +116,7 @@ data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
 
 ## 4. Alice creates a pool for trading her new datatokens
 
-Alice needs Rinkeby OCEAN for this step. Let's check. If this fails, the tutorial to [get test OCEAN](get_test_OCEAN.md) will help.
+Alice needs Rinkeby OCEAN for this step. Let's check. If this fails, the tutorial to [get test OCEAN](get\-test\-OCEAN.md) will help.
 
 ```python
 from ocean_lib.models.btoken import BToken #BToken is ERC20
@@ -194,8 +194,8 @@ Now, we're going to be Bob. Bob wants to buy datatokens from Alice, through the 
 
 First, Bob will need his own Rinkeby Ethereum account / private key, Rinkeby ETH, and Rinkeby OCEAN.
 
--   Get account and ETH with help from the [datatokens tutorial](datatokens_flow.md). Then, in console: `export BOB_KEY=<Bob_private_key>`
--   Get OCEAN with help from [test OCEAN tutorial](get_test_OCEAN.md)
+-   Get account and ETH with help from the [datatokens tutorial](datatokens\-flow.md). Then, in console: `export BOB_KEY=<Bob_private_key>`
+-   Get OCEAN with help from [test OCEAN tutorial](get\-test\-OCEAN.md)
 
 Stop and re-start your Python console. What follows is in Python.
 
@@ -220,13 +220,13 @@ print(f"bob_wallet.address = '{bob_wallet.address}'")
 
 For legacy support, you can also use `metadataStoreUri` instead of `metadataCacheUri`.
 
-Verify that Bob has Rinkeby ETH. If it fails, the [datatokens tutorial](datatokens_tutorial.md) can help.
+Verify that Bob has Rinkeby ETH. If it fails, the [datatokens tutorial](datatokens\-flow.md) can help.
 
 ```python
 assert bob_ocean.web3.eth.getBalance(bob_wallet.address) > 0, "need Rinkeby ETH"
 ```
 
-Verify that Bob has Rinkeby OCEAN. If it fails, the [test OCEAN tutorial](get_test_OCEAN.md) can help.
+Verify that Bob has Rinkeby OCEAN. If it fails, the [test OCEAN tutorial](get\-test\-OCEAN.md) can help.
 
 ```python
 from ocean_lib.models.btoken import BToken #BToken is ERC20
@@ -248,7 +248,7 @@ Bob buys 1.0 datatokens - the amount needed to consume the dataset.
 data_token = bob_ocean.get_data_token(token_address)
 
 bob_ocean.pool.buy_data_tokens(
-    pool_address, 
+    pool_address,
     amount=1.0, # buy 1.0 datatoken
     max_OCEAN_amount=10.0, # pay up to 10.0 OCEAN
     from_wallet=bob_wallet
@@ -281,11 +281,11 @@ print(f"order_tx_id = '{order_tx_id}'")
 Now, download to current working directory `./`. If the connection breaks, Bob can request again by showing the `order_tx_id`.
 
     file_path = bob_ocean.assets.download(
-        asset.did, 
-        service.index, 
-        bob_wallet, 
-        order_tx_id, 
-        destination='./' 
+        asset.did,
+        service.index,
+        bob_wallet,
+        order_tx_id,
+        destination='./'
     )
     print(f"file_path = '{file_path}'") #e.g. datafile.0xAf07...
 

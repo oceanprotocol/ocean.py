@@ -32,11 +32,11 @@ OrderRequirements = namedtuple(
 
 
 class DataServiceProvider:
+
     """
     The main functions available are:
     - consume_service
     - run_compute_service (not implemented yet)
-
     """
 
     _http_client = get_requests_session()
@@ -50,7 +50,7 @@ class DataServiceProvider:
 
     @staticmethod
     def set_http_client(http_client):
-        """Set the http client to something other than the default `requests`"""
+        """Set the http client to something other than the default `requests`."""
         DataServiceProvider._http_client = http_client
 
     @staticmethod

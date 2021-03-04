@@ -7,6 +7,7 @@ import json
 
 class AlgorithmMetadata:
     def __init__(self, metadata_dict):
+        """Initialises AlgorithmMetadata object."""
         self.url = metadata_dict.get("url", "")
         self.rawcode = metadata_dict.get("rawcode", "")
         self.language = metadata_dict.get("language", "")

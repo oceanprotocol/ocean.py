@@ -13,7 +13,7 @@ Here, let's get some OCEAN for the Rinkeby testnet, and verify in Python that we
 
 This builds on the setup in the following. Please do it first.
 
--   [Datatokens tutorial](datatokens_flow.md)
+-   [Datatokens tutorial](datatokens\-flow.md)
 
 ## Get OCEAN
 

@@ -42,7 +42,7 @@ SPDX-License-Identifier: Apache-2.0
     on:
       tags: true
       repo: oceanprotocol/ocean.py
-      python: 3.6
+      python: 3.8
     ```
 
 -   Go to Travis and check the Travis job. It should deploy a new release to PyPI.

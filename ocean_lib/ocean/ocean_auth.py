@@ -35,6 +35,7 @@ class OceanAuth:
     DEFAULT_MESSAGE = "Ocean Protocol Authentication"
 
     def __init__(self, storage_path):
+        """Initialises OceanAuth object."""
         self._tokens_storage = AuthTokensStorage(storage_path)
 
     @staticmethod

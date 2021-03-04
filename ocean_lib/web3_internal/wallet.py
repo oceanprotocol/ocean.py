@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class Wallet:
+
     """
     The wallet is responsible for signing transactions and messages by using an account's
     private key.
@@ -37,6 +38,7 @@ class Wallet:
         password: typing.Union[str, None] = None,
         address: typing.Union[str, None] = None,
     ):
+        """Initialises Wallet object."""
         assert private_key or (
             encrypted_key and password
         ), "private_key or encrypted_key and password is required."
