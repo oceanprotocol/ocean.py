@@ -77,7 +77,6 @@ export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7
 ./deploy.py ganache
 ```
 
-
 ### Install the library
 
 In a new console:
@@ -98,7 +97,7 @@ pip install ocean-lib
 ### Create config file
 
 Create a file called `test3/config.ini` and fill it as follows.
-```
+```text
 [eth-network]
 network = ganache
 artifacts.path = ~/.ocean/ocean-contracts/artifacts

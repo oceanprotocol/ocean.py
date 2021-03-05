@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Publish datatoken
 
-### Run the services
+## Run the services
 
 In a new console:
 
@@ -21,16 +21,16 @@ docker system prune -a --volumes
 ./start_ocean.sh  --with-provider2
 ```
 
-### Create config file
+## Create config file
 Create a file called `config.ini` and fill it as follows.
-```
+```text
 [eth-network]
 network = ganache
 artifacts.path = ~/.ocean/ocean-contracts/artifacts
 address.file = ~/.ocean/ocean-contracts/artifacts/address.json
 ```
 
-### Install the library, set envvars
+## Install the library, set envvars
 
 In a new console:
 
@@ -49,7 +49,7 @@ export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f43
 python
 ```
 
-###  Publish datatokens
+## Publish datatokens
 
 In the Python console:
 
@@ -71,6 +71,5 @@ print("create datatoken: begin.")
 datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet) 
 print(f"created datatoken: done. Its address is {datatoken.address}")
 ```
-
 Congrats, you've created your first Ocean datatoken! 🐋
 
