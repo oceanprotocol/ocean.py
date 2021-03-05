@@ -1,0 +1,10 @@
+##
+## Copyright 2021 Ocean Protocol Foundation
+## SPDX-License-Identifier: Apache-2.0
+##
+pep257:
+    disable: [
+        D213,  # Multi-line docstring summary should start at the second line
+        D211,  # No blank lines allowed before class docstring
+    ]
+
