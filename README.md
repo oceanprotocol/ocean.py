@@ -62,7 +62,6 @@ This batteries-included flow includes metadata, multiple services for one datato
 -   [Learn about wallets](READMEs/wallets.md) - on generating, storing, and accessing private keys
 -   [Get an overview of ocean.py](READMEs/overview.md) - key modules and functions
 
-
 ## 🦑 Development
 
 If you want to further develop ocean.py, then [please go here](READMEs/developers.md).
