@@ -17,7 +17,9 @@ from ocean_lib.web3_internal.web3helper import Web3Helper
 
 
 class OceanAuth:
+
     """Ocean auth class.
+
     Provide basic management of a user auth token. This token can be used to emulate
     sign-in behaviour. The token can be stored and associated with an expiry time.
     This is useful in front-end applications that interact with a 3rd-party wallet

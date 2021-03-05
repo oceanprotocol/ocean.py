@@ -15,9 +15,9 @@ class CustomContractFunction:
         self._contract_function = contract_function
 
     def transact(self, transaction=None):
-        """
-        Customize calling smart contract transaction functions to use `personal_sendTransaction`
-        instead of `eth_sendTransaction` and to estimate gas limit.
+        """Customize calling smart contract transaction functions.
+
+        Use `personal_sendTransaction` instead of `eth_sendTransaction` and to estimate gas limit.
 
         This function is largely copied from web3 ContractFunction with an important addition.
 

@@ -107,8 +107,7 @@ class BPool(BToken):
         return self._ccontract.isPublicSwap()
 
     def isFinalized(self) -> bool:
-        """
-        Returns true if state is finalized.
+        """Returns true if state is finalized.
 
         The `finalized` state lets users know that the weights, balances, and
         fees of this pool are immutable. In the `finalized` state, `SWAP`,
@@ -118,8 +117,7 @@ class BPool(BToken):
         return self._ccontract.isFinalized()
 
     def isBound(self, token_address: str) -> bool:
-        """
-        Returns True if the token is bound.
+        """Returns True if the token is bound.
 
         A bound token has a valid balance and weight. A token cannot be bound
         without valid parameters which will enable e.g. `getSpotPrice` in terms
@@ -613,7 +611,7 @@ class BPool(BToken):
         event_abi = event().abi
         try:
             logs = web3.eth.getLogs(_filter)
-            logs = [get_event_data(event_abi, l) for l in logs]
+            logs = [get_event_data(event_abi, lg) for lg in logs]
         except ValueError as e:
             logger.error(
                 f"get_join_logs failed -> web3.eth.getLogs (filter={_filter}) failed: "

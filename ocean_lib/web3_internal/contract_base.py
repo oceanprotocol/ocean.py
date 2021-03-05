@@ -34,6 +34,10 @@ class ContractBase(object):
     CONTRACT_NAME = None
 
     def __init__(self, address: [str, None], abi_path=None):
+        """Initialises Contract Base object.
+
+        The contract name attribute and abi_path are required.
+        """
         self.name = self.contract_name
         assert (
             self.name
@@ -189,8 +193,9 @@ class ContractBase(object):
     def send_transaction(
         self, fn_name: str, fn_args, from_wallet: Wallet, transact: dict = None
     ) -> str:
-        """Calls a smart contract function using either `personal_sendTransaction` (if
-        passphrase is available) or `ether_sendTransaction`.
+        """Calls a smart contract function.
+
+        Uses either `personal_sendTransaction` (if passphrase is available) or `ether_sendTransaction`.
 
         :param fn_name: str the smart contract function name
         :param fn_args: tuple arguments to pass to function above

@@ -22,8 +22,6 @@ Let's go through each step.
 
 ### Run barge services
 
-In a new console:
-
 ```console
 #grab repo
 git clone https://github.com/oceanprotocol/barge
@@ -53,7 +51,7 @@ Check out the Ocean Market webapp at http://localhost:8000.
 
 ### Give Alice & Bob fake OCEAN
 
-In steps below, Alice and Bob need (fake) OCEAN. Let's send them some. To make this happen, we need to get the ocean.py repo; we don't use that repo otherwise.
+In steps below, Alice and Bob need (fake) OCEAN. Let's send them some. To make this happen, we need to get the ocean.py repo; we don't use that repo for this quickstart otherwise.
 
 In a new console:
 ```console

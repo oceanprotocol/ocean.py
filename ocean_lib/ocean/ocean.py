@@ -41,11 +41,11 @@ logger = logging.getLogger("ocean")
 
 
 class Ocean:
+
     """The Ocean class is the entry point into Ocean Protocol."""
 
     def __init__(self, config=None, data_provider=None):
-        """
-        Initialize Ocean class.
+        """Initialize Ocean class.
 
            >> # Make a new Ocean instance
            >> ocean = Ocean({...})

@@ -91,8 +91,7 @@ class Config(configparser.ConfigParser):
     """Class to manage the ocean-lib configuration."""
 
     def __init__(self, filename=None, options_dict=None, **kwargs):
-        """
-        Initialize Config class.
+        """Initialize Config class.
 
         Options available:
 
@@ -215,8 +214,9 @@ class Config(configparser.ConfigParser):
 
     @property
     def provider_address(self):
-        """Provider address. (e.g.): 0x00bd138abd70e2f00903268f3db08f2d25677c9e.
-        ethereum address of service provider
+        """Provider address (e.g.): 0x00bd138abd70e2f00903268f3db08f2d25677c9e.
+
+        Ethereum address of service provider
         """
         return self.get("resources", NAME_PROVIDER_ADDRESS)
 

@@ -59,8 +59,7 @@ class EventListener(object):
         start_time=None,
         blocking=False,
     ):
-        """
-        Listens once for event.
+        """Listens once for event.
 
         :param callback: a callback function that takes one argument the event dict
         :param timeout: float timeout in seconds
