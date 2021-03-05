@@ -601,18 +601,18 @@ class OceanPool:
             pools = sorted(
                 [
                     (
-                        l.args.bpoolAddress,
+                        lg.args.bpoolAddress,
                         from_base_18(
-                            BPool(l.args.bpoolAddress).getBalance(self.ocean_address)
+                            BPool(lg.args.bpoolAddress).getBalance(self.ocean_address)
                         ),
                     )
-                    for l in logs
+                    for lg in logs
                 ],
                 key=lambda x: x[1],
                 reverse=True,
             )
         else:
-            pools = {l.args.bpoolAddress for l in logs}
+            pools = {lg.args.bpoolAddress for lg in logs}
 
         return pools
 
@@ -651,39 +651,39 @@ class OceanPool:
             return logs
 
         _all = []
-        for l in logs:
+        for lg in logs:
             if action == "join":
                 record = (
-                    l.args.caller,
-                    l.args.tokenIn,
-                    l.args.tokenAmountIn,
+                    lg.args.caller,
+                    lg.args.tokenIn,
+                    lg.args.tokenAmountIn,
                     0,
                     0,
-                    l.blockNumber,
-                    l.transactionHash,
+                    lg.blockNumber,
+                    lg.transactionHash,
                     "join",
                 )
             elif action == "exit":
                 record = (
-                    l.args.caller,
-                    l.args.tokenOut,
-                    l.args.tokenAmountOut,
+                    lg.args.caller,
+                    lg.args.tokenOut,
+                    lg.args.tokenAmountOut,
                     0,
                     0,
-                    l.blockNumber,
-                    l.transactionHash,
+                    lg.blockNumber,
+                    lg.transactionHash,
                     "exit",
                 )
             else:
                 assert action == "swap", f"Unknown pool action {action}"
                 record = (
-                    l.args.caller,
-                    l.args.tokenIn,
-                    l.args.tokenAmountIn,
-                    l.args.tokenOut,
-                    l.args.tokenAmountOut,
-                    l.blockNumber,
-                    l.transactionHash,
+                    lg.args.caller,
+                    lg.args.tokenIn,
+                    lg.args.tokenAmountIn,
+                    lg.args.tokenOut,
+                    lg.args.tokenAmountOut,
+                    lg.blockNumber,
+                    lg.transactionHash,
                     "swap",
                 )
 
@@ -1072,11 +1072,11 @@ class OceanPool:
         join_logs = pool.get_join_logs(
             web3, from_block, current_block, user_address, this_pool_only=False
         )
-        join_logs = [l for l in join_logs if l.address in pools]
+        join_logs = [lg for lg in join_logs if lg.address in pools]
 
         balances = {
-            l.address: DataToken(l.address).token_balance(user_address)
-            for l in join_logs
+            lg.address: DataToken(lg.address).token_balance(user_address)
+            for lg in join_logs
         }
         return balances
 

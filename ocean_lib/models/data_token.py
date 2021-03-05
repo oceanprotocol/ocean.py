@@ -72,8 +72,8 @@ class DataToken(ContractBase):
         event_abi = e().abi
         logs = web3.eth.getLogs(filter_params)
         parsed_logs = []
-        for l in logs:
-            parsed_logs.append(get_event_data(event_abi, l))
+        for lg in logs:
+            parsed_logs.append(get_event_data(event_abi, lg))
         return parsed_logs
 
     def get_transfer_events_in_range(self, from_block, to_block):
@@ -99,15 +99,15 @@ class DataToken(ContractBase):
                 transfer_records.extend(
                     [
                         (
-                            l.args["from"],
-                            l.args.to,
-                            l.args.value,
-                            l.blockNumber,
-                            l.transactionHash.hex(),
-                            l.logIndex,
-                            l.transactionIndex,
+                            lg.args["from"],
+                            lg.args.to,
+                            lg.args.value,
+                            lg.blockNumber,
+                            lg.transactionHash.hex(),
+                            lg.logIndex,
+                            lg.transactionIndex,
                         )
-                        for l in logs
+                        for lg in logs
                     ]
                 )
                 _from = _to + 1
