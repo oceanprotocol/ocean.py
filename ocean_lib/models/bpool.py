@@ -611,7 +611,7 @@ class BPool(BToken):
         event_abi = event().abi
         try:
             logs = web3.eth.getLogs(_filter)
-            logs = [get_event_data(event_abi, l) for l in logs]
+            logs = [get_event_data(event_abi, lg) for lg in logs]
         except ValueError as e:
             logger.error(
                 f"get_join_logs failed -> web3.eth.getLogs (filter={_filter}) failed: "

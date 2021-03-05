@@ -5,3 +5,15 @@
 pep257:
   disable:
     - D213
+
+pylint:
+  run: false
+
+frosted:
+  run: false
+
+mypy:
+  run: false
+
+pyroma:
+  run: false
