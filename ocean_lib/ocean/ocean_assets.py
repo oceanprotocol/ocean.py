@@ -118,8 +118,7 @@ class OceanAssets:
         dt_blob: str = None,
         dt_cap: float = None,
     ) -> (Asset, None):
-        """
-        Register an asset on-chain.
+        """Register an asset on-chain.
 
         Creating/deploying a DataToken contract and in the Metadata store (Aquarius).
 

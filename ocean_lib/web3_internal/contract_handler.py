@@ -117,8 +117,9 @@ class ContractHandler(object):
 
     @staticmethod
     def _load(contract_name, address=None):
-        """Retrieve the contract instance for `contract_name` that represent the smart
-        contract in the ethereum network.
+        """Retrieve the contract instance for `contract_name`.
+
+        That instance represents the smart contract in the ethereum network.
 
         :param contract_name: str name of the solidity smart contract.
         :param address: hex str -- address of smart contract
