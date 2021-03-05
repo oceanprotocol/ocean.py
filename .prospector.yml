@@ -5,3 +5,6 @@
 pep257:
   disable:
     - D213
+
+pylint:
+  run: false
