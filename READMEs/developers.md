@@ -65,33 +65,23 @@ docker system prune -a --volumes
 
 ## 3. Set up contracts
 
-### 3.1 Connect to the deployed contracts
-
-Specify our config file as an envvar. In console:
-
-```console
-export CONFIG_FILE=config.ini
-```
-
-### 3.2 Set private keys
-
-```console
-export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
-export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
-```
-
-### 3.3 Deploy fake OCEAN, and connect to it
-
 In console:
 
 ```console
+#specify config file as an envvar
+export CONFIG_FILE=config.ini
+
+# set private keys of two accounts
+export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
+
+# deploy new OCEAN token; update ~/.ocean/ocean-contracts/artifacts/address.json; send OCEAN to accounts
 ./deploy.py ganache
 ```
 
-This will output the address of OCEAN, and auto-update the "development" : "Ocean" value in  `~/.ocean/ocean-contracts/artifacts/address.json`.
-
 ## 4. Test
 
+In console:
 ```console
 #run a single test
 pytest tests/models/test_btoken.py
