@@ -12,66 +12,149 @@ It focuses on Alice's experience as a publisher, and Bob's experience as a buyer
 Here are the steps:
 
 1.  Setup
-2.  Alice publishes data asset (including metadata)
-3.  Alice mints 100 tokens
-4.  Alice creates a pool for trading her new datatokens
-5.  Market displays the asset for sale
-6.  Value swap: Bob buys datatokens from market
-7.  Bob uses a service by spending datatoken he just purchased (download)
+2.  Alice publishes data asset
+3.  Market displays the asset for sale
+4.  Bob buys data asset, and downloads it
 
 Let's go through each step.
 
 ## 1. Setup
 
-### 1.1 Do Datatokens tutorial
+### Run barge services
 
-This builds on the setup from [Datatokens tutorial](datatokens\-flow.md). Please do it first.
+In a new console:
 
-### 1.2 Run Ocean Market locally
-
-Then, set up the service for the [Ocean Market app](https://github.com/oceanprotocol/market). In a new console:
 ```console
+#grab repo
+git clone https://github.com/oceanprotocol/barge
+cd barge
+
+#clean up old containers (to be sure)
+docker system prune -a --volumes
+
+#run barge (runs ganache, Provider, Aquarius)
+./start_ocean.sh  --with-provider2
+```
+
+### Run Ocean Market service
+
+In a new console:
+```console
+#install
 git clone https://github.com/oceanprotocol/market.git
 cd market
 npm install
+
+#run Ocean Market app
 npm start
 ```
 
-You can now see your locally-running Ocean Market app as a webapp! In your browser, go to http://localhost:8000.
+Check out the Ocean Market webapp at http://localhost:8000.
 
-## 2. Alice publishes data asset (including metadata)
+### Give Alice & Bob fake OCEAN
 
-What follows is in Python, from your main console.
+In steps below, Alice and Bob need (fake) OCEAN. Let's send them some. To make this happen, we need to get the ocean.py repo; we don't use that repo otherwise.
+
+In a new console:
+```console
+#clone the repo and enter into it
+git clone https://github.com/oceanprotocol/ocean.py
+cd ocean.py
+
+#Install OS dependencies
+sudo apt-get install -y python3-dev gcc python-pytest
+
+#Initialize virtual environment and activate it.
+python -m venv venv
+source venv/bin/activate
+
+#Install modules in the environment.
+pip install -r requirements_dev.txt
+
+#set private keys of two accounts (Alice & Bob)
+export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
+
+#send fake OCEAN to Alice & Bob
+./deploy.py ganache
+```
+
+
+### Install the library
+
+In a new console:
+
+```console
+#Create your working directory
+mkdir test3
+cd test3
+
+#Initialize virtual environment and activate it.
+python -m venv venv
+source venv/bin/activate
+
+#Install the ocean.py library
+pip install ocean-lib
+```
+
+### Create config file
+
+Create a file called `test3/config.ini` and fill it as follows.
+```
+[eth-network]
+network = ganache
+artifacts.path = ~/.ocean/ocean-contracts/artifacts
+address.file = ~/.ocean/ocean-contracts/artifacts/address.json
+
+[resources]
+aquarius.url = http://localhost:5000
+provider.url = http://localhost:8030
+provider.address = 0x00bd138abd70e2f00903268f3db08f2d25677c9e
+
+storage.path = ocean_lib.db
+downloads.path = consume-downloads
+```
+
+
+## 2. Alice publishes data asset
+
+Ensure proper environment. In the console:
+```
+#go into venv
+cd test3
+source venv/bin/activate
+
+#set private keys of two accounts (Alice & Bob)
+export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
+
+#go into Python
+python
+```
+
+In the Python console:
 
 ```python
-#setup Alice's ocean instance
+#create ocean instance
 import os
+from ocean_lib.config import Config
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_utils.agreements.service_factory import ServiceDescriptor
-config = {
-   'network' : os.getenv('NETWORK_URL'),
-   'metadataCacheUri' : os.getenv('AQUARIUS_URL'),
-   'providerUri' : os.getenv('PROVIDER_URL'),
-}
+config = Config('config.ini')
 ocean = Ocean(config)
 
 #Alice's wallet
 from ocean_lib.web3_internal.wallet import Wallet
-alice_wallet = Wallet(ocean.web3, private_key=os.getenv('MY_TEST_KEY'))
-```
+alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
 
-Publish a datatoken.
+#Publish a datatoken
+print("create datatoken: begin")
+data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_store_url)
+token_address = data_token.address
+print("create datatoken: done")
 
-    print("create datatoken: begin")
-    data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_store_url)
-    token_address = data_token.address
-    print("create datatoken: done")
-    print(f"token_address = '{token_address}'")
-
-Specify metadata and service attributes. We use a dataset based on the [Branin test function](https://github.com/trentmc/branin).
-
-```python
+#Specify metadata and service attributes, using the Branin test dataset
 date_created = "2019-12-28T10:55:11Z"
 metadata =  {
     "main": {
@@ -89,11 +172,10 @@ service_attributes = {
             "cost": 1.0, # <don't change, this is obsolete>
         }
     }
-```
 
-Publish metadata and service attributes on-chain. The service urls will be encrypted before going on-chain. These are only decrypted for datatoken owners upon consume actions.
-
-```python
+#Publish metadata and service attributes on-chain.
+# The service urls will be encrypted before going on-chain.
+# They're only decrypted for datatoken owners upon consume.
 service_endpoint = DataServiceProvider.get_url(ocean.config)
 download_service = ServiceDescriptor.access_service_descriptor(service_attributes, service_endpoint)
 asset = ocean.assets.create(
@@ -104,29 +186,18 @@ asset = ocean.assets.create(
 assert token_address == asset.data_token_address
 
 did = asset.did  # did contains the datatoken address
-print(f"did = '{did}'")
-```
 
-## 3. Alice mints 100 datatokens
-
-```python
-
+#Mint the datatokens
 data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
-```
 
-## 4. Alice creates a pool for trading her new datatokens
-
-Alice needs Rinkeby OCEAN for this step. Let's check. If this fails, the tutorial to [get test OCEAN](get\-test\-OCEAN.md) will help.
-
-```python
+#In the create() step below, Alice needs ganache OCEAN. Ensure she has it.
 from ocean_lib.models.btoken import BToken #BToken is ERC20
 OCEAN_token = BToken(ocean.OCEAN_address)
-assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need Rinkeby OCEAN"
-```
+assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need OCEAN"
 
-Let's do the actual work to create the pool. It will do several blockchain transactions: create the base pool, bind OCEAN and datatoken, add OCEAN and datatoken liquidity, and finalize the pool.
-
-```python
+#Post the asset for sale. This does many blockchain txs: create base
+# pool, bind OCEAN and datatoken, add OCEAN and datatoken liquidity,
+# and finalize the pool.
 pool = ocean.pool.create(
    token_address,
    data_token_amount=100.0,
@@ -134,120 +205,55 @@ pool = ocean.pool.create(
    from_wallet=alice_wallet
 )
 pool_address = pool.address
+
+#Print values that we use in the next step
+print(f"token_address = '{token_address}'")
+print(f"did = '{did}'")
 print(f"pool_address = '{pool_address}'")
 ```
 
-Note: if you put the steps of this README into a .py file, then `create()` above may fail. This happens when previous txs haven't yet gone through on Rinkeby. Ways to address: check that the previous tx went through (cleanest), repeatedly call `create()` until it succeeds (general, and robust), and call `sleep(time_s)` first (simple, but less clean and different for each Ethereum network).
+## 3. Marketplace displays asset for sale
 
-## 5. Marketplace displays asset for sale
+Now, you're the Marketplace operator. Here's how to get info about the data asset.
 
-Up until now, all the actions have been by Alice. Let's switch now to the perspective to that of the Marketplace operator. They can display for sale whatever data assets they see on chain which are in a pool (or a fixed-price exchange).
-
-Here, we show how the marketplace might grab info about the data asset, price info from the pool, and show it in text form. It can also be in the webapp of course.
-
-Stop and re-start your Python console. What follows is in Python.
+In the same Python console as above:
 
 ```python
-#setup market's ocean instance
-import os
-from ocean_lib.ocean.ocean import Ocean
-config = {
-   'network' : os.getenv('NETWORK_URL'),
-   'metadataCacheUri' : os.getenv('AQUARIUS_URL'),
-   'providerUri' : os.getenv('PROVIDER_URL'),
-}
-market_ocean = Ocean(config)
-```
-
-The market will know the token, etc that it's looking for. For this quickstart, we simply paste in the values that were printed in previous steps.
-
-```python
-token_address = '<printed earlier>'
-did = '<printed earlier>'
-pool_address = '<printed earlier>'
-```
-
-Next, create objects pointing to the service and pool
-
-```python
-#point to service
+#point to services
 from ocean_utils.agreements.service_types import ServiceTypes
-asset = market_ocean.assets.resolve(did)
+asset = ocean.assets.resolve(did)
 service1 = asset.get_service(ServiceTypes.ASSET_ACCESS)
 
 #point to pool
-pool = market_ocean.pool.get(pool_address)
-```
+pool = ocean.pool.get(pool_address)
 
-To access a data service, you need 1.0 datatokens. Here, the market retrieves the datatoken price denominated in OCEAN.
-
-```python
-OCEAN_address = market_ocean.OCEAN_address
-price_in_OCEAN = market_ocean.pool.calcInGivenOut(
+#To access a data service, you need 1.0 datatokens.
+#Here, the market retrieves the datatoken price denominated in OCEAN.
+OCEAN_address = ocean.OCEAN_address
+price_in_OCEAN = ocean.pool.calcInGivenOut(
     pool_address, OCEAN_address, token_address, token_out_amount=1.0)
 print(f"Price of 1 datatoken is {price_in_OCEAN} OCEAN")
 ```
 
-## 6. Value swap: Bob buys datatokens from market
+## 4.  Bob buys data asset, and downloads it
 
-Now, we're going to be Bob. Bob wants to buy datatokens from Alice, through the marketplace using the OCEAN-datatokens pool.
+Now, you're Bob the data consumer.
 
-First, Bob will need his own Rinkeby Ethereum account / private key, Rinkeby ETH, and Rinkeby OCEAN.
-
--   Get account and ETH with help from the [datatokens tutorial](datatokens\-flow.md). Then, in console: `export BOB_KEY=<Bob_private_key>`
--   Get OCEAN with help from [test OCEAN tutorial](get\-test\-OCEAN.md)
-
-Stop and re-start your Python console. What follows is in Python.
-
-Set up Ocean and wallet.
-
+In the same Python console as before:
 ```python
-#setup Bob's ocean instance
-import os
-from ocean_lib.ocean.ocean import Ocean
-config = {
-   'network' : os.getenv('NETWORK_URL'),
-   'metadataCacheUri' : os.getenv('AQUARIUS_URL'),
-   'providerUri' : os.getenv('PROVIDER_URL'),
-}
-bob_ocean = Ocean(config)
-
 #Bob's wallet
-from ocean_lib.web3_internal.wallet import Wallet
-bob_wallet = Wallet(bob_ocean.web3, private_key=os.getenv('BOB_KEY'))
+bob_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY2'))
 print(f"bob_wallet.address = '{bob_wallet.address}'")
-```
 
-For legacy support, you can also use `metadataStoreUri` instead of `metadataCacheUri`.
+#Verify that Bob has ganache ETH
+assert ocean.web3.eth.getBalance(bob_wallet.address) > 0, "need Rinkeby ETH"
 
-Verify that Bob has Rinkeby ETH. If it fails, the [datatokens tutorial](datatokens\-flow.md) can help.
-
-```python
-assert bob_ocean.web3.eth.getBalance(bob_wallet.address) > 0, "need Rinkeby ETH"
-```
-
-Verify that Bob has Rinkeby OCEAN. If it fails, the [test OCEAN tutorial](get\-test\-OCEAN.md) can help.
-
-```python
-from ocean_lib.models.btoken import BToken #BToken is ERC20
-OCEAN_token = BToken(bob_ocean.OCEAN_address)
+#Verify that Bob has ganache OCEAN
 assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need Rinkeby OCEAN"
-```
 
-Fill in values printed earlier. Bob will know these. For this quickstart, paste it in.
-
-```python
-token_address = '<printed earlier>'
-pool_address = '<printed earlier>'
-did = '<printed earlier>'
-```
-
-Bob buys 1.0 datatokens - the amount needed to consume the dataset.
-
-```python
-data_token = bob_ocean.get_data_token(token_address)
-
-bob_ocean.pool.buy_data_tokens(
+#Bob buys 1.0 datatokens - the amount needed to consume the dataset.
+data_token = ocean.get_data_token(token_address)
+ocean.pool.buy_data_tokens(
     pool_address,
     amount=1.0, # buy 1.0 datatoken
     max_OCEAN_amount=10.0, # pay up to 10.0 OCEAN
@@ -257,46 +263,40 @@ bob_ocean.pool.buy_data_tokens(
 print(f"Bob has {data_token.token_balance(bob_wallet.address)} datatokens.")
 
 assert data_token.balanceOf(bob_wallet.address) >= 1.0, "Bob didn't get 1.0 datatokens"
-```
 
-If the previous assertion fails, the first check is to wait a few seconds and try again.
-
-## 7. Bob uses a service from the asset he just purchased (download)
-
-```python
+#Bob points to the service object
 fee_receiver = None # could also be market address
-
-#asset from step 5
 from ocean_utils.agreements.service_types import ServiceTypes
-asset = bob_ocean.assets.resolve(did)
+asset = ocean.assets.resolve(did)
 service = asset.get_service(ServiceTypes.ASSET_ACCESS)
 
-#order the asset, and send over the datatoken
-quote = bob_ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
-order_tx_id = bob_ocean.assets.pay_for_service(
+#Bob sends his datatoken to the service
+quote = ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
+order_tx_id = ocean.assets.pay_for_service(
     quote.amount, quote.data_token_address, asset.did, service.index, fee_receiver, bob_wallet, None)
 print(f"order_tx_id = '{order_tx_id}'")
+
+#Bob downloads. If the connection breaks, Bob can request again by showing order_tx_id.
+file_path = ocean.assets.download(
+    asset.did,
+    service.index,
+    bob_wallet,
+    order_tx_id,
+    destination='./'
+)
+print(f"file_path = '{file_path}'") #e.g. datafile.0xAf07...
 ```
 
-Now, download to current working directory `./`. If the connection breaks, Bob can request again by showing the `order_tx_id`.
-
-    file_path = bob_ocean.assets.download(
-        asset.did,
-        service.index,
-        bob_wallet,
-        order_tx_id,
-        destination='./'
-    )
-    print(f"file_path = '{file_path}'") #e.g. datafile.0xAf07...
-
-In console, verify that the file downloaded:
-
+In console:
 ```console
-cd ./<your file_path, e.g. datafile.0xAf07...>
-more branin.arff
+#verify that the file is downloaded
+cd test3/datafile.0xAf07... 
+ls branin.arff
 ```
 
-It should output the following. It follows the ARFF format, which is sometimes used in AI/ML tools. In this case there are two input variables (x0, x1) and one output.
+Congrats to Bob for buying and consuming a data asset!
+
+_Note_. The file is in ARFF format, used by some AI/ML tools. In this case there are two input variables (x0, x1) and one output.
 
 ```console
 % 1. Title: Branin Function

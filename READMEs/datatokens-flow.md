@@ -3,38 +3,9 @@ Copyright 2021 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Publish your first datatoken
+# Quickstart: Publish datatoken
 
-Steps:
-
-1.  **Install**
-2.  **Run the services**
-3.  **Publish datatokens!**
-
-## 1. Install 
-
-### 1.1 Prerequisites
-
--   Linux/MacOS
--   Docker
--   Python 3.8.5
-
-### 1.2 Install the library
-
-In a console:
-
-```console
-#Initialize virtual environment and activate it.
-python -m venv venv
-source venv/bin/activate
-
-#Install the ocean.py library
-pip install ocean-lib
-```
-
-## 2. Run the services
-
-Use Ocean Barge to run local Ethereum node with Ocean contracts, Aquarius, and Provider.
+### Run the services
 
 In a new console:
 
@@ -46,28 +17,50 @@ cd barge
 #clean up old containers (to be sure)
 docker system prune -a --volumes
 
-#run barge with provider on
+#run barge (runs ganache, Provider, Aquarius)
 ./start_ocean.sh  --with-provider2
 ```
 
-
-## 3. Publish datatokens!
-
-Set envvars. In a new console:
-```console
-export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
-export NETWORK_URL=ganache
+### Create config file
+Create a file called `config.ini` and fill it as follows.
+```
+[eth-network]
+network = ganache
+artifacts.path = ~/.ocean/ocean-contracts/artifacts
+address.file = ~/.ocean/ocean-contracts/artifacts/address.json
 ```
 
-In Python console:
+### Install the library, set envvars
+
+In a new console:
+
+```console
+#Initialize virtual environment and activate it.
+python -m venv venv
+source venv/bin/activate
+
+#Install the ocean.py library
+pip install ocean-lib
+
+#set envvars
+export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+
+#go into python
+python
+```
+
+###  Publish datatokens
+
+In the Python console:
 
 ```python
 import os
+from ocean_lib.config import Config
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
 
 private_key = os.getenv('TEST_PRIVATE_KEY1')
-config = {'network': os.getenv('NETWORK_URL')}
+config = Config('config.ini')
 ocean = Ocean(config)
 
 print("create wallet: begin")
@@ -79,5 +72,5 @@ datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wall
 print(f"created datatoken: done. Its address is {datatoken.address}")
 ```
 
-If you made it to the end: congrats, you have created your first Ocean datatoken! 🐋
+Congrats, you've created your first Ocean datatoken! 🐋
 
