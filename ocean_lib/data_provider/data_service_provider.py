@@ -29,7 +29,6 @@ OrderRequirements = namedtuple(
 
 
 class DataServiceProvider:
-
     """DataServiceProvider class.
 
     The main functions available are:
