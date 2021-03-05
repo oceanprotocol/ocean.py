@@ -112,11 +112,10 @@ storage.path = ocean_lib.db
 downloads.path = consume-downloads
 ```
 
-
 ## 2. Alice publishes data asset
 
 Ensure proper environment. In the console:
-```
+```text
 #go into venv
 cd test3
 source venv/bin/activate

@@ -72,4 +72,3 @@ datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wall
 print(f"created datatoken: done. Its address is {datatoken.address}")
 ```
 Congrats, you've created your first Ocean datatoken! 🐋
-
