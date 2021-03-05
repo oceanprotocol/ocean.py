@@ -15,8 +15,7 @@ class Web3Provider(object):
 
     @staticmethod
     def init_web3(network_url=None, provider=None):
-        """
-        One of `network_url` or `provider` is required.
+        """One of `network_url` or `provider` is required.
 
         If `provider` is given, `network_url` will be ignored.
 

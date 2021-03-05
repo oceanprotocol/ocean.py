@@ -13,6 +13,7 @@ logger = logging.getLogger("account")
 
 
 class Account:
+
     """Class representing an account."""
 
     def __init__(
@@ -23,8 +24,7 @@ class Account:
         encrypted_key=None,
         private_key=None,
     ):
-        """
-        Hold account address, password and either keyfile path, encrypted key or private key.
+        """Hold account address, password and either keyfile path, encrypted key or private key.
 
         :param address: The address of this account
         :param password: account's password. This is necessary for decrypting the private key

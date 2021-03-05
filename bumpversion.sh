@@ -30,12 +30,12 @@ fi
 
 if [[ $2 == '--tag' ]]; then
   if git branch --contains $(git rev-parse --verify HEAD) | grep -E 'main'; then
-    bumpversion --tag --commit $1
+    eval "bumpversion --tag --commit $1"
   else
     echo "Only main tags can be tagged"
     exit 1
   fi
 else
-  bumpversion --no-tag $1
+  eval "bumpversion --no-tag $1"
 fi
 

@@ -15,8 +15,7 @@ class OceanServices:
 
     @staticmethod
     def create_access_service(attributes, provider_uri=None):
-        """
-        Publish an asset with an `Access` service according to the supplied attributes.
+        """Publish an asset with an `Access` service according to the supplied attributes.
 
         :param attributes: attributes of the access service, dict
         :param provider_uri: str URL of service provider. This will be used as base to

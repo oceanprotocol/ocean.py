@@ -68,11 +68,13 @@ docker system prune -a --volumes
 ### 3.1 Connect to the deployed contracts
 
 Specify our config file as an envvar. In console:
+
 ```console
 export CONFIG_FILE=config.ini
 ```
 
 Running barge already deployed contracts for us. Let's point to them. Open the config file `./config.ini`, and in the `[eth-network]` section, set these values:
+
 ```console
 address.file = ~/.ocean/ocean-contracts/artifacts/address.json
 artifacts.path = ~/.ocean/ocean-contracts/artifacts

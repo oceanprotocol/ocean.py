@@ -2,10 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-"""Ocean module."""
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
 
+"""Ocean module."""
 import copy
 import logging
 import lzma
@@ -120,8 +118,7 @@ class OceanAssets:
         dt_blob: str = None,
         dt_cap: float = None,
     ) -> (Asset, None):
-        """
-        Register an asset on-chain.
+        """Register an asset on-chain.
 
         Creating/deploying a DataToken contract and in the Metadata store (Aquarius).
 
