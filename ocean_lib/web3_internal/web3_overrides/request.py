@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-"""This is copied from Web3 python library to control the `requests` session parameters."""
+"""Copied from Web3 python library to control the `requests` session parameters."""
 
 import lru
 import requests
