@@ -124,7 +124,9 @@ class DataProviderMock(object):
         )
         provider_uri = DataServiceProvider.get_root_uri(service_endpoint)
         for i in indexes:
-            signature = DataServiceProvider.sign_message(wallet, did, provider_uri=provider_uri)
+            signature = DataServiceProvider.sign_message(
+                wallet, did, provider_uri=provider_uri
+            )
             download_url = base_url + f"&signature={signature}&fileIndex={i}"
             logger.info(f"invoke consume endpoint with this url: {download_url}")
             response = DataServiceProvider.get_http_client().get(

@@ -192,7 +192,9 @@ class DataServiceProvider:
         )
         provider_uri = DataServiceProvider.get_root_uri(service_endpoint)
         for i in indexes:
-            signature = DataServiceProvider.sign_message(wallet, did, provider_uri=provider_uri)
+            signature = DataServiceProvider.sign_message(
+                wallet, did, provider_uri=provider_uri
+            )
             download_url = base_url + f"&signature={signature}&fileIndex={i}"
             logger.info(f"invoke consume endpoint with this url: {download_url}")
             response = DataServiceProvider._http_method(
@@ -438,9 +440,7 @@ class DataServiceProvider:
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(ConfigProvider.get_config())
 
-        provider_info = DataServiceProvider._http_method(
-            "get", provider_uri
-        ).json()
+        provider_info = DataServiceProvider._http_method("get", provider_uri).json()
 
         return provider_info["serviceEndpoints"]
 
@@ -451,9 +451,7 @@ class DataServiceProvider:
         """
         if not provider_uri:
             provider_uri = ConfigProvider.get_config().provider_url
-        provider_info = DataServiceProvider._http_method(
-            "get", provider_uri
-        ).json()
+        provider_info = DataServiceProvider._http_method("get", provider_uri).json()
         return provider_info["providerAddress"]
 
     @staticmethod

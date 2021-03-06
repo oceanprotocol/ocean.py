@@ -246,8 +246,10 @@ class OceanCompute:
         ), "service at serviceId is not of type compute service."
 
         signature = self._sign_message(
-            consumer_wallet, f"{consumer_wallet.address}{did}",
-            nonce=nonce, service_endpoint=sa.service_endpoint
+            consumer_wallet,
+            f"{consumer_wallet.address}{did}",
+            nonce=nonce,
+            service_endpoint=sa.service_endpoint,
         )
 
         job_info = self._data_provider.start_compute_job(
