@@ -86,17 +86,17 @@ class DataServiceProvider:
             return response.json()["encryptedDocument"]
 
     @staticmethod
-    def sign_message(wallet, msg, config, nonce=None):
+    def sign_message(wallet, msg, nonce=None, provider_uri=None):
         if nonce is None:
-            nonce = DataServiceProvider.get_nonce(wallet.address, config)
+            nonce = DataServiceProvider.get_nonce(wallet.address, provider_uri)
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
         return Web3Helper.sign_hash(
             add_ethereum_prefix_and_hash_msg(f"{msg}{nonce}"), wallet
         )
 
     @staticmethod
-    def get_nonce(user_address, config):
-        _, url = DataServiceProvider.build_endpoint("nonce")
+    def get_nonce(user_address, provider_uri):
+        _, url = DataServiceProvider.build_endpoint("nonce", provider_uri=provider_uri)
         response = DataServiceProvider._http_method(
             "get", f"{url}?userAddress={user_address}"
         )
@@ -190,9 +190,9 @@ class DataServiceProvider:
             f"&transferTxId={order_tx_id}"
             f"&consumerAddress={wallet.address}"
         )
-        config = ConfigProvider.get_config()
+        provider_uri = DataServiceProvider.get_root_uri(service_endpoint)
         for i in indexes:
-            signature = DataServiceProvider.sign_message(wallet, did, config)
+            signature = DataServiceProvider.sign_message(wallet, did, provider_uri=provider_uri)
             download_url = base_url + f"&signature={signature}&fileIndex={i}"
             logger.info(f"invoke consume endpoint with this url: {download_url}")
             response = DataServiceProvider._http_method(
@@ -431,17 +431,18 @@ class DataServiceProvider:
         )
 
     @staticmethod
-    def get_service_endpoints():
+    def get_service_endpoints(provider_uri=None):
         """
         Return the service endpoints from the provider URL.
         """
-        if DataServiceProvider.provider_info is None:
-            config = ConfigProvider.get_config()
-            DataServiceProvider.provider_info = DataServiceProvider._http_method(
-                "get", config.provider_url
-            ).json()
+        if not provider_uri:
+            provider_uri = DataServiceProvider.get_url(ConfigProvider.get_config())
 
-        return DataServiceProvider.provider_info["serviceEndpoints"]
+        provider_info = DataServiceProvider._http_method(
+            "get", provider_uri
+        ).json()
+
+        return provider_info["serviceEndpoints"]
 
     @staticmethod
     def get_provider_address(provider_uri=None):
@@ -449,14 +450,24 @@ class DataServiceProvider:
         Return the provider address
         """
         if not provider_uri:
-            if DataServiceProvider.provider_info is None:
-                config = ConfigProvider.get_config()
-                DataServiceProvider.provider_info = DataServiceProvider._http_method(
-                    "get", config.provider_url
-                ).json()
-            return DataServiceProvider.provider_info["providerAddress"]
-        provider_info = DataServiceProvider._http_method("get", provider_uri).json()
+            provider_uri = ConfigProvider.get_config().provider_url
+        provider_info = DataServiceProvider._http_method(
+            "get", provider_uri
+        ).json()
         return provider_info["providerAddress"]
+
+    @staticmethod
+    def get_root_uri(service_endpoint):
+        provider_uri = service_endpoint
+        parts = provider_uri.split("/")
+        if parts[-2] == "services":
+            provider_uri = "/".join(parts[:-2])
+
+        api_version = DataServiceProvider.get_api_version()
+        if api_version not in provider_uri:
+            provider_uri = urljoin(provider_uri, api_version)
+
+        return provider_uri
 
     @staticmethod
     def build_endpoint(service_name, provider_uri=None, config=None):
@@ -467,14 +478,13 @@ class DataServiceProvider:
         provider_uri = DataServiceProvider._remove_slash(provider_uri)
         parts = provider_uri.split("/")
         if parts[-2] == "services":
-            base_url = "/".join(parts[:-2])
-            return "GET", urljoin(base_url, "services/initialize")
+            provider_uri = "/".join(parts[:-2])
 
         api_version = DataServiceProvider.get_api_version()
         if api_version not in provider_uri:
             provider_uri = urljoin(provider_uri, api_version)
 
-        service_endpoints = DataServiceProvider.get_service_endpoints()
+        service_endpoints = DataServiceProvider.get_service_endpoints(provider_uri)
         method, url = service_endpoints[service_name]
         url = url.replace(api_version, "")
 
@@ -514,12 +524,9 @@ class DataServiceProvider:
 
     @staticmethod
     def get_initialize_endpoint(service_endpoint):
-        parts = service_endpoint.split("/")
-        if parts[-2] == "services":
-            base_url = "/".join(parts[:-2])
-            return "GET", f"{base_url}/services/initialize"
-
-        return DataServiceProvider.build_initialize_endpoint(service_endpoint)
+        return DataServiceProvider.build_initialize_endpoint(
+            DataServiceProvider.get_root_uri(service_endpoint)
+        )
 
     @staticmethod
     def get_download_endpoint(config):

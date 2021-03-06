@@ -180,9 +180,10 @@ class OceanCompute:
             attributes=attributes, service_endpoint=compute_endpoint
         )
 
-    def _sign_message(self, wallet, msg, nonce=None):
+    def _sign_message(self, wallet, msg, nonce=None, service_endpoint=None):
         if nonce is None:
-            nonce = self._data_provider.get_nonce(wallet.address, self._config)
+            uri = self._data_provider.get_root_uri(service_endpoint)
+            nonce = self._data_provider.get_nonce(wallet.address, uri)
         return Web3Helper.sign_hash(
             add_ethereum_prefix_and_hash_msg(f"{msg}{nonce}"), wallet
         )
@@ -245,7 +246,8 @@ class OceanCompute:
         ), "service at serviceId is not of type compute service."
 
         signature = self._sign_message(
-            consumer_wallet, f"{consumer_wallet.address}{did}", nonce=nonce
+            consumer_wallet, f"{consumer_wallet.address}{did}",
+            nonce=nonce, service_endpoint=sa.service_endpoint
         )
 
         job_info = self._data_provider.start_compute_job(
@@ -282,7 +284,7 @@ class OceanCompute:
                 job_id,
                 service_endpoint,
                 wallet.address,
-                self._sign_message(wallet, msg),
+                self._sign_message(wallet, msg, service_endpoint=service_endpoint),
             )
         )
 
@@ -302,7 +304,7 @@ class OceanCompute:
             job_id,
             service_endpoint,
             wallet.address,
-            self._sign_message(wallet, msg),
+            self._sign_message(wallet, msg, service_endpoint=service_endpoint),
         )
         return {
             "did": info_dict.get("resultsDid", ""),
@@ -327,7 +329,7 @@ class OceanCompute:
                 job_id,
                 service_endpoint,
                 wallet.address,
-                self._sign_message(wallet, msg),
+                self._sign_message(wallet, msg, service_endpoint=service_endpoint),
             )
         )
 
@@ -347,7 +349,7 @@ class OceanCompute:
             job_id,
             service_endpoint,
             wallet.address,
-            self._sign_message(wallet, msg),
+            self._sign_message(wallet, msg, service_endpoint=service_endpoint),
         )
         return job_info["jobId"]
 

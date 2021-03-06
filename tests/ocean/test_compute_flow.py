@@ -45,13 +45,22 @@ def test_metadataStoreUri_version():
 
 
 def test_expose_endpoints():
+    service_endpoints = {
+        'computeDelete': ['DELETE', '/api/v1/services/compute'],
+        'computeStart': ['POST', '/api/v1/services/compute'],
+        'computeStatus': ['GET', '/api/v1/services/compute'],
+        'computeStop': ['PUT', '/api/v1/services/compute'],
+        'download': ['GET', '/api/v1/services/download'],
+        'encrypt': ['POST', '/api/v1/services/encrypt'],
+        'fileinfo': ['POST', '/api/v1/services/fileinfo'],
+        'initialize': ['GET', '/api/v1/services/initialize'],
+        'nonce': ['GET', '/api/v1/services/nonce']
+    }
     valid_endpoints = DataServiceProvider.get_service_endpoints()
-    assert len(valid_endpoints) == len(
-        DataServiceProvider.provider_info["serviceEndpoints"]
-    )
+    assert len(valid_endpoints) == len(service_endpoints)
     assert [
         valid_endpoints[key]
-        for key in set(DataServiceProvider.provider_info["serviceEndpoints"])
+        for key in set(service_endpoints)
         & set(valid_endpoints)
     ]
 
