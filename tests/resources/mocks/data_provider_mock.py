@@ -6,7 +6,6 @@
 import os
 import re
 
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider, logger
 from ocean_utils.agreements.service_types import ServiceTypes
 
@@ -65,18 +64,6 @@ class DataProviderMock(object):
         return DataServiceProvider.get_url(config)
 
     @staticmethod
-    def get_consume_endpoint(config):
-        return f"{DataServiceProvider.get_download_endpoint(config)}"
-
-    @staticmethod
-    def get_compute_endpoint(config):
-        return f"{DataServiceProvider.get_compute_endpoint(config)}"
-
-    @staticmethod
-    def get_download_endpoint(config):
-        return f"{DataServiceProvider.get_download_endpoint(config)}"
-
-    @staticmethod
     def build_download_endpoint(service_name):
         service_name = "download"
         provider_uri = "http://localhost:8030"
@@ -122,10 +109,11 @@ class DataProviderMock(object):
             f"&transferTxId={order_tx_id}"
             f"&consumerAddress={wallet.address}"
         )
-        config = ConfigProvider.get_config()
-
+        provider_uri = DataServiceProvider.get_root_uri(service_endpoint)
         for i in indexes:
-            signature = DataServiceProvider.sign_message(wallet, did, config)
+            signature = DataServiceProvider.sign_message(
+                wallet, did, provider_uri=provider_uri
+            )
             download_url = base_url + f"&signature={signature}&fileIndex={i}"
             logger.info(f"invoke consume endpoint with this url: {download_url}")
             response = DataServiceProvider.get_http_client().get(
