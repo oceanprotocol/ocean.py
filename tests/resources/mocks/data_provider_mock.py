@@ -6,7 +6,6 @@
 import os
 import re
 
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider, logger
 from ocean_utils.agreements.service_types import ServiceTypes
 
