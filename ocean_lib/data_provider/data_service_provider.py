@@ -440,6 +440,10 @@ class DataServiceProvider:
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(ConfigProvider.get_config())
 
+        api_version = DataServiceProvider.get_api_version()
+        if api_version in provider_uri:
+            i = provider_uri.find(api_version)
+            provider_uri = provider_uri[:i]
         provider_info = DataServiceProvider._http_method("get", provider_uri).json()
 
         return provider_info["serviceEndpoints"]
@@ -457,15 +461,15 @@ class DataServiceProvider:
     @staticmethod
     def get_root_uri(service_endpoint):
         provider_uri = service_endpoint
+        api_version = DataServiceProvider.get_api_version()
+        if api_version in provider_uri:
+            i = provider_uri.find(api_version)
+            provider_uri = provider_uri[:i]
         parts = provider_uri.split("/")
         if parts[-2] == "services":
             provider_uri = "/".join(parts[:-2])
 
-        api_version = DataServiceProvider.get_api_version()
-        if api_version not in provider_uri:
-            provider_uri = urljoin(provider_uri, api_version)
-
-        return provider_uri
+        return DataServiceProvider._remove_slash(provider_uri)
 
     @staticmethod
     def build_endpoint(service_name, provider_uri=None, config=None):
@@ -473,19 +477,10 @@ class DataServiceProvider:
             config = config or ConfigProvider.get_config()
             provider_uri = DataServiceProvider.get_url(config)
 
-        provider_uri = DataServiceProvider._remove_slash(provider_uri)
-        parts = provider_uri.split("/")
-        if parts[-2] == "services":
-            provider_uri = "/".join(parts[:-2])
-
-        api_version = DataServiceProvider.get_api_version()
-        if api_version not in provider_uri:
-            provider_uri = urljoin(provider_uri, api_version)
-
+        provider_uri = DataServiceProvider.get_root_uri(provider_uri)
         service_endpoints = DataServiceProvider.get_service_endpoints(provider_uri)
-        method, url = service_endpoints[service_name]
-        url = url.replace(api_version, "")
 
+        method, url = service_endpoints[service_name]
         return method, urljoin(provider_uri, url)
 
     @staticmethod
