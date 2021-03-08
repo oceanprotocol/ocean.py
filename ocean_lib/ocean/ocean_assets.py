@@ -339,8 +339,8 @@ class OceanAssets:
         return asset
 
     def update_trusted_algorithms_shallow(
-        self, asset: Asset, publisher_wallet: Wallet, trusted_algorithms: list = None
-    ):
+        self, asset: Asset, trusted_algorithms: list = None
+    ) -> Asset:
         compute_service_descriptor = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
         assert (
             compute_service_descriptor
@@ -351,10 +351,10 @@ class OceanAssets:
                 trusted_algorithms_list = create_publisher_trusted_algorithms(
                     self, trusted_algorithms=trusted_algorithms
                 )
-                compute_service_descriptor[1]["attributes"]["main"]["privacy"] = {
-                    "publisherTrustedAlgorithms": trusted_algorithms_list
-                }
-        self.update(asset=asset, publisher_wallet=publisher_wallet)
+                compute_service_descriptor.__dict__["_attributes"]["main"][
+                    "privacy"
+                ] = {"publisherTrustedAlgorithms": trusted_algorithms_list}
+        return asset
 
     def update(self, asset: Asset, publisher_wallet: Wallet) -> bool:
         try:
