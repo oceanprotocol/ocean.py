@@ -1,5 +1,7 @@
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 
 # Directory ../tests/models/test holds test_btoken.py and more.
 # Those tests grab ../tests/models/conftest.py, which
@@ -8,7 +10,7 @@
 #  here we simply import that conftest's contents.
 
 import pytest
-from examples import ExampleConfig
+from ocean_lib.example_config import ExampleConfig
 from tests.models.conftest import *  # noqa: F401 F403
 
 # Other things to set up, specific to here...
