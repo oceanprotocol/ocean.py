@@ -36,9 +36,7 @@ def test_provider_address():
 
 def test_provider_address_with_url():
     p_ocean_instance = get_publisher_ocean_instance()
-    provider_address = DSP.get_provider_address(
-        DSP.get_url(p_ocean_instance.config)
-    )
+    provider_address = DSP.get_provider_address(DSP.get_url(p_ocean_instance.config))
     assert provider_address, "Failed to get provider address."
 
 
@@ -46,18 +44,33 @@ def test_get_root_uri():
     uri = "http://ppp.com"
     assert DSP.get_root_uri(uri) == uri
     assert DSP.get_root_uri("http://ppp.com:8000") == "http://ppp.com:8000"
-    assert DSP.get_root_uri("http://ppp.com:8000/api/v1/services/") == "http://ppp.com:8000"
+    assert (
+        DSP.get_root_uri("http://ppp.com:8000/api/v1/services/")
+        == "http://ppp.com:8000"
+    )
     assert DSP.get_root_uri("http://ppp.com:8000/api/v1") == "http://ppp.com:8000"
-    assert DSP.get_root_uri("http://ppp.com:8000/services") == "http://ppp.com:8000/services"
-    assert DSP.get_root_uri("http://ppp.com:8000/services/download") == "http://ppp.com:8000"
-    assert DSP.get_root_uri("http://ppp.com:8000/api/v2/services") == "http://ppp.com:8000/api/v2/services"
-    assert DSP.get_root_uri("http://ppp.com:8000/api/v2/services/") == "http://ppp.com:8000/api/v2"
+    assert (
+        DSP.get_root_uri("http://ppp.com:8000/services")
+        == "http://ppp.com:8000/services"
+    )
+    assert (
+        DSP.get_root_uri("http://ppp.com:8000/services/download")
+        == "http://ppp.com:8000"
+    )
+    assert (
+        DSP.get_root_uri("http://ppp.com:8000/api/v2/services")
+        == "http://ppp.com:8000/api/v2/services"
+    )
+    assert (
+        DSP.get_root_uri("http://ppp.com:8000/api/v2/services/")
+        == "http://ppp.com:8000/api/v2"
+    )
 
 
 def test_build_endpoint():
     def get_service_endpoints(_provider_uri=None):
         _endpoints = TEST_SERVICE_ENDPOINTS.copy()
-        _endpoints.update({'newEndpoint': ["GET", "/api/v1/services/newthing"]})
+        _endpoints.update({"newEndpoint": ["GET", "/api/v1/services/newthing"]})
         return _endpoints
 
     original_func = DSP.get_service_endpoints
@@ -66,19 +79,25 @@ def test_build_endpoint():
 
     endpoints = get_service_endpoints()
     uri = "http://ppp.com"
-    method, endpnt = DSP.build_endpoint('newEndpoint',  provider_uri=uri)
-    assert endpnt == urljoin(uri, endpoints['newEndpoint'][1])
+    method, endpnt = DSP.build_endpoint("newEndpoint", provider_uri=uri)
+    assert endpnt == urljoin(uri, endpoints["newEndpoint"][1])
     # config has no effect when provider_uri is set
-    assert endpnt == DSP.build_endpoint('newEndpoint', provider_uri=uri, config=config)[1]
+    assert (
+        endpnt == DSP.build_endpoint("newEndpoint", provider_uri=uri, config=config)[1]
+    )
 
-    method, endpnt = DSP.build_endpoint('newEndpoint',  config=config)
-    assert endpnt == urljoin(DSP.get_root_uri(config.provider_url), endpoints['newEndpoint'][1])
-    assert endpnt == DSP.build_endpoint('newEndpoint',  provider_uri=config.provider_url)[1]
+    method, endpnt = DSP.build_endpoint("newEndpoint", config=config)
+    assert endpnt == urljoin(
+        DSP.get_root_uri(config.provider_url), endpoints["newEndpoint"][1]
+    )
+    assert (
+        endpnt == DSP.build_endpoint("newEndpoint", provider_uri=config.provider_url)[1]
+    )
 
     uri = "http://ppp.com:8030/api/v1/services/newthing"
-    method, endpnt = DSP.build_endpoint('download', provider_uri=uri)
-    assert method == endpoints['download'][0]
-    assert endpnt == urljoin(DSP.get_root_uri(uri), endpoints['download'][1])
+    method, endpnt = DSP.build_endpoint("download", provider_uri=uri)
+    assert method == endpoints["download"][0]
+    assert endpnt == urljoin(DSP.get_root_uri(uri), endpoints["download"][1])
 
     DSP.get_service_endpoints = original_func
 
@@ -94,13 +113,25 @@ def test_build_specific_endpoints():
     DSP.get_service_endpoints = get_service_endpoints
 
     base_uri = DSP.get_root_uri(config.provider_url)
-    assert DSP.build_download_endpoint()[1] == urljoin(base_uri, endpoints['download'][1])
-    assert DSP.build_initialize_endpoint()[1] == urljoin(base_uri, endpoints['initialize'][1])
-    assert DSP.build_encrypt_endpoint()[1] == urljoin(base_uri, endpoints['encrypt'][1])
-    assert DSP.build_fileinfo()[1] == urljoin(base_uri, endpoints['fileinfo'][1])
-    assert DSP.build_compute_endpoint()[1] == urljoin(base_uri, endpoints['computeStatus'][1])
-    assert DSP.build_compute_endpoint()[1] == urljoin(base_uri, endpoints['computeStart'][1])
-    assert DSP.build_compute_endpoint()[1] == urljoin(base_uri, endpoints['computeStop'][1])
-    assert DSP.build_compute_endpoint()[1] == urljoin(base_uri, endpoints['computeDelete'][1])
+    assert DSP.build_download_endpoint()[1] == urljoin(
+        base_uri, endpoints["download"][1]
+    )
+    assert DSP.build_initialize_endpoint()[1] == urljoin(
+        base_uri, endpoints["initialize"][1]
+    )
+    assert DSP.build_encrypt_endpoint()[1] == urljoin(base_uri, endpoints["encrypt"][1])
+    assert DSP.build_fileinfo()[1] == urljoin(base_uri, endpoints["fileinfo"][1])
+    assert DSP.build_compute_endpoint()[1] == urljoin(
+        base_uri, endpoints["computeStatus"][1]
+    )
+    assert DSP.build_compute_endpoint()[1] == urljoin(
+        base_uri, endpoints["computeStart"][1]
+    )
+    assert DSP.build_compute_endpoint()[1] == urljoin(
+        base_uri, endpoints["computeStop"][1]
+    )
+    assert DSP.build_compute_endpoint()[1] == urljoin(
+        base_uri, endpoints["computeDelete"][1]
+    )
 
     DSP.get_service_endpoints = original_func
