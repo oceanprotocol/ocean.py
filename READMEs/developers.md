@@ -160,3 +160,5 @@ Finally, you can [go here](https://app.codacy.com/gh/oceanprotocol/ocean.py/dash
 
 You are welcome to contribute to ocean.py docs! For clean markdowns, we use the `remark` tool for automatic markdown formatting.
 See instructions here: [remark](https://github.com/remarkjs/remark-lint) and use [this configuration file](https://github.com/codacy/codacy-remark-lint/blob/master/.remarkrc.js).
+
+To generate a Sphinx documentation, run `sphinx-build -b html source path_of_your_choice` in the `docs/` folder.
