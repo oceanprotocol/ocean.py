@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.ocean import Ocean
@@ -42,38 +41,6 @@ def test_metadataStoreUri_version():
     config_dict = {"metadataStoreUri": "http://ItWorked.com", "network": "rinkeby"}
     ocean_instance = Ocean(config=config_dict)
     assert "http://ItWorked.com" == ocean_instance.config.aquarius_url
-
-
-def test_expose_endpoints():
-    service_endpoints = {
-        "computeDelete": ["DELETE", "/api/v1/services/compute"],
-        "computeStart": ["POST", "/api/v1/services/compute"],
-        "computeStatus": ["GET", "/api/v1/services/compute"],
-        "computeStop": ["PUT", "/api/v1/services/compute"],
-        "download": ["GET", "/api/v1/services/download"],
-        "encrypt": ["POST", "/api/v1/services/encrypt"],
-        "fileinfo": ["POST", "/api/v1/services/fileinfo"],
-        "initialize": ["GET", "/api/v1/services/initialize"],
-        "nonce": ["GET", "/api/v1/services/nonce"],
-    }
-    valid_endpoints = DataServiceProvider.get_service_endpoints()
-    assert len(valid_endpoints) == len(service_endpoints)
-    assert [
-        valid_endpoints[key] for key in set(service_endpoints) & set(valid_endpoints)
-    ]
-
-
-def test_provider_address():
-    provider_address = DataServiceProvider.get_provider_address()
-    assert provider_address, "Failed to get provider address."
-
-
-def test_provider_address_with_url():
-    p_ocean_instance = get_publisher_ocean_instance()
-    provider_address = DataServiceProvider.get_provider_address(
-        DataServiceProvider.get_url(p_ocean_instance.config)
-    )
-    assert provider_address, "Failed to get provider address."
 
 
 def process_order(ocean_instance, publisher_wallet, consumer_wallet, ddo, service_type):

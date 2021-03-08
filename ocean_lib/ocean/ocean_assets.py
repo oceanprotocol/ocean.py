@@ -428,7 +428,7 @@ class OceanAssets:
 
         dt_address = asset.data_token_address
 
-        _, initialize_url = self._data_provider.get_initialize_endpoint(
+        _, initialize_url = self._data_provider.build_initialize_endpoint(
             sa.service_endpoint
         )
         order_requirements = self._data_provider.get_order_requirements(

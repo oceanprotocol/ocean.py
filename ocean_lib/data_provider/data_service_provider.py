@@ -500,62 +500,8 @@ class DataServiceProvider:
         return DataServiceProvider.build_endpoint("computeStatus", provider_uri)
 
     @staticmethod
-    def build_stop_compute(provider_uri=None):
-        return DataServiceProvider.build_endpoint("computeStop", provider_uri)
-
-    @staticmethod
-    def build_start_compute(provider_uri=None):
-        return DataServiceProvider.build_endpoint("computeStart", provider_uri)
-
-    @staticmethod
-    def build_delete_compute(provider_uri=None):
-        return DataServiceProvider.build_endpoint("computeDelete", provider_uri)
-
-    @staticmethod
     def build_fileinfo(provider_uri=None):
         return DataServiceProvider.build_endpoint("fileinfo", provider_uri)
-
-    @staticmethod
-    def get_initialize_endpoint(service_endpoint):
-        return DataServiceProvider.build_initialize_endpoint(
-            DataServiceProvider.get_root_uri(service_endpoint)
-        )
-
-    @staticmethod
-    def get_download_endpoint(config):
-        """
-        Return the url to consume the asset.
-
-        :param config: Config
-        :return: Url, str
-        """
-        return DataServiceProvider.build_download_endpoint(
-            DataServiceProvider.get_url(config)
-        )
-
-    @staticmethod
-    def get_compute_endpoint(config):
-        """
-        Return the url to execute the asset.
-
-        :param config: Config
-        :return: Url, str
-        """
-        return DataServiceProvider.build_compute_endpoint(
-            DataServiceProvider.get_url(config)
-        )
-
-    @staticmethod
-    def get_encrypt_endpoint(config):
-        """
-        Return the url to encrypt the asset.
-
-        :param config: Config
-        :return: Url, str
-        """
-        return DataServiceProvider.build_encrypt_endpoint(
-            DataServiceProvider.get_url(config)
-        )
 
     @staticmethod
     def write_file(response, destination_folder, file_name):
