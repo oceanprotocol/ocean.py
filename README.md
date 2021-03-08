@@ -46,17 +46,17 @@ This is in beta state and you can expect running into problems. If you run into 
 
 This stripped-down flow shows the essence of Ocean. Just downloading, no metadata.
 
-[Go to simple flow](READMEs/datatokens\-flow.md)
+[Go to simple flow](READMEs/datatokens-flow.md)
 
 ### Marketplace flow
 
 This batteries-included flow includes metadata, multiple services for one datatoken, and compute-to-data.
 
-[Go to marketplace flow](READMEs/marketplace\-flow.md)
+[Go to marketplace flow](READMEs/marketplace-flow.md)
 
 ### Learn more
 
--   [Get test OCEAN](READMEs/get\-test\-OCEAN.md) - from rinkeby
+-   [Get test OCEAN](READMEs/get-test-OCEAN.md) - from rinkeby
 -   [Understand config parameters](READMEs/parameters.md) - envvars vs files
 -   [Learn about off-chain services](READMEs/services.md) - Ocean Provider for data services, Aquarius metadata store
 -   [Learn about wallets](READMEs/wallets.md) - on generating, storing, and accessing private keys

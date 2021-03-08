@@ -159,4 +159,4 @@ Finally, you can [go here](https://app.codacy.com/gh/oceanprotocol/ocean.py/dash
 ## 8. Appendix: Contributing to docs
 
 You are welcome to contribute to ocean.py docs! For clean markdowns, we use the `remark` tool for automatic markdown formatting.
-See instructions here: [remark](https://github.com/remarkjs/remark-lint) and use [this configuration file](https://github.com/codacy/codacy-remark-lint/blob/master/.remarkrc.js).
+OCEAN has an official repository containing remark settings, so please follow the instructions [here](https://github.com/oceanprotocol/ocean-remark).

@@ -37,6 +37,7 @@ docker system prune -a --volumes
 ### Run Ocean Market service
 
 In a new console:
+
 ```console
 #install
 git clone https://github.com/oceanprotocol/market.git
@@ -54,6 +55,7 @@ Check out the Ocean Market webapp at http://localhost:8000.
 In steps below, Alice and Bob need (fake) OCEAN. Let's send them some. To make this happen, we need to get the ocean.py repo; we don't use that repo for this quickstart otherwise.
 
 In a new console:
+
 ```console
 #clone the repo and enter into it
 git clone https://github.com/oceanprotocol/ocean.py
@@ -97,6 +99,7 @@ pip install ocean-lib
 ### Create config file
 
 Create a file called `test3/config.ini` and fill it as follows.
+
 ```text
 [eth-network]
 network = ganache
@@ -115,6 +118,7 @@ downloads.path = consume-downloads
 ## 2. Alice publishes data asset
 
 Ensure proper environment. In the console:
+
 ```text
 #go into venv
 cd test3
@@ -236,6 +240,7 @@ print(f"Price of 1 datatoken is {price_in_OCEAN} OCEAN")
 Now, you're Bob the data consumer.
 
 In the same Python console as before:
+
 ```python
 #Bob's wallet
 bob_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY2'))
@@ -284,6 +289,7 @@ print(f"file_path = '{file_path}'") #e.g. datafile.0xAf07...
 ```
 
 In console:
+
 ```console
 #verify that the file is downloaded
 cd test3/datafile.0xAf07... 
