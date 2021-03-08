@@ -22,7 +22,9 @@ docker system prune -a --volumes
 ```
 
 ## Create config file
+
 Create a file called `config.ini` and fill it as follows.
+
 ```text
 [eth-network]
 network = ganache
@@ -71,4 +73,5 @@ print("create datatoken: begin.")
 datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet) 
 print(f"created datatoken: done. Its address is {datatoken.address}")
 ```
+
 Congrats, you've created your first Ocean datatoken! 🐋
