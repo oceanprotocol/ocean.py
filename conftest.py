@@ -61,7 +61,7 @@ def setup_all():
                 OCEAN_token.transfer(w.address, amt_distribute_base, from_wallet=wallet)
 
 
-@pytest.fixture()
+@pytest.fixture
 def publisher_ocean_instance():
     return get_publisher_ocean_instance()
 
