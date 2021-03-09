@@ -6,9 +6,9 @@ import pytest
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.btoken import BToken
+from ocean_lib.models.tests.conftest import alice_info
 from ocean_lib.ocean.util import from_base_18, get_bfactory_address, to_base_18
 from ocean_lib.web3_internal.wallet import Wallet
-from tests.models.conftest import alice_info
 
 HUGEINT = 2 ** 255
 
