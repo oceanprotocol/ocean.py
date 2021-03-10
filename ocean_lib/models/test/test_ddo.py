@@ -20,6 +20,7 @@ from tests.resources.helper_functions import get_consumer_wallet, get_publisher_
 
 
 def get_ddo_sample(datatoken_address):
+    """Helper function to get a sample ddo for testing."""
     did = f"did:op:{remove_0x_prefix(datatoken_address)}"
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
@@ -37,6 +38,7 @@ def get_ddo_sample(datatoken_address):
 
 
 def test_ddo_on_chain():
+    """Tests chain operations on a DDO."""
     config = ConfigProvider.get_config()
     ddo_address = get_contracts_addresses("ganache", config)[
         MetadataContract.CONTRACT_NAME

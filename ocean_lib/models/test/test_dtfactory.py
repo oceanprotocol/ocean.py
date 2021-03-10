@@ -7,7 +7,8 @@ from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.util import to_base_18
 
 
-def test1(network, alice_wallet, dtfactory_address):
+def test_data_token_creation(network, alice_wallet, dtfactory_address):
+    """Tests that a data token can be created using a DTFactory object."""
     dtfactory = DTFactory(dtfactory_address)
 
     dt_address = dtfactory.createToken(
