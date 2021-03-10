@@ -2,6 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import time
 import uuid
 
 import pytest
@@ -21,6 +22,7 @@ from tests.resources.helper_functions import get_consumer_wallet, get_publisher_
 
 
 def create_asset(ocean, publisher):
+    """Helper function for asset creation based on ddo_sa_sample.json."""
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
 
@@ -32,6 +34,7 @@ def create_asset(ocean, publisher):
 
 
 def test_register_asset(publisher_ocean_instance):
+    """Test various paths for asset registration."""
     ocn = publisher_ocean_instance
     ddo_reg = ocn.assets.ddo_registry()
     block = ocn.web3.eth.blockNumber
@@ -111,19 +114,29 @@ def test_register_asset(publisher_ocean_instance):
 
 
 def test_ocean_assets_search(publisher_ocean_instance, metadata):
+    """Tests that a created asset can be searched successfully."""
+    identifier = str(uuid.uuid1()).replace("-", "")
+    metadata_copy = metadata.copy()
+    metadata_copy["main"]["name"] = identifier
+    assert len(publisher_ocean_instance.assets.search(identifier)) == 0
+
     publisher = get_publisher_wallet()
-    ddo = publisher_ocean_instance.assets.create(metadata, publisher)
+    ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher)
     wait_for_ddo(publisher_ocean_instance, ddo.did)
-    assert len(publisher_ocean_instance.assets.search("Monkey")) > 0
+    time.sleep(1)  # apparently changes are not instantaneous
+    assert len(publisher_ocean_instance.assets.search(identifier)) == 1
+    assert len(publisher_ocean_instance.assets.search("Gorilla")) == 0
 
 
 def test_ocean_assets_validate(publisher_ocean_instance, metadata):
+    """Tests that the validate function returns an error for invalid metadata."""
     assert publisher_ocean_instance.assets.validate(
         metadata
     ), "metadata should be valid, unless the schema changed."
 
 
 def test_ocean_assets_algorithm(publisher_ocean_instance):
+    """Tests the creation of an algorithm DDO."""
     publisher = get_publisher_wallet()
     metadata = get_sample_algorithm_ddo()["service"][0]
     metadata["attributes"]["main"]["files"][0]["checksum"] = str(uuid.uuid4())
@@ -134,6 +147,7 @@ def test_ocean_assets_algorithm(publisher_ocean_instance):
 
 
 def test_ocean_assets_compute(publisher_ocean_instance):
+    """Tests the creation of an asset with a compute service."""
     publisher = get_publisher_wallet()
     metadata = get_computing_metadata()
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())

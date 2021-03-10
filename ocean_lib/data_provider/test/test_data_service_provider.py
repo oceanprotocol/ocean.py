@@ -2,9 +2,12 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+
+import pytest
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
+from ocean_lib.data_provider.exceptions import InvalidURLException
 from tests.resources.helper_functions import get_publisher_ocean_instance
 
 TEST_SERVICE_ENDPOINTS = {
@@ -21,6 +24,7 @@ TEST_SERVICE_ENDPOINTS = {
 
 
 def test_expose_endpoints():
+    """Tests that the DataServiceProvider exposes all service endpoints."""
     service_endpoints = TEST_SERVICE_ENDPOINTS
     valid_endpoints = DataSP.get_service_endpoints()
     assert len(valid_endpoints) == len(service_endpoints)
@@ -30,11 +34,13 @@ def test_expose_endpoints():
 
 
 def test_provider_address():
+    """Tests that a provider address exists on the DataServiceProvider."""
     provider_address = DataSP.get_provider_address()
     assert provider_address, "Failed to get provider address."
 
 
 def test_provider_address_with_url():
+    """Tests that a URL version of provider address exists on the DataServiceProvider."""
     p_ocean_instance = get_publisher_ocean_instance()
     provider_address = DataSP.get_provider_address(
         DataSP.get_url(p_ocean_instance.config)
@@ -43,6 +49,7 @@ def test_provider_address_with_url():
 
 
 def test_get_root_uri():
+    """Tests extraction of base URLs from various inputs."""
     uri = "http://ppp.com"
     assert DataSP.get_root_uri(uri) == uri
     assert DataSP.get_root_uri("http://ppp.com:8000") == "http://ppp.com:8000"
@@ -68,8 +75,16 @@ def test_get_root_uri():
         == "http://ppp.com:8000/api/v2"
     )
 
+    with pytest.raises(InvalidURLException):
+        DataSP.get_root_uri("thisIsNotAnURL")
+
+    with pytest.raises(InvalidURLException):
+        DataSP.get_root_uri("//")
+
 
 def test_build_endpoint():
+    """Tests that service endpoints are correctly built from URL and service name."""
+
     def get_service_endpoints(_provider_uri=None):
         _endpoints = TEST_SERVICE_ENDPOINTS.copy()
         _endpoints.update({"newEndpoint": ["GET", "/api/v1/services/newthing"]})
@@ -107,6 +122,7 @@ def test_build_endpoint():
 
 
 def test_build_specific_endpoints():
+    """Tests that a specific list of agreed endpoints is supported on the DataServiceProvider."""
     config = ConfigProvider.get_config()
     endpoints = TEST_SERVICE_ENDPOINTS
 
