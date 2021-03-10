@@ -6,8 +6,8 @@
 import uuid
 
 import pytest
-from examples import ExampleConfig
 from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.util import (
     get_ocean_token_address,
     get_web3_connection_provider,
