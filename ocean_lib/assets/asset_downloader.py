@@ -54,7 +54,7 @@ def download_asset_files(
     if not os.path.exists(destination):
         os.mkdir(destination)
 
-    asset_folder = os.path.join(
+    asset_folder = os.path.join( ### TODO
         destination, f"datafile.{asset.asset_id}.{service_index}"
     )
     if not os.path.exists(asset_folder):
@@ -83,4 +83,4 @@ def download_asset_files(
             i,
         )
 
-    return destination
+    return asset_folder, destination ### verify if asset_folder is a file => append to destination
