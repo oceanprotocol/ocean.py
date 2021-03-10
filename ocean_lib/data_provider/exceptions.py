@@ -6,5 +6,3 @@
 
 class InvalidURLException(Exception):
     """Raised when a URL can not be parsed in DataServiceProvider."""
-
-    pass
