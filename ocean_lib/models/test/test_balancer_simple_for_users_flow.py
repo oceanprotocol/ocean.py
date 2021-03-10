@@ -7,6 +7,7 @@ from ocean_lib.ocean.util import to_base_18
 
 
 def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wallet):
+    """Tests a simple liquidity add/remove flow."""
     # ===============================================================
     # 1. Alice publishes a dataset (= publishes a datatoken)
     # For now, you're Alice:) Let's proceed.

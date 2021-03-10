@@ -2,6 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import time
 import uuid
 
 import pytest
@@ -114,10 +115,12 @@ def test_register_asset(publisher_ocean_instance):
 
 def test_ocean_assets_search(publisher_ocean_instance, metadata):
     """Tests that a created asset can be searched successfully."""
+    initial_number = len(publisher_ocean_instance.assets.search("Monkey"))
     publisher = get_publisher_wallet()
     ddo = publisher_ocean_instance.assets.create(metadata, publisher)
     wait_for_ddo(publisher_ocean_instance, ddo.did)
-    assert len(publisher_ocean_instance.assets.search("Monkey")) > 0
+    time.sleep(5)
+    assert len(publisher_ocean_instance.assets.search("Monkey")) == (initial_number + 1)
     assert len(publisher_ocean_instance.assets.search("Gorilla")) == 0
 
 
