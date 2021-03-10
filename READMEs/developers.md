@@ -81,14 +81,16 @@ export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7
 
 ## 4. Test
 
-In console:
-```console
-#run a single test
-pytest ocean_lib/models/test/test_btoken.py
+You can run all Python tests by using the command `tox`.
 
-#run all tests
-pytest
+Or you can run a single test file:
+```console
+pytest ocean_lib/models/test/test_btoken.py
 ```
+
+If you want to run a specific test individually, run `pytest test_file_path.py::test_specific_test`.
+In this case, if some environment variables are not set, pytest will default to those defined in `pytest.ini` (defined in the project root directory).
+These variables are the same as the ones tox.ini defines.
 
 Bonus: see the [appendix](developers.md#7-appendix-more-tests) for even more tests.
 

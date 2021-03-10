@@ -65,6 +65,7 @@ dev_requirements = [
     # for the following: maybe needed, maybe not
     "pytest",
     "licenseheaders",
+    "pytest-env",
 ]
 
 docs_requirements = ["Sphinx", "sphinxcontrib-apidoc"]
@@ -99,6 +100,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/oceanprotocol/ocean.py",
-    version='0.5.13', #bumpversion.sh needs single-quotes # noqa : E261, W291
+    version="0.5.13",  # bumpversion.sh needs single-quotes # noqa : E261, W291
     zip_safe=False,
 )
