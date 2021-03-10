@@ -100,6 +100,9 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/oceanprotocol/ocean.py",
-    version="0.5.13",  # bumpversion.sh needs single-quotes # noqa : E261, W291
+    # fmt: off
+    # bumpversion.sh needs single-quotes
+    version='0.5.13',
+    # fmt: on
     zip_safe=False,
 )
