@@ -5,7 +5,6 @@
 
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_token import DataToken
-from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_utils.agreements.service_types import ServiceTypes
 from tests.resources.ddo_helpers import (
@@ -29,20 +28,6 @@ class Setup:
         self.consumer_wallet = get_consumer_wallet()
         self.publisher_ocean_instance = get_publisher_ocean_instance()
         self.consumer_ocean_instance = get_consumer_ocean_instance()
-
-
-def test_metadataCacheUri_version():
-    """Tests that the Aquarius URL can use the custom metadataCacheUri key."""
-    config_dict = {"metadataCacheUri": "http://ItWorked.com", "network": "rinkeby"}
-    ocean_instance = Ocean(config=config_dict)
-    assert "http://ItWorked.com" == ocean_instance.config.aquarius_url
-
-
-def test_metadataStoreUri_version():
-    """Tests that the Aquarius URL can fallback on the custom metadataStoreUri key."""
-    config_dict = {"metadataStoreUri": "http://ItWorked.com", "network": "rinkeby"}
-    ocean_instance = Ocean(config=config_dict)
-    assert "http://ItWorked.com" == ocean_instance.config.aquarius_url
 
 
 def process_order(ocean_instance, publisher_wallet, consumer_wallet, ddo, service_type):
