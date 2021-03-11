@@ -5,6 +5,7 @@
 
 from ocean_lib.config import Config
 from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
 from tests.resources.ddo_helpers import get_resource_path
 
@@ -51,3 +52,10 @@ def test_config_from_text():
     """
     config = Config(text=config_text)
     assert config.aquarius_url == "https://another-aqua.url"
+
+
+def test_network_config():
+    assert (
+        "ganache.infura.io"
+        in ExampleConfig.get_network_config("ganache")["eth-network"]["network"]
+    )
