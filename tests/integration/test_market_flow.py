@@ -23,6 +23,10 @@ from tests.resources.helper_functions import (
 
 @pytest.mark.parametrize("order_type", ["implicit_none", "explicit_none"])
 def test_market_flow(order_type):
+    """Tests that an order is correctly placed on the market.
+
+    The parameter implicit_none sends the payload with an empty key as the delegated consumer.
+    The parameter explicit_none sends None as the delegated consumer, explicitly."""
     pub_wallet = get_publisher_wallet()
 
     publisher_ocean = get_publisher_ocean_instance()
@@ -108,6 +112,7 @@ def test_market_flow(order_type):
 
 
 def test_payer_market_flow():
+    """Tests that an order can be placed for a delegated consumer, other than the payer."""
     pub_wallet = get_publisher_wallet()
 
     publisher_ocean = get_publisher_ocean_instance()
