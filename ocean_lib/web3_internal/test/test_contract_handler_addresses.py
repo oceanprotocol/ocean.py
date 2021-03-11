@@ -1,5 +1,7 @@
-#  Copyright 2021 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 
 import copy
 import os
@@ -11,23 +13,23 @@ from web3.exceptions import InvalidAddress
 
 _NETWORK = "ganache"
 
-# ======================================================================
-# test get_contracts_addresses() - local file
 
-
-def test_get_contracts_addresses__bad_path1():
+def test_get_contracts_addresses_empty():
+    """Tests that an empty address can not be set on a Contract."""
     addresses = ContractHandler.get_contracts_addresses(_NETWORK, address_file=None)
     assert addresses is None
 
 
-def test_get_contracts_addresses__bad_path2():
+def test_get_contracts_addresses_bad_path():
+    """Tests that a non-existent address can not be set on a Contract."""
     addresses = ContractHandler.get_contracts_addresses(
         _NETWORK, address_file="/bin/foo/bar/tralala"
     )
     assert addresses is None
 
 
-def test_get_contracts_addresses__good_path_custom_network(tmp_path):
+def test_get_contracts_addresses_good_path_custom_network(tmp_path):
+    """Tests that an address with a custom network can be set on a Contract."""
     # tmp_path:pathlib.Path is special pytest feature
 
     # create & fill test file
@@ -43,7 +45,8 @@ def test_get_contracts_addresses__good_path_custom_network(tmp_path):
     assert addresses == "myvals"
 
 
-def test_get_contracts_addresses__good_path_use_network_alias(tmp_path):
+def test_get_contracts_addresses_good_path_use_network_alias(tmp_path):
+    """Tests that an address with a network alias can be set on a Contract."""
     assert ContractHandler.network_alias == {"ganache": "development"}
 
     # create & fill test file
@@ -59,7 +62,8 @@ def test_get_contracts_addresses__good_path_use_network_alias(tmp_path):
     assert addresses == "myvals"
 
 
-def test_get_contracts_addresses__example_config(network, example_config):
+def test_get_contracts_addresses_example_config(network, example_config):
+    """Tests that an address can be set if using testing config."""
     # ensure we're testing locally
     assert network in ["ganache", "development"]
 

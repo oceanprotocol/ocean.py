@@ -8,6 +8,7 @@ from tests.resources.helper_functions import get_publisher_wallet
 
 
 def test_create_access_service(publisher_ocean_instance):
+    """Tests that an access service is correctly created."""
     service = publisher_ocean_instance.services.create_access_service(
         {"a": 1}, "service_endpoint"
     )
@@ -17,6 +18,9 @@ def test_create_access_service(publisher_ocean_instance):
 
 
 def test_create_compute_service(publisher_ocean_instance):
+    """Tests that a compute service is correctly created.
+
+    Includes cluster, container and server creation."""
     ocn_compute = publisher_ocean_instance.compute
 
     cluster = ocn_compute.build_cluster_attributes("kubernetes", "/cluster/url")
