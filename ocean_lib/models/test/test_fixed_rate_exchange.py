@@ -9,6 +9,7 @@ from web3.exceptions import ValidationError
 
 
 def run_failing_tx(contract, fn, *args):
+    """Helper function for testing a failed transfer."""
     try:
         tx_id = fn(*args)
         return contract.get_tx_receipt(tx_id).status

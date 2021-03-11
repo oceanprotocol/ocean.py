@@ -9,6 +9,7 @@ from ocean_lib.ocean.util import from_base_18, to_base_18
 
 
 def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address):
+    """Tests DataToken minting, allowance and transfer."""
     token = alice_ocean.create_data_token(
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
@@ -34,6 +35,7 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address
 
 
 def test_blob(alice_ocean, alice_wallet):
+    """Tests DataToken creation with blob."""
     token = alice_ocean.create_data_token(
         "DataToken1", "DT1", alice_wallet, blob="foo_blob"
     )
@@ -41,6 +43,7 @@ def test_blob(alice_ocean, alice_wallet):
 
 
 def test_setMinter(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address):
+    """Tests that a minter can be assigned for a Datatoken."""
     ocean = alice_ocean
     token = ocean.create_data_token(
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"

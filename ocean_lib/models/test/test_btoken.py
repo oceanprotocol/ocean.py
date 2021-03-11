@@ -9,6 +9,7 @@ from ocean_lib.ocean import util
 def test_ERC20(
     network, alice_wallet, alice_address, bob_wallet, bob_address, OCEAN_address
 ):
+    """Tests an OCEAN token approval, allowance and transfers."""
     token = BToken(OCEAN_address)
 
     token.approve(bob_address, 0, from_wallet=alice_wallet)
