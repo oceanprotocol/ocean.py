@@ -8,8 +8,8 @@ import os
 import sys
 from pathlib import Path
 
-from examples import ExampleConfig
 from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.data_token import DataToken

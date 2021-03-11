@@ -10,7 +10,7 @@
 #  here we simply import that conftest's contents.
 
 import pytest
-from examples import ExampleConfig
+from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.test.conftest import *  # noqa: F401 F403
 
 # Other things to set up, specific to here...
