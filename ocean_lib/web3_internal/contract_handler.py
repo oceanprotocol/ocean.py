@@ -108,12 +108,11 @@ class ContractHandler(object):
     @staticmethod
     def _get(name, address=None):
         if address:
-            return ContractHandler._contracts.get(
-                (name, address)
-            ) or ContractHandler._load(name, address)
-        return ContractHandler._contracts.get(name) or ContractHandler._load(
-            name, address
-        )
+            return ContractHandler._contracts.get((name, address)) \
+                or ContractHandler._load(name, address)
+        else:
+            return ContractHandler._contracts.get(name) \
+                or ContractHandler._load(name, address)
 
     @staticmethod
     def _load(contract_name, address=None):
