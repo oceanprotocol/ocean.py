@@ -267,13 +267,14 @@ class DataServiceProvider:
             data=json.dumps(payload),
             headers={"content-type": "application/json"},
         )
-        logger.debug(
-            f"got DataProvider execute response: {response.content} with status-code {response.status_code} "
-        )
         if not response:
             raise AssertionError(
                 f"Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}"
             )
+
+        logger.debug(
+            f"got DataProvider execute response: {response.content} with status-code {response.status_code} "
+        )
 
         if response.status_code not in (201, 200):
             raise ValueError(response.content.decode("utf-8"))

@@ -12,6 +12,7 @@ from ocean_utils.exceptions import OceanEncryptAssetUrlsError
 from ocean_utils.http_requests.requests_session import get_requests_session
 from tests.resources.helper_functions import get_publisher_ocean_instance
 from tests.resources.mocks.http_client_mock import (
+    HttpClientEmptyMock,
     HttpClientEvilMock,
     HttpClientNiceMock,
 )
@@ -45,12 +46,21 @@ def with_nice_client():
     DataSP.set_http_client(get_requests_session())
 
 
+@pytest.fixture
+def with_empty_client():
+    http_client = HttpClientEmptyMock()
+    DataSP.set_http_client(http_client)
+    yield
+    DataSP.set_http_client(get_requests_session())
+
+
 def test_set_http_client(with_nice_client):
     """Tests that a custom http client can be set on the DataServiceProvider."""
     assert isinstance(DataSP.get_http_client(), HttpClientNiceMock)
 
 
 def test_encryption_fails(with_evil_client):
+    """Tests that asset encryption fails with OceanEncryptAssetUrlsError."""
     encrypt_endpoint = "http://mock/encrypt/"
     with pytest.raises(OceanEncryptAssetUrlsError):
         DataSP.encrypt_files_dict(
@@ -59,6 +69,54 @@ def test_encryption_fails(with_evil_client):
             "some_asset_id",
             "some_publisher_address",
             "some_signature",
+        )
+
+
+def test_nonce_fails(with_evil_client):
+    """Tests that nonce retrieved erroneously is set to None."""
+    assert DataSP.get_nonce("some_address", "http://mock/") is None
+
+
+def test_order_requirements_fails(with_evil_client):
+    """Tests failure of order requirements from endpoint."""
+    assert (
+        DataSP.get_order_requirements(
+            "some_did",
+            "http://mock/",
+            "some_consumer_address",
+            "some_service_id",
+            "and_service_type",
+            "some_token_address",
+        )
+        is None
+    )
+
+
+def test_start_compute_job_fails_empty(with_empty_client):
+    """Tests failure of compute job from endpoint with empty response."""
+    with pytest.raises(AssertionError):
+        DataSP.start_compute_job(
+            "some_did",
+            "http://mock/",
+            "some_consumer_address",
+            "some_signature",
+            "some_service_id",
+            "some_tx_id",
+            algorithm_did="some_algo_did",
+        )
+
+
+def test_start_compute_job_fails_error_response(with_evil_client):
+    """Tests failure of compute job from endpoint with non-200 response."""
+    with pytest.raises(ValueError):
+        DataSP.start_compute_job(
+            "some_did",
+            "http://mock/",
+            "some_consumer_address",
+            "some_signature",
+            "some_service_id",
+            "some_tx_id",
+            algorithm_did="some_algo_did",
         )
 
 
