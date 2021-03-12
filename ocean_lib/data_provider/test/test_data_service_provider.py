@@ -8,7 +8,13 @@ from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.data_provider.exceptions import InvalidURLException
+from ocean_utils.exceptions import OceanEncryptAssetUrlsError
+from ocean_utils.http_requests.requests_session import get_requests_session
 from tests.resources.helper_functions import get_publisher_ocean_instance
+from tests.resources.mocks.http_client_mock import (
+    HttpClientEvilMock,
+    HttpClientNiceMock,
+)
 
 TEST_SERVICE_ENDPOINTS = {
     "computeDelete": ["DELETE", "/api/v1/services/compute"],
@@ -21,6 +27,39 @@ TEST_SERVICE_ENDPOINTS = {
     "initialize": ["GET", "/api/v1/services/initialize"],
     "nonce": ["GET", "/api/v1/services/nonce"],
 }
+
+
+@pytest.fixture
+def with_evil_client():
+    http_client = HttpClientEvilMock()
+    DataSP.set_http_client(http_client)
+    yield
+    DataSP.set_http_client(get_requests_session())
+
+
+@pytest.fixture
+def with_nice_client():
+    http_client = HttpClientNiceMock()
+    DataSP.set_http_client(http_client)
+    yield
+    DataSP.set_http_client(get_requests_session())
+
+
+def test_set_http_client(with_nice_client):
+    """Tests that a custom http client can be set on the DataServiceProvider."""
+    assert isinstance(DataSP.get_http_client(), HttpClientNiceMock)
+
+
+def test_encryption_fails(with_evil_client):
+    encrypt_endpoint = "http://mock/encrypt/"
+    with pytest.raises(OceanEncryptAssetUrlsError):
+        DataSP.encrypt_files_dict(
+            "some_files",
+            encrypt_endpoint,
+            "some_asset_id",
+            "some_publisher_address",
+            "some_signature",
+        )
 
 
 def test_expose_endpoints():
