@@ -77,4 +77,3 @@ def test_get_contracts_addresses_example_config(network, example_config):
     # are address values sane?
     for address in addresses.values():
         assert address[0:2] == "0x"
-
