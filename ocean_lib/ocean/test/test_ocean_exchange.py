@@ -13,12 +13,14 @@ _NETWORK = "ganache"
 
 
 def _get_exchange_address():
+    """Helper function to retrieve a known exchange address."""
     return get_contracts_addresses(_NETWORK, ConfigProvider.get_config())[
         FixedRateExchange.CONTRACT_NAME
     ]
 
 
 def test_ocean_exchange(publisher_ocean_instance):
+    """Tests various flows of DataToken exchanges."""
     ocn = publisher_ocean_instance
     alice_wallet = get_publisher_wallet()
     bob_wallet = get_consumer_wallet()

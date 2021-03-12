@@ -7,6 +7,7 @@ from tests.resources.helper_functions import get_publisher_wallet
 
 
 def test_get_token():
+    """Tests aquiring token (happy and sad flows)."""
     ocn_auth = OceanAuth(":memory:")
     wallet = get_publisher_wallet()
     token = ocn_auth.get(wallet)
@@ -20,6 +21,7 @@ def test_get_token():
 
 
 def test_check_token(web3_instance):
+    """Tests a token check (happy and sad flow)."""
     ocn_auth = OceanAuth(":memory:")
     wallet = get_publisher_wallet()
 
@@ -31,9 +33,11 @@ def test_check_token(web3_instance):
     assert ocn_auth.check(sig) == "0x0"
 
     # Test token expiration
+    # TODO
 
 
 def test_store_token():
+    """Tests that a token can be stored."""
     ocn_auth = OceanAuth(":memory:")
     wallet = get_publisher_wallet()
     token = ocn_auth.store(wallet)
@@ -43,6 +47,7 @@ def test_store_token():
 
 
 def test_restore_token():
+    """Test token restoring (happy and sad flows)."""
     ocn_auth = OceanAuth(":memory:")
     wallet = get_publisher_wallet()
     assert (
@@ -56,6 +61,7 @@ def test_restore_token():
 
 
 def test_known_token():
+    """Test that a known token is invalid if its address has been changed."""
     token = (
         "0x1d2741dee30e64989ef0203957c01b14f250f5d2f6ccb0c"
         "88c9518816e4fcec16f84e545094eb3f377b7e214ded22676"

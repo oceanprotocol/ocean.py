@@ -1,5 +1,7 @@
-#  Copyright 2021 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 
 import copy
 import os
@@ -11,76 +13,9 @@ from web3.exceptions import InvalidAddress
 
 _NETWORK = "ganache"
 
-# ======================================================================
-# test get_contracts_addresses() - local file
-
-
-def test_get_contracts_addresses__bad_path1():
-    addresses = ContractHandler.get_contracts_addresses(_NETWORK, address_file=None)
-    assert addresses is None
-
-
-def test_get_contracts_addresses__bad_path2():
-    addresses = ContractHandler.get_contracts_addresses(
-        _NETWORK, address_file="/bin/foo/bar/tralala"
-    )
-    assert addresses is None
-
-
-def test_get_contracts_addresses__good_path_custom_network(tmp_path):
-    # tmp_path:pathlib.Path is special pytest feature
-
-    # create & fill test file
-    d = tmp_path / "subdir"
-    d.mkdir()
-    address_file = d / "address.json"
-    address_file.write_text('{"my_custom_network" : "myvals"}')
-
-    # the main test
-    addresses = ContractHandler.get_contracts_addresses(
-        network="my_custom_network", address_file=address_file
-    )
-    assert addresses == "myvals"
-
-
-def test_get_contracts_addresses__good_path_use_network_alias(tmp_path):
-    assert ContractHandler.network_alias == {"ganache": "development"}
-
-    # create & fill test file
-    d = tmp_path / "subdir"
-    d.mkdir()
-    address_file = d / "address.json"
-    address_file.write_text('{"development" : "myvals"}')  # not "ganache"
-
-    # the main test
-    addresses = ContractHandler.get_contracts_addresses(
-        network="ganache", address_file=address_file
-    )
-    assert addresses == "myvals"
-
-
-def test_get_contracts_addresses__example_config(network, example_config):
-    # ensure we're testing locally
-    assert network in ["ganache", "development"]
-
-    # do we get addresses for every contract?
-    addresses = ContractHandler.get_contracts_addresses(
-        network, example_config.address_file
-    )
-    assert set(addresses.keys()) == set(
-        ["DTFactory", "BFactory", "FixedRateExchange", "Metadata", "Ocean"]
-    )
-
-    # are address values sane?
-    for address in addresses.values():
-        assert address[0:2] == "0x"
-
-
-# ======================================================================
-# test ABIs & artifacts
-
 
 def test_set_artifacts_path__deny_change_to_empty():
+    """Tests can not set empty artifacts path."""
     path_before = copy.copy(ContractHandler.artifacts_path)
     assert path_before is not None
     assert ContractHandler._contracts
@@ -92,6 +27,7 @@ def test_set_artifacts_path__deny_change_to_empty():
 
 
 def test_set_artifacts_path__deny_change_to_same():
+    """Tests can not set unchanged artifacts path."""
     path_before = copy.copy(ContractHandler.artifacts_path)
     assert path_before is not None
     assert ContractHandler._contracts
@@ -103,6 +39,7 @@ def test_set_artifacts_path__deny_change_to_same():
 
 
 def test_set_artifacts_path__allow_change():
+    """Tests that a correct artifacts path can be set (happy flow)."""
     path_before = copy.copy(ContractHandler.artifacts_path)
     assert path_before is not None
     assert ContractHandler._contracts
@@ -114,6 +51,7 @@ def test_set_artifacts_path__allow_change():
 
 
 def test_get_unhappy_paths():
+    """Test that some erroneous artifacts paths can not be set (sad flows)."""
     with pytest.raises(TypeError):
         ContractHandler.get("foo name")
 
@@ -125,8 +63,7 @@ def test_get_unhappy_paths():
 
 
 def test_get_and_has__name_only():
-    # test get() and has() from name-only queries,
-    # which also call _load() and read_abi_from_file()
+    """Tests get() and has() from name-only queries, which also call _load() and read_abi_from_file()."""
     contract = ContractHandler.get("DataTokenTemplate")
     assert contract.address[:2] == "0x"
     assert "totalSupply" in str(contract.abi)
@@ -136,8 +73,7 @@ def test_get_and_has__name_only():
 
 
 def test_get_and_has__name_and_address(network, example_config):
-    # test get() and has() from (name, address) queries,
-    # which also call _load() and read_abi_from_file()
+    """Tests get() and has() from (name, address) queries, which also call _load() and read_abi_from_file()."""
     addresses = ContractHandler.get_contracts_addresses(
         network, example_config.address_file
     )
@@ -154,70 +90,76 @@ def test_get_and_has__name_and_address(network, example_config):
 
 
 def test_get_concise_contract():
+    """Tests that a concise contract can be retrieved from a DataTokenTemplate."""
     contract_concise = ContractHandler.get_concise_contract("DataTokenTemplate")
     assert isinstance(contract_concise, ConciseContract)
 
 
 def test_set():
+    """Tests setting of a DataTokenTemplate on a Contract."""
     contract = ContractHandler.get("DataTokenTemplate")
     address = contract.address
 
     ContractHandler.set("second_name", contract)
 
+    # result format is a tuple of (contract, contract_concise)
     # did it store in (name) key?
-    tup = ContractHandler._contracts["second_name"]  # (contract, contract_concise)
-    assert len(tup) == 2
-    assert tup[0].address == address
-    assert isinstance(tup[1], ConciseContract)
+    result = ContractHandler._contracts["second_name"]
+    assert len(result) == 2
+    assert result[0].address == address
+    assert isinstance(result[1], ConciseContract)
 
     # did it store in (name, address) key?
-    tup2 = ContractHandler._contracts[("second_name", address)]
-    assert tup2 == tup
+    result2 = ContractHandler._contracts[("second_name", address)]
+    assert result2 == result
 
 
 def test_load__fail_empty_artifacts_path():
+    """Tests that an empty artifacts path can not be loaded."""
     ContractHandler.artifacts_path = None
     with pytest.raises(AssertionError):
         ContractHandler._load("DTFactory")
 
 
 def test_load__fail_malformed_eth_address():
+    """Tests that an invalid ETH addres makes the Contract unloadable."""
     with pytest.raises(InvalidAddress):
         ContractHandler._load("DTFactory", "foo address")
 
 
 def test_load__fail_wrong_eth_address():
+    """Tests that a different ETH address from the Contract makes it unloadable."""
     random_eth_address = "0x0daA8DBE3f6760990c886F37E39A5696A4a911F0"
     with pytest.raises(InvalidAddress):
         ContractHandler._load("DTFactory", random_eth_address)
 
 
 def test_load__name_only():
-    # test load() from name-only query
+    """Tests load() from name-only query."""
     assert "DTFactory" not in ContractHandler._contracts
 
     contract = ContractHandler._load("DTFactory")
-
     assert ContractHandler._contracts["DTFactory"] == contract
 
 
 def test_load__name_and_address(network, example_config):
-    # test load() from (name, address) query
+    """Tests load() from (name, address) query."""
     addresses = ContractHandler.get_contracts_addresses(
         network, example_config.address_file
     )
     target_address = addresses["DTFactory"]
 
-    tup = ("DTFactory", target_address)
+    test_tuple = ("DTFactory", target_address)
 
-    assert tup not in ContractHandler._contracts
+    assert test_tuple not in ContractHandler._contracts
 
     contract = ContractHandler._load("DTFactory", target_address)
 
-    assert ContractHandler._contracts[tup] == contract
+    assert ContractHandler._contracts[test_tuple] == contract
 
 
 def test_read_abi_from_file__example_config__happy_path(example_config):
+    """Tests a correct reading of abi from file (happy path)."""
     assert "https" not in str(ContractHandler.artifacts_path)
 
     contract_definition = ContractHandler.read_abi_from_file(
@@ -228,6 +170,7 @@ def test_read_abi_from_file__example_config__happy_path(example_config):
 
 
 def test_read_abi_from_file__example_config__bad_contract_name(example_config):
+    """Tests an incorrect reading of abi from file (sad path)."""
     assert "https" not in str(ContractHandler.artifacts_path)
 
     base_path = ContractHandler.artifacts_path

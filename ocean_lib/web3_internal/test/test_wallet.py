@@ -11,6 +11,7 @@ from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 
 def test_wallet_arguments():
+    """Tests that a wallet's arguments are correctly setup."""
     web3 = Web3Provider.get_web3()
 
     private_key = os.environ.get("TEST_PRIVATE_KEY1")
