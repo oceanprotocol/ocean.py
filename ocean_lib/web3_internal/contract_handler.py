@@ -51,48 +51,6 @@ class ContractHandler(object):
             ContractHandler._contracts.clear()
 
     @staticmethod
-    def _get(name, address=None):
-        if address:
-            return ContractHandler._contracts.get(
-                (name, address)
-            ) or ContractHandler._load(name, address)
-        return ContractHandler._contracts.get(name) or ContractHandler._load(
-            name, address
-        )
-
-    @staticmethod
-    def get(name, address=None):
-        """
-        Return the Contract instance for a given name.
-
-        :param name: Contract name, str
-        :param address: hex str -- address of smart contract
-        :return: Contract instance
-        """
-        return ContractHandler._get(name, address)[0]
-
-    @staticmethod
-    def get_concise_contract(name, address=None):
-        """
-        Return the Concise Contract instance for a given name.
-
-        :param name: str -- Contract name
-        :param address: hex str -- address of smart contract
-        :return: Concise Contract instance
-        """
-        return ContractHandler._get(name, address)[1]
-
-    @staticmethod
-    def _set(name, contract):
-        ContractHandler._contracts[(name, contract.address)] = (
-            contract,
-            ConciseContract(contract),
-        )
-        ContractHandler._contracts[name] = ContractHandler._contracts[
-            (name, contract.address)
-        ]
-
-    @staticmethod
     def set(name, contract):
         """
         Set a Contract instance for a contract name.
@@ -114,6 +72,48 @@ class ContractHandler(object):
         if address:
             return (name, address) in ContractHandler._contracts
         return name in ContractHandler._contracts
+
+    @staticmethod
+    def get_concise_contract(name, address=None):
+        """
+        Return the Concise Contract instance for a given name.
+
+        :param name: str -- Contract name
+        :param address: hex str -- address of smart contract
+        :return: Concise Contract instance
+        """
+        return ContractHandler._get(name, address)[1]
+
+    @staticmethod
+    def get(name, address=None):
+        """
+        Return the Contract instance for a given name.
+
+        :param name: Contract name, str
+        :param address: hex str -- address of smart contract
+        :return: Contract instance
+        """
+        return ContractHandler._get(name, address)[0]
+
+    @staticmethod
+    def _get(name, address=None):
+        if address:
+            return ContractHandler._contracts.get(
+                (name, address)
+            ) or ContractHandler._load(name, address)
+        return ContractHandler._contracts.get(name) or ContractHandler._load(
+            name, address
+        )
+
+    @staticmethod
+    def _set(name, contract):
+        ContractHandler._contracts[(name, contract.address)] = (
+            contract,
+            ConciseContract(contract),
+        )
+        ContractHandler._contracts[name] = ContractHandler._contracts[
+            (name, contract.address)
+        ]
 
     @staticmethod
     def _load(contract_name, address=None):
