@@ -164,20 +164,14 @@ def test_payer_market_flow():
     assert asset_folder is None
     if asset_folder is None:
         # Download the asset files
-        asset_folder, destination = another_consumer_ocean.assets.download(
+        asset_folder = another_consumer_ocean.assets.download(
             asset.did,
             sa.index,
             another_consumer_wallet,
             _order_tx_id,
             another_consumer_ocean.config.downloads_path,
         )
-
-    downloaded_file = os.path.join(
-        destination, os.path.join(f"datafile.{asset.asset_id}.{sa.index}")
-    )
-    assert os.path.exists(destination)
-    assert downloaded_file.split("/")[-1] in os.listdir(destination)
-    assert len(os.listdir(destination)) >= 1
+    assert len(os.listdir(asset_folder)) >= 1
 
     orders = consumer_ocean.get_user_orders(consumer_wallet.address, asset.asset_id)
     assert (
