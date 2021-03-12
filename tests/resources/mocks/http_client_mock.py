@@ -59,5 +59,3 @@ class HttpClientEmptyMock(HttpClientMockBase):
 
 class HttpClientNiceMock(HttpClientMockBase):
     """Mock that returns 200 results and successful responses."""
-
-    pass
