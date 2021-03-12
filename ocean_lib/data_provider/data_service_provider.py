@@ -442,10 +442,6 @@ class DataServiceProvider:
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(ConfigProvider.get_config())
 
-        api_version = DataServiceProvider.get_api_version()
-        if api_version in provider_uri:
-            i = provider_uri.find(api_version)
-            provider_uri = provider_uri[:i]
         provider_info = DataServiceProvider._http_method("get", provider_uri).json()
 
         return provider_info["serviceEndpoints"]

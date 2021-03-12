@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import inspect
+import json
 from abc import ABC
 from unittest.mock import Mock
 
@@ -24,7 +25,7 @@ class HttpClientMockBase(ABC):
             the_response = Mock(spec=Response)
             the_response.status_code = 200
             the_response.json.return_value = {
-                "serviceEndpoints": {"nonce": ["GET", "nonce/endpoint"]}
+                "serviceEndpoints": {"nonce": ["GET", "/api/v1/nonce/endpoint"]}
             }
             return the_response
 
@@ -39,6 +40,7 @@ class HttpClientEvilMock(HttpClientMockBase):
         the_response = Mock(spec=Response)
         the_response.status_code = 400
         the_response.text = "Bad request (mocked)."
+
         return the_response
 
     @staticmethod
@@ -46,6 +48,7 @@ class HttpClientEvilMock(HttpClientMockBase):
         the_response = Mock(spec=Response)
         the_response.status_code = 400
         the_response.text = "Bad request (mocked)."
+
         return the_response
 
 
@@ -59,3 +62,32 @@ class HttpClientEmptyMock(HttpClientMockBase):
 
 class HttpClientNiceMock(HttpClientMockBase):
     """Mock that returns 200 results and successful responses."""
+
+    @staticmethod
+    def specific_get(*args, **kwargs):
+        the_response = Mock(spec=Response)
+        the_response.status_code = 200
+        the_response.content = '{"good_job": "with_mock"}'.encode("utf-8")
+
+        return the_response
+
+    @staticmethod
+    def return_nice_response(indication, *args, **kwargs):
+        the_response = Mock(spec=Response)
+        the_response.status_code = 200
+        json_result = {"good_job": ("with_mock_" + indication)}
+        the_response.content = json.dumps(json_result).encode("utf-8")
+
+        return the_response
+
+    @staticmethod
+    def delete(*args, **kwargs):
+        return HttpClientNiceMock.return_nice_response("delete", *args, **kwargs)
+
+    @staticmethod
+    def put(*args, **kwargs):
+        return HttpClientNiceMock.return_nice_response("put", *args, **kwargs)
+
+    @staticmethod
+    def post(*args, **kwargs):
+        return HttpClientNiceMock.return_nice_response("post", *args, **kwargs)

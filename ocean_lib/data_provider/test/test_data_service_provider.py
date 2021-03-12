@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+from unittest.mock import Mock
+
 import pytest
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
@@ -10,6 +12,7 @@ from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.data_provider.exceptions import InvalidURLException
 from ocean_utils.exceptions import OceanEncryptAssetUrlsError
 from ocean_utils.http_requests.requests_session import get_requests_session
+from requests.models import Response
 from tests.resources.helper_functions import get_publisher_ocean_instance
 from tests.resources.mocks.http_client_mock import (
     HttpClientEmptyMock,
@@ -118,6 +121,65 @@ def test_start_compute_job_fails_error_response(with_evil_client):
             "some_tx_id",
             algorithm_did="some_algo_did",
         )
+
+
+def test_send_compute_request_failure(with_evil_client):
+    """Tests failure of compute request from endpoint with non-200 response."""
+    with pytest.raises(Exception):
+        DataSP._send_compute_request(
+            "post",
+            "some_did",
+            "some_job_id",
+            "http://mock/",
+            "some_consumer_address",
+            "some_signature",
+        )
+
+
+def test_compute_job_result(with_nice_client):
+    """Tests successful compute job starting."""
+    result = DataSP.compute_job_result(
+        "some_did",
+        "some_job_id",
+        "http://mock",
+        "some_consumer_address",
+        "some_signature",
+    )
+    assert result == {"good_job": "with_mock"}
+
+
+def test_restart_job_result(with_nice_client):
+    """Tests successful compute job restart."""
+    result = DataSP.restart_compute_job(
+        "some_did",
+        "some_job_id",
+        "http://mock",
+        "some_consumer_address",
+        "some_signature",
+        "some_service_id",
+        "some_tx_id",
+        algorithm_did="some_algo_did",
+    )
+    assert result == {"good_job": "with_mock_post"}
+
+
+def test_delete_job_result(with_nice_client):
+    """Tests successful compute job deletion."""
+    result = DataSP.delete_compute_job(
+        "some_did",
+        "some_job_id",
+        "http://mock",
+        "some_consumer_address",
+        "some_signature",
+    )
+    assert result == {"good_job": "with_mock_delete"}
+
+
+def test_invalid_file_name():
+    """Tests that no filename is returned if attachment headers are found."""
+    response = Mock(spec=Response)
+    response.headers = {"no_good": "headers at all"}
+    assert DataSP._get_file_name(response) is None
 
 
 def test_expose_endpoints():
