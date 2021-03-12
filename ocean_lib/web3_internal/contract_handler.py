@@ -61,6 +61,16 @@ class ContractHandler(object):
         ContractHandler._set(name, contract)
 
     @staticmethod
+    def _set(name, contract):
+        ContractHandler._contracts[(name, contract.address)] = (
+            contract,
+            ConciseContract(contract),
+        )
+        ContractHandler._contracts[name] = ContractHandler._contracts[
+            (name, contract.address)
+        ]        
+
+    @staticmethod
     def has(name, address=None):
         """
         Check if a contract is the ContractHandler contracts.
@@ -104,16 +114,6 @@ class ContractHandler(object):
         return ContractHandler._contracts.get(name) or ContractHandler._load(
             name, address
         )
-
-    @staticmethod
-    def _set(name, contract):
-        ContractHandler._contracts[(name, contract.address)] = (
-            contract,
-            ConciseContract(contract),
-        )
-        ContractHandler._contracts[name] = ContractHandler._contracts[
-            (name, contract.address)
-        ]
 
     @staticmethod
     def _load(contract_name, address=None):
