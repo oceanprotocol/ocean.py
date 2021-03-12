@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-# This file does tests for method "get_contracts_addresses()", that's all.
+"""
+This file does tests for method "get_contracts_addresses()", that's all.
+"""
 
 import copy
 import os
