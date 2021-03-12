@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+import os
+
 import pytest
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.web3_internal.contract_handler import ContractHandler
@@ -69,22 +71,13 @@ def test_disable_setup_all_2(monkeypatch):
     assert Web3Provider._web3 is not None
     assert ContractHandler._contracts != dict()
     assert ContractHandler.artifacts_path is not None
-
-@pytest.mark.nosetup_all #disable call to conftest.py::setup_all()
-def test_issue185(monkeypatch):
-    #disable envvars that imports may have brought in
-    import os
-            
-    if os.getenv('CONFIG_FILE'):
-        monkeypatch.delenv('CONFIG_FILE')
-    assert os.getenv('CONFIG_FILE') is None, "can't have CONFIG_FILE envvar set"
-
-
-    if os.getenv('ARTIFACTS_PATH'):
-        monkeypatch.delenv('ARTIFACTS_PATH')
-    assert os.getenv('ARTIFACTS_PATH') is None, "can't have ARTIFACTS_PATH envvar set"
     
-    #rest of test
+@pytest.mark.nosetup_all #disable call to conftest.py::setup_all()
+def test_issue185_unit(monkeypatch):
+    """For #185, unit-test the root cause method, which is load"""
+    setup_issue_185(monkeypatch)
+        
+    #actual test. Imports only come now, to avoid setting class-level attributes
     from ocean_lib.ocean.ocean import Ocean
     from ocean_lib.web3_internal.wallet import Wallet
     
@@ -92,10 +85,57 @@ def test_issue185(monkeypatch):
     config = {'network': os.getenv('NETWORK_URL')}
     ocean = Ocean(config)
 
-    print("create wallet: begin")
-    wallet = Wallet(ocean.web3, private_key=private_key)
-    print(f"create wallet: done. Its address is {wallet.address}")
+    #Ensure it's using a path like '/home/trentmc/ocean.py/venv/artifacts'
+    assert os.path.exists(ocean._config.artifacts_path)
+    assert 'venv/artifacts' in ocean._config.artifacts_path
 
-    print("create datatoken: begin.")
+    wallet = Wallet(ocean.web3, private_key=private_key)
+
+    #At this point, shouldn't have any contracts cached
+    assert ContractHandler._contracts == {}
+
+    # This is the call that causes problems in system test.
+    # Weirdly, it passes here
+    contract = ContractHandler._get('DataTokenTemplate', None)
+
+    # After one call, caching might have changed, try again.
+    # Weirdly, that still passes too
+    contract = ContractHandler._get('DataTokenTemplate', None)
+    
+@pytest.mark.nosetup_all #disable call to conftest.py::setup_all()
+def test_issue185_system(monkeypatch):
+    """A system-level test, to replicate original failure seen in #185"""
+    setup_issue_185(monkeypatch)
+            
+    #actual test. Imports only come now, to avoid setting class-level attributes
+    from ocean_lib.ocean.ocean import Ocean
+    from ocean_lib.web3_internal.wallet import Wallet
+    
+    private_key = os.getenv('TEST_PRIVATE_KEY1')
+    config = {'network': os.getenv('NETWORK_URL')}
+    ocean = Ocean(config)
+
+    wallet = Wallet(ocean.web3, private_key=private_key)
+
+    #this failed before the fix
+    
+    # -right before the failure:
+    # (Pdb) ContractHandler._contracts.keys()
+    # dict_keys([('DTFactory', '0x1941b872Cbb1f86C89998c2c69ea55EDE9569587'), 'DTFactory', ('DataTokenTemplate', None), 'DataTokenTemplate'])
+
     datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet) 
 
+
+def setup_issue_185(monkeypatch):
+    
+    #change envvars to suit this test
+    if os.getenv('CONFIG_FILE'):
+        monkeypatch.delenv('CONFIG_FILE')
+    if os.getenv('ARTIFACTS_PATH'):
+        monkeypatch.delenv('ARTIFACTS_PATH')
+        
+    #double-check that envvars are the way this test needs
+    assert os.getenv('CONFIG_FILE') is None, "can't have CONFIG_FILE envvar set"
+    assert os.getenv('ARTIFACTS_PATH') is None, "can't have ARTIFACTS_PATH envvar set"
+    assert os.getenv('TEST_PRIVATE_KEY1') is not None, "need TEST_PRIVATE_KEY1"
+    assert os.getenv('NETWORK_URL') in ["ganache", "development"]

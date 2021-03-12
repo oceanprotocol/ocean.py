@@ -52,13 +52,18 @@ class ContractHandler(object):
 
     @staticmethod
     def _get(name, address=None):
-        if address:
-            return ContractHandler._contracts.get(
-                (name, address)
-            ) or ContractHandler._load(name, address)
-        return ContractHandler._contracts.get(name) or ContractHandler._load(
-            name, address
-        )
+        import copy
+        name2, address2 = copy.copy(name), copy.copy(address)
+        try:
+            if address:
+                return ContractHandler._contracts.get(
+                    (name, address)
+                ) or ContractHandler._load(name, address)
+            return ContractHandler._contracts.get(name) or ContractHandler._load(
+                name, address
+            )
+        except:
+            import pdb; pdb.set_trace()
 
     @staticmethod
     def get(name, address=None):
