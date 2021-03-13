@@ -4,7 +4,6 @@
 #
 
 import os
-import re
 
 from ocean_utils.http_requests.requests_session import get_requests_session
 
