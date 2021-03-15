@@ -137,6 +137,7 @@ def test_finalize(network, T1, T2, alice_address, alice_wallet):
     assert pool.allowance(alice_address, pool.address) == 0
 
     pool.finalize(from_wallet=alice_wallet)
+    assert str(pool) != ""
 
     assert pool.isPublicSwap()
     assert pool.isFinalized()
