@@ -3,8 +3,6 @@ Copyright 2021 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-Note: this README is out of date and will not work. [Here's the issue to fix it](https://github.com/oceanprotocol/ocean.py/issues/101).
-
 # Quickstart: Marketplace Flow with compute-to-data
 
 This tutorial demonstrates publishing a dataset with `compute` service
@@ -26,36 +24,37 @@ Let's go through each step.
 
 ## 0. Prerequisites and Installation
 
-Use an ethereum account with some eth balance on rinkeby. You can get rinkeby eth using
+In a new console:
+```console
+#Create your working directory
+mkdir test
+cd test
+
+#Initialize virtual environment and activate it.
+python -m venv venv
+source venv/bin/activate
+
+#Install the ocean.py library
+pip install ocean-lib
+```
+Use ethereum accounts with some ether balance on rinkeby. You can get rinkeby ether using
 this [faucet](https://www.rinkeby.io/#faucet). Otherwise, run `ganache-cli` and replace
 `rinkeby` with `ganache` when following the steps below.
 
-If you haven't installed yet:
+Also you will need rinkeby ocean for interacting with Balancer DataToken-Ocean Pools. Get your Test Ocean 
+using this [faucet](https://faucet.rinkeby.oceanprotocol.com/).
 
-```console
-pip install ocean-lib
-```
+Initalize 2 different Ethereum Addresses on Rİnkeby with Faucets. We'll call them Alice and Bob.
 
 ## 1. Initialize services
 
 This quickstart treats the publisher/provider service, metadata cache, and marketplace as
-externally-run services. For convenience, we run them locally. Refer to each repo for
-its own requirements and make sure they all point to `rinkeby` testnet.
+externally-run services. We will be using Ocean's provider and aquarius, with links to use services on rinkeby.
+For convenience, we run Market locally. 
 
-[Provider service](https://github.com/oceanprotocol/provider-py)
-
-```console
-    docker run oceanprotocol/provider-py:latest
-```
-
-[Aquarius (Metadata cache)](https://github.com/oceanprotocol/aquarius)
-
-```console
-    docker run oceanprotocol/aquarius:latest
-```
+On a new console:
 
 [Market app](https://github.com/oceanprotocol/market)
-
 ```console
     git clone https://github.com/oceanprotocol/market.git
     cd market
@@ -63,10 +62,11 @@ its own requirements and make sure they all point to `rinkeby` testnet.
     npm start
 ```
 
-Access the market app in the browser at `http://localhost:8000`.
+Access the market app in the browser at `http://localhost:8000`. Switch to rinkeby network on metamask, if you would like to see newly published DataTokens in the following steps.
 
 ## 2. Alice publishes assets for data services (= publishes a DataToken contract)
 
+In a python console or Jupyter Notebook:
 ```python
 from ocean_utils.agreements.service_factory import ServiceDescriptor
 
@@ -74,16 +74,21 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
-#Alice's config
-config = {
-   'network' : 'rinkeby',
-   'metadataCacheUri' : 'http://127.0.0.1:5000',
-   'providerUri' : 'http://127.0.0.1:8030'
-}
-ocean = Ocean(config)
-alice_wallet = Wallet(ocean.web3, private_key='8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f')
+#Alice's config is using 
+providerUri = 'https://provider.mainnet.oceanprotocol.com'
+providerUri_rinkeby = 'https://provider.rinkeby.oceanprotocol.com'
+config={
+        'network': 'rinkeby',
+        'metadataStoreUri': 'https://aquarius.rinkeby.oceanprotocol.com',
+        'providerUri': providerUri_rinkeby
+        }
+ocean = Ocean(config=config)
 
-data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_store_url)
+# Alice needs some ether and Ocean token:
+PRIV_KEY_0='16b8bda3e5163fc20a957aaf859286fc3f7a0948b2c3c77bfe029f492c1d9ec6' #change this if you need to use another publisher
+alice_wallet = Wallet(ocean.web3, private_key=PRIV_KEY_0)
+
+data_token = ocean.create_data_token('DataToken0', 'DT0', alice_wallet, blob=ocean.config.metadata_store_url)
 token_address = data_token.address
 
 # `ocean.assets.create` will encrypt the URLs using the provider's encrypt service endpoint and update
@@ -93,7 +98,7 @@ token_address = data_token.address
 # asset.
 metadata =  {
     "main": {
-        "type": "dataset", "name": "10 Monkey Species Small", "author": "Mario",
+        "type": "dataset", "name": "Compute-flow Example", "author": "User",
         "license": "CC0: Public Domain", "dateCreated": "2012-02-01T10:55:11Z",
         "files": [
             { "index": 0, "contentType": "application/zip", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/training.zip"},
@@ -118,8 +123,9 @@ asset = ocean.assets.create(metadata, alice_wallet, service_descriptors=[downloa
 assert token_address == asset.data_token_address
 
 did = asset.did  # did contains the datatoken address
+print(did)
 ```
-
+Checkout `http://localhost:8000` to see your new DataToken.
 For legacy support, you can also use `metadataStoreUri` instead of `metadataCacheUri`.
 
 ## 3. Alice mints 100 tokens
@@ -134,12 +140,13 @@ data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
 ```python
 pool = ocean.pool.create(
    token_address,
-   data_token_amount=100.0,
+   data_token_amount=99.0,
    OCEAN_amount=10.0,
    from_wallet=alice_wallet
 )
 pool_address = pool.address
 print(f'DataToken @{data_token.address} has a `pool` available @{pool_address}')
+
 ```
 
 ## 5. Marketplace posts asset for sale using price obtained from balancer pool
@@ -152,13 +159,10 @@ from ocean_lib.ocean.util import from_base_18
 from ocean_lib.models.bpool import BPool
 
 # Market's config
-config = {
-   'network': 'rinkeby',
-}
-market_ocean = Ocean(config)
+market_ocean = Ocean(config=config)
 
-did = ''  # from step 3
-pool_address = ''  # from step 4
+# did = 'did:op:2f93D0245B7aaD99b65c7DaC19C03B28CeAb4c36'  # from step 3,
+# pool_address = '0xC4504eb21218BdbD23dec84D6B75986C1424A30d'  # from step 4,
 asset = market_ocean.assets.resolve(did)
 service1 = asset.get_service(ServiceTypes.ASSET_ACCESS)
 pool = market_ocean.pool.get(pool_address)
@@ -168,22 +172,6 @@ price_in_OCEAN = market_ocean.pool.calcInGivenOut(
     pool_address, OCEAN_address, token_address, token_out_amount=1.0
 )
 
-# Display key asset information, such as the cost of each service
-# Each access to an assets service requires ONE datatoken
-tokens_amount = 1.0
-print(f"Service 1 costs {tokens_amount * price_in_OCEAN} OCEAN")
-OCEAN_usd_pool_address = ''
-USDT_token_address = ''
-ocn_pool = BPool(OCEAN_usd_pool_address)
-OCEAN_price = from_base_18(ocn_pool.calcInGivenOut(
-    ocn_pool.getBalance(USDT_token_address),
-    ocn_pool.getDenormalizedWeight(USDT_token_address),
-    ocn_pool.getBalance(OCEAN_address),
-    ocn_pool.getDenormalizedWeight(OCEAN_address),
-    tokenAmountOut_base=to_base_18(price_in_OCEAN),
-    swapFee_base=ocn_pool.getSwapFee()
-))
-print(f"Service 1 costs {tokens_amount * price_in_OCEAN * OCEAN_price} USD")
 ```
 
 ## 6. Value swap: Bob buys datatokens from marketplace (using datatoken <> OCEAN balancer pool)
@@ -192,25 +180,32 @@ print(f"Service 1 costs {tokens_amount * price_in_OCEAN * OCEAN_price} USD")
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.wallet import Wallet
 
-bob_wallet = Wallet(ocean.web3, private_key="PASTE BOB'S TEST PRIVATE KEY HERE")
+bob_wallet = Wallet(ocean.web3, private_key="c594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58")
 data_token = market_ocean.get_data_token(token_address)
 # This assumes bob_wallet already has sufficient OCEAN tokens to buy the data token. OCEAN tokens
-# can be obtained through a crypto exchange or an on-chain pool such as balancer or uniswap
+# can be obtained through a crypto exchange or an on-chain pool such as balancer or uniswap on mainnet, 
+# you need to get test Ocean if you are using a test network such as Rinkeby.
 market_ocean.pool.buy_data_tokens(
     pool_address,
     amount=1.0, # buy one data token
-    max_OCEAN_amount=price_in_OCEAN, # pay maximum 0.1 OCEAN tokens
+    max_OCEAN_amount=10.0, # pay up to s10 OCEAN tokens
     from_wallet=bob_wallet
 )
+```
 
-print(f'bob has {data_token.token_balance(bob_wallet.address} datatokens.')
+and we will wait until bob has some DataTokens:
+```python
+bobsToken=data_token.token_balance(bob_wallet.address)
+while(bobsToken<=0):
+    bobsToken=data_token.token_balance(bob_wallet.address)
+    time.sleep(5)
+print(f'bob has {data_token.token_balance(bob_wallet.address)} datatokens.')
 ```
 
 ## 7. Bob uses a service from the asset he just purchased (download)
 
 ```python
-
-market_address = '0x<markets ethereum address to receive service fee'
+market_address = '0xD679a72Ff5cE7EA1f4725ADb3f57c9aDb8F51738' # Market address can be anyone, that will receive the market fee. Leave empty if you want
 service = asset.get_service(ServiceTypes.ASSET_ACCESS)  # asset from step 5
 quote = market_ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
 order_tx_id = market_ocean.assets.pay_for_service(
@@ -221,6 +216,7 @@ file_path = market_ocean.assets.download(
     service.index,
     bob_wallet,
     order_tx_id,
-    destination='~/my-datasets'
+    destination='./'
 )
 ```
+Now check out the Market for new datatoken; Alice's address & Bob's address to see the details of the Token exchange.  
