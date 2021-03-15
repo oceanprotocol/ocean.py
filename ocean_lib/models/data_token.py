@@ -304,20 +304,23 @@ class DataToken(ContractBase):
     def token_balance(self, account: str):
         return from_base_18(self.balanceOf(account))
 
+    def _get_url_from_blob(self, int_code):
+        try:
+            url_object = json.loads(self.blob())
+        except json.decoder.JSONDecodeError:
+            return None
+
+        assert (
+            url_object["t"] == int_code
+        ), "This datatoken does not appear to have a direct consume url."
+        return url_object["url"] if "url" in url_object else None
+
     def get_metadata_url(self):
         # grab the metadatastore URL from the DataToken contract (@token_address)
-        url_object = json.loads(self.blob())
-        assert (
-            url_object["t"] == 1
-        ), "This datatoken does not appear to have a metadata store url."
-        return url_object["url"]
+        return self._get_url_from_blob(1)
 
     def get_simple_url(self):
-        url_object = json.loads(self.blob())
-        assert (
-            url_object["t"] == 0
-        ), "This datatoken does not appear to have a direct consume url."
-        return url_object["url"]
+        return self._get_url_from_blob(0)
 
     # ============================================================
     # Token transactions using amount of tokens as a float instead of int

@@ -2,9 +2,11 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import json
 import time
 
 import pytest
+from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.util import from_base_18, to_base_18
 
 
@@ -33,13 +35,48 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address
     assert from_base_18(token.balanceOf(alice_address)) == 98.0
     assert from_base_18(token.balanceOf(bob_address)) == 2.0
 
+    # test status functions
+    assert token.totalSupply() == 100_000_000_000_000_000_000
+    assert token.cap() == 1_000_000_000_000_000_000_000
+    assert token.datatoken_name() == "DataToken1"
+    block = alice_ocean.web3.eth.blockNumber
+    token_info = token.get_info(
+        alice_ocean.web3,
+        from_block=(block - 1),
+        to_block=(block + 1),
+        include_holders=True,
+    )
+    assert len(token_info) == 11
+    assert token_info["totalSupply"] == 100
+
 
 def test_blob(alice_ocean, alice_wallet):
     """Tests DataToken creation with blob."""
+    blob_dict = {"t": 0, "url": "http://tblob/", "foo": "bar"}
     token = alice_ocean.create_data_token(
-        "DataToken1", "DT1", alice_wallet, blob="foo_blob"
+        "DataToken1", "DT1", alice_wallet, blob=json.dumps(blob_dict)
     )
-    assert token.blob() == "foo_blob"
+    assert token.blob() == json.dumps(blob_dict)
+    assert token.get_simple_url() == "http://tblob/"
+
+    blob_dict = {"t": 1, "url": "http://tblob/", "foo": "bar"}
+    token = alice_ocean.create_data_token(
+        "DataToken1", "DT1", alice_wallet, blob=json.dumps(blob_dict)
+    )
+    assert token.get_metadata_url() == "http://tblob/"
+
+    blob_string = "foo_bar"
+    token = alice_ocean.create_data_token(
+        "DataToken1", "DT1", alice_wallet, blob=blob_string
+    )
+    assert token.blob() == blob_string
+    assert token.get_simple_url() is None
+
+
+def test_static_methods():
+    """Tests static methods from DataToken class."""
+    assert DataToken.get_max_fee_percentage() == 0.002
+    assert DataToken.calculate_max_fee(1000) == 2
 
 
 def test_setMinter(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address):

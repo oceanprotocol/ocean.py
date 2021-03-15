@@ -494,7 +494,6 @@ class OceanAssets:
                 amount_base,
                 from_wallet.address,
             )
-            return tx_hash
         except (AssertionError, Exception) as e:
             msg = (
                 f"Downloading asset files failed. The problem is related to "
@@ -503,6 +502,10 @@ class OceanAssets:
             )
             logger.error(msg)
             raise AssertionError(msg)
+
+        dt.finishOrder(tx_hash, consumer, amount_base, service_id, from_wallet)
+
+        return tx_hash
 
     def download(
         self,
