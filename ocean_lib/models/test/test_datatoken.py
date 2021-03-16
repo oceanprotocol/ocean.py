@@ -48,6 +48,11 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address
     )
     assert len(token_info) == 11
     assert token_info["totalSupply"] == 100
+    with pytest.raises(ValueError):
+        token.get_event_signature("not a registered event")
+
+    all_transfers = token.get_all_transfers_from_events(block - 1, block + 1, chunk=1)
+    assert len(all_transfers[0]) == 2
 
 
 def test_blob(alice_ocean, alice_wallet):

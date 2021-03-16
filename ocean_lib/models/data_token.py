@@ -17,6 +17,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_utils.http_requests.requests_session import get_requests_session
 from web3 import Web3
+from web3.exceptions import MismatchedABI
 from web3.utils.events import get_event_data
 from websockets import ConnectionClosed
 
@@ -38,8 +39,9 @@ class DataToken(ContractBase):
     MAX_MARKET_FEE_PERCENTAGE = 0.001
 
     def get_event_signature(self, event_name):
-        e = getattr(self.events, event_name)
-        if not e:
+        try:
+            e = getattr(self.events, event_name)
+        except MismatchedABI:
             raise ValueError(
                 f"Event {event_name} not found in {self.CONTRACT_NAME} contract."
             )
@@ -113,7 +115,7 @@ class DataToken(ContractBase):
                 _from = _to + 1
                 _to = min(_from + chunk - 1, end_block)
                 error_count = 0
-                if (_from - start_block) % 1000 == 0:
+                if (_from - start_block) % chunk == 0:
                     print(
                         f"    So far processed {len(transfer_records)} Transfer events from {_from-start_block} blocks."
                     )
