@@ -18,8 +18,5 @@ def test_init_compute_input():
     with pytest.raises(AssertionError):
         ComputeInput(None, "tx_id", "service_id")
 
-    with pytest.raises(TypeError):
-        ComputeInput("did")
-
     with pytest.raises(AssertionError):
         ComputeInput("did", "", "service_id")

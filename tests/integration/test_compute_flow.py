@@ -133,11 +133,11 @@ def run_compute_test(
         # TODO
         # result = ocean_instance.compute.restart(did, job_id, consumer_wallet)
         # print(f"got job status after requesting restart: {result}")
-        # assert 'did' in result, f"something not right about the compute job, no did."
+        # assert 'did' in result, "something not right about the compute job, no did."
 
         result = ocean_instance.compute.result(did, job_id, consumer_wallet)
         print(f"got job status after requesting result: {result}")
-        assert "did" in result, f"something not right about the compute job, no did."
+        assert "did" in result, "something not right about the compute job, no did."
 
 
 def test_compute_raw_algo():
