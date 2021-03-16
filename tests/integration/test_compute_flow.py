@@ -130,10 +130,8 @@ def run_compute_test(
     assert status, f"something not right about the compute job, got status: {status}"
 
     if restart_and_result:
-        # TODO
-        # result = ocean_instance.compute.restart(did, job_id, consumer_wallet)
-        # print(f"got job status after requesting restart: {result}")
-        # assert 'did' in result, "something not right about the compute job, no did."
+        # TODO: test restart function after pending rework
+        # OR delete this TODO if restart is removed from the interface
 
         result = ocean_instance.compute.result(did, job_id, consumer_wallet)
         print(f"got job status after requesting result: {result}")
