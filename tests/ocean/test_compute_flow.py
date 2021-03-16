@@ -2,11 +2,15 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import time
 
+from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_token import DataToken
+from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_utils.agreements.service_types import ServiceTypes
 from tests.resources.ddo_helpers import (
@@ -54,7 +58,7 @@ def test_expose_endpoints():
     assert [
         valid_endpoints[key]
         for key in set(DataServiceProvider.provider_info["serviceEndpoints"])
-        & set(valid_endpoints)
+                   & set(valid_endpoints)
     ]
 
 
@@ -105,14 +109,14 @@ def process_order(ocean_instance, publisher_wallet, consumer_wallet, ddo, servic
 
 
 def run_compute_test(
-    ocean_instance,
-    publisher_wallet,
-    consumer_wallet,
-    input_ddos,
-    algo_ddo=None,
-    algo_meta=None,
-    expect_failure=False,
-    expect_failure_message=None,
+        ocean_instance,
+        publisher_wallet,
+        consumer_wallet,
+        input_ddos,
+        algo_ddo=None,
+        algo_meta=None,
+        expect_failure=False,
+        expect_failure_message=None,
 ):
     compute_ddo = input_ddos[0]
     did = compute_ddo.did
@@ -172,14 +176,14 @@ def run_compute_test(
         assert "error" in response, "expected failure in job creation, but it succeed."
 
         assert (
-            expect_failure_message == response["error"]
+                expect_failure_message == response["error"]
         ), "expected failure message in job creation, but it has a different message."
         return
     status = ocean_instance.compute.status(did, job_id, consumer_wallet)
     print(f"got job status: {status}")
 
     assert (
-        status and status["ok"]
+            status and status["ok"]
     ), f"something not right about the compute job, got status: {status}"
 
     status = ocean_instance.compute.stop(did, job_id, consumer_wallet)
@@ -243,6 +247,13 @@ def test_compute_multi_inputs():
 def test_update_trusted_algorithms():
     setup = Setup()
 
+    config = ConfigProvider.get_config()
+    ddo_address = get_contracts_addresses("ganache", config)[
+        MetadataContract.CONTRACT_NAME
+    ]
+    ddo_registry = MetadataContract(ddo_address)
+    block = setup.publisher_ocean_instance.web3.eth.blockNumber
+
     # Setup algorithm meta to run raw algorithm
     algorithm_ddo = get_registered_algorithm_ddo(
         setup.publisher_ocean_instance, setup.publisher_wallet
@@ -258,29 +269,27 @@ def test_update_trusted_algorithms():
     )
     # verify the ddo is available in Aquarius
     _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
-    new_algorithm_ddo = (
+    compute_ddo = (
         setup.publisher_ocean_instance.assets.update_trusted_algorithms_shallow(
             compute_ddo, trusted_algorithms=[algorithm_ddo.did]
         )
     )
+
     setup.publisher_ocean_instance.assets.update(
-        new_algorithm_ddo, setup.publisher_wallet
+        compute_ddo, setup.publisher_wallet
     )
 
-    # verify the ddo is available in Aquarius
-    chain_new_algo_ddo = wait_for_ddo(
-        setup.publisher_ocean_instance, new_algorithm_ddo.did
-    )
+    wait_for_ddo(setup.publisher_ocean_instance, compute_ddo.did, 30)
 
-    # the did stays the same
-    assert new_algorithm_ddo.did == chain_new_algo_ddo.did
+    log = ddo_registry.get_event_log(ddo_registry.EVENT_METADATA_UPDATED, block, compute_ddo.did, 30)
+    assert log, "no ddo updated event"
 
     run_compute_test(
         setup.consumer_ocean_instance,
         setup.publisher_wallet,
         setup.consumer_wallet,
         [compute_ddo],
-        algo_ddo=chain_new_algo_ddo,
+        algo_ddo=compute_ddo,
     )
 
 
