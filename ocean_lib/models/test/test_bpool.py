@@ -149,7 +149,7 @@ def test_finalize(network, T1, T2, alice_address, alice_wallet):
     assert pool.getCurrentTokens() == [T1.address, T2.address]
 
 
-def test_public_pool(network, bob_wallet):
+def test_public_pool(network, bob_wallet, alice_ocean):
     """Tests successful transfers inside a public pool."""
     alice = alice_info()
     alice_address = alice.address
@@ -241,6 +241,10 @@ def test_public_pool(network, bob_wallet):
     )
     assert from_base_18(BPT.balanceOf(bob_address)) == 0.0
 
+    block = alice_ocean.web3.eth.blockNumber
+    join_log = pool.get_join_logs(alice_ocean.web3, block - 1, block + 1)[0]
+    assert join_log["args"]["tokenIn"] == T1.address
+
 
 def test_rebind_more_tokens(network, T1, T2, alice_wallet):
     """Tests that we can rebind more tokens on a pool."""
@@ -307,7 +311,9 @@ def test_spot_price(network, T1, T2, alice_wallet):
     assert round(p, 8) == 0.1000001
 
 
-def test_joinSwapExternAmountIn(network, T1, T2, alice_wallet, alice_address):
+def test_joinSwapExternAmountIn(
+    network, T1, T2, alice_wallet, alice_address, alice_ocean
+):
     """Tests adding an external amount inside a pool.
 
     When the pool is not public, assert that an Exception is thrown.
@@ -347,6 +353,10 @@ def test_joinSwapExternAmountIn(network, T1, T2, alice_wallet, alice_address):
     )
     assert from_base_18(T2.balanceOf(alice_address)) == (T2balance - 9.0)
 
+    block = alice_ocean.web3.eth.blockNumber
+    swap_log = pool.get_swap_logs(alice_ocean.web3, block - 1, block + 1)[0]
+    assert swap_log["args"]["tokenIn"] == T1.address
+
 
 def test_joinswapPoolAmountOut(network, T1, T2, alice_address, alice_wallet):
     """Tests taking an amount out of the pool."""
@@ -385,7 +395,9 @@ def test_exitswapPoolAmountIn(network, T1, T2, alice_address, alice_wallet):
     assert from_base_18(BPT.balanceOf(alice_address)) == (pool_balance - 10.0)
 
 
-def test_exitswapExternAmountOut(network, T1, T2, alice_address, alice_wallet):
+def test_exitswapExternAmountOut(
+    network, T1, T2, alice_address, alice_wallet, alice_ocean
+):
     T1balance = from_base_18(T1.balanceOf(alice_address))
     pool = _createPoolWith2Tokens(network, T1, T2, alice_wallet, 90.0, 10.0, 9.0, 1.0)
     BPT = pool
@@ -400,6 +412,10 @@ def test_exitswapExternAmountOut(network, T1, T2, alice_address, alice_wallet):
     )
     assert from_base_18(T1.balanceOf(alice_address)) == (T1balance - 90 + 2.0)
     assert from_base_18(BPT.balanceOf(alice_address)) >= (pool_balance - 10.0)
+
+    block = alice_ocean.web3.eth.blockNumber
+    exit_log = pool.get_exit_logs(alice_ocean.web3, block - 1, block + 1)[0]
+    assert exit_log["args"]["tokenOut"] == T1.address
 
 
 def test_calcSpotPrice_base(network, T1, T2, alice_address, alice_wallet):
