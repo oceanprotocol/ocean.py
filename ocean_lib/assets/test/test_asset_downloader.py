@@ -19,8 +19,8 @@ def test_ocean_assets_download_failure(publisher_ocean_instance, metadata):
     ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher)
     wait_for_ddo(publisher_ocean_instance, ddo.did)
     sa = ServiceAgreement.from_ddo(ServiceTypes.ASSET_ACCESS, ddo)
-    sa.__dict__['_service_endpoint'] = None
-    ddo.__dict__['_services'][1] = sa
+    sa.__dict__["_service_endpoint"] = None
+    ddo.__dict__["_services"][1] = sa
 
     with pytest.raises(AssertionError):
         download_asset_files(
@@ -53,7 +53,7 @@ def test_ocean_assets_download_indexes(publisher_ocean_instance, metadata):
             ddo.data_token_address,
             "test_order_tx_id",
             data_provider,
-            index
+            index,
         )
     index = -1
     with pytest.raises(AssertionError):
@@ -65,9 +65,8 @@ def test_ocean_assets_download_indexes(publisher_ocean_instance, metadata):
             ddo.data_token_address,
             "test_order_tx_id",
             data_provider,
-            index
+            index,
         )
-    _files = ddo.metadata["main"]["files"]
     index = 4
     with pytest.raises(AssertionError):
         download_asset_files(
@@ -78,7 +77,7 @@ def test_ocean_assets_download_indexes(publisher_ocean_instance, metadata):
             ddo.data_token_address,
             "test_order_tx_id",
             data_provider,
-            index
+            index,
         )
 
 
@@ -91,7 +90,7 @@ def test_ocean_assets_download_destination_file(publisher_ocean_instance, metada
     wait_for_ddo(publisher_ocean_instance, ddo.did)
     sa = ServiceAgreement.from_ddo(ServiceTypes.ASSET_ACCESS, ddo)
 
-    destination = os.path.abspath('examples')
+    destination = os.path.abspath("examples")
     download_asset_files(
         sa.index,
         ddo,
