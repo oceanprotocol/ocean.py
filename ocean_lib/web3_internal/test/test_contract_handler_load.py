@@ -36,9 +36,8 @@ def test_load__fail_wrong_eth_address():
 def test_load__name_only():
     """Tests load() from name-only query."""
     assert "DTFactory" not in ContractHandler._contracts
-
-    contract = ContractHandler._load("DTFactory")
-    assert ContractHandler._contracts["DTFactory"] == contract
+    ContractHandler._load("DTFactory")
+    assert "DTFactory" in ContractHandler._contracts
 
 
 def test_load__name_and_address(network, example_config):
@@ -52,31 +51,21 @@ def test_load__name_and_address(network, example_config):
 
     assert test_tuple not in ContractHandler._contracts
 
-    contract = ContractHandler._load("DTFactory", target_address)
+    ContractHandler._load("DTFactory", target_address)
 
-    assert ContractHandler._contracts[test_tuple] == contract
-
-@pytest.mark.nosetup_all 
-def test_disable_setup_all_1(monkeypatch):
-    """Test that conftest::setup_all() was *not* called due to decorator"""
-    c = ConfigProvider()
-    assert ConfigProvider._config is None
-    assert Web3Provider._web3 is None
-    assert ContractHandler._contracts == dict()
-    assert ContractHandler.artifacts_path is None
-
-def test_disable_setup_all_2(monkeypatch):
-    """Test that setup_all() *was* called, since no decorator to disable"""
-    assert ConfigProvider._config is not None
-    assert Web3Provider._web3 is not None
-    assert ContractHandler._contracts != dict()
-    assert ContractHandler.artifacts_path is not None
+    assert test_tuple in ContractHandler._contracts
     
 @pytest.mark.nosetup_all #disable call to conftest.py::setup_all()
 def test_issue185_unit(monkeypatch):
     """For #185, unit-test the root cause method, which is load"""
     setup_issue_185(monkeypatch)
-        
+
+    #ensure that conftest::setup_all() was not called
+    assert ConfigProvider._config is None
+    assert Web3Provider._web3 is None
+    assert ContractHandler._contracts == dict()
+    assert ContractHandler.artifacts_path is None
+    
     #actual test. Imports only come now, to avoid setting class-level attributes
     from ocean_lib.ocean.ocean import Ocean
     from ocean_lib.web3_internal.wallet import Wallet
@@ -95,11 +84,9 @@ def test_issue185_unit(monkeypatch):
     assert ContractHandler._contracts == {}
 
     # This is the call that causes problems in system test.
-    # Weirdly, it passes here
     contract = ContractHandler._get('DataTokenTemplate', None)
 
-    # After one call, caching might have changed, try again.
-    # Weirdly, that still passes too
+    # The first call may have caused caching. So call again:)
     contract = ContractHandler._get('DataTokenTemplate', None)
     
 @pytest.mark.nosetup_all #disable call to conftest.py::setup_all()
@@ -118,11 +105,6 @@ def test_issue185_system(monkeypatch):
     wallet = Wallet(ocean.web3, private_key=private_key)
 
     #this failed before the fix
-    
-    # -right before the failure:
-    # (Pdb) ContractHandler._contracts.keys()
-    # dict_keys([('DTFactory', '0x1941b872Cbb1f86C89998c2c69ea55EDE9569587'), 'DTFactory', ('DataTokenTemplate', None), 'DataTokenTemplate'])
-
     datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet) 
 
 

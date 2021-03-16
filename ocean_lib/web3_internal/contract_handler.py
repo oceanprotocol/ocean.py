@@ -8,6 +8,8 @@ import logging
 import os
 
 from ocean_lib.web3_internal.web3_provider import Web3Provider
+from ocean_lib.web3_internal.web3helper import Web3Helper
+from ocean_lib.config_provider import ConfigProvider
 from web3 import Web3
 from web3.contract import ConciseContract
 
@@ -23,9 +25,18 @@ class ContractHandler(object):
         contract = ContractHandler.get('DTFactory')
         concise_contract = ContractHandler.get_concise_contract('DTFactory')
 
-    """
+    It must handle two cases:
+    1. One deployment of contract, eg DTFactory
+    2. >1 deployments, eg DataTokenTemplate
 
-    _contracts = dict()
+    #Attributes (_contracts) and methods (e.g. _load) behave accordingly.
+
+    #The _contracts dict maps:
+    # 1. (contract_name)                   : (contract, concise_contract)
+    # 2. (contract_name, contract_address) : (contract, concise_contract)
+    """
+    _contracts = dict() 
+    
     artifacts_path = None
     network_alias = {"ganache": "development"}
 
@@ -62,13 +73,23 @@ class ContractHandler(object):
 
     @staticmethod
     def _set(name, contract):
-        ContractHandler._contracts[(name, contract.address)] = (
-            contract,
-            ConciseContract(contract),
-        )
-        ContractHandler._contracts[name] = ContractHandler._contracts[
-            (name, contract.address)
-        ]        
+        #preconditions
+        assert contract.address is not None
+
+        tup = (contract, ConciseContract(contract))
+        ContractHandler._contracts[(name, contract.address)] = tup
+        ContractHandler._contracts[name] = tup
+
+        #postconditions
+        (contract1, concise_contract1) = ContractHandler._contracts[name]
+        assert contract1 is not None
+        assert contract1.address is not None
+        assert concise_contract1 is not None
+        assert concise_contract1.address is not None
+        
+        (contract2, concise_contract2) = ContractHandler._contracts[(name, contract1.address)]
+        assert id(contract1) == id(contract2)
+        assert id(concise_contract1) == id(concise_contract2)
 
     @staticmethod
     def has(name, address=None):
@@ -107,22 +128,53 @@ class ContractHandler(object):
 
     @staticmethod
     def _get(name, address=None):
-        if address:
-            return ContractHandler._contracts.get((name, address)) \
-                or ContractHandler._load(name, address)
-        else:
-            return ContractHandler._contracts.get(name) \
-                or ContractHandler._load(name)
+        """
+        Return the contract & its concise version, for a given name.
 
+        :param name: Contract name, str
+        :param address: hex str -- address of contract
+        :return: tuple of (contract, concise_contract)
+        """
+        if address:
+            tup = ContractHandler._contracts.get((name, address))
+            if tup is None:
+                ContractHandler._load(name, address)
+                tup = ContractHandler._contracts.get((name, address))
+                assert tup is not None
+
+        else:
+            tup = ContractHandler._contracts.get(name)
+            if tup is None:
+                ContractHandler._load(name)
+                tup = ContractHandler._contracts.get(name)
+                assert tup is not None
+        
+        #postconditions
+        (contract1, concise_contract1) = ContractHandler._contracts[name]
+        assert contract1 is not None
+        assert contract1.address is not None
+        assert concise_contract1 is not None
+        assert concise_contract1.address is not None
+        
+        (contract2, concise_contract2) = ContractHandler._contracts[(name, contract1.address)]
+        assert id(contract1) == id(contract2)
+        assert id(concise_contract1) == id(concise_contract2)
+
+        #return value
+        return tup
+    
     @staticmethod
     def _load(contract_name, address=None):
         """Retrieve the contract instance for `contract_name`.
 
         That instance represents the smart contract in the ethereum network.
 
+        Handles two cases:
+        1. One deployment of contract, eg DTFactory. 'address' can be None, or specified
+        2. >1 deployments, eg DataTokenTemplate. 'address' must be specified.
+
         :param contract_name: str name of the solidity smart contract.
         :param address: hex str -- address of smart contract
-        :return: web3.eth.Contract instance
         """
         assert (
             ContractHandler.artifacts_path is not None
@@ -135,14 +187,30 @@ class ContractHandler(object):
             address = contract_definition.get("address")
             assert address, "Cannot find contract address in the abi file."
             address = Web3.toChecksumAddress(address)
+        assert address is not None, "address shouldn't be None at this point"
 
         abi = contract_definition["abi"]
         bytecode = contract_definition["bytecode"]
         contract = Web3Provider.get_web3().eth.contract(
             address=address, abi=abi, bytecode=bytecode
         )
+        if contract.address is None: #if web3 drops address, fix it
+            contract.address = address
+        assert contract.address is not None
+
         ContractHandler._set(contract_name, contract)
-        return ContractHandler._contracts[(contract_name, address)]
+
+        #postconditions
+        name = contract_name
+        (contract1, concise_contract1) = ContractHandler._contracts[name]
+        assert contract1 is not None
+        assert contract1.address is not None
+        assert concise_contract1 is not None
+        assert concise_contract1.address is not None
+
+        (contract2, concise_contract2) = ContractHandler._contracts[(name, contract1.address)]
+        assert id(contract1) == id(contract2)
+        assert id(concise_contract1) == id(concise_contract2)
 
     @staticmethod
     def read_abi_from_file(contract_name, abi_path):
