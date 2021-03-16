@@ -64,7 +64,7 @@ This batteries-included flow includes metadata, multiple services for one datato
 
 ## 🦑 Development
 
-If you want to further develop ocean.py, then [please go here](READMEs/developers.md).
+[Go to developers flow](READMEs/developers.md) if you want to further develop ocean.py.
 
 ## 🏛 License
 

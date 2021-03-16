@@ -5,20 +5,11 @@
 
 import logging
 import os
-import sys
 
 from ocean_lib.config import Config
 from ocean_lib.ocean.util import get_infura_id, get_infura_url
 
 logging.basicConfig(level=logging.INFO)
-
-
-def get_variable_value(variable):
-    if os.getenv(variable) is None:
-        logging.error(f"you should provide a {variable}")
-        sys.exit(1)
-    else:
-        return os.getenv(variable)
 
 
 class ExampleConfig:
