@@ -3,11 +3,15 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
+import os
 import time
 
 import pytest
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.util import from_base_18, to_base_18
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_utils.ddo.ddo import DDO
+from tests.resources.ddo_helpers import get_resource_path
 
 
 def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address):
@@ -158,7 +162,7 @@ def test_transfer_event(
     assert transfer_event["args"]["to"] == bob_address
 
 
-def test_verify_tx(alice_address, bob_address, alice_ocean, alice_wallet):
+def test_verify_transfer_tx(alice_address, bob_address, alice_ocean, alice_wallet):
     """Tests verify_transfer_tx function."""
     token = alice_ocean.create_data_token(
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
@@ -177,3 +181,64 @@ def test_verify_tx(alice_address, bob_address, alice_ocean, alice_wallet):
 
     with pytest.raises(AssertionError):
         token.verify_transfer_tx(tx_id, "0x0", bob_address)
+
+
+def test_verify_order_tx(alice_address, bob_address, alice_ocean, alice_wallet):
+    """Tests verify_order_tx function."""
+    alice_w3 = alice_ocean.web3.eth.blockNumber
+
+    token = alice_ocean.create_data_token(
+        "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
+    )
+
+    token.mint(alice_address, to_base_18(100.0), from_wallet=alice_wallet)
+    token.approve(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
+    transfer_tx_id = token.transfer(
+        bob_address, to_base_18(5.0), from_wallet=alice_wallet
+    )
+
+    with pytest.raises(AssertionError):
+        # dummy tx id
+        token.verify_order_tx(
+            alice_w3, "0x0", "some_did", "some_index", "some_amount", alice_address
+        )
+
+    transfer_tx_id = token.transfer(
+        bob_address, to_base_18(5.0), from_wallet=alice_wallet
+    )
+    with pytest.raises(AssertionError):
+        # tx id is from transfer, not order
+        token.verify_order_tx(
+            alice_w3,
+            transfer_tx_id,
+            "some_did",
+            "some_index",
+            "some_amount",
+            alice_address,
+        )
+
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
+    asset = DDO(json_filename=sample_ddo_path)
+    order_tx_id = token.startOrder(
+        alice_address, to_base_18(1), 1, ZERO_ADDRESS, alice_wallet
+    )
+
+    with pytest.raises(AssertionError):
+        # the wrong asset did, this is a sample
+        token.verify_order_tx(
+            alice_w3, order_tx_id, asset.did, "some_index", "some_amount", alice_address
+        )
+
+
+def test_download(alice_ocean, alice_wallet):
+    token = alice_ocean.create_data_token(
+        "DataToken1",
+        "DT1",
+        from_wallet=alice_wallet,
+        blob="https://s3.amazonaws.com/testfiles.oceanprotocol.com/info.0.json",
+    )
+
+    destination = os.path.abspath("tests/resources/downloads")
+    written_path = token.download(alice_wallet, "test", destination)
+    assert os.path.exists(written_path)
+    os.remove(written_path)
