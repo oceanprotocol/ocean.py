@@ -153,7 +153,7 @@ class Ocean:
         )
         address = dtfactory.get_token_address(tx_id)
         assert address, "new datatoken has no address"
-        dt = DataToken(dt_address)
+        dt = DataToken(address)
         return dt
 
     def get_data_token(self, token_address: str) -> DataToken:
