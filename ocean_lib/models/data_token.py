@@ -315,7 +315,8 @@ class DataToken(ContractBase):
         assert (
             url_object["t"] == int_code
         ), "This datatoken does not appear to have a direct consume url."
-        return url_object["url"] if "url" in url_object else None
+
+        return url_object.get("url")
 
     def get_metadata_url(self):
         # grab the metadatastore URL from the DataToken contract (@token_address)

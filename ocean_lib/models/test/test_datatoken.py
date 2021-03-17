@@ -127,3 +127,25 @@ def test_setMinter(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_add
     token.mint(alice_address, to_base_18(10.0), from_wallet=alice_wallet)
     with pytest.raises(Exception):
         token.mint(alice_address, to_base_18(10.0), from_wallet=bob_wallet)
+
+
+def test_transfer_event(
+    alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address
+):
+    """Tests that a transfer event is registered."""
+    token = alice_ocean.create_data_token(
+        "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
+    )
+
+    block = alice_ocean.web3.eth.blockNumber
+    transfer_event = token.get_transfer_event(block, alice_address, bob_address)
+    assert transfer_event is None
+
+    token.mint(alice_address, to_base_18(100.0), from_wallet=alice_wallet)
+    token.approve(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
+    token.transfer(bob_address, to_base_18(5.0), from_wallet=alice_wallet)
+
+    block = alice_ocean.web3.eth.blockNumber
+    transfer_event = token.get_transfer_event(block, alice_address, bob_address)
+    assert transfer_event["args"]["from"] == alice_address
+    assert transfer_event["args"]["to"] == bob_address
