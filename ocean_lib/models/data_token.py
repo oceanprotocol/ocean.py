@@ -262,11 +262,11 @@ class DataToken(ContractBase):
             target_amount = target_amount - order_log.args.marketFee
 
         # verify sender of the tx using the Tx record
+        tx = web3.eth.getTransaction(tx_id)
         if sender not in [order_log.args.consumer, order_log.args.payer]:
             raise AssertionError(
                 "sender of order transaction is not the consumer/payer."
             )
-        tx = web3.eth.getTransaction(tx_id)
         transfer_logs = self.events.Transfer().processReceipt(tx_receipt)
         receiver_to_transfers = {}
         for tr in transfer_logs:

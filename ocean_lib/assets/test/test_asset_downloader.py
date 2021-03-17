@@ -35,6 +35,7 @@ def test_ocean_assets_download_failure(publisher_ocean_instance, metadata):
 
 
 def test_ocean_assets_download_indexes(publisher_ocean_instance, metadata):
+    """Tests different values of indexes that raise AssertionError."""
     publisher = get_publisher_wallet()
     metadata_copy = metadata.copy()
     data_provider = DataServiceProvider()
@@ -82,6 +83,7 @@ def test_ocean_assets_download_indexes(publisher_ocean_instance, metadata):
 
 
 def test_ocean_assets_download_destination_file(publisher_ocean_instance, metadata):
+    """Tests downloading to an existing directory."""
     publisher = get_publisher_wallet()
     metadata_copy = metadata.copy()
     data_provider = DataServiceProvider()
