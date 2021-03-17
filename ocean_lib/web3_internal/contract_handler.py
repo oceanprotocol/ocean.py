@@ -130,6 +130,7 @@ class ContractHandler(object):
         #preconditions
         assert contract.address is not None
 
+        #main work
         tup = (contract, ConciseContract(contract))
         ContractHandler._contracts[(name, contract.address)] = tup
         ContractHandler._contracts[name] = tup
