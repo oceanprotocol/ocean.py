@@ -8,8 +8,6 @@ import logging
 import os
 
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_lib.web3_internal.web3helper import Web3Helper
-from ocean_lib.config_provider import ConfigProvider
 from web3 import Web3
 from web3.contract import ConciseContract
 

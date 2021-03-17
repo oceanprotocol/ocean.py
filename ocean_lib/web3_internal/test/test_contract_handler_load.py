@@ -9,7 +9,6 @@ import pytest
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_lib.web3_internal.web3helper import Web3Helper
 from web3.exceptions import InvalidAddress
 
 
@@ -82,15 +81,18 @@ def test_issue185_unit(monkeypatch):
     assert "venv/artifacts" in ocean._config.artifacts_path
 
     wallet = Wallet(ocean.web3, private_key=private_key)
+    assert wallet is not None
 
     # At this point, shouldn't have any contracts cached
     assert ContractHandler._contracts == {}
 
     # This is the call that causes problems in system test.
     contract = ContractHandler._get("DataTokenTemplate", None)
+    assert contract is not None
 
     # The first call may have caused caching. So call again:)
     contract = ContractHandler._get("DataTokenTemplate", None)
+    assert contract is not None
 
 
 @pytest.mark.skip(reason="postpone until #202 #227 fixed, then revisit in #185")
@@ -111,6 +113,7 @@ def test_issue185_system(monkeypatch):
 
     # this failed before the fix
     datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet)
+    assert datatoken is not None
 
 
 def setup_issue_185(monkeypatch):
