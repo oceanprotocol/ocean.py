@@ -76,20 +76,7 @@ class ContractHandler(object):
             result = ContractHandler._contracts.get(key)
             assert result is not None
 
-        # postconditions
-        (contract1, concise_contract1) = ContractHandler._contracts[name]
-        assert contract1 is not None
-        assert contract1.address is not None
-        assert concise_contract1 is not None
-        assert concise_contract1.address is not None
-
-        (contract2, concise_contract2) = ContractHandler._contracts[
-            (name, contract1.address)
-        ]
-        assert id(contract1) == id(contract2)
-        assert id(concise_contract1) == id(concise_contract2)
-
-        # return result
+        ContractHandler._verifyContractsConsistency(name)
         return result
 
     @staticmethod
@@ -116,26 +103,13 @@ class ContractHandler(object):
 
     @staticmethod
     def _set(name, contract):
-        # preconditions
         assert contract.address is not None
 
-        # main work
         tup = (contract, ConciseContract(contract))
         ContractHandler._contracts[(name, contract.address)] = tup
         ContractHandler._contracts[name] = tup
 
-        # postconditions
-        (contract1, concise_contract1) = ContractHandler._contracts[name]
-        assert contract1 is not None
-        assert contract1.address is not None
-        assert concise_contract1 is not None
-        assert concise_contract1.address is not None
-
-        (contract2, concise_contract2) = ContractHandler._contracts[
-            (name, contract1.address)
-        ]
-        assert id(contract1) == id(contract2)
-        assert id(concise_contract1) == id(concise_contract2)
+        ContractHandler._verifyContractsConsistency(name)
 
     @staticmethod
     def set(name, contract):
@@ -197,19 +171,7 @@ class ContractHandler(object):
 
         ContractHandler._set(contract_name, contract)
 
-        # postconditions
-        name = contract_name
-        (contract1, concise_contract1) = ContractHandler._contracts[name]
-        assert contract1 is not None
-        assert contract1.address is not None
-        assert concise_contract1 is not None
-        assert concise_contract1.address is not None
-
-        (contract2, concise_contract2) = ContractHandler._contracts[
-            (name, contract1.address)
-        ]
-        assert id(contract1) == id(contract2)
-        assert id(concise_contract1) == id(concise_contract2)
+        ContractHandler._verifyContractsConsistency(contract_name)
 
     @staticmethod
     def read_abi_from_file(contract_name, abi_path):
@@ -230,3 +192,24 @@ class ContractHandler(object):
                 return json.loads(f.read())
 
         return None
+    
+    @staticmethod
+    def _verifyContractsConsistency(name):
+        """
+        Raise an error if ContractHandler._contracts is inconsistent 
+        for the given contract name.
+
+        :param name : str -- name of smart contract
+        :return: None 
+        """
+        (contract1, concise_contract1) = ContractHandler._contracts[name]
+        assert contract1 is not None
+        assert contract1.address is not None
+        assert concise_contract1 is not None
+        assert concise_contract1.address is not None
+
+        (contract2, concise_contract2) = ContractHandler._contracts[
+            (name, contract1.address)
+        ]
+        assert id(contract1) == id(contract2)
+        assert id(concise_contract1) == id(concise_contract2)
