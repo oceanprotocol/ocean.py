@@ -151,7 +151,10 @@ class Ocean:
         tx_id = dtfactory.createToken(
             blob, name, symbol, to_base_18(cap), from_wallet=from_wallet
         )
-        return DataToken(dtfactory.get_token_address(tx_id))
+        address = dtfactory.get_token_address(tx_id)
+        assert address, "new datatoken has no address"
+        dt = DataToken(address)
+        return dt
 
     def get_data_token(self, token_address: str) -> DataToken:
         return DataToken(token_address)

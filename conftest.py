@@ -30,7 +30,10 @@ setup_logging()
 
 
 @pytest.fixture(autouse=True)
-def setup_all():
+def setup_all(request):
+    # a test can skip setup_all() via decorator "@pytest.mark.nosetup_all"
+    if "nosetup_all" in request.keywords:
+        return
     config = ExampleConfig.get_config()
     ConfigProvider.set_config(config)
     Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
