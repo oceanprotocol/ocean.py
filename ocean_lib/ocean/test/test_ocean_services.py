@@ -50,3 +50,7 @@ def test_create_compute_service(publisher_ocean_instance):
     assert isinstance(service[1], dict)
     assert service[1]["attributes"] == attributes
     assert service[1]["serviceEndpoint"] == "http://provider.com:8030"
+
+    compute_service = ocn_compute.create_compute_service_descriptor(attributes)
+    assert compute_service[0] == "compute"
+    assert "main" in compute_service[1]["attributes"]

@@ -71,6 +71,7 @@ def run_compute_test(
     input_ddos,
     algo_ddo=None,
     algo_meta=None,
+    restart_and_result=False,
 ):
     """Helper function to bootstrap compute job creation and status checking."""
     compute_ddo = input_ddos[0]
@@ -128,6 +129,14 @@ def run_compute_test(
     print(f"got job status after requesting stop: {status}")
     assert status, f"something not right about the compute job, got status: {status}"
 
+    if restart_and_result:
+        # TODO: test restart function after pending rework
+        # OR delete this TODO if restart is removed from the interface
+
+        result = ocean_instance.compute.result(did, job_id, consumer_wallet)
+        print(f"got job status after requesting result: {result}")
+        assert "did" in result, "something not right about the compute job, no did."
+
 
 def test_compute_raw_algo():
     """Tests that a compute job with a raw algorithm starts properly."""
@@ -148,6 +157,7 @@ def test_compute_raw_algo():
         setup.consumer_wallet,
         [compute_ddo],
         algo_meta=algorithm_meta,
+        restart_and_result=True,
     )
 
 
