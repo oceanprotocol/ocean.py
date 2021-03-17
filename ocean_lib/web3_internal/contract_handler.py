@@ -69,19 +69,12 @@ class ContractHandler(object):
         :param address: hex str -- address of contract
         :return: tuple of (contract, concise_contract)
         """
-        if address:
-            tup = ContractHandler._contracts.get((name, address))
-            if tup is None:
-                ContractHandler._load(name, address)
-                tup = ContractHandler._contracts.get((name, address))
-                assert tup is not None
-
-        else:
-            tup = ContractHandler._contracts.get(name)
-            if tup is None:
-                ContractHandler._load(name)
-                tup = ContractHandler._contracts.get(name)
-                assert tup is not None
+        key = (name, address) if address else (name)
+        result = ContractHandler._contracts.get(key)
+        if result is None:
+            ContractHandler._load(name, address)
+            result = ContractHandler._contracts.get(key)
+            assert result is not None
 
         # postconditions
         (contract1, concise_contract1) = ContractHandler._contracts[name]
@@ -96,8 +89,8 @@ class ContractHandler(object):
         assert id(contract1) == id(contract2)
         assert id(concise_contract1) == id(concise_contract2)
 
-        # return value
-        return tup
+        # return result
+        return result
 
     @staticmethod
     def get(name, address=None):
