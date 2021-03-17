@@ -92,13 +92,16 @@ def test_ocean_assets_download_destination_file(publisher_ocean_instance, metada
     wait_for_ddo(publisher_ocean_instance, ddo.did)
     sa = ServiceAgreement.from_ddo(ServiceTypes.ASSET_ACCESS, ddo)
 
-    destination = os.path.abspath("examples")
-    download_asset_files(
-        sa.index,
-        ddo,
-        publisher,
-        destination,
-        ddo.data_token_address,
-        "test_order_tx_id",
-        data_provider,
-    )
+    with pytest.raises(IsADirectoryError):
+        destination = os.path.abspath("tests/resources/downloads")
+        written_path = download_asset_files(
+            sa.index,
+            ddo,
+            publisher,
+            destination,
+            ddo.data_token_address,
+            "test_order_tx_id",
+            data_provider,
+        )
+        assert os.path.exists(written_path)
+        os.remove(written_path)
