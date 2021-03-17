@@ -115,6 +115,8 @@ def setup_issue_185(monkeypatch):
         monkeypatch.delenv('CONFIG_FILE')
     if os.getenv('ARTIFACTS_PATH'):
         monkeypatch.delenv('ARTIFACTS_PATH')
+    if not os.getenv('NETWORK_URL'):
+        os.environ['NETWORK_URL'] = 'ganache'
         
     #double-check that envvars are the way this test needs
     assert os.getenv('CONFIG_FILE') is None, "can't have CONFIG_FILE envvar set"
