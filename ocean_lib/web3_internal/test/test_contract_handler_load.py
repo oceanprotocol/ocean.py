@@ -117,6 +117,8 @@ def test_issue185_system(monkeypatch):
 
 
 def setup_issue_185(monkeypatch):
+    """Used by tests of issue #185. It's a nuanced setup to replicate the
+    issue; the github issue itself is the best source of details."""
 
     # change envvars to suit this test
     if os.getenv("CONFIG_FILE"):
