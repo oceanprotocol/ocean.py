@@ -196,11 +196,11 @@ class ContractHandler(object):
     @staticmethod
     def _verifyContractsConsistency(name):
         """
-        Raise an error if ContractHandler._contracts is inconsistent 
+        Raise an error if ContractHandler._contracts is inconsistent
         for the given contract name.
 
         :param name : str -- name of smart contract
-        :return: None 
+        :return: None
         """
         (contract1, concise_contract1) = ContractHandler._contracts[name]
         assert contract1 is not None
