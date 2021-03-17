@@ -192,7 +192,7 @@ class ContractHandler(object):
                 return json.loads(f.read())
 
         return None
-    
+
     @staticmethod
     def _verifyContractsConsistency(name):
         """

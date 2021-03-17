@@ -72,6 +72,7 @@ def test_issue185_unit(monkeypatch):
     # isort: off
     from ocean_lib.ocean.ocean import Ocean
     from ocean_lib.web3_internal.wallet import Wallet
+
     # isort: on
 
     private_key = os.getenv("TEST_PRIVATE_KEY1")
