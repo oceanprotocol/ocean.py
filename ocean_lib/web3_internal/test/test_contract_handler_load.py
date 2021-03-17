@@ -69,8 +69,10 @@ def test_issue185_unit(monkeypatch):
     assert ContractHandler.artifacts_path is None
 
     # actual test. Imports only come now, to avoid setting class-level attributes
+    # isort: off
     from ocean_lib.ocean.ocean import Ocean
     from ocean_lib.web3_internal.wallet import Wallet
+    # isort: on
 
     private_key = os.getenv("TEST_PRIVATE_KEY1")
     config = {"network": os.getenv("NETWORK_URL")}
