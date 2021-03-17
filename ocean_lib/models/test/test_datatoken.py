@@ -149,3 +149,24 @@ def test_transfer_event(
     transfer_event = token.get_transfer_event(block, alice_address, bob_address)
     assert transfer_event["args"]["from"] == alice_address
     assert transfer_event["args"]["to"] == bob_address
+
+
+def test_verify_tx(alice_address, bob_address, alice_ocean, alice_wallet):
+    """Tests verify_transfer_tx function."""
+    token = alice_ocean.create_data_token(
+        "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
+    )
+
+    with pytest.raises(AssertionError):
+        # dummy tx id
+        token.verify_transfer_tx("0x0", alice_address, bob_address)
+
+    # an actual transfer does happen
+    token.mint(alice_address, to_base_18(100.0), from_wallet=alice_wallet)
+    token.approve(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
+    tx_id = token.transfer(bob_address, to_base_18(5.0), from_wallet=alice_wallet)
+
+    assert len(token.verify_transfer_tx(tx_id, alice_address, bob_address)) == 2
+
+    with pytest.raises(AssertionError):
+        token.verify_transfer_tx(tx_id, "0x0", bob_address)
