@@ -35,8 +35,9 @@ class ContractHandler(object):
     # 1. (contract_name)                   : (contract, concise_contract)
     # 2. (contract_name, contract_address) : (contract, concise_contract)
     """
-    _contracts = dict() 
-    
+
+    _contracts = dict()
+
     artifacts_path = None
     network_alias = {"ganache": "development"}
 
@@ -55,13 +56,11 @@ class ContractHandler(object):
 
         return network_addresses
 
-
     @staticmethod
     def set_artifacts_path(artifacts_path):
         if artifacts_path and artifacts_path != ContractHandler.artifacts_path:
             ContractHandler.artifacts_path = artifacts_path
             ContractHandler._contracts.clear()
-
 
     @staticmethod
     def _get(name, address=None):
@@ -85,21 +84,22 @@ class ContractHandler(object):
                 ContractHandler._load(name)
                 tup = ContractHandler._contracts.get(name)
                 assert tup is not None
-        
-        #postconditions
+
+        # postconditions
         (contract1, concise_contract1) = ContractHandler._contracts[name]
         assert contract1 is not None
         assert contract1.address is not None
         assert concise_contract1 is not None
         assert concise_contract1.address is not None
-        
-        (contract2, concise_contract2) = ContractHandler._contracts[(name, contract1.address)]
+
+        (contract2, concise_contract2) = ContractHandler._contracts[
+            (name, contract1.address)
+        ]
         assert id(contract1) == id(contract2)
         assert id(concise_contract1) == id(concise_contract2)
 
-        #return value
+        # return value
         return tup
-
 
     @staticmethod
     def get(name, address=None):
@@ -112,7 +112,6 @@ class ContractHandler(object):
         """
         return ContractHandler._get(name, address)[0]
 
-
     @staticmethod
     def get_concise_contract(name, address=None):
         """
@@ -124,28 +123,28 @@ class ContractHandler(object):
         """
         return ContractHandler._get(name, address)[1]
 
-
     @staticmethod
     def _set(name, contract):
-        #preconditions
+        # preconditions
         assert contract.address is not None
 
-        #main work
+        # main work
         tup = (contract, ConciseContract(contract))
         ContractHandler._contracts[(name, contract.address)] = tup
         ContractHandler._contracts[name] = tup
 
-        #postconditions
+        # postconditions
         (contract1, concise_contract1) = ContractHandler._contracts[name]
         assert contract1 is not None
         assert contract1.address is not None
         assert concise_contract1 is not None
         assert concise_contract1.address is not None
-        
-        (contract2, concise_contract2) = ContractHandler._contracts[(name, contract1.address)]
+
+        (contract2, concise_contract2) = ContractHandler._contracts[
+            (name, contract1.address)
+        ]
         assert id(contract1) == id(contract2)
         assert id(concise_contract1) == id(concise_contract2)
-
 
     @staticmethod
     def set(name, contract):
@@ -156,7 +155,6 @@ class ContractHandler(object):
         :param contract: Contract instance
         """
         ContractHandler._set(name, contract)
-
 
     @staticmethod
     def has(name, address=None):
@@ -170,7 +168,6 @@ class ContractHandler(object):
         if address:
             return (name, address) in ContractHandler._contracts
         return name in ContractHandler._contracts
-
 
     @staticmethod
     def _load(contract_name, address=None):
@@ -203,13 +200,13 @@ class ContractHandler(object):
         contract = Web3Provider.get_web3().eth.contract(
             address=address, abi=abi, bytecode=bytecode
         )
-        if contract.address is None: #if web3 drops address, fix it
+        if contract.address is None:  # if web3 drops address, fix it
             contract.address = address
         assert contract.address is not None
 
         ContractHandler._set(contract_name, contract)
 
-        #postconditions
+        # postconditions
         name = contract_name
         (contract1, concise_contract1) = ContractHandler._contracts[name]
         assert contract1 is not None
@@ -217,10 +214,11 @@ class ContractHandler(object):
         assert concise_contract1 is not None
         assert concise_contract1.address is not None
 
-        (contract2, concise_contract2) = ContractHandler._contracts[(name, contract1.address)]
+        (contract2, concise_contract2) = ContractHandler._contracts[
+            (name, contract1.address)
+        ]
         assert id(contract1) == id(contract2)
         assert id(concise_contract1) == id(concise_contract2)
-
 
     @staticmethod
     def read_abi_from_file(contract_name, abi_path):
