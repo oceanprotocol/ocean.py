@@ -82,7 +82,9 @@ def test_ocean_assets_download_indexes(publisher_ocean_instance, metadata):
         )
 
 
-def test_ocean_assets_download_destination_file(publisher_ocean_instance, metadata):
+def test_ocean_assets_download_destination_file(
+    publisher_ocean_instance, metadata, tmpdir
+):
     """Tests downloading to an existing directory."""
     publisher = get_publisher_wallet()
     metadata_copy = metadata.copy()
@@ -92,16 +94,13 @@ def test_ocean_assets_download_destination_file(publisher_ocean_instance, metada
     wait_for_ddo(publisher_ocean_instance, ddo.did)
     sa = ServiceAgreement.from_ddo(ServiceTypes.ASSET_ACCESS, ddo)
 
-    with pytest.raises(IsADirectoryError):
-        destination = os.path.abspath("tests/resources/downloads")
-        written_path = download_asset_files(
-            sa.index,
-            ddo,
-            publisher,
-            destination,
-            ddo.data_token_address,
-            "test_order_tx_id",
-            data_provider,
-        )
-        assert os.path.exists(written_path)
-        os.remove(written_path)
+    written_path = download_asset_files(
+        sa.index,
+        ddo,
+        publisher,
+        tmpdir,
+        ddo.data_token_address,
+        "test_order_tx_id",
+        data_provider,
+    )
+    assert os.path.exists(written_path)
