@@ -2,10 +2,23 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+
+from unittest.mock import Mock
+
+import pytest
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
+from ocean_lib.data_provider.exceptions import InvalidURLException
+from ocean_utils.exceptions import OceanEncryptAssetUrlsError
+from ocean_utils.http_requests.requests_session import get_requests_session
+from requests.models import Response
 from tests.resources.helper_functions import get_publisher_ocean_instance
+from tests.resources.mocks.http_client_mock import (
+    HttpClientEmptyMock,
+    HttpClientEvilMock,
+    HttpClientNiceMock,
+)
 
 TEST_SERVICE_ENDPOINTS = {
     "computeDelete": ["DELETE", "/api/v1/services/compute"],
@@ -20,7 +33,157 @@ TEST_SERVICE_ENDPOINTS = {
 }
 
 
+@pytest.fixture
+def with_evil_client():
+    http_client = HttpClientEvilMock()
+    DataSP.set_http_client(http_client)
+    yield
+    DataSP.set_http_client(get_requests_session())
+
+
+@pytest.fixture
+def with_nice_client():
+    http_client = HttpClientNiceMock()
+    DataSP.set_http_client(http_client)
+    yield
+    DataSP.set_http_client(get_requests_session())
+
+
+@pytest.fixture
+def with_empty_client():
+    http_client = HttpClientEmptyMock()
+    DataSP.set_http_client(http_client)
+    yield
+    DataSP.set_http_client(get_requests_session())
+
+
+def test_set_http_client(with_nice_client):
+    """Tests that a custom http client can be set on the DataServiceProvider."""
+    assert isinstance(DataSP.get_http_client(), HttpClientNiceMock)
+
+
+def test_encryption_fails(with_evil_client):
+    """Tests that asset encryption fails with OceanEncryptAssetUrlsError."""
+    encrypt_endpoint = "http://mock/encrypt/"
+    with pytest.raises(OceanEncryptAssetUrlsError):
+        DataSP.encrypt_files_dict(
+            "some_files",
+            encrypt_endpoint,
+            "some_asset_id",
+            "some_publisher_address",
+            "some_signature",
+        )
+
+
+def test_nonce_fails(with_evil_client):
+    """Tests that nonce retrieved erroneously is set to None."""
+    assert DataSP.get_nonce("some_address", "http://mock/") is None
+
+
+def test_order_requirements_fails(with_evil_client):
+    """Tests failure of order requirements from endpoint."""
+    assert (
+        DataSP.get_order_requirements(
+            "some_did",
+            "http://mock/",
+            "some_consumer_address",
+            "some_service_id",
+            "and_service_type",
+            "some_token_address",
+        )
+        is None
+    )
+
+
+def test_start_compute_job_fails_empty(with_empty_client):
+    """Tests failure of compute job from endpoint with empty response."""
+    with pytest.raises(AssertionError):
+        DataSP.start_compute_job(
+            "some_did",
+            "http://mock/",
+            "some_consumer_address",
+            "some_signature",
+            "some_service_id",
+            "some_tx_id",
+            algorithm_did="some_algo_did",
+        )
+
+
+def test_start_compute_job_fails_error_response(with_evil_client):
+    """Tests failure of compute job from endpoint with non-200 response."""
+    with pytest.raises(ValueError):
+        DataSP.start_compute_job(
+            "some_did",
+            "http://mock/",
+            "some_consumer_address",
+            "some_signature",
+            "some_service_id",
+            "some_tx_id",
+            algorithm_did="some_algo_did",
+        )
+
+
+def test_send_compute_request_failure(with_evil_client):
+    """Tests failure of compute request from endpoint with non-200 response."""
+    with pytest.raises(Exception):
+        DataSP._send_compute_request(
+            "post",
+            "some_did",
+            "some_job_id",
+            "http://mock/",
+            "some_consumer_address",
+            "some_signature",
+        )
+
+
+def test_compute_job_result(with_nice_client):
+    """Tests successful compute job starting."""
+    result = DataSP.compute_job_result(
+        "some_did",
+        "some_job_id",
+        "http://mock",
+        "some_consumer_address",
+        "some_signature",
+    )
+    assert result == {"good_job": "with_mock"}
+
+
+def test_restart_job_result(with_nice_client):
+    """Tests successful compute job restart."""
+    result = DataSP.restart_compute_job(
+        "some_did",
+        "some_job_id",
+        "http://mock",
+        "some_consumer_address",
+        "some_signature",
+        "some_service_id",
+        "some_tx_id",
+        algorithm_did="some_algo_did",
+    )
+    assert result == {"good_job": "with_mock_post"}
+
+
+def test_delete_job_result(with_nice_client):
+    """Tests successful compute job deletion."""
+    result = DataSP.delete_compute_job(
+        "some_did",
+        "some_job_id",
+        "http://mock",
+        "some_consumer_address",
+        "some_signature",
+    )
+    assert result == {"good_job": "with_mock_delete"}
+
+
+def test_invalid_file_name():
+    """Tests that no filename is returned if attachment headers are found."""
+    response = Mock(spec=Response)
+    response.headers = {"no_good": "headers at all"}
+    assert DataSP._get_file_name(response) is None
+
+
 def test_expose_endpoints():
+    """Tests that the DataServiceProvider exposes all service endpoints."""
     service_endpoints = TEST_SERVICE_ENDPOINTS
     valid_endpoints = DataSP.get_service_endpoints()
     assert len(valid_endpoints) == len(service_endpoints)
@@ -30,11 +193,13 @@ def test_expose_endpoints():
 
 
 def test_provider_address():
+    """Tests that a provider address exists on the DataServiceProvider."""
     provider_address = DataSP.get_provider_address()
     assert provider_address, "Failed to get provider address."
 
 
 def test_provider_address_with_url():
+    """Tests that a URL version of provider address exists on the DataServiceProvider."""
     p_ocean_instance = get_publisher_ocean_instance()
     provider_address = DataSP.get_provider_address(
         DataSP.get_url(p_ocean_instance.config)
@@ -43,6 +208,7 @@ def test_provider_address_with_url():
 
 
 def test_get_root_uri():
+    """Tests extraction of base URLs from various inputs."""
     uri = "http://ppp.com"
     assert DataSP.get_root_uri(uri) == uri
     assert DataSP.get_root_uri("http://ppp.com:8000") == "http://ppp.com:8000"
@@ -68,8 +234,16 @@ def test_get_root_uri():
         == "http://ppp.com:8000/api/v2"
     )
 
+    with pytest.raises(InvalidURLException):
+        DataSP.get_root_uri("thisIsNotAnURL")
+
+    with pytest.raises(InvalidURLException):
+        DataSP.get_root_uri("//")
+
 
 def test_build_endpoint():
+    """Tests that service endpoints are correctly built from URL and service name."""
+
     def get_service_endpoints(_provider_uri=None):
         _endpoints = TEST_SERVICE_ENDPOINTS.copy()
         _endpoints.update({"newEndpoint": ["GET", "/api/v1/services/newthing"]})
@@ -107,6 +281,7 @@ def test_build_endpoint():
 
 
 def test_build_specific_endpoints():
+    """Tests that a specific list of agreed endpoints is supported on the DataServiceProvider."""
     config = ConfigProvider.get_config()
     endpoints = TEST_SERVICE_ENDPOINTS
 

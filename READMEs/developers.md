@@ -84,11 +84,19 @@ export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7
 In console:
 ```console
 #run a single test
-pytest tests/models/test_btoken.py
+pytest ocean_lib/models/test/test_btoken.py::test_ERC20
+
+#run all tests in a file
+pytest ocean_lib/models/test/test_btoken.py
 
 #run all tests
 pytest
+
+#run all tests, using CI tooling
+tox
 ```
+
+For envvars that aren't set, `pytest` uses values in `pytest.ini`, and `tox` uses values in `tox.ini`. 
 
 Bonus: see the [appendix](developers.md#7-appendix-more-tests) for even more tests.
 
@@ -160,3 +168,5 @@ Finally, you can [go here](https://app.codacy.com/gh/oceanprotocol/ocean.py/dash
 
 You are welcome to contribute to ocean.py docs! For clean markdowns, we use the `remark` tool for automatic markdown formatting.
 OCEAN has an official repository containing remark settings, so please follow the instructions [here](https://github.com/oceanprotocol/ocean-remark).
+
+To generate a Sphinx documentation, run `sphinx-build -b html source path_of_your_choice` in the `docs/` folder.

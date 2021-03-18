@@ -12,6 +12,7 @@ from collections import namedtuple
 from json import JSONDecodeError
 
 from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.data_provider.exceptions import InvalidURLException
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
@@ -266,13 +267,14 @@ class DataServiceProvider:
             data=json.dumps(payload),
             headers={"content-type": "application/json"},
         )
-        logger.debug(
-            f"got DataProvider execute response: {response.content} with status-code {response.status_code} "
-        )
         if not response:
             raise AssertionError(
                 f"Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}"
             )
+
+        logger.debug(
+            f"got DataProvider execute response: {response.content} with status-code {response.status_code} "
+        )
 
         if response.status_code not in (201, 200):
             raise ValueError(response.content.decode("utf-8"))
@@ -440,10 +442,6 @@ class DataServiceProvider:
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(ConfigProvider.get_config())
 
-        api_version = DataServiceProvider.get_api_version()
-        if api_version in provider_uri:
-            i = provider_uri.find(api_version)
-            provider_uri = provider_uri[:i]
         provider_info = DataServiceProvider._http_method("get", provider_uri).json()
 
         return provider_info["serviceEndpoints"]
@@ -466,10 +464,19 @@ class DataServiceProvider:
             i = provider_uri.find(api_version)
             provider_uri = provider_uri[:i]
         parts = provider_uri.split("/")
+
+        if len(parts) < 2:
+            raise InvalidURLException(f"InvalidURL {service_endpoint}.")
+
         if parts[-2] == "services":
             provider_uri = "/".join(parts[:-2])
 
-        return DataServiceProvider._remove_slash(provider_uri)
+        result = DataServiceProvider._remove_slash(provider_uri)
+
+        if not result:
+            raise InvalidURLException(f"InvalidURL {service_endpoint}.")
+
+        return result
 
     @staticmethod
     def build_endpoint(service_name, provider_uri=None, config=None):

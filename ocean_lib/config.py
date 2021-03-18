@@ -124,11 +124,10 @@ class Config(configparser.ConfigParser):
             with open(filename) as fp:
                 text = fp.read()
                 self.read_string(text)
-        else:
-            if "text" in kwargs:
-                self.read_string(kwargs["text"])
-
-        if options_dict:
+        elif "text" in kwargs:
+            self._logger.debug("Config: loading config file {filename}.")
+            self.read_string(kwargs["text"])
+        elif options_dict:
             self._logger.debug(f"Config: loading from dict {options_dict}")
             self.read_dict(options_dict)
 
