@@ -230,7 +230,7 @@ def test_verify_order_tx(alice_address, bob_address, alice_ocean, alice_wallet):
         )
 
 
-def test_download(alice_ocean, alice_wallet):
+def test_download(alice_ocean, alice_wallet, tmpdir):
     token = alice_ocean.create_data_token(
         "DataToken1",
         "DT1",
@@ -238,7 +238,5 @@ def test_download(alice_ocean, alice_wallet):
         blob="https://s3.amazonaws.com/testfiles.oceanprotocol.com/info.0.json",
     )
 
-    destination = os.path.abspath("tests/resources/downloads")
-    written_path = token.download(alice_wallet, "test", destination)
+    written_path = token.download(alice_wallet, "test", tmpdir)
     assert os.path.exists(written_path)
-    os.remove(written_path)

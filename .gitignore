@@ -17,5 +17,3 @@ ocean_lib.egg-info/
 .tox/
 consume-downloads/
 coverage.xml
-
-tests/resources/downloads/file-*
