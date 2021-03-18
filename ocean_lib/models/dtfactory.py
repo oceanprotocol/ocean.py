@@ -13,6 +13,7 @@ class DTFactory(ContractBase):
     FIRST_BLOB = "https://example.com/dataset-1"
 
     def verify_data_token(self, dt_address):
+        """Checks that a token was registered."""
         event = getattr(self.events, "TokenRegistered")
         filter_params = {"tokenAddress": dt_address}
         event_filter = event().createFilter(fromBlock=0, argument_filters=filter_params)
@@ -23,25 +24,25 @@ class DTFactory(ContractBase):
     def get_token_registered_event(self, from_block, to_block, token_address):
         """Retrieves event log of token registration."""
         event = getattr(self.events, "TokenRegistered")
-        filter_params = {}
-        if token_address:
-            filter_params["tokenAddress"] = token_address
+        filter_params = {"tokenAddress": token_address}
 
         event_filter = event().createFilter(
             fromBlock=from_block, toBlock=to_block, argument_filters=filter_params
         )
         logs = event_filter.get_all_entries()
-        if logs and token_address:
-            return logs[0]
 
-        return None
+        return logs[0] if logs else None
 
     def get_token_minter(self, token_address):
+        """Retrieves token minter.
+
+        This function is deprecated and only kept for maintainability purposes."""
         from ocean_lib.models.data_token import DataToken  # isort:skip
 
         return DataToken(address=token_address).contract_concise.minter()
 
     def get_token_address(self, transaction_id: str) -> str:
+        """Gets token address using transaction id."""
         tx_receipt = self.get_tx_receipt(transaction_id)
         if not tx_receipt:
             logging.warning(

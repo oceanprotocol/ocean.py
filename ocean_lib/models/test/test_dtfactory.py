@@ -7,7 +7,7 @@ from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.util import to_base_18
 
 
-def test_data_token_creation(network, alice_wallet, dtfactory_address, alice_ocean):
+def test_data_token_creation(alice_wallet, dtfactory_address):
     """Tests that a data token can be created using a DTFactory object."""
     dtfactory = DTFactory(dtfactory_address)
 
@@ -20,9 +20,7 @@ def test_data_token_creation(network, alice_wallet, dtfactory_address, alice_oce
     assert dtfactory.verify_data_token(dt.address)
 
 
-def test_data_token_event_registered(
-    network, alice_wallet, dtfactory_address, alice_ocean
-):
+def test_data_token_event_registered(alice_wallet, dtfactory_address, alice_ocean):
     """Tests that a token registration event is created and can be retrieved."""
     dtfactory = DTFactory(dtfactory_address)
 
@@ -40,16 +38,14 @@ def test_data_token_event_registered(
     assert registered_event.args.tokenAddress == dt.address
 
 
-def test_get_token_address_fails(network, alice_wallet, dtfactory_address, alice_ocean):
+def test_get_token_address_fails(dtfactory_address):
     """Tests the failure case for get_token_address."""
     dtfactory = DTFactory(dtfactory_address)
 
     assert dtfactory.get_token_address("") == ""
 
 
-def test_get_token_minter(
-    network, alice_wallet, dtfactory_address, alice_ocean, alice_address
-):
+def test_get_token_minter(alice_wallet, dtfactory_address, alice_address):
     """Tests proper retrieval of token minter from DTFactory."""
     dtfactory = DTFactory(dtfactory_address)
 
