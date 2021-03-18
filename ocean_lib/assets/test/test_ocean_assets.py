@@ -155,3 +155,28 @@ def test_ocean_assets_compute(publisher_ocean_instance):
     assert ddo
     _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did)
     assert _ddo, f"assets.resolve failed for did {ddo.did}"
+
+
+def test_download_fails(publisher_ocean_instance):
+    """Tests failures of assets download function."""
+    publisher = get_publisher_wallet()
+    metadata = get_sample_algorithm_ddo()["service"][0]
+    metadata["attributes"]["main"]["files"][0]["checksum"] = str(uuid.uuid4())
+    ddo = publisher_ocean_instance.assets.create(metadata["attributes"], publisher)
+    _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did)
+    assert _ddo, f"assets.resolve failed for did {ddo.did}"
+    with pytest.raises(AssertionError):
+        publisher_ocean_instance.assets.download(ddo.did, "", publisher, "", "", -4)
+    with pytest.raises(AssertionError):
+        publisher_ocean_instance.assets.download(
+            ddo.did, "", publisher, "", "", "string_index"
+        )
+
+
+def test_create_bad_metadata(publisher_ocean_instance):
+    """Tests that we can't create the asset with plecos failure."""
+    publisher = get_publisher_wallet()
+    metadata = get_sample_algorithm_ddo()["service"][0]
+    metadata["attributes"]["main"]["files"][0]["EXTRA ATTRIB!"] = 0
+    with pytest.raises(ValueError):
+        publisher_ocean_instance.assets.create(metadata["attributes"], publisher)
