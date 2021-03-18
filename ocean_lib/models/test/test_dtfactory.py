@@ -39,20 +39,23 @@ def test_data_token_event_registered(
 
     assert registered_event.args.tokenAddress == dt.address
 
-    # without explicit address, no metadata_url and no sender
-    registered_event = dtfactory.get_token_registered_event(block - 1, block + 1)
-
-    assert registered_event is None
-
-    # TODO: provide metadata_url and sender to return the correct event
-    # still pending because I don't know how blob is encoded in the log args
-
-
-# TODO: test_get_token_minter...
-
 
 def test_get_token_address_fails(network, alice_wallet, dtfactory_address, alice_ocean):
     """Tests the failure case for get_token_address."""
     dtfactory = DTFactory(dtfactory_address)
 
     assert dtfactory.get_token_address("") == ""
+
+
+def test_get_token_minter(
+    network, alice_wallet, dtfactory_address, alice_ocean, alice_address
+):
+    """Tests proper retrieval of token minter from DTFactory."""
+    dtfactory = DTFactory(dtfactory_address)
+
+    dt_address = dtfactory.createToken(
+        "foo_blob", "DT1", "DT1", to_base_18(1000), from_wallet=alice_wallet
+    )
+    dt = DataToken(dtfactory.get_token_address(dt_address))
+    dt.mint(alice_address, to_base_18(10.0), from_wallet=alice_wallet)
+    assert dtfactory.get_token_minter(dt.address) == alice_address

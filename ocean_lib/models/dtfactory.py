@@ -5,7 +5,6 @@
 import logging
 
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.event_filter import EventFilter
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -21,9 +20,8 @@ class DTFactory(ContractBase):
 
         return logs and logs[0].args.tokenAddress == dt_address
 
-    def get_token_registered_event(
-        self, from_block, to_block, metadata_url=None, sender=None, token_address=None
-    ):
+    def get_token_registered_event(self, from_block, to_block, token_address):
+        """Retrieves event log of token registration."""
         event = getattr(self.events, "TokenRegistered")
         filter_params = {}
         if token_address:
@@ -36,26 +34,12 @@ class DTFactory(ContractBase):
         if logs and token_address:
             return logs[0]
 
-        for log in logs:
-            if log.args.blob == metadata_url and sender == log.args.RegisteredBy:
-                return log
-
         return None
 
     def get_token_minter(self, token_address):
-        event = getattr(self.events, "TokenRegistered")
-        # TODO: use the filter on tokenAddress when it is set as indexed in the contract event.
-        filter_params = {}  # {'tokenAddress': token_address}
-        event_filter = EventFilter(
-            "TokenRegistered", event, filter_params, from_block=0, to_block="latest"
-        )
-        logs = event_filter.get_all_entries(max_tries=10)
-        for log in logs:
-            # assert log.args.tokenAddress == token_address
-            if log.args.tokenAddress == token_address:
-                return log.args.registeredBy
+        from ocean_lib.models.data_token import DataToken  # isort:skip
 
-        return None
+        return DataToken(address=token_address).contract_concise.minter()
 
     def get_token_address(self, transaction_id: str) -> str:
         tx_receipt = self.get_tx_receipt(transaction_id)
