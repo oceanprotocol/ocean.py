@@ -36,10 +36,13 @@ class DTFactory(ContractBase):
     def get_token_minter(self, token_address):
         """Retrieves token minter.
 
-        This function is deprecated and only kept for maintainability purposes."""
+        This function will be deprecated in the next major release.
+        It's only kept for backwards compatibility."""
         from ocean_lib.models.data_token import DataToken  # isort:skip
 
-        return DataToken(address=token_address).contract_concise.minter()
+        dt = DataToken(address=token_address)
+
+        return dt.contract_concise.minter()
 
     def get_token_address(self, transaction_id: str) -> str:
         """Gets token address using transaction id."""
