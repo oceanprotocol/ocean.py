@@ -108,7 +108,7 @@ def deploy_fake_OCEAN():
         print(f"Distributed {amt_distribute} OCEAN to address {dst_address}")
 
     print("****Distribute fake OCEAN: done****\n")
-    
+
     print("****Update addresses file: begin****\n")
 
     print(f"addresses file: {addresses_file}")
@@ -121,7 +121,7 @@ def deploy_fake_OCEAN():
         json.dump(network_addresses, f, indent=2)
 
     _s = json.dumps(addresses, indent=4)
-    
+
     s = "Have deployed to, and updated the following addresses\n" + _s
     print(s)
 
@@ -134,4 +134,3 @@ def invalidKey(private_key_str):  # super basic check
 
 def invalidAddr(addr_str):  # super basic check
     return len(addr_str) < 10
-
