@@ -20,8 +20,8 @@ Steps:
 ### 1.1 Prerequisites
 
 -   Linux/MacOS
--   Docker
--   Python 3.8.5
+-   Docker, [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
+-   Python 3.8.5+
 
 ### 1.2 Do Install
 
@@ -43,9 +43,7 @@ source venv/bin/activate
 pip install -r requirements_dev.txt
 ```
 
-## 2. Run the services
-
-Use Ocean Barge to run local Ethereum node with Ocean contracts, Aquarius, and Provider.
+## 2. Run barge services
 
 In a new console:
 
@@ -57,7 +55,7 @@ cd barge
 #clean up old containers (to be sure)
 docker system prune -a --volumes
 
-#run barge with provider on
+#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
 ./start_ocean.sh  --with-provider2
 ```
 
