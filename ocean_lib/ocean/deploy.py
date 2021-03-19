@@ -8,7 +8,6 @@
 import json
 import os
 import sys
-from pathlib import Path
 
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.example_config import ExampleConfig
@@ -55,8 +54,6 @@ def deploy_fake_OCEAN():
 
     if network not in network_addresses:
         network = "development"
-
-    _addresses = network_addresses[network]
 
     # ****SET ENVT****
     deployer_private_key = get_ganache_wallet().private_key

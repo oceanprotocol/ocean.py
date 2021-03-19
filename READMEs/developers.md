@@ -25,7 +25,6 @@ Steps:
 
 ### Do Install
 
-
 In a new console that we'll call the _work_ console (as we'll use it later):
 
 ```console
