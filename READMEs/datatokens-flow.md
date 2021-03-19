@@ -5,7 +5,15 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Publish datatoken
 
-## Run the services
+## Prerequisites
+
+-   Linux/MacOS
+-   Docker, [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
+-   Python 3.8.5+
+
+## Run barge services
+
+Ocean `barge` runs ganache (local blockchain), Provider (data service), and Aquarius (metadata cache).
 
 In a new console:
 
@@ -17,7 +25,7 @@ cd barge
 #clean up old containers (to be sure)
 docker system prune -a --volumes
 
-#run barge (runs ganache, Provider, Aquarius)
+#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
 ./start_ocean.sh  --with-provider2
 ```
 

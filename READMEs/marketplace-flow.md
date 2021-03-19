@@ -20,7 +20,15 @@ Let's go through each step.
 
 ## 1. Setup
 
+### Prerequisites
+
+-   Linux/MacOS
+-   Docker, [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
+-   Python 3.8.5+
+
 ### Run barge services
+
+In a new console:
 
 ```console
 #grab repo
@@ -30,7 +38,7 @@ cd barge
 #clean up old containers (to be sure)
 docker system prune -a --volumes
 
-#run barge (runs ganache, Provider, Aquarius)
+#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
 ./start_ocean.sh  --with-provider2
 ```
 
