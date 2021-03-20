@@ -65,8 +65,8 @@ def get_web3_connection_provider(network_url):
         - the issue is described here: https://github.com/ethereum/web3.py/issues/549
         - and the fix is here: https://web3py.readthedocs.io/en/latest/middleware.html#geth-style-proof-of-authority
 
-    :param network_url:
-    :return:
+    :param network_url: str
+    :return: provider : HTTPProvider
     """
     if network_url == "ganache":
         network_url = GANACHE_URL
