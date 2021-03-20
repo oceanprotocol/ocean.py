@@ -9,7 +9,7 @@ This README is how to further _develop_ ocean.py. (Compare to the quickstarts wh
 Steps:
 
 1.  **Install dependencies**
-2.  **Run the services**
+2.  **Run barge services**
 3.  **Set up contracts**
 4.  **Test**
 5.  **Merge** the changes via a PR
@@ -17,15 +17,15 @@ Steps:
 
 ## 1. Install dependencies
 
-### 1.1 Prerequisites
+### Prerequisites
 
 -   Linux/MacOS
 -   Docker, [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
 -   Python 3.8.5+
 
-### 1.2 Do Install
+### Do Install
 
-In a console:
+In a new console that we'll call the _work_ console (as we'll use it later):
 
 ```console
 #clone the repo and enter into it
@@ -63,7 +63,7 @@ docker system prune -a --volumes
 
 ## 3. Set up contracts
 
-In console:
+In work console:
 
 ```console
 #specify config file as an envvar
@@ -74,12 +74,12 @@ export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f43
 export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
 
 #deploy new OCEAN token; update ~/.ocean/ocean-contracts/artifacts/address.json; send OCEAN to accounts
-./deploy.py ganache
+./deploy_fake_OCEAN.py
 ```
 
 ## 4. Test
 
-In console:
+In work console:
 ```console
 #run a single test
 pytest ocean_lib/models/test/test_btoken.py::test_ERC20
