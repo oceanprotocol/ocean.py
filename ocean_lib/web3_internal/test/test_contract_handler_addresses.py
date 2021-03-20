@@ -7,9 +7,6 @@
 This file does tests for method "get_contracts_addresses()", that's all.
 """
 
-import copy
-import os
-
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 
 _NETWORK = "ganache"
