@@ -20,7 +20,15 @@ Let's go through each step.
 
 ## 1. Setup
 
+### Prerequisites
+
+-   Linux/MacOS
+-   Docker, [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
+-   Python 3.8.5+
+
 ### Run barge services
+
+In a new console:
 
 ```console
 #grab repo
@@ -30,7 +38,7 @@ cd barge
 #clean up old containers (to be sure)
 docker system prune -a --volumes
 
-#run barge (runs ganache, Provider, Aquarius)
+#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
 ./start_ocean.sh  --with-provider2
 ```
 
@@ -50,38 +58,9 @@ npm start
 
 Check out the Ocean Market webapp at http://localhost:8000.
 
-### Give Alice & Bob fake OCEAN
-
-In steps below, Alice and Bob need (fake) OCEAN. Let's send them some. To make this happen, we need to get the ocean.py repo; we don't use that repo for this quickstart otherwise.
-
-In a new console:
-
-```console
-#clone the repo and enter into it
-git clone https://github.com/oceanprotocol/ocean.py
-cd ocean.py
-
-#Install OS dependencies
-sudo apt-get install -y python3-dev gcc python-pytest
-
-#Initialize virtual environment and activate it.
-python -m venv venv
-source venv/bin/activate
-
-#Install modules in the environment.
-pip install -r requirements_dev.txt
-
-#set private keys of two accounts (Alice & Bob)
-export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
-export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
-
-#send fake OCEAN to Alice & Bob
-./deploy.py ganache
-```
-
 ### Install the library
 
-In a new console:
+In a new console that we'll call the _work_ console (as we'll use it later):
 
 ```console
 #Create your working directory
@@ -96,7 +75,7 @@ source venv/bin/activate
 pip install ocean-lib
 ```
 
-### Create config file
+### Set up contracts
 
 Create a file called `test3/config.ini` and fill it as follows.
 
@@ -115,44 +94,41 @@ storage.path = ocean_lib.db
 downloads.path = consume-downloads
 ```
 
-## 2. Alice publishes data asset
-
-Ensure proper environment. In the console:
-
-```text
-#go into venv
-cd test3
-source venv/bin/activate
-
-#set private keys of two accounts (Alice & Bob)
+In the work console:
+```console
+#set private keys of two accounts
 export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
 
-#go into Python
+#start python
 python
 ```
 
 In the Python console:
+```python
+# deploy new OCEAN token; update ~/.ocean/ocean-contracts/artifacts/address.json; send OCEAN to accounts
+from ocean_lib.ocean.deploy import deploy_fake_OCEAN
+deploy_fake_OCEAN()
+```
 
+## 2. Alice publishes data asset
+
+In the Python console:
 ```python
 #create ocean instance
-import os
 from ocean_lib.config import Config
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_utils.agreements.service_factory import ServiceDescriptor
 config = Config('config.ini')
 ocean = Ocean(config)
 
 #Alice's wallet
+import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
 
 #Publish a datatoken
-print("create datatoken: begin")
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_store_url)
 token_address = data_token.address
-print("create datatoken: done")
 
 #Specify metadata and service attributes, using the Branin test dataset
 date_created = "2019-12-28T10:55:11Z"
@@ -176,6 +152,9 @@ service_attributes = {
 #Publish metadata and service attributes on-chain.
 # The service urls will be encrypted before going on-chain.
 # They're only decrypted for datatoken owners upon consume.
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_utils.agreements.service_factory import ServiceDescriptor
+
 service_endpoint = DataServiceProvider.get_url(ocean.config)
 download_service = ServiceDescriptor.access_service_descriptor(service_attributes, service_endpoint)
 asset = ocean.assets.create(
@@ -216,7 +195,7 @@ print(f"pool_address = '{pool_address}'")
 
 Now, you're the Marketplace operator. Here's how to get info about the data asset.
 
-In the same Python console as above:
+In the same Python console as before:
 
 ```python
 #point to services
@@ -247,10 +226,10 @@ bob_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY2'))
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
 #Verify that Bob has ganache ETH
-assert ocean.web3.eth.getBalance(bob_wallet.address) > 0, "need Rinkeby ETH"
+assert ocean.web3.eth.getBalance(bob_wallet.address) > 0, "need ganache ETH"
 
 #Verify that Bob has ganache OCEAN
-assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need Rinkeby OCEAN"
+assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
 
 #Bob buys 1.0 datatokens - the amount needed to consume the dataset.
 data_token = ocean.get_data_token(token_address)

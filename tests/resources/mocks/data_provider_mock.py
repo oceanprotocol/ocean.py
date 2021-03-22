@@ -4,7 +4,8 @@
 #
 
 import os
-import re
+
+from ocean_utils.http_requests.requests_session import get_requests_session
 
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider, logger
 from ocean_utils.agreements.service_types import ServiceTypes
@@ -64,19 +65,10 @@ class DataProviderMock(object):
         return DataServiceProvider.get_url(config)
 
     @staticmethod
-    def build_download_endpoint(service_name):
+    def build_download_endpoint(provider_uri=None):
         service_name = "download"
         provider_uri = "http://localhost:8030"
-        return "GET", f"{provider_uri}/services/{service_name}"
-
-    @staticmethod
-    def _get_file_name(response):
-        try:
-            return re.match(
-                r"attachment;filename=(.+)", response.headers.get("content-disposition")
-            )[1]
-        except Exception as e:
-            logger.warning(f"It was not possible to get the file name. {e}")
+        return "GET", f"{provider_uri}/api/v1/services/{service_name}"
 
     @staticmethod
     def download_service(
@@ -109,19 +101,16 @@ class DataProviderMock(object):
             f"&transferTxId={order_tx_id}"
             f"&consumerAddress={wallet.address}"
         )
-        provider_uri = DataServiceProvider.get_root_uri(service_endpoint)
+        provider_uri = DataProviderMock.build_download_endpoint(service_endpoint)[1]
         for i in indexes:
             signature = DataServiceProvider.sign_message(
                 wallet, did, provider_uri=provider_uri
             )
             download_url = base_url + f"&signature={signature}&fileIndex={i}"
             logger.info(f"invoke consume endpoint with this url: {download_url}")
-            response = DataServiceProvider.get_http_client().get(
-                download_url, stream=True
-            )
-            file_name = DataProviderMock._get_file_name(response)
+            http_client = get_requests_session()
+            response = http_client.get(download_url, stream=True)
+            file_name = DataServiceProvider._get_file_name(response)
             DataServiceProvider.write_file(
                 response, destination_folder, file_name or f"file-{i}"
             )
-
-        return True

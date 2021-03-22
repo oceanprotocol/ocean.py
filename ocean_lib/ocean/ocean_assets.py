@@ -372,8 +372,8 @@ class OceanAssets:
         logger.info(f"Searching asset containing: {text}")
         return [
             Asset(dictionary=ddo_dict)
-            for ddo_dict in self._get_aquarius(aquarius_url).text_search(
-                text, sort, offset, page
+            for ddo_dict in self._get_aquarius(aquarius_url).query_search(
+                {"query": {"query_string": {"query": text}}}, sort, offset, page
             )["results"]
         ]
 
@@ -396,7 +396,9 @@ class OceanAssets:
         aquarius = self._get_aquarius(aquarius_url)
         return [
             Asset(dictionary=ddo_dict)
-            for ddo_dict in aquarius.query_search(query, sort, offset, page)["results"]
+            for ddo_dict in aquarius.query_search({"query": query}, sort, offset, page)[
+                "results"
+            ]
         ]
 
     def order(
@@ -581,7 +583,8 @@ class OceanAssets:
         return [
             asset.did
             for asset in self.query(
-                {"query": {"proof.creator": [owner_address]}}, offset=1000
+                {"query_string": {"query": owner_address, "fields": ["proof.creator"]}},
+                offset=1000,
             )
         ]
 

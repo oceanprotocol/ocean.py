@@ -269,7 +269,6 @@ class DataToken(ContractBase):
             raise AssertionError(
                 "sender of order transaction is not the consumer/payer."
             )
-
         transfer_logs = self.events.Transfer().processReceipt(tx_receipt)
         receiver_to_transfers = {}
         for tr in transfer_logs:
