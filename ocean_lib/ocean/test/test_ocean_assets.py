@@ -125,7 +125,32 @@ def test_ocean_assets_search(publisher_ocean_instance, metadata):
     wait_for_ddo(publisher_ocean_instance, ddo.did)
     time.sleep(1)  # apparently changes are not instantaneous
     assert len(publisher_ocean_instance.assets.search(identifier)) == 1
-    assert len(publisher_ocean_instance.assets.search("Gorilla")) == 0
+    assert (
+        len(
+            publisher_ocean_instance.assets.query(
+                {
+                    "query_string": {
+                        "query": identifier,
+                        "fields": ["service.attributes.main.name"],
+                    }
+                }
+            )
+        )
+        == 1
+    )
+    assert (
+        len(
+            publisher_ocean_instance.assets.query(
+                {
+                    "query_string": {
+                        "query": "Gorilla",
+                        "fields": ["service.attributes.main.name"],
+                    }
+                }
+            )
+        )
+        == 0
+    )
 
 
 def test_ocean_assets_validate(publisher_ocean_instance, metadata):
