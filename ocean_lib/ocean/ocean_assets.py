@@ -338,25 +338,7 @@ class OceanAssets:
 
         return asset
 
-    def update_trusted_algorithms_shallow(
-        self, asset: Asset, trusted_algorithms: list = None
-    ) -> Asset:
-        compute_service_descriptor = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
-        assert (
-            compute_service_descriptor
-        ), "update trusted algorithms failed, compute service does not exist."
-
-        if compute_service_descriptor:
-            if trusted_algorithms:
-                trusted_algorithms_list = create_publisher_trusted_algorithms(
-                    self, trusted_algorithms=trusted_algorithms
-                )
-                compute_service_descriptor.__dict__["_attributes"]["main"][
-                    "privacy"
-                ] = {"publisherTrustedAlgorithms": trusted_algorithms_list}
-        return asset
-
-    def update(self, asset: Asset, publisher_wallet: Wallet) -> bool:
+    def update(self, asset: Asset, publisher_wallet: Wallet) -> str:
         try:
             # publish the new ddo in ocean-db/Aquarius
             ddo_registry = self.ddo_registry()
@@ -372,6 +354,7 @@ class OceanAssets:
                     f"update DDO on-chain failed, transaction status is 0. Transaction hash is {tx_id}"
                 )
             logger.info("Asset/ddo updated on-chain successfully.")
+            return tx_id
         except ValueError as ve:
             raise ValueError(f"Invalid value to publish in the metadata: {str(ve)}")
         except Exception as e:
