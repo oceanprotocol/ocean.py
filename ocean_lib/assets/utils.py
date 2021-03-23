@@ -75,6 +75,6 @@ def remove_publisher_trusted_algorithm(
         )
 
     trusted_algorithms = [ta for ta in trusted_algorithms if ta["did"] != algo_did]
-    asset.update_trusted_algorithms(trusted_algorithms)
+    asset.update_compute_privacy(trusted_algorithms)
     assert asset.get_trusted_algorithms() == trusted_algorithms
     return trusted_algorithms

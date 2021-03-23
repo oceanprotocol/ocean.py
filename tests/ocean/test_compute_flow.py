@@ -267,7 +267,9 @@ def test_update_trusted_algorithms():
     trusted_algo_list = create_publisher_trusted_algorithms(
         [algorithm_ddo.did], setup.publisher_ocean_instance.config.aquarius_url
     )
-    compute_ddo.update_trusted_algorithms(trusted_algorithms=trusted_algo_list)
+    compute_ddo.update_compute_privacy(
+        trusted_algorithms=trusted_algo_list, allow_all=False, allow_raw_algorithm=False
+    )
 
     tx_id = setup.publisher_ocean_instance.assets.update(
         compute_ddo, setup.publisher_wallet
