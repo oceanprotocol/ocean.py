@@ -239,6 +239,7 @@ print(f'DataToken @{datatoken.address} has a `pool` available @{pool_address}')
 
 <!-- ## 5. Marketplace posts asset for sale using price obtained from balancer pool
 
+
 ```python
 from ocean_utils.agreements.service_types import ServiceTypes
 
@@ -290,7 +291,7 @@ while(bobsToken<=0):
 print(f'bob has {datatoken.token_balance(bob_wallet.address)} datatokens.')
 ``` -->
 
-## 7. Bob uses a service from the asset he just purchased (download)
+## 5. Bob uses a service from the asset he just purchased (download)
 
 ```python
 market_address = '0xD679a72Ff5cE7EA1f4725ADb3f57c9aDb8F51738' # Market address can be anyone, that will receive the market fee. Leave empty if you want
