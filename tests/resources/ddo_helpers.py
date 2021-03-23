@@ -144,14 +144,16 @@ def get_registered_ddo_with_compute_service(
     metadata = old_ddo.metadata
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     service = old_ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
-    compute_attributes = ocean_instance.services.create_compute_service_attributes(
+    compute_attributes = ocean_instance.compute.create_compute_service_attributes(
         service.attributes["main"]["timeout"],
         service.attributes["main"]["creator"],
         service.attributes["main"]["datePublished"],
         service.attributes["main"]["provider"],
-        trusted_algorithms,
-        allow_raw_algorithm=True,
-        allow_all_published_algorithms=not bool(trusted_algorithms),
+        privacy_attributes=ocean_instance.compute.build_service_privacy_attributes(
+            trusted_algorithms,
+            allow_raw_algorithm=True,
+            allow_all_published_algorithms=not bool(trusted_algorithms),
+        ),
     )
     compute_service = ServiceDescriptor.compute_service_descriptor(
         compute_attributes, DataServiceProvider.get_url(ocean_instance.config)

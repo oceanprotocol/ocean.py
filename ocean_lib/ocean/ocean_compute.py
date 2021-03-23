@@ -4,7 +4,7 @@
 #
 import logging
 
-from ocean_lib.ocean.ocean_services import OceanServices
+from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.config_provider import ConfigProvider
@@ -99,14 +99,40 @@ class OceanCompute:
         }
 
     @staticmethod
+    def build_service_privacy_attributes(
+        trusted_algorithms: list = None,
+        allow_raw_algorithm: bool = False,
+        allow_all_published_algorithms: bool = False,
+        allow_network_access: bool = False,
+    ):
+        """
+        :param trusted_algorithms: list of algorithm did to be trusted by the compute service provider
+        :param allow_raw_algorithm: bool -- when True, unpublished raw algorithm code can be run on this dataset
+        :param allow_all_published_algorithms: bool -- when True, any published algorithm can be run on this dataset
+            The list of `trusted_algorithms` will be ignored in this case.
+        :param allow_network_access: bool -- allow/disallow the algorithm network access during execution
+        :return: dict
+        """
+        privacy = {
+            "allowRawAlgorithm": allow_raw_algorithm,
+            "allowAllPublishedAlgorithms": allow_all_published_algorithms,
+            "publisherTrustedAlgorithms": [],
+            "allowNetworkAccess": allow_network_access,
+        }
+        if trusted_algorithms:
+            privacy["publisherTrustedAlgorithms"] = create_publisher_trusted_algorithms(
+                trusted_algorithms, ConfigProvider.get_config().aquarius_url
+            )
+
+        return privacy
+
+    @staticmethod
     def create_compute_service_attributes(
         timeout: int,
         creator: str,
         date_published: str,
-        provider_attributes: dict,
-        trusted_algorithms: list = None,
-        allow_raw_algorithm: bool = False,
-        allow_all_published_algorithms: bool = False,
+        provider_attributes: dict = None,
+        privacy_attributes: dict = None,
     ):
         """
 
@@ -114,21 +140,31 @@ class OceanCompute:
         :param creator: str ethereum address
         :param date_published: str timestamp (datetime.utcnow().replace(microsecond=0).isoformat() + "Z")
         :param provider_attributes: dict describing the details of the compute resources (see `build_service_provider_attributes`)
-        :param trusted_algorithms: list of algorithm did to be trusted by the compute service provider
-        :param allow_raw_algorithm: bool -- when True, unpublished raw algorithm code can be run on this dataset
-        :param allow_all_published_algorithms: bool -- when True, any published algorithm can be run on this dataset
-            The list of `trusted_algorithms` will be ignored in this case.
+        :param privacy_attributes: dict specifying what algorithms can be run in this compute service
         :return: dict with `main` key and value contain the minimum required attributes of a compute service
         """
-        return OceanServices.create_compute_service_attributes(
-            timeout,
-            creator,
-            date_published,
-            provider_attributes,
-            trusted_algorithms,
-            allow_raw_algorithm,
-            allow_all_published_algorithms,
-        )
+        if privacy_attributes is None:
+            privacy_attributes = OceanCompute.build_service_privacy_attributes()
+
+        assert set(privacy_attributes.keys()) == {
+            "allowRawAlgorithm",
+            "allowAllPublishedAlgorithms",
+            "publisherTrustedAlgorithms",
+            "allowNetworkAccess",
+        }
+
+        attributes = {
+            "main": {
+                "name": "dataAssetComputingServiceAgreement",
+                "creator": creator,
+                "datePublished": date_published,
+                "cost": 1.0,
+                "timeout": timeout,
+                "provider": provider_attributes,
+                "privacy": privacy_attributes,
+            }
+        }
+        return attributes
 
     @staticmethod
     def _status_from_job_info(job_info):
