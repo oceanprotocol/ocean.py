@@ -9,6 +9,7 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_utils.agreements.service_types import ServiceTypes
@@ -136,6 +137,8 @@ def run_compute_test(
             ocean_instance, publisher_wallet, consumer_wallet, ddo, service_type
         )
         compute_inputs.append(ComputeInput(ddo.did, _order_tx_id, _service.index))
+
+    job_id = None
     if algo_ddo:
         # order the algo download service
         algo_tx_id, _, _ = process_order(
@@ -145,39 +148,33 @@ def run_compute_test(
             algo_ddo,
             ServiceTypes.ASSET_ACCESS,
         )
-        job_id = ocean_instance.compute.start(
-            compute_inputs,
-            consumer_wallet,
-            algorithm_did=algo_ddo.did,
-            algorithm_tx_id=algo_tx_id,
-            algorithm_data_token=algo_ddo.data_token_address,
-            raw_response=expect_failure,
-        )
-
-        if not expect_failure:
-            assert expect_failure_message is None
-            assert job_id, f"expected a job id, got {job_id}"
-
+        try:
+            job_id = ocean_instance.compute.start(
+                compute_inputs,
+                consumer_wallet,
+                algorithm_did=algo_ddo.did,
+                algorithm_tx_id=algo_tx_id,
+                algorithm_data_token=algo_ddo.data_token_address,
+            )
+        except Exception:
+            if not expect_failure:
+                raise
+            return
     else:
         assert algo_meta, "algo_meta is required when not using algo_ddo."
-        job_id = ocean_instance.compute.start(
-            compute_inputs,
-            consumer_wallet,
-            algorithm_meta=algo_meta,
-            raw_response=expect_failure,
-        )
-        if not expect_failure:
-            assert expect_failure_message is None
-            assert job_id, f"expected a job id, got {job_id}"
+        try:
+            job_id = ocean_instance.compute.start(
+                compute_inputs, consumer_wallet, algorithm_meta=algo_meta
+            )
+        except Exception:
+            if not expect_failure:
+                raise
+            return
 
-    if expect_failure:
-        response = job_id.json()
-        assert "error" in response, "expected failure in job creation, but it succeed."
+    if not expect_failure:
+        assert expect_failure_message is None
+        assert job_id, f"expected a job id, got {job_id}"
 
-        assert (
-            expect_failure_message == response["error"]
-        ), "expected failure message in job creation, but it has a different message."
-        return
     status = ocean_instance.compute.status(did, job_id, consumer_wallet)
     print(f"got job status: {status}")
 
@@ -267,7 +264,10 @@ def test_update_trusted_algorithms():
     )
     # verify the ddo is available in Aquarius
     _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
-    compute_ddo.update_trusted_algorithms(trusted_algorithms=[algorithm_ddo.did])
+    trusted_algo_list = create_publisher_trusted_algorithms(
+        [algorithm_ddo.did], setup.publisher_ocean_instance.config.aquarius_url
+    )
+    compute_ddo.update_trusted_algorithms(trusted_algorithms=trusted_algo_list)
 
     tx_id = setup.publisher_ocean_instance.assets.update(
         compute_ddo, setup.publisher_wallet

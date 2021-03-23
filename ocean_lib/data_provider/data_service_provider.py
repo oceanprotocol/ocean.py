@@ -221,7 +221,6 @@ class DataServiceProvider:
         output: dict = None,
         input_datasets: list = None,
         job_id: str = None,
-        raw_response: bool = False,
     ):
         """
 
@@ -240,9 +239,6 @@ class DataServiceProvider:
         :param input_datasets: list of ComputeInput
         :param job_id: str id of compute job that was started and stopped (optional, use it
             here to start a job after it was stopped)
-        :param raw_response: bool object to be used when the response status is different from "200 OK" (
-            it's used after the post request to see what status code we get)
-
         :return: job_info dict with jobId, status, and other values
         """
         assert (
@@ -270,16 +266,13 @@ class DataServiceProvider:
             data=json.dumps(payload),
             headers={"content-type": "application/json"},
         )
-        logger.debug(
+        logger.info(
             f"got DataProvider execute response: {response.content} with status-code {response.status_code} "
         )
 
-        if raw_response:
-            return response
-
-        if not response:
+        if response is None:
             raise AssertionError(
-                f"Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}"
+                f"Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}, response is {response}"
             )
 
         if response.status_code not in (201, 200):

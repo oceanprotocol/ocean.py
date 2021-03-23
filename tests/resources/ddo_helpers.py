@@ -87,7 +87,6 @@ def get_registered_ddo(
     service_descriptor=None,
     datatoken=None,
     provider_uri=None,
-    trusted_algorithms=None,
 ):
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     if not service_descriptor:
@@ -105,7 +104,6 @@ def get_registered_ddo(
         service_descriptors=[service_descriptor],
         data_token_address=datatoken,
         provider_uri=provider_uri,
-        trusted_algorithms=trusted_algorithms,
     )
     ddo_reg = ocean_instance.assets.ddo_registry()
     log = ddo_reg.get_event_log(
@@ -146,17 +144,21 @@ def get_registered_ddo_with_compute_service(
     metadata = old_ddo.metadata
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     service = old_ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
+    compute_attributes = ocean_instance.services.create_compute_service_attributes(
+        service.attributes["main"]["timeout"],
+        service.attributes["main"]["creator"],
+        service.attributes["main"]["datePublished"],
+        service.attributes["main"]["provider"],
+        trusted_algorithms,
+        allow_raw_algorithm=True,
+        allow_all_published_algorithms=not bool(trusted_algorithms),
+    )
     compute_service = ServiceDescriptor.compute_service_descriptor(
-        service.attributes, DataServiceProvider.get_url(ocean_instance.config)
+        compute_attributes, DataServiceProvider.get_url(ocean_instance.config)
     )
 
     return get_registered_ddo(
-        ocean_instance,
-        metadata,
-        wallet,
-        compute_service,
-        provider_uri=provider_uri,
-        trusted_algorithms=trusted_algorithms,
+        ocean_instance, metadata, wallet, compute_service, provider_uri=provider_uri
     )
 
 

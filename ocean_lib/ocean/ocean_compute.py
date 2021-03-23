@@ -4,6 +4,8 @@
 #
 import logging
 
+from ocean_lib.ocean.ocean_services import OceanServices
+
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
@@ -98,7 +100,13 @@ class OceanCompute:
 
     @staticmethod
     def create_compute_service_attributes(
-        timeout: int, creator: str, date_published: str, provider_attributes: dict
+        timeout: int,
+        creator: str,
+        date_published: str,
+        provider_attributes: dict,
+        trusted_algorithms: list = None,
+        allow_raw_algorithm: bool = False,
+        allow_all_published_algorithms: bool = False,
     ):
         """
 
@@ -106,18 +114,21 @@ class OceanCompute:
         :param creator: str ethereum address
         :param date_published: str timestamp (datetime.utcnow().replace(microsecond=0).isoformat() + "Z")
         :param provider_attributes: dict describing the details of the compute resources (see `build_service_provider_attributes`)
+        :param trusted_algorithms: list of algorithm did to be trusted by the compute service provider
+        :param allow_raw_algorithm: bool -- when True, unpublished raw algorithm code can be run on this dataset
+        :param allow_all_published_algorithms: bool -- when True, any published algorithm can be run on this dataset
+            The list of `trusted_algorithms` will be ignored in this case.
         :return: dict with `main` key and value contain the minimum required attributes of a compute service
         """
-        return {
-            "main": {
-                "name": "dataAssetComputingServiceAgreement",
-                "creator": creator,
-                "datePublished": date_published,
-                "cost": 1.0,
-                "timeout": timeout,
-                "provider": provider_attributes,
-            }
-        }
+        return OceanServices.create_compute_service_attributes(
+            timeout,
+            creator,
+            date_published,
+            provider_attributes,
+            trusted_algorithms,
+            allow_raw_algorithm,
+            allow_all_published_algorithms,
+        )
 
     @staticmethod
     def _status_from_job_info(job_info):
@@ -192,7 +203,6 @@ class OceanCompute:
         algorithm_data_token: str = None,
         output: dict = None,
         job_id: str = None,
-        raw_response: bool = False,
     ):
         """Start a remote compute job on the asset files identified by `did` after
         verifying that the provider service is active and transferring the
@@ -211,7 +221,6 @@ class OceanCompute:
         :param output: dict object to be used in publishing mechanism, must define
         :param job_id: str identifier of a compute job that was previously started and
             stopped (if supported by the provider's  backend)
-        :param raw_response: bool object to be used when the response status is different from "200 OK"
         :return: str -- id of compute job being executed
         """
         assert (
@@ -242,27 +251,26 @@ class OceanCompute:
             consumer_wallet, f"{consumer_wallet.address}{did}", nonce=nonce
         )
 
-        job_info = self._data_provider.start_compute_job(
-            did,
-            service_endpoint,
-            consumer_wallet.address,
-            signature,
-            sa.index,
-            order_tx_id,
-            algorithm_did,
-            algorithm_meta,
-            algorithm_tx_id,
-            algorithm_data_token,
-            output,
-            input_datasets,
-            job_id,
-            raw_response=raw_response,
-        )
+        try:
+            job_info = self._data_provider.start_compute_job(
+                did,
+                service_endpoint,
+                consumer_wallet.address,
+                signature,
+                sa.index,
+                order_tx_id,
+                algorithm_did,
+                algorithm_meta,
+                algorithm_tx_id,
+                algorithm_data_token,
+                output,
+                input_datasets,
+                job_id,
+            )
 
-        if raw_response:
-            return job_info
-
-        return job_info["jobId"]
+            return job_info["jobId"]
+        except ValueError:
+            raise
 
     def status(self, did, job_id, wallet):
         """

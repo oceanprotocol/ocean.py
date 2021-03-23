@@ -20,7 +20,6 @@ from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.util import to_base_18
-from ocean_lib.ocean.ocean_assets_utils import create_publisher_trusted_algorithms
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
@@ -69,7 +68,6 @@ class OceanAssets:
         metadata: dict,
         provider_uri: str,
         wallet: Wallet,
-        trusted_algorithms: list = None,
     ) -> list:
         ddo_service_endpoint = self._get_aquarius().get_service_endpoint()
 
@@ -102,14 +100,6 @@ class OceanAssets:
         if access_service_descriptor:
             _service_descriptors.append(access_service_descriptor)
         if compute_service_descriptor:
-            if trusted_algorithms:
-                trusted_algorithms_list = create_publisher_trusted_algorithms(
-                    self, trusted_algorithms=trusted_algorithms
-                )
-                compute_service_descriptor[1]["attributes"]["main"]["privacy"] = {
-                    "publisherTrustedAlgorithms": trusted_algorithms_list
-                }
-
             _service_descriptors.append(compute_service_descriptor)
 
         _service_descriptors.extend(service_type_to_descriptor.values())
@@ -123,7 +113,6 @@ class OceanAssets:
         owner_address: str = None,
         data_token_address: str = None,
         provider_uri=None,
-        trusted_algorithms=None,
         dt_name: str = None,
         dt_symbol: str = None,
         dt_blob: str = None,
@@ -174,11 +163,7 @@ class OceanAssets:
         service_descriptors = service_descriptors or []
 
         services = self._process_service_descriptors(
-            service_descriptors,
-            metadata_copy,
-            provider_uri,
-            publisher_wallet,
-            trusted_algorithms=trusted_algorithms,
+            service_descriptors, metadata_copy, provider_uri, publisher_wallet
         )
 
         stype_to_service = {s.type: s for s in services}
