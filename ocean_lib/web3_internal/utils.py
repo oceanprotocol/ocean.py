@@ -6,6 +6,7 @@ import json
 import logging
 import os
 from collections import namedtuple
+from enforce_typing import enforce_types
 
 import eth_account
 import eth_keys
@@ -141,10 +142,12 @@ def get_wallet(index):
     )
 
 
+@enforce_types
 def privateKeyToAddress(private_key: str) -> str:
     return eth_account.Account().privateKeyToAccount(private_key).address
 
 
+@enforce_types
 def privateKeyToPublicKey(private_key: str):
     private_key_bytes = eth_utils.decode_hex(private_key)
     private_key_object = eth_keys.keys.PrivateKey(private_key_bytes)

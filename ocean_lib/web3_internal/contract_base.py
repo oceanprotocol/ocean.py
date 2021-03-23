@@ -6,8 +6,9 @@
 """All contracts inherit from this base class."""
 import logging
 import os
-import typing
-from typing import Any, Dict, Optional
+
+from typing import Any, Dict, Optional, List
+from enforce_typing import enforce_types
 
 import requests
 from eth_typing import BlockIdentifier
@@ -27,13 +28,14 @@ from websockets import ConnectionClosed
 logger = logging.getLogger(__name__)
 
 
+@enforce_types
 class ContractBase(object):
 
     """Base class for all contract objects."""
 
     CONTRACT_NAME = None
 
-    def __init__(self, address: [str, None], abi_path=None):
+    def __init__(self, address: Optional[str], abi_path=None):
         """Initialises Contract Base object.
 
         The contract name attribute and abi_path are required.
@@ -83,7 +85,7 @@ class ContractBase(object):
         return self.contract.events
 
     @property
-    def function_names(self) -> typing.List[str]:
+    def function_names(self) -> List[str]:
         return list(self.contract.function_names)
 
     @staticmethod

@@ -4,7 +4,9 @@
 #
 import logging
 import os
-import typing
+
+from typing import Optional
+from enforce_typing import enforce_types
 
 from ocean_lib.web3_internal.constants import ENV_MAX_GAS_PRICE, MIN_GAS_PRICE
 from ocean_lib.web3_internal.utils import privateKeyToAddress, privateKeyToPublicKey
@@ -12,6 +14,7 @@ from ocean_lib.web3_internal.utils import privateKeyToAddress, privateKeyToPubli
 logger = logging.getLogger(__name__)
 
 
+@enforce_types
 class Wallet:
 
     """
@@ -33,10 +36,10 @@ class Wallet:
     def __init__(
         self,
         web3,
-        private_key: typing.Union[str, None] = None,
+        private_key: Optional[str] = None,
         encrypted_key: dict = None,
-        password: typing.Union[str, None] = None,
-        address: typing.Union[str, None] = None,
+        password: Optional[str] = None,
+        address: Optional[str] = None,
     ):
         """Initialises Wallet object."""
         assert private_key or (

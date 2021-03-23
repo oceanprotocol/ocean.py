@@ -4,6 +4,9 @@
 #
 import logging
 
+from typing import Optional
+from enforce_typing import enforce_types
+
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
@@ -18,6 +21,7 @@ from ocean_utils.agreements.service_types import ServiceTypes
 logger = logging.getLogger("ocean")
 
 
+@enforce_types
 class OceanCompute:
 
     """Ocean assets class."""
@@ -192,9 +196,9 @@ class OceanCompute:
         self,
         input_datasets: list,
         consumer_wallet: Wallet,
-        nonce: [int, None] = None,
-        algorithm_did: [str, None] = None,
-        algorithm_meta: [AlgorithmMetadata, None] = None,
+        nonce: Optional[int] = None,
+        algorithm_did: Optional[str] = None,
+        algorithm_meta: Optional[AlgorithmMetadata] = None,
         algorithm_tx_id: str = None,
         algorithm_data_token: str = None,
         output: dict = None,

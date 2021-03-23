@@ -10,6 +10,7 @@ import os
 import re
 from collections import namedtuple
 from json import JSONDecodeError
+from enforce_typing import enforce_types
 
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.exceptions import InvalidURLException
@@ -29,6 +30,7 @@ OrderRequirements = namedtuple(
 )
 
 
+@enforce_types
 class DataServiceProvider:
     """DataServiceProvider class.
 

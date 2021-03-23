@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import codecs
+from enforce_typing import enforce_types
 
 from eth_keys.datatypes import Signature
 from eth_keys.utils.numeric import int_to_byte
@@ -10,6 +11,7 @@ from eth_keys.utils.padding import pad32
 from eth_utils import int_to_big_endian
 
 
+@enforce_types
 class SignatureFix(Signature):
 
     """

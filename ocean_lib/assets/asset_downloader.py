@@ -6,6 +6,9 @@
 import logging
 import os
 
+from typing import Optional
+from enforce_typing import enforce_types
+
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.web3_internal.wallet import Wallet
@@ -15,6 +18,7 @@ from ocean_utils.agreements.service_types import ServiceTypes
 logger = logging.getLogger(__name__)
 
 
+@enforce_types
 def download_asset_files(
     service_index: int,
     asset: Asset,
@@ -23,7 +27,7 @@ def download_asset_files(
     token_address: str,
     order_tx_id: str,
     data_provider: DataServiceProvider,
-    index: [int, None] = None,
+    index: Optional[int] = None,
 ):
     """Download asset data files or result files from a compute job.
 

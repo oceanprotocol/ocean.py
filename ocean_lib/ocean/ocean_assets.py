@@ -9,6 +9,9 @@ import logging
 import lzma
 import os
 
+from typing import Optional
+from enforce_typing import enforce_types
+
 from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
@@ -38,6 +41,7 @@ from plecos import plecos
 logger = logging.getLogger("ocean")
 
 
+@enforce_types
 class OceanAssets:
 
     """Ocean assets class."""
@@ -405,7 +409,7 @@ class OceanAssets:
         self,
         did: str,
         consumer_address: str,
-        service_index: [int, None] = None,
+        service_index: Optional[int] = None,
         service_type: str = None,
     ) -> OrderRequirements:
         """
@@ -513,7 +517,7 @@ class OceanAssets:
         consumer_wallet: Wallet,
         order_tx_id: str,
         destination: str,
-        index: [int, None] = None,
+        index: Optional[int] = None,
     ) -> str:
         """
         Consume the asset data.

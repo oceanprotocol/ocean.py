@@ -2,6 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from enforce_typing import enforce_types
+
 from ocean_lib.config import Config
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
@@ -9,6 +11,7 @@ from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.wallet import Wallet
 
 
+@enforce_types
 class OceanExchange:
     def __init__(self, ocean_token_address: str, exchange_address: str, config: Config):
         """Initialises OceanExchange object."""

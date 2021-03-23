@@ -6,6 +6,7 @@ import json
 import os
 import time
 from collections import namedtuple
+from enforce_typing import enforce_types
 
 import requests
 from eth_utils import remove_0x_prefix
@@ -27,6 +28,7 @@ OrderValues = namedtuple(
 )
 
 
+@enforce_types
 class DataToken(ContractBase):
     CONTRACT_NAME = "DataTokenTemplate"
     DEFAULT_CAP = 1000.0
