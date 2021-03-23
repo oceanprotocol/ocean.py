@@ -23,7 +23,6 @@ logger = logging.getLogger(__name__)
 def generate_multi_value_hash(types, values):
     """
     Return the hash of the given list of values.
-
     This is equivalent to packing and hashing values in a solidity smart contract
     hence the use of `soliditySha3`.
 
