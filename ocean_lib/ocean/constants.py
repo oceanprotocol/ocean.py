@@ -19,7 +19,9 @@ TYPECHECK = config["util"].getboolean("typecheck")
 assert TYPECHECK is not None
 
 
+from enforce_typing import enforce_types
 if not TYPECHECK:
     # do nothing, just return the original function
     def noop(f):
         return f
+    enforce_types = noop
