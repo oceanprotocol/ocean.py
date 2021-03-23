@@ -11,12 +11,14 @@ from eth_utils import int_to_big_endian
 
 
 class SignatureFix(Signature):
+
     """
     Hack the Signature class to allow rebuilding of signature with a
     v value of 27 or 28 instead of 0 or 1
     """
 
     def __init__(self, signature_bytes=None, vrs=None, backend=None) -> None:
+        """Initialises SignatureFix object."""
         v, r, s = vrs
         if v == 27 or v == 28:
             v -= 27

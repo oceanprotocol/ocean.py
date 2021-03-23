@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class ContractHandler(object):
+
     """
     Manages loading contracts and also keeps a cache of loaded contracts.
 
@@ -22,9 +23,19 @@ class ContractHandler(object):
         contract = ContractHandler.get('DTFactory')
         concise_contract = ContractHandler.get_concise_contract('DTFactory')
 
+    It must handle two cases:
+    1. One deployment of contract, eg DTFactory
+    2. >1 deployments, eg DataTokenTemplate
+
+    #Attributes (_contracts) and methods (e.g. _load) behave accordingly.
+
+    #The _contracts dict maps:
+    # 1. (contract_name)                   : (contract, concise_contract)
+    # 2. (contract_name, contract_address) : (contract, concise_contract)
     """
 
     _contracts = dict()
+
     artifacts_path = None
     network_alias = {"ganache": "development"}
 
@@ -51,13 +62,22 @@ class ContractHandler(object):
 
     @staticmethod
     def _get(name, address=None):
-        if address:
-            return ContractHandler._contracts.get(
-                (name, address)
-            ) or ContractHandler._load(name, address)
-        return ContractHandler._contracts.get(name) or ContractHandler._load(
-            name, address
-        )
+        """
+        Return the contract & its concise version, for a given name.
+
+        :param name: Contract name, str
+        :param address: hex str -- address of contract
+        :return: tuple of (contract, concise_contract)
+        """
+        key = (name, address) if address else (name)
+        result = ContractHandler._contracts.get(key)
+        if result is None:
+            ContractHandler._load(name, address)
+            result = ContractHandler._contracts.get(key)
+            assert result is not None
+
+        ContractHandler._verifyContractsConsistency(name)
+        return result
 
     @staticmethod
     def get(name, address=None):
@@ -83,13 +103,13 @@ class ContractHandler(object):
 
     @staticmethod
     def _set(name, contract):
-        ContractHandler._contracts[(name, contract.address)] = (
-            contract,
-            ConciseContract(contract),
-        )
-        ContractHandler._contracts[name] = ContractHandler._contracts[
-            (name, contract.address)
-        ]
+        assert contract.address is not None
+
+        tup = (contract, ConciseContract(contract))
+        ContractHandler._contracts[(name, contract.address)] = tup
+        ContractHandler._contracts[name] = tup
+
+        ContractHandler._verifyContractsConsistency(name)
 
     @staticmethod
     def set(name, contract):
@@ -116,12 +136,16 @@ class ContractHandler(object):
 
     @staticmethod
     def _load(contract_name, address=None):
-        """Retrieve the contract instance for `contract_name` that represent the smart
-        contract in the ethereum network.
+        """Retrieve the contract instance for `contract_name`.
+
+        That instance represents the smart contract in the ethereum network.
+
+        Handles two cases:
+        1. One deployment of contract, eg DTFactory. 'address' can be None, or specified
+        2. >1 deployments, eg DataTokenTemplate. 'address' must be specified.
 
         :param contract_name: str name of the solidity smart contract.
         :param address: hex str -- address of smart contract
-        :return: web3.eth.Contract instance
         """
         assert (
             ContractHandler.artifacts_path is not None
@@ -134,14 +158,20 @@ class ContractHandler(object):
             address = contract_definition.get("address")
             assert address, "Cannot find contract address in the abi file."
             address = Web3.toChecksumAddress(address)
+        assert address is not None, "address shouldn't be None at this point"
 
         abi = contract_definition["abi"]
         bytecode = contract_definition["bytecode"]
         contract = Web3Provider.get_web3().eth.contract(
             address=address, abi=abi, bytecode=bytecode
         )
+        if contract.address is None:  # if web3 drops address, fix it
+            contract.address = address
+        assert contract.address is not None
+
         ContractHandler._set(contract_name, contract)
-        return ContractHandler._contracts[(contract_name, address)]
+
+        ContractHandler._verifyContractsConsistency(contract_name)
 
     @staticmethod
     def read_abi_from_file(contract_name, abi_path):
@@ -162,3 +192,24 @@ class ContractHandler(object):
                 return json.loads(f.read())
 
         return None
+
+    @staticmethod
+    def _verifyContractsConsistency(name):
+        """
+        Raise an error if ContractHandler._contracts is inconsistent
+        for the given contract name.
+
+        :param name : str -- name of smart contract
+        :return: None
+        """
+        (contract1, concise_contract1) = ContractHandler._contracts[name]
+        assert contract1 is not None
+        assert contract1.address is not None
+        assert concise_contract1 is not None
+        assert concise_contract1.address is not None
+
+        (contract2, concise_contract2) = ContractHandler._contracts[
+            (name, contract1.address)
+        ]
+        assert id(contract1) == id(contract2)
+        assert id(concise_contract1) == id(concise_contract2)

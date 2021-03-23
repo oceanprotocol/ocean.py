@@ -2,11 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+
 """Provider module."""
-
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
-
 import json
 import logging
 import os
@@ -15,6 +12,7 @@ from collections import namedtuple
 from json import JSONDecodeError
 
 from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.data_provider.exceptions import InvalidURLException
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
@@ -32,11 +30,11 @@ OrderRequirements = namedtuple(
 
 
 class DataServiceProvider:
-    """
+    """DataServiceProvider class.
+
     The main functions available are:
     - consume_service
     - run_compute_service (not implemented yet)
-
     """
 
     _http_client = get_requests_session()
@@ -50,7 +48,7 @@ class DataServiceProvider:
 
     @staticmethod
     def set_http_client(http_client):
-        """Set the http client to something other than the default `requests`"""
+        """Set the http client to something other than the default `requests`."""
         DataServiceProvider._http_client = http_client
 
     @staticmethod
@@ -89,17 +87,17 @@ class DataServiceProvider:
             return response.json()["encryptedDocument"]
 
     @staticmethod
-    def sign_message(wallet, msg, config, nonce=None):
+    def sign_message(wallet, msg, nonce=None, provider_uri=None):
         if nonce is None:
-            nonce = DataServiceProvider.get_nonce(wallet.address, config)
+            nonce = DataServiceProvider.get_nonce(wallet.address, provider_uri)
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
         return Web3Helper.sign_hash(
             add_ethereum_prefix_and_hash_msg(f"{msg}{nonce}"), wallet
         )
 
     @staticmethod
-    def get_nonce(user_address, config):
-        _, url = DataServiceProvider.build_endpoint("nonce")
+    def get_nonce(user_address, provider_uri):
+        _, url = DataServiceProvider.build_endpoint("nonce", provider_uri=provider_uri)
         response = DataServiceProvider._http_method(
             "get", f"{url}?userAddress={user_address}"
         )
@@ -193,9 +191,11 @@ class DataServiceProvider:
             f"&transferTxId={order_tx_id}"
             f"&consumerAddress={wallet.address}"
         )
-        config = ConfigProvider.get_config()
+        provider_uri = DataServiceProvider.get_root_uri(service_endpoint)
         for i in indexes:
-            signature = DataServiceProvider.sign_message(wallet, did, config)
+            signature = DataServiceProvider.sign_message(
+                wallet, did, provider_uri=provider_uri
+            )
             download_url = base_url + f"&signature={signature}&fileIndex={i}"
             logger.info(f"invoke consume endpoint with this url: {download_url}")
             response = DataServiceProvider._http_method(
@@ -270,17 +270,14 @@ class DataServiceProvider:
             data=json.dumps(payload),
             headers={"content-type": "application/json"},
         )
-        logger.debug(
-            f"got DataProvider execute response: {response.content} with status-code {response.status_code} "
-        )
-
-        if raw_response:
-            return response
-
         if not response:
             raise AssertionError(
                 f"Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}"
             )
+
+        logger.debug(
+            f"got DataProvider execute response: {response.content} with status-code {response.status_code} "
+        )
 
         if response.status_code not in (201, 200):
             raise ValueError(response.content.decode("utf-8"))
@@ -441,17 +438,16 @@ class DataServiceProvider:
         )
 
     @staticmethod
-    def get_service_endpoints():
+    def get_service_endpoints(provider_uri=None):
         """
         Return the service endpoints from the provider URL.
         """
-        if DataServiceProvider.provider_info is None:
-            config = ConfigProvider.get_config()
-            DataServiceProvider.provider_info = DataServiceProvider._http_method(
-                "get", config.provider_url
-            ).json()
+        if not provider_uri:
+            provider_uri = DataServiceProvider.get_url(ConfigProvider.get_config())
 
-        return DataServiceProvider.provider_info["serviceEndpoints"]
+        provider_info = DataServiceProvider._http_method("get", provider_uri).json()
+
+        return provider_info["serviceEndpoints"]
 
     @staticmethod
     def get_provider_address(provider_uri=None):
@@ -459,14 +455,31 @@ class DataServiceProvider:
         Return the provider address
         """
         if not provider_uri:
-            if DataServiceProvider.provider_info is None:
-                config = ConfigProvider.get_config()
-                DataServiceProvider.provider_info = DataServiceProvider._http_method(
-                    "get", config.provider_url
-                ).json()
-            return DataServiceProvider.provider_info["providerAddress"]
+            provider_uri = ConfigProvider.get_config().provider_url
         provider_info = DataServiceProvider._http_method("get", provider_uri).json()
         return provider_info["providerAddress"]
+
+    @staticmethod
+    def get_root_uri(service_endpoint):
+        provider_uri = service_endpoint
+        api_version = DataServiceProvider.get_api_version()
+        if api_version in provider_uri:
+            i = provider_uri.find(api_version)
+            provider_uri = provider_uri[:i]
+        parts = provider_uri.split("/")
+
+        if len(parts) < 2:
+            raise InvalidURLException(f"InvalidURL {service_endpoint}.")
+
+        if parts[-2] == "services":
+            provider_uri = "/".join(parts[:-2])
+
+        result = DataServiceProvider._remove_slash(provider_uri)
+
+        if not result:
+            raise InvalidURLException(f"InvalidURL {service_endpoint}.")
+
+        return result
 
     @staticmethod
     def build_endpoint(service_name, provider_uri=None, config=None):
@@ -474,20 +487,10 @@ class DataServiceProvider:
             config = config or ConfigProvider.get_config()
             provider_uri = DataServiceProvider.get_url(config)
 
-        provider_uri = DataServiceProvider._remove_slash(provider_uri)
-        parts = provider_uri.split("/")
-        if parts[-2] == "services":
-            base_url = "/".join(parts[:-2])
-            return "GET", urljoin(base_url, "services/initialize")
+        provider_uri = DataServiceProvider.get_root_uri(provider_uri)
+        service_endpoints = DataServiceProvider.get_service_endpoints(provider_uri)
 
-        api_version = DataServiceProvider.get_api_version()
-        if api_version not in provider_uri:
-            provider_uri = urljoin(provider_uri, api_version)
-
-        service_endpoints = DataServiceProvider.get_service_endpoints()
         method, url = service_endpoints[service_name]
-        url = url.replace(api_version, "")
-
         return method, urljoin(provider_uri, url)
 
     @staticmethod
@@ -507,65 +510,8 @@ class DataServiceProvider:
         return DataServiceProvider.build_endpoint("computeStatus", provider_uri)
 
     @staticmethod
-    def build_stop_compute(provider_uri=None):
-        return DataServiceProvider.build_endpoint("computeStop", provider_uri)
-
-    @staticmethod
-    def build_start_compute(provider_uri=None):
-        return DataServiceProvider.build_endpoint("computeStart", provider_uri)
-
-    @staticmethod
-    def build_delete_compute(provider_uri=None):
-        return DataServiceProvider.build_endpoint("computeDelete", provider_uri)
-
-    @staticmethod
     def build_fileinfo(provider_uri=None):
         return DataServiceProvider.build_endpoint("fileinfo", provider_uri)
-
-    @staticmethod
-    def get_initialize_endpoint(service_endpoint):
-        parts = service_endpoint.split("/")
-        if parts[-2] == "services":
-            base_url = "/".join(parts[:-2])
-            return "GET", f"{base_url}/services/initialize"
-
-        return DataServiceProvider.build_initialize_endpoint(service_endpoint)
-
-    @staticmethod
-    def get_download_endpoint(config):
-        """
-        Return the url to consume the asset.
-
-        :param config: Config
-        :return: Url, str
-        """
-        return DataServiceProvider.build_download_endpoint(
-            DataServiceProvider.get_url(config)
-        )
-
-    @staticmethod
-    def get_compute_endpoint(config):
-        """
-        Return the url to execute the asset.
-
-        :param config: Config
-        :return: Url, str
-        """
-        return DataServiceProvider.build_compute_endpoint(
-            DataServiceProvider.get_url(config)
-        )
-
-    @staticmethod
-    def get_encrypt_endpoint(config):
-        """
-        Return the url to encrypt the asset.
-
-        :param config: Config
-        :return: Url, str
-        """
-        return DataServiceProvider.build_encrypt_endpoint(
-            DataServiceProvider.get_url(config)
-        )
 
     @staticmethod
     def write_file(response, destination_folder, file_name):

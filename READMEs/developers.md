@@ -9,7 +9,7 @@ This README is how to further _develop_ ocean.py. (Compare to the quickstarts wh
 Steps:
 
 1.  **Install dependencies**
-2.  **Run the services**
+2.  **Run barge services**
 3.  **Set up contracts**
 4.  **Test**
 5.  **Merge** the changes via a PR
@@ -17,15 +17,15 @@ Steps:
 
 ## 1. Install dependencies
 
-### 1.1 Prerequisites
+### Prerequisites
 
 -   Linux/MacOS
--   Docker
--   Python 3.8.5
+-   Docker, [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
+-   Python 3.8.5+
 
-### 1.2 Do Install
+### Do Install
 
-In a console:
+In a new console that we'll call the _work_ console (as we'll use it later):
 
 ```console
 #clone the repo and enter into it
@@ -43,9 +43,7 @@ source venv/bin/activate
 pip install -r requirements_dev.txt
 ```
 
-## 2. Run the services
-
-Use Ocean Barge to run local Ethereum node with Ocean contracts, Aquarius, and Provider.
+## 2. Run barge services
 
 In a new console:
 
@@ -57,7 +55,7 @@ cd barge
 #clean up old containers (to be sure)
 docker system prune -a --volumes
 
-#run barge with provider on
+#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
 ./start_ocean.sh  --with-provider2
 ```
 
@@ -65,44 +63,38 @@ docker system prune -a --volumes
 
 ## 3. Set up contracts
 
-### 3.1 Connect to the deployed contracts
+In work console:
 
-Specify our config file as an envvar. In console:
 ```console
+#specify config file as an envvar
 export CONFIG_FILE=config.ini
-```
 
-Running barge already deployed contracts for us. Let's point to them. Open the config file `./config.ini`, and in the `[eth-network]` section, set these values:
-```
-address.file = ~/.ocean/ocean-contracts/artifacts/address.json
-artifacts.path = ~/.ocean/ocean-contracts/artifacts
-```
-
-### 3.2 Set private keys
-
-```console
+#set private keys of two accounts
 export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
-```
 
-### 3.3 Deploy fake OCEAN, and connect to it
-
-In console:
+#deploy new OCEAN token; update ~/.ocean/ocean-contracts/artifacts/address.json; send OCEAN to accounts
+./deploy_fake_OCEAN.py
 ```
-./deploy.py ganache
-```
-
-This will output the address of OCEAN, and auto-update the "development" : "Ocean" value in  `~/.ocean/ocean-contracts/artifacts/address.json`.
 
 ## 4. Test
 
+In work console:
 ```console
 #run a single test
-pytest tests/models/test_btoken.py
+pytest ocean_lib/models/test/test_btoken.py::test_ERC20
+
+#run all tests in a file
+pytest ocean_lib/models/test/test_btoken.py
 
 #run all tests
 pytest
+
+#run all tests, using CI tooling
+tox
 ```
+
+For envvars that aren't set, `pytest` uses values in `pytest.ini`, and `tox` uses values in `tox.ini`. 
 
 Bonus: see the [appendix](developers.md#7-appendix-more-tests) for even more tests.
 
@@ -173,4 +165,6 @@ Finally, you can [go here](https://app.codacy.com/gh/oceanprotocol/ocean.py/dash
 ## 8. Appendix: Contributing to docs
 
 You are welcome to contribute to ocean.py docs! For clean markdowns, we use the `remark` tool for automatic markdown formatting.
-See instructions here: [remark](https://github.com/remarkjs/remark-lint) and use [this configuration file](https://github.com/codacy/codacy-remark-lint/blob/master/.remarkrc.js).
+OCEAN has an official repository containing remark settings, so please follow the instructions [here](https://github.com/oceanprotocol/ocean-remark).
+
+To generate a Sphinx documentation, run `sphinx-build -b html source path_of_your_choice` in the `docs/` folder.

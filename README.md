@@ -44,23 +44,27 @@ This is in beta state and you can expect running into problems. If you run into 
 
 ### Simple Flow
 
-[Publish your first datatoken](READMEs/datatokens_flow.md) - connect to Ethereum, create an Ocean instance, and publish.
+This stripped-down flow shows the essence of Ocean. Just downloading, no metadata.
+
+[Go to simple flow](READMEs/datatokens-flow.md)
+
+### Marketplace flow
+
+This batteries-included flow includes metadata, multiple services for one datatoken, and compute-to-data.
+
+[Go to marketplace flow](READMEs/marketplace-flow.md)
 
 ### Learn more
 
--   [Get test OCEAN](READMEs/get_test_OCEAN.md) - from rinkeby
+-   [Get test OCEAN](READMEs/get-test-OCEAN.md) - from rinkeby
 -   [Understand config parameters](READMEs/parameters.md) - envvars vs files
 -   [Learn about off-chain services](READMEs/services.md) - Ocean Provider for data services, Aquarius metadata store
 -   [Learn about wallets](READMEs/wallets.md) - on generating, storing, and accessing private keys
 -   [Get an overview of ocean.py](READMEs/overview.md) - key modules and functions
 
-### Marketplace flow
-
-[Create a marketplace and sell data](READMEs/marketplace_flow.md) - batteries-included flow including using off-chain services for metadata and consuming datasets.
-
 ## 🦑 Development
 
-If you want to further develop ocean.py, then [please go here](READMEs/developers.md).
+[Go to developers flow](READMEs/developers.md) if you want to further develop ocean.py.
 
 ## 🏛 License
 

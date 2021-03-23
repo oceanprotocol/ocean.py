@@ -21,6 +21,8 @@ from web3 import WebsocketProvider
 
 WEB3_INFURA_PROJECT_ID = "357f2fe737db4304bd2f7285c5602d0d"
 GANACHE_URL = "http://127.0.0.1:8545"
+
+# shortcut names for networks that *Infura* supports, plus ganache
 SUPPORTED_NETWORK_NAMES = {"rinkeby", "kovan", "ganache", "mainnet", "ropsten"}
 
 
@@ -48,8 +50,7 @@ def get_infura_url(infura_id, network):
 
 
 def get_web3_connection_provider(network_url):
-    """
-    Return the suitable web3 provider based on the network_url
+    """Return the suitable web3 provider based on the network_url.
 
     When connecting to a public ethereum network (mainnet or a test net) without
     running a local node requires going through some gateway such as `infura`.
@@ -66,8 +67,8 @@ def get_web3_connection_provider(network_url):
         - the issue is described here: https://github.com/ethereum/web3.py/issues/549
         - and the fix is here: https://web3py.readthedocs.io/en/latest/middleware.html#geth-style-proof-of-authority
 
-    :param network_url:
-    :return:
+    :param network_url: str
+    :return: provider : HTTPProvider
     """
     if network_url == "ganache":
         network_url = GANACHE_URL
@@ -126,7 +127,7 @@ def to_base_18(amt: float) -> int:
 
 
 def to_base(amt: float, dec: int) -> int:
-    """returns value in e.g. wei (taking e.g. ETH as input)"""
+    """Returns value in e.g. wei (taking e.g. ETH as input)."""
     return int(amt * 1 * 10 ** dec)
 
 
@@ -135,7 +136,7 @@ def from_base_18(num_base: int) -> float:
 
 
 def from_base(num_base: int, dec: int) -> float:
-    """returns value in e.g. ETH (taking e.g. wei as input)"""
+    """Returns value in e.g. ETH (taking e.g. wei as input)."""
     return float(num_base / (10 ** dec))
 
 

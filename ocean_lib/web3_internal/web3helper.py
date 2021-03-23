@@ -17,7 +17,7 @@ from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 
 class Web3Helper(object):
-    """This class provides convenient web3 functions"""
+    """This class provides convenient web3 functions."""
 
     DEFAULT_NETWORK_NAME = "ganache"
     _network_name_map = {
@@ -33,6 +33,7 @@ class Web3Helper(object):
     def get_network_name(network_id=None):
         """
         Return the network name based on the current ethereum network id.
+
         Return `ganache` for every network id that is not mapped.
 
         :param network_id: Network id, int

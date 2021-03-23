@@ -20,6 +20,7 @@ before_install:
   - cd barge
   - export PROVIDER_VERSION=ptalgs
   - if [[ -n "$DOCKERHUB_PASSWORD" && -n "$DOCKERHUB_USERNAME" ]]; then echo "logging in to docker";echo "$DOCKERHUB_PASSWORD" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin;fi
+  - export AQUARIUS_VERSION=v2.2.5
   - bash -x start_ocean.sh --no-dashboard --with-provider2  2>&1 > start_ocean.log &
   - cd ..
   - |
@@ -35,7 +36,7 @@ script: tox
 
 after_script:
   - bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.xml --partial && bash <(curl -Ls https://coverage.codacy.com/get.sh) final
- 
+
 deploy:
   provider: pypi
   distributions: sdist bdist_wheel

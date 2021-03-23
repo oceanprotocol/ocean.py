@@ -7,9 +7,7 @@ from web3 import HTTPProvider
 
 
 class CustomHTTPProvider(HTTPProvider):
-    """
-    Override requests to control the connection pool to make it blocking.
-    """
+    """Override requests to control the connection pool to make it blocking."""
 
     def make_request(self, method, params):
         self.logger.debug(

@@ -2,9 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-"""All contracts inherit from this base class"""
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
+
+"""All contracts inherit from this base class."""
 import logging
 import os
 import typing
@@ -29,11 +28,16 @@ logger = logging.getLogger(__name__)
 
 
 class ContractBase(object):
+
     """Base class for all contract objects."""
 
     CONTRACT_NAME = None
 
     def __init__(self, address: [str, None], abi_path=None):
+        """Initialises Contract Base object.
+
+        The contract name attribute and abi_path are required.
+        """
         self.name = self.contract_name
         assert (
             self.name
@@ -52,6 +56,7 @@ class ContractBase(object):
         assert self.contract_concise is not None
 
     def __str__(self):
+        """Returns contract name @ address."""
         return f"{self.contract_name} @ {self.address}"
 
     @classmethod
@@ -65,14 +70,13 @@ class ContractBase(object):
 
     @property
     def address(self) -> str:
-        """Return the ethereum address of the solidity contract deployed
-        in current network.
-        """
+        """Return the ethereum address of the solidity contract deployed in current network."""
         return self.contract.address
 
     @property
     def events(self):
-        """Expose the underlying contract's events.
+        """
+        Expose the underlying contract's events.
 
         :return:
         """
@@ -127,7 +131,8 @@ class ContractBase(object):
         return bool(receipt and receipt.status == 1)
 
     def get_event_signature(self, event_name):
-        """Return signature of event definition to use in the call to eth_getLogs
+        """
+        Return signature of event definition to use in the call to eth_getLogs.
 
         The event signature is used as topic0 (first topic) in the eth_getLogs arguments
         The signature reflects the event name and argument types.
@@ -188,8 +193,9 @@ class ContractBase(object):
     def send_transaction(
         self, fn_name: str, fn_args, from_wallet: Wallet, transact: dict = None
     ) -> str:
-        """Calls a smart contract function using either `personal_sendTransaction` (if
-        passphrase is available) or `ether_sendTransaction`.
+        """Calls a smart contract function.
+
+        Uses either `personal_sendTransaction` (if passphrase is available) or `ether_sendTransaction`.
 
         :param fn_name: str the smart contract function name
         :param fn_args: tuple arguments to pass to function above
@@ -301,6 +307,7 @@ class ContractBase(object):
         blockHash: Optional[HexBytes] = None,
     ):
         """Get events for this contract instance using eth_getLogs API.
+
         This is a stateless method, as opposed to createFilter.
         It can be safely called against nodes which do not provide
         eth_newFilter API, like Infura nodes.
@@ -342,7 +349,6 @@ class ContractBase(object):
           same time as fromBlock or toBlock
         :yield: Tuple of :class:`AttributeDict` instances
         """
-
         if not self.address:
             raise TypeError(
                 "This method can be only called on "
@@ -365,7 +371,7 @@ class ContractBase(object):
 
         # Construct JSON-RPC raw filter presentation based on human readable Python descriptions
         # Namely, convert event names to their keccak signatures
-        data_filter_set, event_filter_params = construct_event_filter_params(
+        _, event_filter_params = construct_event_filter_params(
             abi,
             contract_address=self.address,
             argument_filters=_filters,

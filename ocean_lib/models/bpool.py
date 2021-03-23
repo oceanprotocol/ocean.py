@@ -20,10 +20,12 @@ class BPool(BToken):
     CONTRACT_NAME = "BPool"
 
     def __init__(self, *args, **kwargs):
+        """Initialises BPool object."""
         BToken.__init__(self, *args, **kwargs)
         self._ccontract = self.contract_concise
 
     def __str__(self):
+        """Formats with attributes as key, value pairs."""
         s = []
         s += ["BPool:"]
         s += [f"  pool_address={self.address}"]
@@ -44,11 +46,11 @@ class BPool(BToken):
             final_symbols = [BToken(addr).symbol() for addr in final_addrs]
             s += [f"  finalTokens (as symbols) = {final_symbols}"]
 
-        s += [f"  is bound:"]
+        s += ["  is bound:"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
             s += [f"    {symbol}: {self.isBound(addr)}"]
 
-        s += [f"  weights (fromBase):"]
+        s += ["  weights (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
             denorm_w = util.from_base_18(self.getDenormalizedWeight(addr))
             norm_w = util.from_base_18(self.getNormalizedWeight(addr))
@@ -57,7 +59,7 @@ class BPool(BToken):
         total_denorm_w = util.from_base_18(self.getTotalDenormalizedWeight())
         s += [f"    total_denorm_w={total_denorm_w}"]
 
-        s += [f"  balances (fromBase):"]
+        s += ["  balances (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
             balance_base = self.getBalance(addr)
             dec = BToken(addr).decimals()
@@ -105,7 +107,8 @@ class BPool(BToken):
         return self._ccontract.isPublicSwap()
 
     def isFinalized(self) -> bool:
-        """
+        """Returns true if state is finalized.
+
         The `finalized` state lets users know that the weights, balances, and
         fees of this pool are immutable. In the `finalized` state, `SWAP`,
         `JOIN`, and `EXIT` are public. `CONTROL` capabilities are disabled.
@@ -114,7 +117,8 @@ class BPool(BToken):
         return self._ccontract.isFinalized()
 
     def isBound(self, token_address: str) -> bool:
-        """
+        """Returns True if the token is bound.
+
         A bound token has a valid balance and weight. A token cannot be bound
         without valid parameters which will enable e.g. `getSpotPrice` in terms
         of other tokens. However, disabling `isSwapPublic` will disable any
@@ -454,7 +458,7 @@ class BPool(BToken):
         tokenWeightOut_base: int,
         swapFee_base: int,
     ) -> int:
-        """Returns spotPrice_base"""
+        """Returns spotPrice_base."""
         return self._ccontract.calcSpotPrice(
             tokenBalanceIn_base,
             tokenWeightIn_base,
@@ -472,7 +476,7 @@ class BPool(BToken):
         tokenAmountIn_base: int,
         swapFee_base: int,
     ) -> int:
-        """Returns tokenAmountOut_base"""
+        """Returns tokenAmountOut_base."""
         return self._ccontract.calcOutGivenIn(
             tokenBalanceIn_base,
             tokenWeightIn_base,
@@ -491,7 +495,7 @@ class BPool(BToken):
         tokenAmountOut_base: int,
         swapFee_base: int,
     ) -> int:
-        """Returns tokenAmountIn_base"""
+        """Returns tokenAmountIn_base."""
         return self._ccontract.calcInGivenOut(
             tokenBalanceIn_base,
             tokenWeightIn_base,
@@ -510,7 +514,7 @@ class BPool(BToken):
         tokenAmountIn_base: int,
         swapFee_base: int,
     ) -> int:
-        """Returns poolAmountOut_base"""
+        """Returns poolAmountOut_base."""
         return self._ccontract.calcPoolOutGivenSingleIn(
             tokenBalanceIn_base,
             tokenWeightIn_base,
@@ -529,7 +533,7 @@ class BPool(BToken):
         poolAmountOut_base: int,
         swapFee_base: int,
     ) -> int:
-        """Returns tokenAmountIn_base"""
+        """Returns tokenAmountIn_base."""
         return self._ccontract.calcSingleInGivenPoolOut(
             tokenBalanceIn_base,
             tokenWeightIn_base,
@@ -548,7 +552,7 @@ class BPool(BToken):
         poolAmountIn_base: int,
         swapFee_base: int,
     ) -> int:
-        """Returns tokenAmountOut_base"""
+        """Returns tokenAmountOut_base."""
         return self._ccontract.calcSingleOutGivenPoolIn(
             tokenBalanceOut_base,
             tokenWeightOut_base,
@@ -567,7 +571,7 @@ class BPool(BToken):
         tokenAmountOut_base: int,
         swapFee_base: int,
     ) -> int:
-        """Returns poolAmountIn_base"""
+        """Returns poolAmountIn_base."""
         return self._ccontract.calcPoolInGivenSingleOut(
             tokenBalanceOut_base,
             tokenWeightOut_base,
@@ -607,7 +611,7 @@ class BPool(BToken):
         event_abi = event().abi
         try:
             logs = web3.eth.getLogs(_filter)
-            logs = [get_event_data(event_abi, l) for l in logs]
+            logs = [get_event_data(event_abi, lg) for lg in logs]
         except ValueError as e:
             logger.error(
                 f"get_join_logs failed -> web3.eth.getLogs (filter={_filter}) failed: "

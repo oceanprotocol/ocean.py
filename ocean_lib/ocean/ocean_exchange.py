@@ -11,6 +11,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 class OceanExchange:
     def __init__(self, ocean_token_address: str, exchange_address: str, config: Config):
+        """Initialises OceanExchange object."""
         self.ocean_address = ocean_token_address
         self._exchange_address = exchange_address
         self._config = config

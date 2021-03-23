@@ -1,0 +1,19 @@
+##
+## Copyright 2021 Ocean Protocol Foundation
+## SPDX-License-Identifier: Apache-2.0
+##
+pep257:
+  disable:
+    - D213
+
+pylint:
+  run: false
+
+frosted:
+  run: false
+
+mypy:
+  run: false
+
+pyroma:
+  run: false

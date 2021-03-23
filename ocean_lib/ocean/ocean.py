@@ -2,10 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-"""Ocean module."""
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-Lic;ense-Identifier: Apache-2.0
 
+"""Ocean module."""
 import logging
 import os
 
@@ -43,11 +41,12 @@ logger = logging.getLogger("ocean")
 
 
 class Ocean:
+
     """The Ocean class is the entry point into Ocean Protocol."""
 
     def __init__(self, config=None, data_provider=None):
-        """
-        Initialize Ocean class.
+        """Initialize Ocean class.
+
            >> # Make a new Ocean instance
            >> ocean = Ocean({...})
 
@@ -152,7 +151,10 @@ class Ocean:
         tx_id = dtfactory.createToken(
             blob, name, symbol, to_base_18(cap), from_wallet=from_wallet
         )
-        return DataToken(dtfactory.get_token_address(tx_id))
+        address = dtfactory.get_token_address(tx_id)
+        assert address, "new datatoken has no address"
+        dt = DataToken(address)
+        return dt
 
     def get_data_token(self, token_address: str) -> DataToken:
         return DataToken(token_address)
