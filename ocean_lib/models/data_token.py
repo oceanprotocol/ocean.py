@@ -17,6 +17,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_utils.http_requests.requests_session import get_requests_session
 from web3 import Web3
+from web3.exceptions import MismatchedABI
 from web3.utils.events import get_event_data
 from websockets import ConnectionClosed
 
@@ -38,8 +39,9 @@ class DataToken(ContractBase):
     MAX_MARKET_FEE_PERCENTAGE = 0.001
 
     def get_event_signature(self, event_name):
-        e = getattr(self.events, event_name)
-        if not e:
+        try:
+            e = getattr(self.events, event_name)
+        except MismatchedABI:
             raise ValueError(
                 f"Event {event_name} not found in {self.CONTRACT_NAME} contract."
             )
@@ -72,8 +74,8 @@ class DataToken(ContractBase):
         event_abi = e().abi
         logs = web3.eth.getLogs(filter_params)
         parsed_logs = []
-        for l in logs:
-            parsed_logs.append(get_event_data(event_abi, l))
+        for lg in logs:
+            parsed_logs.append(get_event_data(event_abi, lg))
         return parsed_logs
 
     def get_transfer_events_in_range(self, from_block, to_block):
@@ -99,21 +101,21 @@ class DataToken(ContractBase):
                 transfer_records.extend(
                     [
                         (
-                            l.args["from"],
-                            l.args.to,
-                            l.args.value,
-                            l.blockNumber,
-                            l.transactionHash.hex(),
-                            l.logIndex,
-                            l.transactionIndex,
+                            lg.args["from"],
+                            lg.args.to,
+                            lg.args.value,
+                            lg.blockNumber,
+                            lg.transactionHash.hex(),
+                            lg.logIndex,
+                            lg.transactionIndex,
                         )
-                        for l in logs
+                        for lg in logs
                     ]
                 )
                 _from = _to + 1
                 _to = min(_from + chunk - 1, end_block)
                 error_count = 0
-                if (_from - start_block) % 1000 == 0:
+                if (_from - start_block) % chunk == 0:
                     print(
                         f"    So far processed {len(transfer_records)} Transfer events from {_from-start_block} blocks."
                     )
@@ -267,7 +269,6 @@ class DataToken(ContractBase):
             raise AssertionError(
                 "sender of order transaction is not the consumer/payer."
             )
-
         transfer_logs = self.events.Transfer().processReceipt(tx_receipt)
         receiver_to_transfers = {}
         for tr in transfer_logs:
@@ -304,20 +305,24 @@ class DataToken(ContractBase):
     def token_balance(self, account: str):
         return from_base_18(self.balanceOf(account))
 
+    def _get_url_from_blob(self, int_code):
+        try:
+            url_object = json.loads(self.blob())
+        except json.decoder.JSONDecodeError:
+            return None
+
+        assert (
+            url_object["t"] == int_code
+        ), "This datatoken does not appear to have a direct consume url."
+
+        return url_object.get("url")
+
     def get_metadata_url(self):
         # grab the metadatastore URL from the DataToken contract (@token_address)
-        url_object = json.loads(self.blob())
-        assert (
-            url_object["t"] == 1
-        ), "This datatoken does not appear to have a metadata store url."
-        return url_object["url"]
+        return self._get_url_from_blob(1)
 
     def get_simple_url(self):
-        url_object = json.loads(self.blob())
-        assert (
-            url_object["t"] == 0
-        ), "This datatoken does not appear to have a direct consume url."
-        return url_object["url"]
+        return self._get_url_from_blob(0)
 
     # ============================================================
     # Token transactions using amount of tokens as a float instead of int
@@ -370,7 +375,7 @@ class DataToken(ContractBase):
     def get_info(self, web3, from_block, to_block, include_holders=False):
         contract = self.contract_concise
         minter = contract.minter()
-        all_transfers, block = self.get_all_transfers_from_events(from_block, to_block)
+        all_transfers, _ = self.get_all_transfers_from_events(from_block, to_block)
         order_logs = self.get_start_order_logs(
             web3, from_block=from_block, to_block=to_block
         )

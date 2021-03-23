@@ -2,10 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-"""Ocean module."""
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
 
+"""Ocean module."""
 import copy
 import logging
 import lzma
@@ -41,9 +39,11 @@ logger = logging.getLogger("ocean")
 
 
 class OceanAssets:
+
     """Ocean assets class."""
 
     def __init__(self, config, data_provider, ddo_registry_address):
+        """Initialises OceanAssets object."""
         self._config = config
         self._aquarius_url = config.aquarius_url
         self._data_provider = data_provider
@@ -118,9 +118,9 @@ class OceanAssets:
         dt_blob: str = None,
         dt_cap: float = None,
     ) -> (Asset, None):
-        """
-        Register an asset on-chain by creating/deploying a DataToken contract
-        and in the Metadata store (Aquarius).
+        """Register an asset on-chain.
+
+        Creating/deploying a DataToken contract and in the Metadata store (Aquarius).
 
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
         :param publisher_wallet: Wallet of the publisher registering this asset
@@ -269,7 +269,7 @@ class OceanAssets:
         logger.debug("Encrypting content urls in the metadata.")
 
         publisher_signature = self._data_provider.sign_message(
-            publisher_wallet, asset.asset_id, self._config
+            publisher_wallet, asset.asset_id, provider_uri=provider_uri
         )
         _, encrypt_endpoint = self._data_provider.build_encrypt_endpoint(provider_uri)
         files_encrypted = self._data_provider.encrypt_files_dict(
@@ -373,8 +373,8 @@ class OceanAssets:
         logger.info(f"Searching asset containing: {text}")
         return [
             Asset(dictionary=ddo_dict)
-            for ddo_dict in self._get_aquarius(aquarius_url).text_search(
-                text, sort, offset, page
+            for ddo_dict in self._get_aquarius(aquarius_url).query_search(
+                {"query": {"query_string": {"query": text}}}, sort, offset, page
             )["results"]
         ]
 
@@ -397,7 +397,9 @@ class OceanAssets:
         aquarius = self._get_aquarius(aquarius_url)
         return [
             Asset(dictionary=ddo_dict)
-            for ddo_dict in aquarius.query_search(query, sort, offset, page)["results"]
+            for ddo_dict in aquarius.query_search({"query": query}, sort, offset, page)[
+                "results"
+            ]
         ]
 
     def order(
@@ -429,7 +431,7 @@ class OceanAssets:
 
         dt_address = asset.data_token_address
 
-        _, initialize_url = self._data_provider.get_initialize_endpoint(
+        _, initialize_url = self._data_provider.build_initialize_endpoint(
             sa.service_endpoint
         )
         order_requirements = self._data_provider.get_order_requirements(
@@ -582,7 +584,8 @@ class OceanAssets:
         return [
             asset.did
             for asset in self.query(
-                {"query": {"proof.creator": [owner_address]}}, offset=1000
+                {"query_string": {"query": owner_address, "fields": ["proof.creator"]}},
+                offset=1000,
             )
         ]
 

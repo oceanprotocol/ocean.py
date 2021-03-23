@@ -7,6 +7,7 @@ import json
 
 class AlgorithmMetadata:
     def __init__(self, metadata_dict):
+        """Initialises AlgorithmMetadata object."""
         self.url = metadata_dict.get("url", "")
         self.rawcode = metadata_dict.get("rawcode", "")
         self.language = metadata_dict.get("language", "")
@@ -19,13 +20,9 @@ class AlgorithmMetadata:
         self.container_tag = container.get("tag", "")
 
     def is_valid(self):
-
-        if not (
+        return bool(
             self.container_image and self.container_tag and self.container_entry_point
-        ):
-            return False
-
-        return True
+        )
 
     def as_json_str(self):
         return json.dumps(self.as_dictionary())

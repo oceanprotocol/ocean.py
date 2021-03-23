@@ -87,11 +87,11 @@ config_defaults = {
 
 
 class Config(configparser.ConfigParser):
+
     """Class to manage the ocean-lib configuration."""
 
     def __init__(self, filename=None, options_dict=None, **kwargs):
-        """
-        Initialize Config class.
+        """Initialize Config class.
 
         Options available:
 
@@ -124,11 +124,10 @@ class Config(configparser.ConfigParser):
             with open(filename) as fp:
                 text = fp.read()
                 self.read_string(text)
-        else:
-            if "text" in kwargs:
-                self.read_string(kwargs["text"])
-
-        if options_dict:
+        elif "text" in kwargs:
+            self._logger.debug("Config: loading config file {filename}.")
+            self.read_string(kwargs["text"])
+        elif options_dict:
             self._logger.debug(f"Config: loading from dict {options_dict}")
             self.read_dict(options_dict)
 
@@ -214,8 +213,9 @@ class Config(configparser.ConfigParser):
 
     @property
     def provider_address(self):
-        """Provider address. (e.g.): 0x00bd138abd70e2f00903268f3db08f2d25677c9e.
-        ethereum address of service provider
+        """Provider address (e.g.): 0x00bd138abd70e2f00903268f3db08f2d25677c9e.
+
+        Ethereum address of service provider
         """
         return self.get("resources", NAME_PROVIDER_ADDRESS)
 

@@ -20,6 +20,7 @@ class EventFilter:
         to_block,
         poll_interval=None,
     ):
+        """Initialises EventFilter."""
         self.event_name = event_name
         self.event = event
         self.argument_filters = argument_filters
