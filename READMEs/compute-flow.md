@@ -2,6 +2,7 @@
 Copyright 2021 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
+<!--
 
 # Quickstart: Marketplace Flow with compute-to-data
 
@@ -125,17 +126,104 @@ assert token_address == asset.data_token_address
 did = asset.did  # did contains the datatoken address
 print(did)
 ```
-Checkout `http://localhost:8000` to see your new DataToken.
-For legacy support, you can also use `metadataStoreUri` instead of `metadataCacheUri`.
+-->
+# Quickstart: Publish datatoken
 
-## 3. Alice mints 100 tokens
+## Prerequisites
 
-```python
+-   Linux/MacOS
+-   Docker, [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
+-   Python 3.8.5+
 
-data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
+## Run barge services
+
+Ocean `barge` runs ganache (local blockchain), Provider (data service), and Aquarius (metadata cache).
+
+In a new console:
+
+```console
+#grab repo
+git clone https://github.com/oceanprotocol/barge
+cd barge
+
+#clean up old containers (to be sure)
+docker system prune -a --volumes
+
+#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
+./start_ocean.sh  --with-provider2
 ```
 
-## 4. Alice creates a pool for trading her new data tokens
+## Create config file
+
+Create a file called `config.ini` and fill it as follows.
+
+```text
+[eth-network]
+network = ganache
+artifacts.path = ~/.ocean/ocean-contracts/artifacts
+address.file = ~/.ocean/ocean-contracts/artifacts/address.json
+```
+
+## Install the library, set envvars
+
+In a new console:
+
+```console
+#Initialize virtual environment and activate it.
+python -m venv venv
+source venv/bin/activate
+
+#Install the ocean.py library
+pip install ocean-lib
+
+#set envvars
+export TEST_PRIVATE_KEY1=0x16b8bda3e5163fc20a957aaf859286fc3f7a0948b2c3c77bfe029f492c1d9ec6
+export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+
+#go into python
+python
+```
+
+## 2. Alice publishes a datatoken
+
+In the Python console:
+
+```python
+import os
+from ocean_lib.config import Config
+from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.web3_internal.wallet import Wallet
+
+private_key = os.getenv('TEST_PRIVATE_KEY1')
+private_key_2 = os.getenv('TEST_PRIVATE_KEY2')
+config = Config('config.ini')
+ocean = Ocean(config)
+
+print("create wallet: begin")
+alice_wallet = Wallet(ocean.web3, private_key=private_key)
+bob_wallet = Wallet(ocean.web3, private_key=private_key_2)
+print(f"create wallet: done. Its address is {wallet.address}")
+
+print("create datatoken: begin.")
+datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet) 
+print(f"created datatoken: done. Its address is {datatoken.address}")
+```
+
+Congrats, you've created your first Ocean datatoken! 🐋
+
+<!--
+Checkout `http://localhost:8000` to see your new DataToken.
+For legacy support, you can also use `metadataStoreUri` instead of `metadataCacheUri`.
+-->
+
+## 3. Alice transfers datatoken to Bob
+
+```python
+datatoken.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
+datatoken.transfer(alice_wallet.address,bob_wallet,50.0)
+```
+
+<!-- ## 4. Alice creates a pool for trading her new data tokens
 
 ```python
 pool = ocean.pool.create(
@@ -145,11 +233,11 @@ pool = ocean.pool.create(
    from_wallet=alice_wallet
 )
 pool_address = pool.address
-print(f'DataToken @{data_token.address} has a `pool` available @{pool_address}')
+print(f'DataToken @{datatoken.address} has a `pool` available @{pool_address}')
 
-```
+``` -->
 
-## 5. Marketplace posts asset for sale using price obtained from balancer pool
+<!-- ## 5. Marketplace posts asset for sale using price obtained from balancer pool
 
 ```python
 from ocean_utils.agreements.service_types import ServiceTypes
@@ -172,16 +260,16 @@ price_in_OCEAN = market_ocean.pool.calcInGivenOut(
     pool_address, OCEAN_address, token_address, token_out_amount=1.0
 )
 
-```
+``` -->
 
-## 6. Value swap: Bob buys datatokens from marketplace (using datatoken <> OCEAN balancer pool)
+<!-- ## 6. Value swap: Bob buys datatokens from marketplace (using datatoken <> OCEAN balancer pool)
 
 ```python
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.wallet import Wallet
 
 bob_wallet = Wallet(ocean.web3, private_key="c594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58")
-data_token = market_ocean.get_data_token(token_address)
+datatoken = market_ocean.get_data_token(token_address)
 # This assumes bob_wallet already has sufficient OCEAN tokens to buy the data token. OCEAN tokens
 # can be obtained through a crypto exchange or an on-chain pool such as balancer or uniswap on mainnet, 
 # you need to get test Ocean if you are using a test network such as Rinkeby.
@@ -195,12 +283,12 @@ market_ocean.pool.buy_data_tokens(
 
 and we will wait until bob has some DataTokens:
 ```python
-bobsToken=data_token.token_balance(bob_wallet.address)
+bobsToken=datatoken.token_balance(bob_wallet.address)
 while(bobsToken<=0):
-    bobsToken=data_token.token_balance(bob_wallet.address)
+    bobsToken=datatoken.token_balance(bob_wallet.address)
     time.sleep(5)
-print(f'bob has {data_token.token_balance(bob_wallet.address)} datatokens.')
-```
+print(f'bob has {datatoken.token_balance(bob_wallet.address)} datatokens.')
+``` -->
 
 ## 7. Bob uses a service from the asset he just purchased (download)
 
