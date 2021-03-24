@@ -6,4 +6,6 @@
 """Initialises ocean lib package."""
 
 __author__ = """OceanProtocol"""
-__version__ = "__version__ = '0.5.13'"
+# fmt: off
+__version__ = '0.5.14'
+# fmt: on
