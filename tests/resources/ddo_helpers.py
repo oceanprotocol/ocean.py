@@ -137,13 +137,26 @@ def get_registered_ddo_with_access_service(ocean_instance, wallet, provider_uri=
     )
 
 
-def get_registered_ddo_with_compute_service(ocean_instance, wallet, provider_uri=None):
+def get_registered_ddo_with_compute_service(
+    ocean_instance, wallet, provider_uri=None, trusted_algorithms=None
+):
     old_ddo = get_sample_ddo_with_compute_service()
     metadata = old_ddo.metadata
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     service = old_ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
+    compute_attributes = ocean_instance.compute.create_compute_service_attributes(
+        service.attributes["main"]["timeout"],
+        service.attributes["main"]["creator"],
+        service.attributes["main"]["datePublished"],
+        service.attributes["main"]["provider"],
+        privacy_attributes=ocean_instance.compute.build_service_privacy_attributes(
+            trusted_algorithms,
+            allow_raw_algorithm=True,
+            allow_all_published_algorithms=not bool(trusted_algorithms),
+        ),
+    )
     compute_service = ServiceDescriptor.compute_service_descriptor(
-        service.attributes, DataServiceProvider.get_url(ocean_instance.config)
+        compute_attributes, DataServiceProvider.get_url(ocean_instance.config)
     )
 
     return get_registered_ddo(
@@ -184,7 +197,7 @@ def wait_for_update(ocean, did, updated_attr, value, timeout=30):
 
         if not ddo:
             time.sleep(0.2)
-        elif ddo.metadata["main"][updated_attr] == value:
+        elif ddo.metadata["main"].get(updated_attr) == value:
             break
 
         if time.time() - start > timeout:
