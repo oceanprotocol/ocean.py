@@ -131,7 +131,7 @@ def mint_tokens_and_wait(
     data_token_contract: DataToken, receiver_address: str, minter_wallet: Wallet
 ):
     dtc = data_token_contract
-    tx_id = dtc.mint_tokens(receiver_address, 50, minter_wallet)
+    tx_id = dtc.mint_tokens(receiver_address, 50.0, minter_wallet)
     dtc.get_tx_receipt(tx_id)
     time.sleep(2)
 

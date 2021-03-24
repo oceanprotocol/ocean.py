@@ -41,7 +41,7 @@ def process_order(ocean_instance, publisher_wallet, consumer_wallet, ddo, servic
     # Give the consumer some datatokens so they can order the service
     try:
         dt = DataToken(ddo.data_token_address)
-        tx_id = dt.transfer_tokens(consumer_wallet.address, 10, publisher_wallet)
+        tx_id = dt.transfer_tokens(consumer_wallet.address, 10.0, publisher_wallet)
         dt.verify_transfer_tx(tx_id, publisher_wallet.address, consumer_wallet.address)
     except (AssertionError, Exception) as e:
         print(e)
