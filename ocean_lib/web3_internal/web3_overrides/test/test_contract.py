@@ -11,12 +11,9 @@ from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFuncti
 
 def test_main(dtfactory_address):
     factory = MyFactory(dtfactory_address)
-    # factory.createToken("foo_blob", "DT1", "DT1", to_base_18(1000), alice_wallet)
     fn_args = ("foo_blob", "DT1", "DT1", to_base_18(1000))
     contract_fn = getattr(factory.contract.functions, "createToken")(*fn_args)
     custom_contract = CustomContractFunction(contract_fn)
-
-    # TODO: transaction with passphrase and account key, need to mock web3
 
     with pytest.raises(ValueError):
         custom_contract.transact({"data": "test"})
