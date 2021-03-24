@@ -172,7 +172,7 @@ def _deployAndMintToken(symbol: str, to_address: str) -> btoken.BToken:
         "Template Contract",
         "TEMPLATE",
         wallet.address,
-        to_base_18(1000),
+        to_base_18(1000.0),
         DTFactory.FIRST_BLOB,
         to_address,
     )
