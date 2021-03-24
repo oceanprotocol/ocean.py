@@ -6,7 +6,7 @@
 import logging
 import os
 
-from typing import Optional
+from typing import Optional, Type
 from enforce_typing import enforce_types
 
 from ocean_lib.assets.asset import Asset
@@ -26,7 +26,7 @@ def download_asset_files(
     destination: str,
     token_address: str,
     order_tx_id: str,
-    data_provider: DataServiceProvider,
+    data_provider: Type[DataServiceProvider],
     index: Optional[int] = None,
 ):
     """Download asset data files or result files from a compute job.
@@ -37,7 +37,7 @@ def download_asset_files(
     :param destination: Path, str
     :param token_address: hex str the address of the DataToken smart contract
     :param order_tx_id: hex str the transaction hash of the startOrder tx
-    :param data_provider: DataServiceProvider instance
+    :param data_provider: DataServiceProvider class object
     :param index: Index of the document that is going to be downloaded, int
     :return: Asset folder path, str
     """

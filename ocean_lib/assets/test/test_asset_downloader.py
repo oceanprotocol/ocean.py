@@ -14,7 +14,7 @@ def test_ocean_assets_download_failure(publisher_ocean_instance, metadata):
     """Tests that downloading from an empty service raises an AssertionError."""
     publisher = get_publisher_wallet()
     metadata_copy = metadata.copy()
-    data_provider = DataServiceProvider()
+    data_provider = DataServiceProvider
 
     ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher)
     wait_for_ddo(publisher_ocean_instance, ddo.did)
@@ -38,7 +38,7 @@ def test_ocean_assets_download_indexes(publisher_ocean_instance, metadata):
     """Tests different values of indexes that raise AssertionError."""
     publisher = get_publisher_wallet()
     metadata_copy = metadata.copy()
-    data_provider = DataServiceProvider()
+    data_provider = DataServiceProvider
 
     ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher)
     wait_for_ddo(publisher_ocean_instance, ddo.did)
@@ -98,7 +98,7 @@ def ocean_assets_download_destination_file_helper(
     """Tests downloading to an existing directory."""
     publisher = get_publisher_wallet()
     metadata_copy = metadata.copy()
-    data_provider = DataServiceProvider()
+    data_provider = DataServiceProvider
 
     ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher)
     wait_for_ddo(publisher_ocean_instance, ddo.did)
