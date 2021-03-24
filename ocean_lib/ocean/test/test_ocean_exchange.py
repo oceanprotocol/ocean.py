@@ -31,7 +31,7 @@ def test_ocean_exchange(publisher_ocean_instance):
     ox = OceanExchange(ocn.OCEAN_address, _get_exchange_address(), ocn.config)
     rate = 0.9
     x_id = ox.create(dt.address, rate, bob_wallet)
-    dt.approve_tokens(ox._exchange_address, 20, bob_wallet)
+    dt.approve_tokens(ox._exchange_address, 20.0, bob_wallet)
 
     # create with invalid token address
     with pytest.raises(ValueError):
