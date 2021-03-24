@@ -185,6 +185,6 @@ def _deployAndMintToken(symbol: str, to_address: str) -> btoken.BToken:
         )
     )
     token = DataToken(token_address)
-    token.mint(to_address, to_base_18(1000), wallet)
+    token.mint(to_address, to_base_18(1000.0), wallet)
 
     return btoken.BToken(token.address)
