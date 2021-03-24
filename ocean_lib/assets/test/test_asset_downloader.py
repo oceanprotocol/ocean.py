@@ -91,6 +91,7 @@ def test_ocean_assets_download_destination_file(
         publisher_ocean_instance, metadata, str(tmpdir)
     )
 
+
 def ocean_assets_download_destination_file_helper(
     publisher_ocean_instance, metadata, tmpdir
 ):
