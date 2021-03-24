@@ -45,7 +45,7 @@ def test_ocean_assets_download_indexes(publisher_ocean_instance, metadata):
     sa = ServiceAgreement.from_ddo(ServiceTypes.ASSET_ACCESS, ddo)
 
     index = range(3)
-    with pytest.raises(AssertionError):
+    with pytest.raises(Exception): # AssertionError when TYPECHECK = false, else TypeError
         download_asset_files(
             sa.index,
             ddo,
