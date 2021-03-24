@@ -4,6 +4,7 @@ __pycache__
 *.pyc
 *~
 .eggs/
+artifacts/address.json
 /venv/
 ocean_lib.egg-info/
 /build/
