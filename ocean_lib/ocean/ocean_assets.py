@@ -327,7 +327,7 @@ class OceanAssets:
 
         return asset
 
-    def update(self, asset: Asset, publisher_wallet: Wallet) -> bool:
+    def update(self, asset: Asset, publisher_wallet: Wallet) -> str:
         try:
             # publish the new ddo in ocean-db/Aquarius
             ddo_registry = self.ddo_registry()
@@ -343,6 +343,7 @@ class OceanAssets:
                     f"update DDO on-chain failed, transaction status is 0. Transaction hash is {tx_id}"
                 )
             logger.info("Asset/ddo updated on-chain successfully.")
+            return tx_id
         except ValueError as ve:
             raise ValueError(f"Invalid value to publish in the metadata: {str(ve)}")
         except Exception as e:

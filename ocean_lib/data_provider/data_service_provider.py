@@ -241,7 +241,6 @@ class DataServiceProvider:
         :param input_datasets: list of ComputeInput
         :param job_id: str id of compute job that was started and stopped (optional, use it
             here to start a job after it was stopped)
-
         :return: job_info dict with jobId, status, and other values
         """
         assert (
@@ -269,10 +268,14 @@ class DataServiceProvider:
             data=json.dumps(payload),
             headers={"content-type": "application/json"},
         )
-        if not response:
+        if response is None:
             raise AssertionError(
-                f"Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}"
+                f"Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}, response is {response}"
             )
+
+        logger.debug(
+            f"got DataProvider execute response: {response.content} with status-code {response.status_code} "
+        )
 
         logger.debug(
             f"got DataProvider execute response: {response.content} with status-code {response.status_code} "
