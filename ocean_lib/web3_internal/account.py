@@ -60,9 +60,11 @@ class Account:
 
     @property
     def key_file(self):
-        if self._key_file:
-            return os.path.expandvars(os.path.expanduser(self._key_file))
-        return None
+        return (
+            os.path.expandvars(os.path.expanduser(self._key_file))
+            if self._key_file
+            else None
+        )
 
     @property
     def private_key(self):

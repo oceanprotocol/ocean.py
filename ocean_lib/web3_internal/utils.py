@@ -2,17 +2,12 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
 import logging
-import os
 from collections import namedtuple
 
 import eth_account
 import eth_keys
 import eth_utils
-from eth_keys import KeyAPI
-from eth_utils import big_endian_to_int
-from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3 import Web3
 
 Signature = namedtuple("Signature", ("v", "r", "s"))
@@ -23,7 +18,6 @@ logger = logging.getLogger(__name__)
 def generate_multi_value_hash(types, values):
     """
     Return the hash of the given list of values.
-
     This is equivalent to packing and hashing values in a solidity smart contract
     hence the use of `soliditySha3`.
 
@@ -57,29 +51,6 @@ def add_ethereum_prefix_and_hash_msg(text):
     return Web3.sha3(text=prefixed_msg)
 
 
-def get_public_key_from_address(web3, account):
-    """
-
-    :param web3:
-    :param account:
-    :return:
-    """
-    _hash = web3.sha3(text="verify signature.")
-    signature = web3.personal.sign(_hash, account.address, account.password)
-    signature = split_signature(web3, web3.toBytes(hexstr=signature))
-    signature_vrs = Signature(
-        signature.v % 27, big_endian_to_int(signature.r), big_endian_to_int(signature.s)
-    )
-    prefixed_hash = prepare_prefixed_hash(_hash)
-    pub_key = KeyAPI.PublicKey.recover_from_msg_hash(
-        prefixed_hash, KeyAPI.Signature(vrs=signature_vrs)
-    )
-    assert (
-        pub_key.to_checksum_address() == account.address
-    ), "recovered address does not match signing address."
-    return pub_key
-
-
 def to_32byte_hex(web3, val):
     """
 
@@ -107,38 +78,6 @@ def split_signature(web3, signature):
         v = 27 + v % 2
 
     return Signature(v, r, s)
-
-
-def get_wallet(index):
-    name = "PARITY_ADDRESS" if not index else f"PARITY_ADDRESS{index}"
-    pswrd_name = "PARITY_PASSWORD" if not index else f"PARITY_PASSWORD{index}"
-    key_name = "PARITY_KEY" if not index else f"PARITY_KEY{index}"
-    encrypted_key_name = (
-        "PARITY_ENCRYPTED_KEY" if not index else f"PARITY_ENCRYPTED_KEY{index}"
-    )
-    keyfile_name = "PARITY_KEYFILE" if not index else f"PARITY_KEYFILE{index}"
-
-    address = os.getenv(name)
-    if not address:
-        return None
-
-    pswrd = os.getenv(pswrd_name)
-    key = os.getenv(key_name)
-    encr_key = os.getenv(encrypted_key_name)
-    key_file = os.getenv(keyfile_name)
-    if key_file and not encr_key:
-        with open(key_file) as _file:
-            encr_key = json.loads(_file.read())
-
-    from ocean_lib.web3_internal.wallet import Wallet
-
-    return Wallet(
-        Web3Provider.get_web3(),
-        private_key=key,
-        encrypted_key=encr_key,
-        address=Web3.toChecksumAddress(address),
-        password=pswrd,
-    )
 
 
 def privateKeyToAddress(private_key: str) -> str:
