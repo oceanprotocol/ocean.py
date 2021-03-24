@@ -85,6 +85,14 @@ def test_ocean_assets_download_indexes(publisher_ocean_instance, metadata):
 def test_ocean_assets_download_destination_file(
     publisher_ocean_instance, metadata, tmpdir
 ):
+    """Convert tmpdir: py._path.local.LocalPath to str, satisfy enforce-typing"""
+    ocean_assets_download_destination_file_helper(
+        publisher_ocean_instance, metadata, str(tmpdir)
+    )
+
+def ocean_assets_download_destination_file_helper(
+    publisher_ocean_instance, metadata, tmpdir
+):
     """Tests downloading to an existing directory."""
     publisher = get_publisher_wallet()
     metadata_copy = metadata.copy()
