@@ -220,7 +220,7 @@ def test_verify_order_tx(alice_address, bob_address, alice_ocean, alice_wallet):
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
     asset = DDO(json_filename=sample_ddo_path)
     order_tx_id = token.startOrder(
-        alice_address, to_base_18(1), 1, ZERO_ADDRESS, alice_wallet
+        alice_address, to_base_18(1.0), 1, ZERO_ADDRESS, alice_wallet
     )
 
     with pytest.raises(AssertionError):
