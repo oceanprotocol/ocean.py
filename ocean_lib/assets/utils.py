@@ -44,7 +44,7 @@ def add_publisher_trusted_algorithm(
     compute_service = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
     assert (
         compute_service
-    ), f"Cannot add trusted algorithm to this asset because it has no compute service."
+    ), "Cannot add trusted algorithm to this asset because it has no compute service."
     privacy_values = compute_service.attributes["main"].get("privacy")
     if not privacy_values:
         privacy_values = {}
@@ -75,6 +75,6 @@ def remove_publisher_trusted_algorithm(
         )
 
     trusted_algorithms = [ta for ta in trusted_algorithms if ta["did"] != algo_did]
-    asset.update_compute_privacy(trusted_algorithms)
+    asset.update_compute_privacy(trusted_algorithms, False, False)
     assert asset.get_trusted_algorithms() == trusted_algorithms
     return trusted_algorithms

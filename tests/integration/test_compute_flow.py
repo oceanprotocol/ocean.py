@@ -5,7 +5,6 @@
 
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.metadata import MetadataContract
-from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.models.compute_input import ComputeInput
