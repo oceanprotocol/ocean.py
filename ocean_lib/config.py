@@ -141,16 +141,6 @@ class Config(configparser.ConfigParser):
 
         self._load_environ()
 
-        # Monkey patch the enforce_types decorator into a no-op
-        if not self["util"].getboolean("typecheck"):
-
-            def noop(f):
-                return f
-
-            from enforce_typing import enforce_types
-
-            enforce_types = noop
-
     def _load_environ(self):
         for option_name, environ_item in environ_names.items():
             value = os.environ.get(environ_item[0])
