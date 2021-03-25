@@ -19,7 +19,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3 import Web3
-from web3.exceptions import ValidationError
+from web3.exceptions import MismatchedABI, ValidationError
 from web3.utils.events import get_event_data
 from web3.utils.filters import construct_event_filter_params
 from web3.utils.threads import Timeout
@@ -86,7 +86,7 @@ class ContractBase(object):
 
     @property
     def function_names(self) -> List[str]:
-        return list(self.contract.function_names)
+        return list(self.contract.functions)
 
     @staticmethod
     def to_checksum_address(address: str):
@@ -142,7 +142,11 @@ class ContractBase(object):
         :param event_name:
         :return:
         """
-        e = getattr(self.events, event_name)
+        try:
+            e = getattr(self.events, event_name)
+        except MismatchedABI:
+            e = None
+
         if not e:
             raise ValueError(
                 f"Event {event_name} not found in {self.CONTRACT_NAME} contract."

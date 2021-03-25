@@ -205,3 +205,23 @@ def test_create_bad_metadata(publisher_ocean_instance):
     metadata["attributes"]["main"]["files"][0]["EXTRA ATTRIB!"] = 0
     with pytest.raises(ValueError):
         publisher_ocean_instance.assets.create(metadata["attributes"], publisher)
+
+
+def test_create_asset_with_address(publisher_ocean_instance):
+    """Tests that an asset can be created with specific DT address."""
+    ocn = publisher_ocean_instance
+    alice = get_publisher_wallet()
+
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
+    asset = DDO(json_filename=sample_ddo_path)
+    asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
+    my_secret_store = "http://myownsecretstore.com"
+    auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
+
+    token = ocn.create_data_token(
+        "DataToken1", "DT1", from_wallet=alice, blob="foo_blob"
+    )
+
+    assert ocn.assets.create(
+        asset.metadata, alice, [auth_service], data_token_address=token.address
+    )
