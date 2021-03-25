@@ -6,6 +6,7 @@
 """Ocean module."""
 import logging
 import os
+from enforce_typing import enforce_types
 
 from eth_utils import remove_0x_prefix
 from ocean_lib.config import Config
@@ -40,6 +41,7 @@ from web3.datastructures import AttributeDict
 logger = logging.getLogger("ocean")
 
 
+@enforce_types
 class Ocean:
 
     """The Ocean class is the entry point into Ocean Protocol."""
