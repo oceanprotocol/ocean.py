@@ -50,7 +50,8 @@ def test_main(network, alice_wallet, alice_address, dtfactory_address, alice_oce
 
     # test super-simple functionality of child
     factory = MyFactory(dtfactory_address)
-    factory.createToken("foo_blob", "DT1", "DT1", to_base_18(1000.0), alice_wallet)
+    print(enforce_types)
+    factory.createToken("foo_blob", "DT1", "DT1", to_base_18(1000), alice_wallet)
 
     # test attributes
     assert factory.name == "DTFactory"
