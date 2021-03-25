@@ -4,7 +4,7 @@
 #
 
 import pytest
-from enforce_typing import enforce_types
+from ocean_lib.enforce_typing2 import enforce_types
 
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
