@@ -127,7 +127,14 @@ did = asset.did  # did contains the datatoken address
 print(did)
 ```
 -->
-# Quickstart: Publish datatoken
+# Quickstart: Marketplace Flow with compute-to-data
+
+This tutorial demonstrates publishing a dataset with `compute` service
+
+We will be connecting to the `ganache` test net and the Ocean Protocol
+supporting services.
+
+Here's the steps:
 
 ## Prerequisites
 
@@ -214,34 +221,37 @@ token_address = data_token.address
 # `ocean.assets.create` will require that token_address is a valid DataToken contract address, unless token_address
 # is not provided then the `create` method will first create a new data token and use it in the new
 # asset.
+date_created = "2019-12-28T10:55:11Z"
 metadata =  {
     "main": {
-        "type": "dataset", "name": "Compute-flow Example", "author": "User",
-        "license": "CC0: Public Domain", "dateCreated": "2012-02-01T10:55:11Z",
-        "files": [
-            { "index": 0, "contentType": "application/zip", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/training.zip"},
-            { "index": 1, "contentType": "text/text", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/monkey_labels.txt"},
-            { "index": 2, "contentType": "application/zip", "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/validation.zip"}]}
+        "type": "dataset", "name": "branin", "author": "Trent",
+        "license": "CC0: Public Domain", "dateCreated": date_created,
+        "files": [{"index": 0, "contentType": "text/text",
+	           "url": "https://raw.githubusercontent.com/trentmc/branin/master/branin.arff"}]}
 }
-
-# Prepare attributes for the download service including the cost in DataTokens
 service_attributes = {
         "main": {
             "name": "dataAssetAccessServiceAgreement",
             "creator": alice_wallet.address,
-            "cost": 1.0, # service cost is 1.0 tokens
             "timeout": 3600 * 24,
-            "datePublished": metadata["main"]['dateCreated']
+            "datePublished": date_created,
+            "cost": 1.0, # <don't change, this is obsolete>
         }
     }
 
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_utils.agreements.service_factory import ServiceDescriptor
+
 service_endpoint = DataServiceProvider.get_url(ocean.config)
 download_service = ServiceDescriptor.access_service_descriptor(service_attributes, service_endpoint)
-asset = ocean.assets.create(metadata, alice_wallet, service_descriptors=[download_service], data_token_address=token_address)
+asset = ocean.assets.create(
+  metadata,
+  alice_wallet,
+  service_descriptors=[download_service],
+  data_token_address=token_address)
 assert token_address == asset.data_token_address
 
 did = asset.did  # did contains the datatoken address
-print(did)
 ```
 
 Congrats, you've created your first Ocean datatoken! 🐋
@@ -322,7 +332,7 @@ while(bobsToken<=0):
 print(f'bob has {datatoken.token_balance(bob_wallet.address)} datatokens.')
 ``` -->
 
-## 5. Bob uses a service from the asset he just purchased (download)
+## 4. Bob uses a service from the asset he just purchased (download)
 
 ```python
 market_address = '0xD679a72Ff5cE7EA1f4725ADb3f57c9aDb8F51738' # Market address can be anyone, that will receive the market fee. Leave empty if you want
