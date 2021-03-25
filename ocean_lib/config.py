@@ -19,6 +19,7 @@ DEFAULT_ADDRESS_FILE = ""
 DEFAULT_AQUARIUS_URL = "http://localhost:5000"
 DEFAULT_PROVIDER_URL = ""
 DEFAULT_STORAGE_PATH = "ocean_lib.db"
+DEFAULT_TYPECHECK = "true"
 
 NAME_NETWORK_URL = "network"
 NAME_ARTIFACTS_PATH = "artifacts.path"
@@ -36,6 +37,7 @@ NAME_OCEAN_ADDRESS = "OCEAN.address"
 
 NAME_PROVIDER_ADDRESS = "provider.address"
 
+NAME_TYPECHECK = "typecheck"
 
 environ_names = {
     NAME_DATA_TOKEN_FACTORY_ADDRESS: [
@@ -66,6 +68,7 @@ environ_names = {
         "Auth token expiration time expressed in seconds",
     ],
     NAME_PROVIDER_ADDRESS: ["PROVIDER_ADDRESS", "Provider ethereum address"],
+    NAME_TYPECHECK: ["TYPECHECK", "Enforce type hints at runtime"],
 }
 
 config_defaults = {
@@ -82,6 +85,9 @@ config_defaults = {
         NAME_AUTH_TOKEN_MESSAGE: "",
         NAME_AUTH_TOKEN_EXPIRATION: "",
         NAME_PROVIDER_ADDRESS: "",
+    },
+    "util": {
+        NAME_TYPECHECK: DEFAULT_TYPECHECK,
     },
 }
 
@@ -107,6 +113,8 @@ class Config(configparser.ConfigParser):
         ; Path of back-up storage
         storage.path = ocean_lib.db
 
+        [util]
+        typecheck = true
 
         :param filename: Path of the config file, str.
         :param options_dict: Python dict with the config, dict.
@@ -132,6 +140,16 @@ class Config(configparser.ConfigParser):
             self.read_dict(options_dict)
 
         self._load_environ()
+
+        # Monkey patch the enforce_types decorator into a no-op
+        if not self["util"].getboolean("typecheck"):
+
+            def noop(f):
+                return f
+
+            from enforce_typing import enforce_types
+
+            enforce_types = noop
 
     def _load_environ(self):
         for option_name, environ_item in environ_names.items():
@@ -231,3 +249,7 @@ class Config(configparser.ConfigParser):
     @property
     def auth_token_expiration(self):
         return self.get("resources", NAME_AUTH_TOKEN_EXPIRATION)
+
+    @property
+    def typecheck(self):
+        return self.get("util", NAME_TYPECHECK)
