@@ -33,7 +33,7 @@ class ExampleConfig:
                 "downloads.path": "consume-downloads",
             },
             "util": {
-                "typecheck": "true",
+                "typecheck": "false",
             },
         }
 
