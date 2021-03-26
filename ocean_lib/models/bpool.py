@@ -4,8 +4,8 @@
 #
 import logging
 import typing
-from enforce_typing import enforce_types
 
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from eth_utils import remove_0x_prefix
 from ocean_lib.models import balancer_constants
 from ocean_lib.ocean import util
@@ -17,7 +17,7 @@ from .btoken import BToken
 logger = logging.getLogger(__name__)
 
 
-@enforce_types
+@enforce_types_shim
 class BPool(BToken):
     CONTRACT_NAME = "BPool"
 

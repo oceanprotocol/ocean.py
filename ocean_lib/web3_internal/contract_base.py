@@ -8,7 +8,7 @@ import logging
 import os
 
 from typing import Any, Dict, Optional, List
-from enforce_typing import enforce_types
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 
 import requests
 from eth_typing import BlockIdentifier
@@ -28,7 +28,7 @@ from websockets import ConnectionClosed
 logger = logging.getLogger(__name__)
 
 
-@enforce_types
+@enforce_types_shim
 class ContractBase(object):
 
     """Base class for all contract objects."""

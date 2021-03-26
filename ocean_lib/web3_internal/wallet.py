@@ -6,7 +6,7 @@ import logging
 import os
 
 from typing import Optional
-from enforce_typing import enforce_types
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 
 from ocean_lib.web3_internal.constants import ENV_MAX_GAS_PRICE, MIN_GAS_PRICE
 from ocean_lib.web3_internal.utils import privateKeyToAddress, privateKeyToPublicKey
@@ -14,7 +14,7 @@ from ocean_lib.web3_internal.utils import privateKeyToAddress, privateKeyToPubli
 logger = logging.getLogger(__name__)
 
 
-@enforce_types
+@enforce_types_shim
 class Wallet:
 
     """

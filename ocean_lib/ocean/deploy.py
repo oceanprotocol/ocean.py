@@ -9,6 +9,10 @@ import json
 import os
 import sys
 
+# Setup ocean_lib.enforce_typing_shim before importing anything that uses it
+from ocean_lib.enforce_typing_shim import setup_enforce_typing_shim
+setup_enforce_typing_shim()
+
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.data_token import DataToken

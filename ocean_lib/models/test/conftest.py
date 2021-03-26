@@ -4,8 +4,8 @@
 #
 import os
 import pytest
-from enforce_typing import enforce_types
 
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models import btoken
 from ocean_lib.models.bfactory import BFactory
@@ -162,7 +162,7 @@ def make_info(name, private_key_name):
     return info
 
 
-@enforce_types
+@enforce_types_shim
 def _deployAndMintToken(symbol: str, to_address: str) -> btoken.BToken:
     wallet = get_factory_deployer_wallet(_NETWORK)
     dt_address = DataToken.deploy(

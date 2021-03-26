@@ -10,8 +10,8 @@ import os
 import re
 from collections import namedtuple
 from json import JSONDecodeError
-from enforce_typing import enforce_types
 
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.exceptions import InvalidURLException
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
@@ -30,7 +30,7 @@ OrderRequirements = namedtuple(
 )
 
 
-@enforce_types
+@enforce_types_shim
 class DataServiceProvider:
     """DataServiceProvider class.
 

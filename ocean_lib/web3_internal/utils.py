@@ -4,7 +4,8 @@
 #
 import logging
 from collections import namedtuple
-from enforce_typing import enforce_types
+
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 
 import eth_account
 import eth_keys
@@ -81,12 +82,12 @@ def split_signature(web3, signature):
     return Signature(v, r, s)
 
 
-@enforce_types
+@enforce_types_shim
 def privateKeyToAddress(private_key: str) -> str:
     return eth_account.Account().privateKeyToAccount(private_key).address
 
 
-@enforce_types
+@enforce_types_shim
 def privateKeyToPublicKey(private_key: str):
     private_key_bytes = eth_utils.decode_hex(private_key)
     private_key_object = eth_keys.keys.PrivateKey(private_key_bytes)

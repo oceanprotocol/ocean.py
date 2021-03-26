@@ -5,7 +5,7 @@
 import logging
 
 from typing import Optional
-from enforce_typing import enforce_types
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.assets.asset_resolver import resolve_asset
@@ -22,7 +22,7 @@ from ocean_utils.agreements.service_types import ServiceTypes
 logger = logging.getLogger("ocean")
 
 
-@enforce_types
+@enforce_types_shim
 class OceanCompute:
 
     """Ocean assets class."""

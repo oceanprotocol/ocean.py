@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
-from enforce_typing import enforce_types
 
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
@@ -19,7 +19,7 @@ from scipy.interpolate import interp1d
 logger = logging.getLogger(__name__)
 
 
-@enforce_types
+@enforce_types_shim
 class OceanPool:
 
     """

@@ -7,7 +7,7 @@ import logging
 import os
 
 from typing import Optional, Type
-from enforce_typing import enforce_types
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -18,7 +18,7 @@ from ocean_utils.agreements.service_types import ServiceTypes
 logger = logging.getLogger(__name__)
 
 
-@enforce_types
+@enforce_types_shim
 def download_asset_files(
     service_index: int,
     asset: Asset,

@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from collections import namedtuple
+
 from typing import Optional
-from enforce_typing import enforce_types
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -16,7 +17,7 @@ FixedExchangeData = namedtuple(
 )
 
 
-@enforce_types
+@enforce_types_shim
 class FixedRateExchange(ContractBase):
 
     """

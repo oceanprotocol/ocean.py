@@ -10,7 +10,7 @@ import lzma
 import os
 
 from typing import Optional
-from enforce_typing import enforce_types
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 
 from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import Asset
@@ -41,7 +41,7 @@ from plecos import plecos
 logger = logging.getLogger("ocean")
 
 
-@enforce_types
+@enforce_types_shim
 class OceanAssets:
 
     """Ocean assets class."""
