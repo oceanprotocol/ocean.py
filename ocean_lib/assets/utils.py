@@ -1,8 +1,11 @@
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 import hashlib
 import json
 
 from ocean_lib.assets.asset import Asset
-
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_utils.agreements.service_types import ServiceTypes
 
@@ -22,10 +25,13 @@ def generate_trusted_algo_dict(
     return {
         "did": ddo.did,
         "filesChecksum": create_checksum(
-            algo_metadata["encryptedFiles"] + json.dumps(algo_metadata["main"]["files"])
+            algo_metadata["encryptedFiles"]
+            + json.dumps(algo_metadata["main"]["files"], separators=(",", ":"))
         ),
         "containerSectionChecksum": create_checksum(
-            json.dumps(algo_metadata["main"]["algorithm"]["container"])
+            json.dumps(
+                algo_metadata["main"]["algorithm"]["container"], separators=(",", ":")
+            )
         ),
     }
 
