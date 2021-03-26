@@ -36,17 +36,6 @@ def setup_all(request):
         return
     config = ExampleConfig.get_config()
     ConfigProvider.set_config(config)
-
-    # Monkey patch the enforce_types decorator into a no-op
-    if not config["util"].getboolean("typecheck"):
-
-        def noop(f):
-            return f
-
-        from enforce_typing import enforce_types
-
-        enforce_types = noop
-
     Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
     ContractHandler.set_artifacts_path(config.artifacts_path)
 
