@@ -28,3 +28,8 @@ class ConfigProvider:
         :return:  New Config instance.
         """
         ConfigProvider._config = config
+
+    @staticmethod
+    def peek_config():
+        """Get a Config instance or None if set_config has not been called."""
+        return ConfigProvider._config

@@ -4,7 +4,7 @@
 #
 
 import pytest
-from ocean_lib.enforce_typing2 import enforce_types
+from enforce_typing import enforce_types
 
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -50,7 +50,6 @@ def test_main(network, alice_wallet, alice_address, dtfactory_address, alice_oce
 
     # test super-simple functionality of child
     factory = MyFactory(dtfactory_address)
-    print(enforce_types)
     factory.createToken("foo_blob", "DT1", "DT1", to_base_18(1000), alice_wallet)
 
     # test attributes

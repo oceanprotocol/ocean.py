@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import os
-from enforce_typing import enforce_types
 
+from ocean_lib.enforce_typing2 import enforce_types2
 from ocean_lib.config import Config
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.bfactory import BFactory
@@ -123,23 +123,23 @@ def get_contracts_addresses(network, config):
     return addresses or {}
 
 
-@enforce_types
+@enforce_types2
 def to_base_18(amt: float) -> int:
     return to_base(amt, 18)
 
 
-@enforce_types
+@enforce_types2
 def to_base(amt: float, dec: int) -> int:
     """Returns value in e.g. wei (taking e.g. ETH as input)."""
     return int(amt * 1 * 10 ** dec)
 
 
-@enforce_types
+@enforce_types2
 def from_base_18(num_base: int) -> float:
     return from_base(num_base, 18)
 
 
-@enforce_types
+@enforce_types2
 def from_base(num_base: int, dec: int) -> float:
     """Returns value in e.g. ETH (taking e.g. wei as input)."""
     return float(num_base / (10 ** dec))
