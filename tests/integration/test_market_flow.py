@@ -171,12 +171,6 @@ def test_payer_market_flow():
             _order_tx_id,
             another_consumer_ocean.config.downloads_path,
         )
-
-    downloaded_file = os.path.join(
-        asset_folder, os.path.join(f"datafile.{asset.asset_id}.{sa.index}")
-    )
-    assert os.path.exists(asset_folder)
-    assert downloaded_file.split("/")[-1] in os.listdir(asset_folder)
     assert len(os.listdir(asset_folder)) >= 1
 
     orders = consumer_ocean.get_user_orders(consumer_wallet.address, asset.asset_id)

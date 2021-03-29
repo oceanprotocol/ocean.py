@@ -14,7 +14,7 @@ class CustomContractFunction:
         """Initializes CustomContractFunction."""
         self._contract_function = contract_function
 
-    def transact(self, transaction=None):
+    def transact(self, transaction):
         """Customize calling smart contract transaction functions.
 
         Use `personal_sendTransaction` instead of `eth_sendTransaction` and to estimate gas limit.
@@ -28,10 +28,7 @@ class CustomContractFunction:
             `personal_sendTransaction` requirements.
         :return: hex str transaction hash
         """
-        if transaction is None:
-            transact_transaction = {}
-        else:
-            transact_transaction = dict(**transaction)
+        transact_transaction = dict(**transaction)
 
         if "data" in transact_transaction:
             raise ValueError("Cannot set data in transact transaction")
