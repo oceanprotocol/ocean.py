@@ -1,11 +1,13 @@
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 import hashlib
 import json
 
-from ocean_lib.enforce_typing_shim import enforce_types_shim
-
 from ocean_lib.assets.asset import Asset
-
 from ocean_lib.assets.asset_resolver import resolve_asset
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_utils.agreements.service_types import ServiceTypes
 
 

@@ -4,9 +4,9 @@
 #
 import os
 
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.config import Config
 from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.env_constants import (

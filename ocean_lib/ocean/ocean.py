@@ -7,11 +7,11 @@
 import logging
 import os
 
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 from eth_utils import remove_0x_prefix
 from ocean_lib.config import Config
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange

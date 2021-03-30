@@ -5,12 +5,11 @@
 
 import logging
 import os
-
 from typing import Optional, Type
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_utils.agreements.service_types import ServiceTypes

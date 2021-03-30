@@ -11,9 +11,9 @@ import re
 from collections import namedtuple
 from json import JSONDecodeError
 
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.exceptions import InvalidURLException
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg

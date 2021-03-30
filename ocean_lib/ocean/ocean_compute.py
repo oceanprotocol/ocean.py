@@ -3,13 +3,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
-
 from typing import Optional
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 
-from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.assets.asset_resolver import resolve_asset
+from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg

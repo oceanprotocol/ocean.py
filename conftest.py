@@ -3,26 +3,29 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+"""isort:skip_file"""
+
 import uuid
 
 import pytest
+from ocean_lib.config_provider import ConfigProvider
 
 # Setup ocean_lib.enforce_typing_shim before importing anything that uses it
 from ocean_lib.enforce_typing_shim import setup_enforce_typing_shim
+
 setup_enforce_typing_shim()
 
-from ocean_lib.config_provider import ConfigProvider
-from ocean_lib.example_config import ExampleConfig
-from ocean_lib.ocean.util import (
+from ocean_lib.example_config import ExampleConfig  # noqa: E402
+from ocean_lib.ocean.util import (  # noqa: E402
     get_ocean_token_address,
     get_web3_connection_provider,
     to_base_18,
 )
-from ocean_lib.web3_internal.contract_handler import ContractHandler
-from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_lib.web3_internal.web3helper import Web3Helper
-from tests.resources.ddo_helpers import get_metadata
-from tests.resources.helper_functions import (
+from ocean_lib.web3_internal.contract_handler import ContractHandler  # noqa: E402
+from ocean_lib.web3_internal.web3_provider import Web3Provider  # noqa: E402
+from ocean_lib.web3_internal.web3helper import Web3Helper  # noqa: E402
+from tests.resources.ddo_helpers import get_metadata  # noqa: E402
+from tests.resources.helper_functions import (  # noqa: E402
     get_consumer_ocean_instance,
     get_consumer_wallet,
     get_ganache_wallet,
@@ -30,6 +33,7 @@ from tests.resources.helper_functions import (
     get_publisher_wallet,
     setup_logging,
 )
+
 
 setup_logging()
 

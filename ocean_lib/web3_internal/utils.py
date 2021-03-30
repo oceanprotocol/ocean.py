@@ -5,11 +5,10 @@
 import logging
 from collections import namedtuple
 
-from ocean_lib.enforce_typing_shim import enforce_types_shim
-
 import eth_account
 import eth_keys
 import eth_utils
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from web3 import Web3
 
 Signature = namedtuple("Signature", ("v", "r", "s"))

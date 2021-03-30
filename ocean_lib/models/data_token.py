@@ -8,9 +8,9 @@ import time
 from collections import namedtuple
 
 import requests
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 from eth_utils import remove_0x_prefix
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.event_filter import EventFilter

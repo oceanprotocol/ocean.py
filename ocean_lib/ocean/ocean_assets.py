@@ -8,15 +8,14 @@ import copy
 import logging
 import lzma
 import os
-
 from typing import Optional
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 
 from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.data_provider.data_service_provider import OrderRequirements
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract

@@ -33,7 +33,7 @@ install_requirements = [
     "plecos",
     "cryptography==3.3.2",
     "scipy",
-    "enforce-typing"
+    "enforce-typing==1.0.0.post1"
     # web3 requires eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
