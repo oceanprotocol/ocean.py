@@ -35,7 +35,7 @@ class DTFactory(ContractBase):
 
         return logs[0] if logs else None
 
-    def get_token_minter(self, token_address):  # nosec
+    def get_token_minter(self, token_address):  # pylint: disable=no-self-use
         """Retrieves token minter.
 
         This function will be deprecated in the next major release.
