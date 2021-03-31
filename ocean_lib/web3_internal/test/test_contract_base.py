@@ -87,7 +87,7 @@ def test_static_functions():
 
 
 def test_gas_price(alice_wallet, dtfactory_address, monkeypatch):
-    monkeypatch.setenv("GAS_PRICE", 1)
+    monkeypatch.setenv("GAS_PRICE", "1")
     factory = MyFactory(dtfactory_address)
     assert factory.createToken(
         "foo_blob", "DT1", "DT1", to_base_18(1000.0), alice_wallet
