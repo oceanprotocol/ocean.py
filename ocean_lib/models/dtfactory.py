@@ -35,11 +35,12 @@ class DTFactory(ContractBase):
 
         return logs[0] if logs else None
 
-    def get_token_minter(self, token_address):  # pylint: disable=no-self-use
+    def get_token_minter(self, token_address):
         """Retrieves token minter.
 
         This function will be deprecated in the next major release.
         It's only kept for backwards compatibility."""
+        # pylint: disable=no-self-use
         from ocean_lib.models.data_token import DataToken  # isort:skip
 
         dt = DataToken(address=token_address)
