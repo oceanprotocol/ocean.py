@@ -28,7 +28,7 @@ def create_asset(ocean, publisher):
 
     asset = DDO(json_filename=sample_ddo_path)
     asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    my_secret_store = "http://myownsecretstore.com"  # nosec
+    my_secret_store = "http://myownsecretstore.com"
     auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
     return ocean.assets.create(asset.metadata, publisher, [auth_service])
 

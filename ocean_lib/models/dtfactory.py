@@ -40,7 +40,6 @@ class DTFactory(ContractBase):
 
         This function will be deprecated in the next major release.
         It's only kept for backwards compatibility."""
-        # pylint: disable=no-self-use
         from ocean_lib.models.data_token import DataToken  # isort:skip
 
         dt = DataToken(address=token_address)
