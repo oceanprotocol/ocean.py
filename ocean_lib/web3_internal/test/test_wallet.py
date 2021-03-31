@@ -25,7 +25,7 @@ def test_wallet_arguments():
     assert signed_message
 
     # Create wallet with encrypted key and password
-    password = "darksecret"
+    password = "darksecret"  # nosec
     encrypted_key = web3.eth.account.encrypt(private_key, password)
     w2 = Wallet(web3, encrypted_key=encrypted_key, password=password)
     assert w2.address == wallet.address

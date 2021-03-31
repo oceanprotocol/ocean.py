@@ -4,6 +4,7 @@
 #
 import logging
 
+from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_utils.data_store.storage_base import StorageBase
 
 logger = logging.getLogger(__name__)
@@ -62,13 +63,14 @@ class AuthTokensStorage(StorageBase):
         :return: tuple (signed_token, created_at)
         """
         try:
+            checksumAddress = Web3Provider.get_web3().toChecksumAddress(address)
             rows = [
                 row
                 for row in self._run_query(
                     f"""SELECT signed_token, created
                     FROM {self.AUTH_TOKENS_TABLE}
                     WHERE address=?;""",
-                    (address,),
+                    (checksumAddress,),
                 )
             ]
             token, timestamp = rows[0] if rows else (None, None)

@@ -62,7 +62,7 @@ def test_restore_token():
 
 def test_known_token():
     """Test that a known token is invalid if its address has been changed."""
-    token = (
+    token = (  # nosec
         "0x1d2741dee30e64989ef0203957c01b14f250f5d2f6ccb0c"
         "88c9518816e4fcec16f84e545094eb3f377b7e214ded22676"
         "fbde8ca2e41b4eb1b3565047ecd9acf300-1568372035"
