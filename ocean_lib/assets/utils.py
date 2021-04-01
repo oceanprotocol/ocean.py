@@ -1,9 +1,13 @@
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 import hashlib
 import json
 
 from ocean_lib.assets.asset import Asset
-
 from ocean_lib.assets.asset_resolver import resolve_asset
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_utils.agreements.service_types import ServiceTypes
 
 
@@ -11,6 +15,7 @@ def create_checksum(text):
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
+@enforce_types_shim
 def generate_trusted_algo_dict(
     did: str = None, metadata_store_url: str = None, ddo: Asset = None
 ):
@@ -30,6 +35,7 @@ def generate_trusted_algo_dict(
     }
 
 
+@enforce_types_shim
 def create_publisher_trusted_algorithms(dids: list, metadata_store_url: str) -> list:
     return [
         generate_trusted_algo_dict(did=did, metadata_store_url=metadata_store_url)
@@ -37,6 +43,7 @@ def create_publisher_trusted_algorithms(dids: list, metadata_store_url: str) -> 
     ]
 
 
+@enforce_types_shim
 def add_publisher_trusted_algorithm(
     dataset_did: str, algo_did: str, metadata_store_url: str
 ) -> list:
@@ -64,6 +71,7 @@ def add_publisher_trusted_algorithm(
     return trusted_algos
 
 
+@enforce_types_shim
 def remove_publisher_trusted_algorithm(
     dataset_did: str, algo_did: str, metadata_store_url: str
 ) -> list:

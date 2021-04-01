@@ -4,12 +4,14 @@
 #
 import warnings
 
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 from . import balancer_constants
 
 
+@enforce_types_shim
 class BFactory(ContractBase):
     CONTRACT_NAME = "BFactory"
 
