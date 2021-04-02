@@ -6,6 +6,7 @@ import os
 
 import pytest
 from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models import btoken
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.data_token import DataToken
@@ -161,6 +162,7 @@ def make_info(name, private_key_name):
     return info
 
 
+@enforce_types_shim
 def _deployAndMintToken(symbol: str, to_address: str) -> btoken.BToken:
     wallet = get_factory_deployer_wallet(_NETWORK)
     dt_address = DataToken.deploy(
@@ -170,7 +172,7 @@ def _deployAndMintToken(symbol: str, to_address: str) -> btoken.BToken:
         "Template Contract",
         "TEMPLATE",
         wallet.address,
-        to_base_18(1000),
+        to_base_18(1000.0),
         DTFactory.FIRST_BLOB,
         to_address,
     )
@@ -183,6 +185,6 @@ def _deployAndMintToken(symbol: str, to_address: str) -> btoken.BToken:
         )
     )
     token = DataToken(token_address)
-    token.mint(to_address, to_base_18(1000), wallet)
+    token.mint(to_address, to_base_18(1000.0), wallet)
 
     return btoken.BToken(token.address)

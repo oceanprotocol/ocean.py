@@ -3,11 +3,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
-
-from ocean_lib.assets.utils import create_publisher_trusted_algorithms
+from typing import Optional
 
 from ocean_lib.assets.asset_resolver import resolve_asset
+from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
@@ -20,6 +21,7 @@ from ocean_utils.agreements.service_types import ServiceTypes
 logger = logging.getLogger("ocean")
 
 
+@enforce_types_shim
 class OceanCompute:
 
     """Ocean assets class."""
@@ -239,9 +241,9 @@ class OceanCompute:
         self,
         input_datasets: list,
         consumer_wallet: Wallet,
-        nonce: [int, None] = None,
-        algorithm_did: [str, None] = None,
-        algorithm_meta: [AlgorithmMetadata, None] = None,
+        nonce: Optional[int] = None,
+        algorithm_did: Optional[str] = None,
+        algorithm_meta: Optional[AlgorithmMetadata] = None,
         algorithm_tx_id: str = None,
         algorithm_data_token: str = None,
         output: dict = None,

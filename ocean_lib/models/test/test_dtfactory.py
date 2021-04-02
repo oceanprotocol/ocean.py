@@ -12,7 +12,7 @@ def test_data_token_creation(alice_wallet, dtfactory_address):
     dtfactory = DTFactory(dtfactory_address)
 
     dt_address = dtfactory.createToken(
-        "foo_blob", "DT1", "DT1", to_base_18(1000), from_wallet=alice_wallet
+        "foo_blob", "DT1", "DT1", to_base_18(1000.0), from_wallet=alice_wallet
     )
     dt = DataToken(dtfactory.get_token_address(dt_address))
     assert isinstance(dt, DataToken)
@@ -25,7 +25,7 @@ def test_data_token_event_registered(alice_wallet, dtfactory_address, alice_ocea
     dtfactory = DTFactory(dtfactory_address)
 
     dt_address = dtfactory.createToken(
-        "foo_blob", "DT1", "DT1", to_base_18(1000), from_wallet=alice_wallet
+        "foo_blob", "DT1", "DT1", to_base_18(1000.0), from_wallet=alice_wallet
     )
     dt = DataToken(dtfactory.get_token_address(dt_address))
     block = alice_ocean.web3.eth.blockNumber
@@ -50,7 +50,7 @@ def test_get_token_minter(alice_wallet, dtfactory_address, alice_address):
     dtfactory = DTFactory(dtfactory_address)
 
     dt_address = dtfactory.createToken(
-        "foo_blob", "DT1", "DT1", to_base_18(1000), from_wallet=alice_wallet
+        "foo_blob", "DT1", "DT1", to_base_18(1000.0), from_wallet=alice_wallet
     )
     dt = DataToken(dtfactory.get_token_address(dt_address))
     dt.mint(alice_address, to_base_18(10.0), from_wallet=alice_wallet)

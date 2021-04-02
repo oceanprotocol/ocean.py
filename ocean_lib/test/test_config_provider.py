@@ -20,14 +20,14 @@ def test_set_config():
 
 def test_metadataCacheUri_version():
     """Tests that the Aquarius URL can use the custom metadataCacheUri key."""
-    config_dict = {"metadataCacheUri": "http://ItWorked.com", "network": "rinkeby"}
+    config_dict = {"metadataCacheUri": "http://ItWorked.com", "network": "ganache"}
     ocean_instance = Ocean(config=config_dict)
     assert "http://ItWorked.com" == ocean_instance.config.aquarius_url
 
 
 def test_metadataStoreUri_version():
     """Tests that the Aquarius URL can fallback on the custom metadataStoreUri key."""
-    config_dict = {"metadataStoreUri": "http://ItWorked.com", "network": "rinkeby"}
+    config_dict = {"metadataStoreUri": "http://ItWorked.com", "network": "ganache"}
     ocean_instance = Ocean(config=config_dict)
     assert "http://ItWorked.com" == ocean_instance.config.aquarius_url
 

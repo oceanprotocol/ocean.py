@@ -4,10 +4,12 @@
 #
 import logging
 
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 
+@enforce_types_shim
 class DTFactory(ContractBase):
     CONTRACT_NAME = "DTFactory"
     FIRST_BLOB = "https://example.com/dataset-1"

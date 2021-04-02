@@ -92,6 +92,9 @@ provider.address = 0x00bd138abd70e2f00903268f3db08f2d25677c9e
 
 storage.path = ocean_lib.db
 downloads.path = consume-downloads
+
+[util]
+typecheck = true
 ```
 
 In the work console:
@@ -271,7 +274,7 @@ In console:
 
 ```console
 #verify that the file is downloaded
-cd test3/datafile.0xAf07... 
+cd test3/datafile.0xAf07...
 ls branin.arff
 ```
 

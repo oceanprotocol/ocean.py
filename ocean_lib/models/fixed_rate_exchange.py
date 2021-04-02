@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from collections import namedtuple
+from typing import Optional
 
+from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
@@ -14,6 +16,7 @@ FixedExchangeData = namedtuple(
 )
 
 
+@enforce_types_shim
 class FixedRateExchange(ContractBase):
 
     """
@@ -51,13 +54,13 @@ class FixedRateExchange(ContractBase):
     def setRate(self, exchange_id: str, new_rate: int, from_wallet: Wallet) -> str:
         return self.send_transaction("setRate", (exchange_id, new_rate), from_wallet)
 
-    def activate(self, exchange_id: str, from_wallet: Wallet) -> [str, None]:
+    def activate(self, exchange_id: str, from_wallet: Wallet) -> Optional[str]:
         if self.isActive(exchange_id):
             return
 
         return self.send_transaction("toggleExchangeState", (exchange_id,), from_wallet)
 
-    def deactivate(self, exchange_id: str, from_wallet: Wallet) -> [str, None]:
+    def deactivate(self, exchange_id: str, from_wallet: Wallet) -> Optional[str]:
         if not self.isActive(exchange_id):
             return
 

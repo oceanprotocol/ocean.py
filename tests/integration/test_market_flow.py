@@ -49,7 +49,7 @@ def test_market_flow(order_type):
     ######
     # Give the consumer some datatokens so they can order the service
     try:
-        tx_id = dt.transfer_tokens(consumer_wallet.address, 10, pub_wallet)
+        tx_id = dt.transfer_tokens(consumer_wallet.address, 10.0, pub_wallet)
         dt.verify_transfer_tx(tx_id, pub_wallet.address, consumer_wallet.address)
     except (AssertionError, Exception) as e:
         print(e)
@@ -137,7 +137,7 @@ def test_payer_market_flow():
     ######
     # Give the consumer some datatokens so they can order the service
     try:
-        tx_id = dt.transfer_tokens(consumer_wallet.address, 10, pub_wallet)
+        tx_id = dt.transfer_tokens(consumer_wallet.address, 10.0, pub_wallet)
         dt.verify_transfer_tx(tx_id, pub_wallet.address, consumer_wallet.address)
     except (AssertionError, Exception) as e:
         print(e)
