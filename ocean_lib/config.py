@@ -86,9 +86,7 @@ config_defaults = {
         NAME_AUTH_TOKEN_EXPIRATION: "",
         NAME_PROVIDER_ADDRESS: "",
     },
-    "util": {
-        NAME_TYPECHECK: DEFAULT_TYPECHECK,
-    },
+    "util": {NAME_TYPECHECK: DEFAULT_TYPECHECK},
 }
 
 

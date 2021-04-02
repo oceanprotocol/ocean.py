@@ -10,7 +10,6 @@ import time
 
 import coloredlogs
 import yaml
-
 from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.ocean import Ocean
