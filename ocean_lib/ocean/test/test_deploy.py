@@ -4,8 +4,8 @@
 #
 
 import os
-import pytest
 
+import pytest
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.btoken import BToken  # BToken is ERC20
