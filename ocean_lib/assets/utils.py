@@ -27,10 +27,13 @@ def generate_trusted_algo_dict(
     return {
         "did": ddo.did,
         "filesChecksum": create_checksum(
-            algo_metadata["encryptedFiles"] + json.dumps(algo_metadata["main"]["files"])
+            algo_metadata["encryptedFiles"]
+            + json.dumps(algo_metadata["main"]["files"], separators=(",", ":"))
         ),
         "containerSectionChecksum": create_checksum(
-            json.dumps(algo_metadata["main"]["algorithm"]["container"])
+            json.dumps(
+                algo_metadata["main"]["algorithm"]["container"], separators=(",", ":")
+            )
         ),
     }
 
