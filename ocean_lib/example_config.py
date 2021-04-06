@@ -32,9 +32,7 @@ class ExampleConfig:
                 "storage.path": "ocean_lib.db",
                 "downloads.path": "consume-downloads",
             },
-            "util": {
-                "typecheck": "false",
-            },
+            "util": {"typecheck": "false"},
         }
 
     @staticmethod

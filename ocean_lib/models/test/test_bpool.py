@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-
 from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
