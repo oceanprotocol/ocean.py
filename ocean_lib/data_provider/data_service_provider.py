@@ -11,6 +11,7 @@ import re
 from collections import namedtuple
 from json import JSONDecodeError
 
+import requests
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.exceptions import InvalidURLException
 from ocean_lib.enforce_typing_shim import enforce_types_shim
@@ -632,6 +633,14 @@ class DataServiceProvider:
                 f"Error invoking http method {method}: args={str(args)}, kwargs={str(kwargs)}"
             )
             raise
+
+    @staticmethod
+    def check_single_file_info(file_url, provider_uri=None):
+        _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
+        data = {"url": file_url}
+        response = requests.post(endpoint, json=data).json()
+        for file_info in response:
+            return file_info["valid"]
 
 
 def urljoin(*args):

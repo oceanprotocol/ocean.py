@@ -14,7 +14,10 @@ from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
-from ocean_lib.data_provider.data_service_provider import OrderRequirements
+from ocean_lib.data_provider.data_service_provider import (
+    DataServiceProvider,
+    OrderRequirements,
+)
 from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
@@ -162,6 +165,13 @@ class OceanAssets:
             msg = f"Metadata has validation errors: {errors}"
             logger.error(msg)
             raise ValueError(msg)
+
+        urls = [item["url"] for item in metadata["main"]["files"]]
+        for url in urls:
+            if not DataServiceProvider.check_single_file_info(url, provider_uri):
+                msg = f"Some files can not be accessed: {url}."
+                logger.error(msg)
+                raise ValueError(msg)
 
         service_descriptors = service_descriptors or []
 
