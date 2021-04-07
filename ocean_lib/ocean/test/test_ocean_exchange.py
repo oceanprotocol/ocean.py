@@ -76,4 +76,10 @@ def test_ocean_exchange(publisher_ocean_instance):
         is True
     ), "buy datatokens failed"
 
-    print("-------- all good --------")
+    assert ox.setRate(1.0, bob_wallet, exchange_id=x_id)
+    rate = 1.0
+    # re-evaluate with new rate
+    base_token_amount = ox.get_quote(2.0, exchange_id=x_id)
+    assert (
+        base_token_amount == 2.0 * rate
+    ), f"unexpected quote of base token {base_token_amount}, should be {2.0*rate}."
