@@ -125,7 +125,7 @@ class Config(configparser.ConfigParser):
         self._web3_provider = None
         self._section_name = "eth-network"
         self._logger = logging.getLogger("config")
-        
+
         if filename:
             self._logger.debug(f"Config: loading config file {filename}")
             with open(filename) as fp:
