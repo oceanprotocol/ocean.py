@@ -36,7 +36,7 @@ def test_metadataStoreUri_version():
     assert "http://ItWorked.com" == ocean_instance.config.aquarius_url
 
 
-def test_config__filename_given__file_doesnt_exist():
+def test_config_filename_given_file_doesnt_exist():
     """Test creating a Config object.
     Setup: filename given, file doesn't exist
     Expect: complain
@@ -48,7 +48,7 @@ def test_config__filename_given__file_doesnt_exist():
         config = Config(filename=config_file_name)
 
 
-def test_config__filename_given__file_exists__malformed_content(monkeypatch, tmp_path):
+def test_config_filename_given_file_exists_malformed_content(monkeypatch, tmp_path):
     """Test creating a Config object.
     Setup: filename given, file exists, malformed content
     Expect: complain
@@ -60,7 +60,7 @@ def test_config__filename_given__file_exists__malformed_content(monkeypatch, tmp
         config = Config()
 
 
-def test_config__filename_given__file_exists__wellformed_content():
+def test_config_filename_given_file_exists_wellformed_content():
     """Test creating a Config object.
     Setup: filename given, file exists, content is well-formed
     Expect: success
@@ -75,7 +75,7 @@ def test_config__filename_given__file_exists__wellformed_content():
     assert isinstance(config.gas_limit, int)
 
 
-def test_config__filename_not_given__envvar_is_empty(monkeypatch):
+def test_config_filename_not_given_envvar_is_empty(monkeypatch):
     """Test creating a Config object.
     Setup: filename not given, envvar is empty
     Expect: complain
@@ -85,7 +85,7 @@ def test_config__filename_not_given__envvar_is_empty(monkeypatch):
         config = Config()
 
 
-def test_config__filename_not_given__file_doesnt_exist(monkeypatch):
+def test_config_filename_not_given_file_doesnt_exist(monkeypatch):
     """Test creating a Config object.
     Setup: filename not given, default file doesn't exist
     Expect: complain
@@ -98,7 +98,7 @@ def test_config__filename_not_given__file_doesnt_exist(monkeypatch):
         config = Config()
 
 
-def test_config__filename_not_given__file_exists__malformed_content(
+def test_config_filename_not_given_file_exists_malformed_content(
     monkeypatch, tmp_path
 ):
     """Test creating a Config object.
@@ -112,7 +112,7 @@ def test_config__filename_not_given__file_exists__malformed_content(
         config = Config()
 
 
-def test_config__filename_not_given__file_exists__wellformed_content(monkeypatch):
+def test_config_filename_not_given_file_exists_wellformed_content(monkeypatch):
     """Test creating a Config object.
     Setup: filename not given, default file exists, content is well-formed
     Expect: success. Uses config file at ENV_CONFIG_FILE.
@@ -135,7 +135,7 @@ def _create_malformed_conffile(tmp_path):
     return config_file_name
 
 
-def test_config__from_text__wellformed_content():
+def test_config_from_text_wellformed_content():
     """Tests creating Config object.
     Setup: from raw text, content is well-formed
     Expect: success
@@ -148,7 +148,7 @@ def test_config__from_text__wellformed_content():
     assert config.aquarius_url == "https://another-aqua.url"
 
 
-def test_config__from_text__malformed_content():
+def test_config_from_text_malformed_content():
     """Tests creating Config object.
     Setup: from raw text, content is malformed
     Expect: complain
