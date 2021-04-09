@@ -139,6 +139,8 @@ class Config(configparser.ConfigParser):
             self.read_dict(options_dict)
         else:
             filename = os.getenv(ENV_CONFIG_FILE)
+            if filename is None:
+                raise ValueError(f'Config file envvar "{ENV_CONFIG_FILE}" is empty')
             self._logger.debug(f"Config: loading config file {filename}")
             with open(filename) as fp:
                 text = fp.read()
