@@ -27,6 +27,23 @@ class OceanExchange:
         ocean_amount_base = exchange.get_base_token_quote(exchange_id, amount_base)
         return from_base_18(ocean_amount_base)
 
+    def get_exchange_id_fallback_dt_and_owner(
+        self, exchange_id, exchange_owner, data_token
+    ):
+        exchange = self._exchange_contract()
+
+        if exchange_id:
+            return exchange, exchange_id
+
+        assert (
+            exchange_owner and data_token
+        ), "exchange_owner and data_token are required when exchange_id is not given."
+
+        return (
+            exchange,
+            exchange.generateExchangeId(self.ocean_address, data_token, exchange_owner),
+        )
+
     def buy_at_fixed_rate(
         self,
         amount: float,
@@ -37,14 +54,9 @@ class OceanExchange:
         exchange_owner: str = "",
     ) -> bool:
 
-        exchange = self._exchange_contract()
-        if not exchange_id:
-            assert (
-                exchange_owner and data_token
-            ), "exchange_owner and data_token are required when exchange_id is not given."
-            exchange_id = exchange.generateExchangeId(
-                self.ocean_address, data_token, exchange_owner
-            )
+        exchange, exchange_id = self.get_exchange_id_fallback_dt_and_owner(
+            exchange_id, exchange_owner, data_token
+        )
 
         amount_base = to_base_18(amount)
         max_OCEAN_amount_base = to_base_18(max_OCEAN_amount)
@@ -88,3 +100,30 @@ class OceanExchange:
         )
 
         return exchange_id
+
+    def setRate(
+        self,
+        new_rate: float,
+        wallet: Wallet,
+        exchange_id: str = "",
+        data_token: str = "",
+        exchange_owner: str = "",
+    ) -> bool:
+        assert new_rate > 0, "Invalid exchange rate, must be > 0"
+        exchange_rate_base = to_base_18(new_rate)
+
+        exchange, exchange_id = self.get_exchange_id_fallback_dt_and_owner(
+            exchange_id, exchange_owner, data_token
+        )
+
+        tx_id = exchange.setRate(exchange_id, exchange_rate_base, from_wallet=wallet)
+        # get tx receipt
+        tx_receipt = exchange.get_tx_receipt(tx_id)
+        # get event log from receipt
+        logs = exchange.contract.events.ExchangeRateChanged().processReceipt(tx_receipt)
+        if not logs:
+            raise AssertionError(
+                f"Set rate for exchange_id {exchange_id} failed, transaction receipt for tx {tx_id} is not found."
+            )
+
+        return True
