@@ -148,7 +148,7 @@ def test_config__from_text__wellformed_content():
     assert config.aquarius_url == "https://another-aqua.url"
 
 
-def test_config__from_text__malfformed_content():
+def test_config__from_text__malformed_content():
     """Tests creating Config object.
     Setup: from raw text, content is malformed
     Expect: complain
