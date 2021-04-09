@@ -16,7 +16,7 @@ repos:
     hooks:
     - id: flake8
 -   repo: https://github.com/johann-petrak/licenseheaders.git
-    rev: version-0.8.x
+    rev: v0.8.8
     hooks:
     - id: licenseheaders
       args: ["-t", ".copyright.tmpl", "-f"]
