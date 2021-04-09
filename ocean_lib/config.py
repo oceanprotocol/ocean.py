@@ -9,6 +9,7 @@ import os
 import site
 from pathlib import Path
 
+from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
 
 DEFAULT_NETWORK_HOST = "localhost"
@@ -124,7 +125,7 @@ class Config(configparser.ConfigParser):
         self._web3_provider = None
         self._section_name = "eth-network"
         self._logger = logging.getLogger("config")
-
+        
         if filename:
             self._logger.debug(f"Config: loading config file {filename}")
             with open(filename) as fp:
@@ -136,6 +137,12 @@ class Config(configparser.ConfigParser):
         elif options_dict:
             self._logger.debug(f"Config: loading from dict {options_dict}")
             self.read_dict(options_dict)
+        else:
+            filename = os.getenv(ENV_CONFIG_FILE)
+            self._logger.debug(f"Config: loading config file {filename}")
+            with open(filename) as fp:
+                text = fp.read()
+                self.read_string(text)
 
         self._load_environ()
 
