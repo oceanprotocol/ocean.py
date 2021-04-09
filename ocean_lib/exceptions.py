@@ -54,3 +54,22 @@ class FailedToCreateNewPool(Exception):
     Failed to setup and create new ocean-datatoken pool
     """
     pass
+
+
+class FailedToCreateExchange(Exception):
+    """
+    Failed create new exchange
+    """
+    pass
+
+class FailedToSetExchangeRate(Exception):
+    """
+    Failed set exchange rate
+    """
+    pass
+
+class AmountOfOceanTokensExceedsMaxLimit(Exception):
+    """
+    Buying X datatokens requires Y OCEAN which exceeds the max OCEAN limit.
+    """
+    pass

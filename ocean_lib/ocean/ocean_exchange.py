@@ -2,6 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from ocean_lib.exceptions import FailedToCreateExchange, FailedToSetExchangeRate, AmountOfOceanTokensExceedsMaxLimit
 from ocean_lib.config import Config
 from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models.data_token import DataToken
@@ -64,7 +65,7 @@ class OceanExchange:
         # Figure out the amount of ocean tokens to approve before triggering the exchange function to do the swap
         ocean_amount_base = exchange.get_base_token_quote(exchange_id, amount_base)
         if ocean_amount_base > max_OCEAN_amount_base:
-            raise AssertionError(
+            raise AmountOfOceanTokensExceedsMaxLimit(
                 f"Buying {amount} datatokens requires {from_base_18(ocean_amount_base)} OCEAN "
                 f"tokens which exceeds the max_OCEAN_amount {max_OCEAN_amount}."
             )
@@ -89,7 +90,7 @@ class OceanExchange:
         # get event log from receipt
         logs = exchange.contract.events.ExchangeCreated().processReceipt(tx_receipt)
         if not logs:
-            raise AssertionError(
+            raise FailedToCreateExchange(
                 f"Create new datatoken exchange failed, transaction receipt for tx {tx_id} is not found."
             )
 
@@ -122,7 +123,7 @@ class OceanExchange:
         # get event log from receipt
         logs = exchange.contract.events.ExchangeRateChanged().processReceipt(tx_receipt)
         if not logs:
-            raise AssertionError(
+            raise FailedToSetExchangeRate(
                 f"Set rate for exchange_id {exchange_id} failed, transaction receipt for tx {tx_id} is not found."
             )
 
