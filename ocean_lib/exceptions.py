@@ -48,3 +48,9 @@ class FailedToOrder(Exception):
     The datatoken balance balance is not sufficient
     """
     pass
+
+class FailedToCreateNewPool(Exception):
+    """
+    Failed to setup and create new ocean-datatoken pool
+    """
+    pass
