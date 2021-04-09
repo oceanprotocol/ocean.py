@@ -2,7 +2,11 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from ocean_lib.exceptions import FailedToCreateExchange, FailedToSetExchangeRate, AmountOfOceanTokensExceedsMaxLimit
+from ocean_lib.exceptions import (
+    FailedToCreateExchange,
+    FailedToSetExchangeRate,
+    AmountOfOceanTokensExceedsMaxLimit,
+)
 from ocean_lib.config import Config
 from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models.data_token import DataToken
