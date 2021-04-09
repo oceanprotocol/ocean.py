@@ -9,12 +9,19 @@ from ocean_lib.web3_internal.utils import (
 )
 
 
-def test_generate_multi_value_hash(alice_address):
+def test_generate_multi_value_hash(alice_address, alice_private_key):
     with pytest.raises(AssertionError):
         generate_multi_value_hash(["more", "types", "than"], ["values"])
 
-    expected = "0x6d59f15c5814d9fddd2e69d1f6f61edd0718e337c41ec74011900c0d736a9fec"
-    assert generate_multi_value_hash(["address"], [alice_address]).hex() == expected
+    # Tested with TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+    expected = "0x7ba270cc76c2dde25e744613ec459be48c8130f6f996b66f8df1b60662f60cea"
+    assert (
+        alice_private_key
+        == "0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58"
+    )
+    assert alice_address == "0xe2DD09d719Da89e5a3D0F2549c7E24566e947260"
+    tested = generate_multi_value_hash(["address"], [alice_address]).hex()
+    assert tested == expected
 
 
 def test_prepare_fixed_hash():
