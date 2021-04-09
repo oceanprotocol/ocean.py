@@ -26,5 +26,4 @@ def enforce_types_shim(func):
 
     if typecheck:
         return enforce_types(func)
-    else:
-        return func
+    return func
