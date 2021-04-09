@@ -14,7 +14,7 @@ from tests.resources.helper_functions import get_publisher_wallet
 
 
 def test_values(publisher_ocean_instance, metadata):
-    """Test the value property."""
+    """Tests the value property."""
     publisher = get_publisher_wallet()
     metadata_copy = metadata.copy()
 
@@ -25,12 +25,12 @@ def test_values(publisher_ocean_instance, metadata):
     assert ddo_values is not None
     for key, value in ddo_values.items():
         assert key == "dataToken"
-        assert value.startswith("0x") is True
+        assert value.startswith("0x")
         assert ddo_values[key] is not None
 
 
 def test_trusted_algorithms(publisher_ocean_instance):
-    """Test if the trusted algorithms list is returned correctly."""
+    """Tests if the trusted algorithms list is returned correctly."""
     publisher = get_publisher_wallet()
     provider_uri = ConfigProvider.get_config().provider_url
 
@@ -53,18 +53,20 @@ def test_trusted_algorithms(publisher_ocean_instance):
 
     assert trusted_algorithms is not None
     assert len(trusted_algorithms) >= 1
-    for i in range(0, len(trusted_algorithms)):
-        assert trusted_algorithms[i]["did"] == algorithm_ddo.did
-        assert "filesChecksum" and "containerSectionChecksum" in trusted_algorithms[i]
+    for index, trusted_algorithm in enumerate(trusted_algorithms, 0):
+        assert trusted_algorithm["did"] == algorithm_ddo.did
+        assert "filesChecksum" and "containerSectionChecksum" in trusted_algorithm
         assert (
-            trusted_algorithms[i]["filesChecksum"]
-            == privacy_dict["publisherTrustedAlgorithms"][i]["filesChecksum"]
+            trusted_algorithm["filesChecksum"]
+            == privacy_dict["publisherTrustedAlgorithms"][index]["filesChecksum"]
         )
         assert (
-            trusted_algorithms[i]["containerSectionChecksum"]
-            == privacy_dict["publisherTrustedAlgorithms"][i]["containerSectionChecksum"]
+            trusted_algorithm["containerSectionChecksum"]
+            == privacy_dict["publisherTrustedAlgorithms"][index][
+                "containerSectionChecksum"
+            ]
         )
         assert (
-            trusted_algorithms[i]["did"]
-            == privacy_dict["publisherTrustedAlgorithms"][i]["did"]
+            trusted_algorithm["did"]
+            == privacy_dict["publisherTrustedAlgorithms"][index]["did"]
         )

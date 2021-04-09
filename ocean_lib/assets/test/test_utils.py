@@ -17,6 +17,7 @@ from ocean_lib.assets.utils import (
 
 
 def test_add_trusted_algorithm(publisher_ocean_instance):
+    """Tests adding trusted algorithms in the DDO metadata."""
     publisher = get_publisher_wallet()
 
     algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
@@ -44,6 +45,7 @@ def test_add_trusted_algorithm(publisher_ocean_instance):
 
 
 def test_add_trusted_algorithm_no_compute_service(publisher_ocean_instance, metadata):
+    """Handles if the DDO has or not a compute service."""
     publisher = get_publisher_wallet()
 
     algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
@@ -57,7 +59,7 @@ def test_add_trusted_algorithm_no_compute_service(publisher_ocean_instance, meta
     wait_for_ddo(publisher_ocean_instance, ddo.did)
     assert ddo is not None
 
-    _ = create_publisher_trusted_algorithms(
+    create_publisher_trusted_algorithms(
         [algorithm_ddo.did], publisher_ocean_instance.config.aquarius_url
     )
 
