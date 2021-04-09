@@ -2,6 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from ocean_utils.agreements.service_types import ServiceTypes
 
 from ocean_lib.config_provider import ConfigProvider
 from tests.resources.ddo_helpers import (
@@ -24,6 +25,7 @@ def test_values(publisher_ocean_instance, metadata):
     assert ddo_values is not None
     for key, value in ddo_values.items():
         assert key == "dataToken"
+        assert value.startswith("0x") is True
         assert ddo_values[key] is not None
 
 
@@ -46,8 +48,23 @@ def test_trusted_algorithms(publisher_ocean_instance):
     assert ddo is not None
 
     trusted_algorithms = ddo.get_trusted_algorithms()
+    service = ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
+    privacy_dict = service.attributes["main"].get("privacy", {})
 
     assert trusted_algorithms is not None
     assert len(trusted_algorithms) >= 1
-    assert trusted_algorithms[0]["did"] == algorithm_ddo.did
-    assert "filesChecksum" and "containerSectionChecksum" in trusted_algorithms[0]
+    for i in range(0, len(trusted_algorithms)):
+        assert trusted_algorithms[i]["did"] == algorithm_ddo.did
+        assert "filesChecksum" and "containerSectionChecksum" in trusted_algorithms[i]
+        assert (
+            trusted_algorithms[i]["filesChecksum"]
+            == privacy_dict["publisherTrustedAlgorithms"][i]["filesChecksum"]
+        )
+        assert (
+            trusted_algorithms[i]["containerSectionChecksum"]
+            == privacy_dict["publisherTrustedAlgorithms"][i]["containerSectionChecksum"]
+        )
+        assert (
+            trusted_algorithms[i]["did"]
+            == privacy_dict["publisherTrustedAlgorithms"][i]["did"]
+        )
