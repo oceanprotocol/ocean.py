@@ -25,6 +25,7 @@ from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib.web3_internal.web3helper import Web3Helper
+from ocean_lib.exceptions import *
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_utils.agreements.service_factory import ServiceDescriptor, ServiceFactory
 from ocean_utils.agreements.service_types import ServiceTypes
@@ -214,15 +215,15 @@ class OceanAssets:
             dt = DataToken(data_token_address)
             minter = dt.contract_concise.minter()
             if not minter:
-                raise AssertionError(
+                raise InvalidDatatokenContract(
                     f"datatoken address {data_token_address} does not seem to be a valid DataToken contract."
                 )
             elif minter.lower() != publisher_wallet.address.lower():
-                raise AssertionError(
+                raise InvalidDatatokenMinter(
                     f"Minter of datatoken {data_token_address} is not the same as the publisher."
                 )
             elif not dtfactory.verify_data_token(data_token_address):
-                raise AssertionError(
+                raise DatatokenNotFound(
                     f"datatoken address {data_token_address} is not found in the DTFactory events."
                 )
 
@@ -293,7 +294,7 @@ class OceanAssets:
                 del file["url"]
             metadata_copy["encryptedFiles"] = files_encrypted
         else:
-            raise AssertionError("Encrypting the files failed.")
+            raise FailedToEncryptDDOFiles("Encrypting the files failed.")
 
         logger.debug(
             f"Generated asset and services, DID is {asset.did},"
@@ -314,7 +315,7 @@ class OceanAssets:
                 publisher_wallet,
             )
             if not ddo_registry.verify_tx(tx_id):
-                raise AssertionError(
+                raise FailedToCreateDDO(
                     f"create DDO on-chain failed, transaction status is 0. Transaction hash is {tx_id}"
                 )
             logger.info("Asset/ddo published on-chain successfully.")
@@ -338,7 +339,7 @@ class OceanAssets:
                 publisher_wallet,
             )
             if not ddo_registry.verify_tx(tx_id):
-                raise AssertionError(
+                raise FailedToUpdateDDO(
                     f"update DDO on-chain failed, transaction status is 0. Transaction hash is {tx_id}"
                 )
             logger.info("Asset/ddo updated on-chain successfully.")
@@ -441,7 +442,7 @@ class OceanAssets:
             asset.did, initialize_url, consumer_address, sa.index, sa.type, dt_address
         )
         if not order_requirements:
-            raise AssertionError("Data service provider or service is not available.")
+            raise FailedToOrder("Data service provider or service is not available.")
 
         assert dt_address == order_requirements.data_token_address
         return order_requirements
@@ -472,7 +473,7 @@ class OceanAssets:
         dt = DataToken(token_address)
         balance = dt.balanceOf(from_wallet.address)
         if balance < amount_base:
-            raise AssertionError(
+            raise InsufficientDatatokenBalance(
                 f"Your token balance {balance} is not sufficient "
                 f"to execute the requested service. This service "
                 f"requires {amount_base} number of tokens."
