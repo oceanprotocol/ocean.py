@@ -18,12 +18,11 @@ def enforce_types_shim(func):
     try:
         c = ConfigProvider.get_config()
         typecheck = c["util"].getboolean("typecheck")
-        
-    except AssertionError: #handle if ConfigProvider.set_config() not done yet
+
+    except AssertionError:  # handle if ConfigProvider.set_config() not done yet
         typecheck = config_defaults["util"][NAME_TYPECHECK]
 
     if typecheck:
         return enforce_types(func)
     else:
         return func
-
