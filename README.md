@@ -44,7 +44,7 @@ This is in beta state and you can expect running into problems. If you run into 
 
 ### Simple Flow
 
-This stripped-down flow shows the essence of Ocean. Just downloading, no metadata.
+This stripped-down flow shows the essence of Ocean: simply creating a datatoken.
 
 [Go to simple flow](READMEs/datatokens-flow.md)
 
