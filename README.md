@@ -50,7 +50,7 @@ This stripped-down flow shows the essence of Ocean. Just downloading, no metadat
 
 ### Marketplace flow
 
-This batteries-included flow includes metadata, multiple services for one datatoken, and compute-to-data.
+This batteries-included flow includes metadata and datatoken pool.
 
 [Go to marketplace flow](READMEs/marketplace-flow.md)
 
