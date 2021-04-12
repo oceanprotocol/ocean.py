@@ -14,7 +14,7 @@ from tests.resources.helper_functions import get_publisher_wallet
 
 
 def test_values(publisher_ocean_instance, metadata):
-    """Tests the value property."""
+    """Tests if the DDO has the address for the data token given by 'values' property."""
     publisher = get_publisher_wallet()
     metadata_copy = metadata.copy()
 

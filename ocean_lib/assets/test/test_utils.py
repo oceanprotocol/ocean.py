@@ -46,7 +46,7 @@ def test_add_trusted_algorithm(publisher_ocean_instance):
 
 
 def test_add_trusted_algorithm_no_compute_service(publisher_ocean_instance, metadata):
-    """Handles if the DDO has or not a compute service."""
+    """Tests if the DDO has or not a compute service."""
     publisher = get_publisher_wallet()
 
     algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
