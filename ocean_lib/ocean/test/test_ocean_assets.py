@@ -73,8 +73,8 @@ def test_register_asset(publisher_ocean_instance):
     if "datePublished" in metadata["main"]:
         metadata["main"].pop("datePublished")
     assert (
-            ddo_dict["service"][0]["attributes"]["main"]["name"]
-            == original["service"][0]["attributes"]["main"]["name"]
+        ddo_dict["service"][0]["attributes"]["main"]["name"]
+        == original["service"][0]["attributes"]["main"]["name"]
     )
     assert ddo_dict["service"][1] == original["service"][1]
 
@@ -107,11 +107,11 @@ def test_register_asset(publisher_ocean_instance):
     _asset = wait_for_update(ocn, ddo.did, "name", _name)
     assert _asset, "Cannot read asset after update."
     assert (
-            _asset.metadata["main"]["name"] == _name
+        _asset.metadata["main"]["name"] == _name
     ), "updated asset does not have the new updated name !!!"
 
     assert (
-            ocn.assets.owner(ddo.did) == alice.address
+        ocn.assets.owner(ddo.did) == alice.address
     ), "asset owner does not seem correct."
 
     assert _get_num_assets(alice.address) == num_assets_owned + 1
@@ -130,30 +130,30 @@ def test_ocean_assets_search(publisher_ocean_instance, metadata):
     time.sleep(1)  # apparently changes are not instantaneous
     assert len(publisher_ocean_instance.assets.search(identifier)) == 1
     assert (
-            len(
-                publisher_ocean_instance.assets.query(
-                    {
-                        "query_string": {
-                            "query": identifier,
-                            "fields": ["service.attributes.main.name"],
-                        }
+        len(
+            publisher_ocean_instance.assets.query(
+                {
+                    "query_string": {
+                        "query": identifier,
+                        "fields": ["service.attributes.main.name"],
                     }
-                )
+                }
             )
-            == 1
+        )
+        == 1
     )
     assert (
-            len(
-                publisher_ocean_instance.assets.query(
-                    {
-                        "query_string": {
-                            "query": "Gorilla",
-                            "fields": ["service.attributes.main.name"],
-                        }
+        len(
+            publisher_ocean_instance.assets.query(
+                {
+                    "query_string": {
+                        "query": "Gorilla",
+                        "fields": ["service.attributes.main.name"],
                     }
-                )
+                }
             )
-            == 0
+        )
+        == 0
     )
 
 
@@ -232,6 +232,7 @@ def test_create_asset_with_address(publisher_ocean_instance):
 
 
 def test_create_asset_with_owner_address(publisher_ocean_instance):
+    """Tests creation of the asset which has already an owner address."""
     ocn = publisher_ocean_instance
     alice = get_publisher_wallet()
 
@@ -246,10 +247,16 @@ def test_create_asset_with_owner_address(publisher_ocean_instance):
     )
 
     assert ocn.assets.create(
-        asset.metadata, alice, [auth_service], owner_address=alice.address, data_token_address=token.address)
+        asset.metadata,
+        alice,
+        [auth_service],
+        owner_address=alice.address,
+        data_token_address=token.address,
+    )
 
 
 def test_create_asset_without_dt_address(publisher_ocean_instance):
+    """Tests creation of the asset which has not the data token address."""
     ocn = publisher_ocean_instance
     alice = get_publisher_wallet()
 
@@ -260,10 +267,16 @@ def test_create_asset_without_dt_address(publisher_ocean_instance):
     auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
 
     assert ocn.assets.create(
-        asset.metadata, alice, [auth_service], owner_address=alice.address, data_token_address=None)
+        asset.metadata,
+        alice,
+        [auth_service],
+        owner_address=alice.address,
+        data_token_address=None,
+    )
 
 
 def test_pay_for_service(publisher_ocean_instance):
+    """Tests if balance is lower than the purchased amount."""
     ocn = publisher_ocean_instance
     alice = get_publisher_wallet()
 
@@ -276,4 +289,6 @@ def test_pay_for_service(publisher_ocean_instance):
     )
 
     with pytest.raises(AssertionError):
-        ocn.assets.pay_for_service(10000000000000.0, token.address, asset.did, 0, ZERO_ADDRESS, alice)
+        ocn.assets.pay_for_service(
+            10000000000000.0, token.address, asset.did, 0, ZERO_ADDRESS, alice
+        )
