@@ -169,7 +169,7 @@ class OceanAssets:
         urls = [item["url"] for item in metadata["main"]["files"]]
         for url in urls:
             if not DataServiceProvider.check_single_file_info(url, provider_uri):
-                msg = f"The URL of this file can not be accessed: {url}."
+                msg = f"The URL of this service can not be accessed: {url}."
                 logger.error(msg)
                 raise ValueError(msg)
 
