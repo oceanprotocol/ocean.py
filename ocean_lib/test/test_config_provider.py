@@ -98,9 +98,7 @@ def test_config_filename_not_given_file_doesnt_exist(monkeypatch):
         config = Config()
 
 
-def test_config_filename_not_given_file_exists_malformed_content(
-    monkeypatch, tmp_path
-):
+def test_config_filename_not_given_file_exists_malformed_content(monkeypatch, tmp_path):
     """Test creating a Config object.
     Setup: no filename given, default file exists, content is malformed
     Expect: complain
