@@ -26,6 +26,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib.web3_internal.web3helper import Web3Helper
 from ocean_lib.exceptions import *
+from web3.exceptions import InvalidAddress, ValidationError
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_utils.agreements.service_factory import ServiceDescriptor, ServiceFactory
 from ocean_utils.agreements.service_types import ServiceTypes
@@ -215,11 +216,11 @@ class OceanAssets:
             dt = DataToken(data_token_address)
             minter = dt.contract_concise.minter()
             if not minter:
-                raise InvalidDatatokenContract(
+                raise InvalidAddress(
                     f"datatoken address {data_token_address} does not seem to be a valid DataToken contract."
                 )
             elif minter.lower() != publisher_wallet.address.lower():
-                raise InvalidDatatokenMinter(
+                raise ValidationError(
                     f"Minter of datatoken {data_token_address} is not the same as the publisher."
                 )
             elif not dtfactory.verify_data_token(data_token_address):
