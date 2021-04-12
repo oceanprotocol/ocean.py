@@ -7,7 +7,6 @@ import uuid
 
 import pytest
 from eth_utils import add_0x_prefix
-from ocean_utils.agreements.service_types import ServiceTypes
 
 from ocean_lib.models.data_token import DataToken
 from ocean_utils.agreements.service_factory import ServiceDescriptor
