@@ -12,7 +12,7 @@
         "contentType": "text/csv",
         "encoding": "UTF-8",
         "compression": "zip",
-        "url": "file/url"
+        "url": "https://s3.amazonaws.com/datacommons-seeding-us-east/10_Monkey_Species_Small/assets/training.zip"
       }
     ],
     "type": "dataset"
