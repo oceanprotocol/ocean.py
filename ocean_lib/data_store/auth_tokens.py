@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
+import os
 
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.sql_models import AuthToken
@@ -17,14 +18,27 @@ class AuthTokensStorage:
     AUTH_TOKENS_TABLE = "auth_tokens"
 
     def __init__(self, storage_path):
-        if storage_path == ":memory:":
+        if (
+            storage_path == ":memory:"
+            or ConfigProvider.get_config().storage_path == ":memory:"
+        ):
             _sql_engine = create_engine("sqlite://")
-        else:
-            # TODO: perhaps relative?
-            url = "sqlite:////" + ConfigProvider.get_config().storage_path
-            _sql_engine = create_engine(url)
+            return self._make_session(_sql_engine)
 
-        with _sql_engine.connect() as con:
+        if not storage_path:
+            storage_path = ConfigProvider.get_config().storage_path
+
+        if not os.path.exists(storage_path):
+            # TODO: not sure if this is ok, but if the storage path does not exist?
+            _sql_engine = create_engine("sqlite://")
+            return self._make_session(_sql_engine)
+
+        url = "sqlite:////" + storage_path
+        _sql_engine = create_engine(url)
+        return self._make_session(_sql_engine)
+
+    def _make_session(self, engine):
+        with engine.connect() as con:
             con.execute(
                 f"""CREATE TABLE IF NOT EXISTS {self.AUTH_TOKENS_TABLE} (
                         address VARCHAR PRIMARY KEY,
@@ -34,7 +48,7 @@ class AuthTokensStorage:
                  """
             )
 
-        Session = sessionmaker(bind=_sql_engine)
+        Session = sessionmaker(bind=engine)
         self.session = Session()
 
     def write_token(self, address, signed_token, created_at):
