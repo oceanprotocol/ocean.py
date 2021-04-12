@@ -4,14 +4,38 @@
 #
 import logging
 
+from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.sql_models import AuthToken
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_utils.data_store.storage_base import StorageBase
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
 
 logger = logging.getLogger(__name__)
 
 
-class AuthTokensStorage(StorageBase):
+class AuthTokensStorage:
     AUTH_TOKENS_TABLE = "auth_tokens"
+
+    def __init__(self, storage_path):
+        if storage_path == ":memory:":
+            _sql_engine = create_engine("sqlite://")
+        else:
+            # TODO: perhaps relative?
+            url = "sqlite:////" + ConfigProvider.get_config().storage_path
+            _sql_engine = create_engine(url)
+
+        with _sql_engine.connect() as con:
+            con.execute(
+                f"""CREATE TABLE IF NOT EXISTS {self.AUTH_TOKENS_TABLE} (
+                        address VARCHAR PRIMARY KEY,
+                        signed_token VARCHAR,
+                        created VARCHAR
+                    );
+                 """
+            )
+
+        Session = sessionmaker(bind=_sql_engine)
+        self.session = Session()
 
     def write_token(self, address, signed_token, created_at):
         """
@@ -25,16 +49,18 @@ class AuthTokensStorage(StorageBase):
             f"Writing token to `auth_tokens` storage: "
             f"account={address}, token={signed_token}"
         )
-        self._run_query(
-            f"""CREATE TABLE IF NOT EXISTS {self.AUTH_TOKENS_TABLE}
-               (address VARCHAR PRIMARY KEY, signed_token VARCHAR, created VARCHAR);"""
-        )
-        self._run_query(
-            f"""INSERT OR REPLACE
-                INTO {self.AUTH_TOKENS_TABLE}
-                VALUES (?,?,?)""",
-            [address, signed_token, created_at],
-        )
+
+        result = self.session.query(AuthToken).filter_by(address=address).first()
+
+        if not result:
+            result = AuthToken(
+                address=address, signed_token=signed_token, created=created_at
+            )
+
+        result.signed_token = signed_token
+        result.created = created_at
+        self.session.add(result)
+        self.session.commit()
 
     def update_token(self, address, signed_token, created_at):
         """
@@ -48,12 +74,17 @@ class AuthTokensStorage(StorageBase):
             f"Updating token already in `auth_tokens` storage: "
             f"account={address}, token={signed_token}"
         )
-        self._run_query(
-            f"""UPDATE {self.AUTH_TOKENS_TABLE}
-                SET signed_token=?, created=?
-                WHERE address=?""",
-            (signed_token, created_at, address),
-        )
+        result = self.session.query(AuthToken).filter_by(address=address).first()
+
+        if not result:
+            return None
+
+        result.signed_token = signed_token
+        result.created = created_at
+        self.session.add(result)
+        self.session.commit()
+
+        return result
 
     def read_token(self, address):
         """
@@ -62,24 +93,12 @@ class AuthTokensStorage(StorageBase):
         :param address: hex str the ethereum address that signed the token
         :return: tuple (signed_token, created_at)
         """
-        try:
-            checksumAddress = Web3Provider.get_web3().toChecksumAddress(address)
-            rows = [
-                row
-                for row in self._run_query(
-                    f"""SELECT signed_token, created
-                    FROM {self.AUTH_TOKENS_TABLE}
-                    WHERE address=?;""",
-                    (checksumAddress,),
-                )
-            ]
-            token, timestamp = rows[0] if rows else (None, None)
-            logger.debug(
-                f"Read auth token from `auth_tokens` storage: "
-                f"account={address}, token={token}"
-            )
-            return token, timestamp
+        checksum_address = Web3Provider.get_web3().toChecksumAddress(address)
+        result = (
+            self.session.query(AuthToken).filter_by(address=checksum_address).first()
+        )
 
-        except Exception as e:
-            logging.error(f"Error reading token: {e}")
-            return None, None
+        if result:
+            return result.signed_token, result.created
+
+        return None, None
