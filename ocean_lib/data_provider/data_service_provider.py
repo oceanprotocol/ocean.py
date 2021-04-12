@@ -10,8 +10,8 @@ import os
 import re
 from collections import namedtuple
 from json import JSONDecodeError
-
 import requests
+
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.exceptions import InvalidURLException
 from ocean_lib.enforce_typing_shim import enforce_types_shim
