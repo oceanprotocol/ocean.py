@@ -24,22 +24,6 @@ class DatatokenNotFound(Exception):
     pass
 
 
-class FailedToCreateDDO(Exception):
-    """
-    Failed to create DDO on-chain
-    """
-
-    pass
-
-
-class FailedToUpdateDDO(Exception):
-    """
-    Failed to update DDO on-chain
-    """
-
-    pass
-
-
 class FailedToEncryptDDOFiles(Exception):
     """
     Failed to encrypt ddo files
@@ -91,6 +75,30 @@ class FailedToSetExchangeRate(Exception):
 class AmountOfOceanTokensExceedsMaxLimit(Exception):
     """
     Buying X datatokens requires Y OCEAN which exceeds the max OCEAN limit.
+    """
+
+    pass
+
+
+class TransactionReverted(Exception):
+    """
+    Generic transaction revert error
+    """
+
+    pass
+
+
+class ProviderError(Exception):
+    """
+    Generic provider error
+    """
+
+    pass
+
+
+class AquariusError(Exception):
+    """
+    Generic aquarius error
     """
 
     pass

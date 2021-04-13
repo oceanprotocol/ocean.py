@@ -28,7 +28,11 @@ from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib.web3_internal.web3helper import Web3Helper
-from ocean_lib.exceptions import *
+from ocean_lib.exceptions import (
+    TransactionReverted,
+    FailedToEncryptDDOFiles,
+    FailedToOrder,
+)
 from web3.exceptions import InvalidAddress, ValidationError
 from ocean_utils.agreements.service_agreement import ServiceAgreement
 from ocean_utils.agreements.service_factory import ServiceDescriptor, ServiceFactory
@@ -326,7 +330,7 @@ class OceanAssets:
                 publisher_wallet,
             )
             if not ddo_registry.verify_tx(tx_id):
-                raise FailedToCreateDDO(
+                raise TransactionReverted(
                     f"create DDO on-chain failed, transaction status is 0. Transaction hash is {tx_id}"
                 )
             logger.info("Asset/ddo published on-chain successfully.")
@@ -350,7 +354,7 @@ class OceanAssets:
                 publisher_wallet,
             )
             if not ddo_registry.verify_tx(tx_id):
-                raise FailedToUpdateDDO(
+                raise TransactionReverted(
                     f"update DDO on-chain failed, transaction status is 0. Transaction hash is {tx_id}"
                 )
             logger.info("Asset/ddo updated on-chain successfully.")
