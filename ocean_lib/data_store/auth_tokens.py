@@ -23,7 +23,9 @@ class AuthTokensStorage:
             or ConfigProvider.get_config().storage_path == ":memory:"
         ):
             _sql_engine = create_engine("sqlite://")
-            return self._make_session(_sql_engine)
+            self._make_session(_sql_engine)
+
+            return
 
         if not storage_path:
             storage_path = ConfigProvider.get_config().storage_path
@@ -31,11 +33,14 @@ class AuthTokensStorage:
         if not os.path.exists(storage_path):
             # TODO: not sure if this is ok, but if the storage path does not exist?
             _sql_engine = create_engine("sqlite://")
-            return self._make_session(_sql_engine)
+            self._make_session(_sql_engine)
+
+            return
 
         url = "sqlite:////" + storage_path
         _sql_engine = create_engine(url)
-        return self._make_session(_sql_engine)
+
+        self._make_session(_sql_engine)
 
     def _make_session(self, engine):
         with engine.connect() as con:
