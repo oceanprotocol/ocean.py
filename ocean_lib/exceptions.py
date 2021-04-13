@@ -51,4 +51,3 @@ class AquariusError(Exception):
     """
     Generic aquarius error
     """
-
