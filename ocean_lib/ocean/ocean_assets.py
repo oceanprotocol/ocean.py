@@ -32,6 +32,8 @@ from ocean_lib.exceptions import (
     TransactionReverted,
     FailedToEncryptDDOFiles,
     FailedToOrder,
+    DatatokenNotFound,
+    InsufficientDatatokenBalance,
 )
 from web3.exceptions import InvalidAddress, ValidationError
 from ocean_utils.agreements.service_agreement import ServiceAgreement
