@@ -4,8 +4,6 @@ class ContractNotFound(Exception):
     in the factory events
     """
 
-    pass
-
 
 class DDOError(Exception):
     """
