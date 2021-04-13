@@ -22,15 +22,19 @@ def test_add_trusted_algorithm(publisher_ocean_instance):
     publisher = get_publisher_wallet()
 
     algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
-    _ = publisher_ocean_instance.assets.resolve(algorithm_ddo.did)
+    wait_for_ddo(publisher_ocean_instance, algorithm_ddo.did)
     assert algorithm_ddo is not None
+
+    algorithm_ddo_v2 = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
+    wait_for_ddo(publisher_ocean_instance, algorithm_ddo_v2.did)
+    assert algorithm_ddo_v2 is not None
 
     ddo = get_registered_ddo_with_compute_service(
         publisher_ocean_instance,
         publisher,
         trusted_algorithms=[algorithm_ddo.did],
     )
-    _ = publisher_ocean_instance.assets.resolve(ddo.did)
+    wait_for_ddo(publisher_ocean_instance, ddo.did)
     assert ddo is not None
 
     publisher_trusted_algorithms = create_publisher_trusted_algorithms(
@@ -38,11 +42,11 @@ def test_add_trusted_algorithm(publisher_ocean_instance):
     )
 
     new_publisher_trusted_algorithms = add_publisher_trusted_algorithm(
-        ddo.did, algorithm_ddo.did, publisher_ocean_instance.config.aquarius_url
+        ddo.did, algorithm_ddo_v2.did, publisher_ocean_instance.config.aquarius_url
     )
 
     assert new_publisher_trusted_algorithms is not None
-    assert len(new_publisher_trusted_algorithms) >= len(publisher_trusted_algorithms)
+    assert len(new_publisher_trusted_algorithms) > len(publisher_trusted_algorithms)
 
 
 def test_add_trusted_algorithm_no_compute_service(publisher_ocean_instance, metadata):
@@ -75,7 +79,7 @@ def test_remove_trusted_algorithm(publisher_ocean_instance):
     publisher = get_publisher_wallet()
 
     algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
-    _ = publisher_ocean_instance.assets.resolve(algorithm_ddo.did)
+    wait_for_ddo(publisher_ocean_instance, algorithm_ddo.did)
     assert algorithm_ddo is not None
 
     ddo = get_registered_ddo_with_compute_service(
@@ -83,7 +87,7 @@ def test_remove_trusted_algorithm(publisher_ocean_instance):
         publisher,
         trusted_algorithms=[algorithm_ddo.did],
     )
-    _ = publisher_ocean_instance.assets.resolve(ddo.did)
+    wait_for_ddo(publisher_ocean_instance, ddo.did)
     assert ddo is not None
 
     publisher_trusted_algorithms = create_publisher_trusted_algorithms(
@@ -95,4 +99,4 @@ def test_remove_trusted_algorithm(publisher_ocean_instance):
     )
 
     assert new_publisher_trusted_algorithms is not None
-    assert len(new_publisher_trusted_algorithms) <= len(publisher_trusted_algorithms)
+    assert len(new_publisher_trusted_algorithms) < len(publisher_trusted_algorithms)

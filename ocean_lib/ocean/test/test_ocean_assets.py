@@ -241,16 +241,11 @@ def test_create_asset_with_owner_address(publisher_ocean_instance):
     my_secret_store = "http://myownsecretstore.com"
     auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
 
-    token = ocn.create_data_token(
-        "DataToken1", "DT1", from_wallet=alice, blob="foo_blob"
-    )
-
     assert ocn.assets.create(
         asset.metadata,
         alice,
         [auth_service],
         owner_address=alice.address,
-        data_token_address=token.address,
     )
 
 
@@ -269,12 +264,11 @@ def test_create_asset_without_dt_address(publisher_ocean_instance):
         asset.metadata,
         alice,
         [auth_service],
-        owner_address=alice.address,
         data_token_address=None,
     )
 
 
-def test_pay_for_service(publisher_ocean_instance):
+def test_pay_for_service_insufficient_balance(publisher_ocean_instance):
     """Tests if balance is lower than the purchased amount."""
     ocn = publisher_ocean_instance
     alice = get_publisher_wallet()
