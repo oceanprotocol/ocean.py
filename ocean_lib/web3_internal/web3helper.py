@@ -5,6 +5,9 @@
 """Web3Helper module to provide convenient functions."""
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
+from decimal import Decimal
+
+from enforce_typing_shim import enforce_types_shim
 from eth_utils import big_endian_to_int
 from ocean_lib.web3_internal.utils import (
     add_ethereum_prefix_and_hash_msg,
@@ -16,6 +19,7 @@ from ocean_lib.web3_internal.web3_overrides.signature import SignatureFix
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 
+@enforce_types_shim
 class Web3Helper(object):
     """This class provides convenient web3 functions."""
 
@@ -28,6 +32,9 @@ class Web3Helper(object):
         42: "Kovan",
         100: "xDai",
     }
+
+    """Constant used to quantize decimal.Decimal to 18 digits of precision"""
+    PRECISION_18 = Decimal(10) ** -18
 
     @staticmethod
     def get_network_name(network_id=None):
@@ -105,8 +112,14 @@ class Web3Helper(object):
         )
 
     @staticmethod
-    def from_wei(wei_value):
-        return Web3Provider.get_web3().fromWei(wei_value, "ether")
+    def from_wei(value_in_wei: int) -> Decimal:
+        return Web3Provider.get_web3().fromWei(value_in_wei, "ether")
+
+    @staticmethod
+    def to_wei(value_in_ether: Decimal) -> int:
+        return Web3Provider.get_web3().toWei(
+            value_in_ether.quantize(Web3Helper.PRECISION_18), "ether"
+        )
 
     @staticmethod
     def generate_multi_value_hash(types, values):
