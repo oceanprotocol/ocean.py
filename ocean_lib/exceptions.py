@@ -1,7 +1,7 @@
 class ContractNotFound(Exception):
     """
-    Datatoken address is not found
-    in the datatoken factory events
+    Contract address is not found
+    in the factory events
     """
 
     pass
@@ -9,7 +9,7 @@ class ContractNotFound(Exception):
 
 class DDOError(Exception):
     """
-    Failed to encrypt ddo files
+    Generic DDO Error
     """
 
     pass
@@ -17,7 +17,7 @@ class DDOError(Exception):
 
 class InsufficientBalance(Exception):
     """
-    The datatoken balance balance is not sufficient
+    The token balance is not sufficient
     """
 
     pass
@@ -25,7 +25,7 @@ class InsufficientBalance(Exception):
 
 class AssetsError(Exception):
     """
-    The datatoken balance balance is not sufficient
+    Generic Assets Error
     """
 
     pass
@@ -49,7 +49,7 @@ class ExchangeError(Exception):
 
 class TransactionReverted(Exception):
     """
-    Generic transaction revert error
+    Generic Transaction Revert Error
     """
 
     pass
