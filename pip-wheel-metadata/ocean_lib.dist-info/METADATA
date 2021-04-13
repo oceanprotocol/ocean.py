@@ -1,0 +1,151 @@
+Metadata-Version: 2.1
+Name: ocean-lib
+Version: 0.5.16
+Summary: 🐳 Ocean protocol library.
+Home-page: https://github.com/oceanprotocol/ocean.py
+Author: leucothia
+Author-email: devops@oceanprotocol.com
+License: Apache Software License 2.0
+Keywords: ocean-lib
+Platform: UNKNOWN
+Classifier: Development Status :: 2 - Pre-Alpha
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: Apache Software License
+Classifier: Natural Language :: English
+Classifier: Programming Language :: Python :: 3.8
+Description-Content-Type: text/markdown
+Requires-Dist: ocean-contracts (==0.5.8)
+Requires-Dist: coloredlogs
+Requires-Dist: pyopenssl
+Requires-Dist: PyJWT
+Requires-Dist: PyYAML (==5.4.1)
+Requires-Dist: ocean-utils (==0.4.2)
+Requires-Dist: requests (>=2.21.0)
+Requires-Dist: deprecated
+Requires-Dist: pycryptodomex
+Requires-Dist: tqdm
+Requires-Dist: pytz
+Requires-Dist: web3 (==4.7.1)
+Requires-Dist: plecos
+Requires-Dist: cryptography (==3.3.2)
+Requires-Dist: scipy
+Requires-Dist: enforce-typing (==1.0.0.post1)
+Provides-Extra: dev
+Requires-Dist: bumpversion ; extra == 'dev'
+Requires-Dist: pkginfo ; extra == 'dev'
+Requires-Dist: twine ; extra == 'dev'
+Requires-Dist: watchdog ; extra == 'dev'
+Requires-Dist: flake8 ; extra == 'dev'
+Requires-Dist: isort ; extra == 'dev'
+Requires-Dist: black ; extra == 'dev'
+Requires-Dist: pre-commit ; extra == 'dev'
+Requires-Dist: pytest ; extra == 'dev'
+Requires-Dist: licenseheaders ; extra == 'dev'
+Requires-Dist: pytest-env ; extra == 'dev'
+Requires-Dist: codacy-coverage ; extra == 'dev'
+Requires-Dist: coverage ; extra == 'dev'
+Requires-Dist: docker ; extra == 'dev'
+Requires-Dist: mccabe ; extra == 'dev'
+Requires-Dist: pylint ; extra == 'dev'
+Requires-Dist: pytest-watch ; extra == 'dev'
+Requires-Dist: tox ; extra == 'dev'
+Requires-Dist: Sphinx ; extra == 'dev'
+Requires-Dist: sphinxcontrib-apidoc ; extra == 'dev'
+Provides-Extra: docs
+Requires-Dist: Sphinx ; extra == 'docs'
+Requires-Dist: sphinxcontrib-apidoc ; extra == 'docs'
+Provides-Extra: test
+Requires-Dist: codacy-coverage ; extra == 'test'
+Requires-Dist: coverage ; extra == 'test'
+Requires-Dist: docker ; extra == 'test'
+Requires-Dist: mccabe ; extra == 'test'
+Requires-Dist: pylint ; extra == 'test'
+Requires-Dist: pytest ; extra == 'test'
+Requires-Dist: pytest-watch ; extra == 'test'
+Requires-Dist: tox ; extra == 'test'
+
+<!--
+Copyright 2021 Ocean Protocol Foundation
+SPDX-License-Identifier: Apache-2.0
+-->
+
+[![banner](https://raw.githubusercontent.com/oceanprotocol/art/master/github/repo-banner%402x.png)](https://oceanprotocol.com)
+
+<h1 align="center">ocean.py</h1>
+
+> Python library to privately & securely publish, exchange, and consume data.
+
+[![Codacy Badge](https://app.codacy.com/project/badge/Grade/3abc62f24f0a4fe78c6aeb7dc16399a8)](https://www.codacy.com/gh/oceanprotocol/ocean.py/dashboard?utm_source=github.com\&utm_medium=referral\&utm_content=oceanprotocol/ocean.py\&utm_campaign=Badge_Grade)
+[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/3abc62f24f0a4fe78c6aeb7dc16399a8)](https://www.codacy.com/gh/oceanprotocol/ocean.py/dashboard?utm_source=github.com\&utm_medium=referral\&utm_content=oceanprotocol/ocean.py\&utm_campaign=Badge_Coverage)
+
+With ocean.py, you can:
+
+-   **Publish** data services: downloadable files or compute-to-data.
+    Ocean creates a new [ERC20](https://github.com/ethereum/EIPs/blob/7f4f0377730f5fc266824084188cc17cf246932e/EIPS/eip-20.md)
+    datatoken for each dataset / data service.
+-   **Mint** datatokens for the service
+-   **Sell** datatokens via an OCEAN-datatoken Balancer pool (for auto price discovery), or for a fixed price
+-   **Stake** OCEAN on datatoken pools
+-   **Consume** datatokens, to access the service
+-   **Transfer** datatokens to another owner, and **all other ERC20 actions**
+    using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-with-an-erc20-token-contract) etc.
+
+ocean.py is part of the [Ocean Protocol](https://www.oceanprotocol.com) toolset.
+
+This is in beta state and you can expect running into problems. If you run into them, please open up a [new issue](/issues).
+
+-   [🏗 Installation](#-installation)
+-   [🏄 Quickstart](#-quickstart)
+    -   [Simple Flow](#simple-flow)
+    -   [Learn more](#learn-more)
+    -   [Marketplace Flow](#marketplace-flow)
+-   [🦑 Development](#-development)
+-   [🏛 License](#-license)
+
+## 🏗 Installation
+
+`pip install ocean-lib`
+
+## 🏄 Quickstart
+
+### Simple Flow
+
+This stripped-down flow shows the essence of Ocean: simply creating a datatoken.
+
+[Go to simple flow](READMEs/datatokens-flow.md)
+
+### Marketplace flow
+
+This batteries-included flow includes metadata and datatoken pool.
+
+[Go to marketplace flow](READMEs/marketplace-flow.md)
+
+### Learn more
+
+-   [Get test OCEAN](READMEs/get-test-OCEAN.md) - from rinkeby
+-   [Understand config parameters](READMEs/parameters.md) - envvars vs files
+-   [Learn about off-chain services](READMEs/services.md) - Ocean Provider for data services, Aquarius metadata store
+-   [Learn about wallets](READMEs/wallets.md) - on generating, storing, and accessing private keys
+-   [Get an overview of ocean.py](READMEs/overview.md) - key modules and functions
+
+## 🦑 Development
+
+[Go to developers flow](READMEs/developers.md) if you want to further develop ocean.py.
+
+## 🏛 License
+
+    Copyright ((C)) 2021 Ocean Protocol Foundation
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+

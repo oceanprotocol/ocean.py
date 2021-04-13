@@ -29,11 +29,11 @@ from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib.web3_internal.web3helper import Web3Helper
 from ocean_lib.exceptions import (
+    DDOError,
     TransactionReverted,
-    FailedToEncryptDDOFiles,
-    FailedToOrder,
-    DatatokenNotFound,
-    InsufficientDatatokenBalance,
+    AssetsError,
+    ContractNotFound,
+    InsufficientBalance,
 )
 from web3.exceptions import InvalidAddress, ValidationError
 from ocean_utils.agreements.service_agreement import ServiceAgreement
@@ -240,7 +240,7 @@ class OceanAssets:
                     f"Minter of datatoken {data_token_address} is not the same as the publisher."
                 )
             elif not dtfactory.verify_data_token(data_token_address):
-                raise DatatokenNotFound(
+                raise ContractNotFound(
                     f"datatoken address {data_token_address} is not found in the DTFactory events."
                 )
 
@@ -311,7 +311,7 @@ class OceanAssets:
                 del file["url"]
             metadata_copy["encryptedFiles"] = files_encrypted
         else:
-            raise FailedToEncryptDDOFiles("Encrypting the files failed.")
+            raise DDOError("Encrypting the files failed.")
 
         logger.debug(
             f"Generated asset and services, DID is {asset.did},"
@@ -459,7 +459,7 @@ class OceanAssets:
             asset.did, initialize_url, consumer_address, sa.index, sa.type, dt_address
         )
         if not order_requirements:
-            raise FailedToOrder("Data service provider or service is not available.")
+            raise AssetsError("Data service provider or service is not available.")
 
         assert dt_address == order_requirements.data_token_address
         return order_requirements
@@ -490,7 +490,7 @@ class OceanAssets:
         dt = DataToken(token_address)
         balance = dt.balanceOf(from_wallet.address)
         if balance < amount_base:
-            raise InsufficientDatatokenBalance(
+            raise InsufficientBalance(
                 f"Your token balance {balance} is not sufficient "
                 f"to execute the requested service. This service "
                 f"requires {amount_base} number of tokens."

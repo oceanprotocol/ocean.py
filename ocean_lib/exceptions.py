@@ -1,21 +1,4 @@
-class InvalidDatatokenContract(Exception):
-    """
-    does not seem to be a valid DataToken contract
-    """
-
-    pass
-
-
-class InvalidDatatokenMinter(Exception):
-    """
-    Minter of datatoken is not the same as
-    the publisher address
-    """
-
-    pass
-
-
-class DatatokenNotFound(Exception):
+class ContractNotFound(Exception):
     """
     Datatoken address is not found
     in the datatoken factory events
@@ -24,7 +7,7 @@ class DatatokenNotFound(Exception):
     pass
 
 
-class FailedToEncryptDDOFiles(Exception):
+class DDOError(Exception):
     """
     Failed to encrypt ddo files
     """
@@ -32,7 +15,7 @@ class FailedToEncryptDDOFiles(Exception):
     pass
 
 
-class InsufficientDatatokenBalance(Exception):
+class InsufficientBalance(Exception):
     """
     The datatoken balance balance is not sufficient
     """
@@ -40,7 +23,7 @@ class InsufficientDatatokenBalance(Exception):
     pass
 
 
-class FailedToOrder(Exception):
+class AssetsError(Exception):
     """
     The datatoken balance balance is not sufficient
     """
@@ -48,33 +31,17 @@ class FailedToOrder(Exception):
     pass
 
 
-class FailedToCreateNewPool(Exception):
+class BPoolError(Exception):
     """
-    Failed to setup and create new ocean-datatoken pool
-    """
-
-    pass
-
-
-class FailedToCreateExchange(Exception):
-    """
-    Failed create new exchange
+    Generic Balancer Pool Error
     """
 
     pass
 
 
-class FailedToSetExchangeRate(Exception):
+class ExchangeError(Exception):
     """
-    Failed set exchange rate
-    """
-
-    pass
-
-
-class AmountOfOceanTokensExceedsMaxLimit(Exception):
-    """
-    Buying X datatokens requires Y OCEAN which exceeds the max OCEAN limit.
+    Generic Ocean Exchange Error
     """
 
     pass

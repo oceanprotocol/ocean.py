@@ -14,7 +14,7 @@ from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.util import from_base_18, get_dtfactory_address, to_base_18
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_lib.exceptions import FailedToCreateNewPool
+from ocean_lib.exceptions import BPoolError
 from scipy.interpolate import interp1d
 
 logger = logging.getLogger(__name__)
@@ -93,14 +93,14 @@ class OceanPool:
             pool_address, data_token_amount, from_wallet, wait=True
         )
         if dt.get_tx_receipt(tx_id).status != 1:
-            raise FailedToCreateNewPool(
+            raise BPoolError(
                 f"Approve datatokens failed, pool was created at {pool_address}"
             )
 
         ot = DataToken(self.ocean_address)
         tx_id = ot.approve_tokens(pool_address, OCEAN_amount, from_wallet, wait=True)
         if ot.get_tx_receipt(tx_id).status != 1:
-            raise FailedToCreateNewPool(
+            raise BPoolError(
                 f"Approve OCEAN tokens failed, pool was created at {pool_address}"
             )
 
