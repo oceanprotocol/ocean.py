@@ -34,6 +34,7 @@ from ocean_lib.exceptions import (
     AssetsError,
     ContractNotFound,
     InsufficientBalance,
+    AquariusError,
 )
 from web3.exceptions import InvalidAddress, ValidationError
 from ocean_utils.agreements.service_agreement import ServiceAgreement
@@ -44,7 +45,6 @@ from ocean_utils.aquarius.aquarius_provider import AquariusProvider
 from ocean_utils.ddo.metadata import MetadataMain
 from ocean_utils.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
 from ocean_utils.did import did_to_id
-from ocean_utils.exceptions import OceanDIDAlreadyExist
 from ocean_utils.utils.utilities import checksum
 from plecos import plecos
 
@@ -253,7 +253,7 @@ class OceanAssets:
         logger.debug(f"Using datatoken address as did: {did}")
         # Check if it's already registered first!
         if did in self._get_aquarius().list_assets():
-            raise OceanDIDAlreadyExist(
+            raise AquariusError(
                 f"Asset id {did} is already registered to another asset."
             )
 

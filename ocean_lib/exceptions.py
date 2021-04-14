@@ -1,3 +1,9 @@
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
+
+
 class ContractNotFound(Exception):
     """
     Contract address is not found
@@ -41,9 +47,10 @@ class TransactionReverted(Exception):
     """
 
 
-class ProviderError(Exception):
+class InvalidURL(Exception):
     """
-    Generic provider error
+    Raised when a URL can not be
+    parsed in DataServiceProvider.
     """
 
 

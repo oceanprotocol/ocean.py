@@ -115,7 +115,7 @@ class OceanPool:
             from_wallet,
         )
         if pool.get_tx_receipt(tx_id).status != 1:
-            raise BPoolError(
+            raise BPool(
                 f"pool.setup failed: txId={tx_id}, receipt={pool.get_tx_receipt(tx_id)}"
             )
 
