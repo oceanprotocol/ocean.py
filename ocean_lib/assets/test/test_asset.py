@@ -50,8 +50,7 @@ def test_trusted_algorithms(publisher_ocean_instance):
     trusted_algorithms = ddo.get_trusted_algorithms()
     service = ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
     privacy_dict = service.attributes["main"].get("privacy")
-    if not privacy_dict:
-        return privacy_dict
+    assert privacy_dict
 
     assert trusted_algorithms is not None
     assert len(trusted_algorithms) >= 1
