@@ -285,7 +285,7 @@ class OceanCompute:
         output = OceanCompute.check_output_dict(
             output, consumer_wallet.address, data_provider=self._data_provider
         )
-        asset = resolve_asset(did, metadata_store_url=self._config.aquarius_url)
+        asset = resolve_asset(did, metadata_cache_url=self._config.aquarius_url)
         _, service_endpoint = self._get_service_endpoint(did, asset)
 
         service = asset.get_service_by_index(service_id)

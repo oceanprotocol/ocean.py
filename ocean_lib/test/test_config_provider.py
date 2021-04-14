@@ -45,7 +45,7 @@ def test_config_filename_given_file_doesnt_exist():
     assert not os.path.exists(config_file_name)
 
     with pytest.raises(Exception):
-        config = Config(filename=config_file_name)
+        Config(filename=config_file_name)
 
 
 def test_config_filename_given_file_exists_malformed_content(monkeypatch, tmp_path):
@@ -57,7 +57,7 @@ def test_config_filename_given_file_exists_malformed_content(monkeypatch, tmp_pa
 
     monkeypatch.setenv(ENV_CONFIG_FILE, config_file_name)
     with pytest.raises(Exception):
-        config = Config()
+        Config()
 
 
 def test_config_filename_given_file_exists_wellformed_content():
@@ -82,7 +82,7 @@ def test_config_filename_not_given_envvar_is_empty(monkeypatch):
     """
     monkeypatch.delenv(ENV_CONFIG_FILE)
     with pytest.raises(ValueError):
-        config = Config()
+        Config()
 
 
 def test_config_filename_not_given_file_doesnt_exist(monkeypatch):
@@ -95,7 +95,7 @@ def test_config_filename_not_given_file_doesnt_exist(monkeypatch):
 
     monkeypatch.setenv(ENV_CONFIG_FILE, config_file_name)
     with pytest.raises(Exception):
-        config = Config()
+        Config()
 
 
 def test_config_filename_not_given_file_exists_malformed_content(monkeypatch, tmp_path):
@@ -107,7 +107,7 @@ def test_config_filename_not_given_file_exists_malformed_content(monkeypatch, tm
 
     monkeypatch.setenv(ENV_CONFIG_FILE, config_file_name)
     with pytest.raises(Exception):
-        config = Config()
+        Config()
 
 
 def test_config_filename_not_given_file_exists_wellformed_content(monkeypatch):
@@ -153,7 +153,7 @@ def test_config_from_text_malformed_content():
     """
     config_text = "Malformed content inside config text"
     with pytest.raises(Exception):
-        config = Config(text=config_text)
+        Config(text=config_text)
 
 
 def test_network_config():

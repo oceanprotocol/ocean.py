@@ -366,7 +366,7 @@ class OceanAssets:
         :param did: DID, str
         :return: Asset instance
         """
-        return resolve_asset(did, metadata_store_url=self._config.aquarius_url)
+        return resolve_asset(did, metadata_cache_url=self._config.aquarius_url)
 
     def search(
         self, text: str, sort=None, offset=100, page=1, aquarius_url=None

@@ -15,12 +15,12 @@ from ocean_utils.aquarius.aquarius_provider import AquariusProvider
 logger = logging.getLogger("keeper")
 
 
-def resolve_asset(did, metadata_store_url=None, token_address=None):
+def resolve_asset(did, metadata_cache_url=None, token_address=None):
     """Resolve a DID to an URL/DDO or later an internal/external DID.
 
     :param did: the asset id to resolve, this is part of the ocean
         DID did:op:<32 byte value>
-    :param metadata_store_url: str the url of the metadata store
+    :param metadata_cache_url: str the url of the metadata store
     :param token_address: str the address of the DataToken smart contract
 
     :return string: DDO of the resolved DID
@@ -28,11 +28,11 @@ def resolve_asset(did, metadata_store_url=None, token_address=None):
     :raises OceanDIDNotFound: if no DID can be found to resolve.
     """
     assert (
-        metadata_store_url or token_address
+        metadata_cache_url or token_address
     ), "One of metadata_store_url or token_address is required."
 
-    metadata_url = metadata_store_url
-    if not metadata_store_url and token_address:
+    metadata_url = metadata_cache_url
+    if not metadata_cache_url and token_address:
         metadata_url = DataToken(token_address).get_metadata_url()
 
     logger.debug(f"found did {did} -> url={metadata_url}")

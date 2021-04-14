@@ -218,6 +218,15 @@ class Config(configparser.ConfigParser):
         return self.get("resources", NAME_AQUARIUS_URL)
 
     @property
+    def metadata_cache_url(self):
+        cache_key = self.get("resources", NAME_AQUARIUS_URL)
+        if self.metadata_store_url:
+            return cache_key
+        elif self.aquarius_url:
+            return cache_key
+        return cache_key
+
+    @property
     def aquarius_url(self):
         """URL of aquarius component. (e.g.): http://myaquarius:5000."""
         return self.get("resources", NAME_AQUARIUS_URL)
