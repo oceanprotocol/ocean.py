@@ -388,26 +388,6 @@ class OceanCompute:
             )
         )
 
-    def restart(self, did, job_id, wallet):
-        """
-        Attempt to restart the compute job by stopping it first, then starting a new job.
-
-        :param did: str id of the asset offering the compute service of this job
-        :param job_id: str id of the compute job
-        :param wallet: Wallet instance
-        :return: str -- id of the new compute job
-        """
-        _, service_endpoint = self._get_service_endpoint(did)
-        msg = f'{wallet.address}{job_id or ""}{did}'
-        job_info = self._data_provider.restart_compute_job(
-            did,
-            job_id,
-            service_endpoint,
-            wallet.address,
-            self._sign_message(wallet, msg, service_endpoint=service_endpoint),
-        )
-        return job_info["jobId"]
-
     def _get_service_endpoint(self, did, asset=None):
         if not asset:
             asset = resolve_asset(did, self._config.aquarius_url)
