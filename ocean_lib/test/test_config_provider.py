@@ -26,14 +26,7 @@ def test_metadataCacheUri_version():
     """Tests that the Aquarius URL can use the custom metadataCacheUri key."""
     config_dict = {"metadataCacheUri": "http://ItWorked.com", "network": "ganache"}
     ocean_instance = Ocean(config=config_dict)
-    assert "http://ItWorked.com" == ocean_instance.config.aquarius_url
-
-
-def test_metadataStoreUri_version():
-    """Tests that the Aquarius URL can fallback on the custom metadataStoreUri key."""
-    config_dict = {"metadataStoreUri": "http://ItWorked.com", "network": "ganache"}
-    ocean_instance = Ocean(config=config_dict)
-    assert "http://ItWorked.com" == ocean_instance.config.aquarius_url
+    assert "http://ItWorked.com" == ocean_instance.config.metadata_cache_uri
 
 
 def test_config_filename_given_file_doesnt_exist():
@@ -68,9 +61,8 @@ def test_config_filename_given_file_exists_wellformed_content():
     config_file_name = get_resource_path("config", "test_config.ini")
     config = Config(filename=config_file_name)
 
-    assert config.aquarius_url == "https://custom-aqua.url"
+    assert config.metadata_cache_uri == "https://custom-aqua.url"
     assert config.artifacts_path is not None
-    assert config.metadata_store_url == config.aquarius_url
     assert config.provider_address == "0x00bd138abd70e2f00903268f3db08f2d25677c9e"
     assert isinstance(config.gas_limit, int)
 
@@ -143,7 +135,7 @@ def test_config_from_text_wellformed_content():
         aquarius.url = https://another-aqua.url
     """
     config = Config(text=config_text)
-    assert config.aquarius_url == "https://another-aqua.url"
+    assert config.metadata_cache_uri == "https://another-aqua.url"
 
 
 def test_config_from_text_malformed_content():

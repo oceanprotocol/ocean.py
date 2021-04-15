@@ -130,7 +130,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
 
 #Publish a datatoken
-data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_store_url)
+data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
 token_address = data_token.address
 
 #Specify metadata and service attributes, using the Branin test dataset

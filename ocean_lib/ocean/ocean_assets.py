@@ -51,7 +51,7 @@ class OceanAssets:
     def __init__(self, config, data_provider, ddo_registry_address):
         """Initialises OceanAssets object."""
         self._config = config
-        self._aquarius_url = config.aquarius_url
+        self._metadata_cache_uri = config.metadata_cache_uri
         self._data_provider = data_provider
         self._metadata_registry_address = ddo_registry_address
 
@@ -66,7 +66,7 @@ class OceanAssets:
         return MetadataContract(self._metadata_registry_address)
 
     def _get_aquarius(self, url=None) -> Aquarius:
-        return AquariusProvider.get_aquarius(url or self._aquarius_url)
+        return AquariusProvider.get_aquarius(url or self._metadata_cache_uri)
 
     def _process_service_descriptors(
         self,
@@ -366,10 +366,10 @@ class OceanAssets:
         :param did: DID, str
         :return: Asset instance
         """
-        return resolve_asset(did, metadata_cache_url=self._config.aquarius_url)
+        return resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
 
     def search(
-        self, text: str, sort=None, offset=100, page=1, aquarius_url=None
+        self, text: str, sort=None, offset=100, page=1, metadata_cache_uri=None
     ) -> list:
         """
         Search an asset in oceanDB using aquarius.
@@ -378,7 +378,7 @@ class OceanAssets:
         :param sort: Dictionary to choose order main in some value
         :param offset: Number of elements shows by page
         :param page: Page number
-        :param aquarius_url: Url of the aquarius where you want to search. If there is not
+        :param metadata_cache_uri: Url of the aquarius where you want to search. If there is not
             provided take the default
         :return: List of assets that match with the query
         """
@@ -386,13 +386,13 @@ class OceanAssets:
         logger.info(f"Searching asset containing: {text}")
         return [
             Asset(dictionary=ddo_dict)
-            for ddo_dict in self._get_aquarius(aquarius_url).query_search(
+            for ddo_dict in self._get_aquarius(metadata_cache_uri).query_search(
                 {"query": {"query_string": {"query": text}}}, sort, offset, page
             )["results"]
         ]
 
     def query(
-        self, query: dict, sort=None, offset=100, page=1, aquarius_url=None
+        self, query: dict, sort=None, offset=100, page=1, metadata_cache_uri=None
     ) -> []:
         """
         Search an asset in oceanDB using search query.
@@ -402,12 +402,12 @@ class OceanAssets:
         :param sort: Dictionary to choose order main in some value
         :param offset: Number of elements shows by page
         :param page: Page number
-        :param aquarius_url: Url of the aquarius where you want to search. If there is not
+        :param metadata_cache_uri: Url of the aquarius where you want to search. If there is not
             provided take the default
         :return: List of assets that match with the query.
         """
         logger.info(f"Searching asset query: {query}")
-        aquarius = self._get_aquarius(aquarius_url)
+        aquarius = self._get_aquarius(metadata_cache_uri)
         return [
             Asset(dictionary=ddo_dict)
             for ddo_dict in aquarius.query_search({"query": query}, sort, offset, page)[
@@ -575,7 +575,7 @@ class OceanAssets:
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
         :return: bool
         """
-        return self._get_aquarius(self._aquarius_url).validate_metadata(metadata)
+        return self._get_aquarius(self._metadata_cache_uri).validate_metadata(metadata)
 
     def owner(self, did: str) -> str:
         """

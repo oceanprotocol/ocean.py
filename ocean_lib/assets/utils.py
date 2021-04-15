@@ -17,11 +17,11 @@ def create_checksum(text):
 
 @enforce_types_shim
 def generate_trusted_algo_dict(
-    did: str = None, metadata_cache_url: str = None, ddo: Asset = None
+    did: str = None, metadata_cache_uri: str = None, ddo: Asset = None
 ):
-    assert ddo or (did and metadata_cache_url)
+    assert ddo or (did and metadata_cache_uri)
     if not ddo:
-        ddo = resolve_asset(did, metadata_cache_url=metadata_cache_url)
+        ddo = resolve_asset(did, metadata_cache_uri=metadata_cache_uri)
 
     algo_metadata = ddo.metadata
     return {
@@ -39,18 +39,18 @@ def generate_trusted_algo_dict(
 
 
 @enforce_types_shim
-def create_publisher_trusted_algorithms(dids: list, metadata_cache_url: str) -> list:
+def create_publisher_trusted_algorithms(dids: list, metadata_cache_uri: str) -> list:
     return [
-        generate_trusted_algo_dict(did=did, metadata_cache_url=metadata_cache_url)
+        generate_trusted_algo_dict(did=did, metadata_cache_uri=metadata_cache_uri)
         for did in dids
     ]
 
 
 @enforce_types_shim
 def add_publisher_trusted_algorithm(
-    dataset_did: str, algo_did: str, metadata_cache_url: str
+    dataset_did: str, algo_did: str, metadata_cache_uri: str
 ) -> list:
-    asset = resolve_asset(dataset_did, metadata_cache_url=metadata_cache_url)
+    asset = resolve_asset(dataset_did, metadata_cache_uri=metadata_cache_uri)
     compute_service = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
     assert (
         compute_service
@@ -66,7 +66,7 @@ def add_publisher_trusted_algorithm(
     trusted_algos = [ta for ta in trusted_algos if ta["did"] != algo_did]
 
     # now add this algo_did as trusted algo
-    algo_ddo = resolve_asset(algo_did, metadata_cache_url=metadata_cache_url)
+    algo_ddo = resolve_asset(algo_did, metadata_cache_uri=metadata_cache_uri)
     trusted_algos.append(generate_trusted_algo_dict(ddo=algo_ddo))
     # update with the new list
     privacy_values["publisherTrustedAlgorithms"] = trusted_algos
@@ -76,9 +76,9 @@ def add_publisher_trusted_algorithm(
 
 @enforce_types_shim
 def remove_publisher_trusted_algorithm(
-    dataset_did: str, algo_did: str, metadata_cache_url: str
+    dataset_did: str, algo_did: str, metadata_cache_uri: str
 ) -> list:
-    asset = resolve_asset(dataset_did, metadata_cache_url=metadata_cache_url)
+    asset = resolve_asset(dataset_did, metadata_cache_uri=metadata_cache_uri)
     trusted_algorithms = asset.get_trusted_algorithms()
     if not trusted_algorithms:
         raise ValueError(

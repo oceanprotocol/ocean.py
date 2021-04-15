@@ -92,7 +92,6 @@ config_defaults = {
 
 
 class Config(configparser.ConfigParser):
-
     """Class to manage the ocean-lib configuration."""
 
     def __init__(self, filename=None, options_dict=None, **kwargs):
@@ -214,20 +213,7 @@ class Config(configparser.ConfigParser):
         return int(self.get(self._section_name, NAME_GAS_LIMIT))
 
     @property
-    def metadata_store_url(self):
-        return self.get("resources", NAME_AQUARIUS_URL)
-
-    @property
-    def metadata_cache_url(self):
-        cache_key = self.get("resources", NAME_AQUARIUS_URL)
-        if self.metadata_store_url:
-            return cache_key
-        elif self.aquarius_url:
-            return cache_key
-        return cache_key
-
-    @property
-    def aquarius_url(self):
+    def metadata_cache_uri(self):
         """URL of aquarius component. (e.g.): http://myaquarius:5000."""
         return self.get("resources", NAME_AQUARIUS_URL)
 

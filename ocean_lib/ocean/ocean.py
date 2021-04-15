@@ -78,12 +78,7 @@ class Ocean:
                 config = Config(os.getenv(ENV_CONFIG_FILE))
                 ConfigProvider.set_config(config)
         if isinstance(config, dict):
-            # fallback to metadataStoreUri
-            cache_key = (
-                "metadataCacheUri"
-                if ("metadataCacheUri" in config)
-                else "metadataStoreUri"
-            )
+            cache_key = "metadataCacheUri"
             aqua_url = config.get(
                 cache_key, config.get("aquarius.url", "http://localhost:5000")
             )

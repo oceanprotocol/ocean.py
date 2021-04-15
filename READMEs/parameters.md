@@ -38,8 +38,6 @@ d = {
 ocean = Ocean(d)
 ```
 
-For legacy support, you can also use `metadataStoreUri` instead of `metadataCacheUri`.
-
 ## 1a. Unsetting envvars
 
 Recall that parameters set by envvars override config file values. So, to use a config value in a file, we must remove its envvar.
