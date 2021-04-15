@@ -9,7 +9,7 @@ import pytest
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
-from ocean_lib.data_provider.exceptions import InvalidURLException
+from ocean_lib.exceptions import InvalidURL
 from ocean_utils.exceptions import OceanEncryptAssetUrlsError
 from ocean_utils.http_requests.requests_session import get_requests_session
 from requests.models import Response
@@ -234,10 +234,10 @@ def test_get_root_uri():
         == "http://ppp.com:8000/api/v2"
     )
 
-    with pytest.raises(InvalidURLException):
+    with pytest.raises(InvalidURL):
         DataSP.get_root_uri("thisIsNotAnURL")
 
-    with pytest.raises(InvalidURLException):
+    with pytest.raises(InvalidURL):
         DataSP.get_root_uri("//")
 
 
