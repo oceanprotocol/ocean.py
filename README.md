@@ -44,13 +44,13 @@ This is in beta state and you can expect running into problems. If you run into 
 
 ### Simple Flow
 
-This stripped-down flow shows the essence of Ocean. Just downloading, no metadata.
+This stripped-down flow shows the essence of Ocean: simply creating a datatoken.
 
 [Go to simple flow](READMEs/datatokens-flow.md)
 
 ### Marketplace flow
 
-This batteries-included flow includes metadata, multiple services for one datatoken, and compute-to-data.
+This batteries-included flow includes metadata and datatoken pool.
 
 [Go to marketplace flow](READMEs/marketplace-flow.md)
 

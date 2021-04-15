@@ -174,6 +174,19 @@ def test_ocean_assets_algorithm(publisher_ocean_instance):
     assert _ddo, f"assets.resolve failed for did {ddo.did}"
 
 
+def test_ocean_assets_create_fails_fileinfo(publisher_ocean_instance):
+    """Tests that a file with invalid URL can not be published."""
+    publisher = get_publisher_wallet()
+    metadata = get_sample_algorithm_ddo()["service"][0]
+    metadata["attributes"]["main"]["files"][0]["checksum"] = str(uuid.uuid4())
+    metadata_copy = metadata.copy()
+    metadata_copy["attributes"]["main"]["files"][0][
+        "url"
+    ] = "http://127.0.0.1/not_valid"
+    with pytest.raises(ValueError):
+        publisher_ocean_instance.assets.create(metadata_copy["attributes"], publisher)
+
+
 def test_ocean_assets_compute(publisher_ocean_instance):
     """Tests the creation of an asset with a compute service."""
     publisher = get_publisher_wallet()
