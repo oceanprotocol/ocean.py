@@ -326,6 +326,20 @@ class DataToken(ContractBase):
     def get_simple_url(self):
         return self._get_url_from_blob(0)
 
+    def calculate_token_holders(
+        self, from_block: int, to_block: int, min_token_amount: float
+    ):
+        all_transfers, _ = self.get_all_transfers_from_events(from_block, to_block)
+        holders = []
+        a_to_balance = DataToken.calculate_balances(all_transfers)
+        _min = to_base_18(min_token_amount)
+        holders = sorted(
+            [(a, from_base_18(b)) for a, b in a_to_balance.items() if b > _min],
+            key=lambda x: x[1],
+            reverse=True,
+        )
+        return holders
+
     # ============================================================
     # Token transactions using amount of tokens as a float instead of int
     # amount of tokens will be converted to the base value before sending
@@ -373,37 +387,6 @@ class DataToken(ContractBase):
             a_to_value[_to[i]] += v
 
         return a_to_value
-
-    def get_info(self, web3, from_block, to_block, include_holders=False):
-        contract = self.contract_concise
-        minter = contract.minter()
-        all_transfers, _ = self.get_all_transfers_from_events(from_block, to_block)
-        order_logs = self.get_start_order_logs(
-            web3, from_block=from_block, to_block=to_block
-        )
-        holders = []
-        if include_holders:
-            a_to_balance = DataToken.calculate_balances(all_transfers)
-            _min = to_base_18(0.000001)
-            holders = sorted(
-                [(a, from_base_18(b)) for a, b in a_to_balance.items() if b > _min],
-                key=lambda x: x[1],
-                reverse=True,
-            )
-
-        return {
-            "address": self.address,
-            "name": contract.name(),
-            "symbol": contract.symbol(),
-            "decimals": contract.decimals(),
-            "cap": from_base_18(contract.cap()),
-            "totalSupply": from_base_18(contract.totalSupply()),
-            "minter": minter,
-            "minterBalance": self.token_balance(minter),
-            "numHolders": len(holders),
-            "holders": holders,
-            "numOrders": len(order_logs),
-        }
 
     # ============================================================
     # reflect required ERC20 standard functions
