@@ -406,7 +406,7 @@ class DataToken(ContractBase):
         }
 
     # ============================================================
-    # reflect ERC20 standard functions as defined in the EIP
+    # reflect required ERC20 standard functions
     def totalSupply(self) -> str:
         return self.contract_concise.totalSupply()
 
@@ -430,36 +430,36 @@ class DataToken(ContractBase):
         )
 
     # ============================================================
-    # reflect DataToken Solidity methods
+    # reflect optional ERC20 standard functions
     def datatoken_name(self) -> str:
         return self.contract_concise.name()
 
     def symbol(self) -> str:
         return self.contract_concise.symbol()
 
-    def cap(self) -> str:
-        return self.contract_concise.cap()
-
     def decimals(self) -> str:
         return self.contract_concise.decimals()
 
-    def blob(self) -> str:
-        return self.contract_concise.blob()
+    # ============================================================
+    # reflect non-standard ERC20 functions added by Open Zeppelin contract
+    def increaseAllowance(
+        self, spender_address: str, added_value: int, from_wallet: Wallet
+    ) -> bool:
+        return self.send_transaction(
+            "increaseAllowance", (spender_address, added_value), from_wallet
+        )
 
-    def minter(self) -> str:
-        return self.contract.caller.minter()
+    def decreaseAllowance(
+        self, spender_address: str, subtracted_value: int, from_wallet: Wallet
+    ) -> bool:
+        return self.send_transaction(
+            "decreaseAllowance", (spender_address, subtracted_value), from_wallet
+        )
 
-    def isMinter(self, address: str) -> bool:
-        return self.contract.caller.isMinter(address)
-
-    def calculateFee(self, amount: int, fee_percentage: int) -> int:
-        return self.contract.caller.calculateFee(amount, fee_percentage)
-
-    def proposeMinter(self, new_minter, from_wallet) -> str:
-        return self.send_transaction("proposeMinter", (new_minter,), from_wallet)
-
-    def approveMinter(self, from_wallet) -> str:
-        return self.send_transaction("approveMinter", (), from_wallet)
+    # ============================================================
+    # reflect DataToken Solidity methods
+    def mint(self, account_address: str, value_base: int, from_wallet: Wallet):
+        return self.send_transaction("mint", (account_address, value_base), from_wallet)
 
     def startOrder(
         self,
@@ -484,3 +484,27 @@ class DataToken(ContractBase):
         return self.send_transaction(
             "finishOrder", (orderTxId, consumer, amount, serviceId), from_wallet
         )
+
+    def proposeMinter(self, new_minter, from_wallet) -> str:
+        return self.send_transaction("proposeMinter", (new_minter,), from_wallet)
+
+    def approveMinter(self, from_wallet) -> str:
+        return self.send_transaction("approveMinter", (), from_wallet)
+
+    def blob(self) -> str:
+        return self.contract_concise.blob()
+
+    def cap(self) -> str:
+        return self.contract_concise.cap()
+
+    def isMinter(self, address: str) -> bool:
+        return self.contract.caller.isMinter(address)
+
+    def minter(self) -> str:
+        return self.contract.caller.minter()
+
+    def isInitialized(self) -> bool:
+        return self.contract.caller.isInitialized()
+
+    def calculateFee(self, amount: int, fee_percentage: int) -> int:
+        return self.contract.caller.calculateFee(amount, fee_percentage)
