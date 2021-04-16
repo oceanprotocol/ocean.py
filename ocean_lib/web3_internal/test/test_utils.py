@@ -2,6 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import os
+
 import pytest
 from ocean_lib.web3_internal.utils import (
     generate_multi_value_hash,
@@ -9,12 +11,15 @@ from ocean_lib.web3_internal.utils import (
 )
 
 
-def test_generate_multi_value_hash(alice_address):
+def test_generate_multi_value_hash(alice_address, alice_private_key):
     with pytest.raises(AssertionError):
         generate_multi_value_hash(["more", "types", "than"], ["values"])
 
     expected = "0x6d59f15c5814d9fddd2e69d1f6f61edd0718e337c41ec74011900c0d736a9fec"
-    assert generate_multi_value_hash(["address"], [alice_address]).hex() == expected
+    assert alice_private_key == os.getenv("TEST_PRIVATE_KEY1")
+    assert alice_address == "0x66aB6D9362d4F35596279692F0251Db635165871"
+    tested = generate_multi_value_hash(["address"], [alice_address]).hex()
+    assert tested == expected
 
 
 def test_prepare_fixed_hash():

@@ -14,7 +14,6 @@ ocean_lib.egg-info/
 /scripts/
 
 .coverage
-.idea/
 .tox/
 consume-downloads/
 coverage.xml
