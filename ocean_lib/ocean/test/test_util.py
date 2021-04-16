@@ -6,10 +6,14 @@
 import os
 
 import pytest
+
+from ocean_lib.config import Config
+from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.ocean import util
 from ocean_lib.ocean.env_constants import (
     ENV_INFURA_CONNECTION_TYPE,
     ENV_INFURA_PROJECT_ID,
+    ENV_CONFIG_FILE,
 )
 
 
@@ -98,8 +102,25 @@ def test_get_web3_connection_provider(monkeypatch):
     assert provider.endpoint_uri == "wss://bah.com"
 
 
+def test_get_contracts_addresses():
+    config = Config(os.getenv(ENV_CONFIG_FILE))
+    ConfigProvider.set_config(config)
+    addresses = util.get_contracts_addresses("ganache", config)
+    assert addresses
+    assert isinstance(addresses, dict)
+    assert (
+        "DTFactory"
+        and "BFactory"
+        and "FixedRateExchange"
+        and "Metadata"
+        and "Ocean" in addresses
+    )
+    assert len(addresses) == 5
+    for _, value in addresses.items():
+        assert value.startswith("0x")
+
+
 # FIXME: add tests for:
-# get_contracts_addresses
 # to_base_18
 # to_base
 # from_base_18
