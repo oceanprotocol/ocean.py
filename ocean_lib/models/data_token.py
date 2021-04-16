@@ -458,6 +458,22 @@ class DataToken(ContractBase):
 
     # ============================================================
     # reflect DataToken Solidity methods
+    def initialize(
+        self,
+        name: str,
+        symbol: str,
+        minter_address: str,
+        cap: int,
+        blob: str,
+        fee_collector_address: str,
+        from_wallet: Wallet,
+    ) -> bool:
+        return self.send_transaction(
+            "initialize",
+            (name, symbol, minter_address, cap, blob, fee_collector_address),
+            from_wallet,
+        )
+
     def mint(self, account_address: str, value_base: int, from_wallet: Wallet):
         return self.send_transaction("mint", (account_address, value_base), from_wallet)
 
