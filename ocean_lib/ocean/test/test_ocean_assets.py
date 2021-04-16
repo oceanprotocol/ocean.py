@@ -72,8 +72,8 @@ def test_register_asset(publisher_ocean_instance):
     if "datePublished" in metadata["main"]:
         metadata["main"].pop("datePublished")
     assert (
-        ddo_dict["service"][0]["attributes"]["main"]["name"]
-        == original["service"][0]["attributes"]["main"]["name"]
+            ddo_dict["service"][0]["attributes"]["main"]["name"]
+            == original["service"][0]["attributes"]["main"]["name"]
     )
     assert ddo_dict["service"][1] == original["service"][1]
 
@@ -106,11 +106,11 @@ def test_register_asset(publisher_ocean_instance):
     _asset = wait_for_update(ocn, ddo.did, "name", _name)
     assert _asset, "Cannot read asset after update."
     assert (
-        _asset.metadata["main"]["name"] == _name
+            _asset.metadata["main"]["name"] == _name
     ), "updated asset does not have the new updated name !!!"
 
     assert (
-        ocn.assets.owner(ddo.did) == alice.address
+            ocn.assets.owner(ddo.did) == alice.address
     ), "asset owner does not seem correct."
 
     assert _get_num_assets(alice.address) == num_assets_owned + 1
@@ -129,30 +129,30 @@ def test_ocean_assets_search(publisher_ocean_instance, metadata):
     time.sleep(1)  # apparently changes are not instantaneous
     assert len(publisher_ocean_instance.assets.search(identifier)) == 1
     assert (
-        len(
-            publisher_ocean_instance.assets.query(
-                {
-                    "query_string": {
-                        "query": identifier,
-                        "fields": ["service.attributes.main.name"],
+            len(
+                publisher_ocean_instance.assets.query(
+                    {
+                        "query_string": {
+                            "query": identifier,
+                            "fields": ["service.attributes.main.name"],
+                        }
                     }
-                }
+                )
             )
-        )
-        == 1
+            == 1
     )
     assert (
-        len(
-            publisher_ocean_instance.assets.query(
-                {
-                    "query_string": {
-                        "query": "Gorilla",
-                        "fields": ["service.attributes.main.name"],
+            len(
+                publisher_ocean_instance.assets.query(
+                    {
+                        "query_string": {
+                            "query": "Gorilla",
+                            "fields": ["service.attributes.main.name"],
+                        }
                     }
-                }
+                )
             )
-        )
-        == 0
+            == 0
     )
 
 
@@ -244,7 +244,7 @@ def test_create_asset_with_address(publisher_ocean_instance):
 
 
 def test_create_asset_with_owner_address(publisher_ocean_instance):
-    """Tests creation of the asset which has already an owner address."""
+    """Tests that the created assets have the same owner address."""
     ocn = publisher_ocean_instance
     alice = get_publisher_wallet()
 
@@ -254,12 +254,33 @@ def test_create_asset_with_owner_address(publisher_ocean_instance):
     my_secret_store = "http://myownsecretstore.com"
     auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
 
+    token = ocn.create_data_token(
+        "DataToken1", "DT1", from_wallet=alice, blob="foo_blob"
+    )
+
     assert ocn.assets.create(
         asset.metadata,
         alice,
         [auth_service],
         owner_address=alice.address,
     )
+
+    asset_1 = ocn.assets.create(
+        asset.metadata,
+        alice,
+        [auth_service],
+        owner_address=alice.address,
+        data_token_address=token.address,
+    )
+    assert asset_1
+    asset_2 = ocn.assets.create(
+        asset.metadata,
+        alice,
+        [auth_service],
+        data_token_address=token.address,
+    )
+    assert asset_2
+    assert asset_1.__dict__['_proof']['creator'] == asset_2.__dict__['_proof']['creator']
 
 
 def test_create_asset_without_dt_address(publisher_ocean_instance):
