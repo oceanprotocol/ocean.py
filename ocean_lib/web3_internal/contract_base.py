@@ -224,6 +224,11 @@ class ContractBase(object):
         if transact:
             _transact.update(transact)
 
+        is_successful = self.is_tx_successful(
+            contract_function.transact(_transact).hex()
+        )
+        if not is_successful:
+            return "Tx was not successful."
         return contract_function.transact(_transact).hex()
 
     def get_event_argument_names(self, event_name: str):
