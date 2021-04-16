@@ -406,10 +406,31 @@ class DataToken(ContractBase):
         }
 
     # ============================================================
-    # reflect DataToken Solidity methods
-    def blob(self) -> str:
-        return self.contract_concise.blob()
+    # reflect ERC20 standard functions as defined in the EIP
+    def totalSupply(self) -> str:
+        return self.contract_concise.totalSupply()
 
+    def balanceOf(self, account: str) -> int:
+        return self.contract_concise.balanceOf(account)
+
+    def transfer(self, to: str, value_base: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("transfer", (to, value_base), from_wallet)
+
+    def allowance(self, owner_address: str, spender_address: str) -> int:
+        return self.contract_concise.allowance(owner_address, spender_address)
+
+    def approve(self, spender: str, value_base: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("approve", (spender, value_base), from_wallet)
+
+    def transferFrom(
+        self, from_address: str, to_address: str, value_base: int, from_wallet: Wallet
+    ) -> bool:
+        return self.send_transaction(
+            "transferFrom", (from_address, to_address, value_base), from_wallet
+        )
+
+    # ============================================================
+    # reflect DataToken Solidity methods
     def datatoken_name(self) -> str:
         return self.contract_concise.name()
 
@@ -422,23 +443,17 @@ class DataToken(ContractBase):
     def decimals(self) -> str:
         return self.contract_concise.decimals()
 
-    def totalSupply(self) -> str:
-        return self.contract_concise.totalSupply()
+    def blob(self) -> str:
+        return self.contract_concise.blob()
 
-    def allowance(self, owner_address: str, spender_address: str) -> str:
-        return self.contract_concise.allowance(owner_address, spender_address)
+    def minter(self) -> str:
+        return self.contract.caller.minter()
 
-    def balanceOf(self, account: str) -> int:
-        return self.contract_concise.balanceOf(account)
+    def isMinter(self, address: str) -> bool:
+        return self.contract.caller.isMinter(address)
 
-    def mint(self, to_account: str, value_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("mint", (to_account, value_base), from_wallet)
-
-    def approve(self, spender: str, value_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("approve", (spender, value_base), from_wallet)
-
-    def transfer(self, to: str, value_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("transfer", (to, value_base), from_wallet)
+    def calculateFee(self, amount: int, fee_percentage: int) -> int:
+        return self.contract.caller.calculateFee(amount, fee_percentage)
 
     def proposeMinter(self, new_minter, from_wallet) -> str:
         return self.send_transaction("proposeMinter", (new_minter,), from_wallet)
