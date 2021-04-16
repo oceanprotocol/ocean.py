@@ -498,13 +498,13 @@ class DataToken(ContractBase):
         return self.contract_concise.cap()
 
     def isMinter(self, address: str) -> bool:
-        return self.contract.caller.isMinter(address)
+        return self.contract_concise.isMinter(address)
 
     def minter(self) -> str:
-        return self.contract.caller.minter()
+        return self.contract_concise.minter()
 
     def isInitialized(self) -> bool:
-        return self.contract.caller.isInitialized()
+        return self.contract_concise.isInitialized()
 
     def calculateFee(self, amount: int, fee_percentage: int) -> int:
-        return self.contract.caller.calculateFee(amount, fee_percentage)
+        return self.contract_concise.calculateFee(amount, fee_percentage)
