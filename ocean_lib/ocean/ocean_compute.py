@@ -7,6 +7,9 @@ from typing import Optional
 
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
+from ocean_lib.common.agreements.service_agreement import ServiceAgreement
+from ocean_lib.common.agreements.service_factory import ServiceDescriptor
+from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
@@ -14,9 +17,6 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3helper import Web3Helper
-from ocean_utils.agreements.service_agreement import ServiceAgreement
-from ocean_utils.agreements.service_factory import ServiceDescriptor
-from ocean_utils.agreements.service_types import ServiceTypes
 
 logger = logging.getLogger("ocean")
 

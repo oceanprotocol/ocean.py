@@ -9,12 +9,12 @@ import time
 import uuid
 
 from ocean_lib.assets.asset import Asset
+from ocean_lib.common.agreements.service_factory import ServiceDescriptor
+from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.ddo.metadata import MetadataMain
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_utils.agreements.service_factory import ServiceDescriptor
-from ocean_utils.agreements.service_types import ServiceTypes
-from ocean_utils.ddo.metadata import MetadataMain
 from tests.resources.helper_functions import mint_tokens_and_wait
 
 
