@@ -26,6 +26,34 @@ class MyFactory(ContractBase):
         )
 
 
+def test_send_transaction_with_a_wrong_password(dtfactory_address, alice_wallet):
+    factory = MyFactory(dtfactory_address)
+    old_hash = factory.createToken(
+        "foo_blob", "DT1", "DT1", to_base_18(1000.0), alice_wallet
+    )
+    _transact = {
+        "from": alice_wallet.address,
+        "passphrase": "my_secret_passphrase",
+        "account_key": alice_wallet.key,
+    }
+    wrong_tx_hash = factory.send_transaction(
+        "createToken",
+        ("foo_blob", "DT1", "DT1", to_base_18(1000.0)),
+        alice_wallet,
+        _transact,
+    )
+    assert old_hash != wrong_tx_hash
+    assert not factory.is_tx_successful(
+        factory.send_transaction(
+            "createToken",
+            ("foo_blob", "DT1", "DT1", to_base_18(1000.0)),
+            alice_wallet,
+            _transact,
+        )
+    )
+    assert wrong_tx_hash == "Tx was not successful."
+
+
 def test_name_is_None():
     with pytest.raises(AssertionError):
         # self.name will become None, triggering the error
@@ -46,7 +74,6 @@ def test_nochild():
 
 
 def test_main(network, alice_wallet, alice_address, dtfactory_address, alice_ocean):
-
     # test super-simple functionality of child
     factory = MyFactory(dtfactory_address)
     factory.createToken("foo_blob", "DT1", "DT1", to_base_18(1000.0), alice_wallet)
