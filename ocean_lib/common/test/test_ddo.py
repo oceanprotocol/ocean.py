@@ -5,9 +5,6 @@
 """
     Test did_lib
 """
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
-
 import json
 
 import pytest
@@ -24,6 +21,7 @@ from ocean_lib.common.ddo.public_key_rsa import (
 )
 from ocean_lib.common.did import DID
 from tests.resources.ddo_helpers import get_resource_path, get_sample_ddo
+from tests.resources.helper_functions import get_publisher_wallet
 
 TEST_SERVICE_TYPE = "ocean-meta-storage"
 TEST_SERVICE_URL = "http://localhost:8005"
@@ -38,8 +36,7 @@ def _get_sample_ddo(name):
     return sample_ddo_json_dict
 
 
-#  TODO: repurpose/refurbish
-def not_test_creating_ddo_from_scratch():
+def test_creating_ddo_from_scratch():
     # create an empty ddo
     ddo = DDO()
     assert ddo.did is None
@@ -50,16 +47,15 @@ def not_test_creating_ddo_from_scratch():
     ddo.assign_did(did)
     assert ddo.did == did
 
-    pub_acc = get_publisher_account()
-
     ddo.add_service(TEST_SERVICE_TYPE, TEST_SERVICE_URL)
+
+    pub_acc = get_publisher_wallet()
 
     # add a proof to the first public_key/authentication
     ddo.add_proof("checksum", pub_acc)
     ddo_text_proof = ddo.as_text()
     assert ddo_text_proof
 
-    pub_acc = get_publisher_account()
     assert not ddo.public_keys
     ddo.add_public_key(did, pub_acc.address)
     assert len(ddo.public_keys) == 1
