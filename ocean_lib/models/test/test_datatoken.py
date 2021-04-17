@@ -57,15 +57,6 @@ def test_status_functions(alice_ocean, alice_wallet, alice_address):
     assert token.totalSupply() == 100_000_000_000_000_000_000
     assert token.cap() == 1_000_000_000_000_000_000_000
     assert token.datatoken_name() == "DataToken1"
-    block = alice_ocean.web3.eth.blockNumber
-    token_info = token.get_info(
-        alice_ocean.web3,
-        from_block=(block - 1),
-        to_block=(block + 1),
-        include_holders=True,
-    )
-    assert len(token_info) == 11
-    assert token_info["totalSupply"] == 100
     with pytest.raises(ValueError):
         token.get_event_signature("not a registered event")
 
