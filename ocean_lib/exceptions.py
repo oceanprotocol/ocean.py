@@ -4,10 +4,6 @@
 #
 
 
-class OceanDIDAlreadyExist(Exception):
-    """Raised when a requested DID is already published in OceanDB."""
-
-
 class OceanEncryptAssetUrlsError(Exception):
     """Error invoking the encrypt endpoint."""
 
