@@ -38,11 +38,13 @@ def test_add_trusted_algorithm(publisher_ocean_instance):
     assert ddo is not None
 
     publisher_trusted_algorithms = create_publisher_trusted_algorithms(
-        [algorithm_ddo.did], publisher_ocean_instance.config.aquarius_url
+        [algorithm_ddo.did], publisher_ocean_instance.config.metadata_cache_uri
     )
 
     new_publisher_trusted_algorithms = add_publisher_trusted_algorithm(
-        ddo.did, algorithm_ddo_v2.did, publisher_ocean_instance.config.aquarius_url
+        ddo.did,
+        algorithm_ddo_v2.did,
+        publisher_ocean_instance.config.metadata_cache_uri,
     )
 
     assert new_publisher_trusted_algorithms is not None
@@ -65,12 +67,14 @@ def test_add_trusted_algorithm_no_compute_service(publisher_ocean_instance, meta
     assert ddo is not None
 
     create_publisher_trusted_algorithms(
-        [algorithm_ddo.did], publisher_ocean_instance.config.aquarius_url
+        [algorithm_ddo.did], publisher_ocean_instance.config.metadata_cache_uri
     )
 
     with pytest.raises(AssertionError):
         add_publisher_trusted_algorithm(
-            ddo.did, algorithm_ddo.did, publisher_ocean_instance.config.aquarius_url
+            ddo.did,
+            algorithm_ddo.did,
+            publisher_ocean_instance.config.metadata_cache_uri,
         )
 
 
@@ -91,11 +95,11 @@ def test_remove_trusted_algorithm(publisher_ocean_instance):
     assert ddo is not None
 
     publisher_trusted_algorithms = create_publisher_trusted_algorithms(
-        [algorithm_ddo.did], publisher_ocean_instance.config.aquarius_url
+        [algorithm_ddo.did], publisher_ocean_instance.config.metadata_cache_uri
     )
 
     new_publisher_trusted_algorithms = remove_publisher_trusted_algorithm(
-        ddo.did, algorithm_ddo.did, publisher_ocean_instance.config.aquarius_url
+        ddo.did, algorithm_ddo.did, publisher_ocean_instance.config.metadata_cache_uri
     )
 
     assert new_publisher_trusted_algorithms is not None

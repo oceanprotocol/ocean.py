@@ -57,7 +57,7 @@ environ_names = {
         "Path to json file of deployed contracts addresses",
     ],
     NAME_GAS_LIMIT: ["GAS_LIMIT", "Gas limit"],
-    NAME_AQUARIUS_URL: ["AQUARIUS_URL", "Aquarius URL"],
+    NAME_AQUARIUS_URL: ["METADATA_CACHE_URI", "Aquarius URL"],
     NAME_PROVIDER_URL: ["PROVIDER_URL", "URL of data services provider"],
     NAME_STORAGE_PATH: ["STORAGE_PATH", "Path to the local database file"],
     NAME_AUTH_TOKEN_MESSAGE: [
@@ -149,7 +149,15 @@ class Config(configparser.ConfigParser):
 
     def _load_environ(self):
         for option_name, environ_item in environ_names.items():
-            value = os.environ.get(environ_item[0])
+            if option_name == "aquarius.url":
+                # fallback to AQUARIUS_URL
+                value = (
+                    "METADATA_CACHE_URI"
+                    if ("METADATA_CACHE_URI" == os.environ.get(environ_item[0]))
+                    else "AQUARIUS_URL"
+                )
+            else:
+                value = os.environ.get(environ_item[0])
             if value is not None:
                 self._logger.debug(f"Config: setting environ {option_name} = {value}")
                 self.set(self._section_name, option_name, value)
