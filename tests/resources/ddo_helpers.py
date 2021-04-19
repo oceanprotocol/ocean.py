@@ -11,7 +11,6 @@ import uuid
 from ocean_lib.assets.asset import Asset
 from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.common.ddo.metadata import MetadataMain
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.wallet import Wallet
@@ -93,7 +92,7 @@ def get_registered_ddo(
         service_descriptor = get_access_service_descriptor(
             ocean_instance,
             wallet.address,
-            metadata[MetadataMain.KEY]["dateCreated"],
+            metadata["main"]["dateCreated"],
             provider_uri,
         )
 
@@ -126,10 +125,7 @@ def get_registered_ddo_with_access_service(ocean_instance, wallet, provider_uri=
     metadata = old_ddo.metadata
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     service_descriptor = get_access_service_descriptor(
-        ocean_instance,
-        wallet.address,
-        metadata[MetadataMain.KEY]["dateCreated"],
-        provider_uri,
+        ocean_instance, wallet.address, metadata["main"]["dateCreated"], provider_uri
     )
 
     return get_registered_ddo(
@@ -168,13 +164,10 @@ def get_registered_algorithm_ddo(ocean_instance, wallet, provider_uri=None):
     metadata = get_sample_algorithm_ddo()["service"][0]["attributes"]
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     service_descriptor = get_access_service_descriptor(
-        ocean_instance,
-        wallet.address,
-        metadata[MetadataMain.KEY]["dateCreated"],
-        provider_uri,
+        ocean_instance, wallet.address, metadata["main"]["dateCreated"], provider_uri
     )
-    if "cost" in metadata[MetadataMain.KEY]:
-        metadata[MetadataMain.KEY].pop("cost")
+    if "cost" in metadata["main"]:
+        metadata["main"].pop("cost")
     return get_registered_ddo(
         ocean_instance, metadata, wallet, service_descriptor, provider_uri=provider_uri
     )

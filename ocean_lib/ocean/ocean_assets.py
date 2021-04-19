@@ -22,7 +22,6 @@ from ocean_lib.common.agreements.service_factory import (
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.aquarius.aquarius import Aquarius
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
-from ocean_lib.common.ddo.metadata import MetadataMain
 from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
 from ocean_lib.common.did import did_to_id
 from ocean_lib.common.exceptions import OceanDIDAlreadyExist
@@ -101,7 +100,7 @@ class OceanAssets:
         if not access_service_descriptor and not compute_service_descriptor:
             access_service_descriptor = ServiceDescriptor.access_service_descriptor(
                 self.build_access_service(
-                    metadata[MetadataMain.KEY]["dateCreated"], 1.0, wallet.address
+                    metadata["main"]["dateCreated"], 1.0, wallet.address
                 ),
                 self._data_provider.build_download_endpoint(provider_uri)[1],
             )
