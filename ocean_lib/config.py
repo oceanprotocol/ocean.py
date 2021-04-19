@@ -17,7 +17,7 @@ DEFAULT_NETWORK_PORT = 8545
 DEFAULT_NETWORK_URL = "http://localhost:8545"
 DEFAULT_ARTIFACTS_PATH = ""
 DEFAULT_ADDRESS_FILE = ""
-DEFAULT_AQUARIUS_URL = "http://localhost:5000"
+DEFAULT_METADATA_CACHE_URI = "http://localhost:5000"
 DEFAULT_PROVIDER_URL = ""
 DEFAULT_STORAGE_PATH = "ocean_lib.db"
 DEFAULT_TYPECHECK = "true"
@@ -26,6 +26,7 @@ NAME_NETWORK_URL = "network"
 NAME_ARTIFACTS_PATH = "artifacts.path"
 NAME_ADDRESS_FILE = "address.file"
 NAME_GAS_LIMIT = "gas_limit"
+NAME_METADATA_CACHE_URI = "metadata_cache.uri"
 NAME_AQUARIUS_URL = "aquarius.url"
 NAME_PROVIDER_URL = "provider.url"
 NAME_STORAGE_PATH = "storage.path"
@@ -57,7 +58,7 @@ environ_names = {
         "Path to json file of deployed contracts addresses",
     ],
     NAME_GAS_LIMIT: ["GAS_LIMIT", "Gas limit"],
-    NAME_AQUARIUS_URL: ["METADATA_CACHE_URI", "Aquarius URL"],
+    NAME_METADATA_CACHE_URI: ["METADATA_CACHE_URI", "Metadata Cache URI"],
     NAME_PROVIDER_URL: ["PROVIDER_URL", "URL of data services provider"],
     NAME_STORAGE_PATH: ["STORAGE_PATH", "Path to the local database file"],
     NAME_AUTH_TOKEN_MESSAGE: [
@@ -72,6 +73,8 @@ environ_names = {
     NAME_TYPECHECK: ["TYPECHECK", "Enforce type hints at runtime"],
 }
 
+deprecated_environ_names = {NAME_AQUARIUS_URL: ["AQUARIUS_URL", "Aquarius URL"]}
+
 config_defaults = {
     "eth-network": {
         NAME_NETWORK_URL: DEFAULT_NETWORK_URL,
@@ -80,7 +83,7 @@ config_defaults = {
         NAME_GAS_LIMIT: GAS_LIMIT_DEFAULT,
     },
     "resources": {
-        NAME_AQUARIUS_URL: DEFAULT_AQUARIUS_URL,
+        NAME_METADATA_CACHE_URI: DEFAULT_METADATA_CACHE_URI,
         NAME_PROVIDER_URL: DEFAULT_PROVIDER_URL,
         NAME_STORAGE_PATH: DEFAULT_STORAGE_PATH,
         NAME_AUTH_TOKEN_MESSAGE: "",
@@ -106,7 +109,7 @@ class Config(configparser.ConfigParser):
         artifacts.path = artifacts
 
         [resources]
-        aquarius.url = http://localhost:5000
+        metadata_cache.uri = http://localhost:5000
         provider.url = http://localhost:8030
         ; Path of back-up storage
         storage.path = ocean_lib.db
@@ -149,13 +152,27 @@ class Config(configparser.ConfigParser):
 
     def _load_environ(self):
         for option_name, environ_item in environ_names.items():
-            if option_name == "aquarius.url":
-                # fallback to AQUARIUS_URL
-                value = (
-                    "METADATA_CACHE_URI"
-                    if ("METADATA_CACHE_URI" == os.environ.get(environ_item[0]))
-                    else "AQUARIUS_URL"
+            if option_name == NAME_METADATA_CACHE_URI:
+                metadata_cache_uri = os.environ.get(environ_item[0])
+                aquarius_url = os.environ.get(
+                    deprecated_environ_names[NAME_AQUARIUS_URL][0]
                 )
+
+                if metadata_cache_uri and aquarius_url:
+                    raise ValueError(
+                        (
+                            "Both METADATA_CACHE_URI and AQUARIUS_URL envvars are set. "
+                            "Use only METADATA_CACHE_URI because AQUARIUS_URL is deprecated."
+                        )
+                    )
+
+                if aquarius_url:
+                    self._logger.warning(
+                        "Config: AQUARIUS_URL envvar is deprecated. Use METADATA_CACHE_URI instead."
+                    )
+
+                # fallback to AQUARIUS_URL
+                value = metadata_cache_uri if metadata_cache_uri else aquarius_url
             else:
                 value = os.environ.get(environ_item[0])
             if value is not None:
@@ -222,8 +239,8 @@ class Config(configparser.ConfigParser):
 
     @property
     def metadata_cache_uri(self):
-        """URL of aquarius component. (e.g.): http://myaquarius:5000."""
-        return self.get("resources", NAME_AQUARIUS_URL)
+        """URL of metadata cache component. (e.g.): http://myaquarius:5000."""
+        return self.get("resources", NAME_METADATA_CACHE_URI)
 
     @property
     def provider_url(self):
