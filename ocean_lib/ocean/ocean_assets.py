@@ -30,7 +30,12 @@ from ocean_lib.data_provider.data_service_provider import (
     OrderRequirements,
 )
 from ocean_lib.enforce_typing_shim import enforce_types_shim
-from ocean_lib.exceptions import OceanDIDAlreadyExist
+from ocean_lib.exceptions import (
+    AquariusError,
+    ContractNotFound,
+    InsufficientBalance,
+    VerifyTxFailed,
+)
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
@@ -234,7 +239,7 @@ class OceanAssets:
                     f"Minter of datatoken {data_token_address} is not the same as the publisher."
                 )
             elif not dtfactory.verify_data_token(data_token_address):
-                raise AssertionError(
+                raise ContractNotFound(
                     f"datatoken address {data_token_address} is not found in the DTFactory events."
                 )
 
@@ -247,7 +252,7 @@ class OceanAssets:
         logger.debug(f"Using datatoken address as did: {did}")
         # Check if it's already registered first!
         if did in self._get_aquarius().list_assets():
-            raise OceanDIDAlreadyExist(
+            raise AquariusError(
                 f"Asset id {did} is already registered to another asset."
             )
 
@@ -326,7 +331,7 @@ class OceanAssets:
                 publisher_wallet,
             )
             if not ddo_registry.verify_tx(tx_id):
-                raise AssertionError(
+                raise VerifyTxFailed(
                     f"create DDO on-chain failed, transaction status is 0. Transaction hash is {tx_id}"
                 )
             logger.info("Asset/ddo published on-chain successfully.")
@@ -350,7 +355,7 @@ class OceanAssets:
                 publisher_wallet,
             )
             if not ddo_registry.verify_tx(tx_id):
-                raise AssertionError(
+                raise VerifyTxFailed(
                     f"update DDO on-chain failed, transaction status is 0. Transaction hash is {tx_id}"
                 )
             logger.info("Asset/ddo updated on-chain successfully.")
@@ -484,7 +489,7 @@ class OceanAssets:
         dt = DataToken(token_address)
         balance = dt.balanceOf(from_wallet.address)
         if balance < amount_base:
-            raise AssertionError(
+            raise InsufficientBalance(
                 f"Your token balance {balance} is not sufficient "
                 f"to execute the requested service. This service "
                 f"requires {amount_base} number of tokens."

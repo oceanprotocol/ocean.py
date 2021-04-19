@@ -4,45 +4,25 @@
 #
 
 
-class OceanInvalidContractAddress(Exception):
-    """Raised when an invalid address is passed to the contract loader."""
-
-
-class OceanDIDUnknownValueType(Exception):
-    """Raised when a requested DID or a DID in the chain cannot be found."""
-
-
 class OceanDIDAlreadyExist(Exception):
     """Raised when a requested DID is already published in OceanDB."""
 
 
-class OceanInvalidMetadata(Exception):
-    """Raised when some value in the metadata is invalid."""
-
-
-class OceanInvalidServiceAgreementSignature(Exception):
-    """Raised when the SLA signature is not valid."""
-
-
-class OceanServiceAgreementExists(Exception):
-    """Raised when the SLA already exists."""
-
-
-class OceanInitializeServiceAgreementError(Exception):
-    """Error on invoking purchase endpoint"""
-
-
 class OceanEncryptAssetUrlsError(Exception):
-    """Error invoking the encrypt endpoint"""
+    """Error invoking the encrypt endpoint."""
 
 
-class OceanServiceConsumeError(Exception):
-    """ Error invoking a purchase endpoint"""
+class InsufficientBalance(Exception):
+    """The token balance is insufficient."""
 
 
-class OceanInvalidAgreementTemplate(Exception):
-    """ Error when agreement template is not valid or not approved"""
+class ContractNotFound(Exception):
+    """Contract address is not found in the factory events."""
 
 
-class AquariusGenericError(Exception):
-    """ Error invoking an Aquarius metadata service endpoint"""
+class AquariusError(Exception):
+    """Error invoking an Aquarius metadata service endpoint."""
+
+
+class VerifyTxFailed(Exception):
+    """Transaction verification failed."""

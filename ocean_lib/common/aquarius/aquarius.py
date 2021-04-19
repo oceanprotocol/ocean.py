@@ -15,7 +15,7 @@ import logging
 
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.http_requests.requests_session import get_requests_session
-from ocean_lib.exceptions import AquariusGenericError
+from ocean_lib.exceptions import AquariusError
 
 logger = logging.getLogger("aquarius")
 
@@ -258,7 +258,7 @@ class Aquarius:
             logging.debug(f"Removed asset DID: {did} from metadata store")
             return response
 
-        raise AquariusGenericError(f"Unable to remove DID: {response}")
+        raise AquariusError(f"Unable to remove DID: {response}")
 
     def retire_all_assets(self):
         """
@@ -270,7 +270,7 @@ class Aquarius:
             logging.debug("Removed all the assets successfully")
             return response
 
-        raise AquariusGenericError(f"Unable to remove all the DID: {response}")
+        raise AquariusError(f"Unable to remove all the DID: {response}")
 
     def validate_metadata(self, metadata):
         """
