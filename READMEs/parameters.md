@@ -37,6 +37,7 @@ d = {
 }
 ocean = Ocean(d)
 ```
+For legacy support, you can also use `metadataStoreUri` instead of `metadataCacheUri`.
 
 ## 1a. Unsetting envvars
 
