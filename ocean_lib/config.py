@@ -41,39 +41,70 @@ NAME_PROVIDER_ADDRESS = "provider.address"
 
 NAME_TYPECHECK = "typecheck"
 
-environ_names = {
+SECTION_ETH_NETWORK = "eth-network"
+SECTION_RESOURCES = "resources"
+SECTION_UTIL = "util"
+
+environ_names_and_sections = {
     NAME_DATA_TOKEN_FACTORY_ADDRESS: [
         "DATA_TOKEN_FACTORY_ADDRESS",
         "Data token factory address",
+        SECTION_ETH_NETWORK,
     ],
-    NAME_BFACTORY_ADDRESS: ["BFACTORY_ADDRESS", "BPool factory address"],
-    NAME_OCEAN_ADDRESS: ["OCEAN_ADDRESS", "OCEAN address"],
-    NAME_NETWORK_URL: ["NETWORK_URL", "Network URL"],
+    NAME_BFACTORY_ADDRESS: [
+        "BFACTORY_ADDRESS",
+        "BPool factory address",
+        SECTION_ETH_NETWORK,
+    ],
+    NAME_OCEAN_ADDRESS: ["OCEAN_ADDRESS", "OCEAN address", SECTION_ETH_NETWORK],
+    NAME_NETWORK_URL: ["NETWORK_URL", "Network URL", SECTION_ETH_NETWORK],
     NAME_ARTIFACTS_PATH: [
         "ARTIFACTS_PATH",
         "Path to the abi artifacts of the deployed smart contracts",
+        SECTION_ETH_NETWORK,
     ],
     NAME_ADDRESS_FILE: [
         "ADDRESS_FILE",
         "Path to json file of deployed contracts addresses",
+        SECTION_ETH_NETWORK,
     ],
-    NAME_GAS_LIMIT: ["GAS_LIMIT", "Gas limit"],
-    NAME_METADATA_CACHE_URI: ["METADATA_CACHE_URI", "Metadata Cache URI"],
-    NAME_PROVIDER_URL: ["PROVIDER_URL", "URL of data services provider"],
-    NAME_STORAGE_PATH: ["STORAGE_PATH", "Path to the local database file"],
+    NAME_GAS_LIMIT: ["GAS_LIMIT", "Gas limit", SECTION_ETH_NETWORK],
+    NAME_METADATA_CACHE_URI: [
+        "METADATA_CACHE_URI",
+        "Metadata Cache URI",
+        SECTION_RESOURCES,
+    ],
+    NAME_PROVIDER_URL: [
+        "PROVIDER_URL",
+        "URL of data services provider",
+        SECTION_RESOURCES,
+    ],
+    NAME_STORAGE_PATH: [
+        "STORAGE_PATH",
+        "Path to the local database file",
+        SECTION_RESOURCES,
+    ],
     NAME_AUTH_TOKEN_MESSAGE: [
         "AUTH_TOKEN_MESSAGE",
         "Message to use for generating user auth token",
+        SECTION_RESOURCES,
     ],
     NAME_AUTH_TOKEN_EXPIRATION: [
         "AUTH_TOKEN_EXPIRATION",
         "Auth token expiration time expressed in seconds",
+        SECTION_RESOURCES,
     ],
-    NAME_PROVIDER_ADDRESS: ["PROVIDER_ADDRESS", "Provider ethereum address"],
-    NAME_TYPECHECK: ["TYPECHECK", "Enforce type hints at runtime"],
+    NAME_PROVIDER_ADDRESS: [
+        "PROVIDER_ADDRESS",
+        "Provider ethereum address",
+        SECTION_RESOURCES,
+    ],
+    NAME_TYPECHECK: ["TYPECHECK", "Enforce type hints at runtime", SECTION_UTIL],
 }
 
-deprecated_environ_names = {NAME_AQUARIUS_URL: ["AQUARIUS_URL", "Aquarius URL"]}
+deprecated_environ_names = {
+    NAME_AQUARIUS_URL: ["AQUARIUS_URL", "Aquarius URL", SECTION_RESOURCES]
+}
 
 config_defaults = {
     "eth-network": {
@@ -125,7 +156,6 @@ class Config(configparser.ConfigParser):
 
         self.read_dict(config_defaults)
         self._web3_provider = None
-        self._section_name = "eth-network"
         self._logger = logging.getLogger("config")
 
         if filename:
@@ -151,7 +181,7 @@ class Config(configparser.ConfigParser):
         self._load_environ()
 
     def _load_environ(self):
-        for option_name, environ_item in environ_names.items():
+        for option_name, environ_item in environ_names_and_sections.items():
             if option_name == NAME_METADATA_CACHE_URI:
                 metadata_cache_uri = os.environ.get(environ_item[0])
                 aquarius_url = os.environ.get(
@@ -177,13 +207,13 @@ class Config(configparser.ConfigParser):
                 value = os.environ.get(environ_item[0])
             if value is not None:
                 self._logger.debug(f"Config: setting environ {option_name} = {value}")
-                self.set(self._section_name, option_name, value)
+                self.set(environ_item[2], option_name, value)
 
     @property
     def artifacts_path(self):
         """Path where the contracts artifacts are allocated."""
         path = None
-        _path_string = self.get(self._section_name, NAME_ARTIFACTS_PATH)
+        _path_string = self.get(SECTION_ETH_NETWORK, NAME_ARTIFACTS_PATH)
         if _path_string:
             path = Path(_path_string).expanduser().resolve()
 
@@ -213,7 +243,7 @@ class Config(configparser.ConfigParser):
 
     @property
     def address_file(self):
-        file_path = self.get(self._section_name, NAME_ADDRESS_FILE)
+        file_path = self.get(SECTION_ETH_NETWORK, NAME_ADDRESS_FILE)
         if file_path:
             file_path = Path(file_path).expanduser().resolve()
 
@@ -225,26 +255,26 @@ class Config(configparser.ConfigParser):
     @property
     def storage_path(self):
         """Path to local storage (database file)."""
-        return self.get("resources", NAME_STORAGE_PATH)
+        return self.get(SECTION_RESOURCES, NAME_STORAGE_PATH)
 
     @property
     def network_url(self):
         """URL of the ethereum network. (e.g.): http://mynetwork:8545."""
-        return self.get(self._section_name, NAME_NETWORK_URL)
+        return self.get(SECTION_ETH_NETWORK, NAME_NETWORK_URL)
 
     @property
     def gas_limit(self):
         """Ethereum gas limit."""
-        return int(self.get(self._section_name, NAME_GAS_LIMIT))
+        return int(self.get(SECTION_ETH_NETWORK, NAME_GAS_LIMIT))
 
     @property
     def metadata_cache_uri(self):
         """URL of metadata cache component. (e.g.): http://myaquarius:5000."""
-        return self.get("resources", NAME_METADATA_CACHE_URI)
+        return self.get(SECTION_RESOURCES, NAME_METADATA_CACHE_URI)
 
     @property
     def provider_url(self):
-        return self.get("resources", NAME_PROVIDER_URL)
+        return self.get(SECTION_RESOURCES, NAME_PROVIDER_URL)
 
     @property
     def provider_address(self):
@@ -252,21 +282,21 @@ class Config(configparser.ConfigParser):
 
         Ethereum address of service provider
         """
-        return self.get("resources", NAME_PROVIDER_ADDRESS)
+        return self.get(SECTION_RESOURCES, NAME_PROVIDER_ADDRESS)
 
     @property
     def downloads_path(self):
         """Path for the downloads of assets."""
-        return self.get("resources", "downloads.path")
+        return self.get(SECTION_RESOURCES, "downloads.path")
 
     @property
     def auth_token_message(self):
-        return self.get("resources", NAME_AUTH_TOKEN_MESSAGE)
+        return self.get(SECTION_RESOURCES, NAME_AUTH_TOKEN_MESSAGE)
 
     @property
     def auth_token_expiration(self):
-        return self.get("resources", NAME_AUTH_TOKEN_EXPIRATION)
+        return self.get(SECTION_RESOURCES, NAME_AUTH_TOKEN_EXPIRATION)
 
     @property
     def typecheck(self):
-        return self.get("util", NAME_TYPECHECK)
+        return self.get(SECTION_UTIL, NAME_TYPECHECK)
