@@ -12,7 +12,7 @@ from ocean_lib.config import (
 )
 
 
-def test_metadata_cache_uri_property(monkeypatch):
+def test_metadata_cache_uri_property(monkeypatch, caplog):
     """Tests the 'metadata_cache_uri' property."""
     ENV_METADATA_CACHE_URI = environ_names_and_sections[NAME_METADATA_CACHE_URI][0]
     ENV_AQUARIUS_URL = deprecated_environ_names[NAME_AQUARIUS_URL][0]
@@ -35,3 +35,7 @@ def test_metadata_cache_uri_property(monkeypatch):
     monkeypatch.delenv(ENV_METADATA_CACHE_URI)
     config = Config()
     assert config.metadata_cache_uri == "https://another-aqua.url"
+    assert (
+        "Config: AQUARIUS_URL envvar is deprecated. Use METADATA_CACHE_URI instead."
+        in caplog.text
+    )
