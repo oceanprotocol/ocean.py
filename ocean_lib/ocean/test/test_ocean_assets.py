@@ -7,10 +7,11 @@ import uuid
 
 import pytest
 from eth_utils import add_0x_prefix
+from ocean_lib.common.agreements.service_factory import ServiceDescriptor
+from ocean_lib.common.ddo.ddo import DDO
+from ocean_lib.common.did import DID, did_to_id
 from ocean_lib.models.data_token import DataToken
-from ocean_utils.agreements.service_factory import ServiceDescriptor
-from ocean_utils.ddo.ddo import DDO
-from ocean_utils.did import DID, did_to_id
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import (
     get_computing_metadata,
     get_resource_path,
@@ -238,3 +239,54 @@ def test_create_asset_with_address(publisher_ocean_instance):
     assert ocn.assets.create(
         asset.metadata, alice, [auth_service], data_token_address=token.address
     )
+
+
+def test_create_asset_with_owner_address(publisher_ocean_instance):
+    """Tests creation of the asset which has already an owner address."""
+    ocn = publisher_ocean_instance
+    alice = get_publisher_wallet()
+
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
+    asset = DDO(json_filename=sample_ddo_path)
+    asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
+    my_secret_store = "http://myownsecretstore.com"
+    auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
+
+    assert ocn.assets.create(
+        asset.metadata, alice, [auth_service], owner_address=alice.address
+    )
+
+
+def test_create_asset_without_dt_address(publisher_ocean_instance):
+    """Tests creation of the asset which has not the data token address."""
+    ocn = publisher_ocean_instance
+    alice = get_publisher_wallet()
+
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
+    asset = DDO(json_filename=sample_ddo_path)
+    asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
+    my_secret_store = "http://myownsecretstore.com"
+    auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
+
+    assert ocn.assets.create(
+        asset.metadata, alice, [auth_service], data_token_address=None
+    )
+
+
+def test_pay_for_service_insufficient_balance(publisher_ocean_instance):
+    """Tests if balance is lower than the purchased amount."""
+    ocn = publisher_ocean_instance
+    alice = get_publisher_wallet()
+
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
+    asset = DDO(json_filename=sample_ddo_path)
+    asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
+
+    token = ocn.create_data_token(
+        "DataToken1", "DT1", from_wallet=alice, blob="foo_blob"
+    )
+
+    with pytest.raises(AssertionError):
+        ocn.assets.pay_for_service(
+            10000000000000.0, token.address, asset.did, 0, ZERO_ADDRESS, alice
+        )

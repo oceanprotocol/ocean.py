@@ -5,9 +5,9 @@
 
 import os
 
+from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider, logger
-from ocean_utils.agreements.service_types import ServiceTypes
-from ocean_utils.http_requests.requests_session import get_requests_session
 
 
 class DataProviderMock(object):

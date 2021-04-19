@@ -14,6 +14,18 @@ from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
+from ocean_lib.common.agreements.service_agreement import ServiceAgreement
+from ocean_lib.common.agreements.service_factory import (
+    ServiceDescriptor,
+    ServiceFactory,
+)
+from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.aquarius.aquarius import Aquarius
+from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
+from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
+from ocean_lib.common.did import did_to_id
+from ocean_lib.common.exceptions import OceanDIDAlreadyExist
+from ocean_lib.common.utils.utilities import checksum
 from ocean_lib.data_provider.data_service_provider import (
     DataServiceProvider,
     OrderRequirements,
@@ -28,16 +40,6 @@ from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib.web3_internal.web3helper import Web3Helper
-from ocean_utils.agreements.service_agreement import ServiceAgreement
-from ocean_utils.agreements.service_factory import ServiceDescriptor, ServiceFactory
-from ocean_utils.agreements.service_types import ServiceTypes
-from ocean_utils.aquarius.aquarius import Aquarius
-from ocean_utils.aquarius.aquarius_provider import AquariusProvider
-from ocean_utils.ddo.metadata import MetadataMain
-from ocean_utils.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
-from ocean_utils.did import did_to_id
-from ocean_utils.exceptions import OceanDIDAlreadyExist
-from ocean_utils.utils.utilities import checksum
 from plecos import plecos
 
 logger = logging.getLogger("ocean")
@@ -98,7 +100,7 @@ class OceanAssets:
         if not access_service_descriptor and not compute_service_descriptor:
             access_service_descriptor = ServiceDescriptor.access_service_descriptor(
                 self.build_access_service(
-                    metadata[MetadataMain.KEY]["dateCreated"], 1.0, wallet.address
+                    metadata["main"]["dateCreated"], 1.0, wallet.address
                 ),
                 self._data_provider.build_download_endpoint(provider_uri)[1],
             )

@@ -7,8 +7,8 @@ import json
 
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
+from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.enforce_typing_shim import enforce_types_shim
-from ocean_utils.agreements.service_types import ServiceTypes
 
 
 def create_checksum(text):
