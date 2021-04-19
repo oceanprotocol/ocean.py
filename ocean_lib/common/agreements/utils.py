@@ -7,7 +7,6 @@
 #  Copyright 2018 Ocean Protocol Foundation
 #  SPDX-License-Identifier: Apache-2.0
 
-from ocean_lib.common.agreements.access_sla_template import ACCESS_SLA_TEMPLATE
 from ocean_lib.common.agreements.compute_sla_template import COMPUTE_SLA_TEMPLATE
 from ocean_lib.common.agreements.service_types import ServiceTypes
 

@@ -267,7 +267,7 @@ class Aquarius:
         """
         response = self.requests_session.delete(f"{self.url}", headers=self._headers)
         if response.status_code == 200:
-            logging.debug("Removed all the assets successfully")
+            logging.debug(f"Removed all the assets successfully")
             return response
 
         raise AquariusGenericError(f"Unable to remove all the DID: {response}")

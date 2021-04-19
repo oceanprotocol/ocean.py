@@ -4,11 +4,7 @@
 #
 
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
-from ocean_lib.common.agreements.service_agreement_template import (
-    ServiceAgreementTemplate,
-)
 from ocean_lib.common.agreements.service_types import ServiceTypes, ServiceTypesIndices
-from ocean_lib.common.agreements.utils import get_sla_template
 from ocean_lib.common.ddo.service import Service
 
 
@@ -44,7 +40,7 @@ class ServiceDescriptor(object):
         )
 
     @staticmethod
-    def access_service_descriptor(attributes, service_endpoint, template_id):
+    def access_service_descriptor(attributes, service_endpoint):
         """
         Access service descriptor.
 
@@ -55,15 +51,11 @@ class ServiceDescriptor(object):
         """
         return (
             ServiceTypes.ASSET_ACCESS,
-            {
-                "attributes": attributes,
-                "serviceEndpoint": service_endpoint,
-                "templateId": template_id,
-            },
+            {"attributes": attributes, "serviceEndpoint": service_endpoint},
         )
 
     @staticmethod
-    def compute_service_descriptor(attributes, service_endpoint, template_id):
+    def compute_service_descriptor(attributes, service_endpoint):
         """
         Compute service descriptor.
 
@@ -74,11 +66,7 @@ class ServiceDescriptor(object):
         """
         return (
             ServiceTypes.CLOUD_COMPUTE,
-            {
-                "attributes": attributes,
-                "serviceEndpoint": service_endpoint,
-                "templateId": template_id,
-            },
+            {"attributes": attributes, "serviceEndpoint": service_endpoint},
         )
 
 
@@ -129,11 +117,11 @@ class ServiceFactory(object):
 
         elif service_type == ServiceTypes.ASSET_ACCESS:
             return ServiceFactory.build_access_service(
-                kwargs["attributes"], kwargs["serviceEndpoint"], kwargs["templateId"]
+                kwargs["attributes"], kwargs["serviceEndpoint"]
             )
         elif service_type == ServiceTypes.CLOUD_COMPUTE:
             return ServiceFactory.build_compute_service(
-                kwargs["attributes"], kwargs["serviceEndpoint"], kwargs["templateId"]
+                kwargs["attributes"], kwargs["serviceEndpoint"]
             )
         raise ValueError(f"Unknown service type {service_type}")
 
@@ -170,52 +158,32 @@ class ServiceFactory(object):
         )
 
     @staticmethod
-    def build_access_service(attributes, service_endpoint, template_id):
+    def build_access_service(attributes, service_endpoint):
         """
         Build an authorization service.
 
         :param attributes: attributes of access service, dict
         :param service_endpoint: identifier of the service inside the asset DDO, str
-        :param template_id: hex str the ethereum smart contract address of the
-            service agreement template contract.
         :return: ServiceAgreement instance
         """
-        sla_template_dict = get_sla_template()
-        sla_template = ServiceAgreementTemplate(
-            template_id,
-            "dataAssetAccessServiceAgreement",
-            attributes["main"]["creator"],
-            sla_template_dict,
-        )
         return ServiceAgreement(
             attributes,
-            sla_template,
             service_endpoint,
             ServiceTypes.ASSET_ACCESS,
             ServiceTypesIndices.DEFAULT_ACCESS_INDEX,
         )
 
     @staticmethod
-    def build_compute_service(attributes, service_endpoint, template_id):
+    def build_compute_service(attributes, service_endpoint):
         """
         Build an authorization service.
 
         :param attributes: attributes of compute service, dict
         :param service_endpoint: identifier of the service inside the asset DDO, str
-        :param template_id: hex str the ethereum smart contract address of the
-            service agreement template contract.
         :return: ServiceAgreement instance
         """
-        sla_template_dict = get_sla_template(ServiceTypes.CLOUD_COMPUTE)
-        sla_template = ServiceAgreementTemplate(
-            template_id,
-            "dataComputeServiceAgreement",
-            attributes["main"]["creator"],
-            sla_template_dict,
-        )
         return ServiceAgreement(
             attributes,
-            sla_template,
             service_endpoint,
             ServiceTypes.CLOUD_COMPUTE,
             ServiceTypesIndices.DEFAULT_COMPUTING_INDEX,
