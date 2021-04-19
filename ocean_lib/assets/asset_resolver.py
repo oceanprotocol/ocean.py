@@ -9,8 +9,8 @@
 import logging
 
 from ocean_lib.assets.asset import Asset
+from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
 from ocean_lib.models.data_token import DataToken
-from ocean_utils.aquarius.aquarius_provider import AquariusProvider
 
 logger = logging.getLogger("keeper")
 

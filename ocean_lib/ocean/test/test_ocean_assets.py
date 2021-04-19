@@ -7,12 +7,10 @@ import uuid
 
 import pytest
 from eth_utils import add_0x_prefix
-
+from ocean_lib.common.agreements.service_factory import ServiceDescriptor
+from ocean_lib.common.ddo.ddo import DDO
+from ocean_lib.common.did import DID, did_to_id
 from ocean_lib.models.data_token import DataToken
-from ocean_utils.agreements.service_factory import ServiceDescriptor
-from ocean_utils.ddo.ddo import DDO
-from ocean_utils.did import DID, did_to_id
-
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import (
     get_computing_metadata,
@@ -259,10 +257,7 @@ def test_create_asset_with_owner_address(publisher_ocean_instance):
     )
 
     assert ocn.assets.create(
-        asset.metadata,
-        alice,
-        [auth_service],
-        owner_address=alice.address,
+        asset.metadata, alice, [auth_service], owner_address=alice.address
     )
 
     asset_1 = ocn.assets.create(
@@ -297,10 +292,7 @@ def test_create_asset_without_dt_address(publisher_ocean_instance):
     auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
 
     assert ocn.assets.create(
-        asset.metadata,
-        alice,
-        [auth_service],
-        data_token_address=None,
+        asset.metadata, alice, [auth_service], data_token_address=None
     )
 
 
