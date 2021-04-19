@@ -4,12 +4,12 @@
 #
 
 import os.path
-import pytest
 
+import pytest
 from ocean_lib.config import Config
 from ocean_lib.config_provider import ConfigProvider
-from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.example_config import ExampleConfig
+from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.ocean.ocean import Ocean
 from tests.resources.ddo_helpers import get_resource_path
 
@@ -139,7 +139,7 @@ def test_config_from_text_wellformed_content():
     """
     config_text = """
         [resources]
-        aquarius.url = https://another-aqua.url
+        metadata_cache.uri = https://another-aqua.url
     """
     config = Config(text=config_text)
     assert config.metadata_cache_uri == "https://another-aqua.url"

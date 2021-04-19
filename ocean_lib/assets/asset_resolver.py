@@ -29,7 +29,7 @@ def resolve_asset(did, metadata_cache_uri=None, token_address=None):
     """
     assert (
         metadata_cache_uri or token_address
-    ), "One of metadata_store_url or token_address is required."
+    ), "One of metadata_cache_uri or token_address is required."
 
     metadata_url = metadata_cache_uri
     if not metadata_cache_uri and token_address:

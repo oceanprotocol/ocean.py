@@ -86,7 +86,7 @@ artifacts.path = ~/.ocean/ocean-contracts/artifacts
 address.file = ~/.ocean/ocean-contracts/artifacts/address.json
 
 [resources]
-aquarius.url = http://localhost:5000
+metadata_cache.uri = http://localhost:5000
 provider.url = http://localhost:8030
 provider.address = 0x00bd138abd70e2f00903268f3db08f2d25677c9e
 
