@@ -98,7 +98,7 @@ def test_add_the_same_trusted_algorithm(publisher_ocean_instance):
         ddo.did, algorithm_ddo.did, publisher_ocean_instance.config.aquarius_url
     )
     assert new_publisher_trusted_algorithms is not None
-    for index, trusted_algorithm in enumerate(publisher_trusted_algorithms):
+    for _, trusted_algorithm in enumerate(publisher_trusted_algorithms):
         assert trusted_algorithm["did"] == algorithm_ddo.did
     assert len(new_publisher_trusted_algorithms) == len(publisher_trusted_algorithms)
 
@@ -161,6 +161,6 @@ def test_remove_unexisting_trusted_algorithm(publisher_ocean_instance):
     )
 
     assert new_publisher_trusted_algorithms is not None
-    for index, trusted_algorithm in enumerate(publisher_trusted_algorithms):
+    for _, trusted_algorithm in enumerate(publisher_trusted_algorithms):
         assert trusted_algorithm["did"] != algorithm_ddo_v2.did
     assert len(new_publisher_trusted_algorithms) == len(publisher_trusted_algorithms)
