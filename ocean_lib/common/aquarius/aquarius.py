@@ -13,9 +13,9 @@ Help to communicate with the metadata store.
 import json
 import logging
 
-from ocean_lib.common.aquarius.exceptions import AquariusGenericError
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.http_requests.requests_session import get_requests_session
+from ocean_lib.exceptions import AquariusGenericError
 
 logger = logging.getLogger("aquarius")
 

@@ -2,11 +2,6 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-"""Exceptions for ocean_lib.common """
-
-
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
 
 
 class OceanInvalidContractAddress(Exception):
@@ -47,3 +42,7 @@ class OceanServiceConsumeError(Exception):
 
 class OceanInvalidAgreementTemplate(Exception):
     """ Error when agreement template is not valid or not approved"""
+
+
+class AquariusGenericError(Exception):
+    """ Error invoking an Aquarius metadata service endpoint"""

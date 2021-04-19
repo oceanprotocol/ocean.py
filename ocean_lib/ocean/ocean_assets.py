@@ -24,13 +24,13 @@ from ocean_lib.common.aquarius.aquarius import Aquarius
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
 from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
 from ocean_lib.common.did import did_to_id
-from ocean_lib.common.exceptions import OceanDIDAlreadyExist
 from ocean_lib.common.utils.utilities import checksum
 from ocean_lib.data_provider.data_service_provider import (
     DataServiceProvider,
     OrderRequirements,
 )
 from ocean_lib.enforce_typing_shim import enforce_types_shim
+from ocean_lib.exceptions import OceanDIDAlreadyExist
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
