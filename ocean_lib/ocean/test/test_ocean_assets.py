@@ -10,6 +10,7 @@ from eth_utils import add_0x_prefix
 from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.did import DID, did_to_id
+from ocean_lib.exceptions import InsufficientBalance
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import (
@@ -286,7 +287,7 @@ def test_pay_for_service_insufficient_balance(publisher_ocean_instance):
         "DataToken1", "DT1", from_wallet=alice, blob="foo_blob"
     )
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(InsufficientBalance):
         ocn.assets.pay_for_service(
             10000000000000.0, token.address, asset.did, 0, ZERO_ADDRESS, alice
         )

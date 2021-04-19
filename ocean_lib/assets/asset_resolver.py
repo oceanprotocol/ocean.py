@@ -25,7 +25,6 @@ def resolve_asset(did, metadata_cache_uri=None, token_address=None):
 
     :return string: DDO of the resolved DID
     :return None: if the DID cannot be resolved
-    :raises OceanDIDNotFound: if no DID can be found to resolve.
     """
     assert (
         metadata_cache_uri or token_address
