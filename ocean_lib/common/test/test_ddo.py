@@ -5,10 +5,8 @@
 """
     Test did_lib
 """
-import json
-
 import pytest
-from ocean_lib.common.agreements.service_agreement import ServiceAgreement, ServiceTypes
+from ocean_lib.common.agreements.service_agreement import ServiceTypes
 from ocean_lib.common.agreements.service_factory import (
     ServiceDescriptor,
     ServiceFactory,
@@ -25,15 +23,6 @@ from tests.resources.helper_functions import get_publisher_wallet
 
 TEST_SERVICE_TYPE = "ocean-meta-storage"
 TEST_SERVICE_URL = "http://localhost:8005"
-
-
-def _get_sample_ddo(name):
-    sample_ddo_path = get_resource_path("ddo", name)
-    assert sample_ddo_path.exists(), f"{sample_ddo_path} does not exist!"
-    with open(sample_ddo_path) as f:
-        sample_ddo_json_dict = json.load(f)
-
-    return sample_ddo_json_dict
 
 
 def test_creating_ddo_from_scratch():
@@ -95,37 +84,17 @@ def test_create_public_key_from_json():
     assert pub_key_inst.get_owner() is None
 
 
-# TODO: repurpose/refurbish: all below
-def not_test_load_ddo_json():
-    # TODO: Fix
-    sample_ddo_json_dict = _get_sample_ddo("ddo_sample1.json")
-    sample_ddo_json_string = json.dumps(sample_ddo_json_dict)
-
-    this_ddo = DDO(json_text=sample_ddo_json_string)
-    service = this_ddo.get_service(ServiceTypes.METADATA)
-    assert service
-    assert service.type == ServiceTypes.METADATA
-    assert service.attributes
-    assert this_ddo.as_dictionary() == sample_ddo_json_dict, (
-        f"ddo seems to have changed after being loaded into DDO object: \n"
-        f"{this_ddo.as_text()} vs. {sample_ddo_json_string}"
-    )
-
-
-def not_test_ddo_dict():
-    sample_ddo_path = get_resource_path("ddo", "ddo_sample1.json")
+def test_ddo_dict():
+    sample_ddo_path = get_resource_path("ddo", "ddo_sample_algorithm.json")
     assert sample_ddo_path.exists(), f"{sample_ddo_path} does not exist!"
 
     ddo1 = DDO(json_filename=sample_ddo_path)
     assert len(ddo1.public_keys) == 3
-    assert (
-        ddo1.did
-        == "did:op:0c184915b07b44c888d468be85a9b28253e80070e5294b1aaed81c2f0264e429"
-    )
+    assert ddo1.did == "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019"
 
 
-def not_test_find_service():
-    ddo = get_sample_ddo()
+def test_find_service():
+    ddo = get_sample_ddo("ddo_algorithm.json")
     service = ddo.get_service_by_index(0)
     assert service and service.type == ServiceTypes.METADATA, (
         "Failed to find service by integer " "id."
@@ -135,21 +104,6 @@ def not_test_find_service():
         "Failed to find service by str(int)" " id."
     )
 
-    service = ddo.get_service_by_index(3)
-    assert service and service.type == ServiceTypes.ASSET_ACCESS, (
-        "Failed to find service by " "integer id."
-    )
-    service = ddo.get_service_by_index("3")
-    assert service and service.type == ServiceTypes.ASSET_ACCESS, (
-        "Failed to find service by str(" "int) id."
-    )
-
-    service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
-    assert service and service.type == ServiceTypes.ASSET_ACCESS, (
-        "Failed to find service by id " "using service type."
-    )
-    assert service.index == 3, "index not as expected."
-
     service = ddo.get_service(ServiceTypes.METADATA)
     assert service and service.type == ServiceTypes.METADATA, (
         "Failed to find service by id using " "" "service " "type."
@@ -157,29 +111,14 @@ def not_test_find_service():
     assert service.index == 0, "index not as expected."
 
 
-def not_test_service_factory():
-    ddo = DDO(dictionary=_get_sample_ddo("ddo_sample1.json"))
+def test_service_factory():
+    ddo = get_sample_ddo("ddo_algorithm.json")
     type_to_service = {s.type: s for s in ddo.services}
     metadata = ddo.metadata
 
     md_descriptor = ServiceDescriptor.metadata_service_descriptor(
         metadata, type_to_service[ServiceTypes.METADATA].service_endpoint
     )
-    access_service = type_to_service[ServiceTypes.ASSET_ACCESS]
-    access_descriptor = ServiceDescriptor.access_service_descriptor(
-        access_service.attributes, access_service.service_endpoint
-    )
-    compute_descriptor = ServiceDescriptor.compute_service_descriptor(
-        access_service.attributes, access_service.service_endpoint
-    )
-
-    services = ServiceFactory.build_services(
-        [md_descriptor, access_descriptor, compute_descriptor]
-    )
-    assert len(services) == 3
+    services = ServiceFactory.build_services([md_descriptor])
+    assert len(services) == 1
     assert services[0].type == ServiceTypes.METADATA
-    assert services[1].type == ServiceTypes.ASSET_ACCESS
-    assert services[2].type == ServiceTypes.CLOUD_COMPUTE
-
-    assert isinstance(services[1], ServiceAgreement)
-    assert isinstance(services[2], ServiceAgreement)

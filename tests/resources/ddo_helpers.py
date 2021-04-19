@@ -34,8 +34,8 @@ def get_metadata() -> dict:
     return json.loads(metadata)
 
 
-def get_sample_ddo() -> Asset:
-    return Asset(json_filename=get_resource_path("ddo", "ddo_sa_sample.json"))
+def get_sample_ddo(file_name="ddo_sa_sample.json") -> Asset:
+    return Asset(json_filename=get_resource_path("ddo", file_name))
 
 
 def get_sample_ddo_with_compute_service() -> Asset:
