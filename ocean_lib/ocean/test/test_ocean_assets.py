@@ -275,9 +275,7 @@ def test_create_asset_with_owner_address(publisher_ocean_instance):
         data_token_address=token.address,
     )
     assert asset_2
-    assert (
-        asset_1.__dict__["_proof"]["creator"] == asset_2.__dict__["_proof"]["creator"]
-    )
+    assert asset_1.proof["creator"] == asset_2.proof["creator"]
 
 
 def test_create_asset_without_dt_address(publisher_ocean_instance):
