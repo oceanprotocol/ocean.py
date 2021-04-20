@@ -12,12 +12,34 @@ from ocean_lib.config import (
 )
 
 
-def test_metadata_cache_uri_property(monkeypatch, caplog):
+def test_metadata_cache_uri_set_via_config_options(caplog):
     """Tests the 'metadata_cache_uri' property."""
+    config_dict = {"resources": {"metadata_cache.uri": "https://custom-aqua.uri"}}
+    config = Config(options_dict=config_dict)
+    assert config.metadata_cache_uri == "https://custom-aqua.uri"
+
+    config_dict = {
+        "resources": {
+            "metadata_cache.uri": "https://custom-aqua.uri",
+            "aquarius.url": "https://another-aqua.url",
+        }
+    }
+    with pytest.raises(ValueError):
+        config = Config(options_dict=config_dict)
+
+    config_dict = {"resources": {"aquarius.url": "https://another-aqua.url"}}
+    config = Config(options_dict=config_dict)
+    assert config.metadata_cache_uri == "https://another-aqua.url"
+    assert (
+        "Config: resources.aquarius.url option is deprecated. "
+        "Use resources.metadata_cache.uri instead." in caplog.text
+    )
+
+
+def test_metadata_cache_uri_set_via_env_vars(monkeypatch, caplog):
     ENV_METADATA_CACHE_URI = environ_names_and_sections[NAME_METADATA_CACHE_URI][0]
     ENV_AQUARIUS_URL = deprecated_environ_names[NAME_AQUARIUS_URL][0]
 
-    # Validate defaults
     monkeypatch.delenv(ENV_METADATA_CACHE_URI, raising=False)
     monkeypatch.delenv(ENV_AQUARIUS_URL, raising=False)
     config = Config()

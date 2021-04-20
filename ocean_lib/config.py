@@ -177,8 +177,36 @@ class Config(configparser.ConfigParser):
             with open(filename) as fp:
                 text = fp.read()
                 self.read_string(text)
-
+        self._handle_and_validate_metadata_cache_uri()
         self._load_environ()
+
+    def _handle_and_validate_metadata_cache_uri(self):
+        metadata_cache_uri = self.get(
+            SECTION_RESOURCES, NAME_METADATA_CACHE_URI, fallback=None
+        )
+        aquarius_url = self.get(SECTION_RESOURCES, NAME_AQUARIUS_URL, fallback=None)
+
+        if aquarius_url:
+            self._logger.warning(
+                f"Config: {SECTION_RESOURCES}.{NAME_AQUARIUS_URL} option is deprecated. "
+                f"Use {SECTION_RESOURCES}.{NAME_METADATA_CACHE_URI} instead."
+            )
+
+        # Fallback to aquarius.url
+        if aquarius_url and metadata_cache_uri == DEFAULT_METADATA_CACHE_URI:
+            self.set(SECTION_RESOURCES, NAME_METADATA_CACHE_URI, aquarius_url)
+            self.remove_option(SECTION_RESOURCES, NAME_AQUARIUS_URL)
+            aquarius_url = None
+
+        if aquarius_url and metadata_cache_uri:
+            raise ValueError(
+                (
+                    f"Both {SECTION_RESOURCES}.{NAME_METADATA_CACHE_URI} and "
+                    f"{SECTION_RESOURCES}.{NAME_AQUARIUS_URL} options are set. "
+                    f"Use only {SECTION_RESOURCES}.{NAME_METADATA_CACHE_URI} because "
+                    f"{SECTION_RESOURCES}.{NAME_AQUARIUS_URL} is deprecated."
+                )
+            )
 
     def _load_environ(self):
         for option_name, environ_item in environ_names_and_sections.items():
