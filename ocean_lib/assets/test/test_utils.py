@@ -54,7 +54,7 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
 
     # add an existing algorithm to publisher_trusted_algorithms list
     new_publisher_trusted_algorithms = add_publisher_trusted_algorithm(
-        ddo.did, algorithm_ddo.did, publisher_ocean_instance.config.aquarius_url
+        ddo.did, algorithm_ddo.did, publisher_ocean_instance.config.metadata_cache_uri
     )
     assert new_publisher_trusted_algorithms is not None
     for _, trusted_algorithm in enumerate(publisher_trusted_algorithms):
@@ -63,7 +63,7 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
 
     # remove an existing algorithm to publisher_trusted_algorithms list
     new_publisher_trusted_algorithms = remove_publisher_trusted_algorithm(
-        ddo.did, algorithm_ddo.did, publisher_ocean_instance.config.aquarius_url
+        ddo.did, algorithm_ddo.did, publisher_ocean_instance.config.metadata_cache_uri
     )
 
     assert new_publisher_trusted_algorithms is not None
@@ -71,7 +71,9 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
 
     # remove a trusted algorithm that does not belong to publisher_trusted_algorithms list
     new_publisher_trusted_algorithms = remove_publisher_trusted_algorithm(
-        ddo.did, algorithm_ddo_v3.did, publisher_ocean_instance.config.aquarius_url
+        ddo.did,
+        algorithm_ddo_v3.did,
+        publisher_ocean_instance.config.metadata_cache_uri,
     )
 
     assert new_publisher_trusted_algorithms is not None
