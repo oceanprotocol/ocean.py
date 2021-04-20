@@ -76,7 +76,7 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
     )
 
     assert new_publisher_trusted_algorithms is not None
-    for _, trusted_algorithm in enumerate(publisher_trusted_algorithms):
+    for trusted_algorithm in publisher_trusted_algorithms:
         assert trusted_algorithm["did"] != algorithm_ddo_v3.did
     assert len(new_publisher_trusted_algorithms) == len(publisher_trusted_algorithms)
 
