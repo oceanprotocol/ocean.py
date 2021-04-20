@@ -2,8 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from ocean_utils.agreements.service_types import ServiceTypes
-from ocean_utils.ddo.ddo import DDO
+from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.ddo.ddo import DDO
 
 
 class Asset(DDO):

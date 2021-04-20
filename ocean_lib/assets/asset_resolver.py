@@ -9,8 +9,8 @@
 import logging
 
 from ocean_lib.assets.asset import Asset
+from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
 from ocean_lib.models.data_token import DataToken
-from ocean_utils.aquarius.aquarius_provider import AquariusProvider
 
 logger = logging.getLogger("keeper")
 
@@ -25,7 +25,6 @@ def resolve_asset(did, metadata_store_url=None, token_address=None):
 
     :return string: DDO of the resolved DID
     :return None: if the DID cannot be resolved
-    :raises OceanDIDNotFound: if no DID can be found to resolve.
     """
     assert (
         metadata_store_url or token_address

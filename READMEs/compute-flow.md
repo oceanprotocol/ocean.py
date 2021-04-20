@@ -68,7 +68,7 @@ Access the market app in the browser at `http://localhost:8000`.
 ## 2. Alice publishes assets for data services (= publishes a DataToken contract)
 
 ```python
-from ocean_utils.agreements.service_factory import ServiceDescriptor
+from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
@@ -145,7 +145,7 @@ print(f'DataToken @{data_token.address} has a `pool` available @{pool_address}')
 ## 5. Marketplace posts asset for sale using price obtained from balancer pool
 
 ```python
-from ocean_utils.agreements.service_types import ServiceTypes
+from ocean_lib.common.agreements.service_types import ServiceTypes
 
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import from_base_18
