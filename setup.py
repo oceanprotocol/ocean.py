@@ -23,7 +23,6 @@ install_requirements = [
     "pyopenssl",
     "PyJWT",  # not jwt
     "PyYAML==5.4.1",
-    "ocean-utils==0.4.2",
     "requests>=2.21.0",
     "deprecated",
     "pycryptodomex",
@@ -103,7 +102,7 @@ setup(
     url="https://github.com/oceanprotocol/ocean.py",
     # fmt: off
     # bumpversion.sh needs single-quotes
-    version='0.5.16',
+    version='0.5.17',
     # fmt: on
     zip_safe=False,
 )

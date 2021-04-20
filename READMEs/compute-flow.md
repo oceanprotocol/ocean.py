@@ -68,7 +68,7 @@ Access the market app in the browser at `http://localhost:8000`.
 ## 2. Alice publishes assets for data services (= publishes a DataToken contract)
 
 ```python
-from ocean_utils.agreements.service_factory import ServiceDescriptor
+from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
@@ -83,7 +83,7 @@ config = {
 ocean = Ocean(config)
 alice_wallet = Wallet(ocean.web3, private_key='8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f')
 
-data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_store_url)
+data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
 token_address = data_token.address
 
 # `ocean.assets.create` will encrypt the URLs using the provider's encrypt service endpoint and update
@@ -119,7 +119,6 @@ assert token_address == asset.data_token_address
 
 did = asset.did  # did contains the datatoken address
 ```
-
 For legacy support, you can also use `metadataStoreUri` instead of `metadataCacheUri`.
 
 ## 3. Alice mints 100 tokens
@@ -145,7 +144,7 @@ print(f'DataToken @{data_token.address} has a `pool` available @{pool_address}')
 ## 5. Marketplace posts asset for sale using price obtained from balancer pool
 
 ```python
-from ocean_utils.agreements.service_types import ServiceTypes
+from ocean_lib.common.agreements.service_types import ServiceTypes
 
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import from_base_18

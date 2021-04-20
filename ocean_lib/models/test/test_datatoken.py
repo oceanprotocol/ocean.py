@@ -7,10 +7,10 @@ import os
 import time
 
 import pytest
+from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_utils.ddo.ddo import DDO
 from tests.resources.ddo_helpers import get_resource_path
 
 

@@ -14,11 +14,28 @@ from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
+from ocean_lib.common.agreements.service_agreement import ServiceAgreement
+from ocean_lib.common.agreements.service_factory import (
+    ServiceDescriptor,
+    ServiceFactory,
+)
+from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.aquarius.aquarius import Aquarius
+from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
+from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
+from ocean_lib.common.did import did_to_id
+from ocean_lib.common.utils.utilities import checksum
 from ocean_lib.data_provider.data_service_provider import (
     DataServiceProvider,
     OrderRequirements,
 )
 from ocean_lib.enforce_typing_shim import enforce_types_shim
+from ocean_lib.exceptions import (
+    AquariusError,
+    ContractNotFound,
+    InsufficientBalance,
+    VerifyTxFailed,
+)
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
@@ -28,16 +45,6 @@ from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib.web3_internal.web3helper import Web3Helper
-from ocean_utils.agreements.service_agreement import ServiceAgreement
-from ocean_utils.agreements.service_factory import ServiceDescriptor, ServiceFactory
-from ocean_utils.agreements.service_types import ServiceTypes
-from ocean_utils.aquarius.aquarius import Aquarius
-from ocean_utils.aquarius.aquarius_provider import AquariusProvider
-from ocean_utils.ddo.metadata import MetadataMain
-from ocean_utils.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
-from ocean_utils.did import did_to_id
-from ocean_utils.exceptions import OceanDIDAlreadyExist
-from ocean_utils.utils.utilities import checksum
 from plecos import plecos
 
 logger = logging.getLogger("ocean")
@@ -51,7 +58,7 @@ class OceanAssets:
     def __init__(self, config, data_provider, ddo_registry_address):
         """Initialises OceanAssets object."""
         self._config = config
-        self._aquarius_url = config.aquarius_url
+        self._metadata_cache_uri = config.metadata_cache_uri
         self._data_provider = data_provider
         self._metadata_registry_address = ddo_registry_address
 
@@ -66,7 +73,7 @@ class OceanAssets:
         return MetadataContract(self._metadata_registry_address)
 
     def _get_aquarius(self, url=None) -> Aquarius:
-        return AquariusProvider.get_aquarius(url or self._aquarius_url)
+        return AquariusProvider.get_aquarius(url or self._metadata_cache_uri)
 
     def _process_service_descriptors(
         self,
@@ -98,7 +105,7 @@ class OceanAssets:
         if not access_service_descriptor and not compute_service_descriptor:
             access_service_descriptor = ServiceDescriptor.access_service_descriptor(
                 self.build_access_service(
-                    metadata[MetadataMain.KEY]["dateCreated"], 1.0, wallet.address
+                    metadata["main"]["dateCreated"], 1.0, wallet.address
                 ),
                 self._data_provider.build_download_endpoint(provider_uri)[1],
             )
@@ -232,7 +239,7 @@ class OceanAssets:
                     f"Minter of datatoken {data_token_address} is not the same as the publisher."
                 )
             elif not dtfactory.verify_data_token(data_token_address):
-                raise AssertionError(
+                raise ContractNotFound(
                     f"datatoken address {data_token_address} is not found in the DTFactory events."
                 )
 
@@ -245,7 +252,7 @@ class OceanAssets:
         logger.debug(f"Using datatoken address as did: {did}")
         # Check if it's already registered first!
         if did in self._get_aquarius().list_assets():
-            raise OceanDIDAlreadyExist(
+            raise AquariusError(
                 f"Asset id {did} is already registered to another asset."
             )
 
@@ -324,7 +331,7 @@ class OceanAssets:
                 publisher_wallet,
             )
             if not ddo_registry.verify_tx(tx_id):
-                raise AssertionError(
+                raise VerifyTxFailed(
                     f"create DDO on-chain failed, transaction status is 0. Transaction hash is {tx_id}"
                 )
             logger.info("Asset/ddo published on-chain successfully.")
@@ -348,7 +355,7 @@ class OceanAssets:
                 publisher_wallet,
             )
             if not ddo_registry.verify_tx(tx_id):
-                raise AssertionError(
+                raise VerifyTxFailed(
                     f"update DDO on-chain failed, transaction status is 0. Transaction hash is {tx_id}"
                 )
             logger.info("Asset/ddo updated on-chain successfully.")
@@ -366,10 +373,10 @@ class OceanAssets:
         :param did: DID, str
         :return: Asset instance
         """
-        return resolve_asset(did, metadata_store_url=self._config.aquarius_url)
+        return resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
 
     def search(
-        self, text: str, sort=None, offset=100, page=1, aquarius_url=None
+        self, text: str, sort=None, offset=100, page=1, metadata_cache_uri=None
     ) -> list:
         """
         Search an asset in oceanDB using aquarius.
@@ -378,7 +385,7 @@ class OceanAssets:
         :param sort: Dictionary to choose order main in some value
         :param offset: Number of elements shows by page
         :param page: Page number
-        :param aquarius_url: Url of the aquarius where you want to search. If there is not
+        :param metadata_cache_uri: Url of the aquarius where you want to search. If there is not
             provided take the default
         :return: List of assets that match with the query
         """
@@ -386,13 +393,13 @@ class OceanAssets:
         logger.info(f"Searching asset containing: {text}")
         return [
             Asset(dictionary=ddo_dict)
-            for ddo_dict in self._get_aquarius(aquarius_url).query_search(
+            for ddo_dict in self._get_aquarius(metadata_cache_uri).query_search(
                 {"query": {"query_string": {"query": text}}}, sort, offset, page
             )["results"]
         ]
 
     def query(
-        self, query: dict, sort=None, offset=100, page=1, aquarius_url=None
+        self, query: dict, sort=None, offset=100, page=1, metadata_cache_uri=None
     ) -> []:
         """
         Search an asset in oceanDB using search query.
@@ -402,12 +409,12 @@ class OceanAssets:
         :param sort: Dictionary to choose order main in some value
         :param offset: Number of elements shows by page
         :param page: Page number
-        :param aquarius_url: Url of the aquarius where you want to search. If there is not
+        :param metadata_cache_uri: Url of the aquarius where you want to search. If there is not
             provided take the default
         :return: List of assets that match with the query.
         """
         logger.info(f"Searching asset query: {query}")
-        aquarius = self._get_aquarius(aquarius_url)
+        aquarius = self._get_aquarius(metadata_cache_uri)
         return [
             Asset(dictionary=ddo_dict)
             for ddo_dict in aquarius.query_search({"query": query}, sort, offset, page)[
@@ -482,7 +489,7 @@ class OceanAssets:
         dt = DataToken(token_address)
         balance = dt.balanceOf(from_wallet.address)
         if balance < amount_base:
-            raise AssertionError(
+            raise InsufficientBalance(
                 f"Your token balance {balance} is not sufficient "
                 f"to execute the requested service. This service "
                 f"requires {amount_base} number of tokens."
@@ -575,7 +582,7 @@ class OceanAssets:
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
         :return: bool
         """
-        return self._get_aquarius(self._aquarius_url).validate_metadata(metadata)
+        return self._get_aquarius(self._metadata_cache_uri).validate_metadata(metadata)
 
     def owner(self, did: str) -> str:
         """

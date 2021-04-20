@@ -5,6 +5,7 @@
 import logging
 
 from ocean_lib.enforce_typing_shim import enforce_types_shim
+from ocean_lib.exceptions import VerifyTxFailed
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
@@ -92,14 +93,14 @@ class OceanPool:
             pool_address, data_token_amount, from_wallet, wait=True
         )
         if dt.get_tx_receipt(tx_id).status != 1:
-            raise AssertionError(
+            raise VerifyTxFailed(
                 f"Approve datatokens failed, pool was created at {pool_address}"
             )
 
         ot = DataToken(self.ocean_address)
         tx_id = ot.approve_tokens(pool_address, OCEAN_amount, from_wallet, wait=True)
         if ot.get_tx_receipt(tx_id).status != 1:
-            raise AssertionError(
+            raise VerifyTxFailed(
                 f"Approve OCEAN tokens failed, pool was created at {pool_address}"
             )
 
@@ -114,7 +115,7 @@ class OceanPool:
             from_wallet,
         )
         if pool.get_tx_receipt(tx_id).status != 1:
-            raise AssertionError(
+            raise VerifyTxFailed(
                 f"pool.setup failed: txId={tx_id}, receipt={pool.get_tx_receipt(tx_id)}"
             )
 

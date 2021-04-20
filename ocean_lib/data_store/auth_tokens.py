@@ -4,8 +4,8 @@
 #
 import logging
 
+from ocean_lib.common.data_store.storage_base import StorageBase
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_utils.data_store.storage_base import StorageBase
 
 logger = logging.getLogger(__name__)
 

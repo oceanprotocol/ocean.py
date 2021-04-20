@@ -24,13 +24,13 @@ In your working directory, create a file `config.ini` and fill it with the follo
     network = https://rinkeby.infura.io/v3/<your Infura project id>
 
     [resources]
-    aquarius.url = AQUARIUS_URL=https://aquarius.rinkeby.oceanprotocol.com
-    provider.url = PROVIDER_URL=https://provider.rinkeby.oceanprotocol.com
+    metadata_cache_uri = https://aquarius.rinkeby.oceanprotocol.com
+    provider.url = https://provider.rinkeby.oceanprotocol.com
 
 Ensure that envvars don't override the config file values:
 
 ```console
-unset NETWORK_URL AQUARIUS_URL PROVIDER_URL
+unset NETWORK_URL METADATA_CACHE_URI AQUARIUS_URL PROVIDER_URL
 ```
 
 Create an envvar to point to the new config file. In the console:

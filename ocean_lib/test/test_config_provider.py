@@ -4,12 +4,12 @@
 #
 
 import os.path
-import pytest
 
+import pytest
 from ocean_lib.config import Config
 from ocean_lib.config_provider import ConfigProvider
-from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.example_config import ExampleConfig
+from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.ocean.ocean import Ocean
 from tests.resources.ddo_helpers import get_resource_path
 
@@ -22,18 +22,20 @@ def test_set_config():
     assert ConfigProvider.get_config() == "foo config"
 
 
-def test_metadataCacheUri_version():
-    """Tests that the Aquarius URL can use the custom metadataCacheUri key."""
-    config_dict = {"metadataCacheUri": "http://ItWorked.com", "network": "ganache"}
-    ocean_instance = Ocean(config=config_dict)
-    assert "http://ItWorked.com" == ocean_instance.config.aquarius_url
-
-
-def test_metadataStoreUri_version():
-    """Tests that the Aquarius URL can fallback on the custom metadataStoreUri key."""
+def test_metadataStoreUri_config_key():
+    """Tests that the metadata_cache_uri config property can be set using the
+    `metadataStoreUri` config dict key when created via the Ocean __init__"""
     config_dict = {"metadataStoreUri": "http://ItWorked.com", "network": "ganache"}
     ocean_instance = Ocean(config=config_dict)
-    assert "http://ItWorked.com" == ocean_instance.config.aquarius_url
+    assert "http://ItWorked.com" == ocean_instance.config.metadata_cache_uri
+
+
+def test_metadataCacheUri_config_key():
+    """Tests that the metadata_cache_uri config property can be set using the
+    `metadataCacheUri` config dict key when created via the Ocean __init__"""
+    config_dict = {"metadataCacheUri": "http://ItWorked.com", "network": "ganache"}
+    ocean_instance = Ocean(config=config_dict)
+    assert "http://ItWorked.com" == ocean_instance.config.metadata_cache_uri
 
 
 def test_config_filename_given_file_doesnt_exist():
@@ -45,7 +47,7 @@ def test_config_filename_given_file_doesnt_exist():
     assert not os.path.exists(config_file_name)
 
     with pytest.raises(Exception):
-        config = Config(filename=config_file_name)
+        Config(filename=config_file_name)
 
 
 def test_config_filename_given_file_exists_malformed_content(monkeypatch, tmp_path):
@@ -57,7 +59,7 @@ def test_config_filename_given_file_exists_malformed_content(monkeypatch, tmp_pa
 
     monkeypatch.setenv(ENV_CONFIG_FILE, config_file_name)
     with pytest.raises(Exception):
-        config = Config()
+        Config()
 
 
 def test_config_filename_given_file_exists_wellformed_content():
@@ -68,9 +70,8 @@ def test_config_filename_given_file_exists_wellformed_content():
     config_file_name = get_resource_path("config", "test_config.ini")
     config = Config(filename=config_file_name)
 
-    assert config.aquarius_url == "https://custom-aqua.url"
+    assert config.metadata_cache_uri == "https://custom-aqua.url"
     assert config.artifacts_path is not None
-    assert config.metadata_store_url == config.aquarius_url
     assert config.provider_address == "0x00bd138abd70e2f00903268f3db08f2d25677c9e"
     assert isinstance(config.gas_limit, int)
 
@@ -82,7 +83,7 @@ def test_config_filename_not_given_envvar_is_empty(monkeypatch):
     """
     monkeypatch.delenv(ENV_CONFIG_FILE)
     with pytest.raises(ValueError):
-        config = Config()
+        Config()
 
 
 def test_config_filename_not_given_file_doesnt_exist(monkeypatch):
@@ -95,7 +96,7 @@ def test_config_filename_not_given_file_doesnt_exist(monkeypatch):
 
     monkeypatch.setenv(ENV_CONFIG_FILE, config_file_name)
     with pytest.raises(Exception):
-        config = Config()
+        Config()
 
 
 def test_config_filename_not_given_file_exists_malformed_content(monkeypatch, tmp_path):
@@ -107,7 +108,7 @@ def test_config_filename_not_given_file_exists_malformed_content(monkeypatch, tm
 
     monkeypatch.setenv(ENV_CONFIG_FILE, config_file_name)
     with pytest.raises(Exception):
-        config = Config()
+        Config()
 
 
 def test_config_filename_not_given_file_exists_wellformed_content(monkeypatch):
@@ -140,10 +141,10 @@ def test_config_from_text_wellformed_content():
     """
     config_text = """
         [resources]
-        aquarius.url = https://another-aqua.url
+        metadata_cache_uri = https://another-aqua.url
     """
     config = Config(text=config_text)
-    assert config.aquarius_url == "https://another-aqua.url"
+    assert config.metadata_cache_uri == "https://another-aqua.url"
 
 
 def test_config_from_text_malformed_content():
@@ -153,7 +154,7 @@ def test_config_from_text_malformed_content():
     """
     config_text = "Malformed content inside config text"
     with pytest.raises(Exception):
-        config = Config(text=config_text)
+        Config(text=config_text)
 
 
 def test_network_config():

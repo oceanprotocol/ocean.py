@@ -21,7 +21,7 @@ First, in console:
 
 ```console
 export NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
-export AQUARIUS_URL=https://aquarius.rinkeby.oceanprotocol.com
+export METADATA_CACHE_URI=https://aquarius.rinkeby.oceanprotocol.com
 export PROVIDER_URL=https://provider.rinkeby.oceanprotocol.com
 ```
 
@@ -32,12 +32,11 @@ import os
 from ocean_lib.ocean.ocean import Ocean
 d = {
    'network' : os.getenv('NETWORK_URL'),
-   'metadataCacheUri' : os.getenv('AQUARIUS_URL'),
+   'metadataCacheUri' : os.getenv('METADATA_CACHE_URI'),
    'providerUri' : os.getenv('PROVIDER_URL'),
 }
 ocean = Ocean(d)
 ```
-
 For legacy support, you can also use `metadataStoreUri` instead of `metadataCacheUri`.
 
 ## 1a. Unsetting envvars
@@ -47,7 +46,7 @@ Recall that parameters set by envvars override config file values. So, to use a 
 Here's how. In the console:
 
 ```console
-    unset NETWORK_URL AQUARIUS_URL PROVIDER_URL
+    unset NETWORK_URL METADATA_CACHE_URI AQUARIUS_URL PROVIDER_URL
 ```
 
 ## 2. Config object input, filled from config file
@@ -59,8 +58,8 @@ First, in your working directory, create `config.ini` file and fill as follows:
     network = https://rinkeby.infura.io/v3/<your infura project id>
 
     [resources]
-    aquarius.url = https://provider.rinkeby.oceanprotocol.com
-    provider.url = https://aquarius.rinkeby.oceanprotocol.com
+    metadata_cache_uri = https://aquarius.rinkeby.oceanprotocol.com
+    provider.url = https://provider.rinkeby.oceanprotocol.com
 ```
 
 Then, in Python:
