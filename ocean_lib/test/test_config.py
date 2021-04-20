@@ -14,13 +14,13 @@ from ocean_lib.config import (
 
 def test_metadata_cache_uri_set_via_config_options(caplog):
     """Tests the metadata_cache_uri property fallback logic when set via a config dict"""
-    config_dict = {"resources": {"metadata_cache.uri": "https://custom-aqua.uri"}}
+    config_dict = {"resources": {"metadata_cache_uri": "https://custom-aqua.uri"}}
     config = Config(options_dict=config_dict)
     assert config.metadata_cache_uri == "https://custom-aqua.uri"
 
     config_dict = {
         "resources": {
-            "metadata_cache.uri": "https://custom-aqua.uri",
+            "metadata_cache_uri": "https://custom-aqua.uri",
             "aquarius.url": "https://another-aqua.url",
         }
     }
@@ -32,7 +32,7 @@ def test_metadata_cache_uri_set_via_config_options(caplog):
     assert config.metadata_cache_uri == "https://another-aqua.url"
     assert (
         "Config: resources.aquarius.url option is deprecated. "
-        "Use resources.metadata_cache.uri instead." in caplog.text
+        "Use resources.metadata_cache_uri instead." in caplog.text
     )
 
 

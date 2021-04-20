@@ -26,7 +26,7 @@ NAME_NETWORK_URL = "network"
 NAME_ARTIFACTS_PATH = "artifacts.path"
 NAME_ADDRESS_FILE = "address.file"
 NAME_GAS_LIMIT = "gas_limit"
-NAME_METADATA_CACHE_URI = "metadata_cache.uri"
+NAME_METADATA_CACHE_URI = "metadata_cache_uri"
 NAME_AQUARIUS_URL = "aquarius.url"
 NAME_PROVIDER_URL = "provider.url"
 NAME_STORAGE_PATH = "storage.path"
@@ -140,7 +140,7 @@ class Config(configparser.ConfigParser):
         artifacts.path = artifacts
 
         [resources]
-        metadata_cache.uri = http://localhost:5000
+        metadata_cache_uri = http://localhost:5000
         provider.url = http://localhost:8030
         ; Path of back-up storage
         storage.path = ocean_lib.db

@@ -141,7 +141,7 @@ def test_config_from_text_wellformed_content():
     """
     config_text = """
         [resources]
-        metadata_cache.uri = https://another-aqua.url
+        metadata_cache_uri = https://another-aqua.url
     """
     config = Config(text=config_text)
     assert config.metadata_cache_uri == "https://another-aqua.url"
