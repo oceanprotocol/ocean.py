@@ -13,7 +13,7 @@ from ocean_lib.config import (
 
 
 def test_metadata_cache_uri_set_via_config_options(caplog):
-    """Tests the 'metadata_cache_uri' property."""
+    """Tests the metadata_cache_uri property fallback logic when set via a config dict"""
     config_dict = {"resources": {"metadata_cache.uri": "https://custom-aqua.uri"}}
     config = Config(options_dict=config_dict)
     assert config.metadata_cache_uri == "https://custom-aqua.uri"
@@ -37,6 +37,7 @@ def test_metadata_cache_uri_set_via_config_options(caplog):
 
 
 def test_metadata_cache_uri_set_via_env_vars(monkeypatch, caplog):
+    """Tests the metadata_cache_uri property fallback logic when set via an environment variable"""
     ENV_METADATA_CACHE_URI = environ_names_and_sections[NAME_METADATA_CACHE_URI][0]
     ENV_AQUARIUS_URL = deprecated_environ_names[NAME_AQUARIUS_URL][0]
 
