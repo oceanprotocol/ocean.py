@@ -243,7 +243,7 @@ def test_create_asset_with_address(publisher_ocean_instance):
 
 
 def test_create_asset_with_owner_address(publisher_ocean_instance):
-    """Tests creation of the asset which has already an owner address."""
+    """Tests that the created assets have the same owner address."""
     ocn = publisher_ocean_instance
     alice = get_publisher_wallet()
 
@@ -253,9 +253,30 @@ def test_create_asset_with_owner_address(publisher_ocean_instance):
     my_secret_store = "http://myownsecretstore.com"
     auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
 
+    token = ocn.create_data_token(
+        "DataToken1", "DT1", from_wallet=alice, blob="foo_blob"
+    )
+
     assert ocn.assets.create(
         asset.metadata, alice, [auth_service], owner_address=alice.address
     )
+
+    asset_1 = ocn.assets.create(
+        asset.metadata,
+        alice,
+        [auth_service],
+        owner_address=alice.address,
+        data_token_address=token.address,
+    )
+    assert asset_1
+    asset_2 = ocn.assets.create(
+        asset.metadata,
+        alice,
+        [auth_service],
+        data_token_address=token.address,
+    )
+    assert asset_2
+    assert asset_1.proof["creator"] == asset_2.proof["creator"]
 
 
 def test_create_asset_without_dt_address(publisher_ocean_instance):
