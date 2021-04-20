@@ -237,7 +237,7 @@ def test_update_trusted_algorithms():
     # verify the ddo is available in Aquarius
     _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
     trusted_algo_list = create_publisher_trusted_algorithms(
-        [algorithm_ddo.did], setup.publisher_ocean_instance.config.aquarius_url
+        [algorithm_ddo.did], setup.publisher_ocean_instance.config.metadata_cache_uri
     )
     compute_ddo.update_compute_privacy(
         trusted_algorithms=trusted_algo_list, allow_all=False, allow_raw_algorithm=False

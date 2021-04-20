@@ -26,7 +26,7 @@ class ExampleConfig:
                 "address.file": "",
             },
             "resources": {
-                "aquarius.url": "http://aquarius:5000",
+                "metadata_cache_uri": "http://aquarius:5000",
                 "provider.url": "http://localhost:8030",
                 "provider.address": "0x068Ed00cF0441e4829D9784fCBe7b9e26D4BD8d0",
                 "storage.path": "ocean_lib.db",

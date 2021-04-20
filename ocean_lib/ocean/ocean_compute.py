@@ -128,7 +128,7 @@ class OceanCompute:
         }
         if trusted_algorithms:
             privacy["publisherTrustedAlgorithms"] = create_publisher_trusted_algorithms(
-                trusted_algorithms, ConfigProvider.get_config().aquarius_url
+                trusted_algorithms, ConfigProvider.get_config().metadata_cache_uri
             )
 
         return privacy
@@ -206,7 +206,7 @@ class OceanCompute:
             "brizoUri": data_provider.get_url(config),
             "brizoAddress": config.provider_address,
             "metadata": dict(),
-            "metadataUri": config.aquarius_url,
+            "metadataUri": config.metadata_cache_uri,
             "owner": consumer_address,
             "publishOutput": 0,
             "publishAlgorithmLog": 0,
@@ -285,7 +285,7 @@ class OceanCompute:
         output = OceanCompute.check_output_dict(
             output, consumer_wallet.address, data_provider=self._data_provider
         )
-        asset = resolve_asset(did, metadata_store_url=self._config.aquarius_url)
+        asset = resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
         _, service_endpoint = self._get_service_endpoint(did, asset)
 
         service = asset.get_service_by_index(service_id)
@@ -390,7 +390,7 @@ class OceanCompute:
 
     def _get_service_endpoint(self, did, asset=None):
         if not asset:
-            asset = resolve_asset(did, self._config.aquarius_url)
+            asset = resolve_asset(did, self._config.metadata_cache_uri)
 
         return self._data_provider.build_compute_endpoint(
             ServiceAgreement.from_ddo(

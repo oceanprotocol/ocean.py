@@ -3,18 +3,17 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-
-from tests.resources.ddo_helpers import (
-    get_registered_algorithm_ddo,
-    wait_for_ddo,
-    get_registered_ddo_with_compute_service,
-)
-from tests.resources.helper_functions import get_publisher_wallet
 from ocean_lib.assets.utils import (
-    create_publisher_trusted_algorithms,
     add_publisher_trusted_algorithm,
+    create_publisher_trusted_algorithms,
     remove_publisher_trusted_algorithm,
 )
+from tests.resources.ddo_helpers import (
+    get_registered_algorithm_ddo,
+    get_registered_ddo_with_compute_service,
+    wait_for_ddo,
+)
+from tests.resources.helper_functions import get_publisher_wallet
 
 
 def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
@@ -34,20 +33,20 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
     assert algorithm_ddo_v3 is not None
 
     ddo = get_registered_ddo_with_compute_service(
-        publisher_ocean_instance,
-        publisher,
-        trusted_algorithms=[algorithm_ddo.did],
+        publisher_ocean_instance, publisher, trusted_algorithms=[algorithm_ddo.did]
     )
     wait_for_ddo(publisher_ocean_instance, ddo.did)
     assert ddo is not None
 
     publisher_trusted_algorithms = create_publisher_trusted_algorithms(
-        [algorithm_ddo.did], publisher_ocean_instance.config.aquarius_url
+        [algorithm_ddo.did], publisher_ocean_instance.config.metadata_cache_uri
     )
 
     # add a new trusted algorithm to the publisher_trusted_algorithms list
     new_publisher_trusted_algorithms = add_publisher_trusted_algorithm(
-        ddo.did, algorithm_ddo_v2.did, publisher_ocean_instance.config.aquarius_url
+        ddo.did,
+        algorithm_ddo_v2.did,
+        publisher_ocean_instance.config.metadata_cache_uri,
     )
 
     assert new_publisher_trusted_algorithms is not None
@@ -55,7 +54,7 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
 
     # add an existing algorithm to publisher_trusted_algorithms list
     new_publisher_trusted_algorithms = add_publisher_trusted_algorithm(
-        ddo.did, algorithm_ddo.did, publisher_ocean_instance.config.aquarius_url
+        ddo.did, algorithm_ddo.did, publisher_ocean_instance.config.metadata_cache_uri
     )
     assert new_publisher_trusted_algorithms is not None
     for _, trusted_algorithm in enumerate(publisher_trusted_algorithms):
@@ -64,7 +63,7 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
 
     # remove an existing algorithm to publisher_trusted_algorithms list
     new_publisher_trusted_algorithms = remove_publisher_trusted_algorithm(
-        ddo.did, algorithm_ddo.did, publisher_ocean_instance.config.aquarius_url
+        ddo.did, algorithm_ddo.did, publisher_ocean_instance.config.metadata_cache_uri
     )
 
     assert new_publisher_trusted_algorithms is not None
@@ -72,7 +71,9 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
 
     # remove a trusted algorithm that does not belong to publisher_trusted_algorithms list
     new_publisher_trusted_algorithms = remove_publisher_trusted_algorithm(
-        ddo.did, algorithm_ddo_v3.did, publisher_ocean_instance.config.aquarius_url
+        ddo.did,
+        algorithm_ddo_v3.did,
+        publisher_ocean_instance.config.metadata_cache_uri,
     )
 
     assert new_publisher_trusted_algorithms is not None
@@ -97,10 +98,12 @@ def test_add_trusted_algorithm_no_compute_service(publisher_ocean_instance, meta
     assert ddo is not None
 
     create_publisher_trusted_algorithms(
-        [algorithm_ddo.did], publisher_ocean_instance.config.aquarius_url
+        [algorithm_ddo.did], publisher_ocean_instance.config.metadata_cache_uri
     )
 
     with pytest.raises(AssertionError):
         add_publisher_trusted_algorithm(
-            ddo.did, algorithm_ddo.did, publisher_ocean_instance.config.aquarius_url
+            ddo.did,
+            algorithm_ddo.did,
+            publisher_ocean_instance.config.metadata_cache_uri,
         )
