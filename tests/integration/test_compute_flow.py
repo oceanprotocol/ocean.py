@@ -4,13 +4,13 @@
 #
 
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
+from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_utils.agreements.service_types import ServiceTypes
 from tests.resources.ddo_helpers import (
     get_algorithm_meta,
     get_registered_algorithm_ddo,
@@ -237,7 +237,7 @@ def test_update_trusted_algorithms():
     # verify the ddo is available in Aquarius
     _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
     trusted_algo_list = create_publisher_trusted_algorithms(
-        [algorithm_ddo.did], setup.publisher_ocean_instance.config.aquarius_url
+        [algorithm_ddo.did], setup.publisher_ocean_instance.config.metadata_cache_uri
     )
     compute_ddo.update_compute_privacy(
         trusted_algorithms=trusted_algo_list, allow_all=False, allow_raw_algorithm=False

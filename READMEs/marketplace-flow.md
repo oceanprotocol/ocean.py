@@ -86,7 +86,7 @@ artifacts.path = ~/.ocean/ocean-contracts/artifacts
 address.file = ~/.ocean/ocean-contracts/artifacts/address.json
 
 [resources]
-aquarius.url = http://localhost:5000
+metadata_cache_uri = http://localhost:5000
 provider.url = http://localhost:8030
 provider.address = 0x00bd138abd70e2f00903268f3db08f2d25677c9e
 
@@ -123,7 +123,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
 
 #Publish a datatoken
-data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_store_url)
+data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
 token_address = data_token.address
 
 #Specify metadata and service attributes, using the Branin test dataset
@@ -149,7 +149,7 @@ service_attributes = {
 # The service urls will be encrypted before going on-chain.
 # They're only decrypted for datatoken owners upon consume.
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_utils.agreements.service_factory import ServiceDescriptor
+from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 
 service_endpoint = DataServiceProvider.get_url(ocean.config)
 download_service = ServiceDescriptor.access_service_descriptor(service_attributes, service_endpoint)
@@ -195,7 +195,7 @@ In the same Python console as before:
 
 ```python
 #point to services
-from ocean_utils.agreements.service_types import ServiceTypes
+from ocean_lib.common.agreements.service_types import ServiceTypes
 asset = ocean.assets.resolve(did)
 service1 = asset.get_service(ServiceTypes.ASSET_ACCESS)
 
@@ -242,7 +242,7 @@ assert data_token.balanceOf(bob_wallet.address) >= 1.0, "Bob didn't get 1.0 data
 
 #Bob points to the service object
 fee_receiver = None # could also be market address
-from ocean_utils.agreements.service_types import ServiceTypes
+from ocean_lib.common.agreements.service_types import ServiceTypes
 asset = ocean.assets.resolve(did)
 service = asset.get_service(ServiceTypes.ASSET_ACCESS)
 
