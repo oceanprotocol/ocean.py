@@ -15,6 +15,10 @@ sudo: false
 services:
   - docker
 
+env:
+  global:
+    - CC_TEST_REPORTER_ID=3f0e12c83401974ee46f5d1b37beeb818f5acadcd5f7f647d217cd9473c15371
+
 before_install:
   - git clone https://github.com/oceanprotocol/barge
   - cd barge
@@ -33,7 +37,7 @@ install: pip install -U tox-travis
 script: tox
 
 after_script:
-  - bash <(curl -Ls https://coverage.codacy.com/get.sh) report -r coverage.xml --partial && bash <(curl -Ls https://coverage.codacy.com/get.sh) final
+  - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 
 deploy:
   provider: pypi
