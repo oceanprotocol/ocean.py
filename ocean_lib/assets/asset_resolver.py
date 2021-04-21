@@ -15,23 +15,23 @@ from ocean_lib.models.data_token import DataToken
 logger = logging.getLogger("keeper")
 
 
-def resolve_asset(did, metadata_store_url=None, token_address=None):
+def resolve_asset(did, metadata_cache_uri=None, token_address=None):
     """Resolve a DID to an URL/DDO or later an internal/external DID.
 
     :param did: the asset id to resolve, this is part of the ocean
         DID did:op:<32 byte value>
-    :param metadata_store_url: str the url of the metadata store
+    :param metadata_cache_uri: str the url of the metadata store
     :param token_address: str the address of the DataToken smart contract
 
     :return string: DDO of the resolved DID
     :return None: if the DID cannot be resolved
     """
     assert (
-        metadata_store_url or token_address
-    ), "One of metadata_store_url or token_address is required."
+        metadata_cache_uri or token_address
+    ), "One of metadata_cache_uri or token_address is required."
 
-    metadata_url = metadata_store_url
-    if not metadata_store_url and token_address:
+    metadata_url = metadata_cache_uri
+    if not metadata_cache_uri and token_address:
         metadata_url = DataToken(token_address).get_metadata_url()
 
     logger.debug(f"found did {did} -> url={metadata_url}")

@@ -86,13 +86,13 @@ class Ocean:
                 if ("metadataCacheUri" in config)
                 else "metadataStoreUri"
             )
-            aqua_url = config.get(
-                cache_key, config.get("aquarius.url", "http://localhost:5000")
+            metadata_cache_uri = config.get(
+                cache_key, config.get("metadata_cache_uri", "http://localhost:5000")
             )
             config_dict = {
                 "eth-network": {"network": config.get("network", "")},
                 "resources": {
-                    "aquarius.url": aqua_url,
+                    "metadata_cache_uri": metadata_cache_uri,
                     "provider.url": config.get("providerUri", "http://localhost:8030"),
                 },
             }
