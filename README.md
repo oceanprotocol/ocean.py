@@ -9,8 +9,8 @@ SPDX-License-Identifier: Apache-2.0
 
 > Python library to privately & securely publish, exchange, and consume data.
 
-[![Codacy Badge](https://app.codacy.com/project/badge/Grade/3abc62f24f0a4fe78c6aeb7dc16399a8)](https://www.codacy.com/gh/oceanprotocol/ocean.py/dashboard?utm_source=github.com\&utm_medium=referral\&utm_content=oceanprotocol/ocean.py\&utm_campaign=Badge_Grade)
-[![Codacy Badge](https://app.codacy.com/project/badge/Coverage/3abc62f24f0a4fe78c6aeb7dc16399a8)](https://www.codacy.com/gh/oceanprotocol/ocean.py/dashboard?utm_source=github.com\&utm_medium=referral\&utm_content=oceanprotocol/ocean.py\&utm_campaign=Badge_Coverage)
+[![Maintainability](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/maintainability)](https://codeclimate.com/github/oceanprotocol/ocean.py/maintainability)
+[![Test Coverage](https://api.codeclimate.com/v1/badges/a0be65f412a35440c63e/test_coverage)](https://codeclimate.com/github/oceanprotocol/ocean.py/test_coverage)
 
 With ocean.py, you can:
 
