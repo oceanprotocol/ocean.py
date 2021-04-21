@@ -407,7 +407,7 @@ class DataToken(ContractBase):
 
     def transferFrom(
         self, from_address: str, to_address: str, value_base: int, from_wallet: Wallet
-    ) -> bool:
+    ) -> str:
         return self.send_transaction(
             "transferFrom", (from_address, to_address, value_base), from_wallet
         )
@@ -427,14 +427,14 @@ class DataToken(ContractBase):
     # reflect non-standard ERC20 functions added by Open Zeppelin contract
     def increaseAllowance(
         self, spender_address: str, added_value: int, from_wallet: Wallet
-    ) -> bool:
+    ) -> str:
         return self.send_transaction(
             "increaseAllowance", (spender_address, added_value), from_wallet
         )
 
     def decreaseAllowance(
         self, spender_address: str, subtracted_value: int, from_wallet: Wallet
-    ) -> bool:
+    ) -> str:
         return self.send_transaction(
             "decreaseAllowance", (spender_address, subtracted_value), from_wallet
         )
@@ -450,14 +450,14 @@ class DataToken(ContractBase):
         blob: str,
         fee_collector_address: str,
         from_wallet: Wallet,
-    ) -> bool:
+    ) -> str:
         return self.send_transaction(
             "initialize",
             (name, symbol, minter_address, cap, blob, fee_collector_address),
             from_wallet,
         )
 
-    def mint(self, account_address: str, value_base: int, from_wallet: Wallet):
+    def mint(self, account_address: str, value_base: int, from_wallet: Wallet) -> str:
         return self.send_transaction("mint", (account_address, value_base), from_wallet)
 
     def startOrder(
@@ -467,7 +467,7 @@ class DataToken(ContractBase):
         serviceId: int,
         mrktFeeCollector: str,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         return self.send_transaction(
             "startOrder", (consumer, amount, serviceId, mrktFeeCollector), from_wallet
         )
@@ -479,7 +479,7 @@ class DataToken(ContractBase):
         amount: int,
         serviceId: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         return self.send_transaction(
             "finishOrder", (orderTxId, consumer, amount, serviceId), from_wallet
         )
