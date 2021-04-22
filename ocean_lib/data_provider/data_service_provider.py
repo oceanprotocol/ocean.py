@@ -10,18 +10,18 @@ import os
 import re
 from collections import namedtuple
 from json import JSONDecodeError
-import requests
 
+import requests
+from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.config_provider import ConfigProvider
-from ocean_lib.data_provider.exceptions import InvalidURLException
 from ocean_lib.enforce_typing_shim import enforce_types_shim
+from ocean_lib.exceptions import OceanEncryptAssetUrlsError
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.web3helper import Web3Helper
-from ocean_utils.agreements.service_types import ServiceTypes
-from ocean_utils.exceptions import OceanEncryptAssetUrlsError
-from ocean_utils.http_requests.requests_session import get_requests_session
+from requests.exceptions import InvalidURL
 
 logger = logging.getLogger(__name__)
 
@@ -472,7 +472,7 @@ class DataServiceProvider:
         parts = provider_uri.split("/")
 
         if len(parts) < 2:
-            raise InvalidURLException(f"InvalidURL {service_endpoint}.")
+            raise InvalidURL(f"InvalidURL {service_endpoint}.")
 
         if parts[-2] == "services":
             provider_uri = "/".join(parts[:-2])
@@ -480,7 +480,7 @@ class DataServiceProvider:
         result = DataServiceProvider._remove_slash(provider_uri)
 
         if not result:
-            raise InvalidURLException(f"InvalidURL {service_endpoint}.")
+            raise InvalidURL(f"InvalidURL {service_endpoint}.")
 
         return result
 

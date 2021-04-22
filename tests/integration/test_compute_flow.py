@@ -4,13 +4,13 @@
 #
 
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
+from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_utils.agreements.service_types import ServiceTypes
 from tests.resources.ddo_helpers import (
     get_algorithm_meta,
     get_registered_algorithm_ddo,
@@ -79,7 +79,7 @@ def run_compute_test(
     algo_meta=None,
     expect_failure=False,
     expect_failure_message=None,
-    restart_and_result=False,
+    with_result=False,
 ):
     """Helper function to bootstrap compute job creation and status checking."""
     compute_ddo = input_ddos[0]
@@ -150,10 +150,7 @@ def run_compute_test(
     print(f"got job status after requesting stop: {status}")
     assert status, f"something not right about the compute job, got status: {status}"
 
-    if restart_and_result:
-        # TODO: test restart function after pending rework
-        # OR delete this TODO if restart is removed from the interface
-
+    if with_result:
         result = ocean_instance.compute.result(did, job_id, consumer_wallet)
         print(f"got job status after requesting result: {result}")
         assert "did" in result, "something not right about the compute job, no did."
@@ -178,7 +175,7 @@ def test_compute_raw_algo():
         setup.consumer_wallet,
         [compute_ddo],
         algo_meta=algorithm_meta,
-        restart_and_result=True,
+        with_result=True,
     )
 
 
@@ -240,7 +237,7 @@ def test_update_trusted_algorithms():
     # verify the ddo is available in Aquarius
     _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
     trusted_algo_list = create_publisher_trusted_algorithms(
-        [algorithm_ddo.did], setup.publisher_ocean_instance.config.aquarius_url
+        [algorithm_ddo.did], setup.publisher_ocean_instance.config.metadata_cache_uri
     )
     compute_ddo.update_compute_privacy(
         trusted_algorithms=trusted_algo_list, allow_all=False, allow_raw_algorithm=False

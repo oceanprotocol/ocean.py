@@ -5,6 +5,7 @@
 import logging
 
 from ocean_lib.enforce_typing_shim import enforce_types_shim
+from ocean_lib.exceptions import VerifyTxFailed
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
@@ -92,14 +93,14 @@ class OceanPool:
             pool_address, data_token_amount, from_wallet, wait=True
         )
         if dt.get_tx_receipt(tx_id).status != 1:
-            raise AssertionError(
+            raise VerifyTxFailed(
                 f"Approve datatokens failed, pool was created at {pool_address}"
             )
 
         ot = DataToken(self.ocean_address)
         tx_id = ot.approve_tokens(pool_address, OCEAN_amount, from_wallet, wait=True)
         if ot.get_tx_receipt(tx_id).status != 1:
-            raise AssertionError(
+            raise VerifyTxFailed(
                 f"Approve OCEAN tokens failed, pool was created at {pool_address}"
             )
 
@@ -114,7 +115,7 @@ class OceanPool:
             from_wallet,
         )
         if pool.get_tx_receipt(tx_id).status != 1:
-            raise AssertionError(
+            raise VerifyTxFailed(
                 f"pool.setup failed: txId={tx_id}, receipt={pool.get_tx_receipt(tx_id)}"
             )
 
@@ -787,12 +788,32 @@ class OceanPool:
         shares = None
         info_dict = {"address": pool.address, "dataTokenAddress": dt_address}
         if "datatokenInfo" in flags:
-            info_dict["dataToken"] = DataToken(dt_address).get_info(
-                web3,
-                from_block,
-                current_block,
-                include_holders=bool("dtHolders" in flags),
+            dt = DataToken(dt_address)
+            minter = dt.minter()
+
+            token_holders = []
+            if "dtHolders" in flags:
+                token_holders = dt.calculate_token_holders(
+                    from_block, to_block, 0.000001
+                )
+
+            order_logs = dt.get_start_order_logs(
+                web3, from_block=from_block, to_block=to_block
             )
+
+            info_dict["dataToken"] = {
+                "address": dt.address(),
+                "name": dt.datatoken_name(),
+                "symbol": dt.symbol(),
+                "deciamls": dt.decimals(),
+                "cap": from18(dt.cap()),
+                "totalSupply": from18(dt.totalSupply()),
+                "minter": minter,
+                "minterBalance": from18(dt.balanceOf(minter)),
+                "numHolders": len(token_holders),
+                "holders": token_holders,
+                "numOrders": len(order_logs),
+            }
 
         if "price" in flags:
             info_dict.update(
@@ -826,15 +847,8 @@ class OceanPool:
 
         if "shareHolders" in flags:
             pool_erc20 = DataToken(pool_address)
-            all_transfers, _ = pool_erc20.get_all_transfers_from_events(
-                from_block, current_block
-            )
-            a_to_balance = DataToken.calculate_balances(all_transfers)
-            _min = to_base_18(0.001)
-            pool_holders = sorted(
-                [(a, from_base_18(b)) for a, b in a_to_balance.items() if b > _min],
-                key=lambda x: x[1],
-                reverse=True,
+            pool_holders = pool_erc20.calculate_token_holders(
+                from_block, current_block, 0.001
             )
             info_dict.update(
                 {"numShareHolders": len(pool_holders), "shareHolders": pool_holders}

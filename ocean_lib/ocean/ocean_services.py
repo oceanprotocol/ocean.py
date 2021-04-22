@@ -4,9 +4,9 @@
 #
 
 """Ocean module."""
+from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_utils.agreements.service_factory import ServiceDescriptor
 
 
 class OceanServices:

@@ -6,9 +6,11 @@ import json
 import os
 import time
 from collections import namedtuple
+from typing import List, Tuple
 
 import requests
 from eth_utils import remove_0x_prefix
+from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.ocean.util import from_base_18, to_base_18
@@ -16,7 +18,6 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.event_filter import EventFilter
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_utils.http_requests.requests_session import get_requests_session
 from web3 import Web3
 from web3.exceptions import MismatchedABI
 from web3.utils.events import get_event_data
@@ -40,6 +41,128 @@ class DataToken(ContractBase):
     OPF_FEE_PERCENTAGE = 0.001
     MAX_MARKET_FEE_PERCENTAGE = 0.001
 
+    # ============================================================
+    # reflect DataToken Solidity methods
+    def initialize(
+        self,
+        name: str,
+        symbol: str,
+        minter_address: str,
+        cap: int,
+        blob: str,
+        fee_collector_address: str,
+        from_wallet: Wallet,
+    ) -> str:
+        return self.send_transaction(
+            "initialize",
+            (name, symbol, minter_address, cap, blob, fee_collector_address),
+            from_wallet,
+        )
+
+    def mint(self, account_address: str, value_base: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("mint", (account_address, value_base), from_wallet)
+
+    def startOrder(
+        self,
+        consumer: str,
+        amount: int,
+        serviceId: int,
+        mrktFeeCollector: str,
+        from_wallet: Wallet,
+    ) -> str:
+        return self.send_transaction(
+            "startOrder", (consumer, amount, serviceId, mrktFeeCollector), from_wallet
+        )
+
+    def finishOrder(
+        self,
+        orderTxId: str,
+        consumer: str,
+        amount: int,
+        serviceId: int,
+        from_wallet: Wallet,
+    ) -> str:
+        return self.send_transaction(
+            "finishOrder", (orderTxId, consumer, amount, serviceId), from_wallet
+        )
+
+    def proposeMinter(self, new_minter, from_wallet) -> str:
+        return self.send_transaction("proposeMinter", (new_minter,), from_wallet)
+
+    def approveMinter(self, from_wallet) -> str:
+        return self.send_transaction("approveMinter", (), from_wallet)
+
+    def blob(self) -> str:
+        return self.contract_concise.blob()
+
+    def cap(self) -> str:
+        return self.contract_concise.cap()
+
+    def isMinter(self, address: str) -> bool:
+        return self.contract_concise.isMinter(address)
+
+    def minter(self) -> str:
+        return self.contract_concise.minter()
+
+    def isInitialized(self) -> bool:
+        return self.contract_concise.isInitialized()
+
+    def calculateFee(self, amount: int, fee_percentage: int) -> int:
+        return self.contract_concise.calculateFee(amount, fee_percentage)
+
+    # ============================================================
+    # reflect required ERC20 standard functions
+    def totalSupply(self) -> str:
+        return self.contract_concise.totalSupply()
+
+    def balanceOf(self, account: str) -> int:
+        return self.contract_concise.balanceOf(account)
+
+    def transfer(self, to: str, value_base: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("transfer", (to, value_base), from_wallet)
+
+    def allowance(self, owner_address: str, spender_address: str) -> int:
+        return self.contract_concise.allowance(owner_address, spender_address)
+
+    def approve(self, spender: str, value_base: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("approve", (spender, value_base), from_wallet)
+
+    def transferFrom(
+        self, from_address: str, to_address: str, value_base: int, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "transferFrom", (from_address, to_address, value_base), from_wallet
+        )
+
+    # ============================================================
+    # reflect optional ERC20 standard functions
+    def datatoken_name(self) -> str:
+        return self.contract_concise.name()
+
+    def symbol(self) -> str:
+        return self.contract_concise.symbol()
+
+    def decimals(self) -> str:
+        return self.contract_concise.decimals()
+
+    # ============================================================
+    # reflect non-standard ERC20 functions added by Open Zeppelin
+    def increaseAllowance(
+        self, spender_address: str, added_value: int, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "increaseAllowance", (spender_address, added_value), from_wallet
+        )
+
+    def decreaseAllowance(
+        self, spender_address: str, subtracted_value: int, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "decreaseAllowance", (spender_address, subtracted_value), from_wallet
+        )
+
+    # ============================================================
+    # Events
     def get_event_signature(self, event_name):
         try:
             e = getattr(self.events, event_name)
@@ -326,6 +449,22 @@ class DataToken(ContractBase):
     def get_simple_url(self):
         return self._get_url_from_blob(0)
 
+    def calculate_token_holders(
+        self, from_block: int, to_block: int, min_token_amount: float
+    ) -> List[Tuple[str, float]]:
+        """Returns a list of addresses with token balances above a minimum token
+        amount. Calculated from the transactions between `from_block` and `to_block`."""
+        all_transfers, _ = self.get_all_transfers_from_events(from_block, to_block)
+        balances_above_threshold = []
+        balances = DataToken.calculate_balances(all_transfers)
+        _min = to_base_18(min_token_amount)
+        balances_above_threshold = sorted(
+            [(a, from_base_18(b)) for a, b in balances.items() if b > _min],
+            key=lambda x: x[1],
+            reverse=True,
+        )
+        return balances_above_threshold
+
     # ============================================================
     # Token transactions using amount of tokens as a float instead of int
     # amount of tokens will be converted to the base value before sending
@@ -360,112 +499,16 @@ class DataToken(ContractBase):
         return int(amount * to_base_18(percentage) / to_base_18(1.0))
 
     @staticmethod
-    def calculate_balances(transfers):
+    def calculate_balances(transfers) -> List[Tuple[str, int]]:
         _from = [t[0].lower() for t in transfers]
         _to = [t[1].lower() for t in transfers]
         _value = [t[2] for t in transfers]
-        a_to_value = dict()
-        a_to_value.update({a: 0 for a in _from})
-        a_to_value.update({a: 0 for a in _to})
+        address_to_balance = dict()
+        address_to_balance.update({a: 0 for a in _from})
+        address_to_balance.update({a: 0 for a in _to})
         for i, acc_f in enumerate(_from):
             v = int(_value[i])
-            a_to_value[acc_f] -= v
-            a_to_value[_to[i]] += v
+            address_to_balance[acc_f] -= v
+            address_to_balance[_to[i]] += v
 
-        return a_to_value
-
-    def get_info(self, web3, from_block, to_block, include_holders=False):
-        contract = self.contract_concise
-        minter = contract.minter()
-        all_transfers, _ = self.get_all_transfers_from_events(from_block, to_block)
-        order_logs = self.get_start_order_logs(
-            web3, from_block=from_block, to_block=to_block
-        )
-        holders = []
-        if include_holders:
-            a_to_balance = DataToken.calculate_balances(all_transfers)
-            _min = to_base_18(0.000001)
-            holders = sorted(
-                [(a, from_base_18(b)) for a, b in a_to_balance.items() if b > _min],
-                key=lambda x: x[1],
-                reverse=True,
-            )
-
-        return {
-            "address": self.address,
-            "name": contract.name(),
-            "symbol": contract.symbol(),
-            "decimals": contract.decimals(),
-            "cap": from_base_18(contract.cap()),
-            "totalSupply": from_base_18(contract.totalSupply()),
-            "minter": minter,
-            "minterBalance": self.token_balance(minter),
-            "numHolders": len(holders),
-            "holders": holders,
-            "numOrders": len(order_logs),
-        }
-
-    # ============================================================
-    # reflect DataToken Solidity methods
-    def blob(self) -> str:
-        return self.contract_concise.blob()
-
-    def datatoken_name(self) -> str:
-        return self.contract_concise.name()
-
-    def symbol(self) -> str:
-        return self.contract_concise.symbol()
-
-    def cap(self) -> str:
-        return self.contract_concise.cap()
-
-    def decimals(self) -> str:
-        return self.contract_concise.decimals()
-
-    def totalSupply(self) -> str:
-        return self.contract_concise.totalSupply()
-
-    def allowance(self, owner_address: str, spender_address: str) -> str:
-        return self.contract_concise.allowance(owner_address, spender_address)
-
-    def balanceOf(self, account: str) -> int:
-        return self.contract_concise.balanceOf(account)
-
-    def mint(self, to_account: str, value_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("mint", (to_account, value_base), from_wallet)
-
-    def approve(self, spender: str, value_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("approve", (spender, value_base), from_wallet)
-
-    def transfer(self, to: str, value_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("transfer", (to, value_base), from_wallet)
-
-    def proposeMinter(self, new_minter, from_wallet) -> str:
-        return self.send_transaction("proposeMinter", (new_minter,), from_wallet)
-
-    def approveMinter(self, from_wallet) -> str:
-        return self.send_transaction("approveMinter", (), from_wallet)
-
-    def startOrder(
-        self,
-        consumer: str,
-        amount: int,
-        serviceId: int,
-        mrktFeeCollector: str,
-        from_wallet: Wallet,
-    ):
-        return self.send_transaction(
-            "startOrder", (consumer, amount, serviceId, mrktFeeCollector), from_wallet
-        )
-
-    def finishOrder(
-        self,
-        orderTxId: str,
-        consumer: str,
-        amount: int,
-        serviceId: int,
-        from_wallet: Wallet,
-    ):
-        return self.send_transaction(
-            "finishOrder", (orderTxId, consumer, amount, serviceId), from_wallet
-        )
+        return address_to_balance

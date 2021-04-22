@@ -7,6 +7,9 @@ from typing import Optional
 
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
+from ocean_lib.common.agreements.service_agreement import ServiceAgreement
+from ocean_lib.common.agreements.service_factory import ServiceDescriptor
+from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
@@ -14,9 +17,6 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3helper import Web3Helper
-from ocean_utils.agreements.service_agreement import ServiceAgreement
-from ocean_utils.agreements.service_factory import ServiceDescriptor
-from ocean_utils.agreements.service_types import ServiceTypes
 
 logger = logging.getLogger("ocean")
 
@@ -128,7 +128,7 @@ class OceanCompute:
         }
         if trusted_algorithms:
             privacy["publisherTrustedAlgorithms"] = create_publisher_trusted_algorithms(
-                trusted_algorithms, ConfigProvider.get_config().aquarius_url
+                trusted_algorithms, ConfigProvider.get_config().metadata_cache_uri
             )
 
         return privacy
@@ -206,7 +206,7 @@ class OceanCompute:
             "brizoUri": data_provider.get_url(config),
             "brizoAddress": config.provider_address,
             "metadata": dict(),
-            "metadataUri": config.aquarius_url,
+            "metadataUri": config.metadata_cache_uri,
             "owner": consumer_address,
             "publishOutput": 0,
             "publishAlgorithmLog": 0,
@@ -285,7 +285,7 @@ class OceanCompute:
         output = OceanCompute.check_output_dict(
             output, consumer_wallet.address, data_provider=self._data_provider
         )
-        asset = resolve_asset(did, metadata_store_url=self._config.aquarius_url)
+        asset = resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
         _, service_endpoint = self._get_service_endpoint(did, asset)
 
         service = asset.get_service_by_index(service_id)
@@ -388,29 +388,9 @@ class OceanCompute:
             )
         )
 
-    def restart(self, did, job_id, wallet):
-        """
-        Attempt to restart the compute job by stopping it first, then starting a new job.
-
-        :param did: str id of the asset offering the compute service of this job
-        :param job_id: str id of the compute job
-        :param wallet: Wallet instance
-        :return: str -- id of the new compute job
-        """
-        _, service_endpoint = self._get_service_endpoint(did)
-        msg = f'{wallet.address}{job_id or ""}{did}'
-        job_info = self._data_provider.restart_compute_job(
-            did,
-            job_id,
-            service_endpoint,
-            wallet.address,
-            self._sign_message(wallet, msg, service_endpoint=service_endpoint),
-        )
-        return job_info["jobId"]
-
     def _get_service_endpoint(self, did, asset=None):
         if not asset:
-            asset = resolve_asset(did, self._config.aquarius_url)
+            asset = resolve_asset(did, self._config.metadata_cache_uri)
 
         return self._data_provider.build_compute_endpoint(
             ServiceAgreement.from_ddo(
