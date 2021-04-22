@@ -23,6 +23,7 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address
     assert token.symbol()[:2] == "DT"
     assert token.decimals() == 18
     assert token.balanceOf(alice_address) == 0
+    assert token.totalSupply() == 0
 
     token.mint(alice_address, to_base_18(100.0), from_wallet=alice_wallet)
     assert from_base_18(token.balanceOf(alice_address)) == 100.0
@@ -30,19 +31,24 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address
     assert token.allowance(alice_address, bob_address) == 0
     token.approve(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
     assert token.allowance(alice_address, bob_address) == int(1e18)
+    token.transferFrom(
+        alice_address, bob_address, to_base_18(1.0), from_wallet=bob_wallet
+    )
+    assert from_base_18(token.balanceOf(alice_address)) == 99.0
+    assert from_base_18(token.balanceOf(bob_address)) == 1.0
 
     token.transfer(bob_address, to_base_18(5.0), from_wallet=alice_wallet)
-    assert from_base_18(token.balanceOf(alice_address)) == 95.0
-    assert from_base_18(token.balanceOf(bob_address)) == 5.0
+    assert from_base_18(token.balanceOf(alice_address)) == 94.0
+    assert from_base_18(token.balanceOf(bob_address)) == 6.0
 
     token.transfer(alice_address, to_base_18(3.0), from_wallet=bob_wallet)
-    assert from_base_18(token.balanceOf(alice_address)) == 98.0
-    assert from_base_18(token.balanceOf(bob_address)) == 2.0
+    assert from_base_18(token.balanceOf(alice_address)) == 97.0
+    assert from_base_18(token.balanceOf(bob_address)) == 3.0
 
     # assert transfers were successful
     block = alice_ocean.web3.eth.blockNumber
-    all_transfers = token.get_all_transfers_from_events(block - 1, block + 1, chunk=1)
-    assert len(all_transfers[0]) == 2
+    all_transfers = token.get_all_transfers_from_events(block - 2, block + 1, chunk=1)
+    assert len(all_transfers[0]) == 3
 
 
 def test_status_functions(alice_ocean, alice_wallet, alice_address):
