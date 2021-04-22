@@ -18,6 +18,7 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.event_filter import EventFilter
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
+from ocean_lib.web3_internal.web3helper import Web3Helper
 from web3 import Web3
 from web3.exceptions import MismatchedABI
 from web3.utils.events import get_event_data
@@ -38,8 +39,10 @@ class DataToken(ContractBase):
     ORDER_STARTED_EVENT = "OrderStarted"
     ORDER_FINISHED_EVENT = "OrderFinished"
 
-    OPF_FEE_PERCENTAGE = 0.001
-    MAX_MARKET_FEE_PERCENTAGE = 0.001
+    ONE_DATATOKEN_IN_WEI = 1_000_000_000_000_000_000  # 1 datatoken
+
+    OPF_FEE_PER_DATATOKEN_IN_WEI = ONE_DATATOKEN_IN_WEI // 1000
+    MAX_MARKET_FEE_PER_DATATOKEN_IN_WEI = ONE_DATATOKEN_IN_WEI // 1000
 
     # ============================================================
     # reflect DataToken Solidity methods
@@ -107,8 +110,8 @@ class DataToken(ContractBase):
     def isInitialized(self) -> bool:
         return self.contract_concise.isInitialized()
 
-    def calculateFee(self, amount: int, fee_percentage: int) -> int:
-        return self.contract_concise.calculateFee(amount, fee_percentage)
+    def calculateFee(self, amount: int, fee_per_datatoken_in_wei: int) -> int:
+        return self.contract_concise.calculateFee(amount, fee_per_datatoken_in_wei)
 
     # ============================================================
     # reflect required ERC20 standard functions
@@ -375,16 +378,17 @@ class DataToken(ContractBase):
                 f"event: (serviceId={order_log.args.serviceId}"
             )
 
-        target_amount = amount_base - self.calculate_fee(
-            amount_base, self.OPF_FEE_PERCENTAGE
+        target_amount = amount_base - self.calculateFee(
+            amount_base, self.OPF_FEE_PER_DATATOKEN_IN_WEI
         )
         if order_log.args.mrktFeeCollector and order_log.args.marketFee > 0:
-            assert order_log.args.marketFee <= (
-                self.calculate_fee(amount_base, self.MAX_MARKET_FEE_PERCENTAGE) + 5
-            ), (
+            max_market_fee_in_wei = self.calculateFee(
+                amount_base, self.MAX_MARKET_FEE_PER_DATATOKEN_IN_WEI
+            )
+            assert order_log.args.marketFee <= (max_market_fee_in_wei + 5), (
                 f"marketFee {order_log.args.marketFee} exceeds the expected maximum "
-                f"of {self.calculate_fee(amount_base, self.MAX_MARKET_FEE_PERCENTAGE)} "
-                f"based on feePercentage={self.MAX_MARKET_FEE_PERCENTAGE} ."
+                f"of {max_market_fee_in_wei} based on feePercentage="
+                f"{Web3Helper.from_wei(self.MAX_MARKET_FEE_PER_DATATOKEN_IN_WEI)} ."
             )
             target_amount = target_amount - order_log.args.marketFee
 
@@ -486,14 +490,6 @@ class DataToken(ContractBase):
 
     ################
     # Helpers
-    @staticmethod
-    def get_max_fee_percentage():
-        return DataToken.OPF_FEE_PERCENTAGE + DataToken.MAX_MARKET_FEE_PERCENTAGE
-
-    @staticmethod
-    def calculate_max_fee(amount):
-        return DataToken.calculate_fee(amount, DataToken.get_max_fee_percentage())
-
     @staticmethod
     def calculate_fee(amount, percentage):
         return int(amount * to_base_18(percentage) / to_base_18(1.0))

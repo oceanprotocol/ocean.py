@@ -99,9 +99,7 @@ def test_calculateFee(alice_ocean, alice_wallet):
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
 
-    fee = token.calculateFee(
-        to_base_18(100.0), to_base_18(DataToken.OPF_FEE_PERCENTAGE)
-    )
+    fee = token.calculateFee(to_base_18(100.0), DataToken.OPF_FEE_PER_DATATOKEN_IN_WEI)
     assert from_base_18(fee) == 0.1
 
 
@@ -128,12 +126,6 @@ def test_blob_json(alice_ocean, alice_wallet):
         "DataToken1", "DT1", alice_wallet, blob=json.dumps(blob_dict)
     )
     assert token.get_metadata_url() == "http://tblob/"
-
-
-def test_static_methods():
-    """Tests static methods from DataToken class."""
-    assert DataToken.get_max_fee_percentage() == 0.002
-    assert DataToken.calculate_max_fee(1000) == 2
 
 
 def test_setMinter(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address):
