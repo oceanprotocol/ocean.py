@@ -32,6 +32,10 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address
     assert token.allowance(alice_address, bob_address) == 0
     token.approve(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
     assert token.allowance(alice_address, bob_address) == int(1e18)
+    token.increaseAllowance(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
+    assert token.allowance(alice_address, bob_address) == int(2e18)
+    token.decreaseAllowance(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
+    assert token.allowance(alice_address, bob_address) == int(1e18)
     token.transferFrom(
         alice_address, bob_address, to_base_18(1.0), from_wallet=bob_wallet
     )
@@ -68,6 +72,37 @@ def test_status_functions(alice_ocean, alice_wallet, alice_address):
     assert token.isMinter(alice_address)
     with pytest.raises(ValueError):
         token.get_event_signature("not a registered event")
+
+
+def test_initialize(alice_ocean, alice_wallet, alice_address):
+    """Tests that attempting to re-initialize a datatoken fails."""
+    token = alice_ocean.create_data_token(
+        "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
+    )
+
+    assert token.isInitialized()
+    with pytest.raises(ValueError):
+        token.initialize(
+            "NewName",
+            "NN",
+            alice_address,
+            1000,
+            "foo_blob",
+            alice_address,
+            alice_wallet,
+        )
+
+
+def test_calculateFee(alice_ocean, alice_wallet):
+    """Tests the DataToken calculateFee method."""
+    token = alice_ocean.create_data_token(
+        "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
+    )
+
+    fee = token.calculateFee(
+        to_base_18(100.0), to_base_18(DataToken.OPF_FEE_PERCENTAGE)
+    )
+    assert from_base_18(fee) == 0.1
 
 
 def test_blob(alice_ocean, alice_wallet):
@@ -240,3 +275,14 @@ def test_download(alice_ocean, alice_wallet, tmpdir):
 
     written_path = token.download(alice_wallet, "test", tmpdir)
     assert os.path.exists(written_path)
+
+
+def test_calculate_token_holders(alice_ocean, alice_wallet, alice_address):
+    """Test the calculate_token_holders methods."""
+    token = alice_ocean.create_data_token(
+        "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
+    )
+    token.mint(alice_address, to_base_18(100.0), from_wallet=alice_wallet)
+    block = alice_ocean.web3.eth.blockNumber
+    token_holders = token.calculate_token_holders(block - 1, block + 1, 1.0)
+    assert len(token_holders) == 1
