@@ -33,7 +33,7 @@ from tests.resources.helper_functions import (  # noqa: E402
 )
 
 
-def deploy_fake_OCEAN():
+def mint_fake_OCEAN():
     """
     Does the following:
     1. Deploy to ganache a new ERC20 contract having symbol OCEAN
@@ -47,13 +47,10 @@ def deploy_fake_OCEAN():
     Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
     ContractHandler.set_artifacts_path(config.artifacts_path)
 
-    artifacts_path = ContractHandler.artifacts_path
     addresses_file = config.address_file
 
     ocean = get_publisher_ocean_instance()
     web3 = ocean.web3
-
-    addresses = dict()
 
     if os.path.exists(addresses_file):
         with open(addresses_file) as f:
@@ -77,22 +74,9 @@ def deploy_fake_OCEAN():
     print("****Deploy fake OCEAN: begin****")
     # For simplicity, hijack DataTokenTemplate.
     deployer_addr = deployer_wallet.address
-    OCEAN_cap = 1410 * 10 ** 6  # 1.41B
+    OCEAN_cap = 10000
     OCEAN_cap_base = util.to_base_18(float(OCEAN_cap))
-    OCEAN_token = DataToken(
-        DataToken.deploy(
-            web3,
-            deployer_wallet,
-            artifacts_path,
-            "Ocean",
-            "OCEAN",
-            deployer_addr,
-            OCEAN_cap_base,
-            "",
-            deployer_addr,
-        )
-    )
-    addresses["Ocean"] = OCEAN_token.address
+    OCEAN_token = DataToken(address=network_addresses["development"]["Ocean"])
     print("****Deploy fake OCEAN: done****\n")
 
     print("****Mint fake OCEAN: begin****")
@@ -114,24 +98,6 @@ def deploy_fake_OCEAN():
         print(f"Distributed {amt_distribute} OCEAN to address {dst_address}")
 
     print("****Distribute fake OCEAN: done****\n")
-
-    print("****Update addresses file: begin****\n")
-
-    print(f"addresses file: {addresses_file}")
-    print(f"network: {network}")
-    print("")
-
-    network_addresses[network].update(addresses)
-
-    with open(addresses_file, "w") as f:
-        json.dump(network_addresses, f, indent=2)
-
-    _s = json.dumps(addresses, indent=4)
-
-    s = "Have deployed to, and updated the following addresses\n" + _s
-    print(s)
-
-    print("****Update addresses file: done****\n")
 
 
 def invalidKey(private_key_str):  # super basic check

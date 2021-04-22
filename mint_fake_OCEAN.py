@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from ocean_lib.ocean.deploy import deploy_fake_OCEAN
+from ocean_lib.ocean.mint import mint_fake_OCEAN
 
 if __name__ == "__main__":
-    deploy_fake_OCEAN()
+    mint_fake_OCEAN()
