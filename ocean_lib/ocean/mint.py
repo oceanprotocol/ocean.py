@@ -4,7 +4,7 @@
 #
 
 """
-    Used for deploying fake OCEAN
+    Used for minting and sending fake OCEAN
     isort:skip_file
 """
 
@@ -36,10 +36,8 @@ from tests.resources.helper_functions import (  # noqa: E402
 def mint_fake_OCEAN():
     """
     Does the following:
-    1. Deploy to ganache a new ERC20 contract having symbol OCEAN
-    2. Mints tokens
-    3. Distributes tokens to TEST_PRIVATE_KEY1 and TEST_PRIVATE_KEY2
-    4. In addresses.json, updates development : Ocean entry with new address
+    1. Mints tokens
+    2. Distributes tokens to TEST_PRIVATE_KEY1 and TEST_PRIVATE_KEY2
     """
     network = "ganache"
     config = ExampleConfig.get_config()
@@ -68,19 +66,15 @@ def mint_fake_OCEAN():
         print("Need valid DEPLOYER_PRIVATE_KEY")
         sys.exit(0)
 
-    # ****DEPLOY****
     deployer_wallet = Wallet(web3, private_key=deployer_private_key)
-
-    print("****Deploy fake OCEAN: begin****")
-    # For simplicity, hijack DataTokenTemplate.
-    deployer_addr = deployer_wallet.address
     OCEAN_cap = 10000
     OCEAN_cap_base = util.to_base_18(float(OCEAN_cap))
     OCEAN_token = DataToken(address=network_addresses["development"]["Ocean"])
-    print("****Deploy fake OCEAN: done****\n")
 
     print("****Mint fake OCEAN: begin****")
-    OCEAN_token.mint(deployer_addr, OCEAN_cap_base, from_wallet=deployer_wallet)
+    OCEAN_token.mint(
+        deployer_wallet.address, OCEAN_cap_base, from_wallet=deployer_wallet
+    )
     print("****Mint fake OCEAN: done****\n")
 
     print("****Distribute fake OCEAN: begin****")

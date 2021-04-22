@@ -110,8 +110,8 @@ python
 In the Python console:
 ```python
 # deploy new OCEAN token; update ~/.ocean/ocean-contracts/artifacts/address.json; send OCEAN to accounts
-from ocean_lib.ocean.deploy import deploy_fake_OCEAN
-deploy_fake_OCEAN()
+from ocean_lib.ocean.mint import mint_fake_OCEAN
+mint_fake_OCEAN()
 ```
 
 ## 2. Alice publishes data asset

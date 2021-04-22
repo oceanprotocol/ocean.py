@@ -73,8 +73,8 @@ export CONFIG_FILE=config.ini
 export TEST_PRIVATE_KEY1=0xbbfbee4961061d506ffbb11dfea64eba16355cbf1d9c29613126ba7fec0aed5d
 export TEST_PRIVATE_KEY2=0x804365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a
 
-#deploy new OCEAN token; update ~/.ocean/ocean-contracts/artifacts/address.json; send OCEAN to accounts
-./deploy_fake_OCEAN.py
+#mint and send OCEAN to accounts
+./mint_fake_OCEAN.py
 ```
 
 ## 4. Test
@@ -94,7 +94,7 @@ pytest
 tox
 ```
 
-For envvars that aren't set, `pytest` uses values in `pytest.ini`, and `tox` uses values in `tox.ini`. 
+For envvars that aren't set, `pytest` uses values in `pytest.ini`, and `tox` uses values in `tox.ini`.
 
 Bonus: see the [appendix](developers.md#7-appendix-more-tests) for even more tests.
 
