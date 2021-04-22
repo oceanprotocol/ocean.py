@@ -67,10 +67,9 @@ def mint_fake_OCEAN():
         sys.exit(0)
 
     deployer_wallet = Wallet(web3, private_key=deployer_private_key)
-    OCEAN_cap = 10000
+    OCEAN_cap = 100000
     OCEAN_cap_base = util.to_base_18(float(OCEAN_cap))
     OCEAN_token = DataToken(address=network_addresses["development"]["Ocean"])
-
     print("****Mint fake OCEAN: begin****")
     OCEAN_token.mint(
         deployer_wallet.address, OCEAN_cap_base, from_wallet=deployer_wallet
