@@ -19,9 +19,10 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address
     token = alice_ocean.create_data_token(
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
-
+    assert token.datatoken_name() == "DataToken1"
     assert token.symbol()[:2] == "DT"
     assert token.decimals() == 18
+
     assert token.balanceOf(alice_address) == 0
     assert token.totalSupply() == 0
 
@@ -63,6 +64,8 @@ def test_status_functions(alice_ocean, alice_wallet, alice_address):
     assert token.totalSupply() == 100_000_000_000_000_000_000
     assert token.cap() == 1_000_000_000_000_000_000_000
     assert token.datatoken_name() == "DataToken1"
+    assert token.minter() == alice_address
+    assert token.isMinter(alice_address)
     with pytest.raises(ValueError):
         token.get_event_signature("not a registered event")
 
