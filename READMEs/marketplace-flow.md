@@ -107,13 +107,6 @@ export TEST_PRIVATE_KEY2=0x804365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a60
 python
 ```
 
-In the Python console:
-```python
-# deploy new OCEAN token; update ~/.ocean/ocean-contracts/artifacts/address.json; send OCEAN to accounts
-from ocean_lib.ocean.mint import mint_fake_OCEAN
-mint_fake_OCEAN()
-```
-
 ## 2. Alice publishes data asset
 
 In the Python console:
