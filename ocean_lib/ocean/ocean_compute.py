@@ -26,9 +26,8 @@ class OceanCompute:
 
     """Ocean assets class."""
 
-    def __init__(self, ocean_auth, config, data_provider):
+    def __init__(self, config, data_provider):
         """Initialises OceanCompute class."""
-        self._auth = ocean_auth
         self._config = config
         self._data_provider = data_provider
 
