@@ -74,7 +74,7 @@ def setup_all(request):
 
         OCEAN_token = DataToken(address=network_addresses[network]["Ocean"])
 
-        OCEAN_cap = 10000
+        OCEAN_cap = 2100
         OCEAN_cap_base = util.to_base_18(float(OCEAN_cap))
 
         OCEAN_token.mint(wallet.address, OCEAN_cap_base, from_wallet=wallet)
