@@ -20,10 +20,12 @@ setup_enforce_typing_shim()
 
 from ocean_lib.example_config import ExampleConfig  # noqa: E402
 from ocean_lib.models.data_token import DataToken  # noqa: E402
-from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18  # noqa: E402
-from ocean_lib.web3_internal.contract_handler import ContractHandler  # noqa: E402
-from ocean_lib.web3_internal.web3_provider import Web3Provider  # noqa: E402
-from tests.resources.helper_functions import get_ganache_wallet  # noqa: E402
+from ocean_lib.ocean.util import to_base_18  # noqa: E402
+from tests.resources.helper_functions import (
+    get_ganache_wallet,
+    get_publisher_wallet,
+    get_consumer_wallet,
+)  # noqa: E402
 
 
 def mint_OCEAN():
@@ -34,8 +36,6 @@ def mint_OCEAN():
     config = ExampleConfig.get_config()
     wallet = get_ganache_wallet()
     ConfigProvider.set_config(config)
-    Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
-    ContractHandler.set_artifacts_path(config.artifacts_path)
 
     addresses_file = config.address_file
 
@@ -52,4 +52,10 @@ def mint_OCEAN():
     amt_distribute_base = to_base_18(float(amt_distribute))
 
     OCEAN_token = DataToken(address=network_addresses[network]["Ocean"])
-    OCEAN_token.mint(wallet.address, amt_distribute_base, from_wallet=wallet)
+
+    for w in (get_publisher_wallet(), get_consumer_wallet()):
+        # if Web3Helper.from_wei(Web3Helper.get_ether_balance(w.address)) < 2:
+        #    Web3Helper.send_ether(wallet, w.address, 4)
+
+        OCEAN_token.mint(wallet.address, amt_distribute_base, from_wallet=wallet)
+        OCEAN_token.transfer(w.address, amt_distribute_base, from_wallet=wallet)
