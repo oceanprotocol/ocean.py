@@ -11,7 +11,6 @@ import json
 
 import pytest
 from ocean_lib.config_provider import ConfigProvider
-from ocean_lib.ocean import util
 
 # Setup ocean_lib.enforce_typing_shim before importing anything that uses it
 from ocean_lib.enforce_typing_shim import setup_enforce_typing_shim
@@ -74,11 +73,6 @@ def setup_all(request):
 
         OCEAN_token = DataToken(address=network_addresses[network]["Ocean"])
 
-        OCEAN_cap = 2100
-        OCEAN_cap_base = util.to_base_18(float(OCEAN_cap))
-
-        OCEAN_token.mint(wallet.address, OCEAN_cap_base, from_wallet=wallet)
-
         amt_distribute = 1000
         amt_distribute_base = to_base_18(float(amt_distribute))
         for w in (get_publisher_wallet(), get_consumer_wallet()):
@@ -86,6 +80,9 @@ def setup_all(request):
                 Web3Helper.send_ether(wallet, w.address, 4)
 
             if OCEAN_token.token_balance(w.address) < 100:
+                OCEAN_token.mint(
+                    wallet.address, amt_distribute_base, from_wallet=wallet
+                )
                 OCEAN_token.transfer(w.address, amt_distribute_base, from_wallet=wallet)
 
 
