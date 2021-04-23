@@ -6,6 +6,8 @@
 """isort:skip_file"""
 
 import uuid
+import os
+import json
 
 import pytest
 from ocean_lib.config_provider import ConfigProvider
@@ -16,11 +18,7 @@ from ocean_lib.enforce_typing_shim import setup_enforce_typing_shim
 setup_enforce_typing_shim()
 
 from ocean_lib.example_config import ExampleConfig  # noqa: E402
-from ocean_lib.ocean.util import (  # noqa: E402
-    get_ocean_token_address,
-    get_web3_connection_provider,
-    to_base_18,
-)
+from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18  # noqa: E402
 from ocean_lib.web3_internal.contract_handler import ContractHandler  # noqa: E402
 from ocean_lib.web3_internal.web3_provider import Web3Provider  # noqa: E402
 from ocean_lib.web3_internal.web3helper import Web3Helper  # noqa: E402
@@ -50,6 +48,17 @@ def setup_all(request):
 
     network = Web3Helper.get_network_name()
     wallet = get_ganache_wallet()
+    addresses_file = config.address_file
+
+    if os.path.exists(addresses_file):
+        with open(addresses_file) as f:
+            network_addresses = json.load(f)
+    else:
+        network_addresses = {network: {}}
+
+    if network not in network_addresses:
+        network = "development"
+
     if network in ["ganache", "development"] and wallet:
 
         print(
@@ -62,7 +71,7 @@ def setup_all(request):
 
         from ocean_lib.models.data_token import DataToken
 
-        OCEAN_token = DataToken(get_ocean_token_address(network))
+        OCEAN_token = DataToken(address=network_addresses[network]["Ocean"])
         amt_distribute = 1000
         amt_distribute_base = to_base_18(float(amt_distribute))
         for w in (get_publisher_wallet(), get_consumer_wallet()):
