@@ -12,7 +12,7 @@ class AquariusProvider:
 
     @staticmethod
     def get_aquarius(url):
-        """ Get an Aquarius instance."""
+        """Get an Aquarius instance."""
         return AquariusProvider._aquarius_class(url)
 
     @staticmethod

@@ -57,7 +57,7 @@ class DDO:
 
     @property
     def did(self):
-        """ Get the DID."""
+        """Get the DID."""
         return self._did
 
     @property
