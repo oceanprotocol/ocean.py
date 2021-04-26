@@ -2,10 +2,6 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-"""DID Lib to do DID's and DDO's."""
-
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
 import copy
 import json
 import logging
