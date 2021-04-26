@@ -30,7 +30,7 @@ def test_ocean_exchange(publisher_ocean_instance):
     dt = ocn.create_data_token(
         "DataToken1", "DT1", alice_wallet, blob="http://example.com"
     )
-    dt.mint_tokens(bob_wallet.address, 100.0, alice_wallet)
+    dt.mint(bob_wallet.address, Web3Helper.to_wei(Decimal("100.0")), alice_wallet)
     ox = OceanExchange(ocn.OCEAN_address, _get_exchange_address(), ocn.config)
     rate = 0.9
     x_id = ox.create(dt.address, rate, bob_wallet)

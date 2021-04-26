@@ -7,6 +7,7 @@ import logging
 import logging.config
 import os
 import time
+from decimal import Decimal
 
 import coloredlogs
 import yaml
@@ -15,6 +16,7 @@ from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
+from ocean_lib.web3_internal.web3helper import Web3Helper
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 
 
@@ -131,14 +133,18 @@ def mint_tokens_and_wait(
     data_token_contract: DataToken, receiver_address: str, minter_wallet: Wallet
 ):
     dtc = data_token_contract
-    tx_id = dtc.mint_tokens(receiver_address, 50.0, minter_wallet)
+    tx_id = dtc.mint(
+        receiver_address, Web3Helper.to_wei(Decimal("50.0")), minter_wallet
+    )
     dtc.get_tx_receipt(tx_id)
     time.sleep(2)
 
     def verify_supply(mint_amount=50):
         supply = dtc.contract_concise.totalSupply()
         if supply <= 0:
-            _tx_id = dtc.mint_tokens(receiver_address, mint_amount, minter_wallet)
+            _tx_id = dtc.mint(
+                receiver_address, Web3Helper.to_wei(Decimal(mint_amount)), minter_wallet
+            )
             dtc.get_tx_receipt(_tx_id)
             supply = dtc.contract_concise.totalSupply()
         return supply

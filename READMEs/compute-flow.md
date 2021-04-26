@@ -124,8 +124,10 @@ For legacy support, you can also use `metadataStoreUri` instead of `metadataCach
 ## 3. Alice mints 100 tokens
 
 ```python
+from decimal import Decimal
+from ocean_lib.web3_internal.web3helper import Web3Helper
 
-data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
+data_token.mint(alice_wallet.address, Web3Helper.to_wei(Decimal("100.0")), alice_wallet)
 ```
 
 ## 4. Alice creates a pool for trading her new data tokens

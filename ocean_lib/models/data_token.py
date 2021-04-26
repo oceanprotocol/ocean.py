@@ -469,13 +469,6 @@ class DataToken(ContractBase):
         )
         return balances_above_threshold
 
-    # ============================================================
-    # Token transactions using amount of tokens as a float instead of int
-    # amount of tokens will be converted to the base value before sending
-    # the transaction
-    def mint_tokens(self, to_account: str, value: float, from_wallet: Wallet):
-        return self.mint(to_account, to_base_18(value), from_wallet)
-
     ################
     # Helpers
     @staticmethod
