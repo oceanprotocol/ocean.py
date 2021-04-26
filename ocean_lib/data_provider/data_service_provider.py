@@ -457,10 +457,16 @@ class DataServiceProvider:
         """
         Return the provider address
         """
-        if not provider_uri:
-            provider_uri = ConfigProvider.get_config().provider_url
-        provider_info = DataServiceProvider._http_method("get", provider_uri).json()
-        return provider_info["providerAddress"]
+        try:
+            if not provider_uri:
+                provider_uri = ConfigProvider.get_config().provider_url
+            provider_info = DataServiceProvider._http_method("get", provider_uri).json()
+
+            return provider_info["providerAddress"]
+        except requests.exceptions.RequestException:
+            pass
+
+        return None
 
     @staticmethod
     def get_root_uri(service_endpoint):
