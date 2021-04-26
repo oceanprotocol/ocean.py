@@ -205,6 +205,7 @@ def test_provider_address_with_url():
         DataSP.get_url(p_ocean_instance.config)
     )
     assert provider_address, "Failed to get provider address."
+    assert DataSP.get_provider_address("not a url") is None
 
 
 def test_get_root_uri():
