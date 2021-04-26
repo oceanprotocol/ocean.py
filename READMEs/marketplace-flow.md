@@ -102,6 +102,7 @@ In the work console:
 #set private keys of two accounts
 export TEST_PRIVATE_KEY1=0xbbfbee4961061d506ffbb11dfea64eba16355cbf1d9c29613126ba7fec0aed5d
 export TEST_PRIVATE_KEY2=0x804365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a
+export CONFIG_FILE=config.ini
 
 #start python
 python
