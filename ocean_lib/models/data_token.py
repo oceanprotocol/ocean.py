@@ -98,7 +98,7 @@ class DataToken(ContractBase):
     def blob(self) -> str:
         return self.contract_concise.blob()
 
-    def cap(self) -> str:
+    def cap(self) -> int:
         return self.contract_concise.cap()
 
     def isMinter(self, address: str) -> bool:
@@ -115,7 +115,7 @@ class DataToken(ContractBase):
 
     # ============================================================
     # reflect required ERC20 standard functions
-    def totalSupply(self) -> str:
+    def totalSupply(self) -> int:
         return self.contract_concise.totalSupply()
 
     def balanceOf(self, account: str) -> int:
@@ -145,7 +145,7 @@ class DataToken(ContractBase):
     def symbol(self) -> str:
         return self.contract_concise.symbol()
 
-    def decimals(self) -> str:
+    def decimals(self) -> int:
         return self.contract_concise.decimals()
 
     # ============================================================
