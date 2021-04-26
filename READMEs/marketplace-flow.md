@@ -165,6 +165,10 @@ did = asset.did  # did contains the datatoken address
 #Mint the datatokens
 data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
 
+#Mint OCEAN
+from ocean_lib.ocean.mint import mint_fake_OCEAN
+mint_fake_OCEAN()
+
 #In the create() step below, Alice needs ganache OCEAN. Ensure she has it.
 from ocean_lib.models.btoken import BToken #BToken is ERC20
 OCEAN_token = BToken(ocean.OCEAN_address)

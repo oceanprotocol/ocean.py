@@ -4,12 +4,13 @@
 #
 
 """
-    Used for minting fake OCEAN
+    Used for deploying fake OCEAN
     isort:skip_file
 """
 
 import json
 import os
+import sys
 
 from ocean_lib.config_provider import ConfigProvider
 
@@ -20,24 +21,34 @@ setup_enforce_typing_shim()
 
 from ocean_lib.example_config import ExampleConfig  # noqa: E402
 from ocean_lib.models.data_token import DataToken  # noqa: E402
+from ocean_lib.ocean.util import get_web3_connection_provider  # noqa: E402
+from ocean_lib.web3_internal.contract_handler import ContractHandler  # noqa: E402
+from ocean_lib.web3_internal.utils import privateKeyToAddress  # noqa: E402
 from ocean_lib.ocean.util import to_base_18  # noqa: E402
-from tests.resources.helper_functions import (
+from ocean_lib.web3_internal.wallet import Wallet  # noqa: E402
+from ocean_lib.web3_internal.web3_provider import Web3Provider  # noqa: E402
+from tests.resources.helper_functions import (  # noqa: E402
     get_ganache_wallet,
-    get_publisher_wallet,
-    get_consumer_wallet,
-)  # noqa: E402
+    get_publisher_ocean_instance,
+)
 
 
-def mint_OCEAN():
+def mint_fake_OCEAN():
     """
-    Mints OCEAN tokens
+    Does the following:
+    1. Mints tokens
+    2. Distributes tokens to TEST_PRIVATE_KEY1 and TEST_PRIVATE_KEY2
     """
     network = "ganache"
     config = ExampleConfig.get_config()
-    wallet = get_ganache_wallet()
     ConfigProvider.set_config(config)
+    Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
+    ContractHandler.set_artifacts_path(config.artifacts_path)
 
     addresses_file = config.address_file
+
+    ocean = get_publisher_ocean_instance()
+    web3 = ocean.web3
 
     if os.path.exists(addresses_file):
         with open(addresses_file) as f:
@@ -48,14 +59,36 @@ def mint_OCEAN():
     if network not in network_addresses:
         network = "development"
 
+    # ****SET ENVT****
+    deployer_private_key = get_ganache_wallet().private_key
+
+    if invalidKey(deployer_private_key):
+        print("Need valid DEPLOYER_PRIVATE_KEY")
+        sys.exit(0)
+
+    # ****DEPLOY****
+    deployer_wallet = Wallet(web3, private_key=deployer_private_key)
+
+    # For simplicity, hijack DataTokenTemplate.
+    deployer_addr = deployer_wallet.address
+    OCEAN_token = DataToken(address=network_addresses[network]["Ocean"])
     amt_distribute = 1000
     amt_distribute_base = to_base_18(float(amt_distribute))
 
-    OCEAN_token = DataToken(address=network_addresses[network]["Ocean"])
+    OCEAN_token.mint(
+        deployer_addr, 2 * amt_distribute_base, from_wallet=deployer_wallet
+    )
 
-    for w in (get_publisher_wallet(), get_consumer_wallet()):
-        # if Web3Helper.from_wei(Web3Helper.get_ether_balance(w.address)) < 2:
-        #    Web3Helper.send_ether(wallet, w.address, 4)
+    for key_label in ["TEST_PRIVATE_KEY1", "TEST_PRIVATE_KEY2"]:
+        key = os.environ.get(key_label)
+        if not key:
+            continue
 
-        OCEAN_token.mint(wallet.address, amt_distribute_base, from_wallet=wallet)
-        OCEAN_token.transfer(w.address, amt_distribute_base, from_wallet=wallet)
+        dst_address = privateKeyToAddress(key)
+        OCEAN_token.transfer(
+            dst_address, amt_distribute_base, from_wallet=deployer_wallet
+        )
+
+
+def invalidKey(private_key_str):  # super basic check
+    return len(private_key_str) < 10
