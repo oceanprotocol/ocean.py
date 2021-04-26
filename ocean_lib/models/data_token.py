@@ -485,9 +485,6 @@ class DataToken(ContractBase):
     def mint_tokens(self, to_account: str, value: float, from_wallet: Wallet):
         return self.mint(to_account, to_base_18(value), from_wallet)
 
-    def transfer_tokens(self, to: str, value: float, from_wallet: Wallet):
-        return self.transfer(to, to_base_18(value), from_wallet)
-
     ################
     # Helpers
     @staticmethod

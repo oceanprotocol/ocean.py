@@ -43,8 +43,6 @@ def test_fixed_rate_exchange(
 
     ocean_t = alice_ocean.OCEAN_address
     ocn_token = DataToken(ocean_t)
-    # owner_wallet = get_ganache_wallet()
-    # ocn_token.transfer_tokens(bob_wallet.address, 100, owner_wallet)
     assert ocn_token.token_balance(bob_wallet.address) >= 100, (
         f"bob wallet does not have the expected OCEAN tokens balance, "
         f"got {ocn_token.token_balance(bob_wallet.address)} instead of 100"
