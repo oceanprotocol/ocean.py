@@ -146,7 +146,7 @@ class Ocean:
         name: str,
         symbol: str,
         from_wallet: Wallet,
-        cap: float = DataToken.DEFAULT_CAP,
+        cap: float = from_base_18(DataToken.DEFAULT_CAP_IN_WEI),
         blob: str = "",
     ) -> DataToken:
         dtfactory = self.get_dtfactory()

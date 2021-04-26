@@ -33,8 +33,8 @@ OrderValues = namedtuple(
 @enforce_types_shim
 class DataToken(ContractBase):
     CONTRACT_NAME = "DataTokenTemplate"
-    DEFAULT_CAP = 1000.0
-    DEFAULT_CAP_BASE = to_base_18(DEFAULT_CAP)
+
+    DEFAULT_CAP_IN_WEI = 1_000_000_000_000_000_000_000  # 1000 datatokens
 
     ORDER_STARTED_EVENT = "OrderStarted"
     ORDER_FINISHED_EVENT = "OrderFinished"

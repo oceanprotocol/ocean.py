@@ -39,7 +39,7 @@ from ocean_lib.exceptions import (
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
-from ocean_lib.ocean.util import to_base_18
+from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
@@ -207,7 +207,7 @@ class OceanAssets:
             name = dt_name or metadata["main"]["name"]
             symbol = dt_symbol or name
             # register on-chain
-            _cap = dt_cap if dt_cap else DataToken.DEFAULT_CAP
+            _cap = dt_cap if dt_cap else from_base_18(DataToken.DEFAULT_CAP_IN_WEI)
             tx_id = dtfactory.createToken(
                 blob, name, symbol, to_base_18(_cap), from_wallet=publisher_wallet
             )
