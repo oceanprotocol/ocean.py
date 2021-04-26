@@ -27,6 +27,7 @@ from ocean_lib.web3_internal.utils import privateKeyToAddress  # noqa: E402
 from ocean_lib.ocean.util import to_base_18  # noqa: E402
 from ocean_lib.web3_internal.wallet import Wallet  # noqa: E402
 from ocean_lib.web3_internal.web3_provider import Web3Provider  # noqa: E402
+from ocean_lib.web3_internal.web3helper import Web3Helper  # noqa: E402
 from tests.resources.helper_functions import (  # noqa: E402
     get_ganache_wallet,
     get_publisher_ocean_instance,
@@ -81,6 +82,7 @@ def mint_fake_OCEAN():
 
     for key_label in ["TEST_PRIVATE_KEY1", "TEST_PRIVATE_KEY2"]:
         key = os.environ.get(key_label)
+        w = Wallet(web3, private_key=key)
         if not key:
             continue
 
@@ -88,6 +90,9 @@ def mint_fake_OCEAN():
         OCEAN_token.transfer(
             dst_address, amt_distribute_base, from_wallet=deployer_wallet
         )
+
+        if Web3Helper.from_wei(Web3Helper.get_ether_balance(w.address)) < 2:
+            Web3Helper.send_ether(deployer_wallet, w.address, 4)
 
 
 def invalidKey(private_key_str):  # super basic check

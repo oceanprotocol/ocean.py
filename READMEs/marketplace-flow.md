@@ -123,6 +123,10 @@ import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
 
+#Mint OCEAN
+from ocean_lib.ocean.mint import mint_fake_OCEAN
+mint_fake_OCEAN()
+
 #Publish a datatoken
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
 token_address = data_token.address
@@ -165,10 +169,6 @@ did = asset.did  # did contains the datatoken address
 
 #Mint the datatokens
 data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
-
-#Mint OCEAN
-from ocean_lib.ocean.mint import mint_fake_OCEAN
-mint_fake_OCEAN()
 
 #In the create() step below, Alice needs ganache OCEAN. Ensure she has it.
 from ocean_lib.models.btoken import BToken #BToken is ERC20
