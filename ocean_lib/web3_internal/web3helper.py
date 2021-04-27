@@ -124,6 +124,8 @@ class Web3Helper(object):
             return Web3Provider.get_web3().toWei(
                 Decimal(value_in_ether).quantize(Web3Helper.PRECISION_18), "ether"
             )
+        else:
+            raise TypeError("Unsupported type.  Must be one of Decimal or string")
 
     @staticmethod
     def generate_multi_value_hash(types, values):
