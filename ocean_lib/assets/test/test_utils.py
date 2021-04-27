@@ -7,11 +7,15 @@ from ocean_lib.assets.utils import (
     add_publisher_trusted_algorithm,
     create_publisher_trusted_algorithms,
     remove_publisher_trusted_algorithm,
+    generate_trusted_algo_dict,
 )
+from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.ddo.ddo import DDO
 from tests.resources.ddo_helpers import (
     get_registered_algorithm_ddo,
     get_registered_ddo_with_compute_service,
     wait_for_ddo,
+    get_resource_path,
 )
 from tests.resources.helper_functions import get_publisher_wallet
 
@@ -85,13 +89,11 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
 def test_add_trusted_algorithm_no_compute_service(publisher_ocean_instance, metadata):
     """Tests if the DDO has or not a compute service."""
     publisher = get_publisher_wallet()
+    metadata_copy = metadata.copy()
 
     algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
     wait_for_ddo(publisher_ocean_instance, algorithm_ddo.did)
     assert algorithm_ddo is not None
-
-    publisher = get_publisher_wallet()
-    metadata_copy = metadata.copy()
 
     ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher)
     wait_for_ddo(publisher_ocean_instance, ddo.did)
@@ -107,3 +109,16 @@ def test_add_trusted_algorithm_no_compute_service(publisher_ocean_instance, meta
             algorithm_ddo.did,
             publisher_ocean_instance.config.metadata_cache_uri,
         )
+
+
+def test_fail_generate_trusted_algo_dict():
+    """Tests if all the parameters for generating a trusted algorithm dict are None and if teh scope of this function
+    throws an AssertionError."""
+    try:
+        _ = generate_trusted_algo_dict(None, None, None)
+    except AssertionError as err:
+        proposed_err = AssertionError(
+            "Either ddo, either did and metadata_cache_uri are None."
+        )
+        assert isinstance(err, type(proposed_err))
+        assert err.args == proposed_err.args
