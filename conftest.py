@@ -46,44 +46,40 @@ def setup_all(request):
     Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
     ContractHandler.set_artifacts_path(config.artifacts_path)
 
-    network = Web3Helper.get_network_name()
     wallet = get_ganache_wallet()
+
+    if not wallet:
+        return
+
     addresses_file = config.address_file
+    if not os.path.exists(addresses_file):
+        return
 
-    if os.path.exists(addresses_file):
-        with open(addresses_file) as f:
-            network_addresses = json.load(f)
-    else:
-        network_addresses = {network: {}}
+    with open(addresses_file) as f:
+        network_addresses = json.load(f)
 
-    if network not in network_addresses:
-        network = "development"
+    print(
+        f"sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keysStr()}"
+    )
+    print(
+        f"sender balance: {Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address))}"
+    )
+    assert Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address)) > 10
 
-    if network in ["ganache", "development"] and wallet:
+    from ocean_lib.models.data_token import DataToken
 
-        print(
-            f"sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keysStr()}"
-        )
-        print(
-            f"sender balance: {Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address))}"
-        )
-        assert Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address)) > 10
+    OCEAN_token = DataToken(address=network_addresses["development"]["Ocean"])
 
-        from ocean_lib.models.data_token import DataToken
+    amt_distribute = 1000
+    amt_distribute_base = to_base_18(float(amt_distribute))
 
-        OCEAN_token = DataToken(address=network_addresses[network]["Ocean"])
+    for w in (get_publisher_wallet(), get_consumer_wallet()):
+        if Web3Helper.from_wei(Web3Helper.get_ether_balance(w.address)) < 2:
+            Web3Helper.send_ether(wallet, w.address, 4)
 
-        amt_distribute = 1000
-        amt_distribute_base = to_base_18(float(amt_distribute))
-        for w in (get_publisher_wallet(), get_consumer_wallet()):
-            if Web3Helper.from_wei(Web3Helper.get_ether_balance(w.address)) < 2:
-                Web3Helper.send_ether(wallet, w.address, 4)
-
-            if OCEAN_token.token_balance(w.address) < 100:
-                OCEAN_token.mint(
-                    wallet.address, amt_distribute_base, from_wallet=wallet
-                )
-                OCEAN_token.transfer(w.address, amt_distribute_base, from_wallet=wallet)
+        if OCEAN_token.token_balance(w.address) < 100:
+            OCEAN_token.mint(wallet.address, amt_distribute_base, from_wallet=wallet)
+            OCEAN_token.transfer(w.address, amt_distribute_base, from_wallet=wallet)
 
 
 @pytest.fixture
