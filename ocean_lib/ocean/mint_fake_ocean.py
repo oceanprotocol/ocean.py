@@ -39,18 +39,15 @@ def mint_fake_OCEAN():
         network_addresses = json.load(f)
 
     network = "development"
-
-    # ****SET ENVT****
     deployer_wallet = get_ganache_wallet()
-    deployer_addr = deployer_wallet.address
 
-    # For simplicity, hijack DataTokenTemplate.
     OCEAN_token = DataToken(address=network_addresses[network]["Ocean"])
+
     amt_distribute = 1000
     amt_distribute_base = to_base_18(float(amt_distribute))
 
     OCEAN_token.mint(
-        deployer_addr, 2 * amt_distribute_base, from_wallet=deployer_wallet
+        deployer_wallet.address, 2 * amt_distribute_base, from_wallet=deployer_wallet
     )
 
     for key_label in ["TEST_PRIVATE_KEY1", "TEST_PRIVATE_KEY2"]:
