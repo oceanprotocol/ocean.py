@@ -18,7 +18,6 @@ from ocean_lib.common.did import (
     did_to_id,
     did_to_id_bytes,
     id_to_did,
-    is_did_valid,
 )
 from web3 import Web3
 
@@ -43,18 +42,6 @@ def test_did_parse():
     # test invalid in bytes
     with pytest.raises(TypeError):
         assert did_parse(valid_did.encode())
-
-    # test is_did_valid
-    assert is_did_valid(valid_did)
-    with pytest.raises(ValueError):
-        is_did_valid("op:{}".format(test_id))
-
-    with pytest.raises(TypeError):
-        is_did_valid(None)
-
-    # test invalid in bytes
-    with pytest.raises(TypeError):
-        assert is_did_valid(valid_did.encode())
 
 
 def test_id_to_did():
