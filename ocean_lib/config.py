@@ -19,7 +19,6 @@ DEFAULT_ARTIFACTS_PATH = ""
 DEFAULT_ADDRESS_FILE = ""
 DEFAULT_METADATA_CACHE_URI = "http://localhost:5000"
 DEFAULT_PROVIDER_URL = ""
-DEFAULT_STORAGE_PATH = "ocean_lib.db"
 DEFAULT_TYPECHECK = "true"
 
 NAME_NETWORK_URL = "network"
@@ -29,9 +28,6 @@ NAME_GAS_LIMIT = "gas_limit"
 NAME_METADATA_CACHE_URI = "metadata_cache_uri"
 NAME_AQUARIUS_URL = "aquarius.url"
 NAME_PROVIDER_URL = "provider.url"
-NAME_STORAGE_PATH = "storage.path"
-NAME_AUTH_TOKEN_MESSAGE = "auth_token_message"
-NAME_AUTH_TOKEN_EXPIRATION = "auth_token_expiration"
 
 NAME_DATA_TOKEN_FACTORY_ADDRESS = "dtfactory.address"
 NAME_BFACTORY_ADDRESS = "bfactory.address"
@@ -79,21 +75,6 @@ environ_names_and_sections = {
         "URL of data services provider",
         SECTION_RESOURCES,
     ],
-    NAME_STORAGE_PATH: [
-        "STORAGE_PATH",
-        "Path to the local database file",
-        SECTION_RESOURCES,
-    ],
-    NAME_AUTH_TOKEN_MESSAGE: [
-        "AUTH_TOKEN_MESSAGE",
-        "Message to use for generating user auth token",
-        SECTION_RESOURCES,
-    ],
-    NAME_AUTH_TOKEN_EXPIRATION: [
-        "AUTH_TOKEN_EXPIRATION",
-        "Auth token expiration time expressed in seconds",
-        SECTION_RESOURCES,
-    ],
     NAME_PROVIDER_ADDRESS: [
         "PROVIDER_ADDRESS",
         "Provider ethereum address",
@@ -116,9 +97,6 @@ config_defaults = {
     "resources": {
         NAME_METADATA_CACHE_URI: DEFAULT_METADATA_CACHE_URI,
         NAME_PROVIDER_URL: DEFAULT_PROVIDER_URL,
-        NAME_STORAGE_PATH: DEFAULT_STORAGE_PATH,
-        NAME_AUTH_TOKEN_MESSAGE: "",
-        NAME_AUTH_TOKEN_EXPIRATION: "",
         NAME_PROVIDER_ADDRESS: "",
     },
     "util": {NAME_TYPECHECK: DEFAULT_TYPECHECK},
@@ -142,8 +120,6 @@ class Config(configparser.ConfigParser):
         [resources]
         metadata_cache_uri = http://localhost:5000
         provider.url = http://localhost:8030
-        ; Path of back-up storage
-        storage.path = ocean_lib.db
 
         [util]
         typecheck = true
@@ -281,11 +257,6 @@ class Config(configparser.ConfigParser):
         return file_path
 
     @property
-    def storage_path(self):
-        """Path to local storage (database file)."""
-        return self.get(SECTION_RESOURCES, NAME_STORAGE_PATH)
-
-    @property
     def network_url(self):
         """URL of the ethereum network. (e.g.): http://mynetwork:8545."""
         return self.get(SECTION_ETH_NETWORK, NAME_NETWORK_URL)
@@ -316,14 +287,6 @@ class Config(configparser.ConfigParser):
     def downloads_path(self):
         """Path for the downloads of assets."""
         return self.get(SECTION_RESOURCES, "downloads.path")
-
-    @property
-    def auth_token_message(self):
-        return self.get(SECTION_RESOURCES, NAME_AUTH_TOKEN_MESSAGE)
-
-    @property
-    def auth_token_expiration(self):
-        return self.get(SECTION_RESOURCES, NAME_AUTH_TOKEN_EXPIRATION)
 
     @property
     def typecheck(self):

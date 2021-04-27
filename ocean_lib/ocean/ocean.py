@@ -19,7 +19,6 @@ from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.models.order import Order
 from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.ocean.ocean_assets import OceanAssets
-from ocean_lib.ocean.ocean_auth import OceanAuth
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.ocean_pool import OceanPool
@@ -113,8 +112,7 @@ class Ocean:
             self._config, data_provider, addresses.get(MetadataContract.CONTRACT_NAME)
         )
         self.services = OceanServices()
-        self.auth = OceanAuth(self._config.storage_path)
-        self.compute = OceanCompute(self.auth, self._config, data_provider)
+        self.compute = OceanCompute(self._config, data_provider)
 
         ocean_address = get_ocean_token_address(network)
         self.pool = OceanPool(ocean_address, get_bfactory_address(network))
