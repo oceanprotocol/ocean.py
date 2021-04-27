@@ -4,6 +4,7 @@
 #
 """Web3Helper module to provide convenient functions."""
 from decimal import Decimal
+from typing import Union
 
 from enforce_typing_shim import enforce_types_shim
 from eth_utils import big_endian_to_int
@@ -114,10 +115,15 @@ class Web3Helper(object):
         return Web3Provider.get_web3().fromWei(value_in_wei, "ether")
 
     @staticmethod
-    def to_wei(value_in_ether: Decimal) -> int:
-        return Web3Provider.get_web3().toWei(
-            value_in_ether.quantize(Web3Helper.PRECISION_18), "ether"
-        )
+    def to_wei(value_in_ether: Union[Decimal, str]) -> int:
+        if isinstance(value_in_ether, Decimal):
+            return Web3Provider.get_web3().toWei(
+                value_in_ether.quantize(Web3Helper.PRECISION_18), "ether"
+            )
+        elif isinstance(value_in_ether, str):
+            return Web3Provider.get_web3().toWei(
+                Decimal(value_in_ether).quantize(Web3Helper.PRECISION_18), "ether"
+            )
 
     @staticmethod
     def generate_multi_value_hash(types, values):
