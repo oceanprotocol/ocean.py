@@ -62,9 +62,7 @@ def is_did_valid(did):
     :return bool
     """
     result = did_parse(did)
-    if result:
-        return result["id"] is not None
-    return False
+    return result and (result["id"] is not None)
 
 
 def id_to_did(did_id, method="op"):
@@ -87,9 +85,7 @@ def id_to_did(did_id, method="op"):
 def did_to_id(did):
     """Return an id extracted from a DID string."""
     result = did_parse(did)
-    if result and result["id"] is not None:
-        return result["id"]
-    return None
+    return result["id"] if result and (result["id"] is not None) else None
 
 
 def did_to_id_bytes(did):
