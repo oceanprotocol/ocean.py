@@ -15,7 +15,6 @@ import logging
 
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.http_requests.requests_session import get_requests_session
-from ocean_lib.exceptions import AquariusError
 
 logger = logging.getLogger("aquarius")
 
@@ -67,22 +66,9 @@ class Aquarius:
         :return: List of DID string
         """
         response = self.requests_session.get(self._base_url).content
-        if not response:
-            return {}
+        asset_list = _parse_response(response, [])
 
-        try:
-            asset_list = json.loads(response)
-        except TypeError:
-            asset_list = None
-        except ValueError:
-            raise ValueError(response.decode("UTF-8"))
-
-        if not asset_list:
-            return []
-
-        if "ids" in asset_list:
-            return asset_list["ids"]
-        return []
+        return asset_list
 
     def get_asset_ddo(self, did):
         """
@@ -92,16 +78,11 @@ class Aquarius:
         :return: DDO instance
         """
         response = self.requests_session.get(f"{self.url}/{did}").content
-        if not response:
+        parsed_response = _parse_response(response, None)
+
+        if not parsed_response:
             return {}
-        try:
-            parsed_response = json.loads(response)
-        except TypeError:
-            parsed_response = None
-        except ValueError:
-            raise ValueError(response.decode("UTF-8"))
-        if parsed_response is None:
-            return {}
+
         return DDO(dictionary=parsed_response)
 
     def get_asset_metadata(self, did):
@@ -112,17 +93,9 @@ class Aquarius:
         :return: metadata key of the DDO instance
         """
         response = self.requests_session.get(f"{self._base_url}/metadata/{did}").content
-        if not response:
-            return {}
-        try:
-            parsed_response = json.loads(response)
-        except TypeError:
-            parsed_response = None
-        except ValueError:
-            raise ValueError(response.decode("UTF-8"))
-        if parsed_response is None:
-            return {}
-        return parsed_response["attributes"]
+        parsed_response = _parse_response(response, [])
+
+        return parsed_response
 
     def list_assets_ddo(self):
         """
@@ -165,22 +138,6 @@ class Aquarius:
                 f"Unhandled ERROR: status-code {response.status_code}, "
                 f"error message {response.text}"
             )
-
-    def update_asset_ddo(self, did, ddo):
-        """
-        Update the ddo of a did already registered.
-
-        :param did: Asset DID string
-        :param ddo: DDO instance
-        :return: API response (depends on implementation)
-        """
-        response = self.requests_session.put(
-            f"{self.url}/{did}", data=ddo.as_text(), headers=self._headers
-        )
-        if response.status_code == 200 or response.status_code == 201:
-            return json.loads(response.content)
-        else:
-            raise Exception(f"Unable to update DDO: {response.content}")
 
     def text_search(self, text, sort=None, offset=100, page=1):
         """
@@ -244,34 +201,6 @@ class Aquarius:
         else:
             raise Exception(f"Unable to search for DDO: {response.content}")
 
-    def retire_asset_ddo(self, did):
-        """
-        Retire asset ddo of Aquarius.
-
-        :param did: Asset DID string
-        :return: API response (depends on implementation)
-        """
-        response = self.requests_session.delete(
-            f"{self.url}/{did}", headers=self._headers
-        )
-        if response.status_code == 200:
-            logging.debug(f"Removed asset DID: {did} from metadata store")
-            return response
-
-        raise AquariusError(f"Unable to remove DID: {response}")
-
-    def retire_all_assets(self):
-        """
-        Retire all the ddo assets.
-        :return: str
-        """
-        response = self.requests_session.delete(f"{self.url}", headers=self._headers)
-        if response.status_code == 200:
-            logging.debug("Removed all the assets successfully")
-            return response
-
-        raise AquariusError(f"Unable to remove all the DID: {response}")
-
     def validate_metadata(self, metadata):
         """
         Validate that the metadata of your ddo is valid.
@@ -290,20 +219,25 @@ class Aquarius:
 
     @staticmethod
     def _parse_search_response(response):
-        if not response:
-            return {}
-        try:
-            parsed_response = json.loads(response)
-        except TypeError:
-            parsed_response = None
+        parsed_response = _parse_response(response, None)
 
-        if parsed_response is None:
-            return []
-        elif isinstance(parsed_response, dict):
+        if isinstance(parsed_response, dict) or isinstance(parsed_response, list):
             return parsed_response
-        elif isinstance(parsed_response, list):
-            return parsed_response
-        else:
-            raise ValueError(
-                f"Unknown search response, expecting a list got {type(parsed_response)}."
-            )
+
+        raise ValueError(
+            f"Unknown search response, expecting a list got {type(parsed_response)}."
+        )
+
+
+def _parse_response(response, default_return):
+    if not response:
+        return default_return
+
+    try:
+        return json.loads(response)
+    except TypeError:
+        return default_return
+    except ValueError:
+        raise ValueError(response.decode("UTF-8"))
+
+    return default_return
