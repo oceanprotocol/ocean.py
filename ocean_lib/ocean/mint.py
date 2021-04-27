@@ -2,33 +2,20 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-
-"""
-    Used for deploying fake OCEAN
-    isort:skip_file
-"""
-
 import json
 import os
 import sys
 
 from ocean_lib.config_provider import ConfigProvider
-
-# Setup ocean_lib.enforce_typing_shim before importing anything that uses it
-from ocean_lib.enforce_typing_shim import setup_enforce_typing_shim
-
-setup_enforce_typing_shim()
-
-from ocean_lib.example_config import ExampleConfig  # noqa: E402
-from ocean_lib.models.data_token import DataToken  # noqa: E402
-from ocean_lib.ocean.util import get_web3_connection_provider  # noqa: E402
-from ocean_lib.web3_internal.contract_handler import ContractHandler  # noqa: E402
-from ocean_lib.web3_internal.utils import privateKeyToAddress  # noqa: E402
-from ocean_lib.ocean.util import to_base_18  # noqa: E402
-from ocean_lib.web3_internal.wallet import Wallet  # noqa: E402
-from ocean_lib.web3_internal.web3_provider import Web3Provider  # noqa: E402
-from ocean_lib.web3_internal.web3helper import Web3Helper  # noqa: E402
-from tests.resources.helper_functions import (  # noqa: E402
+from ocean_lib.example_config import ExampleConfig
+from ocean_lib.models.data_token import DataToken
+from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18
+from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.utils import privateKeyToAddress
+from ocean_lib.web3_internal.wallet import Wallet
+from ocean_lib.web3_internal.web3_provider import Web3Provider
+from ocean_lib.web3_internal.web3helper import Web3Helper
+from tests.resources.helper_functions import (
     get_ganache_wallet,
     get_publisher_ocean_instance,
 )
