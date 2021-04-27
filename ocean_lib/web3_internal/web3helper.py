@@ -3,8 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 """Web3Helper module to provide convenient functions."""
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
 from decimal import Decimal
 
 from enforce_typing_shim import enforce_types_shim
