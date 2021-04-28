@@ -460,7 +460,9 @@ class OceanAssets:
         if not order_requirements:
             raise AssertionError("Data service provider or service is not available.")
 
-        assert dt_address == order_requirements.data_token_address
+        assert dt_address == order_requirements.data_token_address, (
+            "Asset's datatoken address does not match the " "requirements. "
+        )
         return order_requirements
 
     @staticmethod

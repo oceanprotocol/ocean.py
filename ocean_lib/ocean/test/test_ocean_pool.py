@@ -21,11 +21,13 @@ def test_add_remove_zero_liquidity(publisher_ocean_instance):
         publisher_ocean_instance.pool._add_liquidity(
             "addr", "an_addr", 0, get_publisher_wallet()
         )
-        == ""
+        == "",
+        "Adding liquidity had effect with 0 balance.",
     )
     assert (
         publisher_ocean_instance.pool._remove_liquidity(
             "addr", "an_addr", 0, 1, get_publisher_wallet()
         )
-        == ""
+        == "",
+        "Removing liquidity had effect with 0 balance.",
     )

@@ -25,7 +25,7 @@ def test_metadata_cache_uri_set_via_config_options(caplog):
         }
     }
     with pytest.raises(ValueError):
-        config = Config(options_dict=config_dict)
+        _ = Config(options_dict=config_dict)
 
     config_dict = {"resources": {"aquarius.url": "https://another-aqua.url"}}
     config = Config(options_dict=config_dict)
@@ -53,7 +53,7 @@ def test_metadata_cache_uri_set_via_env_vars(monkeypatch, caplog):
 
     monkeypatch.setenv(ENV_AQUARIUS_URL, "https://another-aqua.url")
     with pytest.raises(ValueError):
-        config = Config()
+        _ = Config()
 
     monkeypatch.delenv(ENV_METADATA_CACHE_URI)
     config = Config()
