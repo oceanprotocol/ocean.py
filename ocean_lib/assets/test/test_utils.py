@@ -26,21 +26,21 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
 
     algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
     wait_for_ddo(publisher_ocean_instance, algorithm_ddo.did)
-    assert algorithm_ddo is not None
+    assert algorithm_ddo is not None, "Algorithm DDO is not found in cache."
 
     algorithm_ddo_v2 = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
     wait_for_ddo(publisher_ocean_instance, algorithm_ddo_v2.did)
-    assert algorithm_ddo_v2 is not None
+    assert algorithm_ddo_v2 is not None, "Algorithm DDO is not found in cache."
 
     algorithm_ddo_v3 = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
     wait_for_ddo(publisher_ocean_instance, algorithm_ddo_v3.did)
-    assert algorithm_ddo_v3 is not None
+    assert algorithm_ddo_v3 is not None, "Algorithm DDO is not found in cache."
 
     ddo = get_registered_ddo_with_compute_service(
         publisher_ocean_instance, publisher, trusted_algorithms=[algorithm_ddo.did]
     )
     wait_for_ddo(publisher_ocean_instance, ddo.did)
-    assert ddo is not None
+    assert ddo is not None, "DDO is not found in cache."
 
     publisher_trusted_algorithms = create_publisher_trusted_algorithms(
         [algorithm_ddo.did], publisher_ocean_instance.config.metadata_cache_uri
@@ -53,8 +53,16 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
         publisher_ocean_instance.config.metadata_cache_uri,
     )
 
-    assert new_publisher_trusted_algorithms is not None
-    assert len(new_publisher_trusted_algorithms) > len(publisher_trusted_algorithms)
+    assert (
+        new_publisher_trusted_algorithms is not None
+    ), "Added a new trusted algorithm failed. The list is empty."
+    assert len(new_publisher_trusted_algorithms) > len(publisher_trusted_algorithms), (
+        "Added a new trusted algorithm "
+        "failed. The length of the new "
+        "trusted algorithms list should "
+        "be bigger than the previous "
+        "one. "
+    )
 
     # add an existing algorithm to publisher_trusted_algorithms list
     new_publisher_trusted_algorithms = add_publisher_trusted_algorithm(
@@ -62,7 +70,9 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
     )
     assert new_publisher_trusted_algorithms is not None
     for _, trusted_algorithm in enumerate(publisher_trusted_algorithms):
-        assert trusted_algorithm["did"] == algorithm_ddo.did
+        assert (
+            trusted_algorithm["did"] == algorithm_ddo.did
+        ), "Added a different algorithm besides the existing ones."
     assert len(new_publisher_trusted_algorithms) == len(publisher_trusted_algorithms)
 
     # remove an existing algorithm to publisher_trusted_algorithms list
@@ -70,8 +80,15 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
         ddo.did, algorithm_ddo.did, publisher_ocean_instance.config.metadata_cache_uri
     )
 
-    assert new_publisher_trusted_algorithms is not None
-    assert len(new_publisher_trusted_algorithms) < len(publisher_trusted_algorithms)
+    assert (
+        new_publisher_trusted_algorithms is not None
+    ), "Remove process of a trusted algorithm failed."
+    assert len(new_publisher_trusted_algorithms) < len(publisher_trusted_algorithms), (
+        "Remove process of a trusted "
+        "algorithm failed. Too many "
+        "trusted algorithms than it was "
+        "supposed. "
+    )
 
     # remove a trusted algorithm that does not belong to publisher_trusted_algorithms list
     new_publisher_trusted_algorithms = remove_publisher_trusted_algorithm(
@@ -82,7 +99,9 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
 
     assert new_publisher_trusted_algorithms is not None
     for trusted_algorithm in publisher_trusted_algorithms:
-        assert trusted_algorithm["did"] != algorithm_ddo_v3.did
+        assert (
+            trusted_algorithm["did"] != algorithm_ddo_v3.did
+        ), "The trusted algorithm belongs to the list."
     assert len(new_publisher_trusted_algorithms) == len(publisher_trusted_algorithms)
 
 
@@ -93,11 +112,11 @@ def test_add_trusted_algorithm_no_compute_service(publisher_ocean_instance, meta
 
     algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
     wait_for_ddo(publisher_ocean_instance, algorithm_ddo.did)
-    assert algorithm_ddo is not None
+    assert algorithm_ddo is not None, "Algorithm DDO is not found in cache."
 
     ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher)
     wait_for_ddo(publisher_ocean_instance, ddo.did)
-    assert ddo is not None
+    assert ddo is not None, "DDO is not found in cache."
 
     create_publisher_trusted_algorithms(
         [algorithm_ddo.did], publisher_ocean_instance.config.metadata_cache_uri

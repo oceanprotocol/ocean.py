@@ -63,18 +63,25 @@ def test_register_asset(publisher_ocean_instance):
     assert ddo, "ddo is not found in cache."
     ddo_dict = ddo.as_dictionary()
     original = original_ddo.as_dictionary()
-    assert ddo_dict["publicKey"] == original["publicKey"]
-    assert ddo_dict["authentication"] == original["authentication"]
-    assert ddo_dict["service"]
-    assert original["service"]
+    assert ddo_dict["publicKey"] == original["publicKey"], (
+        "The new asset does not have the same public key as the " "original asset. "
+    )
+    assert ddo_dict["authentication"] == original["authentication"], (
+        "The new asset does not have the same "
+        "authentication key as the original asset. "
+    )
+    assert ddo_dict["service"], "The new asset does not have the service field."
+    assert original["service"], "The original asset does not have the service field."
     metadata = ddo_dict["service"][0]["attributes"]
     if "datePublished" in metadata["main"]:
         metadata["main"].pop("datePublished")
     assert (
         ddo_dict["service"][0]["attributes"]["main"]["name"]
         == original["service"][0]["attributes"]["main"]["name"]
+    ), ("The new asset does not have the same name as the " "original asset. ")
+    assert ddo_dict["service"][1] == original["service"][1], (
+        "The two assets have different information regarding " "access service. "
     )
-    assert ddo_dict["service"][1] == original["service"][1]
 
     # Can't resolve unregistered asset
     unregistered_did = DID.did({"0": "0x00112233445566"})
@@ -95,7 +102,9 @@ def test_register_asset(publisher_ocean_instance):
     _ = ddo.metadata["main"]["name"]
     _name = "updated name"
     ddo.metadata["main"]["name"] = _name
-    assert ddo.metadata["main"]["name"] == _name
+    assert (
+        ddo.metadata["main"]["name"] == _name
+    ), "updated asset does not have the new updated name !!!"
     with pytest.raises(ValueError):
         ocn.assets.update(ddo, bob)
 
@@ -112,7 +121,9 @@ def test_register_asset(publisher_ocean_instance):
         ocn.assets.owner(ddo.did) == alice.address
     ), "asset owner does not seem correct."
 
-    assert _get_num_assets(alice.address) == num_assets_owned + 1
+    assert (
+        _get_num_assets(alice.address) == num_assets_owned + 1
+    ), "The new asset was not published in Alice wallet."
 
 
 def test_ocean_assets_search(publisher_ocean_instance, metadata):
@@ -120,13 +131,18 @@ def test_ocean_assets_search(publisher_ocean_instance, metadata):
     identifier = str(uuid.uuid1()).replace("-", "")
     metadata_copy = metadata.copy()
     metadata_copy["main"]["name"] = identifier
-    assert len(publisher_ocean_instance.assets.search(identifier)) == 0
+    assert len(publisher_ocean_instance.assets.search(identifier)) == 0, (
+        "Searched failed. Initially, it was needed "
+        "to have 0 occurrences of the identifier. "
+    )
 
     publisher = get_publisher_wallet()
     ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher)
     wait_for_ddo(publisher_ocean_instance, ddo.did)
     time.sleep(1)  # apparently changes are not instantaneous
-    assert len(publisher_ocean_instance.assets.search(identifier)) == 1
+    assert len(publisher_ocean_instance.assets.search(identifier)) == 1, (
+        "Searched for the occurrences of the " "identifier failed. "
+    )
     assert (
         len(
             publisher_ocean_instance.assets.query(
@@ -138,7 +154,8 @@ def test_ocean_assets_search(publisher_ocean_instance, metadata):
                 }
             )
         )
-        == 1
+        == 1,
+        "Query failed.The identifier was not found in the name.",
     )
     assert (
         len(
@@ -168,7 +185,7 @@ def test_ocean_assets_algorithm(publisher_ocean_instance):
     metadata = get_sample_algorithm_ddo()["service"][0]
     metadata["attributes"]["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     ddo = publisher_ocean_instance.assets.create(metadata["attributes"], publisher)
-    assert ddo
+    assert ddo, "DDO None. The ddo is not cached after the creation."
     _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did)
     assert _ddo, f"assets.resolve failed for did {ddo.did}"
 
@@ -192,7 +209,7 @@ def test_ocean_assets_compute(publisher_ocean_instance):
     metadata = get_computing_metadata()
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     ddo = publisher_ocean_instance.assets.create(metadata, publisher)
-    assert ddo
+    assert ddo, "DDO None. The ddo is not cached after the creation."
     _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did)
     assert _ddo, f"assets.resolve failed for did {ddo.did}"
 
@@ -239,7 +256,7 @@ def test_create_asset_with_address(publisher_ocean_instance):
 
     assert ocn.assets.create(
         asset.metadata, alice, [auth_service], data_token_address=token.address
-    )
+    ), "Asset creation failed with the specified datatoken address."
 
 
 def test_create_asset_with_owner_address(publisher_ocean_instance):
@@ -259,7 +276,7 @@ def test_create_asset_with_owner_address(publisher_ocean_instance):
 
     assert ocn.assets.create(
         asset.metadata, alice, [auth_service], owner_address=alice.address
-    )
+    ), "Asset creation failed with the specified owner address."
 
     asset_1 = ocn.assets.create(
         asset.metadata,
@@ -268,15 +285,17 @@ def test_create_asset_with_owner_address(publisher_ocean_instance):
         owner_address=alice.address,
         data_token_address=token.address,
     )
-    assert asset_1
+    assert asset_1, "Asset creation failed. The asset is None."
     asset_2 = ocn.assets.create(
         asset.metadata,
         alice,
         [auth_service],
         data_token_address=token.address,
     )
-    assert asset_2
-    assert asset_1.proof["creator"] == asset_2.proof["creator"]
+    assert asset_2, "Asset creation failed. The asset is None."
+    assert asset_1.proof["creator"] == asset_2.proof["creator"], (
+        "Different owners. The two assets do not have the " "same creator address. "
+    )
 
 
 def test_create_asset_without_dt_address(publisher_ocean_instance):
@@ -292,7 +311,7 @@ def test_create_asset_without_dt_address(publisher_ocean_instance):
 
     assert ocn.assets.create(
         asset.metadata, alice, [auth_service], data_token_address=None
-    )
+    ), "Asset creation failed with the specified datatoken address."
 
 
 def test_pay_for_service_insufficient_balance(publisher_ocean_instance):

@@ -601,9 +601,13 @@ class DataServiceProvider:
         _input_datasets = []
         if input_datasets:
             for _input in input_datasets:
-                assert _input.did
-                assert _input.transfer_tx_id
-                assert _input.service_id
+                assert _input.did, "The received dataset does not have a did."
+                assert (
+                    _input.transfer_tx_id
+                ), "The received dataset does not have a transaction id."
+                assert (
+                    _input.service_id
+                ), "The received dataset does not have a specified service id."
                 if _input.did != did:
                     _input_datasets.append(_input.as_dictionary())
 
