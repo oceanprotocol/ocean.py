@@ -29,6 +29,9 @@ def test_ddo_in_aqua(publisher_ocean_instance, metadata, aquarius_instance):
     res = aquarius_instance.get_asset_ddo(ddo.did)
     assert res.did == ddo.did
 
+    res = aquarius_instance.text_search(ddo.did)
+    assert len(res)
+
 
 def test_multiple_ddos_in_aqua(aquarius_instance):
     assert aquarius_instance.list_assets()
