@@ -4,12 +4,16 @@
 #
 import logging
 from collections import namedtuple
+from decimal import Decimal
 
-import eth_account
-import eth_keys
-import eth_utils
+from eth_account import Account
+from eth_keys import keys
+from eth_utils import big_endian_to_int, decode_hex
 from ocean_lib.enforce_typing_shim import enforce_types_shim
-from web3 import Web3
+from ocean_lib.web3_internal.constants import DEFAULT_NETWORK_NAME, NETWORK_NAME_MAP
+from ocean_lib.web3_internal.wallet import Wallet
+from ocean_lib.web3_internal.web3_overrides.signature import SignatureFix
+from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 Signature = namedtuple("Signature", ("v", "r", "s"))
 
@@ -27,7 +31,7 @@ def generate_multi_value_hash(types, values):
     :return: bytes
     """
     assert len(types) == len(values)
-    return Web3.soliditySha3(types, values)
+    return Web3Provider.get_web3().soliditySha3(types, values)
 
 
 def prepare_prefixed_hash(msg_hash):
@@ -49,7 +53,7 @@ def add_ethereum_prefix_and_hash_msg(text):
     :return: hash of prefixed text according to the recommended ethereum prefix
     """
     prefixed_msg = f"\x19Ethereum Signed Message:\n{len(text)}{text}"
-    return Web3.sha3(text=prefixed_msg)
+    return Web3Provider.get_web3().sha3(text=prefixed_msg)
 
 
 def to_32byte_hex(web3, val):
@@ -83,11 +87,134 @@ def split_signature(web3, signature):
 
 @enforce_types_shim
 def privateKeyToAddress(private_key: str) -> str:
-    return eth_account.Account().privateKeyToAccount(private_key).address
+    return Account().privateKeyToAccount(private_key).address
 
 
 @enforce_types_shim
-def privateKeyToPublicKey(private_key: str):
-    private_key_bytes = eth_utils.decode_hex(private_key)
-    private_key_object = eth_keys.keys.PrivateKey(private_key_bytes)
+def privateKeyToPublicKey(private_key: str) -> str:
+    private_key_bytes = decode_hex(private_key)
+    private_key_object = keys.PrivateKey(private_key_bytes)
     return private_key_object.public_key
+
+
+@enforce_types_shim
+def get_network_name(network_id: int = None) -> str:
+    """
+    Return the network name based on the current ethereum network id.
+
+    Return `ganache` for every network id that is not mapped.
+
+    :param network_id: Network id, int
+    :return: Network name, str
+    """
+    if not network_id:
+        network_id = get_network_id()
+    return NETWORK_NAME_MAP.get(network_id, DEFAULT_NETWORK_NAME).lower()
+
+
+@enforce_types_shim
+def get_network_id() -> int:
+    """
+    Return the ethereum network id calling the `web3.version.network` method.
+
+    :return: Network id, int
+    """
+    return int(Web3Provider.get_web3().version.network)
+
+
+@enforce_types_shim
+def sign_hash(msg_hash: str, wallet: Wallet) -> str:
+    """
+    This method use `personal_sign`for signing a message. This will always prepend the
+    `\x19Ethereum Signed Message:\n32` prefix before signing.
+
+    :param msg_hash:
+    :param wallet: Wallet instance
+    :return: signature
+    """
+    s = wallet.sign(msg_hash)
+    return s.signature.hex()
+
+
+@enforce_types_shim
+def ec_recover(message: str, signed_message: str):
+    """
+    This method does not prepend the message with the prefix `\x19Ethereum Signed Message:\n32`.
+    The caller should add the prefix to the msg/hash before calling this if the signature was
+    produced for an ethereum-prefixed message.
+
+    :param message:
+    :param signed_message:
+    :return:
+    """
+    w3 = Web3Provider.get_web3()
+    v, r, s = split_signature(w3, w3.toBytes(hexstr=signed_message))
+    signature_object = SignatureFix(vrs=(v, big_endian_to_int(r), big_endian_to_int(s)))
+    return w3.eth.account.recoverHash(
+        message, signature=signature_object.to_hex_v_hacked()
+    )
+
+
+@enforce_types_shim
+def personal_ec_recover(message: str, signed_message: str):
+    prefixed_hash = add_ethereum_prefix_and_hash_msg(message)
+    return ec_recover(prefixed_hash, signed_message)
+
+
+@enforce_types_shim
+def get_ether_balance(address: str) -> int:
+    """
+    Get balance of an ethereum address.
+
+    :param address: address, bytes32
+    :return: balance, int
+    """
+    return Web3Provider.get_web3().eth.getBalance(address, block_identifier="latest")
+
+
+def from_wei(wei_value: int) -> Decimal:
+    return Web3Provider.get_web3().fromWei(wei_value, "ether")
+
+
+def send_ether(from_wallet: Wallet, to_address: str, ether_amount: int):
+    w3 = Web3Provider.get_web3()
+    if not w3.isChecksumAddress(to_address):
+        to_address = w3.toChecksumAddress(to_address)
+
+    tx = {
+        "from": from_wallet.address,
+        "to": to_address,
+        "value": w3.toWei(ether_amount, "ether"),
+    }
+    _ = w3.eth.estimateGas(tx)
+    tx = {
+        "from": from_wallet.address,
+        "to": to_address,
+        "value": w3.toWei(ether_amount, "ether"),
+        "gas": 500000,
+    }
+    wallet = Wallet(w3, private_key=from_wallet.key, address=from_wallet.address)
+    raw_tx = wallet.sign_tx(tx)
+    tx_hash = w3.eth.sendRawTransaction(raw_tx)
+    receipt = w3.eth.waitForTransactionReceipt(tx_hash, timeout=30)
+    return receipt
+
+
+def cancel_or_replace_transaction(
+    from_wallet, nonce_value, gas_price=None, gas_limit=None
+):
+    w3 = Web3Provider.get_web3()
+    tx = {"from": from_wallet.address, "to": from_wallet.address, "value": 0}
+    gas = gas_limit if gas_limit is not None else w3.eth.estimateGas(tx)
+    tx = {
+        "from": from_wallet.address,
+        "to": from_wallet.address,
+        "value": 0,
+        "gas": gas + 1,
+    }
+
+    wallet = Wallet(w3, private_key=from_wallet.key, address=from_wallet.address)
+    raw_tx = wallet.sign_tx(tx, fixed_nonce=nonce_value, gas_price=gas_price)
+    tx_hash = w3.eth.sendRawTransaction(raw_tx)
+    receipt = w3.eth.waitForTransactionReceipt(tx_hash, timeout=30)
+    return receipt
