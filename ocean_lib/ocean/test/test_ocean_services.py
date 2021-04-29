@@ -61,9 +61,9 @@ def test_create_compute_service(publisher_ocean_instance):
     assert (
         service[1]["attributes"] == attributes
     ), "Attributes of the same service do not match."
-    assert service[1]["serviceEndpoint"] == "http://provider.com:8030", (
-        "The service endpoint do not point to the " "provider URL. "
-    )
+    assert (
+        service[1]["serviceEndpoint"] == "http://provider.com:8030"
+    ), "The service endpoint do not point to the provider URL. "
 
     compute_service = ocn_compute.create_compute_service_descriptor(attributes)
     assert (
