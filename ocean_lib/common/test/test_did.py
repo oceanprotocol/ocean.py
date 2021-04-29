@@ -26,6 +26,7 @@ TEST_SERVICE_URL = "http://localhost:8005"
 
 
 def test_did():
+    """Tests various DID functions."""
     assert DID.did({"0": "0x123"}).startswith(OCEAN_PREFIX)
     assert len(DID.did({"0": "0x123"})) - len(OCEAN_PREFIX) == 64
     _id = did_to_id(DID.did({"0": "0x123"}))
@@ -33,6 +34,7 @@ def test_did():
 
 
 def test_did_parse():
+    """Tests DID parsing."""
     test_id = "%s" % secrets.token_hex(32)
     valid_did = "did:op:{0}".format(test_id)
 
@@ -45,6 +47,7 @@ def test_did_parse():
 
 
 def test_id_to_did():
+    """Tests id to did conversion."""
     test_id = "%s" % secrets.token_hex(32)
     valid_did_text = "did:op:{}".format(test_id)
     assert id_to_did(test_id) == valid_did_text
@@ -65,6 +68,7 @@ def test_id_to_did():
 
 
 def test_did_to_id():
+    """Tests did to id conversion."""
     did = DID.did({"0": "0x123"})
     _id = did_to_id(did)
     assert _id is not None and len(_id) == 64, ""
@@ -80,6 +84,7 @@ def test_did_to_id():
 
 
 def test_did_to_bytes():
+    """Tests did to bytes conversion."""
     id_test = secrets.token_hex(32)
     did_test = "did:op:{}".format(id_test)
     id_bytes = Web3.toBytes(hexstr=id_test)
@@ -110,6 +115,7 @@ def test_did_to_bytes():
 
 
 def test_create_did():
+    """Tests did creation."""
     proof = {
         "type": "DDOIntegritySignature",
         "created": "2016-02-08T16:02:20Z",
