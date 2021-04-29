@@ -191,7 +191,7 @@ class Aquarius:
             return parsed_response
 
         raise ValueError(
-            f"Unknown search response, expecting a list got {type(parsed_response)}."
+            f"Unknown search response, expecting a list or dict, got {type(parsed_response)}."
         )
 
 
