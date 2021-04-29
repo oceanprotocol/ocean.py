@@ -56,20 +56,16 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
     assert (
         new_publisher_trusted_algorithms is not None
     ), "Added a new trusted algorithm failed. The list is empty."
-    assert len(new_publisher_trusted_algorithms) > len(publisher_trusted_algorithms), (
-        "Added a new trusted algorithm "
-        "failed. The length of the new "
-        "trusted algorithms list should "
-        "be bigger than the previous "
-        "one. "
-    )
+    assert len(new_publisher_trusted_algorithms) > len(
+        publisher_trusted_algorithms
+    ), "New trusted algorithm list should be longer than the old one."
 
     # add an existing algorithm to publisher_trusted_algorithms list
     new_publisher_trusted_algorithms = add_publisher_trusted_algorithm(
         ddo.did, algorithm_ddo.did, publisher_ocean_instance.config.metadata_cache_uri
     )
     assert new_publisher_trusted_algorithms is not None
-    for _, trusted_algorithm in enumerate(publisher_trusted_algorithms):
+    for trusted_algorithm in publisher_trusted_algorithms:
         assert (
             trusted_algorithm["did"] == algorithm_ddo.did
         ), "Added a different algorithm besides the existing ones."
@@ -83,12 +79,9 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
     assert (
         new_publisher_trusted_algorithms is not None
     ), "Remove process of a trusted algorithm failed."
-    assert len(new_publisher_trusted_algorithms) < len(publisher_trusted_algorithms), (
-        "Remove process of a trusted "
-        "algorithm failed. Too many "
-        "trusted algorithms than it was "
-        "supposed. "
-    )
+    assert len(new_publisher_trusted_algorithms) < len(
+        publisher_trusted_algorithms
+    ), "New trusted algorithm list should be shorter than the old one."
 
     # remove a trusted algorithm that does not belong to publisher_trusted_algorithms list
     new_publisher_trusted_algorithms = remove_publisher_trusted_algorithm(
@@ -131,13 +124,12 @@ def test_add_trusted_algorithm_no_compute_service(publisher_ocean_instance, meta
 
 
 def test_fail_generate_trusted_algo_dict():
-    """Tests if all the parameters for generating a trusted algorithm dict are None and if teh scope of this function
-    throws an AssertionError."""
+    """Tests if generate_trusted_algo_dict throws an AssertionError when all parameters are None."""
     try:
-        _ = generate_trusted_algo_dict(None, None, None)
+        generate_trusted_algo_dict(None, None, None)
     except AssertionError as err:
         proposed_err = AssertionError(
-            "Either ddo, either did and metadata_cache_uri are None."
+            "Either DDO, or both did and metadata_cache_uri are None."
         )
         assert isinstance(err, type(proposed_err))
         assert err.args == proposed_err.args

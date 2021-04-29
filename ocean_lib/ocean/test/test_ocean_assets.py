@@ -78,7 +78,7 @@ def test_register_asset(publisher_ocean_instance):
     assert (
         ddo_dict["service"][0]["attributes"]["main"]["name"]
         == original["service"][0]["attributes"]["main"]["name"]
-    ), ("The new asset does not have the same name as the " "original asset. ")
+    ), "The new asset has a different name."
     assert ddo_dict["service"][1] == original["service"][1], (
         "The two assets have different information regarding " "access service. "
     )
@@ -102,9 +102,7 @@ def test_register_asset(publisher_ocean_instance):
     _ = ddo.metadata["main"]["name"]
     _name = "updated name"
     ddo.metadata["main"]["name"] = _name
-    assert (
-        ddo.metadata["main"]["name"] == _name
-    ), "updated asset does not have the new updated name !!!"
+    assert ddo.metadata["main"]["name"] == _name, "Asset's name was not updated."
     with pytest.raises(ValueError):
         ocn.assets.update(ddo, bob)
 
@@ -131,18 +129,17 @@ def test_ocean_assets_search(publisher_ocean_instance, metadata):
     identifier = str(uuid.uuid1()).replace("-", "")
     metadata_copy = metadata.copy()
     metadata_copy["main"]["name"] = identifier
-    assert len(publisher_ocean_instance.assets.search(identifier)) == 0, (
-        "Searched failed. Initially, it was needed "
-        "to have 0 occurrences of the identifier. "
-    )
+    assert (
+        len(publisher_ocean_instance.assets.search(identifier)) == 0
+    ), "Asset search failed."
 
     publisher = get_publisher_wallet()
     ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher)
     wait_for_ddo(publisher_ocean_instance, ddo.did)
     time.sleep(1)  # apparently changes are not instantaneous
-    assert len(publisher_ocean_instance.assets.search(identifier)) == 1, (
-        "Searched for the occurrences of the " "identifier failed. "
-    )
+    assert (
+        len(publisher_ocean_instance.assets.search(identifier)) == 1
+    ), "Searched for the occurrences of the identifier failed. "
     assert (
         len(
             publisher_ocean_instance.assets.query(

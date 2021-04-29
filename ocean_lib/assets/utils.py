@@ -19,7 +19,7 @@ def create_checksum(text):
 def generate_trusted_algo_dict(did=None, metadata_cache_uri=None, ddo=None):
     assert ddo or (
         did and metadata_cache_uri
-    ), "Either ddo, either did and metadata_cache_uri are None."
+    ), "Either DDO, or both did and metadata_cache_uri are None."
     if not ddo:
         ddo = resolve_asset(did, metadata_cache_uri=metadata_cache_uri)
 
@@ -60,9 +60,7 @@ def add_publisher_trusted_algorithm(
         privacy_values = {}
         compute_service.attributes["main"]["privacy"] = privacy_values
 
-    assert isinstance(
-        privacy_values, dict
-    ), "Privacy key does not have a dictionary as value."
+    assert isinstance(privacy_values, dict), "Privacy key is not a dictionary."
     trusted_algos = privacy_values.get("publisherTrustedAlgorithms", [])
     # remove algo_did if already in the list
     trusted_algos = [ta for ta in trusted_algos if ta["did"] != algo_did]
@@ -72,9 +70,9 @@ def add_publisher_trusted_algorithm(
     trusted_algos.append(generate_trusted_algo_dict(ddo=algo_ddo))
     # update with the new list
     privacy_values["publisherTrustedAlgorithms"] = trusted_algos
-    assert compute_service.attributes["main"]["privacy"] == privacy_values, (
-        "New trusted algorithm was not added. " "Failed when updating the privacy key. "
-    )
+    assert (
+        compute_service.attributes["main"]["privacy"] == privacy_values
+    ), "New trusted algorithm was not added. Failed when updating the privacy key. "
     return trusted_algos
 
 
@@ -91,8 +89,7 @@ def remove_publisher_trusted_algorithm(
 
     trusted_algorithms = [ta for ta in trusted_algorithms if ta["did"] != algo_did]
     asset.update_compute_privacy(trusted_algorithms, False, False)
-    assert asset.get_trusted_algorithms() == trusted_algorithms, (
-        "New trusted algorithm was not removed. Failed "
-        "when updating the list of trusted algorithms. "
-    )
+    assert (
+        asset.get_trusted_algorithms() == trusted_algorithms
+    ), "New trusted algorithm was not removed. Failed when updating the list of trusted algorithms. "
     return trusted_algorithms

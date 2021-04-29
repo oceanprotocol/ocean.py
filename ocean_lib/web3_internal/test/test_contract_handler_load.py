@@ -80,22 +80,26 @@ def test_issue185_unit(monkeypatch):
     ocean = Ocean(config)
 
     # Ensure it's using a path like '/home/trentmc/ocean.py/venv/artifacts'
-    assert os.path.exists(ocean._config.artifacts_path)
-    assert "venv/artifacts" in ocean._config.artifacts_path
+    assert os.path.exists(
+        ocean._config.artifacts_path
+    ), "Could not find the artifacts path."
+    assert (
+        "venv/artifacts" in ocean._config.artifacts_path
+    ), "The artifacts are not in the venv folder."
 
     wallet = Wallet(ocean.web3, private_key=private_key)
-    assert wallet is not None
+    assert wallet is not None, "The wallet does not exist."
 
     # At this point, shouldn't have any contracts cached
     assert ContractHandler._contracts == {}
 
     # This is the call that causes problems in system test.
     contract = ContractHandler._get("DataTokenTemplate", None)
-    assert contract is not None
+    assert contract is not None, "The contract is not cached."
 
     # The first call may have caused caching. So call again:)
     contract = ContractHandler._get("DataTokenTemplate", None)
-    assert contract is not None
+    assert contract is not None, "The contract is not cached."
 
 
 @pytest.mark.skip(reason="postpone until #202 #227 fixed, then revisit in #185")

@@ -12,16 +12,13 @@ def test_create_access_service(publisher_ocean_instance):
     service = publisher_ocean_instance.services.create_access_service(
         {"a": 1}, "service_endpoint"
     )
-    assert service[0] == "access", "The service type is different from access type."
-    assert service[1]["attributes"] == {"a": 1}, (
-        "Access service creation failed. The attributes are different from "
-        "the parameters received in the "
-        "create function. "
-    )
-    assert service[1]["serviceEndpoint"] == "service_endpoint", (
-        "The service endpoint does not match with the one "
-        "that is specified in the creation of the service. "
-    )
+    assert service[0] == "access", "Service type is not access."
+    assert service[1]["attributes"] == {
+        "a": 1
+    }, "The attributes are different from the created service ones."
+    assert (
+        service[1]["serviceEndpoint"] == "service_endpoint"
+    ), "The service endpoint is different."
 
 
 def test_create_compute_service(publisher_ocean_instance):
