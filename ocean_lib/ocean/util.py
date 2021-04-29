@@ -24,7 +24,14 @@ WEB3_INFURA_PROJECT_ID = "357f2fe737db4304bd2f7285c5602d0d"
 GANACHE_URL = "http://127.0.0.1:8545"
 
 # shortcut names for networks that *Infura* supports, plus ganache
-SUPPORTED_NETWORK_NAMES = {"rinkeby", "kovan", "ganache", "mainnet", "ropsten"}
+SUPPORTED_NETWORK_NAMES = {
+    "rinkeby",
+    "kovan",
+    "ganache",
+    "mainnet",
+    "ropsten",
+    "polygon",
+}
 
 
 def get_infura_connection_type():
