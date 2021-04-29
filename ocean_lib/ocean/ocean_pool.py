@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
+from decimal import Decimal
 
 from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.exceptions import VerifyTxFailed
@@ -15,6 +16,7 @@ from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.util import from_base_18, get_dtfactory_address, to_base_18
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
+from ocean_lib.web3_internal.web3helper import Web3Helper
 from scipy.interpolate import interp1d
 
 logger = logging.getLogger(__name__)
@@ -89,8 +91,8 @@ class OceanPool:
 
         # Must approve datatoken and Ocean tokens to the new pool as spender
         dt = DataToken(data_token_address)
-        tx_id = dt.approve_tokens(
-            pool_address, data_token_amount, from_wallet, wait=True
+        tx_id = dt.approve(
+            pool_address, Web3Helper.to_wei(Decimal(data_token_amount)), from_wallet
         )
         if dt.get_tx_receipt(tx_id).status != 1:
             raise VerifyTxFailed(
@@ -98,7 +100,9 @@ class OceanPool:
             )
 
         ot = DataToken(self.ocean_address)
-        tx_id = ot.approve_tokens(pool_address, OCEAN_amount, from_wallet, wait=True)
+        tx_id = ot.approve(
+            pool_address, Web3Helper.to_wei(Decimal(OCEAN_amount)), from_wallet
+        )
         if ot.get_tx_receipt(tx_id).status != 1:
             raise VerifyTxFailed(
                 f"Approve OCEAN tokens failed, pool was created at {pool_address}"
@@ -304,7 +308,9 @@ class OceanPool:
         :return: str transaction id/hash
         """
         ocean_tok = DataToken(self.ocean_address)
-        ocean_tok.approve_tokens(pool_address, max_OCEAN_amount, from_wallet, wait=True)
+        ocean_tok.approve(
+            pool_address, Web3Helper.to_wei(Decimal(max_OCEAN_amount)), from_wallet
+        )
 
         dtoken_address = self.get_token_address(pool_address)
         pool = BPool(pool_address)

@@ -2,6 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from decimal import Decimal
 
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.service_types import ServiceTypes
@@ -11,6 +12,7 @@ from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.web3helper import Web3Helper
 from tests.resources.ddo_helpers import (
     get_algorithm_meta,
     get_registered_algorithm_ddo,
@@ -41,7 +43,11 @@ def process_order(ocean_instance, publisher_wallet, consumer_wallet, ddo, servic
     # Give the consumer some datatokens so they can order the service
     try:
         dt = DataToken(ddo.data_token_address)
-        tx_id = dt.transfer_tokens(consumer_wallet.address, 10.0, publisher_wallet)
+        tx_id = dt.transfer(
+            consumer_wallet.address,
+            Web3Helper.to_wei(Decimal("10.0")),
+            publisher_wallet,
+        )
         dt.verify_transfer_tx(tx_id, publisher_wallet.address, consumer_wallet.address)
     except (AssertionError, Exception) as e:
         print(e)

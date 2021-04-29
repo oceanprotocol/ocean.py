@@ -181,7 +181,7 @@ def _deployAndMintToken(symbol: str, to_address: str) -> btoken.BToken:
     )
     token_address = dt_factory.get_token_address(
         dt_factory.createToken(
-            symbol, symbol, symbol, DataToken.DEFAULT_CAP_BASE, wallet
+            symbol, symbol, symbol, DataToken.DEFAULT_CAP_IN_WEI, wallet
         )
     )
     token = DataToken(token_address)

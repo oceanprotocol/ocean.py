@@ -2,7 +2,10 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from decimal import Decimal
+
 import pytest
+from ocean.web3_internal.web3helper import Web3Helper
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_exchange import OceanExchange
@@ -27,11 +30,11 @@ def test_ocean_exchange(publisher_ocean_instance):
     dt = ocn.create_data_token(
         "DataToken1", "DT1", alice_wallet, blob="http://example.com"
     )
-    dt.mint_tokens(bob_wallet.address, 100.0, alice_wallet)
+    dt.mint(bob_wallet.address, Web3Helper.to_wei(Decimal("100.0")), alice_wallet)
     ox = OceanExchange(ocn.OCEAN_address, _get_exchange_address(), ocn.config)
     rate = 0.9
     x_id = ox.create(dt.address, rate, bob_wallet)
-    dt.approve_tokens(ox._exchange_address, 20.0, bob_wallet)
+    dt.approve(ox._exchange_address, Web3Helper.to_wei(Decimal("20.0")), bob_wallet)
 
     # create with invalid token address
     with pytest.raises(ValueError):
