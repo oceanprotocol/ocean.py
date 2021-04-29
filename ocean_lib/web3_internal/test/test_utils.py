@@ -5,11 +5,13 @@
 import os
 
 import pytest
-from ocean_lib.web3_internal.utils import (
+from ocean_lib.web3_internal.transactions import (
     cancel_or_replace_transaction,
+    send_ether,
+)
+from ocean_lib.web3_internal.utils import (
     generate_multi_value_hash,
     prepare_prefixed_hash,
-    send_ether,
 )
 
 

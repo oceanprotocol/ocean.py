@@ -20,8 +20,9 @@ setup_enforce_typing_shim()
 from ocean_lib.example_config import ExampleConfig  # noqa: E402
 from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18  # noqa: E402
 from ocean_lib.web3_internal.contract_handler import ContractHandler  # noqa: E402
+from ocean_lib.web3_internal.transactions import send_ether  # noqa: E402
+from ocean_lib.web3_internal.utils import from_wei, get_ether_balance  # noqa: E402
 from ocean_lib.web3_internal.web3_provider import Web3Provider  # noqa: E402
-from ocean_lib.web3_internal.web3helper import Web3Helper  # noqa: E402
 from tests.resources.ddo_helpers import get_metadata  # noqa: E402
 from tests.resources.helper_functions import (  # noqa: E402
     get_consumer_ocean_instance,
@@ -61,10 +62,8 @@ def setup_all(request):
     print(
         f"sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keysStr()}"
     )
-    print(
-        f"sender balance: {Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address))}"
-    )
-    assert Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address)) > 10
+    print(f"sender balance: {from_wei(get_ether_balance(wallet.address))}")
+    assert from_wei(get_ether_balance(wallet.address)) > 10
 
     from ocean_lib.models.data_token import DataToken
 
@@ -74,8 +73,8 @@ def setup_all(request):
     amt_distribute_base = to_base_18(float(amt_distribute))
 
     for w in (get_publisher_wallet(), get_consumer_wallet()):
-        if Web3Helper.from_wei(Web3Helper.get_ether_balance(w.address)) < 2:
-            Web3Helper.send_ether(wallet, w.address, 4)
+        if from_wei(get_ether_balance(w.address)) < 2:
+            send_ether(wallet, w.address, 4)
 
         if OCEAN_token.token_balance(w.address) < 100:
             OCEAN_token.mint(wallet.address, amt_distribute_base, from_wallet=wallet)

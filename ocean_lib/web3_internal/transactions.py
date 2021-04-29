@@ -8,7 +8,7 @@ from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 
 @enforce_types_shim
-def sign_hash(msg_hash: str, wallet: Wallet) -> str:
+def sign_hash(msg_hash, wallet: Wallet) -> str:
     """
     This method use `personal_sign`for signing a message. This will always prepend the
     `\x19Ethereum Signed Message:\n32` prefix before signing.
