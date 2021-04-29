@@ -6,8 +6,10 @@ import os
 
 import pytest
 from ocean_lib.web3_internal.utils import (
+    cancel_or_replace_transaction,
     generate_multi_value_hash,
     prepare_prefixed_hash,
+    send_ether,
 )
 
 
@@ -25,3 +27,11 @@ def test_generate_multi_value_hash(alice_address, alice_private_key):
 def test_prepare_fixed_hash():
     expected = "0x5662cc8481d004c9aff44f15f3ed133dd54f9cfba0dbf850f69b1cbfc50145bf"
     assert prepare_prefixed_hash("0x0").hex() == expected
+
+
+def test_send_ether(alice_wallet, bob_address):
+    assert send_ether(alice_wallet, bob_address, 1)
+
+
+def test_cancel_or_replace_transaction(alice_wallet):
+    assert cancel_or_replace_transaction(alice_wallet, None)
