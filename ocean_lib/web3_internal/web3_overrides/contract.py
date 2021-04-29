@@ -125,8 +125,9 @@ def wait_for_tx(tx_hash, web3, timeout=30):
     start = time.time()
     while True:
         try:
-            web3.eth.waitForTransactionReceipt(tx_hash, timeout=timeout)
-            break
+            receipt = web3.eth.waitForTransactionReceipt(tx_hash, timeout=timeout)
+            if receipt.status:
+                break
         except Exception:
             time.sleep(0.2)
 
