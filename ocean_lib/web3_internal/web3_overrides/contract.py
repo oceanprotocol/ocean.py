@@ -126,15 +126,14 @@ def transact_with_contract_function(
 
 def wait_for_tx(tx_hash, web3, timeout=30):
     start = time.time()
-    while True:
+    while time.time() - start <= timeout:
         try:
             receipt = web3.eth.waitForTransactionReceipt(tx_hash, timeout=timeout)
             if receipt.status:
                 return True
         except Exception:
-            time.sleep(0.2)
+            pass
 
-        if time.time() - start > timeout:
-            break
+        time.sleep(0.2)
 
     return False
