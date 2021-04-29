@@ -5,6 +5,7 @@
 import logging
 import time
 
+from ocean_lib.exceptions import TransactionFailed
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.contract import prepare_transaction
 
@@ -117,7 +118,9 @@ def transact_with_contract_function(
     else:
         txn_hash = web3.eth.sendTransaction(transact_transaction)
 
-    wait_for_tx(txn_hash, web3, 5)
+    if not wait_for_tx(txn_hash, web3, 5):
+        raise TransactionFailed
+
     return txn_hash
 
 
@@ -127,11 +130,11 @@ def wait_for_tx(tx_hash, web3, timeout=30):
         try:
             receipt = web3.eth.waitForTransactionReceipt(tx_hash, timeout=timeout)
             if receipt.status:
-                break
+                return True
         except Exception:
             time.sleep(0.2)
 
         if time.time() - start > timeout:
             break
 
-    return
+    return False
