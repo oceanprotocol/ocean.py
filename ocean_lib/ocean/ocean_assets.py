@@ -41,6 +41,7 @@ from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
@@ -272,7 +273,7 @@ class OceanAssets:
         if compute_service:
             asset.add_service(compute_service)
 
-        asset.proof["signatureValue"] = Web3Helper.sign_hash(
+        asset.proof["signatureValue"] = sign_hash(
             add_ethereum_prefix_and_hash_msg(asset.asset_id), publisher_wallet
         )
 
