@@ -22,8 +22,9 @@ from web3 import WebsocketProvider
 
 WEB3_INFURA_PROJECT_ID = "357f2fe737db4304bd2f7285c5602d0d"
 GANACHE_URL = "http://127.0.0.1:8545"
+POLYGON_URL = "https://rpc.polygon.oceanprotocol.com"
 
-# shortcut names for networks that *Infura* supports, plus ganache
+# shortcut names for networks that *Infura* supports, plus ganache and polygon
 SUPPORTED_NETWORK_NAMES = {
     "rinkeby",
     "kovan",
@@ -78,22 +79,21 @@ def get_web3_connection_provider(network_url):
     :param network_url: str
     :return: provider : HTTPProvider
     """
-    if network_url == "ganache":
-        network_url = GANACHE_URL
-
     if network_url.startswith("http"):
         provider = CustomHTTPProvider(network_url)
-
+    elif network_url.startswith("ws"):
+        provider = WebsocketProvider(network_url)
+    elif network_url == "ganache":
+        provider = CustomHTTPProvider(GANACHE_URL)
+    elif network_url == "polygon":
+        provider = CustomHTTPProvider(POLYGON_URL)
     else:
-        if not network_url.startswith("ws"):
-            assert network_url in SUPPORTED_NETWORK_NAMES, (
-                f"The given network_url *{network_url}* does not start with either "
-                f"`http` or `wss`, in this case a network name is expected and must "
-                f"be one of the supported networks {SUPPORTED_NETWORK_NAMES}."
-            )
-
-            network_url = get_infura_url(get_infura_id(), network_url)
-
+        assert network_url in SUPPORTED_NETWORK_NAMES, (
+            f"The given network_url *{network_url}* does not start with either "
+            f"`http` or `wss`, in this case a network name is expected and must "
+            f"be one of the supported networks {SUPPORTED_NETWORK_NAMES}."
+        )
+        network_url = get_infura_url(get_infura_id(), network_url)
         if network_url.startswith("http"):
             provider = CustomHTTPProvider(network_url)
         else:
