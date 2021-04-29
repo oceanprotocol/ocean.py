@@ -122,7 +122,7 @@ def get_network_id() -> int:
 
 
 @enforce_types_shim
-def ec_recover(message: str, signed_message: str):
+def ec_recover(message, signed_message):
     """
     This method does not prepend the message with the prefix `\x19Ethereum Signed Message:\n32`.
     The caller should add the prefix to the msg/hash before calling this if the signature was
@@ -141,7 +141,7 @@ def ec_recover(message: str, signed_message: str):
 
 
 @enforce_types_shim
-def personal_ec_recover(message: str, signed_message: str):
+def personal_ec_recover(message, signed_message):
     prefixed_hash = add_ethereum_prefix_and_hash_msg(message)
     return ec_recover(prefixed_hash, signed_message)
 
