@@ -6,7 +6,6 @@ import logging
 from collections import namedtuple
 from decimal import Decimal
 
-from eth_account import Account
 from eth_keys import keys
 from eth_utils import big_endian_to_int, decode_hex
 from ocean_lib.enforce_typing_shim import enforce_types_shim
@@ -86,7 +85,7 @@ def split_signature(web3, signature):
 
 @enforce_types_shim
 def privateKeyToAddress(private_key: str) -> str:
-    return Account().privateKeyToAccount(private_key).address
+    return Web3Provider.get_web3().eth.account.privateKeyToAccount(private_key).address
 
 
 @enforce_types_shim
