@@ -19,6 +19,7 @@ setup_enforce_typing_shim()
 
 from ocean_lib.example_config import ExampleConfig  # noqa: E402
 from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18  # noqa: E402
+from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider  # noqa: E402
 from ocean_lib.web3_internal.contract_handler import ContractHandler  # noqa: E402
 from ocean_lib.web3_internal.web3_provider import Web3Provider  # noqa: E402
 from ocean_lib.web3_internal.web3helper import Web3Helper  # noqa: E402
@@ -96,6 +97,12 @@ def consumer_ocean_instance():
 def web3_instance():
     config = ExampleConfig.get_config()
     return Web3Provider.get_web3(config.network_url)
+
+
+@pytest.fixture
+def aquarius_instance():
+    config = ExampleConfig.get_config()
+    return AquariusProvider.get_aquarius(config.metadata_cache_uri)
 
 
 @pytest.fixture
