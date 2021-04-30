@@ -11,6 +11,7 @@ from ocean_lib.web3_internal.transactions import (
 )
 from ocean_lib.web3_internal.utils import (
     generate_multi_value_hash,
+    get_network_timeout,
     prepare_prefixed_hash,
 )
 
@@ -39,3 +40,10 @@ def test_cancel_or_replace_transaction(alice_wallet):
     assert cancel_or_replace_transaction(
         alice_wallet, None
     ), "Cancel or replace transaction failed."
+
+
+def test_get_network_timeout():
+    assert get_network_timeout() == 2
+    assert get_network_timeout(123456) == 2  # id is not in list
+    assert get_network_timeout(1) == 600
+    assert get_network_timeout(4) == 300

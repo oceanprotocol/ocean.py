@@ -5,11 +5,16 @@
 import logging
 from collections import namedtuple
 from decimal import Decimal
+from typing import Optional
 
 from eth_keys import keys
 from eth_utils import big_endian_to_int, decode_hex
 from ocean_lib.enforce_typing_shim import enforce_types_shim
-from ocean_lib.web3_internal.constants import DEFAULT_NETWORK_NAME, NETWORK_NAME_MAP
+from ocean_lib.web3_internal.constants import (
+    DEFAULT_NETWORK_NAME,
+    NETWORK_NAME_MAP,
+    NETWORK_TIMEOUT_MAP,
+)
 from ocean_lib.web3_internal.web3_overrides.signature import SignatureFix
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
@@ -96,7 +101,7 @@ def privateKeyToPublicKey(private_key: str) -> str:
 
 
 @enforce_types_shim
-def get_network_name(network_id: int = None) -> str:
+def get_network_name(network_id: Optional[int] = None) -> str:
     """
     Return the network name based on the current ethereum network id.
 
@@ -108,6 +113,18 @@ def get_network_name(network_id: int = None) -> str:
     if not network_id:
         network_id = get_network_id()
     return NETWORK_NAME_MAP.get(network_id, DEFAULT_NETWORK_NAME).lower()
+
+
+@enforce_types_shim
+def get_network_timeout(network_id: Optional[int] = None) -> str:
+    """
+    Return the network blocking call timeout limit based on the current ethereum network id.
+
+    :param network_id: Network id, int
+    :return: number of seconds, int
+    """
+    network_name = get_network_name(network_id)
+    return NETWORK_TIMEOUT_MAP[network_name]
 
 
 @enforce_types_shim
