@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
-import time
 
 from ocean_lib.exceptions import TransactionFailed
 from ocean_lib.web3_internal.wallet import Wallet
@@ -125,15 +124,9 @@ def transact_with_contract_function(
 
 
 def wait_for_tx(tx_hash, web3, timeout=30):
-    start = time.time()
-    while time.time() - start <= timeout:
-        try:
-            receipt = web3.eth.waitForTransactionReceipt(tx_hash, timeout=timeout)
-            if receipt.status:
-                return True
-        except Exception:
-            pass
+    try:
+        receipt = web3.eth.waitForTransactionReceipt(tx_hash, timeout=timeout)
+    except Exception:
+        raise
 
-        time.sleep(0.2)
-
-    return False
+    return bool(receipt.status)
