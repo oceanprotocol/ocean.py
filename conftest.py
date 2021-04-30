@@ -64,7 +64,9 @@ def setup_all(request):
         f"sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keysStr()}"
     )
     print(f"sender balance: {from_wei(get_ether_balance(wallet.address))}")
-    assert from_wei(get_ether_balance(wallet.address)) > 10
+    assert (
+        from_wei(get_ether_balance(wallet.address)) > 10
+    ), "Ether balance less than 10."
 
     from ocean_lib.models.data_token import DataToken
 

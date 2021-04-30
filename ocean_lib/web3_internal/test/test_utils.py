@@ -32,8 +32,10 @@ def test_prepare_fixed_hash():
 
 
 def test_send_ether(alice_wallet, bob_address):
-    assert send_ether(alice_wallet, bob_address, 1)
+    assert send_ether(alice_wallet, bob_address, 1), "Send ether was unsuccessful."
 
 
 def test_cancel_or_replace_transaction(alice_wallet):
-    assert cancel_or_replace_transaction(alice_wallet, None)
+    assert cancel_or_replace_transaction(
+        alice_wallet, None
+    ), "Cancel or replace transaction failed."

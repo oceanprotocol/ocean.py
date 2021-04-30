@@ -150,7 +150,9 @@ def make_info(name, private_key_name):
     info.account = Account(private_key=info.private_key)
     wallet = get_ganache_wallet()
     if wallet:
-        assert from_wei(get_ether_balance(wallet.address)) > 4
+        assert (
+            from_wei(get_ether_balance(wallet.address)) > 4
+        ), "Ether balance less than 4."
         if from_wei(get_ether_balance(info.address)) < 2:
             send_ether(wallet, info.address, 4)
 
