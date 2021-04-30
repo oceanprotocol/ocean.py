@@ -10,9 +10,10 @@ from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18
 from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.transactions import send_ether
+from ocean_lib.web3_internal.utils import from_wei, get_ether_balance
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_lib.web3_internal.web3helper import Web3Helper
 from tests.resources.helper_functions import (
     get_ganache_wallet,
     get_publisher_ocean_instance,
@@ -62,5 +63,5 @@ def mint_fake_OCEAN():
                 w.address, amt_distribute_base, from_wallet=deployer_wallet
             )
 
-        if Web3Helper.from_wei(Web3Helper.get_ether_balance(w.address)) < 2:
-            Web3Helper.send_ether(deployer_wallet, w.address, 4)
+        if from_wei(get_ether_balance(w.address)) < 2:
+            send_ether(deployer_wallet, w.address, 4)
