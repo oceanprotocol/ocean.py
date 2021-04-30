@@ -32,9 +32,9 @@ from ocean_lib.ocean.util import (
     to_base_18,
 )
 from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_lib.web3_internal.web3helper import Web3Helper
 from web3.datastructures import AttributeDict
 
 logger = logging.getLogger("ocean")
@@ -106,7 +106,7 @@ class Ocean:
         if not data_provider:
             data_provider = DataServiceProvider
 
-        network = Web3Helper.get_network_name()
+        network = get_network_name()
         addresses = get_contracts_addresses(network, self._config)
         self.assets = OceanAssets(
             self._config, data_provider, addresses.get(MetadataContract.CONTRACT_NAME)
@@ -119,8 +119,7 @@ class Ocean:
         self.exchange = OceanExchange(
             ocean_address,
             FixedRateExchange.configured_address(
-                network or Web3Helper.get_network_name(),
-                ConfigProvider.get_config().address_file,
+                network or get_network_name(), ConfigProvider.get_config().address_file
             ),
             self.config,
         )
@@ -137,7 +136,7 @@ class Ocean:
 
     @property
     def OCEAN_address(self):
-        return get_ocean_token_address(Web3Helper.get_network_name())
+        return get_ocean_token_address(get_network_name())
 
     def create_data_token(
         self,
@@ -161,7 +160,7 @@ class Ocean:
 
     def get_dtfactory(self, dtfactory_address: str = "") -> DTFactory:
         dtf_address = dtfactory_address or DTFactory.configured_address(
-            Web3Helper.get_network_name(), self._config.address_file
+            get_network_name(), self._config.address_file
         )
         return DTFactory(dtf_address)
 

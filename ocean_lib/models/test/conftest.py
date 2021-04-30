@@ -14,8 +14,9 @@ from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.util import get_ocean_token_address, to_base_18
 from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.transactions import send_ether
+from ocean_lib.web3_internal.utils import from_wei, get_ether_balance
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.web3helper import Web3Helper
 from tests.resources.helper_functions import (
     get_factory_deployer_wallet,
     get_ganache_wallet,
@@ -149,9 +150,11 @@ def make_info(name, private_key_name):
     info.account = Account(private_key=info.private_key)
     wallet = get_ganache_wallet()
     if wallet:
-        assert Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address)) > 4
-        if Web3Helper.from_wei(Web3Helper.get_ether_balance(info.address)) < 2:
-            Web3Helper.send_ether(wallet, info.address, 4)
+        assert (
+            from_wei(get_ether_balance(wallet.address)) > 4
+        ), "Ether balance less than 4."
+        if from_wei(get_ether_balance(info.address)) < 2:
+            send_ether(wallet, info.address, 4)
 
     from ocean_lib.ocean.ocean import Ocean
 
