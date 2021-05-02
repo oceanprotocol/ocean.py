@@ -21,15 +21,6 @@ def generate_new_id():
     return uuid.uuid4().hex + uuid.uuid4().hex
 
 
-def generate_prefixed_id():
-    """
-    Generate a new id prefixed with 0x that is used as identifier for the service agreements ids.
-
-    :return: Id, str
-    """
-    return f"0x{generate_new_id()}"
-
-
 def to_32byte_hex(web3, val):
     """
 

@@ -8,6 +8,7 @@ from web3 import Web3
 
 
 def test_convert():
+    """Tests convert to string from utilities."""
     input_text = "my text"
     text_bytes = utilities.convert_to_bytes(Web3, input_text)
     print("output %s" % utilities.convert_to_string(Web3, text_bytes))

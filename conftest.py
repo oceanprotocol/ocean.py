@@ -6,6 +6,8 @@
 """isort:skip_file"""
 
 import uuid
+import os
+import json
 
 import pytest
 from ocean_lib.config_provider import ConfigProvider
@@ -16,14 +18,12 @@ from ocean_lib.enforce_typing_shim import setup_enforce_typing_shim
 setup_enforce_typing_shim()
 
 from ocean_lib.example_config import ExampleConfig  # noqa: E402
-from ocean_lib.ocean.util import (  # noqa: E402
-    get_ocean_token_address,
-    get_web3_connection_provider,
-    to_base_18,
-)
+from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18  # noqa: E402
+from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider  # noqa: E402
 from ocean_lib.web3_internal.contract_handler import ContractHandler  # noqa: E402
+from ocean_lib.web3_internal.transactions import send_ether  # noqa: E402
+from ocean_lib.web3_internal.utils import from_wei, get_ether_balance  # noqa: E402
 from ocean_lib.web3_internal.web3_provider import Web3Provider  # noqa: E402
-from ocean_lib.web3_internal.web3helper import Web3Helper  # noqa: E402
 from tests.resources.ddo_helpers import get_metadata  # noqa: E402
 from tests.resources.helper_functions import (  # noqa: E402
     get_consumer_ocean_instance,
@@ -48,29 +48,40 @@ def setup_all(request):
     Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
     ContractHandler.set_artifacts_path(config.artifacts_path)
 
-    network = Web3Helper.get_network_name()
     wallet = get_ganache_wallet()
-    if network in ["ganache", "development"] and wallet:
 
-        print(
-            f"sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keysStr()}"
-        )
-        print(
-            f"sender balance: {Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address))}"
-        )
-        assert Web3Helper.from_wei(Web3Helper.get_ether_balance(wallet.address)) > 10
+    if not wallet:
+        return
 
-        from ocean_lib.models.data_token import DataToken
+    addresses_file = config.address_file
+    if not os.path.exists(addresses_file):
+        return
 
-        OCEAN_token = DataToken(get_ocean_token_address(network))
-        amt_distribute = 1000
-        amt_distribute_base = to_base_18(float(amt_distribute))
-        for w in (get_publisher_wallet(), get_consumer_wallet()):
-            if Web3Helper.from_wei(Web3Helper.get_ether_balance(w.address)) < 2:
-                Web3Helper.send_ether(wallet, w.address, 4)
+    with open(addresses_file) as f:
+        network_addresses = json.load(f)
 
-            if OCEAN_token.token_balance(w.address) < 100:
-                OCEAN_token.transfer(w.address, amt_distribute_base, from_wallet=wallet)
+    print(
+        f"sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keysStr()}"
+    )
+    print(f"sender balance: {from_wei(get_ether_balance(wallet.address))}")
+    assert (
+        from_wei(get_ether_balance(wallet.address)) > 10
+    ), "Ether balance less than 10."
+
+    from ocean_lib.models.data_token import DataToken
+
+    OCEAN_token = DataToken(address=network_addresses["development"]["Ocean"])
+
+    amt_distribute = 1000
+    amt_distribute_base = to_base_18(float(amt_distribute))
+
+    for w in (get_publisher_wallet(), get_consumer_wallet()):
+        if from_wei(get_ether_balance(w.address)) < 2:
+            send_ether(wallet, w.address, 4)
+
+        if OCEAN_token.token_balance(w.address) < 100:
+            OCEAN_token.mint(wallet.address, amt_distribute_base, from_wallet=wallet)
+            OCEAN_token.transfer(w.address, amt_distribute_base, from_wallet=wallet)
 
 
 @pytest.fixture
@@ -87,6 +98,12 @@ def consumer_ocean_instance():
 def web3_instance():
     config = ExampleConfig.get_config()
     return Web3Provider.get_web3(config.network_url)
+
+
+@pytest.fixture
+def aquarius_instance():
+    config = ExampleConfig.get_config()
+    return AquariusProvider.get_aquarius(config.metadata_cache_uri)
 
 
 @pytest.fixture

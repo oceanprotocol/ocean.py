@@ -51,22 +51,6 @@ def did_parse(did):
     return result
 
 
-def is_did_valid(did):
-    """
-    Did validator.
-
-    Return True if the did is a valid DID with the method name 'op' and the id
-    in the Ocean format
-
-    :param did: Asset did, str
-    :return bool
-    """
-    result = did_parse(did)
-    if result:
-        return result["id"] is not None
-    return False
-
-
 def id_to_did(did_id, method="op"):
     """Return an Ocean DID from given a hex id."""
     if isinstance(did_id, bytes):
@@ -87,9 +71,7 @@ def id_to_did(did_id, method="op"):
 def did_to_id(did):
     """Return an id extracted from a DID string."""
     result = did_parse(did)
-    if result and result["id"] is not None:
-        return result["id"]
-    return None
+    return result["id"] if result and (result["id"] is not None) else None
 
 
 def did_to_id_bytes(did):

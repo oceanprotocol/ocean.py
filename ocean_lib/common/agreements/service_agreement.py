@@ -6,7 +6,6 @@ from collections import namedtuple
 
 from ocean_lib.common.agreements.service_types import ServiceTypes, ServiceTypesIndices
 from ocean_lib.common.ddo.service import Service
-from ocean_lib.common.utils.utilities import generate_prefixed_id
 
 Agreement = namedtuple("Agreement", ("template", "conditions"))
 
@@ -40,13 +39,13 @@ class ServiceAgreement(Service):
             ServiceTypes.CLOUD_COMPUTE: ServiceTypesIndices.DEFAULT_COMPUTING_INDEX,
         }
 
-        try:
-            default_index = service_to_default_index[service_type]
-        except KeyError:
+        if service_type not in service_to_default_index:
             raise ValueError(
                 f"The service_type {service_type} is not currently supported. Supported "
                 f"service types are {ServiceTypes.ASSET_ACCESS} and {ServiceTypes.CLOUD_COMPUTE}"
             )
+
+        default_index = service_to_default_index[service_type]
 
         service_index = service_index if service_index is not None else default_index
         Service.__init__(
@@ -79,11 +78,13 @@ class ServiceAgreement(Service):
         :param ddo:
         :return:
         """
-        service_dict = ddo.get_service(service_type).as_dictionary()
-        if not service_dict:
+        service = ddo.get_service(service_type)
+        if not service:
             raise ValueError(
                 f"Service of type {service_type} is not found in this DDO."
             )
+
+        service_dict = service.as_dictionary()
 
         return cls.from_json(service_dict)
 
@@ -95,18 +96,10 @@ class ServiceAgreement(Service):
         """
         Return the price from the conditions parameters.
 
-        :return: Int
+        :return: Float
         """
-        return self.main["cost"]
+        return float(self.main["cost"])
 
     @property
     def service_endpoint(self):
         return self._service_endpoint
-
-    @staticmethod
-    def create_new_agreement_id():
-        """
-
-        :return:
-        """
-        return generate_prefixed_id()
