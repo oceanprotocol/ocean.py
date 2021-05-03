@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-"""All contracts inherit from this base class."""
+"""All contracts inherit from `ContractBase` class."""
 import logging
 import os
 from typing import Any, Dict, List, Optional
@@ -37,7 +37,7 @@ class ContractBase(object):
     def __init__(self, address: Optional[str], abi_path=None):
         """Initialises Contract Base object.
 
-        The contract name attribute and abi_path are required.
+        The contract name attribute and `abi_path` are required.
         """
         self.name = self.contract_name
         assert (
@@ -57,16 +57,18 @@ class ContractBase(object):
         assert self.contract_concise is not None
 
     def __str__(self):
-        """Returns contract name @ address."""
+        """Returns contract `name @ address.`"""
         return f"{self.contract_name} @ {self.address}"
 
     @classmethod
     def configured_address(cls, network, address_file):
+        """Returns the contract addresses"""
         addresses = ContractHandler.get_contracts_addresses(network, address_file)
         return addresses.get(cls.CONTRACT_NAME) if addresses else None
 
     @property
     def contract_name(self) -> str:
+        """Returns the contract name"""
         return self.CONTRACT_NAME
 
     @property
@@ -76,15 +78,12 @@ class ContractBase(object):
 
     @property
     def events(self):
-        """
-        Expose the underlying contract's events.
-
-        :return:
-        """
+        """Expose the underlying contract's events."""
         return self.contract.events
 
     @property
     def function_names(self) -> List[str]:
+        """Returns the list of functions in the contract"""
         return list(self.contract.functions)
 
     @staticmethod
@@ -128,6 +127,11 @@ class ContractBase(object):
         return Web3Provider.get_web3().eth.getTransactionReceipt(tx_hash)
 
     def is_tx_successful(self, tx_hash: str) -> bool:
+        """Check if the transaction is successful.
+        
+        :param tx_hash: hash of the transaction
+        :return: bool
+        """
         receipt = self.get_tx_receipt(tx_hash)
         return bool(receipt and receipt.status == 1)
 
@@ -227,6 +231,7 @@ class ContractBase(object):
         return contract_function.transact(_transact).hex()
 
     def get_event_argument_names(self, event_name: str):
+        """:return: Argument names"""
         event = getattr(self.contract.events, event_name, None)
         if event:
             return event().argument_names
@@ -269,6 +274,7 @@ class ContractBase(object):
     def get_event_logs(
         self, event_name, from_block, to_block, filters, web3=None, chunk_size=1000
     ):
+        """:return: Event logs"""
         event = getattr(self.events, event_name)
         if not web3:
             web3 = Web3Provider.get_web3()
@@ -322,7 +328,8 @@ class ContractBase(object):
         on the underlying JSON-RPC call.
         Example - how to get all ERC-20 token transactions
         for the latest 10 blocks:
-        .. code-block:: python
+
+        ```python
             from = max(mycontract.web3.eth.blockNumber - 10, 1)
             to = mycontract.web3.eth.blockNumber
             events = mycontract.events.Transfer.getLogs(fromBlock=from, toBlock=to)
@@ -330,8 +337,10 @@ class ContractBase(object):
                 print(e["args"]["from"],
                     e["args"]["to"],
                     e["args"]["value"])
+        ```
         The returned processed log values will look like:
-        .. code-block:: python
+
+        ```python
             (
                 AttributeDict({
                  'args': AttributeDict({}),
@@ -346,6 +355,8 @@ class ContractBase(object):
                 AttributeDict(...),
                 ...
             )
+        ```
+        
         See also: :func:`web3.middleware.filter.local_filter_middleware`.
         :param argument_filters:
         :param fromBlock: block number or "latest", defaults to "latest"
