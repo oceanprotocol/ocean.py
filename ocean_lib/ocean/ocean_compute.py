@@ -14,9 +14,9 @@ from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
+from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.web3helper import Web3Helper
 
 logger = logging.getLogger("ocean")
 
@@ -232,9 +232,7 @@ class OceanCompute:
         if nonce is None:
             uri = self._data_provider.get_root_uri(service_endpoint)
             nonce = self._data_provider.get_nonce(wallet.address, uri)
-        return Web3Helper.sign_hash(
-            add_ethereum_prefix_and_hash_msg(f"{msg}{nonce}"), wallet
-        )
+        return sign_hash(add_ethereum_prefix_and_hash_msg(f"{msg}{nonce}"), wallet)
 
     def start(
         self,

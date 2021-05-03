@@ -15,9 +15,9 @@ from ocean_lib.ocean.env_constants import (
     ENV_INFURA_PROJECT_ID,
 )
 from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_lib.web3_internal.web3helper import Web3Helper
 from web3 import WebsocketProvider
 
 WEB3_INFURA_PROJECT_ID = "357f2fe737db4304bd2f7285c5602d0d"
@@ -147,21 +147,19 @@ def from_base(num_base: int, dec: int) -> float:
 
 def get_dtfactory_address(network=None):
     return DTFactory.configured_address(
-        network or Web3Helper.get_network_name(),
-        ConfigProvider.get_config().address_file,
+        network or get_network_name(), ConfigProvider.get_config().address_file
     )
 
 
 def get_bfactory_address(network=None):
     return BFactory.configured_address(
-        network or Web3Helper.get_network_name(),
-        ConfigProvider.get_config().address_file,
+        network or get_network_name(), ConfigProvider.get_config().address_file
     )
 
 
 def get_ocean_token_address(network=None):
     addresses = get_contracts_addresses(
-        network or Web3Helper.get_network_name(), ConfigProvider.get_config()
+        network or get_network_name(), ConfigProvider.get_config()
     )
     return addresses.get("Ocean") if addresses else None
 
