@@ -37,6 +37,25 @@ def get_ddo_sample(datatoken_address):
     return asset
 
 
+def test_ddo_credentials():
+    ddo = DDO()
+    ddo._credentials = {
+        "allow": [{"type": "address", "values": ["0x123", "0x456A"]}],
+        "deny": [{"type": "address", "values": ["0x2222", "0x333"]}],
+    }
+
+    assert ddo.get_addresses_of_type("allow") == ["0x123", "0x456a"]
+    assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333"]
+    assert not ddo.is_address_allowed("0x111")
+    assert ddo.is_address_allowed("0x456A")
+
+    ddo._credentials.pop("allow")
+    assert ddo.get_addresses_of_type("allow") == []
+    assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333"]
+    assert ddo.is_address_allowed("0x111")
+    assert not ddo.is_address_allowed("0x333")
+
+
 def test_ddo_on_chain():
     """Tests chain operations on a DDO."""
     config = ConfigProvider.get_config()

@@ -38,6 +38,7 @@ class DDO:
         self._authentications = []
         self._services = []
         self._proof = None
+        self._credentials = {}
         self._created = None
         self._other_values = {}
 
@@ -76,6 +77,11 @@ class DDO:
     def proof(self):
         """Get the static proof, or None."""
         return self._proof
+
+    @property
+    def credentials(self):
+        """Get the credentials."""
+        return self._credentials
 
     @property
     def publisher(self):
@@ -205,6 +211,8 @@ class DDO:
             data["service"] = values
         if self._proof and is_proof:
             data["proof"] = self._proof
+        if self._credentials:
+            data["credentials"] = self._credentials
 
         if self._other_values:
             data.update(self._other_values)
@@ -245,6 +253,8 @@ class DDO:
                 self._services.append(service)
         if "proof" in values:
             self._proof = values.pop("proof")
+        if "credentials" in values:
+            self._credentials = values.pop("credentials")
 
         self._other_values = values
 
@@ -354,3 +364,22 @@ class DDO:
 
         authentication = {"type": authentication_type, "publicKey": key_id}
         return authentication
+
+    def get_addresses_of_type(self, section_type="allow"):
+        """Get a filtered list of addresses from credentials (use with allow/deny)."""
+        entries = self._credentials.get(section_type, [])
+
+        for entry in entries:
+            if entry["type"] == "address":
+                return [val.lower() for val in entry["values"]]
+
+        return []
+
+    def is_address_allowed(self, address):
+        allowed_addresses = self.get_addresses_of_type("allow")
+        denied_addresses = self.get_addresses_of_type("deny")
+
+        if allowed_addresses:
+            return address.lower() in allowed_addresses
+
+        return address.lower() not in denied_addresses
