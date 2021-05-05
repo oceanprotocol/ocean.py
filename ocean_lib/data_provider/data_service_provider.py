@@ -646,6 +646,14 @@ class DataServiceProvider:
         for file_info in response:
             return file_info["valid"]
 
+    @staticmethod
+    def check_asset_file_info(asset, provider_uri=None):
+        _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
+        data = {"did": asset.did}
+        response = requests.post(endpoint, json=data).json()
+        for ddo_info in response:
+            return ddo_info["valid"]
+
 
 def urljoin(*args):
     trailing_slash = "/" if args[-1].endswith("/") else ""

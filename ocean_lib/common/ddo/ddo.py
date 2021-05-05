@@ -7,12 +7,18 @@ import json
 import logging
 
 from eth_utils import add_0x_prefix
+from ocean_lib.common.agreements.consumable import (
+    ConsumableCodes,
+    MalformedCredential,
+    UnsupportedCredential,
+)
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.ddo.public_key_base import PublicKeyBase
 from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_ETHEREUM_ECDSA
 from ocean_lib.common.did import OCEAN_PREFIX, did_to_id
 from ocean_lib.common.utils.utilities import get_timestamp
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 from .constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
 from .public_key_rsa import PUBLIC_KEY_TYPE_RSA, PublicKeyRSA
@@ -375,11 +381,30 @@ class DDO:
 
         return []
 
-    def is_address_allowed(self, address):
+    def get_address_allowed_code(self, address):
         allowed_addresses = self.get_addresses_of_type("allow")
         denied_addresses = self.get_addresses_of_type("deny")
 
-        if allowed_addresses:
-            return address.lower() in allowed_addresses
+        if allowed_addresses and address.lower() not in allowed_addresses:
+            return ConsumableCodes.CREDENTIAL_NOT_IN_ALLOW_LIST
 
-        return address.lower() not in denied_addresses
+        if not allowed_addresses and address.lower() in denied_addresses:
+            return ConsumableCodes.CREDENTIAL_IN_DENY_LIST
+
+        return ConsumableCodes.OK
+
+    def is_consumable(self, credential, provider_uri=None):
+        # TODO: check if disabled
+
+        if not DataServiceProvider.check_asset_file_info(self, provider_uri):
+            return ConsumableCodes.CONNECTIVITY_FAIL
+
+        if credential.get("type") != "address":
+            raise UnsupportedCredential(
+                f'Credential of type {credential.get("type")} is unsupported.'
+            )
+
+        if not credential.get("value"):
+            raise MalformedCredential("Received empty address.")
+
+        return self.get_address_allowed_code(credential["value"])

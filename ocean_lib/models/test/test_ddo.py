@@ -7,6 +7,7 @@ import uuid
 
 from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import Asset
+from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.utils.utilities import checksum
 from ocean_lib.config_provider import ConfigProvider
@@ -37,23 +38,28 @@ def get_ddo_sample(datatoken_address):
     return asset
 
 
-def test_ddo_credentials():
+def test_ddo_credentials_addresses():
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample_with_credentials.json")
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
 
     ddo = DDO(json_filename=sample_ddo_path)
     assert ddo.get_addresses_of_type("allow") == ["0x123", "0x456a"]
     assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333"]
-    assert not ddo.is_address_allowed("0x111")
-    assert ddo.is_address_allowed("0x456A")
+    assert (
+        ddo.get_address_allowed_code("0x111")
+        == ConsumableCodes.CREDENTIAL_NOT_IN_ALLOW_LIST
+    )
+    assert ddo.get_address_allowed_code("0x456A") == ConsumableCodes.OK
 
     # if "allow" exists, "deny" is not checked anymore,
     # so remove allow to test the behaviour of deny
     ddo._credentials.pop("allow")
     assert ddo.get_addresses_of_type("allow") == []
     assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333"]
-    assert ddo.is_address_allowed("0x111")
-    assert not ddo.is_address_allowed("0x333")
+    assert ddo.get_address_allowed_code("0x111") == ConsumableCodes.OK
+    assert (
+        ddo.get_address_allowed_code("0x333") == ConsumableCodes.CREDENTIAL_IN_DENY_LIST
+    )
 
 
 def test_ddo_on_chain():
