@@ -6,14 +6,13 @@
 import os
 
 import pytest
-
 from ocean_lib.config import Config
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.ocean import util
 from ocean_lib.ocean.env_constants import (
+    ENV_CONFIG_FILE,
     ENV_INFURA_CONNECTION_TYPE,
     ENV_INFURA_PROJECT_ID,
-    ENV_CONFIG_FILE,
 )
 
 
@@ -117,7 +116,7 @@ def test_get_contracts_addresses():
         and "Metadata"
         and "Ocean" in addresses
     )
-    assert len(addresses) == 5
+    assert len(addresses) == 6
     for value in addresses.values():
         assert value.startswith("0x"), "It is not a token address."
 

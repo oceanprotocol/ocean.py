@@ -26,6 +26,7 @@ TEST_SERVICE_URL = "http://localhost:8005"
 
 
 def test_creating_ddo_from_scratch():
+    """Tests creating a DDO from scratch."""
     # create an empty ddo
     ddo = DDO()
     assert ddo.did is None
@@ -61,6 +62,7 @@ def test_creating_ddo_from_scratch():
 
 
 def test_create_auth_from_json():
+    """Tests create_authentication_from_json function in DDOs."""
     auth = {"publicKey": "0x00000", "type": "auth-type", "nothing": ""}
     assert DDO.create_authentication_from_json(auth) == {
         "publicKey": "0x00000",
@@ -71,6 +73,7 @@ def test_create_auth_from_json():
 
 
 def test_create_public_key_from_json():
+    """Tests create_public_key_from_json function in DDOs."""
     pkey = {"id": "pkeyid", "type": "keytype", "owner": "0x00009"}
     pub_key_inst = DDO.create_public_key_from_json(pkey)
     assert isinstance(pub_key_inst, PublicKeyBase)
@@ -85,6 +88,7 @@ def test_create_public_key_from_json():
 
 
 def test_ddo_dict():
+    """Tests DDO creation from dictionary."""
     sample_ddo_path = get_resource_path("ddo", "ddo_sample_algorithm.json")
     assert sample_ddo_path.exists(), f"{sample_ddo_path} does not exist!"
 
@@ -94,6 +98,7 @@ def test_ddo_dict():
 
 
 def test_find_service():
+    """Tests finding a DDO service by index."""
     ddo = get_sample_ddo("ddo_algorithm.json")
     service = ddo.get_service_by_index(0)
     assert service and service.type == ServiceTypes.METADATA, (
@@ -112,6 +117,7 @@ def test_find_service():
 
 
 def test_service_factory():
+    """Tests ServiceFactory builds services."""
     ddo = get_sample_ddo("ddo_algorithm.json")
     type_to_service = {s.type: s for s in ddo.services}
     metadata = ddo.metadata

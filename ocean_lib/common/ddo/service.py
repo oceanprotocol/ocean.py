@@ -6,11 +6,7 @@
     Service Class
     To handle service items in a DDO record
 """
-
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
 import copy
-import json
 import logging
 
 logger = logging.getLogger(__name__)
@@ -105,14 +101,6 @@ class Service:
         """
         if name not in self._reserved_names:
             self._values[name] = value
-
-    def as_text(self, is_pretty=False):
-        """Return the service as a JSON string."""
-        values_dict = self.as_dictionary()
-        if is_pretty:
-            return json.dumps(values_dict, indent=4, separators=(",", ": "))
-
-        return json.dumps(values_dict)
 
     def as_dictionary(self):
         """Return the service as a python dictionary."""
