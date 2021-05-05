@@ -47,8 +47,6 @@ def test_ddo_credentials_addresses():
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample_with_credentials.json")
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
 
-    # TODO: check if empty credential
-
     ddo = DDO(json_filename=sample_ddo_path)
     assert ddo.get_addresses_of_type("allow") == ["0x123", "0x456a"]
     assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333"]
@@ -85,8 +83,6 @@ def test_ddo_credentials_addresses():
 def test_ddo_connection():
     ddo = DDO("did:op:testdid")
     assert ddo.is_consumable() == ConsumableCodes.CONNECTIVITY_FAIL
-
-    # TODO: test with publishing that it passes
 
 
 def test_ddo_credentials_disabled():
