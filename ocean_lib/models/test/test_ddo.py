@@ -83,8 +83,10 @@ def test_ddo_credentials_addresses():
 
 
 def test_ddo_connection():
-    # TODO
-    pass
+    ddo = DDO("did:op:testdid")
+    assert ddo.is_consumable() == ConsumableCodes.CONNECTIVITY_FAIL
+
+    # TODO: test with publishing that it passes
 
 
 def test_ddo_credentials_disabled():

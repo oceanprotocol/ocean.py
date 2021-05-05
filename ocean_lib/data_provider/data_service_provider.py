@@ -642,15 +642,27 @@ class DataServiceProvider:
     def check_single_file_info(file_url, provider_uri=None):
         _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
         data = {"url": file_url}
-        response = requests.post(endpoint, json=data).json()
+        response = requests.post(endpoint, json=data)
+
+        if response.status_code != 200:
+            return False
+
+        response = response.json()
         for file_info in response:
             return file_info["valid"]
 
     @staticmethod
     def check_asset_file_info(asset, provider_uri=None):
+        if not asset.did:
+            return False
         _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
         data = {"did": asset.did}
-        response = requests.post(endpoint, json=data).json()
+        response = requests.post(endpoint, json=data)
+
+        if response.status_code != 200:
+            return False
+
+        response = response.json()
         for ddo_info in response:
             return ddo_info["valid"]
 

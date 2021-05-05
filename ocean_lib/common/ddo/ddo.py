@@ -412,9 +412,13 @@ class DDO:
         if self.is_disabled:
             return ConsumableCodes.ASSET_DISABLED
 
-        #        if not DataServiceProvider.check_asset_file_info(self, provider_uri):
-        #            return ConsumableCodes.CONNECTIVITY_FAIL
-
         credential = simplify_credential(credential)
+        address_allowed_code = self.get_address_allowed_code(credential)
 
-        return self.get_address_allowed_code(credential)
+        if address_allowed_code != ConsumableCodes.OK:
+            return address_allowed_code
+
+        if not DataServiceProvider.check_asset_file_info(self, provider_uri):
+            return ConsumableCodes.CONNECTIVITY_FAIL
+
+        return ConsumableCodes.OK
