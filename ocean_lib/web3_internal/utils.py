@@ -4,12 +4,19 @@
 #
 import logging
 from collections import namedtuple
+from decimal import Decimal
+from typing import Union
 
-import eth_account
-import eth_keys
-import eth_utils
+from eth_keys import keys
+from eth_utils import big_endian_to_int, decode_hex
 from ocean_lib.enforce_typing_shim import enforce_types_shim
-from web3 import Web3
+from ocean_lib.web3_internal.constants import (
+    DEFAULT_NETWORK_NAME,
+    NETWORK_NAME_MAP,
+    PRECISION_18,
+)
+from ocean_lib.web3_internal.web3_overrides.signature import SignatureFix
+from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 Signature = namedtuple("Signature", ("v", "r", "s"))
 
@@ -27,7 +34,7 @@ def generate_multi_value_hash(types, values):
     :return: bytes
     """
     assert len(types) == len(values)
-    return Web3.soliditySha3(types, values)
+    return Web3Provider.get_web3().soliditySha3(types, values)
 
 
 def prepare_prefixed_hash(msg_hash):
@@ -49,7 +56,7 @@ def add_ethereum_prefix_and_hash_msg(text):
     :return: hash of prefixed text according to the recommended ethereum prefix
     """
     prefixed_msg = f"\x19Ethereum Signed Message:\n{len(text)}{text}"
-    return Web3.sha3(text=prefixed_msg)
+    return Web3Provider.get_web3().sha3(text=prefixed_msg)
 
 
 def to_32byte_hex(web3, val):
@@ -83,11 +90,91 @@ def split_signature(web3, signature):
 
 @enforce_types_shim
 def privateKeyToAddress(private_key: str) -> str:
-    return eth_account.Account().privateKeyToAccount(private_key).address
+    return Web3Provider.get_web3().eth.account.privateKeyToAccount(private_key).address
 
 
 @enforce_types_shim
-def privateKeyToPublicKey(private_key: str):
-    private_key_bytes = eth_utils.decode_hex(private_key)
-    private_key_object = eth_keys.keys.PrivateKey(private_key_bytes)
+def privateKeyToPublicKey(private_key: str) -> str:
+    private_key_bytes = decode_hex(private_key)
+    private_key_object = keys.PrivateKey(private_key_bytes)
     return private_key_object.public_key
+
+
+@enforce_types_shim
+def get_network_name(network_id: int = None) -> str:
+    """
+    Return the network name based on the current ethereum network id.
+
+    Return `ganache` for every network id that is not mapped.
+
+    :param network_id: Network id, int
+    :return: Network name, str
+    """
+    if not network_id:
+        network_id = get_network_id()
+    return NETWORK_NAME_MAP.get(network_id, DEFAULT_NETWORK_NAME).lower()
+
+
+@enforce_types_shim
+def get_network_id() -> int:
+    """
+    Return the ethereum network id calling the `web3.version.network` method.
+
+    :return: Network id, int
+    """
+    return int(Web3Provider.get_web3().version.network)
+
+
+@enforce_types_shim
+def ec_recover(message, signed_message):
+    """
+    This method does not prepend the message with the prefix `\x19Ethereum Signed Message:\n32`.
+    The caller should add the prefix to the msg/hash before calling this if the signature was
+    produced for an ethereum-prefixed message.
+
+    :param message:
+    :param signed_message:
+    :return:
+    """
+    w3 = Web3Provider.get_web3()
+    v, r, s = split_signature(w3, w3.toBytes(hexstr=signed_message))
+    signature_object = SignatureFix(vrs=(v, big_endian_to_int(r), big_endian_to_int(s)))
+    return w3.eth.account.recoverHash(
+        message, signature=signature_object.to_hex_v_hacked()
+    )
+
+
+@enforce_types_shim
+def personal_ec_recover(message, signed_message):
+    prefixed_hash = add_ethereum_prefix_and_hash_msg(message)
+    return ec_recover(prefixed_hash, signed_message)
+
+
+@enforce_types_shim
+def get_ether_balance(address: str) -> int:
+    """
+    Get balance of an ethereum address.
+
+    :param address: address, bytes32
+    :return: balance, int
+    """
+    return Web3Provider.get_web3().eth.getBalance(address, block_identifier="latest")
+
+
+@enforce_types_shim
+def from_wei(value_in_wei: int) -> Decimal:
+    return Web3Provider.get_web3().fromWei(value_in_wei, "ether")
+
+
+@enforce_types_shim
+def to_wei(value_in_ether: Union[Decimal, str]) -> int:
+    if isinstance(value_in_ether, Decimal):
+        return Web3Provider.get_web3().toWei(
+            value_in_ether.quantize(PRECISION_18), "ether"
+        )
+    elif isinstance(value_in_ether, str):
+        return Web3Provider.get_web3().toWei(
+            Decimal(value_in_ether).quantize(PRECISION_18), "ether"
+        )
+    else:
+        raise TypeError("Unsupported type.  Must be one of Decimal or string")

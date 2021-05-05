@@ -90,7 +90,6 @@ metadata_cache_uri = http://localhost:5000
 provider.url = http://localhost:8030
 provider.address = 0x00bd138abd70e2f00903268f3db08f2d25677c9e
 
-storage.path = ocean_lib.db
 downloads.path = consume-downloads
 
 [util]
@@ -107,13 +106,6 @@ export TEST_PRIVATE_KEY2=0x804365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a60
 python
 ```
 
-In the Python console:
-```python
-# deploy new OCEAN token; update ~/.ocean/ocean-contracts/artifacts/address.json; send OCEAN to accounts
-from ocean_lib.ocean.deploy import deploy_fake_OCEAN
-deploy_fake_OCEAN()
-```
-
 ## 2. Alice publishes data asset
 
 In the Python console:
@@ -128,6 +120,10 @@ ocean = Ocean(config)
 import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
+
+#Mint OCEAN
+from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
+mint_fake_OCEAN()
 
 #Publish a datatoken
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
@@ -171,8 +167,8 @@ did = asset.did  # did contains the datatoken address
 
 #Mint the datatokens
 from decimal import Decimal
-from ocean_lib.web3_internal.web3helper import Web3Helper
-data_token.mint(alice_wallet.address, Web3Helper.to_wei(Decimal("100.0")), alice_wallet)
+from ocean_lib.web3_internal.utils import to_wei
+data_token.mint(alice_wallet.address, to_wei(Decimal("100.0")), alice_wallet)
 
 #In the create() step below, Alice needs ganache OCEAN. Ensure she has it.
 from ocean_lib.models.btoken import BToken #BToken is ERC20

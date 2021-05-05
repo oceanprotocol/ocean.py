@@ -16,9 +16,9 @@ from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.event_filter import EventFilter
+from ocean_lib.web3_internal.utils import from_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_lib.web3_internal.web3helper import Web3Helper
 from web3 import Web3
 from web3.exceptions import MismatchedABI
 from web3.utils.events import get_event_data
@@ -388,7 +388,7 @@ class DataToken(ContractBase):
             assert order_log.args.marketFee <= (max_market_fee_in_wei + 5), (
                 f"marketFee {order_log.args.marketFee} exceeds the expected maximum "
                 f"of {max_market_fee_in_wei} based on feePercentage="
-                f"{Web3Helper.from_wei(self.MAX_MARKET_FEE_PER_DATATOKEN_IN_WEI)} ."
+                f"{from_wei(self.MAX_MARKET_FEE_PER_DATATOKEN_IN_WEI)} ."
             )
             target_amount = target_amount - order_log.args.marketFee
 

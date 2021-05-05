@@ -10,7 +10,7 @@ import pytest
 from ocean_lib.assets.asset import Asset
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.ocean.web3_internal import Web3Helper
+from ocean_lib.web3_internal.utils import to_wei
 from tests.resources.ddo_helpers import get_metadata, get_registered_ddo
 from tests.resources.helper_functions import (
     get_another_consumer_ocean_instance,
@@ -52,7 +52,7 @@ def test_market_flow(order_type):
     # Give the consumer some datatokens so they can order the service
     try:
         tx_id = dt.transfer(
-            consumer_wallet.address, Web3Helper.to_wei(Decimal("10.0")), pub_wallet
+            consumer_wallet.address, to_wei(Decimal("10.0")), pub_wallet
         )
         dt.verify_transfer_tx(tx_id, pub_wallet.address, consumer_wallet.address)
     except (AssertionError, Exception) as e:
@@ -142,7 +142,7 @@ def test_payer_market_flow():
     # Give the consumer some datatokens so they can order the service
     try:
         tx_id = dt.transfer(
-            consumer_wallet.address, Web3Helper.to_wei(Decimal("10.0")), pub_wallet
+            consumer_wallet.address, to_wei(Decimal("10.0")), pub_wallet
         )
         dt.verify_transfer_tx(tx_id, pub_wallet.address, consumer_wallet.address)
     except (AssertionError, Exception) as e:

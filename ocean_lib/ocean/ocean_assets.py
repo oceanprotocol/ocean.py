@@ -41,10 +41,13 @@ from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
+from ocean_lib.web3_internal.transactions import sign_hash
+from ocean_lib.web3_internal.utils import (
+    add_ethereum_prefix_and_hash_msg,
+    get_network_name,
+)
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_lib.web3_internal.web3helper import Web3Helper
 from plecos import plecos
 
 logger = logging.getLogger("ocean")
@@ -199,7 +202,7 @@ class OceanAssets:
         #################
         # DataToken
         address = DTFactory.configured_address(
-            Web3Helper.get_network_name(), self._config.address_file
+            get_network_name(), self._config.address_file
         )
         dtfactory = DTFactory(address)
         if not data_token_address:
@@ -272,7 +275,7 @@ class OceanAssets:
         if compute_service:
             asset.add_service(compute_service)
 
-        asset.proof["signatureValue"] = Web3Helper.sign_hash(
+        asset.proof["signatureValue"] = sign_hash(
             add_ethereum_prefix_and_hash_msg(asset.asset_id), publisher_wallet
         )
 
