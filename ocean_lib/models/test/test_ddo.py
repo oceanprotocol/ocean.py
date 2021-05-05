@@ -38,17 +38,17 @@ def get_ddo_sample(datatoken_address):
 
 
 def test_ddo_credentials():
-    ddo = DDO()
-    ddo._credentials = {
-        "allow": [{"type": "address", "values": ["0x123", "0x456A"]}],
-        "deny": [{"type": "address", "values": ["0x2222", "0x333"]}],
-    }
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample_with_credentials.json")
+    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
 
+    ddo = DDO(json_filename=sample_ddo_path)
     assert ddo.get_addresses_of_type("allow") == ["0x123", "0x456a"]
     assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333"]
     assert not ddo.is_address_allowed("0x111")
     assert ddo.is_address_allowed("0x456A")
 
+    # if "allow" exists, "deny" is not checked anymore,
+    # so remove allow to test the behaviour of deny
     ddo._credentials.pop("allow")
     assert ddo.get_addresses_of_type("allow") == []
     assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333"]
