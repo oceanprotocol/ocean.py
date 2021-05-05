@@ -5,9 +5,14 @@
 import lzma
 import uuid
 
+import pytest
 from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import Asset
-from ocean_lib.common.agreements.consumable import ConsumableCodes
+from ocean_lib.common.agreements.consumable import (
+    ConsumableCodes,
+    MalformedCredential,
+    UnsupportedCredential,
+)
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.utils.utilities import checksum
 from ocean_lib.config_provider import ConfigProvider
@@ -42,6 +47,8 @@ def test_ddo_credentials_addresses():
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample_with_credentials.json")
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
 
+    # TODO: check if empty credential
+
     ddo = DDO(json_filename=sample_ddo_path)
     assert ddo.get_addresses_of_type("allow") == ["0x123", "0x456a"]
     assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333"]
@@ -60,6 +67,40 @@ def test_ddo_credentials_addresses():
     assert (
         ddo.get_address_allowed_code("0x333") == ConsumableCodes.CREDENTIAL_IN_DENY_LIST
     )
+
+    # if "allow" OR "deny" exist, we need a credential,
+    # so remove both to test the behaviour of no credential supplied
+    ddo._credentials.pop("deny")
+    assert ddo.get_address_allowed_code() == ConsumableCodes.OK
+
+    credential = {"type": "nonexistent", "value": "test"}
+    with pytest.raises(UnsupportedCredential):
+        ddo.is_consumable(credential)
+
+    credential = {"type": "address", "value": ""}
+    with pytest.raises(MalformedCredential):
+        ddo.is_consumable(credential)
+
+
+def test_ddo_connection():
+    # TODO
+    pass
+
+
+def test_ddo_credentials_disabled():
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample_disabled.json")
+    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
+
+    ddo = DDO(json_filename=sample_ddo_path)
+    assert ddo.is_disabled
+    assert not ddo.is_enabled
+
+    ddo.enable()
+    assert not ddo.is_disabled
+    assert ddo.is_enabled
+
+    ddo.disable()
+    assert ddo.is_consumable({}) == ConsumableCodes.ASSET_DISABLED
 
 
 def test_ddo_on_chain():

@@ -7,17 +7,13 @@ import json
 import logging
 
 from eth_utils import add_0x_prefix
-from ocean_lib.common.agreements.consumable import (
-    ConsumableCodes,
-    MalformedCredential,
-    UnsupportedCredential,
-)
+from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.ddo.public_key_base import PublicKeyBase
 from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_ETHEREUM_ECDSA
 from ocean_lib.common.did import OCEAN_PREFIX, did_to_id
-from ocean_lib.common.utils.utilities import get_timestamp
+from ocean_lib.common.utils.utilities import get_timestamp, simplify_credential
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 from .constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
@@ -66,6 +62,16 @@ class DDO:
     def did(self):
         """Get the DID."""
         return self._did
+
+    @property
+    def is_disabled(self):
+        """Get the value of is_disabled."""
+        return self._other_values.get("isDisabled")
+
+    @property
+    def is_enabled(self):
+        """Get the reverse of is_disabled (for convenience)."""
+        return not self.is_disabled
 
     @property
     def asset_id(self):
@@ -381,9 +387,18 @@ class DDO:
 
         return []
 
-    def get_address_allowed_code(self, address):
+    def enable(self):
+        self._other_values.pop("isDisabled")
+
+    def disable(self):
+        self._other_values["isDisabled"] = True
+
+    def get_address_allowed_code(self, address=None):
         allowed_addresses = self.get_addresses_of_type("allow")
         denied_addresses = self.get_addresses_of_type("deny")
+
+        if not address and (not allowed_addresses and not denied_addresses):
+            return ConsumableCodes.OK
 
         if allowed_addresses and address.lower() not in allowed_addresses:
             return ConsumableCodes.CREDENTIAL_NOT_IN_ALLOW_LIST
@@ -393,18 +408,13 @@ class DDO:
 
         return ConsumableCodes.OK
 
-    def is_consumable(self, credential, provider_uri=None):
-        # TODO: check if disabled
+    def is_consumable(self, credential=None, provider_uri=None):
+        if self.is_disabled:
+            return ConsumableCodes.ASSET_DISABLED
 
-        if not DataServiceProvider.check_asset_file_info(self, provider_uri):
-            return ConsumableCodes.CONNECTIVITY_FAIL
+        #        if not DataServiceProvider.check_asset_file_info(self, provider_uri):
+        #            return ConsumableCodes.CONNECTIVITY_FAIL
 
-        if credential.get("type") != "address":
-            raise UnsupportedCredential(
-                f'Credential of type {credential.get("type")} is unsupported.'
-            )
+        credential = simplify_credential(credential)
 
-        if not credential.get("value"):
-            raise MalformedCredential("Received empty address.")
-
-        return self.get_address_allowed_code(credential["value"])
+        return self.get_address_allowed_code(credential)

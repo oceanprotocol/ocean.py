@@ -11,6 +11,11 @@ import json
 import uuid
 from datetime import datetime
 
+from ocean_lib.common.agreements.consumable import (
+    MalformedCredential,
+    UnsupportedCredential,
+)
+
 
 def generate_new_id():
     """
@@ -73,3 +78,18 @@ def checksum(seed):
 def get_timestamp():
     """Return the current system timestamp."""
     return f"{datetime.utcnow().replace(microsecond=0).isoformat()}Z"
+
+
+def simplify_credential(credential):
+    if not credential:
+        return None
+
+    if credential.get("type") != "address":
+        raise UnsupportedCredential(
+            f'Credential of type {credential.get("type")} is unsupported.'
+        )
+
+    if not credential.get("value"):
+        raise MalformedCredential("Received empty address.")
+
+    return credential["value"]
