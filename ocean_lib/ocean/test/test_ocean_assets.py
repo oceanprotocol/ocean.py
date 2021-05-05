@@ -99,7 +99,6 @@ def test_register_asset(publisher_ocean_instance):
         print(meta_data_assets)
 
     # Publish the metadata
-    _ = ddo.metadata["main"]["name"]
     _name = "updated name"
     ddo.metadata["main"]["name"] = _name
     assert ddo.metadata["main"]["name"] == _name, "Asset's name was not updated."
@@ -290,9 +289,9 @@ def test_create_asset_with_owner_address(publisher_ocean_instance):
         data_token_address=token.address,
     )
     assert asset_2, "Asset creation failed. The asset is None."
-    assert asset_1.proof["creator"] == asset_2.proof["creator"], (
-        "Different owners. The two assets do not have the " "same creator address. "
-    )
+    assert (
+        asset_1.proof["creator"] == asset_2.proof["creator"]
+    ), "Different owners of the assets."
 
 
 def test_create_asset_without_dt_address(publisher_ocean_instance):

@@ -120,7 +120,7 @@ def test_issue185_system(monkeypatch):
 
     # this failed before the fix
     datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet)
-    assert datatoken is not None
+    assert datatoken is not None, "Datatoken has not been created."
 
 
 def setup_issue_185(monkeypatch):

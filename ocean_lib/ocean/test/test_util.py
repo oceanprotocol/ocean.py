@@ -118,7 +118,7 @@ def test_get_contracts_addresses():
         and "Ocean" in addresses
     )
     assert len(addresses) == 5
-    for _, value in addresses.items():
+    for value in addresses.values():
         assert value.startswith("0x"), "It is not a token address."
 
 
