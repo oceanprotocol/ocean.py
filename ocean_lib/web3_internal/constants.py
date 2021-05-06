@@ -19,3 +19,13 @@ NETWORK_NAME_MAP = {
     42: "Kovan",
     100: "xDai",
 }
+
+NETWORK_TIMEOUT_MAP = {
+    "mainnet": 10 * 60,
+    "morden": 10 * 60,
+    "ropsten": 5 * 60,
+    "rinkeby": 5 * 60,
+    "kovan": 10 * 60,
+    "xdai": 10 * 60,
+    "ganache": 2,
+}
