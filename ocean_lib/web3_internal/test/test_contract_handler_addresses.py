@@ -70,7 +70,7 @@ def test_get_contracts_addresses_example_config(network, example_config):
         network, example_config.address_file
     )
     assert set(addresses.keys()) == set(
-        ["DTFactory", "BFactory", "FixedRateExchange", "Metadata", "Ocean"]
+        ["DTFactory", "BFactory", "FixedRateExchange", "Metadata", "Ocean", "Dispenser"]
     )
 
     # are address values sane?
