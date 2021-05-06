@@ -6,7 +6,6 @@
 import os
 
 import pytest
-from setuptools.config import ConfigHandler
 
 from ocean_lib.config import Config
 from ocean_lib.config_provider import ConfigProvider
@@ -28,7 +27,6 @@ from ocean_lib.ocean.util import (
     get_web3_connection_provider,
 )
 from ocean_lib.web3_internal.contract_handler import ContractHandler
-from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
 
 
 def test_get_infura_connection_type(monkeypatch):
