@@ -63,13 +63,12 @@ def test_register_asset(publisher_ocean_instance):
     assert ddo, "ddo is not found in cache."
     ddo_dict = ddo.as_dictionary()
     original = original_ddo.as_dictionary()
-    assert ddo_dict["publicKey"] == original["publicKey"], (
-        "The new asset does not have the same public key as the " "original asset. "
-    )
-    assert ddo_dict["authentication"] == original["authentication"], (
-        "The new asset does not have the same "
-        "authentication key as the original asset. "
-    )
+    assert (
+        ddo_dict["publicKey"] == original["publicKey"]
+    ), "The new asset's public key does not coincide with the original asset's one."
+    assert (
+        ddo_dict["authentication"] == original["authentication"]
+    ), "The new asset's authentication key does not coincide with the original asset's one."
     assert ddo_dict["service"], "The new asset does not have the service field."
     assert original["service"], "The original asset does not have the service field."
     metadata = ddo_dict["service"][0]["attributes"]
@@ -79,9 +78,9 @@ def test_register_asset(publisher_ocean_instance):
         ddo_dict["service"][0]["attributes"]["main"]["name"]
         == original["service"][0]["attributes"]["main"]["name"]
     ), "The new asset has a different name."
-    assert ddo_dict["service"][1] == original["service"][1], (
-        "The two assets have different information regarding " "access service. "
-    )
+    assert (
+        ddo_dict["service"][1] == original["service"][1]
+    ), "The new asset's access service does not coincide with the original asset's one."
 
     # Can't resolve unregistered asset
     unregistered_did = DID.did({"0": "0x00112233445566"})

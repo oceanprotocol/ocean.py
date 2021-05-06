@@ -5,6 +5,8 @@
 import hashlib
 import json
 
+from typing import Optional
+
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.common.agreements.service_types import ServiceTypes
@@ -16,7 +18,11 @@ def create_checksum(text):
 
 
 @enforce_types_shim
-def generate_trusted_algo_dict(did=None, metadata_cache_uri=None, ddo=None):
+def generate_trusted_algo_dict(
+    did: Optional[str] = None,
+    metadata_cache_uri: Optional[str] = None,
+    ddo: Optional[Asset] = None,
+):
     assert ddo or (
         did and metadata_cache_uri
     ), "Either DDO, or both did and metadata_cache_uri are None."
