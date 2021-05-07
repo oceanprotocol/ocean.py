@@ -44,10 +44,6 @@ class DataProviderMock(object):
         return True
 
     @staticmethod
-    def restart_compute_job(*args, **kwargs):
-        return True
-
-    @staticmethod
     def delete_compute_job(*args, **kwargs):
         return True
 

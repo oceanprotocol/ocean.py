@@ -7,12 +7,17 @@ import json
 import logging
 
 from eth_utils import add_0x_prefix
+from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.ddo.public_key_base import PublicKeyBase
 from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_ETHEREUM_ECDSA
 from ocean_lib.common.did import OCEAN_PREFIX, did_to_id
-from ocean_lib.common.utils.utilities import get_timestamp
+from ocean_lib.common.utils.utilities import (
+    get_timestamp,
+    simplify_credential_to_address,
+)
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 from .constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
 from .public_key_rsa import PUBLIC_KEY_TYPE_RSA, PublicKeyRSA
@@ -38,6 +43,7 @@ class DDO:
         self._authentications = []
         self._services = []
         self._proof = None
+        self._credentials = {}
         self._created = None
         self._other_values = {}
 
@@ -61,6 +67,16 @@ class DDO:
         return self._did
 
     @property
+    def is_disabled(self):
+        """Get the value of is_disabled."""
+        return self._other_values.get("isDisabled")
+
+    @property
+    def is_enabled(self):
+        """Get the reverse of is_disabled (for convenience)."""
+        return not self.is_disabled
+
+    @property
     def asset_id(self):
         """The asset id part of the DID"""
         if not self._did:
@@ -76,6 +92,11 @@ class DDO:
     def proof(self):
         """Get the static proof, or None."""
         return self._proof
+
+    @property
+    def credentials(self):
+        """Get the credentials."""
+        return self._credentials
 
     @property
     def publisher(self):
@@ -205,6 +226,8 @@ class DDO:
             data["service"] = values
         if self._proof and is_proof:
             data["proof"] = self._proof
+        if self._credentials:
+            data["credentials"] = self._credentials
 
         if self._other_values:
             data.update(self._other_values)
@@ -245,6 +268,8 @@ class DDO:
                 self._services.append(service)
         if "proof" in values:
             self._proof = values.pop("proof")
+        if "credentials" in values:
+            self._credentials = values.pop("credentials")
 
         self._other_values = values
 
@@ -354,3 +379,58 @@ class DDO:
 
         authentication = {"type": authentication_type, "publicKey": key_id}
         return authentication
+
+    def get_addresses_of_type(self, section_type="allow"):
+        """Get a filtered list of addresses from credentials (use with allow/deny)."""
+        entries = self._credentials.get(section_type, [])
+
+        for entry in entries:
+            if entry["type"] == "address":
+                return [val.lower() for val in entry["values"]]
+
+        return []
+
+    def enable(self):
+        self._other_values.pop("isDisabled")
+
+    def disable(self):
+        self._other_values["isDisabled"] = True
+
+    def get_address_allowed_code(self, credential=None):
+        address = simplify_credential_to_address(credential)
+
+        allowed_addresses = self.get_addresses_of_type("allow")
+        denied_addresses = self.get_addresses_of_type("deny")
+
+        if not address and not self.requires_address_credential():
+            return ConsumableCodes.OK
+
+        if allowed_addresses and address.lower() not in allowed_addresses:
+            return ConsumableCodes.CREDENTIAL_NOT_IN_ALLOW_LIST
+
+        if not allowed_addresses and address.lower() in denied_addresses:
+            return ConsumableCodes.CREDENTIAL_IN_DENY_LIST
+
+        return ConsumableCodes.OK
+
+    def requires_address_credential(self):
+        allowed_addresses = self.get_addresses_of_type("allow")
+        denied_addresses = self.get_addresses_of_type("deny")
+
+        return allowed_addresses or denied_addresses
+
+    def is_consumable(
+        self, credential=None, with_connectivity_check=True, provider_uri=None
+    ):
+        if self.is_disabled:
+            return ConsumableCodes.ASSET_DISABLED
+
+        if with_connectivity_check and not DataServiceProvider.check_asset_file_info(
+            self, provider_uri
+        ):
+            return ConsumableCodes.CONNECTIVITY_FAIL
+
+        if self.requires_address_credential():
+            return self.get_address_allowed_code(credential)
+
+        return ConsumableCodes.OK

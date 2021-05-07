@@ -7,6 +7,7 @@ from typing import Optional
 
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
+from ocean_lib.common.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 from ocean_lib.common.agreements.service_types import ServiceTypes
@@ -290,6 +291,13 @@ class OceanCompute:
         assert (
             ServiceTypes.CLOUD_COMPUTE == sa.type
         ), "service at serviceId is not of type compute service."
+
+        consumable_result = asset.is_consumable(
+            {"type": "address", "value": consumer_wallet.address},
+            provider_uri=sa.service_endpoint,
+        )
+        if consumable_result != ConsumableCodes.OK:
+            raise AssetNotConsumable(consumable_result)
 
         signature = self._sign_message(
             consumer_wallet,

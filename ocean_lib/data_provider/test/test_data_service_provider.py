@@ -148,21 +148,6 @@ def test_compute_job_result(with_nice_client):
     assert result == {"good_job": "with_mock"}
 
 
-def test_restart_job_result(with_nice_client):
-    """Tests successful compute job restart."""
-    result = DataSP.restart_compute_job(
-        "some_did",
-        "some_job_id",
-        "http://mock",
-        "some_consumer_address",
-        "some_signature",
-        "some_service_id",
-        "some_tx_id",
-        algorithm_did="some_algo_did",
-    )
-    assert result == {"good_job": "with_mock_post"}
-
-
 def test_delete_job_result(with_nice_client):
     """Tests successful compute job deletion."""
     result = DataSP.delete_compute_job(
