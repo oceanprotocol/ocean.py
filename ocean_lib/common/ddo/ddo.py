@@ -13,7 +13,10 @@ from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.ddo.public_key_base import PublicKeyBase
 from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_ETHEREUM_ECDSA
 from ocean_lib.common.did import OCEAN_PREFIX, did_to_id
-from ocean_lib.common.utils.utilities import get_timestamp, simplify_credential
+from ocean_lib.common.utils.utilities import (
+    get_timestamp,
+    simplify_credential_to_address,
+)
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 from .constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
@@ -397,7 +400,7 @@ class DDO:
         allowed_addresses = self.get_addresses_of_type("allow")
         denied_addresses = self.get_addresses_of_type("deny")
 
-        if not address and (not allowed_addresses and not denied_addresses):
+        if not address and not self.requires_address_credential():
             return ConsumableCodes.OK
 
         if allowed_addresses and address.lower() not in allowed_addresses:
@@ -408,17 +411,28 @@ class DDO:
 
         return ConsumableCodes.OK
 
-    def is_consumable(self, credential=None, provider_uri=None):
+    def requires_address_credential(self):
+        allowed_addresses = self.get_addresses_of_type("allow")
+        denied_addresses = self.get_addresses_of_type("deny")
+
+        return allowed_addresses or denied_addresses
+
+    def is_consumable(
+        self, credential=None, with_connectivity_check=True, provider_uri=None
+    ):
         if self.is_disabled:
             return ConsumableCodes.ASSET_DISABLED
 
-        credential = simplify_credential(credential)
-        address_allowed_code = self.get_address_allowed_code(credential)
-
-        if address_allowed_code != ConsumableCodes.OK:
-            return address_allowed_code
-
-        if not DataServiceProvider.check_asset_file_info(self, provider_uri):
+        if with_connectivity_check and not DataServiceProvider.check_asset_file_info(
+            self, provider_uri
+        ):
             return ConsumableCodes.CONNECTIVITY_FAIL
+
+        if self.requires_address_credential():
+            credential = simplify_credential_to_address(credential)
+            address_allowed_code = self.get_address_allowed_code(credential)
+
+            if address_allowed_code != ConsumableCodes.OK:
+                return address_allowed_code
 
         return ConsumableCodes.OK

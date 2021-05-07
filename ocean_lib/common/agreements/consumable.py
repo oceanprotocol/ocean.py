@@ -12,9 +12,5 @@ class ConsumableCodes:
     CREDENTIAL_IN_DENY_LIST = 4
 
 
-class UnsupportedCredential(Exception):
-    pass
-
-
 class MalformedCredential(Exception):
     pass

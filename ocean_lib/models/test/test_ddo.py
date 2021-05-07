@@ -8,11 +8,7 @@ import uuid
 import pytest
 from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import Asset
-from ocean_lib.common.agreements.consumable import (
-    ConsumableCodes,
-    MalformedCredential,
-    UnsupportedCredential,
-)
+from ocean_lib.common.agreements.consumable import ConsumableCodes, MalformedCredential
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.utils.utilities import checksum
 from ocean_lib.config_provider import ConfigProvider
@@ -66,18 +62,14 @@ def test_ddo_credentials_addresses():
         ddo.get_address_allowed_code("0x333") == ConsumableCodes.CREDENTIAL_IN_DENY_LIST
     )
 
+    credential = {"type": "address", "value": ""}
+    with pytest.raises(MalformedCredential):
+        ddo.is_consumable(credential, with_connectivity_check=False)
+
     # if "allow" OR "deny" exist, we need a credential,
     # so remove both to test the behaviour of no credential supplied
     ddo._credentials.pop("deny")
     assert ddo.get_address_allowed_code() == ConsumableCodes.OK
-
-    credential = {"type": "nonexistent", "value": "test"}
-    with pytest.raises(UnsupportedCredential):
-        ddo.is_consumable(credential)
-
-    credential = {"type": "address", "value": ""}
-    with pytest.raises(MalformedCredential):
-        ddo.is_consumable(credential)
 
 
 def test_ddo_connection():

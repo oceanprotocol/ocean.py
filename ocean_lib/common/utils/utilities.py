@@ -11,10 +11,7 @@ import json
 import uuid
 from datetime import datetime
 
-from ocean_lib.common.agreements.consumable import (
-    MalformedCredential,
-    UnsupportedCredential,
-)
+from ocean_lib.common.agreements.consumable import MalformedCredential
 
 
 def generate_new_id():
@@ -80,14 +77,9 @@ def get_timestamp():
     return f"{datetime.utcnow().replace(microsecond=0).isoformat()}Z"
 
 
-def simplify_credential(credential):
+def simplify_credential_to_address(credential):
     if not credential:
         return None
-
-    if credential.get("type") != "address":
-        raise UnsupportedCredential(
-            f'Credential of type {credential.get("type")} is unsupported.'
-        )
 
     if not credential.get("value"):
         raise MalformedCredential("Received empty address.")
