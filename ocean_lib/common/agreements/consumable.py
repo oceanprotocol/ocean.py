@@ -14,3 +14,8 @@ class ConsumableCodes:
 
 class MalformedCredential(Exception):
     pass
+
+
+class AssetNotConsumable(Exception):
+    def __init__(self, consumable_code):
+        self.consumable_code = consumable_code
