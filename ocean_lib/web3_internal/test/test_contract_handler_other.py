@@ -17,19 +17,21 @@ _NETWORK = "ganache"
 def test_set_artifacts_path__deny_change_to_empty():
     """Tests can not set empty artifacts path."""
     path_before = copy.copy(ContractHandler.artifacts_path)
-    assert path_before is not None
-    assert ContractHandler._contracts
+    assert path_before is not None, "The artifacts path does not exist."
+    assert ContractHandler._contracts, "The contracts dict does not map anything."
 
     ContractHandler.set_artifacts_path(None)  # it should deny this
 
-    assert ContractHandler.artifacts_path == path_before
+    assert (
+        ContractHandler.artifacts_path == path_before
+    ), "The artifacts path has been modified."
     assert ContractHandler._contracts  # cache should *not* have reset
 
 
 def test_set_artifacts_path__deny_change_to_same():
     """Tests can not set unchanged artifacts path."""
     path_before = copy.copy(ContractHandler.artifacts_path)
-    assert path_before is not None
+    assert path_before is not None, "The artifacts path does not exist."
     assert ContractHandler._contracts
 
     ContractHandler.set_artifacts_path(path_before)
@@ -41,7 +43,7 @@ def test_set_artifacts_path__deny_change_to_same():
 def test_set_artifacts_path__allow_change():
     """Tests that a correct artifacts path can be set (happy flow)."""
     path_before = copy.copy(ContractHandler.artifacts_path)
-    assert path_before is not None
+    assert path_before is not None, "The artifacts path does not exist."
     assert ContractHandler._contracts
 
     ContractHandler.set_artifacts_path("new path")
@@ -65,8 +67,10 @@ def test_get_unhappy_paths():
 def test_get_and_has__name_only():
     """Tests get() and has() from name-only queries, which also call _load() and read_abi_from_file()."""
     contract = ContractHandler.get("DataTokenTemplate")
-    assert contract.address[:2] == "0x"
-    assert "totalSupply" in str(contract.abi)
+    assert contract.address[:2] == "0x", "Wrong format for addresses."
+    assert "totalSupply" in str(
+        contract.abi
+    ), "Contract abi does not have totalSupply function."
 
     assert ContractHandler.has("DataTokenTemplate")
     assert not ContractHandler.has("foo name")
@@ -80,7 +84,9 @@ def test_get_and_has__name_and_address(network, example_config):
     target_address = addresses["DTFactory"]
 
     contract = ContractHandler.get("DTFactory", target_address)
-    assert "createToken" in str(contract.abi)
+    assert "createToken" in str(
+        contract.abi
+    ), "Contract abi does not have createToken function."
     assert contract.address == addresses["DTFactory"]
 
     assert ContractHandler.has("DTFactory", target_address)
@@ -92,7 +98,9 @@ def test_get_and_has__name_and_address(network, example_config):
 def test_get_concise_contract():
     """Tests that a concise contract can be retrieved from a DataTokenTemplate."""
     contract_concise = ContractHandler.get_concise_contract("DataTokenTemplate")
-    assert isinstance(contract_concise, ConciseContract)
+    assert isinstance(
+        contract_concise, ConciseContract
+    ), "The concise contract does have an unknown instance."
 
 
 def test_set():
@@ -116,18 +124,26 @@ def test_set():
 
 def test_read_abi_from_file__example_config__happy_path(example_config):
     """Tests a correct reading of abi from file (happy path)."""
-    assert "https" not in str(ContractHandler.artifacts_path)
+    assert "https" not in str(
+        ContractHandler.artifacts_path
+    ), "Https is included in artifacts path."
 
     contract_definition = ContractHandler.read_abi_from_file(
         "DTFactory", ContractHandler.artifacts_path
     )
-    assert contract_definition["contractName"] == "DTFactory"
-    assert "createToken" in str(contract_definition["abi"])
+    assert (
+        contract_definition["contractName"] == "DTFactory"
+    ), "DTFactory is not the proper contract name."
+    assert "createToken" in str(
+        contract_definition["abi"]
+    ), "Contract abi does not have createToken function."
 
 
 def test_read_abi_from_file__example_config__bad_contract_name(example_config):
     """Tests an incorrect reading of abi from file (sad path)."""
-    assert "https" not in str(ContractHandler.artifacts_path)
+    assert "https" not in str(
+        ContractHandler.artifacts_path
+    ), "Https is included in artifacts path."
 
     base_path = ContractHandler.artifacts_path
     target_filename = os.path.join(base_path, "DTFactoryFOO.json")
