@@ -396,7 +396,9 @@ class DDO:
     def disable(self):
         self._other_values["isDisabled"] = True
 
-    def get_address_allowed_code(self, address=None):
+    def get_address_allowed_code(self, credential=None):
+        address = simplify_credential_to_address(credential)
+
         allowed_addresses = self.get_addresses_of_type("allow")
         denied_addresses = self.get_addresses_of_type("deny")
 
@@ -429,10 +431,6 @@ class DDO:
             return ConsumableCodes.CONNECTIVITY_FAIL
 
         if self.requires_address_credential():
-            credential = simplify_credential_to_address(credential)
-            address_allowed_code = self.get_address_allowed_code(credential)
-
-            if address_allowed_code != ConsumableCodes.OK:
-                return address_allowed_code
+            return self.get_address_allowed_code(credential)
 
         return ConsumableCodes.OK

@@ -47,29 +47,44 @@ def test_ddo_credentials_addresses():
     assert ddo.get_addresses_of_type("allow") == ["0x123", "0x456a"]
     assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333"]
     assert (
-        ddo.get_address_allowed_code("0x111")
+        ddo.get_address_allowed_code({"type": "address", "value": "0x111"})
         == ConsumableCodes.CREDENTIAL_NOT_IN_ALLOW_LIST
     )
-    assert ddo.get_address_allowed_code("0x456A") == ConsumableCodes.OK
+    assert (
+        ddo.get_address_allowed_code({"type": "address", "value": "0x456A"})
+        == ConsumableCodes.OK
+    )
 
     # if "allow" exists, "deny" is not checked anymore,
     # so remove allow to test the behaviour of deny
     ddo._credentials.pop("allow")
     assert ddo.get_addresses_of_type("allow") == []
     assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333"]
-    assert ddo.get_address_allowed_code("0x111") == ConsumableCodes.OK
     assert (
-        ddo.get_address_allowed_code("0x333") == ConsumableCodes.CREDENTIAL_IN_DENY_LIST
+        ddo.get_address_allowed_code({"type": "address", "value": "0x111"})
+        == ConsumableCodes.OK
+    )
+    assert (
+        ddo.get_address_allowed_code({"type": "address", "value": "0x333"})
+        == ConsumableCodes.CREDENTIAL_IN_DENY_LIST
     )
 
     credential = {"type": "address", "value": ""}
     with pytest.raises(MalformedCredential):
-        ddo.is_consumable(credential, with_connectivity_check=False)
+        ddo.get_address_allowed_code(credential)
 
     # if "allow" OR "deny" exist, we need a credential,
     # so remove both to test the behaviour of no credential supplied
     ddo._credentials.pop("deny")
     assert ddo.get_address_allowed_code() == ConsumableCodes.OK
+
+    # test that we can use another credential if address is not required
+    assert (
+        ddo.is_consumable(
+            {"type": "somethingelse", "value": "test"}, with_connectivity_check=False
+        )
+        == ConsumableCodes.OK
+    )
 
 
 def test_ddo_connection():
