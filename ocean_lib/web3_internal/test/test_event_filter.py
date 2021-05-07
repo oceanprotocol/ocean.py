@@ -20,9 +20,11 @@ def test_transfer_event_filter(alice_ocean, alice_wallet, alice_address, bob_add
     event = getattr(token.events, "Transfer")
     event_filter = EventFilter("Transfer", event, None, block, block)
 
-    assert event_filter.filter_id
+    assert event_filter.filter_id, "Event filter ID is None."
 
     event_filter.uninstall()
     event_filter.recreate_filter()
 
-    assert event_filter.get_new_entries() == []
+    assert (
+        event_filter.get_new_entries() == []
+    ), "There are new entries for EventFilter."

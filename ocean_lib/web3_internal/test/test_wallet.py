@@ -19,10 +19,10 @@ def test_wallet_arguments():
 
     # Create wallet with valid private key
     wallet = Wallet(web3, private_key=private_key)
-    assert wallet.private_key == private_key
-    assert wallet.address
+    assert wallet.private_key == private_key, "Private keys are different."
+    assert wallet.address, "The wallet does not have a wallet address."
     signed_message = wallet.sign(add_ethereum_prefix_and_hash_msg("msg-to-sign"))
-    assert signed_message
+    assert signed_message, "Signed message is None."
 
     # Create wallet with encrypted key and password
     password = "darksecret"
