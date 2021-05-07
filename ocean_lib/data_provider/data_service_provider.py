@@ -19,8 +19,8 @@ from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
+from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
-from ocean_lib.web3_internal.web3helper import Web3Helper
 from requests.exceptions import InvalidURL
 
 logger = logging.getLogger(__name__)
@@ -94,9 +94,7 @@ class DataServiceProvider:
         if nonce is None:
             nonce = DataServiceProvider.get_nonce(wallet.address, provider_uri)
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
-        return Web3Helper.sign_hash(
-            add_ethereum_prefix_and_hash_msg(f"{msg}{nonce}"), wallet
-        )
+        return sign_hash(add_ethereum_prefix_and_hash_msg(f"{msg}{nonce}"), wallet)
 
     @staticmethod
     def get_nonce(user_address, provider_uri):
@@ -601,9 +599,13 @@ class DataServiceProvider:
         _input_datasets = []
         if input_datasets:
             for _input in input_datasets:
-                assert _input.did
-                assert _input.transfer_tx_id
-                assert _input.service_id
+                assert _input.did, "The received dataset does not have a did."
+                assert (
+                    _input.transfer_tx_id
+                ), "The received dataset does not have a transaction id."
+                assert (
+                    _input.service_id
+                ), "The received dataset does not have a specified service id."
                 if _input.did != did:
                     _input_datasets.append(_input.as_dictionary())
 

@@ -70,9 +70,9 @@ def test_get_contracts_addresses_example_config(network, example_config):
         network, example_config.address_file
     )
     assert set(addresses.keys()) == set(
-        ["DTFactory", "BFactory", "FixedRateExchange", "Metadata", "Ocean"]
-    )
+        ["DTFactory", "BFactory", "FixedRateExchange", "Metadata", "Ocean", "Dispenser"]
+    ), "The keys for the addresses are not the expected ones."
 
     # are address values sane?
     for address in addresses.values():
-        assert address[0:2] == "0x"
+        assert address[0:2] == "0x", "The address does not have the proper hex format."
