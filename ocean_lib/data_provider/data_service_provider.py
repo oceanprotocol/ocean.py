@@ -313,56 +313,6 @@ class DataServiceProvider:
         )
 
     @staticmethod
-    def restart_compute_job(
-        did,
-        job_id,
-        service_endpoint,
-        consumer_address,
-        signature,
-        service_id,
-        order_tx_id,
-        algorithm_did=None,
-        algorithm_meta=None,
-        output=None,
-        input_datasets=None,
-    ):
-        """
-
-        :param did: id of asset starting with `did:op:` and a hex str without 0x prefix
-        :param job_id: str id of compute job that was started and stopped (optional, use it
-            here to start a job after it was stopped)
-        :param service_endpoint:
-        :param consumer_address: hex str the ethereum address of the consumer executing the compute job
-        :param signature: hex str signed message to allow the provider to authorize the consumer
-        :param service_id:
-        :param token_address:
-        :param order_tx_id: hex str id of the token transfer transaction
-        :param algorithm_did: str -- the asset did (of `algorithm` type) which consist of `did:op:` and
-            the assetId hex str (without `0x` prefix)
-        :param algorithm_meta: see `OceanCompute.execute`
-        :param output: see `OceanCompute.execute`
-        :param input_datasets: list of ComputeInput
-
-        :return: bool whether the job was restarted successfully
-        """
-        DataServiceProvider.stop_compute_job(
-            did, job_id, service_endpoint, consumer_address, signature
-        )
-        return DataServiceProvider.start_compute_job(
-            did,
-            service_endpoint,
-            consumer_address,
-            signature,
-            service_id,
-            order_tx_id,
-            algorithm_did,
-            algorithm_meta,
-            output,
-            input_datasets=input_datasets,
-            job_id=job_id,
-        )
-
-    @staticmethod
     def delete_compute_job(did, job_id, service_endpoint, consumer_address, signature):
         """
 
