@@ -448,17 +448,18 @@ class OceanAssets:
         ), "One of service_index or service_type is required."
         asset = self.resolve(did)
 
-        consumable_result = asset.is_consumable(
-            {"type": "address", "value": consumer_address}
-        )
-        if consumable_result != ConsumableCodes.OK:
-            raise AssetNotConsumable(consumable_result)
-
         if service_type:
             sa = ServiceAgreement.from_ddo(service_type, asset)
         else:
             service = asset.get_service_by_index(service_index)
             sa = ServiceAgreement.from_ddo(service.type, asset)
+
+        consumable_result = asset.is_consumable(
+            {"type": "address", "value": consumer_address},
+            provider_uri=sa.service_endpoint,
+        )
+        if consumable_result != ConsumableCodes.OK:
+            raise AssetNotConsumable(consumable_result)
 
         dt_address = asset.data_token_address
 
@@ -576,7 +577,8 @@ class OceanAssets:
         ), f"Service with index {service_index} and type {ServiceTypes.ASSET_ACCESS} is not found."
 
         consumable_result = asset.is_consumable(
-            {"type": "address", "value": consumer_wallet.address}
+            {"type": "address", "value": consumer_wallet.address},
+            provider_uri=service.service_endpoint,
         )
         if consumable_result != ConsumableCodes.OK:
             raise AssetNotConsumable(consumable_result)

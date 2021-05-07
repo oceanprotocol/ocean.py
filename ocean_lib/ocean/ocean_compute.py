@@ -293,7 +293,8 @@ class OceanCompute:
         ), "service at serviceId is not of type compute service."
 
         consumable_result = asset.is_consumable(
-            {"type": "address", "value": consumer_wallet.address}
+            {"type": "address", "value": consumer_wallet.address},
+            provider_uri=sa.service_endpoint,
         )
         if consumable_result != ConsumableCodes.OK:
             raise AssetNotConsumable(consumable_result)
