@@ -97,13 +97,15 @@ def test_ddo_credentials_disabled():
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
 
     ddo = DDO(json_filename=sample_ddo_path)
-    assert not ddo.is_listed
+    assert ddo.is_disabled
+    assert not ddo.is_enabled
 
-    ddo.list()
-    assert ddo.is_listed
+    ddo.enable()
+    assert not ddo.is_disabled
+    assert ddo.is_enabled
 
-    ddo.unlist()
-    assert ddo.is_consumable({}) == ConsumableCodes.ASSET_NOT_LISTED
+    ddo.disable()
+    assert ddo.is_consumable({}) == ConsumableCodes.ASSET_DISABLED
 
 
 def test_ddo_on_chain():

@@ -152,6 +152,6 @@
     }
   ],
   "status": {
-    "isListed": false
+    "isOrderDisabled": true
   }
 }

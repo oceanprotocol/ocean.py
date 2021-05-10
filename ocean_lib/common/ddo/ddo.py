@@ -68,15 +68,17 @@ class DDO:
         return self._did
 
     @property
-    def is_listed(self):
-        """Returns whether the asset is listed."""
+    def is_disabled(self):
+        """Returns whether the asset is disabled."""
         if not self._status:
-            return True
+            return False
 
-        if "isListed" not in self._status:
-            return True
+        return self._status.get("isOrderDisabled", False)
 
-        return self._status["isListed"]
+    @property
+    def is_enabled(self):
+        """Returns the opposite of is_disabled, for convenience."""
+        return not self.is_disabled
 
     @property
     def asset_id(self):
@@ -396,17 +398,17 @@ class DDO:
 
         return []
 
-    def list(self):
+    def enable(self):
         if not self._status:
             self._status = {}
 
-        self._status["isListed"] = True
+        self._status.pop("isOrderDisabled")
 
-    def unlist(self):
+    def disable(self):
         if not self._status:
             self._status = {}
 
-        self._status["isListed"] = False
+        self._status["isOrderDisabled"] = True
 
     def get_address_allowed_code(self, credential=None):
         address = simplify_credential_to_address(credential)
@@ -434,8 +436,8 @@ class DDO:
     def is_consumable(
         self, credential=None, with_connectivity_check=True, provider_uri=None
     ):
-        if not self.is_listed:
-            return ConsumableCodes.ASSET_NOT_LISTED
+        if self.is_disabled:
+            return ConsumableCodes.ASSET_DISABLED
 
         if with_connectivity_check and not DataServiceProvider.check_asset_file_info(
             self, provider_uri
