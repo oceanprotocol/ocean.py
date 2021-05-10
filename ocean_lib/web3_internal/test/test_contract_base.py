@@ -64,7 +64,9 @@ def test_main(network, alice_wallet, alice_address, dtfactory_address, alice_oce
     assert factory.address == dtfactory_address
     assert factory.events
     assert str(factory) == f"{factory.contract_name} @ {factory.address}"
-    assert "createToken" in factory.function_names
+    assert (
+        "createToken" in factory.function_names
+    ), "The function createToken from the contract does not exist."
     assert "getCurrentTokenCount" in factory.function_names
     assert "getTokenTemplate" in factory.function_names
     assert not factory.is_tx_successful("nohash")
@@ -73,7 +75,9 @@ def test_main(network, alice_wallet, alice_address, dtfactory_address, alice_oce
     assert factory.subscribe_to_event("TokenCreated", 30, None) is None
     assert factory.get_event_argument_names("TokenCreated") == ()
     block = alice_ocean.web3.eth.blockNumber
-    assert len(factory.get_event_logs("TokenCreated", block, block, None)) == 1
+    assert (
+        len(factory.get_event_logs("TokenCreated", block, block, None)) == 1
+    ), "The token was not created."
 
     copy = factory.contract.address
     factory.contract.address = None
@@ -83,7 +87,9 @@ def test_main(network, alice_wallet, alice_address, dtfactory_address, alice_oce
 
 
 def test_static_functions():
-    assert ContractBase.get_tx_receipt("nohash") is None
+    assert (
+        ContractBase.get_tx_receipt("nohash") is None
+    ), "The transaction receipt exists for the wrong hash."
 
 
 def test_gas_price(alice_wallet, dtfactory_address, monkeypatch):
@@ -91,4 +97,4 @@ def test_gas_price(alice_wallet, dtfactory_address, monkeypatch):
     factory = MyFactory(dtfactory_address)
     assert factory.createToken(
         "foo_blob", "DT1", "DT1", to_base_18(1000.0), alice_wallet
-    )
+    ), "The token could not be created by configuring the gas price env var."
