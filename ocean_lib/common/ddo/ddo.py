@@ -45,6 +45,7 @@ class DDO:
         self._proof = None
         self._credentials = {}
         self._created = None
+        self._status = {}
         self._other_values = {}
 
         if created:
@@ -67,14 +68,15 @@ class DDO:
         return self._did
 
     @property
-    def is_disabled(self):
-        """Get the value of is_disabled."""
-        return self._other_values.get("isDisabled")
+    def is_listed(self):
+        """Returns whether the asset is listed."""
+        if not self._status:
+            return True
 
-    @property
-    def is_enabled(self):
-        """Get the reverse of is_disabled (for convenience)."""
-        return not self.is_disabled
+        if "isListed" not in self._status:
+            return True
+
+        return self._status["isListed"]
 
     @property
     def asset_id(self):
@@ -228,6 +230,8 @@ class DDO:
             data["proof"] = self._proof
         if self._credentials:
             data["credentials"] = self._credentials
+        if self._status:
+            data["status"] = self._status
 
         if self._other_values:
             data.update(self._other_values)
@@ -270,6 +274,8 @@ class DDO:
             self._proof = values.pop("proof")
         if "credentials" in values:
             self._credentials = values.pop("credentials")
+        if "status" in values:
+            self._status = values.pop("status")
 
         self._other_values = values
 
@@ -390,11 +396,17 @@ class DDO:
 
         return []
 
-    def enable(self):
-        self._other_values.pop("isDisabled")
+    def list(self):
+        if not self._status:
+            self._status = {}
 
-    def disable(self):
-        self._other_values["isDisabled"] = True
+        self._status["isListed"] = True
+
+    def unlist(self):
+        if not self._status:
+            self._status = {}
+
+        self._status["isListed"] = False
 
     def get_address_allowed_code(self, credential=None):
         address = simplify_credential_to_address(credential)
@@ -422,8 +434,8 @@ class DDO:
     def is_consumable(
         self, credential=None, with_connectivity_check=True, provider_uri=None
     ):
-        if self.is_disabled:
-            return ConsumableCodes.ASSET_DISABLED
+        if not self.is_listed:
+            return ConsumableCodes.ASSET_NOT_LISTED
 
         if with_connectivity_check and not DataServiceProvider.check_asset_file_info(
             self, provider_uri

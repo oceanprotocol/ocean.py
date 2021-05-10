@@ -6,7 +6,7 @@
 
 class ConsumableCodes:
     OK = 0
-    ASSET_DISABLED = 1
+    ASSET_NOT_LISTED = 1
     CONNECTIVITY_FAIL = 2
     CREDENTIAL_NOT_IN_ALLOW_LIST = 3
     CREDENTIAL_IN_DENY_LIST = 4
