@@ -122,6 +122,71 @@ class DDO:
         files = self.metadata["encryptedFiles"]
         return files
 
+    def add_address_to_list_type(self, address, list_type="allow"):
+        # in the future, we can parameterize credential type too
+        address = address.lower()
+
+        if not self._credentials or list_type not in self._credentials:
+            self._credentials[list_type] = [{"type": "address", "values": [address]}]
+            return
+
+        address_type = [
+            entry
+            for entry in self._credentials[list_type]
+            if entry["type"] == "address"
+        ]
+
+        if not address_type:
+            self._credentials[list_type].append(
+                {"type": "address", "values": [address]}
+            )
+            return
+
+        address_type = address_type[0]
+        lc_addresses = [addr.lower() for addr in address_type["values"]]
+
+        if address not in lc_addresses:
+            lc_addresses.append(address)
+
+        address_type["values"] = lc_addresses
+
+    def add_address_to_allow_list(self, address):
+        self.add_address_to_list_type(address, "allow")
+
+    def add_address_to_deny_list(self, address):
+        self.add_address_to_list_type(address, "deny")
+
+    def remove_address_from_list_type(self, address, list_type="allow"):
+        # in the future, we can parameterize credential type too
+        address = address.lower()
+
+        if not self._credentials or list_type not in self._credentials:
+            return
+
+        address_type = [
+            entry
+            for entry in self._credentials[list_type]
+            if entry["type"] == "address"
+        ]
+
+        if not address_type:
+            return
+
+        address_type = address_type[0]
+        lc_addresses = [addr.lower() for addr in address_type["values"]]
+
+        if address not in lc_addresses:
+            return
+
+        lc_addresses.remove(address)
+        address_type["values"] = lc_addresses
+
+    def remove_address_from_allow_list(self, address):
+        self.remove_address_from_list_type(address, "allow")
+
+    def remove_address_from_deny_list(self, address):
+        self.remove_address_from_list_type(address, "deny")
+
     def assign_did(self, did):
         if self._did:
             raise AssertionError('"did" is already set on this DDO instance.')

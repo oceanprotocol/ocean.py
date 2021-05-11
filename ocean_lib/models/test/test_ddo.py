@@ -55,7 +55,6 @@ def test_ddo_credentials_addresses_both():
         ddo.get_address_allowed_code({"type": "address", "value": "0x456A"})
         == ConsumableCodes.OK
     )
-
     # if "allow" exists, "deny" is not checked anymore
 
 
@@ -207,3 +206,35 @@ def test_ddo_on_chain():
         f"ddo owner does not match the expected publisher address {wallet.address}, "
         f"owner is {DataToken(asset.asset_id).contract_concise.minter(wallet.address)}"
     )
+
+
+def test_ddo_address_utilities():
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample_with_credentials.json")
+    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
+
+    ddo = DDO(json_filename=sample_ddo_path)
+    assert ddo.get_addresses_of_type("allow") == ["0x123", "0x456a"]
+
+    ddo.add_address_to_allow_list("0xAbc12")
+    assert ddo.get_addresses_of_type("allow") == ["0x123", "0x456a", "0xabc12"]
+    ddo.remove_address_from_allow_list("0xAbc12")
+    assert ddo.get_addresses_of_type("allow") == ["0x123", "0x456a"]
+    ddo.remove_address_from_allow_list("0x123")
+    assert ddo.get_addresses_of_type("allow") == ["0x456a"]
+    ddo.remove_address_from_allow_list("0x456a")
+    assert ddo.get_addresses_of_type("allow") == []
+
+    assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333"]
+    # does not exist
+    ddo.remove_address_from_deny_list("0xasfaweg")
+    assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333"]
+    ddo.add_address_to_deny_list("0xasfaweg")
+    assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333", "0xasfaweg"]
+
+    ddo = DDO()
+    assert ddo.get_addresses_of_type("allow") == []
+    ddo.add_address_to_allow_list("0xAbc12")
+    assert ddo.get_addresses_of_type("allow") == ["0xabc12"]
+    # double adding
+    ddo.add_address_to_allow_list("0xAbc12")
+    assert ddo.get_addresses_of_type("allow") == ["0xabc12"]
