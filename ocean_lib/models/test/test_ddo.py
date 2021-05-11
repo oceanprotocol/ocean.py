@@ -39,7 +39,8 @@ def get_ddo_sample(datatoken_address):
     return asset
 
 
-def test_ddo_credentials_addresses():
+def test_ddo_credentials_addresses_both():
+    """Tests DDO credentials when both deny and allow lists exist on the asset."""
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample_with_credentials.json")
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
 
@@ -55,9 +56,17 @@ def test_ddo_credentials_addresses():
         == ConsumableCodes.OK
     )
 
-    # if "allow" exists, "deny" is not checked anymore,
-    # so remove allow to test the behaviour of deny
+    # if "allow" exists, "deny" is not checked anymore
+
+
+def test_ddo_credentials_addresses_only_deny():
+    """Tests DDO credentials when only the deny list exists on the asset."""
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample_with_credentials.json")
+    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
+    # remove allow to test the behaviour of deny
+    ddo = DDO(json_filename=sample_ddo_path)
     ddo._credentials.pop("allow")
+
     assert ddo.get_addresses_of_type("allow") == []
     assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333"]
     assert (
@@ -73,9 +82,18 @@ def test_ddo_credentials_addresses():
     with pytest.raises(MalformedCredential):
         ddo.get_address_allowed_code(credential)
 
+
+def test_ddo_credentials_addresses_no_access_list():
+    """Tests DDO credentials when neither deny, nor allow lists exist on the asset."""
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample_with_credentials.json")
+    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
+
     # if "allow" OR "deny" exist, we need a credential,
     # so remove both to test the behaviour of no credential supplied
+    ddo = DDO(json_filename=sample_ddo_path)
+    ddo._credentials.pop("allow")
     ddo._credentials.pop("deny")
+
     assert ddo.get_address_allowed_code() == ConsumableCodes.OK
 
     # test that we can use another credential if address is not required
