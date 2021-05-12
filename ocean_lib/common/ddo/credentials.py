@@ -29,7 +29,7 @@ class AddressCredential:
 
         return allowed_addresses or denied_addresses
 
-    def get_allowed_code(self, credential=None):
+    def validate_access(self, credential=None):
         address = simplify_credential_to_address(credential)
 
         allowed_addresses = self.get_addresses_of_class("allow")

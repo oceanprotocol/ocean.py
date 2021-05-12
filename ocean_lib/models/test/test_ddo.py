@@ -50,11 +50,11 @@ def test_ddo_credentials_addresses_both():
     assert address_credential.get_addresses_of_class("allow") == ["0x123", "0x456a"]
     assert address_credential.get_addresses_of_class("deny") == ["0x2222", "0x333"]
     assert (
-        address_credential.get_allowed_code({"type": "address", "value": "0x111"})
+        address_credential.validate_access({"type": "address", "value": "0x111"})
         == ConsumableCodes.CREDENTIAL_NOT_IN_ALLOW_LIST
     )
     assert (
-        address_credential.get_allowed_code({"type": "address", "value": "0x456A"})
+        address_credential.validate_access({"type": "address", "value": "0x456A"})
         == ConsumableCodes.OK
     )
     # if "allow" exists, "deny" is not checked anymore
@@ -72,17 +72,17 @@ def test_ddo_credentials_addresses_only_deny():
     assert address_credential.get_addresses_of_class("allow") == []
     assert address_credential.get_addresses_of_class("deny") == ["0x2222", "0x333"]
     assert (
-        address_credential.get_allowed_code({"type": "address", "value": "0x111"})
+        address_credential.validate_access({"type": "address", "value": "0x111"})
         == ConsumableCodes.OK
     )
     assert (
-        address_credential.get_allowed_code({"type": "address", "value": "0x333"})
+        address_credential.validate_access({"type": "address", "value": "0x333"})
         == ConsumableCodes.CREDENTIAL_IN_DENY_LIST
     )
 
     credential = {"type": "address", "value": ""}
     with pytest.raises(MalformedCredential):
-        address_credential.get_allowed_code(credential)
+        address_credential.validate_access(credential)
 
 
 def test_ddo_credentials_addresses_no_access_list():
@@ -97,7 +97,7 @@ def test_ddo_credentials_addresses_no_access_list():
     ddo._credentials.pop("allow")
     ddo._credentials.pop("deny")
 
-    assert address_credential.get_allowed_code() == ConsumableCodes.OK
+    assert address_credential.validate_access() == ConsumableCodes.OK
 
     # test that we can use another credential if address is not required
     assert (

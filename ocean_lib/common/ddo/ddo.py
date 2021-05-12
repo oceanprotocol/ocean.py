@@ -399,6 +399,11 @@ class DDO:
         self._status["isOrderDisabled"] = True
 
     @property
+    def requires_address_credential(self):
+        manager = AddressCredential(self)
+        return manager.requires_credential()
+
+    @property
     def allowed_addresses(self):
         manager = AddressCredential(self)
         return manager.get_addresses_of_class("allow")
@@ -436,9 +441,9 @@ class DDO:
             return ConsumableCodes.CONNECTIVITY_FAIL
 
         # to be parameterized in the future, can implement other credential classes
-        credential = AddressCredential(self)
+        manager = AddressCredential(self)
 
-        if credential.requires_credential():
-            return self.get_access_code(credential)
+        if manager.requires_credential():
+            return manager.validate_access(credential)
 
         return ConsumableCodes.OK
