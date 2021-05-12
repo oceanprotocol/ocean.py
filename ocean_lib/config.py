@@ -110,7 +110,7 @@ class Config(configparser.ConfigParser):
         """Initialize Config class.
 
         Options available:
-
+        ```
         [eth-network]
         ; ethereum network url
         network = rinkeby
@@ -123,7 +123,7 @@ class Config(configparser.ConfigParser):
 
         [util]
         typecheck = true
-
+        ```
         :param filename: Path of the config file, str.
         :param options_dict: Python dict with the config, dict.
         :param kwargs: Additional args. If you pass text, you have to pass the plain text configuration.
