@@ -9,6 +9,7 @@ import pytest
 from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import Asset
 from ocean_lib.common.agreements.consumable import ConsumableCodes, MalformedCredential
+from ocean_lib.common.ddo.credentials import AddressCredential
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.utils.utilities import checksum
 from ocean_lib.config_provider import ConfigProvider
@@ -45,14 +46,15 @@ def test_ddo_credentials_addresses_both():
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
 
     ddo = DDO(json_filename=sample_ddo_path)
-    assert ddo.get_addresses_of_type("allow") == ["0x123", "0x456a"]
-    assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333"]
+    address_credential = AddressCredential(ddo)
+    assert address_credential.get_addresses_of_class("allow") == ["0x123", "0x456a"]
+    assert address_credential.get_addresses_of_class("deny") == ["0x2222", "0x333"]
     assert (
-        ddo.get_address_allowed_code({"type": "address", "value": "0x111"})
+        address_credential.get_allowed_code({"type": "address", "value": "0x111"})
         == ConsumableCodes.CREDENTIAL_NOT_IN_ALLOW_LIST
     )
     assert (
-        ddo.get_address_allowed_code({"type": "address", "value": "0x456A"})
+        address_credential.get_allowed_code({"type": "address", "value": "0x456A"})
         == ConsumableCodes.OK
     )
     # if "allow" exists, "deny" is not checked anymore
@@ -66,20 +68,21 @@ def test_ddo_credentials_addresses_only_deny():
     ddo = DDO(json_filename=sample_ddo_path)
     ddo._credentials.pop("allow")
 
-    assert ddo.get_addresses_of_type("allow") == []
-    assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333"]
+    address_credential = AddressCredential(ddo)
+    assert address_credential.get_addresses_of_class("allow") == []
+    assert address_credential.get_addresses_of_class("deny") == ["0x2222", "0x333"]
     assert (
-        ddo.get_address_allowed_code({"type": "address", "value": "0x111"})
+        address_credential.get_allowed_code({"type": "address", "value": "0x111"})
         == ConsumableCodes.OK
     )
     assert (
-        ddo.get_address_allowed_code({"type": "address", "value": "0x333"})
+        address_credential.get_allowed_code({"type": "address", "value": "0x333"})
         == ConsumableCodes.CREDENTIAL_IN_DENY_LIST
     )
 
     credential = {"type": "address", "value": ""}
     with pytest.raises(MalformedCredential):
-        ddo.get_address_allowed_code(credential)
+        address_credential.get_allowed_code(credential)
 
 
 def test_ddo_credentials_addresses_no_access_list():
@@ -90,10 +93,11 @@ def test_ddo_credentials_addresses_no_access_list():
     # if "allow" OR "deny" exist, we need a credential,
     # so remove both to test the behaviour of no credential supplied
     ddo = DDO(json_filename=sample_ddo_path)
+    address_credential = AddressCredential(ddo)
     ddo._credentials.pop("allow")
     ddo._credentials.pop("deny")
 
-    assert ddo.get_address_allowed_code() == ConsumableCodes.OK
+    assert address_credential.get_allowed_code() == ConsumableCodes.OK
 
     # test that we can use another credential if address is not required
     assert (
@@ -213,28 +217,29 @@ def test_ddo_address_utilities():
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
 
     ddo = DDO(json_filename=sample_ddo_path)
-    assert ddo.get_addresses_of_type("allow") == ["0x123", "0x456a"]
+
+    assert ddo.allowed_addresses == ["0x123", "0x456a"]
 
     ddo.add_address_to_allow_list("0xAbc12")
-    assert ddo.get_addresses_of_type("allow") == ["0x123", "0x456a", "0xabc12"]
+    assert ddo.allowed_addresses == ["0x123", "0x456a", "0xabc12"]
     ddo.remove_address_from_allow_list("0xAbc12")
-    assert ddo.get_addresses_of_type("allow") == ["0x123", "0x456a"]
+    assert ddo.allowed_addresses == ["0x123", "0x456a"]
     ddo.remove_address_from_allow_list("0x123")
-    assert ddo.get_addresses_of_type("allow") == ["0x456a"]
+    assert ddo.allowed_addresses == ["0x456a"]
     ddo.remove_address_from_allow_list("0x456a")
-    assert ddo.get_addresses_of_type("allow") == []
+    assert ddo.allowed_addresses == []
 
-    assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333"]
+    assert ddo.denied_addresses == ["0x2222", "0x333"]
     # does not exist
     ddo.remove_address_from_deny_list("0xasfaweg")
-    assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333"]
+    assert ddo.denied_addresses == ["0x2222", "0x333"]
     ddo.add_address_to_deny_list("0xasfaweg")
-    assert ddo.get_addresses_of_type("deny") == ["0x2222", "0x333", "0xasfaweg"]
+    assert ddo.denied_addresses == ["0x2222", "0x333", "0xasfaweg"]
 
     ddo = DDO()
-    assert ddo.get_addresses_of_type("allow") == []
+    assert ddo.allowed_addresses == []
     ddo.add_address_to_allow_list("0xAbc12")
-    assert ddo.get_addresses_of_type("allow") == ["0xabc12"]
+    assert ddo.allowed_addresses == ["0xabc12"]
     # double adding
     ddo.add_address_to_allow_list("0xAbc12")
-    assert ddo.get_addresses_of_type("allow") == ["0xabc12"]
+    assert ddo.allowed_addresses == ["0xabc12"]

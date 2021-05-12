@@ -10,13 +10,11 @@ from eth_utils import add_0x_prefix
 from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.ddo.credentials import AddressCredential
 from ocean_lib.common.ddo.public_key_base import PublicKeyBase
 from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_ETHEREUM_ECDSA
 from ocean_lib.common.did import OCEAN_PREFIX, did_to_id
-from ocean_lib.common.utils.utilities import (
-    get_timestamp,
-    simplify_credential_to_address,
-)
+from ocean_lib.common.utils.utilities import get_timestamp
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 from .constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
@@ -121,71 +119,6 @@ class DDO:
         """Return encryptedFiles field in the base metadata."""
         files = self.metadata["encryptedFiles"]
         return files
-
-    def add_address_to_list_type(self, address, list_type="allow"):
-        # in the future, we can parameterize credential type too
-        address = address.lower()
-
-        if not self._credentials or list_type not in self._credentials:
-            self._credentials[list_type] = [{"type": "address", "values": [address]}]
-            return
-
-        address_type = [
-            entry
-            for entry in self._credentials[list_type]
-            if entry["type"] == "address"
-        ]
-
-        if not address_type:
-            self._credentials[list_type].append(
-                {"type": "address", "values": [address]}
-            )
-            return
-
-        address_type = address_type[0]
-        lc_addresses = [addr.lower() for addr in address_type["values"]]
-
-        if address not in lc_addresses:
-            lc_addresses.append(address)
-
-        address_type["values"] = lc_addresses
-
-    def add_address_to_allow_list(self, address):
-        self.add_address_to_list_type(address, "allow")
-
-    def add_address_to_deny_list(self, address):
-        self.add_address_to_list_type(address, "deny")
-
-    def remove_address_from_list_type(self, address, list_type="allow"):
-        # in the future, we can parameterize credential type too
-        address = address.lower()
-
-        if not self._credentials or list_type not in self._credentials:
-            return
-
-        address_type = [
-            entry
-            for entry in self._credentials[list_type]
-            if entry["type"] == "address"
-        ]
-
-        if not address_type:
-            return
-
-        address_type = address_type[0]
-        lc_addresses = [addr.lower() for addr in address_type["values"]]
-
-        if address not in lc_addresses:
-            return
-
-        lc_addresses.remove(address)
-        address_type["values"] = lc_addresses
-
-    def remove_address_from_allow_list(self, address):
-        self.remove_address_from_list_type(address, "allow")
-
-    def remove_address_from_deny_list(self, address):
-        self.remove_address_from_list_type(address, "deny")
 
     def assign_did(self, did):
         if self._did:
@@ -453,16 +386,6 @@ class DDO:
         authentication = {"type": authentication_type, "publicKey": key_id}
         return authentication
 
-    def get_addresses_of_type(self, section_type="allow"):
-        """Get a filtered list of addresses from credentials (use with allow/deny)."""
-        entries = self._credentials.get(section_type, [])
-
-        for entry in entries:
-            if entry["type"] == "address":
-                return [val.lower() for val in entry["values"]]
-
-        return []
-
     def enable(self):
         if not self._status:
             self._status = {}
@@ -475,28 +398,31 @@ class DDO:
 
         self._status["isOrderDisabled"] = True
 
-    def get_address_allowed_code(self, credential=None):
-        address = simplify_credential_to_address(credential)
+    @property
+    def allowed_addresses(self):
+        manager = AddressCredential(self)
+        return manager.get_addresses_of_class("allow")
 
-        allowed_addresses = self.get_addresses_of_type("allow")
-        denied_addresses = self.get_addresses_of_type("deny")
+    @property
+    def denied_addresses(self):
+        manager = AddressCredential(self)
+        return manager.get_addresses_of_class("deny")
 
-        if not address and not self.requires_address_credential():
-            return ConsumableCodes.OK
+    def add_address_to_allow_list(self, address):
+        manager = AddressCredential(self)
+        manager.add_address_to_list_class(address, "allow")
 
-        if allowed_addresses and address.lower() not in allowed_addresses:
-            return ConsumableCodes.CREDENTIAL_NOT_IN_ALLOW_LIST
+    def add_address_to_deny_list(self, address):
+        manager = AddressCredential(self)
+        manager.add_address_to_list_class(address, "deny")
 
-        if not allowed_addresses and address.lower() in denied_addresses:
-            return ConsumableCodes.CREDENTIAL_IN_DENY_LIST
+    def remove_address_from_allow_list(self, address):
+        manager = AddressCredential(self)
+        manager.remove_address_from_list_class(address, "allow")
 
-        return ConsumableCodes.OK
-
-    def requires_address_credential(self):
-        allowed_addresses = self.get_addresses_of_type("allow")
-        denied_addresses = self.get_addresses_of_type("deny")
-
-        return allowed_addresses or denied_addresses
+    def remove_address_from_deny_list(self, address):
+        manager = AddressCredential(self)
+        manager.remove_address_from_list_class(address, "deny")
 
     def is_consumable(
         self, credential=None, with_connectivity_check=True, provider_uri=None
@@ -509,7 +435,10 @@ class DDO:
         ):
             return ConsumableCodes.CONNECTIVITY_FAIL
 
-        if self.requires_address_credential():
-            return self.get_address_allowed_code(credential)
+        # to be parameterized in the future, can implement other credential classes
+        credential = AddressCredential(self)
+
+        if credential.requires_credential():
+            return self.get_access_code(credential)
 
         return ConsumableCodes.OK
