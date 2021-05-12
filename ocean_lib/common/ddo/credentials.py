@@ -2,11 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from ocean_lib.common.agreements.consumable import ConsumableCodes
-from ocean_lib.common.utils.utilities import (
-    get_list_entry_with_type_address,
-    simplify_credential_to_address,
-)
+from ocean_lib.common.agreements.consumable import ConsumableCodes, MalformedCredential
 
 
 class AddressCredential:
@@ -94,3 +90,17 @@ class AddressCredential:
 
         lc_addresses.remove(address)
         address_entry["values"] = lc_addresses
+
+
+def simplify_credential_to_address(credential):
+    if not credential:
+        return None
+
+    if not credential.get("value"):
+        raise MalformedCredential("Received empty address.")
+
+    return credential["value"]
+
+
+def get_list_entry_with_type_address(types_list):
+    return [entry for entry in types_list if entry["type"] == "address"]
