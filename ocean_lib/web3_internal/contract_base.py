@@ -210,7 +210,7 @@ class ContractBase(object):
         :param fn_args: tuple arguments to pass to function above
         :param from_wallet:
         :param transact: dict arguments for the transaction such as from, gas, etc.
-        :return:
+        :return: hex str transaction hash
         """
         contract_fn = getattr(self.contract.functions, fn_name)(*fn_args)
         contract_function = CustomContractFunction(contract_fn)
@@ -231,7 +231,11 @@ class ContractBase(object):
         return contract_function.transact(_transact).hex()
 
     def get_event_argument_names(self, event_name: str):
-        """:return: Argument names"""
+        """Finds the event arguments by `event_name`. 
+
+        :param event_name: str Name of the event to search in the `contract`.
+        :return: `event.argument_names` if event is found or None
+        """
         event = getattr(self.contract.events, event_name, None)
         if event:
             return event().argument_names
@@ -274,7 +278,33 @@ class ContractBase(object):
     def get_event_logs(
         self, event_name, from_block, to_block, filters, web3=None, chunk_size=1000
     ):
-        """:return: Event logs"""
+        """
+        Fetches the list of event logs between the given block numbers.
+
+        :param event_name: str
+        :param from_block: int
+        :param to_block: int
+        :param filters:
+        :param web3: Wallet instance
+        :param chunk_size: int
+
+        :return: List of event logs. List will have the structure as below.
+        ```Python
+            [AttributeDict({
+                'args': AttributeDict({}),
+                'event': 'LogNoArguments',
+                'logIndex': 0,
+                'transactionIndex': 0,
+                'transactionHash': HexBytes('...'),
+                'address': '0xF2E246BB76DF876Cef8b38ae84130F4F55De395b',
+                'blockHash': HexBytes('...'),
+                'blockNumber': 3
+                }),
+            AttributeDict(...),
+            ...
+            ]
+        ```
+        """
         event = getattr(self.events, event_name)
         if not web3:
             web3 = Web3Provider.get_web3()
