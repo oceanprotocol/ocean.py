@@ -20,7 +20,9 @@ def test_get_infura_connection_type(monkeypatch):
     # no envvar
     if ENV_INFURA_CONNECTION_TYPE in os.environ:
         monkeypatch.delenv(ENV_INFURA_CONNECTION_TYPE)
-    assert util.get_infura_connection_type() == "http"
+    assert (
+        util.get_infura_connection_type() == "http"
+    ), "The default connection type for infura is not http."
 
     # envvar is "http"
     monkeypatch.setenv(ENV_INFURA_CONNECTION_TYPE, "http")
@@ -116,7 +118,7 @@ def test_get_contracts_addresses():
     )
     assert len(addresses) == 6
     for value in addresses.values():
-        assert value.startswith("0x")
+        assert value.startswith("0x"), "It is not a token address."
 
 
 # FIXME: add tests for:

@@ -5,6 +5,8 @@
 import hashlib
 import json
 
+from typing import Optional
+
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.common.agreements.service_types import ServiceTypes
@@ -17,9 +19,13 @@ def create_checksum(text):
 
 @enforce_types_shim
 def generate_trusted_algo_dict(
-    did: str = None, metadata_cache_uri: str = None, ddo: Asset = None
+    did: Optional[str] = None,
+    metadata_cache_uri: Optional[str] = None,
+    ddo: Optional[Asset] = None,
 ):
-    assert ddo or (did and metadata_cache_uri)
+    assert ddo or (
+        did and metadata_cache_uri
+    ), "Either DDO, or both did and metadata_cache_uri are None."
     if not ddo:
         ddo = resolve_asset(did, metadata_cache_uri=metadata_cache_uri)
 
@@ -60,7 +66,7 @@ def add_publisher_trusted_algorithm(
         privacy_values = {}
         compute_service.attributes["main"]["privacy"] = privacy_values
 
-    assert isinstance(privacy_values, dict)
+    assert isinstance(privacy_values, dict), "Privacy key is not a dictionary."
     trusted_algos = privacy_values.get("publisherTrustedAlgorithms", [])
     # remove algo_did if already in the list
     trusted_algos = [ta for ta in trusted_algos if ta["did"] != algo_did]
@@ -70,7 +76,9 @@ def add_publisher_trusted_algorithm(
     trusted_algos.append(generate_trusted_algo_dict(ddo=algo_ddo))
     # update with the new list
     privacy_values["publisherTrustedAlgorithms"] = trusted_algos
-    assert compute_service.attributes["main"]["privacy"] == privacy_values
+    assert (
+        compute_service.attributes["main"]["privacy"] == privacy_values
+    ), "New trusted algorithm was not added. Failed when updating the privacy key. "
     return trusted_algos
 
 
@@ -87,5 +95,7 @@ def remove_publisher_trusted_algorithm(
 
     trusted_algorithms = [ta for ta in trusted_algorithms if ta["did"] != algo_did]
     asset.update_compute_privacy(trusted_algorithms, False, False)
-    assert asset.get_trusted_algorithms() == trusted_algorithms
+    assert (
+        asset.get_trusted_algorithms() == trusted_algorithms
+    ), "New trusted algorithm was not removed. Failed when updating the list of trusted algorithms. "
     return trusted_algorithms

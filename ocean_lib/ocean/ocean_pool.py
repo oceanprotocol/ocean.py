@@ -386,7 +386,7 @@ class OceanPool:
         :param from_wallet: Wallet instance
         :return: str transaction id/hash
         """
-        assert self._is_valid_pool(pool_address)
+        assert self._is_valid_pool(pool_address), "The pool address is not valid."
         dt_address = self.get_token_address(pool_address)
         dt = BToken(dt_address)
         dt.approve(pool_address, max_data_token_amount_base, from_wallet=from_wallet)
