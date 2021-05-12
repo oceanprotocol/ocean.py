@@ -445,3 +445,18 @@ def test_create_compute_service_descriptor(publisher_ocean_instance):
     assert isinstance(compute_descriptor, tuple)
     assert compute_descriptor[0] == "compute"
     assert compute_descriptor[1]["attributes"] == compute_attributes
+
+
+def test_get_service_endpoint(publisher_ocean_instance):
+    publisher = get_publisher_wallet()
+    data_provider = DataServiceProvider()
+    options_dict = {"resources": {"provider.url": "http://localhost:8030"}}
+    config = Config(options_dict=options_dict)
+    compute = OceanCompute(config, data_provider)
+
+    ddo = get_registered_ddo_with_compute_service(publisher_ocean_instance, publisher)
+    wait_for_ddo(publisher_ocean_instance, ddo.did)
+    assert ddo is not None
+
+    service_endpoint = compute._get_service_endpoint(ddo.did)
+    assert service_endpoint

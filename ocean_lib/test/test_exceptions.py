@@ -28,12 +28,10 @@ def test_InsufficientBalance(publisher_ocean_instance):
         "DataToken1", "DT1", from_wallet=alice, blob="foo_blob"
     )
 
-    try:
+    with pytest.raises(InsufficientBalance):
         publisher_ocean_instance.assets.pay_for_service(
             12345678999999.9, token.address, asset.did, 0, ZERO_ADDRESS, alice
         )
-    except Exception as e:
-        assert type(e) == InsufficientBalance
 
 
 def test_ContractNotFound(publisher_ocean_instance, metadata):
@@ -45,10 +43,6 @@ def test_ContractNotFound(publisher_ocean_instance, metadata):
         publisher_ocean_instance.assets.create(
             metadata_copy, publisher, data_token_address=add_0x_prefix(did[7:])
         )
-
-
-def test_AquariusError(publisher_ocean_instance, metadata):
-    pass
 
 
 def test_VerifyTxFailed(publisher_ocean_instance):
