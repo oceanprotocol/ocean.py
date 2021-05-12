@@ -49,7 +49,7 @@ class Ocean:
         """Initialize Ocean class.
 
         Usage: Make a new Ocean instance
-        
+
         `ocean = Ocean({...})`
 
         This class provides the main top-level functions in ocean protocol:
@@ -62,7 +62,7 @@ class Ocean:
             `asset = ocean.assets.create(metadata, publisher_wallet)`
 
         2. Discover/Search assets via the current configured metadata store (Aquarius)
-            
+
             - Usage:
             `assets_list = ocean.assets.search('search text')`
 
@@ -154,7 +154,7 @@ class Ocean:
     ) -> DataToken:
         """
         This method deploys a datatoken contract on the blockchain.
-        
+
         Usage:
         ```python
             config = Config('config.ini')
@@ -166,11 +166,11 @@ class Ocean:
         :param name: Datatoken name, str
         :param symbol: Datatoken symbol, str
         :param from_wallet: wallet instance, wallet
-        :param cap: float 
+        :param cap: float
 
         :return: `Datatoken` instance
         """
-        
+
         dtfactory = self.get_dtfactory()
         tx_id = dtfactory.createToken(
             blob, name, symbol, to_base_18(cap), from_wallet=from_wallet
@@ -185,7 +185,7 @@ class Ocean:
         :param token_address: Token contract address, str
         :return: `Datatoken` instance
         """
-        
+
         return DataToken(token_address)
 
     def get_dtfactory(self, dtfactory_address: str = "") -> DTFactory:

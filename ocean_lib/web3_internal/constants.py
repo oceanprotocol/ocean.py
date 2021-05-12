@@ -3,10 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-'''
+"""
 This module holds following default values for Gas price, Gas limit and more.
 
-'''
+"""
 
 ENV_GAS_PRICE = "GAS_PRICE"
 ENV_MAX_GAS_PRICE = "MAX_GAS_PRICE"

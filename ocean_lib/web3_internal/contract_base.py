@@ -128,7 +128,7 @@ class ContractBase(object):
 
     def is_tx_successful(self, tx_hash: str) -> bool:
         """Check if the transaction is successful.
-        
+
         :param tx_hash: hash of the transaction
         :return: bool
         """
@@ -231,7 +231,7 @@ class ContractBase(object):
         return contract_function.transact(_transact).hex()
 
     def get_event_argument_names(self, event_name: str):
-        """Finds the event arguments by `event_name`. 
+        """Finds the event arguments by `event_name`.
 
         :param event_name: str Name of the event to search in the `contract`.
         :return: `event.argument_names` if event is found or None
@@ -386,7 +386,7 @@ class ContractBase(object):
                 ...
             )
         ```
-        
+
         See also: :func:`web3.middleware.filter.local_filter_middleware`.
         :param argument_filters:
         :param fromBlock: block number or "latest", defaults to "latest"
