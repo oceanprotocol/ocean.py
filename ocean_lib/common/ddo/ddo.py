@@ -387,12 +387,14 @@ class DDO:
         return authentication
 
     def enable(self):
+        """Enables asset for ordering."""
         if not self._status:
             self._status = {}
 
         self._status.pop("isOrderDisabled")
 
     def disable(self):
+        """Disables asset from ordering."""
         if not self._status:
             self._status = {}
 
@@ -400,38 +402,46 @@ class DDO:
 
     @property
     def requires_address_credential(self):
+        """Checks if an address credential is required on this asset."""
         manager = AddressCredential(self)
         return manager.requires_credential()
 
     @property
     def allowed_addresses(self):
+        """Lists addresses that are explicitly allowed in credentials."""
         manager = AddressCredential(self)
         return manager.get_addresses_of_class("allow")
 
     @property
     def denied_addresses(self):
+        """Lists addresesses that are explicitly denied in credentials."""
         manager = AddressCredential(self)
         return manager.get_addresses_of_class("deny")
 
     def add_address_to_allow_list(self, address):
+        """Adds an address to allowed addresses list."""
         manager = AddressCredential(self)
-        manager.add_address_to_list_class(address, "allow")
+        manager.add_address_to_access_class(address, "allow")
 
     def add_address_to_deny_list(self, address):
+        """Adds an address to the denied addresses list."""
         manager = AddressCredential(self)
-        manager.add_address_to_list_class(address, "deny")
+        manager.add_address_to_access_class(address, "deny")
 
     def remove_address_from_allow_list(self, address):
+        """Removes address from allow list (if it exists)."""
         manager = AddressCredential(self)
-        manager.remove_address_from_list_class(address, "allow")
+        manager.remove_address_from_access_class(address, "allow")
 
     def remove_address_from_deny_list(self, address):
+        """Removes address from deny list (if it exists)."""
         manager = AddressCredential(self)
-        manager.remove_address_from_list_class(address, "deny")
+        manager.remove_address_from_access_class(address, "deny")
 
     def is_consumable(
         self, credential=None, with_connectivity_check=True, provider_uri=None
     ):
+        """Checks whether an asset is consumable and returns a ConsumableCode."""
         if self.is_disabled:
             return ConsumableCodes.ASSET_DISABLED
 

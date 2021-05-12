@@ -20,12 +20,14 @@ class AddressCredential:
         return []
 
     def requires_credential(self):
+        """Checks whether the asset requires an address credential."""
         allowed_addresses = self.get_addresses_of_class("allow")
         denied_addresses = self.get_addresses_of_class("deny")
 
         return allowed_addresses or denied_addresses
 
     def validate_access(self, credential=None):
+        """Checks a credential dictionary against the address allow/deny lists."""
         address = simplify_credential_to_address(credential)
 
         allowed_addresses = self.get_addresses_of_class("allow")
@@ -42,48 +44,46 @@ class AddressCredential:
 
         return ConsumableCodes.OK
 
-    def add_address_to_list_class(self, address, list_class="allow"):
+    def add_address_to_access_class(self, address, access_class="allow"):
+        """Adds an address to an address list (either allow or deny)."""
         address = address.lower()
 
-        if not self.asset._credentials or list_class not in self.asset._credentials:
-            self.asset._credentials[list_class] = [
+        if not self.asset._credentials or access_class not in self.asset._credentials:
+            self.asset._credentials[access_class] = [
                 {"type": "address", "values": [address]}
             ]
             return
 
-        address_entry = get_list_entry_with_type_address(
-            self.asset._credentials[list_class]
-        )
+        address_entries = self.get_address_entry_of_class(access_class)
 
-        if not address_entry:
-            self.asset._credentials[list_class].append(
+        if not address_entries:
+            self.asset._credentials[access_class].append(
                 {"type": "address", "values": [address]}
             )
             return
 
-        address_entry = address_entry[0]
-        lc_addresses = [addr.lower() for addr in address_entry["values"]]
+        address_entry = address_entries[0]
+        lc_addresses = self.get_lc_addresses_from_entry(address_entry)
 
         if address not in lc_addresses:
             lc_addresses.append(address)
 
         address_entry["values"] = lc_addresses
 
-    def remove_address_from_list_class(self, address, list_class="allow"):
+    def remove_address_from_access_class(self, address, access_class="allow"):
+        """Removes an address from an address list (either allow or deny)i."""
         address = address.lower()
 
-        if not self.asset._credentials or list_class not in self.asset._credentials:
+        if not self.asset._credentials or access_class not in self.asset._credentials:
             return
 
-        address_entry = get_list_entry_with_type_address(
-            self.asset._credentials[list_class]
-        )
+        address_entries = self.get_address_entry_of_class(access_class)
 
-        if not address_entry:
+        if not address_entries:
             return
 
-        address_entry = address_entry[0]
-        lc_addresses = [addr.lower() for addr in address_entry["values"]]
+        address_entry = address_entries[0]
+        lc_addresses = self.get_lc_addresses_from_entry(address_entry)
 
         if address not in lc_addresses:
             return
@@ -91,8 +91,18 @@ class AddressCredential:
         lc_addresses.remove(address)
         address_entry["values"] = lc_addresses
 
+    def get_address_entry_of_class(self, access_class="allow"):
+        """Get a filtered list of addresses of a given access_class from credentials (use with allow/deny)."""
+        entries = self.asset._credentials.get(access_class)
+        return [entry for entry in entries if entry["type"] == "address"]
+
+    def get_lc_addresses_from_entry(self, address_entry):
+        """Get an address entry of a given access class from credentials (use with allow/deny)."""
+        return [addr.lower() for addr in address_entry["values"]]
+
 
 def simplify_credential_to_address(credential):
+    """Extracts address value from credential dictionary."""
     if not credential:
         return None
 
@@ -100,7 +110,3 @@ def simplify_credential_to_address(credential):
         raise MalformedCredential("Received empty address.")
 
     return credential["value"]
-
-
-def get_list_entry_with_type_address(types_list):
-    return [entry for entry in types_list if entry["type"] == "address"]
