@@ -3,7 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from ocean_lib.common.agreements.consumable import ConsumableCodes
-from ocean_lib.common.utils.utilities import simplify_credential_to_address
+from ocean_lib.common.utils.utilities import (
+    get_list_entry_with_type_address,
+    simplify_credential_to_address,
+)
 
 
 class AddressCredential:
@@ -52,25 +55,23 @@ class AddressCredential:
             ]
             return
 
-        address_type = [
-            entry
-            for entry in self.asset._credentials[list_class]
-            if entry["type"] == "address"
-        ]
+        address_entry = get_list_entry_with_type_address(
+            self.asset._credentials[list_class]
+        )
 
-        if not address_type:
+        if not address_entry:
             self.asset._credentials[list_class].append(
                 {"type": "address", "values": [address]}
             )
             return
 
-        address_type = address_type[0]
-        lc_addresses = [addr.lower() for addr in address_type["values"]]
+        address_entry = address_entry[0]
+        lc_addresses = [addr.lower() for addr in address_entry["values"]]
 
         if address not in lc_addresses:
             lc_addresses.append(address)
 
-        address_type["values"] = lc_addresses
+        address_entry["values"] = lc_addresses
 
     def remove_address_from_list_class(self, address, list_class="allow"):
         address = address.lower()
@@ -78,20 +79,18 @@ class AddressCredential:
         if not self.asset._credentials or list_class not in self.asset._credentials:
             return
 
-        address_type = [
-            entry
-            for entry in self.asset._credentials[list_class]
-            if entry["type"] == "address"
-        ]
+        address_entry = get_list_entry_with_type_address(
+            self.asset._credentials[list_class]
+        )
 
-        if not address_type:
+        if not address_entry:
             return
 
-        address_type = address_type[0]
-        lc_addresses = [addr.lower() for addr in address_type["values"]]
+        address_entry = address_entry[0]
+        lc_addresses = [addr.lower() for addr in address_entry["values"]]
 
         if address not in lc_addresses:
             return
 
         lc_addresses.remove(address)
-        address_type["values"] = lc_addresses
+        address_entry["values"] = lc_addresses

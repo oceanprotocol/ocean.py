@@ -85,3 +85,7 @@ def simplify_credential_to_address(credential):
         raise MalformedCredential("Received empty address.")
 
     return credential["value"]
+
+
+def get_list_entry_with_type_address(types_list):
+    return [entry for entry in types_list if entry["type"] == "address"]
