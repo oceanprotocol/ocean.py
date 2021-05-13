@@ -9,13 +9,10 @@ from ocean_lib.assets.utils import (
     remove_publisher_trusted_algorithm,
     generate_trusted_algo_dict,
 )
-from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.common.ddo.ddo import DDO
 from tests.resources.ddo_helpers import (
     get_registered_algorithm_ddo,
     get_registered_ddo_with_compute_service,
     wait_for_ddo,
-    get_resource_path,
 )
 from tests.resources.helper_functions import get_publisher_wallet
 
