@@ -86,7 +86,9 @@ def test_get_web3_connection_provider(monkeypatch):
     assert provider.endpoint_uri == "https://rinkeby.infura.io/v3/id1"
 
     # polygon network name
-    assert "polygon" in util.SUPPORTED_NETWORK_NAMES
+    assert (
+        "polygon" in util.SUPPORTED_NETWORK_NAMES
+    ), "polygon is missing from SUPPORTED_NETWORK_NAMES"
     assert util.POLYGON_URL == "https://rpc.polygon.oceanprotocol.com"
     provider = util.get_web3_connection_provider("polygon")
     assert provider.endpoint_uri == "https://rpc.polygon.oceanprotocol.com"
