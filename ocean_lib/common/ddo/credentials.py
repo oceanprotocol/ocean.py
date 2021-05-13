@@ -11,13 +11,10 @@ class AddressCredential:
 
     def get_addresses_of_class(self, access_class="allow"):
         """Get a filtered list of addresses from credentials (use with allow/deny)."""
-        entries = self.asset._credentials.get(access_class, [])
-
-        for entry in entries:
-            if entry["type"] == "address":
-                return [val.lower() for val in entry["values"]]
-
-        return []
+        address_entry = self.get_address_entry_of_class(access_class)
+        return (
+            [addr.lower() for addr in address_entry["values"]] if address_entry else []
+        )
 
     def requires_credential(self):
         """Checks whether the asset requires an address credential."""
@@ -54,16 +51,15 @@ class AddressCredential:
             ]
             return
 
-        address_entries = self.get_address_entry_of_class(access_class)
+        address_entry = self.get_address_entry_of_class(access_class)
 
-        if not address_entries:
+        if not address_entry:
             self.asset._credentials[access_class].append(
                 {"type": "address", "values": [address]}
             )
             return
 
-        address_entry = address_entries[0]
-        lc_addresses = self.get_lc_addresses_from_entry(address_entry)
+        lc_addresses = self.get_addresses_of_class(access_class)
 
         if address not in lc_addresses:
             lc_addresses.append(address)
@@ -77,13 +73,12 @@ class AddressCredential:
         if not self.asset._credentials or access_class not in self.asset._credentials:
             return
 
-        address_entries = self.get_address_entry_of_class(access_class)
+        address_entry = self.get_address_entry_of_class(access_class)
 
-        if not address_entries:
+        if not address_entry:
             return
 
-        address_entry = address_entries[0]
-        lc_addresses = self.get_lc_addresses_from_entry(address_entry)
+        lc_addresses = self.get_addresses_of_class(access_class)
 
         if address not in lc_addresses:
             return
@@ -92,9 +87,10 @@ class AddressCredential:
         address_entry["values"] = lc_addresses
 
     def get_address_entry_of_class(self, access_class="allow"):
-        """Get a filtered list of addresses of a given access_class from credentials (use with allow/deny)."""
-        entries = self.asset._credentials.get(access_class)
-        return [entry for entry in entries if entry["type"] == "address"]
+        """Get address credentials entry of the specified access class. access_class = "allow" or "deny"."""
+        entries = self.asset._credentials.get(access_class, [])
+        address_entries = [entry for entry in entries if entry["type"] == "address"]
+        return address_entries[0] if address_entries else None
 
     def get_lc_addresses_from_entry(self, address_entry):
         """Get an address entry of a given access class from credentials (use with allow/deny)."""
