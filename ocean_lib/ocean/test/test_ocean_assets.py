@@ -7,6 +7,7 @@ import uuid
 
 import pytest
 from eth_utils import add_0x_prefix
+from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.did import DID, did_to_id
@@ -183,6 +184,7 @@ def test_ocean_assets_algorithm(publisher_ocean_instance):
     assert ddo, "DDO None. The ddo is not cached after the creation."
     _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did)
     assert _ddo, f"assets.resolve failed for did {ddo.did}"
+    assert _ddo.is_consumable() == ConsumableCodes.OK
 
 
 def test_ocean_assets_create_fails_fileinfo(publisher_ocean_instance):
@@ -282,10 +284,7 @@ def test_create_asset_with_owner_address(publisher_ocean_instance):
     )
     assert asset_1, "Asset creation failed. The asset is None."
     asset_2 = ocn.assets.create(
-        asset.metadata,
-        alice,
-        [auth_service],
-        data_token_address=token.address,
+        asset.metadata, alice, [auth_service], data_token_address=token.address
     )
     assert asset_2, "Asset creation failed. The asset is None."
     assert (

@@ -14,6 +14,7 @@ from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
+from ocean_lib.common.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_factory import (
     ServiceDescriptor,
@@ -446,11 +447,19 @@ class OceanAssets:
             service_type or service_index
         ), "One of service_index or service_type is required."
         asset = self.resolve(did)
+
         if service_type:
             sa = ServiceAgreement.from_ddo(service_type, asset)
         else:
             service = asset.get_service_by_index(service_index)
             sa = ServiceAgreement.from_ddo(service.type, asset)
+
+        consumable_result = asset.is_consumable(
+            {"type": "address", "value": consumer_address},
+            provider_uri=sa.service_endpoint,
+        )
+        if consumable_result != ConsumableCodes.OK:
+            raise AssetNotConsumable(consumable_result)
 
         dt_address = asset.data_token_address
 
@@ -568,6 +577,13 @@ class OceanAssets:
         assert (
             service and service.type == ServiceTypes.ASSET_ACCESS
         ), f"Service with index {service_index} and type {ServiceTypes.ASSET_ACCESS} is not found."
+
+        consumable_result = asset.is_consumable(
+            {"type": "address", "value": consumer_wallet.address},
+            provider_uri=service.service_endpoint,
+        )
+        if consumable_result != ConsumableCodes.OK:
+            raise AssetNotConsumable(consumable_result)
 
         return download_asset_files(
             service_index,
