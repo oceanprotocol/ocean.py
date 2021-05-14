@@ -313,56 +313,6 @@ class DataServiceProvider:
         )
 
     @staticmethod
-    def restart_compute_job(
-        did,
-        job_id,
-        service_endpoint,
-        consumer_address,
-        signature,
-        service_id,
-        order_tx_id,
-        algorithm_did=None,
-        algorithm_meta=None,
-        output=None,
-        input_datasets=None,
-    ):
-        """
-
-        :param did: id of asset starting with `did:op:` and a hex str without 0x prefix
-        :param job_id: str id of compute job that was started and stopped (optional, use it
-            here to start a job after it was stopped)
-        :param service_endpoint:
-        :param consumer_address: hex str the ethereum address of the consumer executing the compute job
-        :param signature: hex str signed message to allow the provider to authorize the consumer
-        :param service_id:
-        :param token_address:
-        :param order_tx_id: hex str id of the token transfer transaction
-        :param algorithm_did: str -- the asset did (of `algorithm` type) which consist of `did:op:` and
-            the assetId hex str (without `0x` prefix)
-        :param algorithm_meta: see `OceanCompute.execute`
-        :param output: see `OceanCompute.execute`
-        :param input_datasets: list of ComputeInput
-
-        :return: bool whether the job was restarted successfully
-        """
-        DataServiceProvider.stop_compute_job(
-            did, job_id, service_endpoint, consumer_address, signature
-        )
-        return DataServiceProvider.start_compute_job(
-            did,
-            service_endpoint,
-            consumer_address,
-            signature,
-            service_id,
-            order_tx_id,
-            algorithm_did,
-            algorithm_meta,
-            output,
-            input_datasets=input_datasets,
-            job_id=job_id,
-        )
-
-    @staticmethod
     def delete_compute_job(did, job_id, service_endpoint, consumer_address, signature):
         """
 
@@ -599,9 +549,13 @@ class DataServiceProvider:
         _input_datasets = []
         if input_datasets:
             for _input in input_datasets:
-                assert _input.did
-                assert _input.transfer_tx_id
-                assert _input.service_id
+                assert _input.did, "The received dataset does not have a did."
+                assert (
+                    _input.transfer_tx_id
+                ), "The received dataset does not have a transaction id."
+                assert (
+                    _input.service_id
+                ), "The received dataset does not have a specified service id."
                 if _input.did != did:
                     _input_datasets.append(_input.as_dictionary())
 
@@ -642,9 +596,29 @@ class DataServiceProvider:
     def check_single_file_info(file_url, provider_uri=None):
         _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
         data = {"url": file_url}
-        response = requests.post(endpoint, json=data).json()
+        response = requests.post(endpoint, json=data)
+
+        if response.status_code != 200:
+            return False
+
+        response = response.json()
         for file_info in response:
             return file_info["valid"]
+
+    @staticmethod
+    def check_asset_file_info(asset, provider_uri=None):
+        if not asset.did:
+            return False
+        _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
+        data = {"did": asset.did}
+        response = requests.post(endpoint, json=data)
+
+        if response.status_code != 200:
+            return False
+
+        response = response.json()
+        for ddo_info in response:
+            return ddo_info["valid"]
 
 
 def urljoin(*args):

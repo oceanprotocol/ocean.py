@@ -20,7 +20,9 @@ def test_get_infura_connection_type(monkeypatch):
     # no envvar
     if ENV_INFURA_CONNECTION_TYPE in os.environ:
         monkeypatch.delenv(ENV_INFURA_CONNECTION_TYPE)
-    assert util.get_infura_connection_type() == "http"
+    assert (
+        util.get_infura_connection_type() == "http"
+    ), "The default connection type for infura is not http."
 
     # envvar is "http"
     monkeypatch.setenv(ENV_INFURA_CONNECTION_TYPE, "http")
@@ -83,9 +85,17 @@ def test_get_web3_connection_provider(monkeypatch):
     provider = util.get_web3_connection_provider("rinkeby")
     assert provider.endpoint_uri == "https://rinkeby.infura.io/v3/id1"
 
+    # polygon network name
+    assert (
+        "polygon" in util.SUPPORTED_NETWORK_NAMES
+    ), "polygon is missing from SUPPORTED_NETWORK_NAMES"
+    assert util.POLYGON_URL == "https://rpc.polygon.oceanprotocol.com"
+    provider = util.get_web3_connection_provider("polygon")
+    assert provider.endpoint_uri == "https://rpc.polygon.oceanprotocol.com"
+
     # all infura-supported network names
     for network in util.SUPPORTED_NETWORK_NAMES:
-        if network == "ganache":
+        if network == "ganache" or "polygon":
             continue  # tested above
         monkeypatch.setenv(ENV_INFURA_PROJECT_ID, f"id_{network}")
         provider = util.get_web3_connection_provider(network)
@@ -116,7 +126,7 @@ def test_get_contracts_addresses():
     )
     assert len(addresses) == 6
     for value in addresses.values():
-        assert value.startswith("0x")
+        assert value.startswith("0x"), "It is not a token address."
 
 
 # FIXME: add tests for:
