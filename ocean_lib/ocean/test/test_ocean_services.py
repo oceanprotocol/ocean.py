@@ -12,9 +12,13 @@ def test_create_access_service(publisher_ocean_instance):
     service = publisher_ocean_instance.services.create_access_service(
         {"a": 1}, "service_endpoint"
     )
-    assert service[0] == "access"
-    assert service[1]["attributes"] == {"a": 1}
-    assert service[1]["serviceEndpoint"] == "service_endpoint"
+    assert service[0] == "access", "Service type is not access."
+    assert service[1]["attributes"] == {
+        "a": 1
+    }, "The attributes are different from the created service ones."
+    assert (
+        service[1]["serviceEndpoint"] == "service_endpoint"
+    ), "The service endpoint is different."
 
 
 def test_create_compute_service(publisher_ocean_instance):
@@ -45,12 +49,26 @@ def test_create_compute_service(publisher_ocean_instance):
     service = publisher_ocean_instance.services.create_compute_service(
         attributes, "http://provider.com:8030"
     )
-    assert isinstance(service, tuple) and len(service) == 2
-    assert service[0] == ServiceTypes.CLOUD_COMPUTE
-    assert isinstance(service[1], dict)
-    assert service[1]["attributes"] == attributes
-    assert service[1]["serviceEndpoint"] == "http://provider.com:8030"
+    assert (
+        isinstance(service, tuple) and len(service) == 2
+    ), "Different instance of service or different length."
+    assert (
+        service[0] == ServiceTypes.CLOUD_COMPUTE
+    ), "Different from the compute service type."
+    assert isinstance(
+        service[1], dict
+    ), "Different type of object for the service attributes."
+    assert (
+        service[1]["attributes"] == attributes
+    ), "Attributes of the same service do not match."
+    assert (
+        service[1]["serviceEndpoint"] == "http://provider.com:8030"
+    ), "The service endpoint do not point to the provider URL. "
 
     compute_service = ocn_compute.create_compute_service_descriptor(attributes)
-    assert compute_service[0] == "compute"
-    assert "main" in compute_service[1]["attributes"]
+    assert (
+        compute_service[0] == "compute"
+    ), "The service type is different from compute type."
+    assert (
+        "main" in compute_service[1]["attributes"]
+    ), "Main key does not belong to the compute service attributes."
