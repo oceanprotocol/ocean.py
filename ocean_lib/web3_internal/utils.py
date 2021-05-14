@@ -4,7 +4,7 @@
 #
 import logging
 from collections import namedtuple
-from decimal import Decimal
+from decimal import ROUND_DOWN, Context, Decimal
 from typing import Union
 
 from eth_keys import keys
@@ -12,8 +12,8 @@ from eth_utils import big_endian_to_int, decode_hex
 from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.web3_internal.constants import (
     DEFAULT_NETWORK_NAME,
+    MAX_UINT256,
     NETWORK_NAME_MAP,
-    PRECISION_18,
 )
 from ocean_lib.web3_internal.web3_overrides.signature import SignatureFix
 from ocean_lib.web3_internal.web3_provider import Web3Provider
@@ -21,6 +21,14 @@ from ocean_lib.web3_internal.web3_provider import Web3Provider
 Signature = namedtuple("Signature", ("v", "r", "s"))
 
 logger = logging.getLogger(__name__)
+
+
+"""Constant used to quantize decimal.Decimal to 18 decimal places"""
+DECIMAL_PLACES_18 = Decimal(10) ** -18
+
+
+"""The maximum possible token amount on Ethereum-compatible blockchains, denoted in wei"""
+MAX_WEI = MAX_UINT256
 
 
 def generate_multi_value_hash(types, values):
@@ -166,15 +174,24 @@ def from_wei(value_in_wei: int) -> Decimal:
     return Web3Provider.get_web3().fromWei(value_in_wei, "ether")
 
 
+"""The maximum possible token amount on Ethereum-compatible blockchains, denoted in ether"""
+MAX_WEI_IN_ETHER = from_wei(MAX_WEI)
+
+
 @enforce_types_shim
 def to_wei(value_in_ether: Union[Decimal, str]) -> int:
-    if isinstance(value_in_ether, Decimal):
-        return Web3Provider.get_web3().toWei(
-            value_in_ether.quantize(PRECISION_18), "ether"
-        )
-    elif isinstance(value_in_ether, str):
-        return Web3Provider.get_web3().toWei(
-            Decimal(value_in_ether).quantize(PRECISION_18), "ether"
-        )
-    else:
-        raise TypeError("Unsupported type.  Must be one of Decimal or string")
+    if isinstance(value_in_ether, str):
+        value_in_ether = Decimal(value_in_ether)
+
+    if value_in_ether > MAX_WEI_IN_ETHER:
+        raise ValueError("Ether value exceeds MAX_WEI_IN_ETHER.")
+
+    # precision=78 because there are 78 digits in MAX_WEI (MAX_UINT256)
+    # Any lower and quantize throws an InvalidOperation error.
+    # rounding=ROUND_DOWN (towards 0, aka. truncate) to avoid issue where user
+    # removes 100% from a pool and transaction fails because it rounds up.
+    context = Context(prec=78, rounding=ROUND_DOWN)
+
+    return Web3Provider.get_web3().toWei(
+        value_in_ether.quantize(DECIMAL_PLACES_18, context=context), "ether"
+    )

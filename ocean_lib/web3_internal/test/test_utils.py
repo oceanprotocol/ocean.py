@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import os
+from decimal import Decimal
 
 import pytest
 from ocean_lib.web3_internal.transactions import (
@@ -10,8 +11,12 @@ from ocean_lib.web3_internal.transactions import (
     send_ether,
 )
 from ocean_lib.web3_internal.utils import (
+    MAX_WEI,
+    MAX_WEI_IN_ETHER,
+    from_wei,
     generate_multi_value_hash,
     prepare_prefixed_hash,
+    to_wei,
 )
 
 
@@ -41,3 +46,45 @@ def test_cancel_or_replace_transaction(alice_wallet):
     assert cancel_or_replace_transaction(
         alice_wallet, None
     ), "Cancel or replace transaction failed."
+
+
+def test_from_wei():
+    assert from_wei(0) == Decimal("0"), "Zero wei should equal zero ether"
+    assert from_wei(123456789123456789) == Decimal(
+        "0.123456789123456789"
+    ), "Conversion from wei to ether failed."
+    assert from_wei(1123456789123456789) == Decimal(
+        "1.123456789123456789"
+    ), "Conversion from wei to ether failed."
+
+    assert (
+        from_wei(MAX_WEI) == MAX_WEI_IN_ETHER
+    ), "Conversion from maximum wei value to ether failed."
+
+    with pytest.raises(ValueError):
+        from_wei(MAX_WEI + 1)
+
+
+def test_to_wei():
+    assert to_wei(Decimal("0")) == 0, "Zero ether (Decimal) should equal zero wei"
+    assert to_wei("0") == 0, "Zero ether (string) should equal zero wei"
+    assert (
+        to_wei(Decimal("0.123456789123456789")) == 123456789123456789
+    ), "Conversion from ether (Decimal) to wei failed."
+    assert (
+        to_wei("0.123456789123456789") == 123456789123456789
+    ), "Conversion from ether (string) to wei failed."
+
+    assert (
+        to_wei("0.1234567891234567893") == 123456789123456789
+    ), "Conversion from ether to wei failed, supposed to round towards 0 (aka. truncate)."
+    assert (
+        to_wei("0.1234567891234567897") == 123456789123456789
+    ), "Conversion from ether to wei failed, supposed to round towards 0 (aka. truncate)."
+
+    assert (
+        to_wei(MAX_WEI_IN_ETHER) == MAX_WEI
+    ), "Conversion from ether to maximum wei value failed"
+
+    with pytest.raises(ValueError):
+        to_wei(MAX_WEI_IN_ETHER + 1)
