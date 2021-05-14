@@ -5,8 +5,9 @@
 import json
 from datetime import datetime
 
-from ocean_lib.assets.utils import create_checksum
+from ocean_lib.assets.utils import create_checksum, create_publisher_trusted_algorithms
 from ocean_lib.config import Config
+from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.ocean_compute import OceanCompute
@@ -25,14 +26,12 @@ def test_build_cluster_attributes():
     cluster_dict = compute.build_cluster_attributes(
         "Kubernetes", "http://10.0.0.17/my_cluster"
     )
+    expected_cluster_dict = {"type": "Kubernetes", "url": "http://10.0.0.17/my_cluster"}
     assert cluster_dict, "Cluster dictionary is None."
     assert isinstance(cluster_dict, dict), "The cluster is not a dict."
     assert (
-        "type" in cluster_dict and cluster_dict["type"] == "Kubernetes"
-    ), "Type does not belong to the attributes."
-    assert (
-        "url" in cluster_dict and cluster_dict["url"] == "http://10.0.0.17/my_cluster"
-    ), "Url does not belong to the attributes."
+        cluster_dict == expected_cluster_dict
+    ), "The cluster values are different from the expected ones."
 
 
 def test_build_container_attributes():
@@ -42,18 +41,16 @@ def test_build_container_attributes():
     container_dict = compute.build_container_attributes(
         "node", "best_tag", "entrypoint.exe"
     )
+    expected_container_dict = {
+        "image": "node",
+        "tag": "best_tag",
+        "entrypoint": "entrypoint.exe",
+    }
     assert container_dict, "Container dictionary is None."
     assert isinstance(container_dict, dict), "The container is not a dict."
     assert (
-        "image" in container_dict and container_dict["image"] == "node"
-    ), "Image does not belong to the attributes."
-    assert (
-        "tag" in container_dict and container_dict["tag"] == "best_tag"
-    ), "Tag does not belong to the attributes."
-    assert (
-        "entrypoint" in container_dict
-        and container_dict["entrypoint"] == "entrypoint.exe"
-    ), "Entrypoint does not belong to the attributes."
+        container_dict == expected_container_dict
+    ), "The container values are different from the expected ones."
 
 
 def test_build_server_attributes():
@@ -63,29 +60,20 @@ def test_build_server_attributes():
     server_dict = compute.build_server_attributes(
         "test_server_id_123", "test_server_type", 4, 4, "20", "20", 30
     )
+    expected_server_dict = {
+        "serverId": "test_server_id_123",
+        "serverType": "test_server_type",
+        "cpu": 4,
+        "gpu": 4,
+        "memory": "20",
+        "disk": "20",
+        "maxExecutionTime": 30,
+    }
     assert server_dict, "Server dictionary is None."
     assert isinstance(server_dict, dict), "The server is not a dict."
     assert (
-        "serverId" in server_dict and server_dict["serverId"] == "test_server_id_123"
-    ), "serverId does not belong to the attributes."
-    assert (
-        "serverType" in server_dict and server_dict["serverType"] == "test_server_type"
-    ), "serverType does not belong to the attributes."
-    assert (
-        "cpu" in server_dict and server_dict["cpu"] == 4
-    ), "CPU does not belong to the attributes."
-    assert (
-        "gpu" in server_dict and server_dict["gpu"] == 4
-    ), "GPU does not belong to the attributes."
-    assert (
-        "memory" in server_dict and server_dict["memory"] == "20"
-    ), "Memory does not belong to the attributes."
-    assert (
-        "disk" in server_dict and server_dict["disk"] == "20"
-    ), "Disk does not belong to the attributes."
-    assert (
-        "maxExecutionTime" in server_dict and server_dict["maxExecutionTime"] == 30
-    ), "Execution time does not exist."
+        server_dict == expected_server_dict
+    ), "The server values are different from the expected ones."
 
 
 def test_build_service_provider_attributes():
@@ -96,87 +84,62 @@ def test_build_service_provider_attributes():
     cluster_dict = compute.build_cluster_attributes(
         "Kubernetes", "http://10.0.0.17/my_cluster"
     )
+    expected_cluster_dict = {"type": "Kubernetes", "url": "http://10.0.0.17/my_cluster"}
     assert cluster_dict, "Cluster dictionary is None."
     assert isinstance(cluster_dict, dict), "The cluster is not a dict."
     assert (
-        "type" in cluster_dict and cluster_dict["type"] == "Kubernetes"
-    ), "Type does not belong to the attributes."
-    assert (
-        "url" in cluster_dict and cluster_dict["url"] == "http://10.0.0.17/my_cluster"
-    ), "Url does not belong to the attributes."
+        cluster_dict == expected_cluster_dict
+    ), "The cluster values are different from the expected ones."
 
     container_dict = compute.build_container_attributes(
         "node", "best_tag", "entrypoint.exe"
     )
+    expected_container_dict = {
+        "image": "node",
+        "tag": "best_tag",
+        "entrypoint": "entrypoint.exe",
+    }
     assert container_dict, "Container dictionary is None."
     assert isinstance(container_dict, dict), "The container is not a dict."
     assert (
-        "image" in container_dict and container_dict["image"] == "node"
-    ), "Image does not belong to the attributes."
-    assert (
-        "tag" in container_dict and container_dict["tag"] == "best_tag"
-    ), "Tag does not belong to the attributes."
-    assert (
-        "entrypoint" in container_dict
-        and container_dict["entrypoint"] == "entrypoint.exe"
-    ), "Entrypoint does not belong to the attributes."
+        container_dict == expected_container_dict
+    ), "The container values are different from the expected ones."
 
     server_dict = compute.build_server_attributes(
         "test_server_id_123", "test_server_type", 4, 4, "20", "20", 30
     )
+    expected_server_dict = {
+        "serverId": "test_server_id_123",
+        "serverType": "test_server_type",
+        "cpu": 4,
+        "gpu": 4,
+        "memory": "20",
+        "disk": "20",
+        "maxExecutionTime": 30,
+    }
     assert server_dict, "Server dictionary is None."
     assert isinstance(server_dict, dict), "The server is not a dict."
     assert (
-        "serverId" in server_dict and server_dict["serverId"] == "test_server_id_123"
-    ), "serverId does not belong to the attributes."
-    assert (
-        "serverType" in server_dict and server_dict["serverType"] == "test_server_type"
-    ), "serverType does not belong to the attributes."
-    assert (
-        "cpu" in server_dict and server_dict["cpu"] == 4
-    ), "CPU does not belong to the attributes."
-    assert (
-        "gpu" in server_dict and server_dict["gpu"] == 4
-    ), "GPU does not belong to the attributes."
-    assert (
-        "memory" in server_dict and server_dict["memory"] == "20"
-    ), "Memory does not belong to the attributes."
-    assert (
-        "disk" in server_dict and server_dict["disk"] == "20"
-    ), "Disk does not belong to the attributes."
-    assert (
-        "maxExecutionTime" in server_dict and server_dict["maxExecutionTime"] == 30
-    ), "Execution time does not exist."
+        server_dict == expected_server_dict
+    ), "The server values are different from the expected ones."
 
     service_provider_dict = compute.build_service_provider_attributes(
         "My Provider", "Unit testing", cluster_dict, container_dict, server_dict
     )
+    expected_service_provider_dict = {
+        "type": "My Provider",
+        "description": "Unit testing",
+        "environment": {
+            "cluster": cluster_dict,
+            "supportedContainers": container_dict,
+            "supportedServers": server_dict,
+        },
+    }
     assert service_provider_dict, "Provider server is None."
     assert isinstance(service_provider_dict, dict), "Provider server is not a dict."
     assert (
-        "type" in service_provider_dict
-        and service_provider_dict["type"] == "My Provider"
-    ), "Type does not exist in provider server dictionary."
-    assert (
-        "description" in service_provider_dict
-        and service_provider_dict["description"] == "Unit testing"
-    ), "Description does not belong to the attributes."
-    assert (
-        "environment" in service_provider_dict
-    ), "Environment does not belong to the attributes."
-    assert (
-        "cluster" in service_provider_dict["environment"]
-        and service_provider_dict["environment"]["cluster"] == cluster_dict
-    ), "Cluster does not belong to the environment attributes."
-    assert (
-        "supportedContainers" in service_provider_dict["environment"]
-        and service_provider_dict["environment"]["supportedContainers"]
-        == container_dict
-    ), "Container does not belong to the environment attributes."
-    assert (
-        "supportedServers" in service_provider_dict["environment"]
-        and service_provider_dict["environment"]["supportedServers"] == server_dict
-    ), "Server does not belong to the environment attributes."
+        service_provider_dict == expected_service_provider_dict
+    ), "The service provider is not the expected one."
 
 
 def test_build_service_privacy_attributes(publisher_ocean_instance):
@@ -196,47 +159,22 @@ def test_build_service_privacy_attributes(publisher_ocean_instance):
         allow_network_access=True,
     )
 
+    expected_privacy_dict = {
+        "allowRawAlgorithm": True,
+        "allowAllPublishedAlgorithms": True,
+        "publisherTrustedAlgorithms": create_publisher_trusted_algorithms(
+            [algorithm_ddo.did], ConfigProvider.get_config().metadata_cache_uri
+        ),
+        "allowNetworkAccess": True,
+    }
+
     assert privacy_dict, "Privacy dictionary is None."
     assert isinstance(
         privacy_dict, dict
     ), "Privacy attributes do not form a dictionary."
     assert (
-        "allowRawAlgorithm" in privacy_dict
-        and privacy_dict["allowRawAlgorithm"] == True
-    ), "AllowRawAlgorithm does not belong to the attributes."
-    assert (
-        "allowAllPublishedAlgorithms" in privacy_dict
-        and privacy_dict["allowAllPublishedAlgorithms"] == True
-    ), "AllowAllPublishedAlgorithms does not belong to the attributes."
-    assert (
-        "publisherTrustedAlgorithms" in privacy_dict
-    ), "Publisher trusted algorithms do not exist in privacy dict."
-    assert (
-        privacy_dict["publisherTrustedAlgorithms"][0]["did"]
-        and privacy_dict["publisherTrustedAlgorithms"][0]["did"] == algorithm_ddo.did
-    ), "The did of the algorithm DDO does not exist."
-    assert privacy_dict["publisherTrustedAlgorithms"][0][
-        "filesChecksum"
-    ] and privacy_dict["publisherTrustedAlgorithms"][0][
-        "filesChecksum"
-    ] == create_checksum(
-        algorithm_ddo.metadata["encryptedFiles"]
-        + json.dumps(algorithm_ddo.metadata["main"]["files"], separators=(",", ":"))
-    ), "The filesChecksum does not exist."
-    assert privacy_dict["publisherTrustedAlgorithms"][0][
-        "containerSectionChecksum"
-    ] and privacy_dict["publisherTrustedAlgorithms"][0][
-        "containerSectionChecksum"
-    ] == create_checksum(
-        json.dumps(
-            algorithm_ddo.metadata["main"]["algorithm"]["container"],
-            separators=(",", ":"),
-        )
-    ), "The cointainerSectionChecksum does not exist."
-    assert (
-        "allowNetworkAccess" in privacy_dict
-        and privacy_dict["allowNetworkAccess"] == True
-    ), "AllowNetworkAccess does not belong to the attributes."
+        privacy_dict == expected_privacy_dict
+    ), "The privacy dict is not the expected one."
 
 
 def test_build_service_privacy_attributes_no_trusted_algos():
@@ -244,24 +182,17 @@ def test_build_service_privacy_attributes_no_trusted_algos():
     config = Ocean.config
     compute = OceanCompute(config=config, data_provider=data_provider)
     privacy_dict = compute.build_service_privacy_attributes()
+    expected_privacy_dict = {
+        "allowRawAlgorithm": False,
+        "allowAllPublishedAlgorithms": False,
+        "publisherTrustedAlgorithms": [],
+        "allowNetworkAccess": False,
+    }
     assert privacy_dict
     assert isinstance(privacy_dict, dict)
     assert (
-        "allowRawAlgorithm" in privacy_dict
-        and privacy_dict["allowRawAlgorithm"] == False
-    ), "The allowRawAlgorithm is set."
-    assert (
-        "allowAllPublishedAlgorithms" in privacy_dict
-        and privacy_dict["allowAllPublishedAlgorithms"] == False
-    ), "The allowAllPublishedAlgorithms is set."
-    assert (
-        "publisherTrustedAlgorithms" in privacy_dict
-        and privacy_dict["publisherTrustedAlgorithms"] == []
-    ), "The publisher trusted algorithms list is not empty."
-    assert (
-        "allowNetworkAccess" in privacy_dict
-        and privacy_dict["allowNetworkAccess"] == False
-    ), "The allowNetworkAccess is set."
+        privacy_dict == expected_privacy_dict
+    ), "The privacy dict is not the expected one."
 
 
 def test_create_compute_service_attributes(publisher_ocean_instance):
@@ -281,132 +212,82 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
         allow_network_access=True,
     )
 
+    expected_privacy_dict = {
+        "allowRawAlgorithm": True,
+        "allowAllPublishedAlgorithms": True,
+        "publisherTrustedAlgorithms": create_publisher_trusted_algorithms(
+            [algorithm_ddo.did], ConfigProvider.get_config().metadata_cache_uri
+        ),
+        "allowNetworkAccess": True,
+    }
+
     assert privacy_dict, "Privacy dictionary is None."
     assert isinstance(
         privacy_dict, dict
     ), "Privacy attributes do not form a dictionary."
     assert (
-        "allowRawAlgorithm" in privacy_dict
-        and privacy_dict["allowRawAlgorithm"] == True
-    ), "AllowRawAlgorithm does not belong to the attributes."
-    assert (
-        "allowAllPublishedAlgorithms" in privacy_dict
-        and privacy_dict["allowAllPublishedAlgorithms"] == True
-    ), "AllowAllPublishedAlgorithms does not belong to the attributes."
-    assert (
-        "publisherTrustedAlgorithms" in privacy_dict
-    ), "Publisher trusted algorithms do not exist in privacy dict."
-    assert (
-        privacy_dict["publisherTrustedAlgorithms"][0]["did"]
-        and privacy_dict["publisherTrustedAlgorithms"][0]["did"] == algorithm_ddo.did
-    ), "The did of the algorithm DDO does not exist."
-    assert privacy_dict["publisherTrustedAlgorithms"][0][
-        "filesChecksum"
-    ] and privacy_dict["publisherTrustedAlgorithms"][0][
-        "filesChecksum"
-    ] == create_checksum(
-        algorithm_ddo.metadata["encryptedFiles"]
-        + json.dumps(algorithm_ddo.metadata["main"]["files"], separators=(",", ":"))
-    ), "The filesChecksum does not exist."
-    assert privacy_dict["publisherTrustedAlgorithms"][0][
-        "containerSectionChecksum"
-    ] and privacy_dict["publisherTrustedAlgorithms"][0][
-        "containerSectionChecksum"
-    ] == create_checksum(
-        json.dumps(
-            algorithm_ddo.metadata["main"]["algorithm"]["container"],
-            separators=(",", ":"),
-        )
-    ), "The cointainerSectionChecksum does not exist."
-    assert (
-        "allowNetworkAccess" in privacy_dict
-        and privacy_dict["allowNetworkAccess"] == True
-    ), "AllowNetworkAccess does not belong to the attributes."
+        privacy_dict == expected_privacy_dict
+    ), "The privacy dict is not the expected one."
 
     cluster_dict = compute.build_cluster_attributes(
         "Kubernetes", "http://10.0.0.17/my_cluster"
     )
+    expected_cluster_dict = {"type": "Kubernetes", "url": "http://10.0.0.17/my_cluster"}
     assert cluster_dict, "Cluster dictionary is None."
     assert isinstance(cluster_dict, dict), "The cluster is not a dict."
     assert (
-        "type" in cluster_dict and cluster_dict["type"] == "Kubernetes"
-    ), "Type does not belong to the attributes."
-    assert (
-        "url" in cluster_dict and cluster_dict["url"] == "http://10.0.0.17/my_cluster"
-    ), "Url does not belong to the attributes."
+        cluster_dict == expected_cluster_dict
+    ), "The cluster values are different from the expected ones."
 
     container_dict = compute.build_container_attributes(
         "node", "best_tag", "entrypoint.exe"
     )
+    expected_container_dict = {
+        "image": "node",
+        "tag": "best_tag",
+        "entrypoint": "entrypoint.exe",
+    }
     assert container_dict, "Container dictionary is None."
     assert isinstance(container_dict, dict), "The container is not a dict."
     assert (
-        "image" in container_dict and container_dict["image"] == "node"
-    ), "Image does not belong to the attributes."
-    assert (
-        "tag" in container_dict and container_dict["tag"] == "best_tag"
-    ), "Tag does not belong to the attributes."
-    assert (
-        "entrypoint" in container_dict
-        and container_dict["entrypoint"] == "entrypoint.exe"
-    ), "Entrypoint does not belong to the attributes."
+        container_dict == expected_container_dict
+    ), "The container values are different from the expected ones."
 
     server_dict = compute.build_server_attributes(
         "test_server_id_123", "test_server_type", 4, 4, "20", "20", 30
     )
+    expected_server_dict = {
+        "serverId": "test_server_id_123",
+        "serverType": "test_server_type",
+        "cpu": 4,
+        "gpu": 4,
+        "memory": "20",
+        "disk": "20",
+        "maxExecutionTime": 30,
+    }
     assert server_dict, "Server dictionary is None."
     assert isinstance(server_dict, dict), "The server is not a dict."
     assert (
-        "serverId" in server_dict and server_dict["serverId"] == "test_server_id_123"
-    ), "serverId does not belong to the attributes."
-    assert (
-        "serverType" in server_dict and server_dict["serverType"] == "test_server_type"
-    ), "serverType does not belong to the attributes."
-    assert (
-        "cpu" in server_dict and server_dict["cpu"] == 4
-    ), "CPU does not belong to the attributes."
-    assert (
-        "gpu" in server_dict and server_dict["gpu"] == 4
-    ), "GPU does not belong to the attributes."
-    assert (
-        "memory" in server_dict and server_dict["memory"] == "20"
-    ), "Memory does not belong to the attributes."
-    assert (
-        "disk" in server_dict and server_dict["disk"] == "20"
-    ), "Disk does not belong to the attributes."
-    assert (
-        "maxExecutionTime" in server_dict and server_dict["maxExecutionTime"] == 30
-    ), "Execution time does not exist."
+        server_dict == expected_server_dict
+    ), "The server values are different from the expected ones."
 
     service_provider_dict = compute.build_service_provider_attributes(
         "My Provider", "Unit testing", cluster_dict, container_dict, server_dict
     )
+    expected_service_provider_dict = {
+        "type": "My Provider",
+        "description": "Unit testing",
+        "environment": {
+            "cluster": cluster_dict,
+            "supportedContainers": container_dict,
+            "supportedServers": server_dict,
+        },
+    }
     assert service_provider_dict, "Provider server is None."
     assert isinstance(service_provider_dict, dict), "Provider server is not a dict."
     assert (
-        "type" in service_provider_dict
-        and service_provider_dict["type"] == "My Provider"
-    ), "Type does not exist in provider server dictionary."
-    assert (
-        "description" in service_provider_dict
-        and service_provider_dict["description"] == "Unit testing"
-    ), "Description does not belong to the attributes."
-    assert (
-        "environment" in service_provider_dict
-    ), "Environment does not belong to the attributes."
-    assert (
-        "cluster" in service_provider_dict["environment"]
-        and service_provider_dict["environment"]["cluster"] == cluster_dict
-    ), "Cluster does not belong to the environment attributes."
-    assert (
-        "supportedContainers" in service_provider_dict["environment"]
-        and service_provider_dict["environment"]["supportedContainers"]
-        == container_dict
-    ), "Container does not belong to the environment attributes."
-    assert (
-        "supportedServers" in service_provider_dict["environment"]
-        and service_provider_dict["environment"]["supportedServers"] == server_dict
-    ), "Server does not belong to the environment attributes."
+        service_provider_dict == expected_service_provider_dict
+    ), "The service provider is not the expected one."
 
     compute_attributes = compute.create_compute_service_attributes(
         30,
@@ -416,38 +297,23 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
         privacy_dict,
     )
 
+    expected_compute_attributes = {
+        "main": {
+            "name": "dataAssetComputingServiceAgreement",
+            "creator": publisher.address,
+            "datePublished": datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
+            "cost": 1.0,
+            "timeout": 30,
+            "provider": service_provider_dict,
+            "privacy": privacy_dict,
+        }
+    }
+
     assert compute_attributes, "Compute attributes do not exist."
     assert isinstance(compute_attributes, dict), "compute_attributes is not a dict."
     assert (
-        "main" in compute_attributes
-    ), "Main does not belong to compute attributes dict."
-    assert isinstance(compute_attributes["main"], dict), "Main is not a dict."
-    assert (
-        "name" in compute_attributes["main"]
-        and compute_attributes["main"]["name"] == "dataAssetComputingServiceAgreement"
-    ), "Name does not belong to main dict or has a different value."
-    assert (
-        "creator" in compute_attributes["main"]
-        and compute_attributes["main"]["creator"] == publisher.address
-    ), "Creator does not belong to main dict or has a different value."
-    assert (
-        "datePublished" in compute_attributes["main"]
-        and compute_attributes["main"]["datePublished"]
-        == datetime.utcnow().replace(microsecond=0).isoformat() + "Z"
-    ), "Published date does not belong to main dict or has a different value."
-    assert "cost" in compute_attributes["main"], "Cost does not belong to main dict."
-    assert (
-        "timeout" in compute_attributes["main"]
-        and compute_attributes["main"]["timeout"] == 30
-    ), "Timeout does not belong to main dict or has a different value."
-    assert (
-        "provider" in compute_attributes["main"]
-        and compute_attributes["main"]["provider"] == service_provider_dict
-    ), "Provider does not belong to main dict or has a different value."
-    assert (
-        "privacy" in compute_attributes["main"]
-        and compute_attributes["main"]["privacy"] == privacy_dict
-    ), "Privacy does not belong to main dict or has a different value."
+        compute_attributes == expected_compute_attributes
+    ), "The compute attributes are not the expected ones."
 
 
 def test_create_compute_service_descriptor(publisher_ocean_instance):
@@ -467,34 +333,82 @@ def test_create_compute_service_descriptor(publisher_ocean_instance):
         allow_network_access=True,
     )
 
+    expected_privacy_dict = {
+        "allowRawAlgorithm": True,
+        "allowAllPublishedAlgorithms": True,
+        "publisherTrustedAlgorithms": create_publisher_trusted_algorithms(
+            [algorithm_ddo.did], ConfigProvider.get_config().metadata_cache_uri
+        ),
+        "allowNetworkAccess": True,
+    }
+
     assert privacy_dict, "Privacy dictionary is None."
     assert isinstance(
         privacy_dict, dict
     ), "Privacy attributes do not form a dictionary."
+    assert (
+        privacy_dict == expected_privacy_dict
+    ), "The privacy dict is not the expected one."
 
     cluster_dict = compute.build_cluster_attributes(
         "Kubernetes", "http://10.0.0.17/my_cluster"
     )
+    expected_cluster_dict = {"type": "Kubernetes", "url": "http://10.0.0.17/my_cluster"}
     assert cluster_dict, "Cluster dictionary is None."
     assert isinstance(cluster_dict, dict), "The cluster is not a dict."
+    assert (
+        cluster_dict == expected_cluster_dict
+    ), "The cluster values are different from the expected ones."
 
     container_dict = compute.build_container_attributes(
         "node", "best_tag", "entrypoint.exe"
     )
+    expected_container_dict = {
+        "image": "node",
+        "tag": "best_tag",
+        "entrypoint": "entrypoint.exe",
+    }
     assert container_dict, "Container dictionary is None."
     assert isinstance(container_dict, dict), "The container is not a dict."
+    assert (
+        container_dict == expected_container_dict
+    ), "The container values are different from the expected ones."
 
     server_dict = compute.build_server_attributes(
         "test_server_id_123", "test_server_type", 4, 4, "20", "20", 30
     )
+    expected_server_dict = {
+        "serverId": "test_server_id_123",
+        "serverType": "test_server_type",
+        "cpu": 4,
+        "gpu": 4,
+        "memory": "20",
+        "disk": "20",
+        "maxExecutionTime": 30,
+    }
     assert server_dict, "Server dictionary is None."
     assert isinstance(server_dict, dict), "The server is not a dict."
+    assert (
+        server_dict == expected_server_dict
+    ), "The server values are different from the expected ones."
 
     service_provider_dict = compute.build_service_provider_attributes(
         "My Provider", "Unit testing", cluster_dict, container_dict, server_dict
     )
+    expected_service_provider_dict = {
+        "type": "My Provider",
+        "description": "Unit testing",
+        "environment": {
+            "cluster": cluster_dict,
+            "supportedContainers": container_dict,
+            "supportedServers": server_dict,
+        },
+    }
     assert service_provider_dict, "Provider server is None."
     assert isinstance(service_provider_dict, dict), "Provider server is not a dict."
+    assert (
+        service_provider_dict == expected_service_provider_dict
+    ), "The service provider is not the expected one."
 
     compute_attributes = compute.create_compute_service_attributes(
         30,
