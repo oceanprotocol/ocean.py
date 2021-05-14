@@ -221,8 +221,8 @@ class Config(configparser.ConfigParser):
 
         if path and path.exists():
             return path
-        else:
-            return Path(ocean_abis.__file__).parent.expanduser().resolve()
+
+        return Path(ocean_abis.__file__).parent.expanduser().resolve()
 
     @property
     def address_file(self):
