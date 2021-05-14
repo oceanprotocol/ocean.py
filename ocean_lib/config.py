@@ -6,9 +6,9 @@
 import configparser
 import logging
 import os
-import site
 from pathlib import Path
 
+import ocean_abis
 from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
 
@@ -216,34 +216,13 @@ class Config(configparser.ConfigParser):
     @property
     def artifacts_path(self):
         """Path where the contracts artifacts are allocated."""
-        path = None
         _path_string = self.get(SECTION_ETH_NETWORK, NAME_ARTIFACTS_PATH)
-        if _path_string:
-            path = Path(_path_string).expanduser().resolve()
+        path = Path(_path_string).expanduser().resolve() if _path_string else None
 
-        # TODO: Handle the default case and make default empty string
-        # assert path.exists(), "Can't find the keeper path: {} ({})"..format(_path_string,
-        # path)
-        if path and os.path.exists(path):
+        if path and path.exists():
             return path
 
-        if os.getenv("VIRTUAL_ENV") and os.path.exists(
-            os.path.join(os.getenv("VIRTUAL_ENV"), "artifacts")
-        ):
-            path = os.path.join(os.getenv("VIRTUAL_ENV"), "artifacts")
-        else:
-            path = os.path.join(site.PREFIXES[0], "artifacts")
-            if not os.path.exists(path):
-                # try to find 'artifacts' in a subfolder of site.PREFIXES[0]
-                for s in os.listdir(site.PREFIXES[0]):
-                    path = os.path.join(site.PREFIXES[0], s, "artifacts")
-                    if os.path.exists(path):
-                        break
-
-        if not os.path.exists(path):
-            path = Path("~/.ocean/ocean-contracts/artifacts").expanduser().resolve()
-
-        return path
+        return Path(ocean_abis.__file__).parent.expanduser().resolve()
 
     @property
     def address_file(self):

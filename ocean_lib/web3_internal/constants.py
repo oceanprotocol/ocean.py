@@ -18,4 +18,5 @@ NETWORK_NAME_MAP = {
     4: "Rinkeby",
     42: "Kovan",
     100: "xDai",
+    137: "Polygon",
 }
