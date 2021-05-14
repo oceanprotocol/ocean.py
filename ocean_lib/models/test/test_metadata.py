@@ -24,25 +24,30 @@ def test_metadata_contract(publisher_ocean_instance):
 
     # Tested the event properties.
     assert (
-        ddo_registry.event_MetadataCreated.__dict__["abi"]["name"]
+        ddo_registry.event_MetadataCreated.abi["name"]
         == MetadataContract.EVENT_METADATA_CREATED
     )
     assert (
-        ddo_registry.event_MetadataUpdated.__dict__["abi"]["name"]
+        ddo_registry.event_MetadataUpdated.abi["name"]
         == MetadataContract.EVENT_METADATA_UPDATED
     )
 
     # Tested get_event_log for create event.
     original_ddo = create_asset(ocn, alice)
-    assert original_ddo, "create asset failed."
+    assert original_ddo, "Create asset failed."
 
     asset_id = original_ddo.asset_id
     creation_log = ddo_registry.get_event_log(
         ddo_registry.EVENT_METADATA_CREATED, block, asset_id, 30
     )
-    assert creation_log, "no ddo created event."
-    assert creation_log.__dict__["args"]["createdBy"] == alice.address
-    assert creation_log.__dict__["event"] == ddo_registry.EVENT_METADATA_CREATED
+    assert creation_log, "No ddo created event."
+    assert creation_log.args.createdBy == alice.address
+    assert (
+        creation_log.args.createdBy == alice.address
+    ), "The event is not created by the publisher."
+    assert (
+        creation_log.event == ddo_registry.EVENT_METADATA_CREATED
+    ), "Different event types."
 
     # Tested get_event_log for update event.
     ddo = wait_for_ddo(ocn, original_ddo.did)
@@ -50,6 +55,10 @@ def test_metadata_contract(publisher_ocean_instance):
     updating_log = ddo_registry.get_event_log(
         ddo_registry.EVENT_METADATA_UPDATED, block, asset_id, 30
     )
-    assert updating_log, "no ddo updated event."
-    assert updating_log.__dict__["args"]["updatedBy"] == alice.address
-    assert updating_log.__dict__["event"] == ddo_registry.EVENT_METADATA_UPDATED
+    assert updating_log, "No ddo updated event."
+    assert (
+        updating_log.args.updatedBy == alice.address
+    ), "The event is not updated by the publisher."
+    assert (
+        updating_log.event == ddo_registry.EVENT_METADATA_UPDATED
+    ), "Different event types."

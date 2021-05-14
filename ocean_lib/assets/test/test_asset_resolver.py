@@ -2,6 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import pytest
 
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
@@ -37,7 +38,8 @@ def test_bad_resolved_asset(publisher_ocean_instance, metadata):
     wait_for_ddo(publisher_ocean_instance, asset.did)
     assert asset is not None, "The asset is not cached."
 
-    try:
+    with pytest.raises(AssertionError) as err:
         resolve_asset(asset.did)
-    except AssertionError as err:
-        assert err.args[0] == "One of metadata_cache_uri or token_address is required."
+    assert (
+        err.value.args[0] == "One of metadata_cache_uri or token_address is required."
+    )

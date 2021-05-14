@@ -19,7 +19,7 @@ from tests.resources.helper_functions import get_publisher_wallet
 
 
 def test_build_cluster_attributes():
-    data_provider = DataServiceProvider
+    data_provider = DataServiceProvider()
     config = Ocean.config
     compute = OceanCompute(config=config, data_provider=data_provider)
     cluster_dict = compute.build_cluster_attributes(
@@ -36,7 +36,7 @@ def test_build_cluster_attributes():
 
 
 def test_build_container_attributes():
-    data_provider = DataServiceProvider
+    data_provider = DataServiceProvider()
     config = Ocean.config
     compute = OceanCompute(config=config, data_provider=data_provider)
     container_dict = compute.build_container_attributes(
@@ -57,19 +57,19 @@ def test_build_container_attributes():
 
 
 def test_build_server_attributes():
-    data_provider = DataServiceProvider
+    data_provider = DataServiceProvider()
     config = Ocean.config
     compute = OceanCompute(config=config, data_provider=data_provider)
     server_dict = compute.build_server_attributes(
-        "123", "foo_server_type", 4, 4, "20", "20", 30
+        "test_server_id_123", "test_server_type", 4, 4, "20", "20", 30
     )
     assert server_dict, "Server dictionary is None."
     assert isinstance(server_dict, dict), "The server is not a dict."
     assert (
-        "serverId" in server_dict and server_dict["serverId"] == "123"
+        "serverId" in server_dict and server_dict["serverId"] == "test_server_id_123"
     ), "serverId does not belong to the attributes."
     assert (
-        "serverType" in server_dict and server_dict["serverType"] == "foo_server_type"
+        "serverType" in server_dict and server_dict["serverType"] == "test_server_type"
     ), "serverType does not belong to the attributes."
     assert (
         "cpu" in server_dict and server_dict["cpu"] == 4
@@ -89,7 +89,7 @@ def test_build_server_attributes():
 
 
 def test_build_service_provider_attributes():
-    data_provider = DataServiceProvider
+    data_provider = DataServiceProvider()
     config = Ocean.config
     compute = OceanCompute(config=config, data_provider=data_provider)
 
@@ -122,15 +122,15 @@ def test_build_service_provider_attributes():
     ), "Entrypoint does not belong to the attributes."
 
     server_dict = compute.build_server_attributes(
-        "123", "foo_server_type", 4, 4, "20", "20", 30
+        "test_server_id_123", "test_server_type", 4, 4, "20", "20", 30
     )
     assert server_dict, "Server dictionary is None."
     assert isinstance(server_dict, dict), "The server is not a dict."
     assert (
-        "serverId" in server_dict and server_dict["serverId"] == "123"
+        "serverId" in server_dict and server_dict["serverId"] == "test_server_id_123"
     ), "serverId does not belong to the attributes."
     assert (
-        "serverType" in server_dict and server_dict["serverType"] == "foo_server_type"
+        "serverType" in server_dict and server_dict["serverType"] == "test_server_type"
     ), "serverType does not belong to the attributes."
     assert (
         "cpu" in server_dict and server_dict["cpu"] == 4
@@ -181,7 +181,7 @@ def test_build_service_provider_attributes():
 
 def test_build_service_privacy_attributes(publisher_ocean_instance):
     publisher = get_publisher_wallet()
-    data_provider = DataServiceProvider
+    data_provider = DataServiceProvider()
     config = Ocean.config
     compute = OceanCompute(config=config, data_provider=data_provider)
 
@@ -240,7 +240,7 @@ def test_build_service_privacy_attributes(publisher_ocean_instance):
 
 
 def test_build_service_privacy_attributes_no_trusted_algos():
-    data_provider = DataServiceProvider
+    data_provider = DataServiceProvider()
     config = Ocean.config
     compute = OceanCompute(config=config, data_provider=data_provider)
     privacy_dict = compute.build_service_privacy_attributes()
@@ -266,7 +266,7 @@ def test_build_service_privacy_attributes_no_trusted_algos():
 
 def test_create_compute_service_attributes(publisher_ocean_instance):
     publisher = get_publisher_wallet()
-    data_provider = DataServiceProvider
+    data_provider = DataServiceProvider()
     config = Ocean.config
     compute = OceanCompute(config=config, data_provider=data_provider)
 
@@ -352,15 +352,15 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
     ), "Entrypoint does not belong to the attributes."
 
     server_dict = compute.build_server_attributes(
-        "123", "foo_server_type", 4, 4, "20", "20", 30
+        "test_server_id_123", "test_server_type", 4, 4, "20", "20", 30
     )
     assert server_dict, "Server dictionary is None."
     assert isinstance(server_dict, dict), "The server is not a dict."
     assert (
-        "serverId" in server_dict and server_dict["serverId"] == "123"
+        "serverId" in server_dict and server_dict["serverId"] == "test_server_id_123"
     ), "serverId does not belong to the attributes."
     assert (
-        "serverType" in server_dict and server_dict["serverType"] == "foo_server_type"
+        "serverType" in server_dict and server_dict["serverType"] == "test_server_type"
     ), "serverType does not belong to the attributes."
     assert (
         "cpu" in server_dict and server_dict["cpu"] == 4
@@ -452,7 +452,7 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
 
 def test_create_compute_service_descriptor(publisher_ocean_instance):
     publisher = get_publisher_wallet()
-    data_provider = DataServiceProvider
+    data_provider = DataServiceProvider()
     config = Config()
     compute = OceanCompute(config=config, data_provider=data_provider)
 
@@ -485,7 +485,7 @@ def test_create_compute_service_descriptor(publisher_ocean_instance):
     assert isinstance(container_dict, dict), "The container is not a dict."
 
     server_dict = compute.build_server_attributes(
-        "123", "foo_server_type", 4, 4, "20", "20", 30
+        "test_server_id_123", "test_server_type", 4, 4, "20", "20", 30
     )
     assert server_dict, "Server dictionary is None."
     assert isinstance(server_dict, dict), "The server is not a dict."

@@ -35,7 +35,7 @@ def test_market_flow(order_type):
     # Register Asset
     asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
     assert isinstance(asset, Asset)
-    assert asset.data_token_address
+    assert asset.data_token_address, "The asset does not have a token address."
 
     consumer_wallet = get_consumer_wallet()
 
@@ -87,7 +87,7 @@ def test_market_flow(order_type):
         consumer_ocean.config.downloads_path,
     )
 
-    assert len(os.listdir(asset_folder)) >= 1
+    assert len(os.listdir(asset_folder)) >= 1, "The asset folder is empty."
 
     if order_type == "explicit_none":
         # no need to continue, order worked
@@ -122,7 +122,7 @@ def test_payer_market_flow():
     # Register Asset
     asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
     assert isinstance(asset, Asset)
-    assert asset.data_token_address
+    assert asset.data_token_address, "The asset does not have a token address."
 
     another_consumer_wallet = get_another_consumer_wallet()
     consumer_wallet = get_consumer_wallet()

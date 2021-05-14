@@ -169,7 +169,5 @@ def init_components(config=None):
         config = Config(os.getenv(ENV_CONFIG_FILE))
 
     ConfigProvider.set_config(config)
-    import pdb
-
     Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
     ContractHandler.set_artifacts_path(config.artifacts_path)

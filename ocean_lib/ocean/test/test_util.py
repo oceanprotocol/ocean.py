@@ -166,7 +166,7 @@ def test_get_dtfactory_address():
     assert "DTFactory" in addresses
 
     address = get_dtfactory_address()
-    assert address[:2] == "0x"
+    assert address[:2] == "0x", "It is not a token address."
     assert address == addresses["DTFactory"]
 
 
@@ -179,7 +179,7 @@ def test_get_bfactory_address():
     assert "BFactory" in addresses
 
     address = get_bfactory_address()
-    assert address[:2] == "0x"
+    assert address[:2] == "0x", "It is not a token address."
     assert address == addresses["BFactory"]
 
 
@@ -192,7 +192,7 @@ def test_get_ocean_token_address():
     assert "Ocean" in addresses
 
     address = get_ocean_token_address()
-    assert address[:2] == "0x"
+    assert address[:2] == "0x", "It is not a token address."
     assert address == addresses["Ocean"]
 
 
@@ -202,7 +202,7 @@ def test_init_components():
     init_components()
     assert ConfigProvider.get_config() == config
     assert (
-        get_web3_connection_provider(config.network_url).__dict__["endpoint_uri"]
+        get_web3_connection_provider(config.network_url).endpoint_uri
         == "http://127.0.0.1:8545"
     )
     assert ContractHandler.artifacts_path == config.artifacts_path
