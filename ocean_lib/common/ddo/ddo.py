@@ -7,12 +7,15 @@ import json
 import logging
 
 from eth_utils import add_0x_prefix
+from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.ddo.credentials import AddressCredential
 from ocean_lib.common.ddo.public_key_base import PublicKeyBase
 from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_ETHEREUM_ECDSA
 from ocean_lib.common.did import OCEAN_PREFIX, did_to_id
 from ocean_lib.common.utils.utilities import get_timestamp
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 from .constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
 from .public_key_rsa import PUBLIC_KEY_TYPE_RSA, PublicKeyRSA
@@ -38,7 +41,9 @@ class DDO:
         self._authentications = []
         self._services = []
         self._proof = None
+        self._credentials = {}
         self._created = None
+        self._status = {}
         self._other_values = {}
 
         if created:
@@ -61,6 +66,19 @@ class DDO:
         return self._did
 
     @property
+    def is_disabled(self):
+        """Returns whether the asset is disabled."""
+        if not self._status:
+            return False
+
+        return self._status.get("isOrderDisabled", False)
+
+    @property
+    def is_enabled(self):
+        """Returns the opposite of is_disabled, for convenience."""
+        return not self.is_disabled
+
+    @property
     def asset_id(self):
         """The asset id part of the DID"""
         if not self._did:
@@ -76,6 +94,11 @@ class DDO:
     def proof(self):
         """Get the static proof, or None."""
         return self._proof
+
+    @property
+    def credentials(self):
+        """Get the credentials."""
+        return self._credentials
 
     @property
     def publisher(self):
@@ -205,6 +228,10 @@ class DDO:
             data["service"] = values
         if self._proof and is_proof:
             data["proof"] = self._proof
+        if self._credentials:
+            data["credentials"] = self._credentials
+        if self._status:
+            data["status"] = self._status
 
         if self._other_values:
             data.update(self._other_values)
@@ -245,6 +272,10 @@ class DDO:
                 self._services.append(service)
         if "proof" in values:
             self._proof = values.pop("proof")
+        if "credentials" in values:
+            self._credentials = values.pop("credentials")
+        if "status" in values:
+            self._status = values.pop("status")
 
         self._other_values = values
 
@@ -354,3 +385,75 @@ class DDO:
 
         authentication = {"type": authentication_type, "publicKey": key_id}
         return authentication
+
+    def enable(self):
+        """Enables asset for ordering."""
+        if not self._status:
+            self._status = {}
+
+        self._status.pop("isOrderDisabled")
+
+    def disable(self):
+        """Disables asset from ordering."""
+        if not self._status:
+            self._status = {}
+
+        self._status["isOrderDisabled"] = True
+
+    @property
+    def requires_address_credential(self):
+        """Checks if an address credential is required on this asset."""
+        manager = AddressCredential(self)
+        return manager.requires_credential()
+
+    @property
+    def allowed_addresses(self):
+        """Lists addresses that are explicitly allowed in credentials."""
+        manager = AddressCredential(self)
+        return manager.get_addresses_of_class("allow")
+
+    @property
+    def denied_addresses(self):
+        """Lists addresesses that are explicitly denied in credentials."""
+        manager = AddressCredential(self)
+        return manager.get_addresses_of_class("deny")
+
+    def add_address_to_allow_list(self, address):
+        """Adds an address to allowed addresses list."""
+        manager = AddressCredential(self)
+        manager.add_address_to_access_class(address, "allow")
+
+    def add_address_to_deny_list(self, address):
+        """Adds an address to the denied addresses list."""
+        manager = AddressCredential(self)
+        manager.add_address_to_access_class(address, "deny")
+
+    def remove_address_from_allow_list(self, address):
+        """Removes address from allow list (if it exists)."""
+        manager = AddressCredential(self)
+        manager.remove_address_from_access_class(address, "allow")
+
+    def remove_address_from_deny_list(self, address):
+        """Removes address from deny list (if it exists)."""
+        manager = AddressCredential(self)
+        manager.remove_address_from_access_class(address, "deny")
+
+    def is_consumable(
+        self, credential=None, with_connectivity_check=True, provider_uri=None
+    ):
+        """Checks whether an asset is consumable and returns a ConsumableCode."""
+        if self.is_disabled:
+            return ConsumableCodes.ASSET_DISABLED
+
+        if with_connectivity_check and not DataServiceProvider.check_asset_file_info(
+            self, provider_uri
+        ):
+            return ConsumableCodes.CONNECTIVITY_FAIL
+
+        # to be parameterized in the future, can implement other credential classes
+        manager = AddressCredential(self)
+
+        if manager.requires_credential():
+            return manager.validate_access(credential)
+
+        return ConsumableCodes.OK
