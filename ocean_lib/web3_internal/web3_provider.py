@@ -45,4 +45,5 @@ class Web3Provider(object):
 
     @staticmethod
     def set_web3(web3):
+        """Set web3 instance."""
         Web3Provider._web3 = web3
