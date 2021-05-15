@@ -5,8 +5,11 @@
 import lzma
 import uuid
 
+import pytest
 from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import Asset
+from ocean_lib.common.agreements.consumable import ConsumableCodes, MalformedCredential
+from ocean_lib.common.ddo.credentials import AddressCredential
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.utils.utilities import checksum
 from ocean_lib.config_provider import ConfigProvider
@@ -35,6 +38,95 @@ def get_ddo_sample(datatoken_address):
     asset.add_proof(checksum_dict, get_publisher_wallet())
     asset._did = did
     return asset
+
+
+def test_ddo_credentials_addresses_both():
+    """Tests DDO credentials when both deny and allow lists exist on the asset."""
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample_with_credentials.json")
+    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
+
+    ddo = DDO(json_filename=sample_ddo_path)
+    address_credential = AddressCredential(ddo)
+    assert address_credential.get_addresses_of_class("allow") == ["0x123", "0x456a"]
+    assert address_credential.get_addresses_of_class("deny") == ["0x2222", "0x333"]
+    assert (
+        address_credential.validate_access({"type": "address", "value": "0x111"})
+        == ConsumableCodes.CREDENTIAL_NOT_IN_ALLOW_LIST
+    )
+    assert (
+        address_credential.validate_access({"type": "address", "value": "0x456A"})
+        == ConsumableCodes.OK
+    )
+    # if "allow" exists, "deny" is not checked anymore
+
+
+def test_ddo_credentials_addresses_only_deny():
+    """Tests DDO credentials when only the deny list exists on the asset."""
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample_with_credentials.json")
+    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
+    # remove allow to test the behaviour of deny
+    ddo = DDO(json_filename=sample_ddo_path)
+    ddo._credentials.pop("allow")
+
+    address_credential = AddressCredential(ddo)
+    assert address_credential.get_addresses_of_class("allow") == []
+    assert address_credential.get_addresses_of_class("deny") == ["0x2222", "0x333"]
+    assert (
+        address_credential.validate_access({"type": "address", "value": "0x111"})
+        == ConsumableCodes.OK
+    )
+    assert (
+        address_credential.validate_access({"type": "address", "value": "0x333"})
+        == ConsumableCodes.CREDENTIAL_IN_DENY_LIST
+    )
+
+    credential = {"type": "address", "value": ""}
+    with pytest.raises(MalformedCredential):
+        address_credential.validate_access(credential)
+
+
+def test_ddo_credentials_addresses_no_access_list():
+    """Tests DDO credentials when neither deny, nor allow lists exist on the asset."""
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample_with_credentials.json")
+    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
+
+    # if "allow" OR "deny" exist, we need a credential,
+    # so remove both to test the behaviour of no credential supplied
+    ddo = DDO(json_filename=sample_ddo_path)
+    address_credential = AddressCredential(ddo)
+    ddo._credentials.pop("allow")
+    ddo._credentials.pop("deny")
+
+    assert address_credential.validate_access() == ConsumableCodes.OK
+
+    # test that we can use another credential if address is not required
+    assert (
+        ddo.is_consumable(
+            {"type": "somethingelse", "value": "test"}, with_connectivity_check=False
+        )
+        == ConsumableCodes.OK
+    )
+
+
+def test_ddo_connection():
+    ddo = DDO("did:op:testdid")
+    assert ddo.is_consumable() == ConsumableCodes.CONNECTIVITY_FAIL
+
+
+def test_ddo_credentials_disabled():
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample_disabled.json")
+    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
+
+    ddo = DDO(json_filename=sample_ddo_path)
+    assert ddo.is_disabled
+    assert not ddo.is_enabled
+
+    ddo.enable()
+    assert not ddo.is_disabled
+    assert ddo.is_enabled
+
+    ddo.disable()
+    assert ddo.is_consumable({}) == ConsumableCodes.ASSET_DISABLED
 
 
 def test_ddo_on_chain():
@@ -118,3 +210,36 @@ def test_ddo_on_chain():
         f"ddo owner does not match the expected publisher address {wallet.address}, "
         f"owner is {DataToken(asset.asset_id).contract_concise.minter(wallet.address)}"
     )
+
+
+def test_ddo_address_utilities():
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample_with_credentials.json")
+    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
+
+    ddo = DDO(json_filename=sample_ddo_path)
+
+    assert ddo.allowed_addresses == ["0x123", "0x456a"]
+
+    ddo.add_address_to_allow_list("0xAbc12")
+    assert ddo.allowed_addresses == ["0x123", "0x456a", "0xabc12"]
+    ddo.remove_address_from_allow_list("0xAbc12")
+    assert ddo.allowed_addresses == ["0x123", "0x456a"]
+    ddo.remove_address_from_allow_list("0x123")
+    assert ddo.allowed_addresses == ["0x456a"]
+    ddo.remove_address_from_allow_list("0x456a")
+    assert ddo.allowed_addresses == []
+
+    assert ddo.denied_addresses == ["0x2222", "0x333"]
+    # does not exist
+    ddo.remove_address_from_deny_list("0xasfaweg")
+    assert ddo.denied_addresses == ["0x2222", "0x333"]
+    ddo.add_address_to_deny_list("0xasfaweg")
+    assert ddo.denied_addresses == ["0x2222", "0x333", "0xasfaweg"]
+
+    ddo = DDO()
+    assert ddo.allowed_addresses == []
+    ddo.add_address_to_allow_list("0xAbc12")
+    assert ddo.allowed_addresses == ["0xabc12"]
+    # double adding
+    ddo.add_address_to_allow_list("0xAbc12")
+    assert ddo.allowed_addresses == ["0xabc12"]
