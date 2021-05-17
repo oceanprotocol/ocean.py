@@ -11,6 +11,7 @@ from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.utils import to_wei
 from tests.resources.ddo_helpers import get_resource_path
 
 
@@ -276,5 +277,5 @@ def test_calculate_token_holders(alice_ocean, alice_wallet, alice_address):
     )
     token.mint(alice_address, to_base_18(100.0), from_wallet=alice_wallet)
     block = alice_ocean.web3.eth.blockNumber
-    token_holders = token.calculate_token_holders(block - 1, block + 1, 1.0)
+    token_holders = token.calculate_token_holders(block - 1, block + 1, to_wei("1.0"))
     assert len(token_holders) == 1

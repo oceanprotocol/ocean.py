@@ -13,7 +13,7 @@ from eth_utils import remove_0x_prefix
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.enforce_typing_shim import enforce_types_shim
-from ocean_lib.ocean.util import from_base_18, to_base_18
+from ocean_lib.ocean.util import from_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.event_filter import EventFilter
 from ocean_lib.web3_internal.utils import from_wei
@@ -454,16 +454,16 @@ class DataToken(ContractBase):
         return self._get_url_from_blob(0)
 
     def calculate_token_holders(
-        self, from_block: int, to_block: int, min_token_amount: float
-    ) -> List[Tuple[str, float]]:
+        self, from_block: int, to_block: int, min_token_amount: int
+    ) -> List[Tuple[str, int]]:
         """Returns a list of addresses with token balances above a minimum token
         amount. Calculated from the transactions between `from_block` and `to_block`."""
         all_transfers, _ = self.get_all_transfers_from_events(from_block, to_block)
         balances_above_threshold = []
         balances = DataToken.calculate_balances(all_transfers)
-        _min = to_base_18(min_token_amount)
+        _min = min_token_amount
         balances_above_threshold = sorted(
-            [(a, from_base_18(b)) for a, b in balances.items() if b > _min],
+            [(a, b) for a, b in balances.items() if b > _min],
             key=lambda x: x[1],
             reverse=True,
         )

@@ -796,7 +796,7 @@ class OceanPool:
             token_holders = []
             if "dtHolders" in flags:
                 token_holders = dt.calculate_token_holders(
-                    from_block, to_block, 0.000001
+                    from_block, to_block, to_wei("0.000001")
                 )
 
             order_logs = dt.get_start_order_logs(
@@ -850,7 +850,7 @@ class OceanPool:
         if "shareHolders" in flags:
             pool_erc20 = DataToken(pool_address)
             pool_holders = pool_erc20.calculate_token_holders(
-                from_block, current_block, 0.001
+                from_block, current_block, to_wei("0.001")
             )
             info_dict.update(
                 {"numShareHolders": len(pool_holders), "shareHolders": pool_holders}
