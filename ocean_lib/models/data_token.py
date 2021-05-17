@@ -472,10 +472,6 @@ class DataToken(ContractBase):
     ################
     # Helpers
     @staticmethod
-    def calculate_fee(amount, percentage):
-        return int(amount * to_base_18(percentage) / to_base_18(1.0))
-
-    @staticmethod
     def calculate_balances(transfers) -> List[Tuple[str, int]]:
         _from = [t[0].lower() for t in transfers]
         _to = [t[1].lower() for t in transfers]
