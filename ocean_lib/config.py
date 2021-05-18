@@ -8,7 +8,7 @@ import logging
 import os
 from pathlib import Path
 
-import ocean_abis
+import artifacts
 from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
 
@@ -222,7 +222,7 @@ class Config(configparser.ConfigParser):
         if path and path.exists():
             return path
 
-        return Path(ocean_abis.__file__).parent.expanduser().resolve()
+        return Path(artifacts.__file__).parent.expanduser().resolve()
 
     @property
     def address_file(self):
