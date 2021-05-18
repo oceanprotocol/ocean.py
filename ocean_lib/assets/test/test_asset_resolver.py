@@ -17,14 +17,16 @@ def test_resolve_asset(publisher_ocean_instance, metadata):
     asset = publisher_ocean_instance.assets.create(metadata_copy, publisher)
     wait_for_ddo(publisher_ocean_instance, asset.did)
     assert asset is not None, "The asset is not cached."
+    assert isinstance(asset, Asset), "The asset does not have Asset instance."
 
     resolved_asset = resolve_asset(
         asset.did,
         publisher_ocean_instance.config.metadata_cache_uri,
         asset.data_token_address,
     )
-    assert isinstance(asset, Asset), "The asset does not have Asset instance."
-    assert isinstance(resolved_asset, Asset), "The asset does not have Asset instance."
+    assert isinstance(
+        resolved_asset, Asset
+    ), "The resolved asset is not an instance of Asset."
     assert (
         resolved_asset.did == asset.did
     ), "Resolve asset function call is unsuccessful."
