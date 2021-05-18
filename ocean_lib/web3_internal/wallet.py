@@ -28,6 +28,9 @@ class Wallet:
     we can interact directly with remote network nodes without having to run a local parity
     node since we only send the raw transaction hash so the user info is safe.
 
+    Usage:
+        1. `wallet = Wallet(ocean.web3, private_key=private_key)`
+
     """
 
     _last_tx_count = dict()
@@ -143,6 +146,7 @@ class Wallet:
         return signed_tx.rawTransaction
 
     def sign(self, msg_hash):
+        """Sign a transaction."""
         account = self._web3.eth.account.privateKeyToAccount(self.private_key)
         return account.signHash(msg_hash)
 
