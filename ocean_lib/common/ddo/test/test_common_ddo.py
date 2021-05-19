@@ -11,6 +11,7 @@ from ocean_lib.common.agreements.service_factory import (
     ServiceDescriptor,
     ServiceFactory,
 )
+from ocean_lib.common.aquarius.aquarius import Aquarius
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.ddo.public_key_base import PublicKeyBase
 from ocean_lib.common.ddo.public_key_rsa import (
@@ -18,6 +19,8 @@ from ocean_lib.common.ddo.public_key_rsa import (
     PUBLIC_KEY_TYPE_RSA,
 )
 from ocean_lib.common.did import DID
+from ocean_lib.config import Config
+from ocean_lib.exceptions import AquariusError
 from tests.resources.ddo_helpers import get_resource_path, get_sample_ddo
 from tests.resources.helper_functions import get_publisher_wallet
 
@@ -31,7 +34,7 @@ def test_creating_ddo_from_scratch():
     ddo = DDO()
     assert ddo.did is None
     assert ddo.asset_id is None
-    assert ddo.created is not None
+    assert ddo.created is not None, "DDO has not been created."
 
     did = DID.did({"0": "0x99999999999999999"})
     ddo.assign_did(did)

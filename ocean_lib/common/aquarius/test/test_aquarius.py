@@ -10,8 +10,12 @@ from tests.resources.helper_functions import get_publisher_wallet
 def test_init():
     """Tests initialisation of Aquarius objects."""
     aqua = Aquarius("http://something/api/v1/aquarius/assets")
-    assert aqua.url == "http://something/api/v1/aquarius/assets/ddo"
-    assert aqua.root_url == "http://something"
+    assert (
+        aqua.url == "http://something/api/v1/aquarius/assets/ddo"
+    ), "Different URL from the specified one."
+    assert (
+        aqua.root_url == "http://something"
+    ), "Different root URL from the specified one."
 
 
 def test_aqua_functions_for_single_ddo(
@@ -30,10 +34,10 @@ def test_aqua_functions_for_single_ddo(
     assert aqua_metadata["encryptedFiles"] == ddo.metadata["encryptedFiles"]
 
     res = aquarius_instance.get_asset_ddo(ddo.did)
-    assert res.did == ddo.did
+    assert res.did == ddo.did, "Aquarius could not resolve the did."
 
     res = aquarius_instance.text_search(ddo.did)
-    assert len(res)
+    assert len(res), "The result does not exist."
 
 
 def test_aqua_function_for_multiple_ddos(aquarius_instance):
