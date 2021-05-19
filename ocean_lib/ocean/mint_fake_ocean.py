@@ -14,10 +14,11 @@ from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import from_wei, get_ether_balance
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from tests.resources.helper_functions import (
-    get_ganache_wallet,
-    get_publisher_ocean_instance,
-)
+
+# from tests.resources.helper_functions import (
+#     get_ganache_wallet,
+#     get_publisher_ocean_instance,
+# )
 
 
 def mint_fake_OCEAN():
@@ -33,14 +34,19 @@ def mint_fake_OCEAN():
 
     addresses_file = config.address_file
 
-    ocean = get_publisher_ocean_instance()
+    ocean = Wallet(
+        Web3Provider.get_web3(), private_key=os.environ.get("TEST_PRIVATE_KEY1")
+    )
     web3 = ocean.web3
 
     with open(addresses_file) as f:
         network_addresses = json.load(f)
 
     network = "development"
-    deployer_wallet = get_ganache_wallet()
+    deployer_wallet = Wallet(
+        Web3Provider.get_web3(),
+        private_key=os.environ.get("FACTORY_DEPLOYER_PRIVATE_KEY"),
+    )
 
     OCEAN_token = DataToken(address=network_addresses[network]["Ocean"])
 
