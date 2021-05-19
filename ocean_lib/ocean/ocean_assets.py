@@ -231,6 +231,10 @@ class OceanAssets:
             if owner_address:
                 data_token.proposeMinter(owner_address, from_wallet=publisher_wallet)
         else:
+            if not dtfactory.verify_data_token(data_token_address):
+                raise ContractNotFound(
+                    f"datatoken address {data_token_address} is not found in the DTFactory events."
+                )
             # verify data_token_address
             dt = DataToken(data_token_address)
             minter = dt.contract_concise.minter()
@@ -241,10 +245,6 @@ class OceanAssets:
             elif minter.lower() != publisher_wallet.address.lower():
                 raise AssertionError(
                     f"Minter of datatoken {data_token_address} is not the same as the publisher."
-                )
-            elif not dtfactory.verify_data_token(data_token_address):
-                raise ContractNotFound(
-                    f"datatoken address {data_token_address} is not found in the DTFactory events."
                 )
 
         assert (
