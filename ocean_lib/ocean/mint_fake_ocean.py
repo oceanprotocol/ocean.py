@@ -15,11 +15,6 @@ from ocean_lib.web3_internal.utils import from_wei, get_ether_balance
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
-# from tests.resources.helper_functions import (
-#     get_ganache_wallet,
-#     get_publisher_ocean_instance,
-# )
-
 
 def mint_fake_OCEAN():
     """
