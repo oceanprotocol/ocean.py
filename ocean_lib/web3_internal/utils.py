@@ -23,6 +23,16 @@ Signature = namedtuple("Signature", ("v", "r", "s"))
 logger = logging.getLogger(__name__)
 
 
+"""decimal.Context tuned to accomadate MAX_WEI.
+
+* precision=78 because there are 78 digits in MAX_WEI (MAX_UINT256).
+  Any lower and decimal operations like quantize throw an InvalidOperation error.
+* rounding=ROUND_DOWN (towards 0, aka. truncate) to avoid issue where user
+  removes 100% from a pool and transaction fails because it rounds up.
+"""
+DECIMAL_CONTEXT = Context(prec=78, rounding=ROUND_DOWN)
+
+
 """Constant used to quantize decimal.Decimal to 18 decimal places"""
 DECIMAL_PLACES_18 = Decimal(10) ** -18
 
@@ -186,12 +196,6 @@ def to_wei(value_in_ether: Union[Decimal, str]) -> int:
     if value_in_ether > MAX_WEI_IN_ETHER:
         raise ValueError("Ether value exceeds MAX_WEI_IN_ETHER.")
 
-    # precision=78 because there are 78 digits in MAX_WEI (MAX_UINT256)
-    # Any lower and quantize throws an InvalidOperation error.
-    # rounding=ROUND_DOWN (towards 0, aka. truncate) to avoid issue where user
-    # removes 100% from a pool and transaction fails because it rounds up.
-    context = Context(prec=78, rounding=ROUND_DOWN)
-
     return Web3Provider.get_web3().toWei(
-        value_in_ether.quantize(DECIMAL_PLACES_18, context=context), "ether"
+        value_in_ether.quantize(DECIMAL_PLACES_18, context=DECIMAL_CONTEXT), "ether"
     )
