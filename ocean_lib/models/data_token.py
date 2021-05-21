@@ -13,6 +13,7 @@ from eth_utils import remove_0x_prefix
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.enforce_typing_shim import enforce_types_shim
+from ocean_lib.exceptions import VerifyTxFailed
 from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.event_filter import EventFilter
@@ -298,7 +299,7 @@ class DataToken(ContractBase):
 
         tx_receipt = self.get_tx_receipt(tx_id)
         if tx_receipt.status == 0:
-            raise AssertionError("Transfer transaction failed.")
+            raise VerifyTxFailed("Transfer transaction failed.")
 
         logs = getattr(self.events, "Transfer")().processReceipt(tx_receipt)
         transfer_event = logs[0] if logs else None
@@ -350,7 +351,7 @@ class DataToken(ContractBase):
             )
 
         if tx_receipt.status == 0:
-            raise AssertionError("order transaction failed.")
+            raise VerifyTxFailed("order transaction failed.")
 
         receiver = self.contract_concise.minter()
         event_logs = event().processReceipt(tx_receipt)

@@ -121,7 +121,7 @@ class ContractBase(object):
                 f"ConnectionClosed error waiting for transaction receipt failed: {e}."
             )
             raise
-        except VerifyTxFailed as e:
+        except Exception as e:
             logger.info(f"Unknown error waiting for transaction receipt: {e}.")
             raise
 
