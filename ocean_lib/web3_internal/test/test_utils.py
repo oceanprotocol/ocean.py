@@ -17,6 +17,7 @@ from ocean_lib.web3_internal.utils import (
     generate_multi_value_hash,
     prepare_prefixed_hash,
     to_wei,
+    tokenfmt,
 )
 
 
@@ -88,3 +89,22 @@ def test_to_wei():
 
     with pytest.raises(ValueError):
         to_wei(MAX_WEI_IN_ETHER + 1)
+
+
+def test_tokenfmt():
+    assert (
+        tokenfmt(Decimal("0")) == "0.000000000000000000"
+    ), "Should have 18 decimal places, no ticker symbol"
+    assert (
+        tokenfmt(Decimal("0.123456789123456789"), 6) == "0.123456"
+    ), "Should have 6 decimal places, rounded down, no ticker symbol"
+    assert (
+        tokenfmt(Decimal("123456789"), 0, "OCEAN") == "123,456,789 OCEAN"
+    ), "Should have commas, 0 decimal places, OCEAN ticker symbol"
+    assert (
+        tokenfmt(Decimal(MAX_WEI_IN_ETHER))
+        == "115,792,089,237,316,195,423,570,985,008,687,907,853,269,984,665,640,564,039,457.584007913129639935"
+    ), "Should have 78 digits, commas, 18 decimal places, no ticker symbol"
+
+    with pytest.raises(ValueError):
+        assert tokenfmt(Decimal(MAX_WEI_IN_ETHER + 1))
