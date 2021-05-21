@@ -41,6 +41,10 @@ DECIMAL_PLACES_18 = Decimal(10) ** -18
 MAX_WEI = MAX_UINT256
 
 
+"""The maximum possible token amount on Ethereum-compatible blockchains, denoted in ether"""
+MAX_WEI_IN_ETHER = Decimal(MAX_WEI).scaleb(-18, context=DECIMAL_CONTEXT)
+
+
 def generate_multi_value_hash(types, values):
     """
     Return the hash of the given list of values.
@@ -182,10 +186,6 @@ def get_ether_balance(address: str) -> int:
 @enforce_types_shim
 def from_wei(value_in_wei: int) -> Decimal:
     return Web3Provider.get_web3().fromWei(value_in_wei, "ether")
-
-
-"""The maximum possible token amount on Ethereum-compatible blockchains, denoted in ether"""
-MAX_WEI_IN_ETHER = from_wei(MAX_WEI)
 
 
 @enforce_types_shim
