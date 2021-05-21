@@ -20,7 +20,6 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from .constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
 from .public_key_rsa import PUBLIC_KEY_TYPE_RSA, PublicKeyRSA
 from .service import Service
-from ...exceptions import AquariusError
 
 logger = logging.getLogger("ddo")
 
@@ -123,7 +122,7 @@ class DDO:
 
     def assign_did(self, did):
         if self._did:
-            raise AquariusError('"did" is already set on this DDO instance.')
+            raise AssertionError('"did" is already set on this DDO instance.')
         assert did and isinstance(
             did, str
         ), f"did must be of str type, got {did} of type {type(did)}"
