@@ -49,7 +49,6 @@ from ocean_lib.web3_internal.utils import (
 )
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from plecos import plecos
 
 logger = logging.getLogger("ocean")
 
@@ -171,9 +170,10 @@ class OceanAssets:
             "dataset",
             "algorithm",
         ), f"Invalid/unsupported asset type {asset_type}"
-        if not plecos.is_valid_dict_local(metadata_copy):
-            errors = plecos.list_errors_dict_local(metadata_copy)
-            msg = f"Metadata has validation errors: {errors}"
+
+        validation_result, validation_errors = self.validate(metadata)
+        if not validation_result:
+            msg = f"Metadata has validation errors: {validation_errors}"
             logger.error(msg)
             raise ValueError(msg)
 
@@ -596,12 +596,12 @@ class OceanAssets:
             index,
         )
 
-    def validate(self, metadata: dict) -> bool:
+    def validate(self, metadata: dict) -> (bool, list):
         """
         Validate that the metadata is ok to be stored in aquarius.
 
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
-        :return: bool
+        :return: (bool, list) list of errors, empty if valid
         """
         return self._get_aquarius(self._metadata_cache_uri).validate_metadata(metadata)
 

@@ -102,7 +102,7 @@ setup(
     url="https://github.com/oceanprotocol/ocean.py",
     # fmt: off
     # bumpversion.sh needs single-quotes
-    version='0.5.22',
+    version='0.5.23',
     # fmt: on
     zip_safe=False,
 )
