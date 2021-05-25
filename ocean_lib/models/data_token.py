@@ -20,7 +20,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3 import Web3
 from web3.exceptions import MismatchedABI
-from web3.utils.events import get_event_data
+from web3._utils.events import get_event_data
 from websockets import ConnectionClosed
 
 OrderValues = namedtuple(

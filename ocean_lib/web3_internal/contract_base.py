@@ -19,9 +19,9 @@ from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFuncti
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3 import Web3
 from web3.exceptions import MismatchedABI, ValidationError
-from web3.utils.events import get_event_data
-from web3.utils.filters import construct_event_filter_params
-from web3.utils.threads import Timeout
+from web3._utils.events import get_event_data
+from web3._utils.filters import construct_event_filter_params
+from web3._utils.threads import Timeout
 from websockets import ConnectionClosed
 
 logger = logging.getLogger(__name__)

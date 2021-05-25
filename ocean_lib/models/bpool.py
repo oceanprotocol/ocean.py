@@ -10,7 +10,7 @@ from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models import balancer_constants
 from ocean_lib.ocean import util
 from ocean_lib.web3_internal.wallet import Wallet
-from web3.utils.events import get_event_data
+from web3._utils.events import get_event_data
 
 from .btoken import BToken
 

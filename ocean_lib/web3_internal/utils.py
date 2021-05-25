@@ -117,7 +117,7 @@ def get_network_id() -> int:
 
     :return: Network id, int
     """
-    return int(Web3Provider.get_web3().version.network)
+    return int(Web3Provider.get_web3().net.version)
 
 
 @enforce_types_shim
