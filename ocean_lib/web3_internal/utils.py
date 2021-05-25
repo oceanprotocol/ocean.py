@@ -265,3 +265,77 @@ def moneyfmt(value, places=2, curr="", sep=",", dp=".", pos="", neg="-", trailne
     build(curr)
     build(neg if sign else pos)
     return "".join(reversed(result))
+
+
+@enforce_types_shim
+def pretty_ether(
+    amount_in_ether: Union[Decimal, str], ticker: str = "", trim: bool = True
+) -> Decimal:
+    """Returns a human readable token amount denoted in ether with optional ticker symbol
+    Set trim=False to include trailing zeros.
+
+    Examples:
+    pretty_ether("0", ticker="OCEAN") == "0 OCEAN"
+    pretty_ether("0.01234") == "1.23e-2"
+    pretty_ether("1234") == "1.23K"
+    pretty_ether("12345678") == "12.3M"
+    pretty_ether("1000000.000", trim=False) == "1.00M"
+    pretty_ether("123456789012") == "123B"
+    pretty_ether("1234567890123") == "1.23e+12"
+    """
+    with localcontext(ETHEREUM_DECIMAL_CONTEXT) as context:
+        # Reduce to 3 significant figures
+        context.prec = 3
+        sig_fig_3 = context.create_decimal(amount_in_ether)
+
+        exponent = sig_fig_3.adjusted()
+
+        if sig_fig_3 == 0:
+            if trim:
+                return "0 " + ticker if ticker else "0"
+            else:
+                if exponent == -1:
+                    return "0.0 " + ticker if ticker else "0.0"
+                else:
+                    return "0.00 " + ticker if ticker else "0.00"
+
+        if exponent >= 12 or exponent < -1:
+            # format string handles scaling also, so set scale = 0
+            scale = 0
+            fmt_str = "{:e}"
+        elif exponent >= 9:
+            scale = -9
+            fmt_str = "{}B"
+        elif exponent >= 6:
+            scale = -6
+            fmt_str = "{}M"
+        elif exponent >= 3:
+            scale = -3
+            fmt_str = "{}K"
+        else:
+            # scaling and formatting isn't necessary for values between 0 and 1000 (non-inclusive)
+            scale = 0
+            fmt_str = "{}"
+
+        scaled = sig_fig_3.scaleb(scale)
+
+        if trim:
+            scaled = remove_trailing_zeros(scaled)
+
+        return (
+            fmt_str.format(scaled) + " " + ticker if ticker else fmt_str.format(scaled)
+        )
+
+
+@enforce_types_shim
+def remove_trailing_zeros(value: Decimal) -> Decimal:
+    """Returns a Decimal with trailing zeros removed.
+    Adapted from https://docs.python.org/3/library/decimal.html#decimal-faq
+    """
+    # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_WEI_IN_ETHER
+    with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+        return (
+            value.quantize(Decimal(1)).normalize()
+            if value == value.to_integral()
+            else value.normalize()
+        )
