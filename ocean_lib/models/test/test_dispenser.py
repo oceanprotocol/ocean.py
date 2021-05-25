@@ -7,9 +7,7 @@ import pytest
 from ocean_lib.models.dispenser import DispenserContract
 
 
-def test_dispenser_activation(
-    contracts_addresses, alice_ocean, alice_wallet, bob_wallet
-):
+def test_dispenser_status(contracts_addresses, alice_ocean, alice_wallet, bob_wallet):
     dispenser_address = contracts_addresses["Dispenser"]
     dispenser = DispenserContract(dispenser_address)
     token = alice_ocean.create_data_token(
@@ -22,6 +20,16 @@ def test_dispenser_activation(
     assert dispenser.max_tokens(token.address) == 0
     assert dispenser.max_balance(token.address) == 0
     assert dispenser.balance(token.address) == 0
+
+
+def test_dispenser_activation(
+    contracts_addresses, alice_ocean, alice_wallet, bob_wallet
+):
+    dispenser_address = contracts_addresses["Dispenser"]
+    dispenser = DispenserContract(dispenser_address)
+    token = alice_ocean.create_data_token(
+        "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
+    )
 
     dispenser.activate(token.address, 100, 100, alice_wallet)
     assert dispenser.is_active(token.address)
@@ -40,12 +48,21 @@ def test_dispenser_minting(contracts_addresses, alice_ocean, alice_wallet, bob_w
     token = alice_ocean.create_data_token(
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
+
+    with pytest.raises(ValueError):
+        # not yet activated
+        dispenser.dispense(token.address, 1, alice_wallet)
+
     dispenser.activate(token.address, 1000, 1000, alice_wallet)
 
     dispenser.make_minter(token.address, alice_wallet)
     assert dispenser.is_minter_approved(token.address)
     dispenser.dispense(token.address, 1, alice_wallet)
     dispenser.dispense(token.address, 1, bob_wallet)
+
+    with pytest.raises(ValueError):
+        # can not dispense 0
+        dispenser.dispense(token.address, 0, alice_wallet)
 
     dispenser.cancel_minter(token.address, alice_wallet)
     dispenser.owner_withdraw(token.address, alice_wallet)
