@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 * rounding=ROUND_DOWN (towards 0, aka. truncate) to avoid issue where user
   removes 100% from a pool and transaction fails because it rounds up.
 """
-DECIMAL_CONTEXT = Context(prec=78, rounding=ROUND_DOWN)
+ETHEREUM_DECIMAL_CONTEXT = Context(prec=78, rounding=ROUND_DOWN)
 
 
 """Constant used to quantize decimal.Decimal to 18 decimal places"""
@@ -42,7 +42,7 @@ MAX_WEI = MAX_UINT256
 
 
 """The maximum possible token amount on Ethereum-compatible blockchains, denoted in ether"""
-MAX_WEI_IN_ETHER = Decimal(MAX_WEI).scaleb(-18, context=DECIMAL_CONTEXT)
+MAX_WEI_IN_ETHER = Decimal(MAX_WEI).scaleb(-18, context=ETHEREUM_DECIMAL_CONTEXT)
 
 
 def generate_multi_value_hash(types, values):
@@ -197,7 +197,8 @@ def to_wei(value_in_ether: Union[Decimal, str]) -> int:
         raise ValueError("Ether value exceeds MAX_WEI_IN_ETHER.")
 
     return Web3Provider.get_web3().toWei(
-        value_in_ether.quantize(DECIMAL_PLACES_18, context=DECIMAL_CONTEXT), "ether"
+        value_in_ether.quantize(DECIMAL_PLACES_18, context=ETHEREUM_DECIMAL_CONTEXT),
+        "ether",
     )
 
 
@@ -206,9 +207,7 @@ def tokenfmt(amount_in_ether: Decimal, places: int = 18, ticker: str = "") -> st
     if amount_in_ether > MAX_WEI_IN_ETHER:
         raise ValueError("Ether value exceeds MAX_WEI_IN_ETHER.")
 
-    with localcontext() as context:
-        context.prec = DECIMAL_CONTEXT.prec
-        context.rounding = DECIMAL_CONTEXT.rounding
+    with localcontext(ETHEREUM_DECIMAL_CONTEXT):
         return (
             moneyfmt(amount_in_ether, places) + " " + ticker
             if ticker

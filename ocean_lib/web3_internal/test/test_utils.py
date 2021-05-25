@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import os
-from decimal import Decimal
+from decimal import Decimal, localcontext
 
 import pytest
 from ocean_lib.web3_internal.transactions import (
@@ -11,6 +11,7 @@ from ocean_lib.web3_internal.transactions import (
     send_ether,
 )
 from ocean_lib.web3_internal.utils import (
+    ETHEREUM_DECIMAL_CONTEXT,
     MAX_WEI,
     MAX_WEI_IN_ETHER,
     from_wei,
@@ -63,7 +64,9 @@ def test_from_wei():
     ), "Conversion from maximum wei value to ether failed."
 
     with pytest.raises(ValueError):
-        from_wei(MAX_WEI + 1)
+        # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_WEI_IN_ETHER
+        with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+            from_wei(MAX_WEI + 1)
 
 
 def test_to_wei():
@@ -88,7 +91,9 @@ def test_to_wei():
     ), "Conversion from ether to maximum wei value failed"
 
     with pytest.raises(ValueError):
-        to_wei(MAX_WEI_IN_ETHER + 1)
+        # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_WEI_IN_ETHER
+        with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+            to_wei(MAX_WEI_IN_ETHER + 1)
 
 
 def test_tokenfmt():
@@ -107,4 +112,6 @@ def test_tokenfmt():
     ), "Should have 78 digits, commas, 18 decimal places, no ticker symbol"
 
     with pytest.raises(ValueError):
-        assert tokenfmt(Decimal(MAX_WEI_IN_ETHER + 1))
+        # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_WEI_IN_ETHER
+        with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+            assert tokenfmt(Decimal(MAX_WEI_IN_ETHER + 1))
