@@ -14,7 +14,7 @@ import yaml
 from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.web3_internal.utils import to_wei
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from tests.resources.mocks.data_provider_mock import DataProviderMock

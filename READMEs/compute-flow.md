@@ -125,7 +125,7 @@ For legacy support, you can also use `metadataStoreUri` instead of `metadataCach
 
 ```python
 from decimal import Decimal
-from ocean_lib.web3_internal.utils import to_wei
+from ocean_lib.web3_internal.currency import to_wei
 
 data_token.mint(alice_wallet.address, to_wei(Decimal("100.0")), alice_wallet)
 ```

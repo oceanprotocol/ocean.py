@@ -9,7 +9,7 @@ from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.util import get_contracts_addresses
-from ocean_lib.web3_internal.utils import to_wei
+from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
 
 _NETWORK = "ganache"

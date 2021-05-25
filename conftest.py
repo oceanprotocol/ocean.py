@@ -22,7 +22,8 @@ from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18  # noq
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider  # noqa: E402
 from ocean_lib.web3_internal.contract_handler import ContractHandler  # noqa: E402
 from ocean_lib.web3_internal.transactions import send_ether  # noqa: E402
-from ocean_lib.web3_internal.utils import from_wei, get_ether_balance  # noqa: E402
+from ocean_lib.web3_internal.utils import get_ether_balance  # noqa: E402
+from ocean_lib.web3_internal.currency import from_wei  # noqa: E402
 from ocean_lib.web3_internal.web3_provider import Web3Provider  # noqa: E402
 from tests.resources.ddo_helpers import get_metadata  # noqa: E402
 from tests.resources.helper_functions import (  # noqa: E402

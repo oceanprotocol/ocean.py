@@ -15,8 +15,8 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.ocean.util import from_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.web3_internal.currency import from_wei, wei_and_pretty_ether
 from ocean_lib.web3_internal.event_filter import EventFilter
-from ocean_lib.web3_internal.utils import from_wei, wei_and_pretty_ether
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3 import Web3

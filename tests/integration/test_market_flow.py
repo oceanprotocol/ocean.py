@@ -10,7 +10,7 @@ import pytest
 from ocean_lib.assets.asset import Asset
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.web3_internal.utils import to_wei
+from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_metadata, get_registered_ddo
 from tests.resources.helper_functions import (
     get_another_consumer_ocean_instance,

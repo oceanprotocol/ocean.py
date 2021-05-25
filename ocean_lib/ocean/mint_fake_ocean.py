@@ -10,8 +10,9 @@ from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18
 from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.currency import from_wei
 from ocean_lib.web3_internal.transactions import send_ether
-from ocean_lib.web3_internal.utils import from_wei, get_ether_balance
+from ocean_lib.web3_internal.utils import get_ether_balance
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 

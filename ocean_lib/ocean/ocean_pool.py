@@ -14,7 +14,7 @@ from ocean_lib.models.btoken import BToken
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.util import from_base_18, get_dtfactory_address, to_base_18
-from ocean_lib.web3_internal.utils import to_wei
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from scipy.interpolate import interp1d

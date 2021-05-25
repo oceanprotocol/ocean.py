@@ -11,7 +11,7 @@ from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.utils import to_wei
+from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_resource_path
 
 
