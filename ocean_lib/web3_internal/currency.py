@@ -37,8 +37,11 @@ def from_wei(value_in_wei: int) -> Decimal:
 
 
 @enforce_types_shim
-def to_wei(value_in_ether: Union[Decimal, str]) -> int:
-    if isinstance(value_in_ether, str):
+def to_wei(value_in_ether: Union[Decimal, str, int]) -> int:
+    """
+    float input is purposfully not supported
+    """
+    if isinstance(value_in_ether, str) or isinstance(value_in_ether, int):
         value_in_ether = Decimal(value_in_ether)
 
     if value_in_ether > MAX_WEI_IN_ETHER:
