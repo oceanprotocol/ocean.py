@@ -270,7 +270,7 @@ def moneyfmt(value, places=2, curr="", sep=",", dp=".", pos="", neg="-", trailne
 @enforce_types_shim
 def pretty_ether(
     amount_in_ether: Union[Decimal, str], ticker: str = "", trim: bool = True
-) -> Decimal:
+) -> str:
     """Returns a human readable token amount denoted in ether with optional ticker symbol
     Set trim=False to include trailing zeros.
 
