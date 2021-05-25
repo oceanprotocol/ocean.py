@@ -16,7 +16,7 @@ from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.ocean.util import from_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.event_filter import EventFilter
-from ocean_lib.web3_internal.utils import from_wei
+from ocean_lib.web3_internal.utils import from_wei, wei_and_pretty_ether
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3 import Web3
@@ -413,8 +413,8 @@ class DataToken(ContractBase):
         if total < (target_amount - 5):
             raise ValueError(
                 f"transferred value does meet the service cost: "
-                f"service.cost - fees={from_base_18(target_amount)}, "
-                f"transferred value={from_base_18(total)}"
+                f"service.cost - fees={wei_and_pretty_ether(target_amount)}, "
+                f"transferred value={wei_and_pretty_ether(total)}"
             )
         return tx, order_log, transfers[-1]
 
