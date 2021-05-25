@@ -8,9 +8,9 @@ import os
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.data_token import DataToken
-from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18
+from ocean_lib.ocean.util import get_web3_connection_provider
 from ocean_lib.web3_internal.contract_handler import ContractHandler
-from ocean_lib.web3_internal.currency import from_wei
+from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import get_ether_balance
 from ocean_lib.web3_internal.wallet import Wallet
@@ -47,10 +47,10 @@ def mint_fake_OCEAN():
     OCEAN_token = DataToken(address=network_addresses[network]["Ocean"])
 
     amt_distribute = 1000
-    amt_distribute_base = to_base_18(float(amt_distribute))
+    amt_distribute_in_wei = to_wei(amt_distribute)
 
     OCEAN_token.mint(
-        deployer_wallet.address, 2 * amt_distribute_base, from_wallet=deployer_wallet
+        deployer_wallet.address, 2 * amt_distribute_in_wei, from_wallet=deployer_wallet
     )
 
     for key_label in ["TEST_PRIVATE_KEY1", "TEST_PRIVATE_KEY2"]:
@@ -62,7 +62,7 @@ def mint_fake_OCEAN():
 
         if OCEAN_token.token_balance(w.address) < 1000:
             OCEAN_token.transfer(
-                w.address, amt_distribute_base, from_wallet=deployer_wallet
+                w.address, amt_distribute_in_wei, from_wallet=deployer_wallet
             )
 
         if from_wei(get_ether_balance(w.address)) < 2:

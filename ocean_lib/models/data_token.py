@@ -13,7 +13,6 @@ from eth_utils import remove_0x_prefix
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.enforce_typing_shim import enforce_types_shim
-from ocean_lib.ocean.util import from_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.currency import from_wei, wei_and_pretty_ether
 from ocean_lib.web3_internal.event_filter import EventFilter
@@ -432,7 +431,7 @@ class DataToken(ContractBase):
         return os.path.join(destination_folder, file_name)
 
     def token_balance(self, account: str):
-        return from_base_18(self.balanceOf(account))
+        return float(from_wei(self.balanceOf(account)))
 
     def _get_url_from_blob(self, int_code):
         try:

@@ -149,7 +149,7 @@ print(f'DataToken @{data_token.address} has a `pool` available @{pool_address}')
 from ocean_lib.common.agreements.service_types import ServiceTypes
 
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.util import from_base_18
+from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.models.bpool import BPool
 
 # Market's config
@@ -176,12 +176,12 @@ print(f"Service 1 costs {tokens_amount * price_in_OCEAN} OCEAN")
 OCEAN_usd_pool_address = ''
 USDT_token_address = ''
 ocn_pool = BPool(OCEAN_usd_pool_address)
-OCEAN_price = from_base_18(ocn_pool.calcInGivenOut(
+OCEAN_price = from_wei(ocn_pool.calcInGivenOut(
     ocn_pool.getBalance(USDT_token_address),
     ocn_pool.getDenormalizedWeight(USDT_token_address),
     ocn_pool.getBalance(OCEAN_address),
     ocn_pool.getDenormalizedWeight(OCEAN_address),
-    tokenAmountOut_base=to_base_18(price_in_OCEAN),
+    tokenAmountOut_base=to_wei(price_in_OCEAN),
     swapFee_base=ocn_pool.getSwapFee()
 ))
 print(f"Service 1 costs {tokens_amount * price_in_OCEAN * OCEAN_price} USD")
@@ -190,7 +190,6 @@ print(f"Service 1 costs {tokens_amount * price_in_OCEAN * OCEAN_price} USD")
 ## 6. Value swap: Bob buys datatokens from marketplace (using datatoken <> OCEAN balancer pool)
 
 ```python
-from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.wallet import Wallet
 
 bob_wallet = Wallet(ocean.web3, private_key="PASTE BOB'S TEST PRIVATE KEY HERE")

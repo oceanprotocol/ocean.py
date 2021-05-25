@@ -5,9 +5,9 @@
 
 import pytest
 from ocean_lib.enforce_typing_shim import enforce_types_shim
-from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.contract import ConciseContract
 
@@ -49,7 +49,7 @@ def test_main(network, alice_wallet, alice_address, dtfactory_address, alice_oce
 
     # test super-simple functionality of child
     factory = MyFactory(dtfactory_address)
-    factory.createToken("foo_blob", "DT1", "DT1", to_base_18(1000.0), alice_wallet)
+    factory.createToken("foo_blob", "DT1", "DT1", to_wei(1000), alice_wallet)
 
     # test attributes
     assert factory.name == "DTFactory"
@@ -96,5 +96,5 @@ def test_gas_price(alice_wallet, dtfactory_address, monkeypatch):
     monkeypatch.setenv("GAS_PRICE", "1")
     factory = MyFactory(dtfactory_address)
     assert factory.createToken(
-        "foo_blob", "DT1", "DT1", to_base_18(1000.0), alice_wallet
+        "foo_blob", "DT1", "DT1", to_wei(1000), alice_wallet
     ), "The token could not be created by configuring the gas price env var."

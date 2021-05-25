@@ -18,13 +18,18 @@ from ocean_lib.enforce_typing_shim import setup_enforce_typing_shim
 setup_enforce_typing_shim()
 
 from ocean_lib.example_config import ExampleConfig  # noqa: E402
-from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18  # noqa: E402
+from ocean_lib.web3_internal.web3_provider import Web3Provider  # noqa: E402
+from ocean_lib.ocean.util import get_web3_connection_provider  # noqa: E402
+
+# HACK: Setup Web3. Removed after changing ocean APIs to wei-only
+config = ExampleConfig.get_config()
+Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
+
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider  # noqa: E402
 from ocean_lib.web3_internal.contract_handler import ContractHandler  # noqa: E402
 from ocean_lib.web3_internal.transactions import send_ether  # noqa: E402
 from ocean_lib.web3_internal.utils import get_ether_balance  # noqa: E402
-from ocean_lib.web3_internal.currency import from_wei  # noqa: E402
-from ocean_lib.web3_internal.web3_provider import Web3Provider  # noqa: E402
+from ocean_lib.web3_internal.currency import from_wei, to_wei  # noqa: E402
 from tests.resources.ddo_helpers import get_metadata  # noqa: E402
 from tests.resources.helper_functions import (  # noqa: E402
     get_consumer_ocean_instance,
@@ -74,15 +79,15 @@ def setup_all(request):
     OCEAN_token = DataToken(address=network_addresses["development"]["Ocean"])
 
     amt_distribute = 1000
-    amt_distribute_base = to_base_18(float(amt_distribute))
+    amt_distribute_in_wei = to_wei(amt_distribute)
 
     for w in (get_publisher_wallet(), get_consumer_wallet()):
         if from_wei(get_ether_balance(w.address)) < 2:
             send_ether(wallet, w.address, 4)
 
         if OCEAN_token.token_balance(w.address) < 100:
-            OCEAN_token.mint(wallet.address, amt_distribute_base, from_wallet=wallet)
-            OCEAN_token.transfer(w.address, amt_distribute_base, from_wallet=wallet)
+            OCEAN_token.mint(wallet.address, amt_distribute_in_wei, from_wallet=wallet)
+            OCEAN_token.transfer(w.address, amt_distribute_in_wei, from_wallet=wallet)
 
 
 @pytest.fixture

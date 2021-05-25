@@ -6,8 +6,8 @@ from collections import namedtuple
 from typing import Optional
 
 from ocean_lib.enforce_typing_shim import enforce_types_shim
-from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 
 FixedExchangeData = namedtuple(
@@ -35,7 +35,7 @@ class FixedRateExchange(ContractBase):
 
     def get_base_token_quote(self, exchange_id: str, data_token_amount: int):
         rate = self.getRate(exchange_id)
-        return int(data_token_amount * rate / to_base_18(1.0))
+        return int(data_token_amount * rate / to_wei(1))
 
     #########################
     # Transaction methods

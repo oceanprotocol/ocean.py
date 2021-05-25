@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from ocean_lib.ocean.util import to_base_18
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.event_filter import EventFilter
 
 
@@ -12,9 +12,9 @@ def test_transfer_event_filter(alice_ocean, alice_wallet, alice_address, bob_add
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
 
-    token.mint(alice_address, to_base_18(100.0), from_wallet=alice_wallet)
-    token.approve(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
-    token.transfer(bob_address, to_base_18(5.0), from_wallet=alice_wallet)
+    token.mint(alice_address, to_wei(100), from_wallet=alice_wallet)
+    token.approve(bob_address, to_wei(1), from_wallet=alice_wallet)
+    token.transfer(bob_address, to_wei(5), from_wallet=alice_wallet)
 
     block = alice_ocean.web3.eth.blockNumber
     event = getattr(token.events, "Transfer")

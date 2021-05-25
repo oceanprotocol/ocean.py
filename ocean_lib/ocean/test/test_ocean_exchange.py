@@ -32,13 +32,13 @@ def test_ocean_exchange(publisher_ocean_instance):
     )
     dt.mint(bob_wallet.address, to_wei(Decimal("100.0")), alice_wallet)
     ox = OceanExchange(ocn.OCEAN_address, _get_exchange_address(), ocn.config)
-    rate = 0.9
+    rate = Decimal("0.9")
     x_id = ox.create(dt.address, rate, bob_wallet)
     dt.approve(ox._exchange_address, to_wei(Decimal("20.0")), bob_wallet)
 
     # create with invalid token address
     with pytest.raises(ValueError):
-        ox.create(ox.ocean_address, 0.9, bob_wallet)
+        ox.create(ox.ocean_address, rate, bob_wallet)
 
     # TODO: Enable this ValueError handling when the ERC20 check is added in FixedRateExchange.create solidity function
     # with pytest.raises(ValueError):
@@ -46,7 +46,7 @@ def test_ocean_exchange(publisher_ocean_instance):
 
     # create with negative rate, should fail
     with pytest.raises(AssertionError):
-        _ = ox.create(dt.address, rate * -1.0, bob_wallet)
+        _ = ox.create(dt.address, float(rate * Decimal("-1.0")), bob_wallet)
 
     # create using 0 rate
     with pytest.raises(AssertionError):
@@ -56,8 +56,8 @@ def test_ocean_exchange(publisher_ocean_instance):
     # get_quote
     base_token_amount = ox.get_quote(2.0, exchange_id=x_id)
     assert (
-        base_token_amount == 2.0 * rate
-    ), f"unexpected quote of base token {base_token_amount}, should be {2.0*rate}."
+        base_token_amount == Decimal(2) * rate
+    ), f"unexpected quote of base token {base_token_amount}, should be {Decimal(2) * rate}."
 
     #############
     # test buying datatokens

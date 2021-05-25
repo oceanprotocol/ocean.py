@@ -9,9 +9,8 @@ import time
 import pytest
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.models.data_token import DataToken
-from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
+from ocean_lib.web3_internal.currency import from_wei, to_wei
 from tests.resources.ddo_helpers import get_resource_path
 
 
@@ -27,29 +26,27 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address
     assert token.balanceOf(alice_address) == 0
     assert token.totalSupply() == 0
 
-    token.mint(alice_address, to_base_18(100.0), from_wallet=alice_wallet)
-    assert from_base_18(token.balanceOf(alice_address)) == 100.0
+    token.mint(alice_address, to_wei(100), from_wallet=alice_wallet)
+    assert from_wei(token.balanceOf(alice_address)) == 100
 
     assert token.allowance(alice_address, bob_address) == 0
-    token.approve(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
-    assert token.allowance(alice_address, bob_address) == int(1e18)
-    token.increaseAllowance(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
-    assert token.allowance(alice_address, bob_address) == int(2e18)
-    token.decreaseAllowance(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
-    assert token.allowance(alice_address, bob_address) == int(1e18)
-    token.transferFrom(
-        alice_address, bob_address, to_base_18(1.0), from_wallet=bob_wallet
-    )
-    assert from_base_18(token.balanceOf(alice_address)) == 99.0
-    assert from_base_18(token.balanceOf(bob_address)) == 1.0
+    token.approve(bob_address, to_wei(1), from_wallet=alice_wallet)
+    assert token.allowance(alice_address, bob_address) == to_wei(1)
+    token.increaseAllowance(bob_address, to_wei(1), from_wallet=alice_wallet)
+    assert token.allowance(alice_address, bob_address) == to_wei(2)
+    token.decreaseAllowance(bob_address, to_wei(1), from_wallet=alice_wallet)
+    assert token.allowance(alice_address, bob_address) == to_wei(1)
+    token.transferFrom(alice_address, bob_address, to_wei(1), from_wallet=bob_wallet)
+    assert from_wei(token.balanceOf(alice_address)) == 99
+    assert from_wei(token.balanceOf(bob_address)) == 1
 
-    token.transfer(bob_address, to_base_18(5.0), from_wallet=alice_wallet)
-    assert from_base_18(token.balanceOf(alice_address)) == 94.0
-    assert from_base_18(token.balanceOf(bob_address)) == 6.0
+    token.transfer(bob_address, to_wei(5), from_wallet=alice_wallet)
+    assert from_wei(token.balanceOf(alice_address)) == 94
+    assert from_wei(token.balanceOf(bob_address)) == 6
 
-    token.transfer(alice_address, to_base_18(3.0), from_wallet=bob_wallet)
-    assert from_base_18(token.balanceOf(alice_address)) == 97.0
-    assert from_base_18(token.balanceOf(bob_address)) == 3.0
+    token.transfer(alice_address, to_wei(3), from_wallet=bob_wallet)
+    assert from_wei(token.balanceOf(alice_address)) == 97
+    assert from_wei(token.balanceOf(bob_address)) == 3
 
     # assert transfers were successful
     block = alice_ocean.web3.eth.blockNumber
@@ -63,9 +60,9 @@ def test_status_functions(alice_ocean, alice_wallet, alice_address):
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
 
-    token.mint(alice_address, to_base_18(100.0), from_wallet=alice_wallet)
+    token.mint(alice_address, to_wei(100), from_wallet=alice_wallet)
 
-    assert from_base_18(token.balanceOf(alice_address)) == 100.0
+    assert from_wei(token.balanceOf(alice_address)) == 100
     assert token.totalSupply() == 100_000_000_000_000_000_000
     assert token.cap() == 1_000_000_000_000_000_000_000
     assert token.datatoken_name() == "DataToken1"
@@ -100,8 +97,8 @@ def test_calculateFee(alice_ocean, alice_wallet):
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
 
-    fee = token.calculateFee(to_base_18(100.0), DataToken.OPF_FEE_PER_DATATOKEN_IN_WEI)
-    assert from_base_18(fee) == 0.1
+    fee = token.calculateFee(to_wei(100), DataToken.OPF_FEE_PER_DATATOKEN_IN_WEI)
+    assert fee == to_wei("0.1")
 
 
 def test_blob(alice_ocean, alice_wallet):
@@ -137,28 +134,28 @@ def test_setMinter(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_add
     )
 
     # alice is the minter
-    token.mint(alice_address, to_base_18(10.0), from_wallet=alice_wallet)
-    token.mint(bob_address, to_base_18(10.0), from_wallet=alice_wallet)
+    token.mint(alice_address, to_wei(10), from_wallet=alice_wallet)
+    token.mint(bob_address, to_wei(10), from_wallet=alice_wallet)
     with pytest.raises(Exception):
-        token.mint(alice_address, to_base_18(10.0), from_wallet=bob_wallet)
+        token.mint(alice_address, to_wei(10), from_wallet=bob_wallet)
 
     # switch minter to bob
     token.proposeMinter(bob_address, from_wallet=alice_wallet)
     time.sleep(5)
     token.approveMinter(from_wallet=bob_wallet)
-    token.mint(alice_address, to_base_18(10.0), from_wallet=bob_wallet)
+    token.mint(alice_address, to_wei(10), from_wallet=bob_wallet)
     with pytest.raises(Exception):
-        token.mint(alice_address, to_base_18(10.0), from_wallet=alice_wallet)
+        token.mint(alice_address, to_wei(10), from_wallet=alice_wallet)
     with pytest.raises(Exception):
-        token.mint(bob_address, to_base_18(10.0), from_wallet=alice_wallet)
+        token.mint(bob_address, to_wei(10), from_wallet=alice_wallet)
 
     # switch minter back to alice
     token.proposeMinter(alice_address, from_wallet=bob_wallet)
     time.sleep(5)
     token.approveMinter(from_wallet=alice_wallet)
-    token.mint(alice_address, to_base_18(10.0), from_wallet=alice_wallet)
+    token.mint(alice_address, to_wei(10), from_wallet=alice_wallet)
     with pytest.raises(Exception):
-        token.mint(alice_address, to_base_18(10.0), from_wallet=bob_wallet)
+        token.mint(alice_address, to_wei(10), from_wallet=bob_wallet)
 
 
 def test_transfer_event(
@@ -175,9 +172,9 @@ def test_transfer_event(
     transfer_events = token.get_event_logs("Transfer", None, block, block)
     assert transfer_events == []
 
-    token.mint(alice_address, to_base_18(100.0), from_wallet=alice_wallet)
-    token.approve(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
-    token.transfer(bob_address, to_base_18(5.0), from_wallet=alice_wallet)
+    token.mint(alice_address, to_wei(100), from_wallet=alice_wallet)
+    token.approve(bob_address, to_wei(1), from_wallet=alice_wallet)
+    token.transfer(bob_address, to_wei(5), from_wallet=alice_wallet)
 
     block = alice_ocean.web3.eth.blockNumber
     transfer_event = token.get_transfer_event(block, alice_address, bob_address)
@@ -201,9 +198,9 @@ def test_verify_transfer_tx(alice_address, bob_address, alice_ocean, alice_walle
         token.verify_transfer_tx("0x0", alice_address, bob_address)
 
     # an actual transfer does happen
-    token.mint(alice_address, to_base_18(100.0), from_wallet=alice_wallet)
-    token.approve(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
-    tx_id = token.transfer(bob_address, to_base_18(5.0), from_wallet=alice_wallet)
+    token.mint(alice_address, to_wei(100), from_wallet=alice_wallet)
+    token.approve(bob_address, to_wei(1), from_wallet=alice_wallet)
+    tx_id = token.transfer(bob_address, to_wei(5), from_wallet=alice_wallet)
 
     assert len(token.verify_transfer_tx(tx_id, alice_address, bob_address)) == 2
 
@@ -219,11 +216,9 @@ def test_verify_order_tx(alice_address, bob_address, alice_ocean, alice_wallet):
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
 
-    token.mint(alice_address, to_base_18(100.0), from_wallet=alice_wallet)
-    token.approve(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
-    transfer_tx_id = token.transfer(
-        bob_address, to_base_18(5.0), from_wallet=alice_wallet
-    )
+    token.mint(alice_address, to_wei(100), from_wallet=alice_wallet)
+    token.approve(bob_address, to_wei(1), from_wallet=alice_wallet)
+    transfer_tx_id = token.transfer(bob_address, to_wei(5), from_wallet=alice_wallet)
 
     with pytest.raises(AssertionError):
         # dummy tx id
@@ -231,9 +226,7 @@ def test_verify_order_tx(alice_address, bob_address, alice_ocean, alice_wallet):
             alice_w3, "0x0", "some_did", "some_index", "some_amount", alice_address
         )
 
-    transfer_tx_id = token.transfer(
-        bob_address, to_base_18(5.0), from_wallet=alice_wallet
-    )
+    transfer_tx_id = token.transfer(bob_address, to_wei(5), from_wallet=alice_wallet)
     with pytest.raises(AssertionError):
         # tx id is from transfer, not order
         token.verify_order_tx(
@@ -248,7 +241,7 @@ def test_verify_order_tx(alice_address, bob_address, alice_ocean, alice_wallet):
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
     asset = DDO(json_filename=sample_ddo_path)
     order_tx_id = token.startOrder(
-        alice_address, to_base_18(1.0), 1, ZERO_ADDRESS, alice_wallet
+        alice_address, to_wei(1), 1, ZERO_ADDRESS, alice_wallet
     )
 
     with pytest.raises(AssertionError):
@@ -275,7 +268,7 @@ def test_calculate_token_holders(alice_ocean, alice_wallet, alice_address):
     token = alice_ocean.create_data_token(
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
-    token.mint(alice_address, to_base_18(100.0), from_wallet=alice_wallet)
+    token.mint(alice_address, to_wei(100), from_wallet=alice_wallet)
     block = alice_ocean.web3.eth.blockNumber
-    token_holders = token.calculate_token_holders(block - 1, block + 1, to_wei("1.0"))
+    token_holders = token.calculate_token_holders(block - 1, block + 1, to_wei(1))
     assert len(token_holders) == 1
