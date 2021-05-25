@@ -203,7 +203,7 @@ def to_wei(value_in_ether: Union[Decimal, str]) -> int:
 
 
 @enforce_types_shim
-def tokenfmt(amount_in_ether: Decimal, places: int = 18, ticker: str = "") -> str:
+def ether_fmt(amount_in_ether: Decimal, places: int = 18, ticker: str = "") -> str:
     if amount_in_ether > MAX_WEI_IN_ETHER:
         raise ValueError("Ether value exceeds MAX_WEI_IN_ETHER.")
 
