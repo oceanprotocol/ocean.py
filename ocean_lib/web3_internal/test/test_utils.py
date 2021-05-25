@@ -52,6 +52,7 @@ def test_cancel_or_replace_transaction(alice_wallet):
 
 
 def test_from_wei():
+    """Test the from_wei function"""
     assert from_wei(0) == Decimal("0"), "Zero wei should equal zero ether"
     assert from_wei(123456789123456789) == Decimal(
         "0.123456789123456789"
@@ -71,6 +72,7 @@ def test_from_wei():
 
 
 def test_to_wei():
+    """Test the to_wei function"""
     assert to_wei(Decimal("0")) == 0, "Zero ether (Decimal) should equal zero wei"
     assert to_wei("0") == 0, "Zero ether (string) should equal zero wei"
     assert (
