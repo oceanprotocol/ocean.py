@@ -301,13 +301,7 @@ def pretty_ether(
         exponent = sig_fig_3.adjusted()
 
         if sig_fig_3 == 0:
-            if trim:
-                return "0 " + ticker if ticker else "0"
-            else:
-                if exponent == -1:
-                    return "0.0 " + ticker if ticker else "0.0"
-                else:
-                    return "0.00 " + ticker if ticker else "0.00"
+            return _trim_zero_to_3_digits_or_less(trim, exponent, ticker)
 
         if exponent >= 12 or exponent < -1:
             # format string handles scaling also, so set scale = 0
@@ -335,6 +329,20 @@ def pretty_ether(
         return (
             fmt_str.format(scaled) + " " + ticker if ticker else fmt_str.format(scaled)
         )
+
+
+@enforce_types_shim
+def _trim_zero_to_3_digits_or_less(trim: bool, exponent: int, ticker: str) -> str:
+    """Returns a string representation of the number zero, limited to 3 digits
+    This function exists to reduce the cognitive complexity of pretty_ether
+    """
+    if trim:
+        return "0 " + ticker if ticker else "0"
+    else:
+        if exponent == -1:
+            return "0.0 " + ticker if ticker else "0.0"
+        else:
+            return "0.00 " + ticker if ticker else "0.00"
 
 
 @enforce_types_shim
