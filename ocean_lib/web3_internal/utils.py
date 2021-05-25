@@ -268,6 +268,16 @@ def moneyfmt(value, places=2, curr="", sep=",", dp=".", pos="", neg="-", trailne
 
 
 @enforce_types_shim
+def wei_and_pretty_ether(amount_in_wei: int, ticker: str = "") -> str:
+    return "{} ({})".format(amount_in_wei, pretty_ether_from_wei(amount_in_wei, ticker))
+
+
+@enforce_types_shim
+def pretty_ether_from_wei(amount_in_wei: int, ticker: str = "") -> str:
+    return pretty_ether(from_wei(amount_in_wei), ticker=ticker)
+
+
+@enforce_types_shim
 def pretty_ether(
     amount_in_ether: Union[Decimal, str], ticker: str = "", trim: bool = True
 ) -> str:

@@ -20,6 +20,7 @@ from ocean_lib.web3_internal.utils import (
     prepare_prefixed_hash,
     pretty_ether,
     to_wei,
+    wei_and_pretty_ether,
 )
 
 
@@ -173,3 +174,18 @@ def test_pretty_ether():
     # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_WEI_IN_ETHER
     with localcontext(ETHEREUM_DECIMAL_CONTEXT):
         assert pretty_ether(MAX_WEI_IN_ETHER + 1) == "1.15e+59"
+
+
+def test_wei_and_pretty_ether():
+    assert (
+        wei_and_pretty_ether(123456789123456789, "OCEAN")
+        == "123456789123456789 (0.123 OCEAN)"
+    )
+    assert (
+        wei_and_pretty_ether(12345678912345678912345, "OCEAN")
+        == "12345678912345678912345 (12.3K OCEAN)"
+    )
+    assert (
+        wei_and_pretty_ether(123456789123456789123456789, "OCEAN")
+        == "123456789123456789123456789 (123M OCEAN)"
+    )
