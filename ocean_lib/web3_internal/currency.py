@@ -185,12 +185,14 @@ def _trim_zero_to_3_digits_or_less(trim: bool, exponent: int, ticker: str) -> st
     This function exists to reduce the cognitive complexity of pretty_ether
     """
     if trim:
-        return "0 " + ticker if ticker else "0"
+        zero = "0"
     else:
         if exponent == -1:
-            return "0.0 " + ticker if ticker else "0.0"
+            zero = "0.0"
         else:
-            return "0.00 " + ticker if ticker else "0.00"
+            zero = "0.00"
+
+    return zero + " " + ticker if ticker else zero
 
 
 @enforce_types_shim
