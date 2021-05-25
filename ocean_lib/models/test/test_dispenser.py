@@ -49,22 +49,29 @@ def test_dispenser_minting(contracts_addresses, alice_ocean, alice_wallet, bob_w
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
 
+    # not yet activated
+    assert dispenser.is_dispensable(token.address, 1, alice_wallet) is False
     with pytest.raises(ValueError):
-        # not yet activated
         dispenser.dispense(token.address, 1, alice_wallet)
 
     dispenser.activate(token.address, 1000, 1000, alice_wallet)
 
     dispenser.make_minter(token.address, alice_wallet)
     assert dispenser.is_minter_approved(token.address)
+    assert dispenser.is_dispensable(token.address, 1, alice_wallet)
     dispenser.dispense(token.address, 1, alice_wallet)
+    assert dispenser.is_dispensable(token.address, 1, bob_wallet)
     dispenser.dispense(token.address, 1, bob_wallet)
 
+    # can not dispense 0
+    assert dispenser.is_dispensable(token.address, 0, alice_wallet) is False
     with pytest.raises(ValueError):
-        # can not dispense 0
         dispenser.dispense(token.address, 0, alice_wallet)
 
     dispenser.cancel_minter(token.address, alice_wallet)
     dispenser.owner_withdraw(token.address, alice_wallet)
+
+    # no balance left
+    assert dispenser.is_dispensable(token.address, 1, alice_wallet) is False
     with pytest.raises(ValueError):
         dispenser.dispense(token.address, 1, alice_wallet)

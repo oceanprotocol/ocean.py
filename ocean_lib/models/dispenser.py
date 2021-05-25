@@ -71,4 +71,30 @@ class DispenserContract(ContractBase):
     def owner_withdraw(self, dt_address: str, from_wallet: Wallet):
         return self.send_transaction("ownerWithdraw", (dt_address,), from_wallet)
 
-    # TODO: is dispensable
+    def is_dispensable(self, dt_address: str, amount: int, to_wallet: Wallet):
+        if not amount:
+            return False
+
+        token = DataToken(dt_address)
+        if not self.is_active(dt_address):
+            return False
+
+        user_balance = token.balanceOf(to_wallet.address)
+        max_balance = self.max_balance(dt_address)
+
+        if user_balance >= max_balance:
+            return False
+
+        max_tokens = self.max_balance(dt_address)
+        if amount > max_tokens:
+            return False
+
+        is_true_minter = self.is_true_minter(dt_address)
+        if is_true_minter:
+            return True
+
+        contract_balance = self.balance(dt_address)
+        if contract_balance >= amount:
+            return True
+
+        return False
