@@ -31,7 +31,6 @@ class ExampleConfig:
                 "provider.address": "0x068Ed00cF0441e4829D9784fCBe7b9e26D4BD8d0",
                 "downloads.path": "consume-downloads",
             },
-            "util": {"typecheck": "false"},
         }
 
     @staticmethod

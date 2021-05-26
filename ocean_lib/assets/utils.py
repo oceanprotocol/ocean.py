@@ -4,20 +4,19 @@
 #
 import hashlib
 import json
-
 from typing import Optional
 
+from enforce_typing import enforce_types
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 
 
 def create_checksum(text):
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
-@enforce_types_shim
+@enforce_types
 def generate_trusted_algo_dict(
     did: Optional[str] = None,
     metadata_cache_uri: Optional[str] = None,
@@ -44,7 +43,7 @@ def generate_trusted_algo_dict(
     }
 
 
-@enforce_types_shim
+@enforce_types
 def create_publisher_trusted_algorithms(dids: list, metadata_cache_uri: str) -> list:
     return [
         generate_trusted_algo_dict(did=did, metadata_cache_uri=metadata_cache_uri)
@@ -52,7 +51,7 @@ def create_publisher_trusted_algorithms(dids: list, metadata_cache_uri: str) -> 
     ]
 
 
-@enforce_types_shim
+@enforce_types
 def add_publisher_trusted_algorithm(
     dataset_did: str, algo_did: str, metadata_cache_uri: str
 ) -> list:
@@ -82,7 +81,7 @@ def add_publisher_trusted_algorithm(
     return trusted_algos
 
 
-@enforce_types_shim
+@enforce_types
 def remove_publisher_trusted_algorithm(
     dataset_did: str, algo_did: str, metadata_cache_uri: str
 ) -> list:

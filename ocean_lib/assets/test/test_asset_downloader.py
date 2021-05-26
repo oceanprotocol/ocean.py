@@ -8,9 +8,7 @@ import pytest
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from tests.resources.ddo_helpers import wait_for_ddo
 from tests.resources.helper_functions import get_publisher_wallet
 
@@ -49,33 +47,18 @@ def test_ocean_assets_download_indexes(publisher_ocean_instance, metadata):
     wait_for_ddo(publisher_ocean_instance, ddo.did)
     sa = ServiceAgreement.from_ddo(ServiceTypes.ASSET_ACCESS, ddo)
 
-    config = Config(os.getenv(ENV_CONFIG_FILE))
-
     index = range(3)
-    if config["util"].getboolean("typecheck"):
-        with pytest.raises(TypeError):
-            download_asset_files(
-                sa.index,
-                ddo,
-                publisher,
-                "test_destination",
-                ddo.data_token_address,
-                "test_order_tx_id",
-                data_provider,
-                index,
-            )
-    else:
-        with pytest.raises(AssertionError):
-            download_asset_files(
-                sa.index,
-                ddo,
-                publisher,
-                "test_destination",
-                ddo.data_token_address,
-                "test_order_tx_id",
-                data_provider,
-                index,
-            )
+    with pytest.raises(TypeError):
+        download_asset_files(
+            sa.index,
+            ddo,
+            publisher,
+            "test_destination",
+            ddo.data_token_address,
+            "test_order_tx_id",
+            data_provider,
+            index,
+        )
 
     index = -1
     with pytest.raises(AssertionError):
