@@ -265,13 +265,13 @@ class ContractBase(object):
         )
 
         if "gas" not in built_tx:
-            built_tx["gas"] = web3.eth.estimateGas(built_tx)
+            built_tx["gas"] = web3.eth.estimate_gas(built_tx)
 
         raw_tx = deployer_wallet.sign_tx(built_tx)
         logging.debug(
             f"Sending raw tx to deploy contract {cls.CONTRACT_NAME}, signed tx hash: {raw_tx.hex()}"
         )
-        tx_hash = web3.eth.sendRawTransaction(raw_tx)
+        tx_hash = web3.eth.send_raw_transaction(raw_tx)
 
         return cls.get_tx_receipt(tx_hash, timeout=60).contractAddress
 
@@ -360,8 +360,8 @@ class ContractBase(object):
         for the latest 10 blocks:
 
         ```python
-            from = max(mycontract.web3.eth.blockNumber - 10, 1)
-            to = mycontract.web3.eth.blockNumber
+            from = max(mycontract.web3.eth.block_number - 10, 1)
+            to = mycontract.web3.eth.block_number
             events = mycontract.events.Transfer.getLogs(fromBlock=from, toBlock=to)
             for e in events:
                 print(e["args"]["from"],
@@ -429,7 +429,7 @@ class ContractBase(object):
             event_filter_params["blockHash"] = blockHash
 
         # Call JSON-RPC API
-        logs = web3.eth.getLogs(event_filter_params)
+        logs = web3.eth.get_logs(event_filter_params)
 
         # Convert raw binary data to Python proxy objects as described by ABI
         return tuple(get_event_data(abi, entry) for entry in logs)

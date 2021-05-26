@@ -28,7 +28,7 @@ def test_data_token_event_registered(alice_wallet, dtfactory_address, alice_ocea
         "foo_blob", "DT1", "DT1", to_base_18(1000.0), from_wallet=alice_wallet
     )
     dt = DataToken(dtfactory.get_token_address(dt_address))
-    block = alice_ocean.web3.eth.blockNumber
+    block = alice_ocean.web3.eth.block_number
 
     # with explicit address
     registered_event = dtfactory.get_token_registered_event(

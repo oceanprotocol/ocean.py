@@ -197,7 +197,7 @@ class DataToken(ContractBase):
 
         e = getattr(self.events, self.ORDER_STARTED_EVENT)
         event_abi = e().abi
-        logs = web3.eth.getLogs(filter_params)
+        logs = web3.eth.get_logs(filter_params)
         parsed_logs = []
         for lg in logs:
             parsed_logs.append(get_event_data(event_abi, lg))
@@ -389,7 +389,7 @@ class DataToken(ContractBase):
             target_amount = target_amount - order_log.args.marketFee
 
         # verify sender of the tx using the Tx record
-        tx = web3.eth.getTransaction(tx_id)
+        tx = web3.eth.get_transaction(tx_id)
         if sender not in [order_log.args.consumer, order_log.args.payer]:
             raise AssertionError(
                 "sender of order transaction is not the consumer/payer."

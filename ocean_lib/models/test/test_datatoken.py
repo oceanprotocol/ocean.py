@@ -51,7 +51,7 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address
     assert from_base_18(token.balanceOf(bob_address)) == 3.0
 
     # assert transfers were successful
-    block = alice_ocean.web3.eth.blockNumber
+    block = alice_ocean.web3.eth.block_number
     all_transfers = token.get_all_transfers_from_events(block - 2, block + 1, chunk=1)
     assert len(all_transfers[0]) == 3
 
@@ -176,7 +176,7 @@ def test_transfer_event(
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
 
-    block = alice_ocean.web3.eth.blockNumber
+    block = alice_ocean.web3.eth.block_number
     transfer_event = token.get_transfer_event(block, alice_address, bob_address)
     # different way of retrieving
     transfer_events = token.get_event_logs("Transfer", None, block, block)
@@ -186,7 +186,7 @@ def test_transfer_event(
     token.approve(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
     token.transfer(bob_address, to_base_18(5.0), from_wallet=alice_wallet)
 
-    block = alice_ocean.web3.eth.blockNumber
+    block = alice_ocean.web3.eth.block_number
     transfer_event = token.get_transfer_event(block, alice_address, bob_address)
     assert transfer_event["args"]["from"] == alice_address
     assert transfer_event["args"]["to"] == bob_address
@@ -220,7 +220,7 @@ def test_verify_transfer_tx(alice_address, bob_address, alice_ocean, alice_walle
 
 def test_verify_order_tx(alice_address, bob_address, alice_ocean, alice_wallet):
     """Tests verify_order_tx function."""
-    alice_w3 = alice_ocean.web3.eth.blockNumber
+    alice_w3 = alice_ocean.web3.eth.block_number
 
     token = alice_ocean.create_data_token(
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
@@ -283,6 +283,6 @@ def test_calculate_token_holders(alice_ocean, alice_wallet, alice_address):
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
     token.mint(alice_address, to_base_18(100.0), from_wallet=alice_wallet)
-    block = alice_ocean.web3.eth.blockNumber
+    block = alice_ocean.web3.eth.block_number
     token_holders = token.calculate_token_holders(block - 1, block + 1, 1.0)
     assert len(token_holders) == 1
