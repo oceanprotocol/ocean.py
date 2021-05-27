@@ -31,7 +31,7 @@ def send_ether(from_wallet: Wallet, to_address: str, ether_amount: int):
         "to": to_address,
         "value": w3.toWei(ether_amount, "ether"),
     }
-    _ = w3.eth.estimateGas(tx)
+    _ = w3.eth.estimate_gas(tx)
     tx = {
         "from": from_wallet.address,
         "to": to_address,
@@ -50,7 +50,7 @@ def cancel_or_replace_transaction(
 ):
     w3 = Web3Provider.get_web3()
     tx = {"from": from_wallet.address, "to": from_wallet.address, "value": 0}
-    gas = gas_limit if gas_limit is not None else w3.eth.estimateGas(tx)
+    gas = gas_limit if gas_limit is not None else w3.eth.estimate_gas(tx)
     tx = {
         "from": from_wallet.address,
         "to": from_wallet.address,

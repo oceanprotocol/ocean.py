@@ -153,7 +153,7 @@ def get_ether_balance(address: str) -> int:
     :param address: address, bytes32
     :return: balance, int
     """
-    return Web3Provider.get_web3().eth.getBalance(address, block_identifier="latest")
+    return Web3Provider.get_web3().eth.get_balance(address, block_identifier="latest")
 
 
 def from_wei(wei_value: int) -> Decimal:
