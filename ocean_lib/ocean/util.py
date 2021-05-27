@@ -5,12 +5,9 @@
 import os
 
 from enforce_typing import enforce_types
-from ocean_lib.config import Config
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.env_constants import (
-    ENV_CONFIG_FILE,
     ENV_INFURA_CONNECTION_TYPE,
     ENV_INFURA_PROJECT_ID,
 )
@@ -152,29 +149,23 @@ def from_base(num_base: int, dec: int) -> float:
     return float(num_base / (10 ** dec))
 
 
-def get_dtfactory_address(network=None):
+def get_dtfactory_address(config, network=None):
     return DTFactory.configured_address(
-        network or get_network_name(), ConfigProvider.get_config().address_file
+        network or get_network_name(), config.address_file
     )
 
 
-def get_bfactory_address(network=None):
+def get_bfactory_address(config, network=None):
     return BFactory.configured_address(
-        network or get_network_name(), ConfigProvider.get_config().address_file
+        network or get_network_name(), config.address_file
     )
 
 
-def get_ocean_token_address(network=None):
-    addresses = get_contracts_addresses(
-        network or get_network_name(), ConfigProvider.get_config()
-    )
+def get_ocean_token_address(config, network=None):
+    addresses = get_contracts_addresses(network or get_network_name(), config)
     return addresses.get("Ocean") if addresses else None
 
 
-def init_components(config=None):
-    if config is None:
-        config = Config(os.getenv(ENV_CONFIG_FILE))
-
-    ConfigProvider.set_config(config)
+def init_components(config):
     Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
     ContractHandler.set_artifacts_path(config.artifacts_path)

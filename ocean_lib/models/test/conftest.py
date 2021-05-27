@@ -6,7 +6,6 @@ import os
 
 import pytest
 from enforce_typing import enforce_types
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models import btoken
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.data_token import DataToken
@@ -35,24 +34,18 @@ def network():
 
 
 @pytest.fixture
-def dtfactory_address():
-    return DTFactory.configured_address(
-        _NETWORK, ConfigProvider.get_config().address_file
-    )
+def dtfactory_address(config):
+    return DTFactory.configured_address(_NETWORK, config.address_file)
 
 
 @pytest.fixture
-def bfactory_address():
-    return BFactory.configured_address(
-        _NETWORK, ConfigProvider.get_config().address_file
-    )
+def bfactory_address(config):
+    return BFactory.configured_address(_NETWORK, config.address_file)
 
 
 @pytest.fixture
-def contracts_addresses():
-    return ContractHandler.get_contracts_addresses(
-        _NETWORK, ConfigProvider.get_config().address_file
-    )
+def contracts_addresses(config):
+    return ContractHandler.get_contracts_addresses(_NETWORK, config)
 
 
 @pytest.fixture

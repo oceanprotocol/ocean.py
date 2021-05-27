@@ -15,7 +15,6 @@ import requests
 from enforce_typing import enforce_types
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.http_requests.requests_session import get_requests_session
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
@@ -389,25 +388,25 @@ class DataServiceProvider:
         )
 
     @staticmethod
-    def get_service_endpoints(provider_uri=None):
+    def get_service_endpoints(provider_uri=None, config=None):
         """
         Return the service endpoints from the provider URL.
         """
         if not provider_uri:
-            provider_uri = DataServiceProvider.get_url(ConfigProvider.get_config())
+            provider_uri = DataServiceProvider.get_url(config)
 
         provider_info = DataServiceProvider._http_method("get", provider_uri).json()
 
         return provider_info["serviceEndpoints"]
 
     @staticmethod
-    def get_provider_address(provider_uri=None):
+    def get_provider_address(provider_uri=None, config=None):
         """
         Return the provider address
         """
         try:
             if not provider_uri:
-                provider_uri = ConfigProvider.get_config().provider_url
+                provider_uri = config.provider_url
             provider_info = DataServiceProvider._http_method("get", provider_uri).json()
 
             return provider_info["providerAddress"]
@@ -441,7 +440,6 @@ class DataServiceProvider:
     @staticmethod
     def build_endpoint(service_name, provider_uri=None, config=None):
         if not provider_uri:
-            config = config or ConfigProvider.get_config()
             provider_uri = DataServiceProvider.get_url(config)
 
         provider_uri = DataServiceProvider.get_root_uri(provider_uri)

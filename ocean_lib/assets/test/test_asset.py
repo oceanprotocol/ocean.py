@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.config_provider import ConfigProvider
 from tests.resources.ddo_helpers import (
     get_registered_algorithm_ddo,
     get_registered_ddo_with_compute_service,
@@ -28,10 +27,10 @@ def test_values(publisher_ocean_instance, metadata):
         assert ddo_values[key] is not None
 
 
-def test_trusted_algorithms(publisher_ocean_instance):
+def test_trusted_algorithms(publisher_ocean_instance, config):
     """Tests if the trusted algorithms list is returned correctly."""
     publisher = get_publisher_wallet()
-    provider_uri = ConfigProvider.get_config().provider_url
+    provider_uri = config.provider_url
 
     algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
     wait_for_ddo(publisher_ocean_instance, algorithm_ddo.did)

@@ -2,19 +2,17 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
 from datetime import datetime
 
-from ocean_lib.assets.utils import create_checksum, create_publisher_trusted_algorithms
+from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.config import Config
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from tests.resources.ddo_helpers import (
     get_registered_algorithm_ddo,
-    wait_for_ddo,
     get_registered_ddo_with_compute_service,
+    wait_for_ddo,
 )
 from tests.resources.helper_functions import get_publisher_wallet
 
@@ -142,10 +140,9 @@ def test_build_service_provider_attributes():
     ), "The service provider is not the expected one."
 
 
-def test_build_service_privacy_attributes(publisher_ocean_instance):
+def test_build_service_privacy_attributes(publisher_ocean_instance, config):
     publisher = get_publisher_wallet()
     data_provider = DataServiceProvider()
-    config = Ocean.config
     compute = OceanCompute(config=config, data_provider=data_provider)
 
     algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
@@ -153,6 +150,7 @@ def test_build_service_privacy_attributes(publisher_ocean_instance):
     assert algorithm_ddo is not None
 
     privacy_dict = compute.build_service_privacy_attributes(
+        config=config,
         trusted_algorithms=[algorithm_ddo.did],
         allow_raw_algorithm=True,
         allow_all_published_algorithms=True,
@@ -163,7 +161,7 @@ def test_build_service_privacy_attributes(publisher_ocean_instance):
         "allowRawAlgorithm": True,
         "allowAllPublishedAlgorithms": True,
         "publisherTrustedAlgorithms": create_publisher_trusted_algorithms(
-            [algorithm_ddo.did], ConfigProvider.get_config().metadata_cache_uri
+            [algorithm_ddo.did], config.metadata_cache_uri
         ),
         "allowNetworkAccess": True,
     }
@@ -177,11 +175,10 @@ def test_build_service_privacy_attributes(publisher_ocean_instance):
     ), "The privacy dict is not the expected one."
 
 
-def test_build_service_privacy_attributes_no_trusted_algos():
+def test_build_service_privacy_attributes_no_trusted_algos(config):
     data_provider = DataServiceProvider()
-    config = Ocean.config
     compute = OceanCompute(config=config, data_provider=data_provider)
-    privacy_dict = compute.build_service_privacy_attributes()
+    privacy_dict = compute.build_service_privacy_attributes(config=config)
     expected_privacy_dict = {
         "allowRawAlgorithm": False,
         "allowAllPublishedAlgorithms": False,
@@ -216,7 +213,7 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
         "allowRawAlgorithm": True,
         "allowAllPublishedAlgorithms": True,
         "publisherTrustedAlgorithms": create_publisher_trusted_algorithms(
-            [algorithm_ddo.did], ConfigProvider.get_config().metadata_cache_uri
+            [algorithm_ddo.did], config.metadata_cache_uri
         ),
         "allowNetworkAccess": True,
     }
@@ -290,6 +287,7 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
     ), "The service provider is not the expected one."
 
     compute_attributes = compute.create_compute_service_attributes(
+        config,
         30,
         publisher.address,
         (datetime.utcnow().replace(microsecond=0).isoformat() + "Z"),
@@ -316,10 +314,9 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
     ), "The compute attributes are not the expected ones."
 
 
-def test_create_compute_service_descriptor(publisher_ocean_instance):
+def test_create_compute_service_descriptor(publisher_ocean_instance, config):
     publisher = get_publisher_wallet()
     data_provider = DataServiceProvider()
-    config = Config()
     compute = OceanCompute(config=config, data_provider=data_provider)
 
     algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
@@ -337,7 +334,7 @@ def test_create_compute_service_descriptor(publisher_ocean_instance):
         "allowRawAlgorithm": True,
         "allowAllPublishedAlgorithms": True,
         "publisherTrustedAlgorithms": create_publisher_trusted_algorithms(
-            [algorithm_ddo.did], ConfigProvider.get_config().metadata_cache_uri
+            [algorithm_ddo.did], config.metadata_cache_uri
         ),
         "allowNetworkAccess": True,
     }
@@ -411,6 +408,7 @@ def test_create_compute_service_descriptor(publisher_ocean_instance):
     ), "The service provider is not the expected one."
 
     compute_attributes = compute.create_compute_service_attributes(
+        config,
         30,
         publisher.address,
         (datetime.utcnow().replace(microsecond=0).isoformat() + "Z"),

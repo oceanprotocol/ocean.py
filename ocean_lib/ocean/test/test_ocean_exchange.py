@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.util import get_contracts_addresses
@@ -12,11 +11,9 @@ from tests.resources.helper_functions import get_consumer_wallet, get_publisher_
 _NETWORK = "ganache"
 
 
-def _get_exchange_address():
+def _get_exchange_address(config):
     """Helper function to retrieve a known exchange address."""
-    return get_contracts_addresses(_NETWORK, ConfigProvider.get_config())[
-        FixedRateExchange.CONTRACT_NAME
-    ]
+    return get_contracts_addresses(_NETWORK, config)[FixedRateExchange.CONTRACT_NAME]
 
 
 def test_ocean_exchange(publisher_ocean_instance):

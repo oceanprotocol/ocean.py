@@ -12,7 +12,6 @@ from ocean_lib.common.agreements.consumable import ConsumableCodes, MalformedCre
 from ocean_lib.common.ddo.credentials import AddressCredential
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.utils.utilities import checksum
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
@@ -129,9 +128,8 @@ def test_ddo_credentials_disabled():
     assert ddo.is_consumable({}) == ConsumableCodes.ASSET_DISABLED
 
 
-def test_ddo_on_chain():
+def test_ddo_on_chain(config):
     """Tests chain operations on a DDO."""
-    config = ConfigProvider.get_config()
     ddo_address = get_contracts_addresses("ganache", config)[
         MetadataContract.CONTRACT_NAME
     ]

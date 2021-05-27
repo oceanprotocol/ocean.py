@@ -8,7 +8,6 @@ import uuid
 
 import pytest
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18
 from ocean_lib.web3_internal.contract_handler import ContractHandler
@@ -29,12 +28,10 @@ setup_logging()
 
 
 @pytest.fixture(autouse=True)
-def setup_all(request):
+def setup_all(request, config):
     # a test can skip setup_all() via decorator "@pytest.mark.nosetup_all"
     if "nosetup_all" in request.keywords:
         return
-    config = ExampleConfig.get_config()
-    ConfigProvider.set_config(config)
     Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
     ContractHandler.set_artifacts_path(config.artifacts_path)
 
@@ -75,6 +72,11 @@ def setup_all(request):
 
 
 @pytest.fixture
+def config():
+    return ExampleConfig.get_config()
+
+
+@pytest.fixture
 def publisher_ocean_instance():
     return get_publisher_ocean_instance()
 
@@ -85,14 +87,12 @@ def consumer_ocean_instance():
 
 
 @pytest.fixture
-def web3_instance():
-    config = ExampleConfig.get_config()
+def web3_instance(config):
     return Web3Provider.get_web3(config.network_url)
 
 
 @pytest.fixture
-def aquarius_instance():
-    config = ExampleConfig.get_config()
+def aquarius_instance(config):
     return AquariusProvider.get_aquarius(config.metadata_cache_uri)
 
 

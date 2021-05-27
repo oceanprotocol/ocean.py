@@ -5,7 +5,6 @@
 
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.metadata import MetadataContract
@@ -212,10 +211,9 @@ def test_compute_multi_inputs():
     )
 
 
-def test_update_trusted_algorithms():
+def test_update_trusted_algorithms(config):
     setup = Setup()
 
-    config = ConfigProvider.get_config()
     ddo_address = get_contracts_addresses("ganache", config)[
         MetadataContract.CONTRACT_NAME
     ]

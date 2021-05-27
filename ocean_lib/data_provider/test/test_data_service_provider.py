@@ -7,7 +7,6 @@ from unittest.mock import Mock
 
 import pytest
 from ocean_lib.common.http_requests.requests_session import get_requests_session
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
@@ -227,7 +226,7 @@ def test_get_root_uri():
         DataSP.get_root_uri("//")
 
 
-def test_build_endpoint():
+def test_build_endpoint(config):
     """Tests that service endpoints are correctly built from URL and service name."""
 
     def get_service_endpoints(_provider_uri=None):
@@ -237,7 +236,6 @@ def test_build_endpoint():
 
     original_func = DataSP.get_service_endpoints
     DataSP.get_service_endpoints = get_service_endpoints
-    config = ConfigProvider.get_config()
 
     endpoints = get_service_endpoints()
     uri = "http://ppp.com"
@@ -266,9 +264,8 @@ def test_build_endpoint():
     DataSP.get_service_endpoints = original_func
 
 
-def test_build_specific_endpoints():
+def test_build_specific_endpoints(config):
     """Tests that a specific list of agreed endpoints is supported on the DataServiceProvider."""
-    config = ConfigProvider.get_config()
     endpoints = TEST_SERVICE_ENDPOINTS
 
     def get_service_endpoints(_provider_uri=None):

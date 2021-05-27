@@ -6,9 +6,7 @@
 import os
 
 import pytest
-
 from ocean_lib.config import Config
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.ocean import util
 from ocean_lib.ocean.env_constants import (
     ENV_CONFIG_FILE,
@@ -16,15 +14,15 @@ from ocean_lib.ocean.env_constants import (
     ENV_INFURA_PROJECT_ID,
 )
 from ocean_lib.ocean.util import (
-    to_base_18,
-    to_base,
     from_base,
     from_base_18,
-    get_dtfactory_address,
     get_bfactory_address,
+    get_dtfactory_address,
     get_ocean_token_address,
-    init_components,
     get_web3_connection_provider,
+    init_components,
+    to_base,
+    to_base_18,
 )
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 
@@ -126,7 +124,6 @@ def test_get_web3_connection_provider(monkeypatch):
 
 def test_get_contracts_addresses():
     config = Config(os.getenv(ENV_CONFIG_FILE))
-    ConfigProvider.set_config(config)
     addresses = util.get_contracts_addresses("ganache", config)
     assert addresses
     assert isinstance(addresses, dict)
@@ -167,7 +164,6 @@ def test_from_base_and_from_base_18():
 
 def test_get_dtfactory_address():
     config = Config(os.getenv(ENV_CONFIG_FILE))
-    ConfigProvider.set_config(config)
     addresses = util.get_contracts_addresses("ganache", config)
     assert addresses
     assert isinstance(addresses, dict)
@@ -180,7 +176,6 @@ def test_get_dtfactory_address():
 
 def test_get_bfactory_address():
     config = Config(os.getenv(ENV_CONFIG_FILE))
-    ConfigProvider.set_config(config)
     addresses = util.get_contracts_addresses("ganache", config)
     assert addresses
     assert isinstance(addresses, dict)
@@ -193,7 +188,6 @@ def test_get_bfactory_address():
 
 def test_get_ocean_token_address():
     config = Config(os.getenv(ENV_CONFIG_FILE))
-    ConfigProvider.set_config(config)
     addresses = util.get_contracts_addresses("ganache", config)
     assert addresses
     assert isinstance(addresses, dict)
@@ -206,9 +200,7 @@ def test_get_ocean_token_address():
 
 def test_init_components():
     config = Config(os.getenv(ENV_CONFIG_FILE))
-    ConfigProvider.set_config(config)
-    init_components()
-    assert ConfigProvider.get_config() == config
+    init_components(config)
     assert (
         get_web3_connection_provider(config.network_url).endpoint_uri
         == "http://127.0.0.1:8545"
