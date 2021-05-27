@@ -40,8 +40,8 @@ def send_ether(from_wallet: Wallet, to_address: str, ether_amount: int):
     }
     wallet = Wallet(w3, private_key=from_wallet.key, address=from_wallet.address)
     raw_tx = wallet.sign_tx(tx)
-    tx_hash = w3.eth.sendRawTransaction(raw_tx)
-    receipt = w3.eth.waitForTransactionReceipt(tx_hash, timeout=30)
+    tx_hash = w3.eth.send_raw_transaction(raw_tx)
+    receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=30)
     return receipt
 
 
@@ -60,6 +60,6 @@ def cancel_or_replace_transaction(
 
     wallet = Wallet(w3, private_key=from_wallet.key, address=from_wallet.address)
     raw_tx = wallet.sign_tx(tx, fixed_nonce=nonce_value, gas_price=gas_price)
-    tx_hash = w3.eth.sendRawTransaction(raw_tx)
-    receipt = w3.eth.waitForTransactionReceipt(tx_hash, timeout=30)
+    tx_hash = w3.eth.send_raw_transaction(raw_tx)
+    receipt = w3.eth.wait_for_transaction_receipt(tx_hash, timeout=30)
     return receipt

@@ -7,6 +7,8 @@ import os
 import time
 
 import pytest
+from web3.exceptions import TimeExhausted, TransactionNotFound
+
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.util import from_base_18, to_base_18
@@ -203,8 +205,9 @@ def test_verify_transfer_tx(alice_address, bob_address, alice_ocean, alice_walle
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
 
-    with pytest.raises(AssertionError):
-        # dummy tx id
+    with pytest.raises(TransactionNotFound):
+        # dummy tx id which is not found in the chain
+        # need to catch TransactionNotFound exception from web3
         token.verify_transfer_tx("0x0", alice_address, bob_address)
 
     # an actual transfer does happen
@@ -232,8 +235,9 @@ def test_verify_order_tx(alice_address, bob_address, alice_ocean, alice_wallet):
         bob_address, to_base_18(5.0), from_wallet=alice_wallet
     )
 
-    with pytest.raises(AssertionError):
-        # dummy tx id
+    with pytest.raises(TimeExhausted):
+        # dummy tx id which is not found in the chain
+        # need to catch TimeExhausted exception from web3
         token.verify_order_tx(
             alice_w3, "0x0", "some_did", "some_index", "some_amount", alice_address
         )

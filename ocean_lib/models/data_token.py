@@ -200,7 +200,7 @@ class DataToken(ContractBase):
         logs = web3.eth.get_logs(filter_params)
         parsed_logs = []
         for lg in logs:
-            parsed_logs.append(get_event_data(event_abi, lg))
+            parsed_logs.append(get_event_data(web3.codec, event_abi, lg))
         return parsed_logs
 
     def get_transfer_events_in_range(self, from_block, to_block):
@@ -278,7 +278,7 @@ class DataToken(ContractBase):
 
     def verify_transfer_tx(self, tx_id, sender, receiver):
         w3 = Web3Provider.get_web3()
-        tx = w3.eth.getTransaction(tx_id)
+        tx = w3.eth.get_transaction(tx_id)
         if not tx:
             raise AssertionError("Transaction is not found, or is not yet verified.")
 
@@ -291,7 +291,7 @@ class DataToken(ContractBase):
         _iter = 0
         while tx["blockNumber"] is None:
             time.sleep(0.1)
-            tx = w3.eth.getTransaction(tx_id)
+            tx = w3.eth.get_transaction(tx_id)
             _iter = _iter + 1
             if _iter > 100:
                 break

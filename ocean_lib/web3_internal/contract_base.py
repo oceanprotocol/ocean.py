@@ -106,8 +106,8 @@ class ContractBase(object):
         :return: Tx receipt
         """
         try:
-            Web3Provider.get_web3().eth.waitForTransactionReceipt(
-                tx_hash, timeout=timeout
+            Web3Provider.get_web3().eth.wait_for_transaction_receipt(
+                HexBytes(tx_hash), timeout=timeout
             )
         except ValueError as e:
             logger.error(f"Waiting for transaction receipt failed: {e}")
@@ -124,7 +124,7 @@ class ContractBase(object):
             logger.info(f"Unknown error waiting for transaction receipt: {e}.")
             raise
 
-        return Web3Provider.get_web3().eth.getTransactionReceipt(tx_hash)
+        return Web3Provider.get_web3().eth.get_transaction_receipt(tx_hash)
 
     def is_tx_successful(self, tx_hash: str) -> bool:
         """Check if the transaction is successful.
@@ -419,6 +419,7 @@ class ContractBase(object):
         # Namely, convert event names to their keccak signatures
         _, event_filter_params = construct_event_filter_params(
             abi,
+            web3.codec,
             contract_address=self.address,
             argument_filters=_filters,
             fromBlock=fromBlock,
@@ -432,4 +433,4 @@ class ContractBase(object):
         logs = web3.eth.get_logs(event_filter_params)
 
         # Convert raw binary data to Python proxy objects as described by ABI
-        return tuple(get_event_data(abi, entry) for entry in logs)
+        return tuple(get_event_data(web3.codec, abi, entry) for entry in logs)

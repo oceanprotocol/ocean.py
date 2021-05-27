@@ -2,6 +2,9 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import pytest
+from web3.exceptions import TimeExhausted
+
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.util import to_base_18
@@ -41,8 +44,9 @@ def test_data_token_event_registered(alice_wallet, dtfactory_address, alice_ocea
 def test_get_token_address_fails(dtfactory_address):
     """Tests the failure case for get_token_address."""
     dtfactory = DTFactory(dtfactory_address)
-
-    assert dtfactory.get_token_address("") == ""
+    # Transaction 0x is not in the chain
+    with pytest.raises(TimeExhausted):
+        dtfactory.get_token_address("")
 
 
 def test_get_token_minter(alice_wallet, dtfactory_address, alice_address):
