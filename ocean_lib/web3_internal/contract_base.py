@@ -12,7 +12,6 @@ import requests
 from eth_typing import BlockIdentifier
 from hexbytes import HexBytes
 from ocean_lib.enforce_typing_shim import enforce_types_shim
-from ocean_lib.exceptions import VerifyTxFailed
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
