@@ -48,6 +48,8 @@ def test_aqua_function_for_multiple_ddos(aquarius_instance):
 
 def test_metadata_invalid(aquarius_instance):
     """Tests metadata validation failure."""
-    assert (
-        aquarius_instance.validate_metadata({"some_dict": "that is invalid"}) is False
+    result, errors = aquarius_instance.validate_metadata(
+        {"some_dict": "that is invalid"}
     )
+    assert result is False
+    assert errors[0]["message"] == "'main' is a required property"

@@ -178,10 +178,10 @@ class Aquarius:
             f"{self.url}/validate", data=json.dumps(metadata), headers=self._headers
         )
         if response.content == b"true\n":
-            return True
+            return True, []
         else:
-            logger.info(self._parse_search_response(response.content))
-            return False
+            parsed_response = self._parse_search_response(response.content)
+            return False, parsed_response
 
     @staticmethod
     def _parse_search_response(response):
