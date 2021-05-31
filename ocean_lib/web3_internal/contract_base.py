@@ -19,9 +19,9 @@ from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFuncti
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3 import Web3
 from web3.exceptions import MismatchedABI, ValidationError
-from web3.utils.events import get_event_data
-from web3.utils.filters import construct_event_filter_params
-from web3.utils.threads import Timeout
+from web3._utils.events import get_event_data
+from web3._utils.filters import construct_event_filter_params
+from web3._utils.threads import Timeout
 from websockets import ConnectionClosed
 
 logger = logging.getLogger(__name__)
@@ -106,8 +106,8 @@ class ContractBase(object):
         :return: Tx receipt
         """
         try:
-            Web3Provider.get_web3().eth.waitForTransactionReceipt(
-                tx_hash, timeout=timeout
+            Web3Provider.get_web3().eth.wait_for_transaction_receipt(
+                HexBytes(tx_hash), timeout=timeout
             )
         except ValueError as e:
             logger.error(f"Waiting for transaction receipt failed: {e}")
@@ -124,7 +124,7 @@ class ContractBase(object):
             logger.info(f"Unknown error waiting for transaction receipt: {e}.")
             raise
 
-        return Web3Provider.get_web3().eth.getTransactionReceipt(tx_hash)
+        return Web3Provider.get_web3().eth.get_transaction_receipt(tx_hash)
 
     def is_tx_successful(self, tx_hash: str) -> bool:
         """Check if the transaction is successful.
@@ -265,13 +265,13 @@ class ContractBase(object):
         )
 
         if "gas" not in built_tx:
-            built_tx["gas"] = web3.eth.estimateGas(built_tx)
+            built_tx["gas"] = web3.eth.estimate_gas(built_tx)
 
         raw_tx = deployer_wallet.sign_tx(built_tx)
         logging.debug(
             f"Sending raw tx to deploy contract {cls.CONTRACT_NAME}, signed tx hash: {raw_tx.hex()}"
         )
-        tx_hash = web3.eth.sendRawTransaction(raw_tx)
+        tx_hash = web3.eth.send_raw_transaction(raw_tx)
 
         return cls.get_tx_receipt(tx_hash, timeout=60).contractAddress
 
@@ -360,8 +360,8 @@ class ContractBase(object):
         for the latest 10 blocks:
 
         ```python
-            from = max(mycontract.web3.eth.blockNumber - 10, 1)
-            to = mycontract.web3.eth.blockNumber
+            from = max(mycontract.web3.eth.block_number - 10, 1)
+            to = mycontract.web3.eth.block_number
             events = mycontract.events.Transfer.getLogs(fromBlock=from, toBlock=to)
             for e in events:
                 print(e["args"]["from"],
@@ -419,6 +419,7 @@ class ContractBase(object):
         # Namely, convert event names to their keccak signatures
         _, event_filter_params = construct_event_filter_params(
             abi,
+            web3.codec,
             contract_address=self.address,
             argument_filters=_filters,
             fromBlock=fromBlock,
@@ -429,7 +430,7 @@ class ContractBase(object):
             event_filter_params["blockHash"] = blockHash
 
         # Call JSON-RPC API
-        logs = web3.eth.getLogs(event_filter_params)
+        logs = web3.eth.get_logs(event_filter_params)
 
         # Convert raw binary data to Python proxy objects as described by ABI
-        return tuple(get_event_data(abi, entry) for entry in logs)
+        return tuple(get_event_data(web3.codec, abi, entry) for entry in logs)

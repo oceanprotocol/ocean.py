@@ -10,7 +10,7 @@ from eth_utils import remove_0x_prefix
 from ocean_lib.models import balancer_constants
 from ocean_lib.ocean import util
 from ocean_lib.web3_internal.wallet import Wallet
-from web3.utils.events import get_event_data
+from web3._utils.events import get_event_data
 
 from .btoken import BToken
 
@@ -612,11 +612,11 @@ class BPool(BToken):
         event = getattr(self.events, event_name)
         event_abi = event().abi
         try:
-            logs = web3.eth.getLogs(_filter)
-            logs = [get_event_data(event_abi, lg) for lg in logs]
+            logs = web3.eth.get_logs(_filter)
+            logs = [get_event_data(web3.codec, event_abi, lg) for lg in logs]
         except ValueError as e:
             logger.error(
-                f"get_join_logs failed -> web3.eth.getLogs (filter={_filter}) failed: "
+                f"get_join_logs failed -> web3.eth.get_logs (filter={_filter}) failed: "
                 f"{e}.."
             )
             logs = []

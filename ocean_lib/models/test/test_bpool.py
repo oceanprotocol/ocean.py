@@ -242,7 +242,7 @@ def test_public_pool(network, bob_wallet, alice_ocean):
     )
     assert from_base_18(BPT.balanceOf(bob_address)) == 0.0
 
-    block = alice_ocean.web3.eth.blockNumber
+    block = alice_ocean.web3.eth.block_number
     join_log = pool.get_join_logs(alice_ocean.web3, block - 1, block + 1)[0]
     assert join_log["args"]["tokenIn"] == T1.address
 
@@ -354,7 +354,7 @@ def test_joinSwapExternAmountIn(
     )
     assert from_base_18(T2.balanceOf(alice_address)) == (T2balance - 9.0)
 
-    block = alice_ocean.web3.eth.blockNumber
+    block = alice_ocean.web3.eth.block_number
     swap_log = pool.get_swap_logs(alice_ocean.web3, block - 1, block + 1)[0]
     assert swap_log["args"]["tokenIn"] == T1.address
 
@@ -414,7 +414,7 @@ def test_exitswapExternAmountOut(
     assert from_base_18(T1.balanceOf(alice_address)) == (T1balance - 90 + 2.0)
     assert from_base_18(BPT.balanceOf(alice_address)) >= (pool_balance - 10.0)
 
-    block = alice_ocean.web3.eth.blockNumber
+    block = alice_ocean.web3.eth.block_number
     exit_log = pool.get_exit_logs(alice_ocean.web3, block - 1, block + 1)[0]
     assert exit_log["args"]["tokenOut"] == T1.address
 
