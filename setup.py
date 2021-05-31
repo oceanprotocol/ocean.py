@@ -28,8 +28,8 @@ install_requirements = [
     "pycryptodomex",
     "tqdm",
     "pytz",
-    "web3==4.7.1",
-    "plecos",
+    "web3==5.19.0",
+    "wheel",
     "cryptography==3.3.2",
     "scipy",
     "enforce-typing==1.0.0.post1"

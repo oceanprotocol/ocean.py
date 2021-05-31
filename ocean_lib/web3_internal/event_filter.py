@@ -34,7 +34,7 @@ class EventFilter:
         return self._filter.filter_id if self._filter else None
 
     def uninstall(self):
-        Web3Provider.get_web3().eth.uninstallFilter(self._filter.filter_id)
+        Web3Provider.get_web3().eth.uninstall_filter(self._filter.filter_id)
 
     def set_poll_interval(self, interval):
         self._poll_interval = interval

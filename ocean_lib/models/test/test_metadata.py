@@ -14,7 +14,7 @@ from tests.resources.helper_functions import get_publisher_wallet
 def test_metadata_contract(publisher_ocean_instance):
     ocn = publisher_ocean_instance
     alice = get_publisher_wallet()
-    block = ocn.web3.eth.blockNumber
+    block = ocn.web3.eth.block_number
 
     config = ConfigProvider.get_config()
     ddo_address = get_contracts_addresses("ganache", config)[
