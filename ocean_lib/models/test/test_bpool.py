@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from ocean_lib.enforce_typing_shim import enforce_types_shim
+from enforce_typing import enforce_types
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.btoken import BToken
@@ -516,7 +516,7 @@ def test_calcPoolInGivenSingleOut_base(network, alice_wallet):
     assert round(from_base_18(x), 3) == 0.005
 
 
-@enforce_types_shim
+@enforce_types
 def _createPoolWith2Tokens(
     network: str,
     T1: BToken,
@@ -545,7 +545,7 @@ def _createPoolWith2Tokens(
     return pool
 
 
-@enforce_types_shim
+@enforce_types
 def _deployBPool(network: str, from_wallet: Wallet) -> BPool:
     """Helper function to deploy a pool."""
     factory_address = get_bfactory_address(network)
@@ -556,7 +556,7 @@ def _deployBPool(network: str, from_wallet: Wallet) -> BPool:
     return pool
 
 
-@enforce_types_shim
+@enforce_types
 def _spotPrices(
     network: str,
     T1: BToken,

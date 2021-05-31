@@ -9,9 +9,9 @@ import os
 from typing import Any, Dict, List, Optional
 
 import requests
+from enforce_typing import enforce_types
 from eth_typing import BlockIdentifier
 from hexbytes import HexBytes
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
@@ -27,7 +27,7 @@ from websockets import ConnectionClosed
 logger = logging.getLogger(__name__)
 
 
-@enforce_types_shim
+@enforce_types
 class ContractBase(object):
 
     """Base class for all contract objects."""

@@ -9,10 +9,10 @@ from collections import namedtuple
 from typing import List, Tuple
 
 import requests
+from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.event_filter import EventFilter
@@ -29,7 +29,7 @@ OrderValues = namedtuple(
 )
 
 
-@enforce_types_shim
+@enforce_types
 class DataToken(ContractBase):
     CONTRACT_NAME = "DataTokenTemplate"
     DEFAULT_CAP = 1000.0

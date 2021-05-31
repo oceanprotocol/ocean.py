@@ -4,7 +4,7 @@
 #
 import logging
 
-from ocean_lib.enforce_typing_shim import enforce_types_shim
+from enforce_typing import enforce_types
 from ocean_lib.exceptions import VerifyTxFailed
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.bfactory import BFactory
@@ -20,7 +20,7 @@ from scipy.interpolate import interp1d
 logger = logging.getLogger(__name__)
 
 
-@enforce_types_shim
+@enforce_types
 class OceanPool:
 
     """
