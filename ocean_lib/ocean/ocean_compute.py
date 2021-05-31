@@ -107,7 +107,7 @@ class OceanCompute:
 
     @staticmethod
     def build_service_privacy_attributes(
-        config: Config,
+        metadata_cache_uri: str,
         trusted_algorithms: list = None,
         allow_raw_algorithm: bool = False,
         allow_all_published_algorithms: bool = False,
@@ -129,14 +129,14 @@ class OceanCompute:
         }
         if trusted_algorithms:
             privacy["publisherTrustedAlgorithms"] = create_publisher_trusted_algorithms(
-                trusted_algorithms, config.metadata_cache_uri
+                trusted_algorithms, metadata_cache_uri
             )
 
         return privacy
 
     @staticmethod
     def create_compute_service_attributes(
-        config: Config,
+        metadata_cache_uri: str,
         timeout: int,
         creator: str,
         date_published: str,
@@ -154,7 +154,9 @@ class OceanCompute:
         :return: dict with `main` key and value contain the minimum required attributes of a compute service
         """
         if privacy_attributes is None:
-            privacy_attributes = OceanCompute.build_service_privacy_attributes(config)
+            privacy_attributes = OceanCompute.build_service_privacy_attributes(
+                metadata_cache_uri
+            )
 
         assert set(privacy_attributes.keys()) == {
             "allowRawAlgorithm",
@@ -292,7 +294,8 @@ class OceanCompute:
         ), "service at serviceId is not of type compute service."
 
         consumable_result = asset.is_consumable(
-            {"type": "address", "value": consumer_wallet.address},
+            credential={"type": "address", "value": consumer_wallet.address},
+            with_connectivity_check=True,
             provider_uri=sa.service_endpoint,
         )
         if consumable_result != ConsumableCodes.OK:

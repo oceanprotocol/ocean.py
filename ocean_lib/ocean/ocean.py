@@ -98,21 +98,23 @@ class Ocean:
             data_provider = DataServiceProvider
 
         network = get_network_name()
-        addresses = get_contracts_addresses(network, self._config)
+        addresses = get_contracts_addresses(self._config.address_file, network)
         self.assets = OceanAssets(
             self._config, data_provider, addresses.get(MetadataContract.CONTRACT_NAME)
         )
         self.services = OceanServices()
         self.compute = OceanCompute(self._config, data_provider)
 
-        ocean_address = get_ocean_token_address(network)
-        self.pool = OceanPool(ocean_address, get_bfactory_address(network))
+        ocean_address = get_ocean_token_address(self._config.address_file, network)
+        self.pool = OceanPool(
+            ocean_address, get_bfactory_address(self._config.address_file, network)
+        )
         self.exchange = OceanExchange(
             ocean_address,
             FixedRateExchange.configured_address(
-                network or get_network_name(), config.address_file
+                network or get_network_name(), self._config.address_file
             ),
-            self.config,
+            self._config,
         )
 
         logger.debug("Ocean instance initialized: ")
@@ -130,7 +132,7 @@ class Ocean:
 
     @property
     def OCEAN_address(self):
-        return get_ocean_token_address(get_network_name())
+        return get_ocean_token_address(self.config.address_file, get_network_name())
 
     def create_data_token(
         self,

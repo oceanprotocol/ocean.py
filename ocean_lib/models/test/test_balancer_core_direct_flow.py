@@ -10,10 +10,10 @@ from ocean_lib.ocean.util import get_bfactory_address, to_base_18
 
 
 def test_complete_flow(
-    network, OCEAN_address, alice_wallet, alice_ocean, alice_address, bob_wallet
+    network, config, OCEAN_address, alice_wallet, alice_ocean, alice_address, bob_wallet
 ):
     """Tests a full liquidity add/remove flow."""
-    bfactory_address = get_bfactory_address(network)
+    bfactory_address = get_bfactory_address(config.address_file, network)
 
     # ===============================================================
     # 1. Alice publishes a dataset (= publishes a datatoken)

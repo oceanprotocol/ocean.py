@@ -445,8 +445,12 @@ class DDO:
         if self.is_disabled:
             return ConsumableCodes.ASSET_DISABLED
 
-        if with_connectivity_check and not DataServiceProvider.check_asset_file_info(
-            self, provider_uri
+        if (
+            with_connectivity_check
+            and provider_uri
+            and not DataServiceProvider.check_asset_file_info(
+                self, DataServiceProvider.get_root_uri(provider_uri)
+            )
         ):
             return ConsumableCodes.CONNECTIVITY_FAIL
 

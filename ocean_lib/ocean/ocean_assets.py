@@ -178,6 +178,7 @@ class OceanAssets:
             raise ValueError(msg)
 
         urls = [item["url"] for item in metadata["main"]["files"]]
+        provider_uri = DataServiceProvider.get_url(self._config)
         for url in urls:
             if not DataServiceProvider.check_single_file_info(url, provider_uri):
                 msg = f"The URL of this service can not be accessed: {url}."
@@ -455,7 +456,8 @@ class OceanAssets:
             sa = ServiceAgreement.from_ddo(service.type, asset)
 
         consumable_result = asset.is_consumable(
-            {"type": "address", "value": consumer_address},
+            credential={"type": "address", "value": consumer_address},
+            with_connectivity_check=True,
             provider_uri=sa.service_endpoint,
         )
         if consumable_result != ConsumableCodes.OK:
@@ -579,7 +581,8 @@ class OceanAssets:
         ), f"Service with index {service_index} and type {ServiceTypes.ASSET_ACCESS} is not found."
 
         consumable_result = asset.is_consumable(
-            {"type": "address", "value": consumer_wallet.address},
+            credential={"type": "address", "value": consumer_wallet.address},
+            with_connectivity_check=True,
             provider_uri=service.service_endpoint,
         )
         if consumable_result != ConsumableCodes.OK:

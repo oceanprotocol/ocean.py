@@ -6,10 +6,8 @@
 import os
 
 import pytest
-from ocean_lib.config import Config
 from ocean_lib.ocean import util
 from ocean_lib.ocean.env_constants import (
-    ENV_CONFIG_FILE,
     ENV_INFURA_CONNECTION_TYPE,
     ENV_INFURA_PROJECT_ID,
 )
@@ -122,9 +120,8 @@ def test_get_web3_connection_provider(monkeypatch):
     assert provider.endpoint_uri == "wss://bah.com"
 
 
-def test_get_contracts_addresses():
-    config = Config(os.getenv(ENV_CONFIG_FILE))
-    addresses = util.get_contracts_addresses("ganache", config)
+def test_get_contracts_addresses(config):
+    addresses = util.get_contracts_addresses(config.address_file, "ganache")
     assert addresses
     assert isinstance(addresses, dict)
     assert (
@@ -162,44 +159,40 @@ def test_from_base_and_from_base_18():
     assert res == from_base_18(to_base_18(1.0)), "Incorrect conversion to ETH."
 
 
-def test_get_dtfactory_address():
-    config = Config(os.getenv(ENV_CONFIG_FILE))
-    addresses = util.get_contracts_addresses("ganache", config)
+def test_get_dtfactory_address(config):
+    addresses = util.get_contracts_addresses(config.address_file, "ganache")
     assert addresses
     assert isinstance(addresses, dict)
     assert "DTFactory" in addresses
 
-    address = get_dtfactory_address()
+    address = get_dtfactory_address(config.address_file)
     assert address[:2] == "0x", "It is not a token address."
     assert address == addresses["DTFactory"]
 
 
-def test_get_bfactory_address():
-    config = Config(os.getenv(ENV_CONFIG_FILE))
-    addresses = util.get_contracts_addresses("ganache", config)
+def test_get_bfactory_address(config):
+    addresses = util.get_contracts_addresses(config.address_file, "ganache")
     assert addresses
     assert isinstance(addresses, dict)
     assert "BFactory" in addresses
 
-    address = get_bfactory_address()
+    address = get_bfactory_address(config.address_file)
     assert address[:2] == "0x", "It is not a token address."
     assert address == addresses["BFactory"]
 
 
-def test_get_ocean_token_address():
-    config = Config(os.getenv(ENV_CONFIG_FILE))
-    addresses = util.get_contracts_addresses("ganache", config)
+def test_get_ocean_token_address(config):
+    addresses = util.get_contracts_addresses(config.address_file, "ganache")
     assert addresses
     assert isinstance(addresses, dict)
     assert "Ocean" in addresses
 
-    address = get_ocean_token_address()
+    address = get_ocean_token_address(config.address_file)
     assert address[:2] == "0x", "It is not a token address."
     assert address == addresses["Ocean"]
 
 
-def test_init_components():
-    config = Config(os.getenv(ENV_CONFIG_FILE))
+def test_init_components(config):
     init_components(config)
     assert (
         get_web3_connection_provider(config.network_url).endpoint_uri

@@ -377,9 +377,7 @@ class DataServiceProvider:
         :param config: Config
         :return: Url, str
         """
-        return DataServiceProvider._remove_slash(
-            config.provider_url or "http://localhost:8030"
-        )
+        return DataServiceProvider._remove_slash(config.provider_url)
 
     @staticmethod
     def get_api_version():
@@ -388,25 +386,20 @@ class DataServiceProvider:
         )
 
     @staticmethod
-    def get_service_endpoints(provider_uri=None, config=None):
+    def get_service_endpoints(provider_uri):
         """
         Return the service endpoints from the provider URL.
         """
-        if not provider_uri:
-            provider_uri = DataServiceProvider.get_url(config)
-
         provider_info = DataServiceProvider._http_method("get", provider_uri).json()
 
         return provider_info["serviceEndpoints"]
 
     @staticmethod
-    def get_provider_address(provider_uri=None, config=None):
+    def get_provider_address(provider_uri):
         """
         Return the provider address
         """
         try:
-            if not provider_uri:
-                provider_uri = config.provider_url
             provider_info = DataServiceProvider._http_method("get", provider_uri).json()
 
             return provider_info["providerAddress"]
@@ -438,10 +431,7 @@ class DataServiceProvider:
         return result
 
     @staticmethod
-    def build_endpoint(service_name, provider_uri=None, config=None):
-        if not provider_uri:
-            provider_uri = DataServiceProvider.get_url(config)
-
+    def build_endpoint(service_name, provider_uri):
         provider_uri = DataServiceProvider.get_root_uri(provider_uri)
         service_endpoints = DataServiceProvider.get_service_endpoints(provider_uri)
 
@@ -449,23 +439,23 @@ class DataServiceProvider:
         return method, urljoin(provider_uri, url)
 
     @staticmethod
-    def build_encrypt_endpoint(provider_uri=None):
+    def build_encrypt_endpoint(provider_uri):
         return DataServiceProvider.build_endpoint("encrypt", provider_uri)
 
     @staticmethod
-    def build_initialize_endpoint(provider_uri=None):
+    def build_initialize_endpoint(provider_uri):
         return DataServiceProvider.build_endpoint("initialize", provider_uri)
 
     @staticmethod
-    def build_download_endpoint(provider_uri=None):
+    def build_download_endpoint(provider_uri):
         return DataServiceProvider.build_endpoint("download", provider_uri)
 
     @staticmethod
-    def build_compute_endpoint(provider_uri=None):
+    def build_compute_endpoint(provider_uri):
         return DataServiceProvider.build_endpoint("computeStatus", provider_uri)
 
     @staticmethod
-    def build_fileinfo(provider_uri=None):
+    def build_fileinfo(provider_uri):
         return DataServiceProvider.build_endpoint("fileinfo", provider_uri)
 
     @staticmethod
@@ -591,7 +581,7 @@ class DataServiceProvider:
             raise
 
     @staticmethod
-    def check_single_file_info(file_url, provider_uri=None):
+    def check_single_file_info(file_url, provider_uri):
         _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
         data = {"url": file_url}
         response = requests.post(endpoint, json=data)
@@ -604,7 +594,7 @@ class DataServiceProvider:
             return file_info["valid"]
 
     @staticmethod
-    def check_asset_file_info(asset, provider_uri=None):
+    def check_asset_file_info(asset, provider_uri):
         if not asset.did:
             return False
         _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)

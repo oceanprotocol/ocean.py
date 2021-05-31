@@ -214,7 +214,7 @@ def test_compute_multi_inputs():
 def test_update_trusted_algorithms(config):
     setup = Setup()
 
-    ddo_address = get_contracts_addresses("ganache", config)[
+    ddo_address = get_contracts_addresses(config.address_file, "ganache")[
         MetadataContract.CONTRACT_NAME
     ]
     ddo_registry = MetadataContract(ddo_address)
