@@ -228,7 +228,7 @@ bob_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY2'))
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
 #Verify that Bob has ganache ETH
-assert ocean.web3.eth.getBalance(bob_wallet.address) > 0, "need ganache ETH"
+assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
 #Verify that Bob has ganache OCEAN
 assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
