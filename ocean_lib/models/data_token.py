@@ -299,7 +299,7 @@ class DataToken(ContractBase):
 
         tx_receipt = self.get_tx_receipt(tx_id)
         if tx_receipt.status == 0:
-            raise VerifyTxFailed("Transfer transaction failed.")
+            raise AssertionError("Transfer transaction failed.")
 
         logs = getattr(self.events, "Transfer")().processReceipt(tx_receipt)
         transfer_event = logs[0] if logs else None
@@ -351,7 +351,7 @@ class DataToken(ContractBase):
             )
 
         if tx_receipt.status == 0:
-            raise VerifyTxFailed("order transaction failed.")
+            raise AssertionError("order transaction failed.")
 
         receiver = self.contract_concise.minter()
         event_logs = event().processReceipt(tx_receipt)
