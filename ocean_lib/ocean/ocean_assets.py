@@ -128,7 +128,6 @@ class OceanAssets:
         service_descriptors: list = None,
         owner_address: str = None,
         data_token_address: str = None,
-        provider_uri=None,
         dt_name: str = None,
         dt_symbol: str = None,
         dt_blob: str = None,

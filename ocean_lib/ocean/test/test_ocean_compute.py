@@ -291,7 +291,6 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
     ), "The service provider is not the expected one."
 
     compute_attributes = compute.create_compute_service_attributes(
-        config.metadata_cache_uri,
         30,
         publisher.address,
         (datetime.utcnow().replace(microsecond=0).isoformat() + "Z"),
@@ -414,7 +413,6 @@ def test_create_compute_service_descriptor(publisher_ocean_instance):
     ), "The service provider is not the expected one."
 
     compute_attributes = compute.create_compute_service_attributes(
-        config,
         30,
         publisher.address,
         (datetime.utcnow().replace(microsecond=0).isoformat() + "Z"),

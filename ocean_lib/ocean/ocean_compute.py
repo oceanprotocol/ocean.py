@@ -136,12 +136,12 @@ class OceanCompute:
 
     @staticmethod
     def create_compute_service_attributes(
-        metadata_cache_uri: str,
         timeout: int,
         creator: str,
         date_published: str,
         provider_attributes: dict = None,
         privacy_attributes: dict = None,
+        metadata_cache_uri: str = None,
     ):
         """
         Creates compute service attributes.
@@ -151,6 +151,7 @@ class OceanCompute:
         :param date_published: str timestamp (datetime.utcnow().replace(microsecond=0).isoformat() + "Z")
         :param provider_attributes: dict describing the details of the compute resources (see `build_service_provider_attributes`)
         :param privacy_attributes: dict specifying what algorithms can be run in this compute service
+        :param metadata_cache_uri: URI to build privacy_attributes if privacy_attributes is None
         :return: dict with `main` key and value contain the minimum required attributes of a compute service
         """
         if privacy_attributes is None:

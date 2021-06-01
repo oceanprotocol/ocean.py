@@ -27,20 +27,16 @@ def test_values(publisher_ocean_instance, metadata):
         assert ddo_values[key] is not None
 
 
-def test_trusted_algorithms(publisher_ocean_instance, config):
+def test_trusted_algorithms(publisher_ocean_instance):
     """Tests if the trusted algorithms list is returned correctly."""
     publisher = get_publisher_wallet()
-    provider_uri = config.provider_url
 
     algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
     wait_for_ddo(publisher_ocean_instance, algorithm_ddo.did)
     assert algorithm_ddo is not None
 
     ddo = get_registered_ddo_with_compute_service(
-        publisher_ocean_instance,
-        publisher,
-        provider_uri=provider_uri,
-        trusted_algorithms=[algorithm_ddo.did],
+        publisher_ocean_instance, publisher, trusted_algorithms=[algorithm_ddo.did]
     )
     wait_for_ddo(publisher_ocean_instance, ddo.did)
     assert ddo is not None
