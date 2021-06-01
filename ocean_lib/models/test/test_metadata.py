@@ -13,7 +13,7 @@ from tests.resources.helper_functions import get_publisher_wallet
 def test_metadata_contract(publisher_ocean_instance, config):
     ocn = publisher_ocean_instance
     alice = get_publisher_wallet()
-    block = ocn.web3.eth.blockNumber
+    block = ocn.web3.eth.block_number
 
     ddo_address = get_contracts_addresses(config.address_file, "ganache")[
         MetadataContract.CONTRACT_NAME
