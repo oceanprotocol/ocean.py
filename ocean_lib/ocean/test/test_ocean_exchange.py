@@ -18,7 +18,7 @@ def _get_exchange_address(config):
     ]
 
 
-def test_ocean_exchange(publisher_ocean_instance, config):
+def test_ocean_exchange(publisher_ocean_instance):
     """Tests various flows of DataToken exchanges."""
     ocn = publisher_ocean_instance
     alice_wallet = get_publisher_wallet()
@@ -27,7 +27,11 @@ def test_ocean_exchange(publisher_ocean_instance, config):
         "DataToken1", "DT1", alice_wallet, blob="http://example.com"
     )
     dt.mint_tokens(bob_wallet.address, 100.0, alice_wallet)
-    ox = OceanExchange(ocn.OCEAN_address, _get_exchange_address(config), ocn.config)
+    ox = OceanExchange(
+        ocn.OCEAN_address,
+        _get_exchange_address(publisher_ocean_instance.config),
+        ocn.config,
+    )
     rate = 0.9
     x_id = ox.create(dt.address, rate, bob_wallet)
     dt.approve_tokens(ox._exchange_address, 20.0, bob_wallet)

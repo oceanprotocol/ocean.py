@@ -151,8 +151,8 @@ def test_build_service_privacy_attributes(publisher_ocean_instance):
     assert algorithm_ddo is not None
 
     privacy_dict = compute.build_service_privacy_attributes(
-        metadata_cache_uri=publisher_ocean_instance.config.metadata_cache_uri,
         trusted_algorithms=[algorithm_ddo.did],
+        metadata_cache_uri=publisher_ocean_instance.config.metadata_cache_uri,
         allow_raw_algorithm=True,
         allow_all_published_algorithms=True,
         allow_network_access=True,
@@ -179,9 +179,7 @@ def test_build_service_privacy_attributes(publisher_ocean_instance):
 def test_build_service_privacy_attributes_no_trusted_algos(config):
     data_provider = DataServiceProvider()
     compute = OceanCompute(config=config, data_provider=data_provider)
-    privacy_dict = compute.build_service_privacy_attributes(
-        metadata_cache_uri=config.metadata_cache_uri
-    )
+    privacy_dict = compute.build_service_privacy_attributes()
     expected_privacy_dict = {
         "allowRawAlgorithm": False,
         "allowAllPublishedAlgorithms": False,
@@ -206,8 +204,8 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
     assert algorithm_ddo is not None
 
     privacy_dict = compute.build_service_privacy_attributes(
-        metadata_cache_uri=config.metadata_cache_uri,
         trusted_algorithms=[algorithm_ddo.did],
+        metadata_cache_uri=config.metadata_cache_uri,
         allow_raw_algorithm=True,
         allow_all_published_algorithms=True,
         allow_network_access=True,
@@ -328,8 +326,8 @@ def test_create_compute_service_descriptor(publisher_ocean_instance):
     assert algorithm_ddo is not None
 
     privacy_dict = compute.build_service_privacy_attributes(
-        metadata_cache_uri=config.metadata_cache_uri,
         trusted_algorithms=[algorithm_ddo.did],
+        metadata_cache_uri=config.metadata_cache_uri,
         allow_raw_algorithm=True,
         allow_all_published_algorithms=True,
         allow_network_access=True,

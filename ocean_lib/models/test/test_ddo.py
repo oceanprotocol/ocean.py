@@ -129,7 +129,7 @@ def test_ddo_credentials_disabled():
     assert ddo.is_enabled
 
     ddo.disable()
-    assert ddo.is_consumable(credential={}) == ConsumableCodes.ASSET_DISABLED
+    assert ddo.is_consumable() == ConsumableCodes.ASSET_DISABLED
 
 
 def test_ddo_on_chain(config):

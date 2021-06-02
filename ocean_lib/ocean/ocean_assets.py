@@ -457,8 +457,7 @@ class OceanAssets:
             sa = ServiceAgreement.from_ddo(service.type, asset)
 
         consumable_result = asset.is_consumable(
-            credential={"type": "address", "value": consumer_address},
-            with_connectivity_check=True,
+            {"type": "address", "value": consumer_address},
             provider_uri=sa.service_endpoint,
         )
         if consumable_result != ConsumableCodes.OK:
@@ -582,8 +581,7 @@ class OceanAssets:
         ), f"Service with index {service_index} and type {ServiceTypes.ASSET_ACCESS} is not found."
 
         consumable_result = asset.is_consumable(
-            credential={"type": "address", "value": consumer_wallet.address},
-            with_connectivity_check=True,
+            {"type": "address", "value": consumer_wallet.address},
             provider_uri=service.service_endpoint,
         )
         if consumable_result != ConsumableCodes.OK:
