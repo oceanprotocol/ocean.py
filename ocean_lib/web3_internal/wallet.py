@@ -101,7 +101,7 @@ class Wallet:
         return self._key
 
     def validate(self):
-        account = self._web3.eth.account.privateKeyToAccount(self._key)
+        account = self._web3.eth.account.from_key(self._key)
         return account.address == self._address
 
     @staticmethod
@@ -118,7 +118,7 @@ class Wallet:
         return Wallet._last_tx_count[address]
 
     def sign_tx(self, tx, fixed_nonce=None, gas_price=None):
-        account = self._web3.eth.account.privateKeyToAccount(self.private_key)
+        account = self._web3.eth.account.from_key(self.private_key)
         if fixed_nonce is not None:
             nonce = fixed_nonce
             logger.debug(
@@ -140,14 +140,14 @@ class Wallet:
         )
         tx["gasPrice"] = gas_price
         tx["nonce"] = nonce
-        signed_tx = self._web3.eth.account.signTransaction(tx, self.private_key)
+        signed_tx = self._web3.eth.account.sign_transaction(tx, self.private_key)
         logger.debug(f"Using gasPrice: {gas_price}")
         logger.debug(f"`Wallet` signed tx is {signed_tx}")
         return signed_tx.rawTransaction
 
     def sign(self, msg_hash):
         """Sign a transaction."""
-        account = self._web3.eth.account.privateKeyToAccount(self.private_key)
+        account = self._web3.eth.account.from_key(self.private_key)
         return account.signHash(msg_hash)
 
     def keysStr(self):

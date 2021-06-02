@@ -158,7 +158,7 @@ class ContractBase(object):
         abi = e().abi
         types = [param["type"] for param in abi["inputs"]]
         sig_str = f'{event_name}({",".join(types)})'
-        return Web3.sha3(text=sig_str).hex()
+        return Web3.keccak(text=sig_str).hex()
 
     def subscribe_to_event(
         self,
