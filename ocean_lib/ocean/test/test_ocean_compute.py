@@ -449,5 +449,6 @@ def test_get_service_endpoint(publisher_ocean_instance):
         service_endpoint[0] == "GET"
     ), "The http method of compute status job must be GET."
     assert (
-        service_endpoint[1] == data_provider.build_compute_endpoint()[1]
+        service_endpoint[1]
+        == data_provider.build_compute_endpoint(config.provider_url)[1]
     ), "Different URLs for compute status job."

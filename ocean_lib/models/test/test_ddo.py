@@ -107,9 +107,9 @@ def test_ddo_credentials_addresses_no_access_list():
     )
 
 
-def test_ddo_connection():
+def test_ddo_connection(config):
     ddo = DDO("did:op:testdid")
-    provider_uri = "https://not_a_real_uri.com"
+    provider_uri = config.provider_url
     assert (
         ddo.is_consumable(with_connectivity_check=True, provider_uri=provider_uri)
         == ConsumableCodes.CONNECTIVITY_FAIL

@@ -196,6 +196,6 @@ def test_init_components(config):
     init_components(config)
     assert (
         get_web3_connection_provider(config.network_url).endpoint_uri
-        == "http://127.0.0.1:8545"
+        == "http://localhost:8545"
     )
     assert ContractHandler.artifacts_path == config.artifacts_path

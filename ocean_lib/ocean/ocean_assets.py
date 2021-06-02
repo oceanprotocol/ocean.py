@@ -128,6 +128,7 @@ class OceanAssets:
         service_descriptors: list = None,
         owner_address: str = None,
         data_token_address: str = None,
+        provider_uri: str = None,
         dt_name: str = None,
         dt_symbol: str = None,
         dt_blob: str = None,
@@ -177,7 +178,8 @@ class OceanAssets:
             raise ValueError(msg)
 
         urls = [item["url"] for item in metadata["main"]["files"]]
-        provider_uri = DataServiceProvider.get_url(self._config)
+        if not provider_uri:
+            provider_uri = DataServiceProvider.get_url(self._config)
         for url in urls:
             if not DataServiceProvider.check_single_file_info(url, provider_uri):
                 msg = f"The URL of this service can not be accessed: {url}."

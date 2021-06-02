@@ -102,6 +102,7 @@ def get_registered_ddo(
         wallet,
         service_descriptors=[service_descriptor],
         data_token_address=datatoken,
+        provider_uri=provider_uri,
     )
     ddo_reg = ocean_instance.assets.ddo_registry()
     log = ddo_reg.get_event_log(
