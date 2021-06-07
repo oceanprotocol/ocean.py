@@ -104,7 +104,7 @@ class OceanExchange:
 
         return exchange_id
 
-    def setRate(
+    def set_rate(
         self,
         new_rate: float,
         wallet: Wallet,

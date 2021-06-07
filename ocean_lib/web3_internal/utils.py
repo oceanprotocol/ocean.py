@@ -84,12 +84,12 @@ def split_signature(web3, signature):
 
 
 @enforce_types
-def privateKeyToAddress(private_key: str) -> str:
-    return Web3Provider.get_web3().eth.account.privateKeyToAccount(private_key).address
+def private_key_to_address(private_key: str) -> str:
+    return Web3Provider.get_web3().eth.account.from_key(private_key).address
 
 
 @enforce_types
-def privateKeyToPublicKey(private_key: str) -> str:
+def private_key_to_public_key(private_key: str) -> str:
     private_key_bytes = decode_hex(private_key)
     private_key_object = keys.PrivateKey(private_key_bytes)
     return private_key_object.public_key
