@@ -55,8 +55,6 @@ def get_infura_url(infura_id, network):
     if conn_type == "websocket":
         return f"wss://{network}.infura.io/ws/v3/{infura_id}"
 
-    raise AssertionError(f"Unknown connection type {conn_type}")
-
 
 def get_web3_connection_provider(network_url):
     """Return the suitable web3 provider based on the network_url.

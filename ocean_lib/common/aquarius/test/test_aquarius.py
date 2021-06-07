@@ -2,6 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import pytest
+
 from ocean_lib.common.aquarius.aquarius import Aquarius
 from tests.resources.ddo_helpers import wait_for_ddo
 from tests.resources.helper_functions import get_publisher_wallet
@@ -53,3 +55,18 @@ def test_metadata_invalid(aquarius_instance):
     )
     assert result is False
     assert errors[0]["message"] == "'main' is a required property"
+
+
+def test_invalid_text_search(aquarius_instance):
+    """Tests text search with an invalid text."""
+    text = "foo_text"
+    with pytest.raises(ValueError):
+        aquarius_instance.text_search(text=text, sort="foo_sort")
+
+
+def test_invalid_search_query(aquarius_instance):
+    """Tests query search with an invalid query."""
+    search_query = dict()
+    search_query["sort"] = "foo_sort"
+    with pytest.raises(ValueError):
+        aquarius_instance.query_search(search_query=search_query, sort="foo_sort")
