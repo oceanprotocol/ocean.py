@@ -19,7 +19,6 @@ DEFAULT_ARTIFACTS_PATH = ""
 DEFAULT_ADDRESS_FILE = ""
 DEFAULT_METADATA_CACHE_URI = "http://localhost:5000"
 DEFAULT_PROVIDER_URL = ""
-DEFAULT_TYPECHECK = "true"
 
 NAME_NETWORK_URL = "network"
 NAME_ARTIFACTS_PATH = "artifacts.path"
@@ -34,8 +33,6 @@ NAME_BFACTORY_ADDRESS = "bfactory.address"
 NAME_OCEAN_ADDRESS = "OCEAN.address"
 
 NAME_PROVIDER_ADDRESS = "provider.address"
-
-NAME_TYPECHECK = "typecheck"
 
 SECTION_ETH_NETWORK = "eth-network"
 SECTION_RESOURCES = "resources"
@@ -80,7 +77,6 @@ environ_names_and_sections = {
         "Provider ethereum address",
         SECTION_RESOURCES,
     ],
-    NAME_TYPECHECK: ["TYPECHECK", "Enforce type hints at runtime", SECTION_UTIL],
 }
 
 deprecated_environ_names = {
@@ -99,7 +95,6 @@ config_defaults = {
         NAME_PROVIDER_URL: DEFAULT_PROVIDER_URL,
         NAME_PROVIDER_ADDRESS: "",
     },
-    "util": {NAME_TYPECHECK: DEFAULT_TYPECHECK},
 }
 
 
@@ -120,9 +115,6 @@ class Config(configparser.ConfigParser):
         [resources]
         metadata_cache_uri = http://localhost:5000
         provider.url = http://localhost:8030
-
-        [util]
-        typecheck = true
         ```
         :param filename: Path of the config file, str.
         :param options_dict: Python dict with the config, dict.
@@ -266,7 +258,3 @@ class Config(configparser.ConfigParser):
     def downloads_path(self):
         """Path for the downloads of assets."""
         return self.get(SECTION_RESOURCES, "downloads.path")
-
-    @property
-    def typecheck(self):
-        return self.get(SECTION_UTIL, NAME_TYPECHECK)

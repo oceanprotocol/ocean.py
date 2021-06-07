@@ -96,7 +96,7 @@ def get_registered_ddo(
             provider_uri,
         )
 
-    block = ocean_instance.web3.eth.blockNumber
+    block = ocean_instance.web3.eth.block_number
     asset = ocean_instance.assets.create(
         metadata,
         wallet,

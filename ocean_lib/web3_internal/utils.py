@@ -6,9 +6,9 @@ import logging
 from collections import namedtuple
 from decimal import Decimal
 
+from enforce_typing import enforce_types
 from eth_keys import keys
 from eth_utils import big_endian_to_int, decode_hex
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.web3_internal.constants import DEFAULT_NETWORK_NAME, NETWORK_NAME_MAP
 from ocean_lib.web3_internal.web3_overrides.signature import SignatureFix
 from ocean_lib.web3_internal.web3_provider import Web3Provider
@@ -83,19 +83,19 @@ def split_signature(web3, signature):
     return Signature(v, r, s)
 
 
-@enforce_types_shim
+@enforce_types
 def privateKeyToAddress(private_key: str) -> str:
     return Web3Provider.get_web3().eth.account.privateKeyToAccount(private_key).address
 
 
-@enforce_types_shim
+@enforce_types
 def privateKeyToPublicKey(private_key: str) -> str:
     private_key_bytes = decode_hex(private_key)
     private_key_object = keys.PrivateKey(private_key_bytes)
     return private_key_object.public_key
 
 
-@enforce_types_shim
+@enforce_types
 def get_network_name(network_id: int = None) -> str:
     """
     Return the network name based on the current ethereum network id.
@@ -110,17 +110,17 @@ def get_network_name(network_id: int = None) -> str:
     return NETWORK_NAME_MAP.get(network_id, DEFAULT_NETWORK_NAME).lower()
 
 
-@enforce_types_shim
+@enforce_types
 def get_network_id() -> int:
     """
     Return the ethereum network id calling the `web3.version.network` method.
 
     :return: Network id, int
     """
-    return int(Web3Provider.get_web3().version.network)
+    return int(Web3Provider.get_web3().net.version)
 
 
-@enforce_types_shim
+@enforce_types
 def ec_recover(message, signed_message):
     """
     This method does not prepend the message with the prefix `\x19Ethereum Signed Message:\n32`.
@@ -139,13 +139,13 @@ def ec_recover(message, signed_message):
     )
 
 
-@enforce_types_shim
+@enforce_types
 def personal_ec_recover(message, signed_message):
     prefixed_hash = add_ethereum_prefix_and_hash_msg(message)
     return ec_recover(prefixed_hash, signed_message)
 
 
-@enforce_types_shim
+@enforce_types
 def get_ether_balance(address: str) -> int:
     """
     Get balance of an ethereum address.
@@ -153,7 +153,7 @@ def get_ether_balance(address: str) -> int:
     :param address: address, bytes32
     :return: balance, int
     """
-    return Web3Provider.get_web3().eth.getBalance(address, block_identifier="latest")
+    return Web3Provider.get_web3().eth.get_balance(address, block_identifier="latest")
 
 
 def from_wei(wei_value: int) -> Decimal:

@@ -40,7 +40,7 @@ def test_register_asset(publisher_ocean_instance):
     """Test various paths for asset registration."""
     ocn = publisher_ocean_instance
     ddo_reg = ocn.assets.ddo_registry()
-    block = ocn.web3.eth.blockNumber
+    block = ocn.web3.eth.block_number
     alice = get_publisher_wallet()
     bob = get_consumer_wallet()
 

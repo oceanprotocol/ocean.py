@@ -5,6 +5,7 @@
 import logging
 from typing import Optional
 
+from enforce_typing import enforce_types
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.consumable import AssetNotConsumable, ConsumableCodes
@@ -12,7 +13,6 @@ from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.config_provider import ConfigProvider
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.web3_internal.transactions import sign_hash
@@ -22,7 +22,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 logger = logging.getLogger("ocean")
 
 
-@enforce_types_shim
+@enforce_types
 class OceanCompute:
 
     """Ocean assets class."""

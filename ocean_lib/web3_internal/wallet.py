@@ -6,14 +6,14 @@ import logging
 import os
 from typing import Optional
 
-from ocean_lib.enforce_typing_shim import enforce_types_shim
+from enforce_typing import enforce_types
 from ocean_lib.web3_internal.constants import ENV_MAX_GAS_PRICE, MIN_GAS_PRICE
 from ocean_lib.web3_internal.utils import privateKeyToAddress, privateKeyToPublicKey
 
 logger = logging.getLogger(__name__)
 
 
-@enforce_types_shim
+@enforce_types
 class Wallet:
 
     """
@@ -106,12 +106,12 @@ class Wallet:
 
     @staticmethod
     def _get_nonce(web3, address):
-        # We cannot rely on `web3.eth.getTransactionCount` because when sending multiple
+        # We cannot rely on `web3.eth.get_transaction_count` because when sending multiple
         # transactions in a row without wait in between the network may not get the chance to
         # update the transaction count for the account address in time.
         # So we have to manage this internally per account address.
         if address not in Wallet._last_tx_count:
-            Wallet._last_tx_count[address] = web3.eth.getTransactionCount(address)
+            Wallet._last_tx_count[address] = web3.eth.get_transaction_count(address)
         else:
             Wallet._last_tx_count[address] += 1
 
@@ -128,7 +128,7 @@ class Wallet:
             nonce = Wallet._get_nonce(self._web3, account.address)
 
         if not gas_price:
-            gas_price = int(self._web3.eth.gasPrice * 1.1)
+            gas_price = int(self._web3.eth.gas_price * 1.1)
             gas_price = max(gas_price, MIN_GAS_PRICE)
 
         if gas_price and self._max_gas_price:
@@ -136,7 +136,7 @@ class Wallet:
 
         logger.debug(
             f"`Wallet` signing tx: sender address: {account.address} nonce: {nonce}, "
-            f"eth.gasPrice: {self._web3.eth.gasPrice}"
+            f"eth.gasPrice: {self._web3.eth.gas_price}"
         )
         tx["gasPrice"] = gas_price
         tx["nonce"] = nonce
