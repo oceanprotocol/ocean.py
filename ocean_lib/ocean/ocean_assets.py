@@ -11,6 +11,7 @@ import os
 from decimal import Decimal
 from typing import Optional
 
+from enforce_typing import enforce_types
 from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
@@ -31,7 +32,6 @@ from ocean_lib.data_provider.data_service_provider import (
     DataServiceProvider,
     OrderRequirements,
 )
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.exceptions import (
     AquariusError,
     ContractNotFound,
@@ -54,7 +54,7 @@ from ocean_lib.web3_internal.web3_provider import Web3Provider
 logger = logging.getLogger("ocean")
 
 
-@enforce_types_shim
+@enforce_types
 class OceanAssets:
 
     """Ocean assets class."""

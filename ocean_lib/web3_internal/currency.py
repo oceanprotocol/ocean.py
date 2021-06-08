@@ -5,7 +5,7 @@
 from decimal import ROUND_DOWN, Context, Decimal, localcontext
 from typing import Union
 
-from ocean_lib.enforce_typing_shim import enforce_types_shim
+from enforce_typing import enforce_types
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
@@ -31,12 +31,12 @@ MAX_WEI = MAX_UINT256
 MAX_WEI_IN_ETHER = Decimal(MAX_WEI).scaleb(-18, context=ETHEREUM_DECIMAL_CONTEXT)
 
 
-@enforce_types_shim
+@enforce_types
 def from_wei(value_in_wei: int) -> Decimal:
     return Web3Provider.get_web3().fromWei(value_in_wei, "ether")
 
 
-@enforce_types_shim
+@enforce_types
 def to_wei(value_in_ether: Union[Decimal, str, int]) -> int:
     """
     float input is purposfully not supported
@@ -53,7 +53,7 @@ def to_wei(value_in_ether: Union[Decimal, str, int]) -> int:
     )
 
 
-@enforce_types_shim
+@enforce_types
 def ether_fmt(amount_in_ether: Decimal, places: int = 18, ticker: str = "") -> str:
     if amount_in_ether > MAX_WEI_IN_ETHER:
         raise ValueError("Ether value exceeds MAX_WEI_IN_ETHER.")
@@ -66,7 +66,7 @@ def ether_fmt(amount_in_ether: Decimal, places: int = 18, ticker: str = "") -> s
         )
 
 
-@enforce_types_shim
+@enforce_types
 def moneyfmt(value, places=2, curr="", sep=",", dp=".", pos="", neg="-", trailneg=""):
     """Convert Decimal to a money formatted string.
     Copied from https://docs.python.org/3/library/decimal.html#recipes
@@ -118,17 +118,17 @@ def moneyfmt(value, places=2, curr="", sep=",", dp=".", pos="", neg="-", trailne
     return "".join(reversed(result))
 
 
-@enforce_types_shim
+@enforce_types
 def wei_and_pretty_ether(amount_in_wei: int, ticker: str = "") -> str:
     return "{} ({})".format(amount_in_wei, pretty_ether_from_wei(amount_in_wei, ticker))
 
 
-@enforce_types_shim
+@enforce_types
 def pretty_ether_from_wei(amount_in_wei: int, ticker: str = "") -> str:
     return pretty_ether(from_wei(amount_in_wei), ticker=ticker)
 
 
-@enforce_types_shim
+@enforce_types
 def pretty_ether(
     amount_in_ether: Union[Decimal, str], ticker: str = "", trim: bool = True
 ) -> str:
@@ -182,7 +182,7 @@ def pretty_ether(
         )
 
 
-@enforce_types_shim
+@enforce_types
 def _trim_zero_to_3_digits_or_less(trim: bool, exponent: int, ticker: str) -> str:
     """Returns a string representation of the number zero, limited to 3 digits
     This function exists to reduce the cognitive complexity of pretty_ether
@@ -198,7 +198,7 @@ def _trim_zero_to_3_digits_or_less(trim: bool, exponent: int, ticker: str) -> st
     return zero + " " + ticker if ticker else zero
 
 
-@enforce_types_shim
+@enforce_types
 def remove_trailing_zeros(value: Decimal) -> Decimal:
     """Returns a Decimal with trailing zeros removed.
     Adapted from https://docs.python.org/3/library/decimal.html#decimal-faq

@@ -2,36 +2,22 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-
-"""isort:skip_file"""
-
-import uuid
-import os
 import json
+import os
+import uuid
 
 import pytest
+from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
 from ocean_lib.config_provider import ConfigProvider
-
-# Setup ocean_lib.enforce_typing_shim before importing anything that uses it
-from ocean_lib.enforce_typing_shim import setup_enforce_typing_shim
-
-setup_enforce_typing_shim()
-
-from ocean_lib.example_config import ExampleConfig  # noqa: E402
-from ocean_lib.web3_internal.web3_provider import Web3Provider  # noqa: E402
-from ocean_lib.ocean.util import get_web3_connection_provider  # noqa: E402
-
-# HACK: Setup Web3. Removed after changing ocean APIs to wei-only
-config = ExampleConfig.get_config()
-Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
-
-from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider  # noqa: E402
-from ocean_lib.web3_internal.contract_handler import ContractHandler  # noqa: E402
-from ocean_lib.web3_internal.transactions import send_ether  # noqa: E402
-from ocean_lib.web3_internal.utils import get_ether_balance  # noqa: E402
-from ocean_lib.web3_internal.currency import from_wei, to_wei  # noqa: E402
-from tests.resources.ddo_helpers import get_metadata  # noqa: E402
-from tests.resources.helper_functions import (  # noqa: E402
+from ocean_lib.example_config import ExampleConfig
+from ocean_lib.ocean.util import get_web3_connection_provider
+from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.currency import from_wei, to_wei
+from ocean_lib.web3_internal.transactions import send_ether
+from ocean_lib.web3_internal.utils import get_ether_balance
+from ocean_lib.web3_internal.web3_provider import Web3Provider
+from tests.resources.ddo_helpers import get_metadata
+from tests.resources.helper_functions import (
     get_consumer_ocean_instance,
     get_consumer_wallet,
     get_ganache_wallet,
@@ -39,7 +25,6 @@ from tests.resources.helper_functions import (  # noqa: E402
     get_publisher_wallet,
     setup_logging,
 )
-
 
 setup_logging()
 
@@ -67,7 +52,7 @@ def setup_all(request):
         network_addresses = json.load(f)
 
     print(
-        f"sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keysStr()}"
+        f"sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keys_str()}"
     )
     print(f"sender balance: {from_wei(get_ether_balance(wallet.address))}")
     assert (

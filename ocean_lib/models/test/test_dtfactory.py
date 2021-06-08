@@ -2,9 +2,11 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import pytest
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.web3_internal.currency import to_wei
+from web3.exceptions import TimeExhausted
 
 
 def test_data_token_creation(alice_wallet, dtfactory_address):
@@ -28,7 +30,7 @@ def test_data_token_event_registered(alice_wallet, dtfactory_address, alice_ocea
         "foo_blob", "DT1", "DT1", to_wei(1000), from_wallet=alice_wallet
     )
     dt = DataToken(dtfactory.get_token_address(dt_address))
-    block = alice_ocean.web3.eth.blockNumber
+    block = alice_ocean.web3.eth.block_number
 
     # with explicit address
     registered_event = dtfactory.get_token_registered_event(
@@ -41,8 +43,9 @@ def test_data_token_event_registered(alice_wallet, dtfactory_address, alice_ocea
 def test_get_token_address_fails(dtfactory_address):
     """Tests the failure case for get_token_address."""
     dtfactory = DTFactory(dtfactory_address)
-
-    assert dtfactory.get_token_address("") == ""
+    # Transaction 0x is not in the chain
+    with pytest.raises(TimeExhausted):
+        dtfactory.get_token_address("")
 
 
 def test_get_token_minter(alice_wallet, dtfactory_address, alice_address):

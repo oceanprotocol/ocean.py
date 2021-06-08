@@ -5,7 +5,7 @@
 from decimal import Decimal
 
 import pytest
-from ocean_lib.enforce_typing_shim import enforce_types_shim
+from enforce_typing import enforce_types
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.btoken import BToken
@@ -241,7 +241,7 @@ def test_public_pool(network, bob_wallet, alice_ocean):
     )
     assert from_wei(BPT.balanceOf(bob_address)) == 0
 
-    block = alice_ocean.web3.eth.blockNumber
+    block = alice_ocean.web3.eth.block_number
     join_log = pool.get_join_logs(alice_ocean.web3, block - 1, block + 1)[0]
     assert join_log["args"]["tokenIn"] == T1.address
 
@@ -349,7 +349,7 @@ def test_joinSwapExternAmountIn(
     )
     assert from_wei(T2.balanceOf(alice_address)) == (T2balance - 9)
 
-    block = alice_ocean.web3.eth.blockNumber
+    block = alice_ocean.web3.eth.block_number
     swap_log = pool.get_swap_logs(alice_ocean.web3, block - 1, block + 1)[0]
     assert swap_log["args"]["tokenIn"] == T1.address
 
@@ -409,7 +409,7 @@ def test_exitswapExternAmountOut(
     assert from_wei(T1.balanceOf(alice_address)) == (T1balance - 90 + 2)
     assert from_wei(BPT.balanceOf(alice_address)) >= (pool_balance - 10)
 
-    block = alice_ocean.web3.eth.blockNumber
+    block = alice_ocean.web3.eth.block_number
     exit_log = pool.get_exit_logs(alice_ocean.web3, block - 1, block + 1)[0]
     assert exit_log["args"]["tokenOut"] == T1.address
 
@@ -511,7 +511,7 @@ def test_calcPoolInGivenSingleOut_base(network, alice_wallet):
     assert round(from_wei(x), 3) == Decimal("0.005")
 
 
-@enforce_types_shim
+@enforce_types
 def _createPoolWith2Tokens(
     network: str,
     T1: BToken,
@@ -548,7 +548,7 @@ def _createPoolWith2Tokens(
     return pool
 
 
-@enforce_types_shim
+@enforce_types
 def _deployBPool(network: str, from_wallet: Wallet) -> BPool:
     """Helper function to deploy a pool."""
     factory_address = get_bfactory_address(network)
@@ -559,7 +559,7 @@ def _deployBPool(network: str, from_wallet: Wallet) -> BPool:
     return pool
 
 
-@enforce_types_shim
+@enforce_types
 def _spotPrices(
     network: str,
     T1: BToken,

@@ -12,10 +12,10 @@ from collections import namedtuple
 from json import JSONDecodeError
 
 import requests
+from enforce_typing import enforce_types
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.config_provider import ConfigProvider
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
@@ -31,7 +31,7 @@ OrderRequirements = namedtuple(
 )
 
 
-@enforce_types_shim
+@enforce_types
 class DataServiceProvider:
     """DataServiceProvider class.
 

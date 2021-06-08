@@ -9,18 +9,18 @@ from collections import namedtuple
 from typing import List, Tuple
 
 import requests
+from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.currency import from_wei, wei_and_pretty_ether
 from ocean_lib.web3_internal.event_filter import EventFilter
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3 import Web3
+from web3._utils.events import get_event_data
 from web3.exceptions import MismatchedABI
-from web3.utils.events import get_event_data
 from websockets import ConnectionClosed
 
 OrderValues = namedtuple(
@@ -29,7 +29,7 @@ OrderValues = namedtuple(
 )
 
 
-@enforce_types_shim
+@enforce_types
 class DataToken(ContractBase):
     CONTRACT_NAME = "DataTokenTemplate"
 
@@ -176,7 +176,7 @@ class DataToken(ContractBase):
         abi = e().abi
         types = [param["type"] for param in abi["inputs"]]
         sig_str = f'{event_name}({",".join(types)})'
-        return Web3.sha3(text=sig_str).hex()
+        return Web3.keccak(text=sig_str).hex()
 
     def get_start_order_logs(
         self,
@@ -199,10 +199,10 @@ class DataToken(ContractBase):
 
         e = getattr(self.events, self.ORDER_STARTED_EVENT)
         event_abi = e().abi
-        logs = web3.eth.getLogs(filter_params)
+        logs = web3.eth.get_logs(filter_params)
         parsed_logs = []
         for lg in logs:
-            parsed_logs.append(get_event_data(event_abi, lg))
+            parsed_logs.append(get_event_data(web3.codec, event_abi, lg))
         return parsed_logs
 
     def get_transfer_events_in_range(self, from_block, to_block):
@@ -280,7 +280,7 @@ class DataToken(ContractBase):
 
     def verify_transfer_tx(self, tx_id, sender, receiver):
         w3 = Web3Provider.get_web3()
-        tx = w3.eth.getTransaction(tx_id)
+        tx = w3.eth.get_transaction(tx_id)
         if not tx:
             raise AssertionError("Transaction is not found, or is not yet verified.")
 
@@ -293,7 +293,7 @@ class DataToken(ContractBase):
         _iter = 0
         while tx["blockNumber"] is None:
             time.sleep(0.1)
-            tx = w3.eth.getTransaction(tx_id)
+            tx = w3.eth.get_transaction(tx_id)
             _iter = _iter + 1
             if _iter > 100:
                 break
@@ -392,7 +392,7 @@ class DataToken(ContractBase):
             target_amount = target_amount - order_log.args.marketFee
 
         # verify sender of the tx using the Tx record
-        tx = web3.eth.getTransaction(tx_id)
+        tx = web3.eth.get_transaction(tx_id)
         if sender not in [order_log.args.consumer, order_log.args.payer]:
             raise AssertionError(
                 "sender of order transaction is not the consumer/payer."

@@ -4,9 +4,9 @@
 #
 import os
 
+from enforce_typing import enforce_types
 from ocean_lib.config import Config
 from ocean_lib.config_provider import ConfigProvider
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.env_constants import (
@@ -130,7 +130,7 @@ def get_contracts_addresses(network, config):
     return addresses or {}
 
 
-@enforce_types_shim
+@enforce_types
 def from_base(num_base: int, dec: int) -> float:
     """Returns value in e.g. ETH (taking e.g. wei as input)."""
     return float(num_base / (10 ** dec))

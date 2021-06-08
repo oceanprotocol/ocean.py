@@ -5,7 +5,7 @@
 import logging
 from decimal import Decimal
 
-from ocean_lib.enforce_typing_shim import enforce_types_shim
+from enforce_typing import enforce_types
 from ocean_lib.exceptions import VerifyTxFailed
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.bfactory import BFactory
@@ -22,7 +22,7 @@ from scipy.interpolate import interp1d
 logger = logging.getLogger(__name__)
 
 
-@enforce_types_shim
+@enforce_types
 class OceanPool:
 
     """
@@ -601,7 +601,7 @@ class OceanPool:
 
     def get_all_pools(self, from_block=0, chunk_size=1000, include_balance=False):
         web3 = Web3Provider.get_web3()
-        current_block = web3.eth.blockNumber
+        current_block = web3.eth.block_number
 
         bfactory = BFactory(self.bfactory_address)
         logs = bfactory.get_event_logs(
@@ -653,7 +653,7 @@ class OceanPool:
             "exit": "get_exit_logs",
             "swap": "get_swap_logs",
         }
-        current_block = to_block if to_block is not None else web3.eth.blockNumber
+        current_block = to_block if to_block is not None else web3.eth.block_number
         pool = BPool(pool_address)
         dt_address = token_address or self.get_token_address(pool_address, pool)
         factory = DTFactory(get_dtfactory_address())
@@ -781,7 +781,7 @@ class OceanPool:
 
         web3 = Web3Provider.get_web3()
         current_block = (
-            to_block if to_block is not None else web3.eth.blockNumber
+            to_block if to_block is not None else web3.eth.block_number
         )  # RPC_CALL
         pool = BPool(pool_address)
         dt_address = (
@@ -1076,7 +1076,7 @@ class OceanPool:
         timestamps = []
         blocks = list(range(firstblock, lastblock, 240 * 4)) + [lastblock]
         for b in blocks:
-            timestamps.append(web3.eth.getBlock(b).timestamp)
+            timestamps.append(web3.eth.get_block(b).timestamp)
 
         f = interp1d(blocks, timestamps)
         times = f([a[1] for a in ocn_add_remove_list])
@@ -1091,7 +1091,7 @@ class OceanPool:
 
     def get_user_balances(self, user_address, from_block):
         web3 = Web3Provider.get_web3()
-        current_block = web3.eth.blockNumber
+        current_block = web3.eth.block_number
         pool = BPool(None)
 
         pools = self.get_all_pools(from_block, chunk_size=5000, include_balance=False)
@@ -1109,7 +1109,7 @@ class OceanPool:
     def get_creation_block(self, pool_address):
         web3 = Web3Provider.get_web3()
         bfactory = BFactory(self.bfactory_address)
-        current_block = web3.eth.blockNumber
+        current_block = web3.eth.block_number
         logs = bfactory.get_event_logs(
             "BPoolCreated",
             0,

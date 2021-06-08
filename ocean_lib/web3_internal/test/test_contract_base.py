@@ -4,7 +4,7 @@
 #
 
 import pytest
-from ocean_lib.enforce_typing_shim import enforce_types_shim
+from enforce_typing import enforce_types
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.currency import to_wei
@@ -12,7 +12,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 from web3.contract import ConciseContract
 
 
-@enforce_types_shim
+@enforce_types
 class MyFactory(ContractBase):
     CONTRACT_NAME = "DTFactory"
 
@@ -74,7 +74,7 @@ def test_main(network, alice_wallet, alice_address, dtfactory_address, alice_oce
         assert factory.get_event_signature("noevent")
     assert factory.subscribe_to_event("TokenCreated", 30, None) is None
     assert factory.get_event_argument_names("TokenCreated") == ()
-    block = alice_ocean.web3.eth.blockNumber
+    block = alice_ocean.web3.eth.block_number
     assert (
         len(factory.get_event_logs("TokenCreated", block, block, None)) == 1
     ), "The token was not created."

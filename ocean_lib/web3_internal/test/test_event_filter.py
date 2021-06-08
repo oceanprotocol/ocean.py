@@ -16,7 +16,7 @@ def test_transfer_event_filter(alice_ocean, alice_wallet, alice_address, bob_add
     token.approve(bob_address, to_wei(1), from_wallet=alice_wallet)
     token.transfer(bob_address, to_wei(5), from_wallet=alice_wallet)
 
-    block = alice_ocean.web3.eth.blockNumber
+    block = alice_ocean.web3.eth.block_number
     event = getattr(token.events, "Transfer")
     event_filter = EventFilter("Transfer", event, None, block, block)
 

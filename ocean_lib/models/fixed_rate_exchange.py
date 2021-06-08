@@ -5,7 +5,7 @@
 from collections import namedtuple
 from typing import Optional
 
-from ocean_lib.enforce_typing_shim import enforce_types_shim
+from enforce_typing import enforce_types
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
@@ -16,7 +16,7 @@ FixedExchangeData = namedtuple(
 )
 
 
-@enforce_types_shim
+@enforce_types
 class FixedRateExchange(ContractBase):
 
     """
