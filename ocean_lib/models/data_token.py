@@ -35,6 +35,9 @@ class DataToken(ContractBase):
 
     DEFAULT_CAP_IN_WEI = 1_000_000_000_000_000_000_000  # 1000 datatokens
 
+    # HACK: Remove this after all APIs only support wei
+    DEFAULT_CAP_IN_ETHER = 1000.0
+
     ORDER_STARTED_EVENT = "OrderStarted"
     ORDER_FINISHED_EVENT = "OrderFinished"
 
