@@ -51,7 +51,7 @@ def setup_all(request):
         network_addresses = json.load(f)
 
     print(
-        f"sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keysStr()}"
+        f"sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keys_str()}"
     )
     print(f"sender balance: {from_wei(get_ether_balance(wallet.address))}")
     assert (

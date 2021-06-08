@@ -8,7 +8,10 @@ from typing import Optional
 
 from enforce_typing import enforce_types
 from ocean_lib.web3_internal.constants import ENV_MAX_GAS_PRICE, MIN_GAS_PRICE
-from ocean_lib.web3_internal.utils import privateKeyToAddress, privateKeyToPublicKey
+from ocean_lib.web3_internal.utils import (
+    private_key_to_address,
+    private_key_to_public_key,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +64,7 @@ class Wallet:
                 self._key = self._key.hex()
 
         if self._key:
-            address = privateKeyToAddress(self._key)
+            address = private_key_to_address(self._key)
             assert self._address is None or self._address == address
             self._address = address
             self._password = None
@@ -150,11 +153,11 @@ class Wallet:
         account = self._web3.eth.account.from_key(self.private_key)
         return account.signHash(msg_hash)
 
-    def keysStr(self):
+    def keys_str(self):
         s = []
         s += [f"address: {self.address}"]
         if self.private_key is not None:
             s += [f"private key: {self.private_key}"]
-            s += [f"public key: {privateKeyToPublicKey(self.private_key)}"]
+            s += [f"public key: {private_key_to_public_key(self.private_key)}"]
         s += [""]
         return "\n".join(s)
