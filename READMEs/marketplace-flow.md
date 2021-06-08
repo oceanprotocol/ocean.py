@@ -123,7 +123,7 @@ alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
 
 #Mint OCEAN
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-mint_fake_OCEAN()
+mint_fake_OCEAN(config)
 
 #Publish a datatoken
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)

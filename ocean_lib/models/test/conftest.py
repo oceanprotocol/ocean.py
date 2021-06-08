@@ -6,7 +6,7 @@ import os
 
 import pytest
 from enforce_typing import enforce_types
-from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models import btoken
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.data_token import DataToken
@@ -35,29 +35,23 @@ def network():
 
 
 @pytest.fixture
-def dtfactory_address():
-    return DTFactory.configured_address(
-        _NETWORK, ConfigProvider.get_config().address_file
-    )
+def dtfactory_address(config):
+    return DTFactory.configured_address(_NETWORK, config.address_file)
 
 
 @pytest.fixture
-def bfactory_address():
-    return BFactory.configured_address(
-        _NETWORK, ConfigProvider.get_config().address_file
-    )
+def bfactory_address(config):
+    return BFactory.configured_address(_NETWORK, config.address_file)
 
 
 @pytest.fixture
-def contracts_addresses():
-    return ContractHandler.get_contracts_addresses(
-        _NETWORK, ConfigProvider.get_config().address_file
-    )
+def contracts_addresses(config):
+    return ContractHandler.get_contracts_addresses(_NETWORK, config.address_file)
 
 
 @pytest.fixture
-def OCEAN_address():
-    return get_ocean_token_address(_NETWORK)
+def OCEAN_address(config):
+    return get_ocean_token_address(config.address_file, _NETWORK)
 
 
 @pytest.fixture
@@ -158,7 +152,8 @@ def make_info(name, private_key_name):
 
     from ocean_lib.ocean.ocean import Ocean
 
-    info.ocean = Ocean()
+    config = ExampleConfig.get_config()
+    info.ocean = Ocean(config)
     info.T1 = _deployAndMintToken("TOK1", info.address)
     info.T2 = _deployAndMintToken("TOK2", info.address)
 

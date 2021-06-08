@@ -5,12 +5,9 @@
 import os
 
 from enforce_typing import enforce_types
-from ocean_lib.config import Config
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.env_constants import (
-    ENV_CONFIG_FILE,
     ENV_INFURA_CONNECTION_TYPE,
     ENV_INFURA_PROJECT_ID,
 )
@@ -102,32 +99,8 @@ def get_web3_connection_provider(network_url):
     return provider
 
 
-def get_contracts_addresses(network, config):
-    addresses = {}
-    try:
-        addresses = ContractHandler.get_contracts_addresses(
-            network, config.address_file
-        )
-    except Exception as e:
-        print(
-            f"error reading contract addresses: {e}.\n"
-            f"artifacts path is {ContractHandler.artifacts_path}, address file is {config.address_file}"
-        )
-
-    if not addresses:
-        print(
-            f"cannot find contract addresses: \n"
-            f"artifacts path is {ContractHandler.artifacts_path}, address file is {config.address_file}"
-        )
-        print(f"address file exists? {os.path.exists(config.address_file)}")
-        print(
-            f"artifacts path exists? {os.path.exists(ContractHandler.artifacts_path)}"
-        )
-        print(
-            f"contents of artifacts folder: \n"
-            f"{os.listdir(ContractHandler.artifacts_path)}"
-        )
-    return addresses or {}
+def get_contracts_addresses(address_file, network):
+    return ContractHandler.get_contracts_addresses(network, address_file)
 
 
 @enforce_types
@@ -152,29 +125,19 @@ def from_base(num_base: int, dec: int) -> float:
     return float(num_base / (10 ** dec))
 
 
-def get_dtfactory_address(network=None):
-    return DTFactory.configured_address(
-        network or get_network_name(), ConfigProvider.get_config().address_file
-    )
+def get_dtfactory_address(address_file, network=None):
+    return DTFactory.configured_address(network or get_network_name(), address_file)
 
 
-def get_bfactory_address(network=None):
-    return BFactory.configured_address(
-        network or get_network_name(), ConfigProvider.get_config().address_file
-    )
+def get_bfactory_address(address_file, network=None):
+    return BFactory.configured_address(network or get_network_name(), address_file)
 
 
-def get_ocean_token_address(network=None):
-    addresses = get_contracts_addresses(
-        network or get_network_name(), ConfigProvider.get_config()
-    )
+def get_ocean_token_address(address_file, network=None):
+    addresses = get_contracts_addresses(address_file, network or get_network_name())
     return addresses.get("Ocean") if addresses else None
 
 
-def init_components(config=None):
-    if config is None:
-        config = Config(os.getenv(ENV_CONFIG_FILE))
-
-    ConfigProvider.set_config(config)
+def init_components(config):
     Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
     ContractHandler.set_artifacts_path(config.artifacts_path)

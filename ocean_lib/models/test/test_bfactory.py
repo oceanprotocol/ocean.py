@@ -7,9 +7,9 @@ from ocean_lib.models.bpool import BPool
 from ocean_lib.ocean.util import get_bfactory_address
 
 
-def test_bpool_creation(network, alice_wallet):
+def test_bpool_creation(config, alice_wallet):
     """Test the creation of a Balancer Pool from BFactory (happy flow)."""
-    bfactory_address = get_bfactory_address(network)
+    bfactory_address = get_bfactory_address(config.address_file)
     bfactory = BFactory(bfactory_address)
 
     pool_address = bfactory.newBPool(from_wallet=alice_wallet)

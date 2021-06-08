@@ -12,7 +12,7 @@ from ocean_lib.common.agreements.consumable import AssetNotConsumable, Consumabl
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.config import Config
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.web3_internal.transactions import sign_hash
@@ -108,12 +108,14 @@ class OceanCompute:
     @staticmethod
     def build_service_privacy_attributes(
         trusted_algorithms: list = None,
+        metadata_cache_uri: str = None,
         allow_raw_algorithm: bool = False,
         allow_all_published_algorithms: bool = False,
         allow_network_access: bool = False,
     ):
         """
         :param trusted_algorithms: list of algorithm did to be trusted by the compute service provider
+        :param metadata_cache_uir: URI used to get DDOs for trusted algorithm DIDs if trusted_algorithms set
         :param allow_raw_algorithm: bool -- when True, unpublished raw algorithm code can be run on this dataset
         :param allow_all_published_algorithms: bool -- when True, any published algorithm can be run on this dataset
             The list of `trusted_algorithms` will be ignored in this case.
@@ -128,7 +130,7 @@ class OceanCompute:
         }
         if trusted_algorithms:
             privacy["publisherTrustedAlgorithms"] = create_publisher_trusted_algorithms(
-                trusted_algorithms, ConfigProvider.get_config().metadata_cache_uri
+                trusted_algorithms, metadata_cache_uri
             )
 
         return privacy
@@ -188,7 +190,7 @@ class OceanCompute:
         }
 
     @staticmethod
-    def check_output_dict(output_def, consumer_address, data_provider, config=None):
+    def check_output_dict(output_def, consumer_address, data_provider, config: Config):
         """
         Validate the `output_def` dict and fills in defaults for missing values.
 
@@ -198,9 +200,6 @@ class OceanCompute:
         :param config: Config instance
         :return: dict a valid `output_def` object
         """
-        if not config:
-            config = ConfigProvider.get_config()
-
         default_output_def = {
             "nodeUri": config.network_url,
             "brizoUri": data_provider.get_url(config),
@@ -281,7 +280,7 @@ class OceanCompute:
         service_id = first_input.service_id
 
         output = OceanCompute.check_output_dict(
-            output, consumer_wallet.address, data_provider=self._data_provider
+            output, consumer_wallet.address, self._data_provider, self._config
         )
         asset = resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
         _, service_endpoint = self._get_service_endpoint(did, asset)

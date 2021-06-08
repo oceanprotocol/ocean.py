@@ -6,7 +6,6 @@
 import os
 
 import pytest
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3.exceptions import InvalidAddress
@@ -63,7 +62,6 @@ def test_issue185_unit(monkeypatch):
     setup_issue_185(monkeypatch)
 
     # ensure that conftest::setup_all() was not called
-    assert ConfigProvider._config is None
     assert Web3Provider._web3 is None
     assert ContractHandler._contracts == dict()
     assert ContractHandler.artifacts_path is None

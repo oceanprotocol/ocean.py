@@ -12,7 +12,6 @@ from ocean_lib.common.agreements.consumable import ConsumableCodes, MalformedCre
 from ocean_lib.common.ddo.credentials import AddressCredential
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.utils.utilities import checksum
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
@@ -108,9 +107,13 @@ def test_ddo_credentials_addresses_no_access_list():
     )
 
 
-def test_ddo_connection():
+def test_ddo_connection(config):
     ddo = DDO("did:op:testdid")
-    assert ddo.is_consumable() == ConsumableCodes.CONNECTIVITY_FAIL
+    provider_uri = config.provider_url
+    assert (
+        ddo.is_consumable(with_connectivity_check=True, provider_uri=provider_uri)
+        == ConsumableCodes.CONNECTIVITY_FAIL
+    )
 
 
 def test_ddo_credentials_disabled():
@@ -126,16 +129,15 @@ def test_ddo_credentials_disabled():
     assert ddo.is_enabled
 
     ddo.disable()
-    assert ddo.is_consumable({}) == ConsumableCodes.ASSET_DISABLED
+    assert ddo.is_consumable() == ConsumableCodes.ASSET_DISABLED
 
 
-def test_ddo_on_chain():
+def test_ddo_on_chain(config):
     """Tests chain operations on a DDO."""
-    config = ConfigProvider.get_config()
-    ddo_address = get_contracts_addresses("ganache", config)[
+    ddo_address = get_contracts_addresses(config.address_file, "ganache")[
         MetadataContract.CONTRACT_NAME
     ]
-    dtfactory_address = get_contracts_addresses("ganache", config)[
+    dtfactory_address = get_contracts_addresses(config.address_file, "ganache")[
         DTFactory.CONTRACT_NAME
     ]
     ddo_registry = MetadataContract(ddo_address)

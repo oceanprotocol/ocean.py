@@ -11,6 +11,7 @@ import time
 import coloredlogs
 import yaml
 from enforce_typing import enforce_types
+from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
@@ -65,8 +66,9 @@ def get_ganache_wallet():
 
 @enforce_types
 def get_publisher_ocean_instance(use_provider_mock=False) -> Ocean:
+    config = ExampleConfig.get_config()
     data_provider = DataProviderMock if use_provider_mock else None
-    ocn = Ocean(data_provider=data_provider)
+    ocn = Ocean(config, data_provider=data_provider)
     account = get_publisher_wallet()
     ocn.main_account = account
     return ocn
@@ -74,8 +76,9 @@ def get_publisher_ocean_instance(use_provider_mock=False) -> Ocean:
 
 @enforce_types
 def get_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocean:
+    config = ExampleConfig.get_config()
     data_provider = DataProviderMock if use_provider_mock else None
-    ocn = Ocean(data_provider=data_provider)
+    ocn = Ocean(config, data_provider=data_provider)
     account = get_consumer_wallet()
     ocn.main_account = account
     return ocn
@@ -83,8 +86,9 @@ def get_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocean:
 
 @enforce_types
 def get_another_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocean:
+    config = ExampleConfig.get_config()
     data_provider = DataProviderMock if use_provider_mock else None
-    ocn = Ocean(data_provider=data_provider)
+    ocn = Ocean(config, data_provider=data_provider)
     account = get_another_consumer_wallet()
     ocn.main_account = account
     return ocn

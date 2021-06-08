@@ -5,19 +5,16 @@
 
 """Ocean module."""
 import logging
-import os
 
 from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
 from ocean_lib.config import Config
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.models.order import Order
-from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.ocean_exchange import OceanExchange
@@ -45,7 +42,7 @@ class Ocean:
 
     """The Ocean class is the entry point into Ocean Protocol."""
 
-    def __init__(self, config=None, data_provider=None):
+    def __init__(self, config, data_provider=None):
         """Initialize Ocean class.
 
         Usage: Make a new Ocean instance
@@ -71,14 +68,6 @@ class Ocean:
         :param config: `Config` instance
         :param data_provider: `DataServiceProvider` instance
         """
-        # Configuration information for the market is stored in the Config class
-        # config = Config(filename=config_file, options_dict=config_dict)
-        if not config:
-            try:
-                config = ConfigProvider.get_config()
-            except AssertionError:
-                config = Config(os.getenv(ENV_CONFIG_FILE))
-                ConfigProvider.set_config(config)
         if isinstance(config, dict):
             # fallback to metadataStoreUri
             cache_key = (
@@ -97,7 +86,6 @@ class Ocean:
                 },
             }
             config = Config(options_dict=config_dict)
-        ConfigProvider.set_config(config)
         self._config = config
         ContractHandler.set_artifacts_path(self._config.artifacts_path)
         Web3Provider.init_web3(
@@ -110,21 +98,23 @@ class Ocean:
             data_provider = DataServiceProvider
 
         network = get_network_name()
-        addresses = get_contracts_addresses(network, self._config)
+        addresses = get_contracts_addresses(self._config.address_file, network)
         self.assets = OceanAssets(
             self._config, data_provider, addresses.get(MetadataContract.CONTRACT_NAME)
         )
         self.services = OceanServices()
         self.compute = OceanCompute(self._config, data_provider)
 
-        ocean_address = get_ocean_token_address(network)
-        self.pool = OceanPool(ocean_address, get_bfactory_address(network))
+        ocean_address = get_ocean_token_address(self._config.address_file, network)
+        self.pool = OceanPool(
+            ocean_address, get_bfactory_address(self._config.address_file, network)
+        )
         self.exchange = OceanExchange(
             ocean_address,
             FixedRateExchange.configured_address(
-                network or get_network_name(), ConfigProvider.get_config().address_file
+                network or get_network_name(), self._config.address_file
             ),
-            self.config,
+            self._config,
         )
 
         logger.debug("Ocean instance initialized: ")
@@ -142,7 +132,7 @@ class Ocean:
 
     @property
     def OCEAN_address(self):
-        return get_ocean_token_address(get_network_name())
+        return get_ocean_token_address(self.config.address_file, get_network_name())
 
     def create_data_token(
         self,

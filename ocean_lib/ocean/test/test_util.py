@@ -6,25 +6,21 @@
 import os
 
 import pytest
-
-from ocean_lib.config import Config
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.ocean import util
 from ocean_lib.ocean.env_constants import (
-    ENV_CONFIG_FILE,
     ENV_INFURA_CONNECTION_TYPE,
     ENV_INFURA_PROJECT_ID,
 )
 from ocean_lib.ocean.util import (
-    to_base_18,
-    to_base,
     from_base,
     from_base_18,
-    get_dtfactory_address,
     get_bfactory_address,
+    get_dtfactory_address,
     get_ocean_token_address,
-    init_components,
     get_web3_connection_provider,
+    init_components,
+    to_base,
+    to_base_18,
 )
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 
@@ -124,10 +120,8 @@ def test_get_web3_connection_provider(monkeypatch):
     assert provider.endpoint_uri == "wss://bah.com"
 
 
-def test_get_contracts_addresses():
-    config = Config(os.getenv(ENV_CONFIG_FILE))
-    ConfigProvider.set_config(config)
-    addresses = util.get_contracts_addresses("ganache", config)
+def test_get_contracts_addresses(config):
+    addresses = util.get_contracts_addresses(config.address_file, "ganache")
     assert addresses
     assert isinstance(addresses, dict)
     assert (
@@ -165,52 +159,43 @@ def test_from_base_and_from_base_18():
     assert res == from_base_18(to_base_18(1.0)), "Incorrect conversion to ETH."
 
 
-def test_get_dtfactory_address():
-    config = Config(os.getenv(ENV_CONFIG_FILE))
-    ConfigProvider.set_config(config)
-    addresses = util.get_contracts_addresses("ganache", config)
+def test_get_dtfactory_address(config):
+    addresses = util.get_contracts_addresses(config.address_file, "ganache")
     assert addresses
     assert isinstance(addresses, dict)
     assert "DTFactory" in addresses
 
-    address = get_dtfactory_address()
+    address = get_dtfactory_address(config.address_file)
     assert address[:2] == "0x", "It is not a token address."
     assert address == addresses["DTFactory"]
 
 
-def test_get_bfactory_address():
-    config = Config(os.getenv(ENV_CONFIG_FILE))
-    ConfigProvider.set_config(config)
-    addresses = util.get_contracts_addresses("ganache", config)
+def test_get_bfactory_address(config):
+    addresses = util.get_contracts_addresses(config.address_file, "ganache")
     assert addresses
     assert isinstance(addresses, dict)
     assert "BFactory" in addresses
 
-    address = get_bfactory_address()
+    address = get_bfactory_address(config.address_file)
     assert address[:2] == "0x", "It is not a token address."
     assert address == addresses["BFactory"]
 
 
-def test_get_ocean_token_address():
-    config = Config(os.getenv(ENV_CONFIG_FILE))
-    ConfigProvider.set_config(config)
-    addresses = util.get_contracts_addresses("ganache", config)
+def test_get_ocean_token_address(config):
+    addresses = util.get_contracts_addresses(config.address_file, "ganache")
     assert addresses
     assert isinstance(addresses, dict)
     assert "Ocean" in addresses
 
-    address = get_ocean_token_address()
+    address = get_ocean_token_address(config.address_file)
     assert address[:2] == "0x", "It is not a token address."
     assert address == addresses["Ocean"]
 
 
-def test_init_components():
-    config = Config(os.getenv(ENV_CONFIG_FILE))
-    ConfigProvider.set_config(config)
-    init_components()
-    assert ConfigProvider.get_config() == config
+def test_init_components(config):
+    init_components(config)
     assert (
         get_web3_connection_provider(config.network_url).endpoint_uri
-        == "http://127.0.0.1:8545"
+        == "http://localhost:8545"
     )
     assert ContractHandler.artifacts_path == config.artifacts_path
