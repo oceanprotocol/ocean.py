@@ -29,7 +29,7 @@ def generate_multi_value_hash(types, values):
     :return: bytes
     """
     assert len(types) == len(values)
-    return Web3Provider.get_web3().soliditySha3(types, values)
+    return Web3Provider.get_web3().solidityKeccak(types, values)
 
 
 def prepare_prefixed_hash(msg_hash):
@@ -51,7 +51,7 @@ def add_ethereum_prefix_and_hash_msg(text):
     :return: hash of prefixed text according to the recommended ethereum prefix
     """
     prefixed_msg = f"\x19Ethereum Signed Message:\n{len(text)}{text}"
-    return Web3Provider.get_web3().sha3(text=prefixed_msg)
+    return Web3Provider.get_web3().keccak(text=prefixed_msg)
 
 
 def to_32byte_hex(web3, val):
