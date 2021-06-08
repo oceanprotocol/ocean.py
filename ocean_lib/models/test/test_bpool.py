@@ -287,24 +287,24 @@ def test_gulp(network, T1, alice_wallet):
 def test_spot_price(network, T1, T2, alice_wallet):
     """Test calculation of prices on spot."""
     (p, p_sans) = _spotPrices(network, T1, T2, alice_wallet, 1.0, 1.0, 1.0, 1.0)
-    assert p_sans == 1.0
-    assert round(p, 8) == 1.00000100
+    assert p_sans == 1
+    assert round(p, 8) == Decimal("1.00000100")
 
     (p, p_sans) = _spotPrices(network, T1, T2, alice_wallet, 90.0, 10.0, 9.0, 1.0)
-    assert p_sans == 1.0
-    assert round(p, 8) == 1.00000100
+    assert p_sans == 1
+    assert round(p, 8) == Decimal("1.00000100")
 
     (p, p_sans) = _spotPrices(network, T1, T2, alice_wallet, 1.0, 2.0, 1.0, 1.0)
-    assert p_sans == 0.5
-    assert round(p, 8) == 0.500000500
+    assert p_sans == Decimal("0.5")
+    assert round(p, 8) == Decimal("0.500000500")
 
     (p, p_sans) = _spotPrices(network, T1, T2, alice_wallet, 2.0, 1.0, 1.0, 1.0)
-    assert p_sans == 2.0
-    assert round(p, 8) == 2.00000200
+    assert p_sans == 2
+    assert round(p, 8) == Decimal("2.00000200")
 
     (p, p_sans) = _spotPrices(network, T1, T2, alice_wallet, 9.0, 10.0, 9.0, 1.0)
-    assert p_sans == 0.1
-    assert round(p, 8) == 0.100000100
+    assert p_sans == Decimal("0.1")
+    assert round(p, 8) == Decimal("0.100000100")
 
 
 def test_joinSwapExternAmountIn(
