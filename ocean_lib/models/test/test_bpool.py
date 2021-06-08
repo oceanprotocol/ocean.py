@@ -169,8 +169,8 @@ def test_public_pool(network, bob_wallet, alice_ocean):
     alice.T2.transfer(bob_wallet.address, to_wei(100), from_wallet=alice.wallet)
 
     # verify holdings
-    assert from_wei(alice.T1.balanceOf(alice.address)) == (1000 - 90 - 100)
-    assert from_wei(alice.T2.balanceOf(alice.address)) == (1000 - 10 - 100)
+    assert from_wei(alice.T1.balanceOf(alice.address)) == (1000 - 90 - 100)  # 810
+    assert from_wei(alice.T2.balanceOf(alice.address)) == (1000 - 10 - 100)  # 890
     assert from_wei(BPT.balanceOf(alice.address)) == 0
 
     assert from_wei(alice.T1.balanceOf(bob_address)) == 100
@@ -188,7 +188,7 @@ def test_public_pool(network, bob_wallet, alice_ocean):
     # verify holdings
     assert from_wei(alice.T1.balanceOf(alice.address)) == (1000 - 90 - 100)
     assert from_wei(alice.T2.balanceOf(alice.address)) == (1000 - 10 - 100)
-    assert from_wei(BPT.balanceOf(alice.address)) == 100.0  # new!
+    assert from_wei(BPT.balanceOf(alice.address)) == 100  # new!
 
     assert from_wei(T1.balanceOf(pool.address)) == 90
     assert from_wei(T2.balanceOf(pool.address)) == 10
@@ -204,16 +204,16 @@ def test_public_pool(network, bob_wallet, alice_ocean):
     )
 
     # verify holdings
-    assert from_wei(T1.balanceOf(alice_address)) == (1000 - 90 - 100)
-    assert from_wei(T2.balanceOf(alice_address)) == (1000 - 10 - 100)
+    assert from_wei(T1.balanceOf(alice_address)) == (1000 - 90 - 100)  # 810
+    assert from_wei(T2.balanceOf(alice_address)) == (1000 - 10 - 100)  # 890
     assert from_wei(BPT.balanceOf(alice_address)) == 100
 
-    assert from_wei(T1.balanceOf(bob_address)) == (100 - 9)
-    assert from_wei(T2.balanceOf(bob_address)) == (100 - 1)
+    assert from_wei(T1.balanceOf(bob_address)) == (100 - 9)  # 91
+    assert from_wei(T2.balanceOf(bob_address)) == (100 - 1)  # 99
     assert from_wei(BPT.balanceOf(bob_address)) == 10
 
-    assert from_wei(T1.balanceOf(pool.address)) == (90 + 9)
-    assert from_wei(T2.balanceOf(pool.address)) == (10 + 1)
+    assert from_wei(T1.balanceOf(pool.address)) == (90 + 9)  # 99
+    assert from_wei(T2.balanceOf(pool.address)) == (10 + 1)  # 11
     assert from_wei(BPT.balanceOf(pool.address)) == 0
 
     # bob sells 2 BPT
@@ -223,8 +223,8 @@ def test_public_pool(network, bob_wallet, alice_ocean):
         minAmountsOut_base=[to_wei(0), to_wei(0)],
         from_wallet=bob_wallet,
     )
-    assert T1.balanceOf(bob_address) == to_wei("92.8")
-    assert T2.balanceOf(bob_address) == to_wei("99.2")
+    assert T1.balanceOf(bob_address) == 92800000000000000018  # 92.8
+    assert T2.balanceOf(bob_address) == 99200000000000000002  # 99.2
     assert BPT.balanceOf(bob_address) == to_wei(8)
 
     # bob buys 5 more BPT
