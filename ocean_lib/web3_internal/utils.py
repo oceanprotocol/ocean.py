@@ -29,7 +29,7 @@ def generate_multi_value_hash(types, values):
     :return: bytes
     """
     assert len(types) == len(values)
-    return Web3Provider.get_web3().soliditySha3(types, values)
+    return Web3Provider.get_web3().solidityKeccak(types, values)
 
 
 def prepare_prefixed_hash(msg_hash):
@@ -51,7 +51,7 @@ def add_ethereum_prefix_and_hash_msg(text):
     :return: hash of prefixed text according to the recommended ethereum prefix
     """
     prefixed_msg = f"\x19Ethereum Signed Message:\n{len(text)}{text}"
-    return Web3Provider.get_web3().sha3(text=prefixed_msg)
+    return Web3Provider.get_web3().keccak(text=prefixed_msg)
 
 
 def to_32byte_hex(web3, val):
@@ -84,12 +84,12 @@ def split_signature(web3, signature):
 
 
 @enforce_types
-def privateKeyToAddress(private_key: str) -> str:
-    return Web3Provider.get_web3().eth.account.privateKeyToAccount(private_key).address
+def private_key_to_address(private_key: str) -> str:
+    return Web3Provider.get_web3().eth.account.from_key(private_key).address
 
 
 @enforce_types
-def privateKeyToPublicKey(private_key: str) -> str:
+def private_key_to_public_key(private_key: str) -> str:
     private_key_bytes = decode_hex(private_key)
     private_key_object = keys.PrivateKey(private_key_bytes)
     return private_key_object.public_key

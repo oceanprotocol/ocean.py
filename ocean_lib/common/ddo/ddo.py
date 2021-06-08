@@ -17,9 +17,9 @@ from ocean_lib.common.did import OCEAN_PREFIX, did_to_id
 from ocean_lib.common.utils.utilities import get_timestamp
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
-from .constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
-from .public_key_rsa import PUBLIC_KEY_TYPE_RSA, PublicKeyRSA
-from .service import Service
+from ocean_lib.common.ddo.constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
+from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA, PublicKeyRSA
+from ocean_lib.common.ddo.service import Service
 
 logger = logging.getLogger("ddo")
 

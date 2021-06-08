@@ -31,7 +31,7 @@ def test_creating_ddo_from_scratch():
     ddo = DDO()
     assert ddo.did is None
     assert ddo.asset_id is None
-    assert ddo.created is not None
+    assert ddo.created is not None, "DDO has not been created."
 
     did = DID.did({"0": "0x99999999999999999"})
     ddo.assign_did(did)
