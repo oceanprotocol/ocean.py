@@ -30,6 +30,7 @@ ocean-lib includes the [web3.py library](https://web3py.readthedocs.io/en/stable
 Here's how. In Python:
 
 ```python
+
 import web3
 private_key = web3.Web3().eth.account.create().privateKey
 ```
