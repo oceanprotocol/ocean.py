@@ -31,7 +31,7 @@ Here's how. In Python:
 
 ```python
 import web3
-private_key = web3.Web3().eth.account.create().key
+private_key = web3.Web3().eth.account.create().privateKey
 ```
 
 ## 2. Where to store private keys
