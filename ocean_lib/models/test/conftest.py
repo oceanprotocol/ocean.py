@@ -11,11 +11,12 @@ from ocean_lib.models import btoken
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
-from ocean_lib.ocean.util import get_ocean_token_address, to_base_18
+from ocean_lib.ocean.util import get_ocean_token_address
 from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
-from ocean_lib.web3_internal.utils import from_wei, get_ether_balance
+from ocean_lib.web3_internal.utils import get_ether_balance
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import (
     get_factory_deployer_wallet,
@@ -175,7 +176,7 @@ def _deployAndMintToken(symbol: str, to_address: str) -> btoken.BToken:
         "Template Contract",
         "TEMPLATE",
         wallet.address,
-        to_base_18(1000.0),
+        to_wei(1000),
         DTFactory.FIRST_BLOB,
         to_address,
     )
@@ -184,10 +185,10 @@ def _deployAndMintToken(symbol: str, to_address: str) -> btoken.BToken:
     )
     token_address = dt_factory.get_token_address(
         dt_factory.createToken(
-            symbol, symbol, symbol, DataToken.DEFAULT_CAP_BASE, wallet
+            symbol, symbol, symbol, DataToken.DEFAULT_CAP_IN_WEI, wallet
         )
     )
     token = DataToken(token_address)
-    token.mint(to_address, to_base_18(1000.0), wallet)
+    token.mint(to_address, to_wei(1000), wallet)
 
     return btoken.BToken(token.address)

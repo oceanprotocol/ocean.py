@@ -166,7 +166,9 @@ assert token_address == asset.data_token_address
 did = asset.did  # did contains the datatoken address
 
 #Mint the datatokens
-data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
+from decimal import Decimal
+from ocean_lib.web3_internal.currency import to_wei
+data_token.mint(alice_wallet.address, to_wei(Decimal("100.0")), alice_wallet)
 
 #In the create() step below, Alice needs ganache OCEAN. Ensure she has it.
 from ocean_lib.models.btoken import BToken #BToken is ERC20

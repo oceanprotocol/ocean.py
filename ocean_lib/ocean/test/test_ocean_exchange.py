@@ -2,11 +2,13 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+
 import pytest
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.util import get_contracts_addresses
+from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
 
 _NETWORK = "ganache"
@@ -27,15 +29,15 @@ def test_ocean_exchange(publisher_ocean_instance):
     dt = ocn.create_data_token(
         "DataToken1", "DT1", alice_wallet, blob="http://example.com"
     )
-    dt.mint_tokens(bob_wallet.address, 100.0, alice_wallet)
+    dt.mint(bob_wallet.address, to_wei(100), alice_wallet)
     ox = OceanExchange(ocn.OCEAN_address, _get_exchange_address(), ocn.config)
     rate = 0.9
     x_id = ox.create(dt.address, rate, bob_wallet)
-    dt.approve_tokens(ox._exchange_address, 20.0, bob_wallet)
+    dt.approve(ox._exchange_address, to_wei(20), bob_wallet)
 
     # create with invalid token address
     with pytest.raises(ValueError):
-        ox.create(ox.ocean_address, 0.9, bob_wallet)
+        ox.create(ox.ocean_address, rate, bob_wallet)
 
     # TODO: Enable this ValueError handling when the ERC20 check is added in FixedRateExchange.create solidity function
     # with pytest.raises(ValueError):
@@ -53,8 +55,8 @@ def test_ocean_exchange(publisher_ocean_instance):
     # get_quote
     base_token_amount = ox.get_quote(2.0, exchange_id=x_id)
     assert (
-        base_token_amount == 2.0 * rate
-    ), f"unexpected quote of base token {base_token_amount}, should be {2.0*rate}."
+        base_token_amount == 2 * rate
+    ), f"unexpected quote of base token {base_token_amount}, should be {2 * rate}."
 
     #############
     # test buying datatokens

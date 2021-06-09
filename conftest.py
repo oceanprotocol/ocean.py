@@ -10,10 +10,11 @@ import pytest
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.example_config import ExampleConfig
-from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18
+from ocean_lib.ocean.util import get_web3_connection_provider
 from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
-from ocean_lib.web3_internal.utils import from_wei, get_ether_balance
+from ocean_lib.web3_internal.utils import get_ether_balance
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from tests.resources.ddo_helpers import get_metadata
 from tests.resources.helper_functions import (
@@ -63,15 +64,15 @@ def setup_all(request):
     OCEAN_token = DataToken(address=network_addresses["development"]["Ocean"])
 
     amt_distribute = 1000
-    amt_distribute_base = to_base_18(float(amt_distribute))
+    amt_distribute_in_wei = to_wei(amt_distribute)
 
     for w in (get_publisher_wallet(), get_consumer_wallet()):
         if from_wei(get_ether_balance(w.address)) < 2:
             send_ether(wallet, w.address, 4)
 
         if OCEAN_token.token_balance(w.address) < 100:
-            OCEAN_token.mint(wallet.address, amt_distribute_base, from_wallet=wallet)
-            OCEAN_token.transfer(w.address, amt_distribute_base, from_wallet=wallet)
+            OCEAN_token.mint(wallet.address, amt_distribute_in_wei, from_wallet=wallet)
+            OCEAN_token.transfer(w.address, amt_distribute_in_wei, from_wallet=wallet)
 
 
 @pytest.fixture

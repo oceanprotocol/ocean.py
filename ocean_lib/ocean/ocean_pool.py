@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
+from decimal import Decimal
 
 from enforce_typing import enforce_types
 from ocean_lib.exceptions import VerifyTxFailed
@@ -12,7 +13,8 @@ from ocean_lib.models.bpool import BPool
 from ocean_lib.models.btoken import BToken
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
-from ocean_lib.ocean.util import from_base_18, get_dtfactory_address, to_base_18
+from ocean_lib.ocean.util import get_dtfactory_address
+from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from scipy.interpolate import interp1d
@@ -89,8 +91,8 @@ class OceanPool:
 
         # Must approve datatoken and Ocean tokens to the new pool as spender
         dt = DataToken(data_token_address)
-        tx_id = dt.approve_tokens(
-            pool_address, data_token_amount, from_wallet, wait=True
+        tx_id = dt.approve(
+            pool_address, to_wei(Decimal(data_token_amount)), from_wallet
         )
         if dt.get_tx_receipt(tx_id).status != 1:
             raise VerifyTxFailed(
@@ -98,7 +100,7 @@ class OceanPool:
             )
 
         ot = DataToken(self.ocean_address)
-        tx_id = ot.approve_tokens(pool_address, OCEAN_amount, from_wallet, wait=True)
+        tx_id = ot.approve(pool_address, to_wei(Decimal(OCEAN_amount)), from_wallet)
         if ot.get_tx_receipt(tx_id).status != 1:
             raise VerifyTxFailed(
                 f"Approve OCEAN tokens failed, pool was created at {pool_address}"
@@ -106,12 +108,12 @@ class OceanPool:
 
         tx_id = pool.setup(
             data_token_address,
-            to_base_18(data_token_amount),
-            to_base_18(data_token_weight),
+            to_wei(Decimal(data_token_amount)),
+            to_wei(Decimal(data_token_weight)),
             self.ocean_address,
-            to_base_18(OCEAN_amount),
-            to_base_18(base_weight),
-            to_base_18(swap_fee),
+            to_wei(Decimal(OCEAN_amount)),
+            to_wei(Decimal(base_weight)),
+            to_wei(Decimal(swap_fee)),
             from_wallet,
         )
         if pool.get_tx_receipt(tx_id).status != 1:
@@ -304,15 +306,15 @@ class OceanPool:
         :return: str transaction id/hash
         """
         ocean_tok = DataToken(self.ocean_address)
-        ocean_tok.approve_tokens(pool_address, max_OCEAN_amount, from_wallet, wait=True)
+        ocean_tok.approve(pool_address, to_wei(Decimal(max_OCEAN_amount)), from_wallet)
 
         dtoken_address = self.get_token_address(pool_address)
         pool = BPool(pool_address)
         return pool.swapExactAmountOut(
             tokenIn_address=self.ocean_address,  # entering pool
-            maxAmountIn_base=to_base_18(max_OCEAN_amount),  # ""
+            maxAmountIn_base=to_wei(Decimal(max_OCEAN_amount)),  # ""
             tokenOut_address=dtoken_address,  # leaving pool
-            tokenAmountOut_base=to_base_18(amount),  # ""
+            tokenAmountOut_base=to_wei(Decimal(amount)),  # ""
             maxPrice_base=2 ** 255,  # here we limit by max_num_OCEAN, not price
             from_wallet=from_wallet,
         )
@@ -360,9 +362,11 @@ class OceanPool:
         """
         dtoken_address = self.get_token_address(pool_address)
         pool = BPool(pool_address)
-        return from_base_18(
-            pool.getSpotPrice(
-                tokenIn_address=self.ocean_address, tokenOut_address=dtoken_address
+        return float(
+            from_wei(
+                pool.getSpotPrice(
+                    tokenIn_address=self.ocean_address, tokenOut_address=dtoken_address
+                )
             )
         )
 
@@ -415,7 +419,7 @@ class OceanPool:
     # convenient functions
 
     def getReserve(self, pool_address: str, token_address: str):
-        return from_base_18(BPool(pool_address).getBalance(token_address))
+        return float(from_wei(BPool(pool_address).getBalance(token_address)))
 
     def getMaxBuyQuantity(self, pool_address, token_address):
         return self.getReserve(pool_address, token_address) / 3.0
@@ -441,10 +445,10 @@ class OceanPool:
             pool.getDenormalizedWeight(token_in_address),
             pool.getBalance(token_out_address),
             pool.getDenormalizedWeight(token_out_address),
-            to_base_18(token_out_amount),
+            to_wei(Decimal(token_out_amount)),
             pool.getSwapFee(),
         )
-        return from_base_18(in_amount)
+        return float(from_wei(in_amount))
 
     def calcOutGivenIn(
         self,
@@ -459,23 +463,25 @@ class OceanPool:
             pool.getDenormalizedWeight(token_in_address),
             pool.getBalance(token_out_address),
             pool.getDenormalizedWeight(token_out_address),
-            to_base_18(token_in_amount),
+            to_wei(Decimal(token_in_amount)),
             pool.getSwapFee(),
         )
-        return from_base_18(out_amount)
+        return float(from_wei(out_amount))
 
     def calcPoolOutGivenSingleIn(
         self, pool_address: str, token_in_address: str, token_in_amount: float
     ):
         pool = BPool(pool_address)
-        return from_base_18(
-            pool.calcPoolOutGivenSingleIn(
-                pool.getBalance(token_in_address),
-                pool.getDenormalizedWeight(token_in_address),
-                pool.totalSupply(),
-                pool.getTotalDenormalizedWeight(),
-                to_base_18(token_in_amount),
-                pool.getSwapFee(),
+        return float(
+            from_wei(
+                pool.calcPoolOutGivenSingleIn(
+                    pool.getBalance(token_in_address),
+                    pool.getDenormalizedWeight(token_in_address),
+                    pool.totalSupply(),
+                    pool.getTotalDenormalizedWeight(),
+                    to_wei(Decimal(token_in_amount)),
+                    pool.getSwapFee(),
+                )
             )
         )
 
@@ -483,14 +489,16 @@ class OceanPool:
         self, pool_address: str, token_in_address: str, pool_shares: float
     ):
         pool = BPool(pool_address)
-        return from_base_18(
-            pool.calcSingleInGivenPoolOut(
-                pool.getBalance(token_in_address),
-                pool.getDenormalizedWeight(token_in_address),
-                pool.totalSupply(),
-                pool.getTotalDenormalizedWeight(),
-                to_base_18(pool_shares),
-                pool.getSwapFee(),
+        return float(
+            from_wei(
+                pool.calcSingleInGivenPoolOut(
+                    pool.getBalance(token_in_address),
+                    pool.getDenormalizedWeight(token_in_address),
+                    pool.totalSupply(),
+                    pool.getTotalDenormalizedWeight(),
+                    to_wei(Decimal(pool_shares)),
+                    pool.getSwapFee(),
+                )
             )
         )
 
@@ -498,14 +506,16 @@ class OceanPool:
         self, pool_address: str, token_out_address: str, pool_shares: float
     ):
         pool = BPool(pool_address)
-        return from_base_18(
-            pool.calcSingleInGivenPoolOut(
-                pool.getBalance(token_out_address),
-                pool.getDenormalizedWeight(token_out_address),
-                pool.totalSupply(),
-                pool.getTotalDenormalizedWeight(),
-                to_base_18(pool_shares),
-                pool.getSwapFee(),
+        return float(
+            from_wei(
+                pool.calcSingleInGivenPoolOut(
+                    pool.getBalance(token_out_address),
+                    pool.getDenormalizedWeight(token_out_address),
+                    pool.totalSupply(),
+                    pool.getTotalDenormalizedWeight(),
+                    to_wei(Decimal(pool_shares)),
+                    pool.getSwapFee(),
+                )
             )
         )
 
@@ -513,14 +523,16 @@ class OceanPool:
         self, pool_address: str, token_out_address: str, token_out_amount: float
     ):
         pool = BPool(pool_address)
-        return from_base_18(
-            pool.calcPoolInGivenSingleOut(
-                pool.getBalance(token_out_address),
-                pool.getDenormalizedWeight(token_out_address),
-                pool.totalSupply(),
-                pool.getTotalDenormalizedWeight(),
-                to_base_18(token_out_amount),
-                pool.getSwapFee(),
+        return float(
+            from_wei(
+                pool.calcPoolInGivenSingleOut(
+                    pool.getBalance(token_out_address),
+                    pool.getDenormalizedWeight(token_out_address),
+                    pool.totalSupply(),
+                    pool.getTotalDenormalizedWeight(),
+                    to_wei(Decimal(token_out_amount)),
+                    pool.getSwapFee(),
+                )
             )
         )
 
@@ -582,10 +594,10 @@ class OceanPool:
             pool.getDenormalizedWeight(token_in),
             pool.getBalance(token_out),
             pool.getDenormalizedWeight(token_out),
-            to_base_18(amount_out),
+            to_wei(Decimal(amount_out)),
             pool.getSwapFee(),
         )
-        return from_base_18(in_amount)
+        return float(from_wei(in_amount))
 
     def get_all_pools(self, from_block=0, chunk_size=1000, include_balance=False):
         web3 = Web3Provider.get_web3()
@@ -605,7 +617,7 @@ class OceanPool:
                 [
                     (
                         lg.args.bpoolAddress,
-                        from_base_18(
+                        from_wei(
                             BPool(lg.args.bpoolAddress).getBalance(self.ocean_address)
                         ),
                     )
@@ -767,7 +779,6 @@ class OceanPool:
         if not flags:
             flags = self.POOL_INFO_FLAGS
 
-        from18 = from_base_18
         web3 = Web3Provider.get_web3()
         current_block = (
             to_block if to_block is not None else web3.eth.block_number
@@ -794,7 +805,7 @@ class OceanPool:
             token_holders = []
             if "dtHolders" in flags:
                 token_holders = dt.calculate_token_holders(
-                    from_block, to_block, 0.000001
+                    from_block, to_block, to_wei("0.000001")
                 )
 
             order_logs = dt.get_start_order_logs(
@@ -806,10 +817,10 @@ class OceanPool:
                 "name": dt.datatoken_name(),
                 "symbol": dt.symbol(),
                 "deciamls": dt.decimals(),
-                "cap": from18(dt.cap()),
-                "totalSupply": from18(dt.totalSupply()),
+                "cap": from_wei(dt.cap()),
+                "totalSupply": from_wei(dt.totalSupply()),
                 "minter": minter,
-                "minterBalance": from18(dt.balanceOf(minter)),
+                "minterBalance": from_wei(dt.balanceOf(minter)),
                 "numHolders": len(token_holders),
                 "holders": token_holders,
                 "numOrders": len(order_logs),
@@ -818,7 +829,7 @@ class OceanPool:
         if "price" in flags:
             info_dict.update(
                 {
-                    "spotPrice1DT": from18(
+                    "spotPrice1DT": from_wei(
                         pool.getSpotPrice(self.ocean_address, dt_address)
                     ),
                     "totalPrice1DT": self.getOceanRequiredToBuyDT(
@@ -828,27 +839,27 @@ class OceanPool:
             )
 
         if "reserve" in flags:
-            ocn_reserve = from18(pool.getBalance(self.ocean_address))
-            dt_reserve = from18(pool.getBalance(dt_address))
+            ocn_reserve = from_wei(pool.getBalance(self.ocean_address))
+            dt_reserve = from_wei(pool.getBalance(dt_address))
             info_dict.update(
                 {
-                    "oceanWeight": from18(
+                    "oceanWeight": from_wei(
                         pool.getDenormalizedWeight(self.ocean_address)
                     ),
                     "oceanReserve": ocn_reserve,
-                    "dtWeight": from18(pool.getDenormalizedWeight(dt_address)),
+                    "dtWeight": from_wei(pool.getDenormalizedWeight(dt_address)),
                     "dtReserve": dt_reserve,
                 }
             )
         if "shares" in flags or "creator" in flags:
             pool_creator = pool.getController()
-            shares = from18(pool.totalSupply())
+            shares = from_wei(pool.totalSupply())
             info_dict.update({"creator": pool_creator})
 
         if "shareHolders" in flags:
             pool_erc20 = DataToken(pool_address)
             pool_holders = pool_erc20.calculate_token_holders(
-                from_block, current_block, 0.001
+                from_block, current_block, to_wei("0.001")
             )
             info_dict.update(
                 {"numShareHolders": len(pool_holders), "shareHolders": pool_holders}
@@ -865,7 +876,7 @@ class OceanPool:
                 dt_address,
                 raw_result=False,
             )  # RPC_CALL
-            total_ocn_additions = from18(
+            total_ocn_additions = from_wei(
                 sum(r[2] for r in all_join_records if r[1] == self.ocean_address)
             )
             all_exit_records = self.get_all_liquidity_removals(
@@ -876,7 +887,7 @@ class OceanPool:
                 dt_address,
                 raw_result=False,
             )  # RPC_CALL
-            total_ocn_removals = from18(
+            total_ocn_removals = from_wei(
                 sum(r[2] for r in all_exit_records if r[1] == self.ocean_address)
             )
             info_dict.update(
@@ -887,19 +898,19 @@ class OceanPool:
             )
 
         if "liquidity" in flags:
-            creator_shares = from18(pool.balanceOf(pool_creator))
+            creator_shares = from_wei(pool.balanceOf(pool_creator))
             creator_shares_percent = creator_shares / shares
 
             account_to_join_record = self.get_account_to_liquidity_records_map(
                 all_join_records
             )
             ocean_additions = [
-                from18(r[2])
+                from_wei(r[2])
                 for r in account_to_join_record[pool_creator]
                 if r[1] == self.ocean_address
             ]
             dt_additions = [
-                from18(r[2])
+                from_wei(r[2])
                 for r in account_to_join_record[pool_creator]
                 if r[1] == dt_address
             ]
@@ -908,12 +919,12 @@ class OceanPool:
                 all_exit_records
             )
             ocean_removals = [
-                from18(r[2])
+                from_wei(r[2])
                 for r in account_to_exit_record.get(pool_creator, [])
                 if r[1] == self.ocean_address
             ]
             dt_removals = [
-                from18(r[2])
+                from_wei(r[2])
                 for r in account_to_exit_record.get(pool_creator, [])
                 if r[1] == dt_address
             ]
@@ -930,27 +941,27 @@ class OceanPool:
                 all_swap_records
             )
             ocean_in = [
-                from18(r[2])
+                from_wei(r[2])
                 for r in account_to_swap_record.get(pool_creator, [])
                 if r[1] == self.ocean_address
             ]
             dt_in = [
-                from18(r[2])
+                from_wei(r[2])
                 for r in account_to_swap_record.get(pool_creator, [])
                 if r[1] == dt_address
             ]
             ocean_out = [
-                from18(r[4])
+                from_wei(r[4])
                 for r in account_to_swap_record.get(pool_creator, [])
                 if r[3] == self.ocean_address
             ]
             dt_out = [
-                from18(r[4])
+                from_wei(r[4])
                 for r in account_to_swap_record.get(pool_creator, [])
                 if r[3] == dt_address
             ]
 
-            swap_fee = from18(pool.getSwapFee())
+            swap_fee = from_wei(pool.getSwapFee())
             sum_ocean_additions = sum(ocean_additions)
             sum_ocean_removals = sum(ocean_removals)
             sum_ocn_swap_in = sum(ocean_in)
@@ -1008,28 +1019,27 @@ class OceanPool:
         exit_records = self.get_all_liquidity_removals(web3, pool_address, pool_block)
         swap_records = self.get_all_swaps(web3, pool_address, pool_block)
 
-        from18 = from_base_18
         ocn_address = self.ocean_address
         # Liquidity Additions
         ocn_liq_add_list = [
-            (from18(r.args.tokenAmountIn), r.blockNumber)
+            (from_wei(r.args.tokenAmountIn), r.blockNumber)
             for r in join_records
             if r.args.tokenIn == ocn_address
         ]
         dt_liq_add_list = [
-            (from18(r.args.tokenAmountIn), r.blockNumber)
+            (from_wei(r.args.tokenAmountIn), r.blockNumber)
             for r in join_records
             if r.args.tokenIn != ocn_address
         ]
 
         # Liquidity removals
         ocn_liq_rem_list = [
-            (from18(r.args.tokenAmountOut), r.blockNumber)
+            (from_wei(r.args.tokenAmountOut), r.blockNumber)
             for r in exit_records
             if r.args.tokenOut == ocn_address
         ]
         dt_liq_rem_list = [
-            (from18(r.args.tokenAmountOut), r.blockNumber)
+            (from_wei(r.args.tokenAmountOut), r.blockNumber)
             for r in exit_records
             if r.args.tokenOut != ocn_address
         ]
@@ -1039,11 +1049,11 @@ class OceanPool:
             block_no = r.blockNumber
             if r.args.tokenIn == ocn_address:
                 # ocn is the tokenIn
-                ocn_liq_add_list.append((from18(r.args.tokenAmountIn), block_no))
-                dt_liq_rem_list.append((from18(r.args.tokenAmountOut), block_no))
+                ocn_liq_add_list.append((from_wei(r.args.tokenAmountIn), block_no))
+                dt_liq_rem_list.append((from_wei(r.args.tokenAmountOut), block_no))
             else:  # ocn is the tokenOut
-                ocn_liq_rem_list.append((from18(r.args.tokenAmountOut), block_no))
-                dt_liq_add_list.append((from18(r.args.tokenAmountIn), block_no))
+                ocn_liq_rem_list.append((from_wei(r.args.tokenAmountOut), block_no))
+                dt_liq_add_list.append((from_wei(r.args.tokenAmountIn), block_no))
 
         ocn_liq_rem_list = [(-v, t) for v, t in ocn_liq_rem_list]
         dt_liq_rem_list = [(-v, t) for v, t in dt_liq_rem_list]

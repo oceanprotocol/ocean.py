@@ -8,6 +8,7 @@ import copy
 import logging
 import lzma
 import os
+from decimal import Decimal
 from typing import Optional
 
 from enforce_typing import enforce_types
@@ -40,8 +41,8 @@ from ocean_lib.exceptions import (
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
-from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.utils import (
     add_ethereum_prefix_and_hash_msg,
@@ -211,9 +212,9 @@ class OceanAssets:
             name = dt_name or metadata["main"]["name"]
             symbol = dt_symbol or name
             # register on-chain
-            _cap = dt_cap if dt_cap else DataToken.DEFAULT_CAP
+            _cap = dt_cap if dt_cap else from_wei(DataToken.DEFAULT_CAP_IN_WEI)
             tx_id = dtfactory.createToken(
-                blob, name, symbol, to_base_18(_cap), from_wallet=publisher_wallet
+                blob, name, symbol, to_wei(Decimal(_cap)), from_wallet=publisher_wallet
             )
             data_token = DataToken(dtfactory.get_token_address(tx_id))
             if not data_token:
@@ -499,7 +500,7 @@ class OceanAssets:
         :param consumer: str the address of consumer of the service, defaults to the payer (the `from_wallet` address)
         :return: hex str id of transfer transaction
         """
-        amount_base = to_base_18(amount)
+        amount_base = to_wei(Decimal(amount))
         dt = DataToken(token_address)
         balance = dt.balanceOf(from_wallet.address)
         if balance < amount_base:

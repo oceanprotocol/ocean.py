@@ -47,8 +47,8 @@ print(f"Address of your account: {wallet.address}")
 
 #get balance
 OCEAN_balance_base18 = OCEAN_token.balanceOf(wallet.address) #like wei
-from ocean_lib.ocean import util
-OCEAN_balance = util.from_base_18(OCEAN_balance_base18) #like eth
+from ocean_lib.web3_internal.currency import from_wei
+OCEAN_balance = from_wei(OCEAN_balance_base18) #like eth
 print(f"Balance: {OCEAN_balance} OCEAN")
 if OCEAN_balance == 0.0:
   print("WARNING: you don't have any OCEAN yet")

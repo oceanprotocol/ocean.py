@@ -4,7 +4,6 @@
 #
 import logging
 from collections import namedtuple
-from decimal import Decimal
 
 from enforce_typing import enforce_types
 from eth_keys import keys
@@ -154,7 +153,3 @@ def get_ether_balance(address: str) -> int:
     :return: balance, int
     """
     return Web3Provider.get_web3().eth.get_balance(address, block_identifier="latest")
-
-
-def from_wei(wei_value: int) -> Decimal:
-    return Web3Provider.get_web3().fromWei(wei_value, "ether")

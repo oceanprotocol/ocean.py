@@ -6,7 +6,6 @@
 import os
 
 import pytest
-
 from ocean_lib.config import Config
 from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.ocean import util
@@ -16,15 +15,12 @@ from ocean_lib.ocean.env_constants import (
     ENV_INFURA_PROJECT_ID,
 )
 from ocean_lib.ocean.util import (
-    to_base_18,
-    to_base,
     from_base,
-    from_base_18,
-    get_dtfactory_address,
     get_bfactory_address,
+    get_dtfactory_address,
     get_ocean_token_address,
-    init_components,
     get_web3_connection_provider,
+    init_components,
 )
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 
@@ -142,27 +138,11 @@ def test_get_contracts_addresses():
         assert value.startswith("0x"), "It is not a token address."
 
 
-def test_to_base_18():
-    res = to_base_18(1.0)
-    assert res == 1000000000000000000, "Incorrect conversion to wei."
-
-
-def test_to_base():
-    res = to_base(1.0, 10)
-    assert res == 10000000000, "Incorrect conversion to wei."
-    res = to_base(1.0, 2)
-    assert res == 100, "Incorrect conversion to wei."
-    res = to_base(1.0, 18)
-    assert res == to_base_18(1.0), "Incorrect conversion to wei."
-
-
-def test_from_base_and_from_base_18():
+def test_from_base():
     res = from_base(10000000000, 10)
-    assert res == 1.0, "Incorrect conversion to ETH."
+    assert res == 1.0, "Incorrect conversion to ether."
     res = from_base(100, 2)
-    assert res == 1.0, "Incorrect conversion to ETH."
-    res = from_base(to_base_18(1.0), 18)
-    assert res == from_base_18(to_base_18(1.0)), "Incorrect conversion to ETH."
+    assert res == 1.0, "Incorrect conversion to ether."
 
 
 def test_get_dtfactory_address():

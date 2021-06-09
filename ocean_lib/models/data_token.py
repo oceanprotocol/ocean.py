@@ -13,14 +13,14 @@ from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.web3_internal.currency import from_wei, wei_and_pretty_ether
 from ocean_lib.web3_internal.event_filter import EventFilter
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3 import Web3
-from web3.exceptions import MismatchedABI
 from web3._utils.events import get_event_data
+from web3.exceptions import MismatchedABI
 from websockets import ConnectionClosed
 
 OrderValues = namedtuple(
@@ -32,14 +32,19 @@ OrderValues = namedtuple(
 @enforce_types
 class DataToken(ContractBase):
     CONTRACT_NAME = "DataTokenTemplate"
-    DEFAULT_CAP = 1000.0
-    DEFAULT_CAP_BASE = to_base_18(DEFAULT_CAP)
+
+    DEFAULT_CAP_IN_WEI = 1_000_000_000_000_000_000_000  # 1000 datatokens
+
+    # HACK: Remove this after all APIs only support wei
+    DEFAULT_CAP_IN_ETHER = 1000.0
 
     ORDER_STARTED_EVENT = "OrderStarted"
     ORDER_FINISHED_EVENT = "OrderFinished"
 
-    OPF_FEE_PERCENTAGE = 0.001
-    MAX_MARKET_FEE_PERCENTAGE = 0.001
+    ONE_DATATOKEN_IN_WEI = 1_000_000_000_000_000_000  # 1 datatoken
+
+    OPF_FEE_PER_DATATOKEN_IN_WEI = ONE_DATATOKEN_IN_WEI // 1000
+    MAX_MARKET_FEE_PER_DATATOKEN_IN_WEI = ONE_DATATOKEN_IN_WEI // 1000
 
     # ============================================================
     # reflect DataToken Solidity methods
@@ -107,8 +112,8 @@ class DataToken(ContractBase):
     def isInitialized(self) -> bool:
         return self.contract_concise.isInitialized()
 
-    def calculateFee(self, amount: int, fee_percentage: int) -> int:
-        return self.contract_concise.calculateFee(amount, fee_percentage)
+    def calculateFee(self, amount: int, fee_per_datatoken_in_wei: int) -> int:
+        return self.contract_concise.calculateFee(amount, fee_per_datatoken_in_wei)
 
     # ============================================================
     # reflect required ERC20 standard functions
@@ -375,16 +380,17 @@ class DataToken(ContractBase):
                 f"event: (serviceId={order_log.args.serviceId}"
             )
 
-        target_amount = amount_base - self.calculate_fee(
-            amount_base, self.OPF_FEE_PERCENTAGE
+        target_amount = amount_base - self.calculateFee(
+            amount_base, self.OPF_FEE_PER_DATATOKEN_IN_WEI
         )
         if order_log.args.mrktFeeCollector and order_log.args.marketFee > 0:
-            assert order_log.args.marketFee <= (
-                self.calculate_fee(amount_base, self.MAX_MARKET_FEE_PERCENTAGE) + 5
-            ), (
+            max_market_fee_in_wei = self.calculateFee(
+                amount_base, self.MAX_MARKET_FEE_PER_DATATOKEN_IN_WEI
+            )
+            assert order_log.args.marketFee <= (max_market_fee_in_wei + 5), (
                 f"marketFee {order_log.args.marketFee} exceeds the expected maximum "
-                f"of {self.calculate_fee(amount_base, self.MAX_MARKET_FEE_PERCENTAGE)} "
-                f"based on feePercentage={self.MAX_MARKET_FEE_PERCENTAGE} ."
+                f"of {max_market_fee_in_wei} based on feePercentage="
+                f"{from_wei(self.MAX_MARKET_FEE_PER_DATATOKEN_IN_WEI)} ."
             )
             target_amount = target_amount - order_log.args.marketFee
 
@@ -409,8 +415,8 @@ class DataToken(ContractBase):
         if total < (target_amount - 5):
             raise ValueError(
                 f"transferred value does meet the service cost: "
-                f"service.cost - fees={from_base_18(target_amount)}, "
-                f"transferred value={from_base_18(total)}"
+                f"service.cost - fees={wei_and_pretty_ether(target_amount)}, "
+                f"transferred value={wei_and_pretty_ether(total)}"
             )
         return tx, order_log, transfers[-1]
 
@@ -428,7 +434,7 @@ class DataToken(ContractBase):
         return os.path.join(destination_folder, file_name)
 
     def token_balance(self, account: str):
-        return from_base_18(self.balanceOf(account))
+        return float(from_wei(self.balanceOf(account)))
 
     def _get_url_from_blob(self, int_code):
         try:
@@ -450,54 +456,23 @@ class DataToken(ContractBase):
         return self._get_url_from_blob(0)
 
     def calculate_token_holders(
-        self, from_block: int, to_block: int, min_token_amount: float
-    ) -> List[Tuple[str, float]]:
+        self, from_block: int, to_block: int, min_token_amount: int
+    ) -> List[Tuple[str, int]]:
         """Returns a list of addresses with token balances above a minimum token
         amount. Calculated from the transactions between `from_block` and `to_block`."""
         all_transfers, _ = self.get_all_transfers_from_events(from_block, to_block)
         balances_above_threshold = []
         balances = DataToken.calculate_balances(all_transfers)
-        _min = to_base_18(min_token_amount)
+        _min = min_token_amount
         balances_above_threshold = sorted(
-            [(a, from_base_18(b)) for a, b in balances.items() if b > _min],
+            [(a, b) for a, b in balances.items() if b > _min],
             key=lambda x: x[1],
             reverse=True,
         )
         return balances_above_threshold
 
-    # ============================================================
-    # Token transactions using amount of tokens as a float instead of int
-    # amount of tokens will be converted to the base value before sending
-    # the transaction
-    def approve_tokens(
-        self, spender: str, value: float, from_wallet: Wallet, wait: bool = False
-    ):
-        txid = self.approve(spender, to_base_18(value), from_wallet)
-        if wait:
-            self.get_tx_receipt(txid)
-
-        return txid
-
-    def mint_tokens(self, to_account: str, value: float, from_wallet: Wallet):
-        return self.mint(to_account, to_base_18(value), from_wallet)
-
-    def transfer_tokens(self, to: str, value: float, from_wallet: Wallet):
-        return self.transfer(to, to_base_18(value), from_wallet)
-
     ################
     # Helpers
-    @staticmethod
-    def get_max_fee_percentage():
-        return DataToken.OPF_FEE_PERCENTAGE + DataToken.MAX_MARKET_FEE_PERCENTAGE
-
-    @staticmethod
-    def calculate_max_fee(amount):
-        return DataToken.calculate_fee(amount, DataToken.get_max_fee_percentage())
-
-    @staticmethod
-    def calculate_fee(amount, percentage):
-        return int(amount * to_base_18(percentage) / to_base_18(1.0))
-
     @staticmethod
     def calculate_balances(transfers) -> List[Tuple[str, int]]:
         _from = [t[0].lower() for t in transfers]

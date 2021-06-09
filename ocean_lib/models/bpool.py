@@ -8,7 +8,8 @@ import typing
 from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
 from ocean_lib.models import balancer_constants
-from ocean_lib.ocean import util
+from ocean_lib.ocean.util import from_base
+from ocean_lib.web3_internal.currency import from_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from web3._utils.events import get_event_data
 
@@ -35,8 +36,8 @@ class BPool(BToken):
         s += [f"  isPublicSwap = {self.isPublicSwap()}"]
         s += [f"  isFinalized = {self.isFinalized()}"]
 
-        swap_fee = util.from_base_18(self.getSwapFee())
-        s += ["  swapFee = %.2f%%" % (swap_fee * 100.0)]
+        swap_fee = from_wei(self.getSwapFee())
+        s += ["  swapFee = %.2f%%" % (float(swap_fee) * 100.0)]
 
         s += [f"  numTokens = {self.getNumTokens()}"]
         cur_addrs = self.getCurrentTokens()
@@ -54,18 +55,18 @@ class BPool(BToken):
 
         s += ["  weights (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
-            denorm_w = util.from_base_18(self.getDenormalizedWeight(addr))
-            norm_w = util.from_base_18(self.getNormalizedWeight(addr))
+            denorm_w = from_wei(self.getDenormalizedWeight(addr))
+            norm_w = from_wei(self.getNormalizedWeight(addr))
             s += [f"    {symbol}: denorm_w={denorm_w}, norm_w={norm_w} "]
 
-        total_denorm_w = util.from_base_18(self.getTotalDenormalizedWeight())
+        total_denorm_w = from_wei(self.getTotalDenormalizedWeight())
         s += [f"    total_denorm_w={total_denorm_w}"]
 
         s += ["  balances (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
             balance_base = self.getBalance(addr)
             dec = BToken(addr).decimals()
-            balance = util.from_base(balance_base, dec)
+            balance = from_base(balance_base, dec)
             s += [f"    {symbol}: {balance}"]
 
         return "\n".join(s)

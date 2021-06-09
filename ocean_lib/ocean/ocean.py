@@ -6,6 +6,7 @@
 """Ocean module."""
 import logging
 import os
+from decimal import Decimal
 
 from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
@@ -24,14 +25,13 @@ from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.ocean_pool import OceanPool
 from ocean_lib.ocean.ocean_services import OceanServices
 from ocean_lib.ocean.util import (
-    from_base_18,
     get_bfactory_address,
     get_contracts_addresses,
     get_ocean_token_address,
     get_web3_connection_provider,
-    to_base_18,
 )
 from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
@@ -149,7 +149,7 @@ class Ocean:
         name: str,
         symbol: str,
         from_wallet: Wallet,
-        cap: float = DataToken.DEFAULT_CAP,
+        cap: float = DataToken.DEFAULT_CAP_IN_ETHER,
         blob: str = "",
     ) -> DataToken:
         """
@@ -173,7 +173,7 @@ class Ocean:
 
         dtfactory = self.get_dtfactory()
         tx_id = dtfactory.createToken(
-            blob, name, symbol, to_base_18(cap), from_wallet=from_wallet
+            blob, name, symbol, to_wei(Decimal(cap)), from_wallet=from_wallet
         )
         address = dtfactory.get_token_address(tx_id)
         assert address, "new datatoken has no address"
@@ -209,8 +209,8 @@ class Ocean:
             self._web3, address, from_all_tokens=not bool(datatoken)
         ):
             a = dict(log.args.items())
-            a["amount"] = from_base_18(int(log.args.amount))
-            a["marketFee"] = from_base_18(int(log.args.marketFee))
+            a["amount"] = from_wei(int(log.args.amount))
+            a["marketFee"] = from_wei(int(log.args.marketFee))
             a = AttributeDict(a.items())
 
             # 'datatoken', 'amount', 'timestamp', 'transactionId', 'did', 'payer', 'consumer', 'serviceId', 'serviceType'

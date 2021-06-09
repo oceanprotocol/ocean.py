@@ -3,12 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+from decimal import Decimal
+
 from enforce_typing import enforce_types
 from ocean_lib.config import Config
 from ocean_lib.exceptions import VerifyTxFailed
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.ocean.util import from_base_18, to_base_18
+from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.exceptions import ValidationError
 
@@ -26,9 +28,9 @@ class OceanExchange:
 
     def get_quote(self, amount: float, exchange_id: str):
         exchange = self._exchange_contract()
-        amount_base = to_base_18(amount)
+        amount_base = to_wei(Decimal(amount))
         ocean_amount_base = exchange.get_base_token_quote(exchange_id, amount_base)
-        return from_base_18(ocean_amount_base)
+        return float(from_wei(ocean_amount_base))
 
     def get_exchange_id_fallback_dt_and_owner(
         self, exchange_id, exchange_owner, data_token
@@ -61,19 +63,20 @@ class OceanExchange:
             exchange_id, exchange_owner, data_token
         )
 
-        amount_base = to_base_18(amount)
-        max_OCEAN_amount_base = to_base_18(max_OCEAN_amount)
+        amount_base = to_wei(Decimal(amount))
+        max_OCEAN_amount_base = to_wei(Decimal(max_OCEAN_amount))
 
         # Figure out the amount of ocean tokens to approve before triggering the exchange function to do the swap
         ocean_amount_base = exchange.get_base_token_quote(exchange_id, amount_base)
         if ocean_amount_base > max_OCEAN_amount_base:
             raise ValidationError(
-                f"Buying {amount} datatokens requires {from_base_18(ocean_amount_base)} OCEAN "
+                f"Buying {amount} datatokens requires {from_wei(ocean_amount_base)} OCEAN "
                 f"tokens which exceeds the max_OCEAN_amount {max_OCEAN_amount}."
             )
         ocean_token = DataToken(self.ocean_address)
         ocean_token.get_tx_receipt(
-            ocean_token.approve(self._exchange_address, ocean_amount_base, wallet)
+            # HACK: Approving ocean_amount_base instead of max_OCEAN_amount_base after floats have been removed
+            ocean_token.approve(self._exchange_address, max_OCEAN_amount_base, wallet)
         )
         tx_id = exchange.buy_data_token(
             exchange_id, data_token_amount=amount_base, from_wallet=wallet
@@ -83,7 +86,7 @@ class OceanExchange:
     def create(self, data_token: str, exchange_rate: float, wallet: Wallet) -> str:
         assert exchange_rate > 0, "Invalid exchange rate, must be > 0"
         exchange = self._exchange_contract()
-        exchange_rate_base = to_base_18(exchange_rate)
+        exchange_rate_base = to_wei(Decimal(exchange_rate))
         tx_id = exchange.create(
             self.ocean_address, data_token, exchange_rate_base, from_wallet=wallet
         )
@@ -113,7 +116,7 @@ class OceanExchange:
         exchange_owner: str = "",
     ) -> bool:
         assert new_rate > 0, "Invalid exchange rate, must be > 0"
-        exchange_rate_base = to_base_18(new_rate)
+        exchange_rate_base = to_wei(Decimal(new_rate))
 
         exchange, exchange_id = self.get_exchange_id_fallback_dt_and_owner(
             exchange_id, exchange_owner, data_token
