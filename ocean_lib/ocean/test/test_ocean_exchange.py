@@ -2,7 +2,6 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from decimal import Decimal
 
 import pytest
 from ocean_lib.config_provider import ConfigProvider
@@ -30,11 +29,11 @@ def test_ocean_exchange(publisher_ocean_instance):
     dt = ocn.create_data_token(
         "DataToken1", "DT1", alice_wallet, blob="http://example.com"
     )
-    dt.mint(bob_wallet.address, to_wei(Decimal("100.0")), alice_wallet)
+    dt.mint(bob_wallet.address, to_wei(100), alice_wallet)
     ox = OceanExchange(ocn.OCEAN_address, _get_exchange_address(), ocn.config)
-    rate = Decimal("0.9")
+    rate = 0.9
     x_id = ox.create(dt.address, rate, bob_wallet)
-    dt.approve(ox._exchange_address, to_wei(Decimal("20.0")), bob_wallet)
+    dt.approve(ox._exchange_address, to_wei(20), bob_wallet)
 
     # create with invalid token address
     with pytest.raises(ValueError):
@@ -46,7 +45,7 @@ def test_ocean_exchange(publisher_ocean_instance):
 
     # create with negative rate, should fail
     with pytest.raises(AssertionError):
-        _ = ox.create(dt.address, float(rate * Decimal("-1.0")), bob_wallet)
+        _ = ox.create(dt.address, rate * -1.0, bob_wallet)
 
     # create using 0 rate
     with pytest.raises(AssertionError):
@@ -56,8 +55,8 @@ def test_ocean_exchange(publisher_ocean_instance):
     # get_quote
     base_token_amount = ox.get_quote(2.0, exchange_id=x_id)
     assert (
-        base_token_amount == Decimal(2) * rate
-    ), f"unexpected quote of base token {base_token_amount}, should be {Decimal(2) * rate}."
+        base_token_amount == 2 * rate
+    ), f"unexpected quote of base token {base_token_amount}, should be {2 * rate}."
 
     #############
     # test buying datatokens

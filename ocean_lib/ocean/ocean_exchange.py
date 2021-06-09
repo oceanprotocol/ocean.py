@@ -75,7 +75,8 @@ class OceanExchange:
             )
         ocean_token = DataToken(self.ocean_address)
         ocean_token.get_tx_receipt(
-            ocean_token.approve(self._exchange_address, ocean_amount_base, wallet)
+            # HACK: Approving ocean_amount_base instead of max_OCEAN_amount_base after floats have been removed
+            ocean_token.approve(self._exchange_address, max_OCEAN_amount_base, wallet)
         )
         tx_id = exchange.buy_data_token(
             exchange_id, data_token_amount=amount_base, from_wallet=wallet
