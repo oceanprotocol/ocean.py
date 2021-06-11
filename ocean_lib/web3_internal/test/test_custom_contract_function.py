@@ -4,7 +4,7 @@
 #
 import pytest
 from ocean_lib.web3_internal.web3_overrides.contract import wait_for_tx
-from web3.utils.threads import Timeout
+from web3._utils.threads import Timeout
 
 
 def test_wait_for_tx_failures(alice_ocean):
