@@ -6,14 +6,23 @@
 import os
 
 import pytest
-from ocean_lib.config import Config
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.ocean import util
 from ocean_lib.ocean.env_constants import (
-    ENV_CONFIG_FILE,
     ENV_INFURA_CONNECTION_TYPE,
     ENV_INFURA_PROJECT_ID,
 )
+from ocean_lib.ocean.util import (
+    from_base,
+    from_base_18,
+    get_bfactory_address,
+    get_dtfactory_address,
+    get_ocean_token_address,
+    get_web3_connection_provider,
+    init_components,
+    to_base,
+    to_base_18,
+)
+from ocean_lib.web3_internal.contract_handler import ContractHandler
 
 
 def test_get_infura_connection_type(monkeypatch):
@@ -85,9 +94,17 @@ def test_get_web3_connection_provider(monkeypatch):
     provider = util.get_web3_connection_provider("rinkeby")
     assert provider.endpoint_uri == "https://rinkeby.infura.io/v3/id1"
 
+    # polygon network name
+    assert (
+        "polygon" in util.SUPPORTED_NETWORK_NAMES
+    ), "polygon is missing from SUPPORTED_NETWORK_NAMES"
+    assert util.POLYGON_URL == "https://rpc.polygon.oceanprotocol.com"
+    provider = util.get_web3_connection_provider("polygon")
+    assert provider.endpoint_uri == "https://rpc.polygon.oceanprotocol.com"
+
     # all infura-supported network names
     for network in util.SUPPORTED_NETWORK_NAMES:
-        if network == "ganache":
+        if network == "ganache" or "polygon":
             continue  # tested above
         monkeypatch.setenv(ENV_INFURA_PROJECT_ID, f"id_{network}")
         provider = util.get_web3_connection_provider(network)
@@ -103,10 +120,8 @@ def test_get_web3_connection_provider(monkeypatch):
     assert provider.endpoint_uri == "wss://bah.com"
 
 
-def test_get_contracts_addresses():
-    config = Config(os.getenv(ENV_CONFIG_FILE))
-    ConfigProvider.set_config(config)
-    addresses = util.get_contracts_addresses("ganache", config)
+def test_get_contracts_addresses(config):
+    addresses = util.get_contracts_addresses(config.address_file, "ganache")
     assert addresses
     assert isinstance(addresses, dict)
     assert (
@@ -121,12 +136,66 @@ def test_get_contracts_addresses():
         assert value.startswith("0x"), "It is not a token address."
 
 
-# FIXME: add tests for:
-# to_base_18
-# to_base
-# from_base_18
-# from_base
-# get_dtfactory_address
-# get_bfactory_address
-# get_ocean_token_address
-# init_components
+def test_to_base_18():
+    res = to_base_18(1.0)
+    assert res == 1000000000000000000, "Incorrect conversion to wei."
+
+
+def test_to_base():
+    res = to_base(1.0, 10)
+    assert res == 10000000000, "Incorrect conversion to wei."
+    res = to_base(1.0, 2)
+    assert res == 100, "Incorrect conversion to wei."
+    res = to_base(1.0, 18)
+    assert res == to_base_18(1.0), "Incorrect conversion to wei."
+
+
+def test_from_base_and_from_base_18():
+    res = from_base(10000000000, 10)
+    assert res == 1.0, "Incorrect conversion to ETH."
+    res = from_base(100, 2)
+    assert res == 1.0, "Incorrect conversion to ETH."
+    res = from_base(to_base_18(1.0), 18)
+    assert res == from_base_18(to_base_18(1.0)), "Incorrect conversion to ETH."
+
+
+def test_get_dtfactory_address(config):
+    addresses = util.get_contracts_addresses(config.address_file, "ganache")
+    assert addresses
+    assert isinstance(addresses, dict)
+    assert "DTFactory" in addresses
+
+    address = get_dtfactory_address(config.address_file)
+    assert address[:2] == "0x", "It is not a token address."
+    assert address == addresses["DTFactory"]
+
+
+def test_get_bfactory_address(config):
+    addresses = util.get_contracts_addresses(config.address_file, "ganache")
+    assert addresses
+    assert isinstance(addresses, dict)
+    assert "BFactory" in addresses
+
+    address = get_bfactory_address(config.address_file)
+    assert address[:2] == "0x", "It is not a token address."
+    assert address == addresses["BFactory"]
+
+
+def test_get_ocean_token_address(config):
+    addresses = util.get_contracts_addresses(config.address_file, "ganache")
+    assert addresses
+    assert isinstance(addresses, dict)
+    assert "Ocean" in addresses
+
+    address = get_ocean_token_address(config.address_file)
+    assert address[:2] == "0x", "It is not a token address."
+    assert address == addresses["Ocean"]
+
+
+def test_init_components(config):
+    init_components(config)
+    assert (
+        get_web3_connection_provider(config.network_url).endpoint_uri
+        == "http://localhost:8545"
+    )
+    assert ContractHandler.artifacts_path == config.artifacts_path

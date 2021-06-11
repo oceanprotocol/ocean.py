@@ -7,7 +7,7 @@
 import logging
 import os
 
-from ocean_lib.web3_internal.utils import privateKeyToAddress
+from ocean_lib.web3_internal.utils import private_key_to_address
 
 logger = logging.getLogger("account")
 
@@ -54,12 +54,13 @@ class Account:
         self._private_key = private_key
 
         if self.address is None and self._private_key is not None:
-            self.address = privateKeyToAddress(private_key)
+            self.address = private_key_to_address(private_key)
 
         assert self.address is not None
 
     @property
     def key_file(self):
+        """Holds the key file path"""
         return (
             os.path.expandvars(os.path.expanduser(self._key_file))
             if self._key_file
@@ -68,10 +69,12 @@ class Account:
 
     @property
     def private_key(self):
+        """Holds the private key"""
         return self._private_key
 
     @property
     def key(self):
+        """Returns the private key (if defined) or the encrypted key."""
         if self._private_key:
             return self._private_key
 

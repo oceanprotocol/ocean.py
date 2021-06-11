@@ -2,30 +2,20 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-
-"""isort:skip_file"""
-
-import uuid
-import os
 import json
+import os
+import uuid
 
 import pytest
-from ocean_lib.config_provider import ConfigProvider
-
-# Setup ocean_lib.enforce_typing_shim before importing anything that uses it
-from ocean_lib.enforce_typing_shim import setup_enforce_typing_shim
-
-setup_enforce_typing_shim()
-
-from ocean_lib.example_config import ExampleConfig  # noqa: E402
-from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18  # noqa: E402
-from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider  # noqa: E402
-from ocean_lib.web3_internal.contract_handler import ContractHandler  # noqa: E402
-from ocean_lib.web3_internal.transactions import send_ether  # noqa: E402
-from ocean_lib.web3_internal.utils import from_wei, get_ether_balance  # noqa: E402
-from ocean_lib.web3_internal.web3_provider import Web3Provider  # noqa: E402
-from tests.resources.ddo_helpers import get_metadata  # noqa: E402
-from tests.resources.helper_functions import (  # noqa: E402
+from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
+from ocean_lib.example_config import ExampleConfig
+from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18
+from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.transactions import send_ether
+from ocean_lib.web3_internal.utils import from_wei, get_ether_balance
+from ocean_lib.web3_internal.web3_provider import Web3Provider
+from tests.resources.ddo_helpers import get_metadata
+from tests.resources.helper_functions import (
     get_consumer_ocean_instance,
     get_consumer_wallet,
     get_ganache_wallet,
@@ -34,17 +24,14 @@ from tests.resources.helper_functions import (  # noqa: E402
     setup_logging,
 )
 
-
 setup_logging()
 
 
 @pytest.fixture(autouse=True)
-def setup_all(request):
+def setup_all(request, config):
     # a test can skip setup_all() via decorator "@pytest.mark.nosetup_all"
     if "nosetup_all" in request.keywords:
         return
-    config = ExampleConfig.get_config()
-    ConfigProvider.set_config(config)
     Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
     ContractHandler.set_artifacts_path(config.artifacts_path)
 
@@ -61,7 +48,7 @@ def setup_all(request):
         network_addresses = json.load(f)
 
     print(
-        f"sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keysStr()}"
+        f"sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keys_str()}"
     )
     print(f"sender balance: {from_wei(get_ether_balance(wallet.address))}")
     assert (
@@ -85,6 +72,11 @@ def setup_all(request):
 
 
 @pytest.fixture
+def config():
+    return ExampleConfig.get_config()
+
+
+@pytest.fixture
 def publisher_ocean_instance():
     return get_publisher_ocean_instance()
 
@@ -95,14 +87,12 @@ def consumer_ocean_instance():
 
 
 @pytest.fixture
-def web3_instance():
-    config = ExampleConfig.get_config()
+def web3_instance(config):
     return Web3Provider.get_web3(config.network_url)
 
 
 @pytest.fixture
-def aquarius_instance():
-    config = ExampleConfig.get_config()
+def aquarius_instance(config):
     return AquariusProvider.get_aquarius(config.metadata_cache_uri)
 
 

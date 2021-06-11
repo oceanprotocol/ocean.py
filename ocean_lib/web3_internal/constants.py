@@ -2,6 +2,12 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+
+"""
+This module holds following default values for Gas price, Gas limit and more.
+
+"""
+
 ENV_GAS_PRICE = "GAS_PRICE"
 ENV_MAX_GAS_PRICE = "MAX_GAS_PRICE"
 
@@ -18,6 +24,7 @@ NETWORK_NAME_MAP = {
     4: "Rinkeby",
     42: "Kovan",
     100: "xDai",
+    137: "Polygon",
 }
 
 NETWORK_TIMEOUT_MAP = {

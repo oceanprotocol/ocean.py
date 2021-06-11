@@ -3,15 +3,15 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-"""All contracts inherit from this base class."""
+"""All contracts inherit from `ContractBase` class."""
 import logging
 import os
 from typing import Any, Dict, List, Optional
 
 import requests
+from enforce_typing import enforce_types
 from eth_typing import BlockIdentifier
 from hexbytes import HexBytes
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
@@ -19,15 +19,15 @@ from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFuncti
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3 import Web3
 from web3.exceptions import MismatchedABI, ValidationError
-from web3.utils.events import get_event_data
-from web3.utils.filters import construct_event_filter_params
-from web3.utils.threads import Timeout
+from web3._utils.events import get_event_data
+from web3._utils.filters import construct_event_filter_params
+from web3._utils.threads import Timeout
 from websockets import ConnectionClosed
 
 logger = logging.getLogger(__name__)
 
 
-@enforce_types_shim
+@enforce_types
 class ContractBase(object):
 
     """Base class for all contract objects."""
@@ -37,7 +37,7 @@ class ContractBase(object):
     def __init__(self, address: Optional[str], abi_path=None):
         """Initialises Contract Base object.
 
-        The contract name attribute and abi_path are required.
+        The contract name attribute and `abi_path` are required.
         """
         self.name = self.contract_name
         assert (
@@ -57,16 +57,18 @@ class ContractBase(object):
         assert self.contract_concise is not None
 
     def __str__(self):
-        """Returns contract name @ address."""
+        """Returns contract `name @ address.`"""
         return f"{self.contract_name} @ {self.address}"
 
     @classmethod
     def configured_address(cls, network, address_file):
+        """Returns the contract addresses"""
         addresses = ContractHandler.get_contracts_addresses(network, address_file)
         return addresses.get(cls.CONTRACT_NAME) if addresses else None
 
     @property
     def contract_name(self) -> str:
+        """Returns the contract name"""
         return self.CONTRACT_NAME
 
     @property
@@ -76,15 +78,12 @@ class ContractBase(object):
 
     @property
     def events(self):
-        """
-        Expose the underlying contract's events.
-
-        :return:
-        """
+        """Expose the underlying contract's events."""
         return self.contract.events
 
     @property
     def function_names(self) -> List[str]:
+        """Returns the list of functions in the contract"""
         return list(self.contract.functions)
 
     @staticmethod
@@ -107,8 +106,8 @@ class ContractBase(object):
         :return: Tx receipt
         """
         try:
-            Web3Provider.get_web3().eth.waitForTransactionReceipt(
-                tx_hash, timeout=timeout
+            Web3Provider.get_web3().eth.wait_for_transaction_receipt(
+                HexBytes(tx_hash), timeout=timeout
             )
         except ValueError as e:
             logger.error(f"Waiting for transaction receipt failed: {e}")
@@ -125,9 +124,14 @@ class ContractBase(object):
             logger.info(f"Unknown error waiting for transaction receipt: {e}.")
             raise
 
-        return Web3Provider.get_web3().eth.getTransactionReceipt(tx_hash)
+        return Web3Provider.get_web3().eth.get_transaction_receipt(tx_hash)
 
     def is_tx_successful(self, tx_hash: str) -> bool:
+        """Check if the transaction is successful.
+
+        :param tx_hash: hash of the transaction
+        :return: bool
+        """
         receipt = self.get_tx_receipt(tx_hash)
         return bool(receipt and receipt.status == 1)
 
@@ -154,7 +158,7 @@ class ContractBase(object):
         abi = e().abi
         types = [param["type"] for param in abi["inputs"]]
         sig_str = f'{event_name}({",".join(types)})'
-        return Web3.sha3(text=sig_str).hex()
+        return Web3.keccak(text=sig_str).hex()
 
     def subscribe_to_event(
         self,
@@ -206,7 +210,7 @@ class ContractBase(object):
         :param fn_args: tuple arguments to pass to function above
         :param from_wallet:
         :param transact: dict arguments for the transaction such as from, gas, etc.
-        :return:
+        :return: hex str transaction hash
         """
         contract_fn = getattr(self.contract.functions, fn_name)(*fn_args)
         contract_function = CustomContractFunction(contract_fn)
@@ -227,6 +231,11 @@ class ContractBase(object):
         return contract_function.transact(_transact).hex()
 
     def get_event_argument_names(self, event_name: str):
+        """Finds the event arguments by `event_name`.
+
+        :param event_name: str Name of the event to search in the `contract`.
+        :return: `event.argument_names` if event is found or None
+        """
         event = getattr(self.contract.events, event_name, None)
         if event:
             return event().argument_names
@@ -256,19 +265,46 @@ class ContractBase(object):
         )
 
         if "gas" not in built_tx:
-            built_tx["gas"] = web3.eth.estimateGas(built_tx)
+            built_tx["gas"] = web3.eth.estimate_gas(built_tx)
 
         raw_tx = deployer_wallet.sign_tx(built_tx)
         logging.debug(
             f"Sending raw tx to deploy contract {cls.CONTRACT_NAME}, signed tx hash: {raw_tx.hex()}"
         )
-        tx_hash = web3.eth.sendRawTransaction(raw_tx)
+        tx_hash = web3.eth.send_raw_transaction(raw_tx)
 
         return cls.get_tx_receipt(tx_hash, timeout=60).contractAddress
 
     def get_event_logs(
         self, event_name, from_block, to_block, filters, web3=None, chunk_size=1000
     ):
+        """
+        Fetches the list of event logs between the given block numbers.
+
+        :param event_name: str
+        :param from_block: int
+        :param to_block: int
+        :param filters:
+        :param web3: Wallet instance
+        :param chunk_size: int
+
+        :return: List of event logs. List will have the structure as below.
+        ```Python
+            [AttributeDict({
+                'args': AttributeDict({}),
+                'event': 'LogNoArguments',
+                'logIndex': 0,
+                'transactionIndex': 0,
+                'transactionHash': HexBytes('...'),
+                'address': '0xF2E246BB76DF876Cef8b38ae84130F4F55De395b',
+                'blockHash': HexBytes('...'),
+                'blockNumber': 3
+                }),
+            AttributeDict(...),
+            ...
+            ]
+        ```
+        """
         event = getattr(self.events, event_name)
         if not web3:
             web3 = Web3Provider.get_web3()
@@ -322,16 +358,19 @@ class ContractBase(object):
         on the underlying JSON-RPC call.
         Example - how to get all ERC-20 token transactions
         for the latest 10 blocks:
-        .. code-block:: python
-            from = max(mycontract.web3.eth.blockNumber - 10, 1)
-            to = mycontract.web3.eth.blockNumber
+
+        ```python
+            from = max(mycontract.web3.eth.block_number - 10, 1)
+            to = mycontract.web3.eth.block_number
             events = mycontract.events.Transfer.getLogs(fromBlock=from, toBlock=to)
             for e in events:
                 print(e["args"]["from"],
                     e["args"]["to"],
                     e["args"]["value"])
+        ```
         The returned processed log values will look like:
-        .. code-block:: python
+
+        ```python
             (
                 AttributeDict({
                  'args': AttributeDict({}),
@@ -346,6 +385,8 @@ class ContractBase(object):
                 AttributeDict(...),
                 ...
             )
+        ```
+
         See also: :func:`web3.middleware.filter.local_filter_middleware`.
         :param argument_filters:
         :param fromBlock: block number or "latest", defaults to "latest"
@@ -378,6 +419,7 @@ class ContractBase(object):
         # Namely, convert event names to their keccak signatures
         _, event_filter_params = construct_event_filter_params(
             abi,
+            web3.codec,
             contract_address=self.address,
             argument_filters=_filters,
             fromBlock=fromBlock,
@@ -388,7 +430,7 @@ class ContractBase(object):
             event_filter_params["blockHash"] = blockHash
 
         # Call JSON-RPC API
-        logs = web3.eth.getLogs(event_filter_params)
+        logs = web3.eth.get_logs(event_filter_params)
 
         # Convert raw binary data to Python proxy objects as described by ABI
-        return tuple(get_event_data(abi, entry) for entry in logs)
+        return tuple(get_event_data(web3.codec, abi, entry) for entry in logs)

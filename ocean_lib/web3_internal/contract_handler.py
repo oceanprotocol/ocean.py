@@ -20,18 +20,19 @@ class ContractHandler(object):
     Manages loading contracts and also keeps a cache of loaded contracts.
 
     Example:
-        contract = ContractHandler.get('DTFactory')
-        concise_contract = ContractHandler.get_concise_contract('DTFactory')
+        `contract = ContractHandler.get('DTFactory')`
+
+        `concise_contract = ContractHandler.get_concise_contract('DTFactory')`
 
     It must handle two cases:
-    1. One deployment of contract, eg DTFactory
-    2. >1 deployments, eg DataTokenTemplate
+    1. One deployment of contract, e.g. DTFactory
+    2. deployments, e.g. DataTokenTemplate
 
-    #Attributes (_contracts) and methods (e.g. _load) behave accordingly.
+    Attributes (_contracts) and methods (e.g. _load) behave accordingly.
 
-    #The _contracts dict maps:
-    # 1. (contract_name)                   : (contract, concise_contract)
-    # 2. (contract_name, contract_address) : (contract, concise_contract)
+    The _contracts dict maps:
+        1. (contract_name)                   : (contract, concise_contract)
+        2. (contract_name, contract_address) : (contract, concise_contract)
     """
 
     _contracts = dict()
@@ -142,7 +143,7 @@ class ContractHandler(object):
 
         Handles two cases:
         1. One deployment of contract, eg DTFactory. 'address' can be None, or specified
-        2. >1 deployments, eg DataTokenTemplate. 'address' must be specified.
+        2. 1 deployments, eg DataTokenTemplate. 'address' must be specified.
 
         :param contract_name: str name of the solidity smart contract.
         :param address: hex str -- address of smart contract

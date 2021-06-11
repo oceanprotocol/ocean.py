@@ -10,6 +10,7 @@ import lzma
 import os
 from typing import Optional
 
+from enforce_typing import enforce_types
 from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
@@ -30,7 +31,6 @@ from ocean_lib.data_provider.data_service_provider import (
     DataServiceProvider,
     OrderRequirements,
 )
-from ocean_lib.enforce_typing_shim import enforce_types_shim
 from ocean_lib.exceptions import (
     AquariusError,
     ContractNotFound,
@@ -49,12 +49,11 @@ from ocean_lib.web3_internal.utils import (
 )
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from plecos import plecos
 
 logger = logging.getLogger("ocean")
 
 
-@enforce_types_shim
+@enforce_types
 class OceanAssets:
 
     """Ocean assets class."""
@@ -129,7 +128,7 @@ class OceanAssets:
         service_descriptors: list = None,
         owner_address: str = None,
         data_token_address: str = None,
-        provider_uri=None,
+        provider_uri: str = None,
         dt_name: str = None,
         dt_symbol: str = None,
         dt_blob: str = None,
@@ -171,13 +170,16 @@ class OceanAssets:
             "dataset",
             "algorithm",
         ), f"Invalid/unsupported asset type {asset_type}"
-        if not plecos.is_valid_dict_local(metadata_copy):
-            errors = plecos.list_errors_dict_local(metadata_copy)
-            msg = f"Metadata has validation errors: {errors}"
+
+        validation_result, validation_errors = self.validate(metadata)
+        if not validation_result:
+            msg = f"Metadata has validation errors: {validation_errors}"
             logger.error(msg)
             raise ValueError(msg)
 
         urls = [item["url"] for item in metadata["main"]["files"]]
+        if not provider_uri:
+            provider_uri = DataServiceProvider.get_url(self._config)
         for url in urls:
             if not DataServiceProvider.check_single_file_info(url, provider_uri):
                 msg = f"The URL of this service can not be accessed: {url}."
@@ -231,6 +233,10 @@ class OceanAssets:
             if owner_address:
                 data_token.proposeMinter(owner_address, from_wallet=publisher_wallet)
         else:
+            if not dtfactory.verify_data_token(data_token_address):
+                raise ContractNotFound(
+                    f"datatoken address {data_token_address} is not found in the DTFactory events."
+                )
             # verify data_token_address
             dt = DataToken(data_token_address)
             minter = dt.contract_concise.minter()
@@ -241,10 +247,6 @@ class OceanAssets:
             elif minter.lower() != publisher_wallet.address.lower():
                 raise AssertionError(
                     f"Minter of datatoken {data_token_address} is not the same as the publisher."
-                )
-            elif not dtfactory.verify_data_token(data_token_address):
-                raise ContractNotFound(
-                    f"datatoken address {data_token_address} is not found in the DTFactory events."
                 )
 
         assert (
@@ -596,12 +598,12 @@ class OceanAssets:
             index,
         )
 
-    def validate(self, metadata: dict) -> bool:
+    def validate(self, metadata: dict) -> (bool, list):
         """
         Validate that the metadata is ok to be stored in aquarius.
 
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
-        :return: bool
+        :return: (bool, list) list of errors, empty if valid
         """
         return self._get_aquarius(self._metadata_cache_uri).validate_metadata(metadata)
 

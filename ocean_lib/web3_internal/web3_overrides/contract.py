@@ -37,8 +37,8 @@ class CustomContractFunction:
         cf = self._contract_function
         if cf.address is not None:
             transact_transaction.setdefault("to", cf.address)
-        # if cf.web3.eth.defaultAccount is not empty:
-        #     transact_transaction.setdefault('from', cf.web3.eth.defaultAccount)
+        # if cf.web3.eth.default_account is not empty:
+        #     transact_transaction.setdefault('from', cf.web3.eth.default_account)
 
         if "to" not in transact_transaction:
             if isinstance(self, type):
@@ -112,11 +112,11 @@ def transact_with_contract_function(
         logging.debug(
             f"sending raw tx: function: {function_name}, tx hash: {raw_tx.hex()}"
         )
-        txn_hash = web3.eth.sendRawTransaction(raw_tx)
+        txn_hash = web3.eth.send_raw_transaction(raw_tx)
     elif passphrase:
         txn_hash = web3.personal.sendTransaction(transact_transaction, passphrase)
     else:
-        txn_hash = web3.eth.sendTransaction(transact_transaction)
+        txn_hash = web3.eth.send_transaction(transact_transaction)
 
     if not wait_for_tx(txn_hash, web3, get_network_timeout()):
         raise TransactionFailed
@@ -126,7 +126,7 @@ def transact_with_contract_function(
 
 def wait_for_tx(tx_hash, web3, timeout=30):
     try:
-        receipt = web3.eth.waitForTransactionReceipt(tx_hash, timeout=timeout)
+        receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=timeout)
     except Exception:
         raise
 

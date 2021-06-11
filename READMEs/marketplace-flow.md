@@ -91,9 +91,6 @@ provider.url = http://localhost:8030
 provider.address = 0x00bd138abd70e2f00903268f3db08f2d25677c9e
 
 downloads.path = consume-downloads
-
-[util]
-typecheck = true
 ```
 
 In the work console:
@@ -101,6 +98,9 @@ In the work console:
 #set private keys of two accounts
 export TEST_PRIVATE_KEY1=0xbbfbee4961061d506ffbb11dfea64eba16355cbf1d9c29613126ba7fec0aed5d
 export TEST_PRIVATE_KEY2=0x804365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a
+
+#needed to mint fake OCEAN
+export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 
 #start python
 python
@@ -123,7 +123,7 @@ alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
 
 #Mint OCEAN
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-mint_fake_OCEAN()
+mint_fake_OCEAN(config)
 
 #Publish a datatoken
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
@@ -225,7 +225,7 @@ bob_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY2'))
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
 #Verify that Bob has ganache ETH
-assert ocean.web3.eth.getBalance(bob_wallet.address) > 0, "need ganache ETH"
+assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
 #Verify that Bob has ganache OCEAN
 assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"

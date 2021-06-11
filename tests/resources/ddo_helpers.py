@@ -96,7 +96,7 @@ def get_registered_ddo(
             provider_uri,
         )
 
-    block = ocean_instance.web3.eth.blockNumber
+    block = ocean_instance.web3.eth.block_number
     asset = ocean_instance.assets.create(
         metadata,
         wallet,
@@ -146,7 +146,8 @@ def get_registered_ddo_with_compute_service(
         service.attributes["main"]["datePublished"],
         service.attributes["main"]["provider"],
         privacy_attributes=ocean_instance.compute.build_service_privacy_attributes(
-            trusted_algorithms,
+            trusted_algorithms=trusted_algorithms,
+            metadata_cache_uri=ocean_instance.config.metadata_cache_uri,
             allow_raw_algorithm=True,
             allow_all_published_algorithms=not bool(trusted_algorithms),
         ),

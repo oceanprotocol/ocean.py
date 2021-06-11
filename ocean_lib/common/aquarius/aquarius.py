@@ -135,7 +135,7 @@ class Aquarius:
         if response.status_code == 200:
             return self._parse_search_response(response.content)
         else:
-            raise Exception(f"Unable to search for DDO: {response.content}")
+            raise ValueError(f"Unable to search for DDO: {response.content}")
 
     def query_search(self, search_query, sort=None, offset=100, page=1):
         """
@@ -165,7 +165,7 @@ class Aquarius:
         if response.status_code == 200:
             return self._parse_search_response(response.content)
         else:
-            raise Exception(f"Unable to search for DDO: {response.content}")
+            raise ValueError(f"Unable to search for DDO: {response.content}")
 
     def validate_metadata(self, metadata):
         """
@@ -178,10 +178,10 @@ class Aquarius:
             f"{self.url}/validate", data=json.dumps(metadata), headers=self._headers
         )
         if response.content == b"true\n":
-            return True
+            return True, []
         else:
-            logger.info(self._parse_search_response(response.content))
-            return False
+            parsed_response = self._parse_search_response(response.content)
+            return False, parsed_response
 
     @staticmethod
     def _parse_search_response(response):

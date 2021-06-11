@@ -46,14 +46,12 @@ In Python, import and configure the components / services:
 ```python
 import os
 from ocean_lib.config import Config
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.ocean.util import get_web3_connection_provider
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 
 #configure the components
 config = Config(os.getenv('CONFIG_FILE'))
-ConfigProvider.set_config(config)
 Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
 ContractHandler.set_artifacts_path(config.artifacts_path)
 ```
