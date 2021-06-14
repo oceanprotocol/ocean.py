@@ -125,9 +125,5 @@ def transact_with_contract_function(
 
 
 def wait_for_tx(tx_hash, web3, timeout=30):
-    try:
-        receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=timeout)
-    except Exception:
-        raise
-
+    receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=timeout)
     return bool(receipt.status)
