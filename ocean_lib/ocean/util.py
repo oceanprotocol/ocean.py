@@ -22,14 +22,7 @@ GANACHE_URL = "http://127.0.0.1:8545"
 POLYGON_URL = "https://rpc.polygon.oceanprotocol.com"
 
 # shortcut names for networks that *Infura* supports, plus ganache and polygon
-SUPPORTED_NETWORK_NAMES = {
-    "rinkeby",
-    "kovan",
-    "ganache",
-    "mainnet",
-    "ropsten",
-    "polygon",
-}
+SUPPORTED_NETWORK_NAMES = {"rinkeby", "ganache", "mainnet", "ropsten", "polygon"}
 
 
 def get_infura_connection_type():
