@@ -43,7 +43,6 @@ class DDO:
         self._proof = None
         self._credentials = {}
         self._created = None
-        self._status = {}
         self._other_values = {}
 
         if created:
@@ -68,10 +67,11 @@ class DDO:
     @property
     def is_disabled(self):
         """Returns whether the asset is disabled."""
-        if not self._status:
+        metadata_service = self.get_service(ServiceTypes.METADATA)
+        if not metadata_service or not "status" in metadata_service.attributes:
             return False
 
-        return self._status.get("isOrderDisabled", False)
+        return metadata_service.attributes["status"].get("isOrderDisabled", False)
 
     @property
     def is_enabled(self):
@@ -230,8 +230,6 @@ class DDO:
             data["proof"] = self._proof
         if self._credentials:
             data["credentials"] = self._credentials
-        if self._status:
-            data["status"] = self._status
 
         if self._other_values:
             data.update(self._other_values)
@@ -274,8 +272,6 @@ class DDO:
             self._proof = values.pop("proof")
         if "credentials" in values:
             self._credentials = values.pop("credentials")
-        if "status" in values:
-            self._status = values.pop("status")
 
         self._other_values = values
 
@@ -388,17 +384,27 @@ class DDO:
 
     def enable(self):
         """Enables asset for ordering."""
-        if not self._status:
-            self._status = {}
+        metadata_service = self.get_service(ServiceTypes.METADATA)
 
-        self._status.pop("isOrderDisabled")
+        if not metadata_service:
+            return
+
+        if "status" not in metadata_service.attributes:
+            metadata_service.attributes["status"] = {}
+
+        metadata_service.attributes["status"].pop("isOrderDisabled")
 
     def disable(self):
         """Disables asset from ordering."""
-        if not self._status:
-            self._status = {}
+        metadata_service = self.get_service(ServiceTypes.METADATA)
 
-        self._status["isOrderDisabled"] = True
+        if not metadata_service:
+            return
+
+        if "status" not in metadata_service.attributes:
+            metadata_service.attributes["status"] = {}
+
+        metadata_service.attributes["status"]["isOrderDisabled"] = True
 
     @property
     def requires_address_credential(self):
