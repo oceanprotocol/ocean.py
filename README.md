@@ -47,7 +47,12 @@ This is in beta state and you can expect running into problems. If you run into 
 
 ## 🏗 Installation
 
-`pip install ocean-lib`
+```console
+pip install wheel ocean-lib
+```
+
+NOTE: `wheel` is not strictly necessary, but installing it first eliminates
+benign error messages that occur while installing `ocean-lib`.
 
 ## 🏄 Quickstart
 

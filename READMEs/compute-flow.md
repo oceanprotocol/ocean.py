@@ -33,8 +33,11 @@ this [faucet](https://www.rinkeby.io/#faucet). Otherwise, run `ganache-cli` and 
 If you haven't installed yet:
 
 ```console
-pip install ocean-lib
+pip install wheel ocean-lib
 ```
+
+NOTE: `wheel` is not strictly necessary, but installing it first eliminates
+benign error messages that occur while installing `ocean-lib`.
 
 ## 1. Initialize services
 

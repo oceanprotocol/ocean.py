@@ -72,8 +72,11 @@ python -m venv venv
 source venv/bin/activate
 
 #Install the ocean.py library
-pip install ocean-lib
+pip install wheel ocean-lib
 ```
+
+NOTE: `wheel` is not strictly necessary, but installing it first eliminates
+benign error messages that occur while installing `ocean-lib`.
 
 ### Set up contracts
 
