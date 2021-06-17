@@ -49,7 +49,7 @@ In a new console:
 python -m venv venv
 source venv/bin/activate
 
-#Install the ocean.py library
+#Install the ocean.py library. Install wheel first to avoid errors.
 pip install wheel ocean-lib
 
 #set envvars
@@ -58,9 +58,6 @@ export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f43
 #go into python
 python
 ```
-
-NOTE: `wheel` is not strictly necessary, but installing it first eliminates
-benign error messages that occur while installing `ocean-lib`.
 
 ## Publish datatokens
 
