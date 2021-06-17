@@ -50,7 +50,8 @@ python -m venv venv
 source venv/bin/activate
 
 #Install the ocean.py library. Install wheel first to avoid errors.
-pip install wheel ocean-lib
+pip install wheel
+pip install ocean-lib
 
 #set envvars
 export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58

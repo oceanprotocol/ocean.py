@@ -34,7 +34,8 @@ If you haven't installed yet:
 
 ```console
 #Install the ocean.py library. Install wheel first to avoid errors.
-pip install wheel ocean-lib
+pip install wheel
+pip install ocean-lib
 ```
 
 ## 1. Initialize services
