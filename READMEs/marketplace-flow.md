@@ -71,7 +71,8 @@ cd test3
 python -m venv venv
 source venv/bin/activate
 
-#Install the ocean.py library
+#Install the ocean.py library. Install wheel first to avoid errors.
+pip install wheel
 pip install ocean-lib
 ```
 
