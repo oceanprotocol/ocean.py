@@ -5,8 +5,9 @@
 import logging
 import time
 
-from ocean_lib.web3_internal.wallet import Wallet
 from web3.contract import prepare_transaction
+
+from ocean_lib.web3_internal.wallet import Wallet
 
 
 class CustomContractFunction:
@@ -49,6 +50,9 @@ class CustomContractFunction:
                 raise ValueError(
                     "Please ensure that this contract instance has an address."
                 )
+        if "chainId" not in transact_transaction:
+            chain_id = cf.web3.eth.chain_id
+            transact_transaction["chainId"] = chain_id
 
         if "gas" not in transact_transaction:
             tx = transaction.copy()

@@ -12,17 +12,18 @@ import requests
 from enforce_typing import enforce_types
 from eth_typing import BlockIdentifier
 from hexbytes import HexBytes
+from web3 import Web3
+from web3._utils.events import get_event_data
+from web3._utils.filters import construct_event_filter_params
+from web3._utils.threads import Timeout
+from web3.exceptions import MismatchedABI, ValidationError
+from websockets import ConnectionClosed
+
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from web3 import Web3
-from web3.exceptions import MismatchedABI, ValidationError
-from web3._utils.events import get_event_data
-from web3._utils.filters import construct_event_filter_params
-from web3._utils.threads import Timeout
-from websockets import ConnectionClosed
 
 logger = logging.getLogger(__name__)
 
@@ -218,6 +219,7 @@ class ContractBase(object):
             "from": from_wallet.address,
             "passphrase": from_wallet.password,
             "account_key": from_wallet.key,
+            "chainId": contract_function._contract_function.web3.eth.chain_id
             # 'gas': GAS_LIMIT_DEFAULT
         }
 
@@ -263,6 +265,8 @@ class ContractBase(object):
         built_tx = _contract.constructor(*args).buildTransaction(
             {"from": deployer_wallet.address}
         )
+        if "chainId" not in built_tx:
+            built_tx["chainId"] = web3.eth.chain_id
 
         if "gas" not in built_tx:
             built_tx["gas"] = web3.eth.estimate_gas(built_tx)

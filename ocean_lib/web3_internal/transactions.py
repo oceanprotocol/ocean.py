@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enforce_typing import enforce_types
+
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
@@ -30,14 +31,10 @@ def send_ether(from_wallet: Wallet, to_address: str, ether_amount: int):
         "from": from_wallet.address,
         "to": to_address,
         "value": w3.toWei(ether_amount, "ether"),
+        "chainId": w3.eth.chain_id,
     }
-    _ = w3.eth.estimate_gas(tx)
-    tx = {
-        "from": from_wallet.address,
-        "to": to_address,
-        "value": w3.toWei(ether_amount, "ether"),
-        "gas": 500000,
-    }
+    gas = w3.eth.estimate_gas(tx)
+    tx["gas"] = gas
     wallet = Wallet(w3, private_key=from_wallet.key, address=from_wallet.address)
     raw_tx = wallet.sign_tx(tx)
     tx_hash = w3.eth.send_raw_transaction(raw_tx)
@@ -49,15 +46,14 @@ def cancel_or_replace_transaction(
     from_wallet, nonce_value, gas_price=None, gas_limit=None
 ):
     w3 = Web3Provider.get_web3()
-    tx = {"from": from_wallet.address, "to": from_wallet.address, "value": 0}
-    gas = gas_limit if gas_limit is not None else w3.eth.estimate_gas(tx)
     tx = {
         "from": from_wallet.address,
         "to": from_wallet.address,
         "value": 0,
-        "gas": gas + 1,
+        "chainId": w3.eth.chain_id,
     }
-
+    gas = gas_limit if gas_limit is not None else w3.eth.estimate_gas(tx)
+    tx["gas"] = gas + 1
     wallet = Wallet(w3, private_key=from_wallet.key, address=from_wallet.address)
     raw_tx = wallet.sign_tx(tx, fixed_nonce=nonce_value, gas_price=gas_price)
     tx_hash = w3.eth.send_raw_transaction(raw_tx)
