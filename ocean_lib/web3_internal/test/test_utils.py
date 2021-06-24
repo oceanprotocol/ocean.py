@@ -39,12 +39,10 @@ def test_chain_id_send_ether(alice_wallet, bob_address, web3_instance):
     if not receipt:
         raise AssertionError("Send ether was unsuccessful.")
     tx = web3_instance.eth.get_transaction(receipt["transactionHash"])
-    # Geth private chains (default), the chainId will be 1337
-    expected_chain_ids = [1336, 1337]
     # Formula: v = CHAIN_ID * 2 + 35 or v = CHAIN_ID * 2 + 36
     chain_ids = [(tx["v"] - 35) / 2, (tx["v"] - 36) / 2]
-    result = any(map(lambda chain_id: chain_id in expected_chain_ids, chain_ids))
-    assert result
+    result = True if web3_instance.eth.chain_id in chain_ids else False
+    assert result, "The chain ID is not the right one."
 
 
 def test_chain_id_cancel_or_replace_transaction(
@@ -56,12 +54,9 @@ def test_chain_id_cancel_or_replace_transaction(
     tx_cancelled = web3_instance.eth.get_transaction(
         receipt_cancelled["transactionHash"]
     )
-    expected_chain_ids = [1336, 1337]
     chain_ids = [(tx_cancelled["v"] - 35) / 2, (tx_cancelled["v"] - 36) / 2]
-    result_cancelled = any(
-        map(lambda chain_id: chain_id in expected_chain_ids, chain_ids)
-    )
-    assert result_cancelled
+    result_cancelled = True if web3_instance.eth.chain_id in chain_ids else False
+    assert result_cancelled, "The chain ID is not the right one."
 
 
 def test_send_ether(alice_wallet, bob_address):
