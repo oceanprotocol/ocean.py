@@ -93,7 +93,7 @@ class DataServiceProvider:
         if nonce is None:
             nonce = DataServiceProvider.get_nonce(wallet.address, provider_uri)
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
-        return sign_hash(encode_defunct(f"{msg}{nonce}"), wallet)
+        return sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
 
     @staticmethod
     def get_nonce(user_address, provider_uri):

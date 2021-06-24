@@ -277,7 +277,7 @@ class OceanAssets:
             asset.add_service(compute_service)
 
         asset.proof["signatureValue"] = sign_hash(
-            encode_defunct(asset.asset_id), publisher_wallet
+            encode_defunct(text=asset.asset_id), publisher_wallet
         )
 
         # Add public key and authentication

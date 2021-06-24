@@ -131,7 +131,7 @@ def ec_recover(message, signed_message):
 
 @enforce_types
 def personal_ec_recover(message, signed_message):
-    prefixed_hash = encode_defunct(message)
+    prefixed_hash = encode_defunct(text=message)
     return ec_recover(prefixed_hash, signed_message)
 
 

@@ -21,7 +21,7 @@ def test_wallet_arguments():
     wallet = Wallet(web3, private_key=private_key)
     assert wallet.private_key == private_key, "Private keys are different."
     assert wallet.address, "The wallet does not have a wallet address."
-    signed_message = wallet.sign(encode_defunct("msg-to-sign"))
+    signed_message = wallet.sign(encode_defunct(text="msg-to-sign"))
     assert signed_message, "Signed message is None."
 
     # Create wallet with encrypted key and password
@@ -30,7 +30,7 @@ def test_wallet_arguments():
     w2 = Wallet(web3, encrypted_key=encrypted_key, password=password)
     assert w2.address == wallet.address
     assert w2.private_key == wallet.private_key
-    assert w2.sign(encode_defunct("msg-to-sign")) == signed_message
+    assert w2.sign(encode_defunct(text="msg-to-sign")) == signed_message
 
     # create wallet with missing arguments
     with pytest.raises(AssertionError):

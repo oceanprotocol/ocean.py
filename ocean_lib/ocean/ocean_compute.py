@@ -232,7 +232,7 @@ class OceanCompute:
         if nonce is None:
             uri = self._data_provider.get_root_uri(service_endpoint)
             nonce = self._data_provider.get_nonce(wallet.address, uri)
-        return sign_hash(encode_defunct(f"{msg}{nonce}"), wallet)
+        return sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
 
     def start(
         self,
