@@ -5,6 +5,7 @@
 import os
 
 import pytest
+
 from ocean_lib.web3_internal.transactions import (
     cancel_or_replace_transaction,
     send_ether,
@@ -31,6 +32,34 @@ def test_prepare_fixed_hash():
     assert (
         prepare_prefixed_hash("0x0").hex() == expected
     ), "The address is not the expected one."
+
+
+def test_chain_id_send_ether(alice_wallet, bob_address, web3_instance):
+    receipt = send_ether(alice_wallet, bob_address, 1)
+    if not receipt:
+        raise AssertionError("Send ether was unsuccessful.")
+    tx = web3_instance.eth.get_transaction(receipt["transactionHash"])
+    # Geth private chains (default), the chainId will be 1337
+    expected_chain_ids = [1336, 1337]
+    # Formula: v = CHAIN_ID * 2 + 35 or v = CHAIN_ID * 2 + 36
+    chain_ids = [(tx["v"] - 35) / 2, (tx["v"] - 36) / 2]
+    result = any(map(lambda chain_id: chain_id in expected_chain_ids, chain_ids))
+    assert result
+
+
+def test_chain_id_cancel_or_replace_transaction(alice_wallet, bob_address, web3_instance):
+    receipt_cancelled = cancel_or_replace_transaction(alice_wallet, None)
+    if not receipt_cancelled:
+        raise AssertionError("Cancel or replace transaction failed.")
+    tx_cancelled = web3_instance.eth.get_transaction(
+        receipt_cancelled["transactionHash"]
+    )
+    expected_chain_ids = [1336, 1337]
+    chain_ids = [(tx_cancelled["v"] - 35) / 2, (tx_cancelled["v"] - 36) / 2]
+    result_cancelled = any(
+        map(lambda chain_id: chain_id in expected_chain_ids, chain_ids)
+    )
+    assert result_cancelled
 
 
 def test_send_ether(alice_wallet, bob_address):
