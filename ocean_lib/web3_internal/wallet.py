@@ -151,7 +151,7 @@ class Wallet:
     def sign(self, msg_hash):
         """Sign a transaction."""
         account = self._web3.eth.account.from_key(self.private_key)
-        return account.signHash(msg_hash)
+        return account.sign_message(msg_hash)
 
     def keys_str(self):
         s = []
