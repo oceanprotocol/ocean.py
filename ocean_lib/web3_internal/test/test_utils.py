@@ -47,7 +47,9 @@ def test_chain_id_send_ether(alice_wallet, bob_address, web3_instance):
     assert result
 
 
-def test_chain_id_cancel_or_replace_transaction(alice_wallet, bob_address, web3_instance):
+def test_chain_id_cancel_or_replace_transaction(
+    alice_wallet, bob_address, web3_instance
+):
     receipt_cancelled = cancel_or_replace_transaction(alice_wallet, None)
     if not receipt_cancelled:
         raise AssertionError("Cancel or replace transaction failed.")
