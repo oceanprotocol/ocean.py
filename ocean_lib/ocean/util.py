@@ -140,4 +140,3 @@ def get_ocean_token_address(address_file, network=None):
 
 def init_components(config):
     Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
-    ContractHandler.set_artifacts_path(config.artifacts_path)

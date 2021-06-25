@@ -32,14 +32,6 @@ def test_name_is_None():
         ContractBase(None)
 
 
-def test_bad_abi_path():
-    ContractHandler.artifacts_path = ""  # empty value
-    with pytest.raises(AssertionError):
-        # input abi_path of None will get it to use value in ContractHandler,
-        # but since we've forced that empty it should raise an error
-        MyFactory(address=None, abi_path=None)
-
-
 def test_nochild():
     with pytest.raises(AssertionError):
         ContractBase(None)

@@ -17,6 +17,7 @@ from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 from ocean_lib.web3_internal.web3_provider import Web3Provider
+from ocean_lib.web3_internal.utils import get_artifacts_path
 from web3 import Web3
 from web3.exceptions import MismatchedABI, ValidationError
 from web3._utils.events import get_event_data
@@ -44,7 +45,7 @@ class ContractBase(object):
             self.name
         ), "contract_name property needs to be implemented in subclasses."
         if not abi_path:
-            abi_path = ContractHandler.artifacts_path
+            abi_path = get_artifacts_path()
 
         assert abi_path, f"abi_path is required, got {abi_path}"
 
@@ -252,7 +253,7 @@ class ContractBase(object):
         :return: smartcontract address of this contract
         """
         if not abi_path:
-            abi_path = ContractHandler.artifacts_path
+            abi_path = get_artifacts_path()
 
         assert abi_path, f"abi_path is required, got {abi_path}"
 

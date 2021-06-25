@@ -87,7 +87,6 @@ class Ocean:
             }
             config = Config(options_dict=config_dict)
         self._config = config
-        ContractHandler.set_artifacts_path(self._config.artifacts_path)
         Web3Provider.init_web3(
             provider=get_web3_connection_provider(self._config.network_url)
         )

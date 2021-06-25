@@ -2,12 +2,12 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-
 import json
 import logging
 import os
 
 from ocean_lib.web3_internal.web3_provider import Web3Provider
+from ocean_lib.web3_internal.utils import get_artifacts_path
 from web3 import Web3
 from web3.contract import ConciseContract
 
@@ -37,7 +37,6 @@ class ContractHandler(object):
 
     _contracts = dict()
 
-    artifacts_path = None
     network_alias = {"ganache": "development"}
 
     @staticmethod
@@ -54,12 +53,6 @@ class ContractHandler(object):
             )
 
         return network_addresses
-
-    @staticmethod
-    def set_artifacts_path(artifacts_path):
-        if artifacts_path and artifacts_path != ContractHandler.artifacts_path:
-            ContractHandler.artifacts_path = artifacts_path
-            ContractHandler._contracts.clear()
 
     @staticmethod
     def _get(name, address=None):
@@ -148,11 +141,8 @@ class ContractHandler(object):
         :param contract_name: str name of the solidity smart contract.
         :param address: hex str -- address of smart contract
         """
-        assert (
-            ContractHandler.artifacts_path is not None
-        ), "artifacts_path should be already set."
         contract_definition = ContractHandler.read_abi_from_file(
-            contract_name, ContractHandler.artifacts_path
+            contract_name, get_artifacts_path()
         )
 
         if not address and "address" in contract_definition:

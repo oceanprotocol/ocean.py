@@ -53,7 +53,6 @@ from ocean_lib.web3_internal.contract_handler import ContractHandler
 #configure the components
 config = Config(os.getenv('CONFIG_FILE'))
 Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
-ContractHandler.set_artifacts_path(config.artifacts_path)
 ```
 
 Now you're ready to use the services! 🐳 The marketplace tutorial will use them in more detail.

@@ -11,13 +11,6 @@ from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3.exceptions import InvalidAddress
 
 
-def test_load__fail_empty_artifacts_path():
-    """Tests that an empty artifacts path can not be loaded."""
-    ContractHandler.artifacts_path = None
-    with pytest.raises(AssertionError):
-        ContractHandler._load("DTFactory")
-
-
 def test_load__fail_malformed_eth_address():
     """Tests that an invalid ETH addres makes the Contract unloadable."""
     with pytest.raises(InvalidAddress):
@@ -48,8 +41,6 @@ def test_load__name_and_address(network, example_config):
 
     test_tuple = ("DTFactory", target_address)
 
-    assert test_tuple not in ContractHandler._contracts
-
     ContractHandler._load("DTFactory", target_address)
 
     assert test_tuple in ContractHandler._contracts
@@ -64,7 +55,6 @@ def test_issue185_unit(monkeypatch):
     # ensure that conftest::setup_all() was not called
     assert Web3Provider._web3 is None
     assert ContractHandler._contracts == dict()
-    assert ContractHandler.artifacts_path is None
 
     # actual test. Imports only come now, to avoid setting class-level attributes
     # isort: off
@@ -76,14 +66,6 @@ def test_issue185_unit(monkeypatch):
     private_key = os.getenv("TEST_PRIVATE_KEY1")
     config = {"network": os.getenv("NETWORK_URL")}
     ocean = Ocean(config)
-
-    # Ensure it's using a path like '/home/trentmc/ocean.py/venv/artifacts'
-    assert os.path.exists(
-        ocean._config.artifacts_path
-    ), "Could not find the artifacts path."
-    assert (
-        "venv/artifacts" in ocean._config.artifacts_path
-    ), "The artifacts are not in the venv folder."
 
     wallet = Wallet(ocean.web3, private_key=private_key)
     assert wallet is not None, "The wallet does not exist."
@@ -128,13 +110,10 @@ def setup_issue_185(monkeypatch):
     # change envvars to suit this test
     if os.getenv("CONFIG_FILE"):
         monkeypatch.delenv("CONFIG_FILE")
-    if os.getenv("ARTIFACTS_PATH"):
-        monkeypatch.delenv("ARTIFACTS_PATH")
     if not os.getenv("NETWORK_URL"):
         os.environ["NETWORK_URL"] = "ganache"
 
     # double-check that envvars are the way this test needs
     assert os.getenv("CONFIG_FILE") is None, "can't have CONFIG_FILE envvar set"
-    assert os.getenv("ARTIFACTS_PATH") is None, "can't have ARTIFACTS_PATH envvar set"
     assert os.getenv("TEST_PRIVATE_KEY1") is not None, "need TEST_PRIVATE_KEY1"
     assert os.getenv("NETWORK_URL") in ["ganache", "development"]

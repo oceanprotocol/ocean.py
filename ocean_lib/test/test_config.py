@@ -67,7 +67,6 @@ def test_config_filename_given_file_exists_wellformed_content():
     config = Config(filename=config_file_name)
 
     assert config.metadata_cache_uri == "https://custom-aqua.url"
-    assert config.artifacts_path is not None
     assert config.provider_address == "0x00bd138abd70e2f00903268f3db08f2d25677c9e"
     assert isinstance(config.gas_limit, int)
 
