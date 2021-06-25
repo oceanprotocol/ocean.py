@@ -22,7 +22,6 @@ from ocean_lib.ocean.util import (
     to_base,
     to_base_18,
 )
-from ocean_lib.web3_internal.contract_handler import ContractHandler
 
 
 def test_get_infura_connection_type(monkeypatch):

@@ -11,7 +11,9 @@ from ocean_lib.ocean.env_constants import (
     ENV_INFURA_CONNECTION_TYPE,
     ENV_INFURA_PROJECT_ID,
 )
-from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.contract_utils import (
+    get_contracts_addresses as get_contracts_addresses_web3,
+)
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
 from ocean_lib.web3_internal.web3_provider import Web3Provider
@@ -100,7 +102,7 @@ def get_web3_connection_provider(network_url):
 
 
 def get_contracts_addresses(address_file, network):
-    return ContractHandler.get_contracts_addresses(network, address_file)
+    return get_contracts_addresses_web3(network, address_file)
 
 
 @enforce_types

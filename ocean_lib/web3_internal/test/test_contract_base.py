@@ -7,7 +7,6 @@ import pytest
 from enforce_typing import enforce_types
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.contract import ConciseContract
 

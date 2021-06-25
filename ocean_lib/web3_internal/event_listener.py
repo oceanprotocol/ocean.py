@@ -8,8 +8,8 @@ import time
 from datetime import datetime
 from threading import Thread
 
-from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.event_filter import EventFilter
+from ocean_lib.web3_internal.contract_utils import load_contract
 
 logger = logging.getLogger(__name__)
 
@@ -20,6 +20,7 @@ class EventListener(object):
 
     def __init__(
         self,
+        web3,
         contract_name,
         event_name,
         args=None,
@@ -28,7 +29,8 @@ class EventListener(object):
         filters=None,
     ):
         """Initialises EventListener object."""
-        contract = ContractHandler.get(contract_name)
+        # TODO
+        contract = load_contract(web3, contract_name)
         self.event_name = event_name
         self.event = getattr(contract.events, event_name)
         self.filters = filters if filters else {}

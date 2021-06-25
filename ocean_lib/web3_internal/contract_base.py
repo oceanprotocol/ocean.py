@@ -13,11 +13,16 @@ from enforce_typing import enforce_types
 from eth_typing import BlockIdentifier
 from hexbytes import HexBytes
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
-from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_lib.web3_internal.utils import get_artifacts_path, get_contract_definition, load_contract
+from ocean_lib.web3_internal.contract_utils import (
+    get_contract_definition,
+    load_contract,
+    get_contracts_addresses,
+    get_concise_contract,
+)
+from ocean_lib.web3_internal.utils import get_artifacts_path
 from web3 import Web3
 from web3.exceptions import MismatchedABI, ValidationError
 from web3._utils.events import get_event_data
@@ -49,8 +54,9 @@ class ContractBase(object):
 
         assert abi_path, f"abi_path is required, got {abi_path}"
 
-        self.contract_concise = ContractHandler.get_concise_contract(self.name, address)
-        self.contract = load_contract(Web3Provider.get_web3(), self.name, address)
+        self.w3 = Web3Provider.get_web3()
+        self.contract_concise = get_concise_contract(self.w3, self.name, address)
+        self.contract = load_contract(self.w3, self.name, address)
 
         assert not address or (
             self.contract.address == address and self.address == address
@@ -64,7 +70,7 @@ class ContractBase(object):
     @classmethod
     def configured_address(cls, network, address_file):
         """Returns the contract addresses"""
-        addresses = ContractHandler.get_contracts_addresses(network, address_file)
+        addresses = get_contracts_addresses(network, address_file)
         return addresses.get(cls.CONTRACT_NAME) if addresses else None
 
     @property
@@ -190,6 +196,7 @@ class ContractBase(object):
         from ocean_lib.web3_internal.event_listener import EventListener
 
         return EventListener(
+            self.w3,
             self.CONTRACT_NAME,
             event_name,
             args,

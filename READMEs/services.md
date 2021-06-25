@@ -48,7 +48,6 @@ import os
 from ocean_lib.config import Config
 from ocean_lib.ocean.util import get_web3_connection_provider
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_lib.web3_internal.contract_handler import ContractHandler
 
 #configure the components
 config = Config(os.getenv('CONFIG_FILE'))
