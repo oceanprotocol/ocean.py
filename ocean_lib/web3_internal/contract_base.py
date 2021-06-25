@@ -258,7 +258,7 @@ class ContractBase(object):
         assert abi_path, f"abi_path is required, got {abi_path}"
 
         w3 = web3
-        _json = ContractHandler.read_abi_from_file(cls.CONTRACT_NAME, abi_path)
+        _json = ContractHandler.get_contract_definition(cls.CONTRACT_NAME)
 
         _contract = w3.eth.contract(abi=_json["abi"], bytecode=_json["bytecode"])
         built_tx = _contract.constructor(*args).buildTransaction(

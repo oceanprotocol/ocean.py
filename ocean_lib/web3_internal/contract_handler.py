@@ -2,7 +2,9 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import importlib
 import json
+from jsonsempai import magic # noqa: F401
 import logging
 import os
 
@@ -141,9 +143,7 @@ class ContractHandler(object):
         :param contract_name: str name of the solidity smart contract.
         :param address: hex str -- address of smart contract
         """
-        contract_definition = ContractHandler.read_abi_from_file(
-            contract_name, get_artifacts_path()
-        )
+        contract_definition = ContractHandler.get_contract_definition(contract_name)
 
         if not address and "address" in contract_definition:
             address = contract_definition.get("address")
@@ -165,24 +165,11 @@ class ContractHandler(object):
         ContractHandler._verifyContractsConsistency(contract_name)
 
     @staticmethod
-    def read_abi_from_file(contract_name, abi_path):
-        path = None
-        contract_name = contract_name + ".json"
-        names = os.listdir(abi_path)
-        # :HACK: temporary workaround to handle an extra folder that contain the artifact files.
-        if len(names) == 1 and names[0] == "*":
-            abi_path = os.path.join(abi_path, "*")
-
-        for name in os.listdir(abi_path):
-            if name.lower() == contract_name.lower():
-                path = os.path.join(abi_path, contract_name)
-                break
-
-        if path:
-            with open(path) as f:
-                return json.loads(f.read())
-
-        return None
+    def get_contract_definition(contract_name):
+        try:
+            return importlib.import_module('artifacts.' + contract_name).__dict__
+        except ModuleNotFoundError:
+            raise TypeError("Contract name does not exist in artifacts.")
 
     @staticmethod
     def _verifyContractsConsistency(name):
