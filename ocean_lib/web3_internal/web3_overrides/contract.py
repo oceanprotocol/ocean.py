@@ -37,8 +37,6 @@ class CustomContractFunction:
         cf = self._contract_function
         if cf.address is not None:
             transact_transaction.setdefault("to", cf.address)
-        # if cf.web3.eth.default_account is not empty:
-        #     transact_transaction.setdefault('from', cf.web3.eth.default_account)
 
         if "to" not in transact_transaction:
             if isinstance(self, type):
