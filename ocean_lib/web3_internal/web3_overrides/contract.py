@@ -51,8 +51,7 @@ class CustomContractFunction:
                     "Please ensure that this contract instance has an address."
                 )
         if "chainId" not in transact_transaction:
-            chain_id = cf.web3.eth.chain_id
-            transact_transaction["chainId"] = chain_id
+            transact_transaction["chainId"] = cf.web3.eth.chain_id
 
         if "gas" not in transact_transaction:
             tx = transaction.copy()

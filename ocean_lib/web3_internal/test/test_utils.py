@@ -35,6 +35,7 @@ def test_prepare_fixed_hash():
 
 
 def test_chain_id_send_ether(alice_wallet, bob_address, web3_instance):
+    """Tests if the chainId has the right value for send ether transactions."""
     receipt = send_ether(alice_wallet, bob_address, 1)
     if not receipt:
         raise AssertionError("Send ether was unsuccessful.")
@@ -48,6 +49,7 @@ def test_chain_id_send_ether(alice_wallet, bob_address, web3_instance):
 def test_chain_id_cancel_or_replace_transaction(
     alice_wallet, bob_address, web3_instance
 ):
+    """Tests if the chainId has the right value for cancelled tx."""
     receipt_cancelled = cancel_or_replace_transaction(alice_wallet, None)
     if not receipt_cancelled:
         raise AssertionError("Cancel or replace transaction failed.")
