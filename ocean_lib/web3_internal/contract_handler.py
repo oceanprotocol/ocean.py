@@ -4,7 +4,7 @@
 #
 import importlib
 import json
-from jsonsempai import magic # noqa: F401
+from jsonsempai import magic  # noqa: F401
 import logging
 import os
 
@@ -167,7 +167,7 @@ class ContractHandler(object):
     @staticmethod
     def get_contract_definition(contract_name):
         try:
-            return importlib.import_module('artifacts.' + contract_name).__dict__
+            return importlib.import_module("artifacts." + contract_name).__dict__
         except ModuleNotFoundError:
             raise TypeError("Contract name does not exist in artifacts.")
 
