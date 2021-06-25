@@ -33,8 +33,14 @@ def send_ether(from_wallet: Wallet, to_address: str, ether_amount: int):
         "value": w3.toWei(ether_amount, "ether"),
         "chainId": w3.eth.chain_id,
     }
-    gas = w3.eth.estimate_gas(tx)
-    tx["gas"] = gas
+    _ = w3.eth.estimate_gas(tx)
+    tx = {
+        "from": from_wallet.address,
+        "to": to_address,
+        "value": w3.toWei(ether_amount, "ether"),
+        "chainId": w3.eth.chain_id,
+        "gas": 500000,
+    }
     wallet = Wallet(w3, private_key=from_wallet.key, address=from_wallet.address)
     raw_tx = wallet.sign_tx(tx)
     tx_hash = w3.eth.send_raw_transaction(raw_tx)

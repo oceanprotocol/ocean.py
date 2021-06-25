@@ -37,27 +37,23 @@ def test_prepare_fixed_hash():
 def test_chain_id_send_ether(alice_wallet, bob_address, web3_instance):
     """Tests if the chainId has the right value for send ether transactions."""
     receipt = send_ether(alice_wallet, bob_address, 1)
-    if not receipt:
-        raise AssertionError("Send ether was unsuccessful.")
-    tx = web3_instance.eth.get_transaction(receipt["transactionHash"])
+    assert receipt, "Send ether was unsuccessful."
+    tx = alice_wallet.web3.eth.get_transaction(receipt["transactionHash"])
     # Formula: v = CHAIN_ID * 2 + 35 or v = CHAIN_ID * 2 + 36
     chain_ids = [(tx["v"] - 35) / 2, (tx["v"] - 36) / 2]
-    result = True if web3_instance.eth.chain_id in chain_ids else False
+    result = True if alice_wallet.web3.eth.chain_id in chain_ids else False
     assert result, "The chain ID is not the right one."
 
 
-def test_chain_id_cancel_or_replace_transaction(
-    alice_wallet, bob_address, web3_instance
-):
+def test_chain_id_cancel_or_replace_transaction(alice_wallet, bob_address):
     """Tests if the chainId has the right value for cancelled tx."""
     receipt_cancelled = cancel_or_replace_transaction(alice_wallet, None)
-    if not receipt_cancelled:
-        raise AssertionError("Cancel or replace transaction failed.")
-    tx_cancelled = web3_instance.eth.get_transaction(
+    assert receipt_cancelled, "Cancel or replace transaction failed."
+    tx_cancelled = alice_wallet.web3.eth.get_transaction(
         receipt_cancelled["transactionHash"]
     )
     chain_ids = [(tx_cancelled["v"] - 35) / 2, (tx_cancelled["v"] - 36) / 2]
-    result_cancelled = True if web3_instance.eth.chain_id in chain_ids else False
+    result_cancelled = True if alice_wallet.web3.eth.chain_id in chain_ids else False
     assert result_cancelled, "The chain ID is not the right one."
 
 
