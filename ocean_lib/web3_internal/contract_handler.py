@@ -9,7 +9,7 @@ import logging
 import os
 
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_lib.web3_internal.utils import get_artifacts_path
+from ocean_lib.web3_internal.utils import get_artifacts_path, get_contract_definition
 from web3 import Web3
 from web3.contract import ConciseContract
 
@@ -72,7 +72,6 @@ class ContractHandler(object):
             result = ContractHandler._contracts.get(key)
             assert result is not None
 
-        ContractHandler._verifyContractsConsistency(name)
         return result
 
     @staticmethod
@@ -105,8 +104,6 @@ class ContractHandler(object):
         ContractHandler._contracts[(name, contract.address)] = tup
         ContractHandler._contracts[name] = tup
 
-        ContractHandler._verifyContractsConsistency(name)
-
     @staticmethod
     def set(name, contract):
         """
@@ -116,19 +113,6 @@ class ContractHandler(object):
         :param contract: Contract instance
         """
         ContractHandler._set(name, contract)
-
-    @staticmethod
-    def has(name, address=None):
-        """
-        Check if a contract is the ContractHandler contracts.
-
-        :param name: Contract name, str
-        :param address: hex str -- address of smart contract
-        :return: True if the contract is there, bool
-        """
-        if address:
-            return (name, address) in ContractHandler._contracts
-        return name in ContractHandler._contracts
 
     @staticmethod
     def _load(contract_name, address=None):
@@ -143,7 +127,7 @@ class ContractHandler(object):
         :param contract_name: str name of the solidity smart contract.
         :param address: hex str -- address of smart contract
         """
-        contract_definition = ContractHandler.get_contract_definition(contract_name)
+        contract_definition = get_contract_definition(contract_name)
 
         if not address and "address" in contract_definition:
             address = contract_definition.get("address")
@@ -161,33 +145,3 @@ class ContractHandler(object):
         assert contract.address is not None
 
         ContractHandler._set(contract_name, contract)
-
-        ContractHandler._verifyContractsConsistency(contract_name)
-
-    @staticmethod
-    def get_contract_definition(contract_name):
-        try:
-            return importlib.import_module("artifacts." + contract_name).__dict__
-        except ModuleNotFoundError:
-            raise TypeError("Contract name does not exist in artifacts.")
-
-    @staticmethod
-    def _verifyContractsConsistency(name):
-        """
-        Raise an error if ContractHandler._contracts is inconsistent
-        for the given contract name.
-
-        :param name : str -- name of smart contract
-        :return: None
-        """
-        (contract1, concise_contract1) = ContractHandler._contracts[name]
-        assert contract1 is not None
-        assert contract1.address is not None
-        assert concise_contract1 is not None
-        assert concise_contract1.address is not None
-
-        (contract2, concise_contract2) = ContractHandler._contracts[
-            (name, contract1.address)
-        ]
-        assert id(contract1) == id(contract2)
-        assert id(concise_contract1) == id(concise_contract2)

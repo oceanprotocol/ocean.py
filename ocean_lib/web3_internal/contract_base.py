@@ -17,7 +17,7 @@ from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_lib.web3_internal.utils import get_artifacts_path
+from ocean_lib.web3_internal.utils import get_artifacts_path, get_contract_definition, load_contract
 from web3 import Web3
 from web3.exceptions import MismatchedABI, ValidationError
 from web3._utils.events import get_event_data
@@ -50,7 +50,7 @@ class ContractBase(object):
         assert abi_path, f"abi_path is required, got {abi_path}"
 
         self.contract_concise = ContractHandler.get_concise_contract(self.name, address)
-        self.contract = ContractHandler.get(self.name, address)
+        self.contract = load_contract(Web3Provider.get_web3(), self.name, address)
 
         assert not address or (
             self.contract.address == address and self.address == address
@@ -258,7 +258,7 @@ class ContractBase(object):
         assert abi_path, f"abi_path is required, got {abi_path}"
 
         w3 = web3
-        _json = ContractHandler.get_contract_definition(cls.CONTRACT_NAME)
+        _json = get_contract_definition(cls.CONTRACT_NAME)
 
         _contract = w3.eth.contract(abi=_json["abi"], bytecode=_json["bytecode"])
         built_tx = _contract.constructor(*args).buildTransaction(

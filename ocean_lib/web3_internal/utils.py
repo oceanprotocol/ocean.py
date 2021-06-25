@@ -3,10 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import artifacts
-import logging
 from collections import namedtuple
 from decimal import Decimal
+import importlib
+from jsonsempai import magic  # noqa: F401
+import logging
 from pathlib import Path
+from web3 import Web3
 
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
@@ -154,3 +157,24 @@ def from_wei(wei_value: int) -> Decimal:
 
 def get_artifacts_path():
     return str(Path(artifacts.__file__).parent.expanduser().resolve())
+
+
+def get_contract_definition(contract_name):
+    try:
+        return importlib.import_module("artifacts." + contract_name).__dict__
+    except ModuleNotFoundError:
+        raise TypeError("Contract name does not exist in artifacts.")
+
+
+def load_contract(web3, contract_name, address=None):
+    contract_definition = get_contract_definition(contract_name)
+    if not address:
+        address = Web3.toChecksumAddress(contract_definition["address"])
+    assert address is not None, "address shouldn't be None at this point"
+
+    abi = contract_definition["abi"]
+    bytecode = contract_definition["bytecode"]
+    contract = web3.eth.contract(
+        address=address, abi=abi, bytecode=bytecode
+    )
+    return contract
