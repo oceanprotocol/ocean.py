@@ -101,9 +101,9 @@ def transact_with_contract_function(
     if transaction and "passphrase" in transaction:
         passphrase = transaction["passphrase"]
         transact_transaction.pop("passphrase")
-        if "account_key" in transaction:
-            account_key = transaction["account_key"]
-            transact_transaction.pop("account_key")
+    if transaction and "account_key" in transaction:
+        account_key = transaction["account_key"]
+        transact_transaction.pop("account_key")
 
     if account_key:
         raw_tx = Wallet(web3, private_key=account_key).sign_tx(transact_transaction)
