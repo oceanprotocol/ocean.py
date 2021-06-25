@@ -4,9 +4,9 @@
 #
 import logging
 
-from ocean_lib.exceptions import TransactionFailed
 from ocean_lib.web3_internal.utils import get_network_timeout
 from ocean_lib.web3_internal.wallet import Wallet
+from web3._utils.threads import Timeout
 from web3.contract import prepare_transaction
 
 
@@ -17,13 +17,12 @@ class CustomContractFunction:
 
     def transact(self, transaction):
         """Customize calling smart contract transaction functions.
+        This function is copied from web3 ContractFunction with a few additions:
 
-        Use `personal_sendTransaction` instead of `eth_sendTransaction` and to estimate gas limit.
-
-        This function is largely copied from web3 ContractFunction with an important addition.
-
-        Note: will fallback to `eth_sendTransaction` if `passphrase` is not provided in the
-        `transaction` dict.
+        1. Use personal_sendTransaction (local node) if `passphrase` is in the `transaction` dict
+        2. Else, use eth_sendTransaction (hosted node)
+        3. Estimate gas limit if `gas` is not in the `transaction` dict
+        4. Retry failed transactions until the network-dependent timeout is reached
 
         :param transaction: dict which has the required transaction arguments per
             `personal_sendTransaction` requirements.
@@ -105,23 +104,28 @@ def transact_with_contract_function(
         account_key = transaction["account_key"]
         transact_transaction.pop("account_key")
 
-    if account_key:
-        raw_tx = Wallet(web3, private_key=account_key).sign_tx(transact_transaction)
-        logging.debug(
-            f"sending raw tx: function: {function_name}, tx hash: {raw_tx.hex()}"
-        )
-        txn_hash = web3.eth.send_raw_transaction(raw_tx)
-    elif passphrase:
-        txn_hash = web3.personal.sendTransaction(transact_transaction, passphrase)
-    else:
-        txn_hash = web3.eth.send_transaction(transact_transaction)
+    with Timeout(get_network_timeout()) as _timeout:
+        while True:
+            if account_key:
+                raw_tx = Wallet(web3, private_key=account_key).sign_tx(
+                    transact_transaction
+                )
+                logging.debug(
+                    f"sending raw tx: function: {function_name}, tx hash: {raw_tx.hex()}"
+                )
+                txn_hash = web3.eth.send_raw_transaction(raw_tx)
+            elif passphrase:
+                txn_hash = web3.personal.sendTransaction(
+                    transact_transaction, passphrase
+                )
+            else:
+                txn_hash = web3.eth.send_transaction(transact_transaction)
 
-    if not wait_for_tx(txn_hash, web3, get_network_timeout()):
-        raise TransactionFailed
+            txn_receipt = web3.eth.wait_for_transaction_receipt(
+                txn_hash, get_network_timeout()
+            )
+            if bool(txn_receipt.status):
+                break
+            _timeout.sleep(0.1)
 
     return txn_hash
-
-
-def wait_for_tx(tx_hash, web3, timeout=30):
-    receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=timeout)
-    return bool(receipt.status)
