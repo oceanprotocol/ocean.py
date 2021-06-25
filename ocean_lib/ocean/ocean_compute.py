@@ -6,6 +6,7 @@ import logging
 from typing import Optional
 
 from enforce_typing import enforce_types
+from eth_account.messages import encode_defunct
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.consumable import AssetNotConsumable, ConsumableCodes
@@ -16,7 +17,6 @@ from ocean_lib.config import Config
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.web3_internal.transactions import sign_hash
-from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ocean")
@@ -232,7 +232,7 @@ class OceanCompute:
         if nonce is None:
             uri = self._data_provider.get_root_uri(service_endpoint)
             nonce = self._data_provider.get_nonce(wallet.address, uri)
-        return sign_hash(add_ethereum_prefix_and_hash_msg(f"{msg}{nonce}"), wallet)
+        return sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
 
     def start(
         self,

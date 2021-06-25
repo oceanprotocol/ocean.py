@@ -11,6 +11,7 @@ import os
 from typing import Optional
 
 from enforce_typing import enforce_types
+from eth_account.messages import encode_defunct
 from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
@@ -43,10 +44,7 @@ from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.transactions import sign_hash
-from ocean_lib.web3_internal.utils import (
-    add_ethereum_prefix_and_hash_msg,
-    get_network_name,
-)
+from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
 
@@ -279,7 +277,7 @@ class OceanAssets:
             asset.add_service(compute_service)
 
         asset.proof["signatureValue"] = sign_hash(
-            add_ethereum_prefix_and_hash_msg(asset.asset_id), publisher_wallet
+            encode_defunct(text=asset.asset_id), publisher_wallet
         )
 
         # Add public key and authentication

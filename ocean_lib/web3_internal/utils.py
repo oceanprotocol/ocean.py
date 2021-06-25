@@ -7,6 +7,7 @@ from collections import namedtuple
 from decimal import Decimal
 
 from enforce_typing import enforce_types
+from eth_account.messages import encode_defunct
 from eth_keys import keys
 from eth_utils import big_endian_to_int, decode_hex
 from ocean_lib.web3_internal.constants import DEFAULT_NETWORK_NAME, NETWORK_NAME_MAP
@@ -41,17 +42,6 @@ def prepare_prefixed_hash(msg_hash):
     return generate_multi_value_hash(
         ["string", "bytes32"], ["\x19Ethereum Signed Message:\n32", msg_hash]
     )
-
-
-def add_ethereum_prefix_and_hash_msg(text):
-    """
-    This method of adding the ethereum prefix seems to be used in web3.personal.sign/ecRecover.
-
-    :param text: str any str to be signed / used in recovering address from a signature
-    :return: hash of prefixed text according to the recommended ethereum prefix
-    """
-    prefixed_msg = f"\x19Ethereum Signed Message:\n{len(text)}{text}"
-    return Web3Provider.get_web3().keccak(text=prefixed_msg)
 
 
 def to_32byte_hex(web3, val):
@@ -141,7 +131,7 @@ def ec_recover(message, signed_message):
 
 @enforce_types
 def personal_ec_recover(message, signed_message):
-    prefixed_hash = add_ethereum_prefix_and_hash_msg(message)
+    prefixed_hash = encode_defunct(text=message)
     return ec_recover(prefixed_hash, signed_message)
 
 
