@@ -200,6 +200,8 @@ class Config(configparser.ConfigParser):
         file_path = self.get(SECTION_ETH_NETWORK, NAME_ADDRESS_FILE)
         if file_path:
             file_path = Path(file_path).expanduser().resolve()
+        else:
+            file_path = Path(artifacts.__file__).parent.expanduser().resolve()
 
         return str(file_path)
 

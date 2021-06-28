@@ -6,29 +6,16 @@ import importlib
 import json
 import logging
 import os
-from collections import namedtuple
-from decimal import Decimal
-from pathlib import Path
 
-import artifacts
-from enforce_typing import enforce_types
-from eth_account.messages import encode_defunct
-from eth_keys import keys
-from eth_utils import big_endian_to_int, decode_hex
+import artifacts  # noqa
 from jsonsempai import magic  # noqa: F401
-from web3 import Web3
 from web3.contract import ConciseContract
-
-from ocean_lib.web3_internal.constants import DEFAULT_NETWORK_NAME, NETWORK_NAME_MAP
-from ocean_lib.web3_internal.web3_overrides.signature import SignatureFix
-from ocean_lib.web3_internal.web3_provider import Web3Provider
-
-Signature = namedtuple("Signature", ("v", "r", "s"))
 
 logger = logging.getLogger(__name__)
 
 
 def get_contract_definition(contract_name):
+    """Returns the abi JSON for a contract name."""
     try:
         return importlib.import_module("artifacts." + contract_name).__dict__
     except ModuleNotFoundError:
@@ -36,6 +23,7 @@ def get_contract_definition(contract_name):
 
 
 def load_contract(web3, contract_name, address):
+    """Loads a contract using its name and address."""
     contract_definition = get_contract_definition(contract_name)
     abi = contract_definition["abi"]
     bytecode = contract_definition["bytecode"]
@@ -45,6 +33,7 @@ def load_contract(web3, contract_name, address):
 
 # Soon to be deprecated
 def get_concise_contract(web3, contract_name, address):
+    """Loads a concise contract using its name and address. To be deprecated."""
     contract_definition = get_contract_definition(contract_name)
     abi = contract_definition["abi"]
     bytecode = contract_definition["bytecode"]
@@ -53,6 +42,7 @@ def get_concise_contract(web3, contract_name, address):
 
 
 def get_contracts_addresses(network, address_file):
+    """Get addresses for all contract names, per network and address_file given."""
     network_alias = {"ganache": "development"}
 
     if not address_file or not os.path.exists(address_file):

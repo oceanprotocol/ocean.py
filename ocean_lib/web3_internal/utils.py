@@ -5,11 +5,8 @@
 import artifacts
 from collections import namedtuple
 from decimal import Decimal
-import importlib
-from jsonsempai import magic  # noqa: F401
 import logging
 from pathlib import Path
-from web3 import Web3
 
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
