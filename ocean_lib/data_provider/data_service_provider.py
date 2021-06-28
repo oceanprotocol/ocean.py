@@ -13,13 +13,13 @@ from json import JSONDecodeError
 
 import requests
 from enforce_typing import enforce_types
+from eth_account.messages import encode_defunct
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
 from ocean_lib.web3_internal.transactions import sign_hash
-from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from requests.exceptions import InvalidURL
 
 logger = logging.getLogger(__name__)
@@ -93,7 +93,7 @@ class DataServiceProvider:
         if nonce is None:
             nonce = DataServiceProvider.get_nonce(wallet.address, provider_uri)
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
-        return sign_hash(add_ethereum_prefix_and_hash_msg(f"{msg}{nonce}"), wallet)
+        return sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
 
     @staticmethod
     def get_nonce(user_address, provider_uri):
