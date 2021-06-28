@@ -35,12 +35,8 @@ def get_contract_definition(contract_name):
         raise TypeError("Contract name does not exist in artifacts.")
 
 
-def load_contract(web3, contract_name, address=None):
+def load_contract(web3, contract_name, address):
     contract_definition = get_contract_definition(contract_name)
-    if not address:
-        address = Web3.toChecksumAddress(contract_definition["address"])
-    assert address is not None, "address shouldn't be None at this point"
-
     abi = contract_definition["abi"]
     bytecode = contract_definition["bytecode"]
     contract = web3.eth.contract(address=address, abi=abi, bytecode=bytecode)
@@ -48,12 +44,8 @@ def load_contract(web3, contract_name, address=None):
 
 
 # Soon to be deprecated
-def get_concise_contract(web3, contract_name, address=None):
+def get_concise_contract(web3, contract_name, address):
     contract_definition = get_contract_definition(contract_name)
-    if not address:
-        address = Web3.toChecksumAddress(contract_definition["address"])
-    assert address is not None, "address shouldn't be None at this point"
-
     abi = contract_definition["abi"]
     bytecode = contract_definition["bytecode"]
     contract = web3.eth.contract(address=address, abi=abi, bytecode=bytecode)

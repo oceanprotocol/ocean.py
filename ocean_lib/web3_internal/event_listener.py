@@ -22,6 +22,7 @@ class EventListener(object):
         self,
         web3,
         contract_name,
+        address,
         event_name,
         args=None,
         from_block=None,
@@ -29,8 +30,7 @@ class EventListener(object):
         filters=None,
     ):
         """Initialises EventListener object."""
-        # TODO
-        contract = load_contract(web3, contract_name)
+        contract = load_contract(web3, contract_name, address)
         self.event_name = event_name
         self.event = getattr(contract.events, event_name)
         self.filters = filters if filters else {}

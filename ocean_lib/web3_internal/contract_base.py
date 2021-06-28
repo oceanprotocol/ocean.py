@@ -198,6 +198,7 @@ class ContractBase(object):
         return EventListener(
             self.w3,
             self.CONTRACT_NAME,
+            self.address,
             event_name,
             args,
             filters=event_filter,
