@@ -7,7 +7,6 @@ import os
 
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18
-from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import from_wei, get_ether_balance
 from ocean_lib.web3_internal.wallet import Wallet
@@ -21,7 +20,6 @@ def mint_fake_OCEAN(config):
     2. Distributes tokens to TEST_PRIVATE_KEY1 and TEST_PRIVATE_KEY2
     """
     Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
-    ContractHandler.set_artifacts_path(config.artifacts_path)
 
     addresses_file = config.address_file
 

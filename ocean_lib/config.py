@@ -15,13 +15,11 @@ from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
 DEFAULT_NETWORK_HOST = "localhost"
 DEFAULT_NETWORK_PORT = 8545
 DEFAULT_NETWORK_URL = "http://localhost:8545"
-DEFAULT_ARTIFACTS_PATH = ""
 DEFAULT_ADDRESS_FILE = ""
 DEFAULT_METADATA_CACHE_URI = "http://localhost:5000"
 DEFAULT_PROVIDER_URL = ""
 
 NAME_NETWORK_URL = "network"
-NAME_ARTIFACTS_PATH = "artifacts.path"
 NAME_ADDRESS_FILE = "address.file"
 NAME_GAS_LIMIT = "gas_limit"
 NAME_METADATA_CACHE_URI = "metadata_cache_uri"
@@ -51,11 +49,6 @@ environ_names_and_sections = {
     ],
     NAME_OCEAN_ADDRESS: ["OCEAN_ADDRESS", "OCEAN address", SECTION_ETH_NETWORK],
     NAME_NETWORK_URL: ["NETWORK_URL", "Network URL", SECTION_ETH_NETWORK],
-    NAME_ARTIFACTS_PATH: [
-        "ARTIFACTS_PATH",
-        "Path to the abi artifacts of the deployed smart contracts",
-        SECTION_ETH_NETWORK,
-    ],
     NAME_ADDRESS_FILE: [
         "ADDRESS_FILE",
         "Path to json file of deployed contracts addresses",
@@ -86,7 +79,6 @@ deprecated_environ_names = {
 config_defaults = {
     "eth-network": {
         NAME_NETWORK_URL: DEFAULT_NETWORK_URL,
-        NAME_ARTIFACTS_PATH: DEFAULT_ARTIFACTS_PATH,
         NAME_ADDRESS_FILE: DEFAULT_ADDRESS_FILE,
         NAME_GAS_LIMIT: GAS_LIMIT_DEFAULT,
     },
@@ -109,8 +101,6 @@ class Config(configparser.ConfigParser):
         [eth-network]
         ; ethereum network url
         network = rinkeby
-        ; Path of json abis, this defaults to the artifacts installed with `pip install ocean-contracts`
-        artifacts.path = artifacts
 
         [resources]
         metadata_cache_uri = http://localhost:5000
@@ -206,26 +196,14 @@ class Config(configparser.ConfigParser):
                 self.set(environ_item[2], option_name, value)
 
     @property
-    def artifacts_path(self):
-        """Path where the contracts artifacts are allocated."""
-        _path_string = self.get(SECTION_ETH_NETWORK, NAME_ARTIFACTS_PATH)
-        path = Path(_path_string).expanduser().resolve() if _path_string else None
-
-        if path and path.exists():
-            return path
-
-        return Path(artifacts.__file__).parent.expanduser().resolve()
-
-    @property
     def address_file(self):
         file_path = self.get(SECTION_ETH_NETWORK, NAME_ADDRESS_FILE)
         if file_path:
             file_path = Path(file_path).expanduser().resolve()
+        else:
+            file_path = Path(artifacts.__file__).parent.expanduser().resolve()
 
-        if not file_path or not os.path.exists(file_path):
-            file_path = os.path.join(self.artifacts_path, "address.json")
-
-        return file_path
+        return str(file_path)
 
     @property
     def network_url(self):

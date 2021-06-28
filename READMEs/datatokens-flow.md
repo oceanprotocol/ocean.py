@@ -36,7 +36,6 @@ Create a file called `config.ini` and fill it as follows.
 ```text
 [eth-network]
 network = ganache
-artifacts.path = ~/.ocean/ocean-contracts/artifacts
 address.file = ~/.ocean/ocean-contracts/artifacts/address.json
 ```
 
@@ -79,7 +78,7 @@ wallet = Wallet(ocean.web3, private_key=private_key)
 print(f"create wallet: done. Its address is {wallet.address}")
 
 print("create datatoken: begin.")
-datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet) 
+datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet)
 print(f"created datatoken: done. Its address is {datatoken.address}")
 ```
 

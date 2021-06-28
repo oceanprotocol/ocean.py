@@ -28,7 +28,6 @@ from ocean_lib.ocean.util import (
     get_web3_connection_provider,
     to_base_18,
 )
-from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_provider import Web3Provider
@@ -87,7 +86,6 @@ class Ocean:
             }
             config = Config(options_dict=config_dict)
         self._config = config
-        ContractHandler.set_artifacts_path(self._config.artifacts_path)
         Web3Provider.init_web3(
             provider=get_web3_connection_provider(self._config.network_url)
         )

@@ -13,9 +13,9 @@ from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.util import get_ocean_token_address, to_base_18
 from ocean_lib.web3_internal.account import Account
-from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import from_wei, get_ether_balance
+from ocean_lib.web3_internal.contract_utils import get_contracts_addresses
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import (
     get_factory_deployer_wallet,
@@ -46,7 +46,7 @@ def bfactory_address(config):
 
 @pytest.fixture
 def contracts_addresses(config):
-    return ContractHandler.get_contracts_addresses(_NETWORK, config.address_file)
+    return get_contracts_addresses(_NETWORK, config.address_file)
 
 
 @pytest.fixture

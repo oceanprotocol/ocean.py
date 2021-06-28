@@ -83,7 +83,6 @@ Create a file called `test3/config.ini` and fill it as follows.
 ```text
 [eth-network]
 network = ganache
-artifacts.path = ~/.ocean/ocean-contracts/artifacts
 address.file = ~/.ocean/ocean-contracts/artifacts/address.json
 
 [resources]
