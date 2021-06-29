@@ -20,7 +20,13 @@ from web3.exceptions import MismatchedABI, ValidationError
 from websockets import ConnectionClosed
 
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
-from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.contract_utils import (
+    get_concise_contract,
+    get_contract_definition,
+    get_contracts_addresses,
+    load_contract,
+)
+from ocean_lib.web3_internal.utils import get_artifacts_path
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 from ocean_lib.web3_internal.web3_provider import Web3Provider
@@ -45,12 +51,13 @@ class ContractBase(object):
             self.name
         ), "contract_name property needs to be implemented in subclasses."
         if not abi_path:
-            abi_path = ContractHandler.artifacts_path
+            abi_path = get_artifacts_path()
 
         assert abi_path, f"abi_path is required, got {abi_path}"
 
-        self.contract_concise = ContractHandler.get_concise_contract(self.name, address)
-        self.contract = ContractHandler.get(self.name, address)
+        self.w3 = Web3Provider.get_web3()
+        self.contract_concise = get_concise_contract(self.w3, self.name, address)
+        self.contract = load_contract(self.w3, self.name, address)
 
         assert not address or (
             self.contract.address == address and self.address == address
@@ -64,7 +71,7 @@ class ContractBase(object):
     @classmethod
     def configured_address(cls, network, address_file):
         """Returns the contract addresses"""
-        addresses = ContractHandler.get_contracts_addresses(network, address_file)
+        addresses = get_contracts_addresses(network, address_file)
         return addresses.get(cls.CONTRACT_NAME) if addresses else None
 
     @property
@@ -190,7 +197,9 @@ class ContractBase(object):
         from ocean_lib.web3_internal.event_listener import EventListener
 
         return EventListener(
+            self.w3,
             self.CONTRACT_NAME,
+            self.address,
             event_name,
             args,
             filters=event_filter,
@@ -254,12 +263,12 @@ class ContractBase(object):
         :return: smartcontract address of this contract
         """
         if not abi_path:
-            abi_path = ContractHandler.artifacts_path
+            abi_path = get_artifacts_path()
 
         assert abi_path, f"abi_path is required, got {abi_path}"
 
         w3 = web3
-        _json = ContractHandler.read_abi_from_file(cls.CONTRACT_NAME, abi_path)
+        _json = get_contract_definition(cls.CONTRACT_NAME)
 
         _contract = w3.eth.contract(abi=_json["abi"], bytecode=_json["bytecode"])
         built_tx = _contract.constructor(*args).buildTransaction(

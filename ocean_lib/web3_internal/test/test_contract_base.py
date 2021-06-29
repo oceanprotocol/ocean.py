@@ -7,7 +7,6 @@ import pytest
 from enforce_typing import enforce_types
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.contract import ConciseContract
 
@@ -30,14 +29,6 @@ def test_name_is_None():
     with pytest.raises(AssertionError):
         # self.name will become None, triggering the error
         ContractBase(None)
-
-
-def test_bad_abi_path():
-    ContractHandler.artifacts_path = ""  # empty value
-    with pytest.raises(AssertionError):
-        # input abi_path of None will get it to use value in ContractHandler,
-        # but since we've forced that empty it should raise an error
-        MyFactory(address=None, abi_path=None)
 
 
 def test_nochild():

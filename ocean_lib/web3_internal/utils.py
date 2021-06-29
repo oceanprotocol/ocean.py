@@ -2,9 +2,11 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import logging
+import artifacts
 from collections import namedtuple
 from decimal import Decimal
+import logging
+from pathlib import Path
 
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
@@ -148,3 +150,7 @@ def get_ether_balance(address: str) -> int:
 
 def from_wei(wei_value: int) -> Decimal:
     return Web3Provider.get_web3().fromWei(wei_value, "ether")
+
+
+def get_artifacts_path():
+    return str(Path(artifacts.__file__).parent.expanduser().resolve())

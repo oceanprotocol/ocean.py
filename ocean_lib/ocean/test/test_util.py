@@ -22,7 +22,6 @@ from ocean_lib.ocean.util import (
     to_base,
     to_base_18,
 )
-from ocean_lib.web3_internal.contract_handler import ContractHandler
 
 
 def test_get_infura_connection_type(monkeypatch):
@@ -198,4 +197,3 @@ def test_init_components(config):
         get_web3_connection_provider(config.network_url).endpoint_uri
         == "http://localhost:8545"
     )
-    assert ContractHandler.artifacts_path == config.artifacts_path

@@ -10,7 +10,6 @@ import pytest
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18
-from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import from_wei, get_ether_balance
 from ocean_lib.web3_internal.web3_provider import Web3Provider
@@ -33,7 +32,6 @@ def setup_all(request, config):
     if "nosetup_all" in request.keywords:
         return
     Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
-    ContractHandler.set_artifacts_path(config.artifacts_path)
 
     wallet = get_ganache_wallet()
 
