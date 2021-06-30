@@ -228,7 +228,7 @@ class ContractBase(object):
             "from": from_wallet.address,
             "passphrase": from_wallet.password,
             "account_key": from_wallet.key,
-            "chainId": contract_function._contract_function.web3.eth.chain_id
+            "chainId": self.w3.eth.chain_id
             # 'gas': GAS_LIMIT_DEFAULT
         }
 
