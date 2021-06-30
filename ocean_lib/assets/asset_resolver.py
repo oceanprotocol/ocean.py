@@ -30,10 +30,9 @@ def resolve_asset(did, metadata_cache_uri=None, token_address=None):
         metadata_cache_uri or token_address
     ), "One of metadata_cache_uri or token_address is required."
 
-    metadata_url = metadata_cache_uri
-    if not metadata_cache_uri and token_address:
-        metadata_url = DataToken(token_address).get_metadata_url()
+    if not metadata_cache_uri:
+        metadata_cache_uri = DataToken(token_address).get_metadata_url()
 
-    logger.debug(f"found did {did} -> url={metadata_url}")
-    ddo = AquariusProvider.get_aquarius(metadata_url).get_asset_ddo(did)
+    logger.debug(f"found did {did} -> url={metadata_cache_uri}")
+    ddo = AquariusProvider.get_aquarius(metadata_cache_uri).get_asset_ddo(did)
     return Asset(dictionary=ddo.as_dictionary())
