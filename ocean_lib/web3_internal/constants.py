@@ -25,4 +25,5 @@ NETWORK_NAME_MAP = {
     42: "Kovan",
     100: "xDai",
     137: "Polygon",
+    8996: "Ganache",
 }
