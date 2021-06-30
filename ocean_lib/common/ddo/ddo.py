@@ -10,16 +10,23 @@ from eth_utils import add_0x_prefix
 from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.ddo.constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
 from ocean_lib.common.ddo.credentials import AddressCredential
 from ocean_lib.common.ddo.public_key_base import PublicKeyBase
-from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_ETHEREUM_ECDSA
+from ocean_lib.common.ddo.public_key_rsa import (
+    PUBLIC_KEY_TYPE_ETHEREUM_ECDSA,
+    PUBLIC_KEY_TYPE_RSA,
+    PublicKeyRSA,
+)
+from ocean_lib.common.ddo.service import Service
+from ocean_lib.common.ddo.status_helper import (
+    disable_flag,
+    enable_flag,
+    is_flag_enabled,
+)
 from ocean_lib.common.did import OCEAN_PREFIX, did_to_id
 from ocean_lib.common.utils.utilities import get_timestamp
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-
-from ocean_lib.common.ddo.constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
-from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA, PublicKeyRSA
-from ocean_lib.common.ddo.service import Service
 
 logger = logging.getLogger("ddo")
 
@@ -67,16 +74,22 @@ class DDO:
     @property
     def is_disabled(self):
         """Returns whether the asset is disabled."""
-        metadata_service = self.get_service(ServiceTypes.METADATA)
-        if not metadata_service or not "status" in metadata_service.attributes:
-            return False
-
-        return metadata_service.attributes["status"].get("isOrderDisabled", False)
+        return is_flag_enabled(self, "isOrderDisabled")
 
     @property
     def is_enabled(self):
         """Returns the opposite of is_disabled, for convenience."""
         return not self.is_disabled
+
+    @property
+    def is_retired(self):
+        """Returns whether the asset is retired."""
+        return is_flag_enabled(self, "isRetired")
+
+    @property
+    def is_listed(self):
+        """Returns whether the asset is listed."""
+        return is_flag_enabled(self, "isListed")
 
     @property
     def asset_id(self):
@@ -384,27 +397,27 @@ class DDO:
 
     def enable(self):
         """Enables asset for ordering."""
-        metadata_service = self.get_service(ServiceTypes.METADATA)
-
-        if not metadata_service:
-            return
-
-        if "status" not in metadata_service.attributes:
-            metadata_service.attributes["status"] = {}
-
-        metadata_service.attributes["status"].pop("isOrderDisabled")
+        disable_flag(self, "isOrderDisabled")
 
     def disable(self):
         """Disables asset from ordering."""
-        metadata_service = self.get_service(ServiceTypes.METADATA)
+        enable_flag(self, "isOrderDisabled")
 
-        if not metadata_service:
-            return
+    def retire(self):
+        """Retires an asset."""
+        enable_flag(self, "isRetired")
 
-        if "status" not in metadata_service.attributes:
-            metadata_service.attributes["status"] = {}
+    def unretire(self):
+        """Unretires an asset."""
+        disable_flag(self, "isRetired")
 
-        metadata_service.attributes["status"]["isOrderDisabled"] = True
+    def list(self):
+        """Lists a previously unlisted asset."""
+        enable_flag(self, "isListed")
+
+    def unlist(self):
+        """Unlists an asset."""
+        disable_flag(self, "isListed")
 
     @property
     def requires_address_credential(self):
