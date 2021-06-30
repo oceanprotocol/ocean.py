@@ -44,7 +44,7 @@ class DTFactory(ContractBase):
 
         dt = DataToken(address=token_address)
 
-        return dt.contract_concise.minter()
+        return dt.contract.caller.minter()
 
     def get_token_address(self, transaction_id: str) -> str:
         """Gets token address using transaction id."""

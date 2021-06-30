@@ -3,11 +3,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+
 from ocean_lib.assets.utils import (
     add_publisher_trusted_algorithm,
     create_publisher_trusted_algorithms,
-    remove_publisher_trusted_algorithm,
     generate_trusted_algo_dict,
+    remove_publisher_trusted_algorithm,
 )
 from tests.resources.ddo_helpers import (
     get_registered_algorithm_ddo,

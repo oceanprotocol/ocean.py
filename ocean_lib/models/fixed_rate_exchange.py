@@ -71,26 +71,26 @@ class FixedRateExchange(ContractBase):
     def generateExchangeId(
         self, base_token: str, data_token: str, exchange_owner: str
     ) -> str:
-        return self.contract_concise.generateExchangeId(
+        return self.contract.caller.generateExchangeId(
             base_token, data_token, exchange_owner
         )
 
     #########################
     # View/Read-only methods
     def getNumberOfExchanges(self) -> int:
-        return self.contract_concise.getNumberOfExchanges()
+        return self.contract.caller.getNumberOfExchanges()
 
     def getRate(self, exchange_id: str) -> int:
-        return self.contract_concise.getRate(exchange_id)
+        return self.contract.caller.getRate(exchange_id)
 
     def getExchange(self, exchange_id: str):
-        values = self.contract_concise.getExchange(exchange_id)
+        values = self.contract.caller.getExchange(exchange_id)
         if values and len(values) == 6:
             return FixedExchangeData(*values)
         return None
 
     def getExchanges(self) -> list:
-        return self.contract_concise.getExchanges()
+        return self.contract.caller.getExchanges()
 
     def isActive(self, exchange_id: str) -> bool:
-        return self.contract_concise.isActive(exchange_id)
+        return self.contract.caller.isActive(exchange_id)

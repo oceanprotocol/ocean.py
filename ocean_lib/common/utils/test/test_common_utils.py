@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from ocean_lib.common.utils import utilities
 from web3 import Web3
+
+from ocean_lib.common.utils import utilities
 
 
 def test_convert():

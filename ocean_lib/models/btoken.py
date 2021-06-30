@@ -14,13 +14,13 @@ class BToken(ContractBase):
     # ============================================================
     # reflect BToken Solidity methods
     def symbol(self) -> str:
-        return self.contract_concise.symbol()
+        return self.contract.caller.symbol()
 
     def decimals(self) -> int:
-        return self.contract_concise.decimals()
+        return self.contract.caller.decimals()
 
     def balanceOf(self, address: str) -> int:
-        return self.contract_concise.balanceOf(address)
+        return self.contract.caller.balanceOf(address)
 
     def approve(self, spender_address: str, amt_base: int, from_wallet: Wallet):
         return self.send_transaction(
@@ -31,4 +31,4 @@ class BToken(ContractBase):
         return self.send_transaction("transfer", (dst_address, amt_base), from_wallet)
 
     def allowance(self, src_address: str, dst_address: str) -> int:
-        return self.contract_concise.allowance(src_address, dst_address)
+        return self.contract.caller.allowance(src_address, dst_address)

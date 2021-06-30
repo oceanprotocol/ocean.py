@@ -24,7 +24,7 @@ class BPool(BToken):
     def __init__(self, *args, **kwargs):
         """Initialises BPool object."""
         BToken.__init__(self, *args, **kwargs)
-        self._ccontract = self.contract_concise
+        self._ccontract = self.contract.caller
 
     def __str__(self):
         """Formats with attributes as key, value pairs."""

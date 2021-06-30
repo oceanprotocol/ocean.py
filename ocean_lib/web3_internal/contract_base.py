@@ -20,7 +20,7 @@ from ocean_lib.web3_internal.contract_utils import (
     get_contract_definition,
     load_contract,
     get_contracts_addresses,
-    get_concise_contract,
+    get_contract_caller,
 )
 from ocean_lib.web3_internal.utils import get_artifacts_path
 from web3 import Web3
@@ -55,13 +55,13 @@ class ContractBase(object):
         assert abi_path, f"abi_path is required, got {abi_path}"
 
         self.w3 = Web3Provider.get_web3()
-        self.contract_concise = get_concise_contract(self.w3, self.name, address)
+        self.contract_caller = get_contract_caller(self.w3, self.name, address)
         self.contract = load_contract(self.w3, self.name, address)
 
         assert not address or (
             self.contract.address == address and self.address == address
         )
-        assert self.contract_concise is not None
+        assert self.contract_caller is not None
 
     def __str__(self):
         """Returns contract `name @ address.`"""
