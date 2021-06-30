@@ -64,6 +64,7 @@ def test_market_flow(order_type):
     ######
     # Pay for the service
     args = [
+        consumer_ocean.web3,
         order_requirements.amount,
         order_requirements.data_token_address,
         asset.did,
@@ -152,6 +153,7 @@ def test_payer_market_flow():
     ######
     # Pay for the service and have another_consumer_wallet as consumer
     _order_tx_id = consumer_ocean.assets.pay_for_service(
+        consumer_ocean.web3,
         order_requirements.amount,
         order_requirements.data_token_address,
         asset.did,

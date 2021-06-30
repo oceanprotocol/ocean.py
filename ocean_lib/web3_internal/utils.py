@@ -2,19 +2,21 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import artifacts
+import logging
 from collections import namedtuple
 from decimal import Decimal
-import logging
 from pathlib import Path
+from typing import Optional
 
+import artifacts
 from enforce_typing import enforce_types
+from eth_account.account import Account
 from eth_account.messages import encode_defunct
 from eth_keys import keys
 from eth_utils import big_endian_to_int, decode_hex
 from ocean_lib.web3_internal.constants import DEFAULT_NETWORK_NAME, NETWORK_NAME_MAP
 from ocean_lib.web3_internal.web3_overrides.signature import SignatureFix
-from ocean_lib.web3_internal.web3_provider import Web3Provider
+from web3.main import Web3
 
 Signature = namedtuple("Signature", ("v", "r", "s"))
 
@@ -32,7 +34,7 @@ def generate_multi_value_hash(types, values):
     :return: bytes
     """
     assert len(types) == len(values)
-    return Web3Provider.get_web3().solidityKeccak(types, values)
+    return Web3.solidityKeccak(types, values)
 
 
 def prepare_prefixed_hash(msg_hash):
@@ -46,17 +48,16 @@ def prepare_prefixed_hash(msg_hash):
     )
 
 
-def to_32byte_hex(web3, val):
+def to_32byte_hex(val):
     """
 
-    :param web3:
     :param val:
     :return:
     """
-    return web3.toBytes(val).rjust(32, b"\0")
+    return Web3.toBytes(val).rjust(32, b"\0")
 
 
-def split_signature(web3, signature):
+def split_signature(signature):
     """
 
     :param web3:
@@ -66,9 +67,9 @@ def split_signature(web3, signature):
     assert len(signature) == 65, (
         f"invalid signature, " f"expecting bytes of length 65, got {len(signature)}"
     )
-    v = web3.toInt(signature[-1])
-    r = to_32byte_hex(web3, int.from_bytes(signature[:32], "big"))
-    s = to_32byte_hex(web3, int.from_bytes(signature[32:64], "big"))
+    v = Web3.toInt(signature[-1])
+    r = to_32byte_hex(int.from_bytes(signature[:32], "big"))
+    s = to_32byte_hex(int.from_bytes(signature[32:64], "big"))
     if v != 27 and v != 28:
         v = 27 + v % 2
 
@@ -77,7 +78,7 @@ def split_signature(web3, signature):
 
 @enforce_types
 def private_key_to_address(private_key: str) -> str:
-    return Web3Provider.get_web3().eth.account.from_key(private_key).address
+    return Account.from_key(private_key).address
 
 
 @enforce_types
@@ -88,28 +89,34 @@ def private_key_to_public_key(private_key: str) -> str:
 
 
 @enforce_types
-def get_network_name(network_id: int = None) -> str:
+def get_network_name(
+    network_id: Optional[int] = None, web3: Optional[Web3] = None
+) -> str:
     """
     Return the network name based on the current ethereum network id.
 
     Return `ganache` for every network id that is not mapped.
 
     :param network_id: Network id, int
-    :return: Network name, str
+    :param web3: Web3 instance
     """
     if not network_id:
-        network_id = get_network_id()
+        if not web3:
+            return DEFAULT_NETWORK_NAME.lower()
+        else:
+            network_id = get_network_id(web3)
     return NETWORK_NAME_MAP.get(network_id, DEFAULT_NETWORK_NAME).lower()
 
 
 @enforce_types
-def get_network_id() -> int:
+def get_network_id(web3: Web3) -> int:
     """
-    Return the ethereum network id calling the `web3.version.network` method.
+    Return the ethereum network id calling the `web3.net.network` method.
 
+    :param web3: Web3 instance
     :return: Network id, int
     """
-    return int(Web3Provider.get_web3().net.version)
+    return int(web3.net.version)
 
 
 @enforce_types
@@ -123,12 +130,9 @@ def ec_recover(message, signed_message):
     :param signed_message:
     :return:
     """
-    w3 = Web3Provider.get_web3()
-    v, r, s = split_signature(w3, w3.toBytes(hexstr=signed_message))
+    v, r, s = split_signature(Web3.toBytes(hexstr=signed_message))
     signature_object = SignatureFix(vrs=(v, big_endian_to_int(r), big_endian_to_int(s)))
-    return w3.eth.account.recoverHash(
-        message, signature=signature_object.to_hex_v_hacked()
-    )
+    return Account.recoverHash(message, signature=signature_object.to_hex_v_hacked())
 
 
 @enforce_types
@@ -138,18 +142,18 @@ def personal_ec_recover(message, signed_message):
 
 
 @enforce_types
-def get_ether_balance(address: str) -> int:
+def get_ether_balance(web3: Web3, address: str) -> int:
     """
     Get balance of an ethereum address.
 
     :param address: address, bytes32
     :return: balance, int
     """
-    return Web3Provider.get_web3().eth.get_balance(address, block_identifier="latest")
+    return web3.eth.get_balance(address, block_identifier="latest")
 
 
 def from_wei(wei_value: int) -> Decimal:
-    return Web3Provider.get_web3().fromWei(wei_value, "ether")
+    return Web3.fromWei(wei_value, "ether")
 
 
 def get_artifacts_path():

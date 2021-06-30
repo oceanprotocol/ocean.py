@@ -48,7 +48,7 @@ class MetadataContract(ContractBase):
         return _log
 
     def verify_tx(self, tx_hash: str) -> bool:
-        return self.get_tx_receipt(tx_hash).status == 1
+        return self.get_tx_receipt(self.web3, tx_hash).status == 1
 
     def create(self, did: str, flags: bytes, data: bytes, from_wallet: Wallet) -> str:
         return self.send_transaction("create", (did, flags, data), from_wallet)

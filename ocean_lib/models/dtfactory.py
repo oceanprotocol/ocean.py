@@ -42,13 +42,13 @@ class DTFactory(ContractBase):
         It's only kept for backwards compatibility."""
         from ocean_lib.models.data_token import DataToken  # isort:skip
 
-        dt = DataToken(address=token_address)
+        dt = DataToken(self.web3, address=token_address)
 
         return dt.contract_concise.minter()
 
     def get_token_address(self, transaction_id: str) -> str:
         """Gets token address using transaction id."""
-        tx_receipt = self.get_tx_receipt(transaction_id)
+        tx_receipt = self.get_tx_receipt(self.web3, transaction_id)
         if not tx_receipt:
             logging.warning(
                 f"Cannot get the transaction receipt for tx {transaction_id}."

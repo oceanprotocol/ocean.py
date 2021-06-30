@@ -8,7 +8,7 @@ import copy
 import logging
 import lzma
 import os
-from typing import Optional
+from typing import Optional, Tuple
 
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
@@ -46,7 +46,7 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.web3_provider import Web3Provider
+from web3.main import Web3
 
 logger = logging.getLogger("ocean")
 
@@ -56,9 +56,10 @@ class OceanAssets:
 
     """Ocean assets class."""
 
-    def __init__(self, config, data_provider, ddo_registry_address):
+    def __init__(self, config, web3, data_provider, ddo_registry_address):
         """Initialises OceanAssets object."""
         self._config = config
+        self._web3 = web3
         self._metadata_cache_uri = config.metadata_cache_uri
         self._data_provider = data_provider
         self._metadata_registry_address = ddo_registry_address
@@ -71,7 +72,7 @@ class OceanAssets:
         self._downloads_path = downloads_path
 
     def ddo_registry(self):
-        return MetadataContract(self._metadata_registry_address)
+        return MetadataContract(self._web3, self._metadata_registry_address)
 
     def _get_aquarius(self, url=None) -> Aquarius:
         return AquariusProvider.get_aquarius(url or self._metadata_cache_uri)
@@ -131,7 +132,7 @@ class OceanAssets:
         dt_symbol: str = None,
         dt_blob: str = None,
         dt_cap: float = None,
-    ) -> (Asset, None):
+    ) -> Optional[Asset]:
         """Register an asset on-chain.
 
         Creating/deploying a DataToken contract and in the Metadata store (Aquarius).
@@ -205,7 +206,7 @@ class OceanAssets:
         address = DTFactory.configured_address(
             get_network_name(), self._config.address_file
         )
-        dtfactory = DTFactory(address)
+        dtfactory = DTFactory(self._web3, address)
         if not data_token_address:
             blob = dt_blob or ""
             name = dt_name or metadata["main"]["name"]
@@ -215,7 +216,7 @@ class OceanAssets:
             tx_id = dtfactory.createToken(
                 blob, name, symbol, to_base_18(_cap), from_wallet=publisher_wallet
             )
-            data_token = DataToken(dtfactory.get_token_address(tx_id))
+            data_token = DataToken(self._web3, dtfactory.get_token_address(tx_id))
             if not data_token:
                 logger.warning("Creating new data token failed.")
                 return None
@@ -236,7 +237,7 @@ class OceanAssets:
                     f"datatoken address {data_token_address} is not found in the DTFactory events."
                 )
             # verify data_token_address
-            dt = DataToken(data_token_address)
+            dt = DataToken(self._web3, data_token_address)
             minter = dt.contract_concise.minter()
             if not minter:
                 raise AssertionError(
@@ -327,11 +328,10 @@ class OceanAssets:
         try:
             # publish the new ddo in ocean-db/Aquarius
             ddo_registry = self.ddo_registry()
-            web3 = Web3Provider.get_web3()
             tx_id = ddo_registry.create(
                 asset.asset_id,
                 bytes([1]),
-                lzma.compress(web3.toBytes(text=asset.as_text())),
+                lzma.compress(Web3.toBytes(text=asset.as_text())),
                 publisher_wallet,
             )
             if not ddo_registry.verify_tx(tx_id):
@@ -351,11 +351,10 @@ class OceanAssets:
         try:
             # publish the new ddo in ocean-db/Aquarius
             ddo_registry = self.ddo_registry()
-            web3 = Web3Provider.get_web3()
             tx_id = ddo_registry.update(
                 asset.asset_id,
                 bytes([1]),
-                lzma.compress(web3.toBytes(text=asset.as_text())),
+                lzma.compress(Web3.toBytes(text=asset.as_text())),
                 publisher_wallet,
             )
             if not ddo_registry.verify_tx(tx_id):
@@ -404,7 +403,7 @@ class OceanAssets:
 
     def query(
         self, query: dict, sort=None, offset=100, page=1, metadata_cache_uri=None
-    ) -> []:
+    ) -> list:
         """
         Search an asset in oceanDB using search query.
 
@@ -479,6 +478,7 @@ class OceanAssets:
 
     @staticmethod
     def pay_for_service(
+        web3: Web3,
         amount: float,
         token_address: str,
         did: str,
@@ -500,7 +500,7 @@ class OceanAssets:
         :return: hex str id of transfer transaction
         """
         amount_base = to_base_18(amount)
-        dt = DataToken(token_address)
+        dt = DataToken(web3, token_address)
         balance = dt.balanceOf(from_wallet.address)
         if balance < amount_base:
             raise InsufficientBalance(
@@ -524,12 +524,7 @@ class OceanAssets:
 
         try:
             dt.verify_order_tx(
-                Web3Provider.get_web3(),
-                tx_hash,
-                did,
-                service_id,
-                amount_base,
-                from_wallet.address,
+                tx_hash, did, service_id, amount_base, from_wallet.address
             )
             return tx_hash
         except (AssertionError, Exception) as e:
@@ -596,7 +591,7 @@ class OceanAssets:
             index,
         )
 
-    def validate(self, metadata: dict) -> (bool, list):
+    def validate(self, metadata: dict) -> Tuple[bool, list]:
         """
         Validate that the metadata is ok to be stored in aquarius.
 

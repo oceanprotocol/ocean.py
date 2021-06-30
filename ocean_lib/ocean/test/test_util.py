@@ -17,8 +17,6 @@ from ocean_lib.ocean.util import (
     get_bfactory_address,
     get_dtfactory_address,
     get_ocean_token_address,
-    get_web3_connection_provider,
-    init_components,
     to_base,
     to_base_18,
 )
@@ -189,11 +187,3 @@ def test_get_ocean_token_address(config):
     address = get_ocean_token_address(config.address_file)
     assert address[:2] == "0x", "It is not a token address."
     assert address == addresses["Ocean"]
-
-
-def test_init_components(config):
-    init_components(config)
-    assert (
-        get_web3_connection_provider(config.network_url).endpoint_uri
-        == "http://localhost:8545"
-    )

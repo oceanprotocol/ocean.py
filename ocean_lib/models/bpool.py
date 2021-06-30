@@ -11,6 +11,7 @@ from ocean_lib.models import balancer_constants
 from ocean_lib.ocean import util
 from ocean_lib.web3_internal.wallet import Wallet
 from web3._utils.events import get_event_data
+from web3.main import Web3
 
 from .btoken import BToken
 
@@ -40,12 +41,12 @@ class BPool(BToken):
 
         s += [f"  numTokens = {self.getNumTokens()}"]
         cur_addrs = self.getCurrentTokens()
-        cur_symbols = [BToken(addr).symbol() for addr in cur_addrs]
+        cur_symbols = [BToken(self.web3, addr).symbol() for addr in cur_addrs]
         s += [f"  currentTokens (as symbols) = {', '.join(cur_symbols)}"]
 
         if self.isFinalized():
             final_addrs = self.getFinalTokens()
-            final_symbols = [BToken(addr).symbol() for addr in final_addrs]
+            final_symbols = [BToken(self.web3, addr).symbol() for addr in final_addrs]
             s += [f"  finalTokens (as symbols) = {final_symbols}"]
 
         s += ["  is bound:"]
@@ -64,7 +65,7 @@ class BPool(BToken):
         s += ["  balances (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
             balance_base = self.getBalance(addr)
-            dec = BToken(addr).decimals()
+            dec = BToken(self.web3, addr).decimals()
             balance = util.from_base(balance_base, dec)
             s += [f"    {symbol}: {balance}"]
 
@@ -588,7 +589,6 @@ class BPool(BToken):
     def get_liquidity_logs(
         self,
         event_name,
-        web3,
         from_block,
         to_block=None,
         user_address=None,
@@ -604,7 +604,7 @@ class BPool(BToken):
             _filter["address"] = self.address
 
         if user_address:
-            assert web3.isChecksumAddress(user_address)
+            assert Web3.isChecksumAddress(user_address)
             _filter["topics"].append(
                 f"0x000000000000000000000000{remove_0x_prefix(user_address).lower()}"
             )
@@ -612,8 +612,8 @@ class BPool(BToken):
         event = getattr(self.events, event_name)
         event_abi = event().abi
         try:
-            logs = web3.eth.get_logs(_filter)
-            logs = [get_event_data(web3.codec, event_abi, lg) for lg in logs]
+            logs = self.web3.eth.get_logs(_filter)
+            logs = [get_event_data(self.web3.codec, event_abi, lg) for lg in logs]
         except ValueError as e:
             logger.error(
                 f"get_join_logs failed -> web3.eth.get_logs (filter={_filter}) failed: "
@@ -624,22 +624,22 @@ class BPool(BToken):
         return logs
 
     def get_join_logs(
-        self, web3, from_block, to_block=None, user_address=None, this_pool_only=True
+        self, from_block, to_block=None, user_address=None, this_pool_only=True
     ):
         return self.get_liquidity_logs(
-            "LOG_JOIN", web3, from_block, to_block, user_address, this_pool_only
+            "LOG_JOIN", from_block, to_block, user_address, this_pool_only
         )
 
     def get_exit_logs(
-        self, web3, from_block, to_block=None, user_address=None, this_pool_only=True
+        self, from_block, to_block=None, user_address=None, this_pool_only=True
     ):
         return self.get_liquidity_logs(
-            "LOG_EXIT", web3, from_block, to_block, user_address, this_pool_only
+            "LOG_EXIT", from_block, to_block, user_address, this_pool_only
         )
 
     def get_swap_logs(
-        self, web3, from_block, to_block=None, user_address=None, this_pool_only=True
+        self, from_block, to_block=None, user_address=None, this_pool_only=True
     ):
         return self.get_liquidity_logs(
-            "LOG_SWAP", web3, from_block, to_block, user_address, this_pool_only
+            "LOG_SWAP", from_block, to_block, user_address, this_pool_only
         )

@@ -25,7 +25,7 @@ class BFactory(ContractBase):
             from_wallet,
             {"gas": balancer_constants.GASLIMIT_BFACTORY_NEWBPOOL},
         )
-        tx_receipt = self.get_tx_receipt(tx_id)
+        tx_receipt = self.get_tx_receipt(self.web3, tx_id)
         if tx_receipt.status != 1:
             raise ValueError(
                 f"Create BPool failed: tx_id {tx_id}, tx receipt is {tx_receipt}"

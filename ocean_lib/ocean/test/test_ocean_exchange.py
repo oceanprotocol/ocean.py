@@ -28,6 +28,7 @@ def test_ocean_exchange(publisher_ocean_instance):
     )
     dt.mint_tokens(bob_wallet.address, 100.0, alice_wallet)
     ox = OceanExchange(
+        ocn.web3,
         ocn.OCEAN_address,
         _get_exchange_address(publisher_ocean_instance.config),
         ocn.config,

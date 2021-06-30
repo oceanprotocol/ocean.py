@@ -9,8 +9,8 @@ from ocean_lib.web3_internal.test.test_contract_base import MyFactory
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 
 
-def test_main(dtfactory_address):
-    factory = MyFactory(dtfactory_address)
+def test_main(web3, dtfactory_address):
+    factory = MyFactory(web3, dtfactory_address)
     fn_args = ("foo_blob", "DT1", "DT1", to_base_18(1000.0))
     contract_fn = getattr(factory.contract.functions, "createToken")(*fn_args)
     custom_contract = CustomContractFunction(contract_fn)

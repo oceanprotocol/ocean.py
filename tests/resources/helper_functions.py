@@ -14,13 +14,18 @@ from enforce_typing import enforce_types
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.ocean.util import get_web3_connection_provider
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.web3_provider import Web3Provider
 from tests.resources.mocks.data_provider_mock import DataProviderMock
+from web3.main import Web3
 
 
 def get_web3():
-    return Web3Provider.get_web3()
+    return Web3(provider=get_web3_connection_provider(get_example_config().network_url))
+
+
+def get_example_config():
+    return ExampleConfig.get_config()
 
 
 @enforce_types
@@ -136,14 +141,14 @@ def mint_tokens_and_wait(
 ):
     dtc = data_token_contract
     tx_id = dtc.mint_tokens(receiver_address, 50.0, minter_wallet)
-    dtc.get_tx_receipt(tx_id)
+    dtc.get_tx_receipt(dtc.web3, tx_id)
     time.sleep(2)
 
     def verify_supply(mint_amount=50):
         supply = dtc.contract_concise.totalSupply()
         if supply <= 0:
             _tx_id = dtc.mint_tokens(receiver_address, mint_amount, minter_wallet)
-            dtc.get_tx_receipt(_tx_id)
+            dtc.get_tx_receipt(dtc.web3, _tx_id)
             supply = dtc.contract_concise.totalSupply()
         return supply
 

@@ -7,13 +7,10 @@ import os
 import pytest
 from eth_account.messages import encode_defunct
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 
-def test_wallet_arguments():
+def test_wallet_arguments(web3):
     """Tests that a wallet's arguments are correctly setup."""
-    web3 = Web3Provider.get_web3()
-
     private_key = os.environ.get("TEST_PRIVATE_KEY1")
     assert private_key, "envvar TEST_PRIVATE_KEY1 is not set."
 

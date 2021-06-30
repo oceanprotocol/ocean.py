@@ -23,6 +23,7 @@ def test_get_network_name(web3):
     assert get_network_name(3) == "ropsten"
     assert get_network_name(137) == "polygon"
     assert get_network_name(8996) == "ganache"
+    assert get_network_name(web3=web3) == "ganache"
     assert get_network_name(-1) == "ganache"
 
 
