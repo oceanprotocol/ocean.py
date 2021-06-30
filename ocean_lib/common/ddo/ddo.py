@@ -461,7 +461,7 @@ class DDO:
         self, credential=None, with_connectivity_check=True, provider_uri=None
     ):
         """Checks whether an asset is consumable and returns a ConsumableCode."""
-        if self.is_disabled or self.is_retired or not self.is_listed:
+        if self.is_disabled or self.is_retired:
             return ConsumableCodes.ASSET_DISABLED
 
         if (

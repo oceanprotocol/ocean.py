@@ -271,7 +271,6 @@ def test_ddo_unlisting():
 
     ddo.unlist()
     assert not ddo.is_listed
-    assert ddo.is_consumable() == ConsumableCodes.ASSET_DISABLED
 
     ddo.list()
     assert ddo.is_listed
