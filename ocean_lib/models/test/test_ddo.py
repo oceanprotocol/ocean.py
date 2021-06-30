@@ -256,12 +256,10 @@ def test_ddo_retiring():
 
     ddo.retire()
     assert ddo.is_retired
+    assert ddo.is_consumable() == ConsumableCodes.ASSET_DISABLED
 
     ddo.unretire()
     assert not ddo.is_retired
-
-    # TODO: is consumable
-    # assert ddo.is_consumable() == ConsumableCodes.ASSET_DISABLED
 
 
 def test_ddo_unlisting():
@@ -273,6 +271,7 @@ def test_ddo_unlisting():
 
     ddo.unlist()
     assert not ddo.is_listed
+    assert ddo.is_consumable() == ConsumableCodes.ASSET_DISABLED
 
     ddo.list()
     assert ddo.is_listed
