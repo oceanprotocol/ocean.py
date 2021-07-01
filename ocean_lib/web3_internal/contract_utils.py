@@ -31,13 +31,6 @@ def load_contract(web3, contract_name, address):
     return contract
 
 
-def get_contract_caller(web3, contract_name, address):
-    """Loads a concise contract using its name and address. To be deprecated."""
-    contract_definition = get_contract_definition(contract_name)
-    abi = contract_definition["abi"]
-    return ContractCaller(abi=abi, web3=web3, address=address)
-
-
 def get_contracts_addresses(network, address_file):
     """Get addresses for all contract names, per network and address_file given."""
     network_alias = {"ganache": "development"}

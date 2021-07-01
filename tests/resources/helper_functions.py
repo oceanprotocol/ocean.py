@@ -141,11 +141,11 @@ def mint_tokens_and_wait(
     time.sleep(2)
 
     def verify_supply(mint_amount=50):
-        supply = dtc.contract_caller.totalSupply()
+        supply = dtc.contract.caller.totalSupply()
         if supply <= 0:
             _tx_id = dtc.mint_tokens(receiver_address, mint_amount, minter_wallet)
             dtc.get_tx_receipt(_tx_id)
-            supply = dtc.contract_caller.totalSupply()
+            supply = dtc.contract.caller.totalSupply()
         return supply
 
     while True:
