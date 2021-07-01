@@ -9,7 +9,6 @@ import os
 
 import artifacts  # noqa
 from jsonsempai import magic  # noqa: F401
-from web3.contract import ContractCaller
 
 logger = logging.getLogger(__name__)
 
