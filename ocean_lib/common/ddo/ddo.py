@@ -10,16 +10,16 @@ from eth_utils import add_0x_prefix
 from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.ddo.constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
 from ocean_lib.common.ddo.credentials import AddressCredential
-from ocean_lib.common.ddo.public_key_base import PublicKeyBase
-from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_ETHEREUM_ECDSA
+from ocean_lib.common.ddo.public_key_base import (
+    PUBLIC_KEY_TYPE_ETHEREUM_ECDSA,
+    PublicKeyBase,
+)
+from ocean_lib.common.ddo.service import Service
 from ocean_lib.common.did import OCEAN_PREFIX, did_to_id
 from ocean_lib.common.utils.utilities import get_timestamp
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-
-from ocean_lib.common.ddo.constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
-from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA, PublicKeyRSA
-from ocean_lib.common.ddo.service import Service
 
 logger = logging.getLogger("ddo")
 
@@ -68,7 +68,7 @@ class DDO:
     def is_disabled(self):
         """Returns whether the asset is disabled."""
         metadata_service = self.get_service(ServiceTypes.METADATA)
-        if not metadata_service or not "status" in metadata_service.attributes:
+        if not metadata_service or "status" not in metadata_service.attributes:
             return False
 
         return metadata_service.attributes["status"].get("isOrderDisabled", False)
@@ -352,19 +352,15 @@ class DDO:
     @staticmethod
     def create_public_key_from_json(values):
         """Create a public key object based on the values from the JSON record."""
-        # currently we only support RSA public keys
         _id = values.get("id")
         if not _id:
             # Make it more forgiving for now.
             _id = ""
             # raise ValueError('publicKey definition is missing the "id" value.')
 
-        if values.get("type") == PUBLIC_KEY_TYPE_RSA:
-            public_key = PublicKeyRSA(_id, owner=values.get("owner"))
-        else:
-            public_key = PublicKeyBase(
-                _id, owner=values.get("owner"), type=PUBLIC_KEY_TYPE_ETHEREUM_ECDSA
-            )
+        public_key = PublicKeyBase(
+            _id, owner=values.get("owner"), type=PUBLIC_KEY_TYPE_ETHEREUM_ECDSA
+        )
 
         public_key.set_key_value(values)
         return public_key

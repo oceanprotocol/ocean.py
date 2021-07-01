@@ -18,26 +18,6 @@
       "1": "0x999999952b5c93b82dd9e7ecc3d9fdf4755f7f69a54484941897dc517b4adfe3"
     }
   },
-  "publicKey": [
-    {
-      "id": "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019#keys-1",
-      "type": "RsaVerificationKey2018",
-      "owner": "did:op:6027c1e7cbae06a91fce0557ee53195284825f56a7100be0c53cbf4391aa26cc",
-      "publicKeyPem": "-----BEGIN PUBLIC KEY...END PUBLIC KEY-----\r\n"
-    },
-    {
-      "id": "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019#keys-2",
-      "type": "Ed25519VerificationKey2018",
-      "owner": "did:op:4c27a254e607cdf91a1206480e7eb8c74856102316c1a462277d4f21c02373b6",
-      "publicKeyBase58": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"
-    },
-    {
-      "id": "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019#keys-3",
-      "type": "RsaPublicKeyExchangeKey2018",
-      "owner": "did:op:5f6b885202ffb9643874be529302eb00d55e226959f1fbacaeda592c5b5c9484",
-      "publicKeyPem": "-----BEGIN PUBLIC KEY...END PUBLIC KEY-----\r\n"
-    }
-  ],
   "verifiableCredential": [
     {
       "@context": [

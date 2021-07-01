@@ -12,10 +12,9 @@ from ocean_lib.common.agreements.service_factory import (
     ServiceFactory,
 )
 from ocean_lib.common.ddo.ddo import DDO
-from ocean_lib.common.ddo.public_key_base import PublicKeyBase
-from ocean_lib.common.ddo.public_key_rsa import (
+from ocean_lib.common.ddo.public_key_base import (
     PUBLIC_KEY_TYPE_ETHEREUM_ECDSA,
-    PUBLIC_KEY_TYPE_RSA,
+    PublicKeyBase,
 )
 from ocean_lib.common.did import DID
 from tests.resources.ddo_helpers import get_resource_path, get_sample_ddo
@@ -81,11 +80,6 @@ def test_create_public_key_from_json():
     assert pub_key_inst.get_type() == PUBLIC_KEY_TYPE_ETHEREUM_ECDSA
     assert pub_key_inst.get_owner() == pkey["owner"]
 
-    pub_key_inst = DDO.create_public_key_from_json({"type": PUBLIC_KEY_TYPE_RSA})
-    assert pub_key_inst.get_id() == ""
-    assert pub_key_inst.get_type() == PUBLIC_KEY_TYPE_RSA
-    assert pub_key_inst.get_owner() is None
-
 
 def test_ddo_dict():
     """Tests DDO creation from dictionary."""
@@ -93,7 +87,6 @@ def test_ddo_dict():
     assert sample_ddo_path.exists(), f"{sample_ddo_path} does not exist!"
 
     ddo1 = DDO(json_filename=sample_ddo_path)
-    assert len(ddo1.public_keys) == 3
     assert ddo1.did == "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019"
 
 
