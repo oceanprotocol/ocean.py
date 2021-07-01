@@ -23,7 +23,8 @@ from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_utils import (
     get_contract_definition,
     get_contracts_addresses,
-    load_contract, get_contract_caller,
+    load_contract,
+    get_contract_caller,
 )
 from ocean_lib.web3_internal.utils import get_artifacts_path
 from ocean_lib.web3_internal.wallet import Wallet
