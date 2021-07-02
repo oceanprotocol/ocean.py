@@ -48,6 +48,18 @@ def test_ddo_dict():
     ddo1 = DDO(json_filename=sample_ddo_path)
     assert ddo1.did == "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019"
 
+    ddo1.add_proof("checksum", get_publisher_wallet())
+
+    ddo_dict = ddo1.as_dictionary()
+    assert ddo_dict["publicKey"][0]["id"] == ddo1.did
+    assert ddo_dict["publicKey"][0]["owner"] == get_publisher_wallet().address
+    assert ddo_dict["publicKey"][0]["type"] == "EthereumECDSAKey"
+
+    assert ddo_dict["authentication"][0] == {
+        "type": "RsaSignatureAuthentication2018",
+        "publicKey": ddo1.did,
+    }
+
 
 def test_find_service():
     """Tests finding a DDO service by index."""

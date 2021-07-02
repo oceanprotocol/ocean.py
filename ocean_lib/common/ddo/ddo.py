@@ -181,11 +181,7 @@ class DDO:
         }
 
         data["publicKey"] = [
-            {
-                "id": self.did,
-                "type": "EthereumECDSAKey",
-                "owner": self.proof.get("creator"),
-            }
+            {"id": self.did, "type": "EthereumECDSAKey", "owner": self.publisher}
         ]
 
         data["authentication"] = [
