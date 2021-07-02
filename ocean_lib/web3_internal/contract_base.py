@@ -53,7 +53,7 @@ class ContractBase(object):
         assert abi_path, f"abi_path is required, got {abi_path}"
 
         self.web3 = web3
-        self.contract = load_contract(self.w3, self.name, address)
+        self.contract = load_contract(self.web3, self.name, address)
         assert not address or (
             self.contract.address == address and self.address == address
         )
