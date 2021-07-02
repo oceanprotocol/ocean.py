@@ -8,7 +8,7 @@ from ocean_lib.web3_internal.transactions import (
 )
 
 
-def test_chain_id_send_ether(alice_wallet, bob_address, web3_instance):
+def test_chain_id_send_ether(alice_wallet, bob_address):
     """Tests if the chainId has the right value for send ether transactions."""
     receipt = send_ether(alice_wallet, bob_address, 1)
     assert receipt, "Send ether was unsuccessful."

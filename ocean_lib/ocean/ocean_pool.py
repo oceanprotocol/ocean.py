@@ -14,8 +14,8 @@ from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.util import from_base_18, get_dtfactory_address, to_base_18
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.web3_provider import Web3Provider
 from scipy.interpolate import interp1d
+from web3.main import Web3
 
 logger = logging.getLogger(__name__)
 
@@ -49,8 +49,9 @@ class OceanPool:
         "dtHolders",
     }
 
-    def __init__(self, ocean_token_address: str, bfactory_address: str):
+    def __init__(self, web3: Web3, ocean_token_address: str, bfactory_address: str):
         """Initialises Ocean Pool."""
+        self.web3 = web3
         self.ocean_address = ocean_token_address
         self.bfactory_address = bfactory_address
 
@@ -78,28 +79,27 @@ class OceanPool:
         :param swap_fee: float the fee taken by the pool on each swap transaction
         :return: BPool instance
         """
-
-        bfactory = BFactory(self.bfactory_address)
+        bfactory = BFactory(self.web3, self.bfactory_address)
         pool_address = bfactory.newBPool(from_wallet)
-        pool = BPool(pool_address)
+        pool = BPool(self.web3, pool_address)
         logger.debug(f"pool created with address {pool_address}.")
 
         assert 1 <= data_token_weight <= 9
         base_weight = 10.0 - data_token_weight
 
         # Must approve datatoken and Ocean tokens to the new pool as spender
-        dt = DataToken(data_token_address)
+        dt = DataToken(self.web3, data_token_address)
         tx_id = dt.approve_tokens(
             pool_address, data_token_amount, from_wallet, wait=True
         )
-        if dt.get_tx_receipt(tx_id).status != 1:
+        if dt.get_tx_receipt(self.web3, tx_id).status != 1:
             raise VerifyTxFailed(
                 f"Approve datatokens failed, pool was created at {pool_address}"
             )
 
-        ot = DataToken(self.ocean_address)
+        ot = DataToken(self.web3, self.ocean_address)
         tx_id = ot.approve_tokens(pool_address, OCEAN_amount, from_wallet, wait=True)
-        if ot.get_tx_receipt(tx_id).status != 1:
+        if ot.get_tx_receipt(self.web3, tx_id).status != 1:
             raise VerifyTxFailed(
                 f"Approve OCEAN tokens failed, pool was created at {pool_address}"
             )
@@ -114,9 +114,9 @@ class OceanPool:
             to_base_18(swap_fee),
             from_wallet,
         )
-        if pool.get_tx_receipt(tx_id).status != 1:
+        if pool.get_tx_receipt(self.web3, tx_id).status != 1:
             raise VerifyTxFailed(
-                f"pool.setup failed: txId={tx_id}, receipt={pool.get_tx_receipt(tx_id)}"
+                f"pool.setup failed: txId={tx_id}, receipt={pool.get_tx_receipt(self.web3, tx_id)}"
             )
 
         logger.debug(
@@ -126,8 +126,8 @@ class OceanPool:
         return pool
 
     @staticmethod
-    def get(pool_address: str) -> BPool:
-        return BPool(pool_address)
+    def get(web3: Web3, pool_address: str) -> BPool:
+        return BPool(web3, pool_address)
 
     def get_token_address(
         self, pool_address: str, pool: BPool = None, validate=True
@@ -137,7 +137,7 @@ class OceanPool:
             if validate:
                 assert self._is_valid_pool(pool_address)
 
-            pool = BPool(pool_address)
+            pool = BPool(self.web3, pool_address)
 
         tokens = pool.getCurrentTokens()
         return tokens[0] if tokens[0] != self.ocean_address else tokens[1]
@@ -193,16 +193,15 @@ class OceanPool:
         assert amount_base >= 0
         if amount_base == 0:
             return ""
-
-        pool = BPool(pool_address)
-        token = BToken(token_address)
+        pool = BPool(self.web3, pool_address)
+        token = BToken(self.web3, token_address)
         assert token.balanceOf(from_wallet.address) >= amount_base, (
             f"Insufficient funds, {amount_base} tokens are required of token address {token_address}, "
             f"but only a balance of {token.balanceOf(from_wallet.address)} is available."
         )
 
         tx_id = token.approve(pool_address, amount_base, from_wallet)
-        r = token.get_tx_receipt(tx_id)
+        r = token.get_tx_receipt(self.web3, tx_id)
         if not r or r.status != 1:
             return 0
 
@@ -274,7 +273,7 @@ class OceanPool:
 
         assert max_pool_shares_base > 0, ""
 
-        pool = BPool(pool_address)
+        pool = BPool(self.web3, pool_address)
         if pool.balanceOf(from_wallet.address) == 0:
             return ""
 
@@ -303,11 +302,11 @@ class OceanPool:
         :param from_wallet:
         :return: str transaction id/hash
         """
-        ocean_tok = DataToken(self.ocean_address)
+        ocean_tok = DataToken(self.web3, self.ocean_address)
         ocean_tok.approve_tokens(pool_address, max_OCEAN_amount, from_wallet, wait=True)
 
         dtoken_address = self.get_token_address(pool_address)
-        pool = BPool(pool_address)
+        pool = BPool(self.web3, pool_address)
         return pool.swapExactAmountOut(
             tokenIn_address=self.ocean_address,  # entering pool
             maxAmountIn_base=to_base_18(max_OCEAN_amount),  # ""
@@ -339,10 +338,10 @@ class OceanPool:
         :return: str transaction id/hash
         """
         dtoken_address = self.get_token_address(pool_address)
-        dt = BToken(dtoken_address)
+        dt = BToken(self.web3, dtoken_address)
         dt.approve(pool_address, amount_base, from_wallet=from_wallet)
 
-        pool = BPool(pool_address)
+        pool = BPool(self.web3, pool_address)
         return pool.swapExactAmountIn(
             tokenIn_address=dtoken_address,  # entering pool
             tokenAmountIn_base=amount_base,  # ""
@@ -359,7 +358,7 @@ class OceanPool:
         :return: int price of data token in terms of OCEAN tokens
         """
         dtoken_address = self.get_token_address(pool_address)
-        pool = BPool(pool_address)
+        pool = BPool(self.web3, pool_address)
         return from_base_18(
             pool.getSpotPrice(
                 tokenIn_address=self.ocean_address, tokenOut_address=dtoken_address
@@ -388,13 +387,13 @@ class OceanPool:
         """
         assert self._is_valid_pool(pool_address), "The pool address is not valid."
         dt_address = self.get_token_address(pool_address)
-        dt = BToken(dt_address)
+        dt = BToken(self.web3, dt_address)
         dt.approve(pool_address, max_data_token_amount_base, from_wallet=from_wallet)
 
-        OCEAN = BToken(self.ocean_address)
+        OCEAN = BToken(self.web3, self.ocean_address)
         OCEAN.approve(pool_address, max_OCEAN_amount_base, from_wallet=from_wallet)
 
-        pool = BPool(pool_address)
+        pool = BPool(self.web3, pool_address)
         return pool.joinPool(
             bpt_amount_base,
             [max_data_token_amount_base, max_OCEAN_amount_base],
@@ -402,7 +401,7 @@ class OceanPool:
         )
 
     def _is_valid_pool(self, pool_address) -> bool:
-        pool = BPool(pool_address)
+        pool = BPool(self.web3, pool_address)
         if pool.getNumTokens() != 2:
             return False
 
@@ -415,7 +414,7 @@ class OceanPool:
     # convenient functions
 
     def getReserve(self, pool_address: str, token_address: str):
-        return from_base_18(BPool(pool_address).getBalance(token_address))
+        return from_base_18(BPool(self.web3, pool_address).getBalance(token_address))
 
     def getMaxBuyQuantity(self, pool_address, token_address):
         return self.getReserve(pool_address, token_address) / 3.0
@@ -435,7 +434,7 @@ class OceanPool:
         token_out_address: str,
         token_out_amount: float,
     ):
-        pool = BPool(pool_address)
+        pool = BPool(self.web3, pool_address)
         in_amount = pool.calcInGivenOut(
             pool.getBalance(token_in_address),
             pool.getDenormalizedWeight(token_in_address),
@@ -453,7 +452,7 @@ class OceanPool:
         token_out_address: str,
         token_in_amount: float,
     ):
-        pool = BPool(pool_address)
+        pool = BPool(self.web3, pool_address)
         out_amount = pool.calcOutGivenIn(
             pool.getBalance(token_in_address),
             pool.getDenormalizedWeight(token_in_address),
@@ -467,7 +466,7 @@ class OceanPool:
     def calcPoolOutGivenSingleIn(
         self, pool_address: str, token_in_address: str, token_in_amount: float
     ):
-        pool = BPool(pool_address)
+        pool = BPool(self.web3, pool_address)
         return from_base_18(
             pool.calcPoolOutGivenSingleIn(
                 pool.getBalance(token_in_address),
@@ -482,7 +481,7 @@ class OceanPool:
     def calcSingleInGivenPoolOut(
         self, pool_address: str, token_in_address: str, pool_shares: float
     ):
-        pool = BPool(pool_address)
+        pool = BPool(self.web3, pool_address)
         return from_base_18(
             pool.calcSingleInGivenPoolOut(
                 pool.getBalance(token_in_address),
@@ -497,7 +496,7 @@ class OceanPool:
     def calcSingleOutGivenPoolIn(
         self, pool_address: str, token_out_address: str, pool_shares: float
     ):
-        pool = BPool(pool_address)
+        pool = BPool(self.web3, pool_address)
         return from_base_18(
             pool.calcSingleInGivenPoolOut(
                 pool.getBalance(token_out_address),
@@ -512,7 +511,7 @@ class OceanPool:
     def calcPoolInGivenSingleOut(
         self, pool_address: str, token_out_address: str, token_out_amount: float
     ):
-        pool = BPool(pool_address)
+        pool = BPool(self.web3, pool_address)
         return from_base_18(
             pool.calcPoolInGivenSingleOut(
                 pool.getBalance(token_out_address),
@@ -565,13 +564,13 @@ class OceanPool:
         return self.getMaxRemoveLiquidity(pool_address, self.ocean_address)
 
     def getDTRequiredToBuyOcean(self, pool_address: str, ocean_amount: float):
-        pool = BPool(pool_address)
+        pool = BPool(self.web3, pool_address)
         _in = self.get_token_address(pool_address, pool=pool)
         _out = self.ocean_address
         return self.getTokenPrice(pool, _in, _out, ocean_amount)
 
     def getOceanRequiredToBuyDT(self, pool_address: str, dt_amount: float):
-        pool = BPool(pool_address)
+        pool = BPool(self.web3, pool_address)
         _out = self.get_token_address(pool_address, pool=pool)
         _in = self.ocean_address
         return self.getTokenPrice(pool, _in, _out, dt_amount)
@@ -588,17 +587,11 @@ class OceanPool:
         return from_base_18(in_amount)
 
     def get_all_pools(self, from_block=0, chunk_size=1000, include_balance=False):
-        web3 = Web3Provider.get_web3()
-        current_block = web3.eth.block_number
+        current_block = self.web3.eth.block_number
 
-        bfactory = BFactory(self.bfactory_address)
+        bfactory = BFactory(self.web3, self.bfactory_address)
         logs = bfactory.get_event_logs(
-            "BPoolRegistered",
-            from_block,
-            current_block,
-            {},
-            web3=web3,
-            chunk_size=chunk_size,
+            "BPoolRegistered", from_block, current_block, {}, chunk_size=chunk_size
         )
         if include_balance:
             pools = sorted(
@@ -606,7 +599,9 @@ class OceanPool:
                     (
                         lg.args.bpoolAddress,
                         from_base_18(
-                            BPool(lg.args.bpoolAddress).getBalance(self.ocean_address)
+                            BPool(self.web3, lg.args.bpoolAddress).getBalance(
+                                self.ocean_address
+                            )
                         ),
                     )
                     for lg in logs
@@ -629,7 +624,6 @@ class OceanPool:
     def _get_all_liquidity_records(
         self,
         action,
-        web3,
         pool_address,
         block_number=None,
         to_block=None,
@@ -641,15 +635,17 @@ class OceanPool:
             "exit": "get_exit_logs",
             "swap": "get_swap_logs",
         }
-        current_block = to_block if to_block is not None else web3.eth.block_number
-        pool = BPool(pool_address)
+        current_block = to_block if to_block is not None else self.web3.eth.block_number
+        pool = BPool(self.web3, pool_address)
         dt_address = token_address or self.get_token_address(pool_address, pool)
-        factory = DTFactory(get_dtfactory_address())
+        factory = DTFactory(self.web3, get_dtfactory_address())
         if block_number is None:
             block_number = factory.get_token_registered_event(
                 0, current_block, token_address=dt_address
             ).blockNumber
-        logs = getattr(pool, action_to_fn[action])(web3, block_number, current_block)
+        logs = getattr(pool, action_to_fn[action])(
+            self.web3, block_number, current_block
+        )
         if raw_result:
             return logs
 
@@ -695,7 +691,6 @@ class OceanPool:
 
     def get_all_liquidity_additions(
         self,
-        web3,
         pool_address,
         block_number=None,
         to_block=None,
@@ -703,18 +698,11 @@ class OceanPool:
         raw_result=True,
     ):
         return self._get_all_liquidity_records(
-            "join",
-            web3,
-            pool_address,
-            block_number,
-            to_block,
-            token_address,
-            raw_result,
+            "join", pool_address, block_number, to_block, token_address, raw_result
         )
 
     def get_all_liquidity_removals(
         self,
-        web3,
         pool_address,
         block_number=None,
         to_block=None,
@@ -722,18 +710,11 @@ class OceanPool:
         raw_result=True,
     ):
         return self._get_all_liquidity_records(
-            "exit",
-            web3,
-            pool_address,
-            block_number,
-            to_block,
-            token_address,
-            raw_result,
+            "exit", pool_address, block_number, to_block, token_address, raw_result
         )
 
     def get_all_swaps(
         self,
-        web3,
         pool_address,
         block_number=None,
         to_block=None,
@@ -741,13 +722,7 @@ class OceanPool:
         raw_result=True,
     ):
         return self._get_all_liquidity_records(
-            "swap",
-            web3,
-            pool_address,
-            block_number,
-            to_block,
-            token_address,
-            raw_result,
+            "swap", pool_address, block_number, to_block, token_address, raw_result
         )
 
     def get_short_pool_info(
@@ -768,11 +743,10 @@ class OceanPool:
             flags = self.POOL_INFO_FLAGS
 
         from18 = from_base_18
-        web3 = Web3Provider.get_web3()
         current_block = (
-            to_block if to_block is not None else web3.eth.block_number
+            to_block if to_block is not None else self.web3.eth.block_number
         )  # RPC_CALL
-        pool = BPool(pool_address)
+        pool = BPool(self.web3, pool_address)
         dt_address = (
             dt_address
             if dt_address
@@ -788,7 +762,7 @@ class OceanPool:
         shares = None
         info_dict = {"address": pool.address, "dataTokenAddress": dt_address}
         if "datatokenInfo" in flags:
-            dt = DataToken(dt_address)
+            dt = DataToken(self.web3, dt_address)
             minter = dt.minter()
 
             token_holders = []
@@ -798,7 +772,7 @@ class OceanPool:
                 )
 
             order_logs = dt.get_start_order_logs(
-                web3, from_block=from_block, to_block=to_block
+                from_block=from_block, to_block=to_block
             )
 
             info_dict["dataToken"] = {
@@ -846,7 +820,7 @@ class OceanPool:
             info_dict.update({"creator": pool_creator})
 
         if "shareHolders" in flags:
-            pool_erc20 = DataToken(pool_address)
+            pool_erc20 = DataToken(self.web3, pool_address)
             pool_holders = pool_erc20.calculate_token_holders(
                 from_block, current_block, 0.001
             )
@@ -858,23 +832,13 @@ class OceanPool:
         all_exit_records = []
         if "liquidityTotals" in flags or "liquidity" in flags:
             all_join_records = self.get_all_liquidity_additions(
-                web3,
-                pool_address,
-                from_block,
-                current_block,
-                dt_address,
-                raw_result=False,
+                pool_address, from_block, current_block, dt_address, raw_result=False
             )  # RPC_CALL
             total_ocn_additions = from18(
                 sum(r[2] for r in all_join_records if r[1] == self.ocean_address)
             )
             all_exit_records = self.get_all_liquidity_removals(
-                web3,
-                pool_address,
-                from_block,
-                current_block,
-                dt_address,
-                raw_result=False,
+                pool_address, from_block, current_block, dt_address, raw_result=False
             )  # RPC_CALL
             total_ocn_removals = from18(
                 sum(r[2] for r in all_exit_records if r[1] == self.ocean_address)
@@ -919,12 +883,7 @@ class OceanPool:
             ]
 
             all_swap_records = self.get_all_swaps(
-                web3,
-                pool_address,
-                from_block,
-                current_block,
-                dt_address,
-                raw_result=False,
+                pool_address, from_block, current_block, dt_address, raw_result=False
             )
             account_to_swap_record = self.get_account_to_liquidity_records_map(
                 all_swap_records
@@ -1001,12 +960,11 @@ class OceanPool:
         return info_dict
 
     def get_liquidity_history(self, pool_address):
-        web3 = Web3Provider.get_web3()
         pool_block = self.get_creation_block(pool_address)
 
-        join_records = self.get_all_liquidity_additions(web3, pool_address, pool_block)
-        exit_records = self.get_all_liquidity_removals(web3, pool_address, pool_block)
-        swap_records = self.get_all_swaps(web3, pool_address, pool_block)
+        join_records = self.get_all_liquidity_additions(pool_address, pool_block)
+        exit_records = self.get_all_liquidity_removals(pool_address, pool_block)
+        swap_records = self.get_all_swaps(pool_address, pool_block)
 
         from18 = from_base_18
         ocn_address = self.ocean_address
@@ -1066,7 +1024,7 @@ class OceanPool:
         timestamps = []
         blocks = list(range(firstblock, lastblock, 240 * 4)) + [lastblock]
         for b in blocks:
-            timestamps.append(web3.eth.get_block(b).timestamp)
+            timestamps.append(self.web3.eth.get_block(b).timestamp)
 
         f = interp1d(blocks, timestamps)
         times = f([a[1] for a in ocn_add_remove_list])
@@ -1080,32 +1038,29 @@ class OceanPool:
         return ocn_add_remove_list, dt_add_remove_list
 
     def get_user_balances(self, user_address, from_block):
-        web3 = Web3Provider.get_web3()
-        current_block = web3.eth.block_number
-        pool = BPool(None)
+        current_block = self.web3.eth.block_number
+        pool = BPool(self.web3, None)
 
         pools = self.get_all_pools(from_block, chunk_size=5000, include_balance=False)
         join_logs = pool.get_join_logs(
-            web3, from_block, current_block, user_address, this_pool_only=False
+            from_block, current_block, user_address, this_pool_only=False
         )
         join_logs = [lg for lg in join_logs if lg.address in pools]
 
         balances = {
-            lg.address: DataToken(lg.address).token_balance(user_address)
+            lg.address: DataToken(self.web3, lg.address).token_balance(user_address)
             for lg in join_logs
         }
         return balances
 
     def get_creation_block(self, pool_address):
-        web3 = Web3Provider.get_web3()
-        bfactory = BFactory(self.bfactory_address)
-        current_block = web3.eth.block_number
+        bfactory = BFactory(self.web3, self.bfactory_address)
+        current_block = self.web3.eth.block_number
         logs = bfactory.get_event_logs(
             "BPoolCreated",
             0,
             current_block,
             {"newBPoolAddress": pool_address},
-            web3=web3,
             chunk_size=current_block,
         )
         if not logs:

@@ -5,8 +5,6 @@
 import logging
 import time
 
-from ocean_lib.web3_internal.web3_provider import Web3Provider
-
 logger = logging.getLogger(__name__)
 
 
@@ -34,7 +32,7 @@ class EventFilter:
         return self._filter.filter_id if self._filter else None
 
     def uninstall(self):
-        Web3Provider.get_web3().eth.uninstall_filter(self._filter.filter_id)
+        self.event.web3.eth.uninstall_filter(self._filter.filter_id)
 
     def set_poll_interval(self, interval):
         self._poll_interval = interval

@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.util import get_contracts_addresses
@@ -29,6 +28,7 @@ def test_ocean_exchange(publisher_ocean_instance):
     )
     dt.mint_tokens(bob_wallet.address, 100.0, alice_wallet)
     ox = OceanExchange(
+        ocn.web3,
         ocn.OCEAN_address,
         _get_exchange_address(publisher_ocean_instance.config),
         ocn.config,

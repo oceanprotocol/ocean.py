@@ -39,7 +39,7 @@ def process_order(ocean_instance, publisher_wallet, consumer_wallet, ddo, servic
     """Helper function to process a compute order."""
     # Give the consumer some datatokens so they can order the service
     try:
-        dt = DataToken(ddo.data_token_address)
+        dt = DataToken(ocean_instance.web3, ddo.data_token_address)
         tx_id = dt.transfer_tokens(consumer_wallet.address, 10.0, publisher_wallet)
         dt.verify_transfer_tx(tx_id, publisher_wallet.address, consumer_wallet.address)
     except (AssertionError, Exception) as e:
@@ -58,6 +58,7 @@ def process_order(ocean_instance, publisher_wallet, consumer_wallet, ddo, servic
         consumer = order_requirements.computeAddress
 
     _order_tx_id = ocean_instance.assets.pay_for_service(
+        ocean_instance.web3,
         order_requirements.amount,
         order_requirements.data_token_address,
         ddo.did,
@@ -211,13 +212,13 @@ def test_compute_multi_inputs():
     )
 
 
-def test_update_trusted_algorithms(config):
+def test_update_trusted_algorithms(config, web3):
     setup = Setup()
 
     ddo_address = get_contracts_addresses(config.address_file, "ganache")[
         MetadataContract.CONTRACT_NAME
     ]
-    ddo_registry = MetadataContract(ddo_address)
+    ddo_registry = MetadataContract(web3, ddo_address)
 
     # Setup algorithm meta to run raw algorithm
     algorithm_ddo = get_registered_algorithm_ddo(
@@ -245,7 +246,7 @@ def test_update_trusted_algorithms(config):
         compute_ddo, setup.publisher_wallet
     )
 
-    tx_receipt = ddo_registry.get_tx_receipt(tx_id)
+    tx_receipt = ddo_registry.get_tx_receipt(web3, tx_id)
     logs = ddo_registry.event_MetadataUpdated.processReceipt(tx_receipt)
     assert logs[0].args.dataToken == compute_ddo.data_token_address
 

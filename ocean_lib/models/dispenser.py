@@ -56,13 +56,13 @@ class DispenserContract(ContractBase):
         return self.send_transaction("deactivate", (dt_address,), from_wallet)
 
     def make_minter(self, dt_address: str, from_wallet: Wallet):
-        token = DataToken(dt_address)
+        token = DataToken(self.web3, dt_address)
         token.proposeMinter(self.address, from_wallet=from_wallet)
         return self.send_transaction("acceptMinter", (dt_address,), from_wallet)
 
     def cancel_minter(self, dt_address: str, from_wallet: Wallet):
         self.send_transaction("removeMinter", (dt_address,), from_wallet)
-        token = DataToken(dt_address)
+        token = DataToken(self.web3, dt_address)
         return token.approveMinter(from_wallet)
 
     def dispense(self, dt_address: str, amount: int, from_wallet: Wallet):
@@ -75,7 +75,7 @@ class DispenserContract(ContractBase):
         if not amount:
             return False
 
-        token = DataToken(dt_address)
+        token = DataToken(self.web3, dt_address)
         if not self.is_active(dt_address):
             return False
 

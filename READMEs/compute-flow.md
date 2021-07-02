@@ -175,7 +175,7 @@ tokens_amount = 1.0
 print(f"Service 1 costs {tokens_amount * price_in_OCEAN} OCEAN")
 OCEAN_usd_pool_address = ''
 USDT_token_address = ''
-ocn_pool = BPool(OCEAN_usd_pool_address)
+ocn_pool = BPool(market_ocean.web3, OCEAN_usd_pool_address)
 OCEAN_price = from_base_18(ocn_pool.calcInGivenOut(
     ocn_pool.getBalance(USDT_token_address),
     ocn_pool.getDenormalizedWeight(USDT_token_address),
@@ -215,6 +215,7 @@ market_address = '0x<markets ethereum address to receive service fee'
 service = asset.get_service(ServiceTypes.ASSET_ACCESS)  # asset from step 5
 quote = market_ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
 order_tx_id = market_ocean.assets.pay_for_service(
+    market_ocean.web3,
     quote.amount, quote.data_token_address, asset.did, service.index, market_address, bob_wallet
 )
 file_path = market_ocean.assets.download(
