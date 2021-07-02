@@ -5,6 +5,7 @@
 import os.path
 
 import pytest
+
 from ocean_lib.config import (
     NAME_AQUARIUS_URL,
     NAME_METADATA_CACHE_URI,

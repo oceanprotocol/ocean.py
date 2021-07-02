@@ -7,19 +7,22 @@ import json
 import logging
 
 from eth_utils import add_0x_prefix
+
 from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.ddo.constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
 from ocean_lib.common.ddo.credentials import AddressCredential
 from ocean_lib.common.ddo.public_key_base import PublicKeyBase
-from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_ETHEREUM_ECDSA
+from ocean_lib.common.ddo.public_key_rsa import (
+    PUBLIC_KEY_TYPE_ETHEREUM_ECDSA,
+    PUBLIC_KEY_TYPE_RSA,
+    PublicKeyRSA,
+)
+from ocean_lib.common.ddo.service import Service
 from ocean_lib.common.did import OCEAN_PREFIX, did_to_id
 from ocean_lib.common.utils.utilities import get_timestamp
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-
-from ocean_lib.common.ddo.constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
-from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA, PublicKeyRSA
-from ocean_lib.common.ddo.service import Service
 
 logger = logging.getLogger("ddo")
 

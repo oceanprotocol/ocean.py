@@ -189,7 +189,7 @@ def test_ddo_on_chain(config):
     assert (
         _asset.metadata["main"]["name"] == "updated name for test"
     ), "name does not seem to be updated."
-    assert DataToken(asset.asset_id).contract_concise.isMinter(wallet.address)
+    assert DataToken(asset.asset_id).contract.caller.isMinter(wallet.address)
 
     # test update fails from wallet other than the original publisher
     bob = get_consumer_wallet()
@@ -208,9 +208,9 @@ def test_ddo_on_chain(config):
         print("as expected, only owner can update a published ddo.")
 
     # test ddoOwner
-    assert DataToken(asset.asset_id).contract_concise.isMinter(wallet.address), (
+    assert DataToken(asset.asset_id).contract.caller.isMinter(wallet.address), (
         f"ddo owner does not match the expected publisher address {wallet.address}, "
-        f"owner is {DataToken(asset.asset_id).contract_concise.minter(wallet.address)}"
+        f"owner is {DataToken(asset.asset_id).contract.caller.minter(wallet.address)}"
     )
 
 
