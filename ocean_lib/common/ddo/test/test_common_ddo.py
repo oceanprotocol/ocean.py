@@ -12,10 +12,6 @@ from ocean_lib.common.agreements.service_factory import (
     ServiceFactory,
 )
 from ocean_lib.common.ddo.ddo import DDO
-from ocean_lib.common.ddo.public_key_base import (
-    PUBLIC_KEY_TYPE_ETHEREUM_ECDSA,
-    PublicKeyBase,
-)
 from ocean_lib.common.did import DID
 from tests.resources.ddo_helpers import get_resource_path, get_sample_ddo
 from tests.resources.helper_functions import get_publisher_wallet
@@ -45,16 +41,6 @@ def test_creating_ddo_from_scratch():
     ddo_text_proof = ddo.as_text()
     assert ddo_text_proof
 
-    assert not ddo.public_keys
-    ddo.add_public_key(did, pub_acc.address)
-    assert len(ddo.public_keys) == 1
-    assert ddo.get_public_key(0) == ddo.public_keys[0]
-    with pytest.raises(IndexError):
-        ddo.get_public_key(1)
-
-    assert ddo.get_public_key(did) == ddo.public_keys[0]
-    assert ddo.get_public_key("0x32233") is None
-
     assert not ddo.authentications
     ddo.add_authentication(did, "")
     assert len(ddo.authentications) == 1
@@ -69,16 +55,6 @@ def test_create_auth_from_json():
     }
     with pytest.raises(ValueError):
         DDO.create_authentication_from_json({"type": "auth-type"})
-
-
-def test_create_public_key_from_json():
-    """Tests create_public_key_from_json function in DDOs."""
-    pkey = {"id": "pkeyid", "type": "keytype", "owner": "0x00009"}
-    pub_key_inst = DDO.create_public_key_from_json(pkey)
-    assert isinstance(pub_key_inst, PublicKeyBase)
-    assert pub_key_inst.get_id() == pkey["id"]
-    assert pub_key_inst.get_type() == PUBLIC_KEY_TYPE_ETHEREUM_ECDSA
-    assert pub_key_inst.get_owner() == pkey["owner"]
 
 
 def test_ddo_dict():
