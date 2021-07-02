@@ -244,3 +244,32 @@ def test_ddo_address_utilities():
     # double adding
     ddo.add_address_to_allow_list("0xAbc12")
     assert ddo.allowed_addresses == ["0xabc12"]
+
+
+def test_ddo_retiring():
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
+    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
+
+    ddo = DDO(json_filename=sample_ddo_path)
+    assert not ddo.is_retired
+
+    ddo.retire()
+    assert ddo.is_retired
+    assert ddo.is_consumable() == ConsumableCodes.ASSET_DISABLED
+
+    ddo.unretire()
+    assert not ddo.is_retired
+
+
+def test_ddo_unlisting():
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
+    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
+
+    ddo = DDO(json_filename=sample_ddo_path)
+    assert ddo.is_listed
+
+    ddo.unlist()
+    assert not ddo.is_listed
+
+    ddo.list()
+    assert ddo.is_listed
