@@ -5,10 +5,7 @@
 import os
 
 import pytest
-from ocean_lib.web3_internal.transactions import (
-    cancel_or_replace_transaction,
-    send_ether,
-)
+
 from ocean_lib.web3_internal.utils import (
     generate_multi_value_hash,
     get_network_id,
@@ -47,13 +44,3 @@ def test_prepare_fixed_hash():
     assert (
         prepare_prefixed_hash("0x0").hex() == expected
     ), "The address is not the expected one."
-
-
-def test_send_ether(alice_wallet, bob_address):
-    assert send_ether(alice_wallet, bob_address, 1), "Send ether was unsuccessful."
-
-
-def test_cancel_or_replace_transaction(alice_wallet):
-    assert cancel_or_replace_transaction(
-        alice_wallet, None
-    ), "Cancel or replace transaction failed."

@@ -224,6 +224,7 @@ class ContractBase(object):
             "from": from_wallet.address,
             "passphrase": from_wallet.password,
             "account_key": from_wallet.key,
+            "chainId": self.web3.eth.chain_id
             # 'gas': GAS_LIMIT_DEFAULT
         }
 
@@ -268,6 +269,8 @@ class ContractBase(object):
         built_tx = _contract.constructor(*args).buildTransaction(
             {"from": deployer_wallet.address}
         )
+        if "chainId" not in built_tx:
+            built_tx["chainId"] = web3.eth.chain_id
 
         if "gas" not in built_tx:
             built_tx["gas"] = web3.eth.estimate_gas(built_tx)
