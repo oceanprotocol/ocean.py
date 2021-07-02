@@ -11,18 +11,26 @@ from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.exceptions import ValidationError
+from web3.main import Web3
 
 
 @enforce_types
 class OceanExchange:
-    def __init__(self, ocean_token_address: str, exchange_address: str, config: Config):
+    def __init__(
+        self,
+        web3: Web3,
+        ocean_token_address: str,
+        exchange_address: str,
+        config: Config,
+    ):
         """Initialises OceanExchange object."""
         self.ocean_address = ocean_token_address
         self._exchange_address = exchange_address
         self._config = config
+        self._web3 = web3
 
     def _exchange_contract(self):
-        return FixedRateExchange(self._exchange_address)
+        return FixedRateExchange(self._web3, self._exchange_address)
 
     def get_quote(self, amount: float, exchange_id: str):
         exchange = self._exchange_contract()
@@ -71,14 +79,15 @@ class OceanExchange:
                 f"Buying {amount} datatokens requires {from_base_18(ocean_amount_base)} OCEAN "
                 f"tokens which exceeds the max_OCEAN_amount {max_OCEAN_amount}."
             )
-        ocean_token = DataToken(self.ocean_address)
+        ocean_token = DataToken(self._web3, self.ocean_address)
         ocean_token.get_tx_receipt(
-            ocean_token.approve(self._exchange_address, ocean_amount_base, wallet)
+            self._web3,
+            ocean_token.approve(self._exchange_address, ocean_amount_base, wallet),
         )
         tx_id = exchange.buy_data_token(
             exchange_id, data_token_amount=amount_base, from_wallet=wallet
         )
-        return bool(exchange.get_tx_receipt(tx_id).status)
+        return bool(exchange.get_tx_receipt(self._web3, tx_id).status)
 
     def create(self, data_token: str, exchange_rate: float, wallet: Wallet) -> str:
         assert exchange_rate > 0, "Invalid exchange rate, must be > 0"
@@ -88,7 +97,7 @@ class OceanExchange:
             self.ocean_address, data_token, exchange_rate_base, from_wallet=wallet
         )
         # get tx receipt
-        tx_receipt = exchange.get_tx_receipt(tx_id)
+        tx_receipt = exchange.get_tx_receipt(self._web3, tx_id)
         # get event log from receipt
         logs = exchange.contract.events.ExchangeCreated().processReceipt(tx_receipt)
         if not logs:
@@ -121,7 +130,7 @@ class OceanExchange:
 
         tx_id = exchange.setRate(exchange_id, exchange_rate_base, from_wallet=wallet)
         # get tx receipt
-        tx_receipt = exchange.get_tx_receipt(tx_id)
+        tx_receipt = exchange.get_tx_receipt(self._web3, tx_id)
         # get event log from receipt
         logs = exchange.contract.events.ExchangeRateChanged().processReceipt(tx_receipt)
         if not logs:

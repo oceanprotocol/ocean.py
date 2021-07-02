@@ -30,8 +30,8 @@ from ocean_lib.ocean.util import (
 )
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3.datastructures import AttributeDict
+from web3.main import Web3
 
 logger = logging.getLogger("ocean")
 
@@ -86,11 +86,9 @@ class Ocean:
             }
             config = Config(options_dict=config_dict)
         self._config = config
-        Web3Provider.init_web3(
+        self._web3 = Web3(
             provider=get_web3_connection_provider(self._config.network_url)
         )
-
-        self._web3 = Web3Provider.get_web3()
 
         if not data_provider:
             data_provider = DataServiceProvider
@@ -98,16 +96,22 @@ class Ocean:
         network = get_network_name()
         addresses = get_contracts_addresses(self._config.address_file, network)
         self.assets = OceanAssets(
-            self._config, data_provider, addresses.get(MetadataContract.CONTRACT_NAME)
+            self._config,
+            self._web3,
+            data_provider,
+            addresses.get(MetadataContract.CONTRACT_NAME),
         )
         self.services = OceanServices()
         self.compute = OceanCompute(self._config, data_provider)
 
         ocean_address = get_ocean_token_address(self._config.address_file, network)
         self.pool = OceanPool(
-            ocean_address, get_bfactory_address(self._config.address_file, network)
+            self._web3,
+            ocean_address,
+            get_bfactory_address(self._config.address_file, network),
         )
         self.exchange = OceanExchange(
+            self._web3,
             ocean_address,
             FixedRateExchange.configured_address(
                 network or get_network_name(), self._config.address_file
@@ -165,7 +169,7 @@ class Ocean:
         )
         address = dtfactory.get_token_address(tx_id)
         assert address, "new datatoken has no address"
-        dt = DataToken(address)
+        dt = DataToken(self._web3, address)
         return dt
 
     def get_data_token(self, token_address: str) -> DataToken:
@@ -174,27 +178,27 @@ class Ocean:
         :return: `Datatoken` instance
         """
 
-        return DataToken(token_address)
+        return DataToken(self._web3, token_address)
 
     def get_dtfactory(self, dtfactory_address: str = "") -> DTFactory:
-        dtf_address = dtfactory_address or DTFactory.configured_address(
-            get_network_name(), self._config.address_file
-        )
         """
         :param dtfactory_address: contract address, str
 
         :return: `DTFactory` instance
         """
-        return DTFactory(dtf_address)
+        dtf_address = dtfactory_address or DTFactory.configured_address(
+            get_network_name(), self._config.address_file
+        )
+        return DTFactory(self.web3, dtf_address)
 
     def get_user_orders(self, address, datatoken=None, service_id=None):
         """
         :return: List of orders `[Order]`
         """
-        dt = DataToken(datatoken)
+        dt = DataToken(self._web3, datatoken)
         _orders = []
         for log in dt.get_start_order_logs(
-            self._web3, address, from_all_tokens=not bool(datatoken)
+            address, from_all_tokens=not bool(datatoken)
         ):
             a = dict(log.args.items())
             a["amount"] = from_base_18(int(log.args.amount))

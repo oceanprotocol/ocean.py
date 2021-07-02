@@ -5,6 +5,7 @@
 import os
 
 import pytest
+
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes

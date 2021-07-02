@@ -46,12 +46,9 @@ In Python, import and configure the components / services:
 ```python
 import os
 from ocean_lib.config import Config
-from ocean_lib.ocean.util import get_web3_connection_provider
-from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 #configure the components
 config = Config(os.getenv('CONFIG_FILE'))
-Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
 ```
 
 Now you're ready to use the services! 🐳 The marketplace tutorial will use them in more detail.

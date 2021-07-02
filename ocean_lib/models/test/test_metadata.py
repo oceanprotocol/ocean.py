@@ -18,7 +18,7 @@ def test_metadata_contract(publisher_ocean_instance, config):
     ddo_address = get_contracts_addresses(config.address_file, "ganache")[
         MetadataContract.CONTRACT_NAME
     ]
-    ddo_registry = MetadataContract(ddo_address)
+    ddo_registry = MetadataContract(ocn.web3, ddo_address)
 
     # Tested the event properties.
     assert (

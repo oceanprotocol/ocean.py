@@ -16,7 +16,6 @@ from ocean_lib.web3_internal.contract_utils import (
 )
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
-from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3 import WebsocketProvider
 
 WEB3_INFURA_PROJECT_ID = "357f2fe737db4304bd2f7285c5602d0d"
@@ -138,7 +137,3 @@ def get_bfactory_address(address_file, network=None):
 def get_ocean_token_address(address_file, network=None):
     addresses = get_contracts_addresses(address_file, network or get_network_name())
     return addresses.get("Ocean") if addresses else None
-
-
-def init_components(config):
-    Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))

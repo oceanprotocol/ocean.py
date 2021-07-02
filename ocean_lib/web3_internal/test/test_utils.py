@@ -8,8 +8,24 @@ import pytest
 
 from ocean_lib.web3_internal.utils import (
     generate_multi_value_hash,
+    get_network_id,
+    get_network_name,
     prepare_prefixed_hash,
 )
+
+
+def test_get_network_name(web3):
+    assert get_network_name(1) == "mainnet"
+    assert get_network_name(4) == "rinkeby"
+    assert get_network_name(3) == "ropsten"
+    assert get_network_name(137) == "polygon"
+    assert get_network_name(8996) == "ganache"
+    assert get_network_name(web3=web3) == "ganache"
+    assert get_network_name(-1) == "ganache"
+
+
+def test_get_network_id(web3):
+    assert get_network_id(web3) == 8996
 
 
 def test_generate_multi_value_hash(alice_address, alice_private_key):

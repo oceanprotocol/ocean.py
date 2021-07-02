@@ -7,10 +7,10 @@ from ocean_lib.ocean import util
 
 
 def test_ERC20(
-    network, alice_wallet, alice_address, bob_wallet, bob_address, OCEAN_address
+    network, web3, alice_wallet, alice_address, bob_wallet, bob_address, OCEAN_address
 ):
     """Tests an OCEAN token approval, allowance and transfers."""
-    token = BToken(OCEAN_address)
+    token = BToken(web3, OCEAN_address)
 
     token.approve(bob_address, 0, from_wallet=alice_wallet)
     # generating ERC20 Tokens, so the symbol is irrelevant

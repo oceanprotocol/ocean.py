@@ -47,7 +47,13 @@ def test_register_asset(publisher_ocean_instance):
     def _get_num_assets(_minter):
         dids = [add_0x_prefix(did_to_id(a)) for a in ocn.assets.owner_assets(_minter)]
         dids = [a for a in dids if len(a) == 42]
-        return len([a for a in dids if DataToken(a).contract_concise.isMinter(_minter)])
+        return len(
+            [
+                a
+                for a in dids
+                if DataToken(ocn.web3, a).contract.caller.isMinter(_minter)
+            ]
+        )
 
     num_assets_owned = _get_num_assets(alice.address)
 
@@ -323,5 +329,5 @@ def test_pay_for_service_insufficient_balance(publisher_ocean_instance):
 
     with pytest.raises(InsufficientBalance):
         ocn.assets.pay_for_service(
-            10000000000000.0, token.address, asset.did, 0, ZERO_ADDRESS, alice
+            ocn.web3, 10000000000000.0, token.address, asset.did, 0, ZERO_ADDRESS, alice
         )
