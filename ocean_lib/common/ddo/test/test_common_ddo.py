@@ -5,19 +5,12 @@
 """
     Test did_lib
 """
-import pytest
-
 from ocean_lib.common.agreements.service_agreement import ServiceTypes
 from ocean_lib.common.agreements.service_factory import (
     ServiceDescriptor,
     ServiceFactory,
 )
 from ocean_lib.common.ddo.ddo import DDO
-from ocean_lib.common.ddo.public_key_base import PublicKeyBase
-from ocean_lib.common.ddo.public_key_rsa import (
-    PUBLIC_KEY_TYPE_ETHEREUM_ECDSA,
-    PUBLIC_KEY_TYPE_RSA,
-)
 from ocean_lib.common.did import DID
 from tests.resources.ddo_helpers import get_resource_path, get_sample_ddo
 from tests.resources.helper_functions import get_publisher_wallet
@@ -42,50 +35,9 @@ def test_creating_ddo_from_scratch():
 
     pub_acc = get_publisher_wallet()
 
-    # add a proof to the first public_key/authentication
     ddo.add_proof("checksum", pub_acc)
     ddo_text_proof = ddo.as_text()
     assert ddo_text_proof
-
-    assert not ddo.public_keys
-    ddo.add_public_key(did, pub_acc.address)
-    assert len(ddo.public_keys) == 1
-    assert ddo.get_public_key(0) == ddo.public_keys[0]
-    with pytest.raises(IndexError):
-        ddo.get_public_key(1)
-
-    assert ddo.get_public_key(did) == ddo.public_keys[0]
-    assert ddo.get_public_key("0x32233") is None
-
-    assert not ddo.authentications
-    ddo.add_authentication(did, "")
-    assert len(ddo.authentications) == 1
-
-
-def test_create_auth_from_json():
-    """Tests create_authentication_from_json function in DDOs."""
-    auth = {"publicKey": "0x00000", "type": "auth-type", "nothing": ""}
-    assert DDO.create_authentication_from_json(auth) == {
-        "publicKey": "0x00000",
-        "type": "auth-type",
-    }
-    with pytest.raises(ValueError):
-        DDO.create_authentication_from_json({"type": "auth-type"})
-
-
-def test_create_public_key_from_json():
-    """Tests create_public_key_from_json function in DDOs."""
-    pkey = {"id": "pkeyid", "type": "keytype", "owner": "0x00009"}
-    pub_key_inst = DDO.create_public_key_from_json(pkey)
-    assert isinstance(pub_key_inst, PublicKeyBase)
-    assert pub_key_inst.get_id() == pkey["id"]
-    assert pub_key_inst.get_type() == PUBLIC_KEY_TYPE_ETHEREUM_ECDSA
-    assert pub_key_inst.get_owner() == pkey["owner"]
-
-    pub_key_inst = DDO.create_public_key_from_json({"type": PUBLIC_KEY_TYPE_RSA})
-    assert pub_key_inst.get_id() == ""
-    assert pub_key_inst.get_type() == PUBLIC_KEY_TYPE_RSA
-    assert pub_key_inst.get_owner() is None
 
 
 def test_ddo_dict():
@@ -94,8 +46,19 @@ def test_ddo_dict():
     assert sample_ddo_path.exists(), f"{sample_ddo_path} does not exist!"
 
     ddo1 = DDO(json_filename=sample_ddo_path)
-    assert len(ddo1.public_keys) == 3
     assert ddo1.did == "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019"
+
+    ddo1.add_proof("checksum", get_publisher_wallet())
+
+    ddo_dict = ddo1.as_dictionary()
+    assert ddo_dict["publicKey"][0]["id"] == ddo1.did
+    assert ddo_dict["publicKey"][0]["owner"] == get_publisher_wallet().address
+    assert ddo_dict["publicKey"][0]["type"] == "EthereumECDSAKey"
+
+    assert ddo_dict["authentication"][0] == {
+        "type": "RsaSignatureAuthentication2018",
+        "publicKey": ddo1.did,
+    }
 
 
 def test_find_service():

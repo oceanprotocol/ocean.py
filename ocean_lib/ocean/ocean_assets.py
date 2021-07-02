@@ -25,7 +25,6 @@ from ocean_lib.common.agreements.service_factory import (
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.aquarius.aquarius import Aquarius
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
-from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
 from ocean_lib.common.did import did_to_id
 from ocean_lib.common.utils.utilities import checksum
 from ocean_lib.data_provider.data_service_provider import (
@@ -280,11 +279,6 @@ class OceanAssets:
         asset.proof["signatureValue"] = sign_hash(
             encode_defunct(text=asset.asset_id), publisher_wallet
         )
-
-        # Add public key and authentication
-        asset.add_public_key(did, publisher_wallet.address)
-
-        asset.add_authentication(did, PUBLIC_KEY_TYPE_RSA)
 
         # Setup metadata service
         # First compute files_encrypted

@@ -1,6 +1,5 @@
 {
   "@context": "https://w3id.org/future-method/v1",
-  "authentication": [],
   "created": "2019-04-09T19:02:11Z",
   "id": "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019",
   "proof": {
@@ -9,13 +8,6 @@
     "signatureValue": "1cd57300733bcbcda0beb59b3e076de6419c0d7674e7befb77820b53c79e3aa8f1776effc64cf088bad8cb694cc4d71ebd74a13b2f75893df5a53f3f318f6cf828",
     "type": "DDOIntegritySignature"
   },
-  "publicKey": [
-    {
-      "id": "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019",
-      "owner": "0x00Bd138aBD70e2F00903268F3Db08f2D25677C9e",
-      "type": "EthereumECDSAKey"
-    }
-  ],
   "service": [
     {
       "type": "metadata",
