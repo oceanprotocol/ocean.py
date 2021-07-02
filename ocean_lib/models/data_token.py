@@ -93,36 +93,36 @@ class DataToken(ContractBase):
         return self.send_transaction("approveMinter", (), from_wallet)
 
     def blob(self) -> str:
-        return self.contract_concise.blob()
+        return self.contract.caller.blob()
 
     def cap(self) -> int:
-        return self.contract_concise.cap()
+        return self.contract.caller.cap()
 
     def isMinter(self, address: str) -> bool:
-        return self.contract_concise.isMinter(address)
+        return self.contract.caller.isMinter(address)
 
     def minter(self) -> str:
-        return self.contract_concise.minter()
+        return self.contract.caller.minter()
 
     def isInitialized(self) -> bool:
-        return self.contract_concise.isInitialized()
+        return self.contract.caller.isInitialized()
 
     def calculateFee(self, amount: int, fee_percentage: int) -> int:
-        return self.contract_concise.calculateFee(amount, fee_percentage)
+        return self.contract.caller.calculateFee(amount, fee_percentage)
 
     # ============================================================
     # reflect required ERC20 standard functions
     def totalSupply(self) -> int:
-        return self.contract_concise.totalSupply()
+        return self.contract.caller.totalSupply()
 
     def balanceOf(self, account: str) -> int:
-        return self.contract_concise.balanceOf(account)
+        return self.contract.caller.balanceOf(account)
 
     def transfer(self, to: str, value_base: int, from_wallet: Wallet) -> str:
         return self.send_transaction("transfer", (to, value_base), from_wallet)
 
     def allowance(self, owner_address: str, spender_address: str) -> int:
-        return self.contract_concise.allowance(owner_address, spender_address)
+        return self.contract.caller.allowance(owner_address, spender_address)
 
     def approve(self, spender: str, value_base: int, from_wallet: Wallet) -> str:
         return self.send_transaction("approve", (spender, value_base), from_wallet)
@@ -137,13 +137,13 @@ class DataToken(ContractBase):
     # ============================================================
     # reflect optional ERC20 standard functions
     def datatoken_name(self) -> str:
-        return self.contract_concise.name()
+        return self.contract.caller.name()
 
     def symbol(self) -> str:
-        return self.contract_concise.symbol()
+        return self.contract.caller.symbol()
 
     def decimals(self) -> int:
-        return self.contract_concise.decimals()
+        return self.contract.caller.decimals()
 
     # ============================================================
     # reflect non-standard ERC20 functions added by Open Zeppelin
@@ -352,7 +352,7 @@ class DataToken(ContractBase):
         if tx_receipt.status == 0:
             raise AssertionError("order transaction failed.")
 
-        receiver = self.contract_concise.minter()
+        receiver = self.contract.caller.minter()
         event_logs = event().processReceipt(tx_receipt)
         order_log = event_logs[0] if event_logs else None
         if not order_log:

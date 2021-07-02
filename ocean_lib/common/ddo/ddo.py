@@ -7,6 +7,7 @@ import json
 import logging
 
 from eth_utils import add_0x_prefix
+
 from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes

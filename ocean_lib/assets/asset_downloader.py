@@ -8,6 +8,7 @@ import os
 from typing import Optional, Type
 
 from enforce_typing import enforce_types
+
 from ocean_lib.assets.asset import Asset
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
