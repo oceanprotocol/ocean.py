@@ -33,7 +33,6 @@ class DDO:
     ):
         """Clear the DDO data values."""
         self._did = did
-        self._authentications = []
         self._services = []
         self._proof = None
         self._credentials = {}
@@ -127,17 +126,6 @@ class DDO:
         self._did = did
         return did
 
-    def add_authentication(self, did, authentication_type):
-        """
-        Add a authentication public key id and type to the list of authentications.
-
-        :param did: Key id, Authentication
-        :param authentication_type: Authentication type, str
-        """
-        authentication = {"type": authentication_type, "publicKey": did}
-        logger.debug(f"Adding authentication {authentication}")
-        self._authentications.append(authentication)
-
     def add_service(self, service_type, service_endpoint=None, values=None, index=None):
         """
         Add a service to the list of services on the DDO.
@@ -192,7 +180,6 @@ class DDO:
             "created": self._created,
         }
 
-        # TODO: are we sure this is needed?
         data["publicKey"] = [
             {
                 "id": self.did,
@@ -200,11 +187,11 @@ class DDO:
                 "owner": self.proof.get("creator"),
             }
         ]
-        if self._authentications:
-            values = []
-            for authentication in self._authentications:
-                values.append(authentication)
-            data["authentication"] = values
+
+        data["authentication"] = [
+            {"type": "RsaSignatureAuthentication2018", "publicKey": self.did}
+        ]
+
         if self._services:
             values = []
             for service in self._services:
@@ -226,12 +213,6 @@ class DDO:
         self._did = values.pop("id")
         self._created = values.pop("created", None)
 
-        if "authentication" in values:
-            self._authentications = []
-            for value in values.pop("authentication"):
-                if isinstance(value, str):
-                    value = json.loads(value)
-                self._authentications.append(DDO.create_authentication_from_json(value))
         if "service" in values:
             self._services = []
             for value in values.pop("service"):
@@ -268,13 +249,6 @@ class DDO:
             "checksum": checksums,
         }
 
-    def _get_authentication_from_public_key_id(self, key_id):
-        """Return the authentication based on it's id."""
-        for authentication in self._authentications:
-            if authentication["publicKey"] == key_id:
-                return authentication
-        return None
-
     def get_service(self, service_type=None):
         """Return a service using."""
         for service in self._services:
@@ -301,24 +275,6 @@ class DDO:
 
         # try to find by type
         return self.get_service(index)
-
-    @property
-    def authentications(self):
-        """Get the list authentication records."""
-        return self._authentications[:]
-
-    @staticmethod
-    def create_authentication_from_json(values):
-        """Create authentication object from a JSON dict."""
-        key_id = values.get("publicKey")
-        authentication_type = values.get("type")
-        if not key_id:
-            raise ValueError(
-                f'Invalid authentication definition, "publicKey" is missing: {values}'
-            )
-
-        authentication = {"type": authentication_type, "publicKey": key_id}
-        return authentication
 
     def enable(self):
         """Enables asset for ordering."""

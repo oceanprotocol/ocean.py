@@ -1,11 +1,5 @@
 {
   "@context": "https://w3id.org/did/v1",
-  "authentication": [
-    {
-      "type": "RsaSignatureAuthentication2018",
-      "publicKey": "did:op:0ebed8226ada17fde24b6bf2b95d27f8f05fcce09139ff5cec31f6d81a7cd2ea"
-    }
-  ],
   "created": "2019-02-08T08:13:49Z",
   "updated": "2019-03-08T08:13:49Z",
   "id": "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019",

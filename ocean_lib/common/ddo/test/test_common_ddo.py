@@ -5,7 +5,6 @@
 """
     Test did_lib
 """
-import pytest
 from ocean_lib.common.agreements.service_agreement import ServiceTypes
 from ocean_lib.common.agreements.service_factory import (
     ServiceDescriptor,
@@ -36,25 +35,9 @@ def test_creating_ddo_from_scratch():
 
     pub_acc = get_publisher_wallet()
 
-    # add a proof to the first public_key/authentication
     ddo.add_proof("checksum", pub_acc)
     ddo_text_proof = ddo.as_text()
     assert ddo_text_proof
-
-    assert not ddo.authentications
-    ddo.add_authentication(did, "")
-    assert len(ddo.authentications) == 1
-
-
-def test_create_auth_from_json():
-    """Tests create_authentication_from_json function in DDOs."""
-    auth = {"publicKey": "0x00000", "type": "auth-type", "nothing": ""}
-    assert DDO.create_authentication_from_json(auth) == {
-        "publicKey": "0x00000",
-        "type": "auth-type",
-    }
-    with pytest.raises(ValueError):
-        DDO.create_authentication_from_json({"type": "auth-type"})
 
 
 def test_ddo_dict():

@@ -279,8 +279,6 @@ class OceanAssets:
             encode_defunct(text=asset.asset_id), publisher_wallet
         )
 
-        asset.add_authentication(did, "RsaSignatureAuthentication2018")
-
         # Setup metadata service
         # First compute files_encrypted
         assert metadata_copy["main"][
