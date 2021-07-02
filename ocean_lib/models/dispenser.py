@@ -13,7 +13,7 @@ class DispenserContract(ContractBase):
     CONTRACT_NAME = "Dispenser"
 
     def status(self, dt_address: str) -> dict:
-        status_as_list = self.contract_concise.status(dt_address)
+        status_as_list = self.contract.caller.status(dt_address)
         return {
             "active": status_as_list[0],
             "owner": status_as_list[1],

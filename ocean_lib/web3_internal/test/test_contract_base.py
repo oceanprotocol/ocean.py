@@ -8,7 +8,7 @@ from enforce_typing import enforce_types
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
-from web3.contract import ConciseContract
+from web3.contract import ContractCaller
 
 
 @enforce_types
@@ -44,7 +44,7 @@ def test_main(network, alice_wallet, alice_address, dtfactory_address, web3):
 
     # test attributes
     assert factory.name == "DTFactory"
-    assert isinstance(factory.contract_concise, ConciseContract)
+    assert isinstance(factory.contract.caller, ContractCaller)
     assert factory.contract is not None
     assert factory.contract.address == dtfactory_address
     assert ContractBase.to_checksum_address(dtfactory_address) == dtfactory_address

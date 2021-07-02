@@ -22,11 +22,6 @@ logger = logging.getLogger(__name__)
 class BPool(BToken):
     CONTRACT_NAME = "BPool"
 
-    def __init__(self, *args, **kwargs):
-        """Initialises BPool object."""
-        BToken.__init__(self, *args, **kwargs)
-        self._ccontract = self.contract_concise
-
     def __str__(self):
         """Formats with attributes as key, value pairs."""
         s = []
@@ -107,7 +102,7 @@ class BPool(BToken):
 
     # ==== View Functions
     def isPublicSwap(self) -> bool:
-        return self._ccontract.isPublicSwap()
+        return self.contract.caller.isPublicSwap()
 
     def isFinalized(self) -> bool:
         """Returns true if state is finalized.
@@ -117,7 +112,7 @@ class BPool(BToken):
         `JOIN`, and `EXIT` are public. `CONTROL` capabilities are disabled.
         (https://docs.balancer.finance/smart-contracts/api#access-control)
         """
-        return self._ccontract.isFinalized()
+        return self.contract.caller.isFinalized()
 
     def isBound(self, token_address: str) -> bool:
         """Returns True if the token is bound.
@@ -128,27 +123,27 @@ class BPool(BToken):
         interaction with this token in practice (assuming there are no existing
         tokens in the pool, which can always `exitPool`).
         """
-        return self._ccontract.isBound(token_address)
+        return self.contract.caller.isBound(token_address)
 
     def getNumTokens(self) -> int:
         """
         How many tokens are bound to this pool.
         """
-        return self._ccontract.getNumTokens()
+        return self.contract.caller.getNumTokens()
 
     def getCurrentTokens(self) -> typing.List[str]:
         """@return -- list of [token_addr:str]"""
-        return self._ccontract.getCurrentTokens()
+        return self.contract.caller.getCurrentTokens()
 
     def getFinalTokens(self) -> typing.List[str]:
         """@return -- list of [token_addr:str]"""
-        return self._ccontract.getFinalTokens()
+        return self.contract.caller.getFinalTokens()
 
     def getDenormalizedWeight(self, token_address: str) -> int:
-        return self._ccontract.getDenormalizedWeight(token_address)
+        return self.contract.caller.getDenormalizedWeight(token_address)
 
     def getTotalDenormalizedWeight(self) -> int:
-        return self._ccontract.getTotalDenormalizedWeight()
+        return self.contract.caller.getTotalDenormalizedWeight()
 
     def getNormalizedWeight(self, token_address: str) -> int:
         """
@@ -156,20 +151,20 @@ class BPool(BToken):
         all tokens will sum up to 1. (Note: the actual sum may be 1 plus or
         minus a few wei due to division precision loss)
         """
-        return self._ccontract.getNormalizedWeight(token_address)
+        return self.contract.caller.getNormalizedWeight(token_address)
 
     def getBalance(self, token_address: str) -> int:
-        return self._ccontract.getBalance(token_address)
+        return self.contract.caller.getBalance(token_address)
 
     def getSwapFee(self) -> int:
-        return self._ccontract.getSwapFee()
+        return self.contract.caller.getSwapFee()
 
     def getController(self) -> str:
         """
         Get the "controller" address, which can call `CONTROL` functions like
         `rebind`, `setSwapFee`, or `finalize`.
         """
-        return self._ccontract.getController()
+        return self.contract.caller.getController()
 
     # ==== Controller Functions
 
@@ -266,10 +261,12 @@ class BPool(BToken):
     # ==== Price Functions
 
     def getSpotPrice(self, tokenIn_address: str, tokenOut_address: str) -> int:
-        return self._ccontract.getSpotPrice(tokenIn_address, tokenOut_address)
+        return self.contract.caller.getSpotPrice(tokenIn_address, tokenOut_address)
 
     def getSpotPriceSansFee(self, tokenIn_address: str, tokenOut_address: str) -> int:
-        return self._ccontract.getSpotPriceSansFee(tokenIn_address, tokenOut_address)
+        return self.contract.caller.getSpotPriceSansFee(
+            tokenIn_address, tokenOut_address
+        )
 
     # ==== Trading and Liquidity Functions
 
@@ -431,13 +428,13 @@ class BPool(BToken):
 
     # ==== Balancer Pool as ERC20
     def totalSupply(self) -> int:
-        return self._ccontract.totalSupply()
+        return self.contract.caller.totalSupply()
 
     def balanceOf(self, whom_address: str) -> int:
-        return self._ccontract.balanceOf(whom_address)
+        return self.contract.caller.balanceOf(whom_address)
 
     def allowance(self, src_address: str, dst_address: str) -> int:
-        return self._ccontract.allowance(src_address, dst_address)
+        return self.contract.caller.allowance(src_address, dst_address)
 
     def approve(self, dst_address: str, amt_base: int, from_wallet: Wallet):
         return self.send_transaction("approve", (dst_address, amt_base), from_wallet)
@@ -462,7 +459,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns spotPrice_base."""
-        return self._ccontract.calcSpotPrice(
+        return self.contract.caller.calcSpotPrice(
             tokenBalanceIn_base,
             tokenWeightIn_base,
             tokenBalanceOut_base,
@@ -480,7 +477,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns tokenAmountOut_base."""
-        return self._ccontract.calcOutGivenIn(
+        return self.contract.caller.calcOutGivenIn(
             tokenBalanceIn_base,
             tokenWeightIn_base,
             tokenBalanceOut,
@@ -499,7 +496,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns tokenAmountIn_base."""
-        return self._ccontract.calcInGivenOut(
+        return self.contract.caller.calcInGivenOut(
             tokenBalanceIn_base,
             tokenWeightIn_base,
             tokenBalanceOut_base,
@@ -518,7 +515,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns poolAmountOut_base."""
-        return self._ccontract.calcPoolOutGivenSingleIn(
+        return self.contract.caller.calcPoolOutGivenSingleIn(
             tokenBalanceIn_base,
             tokenWeightIn_base,
             poolSupply_base,
@@ -537,7 +534,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns tokenAmountIn_base."""
-        return self._ccontract.calcSingleInGivenPoolOut(
+        return self.contract.caller.calcSingleInGivenPoolOut(
             tokenBalanceIn_base,
             tokenWeightIn_base,
             poolSupply_base,
@@ -556,7 +553,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns tokenAmountOut_base."""
-        return self._ccontract.calcSingleOutGivenPoolIn(
+        return self.contract.caller.calcSingleOutGivenPoolIn(
             tokenBalanceOut_base,
             tokenWeightOut_base,
             poolSupply_base,
@@ -575,7 +572,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns poolAmountIn_base."""
-        return self._ccontract.calcPoolInGivenSingleOut(
+        return self.contract.caller.calcPoolInGivenSingleOut(
             tokenBalanceOut_base,
             tokenWeightOut_base,
             poolSupply_base,

@@ -14,7 +14,6 @@ from eth_typing import BlockIdentifier
 from hexbytes import HexBytes
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_utils import (
-    get_concise_contract,
     get_contract_definition,
     get_contracts_addresses,
     load_contract,
@@ -54,13 +53,11 @@ class ContractBase(object):
         assert abi_path, f"abi_path is required, got {abi_path}"
 
         self.web3 = web3
-        self.contract_concise = get_concise_contract(self.web3, self.name, address)
-        self.contract = load_contract(self.web3, self.name, address)
-
+        self.contract = load_contract(self.w3, self.name, address)
         assert not address or (
             self.contract.address == address and self.address == address
         )
-        assert self.contract_concise is not None
+        assert self.contract.caller is not None
 
     def __str__(self):
         """Returns contract `name @ address.`"""

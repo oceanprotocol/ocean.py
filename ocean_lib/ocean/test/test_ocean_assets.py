@@ -51,7 +51,7 @@ def test_register_asset(publisher_ocean_instance):
             [
                 a
                 for a in dids
-                if DataToken(ocn.web3, a).contract_concise.isMinter(_minter)
+                if DataToken(ocn.web3, a).contract.caller.isMinter(_minter)
             ]
         )
 

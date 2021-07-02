@@ -6,6 +6,7 @@
     Test did_lib
 """
 import pytest
+
 from ocean_lib.common.agreements.service_agreement import ServiceTypes
 from ocean_lib.common.agreements.service_factory import (
     ServiceDescriptor,

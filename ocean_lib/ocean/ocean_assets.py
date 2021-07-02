@@ -238,7 +238,7 @@ class OceanAssets:
                 )
             # verify data_token_address
             dt = DataToken(self._web3, data_token_address)
-            minter = dt.contract_concise.minter()
+            minter = dt.contract.caller.minter()
             if not minter:
                 raise AssertionError(
                     f"datatoken address {data_token_address} does not seem to be a valid DataToken contract."
