@@ -7,13 +7,12 @@ import os
 import time
 
 import pytest
-from web3.exceptions import TimeExhausted, TransactionNotFound
-
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import get_resource_path
+from web3.exceptions import TimeExhausted, TransactionNotFound
 
 
 def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address):
@@ -223,8 +222,6 @@ def test_verify_transfer_tx(alice_address, bob_address, alice_ocean, alice_walle
 
 def test_verify_order_tx(alice_address, bob_address, alice_ocean, alice_wallet):
     """Tests verify_order_tx function."""
-    alice_w3 = alice_ocean.web3.eth.block_number
-
     token = alice_ocean.create_data_token(
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
@@ -239,7 +236,7 @@ def test_verify_order_tx(alice_address, bob_address, alice_ocean, alice_wallet):
         # dummy tx id which is not found in the chain
         # need to catch TimeExhausted exception from web3
         token.verify_order_tx(
-            alice_w3, "0x0", "some_did", "some_index", "some_amount", alice_address
+            "0x0", "some_did", "some_index", "some_amount", alice_address
         )
 
     transfer_tx_id = token.transfer(
@@ -248,12 +245,7 @@ def test_verify_order_tx(alice_address, bob_address, alice_ocean, alice_wallet):
     with pytest.raises(AssertionError):
         # tx id is from transfer, not order
         token.verify_order_tx(
-            alice_w3,
-            transfer_tx_id,
-            "some_did",
-            "some_index",
-            "some_amount",
-            alice_address,
+            transfer_tx_id, "some_did", "some_index", "some_amount", alice_address
         )
 
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
@@ -265,7 +257,7 @@ def test_verify_order_tx(alice_address, bob_address, alice_ocean, alice_wallet):
     with pytest.raises(AssertionError):
         # the wrong asset did, this is a sample
         token.verify_order_tx(
-            alice_w3, order_tx_id, asset.did, "some_index", "some_amount", alice_address
+            order_tx_id, asset.did, "some_index", "some_amount", alice_address
         )
 
 

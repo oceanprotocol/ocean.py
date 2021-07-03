@@ -11,6 +11,8 @@ import json
 import uuid
 from datetime import datetime
 
+from web3.main import Web3
+
 
 def generate_new_id():
     """
@@ -21,44 +23,40 @@ def generate_new_id():
     return uuid.uuid4().hex + uuid.uuid4().hex
 
 
-def to_32byte_hex(web3, val):
+def to_32byte_hex(val):
     """
 
-    :param web3:
     :param val:
     :return:
     """
-    return web3.toBytes(val).rjust(32, b"\0")
+    return Web3.toBytes(val).rjust(32, b"\0")
 
 
-def convert_to_bytes(web3, data):
+def convert_to_bytes(data):
     """
 
-    :param web3:
     :param data:
     :return:
     """
-    return web3.toBytes(text=data)
+    return Web3.toBytes(text=data)
 
 
-def convert_to_string(web3, data):
+def convert_to_string(data):
     """
 
-    :param web3:
     :param data:
     :return:
     """
-    return web3.toHex(data)
+    return Web3.toHex(data)
 
 
-def convert_to_text(web3, data):
+def convert_to_text(data):
     """
 
-    :param web3:
     :param data:
     :return:
     """
-    return web3.toText(data)
+    return Web3.toText(data)
 
 
 def checksum(seed):

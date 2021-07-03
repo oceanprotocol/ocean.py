@@ -7,9 +7,8 @@ import pytest
 from enforce_typing import enforce_types
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.wallet import Wallet
-from web3.contract import ConciseContract
+from web3.contract import ContractCaller
 
 
 @enforce_types
@@ -26,34 +25,26 @@ class MyFactory(ContractBase):
         )
 
 
-def test_name_is_None():
+def test_name_is_None(web3):
     with pytest.raises(AssertionError):
         # self.name will become None, triggering the error
-        ContractBase(None)
+        ContractBase(web3, None)
 
 
-def test_bad_abi_path():
-    ContractHandler.artifacts_path = ""  # empty value
+def test_nochild(web3):
     with pytest.raises(AssertionError):
-        # input abi_path of None will get it to use value in ContractHandler,
-        # but since we've forced that empty it should raise an error
-        MyFactory(address=None, abi_path=None)
+        ContractBase(web3, None)
 
 
-def test_nochild():
-    with pytest.raises(AssertionError):
-        ContractBase(None)
-
-
-def test_main(network, alice_wallet, alice_address, dtfactory_address, alice_ocean):
+def test_main(network, alice_wallet, alice_address, dtfactory_address, web3):
 
     # test super-simple functionality of child
-    factory = MyFactory(dtfactory_address)
+    factory = MyFactory(web3, dtfactory_address)
     factory.createToken("foo_blob", "DT1", "DT1", to_base_18(1000.0), alice_wallet)
 
     # test attributes
     assert factory.name == "DTFactory"
-    assert isinstance(factory.contract_concise, ConciseContract)
+    assert isinstance(factory.contract.caller, ContractCaller)
     assert factory.contract is not None
     assert factory.contract.address == dtfactory_address
     assert ContractBase.to_checksum_address(dtfactory_address) == dtfactory_address
@@ -74,7 +65,7 @@ def test_main(network, alice_wallet, alice_address, dtfactory_address, alice_oce
         assert factory.get_event_signature("noevent")
     assert factory.subscribe_to_event("TokenCreated", 30, None) is None
     assert factory.get_event_argument_names("TokenCreated") == ()
-    block = alice_ocean.web3.eth.block_number
+    block = web3.eth.block_number
     assert (
         len(factory.get_event_logs("TokenCreated", block, block, None)) == 1
     ), "The token was not created."
@@ -82,19 +73,19 @@ def test_main(network, alice_wallet, alice_address, dtfactory_address, alice_oce
     copy = factory.contract.address
     factory.contract.address = None
     with pytest.raises(TypeError):
-        factory.getLogs("", alice_ocean.web3)
+        factory.getLogs("")
     factory.contract.address = copy
 
 
-def test_static_functions():
+def test_static_functions(web3):
     assert (
-        ContractBase.get_tx_receipt("nohash") is None
+        ContractBase.get_tx_receipt(web3, "nohash") is None
     ), "The transaction receipt exists for the wrong hash."
 
 
-def test_gas_price(alice_wallet, dtfactory_address, monkeypatch):
+def test_gas_price(web3, alice_wallet, dtfactory_address, monkeypatch):
     monkeypatch.setenv("GAS_PRICE", "1")
-    factory = MyFactory(dtfactory_address)
+    factory = MyFactory(web3, dtfactory_address)
     assert factory.createToken(
         "foo_blob", "DT1", "DT1", to_base_18(1000.0), alice_wallet
     ), "The token could not be created by configuring the gas price env var."

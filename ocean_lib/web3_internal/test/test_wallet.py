@@ -5,15 +5,12 @@
 import os
 
 import pytest
-from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
+from eth_account.messages import encode_defunct
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.web3_provider import Web3Provider
 
 
-def test_wallet_arguments():
+def test_wallet_arguments(web3):
     """Tests that a wallet's arguments are correctly setup."""
-    web3 = Web3Provider.get_web3()
-
     private_key = os.environ.get("TEST_PRIVATE_KEY1")
     assert private_key, "envvar TEST_PRIVATE_KEY1 is not set."
 
@@ -21,7 +18,7 @@ def test_wallet_arguments():
     wallet = Wallet(web3, private_key=private_key)
     assert wallet.private_key == private_key, "Private keys are different."
     assert wallet.address, "The wallet does not have a wallet address."
-    signed_message = wallet.sign(add_ethereum_prefix_and_hash_msg("msg-to-sign"))
+    signed_message = wallet.sign(encode_defunct(text="msg-to-sign"))
     assert signed_message, "Signed message is None."
 
     # Create wallet with encrypted key and password
@@ -30,7 +27,7 @@ def test_wallet_arguments():
     w2 = Wallet(web3, encrypted_key=encrypted_key, password=password)
     assert w2.address == wallet.address
     assert w2.private_key == wallet.private_key
-    assert w2.sign(add_ethereum_prefix_and_hash_msg("msg-to-sign")) == signed_message
+    assert w2.sign(encode_defunct(text="msg-to-sign")) == signed_message
 
     # create wallet with missing arguments
     with pytest.raises(AssertionError):

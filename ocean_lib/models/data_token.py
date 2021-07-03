@@ -17,10 +17,9 @@ from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.event_filter import EventFilter
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3 import Web3
-from web3.exceptions import MismatchedABI
 from web3._utils.events import get_event_data
+from web3.exceptions import MismatchedABI
 from websockets import ConnectionClosed
 
 OrderValues = namedtuple(
@@ -93,36 +92,36 @@ class DataToken(ContractBase):
         return self.send_transaction("approveMinter", (), from_wallet)
 
     def blob(self) -> str:
-        return self.contract_concise.blob()
+        return self.contract.caller.blob()
 
     def cap(self) -> int:
-        return self.contract_concise.cap()
+        return self.contract.caller.cap()
 
     def isMinter(self, address: str) -> bool:
-        return self.contract_concise.isMinter(address)
+        return self.contract.caller.isMinter(address)
 
     def minter(self) -> str:
-        return self.contract_concise.minter()
+        return self.contract.caller.minter()
 
     def isInitialized(self) -> bool:
-        return self.contract_concise.isInitialized()
+        return self.contract.caller.isInitialized()
 
     def calculateFee(self, amount: int, fee_percentage: int) -> int:
-        return self.contract_concise.calculateFee(amount, fee_percentage)
+        return self.contract.caller.calculateFee(amount, fee_percentage)
 
     # ============================================================
     # reflect required ERC20 standard functions
     def totalSupply(self) -> int:
-        return self.contract_concise.totalSupply()
+        return self.contract.caller.totalSupply()
 
     def balanceOf(self, account: str) -> int:
-        return self.contract_concise.balanceOf(account)
+        return self.contract.caller.balanceOf(account)
 
     def transfer(self, to: str, value_base: int, from_wallet: Wallet) -> str:
         return self.send_transaction("transfer", (to, value_base), from_wallet)
 
     def allowance(self, owner_address: str, spender_address: str) -> int:
-        return self.contract_concise.allowance(owner_address, spender_address)
+        return self.contract.caller.allowance(owner_address, spender_address)
 
     def approve(self, spender: str, value_base: int, from_wallet: Wallet) -> str:
         return self.send_transaction("approve", (spender, value_base), from_wallet)
@@ -137,13 +136,13 @@ class DataToken(ContractBase):
     # ============================================================
     # reflect optional ERC20 standard functions
     def datatoken_name(self) -> str:
-        return self.contract_concise.name()
+        return self.contract.caller.name()
 
     def symbol(self) -> str:
-        return self.contract_concise.symbol()
+        return self.contract.caller.symbol()
 
     def decimals(self) -> int:
-        return self.contract_concise.decimals()
+        return self.contract.caller.decimals()
 
     # ============================================================
     # reflect non-standard ERC20 functions added by Open Zeppelin
@@ -178,7 +177,6 @@ class DataToken(ContractBase):
 
     def get_start_order_logs(
         self,
-        web3,
         consumer_address=None,
         from_block=0,
         to_block="latest",
@@ -197,19 +195,17 @@ class DataToken(ContractBase):
 
         e = getattr(self.events, self.ORDER_STARTED_EVENT)
         event_abi = e().abi
-        logs = web3.eth.get_logs(filter_params)
+        logs = self.web3.eth.get_logs(filter_params)
         parsed_logs = []
         for lg in logs:
-            parsed_logs.append(get_event_data(web3.codec, event_abi, lg))
+            parsed_logs.append(get_event_data(self.web3.codec, event_abi, lg))
         return parsed_logs
 
     def get_transfer_events_in_range(self, from_block, to_block):
         name = "Transfer"
         event = getattr(self.events, name)
 
-        return self.getLogs(
-            event, Web3Provider.get_web3(), fromBlock=from_block, toBlock=to_block
-        )
+        return self.getLogs(event, fromBlock=from_block, toBlock=to_block)
 
     def get_all_transfers_from_events(
         self, start_block: int, end_block: int, chunk: int = 1000
@@ -277,8 +273,7 @@ class DataToken(ContractBase):
         return logs[0]
 
     def verify_transfer_tx(self, tx_id, sender, receiver):
-        w3 = Web3Provider.get_web3()
-        tx = w3.eth.get_transaction(tx_id)
+        tx = self.web3.eth.get_transaction(tx_id)
         if not tx:
             raise AssertionError("Transaction is not found, or is not yet verified.")
 
@@ -291,12 +286,12 @@ class DataToken(ContractBase):
         _iter = 0
         while tx["blockNumber"] is None:
             time.sleep(0.1)
-            tx = w3.eth.get_transaction(tx_id)
+            tx = self.web3.eth.get_transaction(tx_id)
             _iter = _iter + 1
             if _iter > 100:
                 break
 
-        tx_receipt = self.get_tx_receipt(tx_id)
+        tx_receipt = self.get_tx_receipt(self.web3, tx_id)
         if tx_receipt.status == 0:
             raise AssertionError("Transfer transaction failed.")
 
@@ -336,13 +331,13 @@ class DataToken(ContractBase):
 
         return logs
 
-    def verify_order_tx(self, web3, tx_id, did, service_id, amount_base, sender):
+    def verify_order_tx(self, tx_id, did, service_id, amount_base, sender):
         event = getattr(self.events, self.ORDER_STARTED_EVENT)
         try:
-            tx_receipt = self.get_tx_receipt(tx_id)
+            tx_receipt = self.get_tx_receipt(self.web3, tx_id)
         except ConnectionClosed:
             # try again in this case
-            tx_receipt = self.get_tx_receipt(tx_id)
+            tx_receipt = self.get_tx_receipt(self.web3, tx_id)
 
         if tx_receipt is None:
             raise AssertionError(
@@ -352,7 +347,7 @@ class DataToken(ContractBase):
         if tx_receipt.status == 0:
             raise AssertionError("order transaction failed.")
 
-        receiver = self.contract_concise.minter()
+        receiver = self.contract.caller.minter()
         event_logs = event().processReceipt(tx_receipt)
         order_log = event_logs[0] if event_logs else None
         if not order_log:
@@ -389,7 +384,7 @@ class DataToken(ContractBase):
             target_amount = target_amount - order_log.args.marketFee
 
         # verify sender of the tx using the Tx record
-        tx = web3.eth.get_transaction(tx_id)
+        tx = self.web3.eth.get_transaction(tx_id)
         if sender not in [order_log.args.consumer, order_log.args.payer]:
             raise AssertionError(
                 "sender of order transaction is not the consumer/payer."
@@ -474,7 +469,7 @@ class DataToken(ContractBase):
     ):
         txid = self.approve(spender, to_base_18(value), from_wallet)
         if wait:
-            self.get_tx_receipt(txid)
+            self.get_tx_receipt(self.web3, txid)
 
         return txid
 

@@ -36,9 +36,10 @@ def test_complete_flow(
 
     # ===============================================================
     # 4. Alice creates an OCEAN-DT pool (=a Balancer Pool)
-    bfactory = BFactory(bfactory_address)
+    web3 = alice_ocean.web3
+    bfactory = BFactory(web3, bfactory_address)
     pool_address = bfactory.newBPool(from_wallet=alice_wallet)
-    pool = BPool(pool_address)
+    pool = BPool(web3, pool_address)
 
     pool.setPublicSwap(True, from_wallet=alice_wallet)
 
@@ -52,9 +53,9 @@ def test_complete_flow(
         from_wallet=alice_wallet,
     )
 
-    OCEAN_token = BToken(OCEAN_address)
+    OCEAN_token = BToken(web3, OCEAN_address)
     txid = OCEAN_token.approve(pool_address, to_base_18(10.0), from_wallet=alice_wallet)
-    r = OCEAN_token.get_tx_receipt(txid)
+    r = OCEAN_token.get_tx_receipt(web3, txid)
     assert r and r.status == 1, f"approve failed, receipt={r}"
     pool.bind(
         OCEAN_address,

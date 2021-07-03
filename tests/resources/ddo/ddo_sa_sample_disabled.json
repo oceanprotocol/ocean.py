@@ -1,11 +1,5 @@
 {
   "@context": "https://w3id.org/did/v1",
-  "authentication": [
-    {
-      "type": "RsaSignatureAuthentication2018",
-      "publicKey": "did:op:0ebed8226ada17fde24b6bf2b95d27f8f05fcce09139ff5cec31f6d81a7cd2ea"
-    }
-  ],
   "created": "2019-02-08T08:13:49Z",
   "updated": "2019-03-08T08:13:49Z",
   "id": "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019",
@@ -19,26 +13,6 @@
       "1": "0x999999952b5c93b82dd9e7ecc3d9fdf4755f7f69a54484941897dc517b4adfe3"
     }
   },
-  "publicKey": [
-    {
-      "id": "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019#keys-1",
-      "type": "RsaVerificationKey2018",
-      "owner": "did:op:6027c1e7cbae06a91fce0557ee53195284825f56a7100be0c53cbf4391aa26cc",
-      "publicKeyPem": "-----BEGIN PUBLIC KEY...END PUBLIC KEY-----\r\n"
-    },
-    {
-      "id": "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019#keys-2",
-      "type": "Ed25519VerificationKey2018",
-      "owner": "did:op:4c27a254e607cdf91a1206480e7eb8c74856102316c1a462277d4f21c02373b6",
-      "publicKeyBase58": "H3C2AVvLMv6gmMNam3uVAjZpfkcJCwDwnZn6z3wXmqPV"
-    },
-    {
-      "id": "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019#keys-3",
-      "type": "RsaPublicKeyExchangeKey2018",
-      "owner": "did:op:5f6b885202ffb9643874be529302eb00d55e226959f1fbacaeda592c5b5c9484",
-      "publicKeyPem": "-----BEGIN PUBLIC KEY...END PUBLIC KEY-----\r\n"
-    }
-  ],
   "verifiableCredential": [
     {
       "@context": [
@@ -71,6 +45,9 @@
       "type": "metadata",
       "attributes": {
         "encryptedFiles": "0x2e48ceefcca7abb024f90c87c676fce8f7913f889605a349c08c0c4a822c69ad651e122cc81db4fbb52938ac627786491514f37a2ebfd04fd98ec726f1d9061ed52f13fde132222af34d9af8ec358429cf45fc669f81a607185cb9a8150df3cbb2b4e3e382fb16429be228ddd920f061b78dd54701025fac8aab976239fb31a5b60a57393e96a338324c5ac8a5600a1247339c4835533cecdb5b53caf6b6f9d6478b579b7426f650a4154a20d18a9d49f509770af62647a57fc174741b47af3c8beeaaa76bee276cce8fba1f3fec0e1c",
+        "status": {
+            "isOrderDisabled": true
+         },
         "main": {
           "author": "Met Office",
           "dateCreated": "2019-02-08T08:13:49Z",
@@ -150,8 +127,5 @@
         }
       }
     }
-  ],
-  "status": {
-    "isOrderDisabled": true
-  }
+  ]
 }

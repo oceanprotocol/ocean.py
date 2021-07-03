@@ -17,12 +17,18 @@ MIN_GAS_PRICE = 1000000000
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 
 DEFAULT_NETWORK_NAME = "ganache"
-NETWORK_NAME_MAP = {1: "Mainnet", 3: "Ropsten", 4: "Rinkeby", 137: "Polygon"}
+NETWORK_NAME_MAP = {
+    1: "Mainnet",
+    3: "Ropsten",
+    4: "Rinkeby",
+    137: "Polygon",
+    8996: "Ganache",
+}
 
 NETWORK_TIMEOUT_MAP = {
     "mainnet": 10 * 60,
     "ropsten": 5 * 60,
     "rinkeby": 5 * 60,
-    "ganache": 2,
     "polygon": 10 * 60,
+    "ganache": 2,
 }

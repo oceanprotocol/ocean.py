@@ -71,7 +71,8 @@ cd test3
 python -m venv venv
 source venv/bin/activate
 
-#Install the ocean.py library
+#Install the ocean.py library. Install wheel first to avoid errors.
+pip install wheel
 pip install ocean-lib
 ```
 
@@ -82,7 +83,6 @@ Create a file called `test3/config.ini` and fill it as follows.
 ```text
 [eth-network]
 network = ganache
-artifacts.path = ~/.ocean/ocean-contracts/artifacts
 address.file = ~/.ocean/ocean-contracts/artifacts/address.json
 
 [resources]
@@ -170,7 +170,7 @@ data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
 
 #In the create() step below, Alice needs ganache OCEAN. Ensure she has it.
 from ocean_lib.models.btoken import BToken #BToken is ERC20
-OCEAN_token = BToken(ocean.OCEAN_address)
+OCEAN_token = BToken(ocean.web3, ocean.OCEAN_address)
 assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need OCEAN"
 
 #Post the asset for sale. This does many blockchain txs: create base
@@ -252,6 +252,7 @@ service = asset.get_service(ServiceTypes.ASSET_ACCESS)
 #Bob sends his datatoken to the service
 quote = ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
 order_tx_id = ocean.assets.pay_for_service(
+    ocean.web3, 
     quote.amount, quote.data_token_address, asset.did, service.index, fee_receiver, bob_wallet, None)
 print(f"order_tx_id = '{order_tx_id}'")
 

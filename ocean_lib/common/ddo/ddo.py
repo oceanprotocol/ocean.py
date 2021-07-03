@@ -7,19 +7,21 @@ import json
 import logging
 
 from eth_utils import add_0x_prefix
+
 from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.ddo.constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
 from ocean_lib.common.ddo.credentials import AddressCredential
-from ocean_lib.common.ddo.public_key_base import PublicKeyBase
-from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_ETHEREUM_ECDSA
+from ocean_lib.common.ddo.service import Service
+from ocean_lib.common.ddo.status_helper import (
+    disable_flag,
+    enable_flag,
+    is_flag_enabled,
+)
 from ocean_lib.common.did import OCEAN_PREFIX, did_to_id
 from ocean_lib.common.utils.utilities import get_timestamp
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-
-from ocean_lib.common.ddo.constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
-from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA, PublicKeyRSA
-from ocean_lib.common.ddo.service import Service
 
 logger = logging.getLogger("ddo")
 
@@ -37,13 +39,10 @@ class DDO:
     ):
         """Clear the DDO data values."""
         self._did = did
-        self._public_keys = []
-        self._authentications = []
         self._services = []
         self._proof = None
         self._credentials = {}
         self._created = None
-        self._status = {}
         self._other_values = {}
 
         if created:
@@ -68,15 +67,22 @@ class DDO:
     @property
     def is_disabled(self):
         """Returns whether the asset is disabled."""
-        if not self._status:
-            return False
-
-        return self._status.get("isOrderDisabled", False)
+        return is_flag_enabled(self, "isOrderDisabled")
 
     @property
     def is_enabled(self):
         """Returns the opposite of is_disabled, for convenience."""
         return not self.is_disabled
+
+    @property
+    def is_retired(self):
+        """Returns whether the asset is retired."""
+        return is_flag_enabled(self, "isRetired")
+
+    @property
+    def is_listed(self):
+        """Returns whether the asset is listed."""
+        return is_flag_enabled(self, "isListed")
 
     @property
     def asset_id(self):
@@ -132,32 +138,6 @@ class DDO:
         self._did = did
         return did
 
-    def add_public_key(self, did, public_key):
-        """
-        Add a public key object to the list of public keys.
-
-        :param public_key: Public key, PublicKeyHex
-        """
-        logger.debug(f"Adding public key {public_key} to the did {did}")
-        self._public_keys.append(
-            PublicKeyBase(
-                did, **{"owner": public_key, "type": PUBLIC_KEY_TYPE_ETHEREUM_ECDSA}
-            )
-        )
-
-    def add_authentication(self, public_key, authentication_type):
-        """
-        Add a authentication public key id and type to the list of authentications.
-
-        :param public_key: Key id, Authentication
-        :param authentication_type: Authentication type, str
-        """
-        authentication = {}
-        if public_key:
-            authentication = {"type": authentication_type, "publicKey": public_key}
-        logger.debug(f"Adding authentication {authentication}")
-        self._authentications.append(authentication)
-
     def add_service(self, service_type, service_endpoint=None, values=None, index=None):
         """
         Add a service to the list of services on the DDO.
@@ -211,16 +191,15 @@ class DDO:
             "id": self._did,
             "created": self._created,
         }
-        if self._public_keys:
-            values = []
-            for public_key in self._public_keys:
-                values.append(public_key.as_dictionary())
-            data["publicKey"] = values
-        if self._authentications:
-            values = []
-            for authentication in self._authentications:
-                values.append(authentication)
-            data["authentication"] = values
+
+        data["publicKey"] = [
+            {"id": self.did, "type": "EthereumECDSAKey", "owner": self.publisher}
+        ]
+
+        data["authentication"] = [
+            {"type": "RsaSignatureAuthentication2018", "publicKey": self.did}
+        ]
+
         if self._services:
             values = []
             for service in self._services:
@@ -230,8 +209,6 @@ class DDO:
             data["proof"] = self._proof
         if self._credentials:
             data["credentials"] = self._credentials
-        if self._status:
-            data["status"] = self._status
 
         if self._other_values:
             data.update(self._other_values)
@@ -244,18 +221,6 @@ class DDO:
         self._did = values.pop("id")
         self._created = values.pop("created", None)
 
-        if "publicKey" in values:
-            self._public_keys = []
-            for value in values.pop("publicKey"):
-                if isinstance(value, str):
-                    value = json.loads(value)
-                self._public_keys.append(DDO.create_public_key_from_json(value))
-        if "authentication" in values:
-            self._authentications = []
-            for value in values.pop("authentication"):
-                if isinstance(value, str):
-                    value = json.loads(value)
-                self._authentications.append(DDO.create_authentication_from_json(value))
         if "service" in values:
             self._services = []
             for value in values.pop("service"):
@@ -274,8 +239,6 @@ class DDO:
             self._proof = values.pop("proof")
         if "credentials" in values:
             self._credentials = values.pop("credentials")
-        if "status" in values:
-            self._status = values.pop("status")
 
         self._other_values = values
 
@@ -293,28 +256,6 @@ class DDO:
             "signatureValue": "",
             "checksum": checksums,
         }
-
-    def get_public_key(self, key_id):
-        """Key_id can be a string, or int. If int then the index in the list of keys."""
-        if isinstance(key_id, int):
-            return self._public_keys[key_id]
-
-        for item in self._public_keys:
-            if item.get_id() == key_id:
-                return item
-
-        return None
-
-    def _get_public_key_count(self):
-        """Return the count of public keys in the list and embedded."""
-        return len(self._public_keys)
-
-    def _get_authentication_from_public_key_id(self, key_id):
-        """Return the authentication based on it's id."""
-        for authentication in self._authentications:
-            if authentication["publicKey"] == key_id:
-                return authentication
-        return None
 
     def get_service(self, service_type=None):
         """Return a service using."""
@@ -343,62 +284,29 @@ class DDO:
         # try to find by type
         return self.get_service(index)
 
-    @property
-    def public_keys(self):
-        """Get the list of public keys."""
-        return self._public_keys[:]
-
-    @property
-    def authentications(self):
-        """Get the list authentication records."""
-        return self._authentications[:]
-
-    @staticmethod
-    def create_public_key_from_json(values):
-        """Create a public key object based on the values from the JSON record."""
-        # currently we only support RSA public keys
-        _id = values.get("id")
-        if not _id:
-            # Make it more forgiving for now.
-            _id = ""
-            # raise ValueError('publicKey definition is missing the "id" value.')
-
-        if values.get("type") == PUBLIC_KEY_TYPE_RSA:
-            public_key = PublicKeyRSA(_id, owner=values.get("owner"))
-        else:
-            public_key = PublicKeyBase(
-                _id, owner=values.get("owner"), type=PUBLIC_KEY_TYPE_ETHEREUM_ECDSA
-            )
-
-        public_key.set_key_value(values)
-        return public_key
-
-    @staticmethod
-    def create_authentication_from_json(values):
-        """Create authentication object from a JSON dict."""
-        key_id = values.get("publicKey")
-        authentication_type = values.get("type")
-        if not key_id:
-            raise ValueError(
-                f'Invalid authentication definition, "publicKey" is missing: {values}'
-            )
-
-        authentication = {"type": authentication_type, "publicKey": key_id}
-        return authentication
-
     def enable(self):
         """Enables asset for ordering."""
-        if not self._status:
-            self._status = {}
-
-        self._status.pop("isOrderDisabled")
+        disable_flag(self, "isOrderDisabled")
 
     def disable(self):
         """Disables asset from ordering."""
-        if not self._status:
-            self._status = {}
+        enable_flag(self, "isOrderDisabled")
 
-        self._status["isOrderDisabled"] = True
+    def retire(self):
+        """Retires an asset."""
+        enable_flag(self, "isRetired")
+
+    def unretire(self):
+        """Unretires an asset."""
+        disable_flag(self, "isRetired")
+
+    def list(self):
+        """Lists a previously unlisted asset."""
+        enable_flag(self, "isListed")
+
+    def unlist(self):
+        """Unlists an asset."""
+        disable_flag(self, "isListed")
 
     @property
     def requires_address_credential(self):
@@ -442,7 +350,7 @@ class DDO:
         self, credential=None, with_connectivity_check=True, provider_uri=None
     ):
         """Checks whether an asset is consumable and returns a ConsumableCode."""
-        if self.is_disabled:
+        if self.is_disabled or self.is_retired:
             return ConsumableCodes.ASSET_DISABLED
 
         if (

@@ -22,7 +22,6 @@ class ExampleConfig:
         return {
             "eth-network": {
                 "network": "http://localhost:8545",
-                "artifacts.path": "~/.ocean/ocean-contracts/artifacts",
                 "address.file": "",
             },
             "resources": {
@@ -37,7 +36,6 @@ class ExampleConfig:
     def get_network_config(network_name):
         config = ExampleConfig.get_base_config()
         config["eth-network"]["network"] = get_infura_url(get_infura_id(), network_name)
-        config["eth-network"]["artifacts.path"] = "artifacts"
         return config
 
     @staticmethod

@@ -11,6 +11,7 @@ from ocean_lib.models import balancer_constants
 from ocean_lib.ocean import util
 from ocean_lib.web3_internal.wallet import Wallet
 from web3._utils.events import get_event_data
+from web3.main import Web3
 
 from .btoken import BToken
 
@@ -20,11 +21,6 @@ logger = logging.getLogger(__name__)
 @enforce_types
 class BPool(BToken):
     CONTRACT_NAME = "BPool"
-
-    def __init__(self, *args, **kwargs):
-        """Initialises BPool object."""
-        BToken.__init__(self, *args, **kwargs)
-        self._ccontract = self.contract_concise
 
     def __str__(self):
         """Formats with attributes as key, value pairs."""
@@ -40,12 +36,12 @@ class BPool(BToken):
 
         s += [f"  numTokens = {self.getNumTokens()}"]
         cur_addrs = self.getCurrentTokens()
-        cur_symbols = [BToken(addr).symbol() for addr in cur_addrs]
+        cur_symbols = [BToken(self.web3, addr).symbol() for addr in cur_addrs]
         s += [f"  currentTokens (as symbols) = {', '.join(cur_symbols)}"]
 
         if self.isFinalized():
             final_addrs = self.getFinalTokens()
-            final_symbols = [BToken(addr).symbol() for addr in final_addrs]
+            final_symbols = [BToken(self.web3, addr).symbol() for addr in final_addrs]
             s += [f"  finalTokens (as symbols) = {final_symbols}"]
 
         s += ["  is bound:"]
@@ -64,7 +60,7 @@ class BPool(BToken):
         s += ["  balances (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
             balance_base = self.getBalance(addr)
-            dec = BToken(addr).decimals()
+            dec = BToken(self.web3, addr).decimals()
             balance = util.from_base(balance_base, dec)
             s += [f"    {symbol}: {balance}"]
 
@@ -106,7 +102,7 @@ class BPool(BToken):
 
     # ==== View Functions
     def isPublicSwap(self) -> bool:
-        return self._ccontract.isPublicSwap()
+        return self.contract.caller.isPublicSwap()
 
     def isFinalized(self) -> bool:
         """Returns true if state is finalized.
@@ -116,7 +112,7 @@ class BPool(BToken):
         `JOIN`, and `EXIT` are public. `CONTROL` capabilities are disabled.
         (https://docs.balancer.finance/smart-contracts/api#access-control)
         """
-        return self._ccontract.isFinalized()
+        return self.contract.caller.isFinalized()
 
     def isBound(self, token_address: str) -> bool:
         """Returns True if the token is bound.
@@ -127,27 +123,27 @@ class BPool(BToken):
         interaction with this token in practice (assuming there are no existing
         tokens in the pool, which can always `exitPool`).
         """
-        return self._ccontract.isBound(token_address)
+        return self.contract.caller.isBound(token_address)
 
     def getNumTokens(self) -> int:
         """
         How many tokens are bound to this pool.
         """
-        return self._ccontract.getNumTokens()
+        return self.contract.caller.getNumTokens()
 
     def getCurrentTokens(self) -> typing.List[str]:
         """@return -- list of [token_addr:str]"""
-        return self._ccontract.getCurrentTokens()
+        return self.contract.caller.getCurrentTokens()
 
     def getFinalTokens(self) -> typing.List[str]:
         """@return -- list of [token_addr:str]"""
-        return self._ccontract.getFinalTokens()
+        return self.contract.caller.getFinalTokens()
 
     def getDenormalizedWeight(self, token_address: str) -> int:
-        return self._ccontract.getDenormalizedWeight(token_address)
+        return self.contract.caller.getDenormalizedWeight(token_address)
 
     def getTotalDenormalizedWeight(self) -> int:
-        return self._ccontract.getTotalDenormalizedWeight()
+        return self.contract.caller.getTotalDenormalizedWeight()
 
     def getNormalizedWeight(self, token_address: str) -> int:
         """
@@ -155,20 +151,20 @@ class BPool(BToken):
         all tokens will sum up to 1. (Note: the actual sum may be 1 plus or
         minus a few wei due to division precision loss)
         """
-        return self._ccontract.getNormalizedWeight(token_address)
+        return self.contract.caller.getNormalizedWeight(token_address)
 
     def getBalance(self, token_address: str) -> int:
-        return self._ccontract.getBalance(token_address)
+        return self.contract.caller.getBalance(token_address)
 
     def getSwapFee(self) -> int:
-        return self._ccontract.getSwapFee()
+        return self.contract.caller.getSwapFee()
 
     def getController(self) -> str:
         """
         Get the "controller" address, which can call `CONTROL` functions like
         `rebind`, `setSwapFee`, or `finalize`.
         """
-        return self._ccontract.getController()
+        return self.contract.caller.getController()
 
     # ==== Controller Functions
 
@@ -265,10 +261,12 @@ class BPool(BToken):
     # ==== Price Functions
 
     def getSpotPrice(self, tokenIn_address: str, tokenOut_address: str) -> int:
-        return self._ccontract.getSpotPrice(tokenIn_address, tokenOut_address)
+        return self.contract.caller.getSpotPrice(tokenIn_address, tokenOut_address)
 
     def getSpotPriceSansFee(self, tokenIn_address: str, tokenOut_address: str) -> int:
-        return self._ccontract.getSpotPriceSansFee(tokenIn_address, tokenOut_address)
+        return self.contract.caller.getSpotPriceSansFee(
+            tokenIn_address, tokenOut_address
+        )
 
     # ==== Trading and Liquidity Functions
 
@@ -430,13 +428,13 @@ class BPool(BToken):
 
     # ==== Balancer Pool as ERC20
     def totalSupply(self) -> int:
-        return self._ccontract.totalSupply()
+        return self.contract.caller.totalSupply()
 
     def balanceOf(self, whom_address: str) -> int:
-        return self._ccontract.balanceOf(whom_address)
+        return self.contract.caller.balanceOf(whom_address)
 
     def allowance(self, src_address: str, dst_address: str) -> int:
-        return self._ccontract.allowance(src_address, dst_address)
+        return self.contract.caller.allowance(src_address, dst_address)
 
     def approve(self, dst_address: str, amt_base: int, from_wallet: Wallet):
         return self.send_transaction("approve", (dst_address, amt_base), from_wallet)
@@ -461,7 +459,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns spotPrice_base."""
-        return self._ccontract.calcSpotPrice(
+        return self.contract.caller.calcSpotPrice(
             tokenBalanceIn_base,
             tokenWeightIn_base,
             tokenBalanceOut_base,
@@ -479,7 +477,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns tokenAmountOut_base."""
-        return self._ccontract.calcOutGivenIn(
+        return self.contract.caller.calcOutGivenIn(
             tokenBalanceIn_base,
             tokenWeightIn_base,
             tokenBalanceOut,
@@ -498,7 +496,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns tokenAmountIn_base."""
-        return self._ccontract.calcInGivenOut(
+        return self.contract.caller.calcInGivenOut(
             tokenBalanceIn_base,
             tokenWeightIn_base,
             tokenBalanceOut_base,
@@ -517,7 +515,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns poolAmountOut_base."""
-        return self._ccontract.calcPoolOutGivenSingleIn(
+        return self.contract.caller.calcPoolOutGivenSingleIn(
             tokenBalanceIn_base,
             tokenWeightIn_base,
             poolSupply_base,
@@ -536,7 +534,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns tokenAmountIn_base."""
-        return self._ccontract.calcSingleInGivenPoolOut(
+        return self.contract.caller.calcSingleInGivenPoolOut(
             tokenBalanceIn_base,
             tokenWeightIn_base,
             poolSupply_base,
@@ -555,7 +553,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns tokenAmountOut_base."""
-        return self._ccontract.calcSingleOutGivenPoolIn(
+        return self.contract.caller.calcSingleOutGivenPoolIn(
             tokenBalanceOut_base,
             tokenWeightOut_base,
             poolSupply_base,
@@ -574,7 +572,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns poolAmountIn_base."""
-        return self._ccontract.calcPoolInGivenSingleOut(
+        return self.contract.caller.calcPoolInGivenSingleOut(
             tokenBalanceOut_base,
             tokenWeightOut_base,
             poolSupply_base,
@@ -588,7 +586,6 @@ class BPool(BToken):
     def get_liquidity_logs(
         self,
         event_name,
-        web3,
         from_block,
         to_block=None,
         user_address=None,
@@ -604,7 +601,7 @@ class BPool(BToken):
             _filter["address"] = self.address
 
         if user_address:
-            assert web3.isChecksumAddress(user_address)
+            assert Web3.isChecksumAddress(user_address)
             _filter["topics"].append(
                 f"0x000000000000000000000000{remove_0x_prefix(user_address).lower()}"
             )
@@ -612,8 +609,8 @@ class BPool(BToken):
         event = getattr(self.events, event_name)
         event_abi = event().abi
         try:
-            logs = web3.eth.get_logs(_filter)
-            logs = [get_event_data(web3.codec, event_abi, lg) for lg in logs]
+            logs = self.web3.eth.get_logs(_filter)
+            logs = [get_event_data(self.web3.codec, event_abi, lg) for lg in logs]
         except ValueError as e:
             logger.error(
                 f"get_join_logs failed -> web3.eth.get_logs (filter={_filter}) failed: "
@@ -624,22 +621,22 @@ class BPool(BToken):
         return logs
 
     def get_join_logs(
-        self, web3, from_block, to_block=None, user_address=None, this_pool_only=True
+        self, from_block, to_block=None, user_address=None, this_pool_only=True
     ):
         return self.get_liquidity_logs(
-            "LOG_JOIN", web3, from_block, to_block, user_address, this_pool_only
+            "LOG_JOIN", from_block, to_block, user_address, this_pool_only
         )
 
     def get_exit_logs(
-        self, web3, from_block, to_block=None, user_address=None, this_pool_only=True
+        self, from_block, to_block=None, user_address=None, this_pool_only=True
     ):
         return self.get_liquidity_logs(
-            "LOG_EXIT", web3, from_block, to_block, user_address, this_pool_only
+            "LOG_EXIT", from_block, to_block, user_address, this_pool_only
         )
 
     def get_swap_logs(
-        self, web3, from_block, to_block=None, user_address=None, this_pool_only=True
+        self, from_block, to_block=None, user_address=None, this_pool_only=True
     ):
         return self.get_liquidity_logs(
-            "LOG_SWAP", web3, from_block, to_block, user_address, this_pool_only
+            "LOG_SWAP", from_block, to_block, user_address, this_pool_only
         )
