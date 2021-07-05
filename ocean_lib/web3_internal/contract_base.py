@@ -245,7 +245,7 @@ class ContractBase(object):
             return event().argument_names
 
     @classmethod
-    def deploy(cls, web3: Web3, deployer_wallet: Wallet, *args):
+    def deploy(cls, web3: Web3, deployer_wallet: Wallet, abi_path: str = "", *args):
         """
         Deploy the DataTokenTemplate and DTFactory contracts to the current network.
 
@@ -254,8 +254,8 @@ class ContractBase(object):
 
         :return: smartcontract address of this contract
         """
-
-        abi_path = get_artifacts_path()
+        if not abi_path:
+            abi_path = get_artifacts_path()
 
         assert abi_path, f"abi_path is required, got {abi_path}"
 
