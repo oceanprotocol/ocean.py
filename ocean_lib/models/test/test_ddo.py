@@ -209,7 +209,7 @@ def test_ddo_on_chain(config, web3):
     # test ddoOwner
     assert DataToken(web3, asset.asset_id).contract.caller.isMinter(wallet.address), (
         f"ddo owner does not match the expected publisher address {wallet.address}, "
-        f"owner is {DataToken(asset.asset_id).contract.caller.minter(wallet.address)}"
+        f"owner is {DataToken(web3, asset.asset_id).contract.caller.minter(wallet.address)}"
     )
 
 
