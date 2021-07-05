@@ -39,18 +39,11 @@ class ContractBase(object):
     CONTRACT_NAME = None
 
     def __init__(self, web3: Web3, address: Optional[str]):
-        """Initialises Contract Base object.
-
-        The contract name attribute and `abi_path` are required.
-        """
+        """Initialises Contract Base object."""
         self.name = self.contract_name
         assert (
             self.name
         ), "contract_name property needs to be implemented in subclasses."
-
-        abi_path = get_artifacts_path()
-
-        assert abi_path, f"abi_path is required, got {abi_path}"
 
         self.web3 = web3
         self.contract = load_contract(self.web3, self.name, address)
@@ -245,7 +238,7 @@ class ContractBase(object):
             return event().argument_names
 
     @classmethod
-    def deploy(cls, web3: Web3, deployer_wallet: Wallet, abi_path: str = "", *args):
+    def deploy(cls, web3: Web3, deployer_wallet: Wallet, *args):
         """
         Deploy the DataTokenTemplate and DTFactory contracts to the current network.
 
@@ -254,10 +247,6 @@ class ContractBase(object):
 
         :return: smartcontract address of this contract
         """
-        if not abi_path:
-            abi_path = get_artifacts_path()
-
-        assert abi_path, f"abi_path is required, got {abi_path}"
 
         _json = get_contract_definition(cls.CONTRACT_NAME)
 
