@@ -5,6 +5,8 @@
 import logging
 
 from enforce_typing import enforce_types
+from web3.logs import DISCARD
+
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -54,12 +56,12 @@ class DTFactory(ContractBase):
                 f"Cannot get the transaction receipt for tx {transaction_id}."
             )
             return ""
-
-        logs = getattr(self.events, "TokenRegistered")().processReceipt(tx_receipt)
+        logs = getattr(self.events, "TokenRegistered")().processReceipt(
+            tx_receipt, errors=DISCARD
+        )
         if not logs:
             logging.warning(f"No logs were found for tx {transaction_id}.")
             return ""
-
         return logs[0].args.tokenAddress
 
     # ============================================================

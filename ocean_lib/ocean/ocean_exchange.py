@@ -4,6 +4,8 @@
 #
 
 from enforce_typing import enforce_types
+from web3.logs import DISCARD
+
 from ocean_lib.config import Config
 from ocean_lib.exceptions import VerifyTxFailed
 from ocean_lib.models.data_token import DataToken
@@ -99,7 +101,9 @@ class OceanExchange:
         # get tx receipt
         tx_receipt = exchange.get_tx_receipt(self._web3, tx_id)
         # get event log from receipt
-        logs = exchange.contract.events.ExchangeCreated().processReceipt(tx_receipt)
+        logs = exchange.contract.events.ExchangeCreated().processReceipt(
+            tx_receipt, errors=DISCARD
+        )
         if not logs:
             raise VerifyTxFailed(
                 f"Create new datatoken exchange failed, transaction receipt for tx {tx_id} is not found."
@@ -132,7 +136,9 @@ class OceanExchange:
         # get tx receipt
         tx_receipt = exchange.get_tx_receipt(self._web3, tx_id)
         # get event log from receipt
-        logs = exchange.contract.events.ExchangeRateChanged().processReceipt(tx_receipt)
+        logs = exchange.contract.events.ExchangeCreated().processReceipt(
+            tx_receipt, errors=DISCARD
+        )
         if not logs:
             raise VerifyTxFailed(
                 f"Set rate for exchange_id {exchange_id} failed, transaction receipt for tx {tx_id} is not found."

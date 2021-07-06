@@ -2,6 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from web3.logs import DISCARD
 
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.service_types import ServiceTypes
@@ -247,7 +248,7 @@ def test_update_trusted_algorithms(config, web3):
     )
 
     tx_receipt = ddo_registry.get_tx_receipt(web3, tx_id)
-    logs = ddo_registry.event_MetadataUpdated.processReceipt(tx_receipt)
+    logs = ddo_registry.event_MetadataUpdated.processReceipt(tx_receipt, errors=DISCARD)
     assert logs[0].args.dataToken == compute_ddo.data_token_address
 
     wait_for_update(
