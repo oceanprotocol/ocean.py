@@ -34,11 +34,9 @@ class BFactory(ContractBase):
             )
 
         # grab pool_address
-        warnings.filterwarnings("ignore")  # ignore unwarranted warning up next
         rich_logs = self.contract.events.BPoolCreated().processReceipt(
             tx_receipt, errors=DISCARD
         )
-        warnings.resetwarnings()
         pool_address = rich_logs[0]["args"]["newBPoolAddress"]
         print(f"  pool_address = {pool_address}")
 

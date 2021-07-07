@@ -297,9 +297,8 @@ class DataToken(ContractBase):
         if tx_receipt.status == 0:
             raise AssertionError("Transfer transaction failed.")
 
-        logs = getattr(self.events, "Transfer")().processReceipt(
-            tx_receipt, errors=DISCARD
-        )
+        event = self.events["Transfer"]()
+        logs = event.processReceipt(tx_receipt, errors=DISCARD)
         transfer_event = logs[0] if logs else None
         # transfer_event = self.get_transfer_event(tx['blockNumber'], sender, receiver)
         if not transfer_event:
@@ -336,7 +335,7 @@ class DataToken(ContractBase):
         return logs
 
     def verify_order_tx(self, tx_id, did, service_id, amount_base, sender):
-        event = getattr(self.events, self.ORDER_STARTED_EVENT)
+        event = self.events[f"{self.ORDER_STARTED_EVENT}"]
         try:
             tx_receipt = self.get_tx_receipt(self.web3, tx_id)
         except ConnectionClosed:

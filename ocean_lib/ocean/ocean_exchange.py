@@ -136,7 +136,7 @@ class OceanExchange:
         # get tx receipt
         tx_receipt = exchange.get_tx_receipt(self._web3, tx_id)
         # get event log from receipt
-        logs = exchange.contract.events.ExchangeCreated().processReceipt(
+        logs = exchange.contract.events.ExchangeRateChanged().processReceipt(
             tx_receipt, errors=DISCARD
         )
         if not logs:

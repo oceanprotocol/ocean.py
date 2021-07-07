@@ -156,9 +156,6 @@ def test_ddo_on_chain(config, web3):
         asset.asset_id, b"", lzma.compress(Web3.toBytes(text=asset.as_text())), wallet
     )
     assert ddo_registry.verify_tx(txid), f"create ddo failed: txid={txid}"
-    # tx_receipt = ddo_registry.get_tx_receipt(web3, txid)
-    # log_to_process = tx_receipt['logs'][0]
-    # logs = ddo_registry.event_MetadataCreated.processLog(log_to_process)
     logs = ddo_registry.event_MetadataCreated.processReceipt(
         ddo_registry.get_tx_receipt(web3, txid), errors=DISCARD
     )
@@ -180,9 +177,6 @@ def test_ddo_on_chain(config, web3):
         asset.asset_id, b"", lzma.compress(Web3.toBytes(text=asset.as_text())), wallet
     )
     assert ddo_registry.verify_tx(txid), f"update ddo failed: txid={txid}"
-    # tx_receipt = ddo_registry.get_tx_receipt(web3, txid)
-    # log_to_process = tx_receipt['logs'][0]
-    # logs = ddo_registry.event_MetadataUpdated.processLog(log_to_process)
     logs = ddo_registry.event_MetadataUpdated.processReceipt(
         ddo_registry.get_tx_receipt(web3, txid), errors=DISCARD
     )
