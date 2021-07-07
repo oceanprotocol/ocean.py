@@ -7,6 +7,8 @@ import uuid
 
 import pytest
 from eth_utils import add_0x_prefix, remove_0x_prefix
+from web3.logs import DISCARD
+
 from ocean_lib.assets.asset import Asset
 from ocean_lib.common.agreements.consumable import ConsumableCodes, MalformedCredential
 from ocean_lib.common.ddo.credentials import AddressCredential
@@ -155,7 +157,7 @@ def test_ddo_on_chain(config, web3):
     )
     assert ddo_registry.verify_tx(txid), f"create ddo failed: txid={txid}"
     logs = ddo_registry.event_MetadataCreated.processReceipt(
-        ddo_registry.get_tx_receipt(web3, txid)
+        ddo_registry.get_tx_receipt(web3, txid), errors=DISCARD
     )
     assert logs, f"no logs found for create ddo tx {txid}"
     log = logs[0]
@@ -176,7 +178,7 @@ def test_ddo_on_chain(config, web3):
     )
     assert ddo_registry.verify_tx(txid), f"update ddo failed: txid={txid}"
     logs = ddo_registry.event_MetadataUpdated.processReceipt(
-        ddo_registry.get_tx_receipt(web3, txid)
+        ddo_registry.get_tx_receipt(web3, txid), errors=DISCARD
     )
     assert logs, f"no logs found for update ddo tx {txid}"
     log = logs[0]
@@ -198,7 +200,7 @@ def test_ddo_on_chain(config, web3):
         )
         assert ddo_registry.verify_tx(txid) is False, f"update ddo failed: txid={txid}"
         logs = ddo_registry.event_MetadataUpdated.processReceipt(
-            ddo_registry.get_tx_receipt(web3, txid)
+            ddo_registry.get_tx_receipt(web3, txid), errors=DISCARD
         )
         assert (
             not logs
