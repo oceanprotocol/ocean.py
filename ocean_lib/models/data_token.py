@@ -11,6 +11,8 @@ from typing import List, Tuple
 import requests
 from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
+from web3.logs import DISCARD
+
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean.util import from_base_18, to_base_18
@@ -193,8 +195,7 @@ class DataToken(ContractBase):
             # get logs only for this token address
             filter_params["address"] = self.address
 
-        e = getattr(self.events, self.ORDER_STARTED_EVENT)
-        event_abi = e().abi
+        event_abi = self.events.OrderStarted().abi
         logs = self.web3.eth.get_logs(filter_params)
         parsed_logs = []
         for lg in logs:
@@ -202,10 +203,9 @@ class DataToken(ContractBase):
         return parsed_logs
 
     def get_transfer_events_in_range(self, from_block, to_block):
-        name = "Transfer"
-        event = getattr(self.events, name)
-
-        return self.getLogs(event, fromBlock=from_block, toBlock=to_block)
+        return self.getLogs(
+            self.events.Transfer(), fromBlock=from_block, toBlock=to_block
+        )
 
     def get_all_transfers_from_events(
         self, start_block: int, end_block: int, chunk: int = 1000
@@ -250,11 +250,10 @@ class DataToken(ContractBase):
         return transfer_records, min(_to, end_block)  # can have duplicates
 
     def get_transfer_event(self, block_number, sender, receiver):
-        event = getattr(self.events, "Transfer")
         filter_params = {"from": sender, "to": receiver}
         event_filter = EventFilter(
             "Transfer",
-            event,
+            self.events.Transfer,
             filter_params,
             from_block=block_number - 1,
             to_block=block_number + 10,
@@ -295,7 +294,7 @@ class DataToken(ContractBase):
         if tx_receipt.status == 0:
             raise AssertionError("Transfer transaction failed.")
 
-        logs = getattr(self.events, "Transfer")().processReceipt(tx_receipt)
+        logs = self.events.Transfer().processReceipt(tx_receipt, errors=DISCARD)
         transfer_event = logs[0] if logs else None
         # transfer_event = self.get_transfer_event(tx['blockNumber'], sender, receiver)
         if not transfer_event:
@@ -332,7 +331,6 @@ class DataToken(ContractBase):
         return logs
 
     def verify_order_tx(self, tx_id, did, service_id, amount_base, sender):
-        event = getattr(self.events, self.ORDER_STARTED_EVENT)
         try:
             tx_receipt = self.get_tx_receipt(self.web3, tx_id)
         except ConnectionClosed:
@@ -348,7 +346,9 @@ class DataToken(ContractBase):
             raise AssertionError("order transaction failed.")
 
         receiver = self.contract.caller.minter()
-        event_logs = event().processReceipt(tx_receipt)
+        event_logs = self.events.OrderStarted().processReceipt(
+            tx_receipt, errors=DISCARD
+        )
         order_log = event_logs[0] if event_logs else None
         if not order_log:
             raise AssertionError(
@@ -389,7 +389,9 @@ class DataToken(ContractBase):
             raise AssertionError(
                 "sender of order transaction is not the consumer/payer."
             )
-        transfer_logs = self.events.Transfer().processReceipt(tx_receipt)
+        transfer_logs = self.events.Transfer().processReceipt(
+            tx_receipt, errors=DISCARD
+        )
         receiver_to_transfers = {}
         for tr in transfer_logs:
             if tr.args.to not in receiver_to_transfers:

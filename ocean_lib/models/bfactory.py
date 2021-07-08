@@ -5,6 +5,8 @@
 import warnings
 
 from enforce_typing import enforce_types
+from web3.logs import DISCARD
+
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -32,9 +34,9 @@ class BFactory(ContractBase):
             )
 
         # grab pool_address
-        warnings.filterwarnings("ignore")  # ignore unwarranted warning up next
-        rich_logs = self.contract.events.BPoolCreated().processReceipt(tx_receipt)
-        warnings.resetwarnings()
+        rich_logs = self.contract.events.BPoolCreated().processReceipt(
+            tx_receipt, errors=DISCARD
+        )
         pool_address = rich_logs[0]["args"]["newBPoolAddress"]
         print(f"  pool_address = {pool_address}")
 
