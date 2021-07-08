@@ -189,18 +189,17 @@ class DataToken(ContractBase):
         if consumer_address:
             topic1 = f"0x000000000000000000000000{consumer_address[2:].lower()}"
             topics = [topic0, None, topic1]
+        address = self.address if not from_all_tokens else None
 
-        filter_params = {"fromBlock": from_block, "toBlock": to_block, "topics": topics}
-        if not from_all_tokens:
-            # get logs only for this token address
-            filter_params["address"] = self.address
-
-        event_abi = self.events.OrderStarted().abi
-        logs = self.web3.eth.get_logs(filter_params)
-        parsed_logs = []
-        for lg in logs:
-            parsed_logs.append(get_event_data(self.web3.codec, event_abi, lg))
-        return parsed_logs
+        event_filter = EventFilter(
+            event=self.events.OrderStarted(),
+            from_block=from_block,
+            to_block=to_block,
+            topics=topics,
+            address=address,
+        )
+        logs = event_filter.get_all_entries()
+        return logs
 
     def get_transfer_events_in_range(self, from_block, to_block):
         return self.getLogs(
@@ -252,9 +251,8 @@ class DataToken(ContractBase):
     def get_transfer_event(self, block_number, sender, receiver):
         filter_params = {"from": sender, "to": receiver}
         event_filter = EventFilter(
-            "Transfer",
             self.events.Transfer,
-            filter_params,
+            argument_filters=filter_params,
             from_block=block_number - 1,
             to_block=block_number + 10,
         )
@@ -321,13 +319,13 @@ class DataToken(ContractBase):
         event = getattr(self.events, event_name)
         filter_params = filter_args or {}
         event_filter = EventFilter(
-            event_name, event, filter_params, from_block=from_block, to_block=to_block
+            event,
+            argument_filters=filter_params,
+            from_block=from_block,
+            to_block=to_block,
         )
 
         logs = event_filter.get_all_entries(max_tries=10)
-        if not logs:
-            return []
-
         return logs
 
     def verify_order_tx(self, tx_id, did, service_id, amount_base, sender):

@@ -14,6 +14,7 @@ from web3._utils.events import get_event_data
 from web3.main import Web3
 
 from .btoken import BToken
+from ..web3_internal.event_filter import EventFilter
 
 logger = logging.getLogger(__name__)
 
@@ -596,29 +597,23 @@ class BPool(BToken):
         """
         topic0 = self.get_event_signature(event_name)
         to_block = to_block or "latest"
-        _filter = {"fromBlock": from_block, "toBlock": to_block, "topics": [topic0]}
-        if this_pool_only:
-            _filter["address"] = self.address
+        topics = [topic0]
+        address = self.address if this_pool_only else None
 
         if user_address:
             assert Web3.isChecksumAddress(user_address)
-            _filter["topics"].append(
+            topics.append(
                 f"0x000000000000000000000000{remove_0x_prefix(user_address).lower()}"
             )
-
         event = getattr(self.events, event_name)
-        event_abi = event().abi
-        try:
-            logs = self.web3.eth.get_logs(_filter)
-            logs = [get_event_data(self.web3.codec, event_abi, lg) for lg in logs]
-        except ValueError as e:
-            logger.error(
-                f"get_join_logs failed -> web3.eth.get_logs (filter={_filter}) failed: "
-                f"{e}.."
-            )
-            logs = []
-
-        return logs
+        event_filter = EventFilter(
+            event=event,
+            from_block=from_block,
+            to_block=to_block,
+            topics=topics,
+            address=address,
+        )
+        return event_filter.get_all_entries()
 
     def get_join_logs(
         self, from_block, to_block=None, user_address=None, this_pool_only=True
