@@ -5,8 +5,8 @@
 import os.path
 
 import pytest
-
 from ocean_lib.config import (
+    NAME_ADDRESS_FILE,
     NAME_AQUARIUS_URL,
     NAME_METADATA_CACHE_URI,
     Config,
@@ -210,3 +210,31 @@ def test_metadata_cache_uri_set_via_env_vars(monkeypatch, caplog):
         "Config: AQUARIUS_URL envvar is deprecated. Use METADATA_CACHE_URI instead."
         in caplog.text
     )
+
+
+def test_address_file(monkeypatch):
+    """Tests the Config.address_file property."""
+
+    # Test default value when ADDRESS_FILE envvar and address.file config option not set
+    ENV_ADDRESS_FILE = environ_names_and_sections[NAME_ADDRESS_FILE][0]
+    monkeypatch.delenv(ENV_ADDRESS_FILE)
+    config_text_empty = ""
+    config = Config(text=config_text_empty)
+    assert config.address_file.endswith("site-packages/artifacts/address.json")
+
+    # Test when address.file config option is set
+    config_text = """
+        [eth-network]
+        address.file = custom/address.json
+    """
+    config = Config(text=config_text)
+    assert config.address_file.endswith("custom/address.json")
+
+    # Test when ADDRESS_FILE envvar is set
+    monkeypatch.setenv(ENV_ADDRESS_FILE, "another/custom/address.json")
+    config = Config()
+    assert config.address_file.endswith("another/custom/address.json")
+
+    # Test when both ADDRESS_FILE envvar and address.file config option are set
+    config = Config(text=config_text)
+    assert config.address_file.endswith("another/custom/address.json")
