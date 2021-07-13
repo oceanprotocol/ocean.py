@@ -133,7 +133,7 @@ data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
 ## 4. Alice creates a pool for trading her new data tokens
 
 ```python
-pool = ocean.pool.create(
+pool = ocean.create_ocean_pool(
    token_address,
    data_token_amount=100.0,
    OCEAN_amount=10.0,

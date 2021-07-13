@@ -10,6 +10,10 @@ from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.exceptions import VerifyTxFailed
+from ocean_lib.models import balancer_constants
+from ocean_lib.models.bfactory import BFactory
+from ocean_lib.models.bpool import BPool
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
@@ -105,11 +109,6 @@ class Ocean:
         self.compute = OceanCompute(self._config, data_provider)
 
         ocean_address = get_ocean_token_address(self._config.address_file, network)
-        self.pool = OceanPool(
-            self._web3,
-            ocean_address,
-            get_bfactory_address(self._config.address_file, network),
-        )
         self.exchange = OceanExchange(
             self._web3,
             ocean_address,
@@ -221,3 +220,78 @@ class Ocean:
                 _orders.append(order)
 
         return _orders
+
+    def create_ocean_pool(
+        self,
+        data_token_address: str,
+        data_token_amount: float,
+        OCEAN_amount: float,
+        from_wallet: Wallet,
+        data_token_weight: float = balancer_constants.INIT_WEIGHT_DT,
+        swap_fee: float = balancer_constants.DEFAULT_SWAP_FEE,
+    ) -> BPool:
+        """
+        Create a new pool with bound datatoken and OCEAN token then finalize it.
+        The pool will have publicSwap enabled and swap fee is set
+        to `balancer_constants.DEFAULT_SWAP_FEE`.
+        Balances of both data tokens and OCEAN tokens must be sufficient in the
+        `from_wallet`, otherwise this will fail.
+
+        :param data_token_address: str address of the DataToken contract
+        :param data_token_amount: float amount of initial liquidity of data tokens
+        :param OCEAN_amount: float amount of initial liquidity of OCEAN tokens
+        :param from_wallet: Wallet instance of pool owner
+        :param data_token_weight: float weight of the data token to be set in the new pool must be >= 1 & <= 9
+        :param swap_fee: float the fee taken by the pool on each swap transaction
+        :return: BPool instance
+        """
+        bfactory_address = get_bfactory_address(
+            self._config.address_file, get_network_name()
+        )
+        bfactory = BFactory(self._web3, bfactory_address)
+        pool_address = bfactory.newBPool(from_wallet)
+        pool = BPool(self._web3, pool_address)
+        logger.debug(f"pool created with address {pool_address}.")
+
+        assert 1 <= data_token_weight <= 9
+        base_weight = 10.0 - data_token_weight
+
+        # Must approve datatoken and Ocean tokens to the new pool as spender
+        dt = DataToken(self._web3, data_token_address)
+        tx_id = dt.approve_tokens(
+            pool_address, data_token_amount, from_wallet, wait=True
+        )
+        if dt.get_tx_receipt(self._web3, tx_id).status != 1:
+            raise VerifyTxFailed(
+                f"Approve datatokens failed, pool was created at {pool_address}"
+            )
+
+        ot = DataToken(self._web3, self.OCEAN_address)
+        tx_id = ot.approve_tokens(pool_address, OCEAN_amount, from_wallet, wait=True)
+        if ot.get_tx_receipt(self._web3, tx_id).status != 1:
+            raise VerifyTxFailed(
+                f"Approve OCEAN tokens failed, pool was created at {pool_address}"
+            )
+
+        tx_id = pool.setup(
+            data_token_address,
+            to_base_18(data_token_amount),
+            to_base_18(data_token_weight),
+            self.OCEAN_address,
+            to_base_18(OCEAN_amount),
+            to_base_18(base_weight),
+            to_base_18(swap_fee),
+            from_wallet,
+        )
+        if pool.get_tx_receipt(self._web3, tx_id).status != 1:
+            raise VerifyTxFailed(
+                f"pool.setup failed: txId={tx_id}, receipt={pool.get_tx_receipt(self.web3, tx_id)}"
+            )
+
+        logger.debug(
+            f"create pool completed: poolAddress={pool_address}, pool setup TxId={tx_id}"
+        )
+
+        # TODO: remove
+        self.pool = OceanPool(self._web3, self.OCEAN_address)
+        return pool

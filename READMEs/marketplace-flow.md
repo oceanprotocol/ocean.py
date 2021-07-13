@@ -176,7 +176,7 @@ assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need OCEAN"
 #Post the asset for sale. This does many blockchain txs: create base
 # pool, bind OCEAN and datatoken, add OCEAN and datatoken liquidity,
 # and finalize the pool.
-pool = ocean.pool.create(
+pool = ocean.create_ocean_pool(
    token_address,
    data_token_amount=100.0,
    OCEAN_amount=10.0,
@@ -252,7 +252,7 @@ service = asset.get_service(ServiceTypes.ASSET_ACCESS)
 #Bob sends his datatoken to the service
 quote = ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
 order_tx_id = ocean.assets.pay_for_service(
-    ocean.web3, 
+    ocean.web3,
     quote.amount, quote.data_token_address, asset.did, service.index, fee_receiver, bob_wallet, None)
 print(f"order_tx_id = '{order_tx_id}'")
 

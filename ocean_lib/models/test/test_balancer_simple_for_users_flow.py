@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+from ocean_lib.models.bpool import BPool
+from ocean_lib.ocean.ocean_pool import add_liquidity, get_token_address
 from ocean_lib.ocean.util import to_base_18
 
 
@@ -30,7 +32,7 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
     # ===============================================================
     # 4. Alice creates an OCEAN-DT pool (=a Balancer Pool)
 
-    pool = alice_ocean.pool.create(
+    pool = alice_ocean.create_ocean_pool(
         DT_address, data_token_amount=90.0, OCEAN_amount=10.0, from_wallet=alice_wallet
     )
     pool_address = pool.address
@@ -40,13 +42,19 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
 
     # ===============================================================
     # 5. Alice adds liquidity to pool
-    alice_ocean.pool.add_data_token_liquidity(
-        pool_address, amount_base=to_base_18(9.0), from_wallet=alice_wallet
+    dt_address = get_token_address(alice_ocean.web3, pool, alice_ocean.OCEAN_address)
+    add_liquidity(
+        alice_ocean.web3, pool, dt_address, to_base_18(9.0), from_wallet=alice_wallet
     )
+
     dt_pool_shares = pool.balanceOf(alice_wallet.address)
 
-    alice_ocean.pool.add_OCEAN_liquidity(
-        pool_address, amount_base=to_base_18(1.0), from_wallet=alice_wallet
+    add_liquidity(
+        alice_ocean.web3,
+        pool,
+        alice_ocean.OCEAN_address,
+        to_base_18(1.0),
+        from_wallet=alice_wallet,
     )
     ocn_pool_shares = pool.balanceOf(alice_wallet.address)
 
@@ -86,21 +94,29 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
     )
 
     # ===============================================================
-    # 11. Bob adds liquidity
-    bob_ocean.pool.add_data_token_liquidity(
-        pool_address, amount_base=to_base_18(0.1), from_wallet=bob_wallet
+    # 11. Bob adds liquidity in data token and then OCEAN
+    add_liquidity(
+        bob_ocean.web3, pool, dt_address, to_base_18(0.1), from_wallet=bob_wallet
     )
-    bob_ocean.pool.add_OCEAN_liquidity(
-        pool_address, amount_base=to_base_18(1.0), from_wallet=bob_wallet
+    add_liquidity(
+        bob_ocean.web3,
+        pool,
+        bob_ocean.OCEAN_address,
+        to_base_18(1.0),
+        from_wallet=bob_wallet,
     )
 
     # ===============================================================
-    # 12. Bob adds liquidity AGAIN
-    bob_ocean.pool.add_data_token_liquidity(
-        pool_address, amount_base=to_base_18(0.2), from_wallet=bob_wallet
+    # 12. Bob adds liquidity AGAIN (in data token and then OCEAN)
+    add_liquidity(
+        bob_ocean.web3, pool, dt_address, to_base_18(0.2), from_wallet=bob_wallet
     )
-    bob_ocean.pool.add_OCEAN_liquidity(
-        pool_address, amount_base=to_base_18(0.1), from_wallet=bob_wallet
+    add_liquidity(
+        bob_ocean.web3,
+        pool,
+        bob_ocean.OCEAN_address,
+        to_base_18(0.1),
+        from_wallet=bob_wallet,
     )
 
 
@@ -113,20 +129,23 @@ def test_ocean_balancer_helpers(
     DT.mint(alice_address, to_base_18(1000.0), alice_wallet)
 
     with pytest.raises(Exception):  # not enough liquidity
-        pool = alice_ocean.pool.create(
+        pool = alice_ocean.create_ocean_pool(
             DT.address, data_token_amount=0, OCEAN_amount=0, from_wallet=alice_wallet
         )
 
-    pool = alice_ocean.pool.create(
+    pool = alice_ocean.create_ocean_pool(
         DT.address, data_token_amount=90.0, OCEAN_amount=10.0, from_wallet=alice_wallet
     )
     pool_address = pool.address
 
     assert alice_ocean.pool.ocean_address == OCEAN_address
-    assert alice_ocean.pool.get_token_address(pool.address) == DT.address
 
-    assert alice_ocean.pool.get(alice_ocean.web3, pool_address).address == pool_address
-    assert bob_ocean.pool.get(alice_ocean.web3, pool_address).address == pool_address
+    bpool = BPool(alice_ocean.web3, pool_address)
+    tokens = bpool.getCurrentTokens()
+    assert DT.address in tokens
+
+    assert BPool(alice_ocean.web3, pool_address).address == pool_address
+    assert BPool(alice_ocean.web3, pool_address).address == pool_address
 
     DT_price = bob_ocean.pool.get_token_price(pool_address)
     assert DT_price > 0.0
