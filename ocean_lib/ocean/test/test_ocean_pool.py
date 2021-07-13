@@ -9,7 +9,7 @@ from tests.resources.helper_functions import get_publisher_wallet
 
 def test_get_OCEAN_address(publisher_ocean_instance):
     """Tests OCEAN address retrieval."""
-    network = get_network_name()
+    network = get_network_name(web3=publisher_ocean_instance.web3)
     assert publisher_ocean_instance.pool.get_OCEAN_address() == get_ocean_token_address(
         publisher_ocean_instance.config.address_file, network
     )

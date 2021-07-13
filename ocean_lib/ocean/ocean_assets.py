@@ -203,7 +203,7 @@ class OceanAssets:
         #################
         # DataToken
         address = DTFactory.configured_address(
-            get_network_name(), self._config.address_file
+            get_network_name(web3=self._web3), self._config.address_file
         )
         dtfactory = DTFactory(self._web3, address)
         if not data_token_address:
