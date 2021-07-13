@@ -113,14 +113,17 @@ def get_network_name(
 
 
 @enforce_types
-def get_network_timeout(network_id: Optional[int] = None) -> str:
+def get_network_timeout(
+    network_id: Optional[int] = None, web3: Optional[Web3] = None
+) -> str:
     """
     Return the network blocking call timeout limit based on the current ethereum network id.
+    Callers must pass either network_id or web3.
 
     :param network_id: Network id, int
     :return: number of seconds, int
     """
-    network_name = get_network_name(network_id)
+    network_name = get_network_name(network_id, web3)
     return NETWORK_TIMEOUT_MAP[network_name]
 
 

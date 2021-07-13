@@ -47,8 +47,9 @@ def test_prepare_fixed_hash():
     ), "The address is not the expected one."
 
 
-def test_get_network_timeout():
+def test_get_network_timeout(web3):
     assert get_network_timeout() == 2
     assert get_network_timeout(123456) == 2  # id is not in list
+    assert get_network_timeout(web3=web3) == 2
     assert get_network_timeout(1) == 600
     assert get_network_timeout(4) == 300
