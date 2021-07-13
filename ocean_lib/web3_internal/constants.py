@@ -27,7 +27,7 @@ NETWORK_NAME_MAP = {
 
 NETWORK_TIMEOUT_MAP = {
     "mainnet": 10 * 60,
-    "ropsten": 5 * 60,
+    "ropsten": 10 * 60,
     "rinkeby": 5 * 60,
     "polygon": 10 * 60,
     "ganache": 2,
