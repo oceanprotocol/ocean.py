@@ -22,7 +22,6 @@ from ocean_lib.models.order import Order
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.ocean_exchange import OceanExchange
-from ocean_lib.ocean.ocean_pool import OceanPool
 from ocean_lib.ocean.ocean_services import OceanServices
 from ocean_lib.ocean.util import (
     from_base_18,
@@ -292,6 +291,4 @@ class Ocean:
             f"create pool completed: poolAddress={pool_address}, pool setup TxId={tx_id}"
         )
 
-        # TODO: remove
-        self.pool = OceanPool(self._web3, self.OCEAN_address)
         return pool

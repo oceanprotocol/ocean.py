@@ -190,6 +190,7 @@ print(f"Service 1 costs {tokens_amount * price_in_OCEAN * OCEAN_price} USD")
 ## 6. Value swap: Bob buys datatokens from marketplace (using datatoken <> OCEAN balancer pool)
 
 ```python
+from ocean_lib.ocean.ocean_pool import buy_data_tokens
 from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -197,8 +198,11 @@ bob_wallet = Wallet(ocean.web3, private_key="PASTE BOB'S TEST PRIVATE KEY HERE")
 data_token = market_ocean.get_data_token(token_address)
 # This assumes bob_wallet already has sufficient OCEAN tokens to buy the data token. OCEAN tokens
 # can be obtained through a crypto exchange or an on-chain pool such as balancer or uniswap
-market_ocean.pool.buy_data_tokens(
-    pool_address,
+buy_data_tokens(
+    market_ocean.web3,
+    data_token.address,
+    OCEAN_addreess,
+    ocn_pool,
     amount=1.0, # buy one data token
     max_OCEAN_amount=price_in_OCEAN, # pay maximum 0.1 OCEAN tokens
     from_wallet=bob_wallet

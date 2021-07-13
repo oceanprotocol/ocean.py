@@ -4,7 +4,12 @@
 #
 import pytest
 from ocean_lib.models.bpool import BPool
-from ocean_lib.ocean.ocean_pool import add_liquidity, get_token_address
+from ocean_lib.ocean.ocean_pool import (
+    add_liquidity,
+    buy_data_tokens,
+    remove_liquidity,
+    sell_data_tokens,
+)
 from ocean_lib.ocean.util import to_base_18
 
 
@@ -16,7 +21,7 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
     DT = alice_ocean.create_data_token(
         "DataToken1", "DT1", alice_wallet, blob="localhost:8030"
     )
-    DT_address = DT.address
+    dt_address = DT.address
 
     # ===============================================================
     # 2. Alice hosts the dataset
@@ -33,16 +38,14 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
     # 4. Alice creates an OCEAN-DT pool (=a Balancer Pool)
 
     pool = alice_ocean.create_ocean_pool(
-        DT_address, data_token_amount=90.0, OCEAN_amount=10.0, from_wallet=alice_wallet
+        dt_address, data_token_amount=90.0, OCEAN_amount=10.0, from_wallet=alice_wallet
     )
-    pool_address = pool.address
 
     assert pool.isFinalized(), "create pool should finalize the pool."
     assert pool.isPublicSwap(), "create pool should have publicSwap enabled."
 
     # ===============================================================
     # 5. Alice adds liquidity to pool
-    dt_address = get_token_address(alice_ocean.web3, pool, alice_ocean.OCEAN_address)
     add_liquidity(
         alice_ocean.web3, pool, dt_address, to_base_18(9.0), from_wallet=alice_wallet
     )
@@ -56,12 +59,18 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
         to_base_18(1.0),
         from_wallet=alice_wallet,
     )
-    ocn_pool_shares = pool.balanceOf(alice_wallet.address)
+    _ = pool.balanceOf(alice_wallet.address)
 
     # ===============================================================
     # 6. Bob buys a DT from pool
-    alice_ocean.pool.buy_data_tokens(
-        pool_address, amount=1.0, max_OCEAN_amount=2.0, from_wallet=bob_wallet
+    buy_data_tokens(
+        alice_ocean.web3,
+        pool,
+        dt_address,
+        alice_ocean.OCEAN_address,
+        amount=1.0,
+        max_OCEAN_amount=2.0,
+        from_wallet=bob_wallet,
     )
 
     # ===============================================================
@@ -70,24 +79,31 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
 
     # ===============================================================
     # 8. Alice removes liquidity
-    alice_ocean.pool.remove_data_token_liquidity(
-        pool_address,
+    remove_liquidity(
+        alice_ocean.web3,
+        pool,
+        dt_address,
         amount_base=to_base_18(2.0),
         max_pool_shares_base=dt_pool_shares,
         from_wallet=alice_wallet,
     )
 
-    alice_ocean.pool.remove_OCEAN_liquidity(
-        pool_address,
+    remove_liquidity(
+        alice_ocean.web3,
+        pool,
+        alice_ocean.OCEAN_address,
         amount_base=to_base_18(3.0),
-        max_pool_shares_base=ocn_pool_shares,
+        max_pool_shares_base=dt_pool_shares,
         from_wallet=alice_wallet,
     )
 
     # ===============================================================
     # 9. Alice sells data tokens
-    alice_ocean.pool.sell_data_tokens(
-        pool_address,
+    sell_data_tokens(
+        alice_ocean.web3,
+        pool,
+        dt_address,
+        alice_ocean.OCEAN_address,
         amount_base=to_base_18(1.0),
         min_OCEAN_amount_base=to_base_18(0.0001),
         from_wallet=alice_wallet,
@@ -137,8 +153,6 @@ def test_ocean_balancer_helpers(
         DT.address, data_token_amount=90.0, OCEAN_amount=10.0, from_wallet=alice_wallet
     )
     pool_address = pool.address
-
-    assert alice_ocean.pool.ocean_address == OCEAN_address
 
     bpool = BPool(alice_ocean.web3, pool_address)
     tokens = bpool.getCurrentTokens()
