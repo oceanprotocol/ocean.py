@@ -178,14 +178,20 @@ def test_transfer_event(
     )
 
     block = alice_ocean.web3.eth.block_number
+    # different way of retrieving
     transfer_events = token.get_event_logs("Transfer", None, block, block)
-    assert transfer_events == []
+    assert transfer_events == ()
 
     token.mint(alice_address, to_base_18(100.0), from_wallet=alice_wallet)
     token.approve(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
     token.transfer(bob_address, to_base_18(5.0), from_wallet=alice_wallet)
 
     block = alice_ocean.web3.eth.block_number
+    transfer_event = token.get_transfer_event(block, alice_address, bob_address)
+    assert transfer_event["args"]["from"] == alice_address
+    assert transfer_event["args"]["to"] == bob_address
+
+    # same transfer event, different way of retrieving
     transfer_event = token.get_event_logs("Transfer", None, block, block)[0]
     assert transfer_event["args"]["from"] == alice_address
     assert transfer_event["args"]["to"] == bob_address

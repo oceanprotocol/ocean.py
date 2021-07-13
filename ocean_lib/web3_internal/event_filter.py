@@ -14,12 +14,11 @@ class EventFilter:
     def __init__(
         self,
         event: ContractEvent,
+        argument_filters=None,
         from_block=None,
         to_block=None,
-        argument_filters=None,
         address=None,
         topics=None,
-        poll_interval=None,
     ):
         """Initialises EventFilter."""
         self.event = event
@@ -28,7 +27,6 @@ class EventFilter:
         self._filter = None
         self.address = address
         self.topics = topics
-        self._poll_interval = poll_interval if poll_interval else 0.5
         self._create_filter()
 
     @property
@@ -37,11 +35,6 @@ class EventFilter:
 
     def uninstall(self):
         self.event.web3.eth.uninstall_filter(self._filter.filter_id)
-
-    def set_poll_interval(self, interval):
-        self._poll_interval = interval
-        if self._filter and self._poll_interval is not None:
-            self._filter.poll_interval = self._poll_interval
 
     def recreate_filter(self):
         self._create_filter()
@@ -54,8 +47,6 @@ class EventFilter:
             topics=self.topics,
             argument_filters=self.argument_filters,
         )
-        if self._poll_interval is not None:
-            self._filter.poll_interval = self._poll_interval
 
     def get_new_entries(self, max_tries=1):
         return self._get_entries(self._filter.get_new_entries, max_tries=max_tries)

@@ -20,7 +20,6 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.event_filter import EventFilter
 from ocean_lib.web3_internal.wallet import Wallet
 from web3 import Web3
-from web3._utils.events import get_event_data
 from web3.exceptions import MismatchedABI
 from websockets import ConnectionClosed
 
@@ -250,14 +249,12 @@ class DataToken(ContractBase):
 
     def get_transfer_event(self, block_number, sender, receiver):
         filter_params = {"from": sender, "to": receiver}
-        event_filter = EventFilter(
-            self.events.Transfer,
-            argument_filters=filter_params,
+        logs = self.get_event_logs(
+            "Transfer",
+            filter_args=filter_params,
             from_block=block_number - 1,
             to_block=block_number + 10,
         )
-
-        logs = event_filter.get_all_entries(max_tries=10)
         if not logs:
             return None
 
@@ -318,14 +315,9 @@ class DataToken(ContractBase):
     ):
         event = getattr(self.events, event_name)
         filter_params = filter_args or {}
-        event_filter = EventFilter(
-            event,
-            argument_filters=filter_params,
-            from_block=from_block,
-            to_block=to_block,
+        logs = event.getLogs(
+            argument_filters=filter_params, fromBlock=from_block, toBlock=to_block
         )
-
-        logs = event_filter.get_all_entries(max_tries=10)
         return logs
 
     def verify_order_tx(self, tx_id, did, service_id, amount_base, sender):
