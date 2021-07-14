@@ -425,6 +425,7 @@ class OceanAssets:
         consumer_address: str,
         service_index: Optional[int] = None,
         service_type: str = None,
+        userdata: Optional[dict] = None,
     ) -> OrderRequirements:
         """
         Request a specific service from an asset, returns the service requirements that
@@ -460,7 +461,13 @@ class OceanAssets:
             sa.service_endpoint
         )
         order_requirements = self._data_provider.get_order_requirements(
-            asset.did, initialize_url, consumer_address, sa.index, sa.type, dt_address
+            asset.did,
+            initialize_url,
+            consumer_address,
+            sa.index,
+            sa.type,
+            dt_address,
+            userdata,
         )
         if not order_requirements:
             raise AssertionError("Data service provider or service is not available.")
@@ -538,6 +545,7 @@ class OceanAssets:
         order_tx_id: str,
         destination: str,
         index: Optional[int] = None,
+        userdata: Optional[dict] = None,
     ) -> str:
         """
         Consume the asset data.
@@ -583,6 +591,7 @@ class OceanAssets:
             order_tx_id,
             self._data_provider,
             index,
+            userdata,
         )
 
     def validate(self, metadata: dict) -> Tuple[bool, list]:

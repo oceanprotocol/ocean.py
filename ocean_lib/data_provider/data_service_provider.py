@@ -10,18 +10,18 @@ import os
 import re
 from collections import namedtuple
 from json import JSONDecodeError
+from typing import Optional
 
 import requests
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
-from requests.exceptions import InvalidURL
-
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
 from ocean_lib.web3_internal.transactions import sign_hash
+from requests.exceptions import InvalidURL
 
 logger = logging.getLogger(__name__)
 
@@ -109,7 +109,13 @@ class DataServiceProvider:
 
     @staticmethod
     def get_order_requirements(
-        did, service_endpoint, consumer_address, service_id, service_type, token_address
+        did,
+        service_endpoint,
+        consumer_address,
+        service_id,
+        service_type,
+        token_address,
+        userdata=None,
     ):
         """
 
@@ -129,6 +135,10 @@ class DataServiceProvider:
             f"&dataToken={token_address}"
             f"&consumerAddress={consumer_address}"
         )
+
+        if userdata:
+            userdata = json.dumps(userdata)
+            initialize_url += f"&userdata={userdata}"
 
         logger.info(f"invoke the initialize endpoint with this url: {initialize_url}")
         response = DataServiceProvider._http_method("get", initialize_url)
@@ -158,6 +168,7 @@ class DataServiceProvider:
         token_address,
         order_tx_id,
         index=None,
+        userdata=None,
     ):
         """
         Call the provider endpoint to get access to the different files that form the asset.
@@ -192,6 +203,11 @@ class DataServiceProvider:
             f"&transferTxId={order_tx_id}"
             f"&consumerAddress={wallet.address}"
         )
+
+        if userdata:
+            userdata = json.dumps(userdata)
+            base_url += f"&userdata={userdata}"
+
         provider_uri = DataServiceProvider.get_root_uri(service_endpoint)
         for i in indexes:
             signature = DataServiceProvider.sign_message(
@@ -222,6 +238,7 @@ class DataServiceProvider:
         output: dict = None,
         input_datasets: list = None,
         job_id: str = None,
+        userdata: Optional[dict] = None,
     ):
         """
 
@@ -259,6 +276,7 @@ class DataServiceProvider:
             output=output,
             input_datasets=input_datasets,
             job_id=job_id,
+            userdata=userdata,
         )
         logger.info(f"invoke start compute endpoint with this url: {payload}")
         response = DataServiceProvider._http_method(
@@ -523,6 +541,7 @@ class DataServiceProvider:
         output: dict = None,
         input_datasets: list = None,
         job_id: str = None,
+        userdata: Optional[dict] = None,
     ):
         assert (
             algorithm_did or algorithm_meta
@@ -557,6 +576,7 @@ class DataServiceProvider:
             "serviceId": service_id,
             "transferTxId": order_tx_id,
             "additionalInputs": _input_datasets or [],
+            "userdata": userdata,
         }
         if algorithm_did:
             payload.update(
