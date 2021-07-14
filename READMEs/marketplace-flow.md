@@ -203,7 +203,7 @@ asset = ocean.assets.resolve(did)
 service1 = asset.get_service(ServiceTypes.ASSET_ACCESS)
 
 #point to pool
-pool = ocean.pool.get(pool_address)
+pool = ocean.pool.get(ocean.web3, pool_address)
 
 #To access a data service, you need 1.0 datatokens.
 #Here, the market retrieves the datatoken price denominated in OCEAN.
@@ -252,7 +252,7 @@ service = asset.get_service(ServiceTypes.ASSET_ACCESS)
 #Bob sends his datatoken to the service
 quote = ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
 order_tx_id = ocean.assets.pay_for_service(
-    ocean.web3, 
+    ocean.web3,
     quote.amount, quote.data_token_address, asset.did, service.index, fee_receiver, bob_wallet, None)
 print(f"order_tx_id = '{order_tx_id}'")
 
