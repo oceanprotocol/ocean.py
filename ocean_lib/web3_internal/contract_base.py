@@ -12,6 +12,8 @@ import requests
 from enforce_typing import enforce_types
 from eth_typing import BlockIdentifier
 from hexbytes import HexBytes
+from web3.contract import ContractEvent
+
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_utils import (
     get_contract_definition,
@@ -329,7 +331,7 @@ class ContractBase(object):
 
     @staticmethod
     def getLogs(
-        event,
+        event: ContractEvent,
         argument_filters: Optional[Dict[str, Any]] = None,
         fromBlock: Optional[BlockIdentifier] = None,
         toBlock: Optional[BlockIdentifier] = None,
@@ -377,6 +379,7 @@ class ContractBase(object):
         ```
 
         See also: :func:`web3.middleware.filter.local_filter_middleware`.
+        :param event: the ContractEvent instance with a web3 instance
         :param argument_filters:
         :param fromBlock: block number or "latest", defaults to "latest"
         :param toBlock: block number or "latest". Defaults to "latest"
@@ -408,23 +411,14 @@ class ContractBase(object):
         # Construct JSON-RPC raw filter presentation based on human readable Python descriptions
         # Namely, convert event names to their keccak signatures
         address = event.address if not from_all_addresses else None
-        if address:
-            _, event_filter_params = construct_event_filter_params(
-                abi,
-                event.web3.codec,
-                contract_address=address,
-                argument_filters=_filters,
-                fromBlock=fromBlock,
-                toBlock=toBlock,
-            )
-        else:
-            _, event_filter_params = construct_event_filter_params(
-                abi,
-                event.web3.codec,
-                argument_filters=_filters,
-                fromBlock=fromBlock,
-                toBlock=toBlock,
-            )
+        _, event_filter_params = construct_event_filter_params(
+            abi,
+            event.web3.codec,
+            contract_address=address,
+            argument_filters=_filters,
+            fromBlock=fromBlock,
+            toBlock=toBlock,
+        )
 
         if blockHash is not None:
             event_filter_params["blockHash"] = blockHash
