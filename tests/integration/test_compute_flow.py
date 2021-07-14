@@ -2,8 +2,6 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from web3.logs import DISCARD
-
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.models.compute_input import ComputeInput
@@ -25,6 +23,7 @@ from tests.resources.helper_functions import (
     get_publisher_ocean_instance,
     get_publisher_wallet,
 )
+from web3.logs import DISCARD
 
 
 class Setup:
@@ -80,6 +79,7 @@ def run_compute_test(
     algo_meta=None,
     expect_failure=False,
     expect_failure_message=None,
+    userdata=None,
     with_result=False,
 ):
     """Helper function to bootstrap compute job creation and status checking."""
@@ -92,7 +92,7 @@ def run_compute_test(
         compute_ddo,
         ServiceTypes.CLOUD_COMPUTE,
     )
-    compute_inputs = [ComputeInput(did, order_tx_id, service.index)]
+    compute_inputs = [ComputeInput(did, order_tx_id, service.index, userdata=userdata)]
     for ddo in input_ddos[1:]:
         service_type = ServiceTypes.ASSET_ACCESS
         if not ddo.get_service(service_type):
@@ -101,7 +101,9 @@ def run_compute_test(
         _order_tx_id, _order_quote, _service = process_order(
             ocean_instance, publisher_wallet, consumer_wallet, ddo, service_type
         )
-        compute_inputs.append(ComputeInput(ddo.did, _order_tx_id, _service.index))
+        compute_inputs.append(
+            ComputeInput(ddo.did, _order_tx_id, _service.index, userdata=userdata)
+        )
 
     job_id = None
     if algo_ddo:
@@ -210,6 +212,7 @@ def test_compute_multi_inputs():
         setup.consumer_wallet,
         [compute_ddo, access_ddo],
         algo_ddo=algorithm_ddo,
+        userdata={"test_key": "test_value"},
     )
 
 

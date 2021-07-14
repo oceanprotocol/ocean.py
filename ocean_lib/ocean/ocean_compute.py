@@ -320,6 +320,7 @@ class OceanCompute:
                 output,
                 input_datasets,
                 job_id,
+                userdata=first_input.userdata,
             )
 
             return job_info["jobId"]

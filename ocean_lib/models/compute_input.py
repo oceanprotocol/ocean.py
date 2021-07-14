@@ -11,6 +11,9 @@ class ComputeInput:
             did and transfer_tx_id and service_id is not None
         ), f"bad argument values: did={did}, transfer_ts_id={transfer_tx_id}, service_id={service_id}"
 
+        if userdata:
+            assert isinstance(userdata, dict), "Userdata must be a dictionary."
+
         self.did = did
         self.transfer_tx_id = transfer_tx_id
         self.service_id = service_id

@@ -22,6 +22,7 @@ from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
 from ocean_lib.web3_internal.transactions import sign_hash
 from requests.exceptions import InvalidURL
+from requests.models import PreparedRequest
 
 logger = logging.getLogger(__name__)
 
@@ -126,19 +127,24 @@ class DataServiceProvider:
         :param service_type:
         :param token_address:
         :return: OrderRequirements instance -- named tuple (amount, data_token_address, receiver_address, nonce),
+
         """
-        initialize_url = (
-            f"{service_endpoint}"
-            f"?documentId={did}"
-            f"&serviceId={service_id}"
-            f"&serviceType={service_type}"
-            f"&dataToken={token_address}"
-            f"&consumerAddress={consumer_address}"
-        )
+
+        req = PreparedRequest()
+        params = {
+            "documentId": did,
+            "serviceId": service_id,
+            "serviceType": service_type,
+            "dataToken": token_address,
+            "consumerAddress": consumer_address,
+        }
 
         if userdata:
             userdata = json.dumps(userdata)
-            initialize_url += f"&userdata={userdata}"
+            params["userdata"] = userdata
+
+        req.prepare_url(service_endpoint, params)
+        initialize_url = req.url
 
         logger.info(f"invoke the initialize endpoint with this url: {initialize_url}")
         response = DataServiceProvider._http_method("get", initialize_url)
@@ -194,19 +200,22 @@ class DataServiceProvider:
             )
             indexes = [index]
 
-        base_url = (
-            f"{service_endpoint}"
-            f"?documentId={did}"
-            f"&serviceId={service_id}"
-            f"&serviceType={ServiceTypes.ASSET_ACCESS}"
-            f"&dataToken={token_address}"
-            f"&transferTxId={order_tx_id}"
-            f"&consumerAddress={wallet.address}"
-        )
+        req = PreparedRequest()
+        params = {
+            "documentId": did,
+            "serviceId": service_id,
+            "serviceType": ServiceTypes.ASSET_ACCESS,
+            "dataToken": token_address,
+            "transferTxId": order_tx_id,
+            "consumerAddress": wallet.address,
+        }
 
         if userdata:
             userdata = json.dumps(userdata)
-            base_url += f"&userdata={userdata}"
+            params["userdata"] = userdata
+
+        req.prepare_url(service_endpoint, params)
+        base_url = req.url
 
         provider_uri = DataServiceProvider.get_root_uri(service_endpoint)
         for i in indexes:
