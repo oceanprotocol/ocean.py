@@ -18,7 +18,6 @@ from ocean_lib.web3_internal.contract_utils import (
     get_contracts_addresses,
     load_contract,
 )
-from ocean_lib.web3_internal.utils import get_artifacts_path
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 from web3 import Web3
@@ -328,13 +327,14 @@ class ContractBase(object):
 
         return all_logs
 
+    @staticmethod
     def getLogs(
-        self,
         event,
         argument_filters: Optional[Dict[str, Any]] = None,
         fromBlock: Optional[BlockIdentifier] = None,
         toBlock: Optional[BlockIdentifier] = None,
         blockHash: Optional[HexBytes] = None,
+        from_all_addresses: Optional[bool] = False,
     ):
         """Get events for this contract instance using eth_getLogs API.
 
@@ -382,14 +382,15 @@ class ContractBase(object):
         :param toBlock: block number or "latest". Defaults to "latest"
         :param blockHash: block hash. blockHash cannot be set at the
           same time as fromBlock or toBlock
+        :param from_all_addresses: True = return logs from all addresses
+          False = return logs originating from event.address
         :yield: Tuple of :class:`AttributeDict` instances
         """
-        if not self.address:
-            raise TypeError(
-                "This method can be only called on "
-                "an instated contract with an address"
-            )
 
+        if not event or not event.web3:
+            raise TypeError(
+                "This method can be only called on an event which has a web3 instance."
+            )
         abi = event._get_event_abi()
 
         if argument_filters is None:
@@ -406,20 +407,30 @@ class ContractBase(object):
 
         # Construct JSON-RPC raw filter presentation based on human readable Python descriptions
         # Namely, convert event names to their keccak signatures
-        _, event_filter_params = construct_event_filter_params(
-            abi,
-            self.web3.codec,
-            contract_address=self.address,
-            argument_filters=_filters,
-            fromBlock=fromBlock,
-            toBlock=toBlock,
-        )
+        address = event.address if not from_all_addresses else None
+        if address:
+            _, event_filter_params = construct_event_filter_params(
+                abi,
+                event.web3.codec,
+                contract_address=address,
+                argument_filters=_filters,
+                fromBlock=fromBlock,
+                toBlock=toBlock,
+            )
+        else:
+            _, event_filter_params = construct_event_filter_params(
+                abi,
+                event.web3.codec,
+                argument_filters=_filters,
+                fromBlock=fromBlock,
+                toBlock=toBlock,
+            )
 
         if blockHash is not None:
             event_filter_params["blockHash"] = blockHash
 
         # Call JSON-RPC API
-        logs = self.web3.eth.get_logs(event_filter_params)
+        logs = event.web3.eth.get_logs(event_filter_params)
 
         # Convert raw binary data to Python proxy objects as described by ABI
-        return tuple(get_event_data(self.web3.codec, abi, entry) for entry in logs)
+        return tuple(get_event_data(event.web3.codec, abi, entry) for entry in logs)

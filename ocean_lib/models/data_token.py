@@ -17,7 +17,6 @@ from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.event_filter import EventFilter
 from ocean_lib.web3_internal.wallet import Wallet
 from web3 import Web3
 from web3.exceptions import MismatchedABI
@@ -188,20 +187,20 @@ class DataToken(ContractBase):
         if consumer_address:
             topic1 = f"0x000000000000000000000000{consumer_address[2:].lower()}"
             topics = [topic0, None, topic1]
-        address = self.address if not from_all_tokens else None
 
-        event_filter = EventFilter(
-            event=self.events.OrderStarted(),
-            from_block=from_block,
-            to_block=to_block,
-            topics=topics,
-            address=address,
+        argument_filters = {"topics": topics}
+
+        logs = ContractBase.getLogs(
+            self.events.OrderStarted(),
+            argument_filters=argument_filters,
+            fromBlock=from_block,
+            toBlock=to_block,
+            from_all_addresses=from_all_tokens,
         )
-        logs = event_filter.get_all_entries()
         return logs
 
     def get_transfer_events_in_range(self, from_block, to_block):
-        return self.getLogs(
+        return ContractBase.getLogs(
             self.events.Transfer(), fromBlock=from_block, toBlock=to_block
         )
 
@@ -236,7 +235,7 @@ class DataToken(ContractBase):
                 error_count = 0
                 if (_from - start_block) % chunk == 0:
                     print(
-                        f"    So far processed {len(transfer_records)} Transfer events from {_from-start_block} blocks."
+                        f"    So far processed {len(transfer_records)} Transfer events from {_from - start_block} blocks."
                     )
             except requests.exceptions.ReadTimeout as err:
                 print(f"ReadTimeout ({_from}, {_to}): {err}")
@@ -315,8 +314,11 @@ class DataToken(ContractBase):
     ):
         event = getattr(self.events, event_name)
         filter_params = filter_args or {}
-        logs = event.getLogs(
-            argument_filters=filter_params, fromBlock=from_block, toBlock=to_block
+        logs = ContractBase.getLogs(
+            event(),
+            argument_filters=filter_params,
+            fromBlock=from_block,
+            toBlock=to_block,
         )
         return logs
 

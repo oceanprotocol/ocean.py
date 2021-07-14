@@ -12,7 +12,8 @@ from ocean_lib.ocean import util
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.main import Web3
 
-from .btoken import BToken
+from ocean_lib.models.btoken import BToken
+from ocean_lib.web3_internal.contract_base import ContractBase
 
 logger = logging.getLogger(__name__)
 
@@ -596,7 +597,6 @@ class BPool(BToken):
         topic0 = self.get_event_signature(event_name)
         to_block = to_block or "latest"
         topics = [topic0]
-        address = self.address if this_pool_only else None
 
         if user_address:
             assert Web3.isChecksumAddress(user_address)
@@ -605,8 +605,12 @@ class BPool(BToken):
             )
         event = getattr(self.events, event_name)
         argument_filters = {"topics": topics}
-        logs = event.getLogs(
-            argument_filters=argument_filters, fromBlock=from_block, toBlock=to_block
+        logs = ContractBase.getLogs(
+            event(),
+            argument_filters=argument_filters,
+            fromBlock=from_block,
+            toBlock=to_block,
+            from_all_addresses=this_pool_only,
         )
         return logs
 
