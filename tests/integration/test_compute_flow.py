@@ -122,6 +122,7 @@ def run_compute_test(
                 algorithm_did=algo_ddo.did,
                 algorithm_tx_id=algo_tx_id,
                 algorithm_data_token=algo_ddo.data_token_address,
+                algouserdata={"algo_test": "algouserdata_sample"},
             )
         except Exception:
             if not expect_failure:

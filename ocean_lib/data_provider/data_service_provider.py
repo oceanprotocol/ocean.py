@@ -248,6 +248,7 @@ class DataServiceProvider:
         input_datasets: list = None,
         job_id: str = None,
         userdata: Optional[dict] = None,
+        algouserdata: Optional[dict] = None,
     ):
         """
 
@@ -286,6 +287,7 @@ class DataServiceProvider:
             input_datasets=input_datasets,
             job_id=job_id,
             userdata=userdata,
+            algouserdata=algouserdata,
         )
         logger.info(f"invoke start compute endpoint with this url: {payload}")
         response = DataServiceProvider._http_method(
@@ -551,6 +553,7 @@ class DataServiceProvider:
         input_datasets: list = None,
         job_id: str = None,
         userdata: Optional[dict] = None,
+        algouserdata: Optional[dict] = None,
     ):
         assert (
             algorithm_did or algorithm_meta
@@ -595,6 +598,9 @@ class DataServiceProvider:
                     "algorithmTransferTxId": algorithm_tx_id,
                 }
             )
+
+            if algouserdata:
+                payload["algouserdata"] = algouserdata
         else:
             payload["algorithmMeta"] = algorithm_meta
 
