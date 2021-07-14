@@ -93,7 +93,7 @@ class Ocean:
         if not data_provider:
             data_provider = DataServiceProvider
 
-        network = get_network_name()
+        network = get_network_name(web3=self._web3)
         addresses = get_contracts_addresses(self._config.address_file, network)
         self.assets = OceanAssets(
             self._config,
@@ -113,9 +113,7 @@ class Ocean:
         self.exchange = OceanExchange(
             self._web3,
             ocean_address,
-            FixedRateExchange.configured_address(
-                network or get_network_name(), self._config.address_file
-            ),
+            FixedRateExchange.configured_address(network, self._config.address_file),
             self._config,
         )
 
@@ -134,7 +132,7 @@ class Ocean:
 
     @property
     def OCEAN_address(self):
-        return get_ocean_token_address(self.config.address_file, get_network_name())
+        return get_ocean_token_address(self.config.address_file, web3=self.web3)
 
     def create_data_token(
         self,
@@ -187,7 +185,7 @@ class Ocean:
         :return: `DTFactory` instance
         """
         dtf_address = dtfactory_address or DTFactory.configured_address(
-            get_network_name(), self._config.address_file
+            get_network_name(web3=self._web3), self._config.address_file
         )
         return DTFactory(self.web3, dtf_address)
 

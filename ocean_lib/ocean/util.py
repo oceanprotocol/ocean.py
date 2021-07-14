@@ -126,14 +126,29 @@ def from_base(num_base: int, dec: int) -> float:
     return float(num_base / (10 ** dec))
 
 
-def get_dtfactory_address(address_file, network=None):
-    return DTFactory.configured_address(network or get_network_name(), address_file)
+def get_dtfactory_address(address_file, network=None, web3=None):
+    """Returns the DTFactory address for given network or web3 instance
+    Requires either network name or web3 instance.
+    """
+    return DTFactory.configured_address(
+        network or get_network_name(web3=web3), address_file
+    )
 
 
-def get_bfactory_address(address_file, network=None):
-    return BFactory.configured_address(network or get_network_name(), address_file)
+def get_bfactory_address(address_file, network=None, web3=None):
+    """Returns the BFactory address for given network or web3 instance
+    Requires either network name or web3 instance.
+    """
+    return BFactory.configured_address(
+        network or get_network_name(web3=web3), address_file
+    )
 
 
-def get_ocean_token_address(address_file, network=None):
-    addresses = get_contracts_addresses(address_file, network or get_network_name())
+def get_ocean_token_address(address_file, network=None, web3=None):
+    """Returns the Ocean token address for given network or web3 instance
+    Requires either network name or web3 instance.
+    """
+    addresses = get_contracts_addresses(
+        address_file, network or get_network_name(web3=web3)
+    )
     return addresses.get("Ocean") if addresses else None
