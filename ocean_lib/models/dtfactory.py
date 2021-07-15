@@ -20,7 +20,10 @@ class DTFactory(ContractBase):
         """Checks that a token was registered."""
         filter_params = {"tokenAddress": dt_address}
         logs = ContractBase.getLogs(
-            self.events.TokenRegistered(), argument_filters=filter_params, fromBlock=0
+            self.events.TokenRegistered(),
+            argument_filters=filter_params,
+            fromBlock=0,
+            toBlock=999,
         )
 
         return logs and logs[0].args.tokenAddress == dt_address
