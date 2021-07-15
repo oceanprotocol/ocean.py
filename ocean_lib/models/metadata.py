@@ -27,10 +27,10 @@ class MetadataContract(ContractBase):
     def get_event_log(self, event_name, block, did, timeout=45):
         did = remove_0x_prefix(did)
         start = time.time()
-        f = getattr(self.events, event_name)().createFilter(fromBlock=block)
+        event = getattr(self.events, event_name)
         logs = []
         while not logs:
-            logs = f.get_all_entries()
+            logs = ContractBase.getLogs(event(), fromBlock=block)
             if not logs:
                 time.sleep(0.2)
 
