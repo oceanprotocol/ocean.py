@@ -18,24 +18,19 @@ class DTFactory(ContractBase):
 
     def verify_data_token(self, dt_address):
         """Checks that a token was registered."""
-        filter_params = {"tokenAddress": dt_address}
-        logs = ContractBase.getLogs(
-            self.events.TokenRegistered(),
-            argument_filters=filter_params,
-            fromBlock=0,
-            toBlock=999,
+        log = self.get_token_registered_event(
+            from_block=0, to_block=self.web3.eth.block_number, token_address=dt_address
         )
-
-        return logs and logs[0].args.tokenAddress == dt_address
+        return log and log.args.tokenAddress == dt_address
 
     def get_token_registered_event(self, from_block, to_block, token_address):
         """Retrieves event log of token registration."""
         filter_params = {"tokenAddress": token_address}
-        logs = ContractBase.getLogs(
-            self.events.TokenRegistered(),
-            argument_filters=filter_params,
-            fromBlock=from_block,
-            toBlock=to_block,
+        logs = self.get_event_log(
+            "TokenRegistered",
+            from_block=from_block,
+            to_block=to_block,
+            filters=filter_params,
         )
 
         return logs[0] if logs else None

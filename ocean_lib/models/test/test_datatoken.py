@@ -178,6 +178,7 @@ def test_transfer_event(
     )
 
     block = alice_ocean.web3.eth.block_number
+    transfer_event = token.get_transfer_event(block, alice_address, bob_address)
     # different way of retrieving
     transfer_events = token.get_event_logs("Transfer", None, block, block)
     assert transfer_events == ()

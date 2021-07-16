@@ -589,7 +589,7 @@ class BPool(BToken):
         from_block,
         to_block=None,
         user_address=None,
-        this_pool_only=False,
+        this_pool_only=True,
     ):
         """
         :param event_name: str, one of LOG_JOIN, LOG_EXIT, LOG_SWAP
@@ -610,21 +610,27 @@ class BPool(BToken):
             argument_filters=argument_filters,
             fromBlock=from_block,
             toBlock=to_block,
-            from_all_addresses=this_pool_only,
+            from_all_addresses=not this_pool_only,
         )
         return logs
 
-    def get_join_logs(self, from_block, to_block=None, user_address=None):
+    def get_join_logs(
+        self, from_block, to_block=None, user_address=None, this_pool_only=True
+    ):
         return self.get_liquidity_logs(
-            "LOG_JOIN", from_block, to_block, user_address, False
+            "LOG_JOIN", from_block, to_block, user_address, this_pool_only
         )
 
-    def get_exit_logs(self, from_block, to_block=None, user_address=None):
+    def get_exit_logs(
+        self, from_block, to_block=None, user_address=None, this_pool_only=True
+    ):
         return self.get_liquidity_logs(
-            "LOG_EXIT", from_block, to_block, user_address, False
+            "LOG_EXIT", from_block, to_block, user_address, this_pool_only
         )
 
-    def get_swap_logs(self, from_block, to_block=None, user_address=None):
+    def get_swap_logs(
+        self, from_block, to_block=None, user_address=None, this_pool_only=True
+    ):
         return self.get_liquidity_logs(
-            "LOG_SWAP", from_block, to_block, user_address, False
+            "LOG_SWAP", from_block, to_block, user_address, this_pool_only
         )

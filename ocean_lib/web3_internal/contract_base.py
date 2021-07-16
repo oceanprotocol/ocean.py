@@ -269,18 +269,62 @@ class ContractBase(object):
 
         return cls.get_tx_receipt(web3, tx_hash, timeout=60).contractAddress
 
-    def get_event_logs(
-        self, event_name, from_block, to_block, filters, chunk_size=1000
-    ):
-        """
-        Fetches the list of event logs between the given block numbers.
+    def get_event_log(self, event_name, from_block, to_block, filters, chunk_size=1000):
+        """Retrieves the first event log which matches the filters parameter criteria.
+        It processes the blocks order backwards.
 
         :param event_name: str
         :param from_block: int
         :param to_block: int
         :param filters:
         :param chunk_size: int
+        """
+        event = getattr(self.events, event_name)
 
+        chunk = chunk_size
+        _to = to_block
+        _from = _to - chunk + 1
+
+        all_logs = []
+        error_count = 0
+        _from = max(_from, from_block)
+        while _to >= from_block:
+            try:
+                logs = self.getLogs(
+                    event, argument_filters=filters, fromBlock=_from, toBlock=_to
+                )
+                all_logs.extend(logs)
+                if len(all_logs) >= 1:
+                    import pdb
+
+                    pdb.set_trace()
+                    break
+                _to = _from - 1
+                _from = max(_to - chunk + 1, from_block)
+                error_count = 0
+                if (to_block - _to) % 1000 == 0:
+                    print(
+                        f"    So far processed {len(all_logs)} Transfer events from {to_block - _to} blocks."
+                    )
+            except requests.exceptions.ReadTimeout as err:
+                print(f"ReadTimeout ({_from}, {_to}): {err}")
+                error_count += 1
+
+            if error_count > 1:
+                break
+
+        return all_logs
+
+    def get_event_logs(
+        self, event_name, from_block, to_block, filters, chunk_size=1000
+    ):
+        """
+        Fetches the list of event logs between the given block numbers.
+        :param event_name: str
+        :param from_block: int
+        :param to_block: int
+        :param filters:
+        :param chunk_size: int
         :return: List of event logs. List will have the structure as below.
         ```Python
             [AttributeDict({
