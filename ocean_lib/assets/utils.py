@@ -15,7 +15,7 @@ from ocean_lib.common.agreements.service_types import ServiceTypes
 
 def create_checksum(text):
     """
-    :return str:
+    :return: str
     """
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 

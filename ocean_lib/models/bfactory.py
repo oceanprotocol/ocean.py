@@ -21,7 +21,7 @@ class BFactory(ContractBase):
     # reflect BFactory Solidity methods
     def newBPool(self, from_wallet: Wallet) -> str:
         """
-        :return str: new pool address
+        :return: `str` new pool address
         """
         print("BPool.newBPool(). Begin.")
         tx_id = self.send_transaction(

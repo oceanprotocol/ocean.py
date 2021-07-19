@@ -4,8 +4,8 @@
 #
 """
 Contains constant values for
-- DID_DDO_CONTEXT_URL
-- PROOF_TYPE
+- `DID_DDO_CONTEXT_URL`
+- `PROOF_TYPE`
 """
 DID_DDO_CONTEXT_URL = "https://w3id.org/did/v1"
 
