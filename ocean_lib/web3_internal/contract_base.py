@@ -12,8 +12,6 @@ import requests
 from enforce_typing import enforce_types
 from eth_typing import BlockIdentifier
 from hexbytes import HexBytes
-from web3.contract import ContractEvent
-
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_utils import (
     get_contract_definition,
@@ -26,6 +24,7 @@ from web3 import Web3
 from web3._utils.events import get_event_data
 from web3._utils.filters import construct_event_filter_params
 from web3._utils.threads import Timeout
+from web3.contract import ContractEvent
 from web3.exceptions import MismatchedABI, ValidationError
 from websockets import ConnectionClosed
 
@@ -103,7 +102,9 @@ class ContractBase(object):
         :return: Tx receipt
         """
         try:
-            web3.eth.wait_for_transaction_receipt(HexBytes(tx_hash), timeout=timeout)
+            return web3.eth.wait_for_transaction_receipt(
+                HexBytes(tx_hash), timeout=timeout
+            )
         except ValueError as e:
             logger.error(f"Waiting for transaction receipt failed: {e}")
             return None
@@ -118,8 +119,6 @@ class ContractBase(object):
         except Exception as e:
             logger.info(f"Unknown error waiting for transaction receipt: {e}.")
             raise
-
-        return web3.eth.get_transaction_receipt(tx_hash)
 
     def is_tx_successful(self, tx_hash: str) -> bool:
         """Check if the transaction is successful.
