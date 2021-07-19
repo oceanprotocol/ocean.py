@@ -93,7 +93,7 @@ class ContractBase(object):
         return Web3.toChecksumAddress(address)
 
     @staticmethod
-    def get_tx_receipt(web3: Web3, tx_hash: str, timeout=20):
+    def get_tx_receipt(web3: Web3, tx_hash: str, timeout=120):
         """
         Get the receipt of a tx.
 
