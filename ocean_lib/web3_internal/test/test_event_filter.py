@@ -17,8 +17,7 @@ def test_transfer_event_filter(alice_ocean, alice_wallet, alice_address, bob_add
     token.transfer(bob_address, to_base_18(5.0), from_wallet=alice_wallet)
 
     block = alice_ocean.web3.eth.block_number
-    event = getattr(token.events, "Transfer")
-    event_filter = EventFilter("Transfer", event, None, block, block)
+    event_filter = EventFilter(token.events.Transfer, from_block=block, to_block=block)
 
     assert event_filter.filter_id, "Event filter ID is None."
 
