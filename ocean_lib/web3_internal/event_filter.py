@@ -5,26 +5,28 @@
 import logging
 import time
 
+from web3.contract import ContractEvent
+
 logger = logging.getLogger(__name__)
 
 
 class EventFilter:
     def __init__(
         self,
-        event_name,
-        event,
-        argument_filters,
-        from_block,
-        to_block,
-        poll_interval=None,
+        event: ContractEvent,
+        argument_filters=None,
+        from_block=None,
+        to_block=None,
+        address=None,
+        topics=None,
     ):
         """Initialises EventFilter."""
-        self.event_name = event_name
         self.event = event
         self.argument_filters = argument_filters
         self.block_range = (from_block, to_block)
         self._filter = None
-        self._poll_interval = poll_interval if poll_interval else 0.5
+        self.address = address
+        self.topics = topics
         self._create_filter()
 
     @property
@@ -34,22 +36,17 @@ class EventFilter:
     def uninstall(self):
         self.event.web3.eth.uninstall_filter(self._filter.filter_id)
 
-    def set_poll_interval(self, interval):
-        self._poll_interval = interval
-        if self._filter and self._poll_interval is not None:
-            self._filter.poll_interval = self._poll_interval
-
     def recreate_filter(self):
         self._create_filter()
 
     def _create_filter(self):
-        self._filter = self.event().createFilter(
+        self._filter = self.event.createFilter(
             fromBlock=self.block_range[0],
             toBlock=self.block_range[1],
+            address=self.address,
+            topics=self.topics,
             argument_filters=self.argument_filters,
         )
-        if self._poll_interval is not None:
-            self._filter.poll_interval = self._poll_interval
 
     def get_new_entries(self, max_tries=1):
         return self._get_entries(self._filter.get_new_entries, max_tries=max_tries)
@@ -64,7 +61,7 @@ class EventFilter:
                 logs = entries_getter()
                 if logs:
                     logger.debug(
-                        f"found event logs: event-name={self.event_name}, "
+                        f"found event logs: event-name={self.event.event_name}, "
                         f"range={self.block_range}, "
                         f"logs={logs}"
                     )
@@ -72,7 +69,7 @@ class EventFilter:
             except ValueError as e:
                 if "Filter not found" in str(e):
                     logger.debug(
-                        f"recreating filter (Filter not found): event={self.event_name}, "
+                        f"recreating filter (Filter not found): event={self.event.event_name}, "
                         f"arg-filter={self.argument_filters}, from/to={self.block_range}"
                     )
                     time.sleep(1)

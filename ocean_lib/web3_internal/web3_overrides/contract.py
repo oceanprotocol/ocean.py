@@ -4,7 +4,7 @@
 #
 import logging
 
-from ocean_lib.web3_internal.utils import get_network_id, get_network_timeout
+from ocean_lib.web3_internal.utils import get_chain_id, get_network_timeout
 from ocean_lib.web3_internal.wallet import Wallet
 from web3._utils.threads import Timeout
 from web3.contract import prepare_transaction
@@ -106,7 +106,7 @@ def transact_with_contract_function(
         account_key = transaction["account_key"]
         transact_transaction.pop("account_key")
 
-    network_id = get_network_id(web3)
+    network_id = get_chain_id(web3)
     with Timeout(get_network_timeout(network_id=network_id)) as _timeout:
         while True:
             if account_key:

@@ -94,22 +94,22 @@ def private_key_to_public_key(private_key: str) -> str:
 
 @enforce_types
 def get_network_name(
-    network_id: Optional[int] = None, web3: Optional[Web3] = None
+    chain_id: Optional[int] = None, web3: Optional[Web3] = None
 ) -> str:
     """
-    Return the network name based on the current ethereum network id.
+    Return the network name based on the current ethereum chain id.
 
-    Return `ganache` for every network id that is not mapped.
+    Return `ganache` for every chain id that is not mapped.
 
-    :param network_id: Network id, int
+    :param chain_id: Chain id, int
     :param web3: Web3 instance
     """
-    if not network_id:
+    if not chain_id:
         if not web3:
             return DEFAULT_NETWORK_NAME.lower()
         else:
-            network_id = get_network_id(web3)
-    return NETWORK_NAME_MAP.get(network_id, DEFAULT_NETWORK_NAME).lower()
+            chain_id = get_chain_id(web3)
+    return NETWORK_NAME_MAP.get(chain_id, DEFAULT_NETWORK_NAME).lower()
 
 
 @enforce_types
@@ -128,14 +128,14 @@ def get_network_timeout(
 
 
 @enforce_types
-def get_network_id(web3: Web3) -> int:
+def get_chain_id(web3: Web3) -> int:
     """
-    Return the ethereum network id calling the `web3.net.network` method.
+    Return the ethereum chain id calling the `web3.eth.chain_id` method.
 
     :param web3: Web3 instance
-    :return: Network id, int
+    :return: Chain id, int
     """
-    return int(web3.net.version)
+    return int(web3.eth.chain_id)
 
 
 @enforce_types

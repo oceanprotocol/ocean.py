@@ -37,20 +37,17 @@ class EventListener(object):
         self.from_block = from_block if from_block is not None else "latest"
         self.to_block = to_block if to_block is not None else "latest"
         self.event_filter = self.make_event_filter()
-        self.event_filter.poll_interval = 0.5
         self.timeout = 600  # seconds
         self.args = args
 
     def make_event_filter(self):
         """Create a new event filter."""
         event_filter = EventFilter(
-            self.event_name,
             self.event,
-            self.filters,
+            argument_filters=self.filters,
             from_block=self.from_block,
             to_block=self.to_block,
         )
-        event_filter.set_poll_interval(0.5)
         return event_filter
 
     def listen_once(

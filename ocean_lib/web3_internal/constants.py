@@ -22,7 +22,7 @@ NETWORK_NAME_MAP = {
     3: "Ropsten",
     4: "Rinkeby",
     137: "Polygon",
-    8996: "Ganache",
+    1337: "Ganache",
 }
 
 NETWORK_TIMEOUT_MAP = {
