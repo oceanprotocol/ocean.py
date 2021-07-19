@@ -295,9 +295,6 @@ class ContractBase(object):
                 )
                 all_logs.extend(logs)
                 if len(all_logs) >= 1:
-                    import pdb
-
-                    pdb.set_trace()
                     break
                 _to = _from - 1
                 _from = max(_to - chunk + 1, from_block)

@@ -69,6 +69,10 @@ def test_main(network, alice_wallet, alice_address, dtfactory_address, web3):
     assert (
         len(factory.get_event_logs("TokenCreated", block, block, None)) == 1
     ), "The token was not created."
+    log = factory.get_event_log("TokenCreated", block, block, None)
+    assert len(log) == 1, "The token was not created."
+    assert log[0]["event"] == "TokenCreated"
+    assert log[0]["address"] == dtfactory_address
 
     with pytest.raises(TypeError):
         ContractBase.getLogs(None)
