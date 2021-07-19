@@ -3,7 +3,7 @@ u#
 # SPDX-License-Identifier: Apache-2.0
 #
 """
-Defines contants:
+Defines constants:
 - `ENV_CONFIG_FILE`
 - `ENV_PROVIDER_API_VERSION`
 - `ENV_INFURA_CONNECTION_TYPE`
