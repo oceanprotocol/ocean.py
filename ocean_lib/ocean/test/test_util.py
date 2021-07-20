@@ -99,6 +99,14 @@ def test_get_web3_connection_provider(monkeypatch):
     provider = util.get_web3_connection_provider("polygon")
     assert provider.endpoint_uri == "https://rpc.polygon.oceanprotocol.com"
 
+    # bsc network name
+    assert (
+        "bsc" in util.SUPPORTED_NETWORK_NAMES
+    ), "bsc is missing from SUPPORTED_NETWORK_NAMES"
+    assert util.BSC_URL == "https://bsc-dataseed.binance.org"
+    provider = util.get_web3_connection_provider("bsc")
+    assert provider.endpoint_uri == "https://bsc-dataseed.binance.org"
+
     # all infura-supported network names
     for network in util.SUPPORTED_NETWORK_NAMES:
         if network == "ganache" or "polygon":
