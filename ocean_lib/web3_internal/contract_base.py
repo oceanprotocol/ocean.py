@@ -300,7 +300,7 @@ class ContractBase(object):
                 error_count = 0
                 if (to_block - _to) % 1000 == 0:
                     print(
-                        f"    So far processed {len(all_logs)} Transfer events from {to_block - _to} blocks."
+                        f"    Searched blocks {_from}-{_to}. {event_name} event not yet found."
                     )
             except requests.exceptions.ReadTimeout as err:
                 print(f"ReadTimeout ({_from}, {_to}): {err}")
@@ -358,7 +358,7 @@ class ContractBase(object):
                 error_count = 0
                 if (_from - from_block) % 1000 == 0:
                     print(
-                        f"    So far processed {len(all_logs)} Transfer events from {_from-from_block} blocks."
+                        f"    Searched blocks {_from}-{_to}. {len(all_logs)} {event_name} events detected so far."
                     )
             except requests.exceptions.ReadTimeout as err:
                 print(f"ReadTimeout ({_from}, {_to}): {err}")
