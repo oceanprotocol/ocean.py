@@ -52,9 +52,9 @@ def setup_all(request, config, web3):
         from_wei(get_ether_balance(web3, wallet.address)) > 10
     ), "Ether balance less than 10."
 
-    from ocean_lib.models.data_token import DataToken
+    from ocean_lib.models.erc20_token import MockOcean
 
-    OCEAN_token = DataToken(web3, address=network_addresses["development"]["Ocean"])
+    OCEAN_token = MockOcean(web3, address=network_addresses["development"]["Ocean"])
 
     amt_distribute = 1000
     amt_distribute_base = to_base_18(float(amt_distribute))
@@ -64,7 +64,6 @@ def setup_all(request, config, web3):
             send_ether(wallet, w.address, 4)
 
         if OCEAN_token.token_balance(w.address) < 100:
-            OCEAN_token.mint(wallet.address, amt_distribute_base, from_wallet=wallet)
             OCEAN_token.transfer(w.address, amt_distribute_base, from_wallet=wallet)
 
 

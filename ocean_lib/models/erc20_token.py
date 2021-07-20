@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enforce_typing import enforce_types
+from ocean_lib.ocean.util import from_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -160,3 +161,16 @@ class ERC20Token(ContractBase):
 
     def get_fee_collector(self) -> str:
         return self.contract.caller.getFeeCollector()
+
+    def balanceOf(self, account: str) -> int:
+        return self.contract.caller.balanceOf(account)
+
+    def transfer(self, to: str, value_base: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("transfer", (to, value_base), from_wallet)
+
+    def token_balance(self, account: str):
+        return from_base_18(self.balanceOf(account))
+
+
+class MockOcean(ERC20Token):
+    CONTRACT_NAME = "MockOcean"
