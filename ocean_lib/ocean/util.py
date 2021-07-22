@@ -21,6 +21,7 @@ from web3 import WebsocketProvider
 WEB3_INFURA_PROJECT_ID = "357f2fe737db4304bd2f7285c5602d0d"
 GANACHE_URL = "http://127.0.0.1:8545"
 POLYGON_URL = "https://rpc.polygon.oceanprotocol.com"
+BSC_URL = "https://bsc-dataseed.binance.org"
 
 # shortcut names for networks that *Infura* supports, plus ganache and polygon
 SUPPORTED_NETWORK_NAMES = {
@@ -30,6 +31,7 @@ SUPPORTED_NETWORK_NAMES = {
     "mainnet",
     "ropsten",
     "polygon",
+    "bsc",
 }
 
 
@@ -85,6 +87,8 @@ def get_web3_connection_provider(network_url):
         provider = CustomHTTPProvider(GANACHE_URL)
     elif network_url == "polygon":
         provider = CustomHTTPProvider(POLYGON_URL)
+    elif network_url == "bsc":
+        provider = CustomHTTPProvider(BSC_URL)
     else:
         assert network_url in SUPPORTED_NETWORK_NAMES, (
             f"The given network_url *{network_url}* does not start with either "
