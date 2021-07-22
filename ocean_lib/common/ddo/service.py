@@ -8,6 +8,7 @@
 """
 import copy
 import logging
+from typing import Any, Dict, Optional, Tuple
 
 logger = logging.getLogger(__name__)
 
@@ -21,8 +22,13 @@ class Service:
     SERVICE_ATTRIBUTES = "attributes"
 
     def __init__(
-        self, service_endpoint, service_type, attributes, other_values=None, index=None
-    ):
+        self,
+        service_endpoint: Optional[str],
+        service_type: str,
+        attributes: Optional[Dict],
+        other_values: Optional[Dict[str, Any]] = None,
+        index: Optional[int] = None,
+    ) -> None:
         """Initialize Service instance."""
         self._service_endpoint = service_endpoint
         self._type = service_type or ""
@@ -42,7 +48,7 @@ class Service:
                     self._values[name] = value
 
     @property
-    def type(self):
+    def type(self) -> str:
         """
         Type of the service.
 
@@ -51,7 +57,7 @@ class Service:
         return self._type
 
     @property
-    def index(self):
+    def index(self) -> int:
         """
         Identifier of the service inside the asset DDO
 
@@ -60,7 +66,7 @@ class Service:
         return self._index
 
     @property
-    def service_endpoint(self):
+    def service_endpoint(self) -> str:
         """
         Service endpoint.
 
@@ -68,7 +74,7 @@ class Service:
         """
         return self._service_endpoint
 
-    def set_service_endpoint(self, service_endpoint):
+    def set_service_endpoint(self, service_endpoint: str) -> None:
         """
         Update service endpoint. Needed to update after create did.
 
@@ -76,7 +82,7 @@ class Service:
         """
         self._service_endpoint = service_endpoint
 
-    def values(self):
+    def values(self) -> Dict[str, Any]:
         """
 
         :return: array of values
@@ -84,14 +90,14 @@ class Service:
         return self._values.copy()
 
     @property
-    def attributes(self):
+    def attributes(self) -> Dict[str, Any]:
         return self._attributes
 
     @property
-    def main(self):
+    def main(self) -> Dict[str, Any]:
         return self._attributes["main"]
 
-    def update_value(self, name, value):
+    def update_value(self, name: str, value: Any) -> None:
         """
         Update value in the array of values.
 
@@ -102,7 +108,7 @@ class Service:
         if name not in self._reserved_names:
             self._values[name] = value
 
-    def as_dictionary(self):
+    def as_dictionary(self) -> Dict[str, Any]:
         """Return the service as a python dictionary."""
         attributes = {}
         for key, value in self._attributes.items():
@@ -128,7 +134,9 @@ class Service:
         return values
 
     @classmethod
-    def _parse_json(cls, service_dict):
+    def _parse_json(
+        cls, service_dict: Dict[str, Any]
+    ) -> Tuple[str, str, int, Dict, Dict]:
         sd = copy.deepcopy(service_dict)
         service_endpoint = sd.pop(cls.SERVICE_ENDPOINT, None)
         _type = sd.pop(cls.SERVICE_TYPE, None)
@@ -144,7 +152,7 @@ class Service:
         return service_endpoint, _type, _index, _attributes, sd
 
     @classmethod
-    def from_json(cls, service_dict):
+    def from_json(cls, service_dict: Dict[str, Any]) -> "Service":
         """Create a service object from a JSON string."""
         service_endpoint, _type, _index, _attributes, sd = cls._parse_json(service_dict)
         return cls(service_endpoint, _type, _attributes, sd, _index)
