@@ -6,7 +6,8 @@
 import configparser
 import logging
 import os
-from pathlib import Path
+from pathlib import Path, PosixPath
+from typing import Any, Dict, Optional, Union
 
 import artifacts
 from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
@@ -93,7 +94,12 @@ config_defaults = {
 class Config(configparser.ConfigParser):
     """Class to manage the ocean-lib configuration."""
 
-    def __init__(self, filename=None, options_dict=None, **kwargs):
+    def __init__(
+        self,
+        filename: Optional[Union[PosixPath, str]] = None,
+        options_dict: Optional[Dict[str, Any]] = None,
+        **kwargs,
+    ) -> None:
         """Initialize Config class.
 
         Options available:
@@ -138,7 +144,7 @@ class Config(configparser.ConfigParser):
         self._handle_and_validate_metadata_cache_uri()
         self._load_environ()
 
-    def _handle_and_validate_metadata_cache_uri(self):
+    def _handle_and_validate_metadata_cache_uri(self) -> None:
         metadata_cache_uri = self.get(
             SECTION_RESOURCES, NAME_METADATA_CACHE_URI, fallback=None
         )
@@ -166,7 +172,7 @@ class Config(configparser.ConfigParser):
                 )
             )
 
-    def _load_environ(self):
+    def _load_environ(self) -> None:
         for option_name, environ_item in environ_names_and_sections.items():
             if option_name == NAME_METADATA_CACHE_URI:
                 metadata_cache_uri = os.environ.get(environ_item[0])
@@ -196,7 +202,7 @@ class Config(configparser.ConfigParser):
                 self.set(environ_item[2], option_name, value)
 
     @property
-    def address_file(self):
+    def address_file(self) -> str:
         file_path = self.get(SECTION_ETH_NETWORK, NAME_ADDRESS_FILE)
         if file_path:
             file_path = Path(file_path).expanduser().resolve()
@@ -211,26 +217,26 @@ class Config(configparser.ConfigParser):
         return str(file_path)
 
     @property
-    def network_url(self):
+    def network_url(self) -> str:
         """URL of the ethereum network. (e.g.): http://mynetwork:8545."""
         return self.get(SECTION_ETH_NETWORK, NAME_NETWORK_URL)
 
     @property
-    def gas_limit(self):
+    def gas_limit(self) -> int:
         """Ethereum gas limit."""
         return int(self.get(SECTION_ETH_NETWORK, NAME_GAS_LIMIT))
 
     @property
-    def metadata_cache_uri(self):
+    def metadata_cache_uri(self) -> str:
         """URL of metadata cache component. (e.g.): http://myaquarius:5000."""
         return self.get(SECTION_RESOURCES, NAME_METADATA_CACHE_URI)
 
     @property
-    def provider_url(self):
+    def provider_url(self) -> str:
         return self.get(SECTION_RESOURCES, NAME_PROVIDER_URL)
 
     @property
-    def provider_address(self):
+    def provider_address(self) -> str:
         """Provider address (e.g.): 0x00bd138abd70e2f00903268f3db08f2d25677c9e.
 
         Ethereum address of service provider
@@ -238,6 +244,6 @@ class Config(configparser.ConfigParser):
         return self.get(SECTION_RESOURCES, NAME_PROVIDER_ADDRESS)
 
     @property
-    def downloads_path(self):
+    def downloads_path(self) -> str:
         """Path for the downloads of assets."""
         return self.get(SECTION_RESOURCES, "downloads.path")
