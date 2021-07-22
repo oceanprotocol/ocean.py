@@ -23,6 +23,7 @@ NETWORK_NAME_MAP = {
     3: "Ropsten",
     4: "Rinkeby",
     42: "Kovan",
+    56: "Binance Smart Chain",
     100: "xDai",
     137: "Polygon",
     1337: "Ganache",
