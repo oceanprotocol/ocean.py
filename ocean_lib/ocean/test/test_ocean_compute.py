@@ -7,7 +7,6 @@ from datetime import datetime
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from tests.resources.ddo_helpers import (
     get_registered_algorithm_ddo,
@@ -19,8 +18,7 @@ from tests.resources.helper_functions import get_publisher_wallet
 
 def test_build_cluster_attributes():
     data_provider = DataServiceProvider()
-    config = Ocean.config
-    compute = OceanCompute(config=config, data_provider=data_provider)
+    compute = OceanCompute(config={}, data_provider=data_provider)
     cluster_dict = compute.build_cluster_attributes(
         "Kubernetes", "http://10.0.0.17/my_cluster"
     )
@@ -34,8 +32,7 @@ def test_build_cluster_attributes():
 
 def test_build_container_attributes():
     data_provider = DataServiceProvider()
-    config = Ocean.config
-    compute = OceanCompute(config=config, data_provider=data_provider)
+    compute = OceanCompute(config={}, data_provider=data_provider)
     container_dict = compute.build_container_attributes(
         "node", "best_tag", "entrypoint.exe"
     )
@@ -53,8 +50,7 @@ def test_build_container_attributes():
 
 def test_build_server_attributes():
     data_provider = DataServiceProvider()
-    config = Ocean.config
-    compute = OceanCompute(config=config, data_provider=data_provider)
+    compute = OceanCompute(config={}, data_provider=data_provider)
     server_dict = compute.build_server_attributes(
         "test_server_id_123", "test_server_type", 4, 4, "20", "20", 30
     )
