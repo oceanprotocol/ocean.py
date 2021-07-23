@@ -203,7 +203,7 @@ asset = ocean.assets.resolve(did)
 service1 = asset.get_service(ServiceTypes.ASSET_ACCESS)
 
 #point to pool
-pool = ocean.pool.get(pool_address)
+pool = ocean.pool.get(ocean.web3, pool_address)
 
 #To access a data service, you need 1.0 datatokens.
 #Here, the market retrieves the datatoken price denominated in OCEAN.
