@@ -9,7 +9,7 @@ Help to communicate with the metadata store.
 
 import json
 import logging
-from typing import Any, Optional, Union
+from typing import Any, Optional, Tuple, Union
 
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.http_requests.requests_session import get_requests_session
@@ -173,7 +173,7 @@ class Aquarius:
         else:
             raise ValueError(f"Unable to search for DDO: {response.content}")
 
-    def validate_metadata(self, metadata: dict) -> tuple[bool, Any]:
+    def validate_metadata(self, metadata: dict) -> Tuple[bool, Any]:
         """
         Validate that the metadata of your ddo is valid.
 
