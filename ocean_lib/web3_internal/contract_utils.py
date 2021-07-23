@@ -6,6 +6,7 @@ import importlib
 import json
 import logging
 import os
+from typing import Any, Dict
 
 import artifacts  # noqa
 from enforce_typing import enforce_types
@@ -15,7 +16,7 @@ from web3.main import Web3
 logger = logging.getLogger(__name__)
 
 
-def get_contract_definition(contract_name):
+def get_contract_definition(contract_name: str) -> Dict[str, Any]:
     """Returns the abi JSON for a contract name."""
     try:
         return importlib.import_module("artifacts." + contract_name).__dict__
@@ -33,7 +34,7 @@ def load_contract(web3: Web3, contract_name, address):
     return contract
 
 
-def get_contracts_addresses(network, address_file):
+def get_contracts_addresses(network: str, address_file: str) -> Dict[str, str]:
     """Get addresses for all contract names, per network and address_file given."""
     network_alias = {"ganache": "development"}
 

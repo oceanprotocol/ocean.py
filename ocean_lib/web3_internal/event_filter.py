@@ -4,6 +4,7 @@
 #
 import logging
 import time
+from typing import Any, Optional, Union
 
 from web3.contract import ContractEvent
 
@@ -14,11 +15,11 @@ class EventFilter:
     def __init__(
         self,
         event: ContractEvent,
-        argument_filters=None,
-        from_block=None,
-        to_block=None,
-        address=None,
-        topics=None,
+        argument_filters: dict = None,
+        from_block: Optional[Union[int, str]] = None,
+        to_block: Optional[Union[int, str]] = None,
+        address: Optional[str] = None,
+        topics: Any = None,
     ):
         """Initialises EventFilter."""
         self.event = event

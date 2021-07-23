@@ -7,9 +7,11 @@ import logging
 import time
 from datetime import datetime
 from threading import Thread
+from typing import Callable, Optional, Union
 
-from ocean_lib.web3_internal.event_filter import EventFilter
 from ocean_lib.web3_internal.contract_utils import load_contract
+from ocean_lib.web3_internal.event_filter import EventFilter
+from web3.main import Web3
 
 logger = logging.getLogger(__name__)
 
@@ -20,15 +22,15 @@ class EventListener(object):
 
     def __init__(
         self,
-        web3,
-        contract_name,
-        address,
-        event_name,
-        args=None,
-        from_block=None,
-        to_block=None,
-        filters=None,
-    ):
+        web3: Web3,
+        contract_name: str,
+        address: str,
+        event_name: str,
+        args: None = None,
+        from_block: Optional[Union[int, str]] = None,
+        to_block: Optional[Union[int, str]] = None,
+        filters: Optional[dict] = None,
+    ) -> None:
         """Initialises EventListener object."""
         contract = load_contract(web3, contract_name, address)
         self.event_name = event_name
@@ -40,7 +42,7 @@ class EventListener(object):
         self.timeout = 600  # seconds
         self.args = args
 
-    def make_event_filter(self):
+    def make_event_filter(self) -> EventFilter:
         """Create a new event filter."""
         event_filter = EventFilter(
             self.event,
@@ -52,12 +54,12 @@ class EventListener(object):
 
     def listen_once(
         self,
-        callback,
-        timeout=None,
-        timeout_callback=None,
-        start_time=None,
-        blocking=False,
-    ):
+        callback: None,
+        timeout: Optional[int] = None,
+        timeout_callback: Optional[Callable] = None,
+        start_time: Optional[float] = None,
+        blocking: bool = False,
+    ) -> None:
         """Listens once for event.
 
         :param callback: a callback function that takes one argument the event dict
