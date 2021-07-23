@@ -47,7 +47,7 @@ class ExampleConfig:
 
     @staticmethod
     def get_config_dict(
-        network_name: Optional[str] = None
+        network_name: Optional[str] = None,
     ) -> Dict[str, Dict[str, str]]:
         test_net = network_name or ExampleConfig.get_config_net()
         local_node = not test_net or test_net in {"local", "ganache"}

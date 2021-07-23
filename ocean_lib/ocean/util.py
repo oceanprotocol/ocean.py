@@ -61,7 +61,7 @@ def get_infura_url(infura_id: str, network: str) -> str:
 
 
 def get_web3_connection_provider(
-    network_url: str
+    network_url: str,
 ) -> Union[CustomHTTPProvider, WebsocketProvider]:
     """Return the suitable web3 provider based on the network_url.
 
