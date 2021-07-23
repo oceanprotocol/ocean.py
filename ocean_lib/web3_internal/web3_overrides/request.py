@@ -8,6 +8,7 @@
 import lru
 import requests
 from requests.adapters import HTTPAdapter
+from requests.sessions import Session
 from web3._utils.caching import generate_cache_key
 
 
@@ -18,7 +19,7 @@ def _remove_session(key, session):
 _session_cache = lru.LRU(8, callback=_remove_session)
 
 
-def _get_session(*args, **kwargs):
+def _get_session(*args, **kwargs) -> Session:
     cache_key = generate_cache_key((args, kwargs))
     if cache_key not in _session_cache:
         # This is the main change from original Web3 `_get_session`
@@ -35,7 +36,7 @@ def _get_session(*args, **kwargs):
     return _session_cache[cache_key]
 
 
-def make_post_request(endpoint_uri, data, *args, **kwargs):
+def make_post_request(endpoint_uri: str, data: bytes, *args, **kwargs) -> bytes:
     kwargs.setdefault("timeout", 10)
     session = _get_session(endpoint_uri)
     response = session.post(endpoint_uri, data=data, *args, **kwargs)

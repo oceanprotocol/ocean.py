@@ -4,10 +4,12 @@
 #
 import logging
 import time
+from typing import Any, Dict, Optional
 
-from web3.contract import prepare_transaction
-
+from hexbytes.main import HexBytes
 from ocean_lib.web3_internal.wallet import Wallet
+from web3.contract import prepare_transaction
+from web3.main import Web3
 
 
 class CustomContractFunction:
@@ -15,7 +17,7 @@ class CustomContractFunction:
         """Initializes CustomContractFunction."""
         self._contract_function = contract_function
 
-    def transact(self, transaction):
+    def transact(self, transaction: Dict[str, Any]) -> HexBytes:
         """Customize calling smart contract transaction functions.
 
         Use `personal_sendTransaction` instead of `eth_sendTransaction` and to estimate gas limit.
@@ -75,15 +77,15 @@ class CustomContractFunction:
 
 
 def transact_with_contract_function(
-    address,
-    web3,
-    function_name=None,
-    transaction=None,
-    contract_abi=None,
-    fn_abi=None,
+    address: str,
+    web3: Web3,
+    function_name: Optional[str] = None,
+    transaction: Optional[dict] = None,
+    contract_abi: Optional[list] = None,
+    fn_abi: Optional[dict] = None,
     *args,
     **kwargs,
-):
+) -> HexBytes:
     """
     Helper function for interacting with a contract function by sending a
     transaction. This is copied from web3 `transact_with_contract_function`
@@ -124,7 +126,7 @@ def transact_with_contract_function(
     return txn_hash
 
 
-def wait_for_tx(tx_hash, web3, timeout=30):
+def wait_for_tx(tx_hash: HexBytes, web3: Web3, timeout: int = 30) -> None:
     start = time.time()
     while True:
         try:

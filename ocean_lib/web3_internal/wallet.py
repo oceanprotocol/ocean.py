@@ -4,14 +4,18 @@
 #
 import logging
 import os
-from typing import Optional
+from typing import Dict, Optional, Union
 
 from enforce_typing import enforce_types
+from eth_account.datastructures import SignedMessage
+from eth_account.messages import SignableMessage
+from hexbytes.main import HexBytes
 from ocean_lib.web3_internal.constants import ENV_MAX_GAS_PRICE, MIN_GAS_PRICE
 from ocean_lib.web3_internal.utils import (
     private_key_to_address,
     private_key_to_public_key,
 )
+from web3.main import Web3
 
 logger = logging.getLogger(__name__)
 
@@ -40,12 +44,12 @@ class Wallet:
 
     def __init__(
         self,
-        web3,
+        web3: Web3,
         private_key: Optional[str] = None,
         encrypted_key: dict = None,
         password: Optional[str] = None,
         address: Optional[str] = None,
-    ):
+    ) -> None:
         """Initialises Wallet object."""
         assert private_key or (
             encrypted_key and password
@@ -77,23 +81,23 @@ class Wallet:
         self._max_gas_price = os.getenv(ENV_MAX_GAS_PRICE, None)
 
     @property
-    def web3(self):
+    def web3(self) -> Web3:
         return self._web3
 
     @property
-    def address(self):
+    def address(self) -> str:
         return self._address
 
     @property
-    def password(self):
+    def password(self) -> None:
         return self._password
 
     @property
-    def private_key(self):
+    def private_key(self) -> str:
         return self._key
 
     @property
-    def key(self):
+    def key(self) -> str:
         return self._key
 
     @staticmethod
@@ -108,7 +112,7 @@ class Wallet:
         return account.address == self._address
 
     @staticmethod
-    def _get_nonce(web3, address):
+    def _get_nonce(web3: Web3, address: str) -> int:
         # We cannot rely on `web3.eth.get_transaction_count` because when sending multiple
         # transactions in a row without wait in between the network may not get the chance to
         # update the transaction count for the account address in time.
@@ -120,7 +124,12 @@ class Wallet:
 
         return Wallet._last_tx_count[address]
 
-    def sign_tx(self, tx, fixed_nonce=None, gas_price=None):
+    def sign_tx(
+        self,
+        tx: Dict[str, Union[int, str, bytes]],
+        fixed_nonce: Optional[int] = None,
+        gas_price: Optional[float] = None,
+    ) -> HexBytes:
         account = self._web3.eth.account.from_key(self.private_key)
         if fixed_nonce is not None:
             nonce = fixed_nonce
@@ -148,12 +157,12 @@ class Wallet:
         logger.debug(f"`Wallet` signed tx is {signed_tx}")
         return signed_tx.rawTransaction
 
-    def sign(self, msg_hash):
+    def sign(self, msg_hash: SignableMessage) -> SignedMessage:
         """Sign a transaction."""
         account = self._web3.eth.account.from_key(self.private_key)
         return account.sign_message(msg_hash)
 
-    def keys_str(self):
+    def keys_str(self) -> str:
         s = []
         s += [f"address: {self.address}"]
         if self.private_key is not None:

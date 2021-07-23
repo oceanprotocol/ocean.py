@@ -6,7 +6,7 @@ import logging
 from collections import namedtuple
 from decimal import Decimal
 from pathlib import Path
-from typing import Optional
+from typing import List, Optional
 
 import artifacts
 from enforce_typing import enforce_types
@@ -14,6 +14,7 @@ from eth_account.account import Account
 from eth_account.messages import encode_defunct
 from eth_keys import keys
 from eth_utils import big_endian_to_int, decode_hex
+from hexbytes.main import HexBytes
 from ocean_lib.web3_internal.constants import DEFAULT_NETWORK_NAME, NETWORK_NAME_MAP
 from ocean_lib.web3_internal.web3_overrides.signature import SignatureFix
 from web3.main import Web3
@@ -23,7 +24,7 @@ Signature = namedtuple("Signature", ("v", "r", "s"))
 logger = logging.getLogger(__name__)
 
 
-def generate_multi_value_hash(types, values):
+def generate_multi_value_hash(types: List[str], values: List[str]) -> HexBytes:
     """
     Return the hash of the given list of values.
     This is equivalent to packing and hashing values in a solidity smart contract
@@ -37,7 +38,7 @@ def generate_multi_value_hash(types, values):
     return Web3.solidityKeccak(types, values)
 
 
-def prepare_prefixed_hash(msg_hash):
+def prepare_prefixed_hash(msg_hash: str) -> HexBytes:
     """
 
     :param msg_hash:
