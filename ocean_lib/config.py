@@ -205,16 +205,16 @@ class Config(configparser.ConfigParser):
     def address_file(self) -> str:
         file_path = self.get(SECTION_ETH_NETWORK, NAME_ADDRESS_FILE)
         if file_path:
-            file_path = Path(file_path).expanduser().resolve()
+            file_path = str(Path(file_path).expanduser().resolve())
         else:
-            file_path = (
+            file_path = str(
                 Path(artifacts.__file__)
                 .parent.joinpath("address.json")
                 .expanduser()
                 .resolve()
             )
 
-        return str(file_path)
+        return file_path
 
     @property
     def network_url(self) -> str:

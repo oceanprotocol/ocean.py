@@ -55,7 +55,7 @@ class DataServiceProvider:
         return DataServiceProvider._http_client
 
     @staticmethod
-    def set_http_client(http_client):
+    def set_http_client(http_client: object) -> None:
         """Set the http client to something other than the default `requests`."""
         DataServiceProvider._http_client = http_client
 
@@ -98,6 +98,8 @@ class DataServiceProvider:
 
             return response.json()["encryptedDocument"]
 
+        return ""
+
     @staticmethod
     def sign_message(
         wallet: Wallet,
@@ -106,7 +108,7 @@ class DataServiceProvider:
         provider_uri: Optional[str] = None,
     ) -> str:
         if nonce is None:
-            nonce = DataServiceProvider.get_nonce(wallet.address, provider_uri)
+            nonce = str(DataServiceProvider.get_nonce(wallet.address, provider_uri))
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
         return sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
 
@@ -558,6 +560,7 @@ class DataServiceProvider:
             )[1]
         except Exception as e:
             logger.warning(f"It was not possible to get the file name. {e}")
+            return None
 
     @staticmethod
     def _prepare_compute_payload(
@@ -583,7 +586,6 @@ class DataServiceProvider:
                 f"expecting a AlgorithmMetadata type "
                 f"for `algorithm_meta`, got {type(algorithm_meta)}"
             )
-            algorithm_meta = algorithm_meta.as_dictionary()
 
         _input_datasets = []
         if input_datasets:
@@ -617,7 +619,7 @@ class DataServiceProvider:
                 }
             )
         else:
-            payload["algorithmMeta"] = algorithm_meta
+            payload["algorithmMeta"] = algorithm_meta.as_dictionary()
 
         return payload
 
@@ -644,6 +646,8 @@ class DataServiceProvider:
         for file_info in response:
             return file_info["valid"]
 
+        return False
+
     @staticmethod
     def check_asset_file_info(asset: object, provider_uri: str) -> bool:
         """Asset should be a DDO or Asset object."""
@@ -659,6 +663,8 @@ class DataServiceProvider:
         response = response.json()
         for ddo_info in response:
             return ddo_info["valid"]
+
+        return False
 
 
 def urljoin(*args) -> str:
