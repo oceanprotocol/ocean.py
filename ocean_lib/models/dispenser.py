@@ -47,31 +47,31 @@ class DispenserContract(ContractBase):
 
     def activate(
         self, dt_address: str, max_tokens: int, max_balance: int, from_wallet: Wallet
-    ):
+    ) -> str:
         return self.send_transaction(
             "activate", (dt_address, max_tokens, max_balance), from_wallet
         )
 
-    def deactivate(self, dt_address: str, from_wallet: Wallet):
+    def deactivate(self, dt_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("deactivate", (dt_address,), from_wallet)
 
-    def make_minter(self, dt_address: str, from_wallet: Wallet):
+    def make_minter(self, dt_address: str, from_wallet: Wallet) -> str:
         token = DataToken(self.web3, dt_address)
         token.proposeMinter(self.address, from_wallet=from_wallet)
         return self.send_transaction("acceptMinter", (dt_address,), from_wallet)
 
-    def cancel_minter(self, dt_address: str, from_wallet: Wallet):
+    def cancel_minter(self, dt_address: str, from_wallet: Wallet) -> str:
         self.send_transaction("removeMinter", (dt_address,), from_wallet)
         token = DataToken(self.web3, dt_address)
         return token.approveMinter(from_wallet)
 
-    def dispense(self, dt_address: str, amount: int, from_wallet: Wallet):
+    def dispense(self, dt_address: str, amount: int, from_wallet: Wallet) -> str:
         return self.send_transaction("dispense", (dt_address, amount), from_wallet)
 
-    def owner_withdraw(self, dt_address: str, from_wallet: Wallet):
+    def owner_withdraw(self, dt_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("ownerWithdraw", (dt_address,), from_wallet)
 
-    def is_dispensable(self, dt_address: str, amount: int, to_wallet: Wallet):
+    def is_dispensable(self, dt_address: str, amount: int, to_wallet: Wallet) -> bool:
         if not amount:
             return False
 

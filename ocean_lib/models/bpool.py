@@ -4,16 +4,17 @@
 #
 import logging
 import typing
+from typing import Optional, Tuple
 
 from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
 from ocean_lib.models import balancer_constants
-from ocean_lib.ocean import util
-from ocean_lib.web3_internal.wallet import Wallet
-from web3.main import Web3
-
 from ocean_lib.models.btoken import BToken
+from ocean_lib.ocean import util
 from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.web3_internal.wallet import Wallet
+from web3.datastructures import AttributeDict
+from web3.main import Web3
 
 logger = logging.getLogger(__name__)
 
@@ -22,7 +23,7 @@ logger = logging.getLogger(__name__)
 class BPool(BToken):
     CONTRACT_NAME = "BPool"
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Formats with attributes as key, value pairs."""
         s = []
         s += ["BPool:"]
@@ -168,16 +169,16 @@ class BPool(BToken):
 
     # ==== Controller Functions
 
-    def setSwapFee(self, swapFee_base: int, from_wallet: Wallet):
+    def setSwapFee(self, swapFee_base: int, from_wallet: Wallet) -> str:
         """
         Caller must be controller. Pool must NOT be finalized.
         """
         return self.send_transaction("setSwapFee", (swapFee_base,), from_wallet)
 
-    def setController(self, manager_address: str, from_wallet: Wallet):
+    def setController(self, manager_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("setController", (manager_address,), from_wallet)
 
-    def setPublicSwap(self, public: bool, from_wallet: Wallet):
+    def setPublicSwap(self, public: bool, from_wallet: Wallet) -> str:
         """
         Makes `isPublicSwap` return `_publicSwap`. Requires caller to be
         controller and pool not to be finalized. Finalized pools always have
@@ -185,7 +186,7 @@ class BPool(BToken):
         """
         return self.send_transaction("setPublicSwap", (public,), from_wallet)
 
-    def finalize(self, from_wallet: Wallet):
+    def finalize(self, from_wallet: Wallet) -> str:
         """
         This makes the pool **finalized**. This is a one-way transition. `bind`,
         `rebind`, `unbind`, `setSwapFee` and `setPublicSwap` will all throw
@@ -200,7 +201,7 @@ class BPool(BToken):
         balance_base: int,
         weight_base: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Binds the token with address `token`. Tokens will be pushed/pulled from
         caller to adjust match new balance. Token must not already be bound.
@@ -226,7 +227,7 @@ class BPool(BToken):
         balance_base: int,
         weight_base: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Changes the parameters of an already-bound token. Performs the same
         validation on the parameters.
@@ -235,14 +236,14 @@ class BPool(BToken):
             "rebind", (token_address, balance_base, weight_base), from_wallet
         )
 
-    def unbind(self, token_address: str, from_wallet: Wallet):
+    def unbind(self, token_address: str, from_wallet: Wallet) -> str:
         """
         Unbinds a token, clearing all of its parameters. Exit fee is charged
         and the remaining balance is sent to caller.
         """
         return self.send_transaction("unbind", (token_address,), from_wallet)
 
-    def gulp(self, token_address: str, from_wallet: Wallet):
+    def gulp(self, token_address: str, from_wallet: Wallet) -> str:
         """
         This syncs the internal `balance` of `token` within a pool with the
         actual `balance` registered on the ERC20 contract. This is useful to
@@ -275,7 +276,7 @@ class BPool(BToken):
         poolAmountOut_base: int,
         maxAmountsIn_base: typing.List[int],
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Join the pool, getting `poolAmountOut` pool tokens. This will pull some
         of each of the currently trading tokens in the pool, meaning you must
@@ -291,7 +292,7 @@ class BPool(BToken):
         poolAmountIn_base: int,
         minAmountsOut_base: typing.List[int],
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Exit the pool, paying `poolAmountIn` pool tokens and getting some of
         each of the currently trading tokens in return. These values are
@@ -309,7 +310,7 @@ class BPool(BToken):
         minAmountOut_base: int,
         maxPrice_base: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Trades an exact `tokenAmountIn` of `tokenIn` taken from the caller by
         the pool, in exchange for at least `minAmountOut` of `tokenOut` given
@@ -343,7 +344,7 @@ class BPool(BToken):
         tokenAmountOut_base: int,
         maxPrice_base: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         return self.send_transaction(
             "swapExactAmountOut",
             (
@@ -362,7 +363,7 @@ class BPool(BToken):
         tokenAmountIn_base: int,
         minPoolAmountOut_base: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Pay `tokenAmountIn` of token `tokenIn` to join the pool, getting
         `poolAmountOut` of the pool shares.
@@ -379,7 +380,7 @@ class BPool(BToken):
         poolAmountOut_base: int,
         maxAmountIn_base: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Specify `poolAmountOut` pool shares that you want to get, and a token
         `tokenIn` to pay with. This costs `maxAmountIn` tokens (these went
@@ -397,7 +398,7 @@ class BPool(BToken):
         poolAmountIn_base: int,
         minAmountOut_base: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Pay `poolAmountIn` pool shares into the pool, getting `tokenAmountOut`
         of the given token `tokenOut` out of the pool.
@@ -414,7 +415,7 @@ class BPool(BToken):
         tokenAmountOut_base: int,
         maxPoolAmountIn_base: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Specify `tokenAmountOut` of token `tokenOut` that you want to get out
         of the pool. This costs `poolAmountIn` pool shares (these went into
@@ -585,12 +586,12 @@ class BPool(BToken):
 
     def get_liquidity_logs(
         self,
-        event_name,
-        from_block,
-        to_block=None,
-        user_address=None,
-        this_pool_only=True,
-    ):
+        event_name: str,
+        from_block: int,
+        to_block: Optional[int] = None,
+        user_address: None = None,
+        this_pool_only: bool = True,
+    ) -> Tuple:
         """
         :param event_name: str, one of LOG_JOIN, LOG_EXIT, LOG_SWAP
         """
@@ -615,22 +616,34 @@ class BPool(BToken):
         return logs
 
     def get_join_logs(
-        self, from_block, to_block=None, user_address=None, this_pool_only=True
-    ):
+        self,
+        from_block: int,
+        to_block: Optional[int] = None,
+        user_address: Optional[str] = None,
+        this_pool_only: bool = True,
+    ) -> Tuple[AttributeDict, AttributeDict]:
         return self.get_liquidity_logs(
             "LOG_JOIN", from_block, to_block, user_address, this_pool_only
         )
 
     def get_exit_logs(
-        self, from_block, to_block=None, user_address=None, this_pool_only=True
-    ):
+        self,
+        from_block: int,
+        to_block: Optional[int] = None,
+        user_address: Optional[str] = None,
+        this_pool_only: bool = True,
+    ) -> Tuple[AttributeDict]:
         return self.get_liquidity_logs(
             "LOG_EXIT", from_block, to_block, user_address, this_pool_only
         )
 
     def get_swap_logs(
-        self, from_block, to_block=None, user_address=None, this_pool_only=True
-    ):
+        self,
+        from_block: int,
+        to_block: Optional[int] = None,
+        user_address: Optional[str] = None,
+        this_pool_only: bool = True,
+    ) -> Tuple[AttributeDict]:
         return self.get_liquidity_logs(
             "LOG_SWAP", from_block, to_block, user_address, this_pool_only
         )

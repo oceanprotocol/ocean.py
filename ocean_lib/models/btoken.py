@@ -22,12 +22,12 @@ class BToken(ContractBase):
     def balanceOf(self, address: str) -> int:
         return self.contract.caller.balanceOf(address)
 
-    def approve(self, spender_address: str, amt_base: int, from_wallet: Wallet):
+    def approve(self, spender_address: str, amt_base: int, from_wallet: Wallet) -> str:
         return self.send_transaction(
             "approve", (spender_address, amt_base), from_wallet
         )
 
-    def transfer(self, dst_address: str, amt_base: int, from_wallet: Wallet):
+    def transfer(self, dst_address: str, amt_base: int, from_wallet: Wallet) -> str:
         return self.send_transaction("transfer", (dst_address, amt_base), from_wallet)
 
     def allowance(self, src_address: str, dst_address: str) -> int:
