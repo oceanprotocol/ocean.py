@@ -251,12 +251,12 @@ class OceanCompute:
         self,
         wallet: Wallet,
         msg: str,
-        nonce: Optional[str] = None,
+        nonce: Optional[int] = None,
         service_endpoint: Optional[str] = None,
     ) -> str:
         if nonce is None:
             uri = self._data_provider.get_root_uri(service_endpoint)
-            nonce = self._data_provider.get_nonce(wallet.address, uri)
+            nonce = str(self._data_provider.get_nonce(wallet.address, uri))
         return sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
 
     def start(

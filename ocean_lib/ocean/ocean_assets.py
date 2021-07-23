@@ -382,7 +382,7 @@ class OceanAssets:
     def search(
         self,
         text: str,
-        sort: Optional[str] = None,
+        sort: Optional[dict] = None,
         offset: int = 100,
         page: int = 1,
         metadata_cache_uri: Optional[str] = None,
@@ -410,7 +410,7 @@ class OceanAssets:
     def query(
         self,
         query: dict,
-        sort: Optional[str] = None,
+        sort: Optional[dict] = None,
         offset: int = 100,
         page: int = 1,
         metadata_cache_uri: Optional[str] = None,

@@ -5,6 +5,7 @@
 import json
 import os
 
+from ocean_lib.config import Config
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.util import get_web3_connection_provider, to_base_18
 from ocean_lib.web3_internal.transactions import send_ether
@@ -13,7 +14,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 from web3.main import Web3
 
 
-def mint_fake_OCEAN(config):
+def mint_fake_OCEAN(config: Config) -> None:
     """
     Does the following:
     1. Mints tokens

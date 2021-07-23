@@ -140,7 +140,7 @@ class Aquarius:
     def query_search(
         self,
         search_query: dict,
-        sort: Optional[int] = None,
+        sort: Optional[dict] = None,
         offset: int = 100,
         page: int = 1,
     ) -> list:
