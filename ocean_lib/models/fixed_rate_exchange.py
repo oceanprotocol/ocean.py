@@ -30,10 +30,10 @@ class FixedRateExchange(ContractBase):
 
     def buy_data_token(
         self, exchange_id: str, data_token_amount: int, from_wallet: Wallet
-    ):
+    ) -> str:
         return self.swap(exchange_id, data_token_amount, from_wallet)
 
-    def get_base_token_quote(self, exchange_id: str, data_token_amount: int):
+    def get_base_token_quote(self, exchange_id: str, data_token_amount: int) -> int:
         rate = self.getRate(exchange_id)
         return int(data_token_amount * rate / to_base_18(1.0))
 
@@ -41,12 +41,14 @@ class FixedRateExchange(ContractBase):
     # Transaction methods
     def create(
         self, base_token: str, data_token: str, exchange_rate: int, from_wallet: Wallet
-    ):
+    ) -> str:
         return self.send_transaction(
             "create", (base_token, data_token, exchange_rate), from_wallet
         )
 
-    def swap(self, exchange_id: str, data_token_amount: int, from_wallet: Wallet):
+    def swap(
+        self, exchange_id: str, data_token_amount: int, from_wallet: Wallet
+    ) -> str:
         return self.send_transaction(
             "swap", (exchange_id, data_token_amount), from_wallet
         )
@@ -83,7 +85,7 @@ class FixedRateExchange(ContractBase):
     def getRate(self, exchange_id: str) -> int:
         return self.contract.caller.getRate(exchange_id)
 
-    def getExchange(self, exchange_id: str):
+    def getExchange(self, exchange_id: str) -> FixedExchangeData:
         values = self.contract.caller.getExchange(exchange_id)
         if values and len(values) == 6:
             return FixedExchangeData(*values)
