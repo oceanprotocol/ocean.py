@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from collections import namedtuple
+from typing import Optional
 
 from ocean_lib.common.agreements.service_types import ServiceTypes, ServiceTypesIndices
 from ocean_lib.common.ddo.service import Service
@@ -18,11 +19,11 @@ class ServiceAgreement(Service):
 
     def __init__(
         self,
-        attributes,
-        service_endpoint=None,
-        service_type=None,
-        service_index=None,
-        other_values=None,
+        attributes: dict,
+        service_endpoint: str = None,
+        service_type: str = None,
+        service_index: Optional[int] = None,
+        other_values: dict = None,
     ):
         """
 
@@ -58,7 +59,7 @@ class ServiceAgreement(Service):
         )
 
     @classmethod
-    def from_json(cls, service_dict):
+    def from_json(cls, service_dict: dict) -> "ServiceAgreement":
         """
 
         :param service_dict:
@@ -71,7 +72,7 @@ class ServiceAgreement(Service):
         return cls(_attributes, service_endpoint, _type, _index, service_dict)
 
     @classmethod
-    def from_ddo(cls, service_type, ddo):
+    def from_ddo(cls, service_type: str, ddo: object) -> "ServiceAgreement":
         """
 
         :param service_type: identifier of the service inside the asset DDO, str
@@ -88,11 +89,11 @@ class ServiceAgreement(Service):
 
         return cls.from_json(service_dict)
 
-    def as_dictionary(self):
+    def as_dictionary(self) -> dict:
         values = Service.as_dictionary(self)
         return values
 
-    def get_cost(self):
+    def get_cost(self) -> float:
         """
         Return the price from the conditions parameters.
 
@@ -101,5 +102,5 @@ class ServiceAgreement(Service):
         return float(self.main["cost"])
 
     @property
-    def service_endpoint(self):
+    def service_endpoint(self) -> str:
         return self._service_endpoint

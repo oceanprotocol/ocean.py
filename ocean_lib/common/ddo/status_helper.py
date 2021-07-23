@@ -5,7 +5,7 @@
 from ocean_lib.common.agreements.service_types import ServiceTypes
 
 
-def enable_flag(ddo, flag_name):
+def enable_flag(ddo: object, flag_name: str) -> None:
     metadata_service = ddo.get_service(ServiceTypes.METADATA)
 
     if not metadata_service:
@@ -20,7 +20,7 @@ def enable_flag(ddo, flag_name):
         metadata_service.attributes["status"][flag_name] = True
 
 
-def disable_flag(ddo, flag_name):
+def disable_flag(ddo: object, flag_name: str) -> None:
     metadata_service = ddo.get_service(ServiceTypes.METADATA)
 
     if not metadata_service:
@@ -35,7 +35,7 @@ def disable_flag(ddo, flag_name):
         metadata_service.attributes["status"].pop(flag_name)
 
 
-def is_flag_enabled(ddo, flag_name):
+def is_flag_enabled(ddo: object, flag_name: str) -> bool:
     metadata_service = ddo.get_service(ServiceTypes.METADATA)
     default = flag_name == "isListed"  # only one that defaults to True
 

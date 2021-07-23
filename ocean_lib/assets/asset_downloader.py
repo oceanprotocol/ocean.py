@@ -8,7 +8,6 @@ import os
 from typing import Optional, Type
 
 from enforce_typing import enforce_types
-
 from ocean_lib.assets.asset import Asset
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
@@ -28,7 +27,7 @@ def download_asset_files(
     order_tx_id: str,
     data_provider: Type[DataServiceProvider],
     index: Optional[int] = None,
-):
+) -> str:
     """Download asset data files or result files from a compute job.
 
     :param service_index: identifier of the service inside the asset DDO, str

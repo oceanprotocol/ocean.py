@@ -21,7 +21,7 @@ def generate_new_id() -> str:
     return uuid.uuid4().hex + uuid.uuid4().hex
 
 
-def to_32byte_hex(val) -> str:
+def to_32byte_hex(val: Any) -> str:
     """
 
     :param val:

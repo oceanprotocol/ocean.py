@@ -5,9 +5,9 @@
 import copy
 import json
 import logging
+from typing import Any, Optional
 
 from eth_utils import add_0x_prefix
-
 from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
@@ -31,12 +31,12 @@ class DDO:
 
     def __init__(
         self,
-        did=None,
-        json_text=None,
-        json_filename=None,
-        created=None,
-        dictionary=None,
-    ):
+        did: Optional[str] = None,
+        json_text: Optional[str] = None,
+        json_filename: Optional[str] = None,
+        created: Optional[Any] = None,
+        dictionary: Optional[dict] = None,
+    ) -> None:
         """Clear the DDO data values."""
         self._did = did
         self._services = []
@@ -60,73 +60,73 @@ class DDO:
             self._read_dict(dictionary)
 
     @property
-    def did(self):
+    def did(self) -> Optional[str]:
         """Get the DID."""
         return self._did
 
     @property
-    def is_disabled(self):
+    def is_disabled(self) -> bool:
         """Returns whether the asset is disabled."""
         return is_flag_enabled(self, "isOrderDisabled")
 
     @property
-    def is_enabled(self):
+    def is_enabled(self) -> bool:
         """Returns the opposite of is_disabled, for convenience."""
         return not self.is_disabled
 
     @property
-    def is_retired(self):
+    def is_retired(self) -> bool:
         """Returns whether the asset is retired."""
         return is_flag_enabled(self, "isRetired")
 
     @property
-    def is_listed(self):
+    def is_listed(self) -> bool:
         """Returns whether the asset is listed."""
         return is_flag_enabled(self, "isListed")
 
     @property
-    def asset_id(self):
+    def asset_id(self) -> Optional[str]:
         """The asset id part of the DID"""
         if not self._did:
             return None
         return add_0x_prefix(did_to_id(self._did))
 
     @property
-    def services(self):
+    def services(self) -> Optional[list]:
         """Get the list of services."""
         return self._services[:]
 
     @property
-    def proof(self):
+    def proof(self) -> Optional[dict]:
         """Get the static proof, or None."""
         return self._proof
 
     @property
-    def credentials(self):
+    def credentials(self) -> Optional[dict]:
         """Get the credentials."""
         return self._credentials
 
     @property
-    def publisher(self):
+    def publisher(self) -> Optional[str]:
         return self._proof.get("creator") if self._proof else None
 
     @property
-    def metadata(self):
+    def metadata(self) -> Optional[dict]:
         """Get the metadata service."""
         metadata_service = self.get_service(ServiceTypes.METADATA)
         return metadata_service.attributes if metadata_service else None
 
     @property
-    def created(self):
+    def created(self) -> Optional[Any]:
         return self._created
 
     @property
-    def encrypted_files(self):
+    def encrypted_files(self) -> Optional[dict]:
         """Return encryptedFiles field in the base metadata."""
         files = self.metadata["encryptedFiles"]
         return files
 
-    def assign_did(self, did):
+    def assign_did(self, did: str) -> str:
         if self._did:
             raise AssertionError('"did" is already set on this DDO instance.')
         assert did and isinstance(
@@ -138,7 +138,13 @@ class DDO:
         self._did = did
         return did
 
-    def add_service(self, service_type, service_endpoint=None, values=None, index=None):
+    def add_service(
+        self,
+        service_type: str,
+        service_endpoint: Optional[str] = None,
+        values: Optional[dict] = None,
+        index: Optional[int] = None,
+    ) -> None:
         """
         Add a service to the list of services on the DDO.
 
@@ -163,7 +169,7 @@ class DDO:
         )
         self._services.append(service)
 
-    def as_text(self, is_proof=True, is_pretty=False):
+    def as_text(self, is_proof: bool = True, is_pretty: bool = False) -> str:
         """Return the DDO as a JSON text.
 
         :param if is_proof: if False then do not include the 'proof' element.
@@ -176,7 +182,7 @@ class DDO:
 
         return json.dumps(data)
 
-    def as_dictionary(self, is_proof=True):
+    def as_dictionary(self, is_proof: bool = True) -> dict:
         """
         Return the DDO as a JSON dict.
 
@@ -215,7 +221,7 @@ class DDO:
 
         return data
 
-    def _read_dict(self, dictionary):
+    def _read_dict(self, dictionary: dict) -> None:
         """Import a JSON dict into this DDO."""
         values = copy.deepcopy(dictionary)
         self._did = values.pop("id")
@@ -242,7 +248,7 @@ class DDO:
 
         self._other_values = values
 
-    def add_proof(self, checksums, publisher_account):
+    def add_proof(self, checksums: dict, publisher_account: object) -> None:
         """Add a proof to the DDO, based on the public_key id/index and signed with the private key
         add a static proof to the DDO, based on one of the public keys.
 
@@ -257,14 +263,14 @@ class DDO:
             "checksum": checksums,
         }
 
-    def get_service(self, service_type=None):
+    def get_service(self, service_type: str = None) -> Optional[Service]:
         """Return a service using."""
         for service in self._services:
             if service.type == service_type and service_type:
                 return service
         return None
 
-    def get_service_by_index(self, index):
+    def get_service_by_index(self, index: int) -> Optional[Service]:
         """
         Get service for a given index.
 
@@ -282,73 +288,77 @@ class DDO:
                 return service
 
         # try to find by type
+        # FIXME: this shouldn't work and is possibly a typo
         return self.get_service(index)
 
-    def enable(self):
+    def enable(self) -> None:
         """Enables asset for ordering."""
         disable_flag(self, "isOrderDisabled")
 
-    def disable(self):
+    def disable(self) -> None:
         """Disables asset from ordering."""
         enable_flag(self, "isOrderDisabled")
 
-    def retire(self):
+    def retire(self) -> None:
         """Retires an asset."""
         enable_flag(self, "isRetired")
 
-    def unretire(self):
+    def unretire(self) -> None:
         """Unretires an asset."""
         disable_flag(self, "isRetired")
 
-    def list(self):
+    def list(self) -> None:
         """Lists a previously unlisted asset."""
         enable_flag(self, "isListed")
 
-    def unlist(self):
+    def unlist(self) -> None:
         """Unlists an asset."""
         disable_flag(self, "isListed")
 
     @property
-    def requires_address_credential(self):
+    def requires_address_credential(self) -> bool:
         """Checks if an address credential is required on this asset."""
         manager = AddressCredential(self)
         return manager.requires_credential()
 
     @property
-    def allowed_addresses(self):
+    def allowed_addresses(self) -> list:
         """Lists addresses that are explicitly allowed in credentials."""
         manager = AddressCredential(self)
         return manager.get_addresses_of_class("allow")
 
     @property
-    def denied_addresses(self):
+    def denied_addresses(self) -> list:
         """Lists addresesses that are explicitly denied in credentials."""
         manager = AddressCredential(self)
         return manager.get_addresses_of_class("deny")
 
-    def add_address_to_allow_list(self, address):
+    def add_address_to_allow_list(self, address: str) -> None:
         """Adds an address to allowed addresses list."""
         manager = AddressCredential(self)
         manager.add_address_to_access_class(address, "allow")
 
-    def add_address_to_deny_list(self, address):
+    def add_address_to_deny_list(self, address: str) -> None:
         """Adds an address to the denied addresses list."""
         manager = AddressCredential(self)
         manager.add_address_to_access_class(address, "deny")
 
-    def remove_address_from_allow_list(self, address):
+    def remove_address_from_allow_list(self, address: str) -> None:
         """Removes address from allow list (if it exists)."""
         manager = AddressCredential(self)
         manager.remove_address_from_access_class(address, "allow")
 
-    def remove_address_from_deny_list(self, address):
+    def remove_address_from_deny_list(self, address: str) -> None:
         """Removes address from deny list (if it exists)."""
         manager = AddressCredential(self)
         manager.remove_address_from_access_class(address, "deny")
 
     def is_consumable(
-        self, credential=None, with_connectivity_check=True, provider_uri=None
-    ):
+        self,
+        credential: Optional[dict] = None,
+        with_connectivity_check: bool = True,
+        provider_uri: Optional[str] = None,
+    ) -> bool:
         """Checks whether an asset is consumable and returns a ConsumableCode."""
         if self.is_disabled or self.is_retired:
             return ConsumableCodes.ASSET_DISABLED

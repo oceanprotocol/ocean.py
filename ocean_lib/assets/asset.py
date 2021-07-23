@@ -2,34 +2,36 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from typing import Optional
+
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.ddo.ddo import DDO
 
 
 class Asset(DDO):
     @property
-    def data_token_address(self):
+    def data_token_address(self) -> Optional[str]:
         return self._other_values["dataToken"]
 
     @data_token_address.setter
-    def data_token_address(self, token_address):
+    def data_token_address(self, token_address: str) -> None:
         self._other_values["dataToken"] = token_address
 
     @property
-    def values(self):
+    def values(self) -> dict:
         return self._other_values.copy()
 
-    def get_trusted_algorithms(self):
+    def get_trusted_algorithms(self) -> list:
         return self.get_compute_privacy_attributes().get("publisherTrustedAlgorithms")
 
-    def get_compute_privacy_attributes(self):
+    def get_compute_privacy_attributes(self) -> dict:
         service = self.get_service(ServiceTypes.CLOUD_COMPUTE)
         assert service is not None, "this asset does not have a compute service."
         return service.attributes["main"].get("privacy", {})
 
     def update_compute_privacy(
         self, trusted_algorithms: list, allow_all: bool, allow_raw_algorithm: bool
-    ):
+    ) -> None:
         """Set the `trusted_algorithms` on the compute service.
 
         - An assertion is raised if this asset has no compute service

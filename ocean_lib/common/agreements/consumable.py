@@ -17,5 +17,5 @@ class MalformedCredential(Exception):
 
 
 class AssetNotConsumable(Exception):
-    def __init__(self, consumable_code):
+    def __init__(self, consumable_code: int) -> None:
         self.consumable_code = consumable_code
