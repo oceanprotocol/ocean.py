@@ -51,8 +51,8 @@ def send_ether(
 def cancel_or_replace_transaction(
     from_wallet: Wallet,
     nonce_value: Optional[Union[str, int]] = None,
-    gas_price: Optional[float] = None,
-    gas_limit: Optional[float] = None,
+    gas_price: Optional[int] = None,
+    gas_limit: Optional[int] = None,
 ) -> AttributeDict:
     web3 = from_wallet.web3
     tx = {

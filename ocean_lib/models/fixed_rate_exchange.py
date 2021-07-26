@@ -58,13 +58,13 @@ class FixedRateExchange(ContractBase):
 
     def activate(self, exchange_id: str, from_wallet: Wallet) -> Optional[str]:
         if self.isActive(exchange_id):
-            return
+            return None
 
         return self.send_transaction("toggleExchangeState", (exchange_id,), from_wallet)
 
     def deactivate(self, exchange_id: str, from_wallet: Wallet) -> Optional[str]:
         if not self.isActive(exchange_id):
-            return
+            return None
 
         return self.send_transaction("toggleExchangeState", (exchange_id,), from_wallet)
 
@@ -85,7 +85,7 @@ class FixedRateExchange(ContractBase):
     def getRate(self, exchange_id: str) -> int:
         return self.contract.caller.getRate(exchange_id)
 
-    def getExchange(self, exchange_id: str) -> FixedExchangeData:
+    def getExchange(self, exchange_id: str) -> Optional[FixedExchangeData]:
         values = self.contract.caller.getExchange(exchange_id)
         if values and len(values) == 6:
             return FixedExchangeData(*values)

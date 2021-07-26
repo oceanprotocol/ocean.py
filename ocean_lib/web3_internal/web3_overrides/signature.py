@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import codecs
+from typing import Optional, Tuple
 
 from enforce_typing import enforce_types
 from eth_keys.datatypes import Signature
@@ -19,7 +20,12 @@ class SignatureFix(Signature):
     v value of 27 or 28 instead of 0 or 1
     """
 
-    def __init__(self, signature_bytes=None, vrs=None, backend=None) -> None:
+    def __init__(
+        self,
+        signature_bytes: Optional[bytes] = None,
+        vrs: Optional[Tuple[int, int, int]] = None,
+        backend: Optional[object] = None,
+    ) -> None:
         """Initialises SignatureFix object."""
         v, r, s = vrs
         if v == 27 or v == 28:

@@ -437,15 +437,15 @@ class BPool(BToken):
     def allowance(self, src_address: str, dst_address: str) -> int:
         return self.contract.caller.allowance(src_address, dst_address)
 
-    def approve(self, dst_address: str, amt_base: int, from_wallet: Wallet):
+    def approve(self, dst_address: str, amt_base: int, from_wallet: Wallet) -> str:
         return self.send_transaction("approve", (dst_address, amt_base), from_wallet)
 
-    def transfer(self, dst_address: str, amt_base: int, from_wallet: Wallet):
+    def transfer(self, dst_address: str, amt_base: int, from_wallet: Wallet) -> str:
         return self.send_transaction("transfer", (dst_address, amt_base), from_wallet)
 
     def transferFrom(
         self, src_address: str, dst_address: str, amt_base: int, from_wallet: Wallet
-    ):
+    ) -> str:
         return self.send_transaction(
             "transferFrom", (dst_address, src_address, amt_base), from_wallet
         )
@@ -589,7 +589,7 @@ class BPool(BToken):
         event_name: str,
         from_block: int,
         to_block: Optional[int] = None,
-        user_address: None = None,
+        user_address: Optional[str] = None,
         this_pool_only: bool = True,
     ) -> Tuple:
         """
@@ -621,7 +621,7 @@ class BPool(BToken):
         to_block: Optional[int] = None,
         user_address: Optional[str] = None,
         this_pool_only: bool = True,
-    ) -> Tuple[AttributeDict, AttributeDict]:
+    ) -> Tuple[AttributeDict]:
         return self.get_liquidity_logs(
             "LOG_JOIN", from_block, to_block, user_address, this_pool_only
         )

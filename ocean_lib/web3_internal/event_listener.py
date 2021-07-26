@@ -78,7 +78,7 @@ class EventListener(object):
         events = []
         original_callback = callback
 
-        def _callback(event, *args):
+        def _callback(event: dict, *args) -> None:
             events.append(event)
             if original_callback:
                 original_callback(event, *args)
@@ -109,8 +109,13 @@ class EventListener(object):
 
     @staticmethod
     def watch_one_event(
-        event_filter, callback, timeout_callback, timeout, args, start_time=None
-    ):
+        event_filter: EventFilter,
+        callback: Callable,
+        timeout_callback: Callable,
+        timeout: int,
+        args: list,
+        start_time: Optional[int] = None,
+    ) -> None:
         """
         Start to watch one event.
 

@@ -12,7 +12,7 @@ from requests.sessions import Session
 from web3._utils.caching import generate_cache_key
 
 
-def _remove_session(key, session):
+def _remove_session(key: str, session: Session) -> None:
     session.close()
 
 

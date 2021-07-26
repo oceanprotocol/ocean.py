@@ -89,7 +89,7 @@ class Wallet:
         return self._address
 
     @property
-    def password(self) -> None:
+    def password(self) -> Optional[str]:
         return self._password
 
     @property
@@ -101,13 +101,13 @@ class Wallet:
         return self._key
 
     @staticmethod
-    def reset_tx_count():
+    def reset_tx_count() -> None:
         Wallet._last_tx_count = dict()
 
-    def __get_key(self):
+    def __get_key(self) -> Optional[str]:
         return self._key
 
-    def validate(self):
+    def validate(self) -> bool:
         account = self._web3.eth.account.from_key(self._key)
         return account.address == self._address
 
@@ -128,7 +128,7 @@ class Wallet:
         self,
         tx: Dict[str, Union[int, str, bytes]],
         fixed_nonce: Optional[int] = None,
-        gas_price: Optional[float] = None,
+        gas_price: Optional[int] = None,
     ) -> HexBytes:
         account = self._web3.eth.account.from_key(self.private_key)
         if fixed_nonce is not None:

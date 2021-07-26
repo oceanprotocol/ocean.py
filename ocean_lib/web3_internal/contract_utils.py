@@ -6,7 +6,7 @@ import importlib
 import json
 import logging
 import os
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 
 import artifacts  # noqa
 from enforce_typing import enforce_types
@@ -25,7 +25,7 @@ def get_contract_definition(contract_name: str) -> Dict[str, Any]:
 
 
 @enforce_types
-def load_contract(web3: Web3, contract_name, address):
+def load_contract(web3: Web3, contract_name: str, address: str) -> object:
     """Loads a contract using its name and address."""
     contract_definition = get_contract_definition(contract_name)
     abi = contract_definition["abi"]
@@ -34,7 +34,9 @@ def load_contract(web3: Web3, contract_name, address):
     return contract
 
 
-def get_contracts_addresses(network: str, address_file: str) -> Dict[str, str]:
+def get_contracts_addresses(
+    network: str, address_file: str
+) -> Optional[Dict[str, str]]:
     """Get addresses for all contract names, per network and address_file given."""
     network_alias = {"ganache": "development"}
 

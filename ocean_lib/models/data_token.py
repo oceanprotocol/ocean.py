@@ -6,7 +6,7 @@ import json
 import os
 import time
 from collections import namedtuple
-from typing import Dict, List, Optional, Tuple, Union
+from typing import Any, Dict, List, Optional, Tuple, Union
 
 import requests
 from enforce_typing import enforce_types
@@ -337,7 +337,7 @@ class DataToken(ContractBase):
         service_id: Union[str, int],
         amount_base: Union[str, int],
         sender: str,
-    ) -> Tuple[AttributeDict, AttributeDict, AttributeDict]:
+    ) -> Tuple[Any, Any, Any]:
         try:
             tx_receipt = self.get_tx_receipt(self.web3, tx_id)
         except ConnectionClosed:
@@ -503,7 +503,7 @@ class DataToken(ContractBase):
         return int(amount * to_base_18(percentage) / to_base_18(1.0))
 
     @staticmethod
-    def calculate_balances(transfers: List[Tuple]) -> List[Tuple[str, int]]:
+    def calculate_balances(transfers: List[Tuple]) -> dict:
         _from = [t[0].lower() for t in transfers]
         _to = [t[1].lower() for t in transfers]
         _value = [t[2] for t in transfers]

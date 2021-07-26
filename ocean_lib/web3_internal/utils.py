@@ -6,7 +6,7 @@ import logging
 from collections import namedtuple
 from decimal import Decimal
 from pathlib import Path
-from typing import List, Optional
+from typing import Any, List, Optional
 
 import artifacts
 from enforce_typing import enforce_types
@@ -49,7 +49,7 @@ def prepare_prefixed_hash(msg_hash: str) -> HexBytes:
     )
 
 
-def to_32byte_hex(val):
+def to_32byte_hex(val: int) -> str:
     """
 
     :param val:
@@ -58,7 +58,7 @@ def to_32byte_hex(val):
     return Web3.toBytes(val).rjust(32, b"\0")
 
 
-def split_signature(signature):
+def split_signature(signature: Any) -> Signature:
     """
 
     :param web3:
@@ -121,7 +121,7 @@ def get_chain_id(web3: Web3) -> int:
 
 
 @enforce_types
-def ec_recover(message, signed_message):
+def ec_recover(message: str, signed_message: str) -> str:
     """
     This method does not prepend the message with the prefix `\x19Ethereum Signed Message:\n32`.
     The caller should add the prefix to the msg/hash before calling this if the signature was
@@ -137,7 +137,7 @@ def ec_recover(message, signed_message):
 
 
 @enforce_types
-def personal_ec_recover(message, signed_message):
+def personal_ec_recover(message: str, signed_message: str) -> str:
     prefixed_hash = encode_defunct(text=message)
     return ec_recover(prefixed_hash, signed_message)
 
@@ -157,5 +157,5 @@ def from_wei(wei_value: int) -> Decimal:
     return Web3.fromWei(wei_value, "ether")
 
 
-def get_artifacts_path():
+def get_artifacts_path() -> str:
     return str(Path(artifacts.__file__).parent.expanduser().resolve())

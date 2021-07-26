@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import time
+from typing import Optional
 
 from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
@@ -27,7 +28,7 @@ class MetadataContract(ContractBase):
 
     def get_event_log(
         self, event_name: str, block: int, did: str, timeout: int = 45
-    ) -> AttributeDict:
+    ) -> Optional[AttributeDict]:
         did = remove_0x_prefix(did)
         start = time.time()
         event = getattr(self.events, event_name)
