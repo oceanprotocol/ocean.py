@@ -26,15 +26,7 @@ POLYGON_URL = "https://rpc.polygon.oceanprotocol.com"
 BSC_URL = "https://bsc-dataseed.binance.org"
 
 # shortcut names for networks that *Infura* supports, plus ganache and polygon
-SUPPORTED_NETWORK_NAMES = {
-    "rinkeby",
-    "kovan",
-    "ganache",
-    "mainnet",
-    "ropsten",
-    "polygon",
-    "bsc",
-}
+SUPPORTED_NETWORK_NAMES = {"rinkeby", "ganache", "mainnet", "ropsten", "polygon", "bsc"}
 
 
 @enforce_types

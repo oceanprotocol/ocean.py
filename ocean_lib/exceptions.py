@@ -22,3 +22,7 @@ class AquariusError(Exception):
 
 class VerifyTxFailed(Exception):
     """Transaction verification failed."""
+
+
+class TransactionFailed(Exception):
+    """Transaction has failed."""

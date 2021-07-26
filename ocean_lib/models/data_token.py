@@ -235,7 +235,7 @@ class DataToken(ContractBase):
                 error_count = 0
                 if (_from - start_block) % chunk == 0:
                     print(
-                        f"    So far processed {len(transfer_records)} Transfer events from {_from - start_block} blocks."
+                        f"    Searched blocks {_from}-{_to}. {len(transfer_records)} Transfer events detected."
                     )
             except requests.exceptions.ReadTimeout as err:
                 print(f"ReadTimeout ({_from}, {_to}): {err}")
