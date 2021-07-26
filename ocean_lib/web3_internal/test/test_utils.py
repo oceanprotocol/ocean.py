@@ -9,6 +9,7 @@ from ocean_lib.web3_internal.utils import (
     generate_multi_value_hash,
     get_chain_id,
     get_network_name,
+    get_network_timeout,
     prepare_prefixed_hash,
 )
 
@@ -44,3 +45,11 @@ def test_prepare_fixed_hash():
     assert (
         prepare_prefixed_hash("0x0").hex() == expected
     ), "The address is not the expected one."
+
+
+def test_get_network_timeout(web3):
+    assert get_network_timeout() == 2
+    assert get_network_timeout(123456) == 2  # id is not in list
+    assert get_network_timeout(web3=web3) == 2
+    assert get_network_timeout(1) == 600
+    assert get_network_timeout(4) == 300
