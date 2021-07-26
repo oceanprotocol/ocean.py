@@ -25,7 +25,7 @@ def get_contract_definition(contract_name: str) -> Dict[str, Any]:
 
 
 @enforce_types
-def load_contract(web3: Web3, contract_name: str, address: str) -> object:
+def load_contract(web3: Web3, contract_name: str, address: Optional[str]) -> object:
     """Loads a contract using its name and address."""
     contract_definition = get_contract_definition(contract_name)
     abi = contract_definition["abi"]

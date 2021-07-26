@@ -7,12 +7,14 @@ import logging
 import os
 from typing import Dict, Optional
 
+from enforce_typing import enforce_types
 from ocean_lib.config import Config
 from ocean_lib.ocean.util import get_infura_id, get_infura_url
 
 logging.basicConfig(level=logging.INFO)
 
 
+@enforce_types
 class ExampleConfig:
     @staticmethod
     def get_config_net() -> str:

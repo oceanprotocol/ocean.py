@@ -10,6 +10,7 @@ from pathlib import Path, PosixPath
 from typing import Any, Dict, Optional, Union
 
 import artifacts
+from enforce_typing import enforce_types
 from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
 
@@ -116,6 +117,8 @@ class Config(configparser.ConfigParser):
         :param options_dict: Python dict with the config, dict.
         :param kwargs: Additional args. If you pass text, you have to pass the plain text configuration.
         """
+        # can not enforce types on entire class, since init can not be checked
+        # using enforce_types
         configparser.ConfigParser.__init__(self)
 
         self.read_dict(config_defaults)
@@ -144,6 +147,7 @@ class Config(configparser.ConfigParser):
         self._handle_and_validate_metadata_cache_uri()
         self._load_environ()
 
+    @enforce_types
     def _handle_and_validate_metadata_cache_uri(self) -> None:
         metadata_cache_uri = self.get(
             SECTION_RESOURCES, NAME_METADATA_CACHE_URI, fallback=None
@@ -172,6 +176,7 @@ class Config(configparser.ConfigParser):
                 )
             )
 
+    @enforce_types
     def _load_environ(self) -> None:
         for option_name, environ_item in environ_names_and_sections.items():
             if option_name == NAME_METADATA_CACHE_URI:
@@ -202,6 +207,7 @@ class Config(configparser.ConfigParser):
                 self.set(environ_item[2], option_name, value)
 
     @property
+    @enforce_types
     def address_file(self) -> str:
         file_path = self.get(SECTION_ETH_NETWORK, NAME_ADDRESS_FILE)
         if file_path:
@@ -217,25 +223,30 @@ class Config(configparser.ConfigParser):
         return file_path
 
     @property
+    @enforce_types
     def network_url(self) -> str:
         """URL of the ethereum network. (e.g.): http://mynetwork:8545."""
         return self.get(SECTION_ETH_NETWORK, NAME_NETWORK_URL)
 
     @property
+    @enforce_types
     def gas_limit(self) -> int:
         """Ethereum gas limit."""
         return int(self.get(SECTION_ETH_NETWORK, NAME_GAS_LIMIT))
 
     @property
+    @enforce_types
     def metadata_cache_uri(self) -> str:
         """URL of metadata cache component. (e.g.): http://myaquarius:5000."""
         return self.get(SECTION_RESOURCES, NAME_METADATA_CACHE_URI)
 
     @property
+    @enforce_types
     def provider_url(self) -> str:
         return self.get(SECTION_RESOURCES, NAME_PROVIDER_URL)
 
     @property
+    @enforce_types
     def provider_address(self) -> str:
         """Provider address (e.g.): 0x00bd138abd70e2f00903268f3db08f2d25677c9e.
 
@@ -244,6 +255,7 @@ class Config(configparser.ConfigParser):
         return self.get(SECTION_RESOURCES, NAME_PROVIDER_ADDRESS)
 
     @property
+    @enforce_types
     def downloads_path(self) -> str:
         """Path for the downloads of assets."""
         return self.get(SECTION_RESOURCES, "downloads.path")
