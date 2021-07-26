@@ -63,7 +63,8 @@ def test_main(network, alice_wallet, alice_address, dtfactory_address, web3):
     assert not factory.is_tx_successful("nohash")
     with pytest.raises(ValueError):
         assert factory.get_event_signature("noevent")
-    assert factory.subscribe_to_event("TokenCreated", 30, None) is None
+    with pytest.raises(TypeError):
+        assert factory.subscribe_to_event("TokenCreated", 30, None) is None
     assert factory.get_event_argument_names("TokenCreated") == ()
     block = web3.eth.block_number
     assert (
