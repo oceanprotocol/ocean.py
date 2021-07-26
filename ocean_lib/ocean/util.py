@@ -37,6 +37,7 @@ SUPPORTED_NETWORK_NAMES = {
 }
 
 
+@enforce_types
 def get_infura_connection_type() -> str:
     _type = os.getenv(ENV_INFURA_CONNECTION_TYPE, "http")
     if _type not in ("http", "websocket"):
@@ -45,10 +46,12 @@ def get_infura_connection_type() -> str:
     return _type
 
 
+@enforce_types
 def get_infura_id() -> str:
     return os.getenv(ENV_INFURA_PROJECT_ID, WEB3_INFURA_PROJECT_ID)
 
 
+@enforce_types
 def get_infura_url(infura_id: str, network: str) -> str:
     conn_type = get_infura_connection_type()
     if conn_type == "http":
@@ -60,6 +63,7 @@ def get_infura_url(infura_id: str, network: str) -> str:
     raise AssertionError(f"Unknown connection type {conn_type}")
 
 
+@enforce_types
 def get_web3_connection_provider(
     network_url: str,
 ) -> Union[CustomHTTPProvider, WebsocketProvider]:
@@ -134,6 +138,7 @@ def from_base(num_base: int, dec: int) -> float:
     return float(num_base / (10 ** dec))
 
 
+@enforce_types
 def get_dtfactory_address(
     address_file: str, network: Optional[str] = None, web3: Optional[Web3] = None
 ) -> str:
@@ -145,6 +150,7 @@ def get_dtfactory_address(
     )
 
 
+@enforce_types
 def get_bfactory_address(
     address_file: str, network: Optional[str] = None, web3: Optional[Web3] = None
 ) -> str:
@@ -156,6 +162,7 @@ def get_bfactory_address(
     )
 
 
+@enforce_types
 def get_ocean_token_address(
     address_file: str, network: Optional[str] = None, web3: Optional[Web3] = None
 ) -> str:

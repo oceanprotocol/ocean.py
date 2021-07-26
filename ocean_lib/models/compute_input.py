@@ -6,7 +6,10 @@
 
 from typing import Dict, Optional, Union
 
+from enforce_typing import enforce_types
 
+
+@enforce_types
 class ComputeInput:
     def __init__(
         self, did: Optional[str], transfer_tx_id: str, service_id: Union[str, int]

@@ -6,9 +6,11 @@
 """Ocean module."""
 from typing import Any, Dict, Tuple
 
+from enforce_typing import enforce_types
 from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 
 
+@enforce_types
 class OceanServices:
 
     """Ocean services class."""

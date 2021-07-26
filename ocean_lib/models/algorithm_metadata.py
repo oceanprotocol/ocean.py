@@ -5,7 +5,10 @@
 import json
 from typing import Any, Dict
 
+from enforce_typing import enforce_types
 
+
+@enforce_types
 class AlgorithmMetadata:
     def __init__(self, metadata_dict: Dict[str, Any]) -> None:
         """Initialises AlgorithmMetadata object."""
