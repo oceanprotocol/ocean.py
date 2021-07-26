@@ -24,6 +24,7 @@ Signature = namedtuple("Signature", ("v", "r", "s"))
 logger = logging.getLogger(__name__)
 
 
+@enforce_types
 def generate_multi_value_hash(types: List[str], values: List[str]) -> HexBytes:
     """
     Return the hash of the given list of values.
@@ -38,6 +39,7 @@ def generate_multi_value_hash(types: List[str], values: List[str]) -> HexBytes:
     return Web3.solidityKeccak(types, values)
 
 
+@enforce_types
 def prepare_prefixed_hash(msg_hash: str) -> HexBytes:
     """
 
@@ -49,6 +51,7 @@ def prepare_prefixed_hash(msg_hash: str) -> HexBytes:
     )
 
 
+@enforce_types
 def to_32byte_hex(val: int) -> str:
     """
 
@@ -58,6 +61,7 @@ def to_32byte_hex(val: int) -> str:
     return Web3.toBytes(val).rjust(32, b"\0")
 
 
+@enforce_types
 def split_signature(signature: Any) -> Signature:
     """
 
@@ -153,9 +157,11 @@ def get_ether_balance(web3: Web3, address: str) -> int:
     return web3.eth.get_balance(address, block_identifier="latest")
 
 
+@enforce_types
 def from_wei(wei_value: int) -> Decimal:
     return Web3.fromWei(wei_value, "ether")
 
 
+@enforce_types
 def get_artifacts_path() -> str:
     return str(Path(artifacts.__file__).parent.expanduser().resolve())

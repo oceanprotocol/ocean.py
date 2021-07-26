@@ -9,6 +9,7 @@ from datetime import datetime
 from threading import Thread
 from typing import Callable, Optional, Union
 
+from enforce_typing import enforce_types
 from ocean_lib.web3_internal.contract_utils import load_contract
 from ocean_lib.web3_internal.event_filter import EventFilter
 from web3.main import Web3
@@ -16,6 +17,7 @@ from web3.main import Web3
 logger = logging.getLogger(__name__)
 
 
+@enforce_types
 class EventListener(object):
 
     """Class representing an event listener."""

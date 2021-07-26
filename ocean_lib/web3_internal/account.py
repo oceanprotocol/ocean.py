@@ -9,11 +9,13 @@ import os
 from pathlib import PosixPath
 from typing import Optional
 
+from enforce_typing import enforce_types
 from ocean_lib.web3_internal.utils import private_key_to_address
 
 logger = logging.getLogger("account")
 
 
+@enforce_types
 class Account:
 
     """Class representing an account."""
