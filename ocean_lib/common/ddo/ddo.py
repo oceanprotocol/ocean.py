@@ -5,6 +5,7 @@
 import copy
 import json
 import logging
+from pathlib import PosixPath
 from typing import Any, Optional
 
 from eth_utils import add_0x_prefix
@@ -33,7 +34,7 @@ class DDO:
         self,
         did: Optional[str] = None,
         json_text: Optional[str] = None,
-        json_filename: Optional[str] = None,
+        json_filename: Optional[PosixPath] = None,
         created: Optional[Any] = None,
         dictionary: Optional[dict] = None,
     ) -> None:

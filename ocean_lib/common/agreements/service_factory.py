@@ -2,12 +2,13 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-
+from enforce_typing import enforce_types
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes, ServiceTypesIndices
 from ocean_lib.common.ddo.service import Service
 
 
+@enforce_types
 class ServiceDescriptor(object):
     """Tuples of length 2. The first item must be one of ServiceTypes and the second
     item is a dict of parameters and values required by the service"""
@@ -70,6 +71,7 @@ class ServiceDescriptor(object):
         )
 
 
+@enforce_types
 class ServiceFactory(object):
     """Factory class to create Services."""
 

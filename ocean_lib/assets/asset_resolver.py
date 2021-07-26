@@ -20,7 +20,7 @@ logger = logging.getLogger("keeper")
 
 @enforce_types
 def resolve_asset(
-    did,
+    did: str,
     metadata_cache_uri: Optional[str] = None,
     web3: Optional[Web3] = None,
     token_address: Optional[str] = None,

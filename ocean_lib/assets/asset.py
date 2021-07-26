@@ -4,10 +4,12 @@
 #
 from typing import Optional
 
+from enforce_typing import enforce_types
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.ddo.ddo import DDO
 
 
+@enforce_types
 class Asset(DDO):
     @property
     def data_token_address(self) -> Optional[str]:

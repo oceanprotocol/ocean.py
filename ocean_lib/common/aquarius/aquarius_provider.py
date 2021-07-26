@@ -4,9 +4,12 @@
 #
 from typing import Any
 
+from enforce_typing import enforce_types
+
 from .aquarius import Aquarius
 
 
+@enforce_types
 class AquariusProvider:
     """Provides the Aquarius instance."""
 

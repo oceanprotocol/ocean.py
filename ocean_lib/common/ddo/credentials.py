@@ -4,9 +4,11 @@
 #
 from typing import Optional
 
+from enforce_typing import enforce_types
 from ocean_lib.common.agreements.consumable import ConsumableCodes, MalformedCredential
 
 
+@enforce_types
 class AddressCredential:
     def __init__(self, asset) -> None:
         self.asset = asset

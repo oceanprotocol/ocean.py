@@ -11,12 +11,14 @@ import json
 import logging
 from typing import Any, Optional, Tuple, Union
 
+from enforce_typing import enforce_types
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 
 logger = logging.getLogger("aquarius")
 
 
+@enforce_types
 class Aquarius:
     """Aquarius wrapper to call different endpoint of aquarius component."""
 

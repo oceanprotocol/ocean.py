@@ -6,6 +6,7 @@
 import re
 from typing import Dict, Union
 
+from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
 from ocean_lib.common.utils.utilities import checksum
 from web3 import Web3
@@ -13,6 +14,7 @@ from web3 import Web3
 OCEAN_PREFIX = "did:op:"
 
 
+@enforce_types
 class DID:
     """Class representing an asset DID."""
 
@@ -30,6 +32,7 @@ class DID:
         return OCEAN_PREFIX + remove_0x_prefix(checksum(seed))
 
 
+@enforce_types
 def did_parse(did: str) -> Dict[str, str]:
     """
     Parse a DID into it's parts.
@@ -49,6 +52,7 @@ def did_parse(did: str) -> Dict[str, str]:
     return result
 
 
+@enforce_types
 def id_to_did(did_id: Union[bytes, str], method: str = "op") -> str:
     """Return an Ocean DID from given a hex id."""
     if isinstance(did_id, bytes):
@@ -66,12 +70,14 @@ def id_to_did(did_id: Union[bytes, str], method: str = "op") -> str:
     return f"did:{method}:{did_id}"
 
 
+@enforce_types
 def did_to_id(did: str) -> str:
     """Return an id extracted from a DID string."""
     result = did_parse(did)
     return result["id"] if result and (result["id"] is not None) else None
 
 
+@enforce_types
 def did_to_id_bytes(did: Union[bytes, str]) -> bytes:
     """
     Return an Ocean DID to it's correspondng hex id in bytes.

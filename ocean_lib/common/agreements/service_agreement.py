@@ -5,12 +5,14 @@
 from collections import namedtuple
 from typing import Optional
 
+from enforce_typing import enforce_types
 from ocean_lib.common.agreements.service_types import ServiceTypes, ServiceTypesIndices
 from ocean_lib.common.ddo.service import Service
 
 Agreement = namedtuple("Agreement", ("template", "conditions"))
 
 
+@enforce_types
 class ServiceAgreement(Service):
     """Class representing a Service Agreement."""
 
@@ -19,11 +21,11 @@ class ServiceAgreement(Service):
 
     def __init__(
         self,
-        attributes: dict,
-        service_endpoint: str = None,
+        attributes: Optional[dict],
+        service_endpoint: Optional[str],
         service_type: str = None,
         service_index: Optional[int] = None,
-        other_values: dict = None,
+        other_values: Optional[dict] = None,
     ):
         """
 
@@ -49,13 +51,9 @@ class ServiceAgreement(Service):
         default_index = service_to_default_index[service_type]
 
         service_index = service_index if service_index is not None else default_index
-        Service.__init__(
-            self,
-            service_endpoint,
-            service_type,
-            attributes,
-            other_values,
-            service_index,
+
+        super().__init__(
+            service_endpoint, service_type, attributes, other_values, service_index
         )
 
     @classmethod
