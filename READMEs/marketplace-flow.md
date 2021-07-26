@@ -116,10 +116,15 @@ from ocean_lib.ocean.ocean import Ocean
 config = Config('config.ini')
 ocean = Ocean(config)
 
+print(f"config.network_url = '{config.network_url}'")
+print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
+print(f"config.provider_url = '{config.provider_url}'")
+
 #Alice's wallet
 import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
+print(f"alice_wallet.address = '{alice_wallet.address}'")
 
 #Mint OCEAN
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
@@ -128,6 +133,7 @@ mint_fake_OCEAN(config)
 #Publish a datatoken
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
 token_address = data_token.address
+print(f"token_address = '{token_address}'")
 
 #Specify metadata and service attributes, using the Branin test dataset
 date_created = "2019-12-28T10:55:11Z"
@@ -164,6 +170,7 @@ asset = ocean.assets.create(
 assert token_address == asset.data_token_address
 
 did = asset.did  # did contains the datatoken address
+print(f"did = '{did}'")
 
 #Mint the datatokens
 data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
@@ -183,10 +190,6 @@ pool = ocean.pool.create(
    from_wallet=alice_wallet
 )
 pool_address = pool.address
-
-#Print values that we use in the next step
-print(f"token_address = '{token_address}'")
-print(f"did = '{did}'")
 print(f"pool_address = '{pool_address}'")
 ```
 
@@ -203,7 +206,7 @@ asset = ocean.assets.resolve(did)
 service1 = asset.get_service(ServiceTypes.ASSET_ACCESS)
 
 #point to pool
-pool = ocean.pool.get(pool_address)
+pool = ocean.pool.get(ocean.web3, pool_address)
 
 #To access a data service, you need 1.0 datatokens.
 #Here, the market retrieves the datatoken price denominated in OCEAN.
@@ -252,7 +255,7 @@ service = asset.get_service(ServiceTypes.ASSET_ACCESS)
 #Bob sends his datatoken to the service
 quote = ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
 order_tx_id = ocean.assets.pay_for_service(
-    ocean.web3, 
+    ocean.web3,
     quote.amount, quote.data_token_address, asset.did, service.index, fee_receiver, bob_wallet, None)
 print(f"order_tx_id = '{order_tx_id}'")
 

@@ -11,8 +11,6 @@ from typing import List, Tuple
 import requests
 from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
-from web3.logs import DISCARD
-
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean.util import from_base_18, to_base_18
@@ -20,6 +18,7 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 from web3 import Web3
 from web3.exceptions import MismatchedABI
+from web3.logs import DISCARD
 from websockets import ConnectionClosed
 
 OrderValues = namedtuple(
@@ -235,7 +234,7 @@ class DataToken(ContractBase):
                 error_count = 0
                 if (_from - start_block) % chunk == 0:
                     print(
-                        f"    So far processed {len(transfer_records)} Transfer events from {_from - start_block} blocks."
+                        f"    Searched blocks {_from}-{_to}. {len(transfer_records)} Transfer events detected."
                     )
             except requests.exceptions.ReadTimeout as err:
                 print(f"ReadTimeout ({_from}, {_to}): {err}")

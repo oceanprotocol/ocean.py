@@ -536,7 +536,7 @@ class DataServiceProvider:
                 r"attachment;filename=(.+)", response.headers.get("content-disposition")
             )[1]
         except Exception as e:
-            logger.warning(f"It was not possible to get the file name. {e}")
+            logger.warning(f"It was not possible to get the file name. {e}. {response}")
 
     @staticmethod
     def _prepare_compute_payload(

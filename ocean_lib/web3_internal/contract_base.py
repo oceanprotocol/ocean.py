@@ -12,8 +12,6 @@ import requests
 from enforce_typing import enforce_types
 from eth_typing import BlockIdentifier
 from hexbytes import HexBytes
-from web3.contract import ContractEvent
-
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_utils import (
     get_contract_definition,
@@ -26,6 +24,7 @@ from web3 import Web3
 from web3._utils.events import get_event_data
 from web3._utils.filters import construct_event_filter_params
 from web3._utils.threads import Timeout
+from web3.contract import ContractEvent
 from web3.exceptions import MismatchedABI, ValidationError
 from websockets import ConnectionClosed
 
@@ -94,7 +93,7 @@ class ContractBase(object):
         return Web3.toChecksumAddress(address)
 
     @staticmethod
-    def get_tx_receipt(web3: Web3, tx_hash: str, timeout=20):
+    def get_tx_receipt(web3: Web3, tx_hash: str, timeout=120):
         """
         Get the receipt of a tx.
 
@@ -103,7 +102,9 @@ class ContractBase(object):
         :return: Tx receipt
         """
         try:
-            web3.eth.wait_for_transaction_receipt(HexBytes(tx_hash), timeout=timeout)
+            return web3.eth.wait_for_transaction_receipt(
+                HexBytes(tx_hash), timeout=timeout
+            )
         except ValueError as e:
             logger.error(f"Waiting for transaction receipt failed: {e}")
             return None
@@ -118,8 +119,6 @@ class ContractBase(object):
         except Exception as e:
             logger.info(f"Unknown error waiting for transaction receipt: {e}.")
             raise
-
-        return web3.eth.get_transaction_receipt(tx_hash)
 
     def is_tx_successful(self, tx_hash: str) -> bool:
         """Check if the transaction is successful.
@@ -301,7 +300,7 @@ class ContractBase(object):
                 error_count = 0
                 if (to_block - _to) % 1000 == 0:
                     print(
-                        f"    So far processed {len(all_logs)} Transfer events from {to_block - _to} blocks."
+                        f"    Searched blocks {_from}-{_to}. {event_name} event not yet found."
                     )
             except requests.exceptions.ReadTimeout as err:
                 print(f"ReadTimeout ({_from}, {_to}): {err}")
@@ -359,7 +358,7 @@ class ContractBase(object):
                 error_count = 0
                 if (_from - from_block) % 1000 == 0:
                     print(
-                        f"    So far processed {len(all_logs)} Transfer events from {_from-from_block} blocks."
+                        f"    Searched blocks {_from}-{_to}. {len(all_logs)} {event_name} events detected so far."
                     )
             except requests.exceptions.ReadTimeout as err:
                 print(f"ReadTimeout ({_from}, {_to}): {err}")
