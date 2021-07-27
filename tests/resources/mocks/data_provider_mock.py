@@ -3,11 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+import json
 import os
 
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider, logger
+from requests.models import PreparedRequest
 
 
 class DataProviderMock(object):
@@ -76,6 +78,7 @@ class DataProviderMock(object):
         token_address,
         order_tx_id,
         index=None,
+        userdata=None,
     ):
 
         indexes = range(len(files))
@@ -87,15 +90,23 @@ class DataProviderMock(object):
             )
             indexes = [index]
 
-        base_url = (
-            f"{service_endpoint}"
-            f"?documentId={did}"
-            f"&serviceId={service_id}"
-            f"&serviceType={ServiceTypes.ASSET_ACCESS}"
-            f"&dataToken={token_address}"
-            f"&transferTxId={order_tx_id}"
-            f"&consumerAddress={wallet.address}"
-        )
+        req = PreparedRequest()
+        params = {
+            "documentId": did,
+            "serviceId": service_id,
+            "serviceType": ServiceTypes.ASSET_ACCESS,
+            "dataToken": token_address,
+            "transferTxId": order_tx_id,
+            "consumerAddress": wallet.address,
+        }
+
+        if userdata:
+            userdata = json.dumps(userdata)
+            params["userdata"] = userdata
+
+        req.prepare_url(service_endpoint, params)
+        base_url = req.url
+
         provider_uri = DataProviderMock.build_download_endpoint(service_endpoint)[1]
         for i in indexes:
             signature = DataServiceProvider.sign_message(
