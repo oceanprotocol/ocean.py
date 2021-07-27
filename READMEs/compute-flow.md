@@ -33,6 +33,14 @@ this [faucet](https://www.rinkeby.io/#faucet). Otherwise, run `ganache-cli` and 
 If you haven't installed yet:
 
 ```console
+#Create your working directory
+mkdir test3
+cd test3
+
+#Initialize virtual environment and activate it.
+python -m venv venv
+source venv/bin/activate
+
 #Install the ocean.py library. Install wheel first to avoid errors.
 pip install wheel
 pip install ocean-lib
@@ -56,6 +64,20 @@ its own requirements and make sure they all point to `rinkeby` testnet.
     docker run oceanprotocol/aquarius:latest
 ```
 
+Run Provider and Aquarius (Metadata cache) services together using `barge`:
+
+```console
+#grab repo
+git clone https://github.com/oceanprotocol/barge
+cd barge
+
+#clean up old containers (to be sure)
+docker system prune -a --volumes
+
+#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
+./start_ocean.sh  --with-provider2
+```
+
 [Market app](https://github.com/oceanprotocol/market)
 
 ```console
@@ -76,6 +98,8 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
+import os
+
 #Alice's config
 config = {
    'network' : 'rinkeby',
@@ -83,7 +107,7 @@ config = {
    'providerUri' : 'http://127.0.0.1:8030'
 }
 ocean = Ocean(config)
-alice_wallet = Wallet(ocean.web3, private_key='8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f')
+alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
 
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
 token_address = data_token.address
