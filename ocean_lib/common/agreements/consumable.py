@@ -6,6 +6,15 @@ from enforce_typing import enforce_types
 
 
 class ConsumableCodes:
+    """
+    Contains constant values for:
+     - OK
+     - ASSET_DISABLED
+     - CONNECTIVITY_FAIL
+     - CREDENTIAL_NOT_IN_ALLOW_LIST
+     - CREDENTIAL_IN_DENY_LIST
+    """
+
     OK = 0
     ASSET_DISABLED = 1
     CONNECTIVITY_FAIL = 2
