@@ -14,6 +14,9 @@ from ocean_lib.common.agreements.service_types import ServiceTypes
 
 
 def create_checksum(text):
+    """
+    :return: str
+    """
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
 
 
@@ -23,6 +26,16 @@ def generate_trusted_algo_dict(
     metadata_cache_uri: Optional[str] = None,
     ddo: Optional[Asset] = None,
 ):
+    """
+    :return: Object as follows:
+    ```
+    {
+        "did": <did>,
+        "filesChecksum": <str>,
+        "containerSectionChecksum": <str>
+    }
+    ```
+    """
     assert ddo or (
         did and metadata_cache_uri
     ), "Either DDO, or both did and metadata_cache_uri are None."
@@ -46,6 +59,9 @@ def generate_trusted_algo_dict(
 
 @enforce_types
 def create_publisher_trusted_algorithms(dids: list, metadata_cache_uri: str) -> list:
+    """
+    :return: List of objects returned by `generate_trusted_algo_dict` method.
+    """
     return [
         generate_trusted_algo_dict(did=did, metadata_cache_uri=metadata_cache_uri)
         for did in dids
@@ -56,6 +72,9 @@ def create_publisher_trusted_algorithms(dids: list, metadata_cache_uri: str) -> 
 def add_publisher_trusted_algorithm(
     dataset_did: str, algo_did: str, metadata_cache_uri: str
 ) -> list:
+    """
+    :return: List of trusted algos
+    """
     asset = resolve_asset(dataset_did, metadata_cache_uri=metadata_cache_uri)
     compute_service = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
     assert (
@@ -86,6 +105,9 @@ def add_publisher_trusted_algorithm(
 def remove_publisher_trusted_algorithm(
     dataset_did: str, algo_did: str, metadata_cache_uri: str
 ) -> list:
+    """
+    :return: List of trusted algos not containing `algo_did`.
+    """
     asset = resolve_asset(dataset_did, metadata_cache_uri=metadata_cache_uri)
     trusted_algorithms = asset.get_trusted_algorithms()
     if not trusted_algorithms:

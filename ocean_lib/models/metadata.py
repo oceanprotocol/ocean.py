@@ -25,6 +25,9 @@ class MetadataContract(ContractBase):
         return self.events.MetadataUpdated()
 
     def get_event_log(self, event_name, block, did, timeout=45):
+        """
+        :return: Log if event is found else None
+        """
         did = remove_0x_prefix(did)
         start = time.time()
         event = getattr(self.events, event_name)
@@ -48,10 +51,19 @@ class MetadataContract(ContractBase):
         return _log
 
     def verify_tx(self, tx_hash: str) -> bool:
+        """
+        :return bool:
+        """
         return self.get_tx_receipt(self.web3, tx_hash).status == 1
 
     def create(self, did: str, flags: bytes, data: bytes, from_wallet: Wallet) -> str:
+        """
+        :return str: hex str transaction hash
+        """
         return self.send_transaction("create", (did, flags, data), from_wallet)
 
     def update(self, did: str, flags: bytes, data: bytes, from_wallet: Wallet) -> str:
+        """
+        :return str: hex str transaction hash
+        """
         return self.send_transaction("update", (did, flags, data), from_wallet)
