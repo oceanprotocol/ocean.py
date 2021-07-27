@@ -13,9 +13,10 @@ _NETWORK = "ganache"
 
 def _get_exchange_address(config):
     """Helper function to retrieve a known exchange address."""
-    return get_contracts_addresses(config.address_file, _NETWORK)[
-        FixedRateExchange.CONTRACT_NAME
-    ]
+    addresses = get_contracts_addresses(config.address_file, _NETWORK)
+    if "v3" in addresses:
+        addresses = addresses["v3"]
+    return addresses[FixedRateExchange.CONTRACT_NAME]
 
 
 def test_ocean_exchange(publisher_ocean_instance):

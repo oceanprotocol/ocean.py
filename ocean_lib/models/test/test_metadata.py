@@ -5,19 +5,16 @@
 
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.test.test_ocean_assets import create_asset
-from ocean_lib.ocean.util import get_contracts_addresses
 from tests.resources.ddo_helpers import wait_for_ddo
 from tests.resources.helper_functions import get_publisher_wallet
 
 
-def test_metadata_contract(publisher_ocean_instance, config):
+def test_metadata_contract(publisher_ocean_instance, config, contracts_addresses):
     ocn = publisher_ocean_instance
     alice = get_publisher_wallet()
     block = ocn.web3.eth.block_number
 
-    ddo_address = get_contracts_addresses(config.address_file, "ganache")[
-        MetadataContract.CONTRACT_NAME
-    ]
+    ddo_address = contracts_addresses[MetadataContract.CONTRACT_NAME]
     ddo_registry = MetadataContract(ocn.web3, ddo_address)
 
     # Tested the event properties.
