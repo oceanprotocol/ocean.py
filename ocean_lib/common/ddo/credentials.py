@@ -94,7 +94,7 @@ class AddressCredential:
         lc_addresses.remove(address)
         address_entry["values"] = lc_addresses
 
-    def get_address_entry_of_class(self, access_class: str = "allow") -> dict:
+    def get_address_entry_of_class(self, access_class: str = "allow") -> Optional[dict]:
         """Get address credentials entry of the specified access class. access_class = "allow" or "deny"."""
         entries = self.asset._credentials.get(access_class, [])
         address_entries = [entry for entry in entries if entry["type"] == "address"]

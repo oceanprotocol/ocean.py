@@ -8,6 +8,7 @@ import logging
 from pathlib import PosixPath
 from typing import Any, Optional
 
+from eth_account.account import Account
 from eth_utils import add_0x_prefix
 from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
@@ -249,7 +250,7 @@ class DDO:
 
         self._other_values = values
 
-    def add_proof(self, checksums: dict, publisher_account: object) -> None:
+    def add_proof(self, checksums: dict, publisher_account: Account) -> None:
         """Add a proof to the DDO, based on the public_key id/index and signed with the private key
         add a static proof to the DDO, based on one of the public keys.
 

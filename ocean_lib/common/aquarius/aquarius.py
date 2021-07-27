@@ -70,7 +70,7 @@ class Aquarius:
 
         return asset_list
 
-    def get_asset_ddo(self, did: str) -> Optional[DDO]:
+    def get_asset_ddo(self, did: str) -> Union[DDO, dict]:
         """
         Retrieve asset ddo for a given did.
 
@@ -175,7 +175,7 @@ class Aquarius:
         else:
             raise ValueError(f"Unable to search for DDO: {response.content}")
 
-    def validate_metadata(self, metadata: dict) -> Tuple[bool, Any]:
+    def validate_metadata(self, metadata: dict) -> Tuple[bool, Union[list, dict]]:
         """
         Validate that the metadata of your ddo is valid.
 
