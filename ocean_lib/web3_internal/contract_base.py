@@ -211,7 +211,7 @@ class ContractBase(object):
         _transact = {
             "from": from_wallet.address,
             "account_key": from_wallet.key,
-            "chainId": self.web3.eth.chain_id
+            "chainId": self.web3.eth.chain_id,
         }
 
         gas_price = os.environ.get(ENV_GAS_PRICE, None)
