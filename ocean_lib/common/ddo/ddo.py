@@ -289,9 +289,7 @@ class DDO:
             if service.index == index:
                 return service
 
-        # try to find by type
-        # FIXME: this shouldn't work and is possibly a typo
-        return self.get_service(index)
+        return None
 
     def enable(self) -> None:
         """Enables asset for ordering."""

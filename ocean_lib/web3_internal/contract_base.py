@@ -207,8 +207,6 @@ class ContractBase(object):
     ) -> str:
         """Calls a smart contract function.
 
-        Uses either `personal_sendTransaction` (if passphrase is available) or `ether_sendTransaction`.
-
         :param fn_name: str the smart contract function name
         :param fn_args: tuple arguments to pass to function above
         :param from_wallet:
@@ -219,10 +217,8 @@ class ContractBase(object):
         contract_function = CustomContractFunction(contract_fn)
         _transact = {
             "from": from_wallet.address,
-            "passphrase": from_wallet.password,
             "account_key": from_wallet.key,
-            "chainId": self.web3.eth.chain_id
-            # 'gas': GAS_LIMIT_DEFAULT
+            "chainId": self.web3.eth.chain_id,
         }
 
         gas_price = os.environ.get(ENV_GAS_PRICE, None)

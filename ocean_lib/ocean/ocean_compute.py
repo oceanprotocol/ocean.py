@@ -270,6 +270,7 @@ class OceanCompute:
         algorithm_data_token: str = None,
         output: dict = None,
         job_id: str = None,
+        algouserdata: Optional[dict] = None,
     ) -> str:
         """
         Start a remote compute job on the asset files.
@@ -345,6 +346,8 @@ class OceanCompute:
                 output,
                 input_datasets,
                 job_id,
+                userdata=first_input.userdata,
+                algouserdata=algouserdata,
             )
 
             return job_info["jobId"]

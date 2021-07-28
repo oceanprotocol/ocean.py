@@ -6,13 +6,12 @@
 from unittest.mock import Mock
 
 import pytest
-from requests.exceptions import InvalidURL
-from requests.models import Response
-
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
+from requests.exceptions import InvalidURL
+from requests.models import Response
 from tests.resources.helper_functions import get_publisher_ocean_instance
 from tests.resources.mocks.http_client_mock import (
     HttpClientEmptyMock,
@@ -90,6 +89,7 @@ def test_order_requirements_fails(with_evil_client):
             "some_service_id",
             "and_service_type",
             "some_token_address",
+            userdata={"test_dict_key": "test_dict_value"},
         )
         is None
     )
