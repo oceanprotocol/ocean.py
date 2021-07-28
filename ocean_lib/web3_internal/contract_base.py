@@ -75,9 +75,11 @@ class ContractBase(object):
     def configured_address(cls, network, address_file):
         """Returns the contract addresses"""
         addresses = get_contracts_addresses(network, address_file)
-        if "v3" in addresses:
-            key = "v3" if cls.CONTRACT_NAME in cls.V3_CONTRACTS else "v4"
-            addresses = addresses[key]
+        # FIXME: temporary solution, will need to pass in the version
+        # or detect it somehow
+
+        key = "v3" if cls.CONTRACT_NAME in cls.V3_CONTRACTS else "v4"
+        addresses = addresses[key]
 
         return addresses.get(cls.CONTRACT_NAME) if addresses else None
 

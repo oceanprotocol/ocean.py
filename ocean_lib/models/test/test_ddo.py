@@ -134,9 +134,7 @@ def test_ddo_credentials_disabled():
 
 def test_ddo_on_chain(config, web3):
     """Tests chain operations on a DDO."""
-    addresses = get_contracts_addresses(config.address_file, "ganache")
-    if "v3" in addresses:
-        addresses = addresses["v3"]
+    addresses = get_contracts_addresses(config.address_file, "ganache")["v3"]
     ddo_address = addresses[MetadataContract.CONTRACT_NAME]
     dtfactory_address = addresses[DTFactory.CONTRACT_NAME]
     ddo_registry = MetadataContract(web3, ddo_address)

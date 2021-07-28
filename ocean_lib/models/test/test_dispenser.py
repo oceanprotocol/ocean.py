@@ -7,8 +7,10 @@ import pytest
 from ocean_lib.models.dispenser import DispenserContract
 
 
-def test_dispenser_status(contracts_addresses, alice_ocean, alice_wallet, bob_wallet):
-    dispenser_address = contracts_addresses["Dispenser"]
+def test_dispenser_status(
+    v3_contracts_addresses, alice_ocean, alice_wallet, bob_wallet
+):
+    dispenser_address = v3_contracts_addresses["Dispenser"]
     dispenser = DispenserContract(alice_ocean.web3, dispenser_address)
     token = alice_ocean.create_data_token(
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
@@ -25,9 +27,9 @@ def test_dispenser_status(contracts_addresses, alice_ocean, alice_wallet, bob_wa
 
 
 def test_dispenser_activation(
-    contracts_addresses, alice_ocean, alice_wallet, bob_wallet
+    v3_contracts_addresses, alice_ocean, alice_wallet, bob_wallet
 ):
-    dispenser_address = contracts_addresses["Dispenser"]
+    dispenser_address = v3_contracts_addresses["Dispenser"]
     dispenser = DispenserContract(alice_ocean.web3, dispenser_address)
     token = alice_ocean.create_data_token(
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
@@ -44,8 +46,10 @@ def test_dispenser_activation(
     assert dispenser.deactivate(token.address, alice_wallet)
 
 
-def test_dispenser_minting(contracts_addresses, alice_ocean, alice_wallet, bob_wallet):
-    dispenser_address = contracts_addresses["Dispenser"]
+def test_dispenser_minting(
+    v3_contracts_addresses, alice_ocean, alice_wallet, bob_wallet
+):
+    dispenser_address = v3_contracts_addresses["Dispenser"]
     dispenser = DispenserContract(alice_ocean.web3, dispenser_address)
     token = alice_ocean.create_data_token(
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"

@@ -46,11 +46,9 @@ def bfactory_address(config):
 
 
 @pytest.fixture
-def contracts_addresses(config):
+def v3_contracts_addresses(config):
     addresses = get_contracts_addresses(_NETWORK, config.address_file)
-    if "v3" in addresses:
-        # keep backwards compatibility
-        addresses = addresses["v3"]
+    addresses = addresses["v3"]
 
     return addresses
 

@@ -20,7 +20,7 @@ def run_failing_tx(contract, fn, *args):
 
 
 def test_fixed_rate_exchange(
-    web3, alice_ocean, alice_wallet, T1, bob_wallet, T2, contracts_addresses
+    web3, alice_ocean, alice_wallet, T1, bob_wallet, T2, v3_contracts_addresses
 ):
     """Tests for fixed rate exchange.
 
@@ -36,7 +36,7 @@ def test_fixed_rate_exchange(
     """
     base_unit = to_base_18(1.0)
     fixed_ex = FixedRateExchange(
-        web3, contracts_addresses[FixedRateExchange.CONTRACT_NAME]
+        web3, v3_contracts_addresses[FixedRateExchange.CONTRACT_NAME]
     )
     num_ex = fixed_ex.getNumberOfExchanges()
     assert num_ex == len(

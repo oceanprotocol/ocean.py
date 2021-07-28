@@ -13,9 +13,8 @@ _NETWORK = "ganache"
 
 def _get_exchange_address(config):
     """Helper function to retrieve a known exchange address."""
-    addresses = get_contracts_addresses(config.address_file, _NETWORK)
-    if "v3" in addresses:
-        addresses = addresses["v3"]
+    addresses = get_contracts_addresses(config.address_file, _NETWORK)["v3"]
+
     return addresses[FixedRateExchange.CONTRACT_NAME]
 
 

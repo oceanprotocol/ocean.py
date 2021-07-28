@@ -9,12 +9,13 @@ from tests.resources.ddo_helpers import wait_for_ddo
 from tests.resources.helper_functions import get_publisher_wallet
 
 
-def test_metadata_contract(publisher_ocean_instance, config, contracts_addresses):
+def test_metadata_contract(publisher_ocean_instance, config, v3_contracts_addresses):
     ocn = publisher_ocean_instance
     alice = get_publisher_wallet()
     block = ocn.web3.eth.block_number
 
-    ddo_address = contracts_addresses[MetadataContract.CONTRACT_NAME]
+    # FIXME: Metadata needs to suppport both v3 and v4
+    ddo_address = v3_contracts_addresses[MetadataContract.CONTRACT_NAME]
     ddo_registry = MetadataContract(ocn.web3, ddo_address)
 
     # Tested the event properties.
