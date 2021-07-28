@@ -170,7 +170,6 @@ def _deployAndMintToken(web3: Web3, symbol: str, to_address: str) -> btoken.BTok
     dt_address = DataToken.deploy(
         web3,
         wallet,
-        None,
         "Template Contract",
         "TEMPLATE",
         wallet.address,
@@ -178,9 +177,7 @@ def _deployAndMintToken(web3: Web3, symbol: str, to_address: str) -> btoken.BTok
         DTFactory.FIRST_BLOB,
         to_address,
     )
-    dt_factory = DTFactory(
-        web3, DTFactory.deploy(web3, wallet, None, dt_address, to_address)
-    )
+    dt_factory = DTFactory(web3, DTFactory.deploy(web3, wallet, dt_address, to_address))
     token_address = dt_factory.get_token_address(
         dt_factory.createToken(
             symbol, symbol, symbol, DataToken.DEFAULT_CAP_BASE, wallet

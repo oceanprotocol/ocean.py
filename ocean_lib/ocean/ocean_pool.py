@@ -303,7 +303,10 @@ class OceanPool:
         :return: str transaction id/hash
         """
         ocean_tok = DataToken(self.web3, self.ocean_address)
-        ocean_tok.approve_tokens(pool_address, max_OCEAN_amount, from_wallet, wait=True)
+        if ocean_tok.allowance(from_wallet.address, pool_address) < max_OCEAN_amount:
+            ocean_tok.approve_tokens(
+                pool_address, max_OCEAN_amount, from_wallet, wait=True
+            )
 
         dtoken_address = self.get_token_address(pool_address)
         pool = BPool(self.web3, pool_address)
@@ -638,7 +641,7 @@ class OceanPool:
         current_block = to_block if to_block is not None else self.web3.eth.block_number
         pool = BPool(self.web3, pool_address)
         dt_address = token_address or self.get_token_address(pool_address, pool)
-        factory = DTFactory(self.web3, get_dtfactory_address())
+        factory = DTFactory(self.web3, get_dtfactory_address(web3=self.web3))
         if block_number is None:
             block_number = factory.get_token_registered_event(
                 0, current_block, token_address=dt_address

@@ -18,7 +18,7 @@ with open("README.md", encoding="utf8") as readme_file:
 # Installed by pip install ocean-lib
 # or pip install -e .
 install_requirements = [
-    "ocean-contracts==0.6.3",
+    "ocean-contracts==0.6.5",
     "coloredlogs",
     "pyopenssl",
     "PyJWT",  # not jwt
@@ -102,7 +102,7 @@ setup(
     url="https://github.com/oceanprotocol/ocean.py",
     # fmt: off
     # bumpversion.sh needs single-quotes
-    version='0.5.26',
+    version='0.5.27',
     # fmt: on
     zip_safe=False,
 )

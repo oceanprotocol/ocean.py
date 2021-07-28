@@ -7,7 +7,6 @@ import json
 import logging
 
 from eth_utils import add_0x_prefix
-
 from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
@@ -281,8 +280,7 @@ class DDO:
             if service.index == index:
                 return service
 
-        # try to find by type
-        return self.get_service(index)
+        return None
 
     def enable(self):
         """Enables asset for ordering."""

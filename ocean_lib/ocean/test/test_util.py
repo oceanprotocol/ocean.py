@@ -99,6 +99,14 @@ def test_get_web3_connection_provider(monkeypatch):
     provider = util.get_web3_connection_provider("polygon")
     assert provider.endpoint_uri == "https://rpc.polygon.oceanprotocol.com"
 
+    # bsc network name
+    assert (
+        "bsc" in util.SUPPORTED_NETWORK_NAMES
+    ), "bsc is missing from SUPPORTED_NETWORK_NAMES"
+    assert util.BSC_URL == "https://bsc-dataseed.binance.org"
+    provider = util.get_web3_connection_provider("bsc")
+    assert provider.endpoint_uri == "https://bsc-dataseed.binance.org"
+
     # all infura-supported network names
     for network in util.SUPPORTED_NETWORK_NAMES:
         if network == "ganache" or "polygon":
@@ -158,7 +166,7 @@ def test_get_dtfactory_address(config):
     assert isinstance(addresses, dict)
     assert "DTFactory" in addresses
 
-    address = get_dtfactory_address(config.address_file)
+    address = get_dtfactory_address(config.address_file, "ganache")
     assert address[:2] == "0x", "It is not a token address."
     assert address == addresses["DTFactory"]
 
@@ -169,7 +177,7 @@ def test_get_bfactory_address(config):
     assert isinstance(addresses, dict)
     assert "BFactory" in addresses
 
-    address = get_bfactory_address(config.address_file)
+    address = get_bfactory_address(config.address_file, "ganache")
     assert address[:2] == "0x", "It is not a token address."
     assert address == addresses["BFactory"]
 
@@ -180,6 +188,6 @@ def test_get_ocean_token_address(config):
     assert isinstance(addresses, dict)
     assert "Ocean" in addresses
 
-    address = get_ocean_token_address(config.address_file)
+    address = get_ocean_token_address(config.address_file, "ganache")
     assert address[:2] == "0x", "It is not a token address."
     assert address == addresses["Ocean"]

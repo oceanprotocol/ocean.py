@@ -21,16 +21,10 @@ from web3 import WebsocketProvider
 WEB3_INFURA_PROJECT_ID = "357f2fe737db4304bd2f7285c5602d0d"
 GANACHE_URL = "http://127.0.0.1:8545"
 POLYGON_URL = "https://rpc.polygon.oceanprotocol.com"
+BSC_URL = "https://bsc-dataseed.binance.org"
 
 # shortcut names for networks that *Infura* supports, plus ganache and polygon
-SUPPORTED_NETWORK_NAMES = {
-    "rinkeby",
-    "kovan",
-    "ganache",
-    "mainnet",
-    "ropsten",
-    "polygon",
-}
+SUPPORTED_NETWORK_NAMES = {"rinkeby", "ganache", "mainnet", "ropsten", "polygon", "bsc"}
 
 
 def get_infura_connection_type():
@@ -85,6 +79,8 @@ def get_web3_connection_provider(network_url):
         provider = CustomHTTPProvider(GANACHE_URL)
     elif network_url == "polygon":
         provider = CustomHTTPProvider(POLYGON_URL)
+    elif network_url == "bsc":
+        provider = CustomHTTPProvider(BSC_URL)
     else:
         assert network_url in SUPPORTED_NETWORK_NAMES, (
             f"The given network_url *{network_url}* does not start with either "
@@ -126,14 +122,29 @@ def from_base(num_base: int, dec: int) -> float:
     return float(num_base / (10 ** dec))
 
 
-def get_dtfactory_address(address_file, network=None):
-    return DTFactory.configured_address(network or get_network_name(), address_file)
+def get_dtfactory_address(address_file, network=None, web3=None):
+    """Returns the DTFactory address for given network or web3 instance
+    Requires either network name or web3 instance.
+    """
+    return DTFactory.configured_address(
+        network or get_network_name(web3=web3), address_file
+    )
 
 
-def get_bfactory_address(address_file, network=None):
-    return BFactory.configured_address(network or get_network_name(), address_file)
+def get_bfactory_address(address_file, network=None, web3=None):
+    """Returns the BFactory address for given network or web3 instance
+    Requires either network name or web3 instance.
+    """
+    return BFactory.configured_address(
+        network or get_network_name(web3=web3), address_file
+    )
 
 
-def get_ocean_token_address(address_file, network=None):
-    addresses = get_contracts_addresses(address_file, network or get_network_name())
+def get_ocean_token_address(address_file, network=None, web3=None):
+    """Returns the Ocean token address for given network or web3 instance
+    Requires either network name or web3 instance.
+    """
+    addresses = get_contracts_addresses(
+        address_file, network or get_network_name(web3=web3)
+    )
     return addresses.get("Ocean") if addresses else None
