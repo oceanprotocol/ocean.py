@@ -72,6 +72,8 @@ def test_find_service():
     assert service and service.type == ServiceTypes.METADATA, (
         "Failed to find service by str(int)" " id."
     )
+    service = ddo.get_service_by_index(3)
+    assert not service
 
     service = ddo.get_service(ServiceTypes.METADATA)
     assert service and service.type == ServiceTypes.METADATA, (
