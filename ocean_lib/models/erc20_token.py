@@ -2,6 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from typing import List
+
 from enforce_typing import enforce_types
 from ocean_lib.ocean.util import from_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -53,12 +55,12 @@ class ERC20Token(ContractBase):
 
     def start_multiple_order(
         self,
-        consumers: list[str],
-        amounts: list[int],
-        service_ids: list[int],
-        mrkt_fee_collectors: list[str],
-        fee_tokens: list[str],
-        fee_amounts: list[int],
+        consumers: List[str],
+        amounts: List[int],
+        service_ids: List[int],
+        mrkt_fee_collectors: List[str],
+        fee_tokens: List[str],
+        fee_amounts: List[int],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
@@ -88,10 +90,10 @@ class ERC20Token(ContractBase):
 
     def finish_multiple_order(
         self,
-        order_tx_ids: list[str],
-        consumers: list[str],
-        amounts: list[int],
-        service_ids: list[int],
+        order_tx_ids: List[str],
+        consumers: List[str],
+        amounts: List[int],
+        service_ids: List[int],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
@@ -150,13 +152,13 @@ class ERC20Token(ContractBase):
             owner_address, spender_address, value, deadline, v, r, s
         )
 
-    def get_address_length(self, array: list[str]) -> int:
+    def get_address_length(self, array: List[str]) -> int:
         return self.contract.caller.getAddressLength(array)
 
-    def get_uint_length(self, array: list[int]) -> int:
+    def get_uint_length(self, array: List[int]) -> int:
         return self.contract.caller.getUintLength(array)
 
-    def get_bytes_length(self, array: list[bytes]) -> int:
+    def get_bytes_length(self, array: List[bytes]) -> int:
         return self.contract.caller.getBytesLength(array)
 
     def get_fee_collector(self) -> str:

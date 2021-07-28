@@ -2,6 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from typing import List
+
 from enforce_typing import enforce_types
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
@@ -107,5 +109,5 @@ class ERC721Token(ContractBase):
     def clean_permissions(self) -> None:
         return self.contract.caller.cleanPermissions()
 
-    def get_address_length(self, array: list[str]) -> int:
+    def get_address_length(self, array: List[str]) -> int:
         return self.contract.caller.getAddressLength(array)
