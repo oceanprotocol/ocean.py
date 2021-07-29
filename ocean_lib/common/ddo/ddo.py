@@ -16,11 +16,6 @@ from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.ddo.constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
 from ocean_lib.common.ddo.credentials import AddressCredential
 from ocean_lib.common.ddo.service import Service
-from ocean_lib.common.ddo.status_helper import (
-    disable_flag,
-    enable_flag,
-    is_flag_enabled,
-)
 from ocean_lib.common.did import OCEAN_PREFIX, did_to_id
 from ocean_lib.common.utils.utilities import get_timestamp
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -69,7 +64,7 @@ class DDO:
     @property
     def is_disabled(self) -> bool:
         """Returns whether the asset is disabled."""
-        return is_flag_enabled(self, "isOrderDisabled")
+        return self.is_flag_enabled("isOrderDisabled")
 
     @property
     def is_enabled(self) -> bool:
@@ -79,12 +74,12 @@ class DDO:
     @property
     def is_retired(self) -> bool:
         """Returns whether the asset is retired."""
-        return is_flag_enabled(self, "isRetired")
+        return self.is_flag_enabled("isRetired")
 
     @property
     def is_listed(self) -> bool:
         """Returns whether the asset is listed."""
-        return is_flag_enabled(self, "isListed")
+        return self.is_flag_enabled("isListed")
 
     @property
     def asset_id(self) -> Optional[str]:
@@ -293,27 +288,27 @@ class DDO:
 
     def enable(self) -> None:
         """Enables asset for ordering."""
-        disable_flag(self, "isOrderDisabled")
+        self.disable_flag("isOrderDisabled")
 
     def disable(self) -> None:
         """Disables asset from ordering."""
-        enable_flag(self, "isOrderDisabled")
+        self.enable_flag("isOrderDisabled")
 
     def retire(self) -> None:
         """Retires an asset."""
-        enable_flag(self, "isRetired")
+        self.enable_flag("isRetired")
 
     def unretire(self) -> None:
         """Unretires an asset."""
-        disable_flag(self, "isRetired")
+        self.disable_flag("isRetired")
 
     def list(self) -> None:
         """Lists a previously unlisted asset."""
-        enable_flag(self, "isListed")
+        self.enable_flag("isListed")
 
     def unlist(self) -> None:
         """Unlists an asset."""
-        disable_flag(self, "isListed")
+        self.disable_flag("isListed")
 
     @property
     def requires_address_credential(self) -> bool:
@@ -379,3 +374,49 @@ class DDO:
             return manager.validate_access(credential)
 
         return ConsumableCodes.OK
+
+    def enable_flag(self, flag_name: str) -> None:
+        """
+        :return: None
+        """
+        metadata_service = self.get_service(ServiceTypes.METADATA)
+
+        if not metadata_service:
+            return
+
+        if "status" not in metadata_service.attributes:
+            metadata_service.attributes["status"] = {}
+
+        if flag_name == "isListed":  # only one that defaults to True
+            metadata_service.attributes["status"].pop(flag_name)
+        else:
+            metadata_service.attributes["status"][flag_name] = True
+
+    def disable_flag(self, flag_name: str) -> None:
+        """
+        :return: None
+        """
+        metadata_service = self.get_service(ServiceTypes.METADATA)
+
+        if not metadata_service:
+            return
+
+        if "status" not in metadata_service.attributes:
+            metadata_service.attributes["status"] = {}
+
+        if flag_name == "isListed":  # only one that defaults to True
+            metadata_service.attributes["status"][flag_name] = False
+        else:
+            metadata_service.attributes["status"].pop(flag_name)
+
+    def is_flag_enabled(self, flag_name: str) -> bool:
+        """
+        :return: `isListed` or `bool` in metadata_service.attributes["status"]
+        """
+        metadata_service = self.get_service(ServiceTypes.METADATA)
+        default = flag_name == "isListed"  # only one that defaults to True
+
+        if not metadata_service or "status" not in metadata_service.attributes:
+            return default
+
+        return metadata_service.attributes["status"].get(flag_name, default)

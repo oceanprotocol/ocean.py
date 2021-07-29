@@ -678,7 +678,7 @@ class DataServiceProvider:
         return False
 
     @staticmethod
-    def check_asset_file_info(asset: "DDO", provider_uri: str) -> bool:
+    def check_asset_file_info(asset: object, provider_uri: str) -> bool:
         """Asset should be a DDO or Asset object."""
         if not asset.did:
             return False
