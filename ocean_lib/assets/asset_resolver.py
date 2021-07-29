@@ -41,4 +41,8 @@ def resolve_asset(
 
     logger.debug(f"found did {did} -> url={metadata_cache_uri}")
     ddo = AquariusProvider.get_aquarius(metadata_cache_uri).get_asset_ddo(did)
+
+    if not ddo:
+        return None
+
     return Asset(dictionary=ddo.as_dictionary())

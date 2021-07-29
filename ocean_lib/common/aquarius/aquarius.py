@@ -59,17 +59,6 @@ class Aquarius:
         """
         return f"{self.url}/" + "{did}"
 
-    def list_assets(self):
-        """
-        List all the assets registered in the aquarius instance.
-
-        :return: List of DID string
-        """
-        response = self.requests_session.get(self._base_url).content
-        asset_list = _parse_response(response, [])
-
-        return asset_list
-
     def get_asset_ddo(self, did):
         """
         Retrieve asset ddo for a given did.
@@ -78,10 +67,14 @@ class Aquarius:
         :return: DDO instance
         """
         response = self.requests_session.get(f"{self.url}/{did}").content
+
+        if "asset DID is not in OceanDB" in str(response):
+            return None
+
         parsed_response = _parse_response(response, None)
 
         if not parsed_response:
-            return {}
+            return None
 
         return DDO(dictionary=parsed_response)
 
@@ -96,14 +89,6 @@ class Aquarius:
         parsed_response = _parse_response(response, [])
 
         return parsed_response
-
-    def list_assets_ddo(self):
-        """
-        List all the ddos registered in the aquarius instance.
-
-        :return: List of DDO instance
-        """
-        return json.loads(self.requests_session.get(self.url).content)
 
     def text_search(self, text, sort=None, offset=100, page=1):
         """
