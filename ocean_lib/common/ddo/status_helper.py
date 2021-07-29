@@ -7,7 +7,7 @@ from ocean_lib.common.agreements.service_types import ServiceTypes
 
 
 @enforce_types
-def enable_flag(ddo: object, flag_name: str) -> None:
+def enable_flag(ddo: "DDO", flag_name: str) -> None:
     """
     :return: None
     """
@@ -26,7 +26,7 @@ def enable_flag(ddo: object, flag_name: str) -> None:
 
 
 @enforce_types
-def disable_flag(ddo: object, flag_name: str) -> None:
+def disable_flag(ddo: "DDO", flag_name: str) -> None:
     """
     :return: None
     """
@@ -45,7 +45,7 @@ def disable_flag(ddo: object, flag_name: str) -> None:
 
 
 @enforce_types
-def is_flag_enabled(ddo: object, flag_name: str) -> bool:
+def is_flag_enabled(ddo: "DDO", flag_name: str) -> bool:
     """
     :return: `isListed` or `bool` in metadata_service.attributes["status"]
     """
