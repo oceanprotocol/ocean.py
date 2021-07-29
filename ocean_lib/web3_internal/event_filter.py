@@ -7,7 +7,6 @@ import time
 from typing import Any, Callable, Optional, Union
 
 from enforce_typing import enforce_types
-from web3.contract import ContractEvent
 
 logger = logging.getLogger(__name__)
 
@@ -16,7 +15,7 @@ logger = logging.getLogger(__name__)
 class EventFilter:
     def __init__(
         self,
-        event: ContractEvent,
+        event: Any,
         argument_filters: dict = None,
         from_block: Optional[Union[int, str]] = None,
         to_block: Optional[Union[int, str]] = None,
