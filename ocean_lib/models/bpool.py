@@ -7,6 +7,7 @@ import typing
 from typing import Optional, Tuple
 
 from enforce_typing import enforce_types
+from eth_typing import BlockIdentifier
 from eth_utils import remove_0x_prefix
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.btoken import BToken
@@ -587,8 +588,8 @@ class BPool(BToken):
     def get_liquidity_logs(
         self,
         event_name: str,
-        from_block: int,
-        to_block: Optional[int] = None,
+        from_block: BlockIdentifier,
+        to_block: Optional[BlockIdentifier] = None,
         user_address: Optional[str] = None,
         this_pool_only: bool = True,
     ) -> Tuple:
@@ -617,8 +618,8 @@ class BPool(BToken):
 
     def get_join_logs(
         self,
-        from_block: int,
-        to_block: Optional[int] = None,
+        from_block: BlockIdentifier,
+        to_block: Optional[BlockIdentifier] = None,
         user_address: Optional[str] = None,
         this_pool_only: bool = True,
     ) -> Tuple[AttributeDict]:
@@ -628,8 +629,8 @@ class BPool(BToken):
 
     def get_exit_logs(
         self,
-        from_block: int,
-        to_block: Optional[int] = None,
+        from_block: BlockIdentifier,
+        to_block: Optional[BlockIdentifier] = None,
         user_address: Optional[str] = None,
         this_pool_only: bool = True,
     ) -> Tuple[AttributeDict]:
@@ -639,8 +640,8 @@ class BPool(BToken):
 
     def get_swap_logs(
         self,
-        from_block: int,
-        to_block: Optional[int] = None,
+        from_block: BlockIdentifier,
+        to_block: Optional[BlockIdentifier] = None,
         user_address: Optional[str] = None,
         this_pool_only: bool = True,
     ) -> Tuple[AttributeDict]:

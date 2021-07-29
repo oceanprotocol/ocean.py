@@ -12,7 +12,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider, l
 from requests.models import PreparedRequest
 
 
-class DataProviderMock(object):
+class DataProviderMock(DataServiceProvider):
     def __init__(self, ocean_instance=None, wallet=None):
         """Initialises DataProviderMock object."""
         if not ocean_instance:

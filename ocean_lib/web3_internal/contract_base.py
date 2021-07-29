@@ -10,7 +10,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
 from enforce_typing import enforce_types
-from eth_typing import BlockIdentifier
+from eth_typing import BlockIdentifier, ChecksumAddress
 from hexbytes import HexBytes
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_utils import (
@@ -84,7 +84,7 @@ class ContractBase(object):
         return list(self.contract.functions)
 
     @staticmethod
-    def to_checksum_address(address: str) -> str:
+    def to_checksum_address(address: str) -> ChecksumAddress:
         """
         Validate the address provided.
 

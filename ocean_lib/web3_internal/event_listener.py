@@ -113,7 +113,7 @@ class EventListener(object):
     def watch_one_event(
         event_filter: EventFilter,
         callback: Callable,
-        timeout_callback: Callable,
+        timeout_callback: Optional[Callable],
         timeout: int,
         args: list,
         start_time: Optional[int] = None,
