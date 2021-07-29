@@ -16,9 +16,9 @@ from tests.resources.ddo_helpers import (
 from tests.resources.helper_functions import get_publisher_wallet
 
 
-def test_build_cluster_attributes():
+def test_build_cluster_attributes(config):
     data_provider = DataServiceProvider()
-    compute = OceanCompute(config={}, data_provider=data_provider)
+    compute = OceanCompute(config, data_provider=data_provider)
     cluster_dict = compute.build_cluster_attributes(
         "Kubernetes", "http://10.0.0.17/my_cluster"
     )
@@ -30,9 +30,9 @@ def test_build_cluster_attributes():
     ), "The cluster values are different from the expected ones."
 
 
-def test_build_container_attributes():
+def test_build_container_attributes(config):
     data_provider = DataServiceProvider()
-    compute = OceanCompute(config={}, data_provider=data_provider)
+    compute = OceanCompute(config, data_provider=data_provider)
     container_dict = compute.build_container_attributes(
         "node", "best_tag", "entrypoint.exe"
     )
@@ -48,9 +48,9 @@ def test_build_container_attributes():
     ), "The container values are different from the expected ones."
 
 
-def test_build_server_attributes():
+def test_build_server_attributes(config):
     data_provider = DataServiceProvider()
-    compute = OceanCompute(config={}, data_provider=data_provider)
+    compute = OceanCompute(config, data_provider=data_provider)
     server_dict = compute.build_server_attributes(
         "test_server_id_123", "test_server_type", 4, 4, "20", "20", 30
     )

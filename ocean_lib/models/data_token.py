@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import requests
 from enforce_typing import enforce_types
+from eth_typing import BlockIdentifier
 from eth_utils import remove_0x_prefix
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -178,8 +179,8 @@ class DataToken(ContractBase):
     def get_start_order_logs(
         self,
         consumer_address: Optional[str] = None,
-        from_block: int = 0,
-        to_block: Optional[Union[str, int]] = "latest",
+        from_block: Optional[BlockIdentifier] = 0,
+        to_block: Optional[BlockIdentifier] = "latest",
         from_all_tokens: bool = False,
     ) -> Tuple:
         topic0 = self.get_event_signature(self.ORDER_STARTED_EVENT)
@@ -199,13 +200,18 @@ class DataToken(ContractBase):
         )
         return logs
 
-    def get_transfer_events_in_range(self, from_block: int, to_block: int) -> Tuple:
+    def get_transfer_events_in_range(
+        self, from_block: Optional[BlockIdentifier], to_block: Optional[BlockIdentifier]
+    ) -> Tuple:
         return ContractBase.getLogs(
             self.events.Transfer(), fromBlock=from_block, toBlock=to_block
         )
 
     def get_all_transfers_from_events(
-        self, start_block: int, end_block: int, chunk: int = 1000
+        self,
+        start_block: Optional[BlockIdentifier],
+        end_block: Optional[BlockIdentifier],
+        chunk: int = 1000,
     ) -> tuple:
         _from = start_block
         _to = _from + chunk - 1
@@ -247,7 +253,7 @@ class DataToken(ContractBase):
         return transfer_records, min(_to, end_block)  # can have duplicates
 
     def get_transfer_event(
-        self, block_number: int, sender: str, receiver: str
+        self, block_number: Optional[BlockIdentifier], sender: str, receiver: str
     ) -> Optional[AttributeDict]:
         filter_params = {"from": sender, "to": receiver}
         logs = self.get_event_logs(
@@ -317,8 +323,8 @@ class DataToken(ContractBase):
         self,
         event_name: str,
         filter_args: Optional[Dict[str, str]] = None,
-        from_block: int = 0,
-        to_block: Optional[Union[int, str]] = "latest",
+        from_block: Optional[BlockIdentifier] = 0,
+        to_block: Optional[BlockIdentifier] = "latest",
     ) -> Union[Tuple[()], Tuple[AttributeDict]]:
         event = getattr(self.events, event_name)
         filter_params = filter_args or {}
@@ -454,7 +460,10 @@ class DataToken(ContractBase):
         return self._get_url_from_blob(0)
 
     def calculate_token_holders(
-        self, from_block: int, to_block: int, min_token_amount: float
+        self,
+        from_block: Optional[BlockIdentifier],
+        to_block: Optional[BlockIdentifier],
+        min_token_amount: float,
     ) -> List[Tuple[str, float]]:
         """Returns a list of addresses with token balances above a minimum token
         amount. Calculated from the transactions between `from_block` and `to_block`."""
