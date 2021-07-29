@@ -28,7 +28,7 @@ class EventListener(object):
         contract_name: str,
         address: str,
         event_name: str,
-        args: None = None,
+        args: Optional[list] = None,
         from_block: Optional[Union[int, str]] = None,
         to_block: Optional[Union[int, str]] = None,
         filters: Optional[dict] = None,
@@ -56,7 +56,7 @@ class EventListener(object):
 
     def listen_once(
         self,
-        callback: None,
+        callback: Optional[Callable] = None,
         timeout: Optional[int] = None,
         timeout_callback: Optional[Callable] = None,
         start_time: Optional[float] = None,

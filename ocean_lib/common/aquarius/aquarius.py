@@ -192,7 +192,7 @@ class Aquarius:
             return False, parsed_response
 
     @staticmethod
-    def _parse_search_response(response) -> Union[list, dict]:
+    def _parse_search_response(response: Any) -> Union[list, dict]:
         parsed_response = _parse_response(response, None)
 
         if isinstance(parsed_response, dict) or isinstance(parsed_response, list):
@@ -203,7 +203,7 @@ class Aquarius:
         )
 
 
-def _parse_response(response: object, default_return: Any) -> Any:
+def _parse_response(response: Any, default_return: Any) -> Any:
     if not response:
         return default_return
 

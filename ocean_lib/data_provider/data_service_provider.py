@@ -104,7 +104,7 @@ class DataServiceProvider:
     def sign_message(
         wallet: Wallet,
         msg: str,
-        nonce: Optional[str] = None,
+        nonce: Optional[Union[str, int]] = None,
         provider_uri: Optional[str] = None,
     ) -> str:
         if nonce is None:

@@ -6,7 +6,7 @@
 import configparser
 import logging
 import os
-from pathlib import Path, PosixPath
+from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
 import artifacts
@@ -97,7 +97,7 @@ class Config(configparser.ConfigParser):
 
     def __init__(
         self,
-        filename: Optional[Union[PosixPath, str]] = None,
+        filename: Optional[Union[Path, str]] = None,
         options_dict: Optional[Dict[str, Any]] = None,
         **kwargs,
     ) -> None:

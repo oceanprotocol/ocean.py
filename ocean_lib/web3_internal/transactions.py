@@ -27,7 +27,7 @@ def sign_hash(msg_hash: SignableMessage, wallet: Wallet) -> str:
 
 @enforce_types
 def send_ether(
-    from_wallet: Wallet, to_address: str, ether_amount: int
+    from_wallet: Wallet, to_address: str, ether_amount: Union[int, float, str]
 ) -> AttributeDict:
     if not Web3.isChecksumAddress(to_address):
         to_address = Web3.toChecksumAddress(to_address)

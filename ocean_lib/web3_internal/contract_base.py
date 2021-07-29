@@ -6,7 +6,7 @@
 """All contracts inherit from `ContractBase` class."""
 import logging
 import os
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
 from enforce_typing import enforce_types
@@ -161,10 +161,10 @@ class ContractBase(object):
         self,
         event_name: str,
         timeout: int,
-        event_filter: None,
-        callback: None = None,
-        timeout_callback: None = None,
-        args: None = None,
+        event_filter: Optional[dict] = None,
+        callback: Optional[Callable] = None,
+        timeout_callback: Optional[Callable] = None,
+        args: Optional[list] = None,
         wait: bool = False,
         from_block: Optional[Union[str, int]] = "latest",
         to_block: Optional[Union[str, int]] = "latest",

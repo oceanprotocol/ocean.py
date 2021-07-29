@@ -3,9 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import codecs
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Type, Union
 
 from enforce_typing import enforce_types
+from eth_keys.backends.base import BaseECCBackend
 from eth_keys.datatypes import Signature
 from eth_keys.utils.numeric import int_to_byte
 from eth_keys.utils.padding import pad32
@@ -24,7 +25,9 @@ class SignatureFix(Signature):
         self,
         signature_bytes: Optional[bytes] = None,
         vrs: Optional[Tuple[int, int, int]] = None,
-        backend: Optional[object] = None,
+        backend: Optional[
+            Union[BaseECCBackend, Type[BaseECCBackend], str, None]
+        ] = None,
     ) -> None:
         """Initialises SignatureFix object."""
         v, r, s = vrs

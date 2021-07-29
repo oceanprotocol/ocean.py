@@ -5,7 +5,7 @@
 import copy
 import json
 import logging
-from pathlib import PosixPath
+from pathlib import Path
 from typing import Any, Optional
 
 from eth_account.account import Account
@@ -35,7 +35,7 @@ class DDO:
         self,
         did: Optional[str] = None,
         json_text: Optional[str] = None,
-        json_filename: Optional[PosixPath] = None,
+        json_filename: Optional[Path] = None,
         created: Optional[Any] = None,
         dictionary: Optional[dict] = None,
     ) -> None:

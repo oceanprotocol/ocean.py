@@ -63,8 +63,8 @@ class OceanCompute:
     def build_server_attributes(
         server_id: str,
         server_type: str,
-        cpu: Union[str, int],
-        gpu: Union[str, int],
+        cpu: int,
+        gpu: int,
         memory: str,
         disk: str,
         max_run_time: int,
@@ -205,7 +205,7 @@ class OceanCompute:
 
     @staticmethod
     def check_output_dict(
-        output_def: None,
+        output_def: Dict[str, Any],
         consumer_address: str,
         data_provider: DataServiceProvider,
         config: Config,
@@ -235,7 +235,7 @@ class OceanCompute:
         default_output_def.update(output_def)
         return default_output_def
 
-    def create_compute_service_descriptor(self, attributes: Dict) -> ServiceDescriptor:
+    def create_compute_service_descriptor(self, attributes: dict) -> ServiceDescriptor:
         """
         Return a service descriptor (tuple) for service of type ServiceTypes.CLOUD_COMPUTE
         and having the required attributes and service endpoint.

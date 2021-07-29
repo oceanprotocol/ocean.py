@@ -6,7 +6,7 @@
 """Accounts module."""
 import logging
 import os
-from pathlib import PosixPath
+from pathlib import Path
 from typing import Optional
 
 from enforce_typing import enforce_types
@@ -24,7 +24,7 @@ class Account:
         self,
         address: Optional[str] = None,
         password: Optional[str] = None,
-        key_file: Optional[PosixPath] = None,
+        key_file: Optional[Path] = None,
         encrypted_key: Optional[str] = None,
         private_key: Optional[str] = None,
     ) -> None:
