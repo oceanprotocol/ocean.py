@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-
 from ocean_lib.common.aquarius.aquarius import Aquarius
 from tests.resources.ddo_helpers import wait_for_ddo
 from tests.resources.helper_functions import get_publisher_wallet
@@ -40,12 +39,6 @@ def test_aqua_functions_for_single_ddo(
 
     res = aquarius_instance.text_search(ddo.did)
     assert len(res), "The result does not exist."
-
-
-def test_aqua_function_for_multiple_ddos(aquarius_instance):
-    """Tests against multiple-ddo functions of Aquarius."""
-    assert aquarius_instance.list_assets()
-    assert aquarius_instance.list_assets_ddo()
 
 
 def test_metadata_invalid(aquarius_instance):

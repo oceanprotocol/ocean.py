@@ -255,7 +255,7 @@ class OceanAssets:
         did = asset.assign_did(f"did:op:{remove_0x_prefix(data_token_address)}")
         logger.debug(f"Using datatoken address as did: {did}")
         # Check if it's already registered first!
-        if did in self._get_aquarius().list_assets():
+        if self._get_aquarius().ddo_exists(did):
             raise AquariusError(
                 f"Asset id {did} is already registered to another asset."
             )
