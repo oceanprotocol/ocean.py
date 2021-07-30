@@ -27,6 +27,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 from py._path.local import LocalPath
 from requests.exceptions import InvalidURL
 from requests.models import PreparedRequest, Response
+from requests.sessions import Session
 
 logger = logging.getLogger(__name__)
 
@@ -50,12 +51,12 @@ class DataServiceProvider:
     provider_info = None
 
     @staticmethod
-    def get_http_client() -> object:
+    def get_http_client() -> Session:
         """Get the http client."""
         return DataServiceProvider._http_client
 
     @staticmethod
-    def set_http_client(http_client: object) -> None:
+    def set_http_client(http_client: Session) -> None:
         """Set the http client to something other than the default `requests`."""
         DataServiceProvider._http_client = http_client
 

@@ -4,15 +4,16 @@
 #
 from typing import Any, Dict
 
+from enforce_typing import enforce_types
 from ocean_lib.web3_internal.web3_overrides.request import make_post_request
 from web3 import HTTPProvider
-from web3.types import RPCEndpoint
 
 
 class CustomHTTPProvider(HTTPProvider):
     """Override requests to control the connection pool to make it blocking."""
 
-    def make_request(self, method: RPCEndpoint, params: Any) -> Dict[str, Any]:
+    @enforce_types
+    def make_request(self, method: str, params: Any) -> Dict[str, Any]:
         self.logger.debug(
             "Making request HTTP. URI: %s, Method: %s", self.endpoint_uri, method
         )
