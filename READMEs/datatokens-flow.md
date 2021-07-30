@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 ## Prerequisites
 
 -   Linux/MacOS
--   [Docker](https://docs.docker.com/engine/install/), [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
+-   [Docker](https://docs.docker.com/engine/install/), [Docker Compose](https://docs.docker.com/compose/install/), [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
 -   Python 3.8.5+
 
 ## Run barge services
