@@ -5,7 +5,7 @@
 
 """Ocean module."""
 import logging
-from typing import Dict, List, Optional, Union
+from typing import Dict, List, Optional, Type, Union
 
 from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
@@ -43,7 +43,7 @@ class Ocean:
     """The Ocean class is the entry point into Ocean Protocol."""
 
     def __init__(
-        self, config: Union[Dict, Config], data_provider: Optional[object] = None
+        self, config: Union[Dict, Config], data_provider: Optional[Type] = None
     ) -> None:
         """Initialize Ocean class.
 

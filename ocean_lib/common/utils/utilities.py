@@ -9,6 +9,7 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict
 
+from eth_typing import HexStr
 from web3.main import Web3
 
 
@@ -39,7 +40,7 @@ def convert_to_bytes(data: str) -> bytes:
     return Web3.toBytes(text=data)
 
 
-def convert_to_string(data: bytes) -> str:
+def convert_to_string(data: bytes) -> HexStr:
     """
 
     :param data:
