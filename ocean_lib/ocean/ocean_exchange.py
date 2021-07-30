@@ -7,7 +7,7 @@ from enforce_typing import enforce_types
 from web3.logs import DISCARD
 
 from ocean_lib.config import Config
-from ocean_lib.exceptions import VerifyTxFailed
+from ocean_lib.exceptions import VerifyTxFailed, InsufficientBalance
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.util import from_base_18, to_base_18
@@ -82,10 +82,23 @@ class OceanExchange:
                 f"tokens which exceeds the max_OCEAN_amount {max_OCEAN_amount}."
             )
         ocean_token = DataToken(self._web3, self.ocean_address)
-        ocean_token.get_tx_receipt(
-            self._web3,
-            ocean_token.approve(self._exchange_address, ocean_amount_base, wallet),
-        )
+        if (
+            ocean_token.allowance(wallet.address, self._exchange_address)
+            < ocean_amount_base
+        ):
+            tx_id = ocean_token.approve(
+                self._exchange_address, ocean_amount_base, wallet
+            )
+            tx_receipt = ocean_token.get_tx_receipt(
+                self._web3,
+                tx_id,
+            )
+            if not tx_receipt or tx_receipt.status != 1:
+                raise VerifyTxFailed(
+                    f"Approve OCEAN tokens failed, exchange address was {self._exchange_address} and tx id was {tx_id}!"
+                )
+        if ocean_token.balanceOf(wallet.address) < amount_base:
+            raise InsufficientBalance("Insufficient funds for buying DataTokens!")
         tx_id = exchange.buy_data_token(
             exchange_id, data_token_amount=amount_base, from_wallet=wallet
         )

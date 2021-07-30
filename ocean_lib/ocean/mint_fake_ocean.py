@@ -46,7 +46,10 @@ def mint_fake_OCEAN(config):
         w = Wallet(web3, private_key=key)
 
         if OCEAN_token.token_balance(w.address) < 1000:
-            if OCEAN_token.allowance(deployer_wallet.address, w.address) < amt_distribute_base:
+            if (
+                OCEAN_token.allowance(deployer_wallet.address, w.address)
+                < amt_distribute_base
+            ):
                 OCEAN_token.transfer(
                     w.address, amt_distribute_base, from_wallet=deployer_wallet
                 )
