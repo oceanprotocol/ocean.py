@@ -69,10 +69,6 @@ def test_get_infura_url(monkeypatch):
 
 
 def test_get_web3_connection_provider(monkeypatch):
-    # "ganache"
-    provider = util.get_web3_connection_provider("ganache")
-    assert provider.endpoint_uri == util.GANACHE_URL  # e.g. http://127.0.0.1:8545
-
     # GANACHE_URL
     provider = util.get_web3_connection_provider(util.GANACHE_URL)
     assert provider.endpoint_uri == util.GANACHE_URL
@@ -85,39 +81,8 @@ def test_get_web3_connection_provider(monkeypatch):
     provider = util.get_web3_connection_provider("https://bar.com")
     assert provider.endpoint_uri == "https://bar.com"
 
-    # "rinkeby"
-    assert "rinkeby" in util.SUPPORTED_NETWORK_NAMES
-    monkeypatch.setenv(ENV_INFURA_PROJECT_ID, "id1")
-    provider = util.get_web3_connection_provider("rinkeby")
-    assert provider.endpoint_uri == "https://rinkeby.infura.io/v3/id1"
-
-    # polygon network name
-    assert (
-        "polygon" in util.SUPPORTED_NETWORK_NAMES
-    ), "polygon is missing from SUPPORTED_NETWORK_NAMES"
-    assert util.POLYGON_URL == "https://rpc.polygon.oceanprotocol.com"
-    provider = util.get_web3_connection_provider("polygon")
-    assert provider.endpoint_uri == "https://rpc.polygon.oceanprotocol.com"
-
-    # bsc network name
-    assert (
-        "bsc" in util.SUPPORTED_NETWORK_NAMES
-    ), "bsc is missing from SUPPORTED_NETWORK_NAMES"
-    assert util.BSC_URL == "https://bsc-dataseed.binance.org"
-    provider = util.get_web3_connection_provider("bsc")
-    assert provider.endpoint_uri == "https://bsc-dataseed.binance.org"
-
-    # all infura-supported network names
-    for network in util.SUPPORTED_NETWORK_NAMES:
-        if network == "ganache" or "polygon":
-            continue  # tested above
-        monkeypatch.setenv(ENV_INFURA_PROJECT_ID, f"id_{network}")
-        provider = util.get_web3_connection_provider(network)
-        assert provider.endpoint_uri == f"https://{network}.infura.io/v3/id_{network}"
-
     # non-supported name
-    monkeypatch.setenv(ENV_INFURA_PROJECT_ID, "idx")
-    with pytest.raises(Exception):
+    with pytest.raises(AssertionError):
         util.get_web3_connection_provider("not_network_name")
 
     # typical websockets uri "wss://foo.com"
