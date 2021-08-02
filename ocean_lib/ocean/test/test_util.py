@@ -3,14 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-import os
-
 import pytest
 from ocean_lib.ocean import util
-from ocean_lib.ocean.env_constants import (
-    ENV_INFURA_CONNECTION_TYPE,
-    ENV_INFURA_PROJECT_ID,
-)
 from ocean_lib.ocean.util import (
     from_base,
     from_base_18,
@@ -20,52 +14,6 @@ from ocean_lib.ocean.util import (
     to_base,
     to_base_18,
 )
-
-
-def test_get_infura_connection_type(monkeypatch):
-    # no envvar
-    if ENV_INFURA_CONNECTION_TYPE in os.environ:
-        monkeypatch.delenv(ENV_INFURA_CONNECTION_TYPE)
-    assert (
-        util.get_infura_connection_type() == "http"
-    ), "The default connection type for infura is not http."
-
-    # envvar is "http"
-    monkeypatch.setenv(ENV_INFURA_CONNECTION_TYPE, "http")
-    assert util.get_infura_connection_type() == "http"
-
-    # envvar is "websocket"
-    monkeypatch.setenv(ENV_INFURA_CONNECTION_TYPE, "websocket")
-    assert util.get_infura_connection_type() == "websocket"
-
-    # envvar is other val
-    monkeypatch.setenv(ENV_INFURA_CONNECTION_TYPE, "foo_type")
-    assert util.get_infura_connection_type() == "http"
-
-
-def test_get_infura_id(monkeypatch):
-    # no envvar
-    if ENV_INFURA_PROJECT_ID in os.environ:
-        monkeypatch.delenv(ENV_INFURA_PROJECT_ID)
-    assert util.get_infura_id() == util.WEB3_INFURA_PROJECT_ID
-
-    # envvar is other val
-    monkeypatch.setenv(ENV_INFURA_PROJECT_ID, "foo_id")
-    assert util.get_infura_id() == "foo_id"
-
-
-def test_get_infura_url(monkeypatch):
-    # envvar is "http"
-    monkeypatch.setenv(ENV_INFURA_CONNECTION_TYPE, "http")
-    assert util.get_infura_url("id1", "net1") == "https://net1.infura.io/v3/id1"
-
-    # envvar is "websocket"
-    monkeypatch.setenv(ENV_INFURA_CONNECTION_TYPE, "websocket")
-    assert util.get_infura_url("id2", "net2") == "wss://net2.infura.io/ws/v3/id2"
-
-    # envvar is other val - it will resort to "http"
-    monkeypatch.setenv(ENV_INFURA_CONNECTION_TYPE, "foo_type")
-    assert util.get_infura_url("id3", "net3") == "https://net3.infura.io/v3/id3"
 
 
 def test_get_web3_connection_provider(monkeypatch):

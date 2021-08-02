@@ -2,15 +2,9 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import os
-
 from enforce_typing import enforce_types
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.dtfactory import DTFactory
-from ocean_lib.ocean.env_constants import (
-    ENV_INFURA_CONNECTION_TYPE,
-    ENV_INFURA_PROJECT_ID,
-)
 from ocean_lib.web3_internal.contract_utils import (
     get_contracts_addresses as get_contracts_addresses_web3,
 )
@@ -18,31 +12,7 @@ from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
 from web3 import WebsocketProvider
 
-WEB3_INFURA_PROJECT_ID = "357f2fe737db4304bd2f7285c5602d0d"
 GANACHE_URL = "http://127.0.0.1:8545"
-
-
-def get_infura_connection_type():
-    _type = os.getenv(ENV_INFURA_CONNECTION_TYPE, "http")
-    if _type not in ("http", "websocket"):
-        _type = "http"
-
-    return _type
-
-
-def get_infura_id():
-    return os.getenv(ENV_INFURA_PROJECT_ID, WEB3_INFURA_PROJECT_ID)
-
-
-def get_infura_url(infura_id, network):
-    conn_type = get_infura_connection_type()
-    if conn_type == "http":
-        return f"https://{network}.infura.io/v3/{infura_id}"
-
-    if conn_type == "websocket":
-        return f"wss://{network}.infura.io/ws/v3/{infura_id}"
-
-    raise AssertionError(f"Unknown connection type {conn_type}")
 
 
 def get_web3_connection_provider(network_url):
