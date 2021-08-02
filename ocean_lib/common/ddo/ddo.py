@@ -8,6 +8,7 @@ import logging
 from pathlib import Path
 from typing import Any, Optional
 
+from enforce_typing import enforce_types
 from eth_account.account import Account
 from eth_utils import add_0x_prefix
 from ocean_lib.common.agreements.consumable import ConsumableCodes
@@ -23,6 +24,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 logger = logging.getLogger("ddo")
 
 
+@enforce_types
 class DDO:
     """DDO class to create, import, export, validate DDO objects."""
 
@@ -362,7 +364,7 @@ class DDO:
             with_connectivity_check
             and provider_uri
             and not DataServiceProvider.check_asset_file_info(
-                self, DataServiceProvider.get_root_uri(provider_uri)
+                self.did, DataServiceProvider.get_root_uri(provider_uri)
             )
         ):
             return ConsumableCodes.CONNECTIVITY_FAIL

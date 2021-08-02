@@ -12,6 +12,7 @@ from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.common.agreements.service_types import ServiceTypes
 
 
+@enforce_types
 def create_checksum(text: str) -> str:
     """
     :return: str

@@ -679,12 +679,11 @@ class DataServiceProvider:
         return False
 
     @staticmethod
-    def check_asset_file_info(asset: object, provider_uri: str) -> bool:
-        """Asset should be a DDO or Asset object."""
-        if not asset.did:
+    def check_asset_file_info(did: str, provider_uri: str) -> bool:
+        if not did:
             return False
         _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
-        data = {"did": asset.did}
+        data = {"did": did}
         response = requests.post(endpoint, json=data)
 
         if response.status_code != 200:
