@@ -8,7 +8,7 @@ import copy
 import logging
 import lzma
 import os
-from typing import Optional, Tuple
+from typing import Optional, Tuple, Type
 
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
@@ -27,6 +27,7 @@ from ocean_lib.common.aquarius.aquarius import Aquarius
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
 from ocean_lib.common.did import did_to_id
 from ocean_lib.common.utils.utilities import checksum
+from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import (
     DataServiceProvider,
     OrderRequirements,
@@ -55,7 +56,13 @@ class OceanAssets:
 
     """Ocean assets class."""
 
-    def __init__(self, config, web3, data_provider, ddo_registry_address):
+    def __init__(
+        self,
+        config: Config,
+        web3: Web3,
+        data_provider: Type[DataServiceProvider],
+        ddo_registry_address: str,
+    ) -> None:
         """Initialises OceanAssets object."""
         self._config = config
         self._web3 = web3
@@ -70,10 +77,10 @@ class OceanAssets:
             )
         self._downloads_path = downloads_path
 
-    def ddo_registry(self):
+    def ddo_registry(self) -> MetadataContract:
         return MetadataContract(self._web3, self._metadata_registry_address)
 
-    def _get_aquarius(self, url=None) -> Aquarius:
+    def _get_aquarius(self, url: Optional[str] = None) -> Aquarius:
         return AquariusProvider.get_aquarius(url or self._metadata_cache_uri)
 
     def _process_service_descriptors(
@@ -255,7 +262,7 @@ class OceanAssets:
         did = asset.assign_did(f"did:op:{remove_0x_prefix(data_token_address)}")
         logger.debug(f"Using datatoken address as did: {did}")
         # Check if it's already registered first!
-        if did in self._get_aquarius().list_assets():
+        if self._get_aquarius().ddo_exists(did):
             raise AquariusError(
                 f"Asset id {did} is already registered to another asset."
             )
@@ -373,7 +380,12 @@ class OceanAssets:
         return resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
 
     def search(
-        self, text: str, sort=None, offset=100, page=1, metadata_cache_uri=None
+        self,
+        text: str,
+        sort: Optional[dict] = None,
+        offset: int = 100,
+        page: int = 1,
+        metadata_cache_uri: Optional[str] = None,
     ) -> list:
         """
         Search an asset in oceanDB using aquarius.
@@ -396,7 +408,12 @@ class OceanAssets:
         ]
 
     def query(
-        self, query: dict, sort=None, offset=100, page=1, metadata_cache_uri=None
+        self,
+        query: dict,
+        sort: Optional[dict] = None,
+        offset: int = 100,
+        page: int = 1,
+        metadata_cache_uri: Optional[str] = None,
     ) -> list:
         """
         Search an asset in oceanDB using search query.
@@ -424,7 +441,7 @@ class OceanAssets:
         did: str,
         consumer_address: str,
         service_index: Optional[int] = None,
-        service_type: str = None,
+        service_type: Optional[str] = None,
         userdata: Optional[dict] = None,
     ) -> OrderRequirements:
         """
@@ -630,7 +647,7 @@ class OceanAssets:
 
     @staticmethod
     def build_access_service(
-        date_created: str, cost: float, address: str, timeout=3600
+        date_created: str, cost: float, address: str, timeout: int = 3600
     ) -> dict:
         return {
             "main": {

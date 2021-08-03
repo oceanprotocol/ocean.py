@@ -11,7 +11,7 @@ An `Ocean` instance will hold a `Config` instance that holds various config para
 
 1.  dict input: `Ocean({'network':..})`
 2.  Config object input: `Ocean(Config('config.ini'))`
-3.  no input, so it uses CONFIG_FILE envvar
+3.  no input, so it uses OCEAN_CONFIG_FILE envvar
 
 Here are examples.
 
@@ -71,14 +71,14 @@ c = Config('config.ini')
 ocean = Ocean(c)
 ```
 
-## 3. No input, so it uses CONFIG_FILE envvar
+## 3. No input, so it uses OCEAN_CONFIG_FILE envvar
 
 We'll use the `config.ini` file created from the previous example.
 
 Then, set an envvar for the config file. In the console:
 
 ```console
-export CONFIG_FILE=config.ini
+export OCEAN_CONFIG_FILE=config.ini
 ```
 
 Then, in Python:
