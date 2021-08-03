@@ -409,7 +409,7 @@ class OceanPool:
         assert self._is_valid_pool(pool_address), "The pool address is not valid."
         dt_address = self.get_token_address(pool_address)
         dt = BToken(self.web3, dt_address)
-        if dt.balanceOf(from_wallet.address) > max_data_token_amount_base:
+        if dt.balanceOf(from_wallet.address) < max_data_token_amount_base:
             raise InsufficientBalance(
                 f"Insufficient funds for adding liquidity for {dt.address} datatoken!"
             )
@@ -419,7 +419,7 @@ class OceanPool:
             )
 
         OCEAN = BToken(self.web3, self.ocean_address)
-        if OCEAN.balanceOf(from_wallet.address) > max_OCEAN_amount_base:
+        if OCEAN.balanceOf(from_wallet.address) < max_OCEAN_amount_base:
             raise InsufficientBalance(
                 f"Insufficient funds for adding liquidity for {OCEAN.address} OCEAN token!"
             )

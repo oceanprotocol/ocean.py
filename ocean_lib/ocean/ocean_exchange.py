@@ -97,8 +97,10 @@ class OceanExchange:
                 raise VerifyTxFailed(
                     f"Approve OCEAN tokens failed, exchange address was {self._exchange_address} and tx id was {tx_id}!"
                 )
-        if ocean_token.balanceOf(wallet.address) < amount_base:
-            raise InsufficientBalance("Insufficient funds for buying DataTokens!")
+        if ocean_token.balanceOf(wallet.address) < ocean_amount_base:
+            raise InsufficientBalance(
+                f"Insufficient funds for buying {amount_base} DataTokens!"
+            )
         tx_id = exchange.buy_data_token(
             exchange_id, data_token_amount=amount_base, from_wallet=wallet
         )
