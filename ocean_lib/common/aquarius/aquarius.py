@@ -7,22 +7,22 @@ Aquarius module.
 Help to communicate with the metadata store.
 """
 
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
-
 import json
 import logging
+from typing import Any, Optional, Tuple, Union
 
+from enforce_typing import enforce_types
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 
 logger = logging.getLogger("aquarius")
 
 
+@enforce_types
 class Aquarius:
     """Aquarius wrapper to call different endpoint of aquarius component."""
 
-    def __init__(self, aquarius_url):
+    def __init__(self, aquarius_url: str) -> None:
         """
         The Metadata class is a wrapper on the Metadata Store, which has exposed a REST API.
 
@@ -43,15 +43,15 @@ class Aquarius:
         self.requests_session = get_requests_session()
 
     @property
-    def root_url(self):
+    def root_url(self) -> str:
         return self._base_url[: self._base_url.find("/api/v1/")]
 
     @property
-    def url(self):
+    def url(self) -> str:
         """Base URL of the aquarius instance."""
         return f"{self._base_url}/ddo"
 
-    def get_service_endpoint(self):
+    def get_service_endpoint(self) -> str:
         """
         Retrieve the endpoint with the ddo for a given did.
 
@@ -59,7 +59,7 @@ class Aquarius:
         """
         return f"{self.url}/" + "{did}"
 
-    def list_assets(self):
+    def list_assets(self) -> list:
         """
         List all the assets registered in the aquarius instance.
 
@@ -70,7 +70,7 @@ class Aquarius:
 
         return asset_list
 
-    def get_asset_ddo(self, did):
+    def get_asset_ddo(self, did: str) -> Union[DDO, dict]:
         """
         Retrieve asset ddo for a given did.
 
@@ -85,7 +85,7 @@ class Aquarius:
 
         return DDO(dictionary=parsed_response)
 
-    def get_asset_metadata(self, did):
+    def get_asset_metadata(self, did: str) -> list:
         """
         Retrieve asset metadata for a given did.
 
@@ -97,7 +97,7 @@ class Aquarius:
 
         return parsed_response
 
-    def list_assets_ddo(self):
+    def list_assets_ddo(self) -> dict:
         """
         List all the ddos registered in the aquarius instance.
 
@@ -105,7 +105,9 @@ class Aquarius:
         """
         return json.loads(self.requests_session.get(self.url).content)
 
-    def text_search(self, text, sort=None, offset=100, page=1):
+    def text_search(
+        self, text: str, sort: Optional[int] = None, offset: int = 100, page: int = 1
+    ) -> list:
         """
         Search in aquarius using text query.
 
@@ -137,7 +139,13 @@ class Aquarius:
         else:
             raise ValueError(f"Unable to search for DDO: {response.content}")
 
-    def query_search(self, search_query, sort=None, offset=100, page=1):
+    def query_search(
+        self,
+        search_query: dict,
+        sort: Optional[dict] = None,
+        offset: int = 100,
+        page: int = 1,
+    ) -> list:
         """
         Search using a query.
 
@@ -167,7 +175,7 @@ class Aquarius:
         else:
             raise ValueError(f"Unable to search for DDO: {response.content}")
 
-    def validate_metadata(self, metadata):
+    def validate_metadata(self, metadata: dict) -> Tuple[bool, Union[list, dict]]:
         """
         Validate that the metadata of your ddo is valid.
 
@@ -184,7 +192,7 @@ class Aquarius:
             return False, parsed_response
 
     @staticmethod
-    def _parse_search_response(response):
+    def _parse_search_response(response: Any) -> Union[list, dict]:
         parsed_response = _parse_response(response, None)
 
         if isinstance(parsed_response, dict) or isinstance(parsed_response, list):
@@ -195,7 +203,7 @@ class Aquarius:
         )
 
 
-def _parse_response(response, default_return):
+def _parse_response(response: Any, default_return: Any) -> Any:
     if not response:
         return default_return
 

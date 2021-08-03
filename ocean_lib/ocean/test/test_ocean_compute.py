@@ -7,7 +7,6 @@ from datetime import datetime
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from tests.resources.ddo_helpers import (
     get_registered_algorithm_ddo,
@@ -17,10 +16,9 @@ from tests.resources.ddo_helpers import (
 from tests.resources.helper_functions import get_publisher_wallet
 
 
-def test_build_cluster_attributes():
-    data_provider = DataServiceProvider()
-    config = Ocean.config
-    compute = OceanCompute(config=config, data_provider=data_provider)
+def test_build_cluster_attributes(config):
+    data_provider = DataServiceProvider
+    compute = OceanCompute(config, data_provider=data_provider)
     cluster_dict = compute.build_cluster_attributes(
         "Kubernetes", "http://10.0.0.17/my_cluster"
     )
@@ -32,10 +30,9 @@ def test_build_cluster_attributes():
     ), "The cluster values are different from the expected ones."
 
 
-def test_build_container_attributes():
-    data_provider = DataServiceProvider()
-    config = Ocean.config
-    compute = OceanCompute(config=config, data_provider=data_provider)
+def test_build_container_attributes(config):
+    data_provider = DataServiceProvider
+    compute = OceanCompute(config, data_provider=data_provider)
     container_dict = compute.build_container_attributes(
         "node", "best_tag", "entrypoint.exe"
     )
@@ -51,10 +48,9 @@ def test_build_container_attributes():
     ), "The container values are different from the expected ones."
 
 
-def test_build_server_attributes():
-    data_provider = DataServiceProvider()
-    config = Ocean.config
-    compute = OceanCompute(config=config, data_provider=data_provider)
+def test_build_server_attributes(config):
+    data_provider = DataServiceProvider
+    compute = OceanCompute(config, data_provider=data_provider)
     server_dict = compute.build_server_attributes(
         "test_server_id_123", "test_server_type", 4, 4, "20", "20", 30
     )
@@ -75,7 +71,7 @@ def test_build_server_attributes():
 
 
 def test_build_service_provider_attributes(config):
-    data_provider = DataServiceProvider()
+    data_provider = DataServiceProvider
     compute = OceanCompute(config=config, data_provider=data_provider)
 
     cluster_dict = compute.build_cluster_attributes(
@@ -141,7 +137,7 @@ def test_build_service_provider_attributes(config):
 
 def test_build_service_privacy_attributes(publisher_ocean_instance):
     publisher = get_publisher_wallet()
-    data_provider = DataServiceProvider()
+    data_provider = DataServiceProvider
     compute = OceanCompute(
         config=publisher_ocean_instance.config, data_provider=data_provider
     )
@@ -177,7 +173,7 @@ def test_build_service_privacy_attributes(publisher_ocean_instance):
 
 
 def test_build_service_privacy_attributes_no_trusted_algos(config):
-    data_provider = DataServiceProvider()
+    data_provider = DataServiceProvider
     compute = OceanCompute(config=config, data_provider=data_provider)
     privacy_dict = compute.build_service_privacy_attributes()
     expected_privacy_dict = {
@@ -195,7 +191,7 @@ def test_build_service_privacy_attributes_no_trusted_algos(config):
 
 def test_create_compute_service_attributes(publisher_ocean_instance):
     publisher = get_publisher_wallet()
-    data_provider = DataServiceProvider()
+    data_provider = DataServiceProvider
     config = publisher_ocean_instance.config
     compute = OceanCompute(config=config, data_provider=data_provider)
 
@@ -317,7 +313,7 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
 
 def test_create_compute_service_descriptor(publisher_ocean_instance):
     publisher = get_publisher_wallet()
-    data_provider = DataServiceProvider()
+    data_provider = DataServiceProvider
     config = publisher_ocean_instance.config
     compute = OceanCompute(config=config, data_provider=data_provider)
 
@@ -431,7 +427,7 @@ def test_create_compute_service_descriptor(publisher_ocean_instance):
 
 def test_get_service_endpoint(publisher_ocean_instance):
     publisher = get_publisher_wallet()
-    data_provider = DataServiceProvider()
+    data_provider = DataServiceProvider
     options_dict = {"resources": {"provider.url": "http://localhost:8030"}}
     config = Config(options_dict=options_dict)
     compute = OceanCompute(config, data_provider)
