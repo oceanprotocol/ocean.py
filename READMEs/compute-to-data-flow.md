@@ -116,8 +116,9 @@ print(f"config.provider_url = '{config.provider_url}'")
 import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
+bob_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY2'))
 print(f"alice_wallet.address = '{alice_wallet.address}'")
-
+print(f"bob_wallet.address = '{bob_wallet.address}'")
 
 #Publish a datatoken
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
@@ -163,4 +164,22 @@ print(f"did = '{did}'")
 
 #Mint the datatokens
 data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
+```
+
+In the same console, Alice will transfer some data tokens to Bob.
+
+## 3.  Alice transfers some data tokens to Bob
+
+```python
+from ocean_lib.exceptions import VerifyTxFailed
+assert data_token.balanceOf(alice_wallet.address) < 20, "need ETH"
+assert data_token.allowance(alice_wallet.address, bob_wallet.address) < 20
+print(f"bob_balance: {ocean.web3.eth.get_balance(bob.wallet.address)}")
+tx_id = data_token.transferFrom(alice_wallet.address, bob_wallet.address, 20, alice_wallet)
+if data_token.get_tx_receipt(ocean.web3, tx_id).status != 1:
+    raise VerifyTxFailed(
+        f"Transferring datatokens failed."
+    )
+print(f"tx_id: {tx_id}")
+print(f"bob_balance after the transfer: {ocean.web3.eth.get_balance(bob_wallet.address)}") 
 ```
