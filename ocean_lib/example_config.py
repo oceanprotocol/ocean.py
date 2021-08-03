@@ -30,7 +30,9 @@ class ExampleConfig:
         }
 
     @staticmethod
-    def get_config_dict(network_name: Optional[str] = None) -> Dict[str, Dict[str, str]]:
+    def get_config_dict(
+        network_name: Optional[str] = None,
+    ) -> Dict[str, Dict[str, str]]:
         """
         :return: dict
         """
