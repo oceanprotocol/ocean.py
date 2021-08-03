@@ -49,7 +49,9 @@ class OceanPool:
         "dtHolders",
     }
 
-    def __init__(self, web3: Web3, ocean_token_address: str, bfactory_address: str):
+    def __init__(
+        self, web3: Web3, ocean_token_address: str, bfactory_address: str
+    ) -> None:
         """Initialises Ocean Pool."""
         self.web3 = web3
         self.ocean_address = ocean_token_address
@@ -139,7 +141,7 @@ class OceanPool:
         return BPool(web3, pool_address)
 
     def get_token_address(
-        self, pool_address: str, pool: BPool = None, validate=True
+        self, pool_address: str, pool: BPool = None, validate: bool = True
     ) -> str:
         """Returns the address of this pool's datatoken."""
         if not pool:
@@ -433,7 +435,7 @@ class OceanPool:
             from_wallet=from_wallet,
         )
 
-    def _is_valid_pool(self, pool_address) -> bool:
+    def _is_valid_pool(self, pool_address: str) -> bool:
         pool = BPool(self.web3, pool_address)
         if pool.getNumTokens() != 2:
             return False

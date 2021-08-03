@@ -2,14 +2,17 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from enforce_typing import enforce_types
+from typing import Optional, Union
 
+from enforce_typing import enforce_types
+from eth_account.messages import SignableMessage
 from ocean_lib.web3_internal.wallet import Wallet
+from web3.datastructures import AttributeDict
 from web3.main import Web3
 
 
 @enforce_types
-def sign_hash(msg_hash, wallet: Wallet) -> str:
+def sign_hash(msg_hash: SignableMessage, wallet: Wallet) -> str:
     """
     This method use `personal_sign`for signing a message. This will always prepend the
     `\x19Ethereum Signed Message:\n32` prefix before signing.
@@ -23,7 +26,9 @@ def sign_hash(msg_hash, wallet: Wallet) -> str:
 
 
 @enforce_types
-def send_ether(from_wallet: Wallet, to_address: str, ether_amount: int):
+def send_ether(
+    from_wallet: Wallet, to_address: str, ether_amount: Union[int, float, str]
+) -> AttributeDict:
     if not Web3.isChecksumAddress(to_address):
         to_address = Web3.toChecksumAddress(to_address)
 
@@ -44,8 +49,11 @@ def send_ether(from_wallet: Wallet, to_address: str, ether_amount: int):
 
 @enforce_types
 def cancel_or_replace_transaction(
-    from_wallet: Wallet, nonce_value, gas_price=None, gas_limit=None
-):
+    from_wallet: Wallet,
+    nonce_value: Optional[Union[str, int]] = None,
+    gas_price: Optional[int] = None,
+    gas_limit: Optional[int] = None,
+) -> AttributeDict:
     web3 = from_wallet.web3
     tx = {
         "from": from_wallet.address,

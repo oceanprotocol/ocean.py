@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from enforce_typing import enforce_types
-from web3.logs import DISCARD
+from typing import Tuple, Union
 
+from enforce_typing import enforce_types
 from ocean_lib.config import Config
 from ocean_lib.exceptions import VerifyTxFailed, InsufficientBalance
 from ocean_lib.models.data_token import DataToken
@@ -13,6 +13,7 @@ from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.exceptions import ValidationError
+from web3.logs import DISCARD
 from web3.main import Web3
 
 
@@ -24,25 +25,25 @@ class OceanExchange:
         ocean_token_address: str,
         exchange_address: str,
         config: Config,
-    ):
+    ) -> None:
         """Initialises OceanExchange object."""
         self.ocean_address = ocean_token_address
         self._exchange_address = exchange_address
         self._config = config
         self._web3 = web3
 
-    def _exchange_contract(self):
+    def _exchange_contract(self) -> FixedRateExchange:
         return FixedRateExchange(self._web3, self._exchange_address)
 
-    def get_quote(self, amount: float, exchange_id: str):
+    def get_quote(self, amount: float, exchange_id: str) -> float:
         exchange = self._exchange_contract()
         amount_base = to_base_18(amount)
         ocean_amount_base = exchange.get_base_token_quote(exchange_id, amount_base)
         return from_base_18(ocean_amount_base)
 
     def get_exchange_id_fallback_dt_and_owner(
-        self, exchange_id, exchange_owner, data_token
-    ):
+        self, exchange_id: Union[bytes, str], exchange_owner: str, data_token: str
+    ) -> Tuple[FixedRateExchange, bytes]:
         exchange = self._exchange_contract()
 
         if exchange_id:

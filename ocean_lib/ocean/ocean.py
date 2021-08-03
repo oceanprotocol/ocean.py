@@ -5,6 +5,7 @@
 
 """Ocean module."""
 import logging
+from typing import Dict, List, Optional, Type, Union
 
 from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
@@ -41,7 +42,9 @@ class Ocean:
 
     """The Ocean class is the entry point into Ocean Protocol."""
 
-    def __init__(self, config, data_provider=None):
+    def __init__(
+        self, config: Union[Dict, Config], data_provider: Optional[Type] = None
+    ) -> None:
         """Initialize Ocean class.
 
         Usage: Make a new Ocean instance
@@ -120,18 +123,18 @@ class Ocean:
         logger.debug("Ocean instance initialized: ")
 
     @property
-    def config(self):
+    def config(self) -> Config:
         """
         `Config` stores artifact path, urls.
         """
         return self._config
 
     @property
-    def web3(self):
+    def web3(self) -> Web3:
         return self._web3
 
     @property
-    def OCEAN_address(self):
+    def OCEAN_address(self) -> str:
         return get_ocean_token_address(self.config.address_file, web3=self.web3)
 
     def create_data_token(
@@ -189,7 +192,9 @@ class Ocean:
         )
         return DTFactory(self.web3, dtf_address)
 
-    def get_user_orders(self, address, datatoken=None, service_id=None):
+    def get_user_orders(
+        self, address: str, datatoken: Optional[str] = None, service_id: int = None
+    ) -> List[Order]:
         """
         :return: List of orders `[Order]`
         """

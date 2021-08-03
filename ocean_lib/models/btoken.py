@@ -31,7 +31,7 @@ class BToken(ContractBase):
         """
         return self.contract.caller.balanceOf(address)
 
-    def approve(self, spender_address: str, amt_base: int, from_wallet: Wallet):
+    def approve(self, spender_address: str, amt_base: int, from_wallet: Wallet) -> str:
         """
         :return: hex str transaction hash
         """
@@ -39,7 +39,7 @@ class BToken(ContractBase):
             "approve", (spender_address, amt_base), from_wallet
         )
 
-    def transfer(self, dst_address: str, amt_base: int, from_wallet: Wallet):
+    def transfer(self, dst_address: str, amt_base: int, from_wallet: Wallet) -> str:
         """
         :return: hex str transaction hash
         """

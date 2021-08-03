@@ -5,31 +5,31 @@
 
 import logging
 import os
+from typing import Dict, Optional
 
+from enforce_typing import enforce_types
 from ocean_lib.config import Config
 from ocean_lib.ocean.util import get_infura_id, get_infura_url
 
 logging.basicConfig(level=logging.INFO)
 
 
+@enforce_types
 class ExampleConfig:
     @staticmethod
-    def get_config_net():
+    def get_config_net() -> str:
         """
         :return: value of environment variable `TEST_NET` or default `ganache`
         """
         return os.environ.get("TEST_NET", "ganache")
 
     @staticmethod
-    def get_base_config():
+    def get_base_config() -> Dict[str, Dict[str, str]]:
         """
         :return: dict
         """
         return {
-            "eth-network": {
-                "network": "http://localhost:8545",
-                "address.file": "",
-            },
+            "eth-network": {"network": "http://localhost:8545", "address.file": ""},
             "resources": {
                 "metadata_cache_uri": "http://aquarius:5000",
                 "provider.url": "http://localhost:8030",
@@ -39,7 +39,7 @@ class ExampleConfig:
         }
 
     @staticmethod
-    def get_network_config(network_name):
+    def get_network_config(network_name: str) -> Dict[str, Dict[str, str]]:
         """
         :return: dict
         """
@@ -48,7 +48,9 @@ class ExampleConfig:
         return config
 
     @staticmethod
-    def _get_config(local_node=True, net_name=None):
+    def _get_config(
+        local_node: bool = True, net_name: Optional[str] = None
+    ) -> Dict[str, Dict[str, str]]:
         """
         :return: dict
         """
@@ -58,7 +60,9 @@ class ExampleConfig:
         return ExampleConfig.get_network_config(net_name)
 
     @staticmethod
-    def get_config_dict(network_name=None):
+    def get_config_dict(
+        network_name: Optional[str] = None,
+    ) -> Dict[str, Dict[str, str]]:
         """
         :return: dict
         """
@@ -71,7 +75,7 @@ class ExampleConfig:
         return config_dict
 
     @staticmethod
-    def get_config(network_name=None):
+    def get_config(network_name: Optional[str] = None) -> Config:
         """
         :return: `Config` instance
         """
