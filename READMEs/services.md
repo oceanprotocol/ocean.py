@@ -36,7 +36,7 @@ unset NETWORK_URL METADATA_CACHE_URI AQUARIUS_URL PROVIDER_URL
 Create an envvar to point to the new config file. In the console:
 
 ```console
-export CONFIG_FILE=config.ini
+export OCEAN_CONFIG_FILE=config.ini
 ```
 
 ## 2. Use the services within Python
@@ -48,7 +48,7 @@ import os
 from ocean_lib.config import Config
 
 #configure the components
-config = Config(os.getenv('CONFIG_FILE'))
+config = Config(os.getenv('OCEAN_CONFIG_FILE'))
 ```
 
 Now you're ready to use the services! 🐳 The marketplace tutorial will use them in more detail.
