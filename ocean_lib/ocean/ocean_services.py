@@ -4,15 +4,21 @@
 #
 
 """Ocean module."""
+from typing import Any, Dict, Tuple
+
+from enforce_typing import enforce_types
 from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 
 
+@enforce_types
 class OceanServices:
 
     """Ocean services class."""
 
     @staticmethod
-    def create_access_service(attributes, provider_uri):
+    def create_access_service(
+        attributes: Dict[str, Any], provider_uri: str
+    ) -> Tuple[str, Dict[str, Any]]:
         """Publish an asset with an `Access` service according to the supplied attributes.
 
         :param attributes: attributes of the access service, dict
@@ -27,7 +33,9 @@ class OceanServices:
         return service
 
     @staticmethod
-    def create_compute_service(attributes, provider_uri):
+    def create_compute_service(
+        attributes: Dict[str, Any], provider_uri: str
+    ) -> Tuple[str, Dict[str, Any]]:
         service_endpoint = provider_uri
         return ServiceDescriptor.compute_service_descriptor(
             attributes, service_endpoint

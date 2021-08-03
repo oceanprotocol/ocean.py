@@ -4,15 +4,18 @@
 #
 
 import logging
+from typing import Dict, Optional
 
+from enforce_typing import enforce_types
 from ocean_lib.config import Config
 
 logging.basicConfig(level=logging.INFO)
 
 
+@enforce_types
 class ExampleConfig:
     @staticmethod
-    def _get_config():
+    def _get_config() -> Dict[str, Dict[str, str]]:
         """
         :return: dict
         """
@@ -27,7 +30,7 @@ class ExampleConfig:
         }
 
     @staticmethod
-    def get_config_dict(network_name=None):
+    def get_config_dict(network_name: Optional[str] = None) -> Dict[str, Dict[str, str]]:
         """
         :return: dict
         """
@@ -38,7 +41,7 @@ class ExampleConfig:
         return config_dict
 
     @staticmethod
-    def get_config(network_url=None):
+    def get_config(network_url: Optional[str] = None) -> Config:
         """
         :return: `Config` instance
         """

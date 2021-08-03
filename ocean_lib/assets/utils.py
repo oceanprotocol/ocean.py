@@ -7,13 +7,13 @@ import json
 from typing import Optional
 
 from enforce_typing import enforce_types
-
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.common.agreements.service_types import ServiceTypes
 
 
-def create_checksum(text):
+@enforce_types
+def create_checksum(text: str) -> str:
     """
     :return: str
     """
@@ -25,7 +25,7 @@ def generate_trusted_algo_dict(
     did: Optional[str] = None,
     metadata_cache_uri: Optional[str] = None,
     ddo: Optional[Asset] = None,
-):
+) -> dict:
     """
     :return: Object as follows:
     ```

@@ -2,6 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from typing import Dict, Optional, Union
 from enforce_typing import enforce_types
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.dtfactory import DTFactory
@@ -11,11 +12,15 @@ from ocean_lib.web3_internal.contract_utils import (
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
 from web3 import WebsocketProvider
+from web3.main import Web3
 
 GANACHE_URL = "http://127.0.0.1:8545"
 
 
-def get_web3_connection_provider(network_url):
+@enforce_types
+def get_web3_connection_provider(
+    network_url: str,
+) -> Union[CustomHTTPProvider, WebsocketProvider]:
     """Return the suitable web3 provider based on the network_url.
 
     Requires going through some gateway such as `infura`.
@@ -47,7 +52,7 @@ def get_web3_connection_provider(network_url):
         raise AssertionError(msg)
 
 
-def get_contracts_addresses(address_file, network):
+def get_contracts_addresses(address_file: str, network: str) -> Dict[str, str]:
     return get_contracts_addresses_web3(network, address_file)
 
 
@@ -73,7 +78,10 @@ def from_base(num_base: int, dec: int) -> float:
     return float(num_base / (10 ** dec))
 
 
-def get_dtfactory_address(address_file, network=None, web3=None):
+@enforce_types
+def get_dtfactory_address(
+    address_file: str, network: Optional[str] = None, web3: Optional[Web3] = None
+) -> str:
     """Returns the DTFactory address for given network or web3 instance
     Requires either network name or web3 instance.
     """
@@ -82,7 +90,10 @@ def get_dtfactory_address(address_file, network=None, web3=None):
     )
 
 
-def get_bfactory_address(address_file, network=None, web3=None):
+@enforce_types
+def get_bfactory_address(
+    address_file: str, network: Optional[str] = None, web3: Optional[Web3] = None
+) -> str:
     """Returns the BFactory address for given network or web3 instance
     Requires either network name or web3 instance.
     """
@@ -91,7 +102,10 @@ def get_bfactory_address(address_file, network=None, web3=None):
     )
 
 
-def get_ocean_token_address(address_file, network=None, web3=None):
+@enforce_types
+def get_ocean_token_address(
+    address_file: str, network: Optional[str] = None, web3: Optional[Web3] = None
+) -> str:
     """Returns the Ocean token address for given network or web3 instance
     Requires either network name or web3 instance.
     """

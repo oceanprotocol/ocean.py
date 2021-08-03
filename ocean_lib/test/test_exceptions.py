@@ -51,16 +51,10 @@ def test_AquariusError(publisher_ocean_instance, metadata):
     metadata_copy = metadata.copy()
     publisher = get_publisher_wallet()
 
-    all_assets = publisher_ocean_instance.assets._get_aquarius().list_assets()
+    ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher)
+    wait_for_ddo(publisher_ocean_instance, ddo.did)
 
-    if not all_assets:
-        # the test is run in isolation, docker has been pruned,
-        # or Aqua is empty for some other reason
-        ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher)
-        wait_for_ddo(publisher_ocean_instance, ddo.did)
-        all_assets = publisher_ocean_instance.assets._get_aquarius().list_assets()
-
-    did = all_assets[0]
+    did = ddo.did
     token_address = add_0x_prefix(did[7:])
 
     with pytest.raises(AquariusError):
