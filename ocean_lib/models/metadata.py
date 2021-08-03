@@ -3,11 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import time
+from typing import Optional
 
 from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
+from web3.datastructures import AttributeDict
 
 
 @enforce_types
@@ -24,7 +26,9 @@ class MetadataContract(ContractBase):
     def event_MetadataUpdated(self):
         return self.events.MetadataUpdated()
 
-    def get_event_log(self, event_name, block, did, timeout=45):
+    def get_event_log(
+        self, event_name: str, block: int, did: str, timeout: int = 45
+    ) -> Optional[AttributeDict]:
         """
         :return: Log if event is found else None
         """

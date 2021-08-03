@@ -21,7 +21,7 @@ def test_init_compute_input():
     with pytest.raises(AssertionError):
         ComputeInput("did", "", "service_id")
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(TypeError):
         ComputeInput("did", "tx_id", "service_id", userdata="not_a_dict")
 
     userdata = {"test1": "test"}

@@ -6,7 +6,7 @@ import logging
 from collections import namedtuple
 from decimal import Decimal
 from pathlib import Path
-from typing import Optional
+from typing import Any, List, Optional
 
 import artifacts
 from enforce_typing import enforce_types
@@ -14,6 +14,7 @@ from eth_account.account import Account
 from eth_account.messages import encode_defunct
 from eth_keys import keys
 from eth_utils import big_endian_to_int, decode_hex
+from hexbytes.main import HexBytes
 from ocean_lib.web3_internal.constants import (
     DEFAULT_NETWORK_NAME,
     NETWORK_NAME_MAP,
@@ -27,7 +28,8 @@ Signature = namedtuple("Signature", ("v", "r", "s"))
 logger = logging.getLogger(__name__)
 
 
-def generate_multi_value_hash(types, values):
+@enforce_types
+def generate_multi_value_hash(types: List[str], values: List[str]) -> HexBytes:
     """
     Return the hash of the given list of values.
     This is equivalent to packing and hashing values in a solidity smart contract
@@ -41,7 +43,8 @@ def generate_multi_value_hash(types, values):
     return Web3.solidityKeccak(types, values)
 
 
-def prepare_prefixed_hash(msg_hash):
+@enforce_types
+def prepare_prefixed_hash(msg_hash: str) -> HexBytes:
     """
 
     :param msg_hash:
@@ -52,7 +55,8 @@ def prepare_prefixed_hash(msg_hash):
     )
 
 
-def to_32byte_hex(val):
+@enforce_types
+def to_32byte_hex(val: int) -> str:
     """
 
     :param val:
@@ -61,7 +65,8 @@ def to_32byte_hex(val):
     return Web3.toBytes(val).rjust(32, b"\0")
 
 
-def split_signature(signature):
+@enforce_types
+def split_signature(signature: Any) -> Signature:
     """
 
     :param web3:
@@ -139,7 +144,7 @@ def get_chain_id(web3: Web3) -> int:
 
 
 @enforce_types
-def ec_recover(message, signed_message):
+def ec_recover(message: str, signed_message: str) -> str:
     """
     This method does not prepend the message with the prefix `\x19Ethereum Signed Message:\n32`.
     The caller should add the prefix to the msg/hash before calling this if the signature was
@@ -155,7 +160,7 @@ def ec_recover(message, signed_message):
 
 
 @enforce_types
-def personal_ec_recover(message, signed_message):
+def personal_ec_recover(message: str, signed_message: str) -> str:
     prefixed_hash = encode_defunct(text=message)
     return ec_recover(prefixed_hash, signed_message)
 
@@ -171,9 +176,11 @@ def get_ether_balance(web3: Web3, address: str) -> int:
     return web3.eth.get_balance(address, block_identifier="latest")
 
 
+@enforce_types
 def from_wei(wei_value: int) -> Decimal:
     return Web3.fromWei(wei_value, "ether")
 
 
-def get_artifacts_path():
+@enforce_types
+def get_artifacts_path() -> str:
     return str(Path(artifacts.__file__).parent.expanduser().resolve())
