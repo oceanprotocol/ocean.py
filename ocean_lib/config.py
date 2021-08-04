@@ -12,21 +12,23 @@ from typing import Any, Dict, Optional, Union
 import artifacts
 from enforce_typing import enforce_types
 from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
-from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
+from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT, NETWORK_NAME_MAP
 
 DEFAULT_NETWORK_HOST = "localhost"
 DEFAULT_NETWORK_PORT = 8545
 DEFAULT_NETWORK_URL = "http://localhost:8545"
 DEFAULT_ADDRESS_FILE = ""
 DEFAULT_METADATA_CACHE_URI = "http://localhost:5000"
-DEFAULT_PROVIDER_URL = ""
+DEFAULT_PROVIDER_URL = "http://localhost:8030"
 
 NAME_NETWORK_URL = "network"
 NAME_ADDRESS_FILE = "address.file"
+NAME_CHAIN_ID = "chain_id"
 NAME_GAS_LIMIT = "gas_limit"
 NAME_METADATA_CACHE_URI = "metadata_cache_uri"
 NAME_AQUARIUS_URL = "aquarius.url"
 NAME_PROVIDER_URL = "provider.url"
+NAME_DOWNLOADS_PATH = "downloads.path"
 
 NAME_DATA_TOKEN_FACTORY_ADDRESS = "dtfactory.address"
 NAME_BFACTORY_ADDRESS = "bfactory.address"
@@ -82,12 +84,16 @@ config_defaults = {
     "eth-network": {
         NAME_NETWORK_URL: DEFAULT_NETWORK_URL,
         NAME_ADDRESS_FILE: DEFAULT_ADDRESS_FILE,
+        NAME_CHAIN_ID: list(NETWORK_NAME_MAP.keys())[
+            list(NETWORK_NAME_MAP.values()).index("Ganache")
+        ],
         NAME_GAS_LIMIT: GAS_LIMIT_DEFAULT,
     },
     "resources": {
         NAME_METADATA_CACHE_URI: DEFAULT_METADATA_CACHE_URI,
         NAME_PROVIDER_URL: DEFAULT_PROVIDER_URL,
         NAME_PROVIDER_ADDRESS: "",
+        NAME_DOWNLOADS_PATH: "consume-downloads",
     },
 }
 
