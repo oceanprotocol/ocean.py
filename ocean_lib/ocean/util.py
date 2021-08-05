@@ -2,16 +2,10 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import os
 from typing import Dict, Optional, Union
-
 from enforce_typing import enforce_types
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.dtfactory import DTFactory
-from ocean_lib.ocean.env_constants import (
-    ENV_INFURA_CONNECTION_TYPE,
-    ENV_INFURA_PROJECT_ID,
-)
 from ocean_lib.web3_internal.contract_utils import (
     get_contracts_addresses as get_contracts_addresses_web3,
 )
@@ -20,39 +14,7 @@ from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvi
 from web3 import WebsocketProvider
 from web3.main import Web3
 
-WEB3_INFURA_PROJECT_ID = "357f2fe737db4304bd2f7285c5602d0d"
 GANACHE_URL = "http://127.0.0.1:8545"
-POLYGON_URL = "https://rpc.polygon.oceanprotocol.com"
-BSC_URL = "https://bsc-dataseed.binance.org"
-
-# shortcut names for networks that *Infura* supports, plus ganache and polygon
-SUPPORTED_NETWORK_NAMES = {"rinkeby", "ganache", "mainnet", "ropsten", "polygon", "bsc"}
-
-
-@enforce_types
-def get_infura_connection_type() -> str:
-    _type = os.getenv(ENV_INFURA_CONNECTION_TYPE, "http")
-    if _type not in ("http", "websocket"):
-        _type = "http"
-
-    return _type
-
-
-@enforce_types
-def get_infura_id() -> str:
-    return os.getenv(ENV_INFURA_PROJECT_ID, WEB3_INFURA_PROJECT_ID)
-
-
-@enforce_types
-def get_infura_url(infura_id: str, network: str) -> str:
-    conn_type = get_infura_connection_type()
-    if conn_type == "http":
-        return f"https://{network}.infura.io/v3/{infura_id}"
-
-    if conn_type == "websocket":
-        return f"wss://{network}.infura.io/ws/v3/{infura_id}"
-
-    raise AssertionError(f"Unknown connection type {conn_type}")
 
 
 @enforce_types
@@ -61,8 +23,7 @@ def get_web3_connection_provider(
 ) -> Union[CustomHTTPProvider, WebsocketProvider]:
     """Return the suitable web3 provider based on the network_url.
 
-    When connecting to a public ethereum network (mainnet or a test net) without
-    running a local node requires going through some gateway such as `infura`.
+    Requires going through some gateway such as `infura`.
 
     Using infura has some issues if your code is relying on evm events.
     To use events with an infura connection you have to use the websocket interface.
@@ -80,28 +41,15 @@ def get_web3_connection_provider(
     :return: provider : HTTPProvider
     """
     if network_url.startswith("http"):
-        provider = CustomHTTPProvider(network_url)
+        return CustomHTTPProvider(network_url)
     elif network_url.startswith("ws"):
-        provider = WebsocketProvider(network_url)
-    elif network_url == "ganache":
-        provider = CustomHTTPProvider(GANACHE_URL)
-    elif network_url == "polygon":
-        provider = CustomHTTPProvider(POLYGON_URL)
-    elif network_url == "bsc":
-        provider = CustomHTTPProvider(BSC_URL)
+        return WebsocketProvider(network_url)
     else:
-        assert network_url in SUPPORTED_NETWORK_NAMES, (
+        msg = (
             f"The given network_url *{network_url}* does not start with either "
-            f"`http` or `wss`, in this case a network name is expected and must "
-            f"be one of the supported networks {SUPPORTED_NETWORK_NAMES}."
+            f"`http` or `wss`. A correct network url is required."
         )
-        network_url = get_infura_url(get_infura_id(), network_url)
-        if network_url.startswith("http"):
-            provider = CustomHTTPProvider(network_url)
-        else:
-            provider = WebsocketProvider(network_url)
-
-    return provider
+        raise AssertionError(msg)
 
 
 def get_contracts_addresses(address_file: str, network: str) -> Dict[str, str]:

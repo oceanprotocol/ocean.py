@@ -13,16 +13,16 @@ from ocean_lib.config import (
     deprecated_environ_names,
     environ_names_and_sections,
 )
-from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.ocean.util import GANACHE_URL
 from tests.resources.ddo_helpers import get_resource_path
 
 
 def test_metadataStoreUri_config_key():
     """Tests that the metadata_cache_uri config property can be set using the
     `metadataStoreUri` config dict key when created via the Ocean __init__"""
-    config_dict = {"metadataStoreUri": "http://ItWorked.com", "network": "ganache"}
+    config_dict = {"metadataStoreUri": "http://ItWorked.com", "network": GANACHE_URL}
     ocean_instance = Ocean(config=config_dict)
     assert "http://ItWorked.com" == ocean_instance.config.metadata_cache_uri
 
@@ -30,7 +30,7 @@ def test_metadataStoreUri_config_key():
 def test_metadataCacheUri_config_key():
     """Tests that the metadata_cache_uri config property can be set using the
     `metadataCacheUri` config dict key when created via the Ocean __init__"""
-    config_dict = {"metadataCacheUri": "http://ItWorked.com", "network": "ganache"}
+    config_dict = {"metadataCacheUri": "http://ItWorked.com", "network": GANACHE_URL}
     ocean_instance = Ocean(config=config_dict)
     assert "http://ItWorked.com" == ocean_instance.config.metadata_cache_uri
 

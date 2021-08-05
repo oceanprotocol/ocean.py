@@ -8,7 +8,6 @@ from typing import Optional
 
 from enforce_typing import enforce_types
 from ocean_lib.config import Config, config_defaults
-from ocean_lib.ocean.util import get_infura_id, get_infura_url
 from ocean_lib.web3_internal.constants import NETWORK_NAME_MAP
 
 logging.basicConfig(level=logging.INFO)
@@ -18,7 +17,7 @@ CONFIG_HELPER_NETWORKS = {
     "ropsten": {
         "eth-network": list(config_defaults["eth-network"].items())
         + [
-            ("network", get_infura_url(get_infura_id(), "ropsten")),
+            ("network", "https://ropsten.infura.io/v3"),
             (
                 "chain_id",
                 list(NETWORK_NAME_MAP.keys())[
@@ -35,7 +34,7 @@ CONFIG_HELPER_NETWORKS = {
     "rinkeby": {
         "eth-network": list(config_defaults["eth-network"].items())
         + [
-            ("network", get_infura_url(get_infura_id(), "rinkeby")),
+            ("network", "https://rinkeby.infura.io/v3"),
             (
                 "chain_id",
                 list(NETWORK_NAME_MAP.keys())[
@@ -52,7 +51,7 @@ CONFIG_HELPER_NETWORKS = {
     "mainnet": {
         "eth-network": list(config_defaults["eth-network"].items())
         + [
-            ("network", get_infura_url(get_infura_id(), "mainnet")),
+            ("network", "https://mainnet.infura.io/v3"),
             (
                 "chain_id",
                 list(NETWORK_NAME_MAP.keys())[
@@ -69,7 +68,7 @@ CONFIG_HELPER_NETWORKS = {
     "polygon": {
         "eth-network": list(config_defaults["eth-network"].items())
         + [
-            ("network", get_infura_url(get_infura_id(), "polygon")),
+            ("network", "https://polygon-mainnet.infura.io/v3"),
             (
                 "chain_id",
                 list(NETWORK_NAME_MAP.keys())[

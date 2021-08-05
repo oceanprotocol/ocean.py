@@ -13,7 +13,6 @@ from eth_keys.utils.padding import pad32
 from eth_utils import int_to_big_endian
 
 
-@enforce_types
 class SignatureFix(Signature):
 
     """
@@ -30,6 +29,7 @@ class SignatureFix(Signature):
         ] = None,
     ) -> None:
         """Initialises SignatureFix object."""
+        # can not apply the enforce types decorator on init due to the Signature hacking
         v, r, s = vrs
         if v == 27 or v == 28:
             v -= 27
@@ -37,6 +37,7 @@ class SignatureFix(Signature):
         vrs = (v, r, s)
         Signature.__init__(self, signature_bytes, vrs, backend)
 
+    @enforce_types
     def to_hex_v_hacked(self) -> str:
         # Need the 'type: ignore' comment below because of
         # https://github.com/python/typeshed/issues/300
@@ -44,6 +45,7 @@ class SignatureFix(Signature):
             codecs.encode(self.to_bytes_v_hacked(), "hex"), "ascii"
         )  # type: ignore
 
+    @enforce_types
     def to_bytes_v_hacked(self) -> bytes:
         v = self.v
         if v == 0 or v == 1:
