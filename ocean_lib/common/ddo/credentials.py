@@ -16,12 +16,13 @@ class AddressCredential:
     def get_addresses_of_class(self, access_class: str = "allow") -> list:
         """Get a filtered list of addresses from credentials (use with allow/deny)."""
         address_entry = self.get_address_entry_of_class(access_class)
+        if not address_entry:
+            return []
+        
         if "values" not in address_entry:
             raise MalformedCredential("No values key in the address credential.")
 
-        return (
-            [addr.lower() for addr in address_entry["values"]] if address_entry else []
-        )
+        return [addr.lower() for addr in address_entry["values"]]
 
     def requires_credential(self) -> bool:
         """Checks whether the asset requires an address credential."""
