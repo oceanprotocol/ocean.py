@@ -18,7 +18,7 @@ class AddressCredential:
         address_entry = self.get_address_entry_of_class(access_class)
         if not address_entry:
             return []
-        
+
         if "values" not in address_entry:
             raise MalformedCredential("No values key in the address credential.")
 
