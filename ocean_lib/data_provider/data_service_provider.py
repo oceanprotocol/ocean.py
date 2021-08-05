@@ -498,6 +498,16 @@ class DataServiceProvider:
         if not result:
             raise InvalidURL(f"InvalidURL {service_endpoint}.")
 
+        try:
+            response = requests.get(result).json()
+        except requests.exceptions.RequestException:
+            raise InvalidURL(f"InvalidURL {service_endpoint}.")
+
+        if "providerAddress" not in response:
+            raise InvalidURL(
+                f"Invalid Provider URL {service_endpoint}, no providerAddress."
+            )
+
         return result
 
     @staticmethod
