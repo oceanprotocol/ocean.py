@@ -499,7 +499,8 @@ class DataServiceProvider:
             raise InvalidURL(f"InvalidURL {service_endpoint}.")
 
         try:
-            response = requests.get(result).json()
+            root_result = "/".join(parts[0:3])
+            response = requests.get(root_result).json()
         except requests.exceptions.RequestException:
             raise InvalidURL(f"InvalidURL {service_endpoint}.")
 
