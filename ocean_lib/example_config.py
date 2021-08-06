@@ -9,135 +9,64 @@ import os
 from enforce_typing import enforce_types
 from web3 import Web3
 
-from ocean_lib.config import Config, config_defaults
-from ocean_lib.web3_internal.constants import NETWORK_NAME_MAP
+from ocean_lib.config import (
+    Config,
+    config_defaults,
+    SECTION_ETH_NETWORK,
+    NAME_CHAIN_ID,
+    SECTION_RESOURCES,
+    NAME_NETWORK_URL,
+    NAME_PROVIDER_URL,
+)
+from ocean_lib.ocean.util import get_web3_connection_provider
 
 logging.basicConfig(level=logging.INFO)
 
-network_rpc = os.getenv("NETWORK_URL")
-
-CONFIG_HELPER_NETWORKS = {
-    1337: config_defaults,
-    3: {
-        "eth-network": dict(
-            list(config_defaults["eth-network"].items())
-            + [
-                ("network", network_rpc),
-                (
-                    "chain_id",
-                    list(NETWORK_NAME_MAP.keys())[
-                        list(NETWORK_NAME_MAP.values()).index("Ropsten")
-                    ],
-                ),
-            ]
-        ),
-        "resources": dict(
-            list(config_defaults["resources"].items())
-            + [
-                ("metadata_cache_uri", "https://aquarius.oceanprotocol.com"),
-                ("provider.url", "https://provider.ropsten.oceanprotocol.com"),
-            ]
-        ),
-    },
-    4: {
-        "eth-network": dict(
-            list(config_defaults["eth-network"].items())
-            + [
-                ("network", network_rpc),
-                (
-                    "chain_id",
-                    list(NETWORK_NAME_MAP.keys())[
-                        list(NETWORK_NAME_MAP.values()).index("Rinkeby")
-                    ],
-                ),
-            ]
-        ),
-        "resources": dict(
-            list(config_defaults["resources"].items())
-            + [
-                ("metadata_cache_uri", "https://aquarius.oceanprotocol.com"),
-                ("provider.url", "https://provider.rinkeby.oceanprotocol.com"),
-            ]
-        ),
-    },
-    1: {
-        "eth-network": dict(
-            list(config_defaults["eth-network"].items())
-            + [
-                ("network", network_rpc),
-                (
-                    "chain_id",
-                    list(NETWORK_NAME_MAP.keys())[
-                        list(NETWORK_NAME_MAP.values()).index("Mainnet")
-                    ],
-                ),
-            ]
-        ),
-        "resources": dict(
-            list(config_defaults["resources"].items())
-            + [
-                ("metadata_cache_uri", "https://aquarius.oceanprotocol.com"),
-                ("provider.url", "https://provider.mainnet.oceanprotocol.com"),
-            ]
-        ),
-    },
-    137: {
-        "eth-network": dict(
-            list(config_defaults["eth-network"].items())
-            + [
-                ("network", network_rpc),
-                (
-                    "chain_id",
-                    list(NETWORK_NAME_MAP.keys())[
-                        list(NETWORK_NAME_MAP.values()).index("Polygon")
-                    ],
-                ),
-            ]
-        ),
-        "resources": dict(
-            list(config_defaults["resources"].items())
-            + [
-                ("metadata_cache_uri", "https://aquarius.oceanprotocol.com"),
-                ("provider.url", "https://provider.polygon.oceanprotocol.com"),
-            ]
-        ),
-    },
-    56: {
-        "eth-network": dict(
-            list(config_defaults["eth-network"].items())
-            + [
-                ("network", network_rpc),
-                (
-                    "chain_id",
-                    list(NETWORK_NAME_MAP.keys())[
-                        list(NETWORK_NAME_MAP.values()).index("Binance Smart Chain")
-                    ],
-                ),
-            ]
-        ),
-        "resources": dict(
-            list(config_defaults["resources"].items())
-            + [
-                ("metadata_cache_uri", "https://aquarius.oceanprotocol.com"),
-                ("provider.url", "https://provider.bsc.oceanprotocol.com"),
-            ]
-        ),
-    },
+PROVIDER_URLS = {
+    1: "https://provider.mainnet.oceanprotocol.com",
+    3: "https://provider.ropsten.oceanprotocol.com",
+    4: "https://provider.rinkeby.oceanprotocol.com",
+    56: "https://provider.bsc.oceanprotocol.com",
+    137: "https://provider.polygon.oceanprotocol.com",
+    1337: "http://localhost:8030",
 }
+
+
+def get_config_helper_networks(network_url: str) -> dict:
+    w3 = Web3(get_web3_connection_provider(network_url))
+    chain_id = w3.eth.chain_id
+    if chain_id not in PROVIDER_URLS:
+        raise ValueError("The chain id for the specific RPC could not be fetched!")
+    config_helper = {
+        SECTION_ETH_NETWORK: dict(
+            list(config_defaults[SECTION_ETH_NETWORK].items())
+            + [(NAME_NETWORK_URL, network_url), (NAME_CHAIN_ID, chain_id)]
+        ),
+        SECTION_RESOURCES: dict(
+            list(config_defaults[SECTION_RESOURCES].items())
+            + [
+                (NAME_PROVIDER_URL, PROVIDER_URLS[chain_id]),
+            ]
+        ),
+    }
+    return config_helper
 
 
 @enforce_types
 class ExampleConfig:
     @staticmethod
     def get_config() -> Config:
+        """Return `Config` containing default values for a given network.
+        Chain ID is determined by querying the RPC specified by `NETWORK_URL` envvar.
         """
-        :return: `Config` instance
-        """
-        w3 = Web3(Web3.HTTPProvider(network_rpc))
+        network_url = os.getenv("NETWORK_URL")
+        assert (
+            network_url is not None
+        ), "Cannot use ocean-lib without a specified network URL."
+        w3 = Web3(get_web3_connection_provider(network_url))
         chain_id = w3.eth.chain_id
-        assert w3.isConnected()
-        if chain_id not in CONFIG_HELPER_NETWORKS:
+        if chain_id not in PROVIDER_URLS:
             raise ValueError("The chain id for the specific RPC could not be fetched!")
         else:
-            config = CONFIG_HELPER_NETWORKS[chain_id]
+            config = get_config_helper_networks(network_url)
             return Config(options_dict=config)

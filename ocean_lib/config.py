@@ -12,13 +12,13 @@ from typing import Any, Dict, Optional, Union
 import artifacts
 from enforce_typing import enforce_types
 from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
-from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT, NETWORK_NAME_MAP
+from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
 
 DEFAULT_NETWORK_HOST = "localhost"
 DEFAULT_NETWORK_PORT = 8545
 DEFAULT_NETWORK_URL = "http://localhost:8545"
 DEFAULT_ADDRESS_FILE = ""
-DEFAULT_METADATA_CACHE_URI = "http://localhost:5000"
+DEFAULT_METADATA_CACHE_URI = "https://aquarius.oceanprotocol.com"
 DEFAULT_PROVIDER_URL = "http://localhost:8030"
 
 NAME_NETWORK_URL = "network"
@@ -84,9 +84,6 @@ config_defaults = {
     "eth-network": {
         NAME_NETWORK_URL: DEFAULT_NETWORK_URL,
         NAME_ADDRESS_FILE: DEFAULT_ADDRESS_FILE,
-        NAME_CHAIN_ID: list(NETWORK_NAME_MAP.keys())[
-            list(NETWORK_NAME_MAP.values()).index("Ganache")
-        ],
         NAME_GAS_LIMIT: GAS_LIMIT_DEFAULT,
     },
     "resources": {
