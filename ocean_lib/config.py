@@ -90,7 +90,6 @@ config_defaults = {
         NAME_METADATA_CACHE_URI: DEFAULT_METADATA_CACHE_URI,
         NAME_PROVIDER_URL: DEFAULT_PROVIDER_URL,
         NAME_PROVIDER_ADDRESS: "",
-        NAME_DOWNLOADS_PATH: "consume-downloads",
     },
 }
 
