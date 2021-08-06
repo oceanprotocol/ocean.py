@@ -82,7 +82,7 @@ Create a file called `test3/config.ini` and fill it as follows.
 
 ```text
 [eth-network]
-network = http://127.0.0.1:8545
+network = ganache
 address.file = ~/.ocean/ocean-contracts/artifacts/address.json
 
 [resources]
