@@ -107,7 +107,7 @@ class Config(configparser.ConfigParser):
         ```
         [eth-network]
         ; ethereum network url
-        network = https://rinkeby.infura.io/v3/<your Infura project id>
+        network = rinkeby
 
         [resources]
         metadata_cache_uri = http://localhost:5000
