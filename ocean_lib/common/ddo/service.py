@@ -33,7 +33,7 @@ class Service:
     ) -> None:
         """Initialize Service instance."""
         # init can not be type hinted due to conflicts with ServiceAgreement
-        self._service_endpoint = service_endpoint
+        self.service_endpoint = service_endpoint
         self._type = service_type or ""
         self._index = index
         self._attributes = attributes or {}
@@ -69,25 +69,6 @@ class Service:
         :return: str
         """
         return self._index
-
-    @property
-    @enforce_types
-    def service_endpoint(self) -> str:
-        """
-        Service endpoint.
-
-        :return: String
-        """
-        return self._service_endpoint
-
-    @enforce_types
-    def set_service_endpoint(self, service_endpoint: str) -> None:
-        """
-        Update service endpoint. Needed to update after create did.
-
-        :param service_endpoint: Service endpoint, str
-        """
-        self._service_endpoint = service_endpoint
 
     @enforce_types
     def values(self) -> Dict[str, Any]:
@@ -135,8 +116,8 @@ class Service:
             attributes[key] = value
 
         values = {self.SERVICE_TYPE: self._type, self.SERVICE_ATTRIBUTES: attributes}
-        if self._service_endpoint:
-            values[self.SERVICE_ENDPOINT] = self._service_endpoint
+        if self.service_endpoint:
+            values[self.SERVICE_ENDPOINT] = self.service_endpoint
         if self._index is not None:
             values[self.SERVICE_INDEX] = self._index
 

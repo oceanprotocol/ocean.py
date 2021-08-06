@@ -271,7 +271,7 @@ class OceanAssets:
         ddo_service_endpoint = md_service.service_endpoint
         if "{did}" in ddo_service_endpoint:
             ddo_service_endpoint = ddo_service_endpoint.replace("{did}", did)
-            md_service.set_service_endpoint(ddo_service_endpoint)
+            md_service.service_endpoint = ddo_service_endpoint
 
         # Populate the ddo services
         asset.add_service(md_service)

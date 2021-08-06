@@ -33,23 +33,13 @@ class Aquarius:
         if "/api/v1/aquarius/assets" in aquarius_url:
             aquarius_url = aquarius_url[: aquarius_url.find("/api/v1/aquarius/assets")]
 
-        self._base_url = f"{aquarius_url}/api/v1/aquarius/assets"
-        self._headers = {"content-type": "application/json"}
+        self.base_url = f"{aquarius_url}/api/v1/aquarius/assets"
 
         logging.debug(f"Metadata Store connected at {aquarius_url}")
         logging.debug(f"Metadata Store API documentation at {aquarius_url}/api/v1/docs")
-        logging.debug(f"Metadata assets at {self._base_url}")
+        logging.debug(f"Metadata assets at {self.base_url}")
 
         self.requests_session = get_requests_session()
-
-    @property
-    def root_url(self) -> str:
-        return self._base_url[: self._base_url.find("/api/v1/")]
-
-    @property
-    def url(self) -> str:
-        """Base URL of the aquarius instance."""
-        return f"{self._base_url}/ddo"
 
     def get_service_endpoint(self) -> str:
         """
@@ -57,7 +47,10 @@ class Aquarius:
 
         :return: Return the url of the the ddo location
         """
-        return f"{self.url}/" + "{did}"
+        # FIXME: encountered this while changing the properties.
+        # where is this did from? There's no argument and the only usage is in
+        # ocean_assets. Might be deprecated, needs reconsideration!
+        return f"{self.base_url}/ddo/" + "{did}"
 
     def get_asset_ddo(self, did: str) -> Union[DDO, dict]:
         """
@@ -66,7 +59,7 @@ class Aquarius:
         :param did: Asset DID string
         :return: DDO instance
         """
-        response = self.requests_session.get(f"{self.url}/{did}").content
+        response = self.requests_session.get(f"{self.base_url}/ddo/{did}").content
         parsed_response = _parse_response(response, None)
 
         if not parsed_response:
@@ -81,7 +74,7 @@ class Aquarius:
         :param did: Asset DID string
         :return: bool
         """
-        response = self.requests_session.get(f"{self.url}/{did}").content
+        response = self.requests_session.get(f"{self.base_url}/ddo/{did}").content
 
         return "asset DID is not in OceanDB" not in str(response)
 
@@ -92,7 +85,7 @@ class Aquarius:
         :param did: Asset DID string
         :return: metadata key of the DDO instance
         """
-        response = self.requests_session.get(f"{self._base_url}/metadata/{did}").content
+        response = self.requests_session.get(f"{self.base_url}/metadata/{did}").content
         parsed_response = _parse_response(response, [])
 
         return parsed_response
@@ -124,12 +117,14 @@ class Aquarius:
         assert page >= 1, f"Invalid page value {page}. Required page >= 1."
         payload = {"text": text, "sort": sort, "offset": offset, "page": page}
         response = self.requests_session.post(
-            f"{self.url}/query", data=json.dumps(payload), headers=self._headers
+            f"{self.base_url}/ddo/query",
+            data=json.dumps(payload),
+            headers={"content-type": "application/json"},
         )
         if response.status_code == 200:
             return self._parse_search_response(response.content)
-        else:
-            raise ValueError(f"Unable to search for DDO: {response.content}")
+
+        raise ValueError(f"Unable to search for DDO: {response.content}")
 
     def query_search(
         self,
@@ -160,12 +155,14 @@ class Aquarius:
         search_query["offset"] = offset
         search_query["page"] = page
         response = self.requests_session.post(
-            f"{self.url}/query", data=json.dumps(search_query), headers=self._headers
+            f"{self.base_url}/ddo/query",
+            data=json.dumps(search_query),
+            headers={"content-type": "application/json"},
         )
         if response.status_code == 200:
             return self._parse_search_response(response.content)
-        else:
-            raise ValueError(f"Unable to search for DDO: {response.content}")
+
+        raise ValueError(f"Unable to search for DDO: {response.content}")
 
     def validate_metadata(self, metadata: dict) -> Tuple[bool, Union[list, dict]]:
         """
@@ -175,13 +172,16 @@ class Aquarius:
         :return: bool
         """
         response = self.requests_session.post(
-            f"{self.url}/validate", data=json.dumps(metadata), headers=self._headers
+            f"{self.base_url}/ddo/validate",
+            data=json.dumps(metadata),
+            headers={"content-type": "application/json"},
         )
+
         if response.content == b"true\n":
             return True, []
-        else:
-            parsed_response = self._parse_search_response(response.content)
-            return False, parsed_response
+
+        parsed_response = self._parse_search_response(response.content)
+        return False, parsed_response
 
     @staticmethod
     def _parse_search_response(response: Any) -> Union[list, dict]:
