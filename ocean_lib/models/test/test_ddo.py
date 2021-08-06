@@ -7,8 +7,6 @@ import uuid
 
 import pytest
 from eth_utils import add_0x_prefix, remove_0x_prefix
-from web3.logs import DISCARD
-
 from ocean_lib.assets.asset import Asset
 from ocean_lib.common.agreements.consumable import ConsumableCodes, MalformedCredential
 from ocean_lib.common.ddo.credentials import AddressCredential
@@ -20,6 +18,7 @@ from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.util import get_contracts_addresses
 from tests.resources.ddo_helpers import get_resource_path
 from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
+from web3.logs import DISCARD
 from web3.main import Web3
 
 
@@ -37,7 +36,7 @@ def get_ddo_sample(datatoken_address):
         checksum_dict[str(service.index)] = checksum(service.main)
 
     asset.add_proof(checksum_dict, get_publisher_wallet())
-    asset._did = did
+    asset.did = did
     return asset
 
 

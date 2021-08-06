@@ -17,7 +17,7 @@ from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.ddo.constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
 from ocean_lib.common.ddo.credentials import AddressCredential
 from ocean_lib.common.ddo.service import Service
-from ocean_lib.common.did import OCEAN_PREFIX, did_to_id
+from ocean_lib.common.did import did_to_id
 from ocean_lib.common.utils.utilities import get_timestamp
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
@@ -37,7 +37,7 @@ class DDO:
         dictionary: Optional[dict] = None,
     ) -> None:
         """Clear the DDO data values."""
-        self._did = did
+        self.did = did
         self._services = []
         self._proof = None
         self._credentials = {}
@@ -57,11 +57,6 @@ class DDO:
             self._read_dict(json.loads(json_text))
         elif dictionary:
             self._read_dict(dictionary)
-
-    @property
-    def did(self) -> Optional[str]:
-        """Get the DID."""
-        return self._did
 
     @property
     def is_disabled(self) -> bool:
@@ -86,9 +81,9 @@ class DDO:
     @property
     def asset_id(self) -> Optional[str]:
         """The asset id part of the DID"""
-        if not self._did:
+        if not self.did:
             return None
-        return add_0x_prefix(did_to_id(self._did))
+        return add_0x_prefix(did_to_id(self.did))
 
     @property
     def services(self) -> Optional[list]:
@@ -125,18 +120,6 @@ class DDO:
         files = self.metadata["encryptedFiles"]
         return files
 
-    def assign_did(self, did: str) -> str:
-        if self._did:
-            raise AssertionError('"did" is already set on this DDO instance.')
-        assert did and isinstance(
-            did, str
-        ), f"did must be of str type, got {did} of type {type(did)}"
-        assert did.startswith(
-            OCEAN_PREFIX
-        ), f'"did" seems invalid, must start with {OCEAN_PREFIX} prefix.'
-        self._did = did
-        return did
-
     def add_service(
         self,
         service_type: str,
@@ -164,7 +147,7 @@ class DDO:
                 index,
             )
         logger.debug(
-            f"Adding service with service type {service_type} with did {self._did}"
+            f"Adding service with service type {service_type} with did {self.did}"
         )
         self._services.append(service)
 
@@ -193,7 +176,7 @@ class DDO:
 
         data = {
             "@context": DID_DDO_CONTEXT_URL,
-            "id": self._did,
+            "id": self.did,
             "created": self._created,
         }
 
@@ -223,7 +206,7 @@ class DDO:
     def _read_dict(self, dictionary: dict) -> None:
         """Import a JSON dict into this DDO."""
         values = copy.deepcopy(dictionary)
-        self._did = values.pop("id")
+        self.did = values.pop("id")
         self._created = values.pop("created", None)
 
         if "service" in values:

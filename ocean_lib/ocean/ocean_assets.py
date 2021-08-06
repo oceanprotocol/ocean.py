@@ -259,7 +259,8 @@ class OceanAssets:
         ), "data_token_address is required for publishing a dataset asset."
 
         # Generating the did and adding to the ddo.
-        did = asset.assign_did(f"did:op:{remove_0x_prefix(data_token_address)}")
+        did = f"did:op:{remove_0x_prefix(data_token_address)}"
+        asset.did = did
         logger.debug(f"Using datatoken address as did: {did}")
         # Check if it's already registered first!
         if self._get_aquarius().ddo_exists(did):

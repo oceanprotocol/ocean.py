@@ -28,7 +28,7 @@ def test_creating_ddo_from_scratch():
     assert ddo.created is not None, "DDO has not been created."
 
     did = DID.did({"0": "0x99999999999999999"})
-    ddo.assign_did(did)
+    ddo.did = did
     assert ddo.did == did
 
     ddo.add_service(TEST_SERVICE_TYPE, TEST_SERVICE_URL)
