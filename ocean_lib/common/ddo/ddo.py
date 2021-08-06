@@ -93,8 +93,7 @@ class DDO:
     @property
     def encrypted_files(self) -> Optional[dict]:
         """Return encryptedFiles field in the base metadata."""
-        files = self.metadata["encryptedFiles"]
-        return files
+        return self.metadata["encryptedFiles"]
 
     def add_service(
         self,
