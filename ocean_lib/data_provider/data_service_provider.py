@@ -501,7 +501,7 @@ class DataServiceProvider:
         try:
             root_result = "/".join(parts[0:3])
             response = requests.get(root_result).json()
-        except requests.exceptions.RequestException:
+        except (requests.exceptions.RequestException, JSONDecodeError):
             raise InvalidURL(f"InvalidURL {service_endpoint}.")
 
         if "providerAddress" not in response:

@@ -228,6 +228,14 @@ def test_get_root_uri():
         DataSP.get_root_uri("thisIsNotAnURL")
 
     with pytest.raises(InvalidURL):
+        # URL is of correct format but unreachable
+        DataSP.get_root_uri("http://thisisaurl.but/itshouldnt")
+
+    with pytest.raises(InvalidURL):
+        # valid URL, but no provider address
+        DataSP.get_root_uri("http://oceanprotocol.com")
+
+    with pytest.raises(InvalidURL):
         DataSP.get_root_uri("//")
 
 
