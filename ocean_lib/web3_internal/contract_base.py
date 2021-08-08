@@ -6,22 +6,27 @@
 """All contracts inherit from `ContractBase` class."""
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
 from enforce_typing import enforce_types
-from eth_typing import BlockIdentifier
+from eth_typing import BlockIdentifier, ChecksumAddress
 from hexbytes import HexBytes
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
-from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.contract_utils import (
+    get_contract_definition,
+    get_contracts_addresses,
+    load_contract,
+)
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
-from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3 import Web3
-from web3.exceptions import MismatchedABI, ValidationError
 from web3._utils.events import get_event_data
 from web3._utils.filters import construct_event_filter_params
 from web3._utils.threads import Timeout
+from web3.contract import ContractEvent, ContractEvents
+from web3.datastructures import AttributeDict
+from web3.exceptions import MismatchedABI, ValidationError
 from websockets import ConnectionClosed
 
 logger = logging.getLogger(__name__)
@@ -34,36 +39,28 @@ class ContractBase(object):
 
     CONTRACT_NAME = None
 
-    def __init__(self, address: Optional[str], abi_path=None):
-        """Initialises Contract Base object.
-
-        The contract name attribute and `abi_path` are required.
-        """
+    def __init__(self, web3: Web3, address: Optional[str]) -> None:
+        """Initialises Contract Base object."""
         self.name = self.contract_name
         assert (
             self.name
         ), "contract_name property needs to be implemented in subclasses."
-        if not abi_path:
-            abi_path = ContractHandler.artifacts_path
 
-        assert abi_path, f"abi_path is required, got {abi_path}"
-
-        self.contract_concise = ContractHandler.get_concise_contract(self.name, address)
-        self.contract = ContractHandler.get(self.name, address)
-
+        self.web3 = web3
+        self.contract = load_contract(self.web3, self.name, address)
         assert not address or (
             self.contract.address == address and self.address == address
         )
-        assert self.contract_concise is not None
+        assert self.contract.caller is not None
 
-    def __str__(self):
+    def __str__(self) -> str:
         """Returns contract `name @ address.`"""
         return f"{self.contract_name} @ {self.address}"
 
     @classmethod
-    def configured_address(cls, network, address_file):
+    def configured_address(cls, network: str, address_file: str) -> str:
         """Returns the contract addresses"""
-        addresses = ContractHandler.get_contracts_addresses(network, address_file)
+        addresses = get_contracts_addresses(network, address_file)
         return addresses.get(cls.CONTRACT_NAME) if addresses else None
 
     @property
@@ -77,7 +74,7 @@ class ContractBase(object):
         return self.contract.address
 
     @property
-    def events(self):
+    def events(self) -> ContractEvents:
         """Expose the underlying contract's events."""
         return self.contract.events
 
@@ -87,7 +84,7 @@ class ContractBase(object):
         return list(self.contract.functions)
 
     @staticmethod
-    def to_checksum_address(address: str):
+    def to_checksum_address(address: str) -> ChecksumAddress:
         """
         Validate the address provided.
 
@@ -97,7 +94,9 @@ class ContractBase(object):
         return Web3.toChecksumAddress(address)
 
     @staticmethod
-    def get_tx_receipt(tx_hash: str, timeout=20):
+    def get_tx_receipt(
+        web3: Web3, tx_hash: str, timeout: int = 120
+    ) -> Optional[AttributeDict]:
         """
         Get the receipt of a tx.
 
@@ -106,7 +105,7 @@ class ContractBase(object):
         :return: Tx receipt
         """
         try:
-            Web3Provider.get_web3().eth.wait_for_transaction_receipt(
+            return web3.eth.wait_for_transaction_receipt(
                 HexBytes(tx_hash), timeout=timeout
             )
         except ValueError as e:
@@ -124,18 +123,16 @@ class ContractBase(object):
             logger.info(f"Unknown error waiting for transaction receipt: {e}.")
             raise
 
-        return Web3Provider.get_web3().eth.get_transaction_receipt(tx_hash)
-
     def is_tx_successful(self, tx_hash: str) -> bool:
         """Check if the transaction is successful.
 
         :param tx_hash: hash of the transaction
         :return: bool
         """
-        receipt = self.get_tx_receipt(tx_hash)
+        receipt = self.get_tx_receipt(self.web3, tx_hash)
         return bool(receipt and receipt.status == 1)
 
-    def get_event_signature(self, event_name):
+    def get_event_signature(self, event_name: str) -> str:
         """
         Return signature of event definition to use in the call to eth_getLogs.
 
@@ -163,15 +160,15 @@ class ContractBase(object):
     def subscribe_to_event(
         self,
         event_name: str,
-        timeout,
-        event_filter,
-        callback=None,
-        timeout_callback=None,
-        args=None,
-        wait=False,
-        from_block="latest",
-        to_block="latest",
-    ):
+        timeout: int,
+        event_filter: Optional[dict] = None,
+        callback: Optional[Callable] = None,
+        timeout_callback: Optional[Callable] = None,
+        args: Optional[list] = None,
+        wait: bool = False,
+        from_block: Optional[Union[str, int]] = "latest",
+        to_block: Optional[Union[str, int]] = "latest",
+    ) -> None:
         """
         Create a listener for the event `event_name` on this contract.
 
@@ -189,7 +186,9 @@ class ContractBase(object):
         from ocean_lib.web3_internal.event_listener import EventListener
 
         return EventListener(
+            self.web3,
             self.CONTRACT_NAME,
+            self.address,
             event_name,
             args,
             filters=event_filter,
@@ -200,11 +199,13 @@ class ContractBase(object):
         )
 
     def send_transaction(
-        self, fn_name: str, fn_args, from_wallet: Wallet, transact: dict = None
+        self,
+        fn_name: str,
+        fn_args: Any,
+        from_wallet: Wallet,
+        transact: Optional[dict] = None,
     ) -> str:
         """Calls a smart contract function.
-
-        Uses either `personal_sendTransaction` (if passphrase is available) or `ether_sendTransaction`.
 
         :param fn_name: str the smart contract function name
         :param fn_args: tuple arguments to pass to function above
@@ -216,9 +217,8 @@ class ContractBase(object):
         contract_function = CustomContractFunction(contract_fn)
         _transact = {
             "from": from_wallet.address,
-            "passphrase": from_wallet.password,
             "account_key": from_wallet.key,
-            # 'gas': GAS_LIMIT_DEFAULT
+            "chainId": self.web3.eth.chain_id,
         }
 
         gas_price = os.environ.get(ENV_GAS_PRICE, None)
@@ -230,7 +230,7 @@ class ContractBase(object):
 
         return contract_function.transact(_transact).hex()
 
-    def get_event_argument_names(self, event_name: str):
+    def get_event_argument_names(self, event_name: str) -> Tuple:
         """Finds the event arguments by `event_name`.
 
         :param event_name: str Name of the event to search in the `contract`.
@@ -241,28 +241,24 @@ class ContractBase(object):
             return event().argument_names
 
     @classmethod
-    def deploy(cls, web3, deployer_wallet: Wallet, abi_path: str = "", *args):
+    def deploy(cls, web3: Web3, deployer_wallet: Wallet, *args) -> str:
         """
         Deploy the DataTokenTemplate and DTFactory contracts to the current network.
 
         :param web3:
-        :param abi_path:
         :param deployer_wallet: Wallet instance
 
         :return: smartcontract address of this contract
         """
-        if not abi_path:
-            abi_path = ContractHandler.artifacts_path
 
-        assert abi_path, f"abi_path is required, got {abi_path}"
+        _json = get_contract_definition(cls.CONTRACT_NAME)
 
-        w3 = web3
-        _json = ContractHandler.read_abi_from_file(cls.CONTRACT_NAME, abi_path)
-
-        _contract = w3.eth.contract(abi=_json["abi"], bytecode=_json["bytecode"])
+        _contract = web3.eth.contract(abi=_json["abi"], bytecode=_json["bytecode"])
         built_tx = _contract.constructor(*args).buildTransaction(
             {"from": deployer_wallet.address}
         )
+        if "chainId" not in built_tx:
+            built_tx["chainId"] = web3.eth.chain_id
 
         if "gas" not in built_tx:
             built_tx["gas"] = web3.eth.estimate_gas(built_tx)
@@ -273,21 +269,73 @@ class ContractBase(object):
         )
         tx_hash = web3.eth.send_raw_transaction(raw_tx)
 
-        return cls.get_tx_receipt(tx_hash, timeout=60).contractAddress
+        return cls.get_tx_receipt(web3, tx_hash, timeout=60).contractAddress
 
-    def get_event_logs(
-        self, event_name, from_block, to_block, filters, web3=None, chunk_size=1000
-    ):
-        """
-        Fetches the list of event logs between the given block numbers.
+    def get_event_log(
+        self,
+        event_name: str,
+        from_block: int,
+        to_block: int,
+        filters: Optional[Dict[str, str]],
+        chunk_size: int = 1000,
+    ) -> List[Any]:
+        """Retrieves the first event log which matches the filters parameter criteria.
+        It processes the blocks order backwards.
 
         :param event_name: str
         :param from_block: int
         :param to_block: int
         :param filters:
-        :param web3: Wallet instance
         :param chunk_size: int
+        """
+        event = getattr(self.events, event_name)
 
+        chunk = chunk_size
+        _to = to_block
+        _from = _to - chunk + 1
+
+        all_logs = []
+        error_count = 0
+        _from = max(_from, from_block)
+        while _to >= from_block:
+            try:
+                logs = self.getLogs(
+                    event, argument_filters=filters, fromBlock=_from, toBlock=_to
+                )
+                all_logs.extend(logs)
+                if len(all_logs) >= 1:
+                    break
+                _to = _from - 1
+                _from = max(_to - chunk + 1, from_block)
+                error_count = 0
+                if (to_block - _to) % 1000 == 0:
+                    print(
+                        f"    Searched blocks {_from}-{_to}. {event_name} event not yet found."
+                    )
+            except requests.exceptions.ReadTimeout as err:
+                print(f"ReadTimeout ({_from}, {_to}): {err}")
+                error_count += 1
+
+            if error_count > 1:
+                break
+
+        return all_logs
+
+    def get_event_logs(
+        self,
+        event_name: str,
+        from_block: int,
+        to_block: int,
+        filters: Optional[Dict[str, str]] = None,
+        chunk_size: int = 1000,
+    ) -> List[AttributeDict]:
+        """
+        Fetches the list of event logs between the given block numbers.
+        :param event_name: str
+        :param from_block: int
+        :param to_block: int
+        :param filters:
+        :param chunk_size: int
         :return: List of event logs. List will have the structure as below.
         ```Python
             [AttributeDict({
@@ -306,8 +354,6 @@ class ContractBase(object):
         ```
         """
         event = getattr(self.events, event_name)
-        if not web3:
-            web3 = Web3Provider.get_web3()
 
         chunk = chunk_size
         _from = from_block
@@ -319,7 +365,7 @@ class ContractBase(object):
         while _from <= to_block:
             try:
                 logs = self.getLogs(
-                    event, web3, argument_filters=filters, fromBlock=_from, toBlock=_to
+                    event, argument_filters=filters, fromBlock=_from, toBlock=_to
                 )
                 all_logs.extend(logs)
                 _from = _to + 1
@@ -327,7 +373,7 @@ class ContractBase(object):
                 error_count = 0
                 if (_from - from_block) % 1000 == 0:
                     print(
-                        f"    So far processed {len(all_logs)} Transfer events from {_from-from_block} blocks."
+                        f"    Searched blocks {_from}-{_to}. {len(all_logs)} {event_name} events detected so far."
                     )
             except requests.exceptions.ReadTimeout as err:
                 print(f"ReadTimeout ({_from}, {_to}): {err}")
@@ -338,14 +384,14 @@ class ContractBase(object):
 
         return all_logs
 
+    @staticmethod
     def getLogs(
-        self,
-        event,
-        web3,
+        event: ContractEvent,
         argument_filters: Optional[Dict[str, Any]] = None,
         fromBlock: Optional[BlockIdentifier] = None,
         toBlock: Optional[BlockIdentifier] = None,
         blockHash: Optional[HexBytes] = None,
+        from_all_addresses: Optional[bool] = False,
     ):
         """Get events for this contract instance using eth_getLogs API.
 
@@ -388,19 +434,21 @@ class ContractBase(object):
         ```
 
         See also: :func:`web3.middleware.filter.local_filter_middleware`.
+        :param event: the ContractEvent instance with a web3 instance
         :param argument_filters:
         :param fromBlock: block number or "latest", defaults to "latest"
         :param toBlock: block number or "latest". Defaults to "latest"
         :param blockHash: block hash. blockHash cannot be set at the
           same time as fromBlock or toBlock
+        :param from_all_addresses: True = return logs from all addresses
+          False = return logs originating from event.address
         :yield: Tuple of :class:`AttributeDict` instances
         """
-        if not self.address:
-            raise TypeError(
-                "This method can be only called on "
-                "an instated contract with an address"
-            )
 
+        if not event or not event.web3:
+            raise TypeError(
+                "This method can be only called on an event which has a web3 instance."
+            )
         abi = event._get_event_abi()
 
         if argument_filters is None:
@@ -417,10 +465,11 @@ class ContractBase(object):
 
         # Construct JSON-RPC raw filter presentation based on human readable Python descriptions
         # Namely, convert event names to their keccak signatures
+        address = event.address if not from_all_addresses else None
         _, event_filter_params = construct_event_filter_params(
             abi,
-            web3.codec,
-            contract_address=self.address,
+            event.web3.codec,
+            contract_address=address,
             argument_filters=_filters,
             fromBlock=fromBlock,
             toBlock=toBlock,
@@ -430,7 +479,7 @@ class ContractBase(object):
             event_filter_params["blockHash"] = blockHash
 
         # Call JSON-RPC API
-        logs = web3.eth.get_logs(event_filter_params)
+        logs = event.web3.eth.get_logs(event_filter_params)
 
         # Convert raw binary data to Python proxy objects as described by ABI
-        return tuple(get_event_data(web3.codec, abi, entry) for entry in logs)
+        return tuple(get_event_data(event.web3.codec, abi, entry) for entry in logs)

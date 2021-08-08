@@ -3,20 +3,22 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
-from typing import Optional
+from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from enforce_typing import enforce_types
+from eth_account.messages import encode_defunct
+from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.config import Config
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.web3_internal.transactions import sign_hash
-from ocean_lib.web3_internal.utils import add_ethereum_prefix_and_hash_msg
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ocean")
@@ -27,13 +29,15 @@ class OceanCompute:
 
     """Ocean assets class."""
 
-    def __init__(self, config, data_provider):
+    def __init__(
+        self, config: Union[Config, Dict], data_provider: Type[DataServiceProvider]
+    ) -> None:
         """Initialises OceanCompute class."""
         self._config = config
         self._data_provider = data_provider
 
     @staticmethod
-    def build_cluster_attributes(cluster_type, url):
+    def build_cluster_attributes(cluster_type: str, url: str) -> Dict[str, str]:
         """
         Builds cluster attributes.
 
@@ -44,7 +48,9 @@ class OceanCompute:
         return {"type": cluster_type, "url": url}
 
     @staticmethod
-    def build_container_attributes(image, tag, entrypoint):
+    def build_container_attributes(
+        image: str, tag: str, entrypoint: str
+    ) -> Dict[str, str]:
         """
         Builds container attributes.
 
@@ -57,8 +63,14 @@ class OceanCompute:
 
     @staticmethod
     def build_server_attributes(
-        server_id, server_type, cpu, gpu, memory, disk, max_run_time
-    ):
+        server_id: str,
+        server_type: str,
+        cpu: int,
+        gpu: int,
+        memory: str,
+        disk: str,
+        max_run_time: int,
+    ) -> Dict[str, Union[int, str]]:
         """
         Builds server attributes.
 
@@ -83,8 +95,12 @@ class OceanCompute:
 
     @staticmethod
     def build_service_provider_attributes(
-        provider_type, description, cluster, containers, servers
-    ):
+        provider_type: str,
+        description: str,
+        cluster: Dict[str, str],
+        containers: Union[Dict[str, str], List[Dict[str, str]]],
+        servers: Union[Dict, List],
+    ) -> Dict[str, Any]:
         """
         Return a dict with attributes describing the details of compute resources in this service
 
@@ -108,12 +124,14 @@ class OceanCompute:
     @staticmethod
     def build_service_privacy_attributes(
         trusted_algorithms: list = None,
+        metadata_cache_uri: str = None,
         allow_raw_algorithm: bool = False,
         allow_all_published_algorithms: bool = False,
         allow_network_access: bool = False,
-    ):
+    ) -> Dict[str, Any]:
         """
         :param trusted_algorithms: list of algorithm did to be trusted by the compute service provider
+        :param metadata_cache_uir: URI used to get DDOs for trusted algorithm DIDs if trusted_algorithms set
         :param allow_raw_algorithm: bool -- when True, unpublished raw algorithm code can be run on this dataset
         :param allow_all_published_algorithms: bool -- when True, any published algorithm can be run on this dataset
             The list of `trusted_algorithms` will be ignored in this case.
@@ -128,7 +146,7 @@ class OceanCompute:
         }
         if trusted_algorithms:
             privacy["publisherTrustedAlgorithms"] = create_publisher_trusted_algorithms(
-                trusted_algorithms, ConfigProvider.get_config().metadata_cache_uri
+                trusted_algorithms, metadata_cache_uri
             )
 
         return privacy
@@ -140,7 +158,7 @@ class OceanCompute:
         date_published: str,
         provider_attributes: dict = None,
         privacy_attributes: dict = None,
-    ):
+    ) -> Dict[str, Any]:
         """
         Creates compute service attributes.
 
@@ -175,7 +193,7 @@ class OceanCompute:
         return attributes
 
     @staticmethod
-    def _status_from_job_info(job_info):
+    def _status_from_job_info(job_info: Dict[str, Any]) -> Dict[str, Any]:
         """
         Helper function to extract the status dict with an added boolean for quick validation
         :param job_info: dict having status and statusText keys
@@ -188,7 +206,12 @@ class OceanCompute:
         }
 
     @staticmethod
-    def check_output_dict(output_def, consumer_address, data_provider, config=None):
+    def check_output_dict(
+        output_def: Dict[str, Any],
+        consumer_address: str,
+        data_provider: DataServiceProvider,
+        config: Config,
+    ) -> Dict[str, Any]:
         """
         Validate the `output_def` dict and fills in defaults for missing values.
 
@@ -198,9 +221,6 @@ class OceanCompute:
         :param config: Config instance
         :return: dict a valid `output_def` object
         """
-        if not config:
-            config = ConfigProvider.get_config()
-
         default_output_def = {
             "nodeUri": config.network_url,
             "brizoUri": data_provider.get_url(config),
@@ -217,7 +237,7 @@ class OceanCompute:
         default_output_def.update(output_def)
         return default_output_def
 
-    def create_compute_service_descriptor(self, attributes):
+    def create_compute_service_descriptor(self, attributes: dict) -> ServiceDescriptor:
         """
         Return a service descriptor (tuple) for service of type ServiceTypes.CLOUD_COMPUTE
         and having the required attributes and service endpoint.
@@ -229,11 +249,17 @@ class OceanCompute:
             attributes=attributes, service_endpoint=compute_endpoint
         )
 
-    def _sign_message(self, wallet, msg, nonce=None, service_endpoint=None):
+    def _sign_message(
+        self,
+        wallet: Wallet,
+        msg: str,
+        nonce: Optional[int] = None,
+        service_endpoint: Optional[str] = None,
+    ) -> str:
         if nonce is None:
             uri = self._data_provider.get_root_uri(service_endpoint)
-            nonce = self._data_provider.get_nonce(wallet.address, uri)
-        return sign_hash(add_ethereum_prefix_and_hash_msg(f"{msg}{nonce}"), wallet)
+            nonce = str(self._data_provider.get_nonce(wallet.address, uri))
+        return sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
 
     def start(
         self,
@@ -246,7 +272,8 @@ class OceanCompute:
         algorithm_data_token: str = None,
         output: dict = None,
         job_id: str = None,
-    ):
+        algouserdata: Optional[dict] = None,
+    ) -> str:
         """
         Start a remote compute job on the asset files.
 
@@ -281,7 +308,7 @@ class OceanCompute:
         service_id = first_input.service_id
 
         output = OceanCompute.check_output_dict(
-            output, consumer_wallet.address, data_provider=self._data_provider
+            output, consumer_wallet.address, self._data_provider, self._config
         )
         asset = resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
         _, service_endpoint = self._get_service_endpoint(did, asset)
@@ -321,13 +348,15 @@ class OceanCompute:
                 output,
                 input_datasets,
                 job_id,
+                userdata=first_input.userdata,
+                algouserdata=algouserdata,
             )
 
             return job_info["jobId"]
         except ValueError:
             raise
 
-    def status(self, did, job_id, wallet):
+    def status(self, did: str, job_id: str, wallet: Wallet) -> Dict[str, Any]:
         """
         Gets job status.
 
@@ -348,7 +377,7 @@ class OceanCompute:
             )
         )
 
-    def result(self, did, job_id, wallet):
+    def result(self, did: str, job_id: str, wallet: Wallet) -> Dict[str, Any]:
         """
         Gets job result.
 
@@ -372,7 +401,7 @@ class OceanCompute:
             "logs": info_dict.get("algorithmLogUrl", []),
         }
 
-    def stop(self, did, job_id, wallet):
+    def stop(self, did: str, job_id: str, wallet: Wallet) -> Dict[str, Any]:
         """
         Attempt to stop the running compute job.
 
@@ -393,7 +422,9 @@ class OceanCompute:
             )
         )
 
-    def _get_service_endpoint(self, did, asset=None):
+    def _get_service_endpoint(
+        self, did: str, asset: Optional[Asset] = None
+    ) -> Tuple[str, str]:
         if not asset:
             asset = resolve_asset(did, self._config.metadata_cache_uri)
 

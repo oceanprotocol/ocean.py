@@ -5,20 +5,18 @@
 
 """Ocean module."""
 import logging
-import os
 from decimal import Decimal
+from typing import Dict, List, Optional, Type, Union
 
 from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
 from ocean_lib.config import Config
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.models.order import Order
-from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.ocean_exchange import OceanExchange
@@ -30,12 +28,11 @@ from ocean_lib.ocean.util import (
     get_ocean_token_address,
     get_web3_connection_provider,
 )
-from ocean_lib.web3_internal.contract_handler import ContractHandler
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.web3_provider import Web3Provider
 from web3.datastructures import AttributeDict
+from web3.main import Web3
 
 logger = logging.getLogger("ocean")
 
@@ -45,7 +42,9 @@ class Ocean:
 
     """The Ocean class is the entry point into Ocean Protocol."""
 
-    def __init__(self, config=None, data_provider=None):
+    def __init__(
+        self, config: Union[Dict, Config], data_provider: Optional[Type] = None
+    ) -> None:
         """Initialize Ocean class.
 
         Usage: Make a new Ocean instance
@@ -71,14 +70,6 @@ class Ocean:
         :param config: `Config` instance
         :param data_provider: `DataServiceProvider` instance
         """
-        # Configuration information for the market is stored in the Config class
-        # config = Config(filename=config_file, options_dict=config_dict)
-        if not config:
-            try:
-                config = ConfigProvider.get_config()
-            except AssertionError:
-                config = Config(os.getenv(ENV_CONFIG_FILE))
-                ConfigProvider.set_config(config)
         if isinstance(config, dict):
             # fallback to metadataStoreUri
             cache_key = (
@@ -97,52 +88,54 @@ class Ocean:
                 },
             }
             config = Config(options_dict=config_dict)
-        ConfigProvider.set_config(config)
         self._config = config
-        ContractHandler.set_artifacts_path(self._config.artifacts_path)
-        Web3Provider.init_web3(
+        self._web3 = Web3(
             provider=get_web3_connection_provider(self._config.network_url)
         )
-
-        self._web3 = Web3Provider.get_web3()
 
         if not data_provider:
             data_provider = DataServiceProvider
 
-        network = get_network_name()
-        addresses = get_contracts_addresses(network, self._config)
+        network = get_network_name(web3=self._web3)
+        addresses = get_contracts_addresses(self._config.address_file, network)
         self.assets = OceanAssets(
-            self._config, data_provider, addresses.get(MetadataContract.CONTRACT_NAME)
+            self._config,
+            self._web3,
+            data_provider,
+            addresses.get(MetadataContract.CONTRACT_NAME),
         )
         self.services = OceanServices()
         self.compute = OceanCompute(self._config, data_provider)
 
-        ocean_address = get_ocean_token_address(network)
-        self.pool = OceanPool(ocean_address, get_bfactory_address(network))
-        self.exchange = OceanExchange(
+        ocean_address = get_ocean_token_address(self._config.address_file, network)
+        self.pool = OceanPool(
+            self._web3,
             ocean_address,
-            FixedRateExchange.configured_address(
-                network or get_network_name(), ConfigProvider.get_config().address_file
-            ),
-            self.config,
+            get_bfactory_address(self._config.address_file, network),
+        )
+        self.exchange = OceanExchange(
+            self._web3,
+            ocean_address,
+            FixedRateExchange.configured_address(network, self._config.address_file),
+            self._config,
         )
 
         logger.debug("Ocean instance initialized: ")
 
     @property
-    def config(self):
+    def config(self) -> Config:
         """
         `Config` stores artifact path, urls.
         """
         return self._config
 
     @property
-    def web3(self):
+    def web3(self) -> Web3:
         return self._web3
 
     @property
-    def OCEAN_address(self):
-        return get_ocean_token_address(get_network_name())
+    def OCEAN_address(self) -> str:
+        return get_ocean_token_address(self.config.address_file, web3=self.web3)
 
     def create_data_token(
         self,
@@ -177,7 +170,7 @@ class Ocean:
         )
         address = dtfactory.get_token_address(tx_id)
         assert address, "new datatoken has no address"
-        dt = DataToken(address)
+        dt = DataToken(self._web3, address)
         return dt
 
     def get_data_token(self, token_address: str) -> DataToken:
@@ -186,27 +179,29 @@ class Ocean:
         :return: `Datatoken` instance
         """
 
-        return DataToken(token_address)
+        return DataToken(self._web3, token_address)
 
     def get_dtfactory(self, dtfactory_address: str = "") -> DTFactory:
-        dtf_address = dtfactory_address or DTFactory.configured_address(
-            get_network_name(), self._config.address_file
-        )
         """
         :param dtfactory_address: contract address, str
 
         :return: `DTFactory` instance
         """
-        return DTFactory(dtf_address)
+        dtf_address = dtfactory_address or DTFactory.configured_address(
+            get_network_name(web3=self._web3), self._config.address_file
+        )
+        return DTFactory(self.web3, dtf_address)
 
-    def get_user_orders(self, address, datatoken=None, service_id=None):
+    def get_user_orders(
+        self, address: str, datatoken: Optional[str] = None, service_id: int = None
+    ) -> List[Order]:
         """
         :return: List of orders `[Order]`
         """
-        dt = DataToken(datatoken)
+        dt = DataToken(self._web3, datatoken)
         _orders = []
         for log in dt.get_start_order_logs(
-            self._web3, address, from_all_tokens=not bool(datatoken)
+            address, from_all_tokens=not bool(datatoken)
         ):
             a = dict(log.args.items())
             a["amount"] = from_wei(int(log.args.amount))

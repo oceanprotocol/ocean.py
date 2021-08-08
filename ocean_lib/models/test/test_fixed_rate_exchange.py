@@ -12,7 +12,7 @@ def run_failing_tx(contract, fn, *args):
     """Helper function for testing a failed transfer."""
     try:
         tx_id = fn(*args)
-        return contract.get_tx_receipt(tx_id).status
+        return contract.get_tx_receipt(contract.web3, tx_id).status
     except ValueError:
         return 0
     except ValidationError:
@@ -20,7 +20,7 @@ def run_failing_tx(contract, fn, *args):
 
 
 def test_fixed_rate_exchange(
-    alice_ocean, alice_wallet, T1, bob_wallet, T2, contracts_addresses
+    web3, alice_ocean, alice_wallet, T1, bob_wallet, T2, contracts_addresses
 ):
     """Tests for fixed rate exchange.
 
@@ -35,14 +35,16 @@ def test_fixed_rate_exchange(
 
     """
     base_unit = to_wei(1)
-    fixed_ex = FixedRateExchange(contracts_addresses[FixedRateExchange.CONTRACT_NAME])
+    fixed_ex = FixedRateExchange(
+        web3, contracts_addresses[FixedRateExchange.CONTRACT_NAME]
+    )
     num_ex = fixed_ex.getNumberOfExchanges()
     assert num_ex == len(
         fixed_ex.getExchanges()
     ), "num exchanges do not match num of exchange ids."
 
     ocean_t = alice_ocean.OCEAN_address
-    ocn_token = DataToken(ocean_t)
+    ocn_token = DataToken(web3, ocean_t)
     assert ocn_token.token_balance(bob_wallet.address) >= 100, (
         f"bob wallet does not have the expected OCEAN tokens balance, "
         f"got {ocn_token.token_balance(bob_wallet.address)} instead of 100"
@@ -51,7 +53,7 @@ def test_fixed_rate_exchange(
     # clear any previous ocean token allowance for the exchange contract
     assert (
         ocn_token.get_tx_receipt(
-            ocn_token.approve(fixed_ex.address, 1, bob_wallet)
+            web3, ocn_token.approve(fixed_ex.address, 1, bob_wallet)
         ).status
         == 1
     ), "approve failed"
@@ -59,7 +61,7 @@ def test_fixed_rate_exchange(
 
     rate = to_wei("0.1")
     tx_id = fixed_ex.create(ocean_t, T1.address, rate, alice_wallet)
-    r = fixed_ex.get_tx_receipt(tx_id)
+    r = fixed_ex.get_tx_receipt(web3, tx_id)
     assert r.status == 1, f"create fixed rate exchange failed: TxId {tx_id}."
 
     ex_id = fixed_ex.generateExchangeId(ocean_t, T1.address, alice_wallet.address).hex()
@@ -93,7 +95,7 @@ def test_fixed_rate_exchange(
     # approve ocean tokens, buying should still fail because datatokens are not approved by exchange owner
     assert (
         ocn_token.get_tx_receipt(
-            ocn_token.approve(fixed_ex.address, base_token_quote, bob_wallet)
+            web3, ocn_token.approve(fixed_ex.address, base_token_quote, bob_wallet)
         ).status
         == 1
     ), "approve failed"
@@ -107,14 +109,16 @@ def test_fixed_rate_exchange(
 
     # approve data token, now buying should succeed
     assert (
-        T1.get_tx_receipt(T1.approve(fixed_ex.address, amount, alice_wallet)).status
+        T1.get_tx_receipt(
+            web3, T1.approve(fixed_ex.address, amount, alice_wallet)
+        ).status
         == 1
     ), "approve failed"
     assert (
         ocn_token.allowance(bob_wallet.address, fixed_ex.address) == base_token_quote
     ), ""
     tx_id = fixed_ex.buy_data_token(ex_id, amount, bob_wallet)
-    r = fixed_ex.get_tx_receipt(tx_id)
+    r = fixed_ex.get_tx_receipt(web3, tx_id)
     assert (
         r.status == 1
     ), f"buy_data_token/swap on EX {ex_id} failed with status 0: amount {amount}."
@@ -129,7 +133,7 @@ def test_fixed_rate_exchange(
     # create another ex then do more tests
     rate2 = to_wei("0.8")
     tx_id = fixed_ex.create(ocean_t, T2.address, rate2, alice_wallet)
-    r = fixed_ex.get_tx_receipt(tx_id)
+    r = fixed_ex.get_tx_receipt(web3, tx_id)
     assert r.status == 1, f"create fixed rate exchange failed: TxId {tx_id}."
 
     assert fixed_ex.getNumberOfExchanges() == num_ex + 2, (
@@ -154,7 +158,10 @@ def test_fixed_rate_exchange(
     ), f"exchange {t2_ex_id} deactivate (using bob_wallet) should fail but did not."
 
     assert (
-        fixed_ex.get_tx_receipt(fixed_ex.deactivate(t2_ex_id, alice_wallet)).status == 1
+        fixed_ex.get_tx_receipt(
+            web3, fixed_ex.deactivate(t2_ex_id, alice_wallet)
+        ).status
+        == 1
     ), f"exchange {t2_ex_id} deactivate failed."
     assert (
         fixed_ex.isActive(t2_ex_id) is False
@@ -170,7 +177,7 @@ def test_fixed_rate_exchange(
         amount * rate2 / base_unit
     ), f"quote does not seem correct: expected {amount*rate2/base_unit}, got {base_token_quote}"
     ocn_token.get_tx_receipt(
-        ocn_token.approve(fixed_ex.address, base_token_quote, bob_wallet)
+        web3, ocn_token.approve(fixed_ex.address, base_token_quote, bob_wallet)
     )
     # buy should fail (deactivated exchange)
     assert (
@@ -184,7 +191,8 @@ def test_fixed_rate_exchange(
         ocn_token.allowance(bob_wallet.address, fixed_ex.address) == base_token_quote
     ), ""
     assert (
-        fixed_ex.get_tx_receipt(fixed_ex.activate(t2_ex_id, alice_wallet)).status == 1
+        fixed_ex.get_tx_receipt(web3, fixed_ex.activate(t2_ex_id, alice_wallet)).status
+        == 1
     ), f"exchange {t2_ex_id} deactivate failed."
     assert (
         fixed_ex.isActive(t2_ex_id) is True
@@ -202,12 +210,14 @@ def test_fixed_rate_exchange(
 
     # now buy tokens should succeed
     assert (
-        T2.get_tx_receipt(T2.approve(fixed_ex.address, amount * 3, alice_wallet)).status
+        T2.get_tx_receipt(
+            web3, T2.approve(fixed_ex.address, amount * 3, alice_wallet)
+        ).status
         == 1
     ), "approve failed"
     assert (
         fixed_ex.get_tx_receipt(
-            fixed_ex.buy_data_token(t2_ex_id, amount, bob_wallet)
+            web3, fixed_ex.buy_data_token(t2_ex_id, amount, bob_wallet)
         ).status
         == 1
     ), f"buy_data_token/swap on EX {ex_id} failed, "
@@ -215,7 +225,7 @@ def test_fixed_rate_exchange(
 
     # approve again for another purchase
     ocn_token.get_tx_receipt(
-        ocn_token.approve(fixed_ex.address, base_token_quote, bob_wallet)
+        web3, ocn_token.approve(fixed_ex.address, base_token_quote, bob_wallet)
     )
     assert (
         run_failing_tx(
@@ -229,11 +239,11 @@ def test_fixed_rate_exchange(
         t2_ex_id, to_wei(5)
     )  # num base token (OCEAN tokens
     ocn_token.get_tx_receipt(
-        ocn_token.approve(fixed_ex.address, base_token_quote, bob_wallet)
+        web3, ocn_token.approve(fixed_ex.address, base_token_quote, bob_wallet)
     )
     assert (
         fixed_ex.get_tx_receipt(
-            fixed_ex.buy_data_token(t2_ex_id, to_wei(5), bob_wallet)
+            web3, fixed_ex.buy_data_token(t2_ex_id, to_wei(5), bob_wallet)
         ).status
         == 1
     ), f"buy_data_token/swap on EX {t2_ex_id} failed."
@@ -249,7 +259,9 @@ def test_fixed_rate_exchange(
     ), f"T1 exchange rate does not match {rate}, got {fixed_ex.getRate(ex_id)}"
     rate2 = to_wei("0.75")
     assert (
-        fixed_ex.get_tx_receipt(fixed_ex.setRate(t2_ex_id, rate2, alice_wallet)).status
+        fixed_ex.get_tx_receipt(
+            web3, fixed_ex.setRate(t2_ex_id, rate2, alice_wallet)
+        ).status
         == 1
     ), "setRate failed."
     assert (
@@ -267,7 +279,7 @@ def test_fixed_rate_exchange(
     ), "should not accept a negative rate."
     assert (
         fixed_ex.get_tx_receipt(
-            fixed_ex.setRate(t2_ex_id, to_wei(1000), alice_wallet)
+            web3, fixed_ex.setRate(t2_ex_id, to_wei(1000), alice_wallet)
         ).status
         == 1
     ), "setRate failed."

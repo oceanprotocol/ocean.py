@@ -4,16 +4,19 @@
 #
 import logging
 import typing
+from typing import Optional, Tuple
 
 from enforce_typing import enforce_types
+from eth_typing import BlockIdentifier
 from eth_utils import remove_0x_prefix
 from ocean_lib.models import balancer_constants
+from ocean_lib.models.btoken import BToken
 from ocean_lib.ocean.util import from_base
+from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.currency import from_wei
 from ocean_lib.web3_internal.wallet import Wallet
-from web3._utils.events import get_event_data
-
-from .btoken import BToken
+from web3.datastructures import AttributeDict
+from web3.main import Web3
 
 logger = logging.getLogger(__name__)
 
@@ -22,12 +25,7 @@ logger = logging.getLogger(__name__)
 class BPool(BToken):
     CONTRACT_NAME = "BPool"
 
-    def __init__(self, *args, **kwargs):
-        """Initialises BPool object."""
-        BToken.__init__(self, *args, **kwargs)
-        self._ccontract = self.contract_concise
-
-    def __str__(self):
+    def __str__(self) -> str:
         """Formats with attributes as key, value pairs."""
         s = []
         s += ["BPool:"]
@@ -41,12 +39,12 @@ class BPool(BToken):
 
         s += [f"  numTokens = {self.getNumTokens()}"]
         cur_addrs = self.getCurrentTokens()
-        cur_symbols = [BToken(addr).symbol() for addr in cur_addrs]
+        cur_symbols = [BToken(self.web3, addr).symbol() for addr in cur_addrs]
         s += [f"  currentTokens (as symbols) = {', '.join(cur_symbols)}"]
 
         if self.isFinalized():
             final_addrs = self.getFinalTokens()
-            final_symbols = [BToken(addr).symbol() for addr in final_addrs]
+            final_symbols = [BToken(self.web3, addr).symbol() for addr in final_addrs]
             s += [f"  finalTokens (as symbols) = {final_symbols}"]
 
         s += ["  is bound:"]
@@ -65,7 +63,7 @@ class BPool(BToken):
         s += ["  balances (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
             balance_base = self.getBalance(addr)
-            dec = BToken(addr).decimals()
+            dec = BToken(self.web3, addr).decimals()
             balance = from_base(balance_base, dec)
             s += [f"    {symbol}: {balance}"]
 
@@ -107,7 +105,7 @@ class BPool(BToken):
 
     # ==== View Functions
     def isPublicSwap(self) -> bool:
-        return self._ccontract.isPublicSwap()
+        return self.contract.caller.isPublicSwap()
 
     def isFinalized(self) -> bool:
         """Returns true if state is finalized.
@@ -117,7 +115,7 @@ class BPool(BToken):
         `JOIN`, and `EXIT` are public. `CONTROL` capabilities are disabled.
         (https://docs.balancer.finance/smart-contracts/api#access-control)
         """
-        return self._ccontract.isFinalized()
+        return self.contract.caller.isFinalized()
 
     def isBound(self, token_address: str) -> bool:
         """Returns True if the token is bound.
@@ -128,27 +126,27 @@ class BPool(BToken):
         interaction with this token in practice (assuming there are no existing
         tokens in the pool, which can always `exitPool`).
         """
-        return self._ccontract.isBound(token_address)
+        return self.contract.caller.isBound(token_address)
 
     def getNumTokens(self) -> int:
         """
         How many tokens are bound to this pool.
         """
-        return self._ccontract.getNumTokens()
+        return self.contract.caller.getNumTokens()
 
     def getCurrentTokens(self) -> typing.List[str]:
         """@return -- list of [token_addr:str]"""
-        return self._ccontract.getCurrentTokens()
+        return self.contract.caller.getCurrentTokens()
 
     def getFinalTokens(self) -> typing.List[str]:
         """@return -- list of [token_addr:str]"""
-        return self._ccontract.getFinalTokens()
+        return self.contract.caller.getFinalTokens()
 
     def getDenormalizedWeight(self, token_address: str) -> int:
-        return self._ccontract.getDenormalizedWeight(token_address)
+        return self.contract.caller.getDenormalizedWeight(token_address)
 
     def getTotalDenormalizedWeight(self) -> int:
-        return self._ccontract.getTotalDenormalizedWeight()
+        return self.contract.caller.getTotalDenormalizedWeight()
 
     def getNormalizedWeight(self, token_address: str) -> int:
         """
@@ -156,33 +154,33 @@ class BPool(BToken):
         all tokens will sum up to 1. (Note: the actual sum may be 1 plus or
         minus a few wei due to division precision loss)
         """
-        return self._ccontract.getNormalizedWeight(token_address)
+        return self.contract.caller.getNormalizedWeight(token_address)
 
     def getBalance(self, token_address: str) -> int:
-        return self._ccontract.getBalance(token_address)
+        return self.contract.caller.getBalance(token_address)
 
     def getSwapFee(self) -> int:
-        return self._ccontract.getSwapFee()
+        return self.contract.caller.getSwapFee()
 
     def getController(self) -> str:
         """
         Get the "controller" address, which can call `CONTROL` functions like
         `rebind`, `setSwapFee`, or `finalize`.
         """
-        return self._ccontract.getController()
+        return self.contract.caller.getController()
 
     # ==== Controller Functions
 
-    def setSwapFee(self, swapFee_base: int, from_wallet: Wallet):
+    def setSwapFee(self, swapFee_base: int, from_wallet: Wallet) -> str:
         """
         Caller must be controller. Pool must NOT be finalized.
         """
         return self.send_transaction("setSwapFee", (swapFee_base,), from_wallet)
 
-    def setController(self, manager_address: str, from_wallet: Wallet):
+    def setController(self, manager_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("setController", (manager_address,), from_wallet)
 
-    def setPublicSwap(self, public: bool, from_wallet: Wallet):
+    def setPublicSwap(self, public: bool, from_wallet: Wallet) -> str:
         """
         Makes `isPublicSwap` return `_publicSwap`. Requires caller to be
         controller and pool not to be finalized. Finalized pools always have
@@ -190,7 +188,7 @@ class BPool(BToken):
         """
         return self.send_transaction("setPublicSwap", (public,), from_wallet)
 
-    def finalize(self, from_wallet: Wallet):
+    def finalize(self, from_wallet: Wallet) -> str:
         """
         This makes the pool **finalized**. This is a one-way transition. `bind`,
         `rebind`, `unbind`, `setSwapFee` and `setPublicSwap` will all throw
@@ -205,7 +203,7 @@ class BPool(BToken):
         balance_base: int,
         weight_base: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Binds the token with address `token`. Tokens will be pushed/pulled from
         caller to adjust match new balance. Token must not already be bound.
@@ -231,7 +229,7 @@ class BPool(BToken):
         balance_base: int,
         weight_base: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Changes the parameters of an already-bound token. Performs the same
         validation on the parameters.
@@ -240,14 +238,14 @@ class BPool(BToken):
             "rebind", (token_address, balance_base, weight_base), from_wallet
         )
 
-    def unbind(self, token_address: str, from_wallet: Wallet):
+    def unbind(self, token_address: str, from_wallet: Wallet) -> str:
         """
         Unbinds a token, clearing all of its parameters. Exit fee is charged
         and the remaining balance is sent to caller.
         """
         return self.send_transaction("unbind", (token_address,), from_wallet)
 
-    def gulp(self, token_address: str, from_wallet: Wallet):
+    def gulp(self, token_address: str, from_wallet: Wallet) -> str:
         """
         This syncs the internal `balance` of `token` within a pool with the
         actual `balance` registered on the ERC20 contract. This is useful to
@@ -266,10 +264,12 @@ class BPool(BToken):
     # ==== Price Functions
 
     def getSpotPrice(self, tokenIn_address: str, tokenOut_address: str) -> int:
-        return self._ccontract.getSpotPrice(tokenIn_address, tokenOut_address)
+        return self.contract.caller.getSpotPrice(tokenIn_address, tokenOut_address)
 
     def getSpotPriceSansFee(self, tokenIn_address: str, tokenOut_address: str) -> int:
-        return self._ccontract.getSpotPriceSansFee(tokenIn_address, tokenOut_address)
+        return self.contract.caller.getSpotPriceSansFee(
+            tokenIn_address, tokenOut_address
+        )
 
     # ==== Trading and Liquidity Functions
 
@@ -278,7 +278,7 @@ class BPool(BToken):
         poolAmountOut_base: int,
         maxAmountsIn_base: typing.List[int],
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Join the pool, getting `poolAmountOut` pool tokens. This will pull some
         of each of the currently trading tokens in the pool, meaning you must
@@ -294,7 +294,7 @@ class BPool(BToken):
         poolAmountIn_base: int,
         minAmountsOut_base: typing.List[int],
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Exit the pool, paying `poolAmountIn` pool tokens and getting some of
         each of the currently trading tokens in return. These values are
@@ -312,7 +312,7 @@ class BPool(BToken):
         minAmountOut_base: int,
         maxPrice_base: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Trades an exact `tokenAmountIn` of `tokenIn` taken from the caller by
         the pool, in exchange for at least `minAmountOut` of `tokenOut` given
@@ -346,7 +346,7 @@ class BPool(BToken):
         tokenAmountOut_base: int,
         maxPrice_base: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         return self.send_transaction(
             "swapExactAmountOut",
             (
@@ -365,7 +365,7 @@ class BPool(BToken):
         tokenAmountIn_base: int,
         minPoolAmountOut_base: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Pay `tokenAmountIn` of token `tokenIn` to join the pool, getting
         `poolAmountOut` of the pool shares.
@@ -382,7 +382,7 @@ class BPool(BToken):
         poolAmountOut_base: int,
         maxAmountIn_base: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Specify `poolAmountOut` pool shares that you want to get, and a token
         `tokenIn` to pay with. This costs `maxAmountIn` tokens (these went
@@ -400,7 +400,7 @@ class BPool(BToken):
         poolAmountIn_base: int,
         minAmountOut_base: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Pay `poolAmountIn` pool shares into the pool, getting `tokenAmountOut`
         of the given token `tokenOut` out of the pool.
@@ -417,7 +417,7 @@ class BPool(BToken):
         tokenAmountOut_base: int,
         maxPoolAmountIn_base: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Specify `tokenAmountOut` of token `tokenOut` that you want to get out
         of the pool. This costs `poolAmountIn` pool shares (these went into
@@ -431,23 +431,23 @@ class BPool(BToken):
 
     # ==== Balancer Pool as ERC20
     def totalSupply(self) -> int:
-        return self._ccontract.totalSupply()
+        return self.contract.caller.totalSupply()
 
     def balanceOf(self, whom_address: str) -> int:
-        return self._ccontract.balanceOf(whom_address)
+        return self.contract.caller.balanceOf(whom_address)
 
     def allowance(self, src_address: str, dst_address: str) -> int:
-        return self._ccontract.allowance(src_address, dst_address)
+        return self.contract.caller.allowance(src_address, dst_address)
 
-    def approve(self, dst_address: str, amt_base: int, from_wallet: Wallet):
+    def approve(self, dst_address: str, amt_base: int, from_wallet: Wallet) -> str:
         return self.send_transaction("approve", (dst_address, amt_base), from_wallet)
 
-    def transfer(self, dst_address: str, amt_base: int, from_wallet: Wallet):
+    def transfer(self, dst_address: str, amt_base: int, from_wallet: Wallet) -> str:
         return self.send_transaction("transfer", (dst_address, amt_base), from_wallet)
 
     def transferFrom(
         self, src_address: str, dst_address: str, amt_base: int, from_wallet: Wallet
-    ):
+    ) -> str:
         return self.send_transaction(
             "transferFrom", (dst_address, src_address, amt_base), from_wallet
         )
@@ -462,7 +462,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns spotPrice_base."""
-        return self._ccontract.calcSpotPrice(
+        return self.contract.caller.calcSpotPrice(
             tokenBalanceIn_base,
             tokenWeightIn_base,
             tokenBalanceOut_base,
@@ -480,7 +480,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns tokenAmountOut_base."""
-        return self._ccontract.calcOutGivenIn(
+        return self.contract.caller.calcOutGivenIn(
             tokenBalanceIn_base,
             tokenWeightIn_base,
             tokenBalanceOut,
@@ -499,7 +499,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns tokenAmountIn_base."""
-        return self._ccontract.calcInGivenOut(
+        return self.contract.caller.calcInGivenOut(
             tokenBalanceIn_base,
             tokenWeightIn_base,
             tokenBalanceOut_base,
@@ -518,7 +518,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns poolAmountOut_base."""
-        return self._ccontract.calcPoolOutGivenSingleIn(
+        return self.contract.caller.calcPoolOutGivenSingleIn(
             tokenBalanceIn_base,
             tokenWeightIn_base,
             poolSupply_base,
@@ -537,7 +537,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns tokenAmountIn_base."""
-        return self._ccontract.calcSingleInGivenPoolOut(
+        return self.contract.caller.calcSingleInGivenPoolOut(
             tokenBalanceIn_base,
             tokenWeightIn_base,
             poolSupply_base,
@@ -556,7 +556,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns tokenAmountOut_base."""
-        return self._ccontract.calcSingleOutGivenPoolIn(
+        return self.contract.caller.calcSingleOutGivenPoolIn(
             tokenBalanceOut_base,
             tokenWeightOut_base,
             poolSupply_base,
@@ -575,7 +575,7 @@ class BPool(BToken):
         swapFee_base: int,
     ) -> int:
         """Returns poolAmountIn_base."""
-        return self._ccontract.calcPoolInGivenSingleOut(
+        return self.contract.caller.calcPoolInGivenSingleOut(
             tokenBalanceOut_base,
             tokenWeightOut_base,
             poolSupply_base,
@@ -588,59 +588,64 @@ class BPool(BToken):
 
     def get_liquidity_logs(
         self,
-        event_name,
-        web3,
-        from_block,
-        to_block=None,
-        user_address=None,
-        this_pool_only=True,
-    ):
+        event_name: str,
+        from_block: BlockIdentifier,
+        to_block: Optional[BlockIdentifier] = None,
+        user_address: Optional[str] = None,
+        this_pool_only: bool = True,
+    ) -> Tuple:
         """
         :param event_name: str, one of LOG_JOIN, LOG_EXIT, LOG_SWAP
         """
         topic0 = self.get_event_signature(event_name)
         to_block = to_block or "latest"
-        _filter = {"fromBlock": from_block, "toBlock": to_block, "topics": [topic0]}
-        if this_pool_only:
-            _filter["address"] = self.address
+        topics = [topic0]
 
         if user_address:
-            assert web3.isChecksumAddress(user_address)
-            _filter["topics"].append(
+            assert Web3.isChecksumAddress(user_address)
+            topics.append(
                 f"0x000000000000000000000000{remove_0x_prefix(user_address).lower()}"
             )
-
         event = getattr(self.events, event_name)
-        event_abi = event().abi
-        try:
-            logs = web3.eth.get_logs(_filter)
-            logs = [get_event_data(web3.codec, event_abi, lg) for lg in logs]
-        except ValueError as e:
-            logger.error(
-                f"get_join_logs failed -> web3.eth.get_logs (filter={_filter}) failed: "
-                f"{e}.."
-            )
-            logs = []
-
+        argument_filters = {"topics": topics}
+        logs = ContractBase.getLogs(
+            event(),
+            argument_filters=argument_filters,
+            fromBlock=from_block,
+            toBlock=to_block,
+            from_all_addresses=not this_pool_only,
+        )
         return logs
 
     def get_join_logs(
-        self, web3, from_block, to_block=None, user_address=None, this_pool_only=True
-    ):
+        self,
+        from_block: BlockIdentifier,
+        to_block: Optional[BlockIdentifier] = None,
+        user_address: Optional[str] = None,
+        this_pool_only: bool = True,
+    ) -> Tuple[AttributeDict]:
         return self.get_liquidity_logs(
-            "LOG_JOIN", web3, from_block, to_block, user_address, this_pool_only
+            "LOG_JOIN", from_block, to_block, user_address, this_pool_only
         )
 
     def get_exit_logs(
-        self, web3, from_block, to_block=None, user_address=None, this_pool_only=True
-    ):
+        self,
+        from_block: BlockIdentifier,
+        to_block: Optional[BlockIdentifier] = None,
+        user_address: Optional[str] = None,
+        this_pool_only: bool = True,
+    ) -> Tuple[AttributeDict]:
         return self.get_liquidity_logs(
-            "LOG_EXIT", web3, from_block, to_block, user_address, this_pool_only
+            "LOG_EXIT", from_block, to_block, user_address, this_pool_only
         )
 
     def get_swap_logs(
-        self, web3, from_block, to_block=None, user_address=None, this_pool_only=True
-    ):
+        self,
+        from_block: BlockIdentifier,
+        to_block: Optional[BlockIdentifier] = None,
+        user_address: Optional[str] = None,
+        this_pool_only: bool = True,
+    ) -> Tuple[AttributeDict]:
         return self.get_liquidity_logs(
-            "LOG_SWAP", web3, from_block, to_block, user_address, this_pool_only
+            "LOG_SWAP", from_block, to_block, user_address, this_pool_only
         )

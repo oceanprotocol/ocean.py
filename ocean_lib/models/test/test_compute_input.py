@@ -20,3 +20,11 @@ def test_init_compute_input():
 
     with pytest.raises(AssertionError):
         ComputeInput("did", "", "service_id")
+
+    with pytest.raises(TypeError):
+        ComputeInput("did", "tx_id", "service_id", userdata="not_a_dict")
+
+    userdata = {"test1": "test"}
+    compute_input = ComputeInput("did", "tx_id", "service_id", userdata=userdata)
+
+    assert compute_input.as_dictionary()["userdata"] == userdata

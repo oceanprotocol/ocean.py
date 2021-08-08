@@ -3,29 +3,31 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
-import time
+from typing import Any, Dict, Optional
 
+from enforce_typing import enforce_types
+from hexbytes.main import HexBytes
+from ocean_lib.web3_internal.utils import get_chain_id, get_network_timeout
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.contract import prepare_transaction
+from web3.main import Web3
 
 
+@enforce_types
 class CustomContractFunction:
     def __init__(self, contract_function):
         """Initializes CustomContractFunction."""
         self._contract_function = contract_function
 
-    def transact(self, transaction):
+    def transact(self, transaction: Dict[str, Any]) -> HexBytes:
         """Customize calling smart contract transaction functions.
+        This function is copied from web3 ContractFunction with a few changes:
 
-        Use `personal_sendTransaction` instead of `eth_sendTransaction` and to estimate gas limit.
+        1. Don't set `from` using the web3.eth.default account
+        2. Add chainId if `chainId` is not in the `transaction` dict
+        3. Estimate gas limit if `gas` is not in the `transaction` dict
 
-        This function is largely copied from web3 ContractFunction with an important addition.
-
-        Note: will fallback to `eth_sendTransaction` if `passphrase` is not provided in the
-        `transaction` dict.
-
-        :param transaction: dict which has the required transaction arguments per
-            `personal_sendTransaction` requirements.
+        :param transaction: dict which has the required transaction arguments
         :return: hex str transaction hash
         """
         transact_transaction = dict(**transaction)
@@ -36,8 +38,6 @@ class CustomContractFunction:
         cf = self._contract_function
         if cf.address is not None:
             transact_transaction.setdefault("to", cf.address)
-        # if cf.web3.eth.default_account is not empty:
-        #     transact_transaction.setdefault('from', cf.web3.eth.default_account)
 
         if "to" not in transact_transaction:
             if isinstance(self, type):
@@ -49,11 +49,11 @@ class CustomContractFunction:
                 raise ValueError(
                     "Please ensure that this contract instance has an address."
                 )
+        if "chainId" not in transact_transaction:
+            transact_transaction["chainId"] = cf.web3.eth.chain_id
 
         if "gas" not in transact_transaction:
             tx = transaction.copy()
-            if "passphrase" in tx:
-                tx.pop("passphrase")
             if "account_key" in tx:
                 tx.pop("account_key")
             gas = cf.estimateGas(tx)
@@ -71,20 +71,26 @@ class CustomContractFunction:
         )
 
 
+@enforce_types
 def transact_with_contract_function(
-    address,
-    web3,
-    function_name=None,
-    transaction=None,
-    contract_abi=None,
-    fn_abi=None,
+    address: str,
+    web3: Web3,
+    function_name: Optional[str] = None,
+    transaction: Optional[dict] = None,
+    contract_abi: Optional[list] = None,
+    fn_abi: Optional[dict] = None,
     *args,
     **kwargs,
-):
+) -> HexBytes:
     """
     Helper function for interacting with a contract function by sending a
     transaction. This is copied from web3 `transact_with_contract_function`
-    so we can use `personal_sendTransaction` when possible.
+    with a few additions:
+        1. If `account_key` in transaction dict, sign and send transaction via
+           `web3.eth.send_raw_transaction`
+        2. Otherwise, send via `web3.eth.send_transaction`
+        3. Retry failed transactions (when txn_receipt.status indicates failure)
+        4. Network-dependent timeout
     """
     transact_transaction = prepare_transaction(
         address,
@@ -97,14 +103,10 @@ def transact_with_contract_function(
         fn_kwargs=kwargs,
     )
 
-    passphrase = None
     account_key = None
-    if transaction and "passphrase" in transaction:
-        passphrase = transaction["passphrase"]
-        transact_transaction.pop("passphrase")
-        if "account_key" in transaction:
-            account_key = transaction["account_key"]
-            transact_transaction.pop("account_key")
+    if transaction and "account_key" in transaction:
+        account_key = transaction["account_key"]
+        transact_transaction.pop("account_key")
 
     if account_key:
         raw_tx = Wallet(web3, private_key=account_key).sign_tx(transact_transaction)
@@ -112,25 +114,12 @@ def transact_with_contract_function(
             f"sending raw tx: function: {function_name}, tx hash: {raw_tx.hex()}"
         )
         txn_hash = web3.eth.send_raw_transaction(raw_tx)
-    elif passphrase:
-        txn_hash = web3.personal.sendTransaction(transact_transaction, passphrase)
     else:
         txn_hash = web3.eth.send_transaction(transact_transaction)
 
-    wait_for_tx(txn_hash, web3, 5)
+    network_id = get_chain_id(web3)
+    web3.eth.wait_for_transaction_receipt(
+        txn_hash, get_network_timeout(network_id=network_id)
+    )
+
     return txn_hash
-
-
-def wait_for_tx(tx_hash, web3, timeout=30):
-    start = time.time()
-    while True:
-        try:
-            web3.eth.wait_for_transaction_receipt(tx_hash, timeout=timeout)
-            break
-        except Exception:
-            time.sleep(0.2)
-
-        if time.time() - start > timeout:
-            break
-
-    return

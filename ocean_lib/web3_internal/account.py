@@ -6,24 +6,28 @@
 """Accounts module."""
 import logging
 import os
+from pathlib import Path
+from typing import Optional
 
+from enforce_typing import enforce_types
 from ocean_lib.web3_internal.utils import private_key_to_address
 
 logger = logging.getLogger("account")
 
 
+@enforce_types
 class Account:
 
     """Class representing an account."""
 
     def __init__(
         self,
-        address=None,
-        password=None,
-        key_file=None,
-        encrypted_key=None,
-        private_key=None,
-    ):
+        address: Optional[str] = None,
+        password: Optional[str] = None,
+        key_file: Optional[Path] = None,
+        encrypted_key: Optional[str] = None,
+        private_key: Optional[str] = None,
+    ) -> None:
         """Hold account address, password and either keyfile path, encrypted key or private key.
 
         :param address: The address of this account
@@ -59,7 +63,7 @@ class Account:
         assert self.address is not None
 
     @property
-    def key_file(self):
+    def key_file(self) -> Optional[str]:
         """Holds the key file path"""
         return (
             os.path.expandvars(os.path.expanduser(self._key_file))
@@ -68,12 +72,12 @@ class Account:
         )
 
     @property
-    def private_key(self):
+    def private_key(self) -> Optional[str]:
         """Holds the private key"""
         return self._private_key
 
     @property
-    def key(self):
+    def key(self) -> Optional[str]:
         """Returns the private key (if defined) or the encrypted key."""
         if self._private_key:
             return self._private_key

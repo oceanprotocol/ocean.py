@@ -6,14 +6,14 @@ import os
 
 import pytest
 from enforce_typing import enforce_types
-from ocean_lib.config_provider import ConfigProvider
+from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models import btoken
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.util import get_ocean_token_address
 from ocean_lib.web3_internal.account import Account
-from ocean_lib.web3_internal.contract_handler import ContractHandler
+from ocean_lib.web3_internal.contract_utils import get_contracts_addresses
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import get_ether_balance
@@ -23,6 +23,7 @@ from tests.resources.helper_functions import (
     get_ganache_wallet,
     get_web3,
 )
+from web3.main import Web3
 
 _NETWORK = "ganache"
 HUGEINT = 2 ** 255
@@ -36,29 +37,23 @@ def network():
 
 
 @pytest.fixture
-def dtfactory_address():
-    return DTFactory.configured_address(
-        _NETWORK, ConfigProvider.get_config().address_file
-    )
+def dtfactory_address(config):
+    return DTFactory.configured_address(_NETWORK, config.address_file)
 
 
 @pytest.fixture
-def bfactory_address():
-    return BFactory.configured_address(
-        _NETWORK, ConfigProvider.get_config().address_file
-    )
+def bfactory_address(config):
+    return BFactory.configured_address(_NETWORK, config.address_file)
 
 
 @pytest.fixture
-def contracts_addresses():
-    return ContractHandler.get_contracts_addresses(
-        _NETWORK, ConfigProvider.get_config().address_file
-    )
+def contracts_addresses(config):
+    return get_contracts_addresses(_NETWORK, config.address_file)
 
 
 @pytest.fixture
-def OCEAN_address():
-    return get_ocean_token_address(_NETWORK)
+def OCEAN_address(config):
+    return get_ocean_token_address(config.address_file, _NETWORK)
 
 
 @pytest.fixture
@@ -152,27 +147,27 @@ def make_info(name, private_key_name):
     wallet = get_ganache_wallet()
     if wallet:
         assert (
-            from_wei(get_ether_balance(wallet.address)) > 4
+            from_wei(get_ether_balance(web3, wallet.address)) > 4
         ), "Ether balance less than 4."
-        if from_wei(get_ether_balance(info.address)) < 2:
+        if from_wei(get_ether_balance(web3, info.address)) < 2:
             send_ether(wallet, info.address, 4)
 
     from ocean_lib.ocean.ocean import Ocean
 
-    info.ocean = Ocean()
-    info.T1 = _deployAndMintToken("TOK1", info.address)
-    info.T2 = _deployAndMintToken("TOK2", info.address)
+    config = ExampleConfig.get_config()
+    info.ocean = Ocean(config)
+    info.T1 = _deployAndMintToken(web3, "TOK1", info.address)
+    info.T2 = _deployAndMintToken(web3, "TOK2", info.address)
 
     return info
 
 
 @enforce_types
-def _deployAndMintToken(symbol: str, to_address: str) -> btoken.BToken:
+def _deployAndMintToken(web3: Web3, symbol: str, to_address: str) -> btoken.BToken:
     wallet = get_factory_deployer_wallet(_NETWORK)
     dt_address = DataToken.deploy(
-        wallet.web3,
+        web3,
         wallet,
-        None,
         "Template Contract",
         "TEMPLATE",
         wallet.address,
@@ -180,15 +175,13 @@ def _deployAndMintToken(symbol: str, to_address: str) -> btoken.BToken:
         DTFactory.FIRST_BLOB,
         to_address,
     )
-    dt_factory = DTFactory(
-        DTFactory.deploy(wallet.web3, wallet, None, dt_address, to_address)
-    )
+    dt_factory = DTFactory(web3, DTFactory.deploy(web3, wallet, dt_address, to_address))
     token_address = dt_factory.get_token_address(
         dt_factory.createToken(
             symbol, symbol, symbol, DataToken.DEFAULT_CAP_IN_WEI, wallet
         )
     )
-    token = DataToken(token_address)
+    token = DataToken(web3, token_address)
     token.mint(to_address, to_wei(1000), wallet)
 
-    return btoken.BToken(token.address)
+    return btoken.BToken(web3, token.address)

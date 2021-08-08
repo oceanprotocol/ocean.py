@@ -36,7 +36,7 @@ unset NETWORK_URL METADATA_CACHE_URI AQUARIUS_URL PROVIDER_URL
 Create an envvar to point to the new config file. In the console:
 
 ```console
-export CONFIG_FILE=config.ini
+export OCEAN_CONFIG_FILE=config.ini
 ```
 
 ## 2. Use the services within Python
@@ -46,16 +46,9 @@ In Python, import and configure the components / services:
 ```python
 import os
 from ocean_lib.config import Config
-from ocean_lib.config_provider import ConfigProvider
-from ocean_lib.ocean.util import get_web3_connection_provider
-from ocean_lib.web3_internal.web3_provider import Web3Provider
-from ocean_lib.web3_internal.contract_handler import ContractHandler
 
 #configure the components
-config = Config(os.getenv('CONFIG_FILE'))
-ConfigProvider.set_config(config)
-Web3Provider.init_web3(provider=get_web3_connection_provider(config.network_url))
-ContractHandler.set_artifacts_path(config.artifacts_path)
+config = Config(os.getenv('OCEAN_CONFIG_FILE'))
 ```
 
 Now you're ready to use the services! 🐳 The marketplace tutorial will use them in more detail.

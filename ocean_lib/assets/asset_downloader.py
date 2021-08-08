@@ -27,7 +27,8 @@ def download_asset_files(
     order_tx_id: str,
     data_provider: Type[DataServiceProvider],
     index: Optional[int] = None,
-):
+    userdata: Optional[dict] = None,
+) -> str:
     """Download asset data files or result files from a compute job.
 
     :param service_index: identifier of the service inside the asset DDO, str
@@ -84,5 +85,6 @@ def download_asset_files(
             token_address,
             order_tx_id,
             i,
+            userdata,
         )
     return asset_folder

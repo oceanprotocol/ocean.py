@@ -7,19 +7,20 @@ import uuid
 
 import pytest
 from eth_utils import add_0x_prefix, remove_0x_prefix
+from web3.logs import DISCARD
+
 from ocean_lib.assets.asset import Asset
 from ocean_lib.common.agreements.consumable import ConsumableCodes, MalformedCredential
 from ocean_lib.common.ddo.credentials import AddressCredential
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.utils.utilities import checksum
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.util import get_contracts_addresses
-from ocean_lib.web3_internal.web3_provider import Web3Provider
 from tests.resources.ddo_helpers import get_resource_path
 from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
+from web3.main import Web3
 
 
 def get_ddo_sample(datatoken_address):
@@ -108,9 +109,13 @@ def test_ddo_credentials_addresses_no_access_list():
     )
 
 
-def test_ddo_connection():
+def test_ddo_connection(config):
     ddo = DDO("did:op:testdid")
-    assert ddo.is_consumable() == ConsumableCodes.CONNECTIVITY_FAIL
+    provider_uri = config.provider_url
+    assert (
+        ddo.is_consumable(with_connectivity_check=True, provider_uri=provider_uri)
+        == ConsumableCodes.CONNECTIVITY_FAIL
+    )
 
 
 def test_ddo_credentials_disabled():
@@ -126,41 +131,39 @@ def test_ddo_credentials_disabled():
     assert ddo.is_enabled
 
     ddo.disable()
-    assert ddo.is_consumable({}) == ConsumableCodes.ASSET_DISABLED
+    assert ddo.is_consumable() == ConsumableCodes.ASSET_DISABLED
 
 
-def test_ddo_on_chain():
+def test_ddo_on_chain(config, web3):
     """Tests chain operations on a DDO."""
-    config = ConfigProvider.get_config()
-    ddo_address = get_contracts_addresses("ganache", config)[
+    ddo_address = get_contracts_addresses(config.address_file, "ganache")[
         MetadataContract.CONTRACT_NAME
     ]
-    dtfactory_address = get_contracts_addresses("ganache", config)[
+    dtfactory_address = get_contracts_addresses(config.address_file, "ganache")[
         DTFactory.CONTRACT_NAME
     ]
-    ddo_registry = MetadataContract(ddo_address)
+    ddo_registry = MetadataContract(web3, ddo_address)
     wallet = get_publisher_wallet()
-    web3 = Web3Provider.get_web3()
 
-    dtfactory = DTFactory(dtfactory_address)
+    dtfactory = DTFactory(web3, dtfactory_address)
     tx_id = dtfactory.createToken("", "dt1", "dt1", 1000, wallet)
-    dt = DataToken(dtfactory.get_token_address(tx_id))
+    dt = DataToken(web3, dtfactory.get_token_address(tx_id))
 
     # test create ddo
     asset = get_ddo_sample(dt.address)
     old_name = asset.metadata["main"]["name"]
     txid = ddo_registry.create(
-        asset.asset_id, b"", lzma.compress(web3.toBytes(text=asset.as_text())), wallet
+        asset.asset_id, b"", lzma.compress(Web3.toBytes(text=asset.as_text())), wallet
     )
     assert ddo_registry.verify_tx(txid), f"create ddo failed: txid={txid}"
     logs = ddo_registry.event_MetadataCreated.processReceipt(
-        ddo_registry.get_tx_receipt(txid)
+        ddo_registry.get_tx_receipt(web3, txid), errors=DISCARD
     )
     assert logs, f"no logs found for create ddo tx {txid}"
     log = logs[0]
     assert add_0x_prefix(log.args.dataToken) == asset.asset_id
     # read back the asset ddo from the event log
-    ddo_text = web3.toText(lzma.decompress(log.args.data))
+    ddo_text = Web3.toText(lzma.decompress(log.args.data))
     assert ddo_text == asset.as_text(), "ddo text does not match original."
 
     _asset = Asset(json_text=ddo_text)
@@ -171,33 +174,33 @@ def test_ddo_on_chain():
     # test_update ddo
     asset.metadata["main"]["name"] = "updated name for test"
     txid = ddo_registry.update(
-        asset.asset_id, b"", lzma.compress(web3.toBytes(text=asset.as_text())), wallet
+        asset.asset_id, b"", lzma.compress(Web3.toBytes(text=asset.as_text())), wallet
     )
     assert ddo_registry.verify_tx(txid), f"update ddo failed: txid={txid}"
     logs = ddo_registry.event_MetadataUpdated.processReceipt(
-        ddo_registry.get_tx_receipt(txid)
+        ddo_registry.get_tx_receipt(web3, txid), errors=DISCARD
     )
     assert logs, f"no logs found for update ddo tx {txid}"
     log = logs[0]
     assert add_0x_prefix(log.args.dataToken) == asset.asset_id
     # read back the asset ddo from the event log
-    ddo_text = web3.toText(lzma.decompress(log.args.data))
+    ddo_text = Web3.toText(lzma.decompress(log.args.data))
     assert ddo_text == asset.as_text(), "ddo text does not match original."
     _asset = Asset(json_text=ddo_text)
     assert (
         _asset.metadata["main"]["name"] == "updated name for test"
     ), "name does not seem to be updated."
-    assert DataToken(asset.asset_id).contract_concise.isMinter(wallet.address)
+    assert DataToken(web3, asset.asset_id).contract.caller.isMinter(wallet.address)
 
     # test update fails from wallet other than the original publisher
     bob = get_consumer_wallet()
     try:
         txid = ddo_registry.update(
-            asset.asset_id, b"", lzma.compress(web3.toBytes(text=asset.as_text())), bob
+            asset.asset_id, b"", lzma.compress(Web3.toBytes(text=asset.as_text())), bob
         )
         assert ddo_registry.verify_tx(txid) is False, f"update ddo failed: txid={txid}"
         logs = ddo_registry.event_MetadataUpdated.processReceipt(
-            ddo_registry.get_tx_receipt(txid)
+            ddo_registry.get_tx_receipt(web3, txid), errors=DISCARD
         )
         assert (
             not logs
@@ -206,9 +209,9 @@ def test_ddo_on_chain():
         print("as expected, only owner can update a published ddo.")
 
     # test ddoOwner
-    assert DataToken(asset.asset_id).contract_concise.isMinter(wallet.address), (
+    assert DataToken(web3, asset.asset_id).contract.caller.isMinter(wallet.address), (
         f"ddo owner does not match the expected publisher address {wallet.address}, "
-        f"owner is {DataToken(asset.asset_id).contract_concise.minter(wallet.address)}"
+        f"owner is {DataToken(web3, asset.asset_id).contract.caller.minter(wallet.address)}"
     )
 
 
@@ -243,3 +246,32 @@ def test_ddo_address_utilities():
     # double adding
     ddo.add_address_to_allow_list("0xAbc12")
     assert ddo.allowed_addresses == ["0xabc12"]
+
+
+def test_ddo_retiring():
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
+    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
+
+    ddo = DDO(json_filename=sample_ddo_path)
+    assert not ddo.is_retired
+
+    ddo.retire()
+    assert ddo.is_retired
+    assert ddo.is_consumable() == ConsumableCodes.ASSET_DISABLED
+
+    ddo.unretire()
+    assert not ddo.is_retired
+
+
+def test_ddo_unlisting():
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
+    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
+
+    ddo = DDO(json_filename=sample_ddo_path)
+    assert ddo.is_listed
+
+    ddo.unlist()
+    assert not ddo.is_listed
+
+    ddo.list()
+    assert ddo.is_listed

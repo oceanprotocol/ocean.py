@@ -3,15 +3,16 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import codecs
+from typing import Optional, Tuple, Type, Union
 
 from enforce_typing import enforce_types
+from eth_keys.backends.base import BaseECCBackend
 from eth_keys.datatypes import Signature
 from eth_keys.utils.numeric import int_to_byte
 from eth_keys.utils.padding import pad32
 from eth_utils import int_to_big_endian
 
 
-@enforce_types
 class SignatureFix(Signature):
 
     """
@@ -19,8 +20,16 @@ class SignatureFix(Signature):
     v value of 27 or 28 instead of 0 or 1
     """
 
-    def __init__(self, signature_bytes=None, vrs=None, backend=None) -> None:
+    def __init__(
+        self,
+        signature_bytes: Optional[bytes] = None,
+        vrs: Optional[Tuple[int, int, int]] = None,
+        backend: Optional[
+            Union[BaseECCBackend, Type[BaseECCBackend], str, None]
+        ] = None,
+    ) -> None:
         """Initialises SignatureFix object."""
+        # can not apply the enforce types decorator on init due to the Signature hacking
         v, r, s = vrs
         if v == 27 or v == 28:
             v -= 27
@@ -28,6 +37,7 @@ class SignatureFix(Signature):
         vrs = (v, r, s)
         Signature.__init__(self, signature_bytes, vrs, backend)
 
+    @enforce_types
     def to_hex_v_hacked(self) -> str:
         # Need the 'type: ignore' comment below because of
         # https://github.com/python/typeshed/issues/300
@@ -35,6 +45,7 @@ class SignatureFix(Signature):
             codecs.encode(self.to_bytes_v_hacked(), "hex"), "ascii"
         )  # type: ignore
 
+    @enforce_types
     def to_bytes_v_hacked(self) -> bytes:
         v = self.v
         if v == 0 or v == 1:

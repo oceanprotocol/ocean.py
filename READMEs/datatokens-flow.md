@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 ## Prerequisites
 
 -   Linux/MacOS
--   Docker, [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
+-   [Docker](https://docs.docker.com/engine/install/), [Docker Compose](https://docs.docker.com/compose/install/), [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
 -   Python 3.8.5+
 
 ## Run barge services
@@ -36,7 +36,6 @@ Create a file called `config.ini` and fill it as follows.
 ```text
 [eth-network]
 network = ganache
-artifacts.path = ~/.ocean/ocean-contracts/artifacts
 address.file = ~/.ocean/ocean-contracts/artifacts/address.json
 ```
 
@@ -49,7 +48,8 @@ In a new console:
 python -m venv venv
 source venv/bin/activate
 
-#Install the ocean.py library
+#Install the ocean.py library. Install wheel first to avoid errors.
+pip install wheel
 pip install ocean-lib
 
 #set envvars
@@ -78,7 +78,7 @@ wallet = Wallet(ocean.web3, private_key=private_key)
 print(f"create wallet: done. Its address is {wallet.address}")
 
 print("create datatoken: begin.")
-datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet) 
+datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet)
 print(f"created datatoken: done. Its address is {datatoken.address}")
 ```
 

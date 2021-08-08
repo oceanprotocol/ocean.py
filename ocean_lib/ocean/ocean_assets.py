@@ -9,9 +9,10 @@ import logging
 import lzma
 import os
 from decimal import Decimal
-from typing import Optional
+from typing import Optional, Tuple, Type
 
 from enforce_typing import enforce_types
+from eth_account.messages import encode_defunct
 from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
@@ -25,9 +26,9 @@ from ocean_lib.common.agreements.service_factory import (
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.aquarius.aquarius import Aquarius
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
-from ocean_lib.common.ddo.public_key_rsa import PUBLIC_KEY_TYPE_RSA
 from ocean_lib.common.did import did_to_id
 from ocean_lib.common.utils.utilities import checksum
+from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import (
     DataServiceProvider,
     OrderRequirements,
@@ -44,12 +45,9 @@ from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import sign_hash
-from ocean_lib.web3_internal.utils import (
-    add_ethereum_prefix_and_hash_msg,
-    get_network_name,
-)
+from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.web3_provider import Web3Provider
+from web3.main import Web3
 
 logger = logging.getLogger("ocean")
 
@@ -59,9 +57,16 @@ class OceanAssets:
 
     """Ocean assets class."""
 
-    def __init__(self, config, data_provider, ddo_registry_address):
+    def __init__(
+        self,
+        config: Config,
+        web3: Web3,
+        data_provider: Type[DataServiceProvider],
+        ddo_registry_address: str,
+    ) -> None:
         """Initialises OceanAssets object."""
         self._config = config
+        self._web3 = web3
         self._metadata_cache_uri = config.metadata_cache_uri
         self._data_provider = data_provider
         self._metadata_registry_address = ddo_registry_address
@@ -73,10 +78,10 @@ class OceanAssets:
             )
         self._downloads_path = downloads_path
 
-    def ddo_registry(self):
-        return MetadataContract(self._metadata_registry_address)
+    def ddo_registry(self) -> MetadataContract:
+        return MetadataContract(self._web3, self._metadata_registry_address)
 
-    def _get_aquarius(self, url=None) -> Aquarius:
+    def _get_aquarius(self, url: Optional[str] = None) -> Aquarius:
         return AquariusProvider.get_aquarius(url or self._metadata_cache_uri)
 
     def _process_service_descriptors(
@@ -129,12 +134,12 @@ class OceanAssets:
         service_descriptors: list = None,
         owner_address: str = None,
         data_token_address: str = None,
-        provider_uri=None,
+        provider_uri: str = None,
         dt_name: str = None,
         dt_symbol: str = None,
         dt_blob: str = None,
         dt_cap: float = None,
-    ) -> (Asset, None):
+    ) -> Optional[Asset]:
         """Register an asset on-chain.
 
         Creating/deploying a DataToken contract and in the Metadata store (Aquarius).
@@ -179,6 +184,8 @@ class OceanAssets:
             raise ValueError(msg)
 
         urls = [item["url"] for item in metadata["main"]["files"]]
+        if not provider_uri:
+            provider_uri = DataServiceProvider.get_url(self._config)
         for url in urls:
             if not DataServiceProvider.check_single_file_info(url, provider_uri):
                 msg = f"The URL of this service can not be accessed: {url}."
@@ -204,9 +211,9 @@ class OceanAssets:
         #################
         # DataToken
         address = DTFactory.configured_address(
-            get_network_name(), self._config.address_file
+            get_network_name(web3=self._web3), self._config.address_file
         )
-        dtfactory = DTFactory(address)
+        dtfactory = DTFactory(self._web3, address)
         if not data_token_address:
             blob = dt_blob or ""
             name = dt_name or metadata["main"]["name"]
@@ -216,7 +223,7 @@ class OceanAssets:
             tx_id = dtfactory.createToken(
                 blob, name, symbol, to_wei(Decimal(_cap)), from_wallet=publisher_wallet
             )
-            data_token = DataToken(dtfactory.get_token_address(tx_id))
+            data_token = DataToken(self._web3, dtfactory.get_token_address(tx_id))
             if not data_token:
                 logger.warning("Creating new data token failed.")
                 return None
@@ -237,8 +244,8 @@ class OceanAssets:
                     f"datatoken address {data_token_address} is not found in the DTFactory events."
                 )
             # verify data_token_address
-            dt = DataToken(data_token_address)
-            minter = dt.contract_concise.minter()
+            dt = DataToken(self._web3, data_token_address)
+            minter = dt.contract.caller.minter()
             if not minter:
                 raise AssertionError(
                     f"datatoken address {data_token_address} does not seem to be a valid DataToken contract."
@@ -256,7 +263,7 @@ class OceanAssets:
         did = asset.assign_did(f"did:op:{remove_0x_prefix(data_token_address)}")
         logger.debug(f"Using datatoken address as did: {did}")
         # Check if it's already registered first!
-        if did in self._get_aquarius().list_assets():
+        if self._get_aquarius().ddo_exists(did):
             raise AquariusError(
                 f"Asset id {did} is already registered to another asset."
             )
@@ -278,13 +285,8 @@ class OceanAssets:
             asset.add_service(compute_service)
 
         asset.proof["signatureValue"] = sign_hash(
-            add_ethereum_prefix_and_hash_msg(asset.asset_id), publisher_wallet
+            encode_defunct(text=asset.asset_id), publisher_wallet
         )
-
-        # Add public key and authentication
-        asset.add_public_key(did, publisher_wallet.address)
-
-        asset.add_authentication(did, PUBLIC_KEY_TYPE_RSA)
 
         # Setup metadata service
         # First compute files_encrypted
@@ -328,11 +330,10 @@ class OceanAssets:
         try:
             # publish the new ddo in ocean-db/Aquarius
             ddo_registry = self.ddo_registry()
-            web3 = Web3Provider.get_web3()
             tx_id = ddo_registry.create(
                 asset.asset_id,
                 bytes([1]),
-                lzma.compress(web3.toBytes(text=asset.as_text())),
+                lzma.compress(Web3.toBytes(text=asset.as_text())),
                 publisher_wallet,
             )
             if not ddo_registry.verify_tx(tx_id):
@@ -352,11 +353,10 @@ class OceanAssets:
         try:
             # publish the new ddo in ocean-db/Aquarius
             ddo_registry = self.ddo_registry()
-            web3 = Web3Provider.get_web3()
             tx_id = ddo_registry.update(
                 asset.asset_id,
                 bytes([1]),
-                lzma.compress(web3.toBytes(text=asset.as_text())),
+                lzma.compress(Web3.toBytes(text=asset.as_text())),
                 publisher_wallet,
             )
             if not ddo_registry.verify_tx(tx_id):
@@ -381,7 +381,12 @@ class OceanAssets:
         return resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
 
     def search(
-        self, text: str, sort=None, offset=100, page=1, metadata_cache_uri=None
+        self,
+        text: str,
+        sort: Optional[dict] = None,
+        offset: int = 100,
+        page: int = 1,
+        metadata_cache_uri: Optional[str] = None,
     ) -> list:
         """
         Search an asset in oceanDB using aquarius.
@@ -404,8 +409,13 @@ class OceanAssets:
         ]
 
     def query(
-        self, query: dict, sort=None, offset=100, page=1, metadata_cache_uri=None
-    ) -> []:
+        self,
+        query: dict,
+        sort: Optional[dict] = None,
+        offset: int = 100,
+        page: int = 1,
+        metadata_cache_uri: Optional[str] = None,
+    ) -> list:
         """
         Search an asset in oceanDB using search query.
 
@@ -432,7 +442,8 @@ class OceanAssets:
         did: str,
         consumer_address: str,
         service_index: Optional[int] = None,
-        service_type: str = None,
+        service_type: Optional[str] = None,
+        userdata: Optional[dict] = None,
     ) -> OrderRequirements:
         """
         Request a specific service from an asset, returns the service requirements that
@@ -468,7 +479,13 @@ class OceanAssets:
             sa.service_endpoint
         )
         order_requirements = self._data_provider.get_order_requirements(
-            asset.did, initialize_url, consumer_address, sa.index, sa.type, dt_address
+            asset.did,
+            initialize_url,
+            consumer_address,
+            sa.index,
+            sa.type,
+            dt_address,
+            userdata,
         )
         if not order_requirements:
             raise AssertionError("Data service provider or service is not available.")
@@ -480,6 +497,7 @@ class OceanAssets:
 
     @staticmethod
     def pay_for_service(
+        web3: Web3,
         amount: float,
         token_address: str,
         did: str,
@@ -501,7 +519,7 @@ class OceanAssets:
         :return: hex str id of transfer transaction
         """
         amount_base = to_wei(Decimal(amount))
-        dt = DataToken(token_address)
+        dt = DataToken(web3, token_address)
         balance = dt.balanceOf(from_wallet.address)
         if balance < amount_base:
             raise InsufficientBalance(
@@ -525,12 +543,7 @@ class OceanAssets:
 
         try:
             dt.verify_order_tx(
-                Web3Provider.get_web3(),
-                tx_hash,
-                did,
-                service_id,
-                amount_base,
-                from_wallet.address,
+                tx_hash, did, service_id, amount_base, from_wallet.address
             )
             return tx_hash
         except (AssertionError, Exception) as e:
@@ -550,6 +563,7 @@ class OceanAssets:
         order_tx_id: str,
         destination: str,
         index: Optional[int] = None,
+        userdata: Optional[dict] = None,
     ) -> str:
         """
         Consume the asset data.
@@ -595,9 +609,10 @@ class OceanAssets:
             order_tx_id,
             self._data_provider,
             index,
+            userdata,
         )
 
-    def validate(self, metadata: dict) -> (bool, list):
+    def validate(self, metadata: dict) -> Tuple[bool, list]:
         """
         Validate that the metadata is ok to be stored in aquarius.
 
@@ -633,7 +648,7 @@ class OceanAssets:
 
     @staticmethod
     def build_access_service(
-        date_created: str, cost: float, address: str, timeout=3600
+        date_created: str, cost: float, address: str, timeout: int = 3600
     ) -> dict:
         return {
             "main": {

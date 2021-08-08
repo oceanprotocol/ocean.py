@@ -15,12 +15,12 @@ from tests.resources.ddo_helpers import get_metadata, get_registered_ddo
 from tests.resources.helper_functions import mint_tokens_and_wait
 
 
-def test_order(alice_ocean, alice_wallet):
+def test_order(web3, alice_ocean, alice_wallet):
     asset = get_registered_ddo(alice_ocean, get_metadata(), alice_wallet)
     assert isinstance(asset, Asset)
     assert asset.data_token_address, "The asset does not have a token address."
 
-    dt = DataToken(asset.data_token_address)
+    dt = DataToken(web3, asset.data_token_address)
     mint_tokens_and_wait(dt, alice_wallet.address, alice_wallet)
 
     service = asset.get_service(service_type=ServiceTypes.ASSET_ACCESS)
@@ -32,6 +32,7 @@ def test_order(alice_ocean, alice_wallet):
     assert order_requirements, "Order was unsuccessful."
 
     args = [
+        web3,
         order_requirements.amount,
         order_requirements.data_token_address,
         asset.did,
@@ -49,7 +50,7 @@ def test_order(alice_ocean, alice_wallet):
         alice_ocean.config.downloads_path,
     )
     assert len(os.listdir(asset_folder)) >= 1, "The asset folder is empty."
-    for order_log in dt.get_start_order_logs(alice_ocean.web3):
+    for order_log in dt.get_start_order_logs():
         order_log_dict = dict(order_log.args.items())
         order_log_dict["amount"] = from_wei(int(order_log.args.amount))
         order_log_dict["marketFee"] = from_wei(int(order_log.args.marketFee))

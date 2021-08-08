@@ -7,7 +7,7 @@ from typing import Union
 
 from enforce_typing import enforce_types
 from ocean_lib.web3_internal.constants import MAX_UINT256
-from ocean_lib.web3_internal.web3_provider import Web3Provider
+from web3.main import Web3
 
 """decimal.Context tuned to accomadate MAX_WEI.
 
@@ -33,7 +33,7 @@ MAX_WEI_IN_ETHER = Decimal(MAX_WEI).scaleb(-18, context=ETHEREUM_DECIMAL_CONTEXT
 
 @enforce_types
 def from_wei(value_in_wei: int) -> Decimal:
-    return Web3Provider.get_web3().fromWei(value_in_wei, "ether")
+    return Web3.fromWei(value_in_wei, "ether")
 
 
 @enforce_types
@@ -47,7 +47,7 @@ def to_wei(value_in_ether: Union[Decimal, str, int]) -> int:
     if value_in_ether > MAX_WEI_IN_ETHER:
         raise ValueError("Ether value exceeds MAX_WEI_IN_ETHER.")
 
-    return Web3Provider.get_web3().toWei(
+    return Web3.toWei(
         value_in_ether.quantize(DECIMAL_PLACES_18, context=ETHEREUM_DECIMAL_CONTEXT),
         "ether",
     )

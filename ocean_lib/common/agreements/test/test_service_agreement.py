@@ -11,7 +11,7 @@ from tests.resources.ddo_helpers import get_sample_ddo
 def test_no_service_key_ddo(publisher_ocean_instance, metadata):
     """Tests that ServiceAgreements are not created with bad indices."""
     # from init
-    with pytest.raises(ValueError):
+    with pytest.raises(TypeError):
         ServiceAgreement(attributes=None, service_index="not_a_real_index")
 
     # from ddo

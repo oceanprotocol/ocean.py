@@ -12,16 +12,22 @@ from decimal import Decimal
 import coloredlogs
 import yaml
 from enforce_typing import enforce_types
+from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.ocean.util import get_web3_connection_provider
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.web3_provider import Web3Provider
 from tests.resources.mocks.data_provider_mock import DataProviderMock
+from web3.main import Web3
 
 
 def get_web3():
-    return Web3Provider.get_web3()
+    return Web3(provider=get_web3_connection_provider(get_example_config().network_url))
+
+
+def get_example_config():
+    return ExampleConfig.get_config()
 
 
 @enforce_types
@@ -67,8 +73,9 @@ def get_ganache_wallet():
 
 @enforce_types
 def get_publisher_ocean_instance(use_provider_mock=False) -> Ocean:
+    config = ExampleConfig.get_config()
     data_provider = DataProviderMock if use_provider_mock else None
-    ocn = Ocean(data_provider=data_provider)
+    ocn = Ocean(config, data_provider=data_provider)
     account = get_publisher_wallet()
     ocn.main_account = account
     return ocn
@@ -76,8 +83,9 @@ def get_publisher_ocean_instance(use_provider_mock=False) -> Ocean:
 
 @enforce_types
 def get_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocean:
+    config = ExampleConfig.get_config()
     data_provider = DataProviderMock if use_provider_mock else None
-    ocn = Ocean(data_provider=data_provider)
+    ocn = Ocean(config, data_provider=data_provider)
     account = get_consumer_wallet()
     ocn.main_account = account
     return ocn
@@ -85,8 +93,9 @@ def get_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocean:
 
 @enforce_types
 def get_another_consumer_ocean_instance(use_provider_mock: bool = False) -> Ocean:
+    config = ExampleConfig.get_config()
     data_provider = DataProviderMock if use_provider_mock else None
-    ocn = Ocean(data_provider=data_provider)
+    ocn = Ocean(config, data_provider=data_provider)
     account = get_another_consumer_wallet()
     ocn.main_account = account
     return ocn
@@ -134,17 +143,17 @@ def mint_tokens_and_wait(
 ):
     dtc = data_token_contract
     tx_id = dtc.mint(receiver_address, to_wei(Decimal("50.0")), minter_wallet)
-    dtc.get_tx_receipt(tx_id)
+    dtc.get_tx_receipt(dtc.web3, tx_id)
     time.sleep(2)
 
     def verify_supply(mint_amount=50):
-        supply = dtc.contract_concise.totalSupply()
+        supply = dtc.contract.caller.totalSupply()
         if supply <= 0:
             _tx_id = dtc.mint(
                 receiver_address, to_wei(Decimal(mint_amount)), minter_wallet
             )
-            dtc.get_tx_receipt(_tx_id)
-            supply = dtc.contract_concise.totalSupply()
+            dtc.get_tx_receipt(dtc.web3, _tx_id)
+            supply = dtc.contract.caller.totalSupply()
         return supply
 
     while True:

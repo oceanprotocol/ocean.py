@@ -23,7 +23,7 @@ ocean.assets
 # Datatoken Pool: create, add/remove liquidity, check liquidity, price, buy datatokens
 ocean.pool
 
-# Fixed rate exchange: create, price, buy datatokens  
+# Fixed rate exchange: create, price, buy datatokens
 ocean.exchange
 
 # Compute-to-data: consume/start, stop, results, status, define-service
@@ -36,17 +36,17 @@ level objects:
 ```python
 # DataToken -- ERC20 datatoken
 from ocean_lib.models.data_token import DataToken
-DataToken(token_address)
+DataToken(web3, token_address)
 
 # DTFactory -- datatoken factory
 from ocean_lib.models.dtfactory import DTFactory
-DTFactory(dtfactory_address)
+DTFactory(web3, dtfactory_address)
 
 # BPool -- Balancer pool
 from ocean_lib.models.bpool import BPool
-BPool(pool_address)
+BPool(web3, pool_address)
 
 # BFactory -- Balancer pool factory
 from ocean_lib.models.bfactory import BFactory
-BFactory(bfactory_address)
+BFactory(web3, bfactory_address)
 ```

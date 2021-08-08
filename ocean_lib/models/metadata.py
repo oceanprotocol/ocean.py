@@ -3,11 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import time
+from typing import Optional
 
 from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
+from web3.datastructures import AttributeDict
 
 
 @enforce_types
@@ -18,19 +20,24 @@ class MetadataContract(ContractBase):
 
     @property
     def event_MetadataCreated(self):
-        return getattr(self.events, self.EVENT_METADATA_CREATED)()
+        return self.events.MetadataCreated()
 
     @property
     def event_MetadataUpdated(self):
-        return getattr(self.events, self.EVENT_METADATA_UPDATED)()
+        return self.events.MetadataUpdated()
 
-    def get_event_log(self, event_name, block, did, timeout=45):
+    def get_event_log(
+        self, event_name: str, block: int, did: str, timeout: int = 45
+    ) -> Optional[AttributeDict]:
+        """
+        :return: Log if event is found else None
+        """
         did = remove_0x_prefix(did)
         start = time.time()
-        f = getattr(self.events, event_name)().createFilter(fromBlock=block)
+        event = getattr(self.events, event_name)
         logs = []
         while not logs:
-            logs = f.get_all_entries()
+            logs = ContractBase.getLogs(event(), fromBlock=block)
             if not logs:
                 time.sleep(0.2)
 
@@ -48,10 +55,19 @@ class MetadataContract(ContractBase):
         return _log
 
     def verify_tx(self, tx_hash: str) -> bool:
-        return self.get_tx_receipt(tx_hash).status == 1
+        """
+        :return bool:
+        """
+        return self.get_tx_receipt(self.web3, tx_hash).status == 1
 
     def create(self, did: str, flags: bytes, data: bytes, from_wallet: Wallet) -> str:
+        """
+        :return str: hex str transaction hash
+        """
         return self.send_transaction("create", (did, flags, data), from_wallet)
 
     def update(self, did: str, flags: bytes, data: bytes, from_wallet: Wallet) -> str:
+        """
+        :return str: hex str transaction hash
+        """
         return self.send_transaction("update", (did, flags, data), from_wallet)

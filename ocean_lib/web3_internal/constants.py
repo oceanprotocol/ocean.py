@@ -24,10 +24,18 @@ MIN_INT256 = 2 ** 255 * -1
 DEFAULT_NETWORK_NAME = "ganache"
 NETWORK_NAME_MAP = {
     1: "Mainnet",
-    2: "Morden",
     3: "Ropsten",
     4: "Rinkeby",
-    42: "Kovan",
-    100: "xDai",
+    56: "Binance Smart Chain",
     137: "Polygon",
+    1337: "Ganache",
+}
+
+NETWORK_TIMEOUT_MAP = {
+    "mainnet": 10 * 60,
+    "ropsten": 10 * 60,
+    "rinkeby": 5 * 60,
+    "bsc": 10 * 60,
+    "polygon": 10 * 60,
+    "ganache": 2,
 }

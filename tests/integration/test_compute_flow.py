@@ -6,7 +6,6 @@ from decimal import Decimal
 
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.metadata import MetadataContract
@@ -27,6 +26,7 @@ from tests.resources.helper_functions import (
     get_publisher_ocean_instance,
     get_publisher_wallet,
 )
+from web3.logs import DISCARD
 
 
 class Setup:
@@ -42,7 +42,7 @@ def process_order(ocean_instance, publisher_wallet, consumer_wallet, ddo, servic
     """Helper function to process a compute order."""
     # Give the consumer some datatokens so they can order the service
     try:
-        dt = DataToken(ddo.data_token_address)
+        dt = DataToken(ocean_instance.web3, ddo.data_token_address)
         tx_id = dt.transfer(
             consumer_wallet.address, to_wei(Decimal("10.0")), publisher_wallet
         )
@@ -63,6 +63,7 @@ def process_order(ocean_instance, publisher_wallet, consumer_wallet, ddo, servic
         consumer = order_requirements.computeAddress
 
     _order_tx_id = ocean_instance.assets.pay_for_service(
+        ocean_instance.web3,
         order_requirements.amount,
         order_requirements.data_token_address,
         ddo.did,
@@ -83,6 +84,7 @@ def run_compute_test(
     algo_meta=None,
     expect_failure=False,
     expect_failure_message=None,
+    userdata=None,
     with_result=False,
 ):
     """Helper function to bootstrap compute job creation and status checking."""
@@ -95,7 +97,7 @@ def run_compute_test(
         compute_ddo,
         ServiceTypes.CLOUD_COMPUTE,
     )
-    compute_inputs = [ComputeInput(did, order_tx_id, service.index)]
+    compute_inputs = [ComputeInput(did, order_tx_id, service.index, userdata=userdata)]
     for ddo in input_ddos[1:]:
         service_type = ServiceTypes.ASSET_ACCESS
         if not ddo.get_service(service_type):
@@ -104,7 +106,9 @@ def run_compute_test(
         _order_tx_id, _order_quote, _service = process_order(
             ocean_instance, publisher_wallet, consumer_wallet, ddo, service_type
         )
-        compute_inputs.append(ComputeInput(ddo.did, _order_tx_id, _service.index))
+        compute_inputs.append(
+            ComputeInput(ddo.did, _order_tx_id, _service.index, userdata=userdata)
+        )
 
     job_id = None
     if algo_ddo:
@@ -123,6 +127,7 @@ def run_compute_test(
                 algorithm_did=algo_ddo.did,
                 algorithm_tx_id=algo_tx_id,
                 algorithm_data_token=algo_ddo.data_token_address,
+                algouserdata={"algo_test": "algouserdata_sample"},
             )
         except Exception:
             if not expect_failure:
@@ -213,17 +218,17 @@ def test_compute_multi_inputs():
         setup.consumer_wallet,
         [compute_ddo, access_ddo],
         algo_ddo=algorithm_ddo,
+        userdata={"test_key": "test_value"},
     )
 
 
-def test_update_trusted_algorithms():
+def test_update_trusted_algorithms(config, web3):
     setup = Setup()
 
-    config = ConfigProvider.get_config()
-    ddo_address = get_contracts_addresses("ganache", config)[
+    ddo_address = get_contracts_addresses(config.address_file, "ganache")[
         MetadataContract.CONTRACT_NAME
     ]
-    ddo_registry = MetadataContract(ddo_address)
+    ddo_registry = MetadataContract(web3, ddo_address)
 
     # Setup algorithm meta to run raw algorithm
     algorithm_ddo = get_registered_algorithm_ddo(
@@ -251,8 +256,8 @@ def test_update_trusted_algorithms():
         compute_ddo, setup.publisher_wallet
     )
 
-    tx_receipt = ddo_registry.get_tx_receipt(tx_id)
-    logs = ddo_registry.event_MetadataUpdated.processReceipt(tx_receipt)
+    tx_receipt = ddo_registry.get_tx_receipt(web3, tx_id)
+    logs = ddo_registry.event_MetadataUpdated.processReceipt(tx_receipt, errors=DISCARD)
     assert logs[0].args.dataToken == compute_ddo.data_token_address
 
     wait_for_update(

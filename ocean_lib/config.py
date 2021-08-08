@@ -7,21 +7,21 @@ import configparser
 import logging
 import os
 from pathlib import Path
+from typing import Any, Dict, Optional, Union
 
 import artifacts
+from enforce_typing import enforce_types
 from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
 
 DEFAULT_NETWORK_HOST = "localhost"
 DEFAULT_NETWORK_PORT = 8545
 DEFAULT_NETWORK_URL = "http://localhost:8545"
-DEFAULT_ARTIFACTS_PATH = ""
 DEFAULT_ADDRESS_FILE = ""
 DEFAULT_METADATA_CACHE_URI = "http://localhost:5000"
 DEFAULT_PROVIDER_URL = ""
 
 NAME_NETWORK_URL = "network"
-NAME_ARTIFACTS_PATH = "artifacts.path"
 NAME_ADDRESS_FILE = "address.file"
 NAME_GAS_LIMIT = "gas_limit"
 NAME_METADATA_CACHE_URI = "metadata_cache_uri"
@@ -51,11 +51,6 @@ environ_names_and_sections = {
     ],
     NAME_OCEAN_ADDRESS: ["OCEAN_ADDRESS", "OCEAN address", SECTION_ETH_NETWORK],
     NAME_NETWORK_URL: ["NETWORK_URL", "Network URL", SECTION_ETH_NETWORK],
-    NAME_ARTIFACTS_PATH: [
-        "ARTIFACTS_PATH",
-        "Path to the abi artifacts of the deployed smart contracts",
-        SECTION_ETH_NETWORK,
-    ],
     NAME_ADDRESS_FILE: [
         "ADDRESS_FILE",
         "Path to json file of deployed contracts addresses",
@@ -86,7 +81,6 @@ deprecated_environ_names = {
 config_defaults = {
     "eth-network": {
         NAME_NETWORK_URL: DEFAULT_NETWORK_URL,
-        NAME_ARTIFACTS_PATH: DEFAULT_ARTIFACTS_PATH,
         NAME_ADDRESS_FILE: DEFAULT_ADDRESS_FILE,
         NAME_GAS_LIMIT: GAS_LIMIT_DEFAULT,
     },
@@ -101,7 +95,12 @@ config_defaults = {
 class Config(configparser.ConfigParser):
     """Class to manage the ocean-lib configuration."""
 
-    def __init__(self, filename=None, options_dict=None, **kwargs):
+    def __init__(
+        self,
+        filename: Optional[Union[Path, str]] = None,
+        options_dict: Optional[Dict[str, Any]] = None,
+        **kwargs,
+    ) -> None:
         """Initialize Config class.
 
         Options available:
@@ -109,8 +108,6 @@ class Config(configparser.ConfigParser):
         [eth-network]
         ; ethereum network url
         network = rinkeby
-        ; Path of json abis, this defaults to the artifacts installed with `pip install ocean-contracts`
-        artifacts.path = artifacts
 
         [resources]
         metadata_cache_uri = http://localhost:5000
@@ -120,6 +117,8 @@ class Config(configparser.ConfigParser):
         :param options_dict: Python dict with the config, dict.
         :param kwargs: Additional args. If you pass text, you have to pass the plain text configuration.
         """
+        # can not enforce types on entire class, since init can not be checked
+        # using enforce_types
         configparser.ConfigParser.__init__(self)
 
         self.read_dict(config_defaults)
@@ -148,7 +147,8 @@ class Config(configparser.ConfigParser):
         self._handle_and_validate_metadata_cache_uri()
         self._load_environ()
 
-    def _handle_and_validate_metadata_cache_uri(self):
+    @enforce_types
+    def _handle_and_validate_metadata_cache_uri(self) -> None:
         metadata_cache_uri = self.get(
             SECTION_RESOURCES, NAME_METADATA_CACHE_URI, fallback=None
         )
@@ -176,7 +176,8 @@ class Config(configparser.ConfigParser):
                 )
             )
 
-    def _load_environ(self):
+    @enforce_types
+    def _load_environ(self) -> None:
         for option_name, environ_item in environ_names_and_sections.items():
             if option_name == NAME_METADATA_CACHE_URI:
                 metadata_cache_uri = os.environ.get(environ_item[0])
@@ -206,48 +207,47 @@ class Config(configparser.ConfigParser):
                 self.set(environ_item[2], option_name, value)
 
     @property
-    def artifacts_path(self):
-        """Path where the contracts artifacts are allocated."""
-        _path_string = self.get(SECTION_ETH_NETWORK, NAME_ARTIFACTS_PATH)
-        path = Path(_path_string).expanduser().resolve() if _path_string else None
-
-        if path and path.exists():
-            return path
-
-        return Path(artifacts.__file__).parent.expanduser().resolve()
-
-    @property
-    def address_file(self):
+    @enforce_types
+    def address_file(self) -> str:
         file_path = self.get(SECTION_ETH_NETWORK, NAME_ADDRESS_FILE)
         if file_path:
-            file_path = Path(file_path).expanduser().resolve()
-
-        if not file_path or not os.path.exists(file_path):
-            file_path = os.path.join(self.artifacts_path, "address.json")
+            file_path = str(Path(file_path).expanduser().resolve())
+        else:
+            file_path = str(
+                Path(artifacts.__file__)
+                .parent.joinpath("address.json")
+                .expanduser()
+                .resolve()
+            )
 
         return file_path
 
     @property
-    def network_url(self):
+    @enforce_types
+    def network_url(self) -> str:
         """URL of the ethereum network. (e.g.): http://mynetwork:8545."""
         return self.get(SECTION_ETH_NETWORK, NAME_NETWORK_URL)
 
     @property
-    def gas_limit(self):
+    @enforce_types
+    def gas_limit(self) -> int:
         """Ethereum gas limit."""
         return int(self.get(SECTION_ETH_NETWORK, NAME_GAS_LIMIT))
 
     @property
-    def metadata_cache_uri(self):
+    @enforce_types
+    def metadata_cache_uri(self) -> str:
         """URL of metadata cache component. (e.g.): http://myaquarius:5000."""
         return self.get(SECTION_RESOURCES, NAME_METADATA_CACHE_URI)
 
     @property
-    def provider_url(self):
+    @enforce_types
+    def provider_url(self) -> str:
         return self.get(SECTION_RESOURCES, NAME_PROVIDER_URL)
 
     @property
-    def provider_address(self):
+    @enforce_types
+    def provider_address(self) -> str:
         """Provider address (e.g.): 0x00bd138abd70e2f00903268f3db08f2d25677c9e.
 
         Ethereum address of service provider
@@ -255,6 +255,7 @@ class Config(configparser.ConfigParser):
         return self.get(SECTION_RESOURCES, NAME_PROVIDER_ADDRESS)
 
     @property
-    def downloads_path(self):
+    @enforce_types
+    def downloads_path(self) -> str:
         """Path for the downloads of assets."""
         return self.get(SECTION_RESOURCES, "downloads.path")

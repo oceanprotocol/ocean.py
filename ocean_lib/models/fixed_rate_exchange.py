@@ -30,10 +30,10 @@ class FixedRateExchange(ContractBase):
 
     def buy_data_token(
         self, exchange_id: str, data_token_amount: int, from_wallet: Wallet
-    ):
+    ) -> str:
         return self.swap(exchange_id, data_token_amount, from_wallet)
 
-    def get_base_token_quote(self, exchange_id: str, data_token_amount: int):
+    def get_base_token_quote(self, exchange_id: str, data_token_amount: int) -> int:
         rate = self.getRate(exchange_id)
         return int(data_token_amount * rate / to_wei(1))
 
@@ -41,12 +41,14 @@ class FixedRateExchange(ContractBase):
     # Transaction methods
     def create(
         self, base_token: str, data_token: str, exchange_rate: int, from_wallet: Wallet
-    ):
+    ) -> str:
         return self.send_transaction(
             "create", (base_token, data_token, exchange_rate), from_wallet
         )
 
-    def swap(self, exchange_id: str, data_token_amount: int, from_wallet: Wallet):
+    def swap(
+        self, exchange_id: str, data_token_amount: int, from_wallet: Wallet
+    ) -> str:
         return self.send_transaction(
             "swap", (exchange_id, data_token_amount), from_wallet
         )
@@ -56,13 +58,13 @@ class FixedRateExchange(ContractBase):
 
     def activate(self, exchange_id: str, from_wallet: Wallet) -> Optional[str]:
         if self.isActive(exchange_id):
-            return
+            return None
 
         return self.send_transaction("toggleExchangeState", (exchange_id,), from_wallet)
 
     def deactivate(self, exchange_id: str, from_wallet: Wallet) -> Optional[str]:
         if not self.isActive(exchange_id):
-            return
+            return None
 
         return self.send_transaction("toggleExchangeState", (exchange_id,), from_wallet)
 
@@ -71,26 +73,26 @@ class FixedRateExchange(ContractBase):
     def generateExchangeId(
         self, base_token: str, data_token: str, exchange_owner: str
     ) -> str:
-        return self.contract_concise.generateExchangeId(
+        return self.contract.caller.generateExchangeId(
             base_token, data_token, exchange_owner
         )
 
     #########################
     # View/Read-only methods
     def getNumberOfExchanges(self) -> int:
-        return self.contract_concise.getNumberOfExchanges()
+        return self.contract.caller.getNumberOfExchanges()
 
     def getRate(self, exchange_id: str) -> int:
-        return self.contract_concise.getRate(exchange_id)
+        return self.contract.caller.getRate(exchange_id)
 
-    def getExchange(self, exchange_id: str):
-        values = self.contract_concise.getExchange(exchange_id)
+    def getExchange(self, exchange_id: str) -> Optional[FixedExchangeData]:
+        values = self.contract.caller.getExchange(exchange_id)
         if values and len(values) == 6:
             return FixedExchangeData(*values)
         return None
 
     def getExchanges(self) -> list:
-        return self.contract_concise.getExchanges()
+        return self.contract.caller.getExchanges()
 
     def isActive(self, exchange_id: str) -> bool:
-        return self.contract_concise.isActive(exchange_id)
+        return self.contract.caller.isActive(exchange_id)

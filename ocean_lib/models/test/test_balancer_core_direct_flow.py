@@ -16,7 +16,7 @@ def test_complete_flow(
     network, OCEAN_address, alice_wallet, alice_ocean, alice_address, bob_wallet
 ):
     """Tests a full liquidity add/remove flow."""
-    bfactory_address = get_bfactory_address(network)
+    bfactory_address = get_bfactory_address(alice_ocean.config.address_file, network)
 
     # ===============================================================
     # 1. Alice publishes a dataset (= publishes a datatoken)
@@ -39,9 +39,10 @@ def test_complete_flow(
 
     # ===============================================================
     # 4. Alice creates an OCEAN-DT pool (=a Balancer Pool)
-    bfactory = BFactory(bfactory_address)
+    web3 = alice_ocean.web3
+    bfactory = BFactory(web3, bfactory_address)
     pool_address = bfactory.newBPool(from_wallet=alice_wallet)
-    pool = BPool(pool_address)
+    pool = BPool(web3, pool_address)
 
     pool.setPublicSwap(True, from_wallet=alice_wallet)
 
@@ -55,9 +56,9 @@ def test_complete_flow(
         from_wallet=alice_wallet,
     )
 
-    OCEAN_token = BToken(OCEAN_address)
+    OCEAN_token = BToken(web3, OCEAN_address)
     txid = OCEAN_token.approve(pool_address, to_wei(10), from_wallet=alice_wallet)
-    r = OCEAN_token.get_tx_receipt(txid)
+    r = OCEAN_token.get_tx_receipt(web3, txid)
     assert r and r.status == 1, f"approve failed, receipt={r}"
     pool.bind(
         OCEAN_address,

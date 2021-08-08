@@ -9,12 +9,14 @@ from ocean_lib.models.dispenser import DispenserContract
 
 def test_dispenser_status(contracts_addresses, alice_ocean, alice_wallet, bob_wallet):
     dispenser_address = contracts_addresses["Dispenser"]
-    dispenser = DispenserContract(dispenser_address)
+    dispenser = DispenserContract(alice_ocean.web3, dispenser_address)
     token = alice_ocean.create_data_token(
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
     assert dispenser.is_active(token.address) is False
-    assert dispenser.owner(token.address) is None
+    assert (
+        dispenser.owner(token.address) == "0x0000000000000000000000000000000000000000"
+    )
     assert dispenser.is_minter_approved(token.address) is False
     assert dispenser.is_true_minter(token.address) is False
     assert dispenser.max_tokens(token.address) == 0
@@ -26,7 +28,7 @@ def test_dispenser_activation(
     contracts_addresses, alice_ocean, alice_wallet, bob_wallet
 ):
     dispenser_address = contracts_addresses["Dispenser"]
-    dispenser = DispenserContract(dispenser_address)
+    dispenser = DispenserContract(alice_ocean.web3, dispenser_address)
     token = alice_ocean.create_data_token(
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
@@ -44,7 +46,7 @@ def test_dispenser_activation(
 
 def test_dispenser_minting(contracts_addresses, alice_ocean, alice_wallet, bob_wallet):
     dispenser_address = contracts_addresses["Dispenser"]
-    dispenser = DispenserContract(dispenser_address)
+    dispenser = DispenserContract(alice_ocean.web3, dispenser_address)
     token = alice_ocean.create_data_token(
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )

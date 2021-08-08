@@ -4,7 +4,6 @@
 #
 
 import pytest
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.util import get_contracts_addresses
@@ -14,9 +13,9 @@ from tests.resources.helper_functions import get_consumer_wallet, get_publisher_
 _NETWORK = "ganache"
 
 
-def _get_exchange_address():
+def _get_exchange_address(config):
     """Helper function to retrieve a known exchange address."""
-    return get_contracts_addresses(_NETWORK, ConfigProvider.get_config())[
+    return get_contracts_addresses(config.address_file, _NETWORK)[
         FixedRateExchange.CONTRACT_NAME
     ]
 
@@ -30,7 +29,12 @@ def test_ocean_exchange(publisher_ocean_instance):
         "DataToken1", "DT1", alice_wallet, blob="http://example.com"
     )
     dt.mint(bob_wallet.address, to_wei(100), alice_wallet)
-    ox = OceanExchange(ocn.OCEAN_address, _get_exchange_address(), ocn.config)
+    ox = OceanExchange(
+        ocn.web3,
+        ocn.OCEAN_address,
+        _get_exchange_address(publisher_ocean_instance.config),
+        ocn.config,
+    )
     rate = 0.9
     x_id = ox.create(dt.address, rate, bob_wallet)
     dt.approve(ox._exchange_address, to_wei(20), bob_wallet)

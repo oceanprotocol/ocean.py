@@ -9,9 +9,9 @@ from tests.resources.helper_functions import get_publisher_wallet
 
 def test_get_OCEAN_address(publisher_ocean_instance):
     """Tests OCEAN address retrieval."""
-    network = get_network_name()
+    network = get_network_name(web3=publisher_ocean_instance.web3)
     assert publisher_ocean_instance.pool.get_OCEAN_address() == get_ocean_token_address(
-        network
+        publisher_ocean_instance.config.address_file, network
     )
 
 
@@ -21,13 +21,11 @@ def test_add_remove_zero_liquidity(publisher_ocean_instance):
         publisher_ocean_instance.pool._add_liquidity(
             "addr", "an_addr", 0, get_publisher_wallet()
         )
-        == "",
-        "Adding liquidity had effect with 0 balance.",
-    )
+        == ""
+    ), "Adding liquidity had effect with 0 balance."
     assert (
         publisher_ocean_instance.pool._remove_liquidity(
             "addr", "an_addr", 0, 1, get_publisher_wallet()
         )
-        == "",
-        "Removing liquidity had effect with 0 balance.",
-    )
+        == ""
+    ), "Removing liquidity had effect with 0 balance."

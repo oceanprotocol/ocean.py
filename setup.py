@@ -18,7 +18,7 @@ with open("README.md", encoding="utf8") as readme_file:
 # Installed by pip install ocean-lib
 # or pip install -e .
 install_requirements = [
-    "ocean-contracts==0.6.3",
+    "ocean-contracts==0.6.5",
     "coloredlogs",
     "pyopenssl",
     "PyJWT",  # not jwt
@@ -29,10 +29,10 @@ install_requirements = [
     "tqdm",
     "pytz",
     "web3==5.19.0",
-    "wheel",
     "cryptography==3.3.2",
     "scipy",
-    "enforce-typing==1.0.0.post1"
+    "enforce-typing==1.0.0.post1",
+    "json-sempai==0.4.0",
     # web3 requires eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
@@ -102,7 +102,7 @@ setup(
     url="https://github.com/oceanprotocol/ocean.py",
     # fmt: off
     # bumpversion.sh needs single-quotes
-    version='0.5.24',
+    version='0.5.29',
     # fmt: on
     zip_safe=False,
 )

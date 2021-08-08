@@ -7,7 +7,6 @@ from unittest.mock import Mock
 
 import pytest
 from ocean_lib.common.http_requests.requests_session import get_requests_session
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
@@ -90,6 +89,7 @@ def test_order_requirements_fails(with_evil_client):
             "some_service_id",
             "and_service_type",
             "some_token_address",
+            userdata={"test_dict_key": "test_dict_value"},
         )
         is None
     )
@@ -167,19 +167,21 @@ def test_invalid_file_name():
     assert DataSP._get_file_name(response) is None
 
 
-def test_expose_endpoints():
+def test_expose_endpoints(config):
     """Tests that the DataServiceProvider exposes all service endpoints."""
     service_endpoints = TEST_SERVICE_ENDPOINTS
-    valid_endpoints = DataSP.get_service_endpoints()
+    provider_uri = DataSP.get_url(config)
+    valid_endpoints = DataSP.get_service_endpoints(provider_uri)
     assert len(valid_endpoints) == len(service_endpoints)
     assert [
         valid_endpoints[key] for key in set(service_endpoints) & set(valid_endpoints)
     ]
 
 
-def test_provider_address():
+def test_provider_address(config):
     """Tests that a provider address exists on the DataServiceProvider."""
-    provider_address = DataSP.get_provider_address()
+    provider_uri = DataSP.get_url(config)
+    provider_address = DataSP.get_provider_address(provider_uri)
     assert provider_address, "Failed to get provider address."
 
 
@@ -237,26 +239,11 @@ def test_build_endpoint():
 
     original_func = DataSP.get_service_endpoints
     DataSP.get_service_endpoints = get_service_endpoints
-    config = ConfigProvider.get_config()
 
     endpoints = get_service_endpoints()
     uri = "http://ppp.com"
     method, endpnt = DataSP.build_endpoint("newEndpoint", provider_uri=uri)
     assert endpnt == urljoin(uri, endpoints["newEndpoint"][1])
-    # config has no effect when provider_uri is set
-    assert (
-        endpnt
-        == DataSP.build_endpoint("newEndpoint", provider_uri=uri, config=config)[1]
-    )
-
-    method, endpnt = DataSP.build_endpoint("newEndpoint", config=config)
-    assert endpnt == urljoin(
-        DataSP.get_root_uri(config.provider_url), endpoints["newEndpoint"][1]
-    )
-    assert (
-        endpnt
-        == DataSP.build_endpoint("newEndpoint", provider_uri=config.provider_url)[1]
-    )
 
     uri = "http://ppp.com:8030/api/v1/services/newthing"
     method, endpnt = DataSP.build_endpoint("download", provider_uri=uri)
@@ -266,9 +253,8 @@ def test_build_endpoint():
     DataSP.get_service_endpoints = original_func
 
 
-def test_build_specific_endpoints():
+def test_build_specific_endpoints(config):
     """Tests that a specific list of agreed endpoints is supported on the DataServiceProvider."""
-    config = ConfigProvider.get_config()
     endpoints = TEST_SERVICE_ENDPOINTS
 
     def get_service_endpoints(_provider_uri=None):
@@ -277,27 +263,30 @@ def test_build_specific_endpoints():
     original_func = DataSP.get_service_endpoints
     DataSP.get_service_endpoints = get_service_endpoints
 
+    provider_uri = DataSP.get_url(config)
     base_uri = DataSP.get_root_uri(config.provider_url)
-    assert DataSP.build_download_endpoint()[1] == urljoin(
+    assert DataSP.build_download_endpoint(provider_uri)[1] == urljoin(
         base_uri, endpoints["download"][1]
     )
-    assert DataSP.build_initialize_endpoint()[1] == urljoin(
+    assert DataSP.build_initialize_endpoint(provider_uri)[1] == urljoin(
         base_uri, endpoints["initialize"][1]
     )
-    assert DataSP.build_encrypt_endpoint()[1] == urljoin(
+    assert DataSP.build_encrypt_endpoint(provider_uri)[1] == urljoin(
         base_uri, endpoints["encrypt"][1]
     )
-    assert DataSP.build_fileinfo()[1] == urljoin(base_uri, endpoints["fileinfo"][1])
-    assert DataSP.build_compute_endpoint()[1] == urljoin(
+    assert DataSP.build_fileinfo(provider_uri)[1] == urljoin(
+        base_uri, endpoints["fileinfo"][1]
+    )
+    assert DataSP.build_compute_endpoint(provider_uri)[1] == urljoin(
         base_uri, endpoints["computeStatus"][1]
     )
-    assert DataSP.build_compute_endpoint()[1] == urljoin(
+    assert DataSP.build_compute_endpoint(provider_uri)[1] == urljoin(
         base_uri, endpoints["computeStart"][1]
     )
-    assert DataSP.build_compute_endpoint()[1] == urljoin(
+    assert DataSP.build_compute_endpoint(provider_uri)[1] == urljoin(
         base_uri, endpoints["computeStop"][1]
     )
-    assert DataSP.build_compute_endpoint()[1] == urljoin(
+    assert DataSP.build_compute_endpoint(provider_uri)[1] == urljoin(
         base_uri, endpoints["computeDelete"][1]
     )
 

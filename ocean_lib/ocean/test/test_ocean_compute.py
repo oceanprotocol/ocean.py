@@ -2,27 +2,23 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
 from datetime import datetime
 
-from ocean_lib.assets.utils import create_checksum, create_publisher_trusted_algorithms
+from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.config import Config
-from ocean_lib.config_provider import ConfigProvider
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from tests.resources.ddo_helpers import (
     get_registered_algorithm_ddo,
-    wait_for_ddo,
     get_registered_ddo_with_compute_service,
+    wait_for_ddo,
 )
 from tests.resources.helper_functions import get_publisher_wallet
 
 
-def test_build_cluster_attributes():
-    data_provider = DataServiceProvider()
-    config = Ocean.config
-    compute = OceanCompute(config=config, data_provider=data_provider)
+def test_build_cluster_attributes(config):
+    data_provider = DataServiceProvider
+    compute = OceanCompute(config, data_provider=data_provider)
     cluster_dict = compute.build_cluster_attributes(
         "Kubernetes", "http://10.0.0.17/my_cluster"
     )
@@ -34,10 +30,9 @@ def test_build_cluster_attributes():
     ), "The cluster values are different from the expected ones."
 
 
-def test_build_container_attributes():
-    data_provider = DataServiceProvider()
-    config = Ocean.config
-    compute = OceanCompute(config=config, data_provider=data_provider)
+def test_build_container_attributes(config):
+    data_provider = DataServiceProvider
+    compute = OceanCompute(config, data_provider=data_provider)
     container_dict = compute.build_container_attributes(
         "node", "best_tag", "entrypoint.exe"
     )
@@ -53,10 +48,9 @@ def test_build_container_attributes():
     ), "The container values are different from the expected ones."
 
 
-def test_build_server_attributes():
-    data_provider = DataServiceProvider()
-    config = Ocean.config
-    compute = OceanCompute(config=config, data_provider=data_provider)
+def test_build_server_attributes(config):
+    data_provider = DataServiceProvider
+    compute = OceanCompute(config, data_provider=data_provider)
     server_dict = compute.build_server_attributes(
         "test_server_id_123", "test_server_type", 4, 4, "20", "20", 30
     )
@@ -76,9 +70,8 @@ def test_build_server_attributes():
     ), "The server values are different from the expected ones."
 
 
-def test_build_service_provider_attributes():
-    data_provider = DataServiceProvider()
-    config = Ocean.config
+def test_build_service_provider_attributes(config):
+    data_provider = DataServiceProvider
     compute = OceanCompute(config=config, data_provider=data_provider)
 
     cluster_dict = compute.build_cluster_attributes(
@@ -144,9 +137,10 @@ def test_build_service_provider_attributes():
 
 def test_build_service_privacy_attributes(publisher_ocean_instance):
     publisher = get_publisher_wallet()
-    data_provider = DataServiceProvider()
-    config = Ocean.config
-    compute = OceanCompute(config=config, data_provider=data_provider)
+    data_provider = DataServiceProvider
+    compute = OceanCompute(
+        config=publisher_ocean_instance.config, data_provider=data_provider
+    )
 
     algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
     wait_for_ddo(publisher_ocean_instance, algorithm_ddo.did)
@@ -154,6 +148,7 @@ def test_build_service_privacy_attributes(publisher_ocean_instance):
 
     privacy_dict = compute.build_service_privacy_attributes(
         trusted_algorithms=[algorithm_ddo.did],
+        metadata_cache_uri=publisher_ocean_instance.config.metadata_cache_uri,
         allow_raw_algorithm=True,
         allow_all_published_algorithms=True,
         allow_network_access=True,
@@ -163,7 +158,7 @@ def test_build_service_privacy_attributes(publisher_ocean_instance):
         "allowRawAlgorithm": True,
         "allowAllPublishedAlgorithms": True,
         "publisherTrustedAlgorithms": create_publisher_trusted_algorithms(
-            [algorithm_ddo.did], ConfigProvider.get_config().metadata_cache_uri
+            [algorithm_ddo.did], publisher_ocean_instance.config.metadata_cache_uri
         ),
         "allowNetworkAccess": True,
     }
@@ -177,9 +172,8 @@ def test_build_service_privacy_attributes(publisher_ocean_instance):
     ), "The privacy dict is not the expected one."
 
 
-def test_build_service_privacy_attributes_no_trusted_algos():
-    data_provider = DataServiceProvider()
-    config = Ocean.config
+def test_build_service_privacy_attributes_no_trusted_algos(config):
+    data_provider = DataServiceProvider
     compute = OceanCompute(config=config, data_provider=data_provider)
     privacy_dict = compute.build_service_privacy_attributes()
     expected_privacy_dict = {
@@ -197,8 +191,8 @@ def test_build_service_privacy_attributes_no_trusted_algos():
 
 def test_create_compute_service_attributes(publisher_ocean_instance):
     publisher = get_publisher_wallet()
-    data_provider = DataServiceProvider()
-    config = Ocean.config
+    data_provider = DataServiceProvider
+    config = publisher_ocean_instance.config
     compute = OceanCompute(config=config, data_provider=data_provider)
 
     algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
@@ -207,6 +201,7 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
 
     privacy_dict = compute.build_service_privacy_attributes(
         trusted_algorithms=[algorithm_ddo.did],
+        metadata_cache_uri=config.metadata_cache_uri,
         allow_raw_algorithm=True,
         allow_all_published_algorithms=True,
         allow_network_access=True,
@@ -216,7 +211,7 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
         "allowRawAlgorithm": True,
         "allowAllPublishedAlgorithms": True,
         "publisherTrustedAlgorithms": create_publisher_trusted_algorithms(
-            [algorithm_ddo.did], ConfigProvider.get_config().metadata_cache_uri
+            [algorithm_ddo.did], config.metadata_cache_uri
         ),
         "allowNetworkAccess": True,
     }
@@ -318,8 +313,8 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
 
 def test_create_compute_service_descriptor(publisher_ocean_instance):
     publisher = get_publisher_wallet()
-    data_provider = DataServiceProvider()
-    config = Config()
+    data_provider = DataServiceProvider
+    config = publisher_ocean_instance.config
     compute = OceanCompute(config=config, data_provider=data_provider)
 
     algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
@@ -328,6 +323,7 @@ def test_create_compute_service_descriptor(publisher_ocean_instance):
 
     privacy_dict = compute.build_service_privacy_attributes(
         trusted_algorithms=[algorithm_ddo.did],
+        metadata_cache_uri=config.metadata_cache_uri,
         allow_raw_algorithm=True,
         allow_all_published_algorithms=True,
         allow_network_access=True,
@@ -337,7 +333,7 @@ def test_create_compute_service_descriptor(publisher_ocean_instance):
         "allowRawAlgorithm": True,
         "allowAllPublishedAlgorithms": True,
         "publisherTrustedAlgorithms": create_publisher_trusted_algorithms(
-            [algorithm_ddo.did], ConfigProvider.get_config().metadata_cache_uri
+            [algorithm_ddo.did], config.metadata_cache_uri
         ),
         "allowNetworkAccess": True,
     }
@@ -431,7 +427,7 @@ def test_create_compute_service_descriptor(publisher_ocean_instance):
 
 def test_get_service_endpoint(publisher_ocean_instance):
     publisher = get_publisher_wallet()
-    data_provider = DataServiceProvider()
+    data_provider = DataServiceProvider
     options_dict = {"resources": {"provider.url": "http://localhost:8030"}}
     config = Config(options_dict=options_dict)
     compute = OceanCompute(config, data_provider)
@@ -447,5 +443,6 @@ def test_get_service_endpoint(publisher_ocean_instance):
         service_endpoint[0] == "GET"
     ), "The http method of compute status job must be GET."
     assert (
-        service_endpoint[1] == data_provider.build_compute_endpoint()[1]
+        service_endpoint[1]
+        == data_provider.build_compute_endpoint(config.provider_url)[1]
     ), "Different URLs for compute status job."
