@@ -47,9 +47,6 @@ class Aquarius:
 
         :return: Return the url of the the ddo location
         """
-        # FIXME: encountered this while changing the properties.
-        # where is this did from? There's no argument and the only usage is in
-        # ocean_assets. Might be deprecated, needs reconsideration!
         return f"{self.base_url}/ddo/" + "{did}"
 
     def get_asset_ddo(self, did: str) -> Union[DDO, dict]:
