@@ -21,26 +21,14 @@ def test_wallet_arguments(web3):
     signed_message = wallet.sign(encode_defunct(text="msg-to-sign"))
     assert signed_message, "Signed message is None."
 
-    # Create wallet with encrypted key and password
-    password = "darksecret"
-    encrypted_key = web3.eth.account.encrypt(private_key, password)
-    w2 = Wallet(web3, encrypted_key=encrypted_key, password=password)
-    assert w2.address == wallet.address
-    assert w2.private_key == wallet.private_key
-    assert w2.sign(encode_defunct(text="msg-to-sign")) == signed_message
-
     # create wallet with missing arguments
-    with pytest.raises(AssertionError):
+    with pytest.raises(TypeError):
         Wallet(web3)
-    with pytest.raises(AssertionError):
-        Wallet(web3, encrypted_key=encrypted_key)
-    with pytest.raises(AssertionError):
-        Wallet(web3, password=password)
 
     # Create wallet with invalid private_key
     invalid_key = "332233444332"
     with pytest.raises(ValueError):
         Wallet(web3, private_key=invalid_key)
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(TypeError):
         Wallet(web3, private_key=None)
