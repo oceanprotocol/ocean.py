@@ -67,7 +67,7 @@ In work console:
 
 ```console
 #specify config file as an envvar
-export CONFIG_FILE=config.ini
+export OCEAN_CONFIG_FILE=config.ini
 
 #set private keys of two accounts
 export TEST_PRIVATE_KEY1=0xbbfbee4961061d506ffbb11dfea64eba16355cbf1d9c29613126ba7fec0aed5d

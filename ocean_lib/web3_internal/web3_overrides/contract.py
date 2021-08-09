@@ -3,19 +3,23 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
+from typing import Any, Dict, Optional
 
+from enforce_typing import enforce_types
+from hexbytes.main import HexBytes
 from ocean_lib.web3_internal.utils import get_chain_id, get_network_timeout
 from ocean_lib.web3_internal.wallet import Wallet
-from web3._utils.threads import Timeout
 from web3.contract import prepare_transaction
+from web3.main import Web3
 
 
+@enforce_types
 class CustomContractFunction:
     def __init__(self, contract_function):
         """Initializes CustomContractFunction."""
         self._contract_function = contract_function
 
-    def transact(self, transaction):
+    def transact(self, transaction: Dict[str, Any]) -> HexBytes:
         """Customize calling smart contract transaction functions.
         This function is copied from web3 ContractFunction with a few changes:
 
@@ -67,16 +71,17 @@ class CustomContractFunction:
         )
 
 
+@enforce_types
 def transact_with_contract_function(
-    address,
-    web3,
-    function_name=None,
-    transaction=None,
-    contract_abi=None,
-    fn_abi=None,
+    address: str,
+    web3: Web3,
+    function_name: Optional[str] = None,
+    transaction: Optional[dict] = None,
+    contract_abi: Optional[list] = None,
+    fn_abi: Optional[dict] = None,
     *args,
     **kwargs,
-):
+) -> HexBytes:
     """
     Helper function for interacting with a contract function by sending a
     transaction. This is copied from web3 `transact_with_contract_function`
@@ -103,25 +108,18 @@ def transact_with_contract_function(
         account_key = transaction["account_key"]
         transact_transaction.pop("account_key")
 
-    network_id = get_chain_id(web3)
-    with Timeout(get_network_timeout(network_id=network_id)) as _timeout:
-        while True:
-            if account_key:
-                raw_tx = Wallet(web3, private_key=account_key).sign_tx(
-                    transact_transaction
-                )
-                logging.debug(
-                    f"sending raw tx: function: {function_name}, tx hash: {raw_tx.hex()}"
-                )
-                txn_hash = web3.eth.send_raw_transaction(raw_tx)
-            else:
-                txn_hash = web3.eth.send_transaction(transact_transaction)
+    if account_key:
+        raw_tx = Wallet(web3, private_key=account_key).sign_tx(transact_transaction)
+        logging.debug(
+            f"sending raw tx: function: {function_name}, tx hash: {raw_tx.hex()}"
+        )
+        txn_hash = web3.eth.send_raw_transaction(raw_tx)
+    else:
+        txn_hash = web3.eth.send_transaction(transact_transaction)
 
-            txn_receipt = web3.eth.wait_for_transaction_receipt(
-                txn_hash, get_network_timeout(network_id=network_id)
-            )
-            if bool(txn_receipt.status):
-                break
-            _timeout.sleep(0.1)
+    network_id = get_chain_id(web3)
+    web3.eth.wait_for_transaction_receipt(
+        txn_hash, get_network_timeout(network_id=network_id)
+    )
 
     return txn_hash

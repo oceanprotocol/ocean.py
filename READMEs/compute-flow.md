@@ -84,9 +84,10 @@ config = {
 }
 ocean = Ocean(config)
 alice_wallet = Wallet(ocean.web3, private_key='8da4ef21b864d2cc526dbdb2a120bd2874c36c9d0a1fb7f8c63d7f7a8b41de8f')
-
+assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
 token_address = data_token.address
+print(f"token_address: '{token_address}'")
 
 # `ocean.assets.create` will encrypt the URLs using the provider's encrypt service endpoint and update
 # the asset before pushing to metadata store
@@ -116,10 +117,12 @@ service_attributes = {
 
 service_endpoint = DataServiceProvider.get_url(ocean.config)
 download_service = ServiceDescriptor.access_service_descriptor(service_attributes, service_endpoint)
+assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 asset = ocean.assets.create(metadata, alice_wallet, service_descriptors=[download_service], data_token_address=token_address)
 assert token_address == asset.data_token_address
 
 did = asset.did  # did contains the datatoken address
+print(f"did: '{did}'")
 ```
 For legacy support, you can also use `metadataStoreUri` instead of `metadataCacheUri`.
 
@@ -133,6 +136,10 @@ data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
 ## 4. Alice creates a pool for trading her new data tokens
 
 ```python
+from ocean_lib.models.btoken import BToken #BToken is ERC20
+OCEAN_token = BToken(ocean.web3, ocean.OCEAN_address)
+assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need OCEAN"
+
 pool = ocean.pool.create(
    token_address,
    data_token_amount=100.0,
@@ -162,7 +169,7 @@ did = ''  # from step 3
 pool_address = ''  # from step 4
 asset = market_ocean.assets.resolve(did)
 service1 = asset.get_service(ServiceTypes.ASSET_ACCESS)
-pool = market_ocean.pool.get(pool_address)
+pool = market_ocean.pool.get(market_ocean.web3, pool_address)
 # price in OCEAN tokens per data token
 OCEAN_address = market_ocean.pool.ocean_address
 price_in_OCEAN = market_ocean.pool.calcInGivenOut(

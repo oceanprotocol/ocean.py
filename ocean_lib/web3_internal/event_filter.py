@@ -4,22 +4,25 @@
 #
 import logging
 import time
+from typing import Any, Callable, Optional, Union
 
+from enforce_typing import enforce_types
 from web3.contract import ContractEvent
 
 logger = logging.getLogger(__name__)
 
 
+@enforce_types
 class EventFilter:
     def __init__(
         self,
         event: ContractEvent,
-        argument_filters=None,
-        from_block=None,
-        to_block=None,
-        address=None,
-        topics=None,
-    ):
+        argument_filters: dict = None,
+        from_block: Optional[Union[int, str]] = None,
+        to_block: Optional[Union[int, str]] = None,
+        address: Optional[str] = None,
+        topics: Any = None,
+    ) -> None:
         """Initialises EventFilter."""
         self.event = event
         self.argument_filters = argument_filters
@@ -30,16 +33,16 @@ class EventFilter:
         self._create_filter()
 
     @property
-    def filter_id(self):
+    def filter_id(self) -> Optional[str]:
         return self._filter.filter_id if self._filter else None
 
-    def uninstall(self):
+    def uninstall(self) -> None:
         self.event.web3.eth.uninstall_filter(self._filter.filter_id)
 
-    def recreate_filter(self):
+    def recreate_filter(self) -> None:
         self._create_filter()
 
-    def _create_filter(self):
+    def _create_filter(self) -> None:
         self._filter = self.event.createFilter(
             fromBlock=self.block_range[0],
             toBlock=self.block_range[1],
@@ -48,13 +51,13 @@ class EventFilter:
             argument_filters=self.argument_filters,
         )
 
-    def get_new_entries(self, max_tries=1):
+    def get_new_entries(self, max_tries: int = 1) -> list:
         return self._get_entries(self._filter.get_new_entries, max_tries=max_tries)
 
-    def get_all_entries(self, max_tries=1):
+    def get_all_entries(self, max_tries: int = 1) -> list:
         return self._get_entries(self._filter.get_all_entries, max_tries=max_tries)
 
-    def _get_entries(self, entries_getter, max_tries=1):
+    def _get_entries(self, entries_getter: Callable, max_tries: int = 1) -> list:
         i = 0
         while i < max_tries:
             try:

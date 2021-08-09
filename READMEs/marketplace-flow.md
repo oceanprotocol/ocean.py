@@ -131,6 +131,7 @@ from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
 
 #Publish a datatoken
+assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
 token_address = data_token.address
 print(f"token_address = '{token_address}'")
@@ -162,6 +163,7 @@ from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 
 service_endpoint = DataServiceProvider.get_url(ocean.config)
 download_service = ServiceDescriptor.access_service_descriptor(service_attributes, service_endpoint)
+assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 asset = ocean.assets.create(
   metadata,
   alice_wallet,
