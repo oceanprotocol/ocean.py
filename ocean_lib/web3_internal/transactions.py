@@ -2,10 +2,13 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import time
 from typing import Optional, Union
 
 from enforce_typing import enforce_types
 from eth_account.messages import SignableMessage
+
+from ocean_lib.web3_internal.utils import get_network_timeout
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
 from web3.main import Web3
@@ -43,8 +46,16 @@ def send_ether(
     tx["gas"] = web3.eth.estimate_gas(tx)
     raw_tx = from_wallet.sign_tx(tx)
     tx_hash = web3.eth.send_raw_transaction(raw_tx)
-    receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=30)
-    return receipt
+    receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+    if tx["chainId"] != 1337:
+        while web3.eth.block_number < receipt.blockNumber + 6:
+            time.sleep(get_network_timeout(tx["chainId"]))
+    else:
+        current_block = receipt.blockNumber
+        while current_block < receipt.blockNumber + 6:
+            time.sleep(get_network_timeout(1337))
+            current_block += 1
+    return web3.eth.get_transaction_receipt(tx_hash)
 
 
 @enforce_types
@@ -65,5 +76,13 @@ def cancel_or_replace_transaction(
     tx["gas"] = gas + 1
     raw_tx = from_wallet.sign_tx(tx, fixed_nonce=nonce_value, gas_price=gas_price)
     tx_hash = web3.eth.send_raw_transaction(raw_tx)
-    receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=30)
-    return receipt
+    receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
+    if tx["chainId"] != 1337:
+        while web3.eth.block_number < receipt.blockNumber + 6:
+            time.sleep(get_network_timeout(tx["chainId"]))
+    else:
+        current_block = receipt.blockNumber
+        while current_block < receipt.blockNumber + 6:
+            time.sleep(get_network_timeout(1337))
+            current_block += 1
+    return web3.eth.get_transaction_receipt(tx_hash)
