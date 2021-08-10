@@ -24,7 +24,6 @@ from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
-from py._path.local import LocalPath
 from requests.exceptions import InvalidURL
 from requests.models import PreparedRequest, Response
 from requests.sessions import Session
@@ -541,7 +540,9 @@ class DataServiceProvider:
 
     @staticmethod
     def write_file(
-        response: Response, destination_folder: Union[LocalPath, str], file_name: str
+        response: Response,
+        destination_folder: Union[str, bytes, os.PathLike],
+        file_name: str,
     ) -> None:
         """
         Write the response content in a file in the destination folder.
