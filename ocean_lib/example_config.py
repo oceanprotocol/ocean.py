@@ -9,14 +9,13 @@ import copy
 
 from web3 import Web3
 
+from ocean_lib.config import Config, config_defaults
 from ocean_lib.config import (
-    Config,
     SECTION_ETH_NETWORK,
     NAME_CHAIN_ID,
     SECTION_RESOURCES,
     NAME_NETWORK_URL,
     NAME_PROVIDER_URL,
-    config_defaults,
     NAME_METADATA_CACHE_URI,
     DEFAULT_METADATA_CACHE_URI,
     DEFAULT_PROVIDER_URL,
@@ -112,6 +111,5 @@ class ExampleConfig:
         chain_id = w3.eth.chain_id
         if chain_id not in CONFIG_NETWORK_HELPER:
             raise ValueError("The chain id for the specific RPC could not be fetched!")
-        else:
-            config = get_config_helper_network(network_url)
-            return Config(options_dict=config)
+        config = get_config_helper_network(network_url)
+        return Config(options_dict=config)
