@@ -2,6 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import os
 import time
 from typing import Optional, Union
 
@@ -28,6 +29,27 @@ def sign_hash(msg_hash: SignableMessage, wallet: Wallet) -> str:
     return s.signature.hex()
 
 
+def send_dummy_transactions(
+    block_number: int, block_confirmations: int, from_wallet: Wallet, to_address: str
+):
+    if not Web3.isChecksumAddress(to_address):
+        to_address = Web3.toChecksumAddress(to_address)
+
+    web3 = from_wallet.web3
+
+    while web3.eth.block_number < block_number + block_confirmations:
+        tx = {
+            "from": from_wallet.address,
+            "to": to_address,
+            "value": Web3.toWei(0.001, "ether"),
+            "chainId": web3.eth.chain_id,
+        }
+        tx["gas"] = web3.eth.estimate_gas(tx)
+        raw_tx = from_wallet.sign_tx(tx)
+        web3.eth.send_raw_transaction(raw_tx)
+        time.sleep(2.5)
+
+
 @enforce_types
 def send_ether(
     from_wallet: Wallet, to_address: str, ether_amount: Union[int, float, str]
@@ -47,14 +69,14 @@ def send_ether(
     raw_tx = from_wallet.sign_tx(tx)
     tx_hash = web3.eth.send_raw_transaction(raw_tx)
     receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
-    if tx["chainId"] != 1337:
-        while web3.eth.block_number < receipt.blockNumber + 6:
-            time.sleep(get_network_timeout(tx["chainId"]))
+    block_confirmations = int(os.getenv("BLOCK_CONFIRMATIONS"))
+    if tx["chainId"] == 1337:
+        send_dummy_transactions(
+            receipt.blockNumber, block_confirmations, from_wallet, to_address
+        )
     else:
-        current_block = receipt.blockNumber
-        while current_block < receipt.blockNumber + 6:
-            time.sleep(get_network_timeout(1337))
-            current_block += 1
+        while web3.eth.block_number < receipt.blockNumber + block_confirmations:
+            time.sleep(get_network_timeout(tx["chainId"]))
     return web3.eth.get_transaction_receipt(tx_hash)
 
 
@@ -77,12 +99,12 @@ def cancel_or_replace_transaction(
     raw_tx = from_wallet.sign_tx(tx, fixed_nonce=nonce_value, gas_price=gas_price)
     tx_hash = web3.eth.send_raw_transaction(raw_tx)
     receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
-    if tx["chainId"] != 1337:
-        while web3.eth.block_number < receipt.blockNumber + 6:
-            time.sleep(get_network_timeout(tx["chainId"]))
+    block_confirmations = int(os.getenv("BLOCK_CONFIRMATIONS"))
+    if tx["chainId"] == 1337:
+        send_dummy_transactions(
+            receipt.blockNumber, block_confirmations, from_wallet, from_wallet.address
+        )
     else:
-        current_block = receipt.blockNumber
-        while current_block < receipt.blockNumber + 6:
-            time.sleep(get_network_timeout(1337))
-            current_block += 1
+        while web3.eth.block_number < receipt.blockNumber + block_confirmations:
+            time.sleep(get_network_timeout(tx["chainId"]))
     return web3.eth.get_transaction_receipt(tx_hash)
