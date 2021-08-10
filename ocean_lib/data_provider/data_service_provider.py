@@ -511,6 +511,15 @@ class DataServiceProvider:
         return result
 
     @staticmethod
+    def is_valid_provider(provider_uri: str) -> bool:
+        try:
+            DataServiceProvider.get_root_uri(provider_uri)
+        except InvalidURL:
+            return False
+
+        return True
+
+    @staticmethod
     def build_endpoint(service_name: str, provider_uri: str) -> Tuple[str, str]:
         provider_uri = DataServiceProvider.get_root_uri(provider_uri)
         service_endpoints = DataServiceProvider.get_service_endpoints(provider_uri)

@@ -198,6 +198,7 @@ def test_provider_address_with_url():
 def test_get_root_uri():
     """Tests extraction of base URLs from various inputs."""
     uri = "https://provider.mainnet.oceanprotocol.com"
+    assert DataSP.is_valid_provider(uri)
     assert DataSP.get_root_uri(uri) == uri
     assert DataSP.get_root_uri("http://localhost:8030") == "http://localhost:8030"
     assert (
@@ -224,6 +225,7 @@ def test_get_root_uri():
         == "http://localhost:8030/api/v2"
     )
 
+    assert not DataSP.is_valid_provider("thisIsNotAnURL")
     with pytest.raises(InvalidURL):
         DataSP.get_root_uri("thisIsNotAnURL")
 
