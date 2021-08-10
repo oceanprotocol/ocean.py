@@ -153,13 +153,6 @@ def test_config_from_text_malformed_content():
         Config(text=config_text)
 
 
-def test_network_config():
-    assert (
-        "ganache.infura.io"
-        in ExampleConfig.get_network_config("ganache")["eth-network"]["network"]
-    )
-
-
 def test_metadata_cache_uri_set_via_config_options(caplog):
     """Tests the metadata_cache_uri property fallback logic when set via a config dict"""
     config_dict = {"resources": {"metadata_cache_uri": "https://custom-aqua.uri"}}
