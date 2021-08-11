@@ -23,66 +23,137 @@ ETHEREUM_DECIMAL_CONTEXT = Context(prec=78, rounding=ROUND_DOWN)
 relationship between Ether and Wei."""
 DECIMALS_18 = 18
 
+"""The minimum possible token amount on Ethereum-compatible blockchains, denoted in wei"""
+MIN_WEI = 1
 
 """The maximum possible token amount on Ethereum-compatible blockchains, denoted in wei"""
 MAX_WEI = MAX_UINT256
 
+"""The minimum possible token amount on Ethereum-compatible blockchains, denoted in ether"""
+MIN_ETHER = Decimal("0.000000000000000001")
 
 """The maximum possible token amount on Ethereum-compatible blockchains, denoted in ether"""
 MAX_ETHER = Decimal(MAX_WEI).scaleb(-18, context=ETHEREUM_DECIMAL_CONTEXT)
 
 
 @enforce_types
-def from_wei(token_amount_in_wei: int, decimals: int = DECIMALS_18) -> Decimal:
+def from_wei(amount_in_wei: int, decimals: int = DECIMALS_18) -> Decimal:
     """Convert token amount from wei to ether, quantized to the specified number of decimal places."""
     # Coerce to Decimal because Web3.fromWei can return int 0
-    token_amount_in_ether = Decimal(Web3.fromWei(token_amount_in_wei, "ether"))
+    amount_in_ether = Decimal(Web3.fromWei(amount_in_wei, "ether"))
     decimal_places = Decimal(10) ** -abs(decimals)
-    return token_amount_in_ether.quantize(
-        decimal_places, context=ETHEREUM_DECIMAL_CONTEXT
-    )
+    return amount_in_ether.quantize(decimal_places, context=ETHEREUM_DECIMAL_CONTEXT)
 
 
 @enforce_types
 def to_wei(
-    token_amount_in_ether: Union[Decimal, str, int], decimals: int = DECIMALS_18
+    amount_in_ether: Union[Decimal, str, int], decimals: int = DECIMALS_18
 ) -> int:
     """
     Convert token amount to wei from ether, quantized to the specified number of decimal places
     float input is purposfully not supported
     """
-    if isinstance(token_amount_in_ether, str) or isinstance(token_amount_in_ether, int):
-        token_amount_in_ether = Decimal(token_amount_in_ether)
-
-    if token_amount_in_ether > MAX_ETHER:
-        raise ValueError("Token amount exceeds MAX_ETHER.")
-
+    amount_in_ether = normalize_and_validate_ether(amount_in_ether)
     decimal_places = Decimal(10) ** -abs(decimals)
     return Web3.toWei(
-        token_amount_in_ether.quantize(
-            decimal_places, context=ETHEREUM_DECIMAL_CONTEXT
-        ),
+        amount_in_ether.quantize(decimal_places, context=ETHEREUM_DECIMAL_CONTEXT),
         "ether",
     )
 
 
 @enforce_types
-def ether_fmt(amount_in_ether: Decimal, places: int = 18, ticker: str = "") -> str:
-    if amount_in_ether > MAX_ETHER:
-        raise ValueError("Token amount exceeds MAX_ETHER.")
+def wei_and_pretty_ether(amount_in_wei: int, ticker: str = "") -> str:
+    """Returns a formatted token amount denoted in wei and human-readable ether
 
+    Examples:
+    wei_and_pretty_ether(123456789_123456789) == "123456789123456789 (0.123)"
+    wei_and_pretty_ether(123456789_123456789_12345, "OCEAN") == "12345678912345678912345 (12.3K OCEAN)"
+    wei_and_pretty_ether(123456789_123456789_123456789, "") == "123456789123456789123456789 (123M)"
+    """
+    return "{} ({})".format(
+        amount_in_wei, pretty_ether(from_wei(amount_in_wei), ticker)
+    )
+
+
+@enforce_types
+def pretty_ether(
+    amount_in_ether: Union[Decimal, str, int], ticker: str = "", trim: bool = True
+) -> str:
+    """Returns a human-readable token amount denoted in ether with optional ticker symbol
+    Set trim=False to include trailing zeros.
+
+    This function assumes the given ether amount is already quantized to
+    the appropriate number of decimals (like ERC-20 decimals())
+
+    Examples:
+    pretty_ether("0", ticker="OCEAN") == "0 OCEAN"
+    pretty_ether("0.01234") == "1.23e-2"
+    pretty_ether("1234") == "1.23K"
+    pretty_ether("12345678") == "12.3M"
+    pretty_ether("1000000.000", trim=False) == "1.00M"
+    pretty_ether("123456789012") == "123B"
+    pretty_ether("1234567890123") == "1.23e+12"
+    """
+    amount_in_ether = normalize_and_validate_ether(amount_in_ether)
+    with localcontext(ETHEREUM_DECIMAL_CONTEXT) as context:
+
+        # Reduce to 3 significant figures
+        context.prec = 3
+        sig_fig_3 = context.create_decimal(amount_in_ether)
+
+        exponent = sig_fig_3.adjusted()
+
+        if sig_fig_3 == 0:
+            return _trim_zero_to_3_digits_or_less(trim, exponent, ticker)
+
+        if exponent >= 12 or exponent < -1:
+            # format string handles scaling also, so set scale = 0
+            scale = 0
+            fmt_str = "{:e}"
+        elif exponent >= 9:
+            scale = -9
+            fmt_str = "{}B"
+        elif exponent >= 6:
+            scale = -6
+            fmt_str = "{}M"
+        elif exponent >= 3:
+            scale = -3
+            fmt_str = "{}K"
+        else:
+            # scaling and formatting isn't necessary for values between 0 and 1000 (non-inclusive)
+            scale = 0
+            fmt_str = "{}"
+
+        scaled = sig_fig_3.scaleb(scale)
+
+        if trim:
+            scaled = remove_trailing_zeros(scaled)
+
+        return (
+            fmt_str.format(scaled) + " " + ticker if ticker else fmt_str.format(scaled)
+        )
+
+
+@enforce_types
+def ether_fmt(
+    amount_in_ether: Union[Decimal, str, int],
+    decimals: int = DECIMALS_18,
+    ticker: str = "",
+) -> str:
+    """Convert ether amount to a formatted string."""
+    amount_in_ether = normalize_and_validate_ether(amount_in_ether)
     with localcontext(ETHEREUM_DECIMAL_CONTEXT):
         return (
-            moneyfmt(amount_in_ether, places) + " " + ticker
+            moneyfmt(amount_in_ether, decimals) + " " + ticker
             if ticker
-            else moneyfmt(amount_in_ether, places)
+            else moneyfmt(amount_in_ether, decimals)
         )
 
 
 @enforce_types
 def moneyfmt(value, places=2, curr="", sep=",", dp=".", pos="", neg="-", trailneg=""):
     """Convert Decimal to a money formatted string.
-    Copied from https://docs.python.org/3/library/decimal.html#recipes
+    Copied without alteration from https://docs.python.org/3/library/decimal.html#recipes
 
     places:  required number of places after the decimal point
     curr:    optional currency symbol before the sign (may be blank)
@@ -132,65 +203,16 @@ def moneyfmt(value, places=2, curr="", sep=",", dp=".", pos="", neg="-", trailne
 
 
 @enforce_types
-def wei_and_pretty_ether(amount_in_wei: int, ticker: str = "") -> str:
-    """Returns a formatted token amount denoted in wei and human-readable ether."""
-    return "{} ({})".format(
-        amount_in_wei, pretty_ether(from_wei(amount_in_wei, ticker))
-    )
+def normalize_and_validate_ether(amount_in_ether: Union[Decimal, str, int]) -> Decimal:
+    """Returns an amount in ether, encoded as a Decimal
+    Takes Decimal, str, or int as input. Purposefully does not support float."""
+    if isinstance(amount_in_ether, str) or isinstance(amount_in_ether, int):
+        amount_in_ether = Decimal(amount_in_ether)
 
+    if abs(amount_in_ether) > MAX_ETHER:
+        raise ValueError("Token abs(amount_in_ether) exceeds MAX_ETHER.")
 
-@enforce_types
-def pretty_ether(
-    amount_in_ether: Union[Decimal, str], ticker: str = "", trim: bool = True
-) -> str:
-    """Returns a human-readable token amount denoted in ether with optional ticker symbol
-    Set trim=False to include trailing zeros.
-
-    Examples:
-    pretty_ether("0", ticker="OCEAN") == "0 OCEAN"
-    pretty_ether("0.01234") == "1.23e-2"
-    pretty_ether("1234") == "1.23K"
-    pretty_ether("12345678") == "12.3M"
-    pretty_ether("1000000.000", trim=False) == "1.00M"
-    pretty_ether("123456789012") == "123B"
-    pretty_ether("1234567890123") == "1.23e+12"
-    """
-    with localcontext(ETHEREUM_DECIMAL_CONTEXT) as context:
-        # Reduce to 3 significant figures
-        context.prec = 3
-        sig_fig_3 = context.create_decimal(amount_in_ether)
-
-        exponent = sig_fig_3.adjusted()
-
-        if sig_fig_3 == 0:
-            return _trim_zero_to_3_digits_or_less(trim, exponent, ticker)
-
-        if exponent >= 12 or exponent < -1:
-            # format string handles scaling also, so set scale = 0
-            scale = 0
-            fmt_str = "{:e}"
-        elif exponent >= 9:
-            scale = -9
-            fmt_str = "{}B"
-        elif exponent >= 6:
-            scale = -6
-            fmt_str = "{}M"
-        elif exponent >= 3:
-            scale = -3
-            fmt_str = "{}K"
-        else:
-            # scaling and formatting isn't necessary for values between 0 and 1000 (non-inclusive)
-            scale = 0
-            fmt_str = "{}"
-
-        scaled = sig_fig_3.scaleb(scale)
-
-        if trim:
-            scaled = remove_trailing_zeros(scaled)
-
-        return (
-            fmt_str.format(scaled) + " " + ticker if ticker else fmt_str.format(scaled)
-        )
+    return amount_in_ether
 
 
 @enforce_types

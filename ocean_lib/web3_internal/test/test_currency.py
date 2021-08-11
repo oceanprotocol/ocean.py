@@ -9,6 +9,8 @@ from ocean_lib.web3_internal.currency import (
     ETHEREUM_DECIMAL_CONTEXT,
     MAX_ETHER,
     MAX_WEI,
+    MIN_ETHER,
+    MIN_WEI,
     ether_fmt,
     from_wei,
     pretty_ether,
@@ -28,11 +30,15 @@ def test_from_wei():
     ), "Conversion from wei to ether failed."
 
     assert (
+        from_wei(MIN_WEI) == MIN_ETHER
+    ), "Conversion from minimum wei to minimum ether failed."
+
+    assert (
         from_wei(MAX_WEI) == MAX_ETHER
-    ), "Conversion from maximum wei value to ether failed."
+    ), "Conversion from maximum wei to maximum ether failed."
 
     with pytest.raises(ValueError):
-        # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_ETHER
+        # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_ETHER
         with localcontext(ETHEREUM_DECIMAL_CONTEXT):
             from_wei(MAX_WEI + 1)
 
@@ -71,11 +77,15 @@ def test_to_wei():
     ), "Conversion from ether to wei failed, supposed to round towards 0 (aka. truncate)."
 
     assert (
+        to_wei(MIN_ETHER) == MIN_WEI
+    ), "Conversion from minimum ether to minimum wei failed."
+
+    assert (
         to_wei(MAX_ETHER) == MAX_WEI
-    ), "Conversion from ether to maximum wei value failed"
+    ), "Conversion from maximum ether to maximum wei failed."
 
     with pytest.raises(ValueError):
-        # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_ETHER
+        # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_ETHER
         with localcontext(ETHEREUM_DECIMAL_CONTEXT):
             to_wei(MAX_ETHER + 1)
 
@@ -94,28 +104,33 @@ def test_to_wei():
 def test_ether_fmt():
     """Test the ether_fmt function"""
     assert (
-        ether_fmt(Decimal("0")) == "0.000000000000000000"
+        ether_fmt("0") == "0.000000000000000000"
     ), "Should have 18 decimal places, no ticker symbol"
     assert (
-        ether_fmt(Decimal("0.123456789123456789"), 6) == "0.123456"
+        ether_fmt("0.123456789123456789", 6) == "0.123456"
     ), "Should have 6 decimal places, rounded down, no ticker symbol"
     assert (
-        ether_fmt(Decimal("123456789"), 0, "OCEAN") == "123,456,789 OCEAN"
+        ether_fmt("123456789", 0, "OCEAN") == "123,456,789 OCEAN"
     ), "Should have commas, 0 decimal places, OCEAN ticker symbol"
     assert (
-        ether_fmt(Decimal(MAX_ETHER))
+        ether_fmt(MIN_ETHER) == "0.000000000000000001"
+    ), "Should have 18 decimal places, no ticker symbol"
+    assert (
+        ether_fmt(MAX_ETHER)
         == "115,792,089,237,316,195,423,570,985,008,687,907,853,269,984,665,640,564,039,457.584007913129639935"
     ), "Should have 78 digits, commas, 18 decimal places, no ticker symbol"
 
     with pytest.raises(ValueError):
-        # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_ETHER
+        # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_ETHER
         with localcontext(ETHEREUM_DECIMAL_CONTEXT):
-            assert ether_fmt(Decimal(MAX_ETHER + 1))
+            assert ether_fmt(MAX_ETHER + 1)
 
 
 def test_pretty_ether():
     """Test the pretty_ether function.
     assert messages ommited for brevity."""
+    assert pretty_ether("-1.23") == "-1.23"
+    assert pretty_ether(MIN_ETHER) == "1e-18"
     assert pretty_ether("0", ticker="OCEAN") == "0 OCEAN"
     assert pretty_ether("0.000001234") == "1.23e-6"
     assert pretty_ether("0.00001234") == "1.23e-5"
@@ -162,21 +177,28 @@ def test_pretty_ether():
     assert pretty_ether("1234567890123") == "1.23e+12"
     assert pretty_ether("12345678901234") == "1.23e+13"
     assert pretty_ether(MAX_ETHER) == "1.15e+59"
-    # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_ETHER
-    with localcontext(ETHEREUM_DECIMAL_CONTEXT):
-        assert pretty_ether(MAX_ETHER + 1) == "1.15e+59"
+    with pytest.raises(ValueError):
+        # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_ETHER
+        with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+            pretty_ether(MAX_ETHER + 1)
 
 
 def test_wei_and_pretty_ether():
-    assert (
-        wei_and_pretty_ether(123456789_123456789, "OCEAN")
-        == "123456789123456789 (0.123 OCEAN)"
-    )
+    """Test the wei_and_pretty_ether function."""
+    # Test with small value
+    assert wei_and_pretty_ether(1) == "1 (1e-18)"
+
+    # Test with out ticker
+    assert wei_and_pretty_ether(123456789_123456789) == "123456789123456789 (0.123)"
+
+    # Test with ticker
     assert (
         wei_and_pretty_ether(123456789_123456789_12345, "OCEAN")
         == "12345678912345678912345 (12.3K OCEAN)"
     )
+
+    # Test with empty ticker string
     assert (
-        wei_and_pretty_ether(123456789123456789123456789, "OCEAN")
-        == "123456789123456789123456789 (123M OCEAN)"
+        wei_and_pretty_ether(123456789_123456789_123456789, "")
+        == "123456789123456789123456789 (123M)"
     )
