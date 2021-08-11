@@ -102,6 +102,40 @@ def add_publisher_trusted_algorithm(
 
 
 @enforce_types
+def add_publisher_trusted_algorithm_publisher(
+    dataset_did: str, publisher_address: str, metadata_cache_uri: str
+) -> list:
+    """
+    :return: List of trusted algo publishers
+    """
+    asset = resolve_asset(dataset_did, metadata_cache_uri=metadata_cache_uri)
+    compute_service = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
+    assert (
+        compute_service
+    ), "Cannot add trusted algorithm to this asset because it has no compute service."
+    privacy_values = compute_service.attributes["main"].get("privacy")
+    if not privacy_values:
+        privacy_values = {}
+        compute_service.attributes["main"]["privacy"] = privacy_values
+
+    assert isinstance(privacy_values, dict), "Privacy key is not a dictionary."
+    trusted_algo_publishers = privacy_values.get(
+        "publisherTrustedAlgorithmPublishers", []
+    )
+
+    if publisher_address in trusted_algo_publishers:
+        return trusted_algo_publishers
+
+    trusted_algo_publishers.append(publisher_address)
+    # update with the new list
+    privacy_values["publisherTrustedAlgorithmPublishers"] = trusted_algo_publishers
+    assert (
+        compute_service.attributes["main"]["privacy"] == privacy_values
+    ), "New trusted algorithm was not added. Failed when updating the privacy key. "
+    return trusted_algo_publishers
+
+
+@enforce_types
 def remove_publisher_trusted_algorithm(
     dataset_did: str, algo_did: str, metadata_cache_uri: str
 ) -> list:
@@ -116,8 +150,36 @@ def remove_publisher_trusted_algorithm(
         )
 
     trusted_algorithms = [ta for ta in trusted_algorithms if ta["did"] != algo_did]
-    asset.update_compute_privacy(trusted_algorithms, False, False)
+    trusted_algo_publishers = asset.get_trusted_algorithm_publishers()
+    asset.update_compute_privacy(
+        trusted_algorithms, trusted_algo_publishers, False, False
+    )
     assert (
         asset.get_trusted_algorithms() == trusted_algorithms
     ), "New trusted algorithm was not removed. Failed when updating the list of trusted algorithms. "
     return trusted_algorithms
+
+
+@enforce_types
+def remove_publisher_trusted_algorithm_publisher(
+    dataset_did: str, publisher_address: str, metadata_cache_uri: str
+) -> list:
+    """
+    :return: List of trusted algo publishers not containing `publisher_address`.
+    """
+    asset = resolve_asset(dataset_did, metadata_cache_uri=metadata_cache_uri)
+    trusted_algorithm_publishers = asset.get_trusted_algorithm_publishers()
+    if not trusted_algorithm_publishers:
+        raise ValueError(
+            f"Publisher {publisher_address} is not in trusted algorith publishers of this asset."
+        )
+
+    trusted_algorithm_publishers.pop(publisher_address)
+    trusted_algorithms = asset.get_trusted_algorithms()
+    asset.update_compute_privacy(
+        trusted_algorithms, trusted_algorithm_publishers, False, False
+    )
+    assert (
+        asset.get_trusted_algorithm_publishers() == trusted_algorithm_publishers
+    ), "New trusted algorithm publisher was not removed. Failed when updating the list of trusted algo publishers. "
+    return trusted_algorithm_publishers
