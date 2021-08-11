@@ -19,8 +19,9 @@ from web3.main import Web3
 ETHEREUM_DECIMAL_CONTEXT = Context(prec=78, rounding=ROUND_DOWN)
 
 
-"""Constant used to quantize decimal.Decimal to 18 decimal places"""
-DECIMAL_PLACES_18 = Decimal(10) ** -18
+"""ERC20 tokens usually opt for a decimals value of 18, imitating the
+relationship between Ether and Wei."""
+DECIMALS_18 = 18
 
 
 """The maximum possible token amount on Ethereum-compatible blockchains, denoted in wei"""
@@ -28,35 +29,47 @@ MAX_WEI = MAX_UINT256
 
 
 """The maximum possible token amount on Ethereum-compatible blockchains, denoted in ether"""
-MAX_WEI_IN_ETHER = Decimal(MAX_WEI).scaleb(-18, context=ETHEREUM_DECIMAL_CONTEXT)
+MAX_ETHER = Decimal(MAX_WEI).scaleb(-18, context=ETHEREUM_DECIMAL_CONTEXT)
 
 
 @enforce_types
-def from_wei(value_in_wei: int) -> Decimal:
-    return Web3.fromWei(value_in_wei, "ether")
+def from_wei(token_amount_in_wei: int, decimals: int = DECIMALS_18) -> Decimal:
+    """Convert token amount from wei to ether, quantized to the specified number of decimal places."""
+    # Coerce to Decimal because Web3.fromWei can return int 0
+    token_amount_in_ether = Decimal(Web3.fromWei(token_amount_in_wei, "ether"))
+    decimal_places = Decimal(10) ** -abs(decimals)
+    return token_amount_in_ether.quantize(
+        decimal_places, context=ETHEREUM_DECIMAL_CONTEXT
+    )
 
 
 @enforce_types
-def to_wei(value_in_ether: Union[Decimal, str, int]) -> int:
+def to_wei(
+    token_amount_in_ether: Union[Decimal, str, int], decimals: int = DECIMALS_18
+) -> int:
     """
+    Convert token amount to wei from ether, quantized to the specified number of decimal places
     float input is purposfully not supported
     """
-    if isinstance(value_in_ether, str) or isinstance(value_in_ether, int):
-        value_in_ether = Decimal(value_in_ether)
+    if isinstance(token_amount_in_ether, str) or isinstance(token_amount_in_ether, int):
+        token_amount_in_ether = Decimal(token_amount_in_ether)
 
-    if value_in_ether > MAX_WEI_IN_ETHER:
-        raise ValueError("Ether value exceeds MAX_WEI_IN_ETHER.")
+    if token_amount_in_ether > MAX_ETHER:
+        raise ValueError("Token amount exceeds MAX_ETHER.")
 
+    decimal_places = Decimal(10) ** -abs(decimals)
     return Web3.toWei(
-        value_in_ether.quantize(DECIMAL_PLACES_18, context=ETHEREUM_DECIMAL_CONTEXT),
+        token_amount_in_ether.quantize(
+            decimal_places, context=ETHEREUM_DECIMAL_CONTEXT
+        ),
         "ether",
     )
 
 
 @enforce_types
 def ether_fmt(amount_in_ether: Decimal, places: int = 18, ticker: str = "") -> str:
-    if amount_in_ether > MAX_WEI_IN_ETHER:
-        raise ValueError("Ether value exceeds MAX_WEI_IN_ETHER.")
+    if amount_in_ether > MAX_ETHER:
+        raise ValueError("Token amount exceeds MAX_ETHER.")
 
     with localcontext(ETHEREUM_DECIMAL_CONTEXT):
         return (
@@ -120,19 +133,17 @@ def moneyfmt(value, places=2, curr="", sep=",", dp=".", pos="", neg="-", trailne
 
 @enforce_types
 def wei_and_pretty_ether(amount_in_wei: int, ticker: str = "") -> str:
-    return "{} ({})".format(amount_in_wei, pretty_ether_from_wei(amount_in_wei, ticker))
-
-
-@enforce_types
-def pretty_ether_from_wei(amount_in_wei: int, ticker: str = "") -> str:
-    return pretty_ether(from_wei(amount_in_wei), ticker=ticker)
+    """Returns a formatted token amount denoted in wei and human-readable ether."""
+    return "{} ({})".format(
+        amount_in_wei, pretty_ether(from_wei(amount_in_wei, ticker))
+    )
 
 
 @enforce_types
 def pretty_ether(
     amount_in_ether: Union[Decimal, str], ticker: str = "", trim: bool = True
 ) -> str:
-    """Returns a human readable token amount denoted in ether with optional ticker symbol
+    """Returns a human-readable token amount denoted in ether with optional ticker symbol
     Set trim=False to include trailing zeros.
 
     Examples:
@@ -203,7 +214,7 @@ def remove_trailing_zeros(value: Decimal) -> Decimal:
     """Returns a Decimal with trailing zeros removed.
     Adapted from https://docs.python.org/3/library/decimal.html#decimal-faq
     """
-    # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_WEI_IN_ETHER
+    # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_ETHER
     with localcontext(ETHEREUM_DECIMAL_CONTEXT):
         return (
             value.quantize(Decimal(1)).normalize()

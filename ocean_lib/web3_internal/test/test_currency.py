@@ -7,8 +7,8 @@ from decimal import Decimal, localcontext
 import pytest
 from ocean_lib.web3_internal.currency import (
     ETHEREUM_DECIMAL_CONTEXT,
+    MAX_ETHER,
     MAX_WEI,
-    MAX_WEI_IN_ETHER,
     ether_fmt,
     from_wei,
     pretty_ether,
@@ -20,49 +20,75 @@ from ocean_lib.web3_internal.currency import (
 def test_from_wei():
     """Test the from_wei function"""
     assert from_wei(0) == Decimal("0"), "Zero wei should equal zero ether"
-    assert from_wei(123456789123456789) == Decimal(
+    assert from_wei(123456789_123456789) == Decimal(
         "0.123456789123456789"
     ), "Conversion from wei to ether failed."
-    assert from_wei(1123456789123456789) == Decimal(
+    assert from_wei(1123456789_123456789) == Decimal(
         "1.123456789123456789"
     ), "Conversion from wei to ether failed."
 
     assert (
-        from_wei(MAX_WEI) == MAX_WEI_IN_ETHER
+        from_wei(MAX_WEI) == MAX_ETHER
     ), "Conversion from maximum wei value to ether failed."
 
     with pytest.raises(ValueError):
-        # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_WEI_IN_ETHER
+        # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_ETHER
         with localcontext(ETHEREUM_DECIMAL_CONTEXT):
             from_wei(MAX_WEI + 1)
+
+    USDT_DECIMALS = 6
+    assert from_wei(0, USDT_DECIMALS) == Decimal(
+        "0"
+    ), "Zero wei of USDT should equal zero ether of USDT"
+    assert from_wei(123456789_123456789, USDT_DECIMALS) == Decimal(
+        "0.123456"
+    ), "Conversion from wei to ether using decimals failed"
+    assert from_wei(1123456789_123456789, USDT_DECIMALS) == Decimal(
+        "1.123456"
+    ), "Conversion from wei to ether using decimals failed"
 
 
 def test_to_wei():
     """Test the to_wei function"""
     assert to_wei(Decimal("0")) == 0, "Zero ether (Decimal) should equal zero wei"
     assert to_wei("0") == 0, "Zero ether (string) should equal zero wei"
+    assert to_wei(0) == 0, "Zero ether (int) should equal zero wei"
     assert (
-        to_wei(Decimal("0.123456789123456789")) == 123456789123456789
+        to_wei(Decimal("0.123456789123456789")) == 123456789_123456789
     ), "Conversion from ether (Decimal) to wei failed."
     assert (
-        to_wei("0.123456789123456789") == 123456789123456789
+        to_wei("0.123456789123456789") == 123456789_123456789
     ), "Conversion from ether (string) to wei failed."
+    assert (
+        to_wei(1) == 1_000000000_000000000
+    ), "Conversion from ether (int) to wei failed."
 
     assert (
-        to_wei("0.1234567891234567893") == 123456789123456789
+        to_wei("0.1234567891234567893") == 123456789_123456789
     ), "Conversion from ether to wei failed, supposed to round towards 0 (aka. truncate)."
     assert (
-        to_wei("0.1234567891234567897") == 123456789123456789
+        to_wei("0.1234567891234567897") == 123456789_123456789
     ), "Conversion from ether to wei failed, supposed to round towards 0 (aka. truncate)."
 
     assert (
-        to_wei(MAX_WEI_IN_ETHER) == MAX_WEI
+        to_wei(MAX_ETHER) == MAX_WEI
     ), "Conversion from ether to maximum wei value failed"
 
     with pytest.raises(ValueError):
-        # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_WEI_IN_ETHER
+        # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_ETHER
         with localcontext(ETHEREUM_DECIMAL_CONTEXT):
-            to_wei(MAX_WEI_IN_ETHER + 1)
+            to_wei(MAX_ETHER + 1)
+
+    USDT_DECIMALS = 6
+    assert (
+        to_wei("0", USDT_DECIMALS) == 0
+    ), "Zero ether of USDT should equal zero wei of USDT"
+    assert (
+        to_wei("0.123456789123456789", USDT_DECIMALS) == 123456000_000000000
+    ), "Conversion from ether to wei using decimals failed"
+    assert (
+        to_wei("1.123456789123456789", USDT_DECIMALS) == 1_123456000_000000000
+    ), "Conversion from ether to wei using decimals failed"
 
 
 def test_ether_fmt():
@@ -77,14 +103,14 @@ def test_ether_fmt():
         ether_fmt(Decimal("123456789"), 0, "OCEAN") == "123,456,789 OCEAN"
     ), "Should have commas, 0 decimal places, OCEAN ticker symbol"
     assert (
-        ether_fmt(Decimal(MAX_WEI_IN_ETHER))
+        ether_fmt(Decimal(MAX_ETHER))
         == "115,792,089,237,316,195,423,570,985,008,687,907,853,269,984,665,640,564,039,457.584007913129639935"
     ), "Should have 78 digits, commas, 18 decimal places, no ticker symbol"
 
     with pytest.raises(ValueError):
-        # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_WEI_IN_ETHER
+        # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_ETHER
         with localcontext(ETHEREUM_DECIMAL_CONTEXT):
-            assert ether_fmt(Decimal(MAX_WEI_IN_ETHER + 1))
+            assert ether_fmt(Decimal(MAX_ETHER + 1))
 
 
 def test_pretty_ether():
@@ -135,19 +161,19 @@ def test_pretty_ether():
     assert pretty_ether("1000000000000") == "1e+12"
     assert pretty_ether("1234567890123") == "1.23e+12"
     assert pretty_ether("12345678901234") == "1.23e+13"
-    assert pretty_ether(MAX_WEI_IN_ETHER) == "1.15e+59"
-    # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_WEI_IN_ETHER
+    assert pretty_ether(MAX_ETHER) == "1.15e+59"
+    # Use ETHEREUM_DECIMAL_CONTEXT to accomodate MAX_ETHER
     with localcontext(ETHEREUM_DECIMAL_CONTEXT):
-        assert pretty_ether(MAX_WEI_IN_ETHER + 1) == "1.15e+59"
+        assert pretty_ether(MAX_ETHER + 1) == "1.15e+59"
 
 
 def test_wei_and_pretty_ether():
     assert (
-        wei_and_pretty_ether(123456789123456789, "OCEAN")
+        wei_and_pretty_ether(123456789_123456789, "OCEAN")
         == "123456789123456789 (0.123 OCEAN)"
     )
     assert (
-        wei_and_pretty_ether(12345678912345678912345, "OCEAN")
+        wei_and_pretty_ether(123456789_123456789_12345, "OCEAN")
         == "12345678912345678912345 (12.3K OCEAN)"
     )
     assert (
