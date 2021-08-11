@@ -109,12 +109,6 @@ def get_contracts_addresses(address_file: str, network: str) -> Dict[str, str]:
 
 
 @enforce_types
-def from_base(num_base: int, dec: int) -> float:
-    """Returns value in e.g. ETH (taking e.g. wei as input)."""
-    return float(num_base / (10 ** dec))
-
-
-@enforce_types
 def get_dtfactory_address(
     address_file: str, network: Optional[str] = None, web3: Optional[Web3] = None
 ) -> str:

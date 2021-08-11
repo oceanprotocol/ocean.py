@@ -12,7 +12,6 @@ from ocean_lib.ocean.env_constants import (
     ENV_INFURA_PROJECT_ID,
 )
 from ocean_lib.ocean.util import (
-    from_base,
     get_bfactory_address,
     get_dtfactory_address,
     get_ocean_token_address,
@@ -136,13 +135,6 @@ def test_get_contracts_addresses(config):
     assert len(addresses) == 6
     for value in addresses.values():
         assert value.startswith("0x"), "It is not a token address."
-
-
-def test_from_base():
-    res = from_base(10000000000, 10)
-    assert res == 1.0, "Incorrect conversion to ether."
-    res = from_base(100, 2)
-    assert res == 1.0, "Incorrect conversion to ether."
 
 
 def test_get_dtfactory_address(config):

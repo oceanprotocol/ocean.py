@@ -11,7 +11,6 @@ from eth_typing import BlockIdentifier
 from eth_utils import remove_0x_prefix
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.btoken import BToken
-from ocean_lib.ocean.util import from_base
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.currency import from_wei
 from ocean_lib.web3_internal.wallet import Wallet
@@ -62,10 +61,10 @@ class BPool(BToken):
 
         s += ["  balances (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
-            balance_base = self.getBalance(addr)
+            balance_in_wei = self.getBalance(addr)
             dec = BToken(self.web3, addr).decimals()
-            balance = from_base(balance_base, dec)
-            s += [f"    {symbol}: {balance}"]
+            balance_in_ether = from_wei(balance_in_wei, dec)
+            s += [f"    {symbol}: {balance_in_ether}"]
 
         return "\n".join(s)
 
