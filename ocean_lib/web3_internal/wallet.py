@@ -39,9 +39,7 @@ class Wallet:
 
     _last_tx_count = dict()
 
-    def __init__(
-        self, web3: Web3, private_key: str, address: Optional[str] = None
-    ) -> None:
+    def __init__(self, web3: Web3, private_key: str) -> None:
         """Initialises Wallet object."""
         assert private_key, "private_key is required."
 

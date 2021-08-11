@@ -219,11 +219,9 @@ class DDO:
 
     def get_service(self, service_type: str) -> Optional[Service]:
         """Return a service using."""
-        matching_services = [
-            service for service in self.services if service.type == service_type
-        ]
-
-        return matching_services[0] if matching_services else None
+        return next(
+            (service for service in self.services if service.type == service_type), None
+        )
 
     def get_service_by_index(self, index: int) -> Optional[Service]:
         """
@@ -232,11 +230,9 @@ class DDO:
         :param index: Service id, str
         :return: Service
         """
-        matching_services = [
-            service for service in self.services if service.index == index
-        ]
-
-        return matching_services[0] if matching_services else None
+        return next(
+            (service for service in self.services if service.index == index), None
+        )
 
     def enable(self) -> None:
         """Enables asset for ordering."""
