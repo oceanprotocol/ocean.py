@@ -9,8 +9,9 @@ import copy
 
 from web3 import Web3
 
-from ocean_lib.config import Config, config_defaults
 from ocean_lib.config import (
+    Config,
+    config_defaults,
     SECTION_ETH_NETWORK,
     NAME_CHAIN_ID,
     SECTION_RESOURCES,
@@ -25,6 +26,7 @@ from ocean_lib.ocean.util import get_web3_connection_provider
 from enforce_typing import enforce_types
 
 logging.basicConfig(level=logging.INFO)
+
 NETWORK_NAME = "network_name"
 NAME_STORE_INTERVAL = "store_interval"
 
@@ -71,8 +73,10 @@ CONFIG_NETWORK_HELPER = {
 def get_config_helper_network(network_url: str) -> dict:
     w3 = Web3(get_web3_connection_provider(network_url))
     chain_id = w3.eth.chain_id
+
     if chain_id not in CONFIG_NETWORK_HELPER:
         raise ValueError("The chain id for the specific RPC could not be fetched!")
+
     config_helper = copy.deepcopy(config_defaults)
     config_helper[SECTION_ETH_NETWORK].update(
         {
@@ -100,16 +104,21 @@ class ExampleConfig:
         """Return `Config` containing default values for a given network.
         Chain ID is determined by querying the RPC specified by `OCEAN_NETWORK_URL` envvar.
         """
+
         network_url = os.getenv("OCEAN_NETWORK_URL")
         assert (
             network_url is not None
         ), "Cannot use ocean-lib without a specified network URL."
+
         assert network_url.startswith("http") or network_url.startswith(
             "wss"
         ), "Invalid schema for OCEAN_NETWORK_URL!"
+
         w3 = Web3(get_web3_connection_provider(network_url))
         chain_id = w3.eth.chain_id
+
         if chain_id not in CONFIG_NETWORK_HELPER:
             raise ValueError("The chain id for the specific RPC could not be fetched!")
+
         config = get_config_helper_network(network_url)
         return Config(options_dict=config)
