@@ -64,8 +64,8 @@ class DataToken(ContractBase):
             from_wallet,
         )
 
-    def mint(self, account_address: str, value_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("mint", (account_address, value_base), from_wallet)
+    def mint(self, account_address: str, amount: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("mint", (account_address, amount), from_wallet)
 
     def startOrder(
         self,
@@ -123,20 +123,20 @@ class DataToken(ContractBase):
     def balanceOf(self, account: str) -> int:
         return self.contract.caller.balanceOf(account)
 
-    def transfer(self, to: str, value_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("transfer", (to, value_base), from_wallet)
+    def transfer(self, to: str, amount: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("transfer", (to, amount), from_wallet)
 
     def allowance(self, owner_address: str, spender_address: str) -> int:
         return self.contract.caller.allowance(owner_address, spender_address)
 
-    def approve(self, spender: str, value_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("approve", (spender, value_base), from_wallet)
+    def approve(self, spender: str, amount: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("approve", (spender, amount), from_wallet)
 
     def transferFrom(
-        self, from_address: str, to_address: str, value_base: int, from_wallet: Wallet
+        self, from_address: str, to_address: str, amount: int, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "transferFrom", (from_address, to_address, value_base), from_wallet
+            "transferFrom", (from_address, to_address, amount), from_wallet
         )
 
     # ============================================================
