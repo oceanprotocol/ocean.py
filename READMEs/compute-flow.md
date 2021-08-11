@@ -212,7 +212,8 @@ market_ocean.pool.buy_data_tokens(
     from_wallet=bob_wallet
 )
 
-print(f'bob has {data_token.token_balance(bob_wallet.address} datatokens.')
+from ocean_lib.web3_internal.currency import wei_and_pretty_ether
+print(f'bob has {wei_and_pretty_ether(data_token.balanceOf(bob_wallet.address))} datatokens.')
 ```
 
 ## 7. Bob uses a service from the asset he just purchased (download)

@@ -246,9 +246,11 @@ ocean.pool.buy_data_tokens(
     from_wallet=bob_wallet
 )
 
-print(f"Bob has {data_token.token_balance(bob_wallet.address)} datatokens.")
+from ocean_lib.web3_internal.currency import wei_and_pretty_ether
+print(f"Bob has {wei_and_pretty_ether(data_token.balanceOf(bob_wallet.address))} datatokens.")
 
-assert data_token.balanceOf(bob_wallet.address) >= 1.0, "Bob didn't get 1.0 datatokens"
+from ocean_lib.web3_internal.currency import to_wei
+assert data_token.balanceOf(bob_wallet.address) >= to_wei("1.0"), "Bob didn't get 1.0 datatokens"
 
 #Bob points to the service object
 fee_receiver = None # could also be market address

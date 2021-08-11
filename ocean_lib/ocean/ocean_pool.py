@@ -1093,7 +1093,9 @@ class OceanPool:
         join_logs = [lg for lg in join_logs if lg.address in pools]
 
         balances = {
-            lg.address: DataToken(self.web3, lg.address).token_balance(user_address)
+            lg.address: float(
+                from_wei(DataToken(self.web3, lg.address).balanceOf(user_address))
+            )
             for lg in join_logs
         }
         return balances

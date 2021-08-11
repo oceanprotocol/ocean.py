@@ -63,7 +63,7 @@ def setup_all(request, config, web3):
         if from_wei(get_ether_balance(web3, w.address)) < 2:
             send_ether(wallet, w.address, 4)
 
-        if OCEAN_token.token_balance(w.address) < 100:
+        if OCEAN_token.balanceOf(w.address) < to_wei(100):
             OCEAN_token.mint(wallet.address, amt_distribute_in_wei, from_wallet=wallet)
             OCEAN_token.transfer(w.address, amt_distribute_in_wei, from_wallet=wallet)
 

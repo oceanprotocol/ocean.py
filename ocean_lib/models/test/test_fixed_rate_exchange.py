@@ -45,9 +45,9 @@ def test_fixed_rate_exchange(
 
     ocean_t = alice_ocean.OCEAN_address
     ocn_token = DataToken(web3, ocean_t)
-    assert ocn_token.token_balance(bob_wallet.address) >= 100, (
+    assert from_wei(ocn_token.balanceOf(bob_wallet.address)) >= 100, (
         f"bob wallet does not have the expected OCEAN tokens balance, "
-        f"got {ocn_token.token_balance(bob_wallet.address)} instead of 100"
+        f"got {from_wei(ocn_token.balanceOf(bob_wallet.address))} instead of 100"
     )
 
     # clear any previous ocean token allowance for the exchange contract

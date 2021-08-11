@@ -443,9 +443,6 @@ class DataToken(ContractBase):
         DataServiceProvider.write_file(response, destination_folder, file_name)
         return os.path.join(destination_folder, file_name)
 
-    def token_balance(self, account: str) -> float:
-        return float(from_wei(self.balanceOf(account)))
-
     def _get_url_from_blob(self, int_code: int) -> Optional[str]:
         try:
             url_object = json.loads(self.blob())
