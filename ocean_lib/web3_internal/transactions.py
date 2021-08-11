@@ -29,18 +29,16 @@ def sign_hash(msg_hash: SignableMessage, wallet: Wallet) -> str:
     return s.signature.hex()
 
 
+@enforce_types
 def send_dummy_transactions(
-    block_number: int, block_confirmations: int, from_wallet: Wallet, to_address: str
-):
-    if not Web3.isChecksumAddress(to_address):
-        to_address = Web3.toChecksumAddress(to_address)
-
+    block_number: int, block_confirmations: int, from_wallet: Wallet
+) -> None:
     web3 = from_wallet.web3
 
     while web3.eth.block_number < block_number + block_confirmations:
         tx = {
             "from": from_wallet.address,
-            "to": to_address,
+            "to": "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",
             "value": Web3.toWei(0.001, "ether"),
             "chainId": web3.eth.chain_id,
         }
@@ -71,9 +69,7 @@ def send_ether(
     receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
     block_confirmations = int(os.getenv("BLOCK_CONFIRMATIONS"))
     if tx["chainId"] == 1337:
-        send_dummy_transactions(
-            receipt.blockNumber, block_confirmations, from_wallet, to_address
-        )
+        send_dummy_transactions(receipt.blockNumber, block_confirmations, from_wallet)
     else:
         while web3.eth.block_number < receipt.blockNumber + block_confirmations:
             time.sleep(get_network_timeout(tx["chainId"]))
@@ -101,9 +97,7 @@ def cancel_or_replace_transaction(
     receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
     block_confirmations = int(os.getenv("BLOCK_CONFIRMATIONS"))
     if tx["chainId"] == 1337:
-        send_dummy_transactions(
-            receipt.blockNumber, block_confirmations, from_wallet, from_wallet.address
-        )
+        send_dummy_transactions(receipt.blockNumber, block_confirmations, from_wallet)
     else:
         while web3.eth.block_number < receipt.blockNumber + block_confirmations:
             time.sleep(get_network_timeout(tx["chainId"]))
