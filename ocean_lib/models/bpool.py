@@ -4,6 +4,7 @@
 #
 import logging
 import typing
+from decimal import Decimal
 from typing import Optional, Tuple
 
 from enforce_typing import enforce_types
@@ -34,7 +35,7 @@ class BPool(BToken):
         s += [f"  isFinalized = {self.isFinalized()}"]
 
         swap_fee = from_wei(self.getSwapFee())
-        s += ["  swapFee = %.2f%%" % (float(swap_fee) * 100.0)]
+        s += ["  swapFee = %.2f%%" % (swap_fee * Decimal("100.0"))]
 
         s += [f"  numTokens = {self.getNumTokens()}"]
         cur_addrs = self.getCurrentTokens()
