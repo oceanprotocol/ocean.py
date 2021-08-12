@@ -12,11 +12,8 @@ def test_init():
     """Tests initialisation of Aquarius objects."""
     aqua = Aquarius("http://something/api/v1/aquarius/assets")
     assert (
-        aqua.url == "http://something/api/v1/aquarius/assets/ddo"
+        aqua.base_url == "http://something/api/v1/aquarius/assets"
     ), "Different URL from the specified one."
-    assert (
-        aqua.root_url == "http://something"
-    ), "Different root URL from the specified one."
 
 
 def test_aqua_functions_for_single_ddo(

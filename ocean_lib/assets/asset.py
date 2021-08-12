@@ -13,15 +13,15 @@ from ocean_lib.common.ddo.ddo import DDO
 class Asset(DDO):
     @property
     def data_token_address(self) -> Optional[str]:
-        return self._other_values["dataToken"]
+        return self.other_values["dataToken"]
 
     @data_token_address.setter
     def data_token_address(self, token_address: str) -> None:
-        self._other_values["dataToken"] = token_address
+        self.other_values["dataToken"] = token_address
 
     @property
     def values(self) -> dict:
-        return self._other_values.copy()
+        return self.other_values.copy()
 
     def get_trusted_algorithms(self) -> list:
         return self.get_compute_privacy_attributes().get("publisherTrustedAlgorithms")

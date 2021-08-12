@@ -98,7 +98,3 @@ class ServiceAgreement(Service):
         :return: Float
         """
         return float(self.main["cost"])
-
-    @property
-    def service_endpoint(self) -> str:
-        return self._service_endpoint
