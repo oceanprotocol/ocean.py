@@ -5,7 +5,6 @@
 import os
 
 import pytest
-
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
@@ -23,8 +22,8 @@ def test_ocean_assets_download_failure(publisher_ocean_instance, metadata):
     ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher)
     wait_for_ddo(publisher_ocean_instance, ddo.did)
     sa = ServiceAgreement.from_ddo(ServiceTypes.ASSET_ACCESS, ddo)
-    sa.__dict__["_service_endpoint"] = None
-    ddo.__dict__["_services"][1] = sa
+    sa.service_endpoint = None
+    ddo.services[1] = sa
 
     with pytest.raises(AssertionError):
         download_asset_files(
