@@ -5,7 +5,6 @@
 
 """Ocean module."""
 import logging
-from decimal import Decimal
 from typing import Dict, List, Optional, Type, Union
 
 from enforce_typing import enforce_types
@@ -28,7 +27,7 @@ from ocean_lib.ocean.util import (
     get_ocean_token_address,
     get_web3_connection_provider,
 )
-from ocean_lib.web3_internal.currency import from_wei, to_wei
+from ocean_lib.web3_internal.currency import from_wei
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
@@ -129,7 +128,7 @@ class Ocean:
         name: str,
         symbol: str,
         from_wallet: Wallet,
-        cap: float = DataToken.DEFAULT_CAP_IN_ETHER,
+        cap: int = DataToken.DEFAULT_CAP_IN_WEI,
         blob: str = "",
     ) -> DataToken:
         """
@@ -146,15 +145,13 @@ class Ocean:
         :param name: Datatoken name, str
         :param symbol: Datatoken symbol, str
         :param from_wallet: wallet instance, wallet
-        :param cap: float
+        :param cap: Amount of data tokens to create, denoted in wei, int
 
         :return: `Datatoken` instance
         """
 
         dtfactory = self.get_dtfactory()
-        tx_id = dtfactory.createToken(
-            blob, name, symbol, to_wei(Decimal(cap)), from_wallet=from_wallet
-        )
+        tx_id = dtfactory.createToken(blob, name, symbol, cap, from_wallet=from_wallet)
         address = dtfactory.get_token_address(tx_id)
         assert address, "new datatoken has no address"
         dt = DataToken(self.web3, address)
