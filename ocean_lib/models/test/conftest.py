@@ -12,7 +12,6 @@ from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.ocean.util import get_ocean_token_address
-from ocean_lib.web3_internal.account import Account
 from ocean_lib.web3_internal.contract_utils import get_contracts_addresses
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
@@ -72,11 +71,6 @@ def alice_wallet():
 
 
 @pytest.fixture
-def alice_account():
-    return alice_info().account
-
-
-@pytest.fixture
 def alice_ocean():
     return alice_info().ocean
 
@@ -94,11 +88,6 @@ def bob_address():
 @pytest.fixture
 def bob_wallet():
     return bob_info().wallet
-
-
-@pytest.fixture
-def bob_account():
-    return bob_info().account
 
 
 @pytest.fixture
@@ -143,7 +132,6 @@ def make_info(name, private_key_name):
     info.private_key = os.environ.get(private_key_name)
     info.wallet = Wallet(web3, private_key=info.private_key)
     info.address = info.wallet.address
-    info.account = Account(private_key=info.private_key)
     wallet = get_ganache_wallet()
     if wallet:
         assert (

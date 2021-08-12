@@ -17,7 +17,7 @@ from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.ddo.constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
 from ocean_lib.common.ddo.credentials import AddressCredential
 from ocean_lib.common.ddo.service import Service
-from ocean_lib.common.did import OCEAN_PREFIX, did_to_id
+from ocean_lib.common.did import did_to_id
 from ocean_lib.common.utils.utilities import get_timestamp
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
@@ -37,17 +37,12 @@ class DDO:
         dictionary: Optional[dict] = None,
     ) -> None:
         """Clear the DDO data values."""
-        self._did = did
-        self._services = []
-        self._proof = None
-        self._credentials = {}
-        self._created = None
-        self._other_values = {}
-
-        if created:
-            self._created = created
-        else:
-            self._created = get_timestamp()
+        self.did = did
+        self.services = []
+        self.proof = None
+        self.credentials = {}
+        self.created = created if created else get_timestamp()
+        self.other_values = {}
 
         if not json_text and json_filename:
             with open(json_filename, "r") as file_handle:
@@ -57,11 +52,6 @@ class DDO:
             self._read_dict(json.loads(json_text))
         elif dictionary:
             self._read_dict(dictionary)
-
-    @property
-    def did(self) -> Optional[str]:
-        """Get the DID."""
-        return self._did
 
     @property
     def is_disabled(self) -> bool:
@@ -86,28 +76,13 @@ class DDO:
     @property
     def asset_id(self) -> Optional[str]:
         """The asset id part of the DID"""
-        if not self._did:
+        if not self.did:
             return None
-        return add_0x_prefix(did_to_id(self._did))
-
-    @property
-    def services(self) -> Optional[list]:
-        """Get the list of services."""
-        return self._services[:]
-
-    @property
-    def proof(self) -> Optional[dict]:
-        """Get the static proof, or None."""
-        return self._proof
-
-    @property
-    def credentials(self) -> Optional[dict]:
-        """Get the credentials."""
-        return self._credentials
+        return add_0x_prefix(did_to_id(self.did))
 
     @property
     def publisher(self) -> Optional[str]:
-        return self._proof.get("creator") if self._proof else None
+        return self.proof.get("creator") if self.proof else None
 
     @property
     def metadata(self) -> Optional[dict]:
@@ -116,26 +91,9 @@ class DDO:
         return metadata_service.attributes if metadata_service else None
 
     @property
-    def created(self) -> Optional[Any]:
-        return self._created
-
-    @property
     def encrypted_files(self) -> Optional[dict]:
         """Return encryptedFiles field in the base metadata."""
-        files = self.metadata["encryptedFiles"]
-        return files
-
-    def assign_did(self, did: str) -> str:
-        if self._did:
-            raise AssertionError('"did" is already set on this DDO instance.')
-        assert did and isinstance(
-            did, str
-        ), f"did must be of str type, got {did} of type {type(did)}"
-        assert did.startswith(
-            OCEAN_PREFIX
-        ), f'"did" seems invalid, must start with {OCEAN_PREFIX} prefix.'
-        self._did = did
-        return did
+        return self.metadata["encryptedFiles"]
 
     def add_service(
         self,
@@ -164,9 +122,9 @@ class DDO:
                 index,
             )
         logger.debug(
-            f"Adding service with service type {service_type} with did {self._did}"
+            f"Adding service with service type {service_type} with did {self.did}"
         )
-        self._services.append(service)
+        self.services.append(service)
 
     def as_text(self, is_proof: bool = True, is_pretty: bool = False) -> str:
         """Return the DDO as a JSON text.
@@ -188,13 +146,13 @@ class DDO:
         :param if is_proof: if False then do not include the 'proof' element.
         :return: dict
         """
-        if self._created is None:
-            self._created = get_timestamp()
+        if self.created is None:
+            self.created = get_timestamp()
 
         data = {
             "@context": DID_DDO_CONTEXT_URL,
-            "id": self._did,
-            "created": self._created,
+            "id": self.did,
+            "created": self.created,
         }
 
         data["publicKey"] = [
@@ -205,47 +163,44 @@ class DDO:
             {"type": "RsaSignatureAuthentication2018", "publicKey": self.did}
         ]
 
-        if self._services:
-            values = []
-            for service in self._services:
-                values.append(service.as_dictionary())
-            data["service"] = values
-        if self._proof and is_proof:
-            data["proof"] = self._proof
-        if self._credentials:
-            data["credentials"] = self._credentials
-
-        if self._other_values:
-            data.update(self._other_values)
+        if self.services:
+            data["service"] = [service.as_dictionary() for service in self.services]
+        if self.proof and is_proof:
+            data["proof"] = self.proof
+        if self.credentials:
+            data["credentials"] = self.credentials
+        if self.other_values:
+            data.update(self.other_values)
 
         return data
 
     def _read_dict(self, dictionary: dict) -> None:
         """Import a JSON dict into this DDO."""
         values = copy.deepcopy(dictionary)
-        self._did = values.pop("id")
-        self._created = values.pop("created", None)
+        self.did = values.pop("id")
+        self.created = values.pop("created", None)
 
         if "service" in values:
-            self._services = []
+            self.services = []
             for value in values.pop("service"):
                 if isinstance(value, str):
                     value = json.loads(value)
 
-                if value["type"] == ServiceTypes.ASSET_ACCESS:
-                    service = ServiceAgreement.from_json(value)
-                elif value["type"] == ServiceTypes.CLOUD_COMPUTE:
+                if value["type"] in [
+                    ServiceTypes.ASSET_ACCESS,
+                    ServiceTypes.CLOUD_COMPUTE,
+                ]:
                     service = ServiceAgreement.from_json(value)
                 else:
                     service = Service.from_json(value)
 
-                self._services.append(service)
+                self.services.append(service)
         if "proof" in values:
-            self._proof = values.pop("proof")
+            self.proof = values.pop("proof")
         if "credentials" in values:
-            self._credentials = values.pop("credentials")
+            self.credentials = values.pop("credentials")
 
-        self._other_values = values
+        self.other_values = values
 
     def add_proof(self, checksums: dict, publisher_account: Account) -> None:
         """Add a proof to the DDO, based on the public_key id/index and signed with the private key
@@ -254,7 +209,7 @@ class DDO:
         :param checksums: dict with the checksum of the main attributes of each service, dict
         :param publisher_account: account of the publisher, account
         """
-        self._proof = {
+        self.proof = {
             "type": PROOF_TYPE,
             "created": get_timestamp(),
             "creator": publisher_account.address,
@@ -262,12 +217,11 @@ class DDO:
             "checksum": checksums,
         }
 
-    def get_service(self, service_type: str = None) -> Optional[Service]:
+    def get_service(self, service_type: str) -> Optional[Service]:
         """Return a service using."""
-        for service in self._services:
-            if service.type == service_type and service_type:
-                return service
-        return None
+        return next(
+            (service for service in self.services if service.type == service_type), None
+        )
 
     def get_service_by_index(self, index: int) -> Optional[Service]:
         """
@@ -276,17 +230,9 @@ class DDO:
         :param index: Service id, str
         :return: Service
         """
-        try:
-            index = int(index)
-        except ValueError:
-            logging.error(f"The index {index} can not be converted into a int")
-            return None
-
-        for service in self._services:
-            if service.index == index:
-                return service
-
-        return None
+        return next(
+            (service for service in self.services if service.index == index), None
+        )
 
     def enable(self) -> None:
         """Enables asset for ordering."""

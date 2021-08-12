@@ -88,50 +88,37 @@ class Ocean:
                 },
             }
             config = Config(options_dict=config_dict)
-        self._config = config
-        self._web3 = Web3(
-            provider=get_web3_connection_provider(self._config.network_url)
-        )
+        self.config = config
+        self.web3 = Web3(provider=get_web3_connection_provider(self.config.network_url))
 
         if not data_provider:
             data_provider = DataServiceProvider
 
-        network = get_network_name(web3=self._web3)
-        addresses = get_contracts_addresses(self._config.address_file, network)
+        network = get_network_name(web3=self.web3)
+        addresses = get_contracts_addresses(self.config.address_file, network)
         self.assets = OceanAssets(
-            self._config,
-            self._web3,
+            self.config,
+            self.web3,
             data_provider,
             addresses.get(MetadataContract.CONTRACT_NAME),
         )
         self.services = OceanServices()
-        self.compute = OceanCompute(self._config, data_provider)
+        self.compute = OceanCompute(self.config, data_provider)
 
-        ocean_address = get_ocean_token_address(self._config.address_file, network)
+        ocean_address = get_ocean_token_address(self.config.address_file, network)
         self.pool = OceanPool(
-            self._web3,
+            self.web3,
             ocean_address,
-            get_bfactory_address(self._config.address_file, network),
+            get_bfactory_address(self.config.address_file, network),
         )
         self.exchange = OceanExchange(
-            self._web3,
+            self.web3,
             ocean_address,
-            FixedRateExchange.configured_address(network, self._config.address_file),
-            self._config,
+            FixedRateExchange.configured_address(network, self.config.address_file),
+            self.config,
         )
 
         logger.debug("Ocean instance initialized: ")
-
-    @property
-    def config(self) -> Config:
-        """
-        `Config` stores artifact path, urls.
-        """
-        return self._config
-
-    @property
-    def web3(self) -> Web3:
-        return self._web3
 
     @property
     def OCEAN_address(self) -> str:
@@ -170,7 +157,7 @@ class Ocean:
         )
         address = dtfactory.get_token_address(tx_id)
         assert address, "new datatoken has no address"
-        dt = DataToken(self._web3, address)
+        dt = DataToken(self.web3, address)
         return dt
 
     def get_data_token(self, token_address: str) -> DataToken:
@@ -179,7 +166,7 @@ class Ocean:
         :return: `Datatoken` instance
         """
 
-        return DataToken(self._web3, token_address)
+        return DataToken(self.web3, token_address)
 
     def get_dtfactory(self, dtfactory_address: str = "") -> DTFactory:
         """
@@ -188,7 +175,7 @@ class Ocean:
         :return: `DTFactory` instance
         """
         dtf_address = dtfactory_address or DTFactory.configured_address(
-            get_network_name(web3=self._web3), self._config.address_file
+            get_network_name(web3=self.web3), self.config.address_file
         )
         return DTFactory(self.web3, dtf_address)
 
@@ -198,7 +185,7 @@ class Ocean:
         """
         :return: List of orders `[Order]`
         """
-        dt = DataToken(self._web3, datatoken)
+        dt = DataToken(self.web3, datatoken)
         _orders = []
         for log in dt.get_start_order_logs(
             address, from_all_tokens=not bool(datatoken)
