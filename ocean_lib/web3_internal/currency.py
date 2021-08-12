@@ -64,6 +64,11 @@ def to_wei(
 @enforce_types
 def wei_and_pretty_ether(amount_in_wei: int, ticker: str = "") -> str:
     """Returns a formatted token amount denoted in wei and human-readable ether
+    with optional ticker symbol.
+
+    This utility is intended for use in log statements, error messages, and
+    assertions where it is desirable to have both full-precision wei values and
+    human-readable ether values.
 
     Examples:
     wei_and_pretty_ether(123456789_123456789) == "123456789123456789 (0.123)"
