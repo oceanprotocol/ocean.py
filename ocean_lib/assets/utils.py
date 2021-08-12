@@ -4,7 +4,7 @@
 #
 import hashlib
 import json
-from typing import Optional
+from typing import Optional, Union
 
 from enforce_typing import enforce_types
 from ocean_lib.assets.asset import Asset
@@ -22,9 +22,7 @@ def create_checksum(text: str) -> str:
 
 @enforce_types
 def generate_trusted_algo_dict(
-    did: Optional[str] = None,
-    metadata_cache_uri: Optional[str] = None,
-    ddo: Optional[Asset] = None,
+    asset_or_did: Union[str, Asset] = None, metadata_cache_uri: Optional[str] = None
 ) -> dict:
     """
     :return: Object as follows:
@@ -36,11 +34,10 @@ def generate_trusted_algo_dict(
     }
     ```
     """
-    assert ddo or (
-        did and metadata_cache_uri
-    ), "Either DDO, or both did and metadata_cache_uri are None."
-    if not ddo:
-        ddo = resolve_asset(did, metadata_cache_uri=metadata_cache_uri)
+    if isinstance(asset_or_did, Asset):
+        ddo = asset_or_did
+    else:
+        ddo = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
 
     algo_metadata = ddo.metadata
     return {
@@ -63,19 +60,25 @@ def create_publisher_trusted_algorithms(dids: list, metadata_cache_uri: str) -> 
     :return: List of objects returned by `generate_trusted_algo_dict` method.
     """
     return [
-        generate_trusted_algo_dict(did=did, metadata_cache_uri=metadata_cache_uri)
+        generate_trusted_algo_dict(
+            asset_or_did=did, metadata_cache_uri=metadata_cache_uri
+        )
         for did in dids
     ]
 
 
 @enforce_types
 def add_publisher_trusted_algorithm(
-    dataset_did: str, algo_did: str, metadata_cache_uri: str
+    asset_or_did: Union[str, Asset], algo_did: str, metadata_cache_uri: str
 ) -> list:
     """
     :return: List of trusted algos
     """
-    asset = resolve_asset(dataset_did, metadata_cache_uri=metadata_cache_uri)
+    if isinstance(asset_or_did, Asset):
+        asset = asset_or_did
+    else:
+        asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
+
     compute_service = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
     assert (
         compute_service
@@ -92,7 +95,7 @@ def add_publisher_trusted_algorithm(
 
     # now add this algo_did as trusted algo
     algo_ddo = resolve_asset(algo_did, metadata_cache_uri=metadata_cache_uri)
-    trusted_algos.append(generate_trusted_algo_dict(ddo=algo_ddo))
+    trusted_algos.append(generate_trusted_algo_dict(asset_or_did=algo_ddo))
     # update with the new list
     privacy_values["publisherTrustedAlgorithms"] = trusted_algos
     assert (
@@ -103,12 +106,16 @@ def add_publisher_trusted_algorithm(
 
 @enforce_types
 def add_publisher_trusted_algorithm_publisher(
-    dataset_did: str, publisher_address: str, metadata_cache_uri: str
+    asset_or_did: Union[str, Asset], publisher_address: str, metadata_cache_uri: str
 ) -> list:
     """
     :return: List of trusted algo publishers
     """
-    asset = resolve_asset(dataset_did, metadata_cache_uri=metadata_cache_uri)
+    if isinstance(asset_or_did, Asset):
+        asset = asset_or_did
+    else:
+        asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
+
     compute_service = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
     assert (
         compute_service
@@ -137,12 +144,16 @@ def add_publisher_trusted_algorithm_publisher(
 
 @enforce_types
 def remove_publisher_trusted_algorithm(
-    dataset_did: str, algo_did: str, metadata_cache_uri: str
+    asset_or_did: Union[str, Asset], algo_did: str, metadata_cache_uri: str
 ) -> list:
     """
     :return: List of trusted algos not containing `algo_did`.
     """
-    asset = resolve_asset(dataset_did, metadata_cache_uri=metadata_cache_uri)
+    if isinstance(asset_or_did, Asset):
+        asset = asset_or_did
+    else:
+        asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
+
     trusted_algorithms = asset.get_trusted_algorithms()
     if not trusted_algorithms:
         raise ValueError(
@@ -162,12 +173,16 @@ def remove_publisher_trusted_algorithm(
 
 @enforce_types
 def remove_publisher_trusted_algorithm_publisher(
-    dataset_did: str, publisher_address: str, metadata_cache_uri: str
+    asset_or_did: Union[str, Asset], publisher_address: str, metadata_cache_uri: str
 ) -> list:
     """
     :return: List of trusted algo publishers not containing `publisher_address`.
     """
-    asset = resolve_asset(dataset_did, metadata_cache_uri=metadata_cache_uri)
+    if isinstance(asset_or_did, Asset):
+        asset = asset_or_did
+    else:
+        asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
+
     trusted_algorithm_publishers = asset.get_trusted_algorithm_publishers()
     if not trusted_algorithm_publishers:
         raise ValueError(
