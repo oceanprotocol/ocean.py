@@ -64,7 +64,7 @@ def test_ocean_exchange(publisher_ocean_instance):
     expected_base_token_amount = to_wei(2 * rate)
     assert (
         base_token_amount == expected_base_token_amount
-    ), f"unexpected quote of {wei_and_pretty_ether(base_token_amount)} base tokens, should be {wei_and_pretty_ether(expected_base_token_amount)}."
+    ), f"unexpected quote of {wei_and_pretty_ether(base_token_amount, 'OCEAN')} base tokens, should be {wei_and_pretty_ether(expected_base_token_amount, 'OCEAN')}."
 
     #############
     # test buying datatokens
@@ -97,4 +97,4 @@ def test_ocean_exchange(publisher_ocean_instance):
     expected_base_token_amount = to_wei(2 * rate)
     assert (
         base_token_amount == expected_base_token_amount
-    ), f"unexpected quote of {wei_and_pretty_ether(base_token_amount)} base tokens, should be {wei_and_pretty_ether(expected_base_token_amount)}."
+    ), f"unexpected quote of {wei_and_pretty_ether(base_token_amount, 'OCEAN')} base tokens, should be {wei_and_pretty_ether(expected_base_token_amount, 'OCEAN')}."

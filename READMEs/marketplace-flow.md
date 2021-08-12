@@ -247,7 +247,7 @@ ocean.pool.buy_data_tokens(
 )
 
 from ocean_lib.web3_internal.currency import wei_and_pretty_ether
-print(f"Bob has {wei_and_pretty_ether(data_token.balanceOf(bob_wallet.address))} datatokens.")
+print(f"Bob has {wei_and_pretty_ether(data_token.balanceOf(bob_wallet.address), data_token.symbol())} datatokens.")
 
 from ocean_lib.web3_internal.currency import to_wei
 assert data_token.balanceOf(bob_wallet.address) >= to_wei("1.0"), "Bob didn't get 1.0 datatokens"

@@ -72,15 +72,16 @@ class OceanExchange:
 
         # Figure out the amount of ocean tokens to approve before triggering the exchange function to do the swap
         ocean_amount = exchange.get_base_token_quote(exchange_id, amount)
+        ocean_token = DataToken(self._web3, self.ocean_address)
+        ocean_ticker = ocean_token.symbol()
         if ocean_amount > max_OCEAN_amount:
             raise ValidationError(
-                f"Buying {wei_and_pretty_ether(amount)} DataTokens requires {wei_and_pretty_ether(ocean_amount)} OCEAN "
-                f"tokens which exceeds the max_OCEAN_amount {wei_and_pretty_ether(max_OCEAN_amount)}."
+                f"Buying {wei_and_pretty_ether(amount, 'DataTokens')} requires {wei_and_pretty_ether(ocean_amount, ocean_ticker)} "
+                f"tokens which exceeds the max_OCEAN_amount {wei_and_pretty_ether(max_OCEAN_amount, ocean_ticker)}."
             )
-        ocean_token = DataToken(self._web3, self.ocean_address)
         if ocean_token.balanceOf(wallet.address) < ocean_amount:
             raise InsufficientBalance(
-                f"Insufficient funds for buying {wei_and_pretty_ether(amount)} DataTokens!"
+                f"Insufficient funds for buying {wei_and_pretty_ether(amount, 'DataTokens')}!"
             )
         if ocean_token.allowance(wallet.address, self._exchange_address) < ocean_amount:
             tx_id = ocean_token.approve(self._exchange_address, ocean_amount, wallet)
