@@ -68,9 +68,9 @@ def test_main(network, alice_wallet, alice_address, dtfactory_address, web3):
     assert factory.get_event_argument_names("TokenCreated") == ()
     block = web3.eth.block_number
     assert (
-        len(factory.get_event_logs("TokenCreated", block, block, None)) == 1
+        len(factory.get_event_logs("TokenCreated", block - 1, block - 1, None)) == 1
     ), "The token was not created."
-    log = factory.get_event_log("TokenCreated", block, block, None)
+    log = factory.get_event_log("TokenCreated", block - 1, block - 1, None)
     assert len(log) == 1, "The token was not created."
     assert log[0]["event"] == "TokenCreated"
     assert log[0]["address"] == dtfactory_address

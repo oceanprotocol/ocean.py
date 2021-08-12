@@ -10,6 +10,7 @@ from typing import Any, Dict, Optional
 from enforce_typing import enforce_types
 from hexbytes.main import HexBytes
 
+from ocean_lib.config import DEFAULT_BLOCK_CONFIRMATIONS
 from ocean_lib.web3_internal.transactions import send_dummy_transactions
 from ocean_lib.web3_internal.utils import get_chain_id, get_network_timeout
 from ocean_lib.web3_internal.wallet import Wallet
@@ -125,15 +126,13 @@ def transact_with_contract_function(
     receipt = web3.eth.wait_for_transaction_receipt(
         txn_hash, get_network_timeout(network_id=network_id)
     )
-    block_confirmations = int(os.getenv("BLOCK_CONFIRMATIONS"))
     if transaction["chainId"] == 1337:
         send_dummy_transactions(
             receipt.blockNumber,
-            block_confirmations,
             Wallet(web3, private_key=account_key),
         )
     else:
-        while web3.eth.block_number < receipt.blockNumber + block_confirmations:
+        while web3.eth.block_number < receipt.blockNumber + DEFAULT_BLOCK_CONFIRMATIONS:
             time.sleep(get_network_timeout(transaction["chainId"]))
 
     return txn_hash

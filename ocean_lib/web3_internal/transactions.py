@@ -9,6 +9,7 @@ from typing import Optional, Union
 from enforce_typing import enforce_types
 from eth_account.messages import SignableMessage
 
+from ocean_lib.config import DEFAULT_BLOCK_CONFIRMATIONS
 from ocean_lib.web3_internal.utils import get_network_timeout
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
@@ -30,12 +31,10 @@ def sign_hash(msg_hash: SignableMessage, wallet: Wallet) -> str:
 
 
 @enforce_types
-def send_dummy_transactions(
-    block_number: int, block_confirmations: int, from_wallet: Wallet
-) -> None:
+def send_dummy_transactions(block_number: int, from_wallet: Wallet) -> None:
     web3 = from_wallet.web3
 
-    while web3.eth.block_number < block_number + block_confirmations:
+    while web3.eth.block_number < block_number + DEFAULT_BLOCK_CONFIRMATIONS:
         tx = {
             "from": from_wallet.address,
             "to": "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",
@@ -67,11 +66,10 @@ def send_ether(
     raw_tx = from_wallet.sign_tx(tx)
     tx_hash = web3.eth.send_raw_transaction(raw_tx)
     receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
-    block_confirmations = int(os.getenv("BLOCK_CONFIRMATIONS"))
     if tx["chainId"] == 1337:
-        send_dummy_transactions(receipt.blockNumber, block_confirmations, from_wallet)
+        send_dummy_transactions(receipt.blockNumber, from_wallet)
     else:
-        while web3.eth.block_number < receipt.blockNumber + block_confirmations:
+        while web3.eth.block_number < receipt.blockNumber + DEFAULT_BLOCK_CONFIRMATIONS:
             time.sleep(get_network_timeout(tx["chainId"]))
     return web3.eth.get_transaction_receipt(tx_hash)
 
@@ -95,10 +93,9 @@ def cancel_or_replace_transaction(
     raw_tx = from_wallet.sign_tx(tx, fixed_nonce=nonce_value, gas_price=gas_price)
     tx_hash = web3.eth.send_raw_transaction(raw_tx)
     receipt = web3.eth.wait_for_transaction_receipt(tx_hash)
-    block_confirmations = int(os.getenv("BLOCK_CONFIRMATIONS"))
     if tx["chainId"] == 1337:
-        send_dummy_transactions(receipt.blockNumber, block_confirmations, from_wallet)
+        send_dummy_transactions(receipt.blockNumber, from_wallet)
     else:
-        while web3.eth.block_number < receipt.blockNumber + block_confirmations:
+        while web3.eth.block_number < receipt.blockNumber + DEFAULT_BLOCK_CONFIRMATIONS:
             time.sleep(get_network_timeout(tx["chainId"]))
     return web3.eth.get_transaction_receipt(tx_hash)

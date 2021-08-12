@@ -8,6 +8,7 @@ import time
 
 import pytest
 from ocean_lib.common.ddo.ddo import DDO
+from ocean_lib.config import DEFAULT_BLOCK_CONFIRMATIONS
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -54,7 +55,7 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address
     # assert transfers were successful
     block = alice_ocean.web3.eth.block_number
     all_transfers = token.get_all_transfers_from_events(block - 2, block + 1, chunk=1)
-    assert len(all_transfers[0]) == 3
+    assert len(all_transfers[0]) == 1
 
 
 def test_status_functions(alice_ocean, alice_wallet, alice_address):
@@ -188,12 +189,19 @@ def test_transfer_event(
     token.transfer(bob_address, to_base_18(5.0), from_wallet=alice_wallet)
 
     block = alice_ocean.web3.eth.block_number
-    transfer_event = token.get_transfer_event(block, alice_address, bob_address)
+    transfer_event = token.get_transfer_event(
+        block - DEFAULT_BLOCK_CONFIRMATIONS, alice_address, bob_address
+    )
     assert transfer_event["args"]["from"] == alice_address
     assert transfer_event["args"]["to"] == bob_address
 
     # same transfer event, different way of retrieving
-    transfer_event = token.get_event_logs("Transfer", None, block, block)[0]
+    transfer_event = token.get_event_logs(
+        "Transfer",
+        None,
+        block - DEFAULT_BLOCK_CONFIRMATIONS,
+        block - DEFAULT_BLOCK_CONFIRMATIONS,
+    )[0]
     assert transfer_event["args"]["from"] == alice_address
     assert transfer_event["args"]["to"] == bob_address
 
