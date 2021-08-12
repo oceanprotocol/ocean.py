@@ -178,12 +178,17 @@ class OceanCompute:
         if privacy_attributes is None:
             privacy_attributes = OceanCompute.build_service_privacy_attributes()
 
-        assert set(privacy_attributes.keys()) == {
+        for key in [
             "allowRawAlgorithm",
             "allowAllPublishedAlgorithms",
-            "publisherTrustedAlgorithms",
             "allowNetworkAccess",
-        }
+        ]:
+            assert key in privacy_attributes
+
+        assert (
+            "publisherTrustedAlgorithms" in privacy_attributes
+            or "publisherTrustedAlgorithmPublishers" in privacy_attributes
+        )
 
         attributes = {
             "main": {

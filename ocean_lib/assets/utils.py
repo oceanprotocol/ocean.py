@@ -126,9 +126,11 @@ def add_publisher_trusted_algorithm_publisher(
         compute_service.attributes["main"]["privacy"] = privacy_values
 
     assert isinstance(privacy_values, dict), "Privacy key is not a dictionary."
-    trusted_algo_publishers = privacy_values.get(
-        "publisherTrustedAlgorithmPublishers", []
-    )
+    trusted_algo_publishers = [
+        tp.lower()
+        for tp in privacy_values.get("publisherTrustedAlgorithmPublishers", [])
+    ]
+    publisher_address = publisher_address.lower()
 
     if publisher_address in trusted_algo_publishers:
         return trusted_algo_publishers
@@ -183,13 +185,19 @@ def remove_publisher_trusted_algorithm_publisher(
     else:
         asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
 
-    trusted_algorithm_publishers = asset.get_trusted_algorithm_publishers()
+    trusted_algorithm_publishers = [
+        tp.lower() for tp in asset.get_trusted_algorithm_publishers()
+    ]
+    publisher_address = publisher_address.lower()
+
     if not trusted_algorithm_publishers:
         raise ValueError(
             f"Publisher {publisher_address} is not in trusted algorith publishers of this asset."
         )
 
-    trusted_algorithm_publishers.pop(publisher_address)
+    trusted_algorithm_publishers = [
+        tp for tp in trusted_algorithm_publishers if tp != publisher_address
+    ]
     trusted_algorithms = asset.get_trusted_algorithms()
     asset.update_compute_privacy(
         trusted_algorithms, trusted_algorithm_publishers, False, False
