@@ -262,6 +262,25 @@ def test_create_asset_with_address(publisher_ocean_instance):
     ), "Asset creation failed with the specified datatoken address."
 
 
+def test_create_asset_with_owner_address(publisher_ocean_instance):
+    """Tests that an asset can be created with owner address."""
+    ocn = publisher_ocean_instance
+    alice = get_publisher_wallet()
+
+    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
+    asset = DDO(json_filename=sample_ddo_path)
+    asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
+    my_secret_store = "http://myownsecretstore.com"
+    auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
+
+    assert ocn.assets.create(
+        asset.metadata,
+        alice,
+        [auth_service],
+        owner_address=alice.address,
+    ), "Asset creation failed with the specified owner address."
+
+
 def test_create_asset_with_dt_address_and_owner_address(publisher_ocean_instance):
     """Tests that an asset can be created with both a datatoken address and owner address."""
     ocn = publisher_ocean_instance
