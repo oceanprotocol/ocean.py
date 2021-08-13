@@ -138,7 +138,7 @@ def make_info(name, private_key_name):
             from_wei(get_ether_balance(web3, wallet.address)) > 4
         ), "Ether balance less than 4."
         if from_wei(get_ether_balance(web3, info.address)) < 2:
-            send_ether(wallet, info.address, 4)
+            send_ether(wallet, info.address, to_wei(4))
 
     from ocean_lib.ocean.ocean import Ocean
 

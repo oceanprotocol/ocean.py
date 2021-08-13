@@ -53,4 +53,4 @@ def mint_fake_OCEAN(config: Config) -> None:
             )
 
         if from_wei(get_ether_balance(web3, w.address)) < 2:
-            send_ether(deployer_wallet, w.address, 4)
+            send_ether(deployer_wallet, w.address, to_wei(4))
