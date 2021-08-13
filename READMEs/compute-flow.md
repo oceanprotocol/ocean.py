@@ -27,8 +27,8 @@ Let's go through each step.
 ## 0. Prerequisites and Installation
 
 Use an ethereum account with some eth balance on rinkeby. You can get rinkeby eth using
-this [faucet](https://www.rinkeby.io/#faucet). Otherwise, run `ganache-cli` and replace
-`rinkeby` with `ganache` when following the steps below.
+this [faucet](https://www.rinkeby.io/#faucet). Otherwise, run `ganache-cli` and export
+`OCEAN_NETWORK_URL` environment variable `rinkeby` URL with `ganache` network URL when following the steps below.
 
 If you haven't installed yet:
 
@@ -36,6 +36,9 @@ If you haven't installed yet:
 #Install the ocean.py library. Install wheel first to avoid errors.
 pip install wheel
 pip install ocean-lib
+
+#Export the rinkeby URL. Add your Infura project ID as well.
+export OCEAN_NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
 ```
 
 ## 1. Initialize services
@@ -70,6 +73,8 @@ Access the market app in the browser at `http://localhost:8000`.
 ## 2. Alice publishes assets for data services (= publishes a DataToken contract)
 
 ```python
+import os
+
 from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 
 from ocean_lib.ocean.ocean import Ocean
@@ -78,7 +83,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 #Alice's config
 config = {
-   'network' : 'rinkeby',
+   'network' : os.getenv("OCEAN_NETWORK_URL"),
    'metadataCacheUri' : 'http://127.0.0.1:5000',
    'providerUri' : 'http://127.0.0.1:8030'
 }
@@ -153,6 +158,8 @@ print(f'DataToken @{data_token.address} has a `pool` available @{pool_address}')
 ## 5. Marketplace posts asset for sale using price obtained from balancer pool
 
 ```python
+import os
+
 from ocean_lib.common.agreements.service_types import ServiceTypes
 
 from ocean_lib.ocean.ocean import Ocean
@@ -161,7 +168,7 @@ from ocean_lib.models.bpool import BPool
 
 # Market's config
 config = {
-   'network': 'rinkeby',
+   'network': os.getenv("OCEAN_NETWORK_URL"),
 }
 market_ocean = Ocean(config)
 

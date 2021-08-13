@@ -34,6 +34,7 @@ def test_ganache_example_config(monkeypatch):
 
 def test_polygon_example_config(monkeypatch):
     """Tests the config structure of Polygon network."""
+
     monkeypatch.setenv("OCEAN_NETWORK_URL", "https://rpc-mainnet.maticvigil.com")
     config = ExampleConfig.get_config()
 
