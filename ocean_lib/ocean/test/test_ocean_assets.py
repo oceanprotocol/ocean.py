@@ -156,9 +156,8 @@ def test_ocean_assets_search(publisher_ocean_instance, metadata):
                 }
             )
         )
-        == 1,
-        "Query failed.The identifier was not found in the name.",
-    )
+        == 1
+    ), "Query failed.The identifier was not found in the name."
     assert (
         len(
             publisher_ocean_instance.assets.query(
@@ -274,10 +273,7 @@ def test_create_asset_with_owner_address(publisher_ocean_instance):
     auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
 
     assert ocn.assets.create(
-        asset.metadata,
-        alice,
-        [auth_service],
-        owner_address=alice.address,
+        asset.metadata, alice, [auth_service], owner_address=alice.address
     ), "Asset creation failed with the specified owner address."
 
 
@@ -336,5 +332,5 @@ def test_pay_for_service_insufficient_balance(publisher_ocean_instance):
 
     with pytest.raises(InsufficientBalance):
         ocn.assets.pay_for_service(
-            ocn.web3, 10000000000000.0, token.address, asset.did, 0, ZERO_ADDRESS, alice
+            ocn.web3, 10000000000000, token.address, asset.did, 0, ZERO_ADDRESS, alice
         )
