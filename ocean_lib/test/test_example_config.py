@@ -2,22 +2,17 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import pytest
 
 from ocean_lib.config import (
     DEFAULT_METADATA_CACHE_URI,
     DEFAULT_PROVIDER_URL,
     SECTION_ETH_NETWORK,
 )
-from ocean_lib.example_config import ExampleConfig, NETWORK_NAME, NAME_STORE_INTERVAL
-
-
-def test_invalid_schema_url(monkeypatch):
-    """Tests a bad URL schema."""
-
-    monkeypatch.setenv("OCEAN_NETWORK_URL", "bad_url")
-    with pytest.raises(AssertionError):
-        ExampleConfig.get_config()
+from ocean_lib.example_config import (
+    ExampleConfig,
+    NETWORK_NAME,
+    NAME_BLOCK_CONFIRMATION_POLL_INTERVAL,
+)
 
 
 def test_ganache_example_config(monkeypatch):
@@ -33,8 +28,24 @@ def test_ganache_example_config(monkeypatch):
 
     assert config.__dict__["_sections"][SECTION_ETH_NETWORK][NETWORK_NAME] == "ganache"
     assert config.__dict__["_sections"][SECTION_ETH_NETWORK][
-        NAME_STORE_INTERVAL
+        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL
     ] == str(2.5)
+
+
+def test_polygon_example_config(monkeypatch):
+    """Tests the config structure of Polygon network."""
+    monkeypatch.setenv("OCEAN_NETWORK_URL", "https://rpc-mainnet.maticvigil.com")
+    config = ExampleConfig.get_config()
+
+    assert config.chain_id == 137
+    assert config.network_url == "https://rpc-mainnet.maticvigil.com"
+    assert config.metadata_cache_uri == "https://aquarius.oceanprotocol.com"
+    assert config.provider_url == "https://provider.polygon.oceanprotocol.com"
+
+    assert config.__dict__["_sections"][SECTION_ETH_NETWORK][NETWORK_NAME] == "polygon"
+    assert config.__dict__["_sections"][SECTION_ETH_NETWORK][
+        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL
+    ] == str(1)
 
 
 def test_bsc_example_config(monkeypatch):
@@ -50,5 +61,5 @@ def test_bsc_example_config(monkeypatch):
 
     assert config.__dict__["_sections"][SECTION_ETH_NETWORK][NETWORK_NAME] == "bsc"
     assert config.__dict__["_sections"][SECTION_ETH_NETWORK][
-        NAME_STORE_INTERVAL
+        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL
     ] == str(1.5)
