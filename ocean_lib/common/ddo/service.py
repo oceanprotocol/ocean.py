@@ -33,10 +33,10 @@ class Service:
     ) -> None:
         """Initialize Service instance."""
         # init can not be type hinted due to conflicts with ServiceAgreement
-        self._service_endpoint = service_endpoint
-        self._type = service_type or ""
-        self._index = index
-        self._attributes = attributes or {}
+        self.service_endpoint = service_endpoint
+        self.type = service_type or ""
+        self.index = index
+        self.attributes = attributes or {}
 
         # assign the _values property to empty until they are used
         self._values = dict()
@@ -50,45 +50,6 @@ class Service:
                 if name not in self._reserved_names:
                     self._values[name] = value
 
-    @property
-    @enforce_types
-    def type(self) -> str:
-        """
-        Type of the service.
-
-        :return: str
-        """
-        return self._type
-
-    @property
-    @enforce_types
-    def index(self) -> int:
-        """
-        Identifier of the service inside the asset DDO
-
-        :return: str
-        """
-        return self._index
-
-    @property
-    @enforce_types
-    def service_endpoint(self) -> str:
-        """
-        Service endpoint.
-
-        :return: String
-        """
-        return self._service_endpoint
-
-    @enforce_types
-    def set_service_endpoint(self, service_endpoint: str) -> None:
-        """
-        Update service endpoint. Needed to update after create did.
-
-        :param service_endpoint: Service endpoint, str
-        """
-        self._service_endpoint = service_endpoint
-
     @enforce_types
     def values(self) -> Dict[str, Any]:
         """
@@ -99,13 +60,8 @@ class Service:
 
     @property
     @enforce_types
-    def attributes(self) -> Dict[str, Any]:
-        return self._attributes
-
-    @property
-    @enforce_types
     def main(self) -> Dict[str, Any]:
-        return self._attributes["main"]
+        return self.attributes["main"]
 
     @enforce_types
     def update_value(self, name: str, value: Any) -> None:
@@ -123,7 +79,7 @@ class Service:
     def as_dictionary(self) -> Dict[str, Any]:
         """Return the service as a python dictionary."""
         attributes = {}
-        for key, value in self._attributes.items():
+        for key, value in self.attributes.items():
             if isinstance(value, object) and hasattr(value, "as_dictionary"):
                 value = value.as_dictionary()
             elif isinstance(value, list):
@@ -134,11 +90,11 @@ class Service:
 
             attributes[key] = value
 
-        values = {self.SERVICE_TYPE: self._type, self.SERVICE_ATTRIBUTES: attributes}
-        if self._service_endpoint:
-            values[self.SERVICE_ENDPOINT] = self._service_endpoint
-        if self._index is not None:
-            values[self.SERVICE_INDEX] = self._index
+        values = {self.SERVICE_TYPE: self.type, self.SERVICE_ATTRIBUTES: attributes}
+        if self.service_endpoint:
+            values[self.SERVICE_ENDPOINT] = self.service_endpoint
+        if self.index is not None:
+            values[self.SERVICE_INDEX] = self.index
 
         if self._values:
             values.update(self._values)

@@ -497,7 +497,27 @@ class DataServiceProvider:
         if not result:
             raise InvalidURL(f"InvalidURL {service_endpoint}.")
 
+        try:
+            root_result = "/".join(parts[0:3])
+            response = requests.get(root_result).json()
+        except (requests.exceptions.RequestException, JSONDecodeError):
+            raise InvalidURL(f"InvalidURL {service_endpoint}.")
+
+        if "providerAddress" not in response:
+            raise InvalidURL(
+                f"Invalid Provider URL {service_endpoint}, no providerAddress."
+            )
+
         return result
+
+    @staticmethod
+    def is_valid_provider(provider_uri: str) -> bool:
+        try:
+            DataServiceProvider.get_root_uri(provider_uri)
+        except InvalidURL:
+            return False
+
+        return True
 
     @staticmethod
     def build_endpoint(service_name: str, provider_uri: str) -> Tuple[str, str]:

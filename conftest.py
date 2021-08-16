@@ -44,9 +44,7 @@ def setup_all(request, config, web3):
     with open(addresses_file) as f:
         network_addresses = json.load(f)
 
-    print(
-        f"sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keys_str()}"
-    )
+    print(f"sender: {wallet.key}, {wallet.address}, {wallet.keys_str()}")
     print(f"sender balance: {from_wei(get_ether_balance(web3, wallet.address))}")
     assert (
         from_wei(get_ether_balance(web3, wallet.address)) > 10

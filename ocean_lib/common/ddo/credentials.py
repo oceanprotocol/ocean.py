@@ -55,8 +55,8 @@ class AddressCredential:
         """Adds an address to an address list (either allow or deny)."""
         address = address.lower()
 
-        if not self.asset._credentials or access_class not in self.asset._credentials:
-            self.asset._credentials[access_class] = [
+        if not self.asset.credentials or access_class not in self.asset.credentials:
+            self.asset.credentials[access_class] = [
                 {"type": "address", "values": [address]}
             ]
             return
@@ -64,7 +64,7 @@ class AddressCredential:
         address_entry = self.get_address_entry_of_class(access_class)
 
         if not address_entry:
-            self.asset._credentials[access_class].append(
+            self.asset.credentials[access_class].append(
                 {"type": "address", "values": [address]}
             )
             return
@@ -82,7 +82,7 @@ class AddressCredential:
         """Removes an address from an address list (either allow or deny)i."""
         address = address.lower()
 
-        if not self.asset._credentials or access_class not in self.asset._credentials:
+        if not self.asset.credentials or access_class not in self.asset.credentials:
             return
 
         address_entry = self.get_address_entry_of_class(access_class)
@@ -100,7 +100,7 @@ class AddressCredential:
 
     def get_address_entry_of_class(self, access_class: str = "allow") -> Optional[dict]:
         """Get address credentials entry of the specified access class. access_class = "allow" or "deny"."""
-        entries = self.asset._credentials.get(access_class, [])
+        entries = self.asset.credentials.get(access_class, [])
         address_entries = [entry for entry in entries if entry.get("type") == "address"]
         return address_entries[0] if address_entries else None
 
