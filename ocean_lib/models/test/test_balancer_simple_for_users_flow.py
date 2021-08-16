@@ -73,14 +73,14 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
     alice_ocean.pool.remove_data_token_liquidity(
         pool_address,
         amount=to_wei(2),
-        max_pool_shares_base=dt_pool_shares,
+        max_pool_shares=dt_pool_shares,
         from_wallet=alice_wallet,
     )
 
     alice_ocean.pool.remove_OCEAN_liquidity(
         pool_address,
         amount=to_wei(3),
-        max_pool_shares_base=ocn_pool_shares,
+        max_pool_shares=ocn_pool_shares,
         from_wallet=alice_wallet,
     )
 

@@ -216,48 +216,40 @@ class OceanPool:
         return pool_amount
 
     def remove_data_token_liquidity(
-        self,
-        pool_address: str,
-        amount: int,
-        max_pool_shares_base: int,
-        from_wallet: Wallet,
+        self, pool_address: str, amount: int, max_pool_shares: int, from_wallet: Wallet
     ) -> str:
         """
         Remove `amount` number of data tokens from the pool `pool_address`. The wallet owner
         will get that amount of data tokens. At the same time a number of pool shares/tokens up to
-        `max_pool_shares_base` will be taken from the caller's wallet and given back to the pool.
+        `max_pool_shares` will be taken from the caller's wallet and given back to the pool.
 
         :param pool_address: str address of pool contract
         :param amount: int number of data tokens to add to this pool in *base*
-        :param max_pool_shares_base: int maximum number of pool shares as a cost for the withdrawn data tokens
+        :param max_pool_shares: int maximum number of pool shares as a cost for the withdrawn data tokens
         :param from_wallet: Wallet instance of the owner of data tokens
         :return: str transaction id/hash
         """
         dt_address = self.get_token_address(pool_address)
         return self._remove_liquidity(
-            pool_address, dt_address, amount, max_pool_shares_base, from_wallet
+            pool_address, dt_address, amount, max_pool_shares, from_wallet
         )
 
     def remove_OCEAN_liquidity(
-        self,
-        pool_address: str,
-        amount: int,
-        max_pool_shares_base: int,
-        from_wallet: Wallet,
+        self, pool_address: str, amount: int, max_pool_shares: int, from_wallet: Wallet
     ) -> str:
         """
         Remove `amount` number of OCEAN tokens from the pool `pool_address`. The wallet owner
         will get that amount of OCEAN tokens. At the same time a number of pool shares/tokens up to
-        `max_pool_shares_base` will be taken from the caller's wallet and given back to the pool.
+        `max_pool_shares` will be taken from the caller's wallet and given back to the pool.
 
         :param pool_address: str address of pool contract
         :param amount: int number of data tokens to add to this pool in *base*
-        :param max_pool_shares_base: int maximum number of pool shares as a cost for the withdrawn data tokens
+        :param max_pool_shares: int maximum number of pool shares as a cost for the withdrawn data tokens
         :param from_wallet: Wallet instance of the owner of data tokens
         :return: str transaction id/hash
         """
         return self._remove_liquidity(
-            pool_address, self.ocean_address, amount, max_pool_shares_base, from_wallet
+            pool_address, self.ocean_address, amount, max_pool_shares, from_wallet
         )
 
     def _remove_liquidity(
@@ -265,14 +257,14 @@ class OceanPool:
         pool_address: str,
         token_address: str,
         amount: int,
-        max_pool_shares_base: int,
+        max_pool_shares: int,
         from_wallet: Wallet,
     ) -> str:
         assert amount >= 0
         if amount == 0:
             return ""
 
-        assert max_pool_shares_base > 0, ""
+        assert max_pool_shares > 0, ""
 
         pool = BPool(self.web3, pool_address)
         if pool.balanceOf(from_wallet.address) == 0:
@@ -281,7 +273,7 @@ class OceanPool:
             )
 
         return pool.exitswapExternAmountOut(
-            token_address, amount, max_pool_shares_base, from_wallet
+            token_address, amount, max_pool_shares, from_wallet
         )
 
     def buy_data_tokens(
