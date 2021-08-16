@@ -27,23 +27,22 @@ class EventFilter:
         self.event = event
         self.argument_filters = argument_filters
         self.block_range = (from_block, to_block)
-        self._filter = None
         self.address = address
         self.topics = topics
         self._create_filter()
 
     @property
     def filter_id(self) -> Optional[str]:
-        return self._filter.filter_id if self._filter else None
+        return self.filter.filter_id if self.filter else None
 
     def uninstall(self) -> None:
-        self.event.web3.eth.uninstall_filter(self._filter.filter_id)
+        self.event.web3.eth.uninstall_filter(self.filter.filter_id)
 
     def recreate_filter(self) -> None:
         self._create_filter()
 
     def _create_filter(self) -> None:
-        self._filter = self.event.createFilter(
+        self.filter = self.event.createFilter(
             fromBlock=self.block_range[0],
             toBlock=self.block_range[1],
             address=self.address,
@@ -52,10 +51,10 @@ class EventFilter:
         )
 
     def get_new_entries(self, max_tries: int = 1) -> list:
-        return self._get_entries(self._filter.get_new_entries, max_tries=max_tries)
+        return self._get_entries(self.filter.get_new_entries, max_tries=max_tries)
 
     def get_all_entries(self, max_tries: int = 1) -> list:
-        return self._get_entries(self._filter.get_all_entries, max_tries=max_tries)
+        return self._get_entries(self.filter.get_all_entries, max_tries=max_tries)
 
     def _get_entries(self, entries_getter: Callable, max_tries: int = 1) -> list:
         i = 0
