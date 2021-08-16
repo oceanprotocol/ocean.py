@@ -2,6 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from decimal import Decimal
+
 import pytest
 from ocean_lib.web3_internal.currency import to_wei
 
@@ -31,7 +33,10 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
     # 4. Alice creates an OCEAN-DT pool (=a Balancer Pool)
 
     pool = alice_ocean.pool.create(
-        DT_address, data_token_amount=90.0, OCEAN_amount=10.0, from_wallet=alice_wallet
+        DT_address,
+        data_token_amount=to_wei(Decimal("90.0")),
+        OCEAN_amount=to_wei(Decimal("10.0")),
+        from_wallet=alice_wallet,
     )
     pool_address = pool.address
 
@@ -53,7 +58,10 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
     # ===============================================================
     # 6. Bob buys a DT from pool
     alice_ocean.pool.buy_data_tokens(
-        pool_address, amount=1.0, max_OCEAN_amount=2.0, from_wallet=bob_wallet
+        pool_address,
+        amount=to_wei(Decimal("1.0")),
+        max_OCEAN_amount=to_wei(Decimal("2.0")),
+        from_wallet=bob_wallet,
     )
 
     # ===============================================================
@@ -88,7 +96,7 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
     # ===============================================================
     # 11. Bob adds liquidity
     bob_ocean.pool.add_data_token_liquidity(
-        pool_address, amount_base=to_wei("0.1"), from_wallet=bob_wallet
+        pool_address, amount_base=to_wei(Decimal("0.1")), from_wallet=bob_wallet
     )
     bob_ocean.pool.add_OCEAN_liquidity(
         pool_address, amount_base=to_wei(1), from_wallet=bob_wallet
@@ -118,7 +126,10 @@ def test_ocean_balancer_helpers(
         )
 
     pool = alice_ocean.pool.create(
-        DT.address, data_token_amount=90.0, OCEAN_amount=10.0, from_wallet=alice_wallet
+        DT.address,
+        data_token_amount=to_wei(Decimal("90.0")),
+        OCEAN_amount=to_wei(Decimal("10.0")),
+        from_wallet=alice_wallet,
     )
     pool_address = pool.address
 

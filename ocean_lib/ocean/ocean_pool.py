@@ -62,8 +62,8 @@ class OceanPool:
     def create(
         self,
         data_token_address: str,
-        data_token_amount: float,
-        OCEAN_amount: float,
+        data_token_amount: int,
+        OCEAN_amount: int,
         from_wallet: Wallet,
         data_token_weight: float = balancer_constants.INIT_WEIGHT_DT,
         swap_fee: float = balancer_constants.DEFAULT_SWAP_FEE,
@@ -76,8 +76,8 @@ class OceanPool:
         `from_wallet`, otherwise this will fail.
 
         :param data_token_address: str address of the DataToken contract
-        :param data_token_amount: float amount of initial liquidity of data tokens
-        :param OCEAN_amount: float amount of initial liquidity of OCEAN tokens
+        :param data_token_amount: int amount of initial liquidity of data tokens
+        :param OCEAN_amount: int amount of initial liquidity of OCEAN tokens
         :param from_wallet: Wallet instance of pool owner
         :param data_token_weight: float weight of the data token to be set in the new pool must be >= 1 & <= 9
         :param swap_fee: float the fee taken by the pool on each swap transaction
@@ -93,34 +93,32 @@ class OceanPool:
 
         # Must approve datatoken and Ocean tokens to the new pool as spender
         dt = DataToken(self.web3, data_token_address)
-        if dt.balanceOf(from_wallet.address) < to_wei(Decimal(data_token_amount)):
+        if dt.balanceOf(from_wallet.address) < data_token_amount:
             raise InsufficientBalance(
                 "Insufficient datatoken balance for pool creation!"
             )
-        data_token_amount_base = to_wei(Decimal(data_token_amount))
-        if dt.allowance(from_wallet.address, pool_address) < data_token_amount_base:
-            tx_id = dt.approve(pool_address, data_token_amount_base, from_wallet)
+        if dt.allowance(from_wallet.address, pool_address) < data_token_amount:
+            tx_id = dt.approve(pool_address, data_token_amount, from_wallet)
             if dt.get_tx_receipt(self.web3, tx_id).status != 1:
                 raise VerifyTxFailed(
                     f"Approve datatokens failed, pool was created at {pool_address}"
                 )
 
         ot = DataToken(self.web3, self.ocean_address)
-        OCEAN_amount_base = to_wei(Decimal(OCEAN_amount))
-        if ot.balanceOf(from_wallet.address) < OCEAN_amount_base:
+        if ot.balanceOf(from_wallet.address) < OCEAN_amount:
             raise InsufficientBalance("Insufficient OCEAN balance for pool creation!")
-        if ot.allowance(from_wallet.address, pool_address) < OCEAN_amount_base:
-            tx_id = ot.approve(pool_address, OCEAN_amount_base, from_wallet)
+        if ot.allowance(from_wallet.address, pool_address) < OCEAN_amount:
+            tx_id = ot.approve(pool_address, OCEAN_amount, from_wallet)
             if ot.get_tx_receipt(self.web3, tx_id).status != 1:
                 raise VerifyTxFailed(
                     f"Approve OCEAN tokens failed, pool was created at {pool_address}"
                 )
         tx_id = pool.setup(
             data_token_address,
-            to_wei(Decimal(data_token_amount)),
+            data_token_amount,
             to_wei(Decimal(data_token_weight)),
             self.ocean_address,
-            to_wei(Decimal(OCEAN_amount)),
+            OCEAN_amount,
             to_wei(Decimal(base_weight)),
             to_wei(Decimal(swap_fee)),
             from_wallet,
@@ -297,19 +295,15 @@ class OceanPool:
         )
 
     def buy_data_tokens(
-        self,
-        pool_address: str,
-        amount: float,
-        max_OCEAN_amount: float,
-        from_wallet: Wallet,
+        self, pool_address: str, amount: int, max_OCEAN_amount: int, from_wallet: Wallet
     ) -> str:
         """
-        Buy data tokens from this pool, paying `max_OCEAN_amount_base` of OCEAN tokens.
-        If total spent <= max_OCEAN_amount_base.
-        - Caller is spending OCEAN tokens, and receiving `amount_base` DataTokens
+        Buy data tokens from this pool, paying `max_OCEAN_amount` of OCEAN tokens.
+        If total spent <= max_OCEAN_amount.
+        - Caller is spending OCEAN tokens, and receiving `amount` DataTokens
         - OCEAN tokens are going into pool, DataTokens are going out of pool
 
-        The transaction fails if total spent exceeds `max_OCEAN_amount_base`.
+        The transaction fails if total spent exceeds `max_OCEAN_amount`.
 
         :param pool_address: str address of pool contract
         :param amount: int number of data tokens to add to this pool in *base*
@@ -318,22 +312,18 @@ class OceanPool:
         :return: str transaction id/hash
         """
         ocean_tok = DataToken(self.web3, self.ocean_address)
-        if ocean_tok.balanceOf(from_wallet.address) < to_wei(Decimal(max_OCEAN_amount)):
+        if ocean_tok.balanceOf(from_wallet.address) < max_OCEAN_amount:
             raise InsufficientBalance("Insufficient funds for buying DataTokens!")
-        if ocean_tok.allowance(from_wallet.address, pool_address) < to_wei(
-            Decimal(max_OCEAN_amount)
-        ):
-            ocean_tok.approve(
-                pool_address, to_wei(Decimal(max_OCEAN_amount)), from_wallet
-            )
+        if ocean_tok.allowance(from_wallet.address, pool_address) < max_OCEAN_amount:
+            ocean_tok.approve(pool_address, max_OCEAN_amount, from_wallet)
 
         dtoken_address = self.get_token_address(pool_address)
         pool = BPool(self.web3, pool_address)
         return pool.swapExactAmountOut(
             tokenIn_address=self.ocean_address,  # entering pool
-            maxAmountIn_base=to_wei(Decimal(max_OCEAN_amount)),  # ""
+            maxAmountIn_base=max_OCEAN_amount,  # ""
             tokenOut_address=dtoken_address,  # leaving pool
-            tokenAmountOut_base=to_wei(Decimal(amount)),  # ""
+            tokenAmountOut_base=amount,  # ""
             maxPrice_base=2 ** 255,  # here we limit by max_num_OCEAN, not price
             from_wallet=from_wallet,
         )
@@ -479,7 +469,7 @@ class OceanPool:
             pool.getDenormalizedWeight(token_in_address),
             pool.getBalance(token_out_address),
             pool.getDenormalizedWeight(token_out_address),
-            to_wei(Decimal(token_out_amount)),
+            token_out_amount,
             pool.getSwapFee(),
         )
         return float(from_wei(in_amount))
@@ -489,7 +479,7 @@ class OceanPool:
         pool_address: str,
         token_in_address: str,
         token_out_address: str,
-        token_in_amount: float,
+        token_in_amount: int,
     ):
         pool = BPool(self.web3, pool_address)
         out_amount = pool.calcOutGivenIn(
@@ -497,13 +487,13 @@ class OceanPool:
             pool.getDenormalizedWeight(token_in_address),
             pool.getBalance(token_out_address),
             pool.getDenormalizedWeight(token_out_address),
-            to_wei(Decimal(token_in_amount)),
+            token_in_amount,
             pool.getSwapFee(),
         )
         return float(from_wei(out_amount))
 
     def calcPoolOutGivenSingleIn(
-        self, pool_address: str, token_in_address: str, token_in_amount: float
+        self, pool_address: str, token_in_address: str, token_in_amount: int
     ):
         pool = BPool(self.web3, pool_address)
         return float(
@@ -513,14 +503,14 @@ class OceanPool:
                     pool.getDenormalizedWeight(token_in_address),
                     pool.totalSupply(),
                     pool.getTotalDenormalizedWeight(),
-                    to_wei(Decimal(token_in_amount)),
+                    token_in_amount,
                     pool.getSwapFee(),
                 )
             )
         )
 
     def calcSingleInGivenPoolOut(
-        self, pool_address: str, token_in_address: str, pool_shares: float
+        self, pool_address: str, token_in_address: str, pool_shares: int
     ):
         pool = BPool(self.web3, pool_address)
         return float(
@@ -530,14 +520,14 @@ class OceanPool:
                     pool.getDenormalizedWeight(token_in_address),
                     pool.totalSupply(),
                     pool.getTotalDenormalizedWeight(),
-                    to_wei(Decimal(pool_shares)),
+                    pool_shares,
                     pool.getSwapFee(),
                 )
             )
         )
 
     def calcSingleOutGivenPoolIn(
-        self, pool_address: str, token_out_address: str, pool_shares: float
+        self, pool_address: str, token_out_address: str, pool_shares: int
     ):
         pool = BPool(self.web3, pool_address)
         return float(
@@ -547,7 +537,7 @@ class OceanPool:
                     pool.getDenormalizedWeight(token_out_address),
                     pool.totalSupply(),
                     pool.getTotalDenormalizedWeight(),
-                    to_wei(Decimal(pool_shares)),
+                    pool_shares,
                     pool.getSwapFee(),
                 )
             )
@@ -564,28 +554,26 @@ class OceanPool:
                     pool.getDenormalizedWeight(token_out_address),
                     pool.totalSupply(),
                     pool.getTotalDenormalizedWeight(),
-                    to_wei(Decimal(token_out_amount)),
+                    token_out_amount,
                     pool.getSwapFee(),
                 )
             )
         )
 
-    def getPoolSharesRequiredToRemoveDT(self, pool_address: str, dt_amount: float):
+    def getPoolSharesRequiredToRemoveDT(self, pool_address: str, dt_amount: int):
         dt = self.get_token_address(pool_address)
         return self.calcPoolInGivenSingleOut(pool_address, dt, dt_amount)
 
-    # def getPoolSharesForRemoveDT(self, pool_address: str, pool_shares: float):
+    # def getPoolSharesForRemoveDT(self, pool_address: str, pool_shares: int):
     #     dt = self.get_token_address(pool_address)
     #     return self.calcSingleOutGivenPoolIn(pool_address, dt, pool_shares)
 
-    def getPoolSharesRequiredToRemoveOcean(
-        self, pool_address: str, ocean_amount: float
-    ):
+    def getPoolSharesRequiredToRemoveOcean(self, pool_address: str, ocean_amount: int):
         return self.calcPoolInGivenSingleOut(
             pool_address, self.ocean_address, ocean_amount
         )
 
-    # def getPoolSharesForRemoveOcean(self, pool_address: str, pool_shares: float):
+    # def getPoolSharesForRemoveOcean(self, pool_address: str, pool_shares: int):
     #     return self.calcSingleOutGivenPoolIn(pool_address, )
 
     def getDTMaxAddLiquidity(self, pool_address: str):
@@ -610,13 +598,13 @@ class OceanPool:
     def getOceanMaxRemoveLiquidity(self, pool_address):
         return self.getMaxRemoveLiquidity(pool_address, self.ocean_address)
 
-    def getDTRequiredToBuyOcean(self, pool_address: str, ocean_amount: float):
+    def getDTRequiredToBuyOcean(self, pool_address: str, ocean_amount: int):
         pool = BPool(self.web3, pool_address)
         _in = self.get_token_address(pool_address, pool=pool)
         _out = self.ocean_address
         return self.getTokenPrice(pool, _in, _out, ocean_amount)
 
-    def getOceanRequiredToBuyDT(self, pool_address: str, dt_amount: float):
+    def getOceanRequiredToBuyDT(self, pool_address: str, dt_amount: int):
         pool = BPool(self.web3, pool_address)
         _out = self.get_token_address(pool_address, pool=pool)
         _in = self.ocean_address
@@ -628,7 +616,7 @@ class OceanPool:
             pool.getDenormalizedWeight(token_in),
             pool.getBalance(token_out),
             pool.getDenormalizedWeight(token_out),
-            to_wei(Decimal(amount_out)),
+            amount_out,
             pool.getSwapFee(),
         )
         return float(from_wei(in_amount))
