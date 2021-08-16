@@ -28,7 +28,7 @@ Let's go through each step.
 
 Use an ethereum account with some eth balance on rinkeby. You can get rinkeby eth using
 this [faucet](https://www.rinkeby.io/#faucet). Otherwise, run `ganache-cli` and export
-`OCEAN_NETWORK_URL` environment variable `rinkeby` URL with `ganache` network URL when following the steps below.
+`NETWORK_URL` environment variable `rinkeby` URL with `ganache` network URL when following the steps below.
 
 If you haven't installed yet:
 
@@ -38,7 +38,7 @@ pip install wheel
 pip install ocean-lib
 
 #Export the rinkeby URL. Add your Infura project ID as well.
-export OCEAN_NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
+export NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
 ```
 
 ## 1. Initialize services
@@ -83,7 +83,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 #Alice's config
 config = {
-   'network' : os.getenv("OCEAN_NETWORK_URL"),
+   'network' : os.getenv("NETWORK_URL"),
    'metadataCacheUri' : 'http://127.0.0.1:5000',
    'providerUri' : 'http://127.0.0.1:8030'
 }
@@ -168,7 +168,7 @@ from ocean_lib.models.bpool import BPool
 
 # Market's config
 config = {
-   'network': os.getenv("OCEAN_NETWORK_URL"),
+   'network': os.getenv("NETWORK_URL"),
 }
 market_ocean = Ocean(config)
 
