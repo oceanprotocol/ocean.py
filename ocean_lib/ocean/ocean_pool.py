@@ -158,128 +158,118 @@ class OceanPool:
     # to simplify balancer flows. These methods are here because
     # BPool doesn't know (and shouldn't know) OCEAN_address and _DT_address
     def add_data_token_liquidity(
-        self, pool_address: str, amount_base: int, from_wallet: Wallet
+        self, pool_address: str, amount: int, from_wallet: Wallet
     ) -> str:
         """
-        Add `amount_base` number of data tokens to the pool `pool_address`. In return the wallet owner
+        Add `amount` number of data tokens to the pool `pool_address`. In return the wallet owner
         will get a number of pool shares/tokens
 
         The pool has a datatoken and OCEAN token. This function can be used to add liquidity of only
         the datatoken. To add liquidity of the OCEAN token, use the `add_OCEAN_liquidity` function.
 
         :param pool_address: str address of pool contract
-        :param amount_base: number of data tokens to add to this pool
+        :param amount: number of data tokens to add to this pool
         :param from_wallet: Wallet instance of the owner of data tokens
         :return: str transaction id/hash
         """
         return self._add_liquidity(
-            pool_address, self.get_token_address(pool_address), amount_base, from_wallet
+            pool_address, self.get_token_address(pool_address), amount, from_wallet
         )
 
     def add_OCEAN_liquidity(
-        self, pool_address: str, amount_base: int, from_wallet: Wallet
+        self, pool_address: str, amount: int, from_wallet: Wallet
     ) -> str:
         """
-        Add `amount_base` number of OCEAN tokens to the pool `pool_address`. In return the wallet owner
+        Add `amount` number of OCEAN tokens to the pool `pool_address`. In return the wallet owner
         will get a number of pool shares/tokens
 
         :param pool_address: str address of pool contract
-        :param amount_base: number of data tokens to add to this pool
+        :param amount: number of data tokens to add to this pool
         :param from_wallet: Wallet instance of the owner of data tokens
         :return: str transaction id/hash
         """
         return self._add_liquidity(
-            pool_address, self.ocean_address, amount_base, from_wallet
+            pool_address, self.ocean_address, amount, from_wallet
         )
 
     def _add_liquidity(
-        self,
-        pool_address: str,
-        token_address: str,
-        amount_base: int,
-        from_wallet: Wallet,
+        self, pool_address: str, token_address: str, amount: int, from_wallet: Wallet
     ) -> str:
-        assert amount_base >= 0
-        if amount_base == 0:
+        assert amount >= 0
+        if amount == 0:
             return ""
         pool = BPool(self.web3, pool_address)
         token = BToken(self.web3, token_address)
-        assert token.balanceOf(from_wallet.address) >= amount_base, (
-            f"Insufficient funds, {amount_base} tokens are required of token address {token_address}, "
+        assert token.balanceOf(from_wallet.address) >= amount, (
+            f"Insufficient funds, {amount} tokens are required of token address {token_address}, "
             f"but only a balance of {token.balanceOf(from_wallet.address)} is available."
         )
-        if token.allowance(from_wallet.address, pool_address) < amount_base:
-            tx_id = token.approve(pool_address, amount_base, from_wallet)
+        if token.allowance(from_wallet.address, pool_address) < amount:
+            tx_id = token.approve(pool_address, amount, from_wallet)
             r = token.get_tx_receipt(self.web3, tx_id)
             if not r or r.status != 1:
                 raise VerifyTxFailed(
                     f"Approve OCEAN tokens failed, pool was created at {pool_address}"
                 )
 
-        pool_amount = pool.joinswapExternAmountIn(
-            token_address, amount_base, 0, from_wallet
-        )
+        pool_amount = pool.joinswapExternAmountIn(token_address, amount, 0, from_wallet)
         return pool_amount
 
     def remove_data_token_liquidity(
         self,
         pool_address: str,
-        amount_base: int,
+        amount: int,
         max_pool_shares_base: int,
         from_wallet: Wallet,
     ) -> str:
         """
-        Remove `amount_base` number of data tokens from the pool `pool_address`. The wallet owner
+        Remove `amount` number of data tokens from the pool `pool_address`. The wallet owner
         will get that amount of data tokens. At the same time a number of pool shares/tokens up to
         `max_pool_shares_base` will be taken from the caller's wallet and given back to the pool.
 
         :param pool_address: str address of pool contract
-        :param amount_base: int number of data tokens to add to this pool in *base*
+        :param amount: int number of data tokens to add to this pool in *base*
         :param max_pool_shares_base: int maximum number of pool shares as a cost for the withdrawn data tokens
         :param from_wallet: Wallet instance of the owner of data tokens
         :return: str transaction id/hash
         """
         dt_address = self.get_token_address(pool_address)
         return self._remove_liquidity(
-            pool_address, dt_address, amount_base, max_pool_shares_base, from_wallet
+            pool_address, dt_address, amount, max_pool_shares_base, from_wallet
         )
 
     def remove_OCEAN_liquidity(
         self,
         pool_address: str,
-        amount_base: int,
+        amount: int,
         max_pool_shares_base: int,
         from_wallet: Wallet,
     ) -> str:
         """
-        Remove `amount_base` number of OCEAN tokens from the pool `pool_address`. The wallet owner
+        Remove `amount` number of OCEAN tokens from the pool `pool_address`. The wallet owner
         will get that amount of OCEAN tokens. At the same time a number of pool shares/tokens up to
         `max_pool_shares_base` will be taken from the caller's wallet and given back to the pool.
 
         :param pool_address: str address of pool contract
-        :param amount_base: int number of data tokens to add to this pool in *base*
+        :param amount: int number of data tokens to add to this pool in *base*
         :param max_pool_shares_base: int maximum number of pool shares as a cost for the withdrawn data tokens
         :param from_wallet: Wallet instance of the owner of data tokens
         :return: str transaction id/hash
         """
         return self._remove_liquidity(
-            pool_address,
-            self.ocean_address,
-            amount_base,
-            max_pool_shares_base,
-            from_wallet,
+            pool_address, self.ocean_address, amount, max_pool_shares_base, from_wallet
         )
 
     def _remove_liquidity(
         self,
         pool_address: str,
         token_address: str,
-        amount_base: int,
+        amount: int,
         max_pool_shares_base: int,
         from_wallet: Wallet,
     ) -> str:
-        assert amount_base >= 0
-        if amount_base == 0:
+        assert amount >= 0
+        if amount == 0:
             return ""
 
         assert max_pool_shares_base > 0, ""
@@ -291,7 +281,7 @@ class OceanPool:
             )
 
         return pool.exitswapExternAmountOut(
-            token_address, amount_base, max_pool_shares_base, from_wallet
+            token_address, amount, max_pool_shares_base, from_wallet
         )
 
     def buy_data_tokens(
@@ -329,39 +319,35 @@ class OceanPool:
         )
 
     def sell_data_tokens(
-        self,
-        pool_address: str,
-        amount_base: int,
-        min_OCEAN_amount_base: int,
-        from_wallet: Wallet,
+        self, pool_address: str, amount: int, min_OCEAN_amount: int, from_wallet: Wallet
     ) -> str:
         """
-        Sell data tokens into this pool, receive `min_OCEAN_amount_base` of OCEAN tokens.
-        If total income >= min_OCEAN_amount_base
+        Sell data tokens into this pool, receive `min_OCEAN_amount` of OCEAN tokens.
+        If total income >= min_OCEAN_amount
         - Caller is spending DataTokens, and receiving OCEAN tokens
         - DataTokens are going into pool, OCEAN tokens are going out of pool
 
-        The transaction fails if total income does not reach `min_OCEAN_amount_base`
+        The transaction fails if total income does not reach `min_OCEAN_amount`
 
         :param pool_address: str address of pool contract
-        :param amount_base: int number of data tokens to add to this pool in *base*
-        :param min_OCEAN_amount_base:
+        :param amount: int number of data tokens to add to this pool
+        :param min_OCEAN_amount:
         :param from_wallet:
         :return: str transaction id/hash
         """
         dtoken_address = self.get_token_address(pool_address)
         dt = BToken(self.web3, dtoken_address)
-        if dt.balanceOf(from_wallet.address) < amount_base:
+        if dt.balanceOf(from_wallet.address) < amount:
             raise InsufficientBalance("Insufficient funds for selling DataTokens!")
-        if dt.allowance(from_wallet.address, pool_address) < amount_base:
-            dt.approve(pool_address, amount_base, from_wallet=from_wallet)
+        if dt.allowance(from_wallet.address, pool_address) < amount:
+            dt.approve(pool_address, amount, from_wallet=from_wallet)
 
         pool = BPool(self.web3, pool_address)
         return pool.swapExactAmountIn(
             tokenIn_address=dtoken_address,  # entering pool
-            tokenAmountIn_base=amount_base,  # ""
+            tokenAmountIn_base=amount,  # ""
             tokenOut_address=self.ocean_address,  # leaving pool
-            minAmountOut_base=min_OCEAN_amount_base,  # ""
+            minAmountOut_base=min_OCEAN_amount,  # ""
             maxPrice_base=2 ** 255,  # here we limit by max_num_OCEAN, not price
             from_wallet=from_wallet,
         )
@@ -385,47 +371,45 @@ class OceanPool:
     def add_liquidity_finalized(
         self,
         pool_address: str,
-        bpt_amount_base: int,
-        max_data_token_amount_base: int,
-        max_OCEAN_amount_base: int,
+        bpt_amount: int,
+        max_data_token_amount: int,
+        max_OCEAN_amount: int,
         from_wallet: Wallet,
     ) -> str:
         """
         Add liquidity to a pool that's been finalized.
-        Buy bpt_amount_base tokens from the pool, spending DataTokens and OCEAN tokens
+        Buy bpt_amount tokens from the pool, spending DataTokens and OCEAN tokens
         as needed and up to the specified maximum amounts.
 
         :param pool_address: str address of pool contract
-        :param bpt_amount_base: int number of pool shares to receive for adding the liquidity
-        :param max_data_token_amount_base: int maximum amount of Data tokens to go into the pool
-        :param max_OCEAN_amount_base: int maximum amount of OCEAN tokens to go into the pool
+        :param bpt_amount: int number of pool shares to receive for adding the liquidity
+        :param max_data_token_amount: int maximum amount of Data tokens to go into the pool
+        :param max_OCEAN_amount: int maximum amount of OCEAN tokens to go into the pool
         :param from_wallet: Wallet instance
         :return: str transaction id/hash
         """
         assert self._is_valid_pool(pool_address), "The pool address is not valid."
         dt_address = self.get_token_address(pool_address)
         dt = BToken(self.web3, dt_address)
-        if dt.balanceOf(from_wallet.address) < max_data_token_amount_base:
+        if dt.balanceOf(from_wallet.address) < max_data_token_amount:
             raise InsufficientBalance(
                 f"Insufficient funds for adding liquidity for {dt.address} datatoken!"
             )
-        if dt.allowance(from_wallet.address, pool_address) < max_data_token_amount_base:
-            dt.approve(
-                pool_address, max_data_token_amount_base, from_wallet=from_wallet
-            )
+        if dt.allowance(from_wallet.address, pool_address) < max_data_token_amount:
+            dt.approve(pool_address, max_data_token_amount, from_wallet=from_wallet)
 
         OCEAN = BToken(self.web3, self.ocean_address)
-        if OCEAN.balanceOf(from_wallet.address) < max_OCEAN_amount_base:
+        if OCEAN.balanceOf(from_wallet.address) < max_OCEAN_amount:
             raise InsufficientBalance(
                 f"Insufficient funds for adding liquidity for {OCEAN.address} OCEAN token!"
             )
-        if OCEAN.allowance(from_wallet.address, pool_address) < max_OCEAN_amount_base:
-            OCEAN.approve(pool_address, max_OCEAN_amount_base, from_wallet=from_wallet)
+        if OCEAN.allowance(from_wallet.address, pool_address) < max_OCEAN_amount:
+            OCEAN.approve(pool_address, max_OCEAN_amount, from_wallet=from_wallet)
 
         pool = BPool(self.web3, pool_address)
         return pool.joinPool(
-            bpt_amount_base,
-            [max_data_token_amount_base, max_OCEAN_amount_base],
+            bpt_amount,
+            [max_data_token_amount, max_OCEAN_amount],
             from_wallet=from_wallet,
         )
 
