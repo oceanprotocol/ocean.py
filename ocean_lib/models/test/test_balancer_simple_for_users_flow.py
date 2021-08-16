@@ -96,7 +96,7 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
     # ===============================================================
     # 11. Bob adds liquidity
     bob_ocean.pool.add_data_token_liquidity(
-        pool_address, amount=to_wei(Decimal("0.1")), from_wallet=bob_wallet
+        pool_address, amount=to_wei("0.1"), from_wallet=bob_wallet
     )
     bob_ocean.pool.add_OCEAN_liquidity(
         pool_address, amount=to_wei(1), from_wallet=bob_wallet
@@ -127,8 +127,8 @@ def test_ocean_balancer_helpers(
 
     pool = alice_ocean.pool.create(
         DT.address,
-        data_token_amount=to_wei(Decimal("90.0")),
-        OCEAN_amount=to_wei(Decimal("10.0")),
+        data_token_amount=to_wei("90.0"),
+        OCEAN_amount=to_wei("10.0"),
         from_wallet=alice_wallet,
     )
     pool_address = pool.address

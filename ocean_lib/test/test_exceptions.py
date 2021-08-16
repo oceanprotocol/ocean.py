@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import uuid
-from decimal import Decimal
 
 import pytest
 from eth_utils import add_0x_prefix
@@ -28,7 +27,7 @@ def test_InsufficientBalance(publisher_ocean_instance):
     with pytest.raises(InsufficientBalance):
         publisher_ocean_instance.assets.pay_for_service(
             publisher_ocean_instance.web3,
-            to_wei(Decimal(12345678999999.9)),
+            to_wei("12345678999999.9"),
             token.address,
             asset.did,
             0,

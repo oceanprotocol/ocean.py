@@ -175,9 +175,8 @@ did = asset.did  # did contains the datatoken address
 print(f"did = '{did}'")
 
 #Mint the datatokens
-from decimal import Decimal
 from ocean_lib.web3_internal.currency import to_wei
-data_token.mint(alice_wallet.address, to_wei(Decimal("100.0")), alice_wallet)
+data_token.mint(alice_wallet.address, to_wei("100.0"), alice_wallet)
 
 #In the create() step below, Alice needs ganache OCEAN. Ensure she has it.
 from ocean_lib.models.btoken import BToken #BToken is ERC20
@@ -189,7 +188,7 @@ assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need OCEAN"
 # and finalize the pool.
 pool = ocean.pool.create(
    token_address,
-   data_token_amount=to_wei(Decimal("100.0")),
+   data_token_amount=to_wei("100.0"),
    OCEAN_amount=10.0,
    from_wallet=alice_wallet
 )
@@ -241,8 +240,8 @@ assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
 data_token = ocean.get_data_token(token_address)
 ocean.pool.buy_data_tokens(
     pool_address,
-    amount=to_wei(Decimal("1.0")), # buy 1.0 datatoken
-    max_OCEAN_amount=to_wei(Decimal("10.0")), # pay up to 10.0 OCEAN
+    amount=to_wei("1.0"), # buy 1.0 datatoken
+    max_OCEAN_amount=to_wei("10.0"), # pay up to 10.0 OCEAN
     from_wallet=bob_wallet
 )
 
