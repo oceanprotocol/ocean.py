@@ -36,7 +36,7 @@ private_key = Account.create().key
 
 ## 2. Where to store private keys
 
-The _whole point_ of crypto wallets is store private keys. Wallets have various tradeoffs of cost, convienence, and security. For example, hardware wallets tend to be more secure but less convenient and not free.
+The _whole point_ of crypto wallets is to store private keys. Wallets have various tradeoffs of cost, convienence, and security. For example, hardware wallets tend to be more secure but less convenient and not free.
 
 It can also be useful to store private keys locally on your machine, for testing, though only with a small amount of value at stake (keep the risk down 🐙).
 
