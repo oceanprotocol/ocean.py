@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
-from decimal import Decimal
 
 from enforce_typing import enforce_types
 from ocean_lib.exceptions import InsufficientBalance, VerifyTxFailed
@@ -65,13 +64,13 @@ class OceanPool:
         data_token_amount: int,
         OCEAN_amount: int,
         from_wallet: Wallet,
-        data_token_weight: float = balancer_constants.INIT_WEIGHT_DT,
-        swap_fee: float = balancer_constants.DEFAULT_SWAP_FEE,
+        data_token_weight: int = balancer_constants.INIT_WEIGHT_DT_BASE,
+        swap_fee: int = balancer_constants.DEFAULT_SWAP_FEE_BASE,
     ) -> BPool:
         """
         Create a new pool with bound datatoken and OCEAN token then finalize it.
         The pool will have publicSwap enabled and swap fee is set
-        to `balancer_constants.DEFAULT_SWAP_FEE`.
+        to `balancer_constants.DEFAULT_SWAP_FEE_BASE`.
         Balances of both data tokens and OCEAN tokens must be sufficient in the
         `from_wallet`, otherwise this will fail.
 
@@ -79,8 +78,8 @@ class OceanPool:
         :param data_token_amount: int amount of initial liquidity of data tokens
         :param OCEAN_amount: int amount of initial liquidity of OCEAN tokens
         :param from_wallet: Wallet instance of pool owner
-        :param data_token_weight: float weight of the data token to be set in the new pool must be >= 1 & <= 9
-        :param swap_fee: float the fee taken by the pool on each swap transaction
+        :param data_token_weight: int weight of the data token to be set in the new pool must be >= 1 & <= 9
+        :param swap_fee: int the fee taken by the pool on each swap transaction
         :return: BPool instance
         """
         bfactory = BFactory(self.web3, self.bfactory_address)
@@ -88,8 +87,8 @@ class OceanPool:
         pool = BPool(self.web3, pool_address)
         logger.debug(f"pool created with address {pool_address}.")
 
-        assert 1 <= data_token_weight <= 9
-        base_weight = 10.0 - data_token_weight
+        assert to_wei("1") <= data_token_weight <= to_wei("9")
+        base_weight = to_wei("10.0") - data_token_weight
 
         # Must approve datatoken and Ocean tokens to the new pool as spender
         dt = DataToken(self.web3, data_token_address)
@@ -116,11 +115,11 @@ class OceanPool:
         tx_id = pool.setup(
             data_token_address,
             data_token_amount,
-            to_wei(Decimal(data_token_weight)),
+            data_token_weight,
             self.ocean_address,
             OCEAN_amount,
-            to_wei(Decimal(base_weight)),
-            to_wei(Decimal(swap_fee)),
+            base_weight,
+            swap_fee,
             from_wallet,
         )
         if pool.get_tx_receipt(self.web3, tx_id).status != 1:
@@ -344,7 +343,7 @@ class OceanPool:
             from_wallet=from_wallet,
         )
 
-    def get_token_price(self, pool_address: str) -> float:
+    def get_token_price(self, pool_address: str) -> int:
         """
 
         :param pool_address: str the address of the pool contract
@@ -352,12 +351,8 @@ class OceanPool:
         """
         dtoken_address = self.get_token_address(pool_address)
         pool = BPool(self.web3, pool_address)
-        return float(
-            from_wei(
-                pool.getSpotPrice(
-                    tokenIn_address=self.ocean_address, tokenOut_address=dtoken_address
-                )
-            )
+        return pool.getSpotPrice(
+            tokenIn_address=self.ocean_address, tokenOut_address=dtoken_address
         )
 
     def add_liquidity_finalized(
@@ -418,8 +413,8 @@ class OceanPool:
     ###########################################################################
     # convenient functions
 
-    def getReserve(self, pool_address: str, token_address: str):
-        return float(from_wei(BPool(self.web3, pool_address).getBalance(token_address)))
+    def getReserve(self, pool_address: str, token_address: str) -> int:
+        return BPool(self.web3, pool_address).getBalance(token_address)
 
     def getMaxBuyQuantity(self, pool_address, token_address):
         return self.getReserve(pool_address, token_address) / 3.0
@@ -438,9 +433,9 @@ class OceanPool:
         token_in_address: str,
         token_out_address: str,
         token_out_amount: int,
-    ):
+    ) -> int:
         pool = BPool(self.web3, pool_address)
-        in_amount = pool.calcInGivenOut(
+        return pool.calcInGivenOut(
             pool.getBalance(token_in_address),
             pool.getDenormalizedWeight(token_in_address),
             pool.getBalance(token_out_address),
@@ -448,7 +443,6 @@ class OceanPool:
             token_out_amount,
             pool.getSwapFee(),
         )
-        return float(from_wei(in_amount))
 
     def calcOutGivenIn(
         self,
@@ -456,9 +450,9 @@ class OceanPool:
         token_in_address: str,
         token_out_address: str,
         token_in_amount: int,
-    ):
+    ) -> int:
         pool = BPool(self.web3, pool_address)
-        out_amount = pool.calcOutGivenIn(
+        return pool.calcOutGivenIn(
             pool.getBalance(token_in_address),
             pool.getDenormalizedWeight(token_in_address),
             pool.getBalance(token_out_address),
@@ -466,74 +460,57 @@ class OceanPool:
             token_in_amount,
             pool.getSwapFee(),
         )
-        return float(from_wei(out_amount))
 
     def calcPoolOutGivenSingleIn(
         self, pool_address: str, token_in_address: str, token_in_amount: int
-    ):
+    ) -> int:
         pool = BPool(self.web3, pool_address)
-        return float(
-            from_wei(
-                pool.calcPoolOutGivenSingleIn(
-                    pool.getBalance(token_in_address),
-                    pool.getDenormalizedWeight(token_in_address),
-                    pool.totalSupply(),
-                    pool.getTotalDenormalizedWeight(),
-                    token_in_amount,
-                    pool.getSwapFee(),
-                )
-            )
+        return pool.calcPoolOutGivenSingleIn(
+            pool.getBalance(token_in_address),
+            pool.getDenormalizedWeight(token_in_address),
+            pool.totalSupply(),
+            pool.getTotalDenormalizedWeight(),
+            token_in_amount,
+            pool.getSwapFee(),
         )
 
     def calcSingleInGivenPoolOut(
         self, pool_address: str, token_in_address: str, pool_shares: int
-    ):
+    ) -> int:
         pool = BPool(self.web3, pool_address)
-        return float(
-            from_wei(
-                pool.calcSingleInGivenPoolOut(
-                    pool.getBalance(token_in_address),
-                    pool.getDenormalizedWeight(token_in_address),
-                    pool.totalSupply(),
-                    pool.getTotalDenormalizedWeight(),
-                    pool_shares,
-                    pool.getSwapFee(),
-                )
-            )
+        return pool.calcSingleInGivenPoolOut(
+            pool.getBalance(token_in_address),
+            pool.getDenormalizedWeight(token_in_address),
+            pool.totalSupply(),
+            pool.getTotalDenormalizedWeight(),
+            pool_shares,
+            pool.getSwapFee(),
         )
 
     def calcSingleOutGivenPoolIn(
         self, pool_address: str, token_out_address: str, pool_shares: int
-    ):
+    ) -> int:
         pool = BPool(self.web3, pool_address)
-        return float(
-            from_wei(
-                pool.calcSingleInGivenPoolOut(
-                    pool.getBalance(token_out_address),
-                    pool.getDenormalizedWeight(token_out_address),
-                    pool.totalSupply(),
-                    pool.getTotalDenormalizedWeight(),
-                    pool_shares,
-                    pool.getSwapFee(),
-                )
-            )
+        return pool.calcSingleInGivenPoolOut(
+            pool.getBalance(token_out_address),
+            pool.getDenormalizedWeight(token_out_address),
+            pool.totalSupply(),
+            pool.getTotalDenormalizedWeight(),
+            pool_shares,
+            pool.getSwapFee(),
         )
 
     def calcPoolInGivenSingleOut(
         self, pool_address: str, token_out_address: str, token_out_amount: int
     ):
         pool = BPool(self.web3, pool_address)
-        return float(
-            from_wei(
-                pool.calcPoolInGivenSingleOut(
-                    pool.getBalance(token_out_address),
-                    pool.getDenormalizedWeight(token_out_address),
-                    pool.totalSupply(),
-                    pool.getTotalDenormalizedWeight(),
-                    token_out_amount,
-                    pool.getSwapFee(),
-                )
-            )
+        return pool.calcPoolInGivenSingleOut(
+            pool.getBalance(token_out_address),
+            pool.getDenormalizedWeight(token_out_address),
+            pool.totalSupply(),
+            pool.getTotalDenormalizedWeight(),
+            token_out_amount,
+            pool.getSwapFee(),
         )
 
     def getPoolSharesRequiredToRemoveDT(self, pool_address: str, dt_amount: int):
@@ -586,8 +563,8 @@ class OceanPool:
         _in = self.ocean_address
         return self.getTokenPrice(pool, _in, _out, dt_amount)
 
-    def getTokenPrice(self, pool, token_in, token_out, amount_out):
-        in_amount = pool.calcInGivenOut(
+    def getTokenPrice(self, pool, token_in, token_out, amount_out) -> int:
+        return pool.calcInGivenOut(
             pool.getBalance(token_in),
             pool.getDenormalizedWeight(token_in),
             pool.getBalance(token_out),
@@ -595,7 +572,6 @@ class OceanPool:
             amount_out,
             pool.getSwapFee(),
         )
-        return float(from_wei(in_amount))
 
     def get_all_pools(self, from_block=0, chunk_size=1000, include_balance=False):
         current_block = self.web3.eth.block_number
@@ -1057,9 +1033,7 @@ class OceanPool:
         join_logs = [lg for lg in join_logs if lg.address in pools]
 
         balances = {
-            lg.address: float(
-                from_wei(DataToken(self.web3, lg.address).balanceOf(user_address))
-            )
+            lg.address: DataToken(self.web3, lg.address).balanceOf(user_address)
             for lg in join_logs
         }
         return balances
