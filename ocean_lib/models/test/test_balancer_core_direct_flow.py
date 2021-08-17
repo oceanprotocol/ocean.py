@@ -89,10 +89,10 @@ def test_complete_flow(
     OCEAN_token.approve(pool_address, to_wei(2), from_wallet=bob_wallet)
     pool.swapExactAmountOut(
         tokenIn_address=OCEAN_address,
-        maxAmountIn_base=to_wei(2),
+        maxAmountIn=to_wei(2),
         tokenOut_address=DT_address,
-        tokenAmountOut_base=to_wei(1),
-        maxPrice_base=2 ** 255,
+        tokenAmountOut=to_wei(1),
+        maxPrice=2 ** 255,
         from_wallet=bob_wallet,
     )
 
@@ -120,10 +120,10 @@ def test_complete_flow(
     DT.approve(pool_address, to_wei(1), from_wallet=alice_wallet)
     pool.swapExactAmountIn(
         tokenIn_address=DT_address,
-        tokenAmountIn_base=to_wei(1),
+        tokenAmountIn=to_wei(1),
         tokenOut_address=OCEAN_address,
-        minAmountOut_base=to_wei("0.0001"),
-        maxPrice_base=2 ** 255,
+        minAmountOut=to_wei("0.0001"),
+        maxPrice=2 ** 255,
         from_wallet=alice_wallet,
     )
 

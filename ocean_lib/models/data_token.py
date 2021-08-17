@@ -342,7 +342,7 @@ class DataToken(ContractBase):
         tx_id: str,
         did: str,
         service_id: Union[str, int],
-        amount_base: Union[str, int],
+        amount: Union[str, int],
         sender: str,
     ) -> Tuple[Any, Any, Any]:
         try:
@@ -384,12 +384,12 @@ class DataToken(ContractBase):
                 f"event: (serviceId={order_log.args.serviceId}"
             )
 
-        target_amount = amount_base - self.calculateFee(
-            amount_base, self.OPF_FEE_PER_DATATOKEN_IN_WEI
+        target_amount = amount - self.calculateFee(
+            amount, self.OPF_FEE_PER_DATATOKEN_IN_WEI
         )
         if order_log.args.mrktFeeCollector and order_log.args.marketFee > 0:
             max_market_fee_in_wei = self.calculateFee(
-                amount_base, self.MAX_MARKET_FEE_PER_DATATOKEN_IN_WEI
+                amount, self.MAX_MARKET_FEE_PER_DATATOKEN_IN_WEI
             )
             assert order_log.args.marketFee <= (max_market_fee_in_wei + 5), (
                 f"marketFee {order_log.args.marketFee} exceeds the expected maximum "
