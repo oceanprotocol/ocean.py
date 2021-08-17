@@ -215,7 +215,7 @@ pool = ocean.pool.get(ocean.web3, pool_address)
 #Here, the market retrieves the datatoken price denominated in OCEAN.
 OCEAN_address = ocean.OCEAN_address
 price_in_OCEAN = ocean.pool.calcInGivenOut(
-    pool_address, OCEAN_address, token_address, token_out_amount=1.0)
+    pool_address, OCEAN_address, token_address, token_out_amount=to_wei("1.0"))
 print(f"Price of 1 datatoken is {price_in_OCEAN} OCEAN")
 ```
 

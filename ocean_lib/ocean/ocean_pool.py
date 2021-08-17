@@ -437,7 +437,7 @@ class OceanPool:
         pool_address: str,
         token_in_address: str,
         token_out_address: str,
-        token_out_amount: float,
+        token_out_amount: int,
     ):
         pool = BPool(self.web3, pool_address)
         in_amount = pool.calcInGivenOut(
@@ -520,7 +520,7 @@ class OceanPool:
         )
 
     def calcPoolInGivenSingleOut(
-        self, pool_address: str, token_out_address: str, token_out_amount: float
+        self, pool_address: str, token_out_address: str, token_out_amount: int
     ):
         pool = BPool(self.web3, pool_address)
         return float(
