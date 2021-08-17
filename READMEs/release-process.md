@@ -5,6 +5,13 @@ SPDX-License-Identifier: Apache-2.0
 
 # The ocean.py Release Process
 
+## Step 0: Update documentation
+
+- Go to https://github.com/oceanprotocol/readthedocs, and follow the steps
+- This will update what's shown in docs.oceanprotocol.com.
+
+This doesn't actually affect the pip release of the following steps. And if you've just updated READMEs, you can stop after this step if you like.
+
 ## Step 1: Bump version and push changes
 
 - Create a new local feature branch, e.g. `git checkout -b feature/bumpversion-to-v0.2.5`
