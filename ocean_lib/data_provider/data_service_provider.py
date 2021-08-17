@@ -173,7 +173,9 @@ class DataServiceProvider:
         order = dict(response.json())
 
         return OrderRequirements(
-            to_wei(Decimal(order["numTokens"])),
+            to_wei(
+                Decimal(order["numTokens"])
+            ),  # comes as float, needs to be converted
             order["dataToken"],
             order["to"],
             int(order["nonce"]),

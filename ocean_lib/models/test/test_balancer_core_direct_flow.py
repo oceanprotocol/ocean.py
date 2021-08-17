@@ -2,8 +2,6 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from decimal import Decimal
-
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
@@ -81,7 +79,7 @@ def test_complete_flow(
     pool.rebind(
         OCEAN_address,
         to_wei(10 + 1),
-        to_wei(Decimal(balancer_constants.INIT_WEIGHT_OCEAN)),
+        balancer_constants.INIT_WEIGHT_OCEAN_BASE,
         from_wallet=alice_wallet,
     )
 

@@ -2,8 +2,6 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from decimal import Decimal
-
 import pytest
 from ocean_lib.web3_internal.currency import to_wei
 
@@ -34,8 +32,8 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
 
     pool = alice_ocean.pool.create(
         DT_address,
-        data_token_amount=to_wei(Decimal("90.0")),
-        OCEAN_amount=to_wei(Decimal("10.0")),
+        data_token_amount=to_wei("90.0"),
+        OCEAN_amount=to_wei("10.0"),
         from_wallet=alice_wallet,
     )
     pool_address = pool.address
@@ -59,8 +57,8 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
     # 6. Bob buys a DT from pool
     alice_ocean.pool.buy_data_tokens(
         pool_address,
-        amount=to_wei(Decimal("1.0")),
-        max_OCEAN_amount=to_wei(Decimal("2.0")),
+        amount=to_wei("1.0"),
+        max_OCEAN_amount=to_wei("2.0"),
         from_wallet=bob_wallet,
     )
 

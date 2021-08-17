@@ -3,8 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from decimal import Decimal
-
 import pytest
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_exchange import OceanExchange
@@ -37,8 +35,7 @@ def test_ocean_exchange(publisher_ocean_instance):
         _get_exchange_address(publisher_ocean_instance.config),
         ocn.config,
     )
-    rate = Decimal("0.9")
-    rate_in_wei = to_wei(rate)
+    rate_in_wei = to_wei("0.9")
     x_id = ox.create(dt.address, rate_in_wei, bob_wallet)
     dt.approve(ox._exchange_address, to_wei(20), bob_wallet)
 
@@ -61,7 +58,7 @@ def test_ocean_exchange(publisher_ocean_instance):
     ##############
     # get_quote
     base_token_amount = ox.get_quote(to_wei(2), exchange_id=x_id)
-    expected_base_token_amount = to_wei(2 * rate)
+    expected_base_token_amount = to_wei("1.8")  # 2 * 9
     assert (
         base_token_amount == expected_base_token_amount
     ), f"unexpected quote of {wei_and_pretty_ether(base_token_amount, 'OCEAN')} base tokens, should be {wei_and_pretty_ether(expected_base_token_amount, 'OCEAN')}."
@@ -89,12 +86,11 @@ def test_ocean_exchange(publisher_ocean_instance):
         is True
     ), "buy datatokens failed"
 
-    rate = Decimal("1.0")
-    rate_in_wei = to_wei(rate)
+    rate_in_wei = to_wei("1.0")
     assert ox.setRate(rate_in_wei, bob_wallet, exchange_id=x_id)
     # re-evaluate with new rate
     base_token_amount = ox.get_quote(to_wei(2), exchange_id=x_id)
-    expected_base_token_amount = to_wei(2 * rate)
+    expected_base_token_amount = to_wei(2)
     assert (
         base_token_amount == expected_base_token_amount
     ), f"unexpected quote of {wei_and_pretty_ether(base_token_amount, 'OCEAN')} base tokens, should be {wei_and_pretty_ether(expected_base_token_amount, 'OCEAN')}."
