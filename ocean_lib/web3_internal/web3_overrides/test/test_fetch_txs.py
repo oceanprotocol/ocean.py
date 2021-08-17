@@ -19,7 +19,6 @@ def test_fetching_transaction_after_multiple_blocks(monkeypatch):
         consumer_address = Web3.toChecksumAddress(consumer_address)
 
     web3 = publisher_wallet.web3
-
     tx = {
         "from": publisher_wallet.address,
         "to": consumer_address,
@@ -30,4 +29,6 @@ def test_fetching_transaction_after_multiple_blocks(monkeypatch):
     raw_tx = publisher_wallet.sign_tx(tx)
     tx_hash = web3.eth.send_raw_transaction(raw_tx)
     fetch_transaction(web3, tx_hash, tx, publisher_wallet)
-    assert web3.eth.get_transaction_receipt(tx_hash)
+    receipt = web3.eth.get_transaction_receipt(tx_hash)
+    assert receipt
+    assert web3.eth.block_number >= receipt.blockNumber + 6
