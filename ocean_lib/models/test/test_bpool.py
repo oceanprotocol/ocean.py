@@ -217,8 +217,8 @@ def test_public_pool(network, config, bob_wallet, alice_ocean):
     T1.approve(pool.address, to_wei(100), from_wallet=bob_wallet)
     T2.approve(pool.address, to_wei(100), from_wallet=bob_wallet)
     pool.joinPool(
-        poolAmountOut_base=to_wei(10),  # 10 BPT
-        maxAmountsIn_base=[to_wei(100), to_wei(100)],
+        poolAmountOut=to_wei(10),  # 10 BPT
+        maxAmountsIn=[to_wei(100), to_wei(100)],
         from_wallet=bob_wallet,
     )
 
@@ -238,8 +238,8 @@ def test_public_pool(network, config, bob_wallet, alice_ocean):
     # bob sells 2 BPT
     # -this is where BLabs fee kicks in. But the fee is currently set to 0.
     pool.exitPool(
-        poolAmountIn_base=to_wei(2),
-        minAmountsOut_base=[to_wei(0), to_wei(0)],
+        poolAmountIn=to_wei(2),
+        minAmountsOut=[to_wei(0), to_wei(0)],
         from_wallet=bob_wallet,
     )
     assert T1.balanceOf(bob_address) == 92800000000000000018  # 92.8
@@ -248,16 +248,14 @@ def test_public_pool(network, config, bob_wallet, alice_ocean):
 
     # bob buys 5 more BPT
     pool.joinPool(
-        poolAmountOut_base=to_wei(5),
-        maxAmountsIn_base=[to_wei(90), to_wei(90)],
+        poolAmountOut=to_wei(5),
+        maxAmountsIn=[to_wei(90), to_wei(90)],
         from_wallet=bob_wallet,
     )
     assert from_wei(BPT.balanceOf(bob_address)) == 13
 
     # bob fully exits
-    pool.exitPool(
-        poolAmountIn_base=to_wei(13), minAmountsOut_base=[0, 0], from_wallet=bob_wallet
-    )
+    pool.exitPool(poolAmountIn=to_wei(13), minAmountsOut=[0, 0], from_wallet=bob_wallet)
     assert from_wei(BPT.balanceOf(bob_address)) == 0
 
     block = alice_ocean.web3.eth.block_number
@@ -357,10 +355,10 @@ def test_joinSwapExternAmountIn(
     with pytest.raises(Exception):
         pool.swapExactAmountOut(
             tokenIn_address=T1.address,
-            maxAmountIn_base=to_wei(100),
+            maxAmountIn=to_wei(100),
             tokenOut_address=T2.address,
-            tokenAmountOut_base=to_wei(10),
-            maxPrice_base=HUGEINT,
+            tokenAmountOut=to_wei(10),
+            maxPrice=HUGEINT,
             from_wallet=alice_wallet,
         )
 
@@ -368,10 +366,10 @@ def test_joinSwapExternAmountIn(
     pool.setPublicSwap(True, from_wallet=alice_wallet)
     pool.swapExactAmountOut(
         tokenIn_address=T1.address,
-        maxAmountIn_base=to_wei(100),
+        maxAmountIn=to_wei(100),
         tokenOut_address=T2.address,
-        tokenAmountOut_base=to_wei(1),
-        maxPrice_base=HUGEINT,
+        tokenAmountOut=to_wei(1),
+        maxPrice=HUGEINT,
         from_wallet=alice_wallet,
     )
     new_balance = init_T1balance - Decimal("91.055")
@@ -403,8 +401,8 @@ def test_joinswapPoolAmountOut(
     T1balance = from_wei(T1.balanceOf(alice_address))
     pool.joinswapPoolAmountOut(
         tokenIn_address=T1.address,
-        poolAmountOut_base=to_wei(10),  # BPT wanted
-        maxAmountIn_base=to_wei(90),  # max T1 to spend
+        poolAmountOut=to_wei(10),  # BPT wanted
+        maxAmountIn=to_wei(90),  # max T1 to spend
         from_wallet=alice_wallet,
     )
     assert from_wei(T1.balanceOf(alice_address)) >= (T1balance - 90)
@@ -424,8 +422,8 @@ def test_exitswapPoolAmountIn(
     assert from_wei(T1.balanceOf(alice_address)) == (T1balance - 90)
     pool.exitswapPoolAmountIn(
         tokenOut_address=T1.address,
-        poolAmountIn_base=to_wei(10),  # BPT spent
-        minAmountOut_base=to_wei(1),  # min T1 wanted
+        poolAmountIn=to_wei(10),  # BPT spent
+        minAmountOut=to_wei(1),  # min T1 wanted
         from_wallet=alice_wallet,
     )
     assert from_wei(T1.balanceOf(alice_address)) >= (T1balance - 90 + 1)
@@ -445,8 +443,8 @@ def test_exitswapExternAmountOut(
     assert from_wei(T1.balanceOf(alice_address)) == T1balance - 90
     pool.exitswapExternAmountOut(
         tokenOut_address=T1.address,
-        tokenAmountOut_base=to_wei(2),  # T1 wanted
-        maxPoolAmountIn_base=to_wei(10),  # max BPT spent
+        tokenAmountOut=to_wei(2),  # T1 wanted
+        maxPoolAmountIn=to_wei(10),  # max BPT spent
         from_wallet=alice_wallet,
     )
     assert from_wei(T1.balanceOf(alice_address)) == (T1balance - 90 + 2)
@@ -457,99 +455,99 @@ def test_exitswapExternAmountOut(
     assert exit_log["args"]["tokenOut"] == T1.address
 
 
-def test_calcSpotPrice_base(network, config, web3, T1, T2, alice_address, alice_wallet):
+def test_calcSpotPrice(network, config, web3, T1, T2, alice_address, alice_wallet):
     """Tests pricing with calcSpotPrice."""
     pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcSpotPrice(
-        tokenBalanceIn_base=to_wei(10),
-        tokenWeightIn_base=to_wei(1),
-        tokenBalanceOut_base=to_wei(11),
-        tokenWeightOut_base=to_wei(1),
-        swapFee_base=0,
+        tokenBalanceIn=to_wei(10),
+        tokenWeightIn=to_wei(1),
+        tokenBalanceOut=to_wei(11),
+        tokenWeightOut=to_wei(1),
+        swapFee=0,
     )
     assert round(from_wei(x), 3) == Decimal("0.909")
 
 
-def test_calcOutGivenIn_base(network, config, web3, alice_wallet):
+def test_calcOutGivenIn(network, config, web3, alice_wallet):
     """Tests pricing with calcOutGivenIn."""
     pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcOutGivenIn(
-        tokenBalanceIn_base=to_wei(10),
-        tokenWeightIn_base=to_wei(1),
+        tokenBalanceIn=to_wei(10),
+        tokenWeightIn=to_wei(1),
         tokenBalanceOut=to_wei("10.1"),
-        tokenWeightOut_base=to_wei(1),
-        tokenAmountIn_base=to_wei(1),
-        swapFee_base=0,
+        tokenWeightOut=to_wei(1),
+        tokenAmountIn=to_wei(1),
+        swapFee=0,
     )
     assert round(from_wei(x), 3) == Decimal("0.918")
 
 
-def test_calcInGivenOut_base(network, config, web3, alice_wallet):
+def test_calcInGivenOut(network, config, web3, alice_wallet):
     """Tests pricing with calcInGivenOut."""
     pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcInGivenOut(
-        tokenBalanceIn_base=to_wei(10),
-        tokenWeightIn_base=to_wei(1),
-        tokenBalanceOut_base=to_wei("10.1"),
-        tokenWeightOut_base=to_wei(1),
-        tokenAmountOut_base=to_wei(1),
-        swapFee_base=0,
+        tokenBalanceIn=to_wei(10),
+        tokenWeightIn=to_wei(1),
+        tokenBalanceOut=to_wei("10.1"),
+        tokenWeightOut=to_wei(1),
+        tokenAmountOut=to_wei(1),
+        swapFee=0,
     )
     assert round(from_wei(x), 3) == Decimal("1.099")
 
 
-def test_calcPoolOutGivenSingleIn_base(network, config, web3, alice_wallet):
+def test_calcPoolOutGivenSingleIn(network, config, web3, alice_wallet):
     """Tests calculations with calcPoolOutGivenSingleIn."""
     pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcPoolOutGivenSingleIn(
-        tokenBalanceIn_base=to_wei(10),
-        tokenWeightIn_base=to_wei(1),
-        poolSupply_base=to_wei(120),
-        totalWeight_base=to_wei(2),
-        tokenAmountIn_base=to_wei("0.1"),
-        swapFee_base=0,
+        tokenBalanceIn=to_wei(10),
+        tokenWeightIn=to_wei(1),
+        poolSupply=to_wei(120),
+        totalWeight=to_wei(2),
+        tokenAmountIn=to_wei("0.1"),
+        swapFee=0,
     )
     assert round(from_wei(x), 3) == Decimal("0.599")
 
 
-def test_calcSingleInGivenPoolOut_base(network, config, web3, alice_wallet):
+def test_calcSingleInGivenPoolOut(network, config, web3, alice_wallet):
     """Tests pricing with calcSingleInGivenPoolOut."""
     pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcSingleInGivenPoolOut(
-        tokenBalanceIn_base=to_wei(10),
-        tokenWeightIn_base=to_wei(1),
-        poolSupply_base=to_wei(120),
-        totalWeight_base=to_wei(2),
-        poolAmountOut_base=to_wei(10),
-        swapFee_base=0,
+        tokenBalanceIn=to_wei(10),
+        tokenWeightIn=to_wei(1),
+        poolSupply=to_wei(120),
+        totalWeight=to_wei(2),
+        poolAmountOut=to_wei(10),
+        swapFee=0,
     )
     assert round(from_wei(x), 3) == Decimal("1.736")
 
 
-def test_calcSingleOutGivenPoolIn_base(network, config, web3, alice_wallet):
+def test_calcSingleOutGivenPoolIn(network, config, web3, alice_wallet):
     """Tests pricing with calcSingleOutGivenPoolIn."""
     pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcSingleOutGivenPoolIn(
-        tokenBalanceOut_base=to_wei(10),
-        tokenWeightOut_base=to_wei(1),
-        poolSupply_base=to_wei(120),
-        totalWeight_base=to_wei(2),
-        poolAmountIn_base=to_wei(10),
-        swapFee_base=0,
+        tokenBalanceOut=to_wei(10),
+        tokenWeightOut=to_wei(1),
+        poolSupply=to_wei(120),
+        totalWeight=to_wei(2),
+        poolAmountIn=to_wei(10),
+        swapFee=0,
     )
     assert round(from_wei(x), 3) == Decimal("1.597")
 
 
-def test_calcPoolInGivenSingleOut_base(network, config, web3, alice_wallet):
+def test_calcPoolInGivenSingleOut(network, config, web3, alice_wallet):
     """Tests calculations with calcPoolInGivenSingleOut."""
     pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcPoolInGivenSingleOut(
-        tokenBalanceOut_base=to_wei(1000),
-        tokenWeightOut_base=to_wei(5),
-        poolSupply_base=to_wei(100),
-        totalWeight_base=to_wei(10),
-        tokenAmountOut_base=to_wei("0.1"),
-        swapFee_base=0,
+        tokenBalanceOut=to_wei(1000),
+        tokenWeightOut=to_wei(5),
+        poolSupply=to_wei(100),
+        totalWeight=to_wei(10),
+        tokenAmountOut=to_wei("0.1"),
+        swapFee=0,
     )
     assert round(from_wei(x), 3) == Decimal("0.005")
 

@@ -303,10 +303,10 @@ class OceanPool:
         pool = BPool(self.web3, pool_address)
         return pool.swapExactAmountOut(
             tokenIn_address=self.ocean_address,  # entering pool
-            maxAmountIn_base=max_OCEAN_amount,  # ""
+            maxAmountIn=max_OCEAN_amount,  # ""
             tokenOut_address=dtoken_address,  # leaving pool
-            tokenAmountOut_base=amount,  # ""
-            maxPrice_base=2 ** 255,  # here we limit by max_num_OCEAN, not price
+            tokenAmountOut=amount,  # ""
+            maxPrice=2 ** 255,  # here we limit by max_num_OCEAN, not price
             from_wallet=from_wallet,
         )
 
@@ -337,10 +337,10 @@ class OceanPool:
         pool = BPool(self.web3, pool_address)
         return pool.swapExactAmountIn(
             tokenIn_address=dtoken_address,  # entering pool
-            tokenAmountIn_base=amount,  # ""
+            tokenAmountIn=amount,  # ""
             tokenOut_address=self.ocean_address,  # leaving pool
-            minAmountOut_base=min_OCEAN_amount,  # ""
-            maxPrice_base=2 ** 255,  # here we limit by max_num_OCEAN, not price
+            minAmountOut=min_OCEAN_amount,  # ""
+            maxPrice=2 ** 255,  # here we limit by max_num_OCEAN, not price
             from_wallet=from_wallet,
         )
 
