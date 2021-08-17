@@ -53,6 +53,11 @@ environ_names_and_sections = {
     ],
     NAME_OCEAN_ADDRESS: ["OCEAN_ADDRESS", "OCEAN address", SECTION_ETH_NETWORK],
     NAME_NETWORK_URL: ["NETWORK_URL", "Network URL", SECTION_ETH_NETWORK],
+    NAME_BLOCK_CONFIRMATIONS: [
+        "BLOCK_CONFIRMATIONS",
+        "Block confirmations",
+        SECTION_ETH_NETWORK,
+    ],
     NAME_ADDRESS_FILE: [
         "ADDRESS_FILE",
         "Path to json file of deployed contracts addresses",
@@ -224,6 +229,12 @@ class Config(configparser.ConfigParser):
             )
 
         return file_path
+
+    @property
+    @enforce_types
+    def block_confirmations(self) -> int:
+        """Block confirmations."""
+        return int(self.get(SECTION_ETH_NETWORK, NAME_BLOCK_CONFIRMATIONS))
 
     @property
     @enforce_types

@@ -9,7 +9,7 @@ from enforce_typing import enforce_types
 from hexbytes import HexBytes
 from web3 import Web3
 
-from ocean_lib.config import DEFAULT_BLOCK_CONFIRMATIONS
+from ocean_lib.config import Config
 from ocean_lib.web3_internal.utils import get_network_timeout
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -17,8 +17,8 @@ from ocean_lib.web3_internal.wallet import Wallet
 @enforce_types
 def send_dummy_transactions(block_number: int, from_wallet: Wallet) -> None:
     web3 = from_wallet.web3
-
-    while web3.eth.block_number < block_number + DEFAULT_BLOCK_CONFIRMATIONS:
+    config = Config()
+    while web3.eth.block_number < block_number + config.block_confirmations:
         tx = {
             "from": from_wallet.address,
             "to": "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",
@@ -39,6 +39,7 @@ def fetch_transaction(
     from_wallet: Wallet,
     timeout: Optional[int] = None,
 ) -> None:
+    config = Config()
     receipt = (
         web3.eth.wait_for_transaction_receipt(tx_hash, timeout)
         if timeout
@@ -47,5 +48,5 @@ def fetch_transaction(
     if tx["chainId"] == 1337:
         send_dummy_transactions(receipt.blockNumber, from_wallet)
     else:
-        while web3.eth.block_number < receipt.blockNumber + DEFAULT_BLOCK_CONFIRMATIONS:
+        while web3.eth.block_number < receipt.blockNumber + config.block_confirmations:
             time.sleep(get_network_timeout(tx["chainId"]))
