@@ -24,7 +24,7 @@ from tests.resources.ddo_helpers import (
 from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
 
 
-def create_asset(ocean, publisher):
+def create_asset(ocean, publisher, encrypt=False):
     """Helper function for asset creation based on ddo_sa_sample.json."""
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
@@ -33,10 +33,13 @@ def create_asset(ocean, publisher):
     asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     my_secret_store = "http://myownsecretstore.com"
     auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
-    return ocean.assets.create(asset.metadata, publisher, [auth_service])
+    return ocean.assets.create(
+        asset.metadata, publisher, [auth_service], encrypt=encrypt
+    )
 
 
-def test_register_asset(publisher_ocean_instance):
+@pytest.mark.parametrize("encrypt", [False, True])
+def test_register_asset(publisher_ocean_instance, encrypt):
     """Test various paths for asset registration."""
     ocn = publisher_ocean_instance
     ddo_reg = ocn.assets.ddo_registry()
@@ -57,7 +60,7 @@ def test_register_asset(publisher_ocean_instance):
 
     num_assets_owned = _get_num_assets(alice.address)
 
-    original_ddo = create_asset(ocn, alice)
+    original_ddo = create_asset(ocn, alice, encrypt=encrypt)
     assert original_ddo, "create asset failed."
 
     # try to resolve new asset
@@ -274,10 +277,7 @@ def test_create_asset_with_owner_address(publisher_ocean_instance):
     auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
 
     assert ocn.assets.create(
-        asset.metadata,
-        alice,
-        [auth_service],
-        owner_address=alice.address,
+        asset.metadata, alice, [auth_service], owner_address=alice.address
     ), "Asset creation failed with the specified owner address."
 
 

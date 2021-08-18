@@ -138,6 +138,7 @@ class OceanAssets:
         dt_symbol: str = None,
         dt_blob: str = None,
         dt_cap: float = None,
+        encrypt: bool = False,
     ) -> Optional[Asset]:
         """Register an asset on-chain.
 
@@ -326,14 +327,19 @@ class OceanAssets:
 
         # Set datatoken address in the asset
         asset.data_token_address = data_token_address
+        asset_contents = (
+            self._get_aquarius().encrypt(asset.as_text())
+            if encrypt
+            else lzma.compress(Web3.toBytes(text=asset.as_text()))
+        )
 
         try:
             # publish the new ddo in ocean-db/Aquarius
             ddo_registry = self.ddo_registry()
             tx_id = ddo_registry.create(
                 asset.asset_id,
-                bytes([1]),
-                lzma.compress(Web3.toBytes(text=asset.as_text())),
+                bytes([1]) if not encrypt else bytes([2]),
+                asset_contents,
                 publisher_wallet,
             )
             if not ddo_registry.verify_tx(tx_id):
