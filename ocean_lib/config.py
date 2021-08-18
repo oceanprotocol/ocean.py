@@ -19,9 +19,11 @@ DEFAULT_NETWORK_PORT = 8545
 DEFAULT_NETWORK_URL = "http://localhost:8545"
 DEFAULT_ADDRESS_FILE = ""
 DEFAULT_METADATA_CACHE_URI = "http://localhost:5000"
-DEFAULT_PROVIDER_URL = ""
+DEFAULT_PROVIDER_URL = "http://localhost:8030"
+DEFAULT_DOWNLOADS_PATH = "consume-downloads"
 
 NAME_NETWORK_URL = "network"
+NAME_CHAIN_ID = "chain_id"
 NAME_ADDRESS_FILE = "address.file"
 NAME_GAS_LIMIT = "gas_limit"
 NAME_METADATA_CACHE_URI = "metadata_cache_uri"
@@ -33,6 +35,7 @@ NAME_BFACTORY_ADDRESS = "bfactory.address"
 NAME_OCEAN_ADDRESS = "OCEAN.address"
 
 NAME_PROVIDER_ADDRESS = "provider.address"
+NAME_DOWNLOADS_PATH = "downloads.path"
 
 SECTION_ETH_NETWORK = "eth-network"
 SECTION_RESOURCES = "resources"
@@ -88,6 +91,7 @@ config_defaults = {
         NAME_METADATA_CACHE_URI: DEFAULT_METADATA_CACHE_URI,
         NAME_PROVIDER_URL: DEFAULT_PROVIDER_URL,
         NAME_PROVIDER_ADDRESS: "",
+        NAME_DOWNLOADS_PATH: DEFAULT_DOWNLOADS_PATH,
     },
 }
 
@@ -107,7 +111,7 @@ class Config(configparser.ConfigParser):
         ```
         [eth-network]
         ; ethereum network url
-        network = rinkeby
+        network = https://rinkeby.infura.io/v3/<your Infura project id>
 
         [resources]
         metadata_cache_uri = http://localhost:5000
@@ -227,6 +231,12 @@ class Config(configparser.ConfigParser):
     def network_url(self) -> str:
         """URL of the ethereum network. (e.g.): http://mynetwork:8545."""
         return self.get(SECTION_ETH_NETWORK, NAME_NETWORK_URL)
+
+    @property
+    @enforce_types
+    def chain_id(self) -> int:
+        """Chain ID of the ethereum network. (e.g.): 1337."""
+        return int(self.get(SECTION_ETH_NETWORK, NAME_CHAIN_ID))
 
     @property
     @enforce_types
