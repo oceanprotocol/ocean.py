@@ -189,7 +189,7 @@ assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need OCEAN"
 pool = ocean.pool.create(
    token_address,
    data_token_amount=to_wei("100.0"),
-   OCEAN_amount=10.0,
+   OCEAN_amount=to_wei("10.0"),
    from_wallet=alice_wallet
 )
 pool_address = pool.address
