@@ -124,6 +124,7 @@ class OceanCompute:
     @staticmethod
     def build_service_privacy_attributes(
         trusted_algorithms: list = None,
+        trusted_algorithm_publishers: list = None,
         metadata_cache_uri: str = None,
         allow_raw_algorithm: bool = False,
         allow_all_published_algorithms: bool = False,
@@ -131,6 +132,7 @@ class OceanCompute:
     ) -> Dict[str, Any]:
         """
         :param trusted_algorithms: list of algorithm did to be trusted by the compute service provider
+        :param trusted_algorithm_publishers: list of algorithm publisher (addresses) that can be trusted by the compute service provider
         :param metadata_cache_uir: URI used to get DDOs for trusted algorithm DIDs if trusted_algorithms set
         :param allow_raw_algorithm: bool -- when True, unpublished raw algorithm code can be run on this dataset
         :param allow_all_published_algorithms: bool -- when True, any published algorithm can be run on this dataset
@@ -148,6 +150,10 @@ class OceanCompute:
             privacy["publisherTrustedAlgorithms"] = create_publisher_trusted_algorithms(
                 trusted_algorithms, metadata_cache_uri
             )
+        if trusted_algorithm_publishers:
+            privacy[
+                "publisherTrustedAlgorithmPublishers"
+            ] = trusted_algorithm_publishers
 
         return privacy
 
@@ -172,12 +178,17 @@ class OceanCompute:
         if privacy_attributes is None:
             privacy_attributes = OceanCompute.build_service_privacy_attributes()
 
-        assert set(privacy_attributes.keys()) == {
+        for key in [
             "allowRawAlgorithm",
             "allowAllPublishedAlgorithms",
-            "publisherTrustedAlgorithms",
             "allowNetworkAccess",
-        }
+        ]:
+            assert key in privacy_attributes
+
+        assert (
+            "publisherTrustedAlgorithms" in privacy_attributes
+            or "publisherTrustedAlgorithmPublishers" in privacy_attributes
+        )
 
         attributes = {
             "main": {
