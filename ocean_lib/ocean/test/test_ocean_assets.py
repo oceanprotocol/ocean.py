@@ -114,7 +114,7 @@ def test_register_asset(publisher_ocean_instance, encrypt):
     with pytest.raises(ValueError):
         ocn.assets.update(ddo, bob)
 
-    _ = ocn.assets.update(ddo, alice)
+    _ = ocn.assets.update(ddo, alice, encrypt=encrypt)
     log = ddo_reg.get_event_log(ddo_reg.EVENT_METADATA_UPDATED, block, asset_id, 30)
     assert log, "no ddo updated event"
     _asset = wait_for_update(ocn, ddo.did, "name", _name)
