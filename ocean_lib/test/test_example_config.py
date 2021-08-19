@@ -18,7 +18,7 @@ from ocean_lib.example_config import (
 def test_ganache_example_config(monkeypatch):
     """Tests the config structure of ganache network."""
 
-    monkeypatch.setenv("NETWORK_URL", "http://127.0.0.1:8545")
+    monkeypatch.setenv("OCEAN_NETWORK_URL", "http://127.0.0.1:8545")
     config = ExampleConfig.get_config()
 
     assert config.chain_id == 1337
@@ -35,7 +35,7 @@ def test_ganache_example_config(monkeypatch):
 def test_polygon_example_config(monkeypatch):
     """Tests the config structure of Polygon network."""
 
-    monkeypatch.setenv("NETWORK_URL", "https://rpc-mainnet.maticvigil.com")
+    monkeypatch.setenv("OCEAN_NETWORK_URL", "https://rpc-mainnet.maticvigil.com")
     config = ExampleConfig.get_config()
 
     assert config.chain_id == 137
@@ -52,7 +52,7 @@ def test_polygon_example_config(monkeypatch):
 def test_bsc_example_config(monkeypatch):
     """Tests the config structure of BSC network."""
 
-    monkeypatch.setenv("NETWORK_URL", "https://bsc-dataseed.binance.org")
+    monkeypatch.setenv("OCEAN_NETWORK_URL", "https://bsc-dataseed.binance.org")
     config = ExampleConfig.get_config()
 
     assert config.chain_id == 56
