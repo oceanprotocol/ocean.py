@@ -63,6 +63,12 @@ CONFIG_NETWORK_HELPER = {
         NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "polygon",
     },
+    1287: {
+        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 6,
+        NAME_PROVIDER_URL: "https://provider.moonbeamalpha.oceanprotocol.com",
+        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
+        NETWORK_NAME: "moonbeamalpha",
+    },
     1337: {
         NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 2.5,
         NAME_PROVIDER_URL: DEFAULT_PROVIDER_URL,

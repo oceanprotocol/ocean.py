@@ -23,6 +23,7 @@ NETWORK_NAME_MAP = {
     4: "Rinkeby",
     56: "Binance Smart Chain",
     137: "Polygon",
+    1287: "Moonbeam Alpha",
     1337: "Ganache",
 }
 
@@ -32,5 +33,6 @@ NETWORK_TIMEOUT_MAP = {
     "rinkeby": 5 * 60,
     "bsc": 10 * 60,
     "polygon": 10 * 60,
+    "moonbeamalpha": 60,
     "ganache": 2,
 }
