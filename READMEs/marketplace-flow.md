@@ -174,6 +174,9 @@ assert token_address == asset.data_token_address
 did = asset.did  # did contains the datatoken address
 print(f"did = '{did}'")
 
+In order to encrypt the entire asset, when using a private market or metadata cache, use the encrypt keyword:
+`asset = ocean.assets.create(..., encrypt=True)`
+
 #Mint the datatokens
 data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
 

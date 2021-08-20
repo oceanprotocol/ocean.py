@@ -49,6 +49,14 @@ class Aquarius:
         """
         return f"{self.base_url}/ddo/" + "{did}"
 
+    def get_encrypt_endpoint(self) -> str:
+        """
+        Retrieve the endpoint for DDO encrption
+
+        :return: Return the url of the the Aquarius ddo encryption endpoint
+        """
+        return f"{self.base_url}/ddo/encrypt"
+
     def get_asset_ddo(self, did: str) -> Union[DDO, dict]:
         """
         Retrieve asset ddo for a given did.
@@ -190,6 +198,27 @@ class Aquarius:
         raise ValueError(
             f"Unknown search response, expecting a list or dict, got {type(parsed_response)}."
         )
+
+    def encrypt(self, text: str) -> str:
+        """
+        Encrypt the contents of an asset.
+
+        :return: Return the encrypted asset string.
+        """
+        try:
+            endpoint = self.get_encrypt_endpoint()
+            response = self.requests_session.post(
+                endpoint,
+                data=text,
+                headers={"content-type": "application/octet-stream"},
+            )
+
+            if response and response.status_code == 200:
+                return response.content.hex()
+            else:
+                raise ValueError("Failed to encrypt asset.")
+        except Exception:
+            raise ValueError("Failed to encrypt asset.")
 
 
 def _parse_response(response: Any, default_return: Any) -> Any:
