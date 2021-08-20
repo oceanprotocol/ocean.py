@@ -84,8 +84,12 @@ export OCEAN_CONFIG_FILE=config.ini
 Then, in Python:
 
 ```python
+import os
+
+from ocean_lib.config import Config
 from ocean_lib.ocean.ocean import Ocean
-ocean = Ocean()
+c = Config(os.getenv("OCEAN_CONFIG_FILE"))
+ocean = Ocean(c)
 ```
 
 ## Further details
