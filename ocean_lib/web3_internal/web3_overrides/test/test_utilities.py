@@ -28,7 +28,7 @@ def test_fetching_transaction_after_multiple_blocks(monkeypatch):
     tx["gas"] = web3.eth.estimate_gas(tx)
     raw_tx = publisher_wallet.sign_tx(tx)
     tx_hash = web3.eth.send_raw_transaction(raw_tx)
-    fetch_transaction(web3, tx_hash, tx, publisher_wallet)
+    fetch_transaction(tx_hash, tx, publisher_wallet)
     receipt = web3.eth.get_transaction_receipt(tx_hash)
     assert receipt
     assert web3.eth.block_number >= receipt.blockNumber + 6

@@ -10,7 +10,6 @@ from hexbytes import HexBytes
 from web3 import Web3
 
 from ocean_lib.config import Config
-from ocean_lib.web3_internal.utils import get_network_timeout
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -28,25 +27,39 @@ def send_dummy_transactions(block_number: int, from_wallet: Wallet) -> None:
         tx["gas"] = web3.eth.estimate_gas(tx)
         raw_tx = from_wallet.sign_tx(tx)
         web3.eth.send_raw_transaction(raw_tx)
-        time.sleep(2.5)
+        from ocean_lib.example_config import (
+            CONFIG_NETWORK_HELPER,
+            NAME_BLOCK_CONFIRMATION_POLL_INTERVAL,
+        )
+
+        time.sleep(CONFIG_NETWORK_HELPER[1337][NAME_BLOCK_CONFIRMATION_POLL_INTERVAL])
 
 
 @enforce_types
 def fetch_transaction(
-    web3: Web3,
     tx_hash: HexBytes,
     tx: dict,
     from_wallet: Wallet,
     timeout: Optional[int] = None,
 ) -> None:
+    web3 = from_wallet.web3
     config = Config()
     receipt = (
         web3.eth.wait_for_transaction_receipt(tx_hash, timeout)
         if timeout
         else web3.eth.wait_for_transaction_receipt(tx_hash)
     )
+    from ocean_lib.example_config import (
+        CONFIG_NETWORK_HELPER,
+        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL,
+    )
+
     if tx["chainId"] == 1337:
         send_dummy_transactions(receipt.blockNumber, from_wallet)
     else:
         while web3.eth.block_number < receipt.blockNumber + config.block_confirmations:
-            time.sleep(get_network_timeout(tx["chainId"]))
+            time.sleep(
+                CONFIG_NETWORK_HELPER[tx["chainId"]][
+                    NAME_BLOCK_CONFIRMATION_POLL_INTERVAL
+                ]
+            )

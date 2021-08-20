@@ -123,7 +123,6 @@ def transact_with_contract_function(
     network_id = get_chain_id(web3)
     network_timeout = get_network_timeout(network_id=network_id)
     fetch_transaction(
-        web3,
         txn_hash,
         transaction,
         Wallet(web3, private_key=account_key),

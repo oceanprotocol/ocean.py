@@ -46,7 +46,7 @@ def send_ether(
     tx["gas"] = web3.eth.estimate_gas(tx)
     raw_tx = from_wallet.sign_tx(tx)
     tx_hash = web3.eth.send_raw_transaction(raw_tx)
-    fetch_transaction(web3, tx_hash, tx, from_wallet)
+    fetch_transaction(tx_hash, tx, from_wallet)
     return web3.eth.get_transaction_receipt(tx_hash)
 
 
@@ -68,5 +68,5 @@ def cancel_or_replace_transaction(
     tx["gas"] = gas + 1
     raw_tx = from_wallet.sign_tx(tx, fixed_nonce=nonce_value, gas_price=gas_price)
     tx_hash = web3.eth.send_raw_transaction(raw_tx)
-    fetch_transaction(web3, tx_hash, tx, from_wallet)
+    fetch_transaction(tx_hash, tx, from_wallet)
     return web3.eth.get_transaction_receipt(tx_hash)
