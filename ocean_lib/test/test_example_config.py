@@ -64,3 +64,23 @@ def test_bsc_example_config(monkeypatch):
     assert config.__dict__["_sections"][SECTION_ETH_NETWORK][
         NAME_BLOCK_CONFIRMATION_POLL_INTERVAL
     ] == str(1.5)
+
+
+def test_moonbeam_alpha_example_config(monkeypatch):
+    """Tests the config structure of Moonbeam Alpha network."""
+
+    monkeypatch.setenv("NETWORK_URL", "https://rpc.testnet.moonbeam.network")
+    config = ExampleConfig.get_config()
+
+    assert config.chain_id == 1287
+    assert config.network_url == "https://rpc.testnet.moonbeam.network"
+    assert config.metadata_cache_uri == "https://aquarius.oceanprotocol.com"
+    assert config.provider_url == "https://provider.moonbeamalpha.oceanprotocol.com"
+
+    assert (
+        config.__dict__["_sections"][SECTION_ETH_NETWORK][NETWORK_NAME]
+        == "moonbeamalpha"
+    )
+    assert config.__dict__["_sections"][SECTION_ETH_NETWORK][
+        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL
+    ] == str(6)
