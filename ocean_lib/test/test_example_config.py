@@ -69,7 +69,7 @@ def test_bsc_example_config(monkeypatch):
 def test_moonbeam_alpha_example_config(monkeypatch):
     """Tests the config structure of Moonbeam Alpha network."""
 
-    monkeypatch.setenv("NETWORK_URL", "https://rpc.testnet.moonbeam.network")
+    monkeypatch.setenv("OCEAN_NETWORK_URL", "https://rpc.testnet.moonbeam.network")
     config = ExampleConfig.get_config()
 
     assert config.chain_id == 1287
