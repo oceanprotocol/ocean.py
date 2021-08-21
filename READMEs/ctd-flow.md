@@ -59,7 +59,7 @@ export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f43
 python
 ```
 
-## Publish datatokens
+## Publish asset & algorithm, run C2D
 
 In the Python console:
 
@@ -73,13 +73,39 @@ private_key = os.getenv('TEST_PRIVATE_KEY1')
 config = Config('config.ini')
 ocean = Ocean(config)
 
-print("create wallet: begin")
+#create wallet
 wallet = Wallet(ocean.web3, private_key=private_key)
-print(f"create wallet: done. Its address is {wallet.address}")
 
-print("create datatoken: begin.")
+#publish your dataset, including metadata
+### npm run cli publish metadata/simpleDataset.json 
 datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet)
-print(f"created datatoken: done. Its address is {datatoken.address}")
+FIXME
+
+#publish your python algorithm
+### npm run cli publishAlgo metadata/pythonAlgo.json
+FIXME
+
+#create algorithm asset - datatoken & metadata
+###
+FIXME
+
+#allow your algo for C2D for that dataset:
+### npm run cli allowAlgo did:op:023E.. did:op:BfAB..
+FIXME
+
+#start a compute job
+### npm run cli startCompute did:op:02d3.. did:op:BfAB..
+FIXME
+
+#get compute job status
+### pm run cli getCompute 3a98..
+FIXME
+
+#watch the logs & algo output above
+FIXME
+
+
+
+
 ```
 
-Congrats, you've created your first Ocean datatoken! 🐋
