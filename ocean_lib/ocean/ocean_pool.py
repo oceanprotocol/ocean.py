@@ -418,7 +418,7 @@ class OceanPool:
         return BPool(self.web3, pool_address).getBalance(token_address)
 
     def getMaxBuyQuantity(self, pool_address, token_address):
-        return self.getReserve(pool_address, token_address) / 3.0
+        return int(self.getReserve(pool_address, token_address) / 3)
 
     def getOceanMaxBuyQuantity(self, pool_address):
         return self.getMaxBuyQuantity(pool_address, self.ocean_address)
@@ -539,10 +539,10 @@ class OceanPool:
         return self.getMaxAddLiquidity(pool_address, self.ocean_address)
 
     def getMaxAddLiquidity(self, pool_address, token_address):
-        return self.getReserve(pool_address, token_address) / 2.0
+        return int(self.getReserve(pool_address, token_address) / 2)
 
     def getMaxRemoveLiquidity(self, pool_address: str, token_address: str):
-        return self.getReserve(pool_address, token_address) / 3.0
+        return int(self.getReserve(pool_address, token_address) / 3)
 
     def getDTMaxRemoveLiquidity(self, pool_address):
         return self.getMaxRemoveLiquidity(
