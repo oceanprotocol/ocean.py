@@ -57,8 +57,8 @@ Let's confirm that we hold the OCEAN, from Etherscan.
 In your browser:
 - Go to https://rinkeby.etherscan.io
 - Into the search field, enter txid from the previous step or your Ethereum address. Hit Enter.
-- In the results, click on the "ERC20 Token Txns" tab 
-- You will see the tx that sent you OCEAN. 
+- In the results, click on the "ERC20 Token Txns" tab
+- You will see the tx that sent you OCEAN.
 
 Alternatively, go straight to this address: ```https://rinkeby.etherscan.io/token/<OCEAN address>?a=<your account address>```
 - Where OCEAN address on Rinkeby network is listed at https://docs.oceanprotocol.com/concepts/networks/#rinkeby
@@ -100,8 +100,8 @@ print(f"Address of your account: {wallet.address}")
 OCEAN_balance_in_wei = OCEAN_token.balanceOf(wallet.address)
 from ocean_lib.web3_internal.currency import from_wei
 OCEAN_balance_in_ether = from_wei(OCEAN_balance_in_wei)
-print(f"Balance: {OCEAN_balance} OCEAN")
-if OCEAN_balance == 0.0:
+print(f"Balance: {OCEAN_balance_in_ether} OCEAN")
+if OCEAN_balance_in_wei == 0:
   print("WARNING: you don't have any OCEAN yet")
 ```
 
