@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from decimal import Decimal
+from typing import Union
 
 import pytest
 from enforce_typing import enforce_types
@@ -126,7 +127,7 @@ def test_2tokens_basic(network, config, web3, T1, T2, alice_wallet, alice_addres
 def test_unbind(network, config, web3, T1, T2, alice_wallet):
     """Tests that a pool can be unbound."""
     pool = _createPoolWith2Tokens(
-        network, config, web3, T1, T2, alice_wallet, 1.0, 1.0, 1.0, 1.0
+        network, config, web3, T1, T2, alice_wallet, 1, 1, 1, 1
     )
 
     pool.unbind(T1.address, from_wallet=alice_wallet)
@@ -139,7 +140,7 @@ def test_unbind(network, config, web3, T1, T2, alice_wallet):
 def test_finalize(network, config, web3, T1, T2, alice_address, alice_wallet):
     """Tests that a pool containing tokens can be finalized."""
     pool = _createPoolWith2Tokens(
-        network, config, web3, T1, T2, alice_wallet, 90.0, 10.0, 9.0, 1.0
+        network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
 
     assert not pool.isPublicSwap()
@@ -176,10 +177,10 @@ def test_public_pool(network, config, bob_wallet, alice_ocean):
         alice.T1,
         alice.T2,
         alice.wallet,
-        90.0,
-        10.0,
-        9.0,
-        1.0,
+        90,
+        10,
+        9,
+        1,
     )
     BPT = pool
 
@@ -266,7 +267,7 @@ def test_public_pool(network, config, bob_wallet, alice_ocean):
 def test_rebind_more_tokens(network, config, web3, T1, T2, alice_wallet):
     """Tests that we can rebind more tokens on a pool."""
     pool = _createPoolWith2Tokens(
-        network, config, web3, T1, T2, alice_wallet, 90.0, 10.0, 9.0, 1.0
+        network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
 
     # insufficient allowance
@@ -305,35 +306,35 @@ def test_gulp(network, config, web3, T1, alice_wallet):
 
 def test_spot_price(network, config, web3, T1, T2, alice_wallet):
     """Test calculation of prices on spot."""
-    (p, p_sans) = _spotPrices(
-        network, config, web3, T1, T2, alice_wallet, 1.0, 1.0, 1.0, 1.0
+    (price, price_sans_fee) = _spotPrices(
+        network, config, web3, T1, T2, alice_wallet, 1, 1, 1, 1
     )
-    assert p_sans == 1
-    assert round(p, 8) == Decimal("1.00000100")
+    assert price_sans_fee == 1
+    assert price == Decimal("1.000001000001000001")
 
-    (p, p_sans) = _spotPrices(
-        network, config, web3, T1, T2, alice_wallet, 90.0, 10.0, 9.0, 1.0
+    (price, price_sans_fee) = _spotPrices(
+        network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
-    assert p_sans == 1
-    assert round(p, 8) == Decimal("1.00000100")
+    assert price_sans_fee == 1
+    assert price == Decimal("1.000001000001000001")
 
-    (p, p_sans) = _spotPrices(
-        network, config, web3, T1, T2, alice_wallet, 1.0, 2.0, 1.0, 1.0
+    (price, price_sans_fee) = _spotPrices(
+        network, config, web3, T1, T2, alice_wallet, 1, 2, 1, 1
     )
-    assert p_sans == Decimal("0.5")
-    assert round(p, 8) == Decimal("0.500000500")
+    assert price_sans_fee == Decimal("0.5")
+    assert price == Decimal("0.500000500000500001")
 
-    (p, p_sans) = _spotPrices(
-        network, config, web3, T1, T2, alice_wallet, 2.0, 1.0, 1.0, 1.0
+    (price, price_sans_fee) = _spotPrices(
+        network, config, web3, T1, T2, alice_wallet, 2, 1, 1, 1
     )
-    assert p_sans == 2
-    assert round(p, 8) == Decimal("2.00000200")
+    assert price_sans_fee == 2
+    assert price == Decimal("2.000002000002000002")
 
-    (p, p_sans) = _spotPrices(
-        network, config, web3, T1, T2, alice_wallet, 9.0, 10.0, 9.0, 1.0
+    (price, price_sans_fee) = _spotPrices(
+        network, config, web3, T1, T2, alice_wallet, 9, 10, 9, 1
     )
-    assert p_sans == Decimal("0.1")
-    assert round(p, 8) == Decimal("0.100000100")
+    assert price_sans_fee == Decimal("0.1")
+    assert price == Decimal("0.100000100000100000")
 
 
 def test_joinSwapExternAmountIn(
@@ -347,7 +348,7 @@ def test_joinSwapExternAmountIn(
     init_T1balance = from_wei(T1.balanceOf(alice_address))
     T2balance = from_wei(T2.balanceOf(alice_address))
     pool = _createPoolWith2Tokens(
-        network, config, web3, T1, T2, alice_wallet, 90.0, 10.0, 9.0, 1.0
+        network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
     T1.approve(pool.address, to_wei(100), from_wallet=alice_wallet)
 
@@ -391,7 +392,7 @@ def test_joinswapPoolAmountOut(
     """Tests taking an amount out of the pool."""
     T1balance = from_wei(T1.balanceOf(alice_address))
     pool = _createPoolWith2Tokens(
-        network, config, web3, T1, T2, alice_wallet, 90.0, 10.0, 9.0, 1.0
+        network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
     BPT = pool
     pool.finalize(from_wallet=alice_wallet)
@@ -414,7 +415,7 @@ def test_exitswapPoolAmountIn(
 ):
     T1balance = from_wei(T1.balanceOf(alice_address))
     pool = _createPoolWith2Tokens(
-        network, config, web3, T1, T2, alice_wallet, 90.0, 10.0, 9.0, 1.0
+        network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
     BPT = pool
     pool.finalize(from_wallet=alice_wallet)
@@ -435,7 +436,7 @@ def test_exitswapExternAmountOut(
 ):
     T1balance = from_wei(T1.balanceOf(alice_address))
     pool = _createPoolWith2Tokens(
-        network, config, web3, T1, T2, alice_wallet, 90.0, 10.0, 9.0, 1.0
+        network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
     BPT = pool
     pool.finalize(from_wallet=alice_wallet)
@@ -465,7 +466,7 @@ def test_calcSpotPrice(network, config, web3, T1, T2, alice_address, alice_walle
         tokenWeightOut=to_wei(1),
         swapFee=0,
     )
-    assert round(from_wei(x), 3) == Decimal("0.909")
+    assert x == to_wei("0.909090909090909091")
 
 
 def test_calcOutGivenIn(network, config, web3, alice_wallet):
@@ -479,7 +480,7 @@ def test_calcOutGivenIn(network, config, web3, alice_wallet):
         tokenAmountIn=to_wei(1),
         swapFee=0,
     )
-    assert round(from_wei(x), 3) == Decimal("0.918")
+    assert x == to_wei("0.918181818181818181")
 
 
 def test_calcInGivenOut(network, config, web3, alice_wallet):
@@ -493,7 +494,7 @@ def test_calcInGivenOut(network, config, web3, alice_wallet):
         tokenAmountOut=to_wei(1),
         swapFee=0,
     )
-    assert round(from_wei(x), 3) == Decimal("1.099")
+    assert x == to_wei("1.098901098901098900")
 
 
 def test_calcPoolOutGivenSingleIn(network, config, web3, alice_wallet):
@@ -507,7 +508,7 @@ def test_calcPoolOutGivenSingleIn(network, config, web3, alice_wallet):
         tokenAmountIn=to_wei("0.1"),
         swapFee=0,
     )
-    assert round(from_wei(x), 3) == Decimal("0.599")
+    assert x == to_wei("0.598507453453125000")
 
 
 def test_calcSingleInGivenPoolOut(network, config, web3, alice_wallet):
@@ -521,7 +522,7 @@ def test_calcSingleInGivenPoolOut(network, config, web3, alice_wallet):
         poolAmountOut=to_wei(10),
         swapFee=0,
     )
-    assert round(from_wei(x), 3) == Decimal("1.736")
+    assert x == to_wei("1.736111111111111100")
 
 
 def test_calcSingleOutGivenPoolIn(network, config, web3, alice_wallet):
@@ -535,7 +536,7 @@ def test_calcSingleOutGivenPoolIn(network, config, web3, alice_wallet):
         poolAmountIn=to_wei(10),
         swapFee=0,
     )
-    assert round(from_wei(x), 3) == Decimal("1.597")
+    assert x == to_wei("1.597222222222222220")
 
 
 def test_calcPoolInGivenSingleOut(network, config, web3, alice_wallet):
@@ -549,7 +550,7 @@ def test_calcPoolInGivenSingleOut(network, config, web3, alice_wallet):
         tokenAmountOut=to_wei("0.1"),
         swapFee=0,
     )
-    assert round(from_wei(x), 3) == Decimal("0.005")
+    assert x == to_wei("0.005000125006250000")
 
 
 @enforce_types
@@ -560,20 +561,16 @@ def _createPoolWith2Tokens(
     T1: BToken,
     T2: BToken,
     wallet: Wallet,
-    bal1: float,
-    bal2: float,
-    w1: float,
-    w2: float,
+    bal1: Union[Decimal, str, int],
+    bal2: Union[Decimal, str, int],
+    w1: Union[Decimal, str, int],
+    w2: Union[Decimal, str, int],
 ):
     """Helper function to create a basic pool containing 2 tokens."""
     pool = _deployBPool(web3, config.address_file, network, wallet)
 
-    T1.get_tx_receipt(
-        web3, T1.approve(pool.address, to_wei(Decimal(bal1)), from_wallet=wallet)
-    )
-    T2.get_tx_receipt(
-        web3, T2.approve(pool.address, to_wei(Decimal(bal2)), from_wallet=wallet)
-    )
+    T1.get_tx_receipt(web3, T1.approve(pool.address, to_wei(bal1), from_wallet=wallet))
+    T2.get_tx_receipt(web3, T2.approve(pool.address, to_wei(bal2), from_wallet=wallet))
 
     if pool.isBound(T1.address):
         pool.unbind(T1.address, wallet)
@@ -581,12 +578,8 @@ def _createPoolWith2Tokens(
     if pool.isBound(T2.address):
         pool.unbind(T2.address, wallet)
 
-    pool.bind(
-        T1.address, to_wei(Decimal(bal1)), to_wei(Decimal(w1)), from_wallet=wallet
-    )
-    pool.bind(
-        T2.address, to_wei(Decimal(bal2)), to_wei(Decimal(w2)), from_wallet=wallet
-    )
+    pool.bind(T1.address, to_wei(bal1), to_wei(w1), from_wallet=wallet)
+    pool.bind(T2.address, to_wei(bal2), to_wei(w2), from_wallet=wallet)
 
     return pool
 
@@ -612,10 +605,10 @@ def _spotPrices(
     T1: BToken,
     T2: BToken,
     wallet: Wallet,
-    bal1: float,
-    bal2: float,
-    w1: float,
-    w2: float,
+    bal1: Union[Decimal, str, int],
+    bal2: Union[Decimal, str, int],
+    w1: Union[Decimal, str, int],
+    w2: Union[Decimal, str, int],
 ):
     """Helper function to allow for spot price calculations."""
     pool = _createPoolWith2Tokens(
