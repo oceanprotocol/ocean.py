@@ -165,9 +165,7 @@ def _deployAndMintToken(web3: Web3, symbol: str, to_address: str) -> btoken.BTok
     )
     dt_factory = DTFactory(web3, DTFactory.deploy(web3, wallet, dt_address, to_address))
     token_address = dt_factory.get_token_address(
-        dt_factory.createToken(
-            symbol, symbol, symbol, DataToken.DEFAULT_CAP_IN_WEI, wallet
-        )
+        dt_factory.createToken(symbol, symbol, symbol, DataToken.DEFAULT_CAP, wallet)
     )
     token = DataToken(web3, token_address)
     token.mint(to_address, to_wei(1000), wallet)

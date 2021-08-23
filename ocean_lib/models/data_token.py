@@ -15,7 +15,7 @@ from eth_utils import remove_0x_prefix
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.currency import from_wei, wei_and_pretty_ether
+from ocean_lib.web3_internal.currency import from_wei, to_wei, wei_and_pretty_ether
 from ocean_lib.web3_internal.wallet import Wallet
 from web3 import Web3
 from web3.datastructures import AttributeDict
@@ -33,14 +33,13 @@ OrderValues = namedtuple(
 class DataToken(ContractBase):
     CONTRACT_NAME = "DataTokenTemplate"
 
-    DEFAULT_CAP_IN_WEI = 1_000_000_000_000_000_000_000  # 1000 datatokens
+    DEFAULT_CAP = to_wei(1000)
 
     ORDER_STARTED_EVENT = "OrderStarted"
     ORDER_FINISHED_EVENT = "OrderFinished"
 
-    ONE_DATATOKEN_IN_WEI = 1_000_000_000_000_000_000  # 1 datatoken
-    OPF_FEE_PER_DATATOKEN_IN_WEI = ONE_DATATOKEN_IN_WEI // 1000
-    MAX_MARKET_FEE_PER_DATATOKEN_IN_WEI = ONE_DATATOKEN_IN_WEI // 1000
+    OPF_FEE_PER_TOKEN = to_wei("0.001")  # 0.1%
+    MAX_MARKET_FEE_PER_TOKEN = to_wei("0.001")  # 0.1%
 
     # ============================================================
     # reflect DataToken Solidity methods
@@ -108,8 +107,8 @@ class DataToken(ContractBase):
     def isInitialized(self) -> bool:
         return self.contract.caller.isInitialized()
 
-    def calculateFee(self, amount: int, fee_per_datatoken_in_wei: int) -> int:
-        return self.contract.caller.calculateFee(amount, fee_per_datatoken_in_wei)
+    def calculateFee(self, amount: int, fee_per_token: int) -> int:
+        return self.contract.caller.calculateFee(amount, fee_per_token)
 
     # ============================================================
     # reflect required ERC20 standard functions
@@ -384,17 +383,13 @@ class DataToken(ContractBase):
                 f"event: (serviceId={order_log.args.serviceId}"
             )
 
-        target_amount = amount - self.calculateFee(
-            amount, self.OPF_FEE_PER_DATATOKEN_IN_WEI
-        )
+        target_amount = amount - self.calculateFee(amount, self.OPF_FEE_PER_TOKEN)
         if order_log.args.mrktFeeCollector and order_log.args.marketFee > 0:
-            max_market_fee_in_wei = self.calculateFee(
-                amount, self.MAX_MARKET_FEE_PER_DATATOKEN_IN_WEI
-            )
-            assert order_log.args.marketFee <= (max_market_fee_in_wei + 5), (
+            max_market_fee = self.calculateFee(amount, self.MAX_MARKET_FEE_PER_TOKEN)
+            assert order_log.args.marketFee <= (max_market_fee + 5), (
                 f"marketFee {order_log.args.marketFee} exceeds the expected maximum "
-                f"of {max_market_fee_in_wei} based on feePercentage="
-                f"{from_wei(self.MAX_MARKET_FEE_PER_DATATOKEN_IN_WEI)} ."
+                f"of {max_market_fee} based on feePercentage="
+                f"{from_wei(self.MAX_MARKET_FEE_PER_TOKEN)} ."
             )
             target_amount = target_amount - order_log.args.marketFee
 

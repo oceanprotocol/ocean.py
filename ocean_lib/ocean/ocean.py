@@ -128,7 +128,7 @@ class Ocean:
         name: str,
         symbol: str,
         from_wallet: Wallet,
-        cap: int = DataToken.DEFAULT_CAP_IN_WEI,
+        cap: int = DataToken.DEFAULT_CAP,
         blob: str = "",
     ) -> DataToken:
         """

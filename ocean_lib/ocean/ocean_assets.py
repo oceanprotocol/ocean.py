@@ -218,7 +218,7 @@ class OceanAssets:
             name = dt_name or metadata["main"]["name"]
             symbol = dt_symbol or name
             # register on-chain
-            _cap = dt_cap if dt_cap else DataToken.DEFAULT_CAP_IN_WEI
+            _cap = dt_cap if dt_cap else DataToken.DEFAULT_CAP
             tx_id = dtfactory.createToken(
                 blob, name, symbol, _cap, from_wallet=publisher_wallet
             )

@@ -62,10 +62,9 @@ class BPool(BToken):
 
         s += ["  balances (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
-            balance_in_wei = self.getBalance(addr)
+            balance = self.getBalance(addr)
             dec = BToken(self.web3, addr).decimals()
-            balance_in_ether = from_wei(balance_in_wei, dec)
-            s += [f"    {symbol}: {balance_in_ether}"]
+            s += [f"    {symbol}: {from_wei(balance, dec)}"]
 
         return "\n".join(s)
 

@@ -35,9 +35,9 @@ class OceanExchange:
     def _exchange_contract(self) -> FixedRateExchange:
         return FixedRateExchange(self._web3, self._exchange_address)
 
-    def get_quote(self, amount_in_wei: int, exchange_id: str) -> int:
+    def get_quote(self, amount: int, exchange_id: str) -> int:
         exchange = self._exchange_contract()
-        return exchange.get_base_token_quote(exchange_id, amount_in_wei)
+        return exchange.get_base_token_quote(exchange_id, amount)
 
     def get_exchange_id_fallback_dt_and_owner(
         self, exchange_id: Union[bytes, str], exchange_owner: str, data_token: str

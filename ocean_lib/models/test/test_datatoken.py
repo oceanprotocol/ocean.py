@@ -98,7 +98,7 @@ def test_calculateFee(alice_ocean, alice_wallet):
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
 
-    fee = token.calculateFee(to_wei(100), DataToken.OPF_FEE_PER_DATATOKEN_IN_WEI)
+    fee = token.calculateFee(to_wei(100), DataToken.OPF_FEE_PER_TOKEN)
     assert fee == to_wei("0.1")
 
 
