@@ -34,7 +34,6 @@ def test_fixed_rate_exchange(
         buy_data_token
 
     """
-    base_unit = to_wei(1)
     fixed_ex = FixedRateExchange(
         web3, contracts_addresses[FixedRateExchange.CONTRACT_NAME]
     )
@@ -81,9 +80,10 @@ def test_fixed_rate_exchange(
     # Test quote and buy datatokens
     amount = to_wei(10)  # 10 data tokens
     base_token_quote = fixed_ex.get_base_token_quote(ex_id, amount)
+    expected_base_token_quote = int(amount * rate / to_wei(1))
     assert base_token_quote == (
-        amount * rate / base_unit
-    ), f"quote does not seem correct: expected {amount*rate/base_unit}, got {base_token_quote}"
+        expected_base_token_quote
+    ), f"quote does not seem correct: expected {expected_base_token_quote}, got {base_token_quote}"
     assert base_token_quote == to_wei(1), ""
     # buy without approving OCEAN tokens, should fail
     assert (
@@ -173,10 +173,11 @@ def test_fixed_rate_exchange(
     amount = to_wei(4)  # num data tokens
     base_token_quote = fixed_ex.get_base_token_quote(
         t2_ex_id, amount
-    )  # num base token (OCEAN tokens
+    )  # num base token (OCEAN tokens)
+    expected_base_token_quote = int(amount * rate2 / to_wei(1))
     assert base_token_quote == (
-        amount * rate2 / base_unit
-    ), f"quote does not seem correct: expected {amount*rate2/base_unit}, got {base_token_quote}"
+        expected_base_token_quote
+    ), f"quote does not seem correct: expected {expected_base_token_quote}, got {base_token_quote}"
     ocn_token.get_tx_receipt(
         web3, ocn_token.approve(fixed_ex.address, base_token_quote, bob_wallet)
     )
