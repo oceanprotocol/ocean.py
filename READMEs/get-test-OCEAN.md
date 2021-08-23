@@ -97,9 +97,9 @@ wallet = Wallet(ocean.web3, private_key=private_key)
 print(f"Address of your account: {wallet.address}")
 
 #get balance
-OCEAN_balance_base18 = OCEAN_token.balanceOf(wallet.address) #like wei
+OCEAN_balance_in_wei = OCEAN_token.balanceOf(wallet.address)
 from ocean_lib.web3_internal.currency import from_wei
-OCEAN_balance = from_wei(OCEAN_balance_base18) #like eth
+OCEAN_balance_in_ether = from_wei(OCEAN_balance_in_wei)
 print(f"Balance: {OCEAN_balance} OCEAN")
 if OCEAN_balance == 0.0:
   print("WARNING: you don't have any OCEAN yet")
