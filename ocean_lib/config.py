@@ -55,7 +55,7 @@ environ_names_and_sections = {
         SECTION_ETH_NETWORK,
     ],
     NAME_OCEAN_ADDRESS: ["OCEAN_ADDRESS", "OCEAN address", SECTION_ETH_NETWORK],
-    NAME_NETWORK_URL: ["NETWORK_URL", "Network URL", SECTION_ETH_NETWORK],
+    NAME_NETWORK_URL: ["OCEAN_NETWORK_URL", "Network URL", SECTION_ETH_NETWORK],
     NAME_BLOCK_CONFIRMATIONS: [
         "BLOCK_CONFIRMATIONS",
         "Block confirmations",

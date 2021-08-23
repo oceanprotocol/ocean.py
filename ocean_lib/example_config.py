@@ -108,10 +108,10 @@ class ExampleConfig:
     @staticmethod
     def get_config() -> Config:
         """Return `Config` containing default values for a given network.
-        Chain ID is determined by querying the RPC specified by `NETWORK_URL` envvar.
+        Chain ID is determined by querying the RPC specified by `OCEAN_NETWORK_URL` envvar.
         """
 
-        network_url = os.getenv("NETWORK_URL")
+        network_url = os.getenv("OCEAN_NETWORK_URL")
         assert (
             network_url is not None
         ), "Cannot use ocean-lib without a specified network URL."

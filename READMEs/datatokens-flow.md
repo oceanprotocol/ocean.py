@@ -33,13 +33,13 @@ docker system prune -a --volumes
 
 In a console:
 ```console
+#Create config.ini file and fill it with configuration info
 echo """
 [eth-network]
 network = http://127.0.0.1:8545
-address.file = ~/.ocean/ocean-contracts/artifacts/address.json""" > config.ini
+address.file = ~/.ocean/ocean-contracts/artifacts/address.json
+""" > config.ini
 ```
-
-This creates a file called `config.ini` and fills it configuration info for network, etc.
 
 ## Install the library, set envvars
 
