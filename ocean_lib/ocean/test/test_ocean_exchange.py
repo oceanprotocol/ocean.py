@@ -86,7 +86,7 @@ def test_ocean_exchange(publisher_ocean_instance):
         is True
     ), "buy datatokens failed"
 
-    rate = to_wei("1.0")
+    rate = to_wei(1)
     assert ox.setRate(rate, bob_wallet, exchange_id=x_id)
     # re-evaluate with new rate
     base_token_amount = ox.get_quote(to_wei(2), exchange_id=x_id)

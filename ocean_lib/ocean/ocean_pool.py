@@ -88,7 +88,7 @@ class OceanPool:
         logger.debug(f"pool created with address {pool_address}.")
 
         assert to_wei("1") <= data_token_weight <= to_wei("9")
-        base_weight = to_wei("10.0") - data_token_weight
+        base_weight = to_wei(10) - data_token_weight
 
         # Must approve datatoken and Ocean tokens to the new pool as spender
         dt = DataToken(self.web3, data_token_address)

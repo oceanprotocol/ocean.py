@@ -32,8 +32,8 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
 
     pool = alice_ocean.pool.create(
         DT_address,
-        data_token_amount=to_wei("90.0"),
-        OCEAN_amount=to_wei("10.0"),
+        data_token_amount=to_wei(90),
+        OCEAN_amount=to_wei(10),
         from_wallet=alice_wallet,
     )
     pool_address = pool.address
@@ -57,8 +57,8 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
     # 6. Bob buys a DT from pool
     alice_ocean.pool.buy_data_tokens(
         pool_address,
-        amount=to_wei("1.0"),
-        max_OCEAN_amount=to_wei("2.0"),
+        amount=to_wei(1),
+        max_OCEAN_amount=to_wei(2),
         from_wallet=bob_wallet,
     )
 
@@ -125,8 +125,8 @@ def test_ocean_balancer_helpers(
 
     pool = alice_ocean.pool.create(
         DT.address,
-        data_token_amount=to_wei("90.0"),
-        OCEAN_amount=to_wei("10.0"),
+        data_token_amount=to_wei(90),
+        OCEAN_amount=to_wei(10),
         from_wallet=alice_wallet,
     )
     pool_address = pool.address

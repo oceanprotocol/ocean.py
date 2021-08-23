@@ -176,7 +176,7 @@ print(f"did = '{did}'")
 
 #Mint the datatokens
 from ocean_lib.web3_internal.currency import to_wei
-data_token.mint(alice_wallet.address, to_wei("100.0"), alice_wallet)
+data_token.mint(alice_wallet.address, to_wei(100), alice_wallet)
 
 #In the create() step below, Alice needs ganache OCEAN. Ensure she has it.
 from ocean_lib.models.btoken import BToken #BToken is ERC20
@@ -188,8 +188,8 @@ assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need OCEAN"
 # and finalize the pool.
 pool = ocean.pool.create(
    token_address,
-   data_token_amount=to_wei("100.0"),
-   OCEAN_amount=to_wei("10.0"),
+   data_token_amount=to_wei(100),
+   OCEAN_amount=to_wei(10),
    from_wallet=alice_wallet
 )
 pool_address = pool.address
@@ -215,7 +215,7 @@ pool = ocean.pool.get(ocean.web3, pool_address)
 #Here, the market retrieves the datatoken price denominated in OCEAN.
 OCEAN_address = ocean.OCEAN_address
 price_in_OCEAN = ocean.pool.calcInGivenOut(
-    pool_address, OCEAN_address, token_address, token_out_amount=to_wei("1.0"))
+    pool_address, OCEAN_address, token_address, token_out_amount=to_wei(1))
 print(f"Price of 1 datatoken is {price_in_OCEAN} OCEAN")
 ```
 
@@ -240,8 +240,8 @@ assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
 data_token = ocean.get_data_token(token_address)
 ocean.pool.buy_data_tokens(
     pool_address,
-    amount=to_wei("1.0"), # buy 1.0 datatoken
-    max_OCEAN_amount=to_wei("10.0"), # pay up to 10.0 OCEAN
+    amount=to_wei(1), # buy 1.0 datatoken
+    max_OCEAN_amount=to_wei(10), # pay up to 10.0 OCEAN
     from_wallet=bob_wallet
 )
 
@@ -249,7 +249,7 @@ from ocean_lib.web3_internal.currency import wei_and_pretty_ether
 print(f"Bob has {wei_and_pretty_ether(data_token.balanceOf(bob_wallet.address), data_token.symbol())} datatokens.")
 
 from ocean_lib.web3_internal.currency import to_wei
-assert data_token.balanceOf(bob_wallet.address) >= to_wei("1.0"), "Bob didn't get 1.0 datatokens"
+assert data_token.balanceOf(bob_wallet.address) >= to_wei(1), "Bob didn't get 1.0 datatokens"
 
 #Bob points to the service object
 fee_receiver = None # could also be market address
