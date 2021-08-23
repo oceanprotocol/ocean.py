@@ -50,7 +50,7 @@ def test_complete_flow(
     pool.bind(
         DT_address,
         to_wei(90),
-        balancer_constants.INIT_WEIGHT_DT_BASE,
+        balancer_constants.INIT_WEIGHT_DT,
         from_wallet=alice_wallet,
     )
 
@@ -61,7 +61,7 @@ def test_complete_flow(
     pool.bind(
         OCEAN_address,
         to_wei(10),
-        balancer_constants.INIT_WEIGHT_OCEAN_BASE,
+        balancer_constants.INIT_WEIGHT_OCEAN,
         from_wallet=alice_wallet,
     )
 
@@ -71,7 +71,7 @@ def test_complete_flow(
     pool.rebind(
         DT_address,
         to_wei(90 + 9),
-        balancer_constants.INIT_WEIGHT_DT_BASE,
+        balancer_constants.INIT_WEIGHT_DT,
         from_wallet=alice_wallet,
     )
 
@@ -79,7 +79,7 @@ def test_complete_flow(
     pool.rebind(
         OCEAN_address,
         to_wei(10 + 1),
-        balancer_constants.INIT_WEIGHT_OCEAN_BASE,
+        balancer_constants.INIT_WEIGHT_OCEAN,
         from_wallet=alice_wallet,
     )
 
@@ -103,13 +103,13 @@ def test_complete_flow(
     pool.rebind(
         DT_address,
         to_wei(90 + 9 - 2),
-        balancer_constants.INIT_WEIGHT_DT_BASE,
+        balancer_constants.INIT_WEIGHT_DT,
         from_wallet=alice_wallet,
     )
     pool.rebind(
         OCEAN_address,
         to_wei(10 + 1 - 3),
-        balancer_constants.INIT_WEIGHT_OCEAN_BASE,
+        balancer_constants.INIT_WEIGHT_OCEAN,
         from_wallet=alice_wallet,
     )
 

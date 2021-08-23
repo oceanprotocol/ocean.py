@@ -9,14 +9,13 @@ Contains `Balancer` related constants for
 - `BCONST_MIN_WEIGHT`
 - `BCONST_MAX_WEIGHT`
 - `BCONST_MAX_TOTAL_WEIGHT`
-- `BCONST_MAX_TOTAL_WEIGHT`
 - `BCONST_MIN_BALANCE`
 - `INIT_WEIGHT_DT`
 - `INIT_WEIGHT_OCEAN`
-- `INIT_WEIGHT_DT_BASE`
-- `INIT_WEIGHT_OCEAN_BASE`
-- `DEFAULT_SWAP_FEE_BASE`
+- `DEFAULT_SWAP_FEE`
 """
+from ocean_lib.web3_internal.currency import to_wei
+
 # ref: https://bankless.substack.com/p/how-to-create-your-own-balancer-pool
 GASLIMIT_BFACTORY_NEWBPOOL = 5000000  # from ref above
 GASLIMIT_BFACTORY_NEWMPOOL = 5000000  # from ref above
@@ -29,8 +28,6 @@ BCONST_MAX_WEIGHT = BCONST_BONE * 50  # ""
 BCONST_MAX_TOTAL_WEIGHT = BCONST_BONE * 50  # ""
 BCONST_MIN_BALANCE = int(BCONST_BONE / 10 ** 12)  # "". value is 10**6
 
-INIT_WEIGHT_OCEAN = 1.0
-INIT_WEIGHT_DT_BASE = BCONST_BONE * int(9.0)
-INIT_WEIGHT_OCEAN_BASE = BCONST_BONE * int(INIT_WEIGHT_OCEAN)
-
-DEFAULT_SWAP_FEE_BASE = int(BCONST_BONE * 0.015)  # 1.5%
+INIT_WEIGHT_DT = to_wei(9)
+INIT_WEIGHT_OCEAN = to_wei(1)
+DEFAULT_SWAP_FEE = to_wei("0.015")  # 1.5%

@@ -64,13 +64,13 @@ class OceanPool:
         data_token_amount: int,
         OCEAN_amount: int,
         from_wallet: Wallet,
-        data_token_weight: int = balancer_constants.INIT_WEIGHT_DT_BASE,
-        swap_fee: int = balancer_constants.DEFAULT_SWAP_FEE_BASE,
+        data_token_weight: int = balancer_constants.INIT_WEIGHT_DT,
+        swap_fee: int = balancer_constants.DEFAULT_SWAP_FEE,
     ) -> BPool:
         """
         Create a new pool with bound datatoken and OCEAN token then finalize it.
         The pool will have publicSwap enabled and swap fee is set
-        to `balancer_constants.DEFAULT_SWAP_FEE_BASE`.
+        to `balancer_constants.DEFAULT_SWAP_FEE`.
         Balances of both data tokens and OCEAN tokens must be sufficient in the
         `from_wallet`, otherwise this will fail.
 
