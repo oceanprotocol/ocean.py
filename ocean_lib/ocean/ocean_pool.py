@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
+from decimal import Decimal
 
 from enforce_typing import enforce_types
 from ocean_lib.exceptions import InsufficientBalance, VerifyTxFailed
@@ -832,7 +833,7 @@ class OceanPool:
 
         if "liquidity" in flags:
             creator_shares = pool.balanceOf(pool_creator)
-            creator_shares_percent = creator_shares / shares
+            creator_shares_percent = Decimal(creator_shares) / Decimal(shares)
 
             account_to_join_record = self.get_account_to_liquidity_records_map(
                 all_join_records
