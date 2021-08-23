@@ -13,7 +13,7 @@ from ocean_lib.models.bpool import BPool
 from ocean_lib.models.btoken import BToken
 from ocean_lib.models.test.conftest import alice_info
 from ocean_lib.ocean.util import get_bfactory_address
-from ocean_lib.web3_internal.currency import from_wei, to_wei
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.main import Web3
 
@@ -189,30 +189,30 @@ def test_public_pool(network, config, bob_wallet, alice_ocean):
     alice.T2.transfer(bob_wallet.address, to_wei(100), from_wallet=alice.wallet)
 
     # verify holdings
-    assert from_wei(alice.T1.balanceOf(alice.address)) == (1000 - 90 - 100)  # 810
-    assert from_wei(alice.T2.balanceOf(alice.address)) == (1000 - 10 - 100)  # 890
-    assert from_wei(BPT.balanceOf(alice.address)) == 0
+    assert alice.T1.balanceOf(alice.address) == to_wei(1000 - 90 - 100)  # 810
+    assert alice.T2.balanceOf(alice.address) == to_wei(1000 - 10 - 100)  # 890
+    assert BPT.balanceOf(alice.address) == to_wei(0)
 
-    assert from_wei(alice.T1.balanceOf(bob_address)) == 100
-    assert from_wei(alice.T2.balanceOf(bob_address)) == 100
-    assert from_wei(BPT.balanceOf(bob_address)) == 0
+    assert alice.T1.balanceOf(bob_address) == to_wei(100)
+    assert alice.T2.balanceOf(bob_address) == to_wei(100)
+    assert BPT.balanceOf(bob_address) == to_wei(0)
 
-    assert from_wei(T1.balanceOf(pool.address)) == 90
-    assert from_wei(T2.balanceOf(pool.address)) == 10
-    assert from_wei(BPT.balanceOf(pool.address)) == 0
+    assert T1.balanceOf(pool.address) == to_wei(90)
+    assert T2.balanceOf(pool.address) == to_wei(10)
+    assert BPT.balanceOf(pool.address) == to_wei(0)
 
     # finalize
     pool = BPool(alice_ocean.web3, pool.address)
     pool.finalize(from_wallet=alice.wallet)
 
     # verify holdings
-    assert from_wei(alice.T1.balanceOf(alice.address)) == (1000 - 90 - 100)
-    assert from_wei(alice.T2.balanceOf(alice.address)) == (1000 - 10 - 100)
-    assert from_wei(BPT.balanceOf(alice.address)) == 100  # new!
+    assert alice.T1.balanceOf(alice.address) == to_wei(1000 - 90 - 100)
+    assert alice.T2.balanceOf(alice.address) == to_wei(1000 - 10 - 100)
+    assert BPT.balanceOf(alice.address) == to_wei(100)  # new!
 
-    assert from_wei(T1.balanceOf(pool.address)) == 90
-    assert from_wei(T2.balanceOf(pool.address)) == 10
-    assert from_wei(BPT.balanceOf(pool.address)) == 0
+    assert T1.balanceOf(pool.address) == to_wei(90)
+    assert T2.balanceOf(pool.address) == to_wei(10)
+    assert BPT.balanceOf(pool.address) == to_wei(0)
 
     # bob join pool. Wants 10 BPT
     T1.approve(pool.address, to_wei(100), from_wallet=bob_wallet)
@@ -224,17 +224,17 @@ def test_public_pool(network, config, bob_wallet, alice_ocean):
     )
 
     # verify holdings
-    assert from_wei(T1.balanceOf(alice_address)) == (1000 - 90 - 100)  # 810
-    assert from_wei(T2.balanceOf(alice_address)) == (1000 - 10 - 100)  # 890
-    assert from_wei(BPT.balanceOf(alice_address)) == 100
+    assert T1.balanceOf(alice_address) == to_wei(1000 - 90 - 100)  # 810
+    assert T2.balanceOf(alice_address) == to_wei(1000 - 10 - 100)  # 890
+    assert BPT.balanceOf(alice_address) == to_wei(100)
 
-    assert from_wei(T1.balanceOf(bob_address)) == (100 - 9)  # 91
-    assert from_wei(T2.balanceOf(bob_address)) == (100 - 1)  # 99
-    assert from_wei(BPT.balanceOf(bob_address)) == 10
+    assert T1.balanceOf(bob_address) == to_wei(100 - 9)  # 91
+    assert T2.balanceOf(bob_address) == to_wei(100 - 1)  # 99
+    assert BPT.balanceOf(bob_address) == to_wei(10)
 
-    assert from_wei(T1.balanceOf(pool.address)) == (90 + 9)  # 99
-    assert from_wei(T2.balanceOf(pool.address)) == (10 + 1)  # 11
-    assert from_wei(BPT.balanceOf(pool.address)) == 0
+    assert T1.balanceOf(pool.address) == to_wei(90 + 9)  # 99
+    assert T2.balanceOf(pool.address) == to_wei(10 + 1)  # 11
+    assert BPT.balanceOf(pool.address) == to_wei(0)
 
     # bob sells 2 BPT
     # -this is where BLabs fee kicks in. But the fee is currently set to 0.
@@ -253,11 +253,11 @@ def test_public_pool(network, config, bob_wallet, alice_ocean):
         maxAmountsIn=[to_wei(90), to_wei(90)],
         from_wallet=bob_wallet,
     )
-    assert from_wei(BPT.balanceOf(bob_address)) == 13
+    assert BPT.balanceOf(bob_address) == to_wei(13)
 
     # bob fully exits
     pool.exitPool(poolAmountIn=to_wei(13), minAmountsOut=[0, 0], from_wallet=bob_wallet)
-    assert from_wei(BPT.balanceOf(bob_address)) == 0
+    assert BPT.balanceOf(bob_address) == to_wei(0)
 
     block = alice_ocean.web3.eth.block_number
     join_log = pool.get_join_logs(block - 1, block + 1)[0]
@@ -309,32 +309,32 @@ def test_spot_price(network, config, web3, T1, T2, alice_wallet):
     (price, price_sans_fee) = _spotPrices(
         network, config, web3, T1, T2, alice_wallet, 1, 1, 1, 1
     )
-    assert price_sans_fee == 1
-    assert price == Decimal("1.000001000001000001")
+    assert price_sans_fee == to_wei(1)
+    assert price == to_wei("1.000001000001000001")
 
     (price, price_sans_fee) = _spotPrices(
         network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
-    assert price_sans_fee == 1
-    assert price == Decimal("1.000001000001000001")
+    assert price_sans_fee == to_wei(1)
+    assert price == to_wei("1.000001000001000001")
 
     (price, price_sans_fee) = _spotPrices(
         network, config, web3, T1, T2, alice_wallet, 1, 2, 1, 1
     )
-    assert price_sans_fee == Decimal("0.5")
-    assert price == Decimal("0.500000500000500001")
+    assert price_sans_fee == to_wei("0.5")
+    assert price == to_wei("0.500000500000500001")
 
     (price, price_sans_fee) = _spotPrices(
         network, config, web3, T1, T2, alice_wallet, 2, 1, 1, 1
     )
-    assert price_sans_fee == 2
-    assert price == Decimal("2.000002000002000002")
+    assert price_sans_fee == to_wei(2)
+    assert price == to_wei("2.000002000002000002")
 
     (price, price_sans_fee) = _spotPrices(
         network, config, web3, T1, T2, alice_wallet, 9, 10, 9, 1
     )
-    assert price_sans_fee == Decimal("0.1")
-    assert price == Decimal("0.100000100000100000")
+    assert price_sans_fee == to_wei("0.1")
+    assert price == to_wei("0.100000100000100000")
 
 
 def test_joinSwapExternAmountIn(
@@ -345,8 +345,8 @@ def test_joinSwapExternAmountIn(
     When the pool is not public, assert that an Exception is thrown.
     When the pool is public, assert that the swap is made and the correct balance remains.
     """
-    init_T1balance = from_wei(T1.balanceOf(alice_address))
-    T2balance = from_wei(T2.balanceOf(alice_address))
+    init_T1balance = T1.balanceOf(alice_address)
+    T2balance = T2.balanceOf(alice_address)
     pool = _createPoolWith2Tokens(
         network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
@@ -373,13 +373,13 @@ def test_joinSwapExternAmountIn(
         maxPrice=HUGEINT,
         from_wallet=alice_wallet,
     )
-    new_balance = init_T1balance - Decimal("91.055")
+    new_balance = init_T1balance - to_wei("91.055")
     assert (
-        (new_balance - Decimal("0.005"))
-        <= from_wei(T1.balanceOf(alice_address))
-        <= (new_balance + Decimal("0.005"))
+        new_balance - to_wei("0.005")
+        <= T1.balanceOf(alice_address)
+        <= new_balance + to_wei("0.005")
     )
-    assert from_wei(T2.balanceOf(alice_address)) == (T2balance - 9)
+    assert T2.balanceOf(alice_address) == T2balance - to_wei(9)
 
     block = web3.eth.block_number
     swap_log = pool.get_swap_logs(block - 1, block + 1)[0]
@@ -390,66 +390,66 @@ def test_joinswapPoolAmountOut(
     network, config, web3, T1, T2, alice_address, alice_wallet
 ):
     """Tests taking an amount out of the pool."""
-    T1balance = from_wei(T1.balanceOf(alice_address))
+    T1balance = T1.balanceOf(alice_address)
     pool = _createPoolWith2Tokens(
         network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
     BPT = pool
     pool.finalize(from_wallet=alice_wallet)
-    pool_balance = from_wei(BPT.balanceOf(alice_address))
+    pool_balance = BPT.balanceOf(alice_address)
     T1.approve(pool.address, to_wei(90), from_wallet=alice_wallet)
-    assert from_wei(T1.balanceOf(alice_address)) == (T1balance - 90)
-    T1balance = from_wei(T1.balanceOf(alice_address))
+    assert T1.balanceOf(alice_address) == T1balance - to_wei(90)
+    T1balance = T1.balanceOf(alice_address)
     pool.joinswapPoolAmountOut(
         tokenIn_address=T1.address,
         poolAmountOut=to_wei(10),  # BPT wanted
         maxAmountIn=to_wei(90),  # max T1 to spend
         from_wallet=alice_wallet,
     )
-    assert from_wei(T1.balanceOf(alice_address)) >= (T1balance - 90)
-    assert from_wei(BPT.balanceOf(alice_address)) == (pool_balance + 10)
+    assert T1.balanceOf(alice_address) >= T1balance - to_wei(90)
+    assert BPT.balanceOf(alice_address) == pool_balance + to_wei(10)
 
 
 def test_exitswapPoolAmountIn(
     network, config, web3, T1, T2, alice_address, alice_wallet
 ):
-    T1balance = from_wei(T1.balanceOf(alice_address))
+    T1balance = T1.balanceOf(alice_address)
     pool = _createPoolWith2Tokens(
         network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
     BPT = pool
     pool.finalize(from_wallet=alice_wallet)
-    pool_balance = from_wei(BPT.balanceOf(alice_address))
-    assert from_wei(T1.balanceOf(alice_address)) == (T1balance - 90)
+    pool_balance = BPT.balanceOf(alice_address)
+    assert T1.balanceOf(alice_address) == T1balance - to_wei(90)
     pool.exitswapPoolAmountIn(
         tokenOut_address=T1.address,
         poolAmountIn=to_wei(10),  # BPT spent
         minAmountOut=to_wei(1),  # min T1 wanted
         from_wallet=alice_wallet,
     )
-    assert from_wei(T1.balanceOf(alice_address)) >= (T1balance - 90 + 1)
-    assert from_wei(BPT.balanceOf(alice_address)) == (pool_balance - 10)
+    assert T1.balanceOf(alice_address) >= T1balance - to_wei(90) + to_wei(1)
+    assert BPT.balanceOf(alice_address) == pool_balance - to_wei(10)
 
 
 def test_exitswapExternAmountOut(
     network, config, web3, T1, T2, alice_address, alice_wallet, alice_ocean
 ):
-    T1balance = from_wei(T1.balanceOf(alice_address))
+    T1balance = T1.balanceOf(alice_address)
     pool = _createPoolWith2Tokens(
         network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
     BPT = pool
     pool.finalize(from_wallet=alice_wallet)
-    pool_balance = from_wei(BPT.balanceOf(alice_address))
-    assert from_wei(T1.balanceOf(alice_address)) == T1balance - 90
+    pool_balance = BPT.balanceOf(alice_address)
+    assert T1.balanceOf(alice_address) == T1balance - to_wei(90)
     pool.exitswapExternAmountOut(
         tokenOut_address=T1.address,
         tokenAmountOut=to_wei(2),  # T1 wanted
         maxPoolAmountIn=to_wei(10),  # max BPT spent
         from_wallet=alice_wallet,
     )
-    assert from_wei(T1.balanceOf(alice_address)) == (T1balance - 90 + 2)
-    assert from_wei(BPT.balanceOf(alice_address)) >= (pool_balance - 10)
+    assert T1.balanceOf(alice_address) == T1balance - to_wei(90) + to_wei(2)
+    assert BPT.balanceOf(alice_address) >= pool_balance - to_wei(10)
 
     block = alice_ocean.web3.eth.block_number
     exit_log = pool.get_exit_logs(block - 1, block + 1)[0]
@@ -615,7 +615,4 @@ def _spotPrices(
         network, config, web3, T1, T2, wallet, bal1, bal2, w1, w2
     )
     a1, a2 = T1.address, T2.address
-    return (
-        from_wei(pool.getSpotPrice(a1, a2)),
-        from_wei(pool.getSpotPriceSansFee(a1, a2)),
-    )
+    return (pool.getSpotPrice(a1, a2), pool.getSpotPriceSansFee(a1, a2))

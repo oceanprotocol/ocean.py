@@ -10,7 +10,7 @@ import pytest
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import from_wei, to_wei
+from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_resource_path
 from web3.exceptions import TimeExhausted, TransactionNotFound
 
@@ -28,7 +28,7 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address
     assert token.totalSupply() == 0
 
     token.mint(alice_address, to_wei(100), from_wallet=alice_wallet)
-    assert from_wei(token.balanceOf(alice_address)) == 100
+    assert token.balanceOf(alice_address) == to_wei(100)
 
     assert token.allowance(alice_address, bob_address) == 0
     token.approve(bob_address, to_wei(1), from_wallet=alice_wallet)
@@ -38,16 +38,16 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address
     token.decreaseAllowance(bob_address, to_wei(1), from_wallet=alice_wallet)
     assert token.allowance(alice_address, bob_address) == to_wei(1)
     token.transferFrom(alice_address, bob_address, to_wei(1), from_wallet=bob_wallet)
-    assert from_wei(token.balanceOf(alice_address)) == 99
-    assert from_wei(token.balanceOf(bob_address)) == 1
+    assert token.balanceOf(alice_address) == to_wei(99)
+    assert token.balanceOf(bob_address) == to_wei(1)
 
     token.transfer(bob_address, to_wei(5), from_wallet=alice_wallet)
-    assert from_wei(token.balanceOf(alice_address)) == 94
-    assert from_wei(token.balanceOf(bob_address)) == 6
+    assert token.balanceOf(alice_address) == to_wei(94)
+    assert token.balanceOf(bob_address) == to_wei(6)
 
     token.transfer(alice_address, to_wei(3), from_wallet=bob_wallet)
-    assert from_wei(token.balanceOf(alice_address)) == 97
-    assert from_wei(token.balanceOf(bob_address)) == 3
+    assert token.balanceOf(alice_address) == to_wei(97)
+    assert token.balanceOf(bob_address) == to_wei(3)
 
     # assert transfers were successful
     block = alice_ocean.web3.eth.block_number
@@ -63,7 +63,7 @@ def test_status_functions(alice_ocean, alice_wallet, alice_address):
 
     token.mint(alice_address, to_wei(100), from_wallet=alice_wallet)
 
-    assert from_wei(token.balanceOf(alice_address)) == 100
+    assert token.balanceOf(alice_address) == to_wei(100)
     assert token.totalSupply() == 100_000_000_000_000_000_000
     assert token.cap() == 1_000_000_000_000_000_000_000
     assert token.datatoken_name() == "DataToken1"

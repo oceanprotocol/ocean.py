@@ -45,9 +45,10 @@ def test_fixed_rate_exchange(
 
     ocean_t = alice_ocean.OCEAN_address
     ocn_token = DataToken(web3, ocean_t)
-    assert from_wei(ocn_token.balanceOf(bob_wallet.address)) >= 100, (
+    bob_ocean_balance = ocn_token.balanceOf(bob_wallet.address)
+    assert bob_ocean_balance >= to_wei(100), (
         f"bob wallet does not have the expected OCEAN tokens balance, "
-        f"got {from_wei(ocn_token.balanceOf(bob_wallet.address))} instead of 100"
+        f"got {from_wei(bob_ocean_balance)} instead of 100"
     )
 
     # clear any previous ocean token allowance for the exchange contract
@@ -83,7 +84,7 @@ def test_fixed_rate_exchange(
     assert base_token_quote == (
         amount * rate / base_unit
     ), f"quote does not seem correct: expected {amount*rate/base_unit}, got {base_token_quote}"
-    assert from_wei(base_token_quote) == 1, ""
+    assert base_token_quote == to_wei(1), ""
     # buy without approving OCEAN tokens, should fail
     assert (
         run_failing_tx(fixed_ex, fixed_ex.buy_data_token, ex_id, amount, bob_wallet)
