@@ -27,7 +27,6 @@ from ocean_lib.ocean.util import (
     get_ocean_token_address,
     get_web3_connection_provider,
 )
-from ocean_lib.web3_internal.currency import from_wei
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
@@ -188,8 +187,8 @@ class Ocean:
             address, from_all_tokens=not bool(datatoken)
         ):
             a = dict(log.args.items())
-            a["amount"] = from_wei(int(log.args.amount))
-            a["marketFee"] = from_wei(int(log.args.marketFee))
+            a["amount"] = int(log.args.amount)
+            a["marketFee"] = int(log.args.marketFee)
             a = AttributeDict(a.items())
 
             # 'datatoken', 'amount', 'timestamp', 'transactionId', 'did', 'payer', 'consumer', 'serviceId', 'serviceType'

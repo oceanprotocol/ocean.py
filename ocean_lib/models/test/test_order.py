@@ -10,7 +10,6 @@ from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.order import Order
-from ocean_lib.web3_internal.currency import from_wei
 from tests.resources.ddo_helpers import get_metadata, get_registered_ddo
 from tests.resources.helper_functions import mint_tokens_and_wait
 
@@ -52,8 +51,8 @@ def test_order(web3, alice_ocean, alice_wallet):
     assert len(os.listdir(asset_folder)) >= 1, "The asset folder is empty."
     for order_log in dt.get_start_order_logs():
         order_log_dict = dict(order_log.args.items())
-        order_log_dict["amount"] = from_wei(int(order_log.args.amount))
-        order_log_dict["marketFee"] = from_wei(int(order_log.args.marketFee))
+        order_log_dict["amount"] = int(order_log.args.amount)
+        order_log_dict["marketFee"] = int(order_log.args.marketFee)
 
         order_args = [
             order_log.address,
