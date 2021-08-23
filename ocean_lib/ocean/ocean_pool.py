@@ -947,24 +947,24 @@ class OceanPool:
         ocn_address = self.ocean_address
         # Liquidity Additions
         ocn_liq_add_list = [
-            (from_wei(r.args.tokenAmountIn), r.blockNumber)
+            (r.args.tokenAmountIn, r.blockNumber)
             for r in join_records
             if r.args.tokenIn == ocn_address
         ]
         dt_liq_add_list = [
-            (from_wei(r.args.tokenAmountIn), r.blockNumber)
+            (r.args.tokenAmountIn, r.blockNumber)
             for r in join_records
             if r.args.tokenIn != ocn_address
         ]
 
         # Liquidity removals
         ocn_liq_rem_list = [
-            (from_wei(r.args.tokenAmountOut), r.blockNumber)
+            (r.args.tokenAmountOut, r.blockNumber)
             for r in exit_records
             if r.args.tokenOut == ocn_address
         ]
         dt_liq_rem_list = [
-            (from_wei(r.args.tokenAmountOut), r.blockNumber)
+            (r.args.tokenAmountOut, r.blockNumber)
             for r in exit_records
             if r.args.tokenOut != ocn_address
         ]
@@ -974,11 +974,11 @@ class OceanPool:
             block_no = r.blockNumber
             if r.args.tokenIn == ocn_address:
                 # ocn is the tokenIn
-                ocn_liq_add_list.append((from_wei(r.args.tokenAmountIn), block_no))
-                dt_liq_rem_list.append((from_wei(r.args.tokenAmountOut), block_no))
+                ocn_liq_add_list.append((r.args.tokenAmountIn, block_no))
+                dt_liq_rem_list.append((r.args.tokenAmountOut, block_no))
             else:  # ocn is the tokenOut
-                ocn_liq_rem_list.append((from_wei(r.args.tokenAmountOut), block_no))
-                dt_liq_add_list.append((from_wei(r.args.tokenAmountIn), block_no))
+                ocn_liq_rem_list.append((r.args.tokenAmountOut, block_no))
+                dt_liq_add_list.append((r.args.tokenAmountIn, block_no))
 
         ocn_liq_rem_list = [(-v, t) for v, t in ocn_liq_rem_list]
         dt_liq_rem_list = [(-v, t) for v, t in dt_liq_rem_list]
