@@ -54,16 +54,15 @@ def setup_all(request, config, web3):
 
     OCEAN_token = DataToken(web3, address=network_addresses["development"]["Ocean"])
 
-    amt_distribute = 1000
-    amt_distribute_in_wei = to_wei(amt_distribute)
+    amt_distribute = to_wei(1000)
 
     for w in (get_publisher_wallet(), get_consumer_wallet()):
         if from_wei(get_ether_balance(web3, w.address)) < 2:
             send_ether(wallet, w.address, to_wei(4))
 
         if OCEAN_token.balanceOf(w.address) < to_wei(100):
-            OCEAN_token.mint(wallet.address, amt_distribute_in_wei, from_wallet=wallet)
-            OCEAN_token.transfer(w.address, amt_distribute_in_wei, from_wallet=wallet)
+            OCEAN_token.mint(wallet.address, amt_distribute, from_wallet=wallet)
+            OCEAN_token.transfer(w.address, amt_distribute, from_wallet=wallet)
 
 
 @pytest.fixture
