@@ -63,6 +63,12 @@ CONFIG_NETWORK_HELPER = {
         NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "polygon",
     },
+    1287: {
+        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 6,
+        NAME_PROVIDER_URL: "https://provider.moonbeamalpha.oceanprotocol.com",
+        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
+        NETWORK_NAME: "moonbeamalpha",
+    },
     1337: {
         NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 2.5,
         NAME_PROVIDER_URL: DEFAULT_PROVIDER_URL,
@@ -102,10 +108,10 @@ class ExampleConfig:
     @staticmethod
     def get_config() -> Config:
         """Return `Config` containing default values for a given network.
-        Chain ID is determined by querying the RPC specified by `NETWORK_URL` envvar.
+        Chain ID is determined by querying the RPC specified by `OCEAN_NETWORK_URL` envvar.
         """
 
-        network_url = os.getenv("NETWORK_URL")
+        network_url = os.getenv("OCEAN_NETWORK_URL")
         assert (
             network_url is not None
         ), "Cannot use ocean-lib without a specified network URL."

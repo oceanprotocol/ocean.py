@@ -20,7 +20,7 @@ Here are examples.
 First, in console:
 
 ```console
-export NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
+export OCEAN_NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
 export METADATA_CACHE_URI=https://aquarius.rinkeby.oceanprotocol.com
 export PROVIDER_URL=https://provider.rinkeby.oceanprotocol.com
 ```
@@ -31,7 +31,7 @@ Then, do the following in Python. The `Ocean` constructor takes a `dict`, which 
 import os
 from ocean_lib.ocean.ocean import Ocean
 d = {
-   'network' : os.getenv('NETWORK_URL'),
+   'network' : os.getenv('OCEAN_NETWORK_URL'),
    'metadataCacheUri' : os.getenv('METADATA_CACHE_URI'),
    'providerUri' : os.getenv('PROVIDER_URL'),
 }
@@ -46,7 +46,7 @@ Recall that parameters set by envvars override config file values. So, to use a 
 Here's how. In the console:
 
 ```console
-    unset NETWORK_URL METADATA_CACHE_URI AQUARIUS_URL PROVIDER_URL
+    unset OCEAN_NETWORK_URL METADATA_CACHE_URI AQUARIUS_URL PROVIDER_URL
 ```
 
 ## 2. Config object input, filled from config file
@@ -84,8 +84,12 @@ export OCEAN_CONFIG_FILE=config.ini
 Then, in Python:
 
 ```python
+import os
+
+from ocean_lib.config import Config
 from ocean_lib.ocean.ocean import Ocean
-ocean = Ocean()
+c = Config(os.getenv("OCEAN_CONFIG_FILE"))
+ocean = Ocean(c)
 ```
 
 ## Further details

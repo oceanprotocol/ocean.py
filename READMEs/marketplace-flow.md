@@ -58,6 +58,8 @@ npm start
 
 Check out the Ocean Market webapp at http://localhost:8000.
 
+Ocean Market is a graphical interface to the backend smart contracts and Ocean services (Aquarius, Provider). The following steps will interface to the backend in a different fashion: using the command-line / console, and won't need Ocean Market. But it's good to understand there are multiple views.
+
 ### Install the library
 
 In a new console that we'll call the _work_ console (as we'll use it later):
@@ -76,11 +78,13 @@ pip install wheel
 pip install ocean-lib
 ```
 
-### Set up contracts
+### Create config file
 
-Create a file called `test3/config.ini` and fill it as follows.
+In the work console:
 
-```text
+```console
+#Create config.ini file and fill it with configuration info
+echo """
 [eth-network]
 network = http://127.0.0.1:8545
 address.file = ~/.ocean/ocean-contracts/artifacts/address.json
@@ -91,7 +95,10 @@ provider.url = http://localhost:8030
 provider.address = 0x00bd138abd70e2f00903268f3db08f2d25677c9e
 
 downloads.path = consume-downloads
+""" > config.ini
 ```
+
+### Set envvars
 
 In the work console:
 ```console
@@ -107,6 +114,11 @@ python
 ```
 
 ## 2. Alice publishes data asset
+
+In the work console:
+```console
+python
+```
 
 In the Python console:
 ```python
@@ -173,6 +185,9 @@ assert token_address == asset.data_token_address
 
 did = asset.did  # did contains the datatoken address
 print(f"did = '{did}'")
+
+In order to encrypt the entire asset, when using a private market or metadata cache, use the encrypt keyword:
+`asset = ocean.assets.create(..., encrypt=True)`
 
 #Mint the datatokens
 from ocean_lib.web3_internal.currency import to_wei
