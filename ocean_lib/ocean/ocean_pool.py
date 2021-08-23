@@ -585,10 +585,8 @@ class OceanPool:
                 [
                     (
                         lg.args.bpoolAddress,
-                        from_wei(
-                            BPool(self.web3, lg.args.bpoolAddress).getBalance(
-                                self.ocean_address
-                            )
+                        BPool(self.web3, lg.args.bpoolAddress).getBalance(
+                            self.ocean_address
                         ),
                     )
                     for lg in logs
