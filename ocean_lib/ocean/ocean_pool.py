@@ -764,10 +764,10 @@ class OceanPool:
                 "name": dt.datatoken_name(),
                 "symbol": dt.symbol(),
                 "deciamls": dt.decimals(),
-                "cap": from_wei(dt.cap()),
-                "totalSupply": from_wei(dt.totalSupply()),
+                "cap": dt.cap(),
+                "totalSupply": dt.totalSupply(),
                 "minter": minter,
-                "minterBalance": from_wei(dt.balanceOf(minter)),
+                "minterBalance": dt.balanceOf(minter),
                 "numHolders": len(token_holders),
                 "holders": token_holders,
                 "numOrders": len(order_logs),
@@ -776,9 +776,7 @@ class OceanPool:
         if "price" in flags:
             info_dict.update(
                 {
-                    "spotPrice1DT": from_wei(
-                        pool.getSpotPrice(self.ocean_address, dt_address)
-                    ),
+                    "spotPrice1DT": pool.getSpotPrice(self.ocean_address, dt_address),
                     "totalPrice1DT": self.getOceanRequiredToBuyDT(
                         pool_address, dt_amount=1.0
                     ),
@@ -786,21 +784,19 @@ class OceanPool:
             )
 
         if "reserve" in flags:
-            ocn_reserve = from_wei(pool.getBalance(self.ocean_address))
-            dt_reserve = from_wei(pool.getBalance(dt_address))
+            ocn_reserve = pool.getBalance(self.ocean_address)
+            dt_reserve = pool.getBalance(dt_address)
             info_dict.update(
                 {
-                    "oceanWeight": from_wei(
-                        pool.getDenormalizedWeight(self.ocean_address)
-                    ),
+                    "oceanWeight": pool.getDenormalizedWeight(self.ocean_address),
                     "oceanReserve": ocn_reserve,
-                    "dtWeight": from_wei(pool.getDenormalizedWeight(dt_address)),
+                    "dtWeight": pool.getDenormalizedWeight(dt_address),
                     "dtReserve": dt_reserve,
                 }
             )
         if "shares" in flags or "creator" in flags:
             pool_creator = pool.getController()
-            shares = from_wei(pool.totalSupply())
+            shares = pool.totalSupply()
             info_dict.update({"creator": pool_creator})
 
         if "shareHolders" in flags:
@@ -818,14 +814,14 @@ class OceanPool:
             all_join_records = self.get_all_liquidity_additions(
                 pool_address, from_block, current_block, dt_address, raw_result=False
             )  # RPC_CALL
-            total_ocn_additions = from_wei(
-                sum(r[2] for r in all_join_records if r[1] == self.ocean_address)
+            total_ocn_additions = sum(
+                r[2] for r in all_join_records if r[1] == self.ocean_address
             )
             all_exit_records = self.get_all_liquidity_removals(
                 pool_address, from_block, current_block, dt_address, raw_result=False
             )  # RPC_CALL
-            total_ocn_removals = from_wei(
-                sum(r[2] for r in all_exit_records if r[1] == self.ocean_address)
+            total_ocn_removals = sum(
+                r[2] for r in all_exit_records if r[1] == self.ocean_address
             )
             info_dict.update(
                 {
@@ -835,33 +831,31 @@ class OceanPool:
             )
 
         if "liquidity" in flags:
-            creator_shares = from_wei(pool.balanceOf(pool_creator))
+            creator_shares = pool.balanceOf(pool_creator)
             creator_shares_percent = creator_shares / shares
 
             account_to_join_record = self.get_account_to_liquidity_records_map(
                 all_join_records
             )
             ocean_additions = [
-                from_wei(r[2])
+                r[2]
                 for r in account_to_join_record[pool_creator]
                 if r[1] == self.ocean_address
             ]
             dt_additions = [
-                from_wei(r[2])
-                for r in account_to_join_record[pool_creator]
-                if r[1] == dt_address
+                r[2] for r in account_to_join_record[pool_creator] if r[1] == dt_address
             ]
 
             account_to_exit_record = self.get_account_to_liquidity_records_map(
                 all_exit_records
             )
             ocean_removals = [
-                from_wei(r[2])
+                r[2]
                 for r in account_to_exit_record.get(pool_creator, [])
                 if r[1] == self.ocean_address
             ]
             dt_removals = [
-                from_wei(r[2])
+                r[2]
                 for r in account_to_exit_record.get(pool_creator, [])
                 if r[1] == dt_address
             ]
@@ -873,22 +867,22 @@ class OceanPool:
                 all_swap_records
             )
             ocean_in = [
-                from_wei(r[2])
+                r[2]
                 for r in account_to_swap_record.get(pool_creator, [])
                 if r[1] == self.ocean_address
             ]
             dt_in = [
-                from_wei(r[2])
+                r[2]
                 for r in account_to_swap_record.get(pool_creator, [])
                 if r[1] == dt_address
             ]
             ocean_out = [
-                from_wei(r[4])
+                r[4]
                 for r in account_to_swap_record.get(pool_creator, [])
                 if r[3] == self.ocean_address
             ]
             dt_out = [
-                from_wei(r[4])
+                r[4]
                 for r in account_to_swap_record.get(pool_creator, [])
                 if r[3] == dt_address
             ]
