@@ -226,7 +226,7 @@ ALG_ddo = ocean.assets.create(
 print(f"ALG did = '{ALG_ddo.did}'")
 ```
 
-Full details: [ALG_ddo](ALG_ddo.md).
+Full details: [ALG_ddo](ALG_ddo.md)
 
 ## 4. Alice allows the algorithm for C2D for that data asset
 
