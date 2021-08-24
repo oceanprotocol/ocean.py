@@ -117,17 +117,17 @@ from ocean_lib.web3_internal.wallet import Wallet
 alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-
-#Set up a service provider. For simplicity, use the same provider for DATA and ALG
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.common.agreements.service_factory import ServiceDescriptor
-service_endpoint = DataServiceProvider.get_url(ocean.config)
 ```
 
 ## 2. Alice publishes data asset
 
 In the same Python console:
 ```python
+#Set up a service provider. For simplicity, use the same provider for DATA and ALG
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.common.agreements.service_factory import ServiceDescriptor
+service_endpoint = DataServiceProvider.get_url(ocean.config)
+
 #Publish DATA datatoken, mint tokens
 DATA_datatoken = ocean.create_data_token('DATA1', 'DATA1', alice_wallet, blob=ocean.config.metadata_cache_uri)
 DATA_datatoken.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
