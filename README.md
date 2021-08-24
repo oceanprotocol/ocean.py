@@ -68,11 +68,11 @@ In this flow, a data asset is posted for sale in a marketplace, and purchased. I
 
 [Go to marketplace flow](READMEs/marketplace-flow.md)
 
-### Compute-to-data flow
+### Compute-to-Data flow
 
-This flow uses Ocean Compute-to-Data to compute results from a dataset that never leaves the premises.
+This flow uses Ocean Compute-to-Data (c2d) to compute results from a dataset that never leaves the premises.
 
-[Go to CtD flow](READMEs/ctd-flow.md)
+[Go to c2d flow](READMEs/c2d-flow.md)
 
 ### Learn more
 
