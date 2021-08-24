@@ -78,12 +78,6 @@ downloads.path = consume-downloads
 """ > config.ini
 ```
 
-```text
-[eth-network]
-network = ganache
-address.file = ~/.ocean/ocean-contracts/artifacts/address.json
-```
-
 ### Set envvars
 
 In the work console:
