@@ -10,7 +10,7 @@ from ocean_lib.config import Config
 from ocean_lib.exceptions import InsufficientBalance, VerifyTxFailed
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.web3_internal.currency import wei_and_pretty_ether
+from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.exceptions import ValidationError
 from web3.logs import DISCARD
@@ -76,12 +76,12 @@ class OceanExchange:
         ocean_ticker = ocean_token.symbol()
         if ocean_amount > max_OCEAN_amount:
             raise ValidationError(
-                f"Buying {wei_and_pretty_ether(amount, 'DataTokens')} requires {wei_and_pretty_ether(ocean_amount, ocean_ticker)} "
-                f"tokens which exceeds the max_OCEAN_amount {wei_and_pretty_ether(max_OCEAN_amount, ocean_ticker)}."
+                f"Buying {pretty_ether_and_wei(amount, 'DataTokens')} requires {pretty_ether_and_wei(ocean_amount, ocean_ticker)} "
+                f"tokens which exceeds the max_OCEAN_amount {pretty_ether_and_wei(max_OCEAN_amount, ocean_ticker)}."
             )
         if ocean_token.balanceOf(wallet.address) < ocean_amount:
             raise InsufficientBalance(
-                f"Insufficient funds for buying {wei_and_pretty_ether(amount, 'DataTokens')}!"
+                f"Insufficient funds for buying {pretty_ether_and_wei(amount, 'DataTokens')}!"
             )
         if ocean_token.allowance(wallet.address, self._exchange_address) < ocean_amount:
             tx_id = ocean_token.approve(self._exchange_address, ocean_amount, wallet)

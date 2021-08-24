@@ -42,7 +42,7 @@ from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import wei_and_pretty_ether
+from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
@@ -529,9 +529,9 @@ class OceanAssets:
         balance = dt.balanceOf(from_wallet.address)
         if balance < amount:
             raise InsufficientBalance(
-                f"Your token balance {wei_and_pretty_ether(balance, dt.symbol())} is not sufficient "
+                f"Your token balance {pretty_ether_and_wei(balance, dt.symbol())} is not sufficient "
                 f"to execute the requested service. This service "
-                f"requires {wei_and_pretty_ether(amount, dt.symbol())}."
+                f"requires {pretty_ether_and_wei(amount, dt.symbol())}."
             )
 
         if did.startswith("did:"):

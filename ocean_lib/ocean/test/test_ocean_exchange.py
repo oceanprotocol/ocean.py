@@ -7,7 +7,7 @@ import pytest
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.util import get_contracts_addresses
-from ocean_lib.web3_internal.currency import to_wei, wei_and_pretty_ether
+from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei
 from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
 
 _NETWORK = "ganache"
@@ -61,7 +61,7 @@ def test_ocean_exchange(publisher_ocean_instance):
     expected_base_token_amount = to_wei("1.8")  # 2 * 9
     assert (
         base_token_amount == expected_base_token_amount
-    ), f"unexpected quote of {wei_and_pretty_ether(base_token_amount, 'OCEAN')} base tokens, should be {wei_and_pretty_ether(expected_base_token_amount, 'OCEAN')}."
+    ), f"unexpected quote of {pretty_ether_and_wei(base_token_amount, 'OCEAN')}, should be {pretty_ether_and_wei(expected_base_token_amount, 'OCEAN')}."
 
     #############
     # test buying datatokens
@@ -93,4 +93,4 @@ def test_ocean_exchange(publisher_ocean_instance):
     expected_base_token_amount = to_wei(2)
     assert (
         base_token_amount == expected_base_token_amount
-    ), f"unexpected quote of {wei_and_pretty_ether(base_token_amount, 'OCEAN')} base tokens, should be {wei_and_pretty_ether(expected_base_token_amount, 'OCEAN')}."
+    ), f"unexpected quote of {pretty_ether_and_wei(base_token_amount, 'OCEAN')} base tokens, should be {pretty_ether_and_wei(expected_base_token_amount, 'OCEAN')}."

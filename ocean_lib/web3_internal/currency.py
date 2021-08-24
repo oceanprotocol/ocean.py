@@ -62,7 +62,7 @@ def to_wei(
 
 
 @enforce_types
-def wei_and_pretty_ether(amount_in_wei: int, ticker: str = "") -> str:
+def pretty_ether_and_wei(amount_in_wei: int, ticker: str = "") -> str:
     """Returns a formatted token amount denoted in wei and human-readable ether
     with optional ticker symbol.
 
@@ -71,12 +71,12 @@ def wei_and_pretty_ether(amount_in_wei: int, ticker: str = "") -> str:
     human-readable ether values.
 
     Examples:
-    wei_and_pretty_ether(123456789_123456789) == "123456789123456789 (0.123)"
-    wei_and_pretty_ether(123456789_123456789_12345, "OCEAN") == "12345678912345678912345 (12.3K OCEAN)"
-    wei_and_pretty_ether(123456789_123456789_123456789, "") == "123456789123456789123456789 (123M)"
+    pretty_ether_and_wei(123456789_123456789) == "0.123 (123456789123456789 wei)"
+    pretty_ether_and_wei(123456789_123456789_12345, "OCEAN") == "12.3K OCEAN (12345678912345678912345 wei)"
+    pretty_ether_and_wei(123456789_123456789_123456789, "") == "123M (123456789123456789123456789 wei)"
     """
-    return "{} ({})".format(
-        amount_in_wei, pretty_ether(from_wei(amount_in_wei), ticker)
+    return "{} ({} wei)".format(
+        pretty_ether(from_wei(amount_in_wei), ticker), amount_in_wei
     )
 
 

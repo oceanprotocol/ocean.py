@@ -14,8 +14,8 @@ from ocean_lib.web3_internal.currency import (
     ether_fmt,
     from_wei,
     pretty_ether,
+    pretty_ether_and_wei,
     to_wei,
-    wei_and_pretty_ether,
 )
 
 
@@ -183,22 +183,22 @@ def test_pretty_ether():
             pretty_ether(MAX_ETHER + 1)
 
 
-def test_wei_and_pretty_ether():
-    """Test the wei_and_pretty_ether function."""
+def test_pretty_ether_and_wei():
+    """Test the pretty_ether_and_wei function."""
     # Test with small value
-    assert wei_and_pretty_ether(1) == "1 (1e-18)"
+    assert pretty_ether_and_wei(1) == "1e-18 (1 wei)"
 
     # Test with out ticker
-    assert wei_and_pretty_ether(123456789_123456789) == "123456789123456789 (0.123)"
+    assert pretty_ether_and_wei(123456789_123456789) == "0.123 (123456789123456789 wei)"
 
     # Test with ticker
     assert (
-        wei_and_pretty_ether(123456789_123456789_12345, "OCEAN")
-        == "12345678912345678912345 (12.3K OCEAN)"
+        pretty_ether_and_wei(123456789_123456789_12345, "OCEAN")
+        == "12.3K OCEAN (12345678912345678912345 wei)"
     )
 
     # Test with empty ticker string
     assert (
-        wei_and_pretty_ether(123456789_123456789_123456789, "")
-        == "123456789123456789123456789 (123M)"
+        pretty_ether_and_wei(123456789_123456789_123456789, "")
+        == "123M (123456789123456789123456789 wei)"
     )

@@ -15,7 +15,7 @@ from eth_utils import remove_0x_prefix
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.currency import from_wei, to_wei, wei_and_pretty_ether
+from ocean_lib.web3_internal.currency import from_wei, pretty_ether_and_wei, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from web3 import Web3
 from web3.datastructures import AttributeDict
@@ -416,8 +416,8 @@ class DataToken(ContractBase):
         if total < (target_amount - 5):
             raise ValueError(
                 f"transferred value does meet the service cost: "
-                f"service.cost - fees={wei_and_pretty_ether(target_amount)}, "
-                f"transferred value={wei_and_pretty_ether(total)}"
+                f"service.cost - fees={pretty_ether_and_wei(target_amount)}, "
+                f"transferred value={pretty_ether_and_wei(total)}"
             )
         return tx, order_log, transfers[-1]
 
