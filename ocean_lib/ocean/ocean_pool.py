@@ -779,7 +779,7 @@ class OceanPool:
                 {
                     "spotPrice1DT": pool.getSpotPrice(self.ocean_address, dt_address),
                     "totalPrice1DT": self.getOceanRequiredToBuyDT(
-                        pool_address, dt_amount=1.0
+                        pool_address, dt_amount=to_wei(1)
                     ),
                 }
             )
