@@ -155,7 +155,7 @@ metadata =  {
         "type": "dataset", "name": "branin", "author": "Trent",
         "license": "CC0: Public Domain", "dateCreated": date_created,
         "files": [{"index": 0, "contentType": "text/text",
-	           "url": "https://raw.githubusercontent.com/trentmc/branin/master/branin.arff"}]}
+	           "url": "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"}]}
 }
 service_attributes = {
         "main": {
