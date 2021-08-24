@@ -97,7 +97,9 @@ In the work console:
 python
 ```
 
-In the Python console (keep this open for steps that follow):
+For the following steps, we use the Python console. Keep it open between steps.
+
+In the Python console:
 ```python
 #create ocean instance
 from ocean_lib.config import Config
