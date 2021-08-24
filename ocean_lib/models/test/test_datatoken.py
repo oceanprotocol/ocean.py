@@ -265,6 +265,6 @@ def test_calculate_token_holders(alice_ocean, alice_wallet, alice_address):
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
     token.mint(alice_address, to_wei(100), from_wallet=alice_wallet)
-    block = alice_ocean.web3.eth.blockNumber
+    block = alice_ocean.web3.eth.block_number
     token_holders = token.calculate_token_holders(block - 1, block + 1, to_wei(1))
     assert len(token_holders) == 1
