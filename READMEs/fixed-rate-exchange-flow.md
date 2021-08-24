@@ -5,6 +5,8 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Fixed Rate Exchange Flow
 
+This quickstart describes fixed rate exchange flow.
+
 It focuses on Alice's experience as a publisher, and Bob's experience as a buyer & consumer.
 
 Here are the steps:
@@ -39,24 +41,6 @@ docker system prune -a --volumes
 #run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
 ./start_ocean.sh  --with-provider2
 ```
-
-### Run Ocean Market service
-
-In a new console:
-
-```console
-#install
-git clone https://github.com/oceanprotocol/market.git
-cd market
-npm install
-
-#run Ocean Market app
-npm start
-```
-
-Check out the Ocean Market webapp at http://localhost:8000.
-
-Ocean Market is a graphical interface to the backend smart contracts and Ocean services (Aquarius, Provider). The following steps will interface to the backend in a different fashion: using the command-line / console, and won't need Ocean Market. But it's good to understand there are multiple views.
 
 ### Install the library
 
@@ -157,6 +141,7 @@ from ocean_lib.models.btoken import BToken #BToken is ERC20
 OCEAN_token = BToken(ocean.web3, ocean.OCEAN_address)
 assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need OCEAN"
 assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
-fre_exchange_id = ocean.exchange.create(token_address, 0.1, alice_wallet)
-ocean.exchange.buy_at_fixed_rate(2.0, bob_wallet, 5.0, fre_exchange_id, token_address, alice_wallet.address)
+exchange_id = ocean.exchange.create(token_address, 0.1, alice_wallet)
+tx_result = ocean.exchange.buy_at_fixed_rate(2.0, bob_wallet, 5.0, exchange_id, token_address, alice_wallet.address)
+assert tx_result, "failed buying data tokens at fixed rate for Bob"
 ```
