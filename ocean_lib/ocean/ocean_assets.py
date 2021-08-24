@@ -126,6 +126,12 @@ class OceanAssets:
         _service_descriptors.extend(service_type_to_descriptor.values())
         return ServiceFactory.build_services(_service_descriptors)
 
+    def _build_asset_contents(self, asset: Asset, encrypt: bool = False):
+        if not encrypt:
+            return bytes([1]), lzma.compress(Web3.toBytes(text=asset.as_text()))
+
+        return bytes([2]), self._get_aquarius().encrypt(asset.as_text())
+
     def create(
         self,
         metadata: dict,
@@ -138,6 +144,7 @@ class OceanAssets:
         dt_symbol: str = None,
         dt_blob: str = None,
         dt_cap: float = None,
+        encrypt: bool = False,
     ) -> Optional[Asset]:
         """Register an asset on-chain.
 
@@ -326,15 +333,13 @@ class OceanAssets:
 
         # Set datatoken address in the asset
         asset.data_token_address = data_token_address
+        flags, asset_contents = self._build_asset_contents(asset, encrypt)
 
         try:
             # publish the new ddo in ocean-db/Aquarius
             ddo_registry = self.ddo_registry()
             tx_id = ddo_registry.create(
-                asset.asset_id,
-                bytes([1]),
-                lzma.compress(Web3.toBytes(text=asset.as_text())),
-                publisher_wallet,
+                asset.asset_id, flags, asset_contents, publisher_wallet
             )
             if not ddo_registry.verify_tx(tx_id):
                 raise VerifyTxFailed(
@@ -349,16 +354,18 @@ class OceanAssets:
 
         return asset
 
-    def update(self, asset: Asset, publisher_wallet: Wallet) -> str:
+    def update(
+        self, asset: Asset, publisher_wallet: Wallet, encrypt: bool = False
+    ) -> str:
         try:
             # publish the new ddo in ocean-db/Aquarius
             ddo_registry = self.ddo_registry()
+
+            flags, asset_contents = self._build_asset_contents(asset, encrypt)
             tx_id = ddo_registry.update(
-                asset.asset_id,
-                bytes([1]),
-                lzma.compress(Web3.toBytes(text=asset.as_text())),
-                publisher_wallet,
+                asset.asset_id, flags, asset_contents, publisher_wallet
             )
+
             if not ddo_registry.verify_tx(tx_id):
                 raise VerifyTxFailed(
                     f"update DDO on-chain failed, transaction status is 0. Transaction hash is {tx_id}"
