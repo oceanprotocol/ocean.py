@@ -83,7 +83,7 @@ downloads.path = consume-downloads
 In the work console:
 ```console
 #set private keys of two accounts
-export TEST_PRIVATE_KEY1=0xbbfbee4961061d506ffbb11dfea64eba16355cbf1d9c29613126ba7fec0aed5d
+export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 export TEST_PRIVATE_KEY2=0x804365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a
 ```
 
@@ -134,7 +134,7 @@ DATA_metadata = {
         "type": "dataset",
         "files": [
 	  {
-	    "url": "https://raw.githubusercontent.com/trentmc/branin/master/branin.arff",
+	    "url": "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff",
 	    "index": 0,
 	    "contentType": "text/text"
 	  }
@@ -171,8 +171,10 @@ DATA_ddo = ocean.assets.create(
   service_descriptors=[DATA_service_tuple], # [("access", {"attributes": ..})]
   data_token_address=DATA_datatoken.address)
 print(f"DATA did = '{DATA_ddo.did}'")
-
 ```
+
+Full details: [DATA_ddo](DATA_ddo.md)
+
 
 ## 3. Alice publishes algorithm
 
@@ -191,7 +193,7 @@ ALG_metadata =  {
         "type": "algorithm",
         "files": [
 	  {
-	    "url": "https://raw.githubusercontent.com/trentmc/branin/master/gpr.py",
+	    "url": "https://raw.githubusercontent.com/trentmc/branin/main/gpr.py",
 	    "index": 0,
 	    "contentType": "text/text",
 	  }
@@ -223,6 +225,8 @@ ALG_ddo = ocean.assets.create(
   data_token_address=ALG_datatoken.address)
 print(f"ALG did = '{ALG_ddo.did}'")
 ```
+
+Full details: [ALG_ddo](ALG_ddo.md).
 
 ## 4. Alice allows the algorithm for C2D for that data asset
 
