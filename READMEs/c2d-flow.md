@@ -85,9 +85,6 @@ In the work console:
 #set private keys of two accounts
 export TEST_PRIVATE_KEY1=0xbbfbee4961061d506ffbb11dfea64eba16355cbf1d9c29613126ba7fec0aed5d
 export TEST_PRIVATE_KEY2=0x804365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a
-
-#needed to mint fake OCEAN
-export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 ```
 
 ### Config in Python
@@ -123,43 +120,57 @@ assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 
 In the same Python console:
 ```python
-#Set up a service provider. For simplicity, use the same provider for DATA and ALG
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.common.agreements.service_factory import ServiceDescriptor
-service_endpoint = DataServiceProvider.get_url(ocean.config)
-
 #Publish DATA datatoken, mint tokens
 DATA_datatoken = ocean.create_data_token('DATA1', 'DATA1', alice_wallet, blob=ocean.config.metadata_cache_uri)
 DATA_datatoken.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
 print(f"DATA_datatoken.address = '{DATA_datatoken.address}'")
 
-#Specify metadata and service attributes, using the Branin test dataset
+#Specify metadata & service attributes for Branin test dataset.
+# It's specified using _local_ DDO metadata format; Aquarius will convert it to remote
+# by removing `url` and adding `encryptedFiles` field.
 DATA_date_created = "2019-12-28T10:55:11Z"
-DATA_metadata =  {
+DATA_metadata = {
     "main": {
-        "type": "dataset", "name": "branin", "author": "Trent",
-        "license": "CC0: Public Domain", "dateCreated": DATA_date_created,
-        "files": [{"index": 0, "contentType": "text/text",
-	           "url": "https://raw.githubusercontent.com/trentmc/branin/master/branin.arff"}]}
+        "type": "dataset",
+        "files": [
+	  {
+	    "url": "https://raw.githubusercontent.com/trentmc/branin/master/branin.arff",
+	    "index": 0,
+	    "contentType": "text/text"
+	  }
+	],
+	"name": "branin", "author": "Trent", "license": "CC0",
+	"dateCreated": DATA_date_created
+    }
 }
 DATA_service_attributes = {
-        "main": {
-            "name": "DATA_dataAssetAccessServiceAgreement",
-            "creator": alice_wallet.address,
-            "timeout": 3600 * 24,
-            "datePublished": DATA_date_created,
-            "cost": 1.0, # <don't change, this is obsolete>
+    "main": {
+        "name": "DATA_dataAssetAccessServiceAgreement",
+        "creator": alice_wallet.address,
+        "timeout": 3600 * 24,
+        "datePublished": DATA_date_created,
+        "cost": 1.0, # <don't change, this is obsolete>
         }
     }
 
+#Set up a service provider. We'll use this same provider for ALG
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+service_endpoint = DataServiceProvider.get_url(ocean.config)
+#returns "http://localhost:8030"
+
+#Calc DATA service tuple
+from ocean_lib.common.agreements.service_factory import ServiceDescriptor
+DATA_service_tuple = ServiceDescriptor.access_service_descriptor(DATA_service_attributes, service_endpoint)
+#returns ("access",
+#         {"attributes": DATA_service_attributes, "serviceEndpoint": service_endpoint})
+
 #Publish metadata and service info on-chain
-DATA_service = ServiceDescriptor.access_service_descriptor(DATA_service_attributes, service_endpoint)
-DATA_asset = ocean.assets.create(
-  DATA_metadata,
-  alice_wallet,
-  service_descriptors=[DATA_service],
+DATA_ddo = ocean.assets.create(
+  metadata=DATA_metadata, # {"main" : {"type" : "dataset", ..}, ..}
+  publisher_wallet=alice_wallet,
+  service_descriptors=[DATA_service_tuple], # [("access", {"attributes": ..})]
   data_token_address=DATA_datatoken.address)
-print(f"DATA_asset.did = '{DATA_asset.did}'")
+print(f"DATA did = '{DATA_ddo.did}'")
 
 ```
 
@@ -172,16 +183,22 @@ ALG_datatoken = ocean.create_data_token('ALG1', 'ALG1', alice_wallet, blob=ocean
 ALG_datatoken.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
 print(f"ALG_datatoken.address = '{ALG_datatoken.address}'")
 
-#Specify metadata and service attributes, using the Branin test dataset
+#Specify metadata and service attributes, for "GPR" algorithm script.
+# In same location as Branin test dataset. GPR = Gaussian Process Regression.
 ALG_date_created = "2020-01-28T10:55:11Z"
 ALG_metadata =  {
     "main": {
-        "type": "algorithm", "name": "gpr", "author": "Trent",
-        "license": "CC0: Public Domain", "dateCreated": ALG_date_created,
-        "files": [{"name" : "build_model", 
-	           "url": "https://raw.githubusercontent.com/trentmc/branin/master/gpr.py",
-		   "index": 0, "contentType": "text/plain",
-		   }]}
+        "type": "algorithm",
+        "files": [
+	  {
+	    "url": "https://raw.githubusercontent.com/trentmc/branin/master/gpr.py",
+	    "index": 0,
+	    "contentType": "text/text",
+	  }
+	],
+	"name": "gpr", "author": "Trent", "license": "CC0",
+	"dateCreated": ALG_date_created
+    }
 }
 ALG_service_attributes = {
         "main": {
@@ -193,14 +210,18 @@ ALG_service_attributes = {
         }
     }
 
+#Calc ALG service tuple. We use the same service provider as DATA
+ALG_service_tuple = ServiceDescriptor.access_service_descriptor(ALG_service_attributes, service_endpoint)
+#returns ("algorithm",
+#         {"attributes": ALG_service_attributes, "serviceEndpoint": service_endpoint})
+
 #Publish metadata and service info on-chain
-ALG_service = ServiceDescriptor.access_service_descriptor(ALG_service_attributes, service_endpoint)
-ALG_asset = ocean.assets.create(
-  ALG_metadata,
-  alice_wallet,
-  service_descriptors=[ALG_service],
+ALG_ddo = ocean.assets.create(
+  metadata=ALG_metadata, # {"main" : {"type" : "algorithm", ..}, ..}
+  publisher_wallet=alice_wallet,
+  service_descriptors=[ALG_service_tuple], 
   data_token_address=ALG_datatoken.address)
-print(f"ALG_asset.did = '{ALG_asset.did}'")
+print(f"ALG did = '{ALG_ddo.did}'")
 ```
 
 ## 4. Alice allows the algorithm for C2D for that data asset
