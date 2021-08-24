@@ -7,7 +7,6 @@ import logging
 import logging.config
 import os
 import time
-from decimal import Decimal
 
 import coloredlogs
 import yaml
@@ -146,12 +145,10 @@ def mint_tokens_and_wait(
     dtc.get_tx_receipt(dtc.web3, tx_id)
     time.sleep(2)
 
-    def verify_supply(mint_amount=50):
+    def verify_supply(mint_amount=to_wei(50)):
         supply = dtc.contract.caller.totalSupply()
         if supply <= 0:
-            _tx_id = dtc.mint(
-                receiver_address, to_wei(Decimal(mint_amount)), minter_wallet
-            )
+            _tx_id = dtc.mint(receiver_address, mint_amount, minter_wallet)
             dtc.get_tx_receipt(dtc.web3, _tx_id)
             supply = dtc.contract.caller.totalSupply()
         return supply
