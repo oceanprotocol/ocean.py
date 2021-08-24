@@ -231,7 +231,8 @@ pool = ocean.pool.get(ocean.web3, pool_address)
 OCEAN_address = ocean.OCEAN_address
 price_in_OCEAN = ocean.pool.calcInGivenOut(
     pool_address, OCEAN_address, token_address, token_out_amount=to_wei(1))
-print(f"Price of 1 datatoken is {price_in_OCEAN} OCEAN")
+from ocean_lib.web3_internal.currency import wei_and_pretty_ether
+print(f"Price of 1 {datatoken.symbol()} is {wei_and_pretty_ether(price_in_OCEAN, 'OCEAN')}")
 ```
 
 ## 4.  Bob buys data asset, and downloads it
@@ -261,7 +262,7 @@ ocean.pool.buy_data_tokens(
 )
 
 from ocean_lib.web3_internal.currency import wei_and_pretty_ether
-print(f"Bob has {wei_and_pretty_ether(data_token.balanceOf(bob_wallet.address), data_token.symbol())} datatokens.")
+print(f"Bob has {wei_and_pretty_ether(data_token.balanceOf(bob_wallet.address), data_token.symbol())}.")
 
 assert data_token.balanceOf(bob_wallet.address) >= to_wei(1), "Bob didn't get 1.0 datatokens"
 
