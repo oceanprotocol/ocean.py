@@ -95,7 +95,7 @@ python
 
 In the Python console:
 ```python
-#create ocean instance
+#Create ocean instance
 from ocean_lib.config import Config
 from ocean_lib.ocean.ocean import Ocean
 config = Config('config.ini')
@@ -134,14 +134,26 @@ In the same python console:
 bob_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY2'))
 print(f"bob_wallet.address = '{bob_wallet.address}'")
  
- #Verify that Bob has ganache ETH
+#Verify that Bob has ganache ETH
 assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
 from ocean_lib.models.btoken import BToken #BToken is ERC20
 OCEAN_token = BToken(ocean.web3, ocean.OCEAN_address)
 assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need OCEAN"
 assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
+```
+
+If the `exchange_id` is not provided yet, here is the fix.
+It is important to create an `exchange_id` only one time per exchange.
+
+```python
+#Create exchange_id for a new exchange 
 exchange_id = ocean.exchange.create(token_address, 0.1, alice_wallet)
+```
+
+Use the `exchange_id` for buying at fixed rate.
+
+```python
 tx_result = ocean.exchange.buy_at_fixed_rate(2.0, bob_wallet, 5.0, exchange_id, token_address, alice_wallet.address)
 assert tx_result, "failed buying data tokens at fixed rate for Bob"
 ```
