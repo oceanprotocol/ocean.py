@@ -34,6 +34,7 @@ pprint.PrettyPrinter(indent=2).pprint(DATA_ddo.as_dictionary())
           'dateCreated': '2019-12-28T10:55:11Z'
       } }
     },
+
     {
       'type': 'access'
       'index': 3,
@@ -66,6 +67,6 @@ pprint.PrettyPrinter(indent=2).pprint(DATA_ddo.as_dictionary())
     'signatureValue': '0x17d91de3829..',
     'type': 'DDOIntegritySignature'
     }
-  },
+  }
 }
 ```
