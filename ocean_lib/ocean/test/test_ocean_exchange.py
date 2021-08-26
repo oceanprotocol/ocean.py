@@ -5,7 +5,7 @@
 import pytest
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_exchange import OceanExchange
-from ocean_lib.ocean.util import get_contracts_addresses
+from ocean_lib.ocean.util import get_contracts_addresses, to_base_18
 from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
 
 _NETWORK = "ganache"
@@ -16,6 +16,31 @@ def _get_exchange_address(config):
     return get_contracts_addresses(config.address_file, _NETWORK)[
         FixedRateExchange.CONTRACT_NAME
     ]
+
+
+def test_search_exchange_by_data_token(publisher_ocean_instance):
+    """Tests searching exchanges which have matching data token address."""
+    ocn = publisher_ocean_instance
+    alice_wallet = get_publisher_wallet()
+    bob_wallet = get_consumer_wallet()
+    dt = ocn.create_data_token(
+        "DataToken1", "DT1", alice_wallet, blob=ocn.config.metadata_cache_uri
+    )
+    dt.mint_tokens(bob_wallet.address, 100.0, alice_wallet)
+    dt.approve(ocn.exchange._exchange_address, to_base_18(100.0), alice_wallet)
+
+    exchange_id1 = ocn.exchange.create(dt.address, 0.1, alice_wallet)
+
+    exchange_id2 = ocn.exchange.create(dt.address, 0.1, bob_wallet)
+
+    logs = ocn.exchange.search_exchange_by_data_token(dt.address)
+
+    assert logs[0].args.dataToken == dt.address
+    assert logs[1].args.dataToken == dt.address
+    assert exchange_id1 == logs[0].args.exchangeId
+    assert alice_wallet.address == logs[0].args.exchangeOwner
+    assert exchange_id2 == logs[1].args.exchangeId
+    assert bob_wallet.address == logs[1].args.exchangeOwner
 
 
 def test_ocean_exchange(publisher_ocean_instance):
@@ -58,7 +83,7 @@ def test_ocean_exchange(publisher_ocean_instance):
     base_token_amount = ox.get_quote(2.0, exchange_id=x_id)
     assert (
         base_token_amount == 2.0 * rate
-    ), f"unexpected quote of base token {base_token_amount}, should be {2.0*rate}."
+    ), f"unexpected quote of base token {base_token_amount}, should be {2.0 * rate}."
 
     #############
     # test buying datatokens
@@ -86,4 +111,4 @@ def test_ocean_exchange(publisher_ocean_instance):
     base_token_amount = ox.get_quote(2.0, exchange_id=x_id)
     assert (
         base_token_amount == 2.0 * rate
-    ), f"unexpected quote of base token {base_token_amount}, should be {2.0*rate}."
+    ), f"unexpected quote of base token {base_token_amount}, should be {2.0 * rate}."

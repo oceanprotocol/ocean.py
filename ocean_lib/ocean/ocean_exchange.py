@@ -3,14 +3,17 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from typing import Tuple, Union
+from typing import Tuple, Union, List
 
 from enforce_typing import enforce_types
+from web3.datastructures import AttributeDict
+
 from ocean_lib.config import Config
 from ocean_lib.exceptions import VerifyTxFailed, InsufficientBalance
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.util import from_base_18, to_base_18
+from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.exceptions import ValidationError
 from web3.logs import DISCARD
@@ -57,6 +60,14 @@ class OceanExchange:
             exchange,
             exchange.generateExchangeId(self.ocean_address, data_token, exchange_owner),
         )
+
+    def search_exchange_by_data_token(self, data_token: str) -> List[AttributeDict]:
+        fre = self._exchange_contract()
+        filter_args = {"dataToken": data_token}
+        logs = fre.get_event_logs(
+            "ExchangeCreated", 0, self._web3.eth.block_number, filter_args
+        )
+        return logs
 
     def buy_at_fixed_rate(
         self,
