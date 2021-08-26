@@ -27,7 +27,6 @@ class MetadataContract(ContractBase):
     def event_MetadataUpdated(self):
         return self.events.MetadataUpdated()
 
-    @enforce_types
     def get_event_log(
         self, event_name: str, block: int, did: str, timeout: int = 45
     ) -> Optional[AttributeDict]:

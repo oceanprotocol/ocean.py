@@ -185,7 +185,10 @@ class Ocean:
 
     @enforce_types
     def get_user_orders(
-        self, address: str, datatoken: Optional[str] = None, service_id: int = None
+        self,
+        address: str,
+        datatoken: Optional[str] = None,
+        service_id: Optional[int] = None,
     ) -> List[Order]:
         """
         :return: List of orders `[Order]`

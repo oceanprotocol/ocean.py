@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
-from typing import Optional
 
 from enforce_typing import enforce_types
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -24,10 +23,9 @@ class DTFactory(ContractBase):
         )
         return bool(log and log.args.tokenAddress == dt_address)
 
-    @enforce_types
     def get_token_registered_event(
         self, from_block: int, to_block: int, token_address: str
-    ) -> Optional[AttributeDict]:
+    ) -> [AttributeDict]:
         """Retrieves event log of token registration."""
         filter_params = {"tokenAddress": token_address}
         logs = self.get_event_log(
