@@ -11,7 +11,6 @@ from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.did import DID, did_to_id
-from ocean_lib.config import DEFAULT_BLOCK_CONFIRMATIONS
 from ocean_lib.exceptions import InsufficientBalance
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -67,9 +66,10 @@ def test_register_asset(publisher_ocean_instance, encrypt):
     # try to resolve new asset
     did = original_ddo.did
     asset_id = original_ddo.asset_id
+    block_confirmations = ocn.config.block_confirmations
     log = ddo_reg.get_event_log(
         ddo_reg.EVENT_METADATA_CREATED,
-        block - DEFAULT_BLOCK_CONFIRMATIONS,
+        block - block_confirmations,
         asset_id,
         30,
     )
@@ -121,9 +121,10 @@ def test_register_asset(publisher_ocean_instance, encrypt):
         ocn.assets.update(ddo, bob)
 
     _ = ocn.assets.update(ddo, alice, encrypt=encrypt)
+    block_confirmations = ocn.config.block_confirmations
     log = ddo_reg.get_event_log(
         ddo_reg.EVENT_METADATA_UPDATED,
-        block - DEFAULT_BLOCK_CONFIRMATIONS,
+        block - block_confirmations,
         asset_id,
         30,
     )

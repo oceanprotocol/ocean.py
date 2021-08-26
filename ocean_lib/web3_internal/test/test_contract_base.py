@@ -36,7 +36,7 @@ def test_nochild(web3):
         ContractBase(web3, None)
 
 
-def test_main(network, alice_wallet, alice_address, dtfactory_address, web3):
+def test_main(network, alice_wallet, alice_ocean, dtfactory_address, web3):
 
     # test super-simple functionality of child
     factory = MyFactory(web3, dtfactory_address)
@@ -67,10 +67,21 @@ def test_main(network, alice_wallet, alice_address, dtfactory_address, web3):
     assert factory.subscribe_to_event("TokenCreated", 30, None) is None
     assert factory.get_event_argument_names("TokenCreated") == ()
     block = web3.eth.block_number
+    block_confirmations = alice_ocean.config.block_confirmations
     assert (
-        len(factory.get_event_logs("TokenCreated", block - 1, block - 1, None)) == 1
+        len(
+            factory.get_event_logs(
+                "TokenCreated",
+                block - block_confirmations,
+                block - block_confirmations,
+                None,
+            )
+        )
+        == 1
     ), "The token was not created."
-    log = factory.get_event_log("TokenCreated", block - 1, block - 1, None)
+    log = factory.get_event_log(
+        "TokenCreated", block - block_confirmations, block - block_confirmations, None
+    )
     assert len(log) == 1, "The token was not created."
     assert log[0]["event"] == "TokenCreated"
     assert log[0]["address"] == dtfactory_address

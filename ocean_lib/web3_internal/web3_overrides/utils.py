@@ -15,6 +15,11 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 @enforce_types
 def send_dummy_transactions(block_number: int, from_wallet: Wallet) -> None:
+    """Creates and sends dummy transactions for ganache network to increase the block_number by request.
+
+    :param block_number: int is the receipt's block number when it was sent.
+    :param from_wallet: Wallet instance.
+    """
     web3 = from_wallet.web3
     config = Config()
     while web3.eth.block_number < block_number + config.block_confirmations:
@@ -42,6 +47,13 @@ def fetch_transaction(
     from_wallet: Wallet,
     timeout: Optional[int] = None,
 ) -> None:
+    """Settles the transaction on the chain after BLOCK_CONFIRMATIONS blocks depending on the used network.
+
+    :param tx_hash: HexBytes.
+    :param tx: dict.
+    :param from_wallet: Wallet instance.
+    :param timeout: Optional[int] is the network timeout.
+    """
     web3 = from_wallet.web3
     config = Config()
     receipt = (
