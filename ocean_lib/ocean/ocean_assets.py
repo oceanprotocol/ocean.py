@@ -419,8 +419,8 @@ class OceanAssets:
         self,
         query: dict,
         sort: Optional[dict] = None,
-        offset: int = 100,
-        page: int = 1,
+        offset: Optional[int] = 100,
+        page: Optional[int] = 1,
         metadata_cache_uri: Optional[str] = None,
     ) -> list:
         """
