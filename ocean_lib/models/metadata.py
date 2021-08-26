@@ -12,20 +12,22 @@ from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
 
 
-@enforce_types
 class MetadataContract(ContractBase):
     CONTRACT_NAME = "Metadata"
     EVENT_METADATA_CREATED = "MetadataCreated"
     EVENT_METADATA_UPDATED = "MetadataUpdated"
 
     @property
+    @enforce_types
     def event_MetadataCreated(self):
         return self.events.MetadataCreated()
 
     @property
+    @enforce_types
     def event_MetadataUpdated(self):
         return self.events.MetadataUpdated()
 
+    @enforce_types
     def get_event_log(
         self, event_name: str, block: int, did: str, timeout: int = 45
     ) -> Optional[AttributeDict]:
@@ -54,18 +56,21 @@ class MetadataContract(ContractBase):
                 break
         return _log
 
+    @enforce_types
     def verify_tx(self, tx_hash: str) -> bool:
         """
         :return bool:
         """
         return self.get_tx_receipt(self.web3, tx_hash).status == 1
 
+    @enforce_types
     def create(self, did: str, flags: bytes, data: bytes, from_wallet: Wallet) -> str:
         """
         :return str: hex str transaction hash
         """
         return self.send_transaction("create", (did, flags, data), from_wallet)
 
+    @enforce_types
     def update(self, did: str, flags: bytes, data: bytes, from_wallet: Wallet) -> str:
         """
         :return str: hex str transaction hash

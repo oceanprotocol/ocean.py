@@ -214,7 +214,7 @@ class Aquarius:
         )
 
     @enforce_types
-    def encrypt(self, text: str) -> str:
+    def encrypt(self, text: str) -> bytes:
         """
         Encrypt the contents of an asset.
 
@@ -229,7 +229,7 @@ class Aquarius:
             )
 
             if response and response.status_code == 200:
-                return response.content.hex()
+                return response.content
             else:
                 raise ValueError("Failed to encrypt asset.")
         except Exception:

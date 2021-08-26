@@ -66,7 +66,7 @@ def test_encryption_fails(with_evil_client):
     encrypt_endpoint = "http://mock/encrypt/"
     with pytest.raises(OceanEncryptAssetUrlsError):
         DataSP.encrypt_files_dict(
-            "some_files",
+            [{"some_files": "files"}],
             encrypt_endpoint,
             "some_asset_id",
             "some_publisher_address",
@@ -86,7 +86,7 @@ def test_order_requirements_fails(with_evil_client):
             "some_did",
             "http://mock/",
             "some_consumer_address",
-            "some_service_id",
+            0,
             "and_service_type",
             "some_token_address",
             userdata={"test_dict_key": "test_dict_value"},
@@ -103,7 +103,7 @@ def test_start_compute_job_fails_empty(with_empty_client):
             "http://mock/",
             "some_consumer_address",
             "some_signature",
-            "some_service_id",
+            0,
             "some_tx_id",
             algorithm_did="some_algo_did",
         )
@@ -117,7 +117,7 @@ def test_start_compute_job_fails_error_response(with_evil_client):
             "http://mock/",
             "some_consumer_address",
             "some_signature",
-            "some_service_id",
+            0,
             "some_tx_id",
             algorithm_did="some_algo_did",
         )

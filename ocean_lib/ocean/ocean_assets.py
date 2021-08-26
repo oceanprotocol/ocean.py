@@ -8,7 +8,8 @@ import copy
 import logging
 import lzma
 import os
-from typing import Optional, Tuple, Type
+from pathlib import Path
+from typing import Optional, Tuple, Type, Union
 
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
@@ -568,7 +569,7 @@ class OceanAssets:
         service_index: int,
         consumer_wallet: Wallet,
         order_tx_id: str,
-        destination: str,
+        destination: Union[str, Path],
         index: Optional[int] = None,
         userdata: Optional[dict] = None,
     ) -> str:

@@ -10,7 +10,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
 from enforce_typing import enforce_types
-from eth_typing import BlockIdentifier, ChecksumAddress
+from eth_typing import ChecksumAddress
 from hexbytes import HexBytes
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_utils import (
@@ -388,8 +388,8 @@ class ContractBase(object):
     def getLogs(
         event: ContractEvent,
         argument_filters: Optional[Dict[str, Any]] = None,
-        fromBlock: Optional[BlockIdentifier] = None,
-        toBlock: Optional[BlockIdentifier] = None,
+        fromBlock: Optional[int] = None,
+        toBlock: Optional[int] = None,
         blockHash: Optional[HexBytes] = None,
         from_all_addresses: Optional[bool] = False,
     ):
