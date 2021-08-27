@@ -41,8 +41,8 @@ from ocean_lib.exceptions import (
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
-from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
@@ -143,7 +143,7 @@ class OceanAssets:
         dt_name: str = None,
         dt_symbol: str = None,
         dt_blob: str = None,
-        dt_cap: float = None,
+        dt_cap: int = None,
         encrypt: bool = False,
     ) -> Optional[Asset]:
         """Register an asset on-chain.
@@ -165,7 +165,7 @@ class OceanAssets:
         :param dt_symbol: str symbol of DataToken if creating a new one
         :param dt_blob: str blob of DataToken if creating a new one. A `blob` is any text
             to be stored with the ERC20 DataToken contract for any purpose.
-        :param dt_cap: float
+        :param dt_cap: int amount of DataTokens to mint, denoted in wei
         :return: DDO instance
         """
         assert isinstance(
@@ -227,7 +227,7 @@ class OceanAssets:
             # register on-chain
             _cap = dt_cap if dt_cap else DataToken.DEFAULT_CAP
             tx_id = dtfactory.createToken(
-                blob, name, symbol, to_base_18(_cap), from_wallet=publisher_wallet
+                blob, name, symbol, _cap, from_wallet=publisher_wallet
             )
             data_token = DataToken(self._web3, dtfactory.get_token_address(tx_id))
             if not data_token:
@@ -505,7 +505,7 @@ class OceanAssets:
     @staticmethod
     def pay_for_service(
         web3: Web3,
-        amount: float,
+        amount: int,
         token_address: str,
         did: str,
         service_id: int,
@@ -525,14 +525,13 @@ class OceanAssets:
         :param consumer: str the address of consumer of the service, defaults to the payer (the `from_wallet` address)
         :return: hex str id of transfer transaction
         """
-        amount_base = to_base_18(amount)
         dt = DataToken(web3, token_address)
         balance = dt.balanceOf(from_wallet.address)
-        if balance < amount_base:
+        if balance < amount:
             raise InsufficientBalance(
-                f"Your token balance {balance} is not sufficient "
+                f"Your token balance {pretty_ether_and_wei(balance, dt.symbol())} is not sufficient "
                 f"to execute the requested service. This service "
-                f"requires {amount_base} number of tokens."
+                f"requires {pretty_ether_and_wei(amount, dt.symbol())}."
             )
 
         if did.startswith("did:"):
@@ -544,14 +543,10 @@ class OceanAssets:
         if consumer is None:
             consumer = from_wallet.address
 
-        tx_hash = dt.startOrder(
-            consumer, amount_base, service_id, fee_receiver, from_wallet
-        )
+        tx_hash = dt.startOrder(consumer, amount, service_id, fee_receiver, from_wallet)
 
         try:
-            dt.verify_order_tx(
-                tx_hash, did, service_id, amount_base, from_wallet.address
-            )
+            dt.verify_order_tx(tx_hash, did, service_id, amount, from_wallet.address)
             return tx_hash
         except (AssertionError, Exception) as e:
             msg = (

@@ -11,8 +11,8 @@ from eth_typing import BlockIdentifier
 from eth_utils import remove_0x_prefix
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.btoken import BToken
-from ocean_lib.ocean import util
 from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.web3_internal.currency import from_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
 from web3.main import Web3
@@ -33,8 +33,8 @@ class BPool(BToken):
         s += [f"  isPublicSwap = {self.isPublicSwap()}"]
         s += [f"  isFinalized = {self.isFinalized()}"]
 
-        swap_fee = util.from_base_18(self.getSwapFee())
-        s += ["  swapFee = %.2f%%" % (swap_fee * 100.0)]
+        swap_fee = from_wei(self.getSwapFee())
+        s += ["  swapFee = %.2f%%" % (swap_fee * 100)]
 
         s += [f"  numTokens = {self.getNumTokens()}"]
         cur_addrs = self.getCurrentTokens()
@@ -52,19 +52,18 @@ class BPool(BToken):
 
         s += ["  weights (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
-            denorm_w = util.from_base_18(self.getDenormalizedWeight(addr))
-            norm_w = util.from_base_18(self.getNormalizedWeight(addr))
+            denorm_w = from_wei(self.getDenormalizedWeight(addr))
+            norm_w = from_wei(self.getNormalizedWeight(addr))
             s += [f"    {symbol}: denorm_w={denorm_w}, norm_w={norm_w} "]
 
-        total_denorm_w = util.from_base_18(self.getTotalDenormalizedWeight())
+        total_denorm_w = from_wei(self.getTotalDenormalizedWeight())
         s += [f"    total_denorm_w={total_denorm_w}"]
 
         s += ["  balances (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
-            balance_base = self.getBalance(addr)
+            balance = self.getBalance(addr)
             dec = BToken(self.web3, addr).decimals()
-            balance = util.from_base(balance_base, dec)
-            s += [f"    {symbol}: {balance}"]
+            s += [f"    {symbol}: {from_wei(balance, dec)}"]
 
         return "\n".join(s)
 
@@ -170,11 +169,11 @@ class BPool(BToken):
 
     # ==== Controller Functions
 
-    def setSwapFee(self, swapFee_base: int, from_wallet: Wallet) -> str:
+    def setSwapFee(self, swapFee: int, from_wallet: Wallet) -> str:
         """
         Caller must be controller. Pool must NOT be finalized.
         """
-        return self.send_transaction("setSwapFee", (swapFee_base,), from_wallet)
+        return self.send_transaction("setSwapFee", (swapFee,), from_wallet)
 
     def setController(self, manager_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("setController", (manager_address,), from_wallet)
@@ -197,11 +196,7 @@ class BPool(BToken):
         return self.send_transaction("finalize", (), from_wallet)
 
     def bind(
-        self,
-        token_address: str,
-        balance_base: int,
-        weight_base: int,
-        from_wallet: Wallet,
+        self, token_address: str, balance: int, weight: int, from_wallet: Wallet
     ) -> str:
         """
         Binds the token with address `token`. Tokens will be pushed/pulled from
@@ -219,22 +214,18 @@ class BPool(BToken):
         -unspecified error thrown by token
         """
         return self.send_transaction(
-            "bind", (token_address, balance_base, weight_base), from_wallet
+            "bind", (token_address, balance, weight), from_wallet
         )
 
     def rebind(
-        self,
-        token_address: str,
-        balance_base: int,
-        weight_base: int,
-        from_wallet: Wallet,
+        self, token_address: str, balance: int, weight: int, from_wallet: Wallet
     ) -> str:
         """
         Changes the parameters of an already-bound token. Performs the same
         validation on the parameters.
         """
         return self.send_transaction(
-            "rebind", (token_address, balance_base, weight_base), from_wallet
+            "rebind", (token_address, balance, weight), from_wallet
         )
 
     def unbind(self, token_address: str, from_wallet: Wallet) -> str:
@@ -273,10 +264,7 @@ class BPool(BToken):
     # ==== Trading and Liquidity Functions
 
     def joinPool(
-        self,
-        poolAmountOut_base: int,
-        maxAmountsIn_base: typing.List[int],
-        from_wallet: Wallet,
+        self, poolAmountOut: int, maxAmountsIn: typing.List[int], from_wallet: Wallet
     ) -> str:
         """
         Join the pool, getting `poolAmountOut` pool tokens. This will pull some
@@ -285,14 +273,11 @@ class BPool(BToken):
         limited by the array of `maxAmountsIn` in the order of the pool tokens.
         """
         return self.send_transaction(
-            "joinPool", (poolAmountOut_base, maxAmountsIn_base), from_wallet
+            "joinPool", (poolAmountOut, maxAmountsIn), from_wallet
         )
 
     def exitPool(
-        self,
-        poolAmountIn_base: int,
-        minAmountsOut_base: typing.List[int],
-        from_wallet: Wallet,
+        self, poolAmountIn: int, minAmountsOut: typing.List[int], from_wallet: Wallet
     ) -> str:
         """
         Exit the pool, paying `poolAmountIn` pool tokens and getting some of
@@ -300,16 +285,16 @@ class BPool(BToken):
         limited by the array of `minAmountsOut` in the order of the pool tokens.
         """
         return self.send_transaction(
-            "exitPool", (poolAmountIn_base, minAmountsOut_base), from_wallet
+            "exitPool", (poolAmountIn, minAmountsOut), from_wallet
         )
 
     def swapExactAmountIn(
         self,
         tokenIn_address: str,
-        tokenAmountIn_base: int,
+        tokenAmountIn: int,
         tokenOut_address: str,
-        minAmountOut_base: int,
-        maxPrice_base: int,
+        minAmountOut: int,
+        maxPrice: int,
         from_wallet: Wallet,
     ) -> str:
         """
@@ -327,42 +312,30 @@ class BPool(BToken):
         """
         return self.send_transaction(
             "swapExactAmountIn",
-            (
-                tokenIn_address,
-                tokenAmountIn_base,
-                tokenOut_address,
-                minAmountOut_base,
-                maxPrice_base,
-            ),
+            (tokenIn_address, tokenAmountIn, tokenOut_address, minAmountOut, maxPrice),
             from_wallet,
         )
 
     def swapExactAmountOut(
         self,
         tokenIn_address: str,
-        maxAmountIn_base: int,
+        maxAmountIn: int,
         tokenOut_address: str,
-        tokenAmountOut_base: int,
-        maxPrice_base: int,
+        tokenAmountOut: int,
+        maxPrice: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "swapExactAmountOut",
-            (
-                tokenIn_address,
-                maxAmountIn_base,
-                tokenOut_address,
-                tokenAmountOut_base,
-                maxPrice_base,
-            ),
+            (tokenIn_address, maxAmountIn, tokenOut_address, tokenAmountOut, maxPrice),
             from_wallet,
         )
 
     def joinswapExternAmountIn(
         self,
         tokenIn_address: str,
-        tokenAmountIn_base: int,
-        minPoolAmountOut_base: int,
+        tokenAmountIn: int,
+        minPoolAmountOut: int,
         from_wallet: Wallet,
     ) -> str:
         """
@@ -371,15 +344,15 @@ class BPool(BToken):
         """
         return self.send_transaction(
             "joinswapExternAmountIn",
-            (tokenIn_address, tokenAmountIn_base, minPoolAmountOut_base),
+            (tokenIn_address, tokenAmountIn, minPoolAmountOut),
             from_wallet,
         )
 
     def joinswapPoolAmountOut(
         self,
         tokenIn_address: str,
-        poolAmountOut_base: int,
-        maxAmountIn_base: int,
+        poolAmountOut: int,
+        maxAmountIn: int,
         from_wallet: Wallet,
     ) -> str:
         """
@@ -389,15 +362,15 @@ class BPool(BToken):
         """
         return self.send_transaction(
             "joinswapPoolAmountOut",
-            (tokenIn_address, poolAmountOut_base, maxAmountIn_base),
+            (tokenIn_address, poolAmountOut, maxAmountIn),
             from_wallet,
         )
 
     def exitswapPoolAmountIn(
         self,
         tokenOut_address: str,
-        poolAmountIn_base: int,
-        minAmountOut_base: int,
+        poolAmountIn: int,
+        minAmountOut: int,
         from_wallet: Wallet,
     ) -> str:
         """
@@ -406,15 +379,15 @@ class BPool(BToken):
         """
         return self.send_transaction(
             "exitswapPoolAmountIn",
-            (tokenOut_address, poolAmountIn_base, minAmountOut_base),
+            (tokenOut_address, poolAmountIn, minAmountOut),
             from_wallet,
         )
 
     def exitswapExternAmountOut(
         self,
         tokenOut_address: str,
-        tokenAmountOut_base: int,
-        maxPoolAmountIn_base: int,
+        tokenAmountOut: int,
+        maxPoolAmountIn: int,
         from_wallet: Wallet,
     ) -> str:
         """
@@ -424,7 +397,7 @@ class BPool(BToken):
         """
         return self.send_transaction(
             "exitswapExternAmountOut",
-            (tokenOut_address, tokenAmountOut_base, maxPoolAmountIn_base),
+            (tokenOut_address, tokenAmountOut, maxPoolAmountIn),
             from_wallet,
         )
 
@@ -438,149 +411,145 @@ class BPool(BToken):
     def allowance(self, src_address: str, dst_address: str) -> int:
         return self.contract.caller.allowance(src_address, dst_address)
 
-    def approve(self, dst_address: str, amt_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("approve", (dst_address, amt_base), from_wallet)
+    def approve(self, dst_address: str, amt: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("approve", (dst_address, amt), from_wallet)
 
-    def transfer(self, dst_address: str, amt_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("transfer", (dst_address, amt_base), from_wallet)
+    def transfer(self, dst_address: str, amt: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("transfer", (dst_address, amt), from_wallet)
 
     def transferFrom(
-        self, src_address: str, dst_address: str, amt_base: int, from_wallet: Wallet
+        self, src_address: str, dst_address: str, amt: int, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "transferFrom", (dst_address, src_address, amt_base), from_wallet
+            "transferFrom", (dst_address, src_address, amt), from_wallet
         )
 
     # ===== Calculators
     def calcSpotPrice(
         self,
-        tokenBalanceIn_base: int,
-        tokenWeightIn_base: int,
-        tokenBalanceOut_base: int,
-        tokenWeightOut_base: int,
-        swapFee_base: int,
+        tokenBalanceIn: int,
+        tokenWeightIn: int,
+        tokenBalanceOut: int,
+        tokenWeightOut: int,
+        swapFee: int,
     ) -> int:
-        """Returns spotPrice_base."""
+        """Returns spotPrice."""
         return self.contract.caller.calcSpotPrice(
-            tokenBalanceIn_base,
-            tokenWeightIn_base,
-            tokenBalanceOut_base,
-            tokenWeightOut_base,
-            swapFee_base,
+            tokenBalanceIn, tokenWeightIn, tokenBalanceOut, tokenWeightOut, swapFee
         )
 
     def calcOutGivenIn(
         self,
-        tokenBalanceIn_base: int,
-        tokenWeightIn_base: int,
+        tokenBalanceIn: int,
+        tokenWeightIn: int,
         tokenBalanceOut: int,
-        tokenWeightOut_base: int,
-        tokenAmountIn_base: int,
-        swapFee_base: int,
+        tokenWeightOut: int,
+        tokenAmountIn: int,
+        swapFee: int,
     ) -> int:
-        """Returns tokenAmountOut_base."""
+        """Returns tokenAmountOut."""
         return self.contract.caller.calcOutGivenIn(
-            tokenBalanceIn_base,
-            tokenWeightIn_base,
+            tokenBalanceIn,
+            tokenWeightIn,
             tokenBalanceOut,
-            tokenWeightOut_base,
-            tokenAmountIn_base,
-            swapFee_base,
+            tokenWeightOut,
+            tokenAmountIn,
+            swapFee,
         )
 
     def calcInGivenOut(
         self,
-        tokenBalanceIn_base: int,
-        tokenWeightIn_base: int,
-        tokenBalanceOut_base: int,
-        tokenWeightOut_base: int,
-        tokenAmountOut_base: int,
-        swapFee_base: int,
+        tokenBalanceIn: int,
+        tokenWeightIn: int,
+        tokenBalanceOut: int,
+        tokenWeightOut: int,
+        tokenAmountOut: int,
+        swapFee: int,
     ) -> int:
-        """Returns tokenAmountIn_base."""
+        """Returns tokenAmountIn."""
         return self.contract.caller.calcInGivenOut(
-            tokenBalanceIn_base,
-            tokenWeightIn_base,
-            tokenBalanceOut_base,
-            tokenWeightOut_base,
-            tokenAmountOut_base,
-            swapFee_base,
+            tokenBalanceIn,
+            tokenWeightIn,
+            tokenBalanceOut,
+            tokenWeightOut,
+            tokenAmountOut,
+            swapFee,
         )
 
     def calcPoolOutGivenSingleIn(
         self,
-        tokenBalanceIn_base: int,
-        tokenWeightIn_base: int,
-        poolSupply_base: int,
-        totalWeight_base: int,
-        tokenAmountIn_base: int,
-        swapFee_base: int,
+        tokenBalanceIn: int,
+        tokenWeightIn: int,
+        poolSupply: int,
+        totalWeight: int,
+        tokenAmountIn: int,
+        swapFee: int,
     ) -> int:
-        """Returns poolAmountOut_base."""
+        """Returns poolAmountOut."""
         return self.contract.caller.calcPoolOutGivenSingleIn(
-            tokenBalanceIn_base,
-            tokenWeightIn_base,
-            poolSupply_base,
-            totalWeight_base,
-            tokenAmountIn_base,
-            swapFee_base,
+            tokenBalanceIn,
+            tokenWeightIn,
+            poolSupply,
+            totalWeight,
+            tokenAmountIn,
+            swapFee,
         )
 
     def calcSingleInGivenPoolOut(
         self,
-        tokenBalanceIn_base: int,
-        tokenWeightIn_base: int,
-        poolSupply_base: int,
-        totalWeight_base: int,
-        poolAmountOut_base: int,
-        swapFee_base: int,
+        tokenBalanceIn: int,
+        tokenWeightIn: int,
+        poolSupply: int,
+        totalWeight: int,
+        poolAmountOut: int,
+        swapFee: int,
     ) -> int:
-        """Returns tokenAmountIn_base."""
+        """Returns tokenAmountIn."""
         return self.contract.caller.calcSingleInGivenPoolOut(
-            tokenBalanceIn_base,
-            tokenWeightIn_base,
-            poolSupply_base,
-            totalWeight_base,
-            poolAmountOut_base,
-            swapFee_base,
+            tokenBalanceIn,
+            tokenWeightIn,
+            poolSupply,
+            totalWeight,
+            poolAmountOut,
+            swapFee,
         )
 
     def calcSingleOutGivenPoolIn(
         self,
-        tokenBalanceOut_base: int,
-        tokenWeightOut_base: int,
-        poolSupply_base: int,
-        totalWeight_base: int,
-        poolAmountIn_base: int,
-        swapFee_base: int,
+        tokenBalanceOut: int,
+        tokenWeightOut: int,
+        poolSupply: int,
+        totalWeight: int,
+        poolAmountIn: int,
+        swapFee: int,
     ) -> int:
-        """Returns tokenAmountOut_base."""
+        """Returns tokenAmountOut."""
         return self.contract.caller.calcSingleOutGivenPoolIn(
-            tokenBalanceOut_base,
-            tokenWeightOut_base,
-            poolSupply_base,
-            totalWeight_base,
-            poolAmountIn_base,
-            swapFee_base,
+            tokenBalanceOut,
+            tokenWeightOut,
+            poolSupply,
+            totalWeight,
+            poolAmountIn,
+            swapFee,
         )
 
     def calcPoolInGivenSingleOut(
         self,
-        tokenBalanceOut_base: int,
-        tokenWeightOut_base: int,
-        poolSupply_base: int,
-        totalWeight_base: int,
-        tokenAmountOut_base: int,
-        swapFee_base: int,
+        tokenBalanceOut: int,
+        tokenWeightOut: int,
+        poolSupply: int,
+        totalWeight: int,
+        tokenAmountOut: int,
+        swapFee: int,
     ) -> int:
-        """Returns poolAmountIn_base."""
+        """Returns poolAmountIn."""
         return self.contract.caller.calcPoolInGivenSingleOut(
-            tokenBalanceOut_base,
-            tokenWeightOut_base,
-            poolSupply_base,
-            totalWeight_base,
-            tokenAmountOut_base,
-            swapFee_base,
+            tokenBalanceOut,
+            tokenWeightOut,
+            poolSupply,
+            totalWeight,
+            tokenAmountOut,
+            swapFee,
         )
 
     # ===== Events
