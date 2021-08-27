@@ -285,7 +285,7 @@ class ContractBase(object):
 
         return cls.get_tx_receipt(web3, tx_hash, timeout=60).contractAddress
 
-    @enforce_types
+    # can not enforce types since this goes through ContractEvent with Subscriptable Generics
     def get_event_log(
         self,
         event_name: str,
@@ -336,7 +336,7 @@ class ContractBase(object):
 
         return all_logs
 
-    @enforce_types
+    # can not enforce types since this goes through ContractEvent with Subscriptable Generics
     def get_event_logs(
         self,
         event_name: str,

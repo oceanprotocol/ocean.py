@@ -23,6 +23,7 @@ class DTFactory(ContractBase):
         )
         return bool(log and log.args.tokenAddress == dt_address)
 
+    @enforce_types
     def get_token_registered_event(
         self, from_block: int, to_block: int, token_address: str
     ) -> [AttributeDict]:
