@@ -18,10 +18,10 @@ from ocean_lib.common.http_requests.requests_session import get_requests_session
 logger = logging.getLogger("aquarius")
 
 
-@enforce_types
 class Aquarius:
     """Aquarius wrapper to call different endpoint of aquarius component."""
 
+    @enforce_types
     def __init__(self, aquarius_url: str) -> None:
         """
         The Metadata class is a wrapper on the Metadata Store, which has exposed a REST API.
@@ -41,6 +41,7 @@ class Aquarius:
 
         self.requests_session = get_requests_session()
 
+    @enforce_types
     def get_service_endpoint(self) -> str:
         """
         Retrieve the endpoint with the ddo for a given did.
@@ -49,6 +50,7 @@ class Aquarius:
         """
         return f"{self.base_url}/ddo/" + "{did}"
 
+    @enforce_types
     def get_encrypt_endpoint(self) -> str:
         """
         Retrieve the endpoint for DDO encrption
@@ -57,6 +59,7 @@ class Aquarius:
         """
         return f"{self.base_url}/ddo/encrypt"
 
+    @enforce_types
     def get_asset_ddo(self, did: str) -> Union[DDO, dict]:
         """
         Retrieve asset ddo for a given did.
@@ -72,6 +75,7 @@ class Aquarius:
 
         return DDO(dictionary=parsed_response)
 
+    @enforce_types
     def ddo_exists(self, did: str) -> bool:
         """
         Return whether the DDO with this did exists in Aqua
@@ -83,6 +87,7 @@ class Aquarius:
 
         return "asset DID is not in OceanDB" not in str(response)
 
+    @enforce_types
     def get_asset_metadata(self, did: str) -> list:
         """
         Retrieve asset metadata for a given did.
@@ -95,8 +100,13 @@ class Aquarius:
 
         return parsed_response
 
+    @enforce_types
     def text_search(
-        self, text: str, sort: Optional[int] = None, offset: int = 100, page: int = 1
+        self,
+        text: str,
+        sort: Optional[dict] = None,
+        offset: Optional[int] = 100,
+        page: Optional[int] = 1,
     ) -> list:
         """
         Search in aquarius using text query.
@@ -120,6 +130,7 @@ class Aquarius:
         :return: List of DDO instance
         """
         assert page >= 1, f"Invalid page value {page}. Required page >= 1."
+        sort = sort if sort else {}
         payload = {"text": text, "sort": sort, "offset": offset, "page": page}
         response = self.requests_session.post(
             f"{self.base_url}/ddo/query",
@@ -131,12 +142,13 @@ class Aquarius:
 
         raise ValueError(f"Unable to search for DDO: {response.content}")
 
+    @enforce_types
     def query_search(
         self,
         search_query: dict,
         sort: Optional[dict] = None,
-        offset: int = 100,
-        page: int = 1,
+        offset: Optional[int] = 100,
+        page: Optional[int] = 1,
     ) -> list:
         """
         Search using a query.
@@ -169,6 +181,7 @@ class Aquarius:
 
         raise ValueError(f"Unable to search for DDO: {response.content}")
 
+    @enforce_types
     def validate_metadata(self, metadata: dict) -> Tuple[bool, Union[list, dict]]:
         """
         Validate that the metadata of your ddo is valid.
@@ -189,6 +202,7 @@ class Aquarius:
         return False, parsed_response
 
     @staticmethod
+    @enforce_types
     def _parse_search_response(response: Any) -> Union[list, dict]:
         parsed_response = _parse_response(response, None)
 
@@ -199,7 +213,8 @@ class Aquarius:
             f"Unknown search response, expecting a list or dict, got {type(parsed_response)}."
         )
 
-    def encrypt(self, text: str) -> str:
+    @enforce_types
+    def encrypt(self, text: str) -> bytes:
         """
         Encrypt the contents of an asset.
 
@@ -214,13 +229,14 @@ class Aquarius:
             )
 
             if response and response.status_code == 200:
-                return response.content.hex()
+                return response.content
             else:
                 raise ValueError("Failed to encrypt asset.")
         except Exception:
             raise ValueError("Failed to encrypt asset.")
 
 
+@enforce_types
 def _parse_response(response: Any, default_return: Any) -> Any:
     if not response:
         return default_return

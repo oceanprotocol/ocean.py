@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from typing import Tuple, Union
+from typing import Optional, Tuple, Union
 
 from enforce_typing import enforce_types
 from ocean_lib.config import Config
@@ -17,8 +17,8 @@ from web3.logs import DISCARD
 from web3.main import Web3
 
 
-@enforce_types
 class OceanExchange:
+    @enforce_types
     def __init__(
         self,
         web3: Web3,
@@ -32,13 +32,16 @@ class OceanExchange:
         self._config = config
         self._web3 = web3
 
+    @enforce_types
     def _exchange_contract(self) -> FixedRateExchange:
         return FixedRateExchange(self._web3, self._exchange_address)
 
-    def get_quote(self, amount: int, exchange_id: str) -> int:
+    @enforce_types
+    def get_quote(self, amount: int, exchange_id: Union[str, bytes]) -> int:
         exchange = self._exchange_contract()
         return exchange.get_base_token_quote(exchange_id, amount)
 
+    @enforce_types
     def get_exchange_id_fallback_dt_and_owner(
         self, exchange_id: Union[bytes, str], exchange_owner: str, data_token: str
     ) -> Tuple[FixedRateExchange, bytes]:
@@ -56,14 +59,15 @@ class OceanExchange:
             exchange.generateExchangeId(self.ocean_address, data_token, exchange_owner),
         )
 
+    @enforce_types
     def buy_at_fixed_rate(
         self,
         amount: int,
         wallet: Wallet,
         max_OCEAN_amount: int,
-        exchange_id: str = "",
-        data_token: str = "",
-        exchange_owner: str = "",
+        exchange_id: Optional[Union[bytes, str]] = "",
+        data_token: Optional[str] = "",
+        exchange_owner: Optional[str] = "",
     ) -> bool:
 
         exchange, exchange_id = self.get_exchange_id_fallback_dt_and_owner(
@@ -95,6 +99,7 @@ class OceanExchange:
         )
         return bool(exchange.get_tx_receipt(self._web3, tx_id).status)
 
+    @enforce_types
     def create(self, data_token: str, exchange_rate: int, wallet: Wallet) -> str:
         assert exchange_rate > 0, "Invalid exchange rate, must be > 0"
         exchange = self._exchange_contract()
@@ -120,13 +125,14 @@ class OceanExchange:
 
         return exchange_id
 
+    @enforce_types
     def setRate(
         self,
         new_rate: int,
         wallet: Wallet,
-        exchange_id: str = "",
-        data_token: str = "",
-        exchange_owner: str = "",
+        exchange_id: Optional[Union[bytes, str]] = "",
+        data_token: Optional[str] = "",
+        exchange_owner: Optional[str] = "",
     ) -> bool:
         assert new_rate > 0, "Invalid exchange rate, must be > 0"
 

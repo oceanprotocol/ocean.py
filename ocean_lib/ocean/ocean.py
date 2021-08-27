@@ -35,11 +35,11 @@ from web3.main import Web3
 logger = logging.getLogger("ocean")
 
 
-@enforce_types
 class Ocean:
 
     """The Ocean class is the entry point into Ocean Protocol."""
 
+    @enforce_types
     def __init__(
         self, config: Union[Dict, Config], data_provider: Optional[Type] = None
     ) -> None:
@@ -119,9 +119,11 @@ class Ocean:
         logger.debug("Ocean instance initialized: ")
 
     @property
+    @enforce_types
     def OCEAN_address(self) -> str:
         return get_ocean_token_address(self.config.address_file, web3=self.web3)
 
+    @enforce_types
     def create_data_token(
         self,
         name: str,
@@ -156,6 +158,7 @@ class Ocean:
         dt = DataToken(self.web3, address)
         return dt
 
+    @enforce_types
     def get_data_token(self, token_address: str) -> DataToken:
         """
         :param token_address: Token contract address, str
@@ -164,6 +167,7 @@ class Ocean:
 
         return DataToken(self.web3, token_address)
 
+    @enforce_types
     def get_dtfactory(self, dtfactory_address: str = "") -> DTFactory:
         """
         :param dtfactory_address: contract address, str
@@ -175,8 +179,12 @@ class Ocean:
         )
         return DTFactory(self.web3, dtf_address)
 
+    @enforce_types
     def get_user_orders(
-        self, address: str, datatoken: Optional[str] = None, service_id: int = None
+        self,
+        address: str,
+        datatoken: Optional[str] = None,
+        service_id: Optional[int] = None,
     ) -> List[Order]:
         """
         :return: List of orders `[Order]`

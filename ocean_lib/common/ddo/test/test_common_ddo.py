@@ -35,7 +35,7 @@ def test_creating_ddo_from_scratch():
 
     pub_acc = get_publisher_wallet()
 
-    ddo.add_proof("checksum", pub_acc)
+    ddo.add_proof({"checksum": "test"}, pub_acc)
     ddo_text_proof = ddo.as_text()
     assert ddo_text_proof
 
@@ -48,7 +48,7 @@ def test_ddo_dict():
     ddo1 = DDO(json_filename=sample_ddo_path)
     assert ddo1.did == "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019"
 
-    ddo1.add_proof("checksum", get_publisher_wallet())
+    ddo1.add_proof({"checksum": "test"}, get_publisher_wallet())
 
     ddo_dict = ddo1.as_dictionary()
     assert ddo_dict["publicKey"][0]["id"] == ddo1.did

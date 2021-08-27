@@ -26,7 +26,7 @@ class MalformedCredential(Exception):
     pass
 
 
-@enforce_types
 class AssetNotConsumable(Exception):
+    @enforce_types
     def __init__(self, consumable_code: int) -> None:
         self.consumable_code = consumable_code

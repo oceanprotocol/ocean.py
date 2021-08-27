@@ -255,7 +255,7 @@ def test_download(alice_ocean, alice_wallet, tmpdir):
         blob="https://s3.amazonaws.com/testfiles.oceanprotocol.com/info.0.json",
     )
 
-    written_path = token.download(alice_wallet, "test", tmpdir)
+    written_path = token.download(alice_wallet, "test", str(tmpdir))
     assert os.path.exists(written_path)
 
 

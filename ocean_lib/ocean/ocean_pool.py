@@ -22,7 +22,6 @@ from web3.main import Web3
 logger = logging.getLogger(__name__)
 
 
-@enforce_types
 class OceanPool:
 
     """
@@ -51,6 +50,7 @@ class OceanPool:
         "dtHolders",
     }
 
+    @enforce_types
     def __init__(
         self, web3: Web3, ocean_token_address: str, bfactory_address: str
     ) -> None:
@@ -59,6 +59,7 @@ class OceanPool:
         self.ocean_address = ocean_token_address
         self.bfactory_address = bfactory_address
 
+    @enforce_types
     def create(
         self,
         data_token_address: str,
@@ -135,9 +136,11 @@ class OceanPool:
         return pool
 
     @staticmethod
+    @enforce_types
     def get(web3: Web3, pool_address: str) -> BPool:
         return BPool(web3, pool_address)
 
+    @enforce_types
     def get_token_address(
         self, pool_address: str, pool: BPool = None, validate: bool = True
     ) -> str:
@@ -151,12 +154,14 @@ class OceanPool:
         tokens = pool.getCurrentTokens()
         return tokens[0] if tokens[0] != self.ocean_address else tokens[1]
 
+    @enforce_types
     def get_OCEAN_address(self) -> str:
         return self.ocean_address
 
     # ============================================================
     # to simplify balancer flows. These methods are here because
     # BPool doesn't know (and shouldn't know) OCEAN_address and _DT_address
+    @enforce_types
     def add_data_token_liquidity(
         self, pool_address: str, amount: int, from_wallet: Wallet
     ) -> str:
@@ -176,6 +181,7 @@ class OceanPool:
             pool_address, self.get_token_address(pool_address), amount, from_wallet
         )
 
+    @enforce_types
     def add_OCEAN_liquidity(
         self, pool_address: str, amount: int, from_wallet: Wallet
     ) -> str:
@@ -192,6 +198,7 @@ class OceanPool:
             pool_address, self.ocean_address, amount, from_wallet
         )
 
+    @enforce_types
     def _add_liquidity(
         self, pool_address: str, token_address: str, amount: int, from_wallet: Wallet
     ) -> str:
@@ -215,6 +222,7 @@ class OceanPool:
         pool_amount = pool.joinswapExternAmountIn(token_address, amount, 0, from_wallet)
         return pool_amount
 
+    @enforce_types
     def remove_data_token_liquidity(
         self, pool_address: str, amount: int, max_pool_shares: int, from_wallet: Wallet
     ) -> str:
@@ -234,6 +242,7 @@ class OceanPool:
             pool_address, dt_address, amount, max_pool_shares, from_wallet
         )
 
+    @enforce_types
     def remove_OCEAN_liquidity(
         self, pool_address: str, amount: int, max_pool_shares: int, from_wallet: Wallet
     ) -> str:
@@ -252,6 +261,7 @@ class OceanPool:
             pool_address, self.ocean_address, amount, max_pool_shares, from_wallet
         )
 
+    @enforce_types
     def _remove_liquidity(
         self,
         pool_address: str,
@@ -276,6 +286,7 @@ class OceanPool:
             token_address, amount, max_pool_shares, from_wallet
         )
 
+    @enforce_types
     def buy_data_tokens(
         self, pool_address: str, amount: int, max_OCEAN_amount: int, from_wallet: Wallet
     ) -> str:
@@ -310,6 +321,7 @@ class OceanPool:
             from_wallet=from_wallet,
         )
 
+    @enforce_types
     def sell_data_tokens(
         self, pool_address: str, amount: int, min_OCEAN_amount: int, from_wallet: Wallet
     ) -> str:
@@ -344,6 +356,7 @@ class OceanPool:
             from_wallet=from_wallet,
         )
 
+    @enforce_types
     def get_token_price(self, pool_address: str) -> int:
         """
 
@@ -356,6 +369,7 @@ class OceanPool:
             tokenIn_address=self.ocean_address, tokenOut_address=dtoken_address
         )
 
+    @enforce_types
     def add_liquidity_finalized(
         self,
         pool_address: str,
@@ -401,6 +415,7 @@ class OceanPool:
             from_wallet=from_wallet,
         )
 
+    @enforce_types
     def _is_valid_pool(self, pool_address: str) -> bool:
         pool = BPool(self.web3, pool_address)
         if pool.getNumTokens() != 2:
@@ -414,20 +429,25 @@ class OceanPool:
     ###########################################################################
     # convenient functions
 
+    @enforce_types
     def getReserve(self, pool_address: str, token_address: str) -> int:
         return BPool(self.web3, pool_address).getBalance(token_address)
 
+    @enforce_types
     def getMaxBuyQuantity(self, pool_address, token_address):
         return int(self.getReserve(pool_address, token_address) / 3)
 
+    @enforce_types
     def getOceanMaxBuyQuantity(self, pool_address):
         return self.getMaxBuyQuantity(pool_address, self.ocean_address)
 
+    @enforce_types
     def getDTMaxBuyQuantity(self, pool_address):
         return self.getMaxBuyQuantity(
             pool_address, self.get_token_address(pool_address)
         )
 
+    @enforce_types
     def calcInGivenOut(
         self,
         pool_address: str,
@@ -445,6 +465,7 @@ class OceanPool:
             pool.getSwapFee(),
         )
 
+    @enforce_types
     def calcOutGivenIn(
         self,
         pool_address: str,
@@ -462,6 +483,7 @@ class OceanPool:
             pool.getSwapFee(),
         )
 
+    @enforce_types
     def calcPoolOutGivenSingleIn(
         self, pool_address: str, token_in_address: str, token_in_amount: int
     ) -> int:
@@ -475,6 +497,7 @@ class OceanPool:
             pool.getSwapFee(),
         )
 
+    @enforce_types
     def calcSingleInGivenPoolOut(
         self, pool_address: str, token_in_address: str, pool_shares: int
     ) -> int:
@@ -488,6 +511,7 @@ class OceanPool:
             pool.getSwapFee(),
         )
 
+    @enforce_types
     def calcSingleOutGivenPoolIn(
         self, pool_address: str, token_out_address: str, pool_shares: int
     ) -> int:
@@ -501,6 +525,7 @@ class OceanPool:
             pool.getSwapFee(),
         )
 
+    @enforce_types
     def calcPoolInGivenSingleOut(
         self, pool_address: str, token_out_address: str, token_out_amount: int
     ):
@@ -514,6 +539,7 @@ class OceanPool:
             pool.getSwapFee(),
         )
 
+    @enforce_types
     def getPoolSharesRequiredToRemoveDT(self, pool_address: str, dt_amount: int):
         dt = self.get_token_address(pool_address)
         return self.calcPoolInGivenSingleOut(pool_address, dt, dt_amount)
@@ -522,6 +548,7 @@ class OceanPool:
     #     dt = self.get_token_address(pool_address)
     #     return self.calcSingleOutGivenPoolIn(pool_address, dt, pool_shares)
 
+    @enforce_types
     def getPoolSharesRequiredToRemoveOcean(self, pool_address: str, ocean_amount: int):
         return self.calcPoolInGivenSingleOut(
             pool_address, self.ocean_address, ocean_amount
@@ -530,40 +557,49 @@ class OceanPool:
     # def getPoolSharesForRemoveOcean(self, pool_address: str, pool_shares: int):
     #     return self.calcSingleOutGivenPoolIn(pool_address, )
 
+    @enforce_types
     def getDTMaxAddLiquidity(self, pool_address: str):
         return self.getMaxAddLiquidity(
             pool_address, self.get_token_address(pool_address)
         )
 
+    @enforce_types
     def getOceanMaxAddLiquidity(self, pool_address: str):
         return self.getMaxAddLiquidity(pool_address, self.ocean_address)
 
+    @enforce_types
     def getMaxAddLiquidity(self, pool_address, token_address):
         return int(self.getReserve(pool_address, token_address) / 2)
 
+    @enforce_types
     def getMaxRemoveLiquidity(self, pool_address: str, token_address: str):
         return int(self.getReserve(pool_address, token_address) / 3)
 
+    @enforce_types
     def getDTMaxRemoveLiquidity(self, pool_address):
         return self.getMaxRemoveLiquidity(
             pool_address, self.get_token_address(pool_address)
         )
 
+    @enforce_types
     def getOceanMaxRemoveLiquidity(self, pool_address):
         return self.getMaxRemoveLiquidity(pool_address, self.ocean_address)
 
+    @enforce_types
     def getDTRequiredToBuyOcean(self, pool_address: str, ocean_amount: int):
         pool = BPool(self.web3, pool_address)
         _in = self.get_token_address(pool_address, pool=pool)
         _out = self.ocean_address
         return self.getTokenPrice(pool, _in, _out, ocean_amount)
 
+    @enforce_types
     def getOceanRequiredToBuyDT(self, pool_address: str, dt_amount: int):
         pool = BPool(self.web3, pool_address)
         _out = self.get_token_address(pool_address, pool=pool)
         _in = self.ocean_address
         return self.getTokenPrice(pool, _in, _out, dt_amount)
 
+    @enforce_types
     def getTokenPrice(self, pool, token_in, token_out, amount_out) -> int:
         return pool.calcInGivenOut(
             pool.getBalance(token_in),
@@ -574,6 +610,7 @@ class OceanPool:
             pool.getSwapFee(),
         )
 
+    @enforce_types
     def get_all_pools(self, from_block=0, chunk_size=1000, include_balance=False):
         current_block = self.web3.eth.block_number
 
@@ -600,6 +637,7 @@ class OceanPool:
 
         return pools
 
+    @enforce_types
     def get_account_to_liquidity_records_map(self, records):
         lps = {r[0] for r in records}
         a_to_token_amount = {a: [] for a in lps}
@@ -607,6 +645,7 @@ class OceanPool:
             a_to_token_amount[r[0]].append(r)
         return a_to_token_amount
 
+    @enforce_types
     def _get_all_liquidity_records(
         self,
         action,
@@ -675,6 +714,7 @@ class OceanPool:
             _all.append(record)
         return _all
 
+    @enforce_types
     def get_all_liquidity_additions(
         self,
         pool_address,
@@ -687,6 +727,7 @@ class OceanPool:
             "join", pool_address, block_number, to_block, token_address, raw_result
         )
 
+    @enforce_types
     def get_all_liquidity_removals(
         self,
         pool_address,
@@ -699,6 +740,7 @@ class OceanPool:
             "exit", pool_address, block_number, to_block, token_address, raw_result
         )
 
+    @enforce_types
     def get_all_swaps(
         self,
         pool_address,
@@ -711,6 +753,7 @@ class OceanPool:
             "swap", pool_address, block_number, to_block, token_address, raw_result
         )
 
+    @enforce_types
     def get_short_pool_info(
         self, pool_address, dt_address=None, from_block=None, to_block=None
     ):
@@ -722,6 +765,7 @@ class OceanPool:
             ["price", "reserve", "liquidityTotals"],
         )
 
+    @enforce_types
     def get_pool_info(
         self, pool_address, dt_address=None, from_block=None, to_block=None, flags=None
     ):
@@ -938,6 +982,7 @@ class OceanPool:
         )
         return info_dict
 
+    @enforce_types
     def get_liquidity_history(self, pool_address):
         pool_block = self.get_creation_block(pool_address)
 
@@ -1015,6 +1060,7 @@ class OceanPool:
         ]
         return ocn_add_remove_list, dt_add_remove_list
 
+    @enforce_types
     def get_user_balances(self, user_address, from_block):
         current_block = self.web3.eth.block_number
         pool = BPool(self.web3, None)
@@ -1031,6 +1077,7 @@ class OceanPool:
         }
         return balances
 
+    @enforce_types
     def get_creation_block(self, pool_address):
         bfactory = BFactory(self.web3, self.bfactory_address)
         current_block = self.web3.eth.block_number

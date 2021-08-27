@@ -228,8 +228,8 @@ def test_download_fails(publisher_ocean_instance):
     _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did)
     assert _ddo, f"assets.resolve failed for did {ddo.did}"
     with pytest.raises(AssertionError):
-        publisher_ocean_instance.assets.download(ddo.did, "", publisher, "", "", -4)
-    with pytest.raises(AssertionError):
+        publisher_ocean_instance.assets.download(ddo.did, 1, publisher, "", "", -4)
+    with pytest.raises(TypeError):
         publisher_ocean_instance.assets.download(
             ddo.did, "", publisher, "", "", "string_index"
         )
