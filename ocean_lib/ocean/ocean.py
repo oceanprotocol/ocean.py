@@ -22,12 +22,10 @@ from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.ocean_pool import OceanPool
 from ocean_lib.ocean.ocean_services import OceanServices
 from ocean_lib.ocean.util import (
-    from_base_18,
     get_bfactory_address,
     get_contracts_addresses,
     get_ocean_token_address,
     get_web3_connection_provider,
-    to_base_18,
 )
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
@@ -131,7 +129,7 @@ class Ocean:
         name: str,
         symbol: str,
         from_wallet: Wallet,
-        cap: float = DataToken.DEFAULT_CAP,
+        cap: int = DataToken.DEFAULT_CAP,
         blob: str = "",
     ) -> DataToken:
         """
@@ -148,15 +146,13 @@ class Ocean:
         :param name: Datatoken name, str
         :param symbol: Datatoken symbol, str
         :param from_wallet: wallet instance, wallet
-        :param cap: float
+        :param cap: Amount of data tokens to create, denoted in wei, int
 
         :return: `Datatoken` instance
         """
 
         dtfactory = self.get_dtfactory()
-        tx_id = dtfactory.createToken(
-            blob, name, symbol, to_base_18(cap), from_wallet=from_wallet
-        )
+        tx_id = dtfactory.createToken(blob, name, symbol, cap, from_wallet=from_wallet)
         address = dtfactory.get_token_address(tx_id)
         assert address, "new datatoken has no address"
         dt = DataToken(self.web3, address)
@@ -199,8 +195,8 @@ class Ocean:
             address, from_all_tokens=not bool(datatoken)
         ):
             a = dict(log.args.items())
-            a["amount"] = from_base_18(int(log.args.amount))
-            a["marketFee"] = from_base_18(int(log.args.marketFee))
+            a["amount"] = int(log.args.amount)
+            a["marketFee"] = int(log.args.marketFee)
             a = AttributeDict(a.items())
 
             # 'datatoken', 'amount', 'timestamp', 'transactionId', 'did', 'payer', 'consumer', 'serviceId', 'serviceType'

@@ -9,6 +9,7 @@ import logging
 import os
 import re
 from collections import namedtuple
+from decimal import Decimal
 from json import JSONDecodeError
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -23,6 +24,7 @@ from ocean_lib.config import Config
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
 from requests.exceptions import InvalidURL
@@ -177,7 +179,9 @@ class DataServiceProvider:
         order = dict(response.json())
 
         return OrderRequirements(
-            float(order["numTokens"]),
+            to_wei(
+                Decimal(order["numTokens"])
+            ),  # comes as float, needs to be converted
             order["dataToken"],
             order["to"],
             int(order["nonce"]),
