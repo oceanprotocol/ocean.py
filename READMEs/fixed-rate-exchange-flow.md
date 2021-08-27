@@ -39,7 +39,7 @@ cd barge
 docker system prune -a --volumes
 
 #run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-./start_ocean.sh  --with-provider2
+./start_ocean.sh
 ```
 
 ### Install the library
