@@ -12,13 +12,13 @@ from ocean_lib.common.ddo.service import Service
 Agreement = namedtuple("Agreement", ("template", "conditions"))
 
 
-@enforce_types
 class ServiceAgreement(Service):
     """Class representing a Service Agreement."""
 
     AGREEMENT_TEMPLATE = "serviceAgreementTemplate"
     SERVICE_CONDITIONS = "conditions"
 
+    @enforce_types
     def __init__(
         self,
         attributes: Optional[dict],
@@ -57,6 +57,7 @@ class ServiceAgreement(Service):
         )
 
     @classmethod
+    @enforce_types
     def from_json(cls, service_dict: dict) -> "ServiceAgreement":
         """
 
@@ -70,6 +71,7 @@ class ServiceAgreement(Service):
         return cls(_attributes, service_endpoint, _type, _index, service_dict)
 
     @classmethod
+    @enforce_types
     def from_ddo(cls, service_type: str, ddo: object) -> "ServiceAgreement":
         """
 
@@ -87,10 +89,12 @@ class ServiceAgreement(Service):
 
         return cls.from_json(service_dict)
 
+    @enforce_types
     def as_dictionary(self) -> dict:
         values = Service.as_dictionary(self)
         return values
 
+    @enforce_types
     def get_cost(self) -> float:
         """
         Return the price from the conditions parameters.

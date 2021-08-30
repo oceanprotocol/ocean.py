@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
-from typing import Optional
 
 from enforce_typing import enforce_types
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -12,11 +11,11 @@ from web3.datastructures import AttributeDict
 from web3.logs import DISCARD
 
 
-@enforce_types
 class DTFactory(ContractBase):
     CONTRACT_NAME = "DTFactory"
     FIRST_BLOB = "https://example.com/dataset-1"
 
+    @enforce_types
     def verify_data_token(self, dt_address: str) -> bool:
         """Checks that a token was registered."""
         log = self.get_token_registered_event(
@@ -24,9 +23,10 @@ class DTFactory(ContractBase):
         )
         return bool(log and log.args.tokenAddress == dt_address)
 
+    @enforce_types
     def get_token_registered_event(
         self, from_block: int, to_block: int, token_address: str
-    ) -> Optional[AttributeDict]:
+    ) -> [AttributeDict]:
         """Retrieves event log of token registration."""
         filter_params = {"tokenAddress": token_address}
         logs = self.get_event_log(
@@ -38,6 +38,7 @@ class DTFactory(ContractBase):
 
         return logs[0] if logs else None
 
+    @enforce_types
     def get_token_minter(self, token_address: str) -> str:
         """Retrieves token minter.
 
@@ -49,6 +50,7 @@ class DTFactory(ContractBase):
 
         return dt.contract.caller.minter()
 
+    @enforce_types
     def get_token_address(self, transaction_id: str) -> str:
         """Gets token address using transaction id."""
         tx_receipt = self.get_tx_receipt(self.web3, transaction_id)
@@ -65,6 +67,7 @@ class DTFactory(ContractBase):
 
     # ============================================================
     # reflect DataToken Solidity methods
+    @enforce_types
     def createToken(
         self, blob: str, name: str, symbol: str, cap: int, from_wallet: Wallet
     ) -> str:

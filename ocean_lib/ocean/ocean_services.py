@@ -10,12 +10,12 @@ from enforce_typing import enforce_types
 from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 
 
-@enforce_types
 class OceanServices:
 
     """Ocean services class."""
 
     @staticmethod
+    @enforce_types
     def create_access_service(
         attributes: Dict[str, Any], provider_uri: str
     ) -> Tuple[str, Dict[str, Any]]:
@@ -33,6 +33,7 @@ class OceanServices:
         return service
 
     @staticmethod
+    @enforce_types
     def create_compute_service(
         attributes: Dict[str, Any], provider_uri: str
     ) -> Tuple[str, Dict[str, Any]]:
