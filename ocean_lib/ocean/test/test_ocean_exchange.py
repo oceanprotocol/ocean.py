@@ -29,7 +29,7 @@ def test_search_exchange_by_data_token(publisher_ocean_instance):
     dt = ocn.create_data_token(
         "DataToken1", "DT1", alice_wallet, blob=ocn.config.metadata_cache_uri
     )
-    dt.mint_tokens(bob_wallet.address, 100.0, alice_wallet)
+    dt.mint(bob_wallet.address, to_wei(100), alice_wallet)
     dt.approve(ocn.exchange._exchange_address, to_wei(100), alice_wallet)
 
     exchange_id1 = ocn.exchange.create(dt.address, to_wei("0.1"), alice_wallet)
