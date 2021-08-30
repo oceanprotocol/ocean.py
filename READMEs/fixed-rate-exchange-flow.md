@@ -121,9 +121,9 @@ print(f"token_address = '{token_address}'")
 In the same python console:
 ```python
 #Mint the datatokens
-data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
-from ocean_lib.ocean.util import to_base_18
-data_token.approve(ocean.exchange._exchange_address, to_base_18(100.0), alice_wallet)
+from ocean_lib.web3_internal.currency import to_wei
+data_token.mint_tokens(alice_wallet.address, to_wei(100), alice_wallet)
+data_token.approve(ocean.exchange._exchange_address, to_wei(100), alice_wallet)
 ```
 
 ## 4. Bob buys at fixed rate data tokens
@@ -148,12 +148,12 @@ It is important to create an `exchange_id` only one time per exchange.
 
 ```python
 #Create exchange_id for a new exchange 
-exchange_id = ocean.exchange.create(token_address, 0.1, alice_wallet)
+exchange_id = ocean.exchange.create(token_address, to_wei("0.1"), alice_wallet)
 ```
 
 Use the `exchange_id` for buying at fixed rate.
 
 ```python
-tx_result = ocean.exchange.buy_at_fixed_rate(2.0, bob_wallet, 5.0, exchange_id, token_address, alice_wallet.address)
+tx_result = ocean.exchange.buy_at_fixed_rate(to_wei(2), bob_wallet, to_wei(5), exchange_id, token_address, alice_wallet.address)
 assert tx_result, "failed buying data tokens at fixed rate for Bob"
 ```
