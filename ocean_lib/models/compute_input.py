@@ -9,8 +9,8 @@ from typing import Dict, Optional, Union
 from enforce_typing import enforce_types
 
 
-@enforce_types
 class ComputeInput:
+    @enforce_types
     def __init__(
         self,
         did: Optional[str],
@@ -31,6 +31,7 @@ class ComputeInput:
         self.service_id = service_id
         self.userdata = userdata
 
+    @enforce_types
     def as_dictionary(self) -> Dict[str, Union[str, Dict]]:
         res = {
             "documentId": self.did,

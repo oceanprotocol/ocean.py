@@ -2,23 +2,20 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import warnings
-
 from enforce_typing import enforce_types
-from web3.logs import DISCARD
-
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
+from web3.logs import DISCARD
 
 from . import balancer_constants
 
 
-@enforce_types
 class BFactory(ContractBase):
     CONTRACT_NAME = "BFactory"
 
     # ============================================================
     # reflect BFactory Solidity methods
+    @enforce_types
     def newBPool(self, from_wallet: Wallet) -> str:
         """
         :return: `str` new pool address

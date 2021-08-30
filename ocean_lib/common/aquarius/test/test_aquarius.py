@@ -49,14 +49,12 @@ def test_metadata_invalid(aquarius_instance):
 
 def test_invalid_text_search(aquarius_instance):
     """Tests text search with an invalid text."""
-    text = "foo_text"
-    with pytest.raises(ValueError):
-        aquarius_instance.text_search(text=text, sort="foo_sort")
+    with pytest.raises(TypeError):
+        aquarius_instance.text_search(text={})
 
 
 def test_invalid_search_query(aquarius_instance):
     """Tests query search with an invalid query."""
-    search_query = dict()
-    search_query["sort"] = "foo_sort"
-    with pytest.raises(ValueError):
-        aquarius_instance.query_search(search_query=search_query, sort="foo_sort")
+    search_query = "not_a_dict"
+    with pytest.raises(TypeError):
+        aquarius_instance.query_search(search_query=search_query)

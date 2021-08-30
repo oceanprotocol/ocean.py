@@ -17,11 +17,11 @@ from web3.main import Web3
 logger = logging.getLogger(__name__)
 
 
-@enforce_types
 class EventListener(object):
 
     """Class representing an event listener."""
 
+    @enforce_types
     def __init__(
         self,
         web3: Web3,
@@ -44,6 +44,7 @@ class EventListener(object):
         self.timeout = 600  # seconds
         self.args = args
 
+    @enforce_types
     def make_event_filter(self) -> EventFilter:
         """Create a new event filter."""
         event_filter = EventFilter(
@@ -54,13 +55,14 @@ class EventListener(object):
         )
         return event_filter
 
+    @enforce_types
     def listen_once(
         self,
         callback: Optional[Callable] = None,
         timeout: Optional[int] = None,
         timeout_callback: Optional[Callable] = None,
         start_time: Optional[float] = None,
-        blocking: bool = False,
+        blocking: Optional[bool] = False,
     ) -> None:
         """Listens once for event.
 
@@ -110,6 +112,7 @@ class EventListener(object):
         return None
 
     @staticmethod
+    @enforce_types
     def watch_one_event(
         event_filter: EventFilter,
         callback: Callable,

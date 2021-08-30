@@ -2,10 +2,12 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+
 import pytest
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.util import get_contracts_addresses
+from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei
 from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
 
 _NETWORK = "ganache"
@@ -26,20 +28,20 @@ def test_ocean_exchange(publisher_ocean_instance):
     dt = ocn.create_data_token(
         "DataToken1", "DT1", alice_wallet, blob="http://example.com"
     )
-    dt.mint_tokens(bob_wallet.address, 100.0, alice_wallet)
+    dt.mint(bob_wallet.address, to_wei(100), alice_wallet)
     ox = OceanExchange(
         ocn.web3,
         ocn.OCEAN_address,
         _get_exchange_address(publisher_ocean_instance.config),
         ocn.config,
     )
-    rate = 0.9
+    rate = to_wei("0.9")
     x_id = ox.create(dt.address, rate, bob_wallet)
-    dt.approve_tokens(ox._exchange_address, 20.0, bob_wallet)
+    dt.approve(ox._exchange_address, to_wei(20), bob_wallet)
 
     # create with invalid token address
     with pytest.raises(ValueError):
-        ox.create(ox.ocean_address, 0.9, bob_wallet)
+        ox.create(ox.ocean_address, rate, bob_wallet)
 
     # TODO: Enable this ValueError handling when the ERC20 check is added in FixedRateExchange.create solidity function
     # with pytest.raises(ValueError):
@@ -47,25 +49,26 @@ def test_ocean_exchange(publisher_ocean_instance):
 
     # create with negative rate, should fail
     with pytest.raises(AssertionError):
-        _ = ox.create(dt.address, rate * -1.0, bob_wallet)
+        _ = ox.create(dt.address, -rate, bob_wallet)
 
     # create using 0 rate
     with pytest.raises(AssertionError):
-        _ = ox.create(dt.address, 0.0, bob_wallet)
+        _ = ox.create(dt.address, 0, bob_wallet)
 
     ##############
     # get_quote
-    base_token_amount = ox.get_quote(2.0, exchange_id=x_id)
+    base_token_amount = ox.get_quote(to_wei(2), exchange_id=x_id)
+    expected_base_token_amount = to_wei("1.8")  # 2 * 9
     assert (
-        base_token_amount == 2.0 * rate
-    ), f"unexpected quote of base token {base_token_amount}, should be {2.0*rate}."
+        base_token_amount == expected_base_token_amount
+    ), f"unexpected quote of {pretty_ether_and_wei(base_token_amount, 'OCEAN')}, should be {pretty_ether_and_wei(expected_base_token_amount, 'OCEAN')}."
 
     #############
     # test buying datatokens
     # Alice is buying from exchange owned by bob
     assert (
         ox.buy_at_fixed_rate(
-            2.0,
+            to_wei(2),
             alice_wallet,
             max_OCEAN_amount=base_token_amount,
             data_token=dt.address,
@@ -75,15 +78,19 @@ def test_ocean_exchange(publisher_ocean_instance):
     ), "buy datatokens failed"
     assert (
         ox.buy_at_fixed_rate(
-            2.0, alice_wallet, max_OCEAN_amount=base_token_amount, exchange_id=x_id
+            to_wei(2),
+            alice_wallet,
+            max_OCEAN_amount=base_token_amount,
+            exchange_id=x_id,
         )
         is True
     ), "buy datatokens failed"
 
-    assert ox.setRate(1.0, bob_wallet, exchange_id=x_id)
-    rate = 1.0
+    rate = to_wei(1)
+    assert ox.setRate(rate, bob_wallet, exchange_id=x_id)
     # re-evaluate with new rate
-    base_token_amount = ox.get_quote(2.0, exchange_id=x_id)
+    base_token_amount = ox.get_quote(to_wei(2), exchange_id=x_id)
+    expected_base_token_amount = to_wei(2)
     assert (
-        base_token_amount == 2.0 * rate
-    ), f"unexpected quote of base token {base_token_amount}, should be {2.0*rate}."
+        base_token_amount == expected_base_token_amount
+    ), f"unexpected quote of {pretty_ether_and_wei(base_token_amount, 'OCEAN')} base tokens, should be {pretty_ether_and_wei(expected_base_token_amount, 'OCEAN')}."
