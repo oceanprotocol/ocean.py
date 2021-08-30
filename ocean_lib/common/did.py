@@ -14,11 +14,11 @@ from web3 import Web3
 OCEAN_PREFIX = "did:op:"
 
 
-@enforce_types
 class DID:
     """Class representing an asset DID."""
 
     @staticmethod
+    @enforce_types
     def did(seed: Dict[str, str]) -> str:
         """
         Create a did.

@@ -190,7 +190,8 @@ In order to encrypt the entire asset, when using a private market or metadata ca
 `asset = ocean.assets.create(..., encrypt=True)`
 
 #Mint the datatokens
-data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
+from ocean_lib.web3_internal.currency import to_wei
+data_token.mint(alice_wallet.address, to_wei(100), alice_wallet)
 
 #In the create() step below, Alice needs ganache OCEAN. Ensure she has it.
 from ocean_lib.models.btoken import BToken #BToken is ERC20
@@ -202,8 +203,8 @@ assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need OCEAN"
 # and finalize the pool.
 pool = ocean.pool.create(
    token_address,
-   data_token_amount=100.0,
-   OCEAN_amount=10.0,
+   data_token_amount=to_wei(100),
+   OCEAN_amount=to_wei(10),
    from_wallet=alice_wallet
 )
 pool_address = pool.address
@@ -229,8 +230,9 @@ pool = ocean.pool.get(ocean.web3, pool_address)
 #Here, the market retrieves the datatoken price denominated in OCEAN.
 OCEAN_address = ocean.OCEAN_address
 price_in_OCEAN = ocean.pool.calcInGivenOut(
-    pool_address, OCEAN_address, token_address, token_out_amount=1.0)
-print(f"Price of 1 datatoken is {price_in_OCEAN} OCEAN")
+    pool_address, OCEAN_address, token_address, token_out_amount=to_wei(1))
+from ocean_lib.web3_internal.currency import pretty_ether_and_wei
+print(f"Price of 1 {datatoken.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
 ```
 
 ## 4.  Bob buys data asset, and downloads it
@@ -254,14 +256,15 @@ assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
 data_token = ocean.get_data_token(token_address)
 ocean.pool.buy_data_tokens(
     pool_address,
-    amount=1.0, # buy 1.0 datatoken
-    max_OCEAN_amount=10.0, # pay up to 10.0 OCEAN
+    amount=to_wei(1), # buy 1.0 datatoken
+    max_OCEAN_amount=to_wei(10), # pay up to 10.0 OCEAN
     from_wallet=bob_wallet
 )
 
-print(f"Bob has {data_token.token_balance(bob_wallet.address)} datatokens.")
+from ocean_lib.web3_internal.currency import pretty_ether_and_wei
+print(f"Bob has {pretty_ether_and_wei(data_token.balanceOf(bob_wallet.address), data_token.symbol())}.")
 
-assert data_token.balanceOf(bob_wallet.address) >= 1.0, "Bob didn't get 1.0 datatokens"
+assert data_token.balanceOf(bob_wallet.address) >= to_wei(1), "Bob didn't get 1.0 datatokens"
 
 #Bob points to the service object
 fee_receiver = None # could also be market address

@@ -34,7 +34,7 @@ def test_create_compute_service(publisher_ocean_instance):
         "sha256:cb57ecfa6ebbefd8ffc7f75c0f00e57a7fa739578a429b6f72a0df19315deadc",
     )
     server = ocn_compute.build_server_attributes(
-        "1", "xlsize", "16", "0", "128gb", "160gb", 86400
+        "1", "xlsize", 16, 0, "128gb", "160gb", 86400
     )
     provider_attributes = ocn_compute.build_service_provider_attributes(
         "Azure",

@@ -8,11 +8,12 @@ from enforce_typing import enforce_types
 from ocean_lib.common.agreements.consumable import ConsumableCodes, MalformedCredential
 
 
-@enforce_types
 class AddressCredential:
+    @enforce_types
     def __init__(self, asset) -> None:
         self.asset = asset
 
+    @enforce_types
     def get_addresses_of_class(self, access_class: str = "allow") -> list:
         """Get a filtered list of addresses from credentials (use with allow/deny)."""
         address_entry = self.get_address_entry_of_class(access_class)
@@ -24,6 +25,7 @@ class AddressCredential:
 
         return [addr.lower() for addr in address_entry["values"]]
 
+    @enforce_types
     def requires_credential(self) -> bool:
         """Checks whether the asset requires an address credential."""
         allowed_addresses = self.get_addresses_of_class("allow")
@@ -31,6 +33,7 @@ class AddressCredential:
 
         return bool(allowed_addresses or denied_addresses)
 
+    @enforce_types
     def validate_access(self, credential: Optional[dict] = None) -> int:
         """Checks a credential dictionary against the address allow/deny lists."""
         address = simplify_credential_to_address(credential)
@@ -49,6 +52,7 @@ class AddressCredential:
 
         return ConsumableCodes.OK
 
+    @enforce_types
     def add_address_to_access_class(
         self, address: str, access_class: str = "allow"
     ) -> None:
@@ -76,6 +80,7 @@ class AddressCredential:
 
         address_entry["values"] = lc_addresses
 
+    @enforce_types
     def remove_address_from_access_class(
         self, address: str, access_class: str = "allow"
     ) -> None:
@@ -98,6 +103,7 @@ class AddressCredential:
         lc_addresses.remove(address)
         address_entry["values"] = lc_addresses
 
+    @enforce_types
     def get_address_entry_of_class(self, access_class: str = "allow") -> Optional[dict]:
         """Get address credentials entry of the specified access class. access_class = "allow" or "deny"."""
         entries = self.asset.credentials.get(access_class, [])
@@ -105,6 +111,7 @@ class AddressCredential:
         return address_entries[0] if address_entries else None
 
 
+@enforce_types
 def simplify_credential_to_address(credential: Optional[dict]) -> Optional[str]:
     """Extracts address value from credential dictionary."""
     if not credential:

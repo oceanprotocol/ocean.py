@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from ocean_lib.models.btoken import BToken
-from ocean_lib.ocean import util
+from ocean_lib.web3_internal.currency import to_wei
 
 
 def test_ERC20(
@@ -16,12 +16,12 @@ def test_ERC20(
     # generating ERC20 Tokens, so the symbol is irrelevant
     assert token.symbol() == "DTT"
     assert token.decimals() == 18
-    assert token.balanceOf(alice_address) > util.to_base_18(10.0)
-    assert token.balanceOf(bob_address) > util.to_base_18(10.0)
+    assert token.balanceOf(alice_address) > to_wei(10)
+    assert token.balanceOf(bob_address) > to_wei(10)
 
     assert token.allowance(alice_address, bob_address) == 0
-    token.approve(bob_address, int(1e18), from_wallet=alice_wallet)
-    assert token.allowance(alice_address, bob_address) == int(1e18)
+    token.approve(bob_address, to_wei(1), from_wallet=alice_wallet)
+    assert token.allowance(alice_address, bob_address) == to_wei(1)
 
     # alice sends all her OCEAN to Bob, then Bob sends it back
     alice_OCEAN = token.balanceOf(alice_address)

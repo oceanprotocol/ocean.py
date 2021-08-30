@@ -9,37 +9,43 @@ from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.ddo.ddo import DDO
 
 
-@enforce_types
 class Asset(DDO):
     @property
+    @enforce_types
     def data_token_address(self) -> Optional[str]:
         return self.other_values["dataToken"]
 
     @data_token_address.setter
+    @enforce_types
     def data_token_address(self, token_address: str) -> None:
         self.other_values["dataToken"] = token_address
 
     @property
+    @enforce_types
     def values(self) -> dict:
         return self.other_values.copy()
 
+    @enforce_types
     def get_trusted_algorithms(self) -> list:
         return self.get_compute_privacy_attributes().get("publisherTrustedAlgorithms")
 
+    @enforce_types
     def get_trusted_algorithm_publishers(self) -> list:
         return self.get_compute_privacy_attributes().get(
             "publisherTrustedAlgorithmPublishers"
         )
 
+    @enforce_types
     def get_compute_privacy_attributes(self) -> dict:
         service = self.get_service(ServiceTypes.CLOUD_COMPUTE)
         assert service is not None, "this asset does not have a compute service."
         return service.attributes["main"].get("privacy", {})
 
+    @enforce_types
     def update_compute_privacy(
         self,
         trusted_algorithms: list,
-        trusted_algo_publishers: list,
+        trusted_algo_publishers: Optional[list],
         allow_all: bool,
         allow_raw_algorithm: bool,
     ) -> None:

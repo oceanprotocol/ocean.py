@@ -5,7 +5,7 @@
 import pytest
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
-from ocean_lib.ocean.util import to_base_18
+from ocean_lib.web3_internal.currency import to_wei
 from web3.exceptions import TimeExhausted
 
 
@@ -14,7 +14,7 @@ def test_data_token_creation(web3, alice_wallet, dtfactory_address):
     dtfactory = DTFactory(web3, dtfactory_address)
 
     dt_address = dtfactory.createToken(
-        "foo_blob", "DT1", "DT1", to_base_18(1000.0), from_wallet=alice_wallet
+        "foo_blob", "DT1", "DT1", to_wei(1000), from_wallet=alice_wallet
     )
     dt = DataToken(web3, dtfactory.get_token_address(dt_address))
     assert isinstance(dt, DataToken)
@@ -29,7 +29,7 @@ def test_data_token_event_registered(
     dtfactory = DTFactory(web3, dtfactory_address)
 
     dt_address = dtfactory.createToken(
-        "foo_blob", "DT1", "DT1", to_base_18(1000.0), from_wallet=alice_wallet
+        "foo_blob", "DT1", "DT1", to_wei(1000), from_wallet=alice_wallet
     )
     dt = DataToken(web3, dtfactory.get_token_address(dt_address))
     block = alice_ocean.web3.eth.block_number
@@ -58,8 +58,8 @@ def test_get_token_minter(web3, alice_wallet, dtfactory_address, alice_address):
     dtfactory = DTFactory(web3, dtfactory_address)
 
     dt_address = dtfactory.createToken(
-        "foo_blob", "DT1", "DT1", to_base_18(1000.0), from_wallet=alice_wallet
+        "foo_blob", "DT1", "DT1", to_wei(1000), from_wallet=alice_wallet
     )
     dt = DataToken(web3, dtfactory.get_token_address(dt_address))
-    dt.mint(alice_address, to_base_18(10.0), from_wallet=alice_wallet)
+    dt.mint(alice_address, to_wei(10), from_wallet=alice_wallet)
     assert dtfactory.get_token_minter(dt.address) == alice_address

@@ -6,16 +6,16 @@ import json
 import os
 import time
 from collections import namedtuple
+from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import requests
 from enforce_typing import enforce_types
-from eth_typing import BlockIdentifier
 from eth_utils import remove_0x_prefix
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.ocean.util import from_base_18, to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.web3_internal.currency import from_wei, pretty_ether_and_wei, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from web3 import Web3
 from web3.datastructures import AttributeDict
@@ -29,20 +29,20 @@ OrderValues = namedtuple(
 )
 
 
-@enforce_types
 class DataToken(ContractBase):
     CONTRACT_NAME = "DataTokenTemplate"
-    DEFAULT_CAP = 1000.0
-    DEFAULT_CAP_BASE = to_base_18(DEFAULT_CAP)
+
+    DEFAULT_CAP = to_wei(1000)
 
     ORDER_STARTED_EVENT = "OrderStarted"
     ORDER_FINISHED_EVENT = "OrderFinished"
 
-    OPF_FEE_PERCENTAGE = 0.001
-    MAX_MARKET_FEE_PERCENTAGE = 0.001
+    OPF_FEE_PER_TOKEN = to_wei("0.001")  # 0.1%
+    MAX_MARKET_FEE_PER_TOKEN = to_wei("0.001")  # 0.1%
 
     # ============================================================
     # reflect DataToken Solidity methods
+    @enforce_types
     def initialize(
         self,
         name: str,
@@ -59,9 +59,11 @@ class DataToken(ContractBase):
             from_wallet,
         )
 
-    def mint(self, account_address: str, value_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("mint", (account_address, value_base), from_wallet)
+    @enforce_types
+    def mint(self, account_address: str, amount: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("mint", (account_address, amount), from_wallet)
 
+    @enforce_types
     def startOrder(
         self,
         consumer: str,
@@ -74,6 +76,7 @@ class DataToken(ContractBase):
             "startOrder", (consumer, amount, serviceId, mrktFeeCollector), from_wallet
         )
 
+    @enforce_types
     def finishOrder(
         self,
         orderTxId: str,
@@ -86,67 +89,85 @@ class DataToken(ContractBase):
             "finishOrder", (orderTxId, consumer, amount, serviceId), from_wallet
         )
 
+    @enforce_types
     def proposeMinter(self, new_minter: str, from_wallet: Wallet) -> str:
         return self.send_transaction("proposeMinter", (new_minter,), from_wallet)
 
+    @enforce_types
     def approveMinter(self, from_wallet: Wallet) -> str:
         return self.send_transaction("approveMinter", (), from_wallet)
 
+    @enforce_types
     def blob(self) -> str:
         return self.contract.caller.blob()
 
+    @enforce_types
     def cap(self) -> int:
         return self.contract.caller.cap()
 
+    @enforce_types
     def isMinter(self, address: str) -> bool:
         return self.contract.caller.isMinter(address)
 
+    @enforce_types
     def minter(self) -> str:
         return self.contract.caller.minter()
 
+    @enforce_types
     def isInitialized(self) -> bool:
         return self.contract.caller.isInitialized()
 
-    def calculateFee(self, amount: int, fee_percentage: int) -> int:
-        return self.contract.caller.calculateFee(amount, fee_percentage)
+    @enforce_types
+    def calculateFee(self, amount: int, fee_per_token: int) -> int:
+        return self.contract.caller.calculateFee(amount, fee_per_token)
 
     # ============================================================
     # reflect required ERC20 standard functions
+    @enforce_types
     def totalSupply(self) -> int:
         return self.contract.caller.totalSupply()
 
+    @enforce_types
     def balanceOf(self, account: str) -> int:
         return self.contract.caller.balanceOf(account)
 
-    def transfer(self, to: str, value_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("transfer", (to, value_base), from_wallet)
+    @enforce_types
+    def transfer(self, to: str, amount: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("transfer", (to, amount), from_wallet)
 
+    @enforce_types
     def allowance(self, owner_address: str, spender_address: str) -> int:
         return self.contract.caller.allowance(owner_address, spender_address)
 
-    def approve(self, spender: str, value_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("approve", (spender, value_base), from_wallet)
+    @enforce_types
+    def approve(self, spender: str, amount: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("approve", (spender, amount), from_wallet)
 
+    @enforce_types
     def transferFrom(
-        self, from_address: str, to_address: str, value_base: int, from_wallet: Wallet
+        self, from_address: str, to_address: str, amount: int, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "transferFrom", (from_address, to_address, value_base), from_wallet
+            "transferFrom", (from_address, to_address, amount), from_wallet
         )
 
     # ============================================================
     # reflect optional ERC20 standard functions
+    @enforce_types
     def datatoken_name(self) -> str:
         return self.contract.caller.name()
 
+    @enforce_types
     def symbol(self) -> str:
         return self.contract.caller.symbol()
 
+    @enforce_types
     def decimals(self) -> int:
         return self.contract.caller.decimals()
 
     # ============================================================
     # reflect non-standard ERC20 functions added by Open Zeppelin
+    @enforce_types
     def increaseAllowance(
         self, spender_address: str, added_value: int, from_wallet: Wallet
     ) -> str:
@@ -154,6 +175,7 @@ class DataToken(ContractBase):
             "increaseAllowance", (spender_address, added_value), from_wallet
         )
 
+    @enforce_types
     def decreaseAllowance(
         self, spender_address: str, subtracted_value: int, from_wallet: Wallet
     ) -> str:
@@ -163,6 +185,7 @@ class DataToken(ContractBase):
 
     # ============================================================
     # Events
+    @enforce_types
     def get_event_signature(self, event_name: str) -> str:
         try:
             e = getattr(self.events, event_name)
@@ -176,11 +199,12 @@ class DataToken(ContractBase):
         sig_str = f'{event_name}({",".join(types)})'
         return Web3.keccak(text=sig_str).hex()
 
+    @enforce_types
     def get_start_order_logs(
         self,
         consumer_address: Optional[str] = None,
-        from_block: Optional[BlockIdentifier] = 0,
-        to_block: Optional[BlockIdentifier] = "latest",
+        from_block: Optional[int] = 0,
+        to_block: Optional[int] = "latest",
         from_all_tokens: bool = False,
     ) -> Tuple:
         topic0 = self.get_event_signature(self.ORDER_STARTED_EVENT)
@@ -200,18 +224,17 @@ class DataToken(ContractBase):
         )
         return logs
 
+    @enforce_types
     def get_transfer_events_in_range(
-        self, from_block: Optional[BlockIdentifier], to_block: Optional[BlockIdentifier]
+        self, from_block: Optional[int], to_block: Optional[int]
     ) -> Tuple:
         return ContractBase.getLogs(
             self.events.Transfer(), fromBlock=from_block, toBlock=to_block
         )
 
+    @enforce_types
     def get_all_transfers_from_events(
-        self,
-        start_block: Optional[BlockIdentifier],
-        end_block: Optional[BlockIdentifier],
-        chunk: int = 1000,
+        self, start_block: Optional[int], end_block: Optional[int], chunk: int = 1000
     ) -> tuple:
         _from = start_block
         _to = _from + chunk - 1
@@ -252,8 +275,9 @@ class DataToken(ContractBase):
 
         return transfer_records, min(_to, end_block)  # can have duplicates
 
+    @enforce_types
     def get_transfer_event(
-        self, block_number: Optional[BlockIdentifier], sender: str, receiver: str
+        self, block_number: Optional[int], sender: str, receiver: str
     ) -> Optional[AttributeDict]:
         filter_params = {"from": sender, "to": receiver}
         logs = self.get_event_logs(
@@ -273,6 +297,7 @@ class DataToken(ContractBase):
 
         return logs[0]
 
+    @enforce_types
     def verify_transfer_tx(
         self, tx_id: str, sender: str, receiver: str
     ) -> Tuple[AttributeDict, AttributeDict]:
@@ -319,12 +344,13 @@ class DataToken(ContractBase):
 
         return tx, transfer_event
 
+    # can not be type enforced due to reusage of parent function (subscripted Generics)
     def get_event_logs(
         self,
         event_name: str,
         filter_args: Optional[Dict[str, str]] = None,
-        from_block: Optional[BlockIdentifier] = 0,
-        to_block: Optional[BlockIdentifier] = "latest",
+        from_block: Optional[int] = 0,
+        to_block: Optional[int] = "latest",
     ) -> Union[Tuple[()], Tuple[AttributeDict]]:
         event = getattr(self.events, event_name)
         filter_params = filter_args or {}
@@ -336,12 +362,13 @@ class DataToken(ContractBase):
         )
         return logs
 
+    @enforce_types
     def verify_order_tx(
         self,
         tx_id: str,
         did: str,
         service_id: Union[str, int],
-        amount_base: Union[str, int],
+        amount: Union[str, int],
         sender: str,
     ) -> Tuple[Any, Any, Any]:
         try:
@@ -383,16 +410,13 @@ class DataToken(ContractBase):
                 f"event: (serviceId={order_log.args.serviceId}"
             )
 
-        target_amount = amount_base - self.calculate_fee(
-            amount_base, self.OPF_FEE_PERCENTAGE
-        )
+        target_amount = amount - self.calculateFee(amount, self.OPF_FEE_PER_TOKEN)
         if order_log.args.mrktFeeCollector and order_log.args.marketFee > 0:
-            assert order_log.args.marketFee <= (
-                self.calculate_fee(amount_base, self.MAX_MARKET_FEE_PERCENTAGE) + 5
-            ), (
+            max_market_fee = self.calculateFee(amount, self.MAX_MARKET_FEE_PER_TOKEN)
+            assert order_log.args.marketFee <= (max_market_fee + 5), (
                 f"marketFee {order_log.args.marketFee} exceeds the expected maximum "
-                f"of {self.calculate_fee(amount_base, self.MAX_MARKET_FEE_PERCENTAGE)} "
-                f"based on feePercentage={self.MAX_MARKET_FEE_PERCENTAGE} ."
+                f"of {max_market_fee} based on feePercentage="
+                f"{from_wei(self.MAX_MARKET_FEE_PER_TOKEN)} ."
             )
             target_amount = target_amount - order_log.args.marketFee
 
@@ -419,12 +443,15 @@ class DataToken(ContractBase):
         if total < (target_amount - 5):
             raise ValueError(
                 f"transferred value does meet the service cost: "
-                f"service.cost - fees={from_base_18(target_amount)}, "
-                f"transferred value={from_base_18(total)}"
+                f"service.cost - fees={pretty_ether_and_wei(target_amount)}, "
+                f"transferred value={pretty_ether_and_wei(total)}"
             )
         return tx, order_log, transfers[-1]
 
-    def download(self, wallet: Wallet, tx_id: str, destination_folder: str) -> str:
+    @enforce_types
+    def download(
+        self, wallet: Wallet, tx_id: str, destination_folder: Union[str, Path]
+    ) -> str:
         url = self.blob()
         download_url = (
             f"{url}?"
@@ -436,9 +463,6 @@ class DataToken(ContractBase):
         file_name = f"file-{self.address}"
         DataServiceProvider.write_file(response, destination_folder, file_name)
         return os.path.join(destination_folder, file_name)
-
-    def token_balance(self, account: str) -> float:
-        return from_base_18(self.balanceOf(account))
 
     def _get_url_from_blob(self, int_code: int) -> Optional[str]:
         try:
@@ -452,67 +476,40 @@ class DataToken(ContractBase):
 
         return url_object.get("url")
 
+    @enforce_types
     def get_metadata_url(self) -> str:
         # grab the metadatastore URL from the DataToken contract (@token_address)
         return self._get_url_from_blob(1)
 
+    @enforce_types
     def get_simple_url(self) -> Optional[str]:
         return self._get_url_from_blob(0)
 
+    @enforce_types
     def calculate_token_holders(
         self,
-        from_block: Optional[BlockIdentifier],
-        to_block: Optional[BlockIdentifier],
-        min_token_amount: float,
-    ) -> List[Tuple[str, float]]:
+        from_block: Optional[int],
+        to_block: Optional[int],
+        min_token_amount: int,
+    ) -> List[Tuple[str, int]]:
         """Returns a list of addresses with token balances above a minimum token
         amount. Calculated from the transactions between `from_block` and `to_block`."""
         all_transfers, _ = self.get_all_transfers_from_events(from_block, to_block)
         balances_above_threshold = []
         balances = DataToken.calculate_balances(all_transfers)
-        _min = to_base_18(min_token_amount)
+        _min = min_token_amount
         balances_above_threshold = sorted(
-            [(a, from_base_18(b)) for a, b in balances.items() if b > _min],
+            [(a, b) for a, b in balances.items() if b > _min],
             key=lambda x: x[1],
             reverse=True,
         )
         return balances_above_threshold
 
-    # ============================================================
-    # Token transactions using amount of tokens as a float instead of int
-    # amount of tokens will be converted to the base value before sending
-    # the transaction
-    def approve_tokens(
-        self, spender: str, value: float, from_wallet: Wallet, wait: bool = False
-    ) -> str:
-        txid = self.approve(spender, to_base_18(value), from_wallet)
-        if wait:
-            self.get_tx_receipt(self.web3, txid)
-
-        return txid
-
-    def mint_tokens(self, to_account: str, value: float, from_wallet: Wallet) -> str:
-        return self.mint(to_account, to_base_18(value), from_wallet)
-
-    def transfer_tokens(self, to: str, value: float, from_wallet: Wallet) -> str:
-        return self.transfer(to, to_base_18(value), from_wallet)
-
     ################
     # Helpers
     @staticmethod
-    def get_max_fee_percentage() -> float:
-        return DataToken.OPF_FEE_PERCENTAGE + DataToken.MAX_MARKET_FEE_PERCENTAGE
-
-    @staticmethod
-    def calculate_max_fee(amount: int) -> int:
-        return DataToken.calculate_fee(amount, DataToken.get_max_fee_percentage())
-
-    @staticmethod
-    def calculate_fee(amount: int, percentage: float) -> int:
-        return int(amount * to_base_18(percentage) / to_base_18(1.0))
-
-    @staticmethod
-    def calculate_balances(transfers: List[Tuple]) -> dict:
+    @enforce_types
+    def calculate_balances(transfers: List[Tuple]) -> List[Tuple[str, int]]:
         _from = [t[0].lower() for t in transfers]
         _to = [t[1].lower() for t in transfers]
         _value = [t[2] for t in transfers]

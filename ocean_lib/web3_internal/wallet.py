@@ -20,7 +20,6 @@ from web3.main import Web3
 logger = logging.getLogger(__name__)
 
 
-@enforce_types
 class Wallet:
 
     """
@@ -39,6 +38,7 @@ class Wallet:
 
     _last_tx_count = dict()
 
+    @enforce_types
     def __init__(self, web3: Web3, private_key: str) -> None:
         """Initialises Wallet object."""
         assert private_key, "private_key is required."
@@ -50,25 +50,31 @@ class Wallet:
         self._address = private_key_to_address(self.private_key)
 
     @property
+    @enforce_types
     def address(self) -> str:
         return self._address
 
     @property
+    @enforce_types
     def key(self) -> str:
         return self.private_key
 
     @staticmethod
+    @enforce_types
     def reset_tx_count() -> None:
         Wallet._last_tx_count = dict()
 
+    @enforce_types
     def __get_key(self) -> Optional[str]:
         return self.private_key
 
+    @enforce_types
     def validate(self) -> bool:
         account = self.web3.eth.account.from_key(self.private_key)
         return account.address == self._address
 
     @staticmethod
+    @enforce_types
     def _get_nonce(web3: Web3, address: str) -> int:
         # We cannot rely on `web3.eth.get_transaction_count` because when sending multiple
         # transactions in a row without wait in between the network may not get the chance to
@@ -81,6 +87,7 @@ class Wallet:
 
         return Wallet._last_tx_count[address]
 
+    @enforce_types
     def sign_tx(
         self,
         tx: Dict[str, Union[int, str, bytes]],
@@ -115,11 +122,13 @@ class Wallet:
         logger.debug(f"`Wallet` signed tx is {signed_tx}")
         return signed_tx.rawTransaction
 
+    @enforce_types
     def sign(self, msg_hash: SignableMessage) -> SignedMessage:
         """Sign a transaction."""
         account = self.web3.eth.account.from_key(self.private_key)
         return account.sign_message(msg_hash)
 
+    @enforce_types
     def keys_str(self) -> str:
         s = []
         s += [f"address: {self.address}"]

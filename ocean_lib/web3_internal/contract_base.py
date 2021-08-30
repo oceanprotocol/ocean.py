@@ -10,7 +10,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
 from enforce_typing import enforce_types
-from eth_typing import BlockIdentifier, ChecksumAddress
+from eth_typing import ChecksumAddress
 from hexbytes import HexBytes
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_utils import (
@@ -32,13 +32,13 @@ from websockets import ConnectionClosed
 logger = logging.getLogger(__name__)
 
 
-@enforce_types
 class ContractBase(object):
 
     """Base class for all contract objects."""
 
     CONTRACT_NAME = None
 
+    @enforce_types
     def __init__(self, web3: Web3, address: Optional[str]) -> None:
         """Initialises Contract Base object."""
         self.name = self.contract_name
@@ -53,37 +53,44 @@ class ContractBase(object):
         )
         assert self.contract.caller is not None
 
+    @enforce_types
     def __str__(self) -> str:
         """Returns contract `name @ address.`"""
         return f"{self.contract_name} @ {self.address}"
 
     @classmethod
+    @enforce_types
     def configured_address(cls, network: str, address_file: str) -> str:
         """Returns the contract addresses"""
         addresses = get_contracts_addresses(network, address_file)
         return addresses.get(cls.CONTRACT_NAME) if addresses else None
 
     @property
+    @enforce_types
     def contract_name(self) -> str:
         """Returns the contract name"""
         return self.CONTRACT_NAME
 
     @property
+    @enforce_types
     def address(self) -> str:
         """Return the ethereum address of the solidity contract deployed in current network."""
         return self.contract.address
 
     @property
+    @enforce_types
     def events(self) -> ContractEvents:
         """Expose the underlying contract's events."""
         return self.contract.events
 
     @property
+    @enforce_types
     def function_names(self) -> List[str]:
         """Returns the list of functions in the contract"""
         return list(self.contract.functions)
 
     @staticmethod
+    @enforce_types
     def to_checksum_address(address: str) -> ChecksumAddress:
         """
         Validate the address provided.
@@ -94,8 +101,9 @@ class ContractBase(object):
         return Web3.toChecksumAddress(address)
 
     @staticmethod
+    @enforce_types
     def get_tx_receipt(
-        web3: Web3, tx_hash: str, timeout: int = 120
+        web3: Web3, tx_hash: Union[str, HexBytes], timeout: Optional[int] = 120
     ) -> Optional[AttributeDict]:
         """
         Get the receipt of a tx.
@@ -123,6 +131,7 @@ class ContractBase(object):
             logger.info(f"Unknown error waiting for transaction receipt: {e}.")
             raise
 
+    @enforce_types
     def is_tx_successful(self, tx_hash: str) -> bool:
         """Check if the transaction is successful.
 
@@ -132,6 +141,7 @@ class ContractBase(object):
         receipt = self.get_tx_receipt(self.web3, tx_hash)
         return bool(receipt and receipt.status == 1)
 
+    @enforce_types
     def get_event_signature(self, event_name: str) -> str:
         """
         Return signature of event definition to use in the call to eth_getLogs.
@@ -157,6 +167,7 @@ class ContractBase(object):
         sig_str = f'{event_name}({",".join(types)})'
         return Web3.keccak(text=sig_str).hex()
 
+    @enforce_types
     def subscribe_to_event(
         self,
         event_name: str,
@@ -165,7 +176,7 @@ class ContractBase(object):
         callback: Optional[Callable] = None,
         timeout_callback: Optional[Callable] = None,
         args: Optional[list] = None,
-        wait: bool = False,
+        wait: Optional[bool] = False,
         from_block: Optional[Union[str, int]] = "latest",
         to_block: Optional[Union[str, int]] = "latest",
     ) -> None:
@@ -198,6 +209,7 @@ class ContractBase(object):
             callback, timeout_callback=timeout_callback, timeout=timeout, blocking=wait
         )
 
+    @enforce_types
     def send_transaction(
         self,
         fn_name: str,
@@ -230,6 +242,7 @@ class ContractBase(object):
 
         return contract_function.transact(_transact).hex()
 
+    @enforce_types
     def get_event_argument_names(self, event_name: str) -> Tuple:
         """Finds the event arguments by `event_name`.
 
@@ -241,6 +254,7 @@ class ContractBase(object):
             return event().argument_names
 
     @classmethod
+    @enforce_types
     def deploy(cls, web3: Web3, deployer_wallet: Wallet, *args) -> str:
         """
         Deploy the DataTokenTemplate and DTFactory contracts to the current network.
@@ -271,13 +285,14 @@ class ContractBase(object):
 
         return cls.get_tx_receipt(web3, tx_hash, timeout=60).contractAddress
 
+    # can not enforce types since this goes through ContractEvent with Subscriptable Generics
     def get_event_log(
         self,
         event_name: str,
         from_block: int,
         to_block: int,
         filters: Optional[Dict[str, str]],
-        chunk_size: int = 1000,
+        chunk_size: Optional[int] = 1000,
     ) -> List[Any]:
         """Retrieves the first event log which matches the filters parameter criteria.
         It processes the blocks order backwards.
@@ -321,13 +336,14 @@ class ContractBase(object):
 
         return all_logs
 
+    # can not enforce types since this goes through ContractEvent with Subscriptable Generics
     def get_event_logs(
         self,
         event_name: str,
         from_block: int,
         to_block: int,
         filters: Optional[Dict[str, str]] = None,
-        chunk_size: int = 1000,
+        chunk_size: Optional[int] = 1000,
     ) -> List[AttributeDict]:
         """
         Fetches the list of event logs between the given block numbers.
@@ -384,12 +400,13 @@ class ContractBase(object):
 
         return all_logs
 
+    # can not enforce types since this goes through ContractEvent with Subscriptable Generics
     @staticmethod
     def getLogs(
         event: ContractEvent,
         argument_filters: Optional[Dict[str, Any]] = None,
-        fromBlock: Optional[BlockIdentifier] = None,
-        toBlock: Optional[BlockIdentifier] = None,
+        fromBlock: Optional[int] = None,
+        toBlock: Optional[int] = None,
         blockHash: Optional[HexBytes] = None,
         from_all_addresses: Optional[bool] = False,
     ):

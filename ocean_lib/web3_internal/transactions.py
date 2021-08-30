@@ -29,9 +29,7 @@ def sign_hash(msg_hash: SignableMessage, wallet: Wallet) -> str:
 
 
 @enforce_types
-def send_ether(
-    from_wallet: Wallet, to_address: str, ether_amount: Union[int, float, str]
-) -> AttributeDict:
+def send_ether(from_wallet: Wallet, to_address: str, amount: int) -> AttributeDict:
     if not Web3.isChecksumAddress(to_address):
         to_address = Web3.toChecksumAddress(to_address)
 
@@ -40,7 +38,7 @@ def send_ether(
     tx = {
         "from": from_wallet.address,
         "to": to_address,
-        "value": Web3.toWei(ether_amount, "ether"),
+        "value": amount,
         "chainId": web3.eth.chain_id,
     }
     tx["gas"] = web3.eth.estimate_gas(tx)
