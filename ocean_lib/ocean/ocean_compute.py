@@ -426,6 +426,35 @@ class OceanCompute:
         }
 
     @enforce_types
+    def result_safe(self, did: str, job_id: str, index: int, wallet: Wallet) -> Dict[str, Any]:
+        """
+        Gets job result.
+
+        :param did: str id of the asset offering the compute service of this job
+        :param job_id: str id of the compute job
+        :param index: compute result index
+        :param wallet: Wallet instance
+        :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
+        """
+        _, service_endpoint = self._get_compute_result_safe_endpoint(did)
+        msg = f'{wallet.address}{job_id}{str(index)}'
+        info_dict = self._data_provider.compute_job_result(
+            did,
+            job_id,
+            index,
+            service_endpoint,
+            wallet.address,
+            self._sign_message(wallet, msg, service_endpoint=service_endpoint),
+        )
+
+        import pdb; pdb.set_trace()
+        return {
+            "did": info_dict.get("resultsDid", ""),
+            "urls": info_dict.get("resultsUrl", []),
+            "logs": info_dict.get("algorithmLogUrl", []),
+        }
+
+    @enforce_types
     def stop(self, did: str, job_id: str, wallet: Wallet) -> Dict[str, Any]:
         """
         Attempt to stop the running compute job.
@@ -455,6 +484,19 @@ class OceanCompute:
             asset = resolve_asset(did, self._config.metadata_cache_uri)
 
         return self._data_provider.build_compute_endpoint(
+            ServiceAgreement.from_ddo(
+                ServiceTypes.CLOUD_COMPUTE, asset
+            ).service_endpoint
+        )
+
+    @enforce_types
+    def _get_compute_result_safe_endpoint(
+        self, did: str, asset: Optional[Asset] = None
+    ) -> Tuple[str, str]:
+        if not asset:
+            asset = resolve_asset(did, self._config.metadata_cache_uri)
+
+        return self._data_provider.build_compute_result_safe_endpoint(
             ServiceAgreement.from_ddo(
                 ServiceTypes.CLOUD_COMPUTE, asset
             ).service_endpoint

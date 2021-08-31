@@ -160,6 +160,10 @@ def run_compute_test(
         print(f"got job status after requesting result: {result}")
         assert "did" in result, "something not right about the compute job, no did."
 
+        result_safe = ocean_instance.compute.result_safe(did, job_id, 1, consumer_wallet)
+        print(f"got job status after requesting result: {result_safe}")
+        #assert "did" in result, "something not right about the compute job, no did."
+
 
 def test_compute_raw_algo():
     """Tests that a compute job with a raw algorithm starts properly."""
