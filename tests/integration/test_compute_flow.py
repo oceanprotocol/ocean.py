@@ -2,6 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import time
+
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.models.compute_input import ComputeInput
@@ -160,9 +162,21 @@ def run_compute_test(
         print(f"got job status after requesting result: {result}")
         assert "did" in result, "something not right about the compute job, no did."
 
-        result_safe = ocean_instance.compute.result_safe(did, job_id, 1, consumer_wallet)
-        print(f"got job status after requesting result: {result_safe}")
-        #assert "did" in result, "something not right about the compute job, no did."
+        succeeded = False
+        for _ in range(0, 200):
+            status = ocean_instance.compute.status(did, job_id, consumer_wallet)
+            if status["status"] > 60:
+                succeeded = True
+                break
+            time.sleep(5)
+
+        assert succeeded, "compute job unsuccessful"
+        result_safe = ocean_instance.compute.result_safe(
+            did, job_id, 0, consumer_wallet
+        )
+        assert result_safe is not None
+        print(f"got job result: {str(result_safe)}")
+        # assert "did" in result, "something not right about the compute job, no did."
 
 
 def test_compute_raw_algo():

@@ -426,20 +426,20 @@ class OceanCompute:
         }
 
     @enforce_types
-    def result_safe(self, did: str, job_id: str, index: int, wallet: Wallet) -> Dict[str, Any]:
+    def result_safe(
+        self, did: str, job_id: str, index: int, wallet: Wallet
+    ) -> Dict[str, Any]:
         """
         Gets job result.
 
-        :param did: str id of the asset offering the compute service of this job
         :param job_id: str id of the compute job
         :param index: compute result index
         :param wallet: Wallet instance
         :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
         """
         _, service_endpoint = self._get_compute_result_safe_endpoint(did)
-        msg = f'{wallet.address}{job_id}{str(index)}'
-        info_dict = self._data_provider.compute_job_result(
-            did,
+        msg = f"{wallet.address}{job_id}{str(index)}"
+        result = self._data_provider.compute_job_result_safe(
             job_id,
             index,
             service_endpoint,
@@ -447,12 +447,7 @@ class OceanCompute:
             self._sign_message(wallet, msg, service_endpoint=service_endpoint),
         )
 
-        import pdb; pdb.set_trace()
-        return {
-            "did": info_dict.get("resultsDid", ""),
-            "urls": info_dict.get("resultsUrl", []),
-            "logs": info_dict.get("algorithmLogUrl", []),
-        }
+        return result
 
     @enforce_types
     def stop(self, did: str, job_id: str, wallet: Wallet) -> Dict[str, Any]:
