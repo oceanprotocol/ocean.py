@@ -42,7 +42,7 @@ docker system prune -a --volumes
 ./start_ocean.sh
 ```
 
-### Install the library
+### Install the ocean.py library
 
 In a new console that we'll call the _work_ console (as we'll use it later):
 
@@ -122,7 +122,7 @@ In the same python console:
 ```python
 #Mint the datatokens
 from ocean_lib.web3_internal.currency import to_wei
-data_token.mint_tokens(alice_wallet.address, to_wei(100), alice_wallet)
+data_token.mint(alice_wallet.address, to_wei(100), alice_wallet)
 data_token.approve(ocean.exchange._exchange_address, to_wei(100), alice_wallet)
 ```
 
@@ -149,6 +149,23 @@ It is important to create an `exchange_id` only one time per exchange.
 ```python
 #Create exchange_id for a new exchange 
 exchange_id = ocean.exchange.create(token_address, to_wei("0.1"), alice_wallet)
+```
+
+If `exchange_id` has been created before or there are other
+exchanges for a certain data token, it can be searched by
+providing the data token address.
+
+```python
+#Search for exchange_id for a certain data token address (e.g. token_address).
+logs = ocean.exchange.search_exchange_by_data_token(token_address)
+print(logs)
+#E.g. First exchange is the wanted one.
+exchange_id = logs[0].args.exchangeId
+```
+_Optional:_ Filtering the logs by the exchange owner.
+```python
+filtered_logs = list(filter(lambda log: log.args.exchangeOwner == alice_wallet.address, logs))
+print(filtered_logs)
 ```
 
 Use the `exchange_id` for buying at fixed rate.
