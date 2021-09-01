@@ -60,24 +60,6 @@ pip install wheel
 pip install ocean-lib
 ```
 
-### Create config file
-
-In the work console:
-
-```console
-#Create config.ini file and fill it with configuration info
-[eth-network]
-network = http://127.0.0.1:8545
-address.file = ~/.ocean/ocean-contracts/artifacts/address.json
-
-[resources]
-metadata_cache_uri = http://localhost:5000
-provider.url = http://localhost:8030
-provider.address = 0x00bd138abd70e2f00903268f3db08f2d25677c9e
-
-downloads.path = consume-downloads
-```
-
 ### Set envvars
 
 In the work console:
@@ -85,6 +67,9 @@ In the work console:
 #set private keys of two accounts
 export TEST_PRIVATE_KEY1=0xbbfbee4961061d506ffbb11dfea64eba16355cbf1d9c29613126ba7fec0aed5d
 export TEST_PRIVATE_KEY2=0x804365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a
+
+#set network URL
+export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 
 #start python
 python
@@ -96,9 +81,9 @@ python
 In the Python console:
 ```python
 #Create ocean instance
-from ocean_lib.config import Config
+from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
-config = Config('config.ini')
+config = ExampleConfig.get_config()
 ocean = Ocean(config)
 
 print(f"config.network_url = '{config.network_url}'")
