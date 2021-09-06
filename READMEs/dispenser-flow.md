@@ -5,9 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Dispenser Flow
 
-This quickstart describes dispenser flow.
+This quickstart describes the dispenser flow.
 
-It focuses on Alice's experience as a publisher
+It focuses on Alice's experience as a publisher.
 
 Here are the steps:
 
@@ -63,7 +63,7 @@ pip install ocean-lib
 
 In the work console:
 ```console
-#set private keys of two accounts
+#set private key of the account
 export TEST_PRIVATE_KEY1=0xbbfbee4961061d506ffbb11dfea64eba16355cbf1d9c29613126ba7fec0aed5d
 
 #set network URL
@@ -94,6 +94,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
+
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
 token_address = data_token.address
 print(f"token_address = '{token_address}'")
@@ -105,22 +106,26 @@ In the same python console:
 ```python
 from ocean_lib.web3_internal.contract_utils import get_contracts_addresses
 from ocean_lib.models.dispenser import DispenserContract
+from ocean_lib.web3_internal.currency import to_wei
 
 contracts_addresses = get_contracts_addresses('ganache', config.address_file)
+print(f"contracts_addresses = {contracts_addresses}")
 #Create the dispenser
 dispenser_address = contracts_addresses["Dispenser"]
 dispenser = DispenserContract(alice_wallet.web3, dispenser_address)
 
 #Activate the dispenser
 dispenser.activate(token_address, to_wei(100), to_wei(100), alice_wallet)
+assert dispenser.is_active(token_address), f"dispenser is not active for {token_address} data token."
 
 #Mint the datatokens for the dispenser
-from ocean_lib.web3_internal.currency import to_wei
 data_token.mint(dispenser_address, to_wei(100), alice_wallet)
 data_token.approve(dispenser_address, to_wei(100), alice_wallet)
 
 #Dispense
-dispenser.dispense(token_address, to_wei(50), alice_wallet)
+tx_result = dispenser.dispense(token_address, to_wei(50), alice_wallet)
+assert tx_result, "failed to dispense data tokens for Alice."
+print(f"tx_result: '{tx_result}'")
 ```
 
 
