@@ -87,6 +87,7 @@ ocean = Ocean(config)
 print(f"config.network_url = '{config.network_url}'")
 print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
 print(f"config.provider_url = '{config.provider_url}'")
+print(f"config.network_name = '{config.network_name}'")
 
 #Alice's wallet
 import os
@@ -108,7 +109,8 @@ from ocean_lib.web3_internal.contract_utils import get_contracts_addresses
 from ocean_lib.models.dispenser import DispenserContract
 from ocean_lib.web3_internal.currency import to_wei
 
-contracts_addresses = get_contracts_addresses('ganache', config.address_file)
+contracts_addresses = get_contracts_addresses(config.network_name, config.address_file)
+assert contracts_addresses, "invalid network."
 print(f"contracts_addresses = {contracts_addresses}")
 #Create the dispenser
 dispenser_address = contracts_addresses["Dispenser"]
@@ -125,7 +127,7 @@ data_token.approve(dispenser_address, to_wei(100), alice_wallet)
 #Dispense
 tx_result = dispenser.dispense(token_address, to_wei(50), alice_wallet)
 assert tx_result, "failed to dispense data tokens for Alice."
-print(f"tx_result: '{tx_result}'")
+print(f"tx_result = '{tx_result}'")
 ```
 
 
