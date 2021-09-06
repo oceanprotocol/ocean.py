@@ -38,6 +38,7 @@ def test_order(web3, alice_ocean, alice_wallet):
         service.index,
         alice_wallet.address,
         alice_wallet,
+        sa.get_provider_address(),
     ]
     _order_tx_id = alice_ocean.assets.pay_for_service(*args)
 
@@ -73,5 +74,7 @@ def test_order(web3, alice_ocean, alice_wallet):
             order[0] == asset.data_token_address
         ), "The order data token address is different."
         assert order[5] == alice_wallet.address, "The payer is not the supposed one."
-        assert order[6] == alice_wallet.address, "The consumer is not the supposed one."
+        assert (
+            order[6] == sa.get_provider_address()
+        ), "The consumer is not the supposed one."
         assert len(order) == 9, "Different number of args."

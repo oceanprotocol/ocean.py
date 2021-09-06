@@ -276,7 +276,14 @@ service = asset.get_service(ServiceTypes.ASSET_ACCESS)
 quote = ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
 order_tx_id = ocean.assets.pay_for_service(
     ocean.web3,
-    quote.amount, quote.data_token_address, asset.did, service.index, fee_receiver, bob_wallet, None)
+    quote.amount,
+    quote.data_token_address,
+    asset.did,
+    service.index,
+    fee_receiver,
+    bob_wallet,
+    asset.get_provider_address()
+)
 print(f"order_tx_id = '{order_tx_id}'")
 
 #Bob downloads. If the connection breaks, Bob can request again by showing order_tx_id.

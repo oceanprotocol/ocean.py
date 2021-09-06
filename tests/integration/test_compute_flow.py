@@ -54,7 +54,7 @@ def process_order(ocean_instance, publisher_wallet, consumer_wallet, ddo, servic
 
     # Start the order on-chain using the `order` requirements from previous step
     service = ddo.get_service(service_type)
-    consumer = consumer_wallet.address
+    consumer = service.get_provider_address()
     if service_type == ServiceTypes.ASSET_ACCESS and order_requirements.computeAddress:
         consumer = order_requirements.computeAddress
 
