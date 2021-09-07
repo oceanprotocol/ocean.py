@@ -426,7 +426,7 @@ class OceanCompute:
         }
 
     @enforce_types
-    def result_safe(
+    def result_file(
         self, did: str, job_id: str, index: int, wallet: Wallet
     ) -> Dict[str, Any]:
         """
@@ -437,9 +437,9 @@ class OceanCompute:
         :param wallet: Wallet instance
         :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
         """
-        _, service_endpoint = self._get_compute_result_safe_endpoint(did)
+        _, service_endpoint = self._get_compute_result_file_endpoint(did)
         msg = f"{wallet.address}{job_id}{str(index)}"
-        result = self._data_provider.compute_job_result_safe(
+        result = self._data_provider.compute_job_result_file(
             job_id,
             index,
             service_endpoint,
@@ -485,13 +485,13 @@ class OceanCompute:
         )
 
     @enforce_types
-    def _get_compute_result_safe_endpoint(
+    def _get_compute_result_file_endpoint(
         self, did: str, asset: Optional[Asset] = None
     ) -> Tuple[str, str]:
         if not asset:
             asset = resolve_asset(did, self._config.metadata_cache_uri)
 
-        return self._data_provider.build_compute_result_safe_endpoint(
+        return self._data_provider.build_compute_result_file_endpoint(
             ServiceAgreement.from_ddo(
                 ServiceTypes.CLOUD_COMPUTE, asset
             ).service_endpoint

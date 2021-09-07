@@ -171,12 +171,11 @@ def run_compute_test(
             time.sleep(5)
 
         assert succeeded, "compute job unsuccessful"
-        result_safe = ocean_instance.compute.result_safe(
+        result_file = ocean_instance.compute.result_file(
             did, job_id, 0, consumer_wallet
         )
-        assert result_safe is not None
-        print(f"got job result: {str(result_safe)}")
-        # assert "did" in result, "something not right about the compute job, no did."
+        assert result_file is not None
+        print(f"got job result file: {str(result_file)}")
 
 
 def test_compute_raw_algo():

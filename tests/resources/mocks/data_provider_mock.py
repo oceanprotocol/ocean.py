@@ -58,7 +58,7 @@ class DataProviderMock(DataServiceProvider):
         return True
 
     @staticmethod
-    def compute_job_result_safe(*args, **kwargs):
+    def compute_job_result_file(*args, **kwargs):
         return True
 
     @staticmethod

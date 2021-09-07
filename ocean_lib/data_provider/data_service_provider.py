@@ -448,7 +448,7 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def compute_job_result_safe(
+    def compute_job_result_file(
         job_id: str,
         index: int,
         service_endpoint: str,
@@ -474,12 +474,12 @@ class DataServiceProvider:
         }
 
         req.prepare_url(service_endpoint, params)
-        compute_job_result_safe_url = req.url
+        compute_job_result_file_url = req.url
 
         logger.info(
-            f"invoke the computeResult endpoint with this url: {compute_job_result_safe_url}"
+            f"invoke the computeResult endpoint with this url: {compute_job_result_file_url}"
         )
-        response = DataServiceProvider._http_method("get", compute_job_result_safe_url)
+        response = DataServiceProvider._http_method("get", compute_job_result_file_url)
 
         if response.status_code != 200:
             raise Exception(response.content)
@@ -613,7 +613,7 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def build_compute_result_safe_endpoint(provider_uri: str) -> Tuple[str, str]:
+    def build_compute_result_file_endpoint(provider_uri: str) -> Tuple[str, str]:
         return DataServiceProvider.build_endpoint("computeResult", provider_uri)
 
     @staticmethod
