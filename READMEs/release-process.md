@@ -3,20 +3,18 @@ Copyright 2021 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# The Aquarius Release Process
-
-Please note that this upgrade does not affect the deployed versions of Aquarius, i.e. http://aquarius.oceanprotocol.com. Contact the Ocean Protocol team for such a deployment.
+# The ocean.py Release Process
 
 ## Step 0: Update documentation
 
 - Go to https://github.com/oceanprotocol/readthedocs, and follow the steps
-- This will update what's shown in https://docs.oceanprotocol.com/references/read-the-docs/aquarius/.
+- This will update what's shown in https://docs.oceanprotocol.com/references/read-the-docs/ocean-py/.
 
 This doesn't actually affect the pip release of the following steps. And if you've just updated READMEs, you can stop after this step if you like.
 
 ## Step 1: Bump version and push changes
 
-- Create a new local feature branch, e.g. `git checkout -b feature/bumpversion-to-v3.2.5`
+- Create a new local feature branch, e.g. `git checkout -b feature/bumpversion-to-v0.2.5`
 
 - Use the `bumpversion.sh` script to bump the project version. You can execute the script using {major|minor|patch} as first argument to bump the version accordingly:
 
@@ -30,7 +28,7 @@ This doesn't actually affect the pip release of the following steps. And if you'
 
 - Push the feature branch to GitHub.
 
-  `git push origin feature/bumpversion-to-v3.2.5"`
+  `git push origin feature/bumpversion-to-v0.2.5"`
 
 ## Step 2: Merge changes to main branch
 
@@ -44,15 +42,33 @@ This doesn't actually affect the pip release of the following steps. And if you'
 
 - To make a GitHub release (which creates a Git tag):
 
-  - Go to the Aquarius repo's Releases page <https://github.com/oceanprotocol/aquarius/releases>
+  - Go to the ocean.py repo's Releases page <https://github.com/oceanprotocol/ocean.py/releases>
   - Click "Draft a new release".
-  - For tag version, put something like `v3.2.5`
-  - For release title, put the same value (like `v3.2.5`).
+  - For tag version, put something like `v0.2.5`
+  - For release title, put the same value (like `v0.2.5`).
   - For the target, select the `main` branch, or the just-merged commit.
   - Describe the main changes. (In the future, these will come from the changelog.)
   - Click "Publish release".
 
-## Step 4: Verify
+## Step 4: Verifiy
 
-- The Github Action will detect the release (a new tag) and run the deployment.
+- Travis will detect the release (a new tag) and run the deployment section of [.travis.yml](.travis.yml), i.e.
+
+  ```yaml
+  deploy:
+  provider: pypi
+  distributions: sdist bdist_wheel
+  user: ${PYPI_USER}
+  password: ${PYPI_PASSWORD}
+  on:
+    tags: true
+    repo: oceanprotocol/ocean.py
+    python: 3.8
+  ```
+
+- Go to [ocean.py Travis page](https://travis-ci.com/github/oceanprotocol/ocean.py) and check the Travis job. It should deploy a new release to PyPI.
+
 - Check PyPI for the new release at <https://pypi.org/project/ocean-lib/>
+
+- Go through the [simple quickstart](datatokens-flow.md), ensure it works.
+- Go through the [marketplace quickstart](marketplace-flow.md), ensure it works.
