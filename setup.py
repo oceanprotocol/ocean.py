@@ -68,8 +68,6 @@ dev_requirements = [
     "pytest-env",
 ]
 
-docs_requirements = ["Sphinx", "sphinxcontrib-apidoc"]
-
 packages = find_namespace_packages(include=["ocean_lib*"], exclude=["*test*"])
 
 setup(
@@ -85,8 +83,7 @@ setup(
     description="🐳 Ocean protocol library.",
     extras_require={
         "test": test_requirements,
-        "dev": dev_requirements + test_requirements + docs_requirements,
-        "docs": docs_requirements,
+        "dev": dev_requirements + test_requirements,
     },
     install_requires=install_requirements,
     license="Apache Software License 2.0",
