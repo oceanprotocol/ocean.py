@@ -63,14 +63,13 @@ pip install ocean-lib
 
 In the work console:
 ```console
-#set private key of the account
-export TEST_PRIVATE_KEY1=0xbbfbee4961061d506ffbb11dfea64eba16355cbf1d9c29613126ba7fec0aed5d
+export TEST_PRIVATE_KEY1=0x5d75837394b078ce97bc289fa8d75e21000573520bfa7784a9d28ccaae602bf8
 
 #needed to mint fake OCEAN for testing with ganache
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 
-#set network URL
-export OCEAN_NETWORK_URL=http://127.0.0.1:8545
+#set the address file only for ganache
+export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
 
 #start python
 python
