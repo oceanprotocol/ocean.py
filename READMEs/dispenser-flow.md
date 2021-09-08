@@ -66,6 +66,9 @@ In the work console:
 #set private key of the account
 export TEST_PRIVATE_KEY1=0xbbfbee4961061d506ffbb11dfea64eba16355cbf1d9c29613126ba7fec0aed5d
 
+#needed to mint fake OCEAN for testing with ganache
+export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+
 #set network URL
 export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 
@@ -94,6 +97,11 @@ import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
 print(f"alice_wallet.address = '{alice_wallet.address}'")
+
+#Mint OCEAN for ganache only
+from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
+mint_fake_OCEAN(config)
+
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
