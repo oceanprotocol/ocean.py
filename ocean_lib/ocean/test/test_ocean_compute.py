@@ -6,13 +6,13 @@ from datetime import datetime
 from unittest.mock import patch
 
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
+from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from tests.resources.ddo_helpers import (
-    get_registered_ddo_with_compute_service,
     get_sample_algorithm_ddo_obj,
-    wait_for_ddo,
+    get_sample_ddo_with_compute_service,
 )
 from tests.resources.helper_functions import get_publisher_wallet
 
@@ -425,18 +425,20 @@ def test_create_compute_service_descriptor(publisher_ocean_instance):
     ), "compute_attributes do not match compute descriptor ones."
 
 
-def test_get_service_endpoint(publisher_ocean_instance):
-    publisher = get_publisher_wallet()
+def test_get_service_endpoint():
     data_provider = DataServiceProvider
     options_dict = {"resources": {"provider.url": "http://localhost:8030"}}
     config = Config(options_dict=options_dict)
     compute = OceanCompute(config, data_provider)
 
-    ddo = get_registered_ddo_with_compute_service(publisher_ocean_instance, publisher)
-    wait_for_ddo(publisher_ocean_instance, ddo.did)
-    assert ddo is not None, "DDO is not found in cache."
+    ddo = get_sample_ddo_with_compute_service()
+    compute_service = ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
+    compute_service.service_endpoint = "http://localhost:8030"
 
-    service_endpoint = compute._get_service_endpoint(ddo.did)
+    with patch("ocean_lib.ocean.ocean_compute.resolve_asset") as mock:
+        mock.return_value = ddo
+        service_endpoint = compute._get_service_endpoint(ddo.did)
+
     assert service_endpoint, "The service endpoint is None."
     assert isinstance(service_endpoint, tuple), "The service endpoint is not a tuple."
     assert (
