@@ -65,8 +65,14 @@ pip install ocean-lib
 In the work console:
 ```console
 #set private keys of two accounts
-export TEST_PRIVATE_KEY1=0xbbfbee4961061d506ffbb11dfea64eba16355cbf1d9c29613126ba7fec0aed5d
-export TEST_PRIVATE_KEY2=0x804365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a
+export TEST_PRIVATE_KEY1=0x5d75837394b078ce97bc289fa8d75e21000573520bfa7784a9d28ccaae602bf8
+export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
+
+#needed to mint fake OCEAN for testing with ganache
+export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+
+#set the address file only for ganache
+export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
 
 #set network URL
 export OCEAN_NETWORK_URL=http://127.0.0.1:8545
@@ -95,6 +101,11 @@ import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
 print(f"alice_wallet.address = '{alice_wallet.address}'")
+
+#Mint OCEAN for ganache only
+from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
+mint_fake_OCEAN(config)
+
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
 token_address = data_token.address
