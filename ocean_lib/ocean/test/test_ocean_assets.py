@@ -4,6 +4,7 @@
 #
 import time
 import uuid
+from unittest.mock import patch
 
 import pytest
 from eth_utils import add_0x_prefix
@@ -18,6 +19,7 @@ from tests.resources.ddo_helpers import (
     get_computing_metadata,
     get_resource_path,
     get_sample_algorithm_ddo,
+    get_sample_ddo,
     wait_for_ddo,
     wait_for_update,
 )
@@ -222,17 +224,14 @@ def test_ocean_assets_compute(publisher_ocean_instance):
 def test_download_fails(publisher_ocean_instance):
     """Tests failures of assets download function."""
     publisher = get_publisher_wallet()
-    metadata = get_sample_algorithm_ddo()["service"][0]
-    metadata["attributes"]["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    ddo = publisher_ocean_instance.assets.create(metadata["attributes"], publisher)
-    _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did)
-    assert _ddo, f"assets.resolve failed for did {ddo.did}"
-    with pytest.raises(AssertionError):
-        publisher_ocean_instance.assets.download(ddo.did, 1, publisher, "", "", -4)
-    with pytest.raises(TypeError):
-        publisher_ocean_instance.assets.download(
-            ddo.did, "", publisher, "", "", "string_index"
-        )
+    with patch("ocean_lib.ocean.ocean_assets.OceanAssets.resolve") as mock:
+        mock.return_value = get_sample_ddo()
+        with pytest.raises(AssertionError):
+            publisher_ocean_instance.assets.download("0x1", 1, publisher, "", "", -4)
+        with pytest.raises(TypeError):
+            publisher_ocean_instance.assets.download(
+                "0x1", "", publisher, "", "", "string_index"
+            )
 
 
 def test_create_bad_metadata(publisher_ocean_instance):
