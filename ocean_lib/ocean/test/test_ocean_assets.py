@@ -159,9 +159,8 @@ def test_ocean_assets_search(publisher_ocean_instance, metadata):
                 }
             )
         )
-        == 1,
-        "Query failed.The identifier was not found in the name.",
-    )
+        == 1
+    ), "Query failed.The identifier was not found in the name."
     assert (
         len(
             publisher_ocean_instance.assets.query(
@@ -229,8 +228,8 @@ def test_download_fails(publisher_ocean_instance):
     _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did)
     assert _ddo, f"assets.resolve failed for did {ddo.did}"
     with pytest.raises(AssertionError):
-        publisher_ocean_instance.assets.download(ddo.did, "", publisher, "", "", -4)
-    with pytest.raises(AssertionError):
+        publisher_ocean_instance.assets.download(ddo.did, 1, publisher, "", "", -4)
+    with pytest.raises(TypeError):
         publisher_ocean_instance.assets.download(
             ddo.did, "", publisher, "", "", "string_index"
         )
@@ -336,5 +335,5 @@ def test_pay_for_service_insufficient_balance(publisher_ocean_instance):
 
     with pytest.raises(InsufficientBalance):
         ocn.assets.pay_for_service(
-            ocn.web3, 10000000000000.0, token.address, asset.did, 0, ZERO_ADDRESS, alice
+            ocn.web3, 10000000000000, token.address, asset.did, 0, ZERO_ADDRESS, alice
         )

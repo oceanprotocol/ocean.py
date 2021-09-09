@@ -24,11 +24,11 @@ from ocean_lib.web3_internal.wallet import Wallet
 logger = logging.getLogger("ocean")
 
 
-@enforce_types
 class OceanCompute:
 
     """Ocean assets class."""
 
+    @enforce_types
     def __init__(
         self, config: Union[Config, Dict], data_provider: Type[DataServiceProvider]
     ) -> None:
@@ -37,6 +37,7 @@ class OceanCompute:
         self._data_provider = data_provider
 
     @staticmethod
+    @enforce_types
     def build_cluster_attributes(cluster_type: str, url: str) -> Dict[str, str]:
         """
         Builds cluster attributes.
@@ -48,6 +49,7 @@ class OceanCompute:
         return {"type": cluster_type, "url": url}
 
     @staticmethod
+    @enforce_types
     def build_container_attributes(
         image: str, tag: str, entrypoint: str
     ) -> Dict[str, str]:
@@ -62,6 +64,7 @@ class OceanCompute:
         return {"image": image, "tag": tag, "entrypoint": entrypoint}
 
     @staticmethod
+    @enforce_types
     def build_server_attributes(
         server_id: str,
         server_type: str,
@@ -93,6 +96,7 @@ class OceanCompute:
             "maxExecutionTime": max_run_time,
         }
 
+    # can not enforce types due to subscripted generics error
     @staticmethod
     def build_service_provider_attributes(
         provider_type: str,
@@ -122,13 +126,14 @@ class OceanCompute:
         }
 
     @staticmethod
+    @enforce_types
     def build_service_privacy_attributes(
-        trusted_algorithms: list = None,
-        trusted_algorithm_publishers: list = None,
-        metadata_cache_uri: str = None,
-        allow_raw_algorithm: bool = False,
-        allow_all_published_algorithms: bool = False,
-        allow_network_access: bool = False,
+        trusted_algorithms: Optional[list] = None,
+        trusted_algorithm_publishers: Optional[list] = None,
+        metadata_cache_uri: Optional[str] = None,
+        allow_raw_algorithm: Optional[bool] = False,
+        allow_all_published_algorithms: Optional[bool] = False,
+        allow_network_access: Optional[bool] = False,
     ) -> Dict[str, Any]:
         """
         :param trusted_algorithms: list of algorithm did to be trusted by the compute service provider
@@ -158,12 +163,13 @@ class OceanCompute:
         return privacy
 
     @staticmethod
+    @enforce_types
     def create_compute_service_attributes(
         timeout: int,
         creator: str,
         date_published: str,
-        provider_attributes: dict = None,
-        privacy_attributes: dict = None,
+        provider_attributes: Optional[dict] = None,
+        privacy_attributes: Optional[dict] = None,
     ) -> Dict[str, Any]:
         """
         Creates compute service attributes.
@@ -204,6 +210,7 @@ class OceanCompute:
         return attributes
 
     @staticmethod
+    @enforce_types
     def _status_from_job_info(job_info: Dict[str, Any]) -> Dict[str, Any]:
         """
         Helper function to extract the status dict with an added boolean for quick validation
@@ -216,9 +223,10 @@ class OceanCompute:
             "statusText": job_info["statusText"],
         }
 
+    # can not type check due to Subscripted generics error
     @staticmethod
     def check_output_dict(
-        output_def: Dict[str, Any],
+        output_def: Optional[Dict[str, Any]],
         consumer_address: str,
         data_provider: DataServiceProvider,
         config: Config,
@@ -248,6 +256,7 @@ class OceanCompute:
         default_output_def.update(output_def)
         return default_output_def
 
+    @enforce_types
     def create_compute_service_descriptor(self, attributes: dict) -> ServiceDescriptor:
         """
         Return a service descriptor (tuple) for service of type ServiceTypes.CLOUD_COMPUTE
@@ -260,6 +269,7 @@ class OceanCompute:
             attributes=attributes, service_endpoint=compute_endpoint
         )
 
+    @enforce_types
     def _sign_message(
         self,
         wallet: Wallet,
@@ -272,6 +282,7 @@ class OceanCompute:
             nonce = str(self._data_provider.get_nonce(wallet.address, uri))
         return sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
 
+    @enforce_types
     def start(
         self,
         input_datasets: list,
@@ -279,10 +290,10 @@ class OceanCompute:
         nonce: Optional[int] = None,
         algorithm_did: Optional[str] = None,
         algorithm_meta: Optional[AlgorithmMetadata] = None,
-        algorithm_tx_id: str = None,
-        algorithm_data_token: str = None,
-        output: dict = None,
-        job_id: str = None,
+        algorithm_tx_id: Optional[str] = None,
+        algorithm_data_token: Optional[str] = None,
+        output: Optional[dict] = None,
+        job_id: Optional[str] = None,
         algouserdata: Optional[dict] = None,
     ) -> str:
         """
@@ -367,6 +378,7 @@ class OceanCompute:
         except ValueError:
             raise
 
+    @enforce_types
     def status(self, did: str, job_id: str, wallet: Wallet) -> Dict[str, Any]:
         """
         Gets job status.
@@ -388,6 +400,7 @@ class OceanCompute:
             )
         )
 
+    @enforce_types
     def result(self, did: str, job_id: str, wallet: Wallet) -> Dict[str, Any]:
         """
         Gets job result.
@@ -412,6 +425,7 @@ class OceanCompute:
             "logs": info_dict.get("algorithmLogUrl", []),
         }
 
+    @enforce_types
     def stop(self, did: str, job_id: str, wallet: Wallet) -> Dict[str, Any]:
         """
         Attempt to stop the running compute job.
@@ -433,6 +447,7 @@ class OceanCompute:
             )
         )
 
+    @enforce_types
     def _get_service_endpoint(
         self, did: str, asset: Optional[Asset] = None
     ) -> Tuple[str, str]:

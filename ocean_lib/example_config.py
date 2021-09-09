@@ -3,31 +3,29 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
+import copy
 import logging
 import os
-import copy
-
-from web3 import Web3
-
-from ocean_lib.config import (
-    Config,
-    config_defaults,
-    SECTION_ETH_NETWORK,
-    NAME_CHAIN_ID,
-    SECTION_RESOURCES,
-    NAME_NETWORK_URL,
-    NAME_PROVIDER_URL,
-    NAME_METADATA_CACHE_URI,
-    DEFAULT_METADATA_CACHE_URI,
-    DEFAULT_PROVIDER_URL,
-)
-from ocean_lib.ocean.util import get_web3_connection_provider
 
 from enforce_typing import enforce_types
+from ocean_lib.config import (
+    DEFAULT_METADATA_CACHE_URI,
+    DEFAULT_PROVIDER_URL,
+    NAME_CHAIN_ID,
+    NAME_METADATA_CACHE_URI,
+    NAME_NETWORK_URL,
+    NAME_PROVIDER_URL,
+    NETWORK_NAME,
+    SECTION_ETH_NETWORK,
+    SECTION_RESOURCES,
+    Config,
+    config_defaults,
+)
+from ocean_lib.ocean.util import get_web3_connection_provider
+from web3 import Web3
 
 logging.basicConfig(level=logging.INFO)
 
-NETWORK_NAME = "network_name"
 """The interval in seconds between calls for the latest block number."""
 NAME_BLOCK_CONFIRMATION_POLL_INTERVAL = "block_confirmation_poll_interval"
 
@@ -78,6 +76,7 @@ CONFIG_NETWORK_HELPER = {
 }
 
 
+@enforce_types
 def get_config_dict(chain_id: int) -> dict:
     if chain_id not in CONFIG_NETWORK_HELPER:
         raise ValueError("The chain id for the specific RPC could not be fetched!")
@@ -103,9 +102,9 @@ def get_config_dict(chain_id: int) -> dict:
     return config_helper
 
 
-@enforce_types
 class ExampleConfig:
     @staticmethod
+    @enforce_types
     def get_config() -> Config:
         """Return `Config` containing default values for a given network.
         Chain ID is determined by querying the RPC specified by `OCEAN_NETWORK_URL` envvar.

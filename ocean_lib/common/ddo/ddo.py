@@ -6,7 +6,7 @@ import copy
 import json
 import logging
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
 from enforce_typing import enforce_types
 from eth_account.account import Account
@@ -20,14 +20,15 @@ from ocean_lib.common.ddo.service import Service
 from ocean_lib.common.did import did_to_id
 from ocean_lib.common.utils.utilities import get_timestamp
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ddo")
 
 
-@enforce_types
 class DDO:
     """DDO class to create, import, export, validate DDO objects."""
 
+    @enforce_types
     def __init__(
         self,
         did: Optional[str] = None,
@@ -54,26 +55,31 @@ class DDO:
             self._read_dict(dictionary)
 
     @property
+    @enforce_types
     def is_disabled(self) -> bool:
         """Returns whether the asset is disabled."""
         return self.is_flag_enabled("isOrderDisabled")
 
     @property
+    @enforce_types
     def is_enabled(self) -> bool:
         """Returns the opposite of is_disabled, for convenience."""
         return not self.is_disabled
 
     @property
+    @enforce_types
     def is_retired(self) -> bool:
         """Returns whether the asset is retired."""
         return self.is_flag_enabled("isRetired")
 
     @property
+    @enforce_types
     def is_listed(self) -> bool:
         """Returns whether the asset is listed."""
         return self.is_flag_enabled("isListed")
 
     @property
+    @enforce_types
     def asset_id(self) -> Optional[str]:
         """The asset id part of the DID"""
         if not self.did:
@@ -81,23 +87,27 @@ class DDO:
         return add_0x_prefix(did_to_id(self.did))
 
     @property
+    @enforce_types
     def publisher(self) -> Optional[str]:
         return self.proof.get("creator") if self.proof else None
 
     @property
+    @enforce_types
     def metadata(self) -> Optional[dict]:
         """Get the metadata service."""
         metadata_service = self.get_service(ServiceTypes.METADATA)
         return metadata_service.attributes if metadata_service else None
 
     @property
+    @enforce_types
     def encrypted_files(self) -> Optional[dict]:
         """Return encryptedFiles field in the base metadata."""
         return self.metadata["encryptedFiles"]
 
+    @enforce_types
     def add_service(
         self,
-        service_type: str,
+        service_type: Union[str, Service],
         service_endpoint: Optional[str] = None,
         values: Optional[dict] = None,
         index: Optional[int] = None,
@@ -126,6 +136,7 @@ class DDO:
         )
         self.services.append(service)
 
+    @enforce_types
     def as_text(self, is_proof: bool = True, is_pretty: bool = False) -> str:
         """Return the DDO as a JSON text.
 
@@ -139,6 +150,7 @@ class DDO:
 
         return json.dumps(data)
 
+    @enforce_types
     def as_dictionary(self, is_proof: bool = True) -> dict:
         """
         Return the DDO as a JSON dict.
@@ -174,6 +186,7 @@ class DDO:
 
         return data
 
+    @enforce_types
     def _read_dict(self, dictionary: dict) -> None:
         """Import a JSON dict into this DDO."""
         values = copy.deepcopy(dictionary)
@@ -202,7 +215,10 @@ class DDO:
 
         self.other_values = values
 
-    def add_proof(self, checksums: dict, publisher_account: Account) -> None:
+    @enforce_types
+    def add_proof(
+        self, checksums: dict, publisher_account: Union[Account, Wallet]
+    ) -> None:
         """Add a proof to the DDO, based on the public_key id/index and signed with the private key
         add a static proof to the DDO, based on one of the public keys.
 
@@ -217,12 +233,14 @@ class DDO:
             "checksum": checksums,
         }
 
+    @enforce_types
     def get_service(self, service_type: str) -> Optional[Service]:
         """Return a service using."""
         return next(
             (service for service in self.services if service.type == service_type), None
         )
 
+    @enforce_types
     def get_service_by_index(self, index: int) -> Optional[Service]:
         """
         Get service for a given index.
@@ -234,68 +252,82 @@ class DDO:
             (service for service in self.services if service.index == index), None
         )
 
+    @enforce_types
     def enable(self) -> None:
         """Enables asset for ordering."""
         self.disable_flag("isOrderDisabled")
 
+    @enforce_types
     def disable(self) -> None:
         """Disables asset from ordering."""
         self.enable_flag("isOrderDisabled")
 
+    @enforce_types
     def retire(self) -> None:
         """Retires an asset."""
         self.enable_flag("isRetired")
 
+    @enforce_types
     def unretire(self) -> None:
         """Unretires an asset."""
         self.disable_flag("isRetired")
 
+    @enforce_types
     def list(self) -> None:
         """Lists a previously unlisted asset."""
         self.enable_flag("isListed")
 
+    @enforce_types
     def unlist(self) -> None:
         """Unlists an asset."""
         self.disable_flag("isListed")
 
     @property
+    @enforce_types
     def requires_address_credential(self) -> bool:
         """Checks if an address credential is required on this asset."""
         manager = AddressCredential(self)
         return manager.requires_credential()
 
     @property
+    @enforce_types
     def allowed_addresses(self) -> list:
         """Lists addresses that are explicitly allowed in credentials."""
         manager = AddressCredential(self)
         return manager.get_addresses_of_class("allow")
 
     @property
+    @enforce_types
     def denied_addresses(self) -> list:
         """Lists addresesses that are explicitly denied in credentials."""
         manager = AddressCredential(self)
         return manager.get_addresses_of_class("deny")
 
+    @enforce_types
     def add_address_to_allow_list(self, address: str) -> None:
         """Adds an address to allowed addresses list."""
         manager = AddressCredential(self)
         manager.add_address_to_access_class(address, "allow")
 
+    @enforce_types
     def add_address_to_deny_list(self, address: str) -> None:
         """Adds an address to the denied addresses list."""
         manager = AddressCredential(self)
         manager.add_address_to_access_class(address, "deny")
 
+    @enforce_types
     def remove_address_from_allow_list(self, address: str) -> None:
         """Removes address from allow list (if it exists)."""
         manager = AddressCredential(self)
         manager.remove_address_from_access_class(address, "allow")
 
+    @enforce_types
     def remove_address_from_deny_list(self, address: str) -> None:
         """Removes address from deny list (if it exists)."""
         manager = AddressCredential(self)
         manager.remove_address_from_access_class(address, "deny")
 
+    @enforce_types
     def is_consumable(
         self,
         credential: Optional[dict] = None,
@@ -323,6 +355,7 @@ class DDO:
 
         return ConsumableCodes.OK
 
+    @enforce_types
     def enable_flag(self, flag_name: str) -> None:
         """
         :return: None
@@ -340,6 +373,7 @@ class DDO:
         else:
             metadata_service.attributes["status"][flag_name] = True
 
+    @enforce_types
     def disable_flag(self, flag_name: str) -> None:
         """
         :return: None
@@ -357,6 +391,7 @@ class DDO:
         else:
             metadata_service.attributes["status"].pop(flag_name)
 
+    @enforce_types
     def is_flag_enabled(self, flag_name: str) -> bool:
         """
         :return: `isListed` or `bool` in metadata_service.attributes["status"]

@@ -9,10 +9,12 @@ import uuid
 from datetime import datetime
 from typing import Any, Dict
 
+from enforce_typing import enforce_types
 from eth_typing import HexStr
 from web3.main import Web3
 
 
+@enforce_types
 def generate_new_id() -> str:
     """
     Generate a new id without prefix.
@@ -22,6 +24,7 @@ def generate_new_id() -> str:
     return uuid.uuid4().hex + uuid.uuid4().hex
 
 
+@enforce_types
 def to_32byte_hex(val: Any) -> str:
     """
 
@@ -31,6 +34,7 @@ def to_32byte_hex(val: Any) -> str:
     return Web3.toBytes(val).rjust(32, b"\0")
 
 
+@enforce_types
 def convert_to_bytes(data: str) -> bytes:
     """
 
@@ -40,6 +44,7 @@ def convert_to_bytes(data: str) -> bytes:
     return Web3.toBytes(text=data)
 
 
+@enforce_types
 def convert_to_string(data: bytes) -> HexStr:
     """
 
@@ -49,6 +54,7 @@ def convert_to_string(data: bytes) -> HexStr:
     return Web3.toHex(data)
 
 
+@enforce_types
 def convert_to_text(data: bytes) -> str:
     """
 
@@ -58,6 +64,7 @@ def convert_to_text(data: bytes) -> str:
     return Web3.toText(data)
 
 
+@enforce_types
 def checksum(seed: Dict[str, Any]) -> str:
     """Calculate the hash3_256."""
     return hashlib.sha3_256(
@@ -67,6 +74,7 @@ def checksum(seed: Dict[str, Any]) -> str:
     ).hexdigest()
 
 
+@enforce_types
 def get_timestamp() -> str:
     """Return the current system timestamp."""
     return f"{datetime.utcnow().replace(microsecond=0).isoformat()}Z"

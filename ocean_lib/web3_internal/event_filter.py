@@ -12,8 +12,8 @@ from web3.contract import ContractEvent
 logger = logging.getLogger(__name__)
 
 
-@enforce_types
 class EventFilter:
+    @enforce_types
     def __init__(
         self,
         event: ContractEvent,
@@ -32,15 +32,19 @@ class EventFilter:
         self._create_filter()
 
     @property
+    @enforce_types
     def filter_id(self) -> Optional[str]:
         return self.filter.filter_id if self.filter else None
 
+    @enforce_types
     def uninstall(self) -> None:
         self.event.web3.eth.uninstall_filter(self.filter.filter_id)
 
+    @enforce_types
     def recreate_filter(self) -> None:
         self._create_filter()
 
+    @enforce_types
     def _create_filter(self) -> None:
         self.filter = self.event.createFilter(
             fromBlock=self.block_range[0],
@@ -50,13 +54,18 @@ class EventFilter:
             argument_filters=self.argument_filters,
         )
 
-    def get_new_entries(self, max_tries: int = 1) -> list:
+    @enforce_types
+    def get_new_entries(self, max_tries: Optional[int] = 1) -> list:
         return self._get_entries(self.filter.get_new_entries, max_tries=max_tries)
 
-    def get_all_entries(self, max_tries: int = 1) -> list:
+    @enforce_types
+    def get_all_entries(self, max_tries: Optional[int] = 1) -> list:
         return self._get_entries(self.filter.get_all_entries, max_tries=max_tries)
 
-    def _get_entries(self, entries_getter: Callable, max_tries: int = 1) -> list:
+    @enforce_types
+    def _get_entries(
+        self, entries_getter: Callable, max_tries: Optional[int] = 1
+    ) -> list:
         i = 0
         while i < max_tries:
             try:
