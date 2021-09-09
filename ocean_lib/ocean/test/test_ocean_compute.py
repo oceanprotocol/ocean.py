@@ -3,14 +3,15 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from datetime import datetime
+from unittest.mock import patch
 
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from tests.resources.ddo_helpers import (
-    get_registered_algorithm_ddo,
     get_registered_ddo_with_compute_service,
+    get_sample_algorithm_ddo_obj,
     wait_for_ddo,
 )
 from tests.resources.helper_functions import get_publisher_wallet
@@ -136,32 +137,31 @@ def test_build_service_provider_attributes(config):
 
 
 def test_build_service_privacy_attributes(publisher_ocean_instance):
-    publisher = get_publisher_wallet()
     data_provider = DataServiceProvider
     compute = OceanCompute(
         config=publisher_ocean_instance.config, data_provider=data_provider
     )
 
-    algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
-    wait_for_ddo(publisher_ocean_instance, algorithm_ddo.did)
-    assert algorithm_ddo is not None
+    algorithm_ddo = get_sample_algorithm_ddo_obj()
 
-    privacy_dict = compute.build_service_privacy_attributes(
-        trusted_algorithms=[algorithm_ddo.did],
-        metadata_cache_uri=publisher_ocean_instance.config.metadata_cache_uri,
-        allow_raw_algorithm=True,
-        allow_all_published_algorithms=True,
-        allow_network_access=True,
-    )
+    with patch("ocean_lib.assets.utils.resolve_asset") as mock:
+        mock.return_value = algorithm_ddo
+        privacy_dict = compute.build_service_privacy_attributes(
+            trusted_algorithms=[algorithm_ddo.did],
+            metadata_cache_uri=publisher_ocean_instance.config.metadata_cache_uri,
+            allow_raw_algorithm=True,
+            allow_all_published_algorithms=True,
+            allow_network_access=True,
+        )
 
-    expected_privacy_dict = {
-        "allowRawAlgorithm": True,
-        "allowAllPublishedAlgorithms": True,
-        "publisherTrustedAlgorithms": create_publisher_trusted_algorithms(
-            [algorithm_ddo.did], publisher_ocean_instance.config.metadata_cache_uri
-        ),
-        "allowNetworkAccess": True,
-    }
+        expected_privacy_dict = {
+            "allowRawAlgorithm": True,
+            "allowAllPublishedAlgorithms": True,
+            "publisherTrustedAlgorithms": create_publisher_trusted_algorithms(
+                [algorithm_ddo.did], publisher_ocean_instance.config.metadata_cache_uri
+            ),
+            "allowNetworkAccess": True,
+        }
 
     assert privacy_dict, "Privacy dictionary is None."
     assert isinstance(
@@ -195,26 +195,26 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
     config = publisher_ocean_instance.config
     compute = OceanCompute(config=config, data_provider=data_provider)
 
-    algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
-    wait_for_ddo(publisher_ocean_instance, algorithm_ddo.did)
-    assert algorithm_ddo is not None
+    algorithm_ddo = get_sample_algorithm_ddo_obj()
 
-    privacy_dict = compute.build_service_privacy_attributes(
-        trusted_algorithms=[algorithm_ddo.did],
-        metadata_cache_uri=config.metadata_cache_uri,
-        allow_raw_algorithm=True,
-        allow_all_published_algorithms=True,
-        allow_network_access=True,
-    )
+    with patch("ocean_lib.assets.utils.resolve_asset") as mock:
+        mock.return_value = algorithm_ddo
+        privacy_dict = compute.build_service_privacy_attributes(
+            trusted_algorithms=[algorithm_ddo.did],
+            metadata_cache_uri=config.metadata_cache_uri,
+            allow_raw_algorithm=True,
+            allow_all_published_algorithms=True,
+            allow_network_access=True,
+        )
 
-    expected_privacy_dict = {
-        "allowRawAlgorithm": True,
-        "allowAllPublishedAlgorithms": True,
-        "publisherTrustedAlgorithms": create_publisher_trusted_algorithms(
-            [algorithm_ddo.did], config.metadata_cache_uri
-        ),
-        "allowNetworkAccess": True,
-    }
+        expected_privacy_dict = {
+            "allowRawAlgorithm": True,
+            "allowAllPublishedAlgorithms": True,
+            "publisherTrustedAlgorithms": create_publisher_trusted_algorithms(
+                [algorithm_ddo.did], config.metadata_cache_uri
+            ),
+            "allowNetworkAccess": True,
+        }
 
     assert privacy_dict, "Privacy dictionary is None."
     assert isinstance(
@@ -317,26 +317,26 @@ def test_create_compute_service_descriptor(publisher_ocean_instance):
     config = publisher_ocean_instance.config
     compute = OceanCompute(config=config, data_provider=data_provider)
 
-    algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
-    wait_for_ddo(publisher_ocean_instance, algorithm_ddo.did)
-    assert algorithm_ddo is not None
+    algorithm_ddo = get_sample_algorithm_ddo_obj()
 
-    privacy_dict = compute.build_service_privacy_attributes(
-        trusted_algorithms=[algorithm_ddo.did],
-        metadata_cache_uri=config.metadata_cache_uri,
-        allow_raw_algorithm=True,
-        allow_all_published_algorithms=True,
-        allow_network_access=True,
-    )
+    with patch("ocean_lib.assets.utils.resolve_asset") as mock:
+        mock.return_value = algorithm_ddo
+        privacy_dict = compute.build_service_privacy_attributes(
+            trusted_algorithms=[algorithm_ddo.did],
+            metadata_cache_uri=config.metadata_cache_uri,
+            allow_raw_algorithm=True,
+            allow_all_published_algorithms=True,
+            allow_network_access=True,
+        )
 
-    expected_privacy_dict = {
-        "allowRawAlgorithm": True,
-        "allowAllPublishedAlgorithms": True,
-        "publisherTrustedAlgorithms": create_publisher_trusted_algorithms(
-            [algorithm_ddo.did], config.metadata_cache_uri
-        ),
-        "allowNetworkAccess": True,
-    }
+        expected_privacy_dict = {
+            "allowRawAlgorithm": True,
+            "allowAllPublishedAlgorithms": True,
+            "publisherTrustedAlgorithms": create_publisher_trusted_algorithms(
+                [algorithm_ddo.did], config.metadata_cache_uri
+            ),
+            "allowNetworkAccess": True,
+        }
 
     assert privacy_dict, "Privacy dictionary is None."
     assert isinstance(
