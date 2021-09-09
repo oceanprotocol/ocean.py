@@ -51,6 +51,10 @@ def get_sample_algorithm_ddo() -> dict:
     return json.loads(metadata)
 
 
+def get_sample_algorithm_ddo_obj() -> Asset:
+    return Asset(json_filename=get_resource_path("ddo", "ddo_algorithm.json"))
+
+
 def get_algorithm_meta():
     algorithm_ddo_path = get_resource_path("ddo", "ddo_algorithm.json")
     algo_main = Asset(json_filename=algorithm_ddo_path).metadata["main"]
