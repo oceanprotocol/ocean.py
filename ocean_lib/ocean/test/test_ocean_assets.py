@@ -18,7 +18,7 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import (
     get_computing_metadata,
     get_resource_path,
-    get_sample_algorithm_ddo,
+    get_sample_algorithm_ddo_dict,
     get_sample_ddo,
     wait_for_ddo,
     wait_for_update,
@@ -188,7 +188,7 @@ def test_ocean_assets_validate(publisher_ocean_instance, metadata):
 def test_ocean_assets_algorithm(publisher_ocean_instance):
     """Tests the creation of an algorithm DDO."""
     publisher = get_publisher_wallet()
-    metadata = get_sample_algorithm_ddo()["service"][0]
+    metadata = get_sample_algorithm_ddo_dict()["service"][0]
     metadata["attributes"]["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     ddo = publisher_ocean_instance.assets.create(metadata["attributes"], publisher)
     assert ddo, "DDO None. The ddo is not cached after the creation."
@@ -200,7 +200,7 @@ def test_ocean_assets_algorithm(publisher_ocean_instance):
 def test_ocean_assets_create_fails_fileinfo(publisher_ocean_instance):
     """Tests that a file with invalid URL can not be published."""
     publisher = get_publisher_wallet()
-    metadata = get_sample_algorithm_ddo()["service"][0]
+    metadata = get_sample_algorithm_ddo_dict()["service"][0]
     metadata["attributes"]["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     metadata_copy = metadata.copy()
     metadata_copy["attributes"]["main"]["files"][0][
@@ -237,7 +237,7 @@ def test_download_fails(publisher_ocean_instance):
 def test_create_bad_metadata(publisher_ocean_instance):
     """Tests that we can't create the asset with plecos failure."""
     publisher = get_publisher_wallet()
-    metadata = get_sample_algorithm_ddo()["service"][0]
+    metadata = get_sample_algorithm_ddo_dict()["service"][0]
     metadata["attributes"]["main"]["files"][0]["EXTRA ATTRIB!"] = 0
     with pytest.raises(ValueError):
         publisher_ocean_instance.assets.create(metadata["attributes"], publisher)

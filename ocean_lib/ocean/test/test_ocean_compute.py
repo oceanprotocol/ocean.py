@@ -11,7 +11,7 @@ from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from tests.resources.ddo_helpers import (
-    get_sample_algorithm_ddo_obj,
+    get_sample_algorithm_ddo,
     get_sample_ddo_with_compute_service,
 )
 from tests.resources.helper_functions import get_publisher_wallet
@@ -142,7 +142,7 @@ def test_build_service_privacy_attributes(publisher_ocean_instance):
         config=publisher_ocean_instance.config, data_provider=data_provider
     )
 
-    algorithm_ddo = get_sample_algorithm_ddo_obj()
+    algorithm_ddo = get_sample_algorithm_ddo()
 
     with patch("ocean_lib.assets.utils.resolve_asset") as mock:
         mock.return_value = algorithm_ddo
@@ -195,7 +195,7 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
     config = publisher_ocean_instance.config
     compute = OceanCompute(config=config, data_provider=data_provider)
 
-    algorithm_ddo = get_sample_algorithm_ddo_obj()
+    algorithm_ddo = get_sample_algorithm_ddo()
 
     with patch("ocean_lib.assets.utils.resolve_asset") as mock:
         mock.return_value = algorithm_ddo
@@ -317,7 +317,7 @@ def test_create_compute_service_descriptor(publisher_ocean_instance):
     config = publisher_ocean_instance.config
     compute = OceanCompute(config=config, data_provider=data_provider)
 
-    algorithm_ddo = get_sample_algorithm_ddo_obj()
+    algorithm_ddo = get_sample_algorithm_ddo()
 
     with patch("ocean_lib.assets.utils.resolve_asset") as mock:
         mock.return_value = algorithm_ddo
