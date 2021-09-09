@@ -83,8 +83,12 @@ downloads.path = consume-downloads
 In the work console:
 ```console
 #set private keys of two accounts
-export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
-export TEST_PRIVATE_KEY2=0x804365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a
+export TEST_PRIVATE_KEY1=0x5d75837394b078ce97bc289fa8d75e21000573520bfa7784a9d28ccaae602bf8
+export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
+
+#needed to mint fake OCEAN for testing with ganache
+export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+
 ```
 
 ### Config in Python
@@ -113,6 +117,11 @@ import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
 print(f"alice_wallet.address = '{alice_wallet.address}'")
+
+#Mint OCEAN for ganache only
+from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
+mint_fake_OCEAN(config)
+
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 ```
 
@@ -121,8 +130,10 @@ assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 In the same Python console:
 ```python
 #Publish DATA datatoken, mint tokens
+from ocean_lib.web3_internal.currency import to_wei
+
 DATA_datatoken = ocean.create_data_token('DATA1', 'DATA1', alice_wallet, blob=ocean.config.metadata_cache_uri)
-DATA_datatoken.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
+DATA_datatoken.mint(alice_wallet.address, to_wei(100), alice_wallet)
 print(f"DATA_datatoken.address = '{DATA_datatoken.address}'")
 
 #Specify metadata & service attributes for Branin test dataset.
@@ -182,7 +193,7 @@ In the same Python console:
 ```python
 #Publish ALG datatoken
 ALG_datatoken = ocean.create_data_token('ALG1', 'ALG1', alice_wallet, blob=ocean.config.metadata_cache_uri)
-ALG_datatoken.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
+ALG_datatoken.mint(alice_wallet.address, to_wei(100), alice_wallet)
 print(f"ALG_datatoken.address = '{ALG_datatoken.address}'")
 
 #Specify metadata and service attributes, for "GPR" algorithm script.
@@ -241,8 +252,8 @@ utils.add_publisher_trusted_algorithm(DATA_did, ALG_did, config.metadata_cache_u
 In the same Python console:
 ```python
 #alice shares access for both to bob, as datatokens. Alternatively, bob might have bought these in a market.
-DATA_datatoken.transfer(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
-ALG_datatoken.transfer(bob_address, to_base_18(1.0), from_wallet=alice_wallet)
+DATA_datatoken.transfer(bob_address, to_wei(1), from_wallet=alice_wallet)
+ALG_datatoken.transfer(bob_address, to_wei(1), from_wallet=alice_wallet)
 ```
 
 ## 6. Bob starts a compute job
