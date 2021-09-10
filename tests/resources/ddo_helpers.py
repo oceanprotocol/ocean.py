@@ -43,12 +43,16 @@ def get_sample_ddo_with_compute_service() -> Asset:
     )
 
 
-def get_sample_algorithm_ddo() -> dict:
+def get_sample_algorithm_ddo_dict() -> dict:
     path = get_resource_path("ddo", "ddo_algorithm.json")
     assert path.exists(), f"{path} does not exist!"
     with open(path, "r") as file_handle:
         metadata = file_handle.read()
     return json.loads(metadata)
+
+
+def get_sample_algorithm_ddo() -> Asset:
+    return Asset(json_filename=get_resource_path("ddo", "ddo_algorithm.json"))
 
 
 def get_algorithm_meta():
@@ -167,7 +171,7 @@ def get_registered_ddo_with_compute_service(
 
 
 def get_registered_algorithm_ddo(ocean_instance, wallet, provider_uri=None):
-    metadata = get_sample_algorithm_ddo()["service"][0]["attributes"]
+    metadata = get_sample_algorithm_ddo_dict()["service"][0]["attributes"]
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     service_descriptor = get_access_service_descriptor(
         ocean_instance, wallet.address, metadata["main"]["dateCreated"], provider_uri

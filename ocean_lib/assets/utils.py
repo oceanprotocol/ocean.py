@@ -43,7 +43,7 @@ def generate_trusted_algo_dict(
     return {
         "did": ddo.did,
         "filesChecksum": create_checksum(
-            algo_metadata["encryptedFiles"]
+            algo_metadata.get("encryptedFiles", "")
             + json.dumps(algo_metadata["main"]["files"], separators=(",", ":"))
         ),
         "containerSectionChecksum": create_checksum(
@@ -55,15 +55,17 @@ def generate_trusted_algo_dict(
 
 
 @enforce_types
-def create_publisher_trusted_algorithms(dids: list, metadata_cache_uri: str) -> list:
+def create_publisher_trusted_algorithms(
+    ddos_or_dids: list, metadata_cache_uri: str
+) -> list:
     """
     :return: List of objects returned by `generate_trusted_algo_dict` method.
     """
     return [
         generate_trusted_algo_dict(
-            asset_or_did=did, metadata_cache_uri=metadata_cache_uri
+            asset_or_did=ddo_or_did, metadata_cache_uri=metadata_cache_uri
         )
-        for did in dids
+        for ddo_or_did in ddos_or_dids
     ]
 
 
@@ -96,6 +98,7 @@ def add_publisher_trusted_algorithm(
     # now add this algo_did as trusted algo
     algo_ddo = resolve_asset(algo_did, metadata_cache_uri=metadata_cache_uri)
     trusted_algos.append(generate_trusted_algo_dict(asset_or_did=algo_ddo))
+
     # update with the new list
     privacy_values["publisherTrustedAlgorithms"] = trusted_algos
     assert (

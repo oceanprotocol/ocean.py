@@ -27,12 +27,14 @@ class Asset(DDO):
 
     @enforce_types
     def get_trusted_algorithms(self) -> list:
-        return self.get_compute_privacy_attributes().get("publisherTrustedAlgorithms")
+        return self.get_compute_privacy_attributes().get(
+            "publisherTrustedAlgorithms", []
+        )
 
     @enforce_types
     def get_trusted_algorithm_publishers(self) -> list:
         return self.get_compute_privacy_attributes().get(
-            "publisherTrustedAlgorithmPublishers"
+            "publisherTrustedAlgorithmPublishers", []
         )
 
     @enforce_types

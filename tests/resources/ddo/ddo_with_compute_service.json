@@ -47,6 +47,7 @@
           "datePublished": "2019-04-09T19:02:11Z",
           "cost": "1.0",
           "timeout": 86400,
+          "privacy": {},
           "provider": {
             "type": "Azure",
             "description": "",

@@ -50,16 +50,9 @@ def test_resolve_asset(publisher_ocean_instance, metadata):
     ), "Resolve asset function call is unsuccessful."
 
 
-def test_bad_resolved_asset(publisher_ocean_instance, metadata):
-    publisher = get_publisher_wallet()
-    metadata_copy = metadata.copy()
-
-    asset = publisher_ocean_instance.assets.create(metadata_copy, publisher)
-    wait_for_ddo(publisher_ocean_instance, asset.did)
-    assert asset is not None, "The asset is not cached."
-
+def test_bad_resolved_asset():
     with pytest.raises(AssertionError) as err:
-        resolve_asset(asset.did)
+        resolve_asset("0x1")
     assert (
         err.value.args[0]
         == "Either metadata_cache_uri or (web3 and token_address) is required."
