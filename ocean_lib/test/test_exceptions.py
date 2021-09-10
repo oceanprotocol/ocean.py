@@ -3,14 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import uuid
+from unittest.mock import patch
 
 import pytest
-from eth_utils import add_0x_prefix
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
-from tests.resources.ddo_helpers import get_resource_path, wait_for_ddo
+from tests.resources.ddo_helpers import get_resource_path
 from tests.resources.helper_functions import get_publisher_wallet
 
 
@@ -42,23 +42,27 @@ def test_ContractNotFound(publisher_ocean_instance, metadata):
 
     # used a random address from Etherscan
     token_address = "0xB3b8239719403E38de3bdF19B9AC147B48c72BF2"
-    with pytest.raises(ContractNotFound):
-        publisher_ocean_instance.assets.create(
-            metadata_copy, publisher, data_token_address=token_address
-        )
+    with patch("ocean_lib.models.dtfactory.DTFactory.verify_data_token") as mock:
+        mock.return_value = False
+        with pytest.raises(ContractNotFound):
+            publisher_ocean_instance.assets.create(
+                metadata_copy, publisher, data_token_address=token_address
+            )
 
 
 def test_AquariusError(publisher_ocean_instance, metadata):
     metadata_copy = metadata.copy()
     publisher = get_publisher_wallet()
 
-    ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher)
-    wait_for_ddo(publisher_ocean_instance, ddo.did)
+    ocn = publisher_ocean_instance
+    alice_wallet = get_publisher_wallet()
+    dt = ocn.create_data_token(
+        "DataToken1", "DT1", alice_wallet, blob=ocn.config.metadata_cache_uri
+    )
 
-    did = ddo.did
-    token_address = add_0x_prefix(did[7:])
-
-    with pytest.raises(AquariusError):
-        publisher_ocean_instance.assets.create(
-            metadata_copy, publisher, data_token_address=token_address
-        )
+    with patch("ocean_lib.common.aquarius.aquarius.Aquarius.ddo_exists") as mock:
+        mock.return_value = True
+        with pytest.raises(AquariusError):
+            publisher_ocean_instance.assets.create(
+                metadata_copy, publisher, data_token_address=dt.address
+            )
