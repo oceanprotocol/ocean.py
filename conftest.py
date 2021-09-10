@@ -8,9 +8,9 @@ import uuid
 
 import pytest
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
-from ocean_lib.ocean.util import to_base_18
+from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
-from ocean_lib.web3_internal.utils import from_wei, get_ether_balance
+from ocean_lib.web3_internal.utils import get_ether_balance
 from tests.resources.ddo_helpers import get_metadata
 from tests.resources.helper_functions import (
     get_consumer_ocean_instance,
@@ -44,27 +44,24 @@ def setup_all(request, config, web3):
     with open(addresses_file) as f:
         network_addresses = json.load(f)
 
-    print(
-        f"sender: {wallet.key}, {wallet.address}, {wallet.password}, {wallet.keys_str()}"
-    )
+    print(f"sender: {wallet.key}, {wallet.address}, {wallet.keys_str()}")
     print(f"sender balance: {from_wei(get_ether_balance(web3, wallet.address))}")
-    assert (
-        from_wei(get_ether_balance(web3, wallet.address)) > 10
+    assert get_ether_balance(web3, wallet.address) >= to_wei(
+        10
     ), "Ether balance less than 10."
 
     from ocean_lib.models.erc20_token import MockOcean as DataToken
 
     OCEAN_token = DataToken(web3, address=network_addresses["development"]["Ocean"])
 
-    amt_distribute = 1000
-    amt_distribute_base = to_base_18(float(amt_distribute))
+    amt_distribute = to_wei(1000)
 
     for w in (get_publisher_wallet(), get_consumer_wallet()):
-        if from_wei(get_ether_balance(web3, w.address)) < 2:
-            send_ether(wallet, w.address, 4)
+        if get_ether_balance(web3, w.address) < to_wei(2):
+            send_ether(wallet, w.address, to_wei(4))
 
-        if OCEAN_token.token_balance(w.address) < 100:
-            OCEAN_token.transfer(w.address, amt_distribute_base, from_wallet=wallet)
+        if OCEAN_token.balanceOf(w.address) < to_wei(100):
+            OCEAN_token.transfer(w.address, amt_distribute, from_wallet=wallet)
 
 
 @pytest.fixture

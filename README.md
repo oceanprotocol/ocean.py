@@ -40,8 +40,8 @@ This is in beta state and you can expect running into problems. If you run into 
 - [🏗 Installation](#-installation)
 - [🏄 Quickstart](#-quickstart)
   - [Simple Flow](#simple-flow)
-  - [Learn more](#learn-more)
   - [Marketplace Flow](#marketplace-flow)
+  - [Learn more](#learn-more)
 - [🦑 Development](#-development)
 - [🏛 License](#-license)
 

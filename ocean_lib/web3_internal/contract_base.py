@@ -6,11 +6,11 @@
 """All contracts inherit from `ContractBase` class."""
 import logging
 import os
-from typing import Any, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 import requests
 from enforce_typing import enforce_types
-from eth_typing import BlockIdentifier
+from eth_typing import ChecksumAddress
 from hexbytes import HexBytes
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_utils import (
@@ -24,14 +24,14 @@ from web3 import Web3
 from web3._utils.events import get_event_data
 from web3._utils.filters import construct_event_filter_params
 from web3._utils.threads import Timeout
-from web3.contract import ContractEvent
+from web3.contract import ContractEvent, ContractEvents
+from web3.datastructures import AttributeDict
 from web3.exceptions import MismatchedABI, ValidationError
 from websockets import ConnectionClosed
 
 logger = logging.getLogger(__name__)
 
 
-@enforce_types
 class ContractBase(object):
 
     """Base class for all contract objects."""
@@ -46,7 +46,8 @@ class ContractBase(object):
         "Metadata",
     ]
 
-    def __init__(self, web3: Web3, address: Optional[str]):
+    @enforce_types
+    def __init__(self, web3: Web3, address: Optional[str]) -> None:
         """Initialises Contract Base object."""
         self.name = self.contract_name
         assert (
@@ -60,12 +61,14 @@ class ContractBase(object):
         )
         assert self.contract.caller is not None
 
-    def __str__(self):
+    @enforce_types
+    def __str__(self) -> str:
         """Returns contract `name @ address.`"""
         return f"{self.contract_name} @ {self.address}"
 
     @classmethod
-    def configured_address(cls, network, address_file):
+    @enforce_types
+    def configured_address(cls, network: str, address_file: str) -> str:
         """Returns the contract addresses"""
         addresses = get_contracts_addresses(network, address_file)
         # FIXME: temporary solution, will need to pass in the version
@@ -77,27 +80,32 @@ class ContractBase(object):
         return addresses.get(cls.CONTRACT_NAME) if addresses else None
 
     @property
+    @enforce_types
     def contract_name(self) -> str:
         """Returns the contract name"""
         return self.CONTRACT_NAME
 
     @property
+    @enforce_types
     def address(self) -> str:
         """Return the ethereum address of the solidity contract deployed in current network."""
         return self.contract.address
 
     @property
-    def events(self):
+    @enforce_types
+    def events(self) -> ContractEvents:
         """Expose the underlying contract's events."""
         return self.contract.events
 
     @property
+    @enforce_types
     def function_names(self) -> List[str]:
         """Returns the list of functions in the contract"""
         return list(self.contract.functions)
 
     @staticmethod
-    def to_checksum_address(address: str):
+    @enforce_types
+    def to_checksum_address(address: str) -> ChecksumAddress:
         """
         Validate the address provided.
 
@@ -107,7 +115,10 @@ class ContractBase(object):
         return Web3.toChecksumAddress(address)
 
     @staticmethod
-    def get_tx_receipt(web3: Web3, tx_hash: str, timeout=120):
+    @enforce_types
+    def get_tx_receipt(
+        web3: Web3, tx_hash: Union[str, HexBytes], timeout: Optional[int] = 120
+    ) -> Optional[AttributeDict]:
         """
         Get the receipt of a tx.
 
@@ -134,6 +145,7 @@ class ContractBase(object):
             logger.info(f"Unknown error waiting for transaction receipt: {e}.")
             raise
 
+    @enforce_types
     def is_tx_successful(self, tx_hash: str) -> bool:
         """Check if the transaction is successful.
 
@@ -143,7 +155,8 @@ class ContractBase(object):
         receipt = self.get_tx_receipt(self.web3, tx_hash)
         return bool(receipt and receipt.status == 1)
 
-    def get_event_signature(self, event_name):
+    @enforce_types
+    def get_event_signature(self, event_name: str) -> str:
         """
         Return signature of event definition to use in the call to eth_getLogs.
 
@@ -168,18 +181,19 @@ class ContractBase(object):
         sig_str = f'{event_name}({",".join(types)})'
         return Web3.keccak(text=sig_str).hex()
 
+    @enforce_types
     def subscribe_to_event(
         self,
         event_name: str,
-        timeout,
-        event_filter,
-        callback=None,
-        timeout_callback=None,
-        args=None,
-        wait=False,
-        from_block="latest",
-        to_block="latest",
-    ):
+        timeout: int,
+        event_filter: Optional[dict] = None,
+        callback: Optional[Callable] = None,
+        timeout_callback: Optional[Callable] = None,
+        args: Optional[list] = None,
+        wait: Optional[bool] = False,
+        from_block: Optional[Union[str, int]] = "latest",
+        to_block: Optional[Union[str, int]] = "latest",
+    ) -> None:
         """
         Create a listener for the event `event_name` on this contract.
 
@@ -209,8 +223,13 @@ class ContractBase(object):
             callback, timeout_callback=timeout_callback, timeout=timeout, blocking=wait
         )
 
+    @enforce_types
     def send_transaction(
-        self, fn_name: str, fn_args, from_wallet: Wallet, transact: dict = None
+        self,
+        fn_name: str,
+        fn_args: Any,
+        from_wallet: Wallet,
+        transact: Optional[dict] = None,
     ) -> str:
         """Calls a smart contract function.
 
@@ -237,7 +256,8 @@ class ContractBase(object):
 
         return contract_function.transact(_transact).hex()
 
-    def get_event_argument_names(self, event_name: str):
+    @enforce_types
+    def get_event_argument_names(self, event_name: str) -> Tuple:
         """Finds the event arguments by `event_name`.
 
         :param event_name: str Name of the event to search in the `contract`.
@@ -248,7 +268,8 @@ class ContractBase(object):
             return event().argument_names
 
     @classmethod
-    def deploy(cls, web3: Web3, deployer_wallet: Wallet, *args):
+    @enforce_types
+    def deploy(cls, web3: Web3, deployer_wallet: Wallet, *args) -> str:
         """
         Deploy the DataTokenTemplate and DTFactory contracts to the current network.
 
@@ -278,7 +299,15 @@ class ContractBase(object):
 
         return cls.get_tx_receipt(web3, tx_hash, timeout=60).contractAddress
 
-    def get_event_log(self, event_name, from_block, to_block, filters, chunk_size=1000):
+    # can not enforce types since this goes through ContractEvent with Subscriptable Generics
+    def get_event_log(
+        self,
+        event_name: str,
+        from_block: int,
+        to_block: int,
+        filters: Optional[Dict[str, str]],
+        chunk_size: Optional[int] = 1000,
+    ) -> List[Any]:
         """Retrieves the first event log which matches the filters parameter criteria.
         It processes the blocks order backwards.
 
@@ -321,9 +350,15 @@ class ContractBase(object):
 
         return all_logs
 
+    # can not enforce types since this goes through ContractEvent with Subscriptable Generics
     def get_event_logs(
-        self, event_name, from_block, to_block, filters, chunk_size=1000
-    ):
+        self,
+        event_name: str,
+        from_block: int,
+        to_block: int,
+        filters: Optional[Dict[str, str]] = None,
+        chunk_size: Optional[int] = 1000,
+    ) -> List[AttributeDict]:
         """
         Fetches the list of event logs between the given block numbers.
         :param event_name: str
@@ -379,12 +414,13 @@ class ContractBase(object):
 
         return all_logs
 
+    # can not enforce types since this goes through ContractEvent with Subscriptable Generics
     @staticmethod
     def getLogs(
         event: ContractEvent,
         argument_filters: Optional[Dict[str, Any]] = None,
-        fromBlock: Optional[BlockIdentifier] = None,
-        toBlock: Optional[BlockIdentifier] = None,
+        fromBlock: Optional[int] = None,
+        toBlock: Optional[int] = None,
         blockHash: Optional[HexBytes] = None,
         from_all_addresses: Optional[bool] = False,
     ):

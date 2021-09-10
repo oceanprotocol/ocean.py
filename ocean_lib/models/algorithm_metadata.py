@@ -3,10 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
+from typing import Any, Dict
+
+from enforce_typing import enforce_types
 
 
 class AlgorithmMetadata:
-    def __init__(self, metadata_dict):
+    @enforce_types
+    def __init__(self, metadata_dict: Dict[str, Any]) -> None:
         """Initialises AlgorithmMetadata object."""
         self.url = metadata_dict.get("url", "")
         self.rawcode = metadata_dict.get("rawcode", "")
@@ -19,15 +23,18 @@ class AlgorithmMetadata:
         self.container_image = container.get("image", "")
         self.container_tag = container.get("tag", "")
 
-    def is_valid(self):
+    @enforce_types
+    def is_valid(self) -> bool:
         return bool(
             self.container_image and self.container_tag and self.container_entry_point
         )
 
-    def as_json_str(self):
+    @enforce_types
+    def as_json_str(self) -> str:
         return json.dumps(self.as_dictionary())
 
-    def as_dictionary(self):
+    @enforce_types
+    def as_dictionary(self) -> Dict[str, Any]:
         return {
             "url": self.url,
             "rawcode": self.rawcode,

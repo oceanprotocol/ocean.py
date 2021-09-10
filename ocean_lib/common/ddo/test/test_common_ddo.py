@@ -28,14 +28,14 @@ def test_creating_ddo_from_scratch():
     assert ddo.created is not None, "DDO has not been created."
 
     did = DID.did({"0": "0x99999999999999999"})
-    ddo.assign_did(did)
+    ddo.did = did
     assert ddo.did == did
 
     ddo.add_service(TEST_SERVICE_TYPE, TEST_SERVICE_URL)
 
     pub_acc = get_publisher_wallet()
 
-    ddo.add_proof("checksum", pub_acc)
+    ddo.add_proof({"checksum": "test"}, pub_acc)
     ddo_text_proof = ddo.as_text()
     assert ddo_text_proof
 
@@ -48,7 +48,7 @@ def test_ddo_dict():
     ddo1 = DDO(json_filename=sample_ddo_path)
     assert ddo1.did == "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019"
 
-    ddo1.add_proof("checksum", get_publisher_wallet())
+    ddo1.add_proof({"checksum": "test"}, get_publisher_wallet())
 
     ddo_dict = ddo1.as_dictionary()
     assert ddo_dict["publicKey"][0]["id"] == ddo1.did
@@ -67,10 +67,6 @@ def test_find_service():
     service = ddo.get_service_by_index(0)
     assert service and service.type == ServiceTypes.METADATA, (
         "Failed to find service by integer " "id."
-    )
-    service = ddo.get_service_by_index("0")
-    assert service and service.type == ServiceTypes.METADATA, (
-        "Failed to find service by str(int)" " id."
     )
     service = ddo.get_service_by_index(3)
     assert not service

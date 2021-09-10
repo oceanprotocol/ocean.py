@@ -5,7 +5,6 @@
 from typing import List
 
 from enforce_typing import enforce_types
-from ocean_lib.ocean.util import from_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -171,7 +170,7 @@ class ERC20Token(ContractBase):
         return self.send_transaction("transfer", (to, value_base), from_wallet)
 
     def token_balance(self, account: str):
-        return from_base_18(self.balanceOf(account))
+        return self.balanceOf(account)
 
 
 class MockOcean(ERC20Token):

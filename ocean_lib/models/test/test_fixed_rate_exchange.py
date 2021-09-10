@@ -4,7 +4,7 @@
 #
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.ocean.util import from_base_18, to_base_18
+from ocean_lib.web3_internal.currency import from_wei, to_wei
 from web3.exceptions import ValidationError
 
 
@@ -34,7 +34,6 @@ def test_fixed_rate_exchange(
         buy_data_token
 
     """
-    base_unit = to_base_18(1.0)
     fixed_ex = FixedRateExchange(
         web3, v3_contracts_addresses[FixedRateExchange.CONTRACT_NAME]
     )
@@ -45,11 +44,10 @@ def test_fixed_rate_exchange(
 
     ocean_t = alice_ocean.OCEAN_address
     ocn_token = DataToken(web3, ocean_t)
-    # owner_wallet = get_ganache_wallet()
-    # ocn_token.transfer_tokens(bob_wallet.address, 100, owner_wallet)
-    assert ocn_token.token_balance(bob_wallet.address) >= 100, (
+    bob_ocean_balance = ocn_token.balanceOf(bob_wallet.address)
+    assert bob_ocean_balance >= to_wei(100), (
         f"bob wallet does not have the expected OCEAN tokens balance, "
-        f"got {ocn_token.token_balance(bob_wallet.address)} instead of 100"
+        f"got {from_wei(bob_ocean_balance)} instead of 100"
     )
 
     # clear any previous ocean token allowance for the exchange contract
@@ -61,7 +59,7 @@ def test_fixed_rate_exchange(
     ), "approve failed"
     assert ocn_token.allowance(bob_wallet.address, fixed_ex.address) == 1, ""
 
-    rate = to_base_18(0.1)
+    rate = to_wei("0.1")
     tx_id = fixed_ex.create(ocean_t, T1.address, rate, alice_wallet)
     r = fixed_ex.get_tx_receipt(web3, tx_id)
     assert r.status == 1, f"create fixed rate exchange failed: TxId {tx_id}."
@@ -80,13 +78,13 @@ def test_fixed_rate_exchange(
 
     ###################
     # Test quote and buy datatokens
-    amount = to_base_18(10.0)  # 10 data tokens
+    amount = to_wei(10)  # 10 data tokens
     base_token_quote = fixed_ex.get_base_token_quote(ex_id, amount)
-    # quote = from_base_18(base_token_quote)
+    expected_base_token_quote = int(amount * rate / to_wei(1))
     assert base_token_quote == (
-        amount * rate / base_unit
-    ), f"quote does not seem correct: expected {amount*rate/base_unit}, got {base_token_quote}"
-    assert from_base_18(base_token_quote) == 1.0, ""
+        expected_base_token_quote
+    ), f"quote does not seem correct: expected {expected_base_token_quote}, got {base_token_quote}"
+    assert base_token_quote == to_wei(1), ""
     # buy without approving OCEAN tokens, should fail
     assert (
         run_failing_tx(fixed_ex, fixed_ex.buy_data_token, ex_id, amount, bob_wallet)
@@ -134,7 +132,7 @@ def test_fixed_rate_exchange(
 
     #####################
     # create another ex then do more tests
-    rate2 = to_base_18(0.8)
+    rate2 = to_wei("0.8")
     tx_id = fixed_ex.create(ocean_t, T2.address, rate2, alice_wallet)
     r = fixed_ex.get_tx_receipt(web3, tx_id)
     assert r.status == 1, f"create fixed rate exchange failed: TxId {tx_id}."
@@ -172,13 +170,14 @@ def test_fixed_rate_exchange(
 
     ###################################
     # try buying from deactivated ex
-    amount = to_base_18(4.0)  # num data tokens
+    amount = to_wei(4)  # num data tokens
     base_token_quote = fixed_ex.get_base_token_quote(
         t2_ex_id, amount
-    )  # num base token (OCEAN tokens
+    )  # num base token (OCEAN tokens)
+    expected_base_token_quote = int(amount * rate2 / to_wei(1))
     assert base_token_quote == (
-        amount * rate2 / base_unit
-    ), f"quote does not seem correct: expected {amount*rate2/base_unit}, got {base_token_quote}"
+        expected_base_token_quote
+    ), f"quote does not seem correct: expected {expected_base_token_quote}, got {base_token_quote}"
     ocn_token.get_tx_receipt(
         web3, ocn_token.approve(fixed_ex.address, base_token_quote, bob_wallet)
     )
@@ -232,21 +231,21 @@ def test_fixed_rate_exchange(
     )
     assert (
         run_failing_tx(
-            fixed_ex, fixed_ex.buy_data_token, t2_ex_id, to_base_18(5.0), bob_wallet
+            fixed_ex, fixed_ex.buy_data_token, t2_ex_id, to_wei(5), bob_wallet
         )
         == 0
     ), f"buy_data_token/swap on EX {t2_ex_id} should fail because not enough Ocean tokens are approved by buyer."
 
     # get new quote for new amount
     base_token_quote = fixed_ex.get_base_token_quote(
-        t2_ex_id, to_base_18(5.0)
+        t2_ex_id, to_wei(5)
     )  # num base token (OCEAN tokens
     ocn_token.get_tx_receipt(
         web3, ocn_token.approve(fixed_ex.address, base_token_quote, bob_wallet)
     )
     assert (
         fixed_ex.get_tx_receipt(
-            web3, fixed_ex.buy_data_token(t2_ex_id, to_base_18(5.0), bob_wallet)
+            web3, fixed_ex.buy_data_token(t2_ex_id, to_wei(5), bob_wallet)
         ).status
         == 1
     ), f"buy_data_token/swap on EX {t2_ex_id} failed."
@@ -260,7 +259,7 @@ def test_fixed_rate_exchange(
     assert (
         fixed_ex.getRate(ex_id) == rate
     ), f"T1 exchange rate does not match {rate}, got {fixed_ex.getRate(ex_id)}"
-    rate2 = to_base_18(0.75)
+    rate2 = to_wei("0.75")
     assert (
         fixed_ex.get_tx_receipt(
             web3, fixed_ex.setRate(t2_ex_id, rate2, alice_wallet)
@@ -272,20 +271,17 @@ def test_fixed_rate_exchange(
     ), f"T2 exchange rate does not match {rate2}, got {fixed_ex.getRate(t2_ex_id)}"
 
     assert (
-        run_failing_tx(
-            fixed_ex, fixed_ex.setRate, t2_ex_id, to_base_18(0.0), alice_wallet
-        )
-        == 0
+        run_failing_tx(fixed_ex, fixed_ex.setRate, t2_ex_id, 0, alice_wallet) == 0
     ), "should not accept rate of Zero."
     assert (
         run_failing_tx(
-            fixed_ex, fixed_ex.setRate, t2_ex_id, -to_base_18(0.05), alice_wallet
+            fixed_ex, fixed_ex.setRate, t2_ex_id, -to_wei("0.05"), alice_wallet
         )
         == 0
     ), "should not accept a negative rate."
     assert (
         fixed_ex.get_tx_receipt(
-            web3, fixed_ex.setRate(t2_ex_id, to_base_18(1000.0), alice_wallet)
+            web3, fixed_ex.setRate(t2_ex_id, to_wei(1000), alice_wallet)
         ).status
         == 1
     ), "setRate failed."

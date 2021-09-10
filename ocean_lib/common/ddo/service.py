@@ -8,6 +8,9 @@
 """
 import copy
 import logging
+from typing import Any, Dict, Optional, Tuple
+
+from enforce_typing import enforce_types
 
 logger = logging.getLogger(__name__)
 
@@ -21,13 +24,19 @@ class Service:
     SERVICE_ATTRIBUTES = "attributes"
 
     def __init__(
-        self, service_endpoint, service_type, attributes, other_values=None, index=None
-    ):
+        self,
+        service_endpoint: Optional[str],
+        service_type: str,
+        attributes: Optional[Dict],
+        other_values: Optional[Dict[str, Any]] = None,
+        index: Optional[int] = None,
+    ) -> None:
         """Initialize Service instance."""
-        self._service_endpoint = service_endpoint
-        self._type = service_type or ""
-        self._index = index
-        self._attributes = attributes or {}
+        # init can not be type hinted due to conflicts with ServiceAgreement
+        self.service_endpoint = service_endpoint
+        self.type = service_type or ""
+        self.index = index
+        self.attributes = attributes or {}
 
         # assign the _values property to empty until they are used
         self._values = dict()
@@ -41,42 +50,8 @@ class Service:
                 if name not in self._reserved_names:
                     self._values[name] = value
 
-    @property
-    def type(self):
-        """
-        Type of the service.
-
-        :return: str
-        """
-        return self._type
-
-    @property
-    def index(self):
-        """
-        Identifier of the service inside the asset DDO
-
-        :return: str
-        """
-        return self._index
-
-    @property
-    def service_endpoint(self):
-        """
-        Service endpoint.
-
-        :return: String
-        """
-        return self._service_endpoint
-
-    def set_service_endpoint(self, service_endpoint):
-        """
-        Update service endpoint. Needed to update after create did.
-
-        :param service_endpoint: Service endpoint, str
-        """
-        self._service_endpoint = service_endpoint
-
-    def values(self):
+    @enforce_types
+    def values(self) -> Dict[str, Any]:
         """
 
         :return: array of values
@@ -84,14 +59,12 @@ class Service:
         return self._values.copy()
 
     @property
-    def attributes(self):
-        return self._attributes
+    @enforce_types
+    def main(self) -> Dict[str, Any]:
+        return self.attributes["main"]
 
-    @property
-    def main(self):
-        return self._attributes["main"]
-
-    def update_value(self, name, value):
+    @enforce_types
+    def update_value(self, name: str, value: Any) -> None:
         """
         Update value in the array of values.
 
@@ -102,10 +75,11 @@ class Service:
         if name not in self._reserved_names:
             self._values[name] = value
 
-    def as_dictionary(self):
+    @enforce_types
+    def as_dictionary(self) -> Dict[str, Any]:
         """Return the service as a python dictionary."""
         attributes = {}
-        for key, value in self._attributes.items():
+        for key, value in self.attributes.items():
             if isinstance(value, object) and hasattr(value, "as_dictionary"):
                 value = value.as_dictionary()
             elif isinstance(value, list):
@@ -116,11 +90,11 @@ class Service:
 
             attributes[key] = value
 
-        values = {self.SERVICE_TYPE: self._type, self.SERVICE_ATTRIBUTES: attributes}
-        if self._service_endpoint:
-            values[self.SERVICE_ENDPOINT] = self._service_endpoint
-        if self._index is not None:
-            values[self.SERVICE_INDEX] = self._index
+        values = {self.SERVICE_TYPE: self.type, self.SERVICE_ATTRIBUTES: attributes}
+        if self.service_endpoint:
+            values[self.SERVICE_ENDPOINT] = self.service_endpoint
+        if self.index is not None:
+            values[self.SERVICE_INDEX] = self.index
 
         if self._values:
             values.update(self._values)
@@ -128,7 +102,10 @@ class Service:
         return values
 
     @classmethod
-    def _parse_json(cls, service_dict):
+    @enforce_types
+    def _parse_json(
+        cls, service_dict: Dict[str, Any]
+    ) -> Tuple[str, str, int, Dict, Dict]:
         sd = copy.deepcopy(service_dict)
         service_endpoint = sd.pop(cls.SERVICE_ENDPOINT, None)
         _type = sd.pop(cls.SERVICE_TYPE, None)
@@ -144,7 +121,8 @@ class Service:
         return service_endpoint, _type, _index, _attributes, sd
 
     @classmethod
-    def from_json(cls, service_dict):
+    @enforce_types
+    def from_json(cls, service_dict: Dict[str, Any]) -> "Service":
         """Create a service object from a JSON string."""
         service_endpoint, _type, _index, _attributes, sd = cls._parse_json(service_dict)
         return cls(service_endpoint, _type, _attributes, sd, _index)

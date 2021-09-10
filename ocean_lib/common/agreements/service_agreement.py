@@ -3,7 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from collections import namedtuple
+from typing import Optional
 
+from enforce_typing import enforce_types
 from ocean_lib.common.agreements.service_types import ServiceTypes, ServiceTypesIndices
 from ocean_lib.common.ddo.service import Service
 
@@ -16,13 +18,14 @@ class ServiceAgreement(Service):
     AGREEMENT_TEMPLATE = "serviceAgreementTemplate"
     SERVICE_CONDITIONS = "conditions"
 
+    @enforce_types
     def __init__(
         self,
-        attributes,
-        service_endpoint=None,
-        service_type=None,
-        service_index=None,
-        other_values=None,
+        attributes: Optional[dict],
+        service_endpoint: Optional[str],
+        service_type: str = None,
+        service_index: Optional[int] = None,
+        other_values: Optional[dict] = None,
     ):
         """
 
@@ -48,17 +51,14 @@ class ServiceAgreement(Service):
         default_index = service_to_default_index[service_type]
 
         service_index = service_index if service_index is not None else default_index
-        Service.__init__(
-            self,
-            service_endpoint,
-            service_type,
-            attributes,
-            other_values,
-            service_index,
+
+        super().__init__(
+            service_endpoint, service_type, attributes, other_values, service_index
         )
 
     @classmethod
-    def from_json(cls, service_dict):
+    @enforce_types
+    def from_json(cls, service_dict: dict) -> "ServiceAgreement":
         """
 
         :param service_dict:
@@ -71,7 +71,8 @@ class ServiceAgreement(Service):
         return cls(_attributes, service_endpoint, _type, _index, service_dict)
 
     @classmethod
-    def from_ddo(cls, service_type, ddo):
+    @enforce_types
+    def from_ddo(cls, service_type: str, ddo: object) -> "ServiceAgreement":
         """
 
         :param service_type: identifier of the service inside the asset DDO, str
@@ -88,18 +89,16 @@ class ServiceAgreement(Service):
 
         return cls.from_json(service_dict)
 
-    def as_dictionary(self):
+    @enforce_types
+    def as_dictionary(self) -> dict:
         values = Service.as_dictionary(self)
         return values
 
-    def get_cost(self):
+    @enforce_types
+    def get_cost(self) -> float:
         """
         Return the price from the conditions parameters.
 
         :return: Float
         """
         return float(self.main["cost"])
-
-    @property
-    def service_endpoint(self):
-        return self._service_endpoint

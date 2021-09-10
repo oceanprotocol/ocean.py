@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-
 from ocean_lib.common.aquarius.aquarius import Aquarius
 from tests.resources.ddo_helpers import wait_for_ddo
 from tests.resources.helper_functions import get_publisher_wallet
@@ -13,11 +12,8 @@ def test_init():
     """Tests initialisation of Aquarius objects."""
     aqua = Aquarius("http://something/api/v1/aquarius/assets")
     assert (
-        aqua.url == "http://something/api/v1/aquarius/assets/ddo"
+        aqua.base_url == "http://something/api/v1/aquarius/assets"
     ), "Different URL from the specified one."
-    assert (
-        aqua.root_url == "http://something"
-    ), "Different root URL from the specified one."
 
 
 def test_aqua_functions_for_single_ddo(
@@ -42,12 +38,6 @@ def test_aqua_functions_for_single_ddo(
     assert len(res), "The result does not exist."
 
 
-def test_aqua_function_for_multiple_ddos(aquarius_instance):
-    """Tests against multiple-ddo functions of Aquarius."""
-    assert aquarius_instance.list_assets()
-    assert aquarius_instance.list_assets_ddo()
-
-
 def test_metadata_invalid(aquarius_instance):
     """Tests metadata validation failure."""
     result, errors = aquarius_instance.validate_metadata(
@@ -59,14 +49,12 @@ def test_metadata_invalid(aquarius_instance):
 
 def test_invalid_text_search(aquarius_instance):
     """Tests text search with an invalid text."""
-    text = "foo_text"
-    with pytest.raises(ValueError):
-        aquarius_instance.text_search(text=text, sort="foo_sort")
+    with pytest.raises(TypeError):
+        aquarius_instance.text_search(text={})
 
 
 def test_invalid_search_query(aquarius_instance):
     """Tests query search with an invalid query."""
-    search_query = dict()
-    search_query["sort"] = "foo_sort"
-    with pytest.raises(ValueError):
-        aquarius_instance.query_search(search_query=search_query, sort="foo_sort")
+    search_query = "not_a_dict"
+    with pytest.raises(TypeError):
+        aquarius_instance.query_search(search_query=search_query)

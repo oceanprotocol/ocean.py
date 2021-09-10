@@ -3,15 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 """DID Lib to do DID's and DDO's."""
-#  Copyright 2018 Ocean Protocol Foundation
-#  SPDX-License-Identifier: Apache-2.0
-
 import re
+from typing import Dict, Union
 
+from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
-from web3 import Web3
-
 from ocean_lib.common.utils.utilities import checksum
+from web3 import Web3
 
 OCEAN_PREFIX = "did:op:"
 
@@ -20,7 +18,8 @@ class DID:
     """Class representing an asset DID."""
 
     @staticmethod
-    def did(seed):
+    @enforce_types
+    def did(seed: Dict[str, str]) -> str:
         """
         Create a did.
 
@@ -33,7 +32,8 @@ class DID:
         return OCEAN_PREFIX + remove_0x_prefix(checksum(seed))
 
 
-def did_parse(did):
+@enforce_types
+def did_parse(did: str) -> Dict[str, str]:
     """
     Parse a DID into it's parts.
 
@@ -52,7 +52,8 @@ def did_parse(did):
     return result
 
 
-def id_to_did(did_id, method="op"):
+@enforce_types
+def id_to_did(did_id: Union[bytes, str], method: str = "op") -> str:
     """Return an Ocean DID from given a hex id."""
     if isinstance(did_id, bytes):
         did_id = Web3.toHex(did_id)
@@ -69,13 +70,15 @@ def id_to_did(did_id, method="op"):
     return f"did:{method}:{did_id}"
 
 
-def did_to_id(did):
+@enforce_types
+def did_to_id(did: str) -> str:
     """Return an id extracted from a DID string."""
     result = did_parse(did)
     return result["id"] if result and (result["id"] is not None) else None
 
 
-def did_to_id_bytes(did):
+@enforce_types
+def did_to_id_bytes(did: Union[bytes, str]) -> bytes:
     """
     Return an Ocean DID to it's correspondng hex id in bytes.
 

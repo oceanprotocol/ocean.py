@@ -4,13 +4,13 @@
 #
 import inspect
 import json
-from abc import ABC
 from unittest.mock import Mock
 
 from requests.models import Response
+from requests.sessions import Session
 
 
-class HttpClientMockBase(ABC):
+class HttpClientMockBase(Session):
     """Parent class for all HTTPClient mocks."""
 
     @classmethod

@@ -58,6 +58,8 @@ npm start
 
 Check out the Ocean Market webapp at http://localhost:8000.
 
+Ocean Market is a graphical interface to the backend smart contracts and Ocean services (Aquarius, Provider). The following steps will interface to the backend in a different fashion: using the command-line / console, and won't need Ocean Market. But it's good to understand there are multiple views.
+
 ### Install the library
 
 In a new console that we'll call the _work_ console (as we'll use it later):
@@ -76,13 +78,15 @@ pip install wheel
 pip install ocean-lib
 ```
 
-### Set up contracts
+### Create config file
 
-Create a file called `test3/config.ini` and fill it as follows.
+In the work console:
 
-```text
+```console
+#Create config.ini file and fill it with configuration info
+echo """
 [eth-network]
-network = ganache
+network = http://127.0.0.1:8545
 address.file = ~/.ocean/ocean-contracts/artifacts/address.json
 
 [resources]
@@ -91,13 +95,16 @@ provider.url = http://localhost:8030
 provider.address = 0x00bd138abd70e2f00903268f3db08f2d25677c9e
 
 downloads.path = consume-downloads
+""" > config.ini
 ```
+
+### Set envvars
 
 In the work console:
 ```console
 #set private keys of two accounts
-export TEST_PRIVATE_KEY1=0xbbfbee4961061d506ffbb11dfea64eba16355cbf1d9c29613126ba7fec0aed5d
-export TEST_PRIVATE_KEY2=0x804365e293b9fab9bd11bddd39082396d56d30779efbb3ffb0a6089027902c4a
+export TEST_PRIVATE_KEY1=0x5d75837394b078ce97bc289fa8d75e21000573520bfa7784a9d28ccaae602bf8
+export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
 
 #needed to mint fake OCEAN
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
@@ -107,6 +114,11 @@ python
 ```
 
 ## 2. Alice publishes data asset
+
+In the work console:
+```console
+python
+```
 
 In the Python console:
 ```python
@@ -131,6 +143,7 @@ from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
 
 #Publish a datatoken
+assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
 token_address = data_token.address
 print(f"token_address = '{token_address}'")
@@ -142,7 +155,7 @@ metadata =  {
         "type": "dataset", "name": "branin", "author": "Trent",
         "license": "CC0: Public Domain", "dateCreated": date_created,
         "files": [{"index": 0, "contentType": "text/text",
-	           "url": "https://raw.githubusercontent.com/trentmc/branin/master/branin.arff"}]}
+	           "url": "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"}]}
 }
 service_attributes = {
         "main": {
@@ -162,6 +175,7 @@ from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 
 service_endpoint = DataServiceProvider.get_url(ocean.config)
 download_service = ServiceDescriptor.access_service_descriptor(service_attributes, service_endpoint)
+assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 asset = ocean.assets.create(
   metadata,
   alice_wallet,
@@ -172,8 +186,12 @@ assert token_address == asset.data_token_address
 did = asset.did  # did contains the datatoken address
 print(f"did = '{did}'")
 
+In order to encrypt the entire asset, when using a private market or metadata cache, use the encrypt keyword:
+`asset = ocean.assets.create(..., encrypt=True)`
+
 #Mint the datatokens
-data_token.mint_tokens(alice_wallet.address, 100.0, alice_wallet)
+from ocean_lib.web3_internal.currency import to_wei
+data_token.mint(alice_wallet.address, to_wei(100), alice_wallet)
 
 #In the create() step below, Alice needs ganache OCEAN. Ensure she has it.
 from ocean_lib.models.btoken import BToken #BToken is ERC20
@@ -185,8 +203,8 @@ assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need OCEAN"
 # and finalize the pool.
 pool = ocean.pool.create(
    token_address,
-   data_token_amount=100.0,
-   OCEAN_amount=10.0,
+   data_token_amount=to_wei(100),
+   OCEAN_amount=to_wei(10),
    from_wallet=alice_wallet
 )
 pool_address = pool.address
@@ -212,8 +230,9 @@ pool = ocean.pool.get(ocean.web3, pool_address)
 #Here, the market retrieves the datatoken price denominated in OCEAN.
 OCEAN_address = ocean.OCEAN_address
 price_in_OCEAN = ocean.pool.calcInGivenOut(
-    pool_address, OCEAN_address, token_address, token_out_amount=1.0)
-print(f"Price of 1 datatoken is {price_in_OCEAN} OCEAN")
+    pool_address, OCEAN_address, token_address, token_out_amount=to_wei(1))
+from ocean_lib.web3_internal.currency import pretty_ether_and_wei
+print(f"Price of 1 {datatoken.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
 ```
 
 ## 4.  Bob buys data asset, and downloads it
@@ -237,14 +256,15 @@ assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
 data_token = ocean.get_data_token(token_address)
 ocean.pool.buy_data_tokens(
     pool_address,
-    amount=1.0, # buy 1.0 datatoken
-    max_OCEAN_amount=10.0, # pay up to 10.0 OCEAN
+    amount=to_wei(1), # buy 1.0 datatoken
+    max_OCEAN_amount=to_wei(10), # pay up to 10.0 OCEAN
     from_wallet=bob_wallet
 )
 
-print(f"Bob has {data_token.token_balance(bob_wallet.address)} datatokens.")
+from ocean_lib.web3_internal.currency import pretty_ether_and_wei
+print(f"Bob has {pretty_ether_and_wei(data_token.balanceOf(bob_wallet.address), data_token.symbol())}.")
 
-assert data_token.balanceOf(bob_wallet.address) >= 1.0, "Bob didn't get 1.0 datatokens"
+assert data_token.balanceOf(bob_wallet.address) >= to_wei(1), "Bob didn't get 1.0 datatokens"
 
 #Bob points to the service object
 fee_receiver = None # could also be market address

@@ -9,20 +9,27 @@ import logging
 import os
 import re
 from collections import namedtuple
+from decimal import Decimal
 from json import JSONDecodeError
-from typing import Optional
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Tuple, Union
+from unittest.mock import Mock
 
 import requests
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.http_requests.requests_session import get_requests_session
+from ocean_lib.config import Config
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import sign_hash
+from ocean_lib.web3_internal.wallet import Wallet
 from requests.exceptions import InvalidURL
-from requests.models import PreparedRequest
+from requests.models import PreparedRequest, Response
+from requests.sessions import Session
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +39,6 @@ OrderRequirements = namedtuple(
 )
 
 
-@enforce_types
 class DataServiceProvider:
     """DataServiceProvider class.
 
@@ -46,19 +52,26 @@ class DataServiceProvider:
     provider_info = None
 
     @staticmethod
-    def get_http_client():
+    @enforce_types
+    def get_http_client() -> Session:
         """Get the http client."""
         return DataServiceProvider._http_client
 
     @staticmethod
-    def set_http_client(http_client):
+    @enforce_types
+    def set_http_client(http_client: Session) -> None:
         """Set the http client to something other than the default `requests`."""
         DataServiceProvider._http_client = http_client
 
     @staticmethod
+    @enforce_types
     def encrypt_files_dict(
-        files_dict, encrypt_endpoint, asset_id, publisher_address, signed_did
-    ):
+        files_dict: list,
+        encrypt_endpoint: str,
+        asset_id: str,
+        publisher_address: str,
+        signed_did: str,
+    ) -> str:
         payload = json.dumps(
             {
                 "documentId": asset_id,
@@ -90,15 +103,24 @@ class DataServiceProvider:
 
             return response.json()["encryptedDocument"]
 
+        return ""
+
     @staticmethod
-    def sign_message(wallet, msg, nonce=None, provider_uri=None):
+    @enforce_types
+    def sign_message(
+        wallet: Wallet,
+        msg: str,
+        nonce: Optional[Union[str, int]] = None,
+        provider_uri: Optional[str] = None,
+    ) -> str:
         if nonce is None:
-            nonce = DataServiceProvider.get_nonce(wallet.address, provider_uri)
+            nonce = str(DataServiceProvider.get_nonce(wallet.address, provider_uri))
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
         return sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
 
     @staticmethod
-    def get_nonce(user_address, provider_uri):
+    @enforce_types
+    def get_nonce(user_address: str, provider_uri: str) -> Optional[Union[str, int]]:
         _, url = DataServiceProvider.build_endpoint("nonce", provider_uri=provider_uri)
         response = DataServiceProvider._http_method(
             "get", f"{url}?userAddress={user_address}"
@@ -109,15 +131,16 @@ class DataServiceProvider:
         return response.json()["nonce"]
 
     @staticmethod
+    @enforce_types
     def get_order_requirements(
-        did,
-        service_endpoint,
-        consumer_address,
-        service_id,
-        service_type,
-        token_address,
-        userdata=None,
-    ):
+        did: str,
+        service_endpoint: str,
+        consumer_address: str,
+        service_id: Union[str, int],
+        service_type: str,
+        token_address: str,
+        userdata: Optional[Dict] = None,
+    ) -> Optional[OrderRequirements]:
         """
 
         :param did:
@@ -156,7 +179,9 @@ class DataServiceProvider:
         order = dict(response.json())
 
         return OrderRequirements(
-            float(order["numTokens"]),
+            to_wei(
+                Decimal(order["numTokens"])
+            ),  # comes as float, needs to be converted
             order["dataToken"],
             order["to"],
             int(order["nonce"]),
@@ -164,18 +189,19 @@ class DataServiceProvider:
         )
 
     @staticmethod
+    @enforce_types
     def download_service(
-        did,
-        service_endpoint,
-        wallet,
-        files,
-        destination_folder,
-        service_id,
-        token_address,
-        order_tx_id,
-        index=None,
-        userdata=None,
-    ):
+        did: str,
+        service_endpoint: str,
+        wallet: Wallet,
+        files: List[Dict[str, Any]],
+        destination_folder: Union[str, Path],
+        service_id: int,
+        token_address: str,
+        order_tx_id: str,
+        index: Optional[int] = None,
+        userdata: Optional[Dict] = None,
+    ) -> None:
         """
         Call the provider endpoint to get access to the different files that form the asset.
 
@@ -233,6 +259,7 @@ class DataServiceProvider:
             )
 
     @staticmethod
+    @enforce_types
     def start_compute_job(
         did: str,
         service_endpoint: str,
@@ -240,16 +267,16 @@ class DataServiceProvider:
         signature: str,
         service_id: int,
         order_tx_id: str,
-        algorithm_did: str = None,
-        algorithm_meta: AlgorithmMetadata = None,
-        algorithm_tx_id: str = None,
-        algorithm_data_token: str = None,
-        output: dict = None,
-        input_datasets: list = None,
-        job_id: str = None,
+        algorithm_did: Optional[str] = None,
+        algorithm_meta: Optional[AlgorithmMetadata] = None,
+        algorithm_tx_id: Optional[str] = None,
+        algorithm_data_token: Optional[str] = None,
+        output: Optional[dict] = None,
+        input_datasets: Optional[list] = None,
+        job_id: Optional[str] = None,
         userdata: Optional[dict] = None,
         algouserdata: Optional[dict] = None,
-    ):
+    ) -> Dict[str, Any]:
         """
 
         :param did: id of asset starting with `did:op:` and a hex str without 0x prefix
@@ -326,7 +353,14 @@ class DataServiceProvider:
             raise
 
     @staticmethod
-    def stop_compute_job(did, job_id, service_endpoint, consumer_address, signature):
+    @enforce_types
+    def stop_compute_job(
+        did: str,
+        job_id: str,
+        service_endpoint: str,
+        consumer_address: str,
+        signature: str,
+    ) -> Dict[str, Any]:
         """
 
         :param did: hex str the asset/DDO id
@@ -342,7 +376,14 @@ class DataServiceProvider:
         )
 
     @staticmethod
-    def delete_compute_job(did, job_id, service_endpoint, consumer_address, signature):
+    @enforce_types
+    def delete_compute_job(
+        did: str,
+        job_id: str,
+        service_endpoint: str,
+        consumer_address: str,
+        signature: str,
+    ) -> Dict[str, str]:
         """
 
         :param did: hex str the asset/DDO id
@@ -358,7 +399,14 @@ class DataServiceProvider:
         )
 
     @staticmethod
-    def compute_job_status(did, job_id, service_endpoint, consumer_address, signature):
+    @enforce_types
+    def compute_job_status(
+        did: str,
+        job_id: str,
+        service_endpoint: str,
+        consumer_address: str,
+        signature: str,
+    ) -> Dict[str, Any]:
         """
 
         :param did: hex str the asset/DDO id
@@ -375,7 +423,14 @@ class DataServiceProvider:
         )
 
     @staticmethod
-    def compute_job_result(did, job_id, service_endpoint, consumer_address, signature):
+    @enforce_types
+    def compute_job_result(
+        did: str,
+        job_id: str,
+        service_endpoint: str,
+        consumer_address: str,
+        signature: str,
+    ) -> Dict[str, Any]:
         """
 
         :param did: hex str the asset/DDO id
@@ -392,7 +447,8 @@ class DataServiceProvider:
         )
 
     @staticmethod
-    def _remove_slash(path):
+    @enforce_types
+    def _remove_slash(path: str) -> str:
         if path.endswith("/"):
             path = path[:-1]
         if path.startswith("/"):
@@ -400,7 +456,8 @@ class DataServiceProvider:
         return path
 
     @staticmethod
-    def get_url(config):
+    @enforce_types
+    def get_url(config: Config) -> str:
         """
         Return the DataProvider component url.
 
@@ -410,13 +467,15 @@ class DataServiceProvider:
         return DataServiceProvider._remove_slash(config.provider_url)
 
     @staticmethod
-    def get_api_version():
+    @enforce_types
+    def get_api_version() -> str:
         return DataServiceProvider._remove_slash(
             os.getenv(ENV_PROVIDER_API_VERSION, DataServiceProvider.API_VERSION)
         )
 
     @staticmethod
-    def get_service_endpoints(provider_uri):
+    @enforce_types
+    def get_service_endpoints(provider_uri: str) -> Dict[str, List[str]]:
         """
         Return the service endpoints from the provider URL.
         """
@@ -425,7 +484,8 @@ class DataServiceProvider:
         return provider_info["serviceEndpoints"]
 
     @staticmethod
-    def get_provider_address(provider_uri):
+    @enforce_types
+    def get_provider_address(provider_uri: str) -> Optional[str]:
         """
         Return the provider address
         """
@@ -439,7 +499,8 @@ class DataServiceProvider:
         return None
 
     @staticmethod
-    def get_root_uri(service_endpoint):
+    @enforce_types
+    def get_root_uri(service_endpoint: str) -> str:
         provider_uri = service_endpoint
         api_version = DataServiceProvider.get_api_version()
         if api_version in provider_uri:
@@ -458,10 +519,32 @@ class DataServiceProvider:
         if not result:
             raise InvalidURL(f"InvalidURL {service_endpoint}.")
 
+        try:
+            root_result = "/".join(parts[0:3])
+            response = requests.get(root_result).json()
+        except (requests.exceptions.RequestException, JSONDecodeError):
+            raise InvalidURL(f"InvalidURL {service_endpoint}.")
+
+        if "providerAddress" not in response:
+            raise InvalidURL(
+                f"Invalid Provider URL {service_endpoint}, no providerAddress."
+            )
+
         return result
 
     @staticmethod
-    def build_endpoint(service_name, provider_uri):
+    @enforce_types
+    def is_valid_provider(provider_uri: str) -> bool:
+        try:
+            DataServiceProvider.get_root_uri(provider_uri)
+        except InvalidURL:
+            return False
+
+        return True
+
+    @staticmethod
+    @enforce_types
+    def build_endpoint(service_name: str, provider_uri: str) -> Tuple[str, str]:
         provider_uri = DataServiceProvider.get_root_uri(provider_uri)
         service_endpoints = DataServiceProvider.get_service_endpoints(provider_uri)
 
@@ -469,33 +552,43 @@ class DataServiceProvider:
         return method, urljoin(provider_uri, url)
 
     @staticmethod
-    def build_encrypt_endpoint(provider_uri):
+    @enforce_types
+    def build_encrypt_endpoint(provider_uri: str) -> Tuple[str, str]:
         return DataServiceProvider.build_endpoint("encrypt", provider_uri)
 
     @staticmethod
-    def build_initialize_endpoint(provider_uri):
+    @enforce_types
+    def build_initialize_endpoint(provider_uri: str) -> Tuple[str, str]:
         return DataServiceProvider.build_endpoint("initialize", provider_uri)
 
     @staticmethod
-    def build_download_endpoint(provider_uri):
+    @enforce_types
+    def build_download_endpoint(provider_uri: str) -> Tuple[str, str]:
         return DataServiceProvider.build_endpoint("download", provider_uri)
 
     @staticmethod
-    def build_compute_endpoint(provider_uri):
+    @enforce_types
+    def build_compute_endpoint(provider_uri: str) -> Tuple[str, str]:
         return DataServiceProvider.build_endpoint("computeStatus", provider_uri)
 
     @staticmethod
-    def build_fileinfo(provider_uri):
+    @enforce_types
+    def build_fileinfo(provider_uri: str) -> Tuple[str, str]:
         return DataServiceProvider.build_endpoint("fileinfo", provider_uri)
 
     @staticmethod
-    def write_file(response, destination_folder, file_name):
+    @enforce_types
+    def write_file(
+        response: Response,
+        destination_folder: Union[str, bytes, os.PathLike],
+        file_name: str,
+    ) -> None:
         """
         Write the response content in a file in the destination folder.
         :param response: Response
         :param destination_folder: Destination folder, string
         :param file_name: File name, string
-        :return: bool
+        :return: None
         """
         if response.status_code == 200:
             with open(os.path.join(destination_folder, file_name), "wb") as f:
@@ -506,9 +599,15 @@ class DataServiceProvider:
             logger.warning(f"consume failed: {response.reason}")
 
     @staticmethod
+    @enforce_types
     def _send_compute_request(
-        http_method, did, job_id, service_endpoint, consumer_address, signature
-    ):
+        http_method: str,
+        did: str,
+        job_id: str,
+        service_endpoint: str,
+        consumer_address: str,
+        signature: str,
+    ) -> Dict[str, Any]:
         compute_url = (
             f"{service_endpoint}"
             f"?signature={signature}"
@@ -530,31 +629,34 @@ class DataServiceProvider:
         return resp_content
 
     @staticmethod
-    def _get_file_name(response):
+    @enforce_types
+    def _get_file_name(response: Response) -> Optional[str]:
         try:
             return re.match(
                 r"attachment;filename=(.+)", response.headers.get("content-disposition")
             )[1]
         except Exception as e:
-            logger.warning(f"It was not possible to get the file name. {e}. {response}")
+            logger.warning(f"It was not possible to get the file name. {e}")
+            return None
 
     @staticmethod
+    @enforce_types
     def _prepare_compute_payload(
         did: str,
         consumer_address: str,
         service_id: int,
         order_tx_id: str,
-        signature: str = None,
-        algorithm_did: str = None,
-        algorithm_meta=None,
-        algorithm_tx_id: str = None,
-        algorithm_data_token: str = None,
-        output: dict = None,
-        input_datasets: list = None,
-        job_id: str = None,
+        signature: Optional[str] = None,
+        algorithm_did: Optional[str] = None,
+        algorithm_meta: Optional[AlgorithmMetadata] = None,
+        algorithm_tx_id: Optional[str] = None,
+        algorithm_data_token: Optional[str] = None,
+        output: Optional[dict] = None,
+        input_datasets: Optional[list] = None,
+        job_id: Optional[str] = None,
         userdata: Optional[dict] = None,
         algouserdata: Optional[dict] = None,
-    ):
+    ) -> Dict[str, Any]:
         assert (
             algorithm_did or algorithm_meta
         ), "either an algorithm did or an algorithm meta must be provided."
@@ -564,7 +666,6 @@ class DataServiceProvider:
                 f"expecting a AlgorithmMetadata type "
                 f"for `algorithm_meta`, got {type(algorithm_meta)}"
             )
-            algorithm_meta = algorithm_meta.as_dictionary()
 
         _input_datasets = []
         if input_datasets:
@@ -602,12 +703,13 @@ class DataServiceProvider:
             if algouserdata:
                 payload["algouserdata"] = algouserdata
         else:
-            payload["algorithmMeta"] = algorithm_meta
+            payload["algorithmMeta"] = algorithm_meta.as_dictionary()
 
         return payload
 
     @staticmethod
-    def _http_method(method, *args, **kwargs):
+    @enforce_types
+    def _http_method(method: str, *args, **kwargs) -> Optional[Union[Mock, Response]]:
         try:
             return getattr(DataServiceProvider._http_client, method)(*args, **kwargs)
         except Exception:
@@ -617,7 +719,8 @@ class DataServiceProvider:
             raise
 
     @staticmethod
-    def check_single_file_info(file_url, provider_uri):
+    @enforce_types
+    def check_single_file_info(file_url: str, provider_uri: str) -> bool:
         _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
         data = {"url": file_url}
         response = requests.post(endpoint, json=data)
@@ -629,12 +732,15 @@ class DataServiceProvider:
         for file_info in response:
             return file_info["valid"]
 
+        return False
+
     @staticmethod
-    def check_asset_file_info(asset, provider_uri):
-        if not asset.did:
+    @enforce_types
+    def check_asset_file_info(did: str, provider_uri: str) -> bool:
+        if not did:
             return False
         _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
-        data = {"did": asset.did}
+        data = {"did": did}
         response = requests.post(endpoint, json=data)
 
         if response.status_code != 200:
@@ -644,7 +750,11 @@ class DataServiceProvider:
         for ddo_info in response:
             return ddo_info["valid"]
 
+        return False
 
-def urljoin(*args):
+
+@enforce_types
+def urljoin(*args) -> str:
     trailing_slash = "/" if args[-1].endswith("/") else ""
+
     return "/".join(map(lambda x: str(x).strip("/"), args)) + trailing_slash

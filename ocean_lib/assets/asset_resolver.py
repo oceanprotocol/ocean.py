@@ -20,8 +20,11 @@ logger = logging.getLogger("keeper")
 
 @enforce_types
 def resolve_asset(
-    did, metadata_cache_uri=None, web3: Optional[Web3] = None, token_address=None
-):
+    did: str,
+    metadata_cache_uri: Optional[str] = None,
+    web3: Optional[Web3] = None,
+    token_address: Optional[str] = None,
+) -> Asset:
     """Resolve a DID to an URL/DDO or later an internal/external DID.
 
     :param did: the asset id to resolve, this is part of the ocean
@@ -30,7 +33,7 @@ def resolve_asset(
     :param web3: Web3 instance
     :param token_address: str the address of the DataToken smart contract
 
-    :return string: DDO of the resolved DID
+    :return Asset: the resolved DID
     """
     assert metadata_cache_uri or (
         web3 and token_address

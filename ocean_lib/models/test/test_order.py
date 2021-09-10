@@ -5,23 +5,16 @@
 import os
 
 from eth_utils import remove_0x_prefix
-from ocean_lib.assets.asset import Asset
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.order import Order
-from ocean_lib.ocean.util import from_base_18
 from tests.resources.ddo_helpers import get_metadata, get_registered_ddo
-from tests.resources.helper_functions import mint_tokens_and_wait
 
 
 def test_order(web3, alice_ocean, alice_wallet):
     asset = get_registered_ddo(alice_ocean, get_metadata(), alice_wallet)
-    assert isinstance(asset, Asset)
-    assert asset.data_token_address, "The asset does not have a token address."
-
     dt = DataToken(web3, asset.data_token_address)
-    mint_tokens_and_wait(dt, alice_wallet.address, alice_wallet)
 
     service = asset.get_service(service_type=ServiceTypes.ASSET_ACCESS)
     sa = ServiceAgreement.from_json(service.as_dictionary())
@@ -31,7 +24,7 @@ def test_order(web3, alice_ocean, alice_wallet):
     )
     assert order_requirements, "Order was unsuccessful."
 
-    args = [
+    _order_tx_id = alice_ocean.assets.pay_for_service(
         web3,
         order_requirements.amount,
         order_requirements.data_token_address,
@@ -39,8 +32,7 @@ def test_order(web3, alice_ocean, alice_wallet):
         service.index,
         alice_wallet.address,
         alice_wallet,
-    ]
-    _order_tx_id = alice_ocean.assets.pay_for_service(*args)
+    )
 
     asset_folder = alice_ocean.assets.download(
         asset.did,
@@ -49,11 +41,12 @@ def test_order(web3, alice_ocean, alice_wallet):
         _order_tx_id,
         alice_ocean.config.downloads_path,
     )
+
     assert len(os.listdir(asset_folder)) >= 1, "The asset folder is empty."
     for order_log in dt.get_start_order_logs():
         order_log_dict = dict(order_log.args.items())
-        order_log_dict["amount"] = from_base_18(int(order_log.args.amount))
-        order_log_dict["marketFee"] = from_base_18(int(order_log.args.marketFee))
+        order_log_dict["amount"] = int(order_log.args.amount)
+        order_log_dict["marketFee"] = int(order_log.args.marketFee)
 
         order_args = [
             order_log.address,

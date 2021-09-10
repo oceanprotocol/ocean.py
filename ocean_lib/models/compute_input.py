@@ -4,8 +4,20 @@
 #
 
 
+from typing import Dict, Optional, Union
+
+from enforce_typing import enforce_types
+
+
 class ComputeInput:
-    def __init__(self, did, transfer_tx_id, service_id, userdata=None):
+    @enforce_types
+    def __init__(
+        self,
+        did: Optional[str],
+        transfer_tx_id: str,
+        service_id: Union[str, int],
+        userdata: Optional[Dict] = None,
+    ) -> None:
         """Initialise and validate arguments."""
         assert (
             did and transfer_tx_id and service_id is not None
@@ -19,7 +31,8 @@ class ComputeInput:
         self.service_id = service_id
         self.userdata = userdata
 
-    def as_dictionary(self):
+    @enforce_types
+    def as_dictionary(self) -> Dict[str, Union[str, Dict]]:
         res = {
             "documentId": self.did,
             "transferTxId": self.transfer_tx_id,

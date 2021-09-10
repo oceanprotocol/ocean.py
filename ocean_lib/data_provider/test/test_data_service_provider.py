@@ -66,7 +66,7 @@ def test_encryption_fails(with_evil_client):
     encrypt_endpoint = "http://mock/encrypt/"
     with pytest.raises(OceanEncryptAssetUrlsError):
         DataSP.encrypt_files_dict(
-            "some_files",
+            [{"some_files": "files"}],
             encrypt_endpoint,
             "some_asset_id",
             "some_publisher_address",
@@ -76,7 +76,7 @@ def test_encryption_fails(with_evil_client):
 
 def test_nonce_fails(with_evil_client):
     """Tests that nonce retrieved erroneously is set to None."""
-    assert DataSP.get_nonce("some_address", "http://mock/") is None
+    assert DataSP.get_nonce("some_address", "http://localhost:8030") is None
 
 
 def test_order_requirements_fails(with_evil_client):
@@ -86,7 +86,7 @@ def test_order_requirements_fails(with_evil_client):
             "some_did",
             "http://mock/",
             "some_consumer_address",
-            "some_service_id",
+            0,
             "and_service_type",
             "some_token_address",
             userdata={"test_dict_key": "test_dict_value"},
@@ -103,7 +103,7 @@ def test_start_compute_job_fails_empty(with_empty_client):
             "http://mock/",
             "some_consumer_address",
             "some_signature",
-            "some_service_id",
+            0,
             "some_tx_id",
             algorithm_did="some_algo_did",
         )
@@ -117,7 +117,7 @@ def test_start_compute_job_fails_error_response(with_evil_client):
             "http://mock/",
             "some_consumer_address",
             "some_signature",
-            "some_service_id",
+            0,
             "some_tx_id",
             algorithm_did="some_algo_did",
         )
@@ -197,33 +197,45 @@ def test_provider_address_with_url():
 
 def test_get_root_uri():
     """Tests extraction of base URLs from various inputs."""
-    uri = "http://ppp.com"
+    uri = "https://provider.mainnet.oceanprotocol.com"
+    assert DataSP.is_valid_provider(uri)
     assert DataSP.get_root_uri(uri) == uri
-    assert DataSP.get_root_uri("http://ppp.com:8000") == "http://ppp.com:8000"
+    assert DataSP.get_root_uri("http://localhost:8030") == "http://localhost:8030"
     assert (
-        DataSP.get_root_uri("http://ppp.com:8000/api/v1/services/")
-        == "http://ppp.com:8000"
-    )
-    assert DataSP.get_root_uri("http://ppp.com:8000/api/v1") == "http://ppp.com:8000"
-    assert (
-        DataSP.get_root_uri("http://ppp.com:8000/services")
-        == "http://ppp.com:8000/services"
+        DataSP.get_root_uri("http://localhost:8030/api/v1/services/")
+        == "http://localhost:8030"
     )
     assert (
-        DataSP.get_root_uri("http://ppp.com:8000/services/download")
-        == "http://ppp.com:8000"
+        DataSP.get_root_uri("http://localhost:8030/api/v1") == "http://localhost:8030"
     )
     assert (
-        DataSP.get_root_uri("http://ppp.com:8000/api/v2/services")
-        == "http://ppp.com:8000/api/v2/services"
+        DataSP.get_root_uri("http://localhost:8030/services")
+        == "http://localhost:8030/services"
     )
     assert (
-        DataSP.get_root_uri("http://ppp.com:8000/api/v2/services/")
-        == "http://ppp.com:8000/api/v2"
+        DataSP.get_root_uri("http://localhost:8030/services/download")
+        == "http://localhost:8030"
+    )
+    assert (
+        DataSP.get_root_uri("http://localhost:8030/api/v2/services")
+        == "http://localhost:8030/api/v2/services"
+    )
+    assert (
+        DataSP.get_root_uri("http://localhost:8030/api/v2/services/")
+        == "http://localhost:8030/api/v2"
     )
 
+    assert not DataSP.is_valid_provider("thisIsNotAnURL")
     with pytest.raises(InvalidURL):
         DataSP.get_root_uri("thisIsNotAnURL")
+
+    with pytest.raises(InvalidURL):
+        # URL is of correct format but unreachable
+        DataSP.get_root_uri("http://thisisaurl.but/itshouldnt")
+
+    with pytest.raises(InvalidURL):
+        # valid URL, but no provider address
+        DataSP.get_root_uri("http://oceanprotocol.com")
 
     with pytest.raises(InvalidURL):
         DataSP.get_root_uri("//")
@@ -241,11 +253,11 @@ def test_build_endpoint():
     DataSP.get_service_endpoints = get_service_endpoints
 
     endpoints = get_service_endpoints()
-    uri = "http://ppp.com"
+    uri = "http://localhost:8030"
     method, endpnt = DataSP.build_endpoint("newEndpoint", provider_uri=uri)
     assert endpnt == urljoin(uri, endpoints["newEndpoint"][1])
 
-    uri = "http://ppp.com:8030/api/v1/services/newthing"
+    uri = "http://localhost:8030/api/v1/services/newthing"
     method, endpnt = DataSP.build_endpoint("download", provider_uri=uri)
     assert method == endpoints["download"][0]
     assert endpnt == urljoin(DataSP.get_root_uri(uri), endpoints["download"][1])

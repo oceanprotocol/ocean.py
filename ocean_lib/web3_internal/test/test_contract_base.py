@@ -5,8 +5,8 @@
 
 import pytest
 from enforce_typing import enforce_types
-from ocean_lib.ocean.util import to_base_18
 from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.contract import ContractCaller
 
@@ -40,7 +40,7 @@ def test_main(network, alice_wallet, alice_address, dtfactory_address, web3):
 
     # test super-simple functionality of child
     factory = MyFactory(web3, dtfactory_address)
-    factory.createToken("foo_blob", "DT1", "DT1", to_base_18(1000.0), alice_wallet)
+    factory.createToken("foo_blob", "DT1", "DT1", to_wei(1000), alice_wallet)
 
     # test attributes
     assert factory.name == "DTFactory"
@@ -63,6 +63,7 @@ def test_main(network, alice_wallet, alice_address, dtfactory_address, web3):
     assert not factory.is_tx_successful("nohash")
     with pytest.raises(ValueError):
         assert factory.get_event_signature("noevent")
+
     assert factory.subscribe_to_event("TokenCreated", 30, None) is None
     assert factory.get_event_argument_names("TokenCreated") == ()
     block = web3.eth.block_number
@@ -88,5 +89,5 @@ def test_gas_price(web3, alice_wallet, dtfactory_address, monkeypatch):
     monkeypatch.setenv("GAS_PRICE", "1")
     factory = MyFactory(web3, dtfactory_address)
     assert factory.createToken(
-        "foo_blob", "DT1", "DT1", to_base_18(1000.0), alice_wallet
+        "foo_blob", "DT1", "DT1", to_wei(1000), alice_wallet
     ), "The token could not be created by configuring the gas price env var."

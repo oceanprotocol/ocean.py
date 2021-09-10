@@ -11,11 +11,11 @@ from ocean_lib.models import btoken
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
-from ocean_lib.ocean.util import get_ocean_token_address, to_base_18
-from ocean_lib.web3_internal.account import Account
+from ocean_lib.ocean.util import get_ocean_token_address
 from ocean_lib.web3_internal.contract_utils import get_contracts_addresses
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import send_ether
-from ocean_lib.web3_internal.utils import from_wei, get_ether_balance
+from ocean_lib.web3_internal.utils import get_ether_balance
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import (
     get_factory_deployer_wallet,
@@ -74,11 +74,6 @@ def alice_wallet():
 
 
 @pytest.fixture
-def alice_account():
-    return alice_info().account
-
-
-@pytest.fixture
 def alice_ocean():
     return alice_info().ocean
 
@@ -96,11 +91,6 @@ def bob_address():
 @pytest.fixture
 def bob_wallet():
     return bob_info().wallet
-
-
-@pytest.fixture
-def bob_account():
-    return bob_info().account
 
 
 @pytest.fixture
@@ -145,14 +135,13 @@ def make_info(name, private_key_name):
     info.private_key = os.environ.get(private_key_name)
     info.wallet = Wallet(web3, private_key=info.private_key)
     info.address = info.wallet.address
-    info.account = Account(private_key=info.private_key)
     wallet = get_ganache_wallet()
     if wallet:
-        assert (
-            from_wei(get_ether_balance(web3, wallet.address)) > 4
+        assert get_ether_balance(web3, wallet.address) >= to_wei(
+            4
         ), "Ether balance less than 4."
-        if from_wei(get_ether_balance(web3, info.address)) < 2:
-            send_ether(wallet, info.address, 4)
+        if get_ether_balance(web3, info.address) < to_wei(2):
+            send_ether(wallet, info.address, to_wei(4))
 
     from ocean_lib.ocean.ocean import Ocean
 
@@ -173,17 +162,15 @@ def _deployAndMintToken(web3: Web3, symbol: str, to_address: str) -> btoken.BTok
         "Template Contract",
         "TEMPLATE",
         wallet.address,
-        to_base_18(1000.0),
+        to_wei(1000),
         DTFactory.FIRST_BLOB,
         to_address,
     )
     dt_factory = DTFactory(web3, DTFactory.deploy(web3, wallet, dt_address, to_address))
     token_address = dt_factory.get_token_address(
-        dt_factory.createToken(
-            symbol, symbol, symbol, DataToken.DEFAULT_CAP_BASE, wallet
-        )
+        dt_factory.createToken(symbol, symbol, symbol, DataToken.DEFAULT_CAP, wallet)
     )
     token = DataToken(web3, token_address)
-    token.mint(to_address, to_base_18(1000.0), wallet)
+    token.mint(to_address, to_wei(1000), wallet)
 
     return btoken.BToken(web3, token.address)

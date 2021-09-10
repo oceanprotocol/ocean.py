@@ -36,7 +36,7 @@ def get_ddo_sample(datatoken_address):
         checksum_dict[str(service.index)] = checksum(service.main)
 
     asset.add_proof(checksum_dict, get_publisher_wallet())
-    asset._did = did
+    asset.did = did
     return asset
 
 
@@ -66,7 +66,7 @@ def test_ddo_credentials_addresses_only_deny():
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
     # remove allow to test the behaviour of deny
     ddo = DDO(json_filename=sample_ddo_path)
-    ddo._credentials.pop("allow")
+    ddo.credentials.pop("allow")
 
     address_credential = AddressCredential(ddo)
     assert address_credential.get_addresses_of_class("allow") == []
@@ -94,8 +94,8 @@ def test_ddo_credentials_addresses_no_access_list():
     # so remove both to test the behaviour of no credential supplied
     ddo = DDO(json_filename=sample_ddo_path)
     address_credential = AddressCredential(ddo)
-    ddo._credentials.pop("allow")
-    ddo._credentials.pop("deny")
+    ddo.credentials.pop("allow")
+    ddo.credentials.pop("deny")
 
     assert address_credential.validate_access() == ConsumableCodes.OK
 

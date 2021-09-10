@@ -4,25 +4,26 @@
 #
 import logging
 import typing
+from typing import Optional, Tuple
 
 from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
 from ocean_lib.models import balancer_constants
-from ocean_lib.ocean import util
-from ocean_lib.web3_internal.wallet import Wallet
-from web3.main import Web3
-
 from ocean_lib.models.btoken import BToken
 from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.web3_internal.currency import from_wei
+from ocean_lib.web3_internal.wallet import Wallet
+from web3.datastructures import AttributeDict
+from web3.main import Web3
 
 logger = logging.getLogger(__name__)
 
 
-@enforce_types
 class BPool(BToken):
     CONTRACT_NAME = "BPool"
 
-    def __str__(self):
+    @enforce_types
+    def __str__(self) -> str:
         """Formats with attributes as key, value pairs."""
         s = []
         s += ["BPool:"]
@@ -31,8 +32,8 @@ class BPool(BToken):
         s += [f"  isPublicSwap = {self.isPublicSwap()}"]
         s += [f"  isFinalized = {self.isFinalized()}"]
 
-        swap_fee = util.from_base_18(self.getSwapFee())
-        s += ["  swapFee = %.2f%%" % (swap_fee * 100.0)]
+        swap_fee = from_wei(self.getSwapFee())
+        s += ["  swapFee = %.2f%%" % (swap_fee * 100)]
 
         s += [f"  numTokens = {self.getNumTokens()}"]
         cur_addrs = self.getCurrentTokens()
@@ -50,22 +51,22 @@ class BPool(BToken):
 
         s += ["  weights (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
-            denorm_w = util.from_base_18(self.getDenormalizedWeight(addr))
-            norm_w = util.from_base_18(self.getNormalizedWeight(addr))
+            denorm_w = from_wei(self.getDenormalizedWeight(addr))
+            norm_w = from_wei(self.getNormalizedWeight(addr))
             s += [f"    {symbol}: denorm_w={denorm_w}, norm_w={norm_w} "]
 
-        total_denorm_w = util.from_base_18(self.getTotalDenormalizedWeight())
+        total_denorm_w = from_wei(self.getTotalDenormalizedWeight())
         s += [f"    total_denorm_w={total_denorm_w}"]
 
         s += ["  balances (fromBase):"]
         for addr, symbol in zip(cur_addrs, cur_symbols):
-            balance_base = self.getBalance(addr)
+            balance = self.getBalance(addr)
             dec = BToken(self.web3, addr).decimals()
-            balance = util.from_base(balance_base, dec)
-            s += [f"    {symbol}: {balance}"]
+            s += [f"    {symbol}: {from_wei(balance, dec)}"]
 
         return "\n".join(s)
 
+    @enforce_types
     def setup(
         self,
         data_token: str,
@@ -101,9 +102,11 @@ class BPool(BToken):
     # https://docs.balancer.finance/smart-contracts/api
 
     # ==== View Functions
+    @enforce_types
     def isPublicSwap(self) -> bool:
         return self.contract.caller.isPublicSwap()
 
+    @enforce_types
     def isFinalized(self) -> bool:
         """Returns true if state is finalized.
 
@@ -114,6 +117,7 @@ class BPool(BToken):
         """
         return self.contract.caller.isFinalized()
 
+    @enforce_types
     def isBound(self, token_address: str) -> bool:
         """Returns True if the token is bound.
 
@@ -125,26 +129,32 @@ class BPool(BToken):
         """
         return self.contract.caller.isBound(token_address)
 
+    @enforce_types
     def getNumTokens(self) -> int:
         """
         How many tokens are bound to this pool.
         """
         return self.contract.caller.getNumTokens()
 
+    @enforce_types
     def getCurrentTokens(self) -> typing.List[str]:
         """@return -- list of [token_addr:str]"""
         return self.contract.caller.getCurrentTokens()
 
+    @enforce_types
     def getFinalTokens(self) -> typing.List[str]:
         """@return -- list of [token_addr:str]"""
         return self.contract.caller.getFinalTokens()
 
+    @enforce_types
     def getDenormalizedWeight(self, token_address: str) -> int:
         return self.contract.caller.getDenormalizedWeight(token_address)
 
+    @enforce_types
     def getTotalDenormalizedWeight(self) -> int:
         return self.contract.caller.getTotalDenormalizedWeight()
 
+    @enforce_types
     def getNormalizedWeight(self, token_address: str) -> int:
         """
         The normalized weight of a token. The combined normalized weights of
@@ -153,12 +163,15 @@ class BPool(BToken):
         """
         return self.contract.caller.getNormalizedWeight(token_address)
 
+    @enforce_types
     def getBalance(self, token_address: str) -> int:
         return self.contract.caller.getBalance(token_address)
 
+    @enforce_types
     def getSwapFee(self) -> int:
         return self.contract.caller.getSwapFee()
 
+    @enforce_types
     def getController(self) -> str:
         """
         Get the "controller" address, which can call `CONTROL` functions like
@@ -168,16 +181,19 @@ class BPool(BToken):
 
     # ==== Controller Functions
 
-    def setSwapFee(self, swapFee_base: int, from_wallet: Wallet):
+    @enforce_types
+    def setSwapFee(self, swapFee: int, from_wallet: Wallet) -> str:
         """
         Caller must be controller. Pool must NOT be finalized.
         """
-        return self.send_transaction("setSwapFee", (swapFee_base,), from_wallet)
+        return self.send_transaction("setSwapFee", (swapFee,), from_wallet)
 
-    def setController(self, manager_address: str, from_wallet: Wallet):
+    @enforce_types
+    def setController(self, manager_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("setController", (manager_address,), from_wallet)
 
-    def setPublicSwap(self, public: bool, from_wallet: Wallet):
+    @enforce_types
+    def setPublicSwap(self, public: bool, from_wallet: Wallet) -> str:
         """
         Makes `isPublicSwap` return `_publicSwap`. Requires caller to be
         controller and pool not to be finalized. Finalized pools always have
@@ -185,7 +201,8 @@ class BPool(BToken):
         """
         return self.send_transaction("setPublicSwap", (public,), from_wallet)
 
-    def finalize(self, from_wallet: Wallet):
+    @enforce_types
+    def finalize(self, from_wallet: Wallet) -> str:
         """
         This makes the pool **finalized**. This is a one-way transition. `bind`,
         `rebind`, `unbind`, `setSwapFee` and `setPublicSwap` will all throw
@@ -194,13 +211,10 @@ class BPool(BToken):
         """
         return self.send_transaction("finalize", (), from_wallet)
 
+    @enforce_types
     def bind(
-        self,
-        token_address: str,
-        balance_base: int,
-        weight_base: int,
-        from_wallet: Wallet,
-    ):
+        self, token_address: str, balance: int, weight: int, from_wallet: Wallet
+    ) -> str:
         """
         Binds the token with address `token`. Tokens will be pushed/pulled from
         caller to adjust match new balance. Token must not already be bound.
@@ -217,32 +231,31 @@ class BPool(BToken):
         -unspecified error thrown by token
         """
         return self.send_transaction(
-            "bind", (token_address, balance_base, weight_base), from_wallet
+            "bind", (token_address, balance, weight), from_wallet
         )
 
+    @enforce_types
     def rebind(
-        self,
-        token_address: str,
-        balance_base: int,
-        weight_base: int,
-        from_wallet: Wallet,
-    ):
+        self, token_address: str, balance: int, weight: int, from_wallet: Wallet
+    ) -> str:
         """
         Changes the parameters of an already-bound token. Performs the same
         validation on the parameters.
         """
         return self.send_transaction(
-            "rebind", (token_address, balance_base, weight_base), from_wallet
+            "rebind", (token_address, balance, weight), from_wallet
         )
 
-    def unbind(self, token_address: str, from_wallet: Wallet):
+    @enforce_types
+    def unbind(self, token_address: str, from_wallet: Wallet) -> str:
         """
         Unbinds a token, clearing all of its parameters. Exit fee is charged
         and the remaining balance is sent to caller.
         """
         return self.send_transaction("unbind", (token_address,), from_wallet)
 
-    def gulp(self, token_address: str, from_wallet: Wallet):
+    @enforce_types
+    def gulp(self, token_address: str, from_wallet: Wallet) -> str:
         """
         This syncs the internal `balance` of `token` within a pool with the
         actual `balance` registered on the ERC20 contract. This is useful to
@@ -260,9 +273,11 @@ class BPool(BToken):
 
     # ==== Price Functions
 
+    @enforce_types
     def getSpotPrice(self, tokenIn_address: str, tokenOut_address: str) -> int:
         return self.contract.caller.getSpotPrice(tokenIn_address, tokenOut_address)
 
+    @enforce_types
     def getSpotPriceSansFee(self, tokenIn_address: str, tokenOut_address: str) -> int:
         return self.contract.caller.getSpotPriceSansFee(
             tokenIn_address, tokenOut_address
@@ -270,12 +285,10 @@ class BPool(BToken):
 
     # ==== Trading and Liquidity Functions
 
+    @enforce_types
     def joinPool(
-        self,
-        poolAmountOut_base: int,
-        maxAmountsIn_base: typing.List[int],
-        from_wallet: Wallet,
-    ):
+        self, poolAmountOut: int, maxAmountsIn: typing.List[int], from_wallet: Wallet
+    ) -> str:
         """
         Join the pool, getting `poolAmountOut` pool tokens. This will pull some
         of each of the currently trading tokens in the pool, meaning you must
@@ -283,33 +296,32 @@ class BPool(BToken):
         limited by the array of `maxAmountsIn` in the order of the pool tokens.
         """
         return self.send_transaction(
-            "joinPool", (poolAmountOut_base, maxAmountsIn_base), from_wallet
+            "joinPool", (poolAmountOut, maxAmountsIn), from_wallet
         )
 
+    @enforce_types
     def exitPool(
-        self,
-        poolAmountIn_base: int,
-        minAmountsOut_base: typing.List[int],
-        from_wallet: Wallet,
-    ):
+        self, poolAmountIn: int, minAmountsOut: typing.List[int], from_wallet: Wallet
+    ) -> str:
         """
         Exit the pool, paying `poolAmountIn` pool tokens and getting some of
         each of the currently trading tokens in return. These values are
         limited by the array of `minAmountsOut` in the order of the pool tokens.
         """
         return self.send_transaction(
-            "exitPool", (poolAmountIn_base, minAmountsOut_base), from_wallet
+            "exitPool", (poolAmountIn, minAmountsOut), from_wallet
         )
 
+    @enforce_types
     def swapExactAmountIn(
         self,
         tokenIn_address: str,
-        tokenAmountIn_base: int,
+        tokenAmountIn: int,
         tokenOut_address: str,
-        minAmountOut_base: int,
-        maxPrice_base: int,
+        minAmountOut: int,
+        maxPrice: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Trades an exact `tokenAmountIn` of `tokenIn` taken from the caller by
         the pool, in exchange for at least `minAmountOut` of `tokenOut` given
@@ -325,61 +337,52 @@ class BPool(BToken):
         """
         return self.send_transaction(
             "swapExactAmountIn",
-            (
-                tokenIn_address,
-                tokenAmountIn_base,
-                tokenOut_address,
-                minAmountOut_base,
-                maxPrice_base,
-            ),
+            (tokenIn_address, tokenAmountIn, tokenOut_address, minAmountOut, maxPrice),
             from_wallet,
         )
 
+    @enforce_types
     def swapExactAmountOut(
         self,
         tokenIn_address: str,
-        maxAmountIn_base: int,
+        maxAmountIn: int,
         tokenOut_address: str,
-        tokenAmountOut_base: int,
-        maxPrice_base: int,
+        tokenAmountOut: int,
+        maxPrice: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         return self.send_transaction(
             "swapExactAmountOut",
-            (
-                tokenIn_address,
-                maxAmountIn_base,
-                tokenOut_address,
-                tokenAmountOut_base,
-                maxPrice_base,
-            ),
+            (tokenIn_address, maxAmountIn, tokenOut_address, tokenAmountOut, maxPrice),
             from_wallet,
         )
 
+    @enforce_types
     def joinswapExternAmountIn(
         self,
         tokenIn_address: str,
-        tokenAmountIn_base: int,
-        minPoolAmountOut_base: int,
+        tokenAmountIn: int,
+        minPoolAmountOut: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Pay `tokenAmountIn` of token `tokenIn` to join the pool, getting
         `poolAmountOut` of the pool shares.
         """
         return self.send_transaction(
             "joinswapExternAmountIn",
-            (tokenIn_address, tokenAmountIn_base, minPoolAmountOut_base),
+            (tokenIn_address, tokenAmountIn, minPoolAmountOut),
             from_wallet,
         )
 
+    @enforce_types
     def joinswapPoolAmountOut(
         self,
         tokenIn_address: str,
-        poolAmountOut_base: int,
-        maxAmountIn_base: int,
+        poolAmountOut: int,
+        maxAmountIn: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Specify `poolAmountOut` pool shares that you want to get, and a token
         `tokenIn` to pay with. This costs `maxAmountIn` tokens (these went
@@ -387,34 +390,36 @@ class BPool(BToken):
         """
         return self.send_transaction(
             "joinswapPoolAmountOut",
-            (tokenIn_address, poolAmountOut_base, maxAmountIn_base),
+            (tokenIn_address, poolAmountOut, maxAmountIn),
             from_wallet,
         )
 
+    @enforce_types
     def exitswapPoolAmountIn(
         self,
         tokenOut_address: str,
-        poolAmountIn_base: int,
-        minAmountOut_base: int,
+        poolAmountIn: int,
+        minAmountOut: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Pay `poolAmountIn` pool shares into the pool, getting `tokenAmountOut`
         of the given token `tokenOut` out of the pool.
         """
         return self.send_transaction(
             "exitswapPoolAmountIn",
-            (tokenOut_address, poolAmountIn_base, minAmountOut_base),
+            (tokenOut_address, poolAmountIn, minAmountOut),
             from_wallet,
         )
 
+    @enforce_types
     def exitswapExternAmountOut(
         self,
         tokenOut_address: str,
-        tokenAmountOut_base: int,
-        maxPoolAmountIn_base: int,
+        tokenAmountOut: int,
+        maxPoolAmountIn: int,
         from_wallet: Wallet,
-    ):
+    ) -> str:
         """
         Specify `tokenAmountOut` of token `tokenOut` that you want to get out
         of the pool. This costs `poolAmountIn` pool shares (these went into
@@ -422,175 +427,184 @@ class BPool(BToken):
         """
         return self.send_transaction(
             "exitswapExternAmountOut",
-            (tokenOut_address, tokenAmountOut_base, maxPoolAmountIn_base),
+            (tokenOut_address, tokenAmountOut, maxPoolAmountIn),
             from_wallet,
         )
 
     # ==== Balancer Pool as ERC20
+    @enforce_types
     def totalSupply(self) -> int:
         return self.contract.caller.totalSupply()
 
+    @enforce_types
     def balanceOf(self, whom_address: str) -> int:
         return self.contract.caller.balanceOf(whom_address)
 
+    @enforce_types
     def allowance(self, src_address: str, dst_address: str) -> int:
         return self.contract.caller.allowance(src_address, dst_address)
 
-    def approve(self, dst_address: str, amt_base: int, from_wallet: Wallet):
-        return self.send_transaction("approve", (dst_address, amt_base), from_wallet)
+    @enforce_types
+    def approve(self, dst_address: str, amt: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("approve", (dst_address, amt), from_wallet)
 
-    def transfer(self, dst_address: str, amt_base: int, from_wallet: Wallet):
-        return self.send_transaction("transfer", (dst_address, amt_base), from_wallet)
+    @enforce_types
+    def transfer(self, dst_address: str, amt: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("transfer", (dst_address, amt), from_wallet)
 
+    @enforce_types
     def transferFrom(
-        self, src_address: str, dst_address: str, amt_base: int, from_wallet: Wallet
-    ):
+        self, src_address: str, dst_address: str, amt: int, from_wallet: Wallet
+    ) -> str:
         return self.send_transaction(
-            "transferFrom", (dst_address, src_address, amt_base), from_wallet
+            "transferFrom", (dst_address, src_address, amt), from_wallet
         )
 
     # ===== Calculators
+    @enforce_types
     def calcSpotPrice(
         self,
-        tokenBalanceIn_base: int,
-        tokenWeightIn_base: int,
-        tokenBalanceOut_base: int,
-        tokenWeightOut_base: int,
-        swapFee_base: int,
+        tokenBalanceIn: int,
+        tokenWeightIn: int,
+        tokenBalanceOut: int,
+        tokenWeightOut: int,
+        swapFee: int,
     ) -> int:
-        """Returns spotPrice_base."""
+        """Returns spotPrice."""
         return self.contract.caller.calcSpotPrice(
-            tokenBalanceIn_base,
-            tokenWeightIn_base,
-            tokenBalanceOut_base,
-            tokenWeightOut_base,
-            swapFee_base,
+            tokenBalanceIn, tokenWeightIn, tokenBalanceOut, tokenWeightOut, swapFee
         )
 
+    @enforce_types
     def calcOutGivenIn(
         self,
-        tokenBalanceIn_base: int,
-        tokenWeightIn_base: int,
+        tokenBalanceIn: int,
+        tokenWeightIn: int,
         tokenBalanceOut: int,
-        tokenWeightOut_base: int,
-        tokenAmountIn_base: int,
-        swapFee_base: int,
+        tokenWeightOut: int,
+        tokenAmountIn: int,
+        swapFee: int,
     ) -> int:
-        """Returns tokenAmountOut_base."""
+        """Returns tokenAmountOut."""
         return self.contract.caller.calcOutGivenIn(
-            tokenBalanceIn_base,
-            tokenWeightIn_base,
+            tokenBalanceIn,
+            tokenWeightIn,
             tokenBalanceOut,
-            tokenWeightOut_base,
-            tokenAmountIn_base,
-            swapFee_base,
+            tokenWeightOut,
+            tokenAmountIn,
+            swapFee,
         )
 
+    @enforce_types
     def calcInGivenOut(
         self,
-        tokenBalanceIn_base: int,
-        tokenWeightIn_base: int,
-        tokenBalanceOut_base: int,
-        tokenWeightOut_base: int,
-        tokenAmountOut_base: int,
-        swapFee_base: int,
+        tokenBalanceIn: int,
+        tokenWeightIn: int,
+        tokenBalanceOut: int,
+        tokenWeightOut: int,
+        tokenAmountOut: int,
+        swapFee: int,
     ) -> int:
-        """Returns tokenAmountIn_base."""
+        """Returns tokenAmountIn."""
         return self.contract.caller.calcInGivenOut(
-            tokenBalanceIn_base,
-            tokenWeightIn_base,
-            tokenBalanceOut_base,
-            tokenWeightOut_base,
-            tokenAmountOut_base,
-            swapFee_base,
+            tokenBalanceIn,
+            tokenWeightIn,
+            tokenBalanceOut,
+            tokenWeightOut,
+            tokenAmountOut,
+            swapFee,
         )
 
+    @enforce_types
     def calcPoolOutGivenSingleIn(
         self,
-        tokenBalanceIn_base: int,
-        tokenWeightIn_base: int,
-        poolSupply_base: int,
-        totalWeight_base: int,
-        tokenAmountIn_base: int,
-        swapFee_base: int,
+        tokenBalanceIn: int,
+        tokenWeightIn: int,
+        poolSupply: int,
+        totalWeight: int,
+        tokenAmountIn: int,
+        swapFee: int,
     ) -> int:
-        """Returns poolAmountOut_base."""
+        """Returns poolAmountOut."""
         return self.contract.caller.calcPoolOutGivenSingleIn(
-            tokenBalanceIn_base,
-            tokenWeightIn_base,
-            poolSupply_base,
-            totalWeight_base,
-            tokenAmountIn_base,
-            swapFee_base,
+            tokenBalanceIn,
+            tokenWeightIn,
+            poolSupply,
+            totalWeight,
+            tokenAmountIn,
+            swapFee,
         )
 
+    @enforce_types
     def calcSingleInGivenPoolOut(
         self,
-        tokenBalanceIn_base: int,
-        tokenWeightIn_base: int,
-        poolSupply_base: int,
-        totalWeight_base: int,
-        poolAmountOut_base: int,
-        swapFee_base: int,
+        tokenBalanceIn: int,
+        tokenWeightIn: int,
+        poolSupply: int,
+        totalWeight: int,
+        poolAmountOut: int,
+        swapFee: int,
     ) -> int:
-        """Returns tokenAmountIn_base."""
+        """Returns tokenAmountIn."""
         return self.contract.caller.calcSingleInGivenPoolOut(
-            tokenBalanceIn_base,
-            tokenWeightIn_base,
-            poolSupply_base,
-            totalWeight_base,
-            poolAmountOut_base,
-            swapFee_base,
+            tokenBalanceIn,
+            tokenWeightIn,
+            poolSupply,
+            totalWeight,
+            poolAmountOut,
+            swapFee,
         )
 
+    @enforce_types
     def calcSingleOutGivenPoolIn(
         self,
-        tokenBalanceOut_base: int,
-        tokenWeightOut_base: int,
-        poolSupply_base: int,
-        totalWeight_base: int,
-        poolAmountIn_base: int,
-        swapFee_base: int,
+        tokenBalanceOut: int,
+        tokenWeightOut: int,
+        poolSupply: int,
+        totalWeight: int,
+        poolAmountIn: int,
+        swapFee: int,
     ) -> int:
-        """Returns tokenAmountOut_base."""
+        """Returns tokenAmountOut."""
         return self.contract.caller.calcSingleOutGivenPoolIn(
-            tokenBalanceOut_base,
-            tokenWeightOut_base,
-            poolSupply_base,
-            totalWeight_base,
-            poolAmountIn_base,
-            swapFee_base,
+            tokenBalanceOut,
+            tokenWeightOut,
+            poolSupply,
+            totalWeight,
+            poolAmountIn,
+            swapFee,
         )
 
+    @enforce_types
     def calcPoolInGivenSingleOut(
         self,
-        tokenBalanceOut_base: int,
-        tokenWeightOut_base: int,
-        poolSupply_base: int,
-        totalWeight_base: int,
-        tokenAmountOut_base: int,
-        swapFee_base: int,
+        tokenBalanceOut: int,
+        tokenWeightOut: int,
+        poolSupply: int,
+        totalWeight: int,
+        tokenAmountOut: int,
+        swapFee: int,
     ) -> int:
-        """Returns poolAmountIn_base."""
+        """Returns poolAmountIn."""
         return self.contract.caller.calcPoolInGivenSingleOut(
-            tokenBalanceOut_base,
-            tokenWeightOut_base,
-            poolSupply_base,
-            totalWeight_base,
-            tokenAmountOut_base,
-            swapFee_base,
+            tokenBalanceOut,
+            tokenWeightOut,
+            poolSupply,
+            totalWeight,
+            tokenAmountOut,
+            swapFee,
         )
 
     # ===== Events
-
+    @enforce_types
     def get_liquidity_logs(
         self,
-        event_name,
-        from_block,
-        to_block=None,
-        user_address=None,
-        this_pool_only=True,
-    ):
+        event_name: str,
+        from_block: int,
+        to_block: Optional[int] = None,
+        user_address: Optional[str] = None,
+        this_pool_only: bool = True,
+    ) -> Tuple:
         """
         :param event_name: str, one of LOG_JOIN, LOG_EXIT, LOG_SWAP
         """
@@ -614,23 +628,38 @@ class BPool(BToken):
         )
         return logs
 
+    @enforce_types
     def get_join_logs(
-        self, from_block, to_block=None, user_address=None, this_pool_only=True
-    ):
+        self,
+        from_block: int,
+        to_block: Optional[int] = None,
+        user_address: Optional[str] = None,
+        this_pool_only: bool = True,
+    ) -> Tuple[AttributeDict]:
         return self.get_liquidity_logs(
             "LOG_JOIN", from_block, to_block, user_address, this_pool_only
         )
 
+    @enforce_types
     def get_exit_logs(
-        self, from_block, to_block=None, user_address=None, this_pool_only=True
-    ):
+        self,
+        from_block: int,
+        to_block: Optional[int] = None,
+        user_address: Optional[str] = None,
+        this_pool_only: bool = True,
+    ) -> Tuple[AttributeDict]:
         return self.get_liquidity_logs(
             "LOG_EXIT", from_block, to_block, user_address, this_pool_only
         )
 
+    @enforce_types
     def get_swap_logs(
-        self, from_block, to_block=None, user_address=None, this_pool_only=True
-    ):
+        self,
+        from_block: int,
+        to_block: Optional[int] = None,
+        user_address: Optional[str] = None,
+        this_pool_only: bool = True,
+    ) -> Tuple[AttributeDict]:
         return self.get_liquidity_logs(
             "LOG_SWAP", from_block, to_block, user_address, this_pool_only
         )

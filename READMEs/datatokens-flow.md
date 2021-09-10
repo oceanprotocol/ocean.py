@@ -8,7 +8,7 @@ SPDX-License-Identifier: Apache-2.0
 ## Prerequisites
 
 -   Linux/MacOS
--   Docker, [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
+-   [Docker](https://docs.docker.com/engine/install/), [Docker Compose](https://docs.docker.com/compose/install/), [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
 -   Python 3.8.5+
 
 ## Run barge services
@@ -31,12 +31,14 @@ docker system prune -a --volumes
 
 ## Create config file
 
-Create a file called `config.ini` and fill it as follows.
-
-```text
+In a console:
+```console
+#Create config.ini file and fill it with configuration info
+echo """
 [eth-network]
-network = ganache
+network = http://127.0.0.1:8545
 address.file = ~/.ocean/ocean-contracts/artifacts/address.json
+""" > config.ini
 ```
 
 ## Install the library, set envvars
