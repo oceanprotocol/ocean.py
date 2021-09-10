@@ -38,11 +38,9 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
     )
     assert len(publisher_trusted_algorithms) == 1
     compute_service = ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
-    privacy_values = compute_service.attributes["main"].get("privacy")
-    if not privacy_values:
-        privacy_values = {}
-        compute_service.attributes["main"]["privacy"] = privacy_values
-    privacy_values["publisherTrustedAlgorithms"] = publisher_trusted_algorithms
+    compute_service.main["privacy"][
+        "publisherTrustedAlgorithms"
+    ] = publisher_trusted_algorithms
 
     with patch("ocean_lib.assets.utils.resolve_asset") as mock:
         mock.return_value = algorithm_ddo_v2
@@ -110,11 +108,7 @@ def test_utilitary_functions_for_trusted_algorithm_publishers(publisher_ocean_in
     """Tests adding/removing trusted algorithms in the DDO metadata."""
     ddo = get_sample_ddo_with_compute_service()
     compute_service = ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
-    privacy_values = compute_service.attributes["main"].get("privacy")
-    if not privacy_values:
-        privacy_values = {}
-        compute_service.attributes["main"]["privacy"] = privacy_values
-    privacy_values["publisherTrustedAlgorithmPublishers"] = ["0xabc"]
+    compute_service.main["privacy"]["publisherTrustedAlgorithmPublishers"] = ["0xabc"]
 
     # add a new trusted algorithm to the publisher_trusted_algorithms list
     new_publisher_trusted_algo_publishers = add_publisher_trusted_algorithm_publisher(
