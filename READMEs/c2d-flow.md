@@ -171,15 +171,16 @@ service_endpoint = DataServiceProvider.get_url(ocean.config)
 
 #Calc DATA service tuple
 from ocean_lib.common.agreements.service_factory import ServiceDescriptor
-DATA_service_tuple = ServiceDescriptor.access_service_descriptor(DATA_service_attributes, service_endpoint)
-#returns ("access",
+DATA_service_tuple = ServiceDescriptor.compute_service_descriptor(DATA_service_attributes, service_endpoint)
+# DATA_service_tuple = ServiceDescriptor.access_service_descriptor(DATA_service_attributes, service_endpoint)
+#returns ("compute",
 #         {"attributes": DATA_service_attributes, "serviceEndpoint": service_endpoint})
 
 #Publish metadata and service info on-chain
 DATA_ddo = ocean.assets.create(
   metadata=DATA_metadata, # {"main" : {"type" : "dataset", ..}, ..}
   publisher_wallet=alice_wallet,
-  service_descriptors=[DATA_service_tuple], # [("access", {"attributes": ..})]
+  service_descriptors=[DATA_service_tuple], # [("compute", {"attributes": ..})]
   data_token_address=DATA_datatoken.address)
 print(f"DATA did = '{DATA_ddo.did}'")
 ```
@@ -202,6 +203,16 @@ ALG_date_created = "2020-01-28T10:55:11Z"
 ALG_metadata =  {
     "main": {
         "type": "algorithm",
+        "algorithm": {
+            "language": "python",
+            "format": "docker-image",
+            "version": "0.1",
+            "container": {
+              "entrypoint": "node $ALGO",
+              "image": "node",
+              "tag": "10"
+            }
+        },
         "files": [
 	  {
 	    "url": "https://raw.githubusercontent.com/trentmc/branin/main/gpr.py",
@@ -244,16 +255,27 @@ Full details: [ALG_ddo](ALG_ddo.md)
 In the same Python console:
 ```python
 from ocean_lib.assets import utils
-utils.add_publisher_trusted_algorithm(DATA_did, ALG_did, config.metadata_cache_uri)
+utils.add_publisher_trusted_algorithm(DATA_ddo.did, ALG_ddo.did, config.metadata_cache_uri)
 ```
 
 ## 5. Bob acquires datatokens for data and algorithm
 
 In the same Python console:
 ```python
+bob_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY2'))
+print(f"bob_wallet.address = '{bob_wallet.address}'")
+ 
+#Verify that Bob has ganache ETH
+assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
+
+from ocean_lib.models.btoken import BToken #BToken is ERC20
+OCEAN_token = BToken(ocean.web3, ocean.OCEAN_address)
+assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need OCEAN"
+assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
+
 #alice shares access for both to bob, as datatokens. Alternatively, bob might have bought these in a market.
-DATA_datatoken.transfer(bob_address, to_wei(1), from_wallet=alice_wallet)
-ALG_datatoken.transfer(bob_address, to_wei(1), from_wallet=alice_wallet)
+DATA_datatoken.transfer(bob_wallet.address, to_wei(5), from_wallet=alice_wallet)
+ALG_datatoken.transfer(bob_wallet.address, to_wei(5), from_wallet=alice_wallet)
 ```
 
 ## 6. Bob starts a compute job
@@ -266,26 +288,61 @@ What's below is based on the end-to-end example in ocean.js-cli/src/commands.ts:
 
 In the same Python console:
 ```python
-DATA_DDO = resolve(DATA_did)
-ALG_DDO = resolved(ALG_did)
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+DATA_did = DATA_ddo.did
+ALG_did = ALG_ddo.did
+DATA_DDO = ocean.assets.resolve(DATA_did)
+ALG_DDO = ocean.assets.resolve(ALG_did)
 
-compute_service = ocean_lib.assets.getServiceByType(DATA_did, 'compute')
-algo_service = ocean_lib.assets.getServiceByType(DATA_did, 'access')
+compute_service = DATA_DDO.get_service('compute')
+algo_service = ALG_DDO.get_service('access')
 
-compute_address = ocean_lib.compute.getComputeAddress(DATA_did, compute_service.index)
-algo_definition = ComputeAlgorithm(did=ALG_did, serviceIndex=algo_service.index)
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
-DATA_order_tx = ocean_lib.compute.orderAsset(DATA_did, .compute_service.index, algo_definition, from_wallet=bob_wallet)
-ALG_order_tx = ocean_lib.compute.orderAlgorithm(ALG_did, algo_service.type, algo_service.index, from_wallet=bob_wallet)
+#order & pay for dataset
+order_requirements_dataset = ocean.assets.order(DATA_did, bob_wallet.address, service_type=compute_service.type)
+DATA_order_tx_id = ocean.assets.pay_for_service(
+        ocean.web3,
+        order_requirements_dataset.amount,
+        order_requirements_dataset.data_token_address,
+        DATA_did,
+        compute_service.index,
+        ZERO_ADDRESS,
+        bob_wallet,
+        order_requirements_dataset.computeAddress,
+    )
 
+#order & pay for algo
+order_requirements_algorithm = ocean.assets.order(ALG_did, bob_wallet.address, service_type=algo_service.type)
+ALG_order_tx_id = ocean.assets.pay_for_service(
+        ocean.web3,
+        order_requirements_algorithm.amount,
+        order_requirements_algorithm.data_token_address,
+        ALG_did,
+        algo_service.index,
+        ZERO_ADDRESS,
+        bob_wallet,
+        order_requirements_algorithm.computeAddress,
+)
 #Interface at https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/data_provider/data_service_provider.py
+
+signature = ocean.compute._sign_message(
+            bob_wallet, 
+            f"{bob_wallet.address}{DATA_did}",
+            service_endpoint=service_endpoint
+)
+
 response = DataServiceProvider.start_compute_job(
-  did=DATA_did,
-  service_endpoint=service_endpoint,
-  consumer_address=ALG_datatoken.address,
-  signature=FIXME,
-  order_tx_id=ALG_order_tx.id,
-  algorithm_did=ALG_did)
+    did=DATA_did,
+    service_endpoint=service_endpoint,
+    consumer_address=bob_wallet.address,
+    signature=signature,
+    service_id=compute_service.index,
+    order_tx_id=DATA_order_tx_id,
+    algorithm_did=ALG_did,
+    algorithm_tx_id=ALG_order_tx_id,
+    algorithm_data_token=ALG_datatoken.address,
+)
 print(f"Started compute job. Info: {response}")
 print(f"  JobID: FIXME")
 ```
