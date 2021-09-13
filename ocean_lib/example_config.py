@@ -15,6 +15,7 @@ from ocean_lib.config import (
     NAME_METADATA_CACHE_URI,
     NAME_NETWORK_URL,
     NAME_PROVIDER_URL,
+    NETWORK_NAME,
     SECTION_ETH_NETWORK,
     SECTION_RESOURCES,
     Config,
@@ -25,7 +26,6 @@ from web3 import Web3
 
 logging.basicConfig(level=logging.INFO)
 
-NETWORK_NAME = "network_name"
 """The interval in seconds between calls for the latest block number."""
 NAME_BLOCK_CONFIRMATION_POLL_INTERVAL = "block_confirmation_poll_interval"
 

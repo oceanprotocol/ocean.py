@@ -5,6 +5,7 @@
 import json
 import os
 import time
+from unittest.mock import patch
 
 import pytest
 from ocean_lib.common.ddo.ddo import DDO
@@ -190,10 +191,7 @@ def test_transfer_event(
 
     # same transfer event, different way of retrieving
     transfer_event = token.get_event_logs(
-        "Transfer",
-        None,
-        block - block_confirmations,
-        block - block_confirmations,
+        "Transfer", None, block - block_confirmations, block - block_confirmations
     )[0]
     assert transfer_event["args"]["from"] == alice_address
     assert transfer_event["args"]["to"] == bob_address
@@ -232,11 +230,13 @@ def test_verify_order_tx(alice_address, bob_address, alice_ocean, alice_wallet):
     transfer_tx_id = token.transfer(bob_address, to_wei(5), from_wallet=alice_wallet)
 
     with pytest.raises(TimeExhausted):
-        # dummy tx id which is not found in the chain
-        # need to catch TimeExhausted exception from web3
-        token.verify_order_tx(
-            "0x0", "some_did", "some_index", "some_amount", alice_address
-        )
+        with patch("ocean_lib.models.data_token.DataToken.get_tx_receipt") as mock:
+            # dummy tx id which is not found in the chain
+            # catches TimeExhausted exception from web3
+            mock.side_effect = TimeExhausted()
+            token.verify_order_tx(
+                "0x0", "some_did", "some_index", "some_amount", alice_address
+            )
 
     transfer_tx_id = token.transfer(bob_address, to_wei(5), from_wallet=alice_wallet)
     with pytest.raises(AssertionError):

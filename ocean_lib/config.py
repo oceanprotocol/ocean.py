@@ -18,12 +18,14 @@ DEFAULT_NETWORK_HOST = "localhost"
 DEFAULT_NETWORK_PORT = 8545
 DEFAULT_NETWORK_URL = "http://localhost:8545"
 DEFAULT_BLOCK_CONFIRMATIONS = 1
+DEFAULT_NETWORK_NAME = "ganache"
 DEFAULT_ADDRESS_FILE = ""
 DEFAULT_METADATA_CACHE_URI = "http://localhost:5000"
 DEFAULT_PROVIDER_URL = "http://localhost:8030"
 DEFAULT_DOWNLOADS_PATH = "consume-downloads"
 
 NAME_NETWORK_URL = "network"
+NETWORK_NAME = "network_name"
 NAME_CHAIN_ID = "chain_id"
 NAME_ADDRESS_FILE = "address.file"
 NAME_GAS_LIMIT = "gas_limit"
@@ -91,6 +93,7 @@ deprecated_environ_names = {
 config_defaults = {
     "eth-network": {
         NAME_NETWORK_URL: DEFAULT_NETWORK_URL,
+        NETWORK_NAME: DEFAULT_NETWORK_NAME,
         NAME_ADDRESS_FILE: DEFAULT_ADDRESS_FILE,
         NAME_GAS_LIMIT: GAS_LIMIT_DEFAULT,
         NAME_BLOCK_CONFIRMATIONS: DEFAULT_BLOCK_CONFIRMATIONS,
@@ -245,6 +248,12 @@ class Config(configparser.ConfigParser):
     def network_url(self) -> str:
         """URL of the ethereum network. (e.g.): http://mynetwork:8545."""
         return self.get(SECTION_ETH_NETWORK, NAME_NETWORK_URL)
+
+    @property
+    @enforce_types
+    def network_name(self) -> str:
+        """Name of the ethereum network. (e.g.): ganache."""
+        return self.get(SECTION_ETH_NETWORK, NETWORK_NAME)
 
     @property
     @enforce_types

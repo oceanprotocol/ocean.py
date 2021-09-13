@@ -2,6 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import pytest
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.models.compute_input import ComputeInput
@@ -34,6 +35,53 @@ class Setup:
         self.consumer_wallet = get_consumer_wallet()
         self.publisher_ocean_instance = get_publisher_ocean_instance()
         self.consumer_ocean_instance = get_consumer_ocean_instance()
+
+
+@pytest.fixture
+def setup():
+    return Setup()
+
+
+@pytest.fixture
+def simple_compute_ddo():
+    setup = Setup()
+    # Dataset with compute service
+    simple_compute_ddo = get_registered_ddo_with_compute_service(
+        setup.publisher_ocean_instance, setup.publisher_wallet
+    )
+
+    # verify the ddo is available in Aquarius
+    setup.publisher_ocean_instance.assets.resolve(simple_compute_ddo.did)
+
+    yield simple_compute_ddo
+
+
+@pytest.fixture
+def algorithm_ddo():
+    setup = Setup()
+    # Setup algorithm meta to run raw algorithm
+    algorithm_ddo = get_registered_algorithm_ddo(
+        setup.publisher_ocean_instance, setup.publisher_wallet
+    )
+    # verify the ddo is available in Aquarius
+    _ = setup.publisher_ocean_instance.assets.resolve(algorithm_ddo.did)
+
+    yield algorithm_ddo
+
+
+@pytest.fixture
+def asset_with_trusted(algorithm_ddo):
+    setup = Setup()
+    # Setup algorithm meta to run raw algorithm
+    ddo = get_registered_ddo_with_compute_service(
+        setup.publisher_ocean_instance,
+        setup.publisher_wallet,
+        trusted_algorithms=[algorithm_ddo.did],
+    )
+    # verify the ddo is available in Aquarius
+    _ = setup.publisher_ocean_instance.assets.resolve(ddo.did)
+
+    yield ddo
 
 
 def process_order(ocean_instance, publisher_wallet, consumer_wallet, ddo, service_type):
@@ -161,16 +209,9 @@ def run_compute_test(
         assert "did" in result, "something not right about the compute job, no did."
 
 
-def test_compute_raw_algo():
+def test_compute_raw_algo(simple_compute_ddo):
     """Tests that a compute job with a raw algorithm starts properly."""
     setup = Setup()
-
-    # Dataset with compute service
-    compute_ddo = get_registered_ddo_with_compute_service(
-        setup.publisher_ocean_instance, setup.publisher_wallet
-    )
-    # verify the ddo is available in Aquarius
-    _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
 
     # Setup algorithm meta to run raw algorithm
     algorithm_meta = get_algorithm_meta()
@@ -178,22 +219,15 @@ def test_compute_raw_algo():
         setup.consumer_ocean_instance,
         setup.publisher_wallet,
         setup.consumer_wallet,
-        [compute_ddo],
+        [simple_compute_ddo],
         algo_meta=algorithm_meta,
         with_result=True,
     )
 
 
-def test_compute_multi_inputs():
+def test_compute_multi_inputs(simple_compute_ddo):
     """Tests that a compute job with additional Inputs (multiple assets) starts properly."""
     setup = Setup()
-
-    # Dataset with compute service
-    compute_ddo = get_registered_ddo_with_compute_service(
-        setup.publisher_ocean_instance, setup.publisher_wallet
-    )
-    # verify the ddo is available in Aquarius
-    _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
 
     # Another dataset, this time with download service
     access_ddo = get_registered_ddo_with_access_service(
@@ -212,13 +246,13 @@ def test_compute_multi_inputs():
         setup.consumer_ocean_instance,
         setup.publisher_wallet,
         setup.consumer_wallet,
-        [compute_ddo, access_ddo],
+        [simple_compute_ddo, access_ddo],
         algo_ddo=algorithm_ddo,
         userdata={"test_key": "test_value"},
     )
 
 
-def test_update_trusted_algorithms(config, web3):
+def test_update_trusted_algorithms(config, web3, algorithm_ddo, asset_with_trusted):
     setup = Setup()
 
     ddo_address = get_contracts_addresses(config.address_file, "ganache")[
@@ -226,25 +260,10 @@ def test_update_trusted_algorithms(config, web3):
     ]
     ddo_registry = MetadataContract(web3, ddo_address)
 
-    # Setup algorithm meta to run raw algorithm
-    algorithm_ddo = get_registered_algorithm_ddo(
-        setup.publisher_ocean_instance, setup.publisher_wallet
-    )
-    # verify the ddo is available in Aquarius
-    _ = setup.publisher_ocean_instance.assets.resolve(algorithm_ddo.did)
-
-    # Dataset with compute service
-    compute_ddo = get_registered_ddo_with_compute_service(
-        setup.publisher_ocean_instance,
-        setup.publisher_wallet,
-        trusted_algorithms=[algorithm_ddo.did],
-    )
-    # verify the ddo is available in Aquarius
-    _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
     trusted_algo_list = create_publisher_trusted_algorithms(
         [algorithm_ddo.did], setup.publisher_ocean_instance.config.metadata_cache_uri
     )
-    compute_ddo.update_compute_privacy(
+    asset_with_trusted.update_compute_privacy(
         trusted_algorithms=trusted_algo_list,
         trusted_algo_publishers=[],
         allow_all=False,
@@ -252,21 +271,23 @@ def test_update_trusted_algorithms(config, web3):
     )
 
     tx_id = setup.publisher_ocean_instance.assets.update(
-        compute_ddo, setup.publisher_wallet
+        asset_with_trusted, setup.publisher_wallet
     )
 
     tx_receipt = ddo_registry.get_tx_receipt(web3, tx_id)
     logs = ddo_registry.event_MetadataUpdated.processReceipt(tx_receipt, errors=DISCARD)
-    assert logs[0].args.dataToken == compute_ddo.data_token_address
+    assert logs[0].args.dataToken == asset_with_trusted.data_token_address
 
     wait_for_update(
         setup.publisher_ocean_instance,
-        compute_ddo.did,
+        asset_with_trusted.did,
         "privacy",
         {"publisherTrustedAlgorithms": [algorithm_ddo.did]},
     )
 
-    compute_ddo_updated = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
+    compute_ddo_updated = setup.publisher_ocean_instance.assets.resolve(
+        asset_with_trusted.did
+    )
 
     run_compute_test(
         setup.consumer_ocean_instance,
@@ -277,15 +298,8 @@ def test_update_trusted_algorithms(config, web3):
     )
 
 
-def test_compute_trusted_algorithms():
+def test_compute_trusted_algorithms(algorithm_ddo, asset_with_trusted):
     setup = Setup()
-
-    # Setup algorithm meta to run raw algorithm
-    algorithm_ddo = get_registered_algorithm_ddo(
-        setup.publisher_ocean_instance, setup.publisher_wallet
-    )
-    # verify the ddo is available in Aquarius
-    _ = setup.publisher_ocean_instance.assets.resolve(algorithm_ddo.did)
 
     algorithm_ddo_v2 = get_registered_algorithm_ddo(
         setup.publisher_ocean_instance, setup.publisher_wallet
@@ -293,21 +307,12 @@ def test_compute_trusted_algorithms():
     # verify the ddo is available in Aquarius
     _ = setup.publisher_ocean_instance.assets.resolve(algorithm_ddo_v2.did)
 
-    # Dataset with compute service
-    compute_ddo = get_registered_ddo_with_compute_service(
-        setup.publisher_ocean_instance,
-        setup.publisher_wallet,
-        trusted_algorithms=[algorithm_ddo.did],
-    )
-    # verify the ddo is available in Aquarius
-    _ = setup.publisher_ocean_instance.assets.resolve(compute_ddo.did)
-
     # For debugging.
     run_compute_test(
         setup.consumer_ocean_instance,
         setup.publisher_wallet,
         setup.consumer_wallet,
-        [compute_ddo],
+        [asset_with_trusted],
         algo_ddo=algorithm_ddo,
     )
 
@@ -316,7 +321,7 @@ def test_compute_trusted_algorithms():
         setup.consumer_ocean_instance,
         setup.publisher_wallet,
         setup.consumer_wallet,
-        [compute_ddo],
+        [asset_with_trusted],
         algo_ddo=algorithm_ddo_v2,
         expect_failure=True,
         expect_failure_message=f"this algorithm did {algorithm_ddo_v2.did} is not trusted.",

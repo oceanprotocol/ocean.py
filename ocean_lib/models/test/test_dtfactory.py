@@ -2,6 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from unittest.mock import patch
+
 import pytest
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
@@ -50,7 +52,11 @@ def test_get_token_address_fails(web3, dtfactory_address):
     dtfactory = DTFactory(web3, dtfactory_address)
     # Transaction 0x is not in the chain
     with pytest.raises(TimeExhausted):
-        dtfactory.get_token_address("")
+        with patch("ocean_lib.models.dtfactory.DTFactory.get_tx_receipt") as mock:
+            # throw the exception without acually waiting
+            mock.side_effect = TimeExhausted()
+            # we are checking that this exception bubbles up to get_token_address()
+            dtfactory.get_token_address("")
 
 
 def test_get_token_minter(web3, alice_wallet, dtfactory_address, alice_address):
