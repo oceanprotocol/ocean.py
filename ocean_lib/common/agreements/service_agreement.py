@@ -106,8 +106,8 @@ class ServiceAgreement(Service):
         return float(self.main["cost"])
 
     @enforce_types
-    def get_provider_address(self) -> str:
+    def get_c2d_address(self) -> str:
         result = urlparse(self.service_endpoint)
-        return DataServiceProvider.get_provider_address(
+        return DataServiceProvider.get_c2d_address(
             f"{result.scheme}://{result.netloc}/"
         )

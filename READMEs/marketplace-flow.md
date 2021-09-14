@@ -282,7 +282,7 @@ order_tx_id = ocean.assets.pay_for_service(
     service.index,
     fee_receiver,
     bob_wallet,
-    service.get_provider_address()
+    service.get_c2d_address()
 )
 print(f"order_tx_id = '{order_tx_id}'")
 

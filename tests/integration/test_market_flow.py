@@ -70,7 +70,7 @@ def test_market_flow():
         service.index,
         "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",
         consumer_wallet,
-        sa.get_provider_address(),
+        sa.get_c2d_address(),
     ]
 
     _order_tx_id = consumer_ocean.assets.pay_for_service(*args)
