@@ -3,75 +3,34 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import time
-from typing import Optional
 
 from enforce_typing import enforce_types
 from hexbytes import HexBytes
 from web3 import Web3
-
-from ocean_lib.config import Config
-from ocean_lib.web3_internal.wallet import Wallet
+from web3.types import TxReceipt
 
 
 @enforce_types
-def send_dummy_transactions(block_number: int, from_wallet: Wallet) -> None:
-    """Creates and sends dummy transactions for ganache network to increase the block_number by request.
-
-    :param block_number: int is the receipt's block number when it was sent.
-    :param from_wallet: Wallet instance.
-    """
-    web3 = from_wallet.web3
-    config = Config()
-    while web3.eth.block_number < block_number + config.block_confirmations:
-        tx = {
-            "from": from_wallet.address,
-            "to": "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",
-            "value": Web3.toWei(0.001, "ether"),
-            "chainId": web3.eth.chain_id,
-        }
-        tx["gas"] = web3.eth.estimate_gas(tx)
-        raw_tx = from_wallet.sign_tx(tx)
-        web3.eth.send_raw_transaction(raw_tx)
-        from ocean_lib.example_config import (
-            CONFIG_NETWORK_HELPER,
-            NAME_BLOCK_CONFIRMATION_POLL_INTERVAL,
-        )
-
-        time.sleep(CONFIG_NETWORK_HELPER[1337][NAME_BLOCK_CONFIRMATION_POLL_INTERVAL])
-
-
-@enforce_types
-def fetch_transaction(
+def wait_for_transaction_receipt_and_block_confirmations(
+    web3: Web3,
     tx_hash: HexBytes,
-    tx: dict,
-    from_wallet: Wallet,
-    timeout: Optional[int] = None,
-) -> None:
-    """Settles the transaction on the chain after BLOCK_CONFIRMATIONS blocks depending on the used network.
+    block_confirmations: int,
+    block_number_poll_interval: float,
+    timeout: int = 120,
+) -> TxReceipt:
+    """Wait for the transaction receipt. Then, verify the transaction receipt
+    still appears in the chain after `block_confirmations` number of blocks.
+    Return the transaction receipt.
 
-    :param tx_hash: HexBytes.
-    :param tx: dict.
-    :param from_wallet: Wallet instance.
-    :param timeout: Optional[int] is the network timeout.
+    :param web3: Web3, used to query for transaction receipts and block number.
+    :param tx_hash: HexBytes, the transaction hash.
+    :param block_confirmations: int, larger number of block confirmations
+      increases certainty that transaction has settled.
+    :param block_number_poll_interval: interval
+    :param timeout: Optional[int], amount of time to wait for initial tx receipt
+      in seconds.
     """
-    web3 = from_wallet.web3
-    config = Config()
-    receipt = (
-        web3.eth.wait_for_transaction_receipt(tx_hash, timeout)
-        if timeout
-        else web3.eth.wait_for_transaction_receipt(tx_hash)
-    )
-    from ocean_lib.example_config import (
-        CONFIG_NETWORK_HELPER,
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL,
-    )
-
-    if tx["chainId"] == 1337:
-        send_dummy_transactions(receipt.blockNumber, from_wallet)
-    else:
-        while web3.eth.block_number < receipt.blockNumber + config.block_confirmations:
-            time.sleep(
-                CONFIG_NETWORK_HELPER[tx["chainId"]][
-                    NAME_BLOCK_CONFIRMATION_POLL_INTERVAL
-                ]
-            )
+    receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout)
+    while web3.eth.block_number < receipt.blockNumber + block_confirmations:
+        time.sleep(block_number_poll_interval)
+    return web3.eth.get_transaction_receipt(tx_hash)

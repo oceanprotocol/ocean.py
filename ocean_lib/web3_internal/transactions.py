@@ -6,12 +6,12 @@ from typing import Optional, Union
 
 from enforce_typing import enforce_types
 from eth_account.messages import SignableMessage
-
 from ocean_lib.web3_internal.wallet import Wallet
+from ocean_lib.web3_internal.web3_overrides.utils import (
+    wait_for_transaction_receipt_and_block_confirmations,
+)
 from web3.datastructures import AttributeDict
 from web3.main import Web3
-
-from ocean_lib.web3_internal.web3_overrides.utils import fetch_transaction
 
 
 @enforce_types
@@ -44,7 +44,7 @@ def send_ether(from_wallet: Wallet, to_address: str, amount: int) -> AttributeDi
     tx["gas"] = web3.eth.estimate_gas(tx)
     raw_tx = from_wallet.sign_tx(tx)
     tx_hash = web3.eth.send_raw_transaction(raw_tx)
-    fetch_transaction(tx_hash, tx, from_wallet)
+    wait_for_transaction_receipt_and_block_confirmations(tx_hash, tx, from_wallet)
     return web3.eth.get_transaction_receipt(tx_hash)
 
 
@@ -66,5 +66,5 @@ def cancel_or_replace_transaction(
     tx["gas"] = gas + 1
     raw_tx = from_wallet.sign_tx(tx, fixed_nonce=nonce_value, gas_price=gas_price)
     tx_hash = web3.eth.send_raw_transaction(raw_tx)
-    fetch_transaction(tx_hash, tx, from_wallet)
+    wait_for_transaction_receipt_and_block_confirmations(tx_hash, tx, from_wallet)
     return web3.eth.get_transaction_receipt(tx_hash)

@@ -7,13 +7,13 @@ from typing import Any, Dict, Optional
 
 from enforce_typing import enforce_types
 from hexbytes.main import HexBytes
-
 from ocean_lib.web3_internal.utils import get_chain_id, get_network_timeout
 from ocean_lib.web3_internal.wallet import Wallet
+from ocean_lib.web3_internal.web3_overrides.utils import (
+    wait_for_transaction_receipt_and_block_confirmations,
+)
 from web3.contract import prepare_transaction
 from web3.main import Web3
-
-from ocean_lib.web3_internal.web3_overrides.utils import fetch_transaction
 
 
 @enforce_types
@@ -122,7 +122,7 @@ def transact_with_contract_function(
 
     network_id = get_chain_id(web3)
     network_timeout = get_network_timeout(network_id=network_id)
-    fetch_transaction(
+    wait_for_transaction_receipt_and_block_confirmations(
         txn_hash,
         transaction,
         Wallet(web3, private_key=account_key),
