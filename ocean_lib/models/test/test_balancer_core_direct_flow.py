@@ -76,7 +76,8 @@ def test_complete_flow(
         DT_address,
         to_wei(90 + 9),
         balancer_constants.INIT_WEIGHT_DT,
-        from_wallet=alice_wallet,
+        alice_wallet,
+        config.block_confirmations,
     )
 
     OCEAN_token.approve(pool_address, to_wei(1), from_wallet=alice_wallet)
@@ -84,7 +85,8 @@ def test_complete_flow(
         OCEAN_address,
         to_wei(10 + 1),
         balancer_constants.INIT_WEIGHT_OCEAN,
-        from_wallet=alice_wallet,
+        alice_wallet,
+        config.block_confirmations,
     )
 
     # 6. Bob buys a DT from pool
@@ -108,13 +110,15 @@ def test_complete_flow(
         DT_address,
         to_wei(90 + 9 - 2),
         balancer_constants.INIT_WEIGHT_DT,
-        from_wallet=alice_wallet,
+        alice_wallet,
+        config.block_confirmations,
     )
     pool.rebind(
         OCEAN_address,
         to_wei(10 + 1 - 3),
         balancer_constants.INIT_WEIGHT_OCEAN,
-        from_wallet=alice_wallet,
+        alice_wallet,
+        config.block_confirmations,
     )
 
     # ===============================================================

@@ -293,11 +293,15 @@ def test_rebind_more_tokens(network, config, web3, T1, T2, alice_wallet):
 
     # insufficient allowance
     with pytest.raises(Exception):
-        pool.rebind(T1.address, to_wei(120), to_wei(9), from_wallet=alice_wallet)
+        pool.rebind(
+            T1.address, to_wei(120), to_wei(9), alice_wallet, config.block_confirmations
+        )
 
     # sufficient allowance
     T1.approve(pool.address, to_wei(30), from_wallet=alice_wallet)
-    pool.rebind(T1.address, to_wei(120), to_wei(9), from_wallet=alice_wallet)
+    pool.rebind(
+        T1.address, to_wei(120), to_wei(9), alice_wallet, config.block_confirmations
+    )
 
 
 def test_gulp(network, config, web3, T1, alice_wallet):

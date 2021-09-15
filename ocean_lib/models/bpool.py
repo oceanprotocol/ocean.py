@@ -255,14 +255,19 @@ class BPool(BToken):
 
     @enforce_types
     def rebind(
-        self, token_address: str, balance: int, weight: int, from_wallet: Wallet
+        self,
+        token_address: str,
+        balance: int,
+        weight: int,
+        from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         """
         Changes the parameters of an already-bound token. Performs the same
         validation on the parameters.
         """
         return self.send_transaction(
-            "rebind", (token_address, balance, weight), from_wallet
+            "rebind", (token_address, balance, weight), from_wallet, block_confirmations
         )
 
     @enforce_types
