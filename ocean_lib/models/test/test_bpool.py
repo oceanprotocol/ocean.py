@@ -328,7 +328,7 @@ def test_gulp(network, config, web3, T1, alice_wallet):
 
     # so, 'gulp' gets the pool to absorb the tokens into its balances.
     # i.e. to update _records[token].balance to be in sync with ERC20 balance
-    pool.gulp(T1.address, from_wallet=alice_wallet)
+    pool.gulp(T1.address, alice_wallet, config.block_confirmations)
     assert T1.balanceOf(pool.address) == to_wei(2 + 5)  # ERC20
     assert pool.getBalance(T1.address) == to_wei(2 + 5)  # records[]
 

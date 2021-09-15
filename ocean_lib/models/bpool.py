@@ -283,7 +283,9 @@ class BPool(BToken):
         )
 
     @enforce_types
-    def gulp(self, token_address: str, from_wallet: Wallet) -> str:
+    def gulp(
+        self, token_address: str, from_wallet: Wallet, block_confirmations: int
+    ) -> str:
         """
         This syncs the internal `balance` of `token` within a pool with the
         actual `balance` registered on the ERC20 contract. This is useful to
@@ -297,7 +299,9 @@ class BPool(BToken):
         given token, any airdrops in that token will be locked in the pool
         forever.
         """
-        return self.send_transaction("gulp", (token_address,), from_wallet)
+        return self.send_transaction(
+            "gulp", (token_address,), from_wallet, block_confirmations
+        )
 
     # ==== Price Functions
 
