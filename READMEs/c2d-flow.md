@@ -321,12 +321,6 @@ ALG_order_tx_id = ocean.assets.pay_for_service(
         algo_order_requirements.computeAddress,
 )
 
-signature = ocean.compute._sign_message(
-    bob_wallet,
-    f"{bob_wallet.address}{DATA_did}",
-    service_endpoint=compute_service.service_endpoint
-)
-
 compute_inputs = [ComputeInput(DATA_did, DATA_order_tx_id, compute_service.index)]
 job_id = ocean.compute.start(
     compute_inputs,
@@ -340,19 +334,22 @@ print(f"Started compute job with id: {job_id}")
 
 ## 7. Bob monitors logs / algorithm output
 
-What's below is based on the end-to-end example in ocean.js-cli/src/commands.ts::getCompute() (starts line 285 in commands.ts). WIP!
-- In turn, it uses ocean.js/src/ocean/Compute.ts (starts line 201):
-```
-Args:
-   * @param  {Account} consumerAccount The account of the consumer ordering the service.
-   * @param  {string} did Decentralized identifier.
-   * @param  {string} jobId The jobId of the compute job
-   * @param  {string} jobId The Order transaction id
-   * @param  {boolean} sign If the provider request is going to be signed(default) (full status) or not (short status)
-```
+In the same Python console, you can check the job status as many times as needed:
 
-
-In the same Python console:
 ```python
-FIXME
+ocean.compute.status(DATA_did, job_id, bob_wallet)
+
 ```
+
+This will output the status of the current job.
+Here is a list of possible results: [Operator Service Status description](https://github.com/oceanprotocol/operator-service/blob/main/API.md#status-description).
+
+Once you get `{'ok': True, 'status': 70, 'statusText': 'Job finished'}`, Bob can check the result of the job.
+
+```python
+ocean.compute.result(DATA_did, job_id, bob_wallet)
+
+```
+
+It will output a dictionary containing details and logs.
+We are working on a function to also retrieve the binary result file, so expect updates to this README pretty soon :)
