@@ -195,8 +195,12 @@ class BPool(BToken):
         )
 
     @enforce_types
-    def setController(self, manager_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("setController", (manager_address,), from_wallet)
+    def setController(
+        self, manager_address: str, from_wallet: Wallet, block_confirmations: int
+    ) -> str:
+        return self.send_transaction(
+            "setController", (manager_address,), from_wallet, block_confirmations
+        )
 
     @enforce_types
     def setPublicSwap(self, public: bool, from_wallet: Wallet) -> str:

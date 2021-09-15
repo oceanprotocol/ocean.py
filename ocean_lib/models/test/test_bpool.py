@@ -63,7 +63,7 @@ def test_setSwapFee_fails(
         pool.setSwapFee(
             to_wei("0.011"), bob_wallet, config.block_confirmations
         )  # not ok, bob isn't controller
-    pool.setController(bob_address, from_wallet=alice_wallet)
+    pool.setController(bob_address, alice_wallet, config.block_confirmations)
     pool.setSwapFee(to_wei("0.011"), bob_wallet, config.block_confirmations)  # ok now
 
 
@@ -74,10 +74,10 @@ def test_setController(
     pool = _deployBPool(
         web3, config.address_file, network, alice_wallet, config.block_confirmations
     )
-    pool.setController(bob_address, from_wallet=alice_wallet)
+    pool.setController(bob_address, alice_wallet, config.block_confirmations)
     assert pool.getController() == bob_address
 
-    pool.setController(alice_address, from_wallet=bob_wallet)
+    pool.setController(alice_address, bob_wallet, config.block_confirmations)
     assert pool.getController() == alice_address
 
 
