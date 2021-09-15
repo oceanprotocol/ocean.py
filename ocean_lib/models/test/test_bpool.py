@@ -48,7 +48,7 @@ def test_setSwapFee_works(network, config, web3, alice_wallet):
     pool = _deployBPool(
         web3, config.address_file, network, alice_wallet, config.block_confirmations
     )
-    pool.setSwapFee(to_wei("0.011"), from_wallet=alice_wallet)
+    pool.setSwapFee(to_wei("0.011"), alice_wallet, config.block_confirmations)
     assert pool.getSwapFee() == to_wei("0.011")
 
 
@@ -61,10 +61,10 @@ def test_setSwapFee_fails(
     pool = BPool(web3, pool_address)
     with pytest.raises(Exception):
         pool.setSwapFee(
-            to_wei("0.011"), from_wallet=bob_wallet
+            to_wei("0.011"), bob_wallet, config.block_confirmations
         )  # not ok, bob isn't controller
     pool.setController(bob_address, from_wallet=alice_wallet)
-    pool.setSwapFee(to_wei("0.011"), from_wallet=bob_wallet)  # ok now
+    pool.setSwapFee(to_wei("0.011"), bob_wallet, config.block_confirmations)  # ok now
 
 
 def test_setController(

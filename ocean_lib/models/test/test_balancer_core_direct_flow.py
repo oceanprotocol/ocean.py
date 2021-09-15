@@ -44,7 +44,9 @@ def test_complete_flow(
 
     pool.setPublicSwap(True, from_wallet=alice_wallet)
 
-    pool.setSwapFee(to_wei("0.1"), from_wallet=alice_wallet)  # set 10% fee
+    pool.setSwapFee(
+        to_wei("0.1"), alice_wallet, config.block_confirmations
+    )  # set 10% fee
 
     DT.approve(pool_address, to_wei(90), from_wallet=alice_wallet)
     pool.bind(

@@ -184,11 +184,15 @@ class BPool(BToken):
     # ==== Controller Functions
 
     @enforce_types
-    def setSwapFee(self, swapFee: int, from_wallet: Wallet) -> str:
+    def setSwapFee(
+        self, swapFee: int, from_wallet: Wallet, block_confirmations: int
+    ) -> str:
         """
         Caller must be controller. Pool must NOT be finalized.
         """
-        return self.send_transaction("setSwapFee", (swapFee,), from_wallet)
+        return self.send_transaction(
+            "setSwapFee", (swapFee,), from_wallet, block_confirmations
+        )
 
     @enforce_types
     def setController(self, manager_address: str, from_wallet: Wallet) -> str:
