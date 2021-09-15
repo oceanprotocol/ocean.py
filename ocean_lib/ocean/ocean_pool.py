@@ -124,6 +124,7 @@ class OceanPool:
             base_weight,
             swap_fee,
             from_wallet,
+            block_confirmations,
         )
         if pool.get_tx_receipt(self.web3, tx_id).status != 1:
             raise VerifyTxFailed(

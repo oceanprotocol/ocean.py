@@ -77,6 +77,7 @@ class BPool(BToken):
         base_token_weight: int,
         swap_fee: int,
         from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
 
         tx_id = self.send_transaction(
@@ -91,6 +92,7 @@ class BPool(BToken):
                 swap_fee,
             ),
             from_wallet,
+            block_confirmations,
             {"gas": balancer_constants.GASLIMIT_BFACTORY_NEWBPOOL},
         )
 
