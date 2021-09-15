@@ -11,7 +11,7 @@ from ocean_lib.web3_internal.currency import to_wei
 
 
 def test_complete_flow(
-    network, OCEAN_address, alice_wallet, alice_ocean, alice_address, bob_wallet
+    network, OCEAN_address, alice_wallet, alice_ocean, alice_address, bob_wallet, config
 ):
     """Tests a full liquidity add/remove flow."""
     bfactory_address = get_bfactory_address(alice_ocean.config.address_file, network)
@@ -39,7 +39,7 @@ def test_complete_flow(
     # 4. Alice creates an OCEAN-DT pool (=a Balancer Pool)
     web3 = alice_ocean.web3
     bfactory = BFactory(web3, bfactory_address)
-    pool_address = bfactory.newBPool(from_wallet=alice_wallet)
+    pool_address = bfactory.newBPool(alice_wallet, config.block_confirmations)
     pool = BPool(web3, pool_address)
 
     pool.setPublicSwap(True, from_wallet=alice_wallet)

@@ -16,7 +16,7 @@ class BFactory(ContractBase):
     # ============================================================
     # reflect BFactory Solidity methods
     @enforce_types
-    def newBPool(self, from_wallet: Wallet) -> str:
+    def newBPool(self, from_wallet: Wallet, block_confirmations: int) -> str:
         """
         :return: `str` new pool address
         """
@@ -25,6 +25,7 @@ class BFactory(ContractBase):
             "newBPool",
             (),
             from_wallet,
+            block_confirmations,
             {"gas": balancer_constants.GASLIMIT_BFACTORY_NEWBPOOL},
         )
         tx_receipt = self.get_tx_receipt(self.web3, tx_id)

@@ -66,6 +66,7 @@ class OceanPool:
         data_token_amount: int,
         OCEAN_amount: int,
         from_wallet: Wallet,
+        block_confirmations: int,
         data_token_weight: int = balancer_constants.INIT_WEIGHT_DT,
         swap_fee: int = balancer_constants.DEFAULT_SWAP_FEE,
     ) -> BPool:
@@ -85,7 +86,7 @@ class OceanPool:
         :return: BPool instance
         """
         bfactory = BFactory(self.web3, self.bfactory_address)
-        pool_address = bfactory.newBPool(from_wallet)
+        pool_address = bfactory.newBPool(from_wallet, block_confirmations)
         pool = BPool(self.web3, pool_address)
         logger.debug(f"pool created with address {pool_address}.")
 

@@ -12,6 +12,6 @@ def test_bpool_creation(web3, config, alice_wallet):
     bfactory_address = get_bfactory_address(config.address_file, web3=web3)
     bfactory = BFactory(web3, bfactory_address)
 
-    pool_address = bfactory.newBPool(from_wallet=alice_wallet)
+    pool_address = bfactory.newBPool(alice_wallet, config.block_confirmations)
     pool = BPool(web3, pool_address)
     assert isinstance(pool, BPool)
