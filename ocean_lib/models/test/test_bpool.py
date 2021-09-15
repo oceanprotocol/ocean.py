@@ -40,7 +40,9 @@ def test_notokens_basic(
     assert str(pool)
 
     with pytest.raises(Exception):
-        pool.finalize(from_wallet=alice_wallet)  # can't finalize if no tokens
+        pool.finalize(
+            alice_wallet, config.block_confirmations
+        )  # can't finalize if no tokens
 
 
 def test_setSwapFee_works(network, config, web3, alice_wallet):
@@ -159,7 +161,7 @@ def test_finalize(network, config, web3, T1, T2, alice_address, alice_wallet):
     assert pool.balanceOf(alice_address) == 0
     assert pool.allowance(alice_address, pool.address) == 0
 
-    pool.finalize(from_wallet=alice_wallet)
+    pool.finalize(alice_wallet, config.block_confirmations)
     assert str(pool) != ""
 
     assert pool.isPublicSwap()
@@ -213,7 +215,7 @@ def test_public_pool(network, config, bob_wallet, alice_ocean):
 
     # finalize
     pool = BPool(alice_ocean.web3, pool.address)
-    pool.finalize(from_wallet=alice.wallet)
+    pool.finalize(alice.wallet, config.block_confirmations)
 
     # verify holdings
     assert alice.T1.balanceOf(alice.address) == to_wei(1000 - 90 - 100)
@@ -413,7 +415,7 @@ def test_joinswapPoolAmountOut(
         network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
     BPT = pool
-    pool.finalize(from_wallet=alice_wallet)
+    pool.finalize(alice_wallet, config.block_confirmations)
     pool_balance = BPT.balanceOf(alice_address)
     T1.approve(pool.address, to_wei(90), from_wallet=alice_wallet)
     assert T1.balanceOf(alice_address) == T1balance - to_wei(90)
@@ -436,7 +438,7 @@ def test_exitswapPoolAmountIn(
         network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
     BPT = pool
-    pool.finalize(from_wallet=alice_wallet)
+    pool.finalize(alice_wallet, config.block_confirmations)
     pool_balance = BPT.balanceOf(alice_address)
     assert T1.balanceOf(alice_address) == T1balance - to_wei(90)
     pool.exitswapPoolAmountIn(
@@ -457,7 +459,7 @@ def test_exitswapExternAmountOut(
         network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
     BPT = pool
-    pool.finalize(from_wallet=alice_wallet)
+    pool.finalize(alice_wallet, config.block_confirmations)
     pool_balance = BPT.balanceOf(alice_address)
     assert T1.balanceOf(alice_address) == T1balance - to_wei(90)
     pool.exitswapExternAmountOut(

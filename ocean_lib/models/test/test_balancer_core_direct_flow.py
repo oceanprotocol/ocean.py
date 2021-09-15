@@ -129,7 +129,7 @@ def test_complete_flow(
 
     # ===============================================================
     # 10. Alice finalizes pool. Now others can add liquidity.
-    pool.finalize(from_wallet=alice_wallet)
+    pool.finalize(alice_wallet, config.block_confirmations)
 
     # ===============================================================
     # 11. Bob adds liquidity

@@ -216,14 +216,14 @@ class BPool(BToken):
         )
 
     @enforce_types
-    def finalize(self, from_wallet: Wallet) -> str:
+    def finalize(self, from_wallet: Wallet, block_confirmations: int) -> str:
         """
         This makes the pool **finalized**. This is a one-way transition. `bind`,
         `rebind`, `unbind`, `setSwapFee` and `setPublicSwap` will all throw
         `ERR_IS_FINALIZED` after pool is finalized. This also switches
         `isSwapPublic` to true.
         """
-        return self.send_transaction("finalize", (), from_wallet)
+        return self.send_transaction("finalize", (), from_wallet, block_confirmations)
 
     @enforce_types
     def bind(
