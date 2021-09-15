@@ -15,7 +15,7 @@ Here are the steps:
 4. Alice allows the algorithm for C2D for that data asset
 5. Bob acquires datatokens for data and algorithm
 6. Bob starts a compute job
-7. Bob monitors logs / algorithm output 
+7. Bob monitors logs / algorithm output
 
 Let's go through each step.
 
@@ -112,13 +112,13 @@ print(f"config.network_url = '{config.network_url}'")
 print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
 print(f"config.provider_url = '{config.provider_url}'")
 
-#Alice's wallet
+# Create Alice's wallet
 import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
-#Mint OCEAN for ganache only
+# Mint OCEAN for ganache only
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
 
@@ -129,17 +129,16 @@ assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 
 In the same Python console:
 ```python
-#Publish DATA datatoken, mint tokens
+# Publish DATA datatoken, mint tokens
 from ocean_lib.web3_internal.currency import to_wei
 
 DATA_datatoken = ocean.create_data_token('DATA1', 'DATA1', alice_wallet, blob=ocean.config.metadata_cache_uri)
 DATA_datatoken.mint(alice_wallet.address, to_wei(100), alice_wallet)
 print(f"DATA_datatoken.address = '{DATA_datatoken.address}'")
 
-#Specify metadata & service attributes for Branin test dataset.
+# Specify metadata & service attributes for Branin test dataset.
 # It's specified using _local_ DDO metadata format; Aquarius will convert it to remote
 # by removing `url` and adding `encryptedFiles` field.
-DATA_date_created = "2019-12-28T10:55:11Z"
 DATA_metadata = {
     "main": {
         "type": "dataset",
@@ -151,7 +150,7 @@ DATA_metadata = {
 	  }
 	],
 	"name": "branin", "author": "Trent", "license": "CC0",
-	"dateCreated": DATA_date_created
+	"dateCreated": "2019-12-28T10:55:11Z"
     }
 }
 DATA_service_attributes = {
@@ -159,28 +158,25 @@ DATA_service_attributes = {
         "name": "DATA_dataAssetAccessServiceAgreement",
         "creator": alice_wallet.address,
         "timeout": 3600 * 24,
-        "datePublished": DATA_date_created,
+        "datePublished": "2019-12-28T10:55:11Z",
         "cost": 1.0, # <don't change, this is obsolete>
         }
     }
 
-#Set up a service provider. We'll use this same provider for ALG
+# Set up a service provider. We'll use this same provider for ALG
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-service_endpoint = DataServiceProvider.get_url(ocean.config)
-#returns "http://localhost:8030"
+provider_url = DataServiceProvider.get_url(ocean.config)
+# returns "http://localhost:8030"
 
-#Calc DATA service tuple
+# Calc DATA service compute descriptor
 from ocean_lib.common.agreements.service_factory import ServiceDescriptor
-DATA_service_tuple = ServiceDescriptor.compute_service_descriptor(DATA_service_attributes, service_endpoint)
-# DATA_service_tuple = ServiceDescriptor.access_service_descriptor(DATA_service_attributes, service_endpoint)
-#returns ("compute",
-#         {"attributes": DATA_service_attributes, "serviceEndpoint": service_endpoint})
+DATA_compute_service_descriptor = ServiceDescriptor.compute_service_descriptor(DATA_service_attributes, provider_url)
 
 #Publish metadata and service info on-chain
 DATA_ddo = ocean.assets.create(
   metadata=DATA_metadata, # {"main" : {"type" : "dataset", ..}, ..}
   publisher_wallet=alice_wallet,
-  service_descriptors=[DATA_service_tuple], # [("compute", {"attributes": ..})]
+  service_descriptors=[DATA_compute_service_descriptor], # [("compute", {"attributes": ..})]
   data_token_address=DATA_datatoken.address)
 print(f"DATA did = '{DATA_ddo.did}'")
 ```
@@ -192,14 +188,13 @@ Full details: [DATA_ddo](DATA_ddo.md)
 
 In the same Python console:
 ```python
-#Publish ALG datatoken
+# Publish ALG datatoken
 ALG_datatoken = ocean.create_data_token('ALG1', 'ALG1', alice_wallet, blob=ocean.config.metadata_cache_uri)
 ALG_datatoken.mint(alice_wallet.address, to_wei(100), alice_wallet)
 print(f"ALG_datatoken.address = '{ALG_datatoken.address}'")
 
-#Specify metadata and service attributes, for "GPR" algorithm script.
+# Specify metadata and service attributes, for "GPR" algorithm script.
 # In same location as Branin test dataset. GPR = Gaussian Process Regression.
-ALG_date_created = "2020-01-28T10:55:11Z"
 ALG_metadata =  {
     "main": {
         "type": "algorithm",
@@ -221,7 +216,7 @@ ALG_metadata =  {
 	  }
 	],
 	"name": "gpr", "author": "Trent", "license": "CC0",
-	"dateCreated": ALG_date_created
+	"dateCreated": "2020-01-28T10:55:11Z"
     }
 }
 ALG_service_attributes = {
@@ -229,21 +224,21 @@ ALG_service_attributes = {
             "name": "ALG_dataAssetAccessServiceAgreement",
             "creator": alice_wallet.address,
             "timeout": 3600 * 24,
-            "datePublished": ALG_date_created,
+            "datePublished": "2020-01-28T10:55:11Z",
             "cost": 1.0, # <don't change, this is obsolete>
         }
     }
 
-#Calc ALG service tuple. We use the same service provider as DATA
-ALG_service_tuple = ServiceDescriptor.access_service_descriptor(ALG_service_attributes, service_endpoint)
+# Calc ALG service access descriptor. We use the same service provider as DATA
+ALG_access_service_descriptor = ServiceDescriptor.access_service_descriptor(ALG_service_attributes, provider_url)
 #returns ("algorithm",
-#         {"attributes": ALG_service_attributes, "serviceEndpoint": service_endpoint})
+#         {"attributes": ALG_service_attributes, "serviceEndpoint": provider_url})
 
-#Publish metadata and service info on-chain
+# Publish metadata and service info on-chain
 ALG_ddo = ocean.assets.create(
   metadata=ALG_metadata, # {"main" : {"type" : "algorithm", ..}, ..}
   publisher_wallet=alice_wallet,
-  service_descriptors=[ALG_service_tuple], 
+  service_descriptors=[ALG_access_service_descriptor],
   data_token_address=ALG_datatoken.address)
 print(f"ALG did = '{ALG_ddo.did}'")
 ```
@@ -255,7 +250,8 @@ Full details: [ALG_ddo](ALG_ddo.md)
 In the same Python console:
 ```python
 from ocean_lib.assets import utils
-utils.add_publisher_trusted_algorithm(DATA_ddo.did, ALG_ddo.did, config.metadata_cache_uri)
+utils.add_publisher_trusted_algorithm(DATA_ddo, ALG_ddo.did, config.metadata_cache_uri)
+ocean.assets.update(DATA_ddo, publisher_wallet=alice_wallet)
 ```
 
 ## 5. Bob acquires datatokens for data and algorithm
@@ -264,8 +260,8 @@ In the same Python console:
 ```python
 bob_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY2'))
 print(f"bob_wallet.address = '{bob_wallet.address}'")
- 
-#Verify that Bob has ganache ETH
+
+# Verify that Bob has ganache ETH
 assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
 from ocean_lib.models.btoken import BToken #BToken is ERC20
@@ -273,7 +269,7 @@ OCEAN_token = BToken(ocean.web3, ocean.OCEAN_address)
 assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need OCEAN"
 assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
 
-#alice shares access for both to bob, as datatokens. Alternatively, bob might have bought these in a market.
+# Alice shares access for both to Bob, as datatokens. Alternatively, Bob might have bought these in a market.
 DATA_datatoken.transfer(bob_wallet.address, to_wei(5), from_wallet=alice_wallet)
 ALG_datatoken.transfer(bob_wallet.address, to_wei(5), from_wallet=alice_wallet)
 ```
@@ -282,72 +278,67 @@ ALG_datatoken.transfer(bob_wallet.address, to_wei(5), from_wallet=alice_wallet)
 
 Only inputs needed: DATA_did, ALG_did. Everything else can get computed as needed.
 
-
-What's below is based on the end-to-end example in ocean.js-cli/src/commands.ts::compute() (starts line 205 in commands.ts). WIP!
-
-
 In the same Python console:
 ```python
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-DATA_did = DATA_ddo.did
+DATA_did = DATA_ddo.did  # for convenience
 ALG_did = ALG_ddo.did
-DATA_DDO = ocean.assets.resolve(DATA_did)
+DATA_DDO = ocean.assets.resolve(DATA_did)  # make sure we operate on the updated and indexed metadata_cache_uri versions
 ALG_DDO = ocean.assets.resolve(ALG_did)
 
 compute_service = DATA_DDO.get_service('compute')
 algo_service = ALG_DDO.get_service('access')
 
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.models.compute_input import ComputeInput
 
-#order & pay for dataset
-order_requirements_dataset = ocean.assets.order(DATA_did, bob_wallet.address, service_type=compute_service.type)
+# order & pay for dataset
+dataset_order_requirements = ocean.assets.order(
+    DATA_did, bob_wallet.address, service_type=compute_service.type
+)
 DATA_order_tx_id = ocean.assets.pay_for_service(
         ocean.web3,
-        order_requirements_dataset.amount,
-        order_requirements_dataset.data_token_address,
+        dataset_order_requirements.amount,
+        dataset_order_requirements.data_token_address,
         DATA_did,
         compute_service.index,
         ZERO_ADDRESS,
         bob_wallet,
-        order_requirements_dataset.computeAddress,
+        dataset_order_requirements.computeAddress,
     )
 
-#order & pay for algo
-order_requirements_algorithm = ocean.assets.order(ALG_did, bob_wallet.address, service_type=algo_service.type)
+# order & pay for algo
+algo_order_requirements = ocean.assets.order(
+    ALG_did, bob_wallet.address, service_type=algo_service.type
+)
 ALG_order_tx_id = ocean.assets.pay_for_service(
         ocean.web3,
-        order_requirements_algorithm.amount,
-        order_requirements_algorithm.data_token_address,
+        algo_order_requirements.amount,
+        algo_order_requirements.data_token_address,
         ALG_did,
         algo_service.index,
         ZERO_ADDRESS,
         bob_wallet,
-        order_requirements_algorithm.computeAddress,
+        algo_order_requirements.computeAddress,
 )
-#Interface at https://github.com/oceanprotocol/ocean.py/blob/main/ocean_lib/data_provider/data_service_provider.py
 
 signature = ocean.compute._sign_message(
-            bob_wallet, 
-            f"{bob_wallet.address}{DATA_did}",
-            service_endpoint=service_endpoint
+    bob_wallet,
+    f"{bob_wallet.address}{DATA_did}",
+    service_endpoint=compute_service.service_endpoint
 )
 
-response = DataServiceProvider.start_compute_job(
-    did=DATA_did,
-    service_endpoint=service_endpoint,
-    consumer_address=bob_wallet.address,
-    signature=signature,
-    service_id=compute_service.index,
-    order_tx_id=DATA_order_tx_id,
+compute_inputs = [ComputeInput(DATA_did, DATA_order_tx_id, compute_service.index)]
+job_id = ocean.compute.start(
+    compute_inputs,
+    bob_wallet,
     algorithm_did=ALG_did,
     algorithm_tx_id=ALG_order_tx_id,
-    algorithm_data_token=ALG_datatoken.address,
+    algorithm_data_token=ALG_datatoken.address
 )
-print(f"Started compute job. Info: {response}")
-print(f"  JobID: FIXME")
+print(f"Started compute job with id: {job_id}")
 ```
 
-## 7. Bob monitors logs / algorithm output 
+## 7. Bob monitors logs / algorithm output
 
 What's below is based on the end-to-end example in ocean.js-cli/src/commands.ts::getCompute() (starts line 285 in commands.ts). WIP!
 - In turn, it uses ocean.js/src/ocean/Compute.ts (starts line 201):
