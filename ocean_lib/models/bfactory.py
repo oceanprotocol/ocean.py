@@ -18,6 +18,8 @@ class BFactory(ContractBase):
     @enforce_types
     def newBPool(self, from_wallet: Wallet, block_confirmations: int) -> str:
         """
+        :param from_wallet: Wallet, transaction sender wallet.
+        :param block_confirmations: int, blocks before tx considered final.
         :return: `str` new pool address
         """
         print("BPool.newBPool(). Begin.")
