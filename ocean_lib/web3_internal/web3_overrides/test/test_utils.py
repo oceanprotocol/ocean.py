@@ -4,10 +4,7 @@
 #
 import threading
 
-from ocean_lib.example_config import (
-    CONFIG_NETWORK_HELPER,
-    NAME_BLOCK_CONFIRMATION_POLL_INTERVAL,
-)
+from ocean_lib.web3_internal.constants import BLOCK_NUMBER_POLL_INTERVAL
 from ocean_lib.web3_internal.web3_overrides.utils import (
     wait_for_transaction_receipt_and_block_confirmations,
 )
@@ -38,7 +35,7 @@ def test_block_confirmations():
     )
     dummy_tx_thread.start()
 
-    poll_interval = CONFIG_NETWORK_HELPER[1337][NAME_BLOCK_CONFIRMATION_POLL_INTERVAL]
+    poll_interval = BLOCK_NUMBER_POLL_INTERVAL[1337]
     wait_for_transaction_receipt_and_block_confirmations(
         web3, tx_hash, block_confirmations=0, block_number_poll_interval=poll_interval
     )
@@ -71,7 +68,7 @@ def send_dummy_transactions(from_wallet, to_address):
 
 class StoppableThread(threading.Thread):
     """Thread class with a stop() method. The thread itself has to check
-    regularly for the stopped() condition."""
+    regularly for the current_thread().stopped() condition."""
 
     def __init__(self, *args, **kwargs):
         super(StoppableThread, self).__init__(*args, **kwargs)
