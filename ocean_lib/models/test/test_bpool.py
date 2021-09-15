@@ -86,7 +86,7 @@ def test_setPublicSwap(network, config, web3, alice_wallet):
     pool = _deployBPool(
         web3, config.address_file, network, alice_wallet, config.block_confirmations
     )
-    pool.setPublicSwap(True, from_wallet=alice_wallet)
+    pool.setPublicSwap(True, alice_wallet, config.block_confirmations)
     assert pool.isPublicSwap()
     pool.setPublicSwap(False, from_wallet=alice_wallet)
     assert not pool.isPublicSwap()
@@ -379,7 +379,7 @@ def test_joinSwapExternAmountIn(
         )
 
     # pool's public
-    pool.setPublicSwap(True, from_wallet=alice_wallet)
+    pool.setPublicSwap(True, alice_wallet, config.block_confirmations)
     pool.swapExactAmountOut(
         tokenIn_address=T1.address,
         maxAmountIn=to_wei(100),

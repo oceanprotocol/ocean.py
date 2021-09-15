@@ -203,13 +203,17 @@ class BPool(BToken):
         )
 
     @enforce_types
-    def setPublicSwap(self, public: bool, from_wallet: Wallet) -> str:
+    def setPublicSwap(
+        self, public: bool, from_wallet: Wallet, block_confirmations: int
+    ) -> str:
         """
         Makes `isPublicSwap` return `_publicSwap`. Requires caller to be
         controller and pool not to be finalized. Finalized pools always have
         public swap.
         """
-        return self.send_transaction("setPublicSwap", (public,), from_wallet)
+        return self.send_transaction(
+            "setPublicSwap", (public,), from_wallet, block_confirmations
+        )
 
     @enforce_types
     def finalize(self, from_wallet: Wallet) -> str:

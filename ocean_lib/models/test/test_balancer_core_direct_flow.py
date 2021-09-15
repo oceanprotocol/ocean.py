@@ -42,7 +42,7 @@ def test_complete_flow(
     pool_address = bfactory.newBPool(alice_wallet, config.block_confirmations)
     pool = BPool(web3, pool_address)
 
-    pool.setPublicSwap(True, from_wallet=alice_wallet)
+    pool.setPublicSwap(True, alice_wallet, config.block_confirmations)
 
     pool.setSwapFee(
         to_wei("0.1"), alice_wallet, config.block_confirmations
