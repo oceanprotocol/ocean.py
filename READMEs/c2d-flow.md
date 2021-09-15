@@ -203,9 +203,9 @@ ALG_metadata =  {
             "format": "docker-image",
             "version": "0.1",
             "container": {
-              "entrypoint": "node $ALGO",
-              "image": "node",
-              "tag": "10"
+              "entrypoint": "python3.6 $ALGO",
+              "image": "oceanprotocol/algo_dockers",
+              "tag": "python-sql"
             }
         },
         "files": [
@@ -244,6 +244,9 @@ print(f"ALG did = '{ALG_ddo.did}'")
 ```
 
 Full details: [ALG_ddo](ALG_ddo.md)
+
+Please note that this example features a simple Python algorithm. If you publish an algorithm in another language, make sure you have an appropriate container to run it, including dependencies.
+You can find more information about how to do this in the [https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/](OCEAN tutorials).
 
 ## 4. Alice allows the algorithm for C2D for that data asset
 
@@ -347,9 +350,16 @@ Here is a list of possible results: [Operator Service Status description](https:
 Once you get `{'ok': True, 'status': 70, 'statusText': 'Job finished'}`, Bob can check the result of the job.
 
 ```python
-ocean.compute.result(DATA_did, job_id, bob_wallet)
+result = ocean.compute.result(DATA_did, job_id, bob_wallet)
 
 ```
 
-It will output a dictionary containing details and logs.
-We are working on a function to also retrieve the binary result file, so expect updates to this README pretty soon :)
+It will output a dictionary containing details and logs, e.g:
+
+```python
+result['logs']  # will output something like https://compute-publish.s3.amazonaws.com/79..8/data/logs/algorithm.log
+```
+
+Going to your result link you will see the algorithm logs, e.g. in this simple case it will just say hello world.
+
+We are working on a function to also retrieve the binary result file, as well as using a more complex algorithm sample, so expect updates to this README pretty soon :)
