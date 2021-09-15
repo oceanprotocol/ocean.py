@@ -246,7 +246,7 @@ print(f"ALG did = '{ALG_ddo.did}'")
 Full details: [ALG_ddo](ALG_ddo.md)
 
 Please note that this example features a simple Python algorithm. If you publish an algorithm in another language, make sure you have an appropriate container to run it, including dependencies.
-You can find more information about how to do this in the [https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/](OCEAN tutorials).
+You can find more information about how to do this in the [OCEAN tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/).
 
 ## 4. Alice allows the algorithm for C2D for that data asset
 
