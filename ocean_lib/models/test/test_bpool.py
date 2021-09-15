@@ -106,7 +106,9 @@ def test_2tokens_basic(network, config, web3, T1, T2, alice_wallet, alice_addres
     _ = T2.balanceOf(alice_address) >= to_wei(10)
 
     with pytest.raises(Exception):  # can't bind until we approve
-        pool.bind(T1.address, to_wei(90), to_wei(9), from_wallet=alice_wallet)
+        pool.bind(
+            T1.address, to_wei(90), to_wei(9), alice_wallet, config.block_confirmations
+        )
 
     # Bind two tokens to the pool
     T1.approve(pool.address, to_wei(90), from_wallet=alice_wallet)
@@ -116,8 +118,12 @@ def test_2tokens_basic(network, config, web3, T1, T2, alice_wallet, alice_addres
     assert T2.allowance(alice_address, pool.address) == to_wei(10)
 
     assert not pool.isBound(T1.address) and not pool.isBound(T1.address)
-    pool.bind(T1.address, to_wei(90), to_wei(9), from_wallet=alice_wallet)
-    pool.bind(T2.address, to_wei(10), to_wei(1), from_wallet=alice_wallet)
+    pool.bind(
+        T1.address, to_wei(90), to_wei(9), alice_wallet, config.block_confirmations
+    )
+    pool.bind(
+        T2.address, to_wei(10), to_wei(1), alice_wallet, config.block_confirmations
+    )
     assert pool.isBound(T1.address) and pool.isBound(T2.address)
 
     assert pool.getNumTokens() == 2
@@ -302,7 +308,9 @@ def test_gulp(network, config, web3, T1, alice_wallet):
 
     # bind T1 to the pool, with a balance of 2.0
     T1.approve(pool.address, to_wei(50), from_wallet=alice_wallet)
-    pool.bind(T1.address, to_wei(2), to_wei(50), from_wallet=alice_wallet)
+    pool.bind(
+        T1.address, to_wei(2), to_wei(50), alice_wallet, config.block_confirmations
+    )
 
     # T1 is now pool's (a) ERC20 balance (b) _records[token].balance
     assert T1.balanceOf(pool.address) == to_wei(2)  # ERC20 balance
@@ -617,8 +625,8 @@ def _createPoolWith2Tokens(
     if pool.isBound(T2.address):
         pool.unbind(T2.address, wallet)
 
-    pool.bind(T1.address, to_wei(bal1), to_wei(w1), from_wallet=wallet)
-    pool.bind(T2.address, to_wei(bal2), to_wei(w2), from_wallet=wallet)
+    pool.bind(T1.address, to_wei(bal1), to_wei(w1), wallet, config.block_confirmations)
+    pool.bind(T2.address, to_wei(bal2), to_wei(w2), wallet, config.block_confirmations)
 
     return pool
 

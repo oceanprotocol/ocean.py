@@ -227,7 +227,12 @@ class BPool(BToken):
 
     @enforce_types
     def bind(
-        self, token_address: str, balance: int, weight: int, from_wallet: Wallet
+        self,
+        token_address: str,
+        balance: int,
+        weight: int,
+        from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         """
         Binds the token with address `token`. Tokens will be pushed/pulled from
@@ -245,7 +250,7 @@ class BPool(BToken):
         -unspecified error thrown by token
         """
         return self.send_transaction(
-            "bind", (token_address, balance, weight), from_wallet
+            "bind", (token_address, balance, weight), from_wallet, block_confirmations
         )
 
     @enforce_types

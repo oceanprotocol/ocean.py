@@ -53,7 +53,8 @@ def test_complete_flow(
         DT_address,
         to_wei(90),
         balancer_constants.INIT_WEIGHT_DT,
-        from_wallet=alice_wallet,
+        alice_wallet,
+        config.block_confirmations,
     )
 
     OCEAN_token = BToken(web3, OCEAN_address)
@@ -64,7 +65,8 @@ def test_complete_flow(
         OCEAN_address,
         to_wei(10),
         balancer_constants.INIT_WEIGHT_OCEAN,
-        from_wallet=alice_wallet,
+        alice_wallet,
+        config.block_confirmations,
     )
 
     # ===============================================================
