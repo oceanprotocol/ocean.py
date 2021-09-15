@@ -260,6 +260,7 @@ def test_public_pool(network, config, bob_wallet, alice_ocean):
         poolAmountIn=to_wei(2),
         minAmountsOut=[to_wei(0), to_wei(0)],
         from_wallet=bob_wallet,
+        block_confirmations=config.block_confirmations,
     )
     assert T1.balanceOf(bob_address) == 92800000000000000018  # 92.8
     assert T2.balanceOf(bob_address) == 99200000000000000002  # 99.2
@@ -274,7 +275,12 @@ def test_public_pool(network, config, bob_wallet, alice_ocean):
     assert BPT.balanceOf(bob_address) == to_wei(13)
 
     # bob fully exits
-    pool.exitPool(poolAmountIn=to_wei(13), minAmountsOut=[0, 0], from_wallet=bob_wallet)
+    pool.exitPool(
+        poolAmountIn=to_wei(13),
+        minAmountsOut=[0, 0],
+        from_wallet=bob_wallet,
+        block_confirmations=config.block_confirmations,
+    )
     assert BPT.balanceOf(bob_address) == to_wei(0)
 
     block = alice_ocean.web3.eth.block_number

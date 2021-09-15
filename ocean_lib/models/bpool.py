@@ -333,7 +333,11 @@ class BPool(BToken):
 
     @enforce_types
     def exitPool(
-        self, poolAmountIn: int, minAmountsOut: typing.List[int], from_wallet: Wallet
+        self,
+        poolAmountIn: int,
+        minAmountsOut: typing.List[int],
+        from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         """
         Exit the pool, paying `poolAmountIn` pool tokens and getting some of
@@ -341,7 +345,7 @@ class BPool(BToken):
         limited by the array of `minAmountsOut` in the order of the pool tokens.
         """
         return self.send_transaction(
-            "exitPool", (poolAmountIn, minAmountsOut), from_wallet
+            "exitPool", (poolAmountIn, minAmountsOut), from_wallet, block_confirmations
         )
 
     @enforce_types
