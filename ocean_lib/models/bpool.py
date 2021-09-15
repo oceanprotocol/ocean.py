@@ -357,6 +357,7 @@ class BPool(BToken):
         minAmountOut: int,
         maxPrice: int,
         from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         """
         Trades an exact `tokenAmountIn` of `tokenIn` taken from the caller by
@@ -375,6 +376,7 @@ class BPool(BToken):
             "swapExactAmountIn",
             (tokenIn_address, tokenAmountIn, tokenOut_address, minAmountOut, maxPrice),
             from_wallet,
+            block_confirmations,
         )
 
     @enforce_types

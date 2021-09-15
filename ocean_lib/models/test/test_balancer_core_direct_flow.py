@@ -131,6 +131,7 @@ def test_complete_flow(
         minAmountOut=to_wei("0.0001"),
         maxPrice=2 ** 255,
         from_wallet=alice_wallet,
+        block_confirmations=config.block_confirmations,
     )
 
     # ===============================================================
