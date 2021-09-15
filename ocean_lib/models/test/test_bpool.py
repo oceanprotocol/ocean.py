@@ -148,7 +148,7 @@ def test_unbind(network, config, web3, T1, T2, alice_wallet):
         network, config, web3, T1, T2, alice_wallet, 1, 1, 1, 1
     )
 
-    pool.unbind(T1.address, from_wallet=alice_wallet)
+    pool.unbind(T1.address, alice_wallet, config.block_confirmations)
 
     assert pool.getNumTokens() == 1
     assert pool.getCurrentTokens() == [T2.address]
@@ -624,10 +624,10 @@ def _createPoolWith2Tokens(
     T2.get_tx_receipt(web3, T2.approve(pool.address, to_wei(bal2), from_wallet=wallet))
 
     if pool.isBound(T1.address):
-        pool.unbind(T1.address, wallet)
+        pool.unbind(T1.address, wallet, config.block_confirmations)
 
     if pool.isBound(T2.address):
-        pool.unbind(T2.address, wallet)
+        pool.unbind(T2.address, wallet, config.block_confirmations)
 
     pool.bind(T1.address, to_wei(bal1), to_wei(w1), wallet, config.block_confirmations)
     pool.bind(T2.address, to_wei(bal2), to_wei(w2), wallet, config.block_confirmations)

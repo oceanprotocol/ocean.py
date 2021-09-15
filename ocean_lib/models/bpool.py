@@ -271,12 +271,16 @@ class BPool(BToken):
         )
 
     @enforce_types
-    def unbind(self, token_address: str, from_wallet: Wallet) -> str:
+    def unbind(
+        self, token_address: str, from_wallet: Wallet, block_confirmations: int
+    ) -> str:
         """
         Unbinds a token, clearing all of its parameters. Exit fee is charged
         and the remaining balance is sent to caller.
         """
-        return self.send_transaction("unbind", (token_address,), from_wallet)
+        return self.send_transaction(
+            "unbind", (token_address,), from_wallet, block_confirmations
+        )
 
     @enforce_types
     def gulp(self, token_address: str, from_wallet: Wallet) -> str:
