@@ -215,6 +215,7 @@ class ContractBase(object):
         fn_name: str,
         fn_args: Any,
         from_wallet: Wallet,
+        block_confirmations: int,
         transact: Optional[dict] = None,
     ) -> str:
         """Calls a smart contract function.
@@ -240,7 +241,7 @@ class ContractBase(object):
         if transact:
             _transact.update(transact)
 
-        return contract_function.transact(_transact).hex()
+        return contract_function.transact(_transact, block_confirmations).hex()
 
     @enforce_types
     def get_event_argument_names(self, event_name: str) -> Tuple:
