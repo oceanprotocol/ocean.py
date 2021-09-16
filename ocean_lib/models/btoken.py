@@ -49,11 +49,15 @@ class BToken(ContractBase):
         )
 
     @enforce_types
-    def transfer(self, dst_address: str, amt: int, from_wallet: Wallet) -> str:
+    def transfer(
+        self, dst_address: str, amt: int, from_wallet: Wallet, block_confirmations: int
+    ) -> str:
         """
         :return: hex str transaction hash
         """
-        return self.send_transaction("transfer", (dst_address, amt), from_wallet)
+        return self.send_transaction(
+            "transfer", (dst_address, amt), from_wallet, block_confirmations
+        )
 
     @enforce_types
     def allowance(self, src_address: str, dst_address: str) -> int:

@@ -33,10 +33,10 @@ def test_ERC20(
     # alice sends all her OCEAN to Bob, then Bob sends it back
     alice_OCEAN = token.balanceOf(alice_address)
     bob_OCEAN = token.balanceOf(bob_address)
-    token.transfer(bob_address, alice_OCEAN, from_wallet=alice_wallet)
+    token.transfer(bob_address, alice_OCEAN, alice_wallet, config.block_confirmations)
     assert token.balanceOf(alice_address) == 0
     assert token.balanceOf(bob_address) == (alice_OCEAN + bob_OCEAN)
 
-    token.transfer(alice_address, alice_OCEAN, from_wallet=bob_wallet)
+    token.transfer(alice_address, alice_OCEAN, bob_wallet, config.block_confirmations)
     assert token.balanceOf(alice_address) == alice_OCEAN
     assert token.balanceOf(bob_address) == bob_OCEAN
