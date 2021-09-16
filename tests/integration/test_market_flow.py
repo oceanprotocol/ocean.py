@@ -79,6 +79,7 @@ def test_market_flow(order_type):
         service.index,
         "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",
         consumer_wallet,
+        consumer_ocean.config.block_confirmations,
     ]
 
     if order_type == "explicit_none":
@@ -175,6 +176,7 @@ def test_payer_market_flow():
         service.index,
         "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",
         consumer_wallet,
+        consumer_ocean.config.block_confirmations,
         another_consumer_wallet.address,
     )
     asset_folder = None

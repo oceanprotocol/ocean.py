@@ -81,9 +81,13 @@ class DataToken(ContractBase):
         serviceId: int,
         mrktFeeCollector: str,
         from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         return self.send_transaction(
-            "startOrder", (consumer, amount, serviceId, mrktFeeCollector), from_wallet
+            "startOrder",
+            (consumer, amount, serviceId, mrktFeeCollector),
+            from_wallet,
+            block_confirmations,
         )
 
     @enforce_types
