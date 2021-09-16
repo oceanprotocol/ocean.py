@@ -445,6 +445,7 @@ def test_joinswapPoolAmountOut(
         poolAmountOut=to_wei(10),  # BPT wanted
         maxAmountIn=to_wei(90),  # max T1 to spend
         from_wallet=alice_wallet,
+        block_confirmations=config.block_confirmations,
     )
     assert T1.balanceOf(alice_address) >= T1balance - to_wei(90)
     assert BPT.balanceOf(alice_address) == pool_balance + to_wei(10)

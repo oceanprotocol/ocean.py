@@ -424,6 +424,7 @@ class BPool(BToken):
         poolAmountOut: int,
         maxAmountIn: int,
         from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         """
         Specify `poolAmountOut` pool shares that you want to get, and a token
@@ -434,6 +435,7 @@ class BPool(BToken):
             "joinswapPoolAmountOut",
             (tokenIn_address, poolAmountOut, maxAmountIn),
             from_wallet,
+            block_confirmations,
         )
 
     @enforce_types
