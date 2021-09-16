@@ -58,7 +58,9 @@ def test_dispenser_minting(contracts_addresses, alice_ocean, alice_wallet, bob_w
 
     dispenser.activate(token.address, 1000, 1000, alice_wallet)
 
-    dispenser.make_minter(token.address, alice_wallet)
+    dispenser.make_minter(
+        token.address, alice_wallet, alice_ocean.config.block_confirmations
+    )
     assert dispenser.is_minter_approved(token.address)
     assert dispenser.is_dispensable(token.address, 1, alice_wallet)
     dispenser.dispense(token.address, 1, alice_wallet)

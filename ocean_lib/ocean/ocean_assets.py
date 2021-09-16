@@ -249,7 +249,9 @@ class OceanAssets:
             # owner_address is set as minter only if creating new data token. So if
             # `data_token_address` is set `owner_address` has no effect.
             if owner_address:
-                data_token.proposeMinter(owner_address, from_wallet=publisher_wallet)
+                data_token.proposeMinter(
+                    owner_address, publisher_wallet, self._config.block_confirmations
+                )
         else:
             if not dtfactory.verify_data_token(data_token_address):
                 raise ContractNotFound(
