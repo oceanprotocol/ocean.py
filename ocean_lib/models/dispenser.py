@@ -102,13 +102,15 @@ class DispenserContract(ContractBase):
         return self.send_transaction("acceptMinter", (dt_address,), from_wallet)
 
     @enforce_types
-    def cancel_minter(self, dt_address: str, from_wallet: Wallet) -> str:
+    def cancel_minter(
+        self, dt_address: str, from_wallet: Wallet, block_confirmations: int
+    ) -> str:
         """
         :return: hex str transaction hash
         """
         self.send_transaction("removeMinter", (dt_address,), from_wallet)
         token = DataToken(self.web3, dt_address)
-        return token.approveMinter(from_wallet)
+        return token.approveMinter(from_wallet, block_confirmations)
 
     @enforce_types
     def dispense(self, dt_address: str, amount: int, from_wallet: Wallet) -> str:

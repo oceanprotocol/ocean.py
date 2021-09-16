@@ -72,7 +72,9 @@ def test_dispenser_minting(contracts_addresses, alice_ocean, alice_wallet, bob_w
     with pytest.raises(ValueError):
         dispenser.dispense(token.address, 0, alice_wallet)
 
-    dispenser.cancel_minter(token.address, alice_wallet)
+    dispenser.cancel_minter(
+        token.address, alice_wallet, alice_ocean.config.block_confirmations
+    )
     dispenser.owner_withdraw(token.address, alice_wallet)
 
     # no balance left

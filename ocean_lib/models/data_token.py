@@ -116,8 +116,10 @@ class DataToken(ContractBase):
         )
 
     @enforce_types
-    def approveMinter(self, from_wallet: Wallet) -> str:
-        return self.send_transaction("approveMinter", (), from_wallet)
+    def approveMinter(self, from_wallet: Wallet, block_confirmations: int) -> str:
+        return self.send_transaction(
+            "approveMinter", (), from_wallet, block_confirmations
+        )
 
     @enforce_types
     def blob(self) -> str:
