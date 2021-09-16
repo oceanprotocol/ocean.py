@@ -165,7 +165,11 @@ class OceanPool:
     # BPool doesn't know (and shouldn't know) OCEAN_address and _DT_address
     @enforce_types
     def add_data_token_liquidity(
-        self, pool_address: str, amount: int, from_wallet: Wallet
+        self,
+        pool_address: str,
+        amount: int,
+        from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         """
         Add `amount` number of data tokens to the pool `pool_address`. In return the wallet owner
@@ -177,15 +181,24 @@ class OceanPool:
         :param pool_address: str address of pool contract
         :param amount: number of data tokens to add to this pool
         :param from_wallet: Wallet instance of the owner of data tokens
+        :param block_confirmations: int blocks before tx considered final
         :return: str transaction id/hash
         """
         return self._add_liquidity(
-            pool_address, self.get_token_address(pool_address), amount, from_wallet
+            pool_address,
+            self.get_token_address(pool_address),
+            amount,
+            from_wallet,
+            block_confirmations,
         )
 
     @enforce_types
     def add_OCEAN_liquidity(
-        self, pool_address: str, amount: int, from_wallet: Wallet
+        self,
+        pool_address: str,
+        amount: int,
+        from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         """
         Add `amount` number of OCEAN tokens to the pool `pool_address`. In return the wallet owner
@@ -194,15 +207,21 @@ class OceanPool:
         :param pool_address: str address of pool contract
         :param amount: number of data tokens to add to this pool
         :param from_wallet: Wallet instance of the owner of data tokens
+        :param block_confirmations: int blocks before tx considered final
         :return: str transaction id/hash
         """
         return self._add_liquidity(
-            pool_address, self.ocean_address, amount, from_wallet
+            pool_address, self.ocean_address, amount, from_wallet, block_confirmations
         )
 
     @enforce_types
     def _add_liquidity(
-        self, pool_address: str, token_address: str, amount: int, from_wallet: Wallet
+        self,
+        pool_address: str,
+        token_address: str,
+        amount: int,
+        from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         assert amount >= 0
         if amount == 0:
@@ -221,7 +240,9 @@ class OceanPool:
                     f"Approve OCEAN tokens failed, pool was created at {pool_address}"
                 )
 
-        pool_amount = pool.joinswapExternAmountIn(token_address, amount, 0, from_wallet)
+        pool_amount = pool.joinswapExternAmountIn(
+            token_address, amount, 0, from_wallet, block_confirmations
+        )
         return pool_amount
 
     @enforce_types

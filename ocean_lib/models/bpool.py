@@ -404,6 +404,7 @@ class BPool(BToken):
         tokenAmountIn: int,
         minPoolAmountOut: int,
         from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         """
         Pay `tokenAmountIn` of token `tokenIn` to join the pool, getting
@@ -413,6 +414,7 @@ class BPool(BToken):
             "joinswapExternAmountIn",
             (tokenIn_address, tokenAmountIn, minPoolAmountOut),
             from_wallet,
+            block_confirmations,
         )
 
     @enforce_types
