@@ -388,11 +388,13 @@ class BPool(BToken):
         tokenAmountOut: int,
         maxPrice: int,
         from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         return self.send_transaction(
             "swapExactAmountOut",
             (tokenIn_address, maxAmountIn, tokenOut_address, tokenAmountOut, maxPrice),
             from_wallet,
+            block_confirmations,
         )
 
     @enforce_types

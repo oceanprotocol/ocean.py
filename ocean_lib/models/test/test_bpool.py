@@ -396,6 +396,7 @@ def test_joinSwapExternAmountIn(
             tokenAmountOut=to_wei(10),
             maxPrice=HUGEINT,
             from_wallet=alice_wallet,
+            block_confirmations=config.block_confirmations,
         )
 
     # pool's public
@@ -407,6 +408,7 @@ def test_joinSwapExternAmountIn(
         tokenAmountOut=to_wei(1),
         maxPrice=HUGEINT,
         from_wallet=alice_wallet,
+        block_confirmations=config.block_confirmations,
     )
     new_balance = init_T1balance - to_wei("91.055")
     assert (

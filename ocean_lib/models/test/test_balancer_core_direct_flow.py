@@ -98,6 +98,7 @@ def test_complete_flow(
         tokenAmountOut=to_wei(1),
         maxPrice=2 ** 255,
         from_wallet=bob_wallet,
+        block_confirmations=config.block_confirmations,
     )
 
     # ===============================================================

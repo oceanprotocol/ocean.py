@@ -290,7 +290,12 @@ class OceanPool:
 
     @enforce_types
     def buy_data_tokens(
-        self, pool_address: str, amount: int, max_OCEAN_amount: int, from_wallet: Wallet
+        self,
+        pool_address: str,
+        amount: int,
+        max_OCEAN_amount: int,
+        from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         """
         Buy data tokens from this pool, paying `max_OCEAN_amount` of OCEAN tokens.
@@ -321,6 +326,7 @@ class OceanPool:
             tokenAmountOut=amount,  # ""
             maxPrice=2 ** 255,  # here we limit by max_num_OCEAN, not price
             from_wallet=from_wallet,
+            block_confirmations=block_confirmations,
         )
 
     @enforce_types
