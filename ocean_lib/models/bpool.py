@@ -493,19 +493,35 @@ class BPool(BToken):
         return self.contract.caller.allowance(src_address, dst_address)
 
     @enforce_types
-    def approve(self, dst_address: str, amt: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("approve", (dst_address, amt), from_wallet)
+    def approve(
+        self, dst_address: str, amt: int, from_wallet: Wallet, block_confirmations: int
+    ) -> str:
+        return self.send_transaction(
+            "approve", (dst_address, amt), from_wallet, block_confirmations
+        )
 
     @enforce_types
-    def transfer(self, dst_address: str, amt: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("transfer", (dst_address, amt), from_wallet)
+    def transfer(
+        self, dst_address: str, amt: int, from_wallet: Wallet, block_confirmations: int
+    ) -> str:
+        return self.send_transaction(
+            "transfer", (dst_address, amt), from_wallet, block_confirmations
+        )
 
     @enforce_types
     def transferFrom(
-        self, src_address: str, dst_address: str, amt: int, from_wallet: Wallet
+        self,
+        src_address: str,
+        dst_address: str,
+        amt: int,
+        from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         return self.send_transaction(
-            "transferFrom", (dst_address, src_address, amt), from_wallet
+            "transferFrom",
+            (dst_address, src_address, amt),
+            from_wallet,
+            block_confirmations,
         )
 
     # ===== Calculators
