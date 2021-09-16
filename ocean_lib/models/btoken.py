@@ -34,11 +34,19 @@ class BToken(ContractBase):
         return self.contract.caller.balanceOf(address)
 
     @enforce_types
-    def approve(self, spender_address: str, amt: int, from_wallet: Wallet) -> str:
+    def approve(
+        self,
+        spender_address: str,
+        amt: int,
+        from_wallet: Wallet,
+        block_confirmations: int,
+    ) -> str:
         """
         :return: hex str transaction hash
         """
-        return self.send_transaction("approve", (spender_address, amt), from_wallet)
+        return self.send_transaction(
+            "approve", (spender_address, amt), from_wallet, block_confirmations
+        )
 
     @enforce_types
     def transfer(self, dst_address: str, amt: int, from_wallet: Wallet) -> str:

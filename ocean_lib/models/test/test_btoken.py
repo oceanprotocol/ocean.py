@@ -7,12 +7,19 @@ from ocean_lib.web3_internal.currency import to_wei
 
 
 def test_ERC20(
-    network, web3, alice_wallet, alice_address, bob_wallet, bob_address, OCEAN_address
+    network,
+    web3,
+    alice_wallet,
+    alice_address,
+    bob_wallet,
+    bob_address,
+    OCEAN_address,
+    config,
 ):
     """Tests an OCEAN token approval, allowance and transfers."""
     token = BToken(web3, OCEAN_address)
 
-    token.approve(bob_address, 0, from_wallet=alice_wallet)
+    token.approve(bob_address, 0, alice_wallet, config.block_confirmations)
     # generating ERC20 Tokens, so the symbol is irrelevant
     assert token.symbol() == "DTT"
     assert token.decimals() == 18
@@ -20,7 +27,7 @@ def test_ERC20(
     assert token.balanceOf(bob_address) > to_wei(10)
 
     assert token.allowance(alice_address, bob_address) == 0
-    token.approve(bob_address, to_wei(1), from_wallet=alice_wallet)
+    token.approve(bob_address, to_wei(1), alice_wallet, config.block_confirmations)
     assert token.allowance(alice_address, bob_address) == to_wei(1)
 
     # alice sends all her OCEAN to Bob, then Bob sends it back

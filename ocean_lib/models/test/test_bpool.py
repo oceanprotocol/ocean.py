@@ -631,8 +631,12 @@ def _createPoolWith2Tokens(
         web3, config.address_file, network, wallet, config.block_confirmations
     )
 
-    T1.get_tx_receipt(web3, T1.approve(pool.address, to_wei(bal1), from_wallet=wallet))
-    T2.get_tx_receipt(web3, T2.approve(pool.address, to_wei(bal2), from_wallet=wallet))
+    T1.get_tx_receipt(
+        web3, T1.approve(pool.address, to_wei(bal1), wallet, config.block_confirmations)
+    )
+    T2.get_tx_receipt(
+        web3, T2.approve(pool.address, to_wei(bal2), wallet, config.block_confirmations)
+    )
 
     if pool.isBound(T1.address):
         pool.unbind(T1.address, wallet, config.block_confirmations)
