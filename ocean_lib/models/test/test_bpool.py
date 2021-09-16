@@ -467,6 +467,7 @@ def test_exitswapPoolAmountIn(
         poolAmountIn=to_wei(10),  # BPT spent
         minAmountOut=to_wei(1),  # min T1 wanted
         from_wallet=alice_wallet,
+        block_confirmations=config.block_confirmations,
     )
     assert T1.balanceOf(alice_address) >= T1balance - to_wei(90) + to_wei(1)
     assert BPT.balanceOf(alice_address) == pool_balance - to_wei(10)

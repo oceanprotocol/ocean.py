@@ -445,6 +445,7 @@ class BPool(BToken):
         poolAmountIn: int,
         minAmountOut: int,
         from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         """
         Pay `poolAmountIn` pool shares into the pool, getting `tokenAmountOut`
@@ -454,6 +455,7 @@ class BPool(BToken):
             "exitswapPoolAmountIn",
             (tokenOut_address, poolAmountIn, minAmountOut),
             from_wallet,
+            block_confirmations,
         )
 
     @enforce_types
