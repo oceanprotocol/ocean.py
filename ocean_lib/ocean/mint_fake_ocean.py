@@ -36,7 +36,10 @@ def mint_fake_OCEAN(config: Config) -> None:
     amt_distribute = to_wei(1000)
 
     OCEAN_token.mint(
-        deployer_wallet.address, 2 * amt_distribute, from_wallet=deployer_wallet
+        deployer_wallet.address,
+        2 * amt_distribute,
+        deployer_wallet,
+        config.block_confirmations,
     )
 
     for key_label in ["TEST_PRIVATE_KEY1", "TEST_PRIVATE_KEY2"]:

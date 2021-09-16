@@ -62,8 +62,16 @@ class DataToken(ContractBase):
         )
 
     @enforce_types
-    def mint(self, account_address: str, amount: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("mint", (account_address, amount), from_wallet)
+    def mint(
+        self,
+        account_address: str,
+        amount: int,
+        from_wallet: Wallet,
+        block_confirmations: int,
+    ) -> str:
+        return self.send_transaction(
+            "mint", (account_address, amount), from_wallet, block_confirmations
+        )
 
     @enforce_types
     def startOrder(

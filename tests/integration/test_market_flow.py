@@ -34,7 +34,12 @@ def test_market_flow(order_type):
     consumer_ocean = get_consumer_ocean_instance()
 
     # Register Asset
-    asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
+    asset = get_registered_ddo(
+        publisher_ocean,
+        get_metadata(),
+        pub_wallet,
+        publisher_ocean.config.block_confirmations,
+    )
     assert isinstance(asset, Asset)
     assert asset.data_token_address, "The asset does not have a token address."
 
@@ -45,7 +50,9 @@ def test_market_flow(order_type):
 
     # Mint data tokens and assign to publisher
     dt = publisher_ocean.get_data_token(asset.data_token_address)
-    mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
+    mint_tokens_and_wait(
+        dt, pub_wallet.address, pub_wallet, publisher_ocean.config.block_confirmations
+    )
 
     ######
     # Give the consumer some datatokens so they can order the service
@@ -122,7 +129,12 @@ def test_payer_market_flow():
     another_consumer_ocean = get_another_consumer_ocean_instance(use_provider_mock=True)
 
     # Register Asset
-    asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
+    asset = get_registered_ddo(
+        publisher_ocean,
+        get_metadata(),
+        pub_wallet,
+        publisher_ocean.config.block_confirmations,
+    )
     assert isinstance(asset, Asset)
     assert asset.data_token_address, "The asset does not have a token address."
 
@@ -134,7 +146,9 @@ def test_payer_market_flow():
 
     # Mint data tokens and assign to publisher
     dt = publisher_ocean.get_data_token(asset.data_token_address)
-    mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
+    mint_tokens_and_wait(
+        dt, pub_wallet.address, pub_wallet, publisher_ocean.config.block_confirmations
+    )
 
     ######
     # Give the consumer some datatokens so they can order the service

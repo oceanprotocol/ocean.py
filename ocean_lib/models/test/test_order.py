@@ -13,7 +13,12 @@ from tests.resources.ddo_helpers import get_metadata, get_registered_ddo
 
 
 def test_order(web3, alice_ocean, alice_wallet):
-    asset = get_registered_ddo(alice_ocean, get_metadata(), alice_wallet)
+    asset = get_registered_ddo(
+        alice_ocean,
+        get_metadata(),
+        alice_wallet,
+        alice_ocean.config.block_confirmations,
+    )
     dt = DataToken(web3, asset.data_token_address)
 
     service = asset.get_service(service_type=ServiceTypes.ASSET_ACCESS)
