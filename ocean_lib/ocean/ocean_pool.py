@@ -6,6 +6,7 @@ import logging
 from decimal import Decimal
 
 from enforce_typing import enforce_types
+from ocean_lib.config import Config
 from ocean_lib.exceptions import InsufficientBalance, VerifyTxFailed
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.bfactory import BFactory
@@ -52,12 +53,17 @@ class OceanPool:
 
     @enforce_types
     def __init__(
-        self, web3: Web3, ocean_token_address: str, bfactory_address: str
+        self,
+        web3: Web3,
+        ocean_token_address: str,
+        bfactory_address: str,
+        config: Config,
     ) -> None:
         """Initialises Ocean Pool."""
         self.web3 = web3
         self.ocean_address = ocean_token_address
         self.bfactory_address = bfactory_address
+        self.config = config
 
     @enforce_types
     def create(
@@ -66,7 +72,6 @@ class OceanPool:
         data_token_amount: int,
         OCEAN_amount: int,
         from_wallet: Wallet,
-        block_confirmations: int,
         data_token_weight: int = balancer_constants.INIT_WEIGHT_DT,
         swap_fee: int = balancer_constants.DEFAULT_SWAP_FEE,
     ) -> BPool:
@@ -86,7 +91,7 @@ class OceanPool:
         :return: BPool instance
         """
         bfactory = BFactory(self.web3, self.bfactory_address)
-        pool_address = bfactory.newBPool(from_wallet, block_confirmations)
+        pool_address = bfactory.newBPool(from_wallet, self.config.block_confirmations)
         pool = BPool(self.web3, pool_address)
         logger.debug(f"pool created with address {pool_address}.")
 
@@ -124,7 +129,7 @@ class OceanPool:
             base_weight,
             swap_fee,
             from_wallet,
-            block_confirmations,
+            self.config.block_confirmations,
         )
         if pool.get_tx_receipt(self.web3, tx_id).status != 1:
             raise VerifyTxFailed(
@@ -165,11 +170,7 @@ class OceanPool:
     # BPool doesn't know (and shouldn't know) OCEAN_address and _DT_address
     @enforce_types
     def add_data_token_liquidity(
-        self,
-        pool_address: str,
-        amount: int,
-        from_wallet: Wallet,
-        block_confirmations: int,
+        self, pool_address: str, amount: int, from_wallet: Wallet
     ) -> str:
         """
         Add `amount` number of data tokens to the pool `pool_address`. In return the wallet owner
@@ -181,24 +182,15 @@ class OceanPool:
         :param pool_address: str address of pool contract
         :param amount: number of data tokens to add to this pool
         :param from_wallet: Wallet instance of the owner of data tokens
-        :param block_confirmations: int blocks before tx considered final
         :return: str transaction id/hash
         """
         return self._add_liquidity(
-            pool_address,
-            self.get_token_address(pool_address),
-            amount,
-            from_wallet,
-            block_confirmations,
+            pool_address, self.get_token_address(pool_address), amount, from_wallet
         )
 
     @enforce_types
     def add_OCEAN_liquidity(
-        self,
-        pool_address: str,
-        amount: int,
-        from_wallet: Wallet,
-        block_confirmations: int,
+        self, pool_address: str, amount: int, from_wallet: Wallet
     ) -> str:
         """
         Add `amount` number of OCEAN tokens to the pool `pool_address`. In return the wallet owner
@@ -207,21 +199,15 @@ class OceanPool:
         :param pool_address: str address of pool contract
         :param amount: number of data tokens to add to this pool
         :param from_wallet: Wallet instance of the owner of data tokens
-        :param block_confirmations: int blocks before tx considered final
         :return: str transaction id/hash
         """
         return self._add_liquidity(
-            pool_address, self.ocean_address, amount, from_wallet, block_confirmations
+            pool_address, self.ocean_address, amount, from_wallet
         )
 
     @enforce_types
     def _add_liquidity(
-        self,
-        pool_address: str,
-        token_address: str,
-        amount: int,
-        from_wallet: Wallet,
-        block_confirmations: int,
+        self, pool_address: str, token_address: str, amount: int, from_wallet: Wallet
     ) -> str:
         assert amount >= 0
         if amount == 0:
@@ -234,7 +220,7 @@ class OceanPool:
         )
         if token.allowance(from_wallet.address, pool_address) < amount:
             tx_id = token.approve(
-                pool_address, amount, from_wallet, block_confirmations
+                pool_address, amount, from_wallet, self.config.block_confirmations
             )
             r = token.get_tx_receipt(self.web3, tx_id)
             if not r or r.status != 1:
@@ -243,18 +229,13 @@ class OceanPool:
                 )
 
         pool_amount = pool.joinswapExternAmountIn(
-            token_address, amount, 0, from_wallet, block_confirmations
+            token_address, amount, 0, from_wallet, self.config.block_confirmations
         )
         return pool_amount
 
     @enforce_types
     def remove_data_token_liquidity(
-        self,
-        pool_address: str,
-        amount: int,
-        max_pool_shares: int,
-        from_wallet: Wallet,
-        block_confirmations: int,
+        self, pool_address: str, amount: int, max_pool_shares: int, from_wallet: Wallet
     ) -> str:
         """
         Remove `amount` number of data tokens from the pool `pool_address`. The wallet owner
@@ -265,27 +246,16 @@ class OceanPool:
         :param amount: int number of data tokens to add to this pool in *base*
         :param max_pool_shares: int maximum number of pool shares as a cost for the withdrawn data tokens
         :param from_wallet: Wallet instance of the owner of data tokens
-        :param block_confirmations: int blocks before tx considered final
         :return: str transaction id/hash
         """
         dt_address = self.get_token_address(pool_address)
         return self._remove_liquidity(
-            pool_address,
-            dt_address,
-            amount,
-            max_pool_shares,
-            from_wallet,
-            block_confirmations,
+            pool_address, dt_address, amount, max_pool_shares, from_wallet
         )
 
     @enforce_types
     def remove_OCEAN_liquidity(
-        self,
-        pool_address: str,
-        amount: int,
-        max_pool_shares: int,
-        from_wallet: Wallet,
-        block_confirmations: int,
+        self, pool_address: str, amount: int, max_pool_shares: int, from_wallet: Wallet
     ) -> str:
         """
         Remove `amount` number of OCEAN tokens from the pool `pool_address`. The wallet owner
@@ -296,16 +266,10 @@ class OceanPool:
         :param amount: int number of data tokens to add to this pool in *base*
         :param max_pool_shares: int maximum number of pool shares as a cost for the withdrawn data tokens
         :param from_wallet: Wallet instance of the owner of data tokens
-        :param block_confirmations: int blocks before tx considered final
         :return: str transaction id/hash
         """
         return self._remove_liquidity(
-            pool_address,
-            self.ocean_address,
-            amount,
-            max_pool_shares,
-            from_wallet,
-            block_confirmations,
+            pool_address, self.ocean_address, amount, max_pool_shares, from_wallet
         )
 
     @enforce_types
@@ -316,7 +280,6 @@ class OceanPool:
         amount: int,
         max_pool_shares: int,
         from_wallet: Wallet,
-        block_confirmations: int,
     ) -> str:
         assert amount >= 0
         if amount == 0:
@@ -331,17 +294,16 @@ class OceanPool:
             )
 
         return pool.exitswapExternAmountOut(
-            token_address, amount, max_pool_shares, from_wallet, block_confirmations
+            token_address,
+            amount,
+            max_pool_shares,
+            from_wallet,
+            self.config.block_confirmations,
         )
 
     @enforce_types
     def buy_data_tokens(
-        self,
-        pool_address: str,
-        amount: int,
-        max_OCEAN_amount: int,
-        from_wallet: Wallet,
-        block_confirmations: int,
+        self, pool_address: str, amount: int, max_OCEAN_amount: int, from_wallet: Wallet
     ) -> str:
         """
         Buy data tokens from this pool, paying `max_OCEAN_amount` of OCEAN tokens.
@@ -372,17 +334,12 @@ class OceanPool:
             tokenAmountOut=amount,  # ""
             maxPrice=2 ** 255,  # here we limit by max_num_OCEAN, not price
             from_wallet=from_wallet,
-            block_confirmations=block_confirmations,
+            block_confirmations=self.config.block_confirmations,
         )
 
     @enforce_types
     def sell_data_tokens(
-        self,
-        pool_address: str,
-        amount: int,
-        min_OCEAN_amount: int,
-        from_wallet: Wallet,
-        block_confirmations: int,
+        self, pool_address: str, amount: int, min_OCEAN_amount: int, from_wallet: Wallet
     ) -> str:
         """
         Sell data tokens into this pool, receive `min_OCEAN_amount` of OCEAN tokens.
@@ -403,7 +360,9 @@ class OceanPool:
         if dt.balanceOf(from_wallet.address) < amount:
             raise InsufficientBalance("Insufficient funds for selling DataTokens!")
         if dt.allowance(from_wallet.address, pool_address) < amount:
-            dt.approve(pool_address, amount, from_wallet, block_confirmations)
+            dt.approve(
+                pool_address, amount, from_wallet, self.config.block_confirmations
+            )
 
         pool = BPool(self.web3, pool_address)
         return pool.swapExactAmountIn(
@@ -413,7 +372,7 @@ class OceanPool:
             minAmountOut=min_OCEAN_amount,  # ""
             maxPrice=2 ** 255,  # here we limit by max_num_OCEAN, not price
             from_wallet=from_wallet,
-            block_confirmations=block_confirmations,
+            block_confirmations=self.config.block_confirmations,
         )
 
     @enforce_types
@@ -437,7 +396,6 @@ class OceanPool:
         max_data_token_amount: int,
         max_OCEAN_amount: int,
         from_wallet: Wallet,
-        block_confirmations: int,
     ) -> str:
         """
         Add liquidity to a pool that's been finalized.
@@ -460,7 +418,10 @@ class OceanPool:
             )
         if dt.allowance(from_wallet.address, pool_address) < max_data_token_amount:
             dt.approve(
-                pool_address, max_data_token_amount, from_wallet, block_confirmations
+                pool_address,
+                max_data_token_amount,
+                from_wallet,
+                self.config.block_confirmations,
             )
 
         OCEAN = BToken(self.web3, self.ocean_address)
@@ -470,7 +431,10 @@ class OceanPool:
             )
         if OCEAN.allowance(from_wallet.address, pool_address) < max_OCEAN_amount:
             OCEAN.approve(
-                pool_address, max_OCEAN_amount, from_wallet, block_confirmations
+                pool_address,
+                max_OCEAN_amount,
+                from_wallet,
+                self.config.block_confirmations,
             )
 
         pool = BPool(self.web3, pool_address)
