@@ -64,7 +64,9 @@ def setup_all(request, config, web3):
             OCEAN_token.mint(
                 wallet.address, amt_distribute, wallet, config.block_confirmations
             )
-            OCEAN_token.transfer(w.address, amt_distribute, from_wallet=wallet)
+            OCEAN_token.transfer(
+                w.address, amt_distribute, wallet, config.block_confirmations
+            )
 
 
 @pytest.fixture

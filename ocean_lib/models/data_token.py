@@ -156,8 +156,12 @@ class DataToken(ContractBase):
         return self.contract.caller.balanceOf(account)
 
     @enforce_types
-    def transfer(self, to: str, amount: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("transfer", (to, amount), from_wallet)
+    def transfer(
+        self, to: str, amount: int, from_wallet: Wallet, block_confirmations: int
+    ) -> str:
+        return self.send_transaction(
+            "transfer", (to, amount), from_wallet, block_confirmations
+        )
 
     @enforce_types
     def allowance(self, owner_address: str, spender_address: str) -> int:
