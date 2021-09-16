@@ -465,6 +465,7 @@ class BPool(BToken):
         tokenAmountOut: int,
         maxPoolAmountIn: int,
         from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         """
         Specify `tokenAmountOut` of token `tokenOut` that you want to get out
@@ -475,6 +476,7 @@ class BPool(BToken):
             "exitswapExternAmountOut",
             (tokenOut_address, tokenAmountOut, maxPoolAmountIn),
             from_wallet,
+            block_confirmations,
         )
 
     # ==== Balancer Pool as ERC20

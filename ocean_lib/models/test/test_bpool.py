@@ -489,6 +489,7 @@ def test_exitswapExternAmountOut(
         tokenAmountOut=to_wei(2),  # T1 wanted
         maxPoolAmountIn=to_wei(10),  # max BPT spent
         from_wallet=alice_wallet,
+        block_confirmations=config.block_confirmations,
     )
     assert T1.balanceOf(alice_address) == T1balance - to_wei(90) + to_wei(2)
     assert BPT.balanceOf(alice_address) >= pool_balance - to_wei(10)

@@ -247,7 +247,12 @@ class OceanPool:
 
     @enforce_types
     def remove_data_token_liquidity(
-        self, pool_address: str, amount: int, max_pool_shares: int, from_wallet: Wallet
+        self,
+        pool_address: str,
+        amount: int,
+        max_pool_shares: int,
+        from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         """
         Remove `amount` number of data tokens from the pool `pool_address`. The wallet owner
@@ -258,16 +263,27 @@ class OceanPool:
         :param amount: int number of data tokens to add to this pool in *base*
         :param max_pool_shares: int maximum number of pool shares as a cost for the withdrawn data tokens
         :param from_wallet: Wallet instance of the owner of data tokens
+        :param block_confirmations: int blocks before tx considered final
         :return: str transaction id/hash
         """
         dt_address = self.get_token_address(pool_address)
         return self._remove_liquidity(
-            pool_address, dt_address, amount, max_pool_shares, from_wallet
+            pool_address,
+            dt_address,
+            amount,
+            max_pool_shares,
+            from_wallet,
+            block_confirmations,
         )
 
     @enforce_types
     def remove_OCEAN_liquidity(
-        self, pool_address: str, amount: int, max_pool_shares: int, from_wallet: Wallet
+        self,
+        pool_address: str,
+        amount: int,
+        max_pool_shares: int,
+        from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         """
         Remove `amount` number of OCEAN tokens from the pool `pool_address`. The wallet owner
@@ -278,10 +294,16 @@ class OceanPool:
         :param amount: int number of data tokens to add to this pool in *base*
         :param max_pool_shares: int maximum number of pool shares as a cost for the withdrawn data tokens
         :param from_wallet: Wallet instance of the owner of data tokens
+        :param block_confirmations: int blocks before tx considered final
         :return: str transaction id/hash
         """
         return self._remove_liquidity(
-            pool_address, self.ocean_address, amount, max_pool_shares, from_wallet
+            pool_address,
+            self.ocean_address,
+            amount,
+            max_pool_shares,
+            from_wallet,
+            block_confirmations,
         )
 
     @enforce_types
@@ -292,6 +314,7 @@ class OceanPool:
         amount: int,
         max_pool_shares: int,
         from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         assert amount >= 0
         if amount == 0:
@@ -306,7 +329,7 @@ class OceanPool:
             )
 
         return pool.exitswapExternAmountOut(
-            token_address, amount, max_pool_shares, from_wallet
+            token_address, amount, max_pool_shares, from_wallet, block_confirmations
         )
 
     @enforce_types
