@@ -52,11 +52,13 @@ class DataToken(ContractBase):
         blob: str,
         fee_collector_address: str,
         from_wallet: Wallet,
+        block_confirmations: int,
     ) -> str:
         return self.send_transaction(
             "initialize",
             (name, symbol, minter_address, cap, blob, fee_collector_address),
             from_wallet,
+            block_confirmations,
         )
 
     @enforce_types
@@ -487,10 +489,7 @@ class DataToken(ContractBase):
 
     @enforce_types
     def calculate_token_holders(
-        self,
-        from_block: Optional[int],
-        to_block: Optional[int],
-        min_token_amount: int,
+        self, from_block: Optional[int], to_block: Optional[int], min_token_amount: int
     ) -> List[Tuple[str, int]]:
         """Returns a list of addresses with token balances above a minimum token
         amount. Calculated from the transactions between `from_block` and `to_block`."""
