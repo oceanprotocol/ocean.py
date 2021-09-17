@@ -7,6 +7,7 @@ from typing import Any, Dict, Optional
 
 from enforce_typing import enforce_types
 from hexbytes.main import HexBytes
+from ocean_lib.integer import Integer
 from ocean_lib.web3_internal.constants import BLOCK_NUMBER_POLL_INTERVAL
 from ocean_lib.web3_internal.utils import get_chain_id, get_network_timeout
 from ocean_lib.web3_internal.wallet import Wallet
@@ -118,7 +119,9 @@ def transact_with_contract_function(
 
     if account_key:
         raw_tx = Wallet(
-            web3, private_key=account_key, block_confirmations=block_confirmations
+            web3,
+            private_key=account_key,
+            block_confirmations=Integer(block_confirmations),
         ).sign_tx(transact_transaction)
         logging.debug(
             f"sending raw tx: function: {function_name}, tx hash: {raw_tx.hex()}"
