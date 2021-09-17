@@ -203,14 +203,14 @@ ALG_metadata =  {
             "format": "docker-image",
             "version": "0.1",
             "container": {
-              "entrypoint": "python3.6 $ALGO",
+              "entrypoint": "python3.7 $ALGO",
               "image": "oceanprotocol/algo_dockers",
               "tag": "python-branin"
             }
         },
         "files": [
 	  {
-	    "url": "https://raw.githubusercontent.com/trentmc/branin/432a3cc94ba3d8bf729db987c46849998d402c8f/gpr.py",
+	    "url": "https://raw.githubusercontent.com/trentmc/branin/main/gpr.py",
 	    "index": 0,
 	    "contentType": "text/text",
 	  }
