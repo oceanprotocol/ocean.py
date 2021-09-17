@@ -99,7 +99,7 @@ print(f"config.provider_url = '{config.provider_url}'")
 #Alice's wallet
 import os
 from ocean_lib.web3_internal.wallet import Wallet
-alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
+alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'), block_confirmations=config.block_confirmations)
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
 #Mint OCEAN for ganache only
@@ -127,9 +127,9 @@ data_token.approve(ocean.exchange._exchange_address, to_wei(100), alice_wallet)
 
 In the same python console:
 ```python
-bob_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY2'))
+bob_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY2'), block_confirmations=ocean.config.block_confirmations)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
- 
+
 #Verify that Bob has ganache ETH
 assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
@@ -143,7 +143,7 @@ If the `exchange_id` is not provided yet, here is the fix.
 It is important to create an `exchange_id` only one time per exchange.
 
 ```python
-#Create exchange_id for a new exchange 
+#Create exchange_id for a new exchange
 exchange_id = ocean.exchange.create(token_address, to_wei("0.1"), alice_wallet)
 ```
 

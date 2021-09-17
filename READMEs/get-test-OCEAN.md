@@ -93,7 +93,7 @@ OCEAN_token = BToken(ocean.web3, ocean.OCEAN_address)
 #set wallet
 private_key = os.getenv('MY_TEST_KEY')
 from ocean_lib.web3_internal.wallet import Wallet
-wallet = Wallet(ocean.web3, private_key=private_key)
+wallet = Wallet(ocean.web3, private_key=private_key, block_confirmations=ocean.config.block_confirmations)
 print(f"Address of your account: {wallet.address}")
 
 #get balance

@@ -33,7 +33,7 @@ class Wallet:
     node since we only send the raw transaction hash so the user info is safe.
 
     Usage:
-        1. `wallet = Wallet(ocean.web3, private_key=private_key)`
+        1. `wallet = Wallet(ocean.web3, private_key=private_key, block_confirmations=ocean.config.block_confirmations)`
 
     """
 

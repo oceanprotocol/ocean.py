@@ -60,5 +60,6 @@ In Python, you'd create a wallet from this private key with a line like:
 import os
 import web3
 from ocean_lib.web3_internal.wallet import Wallet
-wallet = Wallet(web3, private_key=os.getenv('MY_TEST_KEY'))
+from ocean_lib.integer import Integer
+wallet = Wallet(web3, private_key=os.getenv('MY_TEST_KEY'), block_confirmations=Integer(1))
 ```

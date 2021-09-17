@@ -76,7 +76,7 @@ config = Config('config.ini')
 ocean = Ocean(config)
 
 print("create wallet: begin")
-wallet = Wallet(ocean.web3, private_key=private_key)
+wallet = Wallet(ocean.web3, private_key=private_key, block_confirmations=config.block_confirmations)
 print(f"create wallet: done. Its address is {wallet.address}")
 
 print("create datatoken: begin.")
