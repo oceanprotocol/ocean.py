@@ -203,7 +203,7 @@ ALG_metadata =  {
             "format": "docker-image",
             "version": "0.1",
             "container": {
-              "entrypoint": "python3.7 $ALGO",
+              "entrypoint": "python $ALGO",
               "image": "oceanprotocol/algo_dockers",
               "tag": "python-branin"
             }
