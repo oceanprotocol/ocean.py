@@ -2,7 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import threading
+from threading import Event, Thread, current_thread
 
 from ocean_lib.web3_internal.constants import BLOCK_NUMBER_POLL_INTERVAL
 from ocean_lib.web3_internal.web3_overrides.utils import (
@@ -54,7 +54,7 @@ def test_block_confirmations():
 
 def send_dummy_transactions(from_wallet, to_address):
     web3 = from_wallet.web3
-    while not threading.current_thread().stopped():
+    while not current_thread().stopped():
         tx = {
             "from": from_wallet.address,
             "to": to_address,
@@ -66,13 +66,13 @@ def send_dummy_transactions(from_wallet, to_address):
         web3.eth.send_raw_transaction(raw_tx)
 
 
-class StoppableThread(threading.Thread):
+class StoppableThread(Thread):
     """Thread class with a stop() method. The thread itself has to check
     regularly for the current_thread().stopped() condition."""
 
     def __init__(self, *args, **kwargs):
         super(StoppableThread, self).__init__(*args, **kwargs)
-        self._stop_event = threading.Event()
+        self._stop_event = Event()
 
     def stop(self):
         self._stop_event.set()
