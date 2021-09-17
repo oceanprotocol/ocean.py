@@ -11,6 +11,7 @@ from typing import Any, Dict, Optional, Union
 
 import artifacts
 from enforce_typing import enforce_types
+from ocean_lib.integer import Integer
 from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
 
@@ -239,9 +240,9 @@ class Config(configparser.ConfigParser):
 
     @property
     @enforce_types
-    def block_confirmations(self) -> int:
+    def block_confirmations(self) -> Integer:
         """Block confirmations."""
-        return int(self.get(SECTION_ETH_NETWORK, NAME_BLOCK_CONFIRMATIONS))
+        return Integer(self.get(SECTION_ETH_NETWORK, NAME_BLOCK_CONFIRMATIONS))
 
     @property
     @enforce_types

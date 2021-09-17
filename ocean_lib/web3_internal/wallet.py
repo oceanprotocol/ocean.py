@@ -10,6 +10,7 @@ from enforce_typing import enforce_types
 from eth_account.datastructures import SignedMessage
 from eth_account.messages import SignableMessage
 from hexbytes.main import HexBytes
+from ocean_lib.integer import Integer
 from ocean_lib.web3_internal.constants import ENV_MAX_GAS_PRICE, MIN_GAS_PRICE
 from ocean_lib.web3_internal.utils import (
     private_key_to_address,
@@ -39,11 +40,14 @@ class Wallet:
     _last_tx_count = dict()
 
     @enforce_types
-    def __init__(self, web3: Web3, private_key: str) -> None:
+    def __init__(
+        self, web3: Web3, private_key: str, block_confirmations: Integer
+    ) -> None:
         """Initialises Wallet object."""
         assert private_key, "private_key is required."
 
         self.web3 = web3
+        self.block_confirmations = block_confirmations
         self._last_tx_count.clear()
 
         self.private_key = private_key
