@@ -68,7 +68,7 @@ def test_register_asset(publisher_ocean_instance, encrypt):
     # try to resolve new asset
     did = original_ddo.did
     asset_id = original_ddo.asset_id
-    block_confirmations = ocn.config.block_confirmations
+    block_confirmations = ocn.config.block_confirmations.value
     log = ddo_reg.get_event_log(
         ddo_reg.EVENT_METADATA_CREATED, block - block_confirmations, asset_id, 30
     )
@@ -120,7 +120,7 @@ def test_register_asset(publisher_ocean_instance, encrypt):
         ocn.assets.update(ddo, bob)
 
     _ = ocn.assets.update(ddo, alice, encrypt=encrypt)
-    block_confirmations = ocn.config.block_confirmations
+    block_confirmations = ocn.config.block_confirmations.value
     log = ddo_reg.get_event_log(
         ddo_reg.EVENT_METADATA_UPDATED, block - block_confirmations, asset_id, 30
     )

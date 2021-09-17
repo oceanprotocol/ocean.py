@@ -52,7 +52,7 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address
 
     # assert transfers were successful
     block = alice_ocean.web3.eth.block_number
-    block_confirmations = alice_ocean.config.block_confirmations
+    block_confirmations = alice_ocean.config.block_confirmations.value
     all_transfers = token.get_all_transfers_from_events(
         block - (2 ** block_confirmations), block + block_confirmations, chunk=1
     )
@@ -170,7 +170,7 @@ def test_transfer_event(
     token = alice_ocean.create_data_token(
         "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
     )
-    block_confirmations = alice_ocean.config.block_confirmations
+    block_confirmations = alice_ocean.config.block_confirmations.value
 
     block = alice_ocean.web3.eth.block_number
     transfer_event = token.get_transfer_event(block, alice_address, bob_address)
@@ -277,7 +277,7 @@ def test_calculate_token_holders(alice_ocean, alice_wallet, alice_address):
     )
     token.mint(alice_address, to_wei(100), from_wallet=alice_wallet)
     block = alice_ocean.web3.eth.block_number
-    block_confirmations = alice_ocean.config.block_confirmations
+    block_confirmations = alice_ocean.config.block_confirmations.value
     token_holders = token.calculate_token_holders(
         block - block_confirmations, block + block_confirmations, to_wei(1)
     )

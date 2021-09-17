@@ -67,7 +67,7 @@ def test_main(network, alice_wallet, alice_ocean, dtfactory_address, web3):
     assert factory.subscribe_to_event("TokenCreated", 30, None) is None
     assert factory.get_event_argument_names("TokenCreated") == ()
     block = web3.eth.block_number
-    block_confirmations = alice_ocean.config.block_confirmations
+    block_confirmations = alice_ocean.config.block_confirmations.value
     assert (
         len(
             factory.get_event_logs(

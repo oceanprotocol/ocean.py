@@ -260,7 +260,7 @@ def test_public_pool(network, config, bob_wallet, alice_ocean):
     assert BPT.balanceOf(bob_address) == to_wei(0)
 
     block = alice_ocean.web3.eth.block_number
-    block_confirmations = alice_ocean.config.block_confirmations
+    block_confirmations = alice_ocean.config.block_confirmations.value
     join_log = pool.get_join_logs(
         block - (2 ** block_confirmations + 1), block + (2 ** block_confirmations + 1)
     )[0]
@@ -385,7 +385,7 @@ def test_joinSwapExternAmountIn(
     assert T2.balanceOf(alice_address) == T2balance - to_wei(9)
 
     block = web3.eth.block_number
-    block_confirmations = config.block_confirmations
+    block_confirmations = config.block_confirmations.value
     swap_log = pool.get_swap_logs(
         block - (2 ** block_confirmations + 1), block + (2 ** block_confirmations + 1)
     )[0]
@@ -458,7 +458,7 @@ def test_exitswapExternAmountOut(
     assert BPT.balanceOf(alice_address) >= pool_balance - to_wei(10)
 
     block = alice_ocean.web3.eth.block_number
-    block_confirmations = config.block_confirmations
+    block_confirmations = config.block_confirmations.value
     exit_log = pool.get_exit_logs(
         block - (2 ** block_confirmations + 1), block + (2 ** block_confirmations + 1)
     )[0]
