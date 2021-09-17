@@ -16,10 +16,8 @@ class BFactory(ContractBase):
     # ============================================================
     # reflect BFactory Solidity methods
     @enforce_types
-    def newBPool(self, from_wallet: Wallet, block_confirmations: int) -> str:
+    def newBPool(self, from_wallet: Wallet) -> str:
         """
-        :param from_wallet: Wallet, transaction sender wallet.
-        :param block_confirmations: int, blocks before tx considered final.
         :return: `str` new pool address
         """
         print("BPool.newBPool(). Begin.")
@@ -27,7 +25,6 @@ class BFactory(ContractBase):
             "newBPool",
             (),
             from_wallet,
-            block_confirmations,
             {"gas": balancer_constants.GASLIMIT_BFACTORY_NEWBPOOL},
         )
         tx_receipt = self.get_tx_receipt(self.web3, tx_id)

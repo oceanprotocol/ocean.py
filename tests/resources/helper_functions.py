@@ -138,22 +138,17 @@ def setup_logging(
 
 @enforce_types
 def mint_tokens_and_wait(
-    data_token_contract: DataToken,
-    receiver_address: str,
-    minter_wallet: Wallet,
-    block_confirmations: int,
+    data_token_contract: DataToken, receiver_address: str, minter_wallet: Wallet
 ):
     dtc = data_token_contract
-    tx_id = dtc.mint(receiver_address, to_wei(50), minter_wallet, block_confirmations)
+    tx_id = dtc.mint(receiver_address, to_wei(50), minter_wallet)
     dtc.get_tx_receipt(dtc.web3, tx_id)
     time.sleep(2)
 
     def verify_supply(mint_amount=to_wei(50)):
         supply = dtc.contract.caller.totalSupply()
         if supply <= 0:
-            _tx_id = dtc.mint(
-                receiver_address, mint_amount, minter_wallet, block_confirmations
-            )
+            _tx_id = dtc.mint(receiver_address, mint_amount, minter_wallet)
             dtc.get_tx_receipt(dtc.web3, _tx_id)
             supply = dtc.contract.caller.totalSupply()
         return supply

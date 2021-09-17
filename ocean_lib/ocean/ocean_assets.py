@@ -249,9 +249,7 @@ class OceanAssets:
             # owner_address is set as minter only if creating new data token. So if
             # `data_token_address` is set `owner_address` has no effect.
             if owner_address:
-                data_token.proposeMinter(
-                    owner_address, publisher_wallet, self._config.block_confirmations
-                )
+                data_token.proposeMinter(owner_address, from_wallet=publisher_wallet)
         else:
             if not dtfactory.verify_data_token(data_token_address):
                 raise ContractNotFound(
@@ -525,7 +523,6 @@ class OceanAssets:
         service_id: int,
         fee_receiver: str,
         from_wallet: Wallet,
-        block_confirmations: int,
         consumer: Optional[str] = None,
     ) -> str:
         """
@@ -537,7 +534,6 @@ class OceanAssets:
         :param service_id:
         :param fee_receiver:
         :param from_wallet: Wallet instance
-        :param block_confirmations: int blocks before tx considered final
         :param consumer: str the address of consumer of the service, defaults to the payer (the `from_wallet` address)
         :return: hex str id of transfer transaction
         """
@@ -559,9 +555,7 @@ class OceanAssets:
         if consumer is None:
             consumer = from_wallet.address
 
-        tx_hash = dt.startOrder(
-            consumer, amount, service_id, fee_receiver, from_wallet, block_confirmations
-        )
+        tx_hash = dt.startOrder(consumer, amount, service_id, fee_receiver, from_wallet)
 
         try:
             dt.verify_order_tx(tx_hash, did, service_id, amount, from_wallet.address)

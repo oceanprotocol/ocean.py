@@ -144,20 +144,14 @@ def make_info(name, private_key_name):
 
     config = ExampleConfig.get_config()
     info.ocean = Ocean(config)
-    info.T1 = _deployAndMintToken(
-        web3, "TOK1", info.address, config.block_confirmations
-    )
-    info.T2 = _deployAndMintToken(
-        web3, "TOK2", info.address, config.block_confirmations
-    )
+    info.T1 = _deployAndMintToken(web3, "TOK1", info.address)
+    info.T2 = _deployAndMintToken(web3, "TOK2", info.address)
 
     return info
 
 
 @enforce_types
-def _deployAndMintToken(
-    web3: Web3, symbol: str, to_address: str, block_confirmations: int
-) -> btoken.BToken:
+def _deployAndMintToken(web3: Web3, symbol: str, to_address: str) -> btoken.BToken:
     wallet = get_factory_deployer_wallet(_NETWORK)
     dt_address = DataToken.deploy(
         web3,
@@ -174,6 +168,6 @@ def _deployAndMintToken(
         dt_factory.createToken(symbol, symbol, symbol, DataToken.DEFAULT_CAP, wallet)
     )
     token = DataToken(web3, token_address)
-    token.mint(to_address, to_wei(1000), wallet, block_confirmations)
+    token.mint(to_address, to_wei(1000), wallet)
 
     return btoken.BToken(web3, token.address)

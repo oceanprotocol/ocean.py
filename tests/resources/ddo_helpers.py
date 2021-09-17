@@ -87,7 +87,6 @@ def get_registered_ddo(
     ocean_instance,
     metadata,
     wallet: Wallet,
-    block_confirmations: int,
     service_descriptor=None,
     datatoken=None,
     provider_uri=None,
@@ -117,7 +116,7 @@ def get_registered_ddo(
 
     # Mint tokens for dataset and assign to publisher
     dt = ocean_instance.get_data_token(asset.data_token_address)
-    mint_tokens_and_wait(dt, wallet.address, wallet, block_confirmations)
+    mint_tokens_and_wait(dt, wallet.address, wallet)
 
     ddo = wait_for_ddo(ocean_instance, asset.did)
     assert ddo, f"resolve did {asset.did} failed."
@@ -134,12 +133,7 @@ def get_registered_ddo_with_access_service(ocean_instance, wallet, provider_uri=
     )
 
     return get_registered_ddo(
-        ocean_instance,
-        metadata,
-        wallet,
-        ocean_instance.config.block_confirmations,
-        service_descriptor,
-        provider_uri=provider_uri,
+        ocean_instance, metadata, wallet, service_descriptor, provider_uri=provider_uri
     )
 
 
@@ -172,12 +166,7 @@ def get_registered_ddo_with_compute_service(
     )
 
     return get_registered_ddo(
-        ocean_instance,
-        metadata,
-        wallet,
-        ocean_instance.config.block_confirmations,
-        compute_service,
-        provider_uri=provider_uri,
+        ocean_instance, metadata, wallet, compute_service, provider_uri=provider_uri
     )
 
 
@@ -190,12 +179,7 @@ def get_registered_algorithm_ddo(ocean_instance, wallet, provider_uri=None):
     if "cost" in metadata["main"]:
         metadata["main"].pop("cost")
     return get_registered_ddo(
-        ocean_instance,
-        metadata,
-        wallet,
-        ocean_instance.config.block_confirmations,
-        service_descriptor,
-        provider_uri=provider_uri,
+        ocean_instance, metadata, wallet, service_descriptor, provider_uri=provider_uri
     )
 
 

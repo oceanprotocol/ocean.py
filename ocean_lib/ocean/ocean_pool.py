@@ -6,7 +6,6 @@ import logging
 from decimal import Decimal
 
 from enforce_typing import enforce_types
-from ocean_lib.config import Config
 from ocean_lib.exceptions import InsufficientBalance, VerifyTxFailed
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.bfactory import BFactory
@@ -53,17 +52,12 @@ class OceanPool:
 
     @enforce_types
     def __init__(
-        self,
-        web3: Web3,
-        ocean_token_address: str,
-        bfactory_address: str,
-        config: Config,
+        self, web3: Web3, ocean_token_address: str, bfactory_address: str
     ) -> None:
         """Initialises Ocean Pool."""
         self.web3 = web3
         self.ocean_address = ocean_token_address
         self.bfactory_address = bfactory_address
-        self.config = config
 
     @enforce_types
     def create(
@@ -91,7 +85,7 @@ class OceanPool:
         :return: BPool instance
         """
         bfactory = BFactory(self.web3, self.bfactory_address)
-        pool_address = bfactory.newBPool(from_wallet, self.config.block_confirmations)
+        pool_address = bfactory.newBPool(from_wallet)
         pool = BPool(self.web3, pool_address)
         logger.debug(f"pool created with address {pool_address}.")
 
@@ -129,7 +123,6 @@ class OceanPool:
             base_weight,
             swap_fee,
             from_wallet,
-            self.config.block_confirmations,
         )
         if pool.get_tx_receipt(self.web3, tx_id).status != 1:
             raise VerifyTxFailed(
@@ -219,18 +212,14 @@ class OceanPool:
             f"but only a balance of {token.balanceOf(from_wallet.address)} is available."
         )
         if token.allowance(from_wallet.address, pool_address) < amount:
-            tx_id = token.approve(
-                pool_address, amount, from_wallet, self.config.block_confirmations
-            )
+            tx_id = token.approve(pool_address, amount, from_wallet)
             r = token.get_tx_receipt(self.web3, tx_id)
             if not r or r.status != 1:
                 raise VerifyTxFailed(
                     f"Approve OCEAN tokens failed, pool was created at {pool_address}"
                 )
 
-        pool_amount = pool.joinswapExternAmountIn(
-            token_address, amount, 0, from_wallet, self.config.block_confirmations
-        )
+        pool_amount = pool.joinswapExternAmountIn(token_address, amount, 0, from_wallet)
         return pool_amount
 
     @enforce_types
@@ -294,11 +283,7 @@ class OceanPool:
             )
 
         return pool.exitswapExternAmountOut(
-            token_address,
-            amount,
-            max_pool_shares,
-            from_wallet,
-            self.config.block_confirmations,
+            token_address, amount, max_pool_shares, from_wallet
         )
 
     @enforce_types
@@ -334,7 +319,6 @@ class OceanPool:
             tokenAmountOut=amount,  # ""
             maxPrice=2 ** 255,  # here we limit by max_num_OCEAN, not price
             from_wallet=from_wallet,
-            block_confirmations=self.config.block_confirmations,
         )
 
     @enforce_types
@@ -360,9 +344,7 @@ class OceanPool:
         if dt.balanceOf(from_wallet.address) < amount:
             raise InsufficientBalance("Insufficient funds for selling DataTokens!")
         if dt.allowance(from_wallet.address, pool_address) < amount:
-            dt.approve(
-                pool_address, amount, from_wallet, self.config.block_confirmations
-            )
+            dt.approve(pool_address, amount, from_wallet=from_wallet)
 
         pool = BPool(self.web3, pool_address)
         return pool.swapExactAmountIn(
@@ -372,7 +354,6 @@ class OceanPool:
             minAmountOut=min_OCEAN_amount,  # ""
             maxPrice=2 ** 255,  # here we limit by max_num_OCEAN, not price
             from_wallet=from_wallet,
-            block_confirmations=self.config.block_confirmations,
         )
 
     @enforce_types
@@ -417,12 +398,7 @@ class OceanPool:
                 f"Insufficient funds for adding liquidity for {dt.address} datatoken!"
             )
         if dt.allowance(from_wallet.address, pool_address) < max_data_token_amount:
-            dt.approve(
-                pool_address,
-                max_data_token_amount,
-                from_wallet,
-                self.config.block_confirmations,
-            )
+            dt.approve(pool_address, max_data_token_amount, from_wallet=from_wallet)
 
         OCEAN = BToken(self.web3, self.ocean_address)
         if OCEAN.balanceOf(from_wallet.address) < max_OCEAN_amount:
@@ -430,12 +406,7 @@ class OceanPool:
                 f"Insufficient funds for adding liquidity for {OCEAN.address} OCEAN token!"
             )
         if OCEAN.allowance(from_wallet.address, pool_address) < max_OCEAN_amount:
-            OCEAN.approve(
-                pool_address,
-                max_OCEAN_amount,
-                from_wallet,
-                self.config.block_confirmations,
-            )
+            OCEAN.approve(pool_address, max_OCEAN_amount, from_wallet=from_wallet)
 
         pool = BPool(self.web3, pool_address)
         return pool.joinPool(

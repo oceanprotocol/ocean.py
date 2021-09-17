@@ -59,7 +59,7 @@ def test_get_token_address_fails(web3, dtfactory_address):
             dtfactory.get_token_address("")
 
 
-def test_get_token_minter(web3, alice_wallet, dtfactory_address, alice_address, config):
+def test_get_token_minter(web3, alice_wallet, dtfactory_address, alice_address):
     """Tests proper retrieval of token minter from DTFactory."""
     dtfactory = DTFactory(web3, dtfactory_address)
 
@@ -67,5 +67,5 @@ def test_get_token_minter(web3, alice_wallet, dtfactory_address, alice_address, 
         "foo_blob", "DT1", "DT1", to_wei(1000), from_wallet=alice_wallet
     )
     dt = DataToken(web3, dtfactory.get_token_address(dt_address))
-    dt.mint(alice_address, to_wei(10), alice_wallet, config.block_confirmations)
+    dt.mint(alice_address, to_wei(10), from_wallet=alice_wallet)
     assert dtfactory.get_token_minter(dt.address) == alice_address

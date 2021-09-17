@@ -52,26 +52,16 @@ class DataToken(ContractBase):
         blob: str,
         fee_collector_address: str,
         from_wallet: Wallet,
-        block_confirmations: int,
     ) -> str:
         return self.send_transaction(
             "initialize",
             (name, symbol, minter_address, cap, blob, fee_collector_address),
             from_wallet,
-            block_confirmations,
         )
 
     @enforce_types
-    def mint(
-        self,
-        account_address: str,
-        amount: int,
-        from_wallet: Wallet,
-        block_confirmations: int,
-    ) -> str:
-        return self.send_transaction(
-            "mint", (account_address, amount), from_wallet, block_confirmations
-        )
+    def mint(self, account_address: str, amount: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("mint", (account_address, amount), from_wallet)
 
     @enforce_types
     def startOrder(
@@ -81,13 +71,9 @@ class DataToken(ContractBase):
         serviceId: int,
         mrktFeeCollector: str,
         from_wallet: Wallet,
-        block_confirmations: int,
     ) -> str:
         return self.send_transaction(
-            "startOrder",
-            (consumer, amount, serviceId, mrktFeeCollector),
-            from_wallet,
-            block_confirmations,
+            "startOrder", (consumer, amount, serviceId, mrktFeeCollector), from_wallet
         )
 
     @enforce_types
@@ -98,28 +84,18 @@ class DataToken(ContractBase):
         amount: int,
         serviceId: int,
         from_wallet: Wallet,
-        block_confirmations: int,
     ) -> str:
         return self.send_transaction(
-            "finishOrder",
-            (orderTxId, consumer, amount, serviceId),
-            from_wallet,
-            block_confirmations,
+            "finishOrder", (orderTxId, consumer, amount, serviceId), from_wallet
         )
 
     @enforce_types
-    def proposeMinter(
-        self, new_minter: str, from_wallet: Wallet, block_confirmations: int
-    ) -> str:
-        return self.send_transaction(
-            "proposeMinter", (new_minter,), from_wallet, block_confirmations
-        )
+    def proposeMinter(self, new_minter: str, from_wallet: Wallet) -> str:
+        return self.send_transaction("proposeMinter", (new_minter,), from_wallet)
 
     @enforce_types
-    def approveMinter(self, from_wallet: Wallet, block_confirmations: int) -> str:
-        return self.send_transaction(
-            "approveMinter", (), from_wallet, block_confirmations
-        )
+    def approveMinter(self, from_wallet: Wallet) -> str:
+        return self.send_transaction("approveMinter", (), from_wallet)
 
     @enforce_types
     def blob(self) -> str:
@@ -156,12 +132,8 @@ class DataToken(ContractBase):
         return self.contract.caller.balanceOf(account)
 
     @enforce_types
-    def transfer(
-        self, to: str, amount: int, from_wallet: Wallet, block_confirmations: int
-    ) -> str:
-        return self.send_transaction(
-            "transfer", (to, amount), from_wallet, block_confirmations
-        )
+    def transfer(self, to: str, amount: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("transfer", (to, amount), from_wallet)
 
     @enforce_types
     def allowance(self, owner_address: str, spender_address: str) -> int:

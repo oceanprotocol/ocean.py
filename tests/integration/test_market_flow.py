@@ -34,12 +34,7 @@ def test_market_flow(order_type):
     consumer_ocean = get_consumer_ocean_instance()
 
     # Register Asset
-    asset = get_registered_ddo(
-        publisher_ocean,
-        get_metadata(),
-        pub_wallet,
-        publisher_ocean.config.block_confirmations,
-    )
+    asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
     assert isinstance(asset, Asset)
     assert asset.data_token_address, "The asset does not have a token address."
 
@@ -50,19 +45,12 @@ def test_market_flow(order_type):
 
     # Mint data tokens and assign to publisher
     dt = publisher_ocean.get_data_token(asset.data_token_address)
-    mint_tokens_and_wait(
-        dt, pub_wallet.address, pub_wallet, publisher_ocean.config.block_confirmations
-    )
+    mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
 
     ######
     # Give the consumer some datatokens so they can order the service
     try:
-        tx_id = dt.transfer(
-            consumer_wallet.address,
-            to_wei(10),
-            pub_wallet,
-            publisher_ocean.config.block_confirmations,
-        )
+        tx_id = dt.transfer(consumer_wallet.address, to_wei(10), pub_wallet)
         dt.verify_transfer_tx(tx_id, pub_wallet.address, consumer_wallet.address)
     except (AssertionError, Exception) as e:
         print(e)
@@ -84,7 +72,6 @@ def test_market_flow(order_type):
         service.index,
         "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",
         consumer_wallet,
-        consumer_ocean.config.block_confirmations,
     ]
 
     if order_type == "explicit_none":
@@ -135,12 +122,7 @@ def test_payer_market_flow():
     another_consumer_ocean = get_another_consumer_ocean_instance(use_provider_mock=True)
 
     # Register Asset
-    asset = get_registered_ddo(
-        publisher_ocean,
-        get_metadata(),
-        pub_wallet,
-        publisher_ocean.config.block_confirmations,
-    )
+    asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
     assert isinstance(asset, Asset)
     assert asset.data_token_address, "The asset does not have a token address."
 
@@ -152,19 +134,12 @@ def test_payer_market_flow():
 
     # Mint data tokens and assign to publisher
     dt = publisher_ocean.get_data_token(asset.data_token_address)
-    mint_tokens_and_wait(
-        dt, pub_wallet.address, pub_wallet, publisher_ocean.config.block_confirmations
-    )
+    mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
 
     ######
     # Give the consumer some datatokens so they can order the service
     try:
-        tx_id = dt.transfer(
-            consumer_wallet.address,
-            to_wei(10),
-            pub_wallet,
-            publisher_ocean.config.block_confirmations,
-        )
+        tx_id = dt.transfer(consumer_wallet.address, to_wei(10), pub_wallet)
         dt.verify_transfer_tx(tx_id, pub_wallet.address, consumer_wallet.address)
     except (AssertionError, Exception) as e:
         print(e)
@@ -186,7 +161,6 @@ def test_payer_market_flow():
         service.index,
         "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",
         consumer_wallet,
-        consumer_ocean.config.block_confirmations,
         another_consumer_wallet.address,
     )
     asset_folder = None

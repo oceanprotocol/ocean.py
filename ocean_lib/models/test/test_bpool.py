@@ -24,9 +24,7 @@ def test_notokens_basic(
     OCEAN_address, network, web3, config, alice_wallet, alice_address
 ):
     """Tests deployment of a pool without tokens."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
 
     assert not pool.isPublicSwap()
     assert not pool.isFinalized()
@@ -40,17 +38,13 @@ def test_notokens_basic(
     assert str(pool)
 
     with pytest.raises(Exception):
-        pool.finalize(
-            alice_wallet, config.block_confirmations
-        )  # can't finalize if no tokens
+        pool.finalize(from_wallet=alice_wallet)  # can't finalize if no tokens
 
 
 def test_setSwapFee_works(network, config, web3, alice_wallet):
     """Tests that a swap fee can be set on the pool by the controller of that pool."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
-    pool.setSwapFee(to_wei("0.011"), alice_wallet, config.block_confirmations)
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
+    pool.setSwapFee(to_wei("0.011"), from_wallet=alice_wallet)
     assert pool.getSwapFee() == to_wei("0.011")
 
 
@@ -59,36 +53,32 @@ def test_setSwapFee_fails(
 ):
     """Tests that someone who isn't a controller can not set the swap fee."""
     factory = BFactory(web3, get_bfactory_address(config.address_file, network))
-    pool_address = factory.newBPool(alice_wallet, config.block_confirmations)
+    pool_address = factory.newBPool(alice_wallet)
     pool = BPool(web3, pool_address)
     with pytest.raises(Exception):
         pool.setSwapFee(
-            to_wei("0.011"), bob_wallet, config.block_confirmations
+            to_wei("0.011"), from_wallet=bob_wallet
         )  # not ok, bob isn't controller
-    pool.setController(bob_address, alice_wallet, config.block_confirmations)
-    pool.setSwapFee(to_wei("0.011"), bob_wallet, config.block_confirmations)  # ok now
+    pool.setController(bob_address, from_wallet=alice_wallet)
+    pool.setSwapFee(to_wei("0.011"), from_wallet=bob_wallet)  # ok now
 
 
 def test_setController(
     network, config, web3, alice_wallet, alice_address, bob_wallet, bob_address
 ):
     """Tests that the controller of a pool can be changed."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
-    pool.setController(bob_address, alice_wallet, config.block_confirmations)
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
+    pool.setController(bob_address, from_wallet=alice_wallet)
     assert pool.getController() == bob_address
 
-    pool.setController(alice_address, bob_wallet, config.block_confirmations)
+    pool.setController(alice_address, from_wallet=bob_wallet)
     assert pool.getController() == alice_address
 
 
 def test_setPublicSwap(network, config, web3, alice_wallet):
     """Tests that a pool can be set as public."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
-    pool.setPublicSwap(True, alice_wallet, config.block_confirmations)
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
+    pool.setPublicSwap(True, from_wallet=alice_wallet)
     assert pool.isPublicSwap()
     pool.setPublicSwap(False, from_wallet=alice_wallet)
     assert not pool.isPublicSwap()
@@ -96,9 +86,7 @@ def test_setPublicSwap(network, config, web3, alice_wallet):
 
 def test_2tokens_basic(network, config, web3, T1, T2, alice_wallet, alice_address):
     """Tests the deployment of a pool containing 2 tokens (basic happy flow)."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     assert T1.address != T2.address
     assert T1.address != pool.address
 
@@ -106,9 +94,7 @@ def test_2tokens_basic(network, config, web3, T1, T2, alice_wallet, alice_addres
     _ = T2.balanceOf(alice_address) >= to_wei(10)
 
     with pytest.raises(Exception):  # can't bind until we approve
-        pool.bind(
-            T1.address, to_wei(90), to_wei(9), alice_wallet, config.block_confirmations
-        )
+        pool.bind(T1.address, to_wei(90), to_wei(9), from_wallet=alice_wallet)
 
     # Bind two tokens to the pool
     T1.approve(pool.address, to_wei(90), from_wallet=alice_wallet)
@@ -118,12 +104,8 @@ def test_2tokens_basic(network, config, web3, T1, T2, alice_wallet, alice_addres
     assert T2.allowance(alice_address, pool.address) == to_wei(10)
 
     assert not pool.isBound(T1.address) and not pool.isBound(T1.address)
-    pool.bind(
-        T1.address, to_wei(90), to_wei(9), alice_wallet, config.block_confirmations
-    )
-    pool.bind(
-        T2.address, to_wei(10), to_wei(1), alice_wallet, config.block_confirmations
-    )
+    pool.bind(T1.address, to_wei(90), to_wei(9), from_wallet=alice_wallet)
+    pool.bind(T2.address, to_wei(10), to_wei(1), from_wallet=alice_wallet)
     assert pool.isBound(T1.address) and pool.isBound(T2.address)
 
     assert pool.getNumTokens() == 2
@@ -148,7 +130,7 @@ def test_unbind(network, config, web3, T1, T2, alice_wallet):
         network, config, web3, T1, T2, alice_wallet, 1, 1, 1, 1
     )
 
-    pool.unbind(T1.address, alice_wallet, config.block_confirmations)
+    pool.unbind(T1.address, from_wallet=alice_wallet)
 
     assert pool.getNumTokens() == 1
     assert pool.getCurrentTokens() == [T2.address]
@@ -167,7 +149,7 @@ def test_finalize(network, config, web3, T1, T2, alice_address, alice_wallet):
     assert pool.balanceOf(alice_address) == 0
     assert pool.allowance(alice_address, pool.address) == 0
 
-    pool.finalize(alice_wallet, config.block_confirmations)
+    pool.finalize(from_wallet=alice_wallet)
     assert str(pool) != ""
 
     assert pool.isPublicSwap()
@@ -221,7 +203,7 @@ def test_public_pool(network, config, bob_wallet, alice_ocean):
 
     # finalize
     pool = BPool(alice_ocean.web3, pool.address)
-    pool.finalize(alice.wallet, config.block_confirmations)
+    pool.finalize(from_wallet=alice.wallet)
 
     # verify holdings
     assert alice.T1.balanceOf(alice.address) == to_wei(1000 - 90 - 100)
@@ -260,7 +242,6 @@ def test_public_pool(network, config, bob_wallet, alice_ocean):
         poolAmountIn=to_wei(2),
         minAmountsOut=[to_wei(0), to_wei(0)],
         from_wallet=bob_wallet,
-        block_confirmations=config.block_confirmations,
     )
     assert T1.balanceOf(bob_address) == 92800000000000000018  # 92.8
     assert T2.balanceOf(bob_address) == 99200000000000000002  # 99.2
@@ -275,12 +256,7 @@ def test_public_pool(network, config, bob_wallet, alice_ocean):
     assert BPT.balanceOf(bob_address) == to_wei(13)
 
     # bob fully exits
-    pool.exitPool(
-        poolAmountIn=to_wei(13),
-        minAmountsOut=[0, 0],
-        from_wallet=bob_wallet,
-        block_confirmations=config.block_confirmations,
-    )
+    pool.exitPool(poolAmountIn=to_wei(13), minAmountsOut=[0, 0], from_wallet=bob_wallet)
     assert BPT.balanceOf(bob_address) == to_wei(0)
 
     block = alice_ocean.web3.eth.block_number
@@ -299,28 +275,20 @@ def test_rebind_more_tokens(network, config, web3, T1, T2, alice_wallet):
 
     # insufficient allowance
     with pytest.raises(Exception):
-        pool.rebind(
-            T1.address, to_wei(120), to_wei(9), alice_wallet, config.block_confirmations
-        )
+        pool.rebind(T1.address, to_wei(120), to_wei(9), from_wallet=alice_wallet)
 
     # sufficient allowance
     T1.approve(pool.address, to_wei(30), from_wallet=alice_wallet)
-    pool.rebind(
-        T1.address, to_wei(120), to_wei(9), alice_wallet, config.block_confirmations
-    )
+    pool.rebind(T1.address, to_wei(120), to_wei(9), from_wallet=alice_wallet)
 
 
 def test_gulp(network, config, web3, T1, alice_wallet):
     """Test pool gulp."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
 
     # bind T1 to the pool, with a balance of 2.0
     T1.approve(pool.address, to_wei(50), from_wallet=alice_wallet)
-    pool.bind(
-        T1.address, to_wei(2), to_wei(50), alice_wallet, config.block_confirmations
-    )
+    pool.bind(T1.address, to_wei(2), to_wei(50), from_wallet=alice_wallet)
 
     # T1 is now pool's (a) ERC20 balance (b) _records[token].balance
     assert T1.balanceOf(pool.address) == to_wei(2)  # ERC20 balance
@@ -334,7 +302,7 @@ def test_gulp(network, config, web3, T1, alice_wallet):
 
     # so, 'gulp' gets the pool to absorb the tokens into its balances.
     # i.e. to update _records[token].balance to be in sync with ERC20 balance
-    pool.gulp(T1.address, alice_wallet, config.block_confirmations)
+    pool.gulp(T1.address, from_wallet=alice_wallet)
     assert T1.balanceOf(pool.address) == to_wei(2 + 5)  # ERC20
     assert pool.getBalance(T1.address) == to_wei(2 + 5)  # records[]
 
@@ -396,11 +364,10 @@ def test_joinSwapExternAmountIn(
             tokenAmountOut=to_wei(10),
             maxPrice=HUGEINT,
             from_wallet=alice_wallet,
-            block_confirmations=config.block_confirmations,
         )
 
     # pool's public
-    pool.setPublicSwap(True, alice_wallet, config.block_confirmations)
+    pool.setPublicSwap(True, from_wallet=alice_wallet)
     pool.swapExactAmountOut(
         tokenIn_address=T1.address,
         maxAmountIn=to_wei(100),
@@ -408,7 +375,6 @@ def test_joinSwapExternAmountIn(
         tokenAmountOut=to_wei(1),
         maxPrice=HUGEINT,
         from_wallet=alice_wallet,
-        block_confirmations=config.block_confirmations,
     )
     new_balance = init_T1balance - to_wei("91.055")
     assert (
@@ -435,7 +401,7 @@ def test_joinswapPoolAmountOut(
         network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
     BPT = pool
-    pool.finalize(alice_wallet, config.block_confirmations)
+    pool.finalize(from_wallet=alice_wallet)
     pool_balance = BPT.balanceOf(alice_address)
     T1.approve(pool.address, to_wei(90), from_wallet=alice_wallet)
     assert T1.balanceOf(alice_address) == T1balance - to_wei(90)
@@ -445,7 +411,6 @@ def test_joinswapPoolAmountOut(
         poolAmountOut=to_wei(10),  # BPT wanted
         maxAmountIn=to_wei(90),  # max T1 to spend
         from_wallet=alice_wallet,
-        block_confirmations=config.block_confirmations,
     )
     assert T1.balanceOf(alice_address) >= T1balance - to_wei(90)
     assert BPT.balanceOf(alice_address) == pool_balance + to_wei(10)
@@ -459,7 +424,7 @@ def test_exitswapPoolAmountIn(
         network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
     BPT = pool
-    pool.finalize(alice_wallet, config.block_confirmations)
+    pool.finalize(from_wallet=alice_wallet)
     pool_balance = BPT.balanceOf(alice_address)
     assert T1.balanceOf(alice_address) == T1balance - to_wei(90)
     pool.exitswapPoolAmountIn(
@@ -467,7 +432,6 @@ def test_exitswapPoolAmountIn(
         poolAmountIn=to_wei(10),  # BPT spent
         minAmountOut=to_wei(1),  # min T1 wanted
         from_wallet=alice_wallet,
-        block_confirmations=config.block_confirmations,
     )
     assert T1.balanceOf(alice_address) >= T1balance - to_wei(90) + to_wei(1)
     assert BPT.balanceOf(alice_address) == pool_balance - to_wei(10)
@@ -481,7 +445,7 @@ def test_exitswapExternAmountOut(
         network, config, web3, T1, T2, alice_wallet, 90, 10, 9, 1
     )
     BPT = pool
-    pool.finalize(alice_wallet, config.block_confirmations)
+    pool.finalize(from_wallet=alice_wallet)
     pool_balance = BPT.balanceOf(alice_address)
     assert T1.balanceOf(alice_address) == T1balance - to_wei(90)
     pool.exitswapExternAmountOut(
@@ -489,7 +453,6 @@ def test_exitswapExternAmountOut(
         tokenAmountOut=to_wei(2),  # T1 wanted
         maxPoolAmountIn=to_wei(10),  # max BPT spent
         from_wallet=alice_wallet,
-        block_confirmations=config.block_confirmations,
     )
     assert T1.balanceOf(alice_address) == T1balance - to_wei(90) + to_wei(2)
     assert BPT.balanceOf(alice_address) >= pool_balance - to_wei(10)
@@ -504,9 +467,7 @@ def test_exitswapExternAmountOut(
 
 def test_calcSpotPrice(network, config, web3, T1, T2, alice_address, alice_wallet):
     """Tests pricing with calcSpotPrice."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcSpotPrice(
         tokenBalanceIn=to_wei(10),
         tokenWeightIn=to_wei(1),
@@ -519,9 +480,7 @@ def test_calcSpotPrice(network, config, web3, T1, T2, alice_address, alice_walle
 
 def test_calcOutGivenIn(network, config, web3, alice_wallet):
     """Tests pricing with calcOutGivenIn."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcOutGivenIn(
         tokenBalanceIn=to_wei(10),
         tokenWeightIn=to_wei(1),
@@ -535,9 +494,7 @@ def test_calcOutGivenIn(network, config, web3, alice_wallet):
 
 def test_calcInGivenOut(network, config, web3, alice_wallet):
     """Tests pricing with calcInGivenOut."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcInGivenOut(
         tokenBalanceIn=to_wei(10),
         tokenWeightIn=to_wei(1),
@@ -551,9 +508,7 @@ def test_calcInGivenOut(network, config, web3, alice_wallet):
 
 def test_calcPoolOutGivenSingleIn(network, config, web3, alice_wallet):
     """Tests calculations with calcPoolOutGivenSingleIn."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcPoolOutGivenSingleIn(
         tokenBalanceIn=to_wei(10),
         tokenWeightIn=to_wei(1),
@@ -567,9 +522,7 @@ def test_calcPoolOutGivenSingleIn(network, config, web3, alice_wallet):
 
 def test_calcSingleInGivenPoolOut(network, config, web3, alice_wallet):
     """Tests pricing with calcSingleInGivenPoolOut."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcSingleInGivenPoolOut(
         tokenBalanceIn=to_wei(10),
         tokenWeightIn=to_wei(1),
@@ -583,9 +536,7 @@ def test_calcSingleInGivenPoolOut(network, config, web3, alice_wallet):
 
 def test_calcSingleOutGivenPoolIn(network, config, web3, alice_wallet):
     """Tests pricing with calcSingleOutGivenPoolIn."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcSingleOutGivenPoolIn(
         tokenBalanceOut=to_wei(10),
         tokenWeightOut=to_wei(1),
@@ -599,9 +550,7 @@ def test_calcSingleOutGivenPoolIn(network, config, web3, alice_wallet):
 
 def test_calcPoolInGivenSingleOut(network, config, web3, alice_wallet):
     """Tests calculations with calcPoolInGivenSingleOut."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcPoolInGivenSingleOut(
         tokenBalanceOut=to_wei(1000),
         tokenWeightOut=to_wei(5),
@@ -627,41 +576,31 @@ def _createPoolWith2Tokens(
     w2: Union[Decimal, str, int],
 ):
     """Helper function to create a basic pool containing 2 tokens."""
-    pool = _deployBPool(
-        web3, config.address_file, network, wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, wallet)
 
-    T1.get_tx_receipt(
-        web3, T1.approve(pool.address, to_wei(bal1), wallet, config.block_confirmations)
-    )
-    T2.get_tx_receipt(
-        web3, T2.approve(pool.address, to_wei(bal2), wallet, config.block_confirmations)
-    )
+    T1.get_tx_receipt(web3, T1.approve(pool.address, to_wei(bal1), from_wallet=wallet))
+    T2.get_tx_receipt(web3, T2.approve(pool.address, to_wei(bal2), from_wallet=wallet))
 
     if pool.isBound(T1.address):
-        pool.unbind(T1.address, wallet, config.block_confirmations)
+        pool.unbind(T1.address, wallet)
 
     if pool.isBound(T2.address):
-        pool.unbind(T2.address, wallet, config.block_confirmations)
+        pool.unbind(T2.address, wallet)
 
-    pool.bind(T1.address, to_wei(bal1), to_wei(w1), wallet, config.block_confirmations)
-    pool.bind(T2.address, to_wei(bal2), to_wei(w2), wallet, config.block_confirmations)
+    pool.bind(T1.address, to_wei(bal1), to_wei(w1), from_wallet=wallet)
+    pool.bind(T2.address, to_wei(bal2), to_wei(w2), from_wallet=wallet)
 
     return pool
 
 
 @enforce_types
 def _deployBPool(
-    web3: Web3,
-    address_file: str,
-    network: str,
-    from_wallet: Wallet,
-    block_confirmations: int,
+    web3: Web3, address_file: str, network: str, from_wallet: Wallet
 ) -> BPool:
     """Helper function to deploy a pool."""
     factory_address = get_bfactory_address(address_file, network)
     factory = BFactory(web3, factory_address)
-    pool_address = factory.newBPool(from_wallet, block_confirmations)
+    pool_address = factory.newBPool(from_wallet=from_wallet)
     pool = BPool(web3, pool_address)
 
     return pool
