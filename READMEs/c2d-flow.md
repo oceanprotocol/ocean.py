@@ -205,12 +205,12 @@ ALG_metadata =  {
             "container": {
               "entrypoint": "python3.6 $ALGO",
               "image": "oceanprotocol/algo_dockers",
-              "tag": "python-sql"
+              "tag": "python-branin"
             }
         },
         "files": [
 	  {
-	    "url": "https://raw.githubusercontent.com/trentmc/branin/main/gpr.py",
+	    "url": "https://github.com/trentmc/branin/blob/3cb185f3413d995402238f4006e9d747d0e73420/gpr.py",
 	    "index": 0,
 	    "contentType": "text/text",
 	  }
