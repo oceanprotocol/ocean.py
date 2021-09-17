@@ -39,7 +39,9 @@ class ContractBase(object):
     CONTRACT_NAME = None
 
     @enforce_types
-    def __init__(self, web3: Web3, address: Optional[str]) -> None:
+    def __init__(
+        self, web3: Web3, address: Optional[str], block_confirmations: int
+    ) -> None:
         """Initialises Contract Base object."""
         self.name = self.contract_name
         assert (
@@ -47,6 +49,7 @@ class ContractBase(object):
         ), "contract_name property needs to be implemented in subclasses."
 
         self.web3 = web3
+        self.block_confirmations = block_confirmations
         self.contract = load_contract(self.web3, self.name, address)
         assert not address or (
             self.contract.address == address and self.address == address

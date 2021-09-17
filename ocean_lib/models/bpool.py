@@ -91,6 +91,7 @@ class BPool(BToken):
                 swap_fee,
             ),
             from_wallet,
+            self.block_confirmations,
             {"gas": balancer_constants.GASLIMIT_BFACTORY_NEWBPOOL},
         )
 
@@ -186,11 +187,15 @@ class BPool(BToken):
         """
         Caller must be controller. Pool must NOT be finalized.
         """
-        return self.send_transaction("setSwapFee", (swapFee,), from_wallet)
+        return self.send_transaction(
+            "setSwapFee", (swapFee,), from_wallet, self.block_confirmations
+        )
 
     @enforce_types
     def setController(self, manager_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("setController", (manager_address,), from_wallet)
+        return self.send_transaction(
+            "setController", (manager_address,), from_wallet, self.block_confirmations
+        )
 
     @enforce_types
     def setPublicSwap(self, public: bool, from_wallet: Wallet) -> str:
@@ -199,7 +204,9 @@ class BPool(BToken):
         controller and pool not to be finalized. Finalized pools always have
         public swap.
         """
-        return self.send_transaction("setPublicSwap", (public,), from_wallet)
+        return self.send_transaction(
+            "setPublicSwap", (public,), from_wallet, self.block_confirmations
+        )
 
     @enforce_types
     def finalize(self, from_wallet: Wallet) -> str:
@@ -209,7 +216,9 @@ class BPool(BToken):
         `ERR_IS_FINALIZED` after pool is finalized. This also switches
         `isSwapPublic` to true.
         """
-        return self.send_transaction("finalize", (), from_wallet)
+        return self.send_transaction(
+            "finalize", (), from_wallet, self.block_confirmations
+        )
 
     @enforce_types
     def bind(
@@ -231,7 +240,10 @@ class BPool(BToken):
         -unspecified error thrown by token
         """
         return self.send_transaction(
-            "bind", (token_address, balance, weight), from_wallet
+            "bind",
+            (token_address, balance, weight),
+            from_wallet,
+            self.block_confirmations,
         )
 
     @enforce_types
@@ -243,7 +255,10 @@ class BPool(BToken):
         validation on the parameters.
         """
         return self.send_transaction(
-            "rebind", (token_address, balance, weight), from_wallet
+            "rebind",
+            (token_address, balance, weight),
+            from_wallet,
+            self.block_confirmations,
         )
 
     @enforce_types
@@ -252,7 +267,9 @@ class BPool(BToken):
         Unbinds a token, clearing all of its parameters. Exit fee is charged
         and the remaining balance is sent to caller.
         """
-        return self.send_transaction("unbind", (token_address,), from_wallet)
+        return self.send_transaction(
+            "unbind", (token_address,), from_wallet, self.block_confirmations
+        )
 
     @enforce_types
     def gulp(self, token_address: str, from_wallet: Wallet) -> str:
@@ -269,7 +286,9 @@ class BPool(BToken):
         given token, any airdrops in that token will be locked in the pool
         forever.
         """
-        return self.send_transaction("gulp", (token_address,), from_wallet)
+        return self.send_transaction(
+            "gulp", (token_address,), from_wallet, self.block_confirmations
+        )
 
     # ==== Price Functions
 
@@ -296,7 +315,10 @@ class BPool(BToken):
         limited by the array of `maxAmountsIn` in the order of the pool tokens.
         """
         return self.send_transaction(
-            "joinPool", (poolAmountOut, maxAmountsIn), from_wallet
+            "joinPool",
+            (poolAmountOut, maxAmountsIn),
+            from_wallet,
+            self.block_confirmations,
         )
 
     @enforce_types
@@ -309,7 +331,10 @@ class BPool(BToken):
         limited by the array of `minAmountsOut` in the order of the pool tokens.
         """
         return self.send_transaction(
-            "exitPool", (poolAmountIn, minAmountsOut), from_wallet
+            "exitPool",
+            (poolAmountIn, minAmountsOut),
+            from_wallet,
+            self.block_confirmations,
         )
 
     @enforce_types
@@ -339,6 +364,7 @@ class BPool(BToken):
             "swapExactAmountIn",
             (tokenIn_address, tokenAmountIn, tokenOut_address, minAmountOut, maxPrice),
             from_wallet,
+            self.block_confirmations,
         )
 
     @enforce_types
@@ -355,6 +381,7 @@ class BPool(BToken):
             "swapExactAmountOut",
             (tokenIn_address, maxAmountIn, tokenOut_address, tokenAmountOut, maxPrice),
             from_wallet,
+            self.block_confirmations,
         )
 
     @enforce_types
@@ -373,6 +400,7 @@ class BPool(BToken):
             "joinswapExternAmountIn",
             (tokenIn_address, tokenAmountIn, minPoolAmountOut),
             from_wallet,
+            self.block_confirmations,
         )
 
     @enforce_types
@@ -392,6 +420,7 @@ class BPool(BToken):
             "joinswapPoolAmountOut",
             (tokenIn_address, poolAmountOut, maxAmountIn),
             from_wallet,
+            self.block_confirmations,
         )
 
     @enforce_types
@@ -410,6 +439,7 @@ class BPool(BToken):
             "exitswapPoolAmountIn",
             (tokenOut_address, poolAmountIn, minAmountOut),
             from_wallet,
+            self.block_confirmations,
         )
 
     @enforce_types
@@ -429,6 +459,7 @@ class BPool(BToken):
             "exitswapExternAmountOut",
             (tokenOut_address, tokenAmountOut, maxPoolAmountIn),
             from_wallet,
+            self.block_confirmations,
         )
 
     # ==== Balancer Pool as ERC20
@@ -446,18 +477,25 @@ class BPool(BToken):
 
     @enforce_types
     def approve(self, dst_address: str, amt: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("approve", (dst_address, amt), from_wallet)
+        return self.send_transaction(
+            "approve", (dst_address, amt), from_wallet, self.block_confirmations
+        )
 
     @enforce_types
     def transfer(self, dst_address: str, amt: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("transfer", (dst_address, amt), from_wallet)
+        return self.send_transaction(
+            "transfer", (dst_address, amt), from_wallet, self.block_confirmations
+        )
 
     @enforce_types
     def transferFrom(
         self, src_address: str, dst_address: str, amt: int, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "transferFrom", (dst_address, src_address, amt), from_wallet
+            "transferFrom",
+            (dst_address, src_address, amt),
+            from_wallet,
+            self.block_confirmations,
         )
 
     # ===== Calculators

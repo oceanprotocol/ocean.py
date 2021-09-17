@@ -25,6 +25,7 @@ class BFactory(ContractBase):
             "newBPool",
             (),
             from_wallet,
+            self.block_confirmations,
             {"gas": balancer_constants.GASLIMIT_BFACTORY_NEWBPOOL},
         )
         tx_receipt = self.get_tx_receipt(self.web3, tx_id)
