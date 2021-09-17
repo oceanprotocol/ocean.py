@@ -242,7 +242,7 @@ class Config(configparser.ConfigParser):
     @enforce_types
     def block_confirmations(self) -> Integer:
         """Block confirmations."""
-        return Integer(self.get(SECTION_ETH_NETWORK, NAME_BLOCK_CONFIRMATIONS))
+        return Integer(int(self.get(SECTION_ETH_NETWORK, NAME_BLOCK_CONFIRMATIONS)))
 
     @property
     @enforce_types
