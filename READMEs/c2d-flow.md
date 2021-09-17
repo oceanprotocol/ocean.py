@@ -360,6 +360,16 @@ It will output a dictionary containing details and logs, e.g:
 result['logs']  # will output something like https://compute-publish.s3.amazonaws.com/79..8/data/logs/algorithm.log
 ```
 
-Going to your result link you will see the algorithm logs, e.g. in this simple case it will just say hello world.
+Going to your result link you will see the algorithm logs, e.g. in this simple case it will just log the algorithm steps.
 
-We are working on a function to also retrieve the binary result file, as well as using a more complex algorithm sample, so expect updates to this README pretty soon :)
+We are working on a function to also retrieve the binary result file, so expect updates to this README pretty soon :)
+
+Work in progress (we'll use the resultFile instead of result["urls"]):
+```python
+import requests
+import pickle
+
+response = requests.get(result["urls"][0])
+open('/tmp/resultfile', 'wb').write(response.content)
+pickle.load(open('/tmp/resultfile', "rb"))  # will output the gaussian model result
+```
