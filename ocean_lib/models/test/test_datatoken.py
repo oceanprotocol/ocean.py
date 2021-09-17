@@ -54,7 +54,7 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address
     block = alice_ocean.web3.eth.block_number
     block_confirmations = alice_ocean.config.block_confirmations.value
     all_transfers = token.get_all_transfers_from_events(
-        block - (2 ** block_confirmations), block + block_confirmations, chunk=1
+        block - block_confirmations, block + block_confirmations, chunk=1
     )
     assert len(all_transfers[0]) == 1
 
