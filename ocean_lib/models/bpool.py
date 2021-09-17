@@ -10,7 +10,6 @@ from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.btoken import BToken
-from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.currency import from_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
@@ -657,7 +656,7 @@ class BPool(BToken):
             )
         event = getattr(self.events, event_name)
         argument_filters = {"topics": topics}
-        logs = ContractBase.getLogs(
+        logs = self.getLogs(
             event(),
             argument_filters=argument_filters,
             fromBlock=from_block,
