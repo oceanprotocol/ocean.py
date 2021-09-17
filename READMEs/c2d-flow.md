@@ -210,7 +210,7 @@ ALG_metadata =  {
         },
         "files": [
 	  {
-	    "url": "https://github.com/trentmc/branin/blob/3cb185f3413d995402238f4006e9d747d0e73420/gpr.py",
+	    "url": "https://raw.githubusercontent.com/trentmc/branin/432a3cc94ba3d8bf729db987c46849998d402c8f/gpr.py",
 	    "index": 0,
 	    "contentType": "text/text",
 	  }
@@ -246,7 +246,7 @@ print(f"ALG did = '{ALG_ddo.did}'")
 Full details: [ALG_ddo](ALG_ddo.md)
 
 Please note that this example features a simple Python algorithm. If you publish an algorithm in another language, make sure you have an appropriate container to run it, including dependencies.
-You can find more information about how to do this in the [https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/](OCEAN tutorials).
+You can find more information about how to do this in the [OCEAN tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/).
 
 ## 4. Alice allows the algorithm for C2D for that data asset
 
