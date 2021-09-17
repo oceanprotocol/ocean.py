@@ -261,9 +261,7 @@ def test_public_pool(network, config, bob_wallet, alice_ocean):
 
     block = alice_ocean.web3.eth.block_number
     block_confirmations = alice_ocean.config.block_confirmations.value
-    join_log = pool.get_join_logs(
-        block - block_confirmations, block + block_confirmations
-    )[0]
+    join_log = pool.get_join_logs(block - (2 * block_confirmations + 1), block)[0]
     assert join_log["args"]["tokenIn"] == T1.address
 
 
