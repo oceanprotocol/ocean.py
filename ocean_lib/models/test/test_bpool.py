@@ -24,9 +24,7 @@ def test_notokens_basic(
     OCEAN_address, network, web3, config, alice_wallet, alice_address
 ):
     """Tests deployment of a pool without tokens."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
 
     assert not pool.isPublicSwap()
     assert not pool.isFinalized()
@@ -45,9 +43,7 @@ def test_notokens_basic(
 
 def test_setSwapFee_works(network, config, web3, alice_wallet):
     """Tests that a swap fee can be set on the pool by the controller of that pool."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     pool.setSwapFee(to_wei("0.011"), from_wallet=alice_wallet)
     assert pool.getSwapFee() == to_wei("0.011")
 
@@ -56,11 +52,7 @@ def test_setSwapFee_fails(
     network, config, web3, alice_wallet, alice_address, bob_wallet, bob_address
 ):
     """Tests that someone who isn't a controller can not set the swap fee."""
-    factory = BFactory(
-        web3,
-        get_bfactory_address(config.address_file, network),
-        config.block_confirmations,
-    )
+    factory = BFactory(web3, get_bfactory_address(config.address_file, network))
     pool_address = factory.newBPool(alice_wallet)
     pool = BPool(web3, pool_address)
     with pytest.raises(Exception):
@@ -75,9 +67,7 @@ def test_setController(
     network, config, web3, alice_wallet, alice_address, bob_wallet, bob_address
 ):
     """Tests that the controller of a pool can be changed."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     pool.setController(bob_address, from_wallet=alice_wallet)
     assert pool.getController() == bob_address
 
@@ -87,9 +77,7 @@ def test_setController(
 
 def test_setPublicSwap(network, config, web3, alice_wallet):
     """Tests that a pool can be set as public."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     pool.setPublicSwap(True, from_wallet=alice_wallet)
     assert pool.isPublicSwap()
     pool.setPublicSwap(False, from_wallet=alice_wallet)
@@ -98,9 +86,7 @@ def test_setPublicSwap(network, config, web3, alice_wallet):
 
 def test_2tokens_basic(network, config, web3, T1, T2, alice_wallet, alice_address):
     """Tests the deployment of a pool containing 2 tokens (basic happy flow)."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     assert T1.address != T2.address
     assert T1.address != pool.address
 
@@ -298,9 +284,7 @@ def test_rebind_more_tokens(network, config, web3, T1, T2, alice_wallet):
 
 def test_gulp(network, config, web3, T1, alice_wallet):
     """Test pool gulp."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
 
     # bind T1 to the pool, with a balance of 2.0
     T1.approve(pool.address, to_wei(50), from_wallet=alice_wallet)
@@ -483,9 +467,7 @@ def test_exitswapExternAmountOut(
 
 def test_calcSpotPrice(network, config, web3, T1, T2, alice_address, alice_wallet):
     """Tests pricing with calcSpotPrice."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcSpotPrice(
         tokenBalanceIn=to_wei(10),
         tokenWeightIn=to_wei(1),
@@ -498,9 +480,7 @@ def test_calcSpotPrice(network, config, web3, T1, T2, alice_address, alice_walle
 
 def test_calcOutGivenIn(network, config, web3, alice_wallet):
     """Tests pricing with calcOutGivenIn."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcOutGivenIn(
         tokenBalanceIn=to_wei(10),
         tokenWeightIn=to_wei(1),
@@ -514,9 +494,7 @@ def test_calcOutGivenIn(network, config, web3, alice_wallet):
 
 def test_calcInGivenOut(network, config, web3, alice_wallet):
     """Tests pricing with calcInGivenOut."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcInGivenOut(
         tokenBalanceIn=to_wei(10),
         tokenWeightIn=to_wei(1),
@@ -530,9 +508,7 @@ def test_calcInGivenOut(network, config, web3, alice_wallet):
 
 def test_calcPoolOutGivenSingleIn(network, config, web3, alice_wallet):
     """Tests calculations with calcPoolOutGivenSingleIn."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcPoolOutGivenSingleIn(
         tokenBalanceIn=to_wei(10),
         tokenWeightIn=to_wei(1),
@@ -546,9 +522,7 @@ def test_calcPoolOutGivenSingleIn(network, config, web3, alice_wallet):
 
 def test_calcSingleInGivenPoolOut(network, config, web3, alice_wallet):
     """Tests pricing with calcSingleInGivenPoolOut."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcSingleInGivenPoolOut(
         tokenBalanceIn=to_wei(10),
         tokenWeightIn=to_wei(1),
@@ -562,9 +536,7 @@ def test_calcSingleInGivenPoolOut(network, config, web3, alice_wallet):
 
 def test_calcSingleOutGivenPoolIn(network, config, web3, alice_wallet):
     """Tests pricing with calcSingleOutGivenPoolIn."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcSingleOutGivenPoolIn(
         tokenBalanceOut=to_wei(10),
         tokenWeightOut=to_wei(1),
@@ -578,9 +550,7 @@ def test_calcSingleOutGivenPoolIn(network, config, web3, alice_wallet):
 
 def test_calcPoolInGivenSingleOut(network, config, web3, alice_wallet):
     """Tests calculations with calcPoolInGivenSingleOut."""
-    pool = _deployBPool(
-        web3, config.address_file, network, alice_wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, alice_wallet)
     x = pool.calcPoolInGivenSingleOut(
         tokenBalanceOut=to_wei(1000),
         tokenWeightOut=to_wei(5),
@@ -606,9 +576,7 @@ def _createPoolWith2Tokens(
     w2: Union[Decimal, str, int],
 ):
     """Helper function to create a basic pool containing 2 tokens."""
-    pool = _deployBPool(
-        web3, config.address_file, network, wallet, config.block_confirmations
-    )
+    pool = _deployBPool(web3, config.address_file, network, wallet)
 
     T1.get_tx_receipt(web3, T1.approve(pool.address, to_wei(bal1), from_wallet=wallet))
     T2.get_tx_receipt(web3, T2.approve(pool.address, to_wei(bal2), from_wallet=wallet))
@@ -627,15 +595,11 @@ def _createPoolWith2Tokens(
 
 @enforce_types
 def _deployBPool(
-    web3: Web3,
-    address_file: str,
-    network: str,
-    from_wallet: Wallet,
-    block_confirmations: int,
+    web3: Web3, address_file: str, network: str, from_wallet: Wallet
 ) -> BPool:
     """Helper function to deploy a pool."""
     factory_address = get_bfactory_address(address_file, network)
-    factory = BFactory(web3, factory_address, block_confirmations)
+    factory = BFactory(web3, factory_address)
     pool_address = factory.newBPool(from_wallet=from_wallet)
     pool = BPool(web3, pool_address)
 

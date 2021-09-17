@@ -57,14 +57,11 @@ class DataToken(ContractBase):
             "initialize",
             (name, symbol, minter_address, cap, blob, fee_collector_address),
             from_wallet,
-            self.block_confirmations,
         )
 
     @enforce_types
     def mint(self, account_address: str, amount: int, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "mint", (account_address, amount), from_wallet, self.block_confirmations
-        )
+        return self.send_transaction("mint", (account_address, amount), from_wallet)
 
     @enforce_types
     def startOrder(
@@ -76,10 +73,7 @@ class DataToken(ContractBase):
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "startOrder",
-            (consumer, amount, serviceId, mrktFeeCollector),
-            from_wallet,
-            self.block_confirmations,
+            "startOrder", (consumer, amount, serviceId, mrktFeeCollector), from_wallet
         )
 
     @enforce_types
@@ -92,23 +86,16 @@ class DataToken(ContractBase):
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "finishOrder",
-            (orderTxId, consumer, amount, serviceId),
-            from_wallet,
-            self.block_confirmations,
+            "finishOrder", (orderTxId, consumer, amount, serviceId), from_wallet
         )
 
     @enforce_types
     def proposeMinter(self, new_minter: str, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "proposeMinter", (new_minter,), from_wallet, self.block_confirmations
-        )
+        return self.send_transaction("proposeMinter", (new_minter,), from_wallet)
 
     @enforce_types
     def approveMinter(self, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "approveMinter", (), from_wallet, self.block_confirmations
-        )
+        return self.send_transaction("approveMinter", (), from_wallet)
 
     @enforce_types
     def blob(self) -> str:
@@ -146,9 +133,7 @@ class DataToken(ContractBase):
 
     @enforce_types
     def transfer(self, to: str, amount: int, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "transfer", (to, amount), from_wallet, self.block_confirmations
-        )
+        return self.send_transaction("transfer", (to, amount), from_wallet)
 
     @enforce_types
     def allowance(self, owner_address: str, spender_address: str) -> int:
@@ -156,19 +141,14 @@ class DataToken(ContractBase):
 
     @enforce_types
     def approve(self, spender: str, amount: int, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "approve", (spender, amount), from_wallet, self.block_confirmations
-        )
+        return self.send_transaction("approve", (spender, amount), from_wallet)
 
     @enforce_types
     def transferFrom(
         self, from_address: str, to_address: str, amount: int, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "transferFrom",
-            (from_address, to_address, amount),
-            from_wallet,
-            self.block_confirmations,
+            "transferFrom", (from_address, to_address, amount), from_wallet
         )
 
     # ============================================================
@@ -192,10 +172,7 @@ class DataToken(ContractBase):
         self, spender_address: str, added_value: int, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "increaseAllowance",
-            (spender_address, added_value),
-            from_wallet,
-            self.block_confirmations,
+            "increaseAllowance", (spender_address, added_value), from_wallet
         )
 
     @enforce_types
@@ -203,10 +180,7 @@ class DataToken(ContractBase):
         self, spender_address: str, subtracted_value: int, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "decreaseAllowance",
-            (spender_address, subtracted_value),
-            from_wallet,
-            self.block_confirmations,
+            "decreaseAllowance", (spender_address, subtracted_value), from_wallet
         )
 
     # ============================================================

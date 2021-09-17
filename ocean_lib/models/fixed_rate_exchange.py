@@ -50,10 +50,7 @@ class FixedRateExchange(ContractBase):
         self, base_token: str, data_token: str, exchange_rate: int, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "create",
-            (base_token, data_token, exchange_rate),
-            from_wallet,
-            self.block_confirmations,
+            "create", (base_token, data_token, exchange_rate), from_wallet
         )
 
     @enforce_types
@@ -64,19 +61,14 @@ class FixedRateExchange(ContractBase):
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "swap",
-            (exchange_id, data_token_amount),
-            from_wallet,
-            self.block_confirmations,
+            "swap", (exchange_id, data_token_amount), from_wallet
         )
 
     @enforce_types
     def setRate(
         self, exchange_id: Union[str, bytes], new_rate: int, from_wallet: Wallet
     ) -> str:
-        return self.send_transaction(
-            "setRate", (exchange_id, new_rate), from_wallet, self.block_confirmations
-        )
+        return self.send_transaction("setRate", (exchange_id, new_rate), from_wallet)
 
     @enforce_types
     def activate(
@@ -85,9 +77,7 @@ class FixedRateExchange(ContractBase):
         if self.isActive(exchange_id):
             return None
 
-        return self.send_transaction(
-            "toggleExchangeState", (exchange_id,), from_wallet, self.block_confirmations
-        )
+        return self.send_transaction("toggleExchangeState", (exchange_id,), from_wallet)
 
     @enforce_types
     def deactivate(
@@ -96,9 +86,7 @@ class FixedRateExchange(ContractBase):
         if not self.isActive(exchange_id):
             return None
 
-        return self.send_transaction(
-            "toggleExchangeState", (exchange_id,), from_wallet, self.block_confirmations
-        )
+        return self.send_transaction("toggleExchangeState", (exchange_id,), from_wallet)
 
     #########################
     # Helper methods

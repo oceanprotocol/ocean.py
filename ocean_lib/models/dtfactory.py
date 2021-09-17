@@ -72,8 +72,5 @@ class DTFactory(ContractBase):
         self, blob: str, name: str, symbol: str, cap: int, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "createToken",
-            (blob, name, symbol, cap),
-            from_wallet,
-            self.block_confirmations,
+            "createToken", (blob, name, symbol, cap), from_wallet
         )

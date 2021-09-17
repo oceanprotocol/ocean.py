@@ -6,7 +6,6 @@ import logging
 from decimal import Decimal
 
 from enforce_typing import enforce_types
-from ocean_lib.config import Config
 from ocean_lib.exceptions import InsufficientBalance, VerifyTxFailed
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.bfactory import BFactory
@@ -53,17 +52,12 @@ class OceanPool:
 
     @enforce_types
     def __init__(
-        self,
-        web3: Web3,
-        ocean_token_address: str,
-        bfactory_address: str,
-        config: Config,
+        self, web3: Web3, ocean_token_address: str, bfactory_address: str
     ) -> None:
         """Initialises Ocean Pool."""
         self.web3 = web3
         self.ocean_address = ocean_token_address
         self.bfactory_address = bfactory_address
-        self.config = config
 
     @enforce_types
     def create(
@@ -90,9 +84,7 @@ class OceanPool:
         :param swap_fee: int the fee taken by the pool on each swap transaction
         :return: BPool instance
         """
-        bfactory = BFactory(
-            self.web3, self.bfactory_address, self.config.block_confirmations
-        )
+        bfactory = BFactory(self.web3, self.bfactory_address)
         pool_address = bfactory.newBPool(from_wallet)
         pool = BPool(self.web3, pool_address)
         logger.debug(f"pool created with address {pool_address}.")
@@ -622,9 +614,7 @@ class OceanPool:
     def get_all_pools(self, from_block=0, chunk_size=1000, include_balance=False):
         current_block = self.web3.eth.block_number
 
-        bfactory = BFactory(
-            self.web3, self.bfactory_address, self.config.block_confirmations
-        )
+        bfactory = BFactory(self.web3, self.bfactory_address)
         logs = bfactory.get_event_logs(
             "BPoolRegistered", from_block, current_block, {}, chunk_size=chunk_size
         )
@@ -1089,9 +1079,7 @@ class OceanPool:
 
     @enforce_types
     def get_creation_block(self, pool_address):
-        bfactory = BFactory(
-            self.web3, self.bfactory_address, self.config.block_confirmations
-        )
+        bfactory = BFactory(self.web3, self.bfactory_address)
         current_block = self.web3.eth.block_number
         logs = bfactory.get_event_logs(
             "BPoolCreated",

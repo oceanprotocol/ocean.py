@@ -67,15 +67,11 @@ class MetadataContract(ContractBase):
         """
         :return str: hex str transaction hash
         """
-        return self.send_transaction(
-            "create", (did, flags, data), from_wallet, self.block_confirmations
-        )
+        return self.send_transaction("create", (did, flags, data), from_wallet)
 
     @enforce_types
     def update(self, did: str, flags: bytes, data: bytes, from_wallet: Wallet) -> str:
         """
         :return str: hex str transaction hash
         """
-        return self.send_transaction(
-            "update", (did, flags, data), from_wallet, self.block_confirmations
-        )
+        return self.send_transaction("update", (did, flags, data), from_wallet)

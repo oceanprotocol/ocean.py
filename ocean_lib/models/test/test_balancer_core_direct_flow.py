@@ -38,7 +38,7 @@ def test_complete_flow(
     # ===============================================================
     # 4. Alice creates an OCEAN-DT pool (=a Balancer Pool)
     web3 = alice_ocean.web3
-    bfactory = BFactory(web3, bfactory_address, alice_ocean.config.block_confirmations)
+    bfactory = BFactory(web3, bfactory_address)
     pool_address = bfactory.newBPool(from_wallet=alice_wallet)
     pool = BPool(web3, pool_address)
 

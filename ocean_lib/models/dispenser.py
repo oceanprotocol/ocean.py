@@ -80,10 +80,7 @@ class DispenserContract(ContractBase):
         :return: hex str transaction hash
         """
         return self.send_transaction(
-            "activate",
-            (dt_address, max_tokens, max_balance),
-            from_wallet,
-            self.block_confirmations,
+            "activate", (dt_address, max_tokens, max_balance), from_wallet
         )
 
     @enforce_types
@@ -91,9 +88,7 @@ class DispenserContract(ContractBase):
         """
         :return: hex str transaction hash
         """
-        return self.send_transaction(
-            "deactivate", (dt_address,), from_wallet, self.block_confirmations
-        )
+        return self.send_transaction("deactivate", (dt_address,), from_wallet)
 
     @enforce_types
     def make_minter(self, dt_address: str, from_wallet: Wallet) -> str:
@@ -102,18 +97,14 @@ class DispenserContract(ContractBase):
         """
         token = DataToken(self.web3, dt_address)
         token.proposeMinter(self.address, from_wallet=from_wallet)
-        return self.send_transaction(
-            "acceptMinter", (dt_address,), from_wallet, self.block_confirmations
-        )
+        return self.send_transaction("acceptMinter", (dt_address,), from_wallet)
 
     @enforce_types
     def cancel_minter(self, dt_address: str, from_wallet: Wallet) -> str:
         """
         :return: hex str transaction hash
         """
-        self.send_transaction(
-            "removeMinter", (dt_address,), from_wallet, self.block_confirmations
-        )
+        self.send_transaction("removeMinter", (dt_address,), from_wallet)
         token = DataToken(self.web3, dt_address)
         return token.approveMinter(from_wallet)
 
@@ -122,18 +113,14 @@ class DispenserContract(ContractBase):
         """
         :return: hex str transaction hash
         """
-        return self.send_transaction(
-            "dispense", (dt_address, amount), from_wallet, self.block_confirmations
-        )
+        return self.send_transaction("dispense", (dt_address, amount), from_wallet)
 
     @enforce_types
     def owner_withdraw(self, dt_address: str, from_wallet: Wallet) -> str:
         """
         :return: hex str transaction hash
         """
-        return self.send_transaction(
-            "ownerWithdraw", (dt_address,), from_wallet, self.block_confirmations
-        )
+        return self.send_transaction("ownerWithdraw", (dt_address,), from_wallet)
 
     @enforce_types
     def is_dispensable(self, dt_address: str, amount: int, to_wallet: Wallet) -> bool:
