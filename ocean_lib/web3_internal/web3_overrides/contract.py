@@ -117,7 +117,9 @@ def transact_with_contract_function(
         transact_transaction.pop("account_key")
 
     if account_key:
-        raw_tx = Wallet(web3, private_key=account_key).sign_tx(transact_transaction)
+        raw_tx = Wallet(
+            web3, private_key=account_key, block_confirmations=block_confirmations
+        ).sign_tx(transact_transaction)
         logging.debug(
             f"sending raw tx: function: {function_name}, tx hash: {raw_tx.hex()}"
         )

@@ -31,17 +31,29 @@ def get_example_config():
 
 @enforce_types
 def get_publisher_wallet() -> Wallet:
-    return Wallet(get_web3(), private_key=os.environ.get("TEST_PRIVATE_KEY1"))
+    return Wallet(
+        get_web3(),
+        private_key=os.environ.get("TEST_PRIVATE_KEY1"),
+        block_confirmations=get_example_config().block_confirmations,
+    )
 
 
 @enforce_types
 def get_consumer_wallet() -> Wallet:
-    return Wallet(get_web3(), private_key=os.environ.get("TEST_PRIVATE_KEY2"))
+    return Wallet(
+        get_web3(),
+        private_key=os.environ.get("TEST_PRIVATE_KEY2"),
+        block_confirmations=get_example_config().block_confirmations,
+    )
 
 
 @enforce_types
 def get_another_consumer_wallet() -> Wallet:
-    return Wallet(get_web3(), private_key=os.environ.get("TEST_PRIVATE_KEY3"))
+    return Wallet(
+        get_web3(),
+        private_key=os.environ.get("TEST_PRIVATE_KEY3"),
+        block_confirmations=get_example_config().block_confirmations,
+    )
 
 
 def get_factory_deployer_wallet(network):
@@ -52,7 +64,11 @@ def get_factory_deployer_wallet(network):
     if not private_key:
         return None
 
-    return Wallet(get_web3(), private_key=private_key)
+    return Wallet(
+        get_web3(),
+        private_key=private_key,
+        block_confirmations=get_example_config().block_confirmations,
+    )
 
 
 def get_ganache_wallet():
@@ -65,6 +81,7 @@ def get_ganache_wallet():
         return Wallet(
             web3,
             private_key="0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58",
+            block_confirmations=get_example_config().block_confirmations,
         )
 
     return None
