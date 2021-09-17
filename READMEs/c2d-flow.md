@@ -186,6 +186,12 @@ Full details: [DATA_ddo](DATA_ddo.md)
 
 ## 3. Alice publishes algorithm
 
+For this step, there are some prerequisites needed. If you want to replace the sample algorithm with an algorithm of your choosing, you will need to do some dependency management.
+You can use one of the standard [OCEAN algo_dockers images](https://github.com/oceanprotocol/algo_dockers) or publish a custom docker image.
+Use the image name and tag in the `container` part of the algorithm metadata.
+This docker image needs to have basic support for dependency installation e.g. in the case of Python, OS-level library installations, pip installations etc.
+Take a look at the [OCEAN tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/) to learn more about docker image publishing.
+
 In the same Python console:
 ```python
 # Publish ALG datatoken
