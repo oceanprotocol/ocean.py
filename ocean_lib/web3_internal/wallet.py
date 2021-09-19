@@ -41,13 +41,17 @@ class Wallet:
 
     @enforce_types
     def __init__(
-        self, web3: Web3, private_key: str, block_confirmations: Integer
+        self, web3: Web3, private_key: str, block_confirmations: Union[Integer, int]
     ) -> None:
         """Initialises Wallet object."""
         assert private_key, "private_key is required."
 
         self.web3 = web3
-        self.block_confirmations = block_confirmations
+        self.block_confirmations = (
+            block_confirmations
+            if isinstance(block_confirmations, Integer)
+            else Integer(block_confirmations)
+        )
         self._last_tx_count.clear()
 
         self.private_key = private_key
