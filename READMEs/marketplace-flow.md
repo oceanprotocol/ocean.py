@@ -135,7 +135,8 @@ print(f"config.provider_url = '{config.provider_url}'")
 #Alice's wallet
 import os
 from ocean_lib.web3_internal.wallet import Wallet
-alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'), block_confirmations=config.block_confirmations)
+alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
+alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations)
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
 #Mint OCEAN
@@ -243,7 +244,8 @@ In the same Python console as before:
 
 ```python
 #Bob's wallet
-bob_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY2'), block_confirmations=ocean.config.block_confirmations)
+bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
+bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
 #Verify that Bob has ganache ETH

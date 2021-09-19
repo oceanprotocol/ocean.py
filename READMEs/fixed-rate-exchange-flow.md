@@ -99,7 +99,8 @@ print(f"config.provider_url = '{config.provider_url}'")
 #Alice's wallet
 import os
 from ocean_lib.web3_internal.wallet import Wallet
-alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'), block_confirmations=config.block_confirmations)
+alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
+alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations)
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
 #Mint OCEAN for ganache only
@@ -107,7 +108,7 @@ from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
 
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
+data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, config.metadata_cache_uri)
 token_address = data_token.address
 print(f"token_address = '{token_address}'")
 ```
@@ -127,7 +128,8 @@ data_token.approve(ocean.exchange._exchange_address, to_wei(100), alice_wallet)
 
 In the same python console:
 ```python
-bob_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY2'), block_confirmations=ocean.config.block_confirmations)
+bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
+bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
 #Verify that Bob has ganache ETH

@@ -61,5 +61,6 @@ import os
 import web3
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.integer import Integer
-wallet = Wallet(web3, private_key=os.getenv('MY_TEST_KEY'), block_confirmations=Integer(1))
+private_key = os.getenv('MY_TEST_KEY')
+wallet = Wallet(web3, private_key, 1)
 ```
