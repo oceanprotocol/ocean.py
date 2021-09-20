@@ -24,10 +24,12 @@ def wait_for_transaction_receipt_and_block_confirmations(
 
     :param web3: Web3, used to query for transaction receipts and block number.
     :param tx_hash: HexBytes, the transaction hash.
-    :param block_confirmations: int, larger number of block confirmations
+    :param block_confirmations: int, number of blocks to wait before confirming
+      transaction is still in chain. Larger number of block confirmations
       increases certainty that transaction has settled.
-    :param block_number_poll_interval: interval
-    :param timeout: Optional[int], amount of time to wait for initial tx receipt
+    :param block_number_poll_interval: float, amount of time between calls to
+      get latest block number in seconds
+    :param timeout: int, amount of time to wait for initial tx receipt
       in seconds.
     """
     receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout)
