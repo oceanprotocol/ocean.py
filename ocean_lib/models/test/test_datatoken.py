@@ -54,7 +54,7 @@ def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address
     block = alice_ocean.web3.eth.block_number
     block_confirmations = alice_ocean.config.block_confirmations.value
     all_transfers = token.get_all_transfers_from_events(
-        block - block_confirmations, block + block_confirmations, chunk=1
+        block - (block_confirmations + 1), block, chunk=1
     )
     assert len(all_transfers[0]) == 1
 
@@ -173,7 +173,9 @@ def test_transfer_event(
     block_confirmations = alice_ocean.config.block_confirmations.value
 
     block = alice_ocean.web3.eth.block_number
-    transfer_event = token.get_transfer_event(block, alice_address, bob_address)
+    transfer_event = token.get_transfer_event(
+        block - (block_confirmations + 1), alice_address, bob_address
+    )
     # different way of retrieving
     transfer_events = token.get_event_logs("Transfer", None, block, block)
     assert transfer_events == ()
@@ -184,14 +186,14 @@ def test_transfer_event(
 
     block = alice_ocean.web3.eth.block_number
     transfer_event = token.get_transfer_event(
-        block - block_confirmations, alice_address, bob_address
+        block - (block_confirmations + 1), alice_address, bob_address
     )
     assert transfer_event["args"]["from"] == alice_address
     assert transfer_event["args"]["to"] == bob_address
 
     # same transfer event, different way of retrieving
     transfer_event = token.get_event_logs(
-        "Transfer", None, block - block_confirmations, block - block_confirmations
+        "Transfer", None, block - (block_confirmations + 1), block
     )[0]
     assert transfer_event["args"]["from"] == alice_address
     assert transfer_event["args"]["to"] == bob_address
@@ -279,6 +281,6 @@ def test_calculate_token_holders(alice_ocean, alice_wallet, alice_address):
     block = alice_ocean.web3.eth.block_number
     block_confirmations = alice_ocean.config.block_confirmations.value
     token_holders = token.calculate_token_holders(
-        block - block_confirmations, block + block_confirmations, to_wei(1)
+        block - (block_confirmations + 1), block, to_wei(1)
     )
     assert len(token_holders) == 1

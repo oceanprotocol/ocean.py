@@ -70,7 +70,7 @@ def test_register_asset(publisher_ocean_instance, encrypt):
     asset_id = original_ddo.asset_id
     block_confirmations = ocn.config.block_confirmations.value
     log = ddo_reg.get_event_log(
-        ddo_reg.EVENT_METADATA_CREATED, block - block_confirmations, asset_id, 30
+        ddo_reg.EVENT_METADATA_CREATED, block - (block_confirmations + 1), asset_id, 30
     )
     assert log, "no ddo created event."
 
