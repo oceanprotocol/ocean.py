@@ -48,6 +48,10 @@ def test_block_confirmations():
         web3, tx_hash, block_confirmations=6, block_number_poll_interval=poll_interval
     )
 
+    wait_for_transaction_receipt_and_block_confirmations(
+        web3, tx_hash, block_confirmations=27, block_number_poll_interval=poll_interval
+    )
+
     dummy_tx_thread.stop()
     dummy_tx_thread.join()
 
