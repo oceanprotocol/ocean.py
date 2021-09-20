@@ -108,7 +108,7 @@ from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
 
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, config.metadata_cache_uri)
+data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=config.metadata_cache_uri)
 token_address = data_token.address
 print(f"token_address = '{token_address}'")
 ```
