@@ -135,11 +135,16 @@ def make_info(name, private_key_name):
 
     info = _Info()
     web3 = get_web3()
+    config = ExampleConfig.get_config()
 
     info.web3 = web3
 
     info.private_key = os.environ.get(private_key_name)
-    info.wallet = Wallet(web3, private_key=info.private_key)
+    info.wallet = Wallet(
+        web3,
+        private_key=info.private_key,
+        block_confirmations=config.block_confirmations,
+    )
     info.address = info.wallet.address
     wallet = get_ganache_wallet()
     if wallet:
@@ -151,7 +156,6 @@ def make_info(name, private_key_name):
 
     from ocean_lib.ocean.ocean import Ocean
 
-    config = ExampleConfig.get_config()
     info.ocean = Ocean(config)
     info.T1 = _deployAndMintToken(web3, "TOK1", info.address)
     info.T2 = _deployAndMintToken(web3, "TOK2", info.address)
