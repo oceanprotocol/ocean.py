@@ -68,7 +68,10 @@ def test_register_asset(publisher_ocean_instance, encrypt):
     # try to resolve new asset
     did = original_ddo.did
     asset_id = original_ddo.asset_id
-    log = ddo_reg.get_event_log(ddo_reg.EVENT_METADATA_CREATED, block, asset_id, 30)
+    block_confirmations = ocn.config.block_confirmations.value
+    log = ddo_reg.get_event_log(
+        ddo_reg.EVENT_METADATA_CREATED, block - (block_confirmations + 1), asset_id, 30
+    )
     assert log, "no ddo created event."
 
     ddo = wait_for_ddo(ocn, did)
@@ -117,7 +120,10 @@ def test_register_asset(publisher_ocean_instance, encrypt):
         ocn.assets.update(ddo, bob)
 
     _ = ocn.assets.update(ddo, alice, encrypt=encrypt)
-    log = ddo_reg.get_event_log(ddo_reg.EVENT_METADATA_UPDATED, block, asset_id, 30)
+    block_confirmations = ocn.config.block_confirmations.value
+    log = ddo_reg.get_event_log(
+        ddo_reg.EVENT_METADATA_UPDATED, block - block_confirmations, asset_id, 30
+    )
     assert log, "no ddo updated event"
     _asset = wait_for_update(ocn, ddo.did, "name", _name)
     assert _asset, "Cannot read asset after update."

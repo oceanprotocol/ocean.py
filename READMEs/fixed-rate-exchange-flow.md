@@ -99,7 +99,8 @@ print(f"config.provider_url = '{config.provider_url}'")
 #Alice's wallet
 import os
 from ocean_lib.web3_internal.wallet import Wallet
-alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
+alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
+alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations)
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
 #Mint OCEAN for ganache only
@@ -107,7 +108,7 @@ from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
 
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
+data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=config.metadata_cache_uri)
 token_address = data_token.address
 print(f"token_address = '{token_address}'")
 ```
@@ -127,9 +128,10 @@ data_token.approve(ocean.exchange._exchange_address, to_wei(100), alice_wallet)
 
 In the same python console:
 ```python
-bob_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY2'))
+bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
+bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
- 
+
 #Verify that Bob has ganache ETH
 assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
@@ -143,7 +145,7 @@ If the `exchange_id` is not provided yet, here is the fix.
 It is important to create an `exchange_id` only one time per exchange.
 
 ```python
-#Create exchange_id for a new exchange 
+#Create exchange_id for a new exchange
 exchange_id = ocean.exchange.create(token_address, to_wei("0.1"), alice_wallet)
 ```
 
