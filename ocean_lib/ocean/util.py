@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from typing import Dict, Optional, Union
+
 from enforce_typing import enforce_types
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.dtfactory import DTFactory
@@ -13,8 +14,28 @@ from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
 from web3 import WebsocketProvider
 from web3.main import Web3
+from web3.middleware import geth_poa_middleware
+from web3.providers.base import BaseProvider
 
 GANACHE_URL = "http://127.0.0.1:8545"
+
+
+@enforce_types
+def get_web3(provider: BaseProvider) -> Web3:
+    """
+    Return a web3 instance using the given Provider.
+
+    Adds POA middleware when connecting to the Rinkeby Testnet.
+
+    A note about using the `rinkeby` testnet:
+    Web3 py has an issue when making some requests to `rinkeby`
+    - the issue is described here: https://github.com/ethereum/web3.py/issues/549
+    - and the fix is here: https://web3py.readthedocs.io/en/latest/middleware.html#geth-style-proof-of-authority
+    """
+    web3 = Web3(provider)
+    if web3.eth.chain_id == 4:
+        web3.middleware_onion.inject(geth_poa_middleware, layer=0)
+    return web3
 
 
 @enforce_types
@@ -32,13 +53,8 @@ def get_web3_connection_provider(
     wss://rinkeby.infura.io/ws/v3/357f2fe737db4304bd2f7285c5602d0d
     Note the `/ws/` in the middle and the `wss` protocol in the beginning.
 
-    A note about using the `rinkeby` testnet:
-        Web3 py has an issue when making some requests to `rinkeby`
-        - the issue is described here: https://github.com/ethereum/web3.py/issues/549
-        - and the fix is here: https://web3py.readthedocs.io/en/latest/middleware.html#geth-style-proof-of-authority
-
     :param network_url: str
-    :return: provider : HTTPProvider
+    :return: provider : Union[CustomHTTPProvider, WebsocketProvider]
     """
     if network_url.startswith("http"):
         return CustomHTTPProvider(network_url)
