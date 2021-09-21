@@ -111,9 +111,10 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
 
     # ===============================================================
     # 13. Get liquidity history
-    ocean_liquidity_history, dt_liquidity_history = bob_ocean.pool.get_liquidity_history(
-        pool_address
-    )
+    (
+        ocean_liquidity_history,
+        dt_liquidity_history,
+    ) = bob_ocean.pool.get_liquidity_history(pool_address)
     assert len(ocean_liquidity_history) == 7
     assert len(dt_liquidity_history) == 7
 
