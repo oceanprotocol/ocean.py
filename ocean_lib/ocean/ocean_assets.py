@@ -421,7 +421,7 @@ class OceanAssets:
             Asset(dictionary=ddo_dict)
             for ddo_dict in self._get_aquarius(metadata_cache_uri).query_search(
                 {"query": {"query_string": {"query": text}}}, sort, offset, page
-            )["results"]
+            )
         ]
 
     @enforce_types
@@ -449,9 +449,7 @@ class OceanAssets:
         aquarius = self._get_aquarius(metadata_cache_uri)
         return [
             Asset(dictionary=ddo_dict)
-            for ddo_dict in aquarius.query_search({"query": query}, sort, offset, page)[
-                "results"
-            ]
+            for ddo_dict in aquarius.query_search({"query": query}, sort, offset, page)
         ]
 
     @enforce_types

@@ -94,10 +94,11 @@ class Aquarius:
         :param did: Asset DID string
         :return: metadata key of the DDO instance
         """
-        response = self.requests_session.get(f"{self.base_url}/metadata/{did}").content
-        parsed_response = _parse_response(response, [])
+        response = self.requests_session.get(f"{self.base_url}/metadata/{did}")
+        if response.status_code == 200:
+            return response.json()
 
-        return parsed_response
+        return []
 
     @enforce_types
     def text_search(
@@ -129,13 +130,34 @@ class Aquarius:
         :return: List of DDO instance
         """
         assert page >= 1, f"Invalid page value {page}. Required page >= 1."
-        sort = sort if sort else {}
-        payload = {"text": text, "sort": sort, "offset": offset, "page": page}
+        payload = {
+            "query": {
+                "multi_match": {
+                    "query": text,
+                    "fields": [
+                        "id",
+                        "proof.creator",
+                        "dataToken",
+                        "dataTokenInfo.name",
+                        "dataTokenInfo.symbol",
+                        "service.attributes.main.name^4",
+                        "service.attributes.main.author",
+                        "service.attributes.additionalInformation.description",
+                        "service.attributes.additionalInformation.tags",
+                    ],
+                }
+            }
+        }
+
+        if sort:
+            payload["sort"] = sort
+
         response = self.requests_session.post(
-            f"{self.base_url}/ddo/query",
+            f"{self.base_url}/query",
             data=json.dumps(payload),
             headers={"content-type": "application/json"},
         )
+
         if response.status_code == 200:
             return self._parse_search_response(response.content)
 
@@ -167,16 +189,21 @@ class Aquarius:
         :return: List of DDO instance
         """
         assert page >= 1, f"Invalid page value {page}. Required page >= 1."
-        search_query["sort"] = sort
-        search_query["offset"] = offset
-        search_query["page"] = page
+        if sort:
+            search_query["sort"] = sort
+
+        # if offset:
+        # search_query["from"] = offset
+
+        # TODO Page
         response = self.requests_session.post(
-            f"{self.base_url}/ddo/query",
+            f"{self.base_url}/query",
             data=json.dumps(search_query),
             headers={"content-type": "application/json"},
         )
+
         if response.status_code == 200:
-            return self._parse_search_response(response.content)
+            return response.json()["hits"]["hits"]
 
         raise ValueError(f"Unable to search for DDO: {response.content}")
 
@@ -197,7 +224,7 @@ class Aquarius:
         if response.content == b"true\n":
             return True, []
 
-        parsed_response = self._parse_search_response(response.content)
+        parsed_response = response.json()
         return False, parsed_response
 
     @staticmethod
