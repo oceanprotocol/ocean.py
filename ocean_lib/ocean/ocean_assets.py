@@ -497,7 +497,7 @@ class OceanAssets:
         service_id: int,
         fee_receiver: str,
         from_wallet: Wallet,
-        consumer: Optional[str] = None,
+        consumer: str,
     ) -> str:
         """
         Submits the payment for chosen service in DataTokens.
@@ -508,7 +508,7 @@ class OceanAssets:
         :param service_id:
         :param fee_receiver:
         :param from_wallet: Wallet instance
-        :param consumer: str the address of consumer of the service, defaults to the payer (the `from_wallet` address)
+        :param consumer: str the address of consumer of the service
         :return: hex str id of transfer transaction
         """
         dt = DataToken(web3, token_address)
@@ -525,9 +525,6 @@ class OceanAssets:
 
         if fee_receiver is None:
             fee_receiver = ZERO_ADDRESS
-
-        if consumer is None:
-            consumer = from_wallet.address
 
         tx_hash = dt.startOrder(consumer, amount, service_id, fee_receiver, from_wallet)
 
