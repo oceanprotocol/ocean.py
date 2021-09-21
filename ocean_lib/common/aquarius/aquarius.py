@@ -101,76 +101,7 @@ class Aquarius:
         return []
 
     @enforce_types
-    def text_search(
-        self,
-        text: str,
-        sort: Optional[dict] = None,
-        offset: Optional[int] = 100,
-        page: Optional[int] = 1,
-    ) -> list:
-        """
-        Search in aquarius using text query.
-
-        Given the string aquarius will do a full-text query to search in all documents.
-
-        Currently implemented are the MongoDB and Elastic Search drivers.
-
-        For a detailed guide on how to search, see the MongoDB driver documentation:
-        mongodb driverCurrently implemented in:
-        https://docs.mongodb.com/manual/reference/operator/query/text/
-
-        And the Elastic Search documentation:
-        https://www.elastic.co/guide/en/elasticsearch/guide/current/full-text-search.html
-        Other drivers are possible according to each implementation.
-
-        :param text: String to be search.
-        :param sort: 1/-1 to sort ascending or descending.
-        :param offset: Integer with the number of elements displayed per page.
-        :param page: Integer with the number of page.
-        :return: List of DDO instance
-        """
-        assert page >= 1, f"Invalid page value {page}. Required page >= 1."
-        payload = {
-            "query": {
-                "multi_match": {
-                    "query": text,
-                    "fields": [
-                        "id",
-                        "proof.creator",
-                        "dataToken",
-                        "dataTokenInfo.name",
-                        "dataTokenInfo.symbol",
-                        "service.attributes.main.name^4",
-                        "service.attributes.main.author",
-                        "service.attributes.additionalInformation.description",
-                        "service.attributes.additionalInformation.tags",
-                    ],
-                }
-            }
-        }
-
-        if sort:
-            payload["sort"] = sort
-
-        response = self.requests_session.post(
-            f"{self.base_url}/query",
-            data=json.dumps(payload),
-            headers={"content-type": "application/json"},
-        )
-
-        if response.status_code == 200:
-            return response.json()
-
-        raise ValueError(f"Unable to search for DDO: {response.content}")
-
-    @enforce_types
-    def query_search(
-        self,
-        search_query: dict,
-        sort: Optional[dict] = None,
-        offset: Optional[int] = 100,
-        page: Optional[int] = 1,
-    ) -> list:
+    def query_search(self, search_query: dict) -> list:
         """
         Search using a query.
 
@@ -182,20 +113,9 @@ class Aquarius:
 
         Example: query_search({"price":[0,10]})
 
-        :param search_query: Python dictionary, query following mongodb syntax
-        :param sort: 1/-1 to sort ascending or descending.
-        :param offset: Integer with the number of elements displayed per page.
-        :param page: Integer with the number of page.
+        :param search_query: Python dictionary, query following elasticsearch syntax
         :return: List of DDO instance
         """
-        assert page >= 1, f"Invalid page value {page}. Required page >= 1."
-        if sort:
-            search_query["sort"] = sort
-
-        # if offset:
-        # search_query["from"] = offset
-
-        # TODO Page
         response = self.requests_session.post(
             f"{self.base_url}/query",
             data=json.dumps(search_query),

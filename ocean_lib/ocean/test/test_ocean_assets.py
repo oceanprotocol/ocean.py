@@ -157,9 +157,11 @@ def test_ocean_assets_search(publisher_ocean_instance, metadata):
         len(
             publisher_ocean_instance.assets.query(
                 {
-                    "query_string": {
-                        "query": identifier,
-                        "fields": ["service.attributes.main.name"],
+                    "query": {
+                        "query_string": {
+                            "query": identifier,
+                            "fields": ["service.attributes.main.name"],
+                        }
                     }
                 }
             )
@@ -170,9 +172,11 @@ def test_ocean_assets_search(publisher_ocean_instance, metadata):
         len(
             publisher_ocean_instance.assets.query(
                 {
-                    "query_string": {
-                        "query": "Gorilla",
-                        "fields": ["service.attributes.main.name"],
+                    "query": {
+                        "query_string": {
+                            "query": "Gorilla",
+                            "fields": ["service.attributes.main.name"],
+                        }
                     }
                 }
             )

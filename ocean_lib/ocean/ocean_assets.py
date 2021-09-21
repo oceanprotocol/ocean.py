@@ -396,61 +396,37 @@ class OceanAssets:
         return resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
 
     @enforce_types
-    def search(
-        self,
-        text: str,
-        sort: Optional[dict] = None,
-        offset: Optional[int] = 100,
-        page: Optional[int] = 1,
-        metadata_cache_uri: Optional[str] = None,
-    ) -> list:
+    def search(self, text: str, metadata_cache_uri: Optional[str] = None) -> list:
         """
         Search an asset in oceanDB using aquarius.
 
         :param text: String with the value that you are searching
-        :param sort: Dictionary to choose order main in some value
-        :param offset: Number of elements shows by page
-        :param page: Page number
         :param metadata_cache_uri: Url of the aquarius where you want to search. If there is not
             provided take the default
         :return: List of assets that match with the query
         """
-        assert page >= 1, f"Invalid page value {page}. Required page >= 1."
         logger.info(f"Searching asset containing: {text}")
         return [
             Asset(dictionary=ddo_dict)
             for ddo_dict in self._get_aquarius(metadata_cache_uri).query_search(
-                {"query": {"query_string": {"query": text}}}, sort, offset, page
+                {"query": {"query_string": {"query": text}}}
             )
         ]
 
     @enforce_types
-    def query(
-        self,
-        query: dict,
-        sort: Optional[dict] = None,
-        offset: Optional[int] = 100,
-        page: Optional[int] = 1,
-        metadata_cache_uri: Optional[str] = None,
-    ) -> list:
+    def query(self, query: dict, metadata_cache_uri: Optional[str] = None) -> list:
         """
         Search an asset in oceanDB using search query.
 
         :param query: dict with query parameters
             (e.g.) https://github.com/oceanprotocol/aquarius/blob/develop/docs/for_api_users/API.md
-        :param sort: Dictionary to choose order main in some value
-        :param offset: Number of elements shows by page
-        :param page: Page number
         :param metadata_cache_uri: Url of the aquarius where you want to search. If there is not
             provided take the default
         :return: List of assets that match with the query.
         """
         logger.info(f"Searching asset query: {query}")
         aquarius = self._get_aquarius(metadata_cache_uri)
-        return [
-            Asset(dictionary=ddo_dict)
-            for ddo_dict in aquarius.query_search({"query": query}, sort, offset, page)
-        ]
+        return [Asset(dictionary=ddo_dict) for ddo_dict in aquarius.query_search(query)]
 
     @enforce_types
     def order(
@@ -657,7 +633,15 @@ class OceanAssets:
         return [
             asset.did
             for asset in self.query(
-                {"query_string": {"query": owner_address, "fields": ["proof.creator"]}}
+                {
+                    "size": 1000,
+                    "query": {
+                        "query_string": {
+                            "query": owner_address,
+                            "fields": ["proof.creator"],
+                        }
+                    },
+                }
             )
         ]
 
