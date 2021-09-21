@@ -9,7 +9,7 @@ Help to communicate with the metadata store.
 
 import json
 import logging
-from typing import Any, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
 
 from enforce_typing import enforce_types
 from ocean_lib.common.ddo.ddo import DDO
@@ -159,7 +159,7 @@ class Aquarius:
         )
 
         if response.status_code == 200:
-            return self._parse_search_response(response.content)
+            return response.json()
 
         raise ValueError(f"Unable to search for DDO: {response.content}")
 
@@ -227,18 +227,6 @@ class Aquarius:
         parsed_response = response.json()
         return False, parsed_response
 
-    @staticmethod
-    @enforce_types
-    def _parse_search_response(response: Any) -> Union[list, dict]:
-        parsed_response = _parse_response(response, None)
-
-        if isinstance(parsed_response, dict) or isinstance(parsed_response, list):
-            return parsed_response
-
-        raise ValueError(
-            f"Unknown search response, expecting a list or dict, got {type(parsed_response)}."
-        )
-
     @enforce_types
     def encrypt(self, text: str) -> bytes:
         """
@@ -260,20 +248,3 @@ class Aquarius:
                 raise ValueError("Failed to encrypt asset.")
         except Exception:
             raise ValueError("Failed to encrypt asset.")
-
-
-@enforce_types
-def _parse_response(response: Any, default_return: Any) -> Any:
-    if not response:
-        return default_return
-
-    try:
-        response_json = json.loads(response)
-        if "error" in response_json:
-            return default_return
-    except TypeError:
-        return default_return
-    except ValueError:
-        raise ValueError(response.decode("UTF-8"))
-
-    return default_return

@@ -99,13 +99,10 @@ def test_register_asset(publisher_ocean_instance, encrypt):
 
     # Can't resolve unregistered asset
     unregistered_did = DID.did({"0": "0x00112233445566"})
-    with pytest.raises(ValueError):
-        ocn.assets.resolve(unregistered_did)
+    assert ocn.assets.resolve(unregistered_did) is None
 
-    # Raise error on bad did
     invalid_did = "did:op:0123456789"
-    with pytest.raises(ValueError):
-        ocn.assets.resolve(invalid_did)
+    assert ocn.assets.resolve(invalid_did) is None
 
     meta_data_assets = ocn.assets.search("")
     if meta_data_assets:

@@ -657,8 +657,7 @@ class OceanAssets:
         return [
             asset.did
             for asset in self.query(
-                {"query_string": {"query": owner_address, "fields": ["proof.creator"]}},
-                offset=1000,
+                {"query_string": {"query": owner_address, "fields": ["proof.creator"]}}
             )
         ]
 
