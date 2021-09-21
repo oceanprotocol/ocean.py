@@ -28,7 +28,7 @@ jobs:
         working-directory: ${{ github.workspace }}/barge
         run: |
           export AQUARIUS_VERSION=v3.1.1
-          bash -x start_ocean.sh --no-dashboard 2>&1 --with-rbac > start_ocean.log &
+          bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-rbac > start_ocean.log &
           for i in $(seq 1 50); do
             sleep 5
             [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" ] && break
