@@ -41,6 +41,8 @@ jobs:
           pip install tox tox-gh-actions
       - name: Test with tox and publish code coverage
         uses: paambaati/codeclimate-action@v2.7.5
+        env:
+          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
         with:
           coverageCommand: tox
           debug: true
