@@ -41,3 +41,7 @@ NETWORK_TIMEOUT_MAP = {
     "moonbeamalpha": 60,
     "ganache": 2,
 }
+
+"""The interval in seconds when polling the latest block number
+block_number poll interval = 1/2 average block time for a given chain"""
+BLOCK_NUMBER_POLL_INTERVAL = {1: 6.5, 3: 6, 4: 7.5, 56: 1.5, 137: 1, 1287: 6, 1337: 2.5}

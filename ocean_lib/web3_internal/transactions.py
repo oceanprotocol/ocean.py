@@ -6,7 +6,12 @@ from typing import Optional, Union
 
 from enforce_typing import enforce_types
 from eth_account.messages import SignableMessage
+from ocean_lib.web3_internal.constants import BLOCK_NUMBER_POLL_INTERVAL
+from ocean_lib.web3_internal.utils import get_network_timeout
 from ocean_lib.web3_internal.wallet import Wallet
+from ocean_lib.web3_internal.web3_overrides.utils import (
+    wait_for_transaction_receipt_and_block_confirmations,
+)
 from web3.datastructures import AttributeDict
 from web3.main import Web3
 
@@ -31,18 +36,23 @@ def send_ether(from_wallet: Wallet, to_address: str, amount: int) -> AttributeDi
         to_address = Web3.toChecksumAddress(to_address)
 
     web3 = from_wallet.web3
-
+    chain_id = web3.eth.chain_id
     tx = {
         "from": from_wallet.address,
         "to": to_address,
         "value": amount,
-        "chainId": web3.eth.chain_id,
+        "chainId": chain_id,
     }
     tx["gas"] = web3.eth.estimate_gas(tx)
     raw_tx = from_wallet.sign_tx(tx)
     tx_hash = web3.eth.send_raw_transaction(raw_tx)
-    receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=30)
-    return receipt
+    block_confirmations = from_wallet.block_confirmations.value
+    block_number_poll_interval = BLOCK_NUMBER_POLL_INTERVAL[chain_id]
+    network_timeout = get_network_timeout(network_id=chain_id)
+    wait_for_transaction_receipt_and_block_confirmations(
+        web3, tx_hash, block_confirmations, block_number_poll_interval, network_timeout
+    )
+    return web3.eth.get_transaction_receipt(tx_hash)
 
 
 @enforce_types
@@ -53,15 +63,21 @@ def cancel_or_replace_transaction(
     gas_limit: Optional[int] = None,
 ) -> AttributeDict:
     web3 = from_wallet.web3
+    chain_id = web3.eth.chain_id
     tx = {
         "from": from_wallet.address,
         "to": from_wallet.address,
         "value": 0,
-        "chainId": web3.eth.chain_id,
+        "chainId": chain_id,
     }
     gas = gas_limit if gas_limit is not None else web3.eth.estimate_gas(tx)
     tx["gas"] = gas + 1
     raw_tx = from_wallet.sign_tx(tx, fixed_nonce=nonce_value, gas_price=gas_price)
     tx_hash = web3.eth.send_raw_transaction(raw_tx)
-    receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout=30)
-    return receipt
+    block_confirmations = from_wallet.block_confirmations.value
+    block_number_poll_interval = BLOCK_NUMBER_POLL_INTERVAL[chain_id]
+    network_timeout = get_network_timeout(network_id=chain_id)
+    wait_for_transaction_receipt_and_block_confirmations(
+        web3, tx_hash, block_confirmations, block_number_poll_interval, network_timeout
+    )
+    return web3.eth.get_transaction_receipt(tx_hash)

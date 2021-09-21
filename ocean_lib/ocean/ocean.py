@@ -139,7 +139,7 @@ class Ocean:
         ```python
             config = Config('config.ini')
             ocean = Ocean(config)
-            wallet = Wallet(ocean.web3, private_key=private_key)
+            wallet = Wallet(ocean.web3, private_key=private_key, block_confirmations=config.block_confirmations)
             datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet)
         ```
 
