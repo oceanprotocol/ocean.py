@@ -33,6 +33,7 @@ def test_InsufficientBalance(publisher_ocean_instance):
             0,
             ZERO_ADDRESS,
             alice,
+            alice.address,
         )
 
 

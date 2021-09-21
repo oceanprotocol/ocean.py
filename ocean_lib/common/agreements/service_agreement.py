@@ -4,10 +4,12 @@
 #
 from collections import namedtuple
 from typing import Optional
+from urllib.parse import urlparse
 
 from enforce_typing import enforce_types
 from ocean_lib.common.agreements.service_types import ServiceTypes, ServiceTypesIndices
 from ocean_lib.common.ddo.service import Service
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 Agreement = namedtuple("Agreement", ("template", "conditions"))
 
@@ -102,3 +104,10 @@ class ServiceAgreement(Service):
         :return: Float
         """
         return float(self.main["cost"])
+
+    @enforce_types
+    def get_c2d_address(self) -> str:
+        result = urlparse(self.service_endpoint)
+        return DataServiceProvider.get_c2d_address(
+            f"{result.scheme}://{result.netloc}/"
+        )
