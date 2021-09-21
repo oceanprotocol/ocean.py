@@ -60,20 +60,19 @@ class Aquarius:
         return f"{self.base_url}/ddo/encrypt"
 
     @enforce_types
-    def get_asset_ddo(self, did: str) -> Union[DDO, dict]:
+    def get_asset_ddo(self, did: str) -> Optional[DDO]:
         """
         Retrieve asset ddo for a given did.
 
         :param did: Asset DID string
         :return: DDO instance
         """
-        response = self.requests_session.get(f"{self.base_url}/ddo/{did}").content
-        parsed_response = _parse_response(response, None)
+        response = self.requests_session.get(f"{self.base_url}/ddo/{did}")
 
-        if not parsed_response:
-            return {}
+        if response.status_code == 200:
+            return DDO(dictionary=response.json())
 
-        return DDO(dictionary=parsed_response)
+        return None
 
     @enforce_types
     def ddo_exists(self, did: str) -> bool:
@@ -85,7 +84,7 @@ class Aquarius:
         """
         response = self.requests_session.get(f"{self.base_url}/ddo/{did}").content
 
-        return "asset DID is not in OceanDB" not in str(response)
+        return f"Asset DID {did} not found in Elasticsearch" not in str(response)
 
     @enforce_types
     def get_asset_metadata(self, did: str) -> list:
@@ -242,7 +241,9 @@ def _parse_response(response: Any, default_return: Any) -> Any:
         return default_return
 
     try:
-        return json.loads(response)
+        response_json = json.loads(response)
+        if "error" in response_json:
+            return default_return
     except TypeError:
         return default_return
     except ValueError:
