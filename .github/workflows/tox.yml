@@ -9,9 +9,8 @@ on:
   - pull_request
 
 jobs:
-  build-n-publish:
-    environment:
-      CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+  build:
+    environment: CC_REPORTER_ID
     runs-on: ubuntu-latest
     steps:
       - name: Setup Ocean.py
