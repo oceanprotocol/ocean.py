@@ -109,6 +109,15 @@ def test_quickstart(alice_ocean, alice_wallet, alice_address, bob_ocean, bob_wal
         pool_address, amount=to_wei("0.1"), from_wallet=bob_wallet
     )
 
+    # ===============================================================
+    # 13. Get liquidity history
+    (
+        ocean_liquidity_history,
+        dt_liquidity_history,
+    ) = bob_ocean.pool.get_liquidity_history(pool_address)
+    assert len(ocean_liquidity_history) == 7
+    assert len(dt_liquidity_history) == 7
+
 
 # ===============================================================
 # Test helper functions for the quickstart stuff above
