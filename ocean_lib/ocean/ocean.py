@@ -24,6 +24,7 @@ from ocean_lib.ocean.ocean_services import OceanServices
 from ocean_lib.ocean.util import (
     get_bfactory_address,
     get_contracts_addresses,
+    get_dtfactory_address,
     get_ocean_token_address,
     get_web3,
 )
@@ -107,6 +108,7 @@ class Ocean:
             self.web3,
             ocean_address,
             get_bfactory_address(self.config.address_file, network),
+            get_dtfactory_address(self.config.address_file, network),
         )
         self.exchange = OceanExchange(
             self.web3,
