@@ -15,14 +15,13 @@ from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_web3 as util_get_web3
-from ocean_lib.ocean.util import get_web3_connection_provider
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 
 
 def get_web3():
-    return util_get_web3(get_web3_connection_provider(get_example_config().network_url))
+    return util_get_web3(get_example_config().network_url)
 
 
 def get_example_config():

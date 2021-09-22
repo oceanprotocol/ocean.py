@@ -22,7 +22,7 @@ from ocean_lib.config import (
     Config,
     config_defaults,
 )
-from ocean_lib.ocean.util import get_web3, get_web3_connection_provider
+from ocean_lib.ocean.util import get_web3
 
 logging.basicConfig(level=logging.INFO)
 
@@ -111,7 +111,7 @@ class ExampleConfig:
             network_url is not None
         ), "Cannot use ocean-lib without a specified network URL."
 
-        w3 = get_web3(get_web3_connection_provider(network_url))
+        w3 = get_web3(network_url)
         chain_id = w3.eth.chain_id
 
         config = get_config_dict(chain_id)

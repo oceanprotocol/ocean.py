@@ -26,7 +26,6 @@ from ocean_lib.ocean.util import (
     get_contracts_addresses,
     get_ocean_token_address,
     get_web3,
-    get_web3_connection_provider,
 )
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
@@ -87,7 +86,7 @@ class Ocean:
             }
             config = Config(options_dict=config_dict)
         self.config = config
-        self.web3 = get_web3(get_web3_connection_provider(self.config.network_url))
+        self.web3 = get_web3(self.config.network_url)
 
         if not data_provider:
             data_provider = DataServiceProvider

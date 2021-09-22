@@ -15,15 +15,14 @@ from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvi
 from web3 import WebsocketProvider
 from web3.main import Web3
 from web3.middleware import geth_poa_middleware
-from web3.providers.base import BaseProvider
 
 GANACHE_URL = "http://127.0.0.1:8545"
 
 
 @enforce_types
-def get_web3(provider: BaseProvider) -> Web3:
+def get_web3(network_url: str) -> Web3:
     """
-    Return a web3 instance using the given Provider.
+    Return a web3 instance connected via the given network_url.
 
     Adds POA middleware when connecting to the Rinkeby Testnet.
 
@@ -32,6 +31,7 @@ def get_web3(provider: BaseProvider) -> Web3:
     - the issue is described here: https://github.com/ethereum/web3.py/issues/549
     - and the fix is here: https://web3py.readthedocs.io/en/latest/middleware.html#geth-style-proof-of-authority
     """
+    provider = get_web3_connection_provider(network_url)
     web3 = Web3(provider)
     if web3.eth.chain_id == 4:
         web3.middleware_onion.inject(geth_poa_middleware, layer=0)
