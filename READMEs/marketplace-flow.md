@@ -135,7 +135,8 @@ print(f"config.provider_url = '{config.provider_url}'")
 #Alice's wallet
 import os
 from ocean_lib.web3_internal.wallet import Wallet
-alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
+alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
+alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations)
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
 #Mint OCEAN
@@ -232,7 +233,7 @@ OCEAN_address = ocean.OCEAN_address
 price_in_OCEAN = ocean.pool.calcInGivenOut(
     pool_address, OCEAN_address, token_address, token_out_amount=to_wei(1))
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
-print(f"Price of 1 {datatoken.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
+print(f"Price of 1 {data_token.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
 ```
 
 ## 4.  Bob buys data asset, and downloads it
@@ -243,7 +244,8 @@ In the same Python console as before:
 
 ```python
 #Bob's wallet
-bob_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY2'))
+bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
+bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
 #Verify that Bob has ganache ETH
@@ -276,7 +278,14 @@ service = asset.get_service(ServiceTypes.ASSET_ACCESS)
 quote = ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
 order_tx_id = ocean.assets.pay_for_service(
     ocean.web3,
-    quote.amount, quote.data_token_address, asset.did, service.index, fee_receiver, bob_wallet, None)
+    quote.amount,
+    quote.data_token_address,
+    asset.did,
+    service.index,
+    fee_receiver,
+    bob_wallet,
+    service.get_c2d_address()
+)
 print(f"order_tx_id = '{order_tx_id}'")
 
 #Bob downloads. If the connection breaks, Bob can request again by showing order_tx_id.

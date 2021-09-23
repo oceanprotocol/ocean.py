@@ -8,11 +8,7 @@ from ocean_lib.config import (
     DEFAULT_PROVIDER_URL,
     SECTION_ETH_NETWORK,
 )
-from ocean_lib.example_config import (
-    ExampleConfig,
-    NETWORK_NAME,
-    NAME_BLOCK_CONFIRMATION_POLL_INTERVAL,
-)
+from ocean_lib.example_config import NETWORK_NAME, ExampleConfig
 
 
 def test_ganache_example_config(monkeypatch):
@@ -27,9 +23,6 @@ def test_ganache_example_config(monkeypatch):
     assert config.provider_url == DEFAULT_PROVIDER_URL
 
     assert config.__dict__["_sections"][SECTION_ETH_NETWORK][NETWORK_NAME] == "ganache"
-    assert config.__dict__["_sections"][SECTION_ETH_NETWORK][
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL
-    ] == str(2.5)
 
 
 def test_polygon_example_config(monkeypatch):
@@ -44,9 +37,6 @@ def test_polygon_example_config(monkeypatch):
     assert config.provider_url == "https://provider.polygon.oceanprotocol.com"
 
     assert config.__dict__["_sections"][SECTION_ETH_NETWORK][NETWORK_NAME] == "polygon"
-    assert config.__dict__["_sections"][SECTION_ETH_NETWORK][
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL
-    ] == str(1)
 
 
 def test_bsc_example_config(monkeypatch):
@@ -61,9 +51,6 @@ def test_bsc_example_config(monkeypatch):
     assert config.provider_url == "https://provider.bsc.oceanprotocol.com"
 
     assert config.__dict__["_sections"][SECTION_ETH_NETWORK][NETWORK_NAME] == "bsc"
-    assert config.__dict__["_sections"][SECTION_ETH_NETWORK][
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL
-    ] == str(1.5)
 
 
 def test_moonbeam_alpha_example_config(monkeypatch):
@@ -81,6 +68,3 @@ def test_moonbeam_alpha_example_config(monkeypatch):
         config.__dict__["_sections"][SECTION_ETH_NETWORK][NETWORK_NAME]
         == "moonbeamalpha"
     )
-    assert config.__dict__["_sections"][SECTION_ETH_NETWORK][
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL
-    ] == str(6)

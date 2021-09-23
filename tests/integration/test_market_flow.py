@@ -5,7 +5,6 @@
 
 import os
 
-import pytest
 from ocean_lib.assets.asset import Asset
 from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
@@ -22,8 +21,7 @@ from tests.resources.helper_functions import (
 )
 
 
-@pytest.mark.parametrize("order_type", ["implicit_none", "explicit_none"])
-def test_market_flow(order_type):
+def test_market_flow():
     """Tests that an order is correctly placed on the market.
 
     The parameter implicit_none sends the payload with an empty key as the delegated consumer.
@@ -72,10 +70,8 @@ def test_market_flow(order_type):
         service.index,
         "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",
         consumer_wallet,
+        sa.get_c2d_address(),
     ]
-
-    if order_type == "explicit_none":
-        args.append(None)
 
     _order_tx_id = consumer_ocean.assets.pay_for_service(*args)
 
@@ -90,10 +86,6 @@ def test_market_flow(order_type):
     )
 
     assert len(os.listdir(asset_folder)) >= 1, "The asset folder is empty."
-
-    if order_type == "explicit_none":
-        # no need to continue, order worked
-        return
 
     orders = consumer_ocean.get_user_orders(consumer_wallet.address, asset.asset_id)
     assert (

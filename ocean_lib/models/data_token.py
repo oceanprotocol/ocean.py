@@ -487,10 +487,7 @@ class DataToken(ContractBase):
 
     @enforce_types
     def calculate_token_holders(
-        self,
-        from_block: Optional[int],
-        to_block: Optional[int],
-        min_token_amount: int,
+        self, from_block: Optional[int], to_block: Optional[int], min_token_amount: int
     ) -> List[Tuple[str, int]]:
         """Returns a list of addresses with token balances above a minimum token
         amount. Calculated from the transactions between `from_block` and `to_block`."""

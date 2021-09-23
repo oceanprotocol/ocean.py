@@ -485,14 +485,14 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def get_provider_address(provider_uri: str) -> Optional[str]:
+    def get_c2d_address(provider_uri: str) -> Optional[str]:
         """
         Return the provider address
         """
         try:
             provider_info = DataServiceProvider._http_method("get", provider_uri).json()
 
-            return provider_info["providerAddress"]
+            return provider_info["computeAddress"]
         except requests.exceptions.RequestException:
             pass
 

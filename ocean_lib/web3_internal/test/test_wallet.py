@@ -9,13 +9,15 @@ from eth_account.messages import encode_defunct
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-def test_wallet_arguments(web3):
+def test_wallet_arguments(web3, config):
     """Tests that a wallet's arguments are correctly setup."""
     private_key = os.environ.get("TEST_PRIVATE_KEY1")
     assert private_key, "envvar TEST_PRIVATE_KEY1 is not set."
 
     # Create wallet with valid private key
-    wallet = Wallet(web3, private_key=private_key)
+    wallet = Wallet(
+        web3, private_key=private_key, block_confirmations=config.block_confirmations
+    )
     assert wallet.private_key == private_key, "Private keys are different."
     assert wallet.address, "The wallet does not have a wallet address."
     signed_message = wallet.sign(encode_defunct(text="msg-to-sign"))
@@ -28,7 +30,11 @@ def test_wallet_arguments(web3):
     # Create wallet with invalid private_key
     invalid_key = "332233444332"
     with pytest.raises(ValueError):
-        Wallet(web3, private_key=invalid_key)
+        Wallet(
+            web3,
+            private_key=invalid_key,
+            block_confirmations=config.block_confirmations,
+        )
 
     with pytest.raises(TypeError):
-        Wallet(web3, private_key=None)
+        Wallet(web3, private_key=None, block_confirmations=config.block_confirmations)

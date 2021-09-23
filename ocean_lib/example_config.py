@@ -11,6 +11,7 @@ from enforce_typing import enforce_types
 from ocean_lib.config import (
     DEFAULT_METADATA_CACHE_URI,
     DEFAULT_PROVIDER_URL,
+    NAME_BLOCK_CONFIRMATIONS,
     NAME_CHAIN_ID,
     NAME_METADATA_CACHE_URI,
     NAME_NETWORK_URL,
@@ -26,52 +27,48 @@ from web3 import Web3
 
 logging.basicConfig(level=logging.INFO)
 
-"""The interval in seconds between calls for the latest block number."""
-NAME_BLOCK_CONFIRMATION_POLL_INTERVAL = "block_confirmation_poll_interval"
-
-
 CONFIG_NETWORK_HELPER = {
     1: {
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 6.5,
         NAME_PROVIDER_URL: "https://provider.mainnet.oceanprotocol.com",
         NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "mainnet",
+        NAME_BLOCK_CONFIRMATIONS: 1,
     },
     3: {
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 6,
         NAME_PROVIDER_URL: "https://provider.ropsten.oceanprotocol.com",
         NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "ropsten",
+        NAME_BLOCK_CONFIRMATIONS: 1,
     },
     4: {
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 7.5,
         NAME_PROVIDER_URL: "https://provider.rinkeby.oceanprotocol.com",
         NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "rinkeby",
+        NAME_BLOCK_CONFIRMATIONS: 1,
     },
     56: {
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 1.5,
         NAME_PROVIDER_URL: "https://provider.bsc.oceanprotocol.com",
         NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "bsc",
+        NAME_BLOCK_CONFIRMATIONS: 1,
     },
     137: {
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 1,
         NAME_PROVIDER_URL: "https://provider.polygon.oceanprotocol.com",
         NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "polygon",
+        NAME_BLOCK_CONFIRMATIONS: 15,
     },
     1287: {
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 6,
         NAME_PROVIDER_URL: "https://provider.moonbeamalpha.oceanprotocol.com",
         NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "moonbeamalpha",
+        NAME_BLOCK_CONFIRMATIONS: 3,
     },
     1337: {
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 2.5,
         NAME_PROVIDER_URL: DEFAULT_PROVIDER_URL,
         NAME_METADATA_CACHE_URI: DEFAULT_METADATA_CACHE_URI,
         NETWORK_NAME: "ganache",
+        NAME_BLOCK_CONFIRMATIONS: 0,
     },
 }
 
@@ -86,8 +83,8 @@ def get_config_dict(chain_id: int) -> dict:
         {
             NAME_CHAIN_ID: chain_id,
             NETWORK_NAME: CONFIG_NETWORK_HELPER[chain_id][NETWORK_NAME],
-            NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: CONFIG_NETWORK_HELPER[chain_id][
-                NAME_BLOCK_CONFIRMATION_POLL_INTERVAL
+            NAME_BLOCK_CONFIRMATIONS: CONFIG_NETWORK_HELPER[chain_id][
+                NAME_BLOCK_CONFIRMATIONS
             ],
         }
     )

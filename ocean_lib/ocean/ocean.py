@@ -24,6 +24,7 @@ from ocean_lib.ocean.ocean_services import OceanServices
 from ocean_lib.ocean.util import (
     get_bfactory_address,
     get_contracts_addresses,
+    get_dtfactory_address,
     get_ocean_token_address,
     get_web3_connection_provider,
 )
@@ -108,6 +109,7 @@ class Ocean:
             self.web3,
             ocean_address,
             get_bfactory_address(self.config.address_file, network),
+            get_dtfactory_address(self.config.address_file, network),
         )
         self.exchange = OceanExchange(
             self.web3,
@@ -139,7 +141,7 @@ class Ocean:
         ```python
             config = Config('config.ini')
             ocean = Ocean(config)
-            wallet = Wallet(ocean.web3, private_key=private_key)
+            wallet = Wallet(ocean.web3, private_key=private_key, block_confirmations=config.block_confirmations)
             datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet)
         ```
 
