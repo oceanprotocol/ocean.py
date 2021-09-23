@@ -233,7 +233,7 @@ OCEAN_address = ocean.OCEAN_address
 price_in_OCEAN = ocean.pool.calcInGivenOut(
     pool_address, OCEAN_address, token_address, token_out_amount=to_wei(1))
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
-print(f"Price of 1 {datatoken.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
+print(f"Price of 1 {data_token.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
 ```
 
 ## 4.  Bob buys data asset, and downloads it
