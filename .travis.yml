@@ -49,6 +49,9 @@ after_script:
   - docker logs $img1
   - export img2=$(docker ps --format "table {{.Names}}"| sed 's/NAMES//g' | grep 'ocean_provider2_1' | sed '/^[[:space:]]*$/d')
   - docker logs $img2
+  - export img3=$(docker ps --format "table {{.Names}}"| sed 's/NAMES//g' | grep 'ocean_aquarius_1' | sed '/^[[:space:]]*$/d')
+  - docker logs $img3
+  
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 
 deploy:
