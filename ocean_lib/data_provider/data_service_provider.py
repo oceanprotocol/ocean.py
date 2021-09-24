@@ -448,6 +448,46 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
+    def compute_job_result_file(
+        job_id: str,
+        index: int,
+        service_endpoint: str,
+        consumer_address: str,
+        signature: str,
+    ) -> Dict[str, Any]:
+        """
+
+        :param job_id: str id of compute job that was returned from `start_compute_job`
+        :param index: int compute result index
+        :param service_endpoint: str url of the provider service endpoint for compute service
+        :param consumer_address: hex str the ethereum address of the consumer's account
+        :param signature: hex str signed message to allow the provider to authorize the consumer
+
+        :return: dict of job_id to result urls.
+        """
+        req = PreparedRequest()
+        params = {
+            "signature": signature,
+            "jobId": job_id,
+            "index": index,
+            "consumerAddress": consumer_address,
+        }
+
+        req.prepare_url(service_endpoint, params)
+        compute_job_result_file_url = req.url
+
+        logger.info(
+            f"invoke the computeResult endpoint with this url: {compute_job_result_file_url}"
+        )
+        response = DataServiceProvider._http_method("get", compute_job_result_file_url)
+
+        if response.status_code != 200:
+            raise Exception(response.content)
+
+        return response.content
+
+    @staticmethod
+    @enforce_types
     def _remove_slash(path: str) -> str:
         if path.endswith("/"):
             path = path[:-1]
@@ -570,6 +610,11 @@ class DataServiceProvider:
     @enforce_types
     def build_compute_endpoint(provider_uri: str) -> Tuple[str, str]:
         return DataServiceProvider.build_endpoint("computeStatus", provider_uri)
+
+    @staticmethod
+    @enforce_types
+    def build_compute_result_file_endpoint(provider_uri: str) -> Tuple[str, str]:
+        return DataServiceProvider.build_endpoint("computeResult", provider_uri)
 
     @staticmethod
     @enforce_types
