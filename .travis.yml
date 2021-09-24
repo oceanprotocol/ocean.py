@@ -33,6 +33,7 @@ before_install:
         [ -f "${HOME}/.ocean/ocean-contracts/artifacts/ready" ] && break
       done
       ls -la "${HOME}/.ocean/ocean-contracts/artifacts/"
+      docker container ps
 
 install: pip install -U tox-travis
 
