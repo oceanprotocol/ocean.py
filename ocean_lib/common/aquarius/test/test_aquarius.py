@@ -34,9 +34,6 @@ def test_aqua_functions_for_single_ddo(
     res = aquarius_instance.get_asset_ddo(ddo.did)
     assert res.did == ddo.did, "Aquarius could not resolve the did."
 
-    res = aquarius_instance.text_search(ddo.did)
-    assert len(res), "The result does not exist."
-
 
 def test_metadata_invalid(aquarius_instance):
     """Tests metadata validation failure."""
@@ -45,12 +42,6 @@ def test_metadata_invalid(aquarius_instance):
     )
     assert result is False
     assert errors[0]["message"] == "'main' is a required property"
-
-
-def test_invalid_text_search(aquarius_instance):
-    """Tests text search with an invalid text."""
-    with pytest.raises(TypeError):
-        aquarius_instance.text_search(text={})
 
 
 def test_invalid_search_query(aquarius_instance):
