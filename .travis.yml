@@ -44,6 +44,8 @@ before_script:
 script: tox
 
 after_script:
+  - docker logs ocean_provider_1
+  - docker logs ocean_provider2_1
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 
 deploy:
