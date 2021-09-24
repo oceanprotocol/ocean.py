@@ -458,7 +458,7 @@ class DataServiceProvider:
         """
 
         :param job_id: str id of compute job that was returned from `start_compute_job`
-        :param index: compute result index
+        :param index: int compute result index
         :param service_endpoint: str url of the provider service endpoint for compute service
         :param consumer_address: hex str the ethereum address of the consumer's account
         :param signature: hex str signed message to allow the provider to authorize the consumer
