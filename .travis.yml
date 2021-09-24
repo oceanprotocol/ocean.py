@@ -45,8 +45,10 @@ before_script:
 script: tox
 
 after_script:
-  - docker logs ocean_provider_1
-  - docker logs ocean_provider2_1
+  - export img1=$(docker ps --format "table {{.Names}}"| sed 's/NAMES//g' | grep 'ocean_provider_1' | sed '/^[[:space:]]*$/d')
+  - docker logs $img1
+  - export img2=$(docker ps --format "table {{.Names}}"| sed 's/NAMES//g' | grep 'ocean_provider2_1' | sed '/^[[:space:]]*$/d')
+  - docker logs $img2
   - ./cc-test-reporter after-build --exit-code $TRAVIS_TEST_RESULT
 
 deploy:
