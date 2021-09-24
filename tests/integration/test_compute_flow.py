@@ -212,6 +212,8 @@ def run_compute_test(
         succeeded = False
         for _ in range(0, 200):
             status = ocean_instance.compute.status(did, job_id, consumer_wallet)
+            # wait until job is done, see:
+            # https://github.com/oceanprotocol/operator-service/blob/main/API.md#status-description
             if status["status"] > 60:
                 succeeded = True
                 break
