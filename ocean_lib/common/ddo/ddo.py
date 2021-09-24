@@ -190,7 +190,8 @@ class DDO:
     def _read_dict(self, dictionary: dict) -> None:
         """Import a JSON dict into this DDO."""
         values = copy.deepcopy(dictionary)
-        self.did = values.pop("id")
+        id_key = "id" if "id" in values else "_id"
+        self.did = values.pop(id_key)
         self.created = values.pop("created", None)
 
         if "service" in values:
