@@ -71,6 +71,9 @@ export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f0
 #set the address file only for ganache
 export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
 
+#set network URL
+export OCEAN_NETWORK_URL=http://127.0.0.1:8545
+
 #start python
 python
 ```
@@ -120,6 +123,7 @@ from ocean_lib.web3_internal.currency import to_wei
 contracts_addresses = get_contracts_addresses(config.network_name, config.address_file)
 assert contracts_addresses, "invalid network."
 print(f"contracts_addresses = {contracts_addresses}")
+
 #Create the dispenser
 dispenser_address = contracts_addresses["Dispenser"]
 dispenser = DispenserContract(alice_wallet.web3, dispenser_address)
