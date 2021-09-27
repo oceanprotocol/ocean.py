@@ -33,6 +33,6 @@ def wait_for_transaction_receipt_and_block_confirmations(
       in seconds.
     """
     receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout)
-    while web3.eth.block_number < (receipt.blockNumber + block_confirmations - 1):
+    while web3.eth.block_number < receipt.blockNumber + block_confirmations:
         time.sleep(block_number_poll_interval)
     return web3.eth.get_transaction_receipt(tx_hash)
