@@ -41,6 +41,7 @@ This is in beta state and you can expect running into problems. If you run into 
 - [🏄 Quickstart](#-quickstart)
   - [Simple Flow](#simple-flow)
   - [Marketplace Flow](#marketplace-flow)
+  - [Compute-to-Data Flow](#compute-to-data-flow)
   - [Learn more](#learn-more)
 - [🦑 Development](#-development)
 - [🏛 License](#-license)
@@ -66,9 +67,15 @@ This stripped-down flow shows the essence of Ocean: simply creating a datatoken.
 
 ### Marketplace flow
 
-This batteries-included flow includes metadata and datatoken pool.
+In this flow, a data asset is posted for sale in a marketplace, and purchased. It includes metadata and a datatoken pool.
 
 [Go to marketplace flow](READMEs/marketplace-flow.md)
+
+### Compute-to-Data flow
+
+This flow uses Ocean Compute-to-Data (c2d) to compute results from a dataset that never leaves the premises.
+
+[Go to c2d flow](READMEs/c2d-flow.md)
 
 ### Learn more
 
