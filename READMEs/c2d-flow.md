@@ -129,12 +129,6 @@ import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_wallet = Wallet(ocean.web3, os.getenv('TEST_PRIVATE_KEY1'), config.block_confirmations)
 print(f"alice_wallet.address = '{alice_wallet.address}'")
-
-# Mint OCEAN for ganache only
-from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-mint_fake_OCEAN(config)
-
-assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 ```
 
 ## 2. Alice publishes data asset
@@ -281,14 +275,6 @@ In the same Python console:
 ```python
 bob_wallet = Wallet(ocean.web3, os.getenv('TEST_PRIVATE_KEY2'), config.block_confirmations)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
-
-# Verify that Bob has ganache ETH
-assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
-
-from ocean_lib.models.btoken import BToken #BToken is ERC20
-OCEAN_token = BToken(ocean.web3, ocean.OCEAN_address)
-assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need OCEAN"
-assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
 
 # Alice shares access for both to Bob, as datatokens. Alternatively, Bob might have bought these in a market.
 DATA_datatoken.transfer(bob_wallet.address, to_wei(5), from_wallet=alice_wallet)
