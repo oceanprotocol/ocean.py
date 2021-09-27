@@ -97,10 +97,6 @@ In the work console:
 #set private keys of two accounts
 export TEST_PRIVATE_KEY1=0x5d75837394b078ce97bc289fa8d75e21000573520bfa7784a9d28ccaae602bf8
 export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
-
-#needed to mint fake OCEAN for testing with ganache
-export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
-
 ```
 
 ### Config in Python
@@ -193,7 +189,7 @@ Full details: [DATA_ddo](DATA_ddo.md)
 ## 3. Alice publishes algorithm
 
 For this step, there are some prerequisites needed. If you want to replace the sample algorithm with an algorithm of your choosing, you will need to do some dependency management.
-You can use one of the standard [OCEAN algo_dockers images](https://github.com/oceanprotocol/algo_dockers) or publish a custom docker image.
+You can use one of the standard [Ocean algo_dockers images](https://github.com/oceanprotocol/algo_dockers) or publish a custom docker image.
 Use the image name and tag in the `container` part of the algorithm metadata.
 This docker image needs to have basic support for dependency installation e.g. in the case of Python, OS-level library installations, pip installations etc.
 Take a look at the [Ocean tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/) to learn more about docker image publishing.
