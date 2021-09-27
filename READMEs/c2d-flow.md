@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Compute-to-Data (C2D) Flow
 
-This quickstart describes a C2D fow.
+This quickstart describes a C2D flow.
 
 Here are the steps:
 
@@ -16,6 +16,8 @@ Here are the steps:
 5. Bob acquires datatokens for data and algorithm
 6. Bob starts a compute job
 7. Bob monitors logs / algorithm output
+
+This c2d flow example features a simple algorithm from the field of ML. OCEAN c2d is not limited to ML datasets and algorithms, but it is one of the most common use cases. For a simple image processing example, you can check out [ocean-lena](https://github.com/calina-c/ocean-lena/blob/main/c2d-flow.md).
 
 Let's go through each step.
 
