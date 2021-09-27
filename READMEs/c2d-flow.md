@@ -41,6 +41,9 @@ cd barge
 #clean up old containers (to be sure)
 docker system prune -a --volumes
 
+# make sure to use the dev version of the operator service URL, to match the barge provider
+export OPERATOR_SERVICE_URL=https://c2d-dev.operator.oceanprotocol.com/
+
 #run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
 ./start_ocean.sh  --with-provider2
 ```
@@ -57,6 +60,13 @@ source venv/bin/activate
 #Install the ocean.py library. Install wheel first to avoid errors.
 pip install wheel
 pip install ocean-lib
+```
+
+This example uses c2d to create a regression model. In order to visualise it or manipulate it, you also need some dependencies:
+
+```console
+pip install numpy
+pip install matplotlib
 ```
 
 ### Create config file
@@ -359,5 +369,27 @@ Once you get `{'ok': True, 'status': 70, 'statusText': 'Job finished'}`, Bob can
 result = ocean.compute.result_file(DATA_did, job_id, 0, bob_wallet)  # 0 index, means we retrieve the results from the first dataset index
 
 import pickle
-pickle.loads(result)  # will output the gaussian model result
+model = pickle.loads(result)  # the gaussian model result
 ```
+
+You can use the result however you like. For the purpose of this example, let's plot it.
+```python
+import numpy
+from matplotlib import pyplot
+
+X0_vec = numpy.linspace(-5., 10., 15)
+X1_vec = numpy.linspace(0., 15., 15)
+X0, X1 = numpy.meshgrid(X0_vec, X1_vec)
+b, c, t = 0.12918450914398066, 1.5915494309189535, 0.039788735772973836
+u = X1 - b*X0**2 + c*X0 - 6
+r = 10.*(1. - t) * numpy.cos(X0) + 10
+Z = u**2 + r
+
+fig, ax = pyplot.subplots(subplot_kw={"projection": "3d"})
+ax.scatter(X0, X1, model, c="r", label="model")
+pyplot.title("Data + model")
+pyplot.show() # or pyplot.savefig("test.png") to save the plot as a .png file instead
+```
+
+You should see something like this:
+![test](https://user-images.githubusercontent.com/4101015/134895548-82e8ede8-d0db-433a-b37e-694de390bca3.png)
