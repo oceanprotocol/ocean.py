@@ -44,7 +44,6 @@ NAME_DOWNLOADS_PATH = "downloads.path"
 
 SECTION_ETH_NETWORK = "eth-network"
 SECTION_RESOURCES = "resources"
-SECTION_UTIL = "util"
 
 environ_names_and_sections = {
     NAME_DATA_TOKEN_FACTORY_ADDRESS: [
