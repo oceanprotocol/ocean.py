@@ -78,26 +78,6 @@ pip install wheel
 pip install ocean-lib
 ```
 
-### Create config file
-
-In the work console:
-
-```console
-#Create config.ini file and fill it with configuration info
-echo """
-[eth-network]
-network = http://127.0.0.1:8545
-address.file = ~/.ocean/ocean-contracts/artifacts/address.json
-
-[resources]
-metadata_cache_uri = http://localhost:5000
-provider.url = http://localhost:8030
-provider.address = 0x00bd138abd70e2f00903268f3db08f2d25677c9e
-
-downloads.path = consume-downloads
-""" > config.ini
-```
-
 ### Set envvars
 
 In the work console:
@@ -106,8 +86,14 @@ In the work console:
 export TEST_PRIVATE_KEY1=0x5d75837394b078ce97bc289fa8d75e21000573520bfa7784a9d28ccaae602bf8
 export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
 
-#needed to mint fake OCEAN
+#needed to mint fake OCEAN for testing with ganache
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+
+#set the address file only for ganache
+export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
+
+#set network URL
+export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 
 #start python
 python
@@ -115,20 +101,16 @@ python
 
 ## 2. Alice publishes data asset
 
-In the work console:
-```console
-python
-```
-
 In the Python console:
 ```python
 #create ocean instance
-from ocean_lib.config import Config
+from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
-config = Config('config.ini')
+config = ExampleConfig.get_config()
 ocean = Ocean(config)
 
 print(f"config.network_url = '{config.network_url}'")
+print(f"config.block_confirmations = {config.block_confirmations.value}")
 print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
 print(f"config.provider_url = '{config.provider_url}'")
 
