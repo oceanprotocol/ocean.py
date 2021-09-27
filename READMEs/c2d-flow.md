@@ -17,7 +17,7 @@ Here are the steps:
 6. Bob starts a compute job
 7. Bob monitors logs / algorithm output
 
-This c2d flow example features a simple algorithm from the field of ML. OCEAN c2d is not limited to ML datasets and algorithms, but it is one of the most common use cases. For a simple image processing example, you can check out [ocean-lena](https://github.com/calina-c/ocean-lena/blob/main/c2d-flow.md).
+This c2d flow example features a simple algorithm from the field of ML. Ocean c2d is not limited to ML datasets and algorithms, but it is one of the most common use cases. For a simple image processing example, you can check out [ocean-lena](https://github.com/calina-c/ocean-lena/blob/main/c2d-flow.md).
 
 Let's go through each step.
 
@@ -202,7 +202,7 @@ For this step, there are some prerequisites needed. If you want to replace the s
 You can use one of the standard [OCEAN algo_dockers images](https://github.com/oceanprotocol/algo_dockers) or publish a custom docker image.
 Use the image name and tag in the `container` part of the algorithm metadata.
 This docker image needs to have basic support for dependency installation e.g. in the case of Python, OS-level library installations, pip installations etc.
-Take a look at the [OCEAN tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/) to learn more about docker image publishing.
+Take a look at the [Ocean tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/) to learn more about docker image publishing.
 
 In the same Python console:
 ```python
@@ -264,7 +264,7 @@ print(f"ALG did = '{ALG_ddo.did}'")
 Full details: [ALG_ddo](ALG_ddo.md)
 
 Please note that this example features a simple Python algorithm. If you publish an algorithm in another language, make sure you have an appropriate container to run it, including dependencies.
-You can find more information about how to do this in the [OCEAN tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/).
+You can find more information about how to do this in the [Ocean tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/).
 
 ## 4. Alice allows the algorithm for C2D for that data asset
 
