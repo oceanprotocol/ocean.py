@@ -356,26 +356,8 @@ Here is a list of possible results: [Operator Service Status description](https:
 Once you get `{'ok': True, 'status': 70, 'statusText': 'Job finished'}`, Bob can check the result of the job.
 
 ```python
-result = ocean.compute.result(DATA_did, job_id, bob_wallet)
+result = ocean.compute.result_file(DATA_did, job_id, 0, bob_wallet)  # 0 index, means we retrieve the results from the first dataset index
 
-```
-
-It will output a dictionary containing details and logs, e.g:
-
-```python
-result['logs']  # will output something like https://compute-publish.s3.amazonaws.com/79..8/data/logs/algorithm.log
-```
-
-Going to your result link you will see the algorithm logs, e.g. in this simple case it will just log the algorithm steps.
-
-We are working on a function to also retrieve the binary result file, so expect updates to this README pretty soon :)
-
-Work in progress (we'll use the resultFile instead of result["urls"]):
-```python
-import requests
 import pickle
-
-response = requests.get(result["urls"][0])
-open('/tmp/resultfile', 'wb').write(response.content)
-pickle.load(open('/tmp/resultfile', "rb"))  # will output the gaussian model result
+pickle.loads(result)  # will output the gaussian model result
 ```
