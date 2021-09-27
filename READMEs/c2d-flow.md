@@ -392,4 +392,5 @@ pyplot.show() # or pyplot.savefig("test.png") to save the plot as a .png file in
 ```
 
 You should see something like this:
+
 ![test](https://user-images.githubusercontent.com/4101015/134895548-82e8ede8-d0db-433a-b37e-694de390bca3.png)
