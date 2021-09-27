@@ -123,6 +123,7 @@ from ocean_lib.web3_internal.currency import to_wei
 contracts_addresses = get_contracts_addresses(config.network_name, config.address_file)
 assert contracts_addresses, "invalid network."
 print(f"contracts_addresses = {contracts_addresses}")
+
 #Create the dispenser
 dispenser_address = contracts_addresses["Dispenser"]
 dispenser = DispenserContract(alice_wallet.web3, dispenser_address)
