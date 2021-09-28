@@ -24,7 +24,7 @@ In your working directory, create a file `config.ini` and fill it with the follo
     network = https://rinkeby.infura.io/v3/<your Infura project id>
 
     [resources]
-    metadata_cache_uri = https://aquarius.rinkeby.oceanprotocol.com
+    metadata_cache_uri = https://aquarius.oceanprotocol.com
     provider.url = https://provider.rinkeby.oceanprotocol.com
 
 Ensure that envvars don't override the config file values:
