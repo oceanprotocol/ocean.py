@@ -90,6 +90,7 @@ config = ExampleConfig.get_config()
 ocean = Ocean(config)
 
 print(f"config.network_url = '{config.network_url}'")
+print(f"config.block_confirmations = {config.block_confirmations.value}")
 print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
 print(f"config.provider_url = '{config.provider_url}'")
 print(f"config.network_name = '{config.network_name}'")

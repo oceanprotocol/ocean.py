@@ -29,18 +29,6 @@ docker system prune -a --volumes
 ./start_ocean.sh  --with-provider2
 ```
 
-## Create config file
-
-In a console:
-```console
-#Create config.ini file and fill it with configuration info
-echo """
-[eth-network]
-network = http://127.0.0.1:8545
-address.file = ~/.ocean/ocean-contracts/artifacts/address.json
-""" > config.ini
-```
-
 ## Install the library, set envvars
 
 In a new console:
@@ -57,6 +45,12 @@ pip install ocean-lib
 #set envvars
 export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 
+#set the address file only for ganache
+export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
+
+#set network URL
+export OCEAN_NETWORK_URL=http://127.0.0.1:8545
+
 #go into python
 python
 ```
@@ -67,12 +61,12 @@ In the Python console:
 
 ```python
 import os
-from ocean_lib.config import Config
+from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.wallet import Wallet
 
 private_key = os.getenv('TEST_PRIVATE_KEY1')
-config = Config('config.ini')
+config = ExampleConfig.get_config()
 ocean = Ocean(config)
 
 print("create wallet: begin")

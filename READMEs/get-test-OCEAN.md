@@ -80,9 +80,9 @@ In a Python console:
 
 ```python
 #setup
-import os
+from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
-config = {'network': os.getenv('OCEAN_NETWORK_URL')}
+config = ExampleConfig.get_config()
 ocean = Ocean(config)
 
 #create an ERC20 object of OCEAN token
