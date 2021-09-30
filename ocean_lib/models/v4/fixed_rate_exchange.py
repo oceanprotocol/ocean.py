@@ -8,7 +8,7 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-class FixedRateExchangeV4(ContractBase):
+class IFixedRateExchange(ContractBase):
 
     #########################
     # Transaction methods
