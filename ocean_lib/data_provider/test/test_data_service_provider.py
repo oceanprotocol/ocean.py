@@ -196,7 +196,9 @@ def test_provider_address(config):
 def test_provider_address_with_url():
     """Tests that a URL version of provider address exists on the DataServiceProvider."""
     p_ocean_instance = get_publisher_ocean_instance()
-    provider_address = DataSP.get_provider_address(DataSP.get_url(p_ocean_instance.config))
+    provider_address = DataSP.get_provider_address(
+        DataSP.get_url(p_ocean_instance.config)
+    )
     assert provider_address, "Failed to get provider address."
     assert DataSP.get_provider_address("not a url") is None
 
