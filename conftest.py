@@ -50,7 +50,7 @@ def setup_all(request, config, web3):
         10
     ), "Ether balance less than 10."
 
-    from ocean_lib.models.erc20_token import MockOcean as DataToken
+    from ocean_lib.models.v4.erc20_token import MockOcean as DataToken
 
     OCEAN_token = DataToken(web3, address=network_addresses["development"]["Ocean"])
 

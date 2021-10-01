@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enforce_typing import enforce_types
-from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
+from ocean_lib.models.v4.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 
