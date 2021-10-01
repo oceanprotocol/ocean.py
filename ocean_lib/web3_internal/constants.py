@@ -28,8 +28,11 @@ NETWORK_NAME_MAP = {
     4: "Rinkeby",
     56: "Binance Smart Chain",
     137: "Polygon",
+    246: "Energy Web",
+    1285: "Moonriver",
     1287: "Moonbeam Alpha",
     1337: "Ganache",
+    44787: "Celo Alfajores",
 }
 
 NETWORK_TIMEOUT_MAP = {
@@ -39,6 +42,9 @@ NETWORK_TIMEOUT_MAP = {
     "bsc": 10 * 60,
     "polygon": 10 * 60,
     "moonbeamalpha": 60,
+    "celoalfajores": 60,
+    "moonriver": 60,
+    "energyweb": 60,
     "ganache": 2,
 }
 
