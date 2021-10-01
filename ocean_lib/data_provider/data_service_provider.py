@@ -540,6 +540,21 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
+    def get_provider_address(provider_uri: str) -> Optional[str]:
+        """
+        Return the provider address
+        """
+        try:
+            provider_info = DataServiceProvider._http_method("get", provider_uri).json()
+
+            return provider_info["providerAddress"]
+        except requests.exceptions.RequestException:
+            pass
+
+        return None
+
+    @staticmethod
+    @enforce_types
     def get_root_uri(service_endpoint: str) -> str:
         provider_uri = service_endpoint
         api_version = DataServiceProvider.get_api_version()
