@@ -10,15 +10,15 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 class IPool(ContractBase):
     @enforce_types
-    def getDataTokenAddress(self, from_wallet: Wallet) -> str:
+    def get_data_token_address(self, from_wallet: Wallet) -> str:
         return self.send_transaction("getDataTokenAddress", from_wallet)
 
     @enforce_types
-    def getBaseTokenAddress(self, from_wallet: Wallet) -> str:
+    def get_base_token_address(self, from_wallet: Wallet) -> str:
         return self.send_transaction("getBaseTokenAddress", from_wallet)
 
     @enforce_types
-    def getController(self, from_wallet: Wallet) -> str:
+    def get_controller(self, from_wallet: Wallet) -> str:
         return self.send_transaction("getController", from_wallet)
 
     @enforce_types

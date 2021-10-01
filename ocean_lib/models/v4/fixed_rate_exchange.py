@@ -38,7 +38,7 @@ class IFixedRateExchange(ContractBase):
         )
 
     @enforce_types
-    def createWithDecimals(
+    def create_with_decimals(
         self,
         base_token: str,
         data_token: str,

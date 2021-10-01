@@ -15,7 +15,7 @@ class IFactoryRouter(ContractBase):
     #########################
     # Transaction methods
     @enforce_types
-    def deployPool(
+    def deploy_pool(
         self,
         controller: str,
         tokens: List[str],
@@ -40,7 +40,7 @@ class IFactoryRouter(ContractBase):
         )
 
     @enforce_types
-    def deployFixedRate(
+    def deploy_fixed_rate(
         self,
         fixed_price_address: str,
         base_token: str,

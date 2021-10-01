@@ -28,7 +28,7 @@ class IFactory(ContractBase):
         )
 
     @enforce_types
-    def isInitialized(self, from_wallet: Wallet) -> str:
+    def is_initialized(self, from_wallet: Wallet) -> str:
         return self.send_transaction("isInitialized", from_wallet)
 
     @enforce_types
@@ -48,13 +48,13 @@ class IFactory(ContractBase):
         )
 
     @enforce_types
-    def addToERC721Registry(self, ERC721address: str, from_wallet: Wallet) -> str:
+    def add_to_ERC721_registry(self, ERC721address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("addToERC721Registry", ERC721address, from_wallet)
 
     @enforce_types
-    def erc721List(self, ERC721address: str, from_wallet: Wallet) -> str:
+    def erc721_list(self, ERC721address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("erc721List", ERC721address, from_wallet)
 
     @enforce_types
-    def erc20List(self, data_token: str, from_wallet: Wallet) -> str:
+    def erc20_list(self, data_token: str, from_wallet: Wallet) -> str:
         return self.send_transaction("erc20List", data_token, from_wallet)
