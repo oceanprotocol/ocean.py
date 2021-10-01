@@ -185,12 +185,14 @@ def test_c2d_address(config):
     c2d_address = DataSP.get_c2d_address(provider_uri)
     assert c2d_address, "Failed to get provider address."
 
+
 def test_provider_address(config):
     """Tests that a provider address exists on the DataServiceProvider."""
     provider_uri = DataSP.get_url(config)
     provider_address = DataSP.get_provider_address(provider_uri)
     assert provider_address, "Failed to get provider address."
-    
+
+
 def test_provider_address_with_url():
     """Tests that a URL version of provider address exists on the DataServiceProvider."""
     p_ocean_instance = get_publisher_ocean_instance()
