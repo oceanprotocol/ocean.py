@@ -57,6 +57,18 @@ CONFIG_NETWORK_HELPER = {
         NETWORK_NAME: "polygon",
         NAME_BLOCK_CONFIRMATIONS: 15,
     },
+    246: {
+        NAME_PROVIDER_URL: "https://provider.energyweb.oceanprotocol.com",
+        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
+        NETWORK_NAME: "energyweb",
+        NAME_BLOCK_CONFIRMATIONS: 3,
+    },
+    1285: {
+        NAME_PROVIDER_URL: "https://provider.moonriver.oceanprotocol.com",
+        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
+        NETWORK_NAME: "moonriver",
+        NAME_BLOCK_CONFIRMATIONS: 3,
+    },
     1287: {
         NAME_PROVIDER_URL: "https://provider.moonbeamalpha.oceanprotocol.com",
         NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
@@ -68,6 +80,12 @@ CONFIG_NETWORK_HELPER = {
         NAME_METADATA_CACHE_URI: DEFAULT_METADATA_CACHE_URI,
         NETWORK_NAME: "ganache",
         NAME_BLOCK_CONFIRMATIONS: 0,
+    },
+    44787: {
+        NAME_PROVIDER_URL: "https://provider.celoalfajores.oceanprotocol.com",
+        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
+        NETWORK_NAME: "celoalfajores",
+        NAME_BLOCK_CONFIRMATIONS: 3,
     },
 }
 
