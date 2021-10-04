@@ -6,7 +6,7 @@ from typing import List
 
 from enforce_typing import enforce_types
 from ocean_lib.models.v4.erc_token_factory_base import ERCTokenFactoryBase
-from ocean_lib.models.v4.factory_tuples import (
+from ocean_lib.models.v4.models_structures import (
     NftCreateData,
     ErcCreateData,
     PoolData,
@@ -24,26 +24,21 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     EVENT_NEW_FIXED_RATE = "NewFixedRate"
 
     @property
-    @enforce_types
-    def event_TokenCreated(self):
+    def event_NFTCreated(self):
         return self.events.NFTCreated()
 
     @property
-    @enforce_types
     def event_TokenCreated(self):
         return self.events.TokenCreated()
 
     @property
-    @enforce_types
     def event_NewPool(self):
         return self.events.NewPool()
 
     @property
-    @enforce_types
     def event_NewFixedRate(self):
         return self.events.NewFixedRate()
 
-    @enforce_types
     def deploy_erc721_contract(
         self,
         name: str,
@@ -59,23 +54,18 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             from_wallet,
         )
 
-    @enforce_types
-    def get_current_token_count(self) -> int:
+    def get_current_nft_count(self) -> int:
         return self.contract.caller.getCurrentNFTCount()
 
-    @enforce_types
     def get_nft_template(self, template_index: int) -> list:
         return self.contract.caller.getNFTTemplate(template_index)
 
-    @enforce_types
     def get_current_nft_template_count(self) -> int:
         return self.contract.caller.getCurrentNFTTemplateCount()
 
-    @enforce_types
     def is_contract(self, account_address: str) -> bool:
         return self.contract.caller.isContract(account_address)
 
-    @enforce_types
     def create_token(
         self,
         template_index: int,
@@ -91,19 +81,15 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             from_wallet,
         )
 
-    @enforce_types
     def get_current_token_count(self) -> int:
         return self.contract.caller.getCurrentTokenCount()
 
-    @enforce_types
     def get_token_template(self, index: int) -> list:
         return self.contract.caller.getTokenTemplate(index)
 
-    @enforce_types
     def get_current_template_count(self) -> int:
         return self.contract.caller.getCurrentTemplateCount()
 
-    @enforce_types
     def start_multiple_token_order(
         self,
         token_address: str,
@@ -128,7 +114,6 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         ]
         return self.send_transaction("startMultipleTokenOrder", orders, from_wallet)
 
-    @enforce_types
     def create_nft_with_erc(
         self,
         nft_create_data: NftCreateData,
@@ -154,7 +139,6 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             from_wallet,
         )
 
-    @enforce_types
     def create_nft_erc_with_pool(
         self,
         nft_create_data: NftCreateData,
@@ -190,7 +174,6 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             from_wallet,
         )
 
-    @enforce_types
     def createNftErcWithFixedRate(
         self,
         nft_create_data: NftCreateData,

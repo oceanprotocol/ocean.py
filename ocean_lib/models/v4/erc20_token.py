@@ -5,6 +5,8 @@
 from typing import List
 
 from enforce_typing import enforce_types
+
+from ocean_lib.models.v4.models_structures import PoolData, FixedData
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -16,6 +18,32 @@ class ERC20Token(ContractBase):
     BASE = 10 ** 18
     BASE_COMMUNITY_FEE_PERCENTAGE = BASE / 1000
     BASE_MARKET_FEE_PERCENTAGE = BASE / 1000
+
+    EVENT_ORDER_STARTED = "OrderStarted"
+    EVENT_MINTER_PROPOSED = "MinterProposed"
+    EVENT_MINTER_APPROVED = "MinterApproved"
+    EVENT_NEW_POOL = "NewPool"
+    EVENT_NEW_FIXED_RATE = "NewFixedRate"
+
+    @property
+    def event_OrderStarted(self):
+        return self.events.OrderStarted()
+
+    @property
+    def event_MinterProposed(self):
+        return self.events.MinterProposed()
+
+    @property
+    def event_MinterApproved(self):
+        return self.events.MinterApproved()
+
+    @property
+    def event_NewPool(self):
+        return self.events.NewPool()
+
+    @property
+    def event_NewFixedRate(self):
+        return self.events.NewFixedRate()
 
     def initialize(
         self,
@@ -30,6 +58,36 @@ class ERC20Token(ContractBase):
         return self.send_transaction(
             "initialize",
             (name, symbol, erc_address, cap, fee_collector_address, minter_address),
+            from_wallet,
+        )
+
+    def deploy_pool(self, pool_data: PoolData, from_wallet: Wallet) -> str:
+        return self.send_transaction(
+            "deployPool",
+            (
+                pool_data.controller,
+                pool_data.base_token,
+                pool_data.ss_params,
+                pool_data.bt_sender,
+                pool_data.swap_fees,
+                pool_data.market_fee_collector,
+                pool_data.publisher,
+            ),
+            from_wallet,
+        )
+
+    def create_fixed_rate(self, fixed_data: FixedData, from_wallet: Wallet) -> str:
+        return self.send_transaction(
+            "createFixedRate",
+            (
+                fixed_data.fixed_price_address,
+                fixed_data.base_token,
+                fixed_data.bt_decimals,
+                fixed_data.exchange_rate,
+                fixed_data.owner,
+                fixed_data.market_fee,
+                fixed_data.market_fee_collector,
+            ),
             from_wallet,
         )
 
@@ -101,11 +159,17 @@ class ERC20Token(ContractBase):
             from_wallet,
         )
 
-    def addMinter(self, minter_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("addMinter", (minter_address), from_wallet)
+    def add_minter(self, minter_address: str, from_wallet: Wallet) -> str:
+        return self.send_transaction("addMinter", minter_address, from_wallet)
 
-    def removeMinter(self, minter_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("removeMinter", (minter_address), from_wallet)
+    def remove_minter(self, minter_address: str, from_wallet: Wallet) -> str:
+        return self.send_transaction("removeMinter", minter_address, from_wallet)
+
+    def add_fee_manager(self, fee_manager: str, from_wallet: Wallet) -> str:
+        return self.send_transaction("addFeeManager", fee_manager, from_wallet)
+
+    def remove_fee_manager(self, fee_manager: str, from_wallet: Wallet) -> str:
+        return self.send_transaction("removeFeeManager", fee_manager, from_wallet)
 
     def set_data(self, data: bytes) -> None:
         return self.contract.caller.setData(data)
@@ -118,6 +182,24 @@ class ERC20Token(ContractBase):
 
     def set_fee_collector(self, fee_collector_address: str) -> None:
         return self.contract.caller.setFeeCollector(fee_collector_address)
+
+    def get_publishing_market_fee(self) -> tuple:
+        return self.contract.caller.getPublishingMarketFee()
+
+    def set_publishing_market_fee(
+        self,
+        publish_market_fee_address: str,
+        publish_market_fee_token: str,
+        publish_market_fee_amount: int,
+    ) -> None:
+        return self.contract.caller.setPublishingMarketFee(
+            publish_market_fee_address,
+            publish_market_fee_token,
+            publish_market_fee_amount,
+        )
+
+    def get_id(self) -> int:
+        return self.contract.caller.getId()
 
     def name(self) -> str:
         return self.contract.caller.name()
