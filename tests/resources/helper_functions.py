@@ -30,28 +30,34 @@ def get_example_config():
 
 @enforce_types
 def get_publisher_wallet() -> Wallet:
+    config = get_example_config()
     return Wallet(
         get_web3(),
         private_key=os.environ.get("TEST_PRIVATE_KEY1"),
-        block_confirmations=get_example_config().block_confirmations,
+        block_confirmations=config.block_confirmations,
+        transaction_timeout=config.transaction_timeout,
     )
 
 
 @enforce_types
 def get_consumer_wallet() -> Wallet:
+    config = get_example_config()
     return Wallet(
         get_web3(),
         private_key=os.environ.get("TEST_PRIVATE_KEY2"),
-        block_confirmations=get_example_config().block_confirmations,
+        block_confirmations=config.block_confirmations,
+        transaction_timeout=config.transaction_timeout,
     )
 
 
 @enforce_types
 def get_another_consumer_wallet() -> Wallet:
+    config = get_example_config()
     return Wallet(
         get_web3(),
         private_key=os.environ.get("TEST_PRIVATE_KEY3"),
-        block_confirmations=get_example_config().block_confirmations,
+        block_confirmations=config.block_confirmations,
+        transaction_timeout=config.transaction_timeout,
     )
 
 
@@ -63,10 +69,12 @@ def get_factory_deployer_wallet(network):
     if not private_key:
         return None
 
+    config = get_example_config()
     return Wallet(
         get_web3(),
         private_key=private_key,
-        block_confirmations=get_example_config().block_confirmations,
+        block_confirmations=config.block_confirmations,
+        transaction_timeout=config.transaction_timeout,
     )
 
 
@@ -77,10 +85,12 @@ def get_ganache_wallet():
         and web3.eth.accounts[0].lower()
         == "0xe2DD09d719Da89e5a3D0F2549c7E24566e947260".lower()
     ):
+        config = get_example_config()
         return Wallet(
             web3,
             private_key="0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58",
-            block_confirmations=get_example_config().block_confirmations,
+            block_confirmations=config.block_confirmations,
+            transaction_timeout=config.transaction_timeout,
         )
 
     return None

@@ -16,7 +16,7 @@ def wait_for_transaction_receipt_and_block_confirmations(
     tx_hash: HexBytes,
     block_confirmations: int,
     block_number_poll_interval: float,
-    timeout: int = 120,
+    transaction_timeout: int = 120,
 ) -> TxReceipt:
     """Wait for the transaction receipt. Then, verify the transaction receipt
     still appears in the chain after `block_confirmations` number of blocks.
@@ -29,10 +29,10 @@ def wait_for_transaction_receipt_and_block_confirmations(
       increases certainty that transaction has settled.
     :param block_number_poll_interval: float, amount of time between calls to
       get latest block number in seconds
-    :param timeout: int, amount of time to wait for initial tx receipt
-      in seconds.
+    :param transaction_timeout: int, amount of time to wait for initial tx
+      receipt in seconds.
     """
-    receipt = web3.eth.wait_for_transaction_receipt(tx_hash, timeout)
+    receipt = web3.eth.wait_for_transaction_receipt(tx_hash, transaction_timeout)
     while web3.eth.block_number < receipt.blockNumber + block_confirmations:
         time.sleep(block_number_poll_interval)
     return web3.eth.get_transaction_receipt(tx_hash)

@@ -35,19 +35,6 @@ NETWORK_NAME_MAP = {
     44787: "Celo Alfajores",
 }
 
-NETWORK_TIMEOUT_MAP = {
-    "mainnet": 10 * 60,
-    "ropsten": 10 * 60,
-    "rinkeby": 5 * 60,
-    "bsc": 10 * 60,
-    "polygon": 10 * 60,
-    "moonbeamalpha": 60,
-    "celoalfajores": 60,
-    "moonriver": 60,
-    "energyweb": 60,
-    "ganache": 2,
-}
-
 """The interval in seconds when polling the latest block number
 block_number poll interval = 1/2 average block time for a given chain"""
 BLOCK_NUMBER_POLL_INTERVAL = {1: 6.5, 3: 6, 4: 7.5, 56: 1.5, 137: 1, 1287: 6, 1337: 2.5}
