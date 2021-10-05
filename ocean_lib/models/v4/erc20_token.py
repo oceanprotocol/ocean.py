@@ -171,17 +171,19 @@ class ERC20Token(ContractBase):
     def remove_fee_manager(self, fee_manager: str, from_wallet: Wallet) -> str:
         return self.send_transaction("removeFeeManager", fee_manager, from_wallet)
 
-    def set_data(self, data: bytes) -> None:
-        return self.contract.caller.setData(data)
+    def set_data(self, data: bytes, from_wallet: Wallet) -> str:
+        return self.send_transaction("setData", data, from_wallet)
 
-    def clean_permissions(self) -> None:
-        return self.contract.caller.cleanPermissions()
+    def clean_permissions(self, from_wallet: Wallet) -> str:
+        return self.send_transaction("cleanPermissions", from_wallet)
 
-    def clean_from_721(self) -> None:
-        return self.contract.caller.cleanFrom721()
+    def clean_from_721(self, from_wallet: Wallet) -> str:
+        return self.send_transaction("cleanFrom721", from_wallet)
 
-    def set_fee_collector(self, fee_collector_address: str) -> None:
-        return self.contract.caller.setFeeCollector(fee_collector_address)
+    def set_fee_collector(self, fee_collector_address: str, from_wallet: Wallet) -> str:
+        return self.send_transaction(
+            "setFeeCollector", fee_collector_address, from_wallet
+        )
 
     def get_publishing_market_fee(self) -> tuple:
         return self.contract.caller.getPublishingMarketFee()
@@ -191,11 +193,16 @@ class ERC20Token(ContractBase):
         publish_market_fee_address: str,
         publish_market_fee_token: str,
         publish_market_fee_amount: int,
-    ) -> None:
-        return self.contract.caller.setPublishingMarketFee(
-            publish_market_fee_address,
-            publish_market_fee_token,
-            publish_market_fee_amount,
+        from_wallet: Wallet,
+    ) -> str:
+        return self.send_transaction(
+            "setPublishingMarketFee",
+            (
+                publish_market_fee_address,
+                publish_market_fee_token,
+                publish_market_fee_amount,
+            ),
+            from_wallet,
         )
 
     def get_id(self) -> int:
@@ -248,11 +255,8 @@ class ERC20Token(ContractBase):
     def balanceOf(self, account: str) -> int:
         return self.contract.caller.balanceOf(account)
 
-    def transfer(self, to: str, value_base: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("transfer", (to, value_base), from_wallet)
-
-    def token_balance(self, account: str):
-        return self.balanceOf(account)
+    def withdraw(self, from_wallet: Wallet):
+        return self.send_transaction("withdrawETH", from_wallet)
 
 
 class MockOcean(ERC20Token):
