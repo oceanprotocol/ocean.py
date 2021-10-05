@@ -36,6 +36,18 @@ PoolData = NamedTuple(
     ],
 )
 
+BPoolData = NamedTuple(
+    "BPoolData",
+    [
+        ("controller", str),
+        ("tokens", List[str]),
+        ("publisher", str),
+        ("ss_params", List[int]),
+        ("swap_fees", List[int]),
+        ("market_fee_collector", str),
+    ],
+)
+
 FixedData = NamedTuple(
     "FixedData",
     [

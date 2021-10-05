@@ -20,12 +20,10 @@ class ERC721Token(ContractBase):
     EVENT_METADATA_UPDATED = "MetadataUpdated"
 
     @property
-    @enforce_types
     def event_MetadataCreated(self):
         return self.events.MetadataCreated()
 
     @property
-    @enforce_types
     def event_MetadataUpdated(self):
         return self.events.MetadataUpdated()
 
