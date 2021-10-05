@@ -5,6 +5,8 @@
 from typing import List
 
 from enforce_typing import enforce_types
+
+from ocean_lib.models.v4.models_structures import ErcCreateData
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -67,21 +69,16 @@ class ERC721Token(ContractBase):
     def get_metadata(self) -> tuple:
         return self.contract.caller.getMetaData()
 
-    def update_metadata(self, flags: bytes, data: bytes) -> str:
-        return self.contract.caller.updateMetadata(flags, data)
-
-    def create_erc20(
-        self,
-        name: str,
-        symbol: str,
-        cap: int,
-        template_index: int,
-        minter_address: str,
-        from_wallet: Wallet,
-    ) -> str:
+    def create_erc20(self, erc_create_data: ErcCreateData, from_wallet: Wallet) -> str:
         return self.send_transaction(
             "createERC20",
-            (name, symbol, cap, template_index, minter_address),
+            (
+                erc_create_data.template_index,
+                erc_create_data.strings,
+                erc_create_data.addresses,
+                erc_create_data.uints,
+                erc_create_data.bytess,
+            ),
             from_wallet,
         )
 
