@@ -81,10 +81,10 @@ class ERC721Token(ContractBase):
         )
 
     def add_manager(self, manager_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("addManager", manager_address, from_wallet)
+        return self.send_transaction("addManager", (manager_address,), from_wallet)
 
     def remove_manager(self, manager_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("removeManager", manager_address, from_wallet)
+        return self.send_transaction("removeManager", (manager_address,), from_wallet)
 
     def execute_call(
         self, operation: int, to: str, value: int, data: bytes, from_wallet: Wallet
@@ -113,10 +113,10 @@ class ERC721Token(ContractBase):
         )
 
     def add_v3_minter(self, new_minter_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("addV3Minter", new_minter_address, from_wallet)
+        return self.send_transaction("addV3Minter", (new_minter_address,), from_wallet)
 
     def remove_v3_minter(self, minter_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("removeV3Minter", minter_address, from_wallet)
+        return self.send_transaction("removeV3Minter", (minter_address,), from_wallet)
 
     def transfer_from(
         self, from_address: str, to_address: str, token_id: int, from_wallet: Wallet
@@ -133,7 +133,7 @@ class ERC721Token(ContractBase):
         )
 
     def withdraw(self, from_wallet: Wallet):
-        return self.send_transaction("withdrawETH", from_wallet)
+        return self.send_transaction("withdrawETH", (), from_wallet)
 
     def name(self) -> str:
         return self.contract.caller.name()
@@ -145,7 +145,7 @@ class ERC721Token(ContractBase):
         return self.contract.caller.isInitialized()
 
     def clean_permissions(self, from_wallet: Wallet) -> str:
-        return self.send_transaction("cleanPermissions", from_wallet)
+        return self.send_transaction("cleanPermissions", (), from_wallet)
 
     def get_address_length(self, array: List[str]) -> int:
         return self.contract.caller.getAddressLength(array)

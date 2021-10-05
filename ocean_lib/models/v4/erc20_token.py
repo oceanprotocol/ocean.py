@@ -160,29 +160,29 @@ class ERC20Token(ContractBase):
         )
 
     def add_minter(self, minter_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("addMinter", minter_address, from_wallet)
+        return self.send_transaction("addMinter", (minter_address,), from_wallet)
 
     def remove_minter(self, minter_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("removeMinter", minter_address, from_wallet)
+        return self.send_transaction("removeMinter", (minter_address,), from_wallet)
 
     def add_fee_manager(self, fee_manager: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("addFeeManager", fee_manager, from_wallet)
+        return self.send_transaction("addFeeManager", (fee_manager,), from_wallet)
 
     def remove_fee_manager(self, fee_manager: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("removeFeeManager", fee_manager, from_wallet)
+        return self.send_transaction("removeFeeManager", (fee_manager,), from_wallet)
 
     def set_data(self, data: bytes, from_wallet: Wallet) -> str:
-        return self.send_transaction("setData", data, from_wallet)
+        return self.send_transaction("setData", (data,), from_wallet)
 
     def clean_permissions(self, from_wallet: Wallet) -> str:
-        return self.send_transaction("cleanPermissions", from_wallet)
+        return self.send_transaction("cleanPermissions", (), from_wallet)
 
     def clean_from_721(self, from_wallet: Wallet) -> str:
-        return self.send_transaction("cleanFrom721", from_wallet)
+        return self.send_transaction("cleanFrom721", (), from_wallet)
 
     def set_fee_collector(self, fee_collector_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction(
-            "setFeeCollector", fee_collector_address, from_wallet
+            "setFeeCollector", (fee_collector_address,), from_wallet
         )
 
     def get_publishing_market_fee(self) -> tuple:
@@ -256,7 +256,7 @@ class ERC20Token(ContractBase):
         return self.contract.caller.balanceOf(account)
 
     def withdraw(self, from_wallet: Wallet):
-        return self.send_transaction("withdrawETH", from_wallet)
+        return self.send_transaction("withdrawETH", (), from_wallet)
 
 
 class MockOcean(ERC20Token):

@@ -48,6 +48,19 @@ BPoolData = NamedTuple(
     ],
 )
 
+BPoolInitialized = NamedTuple(
+    "BPoolInitialized",
+    [
+        ("controller", str),
+        ("factory", str),
+        ("swap_fees", List[int]),
+        ("public_swap", bool),
+        ("finalized", bool),
+        ("tokens", List[str]),
+        ("fee_collectors", List[str]),
+    ],
+)
+
 FixedData = NamedTuple(
     "FixedData",
     [

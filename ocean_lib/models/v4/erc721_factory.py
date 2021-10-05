@@ -112,7 +112,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                 consume_fee_amount,
             ]
         ]
-        return self.send_transaction("startMultipleTokenOrder", orders, from_wallet)
+        return self.send_transaction("startMultipleTokenOrder", (orders,), from_wallet)
 
     def create_nft_with_erc(
         self,
