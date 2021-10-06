@@ -18,7 +18,6 @@ from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.common.agreements.consumable import AssetNotConsumable, ConsumableCodes
-from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_factory import (
     ServiceDescriptor,
     ServiceFactory,
@@ -26,6 +25,7 @@ from ocean_lib.common.agreements.service_factory import (
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.aquarius.aquarius import Aquarius
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
+from ocean_lib.common.ddo.service import Service
 from ocean_lib.common.did import did_to_id
 from ocean_lib.common.utils.utilities import checksum
 from ocean_lib.config import Config
@@ -453,10 +453,10 @@ class OceanAssets:
         asset = self.resolve(did)
 
         if service_type:
-            sa = ServiceAgreement.from_ddo(service_type, asset)
+            sa = Service.from_ddo(service_type, asset)
         else:
             service = asset.get_service_by_index(service_index)
-            sa = ServiceAgreement.from_ddo(service.type, asset)
+            sa = Service.from_ddo(service.type, asset)
 
         consumable_result = asset.is_consumable(
             {"type": "address", "value": consumer_address},

@@ -5,7 +5,6 @@
 from typing import Sequence
 
 from enforce_typing import enforce_types
-from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes, ServiceTypesIndices
 from ocean_lib.common.ddo.service import Service
 
@@ -27,20 +26,6 @@ class ServiceDescriptor(object):
         return (
             ServiceTypes.METADATA,
             {"attributes": attributes, "serviceEndpoint": service_endpoint},
-        )
-
-    @staticmethod
-    @enforce_types
-    def authorization_service_descriptor(service_endpoint: str) -> tuple:
-        """
-        Authorization service descriptor.
-
-        :param service_endpoint: identifier of the service inside the asset DDO, str
-        :return: Service descriptor.
-        """
-        return (
-            ServiceTypes.AUTHORIZATION,
-            {"attributes": {"main": {}}, "serviceEndpoint": service_endpoint},
         )
 
     @staticmethod
@@ -94,7 +79,7 @@ class ServiceFactory(object):
         for i, service_desc in enumerate(service_descriptors):
             service = ServiceFactory.build_service(service_desc)
             # set index for each service
-            service.update_value(ServiceAgreement.SERVICE_INDEX, int(i))
+            service.update_value(Service.SERVICE_INDEX, int(i))
             services.append(service)
 
         return services
@@ -115,11 +100,6 @@ class ServiceFactory(object):
         service_type, kwargs = service_descriptor
         if service_type == ServiceTypes.METADATA:
             return ServiceFactory.build_metadata_service(
-                kwargs["attributes"], kwargs["serviceEndpoint"]
-            )
-
-        elif service_type == ServiceTypes.AUTHORIZATION:
-            return ServiceFactory.build_authorization_service(
                 kwargs["attributes"], kwargs["serviceEndpoint"]
             )
 
@@ -152,55 +132,34 @@ class ServiceFactory(object):
 
     @staticmethod
     @enforce_types
-    def build_authorization_service(attributes: dict, service_endpoint: str) -> Service:
+    def build_access_service(attributes: dict, service_endpoint: str) -> Service:
         """
-        Build an authorization service.
-
-        :param attributes: attributes of authorization service, dict
-        :param service_endpoint: identifier of the service inside the asset DDO, str
-        :return: Service
-        """
-        return Service(
-            service_endpoint,
-            ServiceTypes.AUTHORIZATION,
-            attributes=attributes,
-            index=ServiceTypesIndices.DEFAULT_AUTHORIZATION_INDEX,
-        )
-
-    @staticmethod
-    @enforce_types
-    def build_access_service(
-        attributes: dict, service_endpoint: str
-    ) -> ServiceAgreement:
-        """
-        Build an authorization service.
+        Build an access service.
 
         :param attributes: attributes of access service, dict
         :param service_endpoint: identifier of the service inside the asset DDO, str
-        :return: ServiceAgreement instance
+        :return: Serviceinstance
         """
-        return ServiceAgreement(
-            attributes,
+        return Service(
             service_endpoint,
             ServiceTypes.ASSET_ACCESS,
-            ServiceTypesIndices.DEFAULT_ACCESS_INDEX,
+            attributes,
+            index=ServiceTypesIndices.DEFAULT_ACCESS_INDEX,
         )
 
     @staticmethod
     @enforce_types
-    def build_compute_service(
-        attributes: dict, service_endpoint: str
-    ) -> ServiceAgreement:
+    def build_compute_service(attributes: dict, service_endpoint: str) -> Service:
         """
-        Build an authorization service.
+        Build a compute service.
 
         :param attributes: attributes of compute service, dict
         :param service_endpoint: identifier of the service inside the asset DDO, str
-        :return: ServiceAgreement instance
+        :return: Serviceinstance
         """
-        return ServiceAgreement(
-            attributes,
+        return Service(
             service_endpoint,
             ServiceTypes.CLOUD_COMPUTE,
-            ServiceTypesIndices.DEFAULT_COMPUTING_INDEX,
+            attributes,
+            index=ServiceTypesIndices.DEFAULT_COMPUTING_INDEX,
         )

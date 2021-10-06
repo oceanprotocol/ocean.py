@@ -5,11 +5,11 @@
 """
     Test did_lib
 """
-from ocean_lib.common.agreements.service_agreement import ServiceTypes
 from ocean_lib.common.agreements.service_factory import (
     ServiceDescriptor,
     ServiceFactory,
 )
+from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.did import DID
 from tests.resources.ddo_helpers import get_resource_path, get_sample_ddo

@@ -9,8 +9,11 @@
 import copy
 import logging
 from typing import Any, Dict, Optional, Tuple
+from urllib.parse import urlparse
 
 from enforce_typing import enforce_types
+from ocean_lib.common.agreements.service_types import ServiceTypes, ServiceTypesIndices
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +35,6 @@ class Service:
         index: Optional[int] = None,
     ) -> None:
         """Initialize Service instance."""
-        # init can not be type hinted due to conflicts with ServiceAgreement
         self.service_endpoint = service_endpoint
         self.type = service_type or ""
         self.index = index
@@ -49,6 +51,15 @@ class Service:
             for name, value in other_values.items():
                 if name not in self._reserved_names:
                     self._values[name] = value
+
+        if index is None:
+            service_to_default_index = {
+                ServiceTypes.ASSET_ACCESS: ServiceTypesIndices.DEFAULT_ACCESS_INDEX,
+                ServiceTypes.CLOUD_COMPUTE: ServiceTypesIndices.DEFAULT_COMPUTING_INDEX,
+            }
+
+            if service_type in service_to_default_index:
+                self.index = service_to_default_index[service_type]
 
     @enforce_types
     def values(self) -> Dict[str, Any]:
@@ -126,3 +137,38 @@ class Service:
         """Create a service object from a JSON string."""
         service_endpoint, _type, _index, _attributes, sd = cls._parse_json(service_dict)
         return cls(service_endpoint, _type, _attributes, sd, _index)
+
+    @enforce_types
+    def get_cost(self) -> float:
+        """
+        Return the price from the conditions parameters.
+
+        :return: Float
+        """
+        return float(self.main["cost"])
+
+    @enforce_types
+    def get_c2d_address(self) -> str:
+        result = urlparse(self.service_endpoint)
+        return DataServiceProvider.get_c2d_address(
+            f"{result.scheme}://{result.netloc}/"
+        )
+
+    @classmethod
+    @enforce_types
+    def from_ddo(cls, service_type: str, ddo: object) -> "Service":
+        """
+
+        :param service_type: identifier of the service inside the asset DDO, str
+        :param ddo:
+        :return:
+        """
+        service = ddo.get_service(service_type)
+        if not service:
+            raise ValueError(
+                f"Service of type {service_type} is not found in this DDO."
+            )
+
+        service_dict = service.as_dictionary()
+
+        return cls.from_json(service_dict)
