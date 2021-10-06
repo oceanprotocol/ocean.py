@@ -29,67 +29,56 @@ logging.basicConfig(level=logging.INFO)
 CONFIG_NETWORK_HELPER = {
     1: {
         NAME_PROVIDER_URL: "https://provider.mainnet.oceanprotocol.com",
-        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "mainnet",
         NAME_BLOCK_CONFIRMATIONS: 1,
     },
     3: {
         NAME_PROVIDER_URL: "https://provider.ropsten.oceanprotocol.com",
-        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "ropsten",
         NAME_BLOCK_CONFIRMATIONS: 1,
     },
     4: {
         NAME_PROVIDER_URL: "https://provider.rinkeby.oceanprotocol.com",
-        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "rinkeby",
         NAME_BLOCK_CONFIRMATIONS: 1,
     },
     56: {
         NAME_PROVIDER_URL: "https://provider.bsc.oceanprotocol.com",
-        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "bsc",
         NAME_BLOCK_CONFIRMATIONS: 1,
     },
     137: {
         NAME_PROVIDER_URL: "https://provider.polygon.oceanprotocol.com",
-        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "polygon",
         NAME_BLOCK_CONFIRMATIONS: 15,
     },
     246: {
         NAME_PROVIDER_URL: "https://provider.energyweb.oceanprotocol.com",
-        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "energyweb",
         NAME_BLOCK_CONFIRMATIONS: 3,
     },
     1285: {
         NAME_PROVIDER_URL: "https://provider.moonriver.oceanprotocol.com",
-        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "moonriver",
         NAME_BLOCK_CONFIRMATIONS: 3,
     },
     1287: {
         NAME_PROVIDER_URL: "https://provider.moonbeamalpha.oceanprotocol.com",
-        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "moonbeamalpha",
         NAME_BLOCK_CONFIRMATIONS: 3,
     },
     1337: {
         NAME_PROVIDER_URL: DEFAULT_PROVIDER_URL,
-        NAME_METADATA_CACHE_URI: DEFAULT_METADATA_CACHE_URI,
         NETWORK_NAME: "ganache",
         NAME_BLOCK_CONFIRMATIONS: 0,
     },
     44787: {
         NAME_PROVIDER_URL: "https://provider.celoalfajores.oceanprotocol.com",
-        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "celoalfajores",
         NAME_BLOCK_CONFIRMATIONS: 3,
     },
     80001: {
         NAME_PROVIDER_URL: "https://provider.mumbai.oceanprotocol.com",
-        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "mumbai",
         NAME_BLOCK_CONFIRMATIONS: 1,
     },
@@ -114,9 +103,6 @@ def get_config_dict(chain_id: int) -> dict:
     config_helper[SECTION_RESOURCES].update(
         {
             NAME_PROVIDER_URL: CONFIG_NETWORK_HELPER[chain_id][NAME_PROVIDER_URL],
-            NAME_METADATA_CACHE_URI: CONFIG_NETWORK_HELPER[chain_id][
-                NAME_METADATA_CACHE_URI
-            ],
         }
     )
     return config_helper
