@@ -132,12 +132,12 @@ def get_registered_ddo_with_access_service(ocean_instance, wallet, provider_uri=
     old_ddo = get_sample_ddo_with_compute_service()
     metadata = old_ddo.metadata
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    service_descriptor = get_access_service(
+    service = get_access_service(
         ocean_instance, wallet.address, metadata["main"]["dateCreated"], provider_uri
     )
 
     return get_registered_ddo(
-        ocean_instance, metadata, wallet, service_descriptor, provider_uri=provider_uri
+        ocean_instance, metadata, wallet, service, provider_uri=provider_uri
     )
 
 
@@ -179,13 +179,13 @@ def get_registered_ddo_with_compute_service(
 def get_registered_algorithm_ddo(ocean_instance, wallet, provider_uri=None):
     metadata = get_sample_algorithm_ddo_dict()["service"][0]["attributes"]
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    service_descriptor = get_access_service(
+    service = get_access_service(
         ocean_instance, wallet.address, metadata["main"]["dateCreated"], provider_uri
     )
     if "cost" in metadata["main"]:
         metadata["main"].pop("cost")
     return get_registered_ddo(
-        ocean_instance, metadata, wallet, service_descriptor, provider_uri=provider_uri
+        ocean_instance, metadata, wallet, service, provider_uri=provider_uri
     )
 
 
