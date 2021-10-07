@@ -11,7 +11,6 @@ from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.consumable import AssetNotConsumable, ConsumableCodes
-from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.ddo.service import Service
 from ocean_lib.config import Config
@@ -255,19 +254,6 @@ class OceanCompute:
         output_def = output_def if isinstance(output_def, dict) else dict()
         default_output_def.update(output_def)
         return default_output_def
-
-    @enforce_types
-    def create_compute_service_descriptor(self, attributes: dict) -> ServiceDescriptor:
-        """
-        Return a service descriptor (tuple) for service of type ServiceTypes.CLOUD_COMPUTE
-        and having the required attributes and service endpoint.
-
-        :param attributes: dict as created in `create_compute_service_attributes`
-        """
-        compute_endpoint = self._data_provider.get_url(self._config)
-        return ServiceDescriptor.compute_service_descriptor(
-            attributes=attributes, service_endpoint=compute_endpoint
-        )
 
     @enforce_types
     def _sign_message(
