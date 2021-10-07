@@ -20,7 +20,6 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.ocean_pool import OceanPool
-from ocean_lib.ocean.ocean_services import OceanServices
 from ocean_lib.ocean.util import (
     get_bfactory_address,
     get_contracts_addresses,
@@ -100,7 +99,6 @@ class Ocean:
             data_provider,
             addresses.get(MetadataContract.CONTRACT_NAME),
         )
-        self.services = OceanServices()
         self.compute = OceanCompute(self.config, data_provider)
 
         ocean_address = get_ocean_token_address(self.config.address_file, network)
