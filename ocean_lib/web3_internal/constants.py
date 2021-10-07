@@ -33,6 +33,7 @@ NETWORK_NAME_MAP = {
     1287: "Moonbeam Alpha",
     1337: "Ganache",
     44787: "Celo Alfajores",
+    80001: "Mumbai",
 }
 
 NETWORK_TIMEOUT_MAP = {
@@ -41,6 +42,7 @@ NETWORK_TIMEOUT_MAP = {
     "rinkeby": 5 * 60,
     "bsc": 10 * 60,
     "polygon": 10 * 60,
+    "mumbai": 10 * 60,
     "moonbeamalpha": 60,
     "celoalfajores": 60,
     "moonriver": 60,
