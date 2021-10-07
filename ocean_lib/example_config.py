@@ -114,6 +114,9 @@ def get_config_dict(chain_id: int) -> dict:
     config_helper[SECTION_RESOURCES].update(
         {
             NAME_PROVIDER_URL: CONFIG_NETWORK_HELPER[chain_id][NAME_PROVIDER_URL],
+            NAME_METADATA_CACHE_URI: CONFIG_NETWORK_HELPER[chain_id][
+                NAME_METADATA_CACHE_URI
+            ],
         }
     )
     return config_helper
