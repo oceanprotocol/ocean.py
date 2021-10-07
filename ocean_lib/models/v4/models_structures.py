@@ -61,6 +61,17 @@ BPoolInitialized = NamedTuple(
     ],
 )
 
+NewDataTokenCreated = NamedTuple(
+    "NewDataTokenCreated",
+    [
+        ("data_token", str),
+        ("base_token", str),
+        ("pool_address", str),
+        ("publisher_address", str),
+        ("ss_params", List[int]),
+    ],
+)
+
 FixedData = NamedTuple(
     "FixedData",
     [
