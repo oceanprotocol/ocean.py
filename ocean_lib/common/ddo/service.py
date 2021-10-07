@@ -8,7 +8,7 @@
 """
 import copy
 import logging
-from typing import Any, Dict, Optional, Tuple
+from typing import Any, Dict, Optional
 from urllib.parse import urlparse
 
 from enforce_typing import enforce_types
@@ -114,29 +114,21 @@ class Service:
 
     @classmethod
     @enforce_types
-    def _parse_json(
-        cls, service_dict: Dict[str, Any]
-    ) -> Tuple[str, str, int, Dict, Dict]:
+    def from_json(cls, service_dict: Dict[str, Any]) -> "Service":
+        """Create a service object from a JSON string."""
         sd = copy.deepcopy(service_dict)
         service_endpoint = sd.pop(cls.SERVICE_ENDPOINT, None)
-        _type = sd.pop(cls.SERVICE_TYPE, None)
-        _index = sd.pop(cls.SERVICE_INDEX, None)
-        _attributes = sd.pop(cls.SERVICE_ATTRIBUTES, None)
+        service_type = sd.pop(cls.SERVICE_TYPE, None)
+        index = sd.pop(cls.SERVICE_INDEX, None)
+        attributes = sd.pop(cls.SERVICE_ATTRIBUTES, None)
 
-        if not _type:
+        if not service_type:
             logger.error(
                 'Service definition in DDO document is missing the "type" key/value.'
             )
             raise IndexError
 
-        return service_endpoint, _type, _index, _attributes, sd
-
-    @classmethod
-    @enforce_types
-    def from_json(cls, service_dict: Dict[str, Any]) -> "Service":
-        """Create a service object from a JSON string."""
-        service_endpoint, _type, _index, _attributes, sd = cls._parse_json(service_dict)
-        return cls(service_endpoint, _type, _attributes, sd, _index)
+        return cls(service_endpoint, service_type, attributes, sd, index)
 
     @enforce_types
     def get_cost(self) -> float:
@@ -153,22 +145,3 @@ class Service:
         return DataServiceProvider.get_c2d_address(
             f"{result.scheme}://{result.netloc}/"
         )
-
-    @classmethod
-    @enforce_types
-    def from_ddo(cls, service_type: str, ddo: object) -> "Service":
-        """
-
-        :param service_type: identifier of the service inside the asset DDO, str
-        :param ddo:
-        :return:
-        """
-        service = ddo.get_service(service_type)
-        if not service:
-            raise ValueError(
-                f"Service of type {service_type} is not found in this DDO."
-            )
-
-        service_dict = service.as_dictionary()
-
-        return cls.from_json(service_dict)

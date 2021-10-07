@@ -7,7 +7,6 @@ import os
 import pytest
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.common.ddo.service import Service
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from tests.resources.ddo_helpers import get_sample_ddo
 from tests.resources.helper_functions import get_publisher_wallet
@@ -19,7 +18,7 @@ def test_ocean_assets_download_failure():
     data_provider = DataServiceProvider
 
     ddo = get_sample_ddo()
-    sa = Service.from_ddo(ServiceTypes.ASSET_ACCESS, ddo)
+    sa = ddo.get_service(ServiceTypes.ASSET_ACCESS)
     sa.service_endpoint = None
     ddo.services[1] = sa
 
@@ -41,7 +40,7 @@ def test_ocean_assets_download_indexes():
     data_provider = DataServiceProvider
 
     ddo = get_sample_ddo()
-    sa = Service.from_ddo(ServiceTypes.ASSET_ACCESS, ddo)
+    sa = ddo.get_service(ServiceTypes.ASSET_ACCESS)
 
     index = range(3)
     with pytest.raises(TypeError):
@@ -93,7 +92,7 @@ def ocean_assets_download_destination_file_helper(tmpdir):
     data_provider = DataServiceProvider
 
     ddo = get_sample_ddo()
-    sa = Service.from_ddo(ServiceTypes.ASSET_ACCESS, ddo)
+    sa = ddo.get_service(ServiceTypes.ASSET_ACCESS)
 
     written_path = download_asset_files(
         sa.index, ddo, publisher, tmpdir, "0x1", "test_order_tx_id", data_provider

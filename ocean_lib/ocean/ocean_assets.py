@@ -422,10 +422,10 @@ class OceanAssets:
         asset = self.resolve(did)
 
         if service_type:
-            sa = Service.from_ddo(service_type, asset)
+            sa = asset.get_service(service_type)
         else:
             service = asset.get_service_by_index(service_index)
-            sa = Service.from_ddo(service.type, asset)
+            sa = asset.get_service(service.type)
 
         consumable_result = asset.is_consumable(
             {"type": "address", "value": consumer_address},

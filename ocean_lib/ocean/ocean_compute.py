@@ -465,7 +465,7 @@ class OceanCompute:
             asset = resolve_asset(did, self._config.metadata_cache_uri)
 
         return self._data_provider.build_compute_endpoint(
-            Service.from_ddo(ServiceTypes.CLOUD_COMPUTE, asset).service_endpoint
+            asset.get_service(ServiceTypes.CLOUD_COMPUTE).service_endpoint
         )
 
     @enforce_types
@@ -476,5 +476,5 @@ class OceanCompute:
             asset = resolve_asset(did, self._config.metadata_cache_uri)
 
         return self._data_provider.build_compute_result_file_endpoint(
-            Service.from_ddo(ServiceTypes.CLOUD_COMPUTE, asset).service_endpoint
+            asset.get_service(ServiceTypes.CLOUD_COMPUTE).service_endpoint
         )
