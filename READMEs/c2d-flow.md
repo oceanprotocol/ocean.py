@@ -162,7 +162,7 @@ provider_url = DataServiceProvider.get_url(ocean.config)
 from ocean_lib.common.ddo.service import Service
 from ocean_lib.common.agreements.service_types import ServiceTypes
 DATA_compute_service = Service(
-    endpoint=provider_url,
+    service_endpoint=provider_url,
     service_type=ServiceTypes.CLOUD_COMPUTE,
     attributes=DATA_service_attributes
 )
