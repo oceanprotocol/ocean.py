@@ -9,8 +9,8 @@ import time
 import uuid
 
 from ocean_lib.assets.asset import Asset
-from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.ddo.service import Service
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.wallet import Wallet
@@ -165,8 +165,10 @@ def get_registered_ddo_with_compute_service(
             allow_all_published_algorithms=not bool(trusted_algorithms),
         ),
     )
-    compute_service = ServiceDescriptor.compute_service_descriptor(
-        compute_attributes, DataServiceProvider.get_url(ocean_instance.config)
+    compute_service = Service(
+        service_endpoint=DataServiceProvider.get_url(ocean_instance.config),
+        service_type=ServiceTypes.CLOUD_COMPUTE,
+        attributes=compute_attributes,
     )
 
     return get_registered_ddo(
