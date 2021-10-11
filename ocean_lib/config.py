@@ -22,6 +22,7 @@ DEFAULT_BLOCK_CONFIRMATIONS = 1
 DEFAULT_NETWORK_NAME = "ganache"
 DEFAULT_ADDRESS_FILE = ""
 DEFAULT_METADATA_CACHE_URI = "http://localhost:5000"
+METADATA_CACHE_URI = "https://aquarius.oceanprotocol.com"
 DEFAULT_PROVIDER_URL = "http://localhost:8030"
 DEFAULT_DOWNLOADS_PATH = "consume-downloads"
 
