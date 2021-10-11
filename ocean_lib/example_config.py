@@ -98,6 +98,12 @@ CONFIG_NETWORK_HELPER = {
         NAME_BLOCK_CONFIRMATIONS: 3,
         NAME_TRANSACTION_TIMEOUT: 60,
     },
+    80001: {
+        NAME_PROVIDER_URL: "https://provider.mumbai.oceanprotocol.com",
+        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
+        NETWORK_NAME: "mumbai",
+        NAME_BLOCK_CONFIRMATIONS: 1,
+    },
 }
 
 

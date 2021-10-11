@@ -33,6 +33,7 @@ NETWORK_NAME_MAP = {
     1287: "Moonbeam Alpha",
     1337: "Ganache",
     44787: "Celo Alfajores",
+    80001: "Mumbai",
 }
 
 """The interval in seconds when polling the latest block number

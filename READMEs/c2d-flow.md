@@ -164,14 +164,19 @@ provider_url = DataServiceProvider.get_url(ocean.config)
 # returns "http://localhost:8030"
 
 # Calc DATA service compute descriptor
-from ocean_lib.common.agreements.service_factory import ServiceDescriptor
-DATA_compute_service_descriptor = ServiceDescriptor.compute_service_descriptor(DATA_service_attributes, provider_url)
+from ocean_lib.common.ddo.service import Service
+from ocean_lib.common.agreements.service_types import ServiceTypes
+DATA_compute_service = Service(
+    service_endpoint=provider_url,
+    service_type=ServiceTypes.CLOUD_COMPUTE,
+    attributes=DATA_service_attributes
+)
 
 #Publish metadata and service info on-chain
 DATA_ddo = ocean.assets.create(
   metadata=DATA_metadata, # {"main" : {"type" : "dataset", ..}, ..}
   publisher_wallet=alice_wallet,
-  service_descriptors=[DATA_compute_service_descriptor], # [("compute", {"attributes": ..})]
+  services=[DATA_compute_service],
   data_token_address=DATA_datatoken.address)
 print(f"DATA did = '{DATA_ddo.did}'")
 ```
@@ -231,15 +236,17 @@ ALG_service_attributes = {
     }
 
 # Calc ALG service access descriptor. We use the same service provider as DATA
-ALG_access_service_descriptor = ServiceDescriptor.access_service_descriptor(ALG_service_attributes, provider_url)
-#returns ("algorithm",
-#         {"attributes": ALG_service_attributes, "serviceEndpoint": provider_url})
+ALG_access_service = Service(
+    service_endpoint=provider_url,
+    service_type=ServiceTypes.CLOUD_COMPUTE,
+    attributes=ALG_service_attributes
+)
 
 # Publish metadata and service info on-chain
 ALG_ddo = ocean.assets.create(
   metadata=ALG_metadata, # {"main" : {"type" : "algorithm", ..}, ..}
   publisher_wallet=alice_wallet,
-  service_descriptors=[ALG_access_service_descriptor],
+  services=[ALG_access_service],
   data_token_address=ALG_datatoken.address)
 print(f"ALG did = '{ALG_ddo.did}'")
 ```
