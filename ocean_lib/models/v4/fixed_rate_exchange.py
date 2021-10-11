@@ -2,6 +2,8 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from typing import List
+
 from enforce_typing import enforce_types
 
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -131,7 +133,7 @@ class FixedRateExchangeV4(ContractBase):
     def get_fees_info(self, exchange_id: bytes) -> tuple:
         return self.contract.caller.getFeesInfo(exchange_id)
 
-    def get_exchanges(self) -> bytes:
+    def get_exchanges(self) -> List[bytes]:
         return self.contract.caller.getExchanges()
 
     def is_active(self, exchange_id: bytes) -> bool:
