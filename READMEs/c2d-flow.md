@@ -111,7 +111,12 @@ print(f"config.provider_url = '{config.provider_url}'")
 # Create Alice's wallet
 import os
 from ocean_lib.web3_internal.wallet import Wallet
-alice_wallet = Wallet(ocean.web3, os.getenv('TEST_PRIVATE_KEY1'), config.block_confirmations)
+alice_wallet = Wallet(
+    ocean.web3,
+    os.getenv('TEST_PRIVATE_KEY1'),
+    config.block_confirmations,
+    config.transaction_timeout,
+)
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 ```
 
@@ -264,7 +269,12 @@ ocean.assets.update(DATA_ddo, publisher_wallet=alice_wallet)
 
 In the same Python console:
 ```python
-bob_wallet = Wallet(ocean.web3, os.getenv('TEST_PRIVATE_KEY2'), config.block_confirmations)
+bob_wallet = Wallet(
+    ocean.web3,
+    os.getenv('TEST_PRIVATE_KEY2'),
+    config.block_confirmations,
+    config.transaction_timeout,
+)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
 # Alice shares access for both to Bob, as datatokens. Alternatively, Bob might have bought these in a market.

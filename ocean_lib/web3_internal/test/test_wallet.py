@@ -16,7 +16,10 @@ def test_wallet_arguments(web3, config):
 
     # Create wallet with valid private key
     wallet = Wallet(
-        web3, private_key=private_key, block_confirmations=config.block_confirmations
+        web3,
+        private_key=private_key,
+        block_confirmations=config.block_confirmations,
+        transaction_timeout=config.transaction_timeout,
     )
     assert wallet.private_key == private_key, "Private keys are different."
     assert wallet.address, "The wallet does not have a wallet address."
@@ -34,7 +37,13 @@ def test_wallet_arguments(web3, config):
             web3,
             private_key=invalid_key,
             block_confirmations=config.block_confirmations,
+            transaction_timeout=config.transaction_timeout,
         )
 
     with pytest.raises(TypeError):
-        Wallet(web3, private_key=None, block_confirmations=config.block_confirmations)
+        Wallet(
+            web3,
+            private_key=None,
+            block_confirmations=config.block_confirmations,
+            transaction_timeout=config.transaction_timeout,
+        )

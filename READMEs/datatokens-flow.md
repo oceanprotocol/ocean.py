@@ -70,7 +70,7 @@ config = ExampleConfig.get_config()
 ocean = Ocean(config)
 
 print("create wallet: begin")
-wallet = Wallet(ocean.web3, private_key, config.block_confirmations)
+wallet = Wallet(ocean.web3, private_key, config.block_confirmations, config.transaction_timeout)
 print(f"create wallet: done. Its address is {wallet.address}")
 
 print("create datatoken: begin.")
