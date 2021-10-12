@@ -255,7 +255,9 @@ class ContractBase(object):
             _transact.update(transact)
 
         return contract_function.transact(
-            _transact, from_wallet.block_confirmations.value
+            _transact,
+            from_wallet.block_confirmations.value,
+            from_wallet.transaction_timeout.value,
         ).hex()
 
     @enforce_types

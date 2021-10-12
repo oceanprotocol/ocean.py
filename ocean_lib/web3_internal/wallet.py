@@ -33,7 +33,14 @@ class Wallet:
     node since we only send the raw transaction hash so the user info is safe.
 
     Usage:
-        1. `wallet = Wallet(ocean.web3, private_key=private_key, block_confirmations=ocean.config.block_confirmations)`
+    ```python
+    wallet = Wallet(
+        ocean.web3,
+        private_key=private_key,
+        block_confirmations=ocean.config.block_confirmations,
+        transaction_timeout=config.transaction_timeout,
+    )
+    ```
 
     """
 
@@ -41,7 +48,11 @@ class Wallet:
 
     @enforce_types
     def __init__(
-        self, web3: Web3, private_key: str, block_confirmations: Union[Integer, int]
+        self,
+        web3: Web3,
+        private_key: str,
+        block_confirmations: Union[Integer, int],
+        transaction_timeout: Union[Integer, int],
     ) -> None:
         """Initialises Wallet object."""
         assert private_key, "private_key is required."
@@ -51,6 +62,11 @@ class Wallet:
             block_confirmations
             if isinstance(block_confirmations, Integer)
             else Integer(block_confirmations)
+        )
+        self.transaction_timeout = (
+            transaction_timeout
+            if isinstance(transaction_timeout, Integer)
+            else Integer(transaction_timeout)
         )
         self._last_tx_count.clear()
 

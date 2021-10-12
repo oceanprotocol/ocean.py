@@ -16,9 +16,15 @@ def test_main(web3, config, dtfactory_address):
     custom_contract = CustomContractFunction(contract_fn)
 
     with pytest.raises(ValueError):
-        custom_contract.transact({"data": "test"}, config.block_confirmations)
+        custom_contract.transact(
+            {"data": "test"},
+            config.block_confirmations.value,
+            config.transaction_timeout.value,
+        )
 
     with pytest.raises(ValueError):
         custom_contract = CustomContractFunction(contract_fn)
         custom_contract._contract_function.address = None
-        custom_contract.transact({}, config.block_confirmations)
+        custom_contract.transact(
+            {}, config.block_confirmations.value, config.transaction_timeout.value
+        )

@@ -62,5 +62,5 @@ import web3
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.integer import Integer
 private_key = os.getenv('MY_TEST_KEY')
-wallet = Wallet(web3, private_key, 1)
+wallet = Wallet(web3, private_key, 1, 600)
 ```
