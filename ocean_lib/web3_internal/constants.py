@@ -38,4 +38,16 @@ NETWORK_NAME_MAP = {
 
 """The interval in seconds when polling the latest block number
 block_number poll interval = 1/2 average block time for a given chain"""
-BLOCK_NUMBER_POLL_INTERVAL = {1: 6.5, 3: 6, 4: 7.5, 56: 1.5, 137: 1, 1287: 6, 1337: 2.5}
+BLOCK_NUMBER_POLL_INTERVAL = {
+    1: 6.5,
+    3: 6.0,
+    4: 7.5,
+    56: 1.5,
+    137: 1.0,
+    246: 2.6,
+    1285: 6.5,
+    1287: 6.0,
+    1337: 2.5,
+    44787: 2.5,
+    80001: 1.0,
+}
