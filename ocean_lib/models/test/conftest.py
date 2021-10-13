@@ -135,6 +135,7 @@ def make_info(name, private_key_name):
         web3,
         private_key=info.private_key,
         block_confirmations=config.block_confirmations,
+        transaction_timeout=config.transaction_timeout,
     )
     info.address = info.wallet.address
     wallet = get_ganache_wallet()

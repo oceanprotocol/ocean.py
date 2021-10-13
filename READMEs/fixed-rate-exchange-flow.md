@@ -101,7 +101,7 @@ print(f"config.provider_url = '{config.provider_url}'")
 import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
-alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations)
+alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
 #Mint OCEAN for ganache only
@@ -130,7 +130,7 @@ data_token.approve(ocean.exchange._exchange_address, to_wei(100), alice_wallet)
 In the same python console:
 ```python
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
-bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations)
+bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations. config transaction_timeout)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
 #Verify that Bob has ganache ETH

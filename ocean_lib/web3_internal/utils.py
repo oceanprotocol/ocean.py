@@ -14,11 +14,7 @@ from eth_account.messages import encode_defunct
 from eth_keys import keys
 from eth_utils import big_endian_to_int, decode_hex
 from hexbytes.main import HexBytes
-from ocean_lib.web3_internal.constants import (
-    DEFAULT_NETWORK_NAME,
-    NETWORK_NAME_MAP,
-    NETWORK_TIMEOUT_MAP,
-)
+from ocean_lib.web3_internal.constants import DEFAULT_NETWORK_NAME, NETWORK_NAME_MAP
 from ocean_lib.web3_internal.web3_overrides.signature import SignatureFix
 from web3.main import Web3
 
@@ -114,21 +110,6 @@ def get_network_name(
         else:
             chain_id = get_chain_id(web3)
     return NETWORK_NAME_MAP.get(chain_id, DEFAULT_NETWORK_NAME).lower()
-
-
-@enforce_types
-def get_network_timeout(
-    network_id: Optional[int] = None, web3: Optional[Web3] = None
-) -> str:
-    """
-    Return the network blocking call timeout limit based on the current ethereum network id.
-    Callers must pass either network_id or web3.
-
-    :param network_id: Network id, int
-    :return: number of seconds, int
-    """
-    network_name = get_network_name(network_id, web3)
-    return NETWORK_TIMEOUT_MAP[network_name]
 
 
 @enforce_types

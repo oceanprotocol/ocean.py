@@ -36,20 +36,6 @@ NETWORK_NAME_MAP = {
     80001: "Mumbai",
 }
 
-NETWORK_TIMEOUT_MAP = {
-    "mainnet": 10 * 60,
-    "ropsten": 10 * 60,
-    "rinkeby": 5 * 60,
-    "bsc": 10 * 60,
-    "polygon": 10 * 60,
-    "mumbai": 10 * 60,
-    "moonbeamalpha": 60,
-    "celoalfajores": 60,
-    "moonriver": 60,
-    "energyweb": 60,
-    "ganache": 2,
-}
-
 """The interval in seconds when polling the latest block number
 block_number poll interval = 1/2 average block time for a given chain"""
 BLOCK_NUMBER_POLL_INTERVAL = {

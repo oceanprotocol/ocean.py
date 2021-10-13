@@ -30,6 +30,7 @@ def mint_fake_OCEAN(config: Config) -> None:
         web3,
         private_key=os.environ.get("FACTORY_DEPLOYER_PRIVATE_KEY"),
         block_confirmations=config.block_confirmations,
+        transaction_timeout=config.transaction_timeout,
     )
 
     OCEAN_token = DataToken(web3, address=network_addresses["development"]["Ocean"])
@@ -46,7 +47,10 @@ def mint_fake_OCEAN(config: Config) -> None:
             continue
 
         w = Wallet(
-            web3, private_key=key, block_confirmations=config.block_confirmations
+            web3,
+            private_key=key,
+            block_confirmations=config.block_confirmations,
+            transaction_timeout=config.transaction_timeout,
         )
 
         if OCEAN_token.balanceOf(w.address) < amt_distribute:

@@ -7,7 +7,6 @@ from typing import Optional, Union
 from enforce_typing import enforce_types
 from eth_account.messages import SignableMessage
 from ocean_lib.web3_internal.constants import BLOCK_NUMBER_POLL_INTERVAL
-from ocean_lib.web3_internal.utils import get_network_timeout
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.utils import (
     wait_for_transaction_receipt_and_block_confirmations,
@@ -48,9 +47,13 @@ def send_ether(from_wallet: Wallet, to_address: str, amount: int) -> AttributeDi
     tx_hash = web3.eth.send_raw_transaction(raw_tx)
     block_confirmations = from_wallet.block_confirmations.value
     block_number_poll_interval = BLOCK_NUMBER_POLL_INTERVAL[chain_id]
-    network_timeout = get_network_timeout(network_id=chain_id)
+    transaction_timeout = from_wallet.transaction_timeout.value
     wait_for_transaction_receipt_and_block_confirmations(
-        web3, tx_hash, block_confirmations, block_number_poll_interval, network_timeout
+        web3,
+        tx_hash,
+        block_confirmations,
+        block_number_poll_interval,
+        transaction_timeout,
     )
     return web3.eth.get_transaction_receipt(tx_hash)
 
@@ -76,8 +79,12 @@ def cancel_or_replace_transaction(
     tx_hash = web3.eth.send_raw_transaction(raw_tx)
     block_confirmations = from_wallet.block_confirmations.value
     block_number_poll_interval = BLOCK_NUMBER_POLL_INTERVAL[chain_id]
-    network_timeout = get_network_timeout(network_id=chain_id)
+    transaction_timeout = from_wallet.transaction_timeout.value
     wait_for_transaction_receipt_and_block_confirmations(
-        web3, tx_hash, block_confirmations, block_number_poll_interval, network_timeout
+        web3,
+        tx_hash,
+        block_confirmations,
+        block_number_poll_interval,
+        transaction_timeout,
     )
     return web3.eth.get_transaction_receipt(tx_hash)
