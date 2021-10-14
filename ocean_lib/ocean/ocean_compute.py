@@ -11,9 +11,8 @@ from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.consumable import AssetNotConsumable, ConsumableCodes
-from ocean_lib.common.agreements.service_agreement import ServiceAgreement
-from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.ddo.service import Service
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
@@ -257,19 +256,6 @@ class OceanCompute:
         return default_output_def
 
     @enforce_types
-    def create_compute_service_descriptor(self, attributes: dict) -> ServiceDescriptor:
-        """
-        Return a service descriptor (tuple) for service of type ServiceTypes.CLOUD_COMPUTE
-        and having the required attributes and service endpoint.
-
-        :param attributes: dict as created in `create_compute_service_attributes`
-        """
-        compute_endpoint = self._data_provider.get_url(self._config)
-        return ServiceDescriptor.compute_service_descriptor(
-            attributes=attributes, service_endpoint=compute_endpoint
-        )
-
-    @enforce_types
     def _sign_message(
         self,
         wallet: Wallet,
@@ -336,7 +322,7 @@ class OceanCompute:
         _, service_endpoint = self._get_service_endpoint(did, asset)
 
         service = asset.get_service_by_index(service_id)
-        sa = ServiceAgreement.from_json(service.as_dictionary())
+        sa = Service.from_json(service.as_dictionary())
         assert (
             ServiceTypes.CLOUD_COMPUTE == sa.type
         ), "service at serviceId is not of type compute service."
@@ -479,9 +465,7 @@ class OceanCompute:
             asset = resolve_asset(did, self._config.metadata_cache_uri)
 
         return self._data_provider.build_compute_endpoint(
-            ServiceAgreement.from_ddo(
-                ServiceTypes.CLOUD_COMPUTE, asset
-            ).service_endpoint
+            asset.get_service(ServiceTypes.CLOUD_COMPUTE).service_endpoint
         )
 
     @enforce_types
@@ -492,7 +476,5 @@ class OceanCompute:
             asset = resolve_asset(did, self._config.metadata_cache_uri)
 
         return self._data_provider.build_compute_result_file_endpoint(
-            ServiceAgreement.from_ddo(
-                ServiceTypes.CLOUD_COMPUTE, asset
-            ).service_endpoint
+            asset.get_service(ServiceTypes.CLOUD_COMPUTE).service_endpoint
         )

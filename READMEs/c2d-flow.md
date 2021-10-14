@@ -71,25 +71,6 @@ pip install numpy
 pip install matplotlib
 ```
 
-### Create config file
-
-In the work console:
-```console
-#Create config.ini file and fill it with configuration info
-echo """
-[eth-network]
-network = http://127.0.0.1:8545
-address.file = ~/.ocean/ocean-contracts/artifacts/address.json
-
-[resources]
-metadata_cache_uri = http://localhost:5000
-provider.url = http://localhost:8030
-provider.address = 0x00bd138abd70e2f00903268f3db08f2d25677c9e
-
-downloads.path = consume-downloads
-""" > config.ini
-```
-
 ### Set envvars
 
 In the work console:
@@ -97,9 +78,15 @@ In the work console:
 #set private keys of two accounts
 export TEST_PRIVATE_KEY1=0x5d75837394b078ce97bc289fa8d75e21000573520bfa7784a9d28ccaae602bf8
 export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
+
+#set the address file only for ganache
+export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
+
+#set network URL
+export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 ```
 
-### Config in Python
+### Start Python
 
 In the work console:
 ```console
@@ -111,19 +98,25 @@ For the following steps, we use the Python console. Keep it open between steps.
 In the Python console:
 ```python
 #create ocean instance
-from ocean_lib.config import Config
+from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
-config = Config('config.ini')
+config = ExampleConfig.get_config()
 ocean = Ocean(config)
 
 print(f"config.network_url = '{config.network_url}'")
+print(f"config.block_confirmations = {config.block_confirmations.value}")
 print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
 print(f"config.provider_url = '{config.provider_url}'")
 
 # Create Alice's wallet
 import os
 from ocean_lib.web3_internal.wallet import Wallet
-alice_wallet = Wallet(ocean.web3, os.getenv('TEST_PRIVATE_KEY1'), config.block_confirmations)
+alice_wallet = Wallet(
+    ocean.web3,
+    os.getenv('TEST_PRIVATE_KEY1'),
+    config.block_confirmations,
+    config.transaction_timeout,
+)
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 ```
 
@@ -171,14 +164,19 @@ provider_url = DataServiceProvider.get_url(ocean.config)
 # returns "http://localhost:8030"
 
 # Calc DATA service compute descriptor
-from ocean_lib.common.agreements.service_factory import ServiceDescriptor
-DATA_compute_service_descriptor = ServiceDescriptor.compute_service_descriptor(DATA_service_attributes, provider_url)
+from ocean_lib.common.ddo.service import Service
+from ocean_lib.common.agreements.service_types import ServiceTypes
+DATA_compute_service = Service(
+    service_endpoint=provider_url,
+    service_type=ServiceTypes.CLOUD_COMPUTE,
+    attributes=DATA_service_attributes
+)
 
 #Publish metadata and service info on-chain
 DATA_ddo = ocean.assets.create(
   metadata=DATA_metadata, # {"main" : {"type" : "dataset", ..}, ..}
   publisher_wallet=alice_wallet,
-  service_descriptors=[DATA_compute_service_descriptor], # [("compute", {"attributes": ..})]
+  services=[DATA_compute_service],
   data_token_address=DATA_datatoken.address)
 print(f"DATA did = '{DATA_ddo.did}'")
 ```
@@ -238,15 +236,17 @@ ALG_service_attributes = {
     }
 
 # Calc ALG service access descriptor. We use the same service provider as DATA
-ALG_access_service_descriptor = ServiceDescriptor.access_service_descriptor(ALG_service_attributes, provider_url)
-#returns ("algorithm",
-#         {"attributes": ALG_service_attributes, "serviceEndpoint": provider_url})
+ALG_access_service = Service(
+    service_endpoint=provider_url,
+    service_type=ServiceTypes.CLOUD_COMPUTE,
+    attributes=ALG_service_attributes
+)
 
 # Publish metadata and service info on-chain
 ALG_ddo = ocean.assets.create(
   metadata=ALG_metadata, # {"main" : {"type" : "algorithm", ..}, ..}
   publisher_wallet=alice_wallet,
-  service_descriptors=[ALG_access_service_descriptor],
+  services=[ALG_access_service],
   data_token_address=ALG_datatoken.address)
 print(f"ALG did = '{ALG_ddo.did}'")
 ```
@@ -269,7 +269,12 @@ ocean.assets.update(DATA_ddo, publisher_wallet=alice_wallet)
 
 In the same Python console:
 ```python
-bob_wallet = Wallet(ocean.web3, os.getenv('TEST_PRIVATE_KEY2'), config.block_confirmations)
+bob_wallet = Wallet(
+    ocean.web3,
+    os.getenv('TEST_PRIVATE_KEY2'),
+    config.block_confirmations,
+    config.transaction_timeout,
+)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
 # Alice shares access for both to Bob, as datatokens. Alternatively, Bob might have bought these in a market.

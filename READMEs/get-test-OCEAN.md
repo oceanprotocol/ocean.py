@@ -80,9 +80,9 @@ In a Python console:
 
 ```python
 #setup
-import os
+from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
-config = {'network': os.getenv('OCEAN_NETWORK_URL')}
+config = ExampleConfig.get_config()
 ocean = Ocean(config)
 
 #create an ERC20 object of OCEAN token
@@ -93,7 +93,7 @@ OCEAN_token = BToken(ocean.web3, ocean.OCEAN_address)
 #set wallet
 private_key = os.getenv('MY_TEST_KEY')
 from ocean_lib.web3_internal.wallet import Wallet
-wallet = Wallet(ocean.web3, private_key, config.block_confirmations)
+wallet = Wallet(ocean.web3, private_key, config.block_confirmations, config.transaction_timeout)
 print(f"Address of your account: {wallet.address}")
 
 #get balance

@@ -90,6 +90,7 @@ config = ExampleConfig.get_config()
 ocean = Ocean(config)
 
 print(f"config.network_url = '{config.network_url}'")
+print(f"config.block_confirmations = {config.block_confirmations.value}")
 print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
 print(f"config.provider_url = '{config.provider_url}'")
 print(f"config.network_name = '{config.network_name}'")
@@ -98,7 +99,7 @@ print(f"config.network_name = '{config.network_name}'")
 import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
-alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations)
+alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
 #Mint OCEAN for ganache only

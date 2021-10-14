@@ -6,8 +6,8 @@
 import os
 
 from ocean_lib.assets.asset import Asset
-from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.ddo.service import Service
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_metadata, get_registered_ddo
 from tests.resources.helper_functions import (
@@ -39,7 +39,7 @@ def test_market_flow():
     consumer_wallet = get_consumer_wallet()
 
     service = asset.get_service(service_type=ServiceTypes.ASSET_ACCESS)
-    sa = ServiceAgreement.from_json(service.as_dictionary())
+    sa = Service.from_json(service.as_dictionary())
 
     # Mint data tokens and assign to publisher
     dt = publisher_ocean.get_data_token(asset.data_token_address)
@@ -122,7 +122,7 @@ def test_payer_market_flow():
     consumer_wallet = get_consumer_wallet()
 
     service = asset.get_service(service_type=ServiceTypes.ASSET_ACCESS)
-    sa = ServiceAgreement.from_json(service.as_dictionary())
+    sa = Service.from_json(service.as_dictionary())
 
     # Mint data tokens and assign to publisher
     dt = publisher_ocean.get_data_token(asset.data_token_address)

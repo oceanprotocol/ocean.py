@@ -118,7 +118,7 @@ print(f"config.provider_url = '{config.provider_url}'")
 import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
-alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations)
+alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
 #Mint OCEAN
@@ -154,15 +154,20 @@ service_attributes = {
 # The service urls will be encrypted before going on-chain.
 # They're only decrypted for datatoken owners upon consume.
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.common.agreements.service_factory import ServiceDescriptor
+from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.ddo.service import Service
 
 service_endpoint = DataServiceProvider.get_url(ocean.config)
-download_service = ServiceDescriptor.access_service_descriptor(service_attributes, service_endpoint)
+download_service = Service(
+    service_endpoint=service_endpoint,
+    service_type=ServiceTypes.ASSET_ACCESS,
+    attributes=service_attributes,
+)
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 asset = ocean.assets.create(
   metadata,
   alice_wallet,
-  service_descriptors=[download_service],
+  services=[download_service],
   data_token_address=token_address)
 assert token_address == asset.data_token_address
 
@@ -228,7 +233,7 @@ In the same Python console as before:
 ```python
 #Bob's wallet
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
-bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations)
+bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
 #Verify that Bob has ganache ETH

@@ -22,8 +22,10 @@ DEFAULT_BLOCK_CONFIRMATIONS = 1
 DEFAULT_NETWORK_NAME = "ganache"
 DEFAULT_ADDRESS_FILE = ""
 DEFAULT_METADATA_CACHE_URI = "http://localhost:5000"
+METADATA_CACHE_URI = "https://aquarius.oceanprotocol.com"
 DEFAULT_PROVIDER_URL = "http://localhost:8030"
 DEFAULT_DOWNLOADS_PATH = "consume-downloads"
+DEFAULT_TRANSACTION_TIMEOUT = 10 * 60  # 10 minutes
 
 NAME_NETWORK_URL = "network"
 NETWORK_NAME = "network_name"
@@ -34,6 +36,7 @@ NAME_BLOCK_CONFIRMATIONS = "block_confirmations"
 NAME_METADATA_CACHE_URI = "metadata_cache_uri"
 NAME_AQUARIUS_URL = "aquarius.url"
 NAME_PROVIDER_URL = "provider.url"
+NAME_TRANSACTION_TIMEOUT = "transaction_timeout"
 
 NAME_DATA_TOKEN_FACTORY_ADDRESS = "dtfactory.address"
 NAME_BFACTORY_ADDRESS = "bfactory.address"
@@ -44,7 +47,6 @@ NAME_DOWNLOADS_PATH = "downloads.path"
 
 SECTION_ETH_NETWORK = "eth-network"
 SECTION_RESOURCES = "resources"
-SECTION_UTIL = "util"
 
 environ_names_and_sections = {
     NAME_DATA_TOKEN_FACTORY_ADDRESS: [
@@ -70,6 +72,11 @@ environ_names_and_sections = {
         SECTION_ETH_NETWORK,
     ],
     NAME_GAS_LIMIT: ["GAS_LIMIT", "Gas limit", SECTION_ETH_NETWORK],
+    NAME_TRANSACTION_TIMEOUT: [
+        "OCEAN_TRANSACTION_TIMEOUT",
+        "Transaction timeout",
+        SECTION_ETH_NETWORK,
+    ],
     NAME_METADATA_CACHE_URI: [
         "METADATA_CACHE_URI",
         "Metadata Cache URI",
@@ -98,6 +105,7 @@ config_defaults = {
         NAME_ADDRESS_FILE: DEFAULT_ADDRESS_FILE,
         NAME_GAS_LIMIT: GAS_LIMIT_DEFAULT,
         NAME_BLOCK_CONFIRMATIONS: DEFAULT_BLOCK_CONFIRMATIONS,
+        NAME_TRANSACTION_TIMEOUT: DEFAULT_TRANSACTION_TIMEOUT,
     },
     "resources": {
         NAME_METADATA_CACHE_URI: DEFAULT_METADATA_CACHE_URI,
@@ -243,6 +251,12 @@ class Config(configparser.ConfigParser):
     def block_confirmations(self) -> Integer:
         """Block confirmations."""
         return Integer(int(self.get(SECTION_ETH_NETWORK, NAME_BLOCK_CONFIRMATIONS)))
+
+    @property
+    @enforce_types
+    def transaction_timeout(self) -> Integer:
+        """Transaction timeout."""
+        return Integer(int(self.get(SECTION_ETH_NETWORK, NAME_TRANSACTION_TIMEOUT)))
 
     @property
     @enforce_types

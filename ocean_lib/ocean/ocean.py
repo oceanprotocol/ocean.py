@@ -20,7 +20,6 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.ocean_pool import OceanPool
-from ocean_lib.ocean.ocean_services import OceanServices
 from ocean_lib.ocean.util import (
     get_bfactory_address,
     get_contracts_addresses,
@@ -100,7 +99,6 @@ class Ocean:
             data_provider,
             addresses.get(MetadataContract.CONTRACT_NAME),
         )
-        self.services = OceanServices()
         self.compute = OceanCompute(self.config, data_provider)
 
         ocean_address = get_ocean_token_address(self.config.address_file, network)
@@ -140,7 +138,12 @@ class Ocean:
         ```python
             config = Config('config.ini')
             ocean = Ocean(config)
-            wallet = Wallet(ocean.web3, private_key=private_key, block_confirmations=config.block_confirmations)
+            wallet = Wallet(
+                ocean.web3,
+                private_key=private_key,
+                block_confirmations=config.block_confirmations,
+                transaction_timeout=config.transaction_timeout,
+            )
             datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet)
         ```
 
