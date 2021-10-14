@@ -62,12 +62,14 @@ class OceanExchange:
         )
 
     @enforce_types
-    def search_exchange_by_data_token(self, data_token: str) -> List[AttributeDict]:
+    def search_exchange_by_data_token(
+        self, data_token: str, from_block: int
+    ) -> List[AttributeDict]:
         fre = self._exchange_contract()
         filter_args = {"dataToken": data_token}
-        logs = fre.get_event_log(
+        logs = fre.get_event_logs(
             event_name="ExchangeCreated",
-            from_block=0,
+            from_block=from_block,
             to_block=self._web3.eth.block_number,
             filters=filter_args,
         )
