@@ -130,7 +130,7 @@ data_token.approve(ocean.exchange._exchange_address, to_wei(100), alice_wallet)
 In the same python console:
 ```python
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
-bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations. config transaction_timeout)
+bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, configtransaction_timeout)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
 #Verify that Bob has ganache ETH
