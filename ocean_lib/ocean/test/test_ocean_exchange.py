@@ -30,13 +30,14 @@ def test_search_exchange_by_data_token(publisher_ocean_instance):
         "DataToken1", "DT1", alice_wallet, blob=ocn.config.metadata_cache_uri
     )
     dt.mint(bob_wallet.address, to_wei(100), alice_wallet)
-    dt.approve(ocn.exchange._exchange_address, to_wei(100), alice_wallet)
+    tx_hash = dt.approve(ocn.exchange._exchange_address, to_wei(100), alice_wallet)
+    from_block = alice_wallet.web3.eth.wait_for_transaction_receipt(tx_hash).blockNumber
 
     exchange_id1 = ocn.exchange.create(dt.address, to_wei("0.1"), alice_wallet)
 
     exchange_id2 = ocn.exchange.create(dt.address, to_wei("0.1"), bob_wallet)
 
-    logs = ocn.exchange.search_exchange_by_data_token(dt.address)
+    logs = ocn.exchange.search_exchange_by_data_token(dt.address, from_block)
 
     assert logs[0].args.dataToken == dt.address
     assert logs[1].args.dataToken == dt.address
