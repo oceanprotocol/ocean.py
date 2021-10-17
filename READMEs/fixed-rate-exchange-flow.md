@@ -121,10 +121,7 @@ In the same python console:
 #Mint the datatokens
 from ocean_lib.web3_internal.currency import to_wei
 data_token.mint(alice_wallet.address, to_wei(100), alice_wallet)
-tx_hash = data_token.approve(ocean.exchange._exchange_address, to_wei(100), alice_wallet)
-#Store the from_block number to use it if the exchange was already created
-from_block = alice_wallet.web3.eth.wait_for_transaction_receipt(tx_hash).blockNumber
-print(f"from_block = {from_block}")
+data_token.approve(ocean.exchange._exchange_address, to_wei(100), alice_wallet)
 ```
 
 ## 4. Bob buys at fixed rate data tokens
@@ -160,7 +157,7 @@ providing the data token address.
 ```python
 #Search for exchange_id from a specific block retrieved at 3rd step
 #for a certain data token address (e.g. token_address).
-logs = ocean.exchange.search_exchange_by_data_token(token_address, from_block)
+logs = ocean.exchange.search_exchange_by_data_token(token_address)
 print(logs)
 #E.g. First exchange is the wanted one.
 exchange_id = logs[0].args.exchangeId
