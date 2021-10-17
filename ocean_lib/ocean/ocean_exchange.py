@@ -72,7 +72,9 @@ class OceanExchange:
         token_registered_log = dtfactory.get_token_registered_event(
             0, self._web3.eth.block_number, data_token
         )
-        assert token_registered_log, f"No token with '{data_token}' address was created before."
+        assert (
+            token_registered_log
+        ), f"No token with '{data_token}' address was created before."
         from_block = token_registered_log.blockNumber
         fre = self._exchange_contract()
         filter_args = {"dataToken": data_token}

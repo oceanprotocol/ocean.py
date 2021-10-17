@@ -28,8 +28,8 @@ def test_search_exchange_by_nonexistent_data_token(publisher_ocean_instance):
     with pytest.raises(AssertionError) as err:
         ocn.exchange.search_exchange_by_data_token(foo_data_token)
     assert (
-            err.value.args[0]
-            == f"No token with '{foo_data_token}' address was created before."
+        err.value.args[0]
+        == f"No token with '{foo_data_token}' address was created before."
     )
 
 
