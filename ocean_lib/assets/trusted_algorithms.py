@@ -2,7 +2,6 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import hashlib
 import json
 from typing import Optional, Union
 
@@ -10,14 +9,7 @@ from enforce_typing import enforce_types
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.common.agreements.service_types import ServiceTypes
-
-
-@enforce_types
-def create_checksum(text: str) -> str:
-    """
-    :return: str
-    """
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+from ocean_lib.utils.utilities import create_checksum
 
 
 @enforce_types

@@ -9,7 +9,7 @@ from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
-from ocean_lib.assets.utils import create_publisher_trusted_algorithms
+from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.config import Config

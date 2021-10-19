@@ -17,12 +17,11 @@ from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
+from ocean_lib.assets.did import did_to_id
 from ocean_lib.common.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.aquarius.aquarius import Aquarius
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
-from ocean_lib.common.did import did_to_id
-from ocean_lib.common.utils.utilities import checksum
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import (
     DataServiceProvider,
@@ -38,6 +37,7 @@ from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.services.service import Service
+from ocean_lib.utils.utilities import checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 from ocean_lib.web3_internal.transactions import sign_hash

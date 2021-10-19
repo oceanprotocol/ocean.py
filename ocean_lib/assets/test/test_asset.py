@@ -3,8 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from ocean_lib.assets.asset import V3Asset
+from ocean_lib.assets.did import DID
 from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.common.did import DID
 from tests.resources.ddo_helpers import (
     get_registered_algorithm_ddo,
     get_registered_ddo_with_compute_service,

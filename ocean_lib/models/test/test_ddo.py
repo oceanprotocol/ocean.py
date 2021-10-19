@@ -10,11 +10,11 @@ from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.credentials import AddressCredential
 from ocean_lib.common.agreements.consumable import ConsumableCodes, MalformedCredential
-from ocean_lib.common.utils.utilities import checksum
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.util import get_contracts_addresses
+from ocean_lib.utils.utilities import checksum
 from tests.resources.ddo_helpers import get_resource_path
 from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
 from web3.logs import DISCARD
