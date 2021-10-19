@@ -12,11 +12,11 @@ from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.common.ddo.service import Service
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
+from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
 

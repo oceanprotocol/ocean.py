@@ -8,8 +8,8 @@ import uuid
 import pytest
 from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.assets.asset import V3Asset
+from ocean_lib.assets.credentials import AddressCredential
 from ocean_lib.common.agreements.consumable import ConsumableCodes, MalformedCredential
-from ocean_lib.common.ddo.credentials import AddressCredential
 from ocean_lib.common.utils.utilities import checksum
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory

@@ -10,9 +10,9 @@ import uuid
 
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.common.ddo.service import Service
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
+from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import mint_tokens_and_wait
 

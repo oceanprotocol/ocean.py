@@ -11,14 +11,13 @@ from typing import Any, List, Optional, Union
 from enforce_typing import enforce_types
 from eth_account.account import Account
 from eth_utils import add_0x_prefix
+from ocean_lib.assets.credentials import AddressCredential
 from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.common.ddo.constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
-from ocean_lib.common.ddo.credentials import AddressCredential
-from ocean_lib.common.ddo.service import Service
 from ocean_lib.common.did import did_to_id
 from ocean_lib.common.utils.utilities import get_timestamp
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ddo")
@@ -161,7 +160,7 @@ class V3Asset:
             self.created = get_timestamp()
 
         data = {
-            "@context": DID_DDO_CONTEXT_URL,
+            "@context": "https://w3id.org/did/v1",
             "id": self.did,
             "created": self.created,
         }
@@ -219,7 +218,7 @@ class V3Asset:
         :param publisher_account: account of the publisher, account
         """
         self.proof = {
-            "type": PROOF_TYPE,
+            "type": "DDOIntegritySignature",
             "created": get_timestamp(),
             "creator": publisher_account.address,
             "signatureValue": "",
