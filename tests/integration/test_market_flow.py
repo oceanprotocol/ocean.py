@@ -5,7 +5,7 @@
 
 import os
 
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.asset import V3Asset
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.ddo.service import Service
 from ocean_lib.web3_internal.currency import to_wei
@@ -31,9 +31,9 @@ def test_market_flow():
     publisher_ocean = get_publisher_ocean_instance()
     consumer_ocean = get_consumer_ocean_instance()
 
-    # Register Asset
+    # Register asset
     asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
-    assert isinstance(asset, Asset)
+    assert isinstance(asset, V3Asset)
     assert asset.data_token_address, "The asset does not have a token address."
 
     consumer_wallet = get_consumer_wallet()
@@ -115,7 +115,7 @@ def test_payer_market_flow():
 
     # Register Asset
     asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
-    assert isinstance(asset, Asset)
+    assert isinstance(asset, V3Asset)
     assert asset.data_token_address, "The asset does not have a token address."
 
     another_consumer_wallet = get_another_consumer_wallet()

@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.assets.utils import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.consumable import AssetNotConsumable, ConsumableCodes
@@ -459,7 +459,7 @@ class OceanCompute:
 
     @enforce_types
     def _get_service_endpoint(
-        self, did: str, asset: Optional[Asset] = None
+        self, did: str, asset: Optional[V3Asset] = None
     ) -> Tuple[str, str]:
         if not asset:
             asset = resolve_asset(did, self._config.metadata_cache_uri)
@@ -470,7 +470,7 @@ class OceanCompute:
 
     @enforce_types
     def _get_compute_result_file_endpoint(
-        self, did: str, asset: Optional[Asset] = None
+        self, did: str, asset: Optional[V3Asset] = None
     ) -> Tuple[str, str]:
         if not asset:
             asset = resolve_asset(did, self._config.metadata_cache_uri)

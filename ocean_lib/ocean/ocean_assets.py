@@ -14,7 +14,7 @@ from typing import Optional, Tuple, Type, Union
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
 from eth_utils import add_0x_prefix, remove_0x_prefix
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.common.agreements.consumable import AssetNotConsumable, ConsumableCodes
@@ -83,7 +83,7 @@ class OceanAssets:
         return AquariusProvider.get_aquarius(url or self._metadata_cache_uri)
 
     @enforce_types
-    def _build_asset_contents(self, asset: Asset, encrypt: bool = False):
+    def _build_asset_contents(self, asset: V3Asset, encrypt: bool = False):
         if not encrypt:
             return bytes([1]), lzma.compress(Web3.toBytes(text=asset.as_text()))
 
@@ -103,7 +103,7 @@ class OceanAssets:
         dt_blob: Optional[str] = None,
         dt_cap: Optional[int] = None,
         encrypt: Optional[bool] = False,
-    ) -> Optional[Asset]:
+    ) -> Optional[V3Asset]:
         """Register an asset on-chain.
 
         Creating/deploying a DataToken contract and in the Metadata store (Aquarius).
@@ -161,7 +161,7 @@ class OceanAssets:
             checksum_dict[str(service.index)] = checksum(service.main)
 
         # Create a DDO object
-        asset = Asset()
+        asset = V3Asset()
         # Adding proof to the ddo.
         asset.add_proof(checksum_dict, publisher_wallet)
 
@@ -331,7 +331,7 @@ class OceanAssets:
 
     @enforce_types
     def update(
-        self, asset: Asset, publisher_wallet: Wallet, encrypt: Optional[bool] = False
+        self, asset: V3Asset, publisher_wallet: Wallet, encrypt: Optional[bool] = False
     ) -> str:
         try:
             # publish the new ddo in ocean-db/Aquarius
@@ -355,7 +355,7 @@ class OceanAssets:
             raise
 
     @enforce_types
-    def resolve(self, did: str) -> Asset:
+    def resolve(self, did: str) -> V3Asset:
         """
         When you pass a did retrieve the ddo associated.
 
@@ -376,7 +376,7 @@ class OceanAssets:
         """
         logger.info(f"Searching asset containing: {text}")
         return [
-            Asset(dictionary=ddo_dict)
+            V3Asset(dictionary=ddo_dict)
             for ddo_dict in self._get_aquarius(metadata_cache_uri).query_search(
                 {"query": {"query_string": {"query": text}}}
             )
@@ -395,7 +395,9 @@ class OceanAssets:
         """
         logger.info(f"Searching asset query: {query}")
         aquarius = self._get_aquarius(metadata_cache_uri)
-        return [Asset(dictionary=ddo_dict) for ddo_dict in aquarius.query_search(query)]
+        return [
+            V3Asset(dictionary=ddo_dict) for ddo_dict in aquarius.query_search(query)
+        ]
 
     @enforce_types
     def order(
