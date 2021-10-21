@@ -42,15 +42,15 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     def deploy_erc721_contract(
         self,
         name: str,
-        symbol: int,
-        data: bytes,
-        flags: bytes,
+        symbol: str,
         template_index: int,
+        additional_erc20_deployer: str,
+        base_uri: str,
         from_wallet: Wallet,
     ):
         return self.send_transaction(
             "deployERC721Contract",
-            (name, symbol, data, flags, template_index),
+            (name, symbol, template_index, additional_erc20_deployer, base_uri),
             from_wallet,
         )
 
