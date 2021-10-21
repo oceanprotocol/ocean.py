@@ -26,7 +26,7 @@ def test_properties(web3, erc721_factory_address):
 
 
 def test_deploy_erc721_contract(web3, alice_wallet, erc721_factory_address):
-    """Should deploy a new erc721 contract and emit NFTCreated event."""
+    """Tests happy path for deploying a new ERC 721 contract and emit NFTCreated event."""
     erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
     tx = erc721_factory.deploy_erc721_contract(
         "DT1",
