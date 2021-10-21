@@ -41,6 +41,6 @@ def test_deploy_erc721_contract(web3, alice_wallet, erc721_factory_address):
         ERC721FactoryContract.EVENT_NFT_CREATED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
-        None
+        None,
     )
     assert registered_event
