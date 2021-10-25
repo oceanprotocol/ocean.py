@@ -1,0 +1,24 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "Deployer",
+  "sourceName": "contracts/utils/Deployer.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "instance",
+          "type": "address"
+        }
+      ],
+      "name": "InstanceDeployed",
+      "type": "event"
+    }
+  ],
+  "bytecode": "0x6080604052348015600f57600080fd5b50603f80601d6000396000f3fe6080604052600080fdfea26469706673582212209419dfe8089d807890416fd918a14f8a5c2610b30e60b58565eaa0c36d1f8ab264736f6c63430008070033",
+  "deployedBytecode": "0x6080604052600080fdfea26469706673582212209419dfe8089d807890416fd918a14f8a5c2610b30e60b58565eaa0c36d1f8ab264736f6c63430008070033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

@@ -72,7 +72,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         strings: List[str],
         addresses: List[str],
         uints: List[int],
-        bytess: bytes,
+        bytess: List[bytes],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(

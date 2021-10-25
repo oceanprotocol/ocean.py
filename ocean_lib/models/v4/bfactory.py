@@ -10,7 +10,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 
 @enforce_types
-class ERC721Token(ContractBase):
+class BFactory(ContractBase):
     CONTRACT_NAME = "BFactory"
 
     EVENT_BFACTORY_CREATED = "BPoolCreated"

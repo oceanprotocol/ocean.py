@@ -1,0 +1,108 @@
+{
+  "rinkeby": {
+    "DTFactory": "0x3fd7A00106038Fb5c802c6d63fa7147Fe429E83a",
+    "BFactory": "0x53eDF9289B0898e1652Ce009AACf8D25fA9A42F8",
+    "FixedRateExchange": "0xeD1DfC5F3a589CfC4E8B91C1fbfC18FC6699Fbde",
+    "Metadata": "0xFD8a7b6297153397B7eb4356C47dbd381d58bFF4",
+    "Ocean": "0x8967BCF84170c91B0d24D4302C2376283b0B3a07",
+    "Dispenser": "0x623744Cd25Ed553d3b4722667697F926cf99658B",
+    "chainId": 4,
+    "startBlock": 7294090
+  },
+  "ropsten": {
+    "DTFactory": "0x6ebcCa6df2CAba986FCF44E64Ee82251c1455Dcc",
+    "BFactory": "0x75be6e18c80A487C8b49663bf14f80A6495045B2",
+    "FixedRateExchange": "0xA7a711A09396DF82D9be46A26B48BafdB9BB4fA6",
+    "Metadata": "0x3cd7Ef1F207E1a46AAd7D5d7F5f0A5cF081Fc726",
+    "Ocean": "0x5e8DCB2AfA23844bcc311B00Ad1A0C30025aADE9",
+    "Dispenser": "0xc37F8341Ac6e4a94538302bCd4d49Cf0852D30C0",
+    "chainId": 3,
+    "startBlock": 9227563
+  },
+  "development": {
+    "Ocean": "0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB",
+    "OPFCommunityFeeCollector": "0x9E545E3C0baAB3E08CdfD552C960A1050f373042",
+    "chainId": 31337,
+    "startBlock": 0,
+    "v4": {
+      "Metadata": "0x851356ae760d987E095750cCeb3bC6014560891C",
+      "ERC721Factory": "0x95401dc811bb5740090279Ba06cfA8fcF6113778",
+      "ERC20Template": "0xa82fF9aFd8f496c3d6ac40E2a0F282E47488CFc9",
+      "ERC721Template": "0xf5059a5D33d5853360D16C683c16e67980206f36",
+      "Router": "0xc3e53F4d16Ae77Db1c982e75a937B9f60FE63690",
+      "FixedPrice": "0x84eA74d481Ee0A5332c457a4d796187F6Ba67fEB",
+      "Staking": "0x9E545E3C0baAB3E08CdfD552C960A1050f373042",
+      "poolTemplate": "0xE6E340D132b5f46d1e472DebcD681B2aBc16e57E"
+    },
+    "v3": {}
+  },
+  "mainnet": {
+    "DTFactory": "0x57317f97E9EA49eBd19f7c9bB7c180b8cDcbDeB9",
+    "BFactory": "0xbe0083053744ECb871510C88dC0f6b77Da162706",
+    "FixedRateExchange": "0x608d05214E42722B94a54cF6114d4840FCfF84e1",
+    "Metadata": "0x1a4b70d8c9DcA47cD6D0Fb3c52BB8634CA1C0Fdf",
+    "Ocean": "0x967da4048cD07aB37855c090aAF366e4ce1b9F48",
+    "Dispenser": "0xDEfD0018969cd2d4E648209F876ADe184815f038",
+    "chainId": 1,
+    "startBlock": 11005222
+  },
+  "polygon": {
+    "DTFactory": "0xF6410bf5d773C7a41ebFf972f38e7463FA242477",
+    "BFactory": "0x69B6E54Ad2b3c2801d11d8Ad56ea1d892555b776",
+    "FixedRateExchange": "0x2112Eb973af1DBf83a4f11eda82f7a7527D7Fde5",
+    "Metadata": "0x80E63f73cAc60c1662f27D2DFd2EA834acddBaa8",
+    "Ocean": "0x282d8efCe846A88B159800bd4130ad77443Fa1A1",
+    "Dispenser": "0x30E4CC2C7A9c6aA2b2Ce93586E3Df24a3A00bcDD",
+    "chainId": 137,
+    "startBlock": 11005222
+  },
+  "moonbeamalpha": {
+    "DTFactory": "0x80E63f73cAc60c1662f27D2DFd2EA834acddBaa8",
+    "BFactory": "0x30E4CC2C7A9c6aA2b2Ce93586E3Df24a3A00bcDD",
+    "FixedRateExchange": "0xDEfD0018969cd2d4E648209F876ADe184815f038",
+    "Metadata": "0x9C9eE07b8Ce907D2f9244F8317C1Ed29A3193bAe",
+    "Ocean": "0x3c21a90599b5B7f37014cA5Bf30d3f1b73d7e391",
+    "Dispenser": "0x042D709b72B437d7d387F2679bD4ac060e561c9f",
+    "chainId": 1287,
+    "startBlock": 90707
+  },
+  "undefined": {
+    "DTFactory": "0xC54b688d81b6B3bab9834D9D7afd8655641EEdA7",
+    "BFactory": "0x082DD8b8A6eD335364739004280bD4eF41cB6Bd9",
+    "FixedRateExchange": "0x19dcb303B4b56e7983b7F441696B326264c9008c",
+    "Metadata": "0x5F71F2ffF1639D927d43e4965C2EC6cCe9505222",
+    "Dispenser": "0xA4eD47bCAAe977fB1AE39A5DF905AC7420a5e095",
+    "chainId": 0,
+    "startBlock": 0
+  },
+  "gaiaxtestnet": {
+    "DTFactory": "0x2720d405ef7cDC8a2E2e5AeBC8883C99611d893C",
+    "BFactory": "0xc37F8341Ac6e4a94538302bCd4d49Cf0852D30C0",
+    "FixedRateExchange": "0x3c21a90599b5B7f37014cA5Bf30d3f1b73d7e391",
+    "Metadata": "0xCfDdA22C9837aE76E0faA845354f33C62E03653a",
+    "Dispenser": "0x4E6058dC00e90C0DCA47A5d0D3346F409939A5ab",
+    "Ocean": "0x80E63f73cAc60c1662f27D2DFd2EA834acddBaa8",
+    "chainId": 2021000,
+    "startBlock": 177644
+  },
+  "mumbai": {
+    "DTFactory": "0x4E6058dC00e90C0DCA47A5d0D3346F409939A5ab",
+    "BFactory": "0x159924ca0F47D6F704B97E29099b89e518A17B5E",
+    "FixedRateExchange": "0xc313e19146Fc9a04470689C9d41a4D3054693531",
+    "Metadata": "0x98679D582AB3398C03D3308dEB9c7AeC50B52ded",
+    "Dispenser": "0x1d535147a97bd87c8443125376E6671B60556E07",
+    "Ocean": "0xd8992Ed72C445c35Cb4A2be468568Ed1079357c8",
+    "chainId": 80001,
+    "startBlock": 14791845
+  },
+  "bsc": {
+    "DTFactory": "0xE9397625Df9B63f0C152f975234b7988b54710B8",
+    "BFactory": "0xc313e19146Fc9a04470689C9d41a4D3054693531",
+    "FixedRateExchange": "0x98679D582AB3398C03D3308dEB9c7AeC50B52ded",
+    "Metadata": "0x1d535147a97bd87c8443125376E6671B60556E07",
+    "Dispenser": "0xFe7967A5176fDAFa8DE109b3507016B885a82D6e",
+    "Ocean": "0xdce07662ca8ebc241316a15b611c89711414dd1a",
+    "chainId": 56,
+    "startBlock": 8114772
+  }
+}

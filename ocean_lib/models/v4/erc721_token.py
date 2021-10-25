@@ -80,6 +80,13 @@ class ERC721Token(ContractBase):
             from_wallet,
         )
 
+    def add_to_create_erc20_list(
+        self, allowed_address: str, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "addToCreateERC20List", (allowed_address,), from_wallet
+        )
+
     def add_manager(self, manager_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("addManager", (manager_address,), from_wallet)
 
@@ -134,9 +141,6 @@ class ERC721Token(ContractBase):
 
     def withdraw(self, from_wallet: Wallet):
         return self.send_transaction("withdrawETH", (), from_wallet)
-
-    def name(self) -> str:
-        return self.contract.caller.name()
 
     def symbol(self) -> str:
         return self.contract.caller.symbol()

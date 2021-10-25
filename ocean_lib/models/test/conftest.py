@@ -26,7 +26,6 @@ from web3.main import Web3
 
 _NETWORK = "ganache"
 HUGEINT = 2 ** 255
-ERC721_FACTORY_ADDRESS = "0x611f28Ef25D778aFC5a0034Aea94297e2c215a42"
 BobInfo = None
 AliceInfo = None
 
@@ -34,11 +33,6 @@ AliceInfo = None
 @pytest.fixture
 def network():
     return _NETWORK
-
-
-@pytest.fixture
-def erc721_factory_address():
-    return ERC721_FACTORY_ADDRESS
 
 
 @pytest.fixture

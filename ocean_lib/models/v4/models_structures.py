@@ -19,7 +19,7 @@ ErcCreateData = NamedTuple(
         ("strings", List[str]),
         ("addresses", List[str]),
         ("uints", List[int]),
-        ("bytess", bytes),
+        ("bytess", List[bytes]),
     ],
 )
 

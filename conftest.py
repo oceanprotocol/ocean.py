@@ -26,7 +26,8 @@ from tests.resources.helper_functions import (
 setup_logging()
 
 
-@pytest.fixture(autouse=True)
+@pytest.mark.nosetup_all
+# @pytest.fixture(autouse=True)
 def setup_all(request, config, web3):
     # a test can skip setup_all() via decorator "@pytest.mark.nosetup_all"
     if "nosetup_all" in request.keywords:
@@ -50,7 +51,7 @@ def setup_all(request, config, web3):
         10
     ), "Ether balance less than 10."
 
-    from ocean_lib.models.v4.erc20_token import MockOcean as DataToken
+    from ocean_lib.models.v4.erc20_token import ERC20Token as DataToken
 
     OCEAN_token = DataToken(web3, address=network_addresses["development"]["Ocean"])
 
