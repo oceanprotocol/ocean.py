@@ -51,7 +51,9 @@ def setup_all(request, config, web3):
         10
     ), "Ether balance less than 10."
 
-    OCEAN_token = ERC20Token(web3, address=network_addresses["development"]["v4"]["Ocean"])
+    OCEAN_token = ERC20Token(
+        web3, address=network_addresses["development"]["v4"]["Ocean"]
+    )
 
     amt_distribute = to_wei(1000)
 
