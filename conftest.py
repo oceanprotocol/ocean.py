@@ -8,6 +8,7 @@ import uuid
 
 import pytest
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
+from ocean_lib.models.v4.erc20_token import ERC20Token
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import get_ether_balance
@@ -26,8 +27,7 @@ from tests.resources.helper_functions import (
 setup_logging()
 
 
-@pytest.mark.nosetup_all
-# @pytest.fixture(autouse=True)
+@pytest.fixture(autouse=True)
 def setup_all(request, config, web3):
     # a test can skip setup_all() via decorator "@pytest.mark.nosetup_all"
     if "nosetup_all" in request.keywords:
@@ -51,9 +51,7 @@ def setup_all(request, config, web3):
         10
     ), "Ether balance less than 10."
 
-    from ocean_lib.models.v4.erc20_token import ERC20Token as DataToken
-
-    OCEAN_token = DataToken(web3, address=network_addresses["development"]["Ocean"])
+    OCEAN_token = ERC20Token(web3, address=network_addresses["development"]["v4"]["Ocean"])
 
     amt_distribute = to_wei(1000)
 

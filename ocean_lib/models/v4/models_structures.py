@@ -4,7 +4,7 @@
 #
 
 """
-Defines NamedTuples `NftCreateData`, `ErcCreateData`, `PoolData`, `FixedData`
+Defines NamedTuples `NftCreateData`, `ErcCreateData`, `PoolData`, `BPoolData`, `BPoolInitialized`,`FixedData`
 """
 from typing import NamedTuple, List
 
@@ -26,25 +26,19 @@ ErcCreateData = NamedTuple(
 PoolData = NamedTuple(
     "PoolData",
     [
-        ("controller", str),
-        ("base_token", str),
         ("ss_params", List[int]),
-        ("bt_sender", str),
         ("swap_fees", List[int]),
-        ("market_fee_collector", str),
-        ("publisher", str),
+        ("addresses", List[str]),
     ],
 )
 
 BPoolData = NamedTuple(
     "BPoolData",
     [
-        ("controller", str),
         ("tokens", List[str]),
-        ("publisher", str),
         ("ss_params", List[int]),
         ("swap_fees", List[int]),
-        ("market_fee_collector", str),
+        ("addresses", List[str]),
     ],
 )
 

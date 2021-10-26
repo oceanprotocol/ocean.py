@@ -65,13 +65,9 @@ class ERC20Token(ContractBase):
         return self.send_transaction(
             "deployPool",
             (
-                pool_data.controller,
-                pool_data.base_token,
                 pool_data.ss_params,
-                pool_data.bt_sender,
                 pool_data.swap_fees,
-                pool_data.market_fee_collector,
-                pool_data.publisher,
+                pool_data.addresses,
             ),
             from_wallet,
         )
@@ -159,6 +155,29 @@ class ERC20Token(ContractBase):
             from_wallet,
         )
 
+    @enforce_types
+    def transfer(self, to: str, amount: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("transfer", (to, amount), from_wallet)
+
+    @enforce_types
+    def allowance(self, owner_address: str, spender_address: str) -> int:
+        return self.contract.caller.allowance(owner_address, spender_address)
+
+    @enforce_types
+    def approve(self, spender: str, amount: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("approve", (spender, amount), from_wallet)
+
+    @enforce_types
+    def transferFrom(
+        self, from_address: str, to_address: str, amount: int, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "transferFrom", (from_address, to_address, amount), from_wallet
+        )
+
+    def is_minter(self, account: str) -> bool:
+        return self.contract.caller.isMinter(account)
+
     def add_minter(self, minter_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("addMinter", (minter_address,), from_wallet)
 
@@ -223,7 +242,7 @@ class ERC20Token(ContractBase):
     def is_initialized(self) -> bool:
         return self.contract.caller.isInitialized()
 
-    def calculateFee(self, amount: int, fee_percentage: int) -> int:
+    def calculate_fee(self, amount: int, fee_percentage: int) -> int:
         return self.contract.caller.calculateFee(amount, fee_percentage)
 
     def permit(

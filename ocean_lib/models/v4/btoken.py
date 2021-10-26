@@ -9,8 +9,8 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 
 @enforce_types
-class BToken(ContractBase):
-    CONTRACT_NAME = "BToken"
+class BTokenBase(ContractBase):
+    CONTRACT_NAME = "BTokenBase"
 
     def symbol(self) -> str:
         """

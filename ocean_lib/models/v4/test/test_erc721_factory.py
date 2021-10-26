@@ -9,15 +9,16 @@ from web3 import exceptions
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Token
 from ocean_lib.models.v4.models_structures import ErcCreateData
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.constants import (
+    ZERO_ADDRESS,
+    ERC721_FACTORY_ADDRESS,
+    ERC721_TEMPLATE,
+)
 from tests.resources.helper_functions import (
     get_publisher_wallet,
     get_consumer_wallet,
     get_another_consumer_wallet,
 )
-
-ERC721_FACTORY_ADDRESS = "0x611f28Ef25D778aFC5a0034Aea94297e2c215a42"
-ERC721_TEMPLATE = "0x9C2a015129969c98E9A5BcBEb61A5F907FF5b629"
 
 
 def test_properties(web3):

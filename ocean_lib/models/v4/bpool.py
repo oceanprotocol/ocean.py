@@ -7,13 +7,13 @@ from typing import List
 from enforce_typing import enforce_types
 
 from ocean_lib.models import balancer_constants
-from ocean_lib.models.v4.btoken import BToken
+from ocean_lib.models.v4.btoken import BTokenBase
 from ocean_lib.models.v4.models_structures import BPoolInitialized
 from ocean_lib.web3_internal.wallet import Wallet
 
 
 @enforce_types
-class BPool(BToken):
+class BPool(BTokenBase):
     CONTRACT_NAME = "BPool"
 
     EVENT_LOG_SWAP = "LOG_SWAP"

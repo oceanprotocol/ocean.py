@@ -23,12 +23,10 @@ class BFactory(ContractBase):
         return self.send_transaction(
             "newBPool",
             (
-                bpool_data.controller,
                 bpool_data.tokens,
-                bpool_data.publisher,
                 bpool_data.ss_params,
                 bpool_data.swap_fees,
-                bpool_data.market_fee_collector,
+                bpool_data.addresses,
             ),
             from_wallet,
         )

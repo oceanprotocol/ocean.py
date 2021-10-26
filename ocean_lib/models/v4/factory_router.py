@@ -14,19 +14,14 @@ class FactoryRouter(BFactory):
     def get_opf_fee(self, base_token: str) -> int:
         return self.contract.caller.getOPFFeee(base_token)
 
-    def deploy_pool(
-        self, bpool_data: BPoolData, bt_sender: str, from_wallet: Wallet
-    ) -> str:
+    def deploy_pool(self, bpool_data: BPoolData, from_wallet: Wallet) -> str:
         return self.send_transaction(
             "deployPool",
             (
-                bpool_data.controller,
                 bpool_data.tokens,
-                bpool_data.publisher,
                 bpool_data.ss_params,
-                bt_sender,
                 bpool_data.swap_fees,
-                bpool_data.market_fee_collector,
+                bpool_data.addresses,
             ),
             from_wallet,
         )
