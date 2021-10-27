@@ -2,8 +2,6 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
-
 import pytest
 
 from web3 import exceptions
@@ -11,8 +9,8 @@ from web3 import exceptions
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Token
 from ocean_lib.models.v4.models_structures import ErcCreateData
+from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.contract_utils import get_contract_definition
 from tests.resources.helper_functions import (
     get_publisher_wallet,
     get_consumer_wallet,
@@ -24,22 +22,16 @@ _NETWORK = "development"
 
 def get_nft_factory_address(config):
     """Helper function to retrieve a known ERC721 factory address."""
+    addresses = get_contracts_addresses(config.address_file, _NETWORK)["v4"]
 
-    # FIXME: fix get_contract_addresses bug to use here
-    with open(config.address_file) as f:
-        network_addresses = json.load(f)
-
-    return network_addresses[_NETWORK]["v4"][ERC721FactoryContract.CONTRACT_NAME]
+    return addresses[ERC721FactoryContract.CONTRACT_NAME]
 
 
 def get_nft_template_address(config):
     """Helper function to retrieve a known ERC721 template address."""
+    addresses = get_contracts_addresses(config.address_file, _NETWORK)["v4"]
 
-    # FIXME: fix get_contract_addresses bug to use here
-    with open(config.address_file) as f:
-        network_addresses = json.load(f)
-
-    return network_addresses[_NETWORK]["v4"][ERC721Token.CONTRACT_NAME]
+    return addresses[ERC721Token.CONTRACT_NAME]
 
 
 def test_properties(web3, config):

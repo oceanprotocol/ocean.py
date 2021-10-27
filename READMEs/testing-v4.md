@@ -54,9 +54,8 @@ git status
 
 In `ocean.py/addresses` package, there is `address.json` file which contains different
 addresses from your barge output. Please update in `["development"]["v4"]` with the addresses
-that you see in barge for each contract key. Update contract addresses constants from 
-`ocean_lib/web3_internal/constants.py`.
-Do not commit `address.json` & `ocean_lib/web3_internal/constants.py`!
+that you see in barge for each contract key.
+Do not commit `address.json`!
 
 ```console
 cd artifacts

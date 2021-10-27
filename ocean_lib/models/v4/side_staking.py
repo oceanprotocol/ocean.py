@@ -10,21 +10,8 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 
 @enforce_types
-class SSFixedRate(ContractBase):
-    def new_data_token_created(
-        self, data_token_created: NewDataTokenCreated, from_wallet: Wallet
-    ) -> str:
-        return self.send_transaction(
-            "newDataTokenCreated",
-            (
-                data_token_created.data_token,
-                data_token_created.base_token,
-                data_token_created.pool_address,
-                data_token_created.publisher_address,
-                data_token_created.ss_params,
-            ),
-            from_wallet,
-        )
+class SideStaking(ContractBase):
+    CONTRACT_NAME = "SideStaking"
 
     def get_data_token_circulating_supply(self, data_token: str) -> int:
         return self.contract.caller.getDataTokenCirculatingSupply(data_token)
