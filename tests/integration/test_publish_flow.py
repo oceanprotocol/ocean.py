@@ -5,9 +5,9 @@
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Token
 from ocean_lib.models.v4.models_structures import ErcCreateData
+from ocean_lib.models.v4.test.test_erc721_factory import get_nft_factory_address
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.web3_internal.constants import (
-    ERC721_FACTORY_ADDRESS,
     ZERO_ADDRESS,
 )
 from tests.resources.helper_functions import get_publisher_wallet
@@ -17,7 +17,7 @@ from tests.resources.helper_functions import get_publisher_wallet
 def test_publish_flow(web3, config):
     publisher = get_publisher_wallet()
 
-    erc721_factory = ERC721FactoryContract(web3, ERC721_FACTORY_ADDRESS)
+    erc721_factory = ERC721FactoryContract(web3, get_nft_factory_address(config))
 
     # Publisher deploys NFT contract
     tx = erc721_factory.deploy_erc721_contract(

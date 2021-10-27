@@ -1,0 +1,328 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "BFactory",
+  "sourceName": "contracts/pools/balancer/BFactory.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_bpoolTemplate",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_opfCollector",
+          "type": "address"
+        },
+        {
+          "internalType": "address[]",
+          "name": "_preCreatedPools",
+          "type": "address[]"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "constructor"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "newBPoolAddress",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "registeredBy",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "datatokenAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "basetokenAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "bpoolTemplateAddress",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "ssAddress",
+          "type": "address"
+        }
+      ],
+      "name": "BPoolCreated",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": false,
+          "internalType": "address",
+          "name": "instance",
+          "type": "address"
+        }
+      ],
+      "name": "InstanceDeployed",
+      "type": "event"
+    },
+    {
+      "inputs": [],
+      "name": "BONE",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "BPOW_PRECISION",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "EXIT_FEE",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "INIT_POOL_SUPPLY",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_BOUND_TOKENS",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_BPOW_BASE",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_FEE",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_IN_RATIO",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_OUT_RATIO",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_TOTAL_WEIGHT",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MAX_WEIGHT",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MIN_BALANCE",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MIN_BOUND_TOKENS",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MIN_BPOW_BASE",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MIN_FEE",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "MIN_WEIGHT",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "poolTemplate",
+          "type": "address"
+        }
+      ],
+      "name": "isPoolTemplate",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "opfCollector",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b5060405161071938038061071983398101604081905261002f91610207565b6001600160a01b0383166100a05760405162461bcd60e51b815260206004820152602d60248201527f42466163746f72793a20696e76616c69642062706f6f6c2074656d706c61746560448201526c207a65726f206164647265737360981b60648201526084015b60405180910390fd5b6001600160a01b0382166100f65760405162461bcd60e51b815260206004820152601660248201527f42466163746f72793a207a65726f2061646472657373000000000000000000006044820152606401610097565b600080546001600160a01b0319166001600160a01b03841617905561013c836001600160a01b03166000908152600160208190526040909120805460ff19169091179055565b8051156101e35760005b81518110156101e15760006001600160a01b0316336001600160a01b03168383815181106101765761017661031f565b602090810291909101810151604080516000808252938101849052908101929092526001600160a01b0316907fbb6121447d29a04cc37bfd93cdf6a9dd08229f2d941116c1528f04698c4e790e9060600160405180910390a4806101d9816102f6565b915050610146565b505b50505061034b565b80516001600160a01b038116811461020257600080fd5b919050565b60008060006060848603121561021c57600080fd5b610225846101eb565b925060206102348186016101eb565b60408601519093506001600160401b038082111561025157600080fd5b818701915087601f83011261026557600080fd5b81518181111561027757610277610335565b8060051b604051601f19603f8301168101818110858211171561029c5761029c610335565b604052828152858101935084860182860187018c10156102bb57600080fd5b600095505b838610156102e5576102d1816101eb565b8552600195909501949386019386016102c0565b508096505050505050509250925092565b600060001982141561031857634e487b7160e01b600052601160045260246000fd5b5060010190565b634e487b7160e01b600052603260045260246000fd5b634e487b7160e01b600052604160045260246000fd5b6103bf8061035a6000396000f3fe608060405234801561001057600080fd5b50600436106101165760003560e01c8063b7b800a4116100a2578063c07c00fe11610071578063c07c00fe146101b8578063c36596a61461013e578063c6580d12146101f4578063e4a28a521461011b578063ec093021146101fc57600080fd5b8063b7b800a414610198578063ba019dab146101a0578063bc063e1a146101a8578063bc694ea2146101b057600080fd5b8063867378c5116100e9578063867378c5146101555780639381cd2b1461015d578063992e2a9214610165578063a28f78f11461016d578063b0e0d1361461019857600080fd5b806309a3bbe41461011b578063189d00ca14610136578063218b53821461013e57806376c7a3c71461014d575b600080fd5b610123610204565b6040519081526020015b60405180910390f35b61012361021a565b610123670de0b6b3a764000081565b610123610231565b610123610246565b61012361025d565b610123610270565b600054610180906001600160a01b031681565b6040516001600160a01b03909116815260200161012d565b610123600281565b610123600181565b61012361028e565b6101236102a1565b6101e46101c63660046102d3565b6001600160a01b031660009081526001602052604090205460ff1690565b604051901515815260200161012d565b610123600081565b6101236102c0565b610217670de0b6b3a7640000603261033d565b81565b6102176402540be400670de0b6b3a764000061031b565b610217620f4240670de0b6b3a764000061031b565b61021764e8d4a51000670de0b6b3a764000061031b565b610217670de0b6b3a7640000606461033d565b6102836003670de0b6b3a764000061031b565b610217906001610303565b610217600a670de0b6b3a764000061031b565b60016102b6670de0b6b3a7640000600261033d565b610217919061035c565b6102176002670de0b6b3a764000061031b565b6000602082840312156102e557600080fd5b81356001600160a01b03811681146102fc57600080fd5b9392505050565b6000821982111561031657610316610373565b500190565b60008261033857634e487b7160e01b600052601260045260246000fd5b500490565b600081600019048311821515161561035757610357610373565b500290565b60008282101561036e5761036e610373565b500390565b634e487b7160e01b600052601160045260246000fdfea2646970667358221220531fd4651f0d9da58e0aff35f52e5afaf2ea7d2ceddf6fedc6c0359208b465e164736f6c63430008070033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b50600436106101165760003560e01c8063b7b800a4116100a2578063c07c00fe11610071578063c07c00fe146101b8578063c36596a61461013e578063c6580d12146101f4578063e4a28a521461011b578063ec093021146101fc57600080fd5b8063b7b800a414610198578063ba019dab146101a0578063bc063e1a146101a8578063bc694ea2146101b057600080fd5b8063867378c5116100e9578063867378c5146101555780639381cd2b1461015d578063992e2a9214610165578063a28f78f11461016d578063b0e0d1361461019857600080fd5b806309a3bbe41461011b578063189d00ca14610136578063218b53821461013e57806376c7a3c71461014d575b600080fd5b610123610204565b6040519081526020015b60405180910390f35b61012361021a565b610123670de0b6b3a764000081565b610123610231565b610123610246565b61012361025d565b610123610270565b600054610180906001600160a01b031681565b6040516001600160a01b03909116815260200161012d565b610123600281565b610123600181565b61012361028e565b6101236102a1565b6101e46101c63660046102d3565b6001600160a01b031660009081526001602052604090205460ff1690565b604051901515815260200161012d565b610123600081565b6101236102c0565b610217670de0b6b3a7640000603261033d565b81565b6102176402540be400670de0b6b3a764000061031b565b610217620f4240670de0b6b3a764000061031b565b61021764e8d4a51000670de0b6b3a764000061031b565b610217670de0b6b3a7640000606461033d565b6102836003670de0b6b3a764000061031b565b610217906001610303565b610217600a670de0b6b3a764000061031b565b60016102b6670de0b6b3a7640000600261033d565b610217919061035c565b6102176002670de0b6b3a764000061031b565b6000602082840312156102e557600080fd5b81356001600160a01b03811681146102fc57600080fd5b9392505050565b6000821982111561031657610316610373565b500190565b60008261033857634e487b7160e01b600052601260045260246000fd5b500490565b600081600019048311821515161561035757610357610373565b500290565b60008282101561036e5761036e610373565b500390565b634e487b7160e01b600052601160045260246000fdfea2646970667358221220531fd4651f0d9da58e0aff35f52e5afaf2ea7d2ceddf6fedc6c0359208b465e164736f6c63430008070033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

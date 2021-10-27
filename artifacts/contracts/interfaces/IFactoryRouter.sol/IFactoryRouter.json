@@ -7,6 +7,44 @@
       "inputs": [
         {
           "internalType": "address",
+          "name": "_dispenser",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "datatoken",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "maxTokens",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "maxBalance",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "allowedSwapper",
+          "type": "address"
+        }
+      ],
+      "name": "deployDispenser",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
           "name": "fixedPriceAddress",
           "type": "address"
         },
