@@ -6,7 +6,6 @@ from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Token
 from ocean_lib.models.v4.models_structures import ErcCreateData
 from ocean_lib.models.v4.test.test_erc721_factory import get_nft_factory_address
-from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.web3_internal.constants import (
     ZERO_ADDRESS,
 )
@@ -61,8 +60,3 @@ def test_publish_flow(web3, config):
     )
 
     dt_address = token_created_event[0].args.newTokenAddress
-
-    # Publisher interacts with ERC20 contract and creates a pool
-    mint_fake_OCEAN(config)
-
-    # FIXME: BTokenBase contract address does not exist.

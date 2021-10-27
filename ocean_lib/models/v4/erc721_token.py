@@ -153,3 +153,6 @@ class ERC721Token(ContractBase):
 
     def get_address_length(self, array: List[str]) -> int:
         return self.contract.caller.getAddressLength(array)
+
+    def get_permissions(self, user: str) -> list:
+        return self.contract.caller.getPermissions(user)
