@@ -23,7 +23,7 @@ def get_contract_definition(contract_name: str) -> Dict[str, Any]:
     try:
         return importlib.import_module("artifacts." + contract_name).__dict__
     except ModuleNotFoundError:
-        raise TypeError("Contract name does not exist in artifacts.")
+        raise TypeError(f"Contract name {contract_name} does not exist in artifacts.")
 
 
 @enforce_types
@@ -42,12 +42,10 @@ def get_contracts_addresses(
 ) -> Optional[Dict[str, str]]:
     """Get addresses for all contract names, per network and address_file given."""
     network_alias = {"ganache": "development"}
-
     if not address_file or not os.path.exists(address_file):
         return None
     with open(address_file) as f:
         addresses = json.load(f)
-
     network_addresses = addresses.get(network, None)
     if network_addresses is None and network in network_alias:
         network_addresses = addresses.get(network_alias[network], None)

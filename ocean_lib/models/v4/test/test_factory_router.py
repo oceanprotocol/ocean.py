@@ -9,14 +9,20 @@ from web3 import exceptions
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Token
 from ocean_lib.models.v4.factory_router import FactoryRouter
+from ocean_lib.web3_internal.contract_utils import get_contracts_addresses
 from ocean_lib.models.v4.bfactory import BFactory
 from ocean_lib.models.v4.models_structures import ErcCreateData
+from ocean_lib.web3_internal.wallet import Wallet
+from tests.resources.helper_functions import get_factory_deployer_wallet
+from ocean_lib.config import Config
+import os
+_NETWORK = "ganache"
 from ocean_lib.web3_internal.constants import (
+    POOL_TEMPLATE_ADDRESS,
     ZERO_ADDRESS,
     ERC721_FACTORY_ADDRESS,
     ERC721_TEMPLATE,
-    
-    
+    OCEAN_ADDRESS_V4,
 )
 from tests.resources.helper_functions import (
     get_publisher_wallet,
@@ -24,11 +30,4 @@ from tests.resources.helper_functions import (
     get_another_consumer_wallet,
 )
 
-def test_confirm_ocean_added_to_mapping(web3):
-    # deploy factoury router
-    #poolTemplate = BFactory(web3=web3,address=web3.eth.accounts[0]).new_bpool(from_wallet=web3.eth.accounts[0])
-    
-    factory_router = FactoryRouter(web3=web3,address=ERC721_TEMPLATE)
-    #deployed = factory_router.deploy()
-    #print(deployed)
-    assert 0
+
