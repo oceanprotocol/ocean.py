@@ -26,12 +26,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import get_factory_deployer_wallet
 from ocean_lib.config import Config
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.models.v4.models_structures import (
-    NftCreateData,
-    ErcCreateData,
-    PoolData,
-    FixedData,
-)
+
 
 import os
 _NETWORK = "ganache"
@@ -40,7 +35,7 @@ _NETWORK = "ganache"
 
 def get_factory_router_address(config):
     """Helper function to retrieve a known factory router address."""
-    return get_contracts_addresses(address_file=config.address_file, network=_NETWORK)["v4"]["Router"]
+    return get_contracts_addresses(address_file=config.address_file, network=_NETWORK)["Router"]
 
 
 def init(web3, config):
@@ -55,12 +50,12 @@ def create_new_token(web3, config):
 
 def get_erc_address(config):
     """Helper function to retrieve a known ERC address."""
-    return get_contracts_addresses(address_file=config.address_file, network=_NETWORK)["v4"]["ERC20Template"]["1"]
+    return get_contracts_addresses(address_file=config.address_file, network=_NETWORK)["ERC20Template"]["1"]
 
 
 def get_ocean_address(config):
     """Helper function to retrieve a known Ocean address."""
-    return get_contracts_addresses(address_file=config.address_file, network=_NETWORK)["v4"]["Ocean"]
+    return get_contracts_addresses(address_file=config.address_file, network=_NETWORK)["Ocean"]
 
 
 def test_ocean_tokens_mapping(web3, config):
@@ -166,19 +161,19 @@ def test_fail_add_factory_owner(web3, config):
     factory_router = FactoryRouter(web3, get_factory_router_address(config))
     with pytest.raises(exceptions.ContractLogicError):
         factory_router.add_factory(get_another_consumer_wallet().address, get_factory_deployer_wallet(network=_NETWORK))
-    assert factory_router.factory() == get_contracts_addresses(address_file=config.address_file, network=_NETWORK)["v4"]["ERC721Factory"]
+    assert factory_router.factory() == get_contracts_addresses(address_file=config.address_file, network=_NETWORK)["ERC721Factory"]
 
 
 def test_fail_add_factory_not_owner(web3, config):
     factory_router = FactoryRouter(web3, get_factory_router_address(config))
     with pytest.raises(exceptions.ContractLogicError):
         factory_router.add_factory(get_another_consumer_wallet().address, get_consumer_wallet())
-    assert factory_router.factory() == get_contracts_addresses(address_file=config.address_file, network=_NETWORK)["v4"]["ERC721Factory"]
+    assert factory_router.factory() == get_contracts_addresses(address_file=config.address_file, network=_NETWORK)["ERC721Factory"]
 
 
 def test_fixed_rate(web3, config):
     factory_router = FactoryRouter(web3, get_factory_router_address(config))
-    fixedRateExchangeAddress = get_contracts_addresses(address_file=config.address_file, network=_NETWORK)["v4"]["FixedRateExchange"]
+    fixedRateExchangeAddress = get_contracts_addresses(address_file=config.address_file, network=_NETWORK)["FixedPrice"]
     factory_router.add_fixed_rate_contract(fixedRateExchangeAddress, get_factory_deployer_wallet(network=_NETWORK))
     assert factory_router.fixed_price(fixedRateExchangeAddress) == True
 
@@ -229,7 +224,7 @@ def test_fail_remove_pool_template(web3, config):
 
 def test_buy_dt_batch(web3: Web3, config):
 
-    v4Addresses = get_contracts_addresses(address_file=config.address_file, network=_NETWORK)["v4"]
+    v4Addresses = get_contracts_addresses(address_file=config.address_file, network=_NETWORK)
 
     consumer_wallet = get_consumer_wallet()
     factory_deployer = get_factory_deployer_wallet(network=_NETWORK)
