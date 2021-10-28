@@ -119,15 +119,7 @@ class FactoryRouter(BFactory):
     def deploy_fixed_rate(self, fixed_data: FixedData, from_wallet: Wallet) -> str:
         return self.send_transaction(
             "deployFixedRate",
-            (
-                fixed_data.fixed_price_address,
-                fixed_data.base_token,
-                fixed_data.bt_decimals,
-                fixed_data.exchange_rate,
-                fixed_data.owner,
-                fixed_data.market_fee,
-                fixed_data.market_fee_collector,
-            ),
+            (fixed_data.fixed_price_address, fixed_data.addresses, fixed_data.uints),
             from_wallet,
         )
 
@@ -142,5 +134,4 @@ class FactoryRouter(BFactory):
         )
 
     def buy_dt_batch(self, operations: List[Operations], from_wallet: Wallet) -> str:
-        """Requires tokenIn approvals for router from user. (except for dispenser operations)"""
         return self.send_transaction("buyDTBatch", (operations,), from_wallet)

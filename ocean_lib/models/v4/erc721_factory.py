@@ -6,12 +6,6 @@ from typing import List
 
 from enforce_typing import enforce_types
 from ocean_lib.models.v4.erc_token_factory_base import ERCTokenFactoryBase
-from ocean_lib.models.v4.models_structures import (
-    NftCreateData,
-    ErcCreateData,
-    PoolData,
-    FixedData,
-)
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -116,47 +110,30 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     def create_nft_with_erc(
         self,
-        nft_create_data: NftCreateData,
-        erc_create_data: ErcCreateData,
+        nft_create_data: dict,
+        erc_create_data: dict,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "createNftWithErc",
-            (
-                [
-                    nft_create_data.name,
-                    nft_create_data.symbol,
-                    nft_create_data.template_index,
-                ],
-                [
-                    erc_create_data.template_index,
-                    erc_create_data.strings,
-                    erc_create_data.addresses,
-                    erc_create_data.uints,
-                    erc_create_data.bytess,
-                ],
-            ),
+            (nft_create_data, erc_create_data),
             from_wallet,
         )
 
     def create_nft_erc_with_pool(
         self,
-        nft_create_data,
-        erc_create_data,
-        pool_data,
+        nft_create_data: dict,
+        erc_create_data: dict,
+        pool_data: dict,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "createNftErcWithPool",
-            (
-                nft_create_data,
-                erc_create_data,
-                pool_data,
-            ),
+            (nft_create_data, erc_create_data, pool_data),
             from_wallet,
         )
 
-    def createNftErcWithFixedRate(
+    def create_nft_erc_with_fixed_rate(
         self,
         nft_create_data: dict,
         erc_create_data: dict,
@@ -164,11 +141,20 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "createNftErcWithPool",
-            (
-                nft_create_data,
-                erc_create_data,
-                fixed_data,
-            ),
+            "createNftErcWithFixedRate",
+            (nft_create_data, erc_create_data, fixed_data),
+            from_wallet,
+        )
+
+    def create_nft_erc_with_dispenser(
+        self,
+        nft_create_data: dict,
+        erc_create_data: dict,
+        dispenser_data: dict,
+        from_wallet: Wallet,
+    ) -> str:
+        return self.send_transaction(
+            "createNftErcWithDispenser",
+            (nft_create_data, erc_create_data, dispenser_data),
             from_wallet,
         )
