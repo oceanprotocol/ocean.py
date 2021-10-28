@@ -141,67 +141,34 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     def create_nft_erc_with_pool(
         self,
-        nft_create_data: NftCreateData,
-        erc_create_data: ErcCreateData,
-        pool_data: PoolData,
+        nft_create_data,
+        erc_create_data,
+        pool_data,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "createNftErcWithPool",
             (
-                (
-                    nft_create_data.name,
-                    nft_create_data.symbol,
-                    nft_create_data.template_index,
-                    nft_create_data.base_uri
-                ),
-                (
-                    erc_create_data.template_index,
-                    erc_create_data.strings,
-                    erc_create_data.addresses,
-                    erc_create_data.uints,
-                    erc_create_data.bytess,
-                ),
-                (
-                    pool_data.addresses,
-                    pool_data.ss_params,
-                    pool_data.swap_fees,
-                ),
+                nft_create_data,
+                erc_create_data,
+                pool_data,
             ),
             from_wallet,
         )
 
     def createNftErcWithFixedRate(
         self,
-        nft_create_data: NftCreateData,
-        erc_create_data: ErcCreateData,
-        fixed_data: FixedData,
+        nft_create_data: dict,
+        erc_create_data: dict,
+        fixed_data: dict,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "createNftErcWithPool",
             (
-                [
-                    nft_create_data.name,
-                    nft_create_data.symbol,
-                    nft_create_data.template_index,
-                ],
-                [
-                    erc_create_data.template_index,
-                    erc_create_data.strings,
-                    erc_create_data.addresses,
-                    erc_create_data.uints,
-                    erc_create_data.bytess,
-                ],
-                [
-                    fixed_data.fixed_price_address,
-                    fixed_data.base_token,
-                    fixed_data.bt_decimals,
-                    fixed_data.exchange_rate,
-                    fixed_data.owner,
-                    fixed_data.market_fee,
-                    fixed_data.market_fee_collector,
-                ],
+                nft_create_data,
+                erc_create_data,
+                fixed_data,
             ),
             from_wallet,
         )
