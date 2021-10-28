@@ -149,23 +149,24 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return self.send_transaction(
             "createNftErcWithPool",
             (
-                [
+                (
                     nft_create_data.name,
                     nft_create_data.symbol,
                     nft_create_data.template_index,
-                ],
-                [
+                    nft_create_data.base_uri
+                ),
+                (
                     erc_create_data.template_index,
                     erc_create_data.strings,
                     erc_create_data.addresses,
                     erc_create_data.uints,
                     erc_create_data.bytess,
-                ],
-                [
+                ),
+                (
+                    pool_data.addresses,
                     pool_data.ss_params,
                     pool_data.swap_fees,
-                    pool_data.addresses,
-                ],
+                ),
             ),
             from_wallet,
         )

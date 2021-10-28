@@ -9,7 +9,7 @@ from typing import NamedTuple, List
 from enum import Enum
 
 NftCreateData = NamedTuple(
-    "NftCreateData", [("name", str), ("symbol", str), ("template_index", int)]
+    "NftCreateData", [("name", str), ("symbol", str), ("template_index", int), ("base_uri", str)]
 )
 
 ErcCreateData = NamedTuple(
