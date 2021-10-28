@@ -11,7 +11,7 @@ _NETWORK = "ganache"
 
 def get_factory_router_address(config):
     """Helper function to retrieve a known factory router address."""
-    addresses = get_contracts_addresses(config.address_file, _NETWORK)["v4"]
+    addresses = get_contracts_addresses(config.address_file, _NETWORK)
 
     return addresses.get("Router")
 
@@ -19,7 +19,7 @@ def get_factory_router_address(config):
 def get_ocean_address(config):
     """Helper function to retrieve a known Ocean address."""
 
-    addresses = get_contracts_addresses(config.address_file, _NETWORK)["v4"]
+    addresses = get_contracts_addresses(config.address_file, _NETWORK)
     return addresses.get("Ocean")
 
 

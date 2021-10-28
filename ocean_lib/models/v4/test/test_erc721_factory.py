@@ -17,21 +17,21 @@ from tests.resources.helper_functions import (
     get_another_consumer_wallet,
 )
 
-_NETWORK = "development"
+_NETWORK = "ganache"
 
 
 def get_nft_factory_address(config):
     """Helper function to retrieve a known ERC721 factory address."""
-    addresses = get_contracts_addresses(config.address_file, _NETWORK)["v4"]
+    addresses = get_contracts_addresses(config.address_file, _NETWORK)
 
     return addresses[ERC721FactoryContract.CONTRACT_NAME]
 
 
 def get_nft_template_address(config):
     """Helper function to retrieve a known ERC721 template address."""
-    addresses = get_contracts_addresses(config.address_file, _NETWORK)["v4"]
+    addresses = get_contracts_addresses(config.address_file, _NETWORK)
 
-    return addresses[ERC721Token.CONTRACT_NAME]
+    return addresses[ERC721Token.CONTRACT_NAME]["1"]
 
 
 def test_properties(web3, config):

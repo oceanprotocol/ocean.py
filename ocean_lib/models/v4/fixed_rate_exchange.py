@@ -138,3 +138,25 @@ class FixedRateExchangeV4(ContractBase):
 
     def is_active(self, exchange_id: bytes) -> bool:
         return self.contract.caller.isActive(exchange_id)
+
+
+@enforce_types
+class MockExchange(ContractBase):
+    CONTRACT_NAME = "MockExchange"
+
+    def deposit_with_permit(
+        self,
+        token: str,
+        amount: int,
+        deadline: int,
+        v: int,
+        r: bytes,
+        s: bytes,
+        from_wallet: Wallet,
+    ):
+        return self.send_transaction(
+            "depositWithPermit", (token, amount, deadline, v, r, s), from_wallet
+        )
+
+    def deposit(self, token: str, amount: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("deposit", (token, amount), from_wallet)

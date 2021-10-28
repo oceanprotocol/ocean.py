@@ -74,8 +74,8 @@ class ContractBase(object):
         # FIXME: temporary solution, will need to pass in the version
         # or detect it somehow
 
-        key = "v3" if cls.CONTRACT_NAME in cls.V3_CONTRACTS else "v4"
-        addresses = addresses[key]
+        # key = "v3" if cls.CONTRACT_NAME in cls.V3_CONTRACTS else "v4"
+        # addresses = addresses[key]
 
         return addresses.get(cls.CONTRACT_NAME) if addresses else None
 

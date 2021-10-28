@@ -32,9 +32,7 @@ def mint_fake_OCEAN(config: Config) -> None:
     )
 
     # FIXME: temporary solution, will add support for v3 further (DataToken + mint)
-    OCEAN_token = ERC20Token(
-        web3, address=network_addresses["development"]["v4"]["Ocean"]
-    )
+    OCEAN_token = ERC20Token(web3, address=network_addresses["development"]["Ocean"])
     amt_distribute = to_wei(1000)
 
     for key_label in ["TEST_PRIVATE_KEY1", "TEST_PRIVATE_KEY2"]:

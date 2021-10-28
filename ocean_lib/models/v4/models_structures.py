@@ -3,14 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-"""Defines NamedTuples `NftCreateData`, `ErcCreateData`, `PoolData`, `BPoolData`, `BPoolInitialized`, `FixedData`,
+"""Defines NamedTuples `PoolData`, `BPoolData`, `BPoolInitialized`, `FixedData`,
 `DispenserData`, `Operations`"""
 from typing import NamedTuple, List
 from enum import Enum
-
-NftCreateData = NamedTuple(
-    "NftCreateData", [("name", str), ("symbol", str), ("template_index", int)]
-)
 
 ErcCreateData = NamedTuple(
     "ErcCreateData",
@@ -26,9 +22,9 @@ ErcCreateData = NamedTuple(
 PoolData = NamedTuple(
     "PoolData",
     [
+        ("addresses", List[str]),
         ("ss_params", List[int]),
         ("swap_fees", List[int]),
-        ("addresses", List[str]),
     ],
 )
 
@@ -55,27 +51,12 @@ BPoolInitialized = NamedTuple(
     ],
 )
 
-NewDataTokenCreated = NamedTuple(
-    "NewDataTokenCreated",
-    [
-        ("data_token", str),
-        ("base_token", str),
-        ("pool_address", str),
-        ("publisher_address", str),
-        ("ss_params", List[int]),
-    ],
-)
-
 FixedData = NamedTuple(
     "FixedData",
     [
         ("fixed_price_address", str),
-        ("base_token", str),
-        ("bt_decimals", int),
-        ("exchange_rate", int),
-        ("owner", str),
-        ("market_fee", int),
-        ("market_fee_collector", str),
+        ("addresses", List[str]),
+        ("uints", List[int]),
     ],
 )
 

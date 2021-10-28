@@ -4,7 +4,6 @@
 #
 from enforce_typing import enforce_types
 
-from ocean_lib.models.v4.models_structures import NewDataTokenCreated
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
