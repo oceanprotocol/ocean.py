@@ -2,7 +2,9 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from re import A
 import hexbytes
+from toolz.itertoolz import cons
 from web3.main import Web3
 from tests.resources.helper_functions import (
     get_publisher_wallet,
@@ -223,7 +225,7 @@ def test_fail_remove_pool_template(web3, config):
 
 
 def test_buy_dt_batch(web3: Web3, config):
-
+    factory_router = FactoryRouter(web3, get_factory_router_address(config))
     v4Addresses = get_contracts_addresses(address_file=config.address_file, network=_NETWORK)
 
     consumer_wallet = get_consumer_wallet()
@@ -299,7 +301,97 @@ def test_buy_dt_batch(web3: Web3, config):
     )
     pool1 = registered_event_pool[0]['args']['poolAddress']
 
-    print(pool1)
-    print(ercToken)
+    nftData2 = {
+        "name": '72120Bundle',
+        "symbol": '72Bundle',
+        "templateIndex": 1,
+        "baseURI": "https://oceanprotocol.com/nft2/"
+    }
 
-    assert 0
+    ercData2 = {
+        "templateIndex": 1,
+        "strings": ['ERC20B12', 'ERC20DT1Symbol2'],
+        "addresses": [
+            factory_deployer.address,
+            consumer_wallet.address,
+            factory_deployer.address,
+            ZERO_ADDRESS,
+        ],
+        "uints": [web3.toWei('1000000', "ether"), 0],
+        "bytess": []
+    }
+
+    poolData2 = {
+        "addresses": [
+            v4Addresses["Staking"],
+            v4Addresses["Ocean"],
+            v4Addresses["ERC721Factory"],
+            factory_deployer.address,
+            factory_deployer.address,
+            v4Addresses["poolTemplate"],
+        ],
+        "ssParams": [
+            web3.toWei('1', "ether"),
+            daiContract.decimals(),
+            web3.toWei('10000', "ether"),
+            2500000,
+            web3.toWei('2', "ether")
+        ],
+        "swapFees": [
+            web3.toWei('0.001', "ether"),
+            web3.toWei('0.001', "ether")
+        ]
+    }
+
+    tx = nftFactory.create_nft_erc_with_pool(
+        nftData,
+        ercData,
+        poolData,
+        factory_deployer
+    )
+
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_event = nftFactory.get_event_log(
+        'TokenCreated',
+        tx_receipt.blockNumber, web3.eth.block_number, None
+    )
+    ercToken2 = registered_event[0]['args']['newTokenAddress']
+    ercTokenContract2 = ERC20Token(web3=web3, address=ercToken2)
+    registered_event_pool = ercTokenContract2.get_event_log(
+        FactoryRouter.EVENT_NEW_POOL,
+        tx_receipt.blockNumber, web3.eth.block_number, None
+    )
+    pool2 = registered_event_pool[0]['args']['poolAddress']
+
+    op1 = {
+        "exchangeIds": Web3.keccak(0x00),
+        "source": pool1,
+        "operation": 0,
+        "tokenIn": v4Addresses["Ocean"],
+        "amountsIn": web3.toWei('1', "ether"),
+        "tokenOut": ercToken,
+        "amountsOut": web3.toWei('0.1', "ether"),
+        "maxPrice": web3.toWei('10', "ether")
+    }
+
+    op2 = {
+        "exchangeIds": Web3.keccak(0x00),
+        "source": pool2,
+        "operation": 0,
+        "tokenIn": v4Addresses["Ocean"],
+        "amountsIn": web3.toWei('1', "ether"),
+        "tokenOut": ercToken2,
+        "amountsOut": web3.toWei('0.1', "ether"),
+        "maxPrice": web3.toWei('10', "ether")
+    }
+    ercTokenContract.approve(v4Addresses["ERC721Factory"], 2**256 - 1, factory_deployer)
+    ercTokenContract2.approve(v4Addresses["ERC721Factory"], 2**256 - 1, factory_deployer)
+
+    factory_router.buy_dt_batch([op1, op2], factory_deployer)
+
+    balanceDai = (daiContract.balanceOf(factory_deployer.address))
+    balanceDt1 = (ercTokenContract.balanceOf(factory_deployer.address))
+    balanceDt2 = (ercTokenContract2.balanceOf(factory_deployer.address))
+
+    assert(balanceDt1 > 0)
+    assert(balanceDt2 > 0)
