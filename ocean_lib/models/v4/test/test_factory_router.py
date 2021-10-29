@@ -94,10 +94,8 @@ def test_add_token(web3, config):
 def test_fail_add_token(web3, config):
     newTokenAddress = get_erc_address(config)
     factory_router = FactoryRouter(web3, get_factory_router_address(config))
-    with pytest.raises(Exception):
-        factory_router.add_ocean_token(
-            newTokenAddress, get_another_consumer_wallet(network=_NETWORK)
-        )
+    with pytest.raises(exceptions.ContractLogicError):
+        factory_router.add_ocean_token(newTokenAddress, get_another_consumer_wallet())
 
 
 def test_remove_token(web3, config):
@@ -123,7 +121,7 @@ def test_fail_remove_token(web3, config):
         newTokenAddress, get_factory_deployer_wallet(network=_NETWORK)
     )
     assert factory_router.ocean_tokens(newTokenAddress) == True
-    with pytest.raises(Exception):
+    with pytest.raises(exceptions.ContractLogicError):
         factory_router.remove_ocean_token(newTokenAddress, get_consumer_wallet())
 
 
@@ -135,13 +133,13 @@ def test_update_opf_fee(web3, config):
     factory_router = FactoryRouter(web3, get_factory_router_address(config))
 
     assert factory_router.ocean_tokens(newTokenAddress) == False
-    assert factory_router.get_opf_fee(newTokenAddress) == 1e15
-    assert factory_router.swap_ocean_fee() == 1e15
+    assert factory_router.get_opf_fee(newTokenAddress) == web3.toWei(0.001, "ether")
+    assert factory_router.swap_ocean_fee() == web3.toWei(0.001, "ether")
 
     factory_router.update_opf_fee(web3.toWei(0.01, "ether"), factory_deployer)
     assert factory_router.ocean_tokens(newTokenAddress) == False
-    assert factory_router.get_opf_fee(newTokenAddress) == 1e16
-    assert factory_router.swap_ocean_fee() == 1e16
+    assert factory_router.get_opf_fee(newTokenAddress) == web3.toWei(0.01, "ether")
+    assert factory_router.swap_ocean_fee() == web3.toWei(0.01, "ether")
 
 
 def test_fail_update_opf_fee(web3, config):
@@ -152,14 +150,14 @@ def test_fail_update_opf_fee(web3, config):
     factory_router = FactoryRouter(web3, get_factory_router_address(config))
 
     assert factory_router.ocean_tokens(newTokenAddress) == False
-    assert factory_router.get_opf_fee(newTokenAddress) == 1e15
-    assert factory_router.swap_ocean_fee() == 1e15
+    assert factory_router.get_opf_fee(newTokenAddress) == web3.toWei(0.001, "ether")
+    assert factory_router.swap_ocean_fee() == web3.toWei(0.001, "ether")
 
     factory_router.update_opf_fee(web3.toWei(0.01, "ether"), factory_deployer)
 
     assert factory_router.ocean_tokens(newTokenAddress) == False
-    assert factory_router.get_opf_fee(newTokenAddress) == 1e16
-    assert factory_router.swap_ocean_fee() == 1e16
+    assert factory_router.get_opf_fee(newTokenAddress) == web3.toWei(0.01, "ether")
+    assert factory_router.swap_ocean_fee() == web3.toWei(0.01, "ether")
 
 
 def test_ss_contracts(web3, config):
@@ -178,10 +176,8 @@ def test_fail_ss_contracts(web3, config):
 
     factory_router = FactoryRouter(web3, get_factory_router_address(config))
     assert factory_router.ss_contracts(userAddress) == False
-    with pytest.raises(Exception):
-        factory_router.add_ss_contract(
-            userAddress, get_another_consumer_wallet(network=_NETWORK)
-        )
+    with pytest.raises(exceptions.ContractLogicError):
+        factory_router.add_ss_contract(userAddress, get_another_consumer_wallet())
 
 
 def test_fail_add_factory_owner(web3, config):
@@ -282,20 +278,17 @@ def test_fail_remove_pool_template(web3, config):
 
 def test_buy_dt_batch(web3: Web3, config):
     factory_router = FactoryRouter(web3, get_factory_router_address(config))
-    v4Addresses = get_contracts_addresses(
+    v4_addresses = get_contracts_addresses(
         address_file=config.address_file, network=_NETWORK
     )
-    nftFactory = ERC721FactoryContract(web3=web3, address=v4Addresses["ERC721Factory"])
+    nftFactory = ERC721FactoryContract(web3=web3, address=v4_addresses["ERC721Factory"])
 
     consumer_wallet = get_consumer_wallet()
     factory_deployer = get_factory_deployer_wallet(network=_NETWORK)
 
-    daiAddress = v4Addresses["Ocean"]
-
-    daiContract = ERC20Token(web3=web3, address=daiAddress)
-    daiContract.allowance(factory_deployer.address, v4Addresses["ERC721Factory"])
-    daiContract.approve(v4Addresses["ERC721Factory"], 2 ** 256 - 1, factory_deployer)
-    daiContract.approve(v4Addresses["Router"], 2 ** 256 - 1, factory_deployer)
+    oceanContract = ERC20Token(web3=web3, address=v4_addresses["Ocean"])
+    oceanContract.approve(v4_addresses["ERC721Factory"], 2 ** 256 - 1, factory_deployer)
+    oceanContract.approve(v4_addresses["Router"], 2 ** 256 - 1, factory_deployer)
 
     nftData = {
         "name": "72120Bundle",
@@ -319,16 +312,16 @@ def test_buy_dt_batch(web3: Web3, config):
 
     poolData = {
         "addresses": [
-            v4Addresses["Staking"],
-            v4Addresses["Ocean"],
-            v4Addresses["ERC721Factory"],
+            v4_addresses["Staking"],
+            v4_addresses["Ocean"],
+            v4_addresses["ERC721Factory"],
             factory_deployer.address,
             factory_deployer.address,
-            v4Addresses["poolTemplate"],
+            v4_addresses["poolTemplate"],
         ],
         "ssParams": [
             web3.toWei("1", "ether"),
-            daiContract.decimals(),
+            oceanContract.decimals(),
             web3.toWei("10000", "ether"),
             2500000,
             web3.toWei("2", "ether"),
@@ -376,16 +369,16 @@ def test_buy_dt_batch(web3: Web3, config):
 
     poolData2 = {
         "addresses": [
-            v4Addresses["Staking"],
-            v4Addresses["Ocean"],
-            v4Addresses["ERC721Factory"],
+            v4_addresses["Staking"],
+            v4_addresses["Ocean"],
+            v4_addresses["ERC721Factory"],
             factory_deployer.address,
             factory_deployer.address,
-            v4Addresses["poolTemplate"],
+            v4_addresses["poolTemplate"],
         ],
         "ssParams": [
             web3.toWei("1", "ether"),
-            daiContract.decimals(),
+            oceanContract.decimals(),
             web3.toWei("10000", "ether"),
             2500000,
             web3.toWei("2", "ether"),
@@ -415,7 +408,7 @@ def test_buy_dt_batch(web3: Web3, config):
         "exchangeIds": Web3.keccak(0x00),
         "source": pool1,
         "operation": 0,
-        "tokenIn": v4Addresses["Ocean"],
+        "tokenIn": v4_addresses["Ocean"],
         "amountsIn": web3.toWei("1", "ether"),
         "tokenOut": ercToken,
         "amountsOut": web3.toWei("0.1", "ether"),
@@ -426,22 +419,22 @@ def test_buy_dt_batch(web3: Web3, config):
         "exchangeIds": Web3.keccak(0x00),
         "source": pool2,
         "operation": 0,
-        "tokenIn": v4Addresses["Ocean"],
+        "tokenIn": v4_addresses["Ocean"],
         "amountsIn": web3.toWei("1", "ether"),
         "tokenOut": ercToken2,
         "amountsOut": web3.toWei("0.1", "ether"),
         "maxPrice": web3.toWei("10", "ether"),
     }
     ercTokenContract.approve(
-        v4Addresses["ERC721Factory"], 2 ** 256 - 1, factory_deployer
+        v4_addresses["ERC721Factory"], 2 ** 256 - 1, factory_deployer
     )
     ercTokenContract2.approve(
-        v4Addresses["ERC721Factory"], 2 ** 256 - 1, factory_deployer
+        v4_addresses["ERC721Factory"], 2 ** 256 - 1, factory_deployer
     )
 
-    balanceDaiBefore = daiContract.balanceOf(factory_deployer.address)
+    balanceDaiBefore = oceanContract.balanceOf(factory_deployer.address)
     factory_router.buy_dt_batch([op1, op2], factory_deployer)
-    balanceDaiAfter = daiContract.balanceOf(factory_deployer.address)
+    balanceDaiAfter = oceanContract.balanceOf(factory_deployer.address)
 
     balanceDt1 = ercTokenContract.balanceOf(factory_deployer.address)
     balanceDt2 = ercTokenContract2.balanceOf(factory_deployer.address)
