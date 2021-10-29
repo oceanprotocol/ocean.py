@@ -84,6 +84,9 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     def get_current_template_count(self) -> int:
         return self.contract.caller.getCurrentTemplateCount()
 
+    def template_count(self) -> int:
+        return self.contract.caller.templateCount()
+
     def start_multiple_token_order(
         self,
         token_address: str,
@@ -96,7 +99,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         from_wallet: Wallet,
     ) -> str:
         orders = [
-            [
+            (
                 token_address,
                 consumer,
                 amount,
@@ -104,7 +107,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                 consume_fee_address,
                 consume_fee_token,
                 consume_fee_amount,
-            ]
+            )
         ]
         return self.send_transaction("startMultipleTokenOrder", (orders,), from_wallet)
 
