@@ -285,18 +285,18 @@ def test_buy_dt_batch(web3: Web3, config):
         poolData,
         factory_deployer
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
-    registered_event_pool = nftFactory.get_event_log(
-        FactoryRouter.EVENT_NEW_POOL,
-        tx_receipt.blockNumber - 2, web3.eth.block_number, None
-    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = nftFactory.get_event_log(
         'TokenCreated',
         tx_receipt.blockNumber, web3.eth.block_number, None
     )
-
     ercToken = registered_event[0]['args']['newTokenAddress']
+    ercTokenContract = ERC20Token(web3=web3, address=ercToken)
+    registered_event_pool = ercTokenContract.get_event_log(
+        FactoryRouter.EVENT_NEW_POOL,
+        tx_receipt.blockNumber, web3.eth.block_number, None
+    )
     pool1 = registered_event_pool[0]['args']['poolAddress']
 
     print(pool1)
