@@ -87,6 +87,20 @@ class ERC721Token(ContractBase):
             "addToCreateERC20List", (allowed_address,), from_wallet
         )
 
+    def add_to_725_store_list(
+        self, allowed_address: str, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "addTo725StoreList", (allowed_address,), from_wallet
+        )
+
+    def add_to_metadata_list(
+        self, allowed_address: str, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "addToMetadataList", (allowed_address,), from_wallet
+        )
+
     def add_manager(self, manager_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("addManager", (manager_address,), from_wallet)
 
