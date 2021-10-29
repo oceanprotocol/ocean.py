@@ -26,13 +26,13 @@ NETWORK_NAME_MAP = {
     1: "Mainnet",
     3: "Ropsten",
     4: "Rinkeby",
-    56: "Binance Smart Chain",
+    56: "BSC",
     137: "Polygon",
-    246: "Energy Web",
+    246: "EnergyWeb",
     1285: "Moonriver",
-    1287: "Moonbeam Alpha",
+    1287: "MoonbeamAlpha",
     1337: "Ganache",
-    44787: "Celo Alfajores",
+    44787: "CeloAlfajores",
     80001: "Mumbai",
 }
 
