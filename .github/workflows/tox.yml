@@ -24,12 +24,12 @@ jobs:
         with:
           repository: "oceanprotocol/barge"
           path: 'barge'
-          ref: "v4"
       - name: Run Barge
         working-directory: ${{ github.workspace }}/barge
         env:
           OPERATOR_SERVICE_URL: https://c2d-dev.operator.oceanprotocol.com/
         run: |
+          git checkout v4
           bash -x start_ocean.sh --no-dashboard 2>&1 --no-aquarius --no-provider > start_ocean.log &
           for i in $(seq 1 50); do
             sleep 5

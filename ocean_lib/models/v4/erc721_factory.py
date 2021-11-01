@@ -16,6 +16,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     EVENT_TOKEN_CREATED = "TokenCreated"
     EVENT_NEW_POOL = "NewPool"
     EVENT_NEW_FIXED_RATE = "NewFixedRate"
+    EVENT_DISPENSER_CREATED = "DispenserCreated"
 
     @property
     def event_NFTCreated(self):
@@ -32,6 +33,10 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     @property
     def event_NewFixedRate(self):
         return self.events.NewFixedRate()
+
+    @property
+    def event_DispenserCreated(self):
+        return self.events.DispenserCreated()
 
     def deploy_erc721_contract(
         self,
