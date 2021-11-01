@@ -22,9 +22,9 @@ ErcCreateData = NamedTuple(
 PoolData = NamedTuple(
     "PoolData",
     [
-        ("addresses", List[str]),
         ("ss_params", List[int]),
         ("swap_fees", List[int]),
+        ("addresses", List[str]),
     ],
 )
 
