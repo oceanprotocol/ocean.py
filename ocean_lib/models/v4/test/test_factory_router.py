@@ -27,6 +27,18 @@ def create_new_token(web3, config):
     return erc20_token
 
 
+def test_properties(web3, config):
+    """Tests the events' properties."""
+
+    factory_router = FactoryRouter(
+        web3,
+        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
+            "Router"
+        ],
+    )
+    assert factory_router.event_NewPool.abi["name"] == FactoryRouter.EVENT_NEW_POOL
+
+
 def test_ocean_tokens_mapping(web3, config):
     factory_router = FactoryRouter(
         web3,
