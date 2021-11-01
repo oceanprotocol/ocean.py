@@ -373,7 +373,7 @@ def test_fail_remove_pool_template(web3, config):
     assert factory_router.is_pool_template(consumer) == True
 
 
-def test_buy_dt_batch(web3: Web3, config):
+def test_buy_dt_batch(web3, config):
     """Tests that a batch of tokens is successfully bought through the buy_dt_batch function"""
     factory_router = FactoryRouter(
         web3,
