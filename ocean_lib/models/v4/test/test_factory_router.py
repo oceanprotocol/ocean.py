@@ -46,6 +46,7 @@ def test_properties(web3, config):
 
 
 def test_ocean_tokens_mapping(web3, config):
+    """Tests that Ocean token has been added to the mapping"""
     factory_router = FactoryRouter(
         web3,
         get_factory_router_address(config),
@@ -55,6 +56,7 @@ def test_ocean_tokens_mapping(web3, config):
 
 
 def test_add_token(web3, config):
+    """Tests adding a new token address to the mapping if Router Owner"""
     new_token_address = ERC20Token.deploy(
         web3=web3, deployer_wallet=get_factory_deployer_wallet(network=_NETWORK)
     )
@@ -71,6 +73,7 @@ def test_add_token(web3, config):
 
 
 def test_fail_add_token(web3, config):
+    """Tests that if it fails to add a new token address to the mapping if NOT Router Owner"""
     new_token_address = get_erc20_template_address(config)
     factory_router = FactoryRouter(
         web3,
@@ -81,24 +84,32 @@ def test_fail_add_token(web3, config):
 
 
 def test_remove_token(web3, config):
+    """should remove a token previously added if Router Owner, check OPF fee updates properly"""
     new_token_address = create_new_token(web3, config)
 
     factory_router = FactoryRouter(
         web3,
         get_factory_router_address(config),
     )
+
+    assert factory_router.get_opf_fee(new_token_address) == web3.toWei(0.001, "ether")
+
     factory_router.add_ocean_token(
         new_token_address, get_factory_deployer_wallet(network=_NETWORK)
     )
+
+    assert factory_router.get_opf_fee(new_token_address) == 0
 
     assert factory_router.ocean_tokens(new_token_address) == True
     factory_router.remove_ocean_token(
         new_token_address, get_factory_deployer_wallet(network=_NETWORK)
     )
     assert factory_router.ocean_tokens(new_token_address) == False
+    assert factory_router.get_opf_fee(new_token_address) == web3.toWei(0.001, "ether")
 
 
 def test_fail_remove_token(web3, config):
+    """Tests that if it fails to remove a token address to the mapping if NOT Router Owner"""
     new_token_address = create_new_token(web3, config)
 
     factory_router = FactoryRouter(
@@ -118,6 +129,7 @@ def test_fail_remove_token(web3, config):
 
 
 def test_update_opf_fee(web3, config):
+    """Tests if owner can update the opf fee"""
     factory_router = FactoryRouter(
         web3,
         get_factory_router_address(config),
@@ -134,12 +146,14 @@ def test_update_opf_fee(web3, config):
     assert factory_router.swap_ocean_fee() == web3.toWei(0.001, "ether")
 
     factory_router.update_opf_fee(web3.toWei(0.01, "ether"), factory_deployer)
+
     assert factory_router.ocean_tokens(new_token_address) == False
     assert factory_router.get_opf_fee(new_token_address) == web3.toWei(0.01, "ether")
     assert factory_router.swap_ocean_fee() == web3.toWei(0.01, "ether")
 
 
 def test_fail_update_opf_fee(web3, config):
+    """Tests that if it fails to update the opf fee if NOT Router Owner"""
     factory_router = FactoryRouter(
         web3,
         get_factory_router_address(config),
@@ -149,20 +163,37 @@ def test_fail_update_opf_fee(web3, config):
     )
 
     new_token_address = create_new_token(web3, config)
-    factory_deployer = get_factory_deployer_wallet(network=_NETWORK)
+    consumer_wallet = get_consumer_wallet()
 
     assert factory_router.ocean_tokens(new_token_address) == False
     assert factory_router.get_opf_fee(new_token_address) == web3.toWei(0.001, "ether")
     assert factory_router.swap_ocean_fee() == web3.toWei(0.001, "ether")
 
-    factory_router.update_opf_fee(web3.toWei(0.01, "ether"), factory_deployer)
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        factory_router.update_opf_fee(web3.toWei(0.01, "ether"), consumer_wallet)
+
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert OceanRouter: NOT OWNER"
+    )
 
     assert factory_router.ocean_tokens(new_token_address) == False
-    assert factory_router.get_opf_fee(new_token_address) == web3.toWei(0.01, "ether")
-    assert factory_router.swap_ocean_fee() == web3.toWei(0.01, "ether")
+    assert factory_router.get_opf_fee(new_token_address) == web3.toWei(0.001, "ether")
+    assert factory_router.swap_ocean_fee() == web3.toWei(0.001, "ether")
 
 
-def test_ss_contracts(web3, config):
+def test_mapping_ss_contracts(web3, config):
+    """Confirms if ssContract address has been added to the mapping"""
+    factory_router = FactoryRouter(
+        web3,
+        get_factory_router_address(config),
+    )
+
+    assert factory_router.ss_contracts(get_staking_address(config)) == True
+
+
+def test_add_ss_contracts(web3, config):
+    """Tests adding a new ssContract address to the mapping if Router owner"""
     user_address = create_new_token(web3, config)
 
     factory_router = FactoryRouter(
@@ -177,6 +208,7 @@ def test_ss_contracts(web3, config):
 
 
 def test_fail_ss_contracts(web3, config):
+    """Tests that if it fails to add a new ssContract address to the mapping if NOT Router Owner"""
     user_address = create_new_token(web3, config)
 
     factory_router = FactoryRouter(
@@ -193,6 +225,7 @@ def test_fail_ss_contracts(web3, config):
 
 
 def test_fail_add_factory_owner(web3, config):
+    """Tests that if it fails to add a new factory address to the mapping EVEN if Router Owner"""
     factory_router = FactoryRouter(
         web3,
         get_factory_router_address(config),
@@ -210,6 +243,7 @@ def test_fail_add_factory_owner(web3, config):
 
 
 def test_fail_add_factory_not_owner(web3, config):
+    """Tests that if it fails to add a new factory address to the mapping if NOT Router Owner"""
     factory_router = FactoryRouter(
         web3,
         get_factory_router_address(config),
@@ -225,7 +259,18 @@ def test_fail_add_factory_not_owner(web3, config):
     assert factory_router.factory() == get_nft_factory_address(config)
 
 
+def test_fixed_rate_mapping(web3, config):
+    """Confirm that fixedRateExchange address is added to the mapping"""
+    factory_router = FactoryRouter(
+        web3,
+        get_factory_router_address(config),
+    )
+    assert factory_router.fixed_price(get_fixed_price_address(config)) == True
+
+
 def test_fixed_rate(web3, config):
+    """Tests that fixedRateExchange is added if Router owner"""
+
     factory_router = FactoryRouter(
         web3,
         get_factory_router_address(config),
@@ -238,6 +283,7 @@ def test_fixed_rate(web3, config):
 
 
 def test_fail_add_fixed_rate_contract(web3, config):
+    """Tests that if it fails to add a new fixedRateExchange address if NOT Router Owner"""
     factory_router = FactoryRouter(
         web3,
         get_factory_router_address(config),
@@ -255,6 +301,7 @@ def test_fail_add_fixed_rate_contract(web3, config):
 
 
 def test_fail_add_pool_template(web3, config):
+    """Tests that if it fails to add a new poolTemplate if NOT Router Owner"""
     factory_router = FactoryRouter(
         web3,
         get_factory_router_address(config),
@@ -273,6 +320,7 @@ def test_fail_add_pool_template(web3, config):
 
 
 def test_add_pool_template(web3, config):
+    """Tests that poolTemplate is added if Router owner"""
     consumer = get_consumer_wallet().address
     factory_router = FactoryRouter(
         web3,
@@ -289,6 +337,7 @@ def test_add_pool_template(web3, config):
 
 
 def test_remove_pool_template(web3, config):
+    """Tests that poolTemplate is removed if Router owner"""
     consumer = get_consumer_wallet().address
     factory_router = FactoryRouter(
         web3,
@@ -302,6 +351,7 @@ def test_remove_pool_template(web3, config):
 
 
 def test_fail_remove_pool_template(web3, config):
+    """Tests that if it fails to remove a poolTemplate if NOT Router Owner"""
     consumer = get_consumer_wallet().address
     factory_router = FactoryRouter(
         web3,
@@ -324,6 +374,7 @@ def test_fail_remove_pool_template(web3, config):
 
 
 def test_buy_dt_batch(web3: Web3, config):
+    """Tests that a batch of tokens is successfully bought through the buy_dt_batch function"""
     factory_router = FactoryRouter(
         web3,
         get_factory_router_address(config),
