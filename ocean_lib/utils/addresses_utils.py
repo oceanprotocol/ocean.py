@@ -50,3 +50,24 @@ def get_ocean_address(config):
 
     addresses = get_contracts_addresses(config.address_file, _NETWORK)
     return addresses["Ocean"]
+
+
+def get_staking_address(config):
+    """Helper function to retrieve a known Staking address."""
+
+    addresses = get_contracts_addresses(config.address_file, _NETWORK)
+    return addresses["Staking"]
+
+
+def get_pool_template_address(config):
+    """Helper function to retrieve a known Pool Template address."""
+
+    addresses = get_contracts_addresses(config.address_file, _NETWORK)
+    return addresses["poolTemplate"]
+
+
+def get_fixed_price_address(config):
+    """Helper function to retrieve a known Fixed Price Exchange address."""
+
+    addresses = get_contracts_addresses(config.address_file, _NETWORK)
+    return addresses["poolTemplate"]
