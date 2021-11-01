@@ -12,7 +12,7 @@ import logging
 from typing import Optional, Tuple, Union
 
 from enforce_typing import enforce_types
-from ocean_lib.common.ddo.ddo import DDO
+from ocean_lib.assets.asset import V3Asset
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 
 logger = logging.getLogger("aquarius")
@@ -60,24 +60,24 @@ class Aquarius:
         return f"{self.base_url}/ddo/encrypt"
 
     @enforce_types
-    def get_asset_ddo(self, did: str) -> Optional[DDO]:
+    def get_asset_ddo(self, did: str) -> Optional[V3Asset]:
         """
         Retrieve asset ddo for a given did.
 
         :param did: Asset DID string
-        :return: DDO instance
+        :return: V3Asset instance
         """
         response = self.requests_session.get(f"{self.base_url}/ddo/{did}")
 
         if response.status_code == 200:
-            return DDO(dictionary=response.json())
+            return V3Asset(dictionary=response.json())
 
         return None
 
     @enforce_types
     def ddo_exists(self, did: str) -> bool:
         """
-        Return whether the DDO with this did exists in Aqua
+        Return whether the Asset with this did exists in Aqua
 
         :param did: Asset DID string
         :return: bool
@@ -92,7 +92,7 @@ class Aquarius:
         Retrieve asset metadata for a given did.
 
         :param did: Asset DID string
-        :return: metadata key of the DDO instance
+        :return: metadata key of the Asset instance
         """
         response = self.requests_session.get(f"{self.base_url}/metadata/{did}")
         if response.status_code == 200:
@@ -114,7 +114,7 @@ class Aquarius:
         Example: query_search({"price":[0,10]})
 
         :param search_query: Python dictionary, query following elasticsearch syntax
-        :return: List of DDO instance
+        :return: List of V3Asset instance
         """
         response = self.requests_session.post(
             f"{self.base_url}/query",

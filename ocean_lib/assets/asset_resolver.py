@@ -10,7 +10,7 @@ import logging
 from typing import Optional
 
 from enforce_typing import enforce_types
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.asset import V3Asset
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
 from ocean_lib.models.data_token import DataToken
 from web3.main import Web3
@@ -24,7 +24,7 @@ def resolve_asset(
     metadata_cache_uri: Optional[str] = None,
     web3: Optional[Web3] = None,
     token_address: Optional[str] = None,
-) -> Asset:
+) -> V3Asset:
     """Resolve a DID to an URL/DDO or later an internal/external DID.
 
     :param did: the asset id to resolve, this is part of the ocean
@@ -46,4 +46,4 @@ def resolve_asset(
     ddo = AquariusProvider.get_aquarius(metadata_cache_uri).get_asset_ddo(did)
 
     if ddo:
-        return Asset(dictionary=ddo.as_dictionary())
+        return V3Asset(dictionary=ddo.as_dictionary())

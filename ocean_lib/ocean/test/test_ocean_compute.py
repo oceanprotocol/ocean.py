@@ -5,7 +5,7 @@
 from datetime import datetime
 from unittest.mock import patch
 
-from ocean_lib.assets.utils import create_publisher_trusted_algorithms
+from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -144,7 +144,7 @@ def test_build_service_privacy_attributes(publisher_ocean_instance):
 
     algorithm_ddo = get_sample_algorithm_ddo()
 
-    with patch("ocean_lib.assets.utils.resolve_asset") as mock:
+    with patch("ocean_lib.assets.trusted_algorithms.resolve_asset") as mock:
         mock.return_value = algorithm_ddo
         privacy_dict = compute.build_service_privacy_attributes(
             trusted_algorithms=[algorithm_ddo.did],
@@ -197,7 +197,7 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
 
     algorithm_ddo = get_sample_algorithm_ddo()
 
-    with patch("ocean_lib.assets.utils.resolve_asset") as mock:
+    with patch("ocean_lib.assets.trusted_algorithms.resolve_asset") as mock:
         mock.return_value = algorithm_ddo
         privacy_dict = compute.build_service_privacy_attributes(
             trusted_algorithms=[algorithm_ddo.did],

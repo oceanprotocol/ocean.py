@@ -155,7 +155,7 @@ service_attributes = {
 # They're only decrypted for datatoken owners upon consume.
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.common.ddo.service import Service
+from ocean_lib.services.service import Service
 
 service_endpoint = DataServiceProvider.get_url(ocean.config)
 download_service = Service(
