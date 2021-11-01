@@ -21,24 +21,9 @@ from tests.resources.helper_functions import (
 
 _NETWORK = "development"
 
-
-def get_nft_factory_address(config):
-    """Helper function to retrieve a known ERC721 factory address."""
-    addresses = get_contracts_addresses(config.address_file, _NETWORK)
-
-    return addresses[ERC721FactoryContract.CONTRACT_NAME]
-
-
-def get_nft_template_address(config):
-    """Helper function to retrieve a known ERC721 template address."""
-    addresses = get_contracts_addresses(config.address_file, _NETWORK)
-
-    return addresses[ERC721Token.CONTRACT_NAME]
-
-
 def test_properties(web3, config):
     """Tests the events' properties."""
-    erc721_factory = ERC721FactoryContract(web3, get_nft_factory_address(config))
+    erc721_factory = ERC721FactoryContract(web3, get_contracts_addresses(config.address_file, _NETWORK)[ERC721FactoryContract.CONTRACT_NAME])
     assert (
         erc721_factory.event_NFTCreated.abi["name"]
         == ERC721FactoryContract.EVENT_NFT_CREATED
@@ -58,7 +43,7 @@ def test_properties(web3, config):
 def test_deploy_erc721_contract(web3:Web3,config):
     publisher = get_publisher_wallet()
 
-    erc721_factory = ERC721FactoryContract(web3, get_nft_factory_address(config))
+    erc721_factory = ERC721FactoryContract(web3, get_contracts_addresses(config.address_file, _NETWORK)[ERC721FactoryContract.CONTRACT_NAME])
 
     tx = erc721_factory.deploy_erc721_contract("NFT","NFTS",1,ZERO_ADDRESS,"https://oceanprotocol.com/nft/",publisher)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -82,20 +67,20 @@ def test_roles(web3:Web3,config):
     user3 = get_consumer_wallet()
     user2 = get_another_consumer_wallet()
 
-    erc721Token = test_deploy_erc721_contract(web3,config)
-    erc721Token.add_manager(user2.address,publisher)
+    erc721_contract = test_deploy_erc721_contract(web3,config)
+    erc721_contract.add_manager(user2.address,publisher)
 
-    erc721Token.add_to_create_erc20_list(user3.address,user2)
-    erc721Token.add_to_metadata_list(user3.address,user2)
-    erc721Token.add_to_725_store_list(user3.address,user2)
+    erc721_contract.add_to_create_erc20_list(user3.address,user2)
+    erc721_contract.add_to_metadata_list(user3.address,user2)
+    erc721_contract.add_to_725_store_list(user3.address,user2)
 
-    permissions = erc721Token.get_permissions(user3.address)
+    permissions = erc721_contract.get_permissions(user3.address)
 
     assert permissions[1] == True
     assert permissions[2] == True
     assert permissions[3] == True
 
-    return erc721Token
+    return erc721_contract
 
 def test_user3_deploys_erc20dt(web3:Web3,config):
     v4Addresses = get_contracts_addresses(
@@ -132,7 +117,7 @@ def test_user3_deploys_erc20dt(web3:Web3,config):
     return ercToken,erc721Token
 
 def test_user3_deploypool_marketfee(web3,config):
-    v4Addresses = get_contracts_addresses(
+    v4_addresses = get_contracts_addresses(
         address_file=config.address_file, network=_NETWORK
     )
     publisher = get_publisher_wallet()
@@ -141,17 +126,17 @@ def test_user3_deploypool_marketfee(web3,config):
 
     ercToken,erc721Token = test_user3_deploys_erc20dt(web3,config)
 
-    ssDtBalance = ercToken.balanceOf(v4Addresses["Staking"])
+    ssDtBalance = ercToken.balanceOf(v4_addresses["Staking"])
 
     initialOceanLiq = web3.toWei(2000,"ether")
     initialDtLiq = initialOceanLiq
 
-    oceanContract = ERC20Token(web3=web3,address=v4Addresses["Ocean"])
-    oceanContract.approve(v4Addresses["Router"],web3.toWei(2000,"ether"),user3)
+    oceanContract = ERC20Token(web3=web3,address=v4_addresses["Ocean"])
+    oceanContract.approve(v4_addresses["Router"],web3.toWei(2000,"ether"),user3)
     print(oceanContract.balanceOf(user3.address))
 
     poolData = PoolData(
-        [v4Addresses["Staking"],v4Addresses["Ocean"],user3.address,v4Addresses["OPFCommunityFeeCollector"],v4Addresses["poolTemplate"]],
+        [v4_addresses["Staking"],v4_addresses["Ocean"],user3.address,v4_addresses["OPFCommunityFeeCollector"],v4_addresses["poolTemplate"]],
         [
             web3.toWei(1,"ether"),
             18,
