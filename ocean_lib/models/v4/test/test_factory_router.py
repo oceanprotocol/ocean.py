@@ -527,12 +527,6 @@ def test_buy_dt_batch(web3: Web3, config):
         "amountsOut": web3.toWei("0.1", "ether"),
         "maxPrice": web3.toWei("10", "ether"),
     }
-    erc_token_contract.approve(
-        v4_addresses["ERC721Factory"], 2 ** 256 - 1, factory_deployer
-    )
-    erc_token_contract2.approve(
-        v4_addresses["ERC721Factory"], 2 ** 256 - 1, factory_deployer
-    )
 
     balance_ocean_before = ocean_contract.balanceOf(factory_deployer.address)
     factory_router.buy_dt_batch([op1, op2], factory_deployer)
