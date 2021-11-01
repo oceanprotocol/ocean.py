@@ -11,67 +11,88 @@ from enforce_typing import enforce_types
 from ocean_lib.config import (
     DEFAULT_METADATA_CACHE_URI,
     DEFAULT_PROVIDER_URL,
+    METADATA_CACHE_URI,
+    NAME_BLOCK_CONFIRMATIONS,
     NAME_CHAIN_ID,
     NAME_METADATA_CACHE_URI,
     NAME_NETWORK_URL,
     NAME_PROVIDER_URL,
+    NAME_TRANSACTION_TIMEOUT,
     NETWORK_NAME,
     SECTION_ETH_NETWORK,
     SECTION_RESOURCES,
     Config,
     config_defaults,
 )
-from ocean_lib.ocean.util import get_web3_connection_provider
-from web3 import Web3
+from ocean_lib.ocean.util import get_web3
 
 logging.basicConfig(level=logging.INFO)
 
-"""The interval in seconds between calls for the latest block number."""
-NAME_BLOCK_CONFIRMATION_POLL_INTERVAL = "block_confirmation_poll_interval"
-
-
 CONFIG_NETWORK_HELPER = {
     1: {
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 6.5,
         NAME_PROVIDER_URL: "https://provider.mainnet.oceanprotocol.com",
-        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "mainnet",
+        NAME_BLOCK_CONFIRMATIONS: 1,
+        NAME_TRANSACTION_TIMEOUT: 10 * 60,
     },
     3: {
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 6,
         NAME_PROVIDER_URL: "https://provider.ropsten.oceanprotocol.com",
-        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "ropsten",
+        NAME_BLOCK_CONFIRMATIONS: 1,
+        NAME_TRANSACTION_TIMEOUT: 10 * 60,
     },
     4: {
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 7.5,
         NAME_PROVIDER_URL: "https://provider.rinkeby.oceanprotocol.com",
-        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "rinkeby",
+        NAME_BLOCK_CONFIRMATIONS: 1,
+        NAME_TRANSACTION_TIMEOUT: 10 * 60,
     },
     56: {
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 1.5,
         NAME_PROVIDER_URL: "https://provider.bsc.oceanprotocol.com",
-        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "bsc",
+        NAME_BLOCK_CONFIRMATIONS: 1,
+        NAME_TRANSACTION_TIMEOUT: 10 * 60,
     },
     137: {
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 1,
         NAME_PROVIDER_URL: "https://provider.polygon.oceanprotocol.com",
-        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "polygon",
+        NAME_BLOCK_CONFIRMATIONS: 15,
+        NAME_TRANSACTION_TIMEOUT: 10 * 60,
+    },
+    246: {
+        NAME_PROVIDER_URL: "https://provider.energyweb.oceanprotocol.com",
+        NETWORK_NAME: "energyweb",
+        NAME_BLOCK_CONFIRMATIONS: 3,
+        NAME_TRANSACTION_TIMEOUT: 60,
+    },
+    1285: {
+        NAME_PROVIDER_URL: "https://provider.moonriver.oceanprotocol.com",
+        NETWORK_NAME: "moonriver",
+        NAME_BLOCK_CONFIRMATIONS: 3,
+        NAME_TRANSACTION_TIMEOUT: 60,
     },
     1287: {
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 6,
         NAME_PROVIDER_URL: "https://provider.moonbeamalpha.oceanprotocol.com",
-        NAME_METADATA_CACHE_URI: "https://aquarius.oceanprotocol.com",
         NETWORK_NAME: "moonbeamalpha",
+        NAME_BLOCK_CONFIRMATIONS: 3,
+        NAME_TRANSACTION_TIMEOUT: 60,
     },
     1337: {
-        NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: 2.5,
         NAME_PROVIDER_URL: DEFAULT_PROVIDER_URL,
-        NAME_METADATA_CACHE_URI: DEFAULT_METADATA_CACHE_URI,
         NETWORK_NAME: "ganache",
+        NAME_BLOCK_CONFIRMATIONS: 0,
+        NAME_TRANSACTION_TIMEOUT: 2,
+    },
+    44787: {
+        NAME_PROVIDER_URL: "https://provider.celoalfajores.oceanprotocol.com",
+        NETWORK_NAME: "celoalfajores",
+        NAME_BLOCK_CONFIRMATIONS: 3,
+        NAME_TRANSACTION_TIMEOUT: 60,
+    },
+    80001: {
+        NAME_PROVIDER_URL: "https://provider.mumbai.oceanprotocol.com",
+        NETWORK_NAME: "mumbai",
+        NAME_BLOCK_CONFIRMATIONS: 1,
     },
 }
 
@@ -86,17 +107,17 @@ def get_config_dict(chain_id: int) -> dict:
         {
             NAME_CHAIN_ID: chain_id,
             NETWORK_NAME: CONFIG_NETWORK_HELPER[chain_id][NETWORK_NAME],
-            NAME_BLOCK_CONFIRMATION_POLL_INTERVAL: CONFIG_NETWORK_HELPER[chain_id][
-                NAME_BLOCK_CONFIRMATION_POLL_INTERVAL
+            NAME_BLOCK_CONFIRMATIONS: CONFIG_NETWORK_HELPER[chain_id][
+                NAME_BLOCK_CONFIRMATIONS
             ],
         }
     )
     config_helper[SECTION_RESOURCES].update(
         {
             NAME_PROVIDER_URL: CONFIG_NETWORK_HELPER[chain_id][NAME_PROVIDER_URL],
-            NAME_METADATA_CACHE_URI: CONFIG_NETWORK_HELPER[chain_id][
-                NAME_METADATA_CACHE_URI
-            ],
+            NAME_METADATA_CACHE_URI: METADATA_CACHE_URI
+            if chain_id != 1337
+            else DEFAULT_METADATA_CACHE_URI,
         }
     )
     return config_helper
@@ -115,7 +136,7 @@ class ExampleConfig:
             network_url is not None
         ), "Cannot use ocean-lib without a specified network URL."
 
-        w3 = Web3(get_web3_connection_provider(network_url))
+        w3 = get_web3(network_url)
         chain_id = w3.eth.chain_id
 
         config = get_config_dict(chain_id)

@@ -8,9 +8,9 @@ quick overview of the main functions and submodules:
 
 ```python
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.config import Config
+from ocean_lib.example_config import ExampleConfig
 
-config = Config('config.ini')
+config = ExampleConfig.get_config()
 
 # Ocean instance: create/get datatoken, get dtfactory, user orders (history)
 ocean = Ocean(config)

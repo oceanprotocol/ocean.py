@@ -5,10 +5,9 @@
 
 import os
 
-import pytest
-from ocean_lib.assets.asset import Asset
-from ocean_lib.common.agreements.service_agreement import ServiceAgreement
+from ocean_lib.assets.asset import V3Asset
 from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_metadata, get_registered_ddo
 from tests.resources.helper_functions import (
@@ -22,8 +21,7 @@ from tests.resources.helper_functions import (
 )
 
 
-@pytest.mark.parametrize("order_type", ["implicit_none", "explicit_none"])
-def test_market_flow(order_type):
+def test_market_flow():
     """Tests that an order is correctly placed on the market.
 
     The parameter implicit_none sends the payload with an empty key as the delegated consumer.
@@ -33,15 +31,15 @@ def test_market_flow(order_type):
     publisher_ocean = get_publisher_ocean_instance()
     consumer_ocean = get_consumer_ocean_instance()
 
-    # Register Asset
+    # Register asset
     asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
-    assert isinstance(asset, Asset)
+    assert isinstance(asset, V3Asset)
     assert asset.data_token_address, "The asset does not have a token address."
 
     consumer_wallet = get_consumer_wallet()
 
     service = asset.get_service(service_type=ServiceTypes.ASSET_ACCESS)
-    sa = ServiceAgreement.from_json(service.as_dictionary())
+    sa = Service.from_json(service.as_dictionary())
 
     # Mint data tokens and assign to publisher
     dt = publisher_ocean.get_data_token(asset.data_token_address)
@@ -72,10 +70,8 @@ def test_market_flow(order_type):
         service.index,
         "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",
         consumer_wallet,
+        sa.get_c2d_address(),
     ]
-
-    if order_type == "explicit_none":
-        args.append(None)
 
     _order_tx_id = consumer_ocean.assets.pay_for_service(*args)
 
@@ -90,10 +86,6 @@ def test_market_flow(order_type):
     )
 
     assert len(os.listdir(asset_folder)) >= 1, "The asset folder is empty."
-
-    if order_type == "explicit_none":
-        # no need to continue, order worked
-        return
 
     orders = consumer_ocean.get_user_orders(consumer_wallet.address, asset.asset_id)
     assert (
@@ -123,14 +115,14 @@ def test_payer_market_flow():
 
     # Register Asset
     asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
-    assert isinstance(asset, Asset)
+    assert isinstance(asset, V3Asset)
     assert asset.data_token_address, "The asset does not have a token address."
 
     another_consumer_wallet = get_another_consumer_wallet()
     consumer_wallet = get_consumer_wallet()
 
     service = asset.get_service(service_type=ServiceTypes.ASSET_ACCESS)
-    sa = ServiceAgreement.from_json(service.as_dictionary())
+    sa = Service.from_json(service.as_dictionary())
 
     # Mint data tokens and assign to publisher
     dt = publisher_ocean.get_data_token(asset.data_token_address)

@@ -8,7 +8,7 @@ from typing import Dict, Union
 
 from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
-from ocean_lib.common.utils.utilities import checksum
+from ocean_lib.utils.utilities import checksum
 from web3 import Web3
 
 OCEAN_PREFIX = "did:op:"

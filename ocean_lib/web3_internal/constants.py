@@ -26,18 +26,28 @@ NETWORK_NAME_MAP = {
     1: "Mainnet",
     3: "Ropsten",
     4: "Rinkeby",
-    56: "Binance Smart Chain",
+    56: "BSC",
     137: "Polygon",
-    1287: "Moonbeam Alpha",
+    246: "EnergyWeb",
+    1285: "Moonriver",
+    1287: "MoonbeamAlpha",
     1337: "Ganache",
+    44787: "CeloAlfajores",
+    80001: "Mumbai",
 }
 
-NETWORK_TIMEOUT_MAP = {
-    "mainnet": 10 * 60,
-    "ropsten": 10 * 60,
-    "rinkeby": 5 * 60,
-    "bsc": 10 * 60,
-    "polygon": 10 * 60,
-    "moonbeamalpha": 60,
-    "ganache": 2,
+"""The interval in seconds when polling the latest block number
+block_number poll interval = 1/2 average block time for a given chain"""
+BLOCK_NUMBER_POLL_INTERVAL = {
+    1: 6.5,
+    3: 6.0,
+    4: 7.5,
+    56: 1.5,
+    137: 1.0,
+    246: 2.6,
+    1285: 6.5,
+    1287: 6.0,
+    1337: 2.5,
+    44787: 2.5,
+    80001: 1.0,
 }

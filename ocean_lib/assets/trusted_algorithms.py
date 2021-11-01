@@ -2,27 +2,19 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import hashlib
 import json
 from typing import Optional, Union
 
 from enforce_typing import enforce_types
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.common.agreements.service_types import ServiceTypes
-
-
-@enforce_types
-def create_checksum(text: str) -> str:
-    """
-    :return: str
-    """
-    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+from ocean_lib.utils.utilities import create_checksum
 
 
 @enforce_types
 def generate_trusted_algo_dict(
-    asset_or_did: Union[str, Asset] = None, metadata_cache_uri: Optional[str] = None
+    asset_or_did: Union[str, V3Asset] = None, metadata_cache_uri: Optional[str] = None
 ) -> dict:
     """
     :return: Object as follows:
@@ -34,7 +26,7 @@ def generate_trusted_algo_dict(
     }
     ```
     """
-    if isinstance(asset_or_did, Asset):
+    if isinstance(asset_or_did, V3Asset):
         ddo = asset_or_did
     else:
         ddo = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
@@ -71,12 +63,12 @@ def create_publisher_trusted_algorithms(
 
 @enforce_types
 def add_publisher_trusted_algorithm(
-    asset_or_did: Union[str, Asset], algo_did: str, metadata_cache_uri: str
+    asset_or_did: Union[str, V3Asset], algo_did: str, metadata_cache_uri: str
 ) -> list:
     """
     :return: List of trusted algos
     """
-    if isinstance(asset_or_did, Asset):
+    if isinstance(asset_or_did, V3Asset):
         asset = asset_or_did
     else:
         asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
@@ -109,12 +101,12 @@ def add_publisher_trusted_algorithm(
 
 @enforce_types
 def add_publisher_trusted_algorithm_publisher(
-    asset_or_did: Union[str, Asset], publisher_address: str, metadata_cache_uri: str
+    asset_or_did: Union[str, V3Asset], publisher_address: str, metadata_cache_uri: str
 ) -> list:
     """
     :return: List of trusted algo publishers
     """
-    if isinstance(asset_or_did, Asset):
+    if isinstance(asset_or_did, V3Asset):
         asset = asset_or_did
     else:
         asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
@@ -149,12 +141,12 @@ def add_publisher_trusted_algorithm_publisher(
 
 @enforce_types
 def remove_publisher_trusted_algorithm(
-    asset_or_did: Union[str, Asset], algo_did: str, metadata_cache_uri: str
+    asset_or_did: Union[str, V3Asset], algo_did: str, metadata_cache_uri: str
 ) -> list:
     """
     :return: List of trusted algos not containing `algo_did`.
     """
-    if isinstance(asset_or_did, Asset):
+    if isinstance(asset_or_did, V3Asset):
         asset = asset_or_did
     else:
         asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
@@ -178,12 +170,12 @@ def remove_publisher_trusted_algorithm(
 
 @enforce_types
 def remove_publisher_trusted_algorithm_publisher(
-    asset_or_did: Union[str, Asset], publisher_address: str, metadata_cache_uri: str
+    asset_or_did: Union[str, V3Asset], publisher_address: str, metadata_cache_uri: str
 ) -> list:
     """
     :return: List of trusted algo publishers not containing `publisher_address`.
     """
-    if isinstance(asset_or_did, Asset):
+    if isinstance(asset_or_did, V3Asset):
         asset = asset_or_did
     else:
         asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)

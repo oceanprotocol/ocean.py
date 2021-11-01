@@ -10,6 +10,7 @@ from enforce_typing import enforce_types
 from eth_account.datastructures import SignedMessage
 from eth_account.messages import SignableMessage
 from hexbytes.main import HexBytes
+from ocean_lib.integer import Integer
 from ocean_lib.web3_internal.constants import ENV_MAX_GAS_PRICE, MIN_GAS_PRICE
 from ocean_lib.web3_internal.utils import (
     private_key_to_address,
@@ -32,18 +33,41 @@ class Wallet:
     node since we only send the raw transaction hash so the user info is safe.
 
     Usage:
-        1. `wallet = Wallet(ocean.web3, private_key=private_key)`
+    ```python
+    wallet = Wallet(
+        ocean.web3,
+        private_key=private_key,
+        block_confirmations=ocean.config.block_confirmations,
+        transaction_timeout=config.transaction_timeout,
+    )
+    ```
 
     """
 
     _last_tx_count = dict()
 
     @enforce_types
-    def __init__(self, web3: Web3, private_key: str) -> None:
+    def __init__(
+        self,
+        web3: Web3,
+        private_key: str,
+        block_confirmations: Union[Integer, int],
+        transaction_timeout: Union[Integer, int],
+    ) -> None:
         """Initialises Wallet object."""
         assert private_key, "private_key is required."
 
         self.web3 = web3
+        self.block_confirmations = (
+            block_confirmations
+            if isinstance(block_confirmations, Integer)
+            else Integer(block_confirmations)
+        )
+        self.transaction_timeout = (
+            transaction_timeout
+            if isinstance(transaction_timeout, Integer)
+            else Integer(transaction_timeout)
+        )
         self._last_tx_count.clear()
 
         self.private_key = private_key
