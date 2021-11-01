@@ -9,7 +9,6 @@ from unittest.mock import patch
 import pytest
 from eth_utils import add_0x_prefix
 from ocean_lib.common.agreements.consumable import ConsumableCodes
-from ocean_lib.common.agreements.service_factory import ServiceDescriptor
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.did import DID, did_to_id
 from ocean_lib.exceptions import InsufficientBalance
@@ -33,11 +32,7 @@ def create_asset(ocean, publisher, encrypt=False):
 
     asset = DDO(json_filename=sample_ddo_path)
     asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    my_secret_store = "http://myownsecretstore.com"
-    auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
-    return ocean.assets.create(
-        asset.metadata, publisher, [auth_service], encrypt=encrypt
-    )
+    return ocean.assets.create(asset.metadata, publisher, [], encrypt=encrypt)
 
 
 @pytest.mark.parametrize("encrypt", [False, True])
@@ -68,7 +63,10 @@ def test_register_asset(publisher_ocean_instance, encrypt):
     # try to resolve new asset
     did = original_ddo.did
     asset_id = original_ddo.asset_id
-    log = ddo_reg.get_event_log(ddo_reg.EVENT_METADATA_CREATED, block, asset_id, 30)
+    block_confirmations = ocn.config.block_confirmations.value
+    log = ddo_reg.get_event_log(
+        ddo_reg.EVENT_METADATA_CREATED, block - (block_confirmations + 1), asset_id, 30
+    )
     assert log, "no ddo created event."
 
     ddo = wait_for_ddo(ocn, did)
@@ -96,13 +94,10 @@ def test_register_asset(publisher_ocean_instance, encrypt):
 
     # Can't resolve unregistered asset
     unregistered_did = DID.did({"0": "0x00112233445566"})
-    with pytest.raises(ValueError):
-        ocn.assets.resolve(unregistered_did)
+    assert ocn.assets.resolve(unregistered_did) is None
 
-    # Raise error on bad did
     invalid_did = "did:op:0123456789"
-    with pytest.raises(ValueError):
-        ocn.assets.resolve(invalid_did)
+    assert ocn.assets.resolve(invalid_did) is None
 
     meta_data_assets = ocn.assets.search("")
     if meta_data_assets:
@@ -117,7 +112,10 @@ def test_register_asset(publisher_ocean_instance, encrypt):
         ocn.assets.update(ddo, bob)
 
     _ = ocn.assets.update(ddo, alice, encrypt=encrypt)
-    log = ddo_reg.get_event_log(ddo_reg.EVENT_METADATA_UPDATED, block, asset_id, 30)
+    block_confirmations = ocn.config.block_confirmations.value
+    log = ddo_reg.get_event_log(
+        ddo_reg.EVENT_METADATA_UPDATED, block - block_confirmations, asset_id, 30
+    )
     assert log, "no ddo updated event"
     _asset = wait_for_update(ocn, ddo.did, "name", _name)
     assert _asset, "Cannot read asset after update."
@@ -154,9 +152,11 @@ def test_ocean_assets_search(publisher_ocean_instance, metadata):
         len(
             publisher_ocean_instance.assets.query(
                 {
-                    "query_string": {
-                        "query": identifier,
-                        "fields": ["service.attributes.main.name"],
+                    "query": {
+                        "query_string": {
+                            "query": identifier,
+                            "fields": ["service.attributes.main.name"],
+                        }
                     }
                 }
             )
@@ -167,9 +167,11 @@ def test_ocean_assets_search(publisher_ocean_instance, metadata):
         len(
             publisher_ocean_instance.assets.query(
                 {
-                    "query_string": {
-                        "query": "Gorilla",
-                        "fields": ["service.attributes.main.name"],
+                    "query": {
+                        "query_string": {
+                            "query": "Gorilla",
+                            "fields": ["service.attributes.main.name"],
+                        }
                     }
                 }
             )
@@ -251,15 +253,13 @@ def test_create_asset_with_address(publisher_ocean_instance):
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
     asset = DDO(json_filename=sample_ddo_path)
     asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    my_secret_store = "http://myownsecretstore.com"
-    auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
 
     token = ocn.create_data_token(
         "DataToken1", "DT1", from_wallet=alice, blob="foo_blob"
     )
 
     assert ocn.assets.create(
-        asset.metadata, alice, [auth_service], data_token_address=token.address
+        asset.metadata, alice, [], data_token_address=token.address
     ), "Asset creation failed with the specified datatoken address."
 
 
@@ -271,11 +271,9 @@ def test_create_asset_with_owner_address(publisher_ocean_instance):
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
     asset = DDO(json_filename=sample_ddo_path)
     asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    my_secret_store = "http://myownsecretstore.com"
-    auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
 
     assert ocn.assets.create(
-        asset.metadata, alice, [auth_service], owner_address=alice.address
+        asset.metadata, alice, [], owner_address=alice.address
     ), "Asset creation failed with the specified owner address."
 
 
@@ -287,8 +285,6 @@ def test_create_asset_with_dt_address_and_owner_address(publisher_ocean_instance
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
     asset = DDO(json_filename=sample_ddo_path)
     asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    my_secret_store = "http://myownsecretstore.com"
-    auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
 
     token = ocn.create_data_token(
         "DataToken1", "DT1", from_wallet=alice, blob="foo_blob"
@@ -297,7 +293,7 @@ def test_create_asset_with_dt_address_and_owner_address(publisher_ocean_instance
     assert ocn.assets.create(
         asset.metadata,
         alice,
-        [auth_service],
+        [],
         owner_address=alice.address,
         data_token_address=token.address,
     ), "Asset creation failed when given both a datatoken address and owner address."
@@ -311,11 +307,9 @@ def test_create_asset_without_dt_address(publisher_ocean_instance):
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
     asset = DDO(json_filename=sample_ddo_path)
     asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    my_secret_store = "http://myownsecretstore.com"
-    auth_service = ServiceDescriptor.authorization_service_descriptor(my_secret_store)
 
     assert ocn.assets.create(
-        asset.metadata, alice, [auth_service], data_token_address=None
+        asset.metadata, alice, [], data_token_address=None
     ), "Asset creation failed with the specified datatoken address."
 
 
@@ -334,5 +328,12 @@ def test_pay_for_service_insufficient_balance(publisher_ocean_instance):
 
     with pytest.raises(InsufficientBalance):
         ocn.assets.pay_for_service(
-            ocn.web3, 10000000000000, token.address, asset.did, 0, ZERO_ADDRESS, alice
+            ocn.web3,
+            10000000000000,
+            token.address,
+            asset.did,
+            0,
+            ZERO_ADDRESS,
+            alice,
+            alice.address,
         )

@@ -9,7 +9,7 @@ Help to communicate with the metadata store.
 
 import json
 import logging
-from typing import Any, Optional, Tuple, Union
+from typing import Optional, Tuple, Union
 
 from enforce_typing import enforce_types
 from ocean_lib.common.ddo.ddo import DDO
@@ -60,20 +60,19 @@ class Aquarius:
         return f"{self.base_url}/ddo/encrypt"
 
     @enforce_types
-    def get_asset_ddo(self, did: str) -> Union[DDO, dict]:
+    def get_asset_ddo(self, did: str) -> Optional[DDO]:
         """
         Retrieve asset ddo for a given did.
 
         :param did: Asset DID string
         :return: DDO instance
         """
-        response = self.requests_session.get(f"{self.base_url}/ddo/{did}").content
-        parsed_response = _parse_response(response, None)
+        response = self.requests_session.get(f"{self.base_url}/ddo/{did}")
 
-        if not parsed_response:
-            return {}
+        if response.status_code == 200:
+            return DDO(dictionary=response.json())
 
-        return DDO(dictionary=parsed_response)
+        return None
 
     @enforce_types
     def ddo_exists(self, did: str) -> bool:
@@ -85,7 +84,7 @@ class Aquarius:
         """
         response = self.requests_session.get(f"{self.base_url}/ddo/{did}").content
 
-        return "asset DID is not in OceanDB" not in str(response)
+        return f"Asset DID {did} not found in Elasticsearch" not in str(response)
 
     @enforce_types
     def get_asset_metadata(self, did: str) -> list:
@@ -95,61 +94,14 @@ class Aquarius:
         :param did: Asset DID string
         :return: metadata key of the DDO instance
         """
-        response = self.requests_session.get(f"{self.base_url}/metadata/{did}").content
-        parsed_response = _parse_response(response, [])
-
-        return parsed_response
-
-    @enforce_types
-    def text_search(
-        self,
-        text: str,
-        sort: Optional[dict] = None,
-        offset: Optional[int] = 100,
-        page: Optional[int] = 1,
-    ) -> list:
-        """
-        Search in aquarius using text query.
-
-        Given the string aquarius will do a full-text query to search in all documents.
-
-        Currently implemented are the MongoDB and Elastic Search drivers.
-
-        For a detailed guide on how to search, see the MongoDB driver documentation:
-        mongodb driverCurrently implemented in:
-        https://docs.mongodb.com/manual/reference/operator/query/text/
-
-        And the Elastic Search documentation:
-        https://www.elastic.co/guide/en/elasticsearch/guide/current/full-text-search.html
-        Other drivers are possible according to each implementation.
-
-        :param text: String to be search.
-        :param sort: 1/-1 to sort ascending or descending.
-        :param offset: Integer with the number of elements displayed per page.
-        :param page: Integer with the number of page.
-        :return: List of DDO instance
-        """
-        assert page >= 1, f"Invalid page value {page}. Required page >= 1."
-        sort = sort if sort else {}
-        payload = {"text": text, "sort": sort, "offset": offset, "page": page}
-        response = self.requests_session.post(
-            f"{self.base_url}/ddo/query",
-            data=json.dumps(payload),
-            headers={"content-type": "application/json"},
-        )
+        response = self.requests_session.get(f"{self.base_url}/metadata/{did}")
         if response.status_code == 200:
-            return self._parse_search_response(response.content)
+            return response.json()
 
-        raise ValueError(f"Unable to search for DDO: {response.content}")
+        return []
 
     @enforce_types
-    def query_search(
-        self,
-        search_query: dict,
-        sort: Optional[dict] = None,
-        offset: Optional[int] = 100,
-        page: Optional[int] = 1,
-    ) -> list:
+    def query_search(self, search_query: dict) -> list:
         """
         Search using a query.
 
@@ -161,23 +113,17 @@ class Aquarius:
 
         Example: query_search({"price":[0,10]})
 
-        :param search_query: Python dictionary, query following mongodb syntax
-        :param sort: 1/-1 to sort ascending or descending.
-        :param offset: Integer with the number of elements displayed per page.
-        :param page: Integer with the number of page.
+        :param search_query: Python dictionary, query following elasticsearch syntax
         :return: List of DDO instance
         """
-        assert page >= 1, f"Invalid page value {page}. Required page >= 1."
-        search_query["sort"] = sort
-        search_query["offset"] = offset
-        search_query["page"] = page
         response = self.requests_session.post(
-            f"{self.base_url}/ddo/query",
+            f"{self.base_url}/query",
             data=json.dumps(search_query),
             headers={"content-type": "application/json"},
         )
+
         if response.status_code == 200:
-            return self._parse_search_response(response.content)
+            return response.json()["hits"]["hits"]
 
         raise ValueError(f"Unable to search for DDO: {response.content}")
 
@@ -198,20 +144,8 @@ class Aquarius:
         if response.content == b"true\n":
             return True, []
 
-        parsed_response = self._parse_search_response(response.content)
+        parsed_response = response.json()
         return False, parsed_response
-
-    @staticmethod
-    @enforce_types
-    def _parse_search_response(response: Any) -> Union[list, dict]:
-        parsed_response = _parse_response(response, None)
-
-        if isinstance(parsed_response, dict) or isinstance(parsed_response, list):
-            return parsed_response
-
-        raise ValueError(
-            f"Unknown search response, expecting a list or dict, got {type(parsed_response)}."
-        )
 
     @enforce_types
     def encrypt(self, text: str) -> bytes:
@@ -234,18 +168,3 @@ class Aquarius:
                 raise ValueError("Failed to encrypt asset.")
         except Exception:
             raise ValueError("Failed to encrypt asset.")
-
-
-@enforce_types
-def _parse_response(response: Any, default_return: Any) -> Any:
-    if not response:
-        return default_return
-
-    try:
-        return json.loads(response)
-    except TypeError:
-        return default_return
-    except ValueError:
-        raise ValueError(response.decode("UTF-8"))
-
-    return default_return

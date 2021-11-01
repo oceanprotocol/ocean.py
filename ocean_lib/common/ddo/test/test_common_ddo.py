@@ -5,11 +5,7 @@
 """
     Test did_lib
 """
-from ocean_lib.common.agreements.service_agreement import ServiceTypes
-from ocean_lib.common.agreements.service_factory import (
-    ServiceDescriptor,
-    ServiceFactory,
-)
+from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.ddo.ddo import DDO
 from ocean_lib.common.did import DID
 from tests.resources.ddo_helpers import get_resource_path, get_sample_ddo
@@ -76,17 +72,3 @@ def test_find_service():
         "Failed to find service by id using " "" "service " "type."
     )
     assert service.index == 0, "index not as expected."
-
-
-def test_service_factory():
-    """Tests ServiceFactory builds services."""
-    ddo = get_sample_ddo("ddo_algorithm.json")
-    type_to_service = {s.type: s for s in ddo.services}
-    metadata = ddo.metadata
-
-    md_descriptor = ServiceDescriptor.metadata_service_descriptor(
-        metadata, type_to_service[ServiceTypes.METADATA].service_endpoint
-    )
-    services = ServiceFactory.build_services([md_descriptor])
-    assert len(services) == 1
-    assert services[0].type == ServiceTypes.METADATA

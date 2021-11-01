@@ -14,15 +14,14 @@ from enforce_typing import enforce_types
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.util import get_web3_connection_provider
+from ocean_lib.ocean.util import get_web3 as util_get_web3
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
-from web3.main import Web3
 
 
 def get_web3():
-    return Web3(provider=get_web3_connection_provider(get_example_config().network_url))
+    return util_get_web3(get_example_config().network_url)
 
 
 def get_example_config():
@@ -31,17 +30,35 @@ def get_example_config():
 
 @enforce_types
 def get_publisher_wallet() -> Wallet:
-    return Wallet(get_web3(), private_key=os.environ.get("TEST_PRIVATE_KEY1"))
+    config = get_example_config()
+    return Wallet(
+        get_web3(),
+        private_key=os.environ.get("TEST_PRIVATE_KEY1"),
+        block_confirmations=config.block_confirmations,
+        transaction_timeout=config.transaction_timeout,
+    )
 
 
 @enforce_types
 def get_consumer_wallet() -> Wallet:
-    return Wallet(get_web3(), private_key=os.environ.get("TEST_PRIVATE_KEY2"))
+    config = get_example_config()
+    return Wallet(
+        get_web3(),
+        private_key=os.environ.get("TEST_PRIVATE_KEY2"),
+        block_confirmations=config.block_confirmations,
+        transaction_timeout=config.transaction_timeout,
+    )
 
 
 @enforce_types
 def get_another_consumer_wallet() -> Wallet:
-    return Wallet(get_web3(), private_key=os.environ.get("TEST_PRIVATE_KEY3"))
+    config = get_example_config()
+    return Wallet(
+        get_web3(),
+        private_key=os.environ.get("TEST_PRIVATE_KEY3"),
+        block_confirmations=config.block_confirmations,
+        transaction_timeout=config.transaction_timeout,
+    )
 
 
 def get_factory_deployer_wallet(network):
@@ -52,7 +69,13 @@ def get_factory_deployer_wallet(network):
     if not private_key:
         return None
 
-    return Wallet(get_web3(), private_key=private_key)
+    config = get_example_config()
+    return Wallet(
+        get_web3(),
+        private_key=private_key,
+        block_confirmations=config.block_confirmations,
+        transaction_timeout=config.transaction_timeout,
+    )
 
 
 def get_ganache_wallet():
@@ -62,9 +85,12 @@ def get_ganache_wallet():
         and web3.eth.accounts[0].lower()
         == "0xe2DD09d719Da89e5a3D0F2549c7E24566e947260".lower()
     ):
+        config = get_example_config()
         return Wallet(
             web3,
             private_key="0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58",
+            block_confirmations=config.block_confirmations,
+            transaction_timeout=config.transaction_timeout,
         )
 
     return None

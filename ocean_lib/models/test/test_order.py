@@ -5,8 +5,8 @@
 import os
 
 from eth_utils import remove_0x_prefix
-from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.common.ddo.service import Service
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.order import Order
 from tests.resources.ddo_helpers import get_metadata, get_registered_ddo
@@ -17,7 +17,7 @@ def test_order(web3, alice_ocean, alice_wallet):
     dt = DataToken(web3, asset.data_token_address)
 
     service = asset.get_service(service_type=ServiceTypes.ASSET_ACCESS)
-    sa = ServiceAgreement.from_json(service.as_dictionary())
+    sa = Service.from_json(service.as_dictionary())
 
     order_requirements = alice_ocean.assets.order(
         asset.did, alice_wallet.address, sa.index
@@ -32,6 +32,7 @@ def test_order(web3, alice_ocean, alice_wallet):
         service.index,
         alice_wallet.address,
         alice_wallet,
+        sa.get_c2d_address(),
     )
 
     asset_folder = alice_ocean.assets.download(
@@ -67,5 +68,5 @@ def test_order(web3, alice_ocean, alice_wallet):
             order[0] == asset.data_token_address
         ), "The order data token address is different."
         assert order[5] == alice_wallet.address, "The payer is not the supposed one."
-        assert order[6] == alice_wallet.address, "The consumer is not the supposed one."
+        assert order[6] == sa.get_c2d_address(), "The consumer is not the supposed one."
         assert len(order) == 9, "Different number of args."

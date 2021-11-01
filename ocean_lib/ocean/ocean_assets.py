@@ -18,14 +18,10 @@ from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.common.agreements.consumable import AssetNotConsumable, ConsumableCodes
-from ocean_lib.common.agreements.service_agreement import ServiceAgreement
-from ocean_lib.common.agreements.service_factory import (
-    ServiceDescriptor,
-    ServiceFactory,
-)
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.aquarius.aquarius import Aquarius
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
+from ocean_lib.common.ddo.service import Service
 from ocean_lib.common.did import did_to_id
 from ocean_lib.common.utils.utilities import checksum
 from ocean_lib.config import Config
@@ -87,50 +83,6 @@ class OceanAssets:
         return AquariusProvider.get_aquarius(url or self._metadata_cache_uri)
 
     @enforce_types
-    def _process_service_descriptors(
-        self,
-        service_descriptors: list,
-        metadata: dict,
-        provider_uri: str,
-        wallet: Wallet,
-    ) -> list:
-        ddo_service_endpoint = self._get_aquarius().get_service_endpoint()
-
-        service_type_to_descriptor = {sd[0]: sd for sd in service_descriptors}
-        _service_descriptors = []
-        metadata_service_desc = service_type_to_descriptor.pop(
-            ServiceTypes.METADATA,
-            ServiceDescriptor.metadata_service_descriptor(
-                metadata, ddo_service_endpoint
-            ),
-        )
-        _service_descriptors = [metadata_service_desc]
-
-        # Always dafault to creating a ServiceTypes.ASSET_ACCESS service if no services are specified
-        access_service_descriptor = service_type_to_descriptor.pop(
-            ServiceTypes.ASSET_ACCESS, None
-        )
-        compute_service_descriptor = service_type_to_descriptor.pop(
-            ServiceTypes.CLOUD_COMPUTE, None
-        )
-        # Make an access service only if no services are given by the user.
-        if not access_service_descriptor and not compute_service_descriptor:
-            access_service_descriptor = ServiceDescriptor.access_service_descriptor(
-                self.build_access_service(
-                    metadata["main"]["dateCreated"], 1.0, wallet.address
-                ),
-                self._data_provider.build_download_endpoint(provider_uri)[1],
-            )
-
-        if access_service_descriptor:
-            _service_descriptors.append(access_service_descriptor)
-        if compute_service_descriptor:
-            _service_descriptors.append(compute_service_descriptor)
-
-        _service_descriptors.extend(service_type_to_descriptor.values())
-        return ServiceFactory.build_services(_service_descriptors)
-
-    @enforce_types
     def _build_asset_contents(self, asset: Asset, encrypt: bool = False):
         if not encrypt:
             return bytes([1]), lzma.compress(Web3.toBytes(text=asset.as_text()))
@@ -142,7 +94,7 @@ class OceanAssets:
         self,
         metadata: dict,
         publisher_wallet: Wallet,
-        service_descriptors: list = None,
+        services: Optional[list] = None,
         owner_address: Optional[str] = None,
         data_token_address: Optional[str] = None,
         provider_uri: Optional[str] = None,
@@ -158,9 +110,7 @@ class OceanAssets:
 
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
         :param publisher_wallet: Wallet of the publisher registering this asset
-        :param service_descriptors: list of ServiceDescriptor tuples of length 2.
-            The first item must be one of ServiceTypes and the second
-            item is a dict of parameters and values required by the service
+        :param services: list of Service objects.
         :param owner_address: hex str the ethereum address to assign asset ownership to. After
             registering the asset on-chain, the ownership is transferred to this address
         :param data_token_address: hex str the address of the data token smart contract. The new
@@ -177,9 +127,6 @@ class OceanAssets:
         assert isinstance(
             metadata, dict
         ), f"Expected metadata of type dict, got {type(metadata)}"
-        assert service_descriptors is None or isinstance(
-            service_descriptors, list
-        ), f"bad type of `service_descriptors` {type(service_descriptors)}"
 
         # copy metadata so we don't change the original
         metadata_copy = copy.deepcopy(metadata)
@@ -204,13 +151,11 @@ class OceanAssets:
                 logger.error(msg)
                 raise ValueError(msg)
 
-        service_descriptors = service_descriptors or []
-
-        services = self._process_service_descriptors(
-            service_descriptors, metadata_copy, provider_uri, publisher_wallet
+        services = services or []
+        services = self._add_defaults(
+            services, metadata_copy, provider_uri, publisher_wallet
         )
 
-        stype_to_service = {s.type: s for s in services}
         checksum_dict = dict()
         for service in services:
             checksum_dict[str(service.index)] = checksum(service.main)
@@ -281,21 +226,14 @@ class OceanAssets:
                 f"Asset id {did} is already registered to another asset."
             )
 
-        md_service = stype_to_service[ServiceTypes.METADATA]
-        ddo_service_endpoint = md_service.service_endpoint
-        if "{did}" in ddo_service_endpoint:
-            ddo_service_endpoint = ddo_service_endpoint.replace("{did}", did)
-            md_service.service_endpoint = ddo_service_endpoint
+        for service in services:
+            if service.type == ServiceTypes.METADATA:
+                ddo_service_endpoint = service.service_endpoint
+                if "{did}" in ddo_service_endpoint:
+                    ddo_service_endpoint = ddo_service_endpoint.replace("{did}", did)
+                    service.service_endpoint = ddo_service_endpoint
 
-        # Populate the ddo services
-        asset.add_service(md_service)
-        access_service = stype_to_service.get(ServiceTypes.ASSET_ACCESS, None)
-        compute_service = stype_to_service.get(ServiceTypes.CLOUD_COMPUTE, None)
-
-        if access_service:
-            asset.add_service(access_service)
-        if compute_service:
-            asset.add_service(compute_service)
+            asset.add_service(service)
 
         asset.proof["signatureValue"] = sign_hash(
             encode_defunct(text=asset.asset_id), publisher_wallet
@@ -361,6 +299,37 @@ class OceanAssets:
         return asset
 
     @enforce_types
+    def _add_defaults(
+        self, services: list, metadata: dict, provider_uri: str, wallet: Wallet
+    ) -> list:
+        ddo_service_endpoint = self._get_aquarius().get_service_endpoint()
+
+        metadata_service = Service(
+            service_endpoint=ddo_service_endpoint,
+            service_type=ServiceTypes.METADATA,
+            attributes=metadata,
+        )
+
+        services.append(metadata_service)
+
+        has_access_service = False
+        for service in services:
+            if service.type == ServiceTypes.ASSET_ACCESS:
+                has_access_service = True
+
+        if not has_access_service:
+            access_service = self.build_access_service(
+                self._data_provider.build_download_endpoint(provider_uri)[1],
+                metadata["main"]["dateCreated"],
+                1.0,
+                wallet.address,
+            )
+
+            services.append(access_service)
+
+        return services
+
+    @enforce_types
     def update(
         self, asset: Asset, publisher_wallet: Wallet, encrypt: Optional[bool] = False
     ) -> str:
@@ -396,63 +365,37 @@ class OceanAssets:
         return resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
 
     @enforce_types
-    def search(
-        self,
-        text: str,
-        sort: Optional[dict] = None,
-        offset: Optional[int] = 100,
-        page: Optional[int] = 1,
-        metadata_cache_uri: Optional[str] = None,
-    ) -> list:
+    def search(self, text: str, metadata_cache_uri: Optional[str] = None) -> list:
         """
         Search an asset in oceanDB using aquarius.
 
         :param text: String with the value that you are searching
-        :param sort: Dictionary to choose order main in some value
-        :param offset: Number of elements shows by page
-        :param page: Page number
         :param metadata_cache_uri: Url of the aquarius where you want to search. If there is not
             provided take the default
         :return: List of assets that match with the query
         """
-        assert page >= 1, f"Invalid page value {page}. Required page >= 1."
         logger.info(f"Searching asset containing: {text}")
         return [
             Asset(dictionary=ddo_dict)
             for ddo_dict in self._get_aquarius(metadata_cache_uri).query_search(
-                {"query": {"query_string": {"query": text}}}, sort, offset, page
-            )["results"]
+                {"query": {"query_string": {"query": text}}}
+            )
         ]
 
     @enforce_types
-    def query(
-        self,
-        query: dict,
-        sort: Optional[dict] = None,
-        offset: Optional[int] = 100,
-        page: Optional[int] = 1,
-        metadata_cache_uri: Optional[str] = None,
-    ) -> list:
+    def query(self, query: dict, metadata_cache_uri: Optional[str] = None) -> list:
         """
         Search an asset in oceanDB using search query.
 
         :param query: dict with query parameters
             (e.g.) https://github.com/oceanprotocol/aquarius/blob/develop/docs/for_api_users/API.md
-        :param sort: Dictionary to choose order main in some value
-        :param offset: Number of elements shows by page
-        :param page: Page number
         :param metadata_cache_uri: Url of the aquarius where you want to search. If there is not
             provided take the default
         :return: List of assets that match with the query.
         """
         logger.info(f"Searching asset query: {query}")
         aquarius = self._get_aquarius(metadata_cache_uri)
-        return [
-            Asset(dictionary=ddo_dict)
-            for ddo_dict in aquarius.query_search({"query": query}, sort, offset, page)[
-                "results"
-            ]
-        ]
+        return [Asset(dictionary=ddo_dict) for ddo_dict in aquarius.query_search(query)]
 
     @enforce_types
     def order(
@@ -479,10 +422,10 @@ class OceanAssets:
         asset = self.resolve(did)
 
         if service_type:
-            sa = ServiceAgreement.from_ddo(service_type, asset)
+            sa = asset.get_service(service_type)
         else:
             service = asset.get_service_by_index(service_index)
-            sa = ServiceAgreement.from_ddo(service.type, asset)
+            sa = asset.get_service(service.type)
 
         consumable_result = asset.is_consumable(
             {"type": "address", "value": consumer_address},
@@ -523,7 +466,7 @@ class OceanAssets:
         service_id: int,
         fee_receiver: str,
         from_wallet: Wallet,
-        consumer: Optional[str] = None,
+        consumer: str,
     ) -> str:
         """
         Submits the payment for chosen service in DataTokens.
@@ -534,7 +477,7 @@ class OceanAssets:
         :param service_id:
         :param fee_receiver:
         :param from_wallet: Wallet instance
-        :param consumer: str the address of consumer of the service, defaults to the payer (the `from_wallet` address)
+        :param consumer: str the address of consumer of the service
         :return: hex str id of transfer transaction
         """
         dt = DataToken(web3, token_address)
@@ -551,9 +494,6 @@ class OceanAssets:
 
         if fee_receiver is None:
             fee_receiver = ZERO_ADDRESS
-
-        if consumer is None:
-            consumer = from_wallet.address
 
         tx_hash = dt.startOrder(consumer, amount, service_id, fee_receiver, from_wallet)
 
@@ -659,17 +599,28 @@ class OceanAssets:
         return [
             asset.did
             for asset in self.query(
-                {"query_string": {"query": owner_address, "fields": ["proof.creator"]}},
-                offset=1000,
+                {
+                    "size": 1000,
+                    "query": {
+                        "query_string": {
+                            "query": owner_address,
+                            "fields": ["proof.creator"],
+                        }
+                    },
+                }
             )
         ]
 
     @staticmethod
     @enforce_types
     def build_access_service(
-        date_created: str, cost: float, address: str, timeout: Optional[int] = 3600
+        endpoint: str,
+        date_created: str,
+        cost: float,
+        address: str,
+        timeout: Optional[int] = 3600,
     ) -> dict:
-        return {
+        attributes = {
             "main": {
                 "name": "dataAssetAccessServiceAgreement",
                 "creator": address,
@@ -678,3 +629,9 @@ class OceanAssets:
                 "datePublished": date_created,
             }
         }
+
+        return Service(
+            service_endpoint=endpoint,
+            service_type=ServiceTypes.ASSET_ACCESS,
+            attributes=attributes,
+        )

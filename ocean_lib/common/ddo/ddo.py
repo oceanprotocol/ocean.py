@@ -12,7 +12,6 @@ from enforce_typing import enforce_types
 from eth_account.account import Account
 from eth_utils import add_0x_prefix
 from ocean_lib.common.agreements.consumable import ConsumableCodes
-from ocean_lib.common.agreements.service_agreement import ServiceAgreement
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.ddo.constants import DID_DDO_CONTEXT_URL, PROOF_TYPE
 from ocean_lib.common.ddo.credentials import AddressCredential
@@ -190,7 +189,8 @@ class DDO:
     def _read_dict(self, dictionary: dict) -> None:
         """Import a JSON dict into this DDO."""
         values = copy.deepcopy(dictionary)
-        self.did = values.pop("id")
+        id_key = "id" if "id" in values else "_id"
+        self.did = values.pop(id_key)
         self.created = values.pop("created", None)
 
         if "service" in values:
@@ -199,14 +199,7 @@ class DDO:
                 if isinstance(value, str):
                     value = json.loads(value)
 
-                if value["type"] in [
-                    ServiceTypes.ASSET_ACCESS,
-                    ServiceTypes.CLOUD_COMPUTE,
-                ]:
-                    service = ServiceAgreement.from_json(value)
-                else:
-                    service = Service.from_json(value)
-
+                service = Service.from_json(value)
                 self.services.append(service)
         if "proof" in values:
             self.proof = values.pop("proof")

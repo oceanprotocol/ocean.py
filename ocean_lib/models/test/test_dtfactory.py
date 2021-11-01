@@ -37,8 +37,9 @@ def test_data_token_event_registered(
     block = alice_ocean.web3.eth.block_number
 
     # with explicit address
+    block_confirmations = alice_ocean.config.block_confirmations.value
     registered_event = dtfactory.get_token_registered_event(
-        block - 1, block + 1, token_address=dt.address
+        block - (block_confirmations + 1), block, token_address=dt.address
     )
 
     assert registered_event.args.tokenAddress == dt.address

@@ -13,7 +13,6 @@ from ocean_lib.models.bpool import BPool
 from ocean_lib.models.btoken import BToken
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
-from ocean_lib.ocean.util import get_dtfactory_address
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from scipy.interpolate import interp1d
@@ -52,12 +51,17 @@ class OceanPool:
 
     @enforce_types
     def __init__(
-        self, web3: Web3, ocean_token_address: str, bfactory_address: str
+        self,
+        web3: Web3,
+        ocean_token_address: str,
+        bfactory_address: str,
+        dtfactory_address: str,
     ) -> None:
         """Initialises Ocean Pool."""
         self.web3 = web3
         self.ocean_address = ocean_token_address
         self.bfactory_address = bfactory_address
+        self.dtfactory_address = dtfactory_address
 
     @enforce_types
     def create(
@@ -655,22 +659,27 @@ class OceanPool:
         token_address=None,
         raw_result=True,
     ):
-        action_to_fn = {
-            "join": "get_join_logs",
-            "exit": "get_exit_logs",
-            "swap": "get_swap_logs",
-        }
         current_block = to_block if to_block is not None else self.web3.eth.block_number
         pool = BPool(self.web3, pool_address)
         dt_address = token_address or self.get_token_address(pool_address, pool)
-        factory = DTFactory(self.web3, get_dtfactory_address(web3=self.web3))
+        factory = DTFactory(self.web3, self.dtfactory_address)
         if block_number is None:
             block_number = factory.get_token_registered_event(
                 0, current_block, token_address=dt_address
             ).blockNumber
-        logs = getattr(pool, action_to_fn[action])(
-            self.web3, block_number, current_block
-        )
+
+        log_args = (block_number, current_block)
+        if action == "join":
+            logs = pool.get_join_logs(*log_args)
+        elif action == "exit":
+            logs = pool.get_exit_logs(*log_args)
+        elif action == "swap":
+            logs = pool.get_swap_logs(*log_args)
+        else:
+            raise ValueError(
+                f"Invalid action: {action}. Expected 'join', 'exit', or 'swap'."
+            )
+
         if raw_result:
             return logs
 
