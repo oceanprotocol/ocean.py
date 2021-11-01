@@ -254,7 +254,11 @@ class ContractBase(object):
         if transact:
             _transact.update(transact)
 
-        return contract_function.transact(_transact).hex()
+        return contract_function.transact(
+            _transact,
+            from_wallet.block_confirmations.value,
+            from_wallet.transaction_timeout.value,
+        ).hex()
 
     @enforce_types
     def get_event_argument_names(self, event_name: str) -> Tuple:

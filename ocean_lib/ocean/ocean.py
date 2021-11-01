@@ -20,17 +20,16 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.ocean_pool import OceanPool
-from ocean_lib.ocean.ocean_services import OceanServices
 from ocean_lib.ocean.util import (
     get_bfactory_address,
     get_contracts_addresses,
+    get_dtfactory_address,
     get_ocean_token_address,
-    get_web3_connection_provider,
+    get_web3,
 )
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
-from web3.main import Web3
 
 logger = logging.getLogger("ocean")
 
@@ -87,7 +86,7 @@ class Ocean:
             }
             config = Config(options_dict=config_dict)
         self.config = config
-        self.web3 = Web3(provider=get_web3_connection_provider(self.config.network_url))
+        self.web3 = get_web3(self.config.network_url)
 
         if not data_provider:
             data_provider = DataServiceProvider
@@ -100,7 +99,6 @@ class Ocean:
             data_provider,
             addresses.get(MetadataContract.CONTRACT_NAME),
         )
-        self.services = OceanServices()
         self.compute = OceanCompute(self.config, data_provider)
 
         ocean_address = get_ocean_token_address(self.config.address_file, network)
@@ -108,6 +106,7 @@ class Ocean:
             self.web3,
             ocean_address,
             get_bfactory_address(self.config.address_file, network),
+            get_dtfactory_address(self.config.address_file, network),
         )
         self.exchange = OceanExchange(
             self.web3,
@@ -139,7 +138,12 @@ class Ocean:
         ```python
             config = Config('config.ini')
             ocean = Ocean(config)
-            wallet = Wallet(ocean.web3, private_key=private_key)
+            wallet = Wallet(
+                ocean.web3,
+                private_key=private_key,
+                block_confirmations=config.block_confirmations,
+                transaction_timeout=config.transaction_timeout,
+            )
             datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet)
         ```
 

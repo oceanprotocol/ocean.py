@@ -78,6 +78,8 @@ export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7
 
 In work console:
 ```console
+export OPERATOR_SERVICE_URL=https://c2d-dev.operator.oceanprotocol.com/
+
 #run a single test
 pytest ocean_lib/models/test/test_btoken.py::test_ERC20
 

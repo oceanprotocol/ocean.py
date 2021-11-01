@@ -78,26 +78,6 @@ pip install wheel
 pip install ocean-lib
 ```
 
-### Create config file
-
-In the work console:
-
-```console
-#Create config.ini file and fill it with configuration info
-echo """
-[eth-network]
-network = http://127.0.0.1:8545
-address.file = ~/.ocean/ocean-contracts/artifacts/address.json
-
-[resources]
-metadata_cache_uri = http://localhost:5000
-provider.url = http://localhost:8030
-provider.address = 0x00bd138abd70e2f00903268f3db08f2d25677c9e
-
-downloads.path = consume-downloads
-""" > config.ini
-```
-
 ### Set envvars
 
 In the work console:
@@ -106,8 +86,14 @@ In the work console:
 export TEST_PRIVATE_KEY1=0x5d75837394b078ce97bc289fa8d75e21000573520bfa7784a9d28ccaae602bf8
 export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
 
-#needed to mint fake OCEAN
+#needed to mint fake OCEAN for testing with ganache
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+
+#set the address file only for ganache
+export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
+
+#set network URL
+export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 
 #start python
 python
@@ -115,27 +101,24 @@ python
 
 ## 2. Alice publishes data asset
 
-In the work console:
-```console
-python
-```
-
 In the Python console:
 ```python
 #create ocean instance
-from ocean_lib.config import Config
+from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
-config = Config('config.ini')
+config = ExampleConfig.get_config()
 ocean = Ocean(config)
 
 print(f"config.network_url = '{config.network_url}'")
+print(f"config.block_confirmations = {config.block_confirmations.value}")
 print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
 print(f"config.provider_url = '{config.provider_url}'")
 
 #Alice's wallet
 import os
 from ocean_lib.web3_internal.wallet import Wallet
-alice_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY1'))
+alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
+alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
 #Mint OCEAN
@@ -171,24 +154,30 @@ service_attributes = {
 # The service urls will be encrypted before going on-chain.
 # They're only decrypted for datatoken owners upon consume.
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.common.agreements.service_factory import ServiceDescriptor
+from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.services.service import Service
 
 service_endpoint = DataServiceProvider.get_url(ocean.config)
-download_service = ServiceDescriptor.access_service_descriptor(service_attributes, service_endpoint)
+download_service = Service(
+    service_endpoint=service_endpoint,
+    service_type=ServiceTypes.ASSET_ACCESS,
+    attributes=service_attributes,
+)
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 asset = ocean.assets.create(
   metadata,
   alice_wallet,
-  service_descriptors=[download_service],
+  services=[download_service],
   data_token_address=token_address)
 assert token_address == asset.data_token_address
 
 did = asset.did  # did contains the datatoken address
 print(f"did = '{did}'")
+```
 
 In order to encrypt the entire asset, when using a private market or metadata cache, use the encrypt keyword:
 `asset = ocean.assets.create(..., encrypt=True)`
-
+```python
 #Mint the datatokens
 from ocean_lib.web3_internal.currency import to_wei
 data_token.mint(alice_wallet.address, to_wei(100), alice_wallet)
@@ -232,7 +221,7 @@ OCEAN_address = ocean.OCEAN_address
 price_in_OCEAN = ocean.pool.calcInGivenOut(
     pool_address, OCEAN_address, token_address, token_out_amount=to_wei(1))
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
-print(f"Price of 1 {datatoken.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
+print(f"Price of 1 {data_token.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
 ```
 
 ## 4.  Bob buys data asset, and downloads it
@@ -243,7 +232,8 @@ In the same Python console as before:
 
 ```python
 #Bob's wallet
-bob_wallet = Wallet(ocean.web3, private_key=os.getenv('TEST_PRIVATE_KEY2'))
+bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
+bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
 #Verify that Bob has ganache ETH
@@ -267,7 +257,8 @@ print(f"Bob has {pretty_ether_and_wei(data_token.balanceOf(bob_wallet.address), 
 assert data_token.balanceOf(bob_wallet.address) >= to_wei(1), "Bob didn't get 1.0 datatokens"
 
 #Bob points to the service object
-fee_receiver = None # could also be market address
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+fee_receiver = ZERO_ADDRESS # could also be market address
 from ocean_lib.common.agreements.service_types import ServiceTypes
 asset = ocean.assets.resolve(did)
 service = asset.get_service(ServiceTypes.ASSET_ACCESS)
@@ -276,7 +267,14 @@ service = asset.get_service(ServiceTypes.ASSET_ACCESS)
 quote = ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
 order_tx_id = ocean.assets.pay_for_service(
     ocean.web3,
-    quote.amount, quote.data_token_address, asset.did, service.index, fee_receiver, bob_wallet, None)
+    quote.amount,
+    quote.data_token_address,
+    asset.did,
+    service.index,
+    fee_receiver,
+    bob_wallet,
+    service.get_c2d_address()
+)
 print(f"order_tx_id = '{order_tx_id}'")
 
 #Bob downloads. If the connection breaks, Bob can request again by showing order_tx_id.

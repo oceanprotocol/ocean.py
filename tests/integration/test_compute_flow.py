@@ -2,8 +2,10 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import time
+
 import pytest
-from ocean_lib.assets.utils import create_publisher_trusted_algorithms
+from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_token import DataToken
@@ -102,7 +104,7 @@ def process_order(ocean_instance, publisher_wallet, consumer_wallet, ddo, servic
 
     # Start the order on-chain using the `order` requirements from previous step
     service = ddo.get_service(service_type)
-    consumer = consumer_wallet.address
+    consumer = service.get_c2d_address()
     if service_type == ServiceTypes.ASSET_ACCESS and order_requirements.computeAddress:
         consumer = order_requirements.computeAddress
 
@@ -207,6 +209,23 @@ def run_compute_test(
         result = ocean_instance.compute.result(did, job_id, consumer_wallet)
         print(f"got job status after requesting result: {result}")
         assert "did" in result, "something not right about the compute job, no did."
+
+        succeeded = False
+        for _ in range(0, 200):
+            status = ocean_instance.compute.status(did, job_id, consumer_wallet)
+            # wait until job is done, see:
+            # https://github.com/oceanprotocol/operator-service/blob/main/API.md#status-description
+            if status["status"] > 60:
+                succeeded = True
+                break
+            time.sleep(5)
+
+        assert succeeded, "compute job unsuccessful"
+        result_file = ocean_instance.compute.result_file(
+            did, job_id, 0, consumer_wallet
+        )
+        assert result_file is not None
+        print(f"got job result file: {str(result_file)}")
 
 
 def test_compute_raw_algo(simple_compute_ddo):

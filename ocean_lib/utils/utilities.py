@@ -75,6 +75,14 @@ def checksum(seed: Dict[str, Any]) -> str:
 
 
 @enforce_types
+def create_checksum(text: str) -> str:
+    """
+    :return: str
+    """
+    return hashlib.sha256(text.encode("utf-8")).hexdigest()
+
+
+@enforce_types
 def get_timestamp() -> str:
     """Return the current system timestamp."""
     return f"{datetime.utcnow().replace(microsecond=0).isoformat()}Z"

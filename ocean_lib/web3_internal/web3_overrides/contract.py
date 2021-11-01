@@ -7,8 +7,13 @@ from typing import Any, Dict, Optional
 
 from enforce_typing import enforce_types
 from hexbytes.main import HexBytes
-from ocean_lib.web3_internal.utils import get_chain_id, get_network_timeout
+from ocean_lib.integer import Integer
+from ocean_lib.web3_internal.constants import BLOCK_NUMBER_POLL_INTERVAL
+from ocean_lib.web3_internal.utils import get_chain_id
 from ocean_lib.web3_internal.wallet import Wallet
+from ocean_lib.web3_internal.web3_overrides.utils import (
+    wait_for_transaction_receipt_and_block_confirmations,
+)
 from web3.contract import prepare_transaction
 from web3.main import Web3
 
@@ -19,7 +24,12 @@ class CustomContractFunction:
         """Initializes CustomContractFunction."""
         self._contract_function = contract_function
 
-    def transact(self, transaction: Dict[str, Any]) -> HexBytes:
+    def transact(
+        self,
+        transaction: Dict[str, Any],
+        block_confirmations: int,
+        transaction_timeout: int,
+    ) -> HexBytes:
         """Customize calling smart contract transaction functions.
         This function is copied from web3 ContractFunction with a few changes:
 
@@ -62,6 +72,8 @@ class CustomContractFunction:
         return transact_with_contract_function(
             cf.address,
             cf.web3,
+            block_confirmations,
+            transaction_timeout,
             cf.function_identifier,
             transact_transaction,
             cf.contract_abi,
@@ -75,6 +87,8 @@ class CustomContractFunction:
 def transact_with_contract_function(
     address: str,
     web3: Web3,
+    block_confirmations: int,
+    transaction_timeout: int,
     function_name: Optional[str] = None,
     transaction: Optional[dict] = None,
     contract_abi: Optional[list] = None,
@@ -109,7 +123,12 @@ def transact_with_contract_function(
         transact_transaction.pop("account_key")
 
     if account_key:
-        raw_tx = Wallet(web3, private_key=account_key).sign_tx(transact_transaction)
+        raw_tx = Wallet(
+            web3,
+            private_key=account_key,
+            block_confirmations=Integer(block_confirmations),
+            transaction_timeout=Integer(transaction_timeout),
+        ).sign_tx(transact_transaction)
         logging.debug(
             f"sending raw tx: function: {function_name}, tx hash: {raw_tx.hex()}"
         )
@@ -117,9 +136,13 @@ def transact_with_contract_function(
     else:
         txn_hash = web3.eth.send_transaction(transact_transaction)
 
-    network_id = get_chain_id(web3)
-    web3.eth.wait_for_transaction_receipt(
-        txn_hash, get_network_timeout(network_id=network_id)
+    chain_id = get_chain_id(web3)
+    block_number_poll_interval = BLOCK_NUMBER_POLL_INTERVAL[chain_id]
+    wait_for_transaction_receipt_and_block_confirmations(
+        web3,
+        txn_hash,
+        block_confirmations,
+        block_number_poll_interval,
+        transaction_timeout,
     )
-
     return txn_hash

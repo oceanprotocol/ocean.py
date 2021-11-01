@@ -58,6 +58,10 @@ class DataProviderMock(DataServiceProvider):
         return True
 
     @staticmethod
+    def compute_job_result_file(*args, **kwargs):
+        return True
+
+    @staticmethod
     def get_url(config):
         return DataServiceProvider.get_url(config)
 
