@@ -5,7 +5,7 @@
 import json
 
 import pytest
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
 from tests.resources.ddo_helpers import wait_for_ddo
 from tests.resources.helper_functions import get_publisher_wallet
@@ -23,14 +23,14 @@ def test_resolve_asset(publisher_ocean_instance, metadata):
     )
     wait_for_ddo(publisher_ocean_instance, asset.did)
     assert asset is not None, "The asset is not cached."
-    assert isinstance(asset, Asset), "The asset does not have Asset instance."
+    assert isinstance(asset, V3Asset), "The asset does not have Asset instance."
 
     # resolve asset from metadata_cache_uri
     resolved_asset_from_metadata_cache_uri = resolve_asset(
         asset.did, metadata_cache_uri=publisher_ocean_instance.config.metadata_cache_uri
     )
     assert isinstance(
-        resolved_asset_from_metadata_cache_uri, Asset
+        resolved_asset_from_metadata_cache_uri, V3Asset
     ), "The resolved asset is not an instance of Asset."
     assert (
         resolved_asset_from_metadata_cache_uri.did == asset.did
@@ -43,7 +43,7 @@ def test_resolve_asset(publisher_ocean_instance, metadata):
         token_address=asset.data_token_address,
     )
     assert isinstance(
-        resolved_asset_from_web3_and_token_address, Asset
+        resolved_asset_from_web3_and_token_address, V3Asset
     ), "The resolved asset is not an instance of Asset."
     assert (
         resolved_asset_from_web3_and_token_address.did == asset.did

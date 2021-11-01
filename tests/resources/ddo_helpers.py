@@ -8,11 +8,11 @@ import pathlib
 import time
 import uuid
 
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.asset import V3Asset
 from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.common.ddo.service import Service
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
+from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import mint_tokens_and_wait
 
@@ -33,12 +33,12 @@ def get_metadata() -> dict:
     return json.loads(metadata)
 
 
-def get_sample_ddo(file_name="ddo_sa_sample.json") -> Asset:
-    return Asset(json_filename=get_resource_path("ddo", file_name))
+def get_sample_ddo(file_name="ddo_sa_sample.json") -> V3Asset:
+    return V3Asset(json_filename=get_resource_path("ddo", file_name))
 
 
-def get_sample_ddo_with_compute_service() -> Asset:
-    return Asset(
+def get_sample_ddo_with_compute_service() -> V3Asset:
+    return V3Asset(
         json_filename=get_resource_path("ddo", "ddo_with_compute_service.json")
     )
 
@@ -51,13 +51,13 @@ def get_sample_algorithm_ddo_dict() -> dict:
     return json.loads(metadata)
 
 
-def get_sample_algorithm_ddo() -> Asset:
-    return Asset(json_filename=get_resource_path("ddo", "ddo_algorithm.json"))
+def get_sample_algorithm_ddo() -> V3Asset:
+    return V3Asset(json_filename=get_resource_path("ddo", "ddo_algorithm.json"))
 
 
 def get_algorithm_meta():
     algorithm_ddo_path = get_resource_path("ddo", "ddo_algorithm.json")
-    algo_main = Asset(json_filename=algorithm_ddo_path).metadata["main"]
+    algo_main = V3Asset(json_filename=algorithm_ddo_path).metadata["main"]
     algo_meta_dict = algo_main["algorithm"].copy()
     algo_meta_dict["url"] = algo_main["files"][0]["url"]
     return AlgorithmMetadata(algo_meta_dict)

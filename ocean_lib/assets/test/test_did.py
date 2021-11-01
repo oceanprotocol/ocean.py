@@ -11,9 +11,7 @@
 import secrets
 
 import pytest
-from web3 import Web3
-
-from ocean_lib.common.did import (
+from ocean_lib.assets.did import (
     DID,
     OCEAN_PREFIX,
     did_parse,
@@ -21,6 +19,7 @@ from ocean_lib.common.did import (
     did_to_id_bytes,
     id_to_did,
 )
+from web3 import Web3
 
 TEST_SERVICE_TYPE = "ocean-meta-storage"
 TEST_SERVICE_URL = "http://localhost:8005"

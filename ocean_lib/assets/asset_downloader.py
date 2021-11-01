@@ -8,7 +8,7 @@ import os
 from typing import Optional, Type
 
 from enforce_typing import enforce_types
-from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.asset import V3Asset
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.web3_internal.wallet import Wallet
@@ -19,7 +19,7 @@ logger = logging.getLogger(__name__)
 @enforce_types
 def download_asset_files(
     service_index: int,
-    asset: Asset,
+    asset: V3Asset,
     consumer_wallet: Wallet,
     destination: str,
     token_address: str,
@@ -31,14 +31,14 @@ def download_asset_files(
     """Download asset data files or result files from a compute job.
 
     :param service_index: identifier of the service inside the asset DDO, str
-    :param asset: Asset instance
+    :param asset: V3Asset instance
     :param consumer_wallet: Wallet instance of the consumer
     :param destination: Path, str
     :param token_address: hex str the address of the DataToken smart contract
     :param order_tx_id: hex str the transaction hash of the startOrder tx
     :param data_provider: DataServiceProvider class object
     :param index: Index of the document that is going to be downloaded, int
-    :return: Asset folder path, str
+    :return: asset folder path, str
     """
     _files = asset.metadata["main"]["files"]
     sa = asset.get_service(ServiceTypes.ASSET_ACCESS)

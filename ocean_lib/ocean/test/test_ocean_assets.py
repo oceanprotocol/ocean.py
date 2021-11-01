@@ -8,9 +8,9 @@ from unittest.mock import patch
 
 import pytest
 from eth_utils import add_0x_prefix
+from ocean_lib.assets.asset import V3Asset
+from ocean_lib.assets.did import DID, did_to_id
 from ocean_lib.common.agreements.consumable import ConsumableCodes
-from ocean_lib.common.ddo.ddo import DDO
-from ocean_lib.common.did import DID, did_to_id
 from ocean_lib.exceptions import InsufficientBalance
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -30,7 +30,7 @@ def create_asset(ocean, publisher, encrypt=False):
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
     assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
 
-    asset = DDO(json_filename=sample_ddo_path)
+    asset = V3Asset(json_filename=sample_ddo_path)
     asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     return ocean.assets.create(asset.metadata, publisher, [], encrypt=encrypt)
 
@@ -251,7 +251,7 @@ def test_create_asset_with_address(publisher_ocean_instance):
     alice = get_publisher_wallet()
 
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
-    asset = DDO(json_filename=sample_ddo_path)
+    asset = V3Asset(json_filename=sample_ddo_path)
     asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
 
     token = ocn.create_data_token(
@@ -269,7 +269,7 @@ def test_create_asset_with_owner_address(publisher_ocean_instance):
     alice = get_publisher_wallet()
 
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
-    asset = DDO(json_filename=sample_ddo_path)
+    asset = V3Asset(json_filename=sample_ddo_path)
     asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
 
     assert ocn.assets.create(
@@ -283,7 +283,7 @@ def test_create_asset_with_dt_address_and_owner_address(publisher_ocean_instance
     alice = get_publisher_wallet()
 
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
-    asset = DDO(json_filename=sample_ddo_path)
+    asset = V3Asset(json_filename=sample_ddo_path)
     asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
 
     token = ocn.create_data_token(
@@ -305,7 +305,7 @@ def test_create_asset_without_dt_address(publisher_ocean_instance):
     alice = get_publisher_wallet()
 
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
-    asset = DDO(json_filename=sample_ddo_path)
+    asset = V3Asset(json_filename=sample_ddo_path)
     asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
 
     assert ocn.assets.create(
@@ -319,7 +319,7 @@ def test_pay_for_service_insufficient_balance(publisher_ocean_instance):
     alice = get_publisher_wallet()
 
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
-    asset = DDO(json_filename=sample_ddo_path)
+    asset = V3Asset(json_filename=sample_ddo_path)
     asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
 
     token = ocn.create_data_token(
