@@ -3,24 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from ocean_lib.models.v4.factory_router import FactoryRouter
-from ocean_lib.ocean.util import get_contracts_addresses
+from ocean_lib.utils.addresses_utils import (
+    get_ocean_address,
+    get_factory_router_address,
+)
 from tests.resources.helper_functions import get_factory_deployer_wallet
 
 _NETWORK = "ganache"
-
-
-def get_factory_router_address(config):
-    """Helper function to retrieve a known factory router address."""
-    addresses = get_contracts_addresses(config.address_file, _NETWORK)
-
-    return addresses.get("Router")
-
-
-def get_ocean_address(config):
-    """Helper function to retrieve a known Ocean address."""
-
-    addresses = get_contracts_addresses(config.address_file, _NETWORK)
-    return addresses.get("Ocean")
 
 
 def test_ocean_tokens_mapping(web3, config):

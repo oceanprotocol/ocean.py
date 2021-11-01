@@ -10,43 +10,18 @@ from ocean_lib.models.v4.erc20_token import ERC20Token
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Token
 from ocean_lib.models.v4.models_structures import ErcCreateData
-from ocean_lib.ocean.util import get_contracts_addresses
+from ocean_lib.utils.addresses_utils import (
+    get_nft_factory_address,
+    get_nft_template_address,
+    get_erc20_template_address,
+    get_mock_dai_contract,
+)
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import (
     get_publisher_wallet,
     get_consumer_wallet,
     get_another_consumer_wallet,
 )
-
-_NETWORK = "ganache"
-
-
-def get_nft_factory_address(config):
-    """Helper function to retrieve a known ERC721 factory address."""
-    addresses = get_contracts_addresses(config.address_file, _NETWORK)
-
-    return addresses[ERC721FactoryContract.CONTRACT_NAME]
-
-
-def get_nft_template_address(config):
-    """Helper function to retrieve a known ERC721 template address."""
-    addresses = get_contracts_addresses(config.address_file, _NETWORK)
-
-    return addresses[ERC721Token.CONTRACT_NAME]["1"]
-
-
-def get_erc20_template_address(config):
-    """Helper function to retrieve a known ERC20 template address."""
-    addresses = get_contracts_addresses(config.address_file, _NETWORK)
-
-    return addresses[ERC20Token.CONTRACT_NAME]["1"]
-
-
-def get_mock_dai_contract(config):
-    """Helper function to retrieve a known ERC20 template address."""
-    addresses = get_contracts_addresses(config.address_file, _NETWORK)
-
-    return addresses["MockDAI"]
 
 
 def test_properties(web3, config):
