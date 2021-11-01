@@ -14,7 +14,15 @@ import pytest
 from web3 import exceptions
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.factory_router import FactoryRouter
-from ocean_lib.web3_internal.contract_utils import get_contracts_addresses
+from ocean_lib.utils.addresses_utils import (
+    get_nft_factory_address,
+    get_factory_router_address,
+    get_ocean_address,
+    get_pool_template_address,
+    get_staking_address,
+    get_erc20_template_address,
+    get_fixed_price_address,
+)
 from ocean_lib.models.v4.erc20_token import ERC20Token
 from tests.resources.helper_functions import get_factory_deployer_wallet
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -32,9 +40,7 @@ def test_properties(web3, config):
 
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
     assert factory_router.event_NewPool.abi["name"] == FactoryRouter.EVENT_NEW_POOL
 
@@ -42,15 +48,9 @@ def test_properties(web3, config):
 def test_ocean_tokens_mapping(web3, config):
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
-    ocean_tokens = factory_router.ocean_tokens(
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Ocean"
-        ]
-    )
+    ocean_tokens = factory_router.ocean_tokens(get_ocean_address(config))
     assert ocean_tokens is True
 
 
@@ -60,9 +60,7 @@ def test_add_token(web3, config):
     )
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
 
     assert factory_router.ocean_tokens(new_token_address) == False
@@ -73,14 +71,10 @@ def test_add_token(web3, config):
 
 
 def test_fail_add_token(web3, config):
-    new_token_address = get_contracts_addresses(
-        address_file=config.address_file, network=_NETWORK
-    )["ERC20Template"]["1"]
+    new_token_address = get_erc20_template_address(config)
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
     with pytest.raises(exceptions.ContractLogicError):
         factory_router.add_ocean_token(new_token_address, get_another_consumer_wallet())
@@ -91,9 +85,7 @@ def test_remove_token(web3, config):
 
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
     factory_router.add_ocean_token(
         new_token_address, get_factory_deployer_wallet(network=_NETWORK)
@@ -111,9 +103,7 @@ def test_fail_remove_token(web3, config):
 
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
     factory_router.add_ocean_token(
         new_token_address, get_factory_deployer_wallet(network=_NETWORK)
@@ -130,9 +120,7 @@ def test_fail_remove_token(web3, config):
 def test_update_opf_fee(web3, config):
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
     factory_router.update_opf_fee(
         web3.toWei(0.001, "ether"), get_factory_deployer_wallet(network=_NETWORK)
@@ -154,9 +142,7 @@ def test_update_opf_fee(web3, config):
 def test_fail_update_opf_fee(web3, config):
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
     factory_router.update_opf_fee(
         web3.toWei(0.001, "ether"), get_factory_deployer_wallet(network=_NETWORK)
@@ -177,33 +163,29 @@ def test_fail_update_opf_fee(web3, config):
 
 
 def test_ss_contracts(web3, config):
-    userAddress = create_new_token(web3, config)
+    user_address = create_new_token(web3, config)
 
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
-    assert factory_router.ss_contracts(userAddress) == False
+    assert factory_router.ss_contracts(user_address) == False
     factory_router.add_ss_contract(
-        userAddress, get_factory_deployer_wallet(network=_NETWORK)
+        user_address, get_factory_deployer_wallet(network=_NETWORK)
     )
-    assert factory_router.ss_contracts(userAddress) == True
+    assert factory_router.ss_contracts(user_address) == True
 
 
 def test_fail_ss_contracts(web3, config):
-    userAddress = create_new_token(web3, config)
+    user_address = create_new_token(web3, config)
 
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
-    assert factory_router.ss_contracts(userAddress) == False
+    assert factory_router.ss_contracts(user_address) == False
     with pytest.raises(exceptions.ContractLogicError) as err:
-        factory_router.add_ss_contract(userAddress, get_another_consumer_wallet())
+        factory_router.add_ss_contract(user_address, get_another_consumer_wallet())
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert OceanRouter: NOT OWNER"
@@ -213,21 +195,14 @@ def test_fail_ss_contracts(web3, config):
 def test_fail_add_factory_owner(web3, config):
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
     with pytest.raises(exceptions.ContractLogicError) as err:
         factory_router.add_factory(
             get_another_consumer_wallet().address,
             get_factory_deployer_wallet(network=_NETWORK),
         )
-    assert (
-        factory_router.factory()
-        == get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "ERC721Factory"
-        ]
-    )
+    assert factory_router.factory() == get_nft_factory_address(config)
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert FACTORY ALREADY SET"
@@ -237,9 +212,7 @@ def test_fail_add_factory_owner(web3, config):
 def test_fail_add_factory_not_owner(web3, config):
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
     with pytest.raises(exceptions.ContractLogicError) as err:
         factory_router.add_factory(
@@ -249,24 +222,15 @@ def test_fail_add_factory_not_owner(web3, config):
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert OceanRouter: NOT OWNER"
     )
-    assert (
-        factory_router.factory()
-        == get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "ERC721Factory"
-        ]
-    )
+    assert factory_router.factory() == get_nft_factory_address(config)
 
 
 def test_fixed_rate(web3, config):
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
-    fixed_rate_exchange_address = get_contracts_addresses(
-        address_file=config.address_file, network=_NETWORK
-    )["FixedPrice"]
+    fixed_rate_exchange_address = get_fixed_price_address(config)
     factory_router.add_fixed_rate_contract(
         fixed_rate_exchange_address, get_factory_deployer_wallet(network=_NETWORK)
     )
@@ -276,9 +240,7 @@ def test_fixed_rate(web3, config):
 def test_fail_add_fixed_rate_contract(web3, config):
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
 
     with pytest.raises(exceptions.ContractLogicError) as err:
@@ -295,9 +257,7 @@ def test_fail_add_fixed_rate_contract(web3, config):
 def test_fail_add_pool_template(web3, config):
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
     with pytest.raises(exceptions.ContractLogicError) as err:
         factory_router.add_pool_template(
@@ -313,84 +273,76 @@ def test_fail_add_pool_template(web3, config):
 
 
 def test_add_pool_template(web3, config):
-    user = get_consumer_wallet().address
+    consumer = get_consumer_wallet().address
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
     factory_router.remove_pool_template(
-        user, get_factory_deployer_wallet(network=_NETWORK)
+        consumer, get_factory_deployer_wallet(network=_NETWORK)
     )
-    assert factory_router.is_pool_template(user) == False
+    assert factory_router.is_pool_template(consumer) == False
     factory_router.add_pool_template(
-        user, get_factory_deployer_wallet(network=_NETWORK)
+        consumer, get_factory_deployer_wallet(network=_NETWORK)
     )
-    assert factory_router.is_pool_template(user) == True
+    assert factory_router.is_pool_template(consumer) == True
 
 
 def test_remove_pool_template(web3, config):
-    user = get_consumer_wallet().address
+    consumer = get_consumer_wallet().address
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
-    assert factory_router.is_pool_template(user) == True
+    assert factory_router.is_pool_template(consumer) == True
     factory_router.remove_pool_template(
-        user, get_factory_deployer_wallet(network=_NETWORK)
+        consumer, get_factory_deployer_wallet(network=_NETWORK)
     )
-    assert factory_router.is_pool_template(user) == False
+    assert factory_router.is_pool_template(consumer) == False
 
 
 def test_fail_remove_pool_template(web3, config):
-    user = get_consumer_wallet().address
+    consumer = get_consumer_wallet().address
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
 
     factory_router.add_pool_template(
-        user, get_factory_deployer_wallet(network=_NETWORK)
+        consumer, get_factory_deployer_wallet(network=_NETWORK)
     )
-    assert factory_router.is_pool_template(user) == True
+    assert factory_router.is_pool_template(consumer) == True
 
     with pytest.raises(exceptions.ContractLogicError) as err:
-        factory_router.remove_pool_template(user, get_consumer_wallet())
+        factory_router.remove_pool_template(consumer, get_consumer_wallet())
 
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert OceanRouter: NOT OWNER"
     )
-    assert factory_router.is_pool_template(user) == True
+    assert factory_router.is_pool_template(consumer) == True
 
 
 def test_buy_dt_batch(web3: Web3, config):
     factory_router = FactoryRouter(
         web3,
-        get_contracts_addresses(address_file=config.address_file, network=_NETWORK)[
-            "Router"
-        ],
+        get_factory_router_address(config),
     )
-    v4_addresses = get_contracts_addresses(
-        address_file=config.address_file, network=_NETWORK
-    )
+
     nft_factory = ERC721FactoryContract(
-        web3=web3, address=v4_addresses["ERC721Factory"]
+        web3=web3, address=get_nft_factory_address(config)
     )
 
     consumer_wallet = get_consumer_wallet()
     factory_deployer = get_factory_deployer_wallet(network=_NETWORK)
 
-    ocean_contract = ERC20Token(web3=web3, address=v4_addresses["Ocean"])
+    ocean_contract = ERC20Token(web3=web3, address=get_ocean_address(config))
     ocean_contract.approve(
-        v4_addresses["ERC721Factory"], 2 ** 256 - 1, factory_deployer
+        get_nft_factory_address(config), 2 ** 256 - 1, factory_deployer
     )
-    ocean_contract.approve(v4_addresses["Router"], 2 ** 256 - 1, factory_deployer)
+    ocean_contract.approve(
+        get_factory_router_address(config), 2 ** 256 - 1, factory_deployer
+    )
 
     nft_data = {
         "name": "72120Bundle",
@@ -414,12 +366,12 @@ def test_buy_dt_batch(web3: Web3, config):
 
     pool_data = {
         "addresses": [
-            v4_addresses["Staking"],
-            v4_addresses["Ocean"],
-            v4_addresses["ERC721Factory"],
+            get_staking_address(config),
+            get_ocean_address(config),
+            get_nft_factory_address(config),
             factory_deployer.address,
             factory_deployer.address,
-            v4_addresses["poolTemplate"],
+            get_pool_template_address(config),
         ],
         "ssParams": [
             web3.toWei("1", "ether"),
@@ -471,12 +423,12 @@ def test_buy_dt_batch(web3: Web3, config):
 
     pool_data2 = {
         "addresses": [
-            v4_addresses["Staking"],
-            v4_addresses["Ocean"],
-            v4_addresses["ERC721Factory"],
+            get_staking_address(config),
+            get_ocean_address(config),
+            get_nft_factory_address(config),
             factory_deployer.address,
             factory_deployer.address,
-            v4_addresses["poolTemplate"],
+            get_pool_template_address(config),
         ],
         "ssParams": [
             web3.toWei("1", "ether"),
@@ -510,7 +462,7 @@ def test_buy_dt_batch(web3: Web3, config):
         "exchangeIds": Web3.keccak(0x00),
         "source": pool1,
         "operation": 0,
-        "tokenIn": v4_addresses["Ocean"],
+        "tokenIn": get_ocean_address(config),
         "amountsIn": web3.toWei("1", "ether"),
         "tokenOut": erc_token,
         "amountsOut": web3.toWei("0.1", "ether"),
@@ -521,7 +473,7 @@ def test_buy_dt_batch(web3: Web3, config):
         "exchangeIds": Web3.keccak(0x00),
         "source": pool2,
         "operation": 0,
-        "tokenIn": v4_addresses["Ocean"],
+        "tokenIn": get_ocean_address(config),
         "amountsIn": web3.toWei("1", "ether"),
         "tokenOut": erc_token2,
         "amountsOut": web3.toWei("0.1", "ether"),
