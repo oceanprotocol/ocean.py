@@ -29,6 +29,7 @@ jobs:
         env:
           OPERATOR_SERVICE_URL: https://c2d-dev.operator.oceanprotocol.com/
         run: |
+          git remote set-branches origin '*'
           git fetch
           git checkout v4
           bash -x start_ocean.sh --no-dashboard 2>&1 --no-aquarius --no-provider > start_ocean.log &
