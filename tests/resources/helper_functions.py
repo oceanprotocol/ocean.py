@@ -7,17 +7,22 @@ import logging
 import logging.config
 import os
 import time
+from typing import Optional
 
 import coloredlogs
 import yaml
 from enforce_typing import enforce_types
+
+from ocean_lib.config import Config
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.util import get_web3 as util_get_web3
+from ocean_lib.ocean.util import get_web3 as util_get_web3, get_contracts_addresses
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
+
+_NETWORK = "ganache"
 
 
 def get_web3():
@@ -26,6 +31,20 @@ def get_web3():
 
 def get_example_config():
     return ExampleConfig.get_config()
+
+
+@enforce_types
+def get_address_of_type(
+    config: Config, address_type: str, key: Optional[str] = None
+) -> str:
+    addresses = get_contracts_addresses(config.address_file, _NETWORK)
+    if address_type not in addresses.keys():
+        raise KeyError(f"{address_type} address is not set in the config file")
+    return (
+        addresses[address_type]
+        if not isinstance(addresses[address_type], dict)
+        else addresses[address_type].get(key, addresses[address_type]["1"])
+    )
 
 
 @enforce_types

@@ -3,7 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-
 from web3 import exceptions
 
 from ocean_lib.models.v4.dispenser import DispenserV4
@@ -11,27 +10,22 @@ from ocean_lib.models.v4.erc20_token import ERC20Token
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Token
 from ocean_lib.models.v4.models_structures import ErcCreateData
-from ocean_lib.utils.addresses_utils import (
-    get_nft_factory_address,
-    get_nft_template_address,
-    get_erc20_template_address,
-    get_mock_dai_contract,
-    get_ss_address,
-    get_pool_template_address,
-    get_fixed_rate_address,
-    get_dispenser_address,
-)
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import (
-    get_publisher_wallet,
-    get_consumer_wallet,
+    get_address_of_type,
     get_another_consumer_wallet,
+    get_consumer_wallet,
+    get_publisher_wallet,
 )
 
 
 def test_properties(web3, config):
     """Tests the events' properties."""
-    erc721_factory = ERC721FactoryContract(web3, get_nft_factory_address(config))
+    erc721_factory_address = get_address_of_type(
+        config, ERC721FactoryContract.CONTRACT_NAME
+    )
+    erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
+
     assert (
         erc721_factory.event_NFTCreated.abi["name"]
         == ERC721FactoryContract.EVENT_NFT_CREATED
@@ -58,7 +52,11 @@ def test_main(web3, config):
     publisher = get_publisher_wallet()
     consumer = get_consumer_wallet()
 
-    erc721_factory = ERC721FactoryContract(web3, get_nft_factory_address(config))
+    erc721_factory_address = get_address_of_type(
+        config, ERC721FactoryContract.CONTRACT_NAME
+    )
+    erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
+
     tx = erc721_factory.deploy_erc721_contract(
         "DT1",
         "DTSYMBOL",
@@ -94,8 +92,9 @@ def test_main(web3, config):
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
 
     # Tests get NFT template
+    nft_template_address = get_address_of_type(config, ERC721Token.CONTRACT_NAME, "1")
     nft_template = erc721_factory.get_nft_template(1)
-    assert nft_template[0] == get_nft_template_address(config)
+    assert nft_template[0] == nft_template_address
     assert nft_template[1] is True
 
     # Tests creating successfully an ERC20 token
@@ -123,8 +122,9 @@ def test_main(web3, config):
     assert erc721_factory.template_count() == 2
 
     # Tests ERC20 token template list
+    erc20_template_address = get_address_of_type(config, ERC20Token.CONTRACT_NAME, "1")
     template = erc721_factory.get_token_template(1)
-    assert template[0] == get_erc20_template_address(config)
+    assert template[0] == erc20_template_address
     assert template[1] is True
 
     # Tests current token template (one of them should be the Enterprise template)
@@ -133,13 +133,14 @@ def test_main(web3, config):
     # Tests starting multiple token orders successfully
     erc20_token = ERC20Token(web3, erc20_address)
     dt_amount = web3.toWei("0.05", "ether")
+    mock_dai_contract_address = get_address_of_type(config, "MockDAI")
     assert erc20_token.balanceOf(consumer.address) == 0
 
     erc20_token.add_minter(consumer.address, publisher)
     erc20_token.mint(consumer.address, dt_amount, consumer)
     assert erc20_token.balanceOf(consumer.address) == dt_amount
 
-    erc20_token.approve(get_nft_factory_address(config), dt_amount, consumer)
+    erc20_token.approve(erc721_factory_address, dt_amount, consumer)
 
     tx = erc721_factory.start_multiple_token_order(
         erc20_address,
@@ -147,7 +148,7 @@ def test_main(web3, config):
         dt_amount,
         1,
         ZERO_ADDRESS,
-        get_mock_dai_contract(config),
+        mock_dai_contract_address,
         0,
         consumer,
     )
@@ -208,14 +209,12 @@ def test_main(web3, config):
     assert erc20_token2.symbol() == "ERC20DT1Symbol"
 
     # Tests creating NFT with ERC20 and with Pool successfully.
-    side_staking_address = get_ss_address(config)
-    pool_template_address = get_pool_template_address(config)
+    side_staking_address = get_address_of_type(config, "Staking")
+    pool_template_address = get_address_of_type(config, "poolTemplate")
     initial_pool_liquidity = web3.toWei("0.02", "ether")
 
     erc20_token.mint(publisher.address, initial_pool_liquidity, publisher)
-    erc20_token.approve(
-        get_nft_factory_address(config), initial_pool_liquidity, publisher
-    )
+    erc20_token.approve(erc721_factory_address, initial_pool_liquidity, publisher)
 
     erc_create_data_pool = {
         "strings": ["ERC20WithPool", "ERC20P"],
@@ -233,7 +232,7 @@ def test_main(web3, config):
         "addresses": [
             side_staking_address,
             erc20_address,
-            get_nft_factory_address(config),
+            erc721_factory_address,
             publisher.address,
             consumer.address,
             pool_template_address,
@@ -297,7 +296,7 @@ def test_main(web3, config):
     assert pool_token.balanceOf(publisher.address) > 0, "Invalid pool share."
 
     # Tests creating NFT with ERC20 and with Fixed Rate Exchange successfully.
-    fixed_rate_address = get_fixed_rate_address(config)
+    fixed_rate_address = get_address_of_type(config, "FixedPrice")
 
     # Create ERC20 data token for fees.
     fee_address = "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9"
@@ -309,7 +308,7 @@ def test_main(web3, config):
             publisher.address,
             consumer.address,
             fee_address,
-            get_mock_dai_contract(config),
+            mock_dai_contract_address,
         ],
         [web3.toWei("0.5", "ether"), web3.toWei("0.0005", "ether")],
         [b""],
@@ -381,7 +380,7 @@ def test_main(web3, config):
     assert registered_fixed_rate_event[0].args.exchangeId, "Invalid exchange id."
 
     # Tests creating NFT with ERC20 and with Dispenser successfully.
-    dispenser_address = get_dispenser_address(config)
+    dispenser_address = get_address_of_type(config, DispenserV4.CONTRACT_NAME)
     dispenser_data = {
         "dispenserAddress": dispenser_address,
         "maxTokens": web3.toWei("1.0", "ether"),
@@ -441,7 +440,10 @@ def test_main(web3, config):
 
 def test_fail_get_templates(web3, config):
     """Tests multiple failures for getting tokens' templates."""
-    erc721_factory = ERC721FactoryContract(web3, get_nft_factory_address(config))
+    erc721_factory_address = get_address_of_type(
+        config, ERC721FactoryContract.CONTRACT_NAME
+    )
+    erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
 
     # Should fail to get the ERC20token template if index = 0
     with pytest.raises(exceptions.ContractLogicError) as err:
@@ -469,7 +471,10 @@ def test_fail_create_erc20(web3, config):
     consumer = get_consumer_wallet()
     another_consumer = get_another_consumer_wallet()
 
-    erc721_factory = ERC721FactoryContract(web3, get_nft_factory_address(config))
+    erc721_factory_address = get_address_of_type(
+        config, ERC721FactoryContract.CONTRACT_NAME
+    )
+    erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
 
     # Should fail to create an ERC20 calling the factory directly
     with pytest.raises(exceptions.ContractLogicError) as err:
