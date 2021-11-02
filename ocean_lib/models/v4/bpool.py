@@ -93,10 +93,10 @@ class BPool(BTokenBase):
     def opf_fee(self) -> int:
         return self.contract.caller.getOPFFee()
 
-    def community_fee(self,address:str) -> int:
+    def community_fee(self, address: str) -> int:
         return self.contract.caller.communityFees(address)
-        
-    def market_fee(self,address:str) -> int:
+
+    def market_fee(self, address: str) -> int:
         return self.contract.caller.marketFees(address)
 
     def is_finalized(self) -> bool:
