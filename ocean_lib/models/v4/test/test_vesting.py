@@ -11,8 +11,8 @@ from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Token
 from ocean_lib.models.v4.models_structures import ErcCreateData, PoolData
 from ocean_lib.models.v4.side_staking import SideStaking
-from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from tests.resources.helper_functions import get_address_of_type
 
 _NETWORK = "development"
 
@@ -29,16 +29,13 @@ def test_main(
 
     vesting_amount = web3.toWei("0.0018", "ether")
 
-    addresses = get_contracts_addresses(
-        address_file=config.address_file, network=_NETWORK
+    nftFactory = ERC721FactoryContract(
+        web3=web3, address=get_address_of_type(config, "ERC721Factory")
     )
-    nftFactory = ERC721FactoryContract(web3=web3, address=addresses["ERC721Factory"])
 
     erc721_factory = ERC721FactoryContract(
         web3,
-        get_contracts_addresses(config.address_file, _NETWORK)[
-            ERC721FactoryContract.CONTRACT_NAME
-        ],
+        get_address_of_type(config, "ERC721Factory"),
     )
 
     """test deploy erc721"""
@@ -130,9 +127,11 @@ def test_main(
 
     """test user 3 deploys pool and check market fee"""
     initialOceanLiq = web3.toWei(0.02, "ether")
-    oceanContract = ERC20Token(web3=web3, address=addresses["Ocean"])
+    oceanContract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
     oceanContract.approve(
-        addresses["Router"], web3.toWei(1000, "ether"), consumer_wallet
+        get_address_of_type(config, "Router"),
+        web3.toWei(1000, "ether"),
+        consumer_wallet,
     )
 
     poolData = PoolData(
@@ -148,12 +147,12 @@ def test_main(
             web3.toWei(0.001, "ether"),
         ],
         [
-            addresses["Staking"],
+            get_address_of_type(config, "Staking"),
             oceanContract.address,
             consumer_wallet.address,
             consumer_wallet.address,
-            addresses["OPFCommunityFeeCollector"],
-            addresses["poolTemplate"],
+            get_address_of_type(config, "OPFCommunityFeeCollector"),
+            get_address_of_type(config, "poolTemplate"),
         ],
     )
     tx = ercToken.deploy_pool(poolData, consumer_wallet)
@@ -171,12 +170,14 @@ def test_main(
     assert b_pool.is_finalized() == True
     assert b_pool.opf_fee() == 0
     assert b_pool.get_swap_fee() == web3.toWei(0.001, "ether")
-    assert b_pool.community_fee(addresses["Ocean"]) == 0
+    assert b_pool.community_fee(get_address_of_type(config, "Ocean")) == 0
     assert b_pool.community_fee(ercToken.address) == 0
-    assert b_pool.market_fee(addresses["Ocean"]) == 0
+    assert b_pool.market_fee(get_address_of_type(config, "Ocean")) == 0
     assert b_pool.market_fee(ercToken.address) == 0
 
-    assert ercToken.balanceOf(addresses["Staking"]) == web3.toWei(0.03, "ether")
+    assert ercToken.balanceOf(get_address_of_type(config, "Staking")) == web3.toWei(
+        0.03, "ether"
+    )
 
     """user 3 fails to mint new erc20 token even if the minter"""
     perms = ercToken.permissions(consumer_wallet.address)
@@ -189,5 +190,7 @@ def test_main(
 
     """check if the vesting amount is correct"""
 
-    side_staking = SideStaking(web3=web3, address=addresses["Staking"])
+    side_staking = SideStaking(
+        web3=web3, address=get_address_of_type(config, "Staking")
+    )
     assert side_staking.get_vesting_amount(ercToken.address) == vesting_amount
