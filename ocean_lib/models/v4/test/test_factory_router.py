@@ -51,7 +51,7 @@ def test_add_token(web3, config, factory_router):
 
 def test_fail_add_token(web3, config, factory_router):
     """Tests that if it fails to add a new token address to the mapping if NOT Router Owner"""
-    new_token_address = get_address_of_type(config, ERC20Token.CONTRACT_NAME)["1"]
+    new_token_address = get_address_of_type(config, ERC20Token.CONTRACT_NAME)
     with pytest.raises(exceptions.ContractLogicError):
         factory_router.add_ocean_token(new_token_address, get_another_consumer_wallet())
 
