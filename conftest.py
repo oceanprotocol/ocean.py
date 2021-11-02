@@ -22,7 +22,11 @@ from tests.resources.helper_functions import (
     get_publisher_wallet,
     get_web3,
     setup_logging,
+    get_another_consumer_wallet,
+    get_factory_deployer_wallet,
 )
+
+_NETWORK = "ganache"
 
 setup_logging()
 
@@ -93,3 +97,23 @@ def metadata():
     metadata = get_metadata()
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     return metadata
+
+
+@pytest.fixture
+def publisher_wallet():
+    return get_publisher_wallet()
+
+
+@pytest.fixture
+def consumer_wallet():
+    return get_consumer_wallet()
+
+
+@pytest.fixture
+def another_consumer_wallet():
+    return get_another_consumer_wallet()
+
+
+@pytest.fixture
+def factory_deployer():
+    return get_factory_deployer_wallet(_NETWORK)
