@@ -7,11 +7,13 @@ from typing import Union
 
 import pytest
 from enforce_typing import enforce_types
+
+from conftest import alice_info
 from ocean_lib.config import Config
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.btoken import BToken
-from ocean_lib.models.test.conftest import alice_info
+
 from ocean_lib.ocean.util import get_bfactory_address
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet

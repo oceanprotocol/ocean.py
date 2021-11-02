@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from ocean_lib.models.test.conftest import *  # noqa
+from conftest import *  # noqa
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.test.test_contract_base import MyFactory
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
