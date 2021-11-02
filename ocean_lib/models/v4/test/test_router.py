@@ -3,27 +3,26 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from ocean_lib.models.v4.factory_router import FactoryRouter
-from ocean_lib.utils.addresses_utils import (
-    get_ocean_address,
-    get_factory_router_address,
+from tests.resources.helper_functions import (
+    get_factory_deployer_wallet,
+    get_address_of_type,
 )
-from tests.resources.helper_functions import get_factory_deployer_wallet
 
 _NETWORK = "ganache"
 
 
-def test_ocean_tokens_mapping(web3, config):
-    factory_router = FactoryRouter(web3, get_factory_router_address(config))
-    ocean_tokens = factory_router.ocean_tokens(get_ocean_address(config))
+def test_ocean_tokens_mapping(web3, config, factory_router):
+    factory_router = FactoryRouter(web3, factory_router)
+    ocean_tokens = factory_router.ocean_tokens(get_address_of_type(config, "Ocean"))
     assert ocean_tokens is True
 
 
-def test_add_ocean_token(web3, config):
+def test_add_ocean_token(web3, factory_router):
     new_ocean_address = web3.toChecksumAddress(
         "0x967da4048cd07ab37855c090aaf366e4ce1b9f48"
     )
     deployer_wallet = get_factory_deployer_wallet(_NETWORK)
-    factory_router = FactoryRouter(web3, get_factory_router_address(config))
+    factory_router = FactoryRouter(web3, factory_router)
     new_router_address = factory_router.router_owner()
     assert new_router_address == deployer_wallet.address
     factory_router_v2 = FactoryRouter(web3, deployer_wallet.address)
