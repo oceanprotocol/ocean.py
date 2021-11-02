@@ -9,6 +9,7 @@ from web3.main import Web3
 
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Token
+from ocean_lib.models.v4.bpool import BPool
 from ocean_lib.models.v4.erc20_token import ERC20Token
 from ocean_lib.models.v4.models_structures import ErcCreateData, PoolData
 from ocean_lib.ocean.util import get_contracts_addresses
@@ -22,13 +23,18 @@ from tests.resources.helper_functions import (
 _NETWORK = "development"
 
 def test_deploy_erc721_contract(web3:Web3,config):
+    """main test flow"""
 
-
+    v4_addresses = get_contracts_addresses(
+        address_file=config.address_file, network=_NETWORK
+    )
     publisher = get_publisher_wallet()
-
-
+    user3 = get_consumer_wallet()
+    user2 = get_another_consumer_wallet()
     erc721_factory = ERC721FactoryContract(web3, get_contracts_addresses(config.address_file, _NETWORK)[ERC721FactoryContract.CONTRACT_NAME])
+    
 
+    """test deploy erc721"""
     tx = erc721_factory.deploy_erc721_contract("NFT","NFTS",1,ZERO_ADDRESS,"https://oceanprotocol.com/nft/",publisher)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
@@ -45,11 +51,8 @@ def test_deploy_erc721_contract(web3:Web3,config):
     assert ownerBalance == 1
     assert erc721_factory.get_nft_template(0)
     
-     # test roles
-    publisher = get_publisher_wallet()
-    user3 = get_consumer_wallet()
-    user2 = get_another_consumer_wallet()
 
+    """test roles"""
     erc721_contract.add_manager(user2.address,publisher)
 
     erc721_contract.add_to_create_erc20_list(user3.address,user2)
@@ -62,17 +65,8 @@ def test_deploy_erc721_contract(web3:Web3,config):
     assert permissions[2] == True
     assert permissions[3] == True
 
-    # test permissions
-    v4Addresses = get_contracts_addresses(
-        address_file=config.address_file, network=_NETWORK
-    )
-
-
-
-    publisher = get_publisher_wallet()
-    user3 = get_consumer_wallet()
-    user2 = get_another_consumer_wallet()
-    nftFactory = ERC721FactoryContract(web3=web3, address=v4Addresses["ERC721Factory"])
+    """test permissions"""
+    nftFactory = ERC721FactoryContract(web3=web3, address=v4_addresses["ERC721Factory"])
 
     ercData = ErcCreateData(
         1,
@@ -84,6 +78,7 @@ def test_deploy_erc721_contract(web3:Web3,config):
 
     trxErc20 = erc721_contract.create_erc20(ercData,user3) 
     receipt = web3.eth.wait_for_transaction_receipt(trxErc20)
+
     assert receipt["status"] == 1
     
     event = nftFactory.get_event_log(
@@ -96,18 +91,7 @@ def test_deploy_erc721_contract(web3:Web3,config):
 
     assert True == perms[0]
 
-
-
-    # test user 3 deploys an ERC20DT
-    v4Addresses = get_contracts_addresses(
-        address_file=config.address_file, network=_NETWORK
-    )
-
-    publisher = get_publisher_wallet()
-    user3 = get_consumer_wallet()
-    user2 = get_another_consumer_wallet()
-    nftFactory = ERC721FactoryContract(web3=web3, address=v4Addresses["ERC721Factory"])
-
+    """test user 3 deploys an ERC20DT"""
     ercData = ErcCreateData(
         1,
         ["ERC20DT1","ERC20DT1Symbol"],
@@ -129,22 +113,12 @@ def test_deploy_erc721_contract(web3:Web3,config):
     ercToken = ERC20Token(web3=web3,address=dt_address)
     perms = ercToken.permissions(user3.address)
 
-    assert True == perms[0]
+    assert perms[0] == True
 
-
-    # test user 3 deploys pool and check market fee
-
-    v4_addresses = get_contracts_addresses(
-        address_file=config.address_file, network=_NETWORK
-    )
-    publisher = get_publisher_wallet()
-    user3 = get_consumer_wallet()
-    user2 = get_another_consumer_wallet()
-
+    """test user 3 deploys pool and check market fee"""
     initialOceanLiq = web3.toWei(0.2,"ether")
-
     oceanContract = ERC20Token(web3=web3,address=v4_addresses["Ocean"])
-    oceanContract.approve(v4_addresses["Router"],2**256-1,user3)
+    oceanContract.approve(v4_addresses["Router"], web3.toWei(1000,"ether"),user3)
     
     poolData = PoolData(
         [
