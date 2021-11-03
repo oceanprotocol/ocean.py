@@ -148,15 +148,15 @@ def test_main(
     )
 
     assert pool_event[0].event == "NewPool"
-    b_pool_address = pool_event[0].args.poolAddress
-    b_pool = BPool(web3, b_pool_address)
-    assert b_pool.is_finalized() == True
-    assert b_pool.opf_fee() == 0
-    assert b_pool.get_swap_fee() == web3.toWei(0.001, "ether")
-    assert b_pool.community_fee(get_address_of_type(config, "Ocean")) == 0
-    assert b_pool.community_fee(erc20_token.address) == 0
-    assert b_pool.market_fee(get_address_of_type(config, "Ocean")) == 0
-    assert b_pool.market_fee(erc20_token.address) == 0
+    bpool_address = pool_event[0].args.poolAddress
+    bpool = BPool(web3, bpool_address)
+    assert bpool.is_finalized() == True
+    assert bpool.opf_fee() == 0
+    assert bpool.get_swap_fee() == web3.toWei(0.001, "ether")
+    assert bpool.community_fee(get_address_of_type(config, "Ocean")) == 0
+    assert bpool.community_fee(erc20_token.address) == 0
+    assert bpool.market_fee(get_address_of_type(config, "Ocean")) == 0
+    assert bpool.market_fee(erc20_token.address) == 0
 
     assert erc20_token.balanceOf(get_address_of_type(config, "Staking")) == web3.toWei(
         0.03, "ether"
