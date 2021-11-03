@@ -108,7 +108,7 @@ def test_main(
 
     dt_address = event[0].args.newTokenAddress
     erc_token = ERC20Token(web3=web3, address=dt_address)
- 
+
     # Tests permissions
     perms = erc_token.permissions(consumer_wallet.address)
     assert perms[0] == True
