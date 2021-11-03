@@ -2,6 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from enum import IntEnum
 from typing import List
 
 from enforce_typing import enforce_types
@@ -9,6 +10,13 @@ from enforce_typing import enforce_types
 from ocean_lib.models.v4.models_structures import ErcCreateData
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
+
+
+class ERC721Permissions(IntEnum):
+    MANAGER = 0
+    DEPLOY_ERC20 = 1
+    UPDATE_METADATA = 2
+    STORE = 3
 
 
 @enforce_types
@@ -100,6 +108,16 @@ class ERC721Token(ContractBase):
     def add_manager(self, manager_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("addManager", (manager_address,), from_wallet)
 
+    def add_to_725_store_list(self, allowed_address: str, from_wallet: Wallet) -> str:
+        return self.send_transaction(
+            "addTo725StoreList", (allowed_address,), from_wallet
+        )
+
+    def add_to_metadata_list(self, allowed_address: str, from_wallet: Wallet) -> str:
+        return self.send_transaction(
+            "addToMetadataList", (allowed_address,), from_wallet
+        )
+
     def remove_manager(self, manager_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("removeManager", (manager_address,), from_wallet)
 
@@ -118,6 +136,9 @@ class ERC721Token(ContractBase):
 
     def set_data_v3(self, datatoken: str, value: bytes, from_wallet: Wallet) -> str:
         return self.send_transaction("setDataV3", (datatoken, value), from_wallet)
+
+    def get_data(self, key: bytes) -> bytes:
+        return self.contract.caller.getData(key)
 
     def wrap_v3_dt(self, datatoken: str, new_minter: str, from_wallet: Wallet) -> str:
         return self.send_transaction("wrapV3DT", (datatoken, new_minter), from_wallet)
@@ -166,3 +187,9 @@ class ERC721Token(ContractBase):
 
     def get_permissions(self, user: str) -> list:
         return self.contract.caller.getPermissions(user)
+
+    def balance_of(self, account: str) -> int:
+        return self.contract.caller.balanceOf(account)
+
+    def owner_of(self, token_id: int) -> str:
+        return self.contract.caller.ownerOf(token_id)
