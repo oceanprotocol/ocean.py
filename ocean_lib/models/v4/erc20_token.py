@@ -212,6 +212,9 @@ class ERC20Token(ContractBase):
             from_wallet,
         )
 
+    def permissions(self, account: str) -> tuple:
+        return self.contract.caller.permissions(account)
+
     def get_id(self) -> int:
         return self.contract.caller.getId()
 
