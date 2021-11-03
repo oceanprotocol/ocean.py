@@ -24,6 +24,8 @@ from tests.resources.helper_functions import (
 )
 from web3.main import Web3
 
+from web3 import Web3
+
 _NETWORK = "ganache"
 HUGEINT = 2 ** 255
 BobInfo = None
