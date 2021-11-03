@@ -14,8 +14,6 @@ from ocean_lib.models.v4.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import get_address_of_type
 
-_NETWORK = "development"
-
 
 def test_main(
     web3,
@@ -163,7 +161,7 @@ def test_main(
         web3.eth.block_number,
         None,
     )
-    print(poolEvent)
+
     assert poolEvent[0].event == "NewPool"
     b_pool_address = poolEvent[0].args.poolAddress
     b_pool = BPool(web3, b_pool_address)
