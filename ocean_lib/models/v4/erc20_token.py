@@ -212,9 +212,6 @@ class ERC20Token(ContractBase):
             from_wallet,
         )
 
-    def permissions(self, account: str) -> tuple:
-        return self.contract.caller.permissions(account)
-
     def get_id(self) -> int:
         return self.contract.caller.getId()
 
@@ -270,6 +267,9 @@ class ERC20Token(ContractBase):
 
     def withdraw(self, from_wallet: Wallet):
         return self.send_transaction("withdrawETH", (), from_wallet)
+
+    def get_permissions(self, user: str) -> list:
+        return self.contract.caller.permissions(user)
 
 
 class MockERC20(ERC20Token):

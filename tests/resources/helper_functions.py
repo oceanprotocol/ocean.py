@@ -10,14 +10,19 @@ import time
 from typing import Optional
 
 import coloredlogs
+from web3 import Web3
 import yaml
 from enforce_typing import enforce_types
-
 from ocean_lib.config import Config
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.data_token import DataToken
+from ocean_lib.models.v4.erc20_token import ERC20Token
+from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.v4.erc721_token import ERC721Token
+from ocean_lib.models.v4.models_structures import ErcCreateData
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.util import get_web3 as util_get_web3, get_contracts_addresses
+from ocean_lib.ocean.util import get_contracts_addresses, get_web3 as util_get_web3
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
@@ -205,3 +210,76 @@ def mint_tokens_and_wait(
                 break
         except (ValueError, Exception):
             pass
+
+
+def deploy_erc721_erc20(
+    web3: Web3, config: Config, erc721_publisher: Wallet, erc20_minter: Wallet
+):
+    """Helper function to deploy an ERC721Token using erc721_publisher Wallet
+    and an ERC20Token data token with the newly ERC721Token using erc20_minter Wallet.
+
+    :rtype: (ERC721Token, ERC20Token)
+    """
+
+    erc721_factory = ERC721FactoryContract(
+        web3, get_address_of_type(config, "ERC721Factory")
+    )
+    tx = erc721_factory.deploy_erc721_contract(
+        name="NFT",
+        symbol="NFTSYMBOL",
+        template_index=1,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        base_uri="https://oceanprotocol.com/nft/",
+        from_wallet=erc721_publisher,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_event = erc721_factory.get_event_log(
+        event_name=ERC721FactoryContract.EVENT_NFT_CREATED,
+        from_block=tx_receipt.blockNumber,
+        to_block=web3.eth.block_number,
+        filters=None,
+    )
+    token_address = registered_event[0].args.newTokenAddress
+    erc721_token = ERC721Token(web3, token_address)
+
+    erc_create_data = ErcCreateData(
+        template_index=1,
+        strings=["ERC20DT1", "ERC20DT1Symbol"],
+        addresses=[
+            erc20_minter.address,
+            erc721_publisher.address,
+            erc721_publisher.address,
+            ZERO_ADDRESS,
+        ],
+        uints=[web3.toWei("0.5", "ether"), 0],
+        bytess=[b""],
+    )
+    tx_result = erc721_token.create_erc20(erc_create_data, erc721_publisher)
+    tx_receipt2 = web3.eth.wait_for_transaction_receipt(tx_result)
+
+    registered_event2 = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt2.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    erc20_address = registered_event2[0].args.newTokenAddress
+
+    erc20_token = ERC20Token(web3, erc20_address)
+
+    return erc721_token, erc20_token
+
+
+def get_non_existent_nft_template(
+    erc721_factory: ERC721FactoryContract, check_first=20
+) -> int:
+    """Helper function to find a non existent ERC721 template among the first *check_first* templates
+    of an ERC721 Factory contract. Returns -1 if template was found.
+    """
+    for x in range(check_first):
+        [address, _] = erc721_factory.get_nft_template(x)
+        if address == ZERO_ADDRESS:
+            return x
+
+    return -1
