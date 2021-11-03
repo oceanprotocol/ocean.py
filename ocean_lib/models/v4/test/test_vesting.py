@@ -50,37 +50,32 @@ def test_main(
     )
     assert registered_event[0].event == "NFTCreated"
     assert registered_event[0].args.admin == publisher_wallet.address
-    erc721_contract = ERC721Token(
+    erc721_token = ERC721Token(
         web3=web3, address=registered_event[0].args.newTokenAddress
     )
 
-    symbol = erc721_contract.symbol()
+    symbol = erc721_token.symbol()
     assert symbol == "NFTS"
 
-    owner_balance = erc721_contract.contract.caller.balanceOf(publisher_wallet.address)
+    owner_balance = erc721_token.contract.caller.balanceOf(publisher_wallet.address)
     assert owner_balance == 1
-    assert erc721_factory.get_nft_template(0)
 
     # Tests roles
-    erc721_contract.add_manager(another_consumer_wallet.address, publisher_wallet)
+    erc721_token.add_manager(another_consumer_wallet.address, publisher_wallet)
 
-    erc721_contract.add_to_create_erc20_list(
+    erc721_token.add_to_create_erc20_list(
         consumer_wallet.address, another_consumer_wallet
     )
-    erc721_contract.add_to_metadata_list(
-        consumer_wallet.address, another_consumer_wallet
-    )
-    erc721_contract.add_to_725_store_list(
-        consumer_wallet.address, another_consumer_wallet
-    )
+    erc721_token.add_to_metadata_list(consumer_wallet.address, another_consumer_wallet)
+    erc721_token.add_to_725_store_list(consumer_wallet.address, another_consumer_wallet)
 
-    permissions = erc721_contract.get_permissions(consumer_wallet.address)
+    permissions = erc721_token.get_permissions(consumer_wallet.address)
 
     assert permissions[1] == True
     assert permissions[2] == True
     assert permissions[3] == True
 
-    # Tests user 3 deploys an ERC20DT
+    # Tests consumer deploys an ERC20DT
     erc_data = ErcCreateData(
         1,
         ["ERC20DT1", "ERC20DT1Symbol"],
@@ -94,7 +89,7 @@ def test_main(
         [b""],
     )
 
-    trx_erc_20 = erc721_contract.create_erc20(erc_data, consumer_wallet)
+    trx_erc_20 = erc721_token.create_erc20(erc_data, consumer_wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(trx_erc_20)
     assert tx_receipt.status == 1
@@ -107,13 +102,13 @@ def test_main(
     )
 
     dt_address = event[0].args.newTokenAddress
-    erc_token = ERC20Token(web3=web3, address=dt_address)
+    erc20_token = ERC20Token(web3=web3, address=dt_address)
 
     # Tests permissions
-    perms = erc_token.permissions(consumer_wallet.address)
+    perms = erc20_token.permissions(consumer_wallet.address)
     assert perms[0] == True
 
-    # Tests user 3 deploys pool and check market fee
+    # Tests consumer deploys pool and check market fee
     initial_ocean_liq = web3.toWei(0.02, "ether")
     ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
     ocean_contract.approve(
@@ -143,7 +138,7 @@ def test_main(
             get_address_of_type(config, "poolTemplate"),
         ],
     )
-    tx = erc_token.deploy_pool(pool_data, consumer_wallet)
+    tx = erc20_token.deploy_pool(pool_data, consumer_wallet)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     pool_event = factory_router.get_event_log(
         ERC721FactoryContract.EVENT_NEW_POOL,
@@ -159,30 +154,30 @@ def test_main(
     assert b_pool.opf_fee() == 0
     assert b_pool.get_swap_fee() == web3.toWei(0.001, "ether")
     assert b_pool.community_fee(get_address_of_type(config, "Ocean")) == 0
-    assert b_pool.community_fee(erc_token.address) == 0
+    assert b_pool.community_fee(erc20_token.address) == 0
     assert b_pool.market_fee(get_address_of_type(config, "Ocean")) == 0
-    assert b_pool.market_fee(erc_token.address) == 0
+    assert b_pool.market_fee(erc20_token.address) == 0
 
-    assert erc_token.balanceOf(get_address_of_type(config, "Staking")) == web3.toWei(
+    assert erc20_token.balanceOf(get_address_of_type(config, "Staking")) == web3.toWei(
         0.03, "ether"
     )
 
-    # user 3 fails to mint new erc20 token even if the minter
-    perms = erc_token.permissions(consumer_wallet.address)
+    # consumer fails to mint new erc20 token even if the minter
+    perms = erc20_token.permissions(consumer_wallet.address)
     assert perms[0] == True
 
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc_token.mint(consumer_wallet.address, 1, consumer_wallet)
+        erc20_token.mint(consumer_wallet.address, 1, consumer_wallet)
         assert (
             err.value.args[0]
             == "execution reverted: VM Exception while processing transaction: revert DataTokenTemplate: cap exceeded"
         )
 
-    assert erc_token.balanceOf(consumer_wallet.address) == 0
+    assert erc20_token.balanceOf(consumer_wallet.address) == 0
 
     # check if the vesting amount is correct
 
     side_staking = SideStaking(
         web3=web3, address=get_address_of_type(config, "Staking")
     )
-    assert side_staking.get_vesting_amount(erc_token.address) == vesting_amount
+    assert side_staking.get_vesting_amount(erc20_token.address) == vesting_amount
