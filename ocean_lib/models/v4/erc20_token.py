@@ -268,6 +268,9 @@ class ERC20Token(ContractBase):
     def withdraw(self, from_wallet: Wallet):
         return self.send_transaction("withdrawETH", (), from_wallet)
 
+    def get_permissions(self, user: str) -> list:
+        return self.contract.caller.permissions(user)
+
 
 class MockERC20(ERC20Token):
     CONTRACT_NAME = "MockERC20"
