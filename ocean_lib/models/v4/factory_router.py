@@ -29,6 +29,18 @@ class FactoryRouter(BFactory):
         """Gets a router owner address."""
         return self.contract.caller.routerOwner()
 
+    def is_pool_template(self, address: str) -> bool:
+        return self.contract.caller.isPoolTemplate(address)
+
+    def fixed_price(self, address: str) -> bool:
+        return self.contract.caller.fixedPrice(address)
+
+    def factory(self):
+        return self.contract.caller.factory()
+
+    def ss_contracts(self, address: str):
+        return self.contract.caller.ssContracts(address)
+
     def get_opf_fee(self, base_token: str) -> int:
         return self.contract.caller.getOPFFee(base_token)
 
