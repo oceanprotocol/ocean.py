@@ -24,7 +24,6 @@ from tests.resources.helper_functions import (
     get_web3,
     get_address_of_type,
 )
-from web3.main import Web3
 
 _NETWORK = "ganache"
 HUGEINT = 2 ** 255
@@ -45,14 +44,6 @@ def dtfactory_address(config):
 @pytest.fixture
 def bfactory_address(config):
     return BFactory.configured_address(_NETWORK, config.address_file)
-
-
-@pytest.fixture
-def factory_router(web3, config):
-    return FactoryRouter(
-        web3,
-        get_address_of_type(config, "Router"),
-    )
 
 
 @pytest.fixture
