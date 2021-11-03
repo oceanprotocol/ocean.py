@@ -164,7 +164,7 @@ provider_url = DataServiceProvider.get_url(ocean.config)
 # returns "http://localhost:8030"
 
 # Calc DATA service compute descriptor
-from ocean_lib.common.ddo.service import Service
+from ocean_lib.services.service import Service
 from ocean_lib.common.agreements.service_types import ServiceTypes
 DATA_compute_service = Service(
     service_endpoint=provider_url,

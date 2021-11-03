@@ -2,9 +2,10 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import pytest
 import time
-from ocean_lib.assets.utils import create_publisher_trusted_algorithms
+
+import pytest
+from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_token import DataToken
