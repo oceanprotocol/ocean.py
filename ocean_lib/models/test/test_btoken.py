@@ -14,7 +14,7 @@ def test_ERC20(
 
     token.approve(bob_address, 0, from_wallet=alice_wallet)
     # generating ERC20 Tokens, so the symbol is irrelevant
-    assert token.symbol() == "DTT"
+    assert token.symbol() in ["DTT", "Ocean"]  # different in v3 and v4
     assert token.decimals() == 18
     assert token.balanceOf(alice_address) > to_wei(10)
     assert token.balanceOf(bob_address) > to_wei(10)

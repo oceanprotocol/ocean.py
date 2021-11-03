@@ -274,7 +274,8 @@ def test_compute_multi_inputs(simple_compute_ddo):
 def test_update_trusted_algorithms(config, web3, algorithm_ddo, asset_with_trusted):
     setup = Setup()
 
-    ddo_address = get_contracts_addresses(config.address_file, "ganache")[
+    # FIXME: this is temporary. Metadata needs to support both v3 and v4
+    ddo_address = get_contracts_addresses(config.address_file, "ganache")["v3"][
         MetadataContract.CONTRACT_NAME
     ]
     ddo_registry = MetadataContract(web3, ddo_address)

@@ -22,7 +22,6 @@ from tests.resources.helper_functions import (
     get_ganache_wallet,
     get_web3,
 )
-from web3.main import Web3
 
 _NETWORK = "ganache"
 HUGEINT = 2 ** 255
@@ -46,8 +45,11 @@ def bfactory_address(config):
 
 
 @pytest.fixture
-def contracts_addresses(config):
-    return get_contracts_addresses(_NETWORK, config.address_file)
+def v3_contracts_addresses(config):
+    addresses = get_contracts_addresses(_NETWORK, config.address_file)
+    addresses = addresses["v3"]
+
+    return addresses
 
 
 @pytest.fixture

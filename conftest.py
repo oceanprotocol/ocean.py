@@ -8,21 +8,22 @@ import uuid
 
 import pytest
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
+from ocean_lib.models.v4.erc20_token import ERC20Token
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import get_ether_balance
 from tests.resources.ddo_helpers import get_metadata
 from tests.resources.helper_functions import (
-    get_another_consumer_wallet,
     get_consumer_ocean_instance,
     get_consumer_wallet,
     get_example_config,
-    get_factory_deployer_wallet,
     get_ganache_wallet,
     get_publisher_ocean_instance,
     get_publisher_wallet,
     get_web3,
     setup_logging,
+    get_another_consumer_wallet,
+    get_factory_deployer_wallet,
 )
 
 _NETWORK = "ganache"
@@ -54,9 +55,7 @@ def setup_all(request, config, web3):
         10
     ), "Ether balance less than 10."
 
-    from ocean_lib.models.data_token import DataToken
-
-    OCEAN_token = DataToken(web3, address=network_addresses["development"]["Ocean"])
+    OCEAN_token = ERC20Token(web3, address=network_addresses["development"]["Ocean"])
 
     amt_distribute = to_wei(1000)
 
@@ -65,7 +64,6 @@ def setup_all(request, config, web3):
             send_ether(wallet, w.address, to_wei(4))
 
         if OCEAN_token.balanceOf(w.address) < to_wei(100):
-            OCEAN_token.mint(wallet.address, amt_distribute, from_wallet=wallet)
             OCEAN_token.transfer(w.address, amt_distribute, from_wallet=wallet)
 
 

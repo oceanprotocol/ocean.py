@@ -6,7 +6,7 @@ import json
 import os
 
 from ocean_lib.config import Config
-from ocean_lib.models.data_token import DataToken
+from ocean_lib.models.v4.erc20_token import ERC20Token
 from ocean_lib.ocean.util import get_web3
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import send_ether
@@ -33,13 +33,9 @@ def mint_fake_OCEAN(config: Config) -> None:
         transaction_timeout=config.transaction_timeout,
     )
 
-    OCEAN_token = DataToken(web3, address=network_addresses["development"]["Ocean"])
-
+    # FIXME: temporary solution, will add support for v3 further (DataToken + mint)
+    OCEAN_token = ERC20Token(web3, address=network_addresses["development"]["Ocean"])
     amt_distribute = to_wei(1000)
-
-    OCEAN_token.mint(
-        deployer_wallet.address, 2 * amt_distribute, from_wallet=deployer_wallet
-    )
 
     for key_label in ["TEST_PRIVATE_KEY1", "TEST_PRIVATE_KEY2"]:
         key = os.environ.get(key_label)
