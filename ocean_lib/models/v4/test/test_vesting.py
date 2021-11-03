@@ -185,7 +185,10 @@ def test_main(
 
     with pytest.raises(exceptions.ContractLogicError) as err:
         ercToken.mint(consumer_wallet.address, 1, consumer_wallet)
-        assert err.value.args[0] == "execution reverted: VM Exception while processing transaction: revert DataTokenTemplate: cap exceeded"
+        assert (
+            err.value.args[0]
+            == "execution reverted: VM Exception while processing transaction: revert DataTokenTemplate: cap exceeded"
+        )
 
     assert ercToken.balanceOf(consumer_wallet.address) == 0
 
