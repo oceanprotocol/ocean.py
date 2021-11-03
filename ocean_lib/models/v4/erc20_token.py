@@ -274,6 +274,9 @@ class ERC20Token(ContractBase):
     def get_permissions(self, user: str) -> list:
         return self.contract.caller.permissions(user)
 
+    def get_total_supply(self) -> int:
+        return self.contract.caller.totalSupply()
+
 
 class MockERC20(ERC20Token):
     CONTRACT_NAME = "MockERC20"
