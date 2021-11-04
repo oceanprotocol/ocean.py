@@ -8,18 +8,16 @@ import pytest
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
 from tests.resources.ddo_helpers import wait_for_ddo
-from tests.resources.helper_functions import get_publisher_wallet
 
 
-def test_resolve_asset(publisher_ocean_instance, metadata):
-    publisher = get_publisher_wallet()
+def test_resolve_asset(publisher_ocean_instance, metadata, publisher_wallet):
     metadata_copy = metadata.copy()
     blob = json.dumps(
         {"t": 1, "url": publisher_ocean_instance.config.metadata_cache_uri}
     )
 
     asset = publisher_ocean_instance.assets.create(
-        metadata_copy, publisher, dt_blob=blob
+        metadata_copy, publisher_wallet, dt_blob=blob
     )
     wait_for_ddo(publisher_ocean_instance, asset.did)
     assert asset is not None, "The asset is not cached."
