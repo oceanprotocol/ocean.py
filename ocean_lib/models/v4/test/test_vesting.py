@@ -71,9 +71,9 @@ def test_main(
 
     permissions = erc721_token.get_permissions(consumer_wallet.address)
 
-    assert permissions[1] == True
-    assert permissions[2] == True
-    assert permissions[3] == True
+    assert permissions[1] is True
+    assert permissions[2] is True
+    assert permissions[3] is True
 
     # Tests consumer deploys an ERC20DT
     erc_data = ErcCreateData(
@@ -106,7 +106,7 @@ def test_main(
 
     # Tests permissions
     perms = erc20_token.permissions(consumer_wallet.address)
-    assert perms[0] == True
+    assert perms[0] is True
 
     # Tests consumer deploys pool and check market fee
     initial_ocean_liq = web3.toWei(0.02, "ether")
@@ -150,7 +150,7 @@ def test_main(
     assert pool_event[0].event == "NewPool"
     bpool_address = pool_event[0].args.poolAddress
     bpool = BPool(web3, bpool_address)
-    assert bpool.is_finalized() == True
+    assert bpool.is_finalized() is True
     assert bpool.opf_fee() == 0
     assert bpool.get_swap_fee() == web3.toWei(0.001, "ether")
     assert bpool.community_fee(get_address_of_type(config, "Ocean")) == 0
@@ -164,7 +164,7 @@ def test_main(
 
     # consumer fails to mint new erc20 token even if the minter
     perms = erc20_token.permissions(consumer_wallet.address)
-    assert perms[0] == True
+    assert perms[0] is True
 
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc20_token.mint(consumer_wallet.address, 1, consumer_wallet)
