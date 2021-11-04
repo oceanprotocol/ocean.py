@@ -21,13 +21,12 @@ from tests.resources.helper_functions import (
     get_consumer_ocean_instance,
     get_consumer_wallet,
     get_example_config,
+    get_factory_deployer_wallet,
     get_ganache_wallet,
     get_publisher_ocean_instance,
     get_publisher_wallet,
     get_web3,
     setup_logging,
-    get_another_consumer_wallet,
-    get_factory_deployer_wallet,
 )
 
 _NETWORK = "ganache"
