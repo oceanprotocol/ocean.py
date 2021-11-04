@@ -11,7 +11,6 @@ from ocean_lib.models import btoken
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
-from ocean_lib.models.v4.factory_router import FactoryRouter
 from ocean_lib.ocean.util import get_ocean_token_address
 from ocean_lib.web3_internal.contract_utils import get_contracts_addresses
 from ocean_lib.web3_internal.currency import to_wei
@@ -22,7 +21,6 @@ from tests.resources.helper_functions import (
     get_factory_deployer_wallet,
     get_ganache_wallet,
     get_web3,
-    get_address_of_type,
 )
 
 _NETWORK = "ganache"
