@@ -12,7 +12,6 @@ from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_metadata, get_registered_ddo
 from tests.resources.helper_functions import (
     get_another_consumer_ocean_instance,
-    get_another_consumer_wallet,
     get_consumer_ocean_instance,
     get_publisher_ocean_instance,
     mint_tokens_and_wait,
@@ -101,7 +100,7 @@ def test_market_flow(publisher_wallet, consumer_wallet):
     ), f"no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}"
 
 
-def test_payer_market_flow(publisher_wallet, consumer_wallet):
+def test_payer_market_flow(publisher_wallet, consumer_wallet, another_consumer_wallet):
     """Tests that an order can be placed for a delegated consumer, other than the payer."""
     pub_wallet = publisher_wallet
 
@@ -113,8 +112,6 @@ def test_payer_market_flow(publisher_wallet, consumer_wallet):
     asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
     assert isinstance(asset, V3Asset)
     assert asset.data_token_address, "The asset does not have a token address."
-
-    another_consumer_wallet = get_another_consumer_wallet()
 
     service = asset.get_service(service_type=ServiceTypes.ASSET_ACCESS)
     sa = Service.from_json(service.as_dictionary())
