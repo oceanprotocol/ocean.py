@@ -6,7 +6,6 @@ import os
 
 import pytest
 from enforce_typing import enforce_types
-from web3.main import Web3
 
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models import btoken
@@ -24,6 +23,8 @@ from tests.resources.helper_functions import (
     get_ganache_wallet,
     get_web3,
 )
+
+from web3.main import Web3
 
 _NETWORK = "ganache"
 HUGEINT = 2 ** 255
