@@ -6,6 +6,8 @@ import os
 
 import pytest
 from enforce_typing import enforce_types
+from web3.main import Web3
+
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models import btoken
 from ocean_lib.models.bfactory import BFactory
