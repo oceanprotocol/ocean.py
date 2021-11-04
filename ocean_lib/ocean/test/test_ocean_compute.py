@@ -14,7 +14,6 @@ from tests.resources.ddo_helpers import (
     get_sample_algorithm_ddo,
     get_sample_ddo_with_compute_service,
 )
-from tests.resources.helper_functions import get_publisher_wallet
 
 
 def test_build_cluster_attributes(config):
@@ -189,8 +188,7 @@ def test_build_service_privacy_attributes_no_trusted_algos(config):
     ), "The privacy dict is not the expected one."
 
 
-def test_create_compute_service_attributes(publisher_ocean_instance):
-    publisher = get_publisher_wallet()
+def test_create_compute_service_attributes(publisher_ocean_instance, publisher_wallet):
     data_provider = DataServiceProvider
     config = publisher_ocean_instance.config
     compute = OceanCompute(config=config, data_provider=data_provider)
@@ -286,7 +284,7 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
 
     compute_attributes = compute.create_compute_service_attributes(
         30,
-        publisher.address,
+        publisher_wallet.address,
         (datetime.utcnow().replace(microsecond=0).isoformat() + "Z"),
         service_provider_dict,
         privacy_dict,
@@ -295,7 +293,7 @@ def test_create_compute_service_attributes(publisher_ocean_instance):
     expected_compute_attributes = {
         "main": {
             "name": "dataAssetComputingServiceAgreement",
-            "creator": publisher.address,
+            "creator": publisher_wallet.address,
             "datePublished": datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
             "cost": 1.0,
             "timeout": 30,

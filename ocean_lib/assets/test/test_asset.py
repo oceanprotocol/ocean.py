@@ -12,18 +12,16 @@ from tests.resources.ddo_helpers import (
     get_sample_ddo,
     wait_for_ddo,
 )
-from tests.resources.helper_functions import get_publisher_wallet
 
 TEST_SERVICE_TYPE = "ocean-meta-storage"
 TEST_SERVICE_URL = "http://localhost:8005"
 
 
-def test_values(publisher_ocean_instance, metadata):
+def test_values(publisher_ocean_instance, metadata, publisher_wallet):
     """Tests if the DDO has the address for the data token given by 'values' property."""
-    publisher = get_publisher_wallet()
     metadata_copy = metadata.copy()
 
-    ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher)
+    ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher_wallet)
     wait_for_ddo(publisher_ocean_instance, ddo.did)
 
     ddo_values = ddo.values
@@ -34,16 +32,19 @@ def test_values(publisher_ocean_instance, metadata):
         assert ddo_values[key] is not None
 
 
-def test_trusted_algorithms(publisher_ocean_instance):
+def test_trusted_algorithms(publisher_ocean_instance, publisher_wallet):
     """Tests if the trusted algorithms list is returned correctly."""
-    publisher = get_publisher_wallet()
 
-    algorithm_ddo = get_registered_algorithm_ddo(publisher_ocean_instance, publisher)
+    algorithm_ddo = get_registered_algorithm_ddo(
+        publisher_ocean_instance, publisher_wallet
+    )
     wait_for_ddo(publisher_ocean_instance, algorithm_ddo.did)
     assert algorithm_ddo is not None
 
     ddo = get_registered_ddo_with_compute_service(
-        publisher_ocean_instance, publisher, trusted_algorithms=[algorithm_ddo.did]
+        publisher_ocean_instance,
+        publisher_wallet,
+        trusted_algorithms=[algorithm_ddo.did],
     )
     wait_for_ddo(publisher_ocean_instance, ddo.did)
     assert ddo is not None
@@ -74,7 +75,7 @@ def test_trusted_algorithms(publisher_ocean_instance):
         )
 
 
-def test_creating_asset_from_scratch():
+def test_creating_asset_from_scratch(publisher_wallet):
     """Tests creating an Asset from scratch."""
     # create an empty ddo
     ddo = V3Asset()
@@ -88,14 +89,12 @@ def test_creating_asset_from_scratch():
 
     ddo.add_service(TEST_SERVICE_TYPE, TEST_SERVICE_URL)
 
-    pub_acc = get_publisher_wallet()
-
-    ddo.add_proof({"checksum": "test"}, pub_acc)
+    ddo.add_proof({"checksum": "test"}, publisher_wallet)
     ddo_text_proof = ddo.as_text()
     assert ddo_text_proof
 
 
-def test_ddo_dict():
+def test_ddo_dict(publisher_wallet):
     """Tests DDO creation from dictionary."""
     sample_ddo_path = get_resource_path("ddo", "ddo_sample_algorithm.json")
     assert sample_ddo_path.exists(), f"{sample_ddo_path} does not exist!"
@@ -103,11 +102,11 @@ def test_ddo_dict():
     ddo1 = V3Asset(json_filename=sample_ddo_path)
     assert ddo1.did == "did:op:8d1b4d73e7af4634958f071ab8dfe7ab0df14019"
 
-    ddo1.add_proof({"checksum": "test"}, get_publisher_wallet())
+    ddo1.add_proof({"checksum": "test"}, publisher_wallet)
 
     ddo_dict = ddo1.as_dictionary()
     assert ddo_dict["publicKey"][0]["id"] == ddo1.did
-    assert ddo_dict["publicKey"][0]["owner"] == get_publisher_wallet().address
+    assert ddo_dict["publicKey"][0]["owner"] == publisher_wallet.address
     assert ddo_dict["publicKey"][0]["type"] == "EthereumECDSAKey"
 
     assert ddo_dict["authentication"][0] == {

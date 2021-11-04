@@ -5,7 +5,6 @@
 import pytest
 from ocean_lib.common.aquarius.aquarius import Aquarius
 from tests.resources.ddo_helpers import wait_for_ddo
-from tests.resources.helper_functions import get_publisher_wallet
 
 
 def test_init():
@@ -17,13 +16,12 @@ def test_init():
 
 
 def test_aqua_functions_for_single_ddo(
-    publisher_ocean_instance, metadata, aquarius_instance
+    publisher_ocean_instance, metadata, aquarius_instance, publisher_wallet
 ):
     """Tests against single-ddo functions of Aquarius."""
-    publisher = get_publisher_wallet()
     metadata_copy = metadata.copy()
 
-    ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher)
+    ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher_wallet)
     wait_for_ddo(publisher_ocean_instance, ddo.did)
     aqua_metadata = aquarius_instance.get_asset_metadata(ddo.did)
 

@@ -22,7 +22,6 @@ from tests.resources.ddo_helpers import (
     wait_for_ddo,
     wait_for_update,
 )
-from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
 
 
 def create_asset(ocean, publisher, encrypt=False):
@@ -36,13 +35,15 @@ def create_asset(ocean, publisher, encrypt=False):
 
 
 @pytest.mark.parametrize("encrypt", [False, True])
-def test_register_asset(publisher_ocean_instance, encrypt):
+def test_register_asset(
+    publisher_ocean_instance, encrypt, publisher_wallet, consumer_wallet
+):
     """Test various paths for asset registration."""
     ocn = publisher_ocean_instance
     ddo_reg = ocn.assets.ddo_registry()
     block = ocn.web3.eth.block_number
-    alice = get_publisher_wallet()
-    bob = get_consumer_wallet()
+    alice = publisher_wallet
+    bob = consumer_wallet
 
     def _get_num_assets(_minter):
         dids = [add_0x_prefix(did_to_id(a)) for a in ocn.assets.owner_assets(_minter)]
@@ -132,7 +133,7 @@ def test_register_asset(publisher_ocean_instance, encrypt):
     ), "The new asset was not published in Alice wallet."
 
 
-def test_ocean_assets_search(publisher_ocean_instance, metadata):
+def test_ocean_assets_search(publisher_ocean_instance, metadata, publisher_wallet):
     """Tests that a created asset can be searched successfully."""
     identifier = str(uuid.uuid1()).replace("-", "")
     metadata_copy = metadata.copy()
@@ -141,8 +142,7 @@ def test_ocean_assets_search(publisher_ocean_instance, metadata):
         len(publisher_ocean_instance.assets.search(identifier)) == 0
     ), "Asset search failed."
 
-    publisher = get_publisher_wallet()
-    ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher)
+    ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher_wallet)
     wait_for_ddo(publisher_ocean_instance, ddo.did)
     time.sleep(1)  # apparently changes are not instantaneous
     assert (
@@ -187,21 +187,21 @@ def test_ocean_assets_validate(publisher_ocean_instance, metadata):
     ), "metadata should be valid, unless the schema changed."
 
 
-def test_ocean_assets_algorithm(publisher_ocean_instance):
+def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet):
     """Tests the creation of an algorithm DDO."""
-    publisher = get_publisher_wallet()
     metadata = get_sample_algorithm_ddo_dict()["service"][0]
     metadata["attributes"]["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    ddo = publisher_ocean_instance.assets.create(metadata["attributes"], publisher)
+    ddo = publisher_ocean_instance.assets.create(
+        metadata["attributes"], publisher_wallet
+    )
     assert ddo, "DDO None. The ddo is not cached after the creation."
     _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did)
     assert _ddo, f"assets.resolve failed for did {ddo.did}"
     assert _ddo.is_consumable() == ConsumableCodes.OK
 
 
-def test_ocean_assets_create_fails_fileinfo(publisher_ocean_instance):
+def test_ocean_assets_create_fails_fileinfo(publisher_ocean_instance, publisher_wallet):
     """Tests that a file with invalid URL can not be published."""
-    publisher = get_publisher_wallet()
     metadata = get_sample_algorithm_ddo_dict()["service"][0]
     metadata["attributes"]["main"]["files"][0]["checksum"] = str(uuid.uuid4())
     metadata_copy = metadata.copy()
@@ -209,46 +209,47 @@ def test_ocean_assets_create_fails_fileinfo(publisher_ocean_instance):
         "url"
     ] = "http://127.0.0.1/not_valid"
     with pytest.raises(ValueError):
-        publisher_ocean_instance.assets.create(metadata_copy["attributes"], publisher)
+        publisher_ocean_instance.assets.create(
+            metadata_copy["attributes"], publisher_wallet
+        )
 
 
-def test_ocean_assets_compute(publisher_ocean_instance):
+def test_ocean_assets_compute(publisher_ocean_instance, publisher_wallet):
     """Tests the creation of an asset with a compute service."""
-    publisher = get_publisher_wallet()
     metadata = get_computing_metadata()
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    ddo = publisher_ocean_instance.assets.create(metadata, publisher)
+    ddo = publisher_ocean_instance.assets.create(metadata, publisher_wallet)
     assert ddo, "DDO None. The ddo is not cached after the creation."
     _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did)
     assert _ddo, f"assets.resolve failed for did {ddo.did}"
 
 
-def test_download_fails(publisher_ocean_instance):
+def test_download_fails(publisher_ocean_instance, publisher_wallet):
     """Tests failures of assets download function."""
-    publisher = get_publisher_wallet()
     with patch("ocean_lib.ocean.ocean_assets.OceanAssets.resolve") as mock:
         mock.return_value = get_sample_ddo()
         with pytest.raises(AssertionError):
-            publisher_ocean_instance.assets.download("0x1", 1, publisher, "", "", -4)
+            publisher_ocean_instance.assets.download(
+                "0x1", 1, publisher_wallet, "", "", -4
+            )
         with pytest.raises(TypeError):
             publisher_ocean_instance.assets.download(
-                "0x1", "", publisher, "", "", "string_index"
+                "0x1", "", publisher_wallet, "", "", "string_index"
             )
 
 
-def test_create_bad_metadata(publisher_ocean_instance):
+def test_create_bad_metadata(publisher_ocean_instance, publisher_wallet):
     """Tests that we can't create the asset with plecos failure."""
-    publisher = get_publisher_wallet()
     metadata = get_sample_algorithm_ddo_dict()["service"][0]
     metadata["attributes"]["main"]["files"][0]["EXTRA ATTRIB!"] = 0
     with pytest.raises(ValueError):
-        publisher_ocean_instance.assets.create(metadata["attributes"], publisher)
+        publisher_ocean_instance.assets.create(metadata["attributes"], publisher_wallet)
 
 
-def test_create_asset_with_address(publisher_ocean_instance):
+def test_create_asset_with_address(publisher_ocean_instance, publisher_wallet):
     """Tests that an asset can be created with specific DT address."""
     ocn = publisher_ocean_instance
-    alice = get_publisher_wallet()
+    alice = publisher_wallet
 
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
     asset = V3Asset(json_filename=sample_ddo_path)
@@ -263,10 +264,10 @@ def test_create_asset_with_address(publisher_ocean_instance):
     ), "Asset creation failed with the specified datatoken address."
 
 
-def test_create_asset_with_owner_address(publisher_ocean_instance):
+def test_create_asset_with_owner_address(publisher_ocean_instance, publisher_wallet):
     """Tests that an asset can be created with owner address."""
     ocn = publisher_ocean_instance
-    alice = get_publisher_wallet()
+    alice = publisher_wallet
 
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
     asset = V3Asset(json_filename=sample_ddo_path)
@@ -277,10 +278,12 @@ def test_create_asset_with_owner_address(publisher_ocean_instance):
     ), "Asset creation failed with the specified owner address."
 
 
-def test_create_asset_with_dt_address_and_owner_address(publisher_ocean_instance):
+def test_create_asset_with_dt_address_and_owner_address(
+    publisher_ocean_instance, publisher_wallet
+):
     """Tests that an asset can be created with both a datatoken address and owner address."""
     ocn = publisher_ocean_instance
-    alice = get_publisher_wallet()
+    alice = publisher_wallet
 
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
     asset = V3Asset(json_filename=sample_ddo_path)
@@ -299,10 +302,10 @@ def test_create_asset_with_dt_address_and_owner_address(publisher_ocean_instance
     ), "Asset creation failed when given both a datatoken address and owner address."
 
 
-def test_create_asset_without_dt_address(publisher_ocean_instance):
+def test_create_asset_without_dt_address(publisher_ocean_instance, publisher_wallet):
     """Tests creation of the asset which has not the data token address."""
     ocn = publisher_ocean_instance
-    alice = get_publisher_wallet()
+    alice = publisher_wallet
 
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
     asset = V3Asset(json_filename=sample_ddo_path)
@@ -313,10 +316,12 @@ def test_create_asset_without_dt_address(publisher_ocean_instance):
     ), "Asset creation failed with the specified datatoken address."
 
 
-def test_pay_for_service_insufficient_balance(publisher_ocean_instance):
+def test_pay_for_service_insufficient_balance(
+    publisher_ocean_instance, publisher_wallet
+):
     """Tests if balance is lower than the purchased amount."""
     ocn = publisher_ocean_instance
-    alice = get_publisher_wallet()
+    alice = publisher_wallet
 
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
     asset = V3Asset(json_filename=sample_ddo_path)

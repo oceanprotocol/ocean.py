@@ -4,7 +4,6 @@
 #
 from ocean_lib.ocean.util import get_ocean_token_address
 from ocean_lib.web3_internal.utils import get_network_name
-from tests.resources.helper_functions import get_publisher_wallet
 
 
 def test_get_OCEAN_address(publisher_ocean_instance):
@@ -15,17 +14,17 @@ def test_get_OCEAN_address(publisher_ocean_instance):
     )
 
 
-def test_add_remove_zero_liquidity(publisher_ocean_instance):
+def test_add_remove_zero_liquidity(publisher_ocean_instance, publisher_wallet):
     """Tests that adding or removing zero liquidity has no effect."""
     assert (
         publisher_ocean_instance.pool._add_liquidity(
-            "addr", "an_addr", 0, get_publisher_wallet()
+            "addr", "an_addr", 0, publisher_wallet
         )
         == ""
     ), "Adding liquidity had effect with 0 balance."
     assert (
         publisher_ocean_instance.pool._remove_liquidity(
-            "addr", "an_addr", 0, 1, get_publisher_wallet()
+            "addr", "an_addr", 0, 1, publisher_wallet
         )
         == ""
     ), "Removing liquidity had effect with 0 balance."

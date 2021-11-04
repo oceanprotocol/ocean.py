@@ -8,12 +8,11 @@ from ocean_lib.web3_internal.constants import BLOCK_NUMBER_POLL_INTERVAL
 from ocean_lib.web3_internal.web3_overrides.utils import (
     wait_for_transaction_receipt_and_block_confirmations,
 )
-from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
 
 
-def test_block_confirmations():
-    alice_wallet = get_publisher_wallet()
-    bob_address = get_consumer_wallet().address
+def test_block_confirmations(publisher_wallet, consumer_wallet):
+    alice_wallet = publisher_wallet
+    bob_address = consumer_wallet.address
 
     # Send transaction first, start dummy tx thread second
     # else risk race condition: out of order nonce
