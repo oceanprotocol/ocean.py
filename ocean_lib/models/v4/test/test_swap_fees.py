@@ -3160,9 +3160,7 @@ def test_pool_dai_flexible(
         web3, get_address_of_type(config, "ERC721Factory")
     )
     side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
-    dai_contract = ERC20Token(
-        address=get_address_of_type(config, "MockDAI"), web3=web3
-    )
+    dai_contract = ERC20Token(address=get_address_of_type(config, "MockDAI"), web3=web3)
     dai_contract.transfer(
         consumer_wallet.address, web3.toWei("20", "ether"), factory_deployer_wallet
     )
@@ -3306,8 +3304,7 @@ def test_pool_dai_flexible(
 
     # Check swap balances
     assert (
-        dai_contract.balanceOf(publisher_wallet.address)
-        + swap_event_args.tokenAmountIn
+        dai_contract.balanceOf(publisher_wallet.address) + swap_event_args.tokenAmountIn
         == user4_dai_balance
     )
     assert (
@@ -3347,8 +3344,7 @@ def test_pool_dai_flexible(
     swap_event_args = swap_fee_event[0].args
 
     assert (
-        dai_contract.balanceOf(publisher_wallet.address)
-        + swap_event_args.tokenAmountIn
+        dai_contract.balanceOf(publisher_wallet.address) + swap_event_args.tokenAmountIn
         == user4_dai_balance
     )
     assert (
@@ -3473,9 +3469,8 @@ def test_pool_dai_flexible(
         erc20_token.balanceOf(publisher_wallet.address) + swap_event_args.tokenAmountIn
         == user4_dt_balance
     )
-    assert (
-        user4_dai_balance + swap_event_args.tokenAmountOut
-        == dai_contract.balanceOf(publisher_wallet.address)
+    assert user4_dai_balance + swap_event_args.tokenAmountOut == dai_contract.balanceOf(
+        publisher_wallet.address
     )
 
     assert (
