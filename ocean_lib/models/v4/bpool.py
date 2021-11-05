@@ -179,17 +179,17 @@ class BPool(BTokenBase):
     def get_base_token_address(self) -> str:
         return self.contract.caller.getBaseTokenAddress()
 
-    def calc_pool_in_single_out(self,address:str,amount:int):
-        return self.contract.caller.calcPoolInSingleOut(address,amount)
+    def calc_pool_in_single_out(self, address: str, amount: int):
+        return self.contract.caller.calcPoolInSingleOut(address, amount)
 
-    def calc_pool_out_single_in(self,address:str,amount:int):
-        return self.contract.caller.calcPoolOutSingleIn(address,amount)
-    
-    def calc_single_out_pool_in(self,address:str,amount:int):
-        return self.contract.caller.calcSingleOutPoolIn(address,amount)
-    
-    def calc_single_in_pool_out(self,address:str,amount:int):
-        return self.contract.caller.calcSingleInPoolOut(address,amount)
+    def calc_pool_out_single_in(self, address: str, amount: int):
+        return self.contract.caller.calcPoolOutSingleIn(address, amount)
+
+    def calc_single_out_pool_in(self, address: str, amount: int):
+        return self.contract.caller.calcSingleOutPoolIn(address, amount)
+
+    def calc_single_in_pool_out(self, address: str, amount: int):
+        return self.contract.caller.calcSingleInPoolOut(address, amount)
 
     def set_swap_fee(self, swap_fee: int, from_wallet: Wallet) -> str:
         """
