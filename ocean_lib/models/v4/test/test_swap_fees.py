@@ -2389,7 +2389,7 @@ def test_pool_usdc_flexible(
     publisher_wallet,
     factory_router,
 ):
-    """Tests pool with NO ocean token (USDC 6 decimals) and market fee 0.1%"""
+    """Tests pool with NO ocean token (USDC 6 decimals) and market fee 0.1% flexible opf fee"""
     erc721_factory = ERC721FactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
     )
