@@ -213,12 +213,16 @@ def mint_tokens_and_wait(
 
 
 def deploy_erc721_erc20(
-    web3: Web3, config: Config, erc721_publisher: Wallet, erc20_minter: Wallet
+    web3: Web3,
+    config: Config,
+    erc721_publisher: Wallet,
+    erc20_minter: Optional[Wallet] = None,
 ):
     """Helper function to deploy an ERC721Token using erc721_publisher Wallet
-    and an ERC20Token data token with the newly ERC721Token using erc20_minter Wallet.
+    and an ERC20Token data token with the newly ERC721Token using erc20_minter Wallet
+    if the wallet is provided.
 
-    :rtype: (ERC721Token, ERC20Token)
+    :rtype: ERC721Token or (ERC721Token, ERC20Token)
     """
 
     erc721_factory = ERC721FactoryContract(
@@ -241,6 +245,8 @@ def deploy_erc721_erc20(
     )
     token_address = registered_event[0].args.newTokenAddress
     erc721_token = ERC721Token(web3, token_address)
+    if not erc20_minter:
+        return erc721_token
 
     erc_create_data = ErcCreateData(
         template_index=1,

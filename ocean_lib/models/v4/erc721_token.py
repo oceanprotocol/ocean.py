@@ -44,11 +44,22 @@ class ERC721Token(ContractBase):
         owner: str,
         name: str,
         symbol: str,
-        erc20_factory_address: str,
+        token_factory_address: str,
+        additional_erc20_deployer: str,
+        base_uri: str,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "initialize", (owner, name, symbol, erc20_factory_address), from_wallet
+            "initialize",
+            (
+                owner,
+                name,
+                symbol,
+                token_factory_address,
+                additional_erc20_deployer,
+                base_uri,
+            ),
+            from_wallet,
         )
 
     def set_metadata(
@@ -58,9 +69,10 @@ class ERC721Token(ContractBase):
         metadata_decryptor_address: str,
         flags: bytes,
         data: bytes,
+        data_hash: bytes,
         from_wallet: Wallet,
     ) -> str:
-        self.send_transaction(
+        return self.send_transaction(
             "setMetaData",
             (
                 metadata_state,
@@ -68,6 +80,7 @@ class ERC721Token(ContractBase):
                 metadata_decryptor_address,
                 flags,
                 data,
+                data_hash,
             ),
             from_wallet,
         )
@@ -108,16 +121,6 @@ class ERC721Token(ContractBase):
     def add_manager(self, manager_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("addManager", (manager_address,), from_wallet)
 
-    def add_to_725_store_list(self, allowed_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "addTo725StoreList", (allowed_address,), from_wallet
-        )
-
-    def add_to_metadata_list(self, allowed_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "addToMetadataList", (allowed_address,), from_wallet
-        )
-
     def remove_manager(self, manager_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("removeManager", (manager_address,), from_wallet)
 
@@ -139,6 +142,9 @@ class ERC721Token(ContractBase):
 
     def get_data(self, key: bytes) -> bytes:
         return self.contract.caller.getData(key)
+
+    def token_uri(self, token_id: int) -> str:
+        return self.contract.caller.tokenURI(token_id)
 
     def wrap_v3_dt(self, datatoken: str, new_minter: str, from_wallet: Wallet) -> str:
         return self.send_transaction("wrapV3DT", (datatoken, new_minter), from_wallet)
