@@ -16,12 +16,11 @@ from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.utils.utilities import checksum
 from tests.resources.ddo_helpers import get_resource_path
-from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
 from web3.logs import DISCARD
 from web3.main import Web3
 
 
-def get_ddo_sample(datatoken_address):
+def get_ddo_sample(datatoken_address, publisher_wallet):
     """Helper function to get a sample ddo for testing."""
     did = f"did:op:{remove_0x_prefix(datatoken_address)}"
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
@@ -34,7 +33,7 @@ def get_ddo_sample(datatoken_address):
     for service in asset.services:
         checksum_dict[str(service.index)] = checksum(service.main)
 
-    asset.add_proof(checksum_dict, get_publisher_wallet())
+    asset.add_proof(checksum_dict, publisher_wallet)
     asset.did = did
     return asset
 
@@ -132,20 +131,20 @@ def test_ddo_credentials_disabled():
     assert ddo.is_consumable() == ConsumableCodes.ASSET_DISABLED
 
 
-def test_ddo_on_chain(config, web3):
+def test_ddo_on_chain(config, web3, publisher_wallet, consumer_wallet):
     """Tests chain operations on a DDO."""
     addresses = get_contracts_addresses(config.address_file, "ganache")["v3"]
     ddo_address = addresses[MetadataContract.CONTRACT_NAME]
     dtfactory_address = addresses[DTFactory.CONTRACT_NAME]
     ddo_registry = MetadataContract(web3, ddo_address)
-    wallet = get_publisher_wallet()
+    wallet = publisher_wallet
 
     dtfactory = DTFactory(web3, dtfactory_address)
     tx_id = dtfactory.createToken("", "dt1", "dt1", 1000, wallet)
     dt = DataToken(web3, dtfactory.get_token_address(tx_id))
 
     # test create ddo
-    asset = get_ddo_sample(dt.address)
+    asset = get_ddo_sample(dt.address, wallet)
     old_name = asset.metadata["main"]["name"]
     txid = ddo_registry.create(
         asset.asset_id, b"", lzma.compress(Web3.toBytes(text=asset.as_text())), wallet
@@ -188,7 +187,7 @@ def test_ddo_on_chain(config, web3):
     assert DataToken(web3, asset.asset_id).contract.caller.isMinter(wallet.address)
 
     # test update fails from wallet other than the original publisher
-    bob = get_consumer_wallet()
+    bob = consumer_wallet
     try:
         txid = ddo_registry.update(
             asset.asset_id, b"", lzma.compress(Web3.toBytes(text=asset.as_text())), bob

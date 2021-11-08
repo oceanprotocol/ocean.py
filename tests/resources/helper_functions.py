@@ -283,9 +283,26 @@ def get_non_existent_nft_template(
     """Helper function to find a non existent ERC721 template among the first *check_first* templates
     of an ERC721 Factory contract. Returns -1 if template was found.
     """
-    for x in range(check_first):
-        [address, _] = erc721_factory.get_nft_template(x)
+    for template_nbr in range(check_first):
+        [address, _] = erc721_factory.get_nft_template(template_nbr)
         if address == ZERO_ADDRESS:
-            return x
+            return template_nbr
 
     return -1
+
+
+def send_mock_usdc_to_address(
+    web3: Web3, config: Config, recipient: str, amount: int
+) -> int:
+    """Helper function to send mock usdc to an arbitrary recipient address if factory_deployer has enough balance
+    to send. Returns the transferred balance.
+    """
+    factory_deployer = get_factory_deployer_wallet(config.network_name)
+
+    mock_usdc = ERC20Token(web3, get_address_of_type(config, "MockUSDC"))
+    initial_recipient_balance = mock_usdc.balanceOf(recipient)
+
+    if mock_usdc.balanceOf(factory_deployer) >= amount:
+        mock_usdc.transfer(recipient, amount, factory_deployer)
+
+    return mock_usdc.balanceOf(recipient) - initial_recipient_balance

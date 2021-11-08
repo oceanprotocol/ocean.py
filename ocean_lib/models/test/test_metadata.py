@@ -6,12 +6,13 @@
 from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.ocean.test.test_ocean_assets import create_asset
 from tests.resources.ddo_helpers import wait_for_ddo
-from tests.resources.helper_functions import get_publisher_wallet
 
 
-def test_metadata_contract(publisher_ocean_instance, config, v3_contracts_addresses):
+def test_metadata_contract(
+    publisher_ocean_instance, config, v3_contracts_addresses, publisher_wallet
+):
     ocn = publisher_ocean_instance
-    alice = get_publisher_wallet()
+    alice = publisher_wallet
     block = ocn.web3.eth.block_number
 
     # FIXME: Metadata needs to suppport both v3 and v4
