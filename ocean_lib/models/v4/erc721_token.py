@@ -199,3 +199,12 @@ class ERC721Token(ContractBase):
 
     def owner_of(self, token_id: int) -> str:
         return self.contract.caller.ownerOf(token_id)
+
+    def get_tokens_list(self) -> list:
+        return self.contract.caller.getTokensList()
+
+    def is_deployed(self, data_token: str) -> bool:
+        return self.contract.caller.isDeployed(data_token)
+
+    def set_base_uri(self, new_base_uri: str, from_wallet: Wallet) -> str:
+        return self.send_transaction("setBaseURI", (new_base_uri,), from_wallet)
