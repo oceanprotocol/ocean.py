@@ -4,14 +4,14 @@
 #
 import pytest
 from web3 import exceptions
-import math
+
+from ocean_lib.models.v4.bpool import BPool
 from ocean_lib.models.v4.dispenser import DispenserV4
 from ocean_lib.models.v4.erc20_token import ERC20Token
-from ocean_lib.models.v4.bpool import BPool
-from ocean_lib.models.v4.side_staking import SideStaking
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Token
 from ocean_lib.models.v4.models_structures import ErcCreateData, PoolData
+from ocean_lib.models.v4.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import get_address_of_type
 
@@ -485,6 +485,7 @@ def test_pool_ocean(
     consumer_dt_balance = erc20_token.balanceOf(consumer_wallet.address)
     ss_contract_dt_balance = erc20_token.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
+    dt_balance_before_join = side_staking.get_data_token_balance(erc20_token.address)
 
     ocean_contract.approve(bpool_address, web3.toWei(1000, "ether"), consumer_wallet)
 
@@ -510,10 +511,10 @@ def test_pool_ocean(
         side_staking.address
     )
 
-    ##assert (
-    ##    side_staking.get_data_token_balance(erc20_token.address)
-    ##    == ss_contract_dt_balance - side_staking_amount_in
-    ##)
+    assert (
+        side_staking.get_data_token_balance(erc20_token.address)
+        == dt_balance_before_join - side_staking_amount_in
+    )
 
     assert join_pool_event[1].args.tokenAmountIn == side_staking_amount_in
 
@@ -1241,6 +1242,7 @@ def test_pool_dai(
     consumer_dt_balance = erc20_token.balanceOf(consumer_wallet.address)
     ss_contract_dt_balance = erc20_token.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
+    dt_balance_before_join = side_staking.get_data_token_balance(erc20_token.address)
 
     dai_contract.approve(bpool_address, web3.toWei(1000, "ether"), consumer_wallet)
 
@@ -1266,10 +1268,10 @@ def test_pool_dai(
         side_staking.address
     )
 
-    ##assert (
-    ##    side_staking.get_data_token_balance(erc20_token.address)
-    ##    == ss_contract_dt_balance - side_staking_amount_in
-    ##)
+    assert (
+        side_staking.get_data_token_balance(erc20_token.address)
+        == dt_balance_before_join - side_staking_amount_in
+    )
 
     assert join_pool_event[1].args.tokenAmountIn == side_staking_amount_in
 
@@ -2005,6 +2007,7 @@ def test_pool_usdc(
     consumer_dt_balance = erc20_token.balanceOf(consumer_wallet.address)
     ss_contract_dt_balance = erc20_token.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
+    dt_balance_before_join = side_staking.get_data_token_balance(erc20_token.address)
 
     usdc_contract.approve(bpool_address, web3.toWei(1000, "ether"), consumer_wallet)
 
@@ -2030,10 +2033,10 @@ def test_pool_usdc(
         side_staking.address
     )
 
-    ##assert (
-    ##    side_staking.get_data_token_balance(erc20_token.address)
-    ##    == ss_contract_dt_balance - side_staking_amount_in
-    ##)
+    assert (
+        side_staking.get_data_token_balance(erc20_token.address)
+        == dt_balance_before_join - side_staking_amount_in
+    )
 
     assert join_pool_event[1].args.tokenAmountIn == side_staking_amount_in
 
@@ -2770,6 +2773,7 @@ def test_pool_usdc_flexible(
     consumer_dt_balance = erc20_token.balanceOf(consumer_wallet.address)
     ss_contract_dt_balance = erc20_token.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
+    dt_balance_before_join = side_staking.get_data_token_balance(erc20_token.address)
 
     usdc_contract.approve(bpool_address, web3.toWei(1000, "ether"), consumer_wallet)
 
@@ -2795,10 +2799,10 @@ def test_pool_usdc_flexible(
         side_staking.address
     )
 
-    ##assert (
-    ##    side_staking.get_data_token_balance(erc20_token.address)
-    ##    == ss_contract_dt_balance - side_staking_amount_in
-    ##)
+    assert (
+        side_staking.get_data_token_balance(erc20_token.address)
+        == dt_balance_before_join - side_staking_amount_in
+    )
 
     assert join_pool_event[1].args.tokenAmountIn == side_staking_amount_in
 
@@ -3529,6 +3533,7 @@ def test_pool_dai_flexible(
     consumer_dt_balance = erc20_token.balanceOf(consumer_wallet.address)
     ss_contract_dt_balance = erc20_token.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
+    dt_balance_before_join = side_staking.get_data_token_balance(erc20_token.address)
 
     dai_contract.approve(bpool_address, web3.toWei(1000, "ether"), consumer_wallet)
 
@@ -3554,10 +3559,10 @@ def test_pool_dai_flexible(
         side_staking.address
     )
 
-    ##assert (
-    ##    side_staking.get_data_token_balance(erc20_token.address)
-    ##    == ss_contract_dt_balance - side_staking_amount_in
-    ##)
+    assert (
+        side_staking.get_data_token_balance(erc20_token.address)
+        == dt_balance_before_join - side_staking_amount_in
+    )
 
     assert join_pool_event[1].args.tokenAmountIn == side_staking_amount_in
 
