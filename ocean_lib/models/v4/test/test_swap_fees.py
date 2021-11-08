@@ -1679,7 +1679,7 @@ def test_pool_usdc(
 
     # Tests consumer calls deployPool(), we then check USDC and market fee"
 
-    initial_usdc_liq = int(880 * 1e6)  # 880 USDC
+    initial_usdc_liq = int(1e6) * 880  # 880 USDC
 
     usdc_contract.approve(
         get_address_of_type(config, "Router"),
@@ -2435,7 +2435,7 @@ def test_pool_usdc_flexible(
 
     # Tests consumer calls deployPool(), we then check USDC and market fee"
 
-    initial_usdc_liq = int(880 * 1e6)  # 880 USDC
+    initial_usdc_liq = int(1e6) * 880  # 880 USDC  # 880 USDC
 
     usdc_contract.approve(
         get_address_of_type(config, "Router"),
