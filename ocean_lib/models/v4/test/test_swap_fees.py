@@ -13,31 +13,13 @@ from ocean_lib.models.v4.erc721_token import ERC721Token
 from ocean_lib.models.v4.models_structures import ErcCreateData, PoolData
 from ocean_lib.models.v4.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from tests.resources.helper_functions import get_address_of_type
+from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
 def deploy_erc721_token(config, web3, factory_deployer_wallet, manager_wallet):
-    erc721_factory = ERC721FactoryContract(
-        web3, get_address_of_type(config, "ERC721Factory")
+    erc721_token = deploy_erc721_erc20(
+        web3,config,factory_deployer_wallet
     )
-    tx = erc721_factory.deploy_erc721_contract(
-        "NFT",
-        "SYMBOL",
-        1,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
-        factory_deployer_wallet,
-    )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    event = erc721_factory.get_event_log(
-        erc721_factory.EVENT_NFT_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-
-    token_address = event[0].args.newTokenAddress
-    erc721_token = ERC721Token(web3, token_address)
 
     erc721_token.add_to_725_store_list(manager_wallet.address, factory_deployer_wallet)
     erc721_token.add_to_create_erc20_list(
