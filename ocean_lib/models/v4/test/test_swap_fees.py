@@ -17,9 +17,7 @@ from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of
 
 
 def deploy_erc721_token(config, web3, factory_deployer_wallet, manager_wallet):
-    erc721_token = deploy_erc721_erc20(
-        web3,config,factory_deployer_wallet
-    )
+    erc721_token = deploy_erc721_erc20(web3, config, factory_deployer_wallet)
 
     erc721_token.add_to_725_store_list(manager_wallet.address, factory_deployer_wallet)
     erc721_token.add_to_create_erc20_list(
