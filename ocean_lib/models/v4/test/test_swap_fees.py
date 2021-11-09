@@ -16,7 +16,7 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
-def deploy_erc721_token(config, web3, factory_deployer_wallet, manager_wallet):
+def _deploy_erc721_token(config, web3, factory_deployer_wallet, manager_wallet):
     erc721_token = deploy_erc721_erc20(web3, config, factory_deployer_wallet)
 
     erc721_token.add_to_725_store_list(manager_wallet.address, factory_deployer_wallet)
@@ -91,7 +91,7 @@ def test_pool_ocean(
         web3, get_address_of_type(config, "ERC721Factory")
     )
     side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
-    erc721_token = deploy_erc721_token(
+    erc721_token = _deploy_erc721_token(
         config, web3, factory_deployer_wallet, consumer_wallet
     )
 
@@ -864,7 +864,7 @@ def test_pool_dai(
         publisher_wallet.address, web3.toWei("20", "ether"), factory_deployer_wallet
     )
 
-    erc721_token = deploy_erc721_token(
+    erc721_token = _deploy_erc721_token(
         config, web3, factory_deployer_wallet, consumer_wallet
     )
     swap_fee = web3.toWei(0.001, "ether")
@@ -1622,7 +1622,7 @@ def test_pool_usdc(
         publisher_wallet.address, web3.toWei("20", "ether"), factory_deployer_wallet
     )
 
-    erc721_token = deploy_erc721_token(
+    erc721_token = _deploy_erc721_token(
         config, web3, factory_deployer_wallet, consumer_wallet
     )
     swap_fee = web3.toWei(0.001, "ether")
@@ -2378,7 +2378,7 @@ def test_pool_usdc_flexible(
         publisher_wallet.address, web3.toWei("20", "ether"), factory_deployer_wallet
     )
 
-    erc721_token = deploy_erc721_token(
+    erc721_token = _deploy_erc721_token(
         config, web3, factory_deployer_wallet, consumer_wallet
     )
     swap_fee = web3.toWei(0.001, "ether")
@@ -3136,7 +3136,7 @@ def test_pool_dai_flexible(
         publisher_wallet.address, web3.toWei("20", "ether"), factory_deployer_wallet
     )
 
-    erc721_token = deploy_erc721_token(
+    erc721_token = _deploy_erc721_token(
         config, web3, factory_deployer_wallet, consumer_wallet
     )
     swap_fee = web3.toWei(0.001, "ether")
