@@ -6,7 +6,7 @@ from typing import List
 
 from enforce_typing import enforce_types
 
-from ocean_lib.models.v4.models_structures import PoolData, FixedData
+from ocean_lib.models.v4.models_structures import PoolData, FixedData, DispenserData
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -47,17 +47,16 @@ class ERC20Token(ContractBase):
 
     def initialize(
         self,
-        name: str,
-        symbol: str,
-        erc_address: str,
-        cap: int,
-        fee_collector_address: str,
-        minter_address: str,
+        strings: List[str],
+        addresses: List[str],
+        factory_addresses: List[str],
+        uints: List[int],
+        bytess: List[bytes],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "initialize",
-            (name, symbol, erc_address, cap, fee_collector_address, minter_address),
+            (strings, addresses, factory_addresses, uints, bytess),
             from_wallet,
         )
 
@@ -76,6 +75,22 @@ class ERC20Token(ContractBase):
         return self.send_transaction(
             "createFixedRate",
             (fixed_data.fixed_price_address, fixed_data.addresses, fixed_data.uints),
+            from_wallet,
+        )
+
+    def create_dispenser(
+        self, dispenser_data: DispenserData, with_mint: bool, from_wallet: Wallet
+    ) -> str:
+
+        return self.send_transaction(
+            "createDispenser",
+            (
+                dispenser_data.dispenser_address,
+                dispenser_data.max_tokens,
+                dispenser_data.max_balance,
+                with_mint,
+                dispenser_data.allowed_swapper,
+            ),
             from_wallet,
         )
 
