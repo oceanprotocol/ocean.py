@@ -207,24 +207,6 @@ class ERC20Token(ContractBase):
             "setFeeCollector", (fee_collector_address,), from_wallet
         )
 
-    def create_dispenser(
-        self,
-        dispenser_data: DispenserData,
-        with_mint: bool,
-        from_wallet: Wallet,
-    ) -> str:
-        return self.send_transaction(
-            "createDispenser",
-            (
-                dispenser_data.dispenser_address,
-                dispenser_data.max_tokens,
-                dispenser_data.max_balance,
-                with_mint,
-                dispenser_data.allowed_swapper,
-            ),
-            from_wallet,
-        )
-
     def get_publishing_market_fee(self) -> tuple:
         return self.contract.caller.getPublishingMarketFee()
 
