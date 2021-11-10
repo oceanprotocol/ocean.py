@@ -12,7 +12,7 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import get_address_of_type
 
 
-def create_new_token(web3, publisher_wallet):
+def _create_new_token(web3, publisher_wallet):
     """Creates a new token and returns its address"""
     erc20_token = ERC20Token.deploy(web3=web3, deployer_wallet=publisher_wallet)
     return erc20_token
@@ -31,7 +31,7 @@ def test_ocean_tokens_mapping(config, factory_router):
 
 def test_add_token(web3, factory_router, factory_deployer_wallet):
     """Tests adding a new token address to the mapping if Router Owner"""
-    new_token_address = create_new_token(web3, factory_deployer_wallet)
+    new_token_address = _create_new_token(web3, factory_deployer_wallet)
 
     assert factory_router.ocean_tokens(new_token_address) is False
     factory_router.add_ocean_token(new_token_address, factory_deployer_wallet)
@@ -47,7 +47,7 @@ def test_fail_add_token(config, factory_router, another_consumer_wallet):
 
 def test_remove_token(web3, factory_router, factory_deployer_wallet, publisher_wallet):
     """Tests remove a token previously added if Router Owner, check OPF fee updates properly"""
-    new_token_address = create_new_token(web3, publisher_wallet)
+    new_token_address = _create_new_token(web3, publisher_wallet)
     assert factory_router.get_opf_fee(new_token_address) == web3.toWei("0.001", "ether")
 
     factory_router.add_ocean_token(new_token_address, factory_deployer_wallet)
@@ -68,7 +68,7 @@ def test_fail_remove_token(
     publisher_wallet,
 ):
     """Tests that if it fails to remove a token address to the mapping if NOT Router Owner"""
-    new_token_address = create_new_token(web3, publisher_wallet)
+    new_token_address = _create_new_token(web3, publisher_wallet)
 
     factory_router.add_ocean_token(new_token_address, factory_deployer_wallet)
     assert factory_router.ocean_tokens(new_token_address) is True
@@ -87,7 +87,7 @@ def test_update_opf_fee(
 
     factory_router.update_opf_fee(web3.toWei("0.001", "ether"), factory_deployer_wallet)
 
-    new_token_address = create_new_token(web3, publisher_wallet)
+    new_token_address = _create_new_token(web3, publisher_wallet)
 
     assert factory_router.ocean_tokens(new_token_address) is False
     assert factory_router.get_opf_fee(new_token_address) == web3.toWei("0.001", "ether")
@@ -111,7 +111,7 @@ def test_fail_update_opf_fee(
 
     factory_router.update_opf_fee(web3.toWei("0.001", "ether"), factory_deployer_wallet)
 
-    new_token_address = create_new_token(web3, publisher_wallet)
+    new_token_address = _create_new_token(web3, publisher_wallet)
 
     assert factory_router.ocean_tokens(new_token_address) is False
     assert factory_router.get_opf_fee(new_token_address) == web3.toWei("0.001", "ether")
@@ -139,7 +139,7 @@ def test_add_ss_contracts(
     web3, factory_router, factory_deployer_wallet, publisher_wallet
 ):
     """Tests adding a new ssContract address to the mapping if Router owner"""
-    user_address = create_new_token(web3, publisher_wallet)
+    user_address = _create_new_token(web3, publisher_wallet)
 
     assert factory_router.ss_contracts(user_address) is False
     factory_router.add_ss_contract(user_address, factory_deployer_wallet)
@@ -150,7 +150,7 @@ def test_fail_ss_contracts(
     web3, factory_router, another_consumer_wallet, publisher_wallet
 ):
     """Tests that if it fails to add a new ssContract address to the mapping if NOT Router Owner"""
-    user_address = create_new_token(web3, publisher_wallet)
+    user_address = _create_new_token(web3, publisher_wallet)
 
     assert factory_router.ss_contracts(user_address) is False
     with pytest.raises(exceptions.ContractLogicError) as err:

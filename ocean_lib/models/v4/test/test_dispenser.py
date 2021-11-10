@@ -6,10 +6,7 @@ import pytest
 from web3 import exceptions
 
 from ocean_lib.models.v4.dispenser import DispenserV4
-from ocean_lib.models.v4.erc20_token import ERC20Token
-from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.v4.erc721_token import ERC721Token
-from ocean_lib.models.v4.models_structures import DispenserData, ErcCreateData
+from ocean_lib.models.v4.models_structures import DispenserData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
@@ -112,9 +109,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
     )
 
     # Tests publisher deactivates the dispenser
-    tx = dispenser.deactivate(
-        from_wallet=publisher_wallet, data_token=erc20_token.address
-    )
+    dispenser.deactivate(from_wallet=publisher_wallet, data_token=erc20_token.address)
     status = dispenser.status(erc20_token.address)
     assert status[0] is False
 
@@ -159,7 +154,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
         allowed_swapper=ZERO_ADDRESS,
     )
 
-    tx = erc20_token.create_dispenser(
+    erc20_token.create_dispenser(
         from_wallet=publisher_wallet,
         dispenser_data=dispenser_data,
         with_mint=False,
@@ -180,14 +175,14 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
 
     # Tests publisher mints tokens and transfer them to the dispenser.
 
-    tx = erc20_token.mint(
+    erc20_token.mint(
         from_wallet=publisher_wallet,
         account_address=dispenser.address,
         value=web3.toWei(1, "ether"),
     )
 
     # Tests consumer requests data tokens
-    tx = dispenser.dispense(
+    dispenser.dispense(
         amount=web3.toWei(1, "ether"),
         data_token=erc20_token.address,
         destination=consumer_wallet.address,
@@ -207,7 +202,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
     )
 
     # Tests publisher withdraws all datatokens
-    tx = dispenser.owner_withdraw(
+    dispenser.owner_withdraw(
         data_token=erc20_token.address,
         from_wallet=publisher_wallet,
     )
