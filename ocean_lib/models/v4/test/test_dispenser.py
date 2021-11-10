@@ -45,10 +45,8 @@ def test_properties(web3, config):
     )
 
 
-# consumer is consumer
-# publisher is publisher
 def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_wallet):
-    """Tests"""
+    """Tests the main flow of the Dispenser."""
 
     # get the dispenser
     dispenser = DispenserV4(web3, get_address_of_type(config, "Dispenser"))
@@ -73,9 +71,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
     # Tests publisher gets the dispenser status
 
     dispenser_status = dispenser.status(erc20_token.address)
-    assert dispenser_status[0] == True
+    assert dispenser_status[0] is True
     assert dispenser_status[1] == publisher_wallet.address
-    assert dispenser_status[2] == True
+    assert dispenser_status[2] is True
 
     # Tests consumer requests more datatokens then allowed transaction reverts
     with pytest.raises(exceptions.ContractLogicError) as err:
@@ -118,7 +116,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
         from_wallet=publisher_wallet, data_token=erc20_token.address
     )
     status = dispenser.status(erc20_token.address)
-    assert status[0] == False
+    assert status[0] is False
 
     # Tests factory deployer should fail to get data tokens
     with pytest.raises(exceptions.ContractLogicError) as err:
