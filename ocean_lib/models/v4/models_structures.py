@@ -64,10 +64,8 @@ DispenserData = NamedTuple(
     "DispenserData",
     [
         ("dispenser_address", str),
-        ("data_token", str),
         ("max_tokens", int),
         ("max_balance", int),
-        ("owner", str),
         ("allowed_swapper", str),
     ],
 )
