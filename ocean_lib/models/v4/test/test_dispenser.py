@@ -9,10 +9,9 @@ from ocean_lib.models.v4.dispenser import DispenserV4
 from ocean_lib.models.v4.erc20_token import ERC20Token
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Token
-from ocean_lib.models.v4.dispenser import DispenserV4
-from ocean_lib.models.v4.models_structures import ErcCreateData
+from ocean_lib.models.v4.models_structures import DispenserData, ErcCreateData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from tests.resources.helper_functions import get_address_of_type, deploy_erc721_erc20
+from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
 def test_properties(web3, config):
@@ -59,13 +58,14 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
     )
 
     # Tests publisher creates a dispenser with minter role
-    tx = erc20_token.create_dispenser(
+    dispenser_data = DispenserData(
         dispenser_address=dispenser.address,
-        from_wallet=publisher_wallet,
         max_balance=web3.toWei(1, "ether"),
         max_tokens=web3.toWei(1, "ether"),
-        with_mint=True,
         allowed_swapper=ZERO_ADDRESS,
+    )
+    tx = erc20_token.create_dispenser(
+        from_wallet=publisher_wallet, dispenser_data=dispenser_data, with_mint=True
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
@@ -154,13 +154,17 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
         web3, config, publisher_wallet, publisher_wallet, cap=web3.toWei(50, "ether")
     )
 
-    tx = erc20_token.create_dispenser(
+    dispenser_data = DispenserData(
         dispenser_address=dispenser.address,
-        from_wallet=publisher_wallet,
         max_balance=web3.toWei(1, "ether"),
         max_tokens=web3.toWei(1, "ether"),
-        with_mint=False,
         allowed_swapper=ZERO_ADDRESS,
+    )
+
+    tx = erc20_token.create_dispenser(
+        from_wallet=publisher_wallet,
+        dispenser_data=dispenser_data,
+        with_mint=False,
     )
 
     # Tests consumer requests data tokens but they are not minted
