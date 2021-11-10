@@ -1,0 +1,27 @@
+#
+# Copyright 2021 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
+
+from enforce_typing import enforce_types
+from ocean_lib.models.v4.erc20_token import ERC20Token
+from ocean_lib.web3_internal.wallet import Wallet
+
+
+@enforce_types
+class ERC20Enterprise(ERC20Token):
+    CONTRACT_NAME = "ERC20TemplateEnterprise"
+
+    def buy_from_fre_and_order(
+        self, order_params: dict, fre_params: dict, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "buyFromFreAndOrder", (order_params, fre_params), from_wallet
+        )
+
+    def buy_from_dispenser_and_order(
+        self, order_params: dict, dispenser_address: str, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "buyFromDispenserAndOrder", (order_params, dispenser_address), from_wallet
+        )
