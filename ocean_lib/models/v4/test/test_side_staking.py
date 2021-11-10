@@ -12,6 +12,7 @@ from ocean_lib.models.v4.models_structures import PoolData
 from tests.resources.helper_functions import (
     get_address_of_type,
     deploy_erc721_erc20,
+    transfer_ocean_if_balance_lte,
 )
 
 
@@ -36,18 +37,24 @@ def test_side_staking(
         web3, config, consumer_wallet, consumer_wallet, web3.toWei("10000", "ether")
     )
 
-    if ocean_token.balanceOf(consumer_wallet.address) == 0:
-        ocean_token.transfer(
-            consumer_wallet.address,
-            web3.toWei("20000", "ether"),
-            factory_deployer_wallet,
-        )
-    if ocean_token.balanceOf(another_consumer_wallet.address) == 0:
-        ocean_token.transfer(
-            another_consumer_wallet.address,
-            web3.toWei("100", "ether"),
-            factory_deployer_wallet,
-        )
+    # Transfer ocean if needed
+    transfer_ocean_if_balance_lte(
+        web3=web3,
+        config=config,
+        factory_deployer_wallet=factory_deployer_wallet,
+        recipient=consumer_wallet.address,
+        min_balance=0,
+        amount_to_transfer=web3.toWei("20000", "ether"),
+    )
+
+    transfer_ocean_if_balance_lte(
+        web3=web3,
+        config=config,
+        factory_deployer_wallet=factory_deployer_wallet,
+        recipient=another_consumer_wallet.address,
+        min_balance=0,
+        amount_to_transfer=web3.toWei("100", "ether"),
+    )
 
     ocean_token.approve(
         get_address_of_type(config, "Router"),
