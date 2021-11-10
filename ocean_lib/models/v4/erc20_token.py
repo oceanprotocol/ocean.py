@@ -6,7 +6,7 @@ from typing import List
 
 from enforce_typing import enforce_types
 
-from ocean_lib.models.v4.models_structures import PoolData, FixedData
+from ocean_lib.models.v4.models_structures import DispenserData, PoolData, FixedData
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -190,6 +190,24 @@ class ERC20Token(ContractBase):
     def set_fee_collector(self, fee_collector_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction(
             "setFeeCollector", (fee_collector_address,), from_wallet
+        )
+
+    def create_dispenser(
+        self,
+        dispenser_data: DispenserData,
+        with_mint: bool,
+        from_wallet: Wallet,
+    ) -> str:
+        return self.send_transaction(
+            "createDispenser",
+            (
+                dispenser_data.dispenser_address,
+                dispenser_data.max_tokens,
+                dispenser_data.max_balance,
+                with_mint,
+                dispenser_data.allowed_swapper,
+            ),
+            from_wallet,
         )
 
     def get_publishing_market_fee(self) -> tuple:
