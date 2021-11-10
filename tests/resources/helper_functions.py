@@ -217,11 +217,11 @@ def deploy_erc721_erc20(
     config: Config,
     erc721_publisher: Wallet,
     erc20_minter: Optional[Wallet] = None,
+    cap=Web3.toWei("0.5", "ether"),
 ):
     """Helper function to deploy an ERC721Token using erc721_publisher Wallet
     and an ERC20Token data token with the newly ERC721Token using erc20_minter Wallet
     if the wallet is provided.
-
     :rtype: ERC721Token or (ERC721Token, ERC20Token)
     """
 
@@ -257,7 +257,7 @@ def deploy_erc721_erc20(
             erc721_publisher.address,
             ZERO_ADDRESS,
         ],
-        uints=[web3.toWei("0.5", "ether"), 0],
+        uints=[cap, 0],
         bytess=[b""],
     )
     tx_result = erc721_token.create_erc20(erc_create_data, erc721_publisher)
@@ -306,3 +306,31 @@ def send_mock_usdc_to_address(
         mock_usdc.transfer(recipient, amount, factory_deployer)
 
     return mock_usdc.balanceOf(recipient) - initial_recipient_balance
+
+
+def transfer_ocean_if_balance_lte(
+    web3: Web3,
+    config: Config,
+    factory_deployer_wallet: Wallet,
+    recipient: str,
+    min_balance: int,
+    amount_to_transfer: int,
+) -> int:
+    """Helper function to send an arbitrary amount of ocean to recipient address if recipient's ocean balance
+    is less or equal to min_balance and factory_deployer_wallet has enough ocean balance to send.
+    Returns the transferred ocean amount.
+    """
+    ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
+    initial_recipient_balance = ocean_token.balanceOf(recipient)
+    if (
+        initial_recipient_balance
+        <= min_balance & ocean_token.balanceOf(factory_deployer_wallet.address)
+        >= amount_to_transfer
+    ):
+        ocean_token.transfer(
+            recipient,
+            web3.toWei("20000", "ether"),
+            factory_deployer_wallet,
+        )
+
+    return ocean_token.balanceOf(recipient) - initial_recipient_balance
