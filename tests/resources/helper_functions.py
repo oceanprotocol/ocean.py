@@ -222,7 +222,6 @@ def deploy_erc721_erc20(
     """Helper function to deploy an ERC721Token using erc721_publisher Wallet
     and an ERC20Token data token with the newly ERC721Token using erc20_minter Wallet
     if the wallet is provided.
-    :rtype: ERC721Token or (ERC721Token, ERC20Token)
     """
 
     erc721_factory = ERC721FactoryContract(

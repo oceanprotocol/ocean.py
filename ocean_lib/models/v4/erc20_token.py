@@ -238,9 +238,6 @@ class ERC20Token(ContractBase):
             from_wallet,
         )
 
-    def permissions(self, account: str) -> list:
-        return self.contract.caller.permissions(account)
-
     def get_id(self) -> int:
         return self.contract.caller.getId()
 
@@ -258,9 +255,6 @@ class ERC20Token(ContractBase):
 
     def is_initialized(self) -> bool:
         return self.contract.caller.isInitialized()
-
-    def calculate_fee(self, amount: int, fee_percentage: int) -> int:
-        return self.contract.caller.calculateFee(amount, fee_percentage)
 
     def permit(
         self,

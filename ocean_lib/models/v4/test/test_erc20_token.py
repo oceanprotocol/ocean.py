@@ -134,7 +134,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     assert erc20.cap() == web3.toWei(publishMarketFeeAmount, "ether")
 
     # Check minter permissions
-    assert erc20.permissions(publisher_wallet.address)[RolesERC20.MINTER]
+    assert erc20.get_permissions(publisher_wallet.address)[RolesERC20.MINTER]
     assert erc20.is_minter(publisher_wallet.address)
 
     # Check that the erc20Token contract is initialized
@@ -291,9 +291,19 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         from_wallet=publisher_wallet,
     )
 
-    permissions = erc20.permissions(publisher_wallet.address)
+    permissions = erc20.get_permissions(publisher_wallet.address)
     assert not permissions[RolesERC20.MINTER]
     assert not permissions[RolesERC20.FEE_MANAGER]
+
+    # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        erc20.clean_from_721(
+            from_wallet=consumer_wallet,
+        )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT 721 Contract"
+    )
 
     # User should succeed to call startOrder on a ERC20 without publishFees, consumeFeeAmount on top is ZERO
     # Get new tokens
