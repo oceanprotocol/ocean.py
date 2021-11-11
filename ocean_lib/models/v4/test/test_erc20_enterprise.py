@@ -225,7 +225,7 @@ def test_buy_from_fre_and_order(
     )
     mock_usdc_contract.approve(
         spender=erc20_enterprise_token.address,
-        amount=web3.toWei(1000,"ether"),
+        amount=web3.toWei(1000, "ether"),
         from_wallet=consumer_wallet,
     )
     mock_dai_contract.transfer(
@@ -235,7 +235,7 @@ def test_buy_from_fre_and_order(
     )
     mock_dai_contract.approve(
         spender=erc20_enterprise_token.address,
-        amount=web3.toWei(1000,"ether"),
+        amount=web3.toWei(1000, "ether"),
         from_wallet=consumer_wallet,
     )
 
