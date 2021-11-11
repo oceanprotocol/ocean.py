@@ -60,7 +60,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
         allowed_swapper=ZERO_ADDRESS,
     )
     tx = erc20_token.create_dispenser(
-        from_wallet=publisher_wallet, dispenser_data=dispenser_data, with_mint=True
+       dispenser_data=dispenser_data, with_mint=True, from_wallet=publisher_wallet
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
@@ -87,8 +87,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
 
     # Tests consumer requests data tokens
     tx = dispenser.dispense(
-        amount=web3.toWei(1, "ether"),
         data_token=erc20_token.address,
+        amount=web3.toWei(1, "ether"),
         destination=consumer_wallet.address,
         from_wallet=consumer_wallet,
     )
@@ -130,10 +130,10 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
     # Tests consumer should fail to activate a dispenser for a token for he is not a minter
     with pytest.raises(exceptions.ContractLogicError) as err:
         dispenser.activate(
-            from_wallet=consumer_wallet,
             data_token=erc20_token.address,
             max_tokens=web3.toWei(1, "ether"),
             max_balance=web3.toWei(1, "ether"),
+            from_wallet=consumer_wallet,
         )
 
     assert (
@@ -183,8 +183,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
 
     # Tests consumer requests data tokens
     dispenser.dispense(
-        amount=web3.toWei(1, "ether"),
         data_token=erc20_token.address,
+        amount=web3.toWei(1, "ether"),
         destination=consumer_wallet.address,
         from_wallet=consumer_wallet,
     )
