@@ -218,7 +218,6 @@ def deploy_erc721_erc20(
     erc721_publisher: Wallet,
     erc20_minter: Optional[Wallet] = None,
     cap: int = Web3.toWei("0.5", "ether"),
-    template_index: Optional[int] = 1,
 ):
     """Helper function to deploy an ERC721Token using erc721_publisher Wallet
     and an ERC20Token data token with the newly ERC721Token using erc20_minter Wallet
@@ -250,7 +249,7 @@ def deploy_erc721_erc20(
         return erc721_token
 
     erc_create_data = ErcCreateData(
-        template_index=template_index,
+        template_index=1,
         strings=["ERC20DT1", "ERC20DT1Symbol"],
         addresses=[
             erc20_minter.address,
