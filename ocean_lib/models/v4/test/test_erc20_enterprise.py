@@ -225,7 +225,7 @@ def test_buy_from_fre_and_order(
     )
     mock_usdc_contract.approve(
         spender=erc20_enterprise_token.address,
-        amount=consume_fee_amount * 2,
+        amount=web3.toWei(1000,"ether"),
         from_wallet=consumer_wallet,
     )
     mock_dai_contract.transfer(
@@ -235,7 +235,7 @@ def test_buy_from_fre_and_order(
     )
     mock_dai_contract.approve(
         spender=erc20_enterprise_token.address,
-        amount=consume_fee_amount * 2,
+        amount=web3.toWei(1000,"ether"),
         from_wallet=consumer_wallet,
     )
 
@@ -253,6 +253,7 @@ def test_buy_from_fre_and_order(
         "exchangeId": exchange_id,
         "maxBaseTokenAmount": web3.toWei(3, "ether"),
     }
+
     opf_collector_address = get_address_of_type(config, "OPFCommunityFeeCollector")
 
     balance_consume_before = mock_dai_contract.balanceOf(consume_fee_address)
@@ -265,6 +266,7 @@ def test_buy_from_fre_and_order(
         fre_params=fre_params,
         from_wallet=consumer_wallet,
     )
+
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt["status"] == 1
 
