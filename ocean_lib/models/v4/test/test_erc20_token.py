@@ -40,7 +40,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     )
     erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
 
-    publishMarketFeeAmount = 5
+    publish_market_fee_amount = 5
 
     tx = erc721_factory.deploy_erc721_contract(
         "DT1",
@@ -123,7 +123,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         config=config,
         erc721_publisher=publisher_wallet,
         erc20_minter=publisher_wallet,
-        cap=web3.toWei(publishMarketFeeAmount, "ether"),
+        cap=web3.toWei(publish_market_fee_amount, "ether"),
     )
 
     # Check erc20 params
@@ -131,7 +131,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     assert erc20.contract.caller.name() == "ERC20DT1"
     assert erc20.symbol() == "ERC20DT1Symbol"
     assert erc20.decimals() == 18
-    assert erc20.cap() == web3.toWei(publishMarketFeeAmount, "ether")
+    assert erc20.cap() == web3.toWei(publish_market_fee_amount, "ether")
 
     # Check minter permissions
     assert erc20.get_permissions(publisher_wallet.address)[RolesERC20.MINTER]
