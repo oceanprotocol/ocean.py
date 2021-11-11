@@ -217,11 +217,12 @@ def deploy_erc721_erc20(
     config: Config,
     erc721_publisher: Wallet,
     erc20_minter: Optional[Wallet] = None,
+    cap: int = Web3.toWei("0.5", "ether"),
+    template_index: Optional[int] = 1,
 ):
     """Helper function to deploy an ERC721Token using erc721_publisher Wallet
     and an ERC20Token data token with the newly ERC721Token using erc20_minter Wallet
     if the wallet is provided.
-
     :rtype: ERC721Token or (ERC721Token, ERC20Token)
     """
 
@@ -249,7 +250,7 @@ def deploy_erc721_erc20(
         return erc721_token
 
     erc_create_data = ErcCreateData(
-        template_index=1,
+        template_index=template_index,
         strings=["ERC20DT1", "ERC20DT1Symbol"],
         addresses=[
             erc20_minter.address,
@@ -257,7 +258,7 @@ def deploy_erc721_erc20(
             erc721_publisher.address,
             ZERO_ADDRESS,
         ],
-        uints=[web3.toWei("0.5", "ether"), 0],
+        uints=[cap, 0],
         bytess=[b""],
     )
     tx_result = erc721_token.create_erc20(erc_create_data, erc721_publisher)
@@ -275,7 +276,6 @@ def deploy_erc721_erc20(
     erc20_token = ERC20Token(web3, erc20_address)
 
     return erc721_token, erc20_token
-
 
 def get_non_existent_nft_template(
     erc721_factory: ERC721FactoryContract, check_first=20
