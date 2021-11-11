@@ -5,13 +5,13 @@
 import pytest
 from web3 import exceptions
 
+from ocean_lib.models.v4.dispenser import DispenserV4
 from ocean_lib.models.v4.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.v4.erc20_token import ERC20Token
-from ocean_lib.models.v4.models_structures import DispenserData, FixedData
-from ocean_lib.models.v4.dispenser import DispenserV4
 from ocean_lib.models.v4.fixed_rate_exchange import FixedRateExchangeV4
+from ocean_lib.models.v4.models_structures import DispenserData, FixedData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from tests.resources.helper_functions import get_address_of_type, deploy_erc721_erc20
+from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
 def test_buy_from_dispenser_and_order(
@@ -138,7 +138,10 @@ def test_buy_from_dispenser_and_order(
     assert balance_publish - balance_publish_before == expected_publish
     assert balance_opf_publish - balance_opf_publish_before == expected_opf_publish
 
-    assert erc20_enterprise_token.balanceOf(erc20_enterprise_token.get_fee_collector()) == 0
+    assert (
+        erc20_enterprise_token.balanceOf(erc20_enterprise_token.get_fee_collector())
+        == 0
+    )
 
 
 def test_buy_from_fre_and_order(
@@ -283,4 +286,7 @@ def test_buy_from_fre_and_order(
     assert balance_publish - balance_publish_before == expected_publish
     assert balance_opf_publish - balance_opf_publish_before == expected_opf_publish
 
-    assert erc20_enterprise_token.balanceOf(erc20_enterprise_token.get_fee_collector()) == 0
+    assert (
+        erc20_enterprise_token.balanceOf(erc20_enterprise_token.get_fee_collector())
+        == 0
+    )
