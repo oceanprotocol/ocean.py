@@ -60,7 +60,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
         allowed_swapper=ZERO_ADDRESS,
     )
     tx = erc20_token.create_dispenser(
-       dispenser_data=dispenser_data, with_mint=True, from_wallet=publisher_wallet
+        dispenser_data=dispenser_data, with_mint=True, from_wallet=publisher_wallet
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
