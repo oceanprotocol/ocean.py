@@ -54,7 +54,7 @@ class DispenserV4(ContractBase):
         )
 
     def deactivate(self, data_token: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("deactivate", (data_token), from_wallet)
+        return self.send_transaction("deactivate", (data_token,), from_wallet)
 
     def set_allowed_swapper(
         self, data_token: str, new_allowed_swapper: str, from_wallet: Wallet
@@ -71,4 +71,4 @@ class DispenserV4(ContractBase):
         )
 
     def owner_withdraw(self, data_token: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("ownerWithdraw", (data_token), from_wallet)
+        return self.send_transaction("ownerWithdraw", (data_token,), from_wallet)
