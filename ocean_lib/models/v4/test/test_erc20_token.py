@@ -34,7 +34,7 @@ def test_properties(web3, config, publisher_wallet):
 
 
 def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
-    """Tests the utils functions."""
+    """Tests successful function calls"""
     erc721_factory_address = get_address_of_type(
         config, ERC721FactoryContract.CONTRACT_NAME
     )
@@ -140,58 +140,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     # Check that the erc20Token contract is initialized
     assert erc20.is_initialized()
 
-    # Should fail to re-initialize the contracts
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.initialize(
-            strings=["ERC20DT1", "ERC20DT1Symbol"],
-            addresses=[
-                publisher_wallet.address,
-                consumer_wallet.address,
-                publisher_wallet.address,
-                ZERO_ADDRESS,
-            ],
-            factory_addresses=[
-                erc721.address,
-                get_address_of_type(config, "OPFCommunityFeeCollector"),
-                factory_router.address,
-            ],
-            uints=[web3.toWei("10", "ether"), 0],
-            bytess=[b""],
-            from_wallet=publisher_wallet,
-        ),
-
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: "
-        "token instance already initialized"
-    )
-
     # Should succeed to mint 1 ERC20Token to user2
     erc20.mint(consumer_wallet.address, 1, publisher_wallet)
     assert erc20.balanceOf(consumer_wallet.address) == 1
-
-    # Should fail to mint if wallet is not a minter
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.mint(
-            account_address=consumer_wallet.address,
-            value=web3.toWei(1, "ether"),
-            from_wallet=consumer_wallet,
-        )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT MINTER"
-    )
-
-    #  Should fail to set new FeeCollector if not NFTOwner
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.set_fee_collector(
-            fee_collector_address=consumer_wallet.address,
-            from_wallet=consumer_wallet,
-        )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT FEE MANAGER"
-    )
 
     # Should succeed to set new FeeCollector if feeManager
     erc20.set_fee_collector(
@@ -199,39 +150,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         from_wallet=publisher_wallet,
     )
 
-    # Should fail to addMinter if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.add_minter(
-            minter_address=consumer_wallet.address, from_wallet=consumer_wallet
-        )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
-    )
-
-    #  Should fail to removeMinter even if it's minter
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.remove_minter(
-            minter_address=consumer_wallet.address, from_wallet=consumer_wallet
-        )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
-    )
-
     # Should succeed to removeMinter if erc20Deployer
     erc20.remove_minter(
         minter_address=consumer_wallet.address, from_wallet=publisher_wallet
-    )
-
-    # Should fail to addFeeManager if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.add_fee_manager(
-            fee_manager=consumer_wallet.address, from_wallet=consumer_wallet
-        )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
     )
 
     # Should succeed to addFeeManager if erc20Deployer (permission to deploy the erc20Contract at 721 level)
@@ -239,30 +160,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         fee_manager=consumer_wallet.address, from_wallet=publisher_wallet
     )
 
-    # Should fail to removeFeeManager if NOT erc20Deployer
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.remove_fee_manager(
-            fee_manager=consumer_wallet.address, from_wallet=consumer_wallet
-        )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
-    )
-
     # Should succeed to removeFeeManager if erc20Deployer
     erc20.remove_fee_manager(
         fee_manager=consumer_wallet.address, from_wallet=publisher_wallet
-    )
-
-    # Should fail to setData if NOT erc20Deployer
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.set_data(
-            data=web3.toHex(text="SomeData"),
-            from_wallet=consumer_wallet,
-        )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
     )
 
     # Should succeed to setData if erc20Deployer
@@ -276,16 +176,6 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
 
     assert web3.toHex(erc721.get_data(key)) == value
 
-    # Should fail to call cleanPermissions if NOT NFTOwner
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.clean_permissions(
-            from_wallet=consumer_wallet,
-        )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: not NFTOwner"
-    )
-
     # Should succeed to call cleanPermissions if NFTOwner
     erc20.clean_permissions(
         from_wallet=publisher_wallet,
@@ -294,16 +184,6 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     permissions = erc20.get_permissions(publisher_wallet.address)
     assert not permissions[RolesERC20.MINTER]
     assert not permissions[RolesERC20.FEE_MANAGER]
-
-    # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.clean_from_721(
-            from_wallet=consumer_wallet,
-        )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT 721 Contract"
-    )
 
     # User should succeed to call startOrder on a ERC20 without publishFees, consumeFeeAmount on top is ZERO
     # Get new tokens
@@ -401,3 +281,138 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     assert erc20.balanceOf(
         consumer_wallet.address
     ) == initial_consumer_balance - web3.toWei("1", "ether")
+
+
+def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_router):
+    """Tests revert statements in contracts functions"""
+
+    publish_market_fee_amount = 5
+
+    # Create an ERC20 with publish Fees ( 5 USDC, going to publishMarketAddress)
+    erc721, erc20 = deploy_erc721_erc20(
+        web3=web3,
+        config=config,
+        erc721_publisher=publisher_wallet,
+        erc20_minter=publisher_wallet,
+        cap=web3.toWei(publish_market_fee_amount, "ether"),
+    )
+
+    # Should fail to re-initialize the contracts
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        erc20.initialize(
+            strings=["ERC20DT1", "ERC20DT1Symbol"],
+            addresses=[
+                publisher_wallet.address,
+                consumer_wallet.address,
+                publisher_wallet.address,
+                ZERO_ADDRESS,
+            ],
+            factory_addresses=[
+                erc721.address,
+                get_address_of_type(config, "OPFCommunityFeeCollector"),
+                factory_router.address,
+            ],
+            uints=[web3.toWei("10", "ether"), 0],
+            bytess=[b""],
+            from_wallet=publisher_wallet,
+        ),
+
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: "
+        "token instance already initialized"
+    )
+
+    # Should fail to mint if wallet is not a minter
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        erc20.mint(
+            account_address=consumer_wallet.address,
+            value=web3.toWei(1, "ether"),
+            from_wallet=consumer_wallet,
+        )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT MINTER"
+    )
+
+    #  Should fail to set new FeeCollector if not NFTOwner
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        erc20.set_fee_collector(
+            fee_collector_address=consumer_wallet.address,
+            from_wallet=consumer_wallet,
+        )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT FEE MANAGER"
+    )
+
+    # Should fail to addMinter if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        erc20.add_minter(
+            minter_address=consumer_wallet.address, from_wallet=consumer_wallet
+        )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
+    )
+
+    #  Should fail to removeMinter even if it's minter
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        erc20.remove_minter(
+            minter_address=consumer_wallet.address, from_wallet=consumer_wallet
+        )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
+    )
+
+    # Should fail to addFeeManager if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        erc20.add_fee_manager(
+            fee_manager=consumer_wallet.address, from_wallet=consumer_wallet
+        )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
+    )
+
+    # Should fail to removeFeeManager if NOT erc20Deployer
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        erc20.remove_fee_manager(
+            fee_manager=consumer_wallet.address, from_wallet=consumer_wallet
+        )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
+    )
+
+    # Should fail to setData if NOT erc20Deployer
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        erc20.set_data(
+            data=web3.toHex(text="SomeData"),
+            from_wallet=consumer_wallet,
+        )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
+    )
+
+    # Should fail to call cleanPermissions if NOT NFTOwner
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        erc20.clean_permissions(
+            from_wallet=consumer_wallet,
+        )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: not NFTOwner"
+    )
+
+    # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        erc20.clean_from_721(
+            from_wallet=consumer_wallet,
+        )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT 721 Contract"
+    )
