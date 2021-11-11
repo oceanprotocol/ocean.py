@@ -45,9 +45,9 @@ def test_buy_from_dispenser_and_order(
 
     status = dispenser.status(erc20_enterprise_token.address)
 
-    assert status[0] == True
+    assert status[0] is True
     assert status[1] == consumer_wallet.address
-    assert status[2] == True
+    assert status[2] is True
 
     with pytest.raises(exceptions.ContractLogicError) as err:
         dispenser.dispense(
