@@ -52,8 +52,8 @@ def test_side_staking(
         config=config,
         factory_deployer_wallet=factory_deployer_wallet,
         recipient=another_consumer_wallet.address,
-        min_balance=0,
-        amount_to_transfer=web3.toWei("100", "ether"),
+        min_balance=web3.toWei("1000", "ether"),
+        amount_to_transfer=web3.toWei("1000", "ether"),
     )
 
     ocean_token.approve(
@@ -112,7 +112,12 @@ def test_side_staking(
     assert ocean_token.balanceOf(bpool_address) == initial_ocean_liquidity
 
     ocean_token.approve(
-        bpool_address, web3.toWei("10000", "ether"), another_consumer_wallet
+        bpool_address, web3.toWei("100", "ether"), another_consumer_wallet
+    )
+
+    # Transfer some ocean from consumer_wallet to another_consumer_wallet to continue testing
+    ocean_token.transfer(
+        another_consumer_wallet.address, web3.toWei("10", "ether"), consumer_wallet
     )
 
     bpool.swap_exact_amount_in(
