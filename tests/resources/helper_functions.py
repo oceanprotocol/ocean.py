@@ -277,6 +277,7 @@ def deploy_erc721_erc20(
 
     return erc721_token, erc20_token
 
+
 def get_non_existent_nft_template(
     erc721_factory: ERC721FactoryContract, check_first=20
 ) -> int:
