@@ -8,9 +8,6 @@ from enforce_typing import enforce_types
 
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.v4.models_structures import (
-    BPoolData,
-    FixedData,
-    DispenserData,
     Operations,
 )
 from ocean_lib.web3_internal.wallet import Wallet
@@ -87,41 +84,6 @@ class FactoryRouter(BFactory):
 
     def update_opf_fee(self, new_swap_ocean_fee: int, from_wallet: Wallet) -> str:
         return self.send_transaction("updateOPFFee", (new_swap_ocean_fee,), from_wallet)
-
-    def deploy_dispenser(
-        self, dispenser_data: DispenserData, from_wallet: Wallet
-    ) -> str:
-        return self.send_transaction(
-            "deployDispenser",
-            (
-                dispenser_data.dispenser_address,
-                dispenser_data.data_token,
-                dispenser_data.max_tokens,
-                dispenser_data.max_balance,
-                dispenser_data.owner,
-                dispenser_data.allowed_swapper,
-            ),
-            from_wallet,
-        )
-
-    def deploy_pool(self, bpool_data: BPoolData, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "deployPool",
-            (
-                bpool_data.tokens,
-                bpool_data.ss_params,
-                bpool_data.swap_fees,
-                bpool_data.addresses,
-            ),
-            from_wallet,
-        )
-
-    def deploy_fixed_rate(self, fixed_data: FixedData, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "deployFixedRate",
-            (fixed_data.fixed_price_address, fixed_data.addresses, fixed_data.uints),
-            from_wallet,
-        )
 
     def add_pool_template(self, new_pool_template: str, from_wallet: Wallet) -> str:
         return self.send_transaction(
