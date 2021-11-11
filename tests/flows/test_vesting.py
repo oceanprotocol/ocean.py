@@ -105,7 +105,7 @@ def test_main(
     erc20_token = ERC20Token(web3=web3, address=dt_address)
 
     # Tests permissions
-    perms = erc20_token.permissions(consumer_wallet.address)
+    perms = erc20_token.get_permissions(consumer_wallet.address)
     assert perms[0] is True
 
     # Tests consumer deploys pool and check market fee
@@ -163,7 +163,7 @@ def test_main(
     )
 
     # consumer fails to mint new erc20 token even if the minter
-    perms = erc20_token.permissions(consumer_wallet.address)
+    perms = erc20_token.get_permissions(consumer_wallet.address)
     assert perms[0] is True
 
     with pytest.raises(exceptions.ContractLogicError) as err:

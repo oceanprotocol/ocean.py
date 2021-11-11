@@ -2,6 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from enum import IntEnum
 from typing import List
 
 from enforce_typing import enforce_types
@@ -9,6 +10,11 @@ from enforce_typing import enforce_types
 from ocean_lib.models.v4.models_structures import PoolData, FixedData, DispenserData
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
+
+
+class RolesERC20(IntEnum):
+    MINTER = 0
+    FEE_MANAGER = 1
 
 
 @enforce_types
@@ -81,7 +87,6 @@ class ERC20Token(ContractBase):
     def create_dispenser(
         self, dispenser_data: DispenserData, with_mint: bool, from_wallet: Wallet
     ) -> str:
-
         return self.send_transaction(
             "createDispenser",
             (
@@ -178,6 +183,12 @@ class ERC20Token(ContractBase):
             "transferFrom", (from_address, to_address, amount), from_wallet
         )
 
+    def burn(self, amount: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("burn", (amount,), from_wallet)
+
+    def burn_from(self, from_address: str, amount: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("burnFrom", (from_address, amount), from_wallet)
+
     def is_minter(self, account: str) -> bool:
         return self.contract.caller.isMinter(account)
 
@@ -227,9 +238,6 @@ class ERC20Token(ContractBase):
             from_wallet,
         )
 
-    def permissions(self, account: str) -> tuple:
-        return self.contract.caller.permissions(account)
-
     def get_id(self) -> int:
         return self.contract.caller.getId()
 
@@ -247,9 +255,6 @@ class ERC20Token(ContractBase):
 
     def is_initialized(self) -> bool:
         return self.contract.caller.isInitialized()
-
-    def calculate_fee(self, amount: int, fee_percentage: int) -> int:
-        return self.contract.caller.calculateFee(amount, fee_percentage)
 
     def permit(
         self,
