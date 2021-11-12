@@ -15,8 +15,9 @@ from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of
 
 
 def test_buy_from_dispenser_and_order(
-    web3, config, consumer_wallet, publisher_wallet, factory_deployer_wallet
+    web3, config, publisher_wallet, consumer_wallet, factory_deployer_wallet
 ):
+    """Tests buy_from_dispenser_and_order function of the ERC20 Enterprise"""
     mock_usdc_contract = ERC20Token(web3, get_address_of_type(config, "MockUSDC"))
     mock_dai_contract = ERC20Token(web3, get_address_of_type(config, "MockDAI"))
     dispenser = DispenserV4(web3, get_address_of_type(config, "Dispenser"))
@@ -24,8 +25,8 @@ def test_buy_from_dispenser_and_order(
     _, erc20_enterprise_token = deploy_erc721_erc20(
         web3=web3,
         config=config,
-        erc721_publisher=consumer_wallet,
-        erc20_minter=consumer_wallet,
+        erc721_publisher=publisher_wallet,
+        erc20_minter=publisher_wallet,
         cap=web3.toWei(100, "ether"),
         template_index=2,
     )
@@ -38,7 +39,7 @@ def test_buy_from_dispenser_and_order(
         max_tokens=web3.toWei(1, "ether"),
     )
     tx = erc20_enterprise_token.create_dispenser(
-        dispenser_data=dispenser_data, from_wallet=consumer_wallet, with_mint=True
+        dispenser_data=dispenser_data, from_wallet=publisher_wallet, with_mint=True
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
@@ -46,15 +47,15 @@ def test_buy_from_dispenser_and_order(
     status = dispenser.status(erc20_enterprise_token.address)
 
     assert status[0] is True
-    assert status[1] == consumer_wallet.address
+    assert status[1] == publisher_wallet.address
     assert status[2] is True
 
     with pytest.raises(exceptions.ContractLogicError) as err:
         dispenser.dispense(
             data_token=erc20_enterprise_token.address,
             amount=web3.toWei(1, "ether"),
-            destination=publisher_wallet.address,
-            from_wallet=publisher_wallet,
+            destination=consumer_wallet.address,
+            from_wallet=consumer_wallet,
         )
 
     assert (
@@ -63,17 +64,17 @@ def test_buy_from_dispenser_and_order(
     )
 
     consume_fee_amount = web3.toWei(2, "ether")
-    consume_fee_address = publisher_wallet.address
+    consume_fee_address = consumer_wallet.address
     erc20_enterprise_token.set_publishing_market_fee(
         publish_market_fee_address=consume_fee_address,
         publish_market_fee_token=mock_usdc_contract.address,
         publish_market_fee_amount=consume_fee_amount,
-        from_wallet=consumer_wallet,
+        from_wallet=publisher_wallet,
     )
     publish_fees = erc20_enterprise_token.get_publishing_market_fee()
 
     mock_usdc_contract.transfer(
-        to=consumer_wallet.address,
+        to=publisher_wallet.address,
         amount=publish_fees[2],
         from_wallet=factory_deployer_wallet,
     )
@@ -81,11 +82,11 @@ def test_buy_from_dispenser_and_order(
     mock_usdc_contract.approve(
         spender=erc20_enterprise_token.address,
         amount=consume_fee_amount,
-        from_wallet=consumer_wallet,
+        from_wallet=publisher_wallet,
     )
 
     mock_dai_contract.transfer(
-        to=consumer_wallet.address,
+        to=publisher_wallet.address,
         amount=consume_fee_amount,
         from_wallet=factory_deployer_wallet,
     )
@@ -93,7 +94,7 @@ def test_buy_from_dispenser_and_order(
     mock_dai_contract.approve(
         spender=erc20_enterprise_token.address,
         amount=consume_fee_amount,
-        from_wallet=consumer_wallet,
+        from_wallet=publisher_wallet,
     )
 
     order_params = {
@@ -108,13 +109,13 @@ def test_buy_from_dispenser_and_order(
 
     balance_consume_before = mock_dai_contract.balanceOf(consume_fee_address)
     balance_opf_consume_before = mock_dai_contract.balanceOf(opf_collector_address)
-    balance_publish_before = mock_usdc_contract.balanceOf(publisher_wallet.address)
+    balance_publish_before = mock_usdc_contract.balanceOf(consumer_wallet.address)
     balance_opf_publish_before = mock_usdc_contract.balanceOf(opf_collector_address)
 
     tx = erc20_enterprise_token.buy_from_dispenser_and_order(
         order_params=order_params,
         dispenser_address=dispenser.address,
-        from_wallet=consumer_wallet,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -145,8 +146,9 @@ def test_buy_from_dispenser_and_order(
 
 
 def test_buy_from_fre_and_order(
-    web3, config, consumer_wallet, publisher_wallet, factory_deployer_wallet
+    web3, config, publisher_wallet, consumer_wallet, factory_deployer_wallet
 ):
+    """Tests buy_from_fre_and_order function of the ERC20 Enterprise"""
     mock_usdc_contract = ERC20Token(web3, get_address_of_type(config, "MockUSDC"))
     mock_dai_contract = ERC20Token(web3, get_address_of_type(config, "MockDAI"))
     fixed_rate_exchange = FixedRateExchangeV4(
@@ -156,8 +158,8 @@ def test_buy_from_fre_and_order(
     _, erc20_enterprise_token = deploy_erc721_erc20(
         web3=web3,
         config=config,
-        erc721_publisher=consumer_wallet,
-        erc20_minter=consumer_wallet,
+        erc721_publisher=publisher_wallet,
+        erc20_minter=publisher_wallet,
         cap=web3.toWei(100, "ether"),
         template_index=2,
     )
@@ -167,8 +169,8 @@ def test_buy_from_fre_and_order(
         fixed_price_address=fixed_rate_exchange.address,
         addresses=[
             mock_usdc_contract.address,
-            consumer_wallet.address,
-            consumer_wallet.address,
+            publisher_wallet.address,
+            publisher_wallet.address,
             ZERO_ADDRESS,
         ],
         uints=[18, 18, web3.toWei(1, "ether"), web3.toWei(1, "ether"), 1],
@@ -176,7 +178,7 @@ def test_buy_from_fre_and_order(
 
     tx = erc20_enterprise_token.create_fixed_rate(
         fixed_data=fixed_data,
-        from_wallet=consumer_wallet,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -200,7 +202,7 @@ def test_buy_from_fre_and_order(
             exchange_id=exchange_id,
             data_token_amount=web3.toWei(1, "ether"),
             max_base_token_amount=web3.toWei(1, "ether"),
-            from_wallet=publisher_wallet,
+            from_wallet=consumer_wallet,
         )
 
     assert (
@@ -209,38 +211,38 @@ def test_buy_from_fre_and_order(
     )
 
     consume_fee_amount = web3.toWei(2, "ether")
-    consume_fee_address = publisher_wallet.address
+    consume_fee_address = consumer_wallet.address
     erc20_enterprise_token.set_publishing_market_fee(
         publish_market_fee_address=consume_fee_address,
         publish_market_fee_token=mock_usdc_contract.address,
         publish_market_fee_amount=consume_fee_amount,
-        from_wallet=consumer_wallet,
+        from_wallet=publisher_wallet,
     )
     publish_fees = erc20_enterprise_token.get_publishing_market_fee()
 
     mock_usdc_contract.transfer(
-        to=consumer_wallet.address,
+        to=publisher_wallet.address,
         amount=publish_fees[2] + web3.toWei("3", "ether"),
         from_wallet=factory_deployer_wallet,
     )
     mock_usdc_contract.approve(
         spender=erc20_enterprise_token.address,
         amount=2 ** 256 - 1,
-        from_wallet=consumer_wallet,
+        from_wallet=publisher_wallet,
     )
     mock_dai_contract.transfer(
-        to=consumer_wallet.address,
+        to=publisher_wallet.address,
         amount=consume_fee_amount,
         from_wallet=factory_deployer_wallet,
     )
     mock_dai_contract.approve(
         spender=erc20_enterprise_token.address,
         amount=consume_fee_amount,
-        from_wallet=consumer_wallet,
+        from_wallet=publisher_wallet,
     )
 
     order_params = {
-        "consumer": consumer_wallet.address,
+        "consumer": publisher_wallet.address,
         "amount": web3.toWei(1, "ether"),
         "serviceId": 1,
         "consumeFeeAddress": consume_fee_address,
@@ -258,13 +260,13 @@ def test_buy_from_fre_and_order(
 
     balance_consume_before = mock_dai_contract.balanceOf(consume_fee_address)
     balance_opf_consume_before = mock_dai_contract.balanceOf(opf_collector_address)
-    balance_publish_before = mock_usdc_contract.balanceOf(publisher_wallet.address)
+    balance_publish_before = mock_usdc_contract.balanceOf(consumer_wallet.address)
     balance_opf_publish_before = mock_usdc_contract.balanceOf(opf_collector_address)
 
     tx = erc20_enterprise_token.buy_from_fre_and_order(
         order_params=order_params,
         fre_params=fre_params,
-        from_wallet=consumer_wallet,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
