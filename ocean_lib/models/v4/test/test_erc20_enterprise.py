@@ -39,7 +39,7 @@ def test_buy_from_dispenser_and_order(
         max_tokens=web3.toWei(1, "ether"),
     )
     tx = erc20_enterprise_token.create_dispenser(
-        dispenser_data=dispenser_data, from_wallet=publisher_wallet, with_mint=True
+        dispenser_data=dispenser_data, with_mint=True, from_wallet=publisher_wallet
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
