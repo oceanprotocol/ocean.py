@@ -9,6 +9,7 @@ from ocean_lib.ocean.ocean_exchange import OceanExchange
 
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei
+from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
 
 _NETWORK = "ganache"
 
@@ -20,13 +21,23 @@ def _get_exchange_address(config):
     return addresses[FixedRateExchange.CONTRACT_NAME]
 
 
-def test_search_exchange_by_data_token(
-    publisher_ocean_instance, publisher_wallet, consumer_wallet
-):
+def test_search_exchange_by_nonexistent_data_token(publisher_ocean_instance):
+    """Tests searching exchanges with a nonexistent data token address."""
+    ocn = publisher_ocean_instance
+    foo_data_token = "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826"
+    with pytest.raises(AssertionError) as err:
+        ocn.exchange.search_exchange_by_data_token(foo_data_token)
+    assert (
+        err.value.args[0]
+        == f"No token with '{foo_data_token}' address was created before."
+    )
+
+
+def test_search_exchange_by_data_token(publisher_ocean_instance):
     """Tests searching exchanges which have matching data token address."""
     ocn = publisher_ocean_instance
-    alice_wallet = publisher_wallet
-    bob_wallet = consumer_wallet
+    alice_wallet = get_publisher_wallet()
+    bob_wallet = get_consumer_wallet()
     dt = ocn.create_data_token(
         "DataToken1", "DT1", alice_wallet, blob=ocn.config.metadata_cache_uri
     )
