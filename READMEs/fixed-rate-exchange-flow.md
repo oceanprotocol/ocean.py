@@ -130,7 +130,7 @@ data_token.approve(ocean.exchange._exchange_address, to_wei(100), alice_wallet)
 In the same python console:
 ```python
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
-bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations. config transaction_timeout)
+bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
 #Verify that Bob has ganache ETH
@@ -155,7 +155,8 @@ exchanges for a certain data token, it can be searched by
 providing the data token address.
 
 ```python
-#Search for exchange_id for a certain data token address (e.g. token_address).
+#Search for exchange_id from a specific block retrieved at 3rd step
+#for a certain data token address (e.g. token_address).
 logs = ocean.exchange.search_exchange_by_data_token(token_address)
 print(logs)
 #E.g. First exchange is the wanted one.

@@ -11,7 +11,9 @@ from web3.datastructures import AttributeDict
 from ocean_lib.config import Config
 from ocean_lib.exceptions import InsufficientBalance, VerifyTxFailed
 from ocean_lib.models.data_token import DataToken
+from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+from ocean_lib.ocean.util import get_dtfactory_address
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.exceptions import ValidationError
@@ -63,15 +65,24 @@ class OceanExchange:
 
     @enforce_types
     def search_exchange_by_data_token(self, data_token: str) -> List[AttributeDict]:
+        dtfactory_address = get_dtfactory_address(
+            self._config.address_file, web3=self._web3
+        )
+        dtfactory = DTFactory(self._web3, dtfactory_address)
+        token_registered_log = dtfactory.get_token_registered_event(
+            0, self._web3.eth.block_number, data_token
+        )
+        assert (
+            token_registered_log
+        ), f"No token with '{data_token}' address was created before."
+        from_block = token_registered_log.blockNumber
         fre = self._exchange_contract()
-        events = fre.events
-        exchange_event = getattr(events, "ExchangeCreated")
         filter_args = {"dataToken": data_token}
-        logs = fre.getLogs(
-            exchange_event,
-            argument_filters=filter_args,
-            fromBlock=0,
-            toBlock=self._web3.eth.block_number,
+        logs = fre.get_event_logs(
+            event_name="ExchangeCreated",
+            from_block=from_block,
+            to_block=self._web3.eth.block_number,
+            filters=filter_args,
         )
         return logs
 
