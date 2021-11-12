@@ -261,16 +261,11 @@ def test_buy_from_fre_and_order(
     balance_publish_before = mock_usdc_contract.balanceOf(publisher_wallet.address)
     balance_opf_publish_before = mock_usdc_contract.balanceOf(opf_collector_address)
 
-    before_usdc_balance = mock_usdc_contract.balanceOf(consumer_wallet.address)
     tx = erc20_enterprise_token.buy_from_fre_and_order(
         order_params=order_params,
         fre_params=fre_params,
         from_wallet=consumer_wallet,
     )
-    after_usdc_balance = mock_usdc_contract.balanceOf(consumer_wallet.address)
-
-    print(before_usdc_balance - after_usdc_balance)
-    assert 0
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
