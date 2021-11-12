@@ -24,9 +24,9 @@ def test_buy_from_dispenser_and_order(
     _, erc20_enterprise_token = deploy_erc721_erc20(
         web3=web3,
         config=config,
-        cap=web3.toWei(100, "ether"),
-        erc20_minter=consumer_wallet,
         erc721_publisher=consumer_wallet,
+        erc20_minter=consumer_wallet,
+        cap=web3.toWei(100, "ether"),
         template_index=2,
     )
     erc20_enterprise_token = ERC20Enterprise(web3, erc20_enterprise_token.address)
@@ -40,7 +40,7 @@ def test_buy_from_dispenser_and_order(
     tx = erc20_enterprise_token.create_dispenser(
         dispenser_data=dispenser_data, from_wallet=consumer_wallet, with_mint=True
     )
-    tx_receipt = web3.eth.waitForTransactionReceipt(tx)
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
 
     status = dispenser.status(erc20_enterprise_token.address)
@@ -156,9 +156,9 @@ def test_buy_from_fre_and_order(
     _, erc20_enterprise_token = deploy_erc721_erc20(
         web3=web3,
         config=config,
-        cap=web3.toWei(100, "ether"),
-        erc20_minter=consumer_wallet,
         erc721_publisher=consumer_wallet,
+        erc20_minter=consumer_wallet,
+        cap=web3.toWei(100, "ether"),
         template_index=2,
     )
     erc20_enterprise_token = ERC20Enterprise(web3, erc20_enterprise_token.address)
@@ -189,7 +189,7 @@ def test_buy_from_fre_and_order(
         filters=None,
     )
 
-    exchange_id = new_fixed_rate_event[0]["args"]["exchangeId"]
+    exchange_id = new_fixed_rate_event[0].args.exchangeId
     status = fixed_rate_exchange.get_exchange(exchange_id)
 
     assert status[6] is True  # is active
