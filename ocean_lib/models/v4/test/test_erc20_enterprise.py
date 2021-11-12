@@ -220,12 +220,12 @@ def test_buy_from_fre_and_order(
 
     mock_usdc_contract.transfer(
         to=consumer_wallet.address,
-        amount=publish_fees[2] + web3.toWei("3","ether"),
+        amount=publish_fees[2] + web3.toWei("3", "ether"),
         from_wallet=factory_deployer_wallet,
     )
     mock_usdc_contract.approve(
         spender=erc20_enterprise_token.address,
-        amount=2**256-1,
+        amount=2 ** 256 - 1,
         from_wallet=consumer_wallet,
     )
     mock_dai_contract.transfer(
@@ -269,7 +269,7 @@ def test_buy_from_fre_and_order(
     )
     after_usdc_balance = mock_usdc_contract.balanceOf(consumer_wallet.address)
 
-    print(before_usdc_balance-after_usdc_balance)
+    print(before_usdc_balance - after_usdc_balance)
     assert 0
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
