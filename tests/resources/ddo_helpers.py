@@ -82,7 +82,7 @@ def get_algorithm_meta():
 
 
 def get_access_service(
-        ocean_instance, address, date_created, provider_uri=None, timeout=3600
+    ocean_instance, address, date_created, provider_uri=None, timeout=3600
 ):
     if not provider_uri:
         provider_uri = DataServiceProvider.get_url(ocean_instance.config)
@@ -105,12 +105,12 @@ def get_computing_metadata() -> dict:
 
 
 def get_registered_ddo(
-        ocean_instance,
-        metadata,
-        wallet: Wallet,
-        service=None,
-        datatoken=None,
-        provider_uri=None,
+    ocean_instance,
+    metadata,
+    wallet: Wallet,
+    service=None,
+    datatoken=None,
+    provider_uri=None,
 ):
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
 
@@ -160,11 +160,11 @@ def get_registered_ddo_with_access_service(ocean_instance, wallet, provider_uri=
 
 
 def get_registered_ddo_with_compute_service(
-        ocean_instance,
-        wallet,
-        provider_uri=None,
-        trusted_algorithms=None,
-        trusted_algorithm_publishers=None,
+    ocean_instance,
+    wallet,
+    provider_uri=None,
+    trusted_algorithms=None,
+    trusted_algorithm_publishers=None,
 ):
     old_ddo = get_sample_ddo_with_compute_service()
     metadata = old_ddo.metadata
