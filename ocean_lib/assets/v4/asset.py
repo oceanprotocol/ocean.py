@@ -2,9 +2,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import copy
+import json
 import os
 from pathlib import Path
-from typing import Optional, Dict, Union
+from typing import Optional
 
 from enforce_typing import enforce_types
 
@@ -18,22 +19,34 @@ class V4Asset:
 
     def __init__(
         self,
-        did: Optional[str] = None,
+        did: str,
+        nft: dict,
+        data_tokens: dict,
+        event: dict,
+        stats: dict,
+        metadata: Optional[dict] = None,
         json_text: Optional[str] = None,
         json_filename: Optional[Path] = None,
-        metadata: Optional[Dict] = None,
         dictionary: Optional[dict] = None,
     ) -> None:
 
         self.did = did
         self.version = "4.0.0"
         self.metadata = metadata if metadata else self._build_sample_metadata()
-        self.credentials = {}
         self.services = []
+        self.credentials = {}
+        self.nft = nft
+        self.data_tokens = data_tokens
+        self.event = event
+        self.stats = stats
 
         if not json_text and json_filename:
             with open(json_filename, "r") as file_handle:
                 json_text = file_handle.read()
+        if json_text:
+            self._read_dict(json.loads(json_text))
+        elif dictionary:
+            self._read_dict(dictionary)
 
         network_url = os.getenv("OCEAN_NETWORK_URL")
         if network_url:
@@ -41,6 +54,36 @@ class V4Asset:
             self.chain_id = w3.eth.chain_id
         else:
             raise TypeError(f"The network URL is not provided.")
+
+    def _read_dict(self, dictionary: dict) -> None:
+        """Import a JSON dict into this Asset."""
+        values = copy.deepcopy(dictionary)
+        id_key = "id" if "id" in values else "_id"
+        self.did = values.pop(id_key)
+        self.chain_id = values.pop("chainId")
+
+        if "metadata" in values:
+            self.metadata = values.pop("metadata")
+        if "services" in values:
+            self.services = []
+            for value in values.pop("services"):
+                if isinstance(value, str):
+                    value = json.loads(value)
+
+                service = NFTService.from_json(value)
+                self.services.append(service)
+        if "credentials" in values:
+            self.credentials = values.pop("credentials")
+        if "nft" in values:
+            self.nft = values.pop("nft")
+        if "datatokens" in values:
+            self.data_tokens = values.pop("datatokens")
+        if "event" in values:
+            self.event = values.pop("event")
+        if "stats" in values:
+            self.stats = values.pop("stats")
+
+        self.other_values = values
 
     def _build_sample_metadata(self) -> dict:
         """
@@ -80,7 +123,14 @@ class V4Asset:
             data["service"] = [service.as_dictionary() for service in self.services]
         if self.credentials:
             data["credentials"] = self.credentials
-        # TODO: NFT data
+        if self.nft:
+            data["nft"] = self.nft
+        if self.data_tokens:
+            data["datatokens"] = self.data_tokens
+        if self.event:
+            data["event"] = self.event
+        if self.stats:
+            data["stats"] = self.stats
         if self.other_values:
             data.update(self.other_values)
 

@@ -6,11 +6,15 @@
     Service Class for V4
     To handle service items in a DDO record
 """
+import copy
+import logging
 from typing import Dict, Any, Optional
 
 from enforce_typing import enforce_types
 
 from ocean_lib.common.agreements.service_types import ServiceTypesV4, ServiceTypesNames
+
+logger = logging.getLogger(__name__)
 
 
 @enforce_types
@@ -68,6 +72,35 @@ class NFTService:
 
             if service_type in service_to_default_name:
                 self.name = service_to_default_name[service_type]
+
+    @classmethod
+    @enforce_types
+    def from_json(cls, service_dict: Dict[str, Any]) -> "NFTService":
+        """Create a service object from a JSON string."""
+        sd = copy.deepcopy(service_dict)
+        service_type = sd.pop(cls.SERVICE_TYPE, None)
+        service_endpoint = sd.pop(cls.SERVICE_ENDPOINT, None)
+        data_token = sd.pop(cls.SERVICE_DATATOKEN, None)
+        service_files = sd.pop(cls.SERVICE_FILES, None)
+        timeout = sd.pop(cls.SERVICE_TIMEOUT, None)
+        name = sd.pop(cls.SERVICE_NAME, None)
+        description = sd.pop(cls.SERVICE_DESCRIPTION, None)
+
+        if not service_type:
+            logger.error(
+                'Service definition in DDO document is missing the "type" key/value.'
+            )
+            raise IndexError
+
+        return cls(
+            service_type,
+            service_endpoint,
+            data_token,
+            service_files,
+            timeout,
+            name,
+            description,
+        )
 
     def values(self) -> Dict[str, Any]:
         """
