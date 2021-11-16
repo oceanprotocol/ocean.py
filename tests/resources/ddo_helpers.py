@@ -9,6 +9,7 @@ import time
 import uuid
 
 from ocean_lib.assets.asset import V3Asset
+from ocean_lib.assets.v4.asset import V4Asset
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
@@ -33,13 +34,30 @@ def get_metadata() -> dict:
     return json.loads(metadata)
 
 
+def get_key_from_v4_sample_ddo(key, file_name="ddo_v4_sample.json"):
+    sample_v4_ddo = V4Asset(json_filename=get_resource_path("ddo", file_name))
+    if key not in sample_v4_ddo.as_dictionary().keys():
+        return None
+    return sample_v4_ddo.as_dictionary()[key]
+
+
 def get_sample_ddo(file_name="ddo_sa_sample.json") -> V3Asset:
     return V3Asset(json_filename=get_resource_path("ddo", file_name))
+
+
+def get_sample_v4_ddo(file_name="ddo_v4_sample.json") -> V4Asset:
+    return V4Asset(json_filename=get_resource_path("ddo", file_name))
 
 
 def get_sample_ddo_with_compute_service() -> V3Asset:
     return V3Asset(
         json_filename=get_resource_path("ddo", "ddo_with_compute_service.json")
+    )
+
+
+def get_sample_v4_ddo_with_compute_service() -> V4Asset:
+    return V4Asset(
+        json_filename=get_resource_path("ddo", "ddo_v4_with_compute_service.json")
     )
 
 
@@ -64,7 +82,7 @@ def get_algorithm_meta():
 
 
 def get_access_service(
-    ocean_instance, address, date_created, provider_uri=None, timeout=3600
+        ocean_instance, address, date_created, provider_uri=None, timeout=3600
 ):
     if not provider_uri:
         provider_uri = DataServiceProvider.get_url(ocean_instance.config)
@@ -87,12 +105,12 @@ def get_computing_metadata() -> dict:
 
 
 def get_registered_ddo(
-    ocean_instance,
-    metadata,
-    wallet: Wallet,
-    service=None,
-    datatoken=None,
-    provider_uri=None,
+        ocean_instance,
+        metadata,
+        wallet: Wallet,
+        service=None,
+        datatoken=None,
+        provider_uri=None,
 ):
     metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
 
@@ -142,11 +160,11 @@ def get_registered_ddo_with_access_service(ocean_instance, wallet, provider_uri=
 
 
 def get_registered_ddo_with_compute_service(
-    ocean_instance,
-    wallet,
-    provider_uri=None,
-    trusted_algorithms=None,
-    trusted_algorithm_publishers=None,
+        ocean_instance,
+        wallet,
+        provider_uri=None,
+        trusted_algorithms=None,
+        trusted_algorithm_publishers=None,
 ):
     old_ddo = get_sample_ddo_with_compute_service()
     metadata = old_ddo.metadata

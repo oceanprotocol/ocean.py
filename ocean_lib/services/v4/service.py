@@ -10,14 +10,11 @@ import copy
 import logging
 from typing import Dict, Any, Optional
 
-from enforce_typing import enforce_types
-
 from ocean_lib.common.agreements.service_types import ServiceTypesV4, ServiceTypesNames
 
 logger = logging.getLogger(__name__)
 
 
-@enforce_types
 class NFTService:
     """Service class to create validate service in a V4 DDO."""
 
@@ -32,15 +29,15 @@ class NFTService:
     def __init__(
         self,
         service_type: str,
-        service_endpoint: str,
-        data_token: str,
-        files: str,
-        timeout: float,
+        service_endpoint: Optional[str],
+        data_token: Optional[str],
+        files: Optional[str],
+        timeout: Optional[int],
         other_values: Optional[Dict[str, Any]] = None,
         name: Optional[str] = None,
         description: Optional[str] = None,
     ) -> None:
-        """Initialize Service instance."""
+        """Initialize NFT Service instance."""
         self.type = service_type
         self.service_endpoint = service_endpoint
         self.data_token = data_token
@@ -74,7 +71,6 @@ class NFTService:
                 self.name = service_to_default_name[service_type]
 
     @classmethod
-    @enforce_types
     def from_json(cls, service_dict: Dict[str, Any]) -> "NFTService":
         """Create a service object from a JSON string."""
         sd = copy.deepcopy(service_dict)
@@ -85,7 +81,6 @@ class NFTService:
         timeout = sd.pop(cls.SERVICE_TIMEOUT, None)
         name = sd.pop(cls.SERVICE_NAME, None)
         description = sd.pop(cls.SERVICE_DESCRIPTION, None)
-
         if not service_type:
             logger.error(
                 'Service definition in DDO document is missing the "type" key/value.'
@@ -98,6 +93,7 @@ class NFTService:
             data_token,
             service_files,
             timeout,
+            sd,
             name,
             description,
         )
