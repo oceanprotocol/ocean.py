@@ -3,9 +3,10 @@
 #
 import copy
 import json
+import logging
 import os
 from pathlib import Path
-from typing import Optional, List
+from typing import Optional, List, Union
 
 from enforce_typing import enforce_types
 from eth_utils import add_0x_prefix
@@ -15,6 +16,8 @@ from ocean_lib.assets.did import did_to_id
 from ocean_lib.ocean.util import get_web3
 from ocean_lib.services.v4.service import NFTService
 
+logger = logging.getLogger("ddo")
+
 
 @enforce_types
 class V4Asset:
@@ -22,26 +25,14 @@ class V4Asset:
 
     def __init__(
         self,
-        did: Optional[str] = None,
-        metadata: Optional[dict] = None,
-        nft: Optional[dict] = None,
-        data_tokens: Optional[dict] = None,
-        event: Optional[dict] = None,
-        stats: Optional[dict] = None,
+        asset_dict: Optional[dict] = None,
         json_text: Optional[str] = None,
         json_filename: Optional[Path] = None,
-        dictionary: Optional[dict] = None,
     ) -> None:
 
-        self.did = did
         self.version = "4.0.0"
-        self._metadata = metadata if metadata else self._build_sample_metadata()
         self._services = []
         self.credentials = {}
-        self.nft = nft
-        self.data_tokens = data_tokens
-        self.event = event
-        self.stats = stats
 
         network_url = os.getenv("OCEAN_NETWORK_URL")
         if network_url:
@@ -55,8 +46,8 @@ class V4Asset:
                 json_text = file_handle.read()
         if json_text:
             self._read_dict(json.loads(json_text))
-        elif dictionary:
-            self._read_dict(dictionary)
+        elif asset_dict:
+            self._read_dict(asset_dict)
 
     @property
     def asset_id(self) -> Optional[str]:
@@ -66,7 +57,7 @@ class V4Asset:
         return add_0x_prefix(did_to_id(self.did))
 
     @property
-    def metadata(self) -> dict:
+    def metadata(self) -> Optional[dict]:
         """Get the metadata."""
         return self._metadata
 
@@ -146,26 +137,6 @@ class V4Asset:
         if "stats" in values:
             self.stats = values.pop("stats")
 
-        self.other_values = values
-
-    def _build_sample_metadata(self) -> dict:
-        """
-        Return a metadata template as a JSON dict.
-
-        :return: dict
-        """
-        metadata = {
-            "created": "2020-11-15T12:27:48Z",
-            "updated": "2021-05-17T21:58:02Z",
-            "description": "Sample description",
-            "name": "Sample asset",
-            "type": "dataset",
-            "author": "OPF",
-            "license": "https://market.oceanprotocol.com/terms",
-        }
-
-        return metadata
-
     def as_dictionary(self) -> dict:
         """
         Return the DDO as a JSON dict.
@@ -180,8 +151,8 @@ class V4Asset:
             "chainId": self.chain_id,
         }
 
-        data["metadata"] = self._metadata
-
+        if self._metadata:
+            data["metadata"] = self._metadata
         if self.services:
             data["services"] = [service.as_dictionary() for service in self._services]
         if self.credentials:
@@ -194,7 +165,66 @@ class V4Asset:
             data["event"] = self.event
         if self.stats:
             data["stats"] = self.stats
-        if self.other_values:
-            data.update(self.other_values)
 
         return data
+
+    def as_text(self, is_pretty: bool = False) -> str:
+        """Return the V4 DDO as a JSON text.
+
+        :param is_pretty: If True return dictionary in a prettier way, bool
+        :return: str
+        """
+        data = self.as_dictionary()
+        if is_pretty:
+            return json.dumps(data, indent=2, separators=(",", ": "))
+
+        return json.dumps(data)
+
+    def add_service(
+        self,
+        service_type: Union[str, NFTService],
+        service_endpoint: Optional[str] = None,
+        data_token: Optional[str] = None,
+        files: Optional[str] = None,
+        timeout: Optional[int] = None,
+        compute_values: Optional[dict] = None,
+        name: Optional[str] = None,
+        description: Optional[str] = None,
+    ) -> None:
+        """
+        Add a service to the list of services on the V4 DDO.
+
+        :param service_type: Service
+        :param service_endpoint: Service endpoint, str
+        :param data_token: Data token address, str
+        :param files: Encrypted files URLS, str
+        :param timeout: Duration of the service in seconds, int
+        :param compute_values: Python dict with the compute service's requirements, dict
+        :param name: Name of the service, str
+        :param description: Description about the service, str
+        """
+        if isinstance(service_type, NFTService):
+            service = service_type
+        else:
+            values = copy.deepcopy(compute_values) if compute_values else None
+            service = NFTService(
+                service_type,
+                service_endpoint,
+                data_token,
+                files,
+                timeout,
+                values,
+                name,
+                description,
+            )
+        logger.debug(
+            f"Adding service with service type {service_type} with did {self.did}"
+        )
+        self._services.append(service)
+
+    def get_service(self, service_type: str) -> Optional[NFTService]:
+        """Return a service using."""
+        return next(
+            (service for service in self._services if service.type == service_type),
+            None,
+        )

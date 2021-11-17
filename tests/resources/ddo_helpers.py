@@ -35,10 +35,13 @@ def get_metadata() -> dict:
 
 
 def get_key_from_v4_sample_ddo(key, file_name="ddo_v4_sample.json"):
-    sample_v4_ddo = V4Asset(json_filename=get_resource_path("ddo", file_name))
-    if key not in sample_v4_ddo.as_dictionary().keys():
+    path = get_resource_path("ddo", file_name)
+    with open(path, "r") as file_handle:
+        ddo = file_handle.read()
+    ddo_dict = json.loads(ddo)
+    if key not in ddo_dict.keys():
         return None
-    return sample_v4_ddo.as_dictionary()[key]
+    return ddo_dict[key]
 
 
 def get_sample_ddo(file_name="ddo_sa_sample.json") -> V3Asset:

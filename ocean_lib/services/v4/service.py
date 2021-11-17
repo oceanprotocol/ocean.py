@@ -25,6 +25,7 @@ class NFTService:
     SERVICE_DATATOKEN = "datatokenAddress"
     SERVICE_ENDPOINT = "serviceEndpoint"
     SERVICE_TIMEOUT = "timeout"
+    SERVICE_COMPUTE = "compute"
 
     def __init__(
         self,
@@ -33,7 +34,7 @@ class NFTService:
         data_token: Optional[str],
         files: Optional[str],
         timeout: Optional[int],
-        other_values: Optional[Dict[str, Any]] = None,
+        compute_values: Optional[Dict[str, Any]] = None,
         name: Optional[str] = None,
         description: Optional[str] = None,
     ) -> None:
@@ -43,23 +44,10 @@ class NFTService:
         self.data_token = data_token
         self.files = files
         self.timeout = timeout
+        self.compute_values = compute_values
         self.name = name
         self.description = description
         self._values = dict()
-
-        self._reserved_names = {
-            self.SERVICE_TYPE,
-            self.SERVICE_FILES,
-            self.SERVICE_NAME,
-            self.SERVICE_DESCRIPTION,
-            self.SERVICE_DATATOKEN,
-            self.SERVICE_ENDPOINT,
-            self.SERVICE_TIMEOUT,
-        }
-        if other_values:
-            for key, value in other_values.items():
-                if key not in self._reserved_names:
-                    self._values[key] = value
 
         if name is None:
             service_to_default_name = {
@@ -115,6 +103,19 @@ class NFTService:
             self.SERVICE_ENDPOINT: self.service_endpoint,
             self.SERVICE_TIMEOUT: self.timeout,
         }
+
+        if self.SERVICE_COMPUTE in self.compute_values:
+            if (
+                self.compute_values is not None
+                and len(self.compute_values.values()) > 0
+            ):
+                values.update(self.compute_values)
+        else:
+            if (
+                self.compute_values is not None
+                and len(self.compute_values.values()) > 0
+            ):
+                values[self.SERVICE_COMPUTE] = self.compute_values
 
         if self.name is not None:
             values[self.SERVICE_NAME] = self.name
