@@ -273,7 +273,7 @@ class Config(configparser.ConfigParser):
     @property
     @enforce_types
     def chain_id(self) -> int:
-        """Chain ID of the ethereum network. (e.g.): 1337."""
+        """Chain ID of the ethereum network. (e.g.): 8996."""
         return int(self.get(SECTION_ETH_NETWORK, NAME_CHAIN_ID))
 
     @property

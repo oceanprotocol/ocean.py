@@ -18,7 +18,7 @@ def test_ganache_example_config(monkeypatch):
     monkeypatch.setenv("OCEAN_NETWORK_URL", "http://127.0.0.1:8545")
     config = ExampleConfig.get_config()
 
-    assert config.chain_id == 1337
+    assert config.chain_id == 8996
     assert config.network_url == "http://127.0.0.1:8545"
     assert config.metadata_cache_uri == DEFAULT_METADATA_CACHE_URI
     assert config.provider_url == DEFAULT_PROVIDER_URL

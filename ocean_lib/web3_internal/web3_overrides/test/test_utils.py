@@ -34,7 +34,7 @@ def test_block_confirmations(publisher_wallet, consumer_wallet):
     )
     dummy_tx_thread.start()
 
-    poll_interval = BLOCK_NUMBER_POLL_INTERVAL[1337]
+    poll_interval = BLOCK_NUMBER_POLL_INTERVAL[8996]
     wait_for_transaction_receipt_and_block_confirmations(
         web3, tx_hash, block_confirmations=0, block_number_poll_interval=poll_interval
     )
