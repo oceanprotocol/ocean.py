@@ -19,6 +19,7 @@ class NFTService:
     """Service class to create validate service in a V4 DDO."""
 
     SERVICE_TYPE = "type"
+    SERVICE_ID = "serviceId"
     SERVICE_FILES = "files"
     SERVICE_NAME = "name"
     SERVICE_DESCRIPTION = "description"
@@ -29,6 +30,7 @@ class NFTService:
 
     def __init__(
         self,
+        service_id: str,
         service_type: str,
         service_endpoint: Optional[str],
         data_token: Optional[str],
@@ -39,6 +41,7 @@ class NFTService:
         description: Optional[str] = None,
     ) -> None:
         """Initialize NFT Service instance."""
+        self.id = service_id
         self.type = service_type
         self.service_endpoint = service_endpoint
         self.data_token = data_token
@@ -62,6 +65,7 @@ class NFTService:
     def from_json(cls, service_dict: Dict[str, Any]) -> "NFTService":
         """Create a service object from a JSON string."""
         sd = copy.deepcopy(service_dict)
+        service_id = sd.pop(cls.SERVICE_ID, None)
         service_type = sd.pop(cls.SERVICE_TYPE, None)
         service_endpoint = sd.pop(cls.SERVICE_ENDPOINT, None)
         data_token = sd.pop(cls.SERVICE_DATATOKEN, None)
@@ -76,6 +80,7 @@ class NFTService:
             raise IndexError
 
         return cls(
+            service_id,
             service_type,
             service_endpoint,
             data_token,
@@ -97,6 +102,7 @@ class NFTService:
         """Return the service as a python dictionary."""
 
         values = {
+            self.SERVICE_ID: self.id,
             self.SERVICE_TYPE: self.type,
             self.SERVICE_FILES: self.files,
             self.SERVICE_DATATOKEN: self.data_token,

@@ -38,6 +38,7 @@ def test_get_asset_as_dict(web3):
     assert isinstance(ddo_dict["services"], list)
     assert ddo_dict["services"] == [
         {
+            "serviceId": "1",
             "type": "access",
             "files": ENCRYPTED_FILES_URLS,
             "name": "Download service",
@@ -68,13 +69,7 @@ def test_get_asset_as_dict(web3):
             "name": "Datatoken 1",
             "symbol": "DT-1",
             "serviceId": "1",
-        },
-        {
-            "address": "0x000001",
-            "name": "Datatoken 2",
-            "symbol": "DT-2",
-            "serviceId": "2",
-        },
+        }
     ]
 
     assert ddo_dict["event"] == {
@@ -145,6 +140,7 @@ def test_add_service():
         ],
     }
     ddo.add_service(
+        service_id="2",
         service_type="compute",
         service_endpoint="https://myprovider.com",
         data_token="0x124",
@@ -164,6 +160,12 @@ def test_add_service():
     expected_compute_service = get_key_from_v4_sample_ddo(
         key="services", file_name="ddo_v4_with_compute_service.json"
     )[1]
+
+    assert (
+        ddo.as_dictionary()["services"][1]["serviceId"]
+        == expected_compute_service["serviceId"]
+    )
+
     assert (
         ddo.as_dictionary()["services"][1]["name"] == expected_compute_service["name"]
     )

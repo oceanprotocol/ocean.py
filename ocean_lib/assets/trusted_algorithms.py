@@ -115,6 +115,7 @@ def add_publisher_trusted_algorithm_publisher(
     assert (
         compute_service
     ), "Cannot add trusted algorithm to this asset because it has no compute service."
+    # TODO: create function for diff structures depending of the version in each service class
     privacy_values = compute_service.attributes["main"].get("privacy")
     if not privacy_values:
         privacy_values = {}

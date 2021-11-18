@@ -182,6 +182,7 @@ class V4Asset:
 
     def add_service(
         self,
+        service_id: str,
         service_type: Union[str, NFTService],
         service_endpoint: Optional[str] = None,
         data_token: Optional[str] = None,
@@ -194,6 +195,7 @@ class V4Asset:
         """
         Add a service to the list of services on the V4 DDO.
 
+        :param service_id: Unique identifier of the service, str
         :param service_type: Service
         :param service_endpoint: Service endpoint, str
         :param data_token: Data token address, str
@@ -208,6 +210,7 @@ class V4Asset:
         else:
             values = copy.deepcopy(compute_values) if compute_values else None
             service = NFTService(
+                service_id,
                 service_type,
                 service_endpoint,
                 data_token,
