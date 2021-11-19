@@ -206,5 +206,9 @@ class ERC721Token(ContractBase):
     def is_deployed(self, data_token: str) -> bool:
         return self.contract.caller.isDeployed(data_token)
 
-    def set_base_uri(self, new_base_uri: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("setBaseURI", (new_base_uri,), from_wallet)
+    def set_token_uri(
+        self, token_id: int, new_base_uri: str, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "setTokenURI", (token_id, new_base_uri), from_wallet
+        )

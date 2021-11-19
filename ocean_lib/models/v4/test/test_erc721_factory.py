@@ -158,7 +158,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet):
         "name": "72120Bundle",
         "symbol": "72Bundle",
         "templateIndex": 1,
-        "baseURI": "https://oceanprotocol.com/nft/",
+        "tokenURI": "https://oceanprotocol.com/nft/",
     }
     erc_create_data = {
         "strings": ["ERC20B1", "ERC20DT1Symbol"],

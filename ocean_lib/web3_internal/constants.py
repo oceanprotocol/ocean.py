@@ -32,7 +32,7 @@ NETWORK_NAME_MAP = {
     246: "EnergyWeb",
     1285: "Moonriver",
     1287: "MoonbeamAlpha",
-    1337: "Ganache",
+    8996: "Ganache",
     44787: "CeloAlfajores",
     80001: "Mumbai",
 }
@@ -48,7 +48,7 @@ BLOCK_NUMBER_POLL_INTERVAL = {
     246: 2.6,
     1285: 6.5,
     1287: 6.0,
-    1337: 2.5,
+    8996: 2.5,
     44787: 2.5,
     80001: 1.0,
 }

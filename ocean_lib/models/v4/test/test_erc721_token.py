@@ -60,7 +60,7 @@ def test_permissions(
         is True
     )
 
-    assert erc721_token.token_uri(1) == "https://oceanprotocol.com/nft/1"
+    assert erc721_token.token_uri(1) == "https://oceanprotocol.com/nft/"
 
     # Tests failing to re-initialize the contract
     with pytest.raises(exceptions.ContractLogicError) as err:
@@ -486,16 +486,18 @@ def test_erc721_data_token_functions(web3, config, publisher_wallet, consumer_wa
         web3=web3, config=config, erc721_publisher=publisher_wallet
     )
     assert erc721_token_v2.is_deployed(data_token=consumer_wallet.address) is False
-
-    erc721_token.set_base_uri(
-        new_base_uri="https://newurl.com/nft/", from_wallet=publisher_wallet
+    erc721_token.set_token_uri(
+        token_id=1, new_base_uri="https://newurl.com/nft/", from_wallet=publisher_wallet
     )
-    assert erc721_token.token_uri(token_id=1) == "https://newurl.com/nft/1"
+
+    assert erc721_token.token_uri(token_id=1) == "https://newurl.com/nft/"
 
     # Tests failing setting token URI by another user
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_token.set_base_uri(
-            new_base_uri="https://foourl.com/nft/", from_wallet=consumer_wallet
+        erc721_token.set_token_uri(
+            token_id=1,
+            new_base_uri="https://foourl.com/nft/",
+            from_wallet=consumer_wallet,
         )
     assert (
         err.value.args[0]
