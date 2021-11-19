@@ -366,7 +366,7 @@
         },
         {
           "internalType": "string",
-          "name": "baseURI",
+          "name": "tokenURI",
           "type": "string"
         }
       ],

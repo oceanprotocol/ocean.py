@@ -306,7 +306,7 @@ def test_buy_dt_batch(
         "name": "72120Bundle",
         "symbol": "72Bundle",
         "templateIndex": 1,
-        "baseURI": "https://oceanprotocol.com/nft/",
+        "tokenURI": "https://oceanprotocol.com/nft/",
     }
 
     erc_data = {
@@ -363,7 +363,7 @@ def test_buy_dt_batch(
         "name": "72120Bundle",
         "symbol": "72Bundle",
         "templateIndex": 1,
-        "baseURI": "https://oceanprotocol.com/nft2/",
+        "tokenURI": "https://oceanprotocol.com/nft2/",
     }
 
     erc_data2 = {
