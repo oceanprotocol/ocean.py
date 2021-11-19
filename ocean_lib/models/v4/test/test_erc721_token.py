@@ -23,6 +23,10 @@ def test_properties(web3, config):
         erc721_token.event_TokenCreated.abi["name"] == ERC721Token.EVENT_TOKEN_CREATED
     )
     assert (
+        erc721_token.event_TokenURIUpdate.abi["name"]
+        == ERC721Token.EVENT_TOKEN_URI_UPDATED
+    )
+    assert (
         erc721_token.event_MetadataCreated.abi["name"]
         == ERC721Token.EVENT_METADATA_CREATED
     )
@@ -70,7 +74,7 @@ def test_permissions(
             symbol="NN",
             token_factory_address=erc721_factory_address,
             additional_erc20_deployer=ZERO_ADDRESS,
-            base_uri="https://oceanprotocol.com/nft/",
+            token_uri="https://oceanprotocol.com/nft/",
             from_wallet=publisher_wallet,
         )
     assert (
@@ -486,17 +490,31 @@ def test_erc721_data_token_functions(web3, config, publisher_wallet, consumer_wa
         web3=web3, config=config, erc721_publisher=publisher_wallet
     )
     assert erc721_token_v2.is_deployed(data_token=consumer_wallet.address) is False
-    erc721_token.set_token_uri(
-        token_id=1, new_base_uri="https://newurl.com/nft/", from_wallet=publisher_wallet
+    tx = erc721_token.set_token_uri(
+        token_id=1,
+        new_token_uri="https://newurl.com/nft/",
+        from_wallet=publisher_wallet,
     )
-
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    assert tx_receipt.status == 1
+    registered_event = erc721_token.get_event_log(
+        event_name=ERC721Token.EVENT_TOKEN_URI_UPDATED,
+        from_block=tx_receipt.blockNumber,
+        to_block=web3.eth.block_number,
+        filters=None,
+    )
+    assert registered_event, "Cannot find TokenURIUpdate event."
+    assert registered_event[0].args.updatedBy == publisher_wallet.address
+    assert registered_event[0].args.tokenID == 1
+    assert registered_event[0].args.blockNumber == tx_receipt.blockNumber
     assert erc721_token.token_uri(token_id=1) == "https://newurl.com/nft/"
+    assert erc721_token.token_uri(token_id=1) == registered_event[0].args.tokenURI
 
     # Tests failing setting token URI by another user
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_token.set_token_uri(
             token_id=1,
-            new_base_uri="https://foourl.com/nft/",
+            new_token_uri="https://foourl.com/nft/",
             from_wallet=consumer_wallet,
         )
     assert (

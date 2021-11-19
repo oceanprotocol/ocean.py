@@ -26,6 +26,7 @@ class ERC721Token(ContractBase):
     EVENT_TOKEN_CREATED = "TokenCreated"
     EVENT_METADATA_CREATED = "MetadataCreated"
     EVENT_METADATA_UPDATED = "MetadataUpdated"
+    EVENT_TOKEN_URI_UPDATED = "TokenURIUpdate"
 
     @property
     def event_MetadataCreated(self):
@@ -39,6 +40,10 @@ class ERC721Token(ContractBase):
     def event_TokenCreated(self):
         return self.events.TokenCreated()
 
+    @property
+    def event_TokenURIUpdate(self):
+        return self.events.TokenURIUpdate()
+
     def initialize(
         self,
         owner: str,
@@ -46,7 +51,7 @@ class ERC721Token(ContractBase):
         symbol: str,
         token_factory_address: str,
         additional_erc20_deployer: str,
-        base_uri: str,
+        token_uri: str,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
@@ -57,10 +62,13 @@ class ERC721Token(ContractBase):
                 symbol,
                 token_factory_address,
                 additional_erc20_deployer,
-                base_uri,
+                token_uri,
             ),
             from_wallet,
         )
+
+    def set_metadata_state(self, metadata_state: int, from_wallet: Wallet):
+        return self.send_transaction("setMetaDataState", (metadata_state,), from_wallet)
 
     def set_metadata(
         self,
@@ -206,9 +214,12 @@ class ERC721Token(ContractBase):
     def is_deployed(self, data_token: str) -> bool:
         return self.contract.caller.isDeployed(data_token)
 
+    def is_erc20_deployer(self, account: str) -> bool:
+        return self.contract.caller.isERC20Deployer(account)
+
     def set_token_uri(
-        self, token_id: int, new_base_uri: str, from_wallet: Wallet
+        self, token_id: int, new_token_uri: str, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "setTokenURI", (token_id, new_base_uri), from_wallet
+            "setTokenURI", (token_id, new_token_uri), from_wallet
         )
