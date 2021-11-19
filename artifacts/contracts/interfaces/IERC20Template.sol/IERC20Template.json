@@ -253,6 +253,19 @@
     },
     {
       "inputs": [],
+      "name": "getERC721Address",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
       "name": "getPublishingMarketFee",
       "outputs": [
         {
