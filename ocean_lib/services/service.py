@@ -145,3 +145,39 @@ class Service:
         return DataServiceProvider.get_c2d_address(
             f"{result.scheme}://{result.netloc}/"
         )
+
+    @enforce_types
+    def add_trusted_algo_publisher(self, new_publisher_address: str) -> list:
+        privacy_values = self.attributes["main"].get("privacy")
+        if not privacy_values:
+            privacy_values = {}
+            self.attributes["main"]["privacy"] = privacy_values
+
+        assert isinstance(privacy_values, dict), "Privacy key is not a dictionary."
+        trusted_algo_publishers = [
+            tp.lower()
+            for tp in privacy_values.get("publisherTrustedAlgorithmPublishers", [])
+        ]
+        publisher_address = new_publisher_address.lower()
+
+        if publisher_address in trusted_algo_publishers:
+            return trusted_algo_publishers
+
+        trusted_algo_publishers.append(publisher_address)
+        # update with the new list
+        privacy_values["publisherTrustedAlgorithmPublishers"] = trusted_algo_publishers
+        assert (
+            self.attributes["main"]["privacy"] == privacy_values
+        ), "New trusted algorithm was not added. Failed when updating the privacy key. "
+        return trusted_algo_publishers
+
+    @enforce_types
+    def get_trusted_algos(self):
+        privacy_values = self.attributes["main"].get("privacy")
+        if not privacy_values:
+            privacy_values = {}
+            self.attributes["main"]["privacy"] = privacy_values
+
+        assert isinstance(privacy_values, dict), "Privacy key is not a dictionary."
+        trusted_algos = privacy_values.get("publisherTrustedAlgorithms", [])
+        return trusted_algos

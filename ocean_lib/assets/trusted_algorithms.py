@@ -8,7 +8,7 @@ from typing import Optional, Union
 from enforce_typing import enforce_types
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
-from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.assets.v4.asset import V4Asset
 from ocean_lib.utils.utilities import create_checksum
 
 
@@ -63,81 +63,81 @@ def create_publisher_trusted_algorithms(
 
 @enforce_types
 def add_publisher_trusted_algorithm(
-    asset_or_did: Union[str, V3Asset], algo_did: str, metadata_cache_uri: str
+    asset_or_did: Union[str, V3Asset, V4Asset], algo_did: str, metadata_cache_uri: str
 ) -> list:
     """
     :return: List of trusted algos
     """
-    if isinstance(asset_or_did, V3Asset):
+    if isinstance(asset_or_did, V3Asset) or isinstance(asset_or_did, V4Asset):
         asset = asset_or_did
     else:
         asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
 
-    compute_service = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
+    compute_service = asset.get_service("compute")
     assert (
         compute_service
     ), "Cannot add trusted algorithm to this asset because it has no compute service."
-    privacy_values = compute_service.attributes["main"].get("privacy")
-    if not privacy_values:
-        privacy_values = {}
-        compute_service.attributes["main"]["privacy"] = privacy_values
 
-    assert isinstance(privacy_values, dict), "Privacy key is not a dictionary."
-    trusted_algos = privacy_values.get("publisherTrustedAlgorithms", [])
-    # remove algo_did if already in the list
-    trusted_algos = [ta for ta in trusted_algos if ta["did"] != algo_did]
+    if asset.version:
+        initial_trusted_algos_v4 = compute_service.get_trusted_algos_v4()
+        # remove algo_did if already in the list
+        trusted_algos = [ta for ta in initial_trusted_algos_v4 if ta["did"] != algo_did]
+        algo_ddo = resolve_asset(algo_did, metadata_cache_uri=metadata_cache_uri)
+        trusted_algos.append(generate_trusted_algo_dict(asset_or_did=algo_ddo))
 
-    # now add this algo_did as trusted algo
-    algo_ddo = resolve_asset(algo_did, metadata_cache_uri=metadata_cache_uri)
-    trusted_algos.append(generate_trusted_algo_dict(asset_or_did=algo_ddo))
+        # update with the new list
+        compute_service.compute_values["publisherTrustedAlgorithms"] = trusted_algos
+        assert len(compute_service.compute_values["publisherTrustedAlgorithms"]) > len(
+            initial_trusted_algos_v4
+        ), "New trusted algorithm was not added. Failed when updating the privacy key. "
+    else:
+        initial_trusted_algos_v3 = compute_service.get_trusted_algos()
 
-    # update with the new list
-    privacy_values["publisherTrustedAlgorithms"] = trusted_algos
-    assert (
-        compute_service.attributes["main"]["privacy"] == privacy_values
-    ), "New trusted algorithm was not added. Failed when updating the privacy key. "
+        # remove algo_did if already in the list
+        trusted_algos = [ta for ta in initial_trusted_algos_v3 if ta["did"] != algo_did]
+
+        # now add this algo_did as trusted algo
+        algo_ddo = resolve_asset(algo_did, metadata_cache_uri=metadata_cache_uri)
+        trusted_algos.append(generate_trusted_algo_dict(asset_or_did=algo_ddo))
+
+        # update with the new list
+        compute_service.attributes["main"]["privacy"][
+            "publisherTrustedAlgorithms"
+        ] = trusted_algos
+        assert len(compute_service.attributes["main"]["privacy"]) > len(
+            initial_trusted_algos_v3
+        ), "New trusted algorithm was not added. Failed when updating the privacy key. "
+
     return trusted_algos
 
 
 @enforce_types
 def add_publisher_trusted_algorithm_publisher(
-    asset_or_did: Union[str, V3Asset], publisher_address: str, metadata_cache_uri: str
+    asset_or_did: Union[str, V3Asset, V4Asset],
+    publisher_address: str,
+    metadata_cache_uri: str,
 ) -> list:
     """
     :return: List of trusted algo publishers
     """
-    if isinstance(asset_or_did, V3Asset):
+    if isinstance(asset_or_did, V3Asset) or isinstance(asset_or_did, V4Asset):
         asset = asset_or_did
     else:
         asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
 
-    compute_service = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
+    compute_service = asset.get_service("compute")
     assert (
         compute_service
     ), "Cannot add trusted algorithm to this asset because it has no compute service."
-    # TODO: create function for diff structures depending of the version in each service class
-    privacy_values = compute_service.attributes["main"].get("privacy")
-    if not privacy_values:
-        privacy_values = {}
-        compute_service.attributes["main"]["privacy"] = privacy_values
 
-    assert isinstance(privacy_values, dict), "Privacy key is not a dictionary."
-    trusted_algo_publishers = [
-        tp.lower()
-        for tp in privacy_values.get("publisherTrustedAlgorithmPublishers", [])
-    ]
-    publisher_address = publisher_address.lower()
-
-    if publisher_address in trusted_algo_publishers:
-        return trusted_algo_publishers
-
-    trusted_algo_publishers.append(publisher_address)
-    # update with the new list
-    privacy_values["publisherTrustedAlgorithmPublishers"] = trusted_algo_publishers
-    assert (
-        compute_service.attributes["main"]["privacy"] == privacy_values
-    ), "New trusted algorithm was not added. Failed when updating the privacy key. "
-    return trusted_algo_publishers
+    if asset.version:
+        return compute_service.add_trusted_algo_publisher_v4(
+            new_publisher_address=publisher_address
+        )
+    else:
+        return compute_service.add_trusted_algo_publisher(
+            new_publisher_address=publisher_address
+        )
 
 
 @enforce_types

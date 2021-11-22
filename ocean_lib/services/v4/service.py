@@ -15,18 +15,8 @@ from ocean_lib.common.agreements.service_types import ServiceTypesV4, ServiceTyp
 logger = logging.getLogger(__name__)
 
 
-class NFTService:
+class V4Service:
     """Service class to create validate service in a V4 DDO."""
-
-    SERVICE_TYPE = "type"
-    SERVICE_ID = "serviceId"
-    SERVICE_FILES = "files"
-    SERVICE_NAME = "name"
-    SERVICE_DESCRIPTION = "description"
-    SERVICE_DATATOKEN = "datatokenAddress"
-    SERVICE_ENDPOINT = "serviceEndpoint"
-    SERVICE_TIMEOUT = "timeout"
-    SERVICE_COMPUTE = "compute"
 
     def __init__(
         self,
@@ -62,17 +52,17 @@ class NFTService:
                 self.name = service_to_default_name[service_type]
 
     @classmethod
-    def from_json(cls, service_dict: Dict[str, Any]) -> "NFTService":
+    def from_dict(cls, service_dict: Dict[str, Any]) -> "V4Service":
         """Create a service object from a JSON string."""
         sd = copy.deepcopy(service_dict)
-        service_id = sd.pop(cls.SERVICE_ID, None)
-        service_type = sd.pop(cls.SERVICE_TYPE, None)
-        service_endpoint = sd.pop(cls.SERVICE_ENDPOINT, None)
-        data_token = sd.pop(cls.SERVICE_DATATOKEN, None)
-        service_files = sd.pop(cls.SERVICE_FILES, None)
-        timeout = sd.pop(cls.SERVICE_TIMEOUT, None)
-        name = sd.pop(cls.SERVICE_NAME, None)
-        description = sd.pop(cls.SERVICE_DESCRIPTION, None)
+        service_id = sd.pop("serviceId", None)
+        service_type = sd.pop("type", None)
+        service_endpoint = sd.pop("serviceEndpoint", None)
+        data_token = sd.pop("datatokenAddress", None)
+        service_files = sd.pop("files", None)
+        timeout = sd.pop("timeout", None)
+        name = sd.pop("name", None)
+        description = sd.pop("description", None)
         if not service_type:
             logger.error(
                 'Service definition in DDO document is missing the "type" key/value.'
@@ -91,42 +81,65 @@ class NFTService:
             description,
         )
 
+    @classmethod
+    def from_json(cls, service_dict: Dict[str, Any]) -> "V4Service":
+        return cls.from_dict(service_dict)
+
     def values(self) -> Dict[str, Any]:
         """
 
         :return: array of values
         """
-        return self._values.copy()
+        return dict()
+
+    def add_trusted_algo_publisher_v4(self, new_publisher_address: str) -> list:
+        trusted_algo_publishers = [
+            tp.lower()
+            for tp in self.compute_values.get("publisherTrustedAlgorithmPublishers", [])
+        ]
+        publisher_address = new_publisher_address.lower()
+
+        if publisher_address in trusted_algo_publishers:
+            return trusted_algo_publishers
+
+        trusted_algo_publishers.append(publisher_address)
+        initial_len = len(trusted_algo_publishers)
+        # update with the new list
+        self.compute_values[
+            "publisherTrustedAlgorithmPublishers"
+        ] = trusted_algo_publishers
+        assert (
+            len(self.compute_values["publisherTrustedAlgorithmPublishers"])
+            > initial_len
+        ), "New trusted algorithm was not added. Failed when updating the privacy key. "
+        return trusted_algo_publishers
+
+    def get_trusted_algos_v4(self) -> list:
+        trusted_algos = self.compute_values.get("publisherTrustedAlgorithms", [])
+        return trusted_algos
 
     def as_dictionary(self) -> Dict[str, Any]:
         """Return the service as a python dictionary."""
 
         values = {
-            self.SERVICE_ID: self.id,
-            self.SERVICE_TYPE: self.type,
-            self.SERVICE_FILES: self.files,
-            self.SERVICE_DATATOKEN: self.data_token,
-            self.SERVICE_ENDPOINT: self.service_endpoint,
-            self.SERVICE_TIMEOUT: self.timeout,
+            "serviceId": self.id,
+            "type": self.type,
+            "files": self.files,
+            "datatokenAddress": self.data_token,
+            "serviceEndpoint": self.service_endpoint,
+            "timeout": self.timeout,
         }
 
-        if self.SERVICE_COMPUTE in self.compute_values:
-            if (
-                self.compute_values is not None
-                and len(self.compute_values.values()) > 0
-            ):
+        if self.type == "compute":
+            if "compute" in self.compute_values:
                 values.update(self.compute_values)
-        else:
-            if (
-                self.compute_values is not None
-                and len(self.compute_values.values()) > 0
-            ):
-                values[self.SERVICE_COMPUTE] = self.compute_values
+            else:
+                values["compute"] = self.compute_values
 
         if self.name is not None:
-            values[self.SERVICE_NAME] = self.name
+            values["name"] = self.name
         if self.description is not None:
-            values[self.SERVICE_DESCRIPTION] = self.description
+            values["description"] = self.description
 
         for key, value in values.items():
             if isinstance(value, object) and hasattr(value, "as_dictionary"):

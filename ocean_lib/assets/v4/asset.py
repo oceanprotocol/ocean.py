@@ -5,16 +5,15 @@ import copy
 import json
 import logging
 import os
-from pathlib import Path
-from typing import Optional, List, Union
+
+from typing import Optional
 
 from enforce_typing import enforce_types
-from eth_utils import add_0x_prefix
 
 from ocean_lib.assets.credentials import AddressCredential
-from ocean_lib.assets.did import did_to_id
+from ocean_lib.common.agreements.service_types import ServiceTypesV4
 from ocean_lib.ocean.util import get_web3
-from ocean_lib.services.v4.service import NFTService
+from ocean_lib.services.v4.service import V4Service
 
 logger = logging.getLogger("ddo")
 
@@ -25,51 +24,37 @@ class V4Asset:
 
     def __init__(
         self,
-        asset_dict: Optional[dict] = None,
-        json_text: Optional[str] = None,
-        json_filename: Optional[Path] = None,
+        did: Optional[str] = None,
+        context: Optional[list] = None,
+        chain_id: Optional[int] = None,
+        metadata: Optional[dict] = None,
+        services: Optional[list] = None,
+        credentials: Optional[dict] = None,
+        nft: Optional[dict] = None,
+        datatokens: Optional[list] = None,
+        event: Optional[dict] = None,
+        stats: Optional[dict] = None,
     ) -> None:
 
+        self.did = did
+        self.context = context or ["https://w3id.org/did/v1"]
+        self.metadata = metadata
         self.version = "4.0.0"
-        self._services = []
-        self.credentials = {}
+        self.services = services or []
+        self.credentials = credentials or {}
+        self.nft = nft
+        self.datatokens = datatokens
+        self.event = event
+        self.stats = stats
 
         network_url = os.getenv("OCEAN_NETWORK_URL")
-        if network_url:
+        if chain_id:
+            self.chain_id = chain_id
+        elif network_url:
             w3 = get_web3(network_url)
-            self._chain_id = w3.eth.chain_id
+            self.chain_id = w3.eth.chain_id
         else:
-            raise TypeError(f"The network URL is not provided.")
-
-        if not json_text and json_filename:
-            with open(json_filename, "r") as file_handle:
-                json_text = file_handle.read()
-        if json_text:
-            self._read_dict(json.loads(json_text))
-        elif asset_dict:
-            self._read_dict(asset_dict)
-
-    @property
-    def asset_id(self) -> Optional[str]:
-        """The asset id part of the DID"""
-        if not self.did:
-            return None
-        return add_0x_prefix(did_to_id(self.did))
-
-    @property
-    def metadata(self) -> Optional[dict]:
-        """Get the metadata."""
-        return self._metadata
-
-    @property
-    def chain_id(self) -> int:
-        """Get the chain ID."""
-        return self._chain_id
-
-    @property
-    def services(self) -> List[dict]:
-        """Get the chain ID."""
-        return self._services
+            raise TypeError(f"The chain ID is not provided.")
 
     @property
     def requires_address_credential(self) -> bool:
@@ -85,7 +70,7 @@ class V4Asset:
 
     @property
     def denied_addresses(self) -> list:
-        """Lists addresesses that are explicitly denied in credentials."""
+        """Lists addresses that are explicitly denied in credentials."""
         manager = AddressCredential(self)
         return manager.get_addresses_of_class("deny")
 
@@ -109,33 +94,47 @@ class V4Asset:
         manager = AddressCredential(self)
         manager.remove_address_from_access_class(address, "deny")
 
-    def _read_dict(self, dictionary: dict) -> None:
+    @classmethod
+    def from_dict(cls, dictionary: dict) -> "V4Asset":
         """Import a JSON dict into this Asset."""
         values = copy.deepcopy(dictionary)
         id_key = "id" if "id" in values else "_id"
-        self.did = values.pop(id_key)
-        self._chain_id = values.pop("chainId")
+        did = values.pop(id_key)
+        chain_id = values.pop("chainId")
+        context = values.pop("@context")
 
         if "metadata" in values:
-            self._metadata = values.pop("metadata")
+            metadata = values.pop("metadata")
         if "services" in values:
-            self._services = []
+            services = []
             for value in values.pop("services"):
                 if isinstance(value, str):
                     value = json.loads(value)
 
-                service = NFTService.from_json(value)
-                self._services.append(service)
+                service = V4Service.from_json(value)
+                services.append(service)
         if "credentials" in values:
-            self.credentials = values.pop("credentials")
+            credentials = values.pop("credentials")
         if "nft" in values:
-            self.nft = values.pop("nft")
+            nft = values.pop("nft")
         if "datatokens" in values:
-            self.data_tokens = values.pop("datatokens")
+            data_tokens = values.pop("datatokens")
         if "event" in values:
-            self.event = values.pop("event")
+            event = values.pop("event")
         if "stats" in values:
-            self.stats = values.pop("stats")
+            stats = values.pop("stats")
+        return cls(
+            did,
+            context,
+            chain_id,
+            metadata,
+            services,
+            credentials,
+            nft,
+            data_tokens,
+            event,
+            stats,
+        )
 
     def as_dictionary(self) -> dict:
         """
@@ -151,83 +150,50 @@ class V4Asset:
             "chainId": self.chain_id,
         }
 
-        if self._metadata:
-            data["metadata"] = self._metadata
-        if self.services:
-            data["services"] = [service.as_dictionary() for service in self._services]
-        if self.credentials:
-            data["credentials"] = self.credentials
-        if self.nft:
-            data["nft"] = self.nft
-        if self.data_tokens:
-            data["datatokens"] = self.data_tokens
-        if self.event:
-            data["event"] = self.event
-        if self.stats:
-            data["stats"] = self.stats
+        for value in self.services:
+            if isinstance(value, V4Service):
+                service = value.as_dictionary()
+                self.services.append(service)
 
+        self.services = list(filter(lambda s: isinstance(s, dict), self.services))
+
+        args = [
+            "metadata",
+            "services",
+            "credentials",
+            "nft",
+            "datatokens",
+            "event",
+            "stats",
+        ]
+        attrs = list(
+            filter(
+                lambda attr: not not attr[1],
+                map(lambda attr: (attr, getattr(self, attr, None)), args),
+            )
+        )
+        data.update(attrs)
         return data
 
-    def as_text(self, is_pretty: bool = False) -> str:
-        """Return the V4 DDO as a JSON text.
-
-        :param is_pretty: If True return dictionary in a prettier way, bool
-        :return: str
-        """
-        data = self.as_dictionary()
-        if is_pretty:
-            return json.dumps(data, indent=2, separators=(",", ": "))
-
-        return json.dumps(data)
-
-    def add_service(
-        self,
-        service_id: str,
-        service_type: Union[str, NFTService],
-        service_endpoint: Optional[str] = None,
-        data_token: Optional[str] = None,
-        files: Optional[str] = None,
-        timeout: Optional[int] = None,
-        compute_values: Optional[dict] = None,
-        name: Optional[str] = None,
-        description: Optional[str] = None,
-    ) -> None:
+    def add_service(self, service: V4Service) -> None:
         """
         Add a service to the list of services on the V4 DDO.
 
-        :param service_id: Unique identifier of the service, str
-        :param service_type: Service
-        :param service_endpoint: Service endpoint, str
-        :param data_token: Data token address, str
-        :param files: Encrypted files URLS, str
-        :param timeout: Duration of the service in seconds, int
-        :param compute_values: Python dict with the compute service's requirements, dict
-        :param name: Name of the service, str
-        :param description: Description about the service, str
+        :param service: To add service, V4Service
         """
-        if isinstance(service_type, NFTService):
-            service = service_type
-        else:
-            values = copy.deepcopy(compute_values) if compute_values else None
-            service = NFTService(
-                service_id,
-                service_type,
-                service_endpoint,
-                data_token,
-                files,
-                timeout,
-                values,
-                name,
-                description,
-            )
-        logger.debug(
-            f"Adding service with service type {service_type} with did {self.did}"
-        )
-        self._services.append(service)
 
-    def get_service(self, service_type: str) -> Optional[NFTService]:
-        """Return a service using."""
+        logger.debug(
+            f"Adding service with service type {service.type} with did {self.did}"
+        )
+        self.services.append(service)
+
+    def get_service_by_id(self, service_id: str) -> V4Service:
+        """Return the Service with the matching id"""
+        return next((service for service in self.services if service.id == service_id))
+
+    def get_service(self, service_type: str) -> Optional[V4Service]:
+        """Return the first Service with the given service type."""
         return next(
-            (service for service in self._services if service.type == service_type),
+            (service for service in self.services if service.type == service_type),
             None,
         )

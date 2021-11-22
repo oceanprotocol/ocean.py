@@ -9,7 +9,6 @@ import time
 import uuid
 
 from ocean_lib.assets.asset import V3Asset
-from ocean_lib.assets.v4.asset import V4Asset
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
@@ -48,8 +47,11 @@ def get_sample_ddo(file_name="ddo_sa_sample.json") -> V3Asset:
     return V3Asset(json_filename=get_resource_path("ddo", file_name))
 
 
-def get_sample_v4_ddo(file_name="ddo_v4_sample.json") -> V4Asset:
-    return V4Asset(json_filename=get_resource_path("ddo", file_name))
+def get_sample_v4_ddo(file_name="ddo_v4_sample.json") -> dict:
+    path = get_resource_path("ddo", file_name)
+    with open(path, "r") as file_handle:
+        ddo = file_handle.read()
+    return json.loads(ddo)
 
 
 def get_sample_ddo_with_compute_service() -> V3Asset:
@@ -58,10 +60,11 @@ def get_sample_ddo_with_compute_service() -> V3Asset:
     )
 
 
-def get_sample_v4_ddo_with_compute_service() -> V4Asset:
-    return V4Asset(
-        json_filename=get_resource_path("ddo", "ddo_v4_with_compute_service.json")
-    )
+def get_sample_v4_ddo_with_compute_service() -> dict:
+    path = get_resource_path("ddo", "ddo_v4_with_compute_service.json")
+    with open(path, "r") as file_handle:
+        ddo = file_handle.read()
+    return json.loads(ddo)
 
 
 def get_sample_algorithm_ddo_dict() -> dict:
