@@ -132,6 +132,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     assert erc20.symbol() == "ERC20DT1Symbol"
     assert erc20.decimals() == 18
     assert erc20.cap() == web3.toWei(publish_market_fee_amount, "ether")
+    assert erc20.get_erc721_address() == erc721.address
 
     # Check minter permissions
     assert erc20.get_permissions(publisher_wallet.address)[RolesERC20.MINTER]

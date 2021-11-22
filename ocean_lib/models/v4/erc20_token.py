@@ -247,6 +247,9 @@ class ERC20Token(ContractBase):
     def symbol(self) -> str:
         return self.contract.caller.symbol()
 
+    def get_erc721_address(self) -> str:
+        return self.contract.caller.getERC721Address()
+
     def decimals(self) -> int:
         return self.contract.caller.decimals()
 
