@@ -8,7 +8,7 @@
 """
 import copy
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, List
 from urllib.parse import urlparse
 
 from enforce_typing import enforce_types
@@ -181,3 +181,16 @@ class Service:
         assert isinstance(privacy_values, dict), "Privacy key is not a dictionary."
         trusted_algos = privacy_values.get("publisherTrustedAlgorithms", [])
         return trusted_algos
+
+    @enforce_types
+    def get_trusted_algos_publishers(self):
+        privacy_values = self.attributes["main"].get("privacy")
+        if not privacy_values:
+            privacy_values = {}
+            self.attributes["main"]["privacy"] = privacy_values
+
+        assert isinstance(privacy_values, dict), "Privacy key is not a dictionary."
+        trusted_algos_publishers = privacy_values.get(
+            "publisherTrustedAlgorithmPublishers", []
+        )
+        return trusted_algos_publishers

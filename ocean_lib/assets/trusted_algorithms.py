@@ -9,12 +9,14 @@ from enforce_typing import enforce_types
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.assets.v4.asset import V4Asset
+from ocean_lib.common.agreements.service_types import ServiceTypesV4
 from ocean_lib.utils.utilities import create_checksum
 
 
 @enforce_types
 def generate_trusted_algo_dict(
-    asset_or_did: Union[str, V3Asset] = None, metadata_cache_uri: Optional[str] = None
+    asset_or_did: Union[str, V3Asset, V4Asset] = None,
+    metadata_cache_uri: Optional[str] = None,
 ) -> dict:
     """
     :return: Object as follows:
@@ -26,24 +28,41 @@ def generate_trusted_algo_dict(
     }
     ```
     """
-    if isinstance(asset_or_did, V3Asset):
+    if isinstance(asset_or_did, V3Asset) or isinstance(asset_or_did, V4Asset):
         ddo = asset_or_did
     else:
         ddo = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
 
     algo_metadata = ddo.metadata
-    return {
-        "did": ddo.did,
-        "filesChecksum": create_checksum(
-            algo_metadata.get("encryptedFiles", "")
-            + json.dumps(algo_metadata["main"]["files"], separators=(",", ":"))
-        ),
-        "containerSectionChecksum": create_checksum(
-            json.dumps(
-                algo_metadata["main"]["algorithm"]["container"], separators=(",", ":")
-            )
-        ),
-    }
+    if ddo.version:
+        return {
+            "did": ddo.did,
+            "filesChecksum": create_checksum(
+                json.dumps(
+                    ddo.get_service(ServiceTypesV4.CLOUD_COMPUTE).files,
+                    separators=(",", ":"),
+                )
+            ),
+            "containerSectionChecksum": create_checksum(
+                json.dumps(
+                    algo_metadata["algorithm"]["container"], separators=(",", ":")
+                )
+            ),
+        }
+    else:
+        return {
+            "did": ddo.did,
+            "filesChecksum": create_checksum(
+                algo_metadata.get("encryptedFiles", "")
+                + json.dumps(algo_metadata["main"]["files"], separators=(",", ":"))
+            ),
+            "containerSectionChecksum": create_checksum(
+                json.dumps(
+                    algo_metadata["main"]["algorithm"]["container"],
+                    separators=(",", ":"),
+                )
+            ),
+        }
 
 
 @enforce_types
@@ -142,36 +161,62 @@ def add_publisher_trusted_algorithm_publisher(
 
 @enforce_types
 def remove_publisher_trusted_algorithm(
-    asset_or_did: Union[str, V3Asset], algo_did: str, metadata_cache_uri: str
+    asset_or_did: Union[str, V3Asset, V4Asset], algo_did: str, metadata_cache_uri: str
 ) -> list:
     """
     :return: List of trusted algos not containing `algo_did`.
     """
-    if isinstance(asset_or_did, V3Asset):
+    if isinstance(asset_or_did, V3Asset) or isinstance(asset_or_did, V4Asset):
         asset = asset_or_did
     else:
         asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
 
-    trusted_algorithms = asset.get_trusted_algorithms()
+    compute_service = asset.get_service("compute")
+    assert (
+        compute_service
+    ), "Cannot add trusted algorithm to this asset because it has no compute service."
+
+    if asset.version:
+        trusted_algorithms = compute_service.get_trusted_algos_v4()
+    else:
+        trusted_algorithms = compute_service.get_trusted_algos()
     if not trusted_algorithms:
         raise ValueError(
             f"Algorithm {algo_did} is not in trusted algorithms of this asset."
         )
-
-    trusted_algorithms = [ta for ta in trusted_algorithms if ta["did"] != algo_did]
-    trusted_algo_publishers = asset.get_trusted_algorithm_publishers()
-    asset.update_compute_privacy(
-        trusted_algorithms, trusted_algo_publishers, False, False
-    )
-    assert (
-        asset.get_trusted_algorithms() == trusted_algorithms
-    ), "New trusted algorithm was not removed. Failed when updating the list of trusted algorithms. "
+    if asset.version:
+        trusted_algorithms = [ta for ta in trusted_algorithms if ta["did"] != algo_did]
+        trusted_algo_publishers = compute_service.get_trusted_algos_publishers_v4()
+        asset.update_compute_values_v4(
+            trusted_algorithms,
+            trusted_algo_publishers,
+            allow_network_access=True,
+            allow_raw_algorithm=False,
+        )
+        assert (
+            asset.get_service("compute").compute_values["publisherTrustedAlgorithms"]
+            == trusted_algorithms
+        ), "New trusted algorithm was not removed. Failed when updating the list of trusted algorithms. "
+    else:
+        trusted_algorithms = [ta for ta in trusted_algorithms if ta["did"] != algo_did]
+        trusted_algo_publishers = compute_service.get_trusted_algos_publishers()
+        asset.update_compute_privacy(
+            trusted_algorithms,
+            trusted_algo_publishers,
+            allow_all=False,
+            allow_raw_algorithm=False,
+        )
+        assert (
+            asset.get_trusted_algorithms() == trusted_algorithms
+        ), "New trusted algorithm was not removed. Failed when updating the list of trusted algorithms. "
     return trusted_algorithms
 
 
 @enforce_types
 def remove_publisher_trusted_algorithm_publisher(
-    asset_or_did: Union[str, V3Asset], publisher_address: str, metadata_cache_uri: str
+    asset_or_did: Union[str, V3Asset, V4Asset],
+    publisher_address: str,
+    metadata_cache_uri: str,
 ) -> list:
     """
     :return: List of trusted algo publishers not containing `publisher_address`.
@@ -181,24 +226,46 @@ def remove_publisher_trusted_algorithm_publisher(
     else:
         asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
 
-    trusted_algorithm_publishers = [
-        tp.lower() for tp in asset.get_trusted_algorithm_publishers()
-    ]
+    compute_service = asset.get_service("compute")
+    assert (
+        compute_service
+    ), "Cannot add trusted algorithm to this asset because it has no compute service."
+
+    if asset.version:
+        trusted_algorithm_publishers = [
+            tp.lower() for tp in compute_service.get_trusted_algos_publishers_v4()
+        ]
+    else:
+        trusted_algorithm_publishers = [
+            tp.lower() for tp in compute_service.get_trusted_algos_publishers()
+        ]
     publisher_address = publisher_address.lower()
 
     if not trusted_algorithm_publishers:
         raise ValueError(
-            f"Publisher {publisher_address} is not in trusted algorith publishers of this asset."
+            f"Publisher {publisher_address} is not in trusted algorithm publishers of this asset."
         )
 
     trusted_algorithm_publishers = [
         tp for tp in trusted_algorithm_publishers if tp != publisher_address
     ]
-    trusted_algorithms = asset.get_trusted_algorithms()
-    asset.update_compute_privacy(
-        trusted_algorithms, trusted_algorithm_publishers, False, False
-    )
-    assert (
-        asset.get_trusted_algorithm_publishers() == trusted_algorithm_publishers
-    ), "New trusted algorithm publisher was not removed. Failed when updating the list of trusted algo publishers. "
+    if asset.version:
+        trusted_algorithms = compute_service.get_trusted_algos_v4()
+        asset.update_compute_values_v4(
+            trusted_algorithms, trusted_algorithm_publishers, True, False
+        )
+        assert (
+            asset.get_service("compute").compute_values[
+                "publisherTrustedAlgorithmPublishers"
+            ]
+            == trusted_algorithm_publishers
+        ), "New trusted algorithm publisher was not removed. Failed when updating the list of trusted algo publishers. "
+    else:
+        trusted_algorithms = compute_service.get_trusted_algos()
+        asset.update_compute_privacy(
+            trusted_algorithms, trusted_algorithm_publishers, True, False
+        )
+        assert (
+            asset.get_trusted_algorithm_publishers() == trusted_algorithm_publishers
+        ), "New trusted algorithm publisher was not removed. Failed when updating the list of trusted algo publishers. "
     return trusted_algorithm_publishers

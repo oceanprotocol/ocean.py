@@ -92,10 +92,15 @@ class V4Service:
         """
         return dict()
 
+    def get_trusted_algos_v4(self) -> list:
+        return self.compute_values.get("publisherTrustedAlgorithms", [])
+
+    def get_trusted_algos_publishers_v4(self) -> list:
+        return self.compute_values.get("publisherTrustedAlgorithmPublishers", [])
+
     def add_trusted_algo_publisher_v4(self, new_publisher_address: str) -> list:
         trusted_algo_publishers = [
-            tp.lower()
-            for tp in self.compute_values.get("publisherTrustedAlgorithmPublishers", [])
+            tp.lower() for tp in self.get_trusted_algos_publishers_v4()
         ]
         publisher_address = new_publisher_address.lower()
 
@@ -113,10 +118,6 @@ class V4Service:
             > initial_len
         ), "New trusted algorithm was not added. Failed when updating the privacy key. "
         return trusted_algo_publishers
-
-    def get_trusted_algos_v4(self) -> list:
-        trusted_algos = self.compute_values.get("publisherTrustedAlgorithms", [])
-        return trusted_algos
 
     def as_dictionary(self) -> Dict[str, Any]:
         """Return the service as a python dictionary."""

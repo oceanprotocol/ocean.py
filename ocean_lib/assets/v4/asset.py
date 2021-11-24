@@ -6,7 +6,7 @@ import json
 import logging
 import os
 
-from typing import Optional
+from typing import Optional, List
 
 from enforce_typing import enforce_types
 
@@ -197,3 +197,48 @@ class V4Asset:
             (service for service in self.services if service.type == service_type),
             None,
         )
+
+    def update_compute_values_v4(
+        self,
+        trusted_algorithms: List,
+        trusted_algo_publishers: Optional[List],
+        allow_network_access: bool,
+        allow_raw_algorithm: bool,
+    ) -> None:
+        """Set the `trusted_algorithms` on the compute service.
+
+        - An assertion is raised if this asset has no compute service
+        - Updates the compute service in place
+        - Adds the trusted algorithms under privacy.publisherTrustedAlgorithms
+
+        :param trusted_algorithms: list of dicts, each dict contain the keys
+            ("containerSectionChecksum", "filesChecksum", "did")
+        :param trusted_algo_publishers: list of strings, addresses of trusted publishers
+        :param allow_network_access: bool -- set to True to allow network access to all the algorithms that belong to this dataset
+        :param allow_raw_algorithm: bool -- determine whether raw algorithms (i.e. unpublished) can be run on this dataset
+        :return: None
+        :raises AssertionError if this asset has no `ServiceTypes.CLOUD_COMPUTE` service
+        """
+        assert not trusted_algorithms or isinstance(trusted_algorithms, list)
+        service = self.get_service(ServiceTypesV4.CLOUD_COMPUTE)
+        assert service is not None, "this asset does not have a compute service."
+
+        trusted_algorithms = trusted_algorithms if trusted_algorithms else []
+        if trusted_algorithms:
+            for ta in trusted_algorithms:
+                assert isinstance(
+                    ta, dict
+                ), f"item in list of trusted_algorithms must be a dict, got {ta}"
+                assert (
+                    "did" in ta
+                ), f"dict in list of trusted_algorithms is expected to have a `did` key, got {ta.keys()}."
+
+        if not service.compute_values:
+            service.compute_values = {}
+
+        service.compute_values["publisherTrustedAlgorithms"] = trusted_algorithms
+        service.compute_values[
+            "publisherTrustedAlgorithmPublishers"
+        ] = trusted_algo_publishers
+        service.compute_values["allowNetworkAccess"] = allow_network_access
+        service.compute_values["allowRawAlgorithm"] = allow_raw_algorithm
