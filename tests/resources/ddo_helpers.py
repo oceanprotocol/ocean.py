@@ -38,9 +38,7 @@ def get_key_from_v4_sample_ddo(key, file_name="ddo_v4_sample.json"):
     with open(path, "r") as file_handle:
         ddo = file_handle.read()
     ddo_dict = json.loads(ddo)
-    if key not in ddo_dict.keys():
-        return None
-    return ddo_dict[key]
+    return ddo_dict.pop(key, None)
 
 
 def get_sample_ddo(file_name="ddo_sa_sample.json") -> V3Asset:

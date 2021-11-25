@@ -32,7 +32,7 @@ def resolve_asset(did: str, metadata_cache_uri: str) -> Union[V3Asset, V4Asset]:
 
     if ddo:
         ddo_dict = ddo.as_dictionary()
-        if "version" in ddo_dict:
+        if ddo.version.startswith("4."):
             return V4Asset.from_json(ddo_dict)
         else:
             return V3Asset(dictionary=ddo_dict)

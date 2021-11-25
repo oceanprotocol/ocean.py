@@ -8,10 +8,11 @@
 """
 import copy
 import logging
-from typing import Any, Dict, Optional, List
+from typing import Any, Dict, Optional
 from urllib.parse import urlparse
 
 from enforce_typing import enforce_types
+
 from ocean_lib.common.agreements.service_types import ServiceTypes, ServiceTypesIndices
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
@@ -147,7 +148,56 @@ class Service:
         )
 
     @enforce_types
-    def add_trusted_algo_publisher(self, new_publisher_address: str) -> list:
+    def get_trusted_algorithms(self) -> list:
+        return (
+            self.attributes["main"]
+            .get("privacy", {})
+            .get("publisherTrustedAlgorithms", [])
+        )
+
+    @enforce_types
+    def get_trusted_algorithm_publishers(self) -> list:
+        return (
+            self.attributes["main"]
+            .get("privacy", {})
+            .get("publisherTrustedAlgorithmPublishers", [])
+        )
+
+    def add_publisher_trusted_algorithm(
+        self,
+        algo_ddo,
+        generated_trusted_algo_dict: list,
+    ) -> list:
+        """
+        :return: List of trusted algos
+        """
+
+        privacy_values = self.attributes["main"].get("privacy")
+        if not privacy_values:
+            privacy_values = {}
+            self.attributes["main"]["privacy"] = privacy_values
+
+        assert isinstance(privacy_values, dict), "Privacy key is not a dictionary."
+        trusted_algos = privacy_values.get("publisherTrustedAlgorithms", [])
+        # remove algo_did if already in the list
+        trusted_algos = [ta for ta in trusted_algos if ta["did"] != algo_ddo.did]
+
+        # now add this algo_did as trusted algo
+        trusted_algos.append(generated_trusted_algo_dict)
+
+        # update with the new list
+        privacy_values["publisherTrustedAlgorithms"] = trusted_algos
+        assert (
+            self.attributes["main"]["privacy"] == privacy_values
+        ), "New trusted algorithm was not added. Failed when updating the privacy key. "
+        return trusted_algos
+
+    @enforce_types
+    def add_publisher_trusted_algorithm_publisher(self, publisher_address: str) -> list:
+        """
+        :return: List of trusted algo publishers
+        """
+
         privacy_values = self.attributes["main"].get("privacy")
         if not privacy_values:
             privacy_values = {}
@@ -158,39 +208,16 @@ class Service:
             tp.lower()
             for tp in privacy_values.get("publisherTrustedAlgorithmPublishers", [])
         ]
-        publisher_address = new_publisher_address.lower()
+        publisher_address = publisher_address.lower()
 
         if publisher_address in trusted_algo_publishers:
             return trusted_algo_publishers
 
         trusted_algo_publishers.append(publisher_address)
+
         # update with the new list
         privacy_values["publisherTrustedAlgorithmPublishers"] = trusted_algo_publishers
         assert (
             self.attributes["main"]["privacy"] == privacy_values
         ), "New trusted algorithm was not added. Failed when updating the privacy key. "
         return trusted_algo_publishers
-
-    @enforce_types
-    def get_trusted_algos(self):
-        privacy_values = self.attributes["main"].get("privacy")
-        if not privacy_values:
-            privacy_values = {}
-            self.attributes["main"]["privacy"] = privacy_values
-
-        assert isinstance(privacy_values, dict), "Privacy key is not a dictionary."
-        trusted_algos = privacy_values.get("publisherTrustedAlgorithms", [])
-        return trusted_algos
-
-    @enforce_types
-    def get_trusted_algos_publishers(self):
-        privacy_values = self.attributes["main"].get("privacy")
-        if not privacy_values:
-            privacy_values = {}
-            self.attributes["main"]["privacy"] = privacy_values
-
-        assert isinstance(privacy_values, dict), "Privacy key is not a dictionary."
-        trusted_algos_publishers = privacy_values.get(
-            "publisherTrustedAlgorithmPublishers", []
-        )
-        return trusted_algos_publishers

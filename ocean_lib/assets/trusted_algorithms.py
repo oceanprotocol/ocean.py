@@ -28,13 +28,13 @@ def generate_trusted_algo_dict(
     }
     ```
     """
-    if isinstance(asset_or_did, V3Asset) or isinstance(asset_or_did, V4Asset):
+    if isinstance(asset_or_did, (V3Asset, V4Asset)):
         ddo = asset_or_did
     else:
         ddo = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
 
     algo_metadata = ddo.metadata
-    if ddo.version:
+    if ddo.version.startswith("4."):
         return {
             "did": ddo.did,
             "filesChecksum": create_checksum(
@@ -87,7 +87,7 @@ def add_publisher_trusted_algorithm(
     """
     :return: List of trusted algos
     """
-    if isinstance(asset_or_did, V3Asset) or isinstance(asset_or_did, V4Asset):
+    if isinstance(asset_or_did, (V3Asset, V4Asset)):
         asset = asset_or_did
     else:
         asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
@@ -97,37 +97,17 @@ def add_publisher_trusted_algorithm(
         compute_service
     ), "Cannot add trusted algorithm to this asset because it has no compute service."
 
-    if asset.version:
-        initial_trusted_algos_v4 = compute_service.get_trusted_algos_v4()
-        # remove algo_did if already in the list
-        trusted_algos = [ta for ta in initial_trusted_algos_v4 if ta["did"] != algo_did]
-        algo_ddo = resolve_asset(algo_did, metadata_cache_uri=metadata_cache_uri)
-        trusted_algos.append(generate_trusted_algo_dict(asset_or_did=algo_ddo))
+    algo_ddo = resolve_asset(algo_did, metadata_cache_uri=metadata_cache_uri)
+    generated_trusted_algo_dict = generate_trusted_algo_dict(algo_ddo)
 
-        # update with the new list
-        compute_service.compute_values["publisherTrustedAlgorithms"] = trusted_algos
-        assert len(compute_service.compute_values["publisherTrustedAlgorithms"]) > len(
-            initial_trusted_algos_v4
-        ), "New trusted algorithm was not added. Failed when updating the privacy key. "
+    if asset.version.startswith("4."):
+        return compute_service.add_publisher_trusted_algorithm(
+            algo_ddo, generated_trusted_algo_dict
+        )
     else:
-        initial_trusted_algos_v3 = compute_service.get_trusted_algos()
-
-        # remove algo_did if already in the list
-        trusted_algos = [ta for ta in initial_trusted_algos_v3 if ta["did"] != algo_did]
-
-        # now add this algo_did as trusted algo
-        algo_ddo = resolve_asset(algo_did, metadata_cache_uri=metadata_cache_uri)
-        trusted_algos.append(generate_trusted_algo_dict(asset_or_did=algo_ddo))
-
-        # update with the new list
-        compute_service.attributes["main"]["privacy"][
-            "publisherTrustedAlgorithms"
-        ] = trusted_algos
-        assert len(compute_service.attributes["main"]["privacy"]) > len(
-            initial_trusted_algos_v3
-        ), "New trusted algorithm was not added. Failed when updating the privacy key. "
-
-    return trusted_algos
+        return compute_service.add_publisher_trusted_algorithm(
+            algo_ddo, generated_trusted_algo_dict
+        )
 
 
 @enforce_types
@@ -139,7 +119,7 @@ def add_publisher_trusted_algorithm_publisher(
     """
     :return: List of trusted algo publishers
     """
-    if isinstance(asset_or_did, V3Asset) or isinstance(asset_or_did, V4Asset):
+    if isinstance(asset_or_did, (V3Asset, V4Asset)):
         asset = asset_or_did
     else:
         asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
@@ -149,13 +129,13 @@ def add_publisher_trusted_algorithm_publisher(
         compute_service
     ), "Cannot add trusted algorithm to this asset because it has no compute service."
 
-    if asset.version:
-        return compute_service.add_trusted_algo_publisher_v4(
-            new_publisher_address=publisher_address
+    if asset.version.startswith("4."):
+        return compute_service.add_publisher_trusted_algorithm_publisher(
+            publisher_address
         )
     else:
-        return compute_service.add_trusted_algo_publisher(
-            new_publisher_address=publisher_address
+        return compute_service.add_publisher_trusted_algorithm_publisher(
+            publisher_address
         )
 
 
@@ -166,7 +146,7 @@ def remove_publisher_trusted_algorithm(
     """
     :return: List of trusted algos not containing `algo_did`.
     """
-    if isinstance(asset_or_did, V3Asset) or isinstance(asset_or_did, V4Asset):
+    if isinstance(asset_or_did, (V3Asset, V4Asset)):
         asset = asset_or_did
     else:
         asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
@@ -176,40 +156,10 @@ def remove_publisher_trusted_algorithm(
         compute_service
     ), "Cannot add trusted algorithm to this asset because it has no compute service."
 
-    if asset.version:
-        trusted_algorithms = compute_service.get_trusted_algos_v4()
+    if asset.version.startswith("4."):
+        return asset.remove_publisher_trusted_algorithm(compute_service, algo_did)
     else:
-        trusted_algorithms = compute_service.get_trusted_algos()
-    if not trusted_algorithms:
-        raise ValueError(
-            f"Algorithm {algo_did} is not in trusted algorithms of this asset."
-        )
-    if asset.version:
-        trusted_algorithms = [ta for ta in trusted_algorithms if ta["did"] != algo_did]
-        trusted_algo_publishers = compute_service.get_trusted_algos_publishers_v4()
-        asset.update_compute_values_v4(
-            trusted_algorithms,
-            trusted_algo_publishers,
-            allow_network_access=True,
-            allow_raw_algorithm=False,
-        )
-        assert (
-            asset.get_service("compute").compute_values["publisherTrustedAlgorithms"]
-            == trusted_algorithms
-        ), "New trusted algorithm was not removed. Failed when updating the list of trusted algorithms. "
-    else:
-        trusted_algorithms = [ta for ta in trusted_algorithms if ta["did"] != algo_did]
-        trusted_algo_publishers = compute_service.get_trusted_algos_publishers()
-        asset.update_compute_privacy(
-            trusted_algorithms,
-            trusted_algo_publishers,
-            allow_all=False,
-            allow_raw_algorithm=False,
-        )
-        assert (
-            asset.get_trusted_algorithms() == trusted_algorithms
-        ), "New trusted algorithm was not removed. Failed when updating the list of trusted algorithms. "
-    return trusted_algorithms
+        return asset.remove_publisher_trusted_algorithm(compute_service, algo_did)
 
 
 @enforce_types
@@ -221,7 +171,7 @@ def remove_publisher_trusted_algorithm_publisher(
     """
     :return: List of trusted algo publishers not containing `publisher_address`.
     """
-    if isinstance(asset_or_did, V3Asset):
+    if isinstance(asset_or_did, (V3Asset, V4Asset)):
         asset = asset_or_did
     else:
         asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
@@ -231,41 +181,11 @@ def remove_publisher_trusted_algorithm_publisher(
         compute_service
     ), "Cannot add trusted algorithm to this asset because it has no compute service."
 
-    if asset.version:
-        trusted_algorithm_publishers = [
-            tp.lower() for tp in compute_service.get_trusted_algos_publishers_v4()
-        ]
+    if asset.version.startswith("4."):
+        return asset.remove_publisher_trusted_algorithm_publisher(
+            compute_service, publisher_address
+        )
     else:
-        trusted_algorithm_publishers = [
-            tp.lower() for tp in compute_service.get_trusted_algos_publishers()
-        ]
-    publisher_address = publisher_address.lower()
-
-    if not trusted_algorithm_publishers:
-        raise ValueError(
-            f"Publisher {publisher_address} is not in trusted algorithm publishers of this asset."
+        return asset.remove_publisher_trusted_algorithm_publisher(
+            compute_service, publisher_address
         )
-
-    trusted_algorithm_publishers = [
-        tp for tp in trusted_algorithm_publishers if tp != publisher_address
-    ]
-    if asset.version:
-        trusted_algorithms = compute_service.get_trusted_algos_v4()
-        asset.update_compute_values_v4(
-            trusted_algorithms, trusted_algorithm_publishers, True, False
-        )
-        assert (
-            asset.get_service("compute").compute_values[
-                "publisherTrustedAlgorithmPublishers"
-            ]
-            == trusted_algorithm_publishers
-        ), "New trusted algorithm publisher was not removed. Failed when updating the list of trusted algo publishers. "
-    else:
-        trusted_algorithms = compute_service.get_trusted_algos()
-        asset.update_compute_privacy(
-            trusted_algorithms, trusted_algorithm_publishers, True, False
-        )
-        assert (
-            asset.get_trusted_algorithm_publishers() == trusted_algorithm_publishers
-        ), "New trusted algorithm publisher was not removed. Failed when updating the list of trusted algo publishers. "
-    return trusted_algorithm_publishers

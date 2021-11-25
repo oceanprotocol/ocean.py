@@ -40,7 +40,6 @@ class V4Service:
         self.compute_values = compute_values
         self.name = name
         self.description = description
-        self._values = dict()
 
         if name is None:
             service_to_default_name = {
@@ -55,14 +54,8 @@ class V4Service:
     def from_dict(cls, service_dict: Dict[str, Any]) -> "V4Service":
         """Create a service object from a JSON string."""
         sd = copy.deepcopy(service_dict)
-        service_id = sd.pop("serviceId", None)
         service_type = sd.pop("type", None)
-        service_endpoint = sd.pop("serviceEndpoint", None)
-        data_token = sd.pop("datatokenAddress", None)
-        service_files = sd.pop("files", None)
-        timeout = sd.pop("timeout", None)
-        name = sd.pop("name", None)
-        description = sd.pop("description", None)
+
         if not service_type:
             logger.error(
                 'Service definition in DDO document is missing the "type" key/value.'
@@ -70,15 +63,15 @@ class V4Service:
             raise IndexError
 
         return cls(
-            service_id,
+            sd.pop("serviceId", None),
             service_type,
-            service_endpoint,
-            data_token,
-            service_files,
-            timeout,
+            sd.pop("serviceEndpoint", None),
+            sd.pop("datatokenAddress", None),
+            sd.pop("files", None),
+            sd.pop("timeout", None),
             sd,
-            name,
-            description,
+            sd.pop("name", None),
+            sd.pop("description", None),
         )
 
     @classmethod
@@ -87,28 +80,51 @@ class V4Service:
 
     def values(self) -> Dict[str, Any]:
         """
-
+        This was left in for uniformity with V3.
         :return: array of values
         """
         return dict()
 
-    def get_trusted_algos_v4(self) -> list:
+    def get_trusted_algorithms(self) -> list:
         return self.compute_values.get("publisherTrustedAlgorithms", [])
 
-    def get_trusted_algos_publishers_v4(self) -> list:
+    def get_trusted_algorithm_publishers(self) -> list:
         return self.compute_values.get("publisherTrustedAlgorithmPublishers", [])
 
-    def add_trusted_algo_publisher_v4(self, new_publisher_address: str) -> list:
-        trusted_algo_publishers = [
-            tp.lower() for tp in self.get_trusted_algos_publishers_v4()
+    def add_publisher_trusted_algorithm(
+        self, algo_ddo, generated_trusted_algo_dict: list
+    ) -> list:
+        """
+        :return: List of trusted algos
+        """
+        initial_trusted_algos_v4 = self.get_trusted_algorithms()
+
+        # remove algo_did if already in the list
+        trusted_algos = [
+            ta for ta in initial_trusted_algos_v4 if ta["did"] != algo_ddo.did
         ]
-        publisher_address = new_publisher_address.lower()
+        trusted_algos.append(generated_trusted_algo_dict)
+
+        # update with the new list
+        self.compute_values["publisherTrustedAlgorithms"] = trusted_algos
+        assert len(self.compute_values["publisherTrustedAlgorithms"]) > len(
+            initial_trusted_algos_v4
+        ), "New trusted algorithm was not added. Failed when updating the privacy key. "
+
+        return trusted_algos
+
+    def add_publisher_trusted_algorithm_publisher(self, publisher_address: str) -> list:
+        trusted_algo_publishers = [
+            tp.lower() for tp in self.get_trusted_algorithm_publishers()
+        ]
+        publisher_address = publisher_address.lower()
 
         if publisher_address in trusted_algo_publishers:
             return trusted_algo_publishers
 
         trusted_algo_publishers.append(publisher_address)
         initial_len = len(trusted_algo_publishers)
+
         # update with the new list
         self.compute_values[
             "publisherTrustedAlgorithmPublishers"
@@ -117,6 +133,7 @@ class V4Service:
             len(self.compute_values["publisherTrustedAlgorithmPublishers"])
             > initial_len
         ), "New trusted algorithm was not added. Failed when updating the privacy key. "
+
         return trusted_algo_publishers
 
     def as_dictionary(self) -> Dict[str, Any]:
@@ -152,8 +169,5 @@ class V4Service:
                 ]
 
             values[key] = value
-
-        if self._values:
-            values.update(self._values)
 
         return values

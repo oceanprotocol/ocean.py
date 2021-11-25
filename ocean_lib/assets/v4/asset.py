@@ -4,7 +4,6 @@
 import copy
 import json
 import logging
-import os
 
 from typing import Optional, List
 
@@ -12,7 +11,6 @@ from enforce_typing import enforce_types
 
 from ocean_lib.assets.credentials import AddressCredential
 from ocean_lib.common.agreements.service_types import ServiceTypesV4
-from ocean_lib.ocean.util import get_web3
 from ocean_lib.services.v4.service import V4Service
 
 logger = logging.getLogger("ddo")
@@ -38,6 +36,7 @@ class V4Asset:
 
         self.did = did
         self.context = context or ["https://w3id.org/did/v1"]
+        self.chain_id = chain_id
         self.metadata = metadata
         self.version = "4.0.0"
         self.services = services or []
@@ -46,15 +45,6 @@ class V4Asset:
         self.datatokens = datatokens
         self.event = event
         self.stats = stats
-
-        network_url = os.getenv("OCEAN_NETWORK_URL")
-        if chain_id:
-            self.chain_id = chain_id
-        elif network_url:
-            w3 = get_web3(network_url)
-            self.chain_id = w3.eth.chain_id
-        else:
-            raise TypeError(f"The chain ID is not provided.")
 
     @property
     def requires_address_credential(self) -> bool:
@@ -99,41 +89,25 @@ class V4Asset:
         """Import a JSON dict into this Asset."""
         values = copy.deepcopy(dictionary)
         id_key = "id" if "id" in values else "_id"
-        did = values.pop(id_key)
-        chain_id = values.pop("chainId")
-        context = values.pop("@context")
-
-        if "metadata" in values:
-            metadata = values.pop("metadata")
+        services = []
         if "services" in values:
-            services = []
             for value in values.pop("services"):
                 if isinstance(value, str):
                     value = json.loads(value)
 
                 service = V4Service.from_json(value)
                 services.append(service)
-        if "credentials" in values:
-            credentials = values.pop("credentials")
-        if "nft" in values:
-            nft = values.pop("nft")
-        if "datatokens" in values:
-            data_tokens = values.pop("datatokens")
-        if "event" in values:
-            event = values.pop("event")
-        if "stats" in values:
-            stats = values.pop("stats")
         return cls(
-            did,
-            context,
-            chain_id,
-            metadata,
+            values.pop(id_key),
+            values.pop("@context"),
+            values.pop("chainId"),
+            values.pop("metadata", None),
             services,
-            credentials,
-            nft,
-            data_tokens,
-            event,
-            stats,
+            values.pop("credentials", None),
+            values.pop("nft", None),
+            values.pop("datatokens", None),
+            values.pop("event", None),
+            values.pop("stats", None),
         )
 
     def as_dictionary(self) -> dict:
@@ -144,18 +118,18 @@ class V4Asset:
         """
 
         data = {
-            "@context": ["https://w3id.org/did/v1"],
+            "@context": self.context,
             "id": self.did,
             "version": self.version,
             "chainId": self.chain_id,
         }
 
-        for value in self.services:
-            if isinstance(value, V4Service):
-                service = value.as_dictionary()
-                self.services.append(service)
-
-        self.services = list(filter(lambda s: isinstance(s, dict), self.services))
+        services = [
+            self.services.append(service.as_dictionary())
+            for service in self.services
+            if isinstance(service, V4Service)
+        ]
+        self.services = list(filter(lambda s: isinstance(s, dict), services))
 
         args = [
             "metadata",
@@ -198,7 +172,65 @@ class V4Asset:
             None,
         )
 
-    def update_compute_values_v4(
+    def remove_publisher_trusted_algorithm(
+        self, compute_service: V4Service, algo_did: str
+    ) -> list:
+        """Returns a trusted algorithms list after removal."""
+        trusted_algorithms = compute_service.get_trusted_algorithms()
+        if not trusted_algorithms:
+            raise ValueError(
+                f"Algorithm {algo_did} is not in trusted algorithms of this asset."
+            )
+        trusted_algorithms = [ta for ta in trusted_algorithms if ta["did"] != algo_did]
+        trusted_algo_publishers = compute_service.get_trusted_algorithm_publishers()
+        self.update_compute_values_v4(
+            trusted_algorithms,
+            trusted_algo_publishers,
+            allow_network_access=True,
+            allow_raw_algorithm=False,
+        )
+        assert (
+            self.get_service("compute").compute_values["publisherTrustedAlgorithms"]
+            == trusted_algorithms
+        ), "New trusted algorithm was not removed. Failed when updating the list of trusted algorithms. "
+
+        return trusted_algorithms
+
+    def remove_publisher_trusted_algorithm_publisher(
+        self,
+        compute_service: V4Service,
+        publisher_address: str,
+    ) -> list:
+        """
+        :return: List of trusted algo publishers not containing `publisher_address`.
+        """
+
+        trusted_algorithm_publishers = [
+            tp.lower() for tp in compute_service.get_trusted_algorithm_publishers()
+        ]
+        publisher_address = publisher_address.lower()
+        if not trusted_algorithm_publishers:
+            raise ValueError(
+                f"Publisher {publisher_address} is not in trusted algorithm publishers of this asset."
+            )
+
+        trusted_algorithm_publishers = [
+            tp for tp in trusted_algorithm_publishers if tp != publisher_address
+        ]
+        trusted_algorithms = compute_service.get_trusted_algorithms()
+        self.update_compute_values(
+            trusted_algorithms, trusted_algorithm_publishers, True, False
+        )
+        assert (
+            self.get_service("compute").compute_values[
+                "publisherTrustedAlgorithmPublishers"
+            ]
+            == trusted_algorithm_publishers
+        ), "New trusted algorithm publisher was not removed. Failed when updating the list of trusted algo publishers. "
+
+        return trusted_algorithm_publishers
+
+    def update_compute_values(
         self,
         trusted_algorithms: List,
         trusted_algo_publishers: Optional[List],
