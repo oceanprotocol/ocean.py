@@ -2,10 +2,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import copy
-import json
 import logging
-
-from typing import Optional, List
+from typing import List, Optional
 
 from enforce_typing import enforce_types
 
@@ -89,14 +87,10 @@ class V4Asset:
         """Import a JSON dict into this Asset."""
         values = copy.deepcopy(dictionary)
         id_key = "id" if "id" in values else "_id"
-        services = []
         if "services" in values:
-            for value in values.pop("services"):
-                if isinstance(value, str):
-                    value = json.loads(value)
-
-                service = V4Service.from_json(value)
-                services.append(service)
+            services = [V4Service.from_dict(value) for value in values.pop("services")]
+        else:
+            services = []
         return cls(
             values.pop(id_key),
             values.pop("@context"),
@@ -124,16 +118,9 @@ class V4Asset:
             "chainId": self.chain_id,
         }
 
-        services = [
-            self.services.append(service.as_dictionary())
-            for service in self.services
-            if isinstance(service, V4Service)
-        ]
-        self.services = list(filter(lambda s: isinstance(s, dict), services))
-
+        services = [value.as_dictionary() for value in self.services]
         args = [
             "metadata",
-            "services",
             "credentials",
             "nft",
             "datatokens",
@@ -146,6 +133,7 @@ class V4Asset:
                 map(lambda attr: (attr, getattr(self, attr, None)), args),
             )
         )
+        attrs.append(("services", services))
         data.update(attrs)
         return data
 

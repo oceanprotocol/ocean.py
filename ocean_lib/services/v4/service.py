@@ -91,6 +91,7 @@ class V4Service:
     def get_trusted_algorithm_publishers(self) -> list:
         return self.compute_values.get("publisherTrustedAlgorithmPublishers", [])
 
+    # Not type provided due to circular imports
     def add_publisher_trusted_algorithm(
         self, algo_ddo, generated_trusted_algo_dict: list
     ) -> list:
