@@ -14,6 +14,8 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     CONTRACT_NAME = "ERC721Factory"
     EVENT_NFT_CREATED = "NFTCreated"
     EVENT_TOKEN_CREATED = "TokenCreated"
+    EVENT_TEMPLATE721_ADDED = "Template721Added"
+    EVENT_TEMPLATE20_ADDED = "Template20Added"
     EVENT_NEW_POOL = "NewPool"
     EVENT_NEW_FIXED_RATE = "NewFixedRate"
     EVENT_DISPENSER_CREATED = "DispenserCreated"
@@ -25,6 +27,14 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     @property
     def event_TokenCreated(self):
         return self.events.TokenCreated()
+
+    @property
+    def event_Template721Added(self):
+        return self.events.Template721Added()
+
+    @property
+    def event_Template20Added(self):
+        return self.events.Template20Added()
 
     @property
     def event_NewPool(self):
@@ -44,12 +54,12 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         symbol: str,
         template_index: int,
         additional_erc20_deployer: str,
-        base_uri: str,
+        token_uri: str,
         from_wallet: Wallet,
     ):
         return self.send_transaction(
             "deployERC721Contract",
-            (name, symbol, template_index, additional_erc20_deployer, base_uri),
+            (name, symbol, template_index, additional_erc20_deployer, token_uri),
             from_wallet,
         )
 
@@ -94,26 +104,19 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     def start_multiple_token_order(
         self,
-        token_address: str,
-        consumer: str,
-        amount: int,
-        service_id: int,
-        consume_fee_address: str,
-        consume_fee_token: str,
-        consume_fee_amount: int,
+        orders: List[dict],
         from_wallet: Wallet,
     ) -> str:
-        orders = [
-            (
-                token_address,
-                consumer,
-                amount,
-                service_id,
-                consume_fee_address,
-                consume_fee_token,
-                consume_fee_amount,
-            )
-        ]
+        """An order contains the following keys:
+
+        - tokenAddress, str
+        - consumer, str
+        - amount (in Wei), int
+        - serviceId, int
+        - consumeFeeAddress, str
+        - consumeFeeToken (address of the token marketplace wants to add fee on top), str
+        - consumeFeeAmount (in Wei), int
+        """
         return self.send_transaction("startMultipleTokenOrder", (orders,), from_wallet)
 
     def create_nft_with_erc(

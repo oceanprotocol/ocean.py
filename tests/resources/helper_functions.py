@@ -234,7 +234,7 @@ def deploy_erc721_erc20(
         symbol="NFTSYMBOL",
         template_index=1,
         additional_erc20_deployer=ZERO_ADDRESS,
-        base_uri="https://oceanprotocol.com/nft/",
+        token_uri="https://oceanprotocol.com/nft/",
         from_wallet=erc721_publisher,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)

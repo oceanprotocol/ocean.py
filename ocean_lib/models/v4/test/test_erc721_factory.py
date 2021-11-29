@@ -30,6 +30,14 @@ def test_properties(web3, config):
         == ERC721FactoryContract.EVENT_TOKEN_CREATED
     )
     assert (
+        erc721_factory.event_Template721Added.abi["name"]
+        == ERC721FactoryContract.EVENT_TEMPLATE721_ADDED
+    )
+    assert (
+        erc721_factory.event_Template20Added.abi["name"]
+        == ERC721FactoryContract.EVENT_TEMPLATE20_ADDED
+    )
+    assert (
         erc721_factory.event_NewPool.abi["name"] == ERC721FactoryContract.EVENT_NEW_POOL
     )
     assert (
@@ -139,14 +147,20 @@ def test_main(web3, config, publisher_wallet, consumer_wallet):
 
     erc20_token.approve(erc721_factory_address, dt_amount, consumer_wallet)
 
+    orders = [
+        {
+            "tokenAddress": erc20_address,
+            "consumer": consumer_wallet.address,
+            "amount": dt_amount,
+            "serviceId": 1,
+            "consumeFeeAddress": ZERO_ADDRESS,
+            "consumeFeeToken": mock_dai_contract_address,
+            "consumeFeeAmount": 0,
+        }
+    ]
+
     tx = erc721_factory.start_multiple_token_order(
-        erc20_address,
-        consumer_wallet.address,
-        dt_amount,
-        1,
-        ZERO_ADDRESS,
-        mock_dai_contract_address,
-        0,
+        orders,
         consumer_wallet,
     )
     assert tx, "Failed starting multiple token orders."
