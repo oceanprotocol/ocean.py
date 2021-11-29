@@ -17,7 +17,7 @@ from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.services.service import Service
-from ocean_lib.utils.utilities import get_timestamp
+from ocean_lib.utils.utilities import get_timestamp, create_checksum
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ddo")
@@ -465,6 +465,23 @@ class V3Asset:
             == trusted_algorithm_publishers
         ), "New trusted algorithm publisher was not removed. Failed when updating the list of trusted algo publishers. "
         return trusted_algorithm_publishers
+
+    @enforce_types
+    def generate_trusted_algorithms(self) -> dict:
+        algo_metadata = self.metadata
+        return {
+            "did": self.did,
+            "filesChecksum": create_checksum(
+                algo_metadata.get("encryptedFiles", "")
+                + json.dumps(algo_metadata["main"]["files"], separators=(",", ":"))
+            ),
+            "containerSectionChecksum": create_checksum(
+                json.dumps(
+                    algo_metadata["main"]["algorithm"]["container"],
+                    separators=(",", ":"),
+                )
+            ),
+        }
 
     @enforce_types
     def update_compute_privacy(

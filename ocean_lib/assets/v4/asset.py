@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import copy
+import json
 import logging
 from typing import List, Optional
 
@@ -10,6 +11,7 @@ from enforce_typing import enforce_types
 from ocean_lib.assets.credentials import AddressCredential
 from ocean_lib.common.agreements.service_types import ServiceTypesV4
 from ocean_lib.services.v4.service import V4Service
+from ocean_lib.utils.utilities import create_checksum
 
 logger = logging.getLogger("ddo")
 
@@ -86,13 +88,13 @@ class V4Asset:
     def from_dict(cls, dictionary: dict) -> "V4Asset":
         """Import a JSON dict into this Asset."""
         values = copy.deepcopy(dictionary)
-        id_key = "id" if "id" in values else "_id"
-        if "services" in values:
-            services = [V4Service.from_dict(value) for value in values.pop("services")]
-        else:
-            services = []
+        services = (
+            []
+            if "services" not in values
+            else [V4Service.from_dict(value) for value in values.pop("services")]
+        )
         return cls(
-            values.pop(id_key),
+            values.pop("id"),
             values.pop("@context"),
             values.pop("chainId"),
             values.pop("metadata", None),
@@ -217,6 +219,23 @@ class V4Asset:
         ), "New trusted algorithm publisher was not removed. Failed when updating the list of trusted algo publishers. "
 
         return trusted_algorithm_publishers
+
+    def generate_trusted_algorithms(self) -> dict:
+        algo_metadata = self.metadata
+        return {
+            "did": self.did,
+            "filesChecksum": create_checksum(
+                json.dumps(
+                    self.get_service(ServiceTypesV4.CLOUD_COMPUTE).files,
+                    separators=(",", ":"),
+                )
+            ),
+            "containerSectionChecksum": create_checksum(
+                json.dumps(
+                    algo_metadata["algorithm"]["container"], separators=(",", ":")
+                )
+            ),
+        }
 
     def update_compute_values(
         self,

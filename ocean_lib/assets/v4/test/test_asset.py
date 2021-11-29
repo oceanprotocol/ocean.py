@@ -146,7 +146,7 @@ def test_add_service():
         service_type="compute",
         service_endpoint="https://myprovider.com",
         data_token="0x124",
-        files="0x0000",
+        files="0x0001",
         timeout=3600,
         compute_values=compute_values,
         name="Compute service",

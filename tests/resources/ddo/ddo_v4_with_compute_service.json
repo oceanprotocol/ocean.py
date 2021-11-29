@@ -26,7 +26,7 @@
     {
       "serviceId": "2",
       "type": "compute",
-      "files": "0x0000",
+      "files": "0x0001",
       "name": "Compute service",
       "description": "Compute service",
       "datatokenAddress": "0x124",
