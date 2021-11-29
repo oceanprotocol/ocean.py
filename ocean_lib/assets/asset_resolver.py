@@ -31,8 +31,4 @@ def resolve_asset(did: str, metadata_cache_uri: str) -> Union[V3Asset, V4Asset]:
     ddo = AquariusProvider.get_aquarius(metadata_cache_uri).get_asset_ddo(did)
 
     if ddo:
-        ddo_dict = ddo.as_dictionary()
-        if ddo.version.startswith("4."):
-            return V4Asset.from_json(ddo_dict)
-        else:
-            return V3Asset(dictionary=ddo_dict)
+        return ddo

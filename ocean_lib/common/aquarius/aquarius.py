@@ -66,7 +66,7 @@ class Aquarius:
         Retrieve asset ddo for a given did.
 
         :param did: Asset DID string
-        :return: V3Asset instance
+        :return: V3Asset or V4Asset instance
         """
         response = self.requests_session.get(f"{self.base_url}/ddo/{did}")
 
