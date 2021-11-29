@@ -509,15 +509,13 @@ class V3Asset:
         service = self.get_service(ServiceTypes.CLOUD_COMPUTE)
         assert service is not None, "this asset does not have a compute service."
 
-        trusted_algorithms = trusted_algorithms if trusted_algorithms else []
-        if trusted_algorithms:
-            for ta in trusted_algorithms:
-                assert isinstance(
-                    ta, dict
-                ), f"item in list of trusted_algorithms must be a dict, got {ta}"
-                assert (
-                    "did" in ta
-                ), f"dict in list of trusted_algorithms is expected to have a `did` key, got {ta.keys()}."
+        for ta in trusted_algorithms:
+            assert isinstance(
+                ta, dict
+            ), f"item in list of trusted_algorithms must be a dict, got {ta}"
+            assert (
+                "did" in ta
+            ), f"dict in list of trusted_algorithms is expected to have a `did` key, got {ta.keys()}."
 
         if not service.attributes["main"].get("privacy"):
             service.attributes["main"]["privacy"] = {}
