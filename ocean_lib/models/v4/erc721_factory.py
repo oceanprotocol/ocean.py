@@ -112,7 +112,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         - tokenAddress, str
         - consumer, str
         - amount (in Wei), int
-        - serviceId, int
+        - serviceIndex, int
         - consumeFeeAddress, str
         - consumeFeeToken (address of the token marketplace wants to add fee on top), str
         - consumeFeeAmount (in Wei), int

@@ -100,7 +100,7 @@ def test_buy_from_dispenser_and_order(
     order_params = {
         "consumer": consume_fee_address,
         "amount": web3.toWei(1, "ether"),
-        "serviceId": 1,
+        "serviceIndex": 1,
         "consumeFeeAddress": consume_fee_address,
         "consumeFeeToken": mock_dai_contract.address,
         "consumeFeeAmount": consume_fee_amount,
@@ -140,7 +140,7 @@ def test_buy_from_dispenser_and_order(
     assert balance_opf_publish - balance_opf_publish_before == expected_opf_publish
 
     assert (
-        erc20_enterprise_token.balanceOf(erc20_enterprise_token.get_fee_collector())
+        erc20_enterprise_token.balanceOf(erc20_enterprise_token.get_payment_collector())
         == 0
     )
 
@@ -244,7 +244,7 @@ def test_buy_from_fre_and_order(
     order_params = {
         "consumer": publisher_wallet.address,
         "amount": web3.toWei(1, "ether"),
-        "serviceId": 1,
+        "serviceIndex": 1,
         "consumeFeeAddress": consume_fee_address,
         "consumeFeeToken": mock_dai_contract.address,
         "consumeFeeAmount": consume_fee_amount,
@@ -291,6 +291,6 @@ def test_buy_from_fre_and_order(
     assert balance_opf_publish - balance_opf_publish_before == expected_opf_publish
 
     assert (
-        erc20_enterprise_token.balanceOf(erc20_enterprise_token.get_fee_collector())
+        erc20_enterprise_token.balanceOf(erc20_enterprise_token.get_payment_collector())
         == 0
     )

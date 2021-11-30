@@ -152,20 +152,24 @@ def test_main(web3, config, publisher_wallet, consumer_wallet):
             "tokenAddress": erc20_address,
             "consumer": consumer_wallet.address,
             "amount": dt_amount,
-            "serviceId": 1,
+            "serviceIndex": 1,
             "consumeFeeAddress": ZERO_ADDRESS,
             "consumeFeeToken": mock_dai_contract_address,
             "consumeFeeAmount": 0,
         }
     ]
 
+    balance_before = erc20_token.balanceOf(consumer_wallet.address)
     tx = erc721_factory.start_multiple_token_order(
         orders,
         consumer_wallet,
     )
+
     assert tx, "Failed starting multiple token orders."
-    assert erc20_token.balanceOf(consumer_wallet.address) == 0
-    assert erc20_token.balanceOf(erc20_token.get_fee_collector()) == dt_amount
+    assert erc20_token.balanceOf(
+        consumer_wallet.address
+    ) - balance_before == web3.toWei("0.05", "ether")
+    assert erc20_token.balanceOf(erc20_token.get_payment_collector()) == dt_amount
 
     # Tests creating NFT with ERC20 successfully
     nft_create_data = {
