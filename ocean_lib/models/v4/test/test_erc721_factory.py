@@ -50,7 +50,7 @@ def test_properties(web3, config):
     )
 
 
-def test_main(web3, config, publisher_wallet, consumer_wallet):
+def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet):
     """Tests the utils functions."""
     erc721_factory_address = get_address_of_type(
         config, ERC721FactoryContract.CONTRACT_NAME
@@ -147,6 +147,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet):
 
     erc20_token.approve(erc721_factory_address, dt_amount, consumer_wallet)
 
+    erc20_token.set_payment_collector(another_consumer_wallet.address, publisher_wallet)
+
     orders = [
         {
             "tokenAddress": erc20_address,
@@ -159,16 +161,26 @@ def test_main(web3, config, publisher_wallet, consumer_wallet):
         }
     ]
 
-    balance_before = erc20_token.balanceOf(consumer_wallet.address)
     tx = erc721_factory.start_multiple_token_order(
         orders,
         consumer_wallet,
     )
 
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+
+    registered_erc20_start_order_event = erc20_token.get_event_log(
+        ERC20Token.EVENT_ORDER_STARTED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
     assert tx, "Failed starting multiple token orders."
-    assert erc20_token.balanceOf(
-        consumer_wallet.address
-    ) - balance_before == web3.toWei("0.05", "ether")
+    assert (
+        registered_erc20_start_order_event[0].args.consumer == consumer_wallet.address
+    )
+
+    assert erc20_token.balanceOf(consumer_wallet.address) == 0
     assert erc20_token.balanceOf(erc20_token.get_payment_collector()) == dt_amount
 
     # Tests creating NFT with ERC20 successfully
