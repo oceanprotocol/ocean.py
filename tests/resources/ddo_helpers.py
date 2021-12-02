@@ -33,14 +33,36 @@ def get_metadata() -> dict:
     return json.loads(metadata)
 
 
+def get_key_from_v4_sample_ddo(key, file_name="ddo_v4_sample.json"):
+    path = get_resource_path("ddo", file_name)
+    with open(path, "r") as file_handle:
+        ddo = file_handle.read()
+    ddo_dict = json.loads(ddo)
+    return ddo_dict.pop(key, None)
+
+
 def get_sample_ddo(file_name="ddo_sa_sample.json") -> V3Asset:
     return V3Asset(json_filename=get_resource_path("ddo", file_name))
+
+
+def get_sample_v4_ddo(file_name="ddo_v4_sample.json") -> dict:
+    path = get_resource_path("ddo", file_name)
+    with open(path, "r") as file_handle:
+        ddo = file_handle.read()
+    return json.loads(ddo)
 
 
 def get_sample_ddo_with_compute_service() -> V3Asset:
     return V3Asset(
         json_filename=get_resource_path("ddo", "ddo_with_compute_service.json")
     )
+
+
+def get_sample_v4_ddo_with_compute_service() -> dict:
+    path = get_resource_path("ddo", "ddo_v4_with_compute_service.json")
+    with open(path, "r") as file_handle:
+        ddo = file_handle.read()
+    return json.loads(ddo)
 
 
 def get_sample_algorithm_ddo_dict() -> dict:

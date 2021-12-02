@@ -145,3 +145,79 @@ class Service:
         return DataServiceProvider.get_c2d_address(
             f"{result.scheme}://{result.netloc}/"
         )
+
+    @enforce_types
+    def get_trusted_algorithms(self) -> list:
+        return (
+            self.attributes["main"]
+            .get("privacy", {})
+            .get("publisherTrustedAlgorithms", [])
+        )
+
+    @enforce_types
+    def get_trusted_algorithm_publishers(self) -> list:
+        return (
+            self.attributes["main"]
+            .get("privacy", {})
+            .get("publisherTrustedAlgorithmPublishers", [])
+        )
+
+    # Not type provided due to circular imports
+    def add_publisher_trusted_algorithm(
+        self,
+        algo_ddo,
+        generated_trusted_algo_dict: list,
+    ) -> list:
+        """
+        :return: List of trusted algos
+        """
+
+        privacy_values = self.attributes["main"].get("privacy")
+        if not privacy_values:
+            privacy_values = {}
+            self.attributes["main"]["privacy"] = privacy_values
+
+        assert isinstance(privacy_values, dict), "Privacy key is not a dictionary."
+        trusted_algos = privacy_values.get("publisherTrustedAlgorithms", [])
+        # remove algo_did if already in the list
+        trusted_algos = [ta for ta in trusted_algos if ta["did"] != algo_ddo.did]
+
+        # now add this algo_did as trusted algo
+        trusted_algos.append(generated_trusted_algo_dict)
+
+        # update with the new list
+        privacy_values["publisherTrustedAlgorithms"] = trusted_algos
+        assert (
+            self.attributes["main"]["privacy"] == privacy_values
+        ), "New trusted algorithm was not added. Failed when updating the privacy key. "
+        return trusted_algos
+
+    @enforce_types
+    def add_publisher_trusted_algorithm_publisher(self, publisher_address: str) -> list:
+        """
+        :return: List of trusted algo publishers
+        """
+
+        privacy_values = self.attributes["main"].get("privacy")
+        if not privacy_values:
+            privacy_values = {}
+            self.attributes["main"]["privacy"] = privacy_values
+
+        assert isinstance(privacy_values, dict), "Privacy key is not a dictionary."
+        trusted_algo_publishers = [
+            tp.lower()
+            for tp in privacy_values.get("publisherTrustedAlgorithmPublishers", [])
+        ]
+        publisher_address = publisher_address.lower()
+
+        if publisher_address in trusted_algo_publishers:
+            return trusted_algo_publishers
+
+        trusted_algo_publishers.append(publisher_address)
+
+        # update with the new list
+        privacy_values["publisherTrustedAlgorithmPublishers"] = trusted_algo_publishers
+        assert (
+            self.attributes["main"]["privacy"] == privacy_values
+        ), "New trusted algorithm was not added. Failed when updating the privacy key. "
+        return trusted_algo_publishers

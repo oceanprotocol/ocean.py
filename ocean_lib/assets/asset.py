@@ -17,7 +17,7 @@ from ocean_lib.assets.credentials import AddressCredential
 from ocean_lib.assets.did import did_to_id
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.services.service import Service
-from ocean_lib.utils.utilities import get_timestamp
+from ocean_lib.utils.utilities import get_timestamp, create_checksum
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ddo")
@@ -412,22 +412,76 @@ class V3Asset:
         return self.other_values.copy()
 
     @enforce_types
-    def get_trusted_algorithms(self) -> list:
-        return self.get_compute_privacy_attributes().get(
-            "publisherTrustedAlgorithms", []
+    def remove_publisher_trusted_algorithm(
+        self, compute_service: Service, algo_did: str
+    ) -> list:
+        """
+        :return: List of trusted algos not containing `algo_did`.
+        """
+
+        trusted_algorithms = compute_service.get_trusted_algorithms()
+        if not trusted_algorithms:
+            raise ValueError(
+                f"Algorithm {algo_did} is not in trusted algorithms of this asset."
+            )
+
+        trusted_algorithms = [ta for ta in trusted_algorithms if ta["did"] != algo_did]
+        trusted_algo_publishers = compute_service.get_trusted_algorithm_publishers()
+        self.update_compute_privacy(
+            trusted_algorithms, trusted_algo_publishers, False, False
         )
+        assert (
+            compute_service.get_trusted_algorithms() == trusted_algorithms
+        ), "New trusted algorithm was not removed. Failed when updating the list of trusted algorithms. "
+        return trusted_algorithms
 
     @enforce_types
-    def get_trusted_algorithm_publishers(self) -> list:
-        return self.get_compute_privacy_attributes().get(
-            "publisherTrustedAlgorithmPublishers", []
+    def remove_publisher_trusted_algorithm_publisher(
+        self, compute_service: Service, publisher_address: str
+    ) -> list:
+        """
+        :return: List of trusted algo publishers not containing `publisher_address`.
+        """
+
+        trusted_algorithm_publishers = [
+            tp.lower() for tp in compute_service.get_trusted_algorithm_publishers()
+        ]
+        publisher_address = publisher_address.lower()
+
+        if not trusted_algorithm_publishers:
+            raise ValueError(
+                f"Publisher {publisher_address} is not in trusted algorithm publishers of this asset."
+            )
+
+        trusted_algorithm_publishers = [
+            tp for tp in trusted_algorithm_publishers if tp != publisher_address
+        ]
+        trusted_algorithms = compute_service.get_trusted_algorithms()
+        self.update_compute_privacy(
+            trusted_algorithms, trusted_algorithm_publishers, False, False
         )
+        assert (
+            compute_service.get_trusted_algorithm_publishers()
+            == trusted_algorithm_publishers
+        ), "New trusted algorithm publisher was not removed. Failed when updating the list of trusted algo publishers. "
+        return trusted_algorithm_publishers
 
     @enforce_types
-    def get_compute_privacy_attributes(self) -> dict:
-        service = self.get_service(ServiceTypes.CLOUD_COMPUTE)
-        assert service is not None, "this asset does not have a compute service."
-        return service.attributes["main"].get("privacy", {})
+    def generate_trusted_algorithms(self) -> dict:
+        algo_metadata = self.metadata
+        return {
+            "did": self.did,
+            "filesChecksum": create_checksum(
+                algo_metadata.get("encryptedFiles", "")
+                + json.dumps(algo_metadata["main"]["files"], separators=(",", ":"))
+            ),
+            "containerSectionChecksum": create_checksum(
+                json.dumps(
+                    algo_metadata["main"]["algorithm"]["container"],
+                    separators=(",", ":"),
+                )
+            ),
+        }
 
     @enforce_types
     def update_compute_privacy(
@@ -455,15 +509,13 @@ class V3Asset:
         service = self.get_service(ServiceTypes.CLOUD_COMPUTE)
         assert service is not None, "this asset does not have a compute service."
 
-        trusted_algorithms = trusted_algorithms if trusted_algorithms else []
-        if trusted_algorithms:
-            for ta in trusted_algorithms:
-                assert isinstance(
-                    ta, dict
-                ), f"item in list of trusted_algorithms must be a dict, got {ta}"
-                assert (
-                    "did" in ta
-                ), f"dict in list of trusted_algorithms is expected to have a `did` key, got {ta.keys()}."
+        for ta in trusted_algorithms:
+            assert isinstance(
+                ta, dict
+            ), f"item in list of trusted_algorithms must be a dict, got {ta}"
+            assert (
+                "did" in ta
+            ), f"dict in list of trusted_algorithms is expected to have a `did` key, got {ta.keys()}."
 
         if not service.attributes["main"].get("privacy"):
             service.attributes["main"]["privacy"] = {}

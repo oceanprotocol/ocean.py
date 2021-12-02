@@ -13,6 +13,7 @@ from typing import Optional, Tuple, Union
 
 from enforce_typing import enforce_types
 from ocean_lib.assets.asset import V3Asset
+from ocean_lib.assets.v4.asset import V4Asset
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 
 logger = logging.getLogger("aquarius")
@@ -60,17 +61,21 @@ class Aquarius:
         return f"{self.base_url}/ddo/encrypt"
 
     @enforce_types
-    def get_asset_ddo(self, did: str) -> Optional[V3Asset]:
+    def get_asset_ddo(self, did: str) -> Optional[Union[V3Asset, V4Asset]]:
         """
         Retrieve asset ddo for a given did.
 
         :param did: Asset DID string
-        :return: V3Asset instance
+        :return: V3Asset or V4Asset instance
         """
         response = self.requests_session.get(f"{self.base_url}/ddo/{did}")
 
         if response.status_code == 200:
-            return V3Asset(dictionary=response.json())
+            response_dict = response.json()
+            if response_dict.get("version").startswith("4."):
+                return V4Asset.from_dict(response_dict)
+            else:
+                return V3Asset(dictionary=response_dict)
 
         return None
 
