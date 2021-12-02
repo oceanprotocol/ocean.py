@@ -132,6 +132,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     assert erc20.symbol() == "ERC20DT1Symbol"
     assert erc20.decimals() == 18
     assert erc20.cap() == web3.toWei(publish_market_fee_amount, "ether")
+    assert erc20.get_erc721_address() == erc721.address
 
     # Check minter permissions
     assert erc20.get_permissions(publisher_wallet.address)[RolesERC20.MINTER]
@@ -145,7 +146,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     assert erc20.balanceOf(consumer_wallet.address) == 1
 
     # Should succeed to set new FeeCollector if feeManager
-    erc20.set_fee_collector(
+    erc20.set_payment_collector(
         fee_collector_address=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
@@ -156,12 +157,12 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     )
 
     # Should succeed to addFeeManager if erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    erc20.add_fee_manager(
+    erc20.add_payment_manager(
         fee_manager=consumer_wallet.address, from_wallet=publisher_wallet
     )
 
     # Should succeed to removeFeeManager if erc20Deployer
-    erc20.remove_fee_manager(
+    erc20.remove_payment_manager(
         fee_manager=consumer_wallet.address, from_wallet=publisher_wallet
     )
 
@@ -198,7 +199,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     erc20.mint(consumer_wallet.address, web3.toWei(10, "ether"), publisher_wallet)
 
     # Set the fee collector address
-    erc20.set_fee_collector(
+    erc20.set_payment_collector(
         get_address_of_type(config, "OPFCommunityFeeCollector"), publisher_wallet
     )
 
@@ -235,7 +236,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     # PublishMarketFeeAmount set previously
     assert publish_fees[2] == web3.toWei("1.2", "ether")
     # Fee collector
-    assert erc20.get_fee_collector() == get_address_of_type(
+    assert erc20.get_payment_collector() == get_address_of_type(
         config, "OPFCommunityFeeCollector"
     )
 
@@ -337,13 +338,13 @@ def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_rou
 
     #  Should fail to set new FeeCollector if not NFTOwner
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.set_fee_collector(
+        erc20.set_payment_collector(
             fee_collector_address=consumer_wallet.address,
             from_wallet=consumer_wallet,
         )
     assert (
         err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT FEE MANAGER"
+        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT PAYMENT MANAGER or OWNER"
     )
 
     # Should fail to addMinter if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
@@ -368,7 +369,7 @@ def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_rou
 
     # Should fail to addFeeManager if not erc20Deployer (permission to deploy the erc20Contract at 721 level)
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.add_fee_manager(
+        erc20.add_payment_manager(
             fee_manager=consumer_wallet.address, from_wallet=consumer_wallet
         )
     assert (
@@ -378,7 +379,7 @@ def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_rou
 
     # Should fail to removeFeeManager if NOT erc20Deployer
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.remove_fee_manager(
+        erc20.remove_payment_manager(
             fee_manager=consumer_wallet.address, from_wallet=consumer_wallet
         )
     assert (

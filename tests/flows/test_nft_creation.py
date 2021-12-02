@@ -33,7 +33,7 @@ def test_erc721_roles(
         symbol="NFTSYMBOL",
         template_index=1,
         additional_erc20_deployer=ZERO_ADDRESS,
-        base_uri="https://oceanprotocol.com/nft/",
+        token_uri="https://oceanprotocol.com/nft/",
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -173,7 +173,7 @@ def test_nonexistent_template_index(web3, config, publisher_wallet):
             symbol="DTSYMBOL",
             template_index=non_existent_nft_template,
             additional_erc20_deployer=ZERO_ADDRESS,
-            base_uri="https://oceanprotocol.com/nft/",
+            token_uri="https://oceanprotocol.com/nft/",
             from_wallet=publisher_wallet,
         )
     assert (
@@ -194,7 +194,7 @@ def test_successful_erc721_creation(web3, config, publisher_wallet):
         symbol="NFTSYMBOL",
         template_index=1,
         additional_erc20_deployer=ZERO_ADDRESS,
-        base_uri="https://oceanprotocol.com/nft/",
+        token_uri="https://oceanprotocol.com/nft/",
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -226,7 +226,7 @@ def test_nft_count(web3, config, publisher_wallet):
         symbol="NFTSYMBOL",
         template_index=1,
         additional_erc20_deployer=ZERO_ADDRESS,
-        base_uri="https://oceanprotocol.com/nft/",
+        token_uri="https://oceanprotocol.com/nft/",
         from_wallet=publisher_wallet,
     )
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
@@ -256,7 +256,7 @@ def test_erc20_creation(
         symbol="NFTSYMBOL",
         template_index=1,
         additional_erc20_deployer=ZERO_ADDRESS,
-        base_uri="https://oceanprotocol.com/nft/",
+        token_uri="https://oceanprotocol.com/nft/",
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)

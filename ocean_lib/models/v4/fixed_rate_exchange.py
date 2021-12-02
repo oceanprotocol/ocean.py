@@ -152,11 +152,30 @@ class FixedRateExchangeV4(ContractBase):
             from_wallet,
         )
 
+    def update_market_fee(
+        self, exchange_id: bytes, new_market_fee: int, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "updateMarketFee",
+            (exchange_id, new_market_fee),
+            from_wallet,
+        )
+
     def get_number_of_exchanges(self) -> int:
         return self.contract.caller.getNumberOfExchanges()
 
+    def get_allowed_swapper(self, exchange_id: bytes) -> str:
+        return self.contract.caller.getAllowedSwapper(exchange_id)
+
     def set_rate(self, exchange_id: bytes, new_rate: int, from_wallet: Wallet) -> str:
         return self.send_transaction("setRate", (exchange_id, new_rate), from_wallet)
+
+    def set_allowed_swapper(
+        self, exchange_id: bytes, new_allowed_swapper: str, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "setAllowedSwapper", (exchange_id, new_allowed_swapper), from_wallet
+        )
 
     def toggle_exchange_state(self, exchange_id: bytes, from_wallet: Wallet) -> str:
         return self.send_transaction("toggleExchangeState", (exchange_id,), from_wallet)

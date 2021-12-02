@@ -30,3 +30,6 @@ class BFactory(ContractBase):
             ),
             from_wallet,
         )
+
+    def is_pool_template(self, pool_template) -> bool:
+        return self.contract.caller.isPoolTemplate(pool_template)

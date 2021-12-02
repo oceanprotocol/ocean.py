@@ -198,11 +198,13 @@ class ERC20Token(ContractBase):
     def remove_minter(self, minter_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("removeMinter", (minter_address,), from_wallet)
 
-    def add_fee_manager(self, fee_manager: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("addFeeManager", (fee_manager,), from_wallet)
+    def add_payment_manager(self, fee_manager: str, from_wallet: Wallet) -> str:
+        return self.send_transaction("addPaymentManager", (fee_manager,), from_wallet)
 
-    def remove_fee_manager(self, fee_manager: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("removeFeeManager", (fee_manager,), from_wallet)
+    def remove_payment_manager(self, fee_manager: str, from_wallet: Wallet) -> str:
+        return self.send_transaction(
+            "removePaymentManager", (fee_manager,), from_wallet
+        )
 
     def set_data(self, data: bytes, from_wallet: Wallet) -> str:
         return self.send_transaction("setData", (data,), from_wallet)
@@ -213,9 +215,11 @@ class ERC20Token(ContractBase):
     def clean_from_721(self, from_wallet: Wallet) -> str:
         return self.send_transaction("cleanFrom721", (), from_wallet)
 
-    def set_fee_collector(self, fee_collector_address: str, from_wallet: Wallet) -> str:
+    def set_payment_collector(
+        self, fee_collector_address: str, from_wallet: Wallet
+    ) -> str:
         return self.send_transaction(
-            "setFeeCollector", (fee_collector_address,), from_wallet
+            "setPaymentCollector", (fee_collector_address,), from_wallet
         )
 
     def get_publishing_market_fee(self) -> tuple:
@@ -246,6 +250,9 @@ class ERC20Token(ContractBase):
 
     def symbol(self) -> str:
         return self.contract.caller.symbol()
+
+    def get_erc721_address(self) -> str:
+        return self.contract.caller.getERC721Address()
 
     def decimals(self) -> int:
         return self.contract.caller.decimals()
@@ -282,8 +289,8 @@ class ERC20Token(ContractBase):
     def get_bytes_length(self, array: List[bytes]) -> int:
         return self.contract.caller.getBytesLength(array)
 
-    def get_fee_collector(self) -> str:
-        return self.contract.caller.getFeeCollector()
+    def get_payment_collector(self) -> str:
+        return self.contract.caller.getPaymentCollector()
 
     def balanceOf(self, account: str) -> int:
         return self.contract.caller.balanceOf(account)
