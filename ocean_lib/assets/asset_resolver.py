@@ -30,5 +30,4 @@ def resolve_asset(did: str, metadata_cache_uri: str) -> Union[V3Asset, V4Asset]:
     logger.debug(f"found did {did} -> url={metadata_cache_uri}")
     ddo = AquariusProvider.get_aquarius(metadata_cache_uri).get_asset_ddo(did)
 
-    if ddo:
-        return ddo
+    return ddo
