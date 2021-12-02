@@ -14,8 +14,7 @@ from typing import Optional, Tuple, Union
 from enforce_typing import enforce_types
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.v4.asset import V4Asset
-from ocean_lib.common.http_requests.requests_session import get_requests_session
-from ocean_lib.config import Config
+from ocean_lib.http_requests.requests_session import get_requests_session
 
 logger = logging.getLogger("aquarius")
 

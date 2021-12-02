@@ -6,7 +6,7 @@
 from unittest.mock import Mock
 
 import pytest
-from ocean_lib.common.http_requests.requests_session import get_requests_session
+from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
