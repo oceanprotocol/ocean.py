@@ -5,8 +5,8 @@
 from datetime import datetime
 from unittest.mock import patch
 
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
-from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean.ocean_compute import OceanCompute

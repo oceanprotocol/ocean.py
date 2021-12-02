@@ -5,8 +5,8 @@
 import time
 
 import pytest
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
-from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.metadata import MetadataContract

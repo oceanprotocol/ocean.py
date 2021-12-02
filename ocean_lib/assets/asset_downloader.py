@@ -8,8 +8,8 @@ import os
 from typing import Optional, Type
 
 from enforce_typing import enforce_types
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import V3Asset
-from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.web3_internal.wallet import Wallet
 

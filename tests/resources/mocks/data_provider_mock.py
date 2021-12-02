@@ -6,7 +6,7 @@
 import json
 import os
 
-from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider, logger
 from requests.models import PreparedRequest

@@ -11,10 +11,10 @@ from typing import Any, List, Optional, Union
 from enforce_typing import enforce_types
 from eth_account.account import Account
 from eth_utils import add_0x_prefix
+from ocean_lib.agreements.consumable import ConsumableCodes
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.credentials import AddressCredential
 from ocean_lib.assets.did import did_to_id
-from ocean_lib.common.agreements.consumable import ConsumableCodes
-from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.services.service import Service
 from ocean_lib.utils.utilities import get_timestamp

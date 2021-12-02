@@ -5,8 +5,8 @@
 
 import os
 
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import V3Asset
-from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_metadata, get_registered_ddo

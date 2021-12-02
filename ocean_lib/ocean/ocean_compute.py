@@ -7,11 +7,11 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
+from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
-from ocean_lib.common.agreements.consumable import AssetNotConsumable, ConsumableCodes
-from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata

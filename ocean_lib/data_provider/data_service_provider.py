@@ -18,7 +18,7 @@ from unittest.mock import Mock
 import requests
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
-from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.config import Config
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError

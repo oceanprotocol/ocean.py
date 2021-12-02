@@ -5,7 +5,7 @@
 import os
 
 from eth_utils import remove_0x_prefix
-from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.order import Order
 from ocean_lib.services.service import Service
