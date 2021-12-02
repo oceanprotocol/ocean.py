@@ -59,7 +59,7 @@ def test_AquariusError(publisher_ocean_instance, metadata, publisher_wallet):
         "DataToken1", "DT1", alice_wallet, blob=ocn.config.metadata_cache_uri
     )
 
-    with patch("ocean_lib.common.aquarius.aquarius.Aquarius.ddo_exists") as mock:
+    with patch("ocean_lib.aquarius.aquarius.Aquarius.ddo_exists") as mock:
         mock.return_value = True
         with pytest.raises(AquariusError):
             publisher_ocean_instance.assets.create(
