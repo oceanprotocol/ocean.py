@@ -15,6 +15,7 @@ from enforce_typing import enforce_types
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.v4.asset import V4Asset
 from ocean_lib.common.http_requests.requests_session import get_requests_session
+from ocean_lib.config import Config
 
 logger = logging.getLogger("aquarius")
 
@@ -41,6 +42,10 @@ class Aquarius:
         logging.debug(f"Metadata assets at {self.base_url}")
 
         self.requests_session = get_requests_session()
+
+    @classmethod
+    def get_instance(cls, metadata_cache_uri: str) -> "Aquarius":
+        return cls(metadata_cache_uri)
 
     @enforce_types
     def get_service_endpoint(self) -> str:

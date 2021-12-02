@@ -10,7 +10,7 @@ import copy
 import logging
 from typing import Dict, Any, Optional
 
-from ocean_lib.common.agreements.service_types import ServiceTypesV4, ServiceTypesNames
+from ocean_lib.agreements.service_types import ServiceTypesV4, ServiceTypesNames
 
 logger = logging.getLogger(__name__)
 
