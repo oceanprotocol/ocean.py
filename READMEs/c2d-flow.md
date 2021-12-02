@@ -260,8 +260,8 @@ You can find more information about how to do this in the [Ocean tutorials](http
 
 In the same Python console:
 ```python
-from ocean_lib.assets import utils
-utils.add_publisher_trusted_algorithm(DATA_ddo, ALG_ddo.did, config.metadata_cache_uri)
+from ocean_lib.assets.trusted_algorithms import add_publisher_trusted_algorithm
+add_publisher_trusted_algorithm(DATA_ddo, ALG_ddo.did, config.metadata_cache_uri)
 ocean.assets.update(DATA_ddo, publisher_wallet=alice_wallet)
 ```
 
