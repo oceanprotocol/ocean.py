@@ -60,10 +60,15 @@ class SideStaking(ContractBase):
         )
 
     def unstake(
-        self, data_token: str, stake_token: str, amount: int, from_wallet: Wallet
+        self,
+        data_token: str,
+        stake_token: str,
+        dtAmountIn: int,
+        poolAmountOut: int,
+        from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "UnStake", (data_token, stake_token, amount), from_wallet
+            "UnStake", (data_token, stake_token, dtAmountIn, poolAmountOut), from_wallet
         )
 
     def notify_finalize(
