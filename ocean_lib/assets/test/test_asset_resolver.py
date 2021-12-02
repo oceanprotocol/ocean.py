@@ -34,24 +34,8 @@ def test_resolve_asset(publisher_ocean_instance, metadata, publisher_wallet):
         resolved_asset_from_metadata_cache_uri.did == asset.did
     ), "Resolve asset function call is unsuccessful."
 
-    # resolve asset from web3 and token_address
-    resolved_asset_from_web3_and_token_address = resolve_asset(
-        asset.did,
-        web3=publisher_ocean_instance.web3,
-        token_address=asset.data_token_address,
-    )
-    assert isinstance(
-        resolved_asset_from_web3_and_token_address, V3Asset
-    ), "The resolved asset is not an instance of Asset."
-    assert (
-        resolved_asset_from_web3_and_token_address.did == asset.did
-    ), "Resolve asset function call is unsuccessful."
-
 
 def test_bad_resolved_asset():
     with pytest.raises(AssertionError) as err:
         resolve_asset("0x1")
-    assert (
-        err.value.args[0]
-        == "Either metadata_cache_uri or (web3 and token_address) is required."
-    )
+    assert err.value.args[0] == "metadata_cache_uri is required."
