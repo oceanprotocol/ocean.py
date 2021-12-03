@@ -5,6 +5,7 @@
 from unittest.mock import patch
 
 import pytest
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.did import DID
 from ocean_lib.assets.trusted_algorithms import (
     add_publisher_trusted_algorithm,
@@ -14,7 +15,6 @@ from ocean_lib.assets.trusted_algorithms import (
     remove_publisher_trusted_algorithm,
     remove_publisher_trusted_algorithm_publisher,
 )
-from ocean_lib.common.agreements.service_types import ServiceTypes
 from tests.resources.ddo_helpers import (
     get_sample_algorithm_ddo,
     get_sample_ddo,

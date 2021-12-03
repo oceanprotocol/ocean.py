@@ -10,7 +10,7 @@ from typing import Union
 from enforce_typing import enforce_types
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.v4.asset import V4Asset
-from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
+from ocean_lib.aquarius import Aquarius
 
 logger = logging.getLogger("keeper")
 
@@ -28,6 +28,6 @@ def resolve_asset(did: str, metadata_cache_uri: str) -> Union[V3Asset, V4Asset]:
     assert metadata_cache_uri, "metadata_cache_uri is required."
 
     logger.debug(f"found did {did} -> url={metadata_cache_uri}")
-    ddo = AquariusProvider.get_aquarius(metadata_cache_uri).get_asset_ddo(did)
+    ddo = Aquarius.get_instance(metadata_cache_uri).get_asset_ddo(did)
 
     return ddo

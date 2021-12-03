@@ -4,7 +4,7 @@
 #
 
 from ocean_lib.assets.v4.asset import V4Asset
-from ocean_lib.common.agreements.service_types import ServiceTypesV4
+from ocean_lib.agreements.service_types import ServiceTypesV4
 from ocean_lib.services.v4.service import V4Service
 from tests.resources.ddo_helpers import (
     get_key_from_v4_sample_ddo,

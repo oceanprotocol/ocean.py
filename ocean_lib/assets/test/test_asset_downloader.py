@@ -5,8 +5,8 @@
 import os
 
 import pytest
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset_downloader import download_asset_files
-from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from tests.resources.ddo_helpers import get_sample_ddo
 

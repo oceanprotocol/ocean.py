@@ -154,7 +154,7 @@ service_attributes = {
 # The service urls will be encrypted before going on-chain.
 # They're only decrypted for datatoken owners upon consume.
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.services.service import Service
 
 service_endpoint = DataServiceProvider.get_url(ocean.config)
@@ -208,7 +208,7 @@ In the same Python console as before:
 
 ```python
 #point to services
-from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.agreements.service_types import ServiceTypes
 asset = ocean.assets.resolve(did)
 service1 = asset.get_service(ServiceTypes.ASSET_ACCESS)
 
@@ -259,7 +259,7 @@ assert data_token.balanceOf(bob_wallet.address) >= to_wei(1), "Bob didn't get 1.
 #Bob points to the service object
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 fee_receiver = ZERO_ADDRESS # could also be market address
-from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.agreements.service_types import ServiceTypes
 asset = ocean.assets.resolve(did)
 service = asset.get_service(ServiceTypes.ASSET_ACCESS)
 

@@ -2,7 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.services.service import Service
 from tests.resources.ddo_helpers import get_sample_ddo
 

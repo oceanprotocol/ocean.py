@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from ocean_lib.common.aquarius.aquarius import Aquarius
+from ocean_lib.aquarius.aquarius import Aquarius
 from tests.resources.ddo_helpers import wait_for_ddo
 
 

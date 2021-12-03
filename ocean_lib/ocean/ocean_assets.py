@@ -14,14 +14,13 @@ from typing import Optional, Tuple, Type, Union
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
 from eth_utils import add_0x_prefix, remove_0x_prefix
+from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.assets.did import did_to_id
-from ocean_lib.common.agreements.consumable import AssetNotConsumable, ConsumableCodes
-from ocean_lib.common.agreements.service_types import ServiceTypes
-from ocean_lib.common.aquarius.aquarius import Aquarius
-from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
+from ocean_lib.aquarius import Aquarius
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import (
     DataServiceProvider,
@@ -80,7 +79,7 @@ class OceanAssets:
 
     @enforce_types
     def _get_aquarius(self, url: Optional[str] = None) -> Aquarius:
-        return AquariusProvider.get_aquarius(url or self._metadata_cache_uri)
+        return Aquarius.get_instance(url or self._metadata_cache_uri)
 
     @enforce_types
     def _build_asset_contents(self, asset: V3Asset, encrypt: bool = False):

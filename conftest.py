@@ -8,7 +8,7 @@ import uuid
 
 import pytest
 
-from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
+from ocean_lib.aquarius.aquarius import Aquarius
 from ocean_lib.models.v4.erc20_token import ERC20Token
 from ocean_lib.models.v4.factory_router import FactoryRouter
 from ocean_lib.web3_internal.currency import from_wei, to_wei
@@ -92,7 +92,7 @@ def web3():
 
 @pytest.fixture
 def aquarius_instance(config):
-    return AquariusProvider.get_aquarius(config.metadata_cache_uri)
+    return Aquarius.get_instance(config.metadata_cache_uri)
 
 
 @pytest.fixture

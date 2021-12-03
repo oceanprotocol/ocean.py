@@ -8,8 +8,8 @@ import pathlib
 import time
 import uuid
 
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import V3Asset
-from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.services.service import Service

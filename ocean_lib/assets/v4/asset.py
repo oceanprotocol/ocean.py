@@ -9,7 +9,7 @@ from typing import List, Optional
 from enforce_typing import enforce_types
 
 from ocean_lib.assets.credentials import AddressCredential
-from ocean_lib.common.agreements.service_types import ServiceTypesV4
+from ocean_lib.agreements.service_types import ServiceTypesV4
 from ocean_lib.services.v4.service import V4Service
 from ocean_lib.utils.utilities import create_checksum
 

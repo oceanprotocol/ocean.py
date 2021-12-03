@@ -8,9 +8,9 @@ from unittest.mock import patch
 
 import pytest
 from eth_utils import add_0x_prefix
+from ocean_lib.agreements.consumable import ConsumableCodes
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.did import DID, did_to_id
-from ocean_lib.common.agreements.consumable import ConsumableCodes
 from ocean_lib.exceptions import InsufficientBalance
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
