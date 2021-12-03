@@ -9,6 +9,7 @@ from ocean_lib.models.v4.bpool import BPool
 from ocean_lib.models.v4.erc20_token import ERC20Token
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.models_structures import PoolData
+from ocean_lib.models.v4.side_staking import SideStaking
 from tests.resources.helper_functions import (
     get_address_of_type,
     deploy_erc721_erc20,
@@ -30,12 +31,23 @@ def test_side_staking(
     vested_blocks = 2500000
     initial_ocean_liquidity = web3.toWei("10", "ether")
 
+    side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
+
     ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
 
     # Deploy erc721 and erc20 data token
     erc721, erc20 = deploy_erc721_erc20(
         web3, config, consumer_wallet, consumer_wallet, web3.toWei("10000", "ether")
     )
+
+    # Initial vesting should be 0 and last vested block two
+    assert side_staking.get_vesting_amount_so_far(erc20.address) == 0
+    assert side_staking.get_vesting_last_block(erc20.address) == 0
+    assert side_staking.get_vesting_end_block(erc20.address) == 0
+    assert side_staking.get_base_token_balance(erc20.address) == 0
+
+    # Datatoken initial circulating supply should be 0
+    side_staking.get_data_token_circulating_supply(erc20.address) == 0
 
     # Transfer ocean if needed
     transfer_ocean_if_balance_lte(
@@ -91,9 +103,16 @@ def test_side_staking(
         None,
     )
 
+    assert side_staking.get_base_token_address(erc20.address) == ocean_token.address
+    assert side_staking.get_publisher_address(erc20.address) == consumer_wallet.address
+    assert side_staking.get_vesting_amount(erc20.address) == web3.toWei("0.5", "ether")
+
     assert pool_event[0].event == "NewPool"
     bpool_address = pool_event[0].args.poolAddress
     bpool = BPool(web3, bpool_address)
+
+    # Side staking pool address should match the newly created pool
+    assert side_staking.get_pool_address(erc20.address) == bpool_address
 
     assert erc20.balanceOf(get_address_of_type(config, "Staking")) == web3.toWei(
         "9990", "ether"
@@ -477,3 +496,30 @@ def test_side_staking(
     assert ss_contract_dt_balance + exit_event[
         1
     ].args.tokenAmountOut == erc20.balanceOf(get_address_of_type(config, "Staking"))
+
+    # Get vesting should be callable by anyone
+    side_staking.get_vesting(erc20.address, another_consumer_wallet)
+
+    # Only pool can call this function
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        side_staking.can_stake(erc20.address, ocean_token.address, 10)
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERR: Only pool can call this"
+    )
+
+    # Only pool can call this function
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        side_staking.stake(erc20.address, ocean_token.address, 10, consumer_wallet)
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERR: Only pool can call this"
+    )
+
+    # Only pool can call this function
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        side_staking.unstake(erc20.address, ocean_token.address, 10, 5, consumer_wallet)
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERR: Only pool can call this"
+    )
