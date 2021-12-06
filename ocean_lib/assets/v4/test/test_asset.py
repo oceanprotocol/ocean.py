@@ -92,7 +92,10 @@ def test_asset_utils(web3):
     }
     event = ddo_dict["event"]
 
-    assert ddo_dict["stats"] == {"consumes": 4, "isInPurgatory": "false"}
+    assert ddo_dict["purgatory"] == {"state": False}
+    purgatory = ddo_dict["purgatory"]
+
+    assert ddo_dict["stats"] == {"consumes": 4}
     stats = ddo_dict["stats"]
 
     ddo = V4Asset(
@@ -105,6 +108,7 @@ def test_asset_utils(web3):
         nft=nft,
         datatokens=data_tokens,
         event=event,
+        purgatory=purgatory,
         stats=stats,
     )
     ddo_dict_v2 = ddo.as_dictionary()
