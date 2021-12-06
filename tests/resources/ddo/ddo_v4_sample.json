@@ -64,8 +64,12 @@
     "datetime": "2000-10-31T01:30:00"
   },
 
+  "purgatory": {
+    "state": false
+  },
+
+
   "stats": {
-    "consumes": 4,
-    "isInPurgatory": "false"
+    "consumes": 4
   }
 }
