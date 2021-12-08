@@ -6,6 +6,8 @@
 from unittest.mock import Mock
 
 import pytest
+
+from ocean_lib.agreements.file_objects import File, FileObjects
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
@@ -159,6 +161,15 @@ def test_delete_job_result(with_nice_client):
         "some_signature",
     )
     assert result == {"good_job": "with_mock_delete"}
+
+
+def test_encrypt_urls(with_nice_client):
+    """Tests successful encrypt URLs job."""
+    file = File(url="https://url.com/file1.csv", method="GET")
+    another_file = File(url="https://url.com/file2.csv", method="GET")
+    file_objects = FileObjects([file, another_file])
+    result = DataSP.encrypt_urls(file_objects, "http://mock")
+    assert result
 
 
 def test_invalid_file_name():

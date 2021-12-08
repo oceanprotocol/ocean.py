@@ -18,6 +18,8 @@ from unittest.mock import Mock
 import requests
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
+
+from ocean_lib.agreements.file_objects import FileObjects
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.config import Config
@@ -102,6 +104,39 @@ class DataServiceProvider:
             )
 
             return response.json()["encryptedDocument"]
+
+        return ""
+
+    @staticmethod
+    @enforce_types
+    def encrypt_urls(
+        files: FileObjects,
+        encrypt_endpoint: str,
+    ) -> str:
+        files_json = json.dumps(
+            files, default=lambda o: o.__dict__, separators=(",", ":"), indent=4
+        )
+        response = DataServiceProvider._http_method(
+            "post",
+            encrypt_endpoint,
+            data=files_json,
+            headers={"content-type": "application/octet-stream"},
+        )
+        if response and hasattr(response, "status_code"):
+            if response.status_code != 201:
+                msg = (
+                    f"Encrypt file urls failed at the encryptEndpoint "
+                    f"{encrypt_endpoint}, reason {response.text}, status {response.status_code}"
+                )
+                logger.error(msg)
+                raise OceanEncryptAssetUrlsError(msg)
+
+            logger.info(
+                f"Asset urls encrypted successfully, encrypted urls str: {response.text},"
+                f" encryptedEndpoint {encrypt_endpoint}"
+            )
+
+            return str(response)
 
         return ""
 
