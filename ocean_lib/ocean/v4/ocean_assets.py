@@ -23,7 +23,6 @@ from ocean_lib.services.v4.service import V4Service
 from enforce_typing import enforce_types
 
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import get_address_of_type
 
@@ -95,7 +94,6 @@ class OceanAssetV4:
         nft_address: str,
         files: str,
         provider_uri: Optional[str] = None,
-        owner_address: Optional[str] = None,
         nft_name: Optional[str] = None,
         nft_symbol: Optional[str] = None,
         template_index: Optional[int] = 1,
@@ -155,27 +153,12 @@ class OceanAssetV4:
                 f"Successfully created data token with address "
                 f"{nft.address} for new dataset asset."
             )
-            # owner_address is set as minter only if creating new data token. So if
-            # `data_token_address` is set `owner_address` has no effect.
-            if owner_address:
-                nft.add_manager(owner_address, from_wallet=publisher_wallet)
         else:
+            # verify nft address
             if not erc721_factory.verify_nft(nft_address):
                 raise ContractNotFound(
-                    f"datatoken address {nft_address} is not found in the ERC721Factory events."
+                    f"NFT address {nft_address} is not found in the ERC721Factory events."
                 )
-            # verify data_token_address
-            # FIXME
-            # erc721_token = ERC721Token(self._web3, nft_address)
-            # minter = dt.contract.caller.minter()
-            # if not minter:
-            #     raise AssertionError(
-            #         f"datatoken address {nft_address} does not seem to be a valid DataToken contract."
-            #     )
-            # elif minter.lower() != publisher_wallet.address.lower():
-            #     raise AssertionError(
-            #         f"Minter of datatoken {nft_address} is not the same as the publisher."
-            #     )
 
         assert nft_address, "nft_address is required for publishing a dataset asset."
 
@@ -188,6 +171,13 @@ class OceanAssetV4:
             raise AquariusError(
                 f"Asset id {did} is already registered to another asset."
             )
+
+        for service in services:
+            asset.add_service(service)
+
+        # TODO: provider endpoint encrypt urls
+        # TODO: update this call to setMetaData of the NFT -> Store Metadata role
+        # TODO: wait until asset appears in Aqua -> verify if aqua receives it
 
         return asset
 
