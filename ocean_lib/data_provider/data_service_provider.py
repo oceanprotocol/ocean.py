@@ -125,6 +125,10 @@ class DataServiceProvider:
             data=payload,
             headers={"content-type": "application/octet-stream"},
         )
+
+        if response and hasattr(response, "status_code"):
+            return ""
+
         if response.status_code != 201:
             msg = (
                 f"Encrypt file urls failed at the encryptEndpoint "
