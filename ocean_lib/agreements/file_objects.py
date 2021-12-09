@@ -19,7 +19,7 @@ class UrlFile(object):
         return {"type": self.type, "url": self.url, "method": self.method}
 
     def from_dict(self) -> str:
-        return json.dumps(self.to_dict(), separators=(",", ":"), indent=4)
+        return json.dumps(self.to_dict(), separators=(",", ":"))
 
 
 @enforce_types
@@ -32,11 +32,11 @@ class IpfsFile(object):
         return {"type": self.type, "hash": self.hash}
 
     def from_dict(self) -> str:
-        return json.dumps(self.to_dict(), separators=(",", ":"), indent=4)
+        return json.dumps(self.to_dict(), separators=(",", ":"))
 
 
 @enforce_types
-def Factory(file_obj: dict) -> Union[UrlFile, IpfsFile]:
+def FilesTypeFactory(file_obj: dict) -> Union[UrlFile, IpfsFile]:
     """Factory Method"""
     if file_obj["type"] == "url":
         return UrlFile(file_obj["url"], file_obj["method"])

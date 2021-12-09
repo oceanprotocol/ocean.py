@@ -108,34 +108,37 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def encrypt_urls(
-        files: list,
-        encrypt_endpoint: str,
-    ) -> str:
-        data = str(list(map(lambda file: file.from_dict(), files)))
+    def encrypt_urls(files: list, encrypt_endpoint: str) -> Union[bytes, str]:
+        # FIXME: uncomment when Provider have support for this storage type
+        # data = str(list(map(lambda file: file.from_dict(), files)))
+
+        payload = json.dumps(
+            {
+                "document": json.dumps(
+                    [file.url for file in files], separators=(",", ":")
+                )
+            }
+        )
         response = DataServiceProvider._http_method(
             "post",
             encrypt_endpoint,
-            data=data,
+            data=payload,
             headers={"content-type": "application/octet-stream"},
         )
-        if response and hasattr(response, "status_code"):
-            if response.status_code != 200:
-                msg = (
-                    f"Encrypt file urls failed at the encryptEndpoint "
-                    f"{encrypt_endpoint}, reason {response.text}, status {response.status_code}"
-                )
-                logger.error(msg)
-                raise OceanEncryptAssetUrlsError(msg)
-
-            logger.info(
-                f"Asset urls encrypted successfully, encrypted urls str: {response.text},"
-                f" encryptedEndpoint {encrypt_endpoint}"
+        if response.status_code != 201:
+            msg = (
+                f"Encrypt file urls failed at the encryptEndpoint "
+                f"{encrypt_endpoint}, reason {response.text}, status {response.status_code}"
             )
+            logger.error(msg)
+            raise OceanEncryptAssetUrlsError(msg)
 
-            return response
+        logger.info(
+            f"Asset urls encrypted successfully, encrypted urls str: {response.text},"
+            f" encryptedEndpoint {encrypt_endpoint}"
+        )
 
-        return ""
+        return response.content
 
     @staticmethod
     @enforce_types
