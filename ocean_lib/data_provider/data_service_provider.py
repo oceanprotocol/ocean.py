@@ -19,7 +19,6 @@ import requests
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
 
-from ocean_lib.agreements.file_objects import FileObjects
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.config import Config
@@ -110,20 +109,18 @@ class DataServiceProvider:
     @staticmethod
     @enforce_types
     def encrypt_urls(
-        files: FileObjects,
+        files: list,
         encrypt_endpoint: str,
     ) -> str:
-        files_json = json.dumps(
-            files, default=lambda o: o.__dict__, separators=(",", ":"), indent=4
-        )
+        data = str(list(map(lambda file: file.from_dict(), files)))
         response = DataServiceProvider._http_method(
             "post",
             encrypt_endpoint,
-            data=files_json,
+            data=data,
             headers={"content-type": "application/octet-stream"},
         )
         if response and hasattr(response, "status_code"):
-            if response.status_code != 201:
+            if response.status_code != 200:
                 msg = (
                     f"Encrypt file urls failed at the encryptEndpoint "
                     f"{encrypt_endpoint}, reason {response.text}, status {response.status_code}"
@@ -136,7 +133,7 @@ class DataServiceProvider:
                 f" encryptedEndpoint {encrypt_endpoint}"
             )
 
-            return str(response)
+            return response
 
         return ""
 
