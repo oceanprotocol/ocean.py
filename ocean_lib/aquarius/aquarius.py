@@ -51,16 +51,16 @@ class Aquarius:
         """
         Retrieve the endpoint with the ddo for a given did.
 
-        :return: Return the url of the the ddo location
+        :return: Return the url of the ddo location
         """
         return f"{self.base_url}/ddo/" + "{did}"
 
     @enforce_types
     def get_encrypt_endpoint(self) -> str:
         """
-        Retrieve the endpoint for DDO encrption
+        Retrieve the endpoint for DDO encryption
 
-        :return: Return the url of the the Aquarius ddo encryption endpoint
+        :return: Return the url of the Aquarius ddo encryption endpoint
         """
         return f"{self.base_url}/ddo/encrypt"
 
@@ -92,6 +92,21 @@ class Aquarius:
         :return: bool
         """
         response = self.requests_session.get(f"{self.base_url}/ddo/{did}").content
+
+        return f"Asset DID {did} not found in Elasticsearch" not in str(response)
+
+    # FIXME: temporary solution until /v1/ will be removed from the V3 URLs.
+    @enforce_types
+    def v4_ddo_exists(self, did: str) -> bool:
+        """
+        Return whether the Asset with this did exists in Aqua
+
+        :param did: Asset DID string
+        :return: bool
+        """
+        response = self.requests_session.get(
+            f"{self.base_url.replace('/v1/', '/')}/ddo/{did}"
+        ).content
 
         return f"Asset DID {did} not found in Elasticsearch" not in str(response)
 
@@ -147,6 +162,28 @@ class Aquarius:
         response = self.requests_session.post(
             f"{self.base_url}/ddo/validate",
             data=json.dumps(metadata),
+            headers={"content-type": "application/json"},
+        )
+
+        if response.content == b"true\n":
+            return True, []
+
+        parsed_response = response.json()
+        return False, parsed_response
+
+    @enforce_types
+    def validate_asset(self, asset: V4Asset) -> Tuple[bool, Union[list, dict]]:
+        """
+        Validate the asset.
+
+        :param asset: conforming to the asset accepted by Ocean Protocol, V4Asset
+        :return: bool
+        """
+        asset_dict = asset.as_dictionary()
+
+        response = self.requests_session.post(
+            f"{self.base_url.replace('/v1/', '/')}/ddo/validate-remote",
+            data=json.dumps(asset_dict),
             headers={"content-type": "application/json"},
         )
 

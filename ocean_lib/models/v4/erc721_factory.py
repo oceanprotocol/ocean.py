@@ -50,8 +50,9 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     def verify_nft(self, nft: str) -> bool:
         """Checks that a token was registered."""
+        filter_args = {"newTokenAddress": nft}
         log = self.get_event_log(
-            ERC721FactoryContract.EVENT_NFT_CREATED, 0, self.web3.eth.block_number, None
+            self.EVENT_NFT_CREATED, 0, self.web3.eth.block_number, filter_args
         )
         return bool(log and log[0].args.newTokenAddress == nft)
 
