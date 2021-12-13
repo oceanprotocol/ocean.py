@@ -126,7 +126,7 @@ class DataServiceProvider:
             headers={"content-type": "application/octet-stream"},
         )
 
-        if response and hasattr(response, "status_code"):
+        if not response or not hasattr(response, "status_code"):
             return ""
 
         if response.status_code != 201:
