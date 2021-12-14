@@ -15,9 +15,6 @@ from tests.resources.helper_functions import get_address_of_type, deploy_erc721_
 
 def test_properties(web3, config, publisher_wallet):
     """Tests the events' properties."""
-    erc721_factory_address = get_address_of_type(
-        config, ERC721FactoryContract.CONTRACT_NAME
-    )
     _, erc20 = deploy_erc721_erc20(
         web3=web3,
         config=config,

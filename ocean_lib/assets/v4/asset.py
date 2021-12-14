@@ -31,7 +31,6 @@ class V4Asset:
         nft: Optional[dict] = None,
         datatokens: Optional[list] = None,
         event: Optional[dict] = None,
-        purgatory: Optional[dict] = None,
         stats: Optional[dict] = None,
     ) -> None:
 
@@ -45,7 +44,6 @@ class V4Asset:
         self.nft = nft
         self.datatokens = datatokens
         self.event = event
-        self.purgatory = purgatory
         self.stats = stats
 
     @property
@@ -105,7 +103,6 @@ class V4Asset:
             values.pop("nft", None),
             values.pop("datatokens", None),
             values.pop("event", None),
-            values.pop("purgatory", None),
             values.pop("stats", None),
         )
 
@@ -130,7 +127,6 @@ class V4Asset:
             "nft",
             "datatokens",
             "event",
-            "purgatory",
             "stats",
         ]
         attrs = list(

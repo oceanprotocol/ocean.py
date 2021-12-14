@@ -6,8 +6,9 @@ from eth_utils import add_0x_prefix
 
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.v4.models_structures import ErcCreateData
 from ocean_lib.ocean.v4.ocean_assets import OceanAssetV4
-from ocean_lib.utils.utilities import create_checksum
+from ocean_lib.utils.utilities import create_checksum, get_timestamp
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import get_address_of_type
 
@@ -29,7 +30,7 @@ def test_publish_flow(web3, config, publisher_wallet):
         "https://oceanprotocol.com/nft/",
         publisher_wallet,
     )
-
+    created = get_timestamp()
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
         ERC721FactoryContract.EVENT_NFT_CREATED,
@@ -55,9 +56,24 @@ def test_publish_flow(web3, config, publisher_wallet):
     files = add_0x_prefix(
         create_checksum("https://url.com/file1.csv" + "https://url.com/file2.csv")
     )
-    asset.create(
+    erc20_data = ErcCreateData(
+        template_index=1,
+        strings=["Datatoken 1", "DT1"],
+        addresses=[
+            publisher_wallet.address,
+            publisher_wallet.address,
+            ZERO_ADDRESS,
+            get_address_of_type(config, "Ocean"),
+        ],
+        uints=[web3.toWei("0.5", "ether"), 0],
+        bytess=[b""],
+    )
+    ddo = asset.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         files=files,
         nft_address=nft_address,
+        created=created,
+        erc20_data=erc20_data,
     )
+    assert ddo

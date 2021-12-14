@@ -9,6 +9,7 @@ import time
 import uuid
 
 from ocean_lib.agreements.service_types import ServiceTypes
+from ocean_lib.aquarius import Aquarius
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
@@ -217,6 +218,11 @@ def get_registered_algorithm_ddo_different_provider(ocean_instance, wallet):
     )
 
 
+def build_credentials_dict() -> dict:
+    """Build a credentials dict, used for testing."""
+    return {"allow": [], "deny": []}
+
+
 def wait_for_update(ocean, did, updated_attr, value, timeout=30):
     start = time.time()
     ddo = None
@@ -245,6 +251,21 @@ def wait_for_ddo(ocean, did, timeout=30):
             ddo = ocean.assets.resolve(did)
         except ValueError:
             pass
+
+        if not ddo:
+            time.sleep(0.2)
+
+        if time.time() - start > timeout:
+            break
+
+    return ddo
+
+
+def wait_for_asset(metadata_cache_url: str, did: str, timeout=30):
+    start = time.time()
+    ddo = None
+    while not ddo:
+        ddo = Aquarius.get_instance(metadata_cache_url).get_asset_ddo(did)
 
         if not ddo:
             time.sleep(0.2)
