@@ -175,7 +175,7 @@ class OceanAssetV4:
         did = f"did:op:{create_checksum(erc721_factory.address + str(self._web3.eth.chain_id))}"
         asset.did = did
         # Check if it's already registered first!
-        if self._get_aquarius().v4_ddo_exists(did):
+        if self._get_aquarius().ddo_exists(did):
             raise AquariusError(
                 f"Asset id {did} is already registered to another asset."
             )

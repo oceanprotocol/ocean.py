@@ -14,7 +14,7 @@
   },
   "services": [
     {
-      "serviceId": "1",
+      "id": "1",
       "type": "access",
       "files": "0x0000",
       "name": "Download service",
@@ -24,7 +24,7 @@
       "timeout": 0
     },
     {
-      "serviceId": "2",
+      "id": "2",
       "type": "compute",
       "files": "0x0001",
       "name": "Compute service",

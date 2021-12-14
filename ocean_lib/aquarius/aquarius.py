@@ -34,7 +34,8 @@ class Aquarius:
         if "/api/v1/aquarius/assets" in aquarius_url:
             aquarius_url = aquarius_url[: aquarius_url.find("/api/v1/aquarius/assets")]
 
-        self.base_url = f"{aquarius_url}/api/v1/aquarius/assets"
+        # FIXME: add v1 for Aquarius version
+        self.base_url = f"{aquarius_url}/api/aquarius/assets"
 
         logging.debug(f"Metadata Store connected at {aquarius_url}")
         logging.debug(f"Metadata Store API documentation at {aquarius_url}/api/v1/docs")
@@ -92,22 +93,6 @@ class Aquarius:
         :return: bool
         """
         response = self.requests_session.get(f"{self.base_url}/ddo/{did}").content
-
-        return f"Asset DID {did} not found in Elasticsearch" not in str(response)
-
-    # FIXME: temporary solution until /v1/ will be removed from the V3 URLs.
-    @enforce_types
-    def v4_ddo_exists(self, did: str) -> bool:
-        """
-        Return whether the Asset with this did exists in Aqua
-
-        :param did: Asset DID string
-        :return: bool
-        """
-        response = self.requests_session.get(
-            f"{self.base_url.replace('/v1/', '/')}/ddo/{did}"
-        ).content
-
         return f"Asset DID {did} not found in Elasticsearch" not in str(response)
 
     @enforce_types

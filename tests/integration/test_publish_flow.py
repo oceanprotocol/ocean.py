@@ -2,12 +2,10 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
+from eth_utils import add_0x_prefix
 
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.v4.erc721_token import ERC721Token
-from ocean_lib.models.v4.models_structures import ErcCreateData
 from ocean_lib.ocean.v4.ocean_assets import OceanAssetV4
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -54,7 +52,9 @@ def test_publish_flow(web3, config, publisher_wallet):
         "author": "OPF",
         "license": "https://market.oceanprotocol.com/terms",
     }
-    files = create_checksum("https://url.com/file1.csv" + "https://url.com/file2.csv")
+    files = add_0x_prefix(
+        create_checksum("https://url.com/file1.csv" + "https://url.com/file2.csv")
+    )
     asset.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,

@@ -41,7 +41,7 @@ class V4Service:
         self.name = name
         self.description = description
 
-        if name is None:
+        if not name or not description:
             service_to_default_name = {
                 ServiceTypesV4.ASSET_ACCESS: ServiceTypesNames.DEFAULT_ACCESS_NAME,
                 ServiceTypesV4.CLOUD_COMPUTE: ServiceTypesNames.DEFAULT_COMPUTE_NAME,
@@ -49,6 +49,7 @@ class V4Service:
 
             if service_type in service_to_default_name:
                 self.name = service_to_default_name[service_type]
+                self.description = service_to_default_name[service_type]
 
     @classmethod
     def from_dict(cls, service_dict: Dict[str, Any]) -> "V4Service":
@@ -63,7 +64,7 @@ class V4Service:
             raise IndexError
 
         return cls(
-            sd.pop("serviceId", None),
+            sd.pop("id", None),
             service_type,
             sd.pop("serviceEndpoint", None),
             sd.pop("datatokenAddress", None),
@@ -141,7 +142,7 @@ class V4Service:
         """Return the service as a python dictionary."""
 
         values = {
-            "serviceId": self.id,
+            "id": self.id,
             "type": self.type,
             "files": self.files,
             "datatokenAddress": self.data_token,
