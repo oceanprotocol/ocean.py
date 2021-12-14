@@ -101,10 +101,11 @@ def test_buy_from_dispenser_and_order(
         "consumer": consume_fee_address,
         "amount": web3.toWei(1, "ether"),
         "serviceIndex": 1,
-        "consumeFeeAddress": consume_fee_address,
-        "consumeFeeToken": mock_dai_contract.address,
-        "consumeFeeAmount": consume_fee_amount,
+        "providerFeeAddress": consume_fee_address,
+        "providerFeeToken": mock_dai_contract.address,
+        "providerFeeAmount": consume_fee_amount,
     }
+
     opf_collector_address = get_address_of_type(config, "OPFCommunityFeeCollector")
 
     balance_consume_before = mock_dai_contract.balanceOf(consume_fee_address)
@@ -127,14 +128,13 @@ def test_buy_from_dispenser_and_order(
     balance_publish = mock_usdc_contract.balanceOf(publish_fees[0])
     balance_opf_publish = mock_usdc_contract.balanceOf(opf_collector_address)
 
-    expected_consume = consume_fee_amount - consume_fee_amount / 100
-    expected_opf_consume = consume_fee_amount / 100
+    expected_opf_consume = consume_fee_amount
 
     expected_publish = publish_fees[2] - publish_fees[2] / 100
     expected_opf_publish = publish_fees[2] / 100
 
-    assert balance_consume - balance_consume_before == expected_consume
-    assert balance_opf_consume - balance_opf_consume_before == expected_opf_consume
+    assert balance_consume - balance_consume_before == expected_opf_consume
+    assert balance_opf_consume - balance_opf_consume_before == 0
 
     assert balance_publish - balance_publish_before == expected_publish
     assert balance_opf_publish - balance_opf_publish_before == expected_opf_publish
@@ -146,7 +146,12 @@ def test_buy_from_dispenser_and_order(
 
 
 def test_buy_from_fre_and_order(
-    web3, config, publisher_wallet, consumer_wallet, factory_deployer_wallet
+    web3,
+    config,
+    publisher_wallet,
+    consumer_wallet,
+    factory_deployer_wallet,
+    another_consumer_wallet,
 ):
     """Tests buy_from_fre_and_order function of the ERC20 Enterprise"""
     mock_usdc_contract = ERC20Token(web3, get_address_of_type(config, "MockUSDC"))
@@ -245,23 +250,27 @@ def test_buy_from_fre_and_order(
         "consumer": publisher_wallet.address,
         "amount": web3.toWei(1, "ether"),
         "serviceIndex": 1,
-        "consumeFeeAddress": consume_fee_address,
-        "consumeFeeToken": mock_dai_contract.address,
-        "consumeFeeAmount": consume_fee_amount,
+        "providerFeeAddress": another_consumer_wallet.address,
+        "providerFeeToken": ZERO_ADDRESS,
+        "providerFeeAmount": 0,
     }
 
     fre_params = {
         "exchangeContract": fixed_rate_exchange.address,
         "exchangeId": exchange_id,
         "maxBaseTokenAmount": web3.toWei(2.5, "ether"),
+        "swapMarketFee": web3.toWei(0.001, "ether"),  # 1e15 => 0.1%
+        "marketFeeAddress": another_consumer_wallet.address,
     }
 
     opf_collector_address = get_address_of_type(config, "OPFCommunityFeeCollector")
 
     balance_consume_before = mock_dai_contract.balanceOf(consume_fee_address)
-    balance_opf_consume_before = mock_dai_contract.balanceOf(opf_collector_address)
     balance_publish_before = mock_usdc_contract.balanceOf(consumer_wallet.address)
     balance_opf_publish_before = mock_usdc_contract.balanceOf(opf_collector_address)
+    provider_fee_balance_before = mock_usdc_contract.balanceOf(
+        another_consumer_wallet.address
+    )
 
     tx = erc20_enterprise_token.buy_from_fre_and_order(
         order_params=order_params,
@@ -272,20 +281,20 @@ def test_buy_from_fre_and_order(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
 
+    provider_fee_balance_after = mock_usdc_contract.balanceOf(
+        another_consumer_wallet.address
+    )
     balance_consume = mock_dai_contract.balanceOf(consume_fee_address)
-    balance_opf_consume = mock_dai_contract.balanceOf(opf_collector_address)
-
     balance_publish = mock_usdc_contract.balanceOf(publish_fees[0])
     balance_opf_publish = mock_usdc_contract.balanceOf(opf_collector_address)
-
-    expected_consume = consume_fee_amount - consume_fee_amount / 100
-    expected_opf_consume = consume_fee_amount / 100
 
     expected_publish = publish_fees[2] - publish_fees[2] / 100
     expected_opf_publish = publish_fees[2] / 100
 
-    assert balance_consume - balance_consume_before == expected_consume
-    assert balance_opf_consume - balance_opf_consume_before == expected_opf_consume
+    assert balance_consume - balance_consume_before == 0
+    assert provider_fee_balance_after - provider_fee_balance_before == web3.toWei(
+        0.001, "ether"
+    )
 
     assert balance_publish - balance_publish_before == expected_publish
     assert balance_opf_publish - balance_opf_publish_before == expected_opf_publish
