@@ -155,9 +155,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
             "consumer": consumer_wallet.address,
             "amount": dt_amount,
             "serviceIndex": 1,
-            "consumeFeeAddress": ZERO_ADDRESS,
-            "consumeFeeToken": mock_dai_contract_address,
-            "consumeFeeAmount": 0,
+            "providerFeeAddress": ZERO_ADDRESS,
+            "providerFeeToken": mock_dai_contract_address,
+            "providerFeeAmount": 0,
         }
     ]
 
