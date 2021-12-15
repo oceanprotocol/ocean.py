@@ -27,6 +27,7 @@ from tests.resources.helper_functions import (
     get_publisher_wallet,
     get_web3,
     setup_logging,
+    get_provider_wallet,
 )
 
 _NETWORK = "ganache"
@@ -128,3 +129,8 @@ def factory_router(web3, config):
         web3,
         get_address_of_type(config, "Router"),
     )
+
+
+@pytest.fixture
+def provider_wallet(web3, config):
+    return get_provider_wallet()

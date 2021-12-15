@@ -9,7 +9,6 @@ import logging
 import os
 import re
 from collections import namedtuple
-from datetime import datetime
 from decimal import Decimal
 from json import JSONDecodeError
 from pathlib import Path
@@ -19,7 +18,6 @@ from unittest.mock import Mock
 import requests
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
-from eth_typing import HexStr
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.http_requests.requests_session import get_requests_session
@@ -110,13 +108,17 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def encrypt(objects_to_encrypt: Union[list, str], encrypt_endpoint: str) -> Response:
+    def encrypt(
+        objects_to_encrypt: Union[list, str], encrypt_endpoint: str
+    ) -> Response:
         if isinstance(objects_to_encrypt, list):
             data = str(list(map(lambda file: file.from_dict(), objects_to_encrypt)))
 
-            payload = json.dumps({"document": data})
+            payload = json.dumps({"document": data}, separators=(",", ":"))
         else:
-            payload = json.dumps({"document": objects_to_encrypt})
+            payload = json.dumps(
+                {"document": objects_to_encrypt}, separators=(",", ":")
+            )
         response = DataServiceProvider._http_method(
             "post",
             encrypt_endpoint,
