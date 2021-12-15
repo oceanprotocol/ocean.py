@@ -2,7 +2,9 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-
+import hashlib
+import json
+import lzma
 from unittest.mock import Mock
 
 import pytest
@@ -14,7 +16,12 @@ from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
 from requests.exceptions import InvalidURL
 from requests.models import Response
-from tests.resources.helper_functions import get_publisher_ocean_instance
+
+from tests.resources.ddo_helpers import get_sample_v4_ddo
+from tests.resources.helper_functions import (
+    get_publisher_ocean_instance,
+    deploy_erc721_erc20,
+)
 from tests.resources.mocks.http_client_mock import (
     HttpClientEmptyMock,
     HttpClientEvilMock,
@@ -163,19 +170,25 @@ def test_delete_job_result(with_nice_client):
     assert result == {"good_job": "with_mock_delete"}
 
 
-def test_encrypt_urls():
-    """Tests successful encrypt URLs job."""
+def test_encrypt():
+    """Tests successful encrypt job."""
     file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
     file2_dict = {"type": "url", "url": "https://url.com/file2.csv", "method": "GET"}
     file1 = FilesTypeFactory(file1_dict)
     file2 = FilesTypeFactory(file2_dict)
 
-    result = DataSP.encrypt_urls(
+    result = DataSP.encrypt(
         [file1, file2], "http://localhost:8030/api/services/encrypt"
     )
+    assert result.status_code == 201
+    assert result.headers["Content-type"] == "text/plain"
+    assert result.content.decode("utf-8").startswith("0x")
 
-    assert isinstance(result, bytes)
-    assert result.decode("utf-8").startswith("0x")
+    ddo_hash = "ddo_hash"
+    result = DataSP.encrypt(ddo_hash, "http://localhost:8030/api/services/encrypt")
+    assert result.status_code == 201
+    assert result.headers["Content-type"] == "text/plain"
+    assert result.content.decode("utf-8").startswith("0x")
 
 
 def test_invalid_file_name():

@@ -9,6 +9,7 @@ import logging
 import os
 import re
 from collections import namedtuple
+from datetime import datetime
 from decimal import Decimal
 from json import JSONDecodeError
 from pathlib import Path
@@ -18,6 +19,7 @@ from unittest.mock import Mock
 import requests
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
+from eth_typing import HexStr
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.http_requests.requests_session import get_requests_session
@@ -108,17 +110,13 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def encrypt_urls(files: list, encrypt_endpoint: str) -> Union[bytes, str]:
-        # FIXME: uncomment when Provider have support for this storage type
-        # data = str(list(map(lambda file: file.from_dict(), files)))
+    def encrypt(objects_to_encrypt: Union[list, str], encrypt_endpoint: str) -> Response:
+        if isinstance(objects_to_encrypt, list):
+            data = str(list(map(lambda file: file.from_dict(), objects_to_encrypt)))
 
-        payload = json.dumps(
-            {
-                "document": json.dumps(
-                    [file.url for file in files], separators=(",", ":")
-                )
-            }
-        )
+            payload = json.dumps({"document": data})
+        else:
+            payload = json.dumps({"document": objects_to_encrypt})
         response = DataServiceProvider._http_method(
             "post",
             encrypt_endpoint,
@@ -127,7 +125,7 @@ class DataServiceProvider:
         )
 
         if not response or not hasattr(response, "status_code"):
-            return ""
+            raise Exception("Response not found!")
 
         if response.status_code != 201:
             msg = (
@@ -142,7 +140,7 @@ class DataServiceProvider:
             f" encryptedEndpoint {encrypt_endpoint}"
         )
 
-        return response.content
+        return response
 
     @staticmethod
     @enforce_types
