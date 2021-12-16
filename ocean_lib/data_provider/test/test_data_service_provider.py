@@ -2,16 +2,20 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-
+import json
 from unittest.mock import Mock
 
+import ecies
 import pytest
+
+from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
 from requests.exceptions import InvalidURL
 from requests.models import Response
+
 from tests.resources.helper_functions import get_publisher_ocean_instance
 from tests.resources.mocks.http_client_mock import (
     HttpClientEmptyMock,
@@ -159,6 +163,50 @@ def test_delete_job_result(with_nice_client):
         "some_signature",
     )
     assert result == {"good_job": "with_mock_delete"}
+
+
+def test_encrypt(web3, provider_wallet):
+    """Tests successful encrypt job."""
+    key = provider_wallet.private_key
+    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
+    file2_dict = {"type": "url", "url": "https://url.com/file2.csv", "method": "GET"}
+    file1 = FilesTypeFactory(file1_dict)
+    file2 = FilesTypeFactory(file2_dict)
+
+    # Encrypt file objects
+    result = DataSP.encrypt(
+        [file1, file2], "http://localhost:8030/api/services/encrypt"
+    )
+    encrypted_files = result.content.decode("utf-8")
+    assert result.status_code == 201
+    assert result.headers["Content-type"] == "text/plain"
+    assert encrypted_files.startswith("0x")
+
+    if isinstance(encrypted_files, str):
+        encrypted_files = web3.toBytes(hexstr=encrypted_files)
+    decrypted_document = ecies.decrypt(key, encrypted_files)
+    decrypted_document_string = decrypted_document.decode("utf-8")
+    decrypted_document_dict = json.loads(decrypted_document_string)
+    assert decrypted_document_dict["document"] == str(
+        list(map(lambda file: file.from_dict(), [file1, file2]))
+    )
+
+    # Encrypt a simple string
+    test_string = "hello_world"
+    encrypt_result = DataSP.encrypt(
+        test_string, "http://localhost:8030/api/services/encrypt"
+    )
+    encrypted_document = encrypt_result.content.decode("utf-8")
+    assert result.status_code == 201
+    assert result.headers["Content-type"] == "text/plain"
+    assert result.content.decode("utf-8").startswith("0x")
+
+    if isinstance(encrypted_document, str):
+        encrypted_document = web3.toBytes(hexstr=encrypted_document)
+    decrypted_document = ecies.decrypt(key, encrypted_document)
+    decrypted_document_string = decrypted_document.decode("utf-8")
+    decrypted_document_dict = json.loads(decrypted_document_string)
+    assert decrypted_document_dict["document"] == test_string
 
 
 def test_invalid_file_name():
