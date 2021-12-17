@@ -304,7 +304,7 @@ class OceanAssetV4:
             raise ValueError(msg)
 
         asset_dict = asset.as_dictionary()
-        ddo_string = json.dumps(asset_dict, separators=(",", ":"))
+        ddo_string = json.dumps(asset_dict)
         ddo_bytes = ddo_string.encode("utf-8")
         ddo_hash_hexstr = Web3.toHex(hashlib.sha256(ddo_bytes).digest())
 
@@ -315,7 +315,7 @@ class OceanAssetV4:
             _ = erc721_token.set_metadata(
                 metadata_state=0,
                 metadata_decryptor_url=provider_uri,
-                metadata_decryptor_address=publisher_wallet.address,
+                metadata_decryptor_address=provider_wallet.address,
                 flags=bytes([0]),
                 data=encrypted_ddo,
                 data_hash=ddo_hash,
@@ -333,10 +333,10 @@ class OceanAssetV4:
             _ = erc721_token.set_metadata(
                 metadata_state=0,
                 metadata_decryptor_url=provider_uri,
-                metadata_decryptor_address=publisher_wallet.address,
+                metadata_decryptor_address=provider_wallet.address,
                 flags=bytes([2]),
                 data=encrypted_ddo,
-                data_hash=ddo_hash_hexstr,
+                data_hash=create_checksum(ddo_string),
                 from_wallet=publisher_wallet,
             )
 
