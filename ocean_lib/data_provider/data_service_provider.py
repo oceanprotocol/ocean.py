@@ -109,21 +109,19 @@ class DataServiceProvider:
     @staticmethod
     @enforce_types
     def encrypt(
-        objects_to_encrypt: Union[list, str], encrypt_endpoint: str
+        objects_to_encrypt: Union[list, str, bytes], encrypt_endpoint: str
     ) -> Response:
         if isinstance(objects_to_encrypt, list):
             data = str(list(map(lambda file: file.from_dict(), objects_to_encrypt)))
-
-            payload = json.dumps({"document": data}, separators=(",", ":"))
+            payload = data
         else:
-            payload = json.dumps(
-                {"document": objects_to_encrypt}, separators=(",", ":")
-            )
+            payload = objects_to_encrypt
+
         response = DataServiceProvider._http_method(
             "post",
             encrypt_endpoint,
             data=payload,
-            headers={"content-type": "application/octet-stream"},
+            headers={"Content-type": "application/octet-stream"},
         )
 
         if not response or not hasattr(response, "status_code"):

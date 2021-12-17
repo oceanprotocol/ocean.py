@@ -5,18 +5,22 @@
 
 """Ocean module."""
 import copy
+import hashlib
 import json
 import logging
 import os
-from typing import Optional, Tuple, Type
+from typing import Optional, Tuple, Type, List, Union
 
 from enforce_typing import enforce_types
+from eth_utils import to_checksum_address
+
 from ocean_lib.agreements.service_types import ServiceTypesV4
 from ocean_lib.aquarius import Aquarius
 from ocean_lib.assets.v4.asset import V4Asset
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound
+from ocean_lib.models.v4.erc20_token import ERC20Token
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Token
 from ocean_lib.models.v4.models_structures import ErcCreateData
@@ -67,7 +71,11 @@ class OceanAssetV4:
         self, services: list, data_token: str, files: str, provider_uri: str
     ) -> list:
         has_access_service = any(
-            map(lambda s: s.type == ServiceTypesV4.ASSET_ACCESS, services)
+            map(
+                lambda s: s.type == ServiceTypesV4.ASSET_ACCESS
+                and s.id == self.find_service_by_data_token(data_token, services),
+                services,
+            )
         )
 
         if not has_access_service:
@@ -123,22 +131,46 @@ class OceanAssetV4:
 
         return registered_token_event[0].args.newTokenAddress
 
+    def find_service_by_data_token(self, data_token: str, services: list) -> str:
+        for service in services:
+            if service.data_token == data_token:
+                return service.id
+
+    def build_data_tokens_list(
+        self, services: list, deployed_erc20_tokens: list
+    ) -> list:
+        data_tokens = []
+        for erc20_token in deployed_erc20_tokens:
+            for service in services:
+                data_token = {
+                    "address": erc20_token.address,
+                    "name": erc20_token.contract.caller.name(),
+                    "symbol": erc20_token.symbol(),
+                    "serviceId": service.id,
+                }
+                data_tokens.append(data_token)
+        return data_tokens
+
     def create(
         self,
         metadata: dict,
         publisher_wallet: Wallet,
-        files: str,
+        provider_wallet: Wallet,
+        encrypted_files: str,
         services: Optional[list] = None,
         credentials: Optional[list] = None,
         provider_uri: Optional[str] = None,
-        nft_address: Optional[str] = None,
+        erc721_address: Optional[str] = None,
         created: Optional[str] = None,
-        nft_name: Optional[str] = None,
-        nft_symbol: Optional[str] = None,
+        erc721_name: Optional[str] = None,
+        erc721_symbol: Optional[str] = None,
         template_index: Optional[int] = 1,
-        nft_additional_erc_deployer: Optional[str] = None,
-        nft_uri: Optional[str] = None,
-        erc20_data: Optional[ErcCreateData] = None,
+        erc721_additional_erc_deployer: Optional[str] = None,
+        erc721_uri: Optional[str] = None,
+        erc20_data: Optional[List[ErcCreateData]] = None,
+        deployed_erc20_tokens: Optional[List[ERC20Token]] = None,
+        encrypt_flag: Optional[bool] = False,
+        compress_flag: Optional[bool] = False,
     ) -> Optional[V4Asset]:
         assert isinstance(
             metadata, dict
@@ -159,11 +191,11 @@ class OceanAssetV4:
         address = get_address_of_type(self._config, ERC721FactoryContract.CONTRACT_NAME)
         erc721_factory = ERC721FactoryContract(self._web3, address)
 
-        if not nft_address:
-            name = nft_name or metadata["name"]
-            symbol = nft_symbol or name
-            additional_erc20_deployer = nft_additional_erc_deployer or ZERO_ADDRESS
-            token_uri = nft_uri or "https://oceanprotocol.com/nft/"
+        if not erc721_address:
+            name = erc721_name or metadata["name"]
+            symbol = erc721_symbol or name
+            additional_erc20_deployer = erc721_additional_erc_deployer or ZERO_ADDRESS
+            token_uri = erc721_uri or "https://oceanprotocol.com/nft/"
             # register on-chain
             tx_id = erc721_factory.deploy_erc721_contract(
                 name,
@@ -185,26 +217,17 @@ class OceanAssetV4:
                 f"Successfully created data token with address "
                 f"{erc721_token.address} for new dataset asset."
             )
-            nft_address = erc721_token.address
+            erc721_address = erc721_token.address
         else:
             # verify nft address
-            if not erc721_factory.verify_nft(nft_address):
+            if not erc721_factory.verify_nft(erc721_address):
                 raise ContractNotFound(
-                    f"NFT address {nft_address} is not found in the ERC721Factory events."
+                    f"NFT address {erc721_address} is not found in the ERC721Factory events."
                 )
 
-        assert nft_address, "nft_address is required for publishing a dataset asset."
-        erc721_token = ERC721Token(self._web3, nft_address)
+        assert erc721_address, "nft_address is required for publishing a dataset asset."
+        erc721_token = ERC721Token(self._web3, erc721_address)
 
-        erc20_address = self.deploy_datatoken(
-            erc721_factory=erc721_factory,
-            erc721_token=erc721_token,
-            erc20_data=erc20_data,
-            from_wallet=publisher_wallet,
-        )
-
-        services = services or []
-        services = self._add_defaults(services, erc20_address, files, provider_uri)
         # Create a DDO object
         asset = V4Asset()
 
@@ -218,10 +241,60 @@ class OceanAssetV4:
             )
         asset.chain_id = self._web3.eth.chain_id
         asset.metadata = metadata
+
+        asset.credentials = credentials if credentials else build_credentials_dict()
+
+        erc20_addresses = []
+        services = services or []
+        deployed_erc20_tokens = deployed_erc20_tokens or []
+        if not deployed_erc20_tokens:
+            for erc20_token_data in erc20_data:
+                erc20_addresses.append(
+                    self.deploy_datatoken(
+                        erc721_factory=erc721_factory,
+                        erc721_token=erc721_token,
+                        erc20_data=erc20_token_data,
+                        from_wallet=publisher_wallet,
+                    )
+                )
+            if not services:
+                for erc20_address in erc20_addresses:
+                    services = self._add_defaults(
+                        services, erc20_address, encrypted_files, provider_uri
+                    )
+            for erc20_token_address in erc20_addresses:
+                deployed_erc20_tokens.append(
+                    ERC20Token(self._web3, erc20_token_address)
+                )
+
+            data_tokens = self.build_data_tokens_list(
+                services=services, deployed_erc20_tokens=deployed_erc20_tokens
+            )
+        else:
+            if not services:
+                for erc20_token in deployed_erc20_tokens:
+                    services = self._add_defaults(
+                        services, erc20_token.address, encrypted_files, provider_uri
+                    )
+
+            data_tokens = self.build_data_tokens_list(
+                services=services, deployed_erc20_tokens=deployed_erc20_tokens
+            )
+
+        asset.datatokens = data_tokens
+
         for service in services:
             asset.add_service(service)
 
-        asset.credentials = credentials if credentials else build_credentials_dict()
+        nft = {
+            "address": erc721_token.address,
+            "name": erc721_name,
+            "symbol": erc721_symbol,
+            "owner": publisher_wallet.address,
+            "state": 0,
+            "created": created,
+        }
+        asset.nft = nft
 
         # Validation by Aquarius
         validation_result, validation_errors = self.validate(asset)
@@ -230,43 +303,44 @@ class OceanAssetV4:
             logger.error(msg)
             raise ValueError(msg)
 
-        nft = {
-            "address": erc721_token.address,
-            "name": nft_name,
-            "symbol": nft_symbol,
-            "owner": publisher_wallet.address,
-            "state": 0,
-            "created": created,
-        }
-        asset.nft = nft
-
-        data_tokens = [
-            {
-                "address": erc20_address,
-                "name": erc20_data.strings[0],
-                "symbol": erc20_data.strings[1],
-                "serviceId": service.id,
-            }
-            for service in services
-        ]
-        asset.datatokens = data_tokens
-
         asset_dict = asset.as_dictionary()
-        ddo_string = json.dumps(asset_dict)
+        ddo_string = json.dumps(asset_dict, separators=(",", ":"))
         ddo_bytes = ddo_string.encode("utf-8")
-        encrypted_ddo = ddo_bytes
-        ddo_hash = create_checksum(ddo_string)
+        ddo_hash_hexstr = Web3.toHex(hashlib.sha256(ddo_bytes).digest())
 
-        _ = erc721_token.set_metadata(
-            metadata_state=0,
-            metadata_decryptor_url=provider_uri,
-            metadata_decryptor_address=publisher_wallet.address,
-            flags=bytes([0]),
-            data=encrypted_ddo,
-            data_hash=ddo_hash,
-            from_wallet=publisher_wallet,
-        )
+        # Plain asset
+        if not encrypt_flag and not compress_flag:
+            encrypted_ddo = ddo_bytes
+            ddo_hash = create_checksum(ddo_string)
+            _ = erc721_token.set_metadata(
+                metadata_state=0,
+                metadata_decryptor_url=provider_uri,
+                metadata_decryptor_address=publisher_wallet.address,
+                flags=bytes([0]),
+                data=encrypted_ddo,
+                data_hash=ddo_hash,
+                from_wallet=publisher_wallet,
+            )
 
+        # Only encryption, not compressed
+        elif encrypt_flag and not compress_flag:
+            # Encrypt DDO
+            encrypt_response = DataServiceProvider.encrypt(
+                objects_to_encrypt=ddo_string,
+                encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
+            )
+            encrypted_ddo = encrypt_response.content
+            _ = erc721_token.set_metadata(
+                metadata_state=0,
+                metadata_decryptor_url=provider_uri,
+                metadata_decryptor_address=publisher_wallet.address,
+                flags=bytes([2]),
+                data=encrypted_ddo,
+                data_hash=ddo_hash_hexstr,
+                from_wallet=publisher_wallet,
+            )
+
+        # Fetch the asset on chain
         asset = wait_for_asset(self._metadata_cache_uri, did)
 
         return asset
