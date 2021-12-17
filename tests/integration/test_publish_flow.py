@@ -87,7 +87,6 @@ def test_publish_flow(web3, config, publisher_wallet, provider_wallet):
         erc721_address=erc721_address,
         created=created,
         erc20_data=[erc20_data],
-        encrypt_flag=True,
     )
     assert ddo, "The asset is not created."
 
