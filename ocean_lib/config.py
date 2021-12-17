@@ -21,9 +21,9 @@ DEFAULT_NETWORK_URL = "http://localhost:8545"
 DEFAULT_BLOCK_CONFIRMATIONS = 1
 DEFAULT_NETWORK_NAME = "ganache"
 DEFAULT_ADDRESS_FILE = ""
-DEFAULT_METADATA_CACHE_URI = "http://localhost:5000"
+DEFAULT_METADATA_CACHE_URI = "http://172.15.0.5:5000"
 METADATA_CACHE_URI = "https://aquarius.oceanprotocol.com"
-DEFAULT_PROVIDER_URL = "http://localhost:8030"
+DEFAULT_PROVIDER_URL = "http://172.15.0.4:8030"
 DEFAULT_DOWNLOADS_PATH = "consume-downloads"
 DEFAULT_TRANSACTION_TIMEOUT = 10 * 60  # 10 minutes
 
@@ -134,8 +134,8 @@ class Config(configparser.ConfigParser):
         network = https://rinkeby.infura.io/v3/<your Infura project id>
 
         [resources]
-        metadata_cache_uri = http://localhost:5000
-        provider.url = http://localhost:8030
+        metadata_cache_uri = http://172.15.0.5:5000
+        provider.url = http://172.15.0.4:8030
         ```
         :param filename: Path of the config file, str.
         :param options_dict: Python dict with the config, dict.

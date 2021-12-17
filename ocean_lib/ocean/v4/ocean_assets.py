@@ -8,29 +8,25 @@ import copy
 import json
 import logging
 import os
-from typing import Optional, Type, Tuple
+from typing import Optional, Tuple, Type
 
-from web3 import Web3
-
+from enforce_typing import enforce_types
 from ocean_lib.agreements.service_types import ServiceTypesV4
 from ocean_lib.aquarius import Aquarius
-from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.assets.v4.asset import V4Asset
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.exceptions import ContractNotFound, AquariusError
-from ocean_lib.models.v4.erc20_token import ERC20Token
+from ocean_lib.exceptions import AquariusError, ContractNotFound
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Token
 from ocean_lib.models.v4.models_structures import ErcCreateData
 from ocean_lib.services.v4.service import V4Service
-from enforce_typing import enforce_types
-
 from ocean_lib.utils.utilities import create_checksum, get_timestamp
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import build_credentials_dict, wait_for_asset
 from tests.resources.helper_functions import get_address_of_type
+from web3 import Web3
 
 logger = logging.getLogger("ocean")
 
@@ -213,7 +209,7 @@ class OceanAssetV4:
         asset = V4Asset()
 
         # Generating the did and adding to the ddo.
-        did = f"did:op:{create_checksum(erc721_factory.address + str(self._web3.eth.chain_id))}"
+        did = f"did:op:{create_checksum(erc721_token.address + str(self._web3.eth.chain_id))}"
         asset.did = did
         # Check if it's already registered first!
         if self._get_aquarius().ddo_exists(did):
@@ -265,9 +261,9 @@ class OceanAssetV4:
             metadata_state=0,
             metadata_decryptor_url=provider_uri,
             metadata_decryptor_address=publisher_wallet.address,
-            flags=bytes(0),
+            flags=bytes([0]),
             data=encrypted_ddo,
-            data_hash=ddo_hash.encode("utf-8"),
+            data_hash=ddo_hash,
             from_wallet=publisher_wallet,
         )
 
