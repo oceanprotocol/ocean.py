@@ -8,6 +8,7 @@ import copy
 import hashlib
 import json
 import logging
+import lzma
 import os
 from typing import Optional, Tuple, Type, List, Union
 
@@ -155,7 +156,6 @@ class OceanAssetV4:
         self,
         metadata: dict,
         publisher_wallet: Wallet,
-        provider_wallet: Wallet,
         encrypted_files: str,
         services: Optional[list] = None,
         credentials: Optional[list] = None,
@@ -167,11 +167,36 @@ class OceanAssetV4:
         template_index: Optional[int] = 1,
         erc721_additional_erc_deployer: Optional[str] = None,
         erc721_uri: Optional[str] = None,
-        erc20_data: Optional[List[ErcCreateData]] = None,
+        erc20_tokens_data: Optional[List[ErcCreateData]] = None,
         deployed_erc20_tokens: Optional[List[ERC20Token]] = None,
         encrypt_flag: Optional[bool] = False,
         compress_flag: Optional[bool] = False,
     ) -> Optional[V4Asset]:
+        """Register an asset on-chain.
+
+        Creating/deploying a ERC721Token contract and in the Metadata store (Aquarius).
+
+        :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
+        :param publisher_wallet: Wallet of the publisher registering this asset.
+        :param encrypted_files: str of the files that need to be encrypted before publishing.
+        :param services: list of Service objects.
+        :param credentials: list of credentials necessary for the asset.
+        :param provider_uri: str URL of service provider. This will be used as base to
+        construct the serviceEndpoint for the `access` (download) service
+        :param erc721_address: hex str the address of the ERC721 token. The new
+        asset will be associated with this ERC721 token address.
+        :param created: str of the creation time of the ERC721 token
+        :param erc721_name: str name of ERC721 token if creating a new one
+        :param erc721_symbol: str symbol of ERC721 token  if creating a new one
+        :param template_index: int template index of the ERC721 token, by default is 1.
+        :param erc721_additional_erc_deployer: str address of an additional ERC20 deployer.
+        :param erc721_uri: str URL of the ERC721 token.
+        :param erc20_tokens_data: list of ERC20CreateData necessary for deploying ERC20 tokens for different services.
+        :param deployed_erc20_tokens: list of ERC20 tokens which are already deployed.
+        :param encrypt_flag: bool for encryption of the DDO.
+        :param compress_flag: bool for compression of the DDO.
+        :return: DDO instance
+        """
         assert isinstance(
             metadata, dict
         ), f"Expected metadata of type dict, got {type(metadata)}"
@@ -248,7 +273,7 @@ class OceanAssetV4:
         services = services or []
         deployed_erc20_tokens = deployed_erc20_tokens or []
         if not deployed_erc20_tokens:
-            for erc20_token_data in erc20_data:
+            for erc20_token_data in erc20_tokens_data:
                 erc20_addresses.append(
                     self.deploy_datatoken(
                         erc721_factory=erc721_factory,
@@ -288,8 +313,8 @@ class OceanAssetV4:
 
         nft = {
             "address": erc721_token.address,
-            "name": erc721_name,
-            "symbol": erc721_symbol,
+            "name": erc721_token.contract.caller.name(),
+            "symbol": erc721_token.symbol(),
             "owner": publisher_wallet.address,
             "state": 0,
             "created": created,
@@ -303,21 +328,36 @@ class OceanAssetV4:
             logger.error(msg)
             raise ValueError(msg)
 
+        # Process the DDO
         asset_dict = asset.as_dictionary()
         ddo_string = json.dumps(asset_dict)
         ddo_bytes = ddo_string.encode("utf-8")
-        ddo_hash_hexstr = Web3.toHex(hashlib.sha256(ddo_bytes).digest())
+        ddo_hash = create_checksum(ddo_string)
 
         # Plain asset
         if not encrypt_flag and not compress_flag:
             encrypted_ddo = ddo_bytes
-            ddo_hash = create_checksum(ddo_string)
             _ = erc721_token.set_metadata(
                 metadata_state=0,
                 metadata_decryptor_url=provider_uri,
-                metadata_decryptor_address=provider_wallet.address,
+                metadata_decryptor_address=publisher_wallet.address,
                 flags=bytes([0]),
                 data=encrypted_ddo,
+                data_hash=ddo_hash,
+                from_wallet=publisher_wallet,
+            )
+
+        # Only compression, not encrypted
+        elif compress_flag and not encrypt_flag:
+            # Compress DDO
+            compressed_document = lzma.compress(ddo_bytes)
+
+            _ = erc721_token.set_metadata(
+                metadata_state=0,
+                metadata_decryptor_url=provider_uri,
+                metadata_decryptor_address=publisher_wallet.address,
+                flags=bytes([1]),
+                data=compressed_document,
                 data_hash=ddo_hash,
                 from_wallet=publisher_wallet,
             )
@@ -329,14 +369,36 @@ class OceanAssetV4:
                 objects_to_encrypt=ddo_string,
                 encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
             )
-            encrypted_ddo = encrypt_response.content
+            encrypted_ddo = encrypt_response.text
             _ = erc721_token.set_metadata(
                 metadata_state=0,
                 metadata_decryptor_url=provider_uri,
-                metadata_decryptor_address=provider_wallet.address,
+                metadata_decryptor_address=publisher_wallet.address,
                 flags=bytes([2]),
                 data=encrypted_ddo,
-                data_hash=create_checksum(ddo_string),
+                data_hash=ddo_hash,
+                from_wallet=publisher_wallet,
+            )
+
+        # Encrypted & compressed
+        else:
+            # Compress DDO
+            compressed_document = lzma.compress(ddo_bytes)
+
+            # Encrypt DDO
+            encrypt_response = DataServiceProvider.encrypt(
+                objects_to_encrypt=compressed_document,
+                encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
+            )
+
+            encrypted_ddo = encrypt_response.text
+            _ = erc721_token.set_metadata(
+                metadata_state=0,
+                metadata_decryptor_url=provider_uri,
+                metadata_decryptor_address=publisher_wallet.address,
+                flags=bytes([3]),
+                data=encrypted_ddo,
+                data_hash=ddo_hash,
                 from_wallet=publisher_wallet,
             )
 
