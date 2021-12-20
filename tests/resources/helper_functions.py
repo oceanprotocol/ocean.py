@@ -85,6 +85,17 @@ def get_another_consumer_wallet() -> Wallet:
     )
 
 
+@enforce_types
+def get_provider_wallet() -> Wallet:
+    config = get_example_config()
+    return Wallet(
+        get_web3(),
+        private_key=os.environ.get("PROVIDER_PRIVATE_KEY"),
+        block_confirmations=config.block_confirmations,
+        transaction_timeout=config.transaction_timeout,
+    )
+
+
 def get_factory_deployer_wallet(network):
     if network == "ganache":
         return get_ganache_wallet()

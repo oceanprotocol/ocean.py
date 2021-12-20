@@ -33,6 +33,7 @@ install_requirements = [
     "scipy",
     "enforce-typing==1.0.0.post1",
     "json-sempai==0.4.0",
+    "eciespy",
     # web3 requires eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
