@@ -5,6 +5,7 @@
 from threading import Event, Thread, current_thread
 
 from ocean_lib.web3_internal.constants import BLOCK_NUMBER_POLL_INTERVAL
+from ocean_lib.web3_internal.transactions import get_gas_price
 from ocean_lib.web3_internal.web3_overrides.utils import (
     wait_for_transaction_receipt_and_block_confirmations,
 )
@@ -24,6 +25,7 @@ def test_block_confirmations():
         "to": bob_address,
         "value": 1,
         "chainId": web3.eth.chain_id,
+        "gasPrice": get_gas_price(web3),
     }
     tx["gas"] = web3.eth.estimate_gas(tx)
     raw_tx = alice_wallet.sign_tx(tx)
@@ -64,6 +66,7 @@ def send_dummy_transactions(from_wallet, to_address):
             "to": to_address,
             "value": 1,
             "chainId": web3.eth.chain_id,
+            "gasPrice": get_gas_price(web3),
         }
         tx["gas"] = web3.eth.estimate_gas(tx)
         raw_tx = from_wallet.sign_tx(tx)
