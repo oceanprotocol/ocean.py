@@ -209,6 +209,11 @@ class ContractBase(object):
             callback, timeout_callback=timeout_callback, timeout=timeout, blocking=wait
         )
 
+    @staticmethod
+    @enforce_types
+    def get_gas_price(web3) -> int:
+        return int(web3.eth.gas_price * 1.1)
+
     @enforce_types
     def send_transaction(
         self,
@@ -257,11 +262,6 @@ class ContractBase(object):
         event = getattr(self.contract.events, event_name, None)
         if event:
             return event().argument_names
-
-    @staticmethod
-    @enforce_types
-    def get_gas_price(web3) -> int:
-        return int(web3.eth.gas_price * 1.1)
 
     @classmethod
     @enforce_types
