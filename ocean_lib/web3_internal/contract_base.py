@@ -223,6 +223,11 @@ class ContractBase(object):
             callback, timeout_callback=timeout_callback, timeout=timeout, blocking=wait
         )
 
+    @staticmethod
+    @enforce_types
+    def get_gas_price(web3) -> int:
+        return int(web3.eth.gas_price * 1.1)
+
     @enforce_types
     def send_transaction(
         self,
@@ -245,6 +250,7 @@ class ContractBase(object):
             "from": from_wallet.address,
             "account_key": from_wallet.key,
             "chainId": self.web3.eth.chain_id,
+            "gasPrice": self.get_gas_price(self.web3),
         }
 
         gas_price = os.environ.get(ENV_GAS_PRICE, None)
@@ -287,7 +293,7 @@ class ContractBase(object):
 
         _contract = web3.eth.contract(abi=_json["abi"], bytecode=_json["bytecode"])
         built_tx = _contract.constructor(*args).buildTransaction(
-            {"from": deployer_wallet.address}
+            {"from": deployer_wallet.address, "gasPrice": cls.get_gas_price(web3)}
         )
         if "chainId" not in built_tx:
             built_tx["chainId"] = web3.eth.chain_id
