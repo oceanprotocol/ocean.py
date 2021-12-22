@@ -330,6 +330,25 @@
       "inputs": [
         {
           "internalType": "address",
+          "name": "user",
+          "type": "address"
+        }
+      ],
+      "name": "isERC20Deployer",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
           "name": "account",
           "type": "address"
         }
@@ -511,17 +530,17 @@
         },
         {
           "internalType": "address",
-          "name": "consumeFeeAddress",
+          "name": "providerFeeAddress",
           "type": "address"
         },
         {
           "internalType": "address",
-          "name": "consumeFeeToken",
+          "name": "providerFeeToken",
           "type": "address"
         },
         {
           "internalType": "uint256",
-          "name": "consumeFeeAmount",
+          "name": "providerFeeAmount",
           "type": "uint256"
         }
       ],
