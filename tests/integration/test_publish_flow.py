@@ -9,7 +9,6 @@ from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.models_structures import ErcCreateData
 from ocean_lib.ocean.v4.ocean_assets import OceanAssetV4
 from ocean_lib.services.v4.service import V4Service
-from ocean_lib.utils.utilities import get_timestamp
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import build_credentials_dict
 from tests.resources.helper_functions import get_address_of_type, deploy_erc721_erc20
@@ -31,7 +30,6 @@ def test_publish_flow(web3, config, publisher_wallet):
         "https://oceanprotocol.com/nft/",
         publisher_wallet,
     )
-    created = get_timestamp()
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
         ERC721FactoryContract.EVENT_NFT_CREATED,
@@ -85,7 +83,6 @@ def test_publish_flow(web3, config, publisher_wallet):
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_address,
-        created=created,
         erc20_tokens_data=[erc20_data],
     )
     assert ddo, "The asset is not created."
@@ -106,7 +103,6 @@ def test_publish_flow(web3, config, publisher_wallet):
         "https://oceanprotocol.com/nft/",
         publisher_wallet,
     )
-    created2 = get_timestamp()
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
         ERC721FactoryContract.EVENT_NFT_CREATED,
@@ -149,7 +145,6 @@ def test_publish_flow(web3, config, publisher_wallet):
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_address2,
-        created=created2,
         erc20_tokens_data=[erc20_data1, erc20_data2],
     )
     assert ddo, "The asset is not created."
@@ -175,7 +170,6 @@ def test_publish_flow(web3, config, publisher_wallet):
     erc721_token, erc20_token = deploy_erc721_erc20(
         web3, config, publisher_wallet, publisher_wallet
     )
-    created3 = get_timestamp()
 
     access_service = V4Service(
         service_id="1",
@@ -213,7 +207,6 @@ def test_publish_flow(web3, config, publisher_wallet):
         encrypted_files=encrypted_files,
         services=[access_service, compute_service],
         erc721_address=erc721_token.address,
-        created=created3,
         deployed_erc20_tokens=[erc20_token],
     )
     assert ddo, "The asset is not created."
@@ -231,13 +224,11 @@ def test_publish_flow(web3, config, publisher_wallet):
     erc721_token2, erc20_token2 = deploy_erc721_erc20(
         web3, config, publisher_wallet, publisher_wallet
     )
-    created4 = get_timestamp()
     ddo = asset.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_token2.address,
-        created=created4,
         deployed_erc20_tokens=[erc20_token2],
         encrypt_flag=True,
     )
@@ -254,13 +245,11 @@ def test_publish_flow(web3, config, publisher_wallet):
     erc721_token3, erc20_token3 = deploy_erc721_erc20(
         web3, config, publisher_wallet, publisher_wallet
     )
-    created5 = get_timestamp()
     ddo = asset.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_token3.address,
-        created=created5,
         deployed_erc20_tokens=[erc20_token3],
         compress_flag=True,
     )
@@ -277,13 +266,11 @@ def test_publish_flow(web3, config, publisher_wallet):
     erc721_token4, erc20_token4 = deploy_erc721_erc20(
         web3, config, publisher_wallet, publisher_wallet
     )
-    created6 = get_timestamp()
     ddo = asset.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_token4.address,
-        created=created6,
         deployed_erc20_tokens=[erc20_token4],
         encrypt_flag=True,
         compress_flag=True,

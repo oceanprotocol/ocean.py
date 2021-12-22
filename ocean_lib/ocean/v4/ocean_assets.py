@@ -24,7 +24,7 @@ from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Token
 from ocean_lib.models.v4.models_structures import ErcCreateData
 from ocean_lib.services.v4.service import V4Service
-from ocean_lib.utils.utilities import create_checksum, get_timestamp
+from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import build_credentials_dict, wait_for_asset
@@ -160,7 +160,6 @@ class OceanAssetV4:
         credentials: Optional[list] = None,
         provider_uri: Optional[str] = None,
         erc721_address: Optional[str] = None,
-        created: Optional[str] = None,
         erc721_name: Optional[str] = None,
         erc721_symbol: Optional[str] = None,
         template_index: Optional[int] = 1,
@@ -184,7 +183,6 @@ class OceanAssetV4:
         construct the serviceEndpoint for the `access` (download) service
         :param erc721_address: hex str the address of the ERC721 token. The new
         asset will be associated with this ERC721 token address.
-        :param created: str of the creation time of the ERC721 token
         :param erc721_name: str name of ERC721 token if creating a new one
         :param erc721_symbol: str symbol of ERC721 token  if creating a new one
         :param template_index: int template index of the ERC721 token, by default is 1.
@@ -229,11 +227,15 @@ class OceanAssetV4:
                 token_uri=token_uri,
                 from_wallet=publisher_wallet,
             )
-            created = get_timestamp()
-            _ = self._web3.eth.wait_for_transaction_receipt(tx_id)
-            erc721_token = ERC721Token(
-                self._web3, erc721_factory.get_token_address(tx_id)
+            tx_receipt = self._web3.eth.wait_for_transaction_receipt(tx_id)
+            registered_event = erc721_factory.get_event_log(
+                ERC721FactoryContract.EVENT_NFT_CREATED,
+                tx_receipt.blockNumber,
+                self._web3.eth.block_number,
+                None,
             )
+            erc721_address = registered_event[0].args.newTokenAddress
+            erc721_token = ERC721Token(self._web3, erc721_address)
             if not erc721_token:
                 logger.warning("Creating new data token failed.")
                 return None
@@ -241,7 +243,6 @@ class OceanAssetV4:
                 f"Successfully created data token with address "
                 f"{erc721_token.address} for new dataset asset."
             )
-            erc721_address = erc721_token.address
         else:
             # verify nft address
             if not erc721_factory.verify_nft(erc721_address):
