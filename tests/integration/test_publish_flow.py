@@ -59,7 +59,7 @@ def test_publish_flow(web3, config, publisher_wallet):
 
     # Encrypt file objects
     encrypt_response = data_provider.encrypt(
-        [file1, file2], "http://localhost:8030/api/services/encrypt"
+        [file1, file2], "http://172.15.0.4:8030/api/services/encrypt"
     )
     encrypted_files = encrypt_response.content.decode("utf-8")
 

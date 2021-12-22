@@ -320,7 +320,7 @@ class OceanAssetV4:
 
         # Process the DDO
         asset_dict = asset.as_dictionary()
-        ddo_string = json.dumps(asset_dict)
+        ddo_string = json.dumps(asset_dict, separators=(",", ":"))
         ddo_bytes = ddo_string.encode("utf-8")
         ddo_hash = create_checksum(ddo_string)
 

@@ -112,7 +112,8 @@ class DataServiceProvider:
         objects_to_encrypt: Union[list, str, bytes], encrypt_endpoint: str
     ) -> Response:
         if isinstance(objects_to_encrypt, list):
-            data = str(list(map(lambda file: file.from_dict(), objects_to_encrypt)))
+            data_items = list(map(lambda file: file.to_dict(), objects_to_encrypt))
+            data = json.dumps(data_items, separators=(",", ":"))
             payload = data.encode("utf-8")
         elif isinstance(objects_to_encrypt, str):
             payload = objects_to_encrypt.encode("utf-8")
