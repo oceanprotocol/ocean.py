@@ -28,7 +28,7 @@ install_requirements = [
     "pycryptodomex",
     "tqdm",
     "pytz",
-    "web3==5.19.0",
+    "web3==5.25.0",
     "cryptography==3.3.2",
     "scipy",
     "enforce-typing==1.0.0.post1",
