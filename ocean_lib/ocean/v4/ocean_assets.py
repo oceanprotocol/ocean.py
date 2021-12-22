@@ -5,15 +5,13 @@
 
 """Ocean module."""
 import copy
-import hashlib
 import json
 import logging
 import lzma
 import os
-from typing import Optional, Tuple, Type, List, Union
+from typing import Optional, Tuple, Type, List
 
 from enforce_typing import enforce_types
-from eth_utils import to_checksum_address
 
 from ocean_lib.agreements.service_types import ServiceTypesV4
 from ocean_lib.aquarius import Aquarius
@@ -133,9 +131,10 @@ class OceanAssetV4:
         return registered_token_event[0].args.newTokenAddress
 
     def find_service_by_data_token(self, data_token: str, services: list) -> str:
-        for service in services:
-            if service.data_token == data_token:
-                return service.id
+        return next(
+            (service.id for service in services if service.data_token == data_token),
+            None,
+        )
 
     def build_data_tokens_list(
         self, services: list, deployed_erc20_tokens: list
@@ -311,16 +310,6 @@ class OceanAssetV4:
         for service in services:
             asset.add_service(service)
 
-        nft = {
-            "address": erc721_token.address,
-            "name": erc721_token.contract.caller.name(),
-            "symbol": erc721_token.symbol(),
-            "owner": publisher_wallet.address,
-            "state": 0,
-            "created": created,
-        }
-        asset.nft = nft
-
         # Validation by Aquarius
         validation_result, validation_errors = self.validate(asset)
         if not validation_result:
@@ -336,52 +325,28 @@ class OceanAssetV4:
 
         # Plain asset
         if not encrypt_flag and not compress_flag:
-            encrypted_ddo = ddo_bytes
-            _ = erc721_token.set_metadata(
-                metadata_state=0,
-                metadata_decryptor_url=provider_uri,
-                metadata_decryptor_address=publisher_wallet.address,
-                flags=bytes([0]),
-                data=encrypted_ddo,
-                data_hash=ddo_hash,
-                from_wallet=publisher_wallet,
-            )
+            flags = bytes([0])
+            document = ddo_bytes
 
         # Only compression, not encrypted
         elif compress_flag and not encrypt_flag:
+            flags = bytes([1])
             # Compress DDO
-            compressed_document = lzma.compress(ddo_bytes)
-
-            _ = erc721_token.set_metadata(
-                metadata_state=0,
-                metadata_decryptor_url=provider_uri,
-                metadata_decryptor_address=publisher_wallet.address,
-                flags=bytes([1]),
-                data=compressed_document,
-                data_hash=ddo_hash,
-                from_wallet=publisher_wallet,
-            )
+            document = lzma.compress(ddo_bytes)
 
         # Only encryption, not compressed
         elif encrypt_flag and not compress_flag:
+            flags = bytes([2])
             # Encrypt DDO
             encrypt_response = DataServiceProvider.encrypt(
                 objects_to_encrypt=ddo_string,
                 encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
             )
-            encrypted_ddo = encrypt_response.text
-            _ = erc721_token.set_metadata(
-                metadata_state=0,
-                metadata_decryptor_url=provider_uri,
-                metadata_decryptor_address=publisher_wallet.address,
-                flags=bytes([2]),
-                data=encrypted_ddo,
-                data_hash=ddo_hash,
-                from_wallet=publisher_wallet,
-            )
+            document = encrypt_response.text
 
         # Encrypted & compressed
         else:
+            flags = bytes([3])
             # Compress DDO
             compressed_document = lzma.compress(ddo_bytes)
 
@@ -391,16 +356,17 @@ class OceanAssetV4:
                 encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
             )
 
-            encrypted_ddo = encrypt_response.text
-            _ = erc721_token.set_metadata(
-                metadata_state=0,
-                metadata_decryptor_url=provider_uri,
-                metadata_decryptor_address=publisher_wallet.address,
-                flags=bytes([3]),
-                data=encrypted_ddo,
-                data_hash=ddo_hash,
-                from_wallet=publisher_wallet,
-            )
+            document = encrypt_response.text
+
+        _ = erc721_token.set_metadata(
+            metadata_state=0,
+            metadata_decryptor_url=provider_uri,
+            metadata_decryptor_address=publisher_wallet.address,
+            flags=flags,
+            data=document,
+            data_hash=ddo_hash,
+            from_wallet=publisher_wallet,
+        )
 
         # Fetch the asset on chain
         asset = wait_for_asset(self._metadata_cache_uri, did)

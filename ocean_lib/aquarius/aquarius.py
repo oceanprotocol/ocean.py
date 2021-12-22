@@ -172,10 +172,9 @@ class Aquarius:
             headers={"content-type": "application/json"},
         )
 
-        if response.content == b"true\n":
-            return True, []
-
         parsed_response = response.json()
+        if parsed_response is True:
+            return True, []
         return False, parsed_response
 
     @enforce_types
