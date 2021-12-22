@@ -283,7 +283,12 @@ def test_fail_remove_pool_template(
 
 
 def test_buy_dt_batch(
-    web3, config, factory_router, consumer_wallet, factory_deployer_wallet
+    web3,
+    config,
+    factory_router,
+    consumer_wallet,
+    factory_deployer_wallet,
+    another_consumer_wallet,
 ):
     """Tests that a batch of tokens is successfully bought through the buy_dt_batch function"""
 
@@ -425,6 +430,8 @@ def test_buy_dt_batch(
         "tokenOut": erc_token,
         "amountsOut": web3.toWei("0.1", "ether"),
         "maxPrice": web3.toWei("10", "ether"),
+        "swapMarketFee": 0,
+        "marketFeeAddress": another_consumer_wallet.address,
     }
 
     op2 = {
@@ -436,6 +443,8 @@ def test_buy_dt_batch(
         "tokenOut": erc_token2,
         "amountsOut": web3.toWei("0.1", "ether"),
         "maxPrice": web3.toWei("10", "ether"),
+        "swapMarketFee": 0,
+        "marketFeeAddress": another_consumer_wallet.address,
     }
 
     balance_ocean_before = ocean_contract.balanceOf(factory_deployer_wallet.address)

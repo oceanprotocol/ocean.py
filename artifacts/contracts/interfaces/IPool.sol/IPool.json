@@ -19,6 +19,11 @@
           "internalType": "uint256",
           "name": "tokenAmountOut",
           "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_swapMarketFee",
+          "type": "uint256"
         }
       ],
       "name": "getAmountInExactOut",
@@ -26,6 +31,40 @@
         {
           "internalType": "uint256",
           "name": "tokenAmountIn",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "tokenIn",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "tokenOut",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "tokenAmountIn",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_swapMarketFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "getAmountOutExactIn",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "tokenAmountOut",
           "type": "uint256"
         }
       ],
@@ -74,6 +113,19 @@
     {
       "inputs": [
         {
+          "internalType": "uint256",
+          "name": "swapFee",
+          "type": "uint256"
+        }
+      ],
+      "name": "setSwapFee",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "address",
           "name": "dataTokenAaddress",
           "type": "address"
@@ -112,29 +164,14 @@
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "tokenIn",
-          "type": "address"
+          "internalType": "address[3]",
+          "name": "tokenInOutMarket",
+          "type": "address[3]"
         },
         {
-          "internalType": "uint256",
-          "name": "tokenAmountIn",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "tokenOut",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "minAmountOut",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "maxPrice",
-          "type": "uint256"
+          "internalType": "uint256[4]",
+          "name": "amountsInOutMaxFee",
+          "type": "uint256[4]"
         }
       ],
       "name": "swapExactAmountIn",
@@ -156,29 +193,14 @@
     {
       "inputs": [
         {
-          "internalType": "address",
-          "name": "tokenIn",
-          "type": "address"
+          "internalType": "address[3]",
+          "name": "tokenInOutMarket",
+          "type": "address[3]"
         },
         {
-          "internalType": "uint256",
-          "name": "maxAmountIn",
-          "type": "uint256"
-        },
-        {
-          "internalType": "address",
-          "name": "tokenOut",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "tokenAmountOut",
-          "type": "uint256"
-        },
-        {
-          "internalType": "uint256",
-          "name": "maxPrice",
-          "type": "uint256"
+          "internalType": "uint256[4]",
+          "name": "amountsInOutMaxFee",
+          "type": "uint256[4]"
         }
       ],
       "name": "swapExactAmountOut",

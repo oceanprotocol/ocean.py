@@ -96,8 +96,8 @@ class BPool(BTokenBase):
     def community_fee(self, address: str) -> int:
         return self.contract.caller.communityFees(address)
 
-    def market_fee(self, address: str) -> int:
-        return self.contract.caller.marketFees(address)
+    def publish_market_fee(self, address: str) -> int:
+        return self.contract.caller.publishMarketFees(address)
 
     def is_finalized(self) -> bool:
         """Returns true if state is finalized.
@@ -269,44 +269,60 @@ class BPool(BTokenBase):
 
     def swap_exact_amount_in(
         self,
-        tokenIn_address: str,
-        tokenAmountIn: int,
-        tokenOut_address: str,
-        minAmountOut: int,
-        maxPrice: int,
+        token_in_out_market: List[str],
+        amounts_in_out_max_fee: List[int],
         from_wallet: Wallet,
     ) -> str:
-        """
-        Trades an exact `tokenAmountIn` of `tokenIn` taken from the caller by
+        """Trades an exact `tokenAmountIn` of `tokenIn` taken from the caller by
         the pool, in exchange for at least `minAmountOut` of `tokenOut` given
         to the caller from the pool, with a maximum marginal price of
         `maxPrice`.
 
-        Returns `(tokenAmountOut`, `spotPriceAfter)`, where `tokenAmountOut`
-        is the amount of token that came out of the pool, and `spotPriceAfter`
-        is the new marginal spot price, ie, the result of `getSpotPrice` after
-        the call. (These values are what are limited by the arguments; you are
+        The return values are what are limited by the arguments; you are
         guaranteed `tokenAmountOut >= minAmountOut` and
         `spotPriceAfter <= maxPrice)`.
+
+        Args:
+            token_in_out_market (List[str]): [tokenIn, tokenOut, marketFeeAddress]
+            amounts_in_out_max_fee (List[int]): [tokenAmountIn, minAmountOut, maxPrice, swapMarketFee]
+            from_wallet (Wallet): wallet to sign the transaction with
+
+        Returns:
+            tokenAmountIn (int): amount of `tokenIn` sent to the pool
+            spotPriceAfter (int): the new marginal spot price, ie, the result of `getSpotPrice` after the call
         """
         return self.send_transaction(
             "swapExactAmountIn",
-            (tokenIn_address, tokenAmountIn, tokenOut_address, minAmountOut, maxPrice),
+            (token_in_out_market, amounts_in_out_max_fee),
             from_wallet,
         )
 
     def swap_exact_amount_out(
         self,
-        tokenIn_address: str,
-        maxAmountIn: int,
-        tokenOut_address: str,
-        tokenAmountOut: int,
-        maxPrice: int,
+        token_in_out_market: List[str],
+        amounts_in_out_max_fee: List[int],
         from_wallet: Wallet,
     ) -> str:
+        """Swaps as little as possible limited of `tokenIn` for `tokenAmountOut` of `tokenOut`.
+        with a maximum amount of `tokenIn` of `maxAmountIn` and a maximum marginal price of
+        `maxPrice`.
+
+        The return values are what are limited by the arguments; you are
+        guaranteed `tokenAmountOut >= minAmountOut` and
+        `spotPriceAfter <= maxPrice)`.
+
+        Args:
+            token_in_out_market (List[str]): [tokenIn, tokenOut, marketFeeAddress]
+            amounts_in_out_max_fee (List[int]): [maxAmountIn, tokenAmountOut, maxPrice, swapMarketFee]
+            from_wallet (Wallet): wallet to sign the transaction with
+
+        Returns:
+            tokenAmountOut (int): amount of token that came out of the pool
+            spotPriceAfter (int): the new marginal spot price, ie, the result of `getSpotPrice` after the call
+        """
         return self.send_transaction(
             "swapExactAmountOut",
-            (tokenIn_address, maxAmountIn, tokenOut_address, tokenAmountOut, maxPrice),
+            (token_in_out_market, amounts_in_out_max_fee),
             from_wallet,
         )
 

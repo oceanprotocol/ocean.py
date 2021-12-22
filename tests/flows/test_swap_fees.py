@@ -83,6 +83,7 @@ def test_pool_ocean(
     config,
     factory_deployer_wallet,
     consumer_wallet,
+    another_consumer_wallet,
     publisher_wallet,
     factory_router,
 ):
@@ -175,8 +176,8 @@ def test_pool_ocean(
     assert bpool.get_swap_fee() == web3.toWei(0.001, "ether")
     assert bpool.community_fee(get_address_of_type(config, "Ocean")) == 0
     assert bpool.community_fee(erc20_token.address) == 0
-    assert bpool.market_fee(get_address_of_type(config, "Ocean")) == 0
-    assert bpool.market_fee(erc20_token.address) == 0
+    assert bpool.publish_market_fee(get_address_of_type(config, "Ocean")) == 0
+    assert bpool.publish_market_fee(erc20_token.address) == 0
 
     assert erc20_token.balanceOf(side_staking.address) == web3.toWei(99990, "ether")
 
@@ -210,11 +211,13 @@ def test_pool_ocean(
     publisher_ocean_balance = ocean_contract.balanceOf(publisher_wallet.address)
 
     tx = bpool.swap_exact_amount_in(
-        ocean_contract.address,
-        web3.toWei(0.1, "ether"),
-        erc20_address,
-        web3.toWei(0.0001, "ether"),
-        web3.toWei(100, "ether"),
+        [ocean_contract.address, erc20_address, another_consumer_wallet.address],
+        [
+            web3.toWei(0.1, "ether"),
+            web3.toWei(0.0001, "ether"),
+            web3.toWei(100, "ether"),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -245,15 +248,12 @@ def test_pool_ocean(
     # Tests publisher buys some DT - exactAmountOut
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_ocean_balance = ocean_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
-    ocean_market_fee_balance = bpool.market_fee(ocean_contract.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
+    ocean_market_fee_balance = bpool.publish_market_fee(ocean_contract.address)
 
     tx = bpool.swap_exact_amount_out(
-        ocean_contract.address,
-        web3.toWei(10, "ether"),
-        erc20_address,
-        web3.toWei(1, "ether"),
-        web3.toWei(100, "ether"),
+        [ocean_contract.address, erc20_address, another_consumer_wallet.address],
+        [web3.toWei(10, "ether"), web3.toWei(1, "ether"), web3.toWei(100, "ether"), 0],
         publisher_wallet,
     )
 
@@ -290,9 +290,9 @@ def test_pool_ocean(
     assert swap_fees_event_args.oceanFeeAmount == 0
     assert (
         ocean_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
     )
-    assert dt_market_fee_balance == bpool.market_fee(erc20_token.address)
+    assert dt_market_fee_balance == bpool.publish_market_fee(erc20_token.address)
 
     # Tests publisher swaps some DT back to Ocean with swapExactAmountIn, check swap custom fees
     assert bpool.is_finalized() is True
@@ -300,19 +300,21 @@ def test_pool_ocean(
     erc20_token.approve(bpool_address, web3.toWei(1000, "ether"), publisher_wallet)
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_ocean_balance = ocean_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
-    ocean_market_fee_balance = bpool.market_fee(ocean_contract.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
+    ocean_market_fee_balance = bpool.publish_market_fee(ocean_contract.address)
 
     assert bpool.community_fee(ocean_contract.address) == 0
     assert bpool.community_fee(erc20_address) == 0
-    assert bpool.market_fee(erc20_address) == 0
+    assert bpool.publish_market_fee(erc20_address) == 0
 
     tx = bpool.swap_exact_amount_in(
-        erc20_address,
-        web3.toWei(0.1, "ether"),
-        ocean_contract.address,
-        web3.toWei(0.0001, "ether"),
-        web3.toWei(100, "ether"),
+        [erc20_address, ocean_contract.address, another_consumer_wallet.address],
+        [
+            web3.toWei(0.1, "ether"),
+            web3.toWei(0.0001, "ether"),
+            web3.toWei(100, "ether"),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -330,7 +332,7 @@ def test_pool_ocean(
     assert web3.toWei("0.0001", "ether") == swap_fees_event_args.marketFeeAmount
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
     )
 
     swap_event = bpool.get_event_log(
@@ -360,17 +362,19 @@ def test_pool_ocean(
     erc20_token.approve(bpool_address, web3.toWei(1000, "ether"), publisher_wallet)
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_ocean_balance = ocean_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     assert bpool.community_fee(ocean_contract.address) == 0
     assert bpool.community_fee(erc20_address) == 0
 
     tx = bpool.swap_exact_amount_out(
-        erc20_token.address,
-        web3.toWei(0.1, "ether"),
-        ocean_contract.address,
-        web3.toWei(0.0001, "ether"),
-        web3.toWei(100, "ether"),
+        [erc20_token.address, ocean_contract.address, another_consumer_wallet.address],
+        [
+            web3.toWei(0.1, "ether"),
+            web3.toWei(0.0001, "ether"),
+            web3.toWei(100, "ether"),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -386,7 +390,7 @@ def test_pool_ocean(
     swap_fees_event_args = swap_fees_event[0].args
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
     )
 
     swap_event = bpool.get_event_log(
@@ -422,7 +426,7 @@ def test_pool_ocean(
 
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_ocean_balance = ocean_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     ss_contract_dt_balance = erc20_token.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
@@ -838,8 +842,8 @@ def test_pool_ocean(
     assert bpool.get_swap_fee() == swap_market_fee
     assert bpool.community_fee(ocean_contract.address) == 0
     assert bpool.community_fee(erc20_token.address) == 0
-    assert (bpool.market_fee(erc20_token.address) > 0) is True
-    assert (bpool.market_fee(ocean_contract.address) > 0) is True
+    assert (bpool.publish_market_fee(erc20_token.address) > 0) is True
+    assert (bpool.publish_market_fee(ocean_contract.address) > 0) is True
 
 
 def test_pool_dai(
@@ -847,6 +851,7 @@ def test_pool_dai(
     config,
     factory_deployer_wallet,
     consumer_wallet,
+    another_consumer_wallet,
     publisher_wallet,
     factory_router,
 ):
@@ -947,8 +952,8 @@ def test_pool_dai(
     assert bpool.get_swap_fee() == web3.toWei(0.001, "ether")
     assert bpool.community_fee(dai_contract.address) == 0
     assert bpool.community_fee(erc20_token.address) == 0
-    assert bpool.market_fee(dai_contract.address) == 0
-    assert bpool.market_fee(erc20_token.address) == 0
+    assert bpool.publish_market_fee(dai_contract.address) == 0
+    assert bpool.publish_market_fee(erc20_token.address) == 0
 
     assert erc20_token.balanceOf(side_staking.address) == web3.toWei(990, "ether")
 
@@ -974,11 +979,13 @@ def test_pool_dai(
     publisher_dai_balance = dai_contract.balanceOf(publisher_wallet.address)
 
     tx = bpool.swap_exact_amount_in(
-        dai_contract.address,
-        web3.toWei(0.1, "ether"),
-        erc20_address,
-        web3.toWei(0.0001, "ether"),
-        web3.toWei(100, "ether"),
+        [dai_contract.address, erc20_address, another_consumer_wallet.address],
+        [
+            web3.toWei(0.1, "ether"),
+            web3.toWei(0.0001, "ether"),
+            web3.toWei(100, "ether"),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -1008,15 +1015,17 @@ def test_pool_dai(
     # Tests publisher buys some DT - exactAmountOut
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_dai_balance = dai_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
-    dai_market_fee_balance = bpool.market_fee(dai_contract.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
+    dai_market_fee_balance = bpool.publish_market_fee(dai_contract.address)
 
     tx = bpool.swap_exact_amount_out(
-        dai_contract.address,
-        web3.toWei(10, "ether"),
-        erc20_address,
-        web3.toWei(1, "ether"),
-        web3.toWei(100, "ether"),
+        [dai_contract.address, erc20_address, another_consumer_wallet.address],
+        [
+            web3.toWei(10, "ether"),
+            web3.toWei(1, "ether"),
+            web3.toWei(100, "ether"),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -1052,9 +1061,9 @@ def test_pool_dai(
     assert swap_fees_event_args.tokenFees == dai_contract.address
     assert (
         dai_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
     )
-    assert dt_market_fee_balance == bpool.market_fee(erc20_token.address)
+    assert dt_market_fee_balance == bpool.publish_market_fee(erc20_token.address)
 
     # Tests publisher swaps some DT back to DAI with swapExactAmountIn, check swap custom fees
     assert bpool.is_finalized() is True
@@ -1062,15 +1071,17 @@ def test_pool_dai(
     erc20_token.approve(bpool_address, web3.toWei(1000, "ether"), publisher_wallet)
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_dai_balance = dai_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
-    dai_market_fee_balance = bpool.market_fee(dai_contract.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
+    dai_market_fee_balance = bpool.publish_market_fee(dai_contract.address)
 
     tx = bpool.swap_exact_amount_in(
-        erc20_address,
-        web3.toWei(0.1, "ether"),
-        dai_contract.address,
-        web3.toWei(0.0001, "ether"),
-        web3.toWei(100, "ether"),
+        [erc20_address, dai_contract.address, another_consumer_wallet.address],
+        [
+            web3.toWei(0.1, "ether"),
+            web3.toWei(0.0001, "ether"),
+            web3.toWei(100, "ether"),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -1088,7 +1099,7 @@ def test_pool_dai(
     assert web3.toWei("0.0001", "ether") == swap_fees_event_args.marketFeeAmount
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
     )
 
     swap_event = bpool.get_event_log(
@@ -1118,14 +1129,16 @@ def test_pool_dai(
     erc20_token.approve(bpool_address, web3.toWei(1000, "ether"), publisher_wallet)
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_dai_balance = dai_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_out(
-        erc20_token.address,
-        web3.toWei(0.1, "ether"),
-        dai_contract.address,
-        web3.toWei(0.0001, "ether"),
-        web3.toWei(100, "ether"),
+        [erc20_token.address, dai_contract.address, another_consumer_wallet.address],
+        [
+            web3.toWei(0.1, "ether"),
+            web3.toWei(0.0001, "ether"),
+            web3.toWei(100, "ether"),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -1141,7 +1154,7 @@ def test_pool_dai(
     swap_fees_event_args = swap_fees_event[0].args
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
     )
 
     swap_event = bpool.get_event_log(
@@ -1177,7 +1190,7 @@ def test_pool_dai(
 
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_dai_balance = dai_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     ss_contract_dt_balance = erc20_token.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
@@ -1594,8 +1607,8 @@ def test_pool_dai(
     assert bpool.get_swap_fee() == swap_market_fee
     assert (bpool.community_fee(erc20_token.address) > 0) is True
     assert (bpool.community_fee(dai_contract.address) > 0) is True
-    assert (bpool.market_fee(erc20_token.address) > 0) is True
-    assert (bpool.market_fee(dai_contract.address) > 0) is True
+    assert (bpool.publish_market_fee(erc20_token.address) > 0) is True
+    assert (bpool.publish_market_fee(dai_contract.address) > 0) is True
 
 
 def test_pool_usdc(
@@ -1603,6 +1616,7 @@ def test_pool_usdc(
     config,
     factory_deployer_wallet,
     consumer_wallet,
+    another_consumer_wallet,
     publisher_wallet,
     factory_router,
 ):
@@ -1706,8 +1720,8 @@ def test_pool_usdc(
     assert bpool.get_swap_fee() == web3.toWei(0.001, "ether")
     assert bpool.community_fee(usdc_contract.address) == 0
     assert bpool.community_fee(erc20_token.address) == 0
-    assert bpool.market_fee(usdc_contract.address) == 0
-    assert bpool.market_fee(erc20_token.address) == 0
+    assert bpool.publish_market_fee(usdc_contract.address) == 0
+    assert bpool.publish_market_fee(erc20_token.address) == 0
 
     assert erc20_token.balanceOf(side_staking.address) == web3.toWei(120, "ether")
 
@@ -1731,12 +1745,15 @@ def test_pool_usdc(
     assert erc20_token.balanceOf(publisher_wallet.address) == 0
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_usdc_balance = usdc_contract.balanceOf(publisher_wallet.address)
+
     tx = bpool.swap_exact_amount_in(
-        usdc_contract.address,
-        int(1e7),
-        erc20_address,
-        web3.toWei(1, "ether"),
-        web3.toWei(5, "ether"),
+        [usdc_contract.address, erc20_address, another_consumer_wallet.address],
+        [
+            int(1e7),
+            web3.toWei(1, "ether"),
+            web3.toWei(5, "ether"),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -1767,15 +1784,17 @@ def test_pool_usdc(
     # Tests publisher buys some DT - exactAmountOut
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_usdc_balance = usdc_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
-    usdc_market_fee_balance = bpool.market_fee(usdc_contract.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
+    usdc_market_fee_balance = bpool.publish_market_fee(usdc_contract.address)
 
     tx = bpool.swap_exact_amount_out(
-        usdc_contract.address,
-        web3.toWei(10, "ether"),
-        erc20_address,
-        web3.toWei(1, "ether"),
-        web3.toWei(100, "ether"),
+        [usdc_contract.address, erc20_address, another_consumer_wallet.address],
+        [
+            web3.toWei(10, "ether"),
+            web3.toWei(1, "ether"),
+            web3.toWei(100, "ether"),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -1812,9 +1831,9 @@ def test_pool_usdc(
     assert swap_fees_event_args.tokenFees == usdc_contract.address
     assert (
         usdc_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
     )
-    assert dt_market_fee_balance == bpool.market_fee(erc20_token.address)
+    assert dt_market_fee_balance == bpool.publish_market_fee(erc20_token.address)
 
     # Tests publisher swaps some DT back to USDC with swapExactAmountIn, check swap custom fees
     assert bpool.is_finalized() is True
@@ -1822,15 +1841,17 @@ def test_pool_usdc(
     erc20_token.approve(bpool_address, web3.toWei(1000, "ether"), publisher_wallet)
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_usdc_balance = usdc_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
-    usdc_market_fee_balance = bpool.market_fee(usdc_contract.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
+    usdc_market_fee_balance = bpool.publish_market_fee(usdc_contract.address)
 
     tx = bpool.swap_exact_amount_in(
-        erc20_address,
-        web3.toWei(0.1, "ether"),
-        usdc_contract.address,
-        int(1e4),
-        int(2 ** 256 - 1),
+        [erc20_address, usdc_contract.address, another_consumer_wallet.address],
+        [
+            web3.toWei(0.1, "ether"),
+            int(1e4),
+            int(2 ** 256 - 1),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -1848,7 +1869,7 @@ def test_pool_usdc(
     assert web3.toWei("0.0001", "ether") == swap_fees_event_args.marketFeeAmount
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
     )
 
     swap_event = bpool.get_event_log(
@@ -1878,14 +1899,16 @@ def test_pool_usdc(
     erc20_token.approve(bpool_address, web3.toWei(1000, "ether"), publisher_wallet)
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_usdc_balance = usdc_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_out(
-        erc20_token.address,
-        web3.toWei(10, "ether"),
-        usdc_contract.address,
-        int(1e6),
-        web3.toWei(1000000000000000, "ether"),
+        [erc20_token.address, usdc_contract.address, another_consumer_wallet.address],
+        [
+            web3.toWei(10, "ether"),
+            int(1e6),
+            web3.toWei(1000000000000000, "ether"),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -1901,7 +1924,7 @@ def test_pool_usdc(
     swap_fees_event_args = swap_fees_event[0].args
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
     )
 
     swap_event = bpool.get_event_log(
@@ -1937,7 +1960,7 @@ def test_pool_usdc(
 
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_usdc_balance = usdc_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     ss_contract_dt_balance = erc20_token.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
@@ -2351,8 +2374,8 @@ def test_pool_usdc(
     assert bpool.get_swap_fee() == swap_market_fee
     assert (bpool.community_fee(erc20_token.address) > 0) is True
     assert (bpool.community_fee(usdc_contract.address) > 0) is True
-    assert (bpool.market_fee(erc20_token.address) > 0) is True
-    assert (bpool.market_fee(usdc_contract.address) > 0) is True
+    assert (bpool.publish_market_fee(erc20_token.address) > 0) is True
+    assert (bpool.publish_market_fee(usdc_contract.address) > 0) is True
 
 
 def test_pool_usdc_flexible(
@@ -2361,6 +2384,7 @@ def test_pool_usdc_flexible(
     factory_deployer_wallet,
     consumer_wallet,
     publisher_wallet,
+    another_consumer_wallet,
     factory_router,
 ):
     """Tests pool with NO ocean token (USDC 6 decimals) and market fee 0.1% flexible opf fee"""
@@ -2463,8 +2487,8 @@ def test_pool_usdc_flexible(
     assert bpool.get_swap_fee() == web3.toWei(0.001, "ether")
     assert bpool.community_fee(usdc_contract.address) == 0
     assert bpool.community_fee(erc20_token.address) == 0
-    assert bpool.market_fee(usdc_contract.address) == 0
-    assert bpool.market_fee(erc20_token.address) == 0
+    assert bpool.publish_market_fee(usdc_contract.address) == 0
+    assert bpool.publish_market_fee(erc20_token.address) == 0
 
     assert erc20_token.balanceOf(side_staking.address) == web3.toWei(120, "ether")
     assert bpool.calc_pool_in_single_out(erc20_address, web3.toWei(1, "ether")) // int(
@@ -2487,14 +2511,18 @@ def test_pool_usdc_flexible(
     assert erc20_token.balanceOf(publisher_wallet.address) == 0
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_usdc_balance = usdc_contract.balanceOf(publisher_wallet.address)
+
     tx = bpool.swap_exact_amount_in(
-        usdc_contract.address,
-        int(1e7),
-        erc20_address,
-        web3.toWei(1, "ether"),
-        web3.toWei(5, "ether"),
+        [usdc_contract.address, erc20_address, another_consumer_wallet.address],
+        [
+            int(1e7),
+            web3.toWei(1, "ether"),
+            web3.toWei(5, "ether"),
+            0,
+        ],
         publisher_wallet,
     )
+
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     assert (erc20_token.balanceOf(publisher_wallet.address) > 0) is True
@@ -2527,15 +2555,17 @@ def test_pool_usdc_flexible(
     # Tests publisher buys some DT - exactAmountOut
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_usdc_balance = usdc_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
-    usdc_market_fee_balance = bpool.market_fee(usdc_contract.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
+    usdc_market_fee_balance = bpool.publish_market_fee(usdc_contract.address)
 
     tx = bpool.swap_exact_amount_out(
-        usdc_contract.address,
-        web3.toWei(10, "ether"),
-        erc20_address,
-        web3.toWei(1, "ether"),
-        web3.toWei(100, "ether"),
+        [usdc_contract.address, erc20_address, another_consumer_wallet.address],
+        [
+            web3.toWei(10, "ether"),
+            web3.toWei(1, "ether"),
+            web3.toWei(100, "ether"),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -2572,9 +2602,9 @@ def test_pool_usdc_flexible(
     assert swap_fees_event_args.tokenFees == usdc_contract.address
     assert (
         usdc_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
     )
-    assert dt_market_fee_balance == bpool.market_fee(erc20_token.address)
+    assert dt_market_fee_balance == bpool.publish_market_fee(erc20_token.address)
 
     # Tests publisher swaps some DT back to USDC with swapExactAmountIn, check swap custom fees
     assert bpool.is_finalized() is True
@@ -2582,15 +2612,17 @@ def test_pool_usdc_flexible(
     erc20_token.approve(bpool_address, web3.toWei(1000, "ether"), publisher_wallet)
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_usdc_balance = usdc_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
-    usdc_market_fee_balance = bpool.market_fee(usdc_contract.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
+    usdc_market_fee_balance = bpool.publish_market_fee(usdc_contract.address)
 
     tx = bpool.swap_exact_amount_in(
-        erc20_address,
-        web3.toWei(0.1, "ether"),
-        usdc_contract.address,
-        int(1e4),
-        int(2 ** 256 - 1),
+        [erc20_address, usdc_contract.address, another_consumer_wallet.address],
+        [
+            web3.toWei(0.1, "ether"),
+            int(1e4),
+            int(2 ** 256 - 1),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -2608,7 +2640,7 @@ def test_pool_usdc_flexible(
     assert web3.toWei("0.0001", "ether") == swap_fees_event_args.marketFeeAmount
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
     )
 
     swap_event = bpool.get_event_log(
@@ -2638,14 +2670,16 @@ def test_pool_usdc_flexible(
     erc20_token.approve(bpool_address, web3.toWei(1000, "ether"), publisher_wallet)
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_usdc_balance = usdc_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_out(
-        erc20_token.address,
-        web3.toWei(10, "ether"),
-        usdc_contract.address,
-        int(1e6),
-        web3.toWei(1000000000000000, "ether"),
+        [erc20_token.address, usdc_contract.address, another_consumer_wallet.address],
+        [
+            web3.toWei(10, "ether"),
+            int(1e6),
+            web3.toWei(1000000000000000, "ether"),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -2661,7 +2695,7 @@ def test_pool_usdc_flexible(
     swap_fees_event_args = swap_fees_event[0].args
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
     )
 
     swap_event = bpool.get_event_log(
@@ -2697,7 +2731,7 @@ def test_pool_usdc_flexible(
 
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_usdc_balance = usdc_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     ss_contract_dt_balance = erc20_token.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
@@ -3111,8 +3145,8 @@ def test_pool_usdc_flexible(
     assert bpool.get_swap_fee() == swap_market_fee
     assert (bpool.community_fee(erc20_token.address) > 0) is True
     assert (bpool.community_fee(usdc_contract.address) > 0) is True
-    assert (bpool.market_fee(erc20_token.address) > 0) is True
-    assert (bpool.market_fee(usdc_contract.address) > 0) is True
+    assert (bpool.publish_market_fee(erc20_token.address) > 0) is True
+    assert (bpool.publish_market_fee(usdc_contract.address) > 0) is True
 
 
 def test_pool_dai_flexible(
@@ -3121,6 +3155,7 @@ def test_pool_dai_flexible(
     factory_deployer_wallet,
     consumer_wallet,
     publisher_wallet,
+    another_consumer_wallet,
     factory_router,
 ):
     """Tests pool with NO ocean token (DAI 18 decimals) and market fee 0.1% and flexible opf fee"""
@@ -3221,8 +3256,8 @@ def test_pool_dai_flexible(
     assert bpool.get_swap_fee() == web3.toWei(0.001, "ether")
     assert bpool.community_fee(dai_contract.address) == 0
     assert bpool.community_fee(erc20_token.address) == 0
-    assert bpool.market_fee(dai_contract.address) == 0
-    assert bpool.market_fee(erc20_token.address) == 0
+    assert bpool.publish_market_fee(dai_contract.address) == 0
+    assert bpool.publish_market_fee(erc20_token.address) == 0
 
     assert erc20_token.balanceOf(side_staking.address) == web3.toWei(990, "ether")
 
@@ -3248,11 +3283,13 @@ def test_pool_dai_flexible(
     publisher_dai_balance = dai_contract.balanceOf(publisher_wallet.address)
 
     tx = bpool.swap_exact_amount_in(
-        dai_contract.address,
-        web3.toWei(0.1, "ether"),
-        erc20_address,
-        web3.toWei(0.0001, "ether"),
-        web3.toWei(100, "ether"),
+        [dai_contract.address, erc20_address, another_consumer_wallet.address],
+        [
+            web3.toWei(0.1, "ether"),
+            web3.toWei(0.0001, "ether"),
+            web3.toWei(100, "ether"),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -3287,15 +3324,17 @@ def test_pool_dai_flexible(
     # Tests publisher buys some DT - exactAmountOut
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_dai_balance = dai_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
-    dai_market_fee_balance = bpool.market_fee(dai_contract.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
+    dai_market_fee_balance = bpool.publish_market_fee(dai_contract.address)
 
     tx = bpool.swap_exact_amount_out(
-        dai_contract.address,
-        web3.toWei(10, "ether"),
-        erc20_address,
-        web3.toWei(1, "ether"),
-        web3.toWei(100, "ether"),
+        [dai_contract.address, erc20_address, another_consumer_wallet.address],
+        [
+            web3.toWei(10, "ether"),
+            web3.toWei(1, "ether"),
+            web3.toWei(100, "ether"),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -3331,9 +3370,9 @@ def test_pool_dai_flexible(
     assert swap_fees_event_args.tokenFees == dai_contract.address
     assert (
         dai_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
     )
-    assert dt_market_fee_balance == bpool.market_fee(erc20_token.address)
+    assert dt_market_fee_balance == bpool.publish_market_fee(erc20_token.address)
 
     # Tests publisher swaps some DT back to DAI with swapExactAmountIn, check swap custom fees
     assert bpool.is_finalized() is True
@@ -3341,15 +3380,17 @@ def test_pool_dai_flexible(
     erc20_token.approve(bpool_address, web3.toWei(1000, "ether"), publisher_wallet)
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_dai_balance = dai_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
-    dai_market_fee_balance = bpool.market_fee(dai_contract.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
+    dai_market_fee_balance = bpool.publish_market_fee(dai_contract.address)
 
     tx = bpool.swap_exact_amount_in(
-        erc20_address,
-        web3.toWei(0.1, "ether"),
-        dai_contract.address,
-        web3.toWei(0.0001, "ether"),
-        web3.toWei(100, "ether"),
+        [erc20_address, dai_contract.address, another_consumer_wallet.address],
+        [
+            web3.toWei(0.1, "ether"),
+            web3.toWei(0.0001, "ether"),
+            web3.toWei(100, "ether"),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -3367,7 +3408,7 @@ def test_pool_dai_flexible(
     assert web3.toWei("0.0001", "ether") == swap_fees_event_args.marketFeeAmount
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
     )
 
     swap_event = bpool.get_event_log(
@@ -3397,14 +3438,16 @@ def test_pool_dai_flexible(
     erc20_token.approve(bpool_address, web3.toWei(1000, "ether"), publisher_wallet)
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_dai_balance = dai_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_out(
-        erc20_token.address,
-        web3.toWei(0.1, "ether"),
-        dai_contract.address,
-        web3.toWei(0.0001, "ether"),
-        web3.toWei(100, "ether"),
+        [erc20_token.address, dai_contract.address, another_consumer_wallet.address],
+        [
+            web3.toWei(0.1, "ether"),
+            web3.toWei(0.0001, "ether"),
+            web3.toWei(100, "ether"),
+            0,
+        ],
         publisher_wallet,
     )
 
@@ -3420,7 +3463,7 @@ def test_pool_dai_flexible(
     swap_fees_event_args = swap_fees_event[0].args
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
     )
 
     swap_event = bpool.get_event_log(
@@ -3456,7 +3499,7 @@ def test_pool_dai_flexible(
 
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     publisher_dai_balance = dai_contract.balanceOf(publisher_wallet.address)
-    dt_market_fee_balance = bpool.market_fee(erc20_token.address)
+    dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     ss_contract_dt_balance = erc20_token.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
@@ -3873,5 +3916,5 @@ def test_pool_dai_flexible(
     assert bpool.get_swap_fee() == swap_market_fee
     assert (bpool.community_fee(erc20_token.address) > 0) is True
     assert (bpool.community_fee(dai_contract.address) > 0) is True
-    assert (bpool.market_fee(erc20_token.address) > 0) is True
-    assert (bpool.market_fee(dai_contract.address) > 0) is True
+    assert (bpool.publish_market_fee(erc20_token.address) > 0) is True
+    assert (bpool.publish_market_fee(dai_contract.address) > 0) is True

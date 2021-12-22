@@ -140,11 +140,13 @@ def test_side_staking(
     )
 
     bpool.swap_exact_amount_in(
-        ocean_token.address,
-        web3.toWei("1", "ether"),
-        erc20.address,
-        web3.toWei("0", "ether"),
-        web3.toWei("1000000", "ether"),
+        [ocean_token.address, erc20.address, publisher_wallet.address],
+        [
+            web3.toWei("1", "ether"),
+            web3.toWei("0", "ether"),
+            web3.toWei("1000000", "ether"),
+            0,
+        ],
         another_consumer_wallet,
     )
 
@@ -157,11 +159,13 @@ def test_side_staking(
 
     receipt = web3.eth.wait_for_transaction_receipt(
         bpool.swap_exact_amount_in(
-            erc20.address,
-            web3.toWei("0.01", "ether"),
-            ocean_token.address,
-            web3.toWei("0.001", "ether"),
-            web3.toWei("100", "ether"),
+            [erc20.address, ocean_token.address, publisher_wallet.address],
+            [
+                web3.toWei("0.01", "ether"),
+                web3.toWei("0.001", "ether"),
+                web3.toWei("100", "ether"),
+                0,
+            ],
             another_consumer_wallet,
         )
     )

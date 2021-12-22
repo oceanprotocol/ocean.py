@@ -89,5 +89,7 @@ Operations = NamedTuple(
         ("token_out", str),
         ("amounts_out", int),
         ("max_price", int),
+        ("swap_market_fee", int),
+        ("market_fee_address", int),
     ],
 )
