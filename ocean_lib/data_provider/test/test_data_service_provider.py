@@ -186,8 +186,7 @@ def test_encrypt(web3, provider_wallet):
         encrypted_files = web3.toBytes(hexstr=encrypted_files)
     decrypted_document = ecies.decrypt(key, encrypted_files)
     decrypted_document_string = decrypted_document.decode("utf-8")
-    decrypted_document_dict = json.loads(decrypted_document_string)
-    assert decrypted_document_dict["document"] == str(
+    assert decrypted_document_string == str(
         list(map(lambda file: file.from_dict(), [file1, file2]))
     )
 
@@ -205,8 +204,7 @@ def test_encrypt(web3, provider_wallet):
         encrypted_document = web3.toBytes(hexstr=encrypted_document)
     decrypted_document = ecies.decrypt(key, encrypted_document)
     decrypted_document_string = decrypted_document.decode("utf-8")
-    decrypted_document_dict = json.loads(decrypted_document_string)
-    assert decrypted_document_dict["document"] == test_string
+    assert decrypted_document_string == test_string
 
 
 def test_invalid_file_name():

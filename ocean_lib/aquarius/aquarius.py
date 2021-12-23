@@ -34,7 +34,8 @@ class Aquarius:
         if "/api/v1/aquarius/assets" in aquarius_url:
             aquarius_url = aquarius_url[: aquarius_url.find("/api/v1/aquarius/assets")]
 
-        self.base_url = f"{aquarius_url}/api/v1/aquarius/assets"
+        # FIXME: add v1 for Aquarius version
+        self.base_url = f"{aquarius_url}/api/aquarius/assets"
 
         logging.debug(f"Metadata Store connected at {aquarius_url}")
         logging.debug(f"Metadata Store API documentation at {aquarius_url}/api/v1/docs")
@@ -51,16 +52,16 @@ class Aquarius:
         """
         Retrieve the endpoint with the ddo for a given did.
 
-        :return: Return the url of the the ddo location
+        :return: Return the url of the ddo location
         """
         return f"{self.base_url}/ddo/" + "{did}"
 
     @enforce_types
     def get_encrypt_endpoint(self) -> str:
         """
-        Retrieve the endpoint for DDO encrption
+        Retrieve the endpoint for DDO encryption
 
-        :return: Return the url of the the Aquarius ddo encryption endpoint
+        :return: Return the url of the Aquarius ddo encryption endpoint
         """
         return f"{self.base_url}/ddo/encrypt"
 
@@ -92,7 +93,6 @@ class Aquarius:
         :return: bool
         """
         response = self.requests_session.get(f"{self.base_url}/ddo/{did}").content
-
         return f"Asset DID {did} not found in Elasticsearch" not in str(response)
 
     @enforce_types
@@ -154,6 +154,27 @@ class Aquarius:
             return True, []
 
         parsed_response = response.json()
+        return False, parsed_response
+
+    @enforce_types
+    def validate_asset(self, asset: V4Asset) -> Tuple[bool, Union[list, dict]]:
+        """
+        Validate the asset.
+
+        :param asset: conforming to the asset accepted by Ocean Protocol, V4Asset
+        :return: bool
+        """
+        asset_dict = asset.as_dictionary()
+
+        response = self.requests_session.post(
+            f"{self.base_url.replace('/v1/', '/')}/ddo/validate-remote",
+            data=json.dumps(asset_dict),
+            headers={"content-type": "application/json"},
+        )
+
+        parsed_response = response.json()
+        if parsed_response is True:
+            return True, []
         return False, parsed_response
 
     @enforce_types

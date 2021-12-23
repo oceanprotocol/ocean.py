@@ -92,7 +92,8 @@ def test_asset_utils(web3):
     }
     event = ddo_dict["event"]
 
-    assert ddo_dict["stats"] == {"consumes": 4, "isInPurgatory": "false"}
+    # Sample asset
+    assert ddo_dict["stats"] == {"consumes": 4}
     stats = ddo_dict["stats"]
 
     ddo = V4Asset(

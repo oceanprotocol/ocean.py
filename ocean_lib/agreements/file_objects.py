@@ -18,9 +18,6 @@ class UrlFile(object):
     def to_dict(self) -> dict:
         return {"type": self.type, "url": self.url, "method": self.method}
 
-    def from_dict(self) -> str:
-        return json.dumps(self.to_dict(), separators=(",", ":"))
-
 
 @enforce_types
 class IpfsFile(object):
@@ -30,9 +27,6 @@ class IpfsFile(object):
 
     def to_dict(self) -> dict:
         return {"type": self.type, "hash": self.hash}
-
-    def from_dict(self) -> str:
-        return json.dumps(self.to_dict(), separators=(",", ":"))
 
 
 @enforce_types

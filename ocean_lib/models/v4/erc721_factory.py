@@ -48,6 +48,14 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     def event_DispenserCreated(self):
         return self.events.DispenserCreated()
 
+    def verify_nft(self, nft: str) -> bool:
+        """Checks that a token was registered."""
+        filter_args = {"newTokenAddress": nft}
+        log = self.get_event_log(
+            self.EVENT_NFT_CREATED, 0, self.web3.eth.block_number, filter_args
+        )
+        return bool(log and log[0].args.newTokenAddress == nft)
+
     def deploy_erc721_contract(
         self,
         name: str,
