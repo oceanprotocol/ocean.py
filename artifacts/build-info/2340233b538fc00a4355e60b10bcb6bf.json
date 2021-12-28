@@ -1,0 +1,280 @@
+{
+  "id": "2340233b538fc00a4355e60b10bcb6bf",
+  "_format": "hh-sol-build-info-1",
+  "solcVersion": "0.8.10",
+  "solcLongVersion": "0.8.10+commit.fc410830",
+  "input": {
+    "language": "Solidity",
+    "sources": {
+      "contracts/utils/UtilsLib.sol": {
+        "content": "// SPDX-License-Identifier: Apache-2.0\n/*\n * @title Solidity Utils\n * @author Fabian Vogelsteller <fabian@lukso.network>\n *\n * @dev Utils functions\n */\n\npragma solidity 0.8.10;\n\n\nlibrary UtilsLib {\n\n    /**\n     * @dev Internal function to determine if an address is a contract\n     * @param _target The address being queried\n     *\n     * @return result Returns TRUE if `_target` is a contract\n     */\n    function isContract(address _target) internal view returns(bool result) {\n        // solium-disable-next-line security/no-inline-assembly\n        assembly {\n            result := gt(extcodesize(_target), 0)\n        }\n    }\n}"
+      }
+    },
+    "settings": {
+      "optimizer": {
+        "enabled": true,
+        "runs": 200
+      },
+      "outputSelection": {
+        "*": {
+          "*": [
+            "abi",
+            "evm.bytecode",
+            "evm.deployedBytecode",
+            "evm.methodIdentifiers"
+          ],
+          "": [
+            "ast"
+          ]
+        }
+      }
+    }
+  },
+  "output": {
+    "contracts": {
+      "contracts/utils/UtilsLib.sol": {
+        "UtilsLib": {
+          "abi": [],
+          "evm": {
+            "bytecode": {
+              "functionDebugData": {},
+              "generatedSources": [],
+              "linkReferences": {},
+              "object": "60566037600b82828239805160001a607314602a57634e487b7160e01b600052600060045260246000fd5b30600052607381538281f3fe73000000000000000000000000000000000000000030146080604052600080fdfea2646970667358221220136b946e8c0cf928b1083e4d012cfa3fbf3451c0da56241a01362fc60691c10a64736f6c634300080a0033",
+              "opcodes": "PUSH1 0x56 PUSH1 0x37 PUSH1 0xB DUP3 DUP3 DUP3 CODECOPY DUP1 MLOAD PUSH1 0x0 BYTE PUSH1 0x73 EQ PUSH1 0x2A JUMPI PUSH4 0x4E487B71 PUSH1 0xE0 SHL PUSH1 0x0 MSTORE PUSH1 0x0 PUSH1 0x4 MSTORE PUSH1 0x24 PUSH1 0x0 REVERT JUMPDEST ADDRESS PUSH1 0x0 MSTORE PUSH1 0x73 DUP2 MSTORE8 DUP3 DUP2 RETURN INVALID PUSH20 0x0 ADDRESS EQ PUSH1 0x80 PUSH1 0x40 MSTORE PUSH1 0x0 DUP1 REVERT INVALID LOG2 PUSH5 0x6970667358 0x22 SLT KECCAK256 SGT PUSH12 0x946E8C0CF928B1083E4D012C STATICCALL EXTCODEHASH 0xBF CALLVALUE MLOAD 0xC0 0xDA JUMP 0x24 BYTE ADD CALLDATASIZE 0x2F 0xC6 MOD SWAP2 0xC1 EXP PUSH5 0x736F6C6343 STOP ADDMOD EXP STOP CALLER ",
+              "sourceMap": "179:452:0:-:0;;;;;;;;;;;;;;;-1:-1:-1;;;179:452:0;;;;;;;;;;;;;;;;;"
+            },
+            "deployedBytecode": {
+              "functionDebugData": {},
+              "generatedSources": [],
+              "immutableReferences": {},
+              "linkReferences": {},
+              "object": "73000000000000000000000000000000000000000030146080604052600080fdfea2646970667358221220136b946e8c0cf928b1083e4d012cfa3fbf3451c0da56241a01362fc60691c10a64736f6c634300080a0033",
+              "opcodes": "PUSH20 0x0 ADDRESS EQ PUSH1 0x80 PUSH1 0x40 MSTORE PUSH1 0x0 DUP1 REVERT INVALID LOG2 PUSH5 0x6970667358 0x22 SLT KECCAK256 SGT PUSH12 0x946E8C0CF928B1083E4D012C STATICCALL EXTCODEHASH 0xBF CALLVALUE MLOAD 0xC0 0xDA JUMP 0x24 BYTE ADD CALLDATASIZE 0x2F 0xC6 MOD SWAP2 0xC1 EXP PUSH5 0x736F6C6343 STOP ADDMOD EXP STOP CALLER ",
+              "sourceMap": "179:452:0:-:0;;;;;;;;"
+            },
+            "methodIdentifiers": {}
+          }
+        }
+      }
+    },
+    "sources": {
+      "contracts/utils/UtilsLib.sol": {
+        "ast": {
+          "absolutePath": "contracts/utils/UtilsLib.sol",
+          "exportedSymbols": {
+            "UtilsLib": [
+              12
+            ]
+          },
+          "id": 13,
+          "license": "Apache-2.0",
+          "nodeType": "SourceUnit",
+          "nodes": [
+            {
+              "id": 1,
+              "literals": [
+                "solidity",
+                "0.8",
+                ".10"
+              ],
+              "nodeType": "PragmaDirective",
+              "src": "153:23:0"
+            },
+            {
+              "abstract": false,
+              "baseContracts": [],
+              "canonicalName": "UtilsLib",
+              "contractDependencies": [],
+              "contractKind": "library",
+              "fullyImplemented": true,
+              "id": 12,
+              "linearizedBaseContracts": [
+                12
+              ],
+              "name": "UtilsLib",
+              "nameLocation": "187:8:0",
+              "nodeType": "ContractDefinition",
+              "nodes": [
+                {
+                  "body": {
+                    "id": 10,
+                    "nodeType": "Block",
+                    "src": "479:150:0",
+                    "statements": [
+                      {
+                        "AST": {
+                          "nodeType": "YulBlock",
+                          "src": "562:61:0",
+                          "statements": [
+                            {
+                              "nodeType": "YulAssignment",
+                              "src": "576:37:0",
+                              "value": {
+                                "arguments": [
+                                  {
+                                    "arguments": [
+                                      {
+                                        "name": "_target",
+                                        "nodeType": "YulIdentifier",
+                                        "src": "601:7:0"
+                                      }
+                                    ],
+                                    "functionName": {
+                                      "name": "extcodesize",
+                                      "nodeType": "YulIdentifier",
+                                      "src": "589:11:0"
+                                    },
+                                    "nodeType": "YulFunctionCall",
+                                    "src": "589:20:0"
+                                  },
+                                  {
+                                    "kind": "number",
+                                    "nodeType": "YulLiteral",
+                                    "src": "611:1:0",
+                                    "type": "",
+                                    "value": "0"
+                                  }
+                                ],
+                                "functionName": {
+                                  "name": "gt",
+                                  "nodeType": "YulIdentifier",
+                                  "src": "586:2:0"
+                                },
+                                "nodeType": "YulFunctionCall",
+                                "src": "586:27:0"
+                              },
+                              "variableNames": [
+                                {
+                                  "name": "result",
+                                  "nodeType": "YulIdentifier",
+                                  "src": "576:6:0"
+                                }
+                              ]
+                            }
+                          ]
+                        },
+                        "evmVersion": "london",
+                        "externalReferences": [
+                          {
+                            "declaration": 4,
+                            "isOffset": false,
+                            "isSlot": false,
+                            "src": "601:7:0",
+                            "valueSize": 1
+                          },
+                          {
+                            "declaration": 7,
+                            "isOffset": false,
+                            "isSlot": false,
+                            "src": "576:6:0",
+                            "valueSize": 1
+                          }
+                        ],
+                        "id": 9,
+                        "nodeType": "InlineAssembly",
+                        "src": "553:70:0"
+                      }
+                    ]
+                  },
+                  "documentation": {
+                    "id": 2,
+                    "nodeType": "StructuredDocumentation",
+                    "src": "203:199:0",
+                    "text": " @dev Internal function to determine if an address is a contract\n @param _target The address being queried\n @return result Returns TRUE if `_target` is a contract"
+                  },
+                  "id": 11,
+                  "implemented": true,
+                  "kind": "function",
+                  "modifiers": [],
+                  "name": "isContract",
+                  "nameLocation": "416:10:0",
+                  "nodeType": "FunctionDefinition",
+                  "parameters": {
+                    "id": 5,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 4,
+                        "mutability": "mutable",
+                        "name": "_target",
+                        "nameLocation": "435:7:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 11,
+                        "src": "427:15:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_address",
+                          "typeString": "address"
+                        },
+                        "typeName": {
+                          "id": 3,
+                          "name": "address",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "427:7:0",
+                          "stateMutability": "nonpayable",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_address",
+                            "typeString": "address"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "426:17:0"
+                  },
+                  "returnParameters": {
+                    "id": 8,
+                    "nodeType": "ParameterList",
+                    "parameters": [
+                      {
+                        "constant": false,
+                        "id": 7,
+                        "mutability": "mutable",
+                        "name": "result",
+                        "nameLocation": "471:6:0",
+                        "nodeType": "VariableDeclaration",
+                        "scope": 11,
+                        "src": "466:11:0",
+                        "stateVariable": false,
+                        "storageLocation": "default",
+                        "typeDescriptions": {
+                          "typeIdentifier": "t_bool",
+                          "typeString": "bool"
+                        },
+                        "typeName": {
+                          "id": 6,
+                          "name": "bool",
+                          "nodeType": "ElementaryTypeName",
+                          "src": "466:4:0",
+                          "typeDescriptions": {
+                            "typeIdentifier": "t_bool",
+                            "typeString": "bool"
+                          }
+                        },
+                        "visibility": "internal"
+                      }
+                    ],
+                    "src": "465:13:0"
+                  },
+                  "scope": 12,
+                  "src": "407:222:0",
+                  "stateMutability": "view",
+                  "virtual": false,
+                  "visibility": "internal"
+                }
+              ],
+              "scope": 13,
+              "src": "179:452:0",
+              "usedErrors": []
+            }
+          ],
+          "src": "153:478:0"
+        },
+        "id": 0
+      }
+    }
+  }
+}
