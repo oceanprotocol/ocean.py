@@ -9,10 +9,9 @@ import json
 import logging
 import lzma
 import os
-from typing import Optional, Tuple, Type, List
+from typing import List, Optional, Tuple, Type
 
 from enforce_typing import enforce_types
-
 from ocean_lib.agreements.service_types import ServiceTypesV4
 from ocean_lib.aquarius import Aquarius
 from ocean_lib.assets.v4.asset import V4Asset
@@ -366,6 +365,7 @@ class OceanAssetV4:
             flags=flags,
             data=document,
             data_hash=ddo_hash,
+            data_proofs=[],
             from_wallet=publisher_wallet,
         )
 

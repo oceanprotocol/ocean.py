@@ -6,7 +6,6 @@ from enum import IntEnum
 from typing import List
 
 from enforce_typing import enforce_types
-
 from ocean_lib.models.v4.models_structures import ErcCreateData
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
@@ -17,6 +16,13 @@ class ERC721Permissions(IntEnum):
     DEPLOY_ERC20 = 1
     UPDATE_METADATA = 2
     STORE = 3
+
+
+class MetadataProof:
+    validatorAddress: str
+    v: int
+    r: bytes
+    s: bytes
 
 
 @enforce_types
@@ -78,6 +84,7 @@ class ERC721Token(ContractBase):
         flags: bytes,
         data: bytes,
         data_hash: bytes,
+        data_proofs: List[MetadataProof],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
@@ -89,6 +96,7 @@ class ERC721Token(ContractBase):
                 flags,
                 data,
                 data_hash,
+                data_proofs,
             ),
             from_wallet,
         )

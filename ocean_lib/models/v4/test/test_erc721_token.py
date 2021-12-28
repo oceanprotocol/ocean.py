@@ -3,13 +3,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from web3 import exceptions
-
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Permissions, ERC721Token
 from ocean_lib.models.v4.models_structures import ErcCreateData
 from ocean_lib.web3_internal.constants import BLOB, ZERO_ADDRESS
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
+from web3 import exceptions
 
 
 def test_properties(web3, config):
@@ -344,6 +343,7 @@ def test_success_update_metadata(web3, config, publisher_wallet, consumer_wallet
         flags=web3.toBytes(hexstr=BLOB),
         data=web3.toBytes(hexstr=BLOB),
         data_hash=web3.toBytes(hexstr=BLOB),
+        data_proofs=[],
         from_wallet=consumer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -367,6 +367,7 @@ def test_success_update_metadata(web3, config, publisher_wallet, consumer_wallet
         flags=web3.toBytes(hexstr=BLOB),
         data=web3.toBytes(hexstr=BLOB),
         data_hash=web3.toBytes(hexstr=BLOB),
+        data_proofs=[],
         from_wallet=consumer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -403,6 +404,7 @@ def test_fails_update_metadata(web3, config, publisher_wallet, consumer_wallet):
             flags=web3.toBytes(hexstr=BLOB),
             data=web3.toBytes(hexstr=BLOB),
             data_hash=web3.toBytes(hexstr=BLOB),
+            data_proofs=[],
             from_wallet=consumer_wallet,
         )
     assert (
