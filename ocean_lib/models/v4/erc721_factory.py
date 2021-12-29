@@ -2,11 +2,15 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import List
+from typing import List, Tuple
 
 from enforce_typing import enforce_types
+from eth_account.messages import encode_defunct
+from eth_typing.encoding import HexStr
 from ocean_lib.models.v4.erc_token_factory_base import ERCTokenFactoryBase
+from ocean_lib.utils.utilities import prepare_message_for_ecrecover_in_solidity
 from ocean_lib.web3_internal.wallet import Wallet
+from web3.main import Web3
 
 
 @enforce_types
@@ -110,33 +114,43 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     def template_count(self) -> int:
         return self.contract.caller.templateCount()
 
-    def start_multiple_token_order(
-        self,
-        orders: List[dict],
+    @staticmethod
+    def sign_provider_fees(
+        provider_data: bytes,
+        provider_fee_address: str,
+        provider_fee_token: str,
+        provider_fee_amount: int,
         from_wallet: Wallet,
+    ) -> Tuple[HexStr, int, str, str]:
+        message = encode_defunct(
+            text=f"{provider_data}{provider_fee_address}{provider_fee_token}{provider_fee_amount}"
+        )
+        signed_message = Web3.eth.account.sign_message(message, from_wallet.private_key)
+        return prepare_message_for_ecrecover_in_solidity(signed_message)
+
+    def start_multiple_token_order(
+        self, orders: List[dict], from_wallet: Wallet
     ) -> str:
         """An order contains the following keys:
 
         - tokenAddress, str
         - consumer, str
-        - amount (in Wei), int
         - serviceIndex, int
-        - consumeFeeAddress, str
-        - consumeFeeToken (address of the token marketplace wants to add fee on top), str
-        - consumeFeeAmount (in Wei), int
+        - providerFeeAddress, str
+        - providerFeeToken, str
+        - providerFeeAmount (in Wei), int
+        - providerData, bytes
+        - v, int
+        - r, bytes
+        - s, bytes
         """
         return self.send_transaction("startMultipleTokenOrder", (orders,), from_wallet)
 
     def create_nft_with_erc(
-        self,
-        nft_create_data: dict,
-        erc_create_data: dict,
-        from_wallet: Wallet,
+        self, nft_create_data: dict, erc_create_data: dict, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "createNftWithErc",
-            (nft_create_data, erc_create_data),
-            from_wallet,
+            "createNftWithErc", (nft_create_data, erc_create_data), from_wallet
         )
 
     def create_nft_erc_with_pool(
