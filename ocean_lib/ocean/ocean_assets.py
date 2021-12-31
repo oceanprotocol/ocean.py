@@ -16,11 +16,11 @@ from eth_account.messages import encode_defunct
 from eth_utils import add_0x_prefix, remove_0x_prefix
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
+from ocean_lib.aquarius import Aquarius
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.assets.did import did_to_id
-from ocean_lib.aquarius import Aquarius
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import (
     DataServiceProvider,
@@ -145,7 +145,8 @@ class OceanAssets:
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(self._config)
         for url in urls:
-            if not DataServiceProvider.check_single_file_info(url, provider_uri):
+            url_object = {"url": url, "type": "url"}
+            if not DataServiceProvider.check_single_file_info(url_object, provider_uri):
                 msg = f"The URL of this service can not be accessed: {url}."
                 logger.error(msg)
                 raise ValueError(msg)
