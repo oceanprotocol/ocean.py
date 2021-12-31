@@ -111,32 +111,28 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return self.contract.caller.templateCount()
 
     def start_multiple_token_order(
-        self,
-        orders: List[dict],
-        from_wallet: Wallet,
+        self, orders: List[dict], from_wallet: Wallet
     ) -> str:
         """An order contains the following keys:
 
         - tokenAddress, str
         - consumer, str
-        - amount (in Wei), int
         - serviceIndex, int
-        - consumeFeeAddress, str
-        - consumeFeeToken (address of the token marketplace wants to add fee on top), str
-        - consumeFeeAmount (in Wei), int
+        - providerFeeAddress, str
+        - providerFeeToken, str
+        - providerFeeAmount (in Wei), int
+        - providerData, bytes
+        - v, int
+        - r, bytes
+        - s, bytes
         """
         return self.send_transaction("startMultipleTokenOrder", (orders,), from_wallet)
 
     def create_nft_with_erc(
-        self,
-        nft_create_data: dict,
-        erc_create_data: dict,
-        from_wallet: Wallet,
+        self, nft_create_data: dict, erc_create_data: dict, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "createNftWithErc",
-            (nft_create_data, erc_create_data),
-            from_wallet,
+            "createNftWithErc", (nft_create_data, erc_create_data), from_wallet
         )
 
     def create_nft_erc_with_pool(

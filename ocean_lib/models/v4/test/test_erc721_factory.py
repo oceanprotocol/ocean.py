@@ -3,8 +3,6 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from web3 import exceptions
-
 from ocean_lib.models.v4.dispenser import DispenserV4
 from ocean_lib.models.v4.erc20_token import ERC20Token
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
@@ -12,6 +10,7 @@ from ocean_lib.models.v4.erc721_token import ERC721Token
 from ocean_lib.models.v4.models_structures import ErcCreateData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import get_address_of_type
+from web3 import exceptions
 
 
 def test_properties(web3, config):
@@ -149,22 +148,31 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
 
     erc20_token.set_payment_collector(another_consumer_wallet.address, publisher_wallet)
 
+    provider_fee_address = ZERO_ADDRESS
+    provider_data = b"\x00"
+    provider_fee_token = mock_dai_contract_address
+    provider_fee_amount = 0
+
+    msg_hash, v, r, s = ERC20Token.sign_provider_fees(
+        provider_data, provider_fee_address, provider_fee_token, provider_fee_amount
+    )
+
     orders = [
         {
             "tokenAddress": erc20_address,
             "consumer": consumer_wallet.address,
-            "amount": dt_amount,
             "serviceIndex": 1,
-            "providerFeeAddress": ZERO_ADDRESS,
-            "providerFeeToken": mock_dai_contract_address,
-            "providerFeeAmount": 0,
+            "providerFeeAddress": provider_fee_address,
+            "providerFeeToken": provider_fee_token,
+            "providerFeeAmount": provider_fee_amount,
+            "providerData": provider_data,
+            "v": v,
+            "r": r,
+            "s": s,
         }
     ]
 
-    tx = erc721_factory.start_multiple_token_order(
-        orders,
-        consumer_wallet,
-    )
+    tx = erc721_factory.start_multiple_token_order(orders, consumer_wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 

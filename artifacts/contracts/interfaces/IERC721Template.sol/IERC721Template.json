@@ -541,6 +541,38 @@
           "internalType": "bytes",
           "name": "data",
           "type": "bytes"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "_metaDataHash",
+          "type": "bytes32"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "validatorAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "uint8",
+              "name": "v",
+              "type": "uint8"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "r",
+              "type": "bytes32"
+            },
+            {
+              "internalType": "bytes32",
+              "name": "s",
+              "type": "bytes32"
+            }
+          ],
+          "internalType": "struct IERC721Template.metaDataProof[]",
+          "name": "_metadataProofs",
+          "type": "tuple[]"
         }
       ],
       "name": "setMetaData",

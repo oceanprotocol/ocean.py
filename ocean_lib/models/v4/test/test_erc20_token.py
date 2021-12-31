@@ -3,14 +3,13 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from web3 import exceptions
-
 from ocean_lib.models.v4.erc20_token import ERC20Token, RolesERC20
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Token
 from ocean_lib.models.v4.models_structures import ErcCreateData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from tests.resources.helper_functions import get_address_of_type, deploy_erc721_erc20
+from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
+from web3 import exceptions
 
 
 def test_properties(web3, config, publisher_wallet):
@@ -144,8 +143,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
 
     # Should succeed to set new FeeCollector if feeManager
     erc20.set_payment_collector(
-        fee_collector_address=publisher_wallet.address,
-        from_wallet=publisher_wallet,
+        fee_collector_address=publisher_wallet.address, from_wallet=publisher_wallet
     )
 
     # Should succeed to removeMinter if erc20Deployer
@@ -167,17 +165,12 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     value = web3.toHex(text="SomeData")
     key = web3.keccak(hexstr=erc20.address)
 
-    erc20.set_data(
-        data=value,
-        from_wallet=publisher_wallet,
-    )
+    erc20.set_data(data=value, from_wallet=publisher_wallet)
 
     assert web3.toHex(erc721.get_data(key)) == value
 
     # Should succeed to call cleanPermissions if NFTOwner
-    erc20.clean_permissions(
-        from_wallet=publisher_wallet,
-    )
+    erc20.clean_permissions(from_wallet=publisher_wallet)
 
     permissions = erc20.get_permissions(publisher_wallet.address)
     assert not permissions[RolesERC20.MINTER]
@@ -200,13 +193,25 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         get_address_of_type(config, "OPFCommunityFeeCollector"), publisher_wallet
     )
 
+    provider_fee_address = publisher_wallet.address
+    provider_data = b"\x00"
+    provider_fee_token = get_address_of_type(config, "MockUSDC")
+    provider_fee_amount = 0
+
+    msg_hash, v, r, s = ERC20Token.sign_provider_fees(
+        provider_data, provider_fee_address, provider_fee_token, provider_fee_amount
+    )
+
     erc20.start_order(
         consumer=consumer_wallet.address,
-        amount=web3.toWei(1, "ether"),
         service_id=1,
-        mrkt_fee_collector=publisher_wallet.address,
-        fee_token=get_address_of_type(config, "MockUSDC"),
-        fee_amount=0,
+        provider_fee_address=provider_fee_address,
+        provider_fee_token=provider_fee_token,
+        provider_fee_amount=provider_fee_amount,
+        v=v,
+        r=r,
+        s=s,
+        provider_data=provider_data,
         from_wallet=consumer_wallet,
     )
 
@@ -336,8 +341,7 @@ def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_rou
     #  Should fail to set new FeeCollector if not NFTOwner
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc20.set_payment_collector(
-            fee_collector_address=consumer_wallet.address,
-            from_wallet=consumer_wallet,
+            fee_collector_address=consumer_wallet.address, from_wallet=consumer_wallet
         )
     assert (
         err.value.args[0]
@@ -386,10 +390,7 @@ def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_rou
 
     # Should fail to setData if NOT erc20Deployer
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.set_data(
-            data=web3.toHex(text="SomeData"),
-            from_wallet=consumer_wallet,
-        )
+        erc20.set_data(data=web3.toHex(text="SomeData"), from_wallet=consumer_wallet)
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT DEPLOYER ROLE"
@@ -397,9 +398,7 @@ def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_rou
 
     # Should fail to call cleanPermissions if NOT NFTOwner
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.clean_permissions(
-            from_wallet=consumer_wallet,
-        )
+        erc20.clean_permissions(from_wallet=consumer_wallet)
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC20Template: not NFTOwner"
@@ -407,9 +406,7 @@ def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_rou
 
     # Clean from nft should work shouldn't be callable by publisher or consumer, only by erc721 contract
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.clean_from_721(
-            from_wallet=consumer_wallet,
-        )
+        erc20.clean_from_721(from_wallet=consumer_wallet)
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT 721 Contract"
