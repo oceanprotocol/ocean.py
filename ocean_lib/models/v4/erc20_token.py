@@ -3,13 +3,16 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enum import IntEnum
-from typing import List
+from typing import List, Tuple
 
 from enforce_typing import enforce_types
-
-from ocean_lib.models.v4.models_structures import PoolData, FixedData, DispenserData
+from eth_account.messages import encode_defunct
+from eth_typing.encoding import HexStr
+from ocean_lib.models.v4.models_structures import DispenserData, FixedData, PoolData
+from ocean_lib.utils.utilities import prepare_message_for_ecrecover_in_solidity
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
+from web3.main import Web3
 
 
 class RolesERC20(IntEnum):
@@ -69,11 +72,7 @@ class ERC20Token(ContractBase):
     def deploy_pool(self, pool_data: PoolData, from_wallet: Wallet) -> str:
         return self.send_transaction(
             "deployPool",
-            (
-                pool_data.ss_params,
-                pool_data.swap_fees,
-                pool_data.addresses,
-            ),
+            (pool_data.ss_params, pool_data.swap_fees, pool_data.addresses),
             from_wallet,
         )
 
@@ -102,19 +101,46 @@ class ERC20Token(ContractBase):
     def mint(self, account_address: str, value: int, from_wallet: Wallet) -> str:
         return self.send_transaction("mint", (account_address, value), from_wallet)
 
+    @staticmethod
+    def sign_provider_fees(
+        provider_data: bytes,
+        provider_fee_address: str,
+        provider_fee_token: str,
+        provider_fee_amount: int,
+        from_wallet: Wallet,
+    ) -> Tuple[HexStr, int, str, str]:
+        message = encode_defunct(
+            text=f"{provider_data}{provider_fee_address}{provider_fee_token}{provider_fee_amount}"
+        )
+        signed_message = Web3.eth.account.sign_message(message, from_wallet.private_key)
+        return prepare_message_for_ecrecover_in_solidity(signed_message)
+
     def start_order(
         self,
         consumer: str,
-        amount: int,
         service_id: int,
-        mrkt_fee_collector: str,
-        fee_token: str,
-        fee_amount: int,
+        provider_fee_address: str,
+        provider_fee_token: str,
+        provider_fee_amount: int,
+        v: int,
+        r: bytes,
+        s: bytes,
+        provider_data: bytes,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "startOrder",
-            (consumer, amount, service_id, mrkt_fee_collector, fee_token, fee_amount),
+            (
+                consumer,
+                service_id,
+                provider_fee_address,
+                provider_fee_token,
+                provider_fee_amount,
+                v,
+                r,
+                s,
+                provider_data,
+            ),
             from_wallet,
         )
 

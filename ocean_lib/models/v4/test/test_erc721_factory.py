@@ -153,7 +153,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     provider_fee_token = mock_dai_contract_address
     provider_fee_amount = 0
 
-    msg_hash, v, r, s = erc721_factory.sign_provider_fees(
+    msg_hash, v, r, s = ERC20Token.sign_provider_fees(
         provider_data, provider_fee_address, provider_fee_token, provider_fee_amount
     )
 

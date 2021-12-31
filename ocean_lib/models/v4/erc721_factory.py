@@ -2,15 +2,11 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import List, Tuple
+from typing import List
 
 from enforce_typing import enforce_types
-from eth_account.messages import encode_defunct
-from eth_typing.encoding import HexStr
 from ocean_lib.models.v4.erc_token_factory_base import ERCTokenFactoryBase
-from ocean_lib.utils.utilities import prepare_message_for_ecrecover_in_solidity
 from ocean_lib.web3_internal.wallet import Wallet
-from web3.main import Web3
 
 
 @enforce_types
@@ -113,20 +109,6 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     def template_count(self) -> int:
         return self.contract.caller.templateCount()
-
-    @staticmethod
-    def sign_provider_fees(
-        provider_data: bytes,
-        provider_fee_address: str,
-        provider_fee_token: str,
-        provider_fee_amount: int,
-        from_wallet: Wallet,
-    ) -> Tuple[HexStr, int, str, str]:
-        message = encode_defunct(
-            text=f"{provider_data}{provider_fee_address}{provider_fee_token}{provider_fee_amount}"
-        )
-        signed_message = Web3.eth.account.sign_message(message, from_wallet.private_key)
-        return prepare_message_for_ecrecover_in_solidity(signed_message)
 
     def start_multiple_token_order(
         self, orders: List[dict], from_wallet: Wallet
