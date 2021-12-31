@@ -325,7 +325,7 @@ class ERC20Token(ContractBase):
         return self.send_transaction("withdrawETH", (), from_wallet)
 
     def get_permissions(self, user: str) -> list:
-        return self.contract.caller.permissions(user)
+        return self.contract.caller.getPermissions(user)
 
     def get_total_supply(self) -> int:
         return self.contract.caller.totalSupply()
