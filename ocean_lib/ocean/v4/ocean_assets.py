@@ -305,6 +305,7 @@ class OceanAssetV4:
                 services=services, deployed_erc20_tokens=deployed_erc20_tokens
             )
 
+        asset.nft_address = erc721_address
         asset.datatokens = data_tokens
 
         for service in services:

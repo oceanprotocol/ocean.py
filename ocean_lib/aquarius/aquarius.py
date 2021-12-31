@@ -165,16 +165,19 @@ class Aquarius:
         :return: bool
         """
         asset_dict = asset.as_dictionary()
+        data = json.dumps(asset_dict).encode("utf-8")
 
         response = self.requests_session.post(
-            f"{self.base_url.replace('/v1/', '/')}/ddo/validate-remote",
-            data=json.dumps(asset_dict),
-            headers={"content-type": "application/json"},
+            f"{self.base_url.replace('/v1/', '/')}/ddo/validate",
+            data=data,
+            headers={"content-type": "application/octet-stream"},
         )
 
         parsed_response = response.json()
-        if parsed_response is True:
-            return True, []
+
+        if parsed_response.get("hash"):
+            return True, parsed_response
+
         return False, parsed_response
 
     @enforce_types

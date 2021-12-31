@@ -1,3 +1,4 @@
+#
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
@@ -7,9 +8,8 @@ import logging
 from typing import List, Optional
 
 from enforce_typing import enforce_types
-
-from ocean_lib.assets.credentials import AddressCredential
 from ocean_lib.agreements.service_types import ServiceTypesV4
+from ocean_lib.assets.credentials import AddressCredential
 from ocean_lib.services.v4.service import V4Service
 from ocean_lib.utils.utilities import create_checksum
 
@@ -25,6 +25,7 @@ class V4Asset:
         did: Optional[str] = None,
         context: Optional[list] = None,
         chain_id: Optional[int] = None,
+        nft_address: Optional[str] = None,
         metadata: Optional[dict] = None,
         services: Optional[list] = None,
         credentials: Optional[dict] = None,
@@ -37,6 +38,7 @@ class V4Asset:
         self.did = did
         self.context = context or ["https://w3id.org/did/v1"]
         self.chain_id = chain_id
+        self.nft_address = nft_address
         self.metadata = metadata
         self.version = "4.0.0"
         self.services = services or []
@@ -97,6 +99,7 @@ class V4Asset:
             values.pop("id"),
             values.pop("@context"),
             values.pop("chainId"),
+            values.pop("nftAddress"),
             values.pop("metadata", None),
             services,
             values.pop("credentials", None),
@@ -120,15 +123,10 @@ class V4Asset:
             "chainId": self.chain_id,
         }
 
+        data["nftAddress"] = self.nft_address
+
         services = [value.as_dictionary() for value in self.services]
-        args = [
-            "metadata",
-            "credentials",
-            "nft",
-            "datatokens",
-            "event",
-            "stats",
-        ]
+        args = ["metadata", "credentials", "nft", "datatokens", "event", "stats"]
         attrs = list(
             filter(
                 lambda attr: not not attr[1],
@@ -158,8 +156,7 @@ class V4Asset:
     def get_service(self, service_type: str) -> Optional[V4Service]:
         """Return the first Service with the given service type."""
         return next(
-            (service for service in self.services if service.type == service_type),
-            None,
+            (service for service in self.services if service.type == service_type), None
         )
 
     def remove_publisher_trusted_algorithm(
@@ -187,9 +184,7 @@ class V4Asset:
         return trusted_algorithms
 
     def remove_publisher_trusted_algorithm_publisher(
-        self,
-        compute_service: V4Service,
-        publisher_address: str,
+        self, compute_service: V4Service, publisher_address: str
     ) -> list:
         """
         :return: List of trusted algo publishers not containing `publisher_address`.
