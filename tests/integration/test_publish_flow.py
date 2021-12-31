@@ -11,7 +11,7 @@ from ocean_lib.ocean.v4.ocean_assets import OceanAssetV4
 from ocean_lib.services.v4.service import V4Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import build_credentials_dict
-from tests.resources.helper_functions import get_address_of_type, deploy_erc721_erc20
+from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
 def test_publish_flow(web3, config, publisher_wallet):
@@ -282,3 +282,10 @@ def test_publish_flow(web3, config, publisher_wallet):
     assert ddo.datatokens[0]["name"] == "ERC20DT1"
     assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
     assert ddo.datatokens[0]["address"] == erc20_token4.address
+
+    # owner can view file urls for his asset
+    asset_urls = DataServiceProvider.get_asset_urls(
+        ddo.did, ddo.services[0].id, "http://172.15.0.4:8030", publisher_wallet
+    )
+    assert file1_dict in asset_urls
+    assert file2_dict in asset_urls
