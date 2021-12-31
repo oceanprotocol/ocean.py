@@ -51,7 +51,7 @@ def to_lpad_32byte_hex(val: Primitives) -> HexStr:
 
 @enforce_types
 def prepare_message_for_ecrecover_in_solidity(
-    signed_message: SignedMessage
+    signed_message: SignedMessage,
 ) -> Tuple[HexStr, int, str, str]:
     """
     Copied from https://web3py.readthedocs.io/en/stable/web3.eth.account.html#prepare-message-for-ecrecover-in-solidity
