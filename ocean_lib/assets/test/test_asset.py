@@ -3,9 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from ocean_lib.agreements.service_types import ServiceTypesV4
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
-from ocean_lib.services.v4.service import V4Service
+from ocean_lib.services.service import Service
 from tests.resources.ddo_helpers import (
     get_key_from_v4_sample_ddo,
     get_sample_ddo,
@@ -52,7 +52,7 @@ def test_asset_utils(web3):
     ]
 
     services = [
-        V4Service.from_dict(value)
+        Service.from_dict(value)
         for value in ddo_dict["services"]
         if isinstance(value, dict)
     ]
@@ -142,7 +142,7 @@ def test_add_service():
             },
         ],
     }
-    new_service = V4Service(
+    new_service = Service(
         service_id="2",
         service_type="compute",
         service_endpoint="https://myprovider.com",
@@ -207,7 +207,7 @@ def test_get_service():
     )[0]
 
     assert (
-        ddo.get_service(ServiceTypesV4.ASSET_ACCESS).as_dictionary()
+        ddo.get_service(ServiceTypes.ASSET_ACCESS).as_dictionary()
         == expected_access_service
     )
     assert ddo.get_service_by_id("1").as_dictionary() == expected_access_service
@@ -217,6 +217,6 @@ def test_get_service():
     )[1]
     assert ddo.get_service_by_id("2").as_dictionary() == expected_compute_service
     assert (
-        ddo.get_service(ServiceTypesV4.CLOUD_COMPUTE).as_dictionary()
+        ddo.get_service(ServiceTypes.CLOUD_COMPUTE).as_dictionary()
         == expected_compute_service
     )

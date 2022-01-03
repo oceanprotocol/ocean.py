@@ -8,9 +8,9 @@ import logging
 from typing import List, Optional
 
 from enforce_typing import enforce_types
-from ocean_lib.agreements.service_types import ServiceTypesV4
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.credentials import AddressCredential
-from ocean_lib.services.v4.service import V4Service
+from ocean_lib.services.service import Service
 from ocean_lib.utils.utilities import create_checksum
 
 logger = logging.getLogger("ddo")
@@ -93,7 +93,7 @@ class Asset:
         services = (
             []
             if "services" not in values
-            else [V4Service.from_dict(value) for value in values.pop("services")]
+            else [Service.from_dict(value) for value in values.pop("services")]
         )
         return cls(
             values.pop("id"),
@@ -137,11 +137,11 @@ class Asset:
         data.update(attrs)
         return data
 
-    def add_service(self, service: V4Service) -> None:
+    def add_service(self, service: Service) -> None:
         """
         Add a service to the list of services on the V4 DDO.
 
-        :param service: To add service, V4Service
+        :param service: To add service, Service
         """
 
         logger.debug(
@@ -149,18 +149,18 @@ class Asset:
         )
         self.services.append(service)
 
-    def get_service_by_id(self, service_id: str) -> V4Service:
+    def get_service_by_id(self, service_id: str) -> Service:
         """Return the Service with the matching id"""
         return next((service for service in self.services if service.id == service_id))
 
-    def get_service(self, service_type: str) -> Optional[V4Service]:
+    def get_service(self, service_type: str) -> Optional[Service]:
         """Return the first Service with the given service type."""
         return next(
             (service for service in self.services if service.type == service_type), None
         )
 
     def remove_publisher_trusted_algorithm(
-        self, compute_service: V4Service, algo_did: str
+        self, compute_service: Service, algo_did: str
     ) -> list:
         """Returns a trusted algorithms list after removal."""
         trusted_algorithms = compute_service.get_trusted_algorithms()
@@ -184,7 +184,7 @@ class Asset:
         return trusted_algorithms
 
     def remove_publisher_trusted_algorithm_publisher(
-        self, compute_service: V4Service, publisher_address: str
+        self, compute_service: Service, publisher_address: str
     ) -> list:
         """
         :return: List of trusted algo publishers not containing `publisher_address`.
@@ -221,7 +221,7 @@ class Asset:
             "did": self.did,
             "filesChecksum": create_checksum(
                 json.dumps(
-                    self.get_service(ServiceTypesV4.CLOUD_COMPUTE).files,
+                    self.get_service(ServiceTypes.CLOUD_COMPUTE).files,
                     separators=(",", ":"),
                 )
             ),
@@ -254,7 +254,7 @@ class Asset:
         :raises AssertionError if this asset has no `ServiceTypes.CLOUD_COMPUTE` service
         """
         assert not trusted_algorithms or isinstance(trusted_algorithms, list)
-        service = self.get_service(ServiceTypesV4.CLOUD_COMPUTE)
+        service = self.get_service(ServiceTypes.CLOUD_COMPUTE)
         assert service is not None, "this asset does not have a compute service."
 
         for ta in trusted_algorithms:

@@ -12,7 +12,7 @@ import os
 from typing import List, Optional, Tuple, Type
 
 from enforce_typing import enforce_types
-from ocean_lib.agreements.service_types import ServiceTypesV4
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.aquarius import Aquarius
 from ocean_lib.assets.asset import Asset
 from ocean_lib.config import Config
@@ -23,7 +23,7 @@ from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Token
 from ocean_lib.models.v4.models_structures import ErcCreateData
 from ocean_lib.ocean.util import get_address_of_type
-from ocean_lib.services.v4.service import V4Service
+from ocean_lib.services.service import Service
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
@@ -69,7 +69,7 @@ class OceanAssets:
     ) -> list:
         has_access_service = any(
             map(
-                lambda s: s.type == ServiceTypesV4.ASSET_ACCESS
+                lambda s: s.type == ServiceTypes.ASSET_ACCESS
                 and s.id == self.find_service_by_data_token(data_token, services),
                 services,
             )
@@ -96,11 +96,11 @@ class OceanAssets:
         data_token: str,
         files: str,
         timeout: Optional[int] = 3600,
-    ) -> V4Service:
+    ) -> Service:
 
-        return V4Service(
+        return Service(
             service_id=service_id,
-            service_type=ServiceTypesV4.ASSET_ACCESS,
+            service_type=ServiceTypes.ASSET_ACCESS,
             service_endpoint=service_endpoint,
             data_token=data_token,
             files=files,
