@@ -6,7 +6,6 @@ import logging
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from enforce_typing import enforce_types
-from eth_account.messages import encode_defunct
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
@@ -17,7 +16,6 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.services.service import Service
-from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ocean")
@@ -259,24 +257,10 @@ class OceanCompute:
         return default_output_def
 
     @enforce_types
-    def _sign_message(
-        self,
-        wallet: Wallet,
-        msg: str,
-        nonce: Optional[int] = None,
-        service_endpoint: Optional[str] = None,
-    ) -> str:
-        if nonce is None:
-            uri = self._data_provider.get_root_uri(service_endpoint)
-            nonce = str(self._data_provider.get_nonce(wallet.address, uri))
-        return sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
-
-    @enforce_types
     def start(
         self,
         input_datasets: list,
         consumer_wallet: Wallet,
-        nonce: Optional[int] = None,
         algorithm_did: Optional[str] = None,
         algorithm_meta: Optional[AlgorithmMetadata] = None,
         algorithm_tx_id: Optional[str] = None,
@@ -294,7 +278,6 @@ class OceanCompute:
         :param input_datasets: list of ComputeInput -- list of input datasets to the compute job. A dataset is
             represented with ComputeInput struct
         :param consumer_wallet: Wallet instance of the consumer ordering the service
-        :param nonce: int value to use in the signature
         :param algorithm_did: str -- the asset did (of `algorithm` type) which consist of `did:op:` and
             the assetId hex str (without `0x` prefix)
         :param algorithm_meta: `AlgorithmMetadata` instance -- metadata about the algorithm being run if
@@ -337,19 +320,11 @@ class OceanCompute:
         if consumable_result != ConsumableCodes.OK:
             raise AssetNotConsumable(consumable_result)
 
-        signature = self._sign_message(
-            consumer_wallet,
-            f"{consumer_wallet.address}{did}",
-            nonce=nonce,
-            service_endpoint=sa.service_endpoint,
-        )
-
         try:
             job_info = self._data_provider.start_compute_job(
                 did,
                 service_endpoint,
-                consumer_wallet.address,
-                signature,
+                consumer_wallet,
                 sa.index,
                 order_tx_id,
                 algorithm_did,
@@ -378,14 +353,10 @@ class OceanCompute:
         :return: dict the status for an existing compute job, keys are (ok, status, statusText)
         """
         _, service_endpoint = self._get_service_endpoint(did)
-        msg = f'{wallet.address}{job_id or ""}{did}'
+
         return OceanCompute._status_from_job_info(
             self._data_provider.compute_job_status(
-                did,
-                job_id,
-                service_endpoint,
-                wallet.address,
-                self._sign_message(wallet, msg, service_endpoint=service_endpoint),
+                did, job_id, service_endpoint, wallet.address
             )
         )
 
@@ -400,13 +371,8 @@ class OceanCompute:
         :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
         """
         _, service_endpoint = self._get_service_endpoint(did)
-        msg = f'{wallet.address}{job_id or ""}{did}'
         info_dict = self._data_provider.compute_job_result(
-            did,
-            job_id,
-            service_endpoint,
-            wallet.address,
-            self._sign_message(wallet, msg, service_endpoint=service_endpoint),
+            did, job_id, service_endpoint, wallet.address
         )
         return {
             "did": info_dict.get("resultsDid", ""),
@@ -427,13 +393,8 @@ class OceanCompute:
         :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
         """
         _, service_endpoint = self._get_compute_result_file_endpoint(did)
-        msg = f"{wallet.address}{job_id}{str(index)}"
         result = self._data_provider.compute_job_result_file(
-            job_id,
-            index,
-            service_endpoint,
-            wallet.address,
-            self._sign_message(wallet, msg, service_endpoint=service_endpoint),
+            job_id, index, service_endpoint, wallet.address
         )
 
         return result
@@ -449,14 +410,9 @@ class OceanCompute:
         :return: dict the status for the stopped compute job, keys are (ok, status, statusText)
         """
         _, service_endpoint = self._get_service_endpoint(did)
-        msg = f'{wallet.address}{job_id or ""}{did}'
         return self._status_from_job_info(
             self._data_provider.stop_compute_job(
-                did,
-                job_id,
-                service_endpoint,
-                wallet.address,
-                self._sign_message(wallet, msg, service_endpoint=service_endpoint),
+                did, job_id, service_endpoint, wallet.address
             )
         )
 

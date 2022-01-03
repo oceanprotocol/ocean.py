@@ -54,6 +54,7 @@ def download_asset_files(
             'Consume asset failed, service definition is missing the "serviceEndpoint".'
         )
 
+    # TODO: initialize service provider with this endpoint
     _, service_endpoint = data_provider.build_download_endpoint(service_endpoint)
     if not os.path.isabs(destination):
         destination = os.path.abspath(destination)
@@ -79,7 +80,6 @@ def download_asset_files(
     for i in indexes:
         data_provider.download_service(
             asset.did,
-            service_endpoint,
             consumer_wallet,
             _files,
             asset_folder,

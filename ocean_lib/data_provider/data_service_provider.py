@@ -24,7 +24,6 @@ from ocean_lib.config import Config
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
@@ -49,7 +48,6 @@ class DataServiceProvider:
     """
 
     _http_client = get_requests_session()
-    API_VERSION = "/api/v1"
     provider_info = None
 
     @staticmethod
@@ -63,48 +61,6 @@ class DataServiceProvider:
     def set_http_client(http_client: Session) -> None:
         """Set the http client to something other than the default `requests`."""
         DataServiceProvider._http_client = http_client
-
-    @staticmethod
-    @enforce_types
-    def encrypt_files_dict(
-        files_dict: list,
-        encrypt_endpoint: str,
-        asset_id: str,
-        publisher_address: str,
-        signed_did: str,
-    ) -> str:
-        payload = json.dumps(
-            {
-                "documentId": asset_id,
-                "signature": signed_did,
-                "document": json.dumps(files_dict),
-                "publisherAddress": publisher_address,
-            }
-        )
-
-        response = DataServiceProvider._http_method(
-            "post",
-            encrypt_endpoint,
-            data=payload,
-            headers={"content-type": "application/json"},
-        )
-        if response and hasattr(response, "status_code"):
-            if response.status_code != 201:
-                msg = (
-                    f"Encrypt file urls failed at the encryptEndpoint "
-                    f"{encrypt_endpoint}, reason {response.text}, status {response.status_code}"
-                )
-                logger.error(msg)
-                raise OceanEncryptAssetUrlsError(msg)
-
-            logger.info(
-                f"Asset urls encrypted successfully, encrypted urls str: {response.text},"
-                f" encryptedEndpoint {encrypt_endpoint}"
-            )
-
-            return response.json()["encryptedDocument"]
-
-        return ""
 
     @staticmethod
     @enforce_types
@@ -147,28 +103,10 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def sign_message(
-        wallet: Wallet,
-        msg: str,
-        nonce: Optional[Union[str, int]] = None,
-        provider_uri: Optional[str] = None,
-    ) -> str:
-        if nonce is None:
-            nonce = str(DataServiceProvider.get_nonce(wallet.address, provider_uri))
+    def sign_message(wallet: Wallet, msg: str) -> str:
+        nonce = str(datetime.now().timestamp())
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
-        return sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
-
-    @staticmethod
-    @enforce_types
-    def get_nonce(user_address: str, provider_uri: str) -> Optional[Union[str, int]]:
-        _, url = DataServiceProvider.build_endpoint("nonce", provider_uri=provider_uri)
-        response = DataServiceProvider._http_method(
-            "get", f"{url}?userAddress={user_address}"
-        )
-        if response.status_code != 200:
-            return None
-
-        return response.json()["nonce"]
+        return nonce, sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
 
     @staticmethod
     @enforce_types
@@ -283,11 +221,8 @@ class DataServiceProvider:
         req.prepare_url(service_endpoint, params)
         base_url = req.url
 
-        provider_uri = DataServiceProvider.get_root_uri(service_endpoint)
         for i in indexes:
-            signature = DataServiceProvider.sign_message(
-                wallet, did, provider_uri=provider_uri
-            )
+            signature = DataServiceProvider.sign_message(wallet, did)
             download_url = base_url + f"&signature={signature}&fileIndex={i}"
             logger.info(f"invoke consume endpoint with this url: {download_url}")
             response = DataServiceProvider._http_method(
@@ -303,8 +238,7 @@ class DataServiceProvider:
     def start_compute_job(
         did: str,
         service_endpoint: str,
-        consumer_address: str,
-        signature: str,
+        consumer: Wallet,
         service_id: int,
         order_tx_id: str,
         algorithm_did: Optional[str] = None,
@@ -342,10 +276,9 @@ class DataServiceProvider:
 
         payload = DataServiceProvider._prepare_compute_payload(
             did,
-            consumer_address,
+            consumer,
             service_id,
             order_tx_id,
-            signature=signature,
             algorithm_did=algorithm_did,
             algorithm_meta=algorithm_meta,
             algorithm_tx_id=algorithm_tx_id,
@@ -395,11 +328,7 @@ class DataServiceProvider:
     @staticmethod
     @enforce_types
     def stop_compute_job(
-        did: str,
-        job_id: str,
-        service_endpoint: str,
-        consumer_address: str,
-        signature: str,
+        did: str, job_id: str, service_endpoint: str, consumer: Wallet
     ) -> Dict[str, Any]:
         """
 
@@ -412,17 +341,13 @@ class DataServiceProvider:
         :return: bool whether the job was stopped successfully
         """
         return DataServiceProvider._send_compute_request(
-            "put", did, job_id, service_endpoint, consumer_address, signature
+            "put", did, job_id, service_endpoint, consumer
         )
 
     @staticmethod
     @enforce_types
     def delete_compute_job(
-        did: str,
-        job_id: str,
-        service_endpoint: str,
-        consumer_address: str,
-        signature: str,
+        did: str, job_id: str, service_endpoint: str, consumer: Wallet
     ) -> Dict[str, str]:
         """
 
@@ -435,17 +360,13 @@ class DataServiceProvider:
         :return: bool whether the job was deleted successfully
         """
         return DataServiceProvider._send_compute_request(
-            "delete", did, job_id, service_endpoint, consumer_address, signature
+            "delete", did, job_id, service_endpoint, consumer
         )
 
     @staticmethod
     @enforce_types
     def compute_job_status(
-        did: str,
-        job_id: str,
-        service_endpoint: str,
-        consumer_address: str,
-        signature: str,
+        did: str, job_id: str, service_endpoint: str, consumer: Wallet
     ) -> Dict[str, Any]:
         """
 
@@ -459,17 +380,13 @@ class DataServiceProvider:
             status for each job_id that exist for the did
         """
         return DataServiceProvider._send_compute_request(
-            "get", did, job_id, service_endpoint, consumer_address, signature
+            "get", did, job_id, service_endpoint, consumer
         )
 
     @staticmethod
     @enforce_types
     def compute_job_result(
-        did: str,
-        job_id: str,
-        service_endpoint: str,
-        consumer_address: str,
-        signature: str,
+        did: str, job_id: str, service_endpoint: str, consumer: Wallet
     ) -> Dict[str, Any]:
         """
 
@@ -483,17 +400,13 @@ class DataServiceProvider:
             result for each job_id that exist for the did
         """
         return DataServiceProvider._send_compute_request(
-            "get", did, job_id, service_endpoint, consumer_address, signature
+            "get", did, job_id, service_endpoint, consumer
         )
 
     @staticmethod
     @enforce_types
     def compute_job_result_file(
-        job_id: str,
-        index: int,
-        service_endpoint: str,
-        consumer_address: str,
-        signature: str,
+        job_id: str, index: int, service_endpoint: str, consumer: Wallet
     ) -> Dict[str, Any]:
         """
 
@@ -505,12 +418,17 @@ class DataServiceProvider:
 
         :return: dict of job_id to result urls.
         """
+        nonce, signature = DataServiceProvider.sign_message(
+            consumer, f"{job_id}{str(index)}"
+        )
+
         req = PreparedRequest()
         params = {
             "signature": signature,
+            "nonce": nonce,
             "jobId": job_id,
             "index": index,
-            "consumerAddress": consumer_address,
+            "consumerAddress": consumer.address,
         }
 
         req.prepare_url(service_endpoint, params)
@@ -545,13 +463,6 @@ class DataServiceProvider:
         :return: Url, str
         """
         return DataServiceProvider._remove_slash(config.provider_url)
-
-    @staticmethod
-    @enforce_types
-    def get_api_version() -> str:
-        return DataServiceProvider._remove_slash(
-            os.getenv(ENV_PROVIDER_API_VERSION, DataServiceProvider.API_VERSION)
-        )
 
     @staticmethod
     @enforce_types
@@ -597,10 +508,11 @@ class DataServiceProvider:
     @enforce_types
     def get_root_uri(service_endpoint: str) -> str:
         provider_uri = service_endpoint
-        api_version = DataServiceProvider.get_api_version()
-        if api_version in provider_uri:
-            i = provider_uri.find(api_version)
+
+        if "/api" in provider_uri:
+            i = provider_uri.find("/api")
             provider_uri = provider_uri[:i]
+
         parts = provider_uri.split("/")
 
         if len(parts) < 2:
@@ -706,18 +618,16 @@ class DataServiceProvider:
     @staticmethod
     @enforce_types
     def _send_compute_request(
-        http_method: str,
-        did: str,
-        job_id: str,
-        service_endpoint: str,
-        consumer_address: str,
-        signature: str,
+        http_method: str, did: str, job_id: str, service_endpoint: str, consumer: Wallet
     ) -> Dict[str, Any]:
+        nonce, signature = DataServiceProvider.sign_message(consumer, f"{job_id}{did}")
+
         compute_url = (
             f"{service_endpoint}"
             f"?signature={signature}"
+            f"&nonce={nonce}"
             f"&documentId={did}"
-            f"&consumerAddress={consumer_address}"
+            f"&consumerAddress={consumer.address}"
             f'&jobId={job_id or ""}'
         )
         logger.info(f"invoke compute endpoint with this url: {compute_url}")
@@ -748,10 +658,9 @@ class DataServiceProvider:
     @enforce_types
     def _prepare_compute_payload(
         did: str,
-        consumer_address: str,
+        consumer: Wallet,
         service_id: int,
         order_tx_id: str,
-        signature: Optional[str] = None,
         algorithm_did: Optional[str] = None,
         algorithm_meta: Optional[AlgorithmMetadata] = None,
         algorithm_tx_id: Optional[str] = None,
@@ -785,10 +694,15 @@ class DataServiceProvider:
                 if _input.did != did:
                     _input_datasets.append(_input.as_dictionary())
 
+        nonce, signature = DataServiceProvider.sign_message(
+            consumer, f"{consumer.address}{did}"
+        )
+
         payload = {
             "signature": signature,
+            "nonce": nonce,
             "documentId": did,
-            "consumerAddress": consumer_address,
+            "consumerAddress": consumer.address,
             "output": output or dict(),
             "jobId": job_id or "",
             "serviceId": service_id,
@@ -865,10 +779,7 @@ class DataServiceProvider:
             return False
         _, endpoint = DataServiceProvider.build_asset_urls(provider_uri)
 
-        nonce = str(datetime.now().timestamp())
-        signature = DataServiceProvider.sign_message(
-            wallet, did, nonce, provider_uri=provider_uri
-        )
+        nonce, signature = DataServiceProvider.sign_message(wallet, did)
 
         data = {
             "documentId": did,
