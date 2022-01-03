@@ -170,7 +170,7 @@ class Asset:
             )
         trusted_algorithms = [ta for ta in trusted_algorithms if ta["did"] != algo_did]
         trusted_algo_publishers = compute_service.get_trusted_algorithm_publishers()
-        self.update_compute_values_v4(
+        self.update_compute_values(
             trusted_algorithms,
             trusted_algo_publishers,
             allow_network_access=True,
