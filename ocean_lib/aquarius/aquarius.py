@@ -9,6 +9,7 @@ Help to communicate with the metadata store.
 
 import json
 import logging
+import time
 from typing import Optional, Tuple, Union
 
 from enforce_typing import enforce_types
@@ -197,3 +198,18 @@ class Aquarius:
                 raise ValueError("Failed to encrypt asset.")
         except Exception:
             raise ValueError("Failed to encrypt asset.")
+
+    @enforce_types
+    def wait_for_asset(self, did: str, timeout=30):
+        start = time.time()
+        ddo = None
+        while not ddo:
+            ddo = self.get_asset_ddo(did)
+
+            if not ddo:
+                time.sleep(0.2)
+
+            if time.time() - start > timeout:
+                break
+
+        return ddo

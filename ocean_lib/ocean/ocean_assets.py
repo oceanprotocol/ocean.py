@@ -22,19 +22,18 @@ from ocean_lib.models.v4.erc20_token import ERC20Token
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.erc721_token import ERC721Token
 from ocean_lib.models.v4.models_structures import ErcCreateData
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.v4.service import V4Service
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
-from tests.resources.ddo_helpers import build_credentials_dict, wait_for_asset
-from tests.resources.helper_functions import get_address_of_type
 from web3 import Web3
 
 logger = logging.getLogger("ocean")
 
 
 @enforce_types
-class OceanAssetV4:
+class OceanAssets:
     """Ocean asset class for V4."""
 
     def __init__(
@@ -266,7 +265,7 @@ class OceanAssetV4:
         asset.chain_id = self._web3.eth.chain_id
         asset.metadata = metadata
 
-        asset.credentials = credentials if credentials else build_credentials_dict()
+        asset.credentials = credentials if credentials else {"allow": [], "deny": []}
 
         erc20_addresses = []
         services = services or []
@@ -371,6 +370,6 @@ class OceanAssetV4:
         )
 
         # Fetch the asset on chain
-        asset = wait_for_asset(self._metadata_cache_uri, did)
+        asset = self._get_aquarius(self._metadata_cache_uri).wait_for_asset(did)
 
         return asset

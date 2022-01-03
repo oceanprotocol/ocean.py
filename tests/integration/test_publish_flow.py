@@ -7,7 +7,7 @@ from ocean_lib.agreements.service_types import ServiceTypesV4
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.v4.models_structures import ErcCreateData
-from ocean_lib.ocean.v4.ocean_assets import OceanAssetV4
+from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.services.v4.service import V4Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import build_credentials_dict
@@ -42,7 +42,7 @@ def test_publish_flow(web3, config, publisher_wallet):
     erc721_address = registered_event[0].args.newTokenAddress
 
     data_provider = DataServiceProvider
-    asset = OceanAssetV4(config, web3, data_provider)
+    asset = OceanAssets(config, web3, data_provider)
     metadata = {
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
