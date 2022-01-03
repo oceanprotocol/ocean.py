@@ -11,6 +11,7 @@ from web3.datastructures import AttributeDict
 from web3.logs import DISCARD
 
 
+# TODO: needs to be removed, kept for import failure purposes
 class DTFactory(ContractBase):
     CONTRACT_NAME = "DTFactory"
     FIRST_BLOB = "https://example.com/dataset-1"

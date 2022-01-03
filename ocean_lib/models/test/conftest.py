@@ -159,7 +159,7 @@ def make_info(name, private_key_name):
 
 
 @enforce_types
-def _deployAndMintToken(web3: Web3, symbol: str, to_address: str) -> btoken.BToken:
+def _deployAndMintToken(web3: Web3, symbol: str, to_address: str) -> btoken.BTokenBase:
     wallet = get_factory_deployer_wallet(_NETWORK)
     dt_address = DataToken.deploy(
         web3,
@@ -178,4 +178,4 @@ def _deployAndMintToken(web3: Web3, symbol: str, to_address: str) -> btoken.BTok
     token = DataToken(web3, token_address)
     token.mint(to_address, to_wei(1000), wallet)
 
-    return btoken.BToken(web3, token.address)
+    return btoken.BTokenBase(web3, token.address)

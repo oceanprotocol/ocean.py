@@ -3,18 +3,17 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from web3 import exceptions
-
-from ocean_lib.models.v4.bpool import BPool
-from ocean_lib.models.v4.erc20_token import ERC20Token
-from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.v4.models_structures import PoolData
-from ocean_lib.models.v4.side_staking import SideStaking
+from ocean_lib.models.bpool import BPool
+from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.models_structures import PoolData
+from ocean_lib.models.side_staking import SideStaking
 from tests.resources.helper_functions import (
-    get_address_of_type,
     deploy_erc721_erc20,
+    get_address_of_type,
     transfer_ocean_if_balance_lte,
 )
+from web3 import exceptions
 
 
 def test_side_staking(

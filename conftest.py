@@ -7,10 +7,9 @@ import os
 import uuid
 
 import pytest
-
 from ocean_lib.aquarius.aquarius import Aquarius
-from ocean_lib.models.v4.erc20_token import ERC20Token
-from ocean_lib.models.v4.factory_router import FactoryRouter
+from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import get_ether_balance
@@ -23,11 +22,11 @@ from tests.resources.helper_functions import (
     get_example_config,
     get_factory_deployer_wallet,
     get_ganache_wallet,
+    get_provider_wallet,
     get_publisher_ocean_instance,
     get_publisher_wallet,
     get_web3,
     setup_logging,
-    get_provider_wallet,
 )
 
 _NETWORK = "ganache"
@@ -125,10 +124,7 @@ def factory_deployer_wallet():
 
 @pytest.fixture
 def factory_router(web3, config):
-    return FactoryRouter(
-        web3,
-        get_address_of_type(config, "Router"),
-    )
+    return FactoryRouter(web3, get_address_of_type(config, "Router"))
 
 
 @pytest.fixture

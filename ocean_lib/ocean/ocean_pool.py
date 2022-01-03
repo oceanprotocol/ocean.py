@@ -10,7 +10,7 @@ from ocean_lib.exceptions import InsufficientBalance, VerifyTxFailed
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.bpool import BPool
-from ocean_lib.models.btoken import BToken
+from ocean_lib.models.btoken import BTokenBase
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.web3_internal.currency import from_wei, to_wei
@@ -210,7 +210,7 @@ class OceanPool:
         if amount == 0:
             return ""
         pool = BPool(self.web3, pool_address)
-        token = BToken(self.web3, token_address)
+        token = BTokenBase(self.web3, token_address)
         assert token.balanceOf(from_wallet.address) >= amount, (
             f"Insufficient funds, {amount} tokens are required of token address {token_address}, "
             f"but only a balance of {token.balanceOf(from_wallet.address)} is available."
@@ -344,7 +344,7 @@ class OceanPool:
         :return: str transaction id/hash
         """
         dtoken_address = self.get_token_address(pool_address)
-        dt = BToken(self.web3, dtoken_address)
+        dt = BTokenBase(self.web3, dtoken_address)
         if dt.balanceOf(from_wallet.address) < amount:
             raise InsufficientBalance("Insufficient funds for selling DataTokens!")
         if dt.allowance(from_wallet.address, pool_address) < amount:
@@ -396,7 +396,7 @@ class OceanPool:
         """
         assert self._is_valid_pool(pool_address), "The pool address is not valid."
         dt_address = self.get_token_address(pool_address)
-        dt = BToken(self.web3, dt_address)
+        dt = BTokenBase(self.web3, dt_address)
         if dt.balanceOf(from_wallet.address) < max_data_token_amount:
             raise InsufficientBalance(
                 f"Insufficient funds for adding liquidity for {dt.address} datatoken!"
@@ -404,7 +404,7 @@ class OceanPool:
         if dt.allowance(from_wallet.address, pool_address) < max_data_token_amount:
             dt.approve(pool_address, max_data_token_amount, from_wallet=from_wallet)
 
-        OCEAN = BToken(self.web3, self.ocean_address)
+        OCEAN = BTokenBase(self.web3, self.ocean_address)
         if OCEAN.balanceOf(from_wallet.address) < max_OCEAN_amount:
             raise InsufficientBalance(
                 f"Insufficient funds for adding liquidity for {OCEAN.address} OCEAN token!"

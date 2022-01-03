@@ -5,11 +5,8 @@
 from typing import List
 
 from enforce_typing import enforce_types
-
 from ocean_lib.models.bfactory import BFactory
-from ocean_lib.models.v4.models_structures import (
-    Operations,
-)
+from ocean_lib.models.models_structures import Operations
 from ocean_lib.web3_internal.wallet import Wallet
 
 

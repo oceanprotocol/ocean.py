@@ -3,13 +3,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from web3 import exceptions
-
-from ocean_lib.models.v4.erc20_token import ERC20Token
-from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.v4.factory_router import FactoryRouter
+from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import get_address_of_type
+from web3 import exceptions
 
 
 def _create_new_token(web3, publisher_wallet):
@@ -61,11 +60,7 @@ def test_remove_token(web3, factory_router, factory_deployer_wallet, publisher_w
 
 
 def test_fail_remove_token(
-    web3,
-    factory_router,
-    factory_deployer_wallet,
-    consumer_wallet,
-    publisher_wallet,
+    web3, factory_router, factory_deployer_wallet, consumer_wallet, publisher_wallet
 ):
     """Tests that if it fails to remove a token address to the mapping if NOT Router Owner"""
     new_token_address = _create_new_token(web3, publisher_wallet)
@@ -101,11 +96,7 @@ def test_update_opf_fee(
 
 
 def test_fail_update_opf_fee(
-    web3,
-    factory_router,
-    consumer_wallet,
-    factory_deployer_wallet,
-    publisher_wallet,
+    web3, factory_router, consumer_wallet, factory_deployer_wallet, publisher_wallet
 ):
     """Tests that if it fails to update the opf fee if NOT Router Owner"""
 
@@ -168,8 +159,7 @@ def test_fail_add_factory_owner(
 
     with pytest.raises(exceptions.ContractLogicError) as err:
         factory_router.add_factory(
-            another_consumer_wallet.address,
-            factory_deployer_wallet,
+            another_consumer_wallet.address, factory_deployer_wallet
         )
     assert factory_router.factory() == get_address_of_type(
         config, ERC721FactoryContract.CONTRACT_NAME

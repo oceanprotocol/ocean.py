@@ -9,8 +9,6 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_token import DataToken
-from ocean_lib.models.metadata import MetadataContract
-from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import (
@@ -274,11 +272,10 @@ def test_compute_multi_inputs(simple_compute_ddo):
 def test_update_trusted_algorithms(config, web3, algorithm_ddo, asset_with_trusted):
     setup = Setup()
 
-    # FIXME: this is temporary. Metadata needs to support both v3 and v4
-    ddo_address = get_contracts_addresses(config.address_file, "ganache")["v3"][
-        MetadataContract.CONTRACT_NAME
-    ]
-    ddo_registry = MetadataContract(web3, ddo_address)
+    # TODO: outdated, left for inspuration in v4
+    # ddo_address = get_contracts_addresses(config.address_file, "ganache")["v3"]
+    # ddo_registry = MetadataContract(web3, ddo_address)
+    ddo_registry = None
 
     trusted_algo_list = create_publisher_trusted_algorithms(
         [algorithm_ddo.did], setup.publisher_ocean_instance.config.metadata_cache_uri
