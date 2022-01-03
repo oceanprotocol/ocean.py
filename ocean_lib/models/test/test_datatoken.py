@@ -8,7 +8,7 @@ import time
 from unittest.mock import patch
 
 import pytest
-from ocean_lib.assets.asset import V3Asset
+from ocean_lib.assets.asset import Asset
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -251,7 +251,7 @@ def test_verify_order_tx(alice_address, bob_address, alice_ocean, alice_wallet):
         )
 
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
-    asset = V3Asset(json_filename=sample_ddo_path)
+    asset = Asset(json_filename=sample_ddo_path)
     order_tx_id = token.startOrder(
         alice_address, to_wei(1), 1, ZERO_ADDRESS, alice_wallet
     )

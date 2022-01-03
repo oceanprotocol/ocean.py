@@ -5,15 +5,13 @@
 from typing import Optional, Union
 
 from enforce_typing import enforce_types
-from ocean_lib.assets.asset import V3Asset
+from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
-from ocean_lib.assets.v4.asset import V4Asset
 
 
 @enforce_types
 def generate_trusted_algo_dict(
-    asset_or_did: Union[str, V3Asset, V4Asset] = None,
-    metadata_cache_uri: Optional[str] = None,
+    asset_or_did: Union[str, Asset] = None, metadata_cache_uri: Optional[str] = None
 ) -> dict:
     """
     :return: Object as follows:
@@ -25,7 +23,7 @@ def generate_trusted_algo_dict(
     }
     ```
     """
-    if isinstance(asset_or_did, (V3Asset, V4Asset)):
+    if isinstance(asset_or_did, Asset):
         ddo = asset_or_did
     else:
         ddo = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
@@ -50,12 +48,12 @@ def create_publisher_trusted_algorithms(
 
 @enforce_types
 def add_publisher_trusted_algorithm(
-    asset_or_did: Union[str, V3Asset, V4Asset], algo_did: str, metadata_cache_uri: str
+    asset_or_did: Union[str, Asset], algo_did: str, metadata_cache_uri: str
 ) -> list:
     """
     :return: List of trusted algos
     """
-    if isinstance(asset_or_did, (V3Asset, V4Asset)):
+    if isinstance(asset_or_did, Asset):
         asset = asset_or_did
     else:
         asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
@@ -75,14 +73,12 @@ def add_publisher_trusted_algorithm(
 
 @enforce_types
 def add_publisher_trusted_algorithm_publisher(
-    asset_or_did: Union[str, V3Asset, V4Asset],
-    publisher_address: str,
-    metadata_cache_uri: str,
+    asset_or_did: Union[str, Asset], publisher_address: str, metadata_cache_uri: str
 ) -> list:
     """
     :return: List of trusted algo publishers
     """
-    if isinstance(asset_or_did, (V3Asset, V4Asset)):
+    if isinstance(asset_or_did, Asset):
         asset = asset_or_did
     else:
         asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
@@ -97,12 +93,12 @@ def add_publisher_trusted_algorithm_publisher(
 
 @enforce_types
 def remove_publisher_trusted_algorithm(
-    asset_or_did: Union[str, V3Asset, V4Asset], algo_did: str, metadata_cache_uri: str
+    asset_or_did: Union[str, Asset], algo_did: str, metadata_cache_uri: str
 ) -> list:
     """
     :return: List of trusted algos not containing `algo_did`.
     """
-    if isinstance(asset_or_did, (V3Asset, V4Asset)):
+    if isinstance(asset_or_did, Asset):
         asset = asset_or_did
     else:
         asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
@@ -117,14 +113,12 @@ def remove_publisher_trusted_algorithm(
 
 @enforce_types
 def remove_publisher_trusted_algorithm_publisher(
-    asset_or_did: Union[str, V3Asset, V4Asset],
-    publisher_address: str,
-    metadata_cache_uri: str,
+    asset_or_did: Union[str, Asset], publisher_address: str, metadata_cache_uri: str
 ) -> list:
     """
     :return: List of trusted algo publishers not containing `publisher_address`.
     """
-    if isinstance(asset_or_did, (V3Asset, V4Asset)):
+    if isinstance(asset_or_did, Asset):
         asset = asset_or_did
     else:
         asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)

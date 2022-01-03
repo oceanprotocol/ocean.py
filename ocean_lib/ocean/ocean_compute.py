@@ -9,7 +9,7 @@ from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.asset import V3Asset
+from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
 from ocean_lib.config import Config
@@ -21,6 +21,9 @@ from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ocean")
+
+
+# TODO: fix for v4
 
 
 class OceanCompute:
@@ -459,7 +462,7 @@ class OceanCompute:
 
     @enforce_types
     def _get_service_endpoint(
-        self, did: str, asset: Optional[V3Asset] = None
+        self, did: str, asset: Optional[Asset] = None
     ) -> Tuple[str, str]:
         if not asset:
             asset = resolve_asset(did, self._config.metadata_cache_uri)
@@ -470,7 +473,7 @@ class OceanCompute:
 
     @enforce_types
     def _get_compute_result_file_endpoint(
-        self, did: str, asset: Optional[V3Asset] = None
+        self, did: str, asset: Optional[Asset] = None
     ) -> Tuple[str, str]:
         if not asset:
             asset = resolve_asset(did, self._config.metadata_cache_uri)

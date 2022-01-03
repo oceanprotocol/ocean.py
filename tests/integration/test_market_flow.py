@@ -6,7 +6,7 @@
 import os
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.asset import V3Asset
+from ocean_lib.assets.asset import Asset
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_metadata, get_registered_ddo
@@ -30,7 +30,7 @@ def test_market_flow(publisher_wallet, consumer_wallet):
 
     # Register asset
     asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
-    assert isinstance(asset, V3Asset)
+    assert isinstance(asset, Asset)
     assert asset.data_token_address, "The asset does not have a token address."
 
     service = asset.get_service(service_type=ServiceTypes.ASSET_ACCESS)
@@ -110,7 +110,7 @@ def test_payer_market_flow(publisher_wallet, consumer_wallet, another_consumer_w
 
     # Register Asset
     asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
-    assert isinstance(asset, V3Asset)
+    assert isinstance(asset, Asset)
     assert asset.data_token_address, "The asset does not have a token address."
 
     service = asset.get_service(service_type=ServiceTypes.ASSET_ACCESS)

@@ -78,9 +78,9 @@ def test_ocean_assets_download_indexes(publisher_wallet):
         )
 
 
-def test_ocean_assets_download_destination_file(tmpdir):
+def test_ocean_assets_download_destination_file(tmpdir, publisher_wallet):
     """Convert tmpdir: py._path.local.LocalPath to str, satisfy enforce-typing."""
-    ocean_assets_download_destination_file_helper(str(tmpdir))
+    ocean_assets_download_destination_file_helper(str(tmpdir), publisher_wallet)
 
 
 def ocean_assets_download_destination_file_helper(tmpdir, publisher_wallet):
