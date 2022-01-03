@@ -9,9 +9,9 @@ from tests.resources.ddo_helpers import wait_for_ddo
 
 def test_init():
     """Tests initialisation of Aquarius objects."""
-    aqua = Aquarius("http://something/api/v1/aquarius/assets")
+    aqua = Aquarius("http://something/api/aquarius/assets")
     assert (
-        aqua.base_url == "http://something/api/v1/aquarius/assets"
+        aqua.base_url == "http://something/api/aquarius/assets"
     ), "Different URL from the specified one."
 
 
@@ -31,15 +31,6 @@ def test_aqua_functions_for_single_ddo(
 
     res = aquarius_instance.get_asset_ddo(ddo.did)
     assert res.did == ddo.did, "Aquarius could not resolve the did."
-
-
-def test_metadata_invalid(aquarius_instance):
-    """Tests metadata validation failure."""
-    result, errors = aquarius_instance.validate_metadata(
-        {"some_dict": "that is invalid"}
-    )
-    assert result is False
-    assert errors[0]["message"] == "'main' is a required property"
 
 
 def test_invalid_search_query(aquarius_instance):

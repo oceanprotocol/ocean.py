@@ -134,26 +134,6 @@ class Aquarius:
         raise ValueError(f"Unable to search for DDO: {response.content}")
 
     @enforce_types
-    def validate_metadata(self, metadata: dict) -> Tuple[bool, Union[list, dict]]:
-        """
-        Validate that the metadata of your ddo is valid.
-
-        :param metadata: conforming to the Metadata accepted by Ocean Protocol, dict
-        :return: bool
-        """
-        response = self.requests_session.post(
-            f"{self.base_url}/ddo/validate",
-            data=json.dumps(metadata),
-            headers={"content-type": "application/json"},
-        )
-
-        if response.content == b"true\n":
-            return True, []
-
-        parsed_response = response.json()
-        return False, parsed_response
-
-    @enforce_types
     def validate_asset(self, asset: Asset) -> Tuple[bool, Union[list, dict]]:
         """
         Validate the asset.
