@@ -7,15 +7,13 @@ from unittest.mock import Mock
 
 import ecies
 import pytest
-
 from ocean_lib.agreements.file_objects import FilesTypeFactory
-from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
+from ocean_lib.http_requests.requests_session import get_requests_session
 from requests.exceptions import InvalidURL
 from requests.models import Response
-
 from tests.resources.helper_functions import get_publisher_ocean_instance
 from tests.resources.mocks.http_client_mock import (
     HttpClientEmptyMock,
@@ -24,6 +22,7 @@ from tests.resources.mocks.http_client_mock import (
 )
 
 TEST_SERVICE_ENDPOINTS = {
+    "asset_urls": ["GET", "/api/services/assetUrls"],
     "computeDelete": ["DELETE", "/api/v1/services/compute"],
     "computeStart": ["POST", "/api/v1/services/compute"],
     "computeStatus": ["GET", "/api/v1/services/compute"],
@@ -31,6 +30,7 @@ TEST_SERVICE_ENDPOINTS = {
     "computeResult": ["GET", "/api/v1/services/computeResult"],
     "download": ["GET", "/api/v1/services/download"],
     "encrypt": ["POST", "/api/v1/services/encrypt"],
+    "decrypt": ["POST", "/api/services/decrypt"],
     "fileinfo": ["POST", "/api/v1/services/fileinfo"],
     "initialize": ["GET", "/api/v1/services/initialize"],
     "nonce": ["GET", "/api/v1/services/nonce"],
@@ -186,8 +186,8 @@ def test_encrypt(web3, provider_wallet):
         encrypted_files = web3.toBytes(hexstr=encrypted_files)
     decrypted_document = ecies.decrypt(key, encrypted_files)
     decrypted_document_string = decrypted_document.decode("utf-8")
-    assert decrypted_document_string == str(
-        list(map(lambda file: file.from_dict(), [file1, file2]))
+    assert decrypted_document_string == json.dumps(
+        [file1.to_dict(), file2.to_dict()], separators=(",", ":")
     )
 
     # Encrypt a simple string
@@ -357,3 +357,14 @@ def test_build_specific_endpoints(config):
     )
 
     DataSP.get_service_endpoints = original_func
+
+
+def test_check_single_file_info():
+    assert DataSP.check_single_file_info(
+        {"url": "http://www.google.com", "type": "url"},
+        provider_uri="http://172.15.0.4:8030",
+    )
+    assert not DataSP.check_single_file_info(
+        {"url": "http://www.google.com"}, provider_uri="http://172.15.0.4:8030"
+    )
+    assert not DataSP.check_single_file_info({}, provider_uri="http://172.15.0.4:8030")

@@ -9,6 +9,7 @@ import logging
 import os
 import re
 from collections import namedtuple
+from datetime import datetime
 from decimal import Decimal
 from json import JSONDecodeError
 from pathlib import Path
@@ -18,11 +19,10 @@ from unittest.mock import Mock
 import requests
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
-
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.config import Config
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
+from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
 from ocean_lib.web3_internal.currency import to_wei
@@ -678,6 +678,11 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
+    def build_asset_urls(provider_uri: str) -> Tuple[str, str]:
+        return DataServiceProvider.build_endpoint("asset_urls", provider_uri)
+
+    @staticmethod
+    @enforce_types
     def write_file(
         response: Response,
         destination_folder: Union[str, bytes, os.PathLike],
@@ -820,10 +825,9 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def check_single_file_info(file_url: str, provider_uri: str) -> bool:
+    def check_single_file_info(url_object: dict, provider_uri: str) -> bool:
         _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
-        data = {"url": file_url}
-        response = requests.post(endpoint, json=data)
+        response = requests.post(endpoint, json=url_object)
 
         if response.status_code != 200:
             return False
@@ -851,6 +855,35 @@ class DataServiceProvider:
             return ddo_info["valid"]
 
         return False
+
+    @staticmethod
+    @enforce_types
+    def get_asset_urls(
+        did: str, service_id: str, provider_uri: str, wallet: Wallet
+    ) -> None:
+        if not did:
+            return False
+        _, endpoint = DataServiceProvider.build_asset_urls(provider_uri)
+
+        nonce = str(datetime.now().timestamp())
+        signature = DataServiceProvider.sign_message(
+            wallet, did, nonce, provider_uri=provider_uri
+        )
+
+        data = {
+            "documentId": did,
+            "serviceId": service_id,
+            "signature": signature,
+            "nonce": nonce,
+            "publisherAddress": wallet.address,
+        }
+
+        response = requests.get(endpoint, json=data)
+
+        if response.status_code != 200:
+            return None
+
+        return response.json()
 
 
 @enforce_types
