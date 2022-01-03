@@ -57,7 +57,7 @@ def to_32byte_hex(val: int) -> str:
     :param val:
     :return:
     """
-    return Web3.toBytes(val).rjust(32, b"\0")
+    return Web3.toHex(Web3.toBytes(val).rjust(32, b"\0"))
 
 
 @enforce_types

@@ -147,6 +147,62 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
+    def download(
+        did: str,
+        service_id: str,
+        tx_id: str,
+        file_index: int,
+        consumer_wallet: Wallet,
+        download_endpoint: str,
+        userdata: Optional[Dict] = None,
+    ) -> Response:
+
+        payload = {
+            "documentId": did,
+            "serviceId": service_id,
+            "consumerAddress": consumer_wallet.address,
+            "transferTxId": tx_id,
+            "fileIndex": file_index,
+        }
+
+        if userdata:
+            userdata = json.dumps(userdata)
+            payload["userdata"] = userdata
+
+        nonce = str(datetime.now().timestamp())
+        provider_uri = DataServiceProvider.get_root_uri(download_endpoint)
+
+        payload["signature"] = DataServiceProvider.sign_message(
+            consumer_wallet, did, nonce, provider_uri=provider_uri
+        )
+        payload["nonce"] = nonce
+
+        response = DataServiceProvider._http_method(
+            "get",
+            download_endpoint,
+            json=payload,
+            headers={"Content-type": "application/json"},
+        )
+
+        if not response or not hasattr(response, "status_code"):
+            raise Exception("Response not found!")
+
+        if response.status_code != 200:
+            msg = (
+                f"Download asset failed at the downloadEndpoint "
+                f"{download_endpoint}, reason {response.text}, status {response.status_code}"
+            )
+            logger.error(msg)
+            raise Exception(msg)
+
+        logger.info(
+            f"Asset downloaded successfully" f" downloadEndpoint {download_endpoint}"
+        )
+
+        return response
+
+    @staticmethod
+    @enforce_types
     def sign_message(
         wallet: Wallet,
         msg: str,
