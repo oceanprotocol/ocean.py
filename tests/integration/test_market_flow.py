@@ -19,6 +19,7 @@ from tests.resources.helper_functions import (
     get_publisher_wallet,
     mint_tokens_and_wait,
 )
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 
 def test_market_flow():
@@ -103,6 +104,17 @@ def test_market_flow():
     assert (
         orders
     ), f"no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}"
+
+    ######
+    # Publisher can get the urls of the asset
+
+    asset_urls = DataServiceProvider.get_asset_urls(
+        asset.did, str(service.index), "http://172.15.0.4:8030", pub_wallet
+    )
+
+    assert len(asset_urls) == 3
+    for url in asset_urls:
+        assert "10_Monkey_Species_Small" in url
 
 
 def test_payer_market_flow():
