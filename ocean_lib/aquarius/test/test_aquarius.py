@@ -5,6 +5,8 @@
 import pytest
 from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.aquarius.aquarius import Aquarius
+from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -64,6 +66,16 @@ def test_aqua_functions_for_single_ddo(
     res = publisher_ocean_instance.assets.resolve(ddo.did)
     assert res.did == ddo.did, "Aquarius could not resolve the did."
     assert res.did == asset.did, "Aquarius could not resolve the did."
+
+    resolved_asset_from_metadata_cache_uri = resolve_asset(
+        asset.did, metadata_cache_uri=publisher_ocean_instance.config.metadata_cache_uri
+    )
+    assert isinstance(
+        resolved_asset_from_metadata_cache_uri, Asset
+    ), "The resolved asset is not an instance of Asset."
+    assert (
+        resolved_asset_from_metadata_cache_uri.did == asset.did
+    ), "Resolve asset function call is unsuccessful."
 
 
 def test_invalid_search_query(aquarius_instance):
