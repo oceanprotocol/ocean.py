@@ -130,14 +130,18 @@ def test_utilitary_functions_for_trusted_algorithm_publishers(publisher_ocean_in
     assert len(new_publisher_trusted_algo_publishers) == 2
 
     # remove an existing algorithm to publisher_trusted_algorithms list
-    new_publisher_trusted_algo_publishers = remove_publisher_trusted_algorithm_publisher(
-        ddo, "0xABC", publisher_ocean_instance.config.metadata_cache_uri
+    new_publisher_trusted_algo_publishers = (
+        remove_publisher_trusted_algorithm_publisher(
+            ddo, "0xABC", publisher_ocean_instance.config.metadata_cache_uri
+        )
     )
 
     assert len(new_publisher_trusted_algo_publishers) == 1
 
     # remove a trusted algorithm that does not belong to publisher_trusted_algorithms list
-    new_publisher_trusted_algo_publishers = remove_publisher_trusted_algorithm_publisher(
-        ddo, "0xaaaa", publisher_ocean_instance.config.metadata_cache_uri
+    new_publisher_trusted_algo_publishers = (
+        remove_publisher_trusted_algorithm_publisher(
+            ddo, "0xaaaa", publisher_ocean_instance.config.metadata_cache_uri
+        )
     )
     assert len(new_publisher_trusted_algo_publishers) == 1

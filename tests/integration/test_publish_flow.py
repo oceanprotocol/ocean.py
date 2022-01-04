@@ -218,7 +218,7 @@ def test_publish_flow(web3, config, publisher_wallet):
     assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
     assert ddo.datatokens[0]["address"] == erc20_token.address
     assert ddo.credentials == build_credentials_dict()
-    assert ddo.services[1].compute_values["compute"] == compute_values
+    assert ddo.services[1].compute_values == compute_values
 
     # Create an encrypted asset
     erc721_token2, erc20_token2 = deploy_erc721_erc20(
