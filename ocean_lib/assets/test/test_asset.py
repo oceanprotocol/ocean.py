@@ -40,7 +40,7 @@ def test_asset_utils(web3):
     assert isinstance(ddo_dict["services"], list)
     assert ddo_dict["services"] == [
         {
-            "serviceId": "1",
+            "id": "1",
             "type": "access",
             "files": "0x0000",
             "name": "Download service",
@@ -104,6 +104,7 @@ def test_asset_utils(web3):
         services=services,
         credentials=credentials,
         nft=nft,
+        nft_address="0xabc",
         datatokens=data_tokens,
         event=event,
         stats=stats,
@@ -165,10 +166,7 @@ def test_add_service():
         key="services", file_name="ddo_v4_with_compute_service.json"
     )[1]
 
-    assert (
-        ddo.as_dictionary()["services"][1]["serviceId"]
-        == expected_compute_service["serviceId"]
-    )
+    assert ddo.as_dictionary()["services"][1]["id"] == expected_compute_service["id"]
 
     assert (
         ddo.as_dictionary()["services"][1]["name"] == expected_compute_service["name"]
