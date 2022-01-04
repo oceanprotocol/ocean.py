@@ -94,18 +94,19 @@ class Ocean:
         self.compute = OceanCompute(self.config, data_provider)
 
         ocean_address = get_ocean_token_address(self.config.address_file, network)
-        self.pool = OceanPool(
-            self.web3,
-            ocean_address,
-            get_bfactory_address(self.config.address_file, network),
-            get_dtfactory_address(self.config.address_file, network),
-        )
-        self.exchange = OceanExchange(
-            self.web3,
-            ocean_address,
-            FixedRateExchange.configured_address(network, self.config.address_file),
-            self.config,
-        )
+        # FIXME: reinstate after figuring out bfactory and dtfactory
+        # self.pool = OceanPool(
+        #    self.web3,
+        #    ocean_address,
+        #    get_bfactory_address(self.config.address_file, network),
+        #    get_dtfactory_address(self.config.address_file, network),
+        # )
+        # self.exchange = OceanExchange(
+        #    self.web3,
+        #    ocean_address,
+        #    FixedRateExchange.configured_address(network, self.config.address_file),
+        #    self.config,
+        # )
 
         logger.debug("Ocean instance initialized: ")
 

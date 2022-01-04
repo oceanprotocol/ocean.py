@@ -4,7 +4,6 @@
 #
 import json
 import os
-import uuid
 
 import pytest
 from ocean_lib.aquarius.aquarius import Aquarius
@@ -13,7 +12,6 @@ from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import get_ether_balance
-from tests.resources.ddo_helpers import get_metadata
 from tests.resources.helper_functions import (
     get_address_of_type,
     get_another_consumer_wallet,
@@ -93,13 +91,6 @@ def web3():
 @pytest.fixture
 def aquarius_instance(config):
     return Aquarius.get_instance(config.metadata_cache_uri)
-
-
-@pytest.fixture
-def metadata():
-    metadata = get_metadata()
-    metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    return metadata
 
 
 @pytest.fixture

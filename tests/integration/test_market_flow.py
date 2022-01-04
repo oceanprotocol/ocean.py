@@ -9,7 +9,7 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.currency import to_wei
-from tests.resources.ddo_helpers import get_metadata, get_registered_ddo
+from tests.resources.ddo_helpers import get_registered_ddo
 from tests.resources.helper_functions import (
     get_another_consumer_ocean_instance,
     get_consumer_ocean_instance,
@@ -29,7 +29,9 @@ def test_market_flow(publisher_wallet, consumer_wallet):
     consumer_ocean = get_consumer_ocean_instance()
 
     # Register asset
-    asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
+    # TODO was get_metadata, but obsolete
+    # asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
+    asset = None
     assert isinstance(asset, Asset)
     assert asset.data_token_address, "The asset does not have a token address."
 
@@ -109,7 +111,10 @@ def test_payer_market_flow(publisher_wallet, consumer_wallet, another_consumer_w
     another_consumer_ocean = get_another_consumer_ocean_instance(use_provider_mock=True)
 
     # Register Asset
-    asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
+    # Register asset
+    # TODO was get_metadata, but obsolete
+    # asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
+    asset = None
     assert isinstance(asset, Asset)
     assert asset.data_token_address, "The asset does not have a token address."
 

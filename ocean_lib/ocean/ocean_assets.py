@@ -373,3 +373,6 @@ class OceanAssets:
         asset = self._get_aquarius(self._metadata_cache_uri).wait_for_asset(did)
 
         return asset
+
+    def resolve(self, did: str):
+        return self._get_aquarius(self._metadata_cache_uri).get_asset_ddo(did)
