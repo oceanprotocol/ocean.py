@@ -120,3 +120,4 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet, provider_
         download_endpoint="http://172.15.0.4:8030/api/services/download",
     )
     assert response
+    assert response.status_code == 200

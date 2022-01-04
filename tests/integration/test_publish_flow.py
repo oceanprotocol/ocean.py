@@ -172,7 +172,7 @@ def test_publish_flow(web3, config, publisher_wallet):
     )
 
     access_service = V4Service(
-        service_id="1",
+        service_id="0",
         service_type=ServiceTypesV4.ASSET_ACCESS,
         service_endpoint=f"{data_provider.get_url(config)}/api/services/download",
         data_token=erc20_token.address,
@@ -192,7 +192,7 @@ def test_publish_flow(web3, config, publisher_wallet):
         "allowNetworkAccess": True,
     }
     compute_service = V4Service(
-        service_id="2",
+        service_id="1",
         service_type=ServiceTypesV4.CLOUD_COMPUTE,
         service_endpoint=f"{data_provider.get_url(config)}/api/services/compute",
         data_token=erc20_token.address,
