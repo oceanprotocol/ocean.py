@@ -70,7 +70,7 @@ class Service:
             sd.pop("datatokenAddress", None),
             sd.pop("files", None),
             sd.pop("timeout", None),
-            sd,
+            sd.pop("compute", None),
             sd.pop("name", None),
             sd.pop("description", None),
         )
@@ -98,12 +98,15 @@ class Service:
         trusted_algos = [
             ta for ta in initial_trusted_algos_v4 if ta["did"] != algo_ddo.did
         ]
+        initial_count = len(trusted_algos)
+
         trusted_algos.append(generated_trusted_algo_dict)
 
         # update with the new list
         self.compute_values["publisherTrustedAlgorithms"] = trusted_algos
-        assert len(self.compute_values["publisherTrustedAlgorithms"]) > len(
-            initial_trusted_algos_v4
+
+        assert (
+            len(self.compute_values["publisherTrustedAlgorithms"]) > initial_count
         ), "New trusted algorithm was not added. Failed when updating the privacy key. "
 
         return trusted_algos
@@ -117,8 +120,8 @@ class Service:
         if publisher_address in trusted_algo_publishers:
             return trusted_algo_publishers
 
-        trusted_algo_publishers.append(publisher_address)
         initial_len = len(trusted_algo_publishers)
+        trusted_algo_publishers.append(publisher_address)
 
         # update with the new list
         self.compute_values[

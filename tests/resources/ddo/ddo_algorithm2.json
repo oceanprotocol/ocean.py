@@ -1,0 +1,68 @@
+{
+  "@context": ["https://w3id.org/did/v1"],
+  "id": "did:op:ACce67694eD2848dd683c651Dab7Af823b7dd123",
+  "version": "4.0.0",
+  "chainId": 8996,
+  "nftAddress": "0xabc",
+  "metadata": {
+    "created": "2020-11-15T12:27:48Z",
+    "updated": "2021-05-17T21:58:02Z",
+    "description": "Sample description",
+    "name": "Sample asset",
+    "type": "algorithm",
+    "author": "OPF",
+    "license": "https://market.oceanprotocol.com/terms",
+    "algorithm": {
+        "container": {
+            "entrypoint": "node $ALGO",
+          "  image": "node",
+          "  tag": "10"
+        }
+    }
+  },
+  "services": [
+    {
+      "id": "1",
+      "type": "compute",
+      "files": "0x0000",
+      "name": "Download service",
+      "description": "Download service",
+      "datatokenAddress": "0x123",
+      "serviceEndpoint": "https://myprovider.com",
+      "timeout": 0
+    }
+  ],
+  "credentials": {
+    "allow": [ ],
+    "deny": [ ]
+  },
+  "nft": {
+    "address": "0x000000",
+    "name": "Ocean Protocol Asset v4",
+    "symbol": "OCEAN-A-v4",
+    "owner": "0x0000000",
+    "state": 0,
+    "created": "2000-10-31T01:30:00"
+  },
+
+  "datatokens": [
+    {
+      "address": "0x000000",
+      "name": "Datatoken 1",
+      "symbol": "DT-1",
+      "serviceId": "1"
+    }
+  ],
+
+  "event": {
+    "tx": "0x8d127de58509be5dfac600792ad24cc9164921571d168bff2f123c7f1cb4b11c",
+    "block": 12831214,
+    "from": "0xAcca11dbeD4F863Bb3bC2336D3CE5BAC52aa1f83",
+    "contract": "0x1a4b70d8c9DcA47cD6D0Fb3c52BB8634CA1C0Fdf",
+    "datetime": "2000-10-31T01:30:00"
+  },
+
+  "stats": {
+    "consumes": 4
+  }
+}

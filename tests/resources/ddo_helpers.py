@@ -48,23 +48,25 @@ def get_sample_ddo(file_name="ddo_v4_sample.json") -> dict:
     return json.loads(ddo)
 
 
-def get_sample_ddo_with_compute_service() -> dict:
-    path = get_resource_path("ddo", "ddo_v4_with_compute_service.json")
+def get_sample_ddo_with_compute_service(
+    filename="ddo_v4_with_compute_service.json"
+) -> dict:
+    path = get_resource_path("ddo", filename)
     with open(path, "r") as file_handle:
         ddo = file_handle.read()
     return json.loads(ddo)
 
 
-def get_sample_algorithm_ddo_dict() -> dict:
-    path = get_resource_path("ddo", "ddo_algorithm.json")
+def get_sample_algorithm_ddo_dict(filename="ddo_algorithm.json") -> dict:
+    path = get_resource_path("ddo", filename)
     assert path.exists(), f"{path} does not exist!"
     with open(path, "r") as file_handle:
         metadata = file_handle.read()
     return json.loads(metadata)
 
 
-def get_sample_algorithm_ddo() -> Asset:
-    return Asset(json_filename=get_resource_path("ddo", "ddo_algorithm.json"))
+def get_sample_algorithm_ddo(filename="ddo_algorithm.json") -> Asset:
+    return Asset.from_dict(get_sample_algorithm_ddo_dict(filename))
 
 
 def get_algorithm_meta():
