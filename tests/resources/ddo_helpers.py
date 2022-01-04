@@ -92,14 +92,6 @@ def get_access_service(
     )
 
 
-def get_computing_metadata() -> dict:
-    path = get_resource_path("ddo", "computing_metadata.json")
-    assert path.exists(), f"{path} does not exist!"
-    with open(path, "r") as file_handle:
-        metadata = file_handle.read()
-    return json.loads(metadata)
-
-
 def get_registered_ddo(
     ocean_instance,
     metadata,

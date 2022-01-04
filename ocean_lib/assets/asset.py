@@ -99,6 +99,7 @@ class Asset:
     def from_dict(cls, dictionary: dict) -> "Asset":
         """Import a JSON dict into this Asset."""
         values = copy.deepcopy(dictionary)
+
         services = (
             []
             if "services" not in values
