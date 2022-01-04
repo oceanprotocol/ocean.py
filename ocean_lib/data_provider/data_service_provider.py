@@ -147,6 +147,43 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
+    def initialize(
+        did: str,
+        service_id: str,
+        file_index: int,
+        consumer_address: str,
+        service_endpoint: str,
+        userdata: Optional[Dict] = None,
+    ) -> Response:
+        initialize_endpoint = service_endpoint
+        initialize_endpoint += f"?documentId={did}"
+        initialize_endpoint += f"&serviceId={service_id}"
+        initialize_endpoint += f"&fileIndex={file_index}"
+        initialize_endpoint += f"&consumerAddress={consumer_address}"
+        if userdata:
+            initialize_endpoint += f"&userdata={json.dumps(userdata)}"
+        response = DataServiceProvider._http_method("get", initialize_endpoint)
+
+        if not response or not hasattr(response, "status_code"):
+            raise Exception("Response not found!")
+
+        if response.status_code != 200:
+            msg = (
+                f"Initialize service failed at the initializeEndpoint "
+                f"{initialize_endpoint}, reason {response.text}, status {response.status_code}"
+            )
+            logger.error(msg)
+            raise Exception(msg)
+
+        logger.info(
+            f"Service initialized successfully"
+            f" initializeEndpoint {initialize_endpoint}"
+        )
+
+        return response
+
+    @staticmethod
+    @enforce_types
     def download(
         did: str,
         service_id: str,
@@ -154,6 +191,7 @@ class DataServiceProvider:
         file_index: int,
         consumer_wallet: Wallet,
         download_endpoint: str,
+        destination_folder: Union[str, Path],
         userdata: Optional[Dict] = None,
     ) -> Response:
 
@@ -183,6 +221,8 @@ class DataServiceProvider:
             json=payload,
             headers={"Content-type": "application/json"},
         )
+        file_name = DataServiceProvider._get_file_name(response)
+        DataServiceProvider.write_file(response, destination_folder, file_name)
 
         if not response or not hasattr(response, "status_code"):
             raise Exception("Response not found!")

@@ -2,6 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import os
 
 from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.agreements.service_types import ServiceTypesV4
@@ -52,14 +53,14 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet, provider_
         "author": "OPF",
         "license": "https://market.oceanprotocol.com/terms",
     }
-    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
-    file2_dict = {"type": "url", "url": "https://url.com/file2.csv", "method": "GET"}
-    file1 = FilesTypeFactory(file1_dict)
-    file2 = FilesTypeFactory(file2_dict)
+    file_url = "https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt"
+    file_dict = {"type": "url", "url": file_url, "method": "GET"}
+    file = FilesTypeFactory(file_dict)
+    files = [file]
 
     # Encrypt file objects
     encrypt_response = data_provider.encrypt(
-        [file1, file2], "http://172.15.0.4:8030/api/services/encrypt"
+        files, "http://172.15.0.4:8030/api/services/encrypt"
     )
     encrypted_files = encrypt_response.content.decode("utf-8")
 
@@ -104,6 +105,17 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet, provider_
         from_wallet=publisher_wallet,
     )
 
+    # Initialize service
+    response = data_provider.initialize(
+        did=ddo.did,
+        service_id=service.id,
+        file_index=0,
+        consumer_address=consumer_wallet.address,
+        service_endpoint="http://172.15.0.4:8030/api/services/initialize",
+    )
+    assert response
+    assert response.status_code == 200
+
     # Start order for consumer
     tx_id = erc20_token.start_order(
         consumer=consumer_wallet.address,
@@ -111,13 +123,24 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet, provider_
         provider_fees=get_provider_fees(),
         from_wallet=consumer_wallet,
     )
-    response = data_provider.download(
-        did=ddo.did,
-        service_id=service.id,
-        tx_id=tx_id,
-        file_index=0,
-        consumer_wallet=consumer_wallet,
-        download_endpoint="http://172.15.0.4:8030/api/services/download",
-    )
-    assert response
-    assert response.status_code == 200
+    # Download file
+    destination = config.downloads_path
+    if not os.path.isabs(destination):
+        destination = os.path.abspath(destination)
+    if not os.path.exists(destination):
+        os.mkdir(destination)
+
+    for i in range(len(files)):
+        response = data_provider.download(
+            did=ddo.did,
+            service_id=service.id,
+            tx_id=tx_id,
+            file_index=i,
+            consumer_wallet=consumer_wallet,
+            download_endpoint="http://172.15.0.4:8030/api/services/download",
+            destination_folder=destination,
+        )
+        assert response
+        assert response.status_code == 200
+
+    assert len(os.listdir(destination)) >= 1, "The asset folder is empty."
