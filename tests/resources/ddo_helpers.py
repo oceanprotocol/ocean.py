@@ -49,7 +49,7 @@ def get_sample_ddo(file_name="ddo_v4_sample.json") -> dict:
 
 
 def get_sample_ddo_with_compute_service(
-    filename="ddo_v4_with_compute_service.json"
+    filename="ddo_v4_with_compute_service.json",
 ) -> dict:
     path = get_resource_path("ddo", filename)
     with open(path, "r") as file_handle:
