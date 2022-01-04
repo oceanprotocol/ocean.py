@@ -393,3 +393,19 @@ class OceanAssets:
             )
             if "_source" in ddo_dict
         ]
+
+    @enforce_types
+    def query(self, query: dict) -> list:
+        """
+        Search an asset in oceanDB using search query.
+        :param query: dict with query parameters
+            (e.g.) https://github.com/oceanprotocol/aquarius/blob/develop/docs/for_api_users/API.md
+        :return: List of assets that match with the query.
+        """
+        logger.info(f"Searching asset query: {query}")
+        aquarius = self._get_aquarius(self._metadata_cache_uri)
+        return [
+            Asset.from_dict(ddo_dict["_source"])
+            for ddo_dict in aquarius.query_search(query)
+            if "_source" in ddo_dict
+        ]

@@ -14,7 +14,6 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import InsufficientBalance
 from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from tests.resources.helper_functions import get_address_of_type
 from tests.resources.ddo_helpers import (
     get_computing_metadata,
     get_resource_path,
@@ -23,6 +22,7 @@ from tests.resources.ddo_helpers import (
     wait_for_ddo,
     wait_for_update,
 )
+from tests.resources.helper_functions import get_address_of_type
 
 # TODO: fix these, they were previously for v3
 
@@ -67,11 +67,7 @@ def create_asset(ocean, publisher, config, metadata=None):
     return ddo
 
 
-def test_register_asset(
-    publisher_ocean_instance,
-    publisher_wallet,
-    consumer_wallet,
-):
+def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wallet):
     """Test various paths for asset registration.
 
     Happy paths are tested in the publish flow."""
@@ -151,7 +147,7 @@ def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet, config)
                     "query": {
                         "query_string": {
                             "query": identifier,
-                            "fields": ["service.attributes.main.name"],
+                            "fields": ["metadata.name"],
                         }
                     }
                 }
@@ -166,7 +162,7 @@ def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet, config)
                     "query": {
                         "query_string": {
                             "query": "Gorilla",
-                            "fields": ["service.attributes.main.name"],
+                            "fields": ["metadata.name"],
                         }
                     }
                 }
