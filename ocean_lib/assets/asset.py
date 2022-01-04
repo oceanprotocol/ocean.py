@@ -5,274 +5,49 @@
 import copy
 import json
 import logging
-from pathlib import Path
-from typing import Any, List, Optional, Union
+from typing import List, Optional
 
 from enforce_typing import enforce_types
-from eth_account.account import Account
-from eth_utils import add_0x_prefix
-from ocean_lib.agreements.consumable import ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.credentials import AddressCredential
-from ocean_lib.assets.did import did_to_id
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.services.service import Service
-from ocean_lib.utils.utilities import get_timestamp, create_checksum
-from ocean_lib.web3_internal.wallet import Wallet
+from ocean_lib.utils.utilities import create_checksum
 
 logger = logging.getLogger("ddo")
 
 
-class V3Asset:
-    """Asset class to create, import, export, validate Asset/DDO objects."""
+@enforce_types
+class Asset:
+    """Asset class to create, import, export, validate Asset/DDO objects for V4."""
 
     @enforce_types
     def __init__(
         self,
         did: Optional[str] = None,
-        json_text: Optional[str] = None,
-        json_filename: Optional[Path] = None,
-        created: Optional[Any] = None,
-        dictionary: Optional[dict] = None,
+        context: Optional[list] = None,
+        chain_id: Optional[int] = None,
+        nft_address: Optional[str] = None,
+        metadata: Optional[dict] = None,
+        services: Optional[list] = None,
+        credentials: Optional[dict] = None,
+        nft: Optional[dict] = None,
+        datatokens: Optional[list] = None,
+        event: Optional[dict] = None,
+        stats: Optional[dict] = None,
     ) -> None:
-        """Clear the DDO data values."""
+
         self.did = did
-        self.services = []
-        self.proof = None
-        self.credentials = {}
-        self.created = created if created else get_timestamp()
-        self.other_values = {}
-
-        if not json_text and json_filename:
-            with open(json_filename, "r") as file_handle:
-                json_text = file_handle.read()
-
-        if json_text:
-            self._read_dict(json.loads(json_text))
-        elif dictionary:
-            self._read_dict(dictionary)
-
-    @property
-    @enforce_types
-    def is_disabled(self) -> bool:
-        """Returns whether the asset is disabled."""
-        return self.is_flag_enabled("isOrderDisabled")
-
-    @property
-    @enforce_types
-    def is_enabled(self) -> bool:
-        """Returns the opposite of is_disabled, for convenience."""
-        return not self.is_disabled
-
-    @property
-    @enforce_types
-    def is_retired(self) -> bool:
-        """Returns whether the asset is retired."""
-        return self.is_flag_enabled("isRetired")
-
-    @property
-    @enforce_types
-    def is_listed(self) -> bool:
-        """Returns whether the asset is listed."""
-        return self.is_flag_enabled("isListed")
-
-    @property
-    @enforce_types
-    def asset_id(self) -> Optional[str]:
-        """The asset id part of the DID"""
-        if not self.did:
-            return None
-        return add_0x_prefix(did_to_id(self.did))
-
-    @property
-    @enforce_types
-    def publisher(self) -> Optional[str]:
-        return self.proof.get("creator") if self.proof else None
-
-    @property
-    @enforce_types
-    def metadata(self) -> Optional[dict]:
-        """Get the metadata service."""
-        metadata_service = self.get_service(ServiceTypes.METADATA)
-        return metadata_service.attributes if metadata_service else None
-
-    @property
-    @enforce_types
-    def encrypted_files(self) -> Optional[dict]:
-        """Return encryptedFiles field in the base metadata."""
-        return self.metadata["encryptedFiles"]
-
-    @enforce_types
-    def add_service(
-        self,
-        service_type: Union[str, Service],
-        service_endpoint: Optional[str] = None,
-        values: Optional[dict] = None,
-        index: Optional[int] = None,
-    ) -> None:
-        """
-        Add a service to the list of services on the DDO.
-
-        :param service_type: Service
-        :param service_endpoint: Service endpoint, str
-        :param values: Python dict with index, templateId, serviceAgreementContract,
-        list of conditions and purchase endpoint.
-        """
-        if isinstance(service_type, Service):
-            service = service_type
-        else:
-            values = copy.deepcopy(values) if values else {}
-            service = Service(
-                service_endpoint,
-                service_type,
-                values.pop("attributes", None),
-                values,
-                index,
-            )
-        logger.debug(
-            f"Adding service with service type {service_type} with did {self.did}"
-        )
-        self.services.append(service)
-
-    @enforce_types
-    def as_text(self, is_proof: bool = True, is_pretty: bool = False) -> str:
-        """Return the DDO as a JSON text.
-
-        :param if is_proof: if False then do not include the 'proof' element.
-        :param is_pretty: If True return dictionary in a prettier way, bool
-        :return: str
-        """
-        data = self.as_dictionary(is_proof)
-        if is_pretty:
-            return json.dumps(data, indent=2, separators=(",", ": "))
-
-        return json.dumps(data)
-
-    @enforce_types
-    def as_dictionary(self, is_proof: bool = True) -> dict:
-        """
-        Return the DDO as a JSON dict.
-
-        :param if is_proof: if False then do not include the 'proof' element.
-        :return: dict
-        """
-        if self.created is None:
-            self.created = get_timestamp()
-
-        data = {
-            "@context": "https://w3id.org/did/v1",
-            "id": self.did,
-            "created": self.created,
-        }
-
-        data["publicKey"] = [
-            {"id": self.did, "type": "EthereumECDSAKey", "owner": self.publisher}
-        ]
-
-        data["authentication"] = [
-            {"type": "RsaSignatureAuthentication2018", "publicKey": self.did}
-        ]
-
-        if self.services:
-            data["service"] = [service.as_dictionary() for service in self.services]
-        if self.proof and is_proof:
-            data["proof"] = self.proof
-        if self.credentials:
-            data["credentials"] = self.credentials
-        if self.other_values:
-            data.update(self.other_values)
-
-        return data
-
-    @enforce_types
-    def _read_dict(self, dictionary: dict) -> None:
-        """Import a JSON dict into this Asset."""
-        values = copy.deepcopy(dictionary)
-        id_key = "id" if "id" in values else "_id"
-        self.did = values.pop(id_key)
-        self.created = values.pop("created", None)
-
-        if "service" in values:
-            self.services = []
-            for value in values.pop("service"):
-                if isinstance(value, str):
-                    value = json.loads(value)
-
-                service = Service.from_json(value)
-                self.services.append(service)
-        if "proof" in values:
-            self.proof = values.pop("proof")
-        if "credentials" in values:
-            self.credentials = values.pop("credentials")
-
-        self.other_values = values
-
-    @enforce_types
-    def add_proof(
-        self, checksums: dict, publisher_account: Union[Account, Wallet]
-    ) -> None:
-        """Add a proof to the Asset, based on the public_key id/index and signed with the private key
-        add a static proof to the Asset, based on one of the public keys.
-
-        :param checksums: dict with the checksum of the main attributes of each service, dict
-        :param publisher_account: account of the publisher, account
-        """
-        self.proof = {
-            "type": "DDOIntegritySignature",
-            "created": get_timestamp(),
-            "creator": publisher_account.address,
-            "signatureValue": "",
-            "checksum": checksums,
-        }
-
-    @enforce_types
-    def get_service(self, service_type: str) -> Optional[Service]:
-        """Return a service using."""
-        return next(
-            (service for service in self.services if service.type == service_type), None
-        )
-
-    @enforce_types
-    def get_service_by_index(self, index: int) -> Optional[Service]:
-        """
-        Get service for a given index.
-
-        :param index: Service id, str
-        :return: Service
-        """
-        return next(
-            (service for service in self.services if service.index == index), None
-        )
-
-    @enforce_types
-    def enable(self) -> None:
-        """Enables asset for ordering."""
-        self.disable_flag("isOrderDisabled")
-
-    @enforce_types
-    def disable(self) -> None:
-        """Disables asset from ordering."""
-        self.enable_flag("isOrderDisabled")
-
-    @enforce_types
-    def retire(self) -> None:
-        """Retires an asset."""
-        self.enable_flag("isRetired")
-
-    @enforce_types
-    def unretire(self) -> None:
-        """Unretires an asset."""
-        self.disable_flag("isRetired")
-
-    @enforce_types
-    def list(self) -> None:
-        """Lists a previously unlisted asset."""
-        self.enable_flag("isListed")
-
-    @enforce_types
-    def unlist(self) -> None:
-        """Unlists an asset."""
-        self.disable_flag("isListed")
+        self.context = context or ["https://w3id.org/did/v1"]
+        self.chain_id = chain_id
+        self.nft_address = nft_address
+        self.metadata = metadata
+        self.version = "4.0.0"
+        self.services = services or []
+        self.credentials = credentials or {}
+        self.nft = nft
+        self.datatokens = datatokens
+        self.event = event
+        self.stats = stats
 
     @property
     @enforce_types
@@ -291,7 +66,7 @@ class V3Asset:
     @property
     @enforce_types
     def denied_addresses(self) -> list:
-        """Lists addresesses that are explicitly denied in credentials."""
+        """Lists addresses that are explicitly denied in credentials."""
         manager = AddressCredential(self)
         return manager.get_addresses_of_class("deny")
 
@@ -319,120 +94,107 @@ class V3Asset:
         manager = AddressCredential(self)
         manager.remove_address_from_access_class(address, "deny")
 
+    @classmethod
     @enforce_types
-    def is_consumable(
-        self,
-        credential: Optional[dict] = None,
-        with_connectivity_check: bool = True,
-        provider_uri: Optional[str] = None,
-    ) -> bool:
-        """Checks whether an asset is consumable and returns a ConsumableCode."""
-        if self.is_disabled or self.is_retired:
-            return ConsumableCodes.ASSET_DISABLED
+    def from_dict(cls, dictionary: dict) -> "Asset":
+        """Import a JSON dict into this Asset."""
+        values = copy.deepcopy(dictionary)
+        services = (
+            []
+            if "services" not in values
+            else [Service.from_dict(value) for value in values.pop("services")]
+        )
+        return cls(
+            values.pop("id"),
+            values.pop("@context"),
+            values.pop("chainId"),
+            values.pop("nftAddress"),
+            values.pop("metadata", None),
+            services,
+            values.pop("credentials", None),
+            values.pop("nft", None),
+            values.pop("datatokens", None),
+            values.pop("event", None),
+            values.pop("stats", None),
+        )
 
-        if (
-            with_connectivity_check
-            and provider_uri
-            and not DataServiceProvider.check_asset_file_info(
-                self.did, DataServiceProvider.get_root_uri(provider_uri)
+    @enforce_types
+    def as_dictionary(self) -> dict:
+        """
+        Return the DDO as a JSON dict.
+
+        :return: dict
+        """
+
+        data = {
+            "@context": self.context,
+            "id": self.did,
+            "version": self.version,
+            "chainId": self.chain_id,
+        }
+
+        data["nftAddress"] = self.nft_address
+
+        services = [value.as_dictionary() for value in self.services]
+        args = ["metadata", "credentials", "nft", "datatokens", "event", "stats"]
+        attrs = list(
+            filter(
+                lambda attr: not not attr[1],
+                map(lambda attr: (attr, getattr(self, attr, None)), args),
             )
-        ):
-            return ConsumableCodes.CONNECTIVITY_FAIL
-
-        # to be parameterized in the future, can implement other credential classes
-        manager = AddressCredential(self)
-
-        if manager.requires_credential():
-            return manager.validate_access(credential)
-
-        return ConsumableCodes.OK
+        )
+        attrs.append(("services", services))
+        data.update(attrs)
+        return data
 
     @enforce_types
-    def enable_flag(self, flag_name: str) -> None:
+    def add_service(self, service: Service) -> None:
         """
-        :return: None
+        Add a service to the list of services on the V4 DDO.
+
+        :param service: To add service, Service
         """
-        metadata_service = self.get_service(ServiceTypes.METADATA)
 
-        if not metadata_service:
-            return
-
-        if "status" not in metadata_service.attributes:
-            metadata_service.attributes["status"] = {}
-
-        if flag_name == "isListed":  # only one that defaults to True
-            metadata_service.attributes["status"].pop(flag_name)
-        else:
-            metadata_service.attributes["status"][flag_name] = True
+        logger.debug(
+            f"Adding service with service type {service.type} with did {self.did}"
+        )
+        self.services.append(service)
 
     @enforce_types
-    def disable_flag(self, flag_name: str) -> None:
-        """
-        :return: None
-        """
-        metadata_service = self.get_service(ServiceTypes.METADATA)
-
-        if not metadata_service:
-            return
-
-        if "status" not in metadata_service.attributes:
-            metadata_service.attributes["status"] = {}
-
-        if flag_name == "isListed":  # only one that defaults to True
-            metadata_service.attributes["status"][flag_name] = False
-        else:
-            metadata_service.attributes["status"].pop(flag_name)
+    def get_service_by_id(self, service_id: str) -> Service:
+        """Return the Service with the matching id"""
+        return next((service for service in self.services if service.id == service_id))
 
     @enforce_types
-    def is_flag_enabled(self, flag_name: str) -> bool:
-        """
-        :return: `isListed` or `bool` in metadata_service.attributes["status"]
-        """
-        metadata_service = self.get_service(ServiceTypes.METADATA)
-        default = flag_name == "isListed"  # only one that defaults to True
-
-        if not metadata_service or "status" not in metadata_service.attributes:
-            return default
-
-        return metadata_service.attributes["status"].get(flag_name, default)
-
-    @property
-    @enforce_types
-    def data_token_address(self) -> Optional[str]:
-        return self.other_values["dataToken"]
-
-    @data_token_address.setter
-    @enforce_types
-    def data_token_address(self, token_address: str) -> None:
-        self.other_values["dataToken"] = token_address
-
-    @property
-    @enforce_types
-    def values(self) -> dict:
-        return self.other_values.copy()
+    def get_service(self, service_type: str) -> Optional[Service]:
+        """Return the first Service with the given service type."""
+        return next(
+            (service for service in self.services if service.type == service_type), None
+        )
 
     @enforce_types
     def remove_publisher_trusted_algorithm(
         self, compute_service: Service, algo_did: str
     ) -> list:
-        """
-        :return: List of trusted algos not containing `algo_did`.
-        """
-
+        """Returns a trusted algorithms list after removal."""
         trusted_algorithms = compute_service.get_trusted_algorithms()
         if not trusted_algorithms:
             raise ValueError(
                 f"Algorithm {algo_did} is not in trusted algorithms of this asset."
             )
-
         trusted_algorithms = [ta for ta in trusted_algorithms if ta["did"] != algo_did]
         trusted_algo_publishers = compute_service.get_trusted_algorithm_publishers()
-        self.update_compute_privacy(
-            trusted_algorithms, trusted_algo_publishers, False, False
+        self.update_compute_values(
+            trusted_algorithms,
+            trusted_algo_publishers,
+            allow_network_access=True,
+            allow_raw_algorithm=False,
         )
         assert (
-            compute_service.get_trusted_algorithms() == trusted_algorithms
+            self.get_service("compute").compute_values["publisherTrustedAlgorithms"]
+            == trusted_algorithms
         ), "New trusted algorithm was not removed. Failed when updating the list of trusted algorithms. "
+
         return trusted_algorithms
 
     @enforce_types
@@ -447,7 +209,6 @@ class V3Asset:
             tp.lower() for tp in compute_service.get_trusted_algorithm_publishers()
         ]
         publisher_address = publisher_address.lower()
-
         if not trusted_algorithm_publishers:
             raise ValueError(
                 f"Publisher {publisher_address} is not in trusted algorithm publishers of this asset."
@@ -457,13 +218,16 @@ class V3Asset:
             tp for tp in trusted_algorithm_publishers if tp != publisher_address
         ]
         trusted_algorithms = compute_service.get_trusted_algorithms()
-        self.update_compute_privacy(
-            trusted_algorithms, trusted_algorithm_publishers, False, False
+        self.update_compute_values(
+            trusted_algorithms, trusted_algorithm_publishers, True, False
         )
         assert (
-            compute_service.get_trusted_algorithm_publishers()
+            self.get_service("compute").compute_values[
+                "publisherTrustedAlgorithmPublishers"
+            ]
             == trusted_algorithm_publishers
         ), "New trusted algorithm publisher was not removed. Failed when updating the list of trusted algo publishers. "
+
         return trusted_algorithm_publishers
 
     @enforce_types
@@ -472,23 +236,24 @@ class V3Asset:
         return {
             "did": self.did,
             "filesChecksum": create_checksum(
-                algo_metadata.get("encryptedFiles", "")
-                + json.dumps(algo_metadata["main"]["files"], separators=(",", ":"))
+                json.dumps(
+                    self.get_service(ServiceTypes.CLOUD_COMPUTE).files,
+                    separators=(",", ":"),
+                )
             ),
             "containerSectionChecksum": create_checksum(
                 json.dumps(
-                    algo_metadata["main"]["algorithm"]["container"],
-                    separators=(",", ":"),
+                    algo_metadata["algorithm"]["container"], separators=(",", ":")
                 )
             ),
         }
 
     @enforce_types
-    def update_compute_privacy(
+    def update_compute_values(
         self,
         trusted_algorithms: List,
         trusted_algo_publishers: Optional[List],
-        allow_all: bool,
+        allow_network_access: bool,
         allow_raw_algorithm: bool,
     ) -> None:
         """Set the `trusted_algorithms` on the compute service.
@@ -500,7 +265,7 @@ class V3Asset:
         :param trusted_algorithms: list of dicts, each dict contain the keys
             ("containerSectionChecksum", "filesChecksum", "did")
         :param trusted_algo_publishers: list of strings, addresses of trusted publishers
-        :param allow_all: bool -- set to True to allow all published algorithms to run on this dataset
+        :param allow_network_access: bool -- set to True to allow network access to all the algorithms that belong to this dataset
         :param allow_raw_algorithm: bool -- determine whether raw algorithms (i.e. unpublished) can be run on this dataset
         :return: None
         :raises AssertionError if this asset has no `ServiceTypes.CLOUD_COMPUTE` service
@@ -517,14 +282,12 @@ class V3Asset:
                 "did" in ta
             ), f"dict in list of trusted_algorithms is expected to have a `did` key, got {ta.keys()}."
 
-        if not service.attributes["main"].get("privacy"):
-            service.attributes["main"]["privacy"] = {}
+        if not service.compute_values:
+            service.compute_values = {}
 
-        service.attributes["main"]["privacy"][
-            "publisherTrustedAlgorithms"
-        ] = trusted_algorithms
-        service.attributes["main"]["privacy"][
+        service.compute_values["publisherTrustedAlgorithms"] = trusted_algorithms
+        service.compute_values[
             "publisherTrustedAlgorithmPublishers"
         ] = trusted_algo_publishers
-        service.attributes["main"]["privacy"]["allowAllPublishedAlgorithms"] = allow_all
-        service.attributes["main"]["privacy"]["allowRawAlgorithm"] = allow_raw_algorithm
+        service.compute_values["allowNetworkAccess"] = allow_network_access
+        service.compute_values["allowRawAlgorithm"] = allow_raw_algorithm

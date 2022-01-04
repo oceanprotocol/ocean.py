@@ -5,15 +5,6 @@
 """Agreements module."""
 
 
-class ServiceTypes:
-    """Types of Service allowed in ocean protocol DDO services."""
-
-    AUTHORIZATION = "authorization"
-    METADATA = "metadata"
-    ASSET_ACCESS = "access"
-    CLOUD_COMPUTE = "compute"
-
-
 class ServiceTypesIndices:
     DEFAULT_METADATA_INDEX = 0
     DEFAULT_PROVENANCE_INDEX = 1
@@ -22,7 +13,7 @@ class ServiceTypesIndices:
     DEFAULT_COMPUTING_INDEX = 4
 
 
-class ServiceTypesV4:
+class ServiceTypes:
     """Types of Service allowed in ocean protocol DDO services for V4."""
 
     ASSET_ACCESS = "access"

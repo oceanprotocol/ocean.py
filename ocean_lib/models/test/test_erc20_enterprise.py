@@ -3,15 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from web3 import exceptions
-
-from ocean_lib.models.v4.dispenser import DispenserV4
-from ocean_lib.models.v4.erc20_enterprise import ERC20Enterprise
-from ocean_lib.models.v4.erc20_token import ERC20Token
-from ocean_lib.models.v4.fixed_rate_exchange import FixedRateExchangeV4
-from ocean_lib.models.v4.models_structures import DispenserData, FixedData
+from ocean_lib.models.dispenser import Dispenser
+from ocean_lib.models.erc20_enterprise import ERC20Enterprise
+from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+from ocean_lib.models.models_structures import DispenserData, FixedData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
+from web3 import exceptions
 
 
 def test_buy_from_dispenser_and_order(
@@ -20,7 +19,7 @@ def test_buy_from_dispenser_and_order(
     """Tests buy_from_dispenser_and_order function of the ERC20 Enterprise"""
     mock_usdc_contract = ERC20Token(web3, get_address_of_type(config, "MockUSDC"))
     mock_dai_contract = ERC20Token(web3, get_address_of_type(config, "MockDAI"))
-    dispenser = DispenserV4(web3, get_address_of_type(config, "Dispenser"))
+    dispenser = Dispenser(web3, get_address_of_type(config, "Dispenser"))
 
     _, erc20_enterprise_token = deploy_erc721_erc20(
         web3=web3,
@@ -156,7 +155,7 @@ def test_buy_from_fre_and_order(
     """Tests buy_from_fre_and_order function of the ERC20 Enterprise"""
     mock_usdc_contract = ERC20Token(web3, get_address_of_type(config, "MockUSDC"))
     mock_dai_contract = ERC20Token(web3, get_address_of_type(config, "MockDAI"))
-    fixed_rate_exchange = FixedRateExchangeV4(
+    fixed_rate_exchange = FixedRateExchange(
         web3, get_address_of_type(config, "FixedPrice")
     )
 
@@ -182,8 +181,7 @@ def test_buy_from_fre_and_order(
     )
 
     tx = erc20_enterprise_token.create_fixed_rate(
-        fixed_data=fixed_data,
-        from_wallet=publisher_wallet,
+        fixed_data=fixed_data, from_wallet=publisher_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -273,9 +271,7 @@ def test_buy_from_fre_and_order(
     )
 
     tx = erc20_enterprise_token.buy_from_fre_and_order(
-        order_params=order_params,
-        fre_params=fre_params,
-        from_wallet=publisher_wallet,
+        order_params=order_params, fre_params=fre_params, from_wallet=publisher_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)

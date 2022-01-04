@@ -3,6 +3,7 @@
   "id": "did:op:ACce67694eD2848dd683c651Dab7Af823b7dd123",
   "version": "4.0.0",
   "chainId": 8996,
+  "nftAddress": "0xabc",
   "metadata": {
     "created": "2020-11-15T12:27:48Z",
     "updated": "2021-05-17T21:58:02Z",
@@ -101,10 +102,6 @@
     "from": "0xAcca11dbeD4F863Bb3bC2336D3CE5BAC52aa1f83",
     "contract": "0x1a4b70d8c9DcA47cD6D0Fb3c52BB8634CA1C0Fdf",
     "datetime": "2000-10-31T01:30:00"
-  },
-
-  "purgatory": {
-    "state": false
   },
 
   "stats": {

@@ -14,7 +14,6 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.metadata import MetadataContract
 from ocean_lib.models.order import Order
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
@@ -22,7 +21,6 @@ from ocean_lib.ocean.ocean_exchange import OceanExchange
 from ocean_lib.ocean.ocean_pool import OceanPool
 from ocean_lib.ocean.util import (
     get_bfactory_address,
-    get_contracts_addresses,
     get_dtfactory_address,
     get_ocean_token_address,
     get_web3,
@@ -92,28 +90,23 @@ class Ocean:
             data_provider = DataServiceProvider
 
         network = get_network_name(web3=self.web3)
-        addresses = get_contracts_addresses(self.config.address_file, network)
-        self.assets = OceanAssets(
-            self.config,
-            self.web3,
-            data_provider,
-            addresses.get(MetadataContract.CONTRACT_NAME),
-        )
+        self.assets = OceanAssets(self.config, self.web3, data_provider)
         self.compute = OceanCompute(self.config, data_provider)
 
         ocean_address = get_ocean_token_address(self.config.address_file, network)
-        self.pool = OceanPool(
-            self.web3,
-            ocean_address,
-            get_bfactory_address(self.config.address_file, network),
-            get_dtfactory_address(self.config.address_file, network),
-        )
-        self.exchange = OceanExchange(
-            self.web3,
-            ocean_address,
-            FixedRateExchange.configured_address(network, self.config.address_file),
-            self.config,
-        )
+        # FIXME: reinstate after figuring out bfactory and dtfactory
+        # self.pool = OceanPool(
+        #    self.web3,
+        #    ocean_address,
+        #    get_bfactory_address(self.config.address_file, network),
+        #    get_dtfactory_address(self.config.address_file, network),
+        # )
+        # self.exchange = OceanExchange(
+        #    self.web3,
+        #    ocean_address,
+        #    FixedRateExchange.configured_address(network, self.config.address_file),
+        #    self.config,
+        # )
 
         logger.debug("Ocean instance initialized: ")
 

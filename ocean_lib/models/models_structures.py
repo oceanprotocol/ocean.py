@@ -5,8 +5,8 @@
 
 """Defines NamedTuples `PoolData`, `BPoolData`, `BPoolInitialized`, `FixedData`,
 `DispenserData`, `Operations`"""
-from typing import NamedTuple, List
 from enum import Enum
+from typing import List, NamedTuple
 
 ErcCreateData = NamedTuple(
     "ErcCreateData",
@@ -21,11 +21,7 @@ ErcCreateData = NamedTuple(
 
 PoolData = NamedTuple(
     "PoolData",
-    [
-        ("ss_params", List[int]),
-        ("swap_fees", List[int]),
-        ("addresses", List[str]),
-    ],
+    [("ss_params", List[int]), ("swap_fees", List[int]), ("addresses", List[str])],
 )
 
 BPoolData = NamedTuple(
@@ -53,11 +49,7 @@ BPoolInitialized = NamedTuple(
 
 FixedData = NamedTuple(
     "FixedData",
-    [
-        ("fixed_price_address", str),
-        ("addresses", List[str]),
-        ("uints", List[int]),
-    ],
+    [("fixed_price_address", str), ("addresses", List[str]), ("uints", List[int])],
 )
 
 DispenserData = NamedTuple(

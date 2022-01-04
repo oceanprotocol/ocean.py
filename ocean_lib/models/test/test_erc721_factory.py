@@ -3,11 +3,11 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from ocean_lib.models.v4.dispenser import DispenserV4
-from ocean_lib.models.v4.erc20_token import ERC20Token
-from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.v4.erc721_token import ERC721Token
-from ocean_lib.models.v4.models_structures import ErcCreateData
+from ocean_lib.models.dispenser import Dispenser
+from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.erc721_token import ERC721Token
+from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import get_address_of_type
 from web3 import exceptions
@@ -419,7 +419,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert registered_fixed_rate_event[0].args.exchangeId, "Invalid exchange id."
 
     # Tests creating NFT with ERC20 and with Dispenser successfully.
-    dispenser_address = get_address_of_type(config, DispenserV4.CONTRACT_NAME)
+    dispenser_address = get_address_of_type(config, Dispenser.CONTRACT_NAME)
     dispenser_data = {
         "dispenserAddress": dispenser_address,
         "maxTokens": web3.toWei("1.0", "ether"),
@@ -461,7 +461,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert erc20_token5.contract.caller.name() == "ERC20WithPool"
     assert erc20_token5.symbol() == "ERC20P"
 
-    dispenser = DispenserV4(web3, dispenser_address)
+    dispenser = Dispenser(web3, dispenser_address)
 
     registered_dispenser_event = dispenser.get_event_log(
         ERC721FactoryContract.EVENT_DISPENSER_CREATED,

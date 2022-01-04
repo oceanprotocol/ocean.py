@@ -8,7 +8,7 @@ from typing import List, Tuple
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
 from eth_typing.encoding import HexStr
-from ocean_lib.models.v4.models_structures import DispenserData, FixedData, PoolData
+from ocean_lib.models.models_structures import DispenserData, FixedData, PoolData
 from ocean_lib.utils.utilities import prepare_message_for_ecrecover_in_solidity
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet

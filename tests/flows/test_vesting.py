@@ -3,16 +3,15 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from web3 import exceptions
-
-from ocean_lib.models.v4.bpool import BPool
-from ocean_lib.models.v4.erc20_token import ERC20Token
-from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.v4.erc721_token import ERC721Token
-from ocean_lib.models.v4.models_structures import ErcCreateData, PoolData
-from ocean_lib.models.v4.side_staking import SideStaking
+from ocean_lib.models.bpool import BPool
+from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.erc721_token import ERC721Token
+from ocean_lib.models.models_structures import ErcCreateData, PoolData
+from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import get_address_of_type
+from web3 import exceptions
 
 
 def test_main(
@@ -28,8 +27,7 @@ def test_main(
     vesting_amount = web3.toWei("0.0018", "ether")
 
     erc721_factory = ERC721FactoryContract(
-        web3,
-        get_address_of_type(config, "ERC721Factory"),
+        web3, get_address_of_type(config, "ERC721Factory")
     )
 
     # Tests deploy erc721
@@ -125,10 +123,7 @@ def test_main(
             2500000,
             initial_ocean_liq,
         ],
-        [
-            web3.toWei(0.001, "ether"),
-            web3.toWei(0.001, "ether"),
-        ],
+        [web3.toWei(0.001, "ether"), web3.toWei(0.001, "ether")],
         [
             get_address_of_type(config, "Staking"),
             ocean_contract.address,

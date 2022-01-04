@@ -5,18 +5,16 @@
 """DID Resolver module."""
 
 import logging
-from typing import Union
 
 from enforce_typing import enforce_types
-from ocean_lib.assets.asset import V3Asset
-from ocean_lib.assets.v4.asset import V4Asset
 from ocean_lib.aquarius import Aquarius
+from ocean_lib.assets.asset import Asset
 
 logger = logging.getLogger("keeper")
 
 
 @enforce_types
-def resolve_asset(did: str, metadata_cache_uri: str) -> Union[V3Asset, V4Asset]:
+def resolve_asset(did: str, metadata_cache_uri: str) -> Asset:
     """Resolve a DID to an URL/DDO or later an internal/external DID.
 
     :param did: the asset id to resolve, this is part of the ocean

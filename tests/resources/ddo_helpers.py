@@ -9,8 +9,7 @@ import time
 import uuid
 
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.aquarius import Aquarius
-from ocean_lib.assets.asset import V3Asset
+from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.services.service import Service
@@ -42,45 +41,37 @@ def get_key_from_v4_sample_ddo(key, file_name="ddo_v4_sample.json"):
     return ddo_dict.pop(key, None)
 
 
-def get_sample_ddo(file_name="ddo_sa_sample.json") -> V3Asset:
-    return V3Asset(json_filename=get_resource_path("ddo", file_name))
-
-
-def get_sample_v4_ddo(file_name="ddo_v4_sample.json") -> dict:
+def get_sample_ddo(file_name="ddo_v4_sample.json") -> dict:
     path = get_resource_path("ddo", file_name)
     with open(path, "r") as file_handle:
         ddo = file_handle.read()
     return json.loads(ddo)
 
 
-def get_sample_ddo_with_compute_service() -> V3Asset:
-    return V3Asset(
-        json_filename=get_resource_path("ddo", "ddo_with_compute_service.json")
-    )
-
-
-def get_sample_v4_ddo_with_compute_service() -> dict:
-    path = get_resource_path("ddo", "ddo_v4_with_compute_service.json")
+def get_sample_ddo_with_compute_service(
+    filename="ddo_v4_with_compute_service.json",
+) -> dict:
+    path = get_resource_path("ddo", filename)
     with open(path, "r") as file_handle:
         ddo = file_handle.read()
     return json.loads(ddo)
 
 
-def get_sample_algorithm_ddo_dict() -> dict:
-    path = get_resource_path("ddo", "ddo_algorithm.json")
+def get_sample_algorithm_ddo_dict(filename="ddo_algorithm.json") -> dict:
+    path = get_resource_path("ddo", filename)
     assert path.exists(), f"{path} does not exist!"
     with open(path, "r") as file_handle:
         metadata = file_handle.read()
     return json.loads(metadata)
 
 
-def get_sample_algorithm_ddo() -> V3Asset:
-    return V3Asset(json_filename=get_resource_path("ddo", "ddo_algorithm.json"))
+def get_sample_algorithm_ddo(filename="ddo_algorithm.json") -> Asset:
+    return Asset.from_dict(get_sample_algorithm_ddo_dict(filename))
 
 
 def get_algorithm_meta():
     algorithm_ddo_path = get_resource_path("ddo", "ddo_algorithm.json")
-    algo_main = V3Asset(json_filename=algorithm_ddo_path).metadata["main"]
+    algo_main = Asset(json_filename=algorithm_ddo_path).metadata["main"]
     algo_meta_dict = algo_main["algorithm"].copy()
     algo_meta_dict["url"] = algo_main["files"][0]["url"]
     return AlgorithmMetadata(algo_meta_dict)
@@ -251,21 +242,6 @@ def wait_for_ddo(ocean, did, timeout=30):
             ddo = ocean.assets.resolve(did)
         except ValueError:
             pass
-
-        if not ddo:
-            time.sleep(0.2)
-
-        if time.time() - start > timeout:
-            break
-
-    return ddo
-
-
-def wait_for_asset(metadata_cache_url: str, did: str, timeout=30):
-    start = time.time()
-    ddo = None
-    while not ddo:
-        ddo = Aquarius.get_instance(metadata_cache_url).get_asset_ddo(did)
 
         if not ddo:
             time.sleep(0.2)

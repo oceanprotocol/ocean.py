@@ -2,82 +2,203 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-
 import pytest
-from ocean_lib.models.dispenser import DispenserContract
+from ocean_lib.models.dispenser import Dispenser
+from ocean_lib.models.models_structures import DispenserData
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
+from web3 import exceptions
 
 
-def test_dispenser_status(
-    v3_contracts_addresses, alice_ocean, alice_wallet, bob_wallet
-):
-    dispenser_address = v3_contracts_addresses["Dispenser"]
-    dispenser = DispenserContract(alice_ocean.web3, dispenser_address)
-    token = alice_ocean.create_data_token(
-        "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
-    )
-    assert dispenser.is_active(token.address) is False
+def test_properties(web3, config):
+    """Tests the events' properties."""
+    dispenser_address = get_address_of_type(config, Dispenser.CONTRACT_NAME)
+    dispenser = Dispenser(web3, dispenser_address)
+
     assert (
-        dispenser.owner(token.address) == "0x0000000000000000000000000000000000000000"
+        dispenser.event_TokensDispensed.abi["name"] == Dispenser.EVENT_TOKENS_DISPENSED
     )
-    assert dispenser.is_minter_approved(token.address) is False
-    assert dispenser.is_true_minter(token.address) is False
-    assert dispenser.max_tokens(token.address) == 0
-    assert dispenser.max_balance(token.address) == 0
-    assert dispenser.balance(token.address) == 0
-
-
-def test_dispenser_activation(
-    v3_contracts_addresses, alice_ocean, alice_wallet, bob_wallet
-):
-    dispenser_address = v3_contracts_addresses["Dispenser"]
-    dispenser = DispenserContract(alice_ocean.web3, dispenser_address)
-    token = alice_ocean.create_data_token(
-        "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
+    assert (
+        dispenser.event_OwnerWithdrawed.abi["name"] == Dispenser.EVENT_OWNER_WITHDRAWED
     )
-
-    dispenser.activate(token.address, 100, 100, alice_wallet)
-    assert dispenser.is_active(token.address)
-    assert dispenser.owner(token.address) == alice_wallet.address
-
-    with pytest.raises(ValueError):
-        # try to deactivate a different wallet
-        dispenser.deactivate(token.address, bob_wallet)
-
-    assert dispenser.deactivate(token.address, alice_wallet)
-
-
-def test_dispenser_minting(
-    v3_contracts_addresses, alice_ocean, alice_wallet, bob_wallet
-):
-    dispenser_address = v3_contracts_addresses["Dispenser"]
-    dispenser = DispenserContract(alice_ocean.web3, dispenser_address)
-    token = alice_ocean.create_data_token(
-        "DataToken1", "DT1", from_wallet=alice_wallet, blob="foo_blob"
+    assert (
+        dispenser.event_DispenserAllowedSwapperChanged.abi["name"]
+        == Dispenser.EVENT_ALLOWED_SWAPPER_CHANGED
+    )
+    assert (
+        dispenser.event_DispenserDeactivated.abi["name"]
+        == Dispenser.EVENT_DISPENSER_DEACTIVATED
+    )
+    assert (
+        dispenser.event_DispenserActivated.abi["name"]
+        == Dispenser.EVENT_DISPENSER_ACTIVATED
+    )
+    assert (
+        dispenser.event_DispenserCreated.abi["name"]
+        == Dispenser.EVENT_DISPENSER_CREATED
     )
 
-    # not yet activated
-    assert dispenser.is_dispensable(token.address, 1, alice_wallet) is False
-    with pytest.raises(ValueError):
-        dispenser.dispense(token.address, 1, alice_wallet)
 
-    dispenser.activate(token.address, 1000, 1000, alice_wallet)
+def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_wallet):
+    """Tests the main flow of the Dispenser."""
 
-    dispenser.make_minter(token.address, alice_wallet)
-    assert dispenser.is_minter_approved(token.address)
-    assert dispenser.is_dispensable(token.address, 1, alice_wallet)
-    dispenser.dispense(token.address, 1, alice_wallet)
-    assert dispenser.is_dispensable(token.address, 1, bob_wallet)
-    dispenser.dispense(token.address, 1, bob_wallet)
+    # get the dispenser
+    dispenser = Dispenser(web3, get_address_of_type(config, "Dispenser"))
 
-    # can not dispense 0
-    assert dispenser.is_dispensable(token.address, 0, alice_wallet) is False
-    with pytest.raises(ValueError):
-        dispenser.dispense(token.address, 0, alice_wallet)
+    _, erc20_token = deploy_erc721_erc20(
+        web3, config, publisher_wallet, publisher_wallet, cap=web3.toWei(50, "ether")
+    )
 
-    dispenser.cancel_minter(token.address, alice_wallet)
-    dispenser.owner_withdraw(token.address, alice_wallet)
+    # Tests publisher creates a dispenser with minter role
+    dispenser_data = DispenserData(
+        dispenser_address=dispenser.address,
+        max_balance=web3.toWei(1, "ether"),
+        max_tokens=web3.toWei(1, "ether"),
+        allowed_swapper=ZERO_ADDRESS,
+    )
+    tx = erc20_token.create_dispenser(
+        dispenser_data=dispenser_data, with_mint=True, from_wallet=publisher_wallet
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    assert tx_receipt.status == 1
 
-    # no balance left
-    assert dispenser.is_dispensable(token.address, 1, alice_wallet) is False
-    with pytest.raises(ValueError):
-        dispenser.dispense(token.address, 1, alice_wallet)
+    # Tests publisher gets the dispenser status
+
+    dispenser_status = dispenser.status(erc20_token.address)
+    assert dispenser_status[0] is True
+    assert dispenser_status[1] == publisher_wallet.address
+    assert dispenser_status[2] is True
+
+    # Tests consumer requests more datatokens then allowed transaction reverts
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        dispenser.dispense(
+            data_token=erc20_token.address,
+            amount=web3.toWei(20, "ether"),
+            destination=consumer_wallet.address,
+            from_wallet=consumer_wallet,
+        )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert Amount too high"
+    )
+
+    # Tests consumer requests data tokens
+    tx = dispenser.dispense(
+        data_token=erc20_token.address,
+        amount=web3.toWei(1, "ether"),
+        destination=consumer_wallet.address,
+        from_wallet=consumer_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    assert tx_receipt.status == 1
+
+    # Tests consumer requests more datatokens then exceeds maxBalance
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        dispenser.dispense(
+            data_token=erc20_token.address,
+            amount=web3.toWei(1, "ether"),
+            destination=consumer_wallet.address,
+            from_wallet=consumer_wallet,
+        )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert Caller balance too high"
+    )
+
+    # Tests publisher deactivates the dispenser
+    dispenser.deactivate(from_wallet=publisher_wallet, data_token=erc20_token.address)
+    status = dispenser.status(erc20_token.address)
+    assert status[0] is False
+
+    # Tests factory deployer should fail to get data tokens
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        dispenser.dispense(
+            data_token=erc20_token.address,
+            amount=web3.toWei("0.00001", "ether"),
+            destination=factory_deployer_wallet.address,
+            from_wallet=factory_deployer_wallet,
+        )
+
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert Dispenser not active"
+    )
+
+    # Tests consumer should fail to activate a dispenser for a token for he is not a minter
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        dispenser.activate(
+            data_token=erc20_token.address,
+            max_tokens=web3.toWei(1, "ether"),
+            max_balance=web3.toWei(1, "ether"),
+            from_wallet=consumer_wallet,
+        )
+
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert Invalid owner"
+    )
+
+    # Tests publisher creates a dispenser without minter role
+
+    _, erc20_token = deploy_erc721_erc20(
+        web3, config, publisher_wallet, publisher_wallet, cap=web3.toWei(50, "ether")
+    )
+
+    dispenser_data = DispenserData(
+        dispenser_address=dispenser.address,
+        max_balance=web3.toWei(1, "ether"),
+        max_tokens=web3.toWei(1, "ether"),
+        allowed_swapper=ZERO_ADDRESS,
+    )
+
+    erc20_token.create_dispenser(
+        from_wallet=publisher_wallet, dispenser_data=dispenser_data, with_mint=False
+    )
+
+    # Tests consumer requests data tokens but they are not minted
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        dispenser.dispense(
+            data_token=erc20_token.address,
+            amount=web3.toWei(1, "ether"),
+            destination=consumer_wallet.address,
+            from_wallet=consumer_wallet,
+        )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert Not enough reserves"
+    )
+
+    # Tests publisher mints tokens and transfer them to the dispenser.
+
+    erc20_token.mint(
+        from_wallet=publisher_wallet,
+        account_address=dispenser.address,
+        value=web3.toWei(1, "ether"),
+    )
+
+    # Tests consumer requests data tokens
+    dispenser.dispense(
+        data_token=erc20_token.address,
+        amount=web3.toWei(1, "ether"),
+        destination=consumer_wallet.address,
+        from_wallet=consumer_wallet,
+    )
+
+    # Tests consumer tries to withdraw all datatokens
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        dispenser.owner_withdraw(
+            data_token=erc20_token.address, from_wallet=consumer_wallet
+        )
+
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert Invalid owner"
+    )
+
+    # Tests publisher withdraws all datatokens
+    dispenser.owner_withdraw(
+        data_token=erc20_token.address, from_wallet=publisher_wallet
+    )
+
+    status = dispenser.status(erc20_token.address)
+    assert status[5] == 0

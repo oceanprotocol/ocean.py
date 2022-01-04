@@ -9,17 +9,20 @@ from typing import Optional, Type
 
 from enforce_typing import enforce_types
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.asset import V3Asset
+from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger(__name__)
 
 
+# TODO: fix for v4
+
+
 @enforce_types
 def download_asset_files(
     service_index: int,
-    asset: V3Asset,
+    asset: Asset,
     consumer_wallet: Wallet,
     destination: str,
     token_address: str,
@@ -31,7 +34,7 @@ def download_asset_files(
     """Download asset data files or result files from a compute job.
 
     :param service_index: identifier of the service inside the asset DDO, str
-    :param asset: V3Asset instance
+    :param asset: Asset instance
     :param consumer_wallet: Wallet instance of the consumer
     :param destination: Path, str
     :param token_address: hex str the address of the DataToken smart contract
@@ -51,6 +54,7 @@ def download_asset_files(
             'Consume asset failed, service definition is missing the "serviceEndpoint".'
         )
 
+    # TODO: initialize service provider with this endpoint
     _, service_endpoint = data_provider.build_download_endpoint(service_endpoint)
     if not os.path.isabs(destination):
         destination = os.path.abspath(destination)
@@ -76,7 +80,6 @@ def download_asset_files(
     for i in indexes:
         data_provider.download_service(
             asset.did,
-            service_endpoint,
             consumer_wallet,
             _files,
             asset_folder,

@@ -9,14 +9,21 @@
     "updated": "2021-05-17T21:58:02Z",
     "description": "Sample description",
     "name": "Sample asset",
-    "type": "dataset",
+    "type": "algorithm",
     "author": "OPF",
-    "license": "https://market.oceanprotocol.com/terms"
+    "license": "https://market.oceanprotocol.com/terms",
+    "algorithm": {
+        "container": {
+            "entrypoint": "node $ALGO",
+          "  image": "node",
+          "  tag": "10"
+        }
+    }
   },
   "services": [
     {
       "id": "1",
-      "type": "access",
+      "type": "compute",
       "files": "0x0000",
       "name": "Download service",
       "description": "Download service",
@@ -26,18 +33,8 @@
     }
   ],
   "credentials": {
-    "allow": [
-      {
-        "type": "address",
-        "values": ["0x123", "0x456"]
-      }
-    ],
-    "deny": [
-      {
-        "type": "address",
-        "values": ["0x2222", "0x333"]
-      }
-    ]
+    "allow": [ ],
+    "deny": [ ]
   },
   "nft": {
     "address": "0x000000",

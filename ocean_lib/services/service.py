@@ -3,94 +3,161 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 """
-    Service Class
+    Service Class for V4
     To handle service items in a DDO record
 """
 import copy
 import logging
 from typing import Any, Dict, Optional
-from urllib.parse import urlparse
 
-from enforce_typing import enforce_types
-from ocean_lib.agreements.service_types import ServiceTypes, ServiceTypesIndices
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.agreements.service_types import ServiceTypes, ServiceTypesNames
 
 logger = logging.getLogger(__name__)
 
 
 class Service:
-    """Service class to create validate service in a DDO."""
-
-    SERVICE_ENDPOINT = "serviceEndpoint"
-    SERVICE_TYPE = "type"
-    SERVICE_INDEX = "index"
-    SERVICE_ATTRIBUTES = "attributes"
+    """Service class to create validate service in a V4 DDO."""
 
     def __init__(
         self,
-        service_endpoint: Optional[str],
+        service_id: str,
         service_type: str,
-        attributes: Optional[Dict],
-        other_values: Optional[Dict[str, Any]] = None,
-        index: Optional[int] = None,
+        service_endpoint: Optional[str],
+        data_token: Optional[str],
+        files: Optional[str],
+        timeout: Optional[int],
+        compute_values: Optional[Dict[str, Any]] = None,
+        name: Optional[str] = None,
+        description: Optional[str] = None,
     ) -> None:
-        """Initialize Service instance."""
+        """Initialize NFT Service instance."""
+        self.id = service_id
+        self.type = service_type
         self.service_endpoint = service_endpoint
-        self.type = service_type or ""
-        self.index = index
-        self.attributes = attributes or {}
+        self.data_token = data_token
+        self.files = files
+        self.timeout = timeout
+        self.compute_values = compute_values
+        self.name = name
+        self.description = description
 
-        # assign the _values property to empty until they are used
-        self._values = dict()
-        self._reserved_names = {
-            self.SERVICE_ENDPOINT,
-            self.SERVICE_TYPE,
-            self.SERVICE_INDEX,
-        }
-        if other_values:
-            for name, value in other_values.items():
-                if name not in self._reserved_names:
-                    self._values[name] = value
-
-        if index is None:
-            service_to_default_index = {
-                ServiceTypes.ASSET_ACCESS: ServiceTypesIndices.DEFAULT_ACCESS_INDEX,
-                ServiceTypes.CLOUD_COMPUTE: ServiceTypesIndices.DEFAULT_COMPUTING_INDEX,
+        if not name or not description:
+            service_to_default_name = {
+                ServiceTypes.ASSET_ACCESS: ServiceTypesNames.DEFAULT_ACCESS_NAME,
+                ServiceTypes.CLOUD_COMPUTE: ServiceTypesNames.DEFAULT_COMPUTE_NAME,
             }
 
-            if service_type in service_to_default_index:
-                self.index = service_to_default_index[service_type]
+            if service_type in service_to_default_name:
+                self.name = service_to_default_name[service_type]
+                self.description = service_to_default_name[service_type]
 
-    @enforce_types
-    def values(self) -> Dict[str, Any]:
+    @classmethod
+    def from_dict(cls, service_dict: Dict[str, Any]) -> "Service":
+        """Create a service object from a JSON string."""
+        sd = copy.deepcopy(service_dict)
+        service_type = sd.pop("type", None)
+
+        if not service_type:
+            logger.error(
+                'Service definition in DDO document is missing the "type" key/value.'
+            )
+            raise IndexError
+
+        return cls(
+            sd.pop("id", None),
+            service_type,
+            sd.pop("serviceEndpoint", None),
+            sd.pop("datatokenAddress", None),
+            sd.pop("files", None),
+            sd.pop("timeout", None),
+            sd.pop("compute", None),
+            sd.pop("name", None),
+            sd.pop("description", None),
+        )
+
+    @classmethod
+    def from_json(cls, service_dict: Dict[str, Any]) -> "Service":
+        return cls.from_dict(service_dict)
+
+    def get_trusted_algorithms(self) -> list:
+        return self.compute_values.get("publisherTrustedAlgorithms", [])
+
+    def get_trusted_algorithm_publishers(self) -> list:
+        return self.compute_values.get("publisherTrustedAlgorithmPublishers", [])
+
+    # Not type provided due to circular imports
+    def add_publisher_trusted_algorithm(
+        self, algo_ddo, generated_trusted_algo_dict: list
+    ) -> list:
         """
-
-        :return: array of values
+        :return: List of trusted algos
         """
-        return self._values.copy()
+        initial_trusted_algos_v4 = self.get_trusted_algorithms()
 
-    @property
-    @enforce_types
-    def main(self) -> Dict[str, Any]:
-        return self.attributes["main"]
+        # remove algo_did if already in the list
+        trusted_algos = [
+            ta for ta in initial_trusted_algos_v4 if ta["did"] != algo_ddo.did
+        ]
+        initial_count = len(trusted_algos)
 
-    @enforce_types
-    def update_value(self, name: str, value: Any) -> None:
-        """
-        Update value in the array of values.
+        trusted_algos.append(generated_trusted_algo_dict)
 
-        :param name: Key of the value, str
-        :param value: New value, str
-        :return: None
-        """
-        if name not in self._reserved_names:
-            self._values[name] = value
+        # update with the new list
+        self.compute_values["publisherTrustedAlgorithms"] = trusted_algos
 
-    @enforce_types
+        assert (
+            len(self.compute_values["publisherTrustedAlgorithms"]) > initial_count
+        ), "New trusted algorithm was not added. Failed when updating the privacy key. "
+
+        return trusted_algos
+
+    def add_publisher_trusted_algorithm_publisher(self, publisher_address: str) -> list:
+        trusted_algo_publishers = [
+            tp.lower() for tp in self.get_trusted_algorithm_publishers()
+        ]
+        publisher_address = publisher_address.lower()
+
+        if publisher_address in trusted_algo_publishers:
+            return trusted_algo_publishers
+
+        initial_len = len(trusted_algo_publishers)
+        trusted_algo_publishers.append(publisher_address)
+
+        # update with the new list
+        self.compute_values[
+            "publisherTrustedAlgorithmPublishers"
+        ] = trusted_algo_publishers
+        assert (
+            len(self.compute_values["publisherTrustedAlgorithmPublishers"])
+            > initial_len
+        ), "New trusted algorithm was not added. Failed when updating the privacy key. "
+
+        return trusted_algo_publishers
+
     def as_dictionary(self) -> Dict[str, Any]:
         """Return the service as a python dictionary."""
-        attributes = {}
-        for key, value in self.attributes.items():
+
+        values = {
+            "id": self.id,
+            "type": self.type,
+            "files": self.files,
+            "datatokenAddress": self.data_token,
+            "serviceEndpoint": self.service_endpoint,
+            "timeout": self.timeout,
+        }
+
+        if self.type == "compute":
+            if "compute" in self.compute_values:
+                values.update(self.compute_values)
+            else:
+                values["compute"] = self.compute_values
+
+        if self.name is not None:
+            values["name"] = self.name
+        if self.description is not None:
+            values["description"] = self.description
+
+        for key, value in values.items():
             if isinstance(value, object) and hasattr(value, "as_dictionary"):
                 value = value.as_dictionary()
             elif isinstance(value, list):
@@ -99,125 +166,6 @@ class Service:
                     for v in value
                 ]
 
-            attributes[key] = value
-
-        values = {self.SERVICE_TYPE: self.type, self.SERVICE_ATTRIBUTES: attributes}
-        if self.service_endpoint:
-            values[self.SERVICE_ENDPOINT] = self.service_endpoint
-        if self.index is not None:
-            values[self.SERVICE_INDEX] = self.index
-
-        if self._values:
-            values.update(self._values)
+            values[key] = value
 
         return values
-
-    @classmethod
-    @enforce_types
-    def from_json(cls, service_dict: Dict[str, Any]) -> "Service":
-        """Create a service object from a JSON string."""
-        sd = copy.deepcopy(service_dict)
-        service_endpoint = sd.pop(cls.SERVICE_ENDPOINT, None)
-        service_type = sd.pop(cls.SERVICE_TYPE, None)
-        index = sd.pop(cls.SERVICE_INDEX, None)
-        attributes = sd.pop(cls.SERVICE_ATTRIBUTES, None)
-
-        if not service_type:
-            logger.error(
-                'Service definition in DDO document is missing the "type" key/value.'
-            )
-            raise IndexError
-
-        return cls(service_endpoint, service_type, attributes, sd, index)
-
-    @enforce_types
-    def get_cost(self) -> float:
-        """
-        Return the price from the conditions parameters.
-
-        :return: Float
-        """
-        return float(self.main["cost"])
-
-    @enforce_types
-    def get_c2d_address(self) -> str:
-        result = urlparse(self.service_endpoint)
-        return DataServiceProvider.get_c2d_address(
-            f"{result.scheme}://{result.netloc}/"
-        )
-
-    @enforce_types
-    def get_trusted_algorithms(self) -> list:
-        return (
-            self.attributes["main"]
-            .get("privacy", {})
-            .get("publisherTrustedAlgorithms", [])
-        )
-
-    @enforce_types
-    def get_trusted_algorithm_publishers(self) -> list:
-        return (
-            self.attributes["main"]
-            .get("privacy", {})
-            .get("publisherTrustedAlgorithmPublishers", [])
-        )
-
-    # Not type provided due to circular imports
-    def add_publisher_trusted_algorithm(
-        self,
-        algo_ddo,
-        generated_trusted_algo_dict: list,
-    ) -> list:
-        """
-        :return: List of trusted algos
-        """
-
-        privacy_values = self.attributes["main"].get("privacy")
-        if not privacy_values:
-            privacy_values = {}
-            self.attributes["main"]["privacy"] = privacy_values
-
-        assert isinstance(privacy_values, dict), "Privacy key is not a dictionary."
-        trusted_algos = privacy_values.get("publisherTrustedAlgorithms", [])
-        # remove algo_did if already in the list
-        trusted_algos = [ta for ta in trusted_algos if ta["did"] != algo_ddo.did]
-
-        # now add this algo_did as trusted algo
-        trusted_algos.append(generated_trusted_algo_dict)
-
-        # update with the new list
-        privacy_values["publisherTrustedAlgorithms"] = trusted_algos
-        assert (
-            self.attributes["main"]["privacy"] == privacy_values
-        ), "New trusted algorithm was not added. Failed when updating the privacy key. "
-        return trusted_algos
-
-    @enforce_types
-    def add_publisher_trusted_algorithm_publisher(self, publisher_address: str) -> list:
-        """
-        :return: List of trusted algo publishers
-        """
-
-        privacy_values = self.attributes["main"].get("privacy")
-        if not privacy_values:
-            privacy_values = {}
-            self.attributes["main"]["privacy"] = privacy_values
-
-        assert isinstance(privacy_values, dict), "Privacy key is not a dictionary."
-        trusted_algo_publishers = [
-            tp.lower()
-            for tp in privacy_values.get("publisherTrustedAlgorithmPublishers", [])
-        ]
-        publisher_address = publisher_address.lower()
-
-        if publisher_address in trusted_algo_publishers:
-            return trusted_algo_publishers
-
-        trusted_algo_publishers.append(publisher_address)
-
-        # update with the new list
-        privacy_values["publisherTrustedAlgorithmPublishers"] = trusted_algo_publishers
-        assert (
-            self.attributes["main"]["privacy"] == privacy_values
-        ), "New trusted algorithm was not added. Failed when updating the privacy key. "
-        return trusted_algo_publishers

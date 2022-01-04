@@ -9,11 +9,11 @@ Help to communicate with the metadata store.
 
 import json
 import logging
+import time
 from typing import Optional, Tuple, Union
 
 from enforce_typing import enforce_types
-from ocean_lib.assets.asset import V3Asset
-from ocean_lib.assets.v4.asset import V4Asset
+from ocean_lib.assets.asset import Asset
 from ocean_lib.http_requests.requests_session import get_requests_session
 
 logger = logging.getLogger("aquarius")
@@ -31,10 +31,9 @@ class Aquarius:
         """
         assert aquarius_url, f'Invalid url "{aquarius_url}"'
         # :HACK:
-        if "/api/v1/aquarius/assets" in aquarius_url:
-            aquarius_url = aquarius_url[: aquarius_url.find("/api/v1/aquarius/assets")]
+        if "/api/aquarius/assets" in aquarius_url:
+            aquarius_url = aquarius_url[: aquarius_url.find("/api/aquarius/assets")]
 
-        # FIXME: add v1 for Aquarius version
         self.base_url = f"{aquarius_url}/api/aquarius/assets"
 
         logging.debug(f"Metadata Store connected at {aquarius_url}")
@@ -66,21 +65,19 @@ class Aquarius:
         return f"{self.base_url}/ddo/encrypt"
 
     @enforce_types
-    def get_asset_ddo(self, did: str) -> Optional[Union[V3Asset, V4Asset]]:
+    def get_asset_ddo(self, did: str) -> Optional[Asset]:
         """
         Retrieve asset ddo for a given did.
 
         :param did: Asset DID string
-        :return: V3Asset or V4Asset instance
+        :return: Asset instance
         """
         response = self.requests_session.get(f"{self.base_url}/ddo/{did}")
 
         if response.status_code == 200:
             response_dict = response.json()
-            if response_dict.get("version").startswith("4."):
-                return V4Asset.from_dict(response_dict)
-            else:
-                return V3Asset(dictionary=response_dict)
+
+            return Asset.from_dict(response_dict)
 
         return None
 
@@ -123,7 +120,7 @@ class Aquarius:
         Example: query_search({"price":[0,10]})
 
         :param search_query: Python dictionary, query following elasticsearch syntax
-        :return: List of V3Asset instance
+        :return: List of Asset instance
         """
         response = self.requests_session.post(
             f"{self.base_url}/query",
@@ -137,31 +134,11 @@ class Aquarius:
         raise ValueError(f"Unable to search for DDO: {response.content}")
 
     @enforce_types
-    def validate_metadata(self, metadata: dict) -> Tuple[bool, Union[list, dict]]:
-        """
-        Validate that the metadata of your ddo is valid.
-
-        :param metadata: conforming to the Metadata accepted by Ocean Protocol, dict
-        :return: bool
-        """
-        response = self.requests_session.post(
-            f"{self.base_url}/ddo/validate",
-            data=json.dumps(metadata),
-            headers={"content-type": "application/json"},
-        )
-
-        if response.content == b"true\n":
-            return True, []
-
-        parsed_response = response.json()
-        return False, parsed_response
-
-    @enforce_types
-    def validate_asset(self, asset: V4Asset) -> Tuple[bool, Union[list, dict]]:
+    def validate_asset(self, asset: Asset) -> Tuple[bool, Union[list, dict]]:
         """
         Validate the asset.
 
-        :param asset: conforming to the asset accepted by Ocean Protocol, V4Asset
+        :param asset: conforming to the asset accepted by Ocean Protocol, Asset
         :return: bool
         """
         asset_dict = asset.as_dictionary()
@@ -201,3 +178,18 @@ class Aquarius:
                 raise ValueError("Failed to encrypt asset.")
         except Exception:
             raise ValueError("Failed to encrypt asset.")
+
+    @enforce_types
+    def wait_for_asset(self, did: str, timeout=30):
+        start = time.time()
+        ddo = None
+        while not ddo:
+            ddo = self.get_asset_ddo(did)
+
+            if not ddo:
+                time.sleep(0.2)
+
+            if time.time() - start > timeout:
+                break
+
+        return ddo

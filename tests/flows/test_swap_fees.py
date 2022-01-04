@@ -2,16 +2,12 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import pytest
-from web3 import exceptions
-
-from ocean_lib.models.v4.bpool import BPool
-from ocean_lib.models.v4.dispenser import DispenserV4
-from ocean_lib.models.v4.erc20_token import ERC20Token
-from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.v4.erc721_token import ERC721Token
-from ocean_lib.models.v4.models_structures import ErcCreateData, PoolData
-from ocean_lib.models.v4.side_staking import SideStaking
+from ocean_lib.models.bpool import BPool
+from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.erc721_token import ERC721Token
+from ocean_lib.models.models_structures import ErcCreateData, PoolData
+from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
@@ -28,11 +24,7 @@ def _deploy_erc721_token(config, web3, factory_deployer_wallet, manager_wallet):
 
 
 def test_deploy_erc721_and_manage(
-    web3,
-    config,
-    factory_deployer_wallet,
-    consumer_wallet,
-    another_consumer_wallet,
+    web3, config, factory_deployer_wallet, consumer_wallet, another_consumer_wallet
 ):
     """
     Owner deploys a new ERC721 contract
@@ -133,9 +125,7 @@ def test_pool_ocean(
     initial_ocean_liq = web3.toWei(10, "ether")
     ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
     ocean_contract.approve(
-        get_address_of_type(config, "Router"),
-        web3.toWei(10, "ether"),
-        consumer_wallet,
+        get_address_of_type(config, "Router"), web3.toWei(10, "ether"), consumer_wallet
     )
 
     pool_data = PoolData(
@@ -146,10 +136,7 @@ def test_pool_ocean(
             2500000,
             initial_ocean_liq,
         ],
-        [
-            web3.toWei(0.001, "ether"),
-            web3.toWei(0.001, "ether"),
-        ],
+        [web3.toWei(0.001, "ether"), web3.toWei(0.001, "ether")],
         [
             side_staking.address,
             ocean_contract.address,
@@ -226,10 +213,7 @@ def test_pool_ocean(
     assert (erc20_token.balanceOf(publisher_wallet.address) > 0) is True
 
     swap_fee_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_fee_event[0].args
@@ -260,10 +244,7 @@ def test_pool_ocean(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     swap_fee_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_fee_event[0].args
@@ -279,10 +260,7 @@ def test_pool_ocean(
     )
 
     swap_fees_event = bpool.get_event_log(
-        "SWAP_FEES",
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        "SWAP_FEES", tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_fees_event_args = swap_fees_event[0].args
@@ -321,10 +299,7 @@ def test_pool_ocean(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     swap_fees_event = bpool.get_event_log(
-        "SWAP_FEES",
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        "SWAP_FEES", tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_fees_event_args = swap_fees_event[0].args
@@ -336,10 +311,7 @@ def test_pool_ocean(
     )
 
     swap_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_event[0].args
@@ -381,10 +353,7 @@ def test_pool_ocean(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     swap_fees_event = bpool.get_event_log(
-        "SWAP_FEES",
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        "SWAP_FEES", tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_fees_event_args = swap_fees_event[0].args
@@ -394,10 +363,7 @@ def test_pool_ocean(
     )
 
     swap_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_event[0].args
@@ -435,20 +401,14 @@ def test_pool_ocean(
 
     tx = bpool.join_pool(
         web3.toWei("0.01", "ether"),
-        [
-            web3.toWei("50", "ether"),
-            web3.toWei("50", "ether"),
-        ],
+        [web3.toWei("50", "ether"), web3.toWei("50", "ether")],
         publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     join_pool_event = bpool.get_event_log(
-        bpool.EVENT_LOG_JOIN,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_JOIN, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert join_pool_event[0].args.tokenIn == erc20_token.address
@@ -481,10 +441,7 @@ def test_pool_ocean(
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     join_pool_event = bpool.get_event_log(
-        bpool.EVENT_LOG_JOIN,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_JOIN, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert join_pool_event[0].args.tokenIn == ocean_contract.address
@@ -506,10 +463,7 @@ def test_pool_ocean(
     ].args.tokenAmountIn == erc20_token.balanceOf(side_staking.address)
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert bpt_event[0].args.bptAmount + ss_contract_bpt_balance == bpool.balanceOf(
@@ -536,10 +490,7 @@ def test_pool_ocean(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     join_pool_event = bpool.get_event_log(
-        bpool.EVENT_LOG_JOIN,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_JOIN, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert join_pool_event[0].args.tokenIn == ocean_contract.address
@@ -575,20 +526,14 @@ def test_pool_ocean(
 
     tx = bpool.exit_pool(
         web3.toWei("0.5", "ether"),
-        [
-            web3.toWei(0.001, "ether"),
-            web3.toWei(0.001, "ether"),
-        ],
+        [web3.toWei(0.001, "ether"), web3.toWei(0.001, "ether")],
         consumer_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.tokenOut == erc20_token.address
@@ -640,10 +585,7 @@ def test_pool_ocean(
     assert erc20_token.balanceOf(consumer_wallet.address) == consumer_dt_balance
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.caller == consumer_wallet.address
@@ -692,10 +634,7 @@ def test_pool_ocean(
     assert ocean_contract.balanceOf(consumer_wallet.address) == consumer_ocean_balance
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert (
@@ -704,10 +643,7 @@ def test_pool_ocean(
     )
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
     assert exit_event[0].args.caller == consumer_wallet.address
     assert exit_event[0].args.tokenOut == erc20_token.address
@@ -748,10 +684,7 @@ def test_pool_ocean(
     assert erc20_token.balanceOf(consumer_wallet.address) == consumer_dt_balance
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert consumer_bpt_balance - bpt_event[0].args.bptAmount == bpool.balanceOf(
@@ -759,10 +692,7 @@ def test_pool_ocean(
     )
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.caller == consumer_wallet.address
@@ -805,10 +735,7 @@ def test_pool_ocean(
     assert ocean_contract.balanceOf(consumer_wallet.address) == consumer_ocean_balance
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert consumer_bpt_balance - bpt_event[0].args.bptAmount == bpool.balanceOf(
@@ -816,10 +743,7 @@ def test_pool_ocean(
     )
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.caller == consumer_wallet.address
@@ -909,9 +833,7 @@ def test_pool_dai(
     initial_dai_liq = web3.toWei(10, "ether")
 
     dai_contract.approve(
-        get_address_of_type(config, "Router"),
-        web3.toWei(10, "ether"),
-        consumer_wallet,
+        get_address_of_type(config, "Router"), web3.toWei(10, "ether"), consumer_wallet
     )
 
     pool_data = PoolData(
@@ -922,10 +844,7 @@ def test_pool_dai(
             2500000,
             initial_dai_liq,
         ],
-        [
-            web3.toWei(0.001, "ether"),
-            web3.toWei(0.001, "ether"),
-        ],
+        [web3.toWei(0.001, "ether"), web3.toWei(0.001, "ether")],
         [
             side_staking.address,
             dai_contract.address,
@@ -994,10 +913,7 @@ def test_pool_dai(
     assert (erc20_token.balanceOf(publisher_wallet.address) > 0) is True
 
     swap_fee_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_fee_event[0].args
@@ -1020,22 +936,14 @@ def test_pool_dai(
 
     tx = bpool.swap_exact_amount_out(
         [dai_contract.address, erc20_address, another_consumer_wallet.address],
-        [
-            web3.toWei(10, "ether"),
-            web3.toWei(1, "ether"),
-            web3.toWei(100, "ether"),
-            0,
-        ],
+        [web3.toWei(10, "ether"), web3.toWei(1, "ether"), web3.toWei(100, "ether"), 0],
         publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     swap_fee_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_fee_event[0].args
@@ -1050,10 +958,7 @@ def test_pool_dai(
     )
 
     swap_fees_event = bpool.get_event_log(
-        "SWAP_FEES",
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        "SWAP_FEES", tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_fees_event_args = swap_fees_event[0].args
@@ -1088,10 +993,7 @@ def test_pool_dai(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     swap_fees_event = bpool.get_event_log(
-        "SWAP_FEES",
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        "SWAP_FEES", tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_fees_event_args = swap_fees_event[0].args
@@ -1103,10 +1005,7 @@ def test_pool_dai(
     )
 
     swap_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_event[0].args
@@ -1145,10 +1044,7 @@ def test_pool_dai(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     swap_fees_event = bpool.get_event_log(
-        "SWAP_FEES",
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        "SWAP_FEES", tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_fees_event_args = swap_fees_event[0].args
@@ -1158,10 +1054,7 @@ def test_pool_dai(
     )
 
     swap_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_event[0].args
@@ -1200,20 +1093,14 @@ def test_pool_dai(
 
     tx = bpool.join_pool(
         web3.toWei("0.01", "ether"),
-        [
-            web3.toWei("50", "ether"),
-            web3.toWei("50", "ether"),
-        ],
+        [web3.toWei("50", "ether"), web3.toWei("50", "ether")],
         publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     join_pool_event = bpool.get_event_log(
-        bpool.EVENT_LOG_JOIN,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_JOIN, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert join_pool_event[0].args.tokenIn == erc20_token.address
@@ -1246,10 +1133,7 @@ def test_pool_dai(
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     join_pool_event = bpool.get_event_log(
-        bpool.EVENT_LOG_JOIN,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_JOIN, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert join_pool_event[0].args.tokenIn == dai_contract.address
@@ -1271,10 +1155,7 @@ def test_pool_dai(
     ].args.tokenAmountIn == erc20_token.balanceOf(side_staking.address)
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert bpt_event[0].args.bptAmount + ss_contract_bpt_balance == bpool.balanceOf(
@@ -1301,10 +1182,7 @@ def test_pool_dai(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     join_pool_event = bpool.get_event_log(
-        bpool.EVENT_LOG_JOIN,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_JOIN, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert join_pool_event[0].args.tokenIn == dai_contract.address
@@ -1340,20 +1218,14 @@ def test_pool_dai(
 
     tx = bpool.exit_pool(
         web3.toWei("0.5", "ether"),
-        [
-            web3.toWei(0.001, "ether"),
-            web3.toWei(0.001, "ether"),
-        ],
+        [web3.toWei(0.001, "ether"), web3.toWei(0.001, "ether")],
         consumer_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.tokenOut == erc20_token.address
@@ -1405,10 +1277,7 @@ def test_pool_dai(
     assert erc20_token.balanceOf(consumer_wallet.address) == consumer_dt_balance
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.caller == consumer_wallet.address
@@ -1457,10 +1326,7 @@ def test_pool_dai(
     assert dai_contract.balanceOf(consumer_wallet.address) == consumer_dai_balance
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert (
@@ -1469,10 +1335,7 @@ def test_pool_dai(
     )
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
     assert exit_event[0].args.caller == consumer_wallet.address
     assert exit_event[0].args.tokenOut == erc20_token.address
@@ -1513,10 +1376,7 @@ def test_pool_dai(
     assert erc20_token.balanceOf(consumer_wallet.address) == consumer_dt_balance
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert consumer_bpt_balance - bpt_event[0].args.bptAmount == bpool.balanceOf(
@@ -1524,10 +1384,7 @@ def test_pool_dai(
     )
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.caller == consumer_wallet.address
@@ -1570,10 +1427,7 @@ def test_pool_dai(
     assert dai_contract.balanceOf(consumer_wallet.address) == consumer_dai_balance
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert consumer_bpt_balance - bpt_event[0].args.bptAmount == bpool.balanceOf(
@@ -1581,10 +1435,7 @@ def test_pool_dai(
     )
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.caller == consumer_wallet.address
@@ -1676,9 +1527,7 @@ def test_pool_usdc(
     initial_usdc_liq = int(1e6) * 880  # 880 USDC
 
     usdc_contract.approve(
-        get_address_of_type(config, "Router"),
-        web3.toWei(100, "ether"),
-        consumer_wallet,
+        get_address_of_type(config, "Router"), web3.toWei(100, "ether"), consumer_wallet
     )
 
     pool_data = PoolData(
@@ -1689,10 +1538,7 @@ def test_pool_usdc(
             2500000,
             initial_usdc_liq,
         ],
-        [
-            web3.toWei(0.001, "ether"),
-            web3.toWei(0.001, "ether"),
-        ],
+        [web3.toWei(0.001, "ether"), web3.toWei(0.001, "ether")],
         [
             side_staking.address,
             usdc_contract.address,
@@ -1748,12 +1594,7 @@ def test_pool_usdc(
 
     tx = bpool.swap_exact_amount_in(
         [usdc_contract.address, erc20_address, another_consumer_wallet.address],
-        [
-            int(1e7),
-            web3.toWei(1, "ether"),
-            web3.toWei(5, "ether"),
-            0,
-        ],
+        [int(1e7), web3.toWei(1, "ether"), web3.toWei(5, "ether"), 0],
         publisher_wallet,
     )
 
@@ -1762,10 +1603,7 @@ def test_pool_usdc(
     assert (erc20_token.balanceOf(publisher_wallet.address) > 0) is True
 
     swap_fee_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_fee_event[0].args
@@ -1789,22 +1627,14 @@ def test_pool_usdc(
 
     tx = bpool.swap_exact_amount_out(
         [usdc_contract.address, erc20_address, another_consumer_wallet.address],
-        [
-            web3.toWei(10, "ether"),
-            web3.toWei(1, "ether"),
-            web3.toWei(100, "ether"),
-            0,
-        ],
+        [web3.toWei(10, "ether"), web3.toWei(1, "ether"), web3.toWei(100, "ether"), 0],
         publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     swap_fee_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_fee_event[0].args
@@ -1820,10 +1650,7 @@ def test_pool_usdc(
     )
 
     swap_fees_event = bpool.get_event_log(
-        "SWAP_FEES",
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        "SWAP_FEES", tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_fees_event_args = swap_fees_event[0].args
@@ -1846,22 +1673,14 @@ def test_pool_usdc(
 
     tx = bpool.swap_exact_amount_in(
         [erc20_address, usdc_contract.address, another_consumer_wallet.address],
-        [
-            web3.toWei(0.1, "ether"),
-            int(1e4),
-            int(2 ** 256 - 1),
-            0,
-        ],
+        [web3.toWei(0.1, "ether"), int(1e4), int(2 ** 256 - 1), 0],
         publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     swap_fees_event = bpool.get_event_log(
-        "SWAP_FEES",
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        "SWAP_FEES", tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_fees_event_args = swap_fees_event[0].args
@@ -1873,10 +1692,7 @@ def test_pool_usdc(
     )
 
     swap_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_event[0].args
@@ -1903,22 +1719,14 @@ def test_pool_usdc(
 
     tx = bpool.swap_exact_amount_out(
         [erc20_token.address, usdc_contract.address, another_consumer_wallet.address],
-        [
-            web3.toWei(10, "ether"),
-            int(1e6),
-            web3.toWei(1000000000000000, "ether"),
-            0,
-        ],
+        [web3.toWei(10, "ether"), int(1e6), web3.toWei(1000000000000000, "ether"), 0],
         publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     swap_fees_event = bpool.get_event_log(
-        "SWAP_FEES",
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        "SWAP_FEES", tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_fees_event_args = swap_fees_event[0].args
@@ -1928,10 +1736,7 @@ def test_pool_usdc(
     )
 
     swap_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_event[0].args
@@ -1970,20 +1775,14 @@ def test_pool_usdc(
 
     tx = bpool.join_pool(
         web3.toWei("0.01", "ether"),
-        [
-            web3.toWei("50", "ether"),
-            web3.toWei("50", "ether"),
-        ],
+        [web3.toWei("50", "ether"), web3.toWei("50", "ether")],
         publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     join_pool_event = bpool.get_event_log(
-        bpool.EVENT_LOG_JOIN,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_JOIN, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert join_pool_event[0].args.tokenIn == erc20_token.address
@@ -2008,18 +1807,12 @@ def test_pool_usdc(
     usdc_contract.approve(bpool_address, web3.toWei(1000, "ether"), consumer_wallet)
 
     tx = bpool.join_swap_extern_amount_in(
-        usdc_contract.address,
-        int(1e6),
-        web3.toWei(0.01, "ether"),
-        consumer_wallet,
+        usdc_contract.address, int(1e6), web3.toWei(0.01, "ether"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     join_pool_event = bpool.get_event_log(
-        bpool.EVENT_LOG_JOIN,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_JOIN, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert join_pool_event[0].args.tokenIn == usdc_contract.address
@@ -2041,10 +1834,7 @@ def test_pool_usdc(
     ].args.tokenAmountIn == erc20_token.balanceOf(side_staking.address)
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert bpt_event[0].args.bptAmount + ss_contract_bpt_balance == bpool.balanceOf(
@@ -2071,10 +1861,7 @@ def test_pool_usdc(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     join_pool_event = bpool.get_event_log(
-        bpool.EVENT_LOG_JOIN,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_JOIN, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert join_pool_event[0].args.tokenIn == usdc_contract.address
@@ -2117,10 +1904,7 @@ def test_pool_usdc(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.tokenOut == erc20_token.address
@@ -2161,10 +1945,7 @@ def test_pool_usdc(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_pool_amount_in(
-        usdc_contract.address,
-        web3.toWei("0.1", "ether"),
-        int(1e5),
-        consumer_wallet,
+        usdc_contract.address, web3.toWei("0.1", "ether"), int(1e5), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -2172,10 +1953,7 @@ def test_pool_usdc(
     assert erc20_token.balanceOf(consumer_wallet.address) == consumer_dt_balance
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.caller == consumer_wallet.address
@@ -2224,10 +2002,7 @@ def test_pool_usdc(
     assert usdc_contract.balanceOf(consumer_wallet.address) == consumer_usdc_balance
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert (
@@ -2236,10 +2011,7 @@ def test_pool_usdc(
     )
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
     assert exit_event[0].args.caller == consumer_wallet.address
     assert exit_event[0].args.tokenOut == erc20_token.address
@@ -2269,10 +2041,7 @@ def test_pool_usdc(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_extern_amount_out(
-        usdc_contract.address,
-        int(1e6),
-        web3.toWei("1", "ether"),
-        consumer_wallet,
+        usdc_contract.address, int(1e6), web3.toWei("1", "ether"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -2280,10 +2049,7 @@ def test_pool_usdc(
     assert erc20_token.balanceOf(consumer_wallet.address) == consumer_dt_balance
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert consumer_bpt_balance - bpt_event[0].args.bptAmount == bpool.balanceOf(
@@ -2291,10 +2057,7 @@ def test_pool_usdc(
     )
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.caller == consumer_wallet.address
@@ -2337,10 +2100,7 @@ def test_pool_usdc(
     assert usdc_contract.balanceOf(consumer_wallet.address) == consumer_usdc_balance
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert consumer_bpt_balance - bpt_event[0].args.bptAmount == bpool.balanceOf(
@@ -2348,10 +2108,7 @@ def test_pool_usdc(
     )
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.caller == consumer_wallet.address
@@ -2442,9 +2199,7 @@ def test_pool_usdc_flexible(
     initial_usdc_liq = int(1e6) * 880  # 880 USDC  # 880 USDC
 
     usdc_contract.approve(
-        get_address_of_type(config, "Router"),
-        web3.toWei(10, "ether"),
-        consumer_wallet,
+        get_address_of_type(config, "Router"), web3.toWei(10, "ether"), consumer_wallet
     )
 
     pool_data = PoolData(
@@ -2455,10 +2210,7 @@ def test_pool_usdc_flexible(
             2500000,
             initial_usdc_liq,
         ],
-        [
-            web3.toWei(0.001, "ether"),
-            web3.toWei(0.001, "ether"),
-        ],
+        [web3.toWei(0.001, "ether"), web3.toWei(0.001, "ether")],
         [
             side_staking.address,
             usdc_contract.address,
@@ -2514,12 +2266,7 @@ def test_pool_usdc_flexible(
 
     tx = bpool.swap_exact_amount_in(
         [usdc_contract.address, erc20_address, another_consumer_wallet.address],
-        [
-            int(1e7),
-            web3.toWei(1, "ether"),
-            web3.toWei(5, "ether"),
-            0,
-        ],
+        [int(1e7), web3.toWei(1, "ether"), web3.toWei(5, "ether"), 0],
         publisher_wallet,
     )
 
@@ -2528,10 +2275,7 @@ def test_pool_usdc_flexible(
     assert (erc20_token.balanceOf(publisher_wallet.address) > 0) is True
 
     swap_fee_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_fee_event[0].args
@@ -2560,22 +2304,14 @@ def test_pool_usdc_flexible(
 
     tx = bpool.swap_exact_amount_out(
         [usdc_contract.address, erc20_address, another_consumer_wallet.address],
-        [
-            web3.toWei(10, "ether"),
-            web3.toWei(1, "ether"),
-            web3.toWei(100, "ether"),
-            0,
-        ],
+        [web3.toWei(10, "ether"), web3.toWei(1, "ether"), web3.toWei(100, "ether"), 0],
         publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     swap_fee_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_fee_event[0].args
@@ -2591,10 +2327,7 @@ def test_pool_usdc_flexible(
     )
 
     swap_fees_event = bpool.get_event_log(
-        "SWAP_FEES",
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        "SWAP_FEES", tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_fees_event_args = swap_fees_event[0].args
@@ -2617,22 +2350,14 @@ def test_pool_usdc_flexible(
 
     tx = bpool.swap_exact_amount_in(
         [erc20_address, usdc_contract.address, another_consumer_wallet.address],
-        [
-            web3.toWei(0.1, "ether"),
-            int(1e4),
-            int(2 ** 256 - 1),
-            0,
-        ],
+        [web3.toWei(0.1, "ether"), int(1e4), int(2 ** 256 - 1), 0],
         publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     swap_fees_event = bpool.get_event_log(
-        "SWAP_FEES",
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        "SWAP_FEES", tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_fees_event_args = swap_fees_event[0].args
@@ -2644,10 +2369,7 @@ def test_pool_usdc_flexible(
     )
 
     swap_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_event[0].args
@@ -2674,22 +2396,14 @@ def test_pool_usdc_flexible(
 
     tx = bpool.swap_exact_amount_out(
         [erc20_token.address, usdc_contract.address, another_consumer_wallet.address],
-        [
-            web3.toWei(10, "ether"),
-            int(1e6),
-            web3.toWei(1000000000000000, "ether"),
-            0,
-        ],
+        [web3.toWei(10, "ether"), int(1e6), web3.toWei(1000000000000000, "ether"), 0],
         publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     swap_fees_event = bpool.get_event_log(
-        "SWAP_FEES",
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        "SWAP_FEES", tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_fees_event_args = swap_fees_event[0].args
@@ -2699,10 +2413,7 @@ def test_pool_usdc_flexible(
     )
 
     swap_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_event[0].args
@@ -2741,20 +2452,14 @@ def test_pool_usdc_flexible(
 
     tx = bpool.join_pool(
         web3.toWei("0.01", "ether"),
-        [
-            web3.toWei("50", "ether"),
-            web3.toWei("50", "ether"),
-        ],
+        [web3.toWei("50", "ether"), web3.toWei("50", "ether")],
         publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     join_pool_event = bpool.get_event_log(
-        bpool.EVENT_LOG_JOIN,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_JOIN, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert join_pool_event[0].args.tokenIn == erc20_token.address
@@ -2779,18 +2484,12 @@ def test_pool_usdc_flexible(
     usdc_contract.approve(bpool_address, web3.toWei(1000, "ether"), consumer_wallet)
 
     tx = bpool.join_swap_extern_amount_in(
-        usdc_contract.address,
-        int(1e6),
-        web3.toWei(0.01, "ether"),
-        consumer_wallet,
+        usdc_contract.address, int(1e6), web3.toWei(0.01, "ether"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     join_pool_event = bpool.get_event_log(
-        bpool.EVENT_LOG_JOIN,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_JOIN, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert join_pool_event[0].args.tokenIn == usdc_contract.address
@@ -2812,10 +2511,7 @@ def test_pool_usdc_flexible(
     ].args.tokenAmountIn == erc20_token.balanceOf(side_staking.address)
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert bpt_event[0].args.bptAmount + ss_contract_bpt_balance == bpool.balanceOf(
@@ -2842,10 +2538,7 @@ def test_pool_usdc_flexible(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     join_pool_event = bpool.get_event_log(
-        bpool.EVENT_LOG_JOIN,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_JOIN, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert join_pool_event[0].args.tokenIn == usdc_contract.address
@@ -2888,10 +2581,7 @@ def test_pool_usdc_flexible(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.tokenOut == erc20_token.address
@@ -2932,10 +2622,7 @@ def test_pool_usdc_flexible(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_pool_amount_in(
-        usdc_contract.address,
-        web3.toWei("0.1", "ether"),
-        int(1e5),
-        consumer_wallet,
+        usdc_contract.address, web3.toWei("0.1", "ether"), int(1e5), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -2943,10 +2630,7 @@ def test_pool_usdc_flexible(
     assert erc20_token.balanceOf(consumer_wallet.address) == consumer_dt_balance
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.caller == consumer_wallet.address
@@ -2995,10 +2679,7 @@ def test_pool_usdc_flexible(
     assert usdc_contract.balanceOf(consumer_wallet.address) == consumer_usdc_balance
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert (
@@ -3007,10 +2688,7 @@ def test_pool_usdc_flexible(
     )
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
     assert exit_event[0].args.caller == consumer_wallet.address
     assert exit_event[0].args.tokenOut == erc20_token.address
@@ -3040,10 +2718,7 @@ def test_pool_usdc_flexible(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_extern_amount_out(
-        usdc_contract.address,
-        int(1e6),
-        web3.toWei("1", "ether"),
-        consumer_wallet,
+        usdc_contract.address, int(1e6), web3.toWei("1", "ether"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -3051,10 +2726,7 @@ def test_pool_usdc_flexible(
     assert erc20_token.balanceOf(consumer_wallet.address) == consumer_dt_balance
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert consumer_bpt_balance - bpt_event[0].args.bptAmount == bpool.balanceOf(
@@ -3062,10 +2734,7 @@ def test_pool_usdc_flexible(
     )
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.caller == consumer_wallet.address
@@ -3108,10 +2777,7 @@ def test_pool_usdc_flexible(
     assert usdc_contract.balanceOf(consumer_wallet.address) == consumer_usdc_balance
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert consumer_bpt_balance - bpt_event[0].args.bptAmount == bpool.balanceOf(
@@ -3119,10 +2785,7 @@ def test_pool_usdc_flexible(
     )
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.caller == consumer_wallet.address
@@ -3211,23 +2874,12 @@ def test_pool_dai_flexible(
     initial_dai_liq = web3.toWei(10, "ether")
 
     dai_contract.approve(
-        get_address_of_type(config, "Router"),
-        web3.toWei(10, "ether"),
-        consumer_wallet,
+        get_address_of_type(config, "Router"), web3.toWei(10, "ether"), consumer_wallet
     )
 
     pool_data = PoolData(
-        [
-            web3.toWei(1, "ether"),
-            18,
-            initial_dai_liq,
-            2500000,
-            initial_dai_liq,
-        ],
-        [
-            web3.toWei(0.001, "ether"),
-            web3.toWei(0.001, "ether"),
-        ],
+        [web3.toWei(1, "ether"), 18, initial_dai_liq, 2500000, initial_dai_liq],
+        [web3.toWei(0.001, "ether"), web3.toWei(0.001, "ether")],
         [
             side_staking.address,
             dai_contract.address,
@@ -3298,10 +2950,7 @@ def test_pool_dai_flexible(
     assert (erc20_token.balanceOf(publisher_wallet.address) > 0) is True
 
     swap_fee_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_fee_event[0].args
@@ -3329,22 +2978,14 @@ def test_pool_dai_flexible(
 
     tx = bpool.swap_exact_amount_out(
         [dai_contract.address, erc20_address, another_consumer_wallet.address],
-        [
-            web3.toWei(10, "ether"),
-            web3.toWei(1, "ether"),
-            web3.toWei(100, "ether"),
-            0,
-        ],
+        [web3.toWei(10, "ether"), web3.toWei(1, "ether"), web3.toWei(100, "ether"), 0],
         publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     swap_fee_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_fee_event[0].args
@@ -3359,10 +3000,7 @@ def test_pool_dai_flexible(
     )
 
     swap_fees_event = bpool.get_event_log(
-        "SWAP_FEES",
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        "SWAP_FEES", tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_fees_event_args = swap_fees_event[0].args
@@ -3397,10 +3035,7 @@ def test_pool_dai_flexible(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     swap_fees_event = bpool.get_event_log(
-        "SWAP_FEES",
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        "SWAP_FEES", tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_fees_event_args = swap_fees_event[0].args
@@ -3412,10 +3047,7 @@ def test_pool_dai_flexible(
     )
 
     swap_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_event[0].args
@@ -3454,10 +3086,7 @@ def test_pool_dai_flexible(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     swap_fees_event = bpool.get_event_log(
-        "SWAP_FEES",
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        "SWAP_FEES", tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_fees_event_args = swap_fees_event[0].args
@@ -3467,10 +3096,7 @@ def test_pool_dai_flexible(
     )
 
     swap_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     swap_event_args = swap_event[0].args
@@ -3509,20 +3135,14 @@ def test_pool_dai_flexible(
 
     tx = bpool.join_pool(
         web3.toWei("0.01", "ether"),
-        [
-            web3.toWei("50", "ether"),
-            web3.toWei("50", "ether"),
-        ],
+        [web3.toWei("50", "ether"), web3.toWei("50", "ether")],
         publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     join_pool_event = bpool.get_event_log(
-        bpool.EVENT_LOG_JOIN,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_JOIN, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert join_pool_event[0].args.tokenIn == erc20_token.address
@@ -3555,10 +3175,7 @@ def test_pool_dai_flexible(
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     join_pool_event = bpool.get_event_log(
-        bpool.EVENT_LOG_JOIN,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_JOIN, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert join_pool_event[0].args.tokenIn == dai_contract.address
@@ -3580,10 +3197,7 @@ def test_pool_dai_flexible(
     ].args.tokenAmountIn == erc20_token.balanceOf(side_staking.address)
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert bpt_event[0].args.bptAmount + ss_contract_bpt_balance == bpool.balanceOf(
@@ -3610,10 +3224,7 @@ def test_pool_dai_flexible(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     join_pool_event = bpool.get_event_log(
-        bpool.EVENT_LOG_JOIN,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_JOIN, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert join_pool_event[0].args.tokenIn == dai_contract.address
@@ -3649,20 +3260,14 @@ def test_pool_dai_flexible(
 
     tx = bpool.exit_pool(
         web3.toWei("0.5", "ether"),
-        [
-            web3.toWei(0.001, "ether"),
-            web3.toWei(0.001, "ether"),
-        ],
+        [web3.toWei(0.001, "ether"), web3.toWei(0.001, "ether")],
         consumer_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.tokenOut == erc20_token.address
@@ -3714,10 +3319,7 @@ def test_pool_dai_flexible(
     assert erc20_token.balanceOf(consumer_wallet.address) == consumer_dt_balance
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.caller == consumer_wallet.address
@@ -3766,10 +3368,7 @@ def test_pool_dai_flexible(
     assert dai_contract.balanceOf(consumer_wallet.address) == consumer_dai_balance
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert (
@@ -3778,10 +3377,7 @@ def test_pool_dai_flexible(
     )
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
     assert exit_event[0].args.caller == consumer_wallet.address
     assert exit_event[0].args.tokenOut == erc20_token.address
@@ -3822,10 +3418,7 @@ def test_pool_dai_flexible(
     assert erc20_token.balanceOf(consumer_wallet.address) == consumer_dt_balance
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert consumer_bpt_balance - bpt_event[0].args.bptAmount == bpool.balanceOf(
@@ -3833,10 +3426,7 @@ def test_pool_dai_flexible(
     )
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.caller == consumer_wallet.address
@@ -3879,10 +3469,7 @@ def test_pool_dai_flexible(
     assert dai_contract.balanceOf(consumer_wallet.address) == consumer_dai_balance
 
     bpt_event = bpool.get_event_log(
-        bpool.EVENT_LOG_BPT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert consumer_bpt_balance - bpt_event[0].args.bptAmount == bpool.balanceOf(
@@ -3890,10 +3477,7 @@ def test_pool_dai_flexible(
     )
 
     exit_event = bpool.get_event_log(
-        bpool.EVENT_LOG_EXIT,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
+        bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert exit_event[0].args.caller == consumer_wallet.address

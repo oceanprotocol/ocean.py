@@ -5,6 +5,7 @@
 from typing import Dict, Optional, Union
 
 from enforce_typing import enforce_types
+from ocean_lib.config import Config
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.web3_internal.contract_utils import (
@@ -70,6 +71,20 @@ def get_web3_connection_provider(
 
 def get_contracts_addresses(address_file: str, network: str) -> Dict[str, str]:
     return get_contracts_addresses_web3(network, address_file)
+
+
+@enforce_types
+def get_address_of_type(
+    config: Config, address_type: str, key: Optional[str] = None
+) -> str:
+    addresses = get_contracts_addresses(config.address_file, config.network_name)
+    if address_type not in addresses.keys():
+        raise KeyError(f"{address_type} address is not set in the config file")
+    return (
+        addresses[address_type]
+        if not isinstance(addresses[address_type], dict)
+        else addresses[address_type].get(key, addresses[address_type]["1"])
+    )
 
 
 @enforce_types

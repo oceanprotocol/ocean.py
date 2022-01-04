@@ -3,12 +3,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from ocean_lib.agreements.file_objects import FilesTypeFactory
-from ocean_lib.agreements.service_types import ServiceTypesV4
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.v4.models_structures import ErcCreateData
-from ocean_lib.ocean.v4.ocean_assets import OceanAssetV4
-from ocean_lib.services.v4.service import V4Service
+from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.ocean.ocean_assets import OceanAssets
+from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import build_credentials_dict
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
@@ -42,7 +42,7 @@ def test_publish_flow(web3, config, publisher_wallet):
     erc721_address = registered_event[0].args.newTokenAddress
 
     data_provider = DataServiceProvider
-    asset = OceanAssetV4(config, web3, data_provider)
+    asset = OceanAssets(config, web3, data_provider)
     metadata = {
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
@@ -171,9 +171,9 @@ def test_publish_flow(web3, config, publisher_wallet):
         web3, config, publisher_wallet, publisher_wallet
     )
 
-    access_service = V4Service(
+    access_service = Service(
         service_id="1",
-        service_type=ServiceTypesV4.ASSET_ACCESS,
+        service_type=ServiceTypes.ASSET_ACCESS,
         service_endpoint=f"{data_provider.get_url(config)}/api/services/download",
         data_token=erc20_token.address,
         files=encrypted_files,
@@ -191,9 +191,9 @@ def test_publish_flow(web3, config, publisher_wallet):
         "allowRawAlgorithm": False,
         "allowNetworkAccess": True,
     }
-    compute_service = V4Service(
+    compute_service = Service(
         service_id="2",
-        service_type=ServiceTypesV4.CLOUD_COMPUTE,
+        service_type=ServiceTypes.CLOUD_COMPUTE,
         service_endpoint=f"{data_provider.get_url(config)}/api/services/compute",
         data_token=erc20_token.address,
         files=encrypted_files,
@@ -218,7 +218,7 @@ def test_publish_flow(web3, config, publisher_wallet):
     assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
     assert ddo.datatokens[0]["address"] == erc20_token.address
     assert ddo.credentials == build_credentials_dict()
-    assert ddo.services[1].compute_values["compute"] == compute_values
+    assert ddo.services[1].compute_values == compute_values
 
     # Create an encrypted asset
     erc721_token2, erc20_token2 = deploy_erc721_erc20(

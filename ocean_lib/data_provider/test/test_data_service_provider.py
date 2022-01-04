@@ -10,7 +10,6 @@ import pytest
 from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
-from ocean_lib.exceptions import OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
 from requests.exceptions import InvalidURL
 from requests.models import Response
@@ -23,17 +22,17 @@ from tests.resources.mocks.http_client_mock import (
 
 TEST_SERVICE_ENDPOINTS = {
     "asset_urls": ["GET", "/api/services/assetUrls"],
-    "computeDelete": ["DELETE", "/api/v1/services/compute"],
-    "computeStart": ["POST", "/api/v1/services/compute"],
-    "computeStatus": ["GET", "/api/v1/services/compute"],
-    "computeStop": ["PUT", "/api/v1/services/compute"],
-    "computeResult": ["GET", "/api/v1/services/computeResult"],
-    "download": ["GET", "/api/v1/services/download"],
-    "encrypt": ["POST", "/api/v1/services/encrypt"],
+    "computeDelete": ["DELETE", "/api/services/compute"],
+    "computeStart": ["POST", "/api/services/compute"],
+    "computeStatus": ["GET", "/api/services/compute"],
+    "computeStop": ["PUT", "/api/services/compute"],
+    "computeResult": ["GET", "/api/services/computeResult"],
+    "download": ["GET", "/api/services/download"],
+    "encrypt": ["POST", "/api/services/encrypt"],
     "decrypt": ["POST", "/api/services/decrypt"],
-    "fileinfo": ["POST", "/api/v1/services/fileinfo"],
-    "initialize": ["GET", "/api/v1/services/initialize"],
-    "nonce": ["GET", "/api/v1/services/nonce"],
+    "fileinfo": ["POST", "/api/services/fileinfo"],
+    "initialize": ["GET", "/api/services/initialize"],
+    "nonce": ["GET", "/api/services/nonce"],
 }
 
 
@@ -66,24 +65,6 @@ def test_set_http_client(with_nice_client):
     assert isinstance(DataSP.get_http_client(), HttpClientNiceMock)
 
 
-def test_encryption_fails(with_evil_client):
-    """Tests that asset encryption fails with OceanEncryptAssetUrlsError."""
-    encrypt_endpoint = "http://mock/encrypt/"
-    with pytest.raises(OceanEncryptAssetUrlsError):
-        DataSP.encrypt_files_dict(
-            [{"some_files": "files"}],
-            encrypt_endpoint,
-            "some_asset_id",
-            "some_publisher_address",
-            "some_signature",
-        )
-
-
-def test_nonce_fails(with_evil_client):
-    """Tests that nonce retrieved erroneously is set to None."""
-    assert DataSP.get_nonce("some_address", "http://localhost:8030") is None
-
-
 def test_order_requirements_fails(with_evil_client):
     """Tests failure of order requirements from endpoint."""
     assert (
@@ -100,67 +81,52 @@ def test_order_requirements_fails(with_evil_client):
     )
 
 
-def test_start_compute_job_fails_empty(with_empty_client):
+def test_start_compute_job_fails_empty(with_empty_client, provider_wallet):
     """Tests failure of compute job from endpoint with empty response."""
     with pytest.raises(AssertionError):
         DataSP.start_compute_job(
             "some_did",
             "http://mock/",
-            "some_consumer_address",
-            "some_signature",
+            provider_wallet,
             0,
             "some_tx_id",
             algorithm_did="some_algo_did",
         )
 
 
-def test_start_compute_job_fails_error_response(with_evil_client):
+def test_start_compute_job_fails_error_response(with_evil_client, provider_wallet):
     """Tests failure of compute job from endpoint with non-200 response."""
     with pytest.raises(ValueError):
         DataSP.start_compute_job(
             "some_did",
             "http://mock/",
-            "some_consumer_address",
-            "some_signature",
+            provider_wallet,
             0,
             "some_tx_id",
             algorithm_did="some_algo_did",
         )
 
 
-def test_send_compute_request_failure(with_evil_client):
+def test_send_compute_request_failure(with_evil_client, provider_wallet):
     """Tests failure of compute request from endpoint with non-200 response."""
     with pytest.raises(Exception):
         DataSP._send_compute_request(
-            "post",
-            "some_did",
-            "some_job_id",
-            "http://mock/",
-            "some_consumer_address",
-            "some_signature",
+            "post", "some_did", "some_job_id", "http://mock/", provider_wallet
         )
 
 
-def test_compute_job_result(with_nice_client):
+def test_compute_job_result(with_nice_client, provider_wallet):
     """Tests successful compute job starting."""
     result = DataSP.compute_job_result(
-        "some_did",
-        "some_job_id",
-        "http://mock",
-        "some_consumer_address",
-        "some_signature",
+        "some_did", "some_job_id", "http://mock", provider_wallet
     )
     assert result == {"good_job": "with_mock"}
 
 
-def test_delete_job_result(with_nice_client):
+def test_delete_job_result(with_nice_client, provider_wallet):
     """Tests successful compute job deletion."""
     result = DataSP.delete_compute_job(
-        "some_did",
-        "some_job_id",
-        "http://mock",
-        "some_consumer_address",
-        "some_signature",
+        "some_did", "some_job_id", "http://mock", provider_wallet
     )
     assert result == {"good_job": "with_mock_delete"}
 
@@ -256,12 +222,10 @@ def test_get_root_uri():
     assert DataSP.get_root_uri(uri) == uri
     assert DataSP.get_root_uri("http://localhost:8030") == "http://localhost:8030"
     assert (
-        DataSP.get_root_uri("http://localhost:8030/api/v1/services/")
+        DataSP.get_root_uri("http://localhost:8030/api/services/")
         == "http://localhost:8030"
     )
-    assert (
-        DataSP.get_root_uri("http://localhost:8030/api/v1") == "http://localhost:8030"
-    )
+    assert DataSP.get_root_uri("http://localhost:8030/api") == "http://localhost:8030"
     assert (
         DataSP.get_root_uri("http://localhost:8030/services")
         == "http://localhost:8030/services"
@@ -271,12 +235,12 @@ def test_get_root_uri():
         == "http://localhost:8030"
     )
     assert (
-        DataSP.get_root_uri("http://localhost:8030/api/v2/services")
-        == "http://localhost:8030/api/v2/services"
+        DataSP.get_root_uri("http://localhost:8030/api/services")
+        == "http://localhost:8030"
     )
     assert (
-        DataSP.get_root_uri("http://localhost:8030/api/v2/services/")
-        == "http://localhost:8030/api/v2"
+        DataSP.get_root_uri("http://localhost:8030/api/services/")
+        == "http://localhost:8030"
     )
 
     assert not DataSP.is_valid_provider("thisIsNotAnURL")
@@ -300,7 +264,7 @@ def test_build_endpoint():
 
     def get_service_endpoints(_provider_uri=None):
         _endpoints = TEST_SERVICE_ENDPOINTS.copy()
-        _endpoints.update({"newEndpoint": ["GET", "/api/v1/services/newthing"]})
+        _endpoints.update({"newEndpoint": ["GET", "/api/services/newthing"]})
         return _endpoints
 
     original_func = DataSP.get_service_endpoints
@@ -311,7 +275,7 @@ def test_build_endpoint():
     method, endpnt = DataSP.build_endpoint("newEndpoint", provider_uri=uri)
     assert endpnt == urljoin(uri, endpoints["newEndpoint"][1])
 
-    uri = "http://localhost:8030/api/v1/services/newthing"
+    uri = "http://localhost:8030/api/services/newthing"
     method, endpnt = DataSP.build_endpoint("download", provider_uri=uri)
     assert method == endpoints["download"][0]
     assert endpnt == urljoin(DataSP.get_root_uri(uri), endpoints["download"][1])

@@ -6,7 +6,7 @@ import uuid
 from unittest.mock import patch
 
 import pytest
-from ocean_lib.assets.asset import V3Asset
+from ocean_lib.assets.asset import Asset
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -16,7 +16,7 @@ from tests.resources.ddo_helpers import get_resource_path
 def test_InsufficientBalance(publisher_ocean_instance, publisher_wallet):
     alice = publisher_wallet
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
-    asset = V3Asset(json_filename=sample_ddo_path)
+    asset = Asset(json_filename=sample_ddo_path)
     asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
 
     token = publisher_ocean_instance.create_data_token(

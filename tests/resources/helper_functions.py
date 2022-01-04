@@ -10,22 +10,23 @@ import time
 from typing import Optional
 
 import coloredlogs
-from web3 import Web3
 import yaml
 from enforce_typing import enforce_types
 from ocean_lib.config import Config
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.data_token import DataToken
-from ocean_lib.models.v4.erc20_token import ERC20Token
-from ocean_lib.models.v4.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.v4.erc721_token import ERC721Token
-from ocean_lib.models.v4.models_structures import ErcCreateData
+from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.erc721_token import ERC721Token
+from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.util import get_contracts_addresses, get_web3 as util_get_web3
+from ocean_lib.ocean.util import get_contracts_addresses
+from ocean_lib.ocean.util import get_web3 as util_get_web3
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
+from web3 import Web3
 
 _NETWORK = "ganache"
 
@@ -340,9 +341,7 @@ def transfer_ocean_if_balance_lte(
         >= amount_to_transfer
     ):
         ocean_token.transfer(
-            recipient,
-            web3.toWei("20000", "ether"),
-            factory_deployer_wallet,
+            recipient, web3.toWei("20000", "ether"), factory_deployer_wallet
         )
 
     return ocean_token.balanceOf(recipient) - initial_recipient_balance
