@@ -199,11 +199,13 @@ class OceanAssets:
         # copy metadata so we don't change the original
         metadata_copy = copy.deepcopy(metadata)
 
-        asset_type = metadata_copy["type"]
+        asset_type = metadata_copy.get("type")
         assert asset_type in (
             "dataset",
             "algorithm",
         ), f"Invalid/unsupported asset type {asset_type}"
+
+        assert "name" in metadata_copy, "Must have name in metadata."
 
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(self._config)
@@ -374,5 +376,38 @@ class OceanAssets:
 
         return asset
 
-    def resolve(self, did: str):
+    @enforce_types
+    def resolve(self, did: str) -> "Asset":
         return self._get_aquarius(self._metadata_cache_uri).get_asset_ddo(did)
+
+    @enforce_types
+    def search(self, text: str) -> list:
+        """
+        Search an asset in oceanDB using aquarius.
+        :param text: String with the value that you are searching
+        :return: List of assets that match with the query
+        """
+        logger.info(f"Searching asset containing: {text}")
+        return [
+            Asset.from_dict(ddo_dict["_source"])
+            for ddo_dict in self._get_aquarius(self._metadata_cache_uri).query_search(
+                {"query": {"query_string": {"query": text}}}
+            )
+            if "_source" in ddo_dict
+        ]
+
+    @enforce_types
+    def query(self, query: dict) -> list:
+        """
+        Search an asset in oceanDB using search query.
+        :param query: dict with query parameters
+            (e.g.) https://github.com/oceanprotocol/aquarius/blob/develop/docs/for_api_users/API.md
+        :return: List of assets that match with the query.
+        """
+        logger.info(f"Searching asset query: {query}")
+        aquarius = self._get_aquarius(self._metadata_cache_uri)
+        return [
+            Asset.from_dict(ddo_dict["_source"])
+            for ddo_dict in aquarius.query_search(query)
+            if "_source" in ddo_dict
+        ]
