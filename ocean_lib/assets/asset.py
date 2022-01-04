@@ -20,6 +20,7 @@ logger = logging.getLogger("ddo")
 class Asset:
     """Asset class to create, import, export, validate Asset/DDO objects for V4."""
 
+    @enforce_types
     def __init__(
         self,
         did: Optional[str] = None,
@@ -49,44 +50,52 @@ class Asset:
         self.stats = stats
 
     @property
+    @enforce_types
     def requires_address_credential(self) -> bool:
         """Checks if an address credential is required on this asset."""
         manager = AddressCredential(self)
         return manager.requires_credential()
 
     @property
+    @enforce_types
     def allowed_addresses(self) -> list:
         """Lists addresses that are explicitly allowed in credentials."""
         manager = AddressCredential(self)
         return manager.get_addresses_of_class("allow")
 
     @property
+    @enforce_types
     def denied_addresses(self) -> list:
         """Lists addresses that are explicitly denied in credentials."""
         manager = AddressCredential(self)
         return manager.get_addresses_of_class("deny")
 
+    @enforce_types
     def add_address_to_allow_list(self, address: str) -> None:
         """Adds an address to allowed addresses list."""
         manager = AddressCredential(self)
         manager.add_address_to_access_class(address, "allow")
 
+    @enforce_types
     def add_address_to_deny_list(self, address: str) -> None:
         """Adds an address to the denied addresses list."""
         manager = AddressCredential(self)
         manager.add_address_to_access_class(address, "deny")
 
+    @enforce_types
     def remove_address_from_allow_list(self, address: str) -> None:
         """Removes address from allow list (if it exists)."""
         manager = AddressCredential(self)
         manager.remove_address_from_access_class(address, "allow")
 
+    @enforce_types
     def remove_address_from_deny_list(self, address: str) -> None:
         """Removes address from deny list (if it exists)."""
         manager = AddressCredential(self)
         manager.remove_address_from_access_class(address, "deny")
 
     @classmethod
+    @enforce_types
     def from_dict(cls, dictionary: dict) -> "Asset":
         """Import a JSON dict into this Asset."""
         values = copy.deepcopy(dictionary)
@@ -109,6 +118,7 @@ class Asset:
             values.pop("stats", None),
         )
 
+    @enforce_types
     def as_dictionary(self) -> dict:
         """
         Return the DDO as a JSON dict.
@@ -137,6 +147,7 @@ class Asset:
         data.update(attrs)
         return data
 
+    @enforce_types
     def add_service(self, service: Service) -> None:
         """
         Add a service to the list of services on the V4 DDO.
@@ -149,16 +160,19 @@ class Asset:
         )
         self.services.append(service)
 
+    @enforce_types
     def get_service_by_id(self, service_id: str) -> Service:
         """Return the Service with the matching id"""
         return next((service for service in self.services if service.id == service_id))
 
+    @enforce_types
     def get_service(self, service_type: str) -> Optional[Service]:
         """Return the first Service with the given service type."""
         return next(
             (service for service in self.services if service.type == service_type), None
         )
 
+    @enforce_types
     def remove_publisher_trusted_algorithm(
         self, compute_service: Service, algo_did: str
     ) -> list:
@@ -183,6 +197,7 @@ class Asset:
 
         return trusted_algorithms
 
+    @enforce_types
     def remove_publisher_trusted_algorithm_publisher(
         self, compute_service: Service, publisher_address: str
     ) -> list:
@@ -215,6 +230,7 @@ class Asset:
 
         return trusted_algorithm_publishers
 
+    @enforce_types
     def generate_trusted_algorithms(self) -> dict:
         algo_metadata = self.metadata
         return {
@@ -232,6 +248,7 @@ class Asset:
             ),
         }
 
+    @enforce_types
     def update_compute_values(
         self,
         trusted_algorithms: List,
