@@ -7,7 +7,6 @@ import uuid
 from unittest.mock import patch
 
 import pytest
-from ocean_lib.agreements.consumable import ConsumableCodes
 from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -15,16 +14,11 @@ from ocean_lib.exceptions import InsufficientBalance
 from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import (
-    get_computing_metadata,
     get_resource_path,
-    get_sample_algorithm_ddo_dict,
     get_sample_ddo,
-    wait_for_ddo,
     wait_for_update,
 )
 from tests.resources.helper_functions import get_address_of_type
-
-# TODO: fix these, they were previously for v3
 
 
 def create_asset(ocean, publisher, config, metadata=None):
@@ -77,6 +71,7 @@ def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wal
     assert ocn.assets.resolve(invalid_did) is None
 
 
+@pytest.mark.skip(reason="TODO: update function on OceanAssets class")
 def test_update(publisher_ocean_instance, publisher_wallet, consumer_wallet, config):
     ocn = publisher_ocean_instance
     block = ocn.web3.eth.block_number
@@ -90,7 +85,6 @@ def test_update(publisher_ocean_instance, publisher_wallet, consumer_wallet, con
     ddo.metadata["name"] = _name
     assert ddo.metadata["name"] == _name, "Asset's name was not updated."
 
-    # TODO: implement and test ocean assets update
     with pytest.raises(ValueError):
         ocn.assets.update(ddo, bob)
 
@@ -172,50 +166,44 @@ def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet, config)
     )
 
 
-def test_ocean_assets_validate(publisher_ocean_instance, metadata):
+def test_ocean_assets_validate(publisher_ocean_instance):
     """Tests that the validate function returns an error for invalid metadata."""
+    ddo_dict = get_sample_ddo()
+    ddo = Asset.from_dict(ddo_dict)
+
     assert publisher_ocean_instance.assets.validate(
-        metadata
-    ), "metadata should be valid, unless the schema changed."
+        ddo
+    ), "asset should be valid, unless the schema changed."
 
 
-def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet):
+def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet, config):
     """Tests the creation of an algorithm DDO."""
-    metadata = get_sample_algorithm_ddo_dict()["service"][0]
-    metadata["attributes"]["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    ddo = publisher_ocean_instance.assets.create(
-        metadata["attributes"], publisher_wallet
-    )
+    metadata = {
+        "created": "2020-11-15T12:27:48Z",
+        "updated": "2021-05-17T21:58:02Z",
+        "description": "Sample description",
+        "name": "Sample algorithm asset",
+        "type": "algorithm",
+        "author": "OPF",
+        "license": "https://market.oceanprotocol.com/terms",
+        "algorithm": {
+            "language": "scala",
+            "format": "docker-image",
+            "version": "0.1",
+            "container": {
+                "entrypoint": "node $ALGO",
+                "image": "node",
+                "tag": "10",
+                "checksum": "test",
+            },
+        },
+    }
+
+    ddo = create_asset(publisher_ocean_instance, publisher_wallet, config, metadata)
     assert ddo, "DDO None. The ddo is not cached after the creation."
-    _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did)
-    assert _ddo, f"assets.resolve failed for did {ddo.did}"
-    assert _ddo.is_consumable() == ConsumableCodes.OK
 
 
-def test_ocean_assets_create_fails_fileinfo(publisher_ocean_instance, publisher_wallet):
-    """Tests that a file with invalid URL can not be published."""
-    metadata = get_sample_algorithm_ddo_dict()["service"][0]
-    metadata["attributes"]["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    metadata_copy = metadata.copy()
-    metadata_copy["attributes"]["main"]["files"][0][
-        "url"
-    ] = "http://127.0.0.1/not_valid"
-    with pytest.raises(ValueError):
-        publisher_ocean_instance.assets.create(
-            metadata_copy["attributes"], publisher_wallet
-        )
-
-
-def test_ocean_assets_compute(publisher_ocean_instance, publisher_wallet):
-    """Tests the creation of an asset with a compute service."""
-    metadata = get_computing_metadata()
-    metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    ddo = publisher_ocean_instance.assets.create(metadata, publisher_wallet)
-    assert ddo, "DDO None. The ddo is not cached after the creation."
-    _ddo = wait_for_ddo(publisher_ocean_instance, ddo.did)
-    assert _ddo, f"assets.resolve failed for did {ddo.did}"
-
-
+@pytest.mark.skip(reason="TODO: download function on OceanAssets class")
 def test_download_fails(publisher_ocean_instance, publisher_wallet):
     """Tests failures of assets download function."""
     with patch("ocean_lib.ocean.ocean_assets.OceanAssets.resolve") as mock:
@@ -230,88 +218,35 @@ def test_download_fails(publisher_ocean_instance, publisher_wallet):
             )
 
 
-def test_create_bad_metadata(publisher_ocean_instance, publisher_wallet):
+def test_create_bad_metadata(publisher_ocean_instance, publisher_wallet, config):
     """Tests that we can't create the asset with plecos failure."""
-    metadata = get_sample_algorithm_ddo_dict()["service"][0]
-    metadata["attributes"]["main"]["files"][0]["EXTRA ATTRIB!"] = 0
-    with pytest.raises(ValueError):
-        publisher_ocean_instance.assets.create(metadata["attributes"], publisher_wallet)
+    metadata = {
+        "created": "2020-11-15T12:27:48Z",
+        "updated": "2021-05-17T21:58:02Z",
+        "description": "Sample description",
+        # name missing intentionally
+        "type": "dataset",
+        "author": "OPF",
+        "license": "https://market.oceanprotocol.com/terms",
+    }
+    with pytest.raises(AssertionError):
+        create_asset(publisher_ocean_instance, publisher_wallet, config, metadata)
+
+    metadata["name"] = "Sample asset"
+    metadata.pop("type")
+    with pytest.raises(AssertionError):
+        create_asset(publisher_ocean_instance, publisher_wallet, config, metadata)
 
 
-def test_create_asset_with_address(publisher_ocean_instance, publisher_wallet):
-    """Tests that an asset can be created with specific DT address."""
-    ocn = publisher_ocean_instance
-    alice = publisher_wallet
-
-    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
-    asset = Asset(json_filename=sample_ddo_path)
-    asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-
-    token = ocn.create_data_token(
-        "DataToken1", "DT1", from_wallet=alice, blob="foo_blob"
-    )
-
-    assert ocn.assets.create(
-        asset.metadata, alice, [], data_token_address=token.address
-    ), "Asset creation failed with the specified datatoken address."
+#  TODO: add more creation tests. The old v3 ones did not apply anymore
 
 
-def test_create_asset_with_owner_address(publisher_ocean_instance, publisher_wallet):
-    """Tests that an asset can be created with owner address."""
-    ocn = publisher_ocean_instance
-    alice = publisher_wallet
-
-    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
-    asset = Asset(json_filename=sample_ddo_path)
-    asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-
-    assert ocn.assets.create(
-        asset.metadata, alice, [], owner_address=alice.address
-    ), "Asset creation failed with the specified owner address."
-
-
-def test_create_asset_with_dt_address_and_owner_address(
-    publisher_ocean_instance, publisher_wallet
-):
-    """Tests that an asset can be created with both a datatoken address and owner address."""
-    ocn = publisher_ocean_instance
-    alice = publisher_wallet
-
-    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
-    asset = Asset(json_filename=sample_ddo_path)
-    asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-
-    token = ocn.create_data_token(
-        "DataToken1", "DT1", from_wallet=alice, blob="foo_blob"
-    )
-
-    assert ocn.assets.create(
-        asset.metadata,
-        alice,
-        [],
-        owner_address=alice.address,
-        data_token_address=token.address,
-    ), "Asset creation failed when given both a datatoken address and owner address."
-
-
-def test_create_asset_without_dt_address(publisher_ocean_instance, publisher_wallet):
-    """Tests creation of the asset which has not the data token address."""
-    ocn = publisher_ocean_instance
-    alice = publisher_wallet
-
-    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
-    asset = Asset(json_filename=sample_ddo_path)
-    asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-
-    assert ocn.assets.create(
-        asset.metadata, alice, [], data_token_address=None
-    ), "Asset creation failed with the specified datatoken address."
-
-
+@pytest.mark.skip(reason="TODO: pay_for_service function on OceanAssets class")
 def test_pay_for_service_insufficient_balance(
     publisher_ocean_instance, publisher_wallet
 ):
     """Tests if balance is lower than the purchased amount."""
+    #  FIXME: this test still has v3 structure, please adapt
     ocn = publisher_ocean_instance
     alice = publisher_wallet
 

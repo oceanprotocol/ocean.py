@@ -199,11 +199,13 @@ class OceanAssets:
         # copy metadata so we don't change the original
         metadata_copy = copy.deepcopy(metadata)
 
-        asset_type = metadata_copy["type"]
+        asset_type = metadata_copy.get("type")
         assert asset_type in (
             "dataset",
             "algorithm",
         ), f"Invalid/unsupported asset type {asset_type}"
+
+        assert "name" in metadata_copy, "Must have name in metadata."
 
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(self._config)
