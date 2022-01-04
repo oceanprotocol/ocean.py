@@ -6,7 +6,6 @@ from unittest.mock import patch
 
 import pytest
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.did import DID
 from ocean_lib.assets.trusted_algorithms import (
     add_publisher_trusted_algorithm,
     add_publisher_trusted_algorithm_publisher,
@@ -25,11 +24,12 @@ from tests.resources.ddo_helpers import (
 def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
     """Tests adding/removing trusted algorithms in the DDO metadata."""
     algorithm_ddo = get_sample_algorithm_ddo()
-    algorithm_ddo.did = DID.did({"ab": "b"})
+    # TODO: fix dids for v4
+    # algorithm_ddo.did = DID.did({"ab": "b"})
     algorithm_ddo_v2 = get_sample_algorithm_ddo()
-    algorithm_ddo_v2.did = DID.did({"a": "b"})
+    # algorithm_ddo_v2.did = DID.did({"a": "b"})
     algorithm_ddo_v3 = get_sample_algorithm_ddo()
-    algorithm_ddo_v3.did = DID.did({"A": "B"})
+    # algorithm_ddo_v3.did = DID.did({"A": "B"})
 
     ddo = get_sample_ddo_with_compute_service()
 
@@ -89,7 +89,8 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
 def test_add_trusted_algorithm_no_compute_service(publisher_ocean_instance):
     """Tests if the DDO has or not a compute service."""
     algorithm_ddo = get_sample_algorithm_ddo()
-    algorithm_ddo.did = DID.did({"ab": "b"})
+    # TODO: fix for v4
+    # algorithm_ddo.did = DID.did({"ab": "b"})
 
     ddo = get_sample_ddo()
     with pytest.raises(AssertionError):
@@ -127,18 +128,14 @@ def test_utilitary_functions_for_trusted_algorithm_publishers(publisher_ocean_in
     assert len(new_publisher_trusted_algo_publishers) == 2
 
     # remove an existing algorithm to publisher_trusted_algorithms list
-    new_publisher_trusted_algo_publishers = (
-        remove_publisher_trusted_algorithm_publisher(
-            ddo, "0xABC", publisher_ocean_instance.config.metadata_cache_uri
-        )
+    new_publisher_trusted_algo_publishers = remove_publisher_trusted_algorithm_publisher(
+        ddo, "0xABC", publisher_ocean_instance.config.metadata_cache_uri
     )
 
     assert len(new_publisher_trusted_algo_publishers) == 1
 
     # remove a trusted algorithm that does not belong to publisher_trusted_algorithms list
-    new_publisher_trusted_algo_publishers = (
-        remove_publisher_trusted_algorithm_publisher(
-            ddo, "0xaaaa", publisher_ocean_instance.config.metadata_cache_uri
-        )
+    new_publisher_trusted_algo_publishers = remove_publisher_trusted_algorithm_publisher(
+        ddo, "0xaaaa", publisher_ocean_instance.config.metadata_cache_uri
     )
     assert len(new_publisher_trusted_algo_publishers) == 1
