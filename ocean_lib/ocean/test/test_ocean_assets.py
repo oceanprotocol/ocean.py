@@ -8,10 +8,13 @@ from unittest.mock import patch
 
 import pytest
 from ocean_lib.agreements.consumable import ConsumableCodes
+from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.assets.asset import Asset
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import InsufficientBalance
-from ocean_lib.models.data_token import DataToken
+from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from tests.resources.helper_functions import get_address_of_type
 from tests.resources.ddo_helpers import (
     get_computing_metadata,
     get_resource_path,
@@ -24,99 +27,80 @@ from tests.resources.ddo_helpers import (
 # TODO: fix these, they were previously for v3
 
 
-def create_asset(ocean, publisher, encrypt=False):
+def create_asset(ocean, publisher, config, metadata=None):
     """Helper function for asset creation based on ddo_sa_sample.json."""
-    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
-    assert sample_ddo_path.exists(), "{} does not exist!".format(sample_ddo_path)
-
-    asset = Asset(json_filename=sample_ddo_path)
-    asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    return ocean.assets.create(asset.metadata, publisher, [], encrypt=encrypt)
-
-
-@pytest.mark.parametrize("encrypt", [False, True])
-def test_register_asset(
-    publisher_ocean_instance, encrypt, publisher_wallet, consumer_wallet
-):
-    """Test various paths for asset registration."""
-    ocn = publisher_ocean_instance
-    ddo_reg = ocn.assets.ddo_registry()
-    block = ocn.web3.eth.block_number
-    alice = publisher_wallet
-    bob = consumer_wallet
-
-    def _get_num_assets(_minter):
-        # dids = [add_0x_prefix(did_to_id(a)) for a in ocn.assets.owner_assets(_minter)]
-        # TODO: adjust for v4
-        # dids = [a for a in dids if len(a) == 42]
-        dids = []
-        return len(
-            [
-                a
-                for a in dids
-                if DataToken(ocn.web3, a).contract.caller.isMinter(_minter)
-            ]
-        )
-
-    num_assets_owned = _get_num_assets(alice.address)
-
-    original_ddo = create_asset(ocn, alice, encrypt=encrypt)
-    assert original_ddo, "create asset failed."
-
-    # try to resolve new asset
-    did = original_ddo.did
-    asset_id = original_ddo.asset_id
-    block_confirmations = ocn.config.block_confirmations.value
-    log = ddo_reg.get_event_log(
-        ddo_reg.EVENT_METADATA_CREATED, block - (block_confirmations + 1), asset_id, 30
+    erc20_data = ErcCreateData(
+        template_index=1,
+        strings=["Datatoken 1", "DT1"],
+        addresses=[
+            publisher.address,
+            publisher.address,
+            ZERO_ADDRESS,
+            get_address_of_type(config, "Ocean"),
+        ],
+        uints=[ocean.web3.toWei("0.5", "ether"), 0],
+        bytess=[b""],
     )
-    assert log, "no ddo created event."
 
-    ddo = wait_for_ddo(ocn, did)
-    assert ddo, "ddo is not found in cache."
-    ddo_dict = ddo.as_dictionary()
-    original = original_ddo.as_dictionary()
-    assert (
-        ddo_dict["publicKey"] == original["publicKey"]
-    ), "The new asset's public key does not coincide with the original asset's one."
-    assert (
-        ddo_dict["authentication"] == original["authentication"]
-    ), "The new asset's authentication key does not coincide with the original asset's one."
-    assert ddo_dict["service"], "The new asset does not have the service field."
-    assert original["service"], "The original asset does not have the service field."
-    metadata = ddo_dict["service"][0]["attributes"]
-    if "datePublished" in metadata["main"]:
-        metadata["main"].pop("datePublished")
-    assert (
-        ddo_dict["service"][0]["attributes"]["main"]["name"]
-        == original["service"][0]["attributes"]["main"]["name"]
-    ), "The new asset has a different name."
-    assert (
-        ddo_dict["service"][1] == original["service"][1]
-    ), "The new asset's access service does not coincide with the original asset's one."
+    if not metadata:
+        metadata = {
+            "created": "2020-11-15T12:27:48Z",
+            "updated": "2021-05-17T21:58:02Z",
+            "description": "Sample description",
+            "name": "Sample asset",
+            "type": "dataset",
+            "author": "OPF",
+            "license": "https://market.oceanprotocol.com/terms",
+        }
+    data_provider = DataServiceProvider
+    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
+    file1 = FilesTypeFactory(file1_dict)
+    encrypt_response = data_provider.encrypt(
+        [file1], "http://172.15.0.4:8030/api/services/encrypt"
+    )
+    encrypted_files = encrypt_response.content.decode("utf-8")
 
-    # Can't resolve unregistered asset
-    # TODO: fix for v4
-    # unregistered_did = DID.did({"0": "0x00112233445566"})
-    # assert ocn.assets.resolve(unregistered_did) is None
+    ddo = ocean.assets.create(
+        metadata, publisher, encrypted_files, erc20_tokens_data=[erc20_data]
+    )
+
+    return ddo
+
+
+def test_register_asset(
+    publisher_ocean_instance,
+    publisher_wallet,
+    consumer_wallet,
+):
+    """Test various paths for asset registration.
+
+    Happy paths are tested in the publish flow."""
+    ocn = publisher_ocean_instance
 
     invalid_did = "did:op:0123456789"
     assert ocn.assets.resolve(invalid_did) is None
 
-    meta_data_assets = ocn.assets.search("")
-    if meta_data_assets:
-        print("Currently registered assets:")
-        print(meta_data_assets)
+
+def test_update(publisher_ocean_instance, publisher_wallet, consumer_wallet, config):
+    ocn = publisher_ocean_instance
+    block = ocn.web3.eth.block_number
+    alice = publisher_wallet
+    bob = consumer_wallet
+
+    ddo = create_asset(ocn, alice, config)
 
     # Publish the metadata
     _name = "updated name"
-    ddo.metadata["main"]["name"] = _name
-    assert ddo.metadata["main"]["name"] == _name, "Asset's name was not updated."
+    ddo.metadata["name"] = _name
+    assert ddo.metadata["name"] == _name, "Asset's name was not updated."
+
+    # TODO: implement and test ocean assets update
     with pytest.raises(ValueError):
         ocn.assets.update(ddo, bob)
 
-    _ = ocn.assets.update(ddo, alice, encrypt=encrypt)
+    _ = ocn.assets.update(ddo, alice)
     block_confirmations = ocn.config.block_confirmations.value
+
     log = ddo_reg.get_event_log(
         ddo_reg.EVENT_METADATA_UPDATED, block - block_confirmations, asset_id, 30
     )
@@ -136,21 +120,30 @@ def test_register_asset(
     ), "The new asset was not published in Alice wallet."
 
 
-def test_ocean_assets_search(publisher_ocean_instance, metadata, publisher_wallet):
+def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet, config):
     """Tests that a created asset can be searched successfully."""
     identifier = str(uuid.uuid1()).replace("-", "")
-    metadata_copy = metadata.copy()
-    metadata_copy["main"]["name"] = identifier
+    metadata = {
+        "created": "2020-11-15T12:27:48Z",
+        "updated": "2021-05-17T21:58:02Z",
+        "description": "Sample description",
+        "name": identifier,
+        "type": "dataset",
+        "author": "OPF",
+        "license": "https://market.oceanprotocol.com/terms",
+    }
+
     assert (
         len(publisher_ocean_instance.assets.search(identifier)) == 0
     ), "Asset search failed."
 
-    ddo = publisher_ocean_instance.assets.create(metadata_copy, publisher_wallet)
-    wait_for_ddo(publisher_ocean_instance, ddo.did)
+    create_asset(publisher_ocean_instance, publisher_wallet, config, metadata)
+
     time.sleep(1)  # apparently changes are not instantaneous
     assert (
         len(publisher_ocean_instance.assets.search(identifier)) == 1
     ), "Searched for the occurrences of the identifier failed. "
+
     assert (
         len(
             publisher_ocean_instance.assets.query(
