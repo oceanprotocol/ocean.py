@@ -8,12 +8,20 @@ from unittest.mock import Mock
 import ecies
 import pytest
 from ocean_lib.agreements.file_objects import FilesTypeFactory
+from ocean_lib.agreements.service_types import ServiceTypes
+from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.http_requests.requests_session import get_requests_session
 from requests.exceptions import InvalidURL
 from requests.models import Response
-from tests.resources.helper_functions import get_publisher_ocean_instance
+
+from tests.resources.ddo_helpers import get_sample_ddo
+from tests.resources.helper_functions import (
+    get_publisher_ocean_instance,
+    get_provider_fees,
+    deploy_erc721_erc20,
+)
 from tests.resources.mocks.http_client_mock import (
     HttpClientEmptyMock,
     HttpClientEvilMock,
@@ -171,6 +179,51 @@ def test_encrypt(web3, provider_wallet):
     decrypted_document = ecies.decrypt(key, encrypted_document)
     decrypted_document_string = decrypted_document.decode("utf-8")
     assert decrypted_document_string == test_string
+
+
+def test_initialize(web3, config, publisher_wallet, publisher_ocean_instance):
+    erc721_token, erc20_token = deploy_erc721_erc20(
+        web3, config, publisher_wallet, publisher_wallet
+    )
+    metadata = {
+        "created": "2020-11-15T12:27:48Z",
+        "updated": "2021-05-17T21:58:02Z",
+        "description": "Sample description",
+        "name": "Sample asset",
+        "type": "dataset",
+        "author": "OPF",
+        "license": "https://market.oceanprotocol.com/terms",
+    }
+    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
+    file2_dict = {"type": "url", "url": "https://url.com/file2.csv", "method": "GET"}
+    file1 = FilesTypeFactory(file1_dict)
+    file2 = FilesTypeFactory(file2_dict)
+
+    # Encrypt file objects
+    encrypt_response = DataSP.encrypt(
+        [file1, file2], "http://localhost:8030/api/services/encrypt"
+    )
+    encrypted_files = encrypt_response.content.decode("utf-8")
+    ddo = publisher_ocean_instance.assets.create(
+        metadata=metadata,
+        publisher_wallet=publisher_wallet,
+        encrypted_files=encrypted_files,
+        erc721_address=erc721_token.address,
+        deployed_erc20_tokens=[erc20_token],
+    )
+    access_service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
+
+    initialize_result = DataSP.initialize(
+        did=ddo.did,
+        service_id=access_service.id,
+        file_index=0,
+        consumer_address=publisher_wallet.address,
+        service_endpoint="http://172.15.0.4:8030/api/services/initialize",
+    )
+    assert initialize_result
+    assert initialize_result.status_code == 200
+    response_json = initialize_result.json()
+    assert response_json["providerFee"] == get_provider_fees()
 
 
 def test_invalid_file_name():

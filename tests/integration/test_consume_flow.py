@@ -13,7 +13,7 @@ from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
-from tests.resources.helper_functions import get_address_of_type, get_provider_fees
+from tests.resources.helper_functions import get_address_of_type
 
 
 def test_consume_flow(web3, config, publisher_wallet, consumer_wallet, provider_wallet):
@@ -121,18 +121,29 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet, provider_
     tx_id = erc20_token.start_order(
         consumer=consumer_wallet.address,
         service_id=int(service.id),
-        provider_fees=get_provider_fees(),
+        provider_fees=response.json()["providerFee"],
         from_wallet=consumer_wallet,
     )
     # Download file
     destination = config.downloads_path
     if not os.path.isabs(destination):
         destination = os.path.abspath(destination)
+
+    if len(os.listdir(destination)) > 0:
+        list(
+            map(
+                os.unlink,
+                (os.path.join(destination, f) for f in os.listdir(destination)),
+            )
+        )
+
     if not os.path.exists(destination):
         os.mkdir(destination)
 
+    assert len(os.listdir(destination)) == 0
+
     for i in range(len(files)):
-        response = data_provider.download(
+        data_provider.download(
             did=ddo.did,
             service_id=service.id,
             tx_id=tx_id,
@@ -141,7 +152,5 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet, provider_
             download_endpoint="http://172.15.0.4:8030/api/services/download",
             destination_folder=destination,
         )
-        assert response
-        assert response.status_code == 200
 
     assert len(os.listdir(destination)) >= 1, "The asset folder is empty."

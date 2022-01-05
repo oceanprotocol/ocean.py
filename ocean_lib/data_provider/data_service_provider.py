@@ -148,7 +148,7 @@ class DataServiceProvider:
         download_endpoint: str,
         destination_folder: Union[str, Path],
         userdata: Optional[Dict] = None,
-    ) -> Response:
+    ) -> None:
 
         payload = {
             "documentId": did,
@@ -190,8 +190,6 @@ class DataServiceProvider:
         logger.info(
             f"Asset downloaded successfully" f" downloadEndpoint {download_endpoint}"
         )
-
-        return response
 
     @staticmethod
     @enforce_types
