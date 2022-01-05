@@ -19,7 +19,6 @@ from unittest.mock import Mock
 import requests
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
-from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.config import Config
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
@@ -103,7 +102,100 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def sign_message(wallet: Wallet, msg: str) -> str:
+    def initialize(
+        did: str,
+        service_id: str,
+        file_index: int,
+        consumer_address: str,
+        service_endpoint: str,
+        userdata: Optional[Dict] = None,
+    ) -> Response:
+        initialize_endpoint = service_endpoint
+        initialize_endpoint += f"?documentId={did}"
+        initialize_endpoint += f"&serviceId={service_id}"
+        initialize_endpoint += f"&fileIndex={file_index}"
+        initialize_endpoint += f"&consumerAddress={consumer_address}"
+        if userdata:
+            initialize_endpoint += f"&userdata={json.dumps(userdata)}"
+        response = DataServiceProvider._http_method("get", initialize_endpoint)
+
+        if not response or not hasattr(response, "status_code"):
+            raise Exception("Response not found!")
+
+        if response.status_code != 200:
+            msg = (
+                f"Initialize service failed at the initializeEndpoint "
+                f"{initialize_endpoint}, reason {response.text}, status {response.status_code}"
+            )
+            logger.error(msg)
+            raise Exception(msg)
+
+        logger.info(
+            f"Service initialized successfully"
+            f" initializeEndpoint {initialize_endpoint}"
+        )
+
+        return response
+
+    @staticmethod
+    @enforce_types
+    def download(
+        did: str,
+        service_id: str,
+        tx_id: str,
+        file_index: int,
+        consumer_wallet: Wallet,
+        download_endpoint: str,
+        destination_folder: Union[str, Path],
+        userdata: Optional[Dict] = None,
+    ) -> Response:
+
+        payload = {
+            "documentId": did,
+            "serviceId": service_id,
+            "consumerAddress": consumer_wallet.address,
+            "transferTxId": tx_id,
+            "fileIndex": file_index,
+        }
+
+        if userdata:
+            userdata = json.dumps(userdata)
+            payload["userdata"] = userdata
+
+        payload["nonce"], payload["signature"] = DataServiceProvider.sign_message(
+            consumer_wallet, did
+        )
+
+        response = DataServiceProvider._http_method(
+            "get",
+            download_endpoint,
+            json=payload,
+            headers={"Content-type": "application/json"},
+        )
+
+        if not response or not hasattr(response, "status_code"):
+            raise Exception("Response not found!")
+
+        if response.status_code != 200:
+            msg = (
+                f"Download asset failed at the downloadEndpoint "
+                f"{download_endpoint}, reason {response.text}, status {response.status_code}"
+            )
+            logger.error(msg)
+            raise Exception(msg)
+
+        file_name = DataServiceProvider._get_file_name(response)
+        DataServiceProvider.write_file(response, destination_folder, file_name)
+
+        logger.info(
+            f"Asset downloaded successfully" f" downloadEndpoint {download_endpoint}"
+        )
+
+        return response
+
+    @staticmethod
+    @enforce_types
+    def sign_message(wallet: Wallet, msg: str) -> Tuple[str, str]:
         nonce = str(datetime.now().timestamp())
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
         return nonce, sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
@@ -165,73 +257,6 @@ class DataServiceProvider:
             int(order["nonce"]),
             order.get("computeAddress"),
         )
-
-    @staticmethod
-    @enforce_types
-    def download_service(
-        did: str,
-        service_endpoint: str,
-        wallet: Wallet,
-        files: List[Dict[str, Any]],
-        destination_folder: Union[str, Path],
-        service_id: int,
-        token_address: str,
-        order_tx_id: str,
-        index: Optional[int] = None,
-        userdata: Optional[Dict] = None,
-    ) -> None:
-        """
-        Call the provider endpoint to get access to the different files that form the asset.
-
-        :param did: str id of the asset
-        :param service_endpoint: Url to consume, str
-        :param wallet: hex str Wallet instance of the consumer signing this request
-        :param files: List containing the files to be consumed, list
-        :param destination_folder: Path, str
-        :param service_id: integer the id of the service inside the DDO's service dict
-        :param token_address: hex str the data token address associated with this asset/service
-        :param order_tx_id: hex str the transaction hash for the required data token
-            transfer (tokens of the same token address above)
-        :param index: Index of the document that is going to be downloaded, int
-        :return: True if was downloaded, bool
-        """
-        indexes = range(len(files))
-        if index is not None:
-            assert isinstance(index, int), logger.error("index has to be an integer.")
-            assert index >= 0, logger.error("index has to be 0 or a positive integer.")
-            assert index < len(files), logger.error(
-                "index can not be bigger than the number of files"
-            )
-            indexes = [index]
-
-        req = PreparedRequest()
-        params = {
-            "documentId": did,
-            "serviceId": service_id,
-            "serviceType": ServiceTypes.ASSET_ACCESS,
-            "dataToken": token_address,
-            "transferTxId": order_tx_id,
-            "consumerAddress": wallet.address,
-        }
-
-        if userdata:
-            userdata = json.dumps(userdata)
-            params["userdata"] = userdata
-
-        req.prepare_url(service_endpoint, params)
-        base_url = req.url
-
-        for i in indexes:
-            signature = DataServiceProvider.sign_message(wallet, did)
-            download_url = base_url + f"&signature={signature}&fileIndex={i}"
-            logger.info(f"invoke consume endpoint with this url: {download_url}")
-            response = DataServiceProvider._http_method(
-                "get", download_url, stream=True
-            )
-            file_name = DataServiceProvider._get_file_name(response)
-            DataServiceProvider.write_file(
-                response, destination_folder, file_name or f"file-{i}"
-            )
 
     @staticmethod
     @enforce_types

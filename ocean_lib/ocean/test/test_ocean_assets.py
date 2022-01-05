@@ -455,7 +455,7 @@ def test_plain_asset_multiple_services(
     _, metadata, encrypted_files = create_basics(config, web3, data_provider)
 
     access_service = Service(
-        service_id="1",
+        service_id="0",
         service_type=ServiceTypes.ASSET_ACCESS,
         service_endpoint=f"{data_provider.get_url(config)}/api/services/download",
         data_token=erc20_token.address,
@@ -475,7 +475,7 @@ def test_plain_asset_multiple_services(
         "allowNetworkAccess": True,
     }
     compute_service = Service(
-        service_id="2",
+        service_id="1",
         service_type=ServiceTypes.CLOUD_COMPUTE,
         service_endpoint=f"{data_provider.get_url(config)}/api/services/compute",
         data_token=erc20_token.address,
