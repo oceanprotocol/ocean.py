@@ -32,6 +32,7 @@ from web3.datastructures import AttributeDict
 logger = logging.getLogger("ocean")
 
 
+# TODO: update for v4
 class Ocean:
 
     """The Ocean class is the entry point into Ocean Protocol."""
