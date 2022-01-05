@@ -5,11 +5,14 @@
 
 import json
 import os
+from pathlib import Path
+from typing import Union, Optional, Dict
 
-from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider, logger
 from requests.models import PreparedRequest
+
+from ocean_lib.web3_internal.wallet import Wallet
 
 
 class DataProviderMock(DataServiceProvider):
@@ -72,55 +75,60 @@ class DataProviderMock(DataServiceProvider):
         return "GET", f"{provider_uri}/api/v1/services/{service_name}"
 
     @staticmethod
-    def download_service(
-        did,
-        service_endpoint,
-        wallet,
-        files,
-        destination_folder,
-        service_id,
-        token_address,
-        order_tx_id,
-        index=None,
-        userdata=None,
+    def initialize(
+        did: str,
+        service_id: str,
+        file_index: int,
+        consumer_address: str,
+        service_endpoint: str,
+        userdata: Optional[Dict] = None,
+    ):
+        initialize_endpoint = service_endpoint
+        initialize_endpoint += f"?documentId={did}"
+        initialize_endpoint += f"&serviceId={service_id}"
+        initialize_endpoint += f"&fileIndex={file_index}"
+        initialize_endpoint += f"&consumerAddress={consumer_address}"
+        if userdata:
+            initialize_endpoint += f"&userdata={json.dumps(userdata)}"
+        DataServiceProvider._http_method("get", initialize_endpoint)
+
+    @staticmethod
+    def download(
+        did: str,
+        service_id: str,
+        tx_id: str,
+        file_index: int,
+        consumer_wallet: Wallet,
+        download_endpoint: str,
+        destination_folder: Union[str, Path],
+        userdata: Optional[Dict] = None,
     ):
 
-        indexes = range(len(files))
-        if index is not None:
-            assert isinstance(index, int), logger.error("index has to be an integer.")
-            assert index >= 0, logger.error("index has to be 0 or a positive integer.")
-            assert index < len(files), logger.error(
-                "index can not be bigger than the number of files"
-            )
-            indexes = [index]
-
-        req = PreparedRequest()
-        params = {
+        payload = {
             "documentId": did,
             "serviceId": service_id,
-            "serviceType": ServiceTypes.ASSET_ACCESS,
-            "dataToken": token_address,
-            "transferTxId": order_tx_id,
-            "consumerAddress": wallet.address,
+            "consumerAddress": consumer_wallet.address,
+            "transferTxId": tx_id,
+            "fileIndex": file_index,
         }
 
         if userdata:
             userdata = json.dumps(userdata)
-            params["userdata"] = userdata
+            payload["userdata"] = userdata
 
-        req.prepare_url(service_endpoint, params)
+        payload["nonce"], payload["signature"] = DataServiceProvider.sign_message(
+            consumer_wallet, did
+        )
+        req = PreparedRequest()
+        req.prepare_url(download_endpoint, payload)
         base_url = req.url
 
-        provider_uri = DataProviderMock.build_download_endpoint(service_endpoint)[1]
-        for i in indexes:
-            signature = DataServiceProvider.sign_message(
-                wallet, did, provider_uri=provider_uri
-            )
-            download_url = base_url + f"&signature={signature}&fileIndex={i}"
-            logger.info(f"invoke consume endpoint with this url: {download_url}")
-            http_client = get_requests_session()
-            response = http_client.get(download_url, stream=True)
-            file_name = DataServiceProvider._get_file_name(response)
-            DataServiceProvider.write_file(
-                response, destination_folder, file_name or f"file-{i}"
-            )
+        download_url = (
+            base_url + f"&signature={payload['signature']}&fileIndex={file_index}"
+        )
+        logger.info(f"invoke consume endpoint with this url: {download_url}")
+        http_client = get_requests_session()
+        response = http_client.get(download_url, stream=True)
+        response.status_code = 200
+
+        DataServiceProvider.write_file(response, destination_folder, "foo_file.txt")
