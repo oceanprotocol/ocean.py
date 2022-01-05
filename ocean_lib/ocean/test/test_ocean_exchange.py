@@ -33,6 +33,18 @@ def test_search_exchange_by_nonexistent_data_token(publisher_ocean_instance):
     )
 
 
+def test_search_exchange_by_nonexistent_data_token(publisher_ocean_instance):
+    """Tests searching exchanges with a nonexistent data token address."""
+    ocn = publisher_ocean_instance
+    foo_data_token = "0xcd2a3d9f938e13cd947ec05abc7fe734df8dd826"
+    with pytest.raises(AssertionError) as err:
+        ocn.exchange.search_exchange_by_data_token(foo_data_token)
+    assert (
+        err.value.args[0]
+        == f"No token with '{foo_data_token}' address was created before."
+    )
+
+
 def test_search_exchange_by_data_token(publisher_ocean_instance):
     """Tests searching exchanges which have matching data token address."""
     ocn = publisher_ocean_instance
