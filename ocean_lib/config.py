@@ -6,10 +6,10 @@
 import configparser
 import logging
 import os
+import site
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
-import artifacts
 from enforce_typing import enforce_types
 from ocean_lib.integer import Integer
 from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
@@ -238,8 +238,8 @@ class Config(configparser.ConfigParser):
             file_path = str(Path(file_path).expanduser().resolve())
         else:
             file_path = str(
-                Path(artifacts.__file__)
-                .parent.joinpath("address.json")
+                Path(site.getsitepackages()[0])
+                .joinpath("artifacts", "address.json")
                 .expanduser()
                 .resolve()
             )
