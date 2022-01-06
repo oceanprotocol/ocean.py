@@ -9,7 +9,7 @@ import pytest
 from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
-from ocean_lib.assets.asset_downloader import download_asset_file
+from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_sample_ddo
@@ -38,7 +38,7 @@ def test_ocean_assets_download_failure(publisher_wallet, config):
     ddo.services[0] = access_service
 
     with pytest.raises(AssertionError):
-        download_asset_file(
+        download_asset_files(
             ddo,
             config.provider_url,
             publisher_wallet,
@@ -59,7 +59,7 @@ def test_ocean_assets_download_indexes(publisher_wallet, config):
 
     index = range(3)
     with pytest.raises(TypeError):
-        download_asset_file(
+        download_asset_files(
             ddo,
             config.provider_url,
             publisher_wallet,
@@ -72,7 +72,7 @@ def test_ocean_assets_download_indexes(publisher_wallet, config):
 
     index = -1
     with pytest.raises(AssertionError):
-        download_asset_file(
+        download_asset_files(
             ddo,
             config.provider_url,
             publisher_wallet,
@@ -85,7 +85,7 @@ def test_ocean_assets_download_indexes(publisher_wallet, config):
 
     index = 4
     with pytest.raises(AssertionError):
-        download_asset_file(
+        download_asset_files(
             ddo,
             config.provider_url,
             publisher_wallet,
@@ -160,7 +160,7 @@ def ocean_assets_download_destination_file_helper(
         from_wallet=publisher_wallet,
     )
 
-    written_path = download_asset_file(
+    written_path = download_asset_files(
         ddo,
         config.provider_url,
         publisher_wallet,

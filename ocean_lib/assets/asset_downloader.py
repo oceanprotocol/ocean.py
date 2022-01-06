@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @enforce_types
-def download_asset_file(
+def download_asset_files(
     asset: Asset,
     provider_uri: str,
     consumer_wallet: Wallet,
@@ -58,11 +58,6 @@ def download_asset_file(
         assert index < len(files), logger.error(
             "index can not be bigger than the number of files"
         )
-
-    if not os.path.isabs(destination):
-        destination = os.path.abspath(destination)
-    if not os.path.exists(destination):
-        os.mkdir(destination)
 
     asset_folder = os.path.join(destination, f"datafile.{asset.did}.{service_id}")
     if not os.path.exists(asset_folder):

@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import os
+import shutil
 
 from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.agreements.service_types import ServiceTypes
@@ -16,7 +17,7 @@ from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
 
 
-def test_consume_flow(web3, config, publisher_wallet, consumer_wallet, provider_wallet):
+def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
     erc721_factory_address = get_address_of_type(
         config, ERC721FactoryContract.CONTRACT_NAME
     )
@@ -126,16 +127,17 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet, provider_
         provider_fees=response.json()["providerFee"],
         from_wallet=consumer_wallet,
     )
+
     # Download file
     destination = config.downloads_path
     if not os.path.isabs(destination):
         destination = os.path.abspath(destination)
 
-    if len(os.listdir(destination)) > 0:
+    if os.path.exists(destination) and len(os.listdir(destination)) > 0:
         list(
             map(
-                os.unlink,
-                (os.path.join(destination, f) for f in os.listdir(destination)),
+                lambda d: shutil.rmtree(os.path.join(destination, d)),
+                os.listdir(destination),
             )
         )
 
@@ -145,14 +147,15 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet, provider_
     assert len(os.listdir(destination)) == 0
 
     files = list(map(lambda f: f.to_dict(), file_objects))
-    data_provider.download(
-        did=ddo.did,
-        service_id=service.id,
-        tx_id=tx_id,
-        files=files,
+
+    asset.download_asset(
+        asset=ddo,
+        provider_uri=config.provider_url,
         consumer_wallet=consumer_wallet,
-        service_endpoint=data_provider.build_download_endpoint(config.provider_url)[1],
-        destination_folder=destination,
+        destination=destination,
+        order_tx_id=tx_id,
+        data_provider=data_provider,
+        files=files,
     )
 
     assert len(os.listdir(destination)) == len(files), "The asset folder is empty."

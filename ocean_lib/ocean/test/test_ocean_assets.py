@@ -237,18 +237,25 @@ def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet, conf
     assert ddo, "DDO None. The ddo is not cached after the creation."
 
 
-@pytest.mark.skip(reason="TODO: download function on OceanAssets class")
 def test_download_fails(publisher_ocean_instance, publisher_wallet):
     """Tests failures of assets download function."""
     with patch("ocean_lib.ocean.ocean_assets.OceanAssets.resolve") as mock:
-        mock.return_value = get_sample_ddo()
+        mock.return_value = Asset.from_dict(get_sample_ddo())
+        asset = mock.return_value
         with pytest.raises(AssertionError):
-            publisher_ocean_instance.assets.download(
-                "0x1", 1, publisher_wallet, "", "", -4
+            publisher_ocean_instance.assets.download_asset(
+                asset, "", publisher_wallet, "", "", DataServiceProvider, [], index=-4
             )
         with pytest.raises(TypeError):
-            publisher_ocean_instance.assets.download(
-                "0x1", "", publisher_wallet, "", "", "string_index"
+            publisher_ocean_instance.assets.download_asset(
+                asset,
+                "",
+                publisher_wallet,
+                "",
+                "",
+                DataServiceProvider,
+                [],
+                index="string_index",
             )
 
 
