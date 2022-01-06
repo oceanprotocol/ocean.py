@@ -12,9 +12,11 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
+from ocean_lib.ocean import Ocean
+from ocean_lib.ocean.test.test_ocean_assets import create_basics
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.wallet import Wallet
-from tests.resources.helper_functions import mint_tokens_and_wait
+from tests.resources.helper_functions import deploy_erc721_erc20, mint_tokens_and_wait
 
 
 def get_resource_path(dir_name, file_name):
@@ -148,17 +150,47 @@ def get_registered_ddo_with_access_service(ocean_instance, wallet, provider_uri=
 
 
 def get_registered_ddo_with_compute_service(
-    ocean_instance,
-    wallet,
-    provider_uri=None,
-    trusted_algorithms=None,
-    trusted_algorithm_publishers=None,
+    ocean_instance: Ocean, publisher_wallet: Wallet
 ):
-    asset = Asset.from_dict(get_sample_ddo_with_compute_service())
-    published_asset = ocean_instance.asset.create(asset)
+    erc721_token, erc20_token = deploy_erc721_erc20(
+        ocean_instance.web3, ocean_instance.config, publisher_wallet
+    )
 
-    return get_registered_ddo(
-        ocean_instance, metadata, wallet, compute_service, provider_uri=provider_uri
+    web3 = ocean_instance.web3
+    config = ocean_instance.web3
+    data_provider = DataServiceProvider
+    _, metadata, encrypted_files = create_basics(config, web3, data_provider)
+
+    # Set the compute values for compute service
+    compute_values = {
+        "namespace": "ocean-compute",
+        "cpus": 2,
+        "gpus": 4,
+        "gpuType": "NVIDIA Tesla V100 GPU",
+        "memory": "128M",
+        "volumeSize": "2G",
+        "allowRawAlgorithm": False,
+        "allowNetworkAccess": True,
+    }
+    compute_service = Service(
+        service_id="2",
+        service_type=ServiceTypes.CLOUD_COMPUTE,
+        service_endpoint=f"{data_provider.get_url(config)}/api/services/compute",
+        data_token=erc20_token.address,
+        files=encrypted_files,
+        timeout=3600,
+        compute_values=compute_values,
+    )
+
+    return ocean_instance.assets.create(
+        metadata=metadata,
+        publisher_wallet=publisher_wallet,
+        encrypted_files=encrypted_files,
+        services=[compute_service],
+        erc721_address=erc721_token.address,
+        deployed_erc20_tokens=[erc20_token],
+        encrypt_flag=True,
+        compress_flag=True,
     )
 
 
