@@ -2,14 +2,22 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import json
+
 import pytest
+from web3 import exceptions
+from web3.main import Web3
+
 from ocean_lib.models.erc20_token import ERC20Token, RolesERC20
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
-from web3 import exceptions
+from ocean_lib.web3_internal.utils import split_signature
+from tests.resources.helper_functions import (
+    deploy_erc721_erc20,
+    get_address_of_type
+)
 
 
 def test_properties(web3, config, publisher_wallet):
@@ -187,6 +195,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     )
     # Mint erc20 tokens to use
     erc20.mint(consumer_wallet.address, web3.toWei(10, "ether"), publisher_wallet)
+    erc20.mint(publisher_wallet.address, web3.toWei(10, "ether"), publisher_wallet)
 
     # Set the fee collector address
     erc20.set_payment_collector(
@@ -194,29 +203,42 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     )
 
     provider_fee_address = publisher_wallet.address
-    provider_data = b"\x00"
     provider_fee_token = get_address_of_type(config, "MockUSDC")
     provider_fee_amount = 0
+    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
 
-    msg_hash, v, r, s = ERC20Token.sign_provider_fees(
-        provider_data, provider_fee_address, provider_fee_token, provider_fee_amount
+    message = Web3.solidityKeccak(
+        ["bytes", "address", "address", "uint256"],
+        [
+            Web3.toHex(Web3.toBytes(text=provider_data)),
+            provider_fee_address,
+            provider_fee_token,
+            provider_fee_amount,
+        ],
     )
+    signed = web3.eth.sign(provider_fee_address, data=message)
+    signature = split_signature(signed)
+
+    provider_fee = {
+        "providerFeeAddress": provider_fee_address,
+        "providerFeeToken": provider_fee_token,
+        "providerFeeAmount": provider_fee_amount,
+        "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
+        # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
+        "v": signature.v,
+        "r": signature.r,
+        "s": signature.s,
+    }
 
     erc20.start_order(
         consumer=consumer_wallet.address,
         service_id=1,
-        provider_fee_address=provider_fee_address,
-        provider_fee_token=provider_fee_token,
-        provider_fee_amount=provider_fee_amount,
-        v=v,
-        r=r,
-        s=s,
-        provider_data=provider_data,
-        from_wallet=consumer_wallet,
+        provider_fees=provider_fee,
+        from_wallet=publisher_wallet,
     )
 
     # Check erc20 balances
-    assert erc20.balanceOf(consumer_wallet.address) == web3.toWei(9, "ether")
+    assert erc20.balanceOf(publisher_wallet.address) == web3.toWei(9, "ether")
     assert erc20.balanceOf(
         get_address_of_type(config, "OPFCommunityFeeCollector")
     ) == web3.toWei(1, "ether")
