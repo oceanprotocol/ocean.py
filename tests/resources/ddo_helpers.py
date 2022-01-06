@@ -157,7 +157,7 @@ def get_registered_ddo_with_compute_service(
     )
 
     web3 = ocean_instance.web3
-    config = ocean_instance.web3
+    config = ocean_instance.config
     data_provider = DataServiceProvider
     _, metadata, encrypted_files = create_basics(config, web3, data_provider)
 
@@ -194,16 +194,50 @@ def get_registered_ddo_with_compute_service(
     )
 
 
-def get_registered_algorithm_ddo(ocean_instance, wallet, provider_uri=None):
-    metadata = get_sample_algorithm_ddo_dict()["service"][0]["attributes"]
-    metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    service = get_access_service(
-        ocean_instance, wallet.address, metadata["main"]["dateCreated"], provider_uri
+def get_registered_algorithm_ddo(ocean_instance: Ocean, publisher_wallet: Wallet):
+    erc721_token, erc20_token = deploy_erc721_erc20(
+        ocean_instance.web3, ocean_instance.config, publisher_wallet
     )
-    if "cost" in metadata["main"]:
-        metadata["main"].pop("cost")
-    return get_registered_ddo(
-        ocean_instance, metadata, wallet, service, provider_uri=provider_uri
+
+    web3 = ocean_instance.web3
+    config = ocean_instance.config
+    data_provider = DataServiceProvider
+    _, metadata, encrypted_files = create_basics(config, web3, data_provider)
+
+    # Update metadata to include algorithm info
+    algorithm_values = {
+        "algorithm": {
+            "language": "scala",
+            "format": "docker-image",
+            "version": "0.1",
+            "container": {
+                "entrypoint": "node $ALGO",
+                "image": "node",
+                "tag": "10",
+                "checksum": "test",
+            },
+        }
+    }
+    metadata.update(algorithm_values)
+
+    access_service = Service(
+        service_id="1",
+        service_type=ServiceTypes.ASSET_ACCESS,
+        service_endpoint=f"{data_provider.get_url(config)}/api/services/download",
+        data_token=erc20_token.address,
+        files=encrypted_files,
+        timeout=0,
+    )
+
+    return ocean_instance.assets.create(
+        metadata=metadata,
+        publisher_wallet=publisher_wallet,
+        encrypted_files=encrypted_files,
+        services=[access_service],
+        erc721_address=erc721_token.address,
+        deployed_erc20_tokens=[erc20_token],
+        encrypt_flag=True,
+        compress_flag=True,
     )
 
 
