@@ -2,6 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import json
 import pytest
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
@@ -11,6 +12,8 @@ from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import get_address_of_type
 from web3 import exceptions
+from web3.main import Web3
+from ocean_lib.web3_internal.utils import split_signature
 
 
 def test_properties(web3, config):
@@ -148,14 +151,23 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
 
     erc20_token.set_payment_collector(another_consumer_wallet.address, publisher_wallet)
 
-    provider_fee_address = ZERO_ADDRESS
-    provider_data = b"\x00"
     provider_fee_token = mock_dai_contract_address
     provider_fee_amount = 0
+    provider_fee_address = publisher_wallet.address
+    provider_fee_amount = 0
+    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
 
-    msg_hash, v, r, s = ERC20Token.sign_provider_fees(
-        provider_data, provider_fee_address, provider_fee_token, provider_fee_amount
+    message = Web3.solidityKeccak(
+        ["bytes", "address", "address", "uint256"],
+        [
+            Web3.toHex(Web3.toBytes(text=provider_data)),
+            provider_fee_address,
+            provider_fee_token,
+            provider_fee_amount,
+        ],
     )
+    signed = web3.eth.sign(provider_fee_address, data=message)
+    signature = split_signature(signed)
 
     orders = [
         {
@@ -166,9 +178,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
             "providerFeeToken": provider_fee_token,
             "providerFeeAmount": provider_fee_amount,
             "providerData": provider_data,
-            "v": v,
-            "r": r,
-            "s": s,
+            "v": signature.v,
+            "r": signature.r,
+            "s": signature.s,
         }
     ]
 
