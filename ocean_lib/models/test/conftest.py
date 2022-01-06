@@ -13,7 +13,6 @@ from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.ocean.util import get_ocean_token_address
-from ocean_lib.web3_internal.contract_utils import get_contracts_addresses
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import get_ether_balance
@@ -49,14 +48,6 @@ def bfactory_address(config):
 @pytest.fixture
 def nft_factory_address(config):
     return ERC721FactoryContract.configured_address(_NETWORK, config.address_file)
-
-
-@pytest.fixture
-def v3_contracts_addresses(config):
-    addresses = get_contracts_addresses(_NETWORK, config.address_file)
-    addresses = addresses["v3"]
-
-    return addresses
 
 
 @pytest.fixture
@@ -158,6 +149,7 @@ def make_info(name, private_key_name):
     from ocean_lib.ocean.ocean import Ocean
 
     info.ocean = Ocean(config)
+    # TODO: adapt for v4
     # info.T1 = _deployAndMintToken(web3, "TOK1", info.address)
     # info.T2 = _deployAndMintToken(web3, "TOK2", info.address)
 

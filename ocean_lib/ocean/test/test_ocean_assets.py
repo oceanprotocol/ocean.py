@@ -605,8 +605,7 @@ def test_asset_creation_errors(publisher_ocean_instance, publisher_wallet, confi
     data_provider = DataServiceProvider
     _, metadata, encrypted_files = create_basics(config, web3, data_provider)
 
-    # used a random address from Etherscan
-    some_random_address = "0xB3b8239719403E38de3bdF19B9AC147B48c72BF2"
+    some_random_address = ZERO_ADDRESS
     with pytest.raises(ContractNotFound):
         publisher_ocean_instance.assets.create(
             metadata=metadata,
