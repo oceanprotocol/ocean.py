@@ -154,13 +154,13 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     provider_fee_token = mock_dai_contract_address
     provider_fee_amount = 0
     provider_fee_address = publisher_wallet.address
-    provider_fee_amount = 0
-    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
+    # provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
+    provider_data = b"\x00"
 
     message = Web3.solidityKeccak(
         ["bytes", "address", "address", "uint256"],
         [
-            Web3.toHex(Web3.toBytes(text=provider_data)),
+            provider_data,
             provider_fee_address,
             provider_fee_token,
             provider_fee_amount,
@@ -169,19 +169,35 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     signed = web3.eth.sign(provider_fee_address, data=message)
     signature = split_signature(signed)
 
+    # orders = [
+    #     {
+    #         "tokenAddress": erc20_address,
+    #         "consumer": consumer_wallet.address,
+    #         "serviceIndex": 1,
+    #         "providerFeeAddress": provider_fee_address,
+    #         "providerFeeToken": provider_fee_token,
+    #         "providerFeeAmount": provider_fee_amount,
+    #         "providerData": provider_data,
+    #         "v": signature.v,
+    #         "r": signature.r,
+    #         "s": signature.s,
+    #         "providerData": provider_data,
+    #     }
+    # ]
+
     orders = [
-        {
-            "tokenAddress": erc20_address,
-            "consumer": consumer_wallet.address,
-            "serviceIndex": 1,
-            "providerFeeAddress": provider_fee_address,
-            "providerFeeToken": provider_fee_token,
-            "providerFeeAmount": provider_fee_amount,
-            "providerData": provider_data,
-            "v": signature.v,
-            "r": signature.r,
-            "s": signature.s,
-        }
+        (
+            erc20_address,
+            consumer_wallet.address,
+            1,
+            provider_fee_address,
+            provider_fee_token,
+            provider_fee_amount,
+            signature.v,
+            signature.r,
+            signature.s,
+            provider_data,
+        )
     ]
 
     tx = erc721_factory.start_multiple_token_order(orders, consumer_wallet)
