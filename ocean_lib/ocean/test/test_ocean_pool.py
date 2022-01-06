@@ -2,10 +2,12 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import pytest
 from ocean_lib.ocean.util import get_ocean_token_address
 from ocean_lib.web3_internal.utils import get_network_name
 
 
+@pytest.mark.skip(reason="TODO: reinstate pools and pool tests")
 def test_get_OCEAN_address(publisher_ocean_instance):
     """Tests OCEAN address retrieval."""
     network = get_network_name(web3=publisher_ocean_instance.web3)
@@ -14,6 +16,7 @@ def test_get_OCEAN_address(publisher_ocean_instance):
     )
 
 
+@pytest.mark.skip(reason="TODO: reinstate pools and pool tests")
 def test_add_remove_zero_liquidity(publisher_ocean_instance, publisher_wallet):
     """Tests that adding or removing zero liquidity has no effect."""
     assert (

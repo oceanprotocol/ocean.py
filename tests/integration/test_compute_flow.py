@@ -203,6 +203,7 @@ def run_compute_test(
         print(f"got job result file: {str(result_file)}")
 
 
+@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_compute_raw_algo(
     publisher_wallet, publisher_ocean_instance, consumer_wallet, simple_compute_ddo
 ):
@@ -219,6 +220,7 @@ def test_compute_raw_algo(
     )
 
 
+@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_compute_multi_inputs(
     publisher_wallet,
     publisher_ocean_instance,
@@ -250,6 +252,7 @@ def test_compute_multi_inputs(
     )
 
 
+@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_update_trusted_algorithms(
     web3,
     publisher_wallet,
@@ -300,6 +303,7 @@ def test_update_trusted_algorithms(
     )
 
 
+@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_compute_trusted_algorithms(
     publisher_wallet,
     publisher_ocean_instance,
@@ -308,7 +312,6 @@ def test_compute_trusted_algorithms(
     algorithm_ddo,
     asset_with_trusted,
 ):
-
     algorithm_ddo_v2 = get_registered_algorithm_ddo(
         publisher_ocean_instance, publisher_wallet
     )

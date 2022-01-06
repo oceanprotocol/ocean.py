@@ -38,14 +38,6 @@ class ContractBase(object):
 
     CONTRACT_NAME = None
 
-    V3_CONTRACTS = [
-        "BFactory",
-        "FixedRateExchange",
-        "DTFactory",
-        "Dispenser",
-        "Metadata",
-    ]
-
     @enforce_types
     def __init__(self, web3: Web3, address: Optional[str]) -> None:
         """Initialises Contract Base object."""
@@ -71,11 +63,6 @@ class ContractBase(object):
     def configured_address(cls, network: str, address_file: str) -> str:
         """Returns the contract addresses"""
         addresses = get_contracts_addresses(network, address_file)
-        # FIXME: temporary solution, will need to pass in the version
-        # or detect it somehow
-
-        # key = "v3" if cls.CONTRACT_NAME in cls.V3_CONTRACTS else "v4"
-        # addresses = addresses[key]
 
         return addresses.get(cls.CONTRACT_NAME) if addresses else None
 
