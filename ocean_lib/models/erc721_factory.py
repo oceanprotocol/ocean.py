@@ -129,7 +129,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         """
         # encode_abi('(address,address,uint256,address,address,uint256,uin8,bytes32,bytes32,bytes)'[], [mytuple])
 
-        encodedOrders = [ encode_abi(['address', 'address', 'uint256','address', 'address', 'uint256', 'uint8', 'bytes32', 'bytes32', 'bytes'], order) for order in orders ]
+        encodedOrders = encode_single('(address,address,uint256,address,address,uint256,uint8,bytes32,bytes32,bytes)[]', orders)
 
         return self.send_transaction("startMultipleTokenOrder", (encodedOrders,), from_wallet)
 
