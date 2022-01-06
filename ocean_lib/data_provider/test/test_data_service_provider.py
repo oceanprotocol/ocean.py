@@ -65,10 +65,10 @@ def test_set_http_client(with_nice_client):
     assert isinstance(DataSP.get_http_client(), HttpClientNiceMock)
 
 
-def test_order_requirements_fails(with_evil_client):
-    """Tests failure of order requirements from endpoint."""
+def test_initialize(with_evil_client):
+    """Tests failure of initialize endpoint."""
     assert (
-        DataSP.get_order_requirements(
+        DataSP.initialize(
             "some_did",
             "http://mock/",
             "some_consumer_address",

@@ -11,7 +11,6 @@ import uuid
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.ocean import Ocean
 from ocean_lib.ocean.test.test_ocean_assets import create_basics
 from ocean_lib.services.service import Service
@@ -69,14 +68,6 @@ def get_sample_algorithm_ddo_dict(filename="ddo_algorithm.json") -> dict:
 
 def get_sample_algorithm_ddo(filename="ddo_algorithm.json") -> Asset:
     return Asset.from_dict(get_sample_algorithm_ddo_dict(filename))
-
-
-def get_algorithm_meta():
-    algorithm_ddo_path = get_resource_path("ddo", "ddo_algorithm.json")
-    algo_main = Asset(json_filename=algorithm_ddo_path).metadata["main"]
-    algo_meta_dict = algo_main["algorithm"].copy()
-    algo_meta_dict["url"] = algo_main["files"][0]["url"]
-    return AlgorithmMetadata(algo_meta_dict)
 
 
 def get_access_service(

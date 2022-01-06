@@ -8,9 +8,7 @@ import json
 import logging
 import os
 import re
-from collections import namedtuple
 from datetime import datetime
-from decimal import Decimal
 from json import JSONDecodeError
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -24,7 +22,6 @@ from ocean_lib.config import Config
 from ocean_lib.exceptions import OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
 from requests.exceptions import InvalidURL
@@ -32,11 +29,6 @@ from requests.models import PreparedRequest, Response
 from requests.sessions import Session
 
 logger = logging.getLogger(__name__)
-
-OrderRequirements = namedtuple(
-    "OrderRequirements",
-    ("amount", "data_token_address", "receiver_address", "nonce", "computeAddress"),
-)
 
 
 class DataServiceProvider:
@@ -103,68 +95,52 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def sign_message(wallet: Wallet, msg: str) -> str:
-        nonce = str(datetime.now().timestamp())
-        print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
-        return nonce, sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
-
-    @staticmethod
-    @enforce_types
-    def get_order_requirements(
+    def initialize(
         did: str,
-        service_endpoint: str,
+        service_id: str,
         consumer_address: str,
-        service_id: Union[str, int],
-        service_type: str,
-        token_address: str,
+        service_endpoint: str,
         userdata: Optional[Dict] = None,
-    ) -> Optional[OrderRequirements]:
-        """
-
-        :param did:
-        :param service_endpoint:
-        :param consumer_address: hex str the ethereum account address of the consumer
-        :param service_id:
-        :param service_type:
-        :param token_address:
-        :return: OrderRequirements instance -- named tuple (amount, data_token_address, receiver_address, nonce),
-
-        """
+    ) -> Response:
 
         req = PreparedRequest()
-        params = {
+        payload = {
             "documentId": did,
             "serviceId": service_id,
-            "serviceType": service_type,
-            "dataToken": token_address,
             "consumerAddress": consumer_address,
         }
 
         if userdata:
             userdata = json.dumps(userdata)
-            params["userdata"] = userdata
+            payload["userdata"] = userdata
 
-        req.prepare_url(service_endpoint, params)
-        initialize_url = req.url
+        req.prepare_url(service_endpoint, payload)
 
-        logger.info(f"invoke the initialize endpoint with this url: {initialize_url}")
-        response = DataServiceProvider._http_method("get", initialize_url)
-        # The returned json should contain information about the required number of tokens
-        # to consume `service_id`. If service is not available there will be an error or
-        # the returned json is empty.
+        response = DataServiceProvider._http_method("get", req.url)
+
+        if not response or not hasattr(response, "status_code"):
+            raise Exception("Response not found!")
+
         if response.status_code != 200:
-            return None
-        order = dict(response.json())
+            msg = (
+                f"Initialize service failed at the initializeEndpoint "
+                f"{req.url}, reason {response.text}, status {response.status_code}"
+            )
+            logger.error(msg)
+            raise Exception(msg)
 
-        return OrderRequirements(
-            to_wei(
-                Decimal(order["numTokens"])
-            ),  # comes as float, needs to be converted
-            order["dataToken"],
-            order["to"],
-            int(order["nonce"]),
-            order.get("computeAddress"),
+        logger.info(
+            f"Service initialized successfully" f" initializeEndpoint {req.url}"
         )
+
+        return response
+
+    @staticmethod
+    @enforce_types
+    def sign_message(wallet: Wallet, msg: str) -> str:
+        nonce = str(datetime.now().timestamp())
+        print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
+        return nonce, sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
 
     @staticmethod
     @enforce_types

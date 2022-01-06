@@ -116,30 +116,20 @@ class ERC20Token(ContractBase):
         return prepare_message_for_ecrecover_in_solidity(signed_message)
 
     def start_order(
-        self,
-        consumer: str,
-        service_id: int,
-        provider_fee_address: str,
-        provider_fee_token: str,
-        provider_fee_amount: int,
-        v: int,
-        r: bytes,
-        s: bytes,
-        provider_data: bytes,
-        from_wallet: Wallet,
+        self, consumer: str, service_id: int, provider_fees: dict, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
             "startOrder",
             (
                 consumer,
                 service_id,
-                provider_fee_address,
-                provider_fee_token,
-                provider_fee_amount,
-                v,
-                r,
-                s,
-                provider_data,
+                provider_fees["providerFeeAddress"],
+                provider_fees["providerFeeToken"],
+                provider_fees["providerFeeAmount"],
+                provider_fees["v"],
+                provider_fees["r"],
+                provider_fees["s"],
+                provider_fees["providerData"],
             ),
             from_wallet,
         )
