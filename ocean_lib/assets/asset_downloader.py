@@ -5,7 +5,7 @@
 
 import logging
 import os
-from typing import Optional, Type
+from typing import Optional, Type, List, Dict, Any
 
 from enforce_typing import enforce_types
 from ocean_lib.agreements.service_types import ServiceTypes
@@ -19,47 +19,45 @@ logger = logging.getLogger(__name__)
 @enforce_types
 def download_asset_file(
     asset: Asset,
+    provider_uri: str,
     consumer_wallet: Wallet,
     destination: str,
     order_tx_id: str,
     data_provider: Type[DataServiceProvider],
-    file_index: int,
+    files: List[Dict[str, Any]],
+    index: Optional[int] = None,
     userdata: Optional[dict] = None,
 ) -> str:
     """Download asset data file or result file from compute job.
 
     :param asset: Asset instance
+    :param provider_uri: Url of Provider, str
     :param consumer_wallet: Wallet instance of the consumer
     :param destination: Path, str
     :param order_tx_id: hex str the transaction hash of the startOrder tx
     :param data_provider: DataServiceProvider class object
-    :param file_index: Index of the document that is going to be downloaded, int
+    :param files: List of the documents that are going to be downloaded, list
+    :param index: Index of the document that is going to be downloaded, Optional[int]
     :param userdata: Dict of additional data from user
     :return: asset folder path, str
     """
     service = asset.get_service(ServiceTypes.ASSET_ACCESS)
-    service_endpoint = service.service_endpoint
-    if not service_endpoint:
+    if not service.service_endpoint:
         logger.error(
             'Consume asset failed, service definition is missing the "serviceEndpoint".'
         )
         raise AssertionError(
             'Consume asset failed, service definition is missing the "serviceEndpoint".'
         )
+    service_endpoint = data_provider.build_download_endpoint(provider_uri)[1]
     service_id = service.id
 
-    assert isinstance(file_index, int), logger.error("index has to be an integer.")
-    assert file_index >= 0, logger.error("index has to be 0 or a positive integer.")
-
-    service_endpoint += "/api/services/initialize"
-    data_provider.initialize(
-        did=asset.did,
-        service_id=service_id,
-        file_index=file_index,
-        consumer_address=consumer_wallet.address,
-        service_endpoint=service_endpoint,
-        userdata=userdata,
-    )
+    if index is not None:
+        assert isinstance(index, int), logger.error("index has to be an integer.")
+        assert index >= 0, logger.error("index has to be 0 or a positive integer.")
+        assert index < len(files), logger.error(
+            "index can not be bigger than the number of files"
+        )
 
     if not os.path.isabs(destination):
         destination = os.path.abspath(destination)
@@ -70,15 +68,15 @@ def download_asset_file(
     if not os.path.exists(asset_folder):
         os.mkdir(asset_folder)
 
-    service_endpoint.replace("initialize", "download")
     data_provider.download(
         did=asset.did,
         service_id=service_id,
         tx_id=order_tx_id,
-        file_index=file_index,
+        files=files,
         consumer_wallet=consumer_wallet,
-        download_endpoint=service_endpoint,
+        service_endpoint=service_endpoint,
         destination_folder=asset_folder,
+        index=index,
         userdata=userdata,
     )
     return asset_folder

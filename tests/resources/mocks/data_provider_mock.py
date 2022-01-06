@@ -3,16 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-import json
 import os
-from pathlib import Path
-from typing import Union, Optional, Dict
 
-from ocean_lib.http_requests.requests_session import get_requests_session
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider, logger
-from requests.models import PreparedRequest
-
-from ocean_lib.web3_internal.wallet import Wallet
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 
 class DataProviderMock(DataServiceProvider):
@@ -73,62 +66,3 @@ class DataProviderMock(DataServiceProvider):
         service_name = "download"
         provider_uri = "http://localhost:8030"
         return "GET", f"{provider_uri}/api/v1/services/{service_name}"
-
-    @staticmethod
-    def initialize(
-        did: str,
-        service_id: str,
-        file_index: int,
-        consumer_address: str,
-        service_endpoint: str,
-        userdata: Optional[Dict] = None,
-    ):
-        initialize_endpoint = service_endpoint
-        initialize_endpoint += f"?documentId={did}"
-        initialize_endpoint += f"&serviceId={service_id}"
-        initialize_endpoint += f"&fileIndex={file_index}"
-        initialize_endpoint += f"&consumerAddress={consumer_address}"
-        if userdata:
-            initialize_endpoint += f"&userdata={json.dumps(userdata)}"
-        DataServiceProvider._http_method("get", initialize_endpoint)
-
-    @staticmethod
-    def download(
-        did: str,
-        service_id: str,
-        tx_id: str,
-        file_index: int,
-        consumer_wallet: Wallet,
-        download_endpoint: str,
-        destination_folder: Union[str, Path],
-        userdata: Optional[Dict] = None,
-    ):
-
-        payload = {
-            "documentId": did,
-            "serviceId": service_id,
-            "consumerAddress": consumer_wallet.address,
-            "transferTxId": tx_id,
-            "fileIndex": file_index,
-        }
-
-        if userdata:
-            userdata = json.dumps(userdata)
-            payload["userdata"] = userdata
-
-        payload["nonce"], payload["signature"] = DataServiceProvider.sign_message(
-            consumer_wallet, did
-        )
-        req = PreparedRequest()
-        req.prepare_url(download_endpoint, payload)
-        base_url = req.url
-
-        download_url = (
-            base_url + f"&signature={payload['signature']}&fileIndex={file_index}"
-        )
-        logger.info(f"invoke consume endpoint with this url: {download_url}")
-        http_client = get_requests_session()
-        response = http_client.get(download_url, stream=True)
-        response.status_code = 200
-
-        DataServiceProvider.write_file(response, destination_folder, "foo_file.txt")

@@ -105,19 +105,25 @@ class DataServiceProvider:
     def initialize(
         did: str,
         service_id: str,
-        file_index: int,
         consumer_address: str,
         service_endpoint: str,
         userdata: Optional[Dict] = None,
     ) -> Response:
-        initialize_endpoint = service_endpoint
-        initialize_endpoint += f"?documentId={did}"
-        initialize_endpoint += f"&serviceId={service_id}"
-        initialize_endpoint += f"&fileIndex={file_index}"
-        initialize_endpoint += f"&consumerAddress={consumer_address}"
+
+        req = PreparedRequest()
+        service_endpoint += f"?documentId={did}"
+        payload = {
+            "serviceId": service_id,
+            "consumerAddress": consumer_address,
+        }
+
         if userdata:
-            initialize_endpoint += f"&userdata={json.dumps(userdata)}"
-        response = DataServiceProvider._http_method("get", initialize_endpoint)
+            userdata = json.dumps(userdata)
+            payload["userdata"] = userdata
+
+        req.prepare_url(service_endpoint, payload)
+
+        response = DataServiceProvider._http_method("get", req.url)
 
         if not response or not hasattr(response, "status_code"):
             raise Exception("Response not found!")
@@ -125,14 +131,13 @@ class DataServiceProvider:
         if response.status_code != 200:
             msg = (
                 f"Initialize service failed at the initializeEndpoint "
-                f"{initialize_endpoint}, reason {response.text}, status {response.status_code}"
+                f"{req.url}, reason {response.text}, status {response.status_code}"
             )
             logger.error(msg)
             raise Exception(msg)
 
         logger.info(
-            f"Service initialized successfully"
-            f" initializeEndpoint {initialize_endpoint}"
+            f"Service initialized successfully" f" initializeEndpoint {req.url}"
         )
 
         return response
@@ -143,53 +148,58 @@ class DataServiceProvider:
         did: str,
         service_id: str,
         tx_id: str,
-        file_index: int,
+        files: List[Dict[str, Any]],
         consumer_wallet: Wallet,
-        download_endpoint: str,
+        service_endpoint: str,
         destination_folder: Union[str, Path],
+        index: Optional[int] = None,
         userdata: Optional[Dict] = None,
     ) -> None:
 
+        indexes = range(len(files))
+        if index is not None:
+            assert isinstance(index, int), logger.error("index has to be an integer.")
+            assert index >= 0, logger.error("index has to be 0 or a positive integer.")
+            assert index < len(files), logger.error(
+                "index can not be bigger than the number of files"
+            )
+            indexes = [index]
+
+        req = PreparedRequest()
+        service_endpoint += f"?documentId={did}"
         payload = {
-            "documentId": did,
             "serviceId": service_id,
             "consumerAddress": consumer_wallet.address,
             "transferTxId": tx_id,
-            "fileIndex": file_index,
         }
 
         if userdata:
             userdata = json.dumps(userdata)
             payload["userdata"] = userdata
 
-        payload["nonce"], payload["signature"] = DataServiceProvider.sign_message(
-            consumer_wallet, did
-        )
-
-        response = DataServiceProvider._http_method(
-            "get",
-            download_endpoint,
-            json=payload,
-            headers={"Content-type": "application/json"},
-        )
-
-        if not response or not hasattr(response, "status_code"):
-            raise Exception("Response not found!")
-
-        if response.status_code != 200:
-            msg = (
-                f"Download asset failed at the downloadEndpoint "
-                f"{download_endpoint}, reason {response.text}, status {response.status_code}"
+        for i in indexes:
+            payload["fileIndex"] = i
+            payload["nonce"], payload["signature"] = DataServiceProvider.sign_message(
+                consumer_wallet, did
             )
-            logger.error(msg)
-            raise Exception(msg)
+            req.prepare_url(service_endpoint, payload)
+            response = DataServiceProvider._http_method("get", req.url)
 
-        file_name = DataServiceProvider._get_file_name(response)
-        DataServiceProvider.write_file(response, destination_folder, file_name)
+            if not response or not hasattr(response, "status_code"):
+                raise Exception("Response not found!")
 
-        logger.info(
-            f"Asset downloaded successfully" f" downloadEndpoint {download_endpoint}"
-        )
+            if response.status_code != 200:
+                msg = (
+                    f"Download asset failed at the downloadEndpoint "
+                    f"{req.url}, reason {response.text}, status {response.status_code}"
+                )
+                logger.error(msg)
+                raise Exception(msg)
+
+            file_name = DataServiceProvider._get_file_name(response)
+            DataServiceProvider.write_file(response, destination_folder, file_name)
+
+            logger.info(f"Asset downloaded successfully" f" downloadEndpoint {req.url}")
 
     @staticmethod
     @enforce_types
