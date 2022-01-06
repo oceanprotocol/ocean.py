@@ -6,7 +6,6 @@
 import pytest
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_exchange import OceanExchange
-
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei
 from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
@@ -21,6 +20,7 @@ def _get_exchange_address(config):
     return addresses[FixedRateExchange.CONTRACT_NAME]
 
 
+@pytest.mark.skip(reason="TODO: reinstate exchange and exchange tests")
 def test_search_exchange_by_nonexistent_data_token(publisher_ocean_instance):
     """Tests searching exchanges with a nonexistent data token address."""
     ocn = publisher_ocean_instance
@@ -33,6 +33,7 @@ def test_search_exchange_by_nonexistent_data_token(publisher_ocean_instance):
     )
 
 
+@pytest.mark.skip(reason="TODO: reinstate exchange and exchange tests")
 def test_search_exchange_by_data_token(publisher_ocean_instance):
     """Tests searching exchanges which have matching data token address."""
     ocn = publisher_ocean_instance
@@ -58,6 +59,7 @@ def test_search_exchange_by_data_token(publisher_ocean_instance):
     assert bob_wallet.address == logs[1].args.exchangeOwner
 
 
+@pytest.mark.skip(reason="TODO: reinstate exchange and exchange tests")
 def test_ocean_exchange(publisher_ocean_instance, publisher_wallet, consumer_wallet):
     """Tests various flows of DataToken exchanges."""
     ocn = publisher_ocean_instance

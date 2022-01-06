@@ -34,18 +34,7 @@ def test_get_web3_connection_provider(monkeypatch):
     assert provider.endpoint_uri == "wss://bah.com"
 
 
-def test_get_v3_contracts_addresses(config):
-    addresses = util.get_contracts_addresses(config.address_file, "ganache")["v3"]
-    assert addresses
-    assert isinstance(addresses, dict)
-    assert (
-        "DTFactory" and "BFactory" and "FixedRateExchange" and "Metadata" in addresses
-    )
-    assert len(addresses) == 5
-    for value in addresses.values():
-        assert value.startswith("0x"), "It is not a token address."
-
-
+@pytest.mark.skip(reason="TODO: remove or reinstate in v4?")
 def test_get_dtfactory_address(config):
     addresses = util.get_contracts_addresses(config.address_file, "ganache")["v3"]
     assert addresses
@@ -57,6 +46,7 @@ def test_get_dtfactory_address(config):
     assert address == addresses["DTFactory"]
 
 
+@pytest.mark.skip(reason="TODO: remove or reinstate in v4?")
 def test_get_bfactory_address(config):
     addresses = util.get_contracts_addresses(config.address_file, "ganache")["v3"]
     assert addresses
