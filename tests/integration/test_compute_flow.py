@@ -10,8 +10,9 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.ocean import Ocean
+from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import (
@@ -103,7 +104,7 @@ def run_compute_test(
     consumer_wallet: Wallet,
     asset_with_compute_service: Asset,
     algorithm: Asset,
-    additional_asset_ddos: List[Asset] = [],
+    additional_assets: List[Asset] = [],
     expect_failure=False,
     expect_failure_message=None,
     userdata=None,
@@ -118,6 +119,14 @@ def run_compute_test(
         asset_with_compute_service,
         ServiceTypes.CLOUD_COMPUTE,
     )
+    compute_inputs = [
+        ComputeInput(
+            asset_with_compute_service.did,
+            order_tx_id,
+            compute_service.index,
+            userdata=userdata,
+        )
+    ]
 
     # Order algo download service
     algo_tx_id, algo_download_service = process_order(
@@ -127,6 +136,17 @@ def run_compute_test(
         algorithm,
         ServiceTypes.ASSET_ACCESS,
     )
+
+    for asset in additional_assets:
+        service_type = ServiceTypes.ASSET_ACCESS
+        if not asset.get_service(service_type):
+            service_type = ServiceTypes.CLOUD_COMPUTE
+        _order_tx_id, _order_quote, _service = process_order(
+            ocean_instance, publisher_wallet, consumer_wallet, asset, service_type
+        )
+        compute_inputs.append(
+            ComputeInput(asset.did, _order_tx_id, _service.index, userdata=userdata)
+        )
 
     # TODO, fix arguments
     # Start compute job

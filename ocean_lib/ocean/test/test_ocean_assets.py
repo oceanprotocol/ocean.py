@@ -7,7 +7,6 @@ import uuid
 from unittest.mock import patch
 
 import pytest
-from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -18,81 +17,13 @@ from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import (
     build_credentials_dict,
+    create_asset,
+    create_basics,
     get_resource_path,
     get_sample_ddo,
     wait_for_update,
 )
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
-
-
-def create_asset(ocean, publisher, config, metadata=None):
-    """Helper function for asset creation based on ddo_sa_sample.json."""
-    erc20_data = ErcCreateData(
-        template_index=1,
-        strings=["Datatoken 1", "DT1"],
-        addresses=[
-            publisher.address,
-            publisher.address,
-            ZERO_ADDRESS,
-            get_address_of_type(config, "Ocean"),
-        ],
-        uints=[ocean.web3.toWei("0.5", "ether"), 0],
-        bytess=[b""],
-    )
-
-    if not metadata:
-        metadata = {
-            "created": "2020-11-15T12:27:48Z",
-            "updated": "2021-05-17T21:58:02Z",
-            "description": "Sample description",
-            "name": "Sample asset",
-            "type": "dataset",
-            "author": "OPF",
-            "license": "https://market.oceanprotocol.com/terms",
-        }
-    data_provider = DataServiceProvider
-    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
-    file1 = FilesTypeFactory(file1_dict)
-    encrypt_response = data_provider.encrypt(
-        [file1], "http://172.15.0.4:8030/api/services/encrypt"
-    )
-    encrypted_files = encrypt_response.content.decode("utf-8")
-
-    ddo = ocean.assets.create(
-        metadata, publisher, encrypted_files, erc20_tokens_data=[erc20_data]
-    )
-
-    return ddo
-
-
-def create_basics(config, web3, data_provider):
-    erc721_factory_address = get_address_of_type(
-        config, ERC721FactoryContract.CONTRACT_NAME
-    )
-    erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
-
-    metadata = {
-        "created": "2020-11-15T12:27:48Z",
-        "updated": "2021-05-17T21:58:02Z",
-        "description": "Sample description",
-        "name": "Sample asset",
-        "type": "dataset",
-        "author": "OPF",
-        "license": "https://market.oceanprotocol.com/terms",
-    }
-
-    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
-    file2_dict = {"type": "url", "url": "https://url.com/file2.csv", "method": "GET"}
-    file1 = FilesTypeFactory(file1_dict)
-    file2 = FilesTypeFactory(file2_dict)
-
-    # Encrypt file objects
-    encrypt_response = data_provider.encrypt(
-        [file1, file2], "http://172.15.0.4:8030/api/services/encrypt"
-    )
-    encrypted_files = encrypt_response.content.decode("utf-8")
-
-    return erc721_factory, metadata, encrypted_files
 
 
 def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wallet):
