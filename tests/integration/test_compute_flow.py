@@ -47,19 +47,20 @@ def algorithm_asset(publisher_wallet, publisher_ocean_instance):
     yield asset
 
 
-# TODO: Fix similar to data_asset_with_compute_service
 @pytest.fixture
-def asset_with_trusted(publisher_wallet, publisher_ocean_instance, algorithm_ddo):
+def data_asset_with_compute_service_and_trusted_algorithm(
+    publisher_wallet, publisher_ocean_instance, algorithm_asset
+):
     # Setup algorithm meta to run raw algorithm
-    ddo = get_registered_ddo_with_compute_service(
+    asset = get_registered_ddo_with_compute_service(
         publisher_ocean_instance,
         publisher_wallet,
-        trusted_algorithms=[algorithm_ddo.did],
+        trusted_algorithms=[algorithm_asset.did],
     )
     # verify the ddo is available in Aquarius
-    _ = publisher_ocean_instance.assets.resolve(ddo.did)
+    _ = publisher_ocean_instance.assets.resolve(asset.did)
 
-    yield ddo
+    yield asset
 
 
 def process_order(

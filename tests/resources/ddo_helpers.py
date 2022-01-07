@@ -7,6 +7,7 @@ import os
 import pathlib
 import time
 import uuid
+from typing import List, Optional
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
@@ -140,8 +141,11 @@ def get_registered_ddo_with_access_service(ocean_instance, wallet, provider_uri=
     )
 
 
+# TODO Add support for trusted algorithms
 def get_registered_ddo_with_compute_service(
-    ocean_instance: Ocean, publisher_wallet: Wallet
+    ocean_instance: Ocean,
+    publisher_wallet: Wallet,
+    trusted_algorithms: Optional[List[Asset]] = None,
 ):
     erc721_token, erc20_token = deploy_erc721_erc20(
         ocean_instance.web3, ocean_instance.config, publisher_wallet
