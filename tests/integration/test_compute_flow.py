@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import time
-from typing import List
+from typing import List, Optional
 
 import pytest
 from ocean_lib.agreements.service_types import ServiceTypes
@@ -26,7 +26,7 @@ from web3.logs import DISCARD
 
 
 @pytest.fixture
-def data_asset_with_compute_service(publisher_wallet, publisher_ocean_instance):
+def dataset_with_compute_service(publisher_wallet, publisher_ocean_instance):
     # Dataset with compute service
     asset = get_registered_ddo_with_compute_service(
         publisher_ocean_instance, publisher_wallet
@@ -39,7 +39,7 @@ def data_asset_with_compute_service(publisher_wallet, publisher_ocean_instance):
 
 
 @pytest.fixture
-def algorithm_asset(publisher_wallet, publisher_ocean_instance):
+def algorithm(publisher_wallet, publisher_ocean_instance):
     # Setup algorithm meta to run raw algorithm
     asset = get_registered_algorithm_ddo(publisher_ocean_instance, publisher_wallet)
     # verify the ddo is available in Aquarius
@@ -49,14 +49,12 @@ def algorithm_asset(publisher_wallet, publisher_ocean_instance):
 
 
 @pytest.fixture
-def data_asset_with_compute_service_and_trusted_algorithm(
-    publisher_wallet, publisher_ocean_instance, algorithm_asset
+def dataset_with_compute_service_and_trusted_algorithm(
+    publisher_wallet, publisher_ocean_instance, algorithm
 ):
     # Setup algorithm meta to run raw algorithm
     asset = get_registered_ddo_with_compute_service(
-        publisher_ocean_instance,
-        publisher_wallet,
-        trusted_algorithms=[algorithm_asset.did],
+        publisher_ocean_instance, publisher_wallet, trusted_algorithms=[algorithm.did]
     )
     # verify the ddo is available in Aquarius
     _ = publisher_ocean_instance.assets.resolve(asset.did)
@@ -102,9 +100,9 @@ def run_compute_test(
     ocean_instance: Ocean,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
-    asset_with_compute_service: Asset,
+    dataset: Asset,
     algorithm: Asset,
-    additional_assets: List[Asset] = [],
+    additional_datasets: Optional[List[Asset]] = [],
     expect_failure=False,
     expect_failure_message=None,
     userdata=None,
@@ -116,16 +114,11 @@ def run_compute_test(
         ocean_instance,
         publisher_wallet,
         consumer_wallet,
-        asset_with_compute_service,
+        dataset,
         ServiceTypes.CLOUD_COMPUTE,
     )
     compute_inputs = [
-        ComputeInput(
-            asset_with_compute_service.did,
-            order_tx_id,
-            compute_service.index,
-            userdata=userdata,
-        )
+        ComputeInput(dataset.did, order_tx_id, compute_service.index, userdata=userdata)
     ]
 
     # Order algo download service
@@ -137,7 +130,7 @@ def run_compute_test(
         ServiceTypes.ASSET_ACCESS,
     )
 
-    for asset in additional_assets:
+    for asset in additional_datasets:
         service_type = ServiceTypes.ASSET_ACCESS
         if not asset.get_service(service_type):
             service_type = ServiceTypes.CLOUD_COMPUTE
@@ -150,7 +143,7 @@ def run_compute_test(
 
     # Start compute job
     job_id = DataServiceProvider.start_compute_job(
-        did=asset_with_compute_service.did,
+        did=dataset.did,
         service_endpoint=DataServiceProvider.build_compute_endpoint(
             ocean_instance.config.provider_uri
         ),
@@ -162,33 +155,25 @@ def run_compute_test(
         algorithm_data_token=algo_download_service.data_token,
     )
 
-    status = ocean_instance.compute.status(
-        asset_with_compute_service.did, job_id, consumer_wallet
-    )
+    status = ocean_instance.compute.status(dataset.did, job_id, consumer_wallet)
     print(f"got job status: {status}")
 
     assert (
         status and status["ok"]
     ), f"something not right about the compute job, got status: {status}"
 
-    status = ocean_instance.compute.stop(
-        asset_with_compute_service.did, job_id, consumer_wallet
-    )
+    status = ocean_instance.compute.stop(dataset.did, job_id, consumer_wallet)
     print(f"got job status after requesting stop: {status}")
     assert status, f"something not right about the compute job, got status: {status}"
 
     if with_result:
-        result = ocean_instance.compute.result(
-            asset_with_compute_service.did, job_id, consumer_wallet
-        )
+        result = ocean_instance.compute.result(dataset.did, job_id, consumer_wallet)
         print(f"got job status after requesting result: {result}")
         assert "did" in result, "something not right about the compute job, no did."
 
         succeeded = False
         for _ in range(0, 200):
-            status = ocean_instance.compute.status(
-                asset_with_compute_service.did, job_id, consumer_wallet
-            )
+            status = ocean_instance.compute.status(dataset.did, job_id, consumer_wallet)
             # wait until job is done, see:
             # https://github.com/oceanprotocol/operator-service/blob/main/API.md#status-description
             if status["status"] > 60:
@@ -198,7 +183,7 @@ def run_compute_test(
 
         assert succeeded, "compute job unsuccessful"
         result_file = ocean_instance.compute.result_file(
-            asset_with_compute_service.did, job_id, 0, consumer_wallet
+            dataset.did, job_id, 0, consumer_wallet
         )
         assert result_file is not None
         print(f"got job result file: {str(result_file)}")
@@ -208,16 +193,17 @@ def test_compute_raw_algo(
     publisher_wallet,
     publisher_ocean_instance,
     consumer_wallet,
-    data_asset_with_compute_service,
-    algorithm_asset,
+    dataset_with_compute_service,
+    algorithm,
 ):
     """Tests that a compute job with a raw algorithm starts properly."""
     # Setup algorithm meta to run raw algorithm
     run_compute_test(
-        publisher_ocean_instance,
-        publisher_wallet,
-        consumer_wallet,
-        [data_asset_with_compute_service, algorithm_asset],
+        ocean_instance=publisher_ocean_instance,
+        publisher_wallet=publisher_wallet,
+        consumer_wallet=consumer_wallet,
+        dataset=dataset_with_compute_service,
+        algorithm=algorithm,
         with_result=True,
     )
 
@@ -227,29 +213,28 @@ def test_compute_multi_inputs(
     publisher_wallet,
     publisher_ocean_instance,
     consumer_wallet,
-    consumer_ocean_instance,
-    data_asset_with_compute_service,
+    dataset_with_compute_service,
 ):
     """Tests that a compute job with additional Inputs (multiple assets) starts properly."""
     # Another dataset, this time with download service
-    access_ddo = get_registered_ddo_with_access_service(
+    another_dataset = get_registered_ddo_with_access_service(
         publisher_ocean_instance, publisher_wallet
     )
     # verify the ddo is available in Aquarius
-    _ = publisher_ocean_instance.assets.resolve(access_ddo.did)
+    _ = publisher_ocean_instance.assets.resolve(another_dataset.did)
 
     # Setup algorithm meta to run raw algorithm
-    algorithm_ddo = get_registered_algorithm_ddo_different_provider(
+    algorithm = get_registered_algorithm_ddo_different_provider(
         publisher_ocean_instance, publisher_wallet
     )
-    _ = publisher_ocean_instance.assets.resolve(algorithm_ddo.did)
+    _ = publisher_ocean_instance.assets.resolve(algorithm.did)
 
     run_compute_test(
-        consumer_ocean_instance,
-        publisher_wallet,
-        consumer_wallet,
-        [data_asset_with_compute_service, access_ddo],
-        algorithm=algorithm_ddo,
+        ocean_instance=publisher_ocean_instance,
+        publisher_wallet=publisher_wallet,
+        consumer_wallet=consumer_wallet,
+        dataset=dataset_with_compute_service,
+        algorithm=algorithm,
         userdata={"test_key": "test_value"},
     )
 
