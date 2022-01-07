@@ -5,7 +5,7 @@
 
 import logging
 import os
-from typing import Optional, Type, List, Dict, Any
+from typing import Optional, Type
 
 from enforce_typing import enforce_types
 from ocean_lib.agreements.service_types import ServiceTypes
@@ -24,7 +24,6 @@ def download_asset_files(
     destination: str,
     order_tx_id: str,
     data_provider: Type[DataServiceProvider],
-    files: List[Dict[str, Any]],
     index: Optional[int] = None,
     userdata: Optional[dict] = None,
 ) -> str:
@@ -36,7 +35,6 @@ def download_asset_files(
     :param destination: Path, str
     :param order_tx_id: hex str the transaction hash of the startOrder tx
     :param data_provider: DataServiceProvider class object
-    :param files: List of the documents that are going to be downloaded, list
     :param index: Index of the document that is going to be downloaded, Optional[int]
     :param userdata: Dict of additional data from user
     :return: asset folder path, str
@@ -55,9 +53,6 @@ def download_asset_files(
     if index is not None:
         assert isinstance(index, int), logger.error("index has to be an integer.")
         assert index >= 0, logger.error("index has to be 0 or a positive integer.")
-        assert index < len(files), logger.error(
-            "index can not be bigger than the number of files"
-        )
 
     asset_folder = os.path.join(destination, f"datafile.{asset.did}.{service_id}")
     if not os.path.exists(asset_folder):
@@ -67,7 +62,6 @@ def download_asset_files(
         did=asset.did,
         service_id=service_id,
         tx_id=order_tx_id,
-        files=files,
         consumer_wallet=consumer_wallet,
         service_endpoint=service_endpoint,
         destination_folder=asset_folder,

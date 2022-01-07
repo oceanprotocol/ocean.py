@@ -58,11 +58,11 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
     file_url = "https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt"
     file_dict = {"type": "url", "url": file_url, "method": "GET"}
     file = FilesTypeFactory(file_dict)
-    file_objects = [file]
+    files = [file]
 
     # Encrypt file objects
     encrypt_response = data_provider.encrypt(
-        file_objects, "http://172.15.0.4:8030/api/services/encrypt"
+        files, "http://172.15.0.4:8030/api/services/encrypt"
     )
     encrypted_files = encrypt_response.content.decode("utf-8")
 
@@ -146,8 +146,6 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
 
     assert len(os.listdir(destination)) == 0
 
-    files = list(map(lambda f: f.to_dict(), file_objects))
-
     asset.download_asset(
         asset=ddo,
         provider_uri=config.provider_url,
@@ -155,7 +153,8 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
         destination=destination,
         order_tx_id=tx_id,
         data_provider=data_provider,
-        files=files,
     )
 
-    assert len(os.listdir(destination)) == len(files), "The asset folder is empty."
+    assert len(
+        os.listdir(os.path.join(destination, os.listdir(destination)[0]))
+    ) == len(files), "The asset folder is empty."

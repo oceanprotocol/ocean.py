@@ -422,7 +422,6 @@ class OceanAssets:
         destination: str,
         order_tx_id: str,
         data_provider: Type[DataServiceProvider],
-        files: List[Dict[str, Any]],
         index: Optional[int] = None,
         userdata: Optional[dict] = None,
     ) -> str:
@@ -443,7 +442,6 @@ class OceanAssets:
             destination=destination,
             order_tx_id=order_tx_id,
             data_provider=data_provider,
-            files=files,
             index=index,
             userdata=userdata,
         )

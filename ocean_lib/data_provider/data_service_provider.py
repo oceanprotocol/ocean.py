@@ -174,7 +174,6 @@ class DataServiceProvider:
         did: str,
         service_id: str,
         tx_id: str,
-        files: List[Dict[str, Any]],
         consumer_wallet: Wallet,
         service_endpoint: str,
         destination_folder: Union[str, Path],
@@ -182,6 +181,10 @@ class DataServiceProvider:
         userdata: Optional[Dict] = None,
     ) -> None:
 
+        fileinfo_response = DataServiceProvider.fileinfo(
+            did, service_id, "http://172.15.0.4:8030/api/services/fileinfo"
+        )
+        files = fileinfo_response.json()
         indexes = range(len(files))
         if index is not None:
             assert isinstance(index, int), logger.error("index has to be an integer.")

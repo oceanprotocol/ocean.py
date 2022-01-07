@@ -6,30 +6,18 @@ import os
 
 import pytest
 
-from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_sample_ddo
-from tests.resources.helper_functions import deploy_erc721_erc20
-
-
-def get_files() -> tuple:
-    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
-    file2_dict = {"type": "url", "url": "https://url.com/file2.csv", "method": "GET"}
-    file1 = FilesTypeFactory(file1_dict)
-    file2 = FilesTypeFactory(file2_dict)
-    file_objects = [file1, file2]
-    files = list(map(lambda file: file.to_dict(), file_objects))
-    return file_objects, files
+from tests.resources.helper_functions import deploy_erc721_erc20, create_basics
 
 
 def test_ocean_assets_download_failure(publisher_wallet, config):
     """Tests that downloading from an empty service raises an AssertionError."""
     data_provider = DataServiceProvider
-    _, files = get_files()
 
     ddo_dict = get_sample_ddo()
     ddo = Asset.from_dict(ddo_dict)
@@ -45,7 +33,6 @@ def test_ocean_assets_download_failure(publisher_wallet, config):
             "test_destination",
             "test_order_tx_id",
             data_provider,
-            files,
         )
 
 
@@ -55,7 +42,6 @@ def test_ocean_assets_download_indexes(publisher_wallet, config):
 
     ddo_dict = get_sample_ddo()
     ddo = Asset.from_dict(ddo_dict)
-    _, files = get_files()
 
     index = range(3)
     with pytest.raises(TypeError):
@@ -66,7 +52,6 @@ def test_ocean_assets_download_indexes(publisher_wallet, config):
             "test_destination",
             "test_order_tx_id",
             data_provider,
-            files,
             index=index,
         )
 
@@ -79,12 +64,11 @@ def test_ocean_assets_download_indexes(publisher_wallet, config):
             "test_destination",
             "test_order_tx_id",
             data_provider,
-            files,
             index=index,
         )
 
     index = 4
-    with pytest.raises(AssertionError):
+    with pytest.raises(Exception):
         download_asset_files(
             ddo,
             config.provider_url,
@@ -92,7 +76,6 @@ def test_ocean_assets_download_indexes(publisher_wallet, config):
             "test_destination",
             "test_order_tx_id",
             data_provider,
-            files,
             index=index,
         )
 
@@ -114,21 +97,8 @@ def ocean_assets_download_destination_file_helper(
     erc721_token, erc20_token = deploy_erc721_erc20(
         web3, config, publisher_wallet, publisher_wallet, cap=to_wei(100)
     )
-    metadata = {
-        "created": "2020-11-15T12:27:48Z",
-        "updated": "2021-05-17T21:58:02Z",
-        "description": "Sample description",
-        "name": "Sample asset",
-        "type": "dataset",
-        "author": "OPF",
-        "license": "https://market.oceanprotocol.com/terms",
-    }
-    file_objects, files = get_files()
-    # Encrypt file objects
-    encrypt_response = data_provider.encrypt(
-        file_objects, f"{config.provider_url}/api/services/encrypt"
-    )
-    encrypted_files = encrypt_response.content.decode("utf-8")
+
+    _, metadata, encrypted_files = create_basics(config, web3, data_provider)
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
@@ -161,13 +131,7 @@ def ocean_assets_download_destination_file_helper(
     )
 
     written_path = download_asset_files(
-        ddo,
-        config.provider_url,
-        publisher_wallet,
-        tmpdir,
-        tx_id,
-        data_provider,
-        files=files,
+        ddo, config.provider_url, publisher_wallet, tmpdir, tx_id, data_provider
     )
 
     assert os.path.exists(written_path)
