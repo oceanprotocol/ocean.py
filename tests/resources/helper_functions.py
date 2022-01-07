@@ -12,6 +12,8 @@ from typing import Optional, Dict, Any
 import coloredlogs
 import yaml
 from enforce_typing import enforce_types
+
+from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.config import Config
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.data_token import DataToken
@@ -380,3 +382,33 @@ def get_provider_fees() -> Dict[str, Any]:
     }
 
     return provider_fee
+
+
+def create_basics(config, web3, data_provider):
+    erc721_factory_address = get_address_of_type(
+        config, ERC721FactoryContract.CONTRACT_NAME
+    )
+    erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
+
+    metadata = {
+        "created": "2020-11-15T12:27:48Z",
+        "updated": "2021-05-17T21:58:02Z",
+        "description": "Sample description",
+        "name": "Sample asset",
+        "type": "dataset",
+        "author": "OPF",
+        "license": "https://market.oceanprotocol.com/terms",
+    }
+
+    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
+    file2_dict = {"type": "url", "url": "https://url.com/file2.csv", "method": "GET"}
+    file1 = FilesTypeFactory(file1_dict)
+    file2 = FilesTypeFactory(file2_dict)
+
+    # Encrypt file objects
+    encrypt_response = data_provider.encrypt(
+        [file1, file2], "http://172.15.0.4:8030/api/services/encrypt"
+    )
+    encrypted_files = encrypt_response.content.decode("utf-8")
+
+    return erc721_factory, metadata, encrypted_files

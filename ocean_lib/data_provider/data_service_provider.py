@@ -102,6 +102,32 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
+    def fileinfo(did: str, service_id: str, service_endpoint: str) -> Response:
+        payload = {"did": did, "serviceId": service_id}
+
+        response = DataServiceProvider._http_method(
+            "post", service_endpoint, json=payload
+        )
+
+        if not response or not hasattr(response, "status_code"):
+            raise Exception("Response not found!")
+
+        if response.status_code != 200:
+            msg = (
+                f"Fileinfo service failed at the FileInfoEndpoint "
+                f"{service_endpoint}, reason {response.text}, status {response.status_code}"
+            )
+            logger.error(msg)
+            raise Exception(msg)
+
+        logger.info(
+            f"Retrieved asset files successfully"
+            f" FileInfoEndpoint {service_endpoint}"
+        )
+        return response
+
+    @staticmethod
+    @enforce_types
     def initialize(
         did: str,
         service_id: str,

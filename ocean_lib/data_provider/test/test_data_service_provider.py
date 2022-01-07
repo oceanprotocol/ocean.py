@@ -21,6 +21,7 @@ from tests.resources.helper_functions import (
     get_publisher_ocean_instance,
     get_provider_fees,
     deploy_erc721_erc20,
+    create_basics,
 )
 from tests.resources.mocks.http_client_mock import (
     HttpClientEmptyMock,
@@ -181,29 +182,38 @@ def test_encrypt(web3, provider_wallet):
     assert decrypted_document_string == test_string
 
 
+def test_fileinfo(web3, config, publisher_wallet, publisher_ocean_instance):
+    erc721_token, erc20_token = deploy_erc721_erc20(
+        web3, config, publisher_wallet, publisher_wallet
+    )
+    _, metadata, encrypted_files = create_basics(config, web3, DataSP)
+
+    ddo = publisher_ocean_instance.assets.create(
+        metadata=metadata,
+        publisher_wallet=publisher_wallet,
+        encrypted_files=encrypted_files,
+        erc721_address=erc721_token.address,
+        deployed_erc20_tokens=[erc20_token],
+    )
+    access_service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
+
+    fileinfo_result = DataSP.fileinfo(
+        ddo.did, access_service.id, DataSP.build_fileinfo(config.provider_url)[1]
+    )
+    assert fileinfo_result.status_code == 200
+    files_info = fileinfo_result.json()
+    assert len(files_info) == 2
+    for file_index, file in enumerate(files_info):
+        assert file["index"] == file_index
+        assert file["valid"] is True
+        assert file["contentType"] == "text/html"
+
+
 def test_initialize(web3, config, publisher_wallet, publisher_ocean_instance):
     erc721_token, erc20_token = deploy_erc721_erc20(
         web3, config, publisher_wallet, publisher_wallet
     )
-    metadata = {
-        "created": "2020-11-15T12:27:48Z",
-        "updated": "2021-05-17T21:58:02Z",
-        "description": "Sample description",
-        "name": "Sample asset",
-        "type": "dataset",
-        "author": "OPF",
-        "license": "https://market.oceanprotocol.com/terms",
-    }
-    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
-    file2_dict = {"type": "url", "url": "https://url.com/file2.csv", "method": "GET"}
-    file1 = FilesTypeFactory(file1_dict)
-    file2 = FilesTypeFactory(file2_dict)
-
-    # Encrypt file objects
-    encrypt_response = DataSP.encrypt(
-        [file1, file2], "http://localhost:8030/api/services/encrypt"
-    )
-    encrypted_files = encrypt_response.content.decode("utf-8")
+    _, metadata, encrypted_files = create_basics(config, web3, DataSP)
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
@@ -216,9 +226,8 @@ def test_initialize(web3, config, publisher_wallet, publisher_ocean_instance):
     initialize_result = DataSP.initialize(
         did=ddo.did,
         service_id=access_service.id,
-        file_index=0,
         consumer_address=publisher_wallet.address,
-        service_endpoint="http://172.15.0.4:8030/api/services/initialize",
+        service_endpoint=DataSP.build_initialize_endpoint(config.provider_url)[1],
     )
     assert initialize_result
     assert initialize_result.status_code == 200
