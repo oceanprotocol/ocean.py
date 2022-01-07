@@ -8,9 +8,7 @@ import json
 import logging
 import os
 import re
-from collections import namedtuple
 from datetime import datetime
-from decimal import Decimal
 from json import JSONDecodeError
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -19,12 +17,10 @@ from unittest.mock import Mock
 import requests
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
-from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.config import Config
-from ocean_lib.exceptions import OceanEncryptAssetUrlsError
+from ocean_lib.exceptions import OceanEncryptAssetUrlsError, DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
 from requests.exceptions import InvalidURL
@@ -32,11 +28,6 @@ from requests.models import PreparedRequest, Response
 from requests.sessions import Session
 
 logger = logging.getLogger(__name__)
-
-OrderRequirements = namedtuple(
-    "OrderRequirements",
-    ("amount", "data_token_address", "receiver_address", "nonce", "computeAddress"),
-)
 
 
 class DataServiceProvider:
@@ -84,7 +75,7 @@ class DataServiceProvider:
         )
 
         if not response or not hasattr(response, "status_code"):
-            raise Exception("Response not found!")
+            raise DataProviderException("Response not found!")
 
         if response.status_code != 201:
             msg = (
@@ -103,98 +94,91 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def sign_message(wallet: Wallet, msg: str) -> str:
-        nonce = str(datetime.now().timestamp())
-        print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
-        return nonce, sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
+    def fileinfo(did: str, service_id: str, service_endpoint: str) -> Response:
+        payload = {"did": did, "serviceId": service_id}
+
+        response = DataServiceProvider._http_method(
+            "post", service_endpoint, json=payload
+        )
+
+        if not response or not hasattr(response, "status_code"):
+            raise DataProviderException("Response not found!")
+
+        if response.status_code != 200:
+            msg = (
+                f"Fileinfo service failed at the FileInfoEndpoint "
+                f"{service_endpoint}, reason {response.text}, status {response.status_code}"
+            )
+            logger.error(msg)
+            raise DataProviderException(msg)
+
+        logger.info(
+            f"Retrieved asset files successfully"
+            f" FileInfoEndpoint {service_endpoint}"
+        )
+        return response
 
     @staticmethod
     @enforce_types
-    def get_order_requirements(
+    def initialize(
         did: str,
-        service_endpoint: str,
+        service_id: str,
         consumer_address: str,
-        service_id: Union[str, int],
-        service_type: str,
-        token_address: str,
+        service_endpoint: str,
         userdata: Optional[Dict] = None,
-    ) -> Optional[OrderRequirements]:
-        """
-
-        :param did:
-        :param service_endpoint:
-        :param consumer_address: hex str the ethereum account address of the consumer
-        :param service_id:
-        :param service_type:
-        :param token_address:
-        :return: OrderRequirements instance -- named tuple (amount, data_token_address, receiver_address, nonce),
-
-        """
+    ) -> Response:
 
         req = PreparedRequest()
-        params = {
-            "documentId": did,
+
+        # prepare_url function transforms ':' from "did:op:" into "%3".
+        service_endpoint += f"?documentId={did}"
+        payload = {
             "serviceId": service_id,
-            "serviceType": service_type,
-            "dataToken": token_address,
             "consumerAddress": consumer_address,
         }
 
         if userdata:
             userdata = json.dumps(userdata)
-            params["userdata"] = userdata
+            payload["userdata"] = userdata
 
-        req.prepare_url(service_endpoint, params)
-        initialize_url = req.url
+        req.prepare_url(service_endpoint, payload)
 
-        logger.info(f"invoke the initialize endpoint with this url: {initialize_url}")
-        response = DataServiceProvider._http_method("get", initialize_url)
-        # The returned json should contain information about the required number of tokens
-        # to consume `service_id`. If service is not available there will be an error or
-        # the returned json is empty.
+        response = DataServiceProvider._http_method("get", req.url)
+
+        if not response or not hasattr(response, "status_code"):
+            raise DataProviderException("Response not found!")
+
         if response.status_code != 200:
-            return None
-        order = dict(response.json())
+            msg = (
+                f"Initialize service failed at the initializeEndpoint "
+                f"{req.url}, reason {response.text}, status {response.status_code}"
+            )
+            logger.error(msg)
+            raise DataProviderException(msg)
 
-        return OrderRequirements(
-            to_wei(
-                Decimal(order["numTokens"])
-            ),  # comes as float, needs to be converted
-            order["dataToken"],
-            order["to"],
-            int(order["nonce"]),
-            order.get("computeAddress"),
+        logger.info(
+            f"Service initialized successfully" f" initializeEndpoint {req.url}"
         )
+
+        return response
 
     @staticmethod
     @enforce_types
-    def download_service(
+    def download(
         did: str,
+        service_id: str,
+        tx_id: str,
+        consumer_wallet: Wallet,
         service_endpoint: str,
-        wallet: Wallet,
-        files: List[Dict[str, Any]],
         destination_folder: Union[str, Path],
-        service_id: int,
-        token_address: str,
-        order_tx_id: str,
         index: Optional[int] = None,
         userdata: Optional[Dict] = None,
     ) -> None:
-        """
-        Call the provider endpoint to get access to the different files that form the asset.
 
-        :param did: str id of the asset
-        :param service_endpoint: Url to consume, str
-        :param wallet: hex str Wallet instance of the consumer signing this request
-        :param files: List containing the files to be consumed, list
-        :param destination_folder: Path, str
-        :param service_id: integer the id of the service inside the DDO's service dict
-        :param token_address: hex str the data token address associated with this asset/service
-        :param order_tx_id: hex str the transaction hash for the required data token
-            transfer (tokens of the same token address above)
-        :param index: Index of the document that is going to be downloaded, int
-        :return: True if was downloaded, bool
-        """
+        fileinfo_response = DataServiceProvider.fileinfo(
+            did, service_id, "http://172.15.0.4:8030/api/services/fileinfo"
+        )
+        files = fileinfo_response.json()
         indexes = range(len(files))
         if index is not None:
             assert isinstance(index, int), logger.error("index has to be an integer.")
@@ -205,33 +189,49 @@ class DataServiceProvider:
             indexes = [index]
 
         req = PreparedRequest()
-        params = {
-            "documentId": did,
+
+        # prepare_url function transforms ':' from "did:op:" into "%3".
+        service_endpoint += f"?documentId={did}"
+        payload = {
             "serviceId": service_id,
-            "serviceType": ServiceTypes.ASSET_ACCESS,
-            "dataToken": token_address,
-            "transferTxId": order_tx_id,
-            "consumerAddress": wallet.address,
+            "consumerAddress": consumer_wallet.address,
+            "transferTxId": tx_id,
         }
 
         if userdata:
             userdata = json.dumps(userdata)
-            params["userdata"] = userdata
-
-        req.prepare_url(service_endpoint, params)
-        base_url = req.url
+            payload["userdata"] = userdata
 
         for i in indexes:
-            signature = DataServiceProvider.sign_message(wallet, did)
-            download_url = base_url + f"&signature={signature}&fileIndex={i}"
-            logger.info(f"invoke consume endpoint with this url: {download_url}")
-            response = DataServiceProvider._http_method(
-                "get", download_url, stream=True
+            payload["fileIndex"] = i
+            payload["nonce"], payload["signature"] = DataServiceProvider.sign_message(
+                consumer_wallet, did
             )
+            req.prepare_url(service_endpoint, payload)
+            response = DataServiceProvider._http_method("get", req.url)
+
+            if not response or not hasattr(response, "status_code"):
+                raise DataProviderException("Response not found!")
+
+            if response.status_code != 200:
+                msg = (
+                    f"Download asset failed at the downloadEndpoint "
+                    f"{req.url}, reason {response.text}, status {response.status_code}"
+                )
+                logger.error(msg)
+                raise DataProviderException(msg)
+
             file_name = DataServiceProvider._get_file_name(response)
-            DataServiceProvider.write_file(
-                response, destination_folder, file_name or f"file-{i}"
-            )
+            DataServiceProvider.write_file(response, destination_folder, file_name)
+
+            logger.info(f"Asset downloaded successfully" f" downloadEndpoint {req.url}")
+
+    @staticmethod
+    @enforce_types
+    def sign_message(wallet: Wallet, msg: str) -> Tuple[str, str]:
+        nonce = str(datetime.now().timestamp())
+        print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
+        return nonce, sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
 
     @staticmethod
     @enforce_types

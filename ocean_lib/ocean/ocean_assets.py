@@ -15,6 +15,7 @@ from enforce_typing import enforce_types
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.aquarius import Aquarius
 from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound
@@ -77,7 +78,7 @@ class OceanAssets:
 
         if not has_access_service:
             access_service = self.build_access_service(
-                service_id="1",
+                service_id="0",
                 service_endpoint=self._data_provider.build_download_endpoint(
                     provider_uri
                 )[1],
@@ -411,3 +412,34 @@ class OceanAssets:
             for ddo_dict in aquarius.query_search(query)
             if "_source" in ddo_dict
         ]
+
+    @enforce_types
+    def download_asset(
+        self,
+        asset: Asset,
+        provider_uri: str,
+        consumer_wallet: Wallet,
+        destination: str,
+        order_tx_id: str,
+        index: Optional[int] = None,
+        userdata: Optional[dict] = None,
+    ) -> str:
+
+        if index is not None:
+            assert isinstance(index, int), logger.error("index has to be an integer.")
+            assert index >= 0, logger.error("index has to be 0 or a positive integer.")
+
+        service = asset.get_service(ServiceTypes.ASSET_ACCESS)
+        assert (
+            service and service.type == ServiceTypes.ASSET_ACCESS
+        ), f"Service with type {ServiceTypes.ASSET_ACCESS} is not found."
+
+        return download_asset_files(
+            asset=asset,
+            provider_uri=provider_uri,
+            consumer_wallet=consumer_wallet,
+            destination=destination,
+            order_tx_id=order_tx_id,
+            index=index,
+            userdata=userdata,
+        )

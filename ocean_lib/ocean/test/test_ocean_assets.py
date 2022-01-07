@@ -7,7 +7,6 @@ import uuid
 from unittest.mock import patch
 
 import pytest
-from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -22,77 +21,12 @@ from tests.resources.ddo_helpers import (
     get_sample_ddo,
     wait_for_update,
 )
-from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
-
-
-def create_asset(ocean, publisher, config, metadata=None):
-    """Helper function for asset creation based on ddo_sa_sample.json."""
-    erc20_data = ErcCreateData(
-        template_index=1,
-        strings=["Datatoken 1", "DT1"],
-        addresses=[
-            publisher.address,
-            publisher.address,
-            ZERO_ADDRESS,
-            get_address_of_type(config, "Ocean"),
-        ],
-        uints=[ocean.web3.toWei("0.5", "ether"), 0],
-        bytess=[b""],
-    )
-
-    if not metadata:
-        metadata = {
-            "created": "2020-11-15T12:27:48Z",
-            "updated": "2021-05-17T21:58:02Z",
-            "description": "Sample description",
-            "name": "Sample asset",
-            "type": "dataset",
-            "author": "OPF",
-            "license": "https://market.oceanprotocol.com/terms",
-        }
-    data_provider = DataServiceProvider
-    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
-    file1 = FilesTypeFactory(file1_dict)
-    encrypt_response = data_provider.encrypt(
-        [file1], "http://172.15.0.4:8030/api/services/encrypt"
-    )
-    encrypted_files = encrypt_response.content.decode("utf-8")
-
-    ddo = ocean.assets.create(
-        metadata, publisher, encrypted_files, erc20_tokens_data=[erc20_data]
-    )
-
-    return ddo
-
-
-def create_basics(config, web3, data_provider):
-    erc721_factory_address = get_address_of_type(
-        config, ERC721FactoryContract.CONTRACT_NAME
-    )
-    erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
-
-    metadata = {
-        "created": "2020-11-15T12:27:48Z",
-        "updated": "2021-05-17T21:58:02Z",
-        "description": "Sample description",
-        "name": "Sample asset",
-        "type": "dataset",
-        "author": "OPF",
-        "license": "https://market.oceanprotocol.com/terms",
-    }
-
-    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
-    file2_dict = {"type": "url", "url": "https://url.com/file2.csv", "method": "GET"}
-    file1 = FilesTypeFactory(file1_dict)
-    file2 = FilesTypeFactory(file2_dict)
-
-    # Encrypt file objects
-    encrypt_response = data_provider.encrypt(
-        [file1, file2], "http://172.15.0.4:8030/api/services/encrypt"
-    )
-    encrypted_files = encrypt_response.content.decode("utf-8")
-
-    return erc721_factory, metadata, encrypted_files
+from tests.resources.helper_functions import (
+    deploy_erc721_erc20,
+    get_address_of_type,
+    create_basics,
+    create_asset,
+)
 
 
 def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wallet):
@@ -237,18 +171,23 @@ def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet, conf
     assert ddo, "DDO None. The ddo is not cached after the creation."
 
 
-@pytest.mark.skip(reason="TODO: download function on OceanAssets class")
 def test_download_fails(publisher_ocean_instance, publisher_wallet):
     """Tests failures of assets download function."""
     with patch("ocean_lib.ocean.ocean_assets.OceanAssets.resolve") as mock:
-        mock.return_value = get_sample_ddo()
+        asset = Asset.from_dict(get_sample_ddo())
+        mock.return_value = asset
         with pytest.raises(AssertionError):
-            publisher_ocean_instance.assets.download(
-                "0x1", 1, publisher_wallet, "", "", -4
+            publisher_ocean_instance.assets.download_asset(
+                asset, "", publisher_wallet, "", "", index=-4
             )
         with pytest.raises(TypeError):
-            publisher_ocean_instance.assets.download(
-                "0x1", "", publisher_wallet, "", "", "string_index"
+            publisher_ocean_instance.assets.download_asset(
+                asset,
+                "",
+                publisher_wallet,
+                "",
+                "",
+                index="string_index",
             )
 
 
@@ -455,7 +394,7 @@ def test_plain_asset_multiple_services(
     _, metadata, encrypted_files = create_basics(config, web3, data_provider)
 
     access_service = Service(
-        service_id="1",
+        service_id="0",
         service_type=ServiceTypes.ASSET_ACCESS,
         service_endpoint=f"{data_provider.get_url(config)}/api/services/download",
         data_token=erc20_token.address,
@@ -475,7 +414,7 @@ def test_plain_asset_multiple_services(
         "allowNetworkAccess": True,
     }
     compute_service = Service(
-        service_id="2",
+        service_id="1",
         service_type=ServiceTypes.CLOUD_COMPUTE,
         service_endpoint=f"{data_provider.get_url(config)}/api/services/compute",
         data_token=erc20_token.address,
