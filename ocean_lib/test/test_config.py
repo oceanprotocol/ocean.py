@@ -13,9 +13,9 @@ from ocean_lib.config import (
     deprecated_environ_names,
     environ_names_and_sections,
 )
-from ocean_lib.ocean.util import GANACHE_URL
 from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.ocean.util import GANACHE_URL
 from tests.resources.ddo_helpers import get_resource_path
 
 
@@ -207,13 +207,8 @@ def test_metadata_cache_uri_set_via_env_vars(monkeypatch, caplog):
 
 def test_address_file(monkeypatch):
     """Tests the Config.address_file property."""
-
-    # Test default value when ADDRESS_FILE envvar and address.file config option not set
     ENV_ADDRESS_FILE = environ_names_and_sections[NAME_ADDRESS_FILE][0]
     monkeypatch.delenv(ENV_ADDRESS_FILE)
-    config_text_empty = ""
-    config = Config(text=config_text_empty)
-    assert config.address_file.endswith("site-packages/artifacts/address.json")
 
     # Test when address.file config option is set
     config_text = """

@@ -5,6 +5,7 @@
 
 import os
 
+import pytest
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.services.service import Service
@@ -18,6 +19,7 @@ from tests.resources.helper_functions import (
 )
 
 
+@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_market_flow(publisher_wallet, consumer_wallet):
     """Tests that an order is correctly placed on the market.
 
@@ -102,6 +104,7 @@ def test_market_flow(publisher_wallet, consumer_wallet):
     ), f"no orders found using the order history: datatoken {asset.asset_id}, consumer {consumer_wallet.address}"
 
 
+@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_payer_market_flow(publisher_wallet, consumer_wallet, another_consumer_wallet):
     """Tests that an order can be placed for a delegated consumer, other than the payer."""
     pub_wallet = publisher_wallet

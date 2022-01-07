@@ -10,7 +10,7 @@ import pytest
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.exceptions import InsufficientBalance
+from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.services.service import Service
@@ -533,3 +533,36 @@ def test_compressed_and_encrypted_asset(
     file2_dict = {"type": "url", "url": "https://url.com/file2.csv", "method": "GET"}
     assert file1_dict in asset_urls
     assert file2_dict in asset_urls
+
+
+def test_asset_creation_errors(publisher_ocean_instance, publisher_wallet, config):
+    erc721_token, erc20_token = deploy_erc721_erc20(
+        publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
+    )
+
+    web3 = publisher_ocean_instance.web3
+    data_provider = DataServiceProvider
+    _, metadata, encrypted_files = create_basics(config, web3, data_provider)
+
+    some_random_address = ZERO_ADDRESS
+    with pytest.raises(ContractNotFound):
+        publisher_ocean_instance.assets.create(
+            metadata=metadata,
+            publisher_wallet=publisher_wallet,
+            encrypted_files=encrypted_files,
+            erc721_address=some_random_address,
+            deployed_erc20_tokens=[erc20_token],
+            encrypt_flag=True,
+        )
+
+    with patch("ocean_lib.aquarius.aquarius.Aquarius.ddo_exists") as mock:
+        mock.return_value = True
+        with pytest.raises(AquariusError):
+            publisher_ocean_instance.assets.create(
+                metadata=metadata,
+                publisher_wallet=publisher_wallet,
+                encrypted_files=encrypted_files,
+                erc721_address=erc721_token.address,
+                deployed_erc20_tokens=[erc20_token],
+                encrypt_flag=True,
+            )

@@ -3,16 +3,16 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import uuid
-from unittest.mock import patch
 
 import pytest
 from ocean_lib.assets.asset import Asset
-from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
+from ocean_lib.exceptions import InsufficientBalance
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_resource_path
 
 
+@pytest.mark.skip(reason="TODO: pay_for_service function on OceanAssets class")
 def test_InsufficientBalance(publisher_ocean_instance, publisher_wallet):
     alice = publisher_wallet
     sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
@@ -34,34 +34,3 @@ def test_InsufficientBalance(publisher_ocean_instance, publisher_wallet):
             alice,
             alice.address,
         )
-
-
-def test_ContractNotFound(publisher_ocean_instance, metadata, publisher_wallet):
-    metadata_copy = metadata.copy()
-
-    # used a random address from Etherscan
-    token_address = "0xB3b8239719403E38de3bdF19B9AC147B48c72BF2"
-    with patch("ocean_lib.models.dtfactory.DTFactory.verify_data_token") as mock:
-        mock.return_value = False
-        with pytest.raises(ContractNotFound):
-            publisher_ocean_instance.assets.create(
-                metadata_copy, publisher_wallet, data_token_address=token_address
-            )
-
-
-def test_AquariusError(publisher_ocean_instance, metadata, publisher_wallet):
-    metadata_copy = metadata.copy()
-    publisher = publisher_wallet
-
-    ocn = publisher_ocean_instance
-    alice_wallet = publisher_wallet
-    dt = ocn.create_data_token(
-        "DataToken1", "DT1", alice_wallet, blob=ocn.config.metadata_cache_uri
-    )
-
-    with patch("ocean_lib.aquarius.aquarius.Aquarius.ddo_exists") as mock:
-        mock.return_value = True
-        with pytest.raises(AquariusError):
-            publisher_ocean_instance.assets.create(
-                metadata_copy, publisher, data_token_address=dt.address
-            )

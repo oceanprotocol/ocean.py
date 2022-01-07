@@ -226,6 +226,7 @@ def run_compute_test(
         print(f"got job result file: {str(result_file)}")
 
 
+@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_compute_raw_algo(simple_compute_ddo):
     """Tests that a compute job with a raw algorithm starts properly."""
     setup = Setup()
@@ -242,6 +243,7 @@ def test_compute_raw_algo(simple_compute_ddo):
     )
 
 
+@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_compute_multi_inputs(simple_compute_ddo):
     """Tests that a compute job with additional Inputs (multiple assets) starts properly."""
     setup = Setup()
@@ -269,6 +271,7 @@ def test_compute_multi_inputs(simple_compute_ddo):
     )
 
 
+@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_update_trusted_algorithms(config, web3, algorithm_ddo, asset_with_trusted):
     setup = Setup()
 
@@ -315,6 +318,7 @@ def test_update_trusted_algorithms(config, web3, algorithm_ddo, asset_with_trust
     )
 
 
+@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_compute_trusted_algorithms(algorithm_ddo, asset_with_trusted):
     setup = Setup()
 

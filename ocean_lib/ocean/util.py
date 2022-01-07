@@ -34,6 +34,7 @@ def get_web3(network_url: str) -> Web3:
     """
     provider = get_web3_connection_provider(network_url)
     web3 = Web3(provider)
+
     if web3.eth.chain_id == 4:
         web3.middleware_onion.inject(geth_poa_middleware, layer=0)
     return web3
