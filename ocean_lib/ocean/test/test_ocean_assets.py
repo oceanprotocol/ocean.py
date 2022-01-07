@@ -168,18 +168,18 @@ def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet, conf
     assert ddo, "DDO None. The ddo is not cached after the creation."
 
 
-@pytest.mark.skip(reason="TODO: download function on OceanAssets class")
 def test_download_fails(publisher_ocean_instance, publisher_wallet):
     """Tests failures of assets download function."""
     with patch("ocean_lib.ocean.ocean_assets.OceanAssets.resolve") as mock:
-        mock.return_value = get_sample_ddo()
+        asset = Asset.from_dict(get_sample_ddo())
+        mock.return_value = asset
         with pytest.raises(AssertionError):
-            publisher_ocean_instance.assets.download(
-                "0x1", 1, publisher_wallet, "", "", -4
+            publisher_ocean_instance.assets.download_asset(
+                asset, "", publisher_wallet, "", "", index=-4
             )
         with pytest.raises(TypeError):
-            publisher_ocean_instance.assets.download(
-                "0x1", "", publisher_wallet, "", "", "string_index"
+            publisher_ocean_instance.assets.download_asset(
+                asset, "", publisher_wallet, "", "", index="string_index"
             )
 
 
@@ -386,7 +386,7 @@ def test_plain_asset_multiple_services(
     _, metadata, encrypted_files = create_basics(config, web3, data_provider)
 
     access_service = Service(
-        service_id="1",
+        service_id="0",
         service_type=ServiceTypes.ASSET_ACCESS,
         service_endpoint=f"{data_provider.get_url(config)}/api/services/download",
         data_token=erc20_token.address,
@@ -406,7 +406,7 @@ def test_plain_asset_multiple_services(
         "allowNetworkAccess": True,
     }
     compute_service = Service(
-        service_id="2",
+        service_id="1",
         service_type=ServiceTypes.CLOUD_COMPUTE,
         service_endpoint=f"{data_provider.get_url(config)}/api/services/compute",
         data_token=erc20_token.address,

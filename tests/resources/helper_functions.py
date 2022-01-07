@@ -2,12 +2,12 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-
+import json
 import logging
 import logging.config
 import os
 import time
-from typing import Optional
+from typing import Any, Dict, Optional
 
 import coloredlogs
 import yaml
@@ -24,6 +24,7 @@ from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.ocean.util import get_web3 as util_get_web3
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
+from ocean_lib.web3_internal.utils import split_signature
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 from web3 import Web3
@@ -345,3 +346,37 @@ def transfer_ocean_if_balance_lte(
         )
 
     return ocean_token.balanceOf(recipient) - initial_recipient_balance
+
+
+def get_provider_fees() -> Dict[str, Any]:
+    provider_wallet = get_provider_wallet()
+    web3 = get_web3()
+    provider_fee_amount = 0
+    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
+    provider_fee_address = provider_wallet.address
+    provider_fee_token = os.environ.get("PROVIDER_FEE_TOKEN", ZERO_ADDRESS)
+
+    message = Web3.solidityKeccak(
+        ["bytes", "address", "address", "uint256"],
+        [
+            Web3.toHex(Web3.toBytes(text=provider_data)),
+            provider_fee_address,
+            provider_fee_token,
+            provider_fee_amount,
+        ],
+    )
+    signed = web3.eth.sign(provider_fee_address, data=message)
+    signature = split_signature(signed)
+
+    provider_fee = {
+        "providerFeeAddress": provider_fee_address,
+        "providerFeeToken": provider_fee_token,
+        "providerFeeAmount": provider_fee_amount,
+        "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
+        # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
+        "v": signature.v,
+        "r": signature.r,
+        "s": signature.s,
+    }
+
+    return provider_fee

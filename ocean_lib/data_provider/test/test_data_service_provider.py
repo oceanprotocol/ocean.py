@@ -8,12 +8,19 @@ from unittest.mock import Mock
 import ecies
 import pytest
 from ocean_lib.agreements.file_objects import FilesTypeFactory
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
+from ocean_lib.exceptions import DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
 from requests.exceptions import InvalidURL
 from requests.models import Response
-from tests.resources.helper_functions import get_publisher_ocean_instance
+from tests.resources.ddo_helpers import create_basics
+from tests.resources.helper_functions import (
+    deploy_erc721_erc20,
+    get_provider_fees,
+    get_publisher_ocean_instance,
+)
 from tests.resources.mocks.http_client_mock import (
     HttpClientEmptyMock,
     HttpClientEvilMock,
@@ -65,19 +72,18 @@ def test_set_http_client(with_nice_client):
     assert isinstance(DataSP.get_http_client(), HttpClientNiceMock)
 
 
-def test_initialize(with_evil_client):
+def test_initialize_fails(with_evil_client):
     """Tests failure of initialize endpoint."""
-    assert (
+    with pytest.raises(DataProviderException) as err:
         DataSP.initialize(
             "some_did",
-            "http://mock/",
+            "service_id",
             "some_consumer_address",
-            0,
-            "and_service_type",
-            "some_token_address",
+            "http://mock/",
             userdata={"test_dict_key": "test_dict_value"},
         )
-        is None
+    assert err.value.args[0].startswith(
+        "Initialize service failed at the initializeEndpoint"
     )
 
 
@@ -171,6 +177,59 @@ def test_encrypt(web3, provider_wallet):
     decrypted_document = ecies.decrypt(key, encrypted_document)
     decrypted_document_string = decrypted_document.decode("utf-8")
     assert decrypted_document_string == test_string
+
+
+def test_fileinfo(web3, config, publisher_wallet, publisher_ocean_instance):
+    erc721_token, erc20_token = deploy_erc721_erc20(
+        web3, config, publisher_wallet, publisher_wallet
+    )
+    _, metadata, encrypted_files = create_basics(config, web3, DataSP)
+
+    ddo = publisher_ocean_instance.assets.create(
+        metadata=metadata,
+        publisher_wallet=publisher_wallet,
+        encrypted_files=encrypted_files,
+        erc721_address=erc721_token.address,
+        deployed_erc20_tokens=[erc20_token],
+    )
+    access_service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
+
+    fileinfo_result = DataSP.fileinfo(
+        ddo.did, access_service.id, DataSP.build_fileinfo(config.provider_url)[1]
+    )
+    assert fileinfo_result.status_code == 200
+    files_info = fileinfo_result.json()
+    assert len(files_info) == 2
+    for file_index, file in enumerate(files_info):
+        assert file["index"] == file_index
+        assert file["valid"] is True
+        assert file["contentType"] == "text/html"
+
+
+def test_initialize(web3, config, publisher_wallet, publisher_ocean_instance):
+    erc721_token, erc20_token = deploy_erc721_erc20(
+        web3, config, publisher_wallet, publisher_wallet
+    )
+    _, metadata, encrypted_files = create_basics(config, web3, DataSP)
+    ddo = publisher_ocean_instance.assets.create(
+        metadata=metadata,
+        publisher_wallet=publisher_wallet,
+        encrypted_files=encrypted_files,
+        erc721_address=erc721_token.address,
+        deployed_erc20_tokens=[erc20_token],
+    )
+    access_service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
+
+    initialize_result = DataSP.initialize(
+        did=ddo.did,
+        service_id=access_service.id,
+        consumer_address=publisher_wallet.address,
+        service_endpoint=DataSP.build_initialize_endpoint(config.provider_url)[1],
+    )
+    assert initialize_result
+    assert initialize_result.status_code == 200
+    response_json = initialize_result.json()
+    assert response_json["providerFee"] == get_provider_fees()
 
 
 def test_invalid_file_name():
