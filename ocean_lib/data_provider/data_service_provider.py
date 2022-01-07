@@ -230,7 +230,7 @@ class DataServiceProvider:
         """
 
         :param did: id of asset starting with `did:op:` and a hex str without 0x prefix
-        :param service_endpoint:
+        :param service_endpoint: str provider compute/start endpoint
         :param consumer_address: hex str the ethereum address of the consumer executing the compute job
         :param signature: hex str signed message to allow the provider to authorize the consumer
         :param service_id:
@@ -244,6 +244,8 @@ class DataServiceProvider:
         :param input_datasets: list of ComputeInput
         :param job_id: str id of compute job that was started and stopped (optional, use it
             here to start a job after it was stopped)
+        :param userdata: dict of params to append to data asset url
+        :param algouserdata: dict of params to append to algo asset url
         :return: job_info dict with jobId, status, and other values
         """
         assert (

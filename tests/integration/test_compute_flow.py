@@ -148,7 +148,6 @@ def run_compute_test(
             ComputeInput(asset.did, _order_tx_id, _service.index, userdata=userdata)
         )
 
-    # TODO, fix arguments
     # Start compute job
     job_id = DataServiceProvider.start_compute_job(
         did=asset_with_compute_service.did,
@@ -161,10 +160,6 @@ def run_compute_test(
         algorithm_did=algorithm.did,
         algorithm_tx_id=algo_tx_id,
         algorithm_data_token=algo_download_service.data_token,
-        # output: Optional[dict] = None,
-        # job_id: Optional[str] = None,
-        # userdata: Optional[dict] = None,
-        # algouserdata: Optional[dict] = None,
     )
 
     status = ocean_instance.compute.status(
