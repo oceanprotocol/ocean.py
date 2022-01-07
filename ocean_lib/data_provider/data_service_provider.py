@@ -18,7 +18,7 @@ import requests
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
 from ocean_lib.config import Config
-from ocean_lib.exceptions import OceanEncryptAssetUrlsError
+from ocean_lib.exceptions import OceanEncryptAssetUrlsError, DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.transactions import sign_hash
@@ -75,7 +75,7 @@ class DataServiceProvider:
         )
 
         if not response or not hasattr(response, "status_code"):
-            raise Exception("Response not found!")
+            raise DataProviderException("Response not found!")
 
         if response.status_code != 201:
             msg = (
@@ -102,7 +102,7 @@ class DataServiceProvider:
         )
 
         if not response or not hasattr(response, "status_code"):
-            raise Exception("Response not found!")
+            raise DataProviderException("Response not found!")
 
         if response.status_code != 200:
             msg = (
@@ -110,7 +110,7 @@ class DataServiceProvider:
                 f"{service_endpoint}, reason {response.text}, status {response.status_code}"
             )
             logger.error(msg)
-            raise Exception(msg)
+            raise DataProviderException(msg)
 
         logger.info(
             f"Retrieved asset files successfully"
@@ -129,6 +129,8 @@ class DataServiceProvider:
     ) -> Response:
 
         req = PreparedRequest()
+
+        # prepare_url function transforms ':' from "did:op:" into "%3".
         service_endpoint += f"?documentId={did}"
         payload = {
             "serviceId": service_id,
@@ -144,7 +146,7 @@ class DataServiceProvider:
         response = DataServiceProvider._http_method("get", req.url)
 
         if not response or not hasattr(response, "status_code"):
-            raise Exception("Response not found!")
+            raise DataProviderException("Response not found!")
 
         if response.status_code != 200:
             msg = (
@@ -152,7 +154,7 @@ class DataServiceProvider:
                 f"{req.url}, reason {response.text}, status {response.status_code}"
             )
             logger.error(msg)
-            raise Exception(msg)
+            raise DataProviderException(msg)
 
         logger.info(
             f"Service initialized successfully" f" initializeEndpoint {req.url}"
@@ -187,6 +189,8 @@ class DataServiceProvider:
             indexes = [index]
 
         req = PreparedRequest()
+
+        # prepare_url function transforms ':' from "did:op:" into "%3".
         service_endpoint += f"?documentId={did}"
         payload = {
             "serviceId": service_id,
@@ -207,7 +211,7 @@ class DataServiceProvider:
             response = DataServiceProvider._http_method("get", req.url)
 
             if not response or not hasattr(response, "status_code"):
-                raise Exception("Response not found!")
+                raise DataProviderException("Response not found!")
 
             if response.status_code != 200:
                 msg = (
@@ -215,7 +219,7 @@ class DataServiceProvider:
                     f"{req.url}, reason {response.text}, status {response.status_code}"
                 )
                 logger.error(msg)
-                raise Exception(msg)
+                raise DataProviderException(msg)
 
             file_name = DataServiceProvider._get_file_name(response)
             DataServiceProvider.write_file(response, destination_folder, file_name)

@@ -108,13 +108,12 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
     )
 
     # Initialize service
+    _, initialize_url = data_provider.build_initialize_endpoint(config.provider_url)
     response = data_provider.initialize(
         did=ddo.did,
         service_id=service.id,
         consumer_address=consumer_wallet.address,
-        service_endpoint=data_provider.build_initialize_endpoint(config.provider_url)[
-            1
-        ],
+        service_endpoint=initialize_url,
     )
     assert response
     assert response.status_code == 200

@@ -11,6 +11,7 @@ from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
+from ocean_lib.exceptions import DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
 from requests.exceptions import InvalidURL
 from requests.models import Response
@@ -74,7 +75,7 @@ def test_set_http_client(with_nice_client):
 
 def test_initialize_fails(with_evil_client):
     """Tests failure of initialize endpoint."""
-    with pytest.raises(Exception) as err:
+    with pytest.raises(DataProviderException) as err:
         DataSP.initialize(
             "some_did",
             "service_id",

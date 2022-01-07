@@ -12,7 +12,11 @@ from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_sample_ddo
-from tests.resources.helper_functions import deploy_erc721_erc20, create_basics
+from tests.resources.helper_functions import (
+    deploy_erc721_erc20,
+    create_basics,
+    create_asset,
+)
 
 
 def test_ocean_assets_download_failure(publisher_wallet, config):
@@ -46,7 +50,9 @@ def test_invalid_provider_uri(publisher_wallet):
         )
 
 
-def test_ocean_assets_download_indexes(publisher_wallet, config):
+def test_ocean_assets_download_indexes(
+    publisher_wallet, config, publisher_ocean_instance
+):
     """Tests different values of indexes that raise AssertionError."""
 
     ddo_dict = get_sample_ddo()
@@ -75,7 +81,8 @@ def test_ocean_assets_download_indexes(publisher_wallet, config):
         )
 
     index = 4
-    with pytest.raises(Exception):
+    ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
+    with pytest.raises(AssertionError):
         download_asset_files(
             ddo,
             config.provider_url,
@@ -98,7 +105,7 @@ def test_ocean_assets_download_destination_file(
 def ocean_assets_download_destination_file_helper(
     web3, config, tmpdir, publisher_wallet, publisher_ocean_instance
 ):
-    """Tests downloading to an existing directory."""
+    """Downloading to an existing directory."""
     data_provider = DataServiceProvider
     erc721_token, erc20_token = deploy_erc721_erc20(
         web3, config, publisher_wallet, publisher_wallet, cap=to_wei(100)

@@ -26,3 +26,7 @@ class VerifyTxFailed(Exception):
 
 class TransactionFailed(Exception):
     """Transaction has failed."""
+
+
+class DataProviderException(Exception):
+    """Exception from Provider endpoints."""

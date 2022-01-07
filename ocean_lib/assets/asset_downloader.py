@@ -50,7 +50,7 @@ def download_asset_files(
         raise AssertionError(
             'Consume asset failed, service definition is missing the "serviceEndpoint".'
         )
-    service_endpoint = data_provider.build_download_endpoint(provider_uri)[1]
+    _, service_endpoint = data_provider.build_download_endpoint(provider_uri)
     service_id = service.id
 
     if index is not None:
