@@ -9,7 +9,7 @@ import json
 import logging
 import lzma
 import os
-from typing import List, Optional, Tuple, Type, Dict, Any
+from typing import List, Optional, Tuple, Type
 
 from enforce_typing import enforce_types
 from ocean_lib.agreements.service_types import ServiceTypes
@@ -421,7 +421,6 @@ class OceanAssets:
         consumer_wallet: Wallet,
         destination: str,
         order_tx_id: str,
-        data_provider: Type[DataServiceProvider],
         index: Optional[int] = None,
         userdata: Optional[dict] = None,
     ) -> str:
@@ -441,7 +440,6 @@ class OceanAssets:
             consumer_wallet=consumer_wallet,
             destination=destination,
             order_tx_id=order_tx_id,
-            data_provider=data_provider,
             index=index,
             userdata=userdata,
         )

@@ -17,7 +17,6 @@ from tests.resources.helper_functions import deploy_erc721_erc20, create_basics
 
 def test_ocean_assets_download_failure(publisher_wallet, config):
     """Tests that downloading from an empty service raises an AssertionError."""
-    data_provider = DataServiceProvider
 
     ddo_dict = get_sample_ddo()
     ddo = Asset.from_dict(ddo_dict)
@@ -32,13 +31,23 @@ def test_ocean_assets_download_failure(publisher_wallet, config):
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
-            data_provider,
+        )
+
+
+def test_invalid_provider_uri(publisher_wallet):
+    """Tests with invalid provider URI that raise AssertionError."""
+    provider_uri = "http://mock/"
+    ddo_dict = get_sample_ddo()
+    ddo = Asset.from_dict(ddo_dict)
+
+    with pytest.raises(AssertionError):
+        download_asset_files(
+            ddo, provider_uri, publisher_wallet, "test_destination", "test_order_tx_id"
         )
 
 
 def test_ocean_assets_download_indexes(publisher_wallet, config):
     """Tests different values of indexes that raise AssertionError."""
-    data_provider = DataServiceProvider
 
     ddo_dict = get_sample_ddo()
     ddo = Asset.from_dict(ddo_dict)
@@ -51,7 +60,6 @@ def test_ocean_assets_download_indexes(publisher_wallet, config):
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
-            data_provider,
             index=index,
         )
 
@@ -63,7 +71,6 @@ def test_ocean_assets_download_indexes(publisher_wallet, config):
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
-            data_provider,
             index=index,
         )
 
@@ -75,7 +82,6 @@ def test_ocean_assets_download_indexes(publisher_wallet, config):
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
-            data_provider,
             index=index,
         )
 
@@ -131,7 +137,7 @@ def ocean_assets_download_destination_file_helper(
     )
 
     written_path = download_asset_files(
-        ddo, config.provider_url, publisher_wallet, tmpdir, tx_id, data_provider
+        ddo, config.provider_url, publisher_wallet, tmpdir, tx_id
     )
 
     assert os.path.exists(written_path)

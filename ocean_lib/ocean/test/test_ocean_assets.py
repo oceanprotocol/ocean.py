@@ -218,7 +218,7 @@ def test_download_fails(publisher_ocean_instance, publisher_wallet):
         asset = mock.return_value
         with pytest.raises(AssertionError):
             publisher_ocean_instance.assets.download_asset(
-                asset, "", publisher_wallet, "", "", DataServiceProvider, index=-4
+                asset, "", publisher_wallet, "", "", index=-4
             )
         with pytest.raises(TypeError):
             publisher_ocean_instance.assets.download_asset(
@@ -227,7 +227,6 @@ def test_download_fails(publisher_ocean_instance, publisher_wallet):
                 publisher_wallet,
                 "",
                 "",
-                DataServiceProvider,
                 index="string_index",
             )
 

@@ -9,14 +9,12 @@ import ecies
 import pytest
 from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.http_requests.requests_session import get_requests_session
 from requests.exceptions import InvalidURL
 from requests.models import Response
 
-from tests.resources.ddo_helpers import get_sample_ddo
 from tests.resources.helper_functions import (
     get_publisher_ocean_instance,
     get_provider_fees,
@@ -74,19 +72,18 @@ def test_set_http_client(with_nice_client):
     assert isinstance(DataSP.get_http_client(), HttpClientNiceMock)
 
 
-def test_order_requirements_fails(with_evil_client):
-    """Tests failure of order requirements from endpoint."""
-    assert (
-        DataSP.get_order_requirements(
+def test_initialize_fails(with_evil_client):
+    """Tests failure of initialize endpoint."""
+    with pytest.raises(Exception) as err:
+        DataSP.initialize(
             "some_did",
-            "http://mock/",
+            "service_id",
             "some_consumer_address",
-            0,
-            "and_service_type",
-            "some_token_address",
+            "http://mock/",
             userdata={"test_dict_key": "test_dict_value"},
         )
-        is None
+    assert err.value.args[0].startswith(
+        "Initialize service failed at the initializeEndpoint"
     )
 
 

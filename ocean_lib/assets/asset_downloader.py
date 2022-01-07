@@ -5,7 +5,7 @@
 
 import logging
 import os
-from typing import Optional, Type
+from typing import Optional
 
 from enforce_typing import enforce_types
 from ocean_lib.agreements.service_types import ServiceTypes
@@ -23,7 +23,6 @@ def download_asset_files(
     consumer_wallet: Wallet,
     destination: str,
     order_tx_id: str,
-    data_provider: Type[DataServiceProvider],
     index: Optional[int] = None,
     userdata: Optional[dict] = None,
 ) -> str:
@@ -34,11 +33,15 @@ def download_asset_files(
     :param consumer_wallet: Wallet instance of the consumer
     :param destination: Path, str
     :param order_tx_id: hex str the transaction hash of the startOrder tx
-    :param data_provider: DataServiceProvider class object
     :param index: Index of the document that is going to be downloaded, Optional[int]
     :param userdata: Dict of additional data from user
     :return: asset folder path, str
     """
+    data_provider = DataServiceProvider
+    assert data_provider.is_valid_provider(provider_uri=provider_uri), logger.error(
+        "Invalid provider URI."
+    )
+
     service = asset.get_service(ServiceTypes.ASSET_ACCESS)
     if not service.service_endpoint:
         logger.error(
