@@ -229,7 +229,7 @@ def deploy_erc721_erc20(
     config: Config,
     erc721_publisher: Wallet,
     erc20_minter: Optional[Wallet] = None,
-    cap: int = Web3.toWei("0.5", "ether"),
+    cap: int = to_wei(100),
     template_index: Optional[int] = 1,
 ):
     """Helper function to deploy an ERC721Token using erc721_publisher Wallet
