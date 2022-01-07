@@ -90,61 +90,6 @@ def get_access_service(
     )
 
 
-def get_registered_ddo(
-    ocean_instance,
-    metadata,
-    wallet: Wallet,
-    service=None,
-    datatoken=None,
-    provider_uri=None,
-):
-    metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-
-    if not service:
-        service = get_access_service(
-            ocean_instance,
-            wallet.address,
-            metadata["main"]["dateCreated"],
-            provider_uri,
-        )
-
-    block = ocean_instance.web3.eth.block_number
-    asset = ocean_instance.assets.create(
-        metadata,
-        wallet,
-        services=[service],
-        data_token_address=datatoken,
-        provider_uri=provider_uri,
-    )
-    ddo_reg = ocean_instance.assets.ddo_registry()
-    log = ddo_reg.get_event_log(
-        ddo_reg.EVENT_METADATA_CREATED, block, asset.asset_id, 30
-    )
-    assert log, "no ddo created event."
-
-    # Mint tokens for dataset and assign to publisher
-    dt = ocean_instance.get_data_token(asset.data_token_address)
-    mint_tokens_and_wait(dt, wallet.address, wallet)
-
-    ddo = wait_for_ddo(ocean_instance, asset.did)
-    assert ddo, f"resolve did {asset.did} failed."
-
-    return asset
-
-
-def get_registered_ddo_with_access_service(ocean_instance, wallet, provider_uri=None):
-    old_ddo = get_sample_ddo_with_compute_service()
-    metadata = old_ddo.metadata
-    metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
-    service = get_access_service(
-        ocean_instance, wallet.address, metadata["main"]["dateCreated"], provider_uri
-    )
-
-    return get_registered_ddo(
-        ocean_instance, metadata, wallet, service, provider_uri=provider_uri
-    )
-
-
 def create_asset(ocean, publisher, config, metadata=None):
     """Helper function for asset creation based on ddo_sa_sample.json."""
     erc20_data = ErcCreateData(
@@ -213,6 +158,61 @@ def create_basics(config, web3, data_provider):
     encrypted_files = encrypt_response.content.decode("utf-8")
 
     return erc721_factory, metadata, encrypted_files
+
+
+def get_registered_ddo(
+    ocean_instance,
+    metadata,
+    wallet: Wallet,
+    service=None,
+    datatoken=None,
+    provider_uri=None,
+):
+    metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
+
+    if not service:
+        service = get_access_service(
+            ocean_instance,
+            wallet.address,
+            metadata["main"]["dateCreated"],
+            provider_uri,
+        )
+
+    block = ocean_instance.web3.eth.block_number
+    asset = ocean_instance.assets.create(
+        metadata,
+        wallet,
+        services=[service],
+        data_token_address=datatoken,
+        provider_uri=provider_uri,
+    )
+    ddo_reg = ocean_instance.assets.ddo_registry()
+    log = ddo_reg.get_event_log(
+        ddo_reg.EVENT_METADATA_CREATED, block, asset.asset_id, 30
+    )
+    assert log, "no ddo created event."
+
+    # Mint tokens for dataset and assign to publisher
+    dt = ocean_instance.get_data_token(asset.data_token_address)
+    mint_tokens_and_wait(dt, wallet.address, wallet)
+
+    ddo = wait_for_ddo(ocean_instance, asset.did)
+    assert ddo, f"resolve did {asset.did} failed."
+
+    return asset
+
+
+def get_registered_ddo_with_access_service(ocean_instance, wallet, provider_uri=None):
+    old_ddo = get_sample_ddo_with_compute_service()
+    metadata = old_ddo.metadata
+    metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
+    service = get_access_service(
+        ocean_instance, wallet.address, metadata["main"]["dateCreated"], provider_uri
+    )
+
+    return get_registered_ddo(
+        ocean_instance, metadata, wallet, service, provider_uri=provider_uri
+    )
 
 
 # TODO Add support for trusted algorithms
