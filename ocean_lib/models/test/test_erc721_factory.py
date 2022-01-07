@@ -137,87 +137,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     # Tests current token template (one of them should be the Enterprise template)
     assert erc721_factory.get_current_template_count() == 2
 
-    # Tests starting multiple token orders successfully
     erc20_token = ERC20Token(web3, erc20_address)
-    dt_amount = web3.toWei("0.05", "ether")
     mock_dai_contract_address = get_address_of_type(config, "MockDAI")
-    assert erc20_token.balanceOf(consumer_wallet.address) == 0
-
     erc20_token.add_minter(consumer_wallet.address, publisher_wallet)
-    erc20_token.mint(consumer_wallet.address, dt_amount, consumer_wallet)
-    assert erc20_token.balanceOf(consumer_wallet.address) == dt_amount
-
-    erc20_token.approve(erc721_factory_address, dt_amount, consumer_wallet)
-
-    erc20_token.set_payment_collector(another_consumer_wallet.address, publisher_wallet)
-
-    provider_fee_token = mock_dai_contract_address
-    provider_fee_amount = 0
-    provider_fee_address = publisher_wallet.address
-    # provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
-    provider_data = b"\x00"
-
-    message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256"],
-        [
-            provider_data,
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
-        ],
-    )
-    signed = web3.eth.sign(provider_fee_address, data=message)
-    signature = split_signature(signed)
-
-    # orders = [
-    #     {
-    #         "tokenAddress": erc20_address,
-    #         "consumer": consumer_wallet.address,
-    #         "serviceIndex": 1,
-    #         "providerFeeAddress": provider_fee_address,
-    #         "providerFeeToken": provider_fee_token,
-    #         "providerFeeAmount": provider_fee_amount,
-    #         "providerData": provider_data,
-    #         "v": signature.v,
-    #         "r": signature.r,
-    #         "s": signature.s,
-    #         "providerData": provider_data,
-    #     }
-    # ]
-
-    orders = [
-        (
-            erc20_address,
-            consumer_wallet.address,
-            1,
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
-            signature.v,
-            signature.r,
-            signature.s,
-            provider_data,
-        )
-    ]
-
-    tx = erc721_factory.start_multiple_token_order(orders, consumer_wallet)
-
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-
-    registered_erc20_start_order_event = erc20_token.get_event_log(
-        ERC20Token.EVENT_ORDER_STARTED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-
-    assert tx, "Failed starting multiple token orders."
-    assert (
-        registered_erc20_start_order_event[0].args.consumer == consumer_wallet.address
-    )
-
-    assert erc20_token.balanceOf(consumer_wallet.address) == 0
-    assert erc20_token.balanceOf(erc20_token.get_payment_collector()) == dt_amount
 
     # Tests creating NFT with ERC20 successfully
     nft_create_data = {
@@ -503,6 +425,179 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert registered_dispenser_event[
         0
     ].args.datatokenAddress, "Invalid data token address by dispenser."
+
+
+@pytest.mark.skip(
+    reason="TODO: needs special attention with raw encoding, see issue https://github.com/oceanprotocol/ocean.py/issues/639"
+)
+def test_start_multiple_order(
+    web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
+):
+    """Tests the utils functions."""
+    erc721_factory_address = get_address_of_type(
+        config, ERC721FactoryContract.CONTRACT_NAME
+    )
+    erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
+
+    tx = erc721_factory.deploy_erc721_contract(
+        "DT1",
+        "DTSYMBOL",
+        1,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        publisher_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_event = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_NFT_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert registered_event[0].event == "NFTCreated"
+    assert registered_event[0].args.admin == publisher_wallet.address
+    token_address = registered_event[0].args.newTokenAddress
+    erc721_token = ERC721Token(web3, token_address)
+    assert erc721_token.contract.caller.name() == "DT1"
+    assert erc721_token.symbol() == "DTSYMBOL"
+
+    # Tests current NFT count
+    current_nft_count = erc721_factory.get_current_nft_count()
+    erc721_factory.deploy_erc721_contract(
+        "DT2",
+        "DTSYMBOL1",
+        1,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+        publisher_wallet,
+    )
+    assert erc721_factory.get_current_nft_count() == current_nft_count + 1
+
+    # Tests get NFT template
+    nft_template_address = get_address_of_type(config, ERC721Token.CONTRACT_NAME, "1")
+    nft_template = erc721_factory.get_nft_template(1)
+    assert nft_template[0] == nft_template_address
+    assert nft_template[1] is True
+
+    # Tests creating successfully an ERC20 token
+    erc721_token.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
+    erc_create_data = ErcCreateData(
+        1,
+        ["ERC20DT1", "ERC20DT1Symbol"],
+        [
+            publisher_wallet.address,
+            consumer_wallet.address,
+            publisher_wallet.address,
+            ZERO_ADDRESS,
+        ],
+        [web3.toWei("0.5", "ether"), 0],
+        [b""],
+    )
+    tx_result = erc721_token.create_erc20(erc_create_data, consumer_wallet)
+    assert tx_result, "Failed to create ERC20 token."
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
+    registered_token_event = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert registered_token_event, "Cannot find TokenCreated event."
+    erc20_address = registered_token_event[0].args.newTokenAddress
+
+    # Tests templateCount function (one of them should be the Enterprise template)
+    assert erc721_factory.template_count() == 2
+
+    # Tests ERC20 token template list
+    erc20_template_address = get_address_of_type(config, ERC20Token.CONTRACT_NAME, "1")
+    template = erc721_factory.get_token_template(1)
+    assert template[0] == erc20_template_address
+    assert template[1] is True
+
+    # Tests current token template (one of them should be the Enterprise template)
+    assert erc721_factory.get_current_template_count() == 2
+
+    # Tests starting multiple token orders successfully
+    erc20_token = ERC20Token(web3, erc20_address)
+    dt_amount = web3.toWei("0.05", "ether")
+    mock_dai_contract_address = get_address_of_type(config, "MockDAI")
+    assert erc20_token.balanceOf(consumer_wallet.address) == 0
+
+    erc20_token.add_minter(consumer_wallet.address, publisher_wallet)
+    erc20_token.mint(consumer_wallet.address, dt_amount, consumer_wallet)
+    assert erc20_token.balanceOf(consumer_wallet.address) == dt_amount
+
+    erc20_token.approve(erc721_factory_address, dt_amount, consumer_wallet)
+
+    erc20_token.set_payment_collector(another_consumer_wallet.address, publisher_wallet)
+
+    provider_fee_token = mock_dai_contract_address
+    provider_fee_amount = 0
+    provider_fee_address = publisher_wallet.address
+    # provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
+    provider_data = b"\x00"
+
+    message = Web3.solidityKeccak(
+        ["bytes", "address", "address", "uint256"],
+        [
+            provider_data,
+            provider_fee_address,
+            provider_fee_token,
+            provider_fee_amount,
+        ],
+    )
+    signed = web3.eth.sign(provider_fee_address, data=message)
+    signature = split_signature(signed)
+
+    # orders = [
+    #     {
+    #         "tokenAddress": erc20_address,
+    #         "consumer": consumer_wallet.address,
+    #         "serviceIndex": 1,
+    #         "providerFeeAddress": provider_fee_address,
+    #         "providerFeeToken": provider_fee_token,
+    #         "providerFeeAmount": provider_fee_amount,
+    #         "providerData": provider_data,
+    #         "v": signature.v,
+    #         "r": signature.r,
+    #         "s": signature.s,
+    #         "providerData": provider_data,
+    #     }
+    # ]
+
+    orders = [
+        (
+            erc20_address,
+            consumer_wallet.address,
+            1,
+            provider_fee_address,
+            provider_fee_token,
+            provider_fee_amount,
+            signature.v,
+            signature.r,
+            signature.s,
+            provider_data,
+        )
+    ]
+
+    tx = erc721_factory.start_multiple_token_order(orders, consumer_wallet)
+
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+
+    registered_erc20_start_order_event = erc20_token.get_event_log(
+        ERC20Token.EVENT_ORDER_STARTED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    assert tx, "Failed starting multiple token orders."
+    assert (
+        registered_erc20_start_order_event[0].args.consumer == consumer_wallet.address
+    )
+
+    assert erc20_token.balanceOf(consumer_wallet.address) == 0
+    assert erc20_token.balanceOf(erc20_token.get_payment_collector()) == dt_amount
 
 
 def test_fail_get_templates(web3, config):
