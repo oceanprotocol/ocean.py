@@ -10,7 +10,6 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.currency import to_wei
-from tests.resources.ddo_helpers import get_registered_ddo
 from tests.resources.helper_functions import (
     get_another_consumer_ocean_instance,
     get_consumer_ocean_instance,
