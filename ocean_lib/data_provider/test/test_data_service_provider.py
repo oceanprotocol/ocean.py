@@ -30,6 +30,7 @@ TEST_SERVICE_ENDPOINTS = {
     "fileinfo": ["POST", "/api/v1/services/fileinfo"],
     "initialize": ["GET", "/api/v1/services/initialize"],
     "nonce": ["GET", "/api/v1/services/nonce"],
+    "asset_urls": ["GET", "/api/v1/services/assetUrls"],
 }
 
 
@@ -308,6 +309,9 @@ def test_build_specific_endpoints(config):
     )
     assert DataSP.build_compute_endpoint(provider_uri)[1] == urljoin(
         base_uri, endpoints["computeDelete"][1]
+    )
+    assert DataSP.build_asset_urls(provider_uri)[1] == urljoin(
+        base_uri, endpoints["asset_urls"][1]
     )
 
     DataSP.get_service_endpoints = original_func
