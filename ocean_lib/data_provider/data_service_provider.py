@@ -822,12 +822,12 @@ class DataServiceProvider:
     @enforce_types
     def get_asset_urls(
         did: str, service_id: str, provider_uri: str, wallet: Wallet
-    ) -> None:
+    ) -> Union[bool, dict]:
         if not did:
             return False
         _, endpoint = DataServiceProvider.build_asset_urls(provider_uri)
 
-        nonce = str(datetime.now().timestamp())
+        nonce = str(DataServiceProvider.get_nonce(wallet.address, provider_uri))
         signature = DataServiceProvider.sign_message(
             wallet, did, provider_uri=provider_uri
         )
@@ -843,7 +843,7 @@ class DataServiceProvider:
         response = requests.get(endpoint, json=data)
 
         if response.status_code != 200:
-            return None
+            return False
 
         return response.json()
 
