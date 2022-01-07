@@ -12,7 +12,7 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean import Ocean
-from ocean_lib.ocean.test.test_ocean_assets import create_basics
+from ocean_lib.ocean.test.test_ocean_assets import create_asset, create_basics
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import deploy_erc721_erc20, mint_tokens_and_wait
@@ -186,14 +186,10 @@ def get_registered_ddo_with_compute_service(
 
 
 def get_registered_algorithm_ddo(ocean_instance: Ocean, publisher_wallet: Wallet):
-    erc721_token, erc20_token = deploy_erc721_erc20(
-        ocean_instance.web3, ocean_instance.config, publisher_wallet
-    )
-
     web3 = ocean_instance.web3
     config = ocean_instance.config
     data_provider = DataServiceProvider
-    _, metadata, encrypted_files = create_basics(config, web3, data_provider)
+    _, metadata, _ = create_basics(config, web3, data_provider)
 
     # Update metadata to include algorithm info
     algorithm_values = {
@@ -211,24 +207,8 @@ def get_registered_algorithm_ddo(ocean_instance: Ocean, publisher_wallet: Wallet
     }
     metadata.update(algorithm_values)
 
-    access_service = Service(
-        service_id="1",
-        service_type=ServiceTypes.ASSET_ACCESS,
-        service_endpoint=f"{data_provider.get_url(config)}/api/services/download",
-        data_token=erc20_token.address,
-        files=encrypted_files,
-        timeout=0,
-    )
-
-    return ocean_instance.assets.create(
-        metadata=metadata,
-        publisher_wallet=publisher_wallet,
-        encrypted_files=encrypted_files,
-        services=[access_service],
-        erc721_address=erc721_token.address,
-        deployed_erc20_tokens=[erc20_token],
-        encrypt_flag=True,
-        compress_flag=True,
+    return create_asset(
+        ocean_instance, publisher_wallet, ocean_instance.config, metadata=metadata
     )
 
 

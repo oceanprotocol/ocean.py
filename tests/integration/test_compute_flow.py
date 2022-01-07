@@ -100,7 +100,7 @@ def run_compute_test(
     ocean_instance: Ocean,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
-    asset: Asset,
+    asset_with_compute_service: Asset,
     algorithm: Asset,
     additional_asset_ddos: List[Asset] = [],
     expect_failure=False,
@@ -110,11 +110,11 @@ def run_compute_test(
 ):
     """Helper function to bootstrap compute job creation and status checking."""
     # Order asset compute service
-    order_tx_id, asset_compute_service = process_order(
+    order_tx_id, compute_service = process_order(
         ocean_instance,
         publisher_wallet,
         consumer_wallet,
-        asset,
+        asset_with_compute_service,
         ServiceTypes.CLOUD_COMPUTE,
     )
 
@@ -130,12 +130,12 @@ def run_compute_test(
     # TODO, fix arguments
     # Start compute job
     job_id = DataServiceProvider.start_compute_job(
-        did=asset.did,
+        did=asset_with_compute_service.did,
         service_endpoint=DataServiceProvider.build_compute_endpoint(
             ocean_instance.config.provider_uri
         ),
         consumer=consumer_wallet.address,
-        service_id=asset_compute_service.id,
+        service_id=compute_service.id,
         order_tx_id=order_tx_id,
         algorithm_did=algorithm.did,
         algorithm_tx_id=algo_tx_id,
@@ -146,25 +146,33 @@ def run_compute_test(
         # algouserdata: Optional[dict] = None,
     )
 
-    status = ocean_instance.compute.status(asset.did, job_id, consumer_wallet)
+    status = ocean_instance.compute.status(
+        asset_with_compute_service.did, job_id, consumer_wallet
+    )
     print(f"got job status: {status}")
 
     assert (
         status and status["ok"]
     ), f"something not right about the compute job, got status: {status}"
 
-    status = ocean_instance.compute.stop(asset.did, job_id, consumer_wallet)
+    status = ocean_instance.compute.stop(
+        asset_with_compute_service.did, job_id, consumer_wallet
+    )
     print(f"got job status after requesting stop: {status}")
     assert status, f"something not right about the compute job, got status: {status}"
 
     if with_result:
-        result = ocean_instance.compute.result(asset.did, job_id, consumer_wallet)
+        result = ocean_instance.compute.result(
+            asset_with_compute_service.did, job_id, consumer_wallet
+        )
         print(f"got job status after requesting result: {result}")
         assert "did" in result, "something not right about the compute job, no did."
 
         succeeded = False
         for _ in range(0, 200):
-            status = ocean_instance.compute.status(asset.did, job_id, consumer_wallet)
+            status = ocean_instance.compute.status(
+                asset_with_compute_service.did, job_id, consumer_wallet
+            )
             # wait until job is done, see:
             # https://github.com/oceanprotocol/operator-service/blob/main/API.md#status-description
             if status["status"] > 60:
@@ -174,7 +182,7 @@ def run_compute_test(
 
         assert succeeded, "compute job unsuccessful"
         result_file = ocean_instance.compute.result_file(
-            asset.did, job_id, 0, consumer_wallet
+            asset_with_compute_service.did, job_id, 0, consumer_wallet
         )
         assert result_file is not None
         print(f"got job result file: {str(result_file)}")
