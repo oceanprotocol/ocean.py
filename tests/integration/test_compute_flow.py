@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import time
+from typing import List
 
 import pytest
 from ocean_lib.agreements.service_types import ServiceTypes
@@ -96,12 +97,12 @@ def process_order(
 
 
 def run_compute_test(
-    ocean_instance,
-    publisher_wallet,
-    consumer_wallet,
-    asset_ddo,
-    algo_ddo,
-    additional_asset_ddos=[],
+    ocean_instance: Ocean,
+    publisher_wallet: Wallet,
+    consumer_wallet: Wallet,
+    asset: Asset,
+    algorithm: Asset,
+    additional_asset_ddos: List[Asset] = [],
     expect_failure=False,
     expect_failure_message=None,
     userdata=None,
@@ -109,50 +110,61 @@ def run_compute_test(
 ):
     """Helper function to bootstrap compute job creation and status checking."""
     # Order asset compute service
-    order_tx_id, service = process_order(
+    order_tx_id, asset_compute_service = process_order(
         ocean_instance,
         publisher_wallet,
         consumer_wallet,
-        asset_ddo,
+        asset,
         ServiceTypes.CLOUD_COMPUTE,
     )
 
     # Order algo download service
-    algo_tx_id, _ = process_order(
+    algo_tx_id, algo_download_service = process_order(
         ocean_instance,
         publisher_wallet,
         consumer_wallet,
-        algo_ddo,
+        algorithm,
         ServiceTypes.ASSET_ACCESS,
     )
 
     # TODO, fix arguments
     # Start compute job
     job_id = DataServiceProvider.start_compute_job(
-        did=1, service_endpoint=1, consumer=1, service_id=1, order_tx_id=1
+        did=asset.did,
+        service_endpoint=DataServiceProvider.build_compute_endpoint(
+            ocean_instance.config.provider_uri
+        ),
+        consumer=consumer_wallet.address,
+        service_id=asset_compute_service.id,
+        order_tx_id=order_tx_id,
+        algorithm_did=algorithm.did,
+        algorithm_tx_id=algo_tx_id,
+        algorithm_data_token=algo_download_service.data_token,
+        # output: Optional[dict] = None,
+        # job_id: Optional[str] = None,
+        # userdata: Optional[dict] = None,
+        # algouserdata: Optional[dict] = None,
     )
 
-    status = ocean_instance.compute.status(asset_ddo.did, job_id, consumer_wallet)
+    status = ocean_instance.compute.status(asset.did, job_id, consumer_wallet)
     print(f"got job status: {status}")
 
     assert (
         status and status["ok"]
     ), f"something not right about the compute job, got status: {status}"
 
-    status = ocean_instance.compute.stop(asset_ddo.did, job_id, consumer_wallet)
+    status = ocean_instance.compute.stop(asset.did, job_id, consumer_wallet)
     print(f"got job status after requesting stop: {status}")
     assert status, f"something not right about the compute job, got status: {status}"
 
     if with_result:
-        result = ocean_instance.compute.result(asset_ddo.did, job_id, consumer_wallet)
+        result = ocean_instance.compute.result(asset.did, job_id, consumer_wallet)
         print(f"got job status after requesting result: {result}")
         assert "did" in result, "something not right about the compute job, no did."
 
         succeeded = False
         for _ in range(0, 200):
-            status = ocean_instance.compute.status(
-                asset_ddo.did, job_id, consumer_wallet
-            )
+            status = ocean_instance.compute.status(asset.did, job_id, consumer_wallet)
             # wait until job is done, see:
             # https://github.com/oceanprotocol/operator-service/blob/main/API.md#status-description
             if status["status"] > 60:
@@ -162,7 +174,7 @@ def run_compute_test(
 
         assert succeeded, "compute job unsuccessful"
         result_file = ocean_instance.compute.result_file(
-            asset_ddo.did, job_id, 0, consumer_wallet
+            asset.did, job_id, 0, consumer_wallet
         )
         assert result_file is not None
         print(f"got job result file: {str(result_file)}")
@@ -214,7 +226,7 @@ def test_compute_multi_inputs(
         publisher_wallet,
         consumer_wallet,
         [simple_compute_ddo, access_ddo],
-        algo_ddo=algorithm_ddo,
+        algorithm=algorithm_ddo,
         userdata={"test_key": "test_value"},
     )
 
@@ -266,7 +278,7 @@ def test_update_trusted_algorithms(
         publisher_wallet,
         consumer_wallet,
         [compute_ddo_updated],
-        algo_ddo=algorithm_ddo,
+        algorithm=algorithm_ddo,
     )
 
 
@@ -291,7 +303,7 @@ def test_compute_trusted_algorithms(
         publisher_wallet,
         consumer_wallet,
         [asset_with_trusted],
-        algo_ddo=algorithm_ddo,
+        algorithm=algorithm_ddo,
     )
 
     # Expect to fail with another algorithm ddo that is not trusted.
@@ -300,7 +312,7 @@ def test_compute_trusted_algorithms(
         publisher_wallet,
         consumer_wallet,
         [asset_with_trusted],
-        algo_ddo=algorithm_ddo_v2,
+        algorithm=algorithm_ddo_v2,
         expect_failure=True,
         expect_failure_message=f"this algorithm did {algorithm_ddo_v2.did} is not trusted.",
     )
