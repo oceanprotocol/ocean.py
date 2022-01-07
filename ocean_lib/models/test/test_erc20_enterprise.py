@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+from web3.main import Web3
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
@@ -11,6 +12,8 @@ from ocean_lib.models.models_structures import DispenserData, FixedData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 from web3 import exceptions
+from ocean_lib.web3_internal.utils import split_signature
+import json
 
 
 def test_buy_from_dispenser_and_order(
@@ -96,18 +99,38 @@ def test_buy_from_dispenser_and_order(
         from_wallet=publisher_wallet,
     )
 
+    provider_fee_address = publisher_wallet.address
+    provider_fee_token = mock_dai_contract.address
+    provider_fee_amount = 0
+    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
+
+    message = Web3.solidityKeccak(
+        ["bytes", "address", "address", "uint256"],
+        [
+            Web3.toHex(Web3.toBytes(text=provider_data)),
+            provider_fee_address,
+            provider_fee_token,
+            provider_fee_amount,
+        ],
+    )
+    signed = web3.eth.sign(provider_fee_address, data=message)
+    signature = split_signature(signed)
+
     order_params = {
         "consumer": consume_fee_address,
         "amount": web3.toWei(1, "ether"),
         "serviceIndex": 1,
-        "providerFeeAddress": consume_fee_address,
-        "providerFeeToken": mock_dai_contract.address,
-        "providerFeeAmount": consume_fee_amount,
+        "providerFeeAddress": provider_fee_address,
+        "providerFeeToken": provider_fee_token,
+        "providerFeeAmount": provider_fee_amount,
+        "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
+        "v": signature.v,
+        "r": signature.r,
+        "s": signature.s,
     }
 
     opf_collector_address = get_address_of_type(config, "OPFCommunityFeeCollector")
 
-    balance_consume_before = mock_dai_contract.balanceOf(consume_fee_address)
     balance_opf_consume_before = mock_dai_contract.balanceOf(opf_collector_address)
     balance_publish_before = mock_usdc_contract.balanceOf(consumer_wallet.address)
     balance_opf_publish_before = mock_usdc_contract.balanceOf(opf_collector_address)
@@ -121,18 +144,14 @@ def test_buy_from_dispenser_and_order(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
 
-    balance_consume = mock_dai_contract.balanceOf(consume_fee_address)
     balance_opf_consume = mock_dai_contract.balanceOf(opf_collector_address)
 
     balance_publish = mock_usdc_contract.balanceOf(publish_fees[0])
     balance_opf_publish = mock_usdc_contract.balanceOf(opf_collector_address)
 
-    expected_opf_consume = consume_fee_amount
-
     expected_publish = publish_fees[2] - publish_fees[2] / 100
     expected_opf_publish = publish_fees[2] / 100
 
-    assert balance_consume - balance_consume_before == expected_opf_consume
     assert balance_opf_consume - balance_opf_consume_before == 0
 
     assert balance_publish - balance_publish_before == expected_publish
@@ -244,13 +263,33 @@ def test_buy_from_fre_and_order(
         from_wallet=publisher_wallet,
     )
 
+    provider_fee_address = publisher_wallet.address
+    provider_fee_token = mock_dai_contract.address
+    provider_fee_amount = 0
+    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
+
+    message = Web3.solidityKeccak(
+        ["bytes", "address", "address", "uint256"],
+        [
+            Web3.toHex(Web3.toBytes(text=provider_data)),
+            provider_fee_address,
+            provider_fee_token,
+            provider_fee_amount,
+        ],
+    )
+    signed = web3.eth.sign(provider_fee_address, data=message)
+    signature = split_signature(signed)
+
     order_params = {
-        "consumer": publisher_wallet.address,
-        "amount": web3.toWei(1, "ether"),
+        "consumer": another_consumer_wallet.address,
         "serviceIndex": 1,
-        "providerFeeAddress": another_consumer_wallet.address,
-        "providerFeeToken": ZERO_ADDRESS,
+        "providerFeeAddress": publisher_wallet.address,
+        "providerFeeToken": provider_fee_token,
         "providerFeeAmount": 0,
+        "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
+        "v": signature.v,
+        "r": signature.r,
+        "s": signature.s,
     }
 
     fre_params = {
