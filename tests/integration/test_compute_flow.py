@@ -209,12 +209,11 @@ def run_compute_test(
         print(f"got job result file: {str(result_file)}")
 
 
-@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_compute_raw_algo(
     publisher_wallet,
     publisher_ocean_instance,
     consumer_wallet,
-    simple_compute_ddo,
+    data_asset_with_compute_service,
     algorithm_ddo,
 ):
     """Tests that a compute job with a raw algorithm starts properly."""
@@ -223,7 +222,7 @@ def test_compute_raw_algo(
         publisher_ocean_instance,
         publisher_wallet,
         consumer_wallet,
-        [simple_compute_ddo, algorithm_ddo],
+        [data_asset_with_compute_service, algorithm_ddo],
         with_result=True,
     )
 
@@ -234,7 +233,7 @@ def test_compute_multi_inputs(
     publisher_ocean_instance,
     consumer_wallet,
     consumer_ocean_instance,
-    simple_compute_ddo,
+    data_asset_with_compute_service,
 ):
     """Tests that a compute job with additional Inputs (multiple assets) starts properly."""
     # Another dataset, this time with download service
@@ -254,7 +253,7 @@ def test_compute_multi_inputs(
         consumer_ocean_instance,
         publisher_wallet,
         consumer_wallet,
-        [simple_compute_ddo, access_ddo],
+        [data_asset_with_compute_service, access_ddo],
         algorithm=algorithm_ddo,
         userdata={"test_key": "test_value"},
     )
