@@ -111,9 +111,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     def template_count(self) -> int:
         return self.contract.caller.templateCount()
 
-    def start_multiple_token_order(
-        self, orders, from_wallet: Wallet
-    ) -> str:
+    def start_multiple_token_order(self, orders, from_wallet: Wallet) -> str:
         """An order contains the following keys:
 
         - tokenAddress, str
@@ -129,9 +127,14 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         """
         # encode_abi('(address,address,uint256,address,address,uint256,uin8,bytes32,bytes32,bytes)'[], [mytuple])
 
-        encodedOrders = encode_single('(address,address,uint256,address,address,uint256,uint8,bytes32,bytes32,bytes)[]', orders)
+        encodedOrders = encode_single(
+            "(address,address,uint256,address,address,uint256,uint8,bytes32,bytes32,bytes)[]",
+            orders,
+        )
 
-        return self.send_transaction("startMultipleTokenOrder", (encodedOrders,), from_wallet)
+        return self.send_transaction(
+            "startMultipleTokenOrder", (encodedOrders,), from_wallet
+        )
 
     def create_nft_with_erc(
         self, nft_create_data: dict, erc_create_data: dict, from_wallet: Wallet

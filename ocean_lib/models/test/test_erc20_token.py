@@ -14,10 +14,7 @@ from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import split_signature
-from tests.resources.helper_functions import (
-    deploy_erc721_erc20,
-    get_address_of_type
-)
+from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
 def test_properties(web3, config, publisher_wallet):
