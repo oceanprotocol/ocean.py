@@ -209,7 +209,7 @@ def test_compute_raw_algo(
     publisher_ocean_instance,
     consumer_wallet,
     data_asset_with_compute_service,
-    algorithm_ddo,
+    algorithm_asset,
 ):
     """Tests that a compute job with a raw algorithm starts properly."""
     # Setup algorithm meta to run raw algorithm
@@ -217,7 +217,7 @@ def test_compute_raw_algo(
         publisher_ocean_instance,
         publisher_wallet,
         consumer_wallet,
-        [data_asset_with_compute_service, algorithm_ddo],
+        [data_asset_with_compute_service, algorithm_asset],
         with_result=True,
     )
 
