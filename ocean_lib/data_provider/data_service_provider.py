@@ -95,6 +95,13 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
+    def sign_message(wallet: Wallet, msg: str) -> str:
+        nonce = str(datetime.now().timestamp())
+        print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
+        return nonce, sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
+
+    @staticmethod
+    @enforce_types
     def initialize(
         did: str,
         service_id: str,
@@ -134,13 +141,6 @@ class DataServiceProvider:
         )
 
         return response
-
-    @staticmethod
-    @enforce_types
-    def sign_message(wallet: Wallet, msg: str) -> str:
-        nonce = str(datetime.now().timestamp())
-        print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
-        return nonce, sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
 
     @staticmethod
     @enforce_types
