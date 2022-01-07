@@ -170,7 +170,7 @@ def get_registered_ddo_with_compute_service(
     trusted_algorithms: Optional[List[Asset]] = None,
 ):
     erc721_token, erc20_token = deploy_erc721_erc20(
-        ocean_instance.web3, ocean_instance.config, publisher_wallet
+        ocean_instance.web3, ocean_instance.config, publisher_wallet, publisher_wallet
     )
 
     web3 = ocean_instance.web3
