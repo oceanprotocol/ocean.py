@@ -51,7 +51,7 @@ def test_invalid_provider_uri(publisher_wallet):
 
 
 def test_ocean_assets_download_indexes(
-    publisher_wallet, config, publisher_ocean_instance
+    publisher_wallet, config, publisher_ocean_instance, tmpdir
 ):
     """Tests different values of indexes that raise AssertionError."""
 
@@ -87,7 +87,7 @@ def test_ocean_assets_download_indexes(
             ddo,
             config.provider_url,
             publisher_wallet,
-            "test_destination",
+            str(tmpdir),
             "test_order_tx_id",
             index=index,
         )
