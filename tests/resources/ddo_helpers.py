@@ -18,6 +18,7 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import deploy_erc721_erc20
 
@@ -100,7 +101,7 @@ def create_asset(ocean, publisher, config, metadata=None):
             ZERO_ADDRESS,
             get_address_of_type(config, "Ocean"),
         ],
-        uints=[ocean.web3.toWei("0.5", "ether"), 0],
+        uints=[to_wei(100), 0],
         bytess=[b""],
     )
 
