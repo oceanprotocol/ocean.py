@@ -148,7 +148,7 @@ def run_compute_test(
     job_id = DataServiceProvider.start_compute_job(
         did=dataset.did,
         service_endpoint=DataServiceProvider.build_compute_endpoint(
-            ocean_instance.config.provider_uri
+            ocean_instance.config.provider_url
         ),
         consumer=consumer_wallet.address,
         service_id=compute_service.id,
