@@ -76,13 +76,14 @@ def process_order(
     _ = erc20_token.mint(consumer_wallet.address, to_wei(10), publisher_wallet)
 
     # Initialize the service to get provider fees
+    _, initialize_url = DataServiceProvider.build_initialize_endpoint(
+        ocean_instance.config.provider_url
+    )
     initialize_response = DataServiceProvider.initialize(
         did=asset.did,
         service_id=service.id,
         consumer_address=consumer_wallet.address,
-        service_endpoint=DataServiceProvider.build_initialize_endpoint(
-            ocean_instance.config.provider_url
-        )[1],
+        service_endpoint=initialize_url,
     ).json()
 
     # Order the service
