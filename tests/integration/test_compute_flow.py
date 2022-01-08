@@ -77,8 +77,8 @@ def process_order(
 
     # Initialize the service to get provider fees
     initialize_response = DataServiceProvider.initialize(
-        ddo=asset.did,
-        service_id=asset.id,
+        did=asset.did,
+        service_id=service.id,
         consumer_address=consumer_wallet.address,
         service_endpoint=DataServiceProvider.build_initialize_endpoint(
             ocean_instance.config.provider_url
