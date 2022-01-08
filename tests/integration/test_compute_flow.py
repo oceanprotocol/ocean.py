@@ -121,7 +121,7 @@ def run_compute_test(
         ServiceTypes.CLOUD_COMPUTE,
     )
     compute_inputs = [
-        ComputeInput(dataset.did, order_tx_id, compute_service.index, userdata=userdata)
+        ComputeInput(dataset.did, order_tx_id, compute_service.id, userdata=userdata)
     ]
 
     # Order algo download service
