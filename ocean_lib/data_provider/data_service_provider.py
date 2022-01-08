@@ -129,11 +129,10 @@ class DataServiceProvider:
     ) -> Response:
 
         req = PreparedRequest()
-        payload = {
-            "documentId": did,
-            "serviceId": service_id,
-            "consumerAddress": consumer_address,
-        }
+
+        # prepare_url function transforms ':' from "did:op:" into "%3".
+        service_endpoint += f"?documentId={did}"
+        payload = {"serviceId": service_id, "consumerAddress": consumer_address}
 
         if userdata:
             userdata = json.dumps(userdata)
