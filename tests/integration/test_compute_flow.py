@@ -84,6 +84,8 @@ def process_order(
         service_id=service.id,
         consumer_address=consumer_wallet.address,
         service_endpoint=initialize_url,
+        # TODO: add a real compute environment
+        compute_environment="doesn't matter for now",
     ).json()
 
     # Order the service

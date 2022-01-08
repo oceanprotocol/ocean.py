@@ -125,6 +125,7 @@ class DataServiceProvider:
         service_id: str,
         consumer_address: str,
         service_endpoint: str,
+        compute_environment: Optional[str] = None,
         userdata: Optional[Dict] = None,
     ) -> Response:
 
@@ -133,6 +134,9 @@ class DataServiceProvider:
         # prepare_url function transforms ':' from "did:op:" into "%3".
         service_endpoint += f"?documentId={did}"
         payload = {"serviceId": service_id, "consumerAddress": consumer_address}
+
+        if compute_environment:
+            payload["computeEnv"] = compute_environment
 
         if userdata:
             userdata = json.dumps(userdata)
@@ -238,6 +242,8 @@ class DataServiceProvider:
         consumer: Wallet,
         service_id: int,
         order_tx_id: str,
+        # TODO: use compute_environment
+        compute_environment: str,
         algorithm_did: Optional[str] = None,
         algorithm_meta: Optional[AlgorithmMetadata] = None,
         algorithm_tx_id: Optional[str] = None,
@@ -256,6 +262,7 @@ class DataServiceProvider:
         :param signature: hex str signed message to allow the provider to authorize the consumer
         :param service_id:
         :param order_tx_id: hex str id of the token transfer transaction
+        :param compute_environment: str compute environment id
         :param algorithm_did: str -- the asset did (of `algorithm` type) which consist of `did:op:` and
             the assetId hex str (without `0x` prefix)
         :param algorithm_meta: see `OceanCompute.execute`
