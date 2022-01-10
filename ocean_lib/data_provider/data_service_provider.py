@@ -21,6 +21,7 @@ from ocean_lib.config import Config
 from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
+from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
 from requests.exceptions import InvalidURL
@@ -237,63 +238,41 @@ class DataServiceProvider:
     @staticmethod
     @enforce_types
     def start_compute_job(
-        did: str,
         service_endpoint: str,
         consumer: Wallet,
-        service_id: int,
-        order_tx_id: str,
-        # TODO: use compute_environment
+        dataset: ComputeInput,
         compute_environment: str,
-        algorithm_did: Optional[str] = None,
+        algorithm: Optional[ComputeInput] = None,
         algorithm_meta: Optional[AlgorithmMetadata] = None,
-        algorithm_tx_id: Optional[str] = None,
-        algorithm_data_token: Optional[str] = None,
-        output: Optional[dict] = None,
-        input_datasets: Optional[list] = None,
-        job_id: Optional[str] = None,
-        userdata: Optional[dict] = None,
-        algouserdata: Optional[dict] = None,
+        algorithm_custom_data: Optional[str] = None,
+        input_datasets: Optional[List[ComputeInput]] = None,
     ) -> Dict[str, Any]:
         """
+        Start a compute job.
 
-        :param did: id of asset starting with `did:op:` and a hex str without 0x prefix
+        Either algorithm or algorithm_meta must be defined.
+
         :param service_endpoint: str provider compute/start endpoint
-        :param consumer_address: hex str the ethereum address of the consumer executing the compute job
-        :param signature: hex str signed message to allow the provider to authorize the consumer
-        :param service_id:
-        :param order_tx_id: hex str id of the token transfer transaction
+        :param consumer: hex str the ethereum address of the consumer executing the compute job
+        :param dataset: ComputeInput dataset with a compute service
         :param compute_environment: str compute environment id
-        :param algorithm_did: str -- the asset did (of `algorithm` type) which consist of `did:op:` and
-            the assetId hex str (without `0x` prefix)
-        :param algorithm_meta: see `OceanCompute.execute`
-        :param algorithm_tx_id: transaction hash of algorithm StartOrder tx (Required when using `algorithm_did`)
-        :param algorithm_data_token: datatoken address of this algorithm (Required when using `algorithm_did`)
-        :param output: see `OceanCompute.execute`
-        :param input_datasets: list of ComputeInput
-        :param job_id: str id of compute job that was started and stopped (optional, use it
-            here to start a job after it was stopped)
-        :param userdata: dict of params to append to data asset url
-        :param algouserdata: dict of params to append to algo asset url
-        :return: job_info dict with jobId, status, and other values
+        :param algorithm: ComputeInput algorithm witha download service.
+        :param algorithm_meta: AlgorithmMetadata algorithm metadata
+        :param algorithm_custom_data: TODO
+        :param input_datasets: List[ComputeInput] additional input datasets
         """
         assert (
-            algorithm_did or algorithm_meta
+            algorithm or algorithm_meta
         ), "either an algorithm did or an algorithm meta must be provided."
 
         payload = DataServiceProvider._prepare_compute_payload(
-            did,
-            consumer,
-            service_id,
-            order_tx_id,
-            algorithm_did=algorithm_did,
+            consumer=consumer,
+            dataset=dataset,
+            compute_environment=compute_environment,
+            algorithm=algorithm,
             algorithm_meta=algorithm_meta,
-            algorithm_tx_id=algorithm_tx_id,
-            algorithm_data_token=algorithm_data_token,
-            output=output,
+            algorithm_custom_data=algorithm_custom_data,
             input_datasets=input_datasets,
-            job_id=job_id,
-            userdata=userdata,
-            algouserdata=algouserdata,
         )
         logger.info(f"invoke start compute endpoint with this url: {payload}")
         response = DataServiceProvider._http_method(
@@ -663,22 +642,16 @@ class DataServiceProvider:
     @staticmethod
     @enforce_types
     def _prepare_compute_payload(
-        did: str,
         consumer: Wallet,
-        service_id: int,
-        order_tx_id: str,
-        algorithm_did: Optional[str] = None,
+        dataset: ComputeInput,
+        compute_environment: str,
+        algorithm: Optional[ComputeInput] = None,
         algorithm_meta: Optional[AlgorithmMetadata] = None,
-        algorithm_tx_id: Optional[str] = None,
-        algorithm_data_token: Optional[str] = None,
-        output: Optional[dict] = None,
-        input_datasets: Optional[list] = None,
-        job_id: Optional[str] = None,
-        userdata: Optional[dict] = None,
-        algouserdata: Optional[dict] = None,
+        algorithm_custom_data: Optional[str] = None,
+        input_datasets: Optional[List[ComputeInput]] = None,
     ) -> Dict[str, Any]:
         assert (
-            algorithm_did or algorithm_meta
+            algorithm or algorithm_meta
         ), "either an algorithm did or an algorithm meta must be provided."
 
         if algorithm_meta:
@@ -697,38 +670,46 @@ class DataServiceProvider:
                 assert (
                     _input.service_id
                 ), "The received dataset does not have a specified service id."
-                if _input.did != did:
+                if _input.did != dataset.did:
                     _input_datasets.append(_input.as_dictionary())
 
         nonce, signature = DataServiceProvider.sign_message(
-            consumer, f"{consumer.address}{did}"
+            consumer, f"{consumer.address}{dataset.did}"
         )
 
         payload = {
+            "dataset": {
+                "documentId": dataset.did,
+                "serviceId": dataset.service_id,
+                "transferTxId": dataset.transfer_tx_id,
+            },
+            "computeEnv": compute_environment,
+            "algorithm": {},
             "signature": signature,
             "nonce": nonce,
-            "documentId": did,
             "consumerAddress": consumer.address,
-            "output": output or dict(),
-            "jobId": job_id or "",
-            "serviceId": service_id,
-            "transferTxId": order_tx_id,
             "additionalInputs": _input_datasets or [],
-            "userdata": userdata,
         }
-        if algorithm_did:
+
+        if dataset.userdata:
+            payload["dataset"]["userdata"] = dataset.userdata
+
+        if algorithm:
             payload.update(
                 {
-                    "algorithmDid": algorithm_did,
-                    "algorithmDataToken": algorithm_data_token,
-                    "algorithmTransferTxId": algorithm_tx_id,
+                    "algorithm": {
+                        "documentId": algorithm.did,
+                        "serviceId": algorithm.service_id,
+                        "transferTxId": algorithm.transfer_tx_id,
+                    }
                 }
             )
-
-            if algouserdata:
-                payload["algouserdata"] = algouserdata
+            if algorithm.userdata:
+                payload["algorithm"]["userdata"] = algorithm.userdata
+            if algorithm_custom_data:
+                payload["algorithm"]["algocustomdata"] = algorithm_custom_data
         else:
-            payload["algorithmMeta"] = algorithm_meta.as_dictionary()
+            payload["algorithm"]["meta"] = algorithm_meta.as_dictionary()
 
         return payload
 

@@ -13,7 +13,7 @@ class ComputeInput:
     @enforce_types
     def __init__(
         self,
-        did: Optional[str],
+        did: str,
         transfer_tx_id: str,
         service_id: Union[str, int],
         userdata: Optional[Dict] = None,
