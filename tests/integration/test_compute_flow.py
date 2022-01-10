@@ -145,15 +145,17 @@ def run_compute_test(
         )
 
     # Start compute job
+    _, start_compute_endpoint = DataServiceProvider.build_compute_endpoint(
+        ocean_instance.config.provider_url
+    )
     # TODO: Consider replacing with `ocean.compute.start()` after OceanCompute API is fixed.
     job_id = DataServiceProvider.start_compute_job(
         did=dataset.did,
-        service_endpoint=DataServiceProvider.build_compute_endpoint(
-            ocean_instance.config.provider_url
-        ),
-        consumer=consumer_wallet.address,
-        service_id=compute_service.id,
+        service_endpoint=start_compute_endpoint,
+        consumer=consumer_wallet,
+        service_id=int(compute_service.id),
         order_tx_id=order_tx_id,
+        compute_environment="doesn't matter for now",
         algorithm_did=algorithm.did,
         algorithm_tx_id=algo_tx_id,
         algorithm_data_token=algo_download_service.data_token,
