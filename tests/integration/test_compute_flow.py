@@ -145,6 +145,7 @@ def run_compute_test(
         )
 
     # Start compute job
+    # TODO: Consider replacing with `ocean.compute.start()` after OceanCompute API is fixed.
     job_id = DataServiceProvider.start_compute_job(
         did=dataset.did,
         service_endpoint=DataServiceProvider.build_compute_endpoint(
