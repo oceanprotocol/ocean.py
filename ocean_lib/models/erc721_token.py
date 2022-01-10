@@ -195,6 +195,9 @@ class ERC721Token(ContractBase):
     def withdraw(self, from_wallet: Wallet):
         return self.send_transaction("withdrawETH", (), from_wallet)
 
+    def token_name(self) -> str:
+        return self.contract.caller.name()
+
     def symbol(self) -> str:
         return self.contract.caller.symbol()
 

@@ -13,6 +13,8 @@ from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
+from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.order import Order
 from ocean_lib.ocean.ocean_assets import OceanAssets
@@ -25,6 +27,7 @@ from ocean_lib.ocean.util import (
     get_ocean_token_address,
     get_web3,
 )
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
@@ -34,7 +37,6 @@ logger = logging.getLogger("ocean")
 
 # TODO: update for v4
 class Ocean:
-
     """The Ocean class is the entry point into Ocean Protocol."""
 
     @enforce_types
@@ -117,14 +119,15 @@ class Ocean:
         return get_ocean_token_address(self.config.address_file, web3=self.web3)
 
     @enforce_types
-    def create_data_token(
+    def create_erc721_token(
         self,
         name: str,
         symbol: str,
         from_wallet: Wallet,
-        cap: int = DataToken.DEFAULT_CAP,
-        blob: str = "",
-    ) -> DataToken:
+        template_index: int = 1,
+        additional_erc20_deployer: str = ZERO_ADDRESS,
+        token_uri: str = "https://oceanprotocol.com/nft/",
+    ) -> ERC721Token:
         """
         This method deploys a datatoken contract on the blockchain.
 
@@ -141,20 +144,37 @@ class Ocean:
             datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet)
         ```
 
-        :param name: Datatoken name, str
-        :param symbol: Datatoken symbol, str
+        :param name: ERC721 token name, str
+        :param symbol: ERC721 token symbol, str
         :param from_wallet: wallet instance, wallet
-        :param cap: Amount of data tokens to create, denoted in wei, int
+        :param template_index: Template type of the token, int
+        :param additional_erc20_deployer: Address of another ERC20 deployer, str
+        :param token_uri: URL for ERC721 token, str
 
-        :return: `Datatoken` instance
+        :return: `ERC721Token` instance
         """
 
-        dtfactory = self.get_dtfactory()
-        tx_id = dtfactory.createToken(blob, name, symbol, cap, from_wallet=from_wallet)
-        address = dtfactory.get_token_address(tx_id)
-        assert address, "new datatoken has no address"
-        dt = DataToken(self.web3, address)
-        return dt
+        erc721_factory = self.get_erc721_factory()
+        tx = erc721_factory.deploy_erc721_contract(
+            name=name,
+            symbol=symbol,
+            template_index=template_index,
+            additional_erc20_deployer=additional_erc20_deployer,
+            token_uri=token_uri,
+            from_wallet=from_wallet,
+        )
+        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
+        registered_event = erc721_factory.get_event_log(
+            ERC721FactoryContract.EVENT_NFT_CREATED,
+            tx_receipt.blockNumber,
+            self.web3.eth.block_number,
+            None,
+        )
+        assert registered_event[0].event == "NFTCreated"
+        token_address = registered_event[0].args.newTokenAddress
+        assert token_address, "New ERC721 token has no address."
+        erc721_token = ERC721Token(self.web3, token_address)
+        return erc721_token
 
     @enforce_types
     def get_data_token(self, token_address: str) -> DataToken:
@@ -166,16 +186,21 @@ class Ocean:
         return DataToken(self.web3, token_address)
 
     @enforce_types
-    def get_dtfactory(self, dtfactory_address: str = "") -> DTFactory:
+    def get_erc721_factory(
+        self, erc721_factory_address: str = ""
+    ) -> ERC721FactoryContract:
         """
-        :param dtfactory_address: contract address, str
+        :param erc721_factory_address: contract address, str
 
-        :return: `DTFactory` instance
+        :return: `ERC721FactoryContract` instance
         """
-        dtf_address = dtfactory_address or DTFactory.configured_address(
-            get_network_name(web3=self.web3), self.config.address_file
+        erc721_address = (
+            erc721_factory_address
+            or ERC721FactoryContract.configured_address(
+                get_network_name(web3=self.web3), self.config.address_file
+            )
         )
-        return DTFactory(self.web3, dtf_address)
+        return ERC721FactoryContract(self.web3, erc721_address)
 
     @enforce_types
     def get_user_orders(

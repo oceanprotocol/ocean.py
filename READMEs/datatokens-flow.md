@@ -26,7 +26,7 @@ cd barge
 docker system prune -a --volumes
 
 #run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-./start_ocean.sh  --with-provider2
+./start_ocean.sh
 ```
 
 ## Install the library, set envvars
@@ -34,13 +34,26 @@ docker system prune -a --volumes
 In a new console:
 
 ```console
-#Initialize virtual environment and activate it.
-python -m venv venv
-source venv/bin/activate
+#Grab ocean.py repo
+cd Desktop/
+git clone https://github.com/oceanprotocol/ocean.py.git
+git checkout v4main
 
-#Install the ocean.py library. Install wheel first to avoid errors.
-pip install wheel
-pip install ocean-lib
+#Create your working directory. Copy artifacts.
+mkdir test3
+cd test3
+cp -r ../ocean.py/artifacts ./
+
+#Initialize virtual environment and activate it. Install artifacts.
+python3 -m venv venv
+source venv/bin/activate
+chmod 777 artifacts/install-remote.sh
+./artifacts/install-remote.sh
+
+#Intermediary installation before PyPi release of V4. Install wheel first to avoid errors.
+pip3 install wheel
+pip3 install --no-cache-dir ../ocean.py/
+
 
 #set envvars
 export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
@@ -68,14 +81,18 @@ from ocean_lib.web3_internal.wallet import Wallet
 private_key = os.getenv('TEST_PRIVATE_KEY1')
 config = ExampleConfig.get_config()
 ocean = Ocean(config)
+print(f"config.network_url = '{config.network_url}'")
+print(f"config.block_confirmations = {config.block_confirmations.value}")
 
-print("create wallet: begin")
+print("Create wallet: begin")
 wallet = Wallet(ocean.web3, private_key, config.block_confirmations, config.transaction_timeout)
-print(f"create wallet: done. Its address is {wallet.address}")
+print(f"Create wallet: done. Its address is {wallet.address}")
 
-print("create datatoken: begin.")
-datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet)
-print(f"created datatoken: done. Its address is {datatoken.address}")
+print("Create ERC721 token: begin.")
+erc721_token = ocean.create_erc721_token(name="Dataset name", symbol="dtsymbol", from_wallet=wallet)
+print(f"Created ERC721 token: done. Its address is {erc721_token.address}")
+print(f"ERC721 token name: {erc721_token.token_name()}")
+print(f"ERC721 token symbol: {erc721_token.symbol()}")
 ```
 
 Congrats, you've created your first Ocean datatoken! 🐋
