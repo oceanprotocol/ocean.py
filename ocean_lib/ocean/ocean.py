@@ -24,10 +24,10 @@ from ocean_lib.ocean.ocean_pool import OceanPool
 from ocean_lib.ocean.util import (
     get_address_of_type,
     get_bfactory_address,
-    get_dtfactory_address,
     get_ocean_token_address,
     get_web3,
 )
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
@@ -118,15 +118,15 @@ class Ocean:
     def OCEAN_address(self) -> str:
         return get_ocean_token_address(self.config.address_file, web3=self.web3)
 
-    # TODO: adapt for v4
     @enforce_types
-    def create_data_token(
+    def create_nft_token(
         self,
         name: str,
         symbol: str,
+        token_uri: str,
         from_wallet: Wallet,
-        cap: int = DataToken.DEFAULT_CAP,
-        blob: str = "",
+        template_index: Optional[int] = 1,
+        additional_erc20_deployer: Optional[str] = None,
     ) -> DataToken:
         """
         This method deploys a datatoken contract on the blockchain.
@@ -152,12 +152,23 @@ class Ocean:
         :return: `Datatoken` instance
         """
 
-        dtfactory = self.get_dtfactory()
-        tx_id = dtfactory.createToken(blob, name, symbol, cap, from_wallet=from_wallet)
-        address = dtfactory.get_token_address(tx_id)
-        assert address, "new datatoken has no address"
-        dt = DataToken(self.web3, address)
-        return dt
+        if not additional_erc20_deployer:
+            additional_erc20_deployer = ZERO_ADDRESS
+
+        nft_factory = self.get_nft_factory()
+        tx_id = nft_factory.deploy_erc721_contract(
+            name=name,
+            symbol=symbol,
+            template_index=template_index,
+            additional_erc20_deployer=additional_erc20_deployer,
+            token_uri=token_uri,
+            from_wallet=from_wallet,
+        )
+
+        address = nft_factory.get_token_address(tx_id)
+        assert address, "new NFT token has no address"
+        token = ERC721Token(self.web3, address)
+        return token
 
     @enforce_types
     def get_nft_token(self, token_address: str) -> ERC721Token:
