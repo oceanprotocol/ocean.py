@@ -3,16 +3,18 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import time
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 import pytest
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import (
@@ -68,7 +70,7 @@ def process_order(
     consumer_wallet: Wallet,
     asset: Asset,
     service_type: str,
-):
+) -> Tuple[str, Service]:
     """Helper function to process a compute order."""
     # Mint 10 datatokens to the consumer
     service = asset.get_service(service_type)
@@ -99,49 +101,79 @@ def process_order(
     return order_tx_id, service
 
 
+class AssetAndUserdata:
+    asset: Asset
+    userdata: Optional[dict]
+
+
 def run_compute_test(
     ocean_instance: Ocean,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
-    dataset: Asset,
-    algorithm: Asset,
-    additional_datasets: Optional[List[Asset]] = [],
-    expect_failure=False,
-    expect_failure_message=None,
-    userdata=None,
+    dataset_and_userdata: AssetAndUserdata,
+    algorithm_and_userdata: Optional[AssetAndUserdata] = None,
+    algorithm_meta: Optional[AlgorithmMetadata] = None,
+    algorithm_algocustomdata: Optional[dict] = None,
+    additional_datasets_and_userdata: List[AssetAndUserdata] = [],
     with_result=False,
 ):
     """Helper function to bootstrap compute job creation and status checking."""
-    # Order asset compute service
-    order_tx_id, compute_service = process_order(
+    assert (
+        algorithm_and_userdata or algorithm_meta
+    ), "either algorithm_and_userdata or algorithm_meta must be provided."
+
+    # Order dataset with compute service
+    dataset_tx_id, compute_service = process_order(
         ocean_instance,
         publisher_wallet,
         consumer_wallet,
-        dataset,
+        dataset_and_userdata,
         ServiceTypes.CLOUD_COMPUTE,
     )
-    compute_inputs = [
-        ComputeInput(dataset.did, order_tx_id, compute_service.id, userdata=userdata)
-    ]
-
-    # Order algo download service
-    algo_tx_id, algo_download_service = process_order(
-        ocean_instance,
-        publisher_wallet,
-        consumer_wallet,
-        algorithm,
-        ServiceTypes.ASSET_ACCESS,
+    dataset = ComputeInput(
+        dataset_and_userdata.asset.did,
+        dataset_tx_id,
+        compute_service.id,
+        dataset_and_userdata.userdata,
     )
 
-    for asset in additional_datasets:
+    # Order additional datasets
+    additional_datasets = []
+    for asset_and_userdata in additional_datasets_and_userdata:
         service_type = ServiceTypes.ASSET_ACCESS
-        if not asset.get_service(service_type):
+        if not asset_and_userdata.asset.get_service(service_type):
             service_type = ServiceTypes.CLOUD_COMPUTE
-        _order_tx_id, _order_quote, _service = process_order(
-            ocean_instance, publisher_wallet, consumer_wallet, asset, service_type
+        _order_tx_id, _service = process_order(
+            ocean_instance,
+            publisher_wallet,
+            consumer_wallet,
+            asset_and_userdata.asset,
+            service_type,
         )
-        compute_inputs.append(
-            ComputeInput(asset.did, _order_tx_id, _service.index, userdata=userdata)
+        additional_datasets.append(
+            ComputeInput(
+                asset_and_userdata.asset.did,
+                _order_tx_id,
+                _service.id,
+                asset_and_userdata.userdata,
+            )
+        )
+
+    # Order algo download service
+    algorithm = None
+    if algorithm_and_userdata:
+        algo_tx_id, algo_download_service = process_order(
+            ocean_instance,
+            publisher_wallet,
+            consumer_wallet,
+            algorithm_and_userdata.asset,
+            ServiceTypes.ASSET_ACCESS,
+        )
+        algorithm = ComputeInput(
+            algorithm_and_userdata.asset.did,
+            algo_tx_id,
+            algo_download_service.id,
+            algorithm_and_userdata.userdata,
         )
 
     # Start compute job
@@ -150,36 +182,43 @@ def run_compute_test(
     )
     # TODO: Consider replacing with `ocean.compute.start()` after OceanCompute API is fixed.
     job_id = DataServiceProvider.start_compute_job(
-        did=dataset.did,
         service_endpoint=start_compute_endpoint,
         consumer=consumer_wallet,
-        service_id=int(compute_service.id),
-        order_tx_id=order_tx_id,
-        compute_environment="doesn't matter for now",
-        algorithm_did=algorithm.did,
-        algorithm_tx_id=algo_tx_id,
-        algorithm_data_token=algo_download_service.data_token,
+        dataset=dataset,
+        compute_environment="not implemented in provider yet",
+        algorithm=algorithm,
+        algorithm_meta=algorithm_meta,
+        algorithm_custom_data=algorithm_algocustomdata,
+        input_datasets=additional_datasets,
     )
 
-    status = ocean_instance.compute.status(dataset.did, job_id, consumer_wallet)
+    status = ocean_instance.compute.status(
+        dataset_and_userdata.asset.did, job_id, consumer_wallet
+    )
     print(f"got job status: {status}")
 
     assert (
         status and status["ok"]
     ), f"something not right about the compute job, got status: {status}"
 
-    status = ocean_instance.compute.stop(dataset.did, job_id, consumer_wallet)
+    status = ocean_instance.compute.stop(
+        dataset_and_userdata.asset.did, job_id, consumer_wallet
+    )
     print(f"got job status after requesting stop: {status}")
     assert status, f"something not right about the compute job, got status: {status}"
 
     if with_result:
-        result = ocean_instance.compute.result(dataset.did, job_id, consumer_wallet)
+        result = ocean_instance.compute.result(
+            dataset_and_userdata.asset.did, job_id, consumer_wallet
+        )
         print(f"got job status after requesting result: {result}")
         assert "did" in result, "something not right about the compute job, no did."
 
         succeeded = False
         for _ in range(0, 200):
-            status = ocean_instance.compute.status(dataset.did, job_id, consumer_wallet)
+            status = ocean_instance.compute.status(
+                dataset_and_userdata.asset.did, job_id, consumer_wallet
+            )
             # wait until job is done, see:
             # https://github.com/oceanprotocol/operator-service/blob/main/API.md#status-description
             if status["status"] > 60:
@@ -189,12 +228,13 @@ def run_compute_test(
 
         assert succeeded, "compute job unsuccessful"
         result_file = ocean_instance.compute.result_file(
-            dataset.did, job_id, 0, consumer_wallet
+            dataset_and_userdata.asset.did, job_id, 0, consumer_wallet
         )
         assert result_file is not None
         print(f"got job result file: {str(result_file)}")
 
 
+@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_compute_raw_algo(
     publisher_wallet,
     publisher_ocean_instance,
@@ -208,8 +248,27 @@ def test_compute_raw_algo(
         ocean_instance=publisher_ocean_instance,
         publisher_wallet=publisher_wallet,
         consumer_wallet=consumer_wallet,
-        dataset=dataset_with_compute_service,
-        algorithm=algorithm,
+        dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
+        algorithm_meta={},
+        with_result=True,
+    )
+
+
+def test_compute_registered_algo(
+    publisher_wallet,
+    publisher_ocean_instance,
+    consumer_wallet,
+    dataset_with_compute_service,
+    algorithm,
+):
+    """Tests that a compute job with a registered algorithm starts properly."""
+    # Setup algorithm meta to run raw algorithm
+    run_compute_test(
+        ocean_instance=publisher_ocean_instance,
+        publisher_wallet=publisher_wallet,
+        consumer_wallet=consumer_wallet,
+        dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
+        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
         with_result=True,
     )
 
@@ -239,8 +298,8 @@ def test_compute_multi_inputs(
         ocean_instance=publisher_ocean_instance,
         publisher_wallet=publisher_wallet,
         consumer_wallet=consumer_wallet,
-        dataset=dataset_with_compute_service,
-        algorithm=algorithm,
+        dataset_and_userdata=dataset_with_compute_service,
+        algorithm_and_userdata=algorithm,
         userdata={"test_key": "test_value"},
     )
 
@@ -292,7 +351,7 @@ def test_update_trusted_algorithms(
         publisher_wallet,
         consumer_wallet,
         [compute_ddo_updated],
-        algorithm=algorithm_ddo,
+        algorithm_and_userdata=algorithm_ddo,
     )
 
 
@@ -317,7 +376,7 @@ def test_compute_trusted_algorithms(
         publisher_wallet,
         consumer_wallet,
         [asset_with_trusted],
-        algorithm=algorithm_ddo,
+        algorithm_and_userdata=algorithm_ddo,
     )
 
     # Expect to fail with another algorithm ddo that is not trusted.
@@ -326,7 +385,7 @@ def test_compute_trusted_algorithms(
         publisher_wallet,
         consumer_wallet,
         [asset_with_trusted],
-        algorithm=algorithm_ddo_v2,
+        algorithm_and_userdata=algorithm_ddo_v2,
         expect_failure=True,
         expect_failure_message=f"this algorithm did {algorithm_ddo_v2.did} is not trusted.",
     )
