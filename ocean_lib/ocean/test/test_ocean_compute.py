@@ -6,6 +6,7 @@ from datetime import datetime
 from unittest.mock import patch
 
 from ocean_lib.agreements.service_types import ServiceTypes
+from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -141,7 +142,7 @@ def test_build_service_privacy_attributes(publisher_ocean_instance):
         config=publisher_ocean_instance.config, data_provider=data_provider
     )
 
-    algorithm_ddo = get_sample_algorithm_ddo()
+    algorithm_ddo = get_sample_algorithm_ddo("ddo_algorithm2.json")
 
     with patch("ocean_lib.assets.trusted_algorithms.resolve_asset") as mock:
         mock.return_value = algorithm_ddo
@@ -193,7 +194,7 @@ def test_create_compute_service_attributes(publisher_ocean_instance, publisher_w
     config = publisher_ocean_instance.config
     compute = OceanCompute(config=config, data_provider=data_provider)
 
-    algorithm_ddo = get_sample_algorithm_ddo()
+    algorithm_ddo = get_sample_algorithm_ddo("ddo_algorithm2.json")
 
     with patch("ocean_lib.assets.trusted_algorithms.resolve_asset") as mock:
         mock.return_value = algorithm_ddo
@@ -315,7 +316,7 @@ def test_get_service_endpoint():
     config = Config(options_dict=options_dict)
     compute = OceanCompute(config, data_provider)
 
-    ddo = get_sample_ddo_with_compute_service()
+    ddo = Asset.from_dict(get_sample_ddo_with_compute_service())
     compute_service = ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
     compute_service.service_endpoint = "http://localhost:8030"
 
