@@ -6,6 +6,7 @@ import time
 from typing import List, Optional, Tuple
 
 import pytest
+from attr import dataclass
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
@@ -93,14 +94,16 @@ def process_order(
     # Order the service
     order_tx_id = erc20_token.start_order(
         consumer=consumer_wallet.address,
-        service_id=int(service.id),
+        service_id=service.index,
         provider_fees=initialize_response["providerFee"],
         from_wallet=consumer_wallet,
     )
+    ocean_instance.web3.eth.wait_for_transaction_receipt(order_tx_id)
 
     return order_tx_id, service
 
 
+@dataclass
 class AssetAndUserdata:
     asset: Asset
     userdata: Optional[dict]
@@ -127,7 +130,7 @@ def run_compute_test(
         ocean_instance,
         publisher_wallet,
         consumer_wallet,
-        dataset_and_userdata,
+        dataset_and_userdata.asset,
         ServiceTypes.CLOUD_COMPUTE,
     )
     dataset = ComputeInput(

@@ -236,8 +236,9 @@ class DataServiceProvider:
         return nonce, sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
 
     @staticmethod
-    @enforce_types
-    def start_compute_job(
+    # TODO reinstate @enforce_types
+    # @enforce_types
+    def _start_compute_job(
         service_endpoint: str,
         consumer: Wallet,
         dataset: ComputeInput,
@@ -640,7 +641,8 @@ class DataServiceProvider:
             return None
 
     @staticmethod
-    @enforce_types
+    # TODO: reinstate @enforce_types
+    # @enforce_types
     def _prepare_compute_payload(
         consumer: Wallet,
         dataset: ComputeInput,

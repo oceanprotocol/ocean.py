@@ -116,7 +116,7 @@ class ERC20Token(ContractBase):
         return prepare_message_for_ecrecover_in_solidity(signed_message)
 
     def start_order(
-        self, consumer: str, service_id: int, provider_fees: dict, from_wallet: Wallet
+        self, consumer: str, service_id: str, provider_fees: dict, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
             "startOrder",
