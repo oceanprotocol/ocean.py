@@ -6,9 +6,9 @@ import json
 import os
 import pathlib
 import time
-from typing import List, Optional
+from typing import List, Optional, Union
 
-from ocean_lib.agreements.file_objects import FilesTypeFactory
+from ocean_lib.agreements.file_objects import FilesTypeFactory, IpfsFile, UrlFile
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -130,7 +130,19 @@ def create_asset(ocean, publisher, config, metadata=None):
     return ddo
 
 
-def create_basics(config, web3, data_provider):
+def create_basics(
+    config,
+    web3,
+    data_provider,
+    asset_type: str = "dataset",
+    files: Optional[List[Union[UrlFile, IpfsFile]]] = None,
+):
+    """Helper for asset creation, based on ddo_sa_sample.json
+
+    Optional arguments:
+    :param asset_type: used to populate metadata.type, optionally set to "algorithm"
+    :param files: list of file objects creates with FilesTypeFactory
+    """
     erc721_factory_address = get_address_of_type(
         config, ERC721FactoryContract.CONTRACT_NAME
     )
@@ -141,19 +153,29 @@ def create_basics(config, web3, data_provider):
         "updated": "2021-05-17T21:58:02Z",
         "description": "Sample description",
         "name": "Sample asset",
-        "type": "dataset",
+        "type": asset_type,
         "author": "OPF",
         "license": "https://market.oceanprotocol.com/terms",
     }
 
-    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
-    file2_dict = {"type": "url", "url": "https://url.com/file2.csv", "method": "GET"}
-    file1 = FilesTypeFactory(file1_dict)
-    file2 = FilesTypeFactory(file2_dict)
+    if files is None:
+        file1_dict = {
+            "type": "url",
+            "url": "https://url.com/file1.csv",
+            "method": "GET",
+        }
+        file2_dict = {
+            "type": "url",
+            "url": "https://url.com/file2.csv",
+            "method": "GET",
+        }
+        file1 = FilesTypeFactory(file1_dict)
+        file2 = FilesTypeFactory(file2_dict)
+        files = [file1, file2]
 
     # Encrypt file objects
     encrypt_response = data_provider.encrypt(
-        [file1, file2], "http://172.15.0.4:8030/api/services/encrypt"
+        files, "http://172.15.0.4:8030/api/services/encrypt"
     )
     encrypted_files = encrypt_response.content.decode("utf-8")
 
@@ -213,22 +235,32 @@ def get_registered_ddo_with_compute_service(
 
 
 def get_registered_algorithm_ddo(ocean_instance: Ocean, publisher_wallet: Wallet):
+    algorithm_file = FilesTypeFactory(
+        {
+            "type": "url",
+            "url": "https://raw.githubusercontent.com/oceanprotocol/test-algorithm/master/javascript/algo.js",
+            "method": "GET",
+        }
+    )
+
     web3 = ocean_instance.web3
     config = ocean_instance.config
     data_provider = DataServiceProvider
-    _, metadata, _ = create_basics(config, web3, data_provider)
+    _, metadata, _ = create_basics(
+        config, web3, data_provider, asset_type="algorithm", files=[algorithm_file]
+    )
 
     # Update metadata to include algorithm info
     algorithm_values = {
         "algorithm": {
-            "language": "scala",
+            "language": "Node.js",
             "format": "docker-image",
             "version": "0.1",
             "container": {
                 "entrypoint": "node $ALGO",
-                "image": "node",
-                "tag": "10",
-                "checksum": "test",
+                "image": "ubuntu",
+                "tag": "latest",
+                "checksum": "44e10daa6637893f4276bb8d7301eb35306ece50f61ca34dcab550",
             },
         }
     }
