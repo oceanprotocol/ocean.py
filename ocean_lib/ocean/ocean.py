@@ -123,7 +123,7 @@ class Ocean:
         name: str,
         symbol: str,
         from_wallet: Wallet,
-        token_uri: Optional[str],
+        token_uri: Optional[str] = "https://oceanprotocol.com/nft/",
         template_index: Optional[int] = 1,
         additional_erc20_deployer: Optional[str] = None,
     ) -> ERC721Token:
@@ -153,9 +153,6 @@ class Ocean:
 
         if not additional_erc20_deployer:
             additional_erc20_deployer = ZERO_ADDRESS
-
-        if not token_uri:
-            token_uri = "https://oceanprotocol.com/nft/"
 
         nft_factory = self.get_nft_factory()
         tx_id = nft_factory.deploy_erc721_contract(

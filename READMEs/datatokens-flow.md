@@ -89,7 +89,7 @@ wallet = Wallet(ocean.web3, private_key, config.block_confirmations, config.tran
 print(f"Create wallet: done. Its address is {wallet.address}")
 
 print("Create ERC721 token: begin.")
-erc721_token = ocean.create_nft_token(name="Dataset name", symbol="dtsymbol", from_wallet=wallet, token_uri="https://oceanprotocol.com/nft/")
+erc721_token = ocean.create_nft_token(name="Dataset name", symbol="dtsymbol", from_wallet=wallet)
 print(f"Created ERC721 token: done. Its address is {erc721_token.address}")
 print(f"ERC721 token name: {erc721_token.token_name()}")
 print(f"ERC721 token symbol: {erc721_token.symbol()}")
