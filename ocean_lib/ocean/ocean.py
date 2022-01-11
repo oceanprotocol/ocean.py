@@ -15,6 +15,7 @@ from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
+from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.order import Order
 from ocean_lib.ocean.ocean_assets import OceanAssets
@@ -240,3 +241,8 @@ class Ocean:
                 _orders.append(order)
 
         return _orders
+
+    @property
+    @enforce_types
+    def factory_router(self):
+        return FactoryRouter(self.web3, get_address_of_type(self.config, "Router"))

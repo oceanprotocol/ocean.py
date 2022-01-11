@@ -7,15 +7,16 @@ import os
 from ocean_lib.agreements.file_objects import UrlFile
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import ExampleConfig
+from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.models_structures import ErcCreateData, PoolData
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 from ocean_lib.web3_internal.wallet import Wallet
-
-# TODO: move get_address_of_type or take from config directly
-from tests.resources.helper_functions import get_address_of_type
 
 
 def test_marketplace_flow():
@@ -92,24 +93,45 @@ def test_marketplace_flow():
 
     initial_ocean_liq = ocean.web3.toWei(0.02, "ether")
     OCEAN_token = ERC20Token(ocean.web3, ocean.OCEAN_address)
+    OCEAN_token.approve(
+        get_address_of_type(config, "Router"),
+        ocean.web3.toWei(0.02, "ether"),
+        alice_wallet,
+    )
+
     pool_data = PoolData(
         [
-            ocean.web3.toWei(1, "ether"),
+            ocean.web3.toWei(0.01, "ether"),
             OCEAN_token.decimals(),
-            initial_ocean_liq // 100 * 9,
+            2000,
             2500000,
             initial_ocean_liq,
         ],
-        [ocean.web3.toWei(0.001, "ether"), ocean.web3.toWei(0.001, "ether")],
+        [ocean.web3.toWei(0.02, "ether"), ocean.web3.toWei(0.01, "ether")],
         [
             get_address_of_type(config, "Staking"),
             OCEAN_token.address,
             alice_wallet.address,
-            # consumer_wallet.address,
             alice_wallet.address,
-            # consumer_wallet.address,
             get_address_of_type(config, "OPFCommunityFeeCollector"),
             get_address_of_type(config, "poolTemplate"),
         ],
     )
     tx = erc20_token.deploy_pool(pool_data, alice_wallet)
+    tx_receipt = ocean.web3.eth.wait_for_transaction_receipt(tx)
+    pool_event = ocean.factory_router.get_event_log(
+        ERC721FactoryContract.EVENT_NEW_POOL,
+        tx_receipt.blockNumber,
+        ocean.web3.eth.block_number,
+        None,
+    )
+
+    bpool_address = pool_event[0].args.poolAddress
+    bpool = BPool(ocean.web3, bpool_address)
+    assert bpool.address
+
+    # TODO: maybe it's the other function?
+    price = bpool.calc_single_out_pool_in(
+        erc20_token.address, ocean.web3.toWei(1, "ether")
+    )
+    # print(f"Price of 1 {erc20_token.symbol()} is {pretty_ether_and_wei(price, 'OCEAN')}")
