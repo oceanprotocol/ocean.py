@@ -133,7 +133,7 @@ def ocean_assets_download_destination_file_helper(
 
     tx_id = erc20_token.start_order(
         consumer=publisher_wallet.address,
-        service_id=int(access_service.id),
+        service_index=ddo.get_service_index_by_id(access_service.id),
         provider_fees=initialize_response.json()["providerFee"],
         from_wallet=publisher_wallet,
     )
