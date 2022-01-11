@@ -135,3 +135,28 @@ def test_marketplace_flow():
         erc20_token.address, ocean.web3.toWei(1, "ether")
     )
     # print(f"Price of 1 {erc20_token.symbol()} is {pretty_ether_and_wei(price, 'OCEAN')}")
+
+    bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
+    bob_wallet = Wallet(
+        ocean.web3,
+        bob_private_key,
+        config.block_confirmations,
+        config.transaction_timeout,
+    )
+
+    # Verify that Bob has ganache ETH
+    assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
+
+    # Verify that Bob has ganache OCEAN
+    assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
+
+    from ocean_lib.web3_internal.currency import to_wei
+
+    bpool.swap_exact_amount_out(
+        [OCEAN_token.address, erc20_token.address, ZERO_ADDRESS],
+        [to_wei(10), to_wei(1), 2 ** 255, bpool.get_swap_fee()],
+        from_wallet=bob_wallet,
+    )
+    assert erc20_token.balanceOf(bob_wallet.address) >= ocean.web3.toWei(
+        1
+    ), "Bob didn't get 1.0 datatokens"
