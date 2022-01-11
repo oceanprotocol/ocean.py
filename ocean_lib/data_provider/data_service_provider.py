@@ -406,7 +406,7 @@ class DataServiceProvider:
         :return: dict of job_id to result urls.
         """
         nonce, signature = DataServiceProvider.sign_message(
-            consumer, f"{job_id}{str(index)}"
+            consumer, f"{consumer.address}{job_id}{str(index)}"
         )
 
         req = PreparedRequest()
