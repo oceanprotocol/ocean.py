@@ -394,7 +394,7 @@ class OceanCompute:
         """
         _, service_endpoint = self._get_compute_result_file_endpoint(did)
         result = self._data_provider.compute_job_result_file(
-            job_id, index, service_endpoint, wallet.address
+            job_id, index, service_endpoint, wallet
         )
 
         return result
