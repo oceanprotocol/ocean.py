@@ -607,18 +607,22 @@ class DataServiceProvider:
     def _send_compute_request(
         http_method: str, did: str, job_id: str, service_endpoint: str, consumer: Wallet
     ) -> Dict[str, Any]:
-        nonce, signature = DataServiceProvider.sign_message(consumer, f"{job_id}{did}")
-
-        compute_url = (
-            f"{service_endpoint}"
-            f"?signature={signature}"
-            f"&nonce={nonce}"
-            f"&documentId={did}"
-            f"&consumerAddress={consumer.address}"
-            f'&jobId={job_id or ""}'
+        nonce, signature = DataServiceProvider.sign_message(
+            consumer, f"{consumer.address}{did}{job_id}"
         )
-        logger.info(f"invoke compute endpoint with this url: {compute_url}")
-        response = DataServiceProvider._http_method(http_method, compute_url)
+
+        req = PreparedRequest()
+        payload = {
+            "consumerAddress": consumer.address,
+            "documentId": did,
+            "jobId": job_id,
+            "nonce": nonce,
+            "signature": signature,
+        }
+        req.prepare_url(service_endpoint, payload)
+
+        logger.info(f"invoke compute endpoint with this url: {req.url}")
+        response = DataServiceProvider._http_method(http_method, req.url)
         logger.debug(
             f"got provider execute response: {response.content} with status-code {response.status_code} "
         )
