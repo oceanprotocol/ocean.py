@@ -297,7 +297,7 @@ def wait_for_update(ocean, did, updated_attr, value, timeout=30):
 
         if not ddo:
             time.sleep(0.2)
-        elif ddo.metadata["main"].get(updated_attr) == value:
+        elif ddo.metadata.get(updated_attr) == value:
             break
 
         if time.time() - start > timeout:

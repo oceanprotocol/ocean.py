@@ -38,43 +38,56 @@ def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wal
     assert ocn.assets.resolve(invalid_did) is None
 
 
-@pytest.mark.skip(reason="TODO: update function on OceanAssets class")
-def test_update(publisher_ocean_instance, publisher_wallet, consumer_wallet, config):
-    ocn = publisher_ocean_instance
-    block = ocn.web3.eth.block_number
-    alice = publisher_wallet
-    bob = consumer_wallet
-
-    ddo = create_asset(ocn, alice, config)
-
-    # Publish the metadata
-    _name = "updated name"
-    ddo.metadata["name"] = _name
-    assert ddo.metadata["name"] == _name, "Asset's name was not updated."
-
-    with pytest.raises(ValueError):
-        ocn.assets.update(ddo, bob)
-
-    _ = ocn.assets.update(ddo, alice)
-    block_confirmations = ocn.config.block_confirmations.value
-
-    log = ddo_reg.get_event_log(
-        ddo_reg.EVENT_METADATA_UPDATED, block - block_confirmations, asset_id, 30
+def test_update(publisher_ocean_instance, publisher_wallet, config, metadata=None):
+    """Helper function for asset update based on ddo_sa_sample.json."""
+    ocean = publisher_ocean_instance
+    erc20_data = ErcCreateData(
+        template_index=1,
+        strings=["Datatoken 1", "DT1"],
+        addresses=[
+            publisher_wallet.address,
+            publisher_wallet.address,
+            ZERO_ADDRESS,
+            get_address_of_type(config, "Ocean"),
+        ],
+        uints=[ocean.web3.toWei("0.5", "ether"), 0],
+        bytess=[b""],
     )
-    assert log, "no ddo updated event"
-    _asset = wait_for_update(ocn, ddo.did, "name", _name)
+
+    if not metadata:
+        metadata = {
+            "created": "2020-11-15T12:27:48Z",
+            "updated": "2021-05-17T21:58:02Z",
+            "description": "Sample description",
+            "name": "Sample asset",
+            "type": "dataset",
+            "author": "OPF",
+            "license": "https://market.oceanprotocol.com/terms",
+        }
+    data_provider = DataServiceProvider
+    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
+    file1 = FilesTypeFactory(file1_dict)
+    encrypt_response = data_provider.encrypt(
+        [file1], "http://172.15.0.4:8030/api/services/encrypt"
+    )
+    encrypted_files = encrypt_response.content.decode("utf-8")
+
+    ddo = ocean.assets.create(
+        metadata, publisher_wallet, encrypted_files, erc20_tokens_data=[erc20_data]
+    )
+
+    _description = "Updated description"
+    ddo.metadata["description"] = _description
+
+    ocean.assets.update(asset=ddo, publisher_wallet=publisher_wallet)
+
+    _asset = wait_for_update(ocean, ddo.did, "description", _description)
+
     assert _asset, "Cannot read asset after update."
-    assert (
-        _asset.metadata["main"]["name"] == _name
-    ), "updated asset does not have the new updated name !!!"
 
     assert (
-        ocn.assets.owner(ddo.did) == alice.address
-    ), "asset owner does not seem correct."
-
-    assert (
-        _get_num_assets(alice.address) == num_assets_owned + 1
-    ), "The new asset was not published in Alice wallet."
+        _asset.metadata["description"] == _description
+    ), "updated asset does not have the new updated description."
 
 
 def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet, config):

@@ -152,6 +152,56 @@ class OceanAssets:
                 data_tokens.append(data_token)
         return data_tokens
 
+    @staticmethod
+    def process_ddo(
+        asset: Asset,
+        provider_uri: str,
+        encrypt_flag: Optional[bool] = False,
+        compress_flag: Optional[bool] = False,
+    ):
+        # Process the DDO
+        asset_dict = asset.as_dictionary()
+        ddo_string = json.dumps(asset_dict, separators=(",", ":"))
+        ddo_bytes = ddo_string.encode("utf-8")
+        ddo_hash = create_checksum(ddo_string)
+
+        # Plain asset
+        if not encrypt_flag and not compress_flag:
+            flags = bytes([0])
+            document = ddo_bytes
+
+        # Only compression, not encrypted
+        elif compress_flag and not encrypt_flag:
+            flags = bytes([1])
+            # Compress DDO
+            document = lzma.compress(ddo_bytes)
+
+        # Only encryption, not compressed
+        elif encrypt_flag and not compress_flag:
+            flags = bytes([2])
+            # Encrypt DDO
+            encrypt_response = DataServiceProvider.encrypt(
+                objects_to_encrypt=ddo_string,
+                encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
+            )
+            document = encrypt_response.text
+
+        # Encrypted & compressed
+        else:
+            flags = bytes([3])
+            # Compress DDO
+            compressed_document = lzma.compress(ddo_bytes)
+
+            # Encrypt DDO
+            encrypt_response = DataServiceProvider.encrypt(
+                objects_to_encrypt=compressed_document,
+                encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
+            )
+
+            document = encrypt_response.text
+
+        return document, flags, ddo_hash
+
     def create(
         self,
         metadata: dict,
@@ -322,46 +372,9 @@ class OceanAssets:
             logger.error(msg)
             raise ValueError(msg)
 
-        # Process the DDO
-        asset_dict = asset.as_dictionary()
-        ddo_string = json.dumps(asset_dict, separators=(",", ":"))
-        ddo_bytes = ddo_string.encode("utf-8")
-        ddo_hash = create_checksum(ddo_string)
-
-        # Plain asset
-        if not encrypt_flag and not compress_flag:
-            flags = bytes([0])
-            document = ddo_bytes
-
-        # Only compression, not encrypted
-        elif compress_flag and not encrypt_flag:
-            flags = bytes([1])
-            # Compress DDO
-            document = lzma.compress(ddo_bytes)
-
-        # Only encryption, not compressed
-        elif encrypt_flag and not compress_flag:
-            flags = bytes([2])
-            # Encrypt DDO
-            encrypt_response = DataServiceProvider.encrypt(
-                objects_to_encrypt=ddo_string,
-                encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
-            )
-            document = encrypt_response.text
-
-        # Encrypted & compressed
-        else:
-            flags = bytes([3])
-            # Compress DDO
-            compressed_document = lzma.compress(ddo_bytes)
-
-            # Encrypt DDO
-            encrypt_response = DataServiceProvider.encrypt(
-                objects_to_encrypt=compressed_document,
-                encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
-            )
-
-            document = encrypt_response.text
+        [document, flags, ddo_hash] = self.process_ddo(
+            asset, provider_uri, encrypt_flag, compress_flag
+        )
 
         _ = erc721_token.set_metadata(
             metadata_state=0,
@@ -378,6 +391,62 @@ class OceanAssets:
         asset = self._get_aquarius(self._metadata_cache_uri).wait_for_asset(did)
 
         return asset
+
+    def update(
+        self,
+        asset: Asset,
+        publisher_wallet: Wallet,
+        provider_uri: Optional[str] = None,
+        encrypt_flag: Optional[bool] = False,
+        compress_flag: Optional[bool] = False,
+    ) -> str:
+        try:
+            # Validation by Aquarius
+            validation_result, validation_errors = self.validate(asset)
+            if not validation_result:
+                msg = f"Asset has validation errors: {validation_errors}"
+                logger.error(msg)
+                raise ValueError(msg)
+
+            erc721_token = ERC721Token(self._web3, asset.nft_address)
+
+            if not provider_uri:
+                provider_uri = DataServiceProvider.get_url(self._config)
+
+            [document, flags, ddo_hash] = self.process_ddo(
+                asset, provider_uri, encrypt_flag, compress_flag
+            )
+
+            tx_id = erc721_token.set_metadata(
+                metadata_state=0,
+                metadata_decryptor_url=provider_uri,
+                metadata_decryptor_address=publisher_wallet.address,
+                flags=flags,
+                data=document,
+                data_hash=ddo_hash,
+                data_proofs=[],
+                from_wallet=publisher_wallet,
+            )
+
+            tx_receipt = self._web3.eth.wait_for_transaction_receipt(tx_id)
+
+            registered_token_event = erc721_token.get_event_log(
+                ERC721Token.EVENT_METADATA_UPDATED,
+                tx_receipt.blockNumber,
+                self._web3.eth.block_number,
+                None,
+            )
+
+            assert registered_token_event, "Cannot find MetadataUpdated event."
+
+            logger.info("Asset/ddo updated on-chain successfully.")
+
+            return tx_id
+        except ValueError as ve:
+            raise ValueError(f"Invalid value to update in the metadata: {str(ve)}")
+        except Exception as e:
+            logger.error(f"Update asset on-chain failed: {str(e)}")
+            raise
 
     @enforce_types
     def resolve(self, did: str) -> "Asset":
