@@ -608,7 +608,7 @@ class DataServiceProvider:
         http_method: str, did: str, job_id: str, service_endpoint: str, consumer: Wallet
     ) -> Dict[str, Any]:
         nonce, signature = DataServiceProvider.sign_message(
-            consumer, f"{consumer.address}{did}{job_id}"
+            consumer, f"{consumer.address}{job_id}{did}"
         )
 
         req = PreparedRequest()
