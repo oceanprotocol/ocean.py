@@ -124,7 +124,7 @@ class Ocean:
         name: str,
         symbol: str,
         from_wallet: Wallet,
-        token_uri: Optional[str],
+        token_uri: Optional[str] = None,
         template_index: Optional[int] = 1,
         additional_erc20_deployer: Optional[str] = None,
     ) -> ERC721Token:
