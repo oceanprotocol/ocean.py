@@ -123,14 +123,13 @@ class Ocean:
         self,
         name: str,
         symbol: str,
-        token_uri: str,
         from_wallet: Wallet,
+        token_uri: Optional[str],
         template_index: Optional[int] = 1,
         additional_erc20_deployer: Optional[str] = None,
-    ) -> DataToken:
+    ) -> ERC721Token:
         """
         This method deploys a datatoken contract on the blockchain.
-
         Usage:
         ```python
             config = Config('config.ini')
@@ -143,17 +142,19 @@ class Ocean:
             )
             datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet)
         ```
-
-        :param name: Datatoken name, str
-        :param symbol: Datatoken symbol, str
+        :param name: ERC721 token name, str
+        :param symbol: ERC721 token symbol, str
         :param from_wallet: wallet instance, wallet
-        :param cap: Amount of data tokens to create, denoted in wei, int
-
-        :return: `Datatoken` instance
+        :param template_index: Template type of the token, int
+        :param additional_erc20_deployer: Address of another ERC20 deployer, str
+        :return: `ERC721Token` instance
         """
 
         if not additional_erc20_deployer:
             additional_erc20_deployer = ZERO_ADDRESS
+
+        if not token_uri:
+            token_uri = "https://oceanprotocol.com/nft/"
 
         nft_factory = self.get_nft_factory()
         tx_id = nft_factory.deploy_erc721_contract(
@@ -174,7 +175,7 @@ class Ocean:
     def get_nft_token(self, token_address: str) -> ERC721Token:
         """
         :param token_address: Token contract address, str
-        :return: `Datatoken` instance
+        :return: `ERC721Token` instance
         """
 
         return ERC721Token(self.web3, token_address)
@@ -183,7 +184,7 @@ class Ocean:
     def get_data_token(self, token_address: str) -> ERC20Token:
         """
         :param token_address: Token contract address, str
-        :return: `Datatoken` instance
+        :return: `ERC20Token` instance
         """
 
         return ERC20Token(self.web3, token_address)
@@ -191,9 +192,9 @@ class Ocean:
     @enforce_types
     def get_nft_factory(self, nft_factory_address: str = "") -> ERC721FactoryContract:
         """
-        :param dtfactory_address: contract address, str
+        :param nft_factory_address: contract address, str
 
-        :return: `DTFactory` instance
+        :return: `ERC721FactoryContract` instance
         """
         if not nft_factory_address:
             nft_factory_address = get_address_of_type(
