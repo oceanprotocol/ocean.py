@@ -238,7 +238,7 @@ class DataServiceProvider:
     @staticmethod
     # TODO reinstate @enforce_types
     # @enforce_types
-    def _start_compute_job(
+    def start_compute_job(
         service_endpoint: str,
         consumer: Wallet,
         dataset: ComputeInput,
