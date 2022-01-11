@@ -38,11 +38,7 @@ ocean.py is part of the [Ocean Protocol](https://www.oceanprotocol.com) toolset.
 This is in beta state and you can expect running into problems. If you run into them, please open up a [new issue](/issues).
 
 - [🏗 Installation](#-installation)
-- [🏄 Quickstart](#-quickstart)
-  - [Simple Flow](#simple-flow)
-  - [Marketplace Flow](#marketplace-flow)
-  - [Compute-to-Data Flow](#compute-to-data-flow)
-  - [Learn more](#learn-more)
+- [🏄 Quickstart](#-quickstart): simple flow, marketplace, compute-to-data, more
 - [🦑 Development](#-development)
 - [🏛 License](#-license)
 
@@ -67,9 +63,15 @@ This stripped-down flow shows the essence of Ocean: simply creating a datatoken.
 
 ### Marketplace flow
 
-In this flow, a data asset is posted for sale in a marketplace, and purchased. It includes metadata and a datatoken pool.
+In this flow, a data asset is posted for sale in a marketplace, and purchased. It includes metadata, and a datatoken pool for automated price discovery.
 
 [Go to marketplace flow](READMEs/marketplace-flow.md)
+
+### Fixed-Rate Exchange flow
+
+This flow uses a fixed (constant) price for datasets, not automated price discovery.
+
+[Go to fixed-rate exchange flow](READMEs/fixed-rate-exchange-flow.md)
 
 ### Compute-to-Data flow
 
