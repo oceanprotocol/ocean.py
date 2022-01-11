@@ -94,7 +94,7 @@ def process_order(
     # Order the service
     order_tx_id = erc20_token.start_order(
         consumer=consumer_wallet.address,
-        service_id=service.index,
+        service_index=asset.get_service_index_by_id(service.id),
         provider_fees=initialize_response["providerFee"],
         from_wallet=consumer_wallet,
     )
