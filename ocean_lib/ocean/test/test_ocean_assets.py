@@ -10,6 +10,7 @@ from unittest.mock import patch
 import eth_keys
 import pytest
 from ocean_lib.agreements.service_types import ServiceTypes
+from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
