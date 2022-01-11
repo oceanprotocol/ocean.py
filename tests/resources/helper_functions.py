@@ -250,14 +250,7 @@ def deploy_erc721_erc20(
         token_uri="https://oceanprotocol.com/nft/",
         from_wallet=erc721_publisher,
     )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = erc721_factory.get_event_log(
-        event_name=ERC721FactoryContract.EVENT_NFT_CREATED,
-        from_block=tx_receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
-    token_address = registered_event[0].args.newTokenAddress
+    token_address = erc721_factory.get_token_address(tx)
     erc721_token = ERC721Token(web3, token_address)
     if not erc20_minter:
         return erc721_token
