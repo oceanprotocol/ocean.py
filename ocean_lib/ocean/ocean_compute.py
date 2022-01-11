@@ -372,7 +372,7 @@ class OceanCompute:
         """
         _, service_endpoint = self._get_service_endpoint(did)
         info_dict = self._data_provider.compute_job_result(
-            did, job_id, service_endpoint, wallet.address
+            did, job_id, service_endpoint, wallet
         )
         return {
             "did": info_dict.get("resultsDid", ""),
