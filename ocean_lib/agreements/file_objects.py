@@ -2,21 +2,25 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
-from typing import Union
+from typing import Optional, Union
 
 from enforce_typing import enforce_types
 
 
 @enforce_types
 class UrlFile(object):
-    def __init__(self, url: str, method: str) -> None:
+    def __init__(self, url: str, method: Optional[str] = None) -> None:
         self.url = url
         self.method = method
         self.type = "url"
 
     def to_dict(self) -> dict:
-        return {"type": self.type, "url": self.url, "method": self.method}
+        result = {"type": self.type, "url": self.url}
+
+        if self.method:
+            result["method"] = self.method
+
+        return result
 
 
 @enforce_types

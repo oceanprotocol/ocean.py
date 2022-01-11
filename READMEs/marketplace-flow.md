@@ -103,7 +103,7 @@ python
 
 In the Python console:
 ```python
-#create ocean instance
+# Create Ocean instance
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
 config = ExampleConfig.get_config()
@@ -114,71 +114,84 @@ print(f"config.block_confirmations = {config.block_confirmations.value}")
 print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
 print(f"config.provider_url = '{config.provider_url}'")
 
-#Alice's wallet
+# Create Alice's wallet
 import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
 alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
-#Mint OCEAN
+# Mint OCEAN
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
-
-#Publish a datatoken
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
-token_address = data_token.address
+
+# Publish an NFT token
+nft_token = ocean.create_nft_token('NFTToken1', 'NFT1', alice_wallet)
+token_address = nft_token.address
 print(f"token_address = '{token_address}'")
 
-#Specify metadata and service attributes, using the Branin test dataset
-date_created = "2019-12-28T10:55:11Z"
-metadata =  {
-    "main": {
-        "type": "dataset", "name": "branin", "author": "Trent",
-        "license": "CC0: Public Domain", "dateCreated": date_created,
-        "files": [{"index": 0, "contentType": "text/text",
-	           "url": "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"}]}
-}
-service_attributes = {
-        "main": {
-            "name": "dataAssetAccessServiceAgreement",
-            "creator": alice_wallet.address,
-            "timeout": 3600 * 24,
-            "datePublished": date_created,
-            "cost": 1.0, # <don't change, this is obsolete>
-        }
-    }
-
-#Publish metadata and service attributes on-chain.
-# The service urls will be encrypted before going on-chain.
-# They're only decrypted for datatoken owners upon consume.
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.services.service import Service
-
-service_endpoint = DataServiceProvider.get_url(ocean.config)
-download_service = Service(
-    service_endpoint=service_endpoint,
-    service_type=ServiceTypes.ASSET_ACCESS,
-    attributes=service_attributes,
+# Prepare data for ERC20 token
+from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+erc20_data = ErcCreateData(
+    template_index=1,
+    strings=["Datatoken 1", "DT1"],
+    addresses=[
+        alice_wallet.address,
+        alice_wallet.address,
+        ZERO_ADDRESS,
+        ocean.OCEAN_address,
+    ],
+    uints=[ocean.web3.toWei("0.5", "ether"), 0],
+    bytess=[b""],
 )
-assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
+
+# Specify metadata and services, using the Branin test dataset
+date_created = "2021-12-28T10:55:11Z"
+
+metadata = {
+    "created": date_created,
+    "updated": date_created,
+    "description": "Branin dataset",
+    "name": "Branin dataset",
+    "type": "dataset",
+    "author": "Treunt",
+    "license": "CC0: PublicDomain",
+}
+
+# ocean.py offers multiple file types, but a simple url file should be enough for this example
+from ocean_lib.agreements.file_objects import UrlFile
+url_file = UrlFile(
+    url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+)
+
+# Encrypt file(s) using provider
+```python
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+provider_url = config.provider_url + "/api/services/encrypt"
+encrypt_response = DataServiceProvider.encrypt([url_file], provider_url)
+encrypted_files = encrypt_response.content.decode("utf-8")
+
+
+# Publish asset with services on-chain.
+# The download (access service) is automatically created, but you can explore other options as well
 asset = ocean.assets.create(
-  metadata,
-  alice_wallet,
-  services=[download_service],
-  data_token_address=token_address)
-assert token_address == asset.data_token_address
+    metadata, alice_wallet, encrypted_files, erc20_tokens_data=[erc20_data]
+)
 
 did = asset.did  # did contains the datatoken address
 print(f"did = '{did}'")
+
 ```
 
-In order to encrypt the entire asset, when using a private market or metadata cache, use the encrypt keyword:
-`asset = ocean.assets.create(..., encrypt=True)`
+In order to encrypt the entire asset, when using a private market or metadata cache, use the encrypt keyword.
+Same for compression and you can use a combination of the two. E.g:
+`asset = ocean.assets.create(..., encrypt_flag=True)` or `asset = ocean.assets.create(..., compress_flag=True)`
+
+In the following steps we will bind a pool to the created token.
 ```python
-#Mint the datatokens
+# Mint the datatokens
 from ocean_lib.web3_internal.currency import to_wei
 data_token.mint(alice_wallet.address, to_wei(100), alice_wallet)
 
