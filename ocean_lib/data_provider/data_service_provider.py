@@ -261,6 +261,7 @@ class DataServiceProvider:
         :param algorithm_meta: AlgorithmMetadata algorithm metadata
         :param algorithm_custom_data: TODO
         :param input_datasets: List[ComputeInput] additional input datasets
+        :return job_info dict
         """
         assert (
             algorithm or algorithm_meta

@@ -180,12 +180,12 @@ def run_compute_test(
         )
 
     # Start compute job
-    _, start_compute_endpoint = DataServiceProvider.build_compute_endpoint(
+    _, compute_start_endpoint = DataServiceProvider.build_compute_endpoint(
         ocean_instance.config.provider_url
     )
     # TODO: Consider replacing with `ocean.compute.start()` after OceanCompute API is fixed.
-    job_id = DataServiceProvider.start_compute_job(
-        service_endpoint=start_compute_endpoint,
+    job_info = DataServiceProvider.start_compute_job(
+        service_endpoint=compute_start_endpoint,
         consumer=consumer_wallet,
         dataset=dataset,
         compute_environment="not implemented in provider yet",
@@ -194,6 +194,7 @@ def run_compute_test(
         algorithm_custom_data=algorithm_algocustomdata,
         input_datasets=additional_datasets,
     )
+    job_id = job_info["jobId"]
 
     status = ocean_instance.compute.status(
         dataset_and_userdata.asset.did, job_id, consumer_wallet

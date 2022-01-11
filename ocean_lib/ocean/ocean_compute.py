@@ -356,7 +356,7 @@ class OceanCompute:
 
         return OceanCompute._status_from_job_info(
             self._data_provider.compute_job_status(
-                did, job_id, service_endpoint, wallet.address
+                did, job_id, service_endpoint, wallet
             )
         )
 
@@ -411,9 +411,7 @@ class OceanCompute:
         """
         _, service_endpoint = self._get_service_endpoint(did)
         return self._status_from_job_info(
-            self._data_provider.stop_compute_job(
-                did, job_id, service_endpoint, wallet.address
-            )
+            self._data_provider.stop_compute_job(did, job_id, service_endpoint, wallet)
         )
 
     @enforce_types
