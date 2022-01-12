@@ -182,7 +182,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             from_wallet,
         )
 
-    def get_nft_address(self, tx_id: str):
+    def get_token_address(self, tx_id: str):
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_id)
         registered_event = self.get_event_log(
             event_name=ERC721FactoryContract.EVENT_NFT_CREATED,
