@@ -10,7 +10,10 @@ import copy
 import logging
 from typing import Any, Dict, Optional
 
+from ocean_lib.agreements.consumable import ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes, ServiceTypesNames
+from ocean_lib.assets.credentials import AddressCredential
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 logger = logging.getLogger(__name__)
 
@@ -169,3 +172,26 @@ class Service:
             values[key] = value
 
         return values
+
+    def is_consumable(
+        self,
+        asset,
+        credential: Optional[dict] = None,
+        with_connectivity_check: bool = True,
+    ) -> bool:
+        """Checks whether an asset is consumable and returns a ConsumableCode."""
+        if asset.is_disabled:
+            return ConsumableCodes.ASSET_DISABLED
+
+        if with_connectivity_check and not DataServiceProvider.check_asset_file_info(
+            asset.did, self.id, self.service_endpoint
+        ):
+            return ConsumableCodes.CONNECTIVITY_FAIL
+
+        # to be parameterized in the future, can implement other credential classes
+        manager = AddressCredential(asset)
+
+        if manager.requires_credential():
+            return manager.validate_access(credential)
+
+        return ConsumableCodes.OK

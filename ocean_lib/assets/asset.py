@@ -292,3 +292,7 @@ class Asset:
         ] = trusted_algo_publishers
         service.compute_values["allowNetworkAccess"] = allow_network_access
         service.compute_values["allowRawAlgorithm"] = allow_raw_algorithm
+
+    @property
+    def is_disabled(self) -> bool:
+        return not self.metadata or (self.nft and self.nft["state"] != 0)

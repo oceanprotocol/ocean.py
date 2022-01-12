@@ -274,21 +274,21 @@ asset = ocean.assets.resolve(did)
 service = asset.get_service("access")
 
 # Bob sends his datatoken to the service
-# TODO
-quote = ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
+service = asset.get_service("access")
 order_tx_id = ocean.assets.pay_for_service(
-    ocean.web3,
-    quote.amount,
-    quote.data_token_address,
-    asset.did,
-    service.index,
-    fee_receiver,
-    bob_wallet,
-    service.get_c2d_address()
+    asset, service, bob_wallet
 )
 print(f"order_tx_id = '{order_tx_id}'")
 
-#Bob downloads. If the connection breaks, Bob can request again by showing order_tx_id.
+# Bob downloads. If the connection breaks, Bob can request again by showing order_tx_id.
+file_path = ocean.assets.download_asset(
+    asset,
+    service.service_endpoint,
+    bob_wallet,
+    './',
+    order_tx_id
+)
+
 file_path = ocean.assets.download(
     asset.did,
     service.index,

@@ -18,7 +18,7 @@ import requests
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
 from ocean_lib.config import Config
-from ocean_lib.exceptions import OceanEncryptAssetUrlsError, DataProviderException
+from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.transactions import sign_hash
@@ -132,10 +132,7 @@ class DataServiceProvider:
 
         # prepare_url function transforms ':' from "did:op:" into "%3".
         service_endpoint += f"?documentId={did}"
-        payload = {
-            "serviceId": service_id,
-            "consumerAddress": consumer_address,
-        }
+        payload = {"serviceId": service_id, "consumerAddress": consumer_address}
 
         if userdata:
             userdata = json.dumps(userdata)
@@ -754,11 +751,11 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def check_asset_file_info(did: str, provider_uri: str) -> bool:
+    def check_asset_file_info(did: str, service_id: str, provider_uri: str) -> bool:
         if not did:
             return False
         _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
-        data = {"did": did}
+        data = {"did": did, "serviceId": service_id}
         response = requests.post(endpoint, json=data)
 
         if response.status_code != 200:

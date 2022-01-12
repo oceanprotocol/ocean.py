@@ -14,7 +14,7 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-def test_marketplace_flow():
+def test_marketplace_flow(tmp_path):
     config = ExampleConfig.get_config()
     ocean = Ocean(config)
 
@@ -134,4 +134,11 @@ def test_marketplace_flow():
         1, "ether"
     ), "Bob didn't get 1.0 datatokens"
 
-    # TODO: order and pay
+    service = asset.get_service("access")
+    order_tx_id = ocean.assets.pay_for_service(asset, service, bob_wallet)
+
+    file_path = ocean.assets.download_asset(
+        asset, service.service_endpoint, bob_wallet, str(tmp_path), order_tx_id
+    )
+
+    assert file_path
