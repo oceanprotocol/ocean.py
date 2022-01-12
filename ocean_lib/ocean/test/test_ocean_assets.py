@@ -5,15 +5,18 @@
 import copy
 import time
 import uuid
+from datetime import datetime
 from unittest.mock import patch
 
 import eth_keys
 import pytest
-from ocean_lib.agreements.service_types import ServiceTypes
+
 from ocean_lib.agreements.file_objects import FilesTypeFactory
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
+from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.services.service import Service
@@ -26,7 +29,12 @@ from tests.resources.ddo_helpers import (
     get_sample_ddo,
     wait_for_update,
 )
-from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
+from tests.resources.helper_functions import (
+    create_asset,
+    create_basics,
+    deploy_erc721_erc20,
+    get_address_of_type,
+)
 
 
 def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wallet):
@@ -57,8 +65,8 @@ def test_update(publisher_ocean_instance, publisher_wallet, config, metadata=Non
 
     if not metadata:
         metadata = {
-            "created": "2020-11-15T12:27:48Z",
-            "updated": "2021-05-17T21:58:02Z",
+            "created": datetime.utcnow().strftime("%Y-%d-%mT%H:%M:%SZ"),
+            "updated": datetime.utcnow().strftime("%Y-%d-%mT%H:%M:%SZ"),
             "description": "Sample description",
             "name": "Sample asset",
             "type": "dataset",
@@ -76,12 +84,19 @@ def test_update(publisher_ocean_instance, publisher_wallet, config, metadata=Non
     ddo = ocean.assets.create(
         metadata, publisher_wallet, encrypted_files, erc20_tokens_data=[erc20_data]
     )
+    ddo2 = ocean.assets.create(
+        metadata, publisher_wallet, encrypted_files, erc20_tokens_data=[erc20_data]
+    )
+
+    new_metadata = copy.deepcopy(ddo.metadata)
 
     _description = "Updated description"
-    ddo.metadata["description"] = _description
+    new_metadata["description"] = _description
+    new_metadata["updated"] = datetime.utcnow().strftime("%Y-%d-%mT%H:%M:%SZ")
 
+    # Update the asset metadata
     ocean.assets.update(
-        did=ddo.did, metadata=ddo.metadata, publisher_wallet=publisher_wallet
+        did=ddo.did, new_metadata=new_metadata, publisher_wallet=publisher_wallet
     )
 
     _asset = wait_for_update(ocean, ddo.did, "description", _description)
@@ -91,6 +106,44 @@ def test_update(publisher_ocean_instance, publisher_wallet, config, metadata=Non
     assert (
         _asset.metadata["description"] == _description
     ), "updated asset does not have the new updated description."
+
+    # Add new_deployed_erc20_tokens that already exist in the asset
+    with pytest.raises(Exception) as err:
+        ocean.assets.update(
+            did=ddo.did,
+            new_metadata=ddo.metadata,
+            publisher_wallet=publisher_wallet,
+            new_deployed_erc20_tokens=[
+                ERC20Token(ocean.web3, ddo.datatokens[0].get("address"))
+            ],
+            encrypted_files=encrypted_files,
+        )
+    existing_address = ddo.datatokens[0].get("address")
+    assert (
+        err.value.args[0] == f"Deployed ERC20 token {existing_address} already exist."
+    )
+
+    # Add new_deployed_erc20_tokens that do not exist in the asset
+    _description = "Test new_deployed_erc20_tokens"
+    new_metadata["description"] = _description
+    new_metadata["updated"] = datetime.utcnow().strftime("%Y-%d-%mT%H:%M:%SZ")
+
+    ocean.assets.update(
+        did=ddo.did,
+        new_metadata=new_metadata,
+        publisher_wallet=publisher_wallet,
+        new_deployed_erc20_tokens=[
+            ERC20Token(ocean.web3, ddo2.datatokens[0].get("address"))
+        ],
+        encrypted_files=encrypted_files,
+    )
+
+    _asset = wait_for_update(ocean, ddo.did, "description", _description)
+    assert _asset, "Cannot read asset after update."
+    assert _asset.datatokens[1].get("address") == ddo2.datatokens[0].get("address")
+    assert _asset.datatokens[0].get("address") == ddo.datatokens[0].get("address")
+    assert _asset.services[0].data_token == ddo.datatokens[0].get("address")
+    assert _asset.services[1].data_token == ddo2.datatokens[0].get("address")
 
 
 def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet, config):

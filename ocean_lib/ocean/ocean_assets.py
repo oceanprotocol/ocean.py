@@ -208,7 +208,7 @@ class OceanAssets:
         publisher_wallet: Wallet,
         encrypted_files: str,
         services: Optional[list] = None,
-        credentials: Optional[list] = None,
+        credentials: Optional[dict] = None,
         provider_uri: Optional[str] = None,
         erc721_address: Optional[str] = None,
         erc721_name: Optional[str] = None,
@@ -229,7 +229,7 @@ class OceanAssets:
         :param publisher_wallet: Wallet of the publisher registering this asset.
         :param encrypted_files: str of the files that need to be encrypted before publishing.
         :param services: list of Service objects.
-        :param credentials: list of credentials necessary for the asset.
+        :param credentials: credentials dict necessary for the asset.
         :param provider_uri: str URL of service provider. This will be used as base to
         construct the serviceEndpoint for the `access` (download) service
         :param erc721_address: hex str the address of the ERC721 token. The new
@@ -372,7 +372,7 @@ class OceanAssets:
             logger.error(msg)
             raise ValueError(msg)
 
-        [document, flags, ddo_hash] = self.process_ddo(
+        document, flags, ddo_hash = self.process_ddo(
             asset, provider_uri, encrypt_flag, compress_flag
         )
 
@@ -395,36 +395,56 @@ class OceanAssets:
     def update(
         self,
         did: str,
+        new_metadata: dict,
         publisher_wallet: Wallet,
-        metadata: Optional[dict] = None,
+        delete_erc20_tokens: Optional[List[str]] = [],
         encrypted_files: Optional[str] = None,
-        new_services: Optional[list] = None,
-        credentials: Optional[list] = None,
+        new_services: Optional[list] = [],
+        new_credentials: Optional[dict] = None,
         provider_uri: Optional[str] = None,
         new_erc20_tokens_data: Optional[List[ErcCreateData]] = [],
         new_deployed_erc20_tokens: Optional[List[ERC20Token]] = [],
-        delete_erc20_tokens: Optional[List[str]] = [],
         encrypt_flag: Optional[bool] = False,
         compress_flag: Optional[bool] = False,
     ) -> str:
+        """Update an asset on-chain.
+
+        :param did: The DID of the asset to update.
+        :param new_metadata: dict conforming to the Metadata accepted by Ocean Protocol.
+        :param publisher_wallet: Wallet of the publisher registering this asset.
+        :param delete_erc20_tokens: List of existintg ERC20 tokens and related Services to delete.
+        :param encrypted_files: str of the files that need to be encrypted before publishing.
+        :param new_services: list of new Service objects to add.
+        :param new_credentials: new_credentials necessary for the asset.
+        :param provider_uri: str URL of service provider. This will be used as base to construct the serviceEndpoint for the `access` (download) service
+        :param new_erc20_tokens_data: list of ERC20CreateData necessary for deploying ERC20 tokens for different services.
+        :param new_deployed_erc20_tokens: list of ERC20 tokens which are already deployed.
+        :param encrypt_flag: bool for encryption of the DDO.
+        :param compress_flag: bool for compression of the DDO.
+        :return: update tx
+        """
 
         old_asset = self._get_aquarius(self._metadata_cache_uri).wait_for_asset(did)
 
         assert old_asset, "Asset not found."
 
+        if new_deployed_erc20_tokens:
+            assert (
+                encrypted_files
+            ), "encrypted_files is required for adding new_deployed_erc20_tokens."
+
         # Metadata sanity check
-        if metadata:
-            assert isinstance(
-                metadata, dict
-            ), f"Expected metadata of type dict, got {type(metadata)}"
+        assert isinstance(
+            new_metadata, dict
+        ), f"Expected new_metadata of type dict, got {type(new_metadata)}"
 
-            asset_type = metadata.get("type")
-            assert asset_type in (
-                "dataset",
-                "algorithm",
-            ), f"Invalid/unsupported asset type {asset_type}"
+        asset_type = new_metadata.get("type")
+        assert asset_type in (
+            "dataset",
+            "algorithm",
+        ), f"Invalid/unsupported asset type {asset_type}"
 
-            assert "name" in metadata, "Must have name in metadata."
+        assert "name" in new_metadata, "Must have name in new_metadata."
 
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(self._config)
@@ -451,11 +471,13 @@ class OceanAssets:
 
         assert asset.chain_id == self._web3.eth.chain_id, "Chain id mismatch."
 
-        # Override metadata if provided
-        asset.metadata = metadata if metadata else old_asset.metadata
+        # Override metadata
+        asset.metadata = new_metadata
 
         # Override credentials if provided
-        asset.credentials = credentials if credentials else old_asset.credentials
+        asset.credentials = (
+            new_credentials if new_credentials else old_asset.credentials
+        )
 
         # Keep the old erc20 addresses that are not in delete_erc20_tokens list
         erc20_addresses = [
@@ -469,7 +491,7 @@ class OceanAssets:
             service
             for service in old_asset.services
             if service.data_token not in delete_erc20_tokens
-        ] + (new_services or [])
+        ] + new_services
 
         deployed_erc20_tokens = [
             ERC20Token(self._web3, erc20_token_address)
@@ -511,13 +533,16 @@ class OceanAssets:
         else:
             if not new_services:
                 for erc20_token in new_deployed_erc20_tokens:
+                    deployed_erc20_tokens.append(
+                        ERC20Token(self._web3, erc20_token.address)
+                    )
                     services = self._add_defaults(
                         services, erc20_token.address, encrypted_files, provider_uri
                     )
 
-        data_tokens = self.build_data_tokens_list(
-            services=services, deployed_erc20_tokens=new_deployed_erc20_tokens
-        )
+            data_tokens = self.build_data_tokens_list(
+                services=services, deployed_erc20_tokens=deployed_erc20_tokens
+            )
 
         asset.datatokens = data_tokens
 
