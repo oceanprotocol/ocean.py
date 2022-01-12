@@ -5,7 +5,6 @@
 from datetime import datetime
 from unittest.mock import patch
 
-import pytest
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
@@ -137,7 +136,6 @@ def test_build_service_provider_attributes(config):
     ), "The service provider is not the expected one."
 
 
-@pytest.mark.skip(reason="TODO: reinstate ocean compute tests")
 def test_build_service_privacy_attributes(publisher_ocean_instance):
     data_provider = DataServiceProvider
     compute = OceanCompute(
@@ -191,7 +189,6 @@ def test_build_service_privacy_attributes_no_trusted_algos(config):
     ), "The privacy dict is not the expected one."
 
 
-@pytest.mark.skip(reason="TODO: reinstate ocean compute tests")
 def test_create_compute_service_attributes(publisher_ocean_instance, publisher_wallet):
     data_provider = DataServiceProvider
     config = publisher_ocean_instance.config
@@ -313,7 +310,6 @@ def test_create_compute_service_attributes(publisher_ocean_instance, publisher_w
     ), "The compute attributes are not the expected ones."
 
 
-@pytest.mark.skip(reason="TODO: reinstate ocean compute tests")
 def test_get_service_endpoint():
     data_provider = DataServiceProvider
     options_dict = {"resources": {"provider.url": "http://localhost:8030"}}
