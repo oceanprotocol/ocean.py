@@ -11,7 +11,6 @@ from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -101,12 +100,7 @@ def test_marketplace_flow():
     )
     assert bpool.address
 
-    ######## Place in readme ##########
-    # TODO: maybe it's the other function?
-    price = bpool.calc_single_out_pool_in(
-        erc20_token.address, ocean.web3.toWei(1, "ether")
-    )
-    # print(f"Price of 1 {erc20_token.symbol()} is {pretty_ether_and_wei(price, 'OCEAN')}")
+    # TODO: pricing and place pricing in readme
 
     bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
     bob_wallet = Wallet(
@@ -139,3 +133,5 @@ def test_marketplace_flow():
     assert erc20_token.balanceOf(bob_wallet.address) >= ocean.web3.toWei(
         1, "ether"
     ), "Bob didn't get 1.0 datatokens"
+
+    # TODO: order and pay

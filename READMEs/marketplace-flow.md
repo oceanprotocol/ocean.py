@@ -209,7 +209,7 @@ print(f"BPool address: {bpool.address}")
 
 ```
 
-## 3. Marketplace displays asset for sale
+## 3. Marketplace displays asset for sale (TODO)
 
 Now, you're the Marketplace operator. Here's how to get info about the data asset.
 
@@ -234,45 +234,47 @@ print(f"Price of 1 {data_token.symbol()} is {pretty_ether_and_wei(price_in_OCEAN
 ```
 
 ## 4.  Bob buys data asset, and downloads it
-
 Now, you're Bob the data consumer.
 
 In the same Python console as before:
 
 ```python
-#Bob's wallet
+# Bob's wallet
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
 bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
-#Verify that Bob has ganache ETH
+# Verify that Bob has ganache ETH
 assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
-#Verify that Bob has ganache OCEAN
+# Verify that Bob has ganache OCEAN
 assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
 
-#Bob buys 1.0 datatokens - the amount needed to consume the dataset.
-data_token = ocean.get_data_token(token_address)
-ocean.pool.buy_data_tokens(
-    pool_address,
-    amount=to_wei(1), # buy 1.0 datatoken
-    max_OCEAN_amount=to_wei(10), # pay up to 10.0 OCEAN
-    from_wallet=bob_wallet
+# Bob buys 1.0 datatokens - the amount needed to consume the dataset.
+OCEAN_token.approve(bpool.address, ocean.web3.toWei("10000", "ether"), from_wallet=bob_wallet)
+
+bpool.swap_exact_amount_out(
+    [OCEAN_token.address, erc20_token.address, ZERO_ADDRESS],
+    [
+        ocean.web3.toWei(10, "ether"),
+        ocean.web3.toWei(1, "ether"),
+        ocean.web3.toWei(10, "ether"),
+        0,
+    ],
+    from_wallet=bob_wallet,
 )
+assert erc20_token.balanceOf(bob_wallet.address) >= ocean.web3.toWei(
+    1, "ether"
+), "Bob didn't get 1.0 datatokens"
 
-from ocean_lib.web3_internal.currency import pretty_ether_and_wei
-print(f"Bob has {pretty_ether_and_wei(data_token.balanceOf(bob_wallet.address), data_token.symbol())}.")
-
-assert data_token.balanceOf(bob_wallet.address) >= to_wei(1), "Bob didn't get 1.0 datatokens"
-
-#Bob points to the service object
+# Bob points to the service object
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 fee_receiver = ZERO_ADDRESS # could also be market address
-from ocean_lib.agreements.service_types import ServiceTypes
 asset = ocean.assets.resolve(did)
-service = asset.get_service(ServiceTypes.ASSET_ACCESS)
+service = asset.get_service("access")
 
-#Bob sends his datatoken to the service
+# Bob sends his datatoken to the service
+# TODO
 quote = ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
 order_tx_id = ocean.assets.pay_for_service(
     ocean.web3,
