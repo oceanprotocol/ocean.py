@@ -18,14 +18,14 @@ Ocean `barge` runs ganache (local blockchain), Provider (data service), and Aqua
 In a new console:
 
 ```console
-#grab repo
+# Grab repo
 git clone https://github.com/oceanprotocol/barge
 cd barge
 
-#clean up old containers (to be sure)
+# Clean up old containers (to be sure)
 docker system prune -a --volumes
 
-#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
+# Run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
 ./start_ocean.sh
 ```
 
@@ -34,37 +34,37 @@ docker system prune -a --volumes
 In a new console:
 
 ```console
-#Grab ocean.py repo
+# Grab ocean.py repo
 cd Desktop/
 git clone https://github.com/oceanprotocol/ocean.py.git
 git checkout v4main
 
-#Create your working directory. Copy artifacts.
+# Create your working directory. Copy artifacts.
 mkdir test3
 cd test3
 cp -r ../ocean.py/artifacts ./
 
-#Initialize virtual environment and activate it. Install artifacts.
+# Initialize virtual environment and activate it. Install artifacts.
 python3 -m venv venv
 source venv/bin/activate
 chmod 777 artifacts/install-remote.sh
 ./artifacts/install-remote.sh
 
-#Intermediary installation before PyPi release of V4. Install wheel first to avoid errors.
+# Intermediary installation before PyPi release of V4. Install wheel first to avoid errors.
 pip3 install wheel
 pip3 install --no-cache-dir ../ocean.py/
 
 
-#set envvars
+# Set envvars
 export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 
-#set the address file only for ganache
+# Set the address file only for ganache
 export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
 
-#set network URL
+# Set network URL
 export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 
-#go into python
+# Go into python
 python
 ```
 
