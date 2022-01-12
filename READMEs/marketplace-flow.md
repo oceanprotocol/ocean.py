@@ -143,7 +143,7 @@ erc20_data = ErcCreateData(
         ZERO_ADDRESS,
         ocean.OCEAN_address,
     ],
-    uints=[ocean.web3.toWei("0.5", "ether"), 0],
+    uints=[ocean.web3.toWei(100000, "ether"), 0],
     bytess=[b""],
 )
 
@@ -189,28 +189,24 @@ In order to encrypt the entire asset, when using a private market or metadata ca
 Same for compression and you can use a combination of the two. E.g:
 `asset = ocean.assets.create(..., encrypt_flag=True)` or `asset = ocean.assets.create(..., compress_flag=True)`
 
-In the following steps we will bind a pool to the created token.
+In the following steps we will create a pool from the created token, in order to allow another user
+to order this access token.
 ```python
-# Mint the datatokens
-from ocean_lib.web3_internal.currency import to_wei
-data_token.mint(alice_wallet.address, to_wei(100), alice_wallet)
+erc20_token = ocean.get_data_token(asset.get_service("access").data_token)
+OCEAN_token = ocean.get_data_token(ocean.OCEAN_address)
 
-#In the create() step below, Alice needs ganache OCEAN. Ensure she has it.
-from ocean_lib.models.btoken import BToken #BToken is ERC20
-OCEAN_token = BToken(ocean.web3, ocean.OCEAN_address)
-assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need OCEAN"
+ss_params = [
+    ocean.web3.toWei(1, "ether"),
+    OCEAN_token.decimals(),
+    ocean.web3.toWei(10000, "ether"),
+    2500000,
+    ocean.web3.toWei(2000, "ether")
+]
 
-#Post the asset for sale. This does many blockchain txs: create base
-# pool, bind OCEAN and datatoken, add OCEAN and datatoken liquidity,
-# and finalize the pool.
-pool = ocean.pool.create(
-   token_address,
-   data_token_amount=to_wei(100),
-   OCEAN_amount=to_wei(10),
-   from_wallet=alice_wallet
-)
-pool_address = pool.address
-print(f"pool_address = '{pool_address}'")
+swap_fees = [ocean.web3.toWei(0.01, "ether"), ocean.web3.toWei(0.01, "ether")]
+bpool = ocean.create_pool(erc20_token, OCEAN_token, ss_params, swap_fees, alice_wallet)
+print(f"BPool address: {bpool.address}")
+
 ```
 
 ## 3. Marketplace displays asset for sale
