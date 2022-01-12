@@ -145,6 +145,26 @@ def test_update(publisher_ocean_instance, publisher_wallet, config, metadata=Non
     assert _asset.services[0].data_token == ddo.datatokens[0].get("address")
     assert _asset.services[1].data_token == ddo2.datatokens[0].get("address")
 
+    # Delete datatoken
+    _description = "Test delete datatoken"
+    new_metadata["description"] = _description
+    new_metadata["updated"] = datetime.utcnow().strftime("%Y-%d-%mT%H:%M:%SZ")
+
+    ocean.assets.update(
+        did=ddo.did,
+        new_metadata=new_metadata,
+        publisher_wallet=publisher_wallet,
+        delete_erc20_tokens=[_asset.datatokens[0].get("address")],
+    )
+
+    datatoken_to_keep = _asset.datatokens[1]
+    _asset = wait_for_update(ocean, ddo.did, "description", _description)
+    assert _asset, "Cannot read asset after update."
+    assert len(_asset.datatokens) == 1
+    assert len(_asset.services) == 1
+    assert _asset.datatokens[0].get("address") == datatoken_to_keep.get("address")
+    assert _asset.services[0].data_token == datatoken_to_keep.get("address")
+
 
 def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet, config):
     """Tests that a created asset can be searched successfully."""
