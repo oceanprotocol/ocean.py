@@ -158,7 +158,6 @@ class Ocean:
 
         if not token_uri:
             token_uri = "https://oceanprotocol.com/nft/"
-            
 
         nft_factory = self.get_nft_factory()
         tx_id = nft_factory.deploy_erc721_contract(
