@@ -52,7 +52,7 @@ def test_marketplace_flow():
             ZERO_ADDRESS,
             ocean.OCEAN_address,
         ],
-        uints=[ocean.web3.toWei(0.05, "ether"), 0],
+        uints=[ocean.web3.toWei(100000, "ether"), 0],
         bytess=[b""],
     )
 
@@ -91,23 +91,23 @@ def test_marketplace_flow():
     ######## Place in readme ##########
     erc20_token = ocean.get_data_token(asset.services[0].data_token)
 
-    initial_ocean_liq = ocean.web3.toWei(0.02, "ether")
+    initial_ocean_liq = ocean.web3.toWei(2000, "ether")
     OCEAN_token = ERC20Token(ocean.web3, ocean.OCEAN_address)
     OCEAN_token.approve(
         get_address_of_type(config, "Router"),
-        ocean.web3.toWei(0.02, "ether"),
+        ocean.web3.toWei(2000, "ether"),
         alice_wallet,
     )
 
     pool_data = PoolData(
         [
-            ocean.web3.toWei(0.01, "ether"),
+            ocean.web3.toWei(1, "ether"),
             OCEAN_token.decimals(),
-            2000,
+            ocean.web3.toWei(10000, "ether"),
             2500000,
             initial_ocean_liq,
         ],
-        [ocean.web3.toWei(0.02, "ether"), ocean.web3.toWei(0.01, "ether")],
+        [ocean.web3.toWei(0.01, "ether"), ocean.web3.toWei(0.01, "ether")],
         [
             get_address_of_type(config, "Staking"),
             OCEAN_token.address,
@@ -152,11 +152,15 @@ def test_marketplace_flow():
 
     from ocean_lib.web3_internal.currency import to_wei
 
+    OCEAN_token.approve(
+        bpool.address, ocean.web3.toWei("10000", "ether"), from_wallet=bob_wallet
+    )
+
     bpool.swap_exact_amount_out(
         [OCEAN_token.address, erc20_token.address, ZERO_ADDRESS],
-        [to_wei(10), to_wei(1), 2 ** 255, bpool.get_swap_fee()],
+        [to_wei(10), to_wei(1), to_wei(10), 0],
         from_wallet=bob_wallet,
     )
     assert erc20_token.balanceOf(bob_wallet.address) >= ocean.web3.toWei(
-        1
+        1, "ether"
     ), "Bob didn't get 1.0 datatokens"
