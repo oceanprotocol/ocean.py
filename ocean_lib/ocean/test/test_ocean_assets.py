@@ -80,7 +80,9 @@ def test_update(publisher_ocean_instance, publisher_wallet, config, metadata=Non
     _description = "Updated description"
     ddo.metadata["description"] = _description
 
-    ocean.assets.update(asset=ddo, publisher_wallet=publisher_wallet)
+    ocean.assets.update(
+        did=ddo.did, metadata=ddo.metadata, publisher_wallet=publisher_wallet
+    )
 
     _asset = wait_for_update(ocean, ddo.did, "description", _description)
 

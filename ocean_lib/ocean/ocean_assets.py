@@ -394,59 +394,156 @@ class OceanAssets:
 
     def update(
         self,
-        asset: Asset,
+        did: str,
         publisher_wallet: Wallet,
+        metadata: Optional[dict] = None,
+        encrypted_files: Optional[str] = None,
+        new_services: Optional[list] = None,
+        credentials: Optional[list] = None,
         provider_uri: Optional[str] = None,
+        new_erc20_tokens_data: Optional[List[ErcCreateData]] = [],
+        new_deployed_erc20_tokens: Optional[List[ERC20Token]] = [],
+        delete_erc20_tokens: Optional[List[str]] = [],
         encrypt_flag: Optional[bool] = False,
         compress_flag: Optional[bool] = False,
     ) -> str:
-        try:
-            # Validation by Aquarius
-            validation_result, validation_errors = self.validate(asset)
-            if not validation_result:
-                msg = f"Asset has validation errors: {validation_errors}"
-                logger.error(msg)
-                raise ValueError(msg)
 
-            erc721_token = ERC721Token(self._web3, asset.nft_address)
+        old_asset = self._get_aquarius(self._metadata_cache_uri).wait_for_asset(did)
 
-            if not provider_uri:
-                provider_uri = DataServiceProvider.get_url(self._config)
+        assert old_asset, "Asset not found."
 
-            [document, flags, ddo_hash] = self.process_ddo(
-                asset, provider_uri, encrypt_flag, compress_flag
+        # Metadata sanity check
+        if metadata:
+            assert isinstance(
+                metadata, dict
+            ), f"Expected metadata of type dict, got {type(metadata)}"
+
+            asset_type = metadata.get("type")
+            assert asset_type in (
+                "dataset",
+                "algorithm",
+            ), f"Invalid/unsupported asset type {asset_type}"
+
+            assert "name" in metadata, "Must have name in metadata."
+
+        if not provider_uri:
+            provider_uri = DataServiceProvider.get_url(self._config)
+
+        address = get_address_of_type(self._config, ERC721FactoryContract.CONTRACT_NAME)
+        erc721_factory = ERC721FactoryContract(self._web3, address)
+        erc721_address = old_asset.nft_address
+
+        # Verify nft address
+        if not erc721_factory.verify_nft(erc721_address):
+            raise ContractNotFound(
+                f"NFT address {erc721_address} is not found in the ERC721Factory events."
             )
 
-            tx_id = erc721_token.set_metadata(
-                metadata_state=0,
-                metadata_decryptor_url=provider_uri,
-                metadata_decryptor_address=publisher_wallet.address,
-                flags=flags,
-                data=document,
-                data_hash=ddo_hash,
-                data_proofs=[],
-                from_wallet=publisher_wallet,
+        assert erc721_address, "nft_address is required for publishing a dataset asset."
+        erc721_token = ERC721Token(self._web3, erc721_address)
+
+        # Copy original asset
+        asset = copy.deepcopy(old_asset)
+
+        # Check that the ddo is registered
+        if not self._get_aquarius().ddo_exists(did):
+            raise AquariusError(f"Asset id {did} not registered.")
+
+        assert asset.chain_id == self._web3.eth.chain_id, "Chain id mismatch."
+
+        # Override metadata if provided
+        asset.metadata = metadata if metadata else old_asset.metadata
+
+        # Override credentials if provided
+        asset.credentials = credentials if credentials else old_asset.credentials
+
+        # Keep the old erc20 addresses that are not in delete_erc20_tokens list
+        erc20_addresses = [
+            dt.get("address")
+            for dt in old_asset.datatokens
+            if dt.get("address") not in delete_erc20_tokens
+        ]
+
+        # Keep the old services whose datatoken addresses are not in delete_erc20_tokens list and add new services
+        services = [
+            service
+            for service in old_asset.services
+            if service.data_token not in delete_erc20_tokens
+        ] + (new_services or [])
+
+        deployed_erc20_tokens = [
+            ERC20Token(self._web3, erc20_token_address)
+            for erc20_token_address in erc20_addresses
+        ]
+
+        erc20_addresses_to_add = []
+
+        # Check that the new erc20 tokens are not already in the asset
+        for erc20_token in new_deployed_erc20_tokens:
+            assert (
+                erc20_token.address not in erc20_addresses
+            ), f"Deployed ERC20 token {erc20_token.address} already exist."
+
+        if not new_deployed_erc20_tokens:
+            # Deploy new ERC20 tokens
+            for erc20_token_data in new_erc20_tokens_data:
+                erc20_addresses_to_add.append(
+                    self.deploy_datatoken(
+                        erc721_factory=erc721_factory,
+                        erc721_token=erc721_token,
+                        erc20_data=erc20_token_data,
+                        from_wallet=publisher_wallet,
+                    )
+                )
+            if not new_services:
+                for erc20_address in erc20_addresses_to_add:
+                    services = self._add_defaults(
+                        services, erc20_address, encrypted_files, provider_uri
+                    )
+            for erc20_token_address in erc20_addresses_to_add:
+                deployed_erc20_tokens.append(
+                    ERC20Token(self._web3, erc20_token_address)
+                )
+
+            data_tokens = self.build_data_tokens_list(
+                services=services, deployed_erc20_tokens=deployed_erc20_tokens
             )
+        else:
+            if not new_services:
+                for erc20_token in new_deployed_erc20_tokens:
+                    services = self._add_defaults(
+                        services, erc20_token.address, encrypted_files, provider_uri
+                    )
 
-            tx_receipt = self._web3.eth.wait_for_transaction_receipt(tx_id)
+        data_tokens = self.build_data_tokens_list(
+            services=services, deployed_erc20_tokens=new_deployed_erc20_tokens
+        )
 
-            registered_token_event = erc721_token.get_event_log(
-                ERC721Token.EVENT_METADATA_UPDATED,
-                tx_receipt.blockNumber,
-                self._web3.eth.block_number,
-                None,
-            )
+        asset.datatokens = data_tokens
 
-            assert registered_token_event, "Cannot find MetadataUpdated event."
+        asset.services = services
 
-            logger.info("Asset/ddo updated on-chain successfully.")
+        # Validation by Aquarius
+        validation_result, validation_errors = self.validate(asset)
+        if not validation_result:
+            msg = f"Asset has validation errors: {validation_errors}"
+            logger.error(msg)
+            raise ValueError(msg)
 
-            return tx_id
-        except ValueError as ve:
-            raise ValueError(f"Invalid value to update in the metadata: {str(ve)}")
-        except Exception as e:
-            logger.error(f"Update asset on-chain failed: {str(e)}")
-            raise
+        document, flags, ddo_hash = self.process_ddo(
+            asset, provider_uri, encrypt_flag, compress_flag
+        )
+
+        return erc721_token.set_metadata(
+            metadata_state=0,
+            metadata_decryptor_url=provider_uri,
+            metadata_decryptor_address=publisher_wallet.address,
+            flags=flags,
+            data=document,
+            data_hash=ddo_hash,
+            data_proofs=[],
+            from_wallet=publisher_wallet,
+        )
 
     @enforce_types
     def resolve(self, did: str) -> "Asset":
