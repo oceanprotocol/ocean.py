@@ -170,19 +170,6 @@ class Ocean:
         token = ERC721Token(self.web3, address)
         return token
 
-    def create_data_token(
-        self,
-        erc20_data: ErcCreateData,
-        erc721_token: ERC721Token,
-        from_wallet: Wallet,
-    ) -> ERC20Token:
-        nft_factory = self.get_nft_factory()
-        tx_id = erc721_token.create_erc20(erc20_data, from_wallet)
-        address = nft_factory.get_data_token_address(tx_id)
-        assert address, "new data token has no address"
-        token = ERC20Token(self.web3, address)
-        return token
-
     @enforce_types
     def get_nft_token(self, token_address: str) -> ERC721Token:
         """

@@ -112,7 +112,7 @@ erc20_data = ErcCreateData(
         ],
         uints=[cap, 0],
         bytess=[b""])
-erc20_token = ocean.create_data_token(erc20_data=erc20_data, erc721_token=erc721_token, from_wallet=wallet)
+erc20_token = erc721_token.create_erc20_token(erc20_data=erc20_data, from_wallet=wallet)
 print(f"Created ERC20 token: done. Its address is {erc20_token.address}")
 print(f"ERC20 token name: {erc20_token.token_name()}")
 print(f"ERC20 token symbol: {erc20_token.symbol()}")
