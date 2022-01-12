@@ -21,8 +21,8 @@ from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import (
     get_registered_algorithm_ddo,
     get_registered_algorithm_ddo_different_provider,
-    get_registered_ddo_with_access_service,
-    get_registered_ddo_with_compute_service,
+    get_registered_asset_with_access_service,
+    get_registered_asset_with_compute_service,
     wait_for_update,
 )
 from web3.logs import DISCARD
@@ -31,7 +31,7 @@ from web3.logs import DISCARD
 @pytest.fixture
 def dataset_with_compute_service(publisher_wallet, publisher_ocean_instance):
     # Dataset with compute service
-    asset = get_registered_ddo_with_compute_service(
+    asset = get_registered_asset_with_compute_service(
         publisher_ocean_instance, publisher_wallet
     )
 
@@ -56,7 +56,7 @@ def dataset_with_compute_service_and_trusted_algorithm(
     publisher_wallet, publisher_ocean_instance, algorithm
 ):
     # Setup algorithm meta to run raw algorithm
-    asset = get_registered_ddo_with_compute_service(
+    asset = get_registered_asset_with_compute_service(
         publisher_ocean_instance, publisher_wallet, trusted_algorithms=[algorithm.did]
     )
     # verify the ddo is available in Aquarius
@@ -87,7 +87,7 @@ def process_order(
         service_id=service.id,
         consumer_address=consumer_wallet.address,
         service_endpoint=initialize_url,
-        # TODO: add a real compute environment
+        # TODO: add a real compute environment once provider supports it
         compute_environment="doesn't matter for now",
     ).json()
 
@@ -286,7 +286,7 @@ def test_compute_multi_inputs(
 ):
     """Tests that a compute job with additional Inputs (multiple assets) starts properly."""
     # Another dataset, this time with download service
-    another_dataset = get_registered_ddo_with_access_service(
+    another_dataset = get_registered_asset_with_access_service(
         publisher_ocean_instance, publisher_wallet
     )
     # verify the ddo is available in Aquarius
