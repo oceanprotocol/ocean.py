@@ -482,3 +482,15 @@ class OceanAssets:
         )
 
         return tx_id
+
+    @enforce_types
+    def encrypt_files(self, files: list):
+        data_provider = DataServiceProvider
+
+        service_endpoint = data_provider.build_encrypt_endpoint(
+            self._config.provider_url
+        )[1]
+
+        encrypt_response = data_provider.encrypt(files, service_endpoint)
+
+        return encrypt_response.content.decode("utf-8")

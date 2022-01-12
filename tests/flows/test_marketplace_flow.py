@@ -5,7 +5,6 @@
 import os
 
 from ocean_lib.agreements.file_objects import UrlFile
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
@@ -70,9 +69,7 @@ def test_marketplace_flow(tmp_path):
     )
 
     # Encrypt file(s) using provider
-    provider_url = config.provider_url + "/api/services/encrypt"
-    encrypt_response = DataServiceProvider.encrypt([url_file], provider_url)
-    encrypted_files = encrypt_response.content.decode("utf-8")
+    encrypted_files = ocean.assets.encrypt_files([url_file])
 
     # Publish asset with services on-chain.
     # The download (access service) is automatically created, but you can explore other options as well

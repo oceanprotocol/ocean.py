@@ -168,10 +168,7 @@ url_file = UrlFile(
 
 # Encrypt file(s) using provider
 ```python
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-provider_url = config.provider_url + "/api/services/encrypt"
-encrypt_response = DataServiceProvider.encrypt([url_file], provider_url)
-encrypted_files = encrypt_response.content.decode("utf-8")
+encrypted_files = ocean.assets.encrypt_files([url_file])
 
 
 # Publish asset with services on-chain.
