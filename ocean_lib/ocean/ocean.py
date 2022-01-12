@@ -9,8 +9,11 @@ from typing import Dict, List, Optional, Type, Union
 
 from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
+from web3.logs import DISCARD
+
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.exceptions import VerifyTxFailed
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
@@ -155,6 +158,7 @@ class Ocean:
 
         if not token_uri:
             token_uri = "https://oceanprotocol.com/nft/"
+            
 
         nft_factory = self.get_nft_factory()
         tx_id = nft_factory.deploy_erc721_contract(
@@ -202,6 +206,33 @@ class Ocean:
             )
 
         return ERC721FactoryContract(self.web3, nft_factory_address)
+
+    # Temporary solution until FixedRateExchange class will be fixed
+    @enforce_types
+    def create(self, data_token: str, exchange_rate: int, wallet: Wallet) -> str:
+        assert exchange_rate > 0, "Invalid exchange rate, must be > 0"
+        exchange = self._exchange_contract()
+        tx_id = exchange.create(
+            self.ocean_address, data_token, exchange_rate, from_wallet=wallet
+        )
+        # get tx receipt
+        tx_receipt = exchange.get_tx_receipt(self.web3, tx_id)
+        # get event log from receipt
+        logs = exchange.contract.events.ExchangeCreated().processReceipt(
+            tx_receipt, errors=DISCARD
+        )
+        if not logs:
+            raise VerifyTxFailed(
+                f"Create new datatoken exchange failed, transaction receipt for tx {tx_id} is not found."
+            )
+
+        exchange_id = logs[0].args.exchangeId  # get from event log args
+        # compare exchange_id to generateExchangeId() value
+        assert exchange_id == exchange.generateExchangeId(
+            self.ocean_address, data_token, wallet.address
+        )
+
+        return exchange_id
 
     # TODO: adapt for v4
     @enforce_types
