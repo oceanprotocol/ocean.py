@@ -103,7 +103,7 @@ python
 
 In the Python console:
 ```python
-#create ocean instance
+# Create Ocean instance
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
 config = ExampleConfig.get_config()
@@ -114,90 +114,96 @@ print(f"config.block_confirmations = {config.block_confirmations.value}")
 print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
 print(f"config.provider_url = '{config.provider_url}'")
 
-#Alice's wallet
+# Create Alice's wallet
 import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
 alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
-#Mint OCEAN
+# Mint OCEAN
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
-
-#Publish a datatoken
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
-token_address = data_token.address
+
+# Publish an NFT token
+nft_token = ocean.create_nft_token('NFTToken1', 'NFT1', alice_wallet)
+token_address = nft_token.address
 print(f"token_address = '{token_address}'")
 
-#Specify metadata and service attributes, using the Branin test dataset
-date_created = "2019-12-28T10:55:11Z"
-metadata =  {
-    "main": {
-        "type": "dataset", "name": "branin", "author": "Trent",
-        "license": "CC0: Public Domain", "dateCreated": date_created,
-        "files": [{"index": 0, "contentType": "text/text",
-	           "url": "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"}]}
-}
-service_attributes = {
-        "main": {
-            "name": "dataAssetAccessServiceAgreement",
-            "creator": alice_wallet.address,
-            "timeout": 3600 * 24,
-            "datePublished": date_created,
-            "cost": 1.0, # <don't change, this is obsolete>
-        }
-    }
-
-#Publish metadata and service attributes on-chain.
-# The service urls will be encrypted before going on-chain.
-# They're only decrypted for datatoken owners upon consume.
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.agreements.service_types import ServiceTypes
-from ocean_lib.services.service import Service
-
-service_endpoint = DataServiceProvider.get_url(ocean.config)
-download_service = Service(
-    service_endpoint=service_endpoint,
-    service_type=ServiceTypes.ASSET_ACCESS,
-    attributes=service_attributes,
+# Prepare data for ERC20 token
+from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+erc20_data = ErcCreateData(
+    template_index=1,
+    strings=["Datatoken 1", "DT1"],
+    addresses=[
+        alice_wallet.address,
+        alice_wallet.address,
+        ZERO_ADDRESS,
+        ocean.OCEAN_address,
+    ],
+    uints=[ocean.web3.toWei(100000, "ether"), 0],
+    bytess=[b""],
 )
-assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
+
+# Specify metadata and services, using the Branin test dataset
+date_created = "2021-12-28T10:55:11Z"
+
+metadata = {
+    "created": date_created,
+    "updated": date_created,
+    "description": "Branin dataset",
+    "name": "Branin dataset",
+    "type": "dataset",
+    "author": "Treunt",
+    "license": "CC0: PublicDomain",
+}
+
+# ocean.py offers multiple file types, but a simple url file should be enough for this example
+from ocean_lib.agreements.file_objects import UrlFile
+url_file = UrlFile(
+    url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+)
+
+# Encrypt file(s) using provider
+```python
+encrypted_files = ocean.assets.encrypt_files([url_file])
+
+
+# Publish asset with services on-chain.
+# The download (access service) is automatically created, but you can explore other options as well
 asset = ocean.assets.create(
-  metadata,
-  alice_wallet,
-  services=[download_service],
-  data_token_address=token_address)
-assert token_address == asset.data_token_address
+    metadata, alice_wallet, encrypted_files, erc20_tokens_data=[erc20_data]
+)
 
 did = asset.did  # did contains the datatoken address
 print(f"did = '{did}'")
+
 ```
 
-In order to encrypt the entire asset, when using a private market or metadata cache, use the encrypt keyword:
-`asset = ocean.assets.create(..., encrypt=True)`
+In order to encrypt the entire asset, when using a private market or metadata cache, use the encrypt keyword.
+Same for compression and you can use a combination of the two. E.g:
+`asset = ocean.assets.create(..., encrypt_flag=True)` or `asset = ocean.assets.create(..., compress_flag=True)`
+
+In the following steps we will create a pool from the created token, in order to allow another user
+to order this access token.
 ```python
-#Mint the datatokens
-from ocean_lib.web3_internal.currency import to_wei
-data_token.mint(alice_wallet.address, to_wei(100), alice_wallet)
+erc20_token = ocean.get_datatoken(asset.get_service("access").datatoken)
+OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 
-#In the create() step below, Alice needs ganache OCEAN. Ensure she has it.
-from ocean_lib.models.btoken import BToken #BToken is ERC20
-OCEAN_token = BToken(ocean.web3, ocean.OCEAN_address)
-assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need OCEAN"
+ss_params = [
+    ocean.web3.toWei(1, "ether"),
+    OCEAN_token.decimals(),
+    ocean.web3.toWei(10000, "ether"),
+    2500000,
+    ocean.web3.toWei(2000, "ether")
+]
 
-#Post the asset for sale. This does many blockchain txs: create base
-# pool, bind OCEAN and datatoken, add OCEAN and datatoken liquidity,
-# and finalize the pool.
-pool = ocean.pool.create(
-   token_address,
-   data_token_amount=to_wei(100),
-   OCEAN_amount=to_wei(10),
-   from_wallet=alice_wallet
-)
-pool_address = pool.address
-print(f"pool_address = '{pool_address}'")
+swap_fees = [ocean.web3.toWei(0.01, "ether"), ocean.web3.toWei(0.01, "ether")]
+bpool = ocean.create_pool(erc20_token, OCEAN_token, ss_params, swap_fees, alice_wallet)
+print(f"BPool address: {bpool.address}")
+
 ```
 
 ## 3. Marketplace displays asset for sale
@@ -207,77 +213,73 @@ Now, you're the Marketplace operator. Here's how to get info about the data asse
 In the same Python console as before:
 
 ```python
-#point to services
-from ocean_lib.agreements.service_types import ServiceTypes
-asset = ocean.assets.resolve(did)
-service1 = asset.get_service(ServiceTypes.ASSET_ACCESS)
+price_in_OCEAN = bpool.get_amount_in_exact_out(
+    OCEAN_token.address,
+    erc20_token.address,
+    ocean.web3.toWei(1, "ether"),
+    ocean.web3.toWei(0.01, "ether")
+)
 
-#point to pool
-pool = ocean.pool.get(ocean.web3, pool_address)
-
-#To access a data service, you need 1.0 datatokens.
-#Here, the market retrieves the datatoken price denominated in OCEAN.
-OCEAN_address = ocean.OCEAN_address
-price_in_OCEAN = ocean.pool.calcInGivenOut(
-    pool_address, OCEAN_address, token_address, token_out_amount=to_wei(1))
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
-print(f"Price of 1 {data_token.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
+print(f"Price of 1 {erc20_token.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
 ```
 
-## 4.  Bob buys data asset, and downloads it
-
+## 4. Bob buys data asset, and downloads it
 Now, you're Bob the data consumer.
 
 In the same Python console as before:
 
 ```python
-#Bob's wallet
+# Bob's wallet
 bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
 bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
-#Verify that Bob has ganache ETH
+# Verify that Bob has ganache ETH
 assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
-#Verify that Bob has ganache OCEAN
+# Verify that Bob has ganache OCEAN
 assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
 
-#Bob buys 1.0 datatokens - the amount needed to consume the dataset.
-data_token = ocean.get_data_token(token_address)
-ocean.pool.buy_data_tokens(
-    pool_address,
-    amount=to_wei(1), # buy 1.0 datatoken
-    max_OCEAN_amount=to_wei(10), # pay up to 10.0 OCEAN
-    from_wallet=bob_wallet
+# Bob buys 1.0 datatokens - the amount needed to consume the dataset.
+OCEAN_token.approve(bpool.address, ocean.web3.toWei("10000", "ether"), from_wallet=bob_wallet)
+
+bpool.swap_exact_amount_out(
+    [OCEAN_token.address, erc20_token.address, ZERO_ADDRESS],
+    [
+        ocean.web3.toWei(10, "ether"),
+        ocean.web3.toWei(1, "ether"),
+        ocean.web3.toWei(10, "ether"),
+        0,
+    ],
+    from_wallet=bob_wallet,
 )
+assert erc20_token.balanceOf(bob_wallet.address) >= ocean.web3.toWei(
+    1, "ether"
+), "Bob didn't get 1.0 datatokens"
 
-from ocean_lib.web3_internal.currency import pretty_ether_and_wei
-print(f"Bob has {pretty_ether_and_wei(data_token.balanceOf(bob_wallet.address), data_token.symbol())}.")
-
-assert data_token.balanceOf(bob_wallet.address) >= to_wei(1), "Bob didn't get 1.0 datatokens"
-
-#Bob points to the service object
+# Bob points to the service object
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 fee_receiver = ZERO_ADDRESS # could also be market address
-from ocean_lib.agreements.service_types import ServiceTypes
 asset = ocean.assets.resolve(did)
-service = asset.get_service(ServiceTypes.ASSET_ACCESS)
+service = asset.get_service("access")
 
-#Bob sends his datatoken to the service
-quote = ocean.assets.order(asset.did, bob_wallet.address, service_index=service.index)
+# Bob sends his datatoken to the service
+service = asset.get_service("access")
 order_tx_id = ocean.assets.pay_for_service(
-    ocean.web3,
-    quote.amount,
-    quote.data_token_address,
-    asset.did,
-    service.index,
-    fee_receiver,
-    bob_wallet,
-    service.get_c2d_address()
+    asset, service, bob_wallet
 )
 print(f"order_tx_id = '{order_tx_id}'")
 
-#Bob downloads. If the connection breaks, Bob can request again by showing order_tx_id.
+# Bob downloads. If the connection breaks, Bob can request again by showing order_tx_id.
+file_path = ocean.assets.download_asset(
+    asset,
+    service.service_endpoint,
+    bob_wallet,
+    './',
+    order_tx_id
+)
+
 file_path = ocean.assets.download(
     asset.did,
     service.index,

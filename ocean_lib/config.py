@@ -38,8 +38,6 @@ NAME_AQUARIUS_URL = "aquarius.url"
 NAME_PROVIDER_URL = "provider.url"
 NAME_TRANSACTION_TIMEOUT = "transaction_timeout"
 
-NAME_DATA_TOKEN_FACTORY_ADDRESS = "dtfactory.address"
-NAME_BFACTORY_ADDRESS = "bfactory.address"
 NAME_OCEAN_ADDRESS = "OCEAN.address"
 
 NAME_PROVIDER_ADDRESS = "provider.address"
@@ -49,16 +47,6 @@ SECTION_ETH_NETWORK = "eth-network"
 SECTION_RESOURCES = "resources"
 
 environ_names_and_sections = {
-    NAME_DATA_TOKEN_FACTORY_ADDRESS: [
-        "DATA_TOKEN_FACTORY_ADDRESS",
-        "Data token factory address",
-        SECTION_ETH_NETWORK,
-    ],
-    NAME_BFACTORY_ADDRESS: [
-        "BFACTORY_ADDRESS",
-        "BPool factory address",
-        SECTION_ETH_NETWORK,
-    ],
     NAME_OCEAN_ADDRESS: ["OCEAN_ADDRESS", "OCEAN address", SECTION_ETH_NETWORK],
     NAME_NETWORK_URL: ["OCEAN_NETWORK_URL", "Network URL", SECTION_ETH_NETWORK],
     NAME_BLOCK_CONFIRMATIONS: [

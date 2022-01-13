@@ -268,7 +268,7 @@ class ContractBase(object):
     @enforce_types
     def deploy(cls, web3: Web3, deployer_wallet: Wallet, *args) -> str:
         """
-        Deploy the DataTokenTemplate and DTFactory contracts to the current network.
+        Deploy the ERCTokenTemplate contract to the current network.
 
         :param web3:
         :param deployer_wallet: Wallet instance

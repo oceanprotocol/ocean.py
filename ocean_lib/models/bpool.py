@@ -241,6 +241,20 @@ class BPool(BTokenBase):
     def get_spot_price(self, token_in: str, token_out: str) -> int:
         return self.contract.caller.getSpotPrice(token_in, token_out)
 
+    def get_amount_in_exact_out(
+        self, token_in: str, token_out: str, token_amount_out: int, swap_market_fee: int
+    ) -> int:
+        return self.contract.caller.getAmountOutExactIn(
+            token_in, token_out, token_amount_out, swap_market_fee
+        )
+
+    def get_amount_out_exact_in(
+        self, token_in: str, token_out: str, token_amount_in: int, swap_market_fee: int
+    ) -> int:
+        return self.contract.caller.getAmountOutExactIn(
+            token_in, token_out, token_amount_in, swap_market_fee
+        )
+
     def join_pool(
         self, pool_amount_out: int, max_amounts_in: List[int], from_wallet: Wallet
     ) -> str:

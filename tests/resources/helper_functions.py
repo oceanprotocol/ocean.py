@@ -6,7 +6,6 @@ import json
 import logging
 import logging.config
 import os
-import time
 from typing import Any, Dict, Optional
 
 import coloredlogs
@@ -16,7 +15,6 @@ from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import ExampleConfig
-from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
@@ -25,7 +23,6 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.ocean.util import get_web3 as util_get_web3
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
@@ -199,32 +196,6 @@ def setup_logging(
     else:
         logging.basicConfig(level=default_level)
         coloredlogs.install(level=default_level)
-
-
-@enforce_types
-def mint_tokens_and_wait(
-    data_token_contract: DataToken, receiver_address: str, minter_wallet: Wallet
-):
-    dtc = data_token_contract
-    tx_id = dtc.mint(receiver_address, to_wei(50), minter_wallet)
-    dtc.get_tx_receipt(dtc.web3, tx_id)
-    time.sleep(2)
-
-    def verify_supply(mint_amount=to_wei(50)):
-        supply = dtc.contract.caller.totalSupply()
-        if supply <= 0:
-            _tx_id = dtc.mint(receiver_address, mint_amount, minter_wallet)
-            dtc.get_tx_receipt(dtc.web3, _tx_id)
-            supply = dtc.contract.caller.totalSupply()
-        return supply
-
-    while True:
-        try:
-            s = verify_supply()
-            if s > 0:
-                break
-        except (ValueError, Exception):
-            pass
 
 
 def deploy_erc721_erc20(
