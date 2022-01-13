@@ -6,12 +6,9 @@ import os
 
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.models_structures import ErcCreateData, FixedData
+from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
@@ -56,28 +53,11 @@ def test_fre_flow():
         bytess=[b""],
     )
 
-    tx_id = nft_token.create_erc20(erc20_data, alice_wallet)
-    tx_receipt = ocean.web3.eth.wait_for_transaction_receipt(tx_id)
-
-    erc721_factory = ERC721FactoryContract(
-        ocean.web3, get_address_of_type(config, "ERC721Factory")
-    )
-
-    registered_event = erc721_factory.get_event_log(
-        ERC721FactoryContract.EVENT_TOKEN_CREATED,
-        tx_receipt.blockNumber,
-        ocean.web3.eth.block_number,
-        None,
-    )
-
-    erc20_address = registered_event[0].args.newTokenAddress
-    print(f"token_address = '{erc20_address}'")
+    erc20_token = nft_token.create_datatoken(erc20_data, alice_wallet)
+    print(f"token_address = '{erc20_token.address}'")
 
     # Mint the datatokens
-    fixed_price_address = get_address_of_type(config, "FixedPrice")
-    erc20_token = ERC20Token(ocean.web3, erc20_address)
     erc20_token.mint(alice_wallet.address, to_wei(100), alice_wallet)
-    erc20_token.approve(fixed_price_address, to_wei(100), alice_wallet)
 
     # Bob buys at fixed rate data tokens
     bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
@@ -94,34 +74,30 @@ def test_fre_flow():
 
     OCEAN_token = ERC20Token(ocean.web3, ocean.OCEAN_address)
 
-    # Create exchange_id for a new exchange
-    fixed_rate_data = FixedData(
-        fixed_price_address=fixed_price_address,
-        addresses=[
-            ocean.OCEAN_address,
-            alice_wallet.address,
-            alice_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[erc20_token.decimals(), OCEAN_token.decimals(), to_wei(1), int(1e15), 0],
-    )
-    tx_id = erc20_token.create_fixed_rate(
-        fixed_data=fixed_rate_data, from_wallet=alice_wallet
-    )
-    tx_receipt = ocean.web3.eth.wait_for_transaction_receipt(tx_id)
-    fixed_rate_event = erc20_token.get_event_log(
-        ERC721FactoryContract.EVENT_NEW_FIXED_RATE,
-        tx_receipt.blockNumber,
-        ocean.web3.eth.block_number,
-        None,
-    )
-    exchange_id = fixed_rate_event[0].args.exchangeId
-    fixed_rate_exchange = FixedRateExchange(ocean.web3, fixed_price_address)
+    # Prepare data for exchange
+    addresses = [
+        ocean.OCEAN_address,
+        alice_wallet.address,
+        alice_wallet.address,
+        ZERO_ADDRESS,
+    ]
+    uints = [erc20_token.decimals(), OCEAN_token.decimals(), to_wei(1), int(1e15), 0]
 
+    # Create exchange_id for a new exchange
+    exchange_id = ocean.create_fixed_rate(
+        erc20_token=erc20_token,
+        addresses=addresses,
+        uints=uints,
+        amount=to_wei(100),
+        from_wallet=alice_wallet,
+    )
+
+    # Approve tokens for Bob
+    fixed_price_address = ocean.fixed_rate_exchange.address
     erc20_token.approve(fixed_price_address, to_wei(100), bob_wallet)
     OCEAN_token.approve(fixed_price_address, to_wei(100), bob_wallet)
 
-    tx_result = fixed_rate_exchange.buy_dt(
+    tx_result = ocean.fixed_rate_exchange.buy_dt(
         exchange_id=exchange_id,
         data_token_amount=to_wei(20),
         max_base_token_amount=to_wei(50),
