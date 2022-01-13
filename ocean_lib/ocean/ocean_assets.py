@@ -411,9 +411,9 @@ class OceanAssets:
 
         :param did: The DID of the asset to update.
         :param new_metadata: dict conforming to the Metadata accepted by Ocean Protocol.
-        :param publisher_wallet: Wallet of the publisher registering this asset.
-        :param delete_erc20_tokens: List of existintg ERC20 tokens and related Services to delete.
-        :param encrypted_files: str of the files that need to be encrypted before publishing.
+        :param publisher_wallet: Wallet of the publisher updating this asset.
+        :param delete_erc20_tokens: List of existing ERC20 tokens and related Services to delete.
+        :param encrypted_files: str of the files that need to be encrypted before updating.
         :param new_services: list of new Service objects to add.
         :param new_credentials: new_credentials necessary for the asset.
         :param provider_uri: str URL of service provider. This will be used as base to construct the serviceEndpoint for the `access` (download) service
@@ -421,7 +421,7 @@ class OceanAssets:
         :param new_deployed_erc20_tokens: list of ERC20 tokens which are already deployed.
         :param encrypt_flag: bool for encryption of the DDO.
         :param compress_flag: bool for compression of the DDO.
-        :return: update tx
+        :return: update tx_result
         """
 
         old_asset = self._get_aquarius(self._metadata_cache_uri).wait_for_asset(did)

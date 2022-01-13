@@ -18,6 +18,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -219,6 +220,34 @@ def test_update(publisher_ocean_instance, publisher_wallet, config):
         _asset.datatokens[len(_asset.datatokens) - 1].get("address")
         == erc20_token.address
     )
+
+    # Test compress & update flags
+    _description = "Test compress & update flags"
+    new_metadata["description"] = _description
+    new_metadata["updated"] = datetime.now().isoformat()
+
+    erc721_token = ERC721Token(ocean.web3, _asset.nft_address)
+
+    tx_result = ocean.assets.update(
+        did=ddo.did,
+        publisher_wallet=publisher_wallet,
+        new_metadata=new_metadata,
+        compress_flag=True,
+        encrypt_flag=True,
+    )
+
+    tx_receipt = ocean.web3.eth.wait_for_transaction_receipt(tx_result)
+
+    registered_token_event = erc721_token.get_event_log(
+        ERC721Token.EVENT_METADATA_UPDATED,
+        tx_receipt.blockNumber,
+        ocean.web3.eth.block_number,
+        None,
+    )
+
+    _asset = wait_for_update(ocean, ddo.did, "description", _description)
+    assert _asset, "Cannot read asset after update."
+    assert registered_token_event[0].args.get("flags") == bytes([3])
 
 
 def test_update_fails(
