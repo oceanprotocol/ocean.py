@@ -26,6 +26,10 @@ def test_simple_flow():
         name="Dataset name", symbol="dtsymbol", from_wallet=wallet
     )
 
+    assert erc721_token.address
+    assert erc721_token.token_name() == "Dataset name"
+    assert erc721_token.symbol() == "dtsymbol"
+
     cap = to_wei(10)
     erc20_data = ErcCreateData(
         template_index=1,  # default value
@@ -42,6 +46,7 @@ def test_simple_flow():
     erc20_token = erc721_token.create_data_token(
         erc20_data=erc20_data, from_wallet=wallet
     )
-    print(f"Created ERC20 token: done. Its address is {erc20_token.address}")
-    print(f"ERC20 token name: {erc20_token.token_name()}")
-    print(f"ERC20 token symbol: {erc20_token.symbol()}")
+
+    assert erc20_token.address
+    assert erc20_token.token_name() == "ERC20DT1"
+    assert erc20_token.symbol() == "ERC20DT1Symbol"
