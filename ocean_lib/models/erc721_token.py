@@ -8,7 +8,9 @@ from typing import List
 from enforce_typing import enforce_types
 
 from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -238,10 +240,14 @@ class ERC721Token(ContractBase):
         )
 
     def create_erc20_token(
-        self, erc20_data: ErcCreateData, from_wallet: Wallet
+        self,
+        erc20_data: ErcCreateData,
+        nft_factory: ERC721FactoryContract,
+        from_wallet: Wallet,
     ) -> ERC20Token:
         tx_id = self.create_erc20(erc20_data, from_wallet)
-        address = self.get_data_token_address(tx_id)
+        address = nft_factory.get_data_token_address(tx_id)
         assert address, "new data token has no address"
         token = ERC20Token(self.web3, address)
+
         return token
