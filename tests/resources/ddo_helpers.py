@@ -14,7 +14,6 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.wallet import Wallet
-from tests.resources.helper_functions import mint_tokens_and_wait
 
 
 def get_resource_path(dir_name, file_name):
@@ -126,7 +125,7 @@ def get_registered_ddo(
 
     # Mint tokens for dataset and assign to publisher
     dt = ocean_instance.get_datatoken(asset.data_token_address)
-    mint_tokens_and_wait(dt, wallet.address, wallet)
+    # mint_tokens_and_wait(dt, wallet.address, wallet)
 
     ddo = wait_for_ddo(ocean_instance, asset.did)
     assert ddo, f"resolve did {asset.did} failed."

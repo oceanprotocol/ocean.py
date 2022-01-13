@@ -10,12 +10,10 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.currency import to_wei
-from tests.resources.ddo_helpers import get_registered_ddo
 from tests.resources.helper_functions import (
     get_another_consumer_ocean_instance,
     get_consumer_ocean_instance,
     get_publisher_ocean_instance,
-    mint_tokens_and_wait,
 )
 
 
@@ -42,7 +40,7 @@ def test_market_flow(publisher_wallet, consumer_wallet):
 
     # Mint data tokens and assign to publisher
     dt = publisher_ocean.get_datatoken(asset.data_token_address)
-    mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
+    # mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
 
     ######
     # Give the consumer some datatokens so they can order the service
@@ -126,7 +124,7 @@ def test_payer_market_flow(publisher_wallet, consumer_wallet, another_consumer_w
 
     # Mint data tokens and assign to publisher
     dt = publisher_ocean.get_datatoken(asset.data_token_address)
-    mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
+    # mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
 
     ######
     # Give the consumer some datatokens so they can order the service

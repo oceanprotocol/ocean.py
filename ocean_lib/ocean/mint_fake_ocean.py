@@ -33,7 +33,6 @@ def mint_fake_OCEAN(config: Config) -> None:
         transaction_timeout=config.transaction_timeout,
     )
 
-    # FIXME: temporary solution, will add support for v3 further (DataToken + mint)
     OCEAN_token = ERC20Token(web3, address=network_addresses["development"]["Ocean"])
     amt_distribute = to_wei(2000)
 
