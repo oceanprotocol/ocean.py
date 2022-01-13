@@ -6,8 +6,6 @@ from typing import Dict, Optional, Union
 
 from enforce_typing import enforce_types
 from ocean_lib.config import Config
-from ocean_lib.models.bfactory import BFactory
-from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.web3_internal.contract_utils import (
     get_contracts_addresses as get_contracts_addresses_web3,
 )
@@ -85,30 +83,6 @@ def get_address_of_type(
         addresses[address_type]
         if not isinstance(addresses[address_type], dict)
         else addresses[address_type].get(key, addresses[address_type]["1"])
-    )
-
-
-@enforce_types
-def get_dtfactory_address(
-    address_file: str, network: Optional[str] = None, web3: Optional[Web3] = None
-) -> str:
-    """Returns the DTFactory address for given network or web3 instance
-    Requires either network name or web3 instance.
-    """
-    return DTFactory.configured_address(
-        network or get_network_name(web3=web3), address_file
-    )
-
-
-@enforce_types
-def get_bfactory_address(
-    address_file: str, network: Optional[str] = None, web3: Optional[Web3] = None
-) -> str:
-    """Returns the BFactory address for given network or web3 instance
-    Requires either network name or web3 instance.
-    """
-    return BFactory.configured_address(
-        network or get_network_name(web3=web3), address_file
     )
 
 
