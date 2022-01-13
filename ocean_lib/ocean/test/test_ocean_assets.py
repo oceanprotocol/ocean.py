@@ -65,8 +65,8 @@ def test_update(publisher_ocean_instance, publisher_wallet, config, metadata=Non
 
     if not metadata:
         metadata = {
-            "created": datetime.utcnow().strftime("%Y-%d-%mT%H:%M:%SZ"),
-            "updated": datetime.utcnow().strftime("%Y-%d-%mT%H:%M:%SZ"),
+            "created": datetime.now().isoformat(),
+            "updated": datetime.now().isoformat(),
             "description": "Sample description",
             "name": "Sample asset",
             "type": "dataset",
@@ -92,7 +92,7 @@ def test_update(publisher_ocean_instance, publisher_wallet, config, metadata=Non
 
     _description = "Updated description"
     new_metadata["description"] = _description
-    new_metadata["updated"] = datetime.utcnow().strftime("%Y-%d-%mT%H:%M:%SZ")
+    new_metadata["updated"] = datetime.now().isoformat()
 
     # Update the asset metadata
     ocean.assets.update(
@@ -126,7 +126,7 @@ def test_update(publisher_ocean_instance, publisher_wallet, config, metadata=Non
     # Add new_deployed_erc20_tokens that do not exist in the asset
     _description = "Test new_deployed_erc20_tokens"
     new_metadata["description"] = _description
-    new_metadata["updated"] = datetime.utcnow().strftime("%Y-%d-%mT%H:%M:%SZ")
+    new_metadata["updated"] = datetime.now().isoformat()
 
     ocean.assets.update(
         did=ddo.did,
@@ -148,7 +148,7 @@ def test_update(publisher_ocean_instance, publisher_wallet, config, metadata=Non
     # Delete datatoken
     _description = "Test delete datatoken"
     new_metadata["description"] = _description
-    new_metadata["updated"] = datetime.utcnow().strftime("%Y-%d-%mT%H:%M:%SZ")
+    new_metadata["updated"] = datetime.now().isoformat()
 
     ocean.assets.update(
         did=ddo.did,
@@ -157,13 +157,74 @@ def test_update(publisher_ocean_instance, publisher_wallet, config, metadata=Non
         delete_erc20_tokens=[_asset.datatokens[0].get("address")],
     )
 
-    datatoken_to_keep = _asset.datatokens[1]
+    old_datatokens = _asset.datatokens
     _asset = wait_for_update(ocean, ddo.did, "description", _description)
     assert _asset, "Cannot read asset after update."
     assert len(_asset.datatokens) == 1
     assert len(_asset.services) == 1
-    assert _asset.datatokens[0].get("address") == datatoken_to_keep.get("address")
-    assert _asset.services[0].data_token == datatoken_to_keep.get("address")
+    assert _asset.datatokens[0].get("address") == old_datatokens[1].get("address")
+    assert _asset.services[0].data_token == old_datatokens[1].get("address")
+
+    # Add new tokens with new_erc20_tokens_data
+    _description = "Add erc20 tokens with new_erc20_tokens_data"
+    new_metadata["description"] = _description
+    new_metadata["updated"] = datetime.now().isoformat()
+
+    ocean.assets.update(
+        did=ddo.did,
+        new_metadata=new_metadata,
+        publisher_wallet=publisher_wallet,
+        encrypted_files=encrypted_files,
+        new_erc20_tokens_data=[erc20_data],
+    )
+
+    old_asset = _asset
+    _asset = wait_for_update(ocean, ddo.did, "description", _description)
+    assert _asset, "Cannot read asset after update."
+    assert len(_asset.datatokens) == len(old_asset.datatokens) + 1
+    assert len(_asset.services) == len(old_asset.services) + 1
+    assert _asset.datatokens[0].get("address") == old_asset.datatokens[0].get("address")
+
+    # Add new existing datatoken with service
+    _description = "Add new_deployed_erc20_tokens with services"
+    new_metadata["description"] = _description
+    new_metadata["updated"] = datetime.now().isoformat()
+
+    _, erc20_token = deploy_erc721_erc20(
+        publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
+    )
+
+    web3 = publisher_ocean_instance.web3
+    data_provider = DataServiceProvider
+    _, metadata, encrypted_files = create_basics(config, web3, data_provider)
+
+    access_service = Service(
+        service_id="0",
+        service_type=ServiceTypes.ASSET_ACCESS,
+        service_endpoint=f"{data_provider.get_url(config)}/api/services/download",
+        data_token=erc20_token.address,
+        files=encrypted_files,
+        timeout=0,
+    )
+
+    ocean.assets.update(
+        did=ddo.did,
+        new_metadata=new_metadata,
+        publisher_wallet=publisher_wallet,
+        new_deployed_erc20_tokens=[erc20_token],
+        encrypted_files=encrypted_files,
+        new_services=[access_service],
+    )
+
+    old_asset = _asset
+    _asset = wait_for_update(ocean, ddo.did, "description", _description)
+    assert _asset, "Cannot read asset after update."
+    assert len(_asset.datatokens) == len(old_asset.datatokens) + 1
+    assert len(_asset.services) == len(old_asset.services) + 1
+    assert (
+        _asset.datatokens[len(_asset.datatokens) - 1].get("address")
+        == erc20_token.address
+    )
 
 
 def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet, config):

@@ -428,10 +428,14 @@ class OceanAssets:
 
         assert old_asset, "Asset not found."
 
-        if new_deployed_erc20_tokens:
-            assert (
-                encrypted_files
-            ), "encrypted_files is required for adding new_deployed_erc20_tokens."
+        if new_deployed_erc20_tokens or new_erc20_tokens_data:
+            assert encrypted_files, "encrypted_files is required for adding new tokens."
+
+        # Check if datatokens in delete_erc20_tokens are in the old_asset
+        for delete_erc20_tokens_data in delete_erc20_tokens:
+            assert delete_erc20_tokens_data in [
+                dt.get("address") for dt in old_asset.datatokens
+            ], f"{delete_erc20_tokens_data} to delete is not in the old asset datatokens."
 
         # Metadata sanity check
         assert isinstance(
