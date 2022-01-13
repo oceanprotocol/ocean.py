@@ -259,7 +259,7 @@ class DataServiceProvider:
         :param compute_environment: str compute environment id
         :param algorithm: ComputeInput algorithm witha download service.
         :param algorithm_meta: AlgorithmMetadata algorithm metadata
-        :param algorithm_custom_data: TODO
+        :param algorithm_custom_data: dict customizable algo parameters (ie. no of iterations, etc)
         :param input_datasets: List[ComputeInput] additional input datasets
         :return job_info dict
         """
