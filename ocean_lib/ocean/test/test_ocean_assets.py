@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import copy
+from functools import reduce
 import time
 import uuid
 from datetime import datetime
@@ -31,8 +32,6 @@ from tests.resources.ddo_helpers import (
     wait_for_update,
 )
 from tests.resources.helper_functions import (
-    create_asset,
-    create_basics,
     deploy_erc721_erc20,
     get_address_of_type,
 )
@@ -133,8 +132,11 @@ def test_update(publisher_ocean_instance, publisher_wallet, config):
         encrypted_files=encrypted_files,
     )
 
+    old_asset = _asset
     _asset = wait_for_update(ocean, ddo.did, "description", _description)
     assert _asset, "Cannot read asset after update."
+    assert len(_asset.datatokens) == len(old_asset.datatokens) + 1
+    assert len(_asset.services) == len(old_asset.services) + 1
     assert _asset.datatokens[1].get("address") == erc20_token.address
     assert _asset.datatokens[0].get("address") == ddo.datatokens[0].get("address")
     assert _asset.services[0].data_token == ddo.datatokens[0].get("address")
@@ -194,7 +196,7 @@ def test_update(publisher_ocean_instance, publisher_wallet, config):
     _, _, encrypted_files = create_basics(config, web3, data_provider)
 
     access_service = Service(
-        service_id="0",
+        service_id="3",
         service_type=ServiceTypes.ASSET_ACCESS,
         service_endpoint=f"{data_provider.get_url(config)}/api/services/download",
         data_token=erc20_token.address,
@@ -216,6 +218,15 @@ def test_update(publisher_ocean_instance, publisher_wallet, config):
     assert _asset, "Cannot read asset after update."
     assert len(_asset.datatokens) == len(old_asset.datatokens) + 1
     assert len(_asset.services) == len(old_asset.services) + 1
+    assert (
+        reduce(
+            lambda x, datatoken: datatoken.get("address") == erc20_token.address
+            and datatoken
+            or x,
+            _asset.datatokens,
+        ).get("serviceId")
+        == "3"
+    )
     assert (
         _asset.datatokens[len(_asset.datatokens) - 1].get("address")
         == erc20_token.address

@@ -521,25 +521,24 @@ class OceanAssets:
                         from_wallet=publisher_wallet,
                     )
                 )
-            if not new_services:
-                for erc20_address in erc20_addresses_to_add:
-                    services = self._add_defaults(
-                        services, erc20_address, encrypted_files, provider_uri
-                    )
             for erc20_token_address in erc20_addresses_to_add:
                 deployed_erc20_tokens.append(
                     ERC20Token(self._web3, erc20_token_address)
                 )
+                if not new_services:
+                    services = self._add_defaults(
+                        services, erc20_token_address, encrypted_files, provider_uri
+                    )
 
             data_tokens = self.build_data_tokens_list(
                 services=services, deployed_erc20_tokens=deployed_erc20_tokens
             )
         else:
-            if not new_services:
-                for erc20_token in new_deployed_erc20_tokens:
-                    deployed_erc20_tokens.append(
-                        ERC20Token(self._web3, erc20_token.address)
-                    )
+            for erc20_token in new_deployed_erc20_tokens:
+                deployed_erc20_tokens.append(
+                    ERC20Token(self._web3, erc20_token.address)
+                )
+                if not new_services:
                     services = self._add_defaults(
                         services, erc20_token.address, encrypted_files, provider_uri
                     )
