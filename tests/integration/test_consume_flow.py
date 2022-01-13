@@ -122,7 +122,7 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
     # Start order for consumer
     tx_id = erc20_token.start_order(
         consumer=consumer_wallet.address,
-        service_index=ddo.get_service_index_by_id(service.id),
+        service_index=ddo.get_index_of_service(service),
         provider_fees=response.json()["providerFee"],
         from_wallet=consumer_wallet,
     )

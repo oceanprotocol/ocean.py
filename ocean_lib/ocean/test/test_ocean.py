@@ -14,7 +14,7 @@ def test_nft_factory(
 
     erc721, erc20 = deploy_erc721_erc20(web3, config, publisher_wallet, consumer_wallet)
     assert ocn.get_nft_token(erc721.address).address == erc721.address
-    assert ocn.get_data_token(erc20.address).address == erc20.address
+    assert ocn.get_datatoken(erc20.address).address == erc20.address
 
     created_nft = ocn.create_nft_token(
         name="TEST",

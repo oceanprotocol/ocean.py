@@ -34,19 +34,8 @@ To access functions that are not supported in the above classes, you can directl
 level objects:
 
 ```python
-# DataToken -- ERC20 datatoken
-from ocean_lib.models.data_token import DataToken
-DataToken(web3, token_address)
-
-# DTFactory -- datatoken factory
-from ocean_lib.models.dtfactory import DTFactory
-DTFactory(web3, dtfactory_address)
-
 # BPool -- Balancer pool
 from ocean_lib.models.bpool import BPool
 BPool(web3, pool_address)
 
-# BFactory -- Balancer pool factory
-from ocean_lib.models.bfactory import BFactory
-BFactory(web3, bfactory_address)
 ```

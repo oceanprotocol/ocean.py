@@ -115,19 +115,23 @@ def create_asset(ocean, publisher, config, metadata=None):
             "author": "OPF",
             "license": "https://market.oceanprotocol.com/terms",
         }
-    data_provider = DataServiceProvider
     file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
     file1 = FilesTypeFactory(file1_dict)
-    encrypt_response = data_provider.encrypt(
-        [file1], "http://172.15.0.4:8030/api/services/encrypt"
-    )
-    encrypted_files = encrypt_response.content.decode("utf-8")
 
-    ddo = ocean.assets.create(
+    # Encrypt file(s) using provider
+    encrypted_files = ocean.assets.encrypt_files([file1])
+
+    # Publish asset with services on-chain.
+    # The download (access service) is automatically created
+    asset = ocean.assets.create(
         metadata, publisher, encrypted_files, erc20_tokens_data=[erc20_data]
     )
 
-    return ddo
+    # TODO: Mint tokens for dataset and assign to publisher
+    # dt = ocean.get_datatoken(service.data_token_address)
+    # mint_tokens_and_wait(dt, wallet.address, wallet)
+
+    return asset
 
 
 def create_basics(

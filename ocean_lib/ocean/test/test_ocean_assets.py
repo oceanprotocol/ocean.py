@@ -2,10 +2,12 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import copy
 import time
 import uuid
 from unittest.mock import patch
 
+import eth_keys
 import pytest
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
@@ -15,11 +17,11 @@ from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import (
     build_credentials_dict,
     create_asset,
     create_basics,
-    get_resource_path,
     get_sample_ddo,
     wait_for_update,
 )
@@ -203,33 +205,30 @@ def test_create_bad_metadata(publisher_ocean_instance, publisher_wallet, config)
         create_asset(publisher_ocean_instance, publisher_wallet, config, metadata)
 
 
-@pytest.mark.skip(reason="TODO: pay_for_service function on OceanAssets class")
 def test_pay_for_service_insufficient_balance(
-    publisher_ocean_instance, publisher_wallet
+    publisher_ocean_instance, config, publisher_wallet
 ):
     """Tests if balance is lower than the purchased amount."""
-    #  FIXME: this test still has v3 structure, please adapt
-    ocn = publisher_ocean_instance
-    alice = publisher_wallet
+    _, erc20_token = deploy_erc721_erc20(
+        publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
+    )
 
-    sample_ddo_path = get_resource_path("ddo", "ddo_sa_sample.json")
-    asset = Asset(json_filename=sample_ddo_path)
-    asset.metadata["main"]["files"][0]["checksum"] = str(uuid.uuid4())
+    ddo_dict = copy.deepcopy(get_sample_ddo())
+    ddo_dict["services"][0]["datatokenAddress"] = erc20_token.address
+    asset = Asset.from_dict(ddo_dict)
 
-    token = ocn.create_data_token(
-        "DataToken1", "DT1", from_wallet=alice, blob="foo_blob"
+    empty_account = publisher_ocean_instance.web3.eth.account.create()
+    pk = eth_keys.KeyAPI.PrivateKey(empty_account.key)
+    empty_wallet = Wallet(
+        publisher_ocean_instance.web3,
+        str(pk),
+        block_confirmations=config.block_confirmations,
+        transaction_timeout=config.transaction_timeout,
     )
 
     with pytest.raises(InsufficientBalance):
-        ocn.assets.pay_for_service(
-            ocn.web3,
-            10000000000000,
-            token.address,
-            asset.did,
-            0,
-            ZERO_ADDRESS,
-            alice,
-            alice.address,
+        publisher_ocean_instance.assets.pay_for_service(
+            asset, asset.get_service("access"), empty_wallet
         )
 
 

@@ -186,14 +186,14 @@ class Asset:
         )
 
     @enforce_types
-    def get_service_index_by_id(self, service_id: str) -> int:
-        """Return index of the Service with the the given id.
-        Return None if service with the given id not found."""
+    def get_index_of_service(self, service: Service) -> int:
+        """Return index of the given Service.
+        Return None if service was not found."""
         return next(
             (
                 index
-                for index, service in enumerate(self.services)
-                if service.id == service_id
+                for index, asset_service in enumerate(self.services)
+                if asset_service.id == service.id
             ),
             None,
         )
@@ -317,3 +317,7 @@ class Asset:
         ] = trusted_algo_publishers
         service.compute_values["allowNetworkAccess"] = allow_network_access
         service.compute_values["allowRawAlgorithm"] = allow_raw_algorithm
+
+    @property
+    def is_disabled(self) -> bool:
+        return not self.metadata or (self.nft and self.nft["state"] != 0)

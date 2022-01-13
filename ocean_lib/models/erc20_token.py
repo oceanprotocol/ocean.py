@@ -265,7 +265,7 @@ class ERC20Token(ContractBase):
     def get_id(self) -> int:
         return self.contract.caller.getId()
 
-    def name(self) -> str:
+    def token_name(self) -> str:
         return self.contract.caller.name()
 
     def symbol(self) -> str:

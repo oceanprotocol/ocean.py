@@ -78,6 +78,7 @@ def process_order(
     erc20_token = ERC20Token(ocean_instance.web3, service.data_token)
     _ = erc20_token.mint(consumer_wallet.address, to_wei(10), publisher_wallet)
 
+    # TODO: Refactor, use OceanAssets.order() instead of initialize and start_order
     # Initialize the service to get provider fees
     _, initialize_url = DataServiceProvider.build_initialize_endpoint(
         ocean_instance.config.provider_url
@@ -94,7 +95,7 @@ def process_order(
     # Order the service
     order_tx_id = erc20_token.start_order(
         consumer=consumer_wallet.address,
-        service_index=asset.get_service_index_by_id(service.id),
+        service_index=asset.get_index_of_service(service),
         provider_fees=initialize_response["providerFee"],
         from_wallet=consumer_wallet,
     )
@@ -162,7 +163,7 @@ def run_compute_test(
             )
         )
 
-    # Order algo download service
+    # Order algo download service (aka. access service)
     algorithm = None
     if algorithm_and_userdata:
         algo_tx_id, algo_download_service = process_order(

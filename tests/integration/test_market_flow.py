@@ -14,7 +14,6 @@ from tests.resources.helper_functions import (
     get_another_consumer_ocean_instance,
     get_consumer_ocean_instance,
     get_publisher_ocean_instance,
-    mint_tokens_and_wait,
 )
 
 
@@ -40,8 +39,8 @@ def test_market_flow(publisher_wallet, consumer_wallet):
     sa = Service.from_json(service.as_dictionary())
 
     # Mint data tokens and assign to publisher
-    dt = publisher_ocean.get_data_token(asset.data_token_address)
-    mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
+    dt = publisher_ocean.get_datatoken(asset.data_token_address)
+    # mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
 
     ######
     # Give the consumer some datatokens so they can order the service
@@ -124,8 +123,8 @@ def test_payer_market_flow(publisher_wallet, consumer_wallet, another_consumer_w
     sa = Service.from_json(service.as_dictionary())
 
     # Mint data tokens and assign to publisher
-    dt = publisher_ocean.get_data_token(asset.data_token_address)
-    mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
+    dt = publisher_ocean.get_datatoken(asset.data_token_address)
+    # mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
 
     ######
     # Give the consumer some datatokens so they can order the service

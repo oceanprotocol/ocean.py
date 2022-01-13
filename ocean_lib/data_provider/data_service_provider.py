@@ -748,11 +748,11 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def check_asset_file_info(did: str, provider_uri: str) -> bool:
+    def check_asset_file_info(did: str, service_id: str, provider_uri: str) -> bool:
         if not did:
             return False
         _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
-        data = {"did": did}
+        data = {"did": did, "serviceId": service_id}
         response = requests.post(endpoint, json=data)
 
         if response.status_code != 200:
