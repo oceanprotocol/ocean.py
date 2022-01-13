@@ -88,18 +88,18 @@ print("Create wallet: begin")
 wallet = Wallet(ocean.web3, private_key, config.block_confirmations, config.transaction_timeout)
 print(f"Create wallet: done. Its address is {wallet.address}")
 
-print("Create ERC721 token: begin.")
+print("Create ERC721 data NFT: begin.")
 erc721_token = ocean.create_nft_token(name="Dataset name", symbol="dtsymbol", from_wallet=wallet)
 print(f"Created ERC721 token: done. Its address is {erc721_token.address}")
-print(f"ERC721 token name: {erc721_token.token_name()}")
-print(f"ERC721 token symbol: {erc721_token.symbol()}")
+print(f"data NFT token name: {erc721_token.token_name()}")
+print(f"data NFT token symbol: {erc721_token.symbol()}")
 
 # Create ERC20 token related to the above NFT.
 from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 
-print("Create ERC20 token: begin.")
+print("Create ERC20 datatoken: begin.")
 cap = to_wei(10)
 erc20_data = ErcCreateData(
     template_index=1, # default value
@@ -114,10 +114,10 @@ erc20_data = ErcCreateData(
     bytess=[b""]
 )
 nft_factory = ocean.get_nft_factory()
-erc20_token = erc721_token.create_data_token(erc20_data=erc20_data, from_wallet=wallet)
-print(f"Created ERC20 token: done. Its address is {erc20_token.address}")
-print(f"ERC20 token name: {erc20_token.token_name()}")
-print(f"ERC20 token symbol: {erc20_token.symbol()}")
+erc20_token = erc721_token.create_datatoken(erc20_data=erc20_data, from_wallet=wallet)
+print(f"Created ERC20 datatoken: done. Its address is {erc20_token.address}")
+print(f"datatoken name: {erc20_token.token_name()}")
+print(f"datatoken symbol: {erc20_token.symbol()}")
 ```
 
 Congrats, you've created your first Ocean datatoken! 🐋

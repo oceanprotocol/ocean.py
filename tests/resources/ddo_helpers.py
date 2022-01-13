@@ -125,7 +125,7 @@ def get_registered_ddo(
     assert log, "no ddo created event."
 
     # Mint tokens for dataset and assign to publisher
-    dt = ocean_instance.get_data_token(asset.data_token_address)
+    dt = ocean_instance.get_datatoken(asset.data_token_address)
     mint_tokens_and_wait(dt, wallet.address, wallet)
 
     ddo = wait_for_ddo(ocean_instance, asset.did)

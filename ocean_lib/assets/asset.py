@@ -174,6 +174,19 @@ class Asset:
         )
 
     @enforce_types
+    def get_index_of_service(self, service: Service) -> int:
+        """Return index of the given Service.
+        Return None if service was not found."""
+        return next(
+            (
+                index
+                for index, asset_service in enumerate(self.services)
+                if asset_service.id == service.id
+            ),
+            None,
+        )
+
+    @enforce_types
     def remove_publisher_trusted_algorithm(
         self, compute_service: Service, algo_did: str
     ) -> list:
@@ -292,3 +305,7 @@ class Asset:
         ] = trusted_algo_publishers
         service.compute_values["allowNetworkAccess"] = allow_network_access
         service.compute_values["allowRawAlgorithm"] = allow_raw_algorithm
+
+    @property
+    def is_disabled(self) -> bool:
+        return not self.metadata or (self.nft and self.nft["state"] != 0)

@@ -11,24 +11,17 @@ from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.data_token import DataToken
+from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
-from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+from ocean_lib.models.factory_router import FactoryRouter
+from ocean_lib.models.models_structures import PoolData
 from ocean_lib.models.order import Order
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
-from ocean_lib.ocean.ocean_exchange import OceanExchange
-from ocean_lib.ocean.ocean_pool import OceanPool
-from ocean_lib.ocean.util import (
-    get_address_of_type,
-    get_bfactory_address,
-    get_ocean_token_address,
-    get_web3,
-)
+from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
 
@@ -91,24 +84,8 @@ class Ocean:
         if not data_provider:
             data_provider = DataServiceProvider
 
-        network = get_network_name(web3=self.web3)
         self.assets = OceanAssets(self.config, self.web3, data_provider)
         self.compute = OceanCompute(self.config, data_provider)
-
-        ocean_address = get_ocean_token_address(self.config.address_file, network)
-        # FIXME: reinstate after figuring out bfactory and dtfactory
-        # self.pool = OceanPool(
-        #    self.web3,
-        #    ocean_address,
-        #    get_bfactory_address(self.config.address_file, network),
-        #    get_dtfactory_address(self.config.address_file, network),
-        # )
-        # self.exchange = OceanExchange(
-        #    self.web3,
-        #    ocean_address,
-        #    FixedRateExchange.configured_address(network, self.config.address_file),
-        #    self.config,
-        # )
 
         logger.debug("Ocean instance initialized: ")
 
@@ -139,7 +116,7 @@ class Ocean:
                 block_confirmations=config.block_confirmations,
                 transaction_timeout=config.transaction_timeout,
             )
-            datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet)
+            nft_token = ocean.create_nft_token("Dataset name", "dtsymbol", from_wallet=wallet)
         ```
         :param name: ERC721 token name, str
         :param symbol: ERC721 token symbol, str
@@ -179,7 +156,7 @@ class Ocean:
         return ERC721Token(self.web3, token_address)
 
     @enforce_types
-    def get_data_token(self, token_address: str) -> ERC20Token:
+    def get_datatoken(self, token_address: str) -> ERC20Token:
         """
         :param token_address: Token contract address, str
         :return: `ERC20Token` instance
@@ -212,7 +189,7 @@ class Ocean:
         """
         :return: List of orders `[Order]`
         """
-        dt = DataToken(self.web3, datatoken)
+        dt = ERC20Token(self.web3, datatoken)
         _orders = []
         for log in dt.get_start_order_logs(
             address, from_all_tokens=not bool(datatoken)
@@ -238,3 +215,49 @@ class Ocean:
                 _orders.append(order)
 
         return _orders
+
+    @property
+    @enforce_types
+    def factory_router(self):
+        return FactoryRouter(self.web3, get_address_of_type(self.config, "Router"))
+
+    def create_pool(
+        self,
+        erc20_token: ERC20Token,
+        base_token: ERC20Token,
+        ss_params: List,
+        swap_fees: List,
+        from_wallet: Wallet,
+    ) -> BPool:
+        base_token.approve(
+            get_address_of_type(self.config, "Router"),
+            self.web3.toWei(2000, "ether"),
+            from_wallet,
+        )
+
+        pool_data = PoolData(
+            ss_params,
+            swap_fees,
+            [
+                get_address_of_type(self.config, "Staking"),
+                base_token.address,
+                from_wallet.address,
+                from_wallet.address,
+                get_address_of_type(self.config, "OPFCommunityFeeCollector"),
+                get_address_of_type(self.config, "poolTemplate"),
+            ],
+        )
+
+        tx = erc20_token.deploy_pool(pool_data, from_wallet)
+        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
+        pool_event = self.factory_router.get_event_log(
+            ERC721FactoryContract.EVENT_NEW_POOL,
+            tx_receipt.blockNumber,
+            self.web3.eth.block_number,
+            None,
+        )
+
+        bpool_address = pool_event[0].args.poolAddress
+        bpool = BPool(self.web3, bpool_address)
+
+        return bpool
