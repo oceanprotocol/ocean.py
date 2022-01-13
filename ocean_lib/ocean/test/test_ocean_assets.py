@@ -81,9 +81,43 @@ def test_update(publisher_ocean_instance, publisher_wallet, config):
 
     new_metadata = copy.deepcopy(ddo.metadata)
 
+    # Update only metadata
     _description = "Updated description"
     new_metadata["description"] = _description
     new_metadata["updated"] = datetime.now().isoformat()
+
+    ocean.assets.update(
+        did=ddo.did,
+        new_metadata=new_metadata,
+        publisher_wallet=publisher_wallet,
+    )
+
+    _asset = wait_for_update(ocean, ddo.did, "description", _description)
+    assert _asset, "Cannot read asset after update."
+    assert _asset.datatokens == ddo.datatokens
+    assert len(_asset.services) == len(ddo.services)
+    assert _asset.services[0].as_dictionary() == ddo.services[0].as_dictionary()
+    assert _asset.credentials == ddo.credentials
+
+    # Update credentials
+    _description = "Updated credentials"
+    _new_credentials = {
+        "allow": [{"type": "address", "values": ["0x123", "0x456"]}],
+        "deny": [{"type": "address", "values": ["0x2222", "0x333"]}],
+    }
+    new_metadata["description"] = _description
+    new_metadata["updated"] = datetime.now().isoformat()
+
+    ocean.assets.update(
+        did=ddo.did,
+        new_metadata=new_metadata,
+        new_credentials=_new_credentials,
+        publisher_wallet=publisher_wallet,
+    )
+
+    _asset = wait_for_update(ocean, ddo.did, "description", _description)
+    assert _asset, "Cannot read asset after update."
+    assert _asset.credentials == _new_credentials, "Credentials were not updated."
 
     # Add new_deployed_erc20_tokens that do not exist in the asset
     _description = "Test new_deployed_erc20_tokens"
