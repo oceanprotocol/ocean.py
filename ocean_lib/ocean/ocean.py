@@ -12,7 +12,6 @@ from eth_utils import remove_0x_prefix
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.bpool import BPool
-from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
@@ -117,7 +116,7 @@ class Ocean:
                 block_confirmations=config.block_confirmations,
                 transaction_timeout=config.transaction_timeout,
             )
-            datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet)
+            nft_token = ocean.create_nft_token("Dataset name", "dtsymbol", from_wallet=wallet)
         ```
         :param name: ERC721 token name, str
         :param symbol: ERC721 token symbol, str
@@ -157,7 +156,7 @@ class Ocean:
         return ERC721Token(self.web3, token_address)
 
     @enforce_types
-    def get_data_token(self, token_address: str) -> ERC20Token:
+    def get_datatoken(self, token_address: str) -> ERC20Token:
         """
         :param token_address: Token contract address, str
         :return: `ERC20Token` instance
@@ -190,7 +189,7 @@ class Ocean:
         """
         :return: List of orders `[Order]`
         """
-        dt = DataToken(self.web3, datatoken)
+        dt = ERC20Token(self.web3, datatoken)
         _orders = []
         for log in dt.get_start_order_logs(
             address, from_all_tokens=not bool(datatoken)

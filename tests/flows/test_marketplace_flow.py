@@ -81,8 +81,8 @@ def test_marketplace_flow(tmp_path):
     did = asset.did  # did contains the datatoken address
     assert did
 
-    erc20_token = ocean.get_data_token(asset.get_service("access").data_token)
-    OCEAN_token = ocean.get_data_token(ocean.OCEAN_address)
+    erc20_token = ocean.get_datatoken(asset.get_service("access").data_token)
+    OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 
     ss_params = [
         ocean.web3.toWei(1, "ether"),

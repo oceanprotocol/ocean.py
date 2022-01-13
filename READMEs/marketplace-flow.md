@@ -189,8 +189,8 @@ Same for compression and you can use a combination of the two. E.g:
 In the following steps we will create a pool from the created token, in order to allow another user
 to order this access token.
 ```python
-erc20_token = ocean.get_data_token(asset.get_service("access").data_token)
-OCEAN_token = ocean.get_data_token(ocean.OCEAN_address)
+erc20_token = ocean.get_datatoken(asset.get_service("access").datatoken)
+OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 
 ss_params = [
     ocean.web3.toWei(1, "ether"),

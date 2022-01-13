@@ -41,7 +41,7 @@ def test_market_flow(publisher_wallet, consumer_wallet):
     sa = Service.from_json(service.as_dictionary())
 
     # Mint data tokens and assign to publisher
-    dt = publisher_ocean.get_data_token(asset.data_token_address)
+    dt = publisher_ocean.get_datatoken(asset.data_token_address)
     mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
 
     ######
@@ -125,7 +125,7 @@ def test_payer_market_flow(publisher_wallet, consumer_wallet, another_consumer_w
     sa = Service.from_json(service.as_dictionary())
 
     # Mint data tokens and assign to publisher
-    dt = publisher_ocean.get_data_token(asset.data_token_address)
+    dt = publisher_ocean.get_datatoken(asset.data_token_address)
     mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
 
     ######
