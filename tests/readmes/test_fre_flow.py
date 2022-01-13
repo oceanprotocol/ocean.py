@@ -15,6 +15,10 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 
 def test_fre_flow():
+    """This test mirrors the Fixed Rate Exchange README.
+    As such, it does not use the typical pytest fixtures.
+    """
+
     config = ExampleConfig.get_config()
     ocean = Ocean(config)
 
@@ -49,7 +53,7 @@ def test_fre_flow():
             ZERO_ADDRESS,
             ocean.OCEAN_address,
         ],
-        uints=[ocean.web3.toWei(200, "ether"), 0],
+        uints=[to_wei(200), 0],
         bytess=[b""],
     )
 
