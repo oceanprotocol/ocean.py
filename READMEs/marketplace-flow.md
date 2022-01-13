@@ -206,31 +206,25 @@ print(f"BPool address: {bpool.address}")
 
 ```
 
-## 3. Marketplace displays asset for sale (TODO)
+## 3. Marketplace displays asset for sale
 
 Now, you're the Marketplace operator. Here's how to get info about the data asset.
 
 In the same Python console as before:
 
 ```python
-#point to services
-from ocean_lib.agreements.service_types import ServiceTypes
-asset = ocean.assets.resolve(did)
-service1 = asset.get_service(ServiceTypes.ASSET_ACCESS)
+price_in_OCEAN = bpool.get_amount_in_exact_out(
+    OCEAN_token.address,
+    erc20_token.address,
+    ocean.web3.toWei(1, "ether"),
+    ocean.web3.toWei(0.01, "ether")
+)
 
-#point to pool
-pool = ocean.pool.get(ocean.web3, pool_address)
-
-#To access a data service, you need 1.0 datatokens.
-#Here, the market retrieves the datatoken price denominated in OCEAN.
-OCEAN_address = ocean.OCEAN_address
-price_in_OCEAN = ocean.pool.calcInGivenOut(
-    pool_address, OCEAN_address, token_address, token_out_amount=to_wei(1))
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
-print(f"Price of 1 {data_token.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
+print(f"Price of 1 {erc20_token.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
 ```
 
-## 4.  Bob buys data asset, and downloads it
+## 4. Bob buys data asset, and downloads it
 Now, you're Bob the data consumer.
 
 In the same Python console as before:

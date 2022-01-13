@@ -10,6 +10,7 @@ from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -97,7 +98,15 @@ def test_marketplace_flow(tmp_path):
     )
     assert bpool.address
 
-    # TODO: pricing and place pricing in readme
+    price_in_OCEAN = bpool.get_amount_in_exact_out(
+        OCEAN_token.address,
+        erc20_token.address,
+        ocean.web3.toWei(1, "ether"),
+        ocean.web3.toWei(0.01, "ether"),
+    )
+
+    formatted_price = pretty_ether_and_wei(price_in_OCEAN, "OCEAN")
+    assert formatted_price
 
     bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
     bob_wallet = Wallet(
