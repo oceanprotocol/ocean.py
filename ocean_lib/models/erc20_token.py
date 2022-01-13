@@ -118,7 +118,7 @@ class ERC20Token(ContractBase):
     def start_order(
         self,
         consumer: str,
-        service_id: int,
+        service_index: int,
         provider_fees: dict,
         from_wallet: Wallet,
     ) -> str:
@@ -126,7 +126,7 @@ class ERC20Token(ContractBase):
             "startOrder",
             (
                 consumer,
-                service_id,
+                service_index,
                 provider_fees["providerFeeAddress"],
                 provider_fees["providerFeeToken"],
                 provider_fees["providerFeeAmount"],

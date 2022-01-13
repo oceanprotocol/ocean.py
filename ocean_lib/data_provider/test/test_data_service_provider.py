@@ -13,14 +13,14 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider as
 from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.exceptions import DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
+from ocean_lib.models.compute_input import ComputeInput
 from requests.exceptions import InvalidURL
 from requests.models import Response
-
+from tests.resources.ddo_helpers import create_basics
 from tests.resources.helper_functions import (
-    get_publisher_ocean_instance,
-    get_provider_fees,
     deploy_erc721_erc20,
-    create_basics,
+    get_provider_fees,
+    get_publisher_ocean_instance,
 )
 from tests.resources.mocks.http_client_mock import (
     HttpClientEmptyMock,
@@ -88,29 +88,31 @@ def test_initialize_fails(with_evil_client):
     )
 
 
-def test_start_compute_job_fails_empty(with_empty_client, provider_wallet):
+def test_start_compute_job_fails_empty(with_empty_client, consumer_wallet):
     """Tests failure of compute job from endpoint with empty response."""
     with pytest.raises(AssertionError):
         DataSP.start_compute_job(
-            "some_did",
-            "http://mock/",
-            provider_wallet,
-            0,
-            "some_tx_id",
-            algorithm_did="some_algo_did",
+            service_endpoint="http://mock/",
+            consumer=consumer_wallet,
+            dataset=ComputeInput("some_did", "some_tx_id", "some_service_id"),
+            compute_environment="some_compute_environment",
+            algorithm=ComputeInput(
+                "another_did", "another_tx_id", "another_service_id"
+            ),
         )
 
 
-def test_start_compute_job_fails_error_response(with_evil_client, provider_wallet):
+def test_start_compute_job_fails_error_response(with_evil_client, consumer_wallet):
     """Tests failure of compute job from endpoint with non-200 response."""
     with pytest.raises(ValueError):
         DataSP.start_compute_job(
-            "some_did",
-            "http://mock/",
-            provider_wallet,
-            0,
-            "some_tx_id",
-            algorithm_did="some_algo_did",
+            service_endpoint="http://mock/",
+            consumer=consumer_wallet,
+            dataset=ComputeInput("some_did", "some_tx_id", "some_service_id"),
+            compute_environment="some_compute_environment",
+            algorithm=ComputeInput(
+                "another_did", "another_tx_id", "another_service_id"
+            ),
         )
 
 

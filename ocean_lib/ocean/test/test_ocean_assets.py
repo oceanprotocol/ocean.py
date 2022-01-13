@@ -20,16 +20,12 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import (
     build_credentials_dict,
-    get_resource_path,
+    create_asset,
+    create_basics,
     get_sample_ddo,
     wait_for_update,
 )
-from tests.resources.helper_functions import (
-    create_asset,
-    create_basics,
-    deploy_erc721_erc20,
-    get_address_of_type,
-)
+from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
 def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wallet):
