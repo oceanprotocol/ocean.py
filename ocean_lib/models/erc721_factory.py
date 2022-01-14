@@ -7,6 +7,7 @@ from typing import List
 from enforce_typing import enforce_types
 from eth_abi import encode_single
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
+from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -137,10 +138,21 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         )
 
     def create_nft_with_erc(
-        self, nft_create_data: dict, erc_create_data: dict, from_wallet: Wallet
+        self, nft_create_data: dict, erc_create_data: ErcCreateData, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "createNftWithErc", (nft_create_data, erc_create_data), from_wallet
+            "createNftWithErc",
+            (
+                nft_create_data,
+                (
+                    erc_create_data.template_index,
+                    erc_create_data.strings,
+                    erc_create_data.addresses,
+                    erc_create_data.uints,
+                    erc_create_data.bytess,
+                ),
+            ),
+            from_wallet,
         )
 
     def create_nft_erc_with_pool(
@@ -192,3 +204,24 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         )
 
         return registered_event[0].args.newTokenAddress
+
+    def get_deployed_addresses(self, tx_id: str):
+        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_id)
+        return_value = []
+        for event_name in [
+            ERC721FactoryContract.EVENT_NFT_CREATED,
+            ERC721FactoryContract.EVENT_TOKEN_CREATED,
+        ]:
+            registered_event = self.get_event_log(
+                event_name=event_name,
+                from_block=tx_receipt.blockNumber,
+                to_block=self.web3.eth.block_number,
+                filters=None,
+            )
+
+            if registered_event:
+                return_value.append(registered_event[0].args.newTokenAddress)
+            else:
+                return_value.append(None)
+
+        return return_value

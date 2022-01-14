@@ -2,7 +2,6 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
 import pytest
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
@@ -10,10 +9,10 @@ from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.utils import split_signature
 from tests.resources.helper_functions import get_address_of_type
 from web3 import exceptions
 from web3.main import Web3
-from ocean_lib.web3_internal.utils import split_signature
 
 
 def test_properties(web3, config):
@@ -539,12 +538,7 @@ def test_start_multiple_order(
 
     message = Web3.solidityKeccak(
         ["bytes", "address", "address", "uint256"],
-        [
-            provider_data,
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
-        ],
+        [provider_data, provider_fee_address, provider_fee_token, provider_fee_amount],
     )
     signed = web3.eth.sign(provider_fee_address, data=message)
     signature = split_signature(signed)
@@ -728,3 +722,39 @@ def test_fail_create_erc20(
         == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT "
         "ERC20DEPLOYER_ROLE"
     )
+
+
+def test_create_nft_with_erc(publisher_ocean_instance, publisher_wallet, config, web3):
+    erc721_factory_address = get_address_of_type(
+        config, ERC721FactoryContract.CONTRACT_NAME
+    )
+    erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
+
+    erc20_data = ErcCreateData(
+        template_index=1,
+        strings=["Datatoken 1", "DT1"],
+        addresses=[
+            publisher_wallet.address,
+            publisher_wallet.address,
+            ZERO_ADDRESS,
+            publisher_ocean_instance.OCEAN_address,
+        ],
+        uints=[web3.toWei(100000, "ether"), 0],
+        bytess=[b""],
+    )
+
+    tx_id = erc721_factory.create_nft_with_erc(
+        ("NFTToken1", "NFT1", 1, ZERO_ADDRESS), erc20_data, from_wallet=publisher_wallet
+    )
+
+    nft_address, erc20_address = erc721_factory.get_deployed_addresses(tx_id)
+    assert nft_address
+    assert erc20_address
+
+    nft_token = ERC721Token(web3, nft_address)
+    erc20_token = ERC20Token(web3, erc20_address)
+
+    # assert len(nft_token.get_tokens_list()) == 1
+
+    assert nft_token.token_name() == "NFTToken1"
+    assert erc20_token.token_name() == "Datatoken 1"
