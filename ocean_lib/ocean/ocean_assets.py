@@ -141,15 +141,18 @@ class OceanAssets:
         self, services: list, deployed_erc20_tokens: list
     ) -> list:
         data_tokens = []
+        # (1-n) service per datatoken, 1 datatoken per service
         for erc20_token in deployed_erc20_tokens:
             for service in services:
-                data_token = {
-                    "address": erc20_token.address,
-                    "name": erc20_token.contract.caller.name(),
-                    "symbol": erc20_token.symbol(),
-                    "serviceId": service.id,
-                }
-                data_tokens.append(data_token)
+                if service.data_token == erc20_token.address:
+                    data_tokens.append(
+                        {
+                            "address": erc20_token.address,
+                            "name": erc20_token.contract.caller.name(),
+                            "symbol": erc20_token.symbol(),
+                            "serviceId": service.id,
+                        }
+                    )
         return data_tokens
 
     @staticmethod
@@ -532,19 +535,9 @@ class OceanAssets:
                         services, new_erc20_address, encrypted_files, provider_uri
                     )
 
-        # (1-n) service per datatoken, 1 datatoken per service
-        datatokens = []
-        for datatoken in deployed_erc20_tokens:
-            for service in services:
-                if service.data_token == datatoken.address:
-                    datatokens.append(
-                        {
-                            "address": datatoken.address,
-                            "name": datatoken.contract.caller.name(),
-                            "symbol": datatoken.symbol(),
-                            "serviceId": service.id,
-                        }
-                    )
+        datatokens = self.build_data_tokens_list(
+            services=services, deployed_erc20_tokens=deployed_erc20_tokens
+        )
 
         asset.datatokens = datatokens
         asset.services = services
