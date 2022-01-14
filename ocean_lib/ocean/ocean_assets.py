@@ -5,6 +5,7 @@
 
 """Ocean module."""
 import copy
+from functools import reduce
 import json
 import logging
 import lzma
@@ -502,38 +503,13 @@ class OceanAssets:
             for erc20_token_address in erc20_addresses
         ]
 
-        erc20_addresses_to_add = []
-
         # Check that the new erc20 tokens are not already in the asset
         for erc20_token in new_deployed_erc20_tokens:
             assert (
                 erc20_token.address not in erc20_addresses
             ), f"Deployed ERC20 token {erc20_token.address} already exist."
 
-        if not new_deployed_erc20_tokens:
-            # Deploy new ERC20 tokens
-            for erc20_token_data in new_erc20_tokens_data:
-                erc20_addresses_to_add.append(
-                    self.deploy_datatoken(
-                        erc721_factory=erc721_factory,
-                        erc721_token=erc721_token,
-                        erc20_data=erc20_token_data,
-                        from_wallet=publisher_wallet,
-                    )
-                )
-            for erc20_token_address in erc20_addresses_to_add:
-                deployed_erc20_tokens.append(
-                    ERC20Token(self._web3, erc20_token_address)
-                )
-                if not new_services:
-                    services = self._add_defaults(
-                        services, erc20_token_address, encrypted_files, provider_uri
-                    )
-
-            data_tokens = self.build_data_tokens_list(
-                services=services, deployed_erc20_tokens=deployed_erc20_tokens
-            )
-        else:
+        if new_deployed_erc20_tokens:
             for erc20_token in new_deployed_erc20_tokens:
                 deployed_erc20_tokens.append(
                     ERC20Token(self._web3, erc20_token.address)
@@ -542,13 +518,36 @@ class OceanAssets:
                     services = self._add_defaults(
                         services, erc20_token.address, encrypted_files, provider_uri
                     )
+        else:
+            # Deploy new ERC20 tokens
+            for erc20_token_data in new_erc20_tokens_data:
+                new_erc20_address = self.deploy_datatoken(
+                    erc721_factory=erc721_factory,
+                    erc721_token=erc721_token,
+                    erc20_data=erc20_token_data,
+                    from_wallet=publisher_wallet,
+                )
+                deployed_erc20_tokens.append(ERC20Token(self._web3, new_erc20_address))
+                if not new_services:
+                    services = self._add_defaults(
+                        services, new_erc20_address, encrypted_files, provider_uri
+                    )
 
-            data_tokens = self.build_data_tokens_list(
-                services=services, deployed_erc20_tokens=deployed_erc20_tokens
-            )
+        # (1-n) service per datatoken, 1 datatoken per service
+        datatokens = []
+        for datatoken in deployed_erc20_tokens:
+            for service in services:
+                if service.data_token == datatoken.address:
+                    datatokens.append(
+                        {
+                            "address": datatoken.address,
+                            "name": datatoken.contract.caller.name(),
+                            "symbol": datatoken.symbol(),
+                            "serviceId": service.id,
+                        }
+                    )
 
-        asset.datatokens = data_tokens
-
+        asset.datatokens = datatokens
         asset.services = services
 
         # Validation by Aquarius
