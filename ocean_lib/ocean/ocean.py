@@ -24,6 +24,7 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
 
@@ -229,13 +230,19 @@ class Ocean:
     def create_fixed_rate(
         self,
         erc20_token: ERC20Token,
-        addresses: List[str],
-        uints: List[int],
+        base_token: ERC20Token,
         amount: int,
         from_wallet: Wallet,
     ) -> bytes:
         fixed_price_address = get_address_of_type(self.config, "FixedPrice")
         erc20_token.approve(fixed_price_address, amount, from_wallet)
+        addresses = [
+            self.OCEAN_address,
+            from_wallet.address,
+            from_wallet.address,
+            ZERO_ADDRESS,
+        ]
+        uints = [erc20_token.decimals(), base_token.decimals(), to_wei(1), int(1e15), 0]
 
         fixed_rate_data = FixedData(
             fixed_price_address=fixed_price_address,
@@ -256,6 +263,25 @@ class Ocean:
         exchange_id = fixed_rate_event[0].args.exchangeId
 
         return exchange_id
+
+    @enforce_types
+    def search_exchange_by_datatoken(self, datatoken: str) -> List[AttributeDict]:
+        nft_factory = self.get_nft_factory()
+        token_created_log = nft_factory.get_token_created_event(
+            from_block=0, to_block=self.web3.eth.block_number, token_address=datatoken
+        )
+        assert (
+            token_created_log
+        ), f"No token with '{datatoken}' address was created before."
+        from_block = token_created_log.blockNumber
+        filter_args = {"dataToken": datatoken}
+        logs = self.fixed_rate_exchange.get_event_logs(
+            event_name="ExchangeCreated",
+            from_block=from_block,
+            to_block=self.web3.eth.block_number,
+            filters=filter_args,
+        )
+        return logs
 
     @property
     @enforce_types

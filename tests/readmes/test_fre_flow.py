@@ -5,7 +5,6 @@
 import os
 
 from ocean_lib.example_config import ExampleConfig
-from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
@@ -76,22 +75,12 @@ def test_fre_flow():
     # Verify that Bob has ganache ETH
     assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
-    OCEAN_token = ERC20Token(ocean.web3, ocean.OCEAN_address)
-
-    # Prepare data for exchange
-    addresses = [
-        ocean.OCEAN_address,
-        alice_wallet.address,
-        alice_wallet.address,
-        ZERO_ADDRESS,
-    ]
-    uints = [erc20_token.decimals(), OCEAN_token.decimals(), to_wei(1), int(1e15), 0]
+    OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 
     # Create exchange_id for a new exchange
     exchange_id = ocean.create_fixed_rate(
         erc20_token=erc20_token,
-        addresses=addresses,
-        uints=uints,
+        base_token=OCEAN_token,
         amount=to_wei(100),
         from_wallet=alice_wallet,
     )
@@ -108,3 +97,13 @@ def test_fre_flow():
         from_wallet=bob_wallet,
     )
     assert tx_result, "failed buying data tokens at fixed rate for Bob"
+
+    # Search for exchange_id from a specific block retrieved at 3rd step
+    # for a certain data token address (e.g. erc20_token.address).
+    datatoken_address = erc20_token.address
+    logs = ocean.search_exchange_by_datatoken(datatoken_address)
+    assert logs, f"No exchange has {datatoken_address} address."
+
+    # E.g. First exchange is the wanted one.
+    exchange_id = logs[0].args.exchangeId
+    assert exchange_id

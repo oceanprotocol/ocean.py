@@ -6,6 +6,8 @@ from typing import List
 
 from enforce_typing import enforce_types
 from eth_abi import encode_single
+from web3.datastructures import AttributeDict
+
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -181,6 +183,20 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             (nft_create_data, erc_create_data, dispenser_data),
             from_wallet,
         )
+
+    def get_token_created_event(
+        self, from_block: int, to_block: int, token_address: str
+    ) -> [AttributeDict]:
+        """Retrieves event log of token registration."""
+        filter_params = {"newTokenAddress": token_address}
+        logs = self.get_event_log(
+            self.EVENT_TOKEN_CREATED,
+            from_block=from_block,
+            to_block=to_block,
+            filters=filter_params,
+        )
+
+        return logs[0] if logs else None
 
     def get_token_address(self, tx_id: str):
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_id)
