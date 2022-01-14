@@ -264,25 +264,6 @@ class Ocean:
 
         return exchange_id
 
-    @enforce_types
-    def search_exchange_by_datatoken(self, datatoken: str) -> List[AttributeDict]:
-        nft_factory = self.get_nft_factory()
-        token_created_log = nft_factory.get_token_created_event(
-            from_block=0, to_block=self.web3.eth.block_number, token_address=datatoken
-        )
-        assert (
-            token_created_log
-        ), f"No token with '{datatoken}' address was created before."
-        from_block = token_created_log.blockNumber
-        filter_args = {"dataToken": datatoken}
-        logs = self.fixed_rate_exchange.get_event_logs(
-            event_name="ExchangeCreated",
-            from_block=from_block,
-            to_block=self.web3.eth.block_number,
-            filters=filter_args,
-        )
-        return logs
-
     @property
     @enforce_types
     def factory_router(self):

@@ -9,6 +9,7 @@ from eth_abi import encode_single
 from web3.datastructures import AttributeDict
 
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
+from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -197,6 +198,25 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         )
 
         return logs[0] if logs else None
+
+    def search_exchange_by_datatoken(
+        self, fixed_rate_exchange: FixedRateExchange, datatoken: str
+    ) -> List[AttributeDict]:
+        token_created_log = self.get_token_created_event(
+            from_block=0, to_block=self.web3.eth.block_number, token_address=datatoken
+        )
+        assert (
+            token_created_log
+        ), f"No token with '{datatoken}' address was created before."
+        from_block = token_created_log.blockNumber
+        filter_args = {"dataToken": datatoken}
+        logs = fixed_rate_exchange.get_event_logs(
+            event_name="ExchangeCreated",
+            from_block=from_block,
+            to_block=self.web3.eth.block_number,
+            filters=filter_args,
+        )
+        return logs
 
     def get_token_address(self, tx_id: str):
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_id)

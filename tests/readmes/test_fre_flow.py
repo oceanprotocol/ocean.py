@@ -101,7 +101,10 @@ def test_fre_flow():
     # Search for exchange_id from a specific block retrieved at 3rd step
     # for a certain data token address (e.g. erc20_token.address).
     datatoken_address = erc20_token.address
-    logs = ocean.search_exchange_by_datatoken(datatoken_address)
+    nft_factory = ocean.get_nft_factory()
+    logs = nft_factory.search_exchange_by_datatoken(
+        ocean.fixed_rate_exchange, datatoken_address
+    )
     assert logs, f"No exchange has {datatoken_address} address."
 
     # E.g. First exchange is the wanted one.
