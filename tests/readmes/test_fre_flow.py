@@ -106,7 +106,8 @@ def test_fre_flow():
         ocean.fixed_rate_exchange, datatoken_address
     )
     assert logs, f"No exchange has {datatoken_address} address."
+    assert len(logs) == 1
 
-    # E.g. First exchange is the wanted one.
-    exchange_id = logs[0].args.exchangeId
+    exchange_id = logs[0]
     assert exchange_id
+    assert isinstance(exchange_id, bytes)

@@ -188,13 +188,12 @@ providing the data token address.
 
 ```python
 # Search for exchange_id from a specific block retrieved at 3rd step
-# for a certain data token address (e.g. datatoken_address).
+# for a certain data token address (e.g. datatoken_address). Choose
+# one from the list.
 datatoken_address = erc20_token.address
 nft_factory = ocean.get_nft_factory()
 logs = nft_factory.search_exchange_by_datatoken(ocean.fixed_rate_exchange, datatoken_address)
 print(logs)
-#E.g. First exchange is the wanted one.
-exchange_id = logs[0].args.exchangeId
 ```
 
 Use the `exchange_id` for buying at fixed rate.

@@ -201,7 +201,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     def search_exchange_by_datatoken(
         self, fixed_rate_exchange: FixedRateExchange, datatoken: str
-    ) -> List[AttributeDict]:
+    ) -> list:
         token_created_log = self.get_token_created_event(
             from_block=0, to_block=self.web3.eth.block_number, token_address=datatoken
         )
@@ -216,7 +216,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             to_block=self.web3.eth.block_number,
             filters=filter_args,
         )
-        return logs
+        return [item.args.exchangeId for item in logs]
 
     def get_token_address(self, tx_id: str):
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_id)
