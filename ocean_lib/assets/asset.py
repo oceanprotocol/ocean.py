@@ -163,12 +163,24 @@ class Asset:
 
     @enforce_types
     def get_service_by_id(self, service_id: str) -> Service:
-        """Return the Service with the matching id"""
-        return next((service for service in self.services if service.id == service_id))
+        """Return Service with the given id.
+        Return None if service with the given id not found."""
+        return next(
+            (service for service in self.services if service.id == service_id), None
+        )
+
+    @enforce_types
+    def get_service_by_index(self, service_index: int) -> Service:
+        """Return Service with the given index.
+        Return None if service with the given index not found."""
+        return (
+            self.services[service_index] if service_index < len(self.services) else None
+        )
 
     @enforce_types
     def get_service(self, service_type: str) -> Optional[Service]:
-        """Return the first Service with the given service type."""
+        """Return first Service with the given service type.
+        Return None if service with the given service type not found."""
         return next(
             (service for service in self.services if service.type == service_type), None
         )

@@ -356,7 +356,7 @@ class OceanCompute:
 
         return OceanCompute._status_from_job_info(
             self._data_provider.compute_job_status(
-                did, job_id, service_endpoint, wallet.address
+                did, job_id, service_endpoint, wallet
             )
         )
 
@@ -372,7 +372,7 @@ class OceanCompute:
         """
         _, service_endpoint = self._get_service_endpoint(did)
         info_dict = self._data_provider.compute_job_result(
-            did, job_id, service_endpoint, wallet.address
+            did, job_id, service_endpoint, wallet
         )
         return {
             "did": info_dict.get("resultsDid", ""),
@@ -394,7 +394,7 @@ class OceanCompute:
         """
         _, service_endpoint = self._get_compute_result_file_endpoint(did)
         result = self._data_provider.compute_job_result_file(
-            job_id, index, service_endpoint, wallet.address
+            job_id, index, service_endpoint, wallet
         )
 
         return result
@@ -411,9 +411,7 @@ class OceanCompute:
         """
         _, service_endpoint = self._get_service_endpoint(did)
         return self._status_from_job_info(
-            self._data_provider.stop_compute_job(
-                did, job_id, service_endpoint, wallet.address
-            )
+            self._data_provider.stop_compute_job(did, job_id, service_endpoint, wallet)
         )
 
     @enforce_types

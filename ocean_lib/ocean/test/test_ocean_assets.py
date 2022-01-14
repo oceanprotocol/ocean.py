@@ -20,16 +20,12 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import (
     build_credentials_dict,
-    get_resource_path,
+    create_asset,
+    create_basics,
     get_sample_ddo,
     wait_for_update,
 )
-from tests.resources.helper_functions import (
-    create_asset,
-    create_basics,
-    deploy_erc721_erc20,
-    get_address_of_type,
-)
+from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
 def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wallet):
@@ -519,15 +515,6 @@ def test_compressed_and_encrypted_asset(
     assert ddo.datatokens[0]["name"] == "ERC20DT1"
     assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
     assert ddo.datatokens[0]["address"] == erc20_token.address
-
-    # owner can view file urls for his asset
-    asset_urls = DataServiceProvider.get_asset_urls(
-        ddo.did, ddo.services[0].id, "http://172.15.0.4:8030", publisher_wallet
-    )
-    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
-    file2_dict = {"type": "url", "url": "https://url.com/file2.csv", "method": "GET"}
-    assert file1_dict in asset_urls
-    assert file2_dict in asset_urls
 
 
 def test_asset_creation_errors(publisher_ocean_instance, publisher_wallet, config):

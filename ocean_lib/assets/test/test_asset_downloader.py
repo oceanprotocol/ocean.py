@@ -5,18 +5,13 @@
 import os
 
 import pytest
-
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.web3_internal.currency import to_wei
-from tests.resources.ddo_helpers import get_sample_ddo
-from tests.resources.helper_functions import (
-    deploy_erc721_erc20,
-    create_basics,
-    create_asset,
-)
+from tests.resources.ddo_helpers import create_asset, create_basics, get_sample_ddo
+from tests.resources.helper_functions import deploy_erc721_erc20
 
 
 def test_ocean_assets_download_failure(publisher_wallet, config):
@@ -138,7 +133,7 @@ def ocean_assets_download_destination_file_helper(
 
     tx_id = erc20_token.start_order(
         consumer=publisher_wallet.address,
-        service_id=int(access_service.id),
+        service_index=ddo.get_index_of_service(access_service),
         provider_fees=initialize_response.json()["providerFee"],
         from_wallet=publisher_wallet,
     )

@@ -37,6 +37,7 @@ class ERC20Enterprise(ERC20Token):
                 dispenser_data.max_tokens,
                 dispenser_data.max_balance,
                 with_mint,
+                dispenser_data.allowed_swapper,
             ),
             from_wallet,
         )

@@ -476,7 +476,7 @@ class OceanAssets:
 
         tx_id = dt.start_order(
             consumer=wallet.address,
-            service_id=asset.get_index_of_service(service),
+            service_index=asset.get_index_of_service(service),
             provider_fees=initialize_response.json()["providerFee"],
             from_wallet=wallet,
         )
