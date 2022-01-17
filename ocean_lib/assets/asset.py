@@ -263,7 +263,7 @@ class Asset:
             "did": self.did,
             "filesChecksum": create_checksum(
                 json.dumps(
-                    self.get_service(ServiceTypes.CLOUD_COMPUTE).files,
+                    self.get_service(ServiceTypes.ASSET_ACCESS).files,
                     separators=(",", ":"),
                 )
             ),

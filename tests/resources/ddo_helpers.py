@@ -12,6 +12,7 @@ import requests
 from ocean_lib.agreements.file_objects import FilesTypeFactory, IpfsFile, UrlFile
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.trusted_algorithms import generate_trusted_algo_dict
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
@@ -196,7 +197,8 @@ def get_registered_asset_with_access_service(ocean_instance, publisher_wallet):
 def get_registered_asset_with_compute_service(
     ocean_instance: Ocean,
     publisher_wallet: Wallet,
-    trusted_algorithms: Optional[List[Asset]] = None,
+    allow_raw_algorithms: bool = False,
+    trusted_algorithms: List[Asset] = [],
 ):
     erc721_token, erc20_token = deploy_erc721_erc20(
         ocean_instance.web3, ocean_instance.config, publisher_wallet, publisher_wallet
@@ -215,7 +217,7 @@ def get_registered_asset_with_compute_service(
         "gpuType": "NVIDIA Tesla V100 GPU",
         "memory": "128M",
         "volumeSize": "2G",
-        "allowRawAlgorithm": True,
+        "allowRawAlgorithm": allow_raw_algorithms,
         "allowNetworkAccess": True,
     }
     compute_service = Service(
@@ -227,6 +229,11 @@ def get_registered_asset_with_compute_service(
         timeout=3600,
         compute_values=compute_values,
     )
+
+    for trusted_algorithm in trusted_algorithms:
+        compute_service.add_publisher_trusted_algorithm(
+            trusted_algorithm, generate_trusted_algo_dict(trusted_algorithm)
+        )
 
     return ocean_instance.assets.create(
         metadata=metadata,

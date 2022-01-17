@@ -36,18 +36,58 @@ def dataset_with_compute_service(publisher_wallet, publisher_ocean_instance):
     )
     # verify the asset is available in Aquarius
     publisher_ocean_instance.assets.resolve(asset.did)
-    yield asset
+    return asset
 
 
 @pytest.fixture
-def algorithm(publisher_wallet, publisher_ocean_instance):
+def dataset_with_compute_service_allow_raw_algo(
+    publisher_wallet, publisher_ocean_instance
+):
+    # Dataset with compute service
+    asset = get_registered_asset_with_compute_service(
+        publisher_ocean_instance, publisher_wallet, allow_raw_algorithms=True
+    )
+    # verify the asset is available in Aquarius
+    publisher_ocean_instance.assets.resolve(asset.did)
+    return asset
+
+
+@pytest.fixture
+def dataset_with_compute_service_and_trusted_algorithm(
+    publisher_wallet, publisher_ocean_instance, algorithm
+):
+    # Setup algorithm meta to run raw algorithm
+    asset = get_registered_asset_with_compute_service(
+        publisher_ocean_instance, publisher_wallet, trusted_algorithms=[algorithm]
+    )
+    # verify the ddo is available in Aquarius
+    _ = publisher_ocean_instance.assets.resolve(asset.did)
+    return asset
+
+
+def get_algorithm(publisher_wallet, publisher_ocean_instance):
     # Setup algorithm meta to run raw algorithm
     asset = get_registered_algorithm_with_access_service(
         publisher_ocean_instance, publisher_wallet
     )
     # verify the asset is available in Aquarius
     _ = publisher_ocean_instance.assets.resolve(asset.did)
-    yield asset
+    return asset
+
+
+@pytest.fixture
+def algorithm(publisher_wallet, publisher_ocean_instance):
+    return get_algorithm(publisher_wallet, publisher_ocean_instance)
+
+
+@pytest.fixture
+def another_algorithm(publisher_wallet, publisher_ocean_instance):
+    return get_algorithm(publisher_wallet, publisher_ocean_instance)
+
+
+@pytest.fixture
+def raw_algorithm():
+    return get_raw_algorithm()
 
 
 @pytest.fixture
@@ -58,26 +98,7 @@ def dataset_with_access_service(publisher_wallet, publisher_ocean_instance):
     )
     # verify the asset is available in Aquarius
     publisher_ocean_instance.assets.resolve(asset.did)
-    yield asset
-
-
-@pytest.fixture
-def raw_algorithm():
-    return get_raw_algorithm()
-
-
-@pytest.fixture
-def dataset_with_compute_service_and_trusted_algorithm(
-    publisher_wallet, publisher_ocean_instance, algorithm
-):
-    # Setup algorithm meta to run raw algorithm
-    asset = get_registered_asset_with_compute_service(
-        publisher_ocean_instance, publisher_wallet, trusted_algorithms=[algorithm.did]
-    )
-    # verify the ddo is available in Aquarius
-    _ = publisher_ocean_instance.assets.resolve(asset.did)
-
-    yield asset
+    return asset
 
 
 def process_order(
@@ -258,7 +279,7 @@ def test_compute_raw_algo(
     publisher_wallet,
     publisher_ocean_instance,
     consumer_wallet,
-    dataset_with_compute_service,
+    dataset_with_compute_service_allow_raw_algo,
     raw_algorithm,
 ):
     """Tests that a compute job with a raw algorithm starts properly."""
@@ -267,7 +288,9 @@ def test_compute_raw_algo(
         ocean_instance=publisher_ocean_instance,
         publisher_wallet=publisher_wallet,
         consumer_wallet=consumer_wallet,
-        dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
+        dataset_and_userdata=AssetAndUserdata(
+            dataset_with_compute_service_allow_raw_algo, None
+        ),
         algorithm_meta=raw_algorithm,
         with_result=True,
     )
@@ -368,37 +391,35 @@ def test_update_trusted_algorithms(
     )
 
 
-@pytest.mark.skip(reason="TODO: reinstate integration tests")
-def test_compute_trusted_algorithms(
+def test_compute_trusted_algorithm(
     publisher_wallet,
     publisher_ocean_instance,
     consumer_wallet,
-    consumer_ocean_instance,
-    algorithm_ddo,
-    asset_with_trusted,
+    dataset_with_compute_service_and_trusted_algorithm,
+    algorithm,
+    another_algorithm,
 ):
-    algorithm_ddo_v2 = get_registered_algorithm_with_access_service(
-        publisher_ocean_instance, publisher_wallet
-    )
-    # verify the ddo is available in Aquarius
-    _ = publisher_ocean_instance.assets.resolve(algorithm_ddo_v2.did)
-
-    # For debugging.
+    # Expect to pass when trusted algorithm is used
     run_compute_test(
-        consumer_ocean_instance,
-        publisher_wallet,
-        consumer_wallet,
-        [asset_with_trusted],
-        algorithm_and_userdata=algorithm_ddo,
+        ocean_instance=publisher_ocean_instance,
+        publisher_wallet=publisher_wallet,
+        consumer_wallet=consumer_wallet,
+        dataset_and_userdata=AssetAndUserdata(
+            dataset_with_compute_service_and_trusted_algorithm, None
+        ),
+        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+        with_result=True,
     )
 
-    # Expect to fail with another algorithm ddo that is not trusted.
-    run_compute_test(
-        consumer_ocean_instance,
-        publisher_wallet,
-        consumer_wallet,
-        [asset_with_trusted],
-        algorithm_and_userdata=algorithm_ddo_v2,
-        expect_failure=True,
-        expect_failure_message=f"this algorithm did {algorithm_ddo_v2.did} is not trusted.",
-    )
+    # Expect to fail when non-trusted algorithm is used
+    with pytest.raises(ValueError):
+        run_compute_test(
+            ocean_instance=publisher_ocean_instance,
+            publisher_wallet=publisher_wallet,
+            consumer_wallet=consumer_wallet,
+            dataset_and_userdata=AssetAndUserdata(
+                dataset_with_compute_service_and_trusted_algorithm, None
+            ),
+            algorithm_and_userdata=AssetAndUserdata(another_algorithm, None),
+            with_result=True,
+        )
