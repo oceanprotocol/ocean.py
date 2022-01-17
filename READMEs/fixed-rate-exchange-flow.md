@@ -109,8 +109,8 @@ from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
 
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=config.metadata_cache_uri)
-token_address = data_token.address
+datatoken = ocean.create_datatoken('DataToken1', 'DT1', alice_wallet, blob=config.metadata_cache_uri)
+token_address = datatoken.address
 print(f"token_address = '{token_address}'")
 ```
 
@@ -120,8 +120,8 @@ In the same python console:
 ```python
 #Mint the datatokens
 from ocean_lib.web3_internal.currency import to_wei
-data_token.mint(alice_wallet.address, to_wei(100), alice_wallet)
-data_token.approve(ocean.exchange._exchange_address, to_wei(100), alice_wallet)
+datatoken.mint(alice_wallet.address, to_wei(100), alice_wallet)
+datatoken.approve(ocean.exchange._exchange_address, to_wei(100), alice_wallet)
 ```
 
 ## 4. Bob buys at fixed rate data tokens
@@ -157,7 +157,7 @@ providing the data token address.
 ```python
 #Search for exchange_id from a specific block retrieved at 3rd step
 #for a certain data token address (e.g. token_address).
-logs = ocean.exchange.search_exchange_by_data_token(token_address)
+logs = ocean.exchange.search_exchange_by_datatoken(token_address)
 print(logs)
 #E.g. First exchange is the wanted one.
 exchange_id = logs[0].args.exchangeId

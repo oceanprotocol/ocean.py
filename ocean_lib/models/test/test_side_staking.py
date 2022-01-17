@@ -46,7 +46,7 @@ def test_side_staking(
     assert side_staking.get_base_token_balance(erc20.address) == 0
 
     # Datatoken initial circulating supply should be 0
-    side_staking.get_data_token_circulating_supply(erc20.address) == 0
+    side_staking.get_datatoken_circulating_supply(erc20.address) == 0
 
     # Transfer ocean if needed
     transfer_ocean_if_balance_lte(

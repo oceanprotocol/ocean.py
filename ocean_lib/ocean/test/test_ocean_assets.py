@@ -366,11 +366,11 @@ def test_plain_asset_multiple_datatokens(
     assert len(ddo.datatokens) == 2
     assert ddo.credentials == build_credentials_dict()
 
-    data_token_names = []
-    for data_token in ddo.datatokens:
-        data_token_names.append(data_token["name"])
-    assert data_token_names[0] == "Datatoken 2"
-    assert data_token_names[1] == "Datatoken 3"
+    datatoken_names = []
+    for datatoken in ddo.datatokens:
+        datatoken_names.append(datatoken["name"])
+    assert datatoken_names[0] == "Datatoken 2"
+    assert datatoken_names[1] == "Datatoken 3"
 
 
 def test_plain_asset_multiple_services(
@@ -388,7 +388,7 @@ def test_plain_asset_multiple_services(
         service_id="0",
         service_type=ServiceTypes.ASSET_ACCESS,
         service_endpoint=f"{data_provider.get_url(config)}/api/services/download",
-        data_token=erc20_token.address,
+        datatoken=erc20_token.address,
         files=encrypted_files,
         timeout=0,
     )
@@ -408,7 +408,7 @@ def test_plain_asset_multiple_services(
         service_id="1",
         service_type=ServiceTypes.CLOUD_COMPUTE,
         service_endpoint=f"{data_provider.get_url(config)}/api/services/compute",
-        data_token=erc20_token.address,
+        datatoken=erc20_token.address,
         files=encrypted_files,
         timeout=3600,
         compute_values=compute_values,

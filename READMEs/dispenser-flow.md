@@ -108,8 +108,8 @@ mint_fake_OCEAN(config)
 
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 
-data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
-token_address = data_token.address
+datatoken = ocean.create_datatoken('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
+token_address = datatoken.address
 print(f"token_address = '{token_address}'")
 ```
 
@@ -134,8 +134,8 @@ dispenser.activate(token_address, to_wei(100), to_wei(100), alice_wallet)
 assert dispenser.is_active(token_address), f"dispenser is not active for {token_address} data token."
 
 #Mint the datatokens for the dispenser
-data_token.mint(dispenser_address, to_wei(100), alice_wallet)
-data_token.approve(dispenser_address, to_wei(100), alice_wallet)
+datatoken.mint(dispenser_address, to_wei(100), alice_wallet)
+datatoken.approve(dispenser_address, to_wei(100), alice_wallet)
 
 #Dispense
 tx_result = dispenser.dispense(token_address, to_wei(50), alice_wallet)

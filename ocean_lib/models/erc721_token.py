@@ -223,8 +223,8 @@ class ERC721Token(ContractBase):
     def get_tokens_list(self) -> list:
         return self.contract.caller.getTokensList()
 
-    def is_deployed(self, data_token: str) -> bool:
-        return self.contract.caller.isDeployed(data_token)
+    def is_deployed(self, datatoken: str) -> bool:
+        return self.contract.caller.isDeployed(datatoken)
 
     def is_erc20_deployer(self, account: str) -> bool:
         return self.contract.caller.isERC20Deployer(account)
@@ -236,7 +236,7 @@ class ERC721Token(ContractBase):
             "setTokenURI", (token_id, new_token_uri), from_wallet
         )
 
-    def create_data_token(
+    def create_datatoken(
         self, erc20_data: ErcCreateData, from_wallet: Wallet
     ) -> ERC20Token:
         initial_list = self.get_tokens_list()

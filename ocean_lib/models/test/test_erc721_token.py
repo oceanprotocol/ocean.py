@@ -477,7 +477,7 @@ def test_fail_creating_erc20(web3, config, publisher_wallet, consumer_wallet):
     )
 
 
-def test_erc721_data_token_functions(web3, config, publisher_wallet, consumer_wallet):
+def test_erc721_datatoken_functions(web3, config, publisher_wallet, consumer_wallet):
     """Tests ERC721 Template functions for ERC20 tokens."""
     erc721_token, erc20_token = deploy_erc721_erc20(
         web3=web3,
@@ -486,12 +486,12 @@ def test_erc721_data_token_functions(web3, config, publisher_wallet, consumer_wa
         erc20_minter=publisher_wallet,
     )
     assert len(erc721_token.get_tokens_list()) == 1
-    assert erc721_token.is_deployed(data_token=erc20_token.address) is True
+    assert erc721_token.is_deployed(datatoken=erc20_token.address) is True
 
     erc721_token_v2 = deploy_erc721_erc20(
         web3=web3, config=config, erc721_publisher=publisher_wallet
     )
-    assert erc721_token_v2.is_deployed(data_token=consumer_wallet.address) is False
+    assert erc721_token_v2.is_deployed(datatoken=consumer_wallet.address) is False
     tx = erc721_token.set_token_uri(
         token_id=1,
         new_token_uri="https://newurl.com/nft/",

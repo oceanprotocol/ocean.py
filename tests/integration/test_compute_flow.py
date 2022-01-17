@@ -75,7 +75,7 @@ def process_order(
     """Helper function to process a compute order."""
     # Mint 10 datatokens to the consumer
     service = asset.get_service(service_type)
-    erc20_token = ERC20Token(ocean_instance.web3, service.data_token)
+    erc20_token = ERC20Token(ocean_instance.web3, service.datatoken)
     _ = erc20_token.mint(consumer_wallet.address, to_wei(10), publisher_wallet)
 
     # TODO: Refactor, use OceanAssets.order() instead of initialize and start_order
@@ -338,7 +338,7 @@ def test_update_trusted_algorithms(
 
     tx_receipt = ddo_registry.get_tx_receipt(web3, tx_id)
     logs = ddo_registry.event_MetadataUpdated.processReceipt(tx_receipt, errors=DISCARD)
-    assert logs[0].args.dataToken == asset_with_trusted.data_token_address
+    assert logs[0].args.dataToken == asset_with_trusted.datatoken_address
 
     wait_for_update(
         publisher_ocean_instance,
