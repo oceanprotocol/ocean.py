@@ -12,9 +12,9 @@ It focuses on Alice's experience as a publisher, and Bob's experience as a buyer
 Here are the steps:
 
 1.  Setup
-2.  Alice creates a data token
-3.  Alice mints & approves data tokens
-4.  Bob buys at fixed rate data tokens
+2.  Alice creates a datatoken
+3.  Alice mints & approves datatokens
+4.  Bob buys at fixed rate datatokens
 
 Let's go through each step.
 
@@ -81,7 +81,7 @@ export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 python
 ```
 
-## 2. Alice creates the data token
+## 2. Alice creates the datatoken
 
 
 In the Python console:
@@ -114,7 +114,7 @@ token_address = datatoken.address
 print(f"token_address = '{token_address}'")
 ```
 
-## 3. Alice mints & approve data tokens
+## 3. Alice mints & approve datatokens
 
 In the same python console:
 ```python
@@ -124,7 +124,7 @@ datatoken.mint(alice_wallet.address, to_wei(100), alice_wallet)
 datatoken.approve(ocean.exchange._exchange_address, to_wei(100), alice_wallet)
 ```
 
-## 4. Bob buys at fixed rate data tokens
+## 4. Bob buys at fixed rate datatokens
 
 
 In the same python console:
@@ -151,12 +151,12 @@ exchange_id = ocean.exchange.create(token_address, to_wei("0.1"), alice_wallet)
 ```
 
 If `exchange_id` has been created before or there are other
-exchanges for a certain data token, it can be searched by
-providing the data token address.
+exchanges for a certain datatoken, it can be searched by
+providing the datatoken address.
 
 ```python
 #Search for exchange_id from a specific block retrieved at 3rd step
-#for a certain data token address (e.g. token_address).
+#for a certain datatoken address (e.g. token_address).
 logs = ocean.exchange.search_exchange_by_datatoken(token_address)
 print(logs)
 #E.g. First exchange is the wanted one.
@@ -172,5 +172,5 @@ Use the `exchange_id` for buying at fixed rate.
 
 ```python
 tx_result = ocean.exchange.buy_at_fixed_rate(to_wei(2), bob_wallet, to_wei(5), exchange_id, token_address, alice_wallet.address)
-assert tx_result, "failed buying data tokens at fixed rate for Bob"
+assert tx_result, "failed buying datatokens at fixed rate for Bob"
 ```

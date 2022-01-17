@@ -12,7 +12,7 @@ It focuses on Alice's experience as a publisher.
 Here are the steps:
 
 1.  Setup
-2.  Alice creates a data token
+2.  Alice creates a datatoken
 3.  Dispenser creation & activation
 
 Let's go through each step.
@@ -78,7 +78,7 @@ export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 python
 ```
 
-## 2. Alice creates the data token
+## 2. Alice creates the datatoken
 
 
 In the Python console:
@@ -131,7 +131,7 @@ dispenser = DispenserContract(alice_wallet.web3, dispenser_address)
 
 #Activate the dispenser
 dispenser.activate(token_address, to_wei(100), to_wei(100), alice_wallet)
-assert dispenser.is_active(token_address), f"dispenser is not active for {token_address} data token."
+assert dispenser.is_active(token_address), f"dispenser is not active for {token_address} datatoken."
 
 #Mint the datatokens for the dispenser
 datatoken.mint(dispenser_address, to_wei(100), alice_wallet)
@@ -139,7 +139,7 @@ datatoken.approve(dispenser_address, to_wei(100), alice_wallet)
 
 #Dispense
 tx_result = dispenser.dispense(token_address, to_wei(50), alice_wallet)
-assert tx_result, "failed to dispense data tokens for Alice."
+assert tx_result, "failed to dispense datatokens for Alice."
 print(f"tx_result = '{tx_result}'")
 ```
 
