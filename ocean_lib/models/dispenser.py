@@ -3,6 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enforce_typing import enforce_types
+
+from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -71,3 +73,15 @@ class Dispenser(ContractBase):
 
     def owner_withdraw(self, data_token: str, from_wallet: Wallet) -> str:
         return self.send_transaction("ownerWithdraw", (data_token,), from_wallet)
+
+    def dispense_tokens(
+        self, erc20_token: ERC20Token, amount: int, consumer_wallet: Wallet
+    ):
+        tx = self.dispense(
+            data_token=erc20_token.address,
+            amount=amount,
+            destination=consumer_wallet.address,
+            from_wallet=consumer_wallet,
+        )
+        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
+        assert tx_receipt.status == 1

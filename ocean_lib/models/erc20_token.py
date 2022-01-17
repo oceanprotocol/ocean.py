@@ -327,6 +327,15 @@ class ERC20Token(ContractBase):
     def get_total_supply(self) -> int:
         return self.contract.caller.totalSupply()
 
+    def create_dispenser_with_mint(
+        self, dispenser_data: DispenserData, from_wallet: Wallet
+    ):
+        tx = self.create_dispenser(
+            dispenser_data=dispenser_data, with_mint=True, from_wallet=from_wallet
+        )
+        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
+        assert tx_receipt.status == 1
+
 
 class MockERC20(ERC20Token):
     CONTRACT_NAME = "MockERC20"
