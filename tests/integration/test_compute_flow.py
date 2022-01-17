@@ -338,7 +338,7 @@ def test_update_trusted_algorithms(
 
     tx_receipt = ddo_registry.get_tx_receipt(web3, tx_id)
     logs = ddo_registry.event_MetadataUpdated.processReceipt(tx_receipt, errors=DISCARD)
-    assert logs[0].args.dataToken == asset_with_trusted.datatoken_address
+    assert logs[0].args.datatoken == asset_with_trusted.datatoken_address
 
     wait_for_update(
         publisher_ocean_instance,

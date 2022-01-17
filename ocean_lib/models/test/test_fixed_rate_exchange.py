@@ -191,7 +191,7 @@ def test_exchange_rate_creation(
         event_log[0].args.baseTokenSwappedAmount
         - event_log[0].args.marketFeeAmount
         - event_log[0].args.oceanFeeAmount
-        == event_log[0].args.dataTokenSwappedAmount
+        == event_log[0].args.datatokenSwappedAmount
     )
 
     # Do the same but using calc_base_in_given_out_dt
@@ -201,7 +201,7 @@ def test_exchange_rate_creation(
 
     assert (
         calculated_base_in[FixedExchangeBaseInOutData.BASE_TOKEN_AMOUNT]
-        == event_log[0].args.dataTokenSwappedAmount
+        == event_log[0].args.datatokenSwappedAmount
         + event_log[0].args.marketFeeAmount
         + event_log[0].args.oceanFeeAmount
     )

@@ -1,3 +1,7 @@
+<!--
+Copyright 2021 Ocean Protocol Foundation
+SPDX-License-Identifier: Apache-2.0
+-->
 (HACK to help debugging. Remove later)
 
 In Python console:
@@ -6,14 +10,14 @@ pprint.PrettyPrinter(indent=2).pprint(DATA_ddo.as_dictionary())
 
 {
   'id': 'did:op:4568CA67353c0db9eA07Fdf85Dc051468cF7397f',
-  'dataToken': '0x4568CA67353c0db9eA07Fdf85Dc051468cF7397f',
+  'datatoken': '0x4568CA67353c0db9eA07Fdf85Dc051468cF7397f',
   'publicKey': [
     {
       'id': 'did:op:4568CA67353c0db9eA07Fdf85Dc051468cF7397f',
       'owner': '0xe2DD09d719Da89e5a3D0F2549c7E24566e947260',
       'type': 'EthereumECDSAKey'
     }],
-  
+
   'service': [
     {
       'type': 'metadata',
