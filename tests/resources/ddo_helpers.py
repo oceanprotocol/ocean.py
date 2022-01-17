@@ -240,7 +240,9 @@ def get_registered_asset_with_compute_service(
     )
 
 
-def get_registered_algorithm_ddo(ocean_instance: Ocean, publisher_wallet: Wallet):
+def get_registered_algorithm_with_access_service(
+    ocean_instance: Ocean, publisher_wallet: Wallet
+):
     algorithm_file = FilesTypeFactory(
         {
             "type": "url",
@@ -298,7 +300,7 @@ def get_raw_algorithm() -> str:
 
 
 def get_registered_algorithm_ddo_different_provider(ocean_instance, wallet):
-    return get_registered_algorithm_ddo(
+    return get_registered_algorithm_with_access_service(
         ocean_instance, wallet, "http://172.15.0.7:8030"
     )
 

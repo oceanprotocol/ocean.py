@@ -20,8 +20,7 @@ from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import (
     get_raw_algorithm,
-    get_registered_algorithm_ddo,
-    get_registered_algorithm_ddo_different_provider,
+    get_registered_algorithm_with_access_service,
     get_registered_asset_with_access_service,
     get_registered_asset_with_compute_service,
     wait_for_update,
@@ -35,20 +34,30 @@ def dataset_with_compute_service(publisher_wallet, publisher_ocean_instance):
     asset = get_registered_asset_with_compute_service(
         publisher_ocean_instance, publisher_wallet
     )
-
-    # verify the ddo is available in Aquarius
+    # verify the asset is available in Aquarius
     publisher_ocean_instance.assets.resolve(asset.did)
-
     yield asset
 
 
 @pytest.fixture
 def algorithm(publisher_wallet, publisher_ocean_instance):
     # Setup algorithm meta to run raw algorithm
-    asset = get_registered_algorithm_ddo(publisher_ocean_instance, publisher_wallet)
-    # verify the ddo is available in Aquarius
+    asset = get_registered_algorithm_with_access_service(
+        publisher_ocean_instance, publisher_wallet
+    )
+    # verify the asset is available in Aquarius
     _ = publisher_ocean_instance.assets.resolve(asset.did)
+    yield asset
 
+
+@pytest.fixture
+def dataset_with_access_service(publisher_wallet, publisher_ocean_instance):
+    # Dataset with access service
+    asset = get_registered_asset_with_access_service(
+        publisher_ocean_instance, publisher_wallet
+    )
+    # verify the asset is available in Aquarius
+    publisher_ocean_instance.assets.resolve(asset.did)
     yield asset
 
 
@@ -286,34 +295,24 @@ def test_compute_registered_algo(
     )
 
 
-@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_compute_multi_inputs(
     publisher_wallet,
     publisher_ocean_instance,
     consumer_wallet,
     dataset_with_compute_service,
+    algorithm,
+    dataset_with_access_service,
 ):
     """Tests that a compute job with additional Inputs (multiple assets) starts properly."""
-    # Another dataset, this time with download service
-    another_dataset = get_registered_asset_with_access_service(
-        publisher_ocean_instance, publisher_wallet
-    )
-    # verify the ddo is available in Aquarius
-    _ = publisher_ocean_instance.assets.resolve(another_dataset.did)
-
-    # Setup algorithm meta to run raw algorithm
-    algorithm = get_registered_algorithm_ddo_different_provider(
-        publisher_ocean_instance, publisher_wallet
-    )
-    _ = publisher_ocean_instance.assets.resolve(algorithm.did)
-
     run_compute_test(
         ocean_instance=publisher_ocean_instance,
         publisher_wallet=publisher_wallet,
         consumer_wallet=consumer_wallet,
-        dataset_and_userdata=dataset_with_compute_service,
-        algorithm_and_userdata=algorithm,
-        userdata={"test_key": "test_value"},
+        dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
+        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+        additional_datasets_and_userdata=[
+            AssetAndUserdata(dataset_with_access_service, {"test_key": "test_value"})
+        ],
     )
 
 
@@ -377,7 +376,7 @@ def test_compute_trusted_algorithms(
     algorithm_ddo,
     asset_with_trusted,
 ):
-    algorithm_ddo_v2 = get_registered_algorithm_ddo(
+    algorithm_ddo_v2 = get_registered_algorithm_with_access_service(
         publisher_ocean_instance, publisher_wallet
     )
     # verify the ddo is available in Aquarius
