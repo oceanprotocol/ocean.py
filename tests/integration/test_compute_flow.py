@@ -313,6 +313,7 @@ def test_compute_multi_inputs(
         additional_datasets_and_userdata=[
             AssetAndUserdata(dataset_with_access_service, {"test_key": "test_value"})
         ],
+        with_result=True,
     )
 
 
