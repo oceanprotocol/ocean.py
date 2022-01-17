@@ -237,7 +237,7 @@ class Ocean:
         fixed_price_address = get_address_of_type(self.config, "FixedPrice")
         erc20_token.approve(fixed_price_address, amount, from_wallet)
         addresses = [
-            self.OCEAN_address,
+            base_token.address,
             from_wallet.address,
             from_wallet.address,
             ZERO_ADDRESS,
