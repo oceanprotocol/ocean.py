@@ -19,6 +19,7 @@ from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import (
+    get_raw_algorithm,
     get_registered_algorithm_ddo,
     get_registered_algorithm_ddo_different_provider,
     get_registered_asset_with_access_service,
@@ -49,6 +50,11 @@ def algorithm(publisher_wallet, publisher_ocean_instance):
     _ = publisher_ocean_instance.assets.resolve(asset.did)
 
     yield asset
+
+
+@pytest.fixture
+def raw_algorithm():
+    return get_raw_algorithm()
 
 
 @pytest.fixture
@@ -239,13 +245,12 @@ def run_compute_test(
         print(f"got job result file: {str(result_file)}")
 
 
-@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_compute_raw_algo(
     publisher_wallet,
     publisher_ocean_instance,
     consumer_wallet,
     dataset_with_compute_service,
-    algorithm,
+    raw_algorithm,
 ):
     """Tests that a compute job with a raw algorithm starts properly."""
     # Setup algorithm meta to run raw algorithm
@@ -254,9 +259,12 @@ def test_compute_raw_algo(
         publisher_wallet=publisher_wallet,
         consumer_wallet=consumer_wallet,
         dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
-        algorithm_meta={},
+        algorithm_meta=raw_algorithm,
         with_result=True,
     )
+
+
+# TODO Add a raw algo test that fails because allowRawAlgorithm is False
 
 
 def test_compute_registered_algo(

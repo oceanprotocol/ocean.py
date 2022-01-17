@@ -8,10 +8,12 @@ import pathlib
 import time
 from typing import List, Optional, Union
 
+import requests
 from ocean_lib.agreements.file_objects import FilesTypeFactory, IpfsFile, UrlFile
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.ocean.ocean import Ocean
@@ -213,7 +215,7 @@ def get_registered_asset_with_compute_service(
         "gpuType": "NVIDIA Tesla V100 GPU",
         "memory": "128M",
         "volumeSize": "2G",
-        "allowRawAlgorithm": False,
+        "allowRawAlgorithm": True,
         "allowNetworkAccess": True,
     }
     compute_service = Service(
@@ -272,6 +274,26 @@ def get_registered_algorithm_ddo(ocean_instance: Ocean, publisher_wallet: Wallet
 
     return create_asset(
         ocean_instance, publisher_wallet, ocean_instance.config, metadata=metadata
+    )
+
+
+def get_raw_algorithm() -> str:
+    req = requests.get(
+        "https://raw.githubusercontent.com/oceanprotocol/test-algorithm/master/javascript/algo.js"
+    )
+    return AlgorithmMetadata(
+        {
+            "rawcode": req.text,
+            "language": "Node.js",
+            "format": "docker-image",
+            "version": "0.1",
+            "container": {
+                "entrypoint": "node $ALGO",
+                "image": "ubuntu",
+                "tag": "latest",
+                "checksum": "44e10daa6637893f4276bb8d7301eb35306ece50f61ca34dcab550",
+            },
+        }
     )
 
 
