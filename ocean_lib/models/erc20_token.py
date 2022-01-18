@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enum import IntEnum
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
@@ -326,6 +326,31 @@ class ERC20Token(ContractBase):
 
     def get_total_supply(self) -> int:
         return self.contract.caller.totalSupply()
+
+    @enforce_types
+    def get_start_order_logs(
+        self,
+        consumer_address: Optional[str] = None,
+        from_block: Optional[int] = 0,
+        to_block: Optional[int] = "latest",
+        from_all_tokens: bool = False,
+    ) -> Tuple:
+        topic0 = self.get_event_signature(self.EVENT_ORDER_STARTED)
+        topics = [topic0]
+        if consumer_address:
+            topic1 = f"0x000000000000000000000000{consumer_address[2:].lower()}"
+            topics = [topic0, None, topic1]
+
+        argument_filters = {"topics": topics}
+
+        logs = self.getLogs(
+            self.events.OrderStarted(),
+            argument_filters=argument_filters,
+            fromBlock=from_block,
+            toBlock=to_block,
+            from_all_addresses=from_all_tokens,
+        )
+        return logs
 
 
 class MockERC20(ERC20Token):
