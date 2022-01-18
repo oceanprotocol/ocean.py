@@ -27,7 +27,6 @@ from tests.resources.ddo_helpers import (
     create_asset,
     create_basics,
     get_sample_ddo,
-    wait_for_update,
 )
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
@@ -42,23 +41,7 @@ def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wal
     assert ocn.assets.resolve(invalid_did) is None
 
 
-def test_update(publisher_ocean_instance, publisher_wallet, config):
-    """Helper function for asset update based on ddo_sa_sample.json."""
-    ocean = publisher_ocean_instance
-
-    _, erc20_token = deploy_erc721_erc20(
-        publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
-    )
-
-    ocean = publisher_ocean_instance
-
-    data_provider = DataServiceProvider
-    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
-    file1 = FilesTypeFactory(file1_dict)
-    encrypt_response = data_provider.encrypt(
-        [file1], "http://172.15.0.4:8030/api/services/encrypt"
-    )
-    encrypted_files = encrypt_response.content.decode("utf-8")
+def test_update_metadata(publisher_ocean_instance, publisher_wallet, config):
 
     ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
 
@@ -70,48 +53,51 @@ def test_update(publisher_ocean_instance, publisher_wallet, config):
     new_metadata["updated"] = datetime.now().isoformat()
     ddo.metadata = new_metadata
 
-    ocean.assets.update(
+    _asset = publisher_ocean_instance.assets.update(
         asset=ddo,
         publisher_wallet=publisher_wallet,
     )
 
-    _asset = wait_for_update(ocean, ddo.did, "description", _description)
-    assert _asset, "Cannot read asset after update."
     assert _asset.datatokens == ddo.datatokens
     assert len(_asset.services) == len(ddo.services)
     assert _asset.services[0].as_dictionary() == ddo.services[0].as_dictionary()
     assert _asset.credentials == ddo.credentials
 
+
+def test_update_credentials(publisher_ocean_instance, publisher_wallet, config):
+
+    ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
+
     # Update credentials
-    new_asset = new_metadata = copy.deepcopy(_asset)
-    new_metadata = copy.deepcopy(_asset.metadata)
-    _description = "Updated credentials"
     _new_credentials = {
         "allow": [{"type": "address", "values": ["0x123", "0x456"]}],
         "deny": [{"type": "address", "values": ["0x2222", "0x333"]}],
     }
-    new_metadata["description"] = _description
-    new_metadata["updated"] = datetime.now().isoformat()
 
-    new_asset.metadata = new_metadata
-    new_asset.credentials = _new_credentials
+    ddo.credentials = _new_credentials
 
-    ocean.assets.update(
-        asset=new_asset,
+    _asset = publisher_ocean_instance.assets.update(
+        asset=ddo,
         publisher_wallet=publisher_wallet,
     )
 
-    _asset = wait_for_update(ocean, ddo.did, "description", _description)
-    assert _asset, "Cannot read asset after update."
     assert _asset.credentials == _new_credentials, "Credentials were not updated."
 
-    # Add new existing datatoken with service
-    new_asset = new_metadata = copy.deepcopy(_asset)
-    new_metadata = copy.deepcopy(_asset.metadata)
-    _description = "Test new_deployed_erc20_tokens"
-    new_metadata["description"] = _description
-    new_metadata["updated"] = datetime.now().isoformat()
 
+def test_update_datatokens(publisher_ocean_instance, publisher_wallet, config):
+
+    ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
+    data_provider = DataServiceProvider
+    _, erc20_token = deploy_erc721_erc20(
+        publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
+    )
+
+    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
+    file1 = FilesTypeFactory(file1_dict)
+    encrypted_files = publisher_ocean_instance.assets.encrypt_files([file1])
+
+    # Add new existing datatoken with service
+    old_asset = copy.deepcopy(ddo)
     access_service = Service(
         service_id="3",
         service_type=ServiceTypes.ASSET_ACCESS,
@@ -121,7 +107,7 @@ def test_update(publisher_ocean_instance, publisher_wallet, config):
         timeout=0,
     )
 
-    new_asset.datatokens.append(
+    ddo.datatokens.append(
         {
             "address": erc20_token.address,
             "name": erc20_token.contract.caller.name(),
@@ -130,24 +116,21 @@ def test_update(publisher_ocean_instance, publisher_wallet, config):
         }
     )
 
-    new_asset.services.append(access_service)
+    ddo.services.append(access_service)
 
-    ocean.assets.update(
-        asset=new_asset,
+    _asset = publisher_ocean_instance.assets.update(
+        asset=ddo,
         publisher_wallet=publisher_wallet,
     )
 
-    old_asset = _asset
-    _asset = wait_for_update(ocean, ddo.did, "description", _description)
-    assert _asset, "Cannot read asset after update."
     assert len(_asset.datatokens) == len(old_asset.datatokens) + 1
     assert len(_asset.services) == len(old_asset.services) + 1
     assert _asset.datatokens[1].get("address") == erc20_token.address
-    assert _asset.datatokens[0].get("address") == ddo.datatokens[0].get("address")
-    assert _asset.services[0].data_token == ddo.datatokens[0].get("address")
+    assert _asset.datatokens[0].get("address") == old_asset.datatokens[0].get("address")
+    assert _asset.services[0].data_token == old_asset.datatokens[0].get("address")
     assert _asset.services[1].data_token == erc20_token.address
 
-    # # Delete datatoken
+    # Delete datatoken
     new_asset = new_metadata = copy.deepcopy(_asset)
     new_metadata = copy.deepcopy(_asset.metadata)
     _description = "Test delete datatoken"
@@ -162,45 +145,40 @@ def test_update(publisher_ocean_instance, publisher_wallet, config):
         if service.data_token != removed_dt.get("address")
     ]
 
-    ocean.assets.update(
+    old_datatokens = _asset.datatokens
+
+    _asset = publisher_ocean_instance.assets.update(
         asset=new_asset,
         publisher_wallet=publisher_wallet,
     )
 
-    old_datatokens = _asset.datatokens
-    _asset = wait_for_update(ocean, ddo.did, "description", _description)
     assert _asset, "Cannot read asset after update."
     assert len(_asset.datatokens) == 1
     assert _asset.datatokens[0].get("address") == old_datatokens[0].get("address")
     assert _asset.services[0].data_token == old_datatokens[0].get("address")
 
+
+def test_update_flags(publisher_ocean_instance, publisher_wallet, config):
+
+    ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
+
     # Test compress & update flags
-    new_asset = new_metadata = copy.deepcopy(_asset)
-    new_metadata = copy.deepcopy(_asset.metadata)
-    _description = "Test compress & update flags"
-    new_metadata["description"] = _description
-    new_metadata["updated"] = datetime.now().isoformat()
+    erc721_token = ERC721Token(publisher_ocean_instance.web3, ddo.nft_address)
 
-    erc721_token = ERC721Token(ocean.web3, _asset.nft_address)
-
-    tx_result = ocean.assets.update(
-        asset=new_asset,
+    _asset = publisher_ocean_instance.assets.update(
+        asset=ddo,
         publisher_wallet=publisher_wallet,
         compress_flag=True,
         encrypt_flag=True,
     )
 
-    tx_receipt = ocean.web3.eth.wait_for_transaction_receipt(tx_result)
-
     registered_token_event = erc721_token.get_event_log(
         ERC721Token.EVENT_METADATA_UPDATED,
-        tx_receipt.blockNumber,
-        ocean.web3.eth.block_number,
+        _asset.event.get("block"),
+        publisher_ocean_instance.web3.eth.block_number,
         None,
     )
 
-    _asset = wait_for_update(ocean, ddo.did, "description", _description)
-    assert _asset, "Cannot read asset after update."
     assert registered_token_event[0].args.get("flags") == bytes([3])
 
 

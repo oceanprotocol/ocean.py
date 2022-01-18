@@ -4,7 +4,6 @@
 #
 
 """Ocean module."""
-import copy
 import json
 import logging
 import lzma
@@ -24,7 +23,7 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.models_structures import ErcCreateData
-from ocean_lib.ocean.util import get_address_of_type
+from ocean_lib.ocean.util import get_address_of_type, wait_for_asset_update
 from ocean_lib.services.service import Service
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -140,23 +139,24 @@ class OceanAssets:
     def build_data_tokens_list(
         self, services: list, deployed_erc20_tokens: list
     ) -> list:
-        data_tokens = []
+        datatokens = []
         # (1-n) service per datatoken, 1 datatoken per service
         for erc20_token in deployed_erc20_tokens:
-            for service in services:
-                if service.data_token == erc20_token.address:
-                    data_tokens.append(
-                        {
-                            "address": erc20_token.address,
-                            "name": erc20_token.contract.caller.name(),
-                            "symbol": erc20_token.symbol(),
-                            "serviceId": service.id,
-                        }
-                    )
-        return data_tokens
+            datatokens = datatokens + [
+                {
+                    "address": erc20_token.address,
+                    "name": erc20_token.contract.caller.name(),
+                    "symbol": erc20_token.symbol(),
+                    "serviceId": service.id,
+                }
+                for service in services
+                if service.data_token == erc20_token.address
+            ]
+
+        return datatokens
 
     @staticmethod
-    def process_ddo(
+    def _encrypt_ddo_locally(
         asset: Asset,
         provider_uri: str,
         encrypt_flag: Optional[bool] = False,
@@ -172,15 +172,17 @@ class OceanAssets:
         if not encrypt_flag and not compress_flag:
             flags = bytes([0])
             document = ddo_bytes
+            return document, flags, ddo_hash
 
         # Only compression, not encrypted
-        elif compress_flag and not encrypt_flag:
+        if compress_flag and not encrypt_flag:
             flags = bytes([1])
             # Compress DDO
             document = lzma.compress(ddo_bytes)
+            return document, flags, ddo_hash
 
         # Only encryption, not compressed
-        elif encrypt_flag and not compress_flag:
+        if encrypt_flag and not compress_flag:
             flags = bytes([2])
             # Encrypt DDO
             encrypt_response = DataServiceProvider.encrypt(
@@ -188,22 +190,37 @@ class OceanAssets:
                 encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
             )
             document = encrypt_response.text
+            return document, flags, ddo_hash
 
         # Encrypted & compressed
-        else:
-            flags = bytes([3])
-            # Compress DDO
-            compressed_document = lzma.compress(ddo_bytes)
+        flags = bytes([3])
+        # Compress DDO
+        compressed_document = lzma.compress(ddo_bytes)
 
-            # Encrypt DDO
-            encrypt_response = DataServiceProvider.encrypt(
-                objects_to_encrypt=compressed_document,
-                encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
-            )
+        # Encrypt DDO
+        encrypt_response = DataServiceProvider.encrypt(
+            objects_to_encrypt=compressed_document,
+            encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
+        )
 
-            document = encrypt_response.text
+        document = encrypt_response.text
 
         return document, flags, ddo_hash
+
+    @staticmethod
+    def _assert_ddo_metadata(metadata: dict):
+        assert isinstance(
+            metadata, dict
+        ), f"Expected metadata of type dict, got {type(metadata)}"
+
+        asset_type = metadata.get("type")
+
+        assert asset_type in (
+            "dataset",
+            "algorithm",
+        ), f"Invalid/unsupported asset type {asset_type}"
+
+        assert "name" in metadata, "Must have name in metadata."
 
     def create(
         self,
@@ -248,20 +265,7 @@ class OceanAssets:
         :param compress_flag: bool for compression of the DDO.
         :return: DDO instance
         """
-        assert isinstance(
-            metadata, dict
-        ), f"Expected metadata of type dict, got {type(metadata)}"
-
-        # copy metadata so we don't change the original
-        metadata_copy = copy.deepcopy(metadata)
-
-        asset_type = metadata_copy.get("type")
-        assert asset_type in (
-            "dataset",
-            "algorithm",
-        ), f"Invalid/unsupported asset type {asset_type}"
-
-        assert "name" in metadata_copy, "Must have name in metadata."
+        self._assert_ddo_metadata(metadata)
 
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(self._config)
@@ -375,11 +379,11 @@ class OceanAssets:
             logger.error(msg)
             raise ValueError(msg)
 
-        document, flags, ddo_hash = self.process_ddo(
+        document, flags, ddo_hash = self._encrypt_ddo_locally(
             asset, provider_uri, encrypt_flag, compress_flag
         )
 
-        _ = erc721_token.set_metadata(
+        erc721_token.set_metadata(
             metadata_state=0,
             metadata_decryptor_url=provider_uri,
             metadata_decryptor_address=publisher_wallet.address,
@@ -413,19 +417,7 @@ class OceanAssets:
         :return: update tx_result
         """
 
-        # Metadata sanity check
-        assert isinstance(
-            asset.metadata, dict
-        ), f"Expected asset.metadata of type dict, got {type(asset.metadata)}"
-
-        asset_type = asset.metadata.get("type")
-
-        assert asset_type in (
-            "dataset",
-            "algorithm",
-        ), f"Invalid/unsupported asset type {asset_type}"
-
-        assert "name" in asset.metadata, "Must have name in metadata."
+        self._assert_ddo_metadata(asset.metadata)
 
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(self._config)
@@ -452,11 +444,11 @@ class OceanAssets:
             logger.error(msg)
             raise ValueError(msg)
 
-        document, flags, ddo_hash = self.process_ddo(
+        document, flags, ddo_hash = self._encrypt_ddo_locally(
             asset, provider_uri, encrypt_flag, compress_flag
         )
 
-        return erc721_token.set_metadata(
+        tx_result = erc721_token.set_metadata(
             metadata_state=0,
             metadata_decryptor_url=provider_uri,
             metadata_decryptor_address=publisher_wallet.address,
@@ -466,6 +458,10 @@ class OceanAssets:
             data_proofs=[],
             from_wallet=publisher_wallet,
         )
+
+        self._web3.eth.wait_for_transaction_receipt(tx_result)
+
+        return wait_for_asset_update(self._get_aquarius(), asset, tx_result)
 
     @enforce_types
     def resolve(self, did: str) -> "Asset":
