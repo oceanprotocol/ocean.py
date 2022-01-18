@@ -1,3 +1,7 @@
+<!--
+Copyright 2021 Ocean Protocol Foundation
+SPDX-License-Identifier: Apache-2.0
+-->
 (HACK to help debugging. Remove later)
 
 In Python console:
@@ -11,11 +15,11 @@ pprint.PrettyPrinter(indent=2).pprint(ALG_ddo.as_dictionary())
       'publicKey': 'did:op:beD519EF79eE3b06b94751dFC8ce62587b8de6Cf',
       'type': 'RsaSignatureAuthentication2018'
     }],
-    
+
   'created': '2021-08-24T11:57:45Z',
-  'dataToken': '0xbeD519EF79eE3b06b94751dFC8ce62587b8de6Cf',
+  'datatoken': '0xbeD519EF79eE3b06b94751dFC8ce62587b8de6Cf',
   'id': 'did:op:beD519EF79eE3b06b94751dFC8ce62587b8de6Cf',
-  
+
   'proof': {
     'checksum': {
       '0': '09db9193f00de71305d5100d3a2c7d2e08a2a81e958fefe6defb7391ed46fca8',
@@ -32,7 +36,7 @@ pprint.PrettyPrinter(indent=2).pprint(ALG_ddo.as_dictionary())
       'owner': '0xe2DD09d719Da89e5a3D0F2549c7E24566e947260',
       'type': 'EthereumECDSAKey'
     }],
-    
+
   'service': [
     {
       'attributes': {
@@ -52,7 +56,7 @@ pprint.PrettyPrinter(indent=2).pprint(ALG_ddo.as_dictionary())
       'serviceEndpoint': 'http://localhost:5000/api/v1/aquarius/assets/ddo/did:op:beD519EF79eE3b06b94751dFC8ce62587b8de6Cf',
       'type': 'metadata'
     },
-    
+
     {
       'attributes': {
         'main': {

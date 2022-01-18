@@ -73,19 +73,6 @@
     },
     {
       "inputs": [],
-      "name": "getBaseTokenAddress",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [],
       "name": "getController",
       "outputs": [
         {
@@ -99,7 +86,7 @@
     },
     {
       "inputs": [],
-      "name": "getDataTokenAddress",
+      "name": "getDatatokenAddress",
       "outputs": [
         {
           "internalType": "address",
@@ -124,6 +111,19 @@
       "type": "function"
     },
     {
+      "inputs": [],
+      "name": "getbaseTokenAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "uint256",
@@ -140,17 +140,17 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "dataTokenAaddress",
+          "name": "datatokenAddress",
           "type": "address"
         },
         {
           "internalType": "uint256",
-          "name": "dataTokenAmount",
+          "name": "datatokenAmount",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "dataTokenWeight",
+          "name": "datatokennWeight",
           "type": "uint256"
         },
         {

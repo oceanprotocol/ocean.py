@@ -92,7 +92,7 @@ def test_fre_flow():
 
     tx_result = ocean.fixed_rate_exchange.buy_dt(
         exchange_id=exchange_id,
-        data_token_amount=to_wei(20),
+        datatoken_amount=to_wei(20),
         max_base_token_amount=to_wei(50),
         from_wallet=bob_wallet,
     )

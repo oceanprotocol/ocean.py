@@ -120,26 +120,7 @@
           "type": "address"
         }
       ],
-      "name": "getBaseTokenAddress",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "datatokenAddress",
-          "type": "address"
-        }
-      ],
-      "name": "getBaseTokenBalance",
+      "name": "getDatatokenBalance",
       "outputs": [
         {
           "internalType": "uint256",
@@ -158,26 +139,7 @@
           "type": "address"
         }
       ],
-      "name": "getDataTokenBalance",
-      "outputs": [
-        {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "datatokenAddress",
-          "type": "address"
-        }
-      ],
-      "name": "getDataTokenCirculatingSupply",
+      "name": "getDatatokenCirculatingSupply",
       "outputs": [
         {
           "internalType": "uint256",
@@ -234,6 +196,44 @@
           "internalType": "address",
           "name": "",
           "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "datatokenAddress",
+          "type": "address"
+        }
+      ],
+      "name": "getbaseTokenAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "datatokenAddress",
+          "type": "address"
+        }
+      ],
+      "name": "getbaseTokenBalance",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
         }
       ],
       "stateMutability": "view",
@@ -324,7 +324,7 @@
         },
         {
           "internalType": "address",
-          "name": "basetokenAddress",
+          "name": "baseTokenAddress",
           "type": "address"
         },
         {
@@ -343,7 +343,7 @@
           "type": "uint256[]"
         }
       ],
-      "name": "newDataTokenCreated",
+      "name": "newDatatokenCreated",
       "outputs": [
         {
           "internalType": "bool",

@@ -12,7 +12,7 @@ It focuses on Alice's experience as a publisher.
 Here are the steps:
 
 1.  Setup
-2.  Alice creates a data token
+2.  Alice creates a datatoken
 3.  Dispenser creation & activation
 
 Let's go through each step.
@@ -78,7 +78,7 @@ export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 python
 ```
 
-## 2. Alice creates the data token
+## 2. Alice creates the datatoken
 
 
 In the Python console:
@@ -108,8 +108,8 @@ mint_fake_OCEAN(config)
 
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 
-data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
-token_address = data_token.address
+datatoken = ocean.create_datatoken('DataToken1', 'DT1', alice_wallet, blob=ocean.config.metadata_cache_uri)
+token_address = datatoken.address
 print(f"token_address = '{token_address}'")
 ```
 
@@ -131,15 +131,15 @@ dispenser = DispenserContract(alice_wallet.web3, dispenser_address)
 
 #Activate the dispenser
 dispenser.activate(token_address, to_wei(100), to_wei(100), alice_wallet)
-assert dispenser.is_active(token_address), f"dispenser is not active for {token_address} data token."
+assert dispenser.is_active(token_address), f"dispenser is not active for {token_address} datatoken."
 
 #Mint the datatokens for the dispenser
-data_token.mint(dispenser_address, to_wei(100), alice_wallet)
-data_token.approve(dispenser_address, to_wei(100), alice_wallet)
+datatoken.mint(dispenser_address, to_wei(100), alice_wallet)
+datatoken.approve(dispenser_address, to_wei(100), alice_wallet)
 
 #Dispense
 tx_result = dispenser.dispense(token_address, to_wei(50), alice_wallet)
-assert tx_result, "failed to dispense data tokens for Alice."
+assert tx_result, "failed to dispense datatokens for Alice."
 print(f"tx_result = '{tx_result}'")
 ```
 

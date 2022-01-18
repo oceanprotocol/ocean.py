@@ -105,7 +105,7 @@ def test_exchange_rate_creation(
     # Generate exchange id works
     generated_exchange_id = fixed_exchange.generate_exchange_id(
         base_token=get_address_of_type(config, "Ocean"),
-        data_token=erc20.address,
+        datatoken=erc20.address,
         exchange_owner=consumer_wallet.address,
     )
     assert generated_exchange_id == exchange_id
@@ -191,17 +191,17 @@ def test_exchange_rate_creation(
         event_log[0].args.baseTokenSwappedAmount
         - event_log[0].args.marketFeeAmount
         - event_log[0].args.oceanFeeAmount
-        == event_log[0].args.dataTokenSwappedAmount
+        == event_log[0].args.datatokenSwappedAmount
     )
 
     # Do the same but using calc_base_in_given_out_dt
     calculated_base_in = fixed_exchange.calc_base_in_given_out_dt(
-        exchange_id=exchange_id, data_token_amount=amount_dt_to_sell
+        exchange_id=exchange_id, datatoken_amount=amount_dt_to_sell
     )
 
     assert (
         calculated_base_in[FixedExchangeBaseInOutData.BASE_TOKEN_AMOUNT]
-        == event_log[0].args.dataTokenSwappedAmount
+        == event_log[0].args.datatokenSwappedAmount
         + event_log[0].args.marketFeeAmount
         + event_log[0].args.oceanFeeAmount
     )
@@ -224,7 +224,7 @@ def test_exchange_rate_creation(
     assert (
         ocean_token.balanceOf(consumer_wallet.address)
         == fixed_exchange.calc_base_out_given_in_dt(
-            exchange_id=exchange_id, data_token_amount=amount_dt_to_sell
+            exchange_id=exchange_id, datatoken_amount=amount_dt_to_sell
         )[FixedExchangeBaseInOutData.BASE_TOKEN_AMOUNT]
         + ocean_balance_before
     )
