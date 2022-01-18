@@ -577,11 +577,6 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def build_asset_urls(provider_uri: str) -> Tuple[str, str]:
-        return DataServiceProvider.build_endpoint("asset_urls", provider_uri)
-
-    @staticmethod
-    @enforce_types
     def write_file(
         response: Response,
         destination_folder: Union[str, bytes, os.PathLike],
@@ -763,32 +758,6 @@ class DataServiceProvider:
             return ddo_info["valid"]
 
         return False
-
-    @staticmethod
-    @enforce_types
-    def get_asset_urls(
-        did: str, service_id: str, provider_uri: str, wallet: Wallet
-    ) -> None:
-        if not did:
-            return False
-        _, endpoint = DataServiceProvider.build_asset_urls(provider_uri)
-
-        nonce, signature = DataServiceProvider.sign_message(wallet, did)
-
-        data = {
-            "documentId": did,
-            "serviceId": service_id,
-            "signature": signature,
-            "nonce": nonce,
-            "publisherAddress": wallet.address,
-        }
-
-        response = requests.get(endpoint, json=data)
-
-        if response.status_code != 200:
-            return None
-
-        return response.json()
 
 
 @enforce_types

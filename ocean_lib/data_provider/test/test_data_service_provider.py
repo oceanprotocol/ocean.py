@@ -29,7 +29,6 @@ from tests.resources.mocks.http_client_mock import (
 )
 
 TEST_SERVICE_ENDPOINTS = {
-    "asset_urls": ["GET", "/api/services/assetUrls"],
     "computeDelete": ["DELETE", "/api/services/compute"],
     "computeStart": ["POST", "/api/services/compute"],
     "computeStatus": ["GET", "/api/services/compute"],

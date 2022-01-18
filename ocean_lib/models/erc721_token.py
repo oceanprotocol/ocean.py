@@ -236,7 +236,7 @@ class ERC721Token(ContractBase):
             "setTokenURI", (token_id, new_token_uri), from_wallet
         )
 
-    def create_data_token(
+    def create_datatoken(
         self, erc20_data: ErcCreateData, from_wallet: Wallet
     ) -> ERC20Token:
         initial_list = self.get_tokens_list()
