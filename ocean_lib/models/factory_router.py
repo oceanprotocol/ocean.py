@@ -26,14 +26,14 @@ class FactoryRouter(BFactory):
     def is_pool_template(self, address: str) -> bool:
         return self.contract.caller.isPoolTemplate(address)
 
-    def fixed_price(self, address: str) -> bool:
-        return self.contract.caller.fixedPrice(address)
+    def is_fixed_rate_contract(self, address: str) -> bool:
+        return self.contract.caller.isFixedRateContract(address)
 
     def factory(self):
         return self.contract.caller.factory()
 
-    def ss_contracts(self, address: str):
-        return self.contract.caller.ssContracts(address)
+    def is_ss_contract(self, address: str):
+        return self.contract.caller.isSSContract(address)
 
     def get_opf_fee(self, base_token: str) -> int:
         return self.contract.caller.getOPFFee(base_token)
@@ -41,8 +41,8 @@ class FactoryRouter(BFactory):
     def swap_ocean_fee(self) -> int:
         return self.contract.caller.swapOceanFee()
 
-    def ocean_tokens(self, ocean_address: str) -> bool:
-        return self.contract.caller.oceanTokens(ocean_address)
+    def is_ocean_token(self, ocean_address: str) -> bool:
+        return self.contract.caller.isOceanToken(ocean_address)
 
     def change_router_owner(self, new_router_owner: str, from_wallet: Wallet) -> str:
         return self.send_transaction(
