@@ -93,7 +93,7 @@ def get_access_service(
     )
 
 
-def create_asset(ocean, publisher, config, metadata=None):
+def create_asset(ocean, publisher, config, metadata=None, files=None):
     """Helper function for asset creation based on ddo_sa_sample.json."""
     erc20_data = ErcCreateData(
         template_index=1,
@@ -118,11 +118,18 @@ def create_asset(ocean, publisher, config, metadata=None):
             "author": "OPF",
             "license": "https://market.oceanprotocol.com/terms",
         }
-    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
-    file1 = FilesTypeFactory(file1_dict)
+
+    if not files:
+        file1_dict = {
+            "type": "url",
+            "url": "https://url.com/file1.csv",
+            "method": "GET",
+        }
+        file1 = FilesTypeFactory(file1_dict)
+        files = [file1]
 
     # Encrypt file(s) using provider
-    encrypted_files = ocean.assets.encrypt_files([file1])
+    encrypted_files = ocean.assets.encrypt_files(files)
 
     # Publish asset with services on-chain.
     # The download (access service) is automatically created
@@ -232,8 +239,7 @@ def get_registered_asset_with_compute_service(
 
     for algorithm in trusted_algorithms:
         compute_service.add_publisher_trusted_algorithm(
-            algorithm,
-            generate_trusted_algo_dict(ocean_instance.config.provider_url, algorithm),
+            algorithm, generate_trusted_algo_dict(algorithm)
         )
 
     return ocean_instance.assets.create(
@@ -250,20 +256,10 @@ def get_registered_asset_with_compute_service(
 def get_registered_algorithm_with_access_service(
     ocean_instance: Ocean, publisher_wallet: Wallet
 ):
-    algorithm_file = FilesTypeFactory(
-        {
-            "type": "url",
-            "url": "https://raw.githubusercontent.com/oceanprotocol/test-algorithm/master/javascript/algo.js",
-            "method": "GET",
-        }
-    )
-
     web3 = ocean_instance.web3
     config = ocean_instance.config
     data_provider = DataServiceProvider
-    _, metadata, _ = create_basics(
-        config, web3, data_provider, asset_type="algorithm", files=[algorithm_file]
-    )
+    _, metadata, _ = create_basics(config, web3, data_provider, asset_type="algorithm")
 
     # Update metadata to include algorithm info
     algorithm_values = {
@@ -281,8 +277,20 @@ def get_registered_algorithm_with_access_service(
     }
     metadata.update(algorithm_values)
 
+    algorithm_file = FilesTypeFactory(
+        {
+            "type": "url",
+            "url": "https://raw.githubusercontent.com/oceanprotocol/test-algorithm/master/javascript/algo.js",
+            "method": "GET",
+        }
+    )
+
     return create_asset(
-        ocean_instance, publisher_wallet, ocean_instance.config, metadata=metadata
+        ocean_instance,
+        publisher_wallet,
+        ocean_instance.config,
+        metadata=metadata,
+        files=[algorithm_file],
     )
 
 

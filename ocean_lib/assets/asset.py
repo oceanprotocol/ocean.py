@@ -10,7 +10,6 @@ from typing import List, Optional
 from enforce_typing import enforce_types
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.credentials import AddressCredential
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.services.service import Service
 from ocean_lib.utils.utilities import create_checksum
 
@@ -258,20 +257,14 @@ class Asset:
         return trusted_algorithm_publishers
 
     @enforce_types
-    def generate_trusted_algorithms(self, provider_uri: str) -> dict:
+    def generate_trusted_algorithms(self) -> dict:
         files = self.get_service(ServiceTypes.ASSET_ACCESS).files
-        _, encrypt_endpoint = DataServiceProvider.build_encrypt_endpoint(provider_uri)
+        container = self.metadata["algorithm"]["container"]
         return {
             "did": self.did,
-            "filesChecksum": create_checksum(
-                DataServiceProvider.encrypt(files, encrypt_endpoint).content.decode(
-                    "utf-8"
-                )
-            ),
+            "filesChecksum": create_checksum(json.dumps(files, separators=(",", ":"))),
             "containerSectionChecksum": create_checksum(
-                json.dumps(
-                    self.metadata["algorithm"]["container"], separators=(",", ":")
-                )
+                json.dumps(container, separators=(",", ":"))
             ),
         }
 
