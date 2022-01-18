@@ -97,7 +97,7 @@ def test_exchange_rate_creation(
     )
 
     assert fixed_exchange.get_number_of_exchanges() == (number_of_exchanges_before + 1)
-    assert registered_event[0].args.owner == get_address_of_type(config, "Ocean")
+    assert registered_event[0].args.owner == consumer_wallet.address
     assert len(fixed_exchange.get_exchanges()) == (number_of_exchanges_before + 1)
 
     exchange_id = registered_event[0].args.exchangeId

@@ -44,53 +44,5 @@ class FactoryRouter(BFactory):
     def is_ocean_token(self, ocean_address: str) -> bool:
         return self.contract.caller.isOceanToken(ocean_address)
 
-    def change_router_owner(self, new_router_owner: str, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "changeRouterOwner", (new_router_owner,), from_wallet
-        )
-
-    def add_ocean_token(self, ocean_token_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "addOceanToken", (ocean_token_address,), from_wallet
-        )
-
-    def remove_ocean_token(self, ocean_token_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "removeOceanToken", (ocean_token_address,), from_wallet
-        )
-
-    def add_ss_contract(self, new_ss_contract_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "addSSContract", (new_ss_contract_address,), from_wallet
-        )
-
-    def add_factory(self, new_factory_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("addFactory", (new_factory_address,), from_wallet)
-
-    def add_fixed_rate_contract(
-        self, new_fixed_contract: str, from_wallet: Wallet
-    ) -> str:
-        return self.send_transaction(
-            "addFixedRateContract", (new_fixed_contract,), from_wallet
-        )
-
-    def add_dispenser_contract(self, new_dispenser: str, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "addDispenserContract", (new_dispenser,), from_wallet
-        )
-
-    def update_opf_fee(self, new_swap_ocean_fee: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("updateOPFFee", (new_swap_ocean_fee,), from_wallet)
-
-    def add_pool_template(self, new_pool_template: str, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "addPoolTemplate", (new_pool_template,), from_wallet
-        )
-
-    def remove_pool_template(self, pool_template: str, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "removePoolTemplate", (pool_template,), from_wallet
-        )
-
     def buy_dt_batch(self, operations: List[Operations], from_wallet: Wallet) -> str:
         return self.send_transaction("buyDTBatch", (operations,), from_wallet)

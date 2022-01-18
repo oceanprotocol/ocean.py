@@ -103,7 +103,9 @@ def test_fre_flow():
     datatoken_address = erc20_token.address
     nft_factory = ocean.get_nft_factory()
     logs = nft_factory.search_exchange_by_datatoken(
-        ocean.fixed_rate_exchange, datatoken_address
+        ocean.fixed_rate_exchange,
+        datatoken_address,
+        exchange_owner=alice_wallet.address,
     )
     assert logs, f"No exchange has {datatoken_address} address."
     assert len(logs) == 1

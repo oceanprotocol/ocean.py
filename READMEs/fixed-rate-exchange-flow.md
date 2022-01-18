@@ -193,6 +193,8 @@ providing the data token address.
 datatoken_address = erc20_token.address
 nft_factory = ocean.get_nft_factory()
 logs = nft_factory.search_exchange_by_datatoken(ocean.fixed_rate_exchange, datatoken_address)
+# Optional: Filtering the logs by the exchange owner.
+logs = nft_factory.search_exchange_by_datatoken(ocean.fixed_rate_exchange, datatoken_address, alice_wallet.address)
 print(logs)
 ```
 
