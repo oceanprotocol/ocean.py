@@ -211,19 +211,19 @@ class Ocean:
     def create_fixed_rate(
         self,
         erc20_token: ERC20Token,
-        base_token: ERC20Token,
+        basetoken: ERC20Token,
         amount: int,
         from_wallet: Wallet,
     ) -> bytes:
         fixed_price_address = get_address_of_type(self.config, "FixedPrice")
         erc20_token.approve(fixed_price_address, amount, from_wallet)
         addresses = [
-            base_token.address,
+            basetoken.address,
             from_wallet.address,
             from_wallet.address,
             ZERO_ADDRESS,
         ]
-        uints = [erc20_token.decimals(), base_token.decimals(), to_wei(1), int(1e15), 0]
+        uints = [erc20_token.decimals(), basetoken.decimals(), to_wei(1), int(1e15), 0]
 
         fixed_rate_data = FixedData(
             fixed_price_address=fixed_price_address, addresses=addresses, uints=uints
@@ -252,12 +252,12 @@ class Ocean:
     def create_pool(
         self,
         erc20_token: ERC20Token,
-        base_token: ERC20Token,
+        basetoken: ERC20Token,
         ss_params: List,
         swap_fees: List,
         from_wallet: Wallet,
     ) -> BPool:
-        base_token.approve(
+        basetoken.approve(
             get_address_of_type(self.config, "Router"),
             self.web3.toWei(2000, "ether"),
             from_wallet,
@@ -268,7 +268,7 @@ class Ocean:
             swap_fees,
             [
                 get_address_of_type(self.config, "Staking"),
-                base_token.address,
+                basetoken.address,
                 from_wallet.address,
                 from_wallet.address,
                 get_address_of_type(self.config, "OPFCommunityFeeCollector"),
