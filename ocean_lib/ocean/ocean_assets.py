@@ -156,7 +156,7 @@ class OceanAssets:
         self,
         metadata: dict,
         publisher_wallet: Wallet,
-        encrypted_files: str,
+        encrypted_files: Optional[str] = None,
         services: Optional[list] = None,
         credentials: Optional[list] = None,
         provider_uri: Optional[str] = None,

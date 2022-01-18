@@ -11,7 +11,9 @@ from ocean_lib.assets.asset_resolver import resolve_asset
 
 @enforce_types
 def generate_trusted_algo_dict(
-    asset_or_did: Union[str, Asset] = None, metadata_cache_uri: Optional[str] = None
+    provider_uri: str,
+    asset_or_did: Union[str, Asset] = None,
+    metadata_cache_uri: Optional[str] = None,
 ) -> dict:
     """
     :return: Object as follows:
@@ -28,7 +30,7 @@ def generate_trusted_algo_dict(
     else:
         ddo = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
 
-    return ddo.generate_trusted_algorithms()
+    return ddo.generate_trusted_algorithms(provider_uri)
 
 
 @enforce_types

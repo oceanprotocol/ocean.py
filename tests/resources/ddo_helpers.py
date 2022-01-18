@@ -230,15 +230,15 @@ def get_registered_asset_with_compute_service(
         compute_values=compute_values,
     )
 
-    for trusted_algorithm in trusted_algorithms:
+    for algorithm in trusted_algorithms:
         compute_service.add_publisher_trusted_algorithm(
-            trusted_algorithm, generate_trusted_algo_dict(trusted_algorithm)
+            algorithm,
+            generate_trusted_algo_dict(ocean_instance.config.provider_url, algorithm),
         )
 
     return ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        encrypted_files=encrypted_files,
         services=[compute_service],
         erc721_address=erc721_token.address,
         deployed_erc20_tokens=[erc20_token],
