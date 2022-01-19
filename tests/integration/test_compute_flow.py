@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import time
+from datetime import datetime, timedelta
 from typing import List, Optional, Tuple
 
 import pytest
@@ -124,7 +125,7 @@ def process_order(
     """Helper function to process a compute order."""
     # Mint 10 datatokens to the consumer
     service = asset.get_service(service_type)
-    erc20_token = ERC20Token(ocean_instance.web3, service.data_token)
+    erc20_token = ERC20Token(ocean_instance.web3, service.datatoken)
     _ = erc20_token.mint(consumer_wallet.address, to_wei(10), publisher_wallet)
 
     # TODO: Refactor, use OceanAssets.order() instead of initialize and start_order
@@ -139,6 +140,7 @@ def process_order(
         service_endpoint=initialize_url,
         # TODO: add a real compute environment once provider supports it
         compute_environment="doesn't matter for now",
+        valid_until=int((datetime.now() + timedelta(hours=1)).timestamp()),
     ).json()
 
     # Order the service

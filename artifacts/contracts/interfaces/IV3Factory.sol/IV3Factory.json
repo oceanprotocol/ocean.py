@@ -17,7 +17,7 @@
         },
         {
           "internalType": "address",
-          "name": "basetokenAddress",
+          "name": "baseTokenAddress",
           "type": "address"
         },
         {

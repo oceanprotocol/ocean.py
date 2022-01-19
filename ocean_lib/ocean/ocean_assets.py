@@ -68,12 +68,12 @@ class OceanAssets:
         return self._get_aquarius(self._metadata_cache_uri).validate_asset(asset)
 
     def _add_defaults(
-        self, services: list, data_token: str, files: str, provider_uri: str
+        self, services: list, datatoken: str, files: str, provider_uri: str
     ) -> list:
         has_access_service = any(
             map(
                 lambda s: s.type == ServiceTypes.ASSET_ACCESS
-                and s.id == self.find_service_by_data_token(data_token, services),
+                and s.id == self.find_service_by_datatoken(datatoken, services),
                 services,
             )
         )
@@ -84,7 +84,7 @@ class OceanAssets:
                 service_endpoint=self._data_provider.build_download_endpoint(
                     provider_uri
                 )[1],
-                data_token=data_token,
+                datatoken=datatoken,
                 files=files,
             )
 
@@ -96,7 +96,7 @@ class OceanAssets:
     def build_access_service(
         service_id: str,
         service_endpoint: str,
-        data_token: str,
+        datatoken: str,
         files: str,
         timeout: Optional[int] = 3600,
     ) -> Service:
@@ -105,7 +105,7 @@ class OceanAssets:
             service_id=service_id,
             service_type=ServiceTypes.ASSET_ACCESS,
             service_endpoint=service_endpoint,
-            data_token=data_token,
+            datatoken=datatoken,
             files=files,
             timeout=timeout,
         )
@@ -131,26 +131,25 @@ class OceanAssets:
 
         return registered_token_event[0].args.newTokenAddress
 
-    def find_service_by_data_token(self, data_token: str, services: list) -> str:
+    def find_service_by_datatoken(self, datatoken: str, services: list) -> str:
         return next(
-            (service.id for service in services if service.data_token == data_token),
-            None,
+            (service.id for service in services if service.datatoken == datatoken), None
         )
 
-    def build_data_tokens_list(
+    def build_datatokens_list(
         self, services: list, deployed_erc20_tokens: list
     ) -> list:
-        data_tokens = []
+        datatokens = []
         for erc20_token in deployed_erc20_tokens:
             for service in services:
-                data_token = {
+                datatoken = {
                     "address": erc20_token.address,
                     "name": erc20_token.contract.caller.name(),
                     "symbol": erc20_token.symbol(),
                     "serviceId": service.id,
                 }
-                data_tokens.append(data_token)
-        return data_tokens
+                datatokens.append(datatoken)
+        return datatokens
 
     def create(
         self,
@@ -295,7 +294,7 @@ class OceanAssets:
                     ERC20Token(self._web3, erc20_token_address)
                 )
 
-            data_tokens = self.build_data_tokens_list(
+            datatokens = self.build_datatokens_list(
                 services=services, deployed_erc20_tokens=deployed_erc20_tokens
             )
         else:
@@ -305,12 +304,12 @@ class OceanAssets:
                         services, erc20_token.address, encrypted_files, provider_uri
                     )
 
-            data_tokens = self.build_data_tokens_list(
+            datatokens = self.build_datatokens_list(
                 services=services, deployed_erc20_tokens=deployed_erc20_tokens
             )
 
         asset.nft_address = erc721_address
-        asset.datatokens = data_tokens
+        asset.datatokens = datatokens
 
         for service in services:
             asset.add_service(service)
@@ -448,7 +447,7 @@ class OceanAssets:
 
     @enforce_types
     def pay_for_service(self, asset: Asset, service: Service, wallet: Wallet):
-        dt = ERC20Token(self._web3, service.data_token)
+        dt = ERC20Token(self._web3, service.datatoken)
         balance = dt.balanceOf(wallet.address)
 
         if balance < to_wei(1):

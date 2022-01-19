@@ -60,9 +60,9 @@ class BPool(BTokenBase):
 
     def setup(
         self,
-        data_token: str,
-        data_token_amount: int,
-        data_token_weight: int,
+        datatoken: str,
+        datatoken_amount: int,
+        datatoken_weight: int,
         base_token: str,
         base_token_amount: int,
         base_token_weight: int,
@@ -72,9 +72,9 @@ class BPool(BTokenBase):
         tx_id = self.send_transaction(
             "setup",
             (
-                data_token,
-                data_token_amount,
-                data_token_weight,
+                datatoken,
+                datatoken_amount,
+                datatoken_weight,
                 base_token,
                 base_token_amount,
                 base_token_weight,
@@ -172,8 +172,8 @@ class BPool(BTokenBase):
         """
         return self.contract.caller.getController()
 
-    def get_data_token_address(self) -> str:
-        return self.contract.caller.getDataTokenAddress()
+    def get_datatoken_address(self) -> str:
+        return self.contract.caller.getDatatokenAddress()
 
     def get_base_token_address(self) -> str:
         return self.contract.caller.getBaseTokenAddress()

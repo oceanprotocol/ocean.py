@@ -128,6 +128,7 @@ class DataServiceProvider:
         service_endpoint: str,
         compute_environment: Optional[str] = None,
         userdata: Optional[Dict] = None,
+        valid_until: Optional[int] = 0,
     ) -> Response:
 
         req = PreparedRequest()
@@ -138,6 +139,9 @@ class DataServiceProvider:
 
         if compute_environment:
             payload["computeEnv"] = compute_environment
+
+        if valid_until:
+            payload["validUntil"] = valid_until
 
         if userdata:
             userdata = json.dumps(userdata)
