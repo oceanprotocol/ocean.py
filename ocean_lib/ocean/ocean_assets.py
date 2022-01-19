@@ -53,9 +53,7 @@ class OceanAssets:
                 self._config.get("resources", "downloads.path") or downloads_path
             )
         self._downloads_path = downloads_path
-
-    def _get_aquarius(self, url: Optional[str] = None) -> Aquarius:
-        return Aquarius.get_instance(url or self._metadata_cache_uri)
+        self._aquarius = Aquarius.get_instance(self._metadata_cache_uri)
 
     def validate(self, asset: Asset) -> Tuple[bool, list]:
         """
@@ -64,7 +62,7 @@ class OceanAssets:
         :param asset: Asset.
         :return: (bool, list) list of errors, empty if valid
         """
-        return self._get_aquarius(self._metadata_cache_uri).validate_asset(asset)
+        return self._aquarius.validate_asset(asset)
 
     def _add_defaults(
         self, services: list, data_token: str, files: str, provider_uri: str
@@ -320,7 +318,7 @@ class OceanAssets:
         did = f"did:op:{create_checksum(erc721_token.address + str(self._web3.eth.chain_id))}"
         asset.did = did
         # Check if it's already registered first!
-        if self._get_aquarius().ddo_exists(did):
+        if self._aquarius.ddo_exists(did):
             raise AquariusError(
                 f"Asset id {did} is already registered to another asset."
             )
@@ -395,7 +393,7 @@ class OceanAssets:
         )
 
         # Fetch the asset on chain
-        asset = self._get_aquarius(self._metadata_cache_uri).wait_for_asset(did)
+        asset = self._aquarius.wait_for_asset(did)
 
         return asset
 
@@ -461,11 +459,11 @@ class OceanAssets:
 
         self._web3.eth.wait_for_transaction_receipt(tx_result)
 
-        return wait_for_asset_update(self._get_aquarius(), asset, tx_result)
+        return wait_for_asset_update(self._aquarius, asset, tx_result)
 
     @enforce_types
     def resolve(self, did: str) -> "Asset":
-        return self._get_aquarius(self._metadata_cache_uri).get_asset_ddo(did)
+        return self._aquarius.get_asset_ddo(did)
 
     @enforce_types
     def search(self, text: str) -> list:
@@ -477,7 +475,7 @@ class OceanAssets:
         logger.info(f"Searching asset containing: {text}")
         return [
             Asset.from_dict(ddo_dict["_source"])
-            for ddo_dict in self._get_aquarius(self._metadata_cache_uri).query_search(
+            for ddo_dict in self._aquarius.query_search(
                 {"query": {"query_string": {"query": text}}}
             )
             if "_source" in ddo_dict
@@ -492,10 +490,9 @@ class OceanAssets:
         :return: List of assets that match with the query.
         """
         logger.info(f"Searching asset query: {query}")
-        aquarius = self._get_aquarius(self._metadata_cache_uri)
         return [
             Asset.from_dict(ddo_dict["_source"])
-            for ddo_dict in aquarius.query_search(query)
+            for ddo_dict in self._aquarius.query_search(query)
             if "_source" in ddo_dict
         ]
 
