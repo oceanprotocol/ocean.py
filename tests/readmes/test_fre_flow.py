@@ -80,7 +80,7 @@ def test_fre_flow():
     # Create exchange_id for a new exchange
     exchange_id = ocean.create_fixed_rate(
         erc20_token=erc20_token,
-        basetoken=OCEAN_token,
+        base_token=OCEAN_token,
         amount=to_wei(100),
         from_wallet=alice_wallet,
     )
@@ -93,7 +93,7 @@ def test_fre_flow():
     tx_result = ocean.fixed_rate_exchange.buy_dt(
         exchange_id=exchange_id,
         datatoken_amount=to_wei(20),
-        max_basetoken_amount=to_wei(50),
+        max_base_token_amount=to_wei(50),
         from_wallet=bob_wallet,
     )
     assert tx_result, "failed buying data tokens at fixed rate for Bob"

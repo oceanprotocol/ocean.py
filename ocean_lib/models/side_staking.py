@@ -20,13 +20,13 @@ class SideStaking(ContractBase):
     def get_publisher_address(self, datatoken: str) -> str:
         return self.contract.caller.getPublisherAddress(datatoken)
 
-    def get_basetoken_address(self, datatoken: str) -> str:
+    def get_base_token_address(self, datatoken: str) -> str:
         return self.contract.caller.getBasetokenAddress(datatoken)
 
     def get_pool_address(self, datatoken: str) -> str:
         return self.contract.caller.getPoolAddress(datatoken)
 
-    def get_basetoken_balance(self, datatoken: str) -> int:
+    def get_base_token_balance(self, datatoken: str) -> int:
         return self.contract.caller.getBasetokenBalance(datatoken)
 
     def get_datatoken_balance(self, datatoken: str) -> int:

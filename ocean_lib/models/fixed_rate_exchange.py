@@ -14,7 +14,7 @@ class FixedRateExchangeDetails(IntEnum):
     EXCHANGE_OWNER = 0
     DATATOKEN = 1
     DT_DECIMALS = 2
-    BASETOKEN = 3
+    BASE_TOKEN = 3
     BT_DECIMALS = 4
     FIXED_RATE = 5
     ACTIVE = 6
@@ -34,8 +34,8 @@ class FixedRateExchangeFeesInfo(IntEnum):
 
 
 class FixedExchangeBaseInOutData(IntEnum):
-    BASETOKEN_AMOUNT = 0
-    BASETOKEN_AMOUNT_BEFORE_FEE = 1
+    BASE_TOKEN_AMOUNT = 0
+    BASE_TOKEN_AMOUNT_BEFORE_FEE = 1
     OCEAN_FEE_AMOUNT = 2
     MARKET_FEE_AMOUNT = 3
 
@@ -84,14 +84,14 @@ class FixedRateExchange(ContractBase):
     def event_MarketFeeCollected(self):
         return self.events.MarketFeeCollected()
 
-    def get_opf_fee(self, basetoken: str) -> int:
-        return self.contract.caller.getOPFFee(basetoken)
+    def get_opf_fee(self, base_token: str) -> int:
+        return self.contract.caller.getOPFFee(base_token)
 
     def generate_exchange_id(
-        self, basetoken: str, datatoken: str, exchange_owner: str
+        self, base_token: str, datatoken: str, exchange_owner: str
     ) -> bytes:
         return self.contract.caller.generateExchangeId(
-            basetoken, datatoken, exchange_owner
+            base_token, datatoken, exchange_owner
         )
 
     def calc_base_in_given_out_dt(
@@ -108,22 +108,24 @@ class FixedRateExchange(ContractBase):
         self,
         exchange_id: bytes,
         datatoken_amount: int,
-        max_basetoken_amount: int,
+        max_base_token_amount: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "buyDT", (exchange_id, datatoken_amount, max_basetoken_amount), from_wallet
+            "buyDT", (exchange_id, datatoken_amount, max_base_token_amount), from_wallet
         )
 
     def sell_dt(
         self,
         exchange_id: bytes,
         datatoken_amount: int,
-        min_basetoken_amount: int,
+        min_base_token_amount: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "sellDT", (exchange_id, datatoken_amount, min_basetoken_amount), from_wallet
+            "sellDT",
+            (exchange_id, datatoken_amount, min_base_token_amount),
+            from_wallet,
         )
 
     def collect_bt(self, exchange_id: bytes, from_wallet: Wallet) -> str:

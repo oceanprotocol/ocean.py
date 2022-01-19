@@ -43,7 +43,7 @@ def test_side_staking(
     assert side_staking.get_vesting_amount_so_far(erc20.address) == 0
     assert side_staking.get_vesting_last_block(erc20.address) == 0
     assert side_staking.get_vesting_end_block(erc20.address) == 0
-    assert side_staking.get_basetoken_balance(erc20.address) == 0
+    assert side_staking.get_base_token_balance(erc20.address) == 0
 
     # Datatoken initial circulating supply should be 0
     assert side_staking.get_datatoken_circulating_supply(erc20.address) == 0
@@ -102,7 +102,7 @@ def test_side_staking(
         None,
     )
 
-    assert side_staking.get_basetoken_address(erc20.address) == ocean_token.address
+    assert side_staking.get_base_token_address(erc20.address) == ocean_token.address
     assert side_staking.get_publisher_address(erc20.address) == consumer_wallet.address
     assert side_staking.get_vesting_amount(erc20.address) == web3.toWei("0.5", "ether")
 

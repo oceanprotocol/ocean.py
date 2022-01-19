@@ -224,7 +224,7 @@ def test_buy_from_fre_and_order(
         fixed_rate_exchange.buy_dt(
             exchange_id=exchange_id,
             datatoken_amount=web3.toWei(1, "ether"),
-            max_basetoken_amount=web3.toWei(1, "ether"),
+            max_base_token_amount=web3.toWei(1, "ether"),
             from_wallet=consumer_wallet,
         )
 

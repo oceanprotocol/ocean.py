@@ -63,9 +63,9 @@ class BPool(BTokenBase):
         datatoken: str,
         datatoken_amount: int,
         datatoken_weight: int,
-        basetoken: str,
-        basetoken_amount: int,
-        basetoken_weight: int,
+        base_token: str,
+        base_token_amount: int,
+        base_token_weight: int,
         swap_fee: int,
         from_wallet: Wallet,
     ) -> str:
@@ -75,9 +75,9 @@ class BPool(BTokenBase):
                 datatoken,
                 datatoken_amount,
                 datatoken_weight,
-                basetoken,
-                basetoken_amount,
-                basetoken_weight,
+                base_token,
+                base_token_amount,
+                base_token_weight,
                 swap_fee,
             ),
             from_wallet,
@@ -175,7 +175,7 @@ class BPool(BTokenBase):
     def get_datatoken_address(self) -> str:
         return self.contract.caller.getDatatokenAddress()
 
-    def get_basetoken_address(self) -> str:
+    def get_base_token_address(self) -> str:
         return self.contract.caller.getBaseTokenAddress()
 
     def calc_pool_in_single_out(self, address: str, amount: int):
