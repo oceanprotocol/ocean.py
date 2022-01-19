@@ -192,6 +192,32 @@
       "inputs": [
         {
           "internalType": "address",
+          "name": "_allowedAddress",
+          "type": "address"
+        }
+      ],
+      "name": "addToCreateERC20List",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_allowedAddress",
+          "type": "address"
+        }
+      ],
+      "name": "addToMetadataList",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
           "name": "to",
           "type": "address"
         },
@@ -229,6 +255,45 @@
       "inputs": [
         {
           "internalType": "uint256",
+          "name": "_templateIndex",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string[]",
+          "name": "strings",
+          "type": "string[]"
+        },
+        {
+          "internalType": "address[]",
+          "name": "addresses",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "uints",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes[]",
+          "name": "bytess",
+          "type": "bytes[]"
+        }
+      ],
+      "name": "createERC20",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
           "name": "tokenId",
           "type": "uint256"
         }
@@ -242,6 +307,19 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getId",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "pure",
       "type": "function"
     },
     {
@@ -454,6 +532,32 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_allowedAddress",
+          "type": "address"
+        }
+      ],
+      "name": "removeFromCreateERC20List",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "_allowedAddress",
+          "type": "address"
+        }
+      ],
+      "name": "removeFromMetadataList",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
