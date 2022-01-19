@@ -286,26 +286,6 @@ def build_credentials_dict() -> dict:
     return {"allow": [], "deny": []}
 
 
-def wait_for_update(ocean, did, updated_attr, value, timeout=30):
-    start = time.time()
-    ddo = None
-    while True:
-        try:
-            ddo = ocean.assets.resolve(did)
-        except ValueError:
-            pass
-
-        if not ddo:
-            time.sleep(0.2)
-        elif ddo.metadata["main"].get(updated_attr) == value:
-            break
-
-        if time.time() - start > timeout:
-            break
-
-    return ddo
-
-
 def wait_for_ddo(ocean, did, timeout=30):
     start = time.time()
     ddo = None

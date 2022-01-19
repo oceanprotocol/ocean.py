@@ -24,7 +24,6 @@ from tests.resources.ddo_helpers import (
     get_registered_algorithm_ddo_different_provider,
     get_registered_asset_with_access_service,
     get_registered_asset_with_compute_service,
-    wait_for_update,
 )
 from web3.logs import DISCARD
 
@@ -342,12 +341,13 @@ def test_update_trusted_algorithms(
     logs = ddo_registry.event_MetadataUpdated.processReceipt(tx_receipt, errors=DISCARD)
     assert logs[0].args.datatoken == asset_with_trusted.datatoken_address
 
-    wait_for_update(
-        publisher_ocean_instance,
-        asset_with_trusted.did,
-        "privacy",
-        {"publisherTrustedAlgorithms": [algorithm_ddo.did]},
-    )
+    # TODO use util.wait_for_asset_update
+    # wait_for_update(
+    #     publisher_ocean_instance,
+    #     asset_with_trusted.did,
+    #     "privacy",
+    #     {"publisherTrustedAlgorithms": [algorithm_ddo.did]},
+    # )
 
     compute_ddo_updated = publisher_ocean_instance.assets.resolve(
         asset_with_trusted.did
