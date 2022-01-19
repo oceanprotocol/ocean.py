@@ -102,6 +102,34 @@ class ERC721Token(ContractBase):
             from_wallet,
         )
 
+    def set_metadata_token_uri(
+        self,
+        metadata_state: int,
+        metadata_decryptor_url: str,
+        metadata_decryptor_address: str,
+        flags: bytes,
+        data: bytes,
+        data_hash: bytes,
+        data_proofs: List[MetadataProof],
+        token_id: int,
+        token_uri: str,
+        from_wallet: Wallet,
+    ) -> str:
+        new_metadata_new_token_uri = {
+            "metaDataState": metadata_state,
+            "metaDataDecryptorUrl": metadata_decryptor_url,
+            "metaDataDecryptorAddress": metadata_decryptor_address,
+            "flags": flags,
+            "data": data,
+            "metaDataHash": data_hash,
+            "tokenId": token_id,
+            "tokenURI": token_uri,
+            "metadataProofs": data_proofs,
+        }
+        return self.send_transaction(
+            "setMetaDataAndTokenURI", (new_metadata_new_token_uri,), from_wallet
+        )
+
     def get_metadata(self) -> tuple:
         return self.contract.caller.getMetaData()
 
