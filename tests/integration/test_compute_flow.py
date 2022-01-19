@@ -15,9 +15,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
@@ -27,7 +25,6 @@ from tests.resources.ddo_helpers import (
     get_registered_asset_with_access_service,
     get_registered_asset_with_compute_service,
 )
-from web3.logs import DISCARD
 
 
 @pytest.fixture
@@ -354,7 +351,6 @@ def test_compute_multi_inputs(
     )
 
 
-@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_update_trusted_algorithms(
     publisher_wallet,
     publisher_ocean_instance,
@@ -362,11 +358,15 @@ def test_update_trusted_algorithms(
     dataset_with_compute_service_generator,
     algorithm,
 ):
-    erc721_address = get_address_of_type(
-        publisher_ocean_instance.config, ERC721FactoryContract.CONTRACT_NAME
-    )
-    erc721_factory = ERC721FactoryContract(
-        publisher_ocean_instance.web3, erc721_address
+    run_compute_test(
+        ocean_instance=publisher_ocean_instance,
+        publisher_wallet=publisher_wallet,
+        consumer_wallet=consumer_wallet,
+        dataset_and_userdata=AssetAndUserdata(
+            dataset_with_compute_service_generator, None
+        ),
+        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+        with_result=True,
     )
 
     trusted_algo_list = create_publisher_trusted_algorithms([algorithm], "")
@@ -377,37 +377,15 @@ def test_update_trusted_algorithms(
         allow_raw_algorithm=False,
     )
 
-    # TODO: Fix once https://github.com/oceanprotocol/ocean.py/pull/646 is merged
-    tx_id = publisher_ocean_instance.assets.update(
+    updated_dataset = publisher_ocean_instance.assets.update(
         dataset_with_compute_service_generator, publisher_wallet
-    )
-
-    tx_receipt = erc721_factory.get_tx_receipt(publisher_ocean_instance.web3, tx_id)
-    logs = erc721_factory.event_MetadataUpdated.processReceipt(
-        tx_receipt, errors=DISCARD
-    )
-    assert (
-        logs[0].args.dataToken
-        == dataset_with_compute_service_generator.data_token_address
-    )
-
-    # TODO use util.wait_for_asset_update
-    # wait_for_update(
-    #     publisher_ocean_instance,
-    #     asset_with_trusted.did,
-    #     "privacy",
-    #     {"publisherTrustedAlgorithms": [algorithm_ddo.did]},
-    # )
-
-    compute_ddo_updated = publisher_ocean_instance.assets.resolve(
-        dataset_with_compute_service_generator.did
     )
 
     run_compute_test(
         ocean_instance=publisher_ocean_instance,
         publisher_wallet=publisher_wallet,
         consumer_wallet=consumer_wallet,
-        dataset_and_userdata=AssetAndUserdata(compute_ddo_updated, None),
+        dataset_and_userdata=AssetAndUserdata(updated_dataset, None),
         algorithm_and_userdata=AssetAndUserdata(algorithm, None),
         with_result=True,
     )
