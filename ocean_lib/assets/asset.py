@@ -258,7 +258,8 @@ class Asset:
 
     @enforce_types
     def generate_trusted_algorithms(self) -> dict:
-        files = self.get_service(ServiceTypes.ASSET_ACCESS).files
+        """Returns a trustedAlgorithm dictionary for service at index 0."""
+        files = self.get_service_by_index(0).files
         container = self.metadata["algorithm"]["container"]
         return {
             "did": self.did,
