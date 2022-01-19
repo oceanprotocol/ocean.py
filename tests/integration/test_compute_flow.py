@@ -26,7 +26,6 @@ from tests.resources.ddo_helpers import (
     get_registered_algorithm_with_access_service,
     get_registered_asset_with_access_service,
     get_registered_asset_with_compute_service,
-    wait_for_update,
 )
 from web3.logs import DISCARD
 
@@ -392,12 +391,13 @@ def test_update_trusted_algorithms(
         == dataset_with_compute_service_generator.data_token_address
     )
 
-    wait_for_update(
-        publisher_ocean_instance,
-        dataset_with_compute_service_generator.did,
-        "privacy",
-        {"publisherTrustedAlgorithms": [algorithm.did]},
-    )
+    # TODO use util.wait_for_asset_update
+    # wait_for_update(
+    #     publisher_ocean_instance,
+    #     asset_with_trusted.did,
+    #     "privacy",
+    #     {"publisherTrustedAlgorithms": [algorithm_ddo.did]},
+    # )
 
     compute_ddo_updated = publisher_ocean_instance.assets.resolve(
         dataset_with_compute_service_generator.did
