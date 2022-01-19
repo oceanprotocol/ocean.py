@@ -17,7 +17,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "maxbaseTokenAmount",
+          "name": "maxBaseTokenAmount",
           "type": "uint256"
         }
       ],
@@ -272,7 +272,7 @@
         },
         {
           "internalType": "uint256",
-          "name": "minbaseTokenAmount",
+          "name": "minBaseTokenAmount",
           "type": "uint256"
         }
       ],

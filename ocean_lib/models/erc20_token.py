@@ -127,13 +127,16 @@ class ERC20Token(ContractBase):
             (
                 consumer,
                 service_index,
-                provider_fees["providerFeeAddress"],
-                provider_fees["providerFeeToken"],
-                provider_fees["providerFeeAmount"],
-                provider_fees["v"],
-                provider_fees["r"],
-                provider_fees["s"],
-                provider_fees["providerData"],
+                (
+                    provider_fees["providerFeeAddress"],
+                    provider_fees["providerFeeToken"],
+                    provider_fees["providerFeeAmount"],
+                    provider_fees["providerData"],
+                    provider_fees["v"],
+                    provider_fees["r"],
+                    provider_fees["s"],
+                    provider_fees["validUntil"],
+                ),
             ),
             from_wallet,
         )

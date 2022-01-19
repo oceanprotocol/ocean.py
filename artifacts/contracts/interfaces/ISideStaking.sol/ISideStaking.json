@@ -120,6 +120,25 @@
           "type": "address"
         }
       ],
+      "name": "getBaseTokenAddress",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "datatokenAddress",
+          "type": "address"
+        }
+      ],
       "name": "getDatatokenBalance",
       "outputs": [
         {
@@ -209,26 +228,7 @@
           "type": "address"
         }
       ],
-      "name": "getbaseTokenAddress",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "address",
-          "name": "datatokenAddress",
-          "type": "address"
-        }
-      ],
-      "name": "getbaseTokenBalance",
+      "name": "getbBaseTokenBalance",
       "outputs": [
         {
           "internalType": "uint256",
