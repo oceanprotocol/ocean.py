@@ -128,7 +128,7 @@ def create_asset(ocean, publisher, config, metadata=None):
     )
 
     # TODO: Mint tokens for dataset and assign to publisher
-    # dt = ocean.get_datatoken(service.data_token_address)
+    # dt = ocean.get_datatoken(service.datatoken_address)
     # mint_tokens_and_wait(dt, wallet.address, wallet)
 
     return asset
@@ -220,7 +220,7 @@ def get_registered_asset_with_compute_service(
         service_id="2",
         service_type=ServiceTypes.CLOUD_COMPUTE,
         service_endpoint=f"{data_provider.get_url(config)}/api/services/compute",
-        data_token=erc20_token.address,
+        datatoken=erc20_token.address,
         files=encrypted_files,
         timeout=3600,
         compute_values=compute_values,

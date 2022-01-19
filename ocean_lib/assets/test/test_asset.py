@@ -81,7 +81,7 @@ def test_asset_utils(web3):
             "serviceId": "1",
         }
     ]
-    data_tokens = ddo_dict["datatokens"]
+    datatokens = ddo_dict["datatokens"]
 
     assert ddo_dict["event"] == {
         "tx": "0x8d127de58509be5dfac600792ad24cc9164921571d168bff2f123c7f1cb4b11c",
@@ -105,7 +105,7 @@ def test_asset_utils(web3):
         credentials=credentials,
         nft=nft,
         nft_address="0xabc",
-        datatokens=data_tokens,
+        datatokens=datatokens,
         event=event,
         stats=stats,
     )
@@ -147,7 +147,7 @@ def test_add_service():
         service_id="2",
         service_type="compute",
         service_endpoint="https://myprovider.com",
-        data_token="0x124",
+        datatoken="0x124",
         files="0x0001",
         timeout=3600,
         compute_values=compute_values,
