@@ -42,7 +42,7 @@ def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wal
 
 
 def test_update_metadata(publisher_ocean_instance, publisher_wallet, config):
-
+    """Test the update of metadata"""
     ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
 
     new_metadata = copy.deepcopy(ddo.metadata)
@@ -62,10 +62,12 @@ def test_update_metadata(publisher_ocean_instance, publisher_wallet, config):
     assert len(_asset.services) == len(ddo.services)
     assert _asset.services[0].as_dictionary() == ddo.services[0].as_dictionary()
     assert _asset.credentials == ddo.credentials
+    assert _asset.metadata["description"] == _description
+    assert _asset.metadata["updated"] == new_metadata["updated"]
 
 
 def test_update_credentials(publisher_ocean_instance, publisher_wallet, config):
-
+    """Test that the credentials can be updated."""
     ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
 
     # Update credentials
@@ -85,7 +87,7 @@ def test_update_credentials(publisher_ocean_instance, publisher_wallet, config):
 
 
 def test_update_datatokens(publisher_ocean_instance, publisher_wallet, config):
-
+    """Test the update of datatokens"""
     ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
     data_provider = DataServiceProvider
     _, erc20_token = deploy_erc721_erc20(
@@ -159,7 +161,7 @@ def test_update_datatokens(publisher_ocean_instance, publisher_wallet, config):
 
 
 def test_update_flags(publisher_ocean_instance, publisher_wallet, config):
-
+    """Test the update of flags"""
     ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
 
     # Test compress & update flags
