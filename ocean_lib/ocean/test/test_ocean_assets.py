@@ -104,7 +104,7 @@ def test_update_datatokens(publisher_ocean_instance, publisher_wallet, config):
         service_id="3",
         service_type=ServiceTypes.ASSET_ACCESS,
         service_endpoint=f"{data_provider.get_url(config)}/api/services/download",
-        data_token=erc20_token.address,
+        datatoken=erc20_token.address,
         files=encrypted_files,
         timeout=0,
     )
@@ -129,8 +129,8 @@ def test_update_datatokens(publisher_ocean_instance, publisher_wallet, config):
     assert len(_asset.services) == len(old_asset.services) + 1
     assert _asset.datatokens[1].get("address") == erc20_token.address
     assert _asset.datatokens[0].get("address") == old_asset.datatokens[0].get("address")
-    assert _asset.services[0].data_token == old_asset.datatokens[0].get("address")
-    assert _asset.services[1].data_token == erc20_token.address
+    assert _asset.services[0].datatoken == old_asset.datatokens[0].get("address")
+    assert _asset.services[1].datatoken == erc20_token.address
 
     # Delete datatoken
     new_asset = new_metadata = copy.deepcopy(_asset)
@@ -144,7 +144,7 @@ def test_update_datatokens(publisher_ocean_instance, publisher_wallet, config):
     new_asset.services = [
         service
         for service in new_asset.services
-        if service.data_token != removed_dt.get("address")
+        if service.datatoken != removed_dt.get("address")
     ]
 
     old_datatokens = _asset.datatokens
@@ -157,7 +157,7 @@ def test_update_datatokens(publisher_ocean_instance, publisher_wallet, config):
     assert _asset, "Cannot read asset after update."
     assert len(_asset.datatokens) == 1
     assert _asset.datatokens[0].get("address") == old_datatokens[0].get("address")
-    assert _asset.services[0].data_token == old_datatokens[0].get("address")
+    assert _asset.services[0].datatoken == old_datatokens[0].get("address")
 
 
 def test_update_flags(publisher_ocean_instance, publisher_wallet, config):
