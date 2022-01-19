@@ -23,7 +23,7 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.models_structures import ErcCreateData
-from ocean_lib.ocean.util import get_address_of_type, wait_for_asset_update
+from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -154,7 +154,7 @@ class OceanAssets:
         return datatokens
 
     @staticmethod
-    def _encrypt_ddo_locally(
+    def _encrypt_ddo(
         asset: Asset,
         provider_uri: str,
         encrypt_flag: Optional[bool] = False,
@@ -377,7 +377,7 @@ class OceanAssets:
             logger.error(msg)
             raise ValueError(msg)
 
-        document, flags, ddo_hash = self._encrypt_ddo_locally(
+        document, flags, ddo_hash = self._encrypt_ddo(
             asset, provider_uri, encrypt_flag, compress_flag
         )
 
@@ -404,7 +404,7 @@ class OceanAssets:
         provider_uri: Optional[str] = None,
         encrypt_flag: Optional[bool] = False,
         compress_flag: Optional[bool] = False,
-    ) -> str:
+    ) -> Optional[Asset]:
         """Update an asset on-chain.
 
         :param asset: The updated asset to update on-chain
@@ -442,7 +442,7 @@ class OceanAssets:
             logger.error(msg)
             raise ValueError(msg)
 
-        document, flags, ddo_hash = self._encrypt_ddo_locally(
+        document, flags, ddo_hash = self._encrypt_ddo(
             asset, provider_uri, encrypt_flag, compress_flag
         )
 
@@ -459,7 +459,7 @@ class OceanAssets:
 
         self._web3.eth.wait_for_transaction_receipt(tx_result)
 
-        return wait_for_asset_update(self._aquarius, asset, tx_result)
+        return self._aquarius.wait_for_asset_update(asset, tx_result)
 
     @enforce_types
     def resolve(self, did: str) -> "Asset":

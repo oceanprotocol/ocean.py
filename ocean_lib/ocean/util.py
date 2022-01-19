@@ -100,24 +100,3 @@ def get_ocean_token_address(
         address_file, network or get_network_name(web3=web3)
     )
     return addresses.get("Ocean") if addresses else None
-
-
-@enforce_types
-def wait_for_asset_update(aquarius: Aquarius, asset: Asset, tx: str):
-    start = time.time()
-    ddo = None
-    while True:
-        try:
-            ddo = aquarius.get_asset_ddo(asset.did)
-        except ValueError:
-            pass
-        if not ddo:
-            time.sleep(0.2)
-        elif ddo.event.get("tx") == tx:
-            print(ddo.event)
-            break
-
-        if time.time() - start > 30:
-            break
-
-    return ddo
