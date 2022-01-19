@@ -104,14 +104,16 @@ def test_buy_from_dispenser_and_order(
     provider_fee_token = mock_dai_contract.address
     provider_fee_amount = 0
     provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
+    valid_until = 1958133628  # 2032
 
     message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256"],
+        ["bytes", "address", "address", "uint256", "uint256"],
         [
             Web3.toHex(Web3.toBytes(text=provider_data)),
             provider_fee_address,
             provider_fee_token,
             provider_fee_amount,
+            valid_until,
         ],
     )
     signed = web3.eth.sign(provider_fee_address, data=message)
@@ -127,7 +129,7 @@ def test_buy_from_dispenser_and_order(
             signature.v,
             signature.r,
             signature.s,
-            1958133628,  # 2032
+            valid_until,
             Web3.toHex(Web3.toBytes(text=provider_data)),
         ),
     )
@@ -270,14 +272,16 @@ def test_buy_from_fre_and_order(
     provider_fee_token = mock_dai_contract.address
     provider_fee_amount = 0
     provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
+    valid_until = 1958133628  # 2032
 
     message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256"],
+        ["bytes", "address", "address", "uint256", "uint256"],
         [
             Web3.toHex(Web3.toBytes(text=provider_data)),
             provider_fee_address,
             provider_fee_token,
             provider_fee_amount,
+            valid_until,
         ],
     )
     signed = web3.eth.sign(provider_fee_address, data=message)
@@ -293,7 +297,7 @@ def test_buy_from_fre_and_order(
             signature.v,
             signature.r,
             signature.s,
-            1958133628,  # 2032
+            valid_until,
             Web3.toHex(Web3.toBytes(text=provider_data)),
         ),
     )
