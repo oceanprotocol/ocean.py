@@ -10,6 +10,7 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.models_structures import DispenserData, FixedData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 from web3 import exceptions
 from ocean_lib.web3_internal.utils import split_signature
@@ -29,7 +30,7 @@ def test_buy_from_dispenser_and_order(
         config=config,
         erc721_publisher=publisher_wallet,
         erc20_minter=publisher_wallet,
-        cap=web3.toWei(100, "ether"),
+        cap=to_wei(100),
         template_index=2,
     )
     erc20_enterprise_token = ERC20Enterprise(web3, erc20_enterprise_token.address)
@@ -37,8 +38,8 @@ def test_buy_from_dispenser_and_order(
     dispenser_data = DispenserData(
         dispenser_address=dispenser.address,
         allowed_swapper=ZERO_ADDRESS,
-        max_balance=web3.toWei(1, "ether"),
-        max_tokens=web3.toWei(1, "ether"),
+        max_balance=to_wei(1),
+        max_tokens=to_wei(1),
     )
     tx = erc20_enterprise_token.create_dispenser(
         dispenser_data=dispenser_data, with_mint=True, from_wallet=publisher_wallet
@@ -55,7 +56,7 @@ def test_buy_from_dispenser_and_order(
     with pytest.raises(exceptions.ContractLogicError) as err:
         dispenser.dispense(
             data_token=erc20_enterprise_token.address,
-            amount=web3.toWei(1, "ether"),
+            amount=to_wei(1),
             destination=consumer_wallet.address,
             from_wallet=consumer_wallet,
         )
@@ -65,7 +66,7 @@ def test_buy_from_dispenser_and_order(
         == "execution reverted: VM Exception while processing transaction: revert This address is not allowed to request DT"
     )
 
-    consume_fee_amount = web3.toWei(2, "ether")
+    consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address
     erc20_enterprise_token.set_publishing_market_fee(
         publish_market_fee_address=consume_fee_address,
@@ -118,7 +119,7 @@ def test_buy_from_dispenser_and_order(
 
     order_params = {
         "consumer": consume_fee_address,
-        "amount": web3.toWei(1, "ether"),
+        "amount": to_wei(1),
         "serviceIndex": 1,
         "providerFeeAddress": provider_fee_address,
         "providerFeeToken": provider_fee_token,
@@ -183,7 +184,7 @@ def test_buy_from_fre_and_order(
         config=config,
         erc721_publisher=publisher_wallet,
         erc20_minter=publisher_wallet,
-        cap=web3.toWei(100, "ether"),
+        cap=to_wei(100),
         template_index=2,
     )
     erc20_enterprise_token = ERC20Enterprise(web3, erc20_enterprise_token.address)
@@ -196,7 +197,7 @@ def test_buy_from_fre_and_order(
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        uints=[18, 18, web3.toWei(1, "ether"), web3.toWei(1, "ether"), 1],
+        uints=[18, 18, to_wei(1), to_wei(1), 1],
     )
 
     tx = erc20_enterprise_token.create_fixed_rate(
@@ -222,8 +223,8 @@ def test_buy_from_fre_and_order(
     with pytest.raises(exceptions.ContractLogicError) as err:
         fixed_rate_exchange.buy_dt(
             exchange_id=exchange_id,
-            data_token_amount=web3.toWei(1, "ether"),
-            max_base_token_amount=web3.toWei(1, "ether"),
+            data_token_amount=to_wei(1),
+            max_base_token_amount=to_wei(1),
             from_wallet=consumer_wallet,
         )
 
@@ -232,7 +233,7 @@ def test_buy_from_fre_and_order(
         == "execution reverted: VM Exception while processing transaction: revert FixedRateExchange: This address is not allowed to swap"
     )
 
-    consume_fee_amount = web3.toWei(2, "ether")
+    consume_fee_amount = to_wei(2)
     consume_fee_address = consumer_wallet.address
     erc20_enterprise_token.set_publishing_market_fee(
         publish_market_fee_address=consume_fee_address,
@@ -244,7 +245,7 @@ def test_buy_from_fre_and_order(
 
     mock_usdc_contract.transfer(
         to=publisher_wallet.address,
-        amount=publish_fees[2] + web3.toWei("3", "ether"),
+        amount=publish_fees[2] + to_wei(3),
         from_wallet=factory_deployer_wallet,
     )
     mock_usdc_contract.approve(
@@ -295,8 +296,8 @@ def test_buy_from_fre_and_order(
     fre_params = {
         "exchangeContract": fixed_rate_exchange.address,
         "exchangeId": exchange_id,
-        "maxBaseTokenAmount": web3.toWei(2.5, "ether"),
-        "swapMarketFee": web3.toWei(0.001, "ether"),  # 1e15 => 0.1%
+        "maxBaseTokenAmount": to_wei("2.5"),
+        "swapMarketFee": to_wei("0.001"),  # 1e15 => 0.1%
         "marketFeeAddress": another_consumer_wallet.address,
     }
 
@@ -327,9 +328,7 @@ def test_buy_from_fre_and_order(
     expected_opf_publish = publish_fees[2] / 100
 
     assert balance_consume - balance_consume_before == 0
-    assert provider_fee_balance_after - provider_fee_balance_before == web3.toWei(
-        0.001, "ether"
-    )
+    assert provider_fee_balance_after - provider_fee_balance_before == to_wei("0.001")
 
     assert balance_publish - balance_publish_before == expected_publish
     assert balance_opf_publish - balance_opf_publish_before == expected_opf_publish

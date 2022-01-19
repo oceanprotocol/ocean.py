@@ -7,6 +7,7 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
 from web3 import exceptions
 
@@ -47,7 +48,7 @@ def test_fail_add_token(config, factory_router, another_consumer_wallet):
 def test_remove_token(web3, factory_router, factory_deployer_wallet, publisher_wallet):
     """Tests remove a token previously added if Router Owner, check OPF fee updates properly"""
     new_token_address = _create_new_token(web3, publisher_wallet)
-    assert factory_router.get_opf_fee(new_token_address) == web3.toWei("0.001", "ether")
+    assert factory_router.get_opf_fee(new_token_address) == to_wei("0.001")
 
     factory_router.add_ocean_token(new_token_address, factory_deployer_wallet)
 
@@ -56,7 +57,7 @@ def test_remove_token(web3, factory_router, factory_deployer_wallet, publisher_w
     assert factory_router.ocean_tokens(new_token_address) is True
     factory_router.remove_ocean_token(new_token_address, factory_deployer_wallet)
     assert factory_router.ocean_tokens(new_token_address) is False
-    assert factory_router.get_opf_fee(new_token_address) == web3.toWei("0.001", "ether")
+    assert factory_router.get_opf_fee(new_token_address) == to_wei("0.001")
 
 
 def test_fail_remove_token(
@@ -80,19 +81,19 @@ def test_update_opf_fee(
 ):
     """Tests if owner can update the opf fee"""
 
-    factory_router.update_opf_fee(web3.toWei("0.001", "ether"), factory_deployer_wallet)
+    factory_router.update_opf_fee(to_wei("0.001"), factory_deployer_wallet)
 
     new_token_address = _create_new_token(web3, publisher_wallet)
 
     assert factory_router.ocean_tokens(new_token_address) is False
-    assert factory_router.get_opf_fee(new_token_address) == web3.toWei("0.001", "ether")
-    assert factory_router.swap_ocean_fee() == web3.toWei("0.001", "ether")
+    assert factory_router.get_opf_fee(new_token_address) == to_wei("0.001")
+    assert factory_router.swap_ocean_fee() == to_wei("0.001")
 
-    factory_router.update_opf_fee(web3.toWei("0.01", "ether"), factory_deployer_wallet)
+    factory_router.update_opf_fee(to_wei("0.01"), factory_deployer_wallet)
 
     assert factory_router.ocean_tokens(new_token_address) is False
-    assert factory_router.get_opf_fee(new_token_address) == web3.toWei("0.01", "ether")
-    assert factory_router.swap_ocean_fee() == web3.toWei("0.01", "ether")
+    assert factory_router.get_opf_fee(new_token_address) == to_wei("0.01")
+    assert factory_router.swap_ocean_fee() == to_wei("0.01")
 
 
 def test_fail_update_opf_fee(
@@ -100,16 +101,16 @@ def test_fail_update_opf_fee(
 ):
     """Tests that if it fails to update the opf fee if NOT Router Owner"""
 
-    factory_router.update_opf_fee(web3.toWei("0.001", "ether"), factory_deployer_wallet)
+    factory_router.update_opf_fee(to_wei("0.001"), factory_deployer_wallet)
 
     new_token_address = _create_new_token(web3, publisher_wallet)
 
     assert factory_router.ocean_tokens(new_token_address) is False
-    assert factory_router.get_opf_fee(new_token_address) == web3.toWei("0.001", "ether")
-    assert factory_router.swap_ocean_fee() == web3.toWei("0.001", "ether")
+    assert factory_router.get_opf_fee(new_token_address) == to_wei("0.001")
+    assert factory_router.swap_ocean_fee() == to_wei("0.001")
 
     with pytest.raises(exceptions.ContractLogicError) as err:
-        factory_router.update_opf_fee(web3.toWei("0.01", "ether"), consumer_wallet)
+        factory_router.update_opf_fee(to_wei("0.01"), consumer_wallet)
 
     assert (
         err.value.args[0]
@@ -117,8 +118,8 @@ def test_fail_update_opf_fee(
     )
 
     assert factory_router.ocean_tokens(new_token_address) is False
-    assert factory_router.get_opf_fee(new_token_address) == web3.toWei("0.001", "ether")
-    assert factory_router.swap_ocean_fee() == web3.toWei("0.001", "ether")
+    assert factory_router.get_opf_fee(new_token_address) == to_wei("0.001")
+    assert factory_router.swap_ocean_fee() == to_wei("0.001")
 
 
 def test_mapping_ss_contracts(config, factory_router):
@@ -313,7 +314,7 @@ def test_buy_dt_batch(
             factory_deployer_wallet.address,
             ZERO_ADDRESS,
         ],
-        "uints": [web3.toWei("1000000", "ether"), 0],
+        "uints": [to_wei(1000000), 0],
         "bytess": [],
     }
 
@@ -327,13 +328,13 @@ def test_buy_dt_batch(
             get_address_of_type(config, "poolTemplate"),
         ],
         "ssParams": [
-            web3.toWei("1", "ether"),
+            to_wei(2),
             ocean_contract.decimals(),
-            web3.toWei("10000", "ether"),
+            to_wei(10000),
             2500000,
-            web3.toWei("2", "ether"),
+            to_wei(2),
         ],
-        "swapFees": [web3.toWei("0.001", "ether"), web3.toWei("0.001", "ether")],
+        "swapFees": [to_wei("0.001"), to_wei("0.001")],
     }
 
     tx = nft_factory.create_nft_erc_with_pool(
@@ -370,7 +371,7 @@ def test_buy_dt_batch(
             factory_deployer_wallet.address,
             ZERO_ADDRESS,
         ],
-        "uints": [web3.toWei("1000000", "ether"), 0],
+        "uints": [to_wei(1000000), 0],
         "bytess": [],
     }
 
@@ -384,13 +385,13 @@ def test_buy_dt_batch(
             get_address_of_type(config, "poolTemplate"),
         ],
         "ssParams": [
-            web3.toWei("1", "ether"),
+            to_wei(1),
             ocean_contract.decimals(),
-            web3.toWei("10000", "ether"),
+            to_wei(10000),
             2500000,
-            web3.toWei("2", "ether"),
+            to_wei(2),
         ],
-        "swapFees": [web3.toWei("0.001", "ether"), web3.toWei("0.001", "ether")],
+        "swapFees": [to_wei("0.001"), to_wei("0.001")],
     }
 
     tx = nft_factory.create_nft_erc_with_pool(
@@ -416,10 +417,10 @@ def test_buy_dt_batch(
         "source": pool1,
         "operation": 0,
         "tokenIn": get_address_of_type(config, "Ocean"),
-        "amountsIn": web3.toWei("1", "ether"),
+        "amountsIn": to_wei(1),
         "tokenOut": erc_token,
-        "amountsOut": web3.toWei("0.1", "ether"),
-        "maxPrice": web3.toWei("10", "ether"),
+        "amountsOut": to_wei("0.1"),
+        "maxPrice": to_wei(10),
         "swapMarketFee": 0,
         "marketFeeAddress": another_consumer_wallet.address,
     }
@@ -429,10 +430,10 @@ def test_buy_dt_batch(
         "source": pool2,
         "operation": 0,
         "tokenIn": get_address_of_type(config, "Ocean"),
-        "amountsIn": web3.toWei("1", "ether"),
+        "amountsIn": to_wei(1),
         "tokenOut": erc_token2,
-        "amountsOut": web3.toWei("0.1", "ether"),
-        "maxPrice": web3.toWei("10", "ether"),
+        "amountsOut": to_wei("0.1"),
+        "maxPrice": to_wei(10),
         "swapMarketFee": 0,
         "marketFeeAddress": another_consumer_wallet.address,
     }

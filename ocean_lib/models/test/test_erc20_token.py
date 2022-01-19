@@ -10,6 +10,7 @@ from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 from web3 import exceptions
@@ -23,7 +24,7 @@ def test_properties(web3, config, publisher_wallet):
         config=config,
         erc721_publisher=publisher_wallet,
         erc20_minter=publisher_wallet,
-        cap=web3.toWei("1", "ether"),
+        cap=to_wei(1),
     )
 
     assert erc20.event_NewPool.abi["name"] == ERC20Token.EVENT_NEW_POOL
@@ -93,7 +94,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        [web3.toWei("0.5", "ether"), 0],
+        [to_wei("0.5"), 0],
         [b""],
     )
     tx_result = erc721_token.create_erc20(erc_create_data, consumer_wallet)
@@ -123,7 +124,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         config=config,
         erc721_publisher=publisher_wallet,
         erc20_minter=publisher_wallet,
-        cap=web3.toWei(publish_market_fee_amount, "ether"),
+        cap=to_wei(publish_market_fee_amount),
     )
 
     # Check erc20 params
@@ -131,7 +132,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     assert erc20.contract.caller.name() == "ERC20DT1"
     assert erc20.symbol() == "ERC20DT1Symbol"
     assert erc20.decimals() == 18
-    assert erc20.cap() == web3.toWei(publish_market_fee_amount, "ether")
+    assert erc20.cap() == to_wei(publish_market_fee_amount)
     assert erc20.get_erc721_address() == erc721.address
 
     # Check minter permissions
@@ -187,11 +188,11 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         config=config,
         erc721_publisher=publisher_wallet,
         erc20_minter=publisher_wallet,
-        cap=web3.toWei("200", "ether"),
+        cap=to_wei(200),
     )
     # Mint erc20 tokens to use
-    erc20.mint(consumer_wallet.address, web3.toWei(10, "ether"), publisher_wallet)
-    erc20.mint(publisher_wallet.address, web3.toWei(10, "ether"), publisher_wallet)
+    erc20.mint(consumer_wallet.address, to_wei(10), publisher_wallet)
+    erc20.mint(publisher_wallet.address, to_wei(10), publisher_wallet)
 
     # Set the fee collector address
     erc20.set_payment_collector(
@@ -234,16 +235,16 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     )
 
     # Check erc20 balances
-    assert erc20.balanceOf(publisher_wallet.address) == web3.toWei(9, "ether")
+    assert erc20.balanceOf(publisher_wallet.address) == to_wei(9)
     assert erc20.balanceOf(
         get_address_of_type(config, "OPFCommunityFeeCollector")
-    ) == web3.toWei(1, "ether")
+    ) == to_wei(1)
 
     # Set and get publishing market fee params
     erc20.set_publishing_market_fee(
         publish_market_fee_token=get_address_of_type(config, "MockUSDC"),
         publish_market_fee_address=publisher_wallet.address,
-        publish_market_fee_amount=web3.toWei("1.2", "ether"),
+        publish_market_fee_amount=to_wei("1.2"),
         from_wallet=publisher_wallet,
     )
 
@@ -254,7 +255,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     # PublishMarketFeeToken set previously
     assert publish_fees[1] == get_address_of_type(config, "MockUSDC")
     # PublishMarketFeeAmount set previously
-    assert publish_fees[2] == web3.toWei("1.2", "ether")
+    assert publish_fees[2] == to_wei("1.2")
     # Fee collector
     assert erc20.get_payment_collector() == get_address_of_type(
         config, "OPFCommunityFeeCollector"
@@ -265,43 +266,43 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     initial_consumer_balance = erc20.balanceOf(consumer_wallet.address)
 
     # Approve publisher to burn
-    erc20.approve(publisher_wallet.address, web3.toWei("10", "ether"), consumer_wallet)
+    erc20.approve(publisher_wallet.address, to_wei(10), consumer_wallet)
 
-    assert erc20.allowance(
-        consumer_wallet.address, publisher_wallet.address
-    ) == web3.toWei("10", "ether")
-    erc20.burn_from(consumer_wallet.address, web3.toWei("2", "ether"), publisher_wallet)
+    assert erc20.allowance(consumer_wallet.address, publisher_wallet.address) == to_wei(
+        10
+    )
+    erc20.burn_from(consumer_wallet.address, to_wei(2), publisher_wallet)
 
-    assert erc20.get_total_supply() == initial_total_supply - web3.toWei("2", "ether")
+    assert erc20.get_total_supply() == initial_total_supply - to_wei(2)
     assert erc20.balanceOf(
         consumer_wallet.address
-    ) == initial_consumer_balance - web3.toWei("2", "ether")
+    ) == initial_consumer_balance - to_wei(2)
 
     # Test transterFrom too
     initial_consumer_balance = erc20.balanceOf(consumer_wallet.address)
     erc20.transferFrom(
         consumer_wallet.address,
         publisher_wallet.address,
-        web3.toWei("1", "ether"),
+        to_wei(1),
         publisher_wallet,
     )
     assert erc20.balanceOf(
         consumer_wallet.address
-    ) == initial_consumer_balance - web3.toWei("1", "ether")
+    ) == initial_consumer_balance - to_wei(1)
 
     # Consumer should be able to burn his tokens too
     initial_consumer_balance = erc20.balanceOf(consumer_wallet.address)
-    erc20.burn(web3.toWei("1", "ether"), consumer_wallet)
+    erc20.burn(to_wei(1), consumer_wallet)
     assert erc20.balanceOf(
         consumer_wallet.address
-    ) == initial_consumer_balance - web3.toWei("1", "ether")
+    ) == initial_consumer_balance - to_wei(1)
 
     # Consumer should be able to transfer too
     initial_consumer_balance = erc20.balanceOf(consumer_wallet.address)
-    erc20.transfer(publisher_wallet.address, web3.toWei("1", "ether"), consumer_wallet)
+    erc20.transfer(publisher_wallet.address, to_wei(1), consumer_wallet)
     assert erc20.balanceOf(
         consumer_wallet.address
-    ) == initial_consumer_balance - web3.toWei("1", "ether")
+    ) == initial_consumer_balance - to_wei(1)
 
 
 def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_router):
@@ -315,7 +316,7 @@ def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_rou
         config=config,
         erc721_publisher=publisher_wallet,
         erc20_minter=publisher_wallet,
-        cap=web3.toWei(publish_market_fee_amount, "ether"),
+        cap=to_wei(publish_market_fee_amount),
     )
 
     # Should fail to re-initialize the contracts
@@ -333,7 +334,7 @@ def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_rou
                 get_address_of_type(config, "OPFCommunityFeeCollector"),
                 factory_router.address,
             ],
-            uints=[web3.toWei("10", "ether"), 0],
+            uints=[to_wei(10), 0],
             bytess=[b""],
             from_wallet=publisher_wallet,
         ),
@@ -348,7 +349,7 @@ def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_rou
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc20.mint(
             account_address=consumer_wallet.address,
-            value=web3.toWei(1, "ether"),
+            value=to_wei(1),
             from_wallet=consumer_wallet,
         )
     assert (

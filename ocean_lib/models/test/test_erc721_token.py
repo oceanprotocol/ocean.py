@@ -7,6 +7,7 @@ from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Permissions, ERC721Token
 from ocean_lib.models.models_structures import ErcCreateData
 from ocean_lib.web3_internal.constants import BLOB, ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 from web3 import exceptions
 
@@ -434,7 +435,7 @@ def test_create_erc20(web3, config, publisher_wallet, consumer_wallet):
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        uints=[web3.toWei("0.5", "ether"), 0],
+        uints=[to_wei("0.5"), 0],
         bytess=[b""],
     )
     tx = erc721_token.create_erc20(
@@ -463,7 +464,7 @@ def test_fail_creating_erc20(web3, config, publisher_wallet, consumer_wallet):
             consumer_wallet.address,
             ZERO_ADDRESS,
         ],
-        uints=[web3.toWei("0.5", "ether"), 0],
+        uints=[to_wei("0.5"), 0],
         bytess=[b""],
     )
     with pytest.raises(exceptions.ContractLogicError) as err:
@@ -527,12 +528,10 @@ def test_erc721_data_token_functions(web3, config, publisher_wallet, consumer_wa
     # Tests transfer functions
     erc20_token.mint(
         account_address=consumer_wallet.address,
-        value=web3.toWei("0.2", "ether"),
+        value=to_wei("0.2"),
         from_wallet=publisher_wallet,
     )
-    assert erc20_token.balanceOf(account=consumer_wallet.address) == web3.toWei(
-        "0.2", "ether"
-    )
+    assert erc20_token.balanceOf(account=consumer_wallet.address) == to_wei("0.2")
     assert erc721_token.owner_of(token_id=1) == publisher_wallet.address
 
     erc721_token.transfer_from(
@@ -558,7 +557,7 @@ def test_erc721_data_token_functions(web3, config, publisher_wallet, consumer_wa
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        uints=[web3.toWei("0.5", "ether"), 0],
+        uints=[to_wei("0.5"), 0],
         bytess=[b""],
     )
     erc721_token.create_erc20(
@@ -567,7 +566,7 @@ def test_erc721_data_token_functions(web3, config, publisher_wallet, consumer_wa
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc20_token.mint(
             account_address=consumer_wallet.address,
-            value=web3.toWei(1, "ether"),
+            value=to_wei(1),
             from_wallet=consumer_wallet,
         )
     assert (
@@ -580,12 +579,10 @@ def test_erc721_data_token_functions(web3, config, publisher_wallet, consumer_wa
     )
     erc20_token.mint(
         account_address=consumer_wallet.address,
-        value=web3.toWei("0.2", "ether"),
+        value=to_wei("0.2"),
         from_wallet=consumer_wallet,
     )
-    assert erc20_token.balanceOf(account=consumer_wallet.address) == web3.toWei(
-        "0.4", "ether"
-    )
+    assert erc20_token.balanceOf(account=consumer_wallet.address) == to_wei("0.4")
 
 
 def test_fail_transfer_function(web3, config, publisher_wallet, consumer_wallet):
