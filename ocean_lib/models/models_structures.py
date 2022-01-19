@@ -85,3 +85,19 @@ Operations = NamedTuple(
         ("market_fee_address", int),
     ],
 )
+
+OrderData = NamedTuple(
+    "OrderData",
+    [
+        ("token_address", str),
+        ("consumer", str),
+        ("service_index", int),
+        ("provider_fee_address", str),
+        ("provider_fee_token", str),
+        ("provider_fee_amount", int),
+        ("v", str),
+        ("r", str),
+        ("s", str),
+        ("provider_data", bytes),
+    ],
+)

@@ -5,12 +5,11 @@
 from typing import List, Optional
 
 from enforce_typing import enforce_types
-from eth_abi import encode_single
-from web3.datastructures import AttributeDict
-
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+from ocean_lib.models.models_structures import OrderData
 from ocean_lib.web3_internal.wallet import Wallet
+from web3.datastructures import AttributeDict
 
 
 @enforce_types
@@ -114,7 +113,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     def template_count(self) -> int:
         return self.contract.caller.templateCount()
 
-    def start_multiple_token_order(self, orders, from_wallet: Wallet) -> str:
+    def start_multiple_token_order(self, orders: list, from_wallet: Wallet) -> str:
         """An order contains the following keys:
 
         - tokenAddress, str
@@ -128,16 +127,10 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         - r, bytes
         - s, bytes
         """
-        # encode_abi('(address,address,uint256,address,address,uint256,uin8,bytes32,bytes32,bytes)'[], [mytuple])
+        if orders and isinstance(orders[0], OrderData):
+            orders = [tuple(o) for o in orders]
 
-        encodedOrders = encode_single(
-            "(address,address,uint256,address,address,uint256,uint8,bytes32,bytes32,bytes)[]",
-            orders,
-        )
-
-        return self.send_transaction(
-            "startMultipleTokenOrder", (encodedOrders,), from_wallet
-        )
+        return self.send_transaction("startMultipleTokenOrder", (orders,), from_wallet)
 
     def create_nft_with_erc(
         self, nft_create_data: dict, erc_create_data: dict, from_wallet: Wallet
