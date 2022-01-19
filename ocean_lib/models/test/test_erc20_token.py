@@ -8,7 +8,7 @@ import pytest
 from ocean_lib.models.erc20_token import ERC20Token, RolesERC20
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
-from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.utils import split_signature
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
@@ -84,7 +84,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
 
     # Tests creating successfully an ERC20 token
     erc721_token.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
-    erc_create_data = ErcCreateData(
+    erc_create_data = CreateErc20Data(
         1,
         ["ERC20DT1", "ERC20DT1Symbol"],
         [

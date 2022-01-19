@@ -6,7 +6,7 @@ import os
 
 from ocean_lib.agreements.file_objects import UrlFile
 from ocean_lib.example_config import ExampleConfig
-from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -38,7 +38,7 @@ def test_marketplace_flow(tmp_path):
     assert token_address
 
     # Prepare data for ERC20 token
-    erc20_data = ErcCreateData(
+    erc20_data = CreateErc20Data(
         template_index=1,
         strings=["Datatoken 1", "DT1"],
         addresses=[

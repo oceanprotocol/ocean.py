@@ -23,7 +23,7 @@ from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBa
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
-from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.utils.utilities import create_checksum
@@ -114,7 +114,7 @@ class OceanAssets:
         self,
         erc721_factory: ERC721FactoryContract,
         erc721_token: ERC721Token,
-        erc20_data: ErcCreateData,
+        erc20_data: CreateErc20Data,
         from_wallet: Wallet,
     ) -> str:
         tx_result = erc721_token.create_erc20(erc20_data, from_wallet)
@@ -166,7 +166,7 @@ class OceanAssets:
         template_index: Optional[int] = 1,
         erc721_additional_erc_deployer: Optional[str] = None,
         erc721_uri: Optional[str] = None,
-        erc20_tokens_data: Optional[List[ErcCreateData]] = None,
+        erc20_tokens_data: Optional[List[CreateErc20Data]] = None,
         deployed_erc20_tokens: Optional[List[ERC20Token]] = None,
         encrypt_flag: Optional[bool] = False,
         compress_flag: Optional[bool] = False,

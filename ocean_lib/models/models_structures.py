@@ -8,8 +8,8 @@
 from enum import Enum
 from typing import List, NamedTuple
 
-ErcCreateData = NamedTuple(
-    "ErcCreateData",
+CreateErc20Data = NamedTuple(
+    "CreateErc20Data",
     [
         ("template_index", int),
         ("strings", List[str]),

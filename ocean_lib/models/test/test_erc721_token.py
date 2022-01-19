@@ -5,7 +5,7 @@
 import pytest
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Permissions, ERC721Token
-from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.web3_internal.constants import BLOB, ZERO_ADDRESS
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 from web3 import exceptions
@@ -425,7 +425,7 @@ def test_create_erc20(web3, config, publisher_wallet, consumer_wallet):
         is True
     )
 
-    erc_create_data = ErcCreateData(
+    erc_create_data = CreateErc20Data(
         template_index=1,
         strings=["ERC20DT1", "ERC20DT1Symbol"],
         addresses=[
@@ -454,7 +454,7 @@ def test_fail_creating_erc20(web3, config, publisher_wallet, consumer_wallet):
         ]
         is False
     )
-    erc_create_data = ErcCreateData(
+    erc_create_data = CreateErc20Data(
         template_index=1,
         strings=["ERC20DT1", "ERC20DT1Symbol"],
         addresses=[
@@ -549,7 +549,7 @@ def test_erc721_data_token_functions(web3, config, publisher_wallet, consumer_wa
         ]
         is True
     )
-    erc_create_data = ErcCreateData(
+    erc_create_data = CreateErc20Data(
         template_index=1,
         strings=["ERC20DT1", "ERC20DT1Symbol"],
         addresses=[

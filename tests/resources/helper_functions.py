@@ -16,7 +16,7 @@ from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
-from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.ocean.util import get_web3 as util_get_web3
@@ -227,7 +227,7 @@ def deploy_erc721_erc20(
     if not erc20_minter:
         return erc721_token
 
-    erc_create_data = ErcCreateData(
+    erc_create_data = CreateErc20Data(
         template_index=template_index,
         strings=["ERC20DT1", "ERC20DT1Symbol"],
         addresses=[
