@@ -122,7 +122,7 @@ def test_side_staking(
         erc20.mint(consumer_wallet.address, web3.toWei("1", "ether"), consumer_wallet)
     assert (
         err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert DataTokenTemplate: cap exceeded"
+        == "execution reverted: VM Exception while processing transaction: revert DatatokenTemplate: cap exceeded"
     )
 
     # Another consumer buys some DT after burnIn period- exactAmountIn

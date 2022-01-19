@@ -12,22 +12,22 @@ class SideStaking(ContractBase):
     CONTRACT_NAME = "SideStaking"
 
     def get_datatoken_circulating_supply(self, datatoken: str) -> int:
-        return self.contract.caller.getDataTokenCirculatingSupply(datatoken)
+        return self.contract.caller.getDatatokenCirculatingSupply(datatoken)
 
     def get_datatoken_current_circulating_supply(self, datatoken: str) -> int:
-        return self.contract.caller.getDataTokenCurrentCirculatingSupply(datatoken)
+        return self.contract.caller.getDatatokenCurrentCirculatingSupply(datatoken)
 
     def get_publisher_address(self, datatoken: str) -> str:
         return self.contract.caller.getPublisherAddress(datatoken)
 
     def get_base_token_address(self, datatoken: str) -> str:
-        return self.contract.caller.getBasetokenAddress(datatoken)
+        return self.contract.caller.getBaseTokenAddress(datatoken)
 
     def get_pool_address(self, datatoken: str) -> str:
         return self.contract.caller.getPoolAddress(datatoken)
 
     def get_base_token_balance(self, datatoken: str) -> int:
-        return self.contract.caller.getBasetokenBalance(datatoken)
+        return self.contract.caller.getBaseTokenBalance(datatoken)
 
     def get_datatoken_balance(self, datatoken: str) -> int:
         return self.contract.caller.getDatatokenBalance(datatoken)

@@ -117,18 +117,20 @@ def test_buy_from_dispenser_and_order(
     signed = web3.eth.sign(provider_fee_address, data=message)
     signature = split_signature(signed)
 
-    order_params = {
-        "consumer": consume_fee_address,
-        "amount": web3.toWei(1, "ether"),
-        "serviceIndex": 1,
-        "providerFeeAddress": provider_fee_address,
-        "providerFeeToken": provider_fee_token,
-        "providerFeeAmount": provider_fee_amount,
-        "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
-        "v": signature.v,
-        "r": signature.r,
-        "s": signature.s,
-    }
+    order_params = (
+        consume_fee_address,
+        1,
+        (
+            provider_fee_address,
+            provider_fee_token,
+            provider_fee_amount,
+            signature.v,
+            signature.r,
+            signature.s,
+            1958133628,  # 2032
+            Web3.toHex(Web3.toBytes(text=provider_data)),
+        ),
+    )
 
     opf_collector_address = get_address_of_type(config, "OPFCommunityFeeCollector")
 
@@ -281,25 +283,28 @@ def test_buy_from_fre_and_order(
     signed = web3.eth.sign(provider_fee_address, data=message)
     signature = split_signature(signed)
 
-    order_params = {
-        "consumer": another_consumer_wallet.address,
-        "serviceIndex": 1,
-        "providerFeeAddress": publisher_wallet.address,
-        "providerFeeToken": provider_fee_token,
-        "providerFeeAmount": 0,
-        "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
-        "v": signature.v,
-        "r": signature.r,
-        "s": signature.s,
-    }
+    order_params = (
+        another_consumer_wallet.address,
+        1,
+        (
+            publisher_wallet.address,
+            provider_fee_token,
+            provider_fee_amount,
+            signature.v,
+            signature.r,
+            signature.s,
+            1958133628,  # 2032
+            Web3.toHex(Web3.toBytes(text=provider_data)),
+        ),
+    )
 
-    fre_params = {
-        "exchangeContract": fixed_rate_exchange.address,
-        "exchangeId": exchange_id,
-        "maxBasetokenAmount": web3.toWei(2.5, "ether"),
-        "swapMarketFee": web3.toWei(0.001, "ether"),  # 1e15 => 0.1%
-        "marketFeeAddress": another_consumer_wallet.address,
-    }
+    fre_params = (
+        fixed_rate_exchange.address,
+        exchange_id,
+        web3.toWei(2.5, "ether"),
+        web3.toWei(0.001, "ether"),  # 1e15 => 0.1%
+        another_consumer_wallet.address,
+    )
 
     opf_collector_address = get_address_of_type(config, "OPFCommunityFeeCollector")
 

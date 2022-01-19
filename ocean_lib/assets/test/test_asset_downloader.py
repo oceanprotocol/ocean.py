@@ -132,7 +132,6 @@ def ocean_assets_download_destination_file_helper(
     )
 
     provider_fees = initialize_response.json()["providerFee"]
-    provider_fees["validUntil"] = 1958121854  # 2032  TODO: from provider?
     tx_id = erc20_token.start_order(
         consumer=publisher_wallet.address,
         service_index=ddo.get_index_of_service(access_service),
