@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import time
+from datetime import datetime, timedelta
 from typing import List, Optional, Tuple
 
 import pytest
@@ -90,6 +91,7 @@ def process_order(
         service_endpoint=initialize_url,
         # TODO: add a real compute environment once provider supports it
         compute_environment="doesn't matter for now",
+        valid_until=int((datetime.now() + timedelta(hours=1)).timestamp()),
     ).json()
 
     # Order the service

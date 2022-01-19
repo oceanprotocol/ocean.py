@@ -320,14 +320,16 @@ def get_provider_fees() -> Dict[str, Any]:
     provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
     provider_fee_address = provider_wallet.address
     provider_fee_token = os.environ.get("PROVIDER_FEE_TOKEN", ZERO_ADDRESS)
+    valid_until = 0
 
     message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256"],
+        ["bytes", "address", "address", "uint256", "uint256"],
         [
             Web3.toHex(Web3.toBytes(text=provider_data)),
             provider_fee_address,
             provider_fee_token,
             provider_fee_amount,
+            valid_until,
         ],
     )
     signed = web3.eth.sign(provider_fee_address, data=message)
@@ -342,6 +344,7 @@ def get_provider_fees() -> Dict[str, Any]:
         "v": signature.v,
         "r": signature.r,
         "s": signature.s,
+        "validUntil": 0,
     }
 
     return provider_fee
