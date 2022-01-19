@@ -147,7 +147,7 @@ class OceanAssets:
                     "serviceId": service.id,
                 }
                 for service in services
-                if service.data_token == erc20_token.address
+                if service.datatoken == erc20_token.address
             ]
 
         return datatokens
