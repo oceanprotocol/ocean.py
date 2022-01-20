@@ -2,7 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import List
+from typing import List, Optional
 
 from enforce_typing import enforce_types
 from eth_abi import encode_single
@@ -200,7 +200,10 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return logs[0] if logs else None
 
     def search_exchange_by_datatoken(
-        self, fixed_rate_exchange: FixedRateExchange, datatoken: str
+        self,
+        fixed_rate_exchange: FixedRateExchange,
+        datatoken: str,
+        exchange_owner: Optional[str] = None,
     ) -> list:
         token_created_log = self.get_token_created_event(
             from_block=0, to_block=self.web3.eth.block_number, token_address=datatoken
@@ -210,6 +213,8 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         ), f"No token with '{datatoken}' address was created before."
         from_block = token_created_log.blockNumber
         filter_args = {"dataToken": datatoken}
+        if exchange_owner:
+            filter_args["exchangeOwner"] = exchange_owner
         logs = fixed_rate_exchange.get_event_logs(
             event_name="ExchangeCreated",
             from_block=from_block,

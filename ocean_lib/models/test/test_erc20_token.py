@@ -204,12 +204,13 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
 
     message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256"],
+        ["bytes", "address", "address", "uint256", "uint256"],
         [
             Web3.toHex(Web3.toBytes(text=provider_data)),
             provider_fee_address,
             provider_fee_token,
             provider_fee_amount,
+            0,
         ],
     )
     signed = web3.eth.sign(provider_fee_address, data=message)
@@ -224,6 +225,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         "v": signature.v,
         "r": signature.r,
         "s": signature.s,
+        "validUntil": 0,
     }
 
     erc20.start_order(

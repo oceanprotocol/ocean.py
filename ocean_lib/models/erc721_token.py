@@ -225,8 +225,8 @@ class ERC721Token(ContractBase):
     def get_tokens_list(self) -> list:
         return self.contract.caller.getTokensList()
 
-    def is_deployed(self, data_token: str) -> bool:
-        return self.contract.caller.isDeployed(data_token)
+    def is_deployed(self, datatoken: str) -> bool:
+        return self.contract.caller.isDeployed(datatoken)
 
     def is_erc20_deployer(self, account: str) -> bool:
         return self.contract.caller.isERC20Deployer(account)

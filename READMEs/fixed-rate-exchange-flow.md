@@ -12,9 +12,9 @@ It focuses on Alice's experience as a publisher, and Bob's experience as a buyer
 Here are the steps:
 
 1.  Setup
-2.  Alice creates a data token
-3.  Alice mints & approves data tokens
-4.  Bob buys at fixed rate data tokens
+2.  Alice creates a datatoken
+3.  Alice mints & approves datatokens
+4.  Bob buys at fixed rate datatokens
 
 Let's go through each step.
 
@@ -89,7 +89,7 @@ export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 python
 ```
 
-## 2. Alice creates the data token
+## 2. Alice creates the datatoken
 
 
 In the Python console:
@@ -154,7 +154,7 @@ print(f"datatoken_address = '{erc20_token.address}'")
 erc20_token.mint(alice_wallet.address, to_wei(100), alice_wallet)
 ```
 
-## 4. Bob buys at fixed rate data tokens
+## 4. Bob buys at fixed rate datatokens
 
 
 In the same python console:
@@ -183,8 +183,8 @@ exchange_id = ocean.create_fixed_rate(
 ```
 
 If `exchange_id` has been created before or there are other
-exchanges for a certain data token, it can be searched by
-providing the data token address.
+exchanges for a certain datatoken, it can be searched by
+providing the datatoken address.
 
 ```python
 # Search for exchange_id from a specific block retrieved at 3rd step
@@ -193,6 +193,8 @@ providing the data token address.
 datatoken_address = erc20_token.address
 nft_factory = ocean.get_nft_factory()
 logs = nft_factory.search_exchange_by_datatoken(ocean.fixed_rate_exchange, datatoken_address)
+# Optional: Filtering the logs by the exchange owner.
+logs = nft_factory.search_exchange_by_datatoken(ocean.fixed_rate_exchange, datatoken_address, alice_wallet.address)
 print(logs)
 ```
 
@@ -206,7 +208,7 @@ OCEAN_token.approve(fixed_price_address, to_wei(100), bob_wallet)
 
 tx_result = ocean.fixed_rate_exchange.buy_dt(
     exchange_id=exchange_id,
-    data_token_amount=to_wei(20),
+    datatoken_amount=to_wei(20),
     max_base_token_amount=to_wei(50),
     from_wallet=bob_wallet,
     )
