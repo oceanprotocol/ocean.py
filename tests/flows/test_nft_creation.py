@@ -6,7 +6,7 @@ import pytest
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Permissions, ERC721Token
-from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
@@ -267,7 +267,7 @@ def test_erc20_creation(
     token_address = registered_event[0].args.newTokenAddress
     erc721_token = ERC721Token(web3, token_address)
     erc721_token.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
-    erc_create_data = ErcCreateData(
+    erc_create_data = CreateErc20Data(
         template_index=1,
         strings=["ERC20DT1", "ERC20DT1Symbol"],
         addresses=[
@@ -396,7 +396,7 @@ def test_nft_owner_transfer(web3, config, publisher_wallet, consumer_wallet):
     assert erc721.balance_of(publisher_wallet.address) == 0
     assert erc721.owner_of(1) == consumer_wallet.address
     # Owner is not NFT owner anymore, nor has any other role, neither older users
-    erc_create_data = ErcCreateData(
+    erc_create_data = CreateErc20Data(
         template_index=1,
         strings=["ERC20DT1", "ERC20DT1Symbol"],
         addresses=[
@@ -422,7 +422,7 @@ def test_nft_owner_transfer(web3, config, publisher_wallet, consumer_wallet):
     )
 
     # NewOwner now owns the NFT, is already Manager by default and has all roles
-    erc_create_data_new_manager = ErcCreateData(
+    erc_create_data_new_manager = CreateErc20Data(
         template_index=1,
         strings=["ERC20DT1", "ERC20DT1Symbol"],
         addresses=[

@@ -10,7 +10,7 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -67,7 +67,7 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
     encrypted_files = encrypt_response.content.decode("utf-8")
 
     # Set ERC20 Data
-    erc20_data = ErcCreateData(
+    erc20_data = CreateErc20Data(
         template_index=1,
         strings=["Datatoken 1", "DT1"],
         addresses=[

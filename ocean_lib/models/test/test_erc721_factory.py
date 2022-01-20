@@ -7,7 +7,7 @@ from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
-from ocean_lib.models.models_structures import ErcCreateData, OrderData
+from ocean_lib.models.models_structures import CreateErc20Data, OrderData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
@@ -101,7 +101,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
 
     # Tests creating successfully an ERC20 token
     erc721_token.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
-    erc_create_data = ErcCreateData(
+    erc_create_data = CreateErc20Data(
         1,
         ["ERC20DT1", "ERC20DT1Symbol"],
         [
@@ -290,7 +290,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     # Create ERC20 data token for fees.
     fee_address = "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9"
 
-    erc_create_data = ErcCreateData(
+    erc_create_data = CreateErc20Data(
         1,
         ["ERC20DT1P", "ERC20DT1SymbolP"],
         [
@@ -478,7 +478,7 @@ def test_start_multiple_order(
 
     # Tests creating successfully an ERC20 token
     erc721_token.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
-    erc_create_data = ErcCreateData(
+    erc_create_data = CreateErc20Data(
         1,
         ["ERC20DT1", "ERC20DT1Symbol"],
         [
@@ -663,7 +663,7 @@ def test_fail_create_erc20(
     erc721_token.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
 
     # Should fail to create a specific ERC20 Template if the index is ZERO
-    erc_create_data = ErcCreateData(
+    erc_create_data = CreateErc20Data(
         0,
         ["ERC20DT1", "ERC20DT1Symbol"],
         [
@@ -684,7 +684,7 @@ def test_fail_create_erc20(
     )
 
     # Should fail to create a specific ERC20 Template if the index doesn't exist
-    erc_create_data = ErcCreateData(
+    erc_create_data = CreateErc20Data(
         3,
         ["ERC20DT1", "ERC20DT1Symbol"],
         [
