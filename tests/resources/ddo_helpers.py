@@ -137,10 +137,6 @@ def create_asset(ocean, publisher, config, metadata=None, files=None):
         metadata, publisher, encrypted_files, erc20_tokens_data=[erc20_data]
     )
 
-    # TODO: Mint tokens for dataset and assign to publisher
-    # dt = ocean.get_datatoken(service.datatoken_address)
-    # mint_tokens_and_wait(dt, wallet.address, wallet)
-
     return asset
 
 

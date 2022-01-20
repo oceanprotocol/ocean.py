@@ -240,8 +240,7 @@ class DataServiceProvider:
         return nonce, sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
 
     @staticmethod
-    # TODO reinstate @enforce_types
-    # @enforce_types
+    # @enforce_types omitted due to subscripted generics error
     def start_compute_job(
         service_endpoint: str,
         consumer: Wallet,
@@ -645,8 +644,7 @@ class DataServiceProvider:
             return None
 
     @staticmethod
-    # TODO: reinstate @enforce_types
-    # @enforce_types
+    # @enforce_types omitted due to subscripted generics error
     def _prepare_compute_payload(
         consumer: Wallet,
         dataset: ComputeInput,
