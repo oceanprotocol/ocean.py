@@ -54,7 +54,7 @@ def test_dispenser_flow():
         uints=[cap, 0],
         bytess=[b""],
     )
-    erc20_token = erc721_token.create_data_token(
+    erc20_token = erc721_token.create_datatoken(
         erc20_data=erc20_data, from_wallet=alice_wallet
     )
 
