@@ -5,7 +5,7 @@
 import os
 
 from ocean_lib.example_config import ExampleConfig
-from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -43,7 +43,7 @@ def test_fre_flow():
     assert token_address
 
     # Prepare data for ERC20 token
-    erc20_data = ErcCreateData(
+    erc20_data = CreateErc20Data(
         template_index=1,
         strings=["Datatoken 1", "DT1"],
         addresses=[
@@ -92,7 +92,7 @@ def test_fre_flow():
 
     tx_result = ocean.fixed_rate_exchange.buy_dt(
         exchange_id=exchange_id,
-        data_token_amount=to_wei(20),
+        datatoken_amount=to_wei(20),
         max_base_token_amount=to_wei(50),
         from_wallet=bob_wallet,
     )
@@ -103,7 +103,9 @@ def test_fre_flow():
     datatoken_address = erc20_token.address
     nft_factory = ocean.get_nft_factory()
     logs = nft_factory.search_exchange_by_datatoken(
-        ocean.fixed_rate_exchange, datatoken_address
+        ocean.fixed_rate_exchange,
+        datatoken_address,
+        exchange_owner=alice_wallet.address,
     )
     assert logs, f"No exchange has {datatoken_address} address."
     assert len(logs) == 1

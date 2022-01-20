@@ -264,7 +264,7 @@ class OceanCompute:
         algorithm_did: Optional[str] = None,
         algorithm_meta: Optional[AlgorithmMetadata] = None,
         algorithm_tx_id: Optional[str] = None,
-        algorithm_data_token: Optional[str] = None,
+        algorithm_datatoken: Optional[str] = None,
         output: Optional[dict] = None,
         job_id: Optional[str] = None,
         algouserdata: Optional[dict] = None,
@@ -283,7 +283,7 @@ class OceanCompute:
         :param algorithm_meta: `AlgorithmMetadata` instance -- metadata about the algorithm being run if
             `algorithm` is being used. This is ignored when `algorithm_did` is specified.
         :param algorithm_tx_id: transaction hash of algorithm StartOrder tx (Required when using `algorithm_did`)
-        :param algorithm_data_token: datatoken address of this algorithm (Required when using `algorithm_did`)
+        :param algorithm_datatoken: datatoken address of this algorithm (Required when using `algorithm_did`)
         :param output: dict object to be used in publishing mechanism, must define
         :param job_id: str identifier of a compute job that was previously started and
             stopped (if supported by the provider's  backend)
@@ -330,7 +330,7 @@ class OceanCompute:
                 algorithm_did,
                 algorithm_meta,
                 algorithm_tx_id,
-                algorithm_data_token,
+                algorithm_datatoken,
                 output,
                 input_datasets,
                 job_id,

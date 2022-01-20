@@ -7,7 +7,7 @@ from typing import List
 
 from enforce_typing import enforce_types
 from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -133,7 +133,9 @@ class ERC721Token(ContractBase):
     def get_metadata(self) -> tuple:
         return self.contract.caller.getMetaData()
 
-    def create_erc20(self, erc_create_data: ErcCreateData, from_wallet: Wallet) -> str:
+    def create_erc20(
+        self, erc_create_data: CreateErc20Data, from_wallet: Wallet
+    ) -> str:
         return self.send_transaction(
             "createERC20",
             (
@@ -251,8 +253,8 @@ class ERC721Token(ContractBase):
     def get_tokens_list(self) -> list:
         return self.contract.caller.getTokensList()
 
-    def is_deployed(self, data_token: str) -> bool:
-        return self.contract.caller.isDeployed(data_token)
+    def is_deployed(self, datatoken: str) -> bool:
+        return self.contract.caller.isDeployed(datatoken)
 
     def is_erc20_deployer(self, account: str) -> bool:
         return self.contract.caller.isERC20Deployer(account)
@@ -265,7 +267,7 @@ class ERC721Token(ContractBase):
         )
 
     def create_datatoken(
-        self, erc20_data: ErcCreateData, from_wallet: Wallet
+        self, erc20_data: CreateErc20Data, from_wallet: Wallet
     ) -> ERC20Token:
         initial_list = self.get_tokens_list()
 

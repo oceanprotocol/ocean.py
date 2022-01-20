@@ -8,8 +8,8 @@
 from enum import Enum
 from typing import List, NamedTuple
 
-ErcCreateData = NamedTuple(
-    "ErcCreateData",
+CreateErc20Data = NamedTuple(
+    "CreateErc20Data",
     [
         ("template_index", int),
         ("strings", List[str]),
@@ -83,5 +83,29 @@ Operations = NamedTuple(
         ("max_price", int),
         ("swap_market_fee", int),
         ("market_fee_address", int),
+    ],
+)
+
+ProviderFees = NamedTuple(
+    "ProviderFees",
+    [
+        ("provider_fee_address", str),
+        ("provider_fee_token", str),
+        ("provider_fee_amount", int),
+        ("v", str),
+        ("r", str),
+        ("s", str),
+        ("validUntil", int),
+        ("provider_data", bytes),
+    ],
+)
+
+OrderData = NamedTuple(
+    "OrderData",
+    [
+        ("token_address", str),
+        ("consumer", str),
+        ("service_index", int),
+        ("provider_fees", ProviderFees),
     ],
 )
