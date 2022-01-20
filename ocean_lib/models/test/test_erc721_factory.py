@@ -534,8 +534,14 @@ def test_start_multiple_order(
     provider_data = b"\x00"
 
     message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256"],
-        [provider_data, provider_fee_address, provider_fee_token, provider_fee_amount],
+        ["bytes", "address", "address", "uint256", "uint256"],
+        [
+            provider_data,
+            provider_fee_address,
+            provider_fee_token,
+            provider_fee_amount,
+            0,
+        ],
     )
     signed = web3.eth.sign(provider_fee_address, data=message)
     signature = split_signature(signed)
@@ -544,13 +550,16 @@ def test_start_multiple_order(
         erc20_address,
         consumer_wallet.address,
         1,
-        provider_fee_address,
-        provider_fee_token,
-        provider_fee_amount,
-        signature.v,
-        signature.r,
-        signature.s,
-        provider_data,
+        (
+            provider_fee_address,
+            provider_fee_token,
+            provider_fee_amount,
+            signature.v,
+            signature.r,
+            signature.s,
+            0,
+            provider_data,
+        ),
     )
 
     orders = [order_data, order_data]
