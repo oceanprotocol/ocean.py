@@ -9,6 +9,7 @@ from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.models_structures import ErcCreateData, OrderData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
 from tests.resources.helper_functions import get_address_of_type
 from web3 import exceptions
@@ -486,7 +487,7 @@ def test_start_multiple_order(
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        [web3.toWei("2", "ether"), 0],
+        [to_wei("2"), 0],
         [b""],
     )
     tx_result = erc721_token.create_erc20(erc_create_data, consumer_wallet)
@@ -515,7 +516,7 @@ def test_start_multiple_order(
 
     # Tests starting multiple token orders successfully
     erc20_token = ERC20Token(web3, erc20_address)
-    dt_amount = web3.toWei("2", "ether")
+    dt_amount = to_wei("2")
     mock_dai_contract_address = get_address_of_type(config, "MockDAI")
     assert erc20_token.balanceOf(consumer_wallet.address) == 0
 
