@@ -385,6 +385,45 @@ def test_success_update_metadata(web3, config, publisher_wallet, consumer_wallet
     assert metadata_info[3] is True
     assert metadata_info[0] == "http://foourl"
 
+    # Update tokenURI and set metadata in one call
+    tx = erc721_token.set_metadata_token_uri(
+        metadata_state=1,
+        metadata_decryptor_url="http://foourl",
+        metadata_decryptor_address="0x123",
+        flags=web3.toBytes(hexstr=BLOB),
+        data=web3.toBytes(hexstr=BLOB),
+        data_hash=web3.toBytes(hexstr=BLOB),
+        data_proofs=[],
+        token_id=1,
+        token_uri="https://anothernewurl.com/nft/",
+        from_wallet=publisher_wallet,
+    )
+
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    update_token_uri_event = erc721_token.get_event_log(
+        event_name="TokenURIUpdate",
+        from_block=tx_receipt.blockNumber,
+        to_block=web3.eth.block_number,
+        filters=None,
+    )
+    assert update_token_uri_event, "Cannot find TokenURIUpdate event."
+    assert update_token_uri_event[0].args.tokenURI == "https://anothernewurl.com/nft/"
+    assert update_token_uri_event[0].args.updatedBy == publisher_wallet.address
+
+    update_metadata_event = erc721_token.get_event_log(
+        event_name="MetadataUpdated",
+        from_block=tx_receipt.blockNumber,
+        to_block=web3.eth.block_number,
+        filters=None,
+    )
+
+    assert update_metadata_event, "Cannot find MetadataUpdated event."
+    assert update_metadata_event[0].args.decryptorUrl == "http://foourl"
+
+    metadata_info = erc721_token.get_metadata()
+    assert metadata_info[3] is True
+    assert metadata_info[0] == "http://foourl"
+
 
 def test_fails_update_metadata(web3, config, publisher_wallet, consumer_wallet):
     """Tests failure of calling update metadata function when the role of the user is not METADATA UPDATER."""
