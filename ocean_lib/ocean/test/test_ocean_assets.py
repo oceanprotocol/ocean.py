@@ -17,7 +17,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
-from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
@@ -364,7 +364,7 @@ def test_plain_asset_with_one_datatoken(
     assert registered_event[0].args.admin == publisher_wallet.address
     erc721_address = registered_event[0].args.newTokenAddress
 
-    erc20_data = ErcCreateData(
+    erc20_data = CreateErc20Data(
         template_index=1,
         strings=["Datatoken 1", "DT1"],
         addresses=[
@@ -423,7 +423,7 @@ def test_plain_asset_multiple_datatokens(
     assert registered_event[0].args.admin == publisher_wallet.address
     erc721_address2 = registered_event[0].args.newTokenAddress
 
-    erc20_data1 = ErcCreateData(
+    erc20_data1 = CreateErc20Data(
         template_index=1,
         strings=["Datatoken 2", "DT2"],
         addresses=[
@@ -435,7 +435,7 @@ def test_plain_asset_multiple_datatokens(
         uints=[web3.toWei("0.5", "ether"), 0],
         bytess=[b""],
     )
-    erc20_data2 = ErcCreateData(
+    erc20_data2 = CreateErc20Data(
         template_index=1,
         strings=["Datatoken 3", "DT3"],
         addresses=[

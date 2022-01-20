@@ -16,7 +16,7 @@ from ocean_lib.assets.trusted_algorithms import generate_trusted_algo_dict
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
@@ -95,7 +95,7 @@ def get_access_service(
 
 def create_asset(ocean, publisher, config, metadata=None, files=None):
     """Helper function for asset creation based on ddo_sa_sample.json."""
-    erc20_data = ErcCreateData(
+    erc20_data = CreateErc20Data(
         template_index=1,
         strings=["Datatoken 1", "DT1"],
         addresses=[
