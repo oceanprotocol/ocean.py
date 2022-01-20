@@ -201,6 +201,7 @@ def get_registered_asset_with_compute_service(
     publisher_wallet: Wallet,
     allow_raw_algorithms: bool = False,
     trusted_algorithms: List[Asset] = [],
+    trusted_algorithm_publishers: List[str] = [],
 ):
     erc721_token, erc20_token = deploy_erc721_erc20(
         ocean_instance.web3, ocean_instance.config, publisher_wallet, publisher_wallet
@@ -236,6 +237,9 @@ def get_registered_asset_with_compute_service(
         compute_service.add_publisher_trusted_algorithm(
             algorithm, generate_trusted_algo_dict(algorithm)
         )
+
+    for publisher in trusted_algorithm_publishers:
+        compute_service.add_publisher_trusted_algorithm_publisher(publisher)
 
     return ocean_instance.assets.create(
         metadata=metadata,

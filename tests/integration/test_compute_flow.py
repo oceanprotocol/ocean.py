@@ -80,6 +80,21 @@ def dataset_with_compute_service_and_trusted_algorithm(
     return asset
 
 
+@pytest.fixture
+def dataset_with_compute_service_and_trusted_publisher(
+    publisher_wallet, publisher_ocean_instance
+):
+    # Setup algorithm meta to run raw algorithm
+    asset = get_registered_asset_with_compute_service(
+        publisher_ocean_instance,
+        publisher_wallet,
+        trusted_algorithm_publishers=[publisher_wallet.address],
+    )
+    # verify the ddo is available in Aquarius
+    _ = publisher_ocean_instance.assets.resolve(asset.did)
+    return asset
+
+
 def get_algorithm(publisher_wallet, publisher_ocean_instance):
     # Setup algorithm meta to run raw algorithm
     asset = get_registered_algorithm_with_access_service(
@@ -96,8 +111,8 @@ def algorithm(publisher_wallet, publisher_ocean_instance):
 
 
 @pytest.fixture
-def another_algorithm(publisher_wallet, publisher_ocean_instance):
-    return get_algorithm(publisher_wallet, publisher_ocean_instance)
+def algorithm_with_different_publisher(consumer_wallet, publisher_ocean_instance):
+    return get_algorithm(consumer_wallet, publisher_ocean_instance)
 
 
 @pytest.fixture
@@ -363,7 +378,7 @@ def test_compute_trusted_algorithm(
     consumer_wallet,
     dataset_with_compute_service_and_trusted_algorithm,
     algorithm,
-    another_algorithm,
+    algorithm_with_different_publisher,
 ):
     # Expect to pass when trusted algorithm is used
     run_compute_test(
@@ -386,7 +401,9 @@ def test_compute_trusted_algorithm(
             dataset_and_userdata=AssetAndUserdata(
                 dataset_with_compute_service_and_trusted_algorithm, None
             ),
-            algorithm_and_userdata=AssetAndUserdata(another_algorithm, None),
+            algorithm_and_userdata=AssetAndUserdata(
+                algorithm_with_different_publisher, None
+            ),
             with_result=True,
         )
 
@@ -397,7 +414,7 @@ def test_compute_update_trusted_algorithm(
     consumer_wallet,
     dataset_with_compute_service_generator,
     algorithm,
-    another_algorithm,
+    algorithm_with_different_publisher,
 ):
     trusted_algo_list = create_publisher_trusted_algorithms([algorithm], "")
     dataset_with_compute_service_generator.update_compute_values(
@@ -411,6 +428,7 @@ def test_compute_update_trusted_algorithm(
         dataset_with_compute_service_generator, publisher_wallet
     )
 
+    # Expect to pass when trusted algorithm is used
     run_compute_test(
         ocean_instance=publisher_ocean_instance,
         publisher_wallet=publisher_wallet,
@@ -427,6 +445,44 @@ def test_compute_update_trusted_algorithm(
             publisher_wallet=publisher_wallet,
             consumer_wallet=consumer_wallet,
             dataset_and_userdata=AssetAndUserdata(updated_dataset, None),
-            algorithm_and_userdata=AssetAndUserdata(another_algorithm, None),
+            algorithm_and_userdata=AssetAndUserdata(
+                algorithm_with_different_publisher, None
+            ),
+            with_result=True,
+        )
+
+
+def test_compute_trusted_publisher(
+    publisher_wallet,
+    publisher_ocean_instance,
+    consumer_wallet,
+    dataset_with_compute_service_and_trusted_publisher,
+    algorithm,
+    algorithm_with_different_publisher,
+):
+    # Expect to pass when algorithm with trusted publisher is used
+    run_compute_test(
+        ocean_instance=publisher_ocean_instance,
+        publisher_wallet=publisher_wallet,
+        consumer_wallet=consumer_wallet,
+        dataset_and_userdata=AssetAndUserdata(
+            dataset_with_compute_service_and_trusted_publisher, None
+        ),
+        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+        with_result=True,
+    )
+
+    # Expect to fail when algorithm with non-trusted publisher is used
+    with pytest.raises(ValueError):
+        run_compute_test(
+            ocean_instance=publisher_ocean_instance,
+            publisher_wallet=publisher_wallet,
+            consumer_wallet=consumer_wallet,
+            dataset_and_userdata=AssetAndUserdata(
+                dataset_with_compute_service_and_trusted_publisher, None
+            ),
+            algorithm_and_userdata=AssetAndUserdata(
+                algorithm_with_different_publisher, None
+            ),
             with_result=True,
         )
