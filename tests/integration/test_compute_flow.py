@@ -29,6 +29,9 @@ from tests.resources.ddo_helpers import (
 
 @pytest.fixture
 def dataset_with_compute_service(publisher_wallet, publisher_ocean_instance):
+    """Returns a dataset with compute service.
+    Fixture is registered on chain once and can be used multiple times.
+    Reduces setup time."""
     # Dataset with compute service
     asset = get_registered_asset_with_compute_service(
         publisher_ocean_instance, publisher_wallet
@@ -40,6 +43,8 @@ def dataset_with_compute_service(publisher_wallet, publisher_ocean_instance):
 
 @pytest.fixture
 def dataset_with_compute_service_generator(publisher_wallet, publisher_ocean_instance):
+    """Returns a new dataset each time fixture is used.
+    Useful for tests that need to update the dataset"""
     # Dataset with compute service
     asset = get_registered_asset_with_compute_service(
         publisher_ocean_instance, publisher_wallet
@@ -228,21 +233,16 @@ def run_compute_test(
         )
 
     # Start compute job
-    _, compute_start_endpoint = DataServiceProvider.build_compute_endpoint(
-        ocean_instance.config.provider_url
+    job_id = ocean_instance.compute.start(
+        ocean_instance.config.provider_url,
+        consumer_wallet,
+        dataset,
+        "not implemented in provider yet",
+        algorithm,
+        algorithm_meta,
+        algorithm_algocustomdata,
+        additional_datasets,
     )
-    # TODO: Consider replacing with `ocean.compute.start()` after OceanCompute API is fixed.
-    job_info = DataServiceProvider.start_compute_job(
-        service_endpoint=compute_start_endpoint,
-        consumer=consumer_wallet,
-        dataset=dataset,
-        compute_environment="not implemented in provider yet",
-        algorithm=algorithm,
-        algorithm_meta=algorithm_meta,
-        algorithm_custom_data=algorithm_algocustomdata,
-        input_datasets=additional_datasets,
-    )
-    job_id = job_info["jobId"]
 
     status = ocean_instance.compute.status(
         dataset_and_userdata.asset.did, job_id, consumer_wallet
@@ -292,9 +292,9 @@ def test_compute_raw_algo(
     consumer_wallet,
     dataset_with_compute_service_allow_raw_algo,
     raw_algorithm,
+    dataset_with_compute_service,
 ):
     """Tests that a compute job with a raw algorithm starts properly."""
-    # Setup algorithm meta to run raw algorithm
     run_compute_test(
         ocean_instance=publisher_ocean_instance,
         publisher_wallet=publisher_wallet,
@@ -306,8 +306,14 @@ def test_compute_raw_algo(
         with_result=True,
     )
 
-
-# TODO Add a raw algo test that fails because allowRawAlgorithm is False
+    run_compute_test(
+        ocean_instance=publisher_ocean_instance,
+        publisher_wallet=publisher_wallet,
+        consumer_wallet=consumer_wallet,
+        dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
+        algorithm_meta=raw_algorithm,
+        with_result=True,
+    )
 
 
 def test_compute_registered_algo(
@@ -318,7 +324,6 @@ def test_compute_registered_algo(
     algorithm,
 ):
     """Tests that a compute job with a registered algorithm starts properly."""
-    # Setup algorithm meta to run raw algorithm
     run_compute_test(
         ocean_instance=publisher_ocean_instance,
         publisher_wallet=publisher_wallet,
