@@ -132,9 +132,9 @@ token_address = nft_token.address
 print(f"token_address = '{token_address}'")
 
 # Prepare data for ERC20 token
-from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-erc20_data = ErcCreateData(
+erc20_data = CreateErc20Data(
     template_index=1,
     strings=["Datatoken 1", "DT1"],
     addresses=[
@@ -167,7 +167,6 @@ url_file = UrlFile(
 )
 
 # Encrypt file(s) using provider
-```python
 encrypted_files = ocean.assets.encrypt_files([url_file])
 
 
