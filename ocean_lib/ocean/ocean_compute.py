@@ -68,7 +68,7 @@ class OceanCompute:
             ServiceTypes.CLOUD_COMPUTE == service.type
         ), "service at serviceId is not of type compute service."
 
-        consumable_result = asset.is_consumable(
+        consumable_result = service.is_consumable(
             {"type": "address", "value": consumer_wallet.address},
             provider_uri=provider_uri,
         )
