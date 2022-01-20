@@ -357,7 +357,7 @@ def test_compute_multi_inputs(
     )
 
 
-def test_update_trusted_algorithm(
+def test_compute_update_trusted_algorithm(
     publisher_wallet,
     publisher_ocean_instance,
     consumer_wallet,
