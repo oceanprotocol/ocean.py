@@ -200,7 +200,6 @@ def get_registered_asset_with_access_service(ocean_instance, publisher_wallet):
     return create_asset(ocean_instance, publisher_wallet, ocean_instance.config)
 
 
-# TODO Add support for trusted algorithms
 def get_registered_asset_with_compute_service(
     ocean_instance: Ocean,
     publisher_wallet: Wallet,
