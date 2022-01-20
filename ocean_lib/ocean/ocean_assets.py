@@ -294,11 +294,11 @@ class OceanAssets:
             erc721_address = registered_event[0].args.newTokenAddress
             erc721_token = ERC721Token(self._web3, erc721_address)
             if not erc721_token:
-                logger.warning("Creating new data token failed.")
+                logger.warning("Creating new datatoken failed.")
                 return None
             logger.info(
-                f"Successfully created data token with address "
-                f"{erc721_token.address} for new dataset asset."
+                f"Successfully created datatoken with address "
+                f"{erc721_token.address}."
             )
         else:
             # verify nft address
