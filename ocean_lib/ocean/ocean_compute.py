@@ -19,9 +19,6 @@ from ocean_lib.web3_internal.wallet import Wallet
 logger = logging.getLogger("ocean")
 
 
-# TODO: fix for v4
-
-
 class OceanCompute:
 
     """Ocean assets class."""
