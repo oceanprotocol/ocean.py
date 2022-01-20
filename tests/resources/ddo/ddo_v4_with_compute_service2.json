@@ -46,7 +46,7 @@
         "publisherTrustedAlgorithms": [
           {
             "did": "did:op:123",
-            "filesChecksum":"186efccf1a990f6fa2c02c672c515164e7d2e9c9fba6b5068951913afc00ccc8",
+            "filesChecksum":"5ce12db0cc7f13f963b1af3b5df7cab4fd3ffae16c8af7e6e416570d197dcc61",
             "containerSectionChecksum": "002da04eb18978c38ec586b5a0584440efa0b6310518fdb64566c1152c14d5ba"
           }
         ]
