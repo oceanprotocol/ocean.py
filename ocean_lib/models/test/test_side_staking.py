@@ -8,6 +8,7 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.models_structures import PoolData
 from ocean_lib.models.side_staking import SideStaking
+from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
     get_address_of_type,
@@ -28,7 +29,7 @@ def test_side_staking(
     swap_fee = int(1e15)
     swap_market_fee = int(1e15)
     vested_blocks = 2500000
-    initial_ocean_liquidity = web3.toWei("10", "ether")
+    initial_ocean_liquidity = to_wei(10)
 
     side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
 
@@ -36,7 +37,7 @@ def test_side_staking(
 
     # Deploy erc721 and erc20 data token
     erc721, erc20 = deploy_erc721_erc20(
-        web3, config, consumer_wallet, consumer_wallet, web3.toWei("10000", "ether")
+        web3, config, consumer_wallet, consumer_wallet, to_wei(10000)
     )
 
     # Initial vesting should be 0 and last vested block two
@@ -55,7 +56,7 @@ def test_side_staking(
         factory_deployer_wallet=factory_deployer_wallet,
         recipient=consumer_wallet.address,
         min_balance=0,
-        amount_to_transfer=web3.toWei("20000", "ether"),
+        amount_to_transfer=to_wei(20000),
     )
 
     transfer_ocean_if_balance_lte(
@@ -63,21 +64,21 @@ def test_side_staking(
         config=config,
         factory_deployer_wallet=factory_deployer_wallet,
         recipient=another_consumer_wallet.address,
-        min_balance=web3.toWei("1000", "ether"),
-        amount_to_transfer=web3.toWei("1000", "ether"),
+        min_balance=to_wei(1000),
+        amount_to_transfer=to_wei(1000),
     )
 
     ocean_token.approve(
         get_address_of_type(config, "Router"),
-        web3.toWei("20000", "ether"),
+        to_wei(20000),
         consumer_wallet,
     )
 
     pool_data = PoolData(
         ss_params=[
-            web3.toWei(1, "ether"),
+            to_wei(1),
             ocean_token.decimals(),
-            web3.toWei("0.5", "ether"),
+            to_wei("0.5"),
             vested_blocks,
             initial_ocean_liquidity,
         ],
@@ -104,7 +105,7 @@ def test_side_staking(
 
     assert side_staking.get_base_token_address(erc20.address) == ocean_token.address
     assert side_staking.get_publisher_address(erc20.address) == consumer_wallet.address
-    assert side_staking.get_vesting_amount(erc20.address) == web3.toWei("0.5", "ether")
+    assert side_staking.get_vesting_amount(erc20.address) == to_wei("0.5")
 
     assert pool_event[0].event == "NewPool"
     bpool_address = pool_event[0].args.poolAddress
@@ -113,13 +114,11 @@ def test_side_staking(
     # Side staking pool address should match the newly created pool
     assert side_staking.get_pool_address(erc20.address) == bpool_address
 
-    assert erc20.balanceOf(get_address_of_type(config, "Staking")) == web3.toWei(
-        "9990", "ether"
-    )
+    assert erc20.balanceOf(get_address_of_type(config, "Staking")) == to_wei(9990)
 
     # Consumer fails to mints new erc20 tokens even if it's minter
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.mint(consumer_wallet.address, web3.toWei("1", "ether"), consumer_wallet)
+        erc20.mint(consumer_wallet.address, to_wei(1), consumer_wallet)
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert DataTokenTemplate: cap exceeded"
@@ -129,21 +128,17 @@ def test_side_staking(
     # Pool has initial ocean tokens at the beginning
     assert ocean_token.balanceOf(bpool_address) == initial_ocean_liquidity
 
-    ocean_token.approve(
-        bpool_address, web3.toWei("100", "ether"), another_consumer_wallet
-    )
+    ocean_token.approve(bpool_address, to_wei(100), another_consumer_wallet)
 
     # Transfer some ocean from consumer_wallet to another_consumer_wallet to continue testing
-    ocean_token.transfer(
-        another_consumer_wallet.address, web3.toWei("10", "ether"), consumer_wallet
-    )
+    ocean_token.transfer(another_consumer_wallet.address, to_wei(10), consumer_wallet)
 
     bpool.swap_exact_amount_in(
         [ocean_token.address, erc20.address, publisher_wallet.address],
         [
-            web3.toWei("1", "ether"),
-            web3.toWei("0", "ether"),
-            web3.toWei("1000000", "ether"),
+            to_wei(1),
+            to_wei(0),
+            to_wei(1000000),
             0,
         ],
         another_consumer_wallet,
@@ -154,15 +149,15 @@ def test_side_staking(
     # Another consumer swaps some DT back to Ocean swapExactAmountIn
     initial_erc20_balance = erc20.balanceOf(another_consumer_wallet.address)
     initial_ocean_balance = ocean_token.balanceOf(another_consumer_wallet.address)
-    erc20.approve(bpool_address, web3.toWei("10000", "ether"), another_consumer_wallet)
+    erc20.approve(bpool_address, to_wei(10000), another_consumer_wallet)
 
     receipt = web3.eth.wait_for_transaction_receipt(
         bpool.swap_exact_amount_in(
             [erc20.address, ocean_token.address, publisher_wallet.address],
             [
-                web3.toWei("0.01", "ether"),
-                web3.toWei("0.001", "ether"),
-                web3.toWei("100", "ether"),
+                to_wei("0.01"),
+                to_wei("0.001"),
+                to_wei(100),
                 0,
             ],
             another_consumer_wallet,
@@ -191,16 +186,14 @@ def test_side_staking(
     ss_contract_dt_balance = erc20.balanceOf(get_address_of_type(config, "Staking"))
     ss_contract_bpt_balance = bpool.balanceOf(get_address_of_type(config, "Staking"))
 
-    bpt_amount_out = web3.toWei("0.01", "ether")
+    bpt_amount_out = to_wei("0.01")
     maxAmountsIn = [
-        web3.toWei("50", "ether"),  # Amounts IN
-        web3.toWei("50", "ether"),  # Amounts IN
+        to_wei(50),  # Amounts IN
+        to_wei(50),  # Amounts IN
     ]
-    ocean_token.approve(
-        bpool.address, web3.toWei("50", "ether"), another_consumer_wallet
-    )
+    ocean_token.approve(bpool.address, to_wei(50), another_consumer_wallet)
 
-    erc20.approve(bpool.address, web3.toWei("50", "ether"), another_consumer_wallet)
+    erc20.approve(bpool.address, to_wei(50), another_consumer_wallet)
 
     receipt = web3.eth.wait_for_transaction_receipt(
         bpool.join_pool(bpt_amount_out, maxAmountsIn, another_consumer_wallet)
@@ -242,10 +235,10 @@ def test_side_staking(
 
     initial_erc20_balance_consumer = erc20.balanceOf(consumer_wallet.address)
 
-    ocean_token.approve(bpool.address, web3.toWei("1", "ether"), consumer_wallet)
+    ocean_token.approve(bpool.address, to_wei(1), consumer_wallet)
 
-    ocean_amount_in = web3.toWei("0.4", "ether")
-    min_bp_out = web3.toWei("0.1", "ether")
+    ocean_amount_in = to_wei("0.4")
+    min_bp_out = to_wei("0.1")
 
     receipt = web3.eth.wait_for_transaction_receipt(
         bpool.join_swap_extern_amount_in(

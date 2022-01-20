@@ -13,6 +13,7 @@ from ocean_lib.models.fixed_rate_exchange import (
 )
 from ocean_lib.models.models_structures import FixedData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 from web3 import exceptions
 
@@ -57,10 +58,10 @@ def test_exchange_rate_creation(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
     """Test exchange with baseToken(OCEAN) 18 Decimals and dataToken 18 Decimals, RATE = 1"""
-    cap = web3.toWei("100000", "ether")
-    amount_dt_to_sell = web3.toWei("100", "ether")
-    no_limit = web3.toWei("100000000000000000000", "ether")
-    rate = web3.toWei("1", "ether")
+    cap = to_wei(100000)
+    amount_dt_to_sell = to_wei(100)
+    no_limit = to_wei(100000000000000000000)
+    rate = to_wei(1)
     market_fee = int(1e15)  # 0.1%
     opf_fee = int(1e15)  # 0.1%
     ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
@@ -125,7 +126,7 @@ def test_exchange_rate_creation(
     erc20.approve(fixed_exchange.address, amount_dt_to_sell, consumer_wallet)
     # Another_consumer_wallet approves a big amount so that we don't need to re-approve during test
     ocean_token.approve(
-        fixed_exchange.address, web3.toWei("1000000", "ether"), another_consumer_wallet
+        fixed_exchange.address, to_wei(1000000), another_consumer_wallet
     )
 
     # Exchange should have supply and fees setup
@@ -334,5 +335,5 @@ def test_exchange_rate_creation(
     fixed_exchange.toggle_exchange_state(exchange_id, consumer_wallet)
 
     # Set exchange rate exchange should work
-    fixed_exchange.set_rate(exchange_id, web3.toWei("1.1", "ether"), consumer_wallet)
-    assert fixed_exchange.get_rate(exchange_id) == web3.toWei("1.1", "ether")
+    fixed_exchange.set_rate(exchange_id, to_wei("1.1"), consumer_wallet)
+    assert fixed_exchange.get_rate(exchange_id) == to_wei("1.1")
