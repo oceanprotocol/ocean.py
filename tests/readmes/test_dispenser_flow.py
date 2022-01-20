@@ -6,7 +6,7 @@ import os
 
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.dispenser import Dispenser
-from ocean_lib.models.models_structures import ErcCreateData, DispenserData
+from ocean_lib.models.models_structures import CreateErc20Data, DispenserData
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type
@@ -42,7 +42,7 @@ def test_dispenser_flow():
 
     # Prepare data for ERC20 token
     cap = to_wei(100)
-    erc20_data = ErcCreateData(
+    erc20_data = CreateErc20Data(
         template_index=1,  # default value
         strings=["ERC20DT1", "ERC20DT1Symbol"],  # name & symbol for ERC20 token
         addresses=[
