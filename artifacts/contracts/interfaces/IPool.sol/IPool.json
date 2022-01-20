@@ -99,7 +99,7 @@
     },
     {
       "inputs": [],
-      "name": "getDataTokenAddress",
+      "name": "getDatatokenAddress",
       "outputs": [
         {
           "internalType": "address",
@@ -108,6 +108,19 @@
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getId",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "pure",
       "type": "function"
     },
     {
@@ -127,17 +140,17 @@
       "inputs": [
         {
           "internalType": "address",
-          "name": "dataTokenAaddress",
+          "name": "datatokenAddress",
           "type": "address"
         },
         {
           "internalType": "uint256",
-          "name": "dataTokenAmount",
+          "name": "datatokenAmount",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "dataTokenWeight",
+          "name": "datatokennWeight",
           "type": "uint256"
         },
         {

@@ -8,7 +8,6 @@ import logging
 from typing import Dict, List, Optional, Type, Union
 
 from enforce_typing import enforce_types
-from eth_utils import remove_0x_prefix
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.bpool import BPool
@@ -16,12 +15,13 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.factory_router import FactoryRouter
-from ocean_lib.models.models_structures import PoolData
-from ocean_lib.models.order import Order
+from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+from ocean_lib.models.models_structures import FixedData, PoolData
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
 
@@ -178,14 +178,10 @@ class Ocean:
 
         return ERC721FactoryContract(self.web3, nft_factory_address)
 
-    # TODO: adapt for v4
     @enforce_types
     def get_user_orders(
-        self,
-        address: str,
-        datatoken: Optional[str] = None,
-        service_id: Optional[int] = None,
-    ) -> List[Order]:
+        self, address: str, datatoken: Optional[str] = None
+    ) -> List[AttributeDict]:
         """
         :return: List of orders `[Order]`
         """
@@ -196,31 +192,63 @@ class Ocean:
         ):
             a = dict(log.args.items())
             a["amount"] = int(log.args.amount)
-            a["marketFee"] = int(log.args.marketFee)
+            a["address"] = log.address
+            a["transactionHash"] = log.transactionHash
             a = AttributeDict(a.items())
 
-            # 'datatoken', 'amount', 'timestamp', 'transactionId', 'did', 'payer', 'consumer', 'serviceId', 'serviceType'
-            order = Order(
-                log.address,
-                a.amount,
-                a.timestamp,
-                log.transactionHash,
-                f"did:op:{remove_0x_prefix(log.address)}",
-                a.payer,
-                a.consumer,
-                a.serviceId,
-                None,
-            )
-            if service_id is None or order.serviceId == service_id:
-                _orders.append(order)
+            _orders.append(a)
 
         return _orders
+
+    @property
+    @enforce_types
+    def fixed_rate_exchange(self):
+        return FixedRateExchange(
+            self.web3, get_address_of_type(self.config, "FixedPrice")
+        )
+
+    @enforce_types
+    def create_fixed_rate(
+        self,
+        erc20_token: ERC20Token,
+        base_token: ERC20Token,
+        amount: int,
+        from_wallet: Wallet,
+    ) -> bytes:
+        fixed_price_address = get_address_of_type(self.config, "FixedPrice")
+        erc20_token.approve(fixed_price_address, amount, from_wallet)
+        addresses = [
+            base_token.address,
+            from_wallet.address,
+            from_wallet.address,
+            ZERO_ADDRESS,
+        ]
+        uints = [erc20_token.decimals(), base_token.decimals(), to_wei(1), int(1e15), 0]
+
+        fixed_rate_data = FixedData(
+            fixed_price_address=fixed_price_address, addresses=addresses, uints=uints
+        )
+
+        tx = erc20_token.create_fixed_rate(
+            fixed_data=fixed_rate_data, from_wallet=from_wallet
+        )
+        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
+        fixed_rate_event = erc20_token.get_event_log(
+            ERC721FactoryContract.EVENT_NEW_FIXED_RATE,
+            tx_receipt.blockNumber,
+            self.web3.eth.block_number,
+            None,
+        )
+        exchange_id = fixed_rate_event[0].args.exchangeId
+
+        return exchange_id
 
     @property
     @enforce_types
     def factory_router(self):
         return FactoryRouter(self.web3, get_address_of_type(self.config, "Router"))
 
+    @enforce_types
     def create_pool(
         self,
         erc20_token: ERC20Token,

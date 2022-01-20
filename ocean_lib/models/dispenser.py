@@ -44,41 +44,41 @@ class Dispenser(ContractBase):
     def event_OwnerWithdrawed(self):
         return self.events.OwnerWithdrawed()
 
-    def status(self, data_token: str) -> tuple:
-        return self.contract.caller.status(data_token)
+    def status(self, datatoken: str) -> tuple:
+        return self.contract.caller.status(datatoken)
 
     def activate(
-        self, data_token: str, max_tokens: int, max_balance: int, from_wallet: Wallet
+        self, datatoken: str, max_tokens: int, max_balance: int, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "activate", (data_token, max_tokens, max_balance), from_wallet
+            "activate", (datatoken, max_tokens, max_balance), from_wallet
         )
 
-    def deactivate(self, data_token: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("deactivate", (data_token,), from_wallet)
+    def deactivate(self, datatoken: str, from_wallet: Wallet) -> str:
+        return self.send_transaction("deactivate", (datatoken,), from_wallet)
 
     def set_allowed_swapper(
-        self, data_token: str, new_allowed_swapper: str, from_wallet: Wallet
+        self, datatoken: str, new_allowed_swapper: str, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "setAllowedSwapper", (data_token, new_allowed_swapper), from_wallet
+            "setAllowedSwapper", (datatoken, new_allowed_swapper), from_wallet
         )
 
     def dispense(
-        self, data_token: str, amount: int, destination: str, from_wallet: Wallet
+        self, datatoken: str, amount: int, destination: str, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "dispense", (data_token, amount, destination), from_wallet
+            "dispense", (datatoken, amount, destination), from_wallet
         )
 
-    def owner_withdraw(self, data_token: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("ownerWithdraw", (data_token,), from_wallet)
+    def owner_withdraw(self, datatoken: str, from_wallet: Wallet) -> str:
+        return self.send_transaction("ownerWithdraw", (datatoken,), from_wallet)
 
     def dispense_tokens(
         self, erc20_token: ERC20Token, amount: int, consumer_wallet: Wallet
     ):
         tx = self.dispense(
-            data_token=erc20_token.address,
+            datatoken=erc20_token.address,
             amount=amount,
             destination=consumer_wallet.address,
             from_wallet=consumer_wallet,

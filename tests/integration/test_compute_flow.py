@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import time
+from datetime import datetime, timedelta
 from typing import List, Optional, Tuple
 
 import pytest
@@ -23,7 +24,6 @@ from tests.resources.ddo_helpers import (
     get_registered_algorithm_ddo_different_provider,
     get_registered_asset_with_access_service,
     get_registered_asset_with_compute_service,
-    wait_for_update,
 )
 from web3.logs import DISCARD
 
@@ -75,7 +75,7 @@ def process_order(
     """Helper function to process a compute order."""
     # Mint 10 datatokens to the consumer
     service = asset.get_service(service_type)
-    erc20_token = ERC20Token(ocean_instance.web3, service.data_token)
+    erc20_token = ERC20Token(ocean_instance.web3, service.datatoken)
     _ = erc20_token.mint(consumer_wallet.address, to_wei(10), publisher_wallet)
 
     # TODO: Refactor, use OceanAssets.order() instead of initialize and start_order
@@ -90,6 +90,7 @@ def process_order(
         service_endpoint=initialize_url,
         # TODO: add a real compute environment once provider supports it
         compute_environment="doesn't matter for now",
+        valid_until=int((datetime.now() + timedelta(hours=1)).timestamp()),
     ).json()
 
     # Order the service
@@ -338,14 +339,15 @@ def test_update_trusted_algorithms(
 
     tx_receipt = ddo_registry.get_tx_receipt(web3, tx_id)
     logs = ddo_registry.event_MetadataUpdated.processReceipt(tx_receipt, errors=DISCARD)
-    assert logs[0].args.dataToken == asset_with_trusted.data_token_address
+    assert logs[0].args.datatoken == asset_with_trusted.datatoken_address
 
-    wait_for_update(
-        publisher_ocean_instance,
-        asset_with_trusted.did,
-        "privacy",
-        {"publisherTrustedAlgorithms": [algorithm_ddo.did]},
-    )
+    # TODO use util.wait_for_asset_update
+    # wait_for_update(
+    #     publisher_ocean_instance,
+    #     asset_with_trusted.did,
+    #     "privacy",
+    #     {"publisherTrustedAlgorithms": [algorithm_ddo.did]},
+    # )
 
     compute_ddo_updated = publisher_ocean_instance.assets.resolve(
         asset_with_trusted.did

@@ -5,7 +5,7 @@
 import os
 
 from ocean_lib.example_config import ExampleConfig
-from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -31,7 +31,7 @@ def test_simple_flow():
     assert erc721_token.symbol() == "dtsymbol"
 
     cap = to_wei(10)
-    erc20_data = ErcCreateData(
+    erc20_data = CreateErc20Data(
         template_index=1,  # default value
         strings=["ERC20DT1", "ERC20DT1Symbol"],  # name & symbol for ERC20 token
         addresses=[
@@ -43,7 +43,7 @@ def test_simple_flow():
         uints=[cap, 0],
         bytess=[b""],
     )
-    erc20_token = erc721_token.create_data_token(
+    erc20_token = erc721_token.create_datatoken(
         erc20_data=erc20_data, from_wallet=wallet
     )
 

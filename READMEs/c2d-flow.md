@@ -127,7 +127,7 @@ In the same Python console:
 # Publish DATA datatoken, mint tokens
 from ocean_lib.web3_internal.currency import to_wei
 
-DATA_datatoken = ocean.create_data_token('DATA1', 'DATA1', alice_wallet, blob=ocean.config.metadata_cache_uri)
+DATA_datatoken = ocean.create_datatoken('DATA1', 'DATA1', alice_wallet, blob=ocean.config.metadata_cache_uri)
 DATA_datatoken.mint(alice_wallet.address, to_wei(100), alice_wallet)
 print(f"DATA_datatoken.address = '{DATA_datatoken.address}'")
 
@@ -177,7 +177,7 @@ DATA_ddo = ocean.assets.create(
   metadata=DATA_metadata, # {"main" : {"type" : "dataset", ..}, ..}
   publisher_wallet=alice_wallet,
   services=[DATA_compute_service],
-  data_token_address=DATA_datatoken.address)
+  datatoken_address=DATA_datatoken.address)
 print(f"DATA did = '{DATA_ddo.did}'")
 ```
 
@@ -195,7 +195,7 @@ Take a look at the [Ocean tutorials](https://docs.oceanprotocol.com/tutorials/co
 In the same Python console:
 ```python
 # Publish ALG datatoken
-ALG_datatoken = ocean.create_data_token('ALG1', 'ALG1', alice_wallet, blob=ocean.config.metadata_cache_uri)
+ALG_datatoken = ocean.create_datatoken('ALG1', 'ALG1', alice_wallet, blob=ocean.config.metadata_cache_uri)
 ALG_datatoken.mint(alice_wallet.address, to_wei(100), alice_wallet)
 print(f"ALG_datatoken.address = '{ALG_datatoken.address}'")
 
@@ -247,7 +247,7 @@ ALG_ddo = ocean.assets.create(
   metadata=ALG_metadata, # {"main" : {"type" : "algorithm", ..}, ..}
   publisher_wallet=alice_wallet,
   services=[ALG_access_service],
-  data_token_address=ALG_datatoken.address)
+  datatoken_address=ALG_datatoken.address)
 print(f"ALG did = '{ALG_ddo.did}'")
 ```
 
@@ -306,7 +306,7 @@ dataset_order_requirements = ocean.assets.order(
 DATA_order_tx_id = ocean.assets.pay_for_service(
         ocean.web3,
         dataset_order_requirements.amount,
-        dataset_order_requirements.data_token_address,
+        dataset_order_requirements.datatoken_address,
         DATA_did,
         compute_service.index,
         ZERO_ADDRESS,
@@ -321,7 +321,7 @@ algo_order_requirements = ocean.assets.order(
 ALG_order_tx_id = ocean.assets.pay_for_service(
         ocean.web3,
         algo_order_requirements.amount,
-        algo_order_requirements.data_token_address,
+        algo_order_requirements.datatoken_address,
         ALG_did,
         algo_service.index,
         ZERO_ADDRESS,
@@ -335,7 +335,7 @@ job_id = ocean.compute.start(
     bob_wallet,
     algorithm_did=ALG_did,
     algorithm_tx_id=ALG_order_tx_id,
-    algorithm_data_token=ALG_datatoken.address
+    algorithm_datatoken=ALG_datatoken.address
 )
 print(f"Started compute job with id: {job_id}")
 ```

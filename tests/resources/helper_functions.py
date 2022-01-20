@@ -16,7 +16,7 @@ from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
-from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.ocean.util import get_web3 as util_get_web3
@@ -227,7 +227,7 @@ def deploy_erc721_erc20(
     if not erc20_minter:
         return erc721_token
 
-    erc_create_data = ErcCreateData(
+    erc_create_data = CreateErc20Data(
         template_index=template_index,
         strings=["ERC20DT1", "ERC20DT1Symbol"],
         addresses=[
@@ -320,14 +320,16 @@ def get_provider_fees() -> Dict[str, Any]:
     provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
     provider_fee_address = provider_wallet.address
     provider_fee_token = os.environ.get("PROVIDER_FEE_TOKEN", ZERO_ADDRESS)
+    valid_until = 0
 
     message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256"],
+        ["bytes", "address", "address", "uint256", "uint256"],
         [
             Web3.toHex(Web3.toBytes(text=provider_data)),
             provider_fee_address,
             provider_fee_token,
             provider_fee_amount,
+            valid_until,
         ],
     )
     signed = web3.eth.sign(provider_fee_address, data=message)
@@ -342,6 +344,7 @@ def get_provider_fees() -> Dict[str, Any]:
         "v": signature.v,
         "r": signature.r,
         "s": signature.s,
+        "validUntil": 0,
     }
 
     return provider_fee

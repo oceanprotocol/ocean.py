@@ -7,7 +7,7 @@ from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
-from ocean_lib.models.models_structures import ErcCreateData, PoolData
+from ocean_lib.models.models_structures import CreateErc20Data, PoolData
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import get_address_of_type
@@ -74,7 +74,7 @@ def test_main(
     assert permissions[3] is True
 
     # Tests consumer deploys an ERC20DT
-    erc_data = ErcCreateData(
+    erc_data = CreateErc20Data(
         1,
         ["ERC20DT1", "ERC20DT1Symbol"],
         [

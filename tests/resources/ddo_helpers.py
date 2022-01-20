@@ -13,7 +13,7 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
@@ -92,7 +92,7 @@ def get_access_service(
 
 def create_asset(ocean, publisher, config, metadata=None):
     """Helper function for asset creation based on ddo_sa_sample.json."""
-    erc20_data = ErcCreateData(
+    erc20_data = CreateErc20Data(
         template_index=1,
         strings=["Datatoken 1", "DT1"],
         addresses=[
@@ -128,7 +128,7 @@ def create_asset(ocean, publisher, config, metadata=None):
     )
 
     # TODO: Mint tokens for dataset and assign to publisher
-    # dt = ocean.get_datatoken(service.data_token_address)
+    # dt = ocean.get_datatoken(service.datatoken_address)
     # mint_tokens_and_wait(dt, wallet.address, wallet)
 
     return asset
@@ -220,7 +220,7 @@ def get_registered_asset_with_compute_service(
         service_id="2",
         service_type=ServiceTypes.CLOUD_COMPUTE,
         service_endpoint=f"{data_provider.get_url(config)}/api/services/compute",
-        data_token=erc20_token.address,
+        datatoken=erc20_token.address,
         files=encrypted_files,
         timeout=3600,
         compute_values=compute_values,
@@ -284,26 +284,6 @@ def get_registered_algorithm_ddo_different_provider(ocean_instance, wallet):
 def build_credentials_dict() -> dict:
     """Build a credentials dict, used for testing."""
     return {"allow": [], "deny": []}
-
-
-def wait_for_update(ocean, did, updated_attr, value, timeout=30):
-    start = time.time()
-    ddo = None
-    while True:
-        try:
-            ddo = ocean.assets.resolve(did)
-        except ValueError:
-            pass
-
-        if not ddo:
-            time.sleep(0.2)
-        elif ddo.metadata["main"].get(updated_attr) == value:
-            break
-
-        if time.time() - start > timeout:
-            break
-
-    return ddo
 
 
 def wait_for_ddo(ocean, did, timeout=30):

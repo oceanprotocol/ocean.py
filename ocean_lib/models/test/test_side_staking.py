@@ -46,7 +46,7 @@ def test_side_staking(
     assert side_staking.get_base_token_balance(erc20.address) == 0
 
     # Datatoken initial circulating supply should be 0
-    side_staking.get_data_token_circulating_supply(erc20.address) == 0
+    assert side_staking.get_datatoken_circulating_supply(erc20.address) == 0
 
     # Transfer ocean if needed
     transfer_ocean_if_balance_lte(
@@ -122,7 +122,7 @@ def test_side_staking(
         erc20.mint(consumer_wallet.address, web3.toWei("1", "ether"), consumer_wallet)
     assert (
         err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert DataTokenTemplate: cap exceeded"
+        == "execution reverted: VM Exception while processing transaction: revert DatatokenTemplate: cap exceeded"
     )
 
     # Another consumer buys some DT after burnIn period- exactAmountIn

@@ -5,7 +5,7 @@
 import pytest
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Permissions, ERC721Token
-from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.web3_internal.constants import BLOB, ZERO_ADDRESS
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 from web3 import exceptions
@@ -384,6 +384,45 @@ def test_success_update_metadata(web3, config, publisher_wallet, consumer_wallet
     assert metadata_info[3] is True
     assert metadata_info[0] == "http://foourl"
 
+    # Update tokenURI and set metadata in one call
+    tx = erc721_token.set_metadata_token_uri(
+        metadata_state=1,
+        metadata_decryptor_url="http://foourl",
+        metadata_decryptor_address="0x123",
+        flags=web3.toBytes(hexstr=BLOB),
+        data=web3.toBytes(hexstr=BLOB),
+        data_hash=web3.toBytes(hexstr=BLOB),
+        data_proofs=[],
+        token_id=1,
+        token_uri="https://anothernewurl.com/nft/",
+        from_wallet=publisher_wallet,
+    )
+
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    update_token_uri_event = erc721_token.get_event_log(
+        event_name="TokenURIUpdate",
+        from_block=tx_receipt.blockNumber,
+        to_block=web3.eth.block_number,
+        filters=None,
+    )
+    assert update_token_uri_event, "Cannot find TokenURIUpdate event."
+    assert update_token_uri_event[0].args.tokenURI == "https://anothernewurl.com/nft/"
+    assert update_token_uri_event[0].args.updatedBy == publisher_wallet.address
+
+    update_metadata_event = erc721_token.get_event_log(
+        event_name="MetadataUpdated",
+        from_block=tx_receipt.blockNumber,
+        to_block=web3.eth.block_number,
+        filters=None,
+    )
+
+    assert update_metadata_event, "Cannot find MetadataUpdated event."
+    assert update_metadata_event[0].args.decryptorUrl == "http://foourl"
+
+    metadata_info = erc721_token.get_metadata()
+    assert metadata_info[3] is True
+    assert metadata_info[0] == "http://foourl"
+
 
 def test_fails_update_metadata(web3, config, publisher_wallet, consumer_wallet):
     """Tests failure of calling update metadata function when the role of the user is not METADATA UPDATER."""
@@ -425,7 +464,7 @@ def test_create_erc20(web3, config, publisher_wallet, consumer_wallet):
         is True
     )
 
-    erc_create_data = ErcCreateData(
+    erc_create_data = CreateErc20Data(
         template_index=1,
         strings=["ERC20DT1", "ERC20DT1Symbol"],
         addresses=[
@@ -454,7 +493,7 @@ def test_fail_creating_erc20(web3, config, publisher_wallet, consumer_wallet):
         ]
         is False
     )
-    erc_create_data = ErcCreateData(
+    erc_create_data = CreateErc20Data(
         template_index=1,
         strings=["ERC20DT1", "ERC20DT1Symbol"],
         addresses=[
@@ -477,7 +516,7 @@ def test_fail_creating_erc20(web3, config, publisher_wallet, consumer_wallet):
     )
 
 
-def test_erc721_data_token_functions(web3, config, publisher_wallet, consumer_wallet):
+def test_erc721_datatoken_functions(web3, config, publisher_wallet, consumer_wallet):
     """Tests ERC721 Template functions for ERC20 tokens."""
     erc721_token, erc20_token = deploy_erc721_erc20(
         web3=web3,
@@ -486,12 +525,12 @@ def test_erc721_data_token_functions(web3, config, publisher_wallet, consumer_wa
         erc20_minter=publisher_wallet,
     )
     assert len(erc721_token.get_tokens_list()) == 1
-    assert erc721_token.is_deployed(data_token=erc20_token.address) is True
+    assert erc721_token.is_deployed(datatoken=erc20_token.address) is True
 
     erc721_token_v2 = deploy_erc721_erc20(
         web3=web3, config=config, erc721_publisher=publisher_wallet
     )
-    assert erc721_token_v2.is_deployed(data_token=consumer_wallet.address) is False
+    assert erc721_token_v2.is_deployed(datatoken=consumer_wallet.address) is False
     tx = erc721_token.set_token_uri(
         token_id=1,
         new_token_uri="https://newurl.com/nft/",
@@ -549,7 +588,7 @@ def test_erc721_data_token_functions(web3, config, publisher_wallet, consumer_wa
         ]
         is True
     )
-    erc_create_data = ErcCreateData(
+    erc_create_data = CreateErc20Data(
         template_index=1,
         strings=["ERC20DT1", "ERC20DT1Symbol"],
         addresses=[

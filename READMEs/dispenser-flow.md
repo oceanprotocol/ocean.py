@@ -12,7 +12,7 @@ It focuses on Alice's experience as a publisher.
 Here are the steps:
 
 1.  Setup
-2.  Alice creates a data token
+2.  Alice creates a datatoken
 3.  Dispenser creation & activation
 
 Let's go through each step.
@@ -78,14 +78,14 @@ export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 python
 ```
 
-## 2. Alice creates the data token
+## 2. Alice creates the datatoken
 
 
 In the Python console:
 ```python
 #Create ocean instance
 from ocean_lib.example_config import ExampleConfig
-from ocean_lib.models.models_structures import ErcCreateData
+from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -118,7 +118,7 @@ print(f"token_address = '{token_address}'")
 
 # Prepare data for ERC20 token
 cap = to_wei(100)
-erc20_data = ErcCreateData(
+erc20_data = CreateErc20Data(
     template_index=1,  # default value
     strings=["ERC20DT1", "ERC20DT1Symbol"],  # name & symbol for ERC20 token
     addresses=[

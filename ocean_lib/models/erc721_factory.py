@@ -2,12 +2,14 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import List
+from typing import List, Optional
 
 from enforce_typing import enforce_types
-from eth_abi import encode_single
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
+from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+from ocean_lib.models.models_structures import OrderData
 from ocean_lib.web3_internal.wallet import Wallet
+from web3.datastructures import AttributeDict
 
 
 @enforce_types
@@ -111,7 +113,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     def template_count(self) -> int:
         return self.contract.caller.templateCount()
 
-    def start_multiple_token_order(self, orders, from_wallet: Wallet) -> str:
+    def start_multiple_token_order(self, orders: list, from_wallet: Wallet) -> str:
         """An order contains the following keys:
 
         - tokenAddress, str
@@ -125,16 +127,11 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         - r, bytes
         - s, bytes
         """
-        # encode_abi('(address,address,uint256,address,address,uint256,uin8,bytes32,bytes32,bytes)'[], [mytuple])
+        # TODO: this will be handled in web3 py
+        if orders and isinstance(orders[0], OrderData):
+            orders = [tuple(o) for o in orders]
 
-        encodedOrders = encode_single(
-            "(address,address,uint256,address,address,uint256,uint8,bytes32,bytes32,bytes)[]",
-            orders,
-        )
-
-        return self.send_transaction(
-            "startMultipleTokenOrder", (encodedOrders,), from_wallet
-        )
+        return self.send_transaction("startMultipleTokenOrder", (orders,), from_wallet)
 
     def create_nft_with_erc(
         self, nft_create_data: dict, erc_create_data: dict, from_wallet: Wallet
@@ -181,6 +178,44 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             (nft_create_data, erc_create_data, dispenser_data),
             from_wallet,
         )
+
+    def get_token_created_event(
+        self, from_block: int, to_block: int, token_address: str
+    ) -> [AttributeDict]:
+        """Retrieves event log of token registration."""
+        filter_params = {"newTokenAddress": token_address}
+        logs = self.get_event_log(
+            self.EVENT_TOKEN_CREATED,
+            from_block=from_block,
+            to_block=to_block,
+            filters=filter_params,
+        )
+
+        return logs[0] if logs else None
+
+    def search_exchange_by_datatoken(
+        self,
+        fixed_rate_exchange: FixedRateExchange,
+        datatoken: str,
+        exchange_owner: Optional[str] = None,
+    ) -> list:
+        token_created_log = self.get_token_created_event(
+            from_block=0, to_block=self.web3.eth.block_number, token_address=datatoken
+        )
+        assert (
+            token_created_log
+        ), f"No token with '{datatoken}' address was created before."
+        from_block = token_created_log.blockNumber
+        filter_args = {"dataToken": datatoken}
+        if exchange_owner:
+            filter_args["exchangeOwner"] = exchange_owner
+        logs = fixed_rate_exchange.get_event_logs(
+            event_name="ExchangeCreated",
+            from_block=from_block,
+            to_block=self.web3.eth.block_number,
+            filters=filter_args,
+        )
+        return [item.args.exchangeId for item in logs]
 
     def get_token_address(self, tx_id: str):
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_id)

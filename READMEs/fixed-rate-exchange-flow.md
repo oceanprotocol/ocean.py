@@ -12,9 +12,9 @@ It focuses on Alice's experience as a publisher, and Bob's experience as a buyer
 Here are the steps:
 
 1.  Setup
-2.  Alice creates a data token
-3.  Alice mints & approves data tokens
-4.  Bob buys at fixed rate data tokens
+2.  Alice creates a datatoken
+3.  Alice mints & approves datatokens
+4.  Bob buys at fixed rate datatokens
 
 Let's go through each step.
 
@@ -31,14 +31,14 @@ Let's go through each step.
 In a new console:
 
 ```console
-#grab repo
+# Grab repo
 git clone https://github.com/oceanprotocol/barge
 cd barge
 
-#clean up old containers (to be sure)
+# Clean up old containers (to be sure)
 docker system prune -a --volumes
 
-#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
+# Run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
 ./start_ocean.sh
 ```
 
@@ -47,41 +47,49 @@ docker system prune -a --volumes
 In a new console that we'll call the _work_ console (as we'll use it later):
 
 ```console
-#Create your working directory
+# Grab ocean.py repo
+cd Desktop/
+git clone https://github.com/oceanprotocol/ocean.py.git
+git checkout v4main
+
+# Create your working directory. Copy artifacts.
 mkdir test3
 cd test3
+cp -r ../ocean.py/artifacts ./
 
-#Initialize virtual environment and activate it.
-python -m venv venv
+# Initialize virtual environment and activate it. Install artifacts.
+python3 -m venv venv
 source venv/bin/activate
+chmod 777 artifacts/install-remote.sh
+./artifacts/install-remote.sh
 
-#Install the ocean.py library. Install wheel first to avoid errors.
-pip install wheel
-pip install ocean-lib
+# Intermediary installation before PyPi release of V4. Install wheel first to avoid errors.
+pip3 install wheel
+pip3 install --no-cache-dir ../ocean.py/
 ```
 
 ### Set envvars
 
 In the work console:
 ```console
-#set private keys of two accounts
+# Set private keys of two accounts
 export TEST_PRIVATE_KEY1=0x5d75837394b078ce97bc289fa8d75e21000573520bfa7784a9d28ccaae602bf8
 export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
 
-#needed to mint fake OCEAN for testing with ganache
+# Needed to mint fake OCEAN for testing with ganache
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 
-#set the address file only for ganache
+# Set the address file only for ganache
 export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
 
-#set network URL
+# Set network URL
 export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 
-#start python
+# Start python
 python
 ```
 
-## 2. Alice creates the data token
+## 2. Alice creates the datatoken
 
 
 In the Python console:
@@ -109,22 +117,44 @@ from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
 
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-data_token = ocean.create_data_token('DataToken1', 'DT1', alice_wallet, blob=config.metadata_cache_uri)
-token_address = data_token.address
+# Publish an NFT token
+nft_token = ocean.create_nft_token(
+    "NFTToken1", "NFT1", alice_wallet, "https://oceanprotocol.com/nft/"
+)
+token_address = nft_token.address
 print(f"token_address = '{token_address}'")
 ```
 
-## 3. Alice mints & approve data tokens
+## 3. Alice created data token & mints data tokens
 
 In the same python console:
 ```python
-#Mint the datatokens
+from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
-data_token.mint(alice_wallet.address, to_wei(100), alice_wallet)
-data_token.approve(ocean.exchange._exchange_address, to_wei(100), alice_wallet)
+
+# Prepare data for ERC20 token
+erc20_data = CreateErc20Data(
+    template_index=1,
+    strings=["Datatoken 1", "DT1"],
+    addresses=[
+        alice_wallet.address,
+        alice_wallet.address,
+        ZERO_ADDRESS,
+        ocean.OCEAN_address,
+    ],
+    uints=[to_wei(200), 0],
+    bytess=[b""],
+)
+
+erc20_token = nft_token.create_datatoken(erc20_data, alice_wallet)
+print(f"datatoken_address = '{erc20_token.address}'")
+
+#Mint the datatokens
+erc20_token.mint(alice_wallet.address, to_wei(100), alice_wallet)
 ```
 
-## 4. Bob buys at fixed rate data tokens
+## 4. Bob buys at fixed rate datatokens
 
 
 In the same python console:
@@ -133,13 +163,10 @@ bob_private_key = os.getenv('TEST_PRIVATE_KEY2')
 bob_wallet = Wallet(ocean.web3, bob_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
-#Verify that Bob has ganache ETH
+# Verify that Bob has ganache ETH
 assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
-from ocean_lib.models.btoken import BToken #BToken is ERC20
-OCEAN_token = BToken(ocean.web3, ocean.OCEAN_address)
-assert OCEAN_token.balanceOf(alice_wallet.address) > 0, "need OCEAN"
-assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
+OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 ```
 
 If the `exchange_id` is not provided yet, here is the fix.
@@ -147,30 +174,43 @@ It is important to create an `exchange_id` only one time per exchange.
 
 ```python
 #Create exchange_id for a new exchange
-exchange_id = ocean.exchange.create(token_address, to_wei("0.1"), alice_wallet)
+exchange_id = ocean.create_fixed_rate(
+    erc20_token=erc20_token,
+    base_token=OCEAN_token,
+    amount=to_wei(100),
+    from_wallet=alice_wallet,
+)
 ```
 
 If `exchange_id` has been created before or there are other
-exchanges for a certain data token, it can be searched by
-providing the data token address.
+exchanges for a certain datatoken, it can be searched by
+providing the datatoken address.
 
 ```python
-#Search for exchange_id from a specific block retrieved at 3rd step
-#for a certain data token address (e.g. token_address).
-logs = ocean.exchange.search_exchange_by_data_token(token_address)
+# Search for exchange_id from a specific block retrieved at 3rd step
+# for a certain data token address (e.g. datatoken_address). Choose
+# one from the list.
+datatoken_address = erc20_token.address
+nft_factory = ocean.get_nft_factory()
+logs = nft_factory.search_exchange_by_datatoken(ocean.fixed_rate_exchange, datatoken_address)
+# Optional: Filtering the logs by the exchange owner.
+logs = nft_factory.search_exchange_by_datatoken(ocean.fixed_rate_exchange, datatoken_address, alice_wallet.address)
 print(logs)
-#E.g. First exchange is the wanted one.
-exchange_id = logs[0].args.exchangeId
-```
-_Optional:_ Filtering the logs by the exchange owner.
-```python
-filtered_logs = list(filter(lambda log: log.args.exchangeOwner == alice_wallet.address, logs))
-print(filtered_logs)
 ```
 
 Use the `exchange_id` for buying at fixed rate.
 
 ```python
-tx_result = ocean.exchange.buy_at_fixed_rate(to_wei(2), bob_wallet, to_wei(5), exchange_id, token_address, alice_wallet.address)
+# Approve tokens for Bob
+fixed_price_address = ocean.fixed_rate_exchange.address
+erc20_token.approve(fixed_price_address, to_wei(100), bob_wallet)
+OCEAN_token.approve(fixed_price_address, to_wei(100), bob_wallet)
+
+tx_result = ocean.fixed_rate_exchange.buy_dt(
+    exchange_id=exchange_id,
+    datatoken_amount=to_wei(20),
+    max_base_token_amount=to_wei(50),
+    from_wallet=bob_wallet,
+    )
 assert tx_result, "failed buying data tokens at fixed rate for Bob"
 ```
