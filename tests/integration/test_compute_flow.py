@@ -357,18 +357,8 @@ def test_update_trusted_algorithms(
     consumer_wallet,
     dataset_with_compute_service_generator,
     algorithm,
+    another_algorithm,
 ):
-    run_compute_test(
-        ocean_instance=publisher_ocean_instance,
-        publisher_wallet=publisher_wallet,
-        consumer_wallet=consumer_wallet,
-        dataset_and_userdata=AssetAndUserdata(
-            dataset_with_compute_service_generator, None
-        ),
-        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
-        with_result=True,
-    )
-
     trusted_algo_list = create_publisher_trusted_algorithms([algorithm], "")
     dataset_with_compute_service_generator.update_compute_values(
         trusted_algorithms=trusted_algo_list,
@@ -389,6 +379,17 @@ def test_update_trusted_algorithms(
         algorithm_and_userdata=AssetAndUserdata(algorithm, None),
         with_result=True,
     )
+
+    # Expect to fail when non-trusted algorithm is used
+    with pytest.raises(ValueError):
+        run_compute_test(
+            ocean_instance=publisher_ocean_instance,
+            publisher_wallet=publisher_wallet,
+            consumer_wallet=consumer_wallet,
+            dataset_and_userdata=AssetAndUserdata(updated_dataset, None),
+            algorithm_and_userdata=AssetAndUserdata(another_algorithm, None),
+            with_result=True,
+        )
 
 
 def test_compute_trusted_algorithm(
