@@ -306,14 +306,15 @@ def test_compute_raw_algo(
         with_result=True,
     )
 
-    run_compute_test(
-        ocean_instance=publisher_ocean_instance,
-        publisher_wallet=publisher_wallet,
-        consumer_wallet=consumer_wallet,
-        dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
-        algorithm_meta=raw_algorithm,
-        with_result=True,
-    )
+    with pytest.raises(ValueError):
+        run_compute_test(
+            ocean_instance=publisher_ocean_instance,
+            publisher_wallet=publisher_wallet,
+            consumer_wallet=consumer_wallet,
+            dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
+            algorithm_meta=raw_algorithm,
+            with_result=True,
+        )
 
 
 def test_compute_registered_algo(
