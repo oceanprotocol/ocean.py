@@ -531,7 +531,7 @@ class OceanAssets:
         dt = ERC20Token(self._web3, service.datatoken)
         balance = dt.balanceOf(wallet.address)
 
-        if balance < to_wei(1):
+        if balance < to_wei("1"):
             raise InsufficientBalance(
                 f"Your token balance {pretty_ether_and_wei(balance, dt.symbol())} is not sufficient "
                 f"to execute the requested service. This service "

@@ -223,7 +223,13 @@ class Ocean:
             from_wallet.address,
             ZERO_ADDRESS,
         ]
-        uints = [erc20_token.decimals(), base_token.decimals(), to_wei(1), int(1e15), 0]
+        uints = [
+            erc20_token.decimals(),
+            base_token.decimals(),
+            to_wei("1"),
+            int(1e15),
+            0,
+        ]
 
         fixed_rate_data = FixedData(
             fixed_price_address=fixed_price_address, addresses=addresses, uints=uints
@@ -259,7 +265,7 @@ class Ocean:
     ) -> BPool:
         base_token.approve(
             get_address_of_type(self.config, "Router"),
-            self.web3.toWei(2000, "ether"),
+            to_wei("2000"),
             from_wallet,
         )
 

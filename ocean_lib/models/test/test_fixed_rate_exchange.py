@@ -58,10 +58,10 @@ def test_exchange_rate_creation(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
     """Test exchange with baseToken(OCEAN) 18 Decimals and dataToken 18 Decimals, RATE = 1"""
-    cap = to_wei(100000)
-    amount_dt_to_sell = to_wei(100)
-    no_limit = to_wei(100000000000000000000)
-    rate = to_wei(1)
+    cap = to_wei("100000")
+    amount_dt_to_sell = to_wei("100")
+    no_limit = to_wei("100000000000000000000")
+    rate = to_wei("1")
     market_fee = int(1e15)  # 0.1%
     opf_fee = int(1e15)  # 0.1%
     ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
@@ -126,7 +126,7 @@ def test_exchange_rate_creation(
     erc20.approve(fixed_exchange.address, amount_dt_to_sell, consumer_wallet)
     # Another_consumer_wallet approves a big amount so that we don't need to re-approve during test
     ocean_token.approve(
-        fixed_exchange.address, to_wei(1000000), another_consumer_wallet
+        fixed_exchange.address, to_wei("1000000"), another_consumer_wallet
     )
 
     # Exchange should have supply and fees setup

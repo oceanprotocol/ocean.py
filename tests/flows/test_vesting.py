@@ -10,6 +10,7 @@ from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.models_structures import CreateErc20Data, PoolData
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
 from web3 import exceptions
 
@@ -24,7 +25,7 @@ def test_main(
 ):
     """Tests main test flow."""
 
-    vesting_amount = web3.toWei("0.0018", "ether")
+    vesting_amount = to_wei("0.0018")
 
     erc721_factory = ERC721FactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
@@ -83,7 +84,7 @@ def test_main(
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        [web3.toWei(0.05, "ether"), 0],
+        [to_wei("0.05"), 0],
         [b""],
     )
 
@@ -107,23 +108,23 @@ def test_main(
     assert perms[0] is True
 
     # Tests consumer deploys pool and check market fee
-    initial_ocean_liq = web3.toWei(0.02, "ether")
+    initial_ocean_liq = to_wei("0.02")
     ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
     ocean_contract.approve(
         get_address_of_type(config, "Router"),
-        web3.toWei(0.02, "ether"),
+        to_wei("0.02"),
         consumer_wallet,
     )
 
     pool_data = PoolData(
         [
-            web3.toWei(1, "ether"),
+            to_wei(1),
             ocean_contract.decimals(),
             initial_ocean_liq // 100 * 9,
             2500000,
             initial_ocean_liq,
         ],
-        [web3.toWei(0.001, "ether"), web3.toWei(0.001, "ether")],
+        [to_wei("0.001"), to_wei("0.001")],
         [
             get_address_of_type(config, "Staking"),
             ocean_contract.address,
@@ -147,14 +148,14 @@ def test_main(
     bpool = BPool(web3, bpool_address)
     assert bpool.is_finalized() is True
     assert bpool.opf_fee() == 0
-    assert bpool.get_swap_fee() == web3.toWei(0.001, "ether")
+    assert bpool.get_swap_fee() == to_wei("0.001")
     assert bpool.community_fee(get_address_of_type(config, "Ocean")) == 0
     assert bpool.community_fee(erc20_token.address) == 0
     assert bpool.publish_market_fee(get_address_of_type(config, "Ocean")) == 0
     assert bpool.publish_market_fee(erc20_token.address) == 0
 
-    assert erc20_token.balanceOf(get_address_of_type(config, "Staking")) == web3.toWei(
-        0.03, "ether"
+    assert erc20_token.balanceOf(get_address_of_type(config, "Staking")) == to_wei(
+        "0.03"
     )
 
     # consumer fails to mint new erc20 token even if the minter

@@ -566,7 +566,7 @@ def test_erc721_datatoken_functions(web3, config, publisher_wallet, consumer_wal
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc20_token.mint(
             account_address=consumer_wallet.address,
-            value=to_wei(1),
+            value=to_wei("1"),
             from_wallet=consumer_wallet,
         )
     assert (

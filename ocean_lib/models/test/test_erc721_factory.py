@@ -157,7 +157,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        "uints": [to_wei(10), 0],
+        "uints": [to_wei("10"), 0],
         "bytess": [b""],
     }
 
@@ -227,7 +227,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
             pool_template_address,
         ],
         "ssParams": [
-            to_wei(1),
+            to_wei("1"),
             erc20_token.decimals(),
             initial_pool_liquidity
             // 100
@@ -322,7 +322,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
             consumer_wallet.address,
             ZERO_ADDRESS,
         ],
-        "uints": [18, 18, to_wei(1), to_wei("0.001"), 0],
+        "uints": [18, 18, to_wei("1"), to_wei("0.001"), 0],
     }
     tx = erc721_factory.create_nft_erc_with_fixed_rate(
         nft_create_data, erc_create_data_pool, fixed_rate_data, publisher_wallet
@@ -372,8 +372,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     dispenser_address = get_address_of_type(config, Dispenser.CONTRACT_NAME)
     dispenser_data = {
         "dispenserAddress": dispenser_address,
-        "maxTokens": to_wei(1),
-        "maxBalance": to_wei(1),
+        "maxTokens": to_wei("1"),
+        "maxBalance": to_wei("1"),
         "withMint": True,
         "allowedSwapper": ZERO_ADDRESS,
     }

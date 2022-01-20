@@ -31,7 +31,7 @@ def test_buy_from_dispenser_and_order(
         config=config,
         erc721_publisher=publisher_wallet,
         erc20_minter=publisher_wallet,
-        cap=to_wei(100),
+        cap=to_wei("100"),
         template_index=2,
     )
     erc20_enterprise_token = ERC20Enterprise(web3, erc20_enterprise_token.address)
@@ -39,8 +39,8 @@ def test_buy_from_dispenser_and_order(
     dispenser_data = DispenserData(
         dispenser_address=dispenser.address,
         allowed_swapper=ZERO_ADDRESS,
-        max_balance=to_wei(1),
-        max_tokens=to_wei(1),
+        max_balance=to_wei("1"),
+        max_tokens=to_wei("1"),
     )
     tx = erc20_enterprise_token.create_dispenser(
         dispenser_data=dispenser_data, with_mint=True, from_wallet=publisher_wallet
@@ -238,7 +238,7 @@ def test_buy_from_fre_and_order(
         == "execution reverted: VM Exception while processing transaction: revert FixedRateExchange: This address is not allowed to swap"
     )
 
-    consume_fee_amount = to_wei(2)
+    consume_fee_amount = to_wei("2")
     consume_fee_address = consumer_wallet.address
     erc20_enterprise_token.set_publishing_market_fee(
         publish_market_fee_address=consume_fee_address,
@@ -250,7 +250,7 @@ def test_buy_from_fre_and_order(
 
     mock_usdc_contract.transfer(
         to=publisher_wallet.address,
-        amount=publish_fees[2] + to_wei(3),
+        amount=publish_fees[2] + to_wei("3"),
         from_wallet=factory_deployer_wallet,
     )
     mock_usdc_contract.approve(

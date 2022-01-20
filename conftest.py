@@ -53,18 +53,18 @@ def setup_all(request, config, web3):
     print(f"sender: {wallet.key}, {wallet.address}, {wallet.keys_str()}")
     print(f"sender balance: {from_wei(get_ether_balance(web3, wallet.address))}")
     assert get_ether_balance(web3, wallet.address) >= to_wei(
-        10
+        "10"
     ), "Ether balance less than 10."
 
     OCEAN_token = ERC20Token(web3, address=network_addresses["development"]["Ocean"])
 
-    amt_distribute = to_wei(1000)
+    amt_distribute = to_wei("1000")
 
     for w in (get_publisher_wallet(), get_consumer_wallet()):
-        if get_ether_balance(web3, w.address) < to_wei(2):
-            send_ether(wallet, w.address, to_wei(4))
+        if get_ether_balance(web3, w.address) < to_wei("2"):
+            send_ether(wallet, w.address, to_wei("4"))
 
-        if OCEAN_token.balanceOf(w.address) < to_wei(100):
+        if OCEAN_token.balanceOf(w.address) < to_wei("100"):
             OCEAN_token.transfer(w.address, amt_distribute, from_wallet=wallet)
 
 

@@ -89,11 +89,11 @@ def test_buy_dt_batch(
             get_address_of_type(config, "poolTemplate"),
         ],
         "ssParams": [
-            to_wei(2),
+            to_wei("2"),
             ocean_contract.decimals(),
-            to_wei(10000),
+            to_wei("10000"),
             2500000,
-            to_wei(2),
+            to_wei("2"),
         ],
         "swapFees": [to_wei("0.001"), to_wei("0.001")],
     }
