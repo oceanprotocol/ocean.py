@@ -2,18 +2,18 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
 import pytest
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.models.models_structures import CreateErc20Data, OrderData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import to_wei
+from ocean_lib.web3_internal.utils import split_signature
 from tests.resources.helper_functions import get_address_of_type
 from web3 import exceptions
 from web3.main import Web3
-from ocean_lib.web3_internal.utils import split_signature
 
 
 def test_properties(web3, config):
@@ -427,9 +427,6 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     ].args.datatokenAddress, "Invalid data token address by dispenser."
 
 
-@pytest.mark.skip(
-    reason="TODO: needs special attention with raw encoding, see issue https://github.com/oceanprotocol/ocean.py/issues/639"
-)
 def test_start_multiple_order(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
@@ -490,7 +487,7 @@ def test_start_multiple_order(
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        [web3.toWei("0.5", "ether"), 0],
+        [to_wei("2"), 0],
         [b""],
     )
     tx_result = erc721_token.create_erc20(erc_create_data, consumer_wallet)
@@ -519,7 +516,7 @@ def test_start_multiple_order(
 
     # Tests starting multiple token orders successfully
     erc20_token = ERC20Token(web3, erc20_address)
-    dt_amount = web3.toWei("0.05", "ether")
+    dt_amount = to_wei("2")
     mock_dai_contract_address = get_address_of_type(config, "MockDAI")
     assert erc20_token.balanceOf(consumer_wallet.address) == 0
 
@@ -538,47 +535,35 @@ def test_start_multiple_order(
     provider_data = b"\x00"
 
     message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256"],
+        ["bytes", "address", "address", "uint256", "uint256"],
         [
             provider_data,
             provider_fee_address,
             provider_fee_token,
             provider_fee_amount,
+            0,
         ],
     )
     signed = web3.eth.sign(provider_fee_address, data=message)
     signature = split_signature(signed)
 
-    # orders = [
-    #     {
-    #         "tokenAddress": erc20_address,
-    #         "consumer": consumer_wallet.address,
-    #         "serviceIndex": 1,
-    #         "providerFeeAddress": provider_fee_address,
-    #         "providerFeeToken": provider_fee_token,
-    #         "providerFeeAmount": provider_fee_amount,
-    #         "providerData": provider_data,
-    #         "v": signature.v,
-    #         "r": signature.r,
-    #         "s": signature.s,
-    #         "providerData": provider_data,
-    #     }
-    # ]
-
-    orders = [
+    order_data = OrderData(
+        erc20_address,
+        consumer_wallet.address,
+        1,
         (
-            erc20_address,
-            consumer_wallet.address,
-            1,
             provider_fee_address,
             provider_fee_token,
             provider_fee_amount,
             signature.v,
             signature.r,
             signature.s,
+            0,
             provider_data,
-        )
-    ]
+        ),
+    )
+
+    orders = [order_data, order_data]
 
     tx = erc721_factory.start_multiple_token_order(orders, consumer_wallet)
 
