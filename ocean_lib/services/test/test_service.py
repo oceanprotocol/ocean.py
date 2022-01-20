@@ -15,7 +15,7 @@ def test_service():
     assert sa.name == "Download service"
     assert sa.type == "access"
     assert sa.service_endpoint == "https://myprovider.com"
-    assert sa.data_token == "0x123"
+    assert sa.datatoken == "0x123"
 
     assert sa.as_dictionary() == {
         "id": "1",

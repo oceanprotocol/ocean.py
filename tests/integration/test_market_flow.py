@@ -33,13 +33,13 @@ def test_market_flow(publisher_wallet, consumer_wallet):
     # asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
     asset = None
     assert isinstance(asset, Asset)
-    assert asset.data_token_address, "The asset does not have a token address."
+    assert asset.datatoken_address, "The asset does not have a token address."
 
     service = asset.get_service(service_type=ServiceTypes.ASSET_ACCESS)
     sa = Service.from_json(service.as_dictionary())
 
     # Mint data tokens and assign to publisher
-    dt = publisher_ocean.get_datatoken(asset.data_token_address)
+    dt = publisher_ocean.get_datatoken(asset.datatoken_address)
     # mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
 
     ######
@@ -62,7 +62,7 @@ def test_market_flow(publisher_wallet, consumer_wallet):
     args = [
         consumer_ocean.web3,
         order_requirements.amount,
-        order_requirements.data_token_address,
+        order_requirements.datatoken_address,
         asset.did,
         service.index,
         "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",
@@ -117,13 +117,13 @@ def test_payer_market_flow(publisher_wallet, consumer_wallet, another_consumer_w
     # asset = get_registered_ddo(publisher_ocean, get_metadata(), pub_wallet)
     asset = None
     assert isinstance(asset, Asset)
-    assert asset.data_token_address, "The asset does not have a token address."
+    assert asset.datatoken_address, "The asset does not have a token address."
 
     service = asset.get_service(service_type=ServiceTypes.ASSET_ACCESS)
     sa = Service.from_json(service.as_dictionary())
 
     # Mint data tokens and assign to publisher
-    dt = publisher_ocean.get_datatoken(asset.data_token_address)
+    dt = publisher_ocean.get_datatoken(asset.datatoken_address)
     # mint_tokens_and_wait(dt, pub_wallet.address, pub_wallet)
 
     ######
@@ -146,7 +146,7 @@ def test_payer_market_flow(publisher_wallet, consumer_wallet, another_consumer_w
     _order_tx_id = consumer_ocean.assets.pay_for_service(
         consumer_ocean.web3,
         order_requirements.amount,
-        order_requirements.data_token_address,
+        order_requirements.datatoken_address,
         asset.did,
         service.index,
         "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9",

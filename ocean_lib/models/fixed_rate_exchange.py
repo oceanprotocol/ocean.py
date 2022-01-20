@@ -12,7 +12,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 class FixedRateExchangeDetails(IntEnum):
     EXCHANGE_OWNER = 0
-    DATA_TOKEN = 1
+    DATATOKEN = 1
     DT_DECIMALS = 2
     BASE_TOKEN = 3
     BT_DECIMALS = 4
@@ -88,45 +88,43 @@ class FixedRateExchange(ContractBase):
         return self.contract.caller.getOPFFee(base_token)
 
     def generate_exchange_id(
-        self, base_token: str, data_token: str, exchange_owner: str
+        self, base_token: str, datatoken: str, exchange_owner: str
     ) -> bytes:
         return self.contract.caller.generateExchangeId(
-            base_token, data_token, exchange_owner
+            base_token, datatoken, exchange_owner
         )
 
     def calc_base_in_given_out_dt(
-        self, exchange_id: bytes, data_token_amount: int
+        self, exchange_id: bytes, datatoken_amount: int
     ) -> tuple:
-        return self.contract.caller.calcBaseInGivenOutDT(exchange_id, data_token_amount)
+        return self.contract.caller.calcBaseInGivenOutDT(exchange_id, datatoken_amount)
 
     def calc_base_out_given_in_dt(
-        self, exchange_id: bytes, data_token_amount: int
+        self, exchange_id: bytes, datatoken_amount: int
     ) -> tuple:
-        return self.contract.caller.calcBaseOutGivenInDT(exchange_id, data_token_amount)
+        return self.contract.caller.calcBaseOutGivenInDT(exchange_id, datatoken_amount)
 
     def buy_dt(
         self,
         exchange_id: bytes,
-        data_token_amount: int,
+        datatoken_amount: int,
         max_base_token_amount: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "buyDT",
-            (exchange_id, data_token_amount, max_base_token_amount),
-            from_wallet,
+            "buyDT", (exchange_id, datatoken_amount, max_base_token_amount), from_wallet
         )
 
     def sell_dt(
         self,
         exchange_id: bytes,
-        data_token_amount: int,
+        datatoken_amount: int,
         min_base_token_amount: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "sellDT",
-            (exchange_id, data_token_amount, min_base_token_amount),
+            (exchange_id, datatoken_amount, min_base_token_amount),
             from_wallet,
         )
 

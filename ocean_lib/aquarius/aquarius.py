@@ -193,3 +193,25 @@ class Aquarius:
                 break
 
         return ddo
+
+    @enforce_types
+    def wait_for_asset_update(self, asset: Asset, tx: str):
+        start = time.time()
+        ddo = None
+        while True:
+            try:
+                ddo = self.get_asset_ddo(asset.did)
+            except ValueError:
+                pass
+            if not ddo:
+                time.sleep(0.2)
+            elif ddo.event.get("tx") == tx:
+                logger.debug(
+                    f"Transaction matching the given tx id detected in metadata store. asset.event = {ddo.event}"
+                )
+                break
+
+            if time.time() - start > 30:
+                break
+
+        return ddo

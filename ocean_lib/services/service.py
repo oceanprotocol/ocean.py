@@ -26,7 +26,7 @@ class Service:
         service_id: str,
         service_type: str,
         service_endpoint: Optional[str],
-        data_token: Optional[str],
+        datatoken: Optional[str],
         files: Optional[str],
         timeout: Optional[int],
         compute_values: Optional[Dict[str, Any]] = None,
@@ -37,7 +37,7 @@ class Service:
         self.id = service_id
         self.type = service_type
         self.service_endpoint = service_endpoint
-        self.data_token = data_token
+        self.datatoken = datatoken
         self.files = files
         self.timeout = timeout
         self.compute_values = compute_values
@@ -144,7 +144,7 @@ class Service:
             "id": self.id,
             "type": self.type,
             "files": self.files,
-            "datatokenAddress": self.data_token,
+            "datatokenAddress": self.datatoken,
             "serviceEndpoint": self.service_endpoint,
             "timeout": self.timeout,
         }

@@ -4,7 +4,6 @@
 #
 
 """Ocean module."""
-import copy
 import json
 import logging
 import lzma
@@ -54,9 +53,7 @@ class OceanAssets:
                 self._config.get("resources", "downloads.path") or downloads_path
             )
         self._downloads_path = downloads_path
-
-    def _get_aquarius(self, url: Optional[str] = None) -> Aquarius:
-        return Aquarius.get_instance(url or self._metadata_cache_uri)
+        self._aquarius = Aquarius.get_instance(self._metadata_cache_uri)
 
     def validate(self, asset: Asset) -> Tuple[bool, list]:
         """
@@ -65,15 +62,15 @@ class OceanAssets:
         :param asset: Asset.
         :return: (bool, list) list of errors, empty if valid
         """
-        return self._get_aquarius(self._metadata_cache_uri).validate_asset(asset)
+        return self._aquarius.validate_asset(asset)
 
     def _add_defaults(
-        self, services: list, data_token: str, files: str, provider_uri: str
+        self, services: list, datatoken: str, files: str, provider_uri: str
     ) -> list:
         has_access_service = any(
             map(
                 lambda s: s.type == ServiceTypes.ASSET_ACCESS
-                and s.id == self.find_service_by_data_token(data_token, services),
+                and s.id == self.find_service_by_datatoken(datatoken, services),
                 services,
             )
         )
@@ -84,7 +81,7 @@ class OceanAssets:
                 service_endpoint=self._data_provider.build_download_endpoint(
                     provider_uri
                 )[1],
-                data_token=data_token,
+                datatoken=datatoken,
                 files=files,
             )
 
@@ -96,7 +93,7 @@ class OceanAssets:
     def build_access_service(
         service_id: str,
         service_endpoint: str,
-        data_token: str,
+        datatoken: str,
         files: str,
         timeout: Optional[int] = 3600,
     ) -> Service:
@@ -105,7 +102,7 @@ class OceanAssets:
             service_id=service_id,
             service_type=ServiceTypes.ASSET_ACCESS,
             service_endpoint=service_endpoint,
-            data_token=data_token,
+            datatoken=datatoken,
             files=files,
             timeout=timeout,
         )
@@ -131,26 +128,96 @@ class OceanAssets:
 
         return registered_token_event[0].args.newTokenAddress
 
-    def find_service_by_data_token(self, data_token: str, services: list) -> str:
+    def find_service_by_datatoken(self, datatoken: str, services: list) -> str:
         return next(
-            (service.id for service in services if service.data_token == data_token),
-            None,
+            (service.id for service in services if service.datatoken == datatoken), None
         )
 
-    def build_data_tokens_list(
+    def build_datatokens_list(
         self, services: list, deployed_erc20_tokens: list
     ) -> list:
-        data_tokens = []
+        datatokens = []
+        # (1-n) service per datatoken, 1 datatoken per service
         for erc20_token in deployed_erc20_tokens:
-            for service in services:
-                data_token = {
+            datatokens = datatokens + [
+                {
                     "address": erc20_token.address,
                     "name": erc20_token.contract.caller.name(),
                     "symbol": erc20_token.symbol(),
                     "serviceId": service.id,
                 }
-                data_tokens.append(data_token)
-        return data_tokens
+                for service in services
+                if service.datatoken == erc20_token.address
+            ]
+
+        return datatokens
+
+    @staticmethod
+    def _encrypt_ddo(
+        asset: Asset,
+        provider_uri: str,
+        encrypt_flag: Optional[bool] = False,
+        compress_flag: Optional[bool] = False,
+    ):
+        # Process the DDO
+        asset_dict = asset.as_dictionary()
+        ddo_string = json.dumps(asset_dict, separators=(",", ":"))
+        ddo_bytes = ddo_string.encode("utf-8")
+        ddo_hash = create_checksum(ddo_string)
+
+        # Plain asset
+        if not encrypt_flag and not compress_flag:
+            flags = bytes([0])
+            document = ddo_bytes
+            return document, flags, ddo_hash
+
+        # Only compression, not encrypted
+        if compress_flag and not encrypt_flag:
+            flags = bytes([1])
+            # Compress DDO
+            document = lzma.compress(ddo_bytes)
+            return document, flags, ddo_hash
+
+        # Only encryption, not compressed
+        if encrypt_flag and not compress_flag:
+            flags = bytes([2])
+            # Encrypt DDO
+            encrypt_response = DataServiceProvider.encrypt(
+                objects_to_encrypt=ddo_string,
+                encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
+            )
+            document = encrypt_response.text
+            return document, flags, ddo_hash
+
+        # Encrypted & compressed
+        flags = bytes([3])
+        # Compress DDO
+        compressed_document = lzma.compress(ddo_bytes)
+
+        # Encrypt DDO
+        encrypt_response = DataServiceProvider.encrypt(
+            objects_to_encrypt=compressed_document,
+            encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
+        )
+
+        document = encrypt_response.text
+
+        return document, flags, ddo_hash
+
+    @staticmethod
+    def _assert_ddo_metadata(metadata: dict):
+        assert isinstance(
+            metadata, dict
+        ), f"Expected metadata of type dict, got {type(metadata)}"
+
+        asset_type = metadata.get("type")
+
+        assert asset_type in (
+            "dataset",
+            "algorithm",
+        ), f"Invalid/unsupported asset type {asset_type}"
+
+        assert "name" in metadata, "Must have name in metadata."
 
     def create(
         self,
@@ -158,7 +225,7 @@ class OceanAssets:
         publisher_wallet: Wallet,
         encrypted_files: str,
         services: Optional[list] = None,
-        credentials: Optional[list] = None,
+        credentials: Optional[dict] = None,
         provider_uri: Optional[str] = None,
         erc721_address: Optional[str] = None,
         erc721_name: Optional[str] = None,
@@ -179,7 +246,7 @@ class OceanAssets:
         :param publisher_wallet: Wallet of the publisher registering this asset.
         :param encrypted_files: str of the files that need to be encrypted before publishing.
         :param services: list of Service objects.
-        :param credentials: list of credentials necessary for the asset.
+        :param credentials: credentials dict necessary for the asset.
         :param provider_uri: str URL of service provider. This will be used as base to
         construct the serviceEndpoint for the `access` (download) service
         :param erc721_address: hex str the address of the ERC721 token. The new
@@ -195,20 +262,7 @@ class OceanAssets:
         :param compress_flag: bool for compression of the DDO.
         :return: DDO instance
         """
-        assert isinstance(
-            metadata, dict
-        ), f"Expected metadata of type dict, got {type(metadata)}"
-
-        # copy metadata so we don't change the original
-        metadata_copy = copy.deepcopy(metadata)
-
-        asset_type = metadata_copy.get("type")
-        assert asset_type in (
-            "dataset",
-            "algorithm",
-        ), f"Invalid/unsupported asset type {asset_type}"
-
-        assert "name" in metadata_copy, "Must have name in metadata."
+        self._assert_ddo_metadata(metadata)
 
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(self._config)
@@ -263,7 +317,7 @@ class OceanAssets:
         did = f"did:op:{create_checksum(erc721_token.address + str(self._web3.eth.chain_id))}"
         asset.did = did
         # Check if it's already registered first!
-        if self._get_aquarius().ddo_exists(did):
+        if self._aquarius.ddo_exists(did):
             raise AquariusError(
                 f"Asset id {did} is already registered to another asset."
             )
@@ -295,7 +349,7 @@ class OceanAssets:
                     ERC20Token(self._web3, erc20_token_address)
                 )
 
-            data_tokens = self.build_data_tokens_list(
+            datatokens = self.build_datatokens_list(
                 services=services, deployed_erc20_tokens=deployed_erc20_tokens
             )
         else:
@@ -305,12 +359,12 @@ class OceanAssets:
                         services, erc20_token.address, encrypted_files, provider_uri
                     )
 
-            data_tokens = self.build_data_tokens_list(
+            datatokens = self.build_datatokens_list(
                 services=services, deployed_erc20_tokens=deployed_erc20_tokens
             )
 
         asset.nft_address = erc721_address
-        asset.datatokens = data_tokens
+        asset.datatokens = datatokens
 
         for service in services:
             asset.add_service(service)
@@ -322,48 +376,11 @@ class OceanAssets:
             logger.error(msg)
             raise ValueError(msg)
 
-        # Process the DDO
-        asset_dict = asset.as_dictionary()
-        ddo_string = json.dumps(asset_dict, separators=(",", ":"))
-        ddo_bytes = ddo_string.encode("utf-8")
-        ddo_hash = create_checksum(ddo_string)
+        document, flags, ddo_hash = self._encrypt_ddo(
+            asset, provider_uri, encrypt_flag, compress_flag
+        )
 
-        # Plain asset
-        if not encrypt_flag and not compress_flag:
-            flags = bytes([0])
-            document = ddo_bytes
-
-        # Only compression, not encrypted
-        elif compress_flag and not encrypt_flag:
-            flags = bytes([1])
-            # Compress DDO
-            document = lzma.compress(ddo_bytes)
-
-        # Only encryption, not compressed
-        elif encrypt_flag and not compress_flag:
-            flags = bytes([2])
-            # Encrypt DDO
-            encrypt_response = DataServiceProvider.encrypt(
-                objects_to_encrypt=ddo_string,
-                encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
-            )
-            document = encrypt_response.text
-
-        # Encrypted & compressed
-        else:
-            flags = bytes([3])
-            # Compress DDO
-            compressed_document = lzma.compress(ddo_bytes)
-
-            # Encrypt DDO
-            encrypt_response = DataServiceProvider.encrypt(
-                objects_to_encrypt=compressed_document,
-                encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
-            )
-
-            document = encrypt_response.text
-
-        _ = erc721_token.set_metadata(
+        erc721_token.set_metadata(
             metadata_state=0,
             metadata_decryptor_url=provider_uri,
             metadata_decryptor_address=publisher_wallet.address,
@@ -375,13 +392,77 @@ class OceanAssets:
         )
 
         # Fetch the asset on chain
-        asset = self._get_aquarius(self._metadata_cache_uri).wait_for_asset(did)
+        asset = self._aquarius.wait_for_asset(did)
 
         return asset
 
+    def update(
+        self,
+        asset: Asset,
+        publisher_wallet: Wallet,
+        provider_uri: Optional[str] = None,
+        encrypt_flag: Optional[bool] = False,
+        compress_flag: Optional[bool] = False,
+    ) -> Optional[Asset]:
+        """Update an asset on-chain.
+
+        :param asset: The updated asset to update on-chain
+        :param publisher_wallet: Wallet of the publisher updating this asset.
+        :param provider_uri: str URL of service provider. This will be used as base to construct the serviceEndpoint for the `access` (download) service
+        :param encrypt_flag: bool for encryption of the DDO.
+        :param compress_flag: bool for compression of the DDO.
+        :return: update tx_result
+        """
+
+        self._assert_ddo_metadata(asset.metadata)
+
+        if not provider_uri:
+            provider_uri = DataServiceProvider.get_url(self._config)
+
+        address = get_address_of_type(self._config, ERC721FactoryContract.CONTRACT_NAME)
+        erc721_factory = ERC721FactoryContract(self._web3, address)
+        erc721_address = asset.nft_address
+
+        # Verify nft address
+        if not erc721_factory.verify_nft(erc721_address):
+            raise ContractNotFound(
+                f"NFT address {erc721_address} is not found in the ERC721Factory events."
+            )
+
+        assert erc721_address, "nft_address is required for publishing a dataset asset."
+        erc721_token = ERC721Token(self._web3, erc721_address)
+
+        assert asset.chain_id == self._web3.eth.chain_id, "Chain id mismatch."
+
+        # Validation by Aquarius
+        validation_result, validation_errors = self.validate(asset)
+        if not validation_result:
+            msg = f"Asset has validation errors: {validation_errors}"
+            logger.error(msg)
+            raise ValueError(msg)
+
+        document, flags, ddo_hash = self._encrypt_ddo(
+            asset, provider_uri, encrypt_flag, compress_flag
+        )
+
+        tx_result = erc721_token.set_metadata(
+            metadata_state=0,
+            metadata_decryptor_url=provider_uri,
+            metadata_decryptor_address=publisher_wallet.address,
+            flags=flags,
+            data=document,
+            data_hash=ddo_hash,
+            data_proofs=[],
+            from_wallet=publisher_wallet,
+        )
+
+        self._web3.eth.wait_for_transaction_receipt(tx_result)
+
+        return self._aquarius.wait_for_asset_update(asset, tx_result)
+
     @enforce_types
     def resolve(self, did: str) -> "Asset":
-        return self._get_aquarius(self._metadata_cache_uri).get_asset_ddo(did)
+        return self._aquarius.get_asset_ddo(did)
 
     @enforce_types
     def search(self, text: str) -> list:
@@ -393,7 +474,7 @@ class OceanAssets:
         logger.info(f"Searching asset containing: {text}")
         return [
             Asset.from_dict(ddo_dict["_source"])
-            for ddo_dict in self._get_aquarius(self._metadata_cache_uri).query_search(
+            for ddo_dict in self._aquarius.query_search(
                 {"query": {"query_string": {"query": text}}}
             )
             if "_source" in ddo_dict
@@ -408,10 +489,9 @@ class OceanAssets:
         :return: List of assets that match with the query.
         """
         logger.info(f"Searching asset query: {query}")
-        aquarius = self._get_aquarius(self._metadata_cache_uri)
         return [
             Asset.from_dict(ddo_dict["_source"])
-            for ddo_dict in aquarius.query_search(query)
+            for ddo_dict in self._aquarius.query_search(query)
             if "_source" in ddo_dict
         ]
 
@@ -448,7 +528,7 @@ class OceanAssets:
 
     @enforce_types
     def pay_for_service(self, asset: Asset, service: Service, wallet: Wallet):
-        dt = ERC20Token(self._web3, service.data_token)
+        dt = ERC20Token(self._web3, service.datatoken)
         balance = dt.balanceOf(wallet.address)
 
         if balance < to_wei(1):

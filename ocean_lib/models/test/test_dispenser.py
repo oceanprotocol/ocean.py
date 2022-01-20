@@ -47,14 +47,14 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
     dispenser = Dispenser(web3, get_address_of_type(config, "Dispenser"))
 
     _, erc20_token = deploy_erc721_erc20(
-        web3, config, publisher_wallet, publisher_wallet, cap=to_wei(50)
+        web3, config, publisher_wallet, publisher_wallet, cap=to_wei("50")
     )
 
     # Tests publisher creates a dispenser with minter role
     dispenser_data = DispenserData(
         dispenser_address=dispenser.address,
-        max_balance=to_wei(1),
-        max_tokens=to_wei(1),
+        max_balance=to_wei("1"),
+        max_tokens=to_wei("1"),
         allowed_swapper=ZERO_ADDRESS,
     )
     tx = erc20_token.create_dispenser(
@@ -73,8 +73,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
     # Tests consumer requests more datatokens then allowed transaction reverts
     with pytest.raises(exceptions.ContractLogicError) as err:
         dispenser.dispense(
-            data_token=erc20_token.address,
-            amount=to_wei(20),
+            datatoken=erc20_token.address,
+            amount=to_wei("20"),
             destination=consumer_wallet.address,
             from_wallet=consumer_wallet,
         )
@@ -85,8 +85,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
 
     # Tests consumer requests data tokens
     tx = dispenser.dispense(
-        data_token=erc20_token.address,
-        amount=to_wei(1),
+        datatoken=erc20_token.address,
+        amount=to_wei("1"),
         destination=consumer_wallet.address,
         from_wallet=consumer_wallet,
     )
@@ -96,8 +96,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
     # Tests consumer requests more datatokens then exceeds maxBalance
     with pytest.raises(exceptions.ContractLogicError) as err:
         dispenser.dispense(
-            data_token=erc20_token.address,
-            amount=to_wei(1),
+            datatoken=erc20_token.address,
+            amount=to_wei("1"),
             destination=consumer_wallet.address,
             from_wallet=consumer_wallet,
         )
@@ -107,14 +107,14 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
     )
 
     # Tests publisher deactivates the dispenser
-    dispenser.deactivate(from_wallet=publisher_wallet, data_token=erc20_token.address)
+    dispenser.deactivate(from_wallet=publisher_wallet, datatoken=erc20_token.address)
     status = dispenser.status(erc20_token.address)
     assert status[0] is False
 
     # Tests factory deployer should fail to get data tokens
     with pytest.raises(exceptions.ContractLogicError) as err:
         dispenser.dispense(
-            data_token=erc20_token.address,
+            datatoken=erc20_token.address,
             amount=to_wei("0.00001"),
             destination=factory_deployer_wallet.address,
             from_wallet=factory_deployer_wallet,
@@ -128,9 +128,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
     # Tests consumer should fail to activate a dispenser for a token for he is not a minter
     with pytest.raises(exceptions.ContractLogicError) as err:
         dispenser.activate(
-            data_token=erc20_token.address,
-            max_tokens=to_wei(1),
-            max_balance=to_wei(1),
+            datatoken=erc20_token.address,
+            max_tokens=to_wei("1"),
+            max_balance=to_wei("1"),
             from_wallet=consumer_wallet,
         )
 
@@ -142,13 +142,13 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
     # Tests publisher creates a dispenser without minter role
 
     _, erc20_token = deploy_erc721_erc20(
-        web3, config, publisher_wallet, publisher_wallet, cap=to_wei(50)
+        web3, config, publisher_wallet, publisher_wallet, cap=to_wei("50")
     )
 
     dispenser_data = DispenserData(
         dispenser_address=dispenser.address,
-        max_balance=to_wei(1),
-        max_tokens=to_wei(1),
+        max_balance=to_wei("1"),
+        max_tokens=to_wei("1"),
         allowed_swapper=ZERO_ADDRESS,
     )
 
@@ -159,8 +159,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
     # Tests consumer requests data tokens but they are not minted
     with pytest.raises(exceptions.ContractLogicError) as err:
         dispenser.dispense(
-            data_token=erc20_token.address,
-            amount=to_wei(1),
+            datatoken=erc20_token.address,
+            amount=to_wei("1"),
             destination=consumer_wallet.address,
             from_wallet=consumer_wallet,
         )
@@ -174,13 +174,13 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
     erc20_token.mint(
         from_wallet=publisher_wallet,
         account_address=dispenser.address,
-        value=to_wei(1),
+        value=to_wei("1"),
     )
 
     # Tests consumer requests data tokens
     dispenser.dispense(
-        data_token=erc20_token.address,
-        amount=to_wei(1),
+        datatoken=erc20_token.address,
+        amount=to_wei("1"),
         destination=consumer_wallet.address,
         from_wallet=consumer_wallet,
     )
@@ -188,7 +188,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
     # Tests consumer tries to withdraw all datatokens
     with pytest.raises(exceptions.ContractLogicError) as err:
         dispenser.owner_withdraw(
-            data_token=erc20_token.address, from_wallet=consumer_wallet
+            datatoken=erc20_token.address, from_wallet=consumer_wallet
         )
 
     assert (
@@ -198,7 +198,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
 
     # Tests publisher withdraws all datatokens
     dispenser.owner_withdraw(
-        data_token=erc20_token.address, from_wallet=publisher_wallet
+        datatoken=erc20_token.address, from_wallet=publisher_wallet
     )
 
     status = dispenser.status(erc20_token.address)

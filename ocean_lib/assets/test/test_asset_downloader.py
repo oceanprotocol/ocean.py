@@ -103,7 +103,7 @@ def ocean_assets_download_destination_file_helper(
     """Downloading to an existing directory."""
     data_provider = DataServiceProvider
     erc721_token, erc20_token = deploy_erc721_erc20(
-        web3, config, publisher_wallet, publisher_wallet, cap=to_wei(100)
+        web3, config, publisher_wallet, publisher_wallet, cap=to_wei("100")
     )
 
     _, metadata, encrypted_files = create_basics(config, web3, data_provider)
@@ -118,7 +118,7 @@ def ocean_assets_download_destination_file_helper(
 
     erc20_token.mint(
         account_address=publisher_wallet.address,
-        value=to_wei(50),
+        value=to_wei("50"),
         from_wallet=publisher_wallet,
     )
 
@@ -131,12 +131,17 @@ def ocean_assets_download_destination_file_helper(
         ],
     )
 
+    provider_fees = initialize_response.json()["providerFee"]
     tx_id = erc20_token.start_order(
         consumer=publisher_wallet.address,
         service_index=ddo.get_index_of_service(access_service),
-        provider_fees=initialize_response.json()["providerFee"],
+        provider_fees=provider_fees,
         from_wallet=publisher_wallet,
     )
+
+    orders = publisher_ocean_instance.get_user_orders(publisher_wallet.address)
+    assert erc20_token.address in [order.address for order in orders]
+    assert tx_id in [order.transactionHash.hex() for order in orders]
 
     written_path = download_asset_files(
         ddo, config.provider_url, publisher_wallet, tmpdir, tx_id

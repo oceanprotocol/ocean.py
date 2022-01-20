@@ -2,8 +2,9 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import json
+
 import pytest
-from web3.main import Web3
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
@@ -11,10 +12,10 @@ from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.models_structures import DispenserData, FixedData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
+from ocean_lib.web3_internal.utils import split_signature
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 from web3 import exceptions
-from ocean_lib.web3_internal.utils import split_signature
-import json
+from web3.main import Web3
 
 
 def test_buy_from_dispenser_and_order(
@@ -55,8 +56,8 @@ def test_buy_from_dispenser_and_order(
 
     with pytest.raises(exceptions.ContractLogicError) as err:
         dispenser.dispense(
-            data_token=erc20_enterprise_token.address,
-            amount=to_wei(1),
+            datatoken=erc20_enterprise_token.address,
+            amount=to_wei("1"),
             destination=consumer_wallet.address,
             from_wallet=consumer_wallet,
         )
@@ -66,7 +67,7 @@ def test_buy_from_dispenser_and_order(
         == "execution reverted: VM Exception while processing transaction: revert This address is not allowed to request DT"
     )
 
-    consume_fee_amount = to_wei(2)
+    consume_fee_amount = to_wei("2")
     consume_fee_address = consumer_wallet.address
     erc20_enterprise_token.set_publishing_market_fee(
         publish_market_fee_address=consume_fee_address,
@@ -104,31 +105,35 @@ def test_buy_from_dispenser_and_order(
     provider_fee_token = mock_dai_contract.address
     provider_fee_amount = 0
     provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
+    valid_until = 1958133628  # 2032
 
     message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256"],
+        ["bytes", "address", "address", "uint256", "uint256"],
         [
             Web3.toHex(Web3.toBytes(text=provider_data)),
             provider_fee_address,
             provider_fee_token,
             provider_fee_amount,
+            valid_until,
         ],
     )
     signed = web3.eth.sign(provider_fee_address, data=message)
     signature = split_signature(signed)
 
-    order_params = {
-        "consumer": consume_fee_address,
-        "amount": to_wei(1),
-        "serviceIndex": 1,
-        "providerFeeAddress": provider_fee_address,
-        "providerFeeToken": provider_fee_token,
-        "providerFeeAmount": provider_fee_amount,
-        "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
-        "v": signature.v,
-        "r": signature.r,
-        "s": signature.s,
-    }
+    order_params = (
+        consume_fee_address,
+        1,
+        (
+            provider_fee_address,
+            provider_fee_token,
+            provider_fee_amount,
+            signature.v,
+            signature.r,
+            signature.s,
+            valid_until,
+            Web3.toHex(Web3.toBytes(text=provider_data)),
+        ),
+    )
 
     opf_collector_address = get_address_of_type(config, "OPFCommunityFeeCollector")
 
@@ -184,7 +189,7 @@ def test_buy_from_fre_and_order(
         config=config,
         erc721_publisher=publisher_wallet,
         erc20_minter=publisher_wallet,
-        cap=to_wei(100),
+        cap=to_wei("100"),
         template_index=2,
     )
     erc20_enterprise_token = ERC20Enterprise(web3, erc20_enterprise_token.address)
@@ -197,7 +202,7 @@ def test_buy_from_fre_and_order(
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        uints=[18, 18, to_wei(1), to_wei(1), 1],
+        uints=[18, 18, to_wei("1"), to_wei("1"), 1],
     )
 
     tx = erc20_enterprise_token.create_fixed_rate(
@@ -223,8 +228,8 @@ def test_buy_from_fre_and_order(
     with pytest.raises(exceptions.ContractLogicError) as err:
         fixed_rate_exchange.buy_dt(
             exchange_id=exchange_id,
-            data_token_amount=to_wei(1),
-            max_base_token_amount=to_wei(1),
+            datatoken_amount=to_wei("1"),
+            max_base_token_amount=to_wei("1"),
             from_wallet=consumer_wallet,
         )
 
@@ -268,38 +273,43 @@ def test_buy_from_fre_and_order(
     provider_fee_token = mock_dai_contract.address
     provider_fee_amount = 0
     provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
+    valid_until = 1958133628  # 2032
 
     message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256"],
+        ["bytes", "address", "address", "uint256", "uint256"],
         [
             Web3.toHex(Web3.toBytes(text=provider_data)),
             provider_fee_address,
             provider_fee_token,
             provider_fee_amount,
+            valid_until,
         ],
     )
     signed = web3.eth.sign(provider_fee_address, data=message)
     signature = split_signature(signed)
 
-    order_params = {
-        "consumer": another_consumer_wallet.address,
-        "serviceIndex": 1,
-        "providerFeeAddress": publisher_wallet.address,
-        "providerFeeToken": provider_fee_token,
-        "providerFeeAmount": 0,
-        "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
-        "v": signature.v,
-        "r": signature.r,
-        "s": signature.s,
-    }
+    order_params = (
+        another_consumer_wallet.address,
+        1,
+        (
+            publisher_wallet.address,
+            provider_fee_token,
+            provider_fee_amount,
+            signature.v,
+            signature.r,
+            signature.s,
+            valid_until,
+            Web3.toHex(Web3.toBytes(text=provider_data)),
+        ),
+    )
 
-    fre_params = {
-        "exchangeContract": fixed_rate_exchange.address,
-        "exchangeId": exchange_id,
-        "maxBaseTokenAmount": to_wei("2.5"),
-        "swapMarketFee": to_wei("0.001"),  # 1e15 => 0.1%
-        "marketFeeAddress": another_consumer_wallet.address,
-    }
+    fre_params = (
+        fixed_rate_exchange.address,
+        exchange_id,
+        to_wei("2.5"),
+        to_wei("0.001"),  # 1e15 => 0.1%
+        another_consumer_wallet.address,
+    )
 
     opf_collector_address = get_address_of_type(config, "OPFCommunityFeeCollector")
 
