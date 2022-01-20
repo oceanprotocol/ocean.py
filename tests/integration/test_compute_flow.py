@@ -357,6 +357,40 @@ def test_compute_multi_inputs(
     )
 
 
+def test_compute_trusted_algorithm(
+    publisher_wallet,
+    publisher_ocean_instance,
+    consumer_wallet,
+    dataset_with_compute_service_and_trusted_algorithm,
+    algorithm,
+    another_algorithm,
+):
+    # Expect to pass when trusted algorithm is used
+    run_compute_test(
+        ocean_instance=publisher_ocean_instance,
+        publisher_wallet=publisher_wallet,
+        consumer_wallet=consumer_wallet,
+        dataset_and_userdata=AssetAndUserdata(
+            dataset_with_compute_service_and_trusted_algorithm, None
+        ),
+        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+        with_result=True,
+    )
+
+    # Expect to fail when non-trusted algorithm is used
+    with pytest.raises(ValueError):
+        run_compute_test(
+            ocean_instance=publisher_ocean_instance,
+            publisher_wallet=publisher_wallet,
+            consumer_wallet=consumer_wallet,
+            dataset_and_userdata=AssetAndUserdata(
+                dataset_with_compute_service_and_trusted_algorithm, None
+            ),
+            algorithm_and_userdata=AssetAndUserdata(another_algorithm, None),
+            with_result=True,
+        )
+
+
 def test_compute_update_trusted_algorithm(
     publisher_wallet,
     publisher_ocean_instance,
@@ -393,40 +427,6 @@ def test_compute_update_trusted_algorithm(
             publisher_wallet=publisher_wallet,
             consumer_wallet=consumer_wallet,
             dataset_and_userdata=AssetAndUserdata(updated_dataset, None),
-            algorithm_and_userdata=AssetAndUserdata(another_algorithm, None),
-            with_result=True,
-        )
-
-
-def test_compute_trusted_algorithm(
-    publisher_wallet,
-    publisher_ocean_instance,
-    consumer_wallet,
-    dataset_with_compute_service_and_trusted_algorithm,
-    algorithm,
-    another_algorithm,
-):
-    # Expect to pass when trusted algorithm is used
-    run_compute_test(
-        ocean_instance=publisher_ocean_instance,
-        publisher_wallet=publisher_wallet,
-        consumer_wallet=consumer_wallet,
-        dataset_and_userdata=AssetAndUserdata(
-            dataset_with_compute_service_and_trusted_algorithm, None
-        ),
-        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
-        with_result=True,
-    )
-
-    # Expect to fail when non-trusted algorithm is used
-    with pytest.raises(ValueError):
-        run_compute_test(
-            ocean_instance=publisher_ocean_instance,
-            publisher_wallet=publisher_wallet,
-            consumer_wallet=consumer_wallet,
-            dataset_and_userdata=AssetAndUserdata(
-                dataset_with_compute_service_and_trusted_algorithm, None
-            ),
             algorithm_and_userdata=AssetAndUserdata(another_algorithm, None),
             with_result=True,
         )
