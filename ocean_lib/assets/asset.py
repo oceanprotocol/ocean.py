@@ -263,7 +263,7 @@ class Asset:
         container = self.metadata["algorithm"]["container"]
         return {
             "did": self.did,
-            "filesChecksum": create_checksum(json.dumps(files, separators=(",", ":"))),
+            "filesChecksum": create_checksum(files),
             "containerSectionChecksum": create_checksum(
                 json.dumps(container, separators=(",", ":"))
             ),
