@@ -76,7 +76,7 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
             ZERO_ADDRESS,
             get_address_of_type(config, "Ocean"),
         ],
-        uints=[web3.toWei("100", "ether"), 0],
+        uints=[to_wei("100"), 0],
         bytess=[b""],
     )
 
@@ -103,7 +103,7 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
     # Mint 50 ERC20 tokens in consumer wallet from publisher. Max cap = 100
     erc20_token.mint(
         account_address=consumer_wallet.address,
-        value=to_wei(50),
+        value=to_wei("50"),
         from_wallet=publisher_wallet,
     )
 

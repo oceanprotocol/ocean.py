@@ -47,7 +47,7 @@ def test_marketplace_flow(tmp_path):
             ZERO_ADDRESS,
             ocean.OCEAN_address,
         ],
-        uints=[ocean.web3.toWei(100000, "ether"), 0],
+        uints=[ocean.to_wei(100000), 0],
         bytess=[b""],
     )
 
@@ -85,14 +85,14 @@ def test_marketplace_flow(tmp_path):
     OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 
     ss_params = [
-        ocean.web3.toWei(1, "ether"),
+        ocean.to_wei(1),
         OCEAN_token.decimals(),
-        ocean.web3.toWei(10000, "ether"),
+        ocean.to_wei(10000),
         2500000,
-        ocean.web3.toWei(2000, "ether"),
+        ocean.to_wei(2000),
     ]
 
-    swap_fees = [ocean.web3.toWei(0.01, "ether"), ocean.web3.toWei(0.01, "ether")]
+    swap_fees = [ocean.to_wei("0.01"), ocean.to_wei("0.01")]
     bpool = ocean.create_pool(
         erc20_token, OCEAN_token, ss_params, swap_fees, alice_wallet
     )
@@ -101,8 +101,8 @@ def test_marketplace_flow(tmp_path):
     price_in_OCEAN = bpool.get_amount_in_exact_out(
         OCEAN_token.address,
         erc20_token.address,
-        ocean.web3.toWei(1, "ether"),
-        ocean.web3.toWei(0.01, "ether"),
+        ocean.to_wei(1),
+        ocean.to_wei("0.01"),
     )
 
     formatted_price = pretty_ether_and_wei(price_in_OCEAN, "OCEAN")
@@ -122,22 +122,20 @@ def test_marketplace_flow(tmp_path):
     # Verify that Bob has ganache OCEAN
     assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
 
-    OCEAN_token.approve(
-        bpool.address, ocean.web3.toWei("10000", "ether"), from_wallet=bob_wallet
-    )
+    OCEAN_token.approve(bpool.address, ocean.to_wei("10000"), from_wallet=bob_wallet)
 
     bpool.swap_exact_amount_out(
         [OCEAN_token.address, erc20_token.address, ZERO_ADDRESS],
         [
-            ocean.web3.toWei(10, "ether"),
-            ocean.web3.toWei(1, "ether"),
-            ocean.web3.toWei(10, "ether"),
+            ocean.to_wei(10),
+            ocean.to_wei(1),
+            ocean.to_wei(10),
             0,
         ],
         from_wallet=bob_wallet,
     )
-    assert erc20_token.balanceOf(bob_wallet.address) >= ocean.web3.toWei(
-        1, "ether"
+    assert erc20_token.balanceOf(bob_wallet.address) >= ocean.to_wei(
+        1
     ), "Bob didn't get 1.0 datatokens"
 
     service = asset.get_service("access")

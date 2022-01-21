@@ -6,6 +6,7 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
 
 
@@ -74,7 +75,7 @@ def test_buy_dt_batch(
             factory_deployer_wallet.address,
             ZERO_ADDRESS,
         ],
-        "uints": [web3.toWei("1000000", "ether"), 0],
+        "uints": [to_wei("1000000"), 0],
         "bytess": [],
     }
 
@@ -88,13 +89,13 @@ def test_buy_dt_batch(
             get_address_of_type(config, "poolTemplate"),
         ],
         "ssParams": [
-            web3.toWei("1", "ether"),
+            to_wei("2"),
             ocean_contract.decimals(),
-            web3.toWei("10000", "ether"),
+            to_wei("10000"),
             2500000,
-            web3.toWei("2", "ether"),
+            to_wei("2"),
         ],
-        "swapFees": [web3.toWei("0.001", "ether"), web3.toWei("0.001", "ether")],
+        "swapFees": [to_wei("0.001"), to_wei("0.001")],
     }
 
     tx = nft_factory.create_nft_erc_with_pool(
@@ -131,7 +132,7 @@ def test_buy_dt_batch(
             factory_deployer_wallet.address,
             ZERO_ADDRESS,
         ],
-        "uints": [web3.toWei("1000000", "ether"), 0],
+        "uints": [to_wei("1000000"), 0],
         "bytess": [],
     }
 
@@ -145,13 +146,13 @@ def test_buy_dt_batch(
             get_address_of_type(config, "poolTemplate"),
         ],
         "ssParams": [
-            web3.toWei("1", "ether"),
+            to_wei("1"),
             ocean_contract.decimals(),
-            web3.toWei("10000", "ether"),
+            to_wei("10000"),
             2500000,
-            web3.toWei("2", "ether"),
+            to_wei("2"),
         ],
-        "swapFees": [web3.toWei("0.001", "ether"), web3.toWei("0.001", "ether")],
+        "swapFees": [to_wei("0.001"), to_wei("0.001")],
     }
 
     tx = nft_factory.create_nft_erc_with_pool(
@@ -177,10 +178,10 @@ def test_buy_dt_batch(
         "source": pool1,
         "operation": 0,
         "tokenIn": get_address_of_type(config, "Ocean"),
-        "amountsIn": web3.toWei("1", "ether"),
+        "amountsIn": to_wei("1"),
         "tokenOut": erc_token,
-        "amountsOut": web3.toWei("0.1", "ether"),
-        "maxPrice": web3.toWei("10", "ether"),
+        "amountsOut": to_wei("0.1"),
+        "maxPrice": to_wei("10"),
         "swapMarketFee": 0,
         "marketFeeAddress": another_consumer_wallet.address,
     }
@@ -190,10 +191,10 @@ def test_buy_dt_batch(
         "source": pool2,
         "operation": 0,
         "tokenIn": get_address_of_type(config, "Ocean"),
-        "amountsIn": web3.toWei("1", "ether"),
+        "amountsIn": to_wei("1"),
         "tokenOut": erc_token2,
-        "amountsOut": web3.toWei("0.1", "ether"),
-        "maxPrice": web3.toWei("10", "ether"),
+        "amountsOut": to_wei("0.1"),
+        "maxPrice": to_wei("10"),
         "swapMarketFee": 0,
         "marketFeeAddress": another_consumer_wallet.address,
     }

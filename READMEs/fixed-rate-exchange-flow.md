@@ -131,7 +131,6 @@ In the same python console:
 ```python
 from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 
 # Prepare data for ERC20 token
 erc20_data = CreateErc20Data(
@@ -143,7 +142,7 @@ erc20_data = CreateErc20Data(
         ZERO_ADDRESS,
         ocean.OCEAN_address,
     ],
-    uints=[to_wei(200), 0],
+    uints=[ocean.to_wei(200), 0],
     bytess=[b""],
 )
 
@@ -151,7 +150,7 @@ erc20_token = nft_token.create_datatoken(erc20_data, alice_wallet)
 print(f"datatoken_address = '{erc20_token.address}'")
 
 #Mint the datatokens
-erc20_token.mint(alice_wallet.address, to_wei(100), alice_wallet)
+erc20_token.mint(alice_wallet.address, ocean.to_wei(100), alice_wallet)
 ```
 
 ## 4. Bob buys at fixed rate datatokens
@@ -177,7 +176,7 @@ It is important to create an `exchange_id` only one time per exchange.
 exchange_id = ocean.create_fixed_rate(
     erc20_token=erc20_token,
     base_token=OCEAN_token,
-    amount=to_wei(100),
+    amount=ocean.to_wei(100),
     from_wallet=alice_wallet,
 )
 ```
@@ -203,13 +202,13 @@ Use the `exchange_id` for buying at fixed rate.
 ```python
 # Approve tokens for Bob
 fixed_price_address = ocean.fixed_rate_exchange.address
-erc20_token.approve(fixed_price_address, to_wei(100), bob_wallet)
-OCEAN_token.approve(fixed_price_address, to_wei(100), bob_wallet)
+erc20_token.approve(fixed_price_address, ocean.to_wei(100), bob_wallet)
+OCEAN_token.approve(fixed_price_address, ocean.to_wei(100), bob_wallet)
 
 tx_result = ocean.fixed_rate_exchange.buy_dt(
     exchange_id=exchange_id,
-    datatoken_amount=to_wei(20),
-    max_base_token_amount=to_wei(50),
+    datatoken_amount=ocean.to_wei(20),
+    max_base_token_amount=ocean.to_wei(50),
     from_wallet=bob_wallet,
     )
 assert tx_result, "failed buying data tokens at fixed rate for Bob"

@@ -10,6 +10,7 @@ from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
 
 
@@ -22,7 +23,7 @@ def test_init():
 
 
 def test_aqua_functions_for_single_ddo(
-    publisher_ocean_instance, aquarius_instance, publisher_wallet, web3, config
+    publisher_ocean_instance, aquarius_instance, publisher_wallet, config
 ):
     """Tests against single-ddo functions of Aquarius."""
     erc20_data = CreateErc20Data(
@@ -34,7 +35,7 @@ def test_aqua_functions_for_single_ddo(
             ZERO_ADDRESS,
             get_address_of_type(config, "Ocean"),
         ],
-        uints=[web3.toWei("0.5", "ether"), 0],
+        uints=[to_wei("0.5"), 0],
         bytess=[b""],
     )
     metadata = {

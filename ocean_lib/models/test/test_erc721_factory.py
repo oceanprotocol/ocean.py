@@ -110,7 +110,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        [web3.toWei("0.5", "ether"), 0],
+        [to_wei("0.5"), 0],
         [b""],
     )
     tx_result = erc721_token.create_erc20(erc_create_data, consumer_wallet)
@@ -157,7 +157,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        "uints": [web3.toWei("10", "ether"), 0],
+        "uints": [to_wei("10"), 0],
         "bytess": [b""],
     }
 
@@ -198,7 +198,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     # Tests creating NFT with ERC20 and with Pool successfully.
     side_staking_address = get_address_of_type(config, "Staking")
     pool_template_address = get_address_of_type(config, "poolTemplate")
-    initial_pool_liquidity = web3.toWei("0.02", "ether")
+    initial_pool_liquidity = to_wei("0.02")
 
     erc20_token.mint(publisher_wallet.address, initial_pool_liquidity, publisher_wallet)
     erc20_token.approve(
@@ -214,7 +214,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        "uints": [web3.toWei("0.05", "ether"), 0],
+        "uints": [to_wei("0.05"), 0],
         "bytess": [b""],
     }
     pool_data = {
@@ -227,7 +227,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
             pool_template_address,
         ],
         "ssParams": [
-            web3.toWei("1.0", "ether"),
+            to_wei("1"),
             erc20_token.decimals(),
             initial_pool_liquidity
             // 100
@@ -235,7 +235,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
             2500000,
             initial_pool_liquidity,
         ],
-        "swapFees": [web3.toWei("0.001", "ether"), web3.toWei("0.001", "ether")],
+        "swapFees": [to_wei("0.001"), to_wei("0.001")],
     }
     tx = erc721_factory.create_nft_erc_with_pool(
         nft_create_data, erc_create_data_pool, pool_data, publisher_wallet
@@ -299,7 +299,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
             fee_address,
             mock_dai_contract_address,
         ],
-        [web3.toWei("0.5", "ether"), web3.toWei("0.0005", "ether")],
+        [to_wei("0.5"), to_wei("0.0005")],
         [b""],
     )
     tx = erc721_token.create_erc20(erc_create_data, publisher_wallet)
@@ -322,7 +322,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
             consumer_wallet.address,
             ZERO_ADDRESS,
         ],
-        "uints": [18, 18, web3.toWei("1.0", "ether"), web3.toWei("0.001", "ether"), 0],
+        "uints": [18, 18, to_wei("1"), to_wei("0.001"), 0],
     }
     tx = erc721_factory.create_nft_erc_with_fixed_rate(
         nft_create_data, erc_create_data_pool, fixed_rate_data, publisher_wallet
@@ -372,8 +372,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     dispenser_address = get_address_of_type(config, Dispenser.CONTRACT_NAME)
     dispenser_data = {
         "dispenserAddress": dispenser_address,
-        "maxTokens": web3.toWei("1.0", "ether"),
-        "maxBalance": web3.toWei("1.0", "ether"),
+        "maxTokens": to_wei("1"),
+        "maxBalance": to_wei("1"),
         "withMint": True,
         "allowedSwapper": ZERO_ADDRESS,
     }
@@ -632,7 +632,7 @@ def test_fail_create_erc20(
                 publisher_wallet.address,
                 ZERO_ADDRESS,
             ],
-            [web3.toWei("1.0", "ether"), 0],
+            [to_wei(1), 0],
             [b""],
             publisher_wallet,
         )
@@ -672,7 +672,7 @@ def test_fail_create_erc20(
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        [web3.toWei("0.5", "ether"), 0],
+        [to_wei("0.5"), 0],
         [b""],
     )
     with pytest.raises(exceptions.ContractLogicError) as err:
@@ -693,7 +693,7 @@ def test_fail_create_erc20(
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        [web3.toWei("0.5", "ether"), 0],
+        [to_wei("0.5"), 0],
         [b""],
     )
     with pytest.raises(exceptions.ContractLogicError) as err:

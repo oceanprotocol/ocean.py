@@ -11,7 +11,6 @@ from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -41,7 +40,7 @@ def test_dispenser_flow():
     assert erc721_token.symbol() == "NFT1"
 
     # Prepare data for ERC20 token
-    cap = to_wei(100)
+    cap = ocean.to_wei(100)
     erc20_data = CreateErc20Data(
         template_index=1,  # default value
         strings=["ERC20DT1", "ERC20DT1Symbol"],  # name & symbol for ERC20 token
@@ -65,7 +64,7 @@ def test_dispenser_flow():
     # Get the dispenser
     dispenser = Dispenser(ocean.web3, get_address_of_type(config, "Dispenser"))
 
-    max_amount = to_wei(50)
+    max_amount = ocean.to_wei(50)
     dispenser_data = DispenserData(
         dispenser_address=dispenser.address,
         max_balance=max_amount,

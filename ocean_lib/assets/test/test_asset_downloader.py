@@ -103,7 +103,7 @@ def ocean_assets_download_destination_file_helper(
     """Downloading to an existing directory."""
     data_provider = DataServiceProvider
     erc721_token, erc20_token = deploy_erc721_erc20(
-        web3, config, publisher_wallet, publisher_wallet, cap=to_wei(100)
+        web3, config, publisher_wallet, publisher_wallet, cap=to_wei("100")
     )
 
     _, metadata, encrypted_files = create_basics(config, web3, data_provider)
@@ -118,7 +118,7 @@ def ocean_assets_download_destination_file_helper(
 
     erc20_token.mint(
         account_address=publisher_wallet.address,
-        value=to_wei(50),
+        value=to_wei("50"),
         from_wallet=publisher_wallet,
     )
 
