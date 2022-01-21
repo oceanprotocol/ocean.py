@@ -134,7 +134,6 @@ print(f"token_address = '{token_address}'")
 # Prepare data for ERC20 token
 from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 erc20_data = CreateErc20Data(
     template_index=1,
     strings=["Datatoken 1", "DT1"],
@@ -144,7 +143,7 @@ erc20_data = CreateErc20Data(
         ZERO_ADDRESS,
         ocean.OCEAN_address,
     ],
-    uints=[to_wei(100000), 0],
+    uints=[ocean.to_wei(100000), 0],
     bytess=[b""],
 )
 
@@ -193,14 +192,14 @@ erc20_token = ocean.get_datatoken(asset.get_service("access").datatoken)
 OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 
 ss_params = [
-    to_wei(1),
+    ocean.to_wei(1),
     OCEAN_token.decimals(),
-    to_wei(10000),
+    ocean.to_wei(10000),
     2500000,
-    to_wei(2000)
+    ocean.to_wei(2000)
 ]
 
-swap_fees = [to_wei("0.01"), to_wei("0.01")]
+swap_fees = [ocean.to_wei("0.01"), ocean.to_wei("0.01")]
 bpool = ocean.create_pool(erc20_token, OCEAN_token, ss_params, swap_fees, alice_wallet)
 print(f"BPool address: {bpool.address}")
 
@@ -216,8 +215,8 @@ In the same Python console as before:
 price_in_OCEAN = bpool.get_amount_in_exact_out(
     OCEAN_token.address,
     erc20_token.address,
-    to_wei(1),
-    to_wei("0.01")
+    ocean.to_wei(1),
+    ocean.to_wei("0.01")
 )
 
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
@@ -242,19 +241,19 @@ assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
 
 # Bob buys 1.0 datatokens - the amount needed to consume the dataset.
-OCEAN_token.approve(bpool.address, to_wei("10000"), from_wallet=bob_wallet)
+OCEAN_token.approve(bpool.address, ocean.to_wei("10000"), from_wallet=bob_wallet)
 
 bpool.swap_exact_amount_out(
     [OCEAN_token.address, erc20_token.address, ZERO_ADDRESS],
     [
-        to_wei(10),
-        to_wei(1),
-        to_wei(10),
+        ocean.to_wei(10),
+        ocean.to_wei(1),
+        ocean.to_wei(10),
         0,
     ],
     from_wallet=bob_wallet,
 )
-assert erc20_token.balanceOf(bob_wallet.address) >= to_wei(
+assert erc20_token.balanceOf(bob_wallet.address) >= ocean.to_wei(
     1
 ), "Bob didn't get 1.0 datatokens"
 

@@ -9,7 +9,6 @@ from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -52,7 +51,7 @@ def test_fre_flow():
             ZERO_ADDRESS,
             ocean.OCEAN_address,
         ],
-        uints=[to_wei(200), 0],
+        uints=[ocean.to_wei(200), 0],
         bytess=[b""],
     )
 
@@ -60,7 +59,7 @@ def test_fre_flow():
     print(f"token_address = '{erc20_token.address}'")
 
     # Mint the datatokens
-    erc20_token.mint(alice_wallet.address, to_wei(100), alice_wallet)
+    erc20_token.mint(alice_wallet.address, ocean.to_wei(100), alice_wallet)
 
     # Bob buys at fixed rate data tokens
     bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
@@ -81,19 +80,19 @@ def test_fre_flow():
     exchange_id = ocean.create_fixed_rate(
         erc20_token=erc20_token,
         base_token=OCEAN_token,
-        amount=to_wei(100),
+        amount=ocean.to_wei(100),
         from_wallet=alice_wallet,
     )
 
     # Approve tokens for Bob
     fixed_price_address = ocean.fixed_rate_exchange.address
-    erc20_token.approve(fixed_price_address, to_wei(100), bob_wallet)
-    OCEAN_token.approve(fixed_price_address, to_wei(100), bob_wallet)
+    erc20_token.approve(fixed_price_address, ocean.to_wei(100), bob_wallet)
+    OCEAN_token.approve(fixed_price_address, ocean.to_wei(100), bob_wallet)
 
     tx_result = ocean.fixed_rate_exchange.buy_dt(
         exchange_id=exchange_id,
-        datatoken_amount=to_wei(20),
-        max_base_token_amount=to_wei(50),
+        datatoken_amount=ocean.to_wei(20),
+        max_base_token_amount=ocean.to_wei(50),
         from_wallet=bob_wallet,
     )
     assert tx_result, "failed buying data tokens at fixed rate for Bob"
