@@ -106,7 +106,6 @@ def test_static_functions(web3):
     ), "The transaction receipt exists for the wrong hash."
 
 
-# TODO: I adapted this from v3, but is it still valid?
 def test_gas_price(web3, alice_wallet, nft_factory_address, monkeypatch):
     monkeypatch.setenv("GAS_PRICE", "1")
     factory = MyFactory(web3, nft_factory_address)

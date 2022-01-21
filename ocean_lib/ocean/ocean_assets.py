@@ -527,9 +527,18 @@ class OceanAssets:
         )
 
     @enforce_types
-    def pay_for_service(self, asset: Asset, service: Service, wallet: Wallet):
+    def pay_for_service(
+        self,
+        asset: Asset,
+        service: Service,
+        wallet: Wallet,
+        consumer_address: Optional[str] = None,
+    ):
         dt = ERC20Token(self._web3, service.datatoken)
         balance = dt.balanceOf(wallet.address)
+
+        if not consumer_address:
+            consumer_address = wallet.address
 
         if balance < to_wei(1):
             raise InsufficientBalance(
@@ -548,14 +557,14 @@ class OceanAssets:
         initialize_response = data_provider.initialize(
             did=asset.did,
             service_id=service.id,
-            consumer_address=wallet.address,
+            consumer_address=consumer_address,
             service_endpoint=data_provider.build_initialize_endpoint(
                 self._config.provider_url
             )[1],
         )
 
         tx_id = dt.start_order(
-            consumer=wallet.address,
+            consumer=consumer_address,
             service_index=asset.get_index_of_service(service),
             provider_fees=initialize_response.json()["providerFee"],
             from_wallet=wallet,
