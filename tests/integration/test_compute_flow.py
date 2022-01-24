@@ -251,7 +251,8 @@ def run_compute_test(
     job_id = ocean_instance.compute.start(
         consumer_wallet,
         dataset,
-        "not implemented in provider yet",
+        # TODO: add a real compute environment after implemented in provider
+        "TODO: add a real compute environment after implemented in provider",
         algorithm,
         algorithm_meta,
         algorithm_algocustomdata,
