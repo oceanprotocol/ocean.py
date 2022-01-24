@@ -27,8 +27,8 @@ def generate_trusted_algo_dict(
         ddo = asset_or_did
     else:
         ddo = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
-
-    return ddo.generate_trusted_algorithms()
+    service = ddo.get_service_by_index(0)
+    return service.generate_trusted_algorithms(ddo)
 
 
 @enforce_types

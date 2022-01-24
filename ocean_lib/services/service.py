@@ -7,13 +7,17 @@
     To handle service items in a DDO record
 """
 import copy
+import json
 import logging
 from typing import Any, Dict, Optional
 
+from enforce_typing import enforce_types
 from ocean_lib.agreements.consumable import ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes, ServiceTypesNames
+from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.credentials import AddressCredential
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.utils.utilities import create_checksum
 from web3.main import Web3
 
 logger = logging.getLogger(__name__)
@@ -88,6 +92,18 @@ class Service:
 
     def get_trusted_algorithm_publishers(self) -> list:
         return self.compute_values.get("publisherTrustedAlgorithmPublishers", [])
+
+    @enforce_types
+    def generate_trusted_algorithms(self, asset: Asset) -> dict:
+        """Returns a trustedAlgorithm dictionary for service at index 0."""
+        container = asset.metadata["algorithm"]["container"]
+        return {
+            "did": self.did,
+            "filesChecksum": create_checksum(self.files),
+            "containerSectionChecksum": create_checksum(
+                json.dumps(container, separators=(",", ":"))
+            ),
+        }
 
     # Not type provided due to circular imports
     def add_publisher_trusted_algorithm(
