@@ -76,7 +76,7 @@ def dataset_with_compute_service_and_trusted_algorithm(
         publisher_ocean_instance, publisher_wallet, trusted_algorithms=[algorithm]
     )
     # verify the ddo is available in Aquarius
-    _ = publisher_ocean_instance.assets.resolve(asset.did)
+    publisher_ocean_instance.assets.resolve(asset.did)
     return asset
 
 
@@ -91,7 +91,7 @@ def dataset_with_compute_service_and_trusted_publisher(
         trusted_algorithm_publishers=[publisher_wallet.address],
     )
     # verify the ddo is available in Aquarius
-    _ = publisher_ocean_instance.assets.resolve(asset.did)
+    publisher_ocean_instance.assets.resolve(asset.did)
     return asset
 
 
@@ -101,7 +101,7 @@ def get_algorithm(publisher_wallet, publisher_ocean_instance):
         publisher_ocean_instance, publisher_wallet
     )
     # verify the asset is available in Aquarius
-    _ = publisher_ocean_instance.assets.resolve(asset.did)
+    publisher_ocean_instance.assets.resolve(asset.did)
     return asset
 
 
@@ -142,7 +142,7 @@ def process_order(
     # Mint 10 datatokens to the consumer
     service = asset.get_service(service_type)
     erc20_token = ERC20Token(ocean_instance.web3, service.datatoken)
-    _ = erc20_token.mint(consumer_wallet.address, to_wei(10), publisher_wallet)
+    erc20_token.mint(consumer_wallet.address, to_wei(10), publisher_wallet)
 
     # TODO: Refactor, use OceanAssets.order() instead of initialize and start_order
     # Initialize the service to get provider fees
