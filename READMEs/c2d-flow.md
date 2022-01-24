@@ -52,7 +52,7 @@ export OPERATOR_SERVICE_URL=https://c2d-dev.operator.oceanprotocol.com/
 
 ### Install the library
 
-In a new console that we'll call the work console (as we'll use it later):
+In a new console that we'll call the _work_ console (as we'll use it later):
 
 ```console
 #Initialize virtual environment and activate it.
