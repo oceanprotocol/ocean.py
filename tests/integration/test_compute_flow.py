@@ -393,7 +393,8 @@ def test_compute_trusted_algorithm(
     )
 
     # Expect to fail when non-trusted algorithm is used
-    with pytest.raises(ValueError):
+    # TODO: match actual error string
+    with pytest.raises(ValueError, match="TODO"):
         run_compute_test(
             ocean_instance=publisher_ocean_instance,
             publisher_wallet=publisher_wallet,
@@ -439,7 +440,8 @@ def test_compute_update_trusted_algorithm(
     )
 
     # Expect to fail when non-trusted algorithm is used
-    with pytest.raises(ValueError):
+    # TODO: match actual error string
+    with pytest.raises(ValueError, match="TODO"):
         run_compute_test(
             ocean_instance=publisher_ocean_instance,
             publisher_wallet=publisher_wallet,
