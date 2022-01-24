@@ -48,7 +48,6 @@ class OceanCompute:
     @enforce_types
     def start(
         self,
-        provider_uri: str,
         consumer_wallet: Wallet,
         dataset: ComputeInput,
         compute_environment: str,
@@ -74,11 +73,8 @@ class OceanCompute:
             raise AssetNotConsumable(consumable_result)
 
         # Start compute job
-        _, compute_start_endpoint = self._data_provider.build_compute_endpoint(
-            provider_uri
-        )
         job_info = self._data_provider.start_compute_job(
-            service_endpoint=compute_start_endpoint,
+            service_endpoint=service.service_endpoint,
             consumer=consumer_wallet,
             dataset=dataset,
             compute_environment=compute_environment,

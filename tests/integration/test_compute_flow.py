@@ -249,7 +249,6 @@ def run_compute_test(
 
     # Start compute job
     job_id = ocean_instance.compute.start(
-        ocean_instance.config.provider_url,
         consumer_wallet,
         dataset,
         "not implemented in provider yet",
