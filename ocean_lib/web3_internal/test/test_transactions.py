@@ -11,7 +11,7 @@ from ocean_lib.web3_internal.transactions import (
 
 def test_chain_id_send_ether(alice_wallet, bob_address):
     """Tests if the chainId has the right value for send ether transactions."""
-    receipt = send_ether(alice_wallet, bob_address, to_wei(1))
+    receipt = send_ether(alice_wallet, bob_address, to_wei("1"))
     assert receipt, "Send ether was unsuccessful."
     tx = alice_wallet.web3.eth.get_transaction(receipt["transactionHash"])
     # Formula: v = CHAIN_ID * 2 + 35 or v = CHAIN_ID * 2 + 36
@@ -34,7 +34,7 @@ def test_chain_id_cancel_or_replace_transaction(alice_wallet, bob_address):
 
 def test_send_ether(alice_wallet, bob_address):
     assert send_ether(
-        alice_wallet, bob_address, to_wei(1)
+        alice_wallet, bob_address, to_wei("1")
     ), "Send ether was unsuccessful."
 
 

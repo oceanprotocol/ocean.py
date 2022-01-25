@@ -20,6 +20,7 @@ from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import (
     build_credentials_dict,
@@ -373,7 +374,7 @@ def test_plain_asset_with_one_datatoken(
             ZERO_ADDRESS,
             get_address_of_type(config, "Ocean"),
         ],
-        uints=[web3.toWei("0.5", "ether"), 0],
+        uints=[to_wei("0.5"), 0],
         bytess=[b""],
     )
 
@@ -432,7 +433,7 @@ def test_plain_asset_multiple_datatokens(
             ZERO_ADDRESS,
             get_address_of_type(config, "Ocean"),
         ],
-        uints=[web3.toWei("0.5", "ether"), 0],
+        uints=[to_wei("0.5"), 0],
         bytess=[b""],
     )
     erc20_data2 = CreateErc20Data(
@@ -444,7 +445,7 @@ def test_plain_asset_multiple_datatokens(
             ZERO_ADDRESS,
             get_address_of_type(config, "Ocean"),
         ],
-        uints=[web3.toWei("0.5", "ether"), 0],
+        uints=[to_wei("0.5"), 0],
         bytess=[b""],
     )
 

@@ -21,7 +21,7 @@ class ERC20Enterprise(ERC20Token):
         )
 
     def buy_from_dispenser_and_order(
-        self, order_params: dict, dispenser_address: str, from_wallet: Wallet
+        self, order_params: dict, dispenser_address: dict, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
             "buyFromDispenserAndOrder", (order_params, dispenser_address), from_wallet
