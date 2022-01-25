@@ -180,10 +180,11 @@ class DataServiceProvider:
         index: Optional[int] = None,
         userdata: Optional[Dict] = None,
     ) -> None:
-
+        _, fileinfo_endpoint = DataServiceProvider.build_fileinfo(service_endpoint)
         fileinfo_response = DataServiceProvider.fileinfo(
-            did, service_id, "http://172.15.0.4:8030/api/services/fileinfo"
+            did, service_id, fileinfo_endpoint
         )
+
         files = fileinfo_response.json()
         indexes = range(len(files))
         if index is not None:
