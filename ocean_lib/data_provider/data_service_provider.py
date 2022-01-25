@@ -300,7 +300,7 @@ class DataServiceProvider:
         )
 
         if response.status_code not in (201, 200):
-            raise ValueError(response.content.decode("utf-8"))
+            raise DataProviderException(response.content.decode("utf-8"))
 
         try:
             job_info = json.loads(response.content.decode("utf-8"))

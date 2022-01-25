@@ -527,7 +527,13 @@ class OceanAssets:
         )
 
     @enforce_types
-    def pay_for_service(self, asset: Asset, service: Service, wallet: Wallet):
+    def pay_for_service(
+        self,
+        asset: Asset,
+        service: Service,
+        wallet: Wallet,
+        initialize_args: Optional[dict] = None,
+    ):
         dt = ERC20Token(self._web3, service.datatoken)
         balance = dt.balanceOf(wallet.address)
 
@@ -545,14 +551,20 @@ class OceanAssets:
             raise AssetNotConsumable(consumable_result)
 
         data_provider = DataServiceProvider
-        initialize_response = data_provider.initialize(
-            did=asset.did,
-            service_id=service.id,
-            consumer_address=wallet.address,
-            service_endpoint=data_provider.build_initialize_endpoint(
+
+        built_initialize_args = {
+            "did": asset.did,
+            "service_id": service.id,
+            "consumer_address": wallet.address,
+            "service_endpoint": data_provider.build_initialize_endpoint(
                 self._config.provider_url
             )[1],
-        )
+        }
+
+        if initialize_args:
+            built_initialize_args.update(initialize_args)
+
+        initialize_response = data_provider.initialize(**built_initialize_args)
 
         tx_id = dt.start_order(
             consumer=wallet.address,

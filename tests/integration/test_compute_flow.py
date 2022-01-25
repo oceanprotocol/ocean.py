@@ -11,7 +11,7 @@ from attr import dataclass
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.exceptions import DataProviderException
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.erc20_token import ERC20Token
@@ -142,31 +142,23 @@ def process_order(
     # Mint 10 datatokens to the consumer
     service = asset.get_service(service_type)
     erc20_token = ERC20Token(ocean_instance.web3, service.datatoken)
-    erc20_token.mint(consumer_wallet.address, to_wei(10), publisher_wallet)
-
-    # TODO: Refactor, use OceanAssets.order() instead of initialize and start_order
-    # Initialize the service to get provider fees
-    _, initialize_url = DataServiceProvider.build_initialize_endpoint(
-        ocean_instance.config.provider_url
+    # for the "algorithm with different publisher fixture, consumer is minter
+    minter = (
+        consumer_wallet
+        if erc20_token.contract.caller.isMinter(consumer_wallet.address)
+        else publisher_wallet
     )
-    initialize_response = DataServiceProvider.initialize(
-        did=asset.did,
-        service_id=service.id,
-        consumer_address=consumer_wallet.address,
-        service_endpoint=initialize_url,
-        # TODO: add a real compute environment once provider supports it
-        compute_environment="doesn't matter for now",
-        valid_until=int((datetime.now() + timedelta(hours=1)).timestamp()),
-    ).json()
-
-    # Order the service
-    order_tx_id = erc20_token.start_order(
-        consumer=consumer_wallet.address,
-        service_index=asset.get_index_of_service(service),
-        provider_fees=initialize_response["providerFee"],
-        from_wallet=consumer_wallet,
+    erc20_token.mint(consumer_wallet.address, to_wei(10), minter)
+    order_tx_id = ocean_instance.assets.pay_for_service(
+        asset,
+        service,
+        consumer_wallet,
+        initialize_args={
+            # TODO: add a real compute environment once provider supports it
+            "compute_environment": "doesn't matter for now",
+            "valid_until": int((datetime.now() + timedelta(hours=1)).timestamp()),
+        },
     )
-    ocean_instance.web3.eth.wait_for_transaction_receipt(order_tx_id)
 
     return order_tx_id, service
 
@@ -321,7 +313,9 @@ def test_compute_raw_algo(
         with_result=True,
     )
 
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        DataProviderException, match="cannot run raw algorithm on this did"
+    ):
         run_compute_test(
             ocean_instance=publisher_ocean_instance,
             publisher_wallet=publisher_wallet,
@@ -393,8 +387,10 @@ def test_compute_trusted_algorithm(
     )
 
     # Expect to fail when non-trusted algorithm is used
-    # TODO: match actual error string
-    with pytest.raises(ValueError, match="TODO"):
+    with pytest.raises(
+        DataProviderException,
+        match=f"this algorithm did {algorithm_with_different_publisher.did} is not trusted",
+    ):
         run_compute_test(
             ocean_instance=publisher_ocean_instance,
             publisher_wallet=publisher_wallet,
@@ -440,8 +436,10 @@ def test_compute_update_trusted_algorithm(
     )
 
     # Expect to fail when non-trusted algorithm is used
-    # TODO: match actual error string
-    with pytest.raises(ValueError, match="TODO"):
+    with pytest.raises(
+        DataProviderException,
+        match=f"this algorithm did {algorithm_with_different_publisher.did} is not trusted",
+    ):
         run_compute_test(
             ocean_instance=publisher_ocean_instance,
             publisher_wallet=publisher_wallet,
