@@ -5,6 +5,7 @@
 
 """Ocean module."""
 import logging
+from decimal import Decimal
 from typing import Dict, List, Optional, Type, Union
 
 from enforce_typing import enforce_types
@@ -21,7 +22,7 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
+from ocean_lib.web3_internal.currency import to_wei as _to_wei, DECIMALS_18
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
 
@@ -93,6 +94,12 @@ class Ocean:
     @enforce_types
     def OCEAN_address(self) -> str:
         return get_ocean_token_address(self.config.address_file, web3=self.web3)
+
+    @enforce_types
+    def to_wei(
+        self, amount_in_ether: Union[Decimal, str, int], decimals: int = DECIMALS_18
+    ):
+        return _to_wei(amount_in_ether=amount_in_ether, decimals=decimals)
 
     @enforce_types
     def create_nft_token(
@@ -223,7 +230,13 @@ class Ocean:
             from_wallet.address,
             ZERO_ADDRESS,
         ]
-        uints = [erc20_token.decimals(), base_token.decimals(), to_wei(1), int(1e15), 0]
+        uints = [
+            erc20_token.decimals(),
+            base_token.decimals(),
+            self.to_wei("1"),
+            int(1e15),
+            0,
+        ]
 
         fixed_rate_data = FixedData(
             fixed_price_address=fixed_price_address, addresses=addresses, uints=uints
@@ -259,7 +272,7 @@ class Ocean:
     ) -> BPool:
         base_token.approve(
             get_address_of_type(self.config, "Router"),
-            self.web3.toWei(2000, "ether"),
+            self.to_wei("2000"),
             from_wallet,
         )
 

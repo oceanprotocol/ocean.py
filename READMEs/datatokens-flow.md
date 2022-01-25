@@ -97,10 +97,9 @@ print(f"data NFT token symbol: {erc721_token.symbol()}")
 # Create ERC20 token related to the above NFT.
 from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 
 print("Create ERC20 datatoken: begin.")
-cap = to_wei(10)
+cap = ocean.to_wei(10)
 erc20_data = CreateErc20Data(
     template_index=1, # default value
     strings=["ERC20DT1", "ERC20DT1Symbol"], # name & symbol for ERC20 token

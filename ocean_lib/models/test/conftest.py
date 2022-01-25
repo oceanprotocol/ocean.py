@@ -121,10 +121,10 @@ def make_info(name, private_key_name):
     wallet = get_ganache_wallet()
     if wallet:
         assert get_ether_balance(web3, wallet.address) >= to_wei(
-            4
+            "4"
         ), "Ether balance less than 4."
-        if get_ether_balance(web3, info.address) < to_wei(2):
-            send_ether(wallet, info.address, to_wei(4))
+        if get_ether_balance(web3, info.address) < to_wei("2"):
+            send_ether(wallet, info.address, to_wei("4"))
 
     from ocean_lib.ocean.ocean import Ocean
 
