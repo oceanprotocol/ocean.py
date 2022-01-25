@@ -307,7 +307,7 @@ def transfer_ocean_if_balance_lte(
         >= amount_to_transfer
     ):
         ocean_token.transfer(
-            recipient, web3.toWei("20000", "ether"), factory_deployer_wallet
+            recipient, to_wei("20000", "ether"), factory_deployer_wallet
         )
 
     return ocean_token.balanceOf(recipient) - initial_recipient_balance
