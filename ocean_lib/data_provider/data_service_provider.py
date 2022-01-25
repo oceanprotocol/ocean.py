@@ -130,12 +130,11 @@ class DataServiceProvider:
         userdata: Optional[Dict] = None,
         valid_until: Optional[int] = 0,
     ) -> Response:
-
-        req = PreparedRequest()
-
-        # prepare_url function transforms ':' from "did:op:" into "%3".
-        service_endpoint += f"?documentId={did}"
-        payload = {"serviceId": service_id, "consumerAddress": consumer_address}
+        payload = {
+            "documentId": did,
+            "serviceId": service_id,
+            "consumerAddress": consumer_address,
+        }
 
         if compute_environment:
             payload["computeEnv"] = compute_environment
@@ -147,9 +146,9 @@ class DataServiceProvider:
             userdata = json.dumps(userdata)
             payload["userdata"] = userdata
 
-        req.prepare_url(service_endpoint, payload)
-
-        response = DataServiceProvider._http_method("get", req.url)
+        response = DataServiceProvider._http_method(
+            "get", url=service_endpoint, params=payload
+        )
 
         if not response or not hasattr(response, "status_code"):
             raise DataProviderException("Response not found!")
@@ -157,13 +156,14 @@ class DataServiceProvider:
         if response.status_code != 200:
             msg = (
                 f"Initialize service failed at the initializeEndpoint "
-                f"{req.url}, reason {response.text}, status {response.status_code}"
+                f"{service_endpoint}, reason {response.text}, status {response.status_code}"
             )
             logger.error(msg)
             raise DataProviderException(msg)
 
         logger.info(
-            f"Service initialized successfully" f" initializeEndpoint {req.url}"
+            f"Service initialized successfully"
+            f" initializeEndpoint {service_endpoint}"
         )
 
         return response
@@ -194,11 +194,8 @@ class DataServiceProvider:
             )
             indexes = [index]
 
-        req = PreparedRequest()
-
-        # prepare_url function transforms ':' from "did:op:" into "%3".
-        service_endpoint += f"?documentId={did}"
         payload = {
+            "documentId": did,
             "serviceId": service_id,
             "consumerAddress": consumer_wallet.address,
             "transferTxId": tx_id,
@@ -213,8 +210,9 @@ class DataServiceProvider:
             payload["nonce"], payload["signature"] = DataServiceProvider.sign_message(
                 consumer_wallet, did
             )
-            req.prepare_url(service_endpoint, payload)
-            response = DataServiceProvider._http_method("get", req.url)
+            response = DataServiceProvider._http_method(
+                "get", url=service_endpoint, params=payload
+            )
 
             if not response or not hasattr(response, "status_code"):
                 raise DataProviderException("Response not found!")
@@ -222,7 +220,7 @@ class DataServiceProvider:
             if response.status_code != 200:
                 msg = (
                     f"Download asset failed at the downloadEndpoint "
-                    f"{req.url}, reason {response.text}, status {response.status_code}"
+                    f"{service_endpoint}, reason {response.text}, status {response.status_code}"
                 )
                 logger.error(msg)
                 raise DataProviderException(msg)
@@ -230,7 +228,9 @@ class DataServiceProvider:
             file_name = DataServiceProvider._get_file_name(response)
             DataServiceProvider.write_file(response, destination_folder, file_name)
 
-            logger.info(f"Asset downloaded successfully" f" downloadEndpoint {req.url}")
+            logger.info(
+                f"Asset downloaded successfully" f" downloadEndpoint {service_endpoint}"
+            )
 
     @staticmethod
     @enforce_types
