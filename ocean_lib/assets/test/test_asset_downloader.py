@@ -5,6 +5,8 @@
 import os
 
 import pytest
+
+from ocean_lib.agreements.consumable import AssetNotConsumable
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
@@ -42,6 +44,33 @@ def test_invalid_provider_uri(publisher_wallet):
     with pytest.raises(AssertionError):
         download_asset_files(
             ddo, provider_uri, publisher_wallet, "test_destination", "test_order_tx_id"
+        )
+
+
+def test_invalid_state(config, publisher_wallet):
+    """Tests different scenarios that raise AssetNotConsumable."""
+    data_provider = DataServiceProvider
+    ddo_dict = get_sample_ddo()
+    ddo = Asset.from_dict(ddo_dict)
+    ddo.nft["state"] = 1
+
+    with pytest.raises(AssetNotConsumable):
+        download_asset_files(
+            ddo,
+            data_provider.get_url(config),
+            publisher_wallet,
+            "test_destination",
+            "test_order_tx_id",
+        )
+
+    ddo.metadata = []
+    with pytest.raises(AssetNotConsumable):
+        download_asset_files(
+            ddo,
+            data_provider.get_url(config),
+            publisher_wallet,
+            "test_destination",
+            "test_order_tx_id",
         )
 
 

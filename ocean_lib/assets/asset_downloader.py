@@ -8,6 +8,8 @@ import os
 from typing import Optional
 
 from enforce_typing import enforce_types
+
+from ocean_lib.agreements.consumable import ConsumableCodes, AssetNotConsumable
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -60,6 +62,14 @@ def download_asset_files(
     asset_folder = os.path.join(destination, f"datafile.{asset.did}.{service_id}")
     if not os.path.exists(asset_folder):
         os.mkdir(asset_folder)
+
+    consumable_result = service.is_consumable(
+        asset,
+        {"type": "address", "value": consumer_wallet.address},
+        with_connectivity_check=True,
+    )
+    if consumable_result != ConsumableCodes.OK:
+        raise AssetNotConsumable(consumable_result)
 
     data_provider.download(
         did=asset.did,
