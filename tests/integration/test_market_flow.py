@@ -56,7 +56,10 @@ def test_market_flow(
         )
     else:
         order_tx_id = consumer_ocean.assets.pay_for_service(
-            asset, service, consumer_wallet, another_consumer_wallet.address
+            asset,
+            service,
+            consumer_wallet,
+            consumer_address=another_consumer_wallet.address,
         )
         asset_folder = consumer_ocean.assets.download_asset(
             asset,

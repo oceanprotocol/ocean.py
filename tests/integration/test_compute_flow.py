@@ -473,7 +473,9 @@ def test_compute_trusted_publisher(
     )
 
     # Expect to fail when algorithm with non-trusted publisher is used
-    with pytest.raises(ValueError):
+    with pytest.raises(
+        DataProviderException, match="this algorithm is not from a trusted publisher"
+    ):
         run_compute_test(
             ocean_instance=publisher_ocean_instance,
             publisher_wallet=publisher_wallet,
