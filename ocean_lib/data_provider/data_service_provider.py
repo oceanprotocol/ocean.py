@@ -25,7 +25,7 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
 from requests.exceptions import InvalidURL
-from requests.models import PreparedRequest, Response
+from requests.models import Response
 from requests.sessions import Session
 
 logger = logging.getLogger(__name__)
@@ -413,7 +413,6 @@ class DataServiceProvider:
             consumer, f"{consumer.address}{job_id}{str(index)}"
         )
 
-        req = PreparedRequest()
         params = {
             "signature": signature,
             "nonce": nonce,
@@ -422,13 +421,12 @@ class DataServiceProvider:
             "consumerAddress": consumer.address,
         }
 
-        req.prepare_url(service_endpoint, params)
-        compute_job_result_file_url = req.url
-
         logger.info(
-            f"invoke the computeResult endpoint with this url: {compute_job_result_file_url}"
+            f"invoke the computeResult endpoint with this url: {service_endpoint}"
         )
-        response = DataServiceProvider._http_method("get", compute_job_result_file_url)
+        response = DataServiceProvider._http_method(
+            "get", service_endpoint, params=params
+        )
 
         if response.status_code != 200:
             raise Exception(response.content)
@@ -610,7 +608,6 @@ class DataServiceProvider:
             consumer, f"{consumer.address}{job_id}{did}"
         )
 
-        req = PreparedRequest()
         payload = {
             "consumerAddress": consumer.address,
             "documentId": did,
@@ -618,10 +615,11 @@ class DataServiceProvider:
             "nonce": nonce,
             "signature": signature,
         }
-        req.prepare_url(service_endpoint, payload)
 
-        logger.info(f"invoke compute endpoint with this url: {req.url}")
-        response = DataServiceProvider._http_method(http_method, req.url)
+        logger.info(f"invoke compute endpoint with this url: {service_endpoint}")
+        response = DataServiceProvider._http_method(
+            http_method, service_endpoint, params=payload
+        )
         logger.debug(
             f"got provider execute response: {response.content} with status-code {response.status_code} "
         )
