@@ -293,6 +293,7 @@ def run_compute_test(
         print(f"got job result file: {str(result_file)}")
 
 
+@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_compute_raw_algo(
     publisher_wallet,
     publisher_ocean_instance,
@@ -326,6 +327,7 @@ def test_compute_raw_algo(
         )
 
 
+@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_compute_registered_algo(
     publisher_wallet,
     publisher_ocean_instance,
@@ -344,6 +346,7 @@ def test_compute_registered_algo(
     )
 
 
+@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_compute_multi_inputs(
     publisher_wallet,
     publisher_ocean_instance,
@@ -366,6 +369,7 @@ def test_compute_multi_inputs(
     )
 
 
+@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_compute_trusted_algorithm(
     publisher_wallet,
     publisher_ocean_instance,
@@ -405,6 +409,7 @@ def test_compute_trusted_algorithm(
         )
 
 
+@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_compute_update_trusted_algorithm(
     publisher_wallet,
     publisher_ocean_instance,
@@ -452,6 +457,7 @@ def test_compute_update_trusted_algorithm(
         )
 
 
+@pytest.mark.skip(reason="TODO: reinstate integration tests")
 def test_compute_trusted_publisher(
     publisher_wallet,
     publisher_ocean_instance,
