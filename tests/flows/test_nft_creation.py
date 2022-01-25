@@ -8,6 +8,7 @@ from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Permissions, ERC721Token
 from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
     get_address_of_type,
@@ -142,7 +143,7 @@ def test_fail_create_erc20(web3, config, publisher_wallet):
                 publisher_wallet.address,
                 ZERO_ADDRESS,
             ],
-            uints=[web3.toWei("1.0", "ether"), 0],
+            uints=[to_wei("1.0"), 0],
             bytess=[b""],
             from_wallet=publisher_wallet,
         )
@@ -276,7 +277,7 @@ def test_erc20_creation(
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        uints=[web3.toWei("0.5", "ether"), 0],
+        uints=[to_wei("0.5"), 0],
         bytess=[b""],
     )
     tx_result = erc721_token.create_erc20(erc_create_data, consumer_wallet)
@@ -405,7 +406,7 @@ def test_nft_owner_transfer(web3, config, publisher_wallet, consumer_wallet):
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        uints=[web3.toWei("0.5", "ether"), 0],
+        uints=[to_wei("0.5"), 0],
         bytess=[b""],
     )
     with pytest.raises(exceptions.ContractLogicError) as err:
@@ -431,7 +432,7 @@ def test_nft_owner_transfer(web3, config, publisher_wallet, consumer_wallet):
             consumer_wallet.address,
             ZERO_ADDRESS,
         ],
-        uints=[web3.toWei("0.5", "ether"), 0],
+        uints=[to_wei("0.5"), 0],
         bytess=[b""],
     )
 

@@ -87,7 +87,6 @@ In the Python console:
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 config = ExampleConfig.get_config()
 ocean = Ocean(config)
@@ -117,7 +116,7 @@ token_address = erc721_token.address
 print(f"token_address = '{token_address}'")
 
 # Prepare data for ERC20 token
-cap = to_wei(100)
+cap = ocean.to_wei(100)
 erc20_data = CreateErc20Data(
     template_index=1,  # default value
     strings=["ERC20DT1", "ERC20DT1Symbol"],  # name & symbol for ERC20 token
@@ -146,7 +145,7 @@ from ocean_lib.ocean.util import get_address_of_type
 # Get the dispenser
 dispenser = Dispenser(ocean.web3, get_address_of_type(config, "Dispenser"))
 
-max_amount = to_wei(50)
+max_amount = ocean.to_wei(50)
 dispenser_data = DispenserData(
     dispenser_address=dispenser.address,
     max_balance=max_amount,

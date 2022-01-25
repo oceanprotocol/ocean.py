@@ -30,7 +30,7 @@ def test_simple_flow():
     assert erc721_token.token_name() == "Dataset name"
     assert erc721_token.symbol() == "dtsymbol"
 
-    cap = to_wei(10)
+    cap = ocean.to_wei(10)
     erc20_data = CreateErc20Data(
         template_index=1,  # default value
         strings=["ERC20DT1", "ERC20DT1Symbol"],  # name & symbol for ERC20 token
