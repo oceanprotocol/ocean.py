@@ -5,7 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Fixed Rate Exchange Flow
 
-This quickstart describes fixed rate exchange flow.
+This quickstart describes fixed rate exchange flow created with OCEAN base token.
+The base token can be changed into something else, such as USDC, DAI etc., but
+it will require an extra fee.
 
 It focuses on Alice's experience as a publisher, and Bob's experience as a buyer & consumer.
 
