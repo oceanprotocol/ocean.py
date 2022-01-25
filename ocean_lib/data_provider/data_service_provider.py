@@ -181,8 +181,11 @@ class DataServiceProvider:
         userdata: Optional[Dict] = None,
     ) -> None:
 
+        provider_uri = DataServiceProvider.get_root_uri(
+            service_endpoint=service_endpoint
+        )
         fileinfo_response = DataServiceProvider.fileinfo(
-            did, service_id, "http://172.15.0.4:8030/api/services/fileinfo"
+            did, service_id, DataServiceProvider.build_fileinfo(provider_uri)[1]
         )
         files = fileinfo_response.json()
         indexes = range(len(files))
