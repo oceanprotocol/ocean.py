@@ -124,11 +124,8 @@ def ocean_assets_download_destination_file_helper(
 
     initialize_response = data_provider.initialize(
         did=ddo.did,
-        service_id=access_service.id,
+        service=access_service,
         consumer_address=publisher_wallet.address,
-        service_endpoint=data_provider.build_initialize_endpoint(config.provider_url)[
-            1
-        ],
     )
 
     provider_fees = initialize_response.json()["providerFee"]

@@ -184,7 +184,7 @@ class OceanAssets:
             # Encrypt DDO
             encrypt_response = DataServiceProvider.encrypt(
                 objects_to_encrypt=ddo_string,
-                encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
+                provider_uri=provider_uri,
             )
             document = encrypt_response.text
             return document, flags, ddo_hash
@@ -197,7 +197,7 @@ class OceanAssets:
         # Encrypt DDO
         encrypt_response = DataServiceProvider.encrypt(
             objects_to_encrypt=compressed_document,
-            encrypt_endpoint=f"{provider_uri}/api/services/encrypt",
+            provider_uri=provider_uri,
         )
 
         document = encrypt_response.text
@@ -555,12 +555,7 @@ class OceanAssets:
 
         data_provider = DataServiceProvider
         initialize_response = data_provider.initialize(
-            did=asset.did,
-            service_id=service.id,
-            consumer_address=consumer_address,
-            service_endpoint=data_provider.build_initialize_endpoint(
-                self._config.provider_url
-            )[1],
+            did=asset.did, service=service, consumer_address=consumer_address
         )
 
         tx_id = dt.start_order(
@@ -576,10 +571,6 @@ class OceanAssets:
     def encrypt_files(self, files: list):
         data_provider = DataServiceProvider
 
-        service_endpoint = data_provider.build_encrypt_endpoint(
-            self._config.provider_url
-        )[1]
-
-        encrypt_response = data_provider.encrypt(files, service_endpoint)
+        encrypt_response = data_provider.encrypt(files, self._config.provider_url)
 
         return encrypt_response.content.decode("utf-8")

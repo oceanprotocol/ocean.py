@@ -57,7 +57,7 @@ class DataServiceProvider:
     @staticmethod
     @enforce_types
     def encrypt(
-        objects_to_encrypt: Union[list, str, bytes], encrypt_endpoint: str
+        objects_to_encrypt: Union[list, str, bytes], provider_uri: str
     ) -> Response:
         if isinstance(objects_to_encrypt, list):
             data_items = list(map(lambda file: file.to_dict(), objects_to_encrypt))
@@ -68,6 +68,7 @@ class DataServiceProvider:
         else:
             payload = objects_to_encrypt
 
+        _, encrypt_endpoint = DataServiceProvider.build_encrypt_endpoint(provider_uri)
         response = DataServiceProvider._http_method(
             "post",
             encrypt_endpoint,
@@ -76,7 +77,7 @@ class DataServiceProvider:
         )
 
         if not response or not hasattr(response, "status_code"):
-            raise DataProviderException("Response not found!")
+            raise DataProviderException("Response not found!\n" + response.text)
 
         if response.status_code != 201:
             msg = (
@@ -95,27 +96,30 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def fileinfo(did: str, service_id: str, service_endpoint: str) -> Response:
-        payload = {"did": did, "serviceId": service_id}
+    def fileinfo(did: str, service: Any) -> Response:  # intermediary tweak
+        _, fileinfo_endpoint = DataServiceProvider.build_fileinfo(
+            service.service_endpoint
+        )
+        payload = {"did": did, "serviceId": service.id}
 
         response = DataServiceProvider._http_method(
-            "post", service_endpoint, json=payload
+            "post", fileinfo_endpoint, json=payload
         )
 
         if not response or not hasattr(response, "status_code"):
-            raise DataProviderException("Response not found!")
+            raise DataProviderException("Response not found!\n" + response.text)
 
         if response.status_code != 200:
             msg = (
                 f"Fileinfo service failed at the FileInfoEndpoint "
-                f"{service_endpoint}, reason {response.text}, status {response.status_code}"
+                f"{fileinfo_endpoint}, reason {response.text}, status {response.status_code}"
             )
             logger.error(msg)
             raise DataProviderException(msg)
 
         logger.info(
             f"Retrieved asset files successfully"
-            f" FileInfoEndpoint {service_endpoint}"
+            f" FileInfoEndpoint {fileinfo_endpoint}"
         )
         return response
 
@@ -123,19 +127,22 @@ class DataServiceProvider:
     @enforce_types
     def initialize(
         did: str,
-        service_id: str,
+        service: Any,  # intermediary tweak
         consumer_address: str,
-        service_endpoint: str,
         compute_environment: Optional[str] = None,
         userdata: Optional[Dict] = None,
         valid_until: Optional[int] = 0,
     ) -> Response:
 
-        req = PreparedRequest()
+        _, initialize_endpoint = DataServiceProvider.build_initialize_endpoint(
+            service.service_endpoint
+        )
 
-        # prepare_url function transforms ':' from "did:op:" into "%3".
-        service_endpoint += f"?documentId={did}"
-        payload = {"serviceId": service_id, "consumerAddress": consumer_address}
+        payload = {
+            "documentId": did,
+            "serviceId": service.id,
+            "consumerAddress": consumer_address,
+        }
 
         if compute_environment:
             payload["computeEnv"] = compute_environment
@@ -147,23 +154,23 @@ class DataServiceProvider:
             userdata = json.dumps(userdata)
             payload["userdata"] = userdata
 
-        req.prepare_url(service_endpoint, payload)
-
-        response = DataServiceProvider._http_method("get", req.url)
-
+        response = DataServiceProvider._http_method(
+            "get", url=initialize_endpoint, params=payload
+        )
         if not response or not hasattr(response, "status_code"):
-            raise DataProviderException("Response not found!")
+            raise DataProviderException("Response not found!\n" + response.text)
 
         if response.status_code != 200:
             msg = (
                 f"Initialize service failed at the initializeEndpoint "
-                f"{req.url}, reason {response.text}, status {response.status_code}"
+                f"{initialize_endpoint}, reason {response.text}, status {response.status_code}"
             )
             logger.error(msg)
             raise DataProviderException(msg)
 
         logger.info(
-            f"Service initialized successfully" f" initializeEndpoint {req.url}"
+            f"Service initialized successfully"
+            f" initializeEndpoint {initialize_endpoint}"
         )
 
         return response
@@ -172,18 +179,15 @@ class DataServiceProvider:
     @enforce_types
     def download(
         did: str,
-        service_id: str,
+        service: Any,  # intermediary tweak
         tx_id: str,
         consumer_wallet: Wallet,
-        service_endpoint: str,
         destination_folder: Union[str, Path],
         index: Optional[int] = None,
         userdata: Optional[Dict] = None,
     ) -> None:
-        _, fileinfo_endpoint = DataServiceProvider.build_fileinfo(service_endpoint)
-        fileinfo_response = DataServiceProvider.fileinfo(
-            did, service_id, fileinfo_endpoint
-        )
+        service_endpoint = service.service_endpoint
+        fileinfo_response = DataServiceProvider.fileinfo(did, service)
 
         files = fileinfo_response.json()
         indexes = range(len(files))
@@ -195,12 +199,13 @@ class DataServiceProvider:
             )
             indexes = [index]
 
-        req = PreparedRequest()
+        _, download_endpoint = DataServiceProvider.build_download_endpoint(
+            service_endpoint
+        )
 
-        # prepare_url function transforms ':' from "did:op:" into "%3".
-        service_endpoint += f"?documentId={did}"
         payload = {
-            "serviceId": service_id,
+            "documentId": did,
+            "serviceId": service.id,
             "consumerAddress": consumer_wallet.address,
             "transferTxId": tx_id,
         }
@@ -214,16 +219,17 @@ class DataServiceProvider:
             payload["nonce"], payload["signature"] = DataServiceProvider.sign_message(
                 consumer_wallet, did
             )
-            req.prepare_url(service_endpoint, payload)
-            response = DataServiceProvider._http_method("get", req.url)
+            response = DataServiceProvider._http_method(
+                "get", url=download_endpoint, params=payload
+            )
 
             if not response or not hasattr(response, "status_code"):
-                raise DataProviderException("Response not found!")
+                raise DataProviderException("Response not found!\n" + response.text)
 
             if response.status_code != 200:
                 msg = (
                     f"Download asset failed at the downloadEndpoint "
-                    f"{req.url}, reason {response.text}, status {response.status_code}"
+                    f"{download_endpoint}, reason {response.text}, status {response.status_code}"
                 )
                 logger.error(msg)
                 raise DataProviderException(msg)
@@ -231,7 +237,10 @@ class DataServiceProvider:
             file_name = DataServiceProvider._get_file_name(response)
             DataServiceProvider.write_file(response, destination_folder, file_name)
 
-            logger.info(f"Asset downloaded successfully" f" downloadEndpoint {req.url}")
+            logger.info(
+                f"Asset downloaded successfully"
+                f" downloadEndpoint {download_endpoint}"
+            )
 
     @staticmethod
     @enforce_types
@@ -462,7 +471,7 @@ class DataServiceProvider:
         """
         Return the service endpoints from the provider URL.
         """
-        provider_info = DataServiceProvider._http_method("get", provider_uri).json()
+        provider_info = DataServiceProvider._http_method("get", url=provider_uri).json()
 
         return provider_info["serviceEndpoints"]
 

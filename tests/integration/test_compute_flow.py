@@ -80,14 +80,10 @@ def process_order(
 
     # TODO: Refactor, use OceanAssets.order() instead of initialize and start_order
     # Initialize the service to get provider fees
-    _, initialize_url = DataServiceProvider.build_initialize_endpoint(
-        ocean_instance.config.provider_url
-    )
     initialize_response = DataServiceProvider.initialize(
         did=asset.did,
-        service_id=service.id,
+        service=service,
         consumer_address=consumer_wallet.address,
-        service_endpoint=initialize_url,
         # TODO: add a real compute environment once provider supports it
         compute_environment="doesn't matter for now",
         valid_until=int((datetime.now() + timedelta(hours=1)).timestamp()),

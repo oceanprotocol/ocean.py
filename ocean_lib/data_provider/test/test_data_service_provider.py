@@ -16,6 +16,8 @@ from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
 from requests.exceptions import InvalidURL
 from requests.models import Response
+
+from ocean_lib.services.service import Service
 from tests.resources.ddo_helpers import create_basics
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
@@ -72,19 +74,34 @@ def test_set_http_client(with_nice_client):
     assert isinstance(DataSP.get_http_client(), HttpClientNiceMock)
 
 
-def test_initialize_fails(with_evil_client):
-    """Tests failure of initialize endpoint."""
+def test_initialize_fails(config):
+    """Tests failures of initialize endpoint."""
+    mock_service = Service(
+        service_id="some_service_id",
+        service_type="some_service_type",
+        service_endpoint="http://mock/",
+        datatoken="some_dt",
+        files="some_files",
+        timeout=0,
+    )
+    with pytest.raises(InvalidURL) as err:
+        DataSP.initialize(
+            "some_did",
+            mock_service,
+            "some_consumer_address",
+            userdata={"test_dict_key": "test_dict_value"},
+        )
+    assert err.value.args[0] == f"InvalidURL {mock_service.service_endpoint}."
+
+    mock_service.service_endpoint = f"{config.provider_url}"
     with pytest.raises(DataProviderException) as err:
         DataSP.initialize(
             "some_did",
-            "service_id",
+            mock_service,
             "some_consumer_address",
-            "http://mock/",
             userdata={"test_dict_key": "test_dict_value"},
         )
-    assert err.value.args[0].startswith(
-        "Initialize service failed at the initializeEndpoint"
-    )
+    assert err.value.args[0].startswith("Response not found!")
 
 
 def test_start_compute_job_fails_empty(with_empty_client, consumer_wallet):
@@ -139,7 +156,7 @@ def test_delete_job_result(with_nice_client, provider_wallet):
     assert result == {"good_job": "with_mock_delete"}
 
 
-def test_encrypt(web3, provider_wallet):
+def test_encrypt(web3, config, provider_wallet):
     """Tests successful encrypt job."""
     key = provider_wallet.private_key
     file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
@@ -148,9 +165,7 @@ def test_encrypt(web3, provider_wallet):
     file2 = FilesTypeFactory(file2_dict)
 
     # Encrypt file objects
-    result = DataSP.encrypt(
-        [file1, file2], "http://localhost:8030/api/services/encrypt"
-    )
+    result = DataSP.encrypt([file1, file2], config.provider_url)
     encrypted_files = result.content.decode("utf-8")
     assert result.status_code == 201
     assert result.headers["Content-type"] == "text/plain"
@@ -166,9 +181,7 @@ def test_encrypt(web3, provider_wallet):
 
     # Encrypt a simple string
     test_string = "hello_world"
-    encrypt_result = DataSP.encrypt(
-        test_string, "http://localhost:8030/api/services/encrypt"
-    )
+    encrypt_result = DataSP.encrypt(test_string, config.provider_url)
     encrypted_document = encrypt_result.content.decode("utf-8")
     assert result.status_code == 201
     assert result.headers["Content-type"] == "text/plain"
@@ -196,9 +209,7 @@ def test_fileinfo(web3, config, publisher_wallet, publisher_ocean_instance):
     )
     access_service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
 
-    fileinfo_result = DataSP.fileinfo(
-        ddo.did, access_service.id, DataSP.build_fileinfo(config.provider_url)[1]
-    )
+    fileinfo_result = DataSP.fileinfo(ddo.did, access_service)
     assert fileinfo_result.status_code == 200
     files_info = fileinfo_result.json()
     assert len(files_info) == 2
@@ -224,9 +235,8 @@ def test_initialize(web3, config, publisher_wallet, publisher_ocean_instance):
 
     initialize_result = DataSP.initialize(
         did=ddo.did,
-        service_id=access_service.id,
+        service=access_service,
         consumer_address=publisher_wallet.address,
-        service_endpoint=DataSP.build_initialize_endpoint(config.provider_url)[1],
     )
     assert initialize_result
     assert initialize_result.status_code == 200

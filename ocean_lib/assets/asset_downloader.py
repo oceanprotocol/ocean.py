@@ -50,23 +50,20 @@ def download_asset_files(
         raise AssertionError(
             'Consume asset failed, service definition is missing the "serviceEndpoint".'
         )
-    _, service_endpoint = data_provider.build_download_endpoint(provider_uri)
-    service_id = service.id
 
     if index is not None:
         assert isinstance(index, int), logger.error("index has to be an integer.")
         assert index >= 0, logger.error("index has to be 0 or a positive integer.")
 
-    asset_folder = os.path.join(destination, f"datafile.{asset.did}.{service_id}")
+    asset_folder = os.path.join(destination, f"datafile.{asset.did}.{service.id}")
     if not os.path.exists(asset_folder):
         os.mkdir(asset_folder)
 
     data_provider.download(
         did=asset.did,
-        service_id=service_id,
+        service=service,
         tx_id=order_tx_id,
         consumer_wallet=consumer_wallet,
-        service_endpoint=service_endpoint,
         destination_folder=asset_folder,
         index=index,
         userdata=userdata,
