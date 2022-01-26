@@ -49,3 +49,5 @@ jobs:
         with:
           coverageCommand: tox
           debug: true
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1
