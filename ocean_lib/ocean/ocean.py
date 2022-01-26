@@ -22,7 +22,8 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei as _to_wei, DECIMALS_18
+from ocean_lib.web3_internal.currency import DECIMALS_18
+from ocean_lib.web3_internal.currency import to_wei as _to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
 
@@ -69,13 +70,13 @@ class Ocean:
                 else "metadataStoreUri"
             )
             metadata_cache_uri = config.get(
-                cache_key, config.get("metadata_cache_uri", "http://localhost:5000")
+                cache_key, config.get("metadata_cache_uri", "http://172.15.0.5:5000")
             )
             config_dict = {
                 "eth-network": {"network": config.get("network", "")},
                 "resources": {
                     "metadata_cache_uri": metadata_cache_uri,
-                    "provider.url": config.get("providerUri", "http://localhost:8030"),
+                    "provider.url": config.get("providerUri", "http://172.15.0.4:8030"),
                 },
             }
             config = Config(options_dict=config_dict)
@@ -271,9 +272,7 @@ class Ocean:
         from_wallet: Wallet,
     ) -> BPool:
         base_token.approve(
-            get_address_of_type(self.config, "Router"),
-            self.to_wei("2000"),
-            from_wallet,
+            get_address_of_type(self.config, "Router"), self.to_wei("2000"), from_wallet
         )
 
         pool_data = PoolData(
