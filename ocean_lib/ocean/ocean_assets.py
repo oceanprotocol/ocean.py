@@ -223,7 +223,7 @@ class OceanAssets:
         self,
         metadata: dict,
         publisher_wallet: Wallet,
-        encrypted_files: str,
+        encrypted_files: Optional[str] = None,
         services: Optional[list] = None,
         credentials: Optional[dict] = None,
         provider_uri: Optional[str] = None,
@@ -294,11 +294,11 @@ class OceanAssets:
             erc721_address = registered_event[0].args.newTokenAddress
             erc721_token = ERC721Token(self._web3, erc721_address)
             if not erc721_token:
-                logger.warning("Creating new data token failed.")
+                logger.warning("Creating new datatoken failed.")
                 return None
             logger.info(
-                f"Successfully created data token with address "
-                f"{erc721_token.address} for new dataset asset."
+                f"Successfully created datatoken with address "
+                f"{erc721_token.address}."
             )
         else:
             # verify nft address
@@ -532,6 +532,7 @@ class OceanAssets:
         asset: Asset,
         service: Service,
         wallet: Wallet,
+        initialize_args: Optional[dict] = None,
         consumer_address: Optional[str] = None,
     ):
         dt = ERC20Token(self._web3, service.datatoken)
@@ -554,14 +555,20 @@ class OceanAssets:
             raise AssetNotConsumable(consumable_result)
 
         data_provider = DataServiceProvider
-        initialize_response = data_provider.initialize(
-            did=asset.did,
-            service_id=service.id,
-            consumer_address=consumer_address,
-            service_endpoint=data_provider.build_initialize_endpoint(
+
+        built_initialize_args = {
+            "did": asset.did,
+            "service_id": service.id,
+            "consumer_address": consumer_address,
+            "service_endpoint": data_provider.build_initialize_endpoint(
                 self._config.provider_url
             )[1],
-        )
+        }
+
+        if initialize_args:
+            built_initialize_args.update(initialize_args)
+
+        initialize_response = data_provider.initialize(**built_initialize_args)
 
         tx_id = dt.start_order(
             consumer=consumer_address,

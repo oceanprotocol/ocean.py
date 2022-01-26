@@ -76,7 +76,9 @@ class DataServiceProvider:
         )
 
         if not response or not hasattr(response, "status_code"):
-            raise DataProviderException("Response not found!")
+            raise DataProviderException(
+                f"Failed to get a response for request: encryptEndpoint={encrypt_endpoint}, payload={payload}, response is {response}"
+            )
 
         if response.status_code != 201:
             msg = (
@@ -103,11 +105,13 @@ class DataServiceProvider:
         )
 
         if not response or not hasattr(response, "status_code"):
-            raise DataProviderException("Response not found!")
+            raise DataProviderException(
+                f"Failed to get a response for request: fileinfoEndpoint={service_endpoint}, payload={payload}, response is {response}"
+            )
 
         if response.status_code != 200:
             msg = (
-                f"Fileinfo service failed at the FileInfoEndpoint "
+                f"Fileinfo service failed at the fileinfoEndpoint "
                 f"{service_endpoint}, reason {response.text}, status {response.status_code}"
             )
             logger.error(msg)
@@ -152,7 +156,9 @@ class DataServiceProvider:
         response = DataServiceProvider._http_method("get", req.url)
 
         if not response or not hasattr(response, "status_code"):
-            raise DataProviderException("Response not found!")
+            raise DataProviderException(
+                f"Failed to get a response for request: initializeEndpoint={service_endpoint}, payload={payload}, response is {response}"
+            )
 
         if response.status_code != 200:
             msg = (
@@ -218,7 +224,9 @@ class DataServiceProvider:
             response = DataServiceProvider._http_method("get", req.url)
 
             if not response or not hasattr(response, "status_code"):
-                raise DataProviderException("Response not found!")
+                raise DataProviderException(
+                    f"Failed to get a response for request: downloadEndpoint={service_endpoint}, payload={payload}, response is {response}"
+                )
 
             if response.status_code != 200:
                 msg = (
@@ -241,8 +249,7 @@ class DataServiceProvider:
         return nonce, sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
 
     @staticmethod
-    # TODO reinstate @enforce_types
-    # @enforce_types
+    # @enforce_types omitted due to subscripted generics error
     def start_compute_job(
         service_endpoint: str,
         consumer: Wallet,
@@ -264,7 +271,7 @@ class DataServiceProvider:
         :param compute_environment: str compute environment id
         :param algorithm: ComputeInput algorithm witha download service.
         :param algorithm_meta: AlgorithmMetadata algorithm metadata
-        :param algorithm_custom_data: TODO
+        :param algorithm_custom_data: dict customizable algo parameters (ie. no of iterations, etc)
         :param input_datasets: List[ComputeInput] additional input datasets
         :return job_info dict
         """
@@ -282,6 +289,7 @@ class DataServiceProvider:
             input_datasets=input_datasets,
         )
         logger.info(f"invoke start compute endpoint with this url: {payload}")
+
         response = DataServiceProvider._http_method(
             "post",
             service_endpoint,
@@ -289,20 +297,21 @@ class DataServiceProvider:
             headers={"content-type": "application/json"},
         )
         if response is None:
-            raise AssertionError(
-                f"Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}, response is {response}"
+            raise DataProviderException(
+                f"Failed to get a response for request: computeStartEndpoint={service_endpoint}, payload={payload}, response is {response}"
             )
 
         logger.debug(
             f"got DataProvider execute response: {response.content} with status-code {response.status_code} "
         )
 
-        logger.debug(
-            f"got DataProvider execute response: {response.content} with status-code {response.status_code} "
-        )
-
         if response.status_code not in (201, 200):
-            raise ValueError(response.content.decode("utf-8"))
+            msg = (
+                f"Start Compute failed at the computeStartEndpoint "
+                f"{service_endpoint}, reason {response.text}, status {response.status_code}"
+            )
+            logger.error(msg)
+            raise DataProviderException(msg)
 
         try:
             job_info = json.loads(response.content.decode("utf-8"))
@@ -646,8 +655,7 @@ class DataServiceProvider:
             return None
 
     @staticmethod
-    # TODO: reinstate @enforce_types
-    # @enforce_types
+    # @enforce_types omitted due to subscripted generics error
     def _prepare_compute_payload(
         consumer: Wallet,
         dataset: ComputeInput,
