@@ -19,6 +19,11 @@ CreateERC721Data = NamedTuple(
     ],
 )
 
+CreateERC721DataNoDeployer = NamedTuple(
+    "CreateERC721DataNoDeployer",
+    [("name", str), ("symbol", str), ("template_index", int), ("token_uri", str)],
+)
+
 CreateErc20Data = NamedTuple(
     "CreateErc20Data",
     [
@@ -33,6 +38,12 @@ CreateErc20Data = NamedTuple(
 PoolData = NamedTuple(
     "PoolData",
     [("ss_params", List[int]), ("swap_fees", List[int]), ("addresses", List[str])],
+)
+
+# TODO: remove once the order for the tuples is the same
+PoolData2 = NamedTuple(
+    "PoolData",
+    [("addresses", List[str]), ("ss_params", List[int]), ("swap_fees", List[int])],
 )
 
 BPoolData = NamedTuple(

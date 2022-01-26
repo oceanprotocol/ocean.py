@@ -7,7 +7,12 @@ from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
-from ocean_lib.models.models_structures import CreateErc20Data, OrderData
+from ocean_lib.models.models_structures import (
+    CreateErc20Data,
+    CreateERC721DataNoDeployer,
+    OrderData,
+    PoolData2,
+)
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
@@ -134,24 +139,25 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     erc20_token.add_minter(consumer_wallet.address, publisher_wallet)
 
     # Tests creating NFT with ERC20 successfully
-    nft_create_data = {
-        "name": "72120Bundle",
-        "symbol": "72Bundle",
-        "templateIndex": 1,
-        "tokenURI": "https://oceanprotocol.com/nft/",
-    }
-    erc_create_data = {
-        "strings": ["ERC20B1", "ERC20DT1Symbol"],
-        "templateIndex": 1,
-        "addresses": [
+    nft_create_data = CreateERC721DataNoDeployer(
+        name="72120Bundle",
+        symbol="72Bundle",
+        template_index=1,
+        token_uri="https://oceanprotocol.com/nft/",
+    )
+
+    erc_create_data = CreateErc20Data(
+        strings=["ERC20B1", "ERC20DT1Symbol"],
+        template_index=1,
+        addresses=[
             publisher_wallet.address,
             consumer_wallet.address,
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        "uints": [to_wei("10"), 0],
-        "bytess": [b""],
-    }
+        uints=[to_wei("10"), 0],
+        bytess=[b""],
+    )
 
     tx = erc721_factory.create_nft_with_erc(
         nft_create_data, erc_create_data, publisher_wallet
@@ -197,20 +203,21 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         erc721_factory_address, initial_pool_liquidity, publisher_wallet
     )
 
-    erc_create_data_pool = {
-        "strings": ["ERC20WithPool", "ERC20P"],
-        "templateIndex": 1,
-        "addresses": [
+    erc_create_data_pool = CreateErc20Data(
+        strings=["ERC20WithPool", "ERC20P"],
+        template_index=1,
+        addresses=[
             publisher_wallet.address,
             consumer_wallet.address,
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        "uints": [to_wei("0.05"), 0],
-        "bytess": [b""],
-    }
-    pool_data = {
-        "addresses": [
+        uints=[to_wei("0.05"), 0],
+        bytess=[b""],
+    )
+
+    pool_data = PoolData2(
+        addresses=[
             side_staking_address,
             erc20_address,
             erc721_factory_address,
@@ -218,7 +225,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
             consumer_wallet.address,
             pool_template_address,
         ],
-        "ssParams": [
+        ss_params=[
             to_wei("1"),
             erc20_token.decimals(),
             initial_pool_liquidity
@@ -227,8 +234,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
             2500000,
             initial_pool_liquidity,
         ],
-        "swapFees": [to_wei("0.001"), to_wei("0.001")],
-    }
+        swap_fees=[to_wei("0.001"), to_wei("0.001")],
+    )
     tx = erc721_factory.create_nft_erc_with_pool(
         nft_create_data, erc_create_data_pool, pool_data, publisher_wallet
     )

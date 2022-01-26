@@ -10,7 +10,9 @@ from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.models_structures import (
     CreateErc20Data,
     CreateERC721Data,
+    CreateERC721DataNoDeployer,
     OrderData,
+    PoolData2,
 )
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
@@ -118,19 +120,42 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return self.send_transaction("startMultipleTokenOrder", (orders,), from_wallet)
 
     def create_nft_with_erc(
-        self, nft_create_data: dict, erc_create_data: dict, from_wallet: Wallet
+        self,
+        nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
+        erc_create_data: Union[dict, tuple, CreateErc20Data],
+        from_wallet: Wallet,
     ) -> str:
+        # TODO: this will be handled in web3 py
+        if isinstance(nft_create_data, CreateERC721DataNoDeployer):
+            nft_create_data = tuple(nft_create_data)
+
+        # TODO: this will be handled in web3 py
+        if isinstance(erc_create_data, CreateErc20Data):
+            erc_create_data = tuple(erc_create_data)
+
         return self.send_transaction(
             "createNftWithErc", (nft_create_data, erc_create_data), from_wallet
         )
 
     def create_nft_erc_with_pool(
         self,
-        nft_create_data: dict,
-        erc_create_data: dict,
-        pool_data: dict,
+        nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
+        erc_create_data: Union[dict, tuple, CreateErc20Data],
+        pool_data: Union[dict, tuple, PoolData2],
         from_wallet: Wallet,
     ) -> str:
+        # TODO: this will be handled in web3 py
+        if isinstance(nft_create_data, CreateERC721DataNoDeployer):
+            nft_create_data = tuple(nft_create_data)
+
+        # TODO: this will be handled in web3 py
+        if isinstance(erc_create_data, CreateErc20Data):
+            erc_create_data = tuple(erc_create_data)
+
+        # TODO: this will be handled in web3 py
+        if isinstance(pool_data, PoolData2):
+            pool_data = tuple(pool_data)
+
         return self.send_transaction(
             "createNftErcWithPool",
             (nft_create_data, erc_create_data, pool_data),
