@@ -76,7 +76,9 @@ class DataServiceProvider:
         )
 
         if not response or not hasattr(response, "status_code"):
-            raise DataProviderException("Response not found!")
+            raise DataProviderException(
+                f"Failed to get a response for request: serviceEndpoint={encrypt_endpoint}, payload={payload}, response is {response}"
+            )
 
         if response.status_code != 201:
             msg = (
@@ -103,7 +105,9 @@ class DataServiceProvider:
         )
 
         if not response or not hasattr(response, "status_code"):
-            raise DataProviderException("Response not found!")
+            raise DataProviderException(
+                f"Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}, response is {response}"
+            )
 
         if response.status_code != 200:
             msg = (
@@ -152,7 +156,9 @@ class DataServiceProvider:
         response = DataServiceProvider._http_method("get", req.url)
 
         if not response or not hasattr(response, "status_code"):
-            raise DataProviderException("Response not found!")
+            raise DataProviderException(
+                f"Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}, response is {response}"
+            )
 
         if response.status_code != 200:
             msg = (
@@ -218,7 +224,9 @@ class DataServiceProvider:
             response = DataServiceProvider._http_method("get", req.url)
 
             if not response or not hasattr(response, "status_code"):
-                raise DataProviderException("Response not found!")
+                raise DataProviderException(
+                    f"Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}, response is {response}"
+                )
 
             if response.status_code != 200:
                 msg = (
@@ -288,7 +296,7 @@ class DataServiceProvider:
             headers={"content-type": "application/json"},
         )
         if response is None:
-            raise AssertionError(
+            raise DataProviderException(
                 f"Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}, response is {response}"
             )
 
