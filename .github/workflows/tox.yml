@@ -28,7 +28,7 @@ jobs:
       - name: Run Barge
         working-directory: ${{ github.workspace }}/barge
         env:
-          OPERATOR_SERVICE_URL: https://c2d-dev.operator.oceanprotocol.com/
+          OPERATOR_SERVICE_URL: https://nextv.operator.oceanprotocol.com
           PROVIDER_VERSION: logging
         run: |
           bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-rbac > start_ocean.log &
