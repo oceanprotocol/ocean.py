@@ -77,7 +77,7 @@ class DataServiceProvider:
 
         if not response or not hasattr(response, "status_code"):
             raise DataProviderException(
-                f"Failed to get a response for request: serviceEndpoint={encrypt_endpoint}, payload={payload}, response is {response}"
+                f"Failed to get a response for request: encryptEndpoint={encrypt_endpoint}, payload={payload}, response is {response}"
             )
 
         if response.status_code != 201:
@@ -106,12 +106,12 @@ class DataServiceProvider:
 
         if not response or not hasattr(response, "status_code"):
             raise DataProviderException(
-                f"Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}, response is {response}"
+                f"Failed to get a response for request: fileinfoEndpoint={service_endpoint}, payload={payload}, response is {response}"
             )
 
         if response.status_code != 200:
             msg = (
-                f"Fileinfo service failed at the FileInfoEndpoint "
+                f"Fileinfo service failed at the fileinfoEndpoint "
                 f"{service_endpoint}, reason {response.text}, status {response.status_code}"
             )
             logger.error(msg)
@@ -157,7 +157,7 @@ class DataServiceProvider:
 
         if not response or not hasattr(response, "status_code"):
             raise DataProviderException(
-                f"Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}, response is {response}"
+                f"Failed to get a response for request: initializeEndpoint={service_endpoint}, payload={payload}, response is {response}"
             )
 
         if response.status_code != 200:
@@ -225,7 +225,7 @@ class DataServiceProvider:
 
             if not response or not hasattr(response, "status_code"):
                 raise DataProviderException(
-                    f"Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}, response is {response}"
+                    f"Failed to get a response for request: downloadEndpoint={service_endpoint}, payload={payload}, response is {response}"
                 )
 
             if response.status_code != 200:
@@ -289,6 +289,7 @@ class DataServiceProvider:
             input_datasets=input_datasets,
         )
         logger.info(f"invoke start compute endpoint with this url: {payload}")
+
         response = DataServiceProvider._http_method(
             "post",
             service_endpoint,
@@ -297,19 +298,20 @@ class DataServiceProvider:
         )
         if response is None:
             raise DataProviderException(
-                f"Failed to get a response for request: serviceEndpoint={service_endpoint}, payload={payload}, response is {response}"
+                f"Failed to get a response for request: computeStartEndpoint={service_endpoint}, payload={payload}, response is {response}"
             )
 
         logger.debug(
             f"got DataProvider execute response: {response.content} with status-code {response.status_code} "
         )
 
-        logger.debug(
-            f"got DataProvider execute response: {response.content} with status-code {response.status_code} "
-        )
-
         if response.status_code not in (201, 200):
-            raise DataProviderException(response.content.decode("utf-8"))
+            msg = (
+                f"Start Compute failed at the computeStartEndpoint "
+                f"{service_endpoint}, reason {response.text}, status {response.status_code}"
+            )
+            logger.error(msg)
+            raise DataProviderException(msg)
 
         try:
             job_info = json.loads(response.content.decode("utf-8"))
