@@ -33,11 +33,7 @@ def test_main(
 
     # Tests deploy erc721
     tx = erc721_factory.deploy_erc721_contract(
-        "NFT",
-        "NFTS",
-        1,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
+        ("NFT", "NFTS", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
         publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -111,9 +107,7 @@ def test_main(
     initial_ocean_liq = to_wei("0.02")
     ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
     ocean_contract.approve(
-        get_address_of_type(config, "Router"),
-        to_wei("0.02"),
-        consumer_wallet,
+        get_address_of_type(config, "Router"), to_wei("0.02"), consumer_wallet
     )
 
     pool_data = PoolData(

@@ -8,7 +8,7 @@ import pytest
 from ocean_lib.models.erc20_token import ERC20Token, RolesERC20
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.models.models_structures import CreateErc20Data, ProviderFees
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
@@ -44,11 +44,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     publish_market_fee_amount = 5
 
     tx = erc721_factory.deploy_erc721_contract(
-        "DT1",
-        "DTSYMBOL",
-        1,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
+        ("DT1", "DTSYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
         publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -68,11 +64,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     # Tests current NFT count
     current_nft_count = erc721_factory.get_current_nft_count()
     erc721_factory.deploy_erc721_contract(
-        "DT2",
-        "DTSYMBOL1",
-        1,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
+        ("DT2", "DTSYMBOL1", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
         publisher_wallet,
     )
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
@@ -217,17 +209,17 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     signed = web3.eth.sign(provider_fee_address, data=message)
     signature = split_signature(signed)
 
-    provider_fee = {
-        "providerFeeAddress": provider_fee_address,
-        "providerFeeToken": provider_fee_token,
-        "providerFeeAmount": provider_fee_amount,
-        "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
+    provider_fee = ProviderFees(
+        provider_fee_address=provider_fee_address,
+        provider_fee_token=provider_fee_token,
+        provider_fee_amount=provider_fee_amount,
+        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
         # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
-        "v": signature.v,
-        "r": signature.r,
-        "s": signature.s,
-        "validUntil": 0,
-    }
+        v=signature.v,
+        r=signature.r,
+        s=signature.s,
+        valid_until=0,
+    )
 
     erc20.start_order(
         consumer=consumer_wallet.address,
@@ -283,10 +275,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     # Test transterFrom too
     initial_consumer_balance = erc20.balanceOf(consumer_wallet.address)
     erc20.transferFrom(
-        consumer_wallet.address,
-        publisher_wallet.address,
-        to_wei("1"),
-        publisher_wallet,
+        consumer_wallet.address, publisher_wallet.address, to_wei("1"), publisher_wallet
     )
     assert erc20.balanceOf(
         consumer_wallet.address

@@ -2,7 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import List
+from typing import List, Union
 
 from enforce_typing import enforce_types
 from ocean_lib.models import balancer_constants
@@ -42,21 +42,11 @@ class BPool(BTokenBase):
         return self.events.LOG_BPT()
 
     def initialize(
-        self, bpool_initialized: BPoolInitialized, from_wallet: Wallet
+        self,
+        bpool_initialized: Union[list, tuple, BPoolInitialized],
+        from_wallet: Wallet,
     ) -> str:
-        return self.send_transaction(
-            "initialize",
-            (
-                bpool_initialized.controller,
-                bpool_initialized.factory,
-                bpool_initialized.swap_fees,
-                bpool_initialized.public_swap,
-                bpool_initialized.finalized,
-                bpool_initialized.tokens,
-                bpool_initialized.fee_collectors,
-            ),
-            from_wallet,
-        )
+        return self.send_transaction("initialize", bpool_initialized, from_wallet)
 
     def setup(
         self,

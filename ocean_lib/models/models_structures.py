@@ -8,6 +8,17 @@
 from enum import Enum
 from typing import List, NamedTuple
 
+CreateERC721Data = NamedTuple(
+    "CreateErc721Data",
+    [
+        ("name", str),
+        ("symbol", str),
+        ("template_index", int),
+        ("additional_erc20_deployer", str),
+        ("token_uri", str),
+    ],
+)
+
 CreateErc20Data = NamedTuple(
     "CreateErc20Data",
     [
@@ -58,6 +69,7 @@ DispenserData = NamedTuple(
         ("dispenser_address", str),
         ("max_tokens", int),
         ("max_balance", int),
+        ("with_mint", bool),
         ("allowed_swapper", str),
     ],
 )
@@ -95,7 +107,7 @@ ProviderFees = NamedTuple(
         ("v", str),
         ("r", str),
         ("s", str),
-        ("validUntil", int),
+        ("valid_until", int),
         ("provider_data", bytes),
     ],
 )

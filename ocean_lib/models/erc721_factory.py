@@ -2,12 +2,16 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import List, Optional
+from typing import Optional, Union
 
 from enforce_typing import enforce_types
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.models_structures import OrderData
+from ocean_lib.models.models_structures import (
+    CreateErc20Data,
+    CreateERC721Data,
+    OrderData,
+)
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
 
@@ -60,19 +64,9 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return bool(log and log[0].args.newTokenAddress == nft)
 
     def deploy_erc721_contract(
-        self,
-        name: str,
-        symbol: str,
-        template_index: int,
-        additional_erc20_deployer: str,
-        token_uri: str,
-        from_wallet: Wallet,
+        self, erc721_data: Union[dict, tuple, CreateERC721Data], from_wallet: Wallet
     ):
-        return self.send_transaction(
-            "deployERC721Contract",
-            (name, symbol, template_index, additional_erc20_deployer, token_uri),
-            from_wallet,
-        )
+        return self.send_transaction("deployERC721Contract", erc721_data, from_wallet)
 
     def get_current_nft_count(self) -> int:
         return self.contract.caller.getCurrentNFTCount()
@@ -87,19 +81,9 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return self.contract.caller.isContract(account_address)
 
     def create_token(
-        self,
-        template_index: int,
-        strings: List[str],
-        addresses: List[str],
-        uints: List[int],
-        bytess: List[bytes],
-        from_wallet: Wallet,
+        self, token_data: Union[list, dict, CreateErc20Data], from_wallet: Wallet
     ) -> str:
-        return self.send_transaction(
-            "createToken",
-            (template_index, strings, addresses, uints, bytess),
-            from_wallet,
-        )
+        return self.send_transaction("createToken", token_data, from_wallet)
 
     def get_current_token_count(self) -> int:
         return self.contract.caller.getCurrentTokenCount()

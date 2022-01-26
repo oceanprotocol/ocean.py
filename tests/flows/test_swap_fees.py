@@ -34,11 +34,7 @@ def test_deploy_erc721_and_manage(
         web3, get_address_of_type(config, "ERC721Factory")
     )
     tx = erc721_factory.deploy_erc721_contract(
-        "NFT",
-        "SYMBOL",
-        1,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
+        ("NFT", "SYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
         factory_deployer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -182,10 +178,7 @@ def test_pool_ocean(
     assert bpool.calc_single_in_pool_out(
         erc20_address, to_wei("1")
     ) == bpool.calc_single_in_pool_out(
-        get_address_of_type(config, "Ocean"),
-        to_wei(
-            "1",
-        ),
+        get_address_of_type(config, "Ocean"), to_wei("1")
     )
     assert bpool.calc_single_out_pool_in(
         erc20_address, to_wei("1")
@@ -203,12 +196,7 @@ def test_pool_ocean(
 
     tx = bpool.swap_exact_amount_in(
         [ocean_contract.address, erc20_address, another_consumer_wallet.address],
-        [
-            to_wei("0.1"),
-            to_wei("0.0001"),
-            to_wei("100"),
-            0,
-        ],
+        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
         publisher_wallet,
     )
 
@@ -289,12 +277,7 @@ def test_pool_ocean(
 
     tx = bpool.swap_exact_amount_in(
         [erc20_address, ocean_contract.address, another_consumer_wallet.address],
-        [
-            to_wei("0.1"),
-            to_wei("0.0001"),
-            to_wei("100"),
-            0,
-        ],
+        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
         publisher_wallet,
     )
 
@@ -343,12 +326,7 @@ def test_pool_ocean(
 
     tx = bpool.swap_exact_amount_out(
         [erc20_token.address, ocean_contract.address, another_consumer_wallet.address],
-        [
-            to_wei("0.1"),
-            to_wei("0.0001"),
-            to_wei("100"),
-            0,
-        ],
+        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
         publisher_wallet,
     )
 
@@ -395,11 +373,7 @@ def test_pool_ocean(
 
     erc20_token.approve(bpool_address, to_wei("1000"), publisher_wallet)
 
-    tx = bpool.join_pool(
-        to_wei("0.01"),
-        [to_wei("50"), to_wei("50")],
-        publisher_wallet,
-    )
+    tx = bpool.join_pool(to_wei("0.01"), [to_wei("50"), to_wei("50")], publisher_wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
@@ -427,10 +401,7 @@ def test_pool_ocean(
     ocean_contract.approve(bpool_address, to_wei("1000"), consumer_wallet)
 
     tx = bpool.join_swap_extern_amount_in(
-        ocean_contract.address,
-        to_wei("1"),
-        to_wei("0.01"),
-        consumer_wallet,
+        ocean_contract.address, to_wei("1"), to_wei("0.01"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -519,9 +490,7 @@ def test_pool_ocean(
     dt_balance_before_exit = side_staking.get_datatoken_balance(erc20_token.address)
 
     tx = bpool.exit_pool(
-        to_wei("0.5"),
-        [to_wei("0.001"), to_wei("0.001")],
-        consumer_wallet,
+        to_wei("0.5"), [to_wei("0.001"), to_wei("0.001")], consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -567,10 +536,7 @@ def test_pool_ocean(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_pool_amount_in(
-        ocean_contract.address,
-        to_wei("0.05"),
-        to_wei("0.005"),
-        consumer_wallet,
+        ocean_contract.address, to_wei("0.05"), to_wei("0.005"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -617,10 +583,7 @@ def test_pool_ocean(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_pool_amount_in(
-        erc20_token.address,
-        to_wei("0.05"),
-        to_wei("0.005"),
-        consumer_wallet,
+        erc20_token.address, to_wei("0.05"), to_wei("0.005"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -666,10 +629,7 @@ def test_pool_ocean(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_extern_amount_out(
-        ocean_contract.address,
-        to_wei("0.001"),
-        to_wei("0.005"),
-        consumer_wallet,
+        ocean_contract.address, to_wei("0.001"), to_wei("0.005"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -717,10 +677,7 @@ def test_pool_ocean(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_extern_amount_out(
-        erc20_token.address,
-        to_wei("0.001"),
-        to_wei("0.05"),
-        consumer_wallet,
+        erc20_token.address, to_wei("0.001"), to_wei("0.05"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -892,12 +849,7 @@ def test_pool_dai(
 
     tx = bpool.swap_exact_amount_in(
         [dai_contract.address, erc20_address, another_consumer_wallet.address],
-        [
-            to_wei("0.1"),
-            to_wei("0.0001"),
-            to_wei("100"),
-            0,
-        ],
+        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
         publisher_wallet,
     )
 
@@ -972,12 +924,7 @@ def test_pool_dai(
 
     tx = bpool.swap_exact_amount_in(
         [erc20_address, dai_contract.address, another_consumer_wallet.address],
-        [
-            to_wei("0.1"),
-            to_wei("0.0001"),
-            to_wei("100"),
-            0,
-        ],
+        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
         publisher_wallet,
     )
 
@@ -1023,12 +970,7 @@ def test_pool_dai(
 
     tx = bpool.swap_exact_amount_out(
         [erc20_token.address, dai_contract.address, another_consumer_wallet.address],
-        [
-            to_wei("0.1"),
-            to_wei("0.0001"),
-            to_wei("100"),
-            0,
-        ],
+        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
         publisher_wallet,
     )
 
@@ -1076,11 +1018,7 @@ def test_pool_dai(
     dai_contract.approve(bpool_address, to_wei(1000), publisher_wallet)
     erc20_token.approve(bpool_address, to_wei(1000), publisher_wallet)
 
-    tx = bpool.join_pool(
-        to_wei("0.01"),
-        [to_wei("50"), to_wei("50")],
-        publisher_wallet,
-    )
+    tx = bpool.join_pool(to_wei("0.01"), [to_wei("50"), to_wei("50")], publisher_wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
@@ -1108,10 +1046,7 @@ def test_pool_dai(
     dai_contract.approve(bpool_address, to_wei(1000), consumer_wallet)
 
     tx = bpool.join_swap_extern_amount_in(
-        dai_contract.address,
-        to_wei(1),
-        to_wei("0.01"),
-        consumer_wallet,
+        dai_contract.address, to_wei(1), to_wei("0.01"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1200,9 +1135,7 @@ def test_pool_dai(
     dt_balance_before_exit = side_staking.get_datatoken_balance(erc20_token.address)
 
     tx = bpool.exit_pool(
-        to_wei("0.5"),
-        [to_wei("0.001"), to_wei("0.001")],
-        consumer_wallet,
+        to_wei("0.5"), [to_wei("0.001"), to_wei("0.001")], consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1248,10 +1181,7 @@ def test_pool_dai(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_pool_amount_in(
-        dai_contract.address,
-        to_wei("0.05"),
-        to_wei("0.005"),
-        consumer_wallet,
+        dai_contract.address, to_wei("0.05"), to_wei("0.005"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1298,10 +1228,7 @@ def test_pool_dai(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_pool_amount_in(
-        erc20_token.address,
-        to_wei("0.05"),
-        to_wei("0.005"),
-        consumer_wallet,
+        erc20_token.address, to_wei("0.05"), to_wei("0.005"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1347,10 +1274,7 @@ def test_pool_dai(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_extern_amount_out(
-        dai_contract.address,
-        to_wei("0.001"),
-        to_wei("0.005"),
-        consumer_wallet,
+        dai_contract.address, to_wei("0.001"), to_wei("0.005"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1398,10 +1322,7 @@ def test_pool_dai(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_extern_amount_out(
-        erc20_token.address,
-        to_wei("0.001"),
-        to_wei("0.05"),
-        consumer_wallet,
+        erc20_token.address, to_wei("0.001"), to_wei("0.05"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1746,11 +1667,7 @@ def test_pool_usdc(
     usdc_contract.approve(bpool_address, to_wei("1000"), publisher_wallet)
     erc20_token.approve(bpool_address, to_wei("1000"), publisher_wallet)
 
-    tx = bpool.join_pool(
-        to_wei("0.01"),
-        [to_wei("50"), to_wei("50")],
-        publisher_wallet,
-    )
+    tx = bpool.join_pool(to_wei("0.01"), [to_wei("50"), to_wei("50")], publisher_wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
@@ -1866,11 +1783,7 @@ def test_pool_usdc(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
     dt_balance_before_exit = side_staking.get_datatoken_balance(erc20_token.address)
 
-    tx = bpool.exit_pool(
-        to_wei("0.1"),
-        [to_wei("0.1"), int(1e5)],
-        consumer_wallet,
-    )
+    tx = bpool.exit_pool(to_wei("0.1"), [to_wei("0.1"), int(1e5)], consumer_wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
@@ -1962,10 +1875,7 @@ def test_pool_usdc(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_pool_amount_in(
-        erc20_token.address,
-        to_wei("0.05"),
-        to_wei("0.005"),
-        consumer_wallet,
+        erc20_token.address, to_wei("0.05"), to_wei("0.005"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -2059,10 +1969,7 @@ def test_pool_usdc(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_extern_amount_out(
-        erc20_token.address,
-        to_wei("0.001"),
-        to_wei("0.05"),
-        consumer_wallet,
+        erc20_token.address, to_wei("0.001"), to_wei("0.05"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -2404,11 +2311,7 @@ def test_pool_usdc_flexible(
     usdc_contract.approve(bpool_address, to_wei(1000), publisher_wallet)
     erc20_token.approve(bpool_address, to_wei(1000), publisher_wallet)
 
-    tx = bpool.join_pool(
-        to_wei("0.01"),
-        [to_wei("50"), to_wei("50")],
-        publisher_wallet,
-    )
+    tx = bpool.join_pool(to_wei("0.01"), [to_wei("50"), to_wei("50")], publisher_wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
@@ -2524,11 +2427,7 @@ def test_pool_usdc_flexible(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
     dt_balance_before_exit = side_staking.get_datatoken_balance(erc20_token.address)
 
-    tx = bpool.exit_pool(
-        to_wei("0.1"),
-        [to_wei("0.1"), int(1e5)],
-        consumer_wallet,
-    )
+    tx = bpool.exit_pool(to_wei("0.1"), [to_wei("0.1"), int(1e5)], consumer_wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
@@ -2620,10 +2519,7 @@ def test_pool_usdc_flexible(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_pool_amount_in(
-        erc20_token.address,
-        to_wei("0.05"),
-        to_wei("0.005"),
-        consumer_wallet,
+        erc20_token.address, to_wei("0.05"), to_wei("0.005"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -2717,10 +2613,7 @@ def test_pool_usdc_flexible(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_extern_amount_out(
-        erc20_token.address,
-        to_wei("0.001"),
-        to_wei("0.05"),
-        consumer_wallet,
+        erc20_token.address, to_wei("0.001"), to_wei("0.05"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -2885,12 +2778,7 @@ def test_pool_dai_flexible(
 
     tx = bpool.swap_exact_amount_in(
         [dai_contract.address, erc20_address, another_consumer_wallet.address],
-        [
-            to_wei("0.1"),
-            to_wei("0.0001"),
-            to_wei("100"),
-            0,
-        ],
+        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
         publisher_wallet,
     )
 
@@ -2965,12 +2853,7 @@ def test_pool_dai_flexible(
 
     tx = bpool.swap_exact_amount_in(
         [erc20_address, dai_contract.address, another_consumer_wallet.address],
-        [
-            to_wei("0.1"),
-            to_wei("0.0001"),
-            to_wei("100"),
-            0,
-        ],
+        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
         publisher_wallet,
     )
 
@@ -3016,12 +2899,7 @@ def test_pool_dai_flexible(
 
     tx = bpool.swap_exact_amount_out(
         [erc20_token.address, dai_contract.address, another_consumer_wallet.address],
-        [
-            to_wei("0.1"),
-            to_wei("0.0001"),
-            to_wei(100),
-            0,
-        ],
+        [to_wei("0.1"), to_wei("0.0001"), to_wei(100), 0],
         publisher_wallet,
     )
 
@@ -3068,11 +2946,7 @@ def test_pool_dai_flexible(
     dai_contract.approve(bpool_address, to_wei(1000), publisher_wallet)
     erc20_token.approve(bpool_address, to_wei(1000), publisher_wallet)
 
-    tx = bpool.join_pool(
-        to_wei("0.01"),
-        [to_wei("50"), to_wei("50")],
-        publisher_wallet,
-    )
+    tx = bpool.join_pool(to_wei("0.01"), [to_wei("50"), to_wei("50")], publisher_wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
@@ -3100,10 +2974,7 @@ def test_pool_dai_flexible(
     dai_contract.approve(bpool_address, to_wei("1000"), consumer_wallet)
 
     tx = bpool.join_swap_extern_amount_in(
-        dai_contract.address,
-        to_wei("1"),
-        to_wei("0.01"),
-        consumer_wallet,
+        dai_contract.address, to_wei("1"), to_wei("0.01"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -3192,9 +3063,7 @@ def test_pool_dai_flexible(
     dt_balance_before_exit = side_staking.get_datatoken_balance(erc20_token.address)
 
     tx = bpool.exit_pool(
-        to_wei("0.5"),
-        [to_wei("0.001"), to_wei("0.001")],
-        consumer_wallet,
+        to_wei("0.5"), [to_wei("0.001"), to_wei("0.001")], consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -3240,10 +3109,7 @@ def test_pool_dai_flexible(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_pool_amount_in(
-        dai_contract.address,
-        to_wei("0.05"),
-        to_wei("0.005"),
-        consumer_wallet,
+        dai_contract.address, to_wei("0.05"), to_wei("0.005"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -3290,10 +3156,7 @@ def test_pool_dai_flexible(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_pool_amount_in(
-        erc20_token.address,
-        to_wei("0.05"),
-        to_wei("0.005"),
-        consumer_wallet,
+        erc20_token.address, to_wei("0.05"), to_wei("0.005"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -3339,10 +3202,7 @@ def test_pool_dai_flexible(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_extern_amount_out(
-        dai_contract.address,
-        to_wei("0.001"),
-        to_wei("0.005"),
-        consumer_wallet,
+        dai_contract.address, to_wei("0.001"), to_wei("0.005"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -3390,10 +3250,7 @@ def test_pool_dai_flexible(
     consumer_bpt_balance = bpool.balanceOf(consumer_wallet.address)
 
     tx = bpool.exit_swap_extern_amount_out(
-        erc20_token.address,
-        to_wei("0.001"),
-        to_wei("0.05"),
-        consumer_wallet,
+        erc20_token.address, to_wei("0.001"), to_wei("0.05"), consumer_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)

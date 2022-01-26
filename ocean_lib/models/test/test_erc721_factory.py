@@ -60,11 +60,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
 
     tx = erc721_factory.deploy_erc721_contract(
-        "DT1",
-        "DTSYMBOL",
-        1,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
+        ("DT1", "DTSYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
         publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -84,11 +80,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     # Tests current NFT count
     current_nft_count = erc721_factory.get_current_nft_count()
     erc721_factory.deploy_erc721_contract(
-        "DT2",
-        "DTSYMBOL1",
-        1,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
+        ("DT2", "DTSYMBOL1", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
         publisher_wallet,
     )
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
@@ -437,11 +429,7 @@ def test_start_multiple_order(
     erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
 
     tx = erc721_factory.deploy_erc721_contract(
-        "DT1",
-        "DTSYMBOL",
-        1,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
+        ("DT1", "DTSYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
         publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -461,11 +449,7 @@ def test_start_multiple_order(
     # Tests current NFT count
     current_nft_count = erc721_factory.get_current_nft_count()
     erc721_factory.deploy_erc721_contract(
-        "DT2",
-        "DTSYMBOL1",
-        1,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
+        ("DT2", "DTSYMBOL1", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
         publisher_wallet,
     )
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
@@ -624,16 +608,18 @@ def test_fail_create_erc20(
     # Should fail to create an ERC20 calling the factory directly
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_factory.create_token(
-            1,
-            ["ERC20DT1", "ERC20DT1Symbol"],
-            [
-                publisher_wallet.address,
-                publisher_wallet.address,
-                publisher_wallet.address,
-                ZERO_ADDRESS,
-            ],
-            [to_wei(1), 0],
-            [b""],
+            (
+                1,
+                ["ERC20DT1", "ERC20DT1Symbol"],
+                [
+                    publisher_wallet.address,
+                    publisher_wallet.address,
+                    publisher_wallet.address,
+                    ZERO_ADDRESS,
+                ],
+                [to_wei(1), 0],
+                [b""],
+            ),
             publisher_wallet,
         )
     assert (
@@ -642,11 +628,7 @@ def test_fail_create_erc20(
         "INSTANCE FROM ERC721FACTORY"
     )
     tx = erc721_factory.deploy_erc721_contract(
-        "DT1",
-        "DTSYMBOL",
-        1,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
+        ("DT1", "DTSYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
         publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)

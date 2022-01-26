@@ -141,11 +141,7 @@ class Ocean:
 
         nft_factory = self.get_nft_factory()
         tx_id = nft_factory.deploy_erc721_contract(
-            name=name,
-            symbol=symbol,
-            template_index=template_index,
-            additional_erc20_deployer=additional_erc20_deployer,
-            token_uri=token_uri,
+            (name, symbol, template_index, additional_erc20_deployer, token_uri),
             from_wallet=from_wallet,
         )
 
