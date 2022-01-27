@@ -11,7 +11,7 @@ For most smart contract functions that accept tuples or lists, you are free to d
 However, ocean.py offers helpers to deal with the trouble of ABI-matching, by providing a few NamedTuple instances
 that mirror the ABI structure. Typings and examples inside ocean.py will guide you in using the predefined structures.
 
-You will find these modelse inside `ocean_lib/models/models_structures`. You are free to use (and contribute to)
+You will find these models inside `ocean_lib/models/models_structures`. You are free to use (and contribute to)
 these, or choose the option of hand-coded structures.
 
 In most cases, by using the Ocean class and utils directly, this functionality is offered out of the box,
