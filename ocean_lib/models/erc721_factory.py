@@ -14,7 +14,7 @@ from ocean_lib.models.models_structures import (
     DispenserData,
     FixedData,
     OrderData,
-    PoolData2,
+    PoolData,
 )
 from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
@@ -143,7 +143,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         self,
         nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
         erc_create_data: Union[dict, tuple, CreateErc20Data],
-        pool_data: Union[dict, tuple, PoolData2],
+        pool_data: Union[dict, tuple, PoolData],
         from_wallet: Wallet,
     ) -> str:
         # TODO: this will be handled in web3 py
@@ -155,7 +155,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             erc_create_data = tuple(erc_create_data)
 
         # TODO: this will be handled in web3 py
-        if isinstance(pool_data, PoolData2):
+        if isinstance(pool_data, PoolData):
             pool_data = tuple(pool_data)
 
         return self.send_transaction(

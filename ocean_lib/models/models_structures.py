@@ -40,12 +40,6 @@ PoolData = NamedTuple(
     [("ss_params", List[int]), ("swap_fees", List[int]), ("addresses", List[str])],
 )
 
-# TODO: remove once the order for the tuples is the same
-PoolData2 = NamedTuple(
-    "PoolData",
-    [("addresses", List[str]), ("ss_params", List[int]), ("swap_fees", List[int])],
-)
-
 BPoolData = NamedTuple(
     "BPoolData",
     [

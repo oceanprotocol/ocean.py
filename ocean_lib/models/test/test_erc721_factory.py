@@ -13,7 +13,7 @@ from ocean_lib.models.models_structures import (
     DispenserData,
     FixedData,
     OrderData,
-    PoolData2,
+    PoolData,
 )
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -218,7 +218,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         bytess=[b""],
     )
 
-    pool_data = PoolData2(
+    pool_data = PoolData(
         addresses=[
             side_staking_address,
             erc20_address,
