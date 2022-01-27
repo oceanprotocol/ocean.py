@@ -84,29 +84,35 @@ def test_initialize_fails(config):
         files="some_files",
         timeout=0,
     )
-    with pytest.raises(InvalidURL) as err:
+    with pytest.raises(
+        InvalidURL, match=f"InvalidURL {mock_service.service_endpoint}."
+    ):
         DataSP.initialize(
             "some_did",
             mock_service,
             "some_consumer_address",
             userdata={"test_dict_key": "test_dict_value"},
         )
-    assert err.value.args[0] == f"InvalidURL {mock_service.service_endpoint}."
 
     mock_service.service_endpoint = f"{config.provider_url}"
-    with pytest.raises(DataProviderException) as err:
+    with pytest.raises(
+        DataProviderException,
+        match=f"Failed to get a response for request: initializeEndpoint={mock_service.service_endpoint}",
+    ) as err:
         DataSP.initialize(
             "some_did",
             mock_service,
             "some_consumer_address",
             userdata={"test_dict_key": "test_dict_value"},
         )
-    assert err.value.args[0].startswith("Response not found!")
+    assert err.value.args[0].startswith(
+        "Failed to get a response for request: initializeEndpoint"
+    )
 
 
 def test_start_compute_job_fails_empty(with_empty_client, consumer_wallet):
     """Tests failure of compute job from endpoint with empty response."""
-    with pytest.raises(AssertionError):
+    with pytest.raises(DataProviderException):
         DataSP.start_compute_job(
             service_endpoint="http://mock/",
             consumer=consumer_wallet,
@@ -120,7 +126,7 @@ def test_start_compute_job_fails_empty(with_empty_client, consumer_wallet):
 
 def test_start_compute_job_fails_error_response(with_evil_client, consumer_wallet):
     """Tests failure of compute job from endpoint with non-200 response."""
-    with pytest.raises(ValueError):
+    with pytest.raises(DataProviderException):
         DataSP.start_compute_job(
             service_endpoint="http://mock/",
             consumer=consumer_wallet,

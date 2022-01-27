@@ -111,11 +111,13 @@ def test_utilitary_functions_for_trusted_algorithm_publishers(publisher_ocean_in
     """Tests adding/removing trusted algorithms in the DDO metadata."""
     ddo = Asset.from_dict(get_sample_ddo_with_compute_service())
     compute_service = ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
-    compute_service.compute_values["publisherTrustedAlgorithmPublishers"] = ["0xabc"]
+    addr1 = publisher_ocean_instance.web3.eth.account.create().address
+    compute_service.compute_values["publisherTrustedAlgorithmPublishers"] = [addr1]
 
+    addr2 = publisher_ocean_instance.web3.eth.account.create().address
     # add a new trusted algorithm to the publisher_trusted_algorithms list
     new_publisher_trusted_algo_publishers = add_publisher_trusted_algorithm_publisher(
-        ddo, "0x123", publisher_ocean_instance.config.metadata_cache_uri
+        ddo, addr2, publisher_ocean_instance.config.metadata_cache_uri
     )
 
     assert (
@@ -125,23 +127,24 @@ def test_utilitary_functions_for_trusted_algorithm_publishers(publisher_ocean_in
 
     # add an existing algorithm to publisher_trusted_algorithms list
     new_publisher_trusted_algo_publishers = add_publisher_trusted_algorithm_publisher(
-        ddo, "0xAbC", publisher_ocean_instance.config.metadata_cache_uri
+        ddo, addr2.upper(), publisher_ocean_instance.config.metadata_cache_uri
     )
     assert len(new_publisher_trusted_algo_publishers) == 2
 
     # remove an existing algorithm to publisher_trusted_algorithms list
     new_publisher_trusted_algo_publishers = (
         remove_publisher_trusted_algorithm_publisher(
-            ddo, "0xABC", publisher_ocean_instance.config.metadata_cache_uri
+            ddo, addr2.upper(), publisher_ocean_instance.config.metadata_cache_uri
         )
     )
 
     assert len(new_publisher_trusted_algo_publishers) == 1
 
+    addr3 = publisher_ocean_instance.web3.eth.account.create().address
     # remove a trusted algorithm that does not belong to publisher_trusted_algorithms list
     new_publisher_trusted_algo_publishers = (
         remove_publisher_trusted_algorithm_publisher(
-            ddo, "0xaaaa", publisher_ocean_instance.config.metadata_cache_uri
+            ddo, addr3, publisher_ocean_instance.config.metadata_cache_uri
         )
     )
     assert len(new_publisher_trusted_algo_publishers) == 1

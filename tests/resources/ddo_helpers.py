@@ -8,10 +8,13 @@ import pathlib
 import time
 from typing import List, Optional, Union
 
+import requests
 from ocean_lib.agreements.file_objects import FilesTypeFactory, IpfsFile, UrlFile
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.trusted_algorithms import generate_trusted_algo_dict
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.ocean import Ocean
@@ -90,7 +93,7 @@ def get_access_service(
     )
 
 
-def create_asset(ocean, publisher, config, metadata=None):
+def create_asset(ocean, publisher, config, metadata=None, files=None):
     """Helper function for asset creation based on ddo_sa_sample.json."""
     erc20_data = CreateErc20Data(
         template_index=1,
@@ -115,11 +118,18 @@ def create_asset(ocean, publisher, config, metadata=None):
             "author": "OPF",
             "license": "https://market.oceanprotocol.com/terms",
         }
-    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
-    file1 = FilesTypeFactory(file1_dict)
+
+    if not files:
+        file1_dict = {
+            "type": "url",
+            "url": "https://url.com/file1.csv",
+            "method": "GET",
+        }
+        file1 = FilesTypeFactory(file1_dict)
+        files = [file1]
 
     # Encrypt file(s) using provider
-    encrypted_files = ocean.assets.encrypt_files([file1])
+    encrypted_files = ocean.assets.encrypt_files(files)
 
     # Publish asset with services on-chain.
     # The download (access service) is automatically created
@@ -184,11 +194,12 @@ def get_registered_asset_with_access_service(ocean_instance, publisher_wallet):
     return create_asset(ocean_instance, publisher_wallet, ocean_instance.config)
 
 
-# TODO Add support for trusted algorithms
 def get_registered_asset_with_compute_service(
     ocean_instance: Ocean,
     publisher_wallet: Wallet,
-    trusted_algorithms: Optional[List[Asset]] = None,
+    allow_raw_algorithms: bool = False,
+    trusted_algorithms: List[Asset] = [],
+    trusted_algorithm_publishers: List[str] = [],
 ):
     erc721_token, erc20_token = deploy_erc721_erc20(
         ocean_instance.web3, ocean_instance.config, publisher_wallet, publisher_wallet
@@ -207,7 +218,7 @@ def get_registered_asset_with_compute_service(
         "gpuType": "NVIDIA Tesla V100 GPU",
         "memory": "128M",
         "volumeSize": "2G",
-        "allowRawAlgorithm": False,
+        "allowRawAlgorithm": allow_raw_algorithms,
         "allowNetworkAccess": True,
     }
     compute_service = Service(
@@ -220,10 +231,17 @@ def get_registered_asset_with_compute_service(
         compute_values=compute_values,
     )
 
+    for algorithm in trusted_algorithms:
+        compute_service.add_publisher_trusted_algorithm(
+            algorithm, generate_trusted_algo_dict(algorithm)
+        )
+
+    for publisher in trusted_algorithm_publishers:
+        compute_service.add_publisher_trusted_algorithm_publisher(publisher)
+
     return ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        encrypted_files=encrypted_files,
         services=[compute_service],
         erc721_address=erc721_token.address,
         deployed_erc20_tokens=[erc20_token],
@@ -232,21 +250,13 @@ def get_registered_asset_with_compute_service(
     )
 
 
-def get_registered_algorithm_ddo(ocean_instance: Ocean, publisher_wallet: Wallet):
-    algorithm_file = FilesTypeFactory(
-        {
-            "type": "url",
-            "url": "https://raw.githubusercontent.com/oceanprotocol/test-algorithm/master/javascript/algo.js",
-            "method": "GET",
-        }
-    )
-
+def get_registered_algorithm_with_access_service(
+    ocean_instance: Ocean, publisher_wallet: Wallet
+):
     web3 = ocean_instance.web3
     config = ocean_instance.config
     data_provider = DataServiceProvider
-    _, metadata, _ = create_basics(
-        config, web3, data_provider, asset_type="algorithm", files=[algorithm_file]
-    )
+    _, metadata, _ = create_basics(config, web3, data_provider, asset_type="algorithm")
 
     # Update metadata to include algorithm info
     algorithm_values = {
@@ -264,13 +274,45 @@ def get_registered_algorithm_ddo(ocean_instance: Ocean, publisher_wallet: Wallet
     }
     metadata.update(algorithm_values)
 
+    algorithm_file = FilesTypeFactory(
+        {
+            "type": "url",
+            "url": "https://raw.githubusercontent.com/oceanprotocol/test-algorithm/master/javascript/algo.js",
+            "method": "GET",
+        }
+    )
+
     return create_asset(
-        ocean_instance, publisher_wallet, ocean_instance.config, metadata=metadata
+        ocean_instance,
+        publisher_wallet,
+        ocean_instance.config,
+        metadata=metadata,
+        files=[algorithm_file],
+    )
+
+
+def get_raw_algorithm() -> str:
+    req = requests.get(
+        "https://raw.githubusercontent.com/oceanprotocol/test-algorithm/master/javascript/algo.js"
+    )
+    return AlgorithmMetadata(
+        {
+            "rawcode": req.text,
+            "language": "Node.js",
+            "format": "docker-image",
+            "version": "0.1",
+            "container": {
+                "entrypoint": "node $ALGO",
+                "image": "ubuntu",
+                "tag": "latest",
+                "checksum": "44e10daa6637893f4276bb8d7301eb35306ece50f61ca34dcab550",
+            },
+        }
     )
 
 
 def get_registered_algorithm_ddo_different_provider(ocean_instance, wallet):
-    return get_registered_algorithm_ddo(
+    return get_registered_algorithm_with_access_service(
         ocean_instance, wallet, "http://172.15.0.7:8030"
     )
 
