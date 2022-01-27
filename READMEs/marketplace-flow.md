@@ -7,6 +7,10 @@ SPDX-License-Identifier: Apache-2.0
 
 This quickstart describes a batteries-included flow including using off-chain services for metadata (Aquarius) and consuming datasets (Provider).
 
+For pool creation, it is used as base token, OCEAN token.
+The base token can be changed into something else, such as USDC, DAI etc., but
+it will require an extra fee.
+
 It focuses on Alice's experience as a publisher, and Bob's experience as a buyer & consumer.
 
 Here are the steps:

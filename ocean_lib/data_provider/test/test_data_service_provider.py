@@ -89,7 +89,7 @@ def test_initialize_fails(with_evil_client):
 
 def test_start_compute_job_fails_empty(with_empty_client, consumer_wallet):
     """Tests failure of compute job from endpoint with empty response."""
-    with pytest.raises(AssertionError):
+    with pytest.raises(DataProviderException):
         DataSP.start_compute_job(
             service_endpoint="http://mock/",
             consumer=consumer_wallet,
