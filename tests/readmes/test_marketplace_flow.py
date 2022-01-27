@@ -60,7 +60,7 @@ def test_marketplace_flow(tmp_path):
         "description": "Branin dataset",
         "name": "Branin dataset",
         "type": "dataset",
-        "author": "Treunt",
+        "author": "Trent",
         "license": "CC0: PublicDomain",
     }
 
@@ -99,10 +99,7 @@ def test_marketplace_flow(tmp_path):
     assert bpool.address
 
     price_in_OCEAN = bpool.get_amount_in_exact_out(
-        OCEAN_token.address,
-        erc20_token.address,
-        ocean.to_wei(1),
-        ocean.to_wei("0.01"),
+        OCEAN_token.address, erc20_token.address, ocean.to_wei(1), ocean.to_wei("0.01")
     )
 
     formatted_price = pretty_ether_and_wei(price_in_OCEAN, "OCEAN")
@@ -126,12 +123,7 @@ def test_marketplace_flow(tmp_path):
 
     bpool.swap_exact_amount_out(
         [OCEAN_token.address, erc20_token.address, ZERO_ADDRESS],
-        [
-            ocean.to_wei(10),
-            ocean.to_wei(1),
-            ocean.to_wei(10),
-            0,
-        ],
+        [ocean.to_wei(10), ocean.to_wei(1), ocean.to_wei(10), 0],
         from_wallet=bob_wallet,
     )
     assert erc20_token.balanceOf(bob_wallet.address) >= ocean.to_wei(

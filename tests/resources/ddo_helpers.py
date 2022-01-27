@@ -214,14 +214,10 @@ def get_registered_asset_with_compute_service(
 
     # Set the compute values for compute service
     compute_values = {
-        "namespace": "ocean-compute",
-        "cpus": 2,
-        "gpus": 4,
-        "gpuType": "NVIDIA Tesla V100 GPU",
-        "memory": "128M",
-        "volumeSize": "2G",
         "allowRawAlgorithm": allow_raw_algorithms,
         "allowNetworkAccess": True,
+        "publisherTrustedAlgorithms": [],
+        "publisherTrustedAlgorithmPublishers": [],
     }
     compute_service = Service(
         service_id="2",

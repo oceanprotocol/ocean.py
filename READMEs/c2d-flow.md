@@ -91,6 +91,7 @@ export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 For the following steps, we use the Python console. Keep it open between steps.
 
 In the Python console:
+
 ```python
 #create ocean instance
 from ocean_lib.example_config import ExampleConfig
@@ -151,7 +152,7 @@ DATA_metadata = {
     "description": "Branin dataset",
     "name": "Branin dataset",
     "type": "dataset",
-    "author": "Treunt",
+    "author": "Trent",
     "license": "CC0: PublicDomain",
 }
 
@@ -166,15 +167,11 @@ DATA_encrypted_files = ocean.assets.encrypt_files([DATA_url_file])
 
 # Set the compute values for compute service
 DATA_compute_values = {
-    "namespace": "ocean-compute",
-    "cpus": 2,
-    "gpus": 4,
-    "gpuType": "NVIDIA Tesla V100 GPU",
-    "memory": "128M",
-    "volumeSize": "2G",
     "allowRawAlgorithm": False,
     "allowNetworkAccess": True,
-)
+    "publisherTrustedAlgorithms": [],
+    "publisherTrustedAlgorithmPublishers": [],
+}
 
 # Create the Service
 from ocean_lib.services.service import Service
@@ -205,17 +202,81 @@ print(f"DATA_asset did = '{DATA_asset.did}'")
 
 For this step, there are some prerequisites needed. If you want to replace the sample algorithm with an algorithm of your choosing, you will need to do some dependency management.
 You can use one of the standard [Ocean algo_dockers images](https://github.com/oceanprotocol/algo_dockers) or publish a custom docker image.
+
 Use the image name and tag in the `container` part of the algorithm metadata.
 This docker image needs to have basic support for dependency installation e.g. in the case of Python, OS-level library installations, pip installations etc.
 Take a look at the [Ocean tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/) to learn more about docker image publishing.
 
-In the same Python console:
-```python
-
-```
-
 Please note that this example features a simple Python algorithm. If you publish an algorithm in another language, make sure you have an appropriate container to run it, including dependencies.
 You can find more information about how to do this in the [Ocean tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/).
+
+In the same Python console:
+
+```python
+# Publish the algorithm NFT token
+ALG_nft_token = ocean.create_nft_token("NFTToken1", "NFT1", alice_wallet)
+print(f"ALG_nft_token address = '{ALG_nft_token.address}'")
+
+# Publish the datatoken
+ALG_erc20_data = CreateErc20Data(
+    template_index=1,
+    strings=["Datatoken 1", "DT1"],
+    addresses=[
+        alice_wallet.address,
+        alice_wallet.address,
+        ZERO_ADDRESS,
+        ocean.OCEAN_address,
+    ],
+    uints=[ocean.to_wei(100000), 0],
+    bytess=[b""],
+)
+ALG_datatoken = ALG_nft_token.create_datatoken(ALG_erc20_data, alice_wallet)
+
+# Specify metadata and services, using the Branin test dataset
+ALG_date_created = "2021-12-28T10:55:11Z"
+
+ALG_metadata = {
+    "created": ALG_date_created,
+    "updated": ALG_date_created,
+    "description": "gpr",
+    "name": "gpr",
+    "type": "algorithm",
+    "author": "Trent",
+    "license": "CC0: PublicDomain",
+    "algorithm": {
+        "language": "python",
+        "format": "docker-image",
+        "version": "0.1",
+        "container": {
+            "entrypoint": "python $ALGO",
+            "image": "oceanprotocol/algo_dockers",
+            "tag": "python-branin",
+            # TODO: fix checksum
+            "checksum": "44e10daa6637893f4276bb8d7301eb35306ece50f61ca34dcab550",
+        },
+    }
+}
+
+# ocean.py offers multiple file types, but a simple url file should be enough for this example
+ALG_url_file = UrlFile(
+    url="https://raw.githubusercontent.com/trentmc/branin/main/gpr.py"
+)
+
+# Encrypt file(s) using provider
+ALG_encrypted_files = ocean.assets.encrypt_files([ALG_url_file])
+
+# Publish asset with compute service on-chain.
+# The download (access service) is automatically created, but you can explore other options as well
+ALG_asset = ocean.assets.create(
+    metadata=ALG_metadata,
+    publisher_wallet=alice_wallet,
+    encrypted_files=ALG_encrypted_files,
+    erc721_address=ALG_nft_token.address,
+    deployed_erc20_tokens=[ALG_datatoken],
+)
+
+print(f"ALG_asset did = '{ALG_asset.did}'")
+```
 
 ## 4. Alice allows the algorithm for C2D for that data asset
 
