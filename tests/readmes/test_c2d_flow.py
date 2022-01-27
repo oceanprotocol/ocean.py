@@ -14,7 +14,10 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-def test_c2d_flow(tmp_path):
+def test_c2d_flow():
+    """This test mirrors the c2d-flow.md README."""
+
+    # 2. Alice publishes data asset with compute service
     config = ExampleConfig.get_config()
     ocean = Ocean(config)
 
@@ -106,6 +109,8 @@ def test_c2d_flow(tmp_path):
     )
 
     assert DATA_asset.did
+
+    # 3. Alice publishes algorithm
 
     return
 

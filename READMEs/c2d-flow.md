@@ -86,12 +86,7 @@ export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
 export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 ```
 
-## 2. Alice publishes data asset
-
-In the work console:
-```console
-python
-```
+## 2. Alice publishes data asset with compute service
 
 For the following steps, we use the Python console. Keep it open between steps.
 
@@ -218,8 +213,6 @@ In the same Python console:
 ```python
 
 ```
-
-Full details: [ALG_ddo](ALG_ddo.md)
 
 Please note that this example features a simple Python algorithm. If you publish an algorithm in another language, make sure you have an appropriate container to run it, including dependencies.
 You can find more information about how to do this in the [Ocean tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/).
