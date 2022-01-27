@@ -17,20 +17,8 @@ class MyFactory(ContractBase):
 
     # super-simple functionality, because our main point here is to
     # test ContractBase itself, not a child class.
-    def deploy_erc721_contract(
-        self,
-        name: str,
-        symbol: str,
-        template_index: int,
-        additional_erc20_deployer: str,
-        token_uri: str,
-        from_wallet: Wallet,
-    ):
-        return self.send_transaction(
-            "deployERC721Contract",
-            (name, symbol, template_index, additional_erc20_deployer, token_uri),
-            from_wallet,
-        )
+    def deploy_erc721_contract(self, erc721_data, from_wallet: Wallet):
+        return self.send_transaction("deployERC721Contract", erc721_data, from_wallet)
 
 
 def test_name_is_None(web3):
@@ -49,7 +37,7 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
     # test super-simple functionality of child
     factory = MyFactory(web3, nft_factory_address)
     factory.deploy_erc721_contract(
-        "NFT", "NFTS", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/", alice_wallet
+        ("NFT", "NFTS", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"), alice_wallet
     )
 
     # test attributes
@@ -110,5 +98,5 @@ def test_gas_price(web3, alice_wallet, nft_factory_address, monkeypatch):
     monkeypatch.setenv("GAS_PRICE", "1")
     factory = MyFactory(web3, nft_factory_address)
     assert factory.deploy_erc721_contract(
-        "NFT", "NFTS", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/", alice_wallet
+        ("NFT", "NFTS", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"), alice_wallet
     ), "The token could not be created by configuring the gas price env var."

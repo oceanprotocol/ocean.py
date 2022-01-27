@@ -83,6 +83,7 @@ This flow uses Ocean Compute-to-Data (c2d) to compute results from a dataset tha
 - [Understand config parameters](READMEs/parameters.md) - envvars vs files
 - [Learn about off-chain services](READMEs/services.md) - Ocean Provider for data services, Aquarius metadata store
 - [Learn about wallets](READMEs/wallets.md) - on generating, storing, and accessing private keys
+- [Learn about the structures we use for ABI matching](READMEs/structures.md) - a review of the helpers we offer in dealing with ABI tuple parameters
 - [Get an overview of ocean.py](READMEs/overview.md) - key modules and functions
 
 ## 🦑 Development

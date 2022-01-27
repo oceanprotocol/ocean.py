@@ -22,7 +22,7 @@ from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBa
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.models.models_structures import ChainMetadata, CreateErc20Data
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.utils.utilities import create_checksum
@@ -277,11 +277,7 @@ class OceanAssets:
             token_uri = erc721_uri or "https://oceanprotocol.com/nft/"
             # register on-chain
             tx_id = erc721_factory.deploy_erc721_contract(
-                name,
-                symbol,
-                template_index=template_index,
-                additional_erc20_deployer=additional_erc20_deployer,
-                token_uri=token_uri,
+                (name, symbol, template_index, additional_erc20_deployer, token_uri),
                 from_wallet=publisher_wallet,
             )
             tx_receipt = self._web3.eth.wait_for_transaction_receipt(tx_id)
@@ -380,7 +376,7 @@ class OceanAssets:
             asset, provider_uri, encrypt_flag, compress_flag
         )
 
-        erc721_token.set_metadata(
+        chain_metadata = ChainMetadata(
             metadata_state=0,
             metadata_decryptor_url=provider_uri,
             metadata_decryptor_address=publisher_wallet.address,
@@ -388,8 +384,9 @@ class OceanAssets:
             data=document,
             data_hash=ddo_hash,
             data_proofs=[],
-            from_wallet=publisher_wallet,
         )
+
+        erc721_token.set_metadata(chain_metadata, from_wallet=publisher_wallet)
 
         # Fetch the asset on chain
         asset = self._aquarius.wait_for_asset(did)
@@ -445,7 +442,7 @@ class OceanAssets:
             asset, provider_uri, encrypt_flag, compress_flag
         )
 
-        tx_result = erc721_token.set_metadata(
+        chain_metadata = ChainMetadata(
             metadata_state=0,
             metadata_decryptor_url=provider_uri,
             metadata_decryptor_address=publisher_wallet.address,
@@ -453,7 +450,10 @@ class OceanAssets:
             data=document,
             data_hash=ddo_hash,
             data_proofs=[],
-            from_wallet=publisher_wallet,
+        )
+
+        tx_result = erc721_token.set_metadata(
+            chain_metadata=chain_metadata, from_wallet=publisher_wallet
         )
 
         self._web3.eth.wait_for_transaction_receipt(tx_result)

@@ -3,11 +3,15 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enum import IntEnum
-from typing import List
+from typing import List, Union
 
 from enforce_typing import enforce_types
 from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.models.models_structures import (
+    ChainMetadata,
+    ChainMetadataWithTokenUri,
+    CreateErc20Data,
+)
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -17,13 +21,6 @@ class ERC721Permissions(IntEnum):
     DEPLOY_ERC20 = 1
     UPDATE_METADATA = 2
     STORE = 3
-
-
-class MetadataProof:
-    validatorAddress: str
-    v: int
-    r: bytes
-    s: bytes
 
 
 @enforce_types
@@ -77,76 +74,31 @@ class ERC721Token(ContractBase):
     def set_metadata_state(self, metadata_state: int, from_wallet: Wallet):
         return self.send_transaction("setMetaDataState", (metadata_state,), from_wallet)
 
-    def set_metadata(
-        self,
-        metadata_state: int,
-        metadata_decryptor_url: str,
-        metadata_decryptor_address: str,
-        flags: bytes,
-        data: bytes,
-        data_hash: bytes,
-        data_proofs: List[MetadataProof],
-        from_wallet: Wallet,
-    ) -> str:
-        return self.send_transaction(
-            "setMetaData",
-            (
-                metadata_state,
-                metadata_decryptor_url,
-                metadata_decryptor_address,
-                flags,
-                data,
-                data_hash,
-                data_proofs,
-            ),
-            from_wallet,
-        )
+    def set_metadata(self, chain_metadata: ChainMetadata, from_wallet: Wallet) -> str:
+        # TODO: this will be handled in web3 py
+        if isinstance(chain_metadata, ChainMetadata):
+            chain_metadata = tuple(chain_metadata)
+
+        return self.send_transaction("setMetaData", chain_metadata, from_wallet)
 
     def set_metadata_token_uri(
-        self,
-        metadata_state: int,
-        metadata_decryptor_url: str,
-        metadata_decryptor_address: str,
-        flags: bytes,
-        data: bytes,
-        data_hash: bytes,
-        data_proofs: List[MetadataProof],
-        token_id: int,
-        token_uri: str,
-        from_wallet: Wallet,
+        self, chain_metadata: ChainMetadataWithTokenUri, from_wallet: Wallet
     ) -> str:
-        new_metadata_new_token_uri = {
-            "metaDataState": metadata_state,
-            "metaDataDecryptorUrl": metadata_decryptor_url,
-            "metaDataDecryptorAddress": metadata_decryptor_address,
-            "flags": flags,
-            "data": data,
-            "metaDataHash": data_hash,
-            "tokenId": token_id,
-            "tokenURI": token_uri,
-            "metadataProofs": data_proofs,
-        }
+        # TODO: this will be handled in web3 py
+        if isinstance(chain_metadata, ChainMetadataWithTokenUri):
+            chain_metadata = tuple(chain_metadata)
+
         return self.send_transaction(
-            "setMetaDataAndTokenURI", (new_metadata_new_token_uri,), from_wallet
+            "setMetaDataAndTokenURI", (chain_metadata,), from_wallet
         )
 
     def get_metadata(self) -> tuple:
         return self.contract.caller.getMetaData()
 
     def create_erc20(
-        self, erc_create_data: CreateErc20Data, from_wallet: Wallet
+        self, erc_create_data: Union[dict, tuple, CreateErc20Data], from_wallet: Wallet
     ) -> str:
-        return self.send_transaction(
-            "createERC20",
-            (
-                erc_create_data.template_index,
-                erc_create_data.strings,
-                erc_create_data.addresses,
-                erc_create_data.uints,
-                erc_create_data.bytess,
-            ),
-            from_wallet,
-        )
+        return self.send_transaction("createERC20", erc_create_data, from_wallet)
 
     def add_to_create_erc20_list(
         self, allowed_address: str, from_wallet: Wallet
