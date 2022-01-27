@@ -84,7 +84,11 @@ class FixedRateExchange(ContractBase):
     def event_MarketFeeCollected(self):
         return self.events.MarketFeeCollected()
 
+<<<<<<< HEAD
     def get_opc_fee(self, base_token: str) -> int:
+=======
+    def get_opf_fee(self, base_token: str) -> int:
+>>>>>>> 43c0292... Fix tests
         return self.contract.caller.getOPCFee(base_token)
 
     def generate_exchange_id(

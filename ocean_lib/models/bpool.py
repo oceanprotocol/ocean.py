@@ -79,7 +79,11 @@ class BPool(BTokenBase):
     def is_public_pool(self) -> bool:
         return self.contract.caller.isPublicSwap()
 
+<<<<<<< HEAD
     def opc_fee(self) -> int:
+=======
+    def opf_fee(self) -> int:
+>>>>>>> 43c0292... Fix tests
         return self.contract.caller.getOPCFee()
 
     def community_fee(self, address: str) -> int:
