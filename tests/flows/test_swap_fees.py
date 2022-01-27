@@ -156,7 +156,7 @@ def test_pool_ocean(
     bpool_address = pool_event[0].args.poolAddress
     bpool = BPool(web3, bpool_address)
     assert bpool.is_finalized() is True
-    assert bpool.opf_fee() == 0
+    assert bpool.opc_fee() == 0
     assert bpool.get_swap_fee() == to_wei("0.001")
     assert bpool.community_fee(get_address_of_type(config, "Ocean")) == 0
     assert bpool.community_fee(erc20_token.address) == 0
@@ -712,7 +712,7 @@ def test_pool_ocean(
     assert ss_contract_dt_balance == erc20_token.balanceOf(side_staking.address)
 
     # Tests no ocean and market fees were accounted for
-    assert bpool.opf_fee() == 0
+    assert bpool.opc_fee() == 0
     assert bpool.get_swap_fee() == swap_market_fee
     assert bpool.community_fee(ocean_contract.address) == 0
     assert bpool.community_fee(erc20_token.address) == 0
@@ -817,7 +817,7 @@ def test_pool_dai(
     bpool_address = pool_event[0].args.poolAddress
     bpool = BPool(web3, bpool_address)
     assert bpool.is_finalized() is True
-    assert bpool.opf_fee() == to_wei("0.001")
+    assert bpool.opc_fee() == to_wei("0.001")
     assert bpool.get_swap_fee() == to_wei("0.001")
     assert bpool.community_fee(dai_contract.address) == 0
     assert bpool.community_fee(erc20_token.address) == 0
@@ -1357,7 +1357,7 @@ def test_pool_dai(
     assert ss_contract_dt_balance == erc20_token.balanceOf(side_staking.address)
 
     # Tests Ocean and market fees were accounted for
-    assert bpool.opf_fee() == to_wei("0.001")
+    assert bpool.opc_fee() == to_wei("0.001")
     assert bpool.get_swap_fee() == swap_market_fee
     assert (bpool.community_fee(erc20_token.address) > 0) is True
     assert (bpool.community_fee(dai_contract.address) > 0) is True
@@ -1465,7 +1465,7 @@ def test_pool_usdc(
     bpool_address = pool_event[0].args.poolAddress
     bpool = BPool(web3, bpool_address)
     assert bpool.is_finalized() is True
-    assert bpool.opf_fee() == to_wei("0.001")
+    assert bpool.opc_fee() == to_wei("0.001")
     assert bpool.get_swap_fee() == to_wei("0.001")
     assert bpool.community_fee(usdc_contract.address) == 0
     assert bpool.community_fee(erc20_token.address) == 0
@@ -2004,7 +2004,7 @@ def test_pool_usdc(
     assert ss_contract_dt_balance == erc20_token.balanceOf(side_staking.address)
 
     # Tests Ocean and market fees were accounted for
-    assert bpool.opf_fee() == to_wei("0.001")
+    assert bpool.opc_fee() == to_wei("0.001")
     assert bpool.get_swap_fee() == swap_market_fee
     assert (bpool.community_fee(erc20_token.address) > 0) is True
     assert (bpool.community_fee(usdc_contract.address) > 0) is True
@@ -2021,7 +2021,7 @@ def test_pool_usdc_flexible(
     another_consumer_wallet,
     factory_router,
 ):
-    """Tests pool with NO ocean token (USDC 6 decimals) and market fee 0.1% flexible opf fee"""
+    """Tests pool with NO ocean token (USDC 6 decimals) and market fee 0.1% flexible opc fee"""
     erc721_factory = ERC721FactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
     )
@@ -2648,7 +2648,7 @@ def test_pool_usdc_flexible(
     assert ss_contract_dt_balance == erc20_token.balanceOf(side_staking.address)
 
     # Tests Ocean and market fees were accounted for
-    assert bpool.opf_fee() == to_wei("0.001")
+    assert bpool.opc_fee() == to_wei("0.001")
     assert bpool.get_swap_fee() == swap_market_fee
     assert (bpool.community_fee(erc20_token.address) > 0) is True
     assert (bpool.community_fee(usdc_contract.address) > 0) is True
@@ -2665,7 +2665,7 @@ def test_pool_dai_flexible(
     another_consumer_wallet,
     factory_router,
 ):
-    """Tests pool with NO ocean token (DAI 18 decimals) and market fee 0.1% and flexible opf fee"""
+    """Tests pool with NO ocean token (DAI 18 decimals) and market fee 0.1% and flexible opc fee"""
     erc721_factory = ERC721FactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
     )
@@ -3285,7 +3285,7 @@ def test_pool_dai_flexible(
     assert ss_contract_dt_balance == erc20_token.balanceOf(side_staking.address)
 
     # Tests Ocean and market fees were accounted for
-    assert bpool.opf_fee() == to_wei("0.001")
+    assert bpool.opc_fee() == to_wei("0.001")
     assert bpool.get_swap_fee() == swap_market_fee
     assert (bpool.community_fee(erc20_token.address) > 0) is True
     assert (bpool.community_fee(dai_contract.address) > 0) is True
