@@ -132,3 +132,36 @@ OrderData = NamedTuple(
         ("provider_fees", ProviderFees),
     ],
 )
+
+MetadataProof = NamedTuple(
+    "MetadataProof",
+    [("validator_address", str), ("v", int), ("r", bytes), ("s", bytes)],
+)
+
+ChainMetadata = NamedTuple(
+    "ChainMetadata",
+    [
+        ("metadata_state", int),
+        ("metadata_decryptor_url", str),
+        ("metadata_decryptor_address", str),
+        ("flags", bytes),
+        ("data", bytes),
+        ("data_hash", bytes),
+        ("data_proofs", List[MetadataProof]),
+    ],
+)
+
+ChainMetadataWithTokenUri = NamedTuple(
+    "ChainMetadataWithTokenUri",
+    [
+        ("metadata_state", int),
+        ("metadata_decryptor_url", str),
+        ("metadata_decryptor_address", str),
+        ("flags", bytes),
+        ("data", bytes),
+        ("data_hash", bytes),
+        ("token_id", int),
+        ("token_uri", str),
+        ("data_proofs", List[MetadataProof]),
+    ],
+)
