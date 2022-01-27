@@ -61,7 +61,7 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
     files = [file]
 
     # Encrypt file objects
-    encrypt_response = data_provider.encrypt(files, config.provider_url)
+    encrypt_response = data_provider.encrypt(files)
     encrypted_files = encrypt_response.content.decode("utf-8")
 
     # Set ERC20 Data

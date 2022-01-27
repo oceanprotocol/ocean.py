@@ -174,7 +174,7 @@ def create_basics(
         files = [file1, file2]
 
     # Encrypt file objects
-    encrypt_response = data_provider.encrypt(files, config.provider_url)
+    encrypt_response = data_provider.encrypt(files)
     encrypted_files = encrypt_response.content.decode("utf-8")
 
     return erc721_factory, metadata, encrypted_files

@@ -57,7 +57,8 @@ class DataServiceProvider:
     @staticmethod
     @enforce_types
     def encrypt(
-        objects_to_encrypt: Union[list, str, bytes], provider_uri: str
+        objects_to_encrypt: Union[list, str, bytes],
+        provider_uri: Optional[str] = "http://172.15.0.4:8030",
     ) -> Response:
         if isinstance(objects_to_encrypt, list):
             data_items = list(map(lambda file: file.to_dict(), objects_to_encrypt))
@@ -77,7 +78,7 @@ class DataServiceProvider:
         )
 
         if not response or not hasattr(response, "status_code"):
-            raise DataProviderException("Response not found!\n" + response.text)
+            raise DataProviderException("Response not found!")
 
         if response.status_code != 201:
             msg = (
@@ -96,7 +97,9 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def fileinfo(did: str, service: Any) -> Response:  # intermediary tweak
+    def fileinfo(
+        did: str, service: Any
+    ) -> Response:  # Can not add Service typing due to enforce_type errors.
         _, fileinfo_endpoint = DataServiceProvider.build_fileinfo(
             service.service_endpoint
         )
@@ -107,7 +110,7 @@ class DataServiceProvider:
         )
 
         if not response or not hasattr(response, "status_code"):
-            raise DataProviderException("Response not found!\n" + response.text)
+            raise DataProviderException("Response not found!")
 
         if response.status_code != 200:
             msg = (
@@ -127,7 +130,7 @@ class DataServiceProvider:
     @enforce_types
     def initialize(
         did: str,
-        service: Any,  # intermediary tweak
+        service: Any,  # Can not add Service typing due to enforce_type errors.
         consumer_address: str,
         compute_environment: Optional[str] = None,
         userdata: Optional[Dict] = None,
@@ -158,7 +161,7 @@ class DataServiceProvider:
             "get", url=initialize_endpoint, params=payload
         )
         if not response or not hasattr(response, "status_code"):
-            raise DataProviderException("Response not found!\n" + response.text)
+            raise DataProviderException("Response not found!")
 
         if response.status_code != 200:
             msg = (
@@ -179,7 +182,7 @@ class DataServiceProvider:
     @enforce_types
     def download(
         did: str,
-        service: Any,  # intermediary tweak
+        service: Any,  # Can not add Service typing due to enforce_type errors.
         tx_id: str,
         consumer_wallet: Wallet,
         destination_folder: Union[str, Path],
@@ -224,7 +227,7 @@ class DataServiceProvider:
             )
 
             if not response or not hasattr(response, "status_code"):
-                raise DataProviderException("Response not found!\n" + response.text)
+                raise DataProviderException("Response not found!")
 
             if response.status_code != 200:
                 msg = (

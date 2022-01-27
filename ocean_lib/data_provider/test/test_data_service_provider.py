@@ -165,7 +165,7 @@ def test_encrypt(web3, config, provider_wallet):
     file2 = FilesTypeFactory(file2_dict)
 
     # Encrypt file objects
-    result = DataSP.encrypt([file1, file2], config.provider_url)
+    result = DataSP.encrypt([file1, file2])
     encrypted_files = result.content.decode("utf-8")
     assert result.status_code == 201
     assert result.headers["Content-type"] == "text/plain"
@@ -181,7 +181,7 @@ def test_encrypt(web3, config, provider_wallet):
 
     # Encrypt a simple string
     test_string = "hello_world"
-    encrypt_result = DataSP.encrypt(test_string, config.provider_url)
+    encrypt_result = DataSP.encrypt(test_string)
     encrypted_document = encrypt_result.content.decode("utf-8")
     assert result.status_code == 201
     assert result.headers["Content-type"] == "text/plain"

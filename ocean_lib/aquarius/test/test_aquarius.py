@@ -51,7 +51,7 @@ def test_aqua_functions_for_single_ddo(
     data_provider = DataServiceProvider
     file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
     file1 = FilesTypeFactory(file1_dict)
-    encrypt_response = data_provider.encrypt([file1], config.provider_url)
+    encrypt_response = data_provider.encrypt([file1])
     encrypted_files = encrypt_response.content.decode("utf-8")
 
     ddo = publisher_ocean_instance.assets.create(
