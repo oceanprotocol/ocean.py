@@ -5,6 +5,7 @@
 import os
 
 from ocean_lib.agreements.file_objects import UrlFile
+from ocean_lib.assets.trusted_algorithms import add_publisher_trusted_algorithm
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
@@ -172,6 +173,12 @@ def test_c2d_flow():
     )
 
     assert ALG_asset.did
+
+    # 4. Alice allows the algorithm for C2D for that data asset
+    add_publisher_trusted_algorithm(
+        DATA_asset, ALG_asset.did, config.metadata_cache_uri
+    )
+    DATA_asset = ocean.assets.update(DATA_asset, alice_wallet)
 
     return
 

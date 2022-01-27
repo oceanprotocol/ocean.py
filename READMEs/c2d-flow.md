@@ -282,9 +282,9 @@ print(f"ALG_asset did = '{ALG_asset.did}'")
 
 In the same Python console:
 ```python
-from ocean_lib.assets import utils
-utils.add_publisher_trusted_algorithm(DATA_ddo, ALG_ddo.did, config.metadata_cache_uri)
-ocean.assets.update(DATA_ddo, publisher_wallet=alice_wallet)
+from ocean_lib.assets.trusted_algorithms import add_publisher_trusted_algorithm
+add_publisher_trusted_algorithm(DATA_asset, ALG_asset.did, config.metadata_cache_uri)
+DATA_asset = ocean.assets.update(DATA_asset, alice_wallet)
 ```
 
 ## 5. Bob acquires datatokens for data and algorithm
