@@ -43,11 +43,8 @@ cd barge
 #clean up old containers (to be sure)
 docker system prune -a --volumes
 
-# make sure to use the dev version of the operator service URL, to match the barge provider
-export OPERATOR_SERVICE_URL=https://c2d-dev.operator.oceanprotocol.com/
-
 #run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-./start_ocean.sh  --with-provider2
+./start_ocean.sh
 ```
 
 ### Install the library
@@ -78,6 +75,9 @@ In the work console:
 #set private keys of two accounts
 export TEST_PRIVATE_KEY1=0x5d75837394b078ce97bc289fa8d75e21000573520bfa7784a9d28ccaae602bf8
 export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
+
+#needed to mint fake OCEAN for testing with ganache
+export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 
 #set the address file only for ganache
 export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
@@ -299,10 +299,10 @@ bob_wallet = Wallet(
 )
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
-# Alice shares DATA datatokens and ALGO datatokens with Bob.
+# Alice mints DATA datatokens and ALGO datatokens to Bob.
 # Alternatively, Bob might have bought these in a market.
-DATA_datatoken.transfer(bob_wallet.address, ocean.to_wei(5), alice_wallet)
-ALGO_datatoken.transfer(bob_wallet.address, ocean.to_wei(5), alice_wallet)
+DATA_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
+ALGO_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
 ```
 
 ## 6. Bob starts a compute job
