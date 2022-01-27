@@ -301,15 +301,18 @@ class DataServiceProvider:
             input_datasets=input_datasets,
         )
         logger.info(f"invoke start compute endpoint with this url: {payload}")
+        _, compute_endpoint = DataServiceProvider.build_compute_endpoint(
+            service_endpoint
+        )
         response = DataServiceProvider._http_method(
             "post",
-            service_endpoint,
+            compute_endpoint,
             data=json.dumps(payload),
             headers={"content-type": "application/json"},
         )
         if response is None:
             raise DataProviderException(
-                f"Failed to get a response for request: computeStartEndpoint={service_endpoint}, payload={payload}, response is {response}"
+                f"Failed to get a response for request: computeStartEndpoint={compute_endpoint}, payload={payload}, response is {response}"
             )
 
         logger.debug(
@@ -319,7 +322,7 @@ class DataServiceProvider:
         if response.status_code not in (201, 200):
             msg = (
                 f"Start Compute failed at the computeStartEndpoint "
-                f"{service_endpoint}, reason {response.text}, status {response.status_code}"
+                f"{compute_endpoint}, reason {response.text}, status {response.status_code}"
             )
             logger.error(msg)
             raise DataProviderException(msg)
@@ -385,14 +388,16 @@ class DataServiceProvider:
         :param did: hex str the asset/DDO id
         :param job_id: str id of compute job that was returned from `start_compute_job`
         :param service_endpoint: str url of the provider service endpoint for compute service
-        :param consumer_address: hex str the ethereum address of the consumer's account
-        :param signature: hex str signed message to allow the provider to authorize the consumer
+        :param consumer: Wallet of the consumer's account
 
         :return: dict of job_id to status info. When job_id is not provided, this will return
             status for each job_id that exist for the did
         """
+        _, compute_status_endpoint = DataServiceProvider.build_compute_endpoint(
+            service_endpoint
+        )
         return DataServiceProvider._send_compute_request(
-            "get", did, job_id, service_endpoint, consumer
+            "get", did, job_id, compute_status_endpoint, consumer
         )
 
     @staticmethod
@@ -405,9 +410,7 @@ class DataServiceProvider:
         :param did: hex str the asset/DDO id
         :param job_id: str id of compute job that was returned from `start_compute_job`
         :param service_endpoint: str url of the provider service endpoint for compute service
-        :param consumer_address: hex str the ethereum address of the consumer's account
-        :param signature: hex str signed message to allow the provider to authorize the consumer
-
+        :param consumer: Wallet of the consumer's account
         :return: dict of job_id to result urls. When job_id is not provided, this will return
             result for each job_id that exist for the did
         """
@@ -425,8 +428,7 @@ class DataServiceProvider:
         :param job_id: str id of compute job that was returned from `start_compute_job`
         :param index: int compute result index
         :param service_endpoint: str url of the provider service endpoint for compute service
-        :param consumer_address: hex str the ethereum address of the consumer's account
-        :param signature: hex str signed message to allow the provider to authorize the consumer
+        :param consumer: Wallet of the consumer's account
 
         :return: dict of job_id to result urls.
         """
