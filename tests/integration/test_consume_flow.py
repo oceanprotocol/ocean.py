@@ -25,11 +25,7 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
 
     # Publisher deploys NFT contract
     tx = erc721_factory.deploy_erc721_contract(
-        "NFT1",
-        "NFTSYMBOL",
-        1,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
+        ("NFT1", "NFTSYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
         publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)

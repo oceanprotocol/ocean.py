@@ -2,7 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import List
+from typing import List, Union
 
 from enforce_typing import enforce_types
 from ocean_lib.models.bfactory import BFactory
@@ -35,8 +35,8 @@ class FactoryRouter(BFactory):
     def is_ss_contract(self, address: str):
         return self.contract.caller.isSSContract(address)
 
-    def get_opf_fee(self, base_token: str) -> int:
-        return self.contract.caller.getOPFFee(base_token)
+    def get_opc_fee(self, base_token: str) -> int:
+        return self.contract.caller.getOPCFee(base_token)
 
     def swap_ocean_fee(self) -> int:
         return self.contract.caller.swapOceanFee()
@@ -44,5 +44,7 @@ class FactoryRouter(BFactory):
     def is_ocean_token(self, ocean_address: str) -> bool:
         return self.contract.caller.isOceanToken(ocean_address)
 
-    def buy_dt_batch(self, operations: List[Operations], from_wallet: Wallet) -> str:
+    def buy_dt_batch(
+        self, operations: List[Union[dict, tuple, Operations]], from_wallet: Wallet
+    ) -> str:
         return self.send_transaction("buyDTBatch", (operations,), from_wallet)

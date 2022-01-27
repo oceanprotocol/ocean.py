@@ -17,7 +17,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.models.models_structures import CreateErc20Data, CreateERC721Data
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -347,11 +347,7 @@ def test_plain_asset_with_one_datatoken(
 
     # Publisher deploys NFT contract
     tx = erc721_factory.deploy_erc721_contract(
-        "NFT1",
-        "NFTSYMBOL",
-        1,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
+        ("NFT1", "NFTSYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
         publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -404,14 +400,11 @@ def test_plain_asset_multiple_datatokens(
         config, web3, data_provider
     )
 
-    tx = erc721_factory.deploy_erc721_contract(
-        "NFT2",
-        "NFT2SYMBOL",
-        1,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
-        publisher_wallet,
+    erc721_data = CreateERC721Data(
+        "NFT2", "NFT2SYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"
     )
+
+    tx = erc721_factory.deploy_erc721_contract(erc721_data, publisher_wallet)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
         ERC721FactoryContract.EVENT_NFT_CREATED,

@@ -63,7 +63,7 @@ def test_exchange_rate_creation(
     no_limit = to_wei("100000000000000000000")
     rate = to_wei("1")
     market_fee = int(1e15)  # 0.1%
-    opf_fee = int(1e15)  # 0.1%
+    opc_fee = int(1e15)  # 0.1%
     ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
 
     fixed_exchange = FixedRateExchange(web3, get_address_of_type(config, "FixedPrice"))
@@ -137,13 +137,13 @@ def test_exchange_rate_creation(
         fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR]
         == another_consumer_wallet.address
     )
-    assert fee_info[FixedRateExchangeFeesInfo.OPF_FEE] == 0
+    assert fee_info[FixedRateExchangeFeesInfo.OPC_FEE] == 0
     assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE] == 0
     assert fee_info[FixedRateExchangeFeesInfo.OCEAN_FEE_AVAILABLE] == 0
 
     # Get exchange info
     # Get swapOceanFee
-    assert fixed_exchange.get_opf_fee(ZERO_ADDRESS) == opf_fee
+    assert fixed_exchange.get_opc_fee(ZERO_ADDRESS) == opc_fee
 
     # Should get the exchange rate
     exchange_rate = fixed_exchange.get_rate(exchange_id)
@@ -303,7 +303,7 @@ def test_exchange_rate_creation(
         fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR]
         == another_consumer_wallet.address
     )
-    assert fee_info[FixedRateExchangeFeesInfo.OPF_FEE] == 0
+    assert fee_info[FixedRateExchangeFeesInfo.OPC_FEE] == 0
     assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE] > 0
     assert fee_info[FixedRateExchangeFeesInfo.OCEAN_FEE_AVAILABLE] == 0
 

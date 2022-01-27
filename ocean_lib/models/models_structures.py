@@ -8,6 +8,22 @@
 from enum import Enum
 from typing import List, NamedTuple
 
+CreateERC721Data = NamedTuple(
+    "CreateErc721Data",
+    [
+        ("name", str),
+        ("symbol", str),
+        ("template_index", int),
+        ("additional_erc20_deployer", str),
+        ("token_uri", str),
+    ],
+)
+
+CreateERC721DataNoDeployer = NamedTuple(
+    "CreateERC721DataNoDeployer",
+    [("name", str), ("symbol", str), ("template_index", int), ("token_uri", str)],
+)
+
 CreateErc20Data = NamedTuple(
     "CreateErc20Data",
     [
@@ -58,6 +74,7 @@ DispenserData = NamedTuple(
         ("dispenser_address", str),
         ("max_tokens", int),
         ("max_balance", int),
+        ("with_mint", bool),
         ("allowed_swapper", str),
     ],
 )
@@ -95,7 +112,7 @@ ProviderFees = NamedTuple(
         ("v", str),
         ("r", str),
         ("s", str),
-        ("validUntil", int),
+        ("valid_until", int),
         ("provider_data", bytes),
     ],
 )
@@ -107,5 +124,38 @@ OrderData = NamedTuple(
         ("consumer", str),
         ("service_index", int),
         ("provider_fees", ProviderFees),
+    ],
+)
+
+MetadataProof = NamedTuple(
+    "MetadataProof",
+    [("validator_address", str), ("v", int), ("r", bytes), ("s", bytes)],
+)
+
+ChainMetadata = NamedTuple(
+    "ChainMetadata",
+    [
+        ("metadata_state", int),
+        ("metadata_decryptor_url", str),
+        ("metadata_decryptor_address", str),
+        ("flags", bytes),
+        ("data", bytes),
+        ("data_hash", bytes),
+        ("data_proofs", List[MetadataProof]),
+    ],
+)
+
+ChainMetadataWithTokenUri = NamedTuple(
+    "ChainMetadataWithTokenUri",
+    [
+        ("metadata_state", int),
+        ("metadata_decryptor_url", str),
+        ("metadata_decryptor_address", str),
+        ("flags", bytes),
+        ("data", bytes),
+        ("data_hash", bytes),
+        ("token_id", int),
+        ("token_uri", str),
+        ("data_proofs", List[MetadataProof]),
     ],
 )

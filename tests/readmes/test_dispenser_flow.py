@@ -69,10 +69,11 @@ def test_dispenser_flow():
         dispenser_address=dispenser.address,
         max_balance=max_amount,
         max_tokens=max_amount,
+        with_mint=True,
         allowed_swapper=ZERO_ADDRESS,
     )
 
-    erc20_token.create_dispenser_with_mint(dispenser_data, from_wallet=alice_wallet)
+    erc20_token.create_dispenser(dispenser_data, from_wallet=alice_wallet)
 
     dispenser_status = dispenser.status(erc20_token.address)
     assert dispenser_status[0] is True
