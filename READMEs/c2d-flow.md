@@ -86,7 +86,7 @@ export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
 export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 ```
 
-### Start Python
+## 2. Alice publishes data asset
 
 In the work console:
 ```console
@@ -118,71 +118,96 @@ alice_wallet = Wallet(
     config.transaction_timeout,
 )
 print(f"alice_wallet.address = '{alice_wallet.address}'")
-```
 
-## 2. Alice publishes data asset
+# Mint OCEAN
+from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
+mint_fake_OCEAN(config)
+assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 
-In the same Python console:
-```python
-# Publish DATA datatoken, mint tokens
-from ocean_lib.web3_internal.currency import to_wei
+# Publish the data NFT token
+DATA_nft_token = ocean.create_nft_token('NFTToken1', 'NFT1', alice_wallet)
+print(f"DATA_nft_token address = '{DATA_nft_token.address}'")
 
-DATA_datatoken = ocean.create_datatoken('DATA1', 'DATA1', alice_wallet, blob=ocean.config.metadata_cache_uri)
-DATA_datatoken.mint(alice_wallet.address, to_wei(100), alice_wallet)
-print(f"DATA_datatoken.address = '{DATA_datatoken.address}'")
 
-# Specify metadata & service attributes for Branin test dataset.
-# It's specified using _local_ DDO metadata format; Aquarius will convert it to remote
-# by removing `url` and adding `encryptedFiles` field.
+# Prepare data for ERC20 token
+from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+# Publish the datatoken
+DATA_erc20_data = CreateErc20Data(
+    template_index=1,
+    strings=["Datatoken 1", "DT1"],
+    addresses=[
+        alice_wallet.address,
+        alice_wallet.address,
+        ZERO_ADDRESS,
+        ocean.OCEAN_address,
+    ],
+    uints=[ocean.to_wei(100000), 0],
+    bytess=[b""],
+)
+DATA_datatoken = DATA_nft_token.create_datatoken(DATA_erc20_data, alice_wallet)
+
+
+# Specify metadata and services, using the Branin test dataset
+DATA_date_created = "2021-12-28T10:55:11Z"
+
 DATA_metadata = {
-    "main": {
-        "type": "dataset",
-        "files": [
-	  {
-	    "url": "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff",
-	    "index": 0,
-	    "contentType": "text/text"
-	  }
-	],
-	"name": "branin", "author": "Trent", "license": "CC0",
-	"dateCreated": "2019-12-28T10:55:11Z"
-    }
+    "created": DATA_date_created,
+    "updated": DATA_date_created,
+    "description": "Branin dataset",
+    "name": "Branin dataset",
+    "type": "dataset",
+    "author": "Treunt",
+    "license": "CC0: PublicDomain",
 }
-DATA_service_attributes = {
-    "main": {
-        "name": "DATA_dataAssetAccessServiceAgreement",
-        "creator": alice_wallet.address,
-        "timeout": 3600 * 24,
-        "datePublished": "2019-12-28T10:55:11Z",
-        "cost": 1.0, # <don't change, this is obsolete>
-        }
-    }
 
-# Set up a service provider. We'll use this same provider for ALG
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-provider_url = DataServiceProvider.get_url(ocean.config)
-# returns "http://localhost:8030"
-
-# Calc DATA service compute descriptor
-from ocean_lib.services.service import Service
-from ocean_lib.agreements.service_types import ServiceTypes
-DATA_compute_service = Service(
-    service_endpoint=provider_url,
-    service_type=ServiceTypes.CLOUD_COMPUTE,
-    attributes=DATA_service_attributes
+# ocean.py offers multiple file types, but a simple url file should be enough for this example
+from ocean_lib.agreements.file_objects import UrlFile
+DATA_url_file = UrlFile(
+    url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 )
 
-#Publish metadata and service info on-chain
-DATA_ddo = ocean.assets.create(
-  metadata=DATA_metadata, # {"main" : {"type" : "dataset", ..}, ..}
-  publisher_wallet=alice_wallet,
-  services=[DATA_compute_service],
-  datatoken_address=DATA_datatoken.address)
-print(f"DATA did = '{DATA_ddo.did}'")
+# Encrypt file(s) using provider
+DATA_encrypted_files = ocean.assets.encrypt_files([DATA_url_file])
+
+# Set the compute values for compute service
+DATA_compute_values = {
+    "namespace": "ocean-compute",
+    "cpus": 2,
+    "gpus": 4,
+    "gpuType": "NVIDIA Tesla V100 GPU",
+    "memory": "128M",
+    "volumeSize": "2G",
+    "allowRawAlgorithm": False,
+    "allowNetworkAccess": True,
+)
+
+# Create the Service
+from ocean_lib.services.service import Service
+DATA_compute_service = Service(
+    service_id="2",
+    service_type="compute",
+    service_endpoint=f"{ocean.config.provider_url}/api/services/compute",
+    datatoken=DATA_datatoken.address,
+    files=DATA_encrypted_files,
+    timeout=3600,
+    compute_values=DATA_compute_values,
+)
+
+
+# Publish asset with compute service on-chain.
+DATA_asset = ocean.assets.create(
+    metadata=DATA_metadata,
+    publisher_wallet=alice_wallet,
+    encrypted_files=DATA_encrypted_files,
+    services=[DATA_compute_service],
+    erc721_address=DATA_nft_token.address,
+    deployed_erc20_tokens=[DATA_datatoken],
+)
+
+DATA_service = DATA_asset.get_service("compute")
+print(f"DATA_service datatoken address = '{DATA_service.datatoken}'")
 ```
-
-Full details: [DATA_ddo](DATA_ddo.md)
-
 
 ## 3. Alice publishes algorithm
 
@@ -194,61 +219,7 @@ Take a look at the [Ocean tutorials](https://docs.oceanprotocol.com/tutorials/co
 
 In the same Python console:
 ```python
-# Publish ALG datatoken
-ALG_datatoken = ocean.create_datatoken('ALG1', 'ALG1', alice_wallet, blob=ocean.config.metadata_cache_uri)
-ALG_datatoken.mint(alice_wallet.address, to_wei(100), alice_wallet)
-print(f"ALG_datatoken.address = '{ALG_datatoken.address}'")
 
-# Specify metadata and service attributes, for "GPR" algorithm script.
-# In same location as Branin test dataset. GPR = Gaussian Process Regression.
-ALG_metadata =  {
-    "main": {
-        "type": "algorithm",
-        "algorithm": {
-            "language": "python",
-            "format": "docker-image",
-            "version": "0.1",
-            "container": {
-              "entrypoint": "python $ALGO",
-              "image": "oceanprotocol/algo_dockers",
-              "tag": "python-branin"
-            }
-        },
-        "files": [
-	  {
-	    "url": "https://raw.githubusercontent.com/trentmc/branin/main/gpr.py",
-	    "index": 0,
-	    "contentType": "text/text",
-	  }
-	],
-	"name": "gpr", "author": "Trent", "license": "CC0",
-	"dateCreated": "2020-01-28T10:55:11Z"
-    }
-}
-ALG_service_attributes = {
-        "main": {
-            "name": "ALG_dataAssetAccessServiceAgreement",
-            "creator": alice_wallet.address,
-            "timeout": 3600 * 24,
-            "datePublished": "2020-01-28T10:55:11Z",
-            "cost": 1.0, # <don't change, this is obsolete>
-        }
-    }
-
-# Calc ALG service access descriptor. We use the same service provider as DATA
-ALG_access_service = Service(
-    service_endpoint=provider_url,
-    service_type=ServiceTypes.CLOUD_COMPUTE,
-    attributes=ALG_service_attributes
-)
-
-# Publish metadata and service info on-chain
-ALG_ddo = ocean.assets.create(
-  metadata=ALG_metadata, # {"main" : {"type" : "algorithm", ..}, ..}
-  publisher_wallet=alice_wallet,
-  services=[ALG_access_service],
-  datatoken_address=ALG_datatoken.address)
-print(f"ALG did = '{ALG_ddo.did}'")
 ```
 
 Full details: [ALG_ddo](ALG_ddo.md)
