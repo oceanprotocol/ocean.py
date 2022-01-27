@@ -299,9 +299,10 @@ bob_wallet = Wallet(
 )
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
-# Alice shares access for both to Bob, as datatokens. Alternatively, Bob might have bought these in a market.
-DATA_datatoken.transfer(bob_wallet.address, to_wei(5), from_wallet=alice_wallet)
-ALG_datatoken.transfer(bob_wallet.address, to_wei(5), from_wallet=alice_wallet)
+# Alice shares DATA datatokens and ALG datatokens with Bob.
+# Alternatively, Bob might have bought these in a market.
+DATA_datatoken.transfer(bob_wallet.address, ocean.to_wei(5), alice_wallet)
+ALG_datatoken.transfer(bob_wallet.address, ocean.to_wei(5), alice_wallet)
 ```
 
 ## 6. Bob starts a compute job
