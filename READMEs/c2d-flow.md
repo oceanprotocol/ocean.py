@@ -322,6 +322,8 @@ ALGO_asset = ocean.assets.resolve(ALGO_did)
 compute_service = DATA_asset.get_service("compute")
 algo_service = ALGO_asset.get_service("access")
 
+from datetime import datetime, timedelta
+
 # Pay for dataset for 1 day
 DATA_order_tx_id = ocean.assets.pay_for_service(
     asset=DATA_asset,
@@ -346,6 +348,7 @@ ALGO_order_tx_id = ocean.assets.pay_for_service(
 print(f"Paid for algorithm access service, order tx id: {ALGO_order_tx_id}")
 
 # Start compute job
+from ocean_lib.models.compute_input import ComputeInput
 DATA_compute_input = ComputeInput(DATA_did, DATA_order_tx_id, compute_service.id)
 ALGO_compute_input = ComputeInput(ALGO_did, ALGO_order_tx_id, algo_service.id)
 job_id = ocean.compute.start(
@@ -363,8 +366,15 @@ print(f"Started compute job with id: {job_id}")
 In the same Python console, you can check the job status as many times as needed:
 
 ```python
-ocean.compute.status(DATA_did, job_id, bob_wallet)
-
+# Wait until job is done
+import time
+succeeded = False
+for _ in range(0, 200):
+    status = ocean.compute.status(DATA_did, job_id, bob_wallet)
+    if status["status"] > 60:
+        succeeded = True
+        break
+    time.sleep(5)
 ```
 
 This will output the status of the current job.
@@ -373,13 +383,16 @@ Here is a list of possible results: [Operator Service Status description](https:
 Once you get `{'ok': True, 'status': 70, 'statusText': 'Job finished'}`, Bob can check the result of the job.
 
 ```python
-result = ocean.compute.result_file(DATA_did, job_id, 0, bob_wallet)  # 0 index, means we retrieve the results from the first dataset index
+# Retrieve result
+# 0 index, means we retrieve the results from the first dataset index
+result = ocean.compute.result_file(DATA_did, job_id, 0, bob_wallet)
 
 import pickle
 model = pickle.loads(result)  # the gaussian model result
 ```
 
 You can use the result however you like. For the purpose of this example, let's plot it.
+
 ```python
 import numpy
 from matplotlib import pyplot

@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import os
+import time
 from datetime import datetime, timedelta
 
 from ocean_lib.agreements.file_objects import UrlFile
@@ -108,7 +109,7 @@ def test_c2d_flow():
         deployed_erc20_tokens=[DATA_datatoken],
     )
 
-    assert DATA_asset.did
+    assert DATA_asset.did, "create dataset with compute service unsuccessful"
 
     # 3. Alice publishes algorithm
 
@@ -174,7 +175,7 @@ def test_c2d_flow():
         deployed_erc20_tokens=[ALGO_datatoken],
     )
 
-    assert ALGO_asset.did
+    assert ALGO_asset.did, "create algorithm unsuccessful"
 
     # 4. Alice allows the algorithm for C2D for that data asset
     add_publisher_trusted_algorithm(
@@ -219,7 +220,7 @@ def test_c2d_flow():
             "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
         },
     )
-    assert DATA_order_tx_id
+    assert DATA_order_tx_id, "pay for dataset unsuccessful"
 
     # Pay for algorithm
     ALGO_order_tx_id = ocean.assets.pay_for_service(
@@ -230,7 +231,7 @@ def test_c2d_flow():
             "valid_until": int((datetime.now() + timedelta(days=1)).timestamp())
         },
     )
-    assert ALGO_order_tx_id
+    assert ALGO_order_tx_id, "pay for algorithm unsuccessful"
 
     # Start compute job
     DATA_compute_input = ComputeInput(DATA_did, DATA_order_tx_id, compute_service.id)
@@ -242,64 +243,19 @@ def test_c2d_flow():
         compute_environment="unused",
         algorithm=ALGO_compute_input,
     )
-    assert job_id
+    assert job_id, "start compute unsuccessful"
 
-    return
+    # Wait until job is done
+    succeeded = False
+    for _ in range(0, 200):
+        status = ocean.compute.status(DATA_did, job_id, bob_wallet)
+        if status["status"] > 60:
+            succeeded = True
+            break
+        time.sleep(5)
+    assert succeeded, "compute job unsuccessful"
 
-    # erc20_token = ocean.get_datatoken(asset.get_service("access").datatoken)
-    # OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
-
-    # ss_params = [
-    #     ocean.to_wei(1),
-    #     OCEAN_token.decimals(),
-    #     ocean.to_wei(10000),
-    #     2500000,
-    #     ocean.to_wei(2000),
-    # ]
-
-    # swap_fees = [ocean.to_wei("0.01"), ocean.to_wei("0.01")]
-    # bpool = ocean.create_pool(
-    #     erc20_token, OCEAN_token, ss_params, swap_fees, alice_wallet
-    # )
-    # assert bpool.address
-
-    # price_in_OCEAN = bpool.get_amount_in_exact_out(
-    #     OCEAN_token.address, erc20_token.address, ocean.to_wei(1), ocean.to_wei("0.01")
-    # )
-
-    # formatted_price = pretty_ether_and_wei(price_in_OCEAN, "OCEAN")
-    # assert formatted_price
-
-    # bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
-    # bob_wallet = Wallet(
-    #     ocean.web3,
-    #     bob_private_key,
-    #     config.block_confirmations,
-    #     config.transaction_timeout,
-    # )
-
-    # # Verify that Bob has ganache ETH
-    # assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
-
-    # # Verify that Bob has ganache OCEAN
-    # assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
-
-    # OCEAN_token.approve(bpool.address, ocean.to_wei("10000"), from_wallet=bob_wallet)
-
-    # bpool.swap_exact_amount_out(
-    #     [OCEAN_token.address, erc20_token.address, ZERO_ADDRESS],
-    #     [ocean.to_wei(10), ocean.to_wei(1), ocean.to_wei(10), 0],
-    #     from_wallet=bob_wallet,
-    # )
-    # assert erc20_token.balanceOf(bob_wallet.address) >= ocean.to_wei(
-    #     1
-    # ), "Bob didn't get 1.0 datatokens"
-
-    # service = asset.get_service("access")
-    # order_tx_id = ocean.assets.pay_for_service(asset, service, bob_wallet)
-
-    # file_path = ocean.assets.download_asset(
-    #     asset, service.service_endpoint, bob_wallet, str(tmp_path), order_tx_id
-    # )
-
-    # assert file_path
+    # Retrieve result
+    # 0 index, means we retrieve the results from the first dataset index
+    result = ocean.compute.result_file(DATA_did, job_id, 0, bob_wallet)
+    assert result, "result retrieval unsuccessful"
