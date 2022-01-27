@@ -10,6 +10,8 @@ from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.models_structures import (
     CreateErc20Data,
     CreateERC721DataNoDeployer,
+    DispenserData,
+    FixedData,
     OrderData,
     PoolData2,
 )
@@ -313,16 +315,16 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert registered_fee_token_event, "Cannot find TokenCreated event."
     fee_erc20_address = registered_fee_token_event[0].args.newTokenAddress
 
-    fixed_rate_data = {
-        "fixedPriceAddress": fixed_rate_address,
-        "addresses": [
+    fixed_rate_data = FixedData(
+        fixed_price_address=fixed_rate_address,
+        addresses=[
             fee_erc20_address,
             publisher_wallet.address,
             consumer_wallet.address,
             ZERO_ADDRESS,
         ],
-        "uints": [18, 18, to_wei("1"), to_wei("0.001"), 0],
-    }
+        uints=[18, 18, to_wei("1"), to_wei("0.001"), 0],
+    )
     tx = erc721_factory.create_nft_erc_with_fixed_rate(
         nft_create_data, erc_create_data_pool, fixed_rate_data, publisher_wallet
     )
@@ -369,13 +371,13 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
 
     # Tests creating NFT with ERC20 and with Dispenser successfully.
     dispenser_address = get_address_of_type(config, Dispenser.CONTRACT_NAME)
-    dispenser_data = {
-        "dispenserAddress": dispenser_address,
-        "maxTokens": to_wei("1"),
-        "maxBalance": to_wei("1"),
-        "withMint": True,
-        "allowedSwapper": ZERO_ADDRESS,
-    }
+    dispenser_data = DispenserData(
+        dispenser_address=dispenser_address,
+        max_tokens=to_wei("1"),
+        max_balance=to_wei("1"),
+        with_mint=True,
+        allowed_swapper=ZERO_ADDRESS,
+    )
 
     tx = erc721_factory.create_nft_erc_with_dispenser(
         nft_create_data, erc_create_data_pool, dispenser_data, publisher_wallet
