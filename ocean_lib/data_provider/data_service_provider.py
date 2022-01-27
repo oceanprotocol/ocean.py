@@ -263,10 +263,9 @@ class DataServiceProvider:
     @staticmethod
     # @enforce_types omitted due to subscripted generics error
     def start_compute_job(
-        service_endpoint: str,
+        dataset_compute_service: Any,  # Can not add Service typing due to enforce_type errors.
         consumer: Wallet,
         dataset: ComputeInput,
-        compute_environment: str,
         algorithm: Optional[ComputeInput] = None,
         algorithm_meta: Optional[AlgorithmMetadata] = None,
         algorithm_custom_data: Optional[str] = None,
@@ -277,10 +276,9 @@ class DataServiceProvider:
 
         Either algorithm or algorithm_meta must be defined.
 
-        :param service_endpoint: str provider compute/start endpoint
+        :param dataset_compute_service:
         :param consumer: hex str the ethereum address of the consumer executing the compute job
         :param dataset: ComputeInput dataset with a compute service
-        :param compute_environment: str compute environment id
         :param algorithm: ComputeInput algorithm witha download service.
         :param algorithm_meta: AlgorithmMetadata algorithm metadata
         :param algorithm_custom_data: dict customizable algo parameters (ie. no of iterations, etc)
@@ -294,7 +292,9 @@ class DataServiceProvider:
         payload = DataServiceProvider._prepare_compute_payload(
             consumer=consumer,
             dataset=dataset,
-            compute_environment=compute_environment,
+            compute_environment=json.dumps(
+                dataset_compute_service.compute_values, separators=(",", ":")
+            ),
             algorithm=algorithm,
             algorithm_meta=algorithm_meta,
             algorithm_custom_data=algorithm_custom_data,
@@ -302,7 +302,7 @@ class DataServiceProvider:
         )
         logger.info(f"invoke start compute endpoint with this url: {payload}")
         _, compute_endpoint = DataServiceProvider.build_compute_endpoint(
-            service_endpoint
+            dataset_compute_service.service_endpoint
         )
         response = DataServiceProvider._http_method(
             "post",
@@ -343,58 +343,71 @@ class DataServiceProvider:
     @staticmethod
     @enforce_types
     def stop_compute_job(
-        did: str, job_id: str, service_endpoint: str, consumer: Wallet
+        did: str,
+        job_id: str,
+        dataset_compute_service: Any,
+        consumer: Wallet,  # Can not add Service typing due to enforce_type errors.
     ) -> Dict[str, Any]:
         """
 
         :param did: hex str the asset/DDO id
         :param job_id: str id of compute job that was returned from `start_compute_job`
-        :param service_endpoint: str url of the provider service endpoint for compute service
-        :param consumer_address: hex str the ethereum address of the consumer's account
-        :param signature: hex str signed message to allow the provider to authorize the consumer
+        :param dataset_compute_service:
+        :param consumer: Wallet of the consumer's account
 
         :return: bool whether the job was stopped successfully
         """
+        _, compute_stop_endpoint = DataServiceProvider.build_compute_endpoint(
+            dataset_compute_service.service_endpoint
+        )
         return DataServiceProvider._send_compute_request(
-            "put", did, job_id, service_endpoint, consumer
+            "put", did, job_id, compute_stop_endpoint, consumer
         )
 
     @staticmethod
     @enforce_types
     def delete_compute_job(
-        did: str, job_id: str, service_endpoint: str, consumer: Wallet
+        did: str,
+        job_id: str,
+        dataset_compute_service: Any,
+        consumer: Wallet,  # Can not add Service typing due to enforce_type errors.
     ) -> Dict[str, str]:
         """
 
         :param did: hex str the asset/DDO id
         :param job_id: str id of compute job that was returned from `start_compute_job`
-        :param service_endpoint: str url of the provider service endpoint for compute service
-        :param consumer_address: hex str the ethereum address of the consumer's account
-        :param signature: hex str signed message to allow the provider to authorize the consumer
+        :param dataset_compute_service:
+        :param consumer: Wallet of the consumer's account
 
         :return: bool whether the job was deleted successfully
         """
+        _, compute_delete_endpoint = DataServiceProvider.build_compute_endpoint(
+            dataset_compute_service.service_endpoint
+        )
         return DataServiceProvider._send_compute_request(
-            "delete", did, job_id, service_endpoint, consumer
+            "delete", did, job_id, compute_delete_endpoint, consumer
         )
 
     @staticmethod
     @enforce_types
     def compute_job_status(
-        did: str, job_id: str, service_endpoint: str, consumer: Wallet
+        did: str,
+        job_id: str,
+        dataset_compute_service: Any,
+        consumer: Wallet,  # Can not add Service typing due to enforce_type errors.
     ) -> Dict[str, Any]:
         """
 
         :param did: hex str the asset/DDO id
         :param job_id: str id of compute job that was returned from `start_compute_job`
-        :param service_endpoint: str url of the provider service endpoint for compute service
+        :param dataset_compute_service:
         :param consumer: Wallet of the consumer's account
 
         :return: dict of job_id to status info. When job_id is not provided, this will return
             status for each job_id that exist for the did
         """
         _, compute_status_endpoint = DataServiceProvider.build_compute_endpoint(
-            service_endpoint
+            dataset_compute_service.service_endpoint
         )
         return DataServiceProvider._send_compute_request(
             "get", did, job_id, compute_status_endpoint, consumer
@@ -403,31 +416,40 @@ class DataServiceProvider:
     @staticmethod
     @enforce_types
     def compute_job_result(
-        did: str, job_id: str, service_endpoint: str, consumer: Wallet
+        did: str,
+        job_id: str,
+        dataset_compute_service: Any,
+        consumer: Wallet,  # Can not add Service typing due to enforce_type errors.
     ) -> Dict[str, Any]:
         """
 
         :param did: hex str the asset/DDO id
         :param job_id: str id of compute job that was returned from `start_compute_job`
-        :param service_endpoint: str url of the provider service endpoint for compute service
+        :param dataset_compute_service:
         :param consumer: Wallet of the consumer's account
         :return: dict of job_id to result urls. When job_id is not provided, this will return
             result for each job_id that exist for the did
         """
+        _, compute_job_result_endpoint = DataServiceProvider.build_compute_endpoint(
+            dataset_compute_service.service_endpoint
+        )
         return DataServiceProvider._send_compute_request(
-            "get", did, job_id, service_endpoint, consumer
+            "get", did, job_id, compute_job_result_endpoint, consumer
         )
 
     @staticmethod
     @enforce_types
     def compute_job_result_file(
-        job_id: str, index: int, service_endpoint: str, consumer: Wallet
+        job_id: str,
+        index: int,
+        dataset_compute_service: Any,
+        consumer: Wallet,  # Can not add Service typing due to enforce_type errors.
     ) -> Dict[str, Any]:
         """
 
         :param job_id: str id of compute job that was returned from `start_compute_job`
         :param index: int compute result index
-        :param service_endpoint: str url of the provider service endpoint for compute service
+        :param dataset_compute_service:
         :param consumer: Wallet of the consumer's account
 
         :return: dict of job_id to result urls.
@@ -445,7 +467,13 @@ class DataServiceProvider:
             "consumerAddress": consumer.address,
         }
 
-        req.prepare_url(service_endpoint, params)
+        (
+            _,
+            compute_job_result_endpoint,
+        ) = DataServiceProvider.build_compute_result_file_endpoint(
+            dataset_compute_service.service_endpoint
+        )
+        req.prepare_url(compute_job_result_endpoint, params)
         compute_job_result_file_url = req.url
 
         logger.info(

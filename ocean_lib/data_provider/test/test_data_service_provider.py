@@ -97,7 +97,7 @@ def test_initialize_fails(config):
     mock_service.service_endpoint = f"{config.provider_url}"
     with pytest.raises(
         DataProviderException,
-        match=f"Failed to get a response for request: initializeEndpoint={mock_service.service_endpoint}",
+        match=f"Failed to get a response for request: initializeEndpoint={DataSP.build_initialize_endpoint(mock_service.service_endpoint)[1]}",
     ) as err:
         DataSP.initialize(
             "some_did",
@@ -110,28 +110,37 @@ def test_initialize_fails(config):
     )
 
 
-def test_start_compute_job_fails_empty(with_empty_client, consumer_wallet):
-    """Tests failure of compute job from endpoint with empty response."""
-    with pytest.raises(DataProviderException):
+def test_start_compute_job_fails_empty(consumer_wallet, config):
+    """Tests failures of compute job from endpoint with empty response."""
+    mock_service = Service(
+        service_id="some_service_id",
+        service_type="some_service_type",
+        service_endpoint="http://mock/",
+        datatoken="some_dt",
+        files="some_files",
+        timeout=0,
+        compute_values=dict(),
+    )
+    with pytest.raises(
+        InvalidURL, match=f"InvalidURL {mock_service.service_endpoint}."
+    ):
         DataSP.start_compute_job(
-            service_endpoint="http://mock/",
+            dataset_compute_service=mock_service,
             consumer=consumer_wallet,
             dataset=ComputeInput("some_did", "some_tx_id", "some_service_id"),
-            compute_environment="some_compute_environment",
             algorithm=ComputeInput(
                 "another_did", "another_tx_id", "another_service_id"
             ),
         )
-
-
-def test_start_compute_job_fails_error_response(with_evil_client, consumer_wallet):
-    """Tests failure of compute job from endpoint with non-200 response."""
-    with pytest.raises(DataProviderException):
+    mock_service.service_endpoint = f"{config.provider_url}"
+    with pytest.raises(
+        DataProviderException,
+        match=f"Start Compute failed at the computeStartEndpoint {DataSP.build_compute_endpoint(mock_service.service_endpoint)[1]}",
+    ):
         DataSP.start_compute_job(
-            service_endpoint="http://mock/",
+            dataset_compute_service=mock_service,
             consumer=consumer_wallet,
             dataset=ComputeInput("some_did", "some_tx_id", "some_service_id"),
-            compute_environment="some_compute_environment",
             algorithm=ComputeInput(
                 "another_did", "another_tx_id", "another_service_id"
             ),
@@ -146,20 +155,50 @@ def test_send_compute_request_failure(with_evil_client, provider_wallet):
         )
 
 
-def test_compute_job_result(with_nice_client, provider_wallet):
-    """Tests successful compute job starting."""
-    result = DataSP.compute_job_result(
-        "some_did", "some_job_id", "http://mock", provider_wallet
+def test_compute_job_result_fails(provider_wallet, config):
+    """Tests failure of compute job starting."""
+
+    mock_service = Service(
+        service_id="some_service_id",
+        service_type="some_service_type",
+        service_endpoint="http://mock",
+        datatoken="some_dt",
+        files="some_files",
+        timeout=0,
+        compute_values=dict(),
     )
-    assert result == {"good_job": "with_mock"}
+
+    with pytest.raises(
+        InvalidURL, match=f"InvalidURL {mock_service.service_endpoint}."
+    ):
+        DataSP.compute_job_result(
+            "some_did", "some_job_id", mock_service, provider_wallet
+        )
 
 
-def test_delete_job_result(with_nice_client, provider_wallet):
-    """Tests successful compute job deletion."""
-    result = DataSP.delete_compute_job(
-        "some_did", "some_job_id", "http://mock", provider_wallet
+def test_delete_job_result(provider_wallet, config):
+    """Tests a failure & a success of compute job deletion."""
+    mock_service = Service(
+        service_id="some_service_id",
+        service_type="some_service_type",
+        service_endpoint="http://mock/",
+        datatoken="some_dt",
+        files="some_files",
+        timeout=0,
+        compute_values=dict(),
     )
-    assert result == {"good_job": "with_mock_delete"}
+
+    # Failure of compute job deletion.
+    with pytest.raises(
+        InvalidURL, match=f"InvalidURL {mock_service.service_endpoint}."
+    ):
+        DataSP.delete_compute_job(
+            "some_did", "some_job_id", mock_service, provider_wallet
+        )
+
+    # Success of compute job deletion.
+    mock_service.service_endpoint = f"{config.provider_url}"
+    DataSP.delete_compute_job("some_did", "some_job_id", mock_service, provider_wallet)
 
 
 def test_encrypt(web3, config, provider_wallet):

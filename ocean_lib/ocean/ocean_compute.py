@@ -50,7 +50,6 @@ class OceanCompute:
         self,
         consumer_wallet: Wallet,
         dataset: ComputeInput,
-        compute_environment: str,
         algorithm: Optional[ComputeInput] = None,
         algorithm_meta: Optional[AlgorithmMetadata] = None,
         algorithm_algocustomdata: Optional[dict] = None,
@@ -74,10 +73,9 @@ class OceanCompute:
 
         # Start compute job
         job_info = self._data_provider.start_compute_job(
-            service_endpoint=service.service_endpoint,
+            dataset_compute_service=service,
             consumer=consumer_wallet,
             dataset=dataset,
-            compute_environment=compute_environment,
             algorithm=algorithm,
             algorithm_meta=algorithm_meta,
             algorithm_custom_data=algorithm_algocustomdata,
@@ -95,11 +93,12 @@ class OceanCompute:
         :param wallet: Wallet instance
         :return: dict the status for an existing compute job, keys are (ok, status, statusText)
         """
-        _, service_endpoint = self._get_service_endpoint(did)
+        asset = resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
+        dataset_compute_service = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
 
         return OceanCompute._status_from_job_info(
             self._data_provider.compute_job_status(
-                did, job_id, service_endpoint, wallet
+                did, job_id, dataset_compute_service, wallet
             )
         )
 
@@ -113,9 +112,11 @@ class OceanCompute:
         :param wallet: Wallet instance
         :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
         """
-        _, service_endpoint = self._get_service_endpoint(did)
+        asset = resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
+        dataset_compute_service = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
+
         info_dict = self._data_provider.compute_job_result(
-            did, job_id, service_endpoint, wallet
+            did, job_id, dataset_compute_service, wallet
         )
         return {
             "did": info_dict.get("resultsDid", ""),
@@ -135,9 +136,11 @@ class OceanCompute:
         :param wallet: Wallet instance
         :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
         """
-        _, service_endpoint = self._get_compute_result_file_endpoint(did)
+        asset = resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
+        dataset_compute_service = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
+
         result = self._data_provider.compute_job_result_file(
-            job_id, index, service_endpoint, wallet
+            job_id, index, dataset_compute_service, wallet
         )
 
         return result
@@ -152,9 +155,13 @@ class OceanCompute:
         :param wallet: Wallet instance
         :return: dict the status for the stopped compute job, keys are (ok, status, statusText)
         """
-        _, service_endpoint = self._get_service_endpoint(did)
+        asset = resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
+        dataset_compute_service = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
+
         return self._status_from_job_info(
-            self._data_provider.stop_compute_job(did, job_id, service_endpoint, wallet)
+            self._data_provider.stop_compute_job(
+                did, job_id, dataset_compute_service, wallet
+            )
         )
 
     @enforce_types
