@@ -128,11 +128,9 @@ assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 DATA_nft_token = ocean.create_nft_token('NFTToken1', 'NFT1', alice_wallet)
 print(f"DATA_nft_token address = '{DATA_nft_token.address}'")
 
-
-# Prepare data for ERC20 token
+# Publish the datatoken
 from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-# Publish the datatoken
 DATA_erc20_data = CreateErc20Data(
     template_index=1,
     strings=["Datatoken 1", "DT1"],
@@ -146,6 +144,7 @@ DATA_erc20_data = CreateErc20Data(
     bytess=[b""],
 )
 DATA_datatoken = DATA_nft_token.create_datatoken(DATA_erc20_data, alice_wallet)
+print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
 
 
 # Specify metadata and services, using the Branin test dataset
@@ -194,7 +193,6 @@ DATA_compute_service = Service(
     compute_values=DATA_compute_values,
 )
 
-
 # Publish asset with compute service on-chain.
 DATA_asset = ocean.assets.create(
     metadata=DATA_metadata,
@@ -205,8 +203,7 @@ DATA_asset = ocean.assets.create(
     deployed_erc20_tokens=[DATA_datatoken],
 )
 
-DATA_service = DATA_asset.get_service("compute")
-print(f"DATA_service datatoken address = '{DATA_service.datatoken}'")
+print(f"DATA_asset did = '{DATA_asset.did}'")
 ```
 
 ## 3. Alice publishes algorithm

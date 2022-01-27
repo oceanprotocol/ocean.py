@@ -105,8 +105,7 @@ def test_c2d_flow(tmp_path):
         deployed_erc20_tokens=[DATA_datatoken],
     )
 
-    DATA_service = DATA_asset.get_service("compute")
-    assert DATA_service.datatoken
+    assert DATA_asset.did
 
     return
 
