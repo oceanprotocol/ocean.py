@@ -141,13 +141,13 @@ class DataServiceProvider:
         service_endpoint += f"?documentId={did}"
         payload = {"serviceId": service_id, "consumerAddress": consumer_address}
 
-        if compute_environment:
+        if compute_environment is not None:
             payload["computeEnv"] = compute_environment
 
-        if valid_until:
+        if valid_until is not None:
             payload["validUntil"] = valid_until
 
-        if userdata:
+        if userdata is not None:
             userdata = json.dumps(userdata)
             payload["userdata"] = userdata
 

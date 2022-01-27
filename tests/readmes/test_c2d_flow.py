@@ -3,10 +3,12 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import os
+from datetime import datetime, timedelta
 
 from ocean_lib.agreements.file_objects import UrlFile
 from ocean_lib.assets.trusted_algorithms import add_publisher_trusted_algorithm
 from ocean_lib.example_config import ExampleConfig
+from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
@@ -111,11 +113,11 @@ def test_c2d_flow():
     # 3. Alice publishes algorithm
 
     # Publish the algorithm NFT token
-    ALG_nft_token = ocean.create_nft_token("NFTToken1", "NFT1", alice_wallet)
-    assert ALG_nft_token.address
+    ALGO_nft_token = ocean.create_nft_token("NFTToken1", "NFT1", alice_wallet)
+    assert ALGO_nft_token.address
 
     # Publish the datatoken
-    ALG_erc20_data = CreateErc20Data(
+    ALGO_erc20_data = CreateErc20Data(
         template_index=1,
         strings=["Datatoken 1", "DT1"],
         addresses=[
@@ -127,14 +129,14 @@ def test_c2d_flow():
         uints=[ocean.to_wei(100000), 0],
         bytess=[b""],
     )
-    ALG_datatoken = ALG_nft_token.create_datatoken(ALG_erc20_data, alice_wallet)
+    ALGO_datatoken = ALGO_nft_token.create_datatoken(ALGO_erc20_data, alice_wallet)
 
     # Specify metadata and services, using the Branin test dataset
-    ALG_date_created = "2021-12-28T10:55:11Z"
+    ALGO_date_created = "2021-12-28T10:55:11Z"
 
-    ALG_metadata = {
-        "created": ALG_date_created,
-        "updated": ALG_date_created,
+    ALGO_metadata = {
+        "created": ALGO_date_created,
+        "updated": ALGO_date_created,
         "description": "gpr",
         "name": "gpr",
         "type": "algorithm",
@@ -155,28 +157,28 @@ def test_c2d_flow():
     }
 
     # ocean.py offers multiple file types, but a simple url file should be enough for this example
-    ALG_url_file = UrlFile(
+    ALGO_url_file = UrlFile(
         url="https://raw.githubusercontent.com/trentmc/branin/main/gpr.py"
     )
 
     # Encrypt file(s) using provider
-    ALG_encrypted_files = ocean.assets.encrypt_files([ALG_url_file])
+    ALGO_encrypted_files = ocean.assets.encrypt_files([ALGO_url_file])
 
     # Publish asset with compute service on-chain.
     # The download (access service) is automatically created, but you can explore other options as well
-    ALG_asset = ocean.assets.create(
-        metadata=ALG_metadata,
+    ALGO_asset = ocean.assets.create(
+        metadata=ALGO_metadata,
         publisher_wallet=alice_wallet,
-        encrypted_files=ALG_encrypted_files,
-        erc721_address=ALG_nft_token.address,
-        deployed_erc20_tokens=[ALG_datatoken],
+        encrypted_files=ALGO_encrypted_files,
+        erc721_address=ALGO_nft_token.address,
+        deployed_erc20_tokens=[ALGO_datatoken],
     )
 
-    assert ALG_asset.did
+    assert ALGO_asset.did
 
     # 4. Alice allows the algorithm for C2D for that data asset
     add_publisher_trusted_algorithm(
-        DATA_asset, ALG_asset.did, config.metadata_cache_uri
+        DATA_asset, ALGO_asset.did, config.metadata_cache_uri
     )
     DATA_asset = ocean.assets.update(DATA_asset, alice_wallet)
 
@@ -189,10 +191,58 @@ def test_c2d_flow():
     )
     print(f"bob_wallet.address = '{bob_wallet.address}'")
 
-    # Alice shares DATA datatokens and ALG datatokens with Bob.
+    # Alice mints DATA datatokens and ALGO datatokens to Bob.
     # Alternatively, Bob might have bought these in a market.
-    DATA_datatoken.transfer(bob_wallet.address, ocean.to_wei(5), alice_wallet)
-    ALG_datatoken.transfer(bob_wallet.address, ocean.to_wei(5), alice_wallet)
+    DATA_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
+    ALGO_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
+
+    # 6. Bob starts a compute job
+
+    # Convenience variables
+    DATA_did = DATA_asset.did
+    ALGO_did = ALGO_asset.did
+
+    # Operate on updated and indexed assets
+    DATA_asset = ocean.assets.resolve(DATA_did)
+    ALGO_asset = ocean.assets.resolve(ALGO_did)
+
+    compute_service = DATA_asset.get_service("compute")
+    algo_service = ALGO_asset.get_service("access")
+
+    # Pay for dataset
+    DATA_order_tx_id = ocean.assets.pay_for_service(
+        asset=DATA_asset,
+        service=compute_service,
+        wallet=bob_wallet,
+        initialize_args={
+            "compute_environment": "unused",
+            "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
+        },
+    )
+    assert DATA_order_tx_id
+
+    # Pay for algorithm
+    ALGO_order_tx_id = ocean.assets.pay_for_service(
+        asset=ALGO_asset,
+        service=algo_service,
+        wallet=bob_wallet,
+        initialize_args={
+            "valid_until": int((datetime.now() + timedelta(days=1)).timestamp())
+        },
+    )
+    assert ALGO_order_tx_id
+
+    # Start compute job
+    DATA_compute_input = ComputeInput(DATA_did, DATA_order_tx_id, compute_service.id)
+    ALGO_compute_input = ComputeInput(ALGO_did, ALGO_order_tx_id, algo_service.id)
+    job_id = ocean.compute.start(
+        consumer_wallet=bob_wallet,
+        dataset=DATA_compute_input,
+        # TODO: Update once compute environment implemented in provider
+        compute_environment="unused",
+        algorithm=ALGO_compute_input,
+    )
+    assert job_id
 
     return
 

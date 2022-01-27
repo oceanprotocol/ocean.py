@@ -214,11 +214,11 @@ In the same Python console:
 
 ```python
 # Publish the algorithm NFT token
-ALG_nft_token = ocean.create_nft_token("NFTToken1", "NFT1", alice_wallet)
-print(f"ALG_nft_token address = '{ALG_nft_token.address}'")
+ALGO_nft_token = ocean.create_nft_token("NFTToken1", "NFT1", alice_wallet)
+print(f"ALGO_nft_token address = '{ALGO_nft_token.address}'")
 
 # Publish the datatoken
-ALG_erc20_data = CreateErc20Data(
+ALGO_erc20_data = CreateErc20Data(
     template_index=1,
     strings=["Datatoken 1", "DT1"],
     addresses=[
@@ -230,14 +230,14 @@ ALG_erc20_data = CreateErc20Data(
     uints=[ocean.to_wei(100000), 0],
     bytess=[b""],
 )
-ALG_datatoken = ALG_nft_token.create_datatoken(ALG_erc20_data, alice_wallet)
+ALGO_datatoken = ALGO_nft_token.create_datatoken(ALGO_erc20_data, alice_wallet)
 
 # Specify metadata and services, using the Branin test dataset
-ALG_date_created = "2021-12-28T10:55:11Z"
+ALGO_date_created = "2021-12-28T10:55:11Z"
 
-ALG_metadata = {
-    "created": ALG_date_created,
-    "updated": ALG_date_created,
+ALGO_metadata = {
+    "created": ALGO_date_created,
+    "updated": ALGO_date_created,
     "description": "gpr",
     "name": "gpr",
     "type": "algorithm",
@@ -258,24 +258,24 @@ ALG_metadata = {
 }
 
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
-ALG_url_file = UrlFile(
+ALGO_url_file = UrlFile(
     url="https://raw.githubusercontent.com/trentmc/branin/main/gpr.py"
 )
 
 # Encrypt file(s) using provider
-ALG_encrypted_files = ocean.assets.encrypt_files([ALG_url_file])
+ALGO_encrypted_files = ocean.assets.encrypt_files([ALGO_url_file])
 
 # Publish asset with compute service on-chain.
 # The download (access service) is automatically created, but you can explore other options as well
-ALG_asset = ocean.assets.create(
-    metadata=ALG_metadata,
+ALGO_asset = ocean.assets.create(
+    metadata=ALGO_metadata,
     publisher_wallet=alice_wallet,
-    encrypted_files=ALG_encrypted_files,
-    erc721_address=ALG_nft_token.address,
-    deployed_erc20_tokens=[ALG_datatoken],
+    encrypted_files=ALGO_encrypted_files,
+    erc721_address=ALGO_nft_token.address,
+    deployed_erc20_tokens=[ALGO_datatoken],
 )
 
-print(f"ALG_asset did = '{ALG_asset.did}'")
+print(f"ALGO_asset did = '{ALGO_asset.did}'")
 ```
 
 ## 4. Alice allows the algorithm for C2D for that data asset
@@ -283,7 +283,7 @@ print(f"ALG_asset did = '{ALG_asset.did}'")
 In the same Python console:
 ```python
 from ocean_lib.assets.trusted_algorithms import add_publisher_trusted_algorithm
-add_publisher_trusted_algorithm(DATA_asset, ALG_asset.did, config.metadata_cache_uri)
+add_publisher_trusted_algorithm(DATA_asset, ALGO_asset.did, config.metadata_cache_uri)
 DATA_asset = ocean.assets.update(DATA_asset, alice_wallet)
 ```
 
@@ -299,66 +299,61 @@ bob_wallet = Wallet(
 )
 print(f"bob_wallet.address = '{bob_wallet.address}'")
 
-# Alice shares DATA datatokens and ALG datatokens with Bob.
+# Alice shares DATA datatokens and ALGO datatokens with Bob.
 # Alternatively, Bob might have bought these in a market.
 DATA_datatoken.transfer(bob_wallet.address, ocean.to_wei(5), alice_wallet)
-ALG_datatoken.transfer(bob_wallet.address, ocean.to_wei(5), alice_wallet)
+ALGO_datatoken.transfer(bob_wallet.address, ocean.to_wei(5), alice_wallet)
 ```
 
 ## 6. Bob starts a compute job
 
-Only inputs needed: DATA_did, ALG_did. Everything else can get computed as needed.
+Only inputs needed: DATA_did, ALGO_did. Everything else can get computed as needed.
 
 In the same Python console:
 ```python
-DATA_did = DATA_ddo.did  # for convenience
-ALG_did = ALG_ddo.did
-DATA_DDO = ocean.assets.resolve(DATA_did)  # make sure we operate on the updated and indexed metadata_cache_uri versions
-ALG_DDO = ocean.assets.resolve(ALG_did)
+# Convenience variables
+DATA_did = DATA_asset.did
+ALGO_did = ALGO_asset.did
 
-compute_service = DATA_DDO.get_service('compute')
-algo_service = ALG_DDO.get_service('access')
+# Operate on updated and indexed assets
+DATA_asset = ocean.assets.resolve(DATA_did)
+ALGO_asset = ocean.assets.resolve(ALGO_did)
 
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.models.compute_input import ComputeInput
+compute_service = DATA_asset.get_service("compute")
+algo_service = ALGO_asset.get_service("access")
 
-# order & pay for dataset
-dataset_order_requirements = ocean.assets.order(
-    DATA_did, bob_wallet.address, service_type=compute_service.type
-)
+# Pay for dataset for 1 day
 DATA_order_tx_id = ocean.assets.pay_for_service(
-        ocean.web3,
-        dataset_order_requirements.amount,
-        dataset_order_requirements.datatoken_address,
-        DATA_did,
-        compute_service.index,
-        ZERO_ADDRESS,
-        bob_wallet,
-        dataset_order_requirements.computeAddress,
-    )
-
-# order & pay for algo
-algo_order_requirements = ocean.assets.order(
-    ALG_did, bob_wallet.address, service_type=algo_service.type
+    asset=DATA_asset,
+    service=compute_service,
+    wallet=bob_wallet,
+    initialize_args={
+        "compute_environment": "unused",
+        "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
+    },
 )
-ALG_order_tx_id = ocean.assets.pay_for_service(
-        ocean.web3,
-        algo_order_requirements.amount,
-        algo_order_requirements.datatoken_address,
-        ALG_did,
-        algo_service.index,
-        ZERO_ADDRESS,
-        bob_wallet,
-        algo_order_requirements.computeAddress,
-)
+print(f"Paid for dataset compute service, order tx id: {DATA_order_tx_id}")
 
-compute_inputs = [ComputeInput(DATA_did, DATA_order_tx_id, compute_service.index)]
+# Pay for algorithm for 1 day
+ALGO_order_tx_id = ocean.assets.pay_for_service(
+    asset=ALGO_asset,
+    service=algo_service,
+    wallet=bob_wallet,
+    initialize_args={
+        "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
+    }
+)
+print(f"Paid for algorithm access service, order tx id: {ALGO_order_tx_id}")
+
+# Start compute job
+DATA_compute_input = ComputeInput(DATA_did, DATA_order_tx_id, compute_service.id)
+ALGO_compute_input = ComputeInput(ALGO_did, ALGO_order_tx_id, algo_service.id)
 job_id = ocean.compute.start(
-    compute_inputs,
-    bob_wallet,
-    algorithm_did=ALG_did,
-    algorithm_tx_id=ALG_order_tx_id,
-    algorithm_datatoken=ALG_datatoken.address
+    consumer_wallet=bob_wallet,
+    dataset=DATA_compute_input,
+    # TODO: Update once compute environment implemented in provider
+    compute_environment="unused",
+    algorithm=ALGO_compute_input,
 )
 print(f"Started compute job with id: {job_id}")
 ```
