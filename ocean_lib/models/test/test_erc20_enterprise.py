@@ -40,10 +40,11 @@ def test_buy_from_dispenser_and_order(
         dispenser_address=dispenser.address,
         allowed_swapper=ZERO_ADDRESS,
         max_balance=to_wei("1"),
+        with_mint=True,
         max_tokens=to_wei("1"),
     )
     tx = erc20_enterprise_token.create_dispenser(
-        dispenser_data=dispenser_data, with_mint=True, from_wallet=publisher_wallet
+        dispenser_data=dispenser_data, from_wallet=publisher_wallet
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1

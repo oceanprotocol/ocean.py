@@ -5,7 +5,11 @@
 import pytest
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Permissions, ERC721Token
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.models.models_structures import (
+    ChainMetadata,
+    ChainMetadataWithTokenUri,
+    CreateErc20Data,
+)
 from ocean_lib.web3_internal.constants import BLOB, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
@@ -337,7 +341,8 @@ def test_success_update_metadata(web3, config, publisher_wallet, consumer_wallet
     )
     metadata_info = erc721_token.get_metadata()
     assert metadata_info[3] is False
-    tx = erc721_token.set_metadata(
+
+    chain_metadata = ChainMetadata(
         metadata_state=1,
         metadata_decryptor_url="http://myprovider:8030",
         metadata_decryptor_address="0x123",
@@ -345,7 +350,10 @@ def test_success_update_metadata(web3, config, publisher_wallet, consumer_wallet
         data=web3.toBytes(hexstr=BLOB),
         data_hash=web3.toBytes(hexstr=BLOB),
         data_proofs=[],
-        from_wallet=consumer_wallet,
+    )
+
+    tx = erc721_token.set_metadata(
+        chain_metadata=chain_metadata, from_wallet=consumer_wallet
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     create_metadata_event = erc721_token.get_event_log(
@@ -361,7 +369,7 @@ def test_success_update_metadata(web3, config, publisher_wallet, consumer_wallet
     assert metadata_info[3] is True
     assert metadata_info[0] == "http://myprovider:8030"
 
-    tx = erc721_token.set_metadata(
+    chain_metadata = ChainMetadata(
         metadata_state=1,
         metadata_decryptor_url="http://foourl",
         metadata_decryptor_address="0x123",
@@ -369,8 +377,8 @@ def test_success_update_metadata(web3, config, publisher_wallet, consumer_wallet
         data=web3.toBytes(hexstr=BLOB),
         data_hash=web3.toBytes(hexstr=BLOB),
         data_proofs=[],
-        from_wallet=consumer_wallet,
     )
+    tx = erc721_token.set_metadata(chain_metadata, from_wallet=consumer_wallet)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     update_metadata_event = erc721_token.get_event_log(
         event_name="MetadataUpdated",
@@ -386,7 +394,7 @@ def test_success_update_metadata(web3, config, publisher_wallet, consumer_wallet
     assert metadata_info[0] == "http://foourl"
 
     # Update tokenURI and set metadata in one call
-    tx = erc721_token.set_metadata_token_uri(
+    metadata_with_token_uri = ChainMetadataWithTokenUri(
         metadata_state=1,
         metadata_decryptor_url="http://foourl",
         metadata_decryptor_address="0x123",
@@ -396,7 +404,9 @@ def test_success_update_metadata(web3, config, publisher_wallet, consumer_wallet
         data_proofs=[],
         token_id=1,
         token_uri="https://anothernewurl.com/nft/",
-        from_wallet=publisher_wallet,
+    )
+    tx = erc721_token.set_metadata_token_uri(
+        metadata_with_token_uri, from_wallet=publisher_wallet
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -436,16 +446,20 @@ def test_fails_update_metadata(web3, config, publisher_wallet, consumer_wallet):
         ]
         is False
     )
+
+    wrong_chain_metadata = ChainMetadata(
+        metadata_state=1,
+        metadata_decryptor_url="http://myprovider:8030",
+        metadata_decryptor_address="0x123",
+        flags=web3.toBytes(hexstr=BLOB),
+        data=web3.toBytes(hexstr=BLOB),
+        data_hash=web3.toBytes(hexstr=BLOB),
+        data_proofs=[],
+    )
+
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_token.set_metadata(
-            metadata_state=1,
-            metadata_decryptor_url="http://myprovider:8030",
-            metadata_decryptor_address="0x123",
-            flags=web3.toBytes(hexstr=BLOB),
-            data=web3.toBytes(hexstr=BLOB),
-            data_hash=web3.toBytes(hexstr=BLOB),
-            data_proofs=[],
-            from_wallet=consumer_wallet,
+            chain_metadata=wrong_chain_metadata, from_wallet=consumer_wallet
         )
     assert (
         err.value.args[0]
