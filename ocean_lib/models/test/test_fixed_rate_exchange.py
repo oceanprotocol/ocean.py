@@ -119,7 +119,12 @@ def test_exchange_rate_creation(
     exchange_details = fixed_exchange.get_exchange(exchange_id)
 
     assert (exchange_details[FixedRateExchangeDetails.DT_SUPPLY]) == 0
-    assert (exchange_details[FixedRateExchangeDetails.BT_SUPPLY]) == 0
+    assert (
+        exchange_details[FixedRateExchangeDetails.BT_SUPPLY]
+    ) == ocean_token.allowance(
+        exchange_details[FixedRateExchangeDetails.EXCHANGE_OWNER],
+        fixed_exchange.address,
+    )
 
     # Consumer_wallet approves how many DT tokens wants to sell
     # Consumer_wallet only approves an exact amount so we can check supply etc later in the test
@@ -238,7 +243,12 @@ def test_exchange_rate_creation(
     exchange_details = fixed_exchange.get_exchange(exchange_id)
 
     assert (exchange_details[FixedRateExchangeDetails.DT_SUPPLY]) == amount_dt_to_sell
-    assert (exchange_details[FixedRateExchangeDetails.BT_SUPPLY]) == 0
+    assert (
+        exchange_details[FixedRateExchangeDetails.BT_SUPPLY]
+    ) == ocean_token.allowance(
+        exchange_details[FixedRateExchangeDetails.EXCHANGE_OWNER],
+        fixed_exchange.address,
+    )
 
     # Fixed Rate Exchange owner withdraws DT balance
 
