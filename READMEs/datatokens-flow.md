@@ -42,13 +42,10 @@ git checkout v4main
 # Create your working directory. Copy artifacts.
 mkdir test3
 cd test3
-cp -r ../ocean.py/artifacts ./
 
 # Initialize virtual environment and activate it. Install artifacts.
 python3 -m venv venv
 source venv/bin/activate
-chmod 777 artifacts/install-remote.sh
-./artifacts/install-remote.sh
 
 # Intermediary installation before PyPi release of V4. Install wheel first to avoid errors.
 pip3 install wheel
