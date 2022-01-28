@@ -142,7 +142,7 @@ def test_marketplace_flow(tmp_path):
     order_tx_id = ocean.assets.pay_for_service(asset, service, bob_wallet)
 
     file_path = ocean.assets.download_asset(
-        asset, service.service_endpoint, bob_wallet, str(tmp_path), order_tx_id
+        asset, config.provider_url, bob_wallet, str(tmp_path), order_tx_id
     )
 
     assert file_path
