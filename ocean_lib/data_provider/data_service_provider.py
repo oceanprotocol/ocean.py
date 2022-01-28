@@ -144,7 +144,7 @@ class DataServiceProvider:
         if compute_environment is not None:
             payload["computeEnv"] = compute_environment
 
-        if valid_until is not None:
+        if valid_until:
             payload["validUntil"] = valid_until
 
         if userdata is not None:
