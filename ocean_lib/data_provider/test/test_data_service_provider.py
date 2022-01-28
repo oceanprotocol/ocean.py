@@ -40,6 +40,7 @@ TEST_SERVICE_ENDPOINTS = {
     "fileinfo": ["POST", "/api/services/fileinfo"],
     "initialize": ["GET", "/api/services/initialize"],
     "nonce": ["GET", "/api/services/nonce"],
+    "computeEnvironments": ["GET", "/api/services/computeEnvironments"],
 }
 
 

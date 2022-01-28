@@ -35,11 +35,7 @@ class FactoryRouter(BFactory):
     def is_ss_contract(self, address: str):
         return self.contract.caller.isSSContract(address)
 
-<<<<<<< HEAD
     def get_opc_fee(self, base_token: str) -> int:
-=======
-    def get_opf_fee(self, base_token: str) -> int:
->>>>>>> 43c0292... Fix tests
         return self.contract.caller.getOPCFee(base_token)
 
     def swap_ocean_fee(self) -> int:
