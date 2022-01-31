@@ -58,8 +58,11 @@ class DataServiceProvider:
     @enforce_types
     def encrypt(
         objects_to_encrypt: Union[list, str, bytes],
-        provider_uri: Optional[str] = "http://172.15.0.4:8030",
+        provider_uri: Optional[str] = None,
     ) -> Response:
+        if not provider_uri:
+            provider_uri = "http://172.15.0.4:8030"
+
         if isinstance(objects_to_encrypt, list):
             data_items = list(map(lambda file: file.to_dict(), objects_to_encrypt))
             data = json.dumps(data_items, separators=(",", ":"))
