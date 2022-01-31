@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 """
@@ -10,11 +10,12 @@ import copy
 import logging
 from typing import Any, Dict, Optional
 
+from web3.main import Web3
+
 from ocean_lib.agreements.consumable import ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes, ServiceTypesNames
 from ocean_lib.assets.credentials import AddressCredential
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from web3.main import Web3
 
 logger = logging.getLogger(__name__)
 
