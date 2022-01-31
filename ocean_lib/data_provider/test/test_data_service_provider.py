@@ -36,7 +36,6 @@ TEST_SERVICE_ENDPOINTS = {
     "computeStatus": ["GET", "/api/services/compute"],
     "computeStop": ["PUT", "/api/services/compute"],
     "computeResult": ["GET", "/api/services/computeResult"],
-    "computeEnvironments": ["GET", "/api/services/computeEnvironments"],
     "download": ["GET", "/api/services/download"],
     "encrypt": ["POST", "/api/services/encrypt"],
     "decrypt": ["POST", "/api/services/decrypt"],
