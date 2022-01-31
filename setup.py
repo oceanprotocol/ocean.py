@@ -59,13 +59,13 @@ dev_requirements = [
     "pkginfo",
     "twine",
     "watchdog",
-    "flake8",
-    "isort",
-    "black==21.4b0",
+    "flake8==3.9.2",
+    "isort==5.10.1",
+    "black==22.1.0",
     "pre-commit",
     # for the following: maybe needed, maybe not
     "pytest",
-    "licenseheaders",
+    "licenseheaders==0.8.8",
     "pytest-env",
 ]
 
