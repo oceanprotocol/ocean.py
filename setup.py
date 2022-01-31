@@ -69,7 +69,6 @@ dev_requirements = [
     "pytest-env",
 ]
 
-
 packages = find_namespace_packages(include=["ocean_lib*"], exclude=["*test*"])
 
 setup(
