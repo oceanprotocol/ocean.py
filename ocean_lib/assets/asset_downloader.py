@@ -59,10 +59,6 @@ def download_asset_files(
         assert isinstance(index, int), logger.error("index has to be an integer.")
         assert index >= 0, logger.error("index has to be 0 or a positive integer.")
 
-    asset_folder = os.path.join(destination, f"datafile.{asset.did}.{service_id}")
-    if not os.path.exists(asset_folder):
-        os.mkdir(asset_folder)
-
     consumable_result = service.is_consumable(
         asset,
         {"type": "address", "value": consumer_wallet.address},
@@ -70,6 +66,10 @@ def download_asset_files(
     )
     if consumable_result != ConsumableCodes.OK:
         raise AssetNotConsumable(consumable_result)
+
+    asset_folder = os.path.join(destination, f"datafile.{asset.did}.{service_id}")
+    if not os.path.exists(asset_folder):
+        os.mkdir(asset_folder)
 
     data_provider.download(
         did=asset.did,
