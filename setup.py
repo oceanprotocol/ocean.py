@@ -61,7 +61,7 @@ dev_requirements = [
     "watchdog",
     "flake8",
     "isort",
-    "black",
+    "black==22.1.0",
     "pre-commit",
     # for the following: maybe needed, maybe not
     "pytest",
