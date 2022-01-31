@@ -57,14 +57,6 @@ addresses from your barge output. Please update in `["development"]["v4"]` with 
 that you see in barge for each contract key.
 Do not commit `address.json`!
 
-```console
-cd artifacts
-# Run install.sh script to get the addresses from addresses/address.json
-# file into your environment
-chmod 777 install.sh
-./install.sh
-```
-
 ## Testing
 
 Use `pytest`, because right now each V4 unit test needs to be tested individually

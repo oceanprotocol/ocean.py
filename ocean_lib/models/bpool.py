@@ -2,7 +2,7 @@
 # Copyright 2021 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import List
+from typing import List, Union
 
 from enforce_typing import enforce_types
 from ocean_lib.models import balancer_constants
@@ -42,21 +42,11 @@ class BPool(BTokenBase):
         return self.events.LOG_BPT()
 
     def initialize(
-        self, bpool_initialized: BPoolInitialized, from_wallet: Wallet
+        self,
+        bpool_initialized: Union[list, tuple, BPoolInitialized],
+        from_wallet: Wallet,
     ) -> str:
-        return self.send_transaction(
-            "initialize",
-            (
-                bpool_initialized.controller,
-                bpool_initialized.factory,
-                bpool_initialized.swap_fees,
-                bpool_initialized.public_swap,
-                bpool_initialized.finalized,
-                bpool_initialized.tokens,
-                bpool_initialized.fee_collectors,
-            ),
-            from_wallet,
-        )
+        return self.send_transaction("initialize", bpool_initialized, from_wallet)
 
     def setup(
         self,
@@ -89,8 +79,8 @@ class BPool(BTokenBase):
     def is_public_pool(self) -> bool:
         return self.contract.caller.isPublicSwap()
 
-    def opf_fee(self) -> int:
-        return self.contract.caller.getOPFFee()
+    def opc_fee(self) -> int:
+        return self.contract.caller.getOPCFee()
 
     def community_fee(self, address: str) -> int:
         return self.contract.caller.communityFees(address)
@@ -132,8 +122,8 @@ class BPool(BTokenBase):
         """@return -- list of [token_addr:str]"""
         return self.contract.caller.getFinalTokens()
 
-    def collect_opf(self, dst: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("collectOPF", (dst,), from_wallet)
+    def collect_opc(self, dst: str, from_wallet: Wallet) -> str:
+        return self.send_transaction("collectOPC", (dst,), from_wallet)
 
     def collect_market_fee(self, dst: str, from_wallet: Wallet) -> str:
         return self.send_transaction("collectMarketFee", (dst,), from_wallet)

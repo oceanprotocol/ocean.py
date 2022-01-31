@@ -6,7 +6,7 @@ import pytest
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Permissions, ERC721Token
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.models.models_structures import CreateErc20Data, CreateERC721Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import (
@@ -27,13 +27,15 @@ def test_erc721_roles(
     erc721_factory = ERC721FactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
     )
-    tx = erc721_factory.deploy_erc721_contract(
+    erc721_data = CreateERC721Data(
         name="NFT",
         symbol="NFTSYMBOL",
         template_index=1,
         additional_erc20_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
-        from_wallet=publisher_wallet,
+    )
+    tx = erc721_factory.deploy_erc721_contract(
+        erc721_data, from_wallet=publisher_wallet
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
@@ -133,20 +135,21 @@ def test_fail_create_erc20(web3, config, publisher_wallet):
         web3, get_address_of_type(config, "ERC721Factory")
     )
 
+    wrong_erc20_data = CreateErc20Data(
+        template_index=1,
+        strings=["ERC20DT1", "ERC20DT1Symbol"],
+        addresses=[
+            publisher_wallet.address,
+            publisher_wallet.address,
+            publisher_wallet.address,
+            ZERO_ADDRESS,
+        ],
+        uints=[to_wei("1.0"), 0],
+        bytess=[b""],
+    )
+
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_factory.create_token(
-            template_index=1,
-            strings=["ERC20DT1", "ERC20DT1Symbol"],
-            addresses=[
-                publisher_wallet.address,
-                publisher_wallet.address,
-                publisher_wallet.address,
-                ZERO_ADDRESS,
-            ],
-            uints=[to_wei("1.0"), 0],
-            bytess=[b""],
-            from_wallet=publisher_wallet,
-        )
+        erc721_factory.create_token(wrong_erc20_data, from_wallet=publisher_wallet)
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC721Factory: ONLY ERC721 "
@@ -168,11 +171,13 @@ def test_nonexistent_template_index(web3, config, publisher_wallet):
 
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_factory.deploy_erc721_contract(
-            name="DT1",
-            symbol="DTSYMBOL",
-            template_index=non_existent_nft_template,
-            additional_erc20_deployer=ZERO_ADDRESS,
-            token_uri="https://oceanprotocol.com/nft/",
+            (
+                "DT1",
+                "DTSYMBOL",
+                non_existent_nft_template,
+                ZERO_ADDRESS,
+                "https://oceanprotocol.com/nft/",
+            ),
             from_wallet=publisher_wallet,
         )
     assert (
@@ -188,13 +193,15 @@ def test_successful_erc721_creation(web3, config, publisher_wallet):
     erc721_factory = ERC721FactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
     )
-    tx = erc721_factory.deploy_erc721_contract(
+    erc721_data = CreateERC721Data(
         name="NFT",
         symbol="NFTSYMBOL",
         template_index=1,
         additional_erc20_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
-        from_wallet=publisher_wallet,
+    )
+    tx = erc721_factory.deploy_erc721_contract(
+        erc721_data, from_wallet=publisher_wallet
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
@@ -219,15 +226,15 @@ def test_nft_count(web3, config, publisher_wallet):
     erc721_factory = ERC721FactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
     )
-    current_nft_count = erc721_factory.get_current_nft_count()
-    erc721_factory.deploy_erc721_contract(
+    erc721_data = CreateERC721Data(
         name="NFT",
         symbol="NFTSYMBOL",
         template_index=1,
         additional_erc20_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
-        from_wallet=publisher_wallet,
     )
+    current_nft_count = erc721_factory.get_current_nft_count()
+    erc721_factory.deploy_erc721_contract(erc721_data, from_wallet=publisher_wallet)
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
 
 
@@ -250,13 +257,16 @@ def test_erc20_creation(
     erc721_factory = ERC721FactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
     )
-    tx = erc721_factory.deploy_erc721_contract(
+    erc721_data = CreateERC721Data(
         name="NFT",
         symbol="NFTSYMBOL",
         template_index=1,
         additional_erc20_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
-        from_wallet=publisher_wallet,
+    )
+
+    tx = erc721_factory.deploy_erc721_contract(
+        erc721_data, from_wallet=publisher_wallet
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(

@@ -258,19 +258,14 @@ class Asset:
 
     @enforce_types
     def generate_trusted_algorithms(self) -> dict:
-        algo_metadata = self.metadata
+        """Returns a trustedAlgorithm dictionary for service at index 0."""
+        files = self.get_service_by_index(0).files
+        container = self.metadata["algorithm"]["container"]
         return {
             "did": self.did,
-            "filesChecksum": create_checksum(
-                json.dumps(
-                    self.get_service(ServiceTypes.CLOUD_COMPUTE).files,
-                    separators=(",", ":"),
-                )
-            ),
+            "filesChecksum": create_checksum(files),
             "containerSectionChecksum": create_checksum(
-                json.dumps(
-                    algo_metadata["algorithm"]["container"], separators=(",", ":")
-                )
+                json.dumps(container, separators=(",", ":"))
             ),
         }
 

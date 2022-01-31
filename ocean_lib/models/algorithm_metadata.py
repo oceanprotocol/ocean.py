@@ -22,6 +22,7 @@ class AlgorithmMetadata:
         self.container_entry_point = container.get("entrypoint", "")
         self.container_image = container.get("image", "")
         self.container_tag = container.get("tag", "")
+        self.container_checksum = container.get("checksum", "")
 
     @enforce_types
     def is_valid(self) -> bool:
@@ -45,5 +46,6 @@ class AlgorithmMetadata:
                 "entrypoint": self.container_entry_point,
                 "image": self.container_image,
                 "tag": self.container_tag,
+                "checksum": self.container_checksum,
             },
         }

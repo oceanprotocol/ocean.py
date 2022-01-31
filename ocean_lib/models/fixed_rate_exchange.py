@@ -28,7 +28,7 @@ class FixedRateExchangeDetails(IntEnum):
 class FixedRateExchangeFeesInfo(IntEnum):
     MARKET_FEE = 0
     MARKET_FEE_COLLECTOR = 1
-    OPF_FEE = 2
+    OPC_FEE = 2
     MARKET_FEE_AVAILABLE = 3
     OCEAN_FEE_AVAILABLE = 4
 
@@ -84,8 +84,8 @@ class FixedRateExchange(ContractBase):
     def event_MarketFeeCollected(self):
         return self.events.MarketFeeCollected()
 
-    def get_opf_fee(self, base_token: str) -> int:
-        return self.contract.caller.getOPFFee(base_token)
+    def get_opc_fee(self, base_token: str) -> int:
+        return self.contract.caller.getOPCFee(base_token)
 
     def generate_exchange_id(
         self, base_token: str, datatoken: str, exchange_owner: str

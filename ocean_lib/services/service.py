@@ -14,6 +14,7 @@ from ocean_lib.agreements.consumable import ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes, ServiceTypesNames
 from ocean_lib.assets.credentials import AddressCredential
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from web3.main import Web3
 
 logger = logging.getLogger(__name__)
 
@@ -116,9 +117,9 @@ class Service:
 
     def add_publisher_trusted_algorithm_publisher(self, publisher_address: str) -> list:
         trusted_algo_publishers = [
-            tp.lower() for tp in self.get_trusted_algorithm_publishers()
+            Web3.toChecksumAddress(tp) for tp in self.get_trusted_algorithm_publishers()
         ]
-        publisher_address = publisher_address.lower()
+        publisher_address = Web3.toChecksumAddress(publisher_address)
 
         if publisher_address in trusted_algo_publishers:
             return trusted_algo_publishers

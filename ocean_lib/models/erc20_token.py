@@ -3,12 +3,17 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enum import IntEnum
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
 from eth_typing.encoding import HexStr
-from ocean_lib.models.models_structures import DispenserData, FixedData, PoolData
+from ocean_lib.models.models_structures import (
+    DispenserData,
+    FixedData,
+    PoolData,
+    ProviderFees,
+)
 from ocean_lib.utils.utilities import prepare_message_for_ecrecover_in_solidity
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
@@ -69,34 +74,20 @@ class ERC20Token(ContractBase):
             from_wallet,
         )
 
-    def deploy_pool(self, pool_data: PoolData, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "deployPool",
-            (pool_data.ss_params, pool_data.swap_fees, pool_data.addresses),
-            from_wallet,
-        )
+    def deploy_pool(
+        self, pool_data: Union[dict, tuple, PoolData], from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction("deployPool", pool_data, from_wallet)
 
-    def create_fixed_rate(self, fixed_data: FixedData, from_wallet: Wallet) -> str:
-        return self.send_transaction(
-            "createFixedRate",
-            (fixed_data.fixed_price_address, fixed_data.addresses, fixed_data.uints),
-            from_wallet,
-        )
+    def create_fixed_rate(
+        self, fixed_data: Union[dict, tuple, FixedData], from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction("createFixedRate", fixed_data, from_wallet)
 
     def create_dispenser(
-        self, dispenser_data: DispenserData, with_mint: bool, from_wallet: Wallet
+        self, dispenser_data: Union[dict, tuple, DispenserData], from_wallet: Wallet
     ) -> str:
-        return self.send_transaction(
-            "createDispenser",
-            (
-                dispenser_data.dispenser_address,
-                dispenser_data.max_tokens,
-                dispenser_data.max_balance,
-                with_mint,
-                dispenser_data.allowed_swapper,
-            ),
-            from_wallet,
-        )
+        return self.send_transaction("createDispenser", dispenser_data, from_wallet)
 
     def mint(self, account_address: str, value: int, from_wallet: Wallet) -> str:
         return self.send_transaction("mint", (account_address, value), from_wallet)
@@ -119,26 +110,15 @@ class ERC20Token(ContractBase):
         self,
         consumer: str,
         service_index: int,
-        provider_fees: dict,
+        provider_fees: Union[dict, tuple, ProviderFees],
         from_wallet: Wallet,
     ) -> str:
+        # TODO: will be fixed in web3.py
+        if isinstance(provider_fees, ProviderFees):
+            provider_fees = tuple(provider_fees)
+
         return self.send_transaction(
-            "startOrder",
-            (
-                consumer,
-                service_index,
-                (
-                    provider_fees["providerFeeAddress"],
-                    provider_fees["providerFeeToken"],
-                    provider_fees["providerFeeAmount"],
-                    provider_fees["v"],
-                    provider_fees["r"],
-                    provider_fees["s"],
-                    provider_fees["validUntil"],
-                    provider_fees["providerData"],
-                ),
-            ),
-            from_wallet,
+            "startOrder", (consumer, service_index, provider_fees), from_wallet
         )
 
     def start_multiple_order(
@@ -329,15 +309,6 @@ class ERC20Token(ContractBase):
 
     def get_total_supply(self) -> int:
         return self.contract.caller.totalSupply()
-
-    def create_dispenser_with_mint(
-        self, dispenser_data: DispenserData, from_wallet: Wallet
-    ):
-        tx = self.create_dispenser(
-            dispenser_data=dispenser_data, with_mint=True, from_wallet=from_wallet
-        )
-        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
-        assert tx_receipt.status == 1
 
     def get_start_order_logs(
         self,

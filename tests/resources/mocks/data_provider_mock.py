@@ -60,9 +60,3 @@ class DataProviderMock(DataServiceProvider):
     @staticmethod
     def get_url(config):
         return DataServiceProvider.get_url(config)
-
-    @staticmethod
-    def build_download_endpoint(provider_uri=None):
-        service_name = "download"
-        provider_uri = "http://localhost:8030"
-        return "GET", f"{provider_uri}/api/v1/services/{service_name}"

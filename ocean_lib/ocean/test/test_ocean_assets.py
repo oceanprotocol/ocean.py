@@ -10,7 +10,6 @@ from unittest.mock import patch
 
 import eth_keys
 import pytest
-
 from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
@@ -18,7 +17,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.models.models_structures import CreateErc20Data, CreateERC721Data
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -55,8 +54,7 @@ def test_update_metadata(publisher_ocean_instance, publisher_wallet, config):
     ddo.metadata = new_metadata
 
     _asset = publisher_ocean_instance.assets.update(
-        asset=ddo,
-        publisher_wallet=publisher_wallet,
+        asset=ddo, publisher_wallet=publisher_wallet
     )
 
     assert _asset.datatokens == ddo.datatokens
@@ -80,8 +78,7 @@ def test_update_credentials(publisher_ocean_instance, publisher_wallet, config):
     ddo.credentials = _new_credentials
 
     _asset = publisher_ocean_instance.assets.update(
-        asset=ddo,
-        publisher_wallet=publisher_wallet,
+        asset=ddo, publisher_wallet=publisher_wallet
     )
 
     assert _asset.credentials == _new_credentials, "Credentials were not updated."
@@ -122,8 +119,7 @@ def test_update_datatokens(publisher_ocean_instance, publisher_wallet, config):
     ddo.services.append(access_service)
 
     _asset = publisher_ocean_instance.assets.update(
-        asset=ddo,
-        publisher_wallet=publisher_wallet,
+        asset=ddo, publisher_wallet=publisher_wallet
     )
 
     assert len(_asset.datatokens) == len(old_asset.datatokens) + 1
@@ -151,8 +147,7 @@ def test_update_datatokens(publisher_ocean_instance, publisher_wallet, config):
     old_datatokens = _asset.datatokens
 
     _asset = publisher_ocean_instance.assets.update(
-        asset=new_asset,
-        publisher_wallet=publisher_wallet,
+        asset=new_asset, publisher_wallet=publisher_wallet
     )
 
     assert _asset, "Cannot read asset after update."
@@ -352,11 +347,7 @@ def test_plain_asset_with_one_datatoken(
 
     # Publisher deploys NFT contract
     tx = erc721_factory.deploy_erc721_contract(
-        "NFT1",
-        "NFTSYMBOL",
-        1,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
+        ("NFT1", "NFTSYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
         publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -409,14 +400,11 @@ def test_plain_asset_multiple_datatokens(
         config, web3, data_provider
     )
 
-    tx = erc721_factory.deploy_erc721_contract(
-        "NFT2",
-        "NFT2SYMBOL",
-        1,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
-        publisher_wallet,
+    erc721_data = CreateERC721Data(
+        "NFT2", "NFT2SYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"
     )
+
+    tx = erc721_factory.deploy_erc721_contract(erc721_data, publisher_wallet)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
         ERC721FactoryContract.EVENT_NFT_CREATED,
