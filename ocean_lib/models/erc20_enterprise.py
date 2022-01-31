@@ -16,14 +16,20 @@ class ERC20Enterprise(ERC20Token):
     CONTRACT_NAME = "ERC20TemplateEnterprise"
 
     def buy_from_fre_and_order(
-        self, order_params: dict, fre_params: dict, from_wallet: Wallet
+        self,
+        order_params: Union[dict, tuple],
+        fre_params: Union[dict, tuple],
+        from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "buyFromFreAndOrder", (order_params, fre_params), from_wallet
         )
 
     def buy_from_dispenser_and_order(
-        self, order_params: dict, dispenser_address: dict, from_wallet: Wallet
+        self,
+        order_params: Union[dict, tuple],
+        dispenser_address: str,
+        from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "buyFromDispenserAndOrder", (order_params, dispenser_address), from_wallet

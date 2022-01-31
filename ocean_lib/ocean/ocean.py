@@ -12,6 +12,8 @@ from enforce_typing import enforce_types
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.bpool import BPool
+from ocean_lib.models.dispenser import Dispenser
+from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
@@ -211,10 +213,15 @@ class Ocean:
             self.web3, get_address_of_type(self.config, "FixedPrice")
         )
 
+    @property
+    @enforce_types
+    def dispenser(self):
+        return Dispenser(self.web3, get_address_of_type(self.config, "Dispenser"))
+
     @enforce_types
     def create_fixed_rate(
         self,
-        erc20_token: ERC20Token,
+        erc20_token: Union[ERC20Token, ERC20Enterprise],
         base_token: ERC20Token,
         amount: int,
         from_wallet: Wallet,
