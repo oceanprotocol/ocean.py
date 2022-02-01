@@ -29,7 +29,7 @@ class RolesERC20(IntEnum):
 class ERC20Token(ContractBase):
     CONTRACT_NAME = "ERC20Template"
 
-    BASE = 10 ** 18
+    BASE = 10**18
     BASE_COMMUNITY_FEE_PERCENTAGE = BASE / 1000
     BASE_MARKET_FEE_PERCENTAGE = BASE / 1000
 
