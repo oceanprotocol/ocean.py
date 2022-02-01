@@ -1,13 +1,14 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 from decimal import ROUND_DOWN, Context, Decimal, localcontext
 from typing import Union
 
 from enforce_typing import enforce_types
-from ocean_lib.web3_internal.constants import MAX_UINT256
 from web3.main import Web3
+
+from ocean_lib.web3_internal.constants import MAX_UINT256
 
 """decimal.Context tuned to accomadate MAX_WEI.
 

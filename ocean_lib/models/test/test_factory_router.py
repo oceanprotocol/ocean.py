@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 from ocean_lib.models.erc20_token import ERC20Token
@@ -52,11 +52,11 @@ def test_buy_dt_batch(
     ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
     ocean_contract.approve(
         get_address_of_type(config, ERC721FactoryContract.CONTRACT_NAME),
-        2 ** 256 - 1,
+        2**256 - 1,
         factory_deployer_wallet,
     )
     ocean_contract.approve(
-        get_address_of_type(config, "Router"), 2 ** 256 - 1, factory_deployer_wallet
+        get_address_of_type(config, "Router"), 2**256 - 1, factory_deployer_wallet
     )
 
     nft_data = {

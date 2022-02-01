@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
@@ -11,6 +11,8 @@ from typing import Any, Dict, Optional
 import coloredlogs
 import yaml
 from enforce_typing import enforce_types
+from web3 import Web3
+
 from ocean_lib.config import Config
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.erc20_token import ERC20Token
@@ -25,7 +27,6 @@ from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
-from web3 import Web3
 
 _NETWORK = "ganache"
 

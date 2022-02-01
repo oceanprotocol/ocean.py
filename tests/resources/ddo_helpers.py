@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
@@ -9,6 +9,7 @@ import time
 from typing import List, Optional, Union
 
 import requests
+
 from ocean_lib.agreements.file_objects import FilesTypeFactory, IpfsFile, UrlFile
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset

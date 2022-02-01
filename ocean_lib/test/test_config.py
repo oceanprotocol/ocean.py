@@ -1,10 +1,11 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import os.path
 
 import pytest
+
 from ocean_lib.config import (
     NAME_ADDRESS_FILE,
     NAME_AQUARIUS_URL,

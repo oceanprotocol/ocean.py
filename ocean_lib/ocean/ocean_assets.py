@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -11,6 +11,8 @@ import os
 from typing import List, Optional, Tuple, Type
 
 from enforce_typing import enforce_types
+from web3 import Web3
+
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.aquarius import Aquarius
@@ -29,7 +31,6 @@ from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
-from web3 import Web3
 
 logger = logging.getLogger("ocean")
 
