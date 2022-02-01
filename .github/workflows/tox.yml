@@ -24,16 +24,16 @@ jobs:
         with:
           repository: "oceanprotocol/barge"
           path: 'barge'
-          ref: v4
+          ref: feature/v4_c2d
       - name: Run Barge
         working-directory: ${{ github.workspace }}/barge
         env:
           OPERATOR_SERVICE_URL: https://c2d-dev.operator.oceanprotocol.com/
         run: |
-          bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-rbac > start_ocean.log &
+          bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-rbac --with-c2d > start_ocean.log &
           for i in $(seq 1 50); do
             sleep 5
-            [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" ] && break
+            [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" && -f "$HOME/.ocean/ocean/c2d/ready" ] && break
             done
           ls -la "$HOME/.ocean/ocean-contracts/artifacts/"
       - name: Install dependencies
