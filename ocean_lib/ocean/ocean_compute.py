@@ -32,17 +32,6 @@ class OceanCompute:
         self._config = config
         self._data_provider = data_provider
 
-    @staticmethod
-    @enforce_types
-    def _add_ok_to_job_info(job_info: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Helper method to add the "ok" key to the job info dict for quick validation.
-        :param job_info: dict returned by computeStatus endpoint in provider
-        :return: dict with the "ok" key added
-        """
-        job_info.update({"ok": job_info["status"] not in (31, 32)})
-        return job_info
-
     @enforce_types
     def start(
         self,
@@ -94,11 +83,11 @@ class OceanCompute:
         :return: dict the status for an existing compute job
         """
         _, service_endpoint = self._get_service_endpoint(did)
-        return OceanCompute._add_ok_to_job_info(
-            self._data_provider.compute_job_status(
-                did, job_id, service_endpoint, wallet
-            )
+        job_info = self._data_provider.compute_job_status(
+            did, job_id, service_endpoint, wallet
         )
+        job_info.update({"ok": job_info["status"] not in (31, 32)})
+        return job_info
 
     @enforce_types
     def result(
@@ -130,9 +119,11 @@ class OceanCompute:
         :return: dict the status for the stopped compute job, keys are (ok, status, statusText)
         """
         _, service_endpoint = self._get_service_endpoint(did)
-        return self._add_ok_to_job_info(
-            self._data_provider.stop_compute_job(did, job_id, service_endpoint, wallet)
+        job_info = self._data_provider.stop_compute_job(
+            did, job_id, service_endpoint, wallet
         )
+        job_info.update({"ok": job_info["status"] not in (31, 32)})
+        return job_info
 
     @enforce_types
     def _get_service_endpoint(
