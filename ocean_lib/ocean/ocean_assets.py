@@ -184,7 +184,7 @@ class OceanAssets:
             flags = bytes([2])
             # Encrypt DDO
             encrypt_response = DataServiceProvider.encrypt(
-                objects_to_encrypt=ddo_string,
+                objects_to_encrypt=ddo_string, provider_uri=provider_uri
             )
             document = encrypt_response.text
             return document, flags, ddo_hash
@@ -196,7 +196,7 @@ class OceanAssets:
 
         # Encrypt DDO
         encrypt_response = DataServiceProvider.encrypt(
-            objects_to_encrypt=compressed_document,
+            objects_to_encrypt=compressed_document, provider_uri=provider_uri
         )
 
         document = encrypt_response.text
