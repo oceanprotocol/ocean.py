@@ -221,8 +221,8 @@ class ERC721Token(ContractBase):
         )
 
     def create_datatoken(
-        self, erc20_data: CreateErc20Data, from_wallet: Wallet
-    ) -> ERC20Token:
+        self, erc20_data: Union[CreateErc20Data, dict, tuple], from_wallet: Wallet
+    ) -> Union[ERC20Token, ERC20Enterprise]:
         initial_list = self.get_tokens_list()
 
         tx_id = self.create_erc20(erc20_data, from_wallet)
@@ -233,23 +233,9 @@ class ERC721Token(ContractBase):
         ]
 
         assert len(new_elements) == 1, "new data token has no address"
-        token = ERC20Token(self.web3, new_elements[0])
 
-        return token
-
-    def create_enterprise_datatoken(
-        self, erc20_data: CreateErc20Data, from_wallet: Wallet
-    ) -> ERC20Enterprise:
-        initial_list = self.get_tokens_list()
-
-        tx_id = self.create_erc20(erc20_data, from_wallet)
-        self.web3.eth.wait_for_transaction_receipt(tx_id)
-
-        new_elements = [
-            item for item in self.get_tokens_list() if item not in initial_list
-        ]
-
-        assert len(new_elements) == 1, "new data token has no address"
-        token = ERC20Enterprise(self.web3, new_elements[0])
-
-        return token
+        return (
+            ERC20Token(self.web3, new_elements[0])
+            if erc20_data.template_index == 1
+            else ERC20Enterprise(self.web3, new_elements[0])
+        )

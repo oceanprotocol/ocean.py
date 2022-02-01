@@ -6,11 +6,14 @@ import json
 import os
 
 from ocean_lib.example_config import ExampleConfig
-from ocean_lib.models.models_structures import CreateErc20Data, DispenserData
+from ocean_lib.models.models_structures import (
+    CreateErc20Data,
+    DispenserData,
+    OrderParams,
+)
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.utils import split_signature
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -51,7 +54,7 @@ def test_erc20_enterprise_flow_with_dispenser():
         uints=[cap, 0],
         bytess=[b""],
     )
-    erc20_enterprise_token = nft_token.create_enterprise_datatoken(
+    erc20_enterprise_token = nft_token.create_datatoken(
         erc20_data=erc20_data, from_wallet=alice_wallet
     )
 
@@ -106,22 +109,17 @@ def test_erc20_enterprise_flow_with_dispenser():
     provider_fee_amount = 0
     provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
     valid_until = 1958133628  # 2032
-
-    message = ocean.web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256", "uint256"],
-        [
-            ocean.web3.toHex(ocean.web3.toBytes(text=provider_data)),
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
-            valid_until,
-        ],
+    signature = ocean.compute_signature(
+        provider_data=provider_data,
+        provider_fee_address=provider_fee_address,
+        provider_fee_token=provider_fee_token,
+        provider_fee_amount=provider_fee_amount,
+        valid_until=valid_until,
     )
-    signed = ocean.web3.eth.sign(provider_fee_address, data=message)
-    signature = split_signature(signed)
 
     initial_bob_balance = OCEAN_token.balanceOf(bob_wallet.address)
-    order_params = (
+
+    order_params = OrderParams(
         bob_wallet.address,
         1,
         (
@@ -182,7 +180,7 @@ def test_erc20_enterprise_flow_with_fre():
         uints=[cap, 0],
         bytess=[b""],
     )
-    erc20_enterprise_token = nft_token.create_enterprise_datatoken(
+    erc20_enterprise_token = nft_token.create_datatoken(
         erc20_data=erc20_data, from_wallet=alice_wallet
     )
 
@@ -219,25 +217,19 @@ def test_erc20_enterprise_flow_with_fre():
     provider_fee_amount = 0
     provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
     valid_until = 1958133628  # 2032
-
-    message = ocean.web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256", "uint256"],
-        [
-            ocean.web3.toHex(ocean.web3.toBytes(text=provider_data)),
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
-            valid_until,
-        ],
+    signature = ocean.compute_signature(
+        provider_data=provider_data,
+        provider_fee_address=provider_fee_address,
+        provider_fee_token=provider_fee_token,
+        provider_fee_amount=provider_fee_amount,
+        valid_until=valid_until,
     )
-    signed = ocean.web3.eth.sign(provider_fee_address, data=message)
-    signature = split_signature(signed)
 
-    order_params = (
+    order_params = OrderParams(
         bob_wallet.address,
         1,
         (
-            alice_wallet.address,
+            provider_fee_address,
             provider_fee_token,
             provider_fee_amount,
             signature.v,
@@ -267,7 +259,8 @@ def test_erc20_enterprise_flow_with_fre():
         spender=alice_wallet.address, amount=ocean.to_wei(20), from_wallet=alice_wallet
     )
 
-    tx = erc20_enterprise_token.buy_from_fre_and_order(
+    tx_id = erc20_enterprise_token.buy_from_fre_and_order(
         order_params=order_params, fre_params=fre_params, from_wallet=alice_wallet
     )
-    assert tx, "failed buying data tokens from FRE."
+    tx_receipt = ocean.web3.eth.wait_for_transaction_receipt(tx_id)
+    assert tx_receipt.status == 1, "failed buying data tokens from FRE."

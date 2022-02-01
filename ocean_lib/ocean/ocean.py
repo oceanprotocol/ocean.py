@@ -28,6 +28,7 @@ from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, g
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import DECIMALS_18
 from ocean_lib.web3_internal.currency import to_wei as _to_wei
+from ocean_lib.web3_internal.utils import split_signature, Signature
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ocean")
@@ -305,3 +306,26 @@ class Ocean:
         bpool = BPool(self.web3, bpool_address)
 
         return bpool
+
+    @enforce_types
+    def compute_signature(
+        self,
+        provider_data: str,
+        provider_fee_address: str,
+        provider_fee_token: str,
+        provider_fee_amount: int,
+        valid_until: int,
+    ) -> Signature:
+        message = self.web3.solidityKeccak(
+            ["bytes", "address", "address", "uint256", "uint256"],
+            [
+                self.web3.toHex(self.web3.toBytes(text=provider_data)),
+                provider_fee_address,
+                provider_fee_token,
+                provider_fee_amount,
+                valid_until,
+            ],
+        )
+        signed = self.web3.eth.sign(provider_fee_address, data=message)
+        signature = split_signature(signed)
+        return signature
