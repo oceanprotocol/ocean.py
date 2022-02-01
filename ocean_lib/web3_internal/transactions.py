@@ -1,18 +1,19 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 from typing import Optional, Union
 
 from enforce_typing import enforce_types
 from eth_account.messages import SignableMessage
+from web3.datastructures import AttributeDict
+from web3.main import Web3
+
 from ocean_lib.web3_internal.constants import BLOCK_NUMBER_POLL_INTERVAL
 from ocean_lib.web3_internal.wallet import Wallet
 from ocean_lib.web3_internal.web3_overrides.utils import (
     wait_for_transaction_receipt_and_block_confirmations,
 )
-from web3.datastructures import AttributeDict
-from web3.main import Web3
 
 
 @enforce_types

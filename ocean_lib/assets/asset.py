@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import copy
@@ -8,6 +8,7 @@ import logging
 from typing import List, Optional
 
 from enforce_typing import enforce_types
+
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.credentials import AddressCredential
 from ocean_lib.services.service import Service

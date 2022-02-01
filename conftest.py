@@ -1,11 +1,12 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
 import os
 
 import pytest
+
 from ocean_lib.aquarius.aquarius import Aquarius
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.factory_router import FactoryRouter

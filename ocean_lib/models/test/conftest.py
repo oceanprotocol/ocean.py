@@ -1,10 +1,11 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import os
 
 import pytest
+
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.ocean.util import get_ocean_token_address
@@ -15,7 +16,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import get_ganache_wallet, get_web3
 
 _NETWORK = "ganache"
-HUGEINT = 2 ** 255
+HUGEINT = 2**255
 BobInfo = None
 AliceInfo = None
 

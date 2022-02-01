@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import importlib
@@ -8,11 +8,12 @@ import logging
 import os
 from typing import Any, Dict, Optional
 
-import artifacts  # noqa
 from enforce_typing import enforce_types
 from jsonsempai import magic  # noqa: F401
 from web3.contract import Contract
 from web3.main import Web3
+
+import artifacts  # noqa
 
 logger = logging.getLogger(__name__)
 
