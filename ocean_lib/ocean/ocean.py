@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -9,6 +9,8 @@ from decimal import Decimal
 from typing import Dict, List, Optional, Type, Union
 
 from enforce_typing import enforce_types
+from web3.datastructures import AttributeDict
+
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.bpool import BPool
@@ -25,7 +27,6 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import DECIMALS_18
 from ocean_lib.web3_internal.currency import to_wei as _to_wei
 from ocean_lib.web3_internal.wallet import Wallet
-from web3.datastructures import AttributeDict
 
 logger = logging.getLogger("ocean")
 

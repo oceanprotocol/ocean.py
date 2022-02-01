@@ -1,10 +1,11 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import os
 
 import pytest
+
 from ocean_lib.web3_internal.utils import (
     generate_multi_value_hash,
     get_chain_id,

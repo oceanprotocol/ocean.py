@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 """DID Resolver module."""
@@ -7,6 +7,7 @@
 import logging
 
 from enforce_typing import enforce_types
+
 from ocean_lib.aquarius import Aquarius
 from ocean_lib.assets.asset import Asset
 

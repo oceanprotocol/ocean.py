@@ -1,11 +1,12 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
 import os
 
 import pytest
+
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_registered_asset_with_access_service
 from tests.resources.helper_functions import get_another_consumer_ocean_instance

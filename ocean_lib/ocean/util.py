@@ -1,22 +1,20 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import time
 from typing import Dict, Optional, Union
 
 from enforce_typing import enforce_types
-from ocean_lib.aquarius.aquarius import Aquarius
-from ocean_lib.assets.asset import Asset
+from web3 import WebsocketProvider
+from web3.main import Web3
+from web3.middleware import geth_poa_middleware
+
 from ocean_lib.config import Config
 from ocean_lib.web3_internal.contract_utils import (
     get_contracts_addresses as get_contracts_addresses_web3,
 )
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
-from web3 import WebsocketProvider
-from web3.main import Web3
-from web3.middleware import geth_poa_middleware
 
 GANACHE_URL = "http://127.0.0.1:8545"
 

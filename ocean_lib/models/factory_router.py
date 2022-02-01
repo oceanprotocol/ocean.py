@@ -1,10 +1,11 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 from typing import List, Union
 
 from enforce_typing import enforce_types
+
 from ocean_lib.models.bfactory import BFactory
 from ocean_lib.models.models_structures import Operations
 from ocean_lib.web3_internal.wallet import Wallet
