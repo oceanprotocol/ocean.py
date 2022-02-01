@@ -251,6 +251,7 @@ def test_c2d_flow():
     for _ in range(0, 200):
         status = ocean.compute.status(DATA_did, job_id, bob_wallet)
         if status["status"] > 60:
+            print(f"Status = '{status}'")
             succeeded = True
             break
         time.sleep(5)
