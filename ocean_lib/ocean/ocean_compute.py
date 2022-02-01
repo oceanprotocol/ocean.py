@@ -34,17 +34,14 @@ class OceanCompute:
 
     @staticmethod
     @enforce_types
-    def _status_from_job_info(job_info: Dict[str, Any]) -> Dict[str, Any]:
+    def _add_ok_to_job_info(job_info: Dict[str, Any]) -> Dict[str, Any]:
         """
-        Helper function to extract the status dict with an added boolean for quick validation
-        :param job_info: dict having status and statusText keys
-        :return:
+        Helper method to add the "ok" key to the job info dict for quick validation.
+        :param job_info: dict returned by computeStatus endpoint in provider
+        :return: dict with the "ok" key added
         """
-        return {
-            "ok": job_info["status"] not in (31, 32),
-            "status": job_info["status"],
-            "statusText": job_info["statusText"],
-        }
+        job_info.update({"ok": job_info["status"] not in (31, 32)})
+        return job_info
 
     @enforce_types
     def start(
@@ -94,38 +91,17 @@ class OceanCompute:
         :param did: str id of the asset offering the compute service of this job
         :param job_id: str id of the compute job
         :param wallet: Wallet instance
-        :return: dict the status for an existing compute job, keys are (ok, status, statusText)
+        :return: dict the status for an existing compute job
         """
         _, service_endpoint = self._get_service_endpoint(did)
-
-        return OceanCompute._status_from_job_info(
+        return OceanCompute._add_ok_to_job_info(
             self._data_provider.compute_job_status(
                 did, job_id, service_endpoint, wallet
             )
         )
 
     @enforce_types
-    def result(self, did: str, job_id: str, wallet: Wallet) -> Dict[str, Any]:
-        """
-        Gets job result.
-
-        :param did: str id of the asset offering the compute service of this job
-        :param job_id: str id of the compute job
-        :param wallet: Wallet instance
-        :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
-        """
-        _, service_endpoint = self._get_service_endpoint(did)
-        info_dict = self._data_provider.compute_job_result(
-            did, job_id, service_endpoint, wallet
-        )
-        return {
-            "did": info_dict.get("resultsDid", ""),
-            "urls": info_dict.get("resultsUrl", []),
-            "logs": info_dict.get("algorithmLogUrl", []),
-        }
-
-    @enforce_types
-    def result_file(
+    def result(
         self, did: str, job_id: str, index: int, wallet: Wallet
     ) -> Dict[str, Any]:
         """
@@ -154,7 +130,7 @@ class OceanCompute:
         :return: dict the status for the stopped compute job, keys are (ok, status, statusText)
         """
         _, service_endpoint = self._get_service_endpoint(did)
-        return self._status_from_job_info(
+        return self._add_ok_to_job_info(
             self._data_provider.stop_compute_job(did, job_id, service_endpoint, wallet)
         )
 
