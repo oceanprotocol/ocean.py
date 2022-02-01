@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 from enum import IntEnum
@@ -8,6 +8,8 @@ from typing import List, Optional, Tuple, Union
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
 from eth_typing.encoding import HexStr
+from web3.main import Web3
+
 from ocean_lib.models.models_structures import (
     DispenserData,
     FixedData,
@@ -17,7 +19,6 @@ from ocean_lib.models.models_structures import (
 from ocean_lib.utils.utilities import prepare_message_for_ecrecover_in_solidity
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
-from web3.main import Web3
 
 
 class RolesERC20(IntEnum):

@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -8,6 +8,7 @@ import logging
 import os
 
 from enforce_typing import enforce_types
+
 from ocean_lib.config import (
     DEFAULT_METADATA_CACHE_URI,
     DEFAULT_PROVIDER_URL,

@@ -1,10 +1,13 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
 
 import pytest
+from web3 import exceptions
+from web3.main import Web3
+
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
@@ -14,8 +17,6 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
-from web3 import exceptions
-from web3.main import Web3
 
 
 def test_buy_from_dispenser_and_order(
