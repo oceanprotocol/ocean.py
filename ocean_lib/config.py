@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -9,8 +9,9 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
-import artifacts
 from enforce_typing import enforce_types
+
+import artifacts
 from ocean_lib.integer import Integer
 from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT

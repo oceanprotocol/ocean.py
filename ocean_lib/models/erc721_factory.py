@@ -1,10 +1,12 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 from typing import Optional, Union
 
 from enforce_typing import enforce_types
+from web3.datastructures import AttributeDict
+
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.models_structures import (
@@ -17,7 +19,6 @@ from ocean_lib.models.models_structures import (
     PoolData,
 )
 from ocean_lib.web3_internal.wallet import Wallet
-from web3.datastructures import AttributeDict
 
 
 @enforce_types

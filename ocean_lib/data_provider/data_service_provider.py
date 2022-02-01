@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -17,6 +17,10 @@ from unittest.mock import Mock
 import requests
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
+from requests.exceptions import InvalidURL
+from requests.models import PreparedRequest, Response
+from requests.sessions import Session
+
 from ocean_lib.config import Config
 from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
@@ -24,9 +28,6 @@ from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
-from requests.exceptions import InvalidURL
-from requests.models import PreparedRequest, Response
-from requests.sessions import Session
 
 logger = logging.getLogger(__name__)
 

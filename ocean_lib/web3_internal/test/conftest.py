@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -10,6 +10,7 @@
 #  here we simply import that conftest's contents.
 
 import pytest
+
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.test.conftest import *  # noqa: F401 F403
 

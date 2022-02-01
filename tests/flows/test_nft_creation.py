@@ -1,8 +1,10 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+from web3 import Web3, exceptions
+
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Permissions, ERC721Token
@@ -14,7 +16,6 @@ from tests.resources.helper_functions import (
     get_address_of_type,
     get_non_existent_nft_template,
 )
-from web3 import Web3, exceptions
 
 
 def test_erc721_roles(

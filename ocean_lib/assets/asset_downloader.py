@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -8,6 +8,8 @@ import os
 from typing import Optional
 
 from enforce_typing import enforce_types
+
+from ocean_lib.agreements.consumable import ConsumableCodes, AssetNotConsumable
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -56,6 +58,14 @@ def download_asset_files(
     if index is not None:
         assert isinstance(index, int), logger.error("index has to be an integer.")
         assert index >= 0, logger.error("index has to be 0 or a positive integer.")
+
+    consumable_result = service.is_consumable(
+        asset,
+        {"type": "address", "value": consumer_wallet.address},
+        with_connectivity_check=True,
+    )
+    if consumable_result != ConsumableCodes.OK:
+        raise AssetNotConsumable(consumable_result)
 
     asset_folder = os.path.join(destination, f"datafile.{asset.did}.{service_id}")
     if not os.path.exists(asset_folder):

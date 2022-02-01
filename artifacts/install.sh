@@ -1,5 +1,5 @@
 ##
-## Copyright 2021 Ocean Protocol Foundation
+## Copyright 2022 Ocean Protocol Foundation
 ## SPDX-License-Identifier: Apache-2.0
 ##
 rm -rf $VIRTUAL_ENV/lib/python3.9/site-packages/artifacts/
