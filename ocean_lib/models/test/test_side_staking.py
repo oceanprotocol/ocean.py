@@ -1,8 +1,10 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+from web3 import exceptions
+
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
@@ -14,7 +16,6 @@ from tests.resources.helper_functions import (
     get_address_of_type,
     transfer_ocean_if_balance_lte,
 )
-from web3 import exceptions
 
 
 def test_side_staking(

@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 from ocean_lib.models.bpool import BPool
@@ -1574,7 +1574,7 @@ def test_pool_usdc(
 
     tx = bpool.swap_exact_amount_in(
         [erc20_address, usdc_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), int(1e4), int(2 ** 256 - 1), 0],
+        [to_wei("0.1"), int(1e4), int(2**256 - 1), 0],
         publisher_wallet,
     )
 
@@ -2218,7 +2218,7 @@ def test_pool_usdc_flexible(
 
     tx = bpool.swap_exact_amount_in(
         [erc20_address, usdc_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), int(1e4), int(2 ** 256 - 1), 0],
+        [to_wei("0.1"), int(1e4), int(2**256 - 1), 0],
         publisher_wallet,
     )
 
