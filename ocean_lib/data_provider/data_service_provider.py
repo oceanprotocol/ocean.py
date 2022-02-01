@@ -21,6 +21,7 @@ from requests.exceptions import InvalidURL
 from requests.models import PreparedRequest, Response
 from requests.sessions import Session
 
+from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.config import Config
 from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
@@ -58,12 +59,8 @@ class DataServiceProvider:
     @staticmethod
     @enforce_types
     def encrypt(
-        objects_to_encrypt: Union[list, str, bytes],
-        provider_uri: Optional[str] = None,
+        objects_to_encrypt: Union[list, str, bytes], provider_uri: str
     ) -> Response:
-        if not provider_uri:
-            provider_uri = "http://172.15.0.4:8030"
-
         if isinstance(objects_to_encrypt, list):
             data_items = list(map(lambda file: file.to_dict(), objects_to_encrypt))
             data = json.dumps(data_items, separators=(",", ":"))
@@ -270,6 +267,7 @@ class DataServiceProvider:
         dataset_compute_service: Any,  # Can not add Service typing due to enforce_type errors.
         consumer: Wallet,
         dataset: ComputeInput,
+        compute_environment: str,
         algorithm: Optional[ComputeInput] = None,
         algorithm_meta: Optional[AlgorithmMetadata] = None,
         algorithm_custom_data: Optional[str] = None,
@@ -283,6 +281,7 @@ class DataServiceProvider:
         :param dataset_compute_service:
         :param consumer: hex str the ethereum address of the consumer executing the compute job
         :param dataset: ComputeInput dataset with a compute service
+        :param compute_environment: str compute environment id
         :param algorithm: ComputeInput algorithm witha download service.
         :param algorithm_meta: AlgorithmMetadata algorithm metadata
         :param algorithm_custom_data: dict customizable algo parameters (ie. no of iterations, etc)
@@ -293,12 +292,15 @@ class DataServiceProvider:
             algorithm or algorithm_meta
         ), "either an algorithm did or an algorithm meta must be provided."
 
+        assert (
+            hasattr(dataset_compute_service, "type")
+            and dataset_compute_service.type == ServiceTypes.CLOUD_COMPUTE
+        ), "invalid compute service"
+
         payload = DataServiceProvider._prepare_compute_payload(
             consumer=consumer,
             dataset=dataset,
-            compute_environment=json.dumps(
-                dataset_compute_service.compute_values, separators=(",", ":")
-            ),
+            compute_environment=compute_environment,
             algorithm=algorithm,
             algorithm_meta=algorithm_meta,
             algorithm_custom_data=algorithm_custom_data,

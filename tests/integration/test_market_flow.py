@@ -50,7 +50,6 @@ def test_market_flow(
         )
         asset_folder = consumer_ocean.assets.download_asset(
             asset,
-            service.service_endpoint,
             consumer_wallet,
             consumer_ocean.config.downloads_path,
             order_tx_id,
@@ -64,7 +63,6 @@ def test_market_flow(
         )
         asset_folder = consumer_ocean.assets.download_asset(
             asset,
-            consumer_ocean.config.provider_url,
             another_consumer_wallet,
             another_consumer_ocean.config.downloads_path,
             order_tx_id,

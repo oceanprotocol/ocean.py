@@ -49,11 +49,9 @@ def test_aqua_functions_for_single_ddo(
         "license": "https://market.oceanprotocol.com/terms",
     }
 
-    data_provider = DataServiceProvider
     file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
     file1 = FilesTypeFactory(file1_dict)
-    encrypt_response = data_provider.encrypt([file1])
-    encrypted_files = encrypt_response.content.decode("utf-8")
+    encrypted_files = publisher_ocean_instance.assets.encrypt_files([file1])
 
     ddo = publisher_ocean_instance.assets.create(
         metadata, publisher_wallet, encrypted_files, erc20_tokens_data=[erc20_data]

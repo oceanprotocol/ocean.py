@@ -115,7 +115,7 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
     """Tests failures of compute job from endpoint with empty response."""
     mock_service = Service(
         service_id="some_service_id",
-        service_type="some_service_type",
+        service_type="compute",
         service_endpoint="http://mock/",
         datatoken="some_dt",
         files="some_files",
@@ -129,6 +129,7 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
             dataset_compute_service=mock_service,
             consumer=consumer_wallet,
             dataset=ComputeInput("some_did", "some_tx_id", "some_service_id"),
+            compute_environment="some_env",
             algorithm=ComputeInput(
                 "another_did", "another_tx_id", "another_service_id"
             ),
@@ -142,6 +143,7 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
             dataset_compute_service=mock_service,
             consumer=consumer_wallet,
             dataset=ComputeInput("some_did", "some_tx_id", "some_service_id"),
+            compute_environment="some_env",
             algorithm=ComputeInput(
                 "another_did", "another_tx_id", "another_service_id"
             ),
@@ -211,7 +213,7 @@ def test_encrypt(web3, config, provider_wallet):
     file2 = FilesTypeFactory(file2_dict)
 
     # Encrypt file objects
-    result = DataSP.encrypt([file1, file2])
+    result = DataSP.encrypt([file1, file2], config.provider_url)
     encrypted_files = result.content.decode("utf-8")
     assert result.status_code == 201
     assert result.headers["Content-type"] == "text/plain"
@@ -227,7 +229,7 @@ def test_encrypt(web3, config, provider_wallet):
 
     # Encrypt a simple string
     test_string = "hello_world"
-    encrypt_result = DataSP.encrypt(test_string)
+    encrypt_result = DataSP.encrypt(test_string, config.provider_url)
     encrypted_document = encrypt_result.content.decode("utf-8")
     assert result.status_code == 201
     assert result.headers["Content-type"] == "text/plain"

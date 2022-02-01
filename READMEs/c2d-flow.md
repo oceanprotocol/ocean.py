@@ -331,8 +331,9 @@ ALG_order_tx_id = ocean.assets.pay_for_service(
 
 compute_inputs = [ComputeInput(DATA_did, DATA_order_tx_id, compute_service.index)]
 job_id = ocean.compute.start(
-    compute_inputs,
     bob_wallet,
+    compute_inputs[0],
+    "compute_env",
     algorithm_did=ALG_did,
     algorithm_tx_id=ALG_order_tx_id,
     algorithm_datatoken=ALG_datatoken.address

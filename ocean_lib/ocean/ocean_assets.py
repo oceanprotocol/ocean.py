@@ -498,7 +498,6 @@ class OceanAssets:
     def download_asset(
         self,
         asset: Asset,
-        provider_uri: str,
         consumer_wallet: Wallet,
         destination: str,
         order_tx_id: str,
@@ -517,7 +516,7 @@ class OceanAssets:
 
         return download_asset_files(
             asset=asset,
-            provider_uri=provider_uri,
+            provider_uri=self._config.provider_url,
             consumer_wallet=consumer_wallet,
             destination=destination,
             order_tx_id=order_tx_id,
@@ -579,6 +578,6 @@ class OceanAssets:
     def encrypt_files(self, files: list):
         data_provider = DataServiceProvider
 
-        encrypt_response = data_provider.encrypt(files)
+        encrypt_response = data_provider.encrypt(files, self._config.provider_url)
 
         return encrypt_response.content.decode("utf-8")
