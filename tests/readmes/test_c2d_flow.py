@@ -261,7 +261,7 @@ def test_c2d_flow():
     # 0 index, means we retrieve the results from the first dataset index
     result = ocean.compute.result_file(DATA_did, job_id, 0, bob_wallet)
     assert result, "result retrieval unsuccessful"
-
+    print(result)
     # Unpickle the gaussian model result
     model = pickle.loads(result)
     assert model, "unpickle result unsuccessful"
