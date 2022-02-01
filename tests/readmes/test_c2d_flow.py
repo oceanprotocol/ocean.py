@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import os
@@ -19,7 +19,7 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-def test_c2d_flow():
+def test_c2d_flow_readme():
     """This test mirrors the c2d-flow.md README."""
 
     # 2. Alice publishes data asset with compute service
