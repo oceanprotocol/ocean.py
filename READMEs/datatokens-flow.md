@@ -5,13 +5,14 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Publish datatoken
 
+## 1. Setup
 ## Prerequisites
 
 -   Linux/MacOS
 -   [Docker](https://docs.docker.com/engine/install/), [Docker Compose](https://docs.docker.com/compose/install/), [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
 -   Python 3.8.5+
 
-## Run barge services
+## Download barge and run services
 
 Ocean `barge` runs ganache (local blockchain), Provider (data service), and Aquarius (metadata cache).
 
@@ -25,11 +26,14 @@ cd barge
 # Clean up old containers (to be sure)
 docker system prune -a --volumes
 
-# Run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-./start_ocean.sh
+# make sure to use the dev version of the operator service URL, to match the barge provider
+export OPERATOR_SERVICE_URL=https://c2d-dev.operator.oceanprotocol.com/
+
+#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
+./start_ocean.sh  --with-provider2
 ```
 
-## Install the library, set envvars
+## Install the library from v4 sources
 
 In a new console:
 
@@ -40,8 +44,8 @@ git clone https://github.com/oceanprotocol/ocean.py.git
 git checkout v4main
 
 # Create your working directory. Copy artifacts.
-mkdir test3
-cd test3
+mkdir my_project
+cd my_project
 
 # Initialize virtual environment and activate it. Install artifacts.
 python3 -m venv venv
@@ -50,8 +54,10 @@ source venv/bin/activate
 # Intermediary installation before PyPi release of V4. Install wheel first to avoid errors.
 pip3 install wheel
 pip3 install --no-cache-dir ../ocean.py/
+```
 
-
+## Set envvars
+```console
 # Set envvars
 export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 
@@ -60,12 +66,13 @@ export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
 
 # Set network URL
 export OCEAN_NETWORK_URL=http://127.0.0.1:8545
-
-# Go into python
-python
 ```
 
-## Publish datatokens
+## 2. Publish datatokens
+Open a new console and run python console with the command:
+```console
+python
+```
 
 In the Python console:
 
