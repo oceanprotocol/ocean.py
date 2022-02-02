@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 @enforce_types
 def download_asset_files(
     asset: Asset,
-    provider_uri: str,
     consumer_wallet: Wallet,
     destination: str,
     order_tx_id: str,
@@ -40,9 +39,6 @@ def download_asset_files(
     :return: asset folder path, str
     """
     data_provider = DataServiceProvider
-    assert data_provider.is_valid_provider(provider_uri=provider_uri), logger.error(
-        "Invalid provider URI."
-    )
 
     service = asset.get_service(ServiceTypes.ASSET_ACCESS)
     if not service.service_endpoint:

@@ -516,7 +516,6 @@ class OceanAssets:
 
         return download_asset_files(
             asset=asset,
-            provider_uri=self._config.provider_url,
             consumer_wallet=consumer_wallet,
             destination=destination,
             order_tx_id=order_tx_id,
