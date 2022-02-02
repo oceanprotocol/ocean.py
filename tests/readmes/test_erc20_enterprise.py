@@ -10,6 +10,7 @@ from ocean_lib.models.models_structures import (
     CreateErc20Data,
     DispenserData,
     OrderParams,
+    ProviderFees,
 )
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
@@ -96,20 +97,20 @@ def test_erc20_enterprise_flow_with_dispenser():
         from_wallet=alice_wallet,
     )
 
-    # Approve tokens.
+    # Approve tokens
     OCEAN_token.approve(
         spender=erc20_enterprise_token.address,
         amount=consume_fee_amount,
         from_wallet=alice_wallet,
     )
 
-    # Prepare data for order.
+    # Prepare data for order
     provider_fee_address = alice_wallet.address
     provider_fee_token = OCEAN_token.address
     provider_fee_amount = 0
     provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
     valid_until = 1958133628  # 2032
-    signature = ocean.compute_signature(
+    provider_fees = ocean.build_compute_provider_fees(
         provider_data=provider_data,
         provider_fee_address=provider_fee_address,
         provider_fee_token=provider_fee_token,
@@ -117,21 +118,15 @@ def test_erc20_enterprise_flow_with_dispenser():
         valid_until=valid_until,
     )
 
-    initial_bob_balance = OCEAN_token.balanceOf(bob_wallet.address)
+    # TODO: this will be handled in web3 py
+    if isinstance(provider_fees, ProviderFees):
+        provider_fees = tuple(provider_fees)
 
+    initial_bob_balance = OCEAN_token.balanceOf(bob_wallet.address)
     order_params = OrderParams(
         bob_wallet.address,
         1,
-        (
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
-            signature.v,
-            signature.r,
-            signature.s,
-            valid_until,
-            ocean.web3.toHex(ocean.web3.toBytes(text=provider_data)),
-        ),
+        provider_fees,
     )
 
     erc20_enterprise_token.buy_from_dispenser_and_order(
@@ -210,14 +205,14 @@ def test_erc20_enterprise_flow_with_fre():
         from_wallet=alice_wallet,
     )
 
-    # Prepare data for order.
+    # Prepare data for order
     consume_fee_amount = ocean.to_wei(2)
     provider_fee_address = alice_wallet.address
     provider_fee_token = OCEAN_token.address
     provider_fee_amount = 0
     provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
     valid_until = 1958133628  # 2032
-    signature = ocean.compute_signature(
+    provider_fees = ocean.build_compute_provider_fees(
         provider_data=provider_data,
         provider_fee_address=provider_fee_address,
         provider_fee_token=provider_fee_token,
@@ -225,19 +220,14 @@ def test_erc20_enterprise_flow_with_fre():
         valid_until=valid_until,
     )
 
+    # TODO: this will be handled in web3 py
+    if isinstance(provider_fees, ProviderFees):
+        provider_fees = tuple(provider_fees)
+
     order_params = OrderParams(
         bob_wallet.address,
         1,
-        (
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
-            signature.v,
-            signature.r,
-            signature.s,
-            valid_until,
-            ocean.web3.toHex(ocean.web3.toBytes(text=provider_data)),
-        ),
+        provider_fees,
     )
 
     fre_params = (
@@ -249,7 +239,7 @@ def test_erc20_enterprise_flow_with_fre():
     )
     erc20_enterprise_token.mint(alice_wallet.address, ocean.to_wei(20), alice_wallet)
 
-    # Approve tokens.
+    # Approve tokens
     OCEAN_token.approve(
         spender=erc20_enterprise_token.address,
         amount=consume_fee_amount,

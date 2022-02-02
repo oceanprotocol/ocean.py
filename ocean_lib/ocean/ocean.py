@@ -15,13 +15,12 @@ from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.dispenser import Dispenser
-from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.models_structures import FixedData, PoolData
+from ocean_lib.models.models_structures import FixedData, PoolData, ProviderFees
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
@@ -223,7 +222,7 @@ class Ocean:
     @enforce_types
     def create_fixed_rate(
         self,
-        erc20_token: Union[ERC20Token, ERC20Enterprise],
+        erc20_token: ERC20Token,
         base_token: ERC20Token,
         amount: int,
         from_wallet: Wallet,
@@ -308,14 +307,14 @@ class Ocean:
         return bpool
 
     @enforce_types
-    def compute_signature(
+    def build_compute_provider_fees(
         self,
         provider_data: str,
         provider_fee_address: str,
         provider_fee_token: str,
         provider_fee_amount: int,
         valid_until: int,
-    ) -> Signature:
+    ) -> ProviderFees:
         message = self.web3.solidityKeccak(
             ["bytes", "address", "address", "uint256", "uint256"],
             [
@@ -328,4 +327,13 @@ class Ocean:
         )
         signed = self.web3.eth.sign(provider_fee_address, data=message)
         signature = split_signature(signed)
-        return signature
+        return ProviderFees(
+            provider_fee_address,
+            provider_fee_token,
+            provider_fee_amount,
+            signature.v,
+            signature.r,
+            signature.s,
+            valid_until,
+            self.web3.toHex(self.web3.toBytes(text=provider_data)),
+        )
