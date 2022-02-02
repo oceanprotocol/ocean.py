@@ -388,26 +388,6 @@ class DataServiceProvider:
     @staticmethod
     @enforce_types
     def compute_job_result(
-        did: str, job_id: str, service_endpoint: str, consumer: Wallet
-    ) -> Dict[str, Any]:
-        """
-
-        :param did: hex str the asset/DDO id
-        :param job_id: str id of compute job that was returned from `start_compute_job`
-        :param service_endpoint: str url of the provider service endpoint for compute service
-        :param consumer_address: hex str the ethereum address of the consumer's account
-        :param signature: hex str signed message to allow the provider to authorize the consumer
-
-        :return: dict of job_id to result urls. When job_id is not provided, this will return
-            result for each job_id that exist for the did
-        """
-        return DataServiceProvider._send_compute_request(
-            "get", did, job_id, service_endpoint, consumer
-        )
-
-    @staticmethod
-    @enforce_types
-    def compute_job_result_file(
         job_id: str, index: int, service_endpoint: str, consumer: Wallet
     ) -> Dict[str, Any]:
         """
