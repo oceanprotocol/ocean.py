@@ -19,45 +19,12 @@ Let's go through each step.
 
 ## 1. Setup
 
-### Prerequisites
+### First steps
 
--   Linux/MacOS
--   Docker, [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
--   Python 3.8.5+
-
-### Run barge services
-
-In a new console:
-
-```console
-#grab repo
-git clone https://github.com/oceanprotocol/barge
-cd barge
-
-#clean up old containers (to be sure)
-docker system prune -a --volumes
-
-#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-./start_ocean.sh
-```
-
-### Install the ocean.py library
-
-In a new console that we'll call the _work_ console (as we'll use it later):
-
-```console
-#Create your working directory
-mkdir test3
-cd test3
-
-#Initialize virtual environment and activate it.
-python -m venv venv
-source venv/bin/activate
-
-#Install the ocean.py library. Install wheel first to avoid errors.
-pip install wheel
-pip install ocean-lib
-```
+To get started with this guide, please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+- [x] Setup : Prerequisites
+- [x] Setup : Download barge and run services
+- [x] Setup : Install the library from v4 sources
 
 ### Set envvars
 
@@ -73,13 +40,14 @@ export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
 
 #set network URL
 export OCEAN_NETWORK_URL=http://127.0.0.1:8545
-
-#start python
-python
 ```
 
 ## 2. Alice creates the datatoken
 
+In the work console:
+```console
+python
+```
 
 In the Python console:
 ```python
@@ -129,7 +97,7 @@ erc20_data = CreateErc20Data(
     uints=[cap, 0],
     bytess=[b""],
 )
-erc20_token = erc721_token.create_data_token(
+erc20_token = erc721_token.create_datatoken(
     erc20_data=erc20_data, from_wallet=alice_wallet
 )
 ```
