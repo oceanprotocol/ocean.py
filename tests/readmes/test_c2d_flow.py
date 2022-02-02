@@ -251,6 +251,7 @@ def test_c2d_flow_readme():
     for _ in range(0, 200):
         status = ocean.compute.status(DATA_did, job_id, bob_wallet)
         if status["status"] > 60:
+            print(f"Status = '{status}'")
             succeeded = True
             break
         time.sleep(5)
@@ -260,7 +261,7 @@ def test_c2d_flow_readme():
     # 0 index, means we retrieve the results from the first dataset index
     result = ocean.compute.result(DATA_did, job_id, 0, bob_wallet)
     assert result, "result retrieval unsuccessful"
-
+    print(result)
     # Unpickle the gaussian model result
     model = pickle.loads(result)
     assert model, "unpickle result unsuccessful"
