@@ -355,7 +355,7 @@ Here is a list of possible results: [Operator Service Status description](https:
 Once you get `{'ok': True, 'status': 70, 'statusText': 'Job finished'}`, Bob can check the result of the job.
 
 ```python
-result = ocean.compute.result_file(DATA_did, job_id, 0, bob_wallet)  # 0 index, means we retrieve the results from the first dataset index
+result = ocean.compute.result(DATA_did, job_id, 0, bob_wallet)  # 0 index, means we retrieve the results from the first dataset index
 
 import pickle
 model = pickle.loads(result)  # the gaussian model result
