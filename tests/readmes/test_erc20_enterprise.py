@@ -105,17 +105,12 @@ def test_erc20_enterprise_flow_with_dispenser():
     )
 
     # Prepare data for order
-    provider_fee_address = alice_wallet.address
-    provider_fee_token = OCEAN_token.address
-    provider_fee_amount = 0
-    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
-    valid_until = 1958133628  # 2032
     provider_fees = ocean.build_compute_provider_fees(
-        provider_data=provider_data,
-        provider_fee_address=provider_fee_address,
-        provider_fee_token=provider_fee_token,
-        provider_fee_amount=provider_fee_amount,
-        valid_until=valid_until,
+        provider_data=json.dumps({"timeout": 0}, separators=(",", ":")),
+        provider_fee_address=alice_wallet.address,
+        provider_fee_token=OCEAN_token.address,
+        provider_fee_amount=0,
+        valid_until=1958133628,  # 2032
     )
 
     # TODO: this will be handled in web3 py
@@ -206,18 +201,12 @@ def test_erc20_enterprise_flow_with_fre():
     )
 
     # Prepare data for order
-    consume_fee_amount = ocean.to_wei(2)
-    provider_fee_address = alice_wallet.address
-    provider_fee_token = OCEAN_token.address
-    provider_fee_amount = 0
-    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
-    valid_until = 1958133628  # 2032
     provider_fees = ocean.build_compute_provider_fees(
-        provider_data=provider_data,
-        provider_fee_address=provider_fee_address,
-        provider_fee_token=provider_fee_token,
-        provider_fee_amount=provider_fee_amount,
-        valid_until=valid_until,
+        provider_data=json.dumps({"timeout": 0}, separators=(",", ":")),
+        provider_fee_address=alice_wallet.address,
+        provider_fee_token=OCEAN_token.address,
+        provider_fee_amount=0,
+        valid_until=1958133628,  # 2032
     )
 
     # TODO: this will be handled in web3 py
@@ -242,7 +231,7 @@ def test_erc20_enterprise_flow_with_fre():
     # Approve tokens
     OCEAN_token.approve(
         spender=erc20_enterprise_token.address,
-        amount=consume_fee_amount,
+        amount=ocean.to_wei(20),
         from_wallet=alice_wallet,
     )
     erc20_enterprise_token.approve(
