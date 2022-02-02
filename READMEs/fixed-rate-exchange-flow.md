@@ -22,50 +22,12 @@ Let's go through each step.
 
 ## 1. Setup
 
-### Prerequisites
+### First steps
 
--   Linux/MacOS
--   Docker, [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
--   Python 3.8.5+
-
-### Run barge services
-
-In a new console:
-
-```console
-# Grab repo
-git clone https://github.com/oceanprotocol/barge
-cd barge
-
-# Clean up old containers (to be sure)
-docker system prune -a --volumes
-
-# Run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-./start_ocean.sh
-```
-
-### Install the ocean.py library
-
-In a new console that we'll call the _work_ console (as we'll use it later):
-
-```console
-# Grab ocean.py repo
-cd Desktop/
-git clone https://github.com/oceanprotocol/ocean.py.git
-git checkout v4main
-
-# Create your working directory. Copy artifacts.
-mkdir test3
-cd test3
-
-# Initialize virtual environment and activate it. Install artifacts.
-python3 -m venv venv
-source venv/bin/activate
-
-# Intermediary installation before PyPi release of V4. Install wheel first to avoid errors.
-pip3 install wheel
-pip3 install --no-cache-dir ../ocean.py/
-```
+To get started with this guide, please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+- [x] Setup : Prerequisites
+- [x] Setup : Download barge and run services
+- [x] Setup : Install the library from v4 sources
 
 ### Set envvars
 
@@ -83,13 +45,14 @@ export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
 
 # Set network URL
 export OCEAN_NETWORK_URL=http://127.0.0.1:8545
-
-# Start python
-python
 ```
 
 ## 2. Alice creates the datatoken
 
+In the work console:
+```console
+python
+```
 
 In the Python console:
 ```python
@@ -117,10 +80,10 @@ mint_fake_OCEAN(config)
 
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 # Publish an NFT token
-nft_token = ocean.create_nft_token(
+erc721_nft = ocean.create_data_nft(
     "NFTToken1", "NFT1", alice_wallet, "https://oceanprotocol.com/nft/"
 )
-token_address = nft_token.address
+token_address = erc721_nft.address
 print(f"token_address = '{token_address}'")
 ```
 
@@ -145,7 +108,7 @@ erc20_data = CreateErc20Data(
     bytess=[b""],
 )
 
-erc20_token = nft_token.create_datatoken(erc20_data, alice_wallet)
+erc20_token = erc721_nft.create_datatoken(erc20_data, alice_wallet)
 print(f"datatoken_address = '{erc20_token.address}'")
 
 #Mint the datatokens

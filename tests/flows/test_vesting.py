@@ -8,7 +8,7 @@ from web3 import exceptions
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_token import ERC721Token
+from ocean_lib.models.erc721_nft import ERC721Token
 from ocean_lib.models.models_structures import CreateErc20Data, PoolData
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -46,26 +46,26 @@ def test_main(
     )
     assert registered_event[0].event == "NFTCreated"
     assert registered_event[0].args.admin == publisher_wallet.address
-    erc721_token = ERC721Token(
+    erc721_nft = ERC721Token(
         web3=web3, address=registered_event[0].args.newTokenAddress
     )
 
-    symbol = erc721_token.symbol()
+    symbol = erc721_nft.symbol()
     assert symbol == "NFTS"
 
-    owner_balance = erc721_token.contract.caller.balanceOf(publisher_wallet.address)
+    owner_balance = erc721_nft.contract.caller.balanceOf(publisher_wallet.address)
     assert owner_balance == 1
 
     # Tests roles
-    erc721_token.add_manager(another_consumer_wallet.address, publisher_wallet)
+    erc721_nft.add_manager(another_consumer_wallet.address, publisher_wallet)
 
-    erc721_token.add_to_create_erc20_list(
+    erc721_nft.add_to_create_erc20_list(
         consumer_wallet.address, another_consumer_wallet
     )
-    erc721_token.add_to_metadata_list(consumer_wallet.address, another_consumer_wallet)
-    erc721_token.add_to_725_store_list(consumer_wallet.address, another_consumer_wallet)
+    erc721_nft.add_to_metadata_list(consumer_wallet.address, another_consumer_wallet)
+    erc721_nft.add_to_725_store_list(consumer_wallet.address, another_consumer_wallet)
 
-    permissions = erc721_token.get_permissions(consumer_wallet.address)
+    permissions = erc721_nft.get_permissions(consumer_wallet.address)
 
     assert permissions[1] is True
     assert permissions[2] is True
@@ -85,7 +85,7 @@ def test_main(
         [b""],
     )
 
-    trx_erc_20 = erc721_token.create_erc20(erc_data, consumer_wallet)
+    trx_erc_20 = erc721_nft.create_erc20(erc_data, consumer_wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(trx_erc_20)
     assert tx_receipt.status == 1

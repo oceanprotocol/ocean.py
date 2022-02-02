@@ -16,7 +16,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_token import ERC721Token
+from ocean_lib.models.erc721_nft import ERC721Token
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.models_structures import FixedData, PoolData
@@ -104,7 +104,7 @@ class Ocean:
         return _to_wei(amount_in_ether=amount_in_ether, decimals=decimals)
 
     @enforce_types
-    def create_nft_token(
+    def create_data_nft(
         self,
         name: str,
         symbol: str,
@@ -125,7 +125,7 @@ class Ocean:
                 block_confirmations=config.block_confirmations,
                 transaction_timeout=config.transaction_timeout,
             )
-            nft_token = ocean.create_nft_token("Dataset name", "dtsymbol", from_wallet=wallet)
+            erc721_nft = ocean.create_data_nft("Dataset name", "dtsymbol", from_wallet=wallet)
         ```
         :param name: ERC721 token name, str
         :param symbol: ERC721 token symbol, str

@@ -10,7 +10,7 @@ from web3.main import Web3
 
 from ocean_lib.models.erc20_token import ERC20Token, RolesERC20
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_token import ERC721Token
+from ocean_lib.models.erc721_nft import ERC721Token
 from ocean_lib.models.models_structures import CreateErc20Data, ProviderFees
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -58,9 +58,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     assert registered_event[0].event == "NFTCreated"
     assert registered_event[0].args.admin == publisher_wallet.address
     token_address = registered_event[0].args.newTokenAddress
-    erc721_token = ERC721Token(web3, token_address)
-    assert erc721_token.contract.caller.name() == "DT1"
-    assert erc721_token.symbol() == "DTSYMBOL"
+    erc721_nft = ERC721Token(web3, token_address)
+    assert erc721_nft.contract.caller.name() == "DT1"
+    assert erc721_nft.symbol() == "DTSYMBOL"
 
     # Tests current NFT count
     current_nft_count = erc721_factory.get_current_nft_count()
@@ -77,7 +77,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     assert nft_template[1] is True
 
     # Tests creating successfully an ERC20 token
-    erc721_token.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
+    erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
     erc_create_data = CreateErc20Data(
         1,
         ["ERC20DT1", "ERC20DT1Symbol"],
@@ -90,7 +90,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         [to_wei("0.5"), 0],
         [b""],
     )
-    tx_result = erc721_token.create_erc20(erc_create_data, consumer_wallet)
+    tx_result = erc721_nft.create_erc20(erc_create_data, consumer_wallet)
     assert tx_result, "Failed to create ERC20 token."
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
