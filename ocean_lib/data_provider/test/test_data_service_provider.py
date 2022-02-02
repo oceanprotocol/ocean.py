@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
@@ -7,6 +7,9 @@ from unittest.mock import Mock
 
 import ecies
 import pytest
+from requests.exceptions import InvalidURL
+from requests.models import Response
+
 from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
@@ -14,8 +17,6 @@ from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.exceptions import DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
-from requests.exceptions import InvalidURL
-from requests.models import Response
 from tests.resources.ddo_helpers import create_basics
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
@@ -124,9 +125,9 @@ def test_send_compute_request_failure(with_evil_client, provider_wallet):
         )
 
 
-def test_compute_job_result(with_nice_client, provider_wallet):
+def test_compute_job_status(with_nice_client, provider_wallet):
     """Tests successful compute job starting."""
-    result = DataSP.compute_job_result(
+    result = DataSP.compute_job_status(
         "some_did", "some_job_id", "http://mock", provider_wallet
     )
     assert result == {"good_job": "with_mock"}

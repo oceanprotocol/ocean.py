@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
@@ -10,13 +10,14 @@ from enforce_typing import enforce_types
 from eth_account.datastructures import SignedMessage
 from eth_account.messages import SignableMessage
 from hexbytes.main import HexBytes
+from web3.main import Web3
+
 from ocean_lib.integer import Integer
 from ocean_lib.web3_internal.constants import ENV_MAX_GAS_PRICE, MIN_GAS_PRICE
 from ocean_lib.web3_internal.utils import (
     private_key_to_address,
     private_key_to_public_key,
 )
-from web3.main import Web3
 
 logger = logging.getLogger(__name__)
 

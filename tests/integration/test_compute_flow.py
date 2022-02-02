@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import time
@@ -8,6 +8,7 @@ from typing import List, Optional, Tuple
 
 import pytest
 from attr import dataclass
+
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
@@ -267,12 +268,6 @@ def run_compute_test(
     assert status, f"something not right about the compute job, got status: {status}"
 
     if with_result:
-        result = ocean_instance.compute.result(
-            dataset_and_userdata.asset.did, job_id, consumer_wallet
-        )
-        print(f"got job status after requesting result: {result}")
-        assert "did" in result, "something not right about the compute job, no did."
-
         succeeded = False
         for _ in range(0, 200):
             status = ocean_instance.compute.status(
@@ -286,7 +281,7 @@ def run_compute_test(
             time.sleep(5)
 
         assert succeeded, "compute job unsuccessful"
-        result_file = ocean_instance.compute.result_file(
+        result_file = ocean_instance.compute.result(
             dataset_and_userdata.asset.did, job_id, 0, consumer_wallet
         )
         assert result_file is not None

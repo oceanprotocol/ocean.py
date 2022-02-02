@@ -1,5 +1,5 @@
 <!--
-Copyright 2021 Ocean Protocol Foundation
+Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
@@ -23,17 +23,18 @@ Let's go through each step.
 
 ## 1. Setup
 
-### Prerequisites
+### First steps
 
--   Linux/MacOS
--   [Docker](https://docs.docker.com/engine/install/), [Docker Compose](https://docs.docker.com/compose/install/), [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
--   Python 3.8.5+
+To get started with this guide, please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+- [x] Setup : Prerequisites
+- [x] Setup : Download barge and run services
+- [x] Setup : Install the library from v4 sources
 
-### Run barge services
+### Install extra libraries
 
-Ocean `barge` runs ganache (local blockchain), Provider (data service), and Aquarius (metadata cache).
+This example uses c2d to create a regression model. In order to visualise it or manipulate it, you also need some dependencies.
 
-In a new console:
+In your project folder, in this case my_project from `Setup : Install the library` in First Steps, run the following command:
 
 ```console
 #grab repo

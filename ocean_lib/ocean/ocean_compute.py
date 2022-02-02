@@ -1,11 +1,12 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
 from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from enforce_typing import enforce_types
+
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
@@ -30,20 +31,6 @@ class OceanCompute:
         """Initialises OceanCompute class."""
         self._config = config
         self._data_provider = data_provider
-
-    @staticmethod
-    @enforce_types
-    def _status_from_job_info(job_info: Dict[str, Any]) -> Dict[str, Any]:
-        """
-        Helper function to extract the status dict with an added boolean for quick validation
-        :param job_info: dict having status and statusText keys
-        :return:
-        """
-        return {
-            "ok": job_info["status"] not in (31, 32),
-            "status": job_info["status"],
-            "statusText": job_info["statusText"],
-        }
 
     @enforce_types
     def start(
@@ -93,38 +80,17 @@ class OceanCompute:
         :param did: str id of the asset offering the compute service of this job
         :param job_id: str id of the compute job
         :param wallet: Wallet instance
-        :return: dict the status for an existing compute job, keys are (ok, status, statusText)
+        :return: dict the status for an existing compute job
         """
         _, service_endpoint = self._get_service_endpoint(did)
-
-        return OceanCompute._status_from_job_info(
-            self._data_provider.compute_job_status(
-                did, job_id, service_endpoint, wallet
-            )
-        )
-
-    @enforce_types
-    def result(self, did: str, job_id: str, wallet: Wallet) -> Dict[str, Any]:
-        """
-        Gets job result.
-
-        :param did: str id of the asset offering the compute service of this job
-        :param job_id: str id of the compute job
-        :param wallet: Wallet instance
-        :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
-        """
-        _, service_endpoint = self._get_service_endpoint(did)
-        info_dict = self._data_provider.compute_job_result(
+        job_info = self._data_provider.compute_job_status(
             did, job_id, service_endpoint, wallet
         )
-        return {
-            "did": info_dict.get("resultsDid", ""),
-            "urls": info_dict.get("resultsUrl", []),
-            "logs": info_dict.get("algorithmLogUrl", []),
-        }
+        job_info.update({"ok": job_info.get("status") not in (31, 32, None)})
+        return job_info
 
     @enforce_types
-    def result_file(
+    def result(
         self, did: str, job_id: str, index: int, wallet: Wallet
     ) -> Dict[str, Any]:
         """
@@ -136,7 +102,7 @@ class OceanCompute:
         :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
         """
         _, service_endpoint = self._get_compute_result_file_endpoint(did)
-        result = self._data_provider.compute_job_result_file(
+        result = self._data_provider.compute_job_result(
             job_id, index, service_endpoint, wallet
         )
 
@@ -153,9 +119,11 @@ class OceanCompute:
         :return: dict the status for the stopped compute job, keys are (ok, status, statusText)
         """
         _, service_endpoint = self._get_service_endpoint(did)
-        return self._status_from_job_info(
-            self._data_provider.stop_compute_job(did, job_id, service_endpoint, wallet)
+        job_info = self._data_provider.stop_compute_job(
+            did, job_id, service_endpoint, wallet
         )
+        job_info.update({"ok": job_info.get("status") not in (31, 32, None)})
+        return job_info
 
     @enforce_types
     def _get_service_endpoint(

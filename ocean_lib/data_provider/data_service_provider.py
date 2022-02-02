@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -17,6 +17,10 @@ from unittest.mock import Mock
 import requests
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
+from requests.exceptions import InvalidURL
+from requests.models import PreparedRequest, Response
+from requests.sessions import Session
+
 from ocean_lib.config import Config
 from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
@@ -24,9 +28,6 @@ from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
-from requests.exceptions import InvalidURL
-from requests.models import PreparedRequest, Response
-from requests.sessions import Session
 
 logger = logging.getLogger(__name__)
 
@@ -387,26 +388,6 @@ class DataServiceProvider:
     @staticmethod
     @enforce_types
     def compute_job_result(
-        did: str, job_id: str, service_endpoint: str, consumer: Wallet
-    ) -> Dict[str, Any]:
-        """
-
-        :param did: hex str the asset/DDO id
-        :param job_id: str id of compute job that was returned from `start_compute_job`
-        :param service_endpoint: str url of the provider service endpoint for compute service
-        :param consumer_address: hex str the ethereum address of the consumer's account
-        :param signature: hex str signed message to allow the provider to authorize the consumer
-
-        :return: dict of job_id to result urls. When job_id is not provided, this will return
-            result for each job_id that exist for the did
-        """
-        return DataServiceProvider._send_compute_request(
-            "get", did, job_id, service_endpoint, consumer
-        )
-
-    @staticmethod
-    @enforce_types
-    def compute_job_result_file(
         job_id: str, index: int, service_endpoint: str, consumer: Wallet
     ) -> Dict[str, Any]:
         """
