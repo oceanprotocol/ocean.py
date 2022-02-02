@@ -31,92 +31,26 @@ To get started with this guide, please refer to [datatokens-flow](datatokens-flo
 
 ### Set envvars
 
-In the work console:
-```console
-# Set private keys of two accounts
-export TEST_PRIVATE_KEY1=0x5d75837394b078ce97bc289fa8d75e21000573520bfa7784a9d28ccaae602bf8
-export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
-
-# Needed to mint fake OCEAN for testing with ganache
-export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
-
-# Set the address file only for ganache
-export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
-
-# Set network URL
-export OCEAN_NETWORK_URL=http://127.0.0.1:8545
-```
+Set the required enviroment variables as described in [datatokens-flow](datatokens-flow.md):
+- [x] Setup : Set envvars
 
 ## 2. Alice creates the datatoken
 
-In the work console:
-```console
-python
-```
+In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
 
-In the Python console:
-```python
-#Create ocean instance
-from ocean_lib.example_config import ExampleConfig
-from ocean_lib.ocean.ocean import Ocean
-config = ExampleConfig.get_config()
-ocean = Ocean(config)
+Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+- [x] 2.1 Create an erc721 NFT token
+- [x] 2.2 Create the erc20 datatoken from the NFT contract
 
-print(f"config.network_url = '{config.network_url}'")
-print(f"config.block_confirmations = {config.block_confirmations.value}")
-print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
-print(f"config.provider_url = '{config.provider_url}'")
-
-#Alice's wallet
-import os
-from ocean_lib.web3_internal.wallet import Wallet
-alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
-alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
-print(f"alice_wallet.address = '{alice_wallet.address}'")
-
-#Mint OCEAN for ganache only
-from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-mint_fake_OCEAN(config)
-
-assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-# Publish an NFT token
-nft_token = ocean.create_nft_token(
-    "NFTToken1", "NFT1", alice_wallet, "https://oceanprotocol.com/nft/"
-)
-token_address = nft_token.address
-print(f"token_address = '{token_address}'")
-```
-
-## 3. Alice created data token & mints data tokens
+## 3. Alice mints data tokens
 
 In the same python console:
 ```python
-from ocean_lib.models.models_structures import CreateErc20Data
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-
-# Prepare data for ERC20 token
-erc20_data = CreateErc20Data(
-    template_index=1,
-    strings=["Datatoken 1", "DT1"],
-    addresses=[
-        alice_wallet.address,
-        alice_wallet.address,
-        ZERO_ADDRESS,
-        ocean.OCEAN_address,
-    ],
-    uints=[ocean.to_wei(200), 0],
-    bytess=[b""],
-)
-
-erc20_token = nft_token.create_datatoken(erc20_data, alice_wallet)
-print(f"datatoken_address = '{erc20_token.address}'")
-
 #Mint the datatokens
 erc20_token.mint(alice_wallet.address, ocean.to_wei(100), alice_wallet)
 ```
 
 ## 4. Bob buys at fixed rate datatokens
-
 
 In the same python console:
 ```python
