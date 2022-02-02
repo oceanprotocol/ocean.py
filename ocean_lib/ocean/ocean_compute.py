@@ -86,7 +86,7 @@ class OceanCompute:
         job_info = self._data_provider.compute_job_status(
             did, job_id, service_endpoint, wallet
         )
-        job_info.update({"ok": job_info["status"] not in (31, 32)})
+        job_info.update({"ok": job_info.get("status") not in (31, 32, None)})
         return job_info
 
     @enforce_types
@@ -122,7 +122,7 @@ class OceanCompute:
         job_info = self._data_provider.stop_compute_job(
             did, job_id, service_endpoint, wallet
         )
-        job_info.update({"ok": job_info["status"] not in (31, 32)})
+        job_info.update({"ok": job_info.get("status") not in (31, 32, None)})
         return job_info
 
     @enforce_types
