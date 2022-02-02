@@ -258,7 +258,7 @@ def test_c2d_flow_readme():
 
     # Retrieve result
     # 0 index, means we retrieve the results from the first dataset index
-    result = ocean.compute.result_file(DATA_did, job_id, 0, bob_wallet)
+    result = ocean.compute.result(DATA_did, job_id, 0, bob_wallet)
     assert result, "result retrieval unsuccessful"
 
     # Unpickle the gaussian model result
