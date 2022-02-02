@@ -125,9 +125,9 @@ def test_send_compute_request_failure(with_evil_client, provider_wallet):
         )
 
 
-def test_compute_job_result(with_nice_client, provider_wallet):
+def test_compute_job_status(with_nice_client, provider_wallet):
     """Tests successful compute job starting."""
-    result = DataSP.compute_job_result(
+    result = DataSP.compute_job_status(
         "some_did", "some_job_id", "http://mock", provider_wallet
     )
     assert result == {"good_job": "with_mock"}

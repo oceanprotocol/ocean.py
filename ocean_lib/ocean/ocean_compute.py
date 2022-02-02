@@ -102,7 +102,7 @@ class OceanCompute:
         :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
         """
         _, service_endpoint = self._get_compute_result_file_endpoint(did)
-        result = self._data_provider.compute_job_result_file(
+        result = self._data_provider.compute_job_result(
             job_id, index, service_endpoint, wallet
         )
 
