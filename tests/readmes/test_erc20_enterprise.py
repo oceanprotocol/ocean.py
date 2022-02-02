@@ -44,11 +44,14 @@ def test_erc20_enterprise_flow_with_dispenser():
     # Prepare data for ERC20 Enterprise token
     cap = ocean.to_wei(200)
     erc20_data = CreateErc20Data(
-        template_index=2,  # default value
-        strings=["ERC20DT1", "ERC20DT1Symbol"],  # name & symbol for ERC20 token
+        template_index=2,  # this is the value for ERC20 Enterprise token
+        strings=[
+            "ERC20DT1",
+            "ERC20DT1Symbol",
+        ],  # name & symbol for ERC20 Enterprise token
         addresses=[
             alice_wallet.address,  # minter address
-            alice_wallet.address,  # fee manager for this ERC20 token
+            alice_wallet.address,  # fee manager for this ERC20 Enterprise token
             alice_wallet.address,  # publishing Market Address
             ZERO_ADDRESS,  # publishing Market Fee Token
         ],
@@ -159,11 +162,14 @@ def test_erc20_enterprise_flow_with_fre():
     # Prepare data for ERC20 Enterprise token
     cap = ocean.to_wei(200)
     erc20_data = CreateErc20Data(
-        template_index=2,  # default value
-        strings=["ERC20DT1", "ERC20DT1Symbol"],  # name & symbol for ERC20 token
+        template_index=2,  # this is the value for ERC20 Enterprise token
+        strings=[
+            "ERC20DT1",
+            "ERC20DT1Symbol",
+        ],  # name & symbol for ERC20 Enterprise token
         addresses=[
             alice_wallet.address,  # minter address
-            alice_wallet.address,  # fee manager for this ERC20 token
+            alice_wallet.address,  # fee manager for this ERC20 Enterprise token
             alice_wallet.address,  # publishing Market Address
             ZERO_ADDRESS,  # publishing Market Fee Token
         ],
