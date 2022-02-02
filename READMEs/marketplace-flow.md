@@ -24,27 +24,12 @@ Let's go through each step.
 
 ## 1. Setup
 
-### Prerequisites
+### First steps
 
--   Linux/MacOS
--   Docker, [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
--   Python 3.8.5+
-
-### Run barge services
-
-In a new console:
-
-```console
-#grab repo
-git clone https://github.com/oceanprotocol/barge
-cd barge
-
-#clean up old containers (to be sure)
-docker system prune -a --volumes
-
-#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-./start_ocean.sh  --with-provider2
-```
+To get started with this guide, please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+- [x] Setup : Prerequisites
+- [x] Setup : Download barge and run services
+- [x] Setup : Install the library from v4 sources
 
 ### Run Ocean Market service
 
@@ -63,25 +48,6 @@ npm start
 Check out the Ocean Market webapp at http://localhost:8000.
 
 Ocean Market is a graphical interface to the backend smart contracts and Ocean services (Aquarius, Provider). The following steps will interface to the backend in a different fashion: using the command-line / console, and won't need Ocean Market. But it's good to understand there are multiple views.
-
-### Install the library
-
-In a new console that we'll call the _work_ console (as we'll use it later):
-
-```console
-#Create your working directory
-mkdir test3
-cd test3
-
-#Initialize virtual environment and activate it.
-python -m venv venv
-source venv/bin/activate
-
-#Install the ocean.py library. Install wheel first to avoid errors.
-pip install wheel
-pip install ocean-lib
-```
-
 ### Set envvars
 
 In the work console:
@@ -98,12 +64,15 @@ export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
 
 #set network URL
 export OCEAN_NETWORK_URL=http://127.0.0.1:8545
-
-#start python
-python
 ```
 
 ## 2. Alice publishes data asset
+
+In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run python console with the command:
+
+```console
+python
+```
 
 In the Python console:
 ```python
@@ -283,13 +252,6 @@ file_path = ocean.assets.download_asset(
     order_tx_id
 )
 
-file_path = ocean.assets.download(
-    asset.did,
-    service.index,
-    bob_wallet,
-    order_tx_id,
-    destination='./'
-)
 print(f"file_path = '{file_path}'") #e.g. datafile.0xAf07...
 ```
 
@@ -297,7 +259,7 @@ In console:
 
 ```console
 #verify that the file is downloaded
-cd test3/datafile.0xAf07...
+cd my_project/datafile.did:op:0xAf07...
 ls branin.arff
 ```
 
