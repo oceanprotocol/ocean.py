@@ -7,6 +7,8 @@ import pickle
 import time
 from datetime import datetime, timedelta
 
+import pytest
+
 from ocean_lib.agreements.file_objects import UrlFile
 from ocean_lib.assets.trusted_algorithms import add_publisher_trusted_algorithm
 from ocean_lib.example_config import ExampleConfig
@@ -19,6 +21,7 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
 
+@pytest.mark.skip("TODO: reinstate after c2d backend is fixed to support v4")
 def test_c2d_flow_readme():
     """This test mirrors the c2d-flow.md README."""
 
