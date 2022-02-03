@@ -38,7 +38,7 @@ In your project folder (i.e. my_project from `Install the library` step) and in 
 
 Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
 - [x] 2.1 Create an ERC721 data NFT
-- [x] 2.2 Create the erc20 datatoken from the data NFT
+- [x] 2.2 Create and erc20 datatoken from the data NFT
 
 ### 3. Dispenser creation & activation
 

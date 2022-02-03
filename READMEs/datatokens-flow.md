@@ -112,7 +112,7 @@ print(f"data NFT token name: {erc721_token.token_name()}")
 print(f"data NFT token symbol: {erc721_token.symbol()}")
 ```
 
-### 2.2 Create the erc20 datatoken from the data NFT
+### 2.2 Create an erc20 datatoken from the data NFT
 
 In the same python console:
 ```python
