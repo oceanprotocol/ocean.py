@@ -7,6 +7,8 @@ from typing import Optional, Union
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
 
+from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.models_structures import (
@@ -124,12 +126,16 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     def create_nft_with_erc(
         self,
-        nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
+        nft_create_data: Union[
+            dict, tuple, CreateERC721DataNoDeployer, CreateERC721Data
+        ],
         erc_create_data: Union[dict, tuple, CreateErc20Data],
         from_wallet: Wallet,
     ) -> str:
         # TODO: this will be handled in web3 py
-        if isinstance(nft_create_data, CreateERC721DataNoDeployer):
+        if isinstance(nft_create_data, CreateERC721DataNoDeployer) or isinstance(
+            nft_create_data, CreateERC721Data
+        ):
             nft_create_data = tuple(nft_create_data)
 
         # TODO: this will be handled in web3 py
@@ -142,13 +148,17 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     def create_nft_erc_with_pool(
         self,
-        nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
+        nft_create_data: Union[
+            dict, tuple, CreateERC721DataNoDeployer, CreateERC721Data
+        ],
         erc_create_data: Union[dict, tuple, CreateErc20Data],
         pool_data: Union[dict, tuple, PoolData],
         from_wallet: Wallet,
     ) -> str:
         # TODO: this will be handled in web3 py
-        if isinstance(nft_create_data, CreateERC721DataNoDeployer):
+        if isinstance(nft_create_data, CreateERC721DataNoDeployer) or isinstance(
+            nft_create_data, CreateERC721Data
+        ):
             nft_create_data = tuple(nft_create_data)
 
         # TODO: this will be handled in web3 py
@@ -167,13 +177,17 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     def create_nft_erc_with_fixed_rate(
         self,
-        nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
+        nft_create_data: Union[
+            dict, tuple, CreateERC721DataNoDeployer, CreateERC721Data
+        ],
         erc_create_data: Union[dict, tuple, CreateErc20Data],
         fixed_data: Union[dict, tuple, FixedData],
         from_wallet: Wallet,
     ) -> str:
         # TODO: this will be handled in web3 py
-        if isinstance(nft_create_data, CreateERC721DataNoDeployer):
+        if isinstance(nft_create_data, CreateERC721DataNoDeployer) or isinstance(
+            nft_create_data, CreateERC721Data
+        ):
             nft_create_data = tuple(nft_create_data)
 
         # TODO: this will be handled in web3 py
@@ -192,13 +206,17 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     def create_nft_erc_with_dispenser(
         self,
-        nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
+        nft_create_data: Union[
+            dict, tuple, CreateERC721DataNoDeployer, CreateERC721Data
+        ],
         erc_create_data: Union[dict, tuple, CreateErc20Data],
         dispenser_data: Union[dict, tuple, DispenserData],
         from_wallet: Wallet,
     ) -> str:
         # TODO: this will be handled in web3 py
-        if isinstance(nft_create_data, CreateERC721DataNoDeployer):
+        if isinstance(nft_create_data, CreateERC721DataNoDeployer) or isinstance(
+            nft_create_data, CreateERC721Data
+        ):
             nft_create_data = tuple(nft_create_data)
 
         # TODO: this will be handled in web3 py
@@ -263,3 +281,31 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         )
 
         return registered_event[0].args.newTokenAddress
+
+    def create_nft_erc_tokens_once(
+        self,
+        erc721_data: CreateERC721Data,
+        erc20_data: CreateErc20Data,
+        from_wallet: Wallet,
+    ) -> tuple:
+        tx = self.create_nft_with_erc(erc721_data, erc20_data, from_wallet)
+        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
+        registered_nft_event = self.get_event_log(
+            ERC721FactoryContract.EVENT_NFT_CREATED,
+            tx_receipt.blockNumber,
+            self.web3.eth.block_number,
+            None,
+        )
+        erc721_address = registered_nft_event[0].args.newTokenAddress
+        erc721_token = ERC721Token(self.web3, erc721_address)
+
+        registered_token_event = self.get_event_log(
+            ERC721FactoryContract.EVENT_TOKEN_CREATED,
+            tx_receipt.blockNumber,
+            self.web3.eth.block_number,
+            None,
+        )
+        erc20_address = registered_token_event[0].args.newTokenAddress
+        erc20_token = ERC20Token(self.web3, erc20_address)
+
+        return erc721_token, erc20_token

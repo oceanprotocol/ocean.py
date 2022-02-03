@@ -123,4 +123,60 @@ print(f"datatoken name: {erc20_token.token_name()}")
 print(f"datatoken symbol: {erc20_token.symbol()}")
 ```
 
+## 3. Publish datatokens using one helper
+
+```python
+import os
+from ocean_lib.example_config import ExampleConfig
+from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.web3_internal.wallet import Wallet
+
+private_key = os.getenv('TEST_PRIVATE_KEY1')
+config = ExampleConfig.get_config()
+ocean = Ocean(config)
+print(f"config.network_url = '{config.network_url}'")
+print(f"config.block_confirmations = {config.block_confirmations.value}")
+
+print("Create wallet: begin")
+wallet = Wallet(ocean.web3, private_key, config.block_confirmations, config.transaction_timeout)
+print(f"Create wallet: done. Its address is {wallet.address}")
+
+from ocean_lib.models.models_structures import CreateERC721Data, CreateErc20Data
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+
+nft_factory = ocean.get_nft_factory()
+
+cap = ocean.to_wei(10)
+erc721_data = CreateERC721Data(
+    name="NFT",
+    symbol="NFTSYMBOL",
+    template_index=1,  # default value
+    additional_erc20_deployer=ZERO_ADDRESS,
+    token_uri="https://oceanprotocol.com/nft/",
+)
+erc20_data = CreateErc20Data(
+    template_index=1, # default value
+    strings=["ERC20DT1", "ERC20DT1Symbol"], # name & symbol for ERC20 token
+    addresses=[
+        wallet.address, # minter address
+        wallet.address, # fee manager for this ERC20 token
+        wallet.address, # publishing Market Address
+        ZERO_ADDRESS, # publishing Market Fee Token
+    ],
+    uints=[cap, 0],
+    bytess=[b""]
+)
+erc721_token, erc20_token = nft_factory.create_nft_erc_tokens_once(
+    erc721_data=erc721_data, erc20_data=erc20_data, from_wallet=wallet
+)
+print(f"Created ERC721 token: done. Its address is {erc721_token.address}")
+print(f"data NFT token name: {erc721_token.token_name()}")
+print(f"data NFT token symbol: {erc721_token.symbol()}")
+
+print(f"Created ERC20 datatoken: done. Its address is {erc20_token.address}")
+print(f"datatoken name: {erc20_token.token_name()}")
+print(f"datatoken symbol: {erc20_token.symbol()}")
+```
+
+
 Congrats, you've created your first Ocean datatoken! 🐋
