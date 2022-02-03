@@ -155,7 +155,6 @@ def test_c2d_flow_readme():
                 "entrypoint": "python $ALGO",
                 "image": "oceanprotocol/algo_dockers",
                 "tag": "python-branin",
-                # TODO: fix checksum
                 "checksum": "44e10daa6637893f4276bb8d7301eb35306ece50f61ca34dcab550",
             },
         },
