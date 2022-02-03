@@ -194,7 +194,7 @@ def test_c2d_flow_readme():
         config.block_confirmations,
         config.transaction_timeout,
     )
-    print(f"bob_wallet.address = '{bob_wallet.address}'")
+    assert bob_wallet.address
 
     # Alice mints DATA datatokens and ALGO datatokens to Bob.
     # Alternatively, Bob might have bought these in a market.
@@ -272,6 +272,7 @@ def test_c2d_flow_readme():
         # Extract algorithm output
         if result_type == "output":
             output = result
+    assert output, "algorithm output not found"
 
     # Unpickle the gaussian model result
     model = pickle.loads(output)

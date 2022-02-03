@@ -355,13 +355,20 @@ Here is a list of possible results: [Operator Service Status description](https:
 Once you get `{'ok': True, 'status': 70, 'statusText': 'Job finished'}`, Bob can check the result of the job.
 
 ```python
-# Retrieve result
-# 0 index, means we retrieve the results from the first dataset index
-# TODO: Use compute.status to determine which index is output
-result = ocean.compute.result(DATA_did, job_id, 0, bob_wallet)
+# Retrieve algorithm output and log files
+for i in range(len(status["results"])):
+    result_type = status["results"][i]["type"]
+    print(f"Fetch result index {i}, type: {result_type}")
+    result = ocean.compute.result(DATA_did, job_id, i, bob_wallet)
+    print(result)
+    print("==========\n")
+
+    # Extract algorithm output
+    if result_type == "output":
+        output = result
 
 import pickle
-model = pickle.loads(result)  # the gaussian model result
+model = pickle.loads(output)  # the gaussian model result
 ```
 
 You can use the result however you like. For the purpose of this example, let's plot it.
