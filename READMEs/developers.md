@@ -89,11 +89,9 @@ pytest ocean_lib/models/test/test_btoken.py
 #run all tests
 pytest
 
-#run all tests, using CI tooling
-tox
 ```
 
-For envvars that aren't set, `pytest` uses values in `pytest.ini`, and `tox` uses values in `tox.ini`.
+For envvars that aren't set, `pytest` uses values in `pytest.ini`.
 
 Bonus: see the [appendix](developers.md#7-appendix-more-tests) for even more tests.
 
