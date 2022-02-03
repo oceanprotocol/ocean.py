@@ -240,7 +240,7 @@ def test_encrypt(web3, config, provider_wallet):
 
 
 def test_fileinfo(web3, config, publisher_wallet, publisher_ocean_instance):
-    erc721_token, erc20_token = deploy_erc721_erc20(
+    erc721_nft, erc20_token = deploy_erc721_erc20(
         web3, config, publisher_wallet, publisher_wallet
     )
     _, metadata, encrypted_files = create_basics(config, web3, DataSP)
@@ -249,7 +249,7 @@ def test_fileinfo(web3, config, publisher_wallet, publisher_ocean_instance):
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=erc721_token.address,
+        erc721_address=erc721_nft.address,
         deployed_erc20_tokens=[erc20_token],
     )
     access_service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
@@ -265,7 +265,7 @@ def test_fileinfo(web3, config, publisher_wallet, publisher_ocean_instance):
 
 
 def test_initialize(web3, config, publisher_wallet, publisher_ocean_instance):
-    erc721_token, erc20_token = deploy_erc721_erc20(
+    erc721_nft, erc20_token = deploy_erc721_erc20(
         web3, config, publisher_wallet, publisher_wallet
     )
     _, metadata, encrypted_files = create_basics(config, web3, DataSP)
@@ -273,7 +273,7 @@ def test_initialize(web3, config, publisher_wallet, publisher_ocean_instance):
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=erc721_token.address,
+        erc721_address=erc721_nft.address,
         deployed_erc20_tokens=[erc20_token],
     )
     access_service = ddo.get_service(ServiceTypes.ASSET_ACCESS)

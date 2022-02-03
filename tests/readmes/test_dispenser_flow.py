@@ -36,11 +36,11 @@ def test_dispenser_flow_readme():
     assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 
     # Publish an NFT token
-    erc721_token = ocean.create_nft_token("NFTToken1", "NFT1", alice_wallet)
-    token_address = erc721_token.address
+    erc721_nft = ocean.create_data_nft("NFTToken1", "NFT1", alice_wallet)
+    token_address = erc721_nft.address
     assert token_address
-    assert erc721_token.token_name() == "NFTToken1"
-    assert erc721_token.symbol() == "NFT1"
+    assert erc721_nft.token_name() == "NFTToken1"
+    assert erc721_nft.symbol() == "NFT1"
 
     # Prepare data for ERC20 token
     cap = ocean.to_wei(100)
@@ -56,7 +56,7 @@ def test_dispenser_flow_readme():
         uints=[cap, 0],
         bytess=[b""],
     )
-    erc20_token = erc721_token.create_datatoken(
+    erc20_token = erc721_nft.create_datatoken(
         erc20_data=erc20_data, from_wallet=alice_wallet
     )
 

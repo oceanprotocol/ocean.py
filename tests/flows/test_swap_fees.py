@@ -5,7 +5,7 @@
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_token import ERC721Token
+from ocean_lib.models.erc721_nft import ERC721Token
 from ocean_lib.models.models_structures import CreateErc20Data, PoolData
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -14,14 +14,14 @@ from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of
 
 
 def _deploy_erc721_token(config, web3, factory_deployer_wallet, manager_wallet):
-    erc721_token = deploy_erc721_erc20(web3, config, factory_deployer_wallet)
+    erc721_nft = deploy_erc721_erc20(web3, config, factory_deployer_wallet)
 
-    erc721_token.add_to_725_store_list(manager_wallet.address, factory_deployer_wallet)
-    erc721_token.add_to_create_erc20_list(
+    erc721_nft.add_to_725_store_list(manager_wallet.address, factory_deployer_wallet)
+    erc721_nft.add_to_create_erc20_list(
         manager_wallet.address, factory_deployer_wallet
     )
-    erc721_token.add_to_metadata_list(manager_wallet.address, factory_deployer_wallet)
-    return erc721_token
+    erc721_nft.add_to_metadata_list(manager_wallet.address, factory_deployer_wallet)
+    return erc721_nft
 
 
 def test_deploy_erc721_and_manage(
@@ -49,18 +49,18 @@ def test_deploy_erc721_and_manage(
     assert event
 
     token_address = event[0].args.newTokenAddress
-    erc721_token = ERC721Token(web3, token_address)
+    erc721_nft = ERC721Token(web3, token_address)
 
-    assert erc721_token.balance_of(factory_deployer_wallet.address) == 1
+    assert erc721_nft.balance_of(factory_deployer_wallet.address) == 1
 
-    erc721_token.add_manager(another_consumer_wallet.address, factory_deployer_wallet)
-    erc721_token.add_to_725_store_list(consumer_wallet.address, factory_deployer_wallet)
-    erc721_token.add_to_create_erc20_list(
+    erc721_nft.add_manager(another_consumer_wallet.address, factory_deployer_wallet)
+    erc721_nft.add_to_725_store_list(consumer_wallet.address, factory_deployer_wallet)
+    erc721_nft.add_to_create_erc20_list(
         consumer_wallet.address, factory_deployer_wallet
     )
-    erc721_token.add_to_metadata_list(consumer_wallet.address, factory_deployer_wallet)
+    erc721_nft.add_to_metadata_list(consumer_wallet.address, factory_deployer_wallet)
 
-    permissions = erc721_token.get_permissions(consumer_wallet.address)
+    permissions = erc721_nft.get_permissions(consumer_wallet.address)
 
     assert permissions[1] is True
     assert permissions[2] is True
@@ -81,13 +81,13 @@ def test_pool_ocean(
         web3, get_address_of_type(config, "ERC721Factory")
     )
     side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
-    erc721_token = _deploy_erc721_token(
+    erc721_nft = _deploy_erc721_token(
         config, web3, factory_deployer_wallet, consumer_wallet
     )
 
     # Tests consumer deploys a new erc20DT, assigning himself as minter
     cap = to_wei("100000")
-    tx = erc721_token.create_erc20(
+    tx = erc721_nft.create_erc20(
         CreateErc20Data(
             1,
             ["ERC20DT1", "ERC20DT1Symbol"],
@@ -104,7 +104,7 @@ def test_pool_ocean(
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     event = erc721_factory.get_event_log(
-        erc721_token.EVENT_TOKEN_CREATED,
+        erc721_nft.EVENT_TOKEN_CREATED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -611,7 +611,7 @@ def test_pool_dai(
         publisher_wallet.address, to_wei("20"), factory_deployer_wallet
     )
 
-    erc721_token = _deploy_erc721_token(
+    erc721_nft = _deploy_erc721_token(
         config, web3, factory_deployer_wallet, consumer_wallet
     )
     swap_fee = to_wei("0.001")
@@ -619,7 +619,7 @@ def test_pool_dai(
 
     # Tests consumer deploys a new erc20DT, assigning himself as minter
     cap = to_wei("1000")
-    tx = erc721_token.create_erc20(
+    tx = erc721_nft.create_erc20(
         CreateErc20Data(
             1,
             ["ERC20DT1", "ERC20DT1Symbol"],
@@ -636,7 +636,7 @@ def test_pool_dai(
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     event = erc721_factory.get_event_log(
-        erc721_token.EVENT_TOKEN_CREATED,
+        erc721_nft.EVENT_TOKEN_CREATED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -1126,7 +1126,7 @@ def test_pool_usdc(
         publisher_wallet.address, to_wei("20"), factory_deployer_wallet
     )
 
-    erc721_token = _deploy_erc721_token(
+    erc721_nft = _deploy_erc721_token(
         config, web3, factory_deployer_wallet, consumer_wallet
     )
     swap_fee = to_wei("0.001")
@@ -1134,7 +1134,7 @@ def test_pool_usdc(
 
     # Tests consumer deploys a new erc20DT, assigning himself as minter
     cap = to_wei("1000")
-    tx = erc721_token.create_erc20(
+    tx = erc721_nft.create_erc20(
         CreateErc20Data(
             1,
             ["ERC20DT1", "ERC20DT1Symbol"],
@@ -1151,7 +1151,7 @@ def test_pool_usdc(
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     event = erc721_factory.get_event_log(
-        erc721_token.EVENT_TOKEN_CREATED,
+        erc721_nft.EVENT_TOKEN_CREATED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -1637,7 +1637,7 @@ def test_pool_usdc_flexible(
         publisher_wallet.address, to_wei("20"), factory_deployer_wallet
     )
 
-    erc721_token = _deploy_erc721_token(
+    erc721_nft = _deploy_erc721_token(
         config, web3, factory_deployer_wallet, consumer_wallet
     )
     swap_fee = to_wei("0.001")
@@ -1645,7 +1645,7 @@ def test_pool_usdc_flexible(
 
     # Tests consumer deploys a new erc20DT, assigning himself as minter
     cap = to_wei(1000)
-    tx = erc721_token.create_erc20(
+    tx = erc721_nft.create_erc20(
         CreateErc20Data(
             1,
             ["ERC20DT1", "ERC20DT1Symbol"],
@@ -1662,7 +1662,7 @@ def test_pool_usdc_flexible(
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     event = erc721_factory.get_event_log(
-        erc721_token.EVENT_TOKEN_CREATED,
+        erc721_nft.EVENT_TOKEN_CREATED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -2143,7 +2143,7 @@ def test_pool_dai_flexible(
         publisher_wallet.address, to_wei("20"), factory_deployer_wallet
     )
 
-    erc721_token = _deploy_erc721_token(
+    erc721_nft = _deploy_erc721_token(
         config, web3, factory_deployer_wallet, consumer_wallet
     )
     swap_fee = to_wei("0.001")
@@ -2151,7 +2151,7 @@ def test_pool_dai_flexible(
 
     # Tests consumer deploys a new erc20DT, assigning himself as minter
     cap = to_wei(1000)
-    tx = erc721_token.create_erc20(
+    tx = erc721_nft.create_erc20(
         CreateErc20Data(
             1,
             ["ERC20DT1", "ERC20DT1Symbol"],
@@ -2168,7 +2168,7 @@ def test_pool_dai_flexible(
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     event = erc721_factory.get_event_log(
-        erc721_token.EVENT_TOKEN_CREATED,
+        erc721_nft.EVENT_TOKEN_CREATED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,

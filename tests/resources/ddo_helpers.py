@@ -202,7 +202,7 @@ def get_registered_asset_with_compute_service(
     trusted_algorithms: List[Asset] = [],
     trusted_algorithm_publishers: List[str] = [],
 ):
-    erc721_token, erc20_token = deploy_erc721_erc20(
+    erc721_nft, erc20_token = deploy_erc721_erc20(
         ocean_instance.web3, ocean_instance.config, publisher_wallet, publisher_wallet
     )
 
@@ -240,7 +240,7 @@ def get_registered_asset_with_compute_service(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         services=[compute_service],
-        erc721_address=erc721_token.address,
+        erc721_address=erc721_nft.address,
         deployed_erc20_tokens=[erc20_token],
         encrypt_flag=True,
         compress_flag=True,
