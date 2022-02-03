@@ -170,13 +170,10 @@ def test_compute_job_result_fails(provider_wallet, config):
         timeout=0,
         compute_values=dict(),
     )
-
     with pytest.raises(
         InvalidURL, match=f"InvalidURL {mock_service.service_endpoint}."
     ):
-        DataSP.compute_job_result(
-            "some_did", "some_job_id", mock_service, provider_wallet
-        )
+        DataSP.compute_job_result("some_job_id", 0, mock_service, provider_wallet)
 
 
 def test_delete_job_result(provider_wallet, config):

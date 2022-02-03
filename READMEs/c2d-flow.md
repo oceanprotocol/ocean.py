@@ -23,52 +23,21 @@ Let's go through each step.
 
 ## 1. Setup
 
-### Prerequisites
+### First steps
 
--   Linux/MacOS
--   [Docker](https://docs.docker.com/engine/install/), [Docker Compose](https://docs.docker.com/compose/install/), [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
--   Python 3.8.5+
+To get started with this guide, please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+- [x] Setup : Prerequisites
+- [x] Setup : Download barge and run services
+- [x] Setup : Install the library from v4 sources
 
-### Run barge services
+### Install extra libraries
 
-Ocean `barge` runs ganache (local blockchain), Provider (data service), and Aquarius (metadata cache).
+This example uses c2d to create a regression model. In order to visualise it or manipulate it, you also need some dependencies.
 
-In a new console:
-
-```console
-#grab repo
-git clone https://github.com/oceanprotocol/barge
-cd barge
-
-#clean up old containers (to be sure)
-docker system prune -a --volumes
-
-# make sure to use the dev version of the operator service URL, to match the barge provider
-export OPERATOR_SERVICE_URL=https://c2d-dev.operator.oceanprotocol.com/
-
-#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-./start_ocean.sh  --with-provider2
-```
-
-### Install the library
-
-In a new console that we'll call the work console (as we'll use it later):
+In your project folder, in this case my_project from `Setup : Install the library` in First Steps, run the following command:
 
 ```console
-#Initialize virtual environment and activate it.
-python -m venv venv
-source venv/bin/activate
-
-#Install the ocean.py library. Install wheel first to avoid errors.
-pip install wheel
-pip install ocean-lib
-```
-
-This example uses c2d to create a regression model. In order to visualise it or manipulate it, you also need some dependencies:
-
-```console
-pip install numpy
-pip install matplotlib
+pip install numpy matplotlib
 ```
 
 ### Set envvars
@@ -356,7 +325,7 @@ Here is a list of possible results: [Operator Service Status description](https:
 Once you get `{'ok': True, 'status': 70, 'statusText': 'Job finished'}`, Bob can check the result of the job.
 
 ```python
-result = ocean.compute.result_file(DATA_did, job_id, 0, bob_wallet)  # 0 index, means we retrieve the results from the first dataset index
+result = ocean.compute.result(DATA_did, job_id, 0, bob_wallet)  # 0 index, means we retrieve the results from the first dataset index
 
 import pickle
 model = pickle.loads(result)  # the gaussian model result
