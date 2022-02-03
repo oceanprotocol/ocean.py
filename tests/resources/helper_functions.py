@@ -17,7 +17,7 @@ from ocean_lib.config import Config
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721Token
+from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_contracts_addresses
@@ -206,10 +206,10 @@ def deploy_erc721_erc20(
     cap: int = to_wei(100),
     template_index: Optional[int] = 1,
 ):
-    """Helper function to deploy an ERC721Token using erc721_publisher Wallet
-    and an ERC20Token data token with the newly ERC721Token using erc20_minter Wallet
+    """Helper function to deploy an ERC721NFT using erc721_publisher Wallet
+    and an ERC20Token data token with the newly ERC721NFT using erc20_minter Wallet
     if the wallet is provided.
-    :rtype: Union[ERC721Token, Tuple[ERC721Token, ERC20Token]]
+    :rtype: Union[ERC721NFT, Tuple[ERC721NFT, ERC20Token]]
     """
 
     erc721_factory = ERC721FactoryContract(
@@ -220,7 +220,7 @@ def deploy_erc721_erc20(
         from_wallet=erc721_publisher,
     )
     token_address = erc721_factory.get_token_address(tx)
-    erc721_nft = ERC721Token(web3, token_address)
+    erc721_nft = ERC721NFT(web3, token_address)
     if not erc20_minter:
         return erc721_nft
 

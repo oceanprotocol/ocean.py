@@ -7,7 +7,7 @@ from web3 import Web3, exceptions
 
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721Permissions, ERC721Token
+from ocean_lib.models.erc721_nft import ERC721Permissions, ERC721NFT
 from ocean_lib.models.models_structures import CreateErc20Data, CreateERC721Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -48,7 +48,7 @@ def test_erc721_roles(
     assert registered_event[0].event == ERC721FactoryContract.EVENT_NFT_CREATED
     assert registered_event[0].args.admin == publisher_wallet.address
     token_address = registered_event[0].args.newTokenAddress
-    erc721_nft = ERC721Token(web3, token_address)
+    erc721_nft = ERC721NFT(web3, token_address)
 
     # Publisher should be a manager
     assert erc721_nft.get_permissions(publisher_wallet.address)[
@@ -214,7 +214,7 @@ def test_successful_erc721_creation(web3, config, publisher_wallet):
     assert registered_event[0].event == ERC721FactoryContract.EVENT_NFT_CREATED
     assert registered_event[0].args.admin == publisher_wallet.address
     token_address = registered_event[0].args.newTokenAddress
-    erc721_nft = ERC721Token(web3, token_address)
+    erc721_nft = ERC721NFT(web3, token_address)
     owner_balance = erc721_nft.balance_of(publisher_wallet.address)
     assert erc721_nft.contract.caller.name() == "NFT"
     assert erc721_nft.symbol() == "NFTSYMBOL"
@@ -277,7 +277,7 @@ def test_erc20_creation(
         filters=None,
     )
     token_address = registered_event[0].args.newTokenAddress
-    erc721_nft = ERC721Token(web3, token_address)
+    erc721_nft = ERC721NFT(web3, token_address)
     erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
     erc_create_data = CreateErc20Data(
         template_index=1,

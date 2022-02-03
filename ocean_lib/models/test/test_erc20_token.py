@@ -10,7 +10,7 @@ from web3.main import Web3
 
 from ocean_lib.models.erc20_token import ERC20Token, RolesERC20
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721Token
+from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.models_structures import CreateErc20Data, ProviderFees
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -58,7 +58,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     assert registered_event[0].event == "NFTCreated"
     assert registered_event[0].args.admin == publisher_wallet.address
     token_address = registered_event[0].args.newTokenAddress
-    erc721_nft = ERC721Token(web3, token_address)
+    erc721_nft = ERC721NFT(web3, token_address)
     assert erc721_nft.contract.caller.name() == "DT1"
     assert erc721_nft.symbol() == "DTSYMBOL"
 
@@ -71,7 +71,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
 
     # Tests get NFT template
-    nft_template_address = get_address_of_type(config, ERC721Token.CONTRACT_NAME, "1")
+    nft_template_address = get_address_of_type(config, ERC721NFT.CONTRACT_NAME, "1")
     nft_template = erc721_factory.get_nft_template(1)
     assert nft_template[0] == nft_template_address
     assert nft_template[1] is True

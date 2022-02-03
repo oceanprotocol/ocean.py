@@ -6,7 +6,7 @@ import pytest
 from web3 import exceptions
 
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721Permissions, ERC721Token
+from ocean_lib.models.erc721_nft import ERC721Permissions, ERC721NFT
 from ocean_lib.models.models_structures import (
     ChainMetadata,
     ChainMetadataWithTokenUri,
@@ -20,24 +20,24 @@ from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of
 def test_properties(web3, config):
     """Tests the events' properties."""
     erc721_token_address = get_address_of_type(
-        config=config, address_type=ERC721Token.CONTRACT_NAME
+        config=config, address_type=ERC721NFT.CONTRACT_NAME
     )
-    erc721_nft = ERC721Token(web3=web3, address=erc721_token_address)
+    erc721_nft = ERC721NFT(web3=web3, address=erc721_token_address)
 
     assert (
-        erc721_nft.event_TokenCreated.abi["name"] == ERC721Token.EVENT_TOKEN_CREATED
+        erc721_nft.event_TokenCreated.abi["name"] == ERC721NFT.EVENT_TOKEN_CREATED
     )
     assert (
         erc721_nft.event_TokenURIUpdate.abi["name"]
-        == ERC721Token.EVENT_TOKEN_URI_UPDATED
+        == ERC721NFT.EVENT_TOKEN_URI_UPDATED
     )
     assert (
         erc721_nft.event_MetadataCreated.abi["name"]
-        == ERC721Token.EVENT_METADATA_CREATED
+        == ERC721NFT.EVENT_METADATA_CREATED
     )
     assert (
         erc721_nft.event_MetadataUpdated.abi["name"]
-        == ERC721Token.EVENT_METADATA_UPDATED
+        == ERC721NFT.EVENT_METADATA_UPDATED
     )
 
 
@@ -555,7 +555,7 @@ def test_erc721_datatoken_functions(web3, config, publisher_wallet, consumer_wal
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
     registered_event = erc721_nft.get_event_log(
-        event_name=ERC721Token.EVENT_TOKEN_URI_UPDATED,
+        event_name=ERC721NFT.EVENT_TOKEN_URI_UPDATED,
         from_block=tx_receipt.blockNumber,
         to_block=web3.eth.block_number,
         filters=None,

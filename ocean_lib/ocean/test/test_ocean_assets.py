@@ -17,7 +17,7 @@ from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721Token
+from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.models_structures import CreateErc20Data, CreateERC721Data
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -162,7 +162,7 @@ def test_update_flags(publisher_ocean_instance, publisher_wallet, config):
     ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
 
     # Test compress & update flags
-    erc721_nft = ERC721Token(publisher_ocean_instance.web3, ddo.nft_address)
+    erc721_nft = ERC721NFT(publisher_ocean_instance.web3, ddo.nft_address)
 
     _asset = publisher_ocean_instance.assets.update(
         asset=ddo,
@@ -172,7 +172,7 @@ def test_update_flags(publisher_ocean_instance, publisher_wallet, config):
     )
 
     registered_token_event = erc721_nft.get_event_log(
-        ERC721Token.EVENT_METADATA_UPDATED,
+        ERC721NFT.EVENT_METADATA_UPDATED,
         _asset.event.get("block"),
         publisher_ocean_instance.web3.eth.block_number,
         None,

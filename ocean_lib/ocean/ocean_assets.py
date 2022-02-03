@@ -23,7 +23,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721Token
+from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.models_structures import ChainMetadata, CreateErc20Data
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
@@ -109,7 +109,7 @@ class OceanAssets:
     def deploy_datatoken(
         self,
         erc721_factory: ERC721FactoryContract,
-        erc721_nft: ERC721Token,
+        erc721_nft: ERC721NFT,
         erc20_data: CreateErc20Data,
         from_wallet: Wallet,
     ) -> str:
@@ -237,7 +237,7 @@ class OceanAssets:
     ) -> Optional[Asset]:
         """Register an asset on-chain.
 
-        Creating/deploying a ERC721Token contract and in the Metadata store (Aquarius).
+        Creating/deploying a ERC721NFT contract and in the Metadata store (Aquarius).
 
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
         :param publisher_wallet: Wallet of the publisher registering this asset.
@@ -285,7 +285,7 @@ class OceanAssets:
                 None,
             )
             erc721_address = registered_event[0].args.newTokenAddress
-            erc721_nft = ERC721Token(self._web3, erc721_address)
+            erc721_nft = ERC721NFT(self._web3, erc721_address)
             if not erc721_nft:
                 logger.warning("Creating new datatoken failed.")
                 return None
@@ -301,7 +301,7 @@ class OceanAssets:
                 )
 
         assert erc721_address, "nft_address is required for publishing a dataset asset."
-        erc721_nft = ERC721Token(self._web3, erc721_address)
+        erc721_nft = ERC721NFT(self._web3, erc721_address)
 
         # Create a DDO object
         asset = Asset()
@@ -424,7 +424,7 @@ class OceanAssets:
             )
 
         assert erc721_address, "nft_address is required for publishing a dataset asset."
-        erc721_nft = ERC721Token(self._web3, erc721_address)
+        erc721_nft = ERC721NFT(self._web3, erc721_address)
 
         assert asset.chain_id == self._web3.eth.chain_id, "Chain id mismatch."
 

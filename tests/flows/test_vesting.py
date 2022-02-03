@@ -8,7 +8,7 @@ from web3 import exceptions
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721Token
+from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.models_structures import CreateErc20Data, PoolData
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -46,7 +46,7 @@ def test_main(
     )
     assert registered_event[0].event == "NFTCreated"
     assert registered_event[0].args.admin == publisher_wallet.address
-    erc721_nft = ERC721Token(
+    erc721_nft = ERC721NFT(
         web3=web3, address=registered_event[0].args.newTokenAddress
     )
 
@@ -91,7 +91,7 @@ def test_main(
     assert tx_receipt.status == 1
 
     event = erc721_factory.get_event_log(
-        ERC721Token.EVENT_TOKEN_CREATED,
+        ERC721NFT.EVENT_TOKEN_CREATED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,

@@ -5,7 +5,7 @@
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721Token
+from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.models_structures import CreateErc20Data, PoolData
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -49,7 +49,7 @@ def test_deploy_erc721_and_manage(
     assert event
 
     token_address = event[0].args.newTokenAddress
-    erc721_nft = ERC721Token(web3, token_address)
+    erc721_nft = ERC721NFT(web3, token_address)
 
     assert erc721_nft.balance_of(factory_deployer_wallet.address) == 1
 
