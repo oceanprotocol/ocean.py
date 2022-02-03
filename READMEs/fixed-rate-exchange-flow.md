@@ -34,15 +34,15 @@ To get started with this guide, please refer to [datatokens-flow](datatokens-flo
 Set the required enviroment variables as described in [datatokens-flow](datatokens-flow.md):
 - [x] Setup : Set envvars
 
-## 2. Alice creates the datatoken
+## 2. Alice publishes Data NFT & Datatoken
 
 In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
 
 Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
-- [x] 2.1 Create an erc721 NFT token
-- [x] 2.2 Create the erc20 datatoken from the NFT contract
+- [x] 2.1 Create an ERC721 data NFT
+- [x] 2.2 Create the erc20 datatoken from the data NFT
 
-## 3. Alice mints data tokens
+## 3. Alice mints datatokens
 
 In the same python console:
 ```python
@@ -83,7 +83,7 @@ providing the datatoken address.
 
 ```python
 # Search for exchange_id from a specific block retrieved at 3rd step
-# for a certain data token address (e.g. datatoken_address). Choose
+# for a certain datatoken address (e.g. datatoken_address). Choose
 # one from the list.
 datatoken_address = erc20_token.address
 nft_factory = ocean.get_nft_factory()
@@ -107,5 +107,5 @@ tx_result = ocean.fixed_rate_exchange.buy_dt(
     max_base_token_amount=ocean.to_wei(50),
     from_wallet=bob_wallet,
     )
-assert tx_result, "failed buying data tokens at fixed rate for Bob"
+assert tx_result, "failed buying datatokens at fixed rate for Bob"
 ```

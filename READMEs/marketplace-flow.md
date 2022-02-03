@@ -53,12 +53,12 @@ Ocean Market is a graphical interface to the backend smart contracts and Ocean s
 Set the required enviroment variables as described in [datatokens-flow](datatokens-flow.md):
 - [x] Setup : Set envvars
 
-## 2. Marketplace flow
+## 2. Publish Data NFT & Datatoken
 
 In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
 
 Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
-- [x] 2.1 Create an erc721 NFT token
+- [x] 2.1 Create an ERC721 data NFT
 
 Then in the same python console:
 ```python
@@ -116,6 +116,8 @@ In order to encrypt the entire asset, when using a private market or metadata ca
 Same for compression and you can use a combination of the two. E.g:
 `asset = ocean.assets.create(..., encrypt_flag=True)` or `asset = ocean.assets.create(..., compress_flag=True)`
 
+## 3. Creation of datatoken liquidity pool
+
 In the following steps we will create a pool from the created token, in order to allow another user
 to order this access token.
 ```python
@@ -136,7 +138,7 @@ print(f"BPool address: {bpool.address}")
 
 ```
 
-## 3. Marketplace displays asset for sale
+## 4. Marketplace displays asset for sale
 
 Now, you're the Marketplace operator. Here's how to get info about the data asset.
 
@@ -154,7 +156,7 @@ from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 print(f"Price of 1 {erc20_token.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
 ```
 
-## 4. Bob buys data asset, and downloads it
+## 5. Bob buys data asset, and downloads it
 Now, you're Bob the data consumer.
 
 In the same Python console as before:

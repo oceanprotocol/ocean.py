@@ -3,7 +3,7 @@ Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Quickstart: Publish datatoken
+# Quickstart: Publish Data NFT & Datatoken
 
 ## 1. Setup
 ## Prerequisites
@@ -69,9 +69,9 @@ export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
 export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 ```
 
-## 2. Publish datatokens
+## 2. Publish Data NFT & Datatoken
 
-### 2.1 Create an erc721 NFT token
+### 2.1 Create an ERC721 data NFT
 
 Open a new console and run python console with the command:
 ```console
@@ -112,7 +112,7 @@ print(f"data NFT token name: {erc721_token.token_name()}")
 print(f"data NFT token symbol: {erc721_token.symbol()}")
 ```
 
-### 2.2 Create the erc20 datatoken from the NFT contract
+### 2.2 Create the erc20 datatoken from the data NFT
 
 In the same python console:
 ```python

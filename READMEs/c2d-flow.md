@@ -49,10 +49,12 @@ Set the required enviroment variables as described in [datatokens-flow](datatoke
 
 In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
 
-Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
-- [x] 2.1 Create an erc721 NFT token
+## 2. Alice publishes a Data NFT
 
-## 2. Alice creates a datatoken
+Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+- [x] 2.1 Create an ERC721 data NFT
+
+## 3. Alice publishes a datatoken
 
 In the same Python console:
 ```python
@@ -116,7 +118,7 @@ print(f"DATA did = '{DATA_ddo.did}'")
 Full details: [DATA_ddo](DATA_ddo.md)
 
 
-## 3. Alice publishes algorithm
+## 4. Alice publishes algorithm
 
 For this step, there are some prerequisites needed. If you want to replace the sample algorithm with an algorithm of your choosing, you will need to do some dependency management.
 You can use one of the standard [Ocean algo_dockers images](https://github.com/oceanprotocol/algo_dockers) or publish a custom docker image.
@@ -188,7 +190,7 @@ Full details: [ALG_ddo](ALG_ddo.md)
 Please note that this example features a simple Python algorithm. If you publish an algorithm in another language, make sure you have an appropriate container to run it, including dependencies.
 You can find more information about how to do this in the [Ocean tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/).
 
-## 4. Alice allows the algorithm for C2D for that data asset
+## 5. Alice allows the algorithm for C2D for that data asset
 
 In the same Python console:
 ```python
@@ -197,7 +199,7 @@ utils.add_publisher_trusted_algorithm(DATA_ddo, ALG_ddo.did, config.metadata_cac
 ocean.assets.update(DATA_ddo, publisher_wallet=alice_wallet)
 ```
 
-## 5. Bob acquires datatokens for data and algorithm
+## 6. Bob acquires datatokens for data and algorithm
 
 In the same Python console:
 ```python
@@ -214,7 +216,7 @@ DATA_datatoken.transfer(bob_wallet.address, to_wei(5), from_wallet=alice_wallet)
 ALG_datatoken.transfer(bob_wallet.address, to_wei(5), from_wallet=alice_wallet)
 ```
 
-## 6. Bob starts a compute job
+## 7. Bob starts a compute job
 
 Only inputs needed: DATA_did, ALG_did. Everything else can get computed as needed.
 
@@ -272,7 +274,7 @@ job_id = ocean.compute.start(
 print(f"Started compute job with id: {job_id}")
 ```
 
-## 7. Bob monitors logs / algorithm output
+## 8. Bob monitors logs / algorithm output
 
 In the same Python console, you can check the job status as many times as needed:
 

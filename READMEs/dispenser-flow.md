@@ -32,13 +32,13 @@ To get started with this guide, please refer to [datatokens-flow](datatokens-flo
 Set the required enviroment variables as described in [datatokens-flow](datatokens-flow.md):
 - [x] Setup : Set envvars
 
-## 2. Alice creates the datatoken
+## 2. Publish Data NFT & Datatoken
 
 In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
 
 Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
-- [x] 2.1 Create an erc721 NFT token
-- [x] 2.2 Create the erc20 datatoken from the NFT contract
+- [x] 2.1 Create an ERC721 data NFT
+- [x] 2.2 Create the erc20 datatoken from the data NFT
 
 ### 3. Dispenser creation & activation
 
