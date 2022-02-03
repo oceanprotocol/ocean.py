@@ -26,7 +26,7 @@ def test_deploy_erc721_and_manage(
     web3, config, factory_deployer_wallet, consumer_wallet, another_consumer_wallet
 ):
     """
-    Owner deploys a new ERC721 contract
+    Owner deploys a new ERC721 NFT
     """
     erc721_factory = ERC721FactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
@@ -1308,7 +1308,7 @@ def test_pool_usdc(
 
     tx = bpool.swap_exact_amount_in(
         [erc20_address, usdc_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), int(1e4), int(2 ** 256 - 1), 0],
+        [to_wei("0.1"), int(1e4), int(2**256 - 1), 0],
         publisher_wallet,
     )
 
@@ -1817,7 +1817,7 @@ def test_pool_usdc_flexible(
 
     tx = bpool.swap_exact_amount_in(
         [erc20_address, usdc_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), int(1e4), int(2 ** 256 - 1), 0],
+        [to_wei("0.1"), int(1e4), int(2**256 - 1), 0],
         publisher_wallet,
     )
 
