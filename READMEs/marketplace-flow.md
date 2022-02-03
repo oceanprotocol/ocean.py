@@ -129,7 +129,7 @@ metadata = {
     "description": "Branin dataset",
     "name": "Branin dataset",
     "type": "dataset",
-    "author": "Treunt",
+    "author": "Trent",
     "license": "CC0: PublicDomain",
 }
 
