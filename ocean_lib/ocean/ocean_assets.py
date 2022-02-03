@@ -290,8 +290,7 @@ class OceanAssets:
                 logger.warning("Creating new datatoken failed.")
                 return None
             logger.info(
-                f"Successfully created datatoken with address "
-                f"{erc721_nft.address}."
+                f"Successfully created datatoken with address " f"{erc721_nft.address}."
             )
         else:
             # verify nft address

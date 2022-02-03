@@ -17,9 +17,7 @@ def _deploy_erc721_token(config, web3, factory_deployer_wallet, manager_wallet):
     erc721_nft = deploy_erc721_erc20(web3, config, factory_deployer_wallet)
 
     erc721_nft.add_to_725_store_list(manager_wallet.address, factory_deployer_wallet)
-    erc721_nft.add_to_create_erc20_list(
-        manager_wallet.address, factory_deployer_wallet
-    )
+    erc721_nft.add_to_create_erc20_list(manager_wallet.address, factory_deployer_wallet)
     erc721_nft.add_to_metadata_list(manager_wallet.address, factory_deployer_wallet)
     return erc721_nft
 
@@ -1310,7 +1308,7 @@ def test_pool_usdc(
 
     tx = bpool.swap_exact_amount_in(
         [erc20_address, usdc_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), int(1e4), int(2**256 - 1), 0],
+        [to_wei("0.1"), int(1e4), int(2 ** 256 - 1), 0],
         publisher_wallet,
     )
 
@@ -1819,7 +1817,7 @@ def test_pool_usdc_flexible(
 
     tx = bpool.swap_exact_amount_in(
         [erc20_address, usdc_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), int(1e4), int(2**256 - 1), 0],
+        [to_wei("0.1"), int(1e4), int(2 ** 256 - 1), 0],
         publisher_wallet,
     )
 

@@ -24,20 +24,15 @@ def test_properties(web3, config):
     )
     erc721_nft = ERC721NFT(web3=web3, address=erc721_token_address)
 
+    assert erc721_nft.event_TokenCreated.abi["name"] == ERC721NFT.EVENT_TOKEN_CREATED
     assert (
-        erc721_nft.event_TokenCreated.abi["name"] == ERC721NFT.EVENT_TOKEN_CREATED
+        erc721_nft.event_TokenURIUpdate.abi["name"] == ERC721NFT.EVENT_TOKEN_URI_UPDATED
     )
     assert (
-        erc721_nft.event_TokenURIUpdate.abi["name"]
-        == ERC721NFT.EVENT_TOKEN_URI_UPDATED
+        erc721_nft.event_MetadataCreated.abi["name"] == ERC721NFT.EVENT_METADATA_CREATED
     )
     assert (
-        erc721_nft.event_MetadataCreated.abi["name"]
-        == ERC721NFT.EVENT_METADATA_CREATED
-    )
-    assert (
-        erc721_nft.event_MetadataUpdated.abi["name"]
-        == ERC721NFT.EVENT_METADATA_UPDATED
+        erc721_nft.event_MetadataUpdated.abi["name"] == ERC721NFT.EVENT_METADATA_UPDATED
     )
 
 

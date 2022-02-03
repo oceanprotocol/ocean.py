@@ -46,9 +46,7 @@ def test_main(
     )
     assert registered_event[0].event == "NFTCreated"
     assert registered_event[0].args.admin == publisher_wallet.address
-    erc721_nft = ERC721NFT(
-        web3=web3, address=registered_event[0].args.newTokenAddress
-    )
+    erc721_nft = ERC721NFT(web3=web3, address=registered_event[0].args.newTokenAddress)
 
     symbol = erc721_nft.symbol()
     assert symbol == "NFTS"
