@@ -42,54 +42,19 @@ pip install numpy matplotlib
 
 ### Set envvars
 
-In the work console:
-```console
-#set private keys of two accounts
-export TEST_PRIVATE_KEY1=0x5d75837394b078ce97bc289fa8d75e21000573520bfa7784a9d28ccaae602bf8
-export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
-
-#set the address file only for ganache
-export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
-
-#set network URL
-export OCEAN_NETWORK_URL=http://127.0.0.1:8545
-```
+Set the required enviroment variables as described in [datatokens-flow](datatokens-flow.md):
+- [x] Setup : Set envvars
 
 ### Start Python
 
-In the work console:
-```console
-python
-```
+In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
 
-For the following steps, we use the Python console. Keep it open between steps.
+## 2. Alice publishes a Data NFT
 
-In the Python console:
-```python
-#create ocean instance
-from ocean_lib.example_config import ExampleConfig
-from ocean_lib.ocean.ocean import Ocean
-config = ExampleConfig.get_config()
-ocean = Ocean(config)
+Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+- [x] 2.1 Create an ERC721 data NFT
 
-print(f"config.network_url = '{config.network_url}'")
-print(f"config.block_confirmations = {config.block_confirmations.value}")
-print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
-print(f"config.provider_url = '{config.provider_url}'")
-
-# Create Alice's wallet
-import os
-from ocean_lib.web3_internal.wallet import Wallet
-alice_wallet = Wallet(
-    ocean.web3,
-    os.getenv('TEST_PRIVATE_KEY1'),
-    config.block_confirmations,
-    config.transaction_timeout,
-)
-print(f"alice_wallet.address = '{alice_wallet.address}'")
-```
-
-## 2. Alice publishes data asset
+## 3. Alice publishes a datatoken
 
 In the same Python console:
 ```python
@@ -153,7 +118,7 @@ print(f"DATA did = '{DATA_ddo.did}'")
 Full details: [DATA_ddo](DATA_ddo.md)
 
 
-## 3. Alice publishes algorithm
+## 4. Alice publishes algorithm
 
 For this step, there are some prerequisites needed. If you want to replace the sample algorithm with an algorithm of your choosing, you will need to do some dependency management.
 You can use one of the standard [Ocean algo_dockers images](https://github.com/oceanprotocol/algo_dockers) or publish a custom docker image.
@@ -225,7 +190,7 @@ Full details: [ALG_ddo](ALG_ddo.md)
 Please note that this example features a simple Python algorithm. If you publish an algorithm in another language, make sure you have an appropriate container to run it, including dependencies.
 You can find more information about how to do this in the [Ocean tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/).
 
-## 4. Alice allows the algorithm for C2D for that data asset
+## 5. Alice allows the algorithm for C2D for that data asset
 
 In the same Python console:
 ```python
@@ -234,7 +199,7 @@ utils.add_publisher_trusted_algorithm(DATA_ddo, ALG_ddo.did, config.metadata_cac
 ocean.assets.update(DATA_ddo, publisher_wallet=alice_wallet)
 ```
 
-## 5. Bob acquires datatokens for data and algorithm
+## 6. Bob acquires datatokens for data and algorithm
 
 In the same Python console:
 ```python
@@ -251,7 +216,7 @@ DATA_datatoken.transfer(bob_wallet.address, to_wei(5), from_wallet=alice_wallet)
 ALG_datatoken.transfer(bob_wallet.address, to_wei(5), from_wallet=alice_wallet)
 ```
 
-## 6. Bob starts a compute job
+## 7. Bob starts a compute job
 
 Only inputs needed: DATA_did, ALG_did. Everything else can get computed as needed.
 
@@ -310,7 +275,7 @@ job_id = ocean.compute.start(
 print(f"Started compute job with id: {job_id}")
 ```
 
-## 7. Bob monitors logs / algorithm output
+## 8. Bob monitors logs / algorithm output
 
 In the same Python console, you can check the job status as many times as needed:
 
