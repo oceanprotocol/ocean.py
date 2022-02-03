@@ -260,14 +260,18 @@ def test_c2d_flow_readme():
         time.sleep(5)
     assert succeeded, "compute job unsuccessful"
 
-    # Retrieve all result
+    # Retrieve algorithm output and log files
     for i in range(len(status["results"])):
-        # 0 index, means we retrieve the results from the first dataset index
-        print(f"Fetch index {i}, type: {status['results'][i]['type']}")
+        result_type = status["results"][i]["type"]
+        print(f"Fetch result index {i}, type: {result_type}")
         result = ocean.compute.result(DATA_did, job_id, i, bob_wallet)
         assert result, "result retrieval unsuccessful"
         print(result)
         print("==========\n")
+
+        if result_type == "output":
+            output = result
+
     # Unpickle the gaussian model result
-    model = pickle.loads(result)
+    model = pickle.loads(output)
     assert model, "unpickle result unsuccessful"
