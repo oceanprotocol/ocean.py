@@ -261,7 +261,7 @@ def test_c2d_flow():
     for i in range(len(status['results'])):
         # 0 index, means we retrieve the results from the first dataset index
         print(f"Fetch index {i}, type: {status['results'][i]['type']}")
-        result = ocean.compute.result_file(DATA_did, job_id, i, bob_wallet)
+        result = ocean.compute.result(DATA_did, job_id, i, bob_wallet)
         assert result, "result retrieval unsuccessful"
         print(result)
         print("==========\n")
