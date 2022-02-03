@@ -143,10 +143,11 @@ def process_order(
     # Mint 10 datatokens to the consumer
     service = asset.get_service(service_type)
     erc20_token = ERC20Token(ocean_instance.web3, service.datatoken)
+
     # for the "algorithm with different publisher fixture, consumer is minter
     minter = (
         consumer_wallet
-        if erc20_token.contract.caller.isMinter(consumer_wallet.address)
+        if erc20_token.is_minter(consumer_wallet.address)
         else publisher_wallet
     )
     erc20_token.mint(consumer_wallet.address, to_wei(10), minter)
