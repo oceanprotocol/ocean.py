@@ -269,6 +269,7 @@ def test_c2d_flow_readme():
         print(result)
         print("==========\n")
 
+        # Extract algorithm output
         if result_type == "output":
             output = result
 
