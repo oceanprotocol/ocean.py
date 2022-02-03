@@ -17,7 +17,11 @@ Here are the steps:
 6. Bob starts a compute job
 7. Bob monitors logs / algorithm output
 
-This c2d flow example features a simple algorithm from the field of ML. Ocean c2d is not limited to ML datasets and algorithms, but it is one of the most common use cases. Besides the flow below, two other worked C2D flows are: (a) simple image processing at [ocean-lena](https://github.com/calina-c/ocean-lena/blob/main/c2d-flow.md), (b) logistic regression for classification [blog post](https://medium.com/ravenprotocol/machine-learning-series-using-logistic-regression-for-classification-in-oceans-compute-to-data-18df49b6b165) with both GUI and CLI flows.
+This c2d flow example features a simple algorithm from the field of ML. Ocean c2d is not limited to ML datasets and algorithms, but it is one of the most common use cases. Besides the flow below, two other worked C2D flows are:
+
+TODO: Update these examples based on v4
+1. simple image processing at [ocean-lena](https://github.com/calina-c/ocean-lena/blob/main/c2d-flow.md)
+2. logistic regression for classification [blog post](https://medium.com/ravenprotocol/machine-learning-series-using-logistic-regression-for-classification-in-oceans-compute-to-data-18df49b6b165) with both GUI and CLI flows.
 
 Let's go through each step.
 
@@ -42,61 +46,24 @@ pip install numpy matplotlib
 
 ### Set envvars
 
-In the work console:
-```console
-#set private keys of two accounts
-export TEST_PRIVATE_KEY1=0x5d75837394b078ce97bc289fa8d75e21000573520bfa7784a9d28ccaae602bf8
-export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
+Set the required enviroment variables as described in [datatokens-flow](datatokens-flow.md):
+- [x] Setup : Set envvars
 
-#needed to mint fake OCEAN for testing with ganache
-export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
+### Start Python
 
-#set the address file only for ganache
-export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
+In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
 
-#set network URL
-export OCEAN_NETWORK_URL=http://127.0.0.1:8545
-```
+## 2. Alice publishes a Data NFT
 
-## 2. Alice publishes data asset with compute service
+Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+- [x] 2.1 Create an ERC721 data NFT
 
-For the following steps, we use the Python console. Keep it open between steps.
+## 3. Alice publishes a dataset
 
-In the Python console:
+In the same python console:
 
 ```python
-#create ocean instance
-from ocean_lib.example_config import ExampleConfig
-from ocean_lib.ocean.ocean import Ocean
-config = ExampleConfig.get_config()
-ocean = Ocean(config)
-
-print(f"config.network_url = '{config.network_url}'")
-print(f"config.block_confirmations = {config.block_confirmations.value}")
-print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
-print(f"config.provider_url = '{config.provider_url}'")
-
-# Create Alice's wallet
-import os
-from ocean_lib.web3_internal.wallet import Wallet
-alice_wallet = Wallet(
-    ocean.web3,
-    os.getenv('TEST_PRIVATE_KEY1'),
-    config.block_confirmations,
-    config.transaction_timeout,
-)
-print(f"alice_wallet.address = '{alice_wallet.address}'")
-
-# Mint OCEAN
-from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-mint_fake_OCEAN(config)
-assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-
-# Publish the data NFT token
-DATA_nft_token = ocean.create_nft_token('NFTToken1', 'NFT1', alice_wallet)
-print(f"DATA_nft_token address = '{DATA_nft_token.address}'")
-
-# Publish the datatoken
+# Prepare data for ERC20 token
 from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 DATA_erc20_data = CreateErc20Data(
@@ -114,10 +81,8 @@ DATA_erc20_data = CreateErc20Data(
 DATA_datatoken = DATA_nft_token.create_datatoken(DATA_erc20_data, alice_wallet)
 print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
 
-
 # Specify metadata and services, using the Branin test dataset
 DATA_date_created = "2021-12-28T10:55:11Z"
-
 DATA_metadata = {
     "created": DATA_date_created,
     "updated": DATA_date_created,
@@ -170,7 +135,7 @@ DATA_asset = ocean.assets.create(
 print(f"DATA_asset did = '{DATA_asset.did}'")
 ```
 
-## 3. Alice publishes algorithm
+## 4. Alice publishes an algorithm
 
 For this step, there are some prerequisites needed. If you want to replace the sample algorithm with an algorithm of your choosing, you will need to do some dependency management.
 You can use one of the standard [Ocean algo_dockers images](https://github.com/oceanprotocol/algo_dockers) or publish a custom docker image.
@@ -250,7 +215,7 @@ ALGO_asset = ocean.assets.create(
 print(f"ALGO_asset did = '{ALGO_asset.did}'")
 ```
 
-## 4. Alice allows the algorithm for C2D for that data asset
+## 5. Alice allows the algorithm for C2D for that data asset
 
 In the same Python console:
 ```python
@@ -259,7 +224,7 @@ add_publisher_trusted_algorithm(DATA_asset, ALGO_asset.did, config.metadata_cach
 DATA_asset = ocean.assets.update(DATA_asset, alice_wallet)
 ```
 
-## 5. Bob acquires datatokens for data and algorithm
+## 6. Bob acquires datatokens for data and algorithm
 
 In the same Python console:
 ```python
@@ -277,7 +242,7 @@ DATA_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
 ALGO_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
 ```
 
-## 6. Bob starts a compute job
+## 7. Bob starts a compute job
 
 Only inputs needed: DATA_did, ALGO_did. Everything else can get computed as needed.
 
@@ -333,7 +298,7 @@ job_id = ocean.compute.start(
 print(f"Started compute job with id: {job_id}")
 ```
 
-## 7. Bob monitors logs / algorithm output
+## 8. Bob monitors logs / algorithm output
 
 In the same Python console, you can check the job status as many times as needed:
 
