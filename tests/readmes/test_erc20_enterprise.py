@@ -237,15 +237,24 @@ def test_erc20_enterprise_flow_with_fre():
     # Approve tokens
     OCEAN_token.approve(
         spender=erc20_enterprise_token.address,
-        amount=ocean.to_wei(20),
+        amount=ocean.to_wei(1000),
         from_wallet=alice_wallet,
     )
-    erc20_enterprise_token.approve(
-        spender=alice_wallet.address, amount=ocean.to_wei(20), from_wallet=alice_wallet
-    )
 
+    # Transfer some ERC20 Enterprise tokens to Bob for buying from the FRE
+    erc20_enterprise_token.transfer(bob_wallet.address, ocean.to_wei(15), alice_wallet)
+    OCEAN_token.approve(
+        spender=erc20_enterprise_token.address,
+        amount=ocean.to_wei(1000),
+        from_wallet=bob_wallet,
+    )
+    erc20_enterprise_token.approve(
+        spender=erc20_enterprise_token.address,
+        amount=ocean.to_wei(1000),
+        from_wallet=bob_wallet,
+    )
     tx_id = erc20_enterprise_token.buy_from_fre_and_order(
-        order_params=order_params, fre_params=fre_params, from_wallet=alice_wallet
+        order_params=order_params, fre_params=fre_params, from_wallet=bob_wallet
     )
     tx_receipt = ocean.web3.eth.wait_for_transaction_receipt(tx_id)
     assert tx_receipt.status == 1, "failed buying data tokens from FRE."

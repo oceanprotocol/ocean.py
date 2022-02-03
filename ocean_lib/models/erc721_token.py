@@ -222,7 +222,7 @@ class ERC721Token(ContractBase):
 
     def create_datatoken(
         self, erc20_data: Union[CreateErc20Data, dict, tuple], from_wallet: Wallet
-    ) -> Union[ERC20Token, ERC20Enterprise]:
+    ) -> ERC20Token:
         initial_list = self.get_tokens_list()
 
         tx_id = self.create_erc20(erc20_data, from_wallet)
