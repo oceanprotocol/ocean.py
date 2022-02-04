@@ -27,8 +27,6 @@ jobs:
           ref: feature/v4_c2d
       - name: Run Barge
         working-directory: ${{ github.workspace }}/barge
-        env:
-          OPERATOR_SERVICE_URL: https://c2d-dev.operator.oceanprotocol.com/
         run: |
           bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-rbac --with-c2d > start_ocean.log &
           for i in $(seq 1 50); do
