@@ -20,7 +20,9 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 
 def test_c2d_flow_readme():
-    """This test mirrors the c2d-flow.md README."""
+    """This test mirrors the c2d-flow.md README.
+    As such, it does not use the typical pytest fixtures.
+    """
 
     # 2. Alice publishes data asset with compute service
     config = ExampleConfig.get_config()

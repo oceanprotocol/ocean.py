@@ -11,7 +11,10 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-def test_simple_flow():
+def test_datatokens_flow_readme():
+    """This test mirrors the datatokens-flow.md README.
+    As such, it does not use the typical pytest fixtures.
+    """
 
     private_key = os.getenv("TEST_PRIVATE_KEY1")
     config = ExampleConfig.get_config()
