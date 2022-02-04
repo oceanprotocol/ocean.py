@@ -259,7 +259,6 @@ compute_service = DATA_asset.get_service("compute")
 algo_service = ALGO_asset.get_service("access")
 
 from datetime import datetime, timedelta
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 # Pay for dataset for 1 day
 DATA_order_tx_id = ocean.assets.pay_for_service(
@@ -270,9 +269,7 @@ DATA_order_tx_id = ocean.assets.pay_for_service(
         "compute_environment": "unused",
         "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
     },
-   consumer_address=DataServiceProvider.get_c2d_address(
-        compute_service.service_endpoint
-    ),
+    consumer_address=ocean.compute.get_c2d_address(DATA_did),
 )
 print(f"Paid for dataset compute service, order tx id: {DATA_order_tx_id}")
 
@@ -284,9 +281,7 @@ ALGO_order_tx_id = ocean.assets.pay_for_service(
     initialize_args={
         "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
     },
-    consumer_address=DataServiceProvider.get_c2d_address(
-        compute_service.service_endpoint
-    ),
+    consumer_address=ocean.compute.get_c2d_address(ALGO_did),
 )
 print(f"Paid for algorithm access service, order tx id: {ALGO_order_tx_id}")
 

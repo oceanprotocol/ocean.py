@@ -132,6 +132,14 @@ class OceanCompute:
         return job_info
 
     @enforce_types
+    def get_c2d_address(self, did: str) -> str:
+        asset = resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
+        dataset_compute_service = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
+        return DataServiceProvider.get_c2d_address(
+            dataset_compute_service.service_endpoint
+        )
+
+    @enforce_types
     def _get_service_endpoint(
         self, did: str, asset: Optional[Asset] = None
     ) -> Tuple[str, str]:
