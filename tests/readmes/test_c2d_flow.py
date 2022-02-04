@@ -251,7 +251,7 @@ def test_c2d_flow_readme():
     succeeded = False
     for _ in range(0, 200):
         status = ocean.compute.status(DATA_did, job_id, bob_wallet)
-        if status.get("dateFinished", None) and int(status["dateFinished"]) > 0:
+        if status.get("dateFinished") and int(status["dateFinished"]) > 0:
             print(f"Status = '{status}'")
             succeeded = True
             break
