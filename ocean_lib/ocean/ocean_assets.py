@@ -407,7 +407,7 @@ class OceanAssets:
         :param provider_uri: str URL of service provider. This will be used as base to construct the serviceEndpoint for the `access` (download) service
         :param encrypt_flag: bool for encryption of the DDO.
         :param compress_flag: bool for compression of the DDO.
-        :return: update tx_result
+        :return: Optional[Asset] the updated Asset or None if updated asset not found in metadata cache
         """
 
         self._assert_ddo_metadata(asset.metadata)

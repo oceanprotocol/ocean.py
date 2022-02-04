@@ -152,13 +152,13 @@ class DataServiceProvider:
             "consumerAddress": consumer_address,
         }
 
-        if compute_environment:
+        if compute_environment is not None:
             payload["computeEnv"] = compute_environment
 
         if valid_until:
             payload["validUntil"] = valid_until
 
-        if userdata:
+        if userdata is not None:
             userdata = json.dumps(userdata)
             payload["userdata"] = userdata
 
