@@ -6,8 +6,6 @@ import os
 import pickle
 import time
 from datetime import datetime, timedelta
-import pytest
-
 from ocean_lib.agreements.file_objects import UrlFile
 from ocean_lib.assets.trusted_algorithms import add_publisher_trusted_algorithm
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -21,12 +19,10 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-# @pytest.mark.skip("TODO: reinstate after c2d backend is fixed to support v4")
 def test_c2d_flow_readme():
     """This test mirrors the c2d-flow.md README."""
 
     # 2. Alice publishes data asset with compute service
-
     config = ExampleConfig.get_config()
     ocean = Ocean(config)
 
@@ -223,7 +219,9 @@ def test_c2d_flow_readme():
             "compute_environment": "unused",
             "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
         },
-        consumer_address=DataServiceProvider.get_c2d_address(compute_service.service_endpoint)
+        consumer_address=DataServiceProvider.get_c2d_address(
+            compute_service.service_endpoint
+        ),
     )
     assert DATA_order_tx_id, "pay for dataset unsuccessful"
 
@@ -235,7 +233,9 @@ def test_c2d_flow_readme():
         initialize_args={
             "valid_until": int((datetime.now() + timedelta(days=1)).timestamp())
         },
-        consumer_address=DataServiceProvider.get_c2d_address(compute_service.service_endpoint)
+        consumer_address=DataServiceProvider.get_c2d_address(
+            compute_service.service_endpoint
+        ),
     )
     assert ALGO_order_tx_id, "pay for algorithm unsuccessful"
 
@@ -268,8 +268,7 @@ def test_c2d_flow_readme():
         result_type = status["results"][i]["type"]
         print(f"Fetch result index {i}, type: {result_type}")
         result = ocean.compute.result(DATA_did, job_id, i, bob_wallet)
-        print(result)
-        print("==========\n")
+        assert result, "result retrieval unsuccessful"
         # Extract algorithm output
         if result_type == "output":
             output = result

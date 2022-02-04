@@ -298,6 +298,7 @@ compute_service = DATA_asset.get_service("compute")
 algo_service = ALGO_asset.get_service("access")
 
 from datetime import datetime, timedelta
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 # Pay for dataset for 1 day
 DATA_order_tx_id = ocean.assets.pay_for_service(
@@ -308,6 +309,9 @@ DATA_order_tx_id = ocean.assets.pay_for_service(
         "compute_environment": "unused",
         "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
     },
+   consumer_address=DataServiceProvider.get_c2d_address(
+        compute_service.service_endpoint
+    ),
 )
 print(f"Paid for dataset compute service, order tx id: {DATA_order_tx_id}")
 
@@ -318,7 +322,10 @@ ALGO_order_tx_id = ocean.assets.pay_for_service(
     wallet=bob_wallet,
     initialize_args={
         "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
-    }
+    },
+    consumer_address=DataServiceProvider.get_c2d_address(
+        compute_service.service_endpoint
+    ),
 )
 print(f"Paid for algorithm access service, order tx id: {ALGO_order_tx_id}")
 
@@ -346,7 +353,7 @@ import time
 succeeded = False
 for _ in range(0, 200):
     status = ocean.compute.status(DATA_did, job_id, bob_wallet)
-    if status["status"] > 60:
+    if status.get("dateFinished", None) and int(status["dateFinished"]) > 0:
         succeeded = True
         break
     time.sleep(5)
@@ -372,6 +379,7 @@ for i in range(len(status["results"])):
 
 import pickle
 model = pickle.loads(output)  # the gaussian model result
+assert len(model) > 0, "unpickle result unsuccessful"
 ```
 
 You can use the result however you like. For the purpose of this example, let's plot it.
