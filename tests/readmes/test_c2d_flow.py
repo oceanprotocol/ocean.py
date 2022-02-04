@@ -10,6 +10,7 @@ import pytest
 
 from ocean_lib.agreements.file_objects import UrlFile
 from ocean_lib.assets.trusted_algorithms import add_publisher_trusted_algorithm
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.models_structures import CreateErc20Data
@@ -222,6 +223,7 @@ def test_c2d_flow_readme():
             "compute_environment": "unused",
             "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
         },
+        consumer_address=DataServiceProvider.get_c2d_address(compute_service.service_endpoint)
     )
     assert DATA_order_tx_id, "pay for dataset unsuccessful"
 
@@ -233,6 +235,7 @@ def test_c2d_flow_readme():
         initialize_args={
             "valid_until": int((datetime.now() + timedelta(days=1)).timestamp())
         },
+        consumer_address=DataServiceProvider.get_c2d_address(compute_service.service_endpoint)
     )
     assert ALGO_order_tx_id, "pay for algorithm unsuccessful"
 
