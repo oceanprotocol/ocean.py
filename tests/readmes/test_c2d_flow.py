@@ -277,4 +277,4 @@ def test_c2d_flow_readme():
 
     # Unpickle the gaussian model result
     model = pickle.loads(output)
-    assert model, "unpickle result unsuccessful"
+    assert len(model) > 0, "unpickle result unsuccessful"
