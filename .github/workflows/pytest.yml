@@ -41,7 +41,7 @@ jobs:
           pip install -r requirements_dev.txt
       - name: Test with pytest
         run: |
-          coverage run --source ocean_lib -m py.test
+          coverage run --source ocean_lib -m py.test tests/readmes/test_c2d_flow.py::test_c2d_flow_readme
           coverage report
           coverage xml
       - name: Publish code coverage
