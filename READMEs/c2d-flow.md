@@ -57,7 +57,8 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 - [x] 2.1 Create an ERC721 data NFT
 
 ## 3. Alice publishes a dataset
-In the Python console:
+
+In the same python console:
 
 ```python
 # Prepare data for ERC20 token
