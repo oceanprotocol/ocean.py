@@ -5,7 +5,10 @@
 import os
 
 from ocean_lib.example_config import ExampleConfig
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.models.models_structures import (
+    CreateErc20Data,
+    CreateERC721DataNoDeployer,
+)
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
@@ -55,26 +58,17 @@ def test_simpler_flow():
     private_key = os.getenv("TEST_PRIVATE_KEY1")
     config = ExampleConfig.get_config()
     ocean = Ocean(config)
-    print(f"config.network_url = '{config.network_url}'")
-    print(f"config.block_confirmations = {config.block_confirmations.value}")
-
-    print("Create wallet: begin")
     wallet = Wallet(
         ocean.web3, private_key, config.block_confirmations, config.transaction_timeout
     )
-    print(f"Create wallet: done. Its address is {wallet.address}")
-
-    from ocean_lib.models.models_structures import CreateERC721Data, CreateErc20Data
-    from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
     nft_factory = ocean.get_nft_factory()
 
     cap = ocean.to_wei(10)
-    erc721_data = CreateERC721Data(
+    erc721_data = CreateERC721DataNoDeployer(
         name="NFT",
         symbol="NFTSYMBOL",
         template_index=1,  # default value
-        additional_erc20_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
     )
     erc20_data = CreateErc20Data(

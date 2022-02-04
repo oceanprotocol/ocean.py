@@ -123,35 +123,23 @@ print(f"datatoken name: {erc20_token.token_name()}")
 print(f"datatoken symbol: {erc20_token.symbol()}")
 ```
 
-## 3. Publish datatokens using one helper
+As an alternative to publishing the nft and the datatoken using separate transactions,
+you can use the `create_nft_erc_tokens_once` function to deploy them within a single
+transaction. ocean.py also offers the option of creating the NFT, the ERC20 and a pool, exchange or
+dispenser within the same transaction, using the PoolData, FixedData or DispenserData
+as arguments.
 
 ```python
-import os
-from ocean_lib.example_config import ExampleConfig
-from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.web3_internal.wallet import Wallet
-
-private_key = os.getenv('TEST_PRIVATE_KEY1')
-config = ExampleConfig.get_config()
-ocean = Ocean(config)
-print(f"config.network_url = '{config.network_url}'")
-print(f"config.block_confirmations = {config.block_confirmations.value}")
-
-print("Create wallet: begin")
-wallet = Wallet(ocean.web3, private_key, config.block_confirmations, config.transaction_timeout)
-print(f"Create wallet: done. Its address is {wallet.address}")
-
-from ocean_lib.models.models_structures import CreateERC721Data, CreateErc20Data
+from ocean_lib.models.models_structures import CreateErc20Data, CreateERC721DataNoDeployer
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 nft_factory = ocean.get_nft_factory()
 
 cap = ocean.to_wei(10)
-erc721_data = CreateERC721Data(
+erc721_data = CreateERC721DataNoDeployer(
     name="NFT",
     symbol="NFTSYMBOL",
     template_index=1,  # default value
-    additional_erc20_deployer=ZERO_ADDRESS,
     token_uri="https://oceanprotocol.com/nft/",
 )
 erc20_data = CreateErc20Data(

@@ -126,16 +126,12 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     def create_nft_with_erc(
         self,
-        nft_create_data: Union[
-            dict, tuple, CreateERC721DataNoDeployer, CreateERC721Data
-        ],
+        nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
         erc_create_data: Union[dict, tuple, CreateErc20Data],
         from_wallet: Wallet,
     ) -> str:
         # TODO: this will be handled in web3 py
-        if isinstance(nft_create_data, CreateERC721DataNoDeployer) or isinstance(
-            nft_create_data, CreateERC721Data
-        ):
+        if isinstance(nft_create_data, CreateERC721DataNoDeployer):
             nft_create_data = tuple(nft_create_data)
 
         # TODO: this will be handled in web3 py
@@ -148,17 +144,13 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     def create_nft_erc_with_pool(
         self,
-        nft_create_data: Union[
-            dict, tuple, CreateERC721DataNoDeployer, CreateERC721Data
-        ],
+        nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
         erc_create_data: Union[dict, tuple, CreateErc20Data],
         pool_data: Union[dict, tuple, PoolData],
         from_wallet: Wallet,
     ) -> str:
         # TODO: this will be handled in web3 py
-        if isinstance(nft_create_data, CreateERC721DataNoDeployer) or isinstance(
-            nft_create_data, CreateERC721Data
-        ):
+        if isinstance(nft_create_data, CreateERC721DataNoDeployer):
             nft_create_data = tuple(nft_create_data)
 
         # TODO: this will be handled in web3 py
@@ -177,17 +169,13 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     def create_nft_erc_with_fixed_rate(
         self,
-        nft_create_data: Union[
-            dict, tuple, CreateERC721DataNoDeployer, CreateERC721Data
-        ],
+        nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
         erc_create_data: Union[dict, tuple, CreateErc20Data],
         fixed_data: Union[dict, tuple, FixedData],
         from_wallet: Wallet,
     ) -> str:
         # TODO: this will be handled in web3 py
-        if isinstance(nft_create_data, CreateERC721DataNoDeployer) or isinstance(
-            nft_create_data, CreateERC721Data
-        ):
+        if isinstance(nft_create_data, CreateERC721DataNoDeployer):
             nft_create_data = tuple(nft_create_data)
 
         # TODO: this will be handled in web3 py
@@ -206,17 +194,13 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     def create_nft_erc_with_dispenser(
         self,
-        nft_create_data: Union[
-            dict, tuple, CreateERC721DataNoDeployer, CreateERC721Data
-        ],
+        nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
         erc_create_data: Union[dict, tuple, CreateErc20Data],
         dispenser_data: Union[dict, tuple, DispenserData],
         from_wallet: Wallet,
     ) -> str:
         # TODO: this will be handled in web3 py
-        if isinstance(nft_create_data, CreateERC721DataNoDeployer) or isinstance(
-            nft_create_data, CreateERC721Data
-        ):
+        if isinstance(nft_create_data, CreateERC721DataNoDeployer):
             nft_create_data = tuple(nft_create_data)
 
         # TODO: this will be handled in web3 py
@@ -284,7 +268,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     def create_nft_erc_tokens_once(
         self,
-        erc721_data: CreateERC721Data,
+        erc721_data: CreateERC721DataNoDeployer,
         erc20_data: CreateErc20Data,
         from_wallet: Wallet,
     ) -> tuple:
