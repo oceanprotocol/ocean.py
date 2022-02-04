@@ -41,36 +41,7 @@ This example uses c2d to create a regression model. In order to visualise it or 
 In your project folder, in this case my_project from `Setup : Install the library` in First Steps, run the following command:
 
 ```console
-#grab repo
-git clone https://github.com/oceanprotocol/barge
-cd barge
-
-#clean up old containers (to be sure)
-docker system prune -a --volumes
-
-#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-./start_ocean.sh
-```
-
-### Install the library
-
-In a new console that we'll call the _work_ console (as we'll use it later):
-
-```console
-#Initialize virtual environment and activate it.
-python -m venv venv
-source venv/bin/activate
-
-#Install the ocean.py library. Install wheel first to avoid errors.
-pip install wheel
-pip install ocean-lib
-```
-
-This example uses c2d to create a regression model. In order to visualise it or manipulate it, you also need some dependencies:
-
-```console
-pip install numpy
-pip install matplotlib
+pip install numpy matplotlib
 ```
 
 ### Set envvars
@@ -78,20 +49,9 @@ pip install matplotlib
 Set the required enviroment variables as described in [datatokens-flow](datatokens-flow.md):
 - [x] Setup : Set envvars
 
-```console
-#needed to mint fake OCEAN for testing with ganache
-export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
-
-#set the address file only for ganache
-export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
-=======
-#start Python
-python
-```
+## 2. Alice publishes a Data NFT
 
 In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
-
-## 2. Alice publishes a Data NFT
 
 Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
 - [x] 2.1 Create an ERC721 data NFT
