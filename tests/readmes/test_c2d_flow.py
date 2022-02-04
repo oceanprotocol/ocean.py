@@ -261,10 +261,12 @@ def test_c2d_flow_readme():
     # Retrieve algorithm output and log files
     output = None
     for i in range(len(status["results"])):
+        result = None
         result_type = status["results"][i]["type"]
         print(f"Fetch result index {i}, type: {result_type}")
         result = ocean.compute.result(DATA_did, job_id, i, bob_wallet)
         assert result, "result retrieval unsuccessful"
+
         # Extract algorithm output
         if result_type == "output":
             output = result
