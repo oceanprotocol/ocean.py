@@ -318,7 +318,7 @@ for _ in range(0, 200):
 This will output the status of the current job.
 Here is a list of possible results: [Operator Service Status description](https://github.com/oceanprotocol/operator-service/blob/main/API.md#status-description).
 
-Once you get `{'ok': True, 'status': 70, 'statusText': 'Job finished'}`, Bob can check the result of the job.
+Once the returned status dictionary contains the `dateFinished` key, Bob can retrieve the job results.
 
 ```python
 # Retrieve algorithm output and log files
