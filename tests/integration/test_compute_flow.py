@@ -152,14 +152,17 @@ def process_order(
     )
     erc20_token.mint(consumer_wallet.address, to_wei(10), minter)
     order_tx_id = ocean_instance.assets.pay_for_service(
-        asset,
-        service,
-        consumer_wallet,
+        asset=asset,
+        service=service,
+        wallet=consumer_wallet,
         initialize_args={
             # TODO: add a real compute environment once provider supports it
             "compute_environment": "doesn't matter for now",
             "valid_until": int((datetime.now() + timedelta(hours=1)).timestamp()),
         },
+        consumer_address=ocean_instance.compute.get_c2d_address(
+            service.service_endpoint
+        ),
     )
 
     return order_tx_id, service

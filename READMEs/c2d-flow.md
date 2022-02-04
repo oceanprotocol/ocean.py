@@ -269,7 +269,9 @@ DATA_order_tx_id = ocean.assets.pay_for_service(
         "compute_environment": "unused",
         "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
     },
-    consumer_address=ocean.compute.get_c2d_address(DATA_did),
+    consumer_address=ocean.compute.get_c2d_address(
+        compute_service.service_endpoint
+    ),
 )
 print(f"Paid for dataset compute service, order tx id: {DATA_order_tx_id}")
 
@@ -281,7 +283,7 @@ ALGO_order_tx_id = ocean.assets.pay_for_service(
     initialize_args={
         "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
     },
-    consumer_address=ocean.compute.get_c2d_address(ALGO_did),
+    consumer_address=ocean.compute.get_c2d_address(algo_service.service_endpoint),
 )
 print(f"Paid for algorithm access service, order tx id: {ALGO_order_tx_id}")
 

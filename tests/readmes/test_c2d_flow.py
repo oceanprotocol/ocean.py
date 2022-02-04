@@ -221,7 +221,9 @@ def test_c2d_flow_readme():
             "compute_environment": "unused",
             "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
         },
-        consumer_address=ocean.compute.get_c2d_address(DATA_did),
+        consumer_address=ocean.compute.get_c2d_address(
+            compute_service.service_endpoint
+        ),
     )
     assert DATA_order_tx_id, "pay for dataset unsuccessful"
 
@@ -233,7 +235,7 @@ def test_c2d_flow_readme():
         initialize_args={
             "valid_until": int((datetime.now() + timedelta(days=1)).timestamp())
         },
-        consumer_address=ocean.compute.get_c2d_address(ALGO_did),
+        consumer_address=ocean.compute.get_c2d_address(algo_service.service_endpoint),
     )
     assert ALGO_order_tx_id, "pay for algorithm unsuccessful"
 
