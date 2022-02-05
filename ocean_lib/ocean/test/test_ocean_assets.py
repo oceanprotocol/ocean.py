@@ -102,7 +102,7 @@ def test_update_datatokens(publisher_ocean_instance, publisher_wallet, config):
     access_service = Service(
         service_id="3",
         service_type=ServiceTypes.ASSET_ACCESS,
-        service_endpoint=f"{data_provider.get_url(config)}/api/services/download",
+        service_endpoint=data_provider.get_url(config),
         datatoken=erc20_token.address,
         files=encrypted_files,
         timeout=0,
@@ -484,7 +484,7 @@ def test_plain_asset_multiple_services(
     access_service = Service(
         service_id="0",
         service_type=ServiceTypes.ASSET_ACCESS,
-        service_endpoint=f"{data_provider.get_url(config)}/api/services/download",
+        service_endpoint=data_provider.get_url(config),
         datatoken=erc20_token.address,
         files=encrypted_files,
         timeout=0,
@@ -504,7 +504,7 @@ def test_plain_asset_multiple_services(
     compute_service = Service(
         service_id="1",
         service_type=ServiceTypes.CLOUD_COMPUTE,
-        service_endpoint=f"{data_provider.get_url(config)}/api/services/compute",
+        service_endpoint=data_provider.get_url(config),
         datatoken=erc20_token.address,
         files=encrypted_files,
         timeout=3600,
