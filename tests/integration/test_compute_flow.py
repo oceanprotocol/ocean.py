@@ -309,7 +309,6 @@ def test_compute_raw_algo(
             dataset_with_compute_service_allow_raw_algo, None
         ),
         algorithm_meta=raw_algorithm,
-        with_result=True,
     )
 
     with pytest.raises(
@@ -321,7 +320,6 @@ def test_compute_raw_algo(
             consumer_wallet=consumer_wallet,
             dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
             algorithm_meta=raw_algorithm,
-            with_result=True,
         )
 
 
@@ -339,7 +337,6 @@ def test_compute_registered_algo(
         consumer_wallet=consumer_wallet,
         dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
         algorithm_and_userdata=AssetAndUserdata(algorithm, None),
-        with_result=True,
     )
 
 
@@ -361,7 +358,6 @@ def test_compute_multi_inputs(
         additional_datasets_and_userdata=[
             AssetAndUserdata(dataset_with_access_service, {"test_key": "test_value"})
         ],
-        with_result=True,
     )
 
 
@@ -382,7 +378,6 @@ def test_compute_trusted_algorithm(
             dataset_with_compute_service_and_trusted_algorithm, None
         ),
         algorithm_and_userdata=AssetAndUserdata(algorithm, None),
-        with_result=True,
     )
 
     # Expect to fail when non-trusted algorithm is used
@@ -400,7 +395,6 @@ def test_compute_trusted_algorithm(
             algorithm_and_userdata=AssetAndUserdata(
                 algorithm_with_different_publisher, None
             ),
-            with_result=True,
         )
 
 
@@ -468,7 +462,6 @@ def test_compute_trusted_publisher(
             dataset_with_compute_service_and_trusted_publisher, None
         ),
         algorithm_and_userdata=AssetAndUserdata(algorithm, None),
-        with_result=True,
     )
 
     # Expect to fail when algorithm with non-trusted publisher is used
@@ -485,5 +478,4 @@ def test_compute_trusted_publisher(
             algorithm_and_userdata=AssetAndUserdata(
                 algorithm_with_different_publisher, None
             ),
-            with_result=True,
         )
