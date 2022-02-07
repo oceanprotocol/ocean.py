@@ -14,6 +14,7 @@ from web3.datastructures import AttributeDict
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.bpool import BPool
+from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
@@ -204,6 +205,11 @@ class Ocean:
             _orders.append(a)
 
         return _orders
+
+    @property
+    @enforce_types
+    def dispenser(self):
+        return Dispenser(self.web3, get_address_of_type(self.config, "Dispenser"))
 
     @property
     @enforce_types

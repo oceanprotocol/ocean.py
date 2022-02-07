@@ -7,6 +7,7 @@ from typing import Optional, Union, Tuple
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
 
+from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
@@ -332,3 +333,47 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         exchange_id = registered_fixed_rate_event[0].args.exchangeId
 
         return erc721_token, erc20_token, exchange_id
+
+    def create_nft_erc_dispenser_in_one_call(
+        self,
+        erc721_data: CreateERC721DataNoDeployer,
+        erc20_data: CreateErc20Data,
+        dispenser_data: DispenserData,
+        from_wallet: Wallet,
+    ) -> Tuple[ERC721Token, ERC20Token]:
+        tx = self.create_nft_erc_with_dispenser(
+            erc721_data, erc20_data, dispenser_data, from_wallet
+        )
+        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
+        registered_nft_event = self.get_event_log(
+            ERC721FactoryContract.EVENT_NFT_CREATED,
+            tx_receipt.blockNumber,
+            self.web3.eth.block_number,
+            None,
+        )
+        erc721_address = registered_nft_event[0].args.newTokenAddress
+        erc721_token = ERC721Token(self.web3, erc721_address)
+
+        registered_token_event = self.get_event_log(
+            ERC721FactoryContract.EVENT_TOKEN_CREATED,
+            tx_receipt.blockNumber,
+            self.web3.eth.block_number,
+            None,
+        )
+        erc20_address = registered_token_event[0].args.newTokenAddress
+        erc20_token = ERC20Token(self.web3, erc20_address)
+
+        dispenser = Dispenser(self.web3, dispenser_data.dispenser_address)
+
+        registered_dispenser_event = dispenser.get_event_log(
+            ERC721FactoryContract.EVENT_DISPENSER_CREATED,
+            tx_receipt.blockNumber,
+            self.web3.eth.block_number,
+            None,
+        )
+
+        # Verify if the Dispenser data token was created.
+        assert registered_dispenser_event, "Cannot find DispenserCreated event."
+        assert registered_dispenser_event[0].args.datatokenAddress == erc20_address
+
+        return erc721_token, erc20_token
