@@ -16,102 +16,39 @@ It focuses on Alice's experience as a publisher, and Bob's experience as a buyer
 
 Here are the steps:
 
-1.  Setup
-2.  Dispenser flow
-3.  Fixed Rate Exchange flow
+1. Setup
+2. Alice creates a NFT
+3. Dispenser flow
+4. Fixed Rate Exchange flow
 
 Let's go through each step.
 
 ## 1. Setup
 
-### Prerequisites
+### First steps
 
--   Linux/MacOS
--   Docker, [allowing non-root users](https://www.thegeekdiary.com/run-docker-as-a-non-root-user/)
--   Python 3.8.5+
+To get started with this guide, please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+- [x] Setup : Prerequisites
+- [x] Setup : Download barge and run services
+- [x] Setup : Install the library from v4 sources
 
-### Run barge services
-
-In a new console:
-
-```console
-#grab repo
-git clone https://github.com/oceanprotocol/barge
-cd barge
-
-#clean up old containers (to be sure)
-docker system prune -a --volumes
-
-#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-./start_ocean.sh  --with-provider2
-```
-
-### Install the library
-
-In a new console that we'll call the _work_ console (as we'll use it later):
-
-```console
-#Create your working directory
-mkdir test3
-cd test3
-
-#Initialize virtual environment and activate it.
-python -m venv venv
-source venv/bin/activate
-
-#Install the ocean.py library. Install wheel first to avoid errors.
-pip install wheel
-pip install ocean-lib
-```
 
 ### Set envvars
 
-In the work console:
-```console
-#set private keys of two accounts
-export TEST_PRIVATE_KEY1=0x5d75837394b078ce97bc289fa8d75e21000573520bfa7784a9d28ccaae602bf8
-export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
+Set the required enviroment variables as described in [datatokens-flow](datatokens-flow.md):
+- [x] Setup : Set envvars
 
-#needed to mint fake OCEAN for testing with ganache
-export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 
-#set the address file only for ganache
-export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
+## 2. Alice creates a NFT
+In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
 
-#set network URL
-export OCEAN_NETWORK_URL=http://127.0.0.1:8545
+Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+- [x] 2.1 Create an ERC721 data NFT
 
-#start python
-python
-```
-
-## 2. Dispenser Flow
+## 3. Dispenser Flow
 
 In the Python console:
 ```python
-# Create Ocean instance
-from ocean_lib.example_config import ExampleConfig
-from ocean_lib.ocean.ocean import Ocean
-config = ExampleConfig.get_config()
-ocean = Ocean(config)
-
-print(f"config.network_url = '{config.network_url}'")
-print(f"config.block_confirmations = {config.block_confirmations.value}")
-print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
-print(f"config.provider_url = '{config.provider_url}'")
-
-# Create Alice's wallet
-import os
-from ocean_lib.web3_internal.wallet import Wallet
-alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
-alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
-print(f"alice_wallet.address = '{alice_wallet.address}'")
-
-# Publish an NFT token
-nft_token = ocean.create_nft_token("NFTToken1", "NFT1", alice_wallet)
-token_address = nft_token.address
-assert token_address
-
 # Prepare data for ERC20 Enterprise token
 cap = ocean.to_wei(200)
 from ocean_lib.models.models_structures import CreateErc20Data, DispenserData, ProviderFees, OrderParams
@@ -212,29 +149,6 @@ assert initial_bob_balance < increased_balance
 
 In the Python console:
 ```python
-# Create Ocean instance
-from ocean_lib.example_config import ExampleConfig
-from ocean_lib.ocean.ocean import Ocean
-config = ExampleConfig.get_config()
-ocean = Ocean(config)
-
-print(f"config.network_url = '{config.network_url}'")
-print(f"config.block_confirmations = {config.block_confirmations.value}")
-print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
-print(f"config.provider_url = '{config.provider_url}'")
-
-# Create Alice's wallet
-import os
-from ocean_lib.web3_internal.wallet import Wallet
-alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
-alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
-print(f"alice_wallet.address = '{alice_wallet.address}'")
-
-# Publish an NFT token
-nft_token = ocean.create_nft_token("NFTToken1", "NFT1", alice_wallet)
-token_address = nft_token.address
-assert token_address
-
 # Prepare data for ERC20 Enterprise token
 cap = ocean.to_wei(200)
 from ocean_lib.models.models_structures import CreateErc20Data, ProviderFees, OrderParams
