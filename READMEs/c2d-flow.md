@@ -49,11 +49,9 @@ pip install numpy matplotlib
 Set the required enviroment variables as described in [datatokens-flow](datatokens-flow.md):
 - [x] Setup : Set envvars
 
-### Start Python
+## 2. Alice publishes a Data NFT
 
 In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
-
-## 2. Alice publishes a Data NFT
 
 Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
 - [x] 2.1 Create an ERC721 data NFT
@@ -78,6 +76,7 @@ DATA_erc20_data = CreateErc20Data(
     uints=[ocean.to_wei(100000), 0],
     bytess=[b""],
 )
+
 DATA_datatoken = DATA_nft_token.create_datatoken(DATA_erc20_data, alice_wallet)
 print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
 
@@ -115,7 +114,7 @@ from ocean_lib.services.service import Service
 DATA_compute_service = Service(
     service_id="2",
     service_type="compute",
-    service_endpoint=f"{ocean.config.provider_url}/api/services/compute",
+    service_endpoint=ocean.config.provider_url,
     datatoken=DATA_datatoken.address,
     files=DATA_encrypted_files,
     timeout=3600,
@@ -194,6 +193,7 @@ ALGO_metadata = {
 }
 
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
+from ocean_lib.agreements.file_objects import UrlFile
 ALGO_url_file = UrlFile(
     url="https://raw.githubusercontent.com/trentmc/branin/main/gpr.py"
 )
@@ -269,6 +269,9 @@ DATA_order_tx_id = ocean.assets.pay_for_service(
         "compute_environment": "unused",
         "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
     },
+    consumer_address=ocean.compute.get_c2d_address(
+        compute_service.service_endpoint
+    ),
 )
 print(f"Paid for dataset compute service, order tx id: {DATA_order_tx_id}")
 
@@ -279,7 +282,8 @@ ALGO_order_tx_id = ocean.assets.pay_for_service(
     wallet=bob_wallet,
     initialize_args={
         "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
-    }
+    },
+    consumer_address=ocean.compute.get_c2d_address(algo_service.service_endpoint),
 )
 print(f"Paid for algorithm access service, order tx id: {ALGO_order_tx_id}")
 
@@ -307,7 +311,7 @@ import time
 succeeded = False
 for _ in range(0, 200):
     status = ocean.compute.status(DATA_did, job_id, bob_wallet)
-    if status["status"] > 60:
+    if status.get("dateFinished") and int(status["dateFinished"]) > 0:
         succeeded = True
         break
     time.sleep(5)
@@ -316,11 +320,12 @@ for _ in range(0, 200):
 This will output the status of the current job.
 Here is a list of possible results: [Operator Service Status description](https://github.com/oceanprotocol/operator-service/blob/main/API.md#status-description).
 
-Once you get `{'ok': True, 'status': 70, 'statusText': 'Job finished'}`, Bob can check the result of the job.
+Once the returned status dictionary contains the `dateFinished` key, Bob can retrieve the job results.
 
 ```python
 # Retrieve algorithm output and log files
 for i in range(len(status["results"])):
+    result = None
     result_type = status["results"][i]["type"]
     print(f"Fetch result index {i}, type: {result_type}")
     result = ocean.compute.result(DATA_did, job_id, i, bob_wallet)
@@ -333,6 +338,7 @@ for i in range(len(status["results"])):
 
 import pickle
 model = pickle.loads(output)  # the gaussian model result
+assert len(model) > 0, "unpickle result unsuccessful"
 ```
 
 You can use the result however you like. For the purpose of this example, let's plot it.

@@ -152,14 +152,17 @@ def process_order(
     )
     erc20_token.mint(consumer_wallet.address, to_wei(10), minter)
     order_tx_id = ocean_instance.assets.pay_for_service(
-        asset,
-        service,
-        consumer_wallet,
+        asset=asset,
+        service=service,
+        wallet=consumer_wallet,
         initialize_args={
             # TODO: add a real compute environment once provider supports it
             "compute_environment": "doesn't matter for now",
             "valid_until": int((datetime.now() + timedelta(hours=1)).timestamp()),
         },
+        consumer_address=ocean_instance.compute.get_c2d_address(
+            service.service_endpoint
+        ),
     )
 
     return order_tx_id, service
@@ -306,7 +309,6 @@ def test_compute_raw_algo(
             dataset_with_compute_service_allow_raw_algo, None
         ),
         algorithm_meta=raw_algorithm,
-        with_result=True,
     )
 
     with pytest.raises(
@@ -318,7 +320,6 @@ def test_compute_raw_algo(
             consumer_wallet=consumer_wallet,
             dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
             algorithm_meta=raw_algorithm,
-            with_result=True,
         )
 
 
@@ -336,7 +337,6 @@ def test_compute_registered_algo(
         consumer_wallet=consumer_wallet,
         dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
         algorithm_and_userdata=AssetAndUserdata(algorithm, None),
-        with_result=True,
     )
 
 
@@ -358,7 +358,6 @@ def test_compute_multi_inputs(
         additional_datasets_and_userdata=[
             AssetAndUserdata(dataset_with_access_service, {"test_key": "test_value"})
         ],
-        with_result=True,
     )
 
 
@@ -379,7 +378,6 @@ def test_compute_trusted_algorithm(
             dataset_with_compute_service_and_trusted_algorithm, None
         ),
         algorithm_and_userdata=AssetAndUserdata(algorithm, None),
-        with_result=True,
     )
 
     # Expect to fail when non-trusted algorithm is used
@@ -397,7 +395,6 @@ def test_compute_trusted_algorithm(
             algorithm_and_userdata=AssetAndUserdata(
                 algorithm_with_different_publisher, None
             ),
-            with_result=True,
         )
 
 
@@ -465,7 +462,6 @@ def test_compute_trusted_publisher(
             dataset_with_compute_service_and_trusted_publisher, None
         ),
         algorithm_and_userdata=AssetAndUserdata(algorithm, None),
-        with_result=True,
     )
 
     # Expect to fail when algorithm with non-trusted publisher is used
@@ -482,5 +478,4 @@ def test_compute_trusted_publisher(
             algorithm_and_userdata=AssetAndUserdata(
                 algorithm_with_different_publisher, None
             ),
-            with_result=True,
         )

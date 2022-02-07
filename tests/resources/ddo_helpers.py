@@ -221,7 +221,7 @@ def get_registered_asset_with_compute_service(
     compute_service = Service(
         service_id="2",
         service_type=ServiceTypes.CLOUD_COMPUTE,
-        service_endpoint=f"{data_provider.get_url(config)}/api/services/compute",
+        service_endpoint=data_provider.get_url(config),
         datatoken=erc20_token.address,
         files=encrypted_files,
         timeout=3600,

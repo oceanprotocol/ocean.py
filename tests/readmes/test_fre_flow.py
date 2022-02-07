@@ -12,8 +12,8 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-def test_fre_flow():
-    """This test mirrors the Fixed Rate Exchange README.
+def test_fre_flow_readme():
+    """This test mirrors the fixed-rate-exchange-flow.md README.
     As such, it does not use the typical pytest fixtures.
     """
 
