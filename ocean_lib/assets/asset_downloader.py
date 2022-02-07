@@ -21,7 +21,6 @@ logger = logging.getLogger(__name__)
 @enforce_types
 def download_asset_files(
     asset: Asset,
-    provider_uri: str,
     consumer_wallet: Wallet,
     destination: str,
     order_tx_id: str,
@@ -40,9 +39,6 @@ def download_asset_files(
     :return: asset folder path, str
     """
     data_provider = DataServiceProvider
-    assert data_provider.is_valid_provider(provider_uri=provider_uri), logger.error(
-        "Invalid provider URI."
-    )
 
     service = asset.get_service(ServiceTypes.ASSET_ACCESS)
     if not service.service_endpoint:
@@ -52,8 +48,6 @@ def download_asset_files(
         raise AssertionError(
             'Consume asset failed, service definition is missing the "serviceEndpoint".'
         )
-    _, service_endpoint = data_provider.build_download_endpoint(provider_uri)
-    service_id = service.id
 
     if index is not None:
         assert isinstance(index, int), logger.error("index has to be an integer.")
@@ -67,16 +61,15 @@ def download_asset_files(
     if consumable_result != ConsumableCodes.OK:
         raise AssetNotConsumable(consumable_result)
 
-    asset_folder = os.path.join(destination, f"datafile.{asset.did}.{service_id}")
+    asset_folder = os.path.join(destination, f"datafile.{asset.did}.{service.id}")
     if not os.path.exists(asset_folder):
         os.mkdir(asset_folder)
 
     data_provider.download(
         did=asset.did,
-        service_id=service_id,
+        service=service,
         tx_id=order_tx_id,
         consumer_wallet=consumer_wallet,
-        service_endpoint=service_endpoint,
         destination_folder=asset_folder,
         index=index,
         userdata=userdata,

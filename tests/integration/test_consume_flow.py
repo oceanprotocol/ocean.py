@@ -57,9 +57,7 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
     files = [file]
 
     # Encrypt file objects
-    encrypt_response = data_provider.encrypt(
-        files, "http://172.15.0.4:8030/api/services/encrypt"
-    )
+    encrypt_response = data_provider.encrypt(files, config.provider_url)
     encrypted_files = encrypt_response.content.decode("utf-8")
 
     # Set ERC20 Data
@@ -104,12 +102,8 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
     )
 
     # Initialize service
-    _, initialize_url = data_provider.build_initialize_endpoint(config.provider_url)
     response = data_provider.initialize(
-        did=ddo.did,
-        service_id=service.id,
-        consumer_address=consumer_wallet.address,
-        service_endpoint=initialize_url,
+        did=ddo.did, service=service, consumer_address=consumer_wallet.address
     )
     assert response
     assert response.status_code == 200
@@ -143,7 +137,6 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
 
     asset.download_asset(
         asset=ddo,
-        provider_uri=config.provider_url,
         consumer_wallet=consumer_wallet,
         destination=destination,
         order_tx_id=tx_id,
