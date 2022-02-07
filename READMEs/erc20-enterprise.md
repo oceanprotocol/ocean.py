@@ -50,7 +50,7 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 In the Python console:
 ```python
 # Prepare data for ERC20 Enterprise token
-from ocean_lib.models.models_structures import CreateErc20Data, DispenserData, ProviderFees, OrderParams
+from ocean_lib.models.models_structures import CreateErc20Data, DispenserData, OrderParams
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 cap = ocean.to_wei(200)
@@ -124,10 +124,6 @@ provider_fees = ocean.build_compute_provider_fees(
     valid_until=1958133628,  # 2032
 )
 
-# TODO: this will be handled in web3 py
-if isinstance(provider_fees, ProviderFees):
-    provider_fees = tuple(provider_fees)
-
 initial_bob_balance = OCEAN_token.balanceOf(bob_wallet.address)
 order_params = OrderParams(
     bob_wallet.address,
@@ -151,7 +147,7 @@ In the Python console:
 ```python
 # Prepare data for ERC20 Enterprise token
 cap = ocean.to_wei(200)
-from ocean_lib.models.models_structures import CreateErc20Data, ProviderFees, OrderParams
+from ocean_lib.models.models_structures import CreateErc20Data, OrderParams
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 erc20_data = CreateErc20Data(
     template_index=2,  # this is the value for ERC20 Enterprise token
@@ -197,16 +193,12 @@ exchange_id = ocean.create_fixed_rate(
 
 # Prepare data for order
 provider_fees = ocean.build_compute_provider_fees(
-    provider_data=json.dumps({"timeout": 0}, separators=(",", ":")),
+    provider_data={"timeout": 0},
     provider_fee_address=alice_wallet.address,
     provider_fee_token=OCEAN_token.address,
     provider_fee_amount=0,
     valid_until=1958133628,  # 2032
 )
-
-# TODO: this will be handled in web3 py
-if isinstance(provider_fees, ProviderFees):
-    provider_fees = tuple(provider_fees)
 
 order_params = OrderParams(
     bob_wallet.address,

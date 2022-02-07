@@ -23,8 +23,11 @@ class ERC20Enterprise(ERC20Token):
         from_wallet: Wallet,
     ) -> str:
         # TODO: this will be handled in web3 py
-        if isinstance(order_params, OrderParams):
-            order_params = tuple(order_params)
+        provider_fees = None
+        if isinstance(order_params[2], ProviderFees):
+            provider_fees = tuple(order_params[2])
+
+        order_params = (order_params[0], order_params[1], provider_fees)
 
         return self.send_transaction(
             "buyFromFreAndOrder", (order_params, fre_params), from_wallet
@@ -37,8 +40,11 @@ class ERC20Enterprise(ERC20Token):
         from_wallet: Wallet,
     ) -> str:
         # TODO: this will be handled in web3 py
-        if isinstance(order_params, OrderParams):
-            order_params = tuple(order_params)
+        provider_fees = None
+        if isinstance(order_params[2], ProviderFees):
+            provider_fees = tuple(order_params[2])
+
+        order_params = (order_params[0], order_params[1], provider_fees)
 
         return self.send_transaction(
             "buyFromDispenserAndOrder", (order_params, dispenser_address), from_wallet

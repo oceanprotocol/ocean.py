@@ -10,7 +10,6 @@ from ocean_lib.models.models_structures import (
     CreateErc20Data,
     DispenserData,
     OrderParams,
-    ProviderFees,
 )
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
@@ -109,16 +108,12 @@ def test_erc20_enterprise_flow_with_dispenser():
 
     # Prepare data for order
     provider_fees = ocean.build_compute_provider_fees(
-        provider_data=json.dumps({"timeout": 0}, separators=(",", ":")),
+        provider_data={"timeout": 0},
         provider_fee_address=alice_wallet.address,
         provider_fee_token=OCEAN_token.address,
         provider_fee_amount=0,
         valid_until=1958133628,  # 2032
     )
-
-    # TODO: this will be handled in web3 py
-    if isinstance(provider_fees, ProviderFees):
-        provider_fees = tuple(provider_fees)
 
     initial_bob_balance = OCEAN_token.balanceOf(bob_wallet.address)
     order_params = OrderParams(
@@ -208,16 +203,12 @@ def test_erc20_enterprise_flow_with_fre():
 
     # Prepare data for order
     provider_fees = ocean.build_compute_provider_fees(
-        provider_data=json.dumps({"timeout": 0}, separators=(",", ":")),
+        provider_data={"timeout": 0},
         provider_fee_address=alice_wallet.address,
         provider_fee_token=OCEAN_token.address,
         provider_fee_amount=0,
         valid_until=1958133628,  # 2032
     )
-
-    # TODO: this will be handled in web3 py
-    if isinstance(provider_fees, ProviderFees):
-        provider_fees = tuple(provider_fees)
 
     order_params = OrderParams(
         bob_wallet.address,
