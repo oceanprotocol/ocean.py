@@ -50,9 +50,10 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 In the Python console:
 ```python
 # Prepare data for ERC20 Enterprise token
-cap = ocean.to_wei(200)
 from ocean_lib.models.models_structures import CreateErc20Data, DispenserData, ProviderFees, OrderParams
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+
+cap = ocean.to_wei(200)
 erc20_data = CreateErc20Data(
     template_index=2,  # this is the value for ERC20 Enterprise token
     strings=[
@@ -115,9 +116,8 @@ OCEAN_token.approve(
 )
 
 # Prepare data for order
-import json
 provider_fees = ocean.build_compute_provider_fees(
-    provider_data=json.dumps({"timeout": 0}, separators=(",", ":")),
+    provider_data={"timeout": 0},
     provider_fee_address=alice_wallet.address,
     provider_fee_token=OCEAN_token.address,
     provider_fee_amount=0,

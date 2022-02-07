@@ -4,6 +4,7 @@
 #
 
 """Ocean module."""
+import json
 import logging
 from decimal import Decimal
 from typing import Dict, List, Optional, Type, Union
@@ -309,12 +310,15 @@ class Ocean:
     @enforce_types
     def build_compute_provider_fees(
         self,
-        provider_data: str,
+        provider_data: Union[str, dict],
         provider_fee_address: str,
         provider_fee_token: str,
         provider_fee_amount: int,
         valid_until: int,
     ) -> ProviderFees:
+        if isinstance(provider_data, dict):
+            provider_data = json.dumps(provider_data, separators=(",", ":"))
+
         message = self.web3.solidityKeccak(
             ["bytes", "address", "address", "uint256", "uint256"],
             [
