@@ -5,6 +5,7 @@
 import os
 
 import pytest
+from requests.exceptions import InvalidURL
 
 from ocean_lib.agreements.consumable import AssetNotConsumable
 from ocean_lib.agreements.service_types import ServiceTypes
@@ -16,7 +17,7 @@ from tests.resources.ddo_helpers import create_asset, create_basics, get_sample_
 from tests.resources.helper_functions import deploy_erc721_erc20
 
 
-def test_ocean_assets_download_failure(publisher_wallet, config):
+def test_ocean_assets_download_failure(publisher_wallet):
     """Tests that downloading from an empty service raises an AssertionError."""
 
     ddo_dict = get_sample_ddo()
@@ -28,7 +29,6 @@ def test_ocean_assets_download_failure(publisher_wallet, config):
     with pytest.raises(AssertionError):
         download_asset_files(
             ddo,
-            config.provider_url,
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
@@ -37,19 +37,17 @@ def test_ocean_assets_download_failure(publisher_wallet, config):
 
 def test_invalid_provider_uri(publisher_wallet):
     """Tests with invalid provider URI that raise AssertionError."""
-    provider_uri = "http://mock/"
     ddo_dict = get_sample_ddo()
     ddo = Asset.from_dict(ddo_dict)
 
-    with pytest.raises(AssertionError):
+    with pytest.raises(InvalidURL):
         download_asset_files(
-            ddo, provider_uri, publisher_wallet, "test_destination", "test_order_tx_id"
+            ddo, publisher_wallet, "test_destination", "test_order_tx_id"
         )
 
 
-def test_invalid_state(config, publisher_wallet):
+def test_invalid_state(publisher_wallet):
     """Tests different scenarios that raise AssetNotConsumable."""
-    data_provider = DataServiceProvider
     ddo_dict = get_sample_ddo()
     ddo = Asset.from_dict(ddo_dict)
     ddo.nft["state"] = 1
@@ -57,7 +55,6 @@ def test_invalid_state(config, publisher_wallet):
     with pytest.raises(AssetNotConsumable):
         download_asset_files(
             ddo,
-            data_provider.get_url(config),
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
@@ -67,7 +64,6 @@ def test_invalid_state(config, publisher_wallet):
     with pytest.raises(AssetNotConsumable):
         download_asset_files(
             ddo,
-            data_provider.get_url(config),
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
@@ -86,7 +82,6 @@ def test_ocean_assets_download_indexes(
     with pytest.raises(TypeError):
         download_asset_files(
             ddo,
-            config.provider_url,
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
@@ -97,7 +92,6 @@ def test_ocean_assets_download_indexes(
     with pytest.raises(AssertionError):
         download_asset_files(
             ddo,
-            config.provider_url,
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
@@ -109,7 +103,6 @@ def test_ocean_assets_download_indexes(
     with pytest.raises(AssertionError):
         download_asset_files(
             ddo,
-            config.provider_url,
             publisher_wallet,
             str(tmpdir),
             "test_order_tx_id",
@@ -153,11 +146,8 @@ def ocean_assets_download_destination_file_helper(
 
     initialize_response = data_provider.initialize(
         did=ddo.did,
-        service_id=access_service.id,
+        service=access_service,
         consumer_address=publisher_wallet.address,
-        service_endpoint=data_provider.build_initialize_endpoint(config.provider_url)[
-            1
-        ],
     )
 
     provider_fees = initialize_response.json()["providerFee"]
@@ -172,8 +162,6 @@ def ocean_assets_download_destination_file_helper(
     assert erc20_token.address in [order.address for order in orders]
     assert tx_id in [order.transactionHash.hex() for order in orders]
 
-    written_path = download_asset_files(
-        ddo, config.provider_url, publisher_wallet, tmpdir, tx_id
-    )
+    written_path = download_asset_files(ddo, publisher_wallet, tmpdir, tx_id)
 
     assert os.path.exists(written_path)

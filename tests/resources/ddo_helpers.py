@@ -185,9 +185,7 @@ def create_basics(
         files = [file1, file2]
 
     # Encrypt file objects
-    encrypt_response = data_provider.encrypt(
-        files, "http://172.15.0.4:8030/api/services/encrypt"
-    )
+    encrypt_response = data_provider.encrypt(files, config.provider_url)
     encrypted_files = encrypt_response.content.decode("utf-8")
 
     return erc721_factory, metadata, encrypted_files
@@ -215,14 +213,10 @@ def get_registered_asset_with_compute_service(
 
     # Set the compute values for compute service
     compute_values = {
-        "namespace": "ocean-compute",
-        "cpus": 2,
-        "gpus": 4,
-        "gpuType": "NVIDIA Tesla V100 GPU",
-        "memory": "128M",
-        "volumeSize": "2G",
         "allowRawAlgorithm": allow_raw_algorithms,
         "allowNetworkAccess": True,
+        "publisherTrustedAlgorithms": [],
+        "publisherTrustedAlgorithmPublishers": [],
     }
     compute_service = Service(
         service_id="2",
