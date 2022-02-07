@@ -109,3 +109,63 @@ tx_result = ocean.fixed_rate_exchange.buy_dt(
     )
 assert tx_result, "failed buying datatokens at fixed rate for Bob"
 ```
+
+As an alternative to publishing the nft, the datatoken and the fixed rate exchange using separate transactions,
+you can use the `create_nft_erc_fre_in_one_call` function to deploy them within a single
+transaction. ocean.py also offers the option of creating the NFT, the ERC20 and a pool, exchange or
+dispenser within the same transaction, using the PoolData, FixedData or DispenserData
+as arguments.
+
+```python
+from ocean_lib.models.models_structures import CreateErc20Data, CreateERC721DataNoDeployer, FixedData
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+
+nft_factory = ocean.get_nft_factory()
+fixed_rate_address = ocean.fixed_rate_exchange.address
+
+cap = ocean.to_wei(10)
+erc721_data = CreateERC721DataNoDeployer(
+    name="NFT",
+    symbol="NFTSYMBOL",
+    template_index=1,  # default value
+    token_uri="https://oceanprotocol.com/nft/",
+)
+erc20_data = CreateErc20Data(
+    template_index=1, # default value
+    strings=["ERC20DT1", "ERC20DT1Symbol"], # name & symbol for ERC20 token
+    addresses=[
+        alice_wallet.address, # minter address
+        alice_wallet.address, # fee manager for this ERC20 token
+        alice_wallet.address, # publishing Market Address
+        ZERO_ADDRESS, # publishing Market Fee Token
+    ],
+    uints=[cap, 0],
+    bytess=[b""]
+)
+fixed_rate_data = FixedData(
+    fixed_price_address=fixed_rate_address,
+    addresses=[
+        ocean.OCEAN_address,  # basetoken address
+        alice_wallet.address,  # owner address
+        bob_wallet.address,  # market fee collector address
+        ZERO_ADDRESS,
+    ],
+    uints=[18, 18, ocean.to_wei("1"), ocean.to_wei("0.001"), 0],
+    # basetoken decimals, datatoken decimals, fixed rate, market fee, with mint
+)
+erc721_token, erc20_token, exchange_id = nft_factory.create_nft_erc_fre_in_one_call(
+    erc721_data=erc721_data,
+    erc20_data=erc20_data,
+    fixed_rate_data=fixed_rate_data,
+    from_wallet=alice_wallet,
+)
+print(f"Created ERC721 token: done. Its address is {erc721_token.address}")
+print(f"data NFT token name: {erc721_token.token_name()}")
+print(f"data NFT token symbol: {erc721_token.symbol()}")
+
+print(f"Created ERC20 datatoken: done. Its address is {erc20_token.address}")
+print(f"datatoken name: {erc20_token.token_name()}")
+print(f"datatoken symbol: {erc20_token.symbol()}")
+
+print(f"Created Fixed Rate Exchange: done. Its exchange id is {exchange_id}")
+```

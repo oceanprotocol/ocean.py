@@ -2,7 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import Optional, Union
+from typing import Optional, Union, Tuple
 
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
@@ -266,12 +266,12 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
         return registered_event[0].args.newTokenAddress
 
-    def create_nft_erc_tokens_once(
+    def create_nft_erc_in_one_call(
         self,
         erc721_data: CreateERC721DataNoDeployer,
         erc20_data: CreateErc20Data,
         from_wallet: Wallet,
-    ) -> tuple:
+    ) -> Tuple[ERC721Token, ERC20Token]:
         tx = self.create_nft_with_erc(erc721_data, erc20_data, from_wallet)
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
         registered_nft_event = self.get_event_log(
@@ -293,3 +293,42 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         erc20_token = ERC20Token(self.web3, erc20_address)
 
         return erc721_token, erc20_token
+
+    def create_nft_erc_fre_in_one_call(
+        self,
+        erc721_data: CreateERC721DataNoDeployer,
+        erc20_data: CreateErc20Data,
+        fixed_rate_data: FixedData,
+        from_wallet: Wallet,
+    ) -> Tuple[ERC721Token, ERC20Token, bytes]:
+        tx = self.create_nft_erc_with_fixed_rate(
+            erc721_data, erc20_data, fixed_rate_data, from_wallet
+        )
+        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
+        registered_nft_event = self.get_event_log(
+            ERC721FactoryContract.EVENT_NFT_CREATED,
+            tx_receipt.blockNumber,
+            self.web3.eth.block_number,
+            None,
+        )
+        erc721_address = registered_nft_event[0].args.newTokenAddress
+        erc721_token = ERC721Token(self.web3, erc721_address)
+
+        registered_token_event = self.get_event_log(
+            ERC721FactoryContract.EVENT_TOKEN_CREATED,
+            tx_receipt.blockNumber,
+            self.web3.eth.block_number,
+            None,
+        )
+        erc20_address = registered_token_event[0].args.newTokenAddress
+        erc20_token = ERC20Token(self.web3, erc20_address)
+
+        registered_fixed_rate_event = erc20_token.get_event_log(
+            ERC721FactoryContract.EVENT_NEW_FIXED_RATE,
+            tx_receipt.blockNumber,
+            self.web3.eth.block_number,
+            None,
+        )
+        exchange_id = registered_fixed_rate_event[0].args.exchangeId
+
+        return erc721_token, erc20_token, exchange_id
