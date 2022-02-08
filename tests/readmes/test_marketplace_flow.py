@@ -14,7 +14,11 @@ from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-def test_marketplace_flow(tmp_path):
+def test_marketplace_flow_readme(tmp_path):
+    """This test mirrors the marketplace-flow.md README.
+    As such, it does not use the typical pytest fixtures.
+    """
+
     config = ExampleConfig.get_config()
     ocean = Ocean(config)
 
