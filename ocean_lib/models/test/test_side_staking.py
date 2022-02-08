@@ -242,9 +242,7 @@ def test_side_staking(
     min_bp_out = to_wei("0.1")
 
     receipt = web3.eth.wait_for_transaction_receipt(
-        bpool.join_swap_extern_amount_in(
-            ocean_token.address, ocean_amount_in, min_bp_out, consumer_wallet
-        )
+        bpool.join_swap_extern_amount_in(ocean_amount_in, min_bp_out, consumer_wallet)
     )
 
     registered_event = bpool.get_event_log(
@@ -285,55 +283,6 @@ def test_side_staking(
 
     # No dt token where taken from user3
 
-    assert erc20.balanceOf(consumer_wallet.address) == initial_erc20_balance_consumer
-
-    # Consumer adds more liquidity with joinswapPoolAmountOut (only OCEAN)
-    initial_erc20_balance_consumer = erc20.balanceOf(consumer_wallet.address)
-    initial_ocean_balance_consumer = ocean_token.balanceOf(consumer_wallet.address)
-    initial_bpt_balance_consumer = bpool.balanceOf(consumer_wallet.address)
-    ss_contract_dt_balance = erc20.balanceOf(get_address_of_type(config, "Staking"))
-    ss_contract_bpt_balance = bpool.balanceOf(get_address_of_type(config, "Staking"))
-
-    ocean_token.approve(bpool.address, to_wei("1"), consumer_wallet)
-    bp_amt_out = to_wei("0.01")
-    max_ocean_in = to_wei("100")
-
-    receipt = web3.eth.wait_for_transaction_receipt(
-        bpool.join_swap_pool_amount_out(
-            ocean_token.address, bp_amt_out, max_ocean_in, consumer_wallet
-        )
-    )
-
-    registered_event = bpool.get_event_log(
-        event_name=BPool.EVENT_LOG_JOIN,
-        from_block=receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
-    assert registered_event[0].args.tokenIn == ocean_token.address
-    assert registered_event[1].args.tokenIn == erc20.address
-
-    # Check balances (ocean and bpt)
-    assert (
-        registered_event[0].args.tokenAmountIn
-        + ocean_token.balanceOf(consumer_wallet.address)
-        == initial_ocean_balance_consumer
-    )
-    assert bp_amt_out + initial_bpt_balance_consumer == bpool.balanceOf(
-        consumer_wallet.address
-    )
-
-    # We check ssContract received the same amount of BPT
-    assert ss_contract_bpt_balance + bp_amt_out == bpool.balanceOf(
-        get_address_of_type(config, "Staking")
-    )
-
-    # And also that DT balance lowered in the ssContract
-    assert ss_contract_dt_balance - registered_event[
-        1
-    ].args.tokenAmountIn == erc20.balanceOf(get_address_of_type(config, "Staking"))
-
-    # No token where taken from user3.
     assert erc20.balanceOf(consumer_wallet.address) == initial_erc20_balance_consumer
 
     # Consumer removes liquidity with JoinPool, receiving both tokens
@@ -401,9 +350,7 @@ def test_side_staking(
     min_ocean_out = to_wei("0.000001")
 
     receipt = web3.eth.wait_for_transaction_receipt(
-        bpool.exit_swap_pool_amount_in(
-            ocean_token.address, bpt_amount_in, min_ocean_out, consumer_wallet
-        )
+        bpool.exit_swap_pool_amount_in(bpt_amount_in, min_ocean_out, consumer_wallet)
     )
 
     assert erc20.balanceOf(consumer_wallet.address) == initial_erc20_balance_consumer
@@ -436,70 +383,12 @@ def test_side_staking(
         1
     ].args.tokenAmountOut == erc20.balanceOf(get_address_of_type(config, "Staking"))
 
-    # Consumer removes liquidity with exitswapPoolAmountIn, receiving only DT tokens
-
-    initial_erc20_balance_consumer = erc20.balanceOf(consumer_wallet.address)
-    initial_ocean_balance_consumer = ocean_token.balanceOf(consumer_wallet.address)
-    initial_bpt_balance_consumer = bpool.balanceOf(consumer_wallet.address)
-    ss_contract_dt_balance = erc20.balanceOf(get_address_of_type(config, "Staking"))
-    ss_contract_bpt_balance = bpool.balanceOf(get_address_of_type(config, "Staking"))
-
-    max_btp_in = to_wei("0.01")
-    exact_ocean_out = to_wei("1")
-
-    receipt = web3.eth.wait_for_transaction_receipt(
-        bpool.exit_swap_extern_amount_out(
-            ocean_token.address, max_btp_in, exact_ocean_out, consumer_wallet
-        )
-    )
-
-    registered_event = bpool.get_event_log(
-        event_name=BPool.EVENT_LOG_BPT,
-        from_block=receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
-
-    assert initial_erc20_balance_consumer == erc20.balanceOf(consumer_wallet.address)
-    assert (
-        bpool.balanceOf(consumer_wallet.address)
-        == initial_bpt_balance_consumer - registered_event[0].args.bptAmount
-    )
-
-    # Check exit event
-    exit_event = bpool.get_event_log(
-        event_name=BPool.EVENT_LOG_EXIT,
-        from_block=receipt.blockNumber,
-        to_block=web3.eth.block_number,
-        filters=None,
-    )
-
-    # We check event arguments
-    assert exit_event[0].args.caller == consumer_wallet.address
-    assert exit_event[0].args.tokenOut == ocean_token.address
-    assert exit_event[1].args.tokenOut == erc20.address
-
-    assert exit_event[
-        0
-    ].args.tokenAmountOut + initial_ocean_balance_consumer == ocean_token.balanceOf(
-        consumer_wallet.address
-    )
-
-    # Now we check the ssContract BPT balance
-    assert ss_contract_bpt_balance - registered_event[
-        0
-    ].args.bptAmount == bpool.balanceOf(get_address_of_type(config, "Staking"))
-    # And that we got back some dt when redeeeming BPT
-    assert ss_contract_dt_balance + exit_event[
-        1
-    ].args.tokenAmountOut == erc20.balanceOf(get_address_of_type(config, "Staking"))
-
     # Get vesting should be callable by anyone
     side_staking.get_vesting(erc20.address, another_consumer_wallet)
 
     # Only pool can call this function
     with pytest.raises(exceptions.ContractLogicError) as err:
-        side_staking.can_stake(erc20.address, ocean_token.address, 10)
+        side_staking.can_stake(erc20.address, 10)
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERR: Only pool can call this"
@@ -507,7 +396,7 @@ def test_side_staking(
 
     # Only pool can call this function
     with pytest.raises(exceptions.ContractLogicError) as err:
-        side_staking.stake(erc20.address, ocean_token.address, 10, consumer_wallet)
+        side_staking.stake(erc20.address, 10, consumer_wallet)
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERR: Only pool can call this"
@@ -515,7 +404,7 @@ def test_side_staking(
 
     # Only pool can call this function
     with pytest.raises(exceptions.ContractLogicError) as err:
-        side_staking.unstake(erc20.address, ocean_token.address, 10, 5, consumer_wallet)
+        side_staking.unstake(erc20.address, 10, 5, consumer_wallet)
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERR: Only pool can call this"

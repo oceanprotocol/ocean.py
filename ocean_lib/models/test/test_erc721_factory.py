@@ -162,7 +162,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         bytess=[b""],
     )
 
-    tx = erc721_factory.create_nft_with_erc(
+    tx = erc721_factory.create_nft_with_erc20(
         nft_create_data, erc_create_data, publisher_wallet
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -239,7 +239,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         ],
         swap_fees=[to_wei("0.001"), to_wei("0.001")],
     )
-    tx = erc721_factory.create_nft_erc_with_pool(
+    tx = erc721_factory.create_nft_erc20_with_pool(
         nft_create_data, erc_create_data_pool, pool_data, publisher_wallet
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -326,7 +326,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         ],
         uints=[18, 18, to_wei("1"), to_wei("0.001"), 0],
     )
-    tx = erc721_factory.create_nft_erc_with_fixed_rate(
+    tx = erc721_factory.create_nft_erc20_with_fixed_rate(
         nft_create_data, erc_create_data_pool, fixed_rate_data, publisher_wallet
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -380,7 +380,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         allowed_swapper=ZERO_ADDRESS,
     )
 
-    tx = erc721_factory.create_nft_erc_with_dispenser(
+    tx = erc721_factory.create_nft_erc20_with_dispenser(
         nft_create_data, erc_create_data_pool, dispenser_data, publisher_wallet
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)

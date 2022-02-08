@@ -98,7 +98,7 @@ def test_buy_dt_batch(
         "swapFees": [to_wei("0.001"), to_wei("0.001")],
     }
 
-    tx = nft_factory.create_nft_erc_with_pool(
+    tx = nft_factory.create_nft_erc20_with_pool(
         nft_data, erc_data, pool_data, factory_deployer_wallet
     )
 
@@ -155,7 +155,7 @@ def test_buy_dt_batch(
         "swapFees": [to_wei("0.001"), to_wei("0.001")],
     }
 
-    tx = nft_factory.create_nft_erc_with_pool(
+    tx = nft_factory.create_nft_erc20_with_pool(
         nft_data2, erc_data2, pool_data2, factory_deployer_wallet
     )
 
