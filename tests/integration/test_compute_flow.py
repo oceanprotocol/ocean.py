@@ -151,18 +151,18 @@ def process_order(
         else publisher_wallet
     )
     erc20_token.mint(consumer_wallet.address, to_wei(10), minter)
+
+    environments = ocean_instance.compute.get_c2d_environments(service.service_endpoint)
+
     order_tx_id = ocean_instance.assets.pay_for_service(
         asset=asset,
         service=service,
         wallet=consumer_wallet,
         initialize_args={
-            # TODO: add a real compute environment once provider supports it
-            "compute_environment": "doesn't matter for now",
+            "compute_environment": environments[0]["id"],
             "valid_until": int((datetime.now() + timedelta(hours=1)).timestamp()),
         },
-        consumer_address=ocean_instance.compute.get_c2d_address(
-            service.service_endpoint
-        ),
+        consumer_address=environments[0]["consumerAddress"],
     )
 
     return order_tx_id, service
@@ -244,12 +244,14 @@ def run_compute_test(
             algorithm_and_userdata.userdata,
         )
 
+    service = dataset_and_userdata.asset.get_service(ServiceTypes.CLOUD_COMPUTE)
+    environments = ocean_instance.compute.get_c2d_environments(service.service_endpoint)
+
     # Start compute job
     job_id = ocean_instance.compute.start(
         consumer_wallet,
         dataset,
-        # TODO: add a real compute environment after implemented in provider
-        "TODO: add a real compute environment after implemented in provider",
+        environments[0]["id"],
         algorithm,
         algorithm_meta,
         algorithm_algocustomdata,
