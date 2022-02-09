@@ -314,7 +314,10 @@ def get_provider_fees() -> Dict[str, Any]:
     provider_wallet = get_provider_wallet()
     web3 = get_web3()
     provider_fee_amount = 0
-    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
+    compute_env = None
+    provider_data = json.dumps(
+        {"environment": compute_env, "timeout": 0}, separators=(",", ":")
+    )
     provider_fee_address = provider_wallet.address
     provider_fee_token = os.environ.get("PROVIDER_FEE_TOKEN", ZERO_ADDRESS)
     valid_until = 0
