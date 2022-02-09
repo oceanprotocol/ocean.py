@@ -132,6 +132,10 @@ class OceanCompute:
         return job_info
 
     @enforce_types
+    def get_c2d_address(self, service_endpoint: str) -> str:
+        return DataServiceProvider.get_c2d_address(service_endpoint)
+
+    @enforce_types
     def _get_service_endpoint(
         self, did: str, asset: Optional[Asset] = None
     ) -> Tuple[str, str]:

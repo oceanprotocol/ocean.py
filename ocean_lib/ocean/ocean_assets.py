@@ -79,9 +79,7 @@ class OceanAssets:
         if not has_access_service:
             access_service = self.build_access_service(
                 service_id="0",
-                service_endpoint=self._data_provider.build_download_endpoint(
-                    provider_uri
-                )[1],
+                service_endpoint=self._config.provider_url,
                 datatoken=datatoken,
                 files=files,
             )

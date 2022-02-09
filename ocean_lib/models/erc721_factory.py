@@ -125,7 +125,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
         return self.send_transaction("startMultipleTokenOrder", (orders,), from_wallet)
 
-    def create_nft_with_erc(
+    def create_nft_with_erc20(
         self,
         nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
         erc_create_data: Union[dict, tuple, CreateErc20Data],
@@ -140,10 +140,10 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             erc_create_data = tuple(erc_create_data)
 
         return self.send_transaction(
-            "createNftWithErc", (nft_create_data, erc_create_data), from_wallet
+            "createNftWithErc20", (nft_create_data, erc_create_data), from_wallet
         )
 
-    def create_nft_erc_with_pool(
+    def create_nft_erc20_with_pool(
         self,
         nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
         erc_create_data: Union[dict, tuple, CreateErc20Data],
@@ -163,12 +163,12 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             pool_data = tuple(pool_data)
 
         return self.send_transaction(
-            "createNftErcWithPool",
+            "createNftWithErc20WithPool",
             (nft_create_data, erc_create_data, pool_data),
             from_wallet,
         )
 
-    def create_nft_erc_with_fixed_rate(
+    def create_nft_erc20_with_fixed_rate(
         self,
         nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
         erc_create_data: Union[dict, tuple, CreateErc20Data],
@@ -188,12 +188,12 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             fixed_data = tuple(fixed_data)
 
         return self.send_transaction(
-            "createNftErcWithFixedRate",
+            "createNftWithErc20WithFixedRate",
             (nft_create_data, erc_create_data, fixed_data),
             from_wallet,
         )
 
-    def create_nft_erc_with_dispenser(
+    def create_nft_erc20_with_dispenser(
         self,
         nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
         erc_create_data: Union[dict, tuple, CreateErc20Data],
@@ -213,7 +213,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             dispenser_data = tuple(dispenser_data)
 
         return self.send_transaction(
-            "createNftErcWithDispenser",
+            "createNftWithErc20WithDispenser",
             (nft_create_data, erc_create_data, dispenser_data),
             from_wallet,
         )

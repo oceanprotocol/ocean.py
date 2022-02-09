@@ -7,8 +7,6 @@ import pickle
 import time
 from datetime import datetime, timedelta
 
-import pytest
-
 from ocean_lib.agreements.file_objects import UrlFile
 from ocean_lib.assets.trusted_algorithms import add_publisher_trusted_algorithm
 from ocean_lib.example_config import ExampleConfig
@@ -21,9 +19,10 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-@pytest.mark.skip("TODO: reinstate after c2d backend is fixed to support v4")
 def test_c2d_flow_readme():
-    """This test mirrors the c2d-flow.md README."""
+    """This test mirrors the c2d-flow.md README.
+    As such, it does not use the typical pytest fixtures.
+    """
 
     # 2. Alice publishes data asset with compute service
     config = ExampleConfig.get_config()
@@ -96,7 +95,7 @@ def test_c2d_flow_readme():
     DATA_compute_service = Service(
         service_id="2",
         service_type="compute",
-        service_endpoint=f"{ocean.config.provider_url}/api/services/compute",
+        service_endpoint=ocean.config.provider_url,
         datatoken=DATA_datatoken.address,
         files=DATA_encrypted_files,
         timeout=3600,
@@ -222,6 +221,9 @@ def test_c2d_flow_readme():
             "compute_environment": "unused",
             "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
         },
+        consumer_address=ocean.compute.get_c2d_address(
+            compute_service.service_endpoint
+        ),
     )
     assert DATA_order_tx_id, "pay for dataset unsuccessful"
 
@@ -233,6 +235,7 @@ def test_c2d_flow_readme():
         initialize_args={
             "valid_until": int((datetime.now() + timedelta(days=1)).timestamp())
         },
+        consumer_address=ocean.compute.get_c2d_address(algo_service.service_endpoint),
     )
     assert ALGO_order_tx_id, "pay for algorithm unsuccessful"
 
@@ -252,7 +255,7 @@ def test_c2d_flow_readme():
     succeeded = False
     for _ in range(0, 200):
         status = ocean.compute.status(DATA_did, job_id, bob_wallet)
-        if status["status"] > 60:
+        if status.get("dateFinished") and int(status["dateFinished"]) > 0:
             print(f"Status = '{status}'")
             succeeded = True
             break
@@ -260,13 +263,13 @@ def test_c2d_flow_readme():
     assert succeeded, "compute job unsuccessful"
 
     # Retrieve algorithm output and log files
+    output = None
     for i in range(len(status["results"])):
+        result = None
         result_type = status["results"][i]["type"]
         print(f"Fetch result index {i}, type: {result_type}")
         result = ocean.compute.result(DATA_did, job_id, i, bob_wallet)
         assert result, "result retrieval unsuccessful"
-        print(result)
-        print("==========\n")
 
         # Extract algorithm output
         if result_type == "output":
@@ -275,4 +278,4 @@ def test_c2d_flow_readme():
 
     # Unpickle the gaussian model result
     model = pickle.loads(output)
-    assert model, "unpickle result unsuccessful"
+    assert len(model) > 0, "unpickle result unsuccessful"

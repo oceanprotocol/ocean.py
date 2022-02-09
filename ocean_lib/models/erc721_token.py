@@ -7,6 +7,7 @@ from typing import List, Union
 
 from enforce_typing import enforce_types
 
+from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.models_structures import (
     ChainMetadata,
@@ -220,7 +221,7 @@ class ERC721Token(ContractBase):
         )
 
     def create_datatoken(
-        self, erc20_data: CreateErc20Data, from_wallet: Wallet
+        self, erc20_data: Union[CreateErc20Data, dict, tuple], from_wallet: Wallet
     ) -> ERC20Token:
         initial_list = self.get_tokens_list()
 
@@ -232,6 +233,9 @@ class ERC721Token(ContractBase):
         ]
 
         assert len(new_elements) == 1, "new data token has no address"
-        token = ERC20Token(self.web3, new_elements[0])
 
-        return token
+        return (
+            ERC20Token(self.web3, new_elements[0])
+            if erc20_data.template_index == 1
+            else ERC20Enterprise(self.web3, new_elements[0])
+        )

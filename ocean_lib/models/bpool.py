@@ -332,7 +332,6 @@ class BPool(BTokenBase):
 
     def join_swap_extern_amount_in(
         self,
-        tokenIn_address: str,
         tokenAmountIn: int,
         minPoolAmountOut: int,
         from_wallet: Wallet,
@@ -343,31 +342,12 @@ class BPool(BTokenBase):
         """
         return self.send_transaction(
             "joinswapExternAmountIn",
-            (tokenIn_address, tokenAmountIn, minPoolAmountOut),
-            from_wallet,
-        )
-
-    def join_swap_pool_amount_out(
-        self,
-        tokenIn_address: str,
-        poolAmountOut: int,
-        maxAmountIn: int,
-        from_wallet: Wallet,
-    ) -> str:
-        """
-        Specify `poolAmountOut` pool shares that you want to get, and a token
-        `tokenIn` to pay with. This costs `maxAmountIn` tokens (these went
-        into the pool).
-        """
-        return self.send_transaction(
-            "joinswapPoolAmountOut",
-            (tokenIn_address, poolAmountOut, maxAmountIn),
+            (tokenAmountIn, minPoolAmountOut),
             from_wallet,
         )
 
     def exit_swap_pool_amount_in(
         self,
-        tokenOut_address: str,
         poolAmountIn: int,
         minAmountOut: int,
         from_wallet: Wallet,
@@ -378,24 +358,6 @@ class BPool(BTokenBase):
         """
         return self.send_transaction(
             "exitswapPoolAmountIn",
-            (tokenOut_address, poolAmountIn, minAmountOut),
-            from_wallet,
-        )
-
-    def exit_swap_extern_amount_out(
-        self,
-        tokenOut_address: str,
-        tokenAmountOut: int,
-        maxPoolAmountIn: int,
-        from_wallet: Wallet,
-    ) -> str:
-        """
-        Specify `tokenAmountOut` of token `tokenOut` that you want to get out
-        of the pool. This costs `poolAmountIn` pool shares (these went into
-        the pool).
-        """
-        return self.send_transaction(
-            "exitswapExternAmountOut",
-            (tokenOut_address, tokenAmountOut, maxPoolAmountIn),
+            (poolAmountIn, minAmountOut),
             from_wallet,
         )

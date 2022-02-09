@@ -127,6 +127,15 @@ OrderData = NamedTuple(
     ],
 )
 
+OrderParams = NamedTuple(
+    "OrderParams",
+    [
+        ("consumer", str),
+        ("service_index", int),
+        ("provider_fees", ProviderFees),
+    ],
+)
+
 MetadataProof = NamedTuple(
     "MetadataProof",
     [("validator_address", str), ("v", int), ("r", bytes), ("s", bytes)],
