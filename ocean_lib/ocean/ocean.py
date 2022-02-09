@@ -4,6 +4,7 @@
 #
 
 """Ocean module."""
+import json
 import logging
 from decimal import Decimal
 from typing import Dict, List, Optional, Type, Union
@@ -14,18 +15,20 @@ from web3.datastructures import AttributeDict
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.bpool import BPool
+from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.models_structures import FixedData, PoolData
+from ocean_lib.models.models_structures import FixedData, PoolData, ProviderFees
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import DECIMALS_18
 from ocean_lib.web3_internal.currency import to_wei as _to_wei
+from ocean_lib.web3_internal.utils import split_signature, Signature
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ocean")
@@ -212,6 +215,11 @@ class Ocean:
             self.web3, get_address_of_type(self.config, "FixedPrice")
         )
 
+    @property
+    @enforce_types
+    def dispenser(self):
+        return Dispenser(self.web3, get_address_of_type(self.config, "Dispenser"))
+
     @enforce_types
     def create_fixed_rate(
         self,
@@ -298,3 +306,38 @@ class Ocean:
         bpool = BPool(self.web3, bpool_address)
 
         return bpool
+
+    @enforce_types
+    def build_compute_provider_fees(
+        self,
+        provider_data: Union[str, dict],
+        provider_fee_address: str,
+        provider_fee_token: str,
+        provider_fee_amount: int,
+        valid_until: int,
+    ) -> ProviderFees:
+        if isinstance(provider_data, dict):
+            provider_data = json.dumps(provider_data, separators=(",", ":"))
+
+        message = self.web3.solidityKeccak(
+            ["bytes", "address", "address", "uint256", "uint256"],
+            [
+                self.web3.toHex(self.web3.toBytes(text=provider_data)),
+                provider_fee_address,
+                provider_fee_token,
+                provider_fee_amount,
+                valid_until,
+            ],
+        )
+        signed = self.web3.eth.sign(provider_fee_address, data=message)
+        signature = split_signature(signed)
+        return ProviderFees(
+            provider_fee_address,
+            provider_fee_token,
+            provider_fee_amount,
+            signature.v,
+            signature.r,
+            signature.s,
+            valid_until,
+            self.web3.toHex(self.web3.toBytes(text=provider_data)),
+        )
