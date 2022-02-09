@@ -75,65 +75,7 @@ dispenser.dispense_tokens(
 assert erc20_token.balanceOf(alice_wallet.address) == max_amount
 ```
 
-As an alternative to publishing the nft, the datatoken and the dispenser using separate transactions,
-you can use the `create_nft_erc_dispenser_in_one_call` function to deploy them within a single
-transaction. ocean.py also offers the option of creating the NFT, the ERC20 and a pool, exchange or
-dispenser within the same transaction, using the PoolData, FixedData or DispenserData
-as arguments.
+As an alternative for publishing a NFT, a datatoken and a dispenser at once, you can use `create_nft_erc20_with_dispenser`.
 
-```python
-from ocean_lib.models.models_structures import CreateErc20Data, CreateERC721DataNoDeployer, DispenserData
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-
-nft_factory = ocean.get_nft_factory()
-dispenser_address = ocean.dispenser.address
-
-cap = ocean.to_wei(10)
-erc721_data = CreateERC721DataNoDeployer(
-    name="NFT",
-    symbol="NFTSYMBOL",
-    template_index=1,  # default value
-    token_uri="https://oceanprotocol.com/nft/",
-)
-erc20_data = CreateErc20Data(
-    template_index=1, # default value
-    strings=["ERC20DT1", "ERC20DT1Symbol"], # name & symbol for ERC20 token
-    addresses=[
-        alice_wallet.address, # minter address
-        alice_wallet.address, # fee manager for this ERC20 token
-        alice_wallet.address, # publishing Market Address
-        ZERO_ADDRESS, # publishing Market Fee Token
-    ],
-    uints=[cap, 0],
-    bytess=[b""]
-)
-
-dispenser_data = DispenserData(
-    dispenser_address=dispenser_address,
-    max_tokens=ocean.to_wei("1"),
-    max_balance=ocean.to_wei("1"),
-    with_mint=True,
-    allowed_swapper=ZERO_ADDRESS,
-)
-erc721_token, erc20_token = nft_factory.create_nft_erc_dispenser_in_one_call(
-    erc721_data=erc721_data,
-    erc20_data=erc20_data,
-    dispenser_data=dispenser_data,
-    from_wallet=alice_wallet,
-)
-print(f"Created ERC721 token: done. Its address is {erc721_token.address}")
-print(f"data NFT token name: {erc721_token.token_name()}")
-print(f"data NFT token symbol: {erc721_token.symbol()}")
-
-print(f"Created ERC20 datatoken: done. Its address is {erc20_token.address}")
-print(f"datatoken name: {erc20_token.token_name()}")
-print(f"datatoken symbol: {erc20_token.symbol()}")
-
-dispenser_status = ocean.dispenser.status(erc20_token.address)
-assert dispenser_status[0] is True
-assert dispenser_status[1] == nft_factory.address
-assert dispenser_status[2] is True
-
-```
 
 

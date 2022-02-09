@@ -138,6 +138,8 @@ print(f"BPool address: {bpool.address}")
 
 ```
 
+As an alternative for publishing a NFT, a datatoken and a pool at once, you can use `create_nft_erc20_with_pool`.
+
 ## 4. Marketplace displays asset for sale
 
 Now, you're the Marketplace operator. Here's how to get info about the data asset.
