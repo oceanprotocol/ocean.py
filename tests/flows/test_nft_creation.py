@@ -7,7 +7,7 @@ from web3 import Web3, exceptions
 
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_token import ERC721Permissions, ERC721Token
+from ocean_lib.models.erc721_nft import ERC721Permissions, ERC721NFT
 from ocean_lib.models.models_structures import CreateErc20Data, CreateERC721Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -48,60 +48,60 @@ def test_erc721_roles(
     assert registered_event[0].event == ERC721FactoryContract.EVENT_NFT_CREATED
     assert registered_event[0].args.admin == publisher_wallet.address
     token_address = registered_event[0].args.newTokenAddress
-    erc721_token = ERC721Token(web3, token_address)
+    erc721_nft = ERC721NFT(web3, token_address)
 
     # Publisher should be a manager
-    assert erc721_token.get_permissions(publisher_wallet.address)[
+    assert erc721_nft.get_permissions(publisher_wallet.address)[
         ERC721Permissions.MANAGER
     ]
 
     # Consumer address should't be manager
-    assert not erc721_token.get_permissions(consumer_wallet.address)[
+    assert not erc721_nft.get_permissions(consumer_wallet.address)[
         ERC721Permissions.MANAGER
     ]
 
-    erc721_token.add_manager(consumer_wallet.address, publisher_wallet)
+    erc721_nft.add_manager(consumer_wallet.address, publisher_wallet)
 
     # Consumer now should be manager
-    assert erc721_token.get_permissions(consumer_wallet.address)[
+    assert erc721_nft.get_permissions(consumer_wallet.address)[
         ERC721Permissions.MANAGER
     ]
 
     # Check the rest of roles for another_consumer_wallet
-    assert not erc721_token.get_permissions(another_consumer_wallet.address)[
+    assert not erc721_nft.get_permissions(another_consumer_wallet.address)[
         ERC721Permissions.MANAGER
     ]
-    assert not erc721_token.get_permissions(another_consumer_wallet.address)[
+    assert not erc721_nft.get_permissions(another_consumer_wallet.address)[
         ERC721Permissions.DEPLOY_ERC20
     ]
-    assert not erc721_token.get_permissions(another_consumer_wallet.address)[
+    assert not erc721_nft.get_permissions(another_consumer_wallet.address)[
         ERC721Permissions.UPDATE_METADATA
     ]
-    assert not erc721_token.get_permissions(another_consumer_wallet.address)[
+    assert not erc721_nft.get_permissions(another_consumer_wallet.address)[
         ERC721Permissions.STORE
     ]
 
-    erc721_token.add_to_create_erc20_list(
+    erc721_nft.add_to_create_erc20_list(
         another_consumer_wallet.address, consumer_wallet
     )
-    erc721_token.add_to_725_store_list(another_consumer_wallet.address, consumer_wallet)
-    erc721_token.add_to_metadata_list(another_consumer_wallet.address, consumer_wallet)
+    erc721_nft.add_to_725_store_list(another_consumer_wallet.address, consumer_wallet)
+    erc721_nft.add_to_metadata_list(another_consumer_wallet.address, consumer_wallet)
 
     # Test rest of add roles functions with newly added manager
-    assert erc721_token.get_permissions(another_consumer_wallet.address)[
+    assert erc721_nft.get_permissions(another_consumer_wallet.address)[
         ERC721Permissions.DEPLOY_ERC20
     ]
-    assert erc721_token.get_permissions(another_consumer_wallet.address)[
+    assert erc721_nft.get_permissions(another_consumer_wallet.address)[
         ERC721Permissions.UPDATE_METADATA
     ]
-    assert erc721_token.get_permissions(another_consumer_wallet.address)[
+    assert erc721_nft.get_permissions(another_consumer_wallet.address)[
         ERC721Permissions.STORE
     ]
 
     # Remove the manager
-    erc721_token.remove_manager(consumer_wallet.address, publisher_wallet)
+    erc721_nft.remove_manager(consumer_wallet.address, publisher_wallet)
 
-    assert not erc721_token.get_permissions(consumer_wallet.address)[
+    assert not erc721_nft.get_permissions(consumer_wallet.address)[
         ERC721Permissions.MANAGER
     ]
 
@@ -214,10 +214,10 @@ def test_successful_erc721_creation(web3, config, publisher_wallet):
     assert registered_event[0].event == ERC721FactoryContract.EVENT_NFT_CREATED
     assert registered_event[0].args.admin == publisher_wallet.address
     token_address = registered_event[0].args.newTokenAddress
-    erc721_token = ERC721Token(web3, token_address)
-    owner_balance = erc721_token.balance_of(publisher_wallet.address)
-    assert erc721_token.contract.caller.name() == "NFT"
-    assert erc721_token.symbol() == "NFTSYMBOL"
+    erc721_nft = ERC721NFT(web3, token_address)
+    owner_balance = erc721_nft.balance_of(publisher_wallet.address)
+    assert erc721_nft.contract.caller.name() == "NFT"
+    assert erc721_nft.symbol() == "NFTSYMBOL"
     assert owner_balance == 1
 
 
@@ -277,8 +277,8 @@ def test_erc20_creation(
         filters=None,
     )
     token_address = registered_event[0].args.newTokenAddress
-    erc721_token = ERC721Token(web3, token_address)
-    erc721_token.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
+    erc721_nft = ERC721NFT(web3, token_address)
+    erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
     erc_create_data = CreateErc20Data(
         template_index=1,
         strings=["ERC20DT1", "ERC20DT1Symbol"],
@@ -291,7 +291,7 @@ def test_erc20_creation(
         uints=[to_wei("0.5"), 0],
         bytess=[b""],
     )
-    tx_result = erc721_token.create_erc20(erc_create_data, consumer_wallet)
+    tx_result = erc721_nft.create_erc20(erc_create_data, consumer_wallet)
     tx_receipt2 = web3.eth.wait_for_transaction_receipt(tx_result)
 
     registered_event2 = erc721_factory.get_event_log(
@@ -312,7 +312,7 @@ def test_erc20_creation(
 
     # Tests failed creation of ERC20
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_token.create_erc20(erc_create_data, another_consumer_wallet)
+        erc721_nft.create_erc20(erc_create_data, another_consumer_wallet)
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT "

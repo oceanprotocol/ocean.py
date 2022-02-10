@@ -24,13 +24,13 @@ def test_datatokens_flow_readme():
         ocean.web3, private_key, config.block_confirmations, config.transaction_timeout
     )
 
-    erc721_token = ocean.create_nft_token(
+    erc721_nft = ocean.create_erc721_nft(
         name="Dataset name", symbol="dtsymbol", from_wallet=wallet
     )
 
-    assert erc721_token.address
-    assert erc721_token.token_name() == "Dataset name"
-    assert erc721_token.symbol() == "dtsymbol"
+    assert erc721_nft.address
+    assert erc721_nft.token_name() == "Dataset name"
+    assert erc721_nft.symbol() == "dtsymbol"
 
     cap = ocean.to_wei(10)
     erc20_data = CreateErc20Data(
@@ -45,9 +45,7 @@ def test_datatokens_flow_readme():
         uints=[cap, 0],
         bytess=[b""],
     )
-    erc20_token = erc721_token.create_datatoken(
-        erc20_data=erc20_data, from_wallet=wallet
-    )
+    erc20_token = erc721_nft.create_datatoken(erc20_data=erc20_data, from_wallet=wallet)
 
     assert erc20_token.address
     assert erc20_token.token_name() == "ERC20DT1"

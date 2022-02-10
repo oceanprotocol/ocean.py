@@ -2,7 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from ocean_lib.models.erc721_token import ERC721Token
+from ocean_lib.models.erc721_nft import ERC721NFT
 from tests.resources.helper_functions import deploy_erc721_erc20
 
 
@@ -16,13 +16,13 @@ def test_nft_factory(
     assert ocn.get_nft_token(erc721.address).address == erc721.address
     assert ocn.get_datatoken(erc20.address).address == erc20.address
 
-    created_nft = ocn.create_nft_token(
+    created_nft = ocn.create_erc721_nft(
         name="TEST",
         symbol="TEST2",
         token_uri="http://oceanprotocol.com/nft",
         from_wallet=publisher_wallet,
     )
-    assert isinstance(created_nft, ERC721Token)
+    assert isinstance(created_nft, ERC721NFT)
     assert created_nft.contract.caller.name() == "TEST"
     assert created_nft.symbol() == "TEST2"
     assert created_nft.address

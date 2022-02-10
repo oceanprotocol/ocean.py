@@ -69,7 +69,7 @@ erc20_data = CreateErc20Data(
     uints=[cap, 0],
     bytess=[b""],
 )
-erc20_enterprise_token = nft_token.create_datatoken(
+erc20_enterprise_token = erc721_nft.create_datatoken(
     erc20_data=erc20_data, from_wallet=alice_wallet
 )
 print(f"ERC20 Enterprise address: {erc20_enterprise_token.address}")
@@ -164,7 +164,7 @@ erc20_data = CreateErc20Data(
     uints=[cap, 0],
     bytess=[b""],
 )
-erc20_enterprise_token = nft_token.create_datatoken(
+erc20_enterprise_token = erc721_nft.create_datatoken(
     erc20_data=erc20_data, from_wallet=alice_wallet
 )
 print(f"ERC20 Enterprise address: {erc20_enterprise_token.address}")

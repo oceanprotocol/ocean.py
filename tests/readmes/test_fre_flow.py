@@ -35,10 +35,10 @@ def test_fre_flow_readme():
     assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 
     # Publish an NFT token
-    nft_token = ocean.create_nft_token(
+    erc721_nft = ocean.create_erc721_nft(
         "NFTToken1", "NFT1", alice_wallet, "https://oceanprotocol.com/nft/"
     )
-    token_address = nft_token.address
+    token_address = erc721_nft.address
     assert token_address
 
     # Prepare data for ERC20 token
@@ -55,7 +55,7 @@ def test_fre_flow_readme():
         bytess=[b""],
     )
 
-    erc20_token = nft_token.create_datatoken(erc20_data, alice_wallet)
+    erc20_token = erc721_nft.create_datatoken(erc20_data, alice_wallet)
     print(f"token_address = '{erc20_token.address}'")
 
     # Mint the datatokens
