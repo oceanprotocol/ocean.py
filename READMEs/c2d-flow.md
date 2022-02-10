@@ -257,6 +257,7 @@ ALGO_asset = ocean.assets.resolve(ALGO_did)
 
 compute_service = DATA_asset.get_service("compute")
 algo_service = ALGO_asset.get_service("access")
+environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
 
 from datetime import datetime, timedelta
 
@@ -266,12 +267,10 @@ DATA_order_tx_id = ocean.assets.pay_for_service(
     service=compute_service,
     wallet=bob_wallet,
     initialize_args={
-        "compute_environment": "unused",
+        "compute_environment": environments[0]["id"],
         "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
     },
-    consumer_address=ocean.compute.get_c2d_address(
-        compute_service.service_endpoint
-    ),
+    consumer_address=environments[0]["consumerAddress"],
 )
 print(f"Paid for dataset compute service, order tx id: {DATA_order_tx_id}")
 
@@ -283,7 +282,7 @@ ALGO_order_tx_id = ocean.assets.pay_for_service(
     initialize_args={
         "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
     },
-    consumer_address=ocean.compute.get_c2d_address(algo_service.service_endpoint),
+    consumer_address=environments[0]["consumerAddress"],
 )
 print(f"Paid for algorithm access service, order tx id: {ALGO_order_tx_id}")
 
@@ -294,8 +293,7 @@ ALGO_compute_input = ComputeInput(ALGO_did, ALGO_order_tx_id, algo_service.id)
 job_id = ocean.compute.start(
     consumer_wallet=bob_wallet,
     dataset=DATA_compute_input,
-    # TODO: Update once compute environment implemented in provider
-    compute_environment="unused",
+    compute_environment=environments[0]["id"],
     algorithm=ALGO_compute_input,
 )
 print(f"Started compute job with id: {job_id}")

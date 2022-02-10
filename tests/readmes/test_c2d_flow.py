@@ -212,18 +212,18 @@ def test_c2d_flow_readme():
     compute_service = DATA_asset.get_service("compute")
     algo_service = ALGO_asset.get_service("access")
 
+    environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
+
     # Pay for dataset
     DATA_order_tx_id = ocean.assets.pay_for_service(
         asset=DATA_asset,
         service=compute_service,
         wallet=bob_wallet,
         initialize_args={
-            "compute_environment": "unused",
+            "compute_environment": environments[0]["id"],
             "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
         },
-        consumer_address=ocean.compute.get_c2d_address(
-            compute_service.service_endpoint
-        ),
+        consumer_address=environments[0]["consumerAddress"],
     )
     assert DATA_order_tx_id, "pay for dataset unsuccessful"
 
@@ -235,7 +235,7 @@ def test_c2d_flow_readme():
         initialize_args={
             "valid_until": int((datetime.now() + timedelta(days=1)).timestamp())
         },
-        consumer_address=ocean.compute.get_c2d_address(algo_service.service_endpoint),
+        consumer_address=environments[0]["consumerAddress"],
     )
     assert ALGO_order_tx_id, "pay for algorithm unsuccessful"
 
@@ -245,8 +245,7 @@ def test_c2d_flow_readme():
     job_id = ocean.compute.start(
         consumer_wallet=bob_wallet,
         dataset=DATA_compute_input,
-        # TODO: Update once compute environment implemented in provider
-        compute_environment="unused",
+        compute_environment=environments[0]["id"],
         algorithm=ALGO_compute_input,
     )
     assert job_id, "start compute unsuccessful"

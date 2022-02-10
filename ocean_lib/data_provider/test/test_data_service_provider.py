@@ -7,6 +7,9 @@ from unittest.mock import Mock
 
 import ecies
 import pytest
+from requests.exceptions import InvalidURL
+from requests.models import Response
+
 from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
@@ -14,9 +17,6 @@ from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.exceptions import DataProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
-from requests.exceptions import InvalidURL
-from requests.models import Response
-
 from ocean_lib.services.service import Service
 from tests.resources.ddo_helpers import create_basics
 from tests.resources.helper_functions import (
@@ -307,11 +307,12 @@ def test_expose_endpoints(config):
     ]
 
 
-def test_c2d_address(config):
+def test_c2d_environments(config):
     """Tests that a provider address exists on the DataServiceProvider."""
     provider_uri = DataSP.get_url(config)
-    c2d_address = DataSP.get_c2d_address(provider_uri)
-    assert c2d_address, "Failed to get provider address."
+    c2d_envs = DataSP.get_c2d_environments(provider_uri)
+    c2d_env_ids = [elem["id"] for elem in c2d_envs]
+    assert "ocean-compute" in c2d_env_ids, "ocean-compute env not found."
 
 
 def test_provider_address(config):
