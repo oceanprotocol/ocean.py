@@ -150,7 +150,7 @@ In the same Python console:
 
 ```python
 # Publish the algorithm NFT token
-ALGO_nft_token = ocean.create_nft_token("NFTToken1", "NFT1", alice_wallet)
+ALGO_nft_token = ocean.create_data_nft("NFTToken1", "NFT1", alice_wallet)
 print(f"ALGO_nft_token address = '{ALGO_nft_token.address}'")
 
 # Publish the datatoken
