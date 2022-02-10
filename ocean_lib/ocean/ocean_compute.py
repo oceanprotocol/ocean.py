@@ -73,19 +73,18 @@ class OceanCompute:
         return job_info["jobId"]
 
     @enforce_types
-    def status(self, did: str, job_id: str, wallet: Wallet) -> Dict[str, Any]:
+    def status(self, asset: Asset, job_id: str, wallet: Wallet) -> Dict[str, Any]:
         """
         Gets job status.
 
-        :param did: str id of the asset offering the compute service of this job
+        :param asset: Asset offering the compute service of this job
         :param job_id: str id of the compute job
         :param wallet: Wallet instance
         :return: dict the status for an existing compute job, keys are (ok, status, statusText)
         """
-        asset = resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
         dataset_compute_service = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
         job_info = self._data_provider.compute_job_status(
-            did, job_id, dataset_compute_service, wallet
+            asset.did, job_id, dataset_compute_service, wallet
         )
         job_info.update({"ok": job_info.get("status") not in (31, 32, None)})
 
@@ -93,18 +92,17 @@ class OceanCompute:
 
     @enforce_types
     def result(
-        self, did: str, job_id: str, index: int, wallet: Wallet
+        self, asset: Asset, job_id: str, index: int, wallet: Wallet
     ) -> Dict[str, Any]:
         """
         Gets job result.
 
-        :param did: str id of the asset offering the compute service of this job
+        :param asset: Asset offering the compute service of this job
         :param job_id: str id of the compute job
         :param index: compute result index
         :param wallet: Wallet instance
         :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
         """
-        asset = resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
         dataset_compute_service = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
         result = self._data_provider.compute_job_result(
             job_id, index, dataset_compute_service, wallet
@@ -113,20 +111,19 @@ class OceanCompute:
         return result
 
     @enforce_types
-    def stop(self, did: str, job_id: str, wallet: Wallet) -> Dict[str, Any]:
+    def stop(self, asset: Asset, job_id: str, wallet: Wallet) -> Dict[str, Any]:
         """
         Attempt to stop the running compute job.
 
-        :param did: str id of the asset offering the compute service of this job
+        :param asset: Asset offering the compute service of this job
         :param job_id: str id of the compute job
         :param wallet: Wallet instance
         :return: dict the status for the stopped compute job, keys are (ok, status, statusText)
         """
-        asset = resolve_asset(did, metadata_cache_uri=self._config.metadata_cache_uri)
         dataset_compute_service = asset.get_service(ServiceTypes.CLOUD_COMPUTE)
 
         job_info = self._data_provider.stop_compute_job(
-            did, job_id, dataset_compute_service, wallet
+            asset.did, job_id, dataset_compute_service, wallet
         )
         job_info.update({"ok": job_info.get("status") not in (31, 32, None)})
         return job_info
