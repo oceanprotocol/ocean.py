@@ -24,7 +24,7 @@ def test_datatokens_flow_readme():
         ocean.web3, private_key, config.block_confirmations, config.transaction_timeout
     )
 
-    erc721_nft = ocean.create_data_nft(
+    erc721_nft = ocean.create_erc721_nft(
         name="Dataset name", symbol="dtsymbol", from_wallet=wallet
     )
 

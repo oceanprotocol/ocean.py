@@ -35,7 +35,7 @@ def test_fre_flow_readme():
     assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 
     # Publish an NFT token
-    erc721_nft = ocean.create_data_nft(
+    erc721_nft = ocean.create_erc721_nft(
         "NFTToken1", "NFT1", alice_wallet, "https://oceanprotocol.com/nft/"
     )
     token_address = erc721_nft.address

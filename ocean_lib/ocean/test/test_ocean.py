@@ -16,7 +16,7 @@ def test_nft_factory(
     assert ocn.get_nft_token(erc721.address).address == erc721.address
     assert ocn.get_datatoken(erc20.address).address == erc20.address
 
-    created_nft = ocn.create_data_nft(
+    created_nft = ocn.create_erc721_nft(
         name="TEST",
         symbol="TEST2",
         token_uri="http://oceanprotocol.com/nft",

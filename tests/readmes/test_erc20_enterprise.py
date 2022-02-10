@@ -36,7 +36,7 @@ def test_erc20_enterprise_flow_with_dispenser():
     assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 
     # Publish an NFT token
-    erc721_nft = ocean.create_data_nft("NFTToken1", "NFT1", alice_wallet)
+    erc721_nft = ocean.create_erc721_nft("NFTToken1", "NFT1", alice_wallet)
     token_address = erc721_nft.address
     assert token_address
 
@@ -150,7 +150,7 @@ def test_erc20_enterprise_flow_with_fre():
     assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 
     # Publish an NFT token
-    erc721_nft = ocean.create_data_nft("NFTToken1", "NFT1", alice_wallet)
+    erc721_nft = ocean.create_erc721_nft("NFTToken1", "NFT1", alice_wallet)
     token_address = erc721_nft.address
     assert token_address
 

@@ -107,7 +107,7 @@ class Ocean:
         return _to_wei(amount_in_ether=amount_in_ether, decimals=decimals)
 
     @enforce_types
-    def create_data_nft(
+    def create_erc721_nft(
         self,
         name: str,
         symbol: str,
@@ -128,7 +128,7 @@ class Ocean:
                 block_confirmations=config.block_confirmations,
                 transaction_timeout=config.transaction_timeout,
             )
-            erc721_nft = ocean.create_data_nft("Dataset name", "dtsymbol", from_wallet=wallet)
+            erc721_nft = ocean.create_erc721_nft("Dataset name", "dtsymbol", from_wallet=wallet)
         ```
         :param name: ERC721 token name, str
         :param symbol: ERC721 token symbol, str

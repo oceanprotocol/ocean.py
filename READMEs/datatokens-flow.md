@@ -106,7 +106,7 @@ assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 
 # Publish an NFT token
 print("Create ERC721 data NFT: begin.")
-erc721_nft = ocean.create_data_nft('NFTToken1', 'NFT1', alice_wallet)
+erc721_nft = ocean.create_erc721_nft('NFTToken1', 'NFT1', alice_wallet)
 print(f"Created ERC721 token: done. Its address is {erc721_nft.address}")
 print(f"data NFT token name: {erc721_nft.token_name()}")
 print(f"data NFT token symbol: {erc721_nft.symbol()}")
