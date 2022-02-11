@@ -26,7 +26,7 @@ class ERC721Permissions(IntEnum):
 
 
 @enforce_types
-class ERC721Token(ContractBase):
+class ERC721NFT(ContractBase):
     CONTRACT_NAME = "ERC721Template"
 
     EVENT_TOKEN_CREATED = "TokenCreated"

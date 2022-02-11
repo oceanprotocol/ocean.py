@@ -23,7 +23,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_token import ERC721Token
+from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.models_structures import ChainMetadata, CreateErc20Data
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
@@ -109,11 +109,11 @@ class OceanAssets:
     def deploy_datatoken(
         self,
         erc721_factory: ERC721FactoryContract,
-        erc721_token: ERC721Token,
+        erc721_nft: ERC721NFT,
         erc20_data: CreateErc20Data,
         from_wallet: Wallet,
     ) -> str:
-        tx_result = erc721_token.create_erc20(erc20_data, from_wallet)
+        tx_result = erc721_nft.create_erc20(erc20_data, from_wallet)
         assert tx_result, "Failed to create ERC20 token."
 
         tx_receipt = self._web3.eth.wait_for_transaction_receipt(tx_result)
@@ -237,7 +237,7 @@ class OceanAssets:
     ) -> Optional[Asset]:
         """Register an asset on-chain.
 
-        Creating/deploying a ERC721Token contract and in the Metadata store (Aquarius).
+        Creating/deploying a ERC721NFT contract and in the Metadata store (Aquarius).
 
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
         :param publisher_wallet: Wallet of the publisher registering this asset.
@@ -285,13 +285,12 @@ class OceanAssets:
                 None,
             )
             erc721_address = registered_event[0].args.newTokenAddress
-            erc721_token = ERC721Token(self._web3, erc721_address)
-            if not erc721_token:
+            erc721_nft = ERC721NFT(self._web3, erc721_address)
+            if not erc721_nft:
                 logger.warning("Creating new datatoken failed.")
                 return None
             logger.info(
-                f"Successfully created datatoken with address "
-                f"{erc721_token.address}."
+                f"Successfully created datatoken with address " f"{erc721_nft.address}."
             )
         else:
             # verify nft address
@@ -301,13 +300,13 @@ class OceanAssets:
                 )
 
         assert erc721_address, "nft_address is required for publishing a dataset asset."
-        erc721_token = ERC721Token(self._web3, erc721_address)
+        erc721_nft = ERC721NFT(self._web3, erc721_address)
 
         # Create a DDO object
         asset = Asset()
 
         # Generating the did and adding to the ddo.
-        did = f"did:op:{create_checksum(erc721_token.address + str(self._web3.eth.chain_id))}"
+        did = f"did:op:{create_checksum(erc721_nft.address + str(self._web3.eth.chain_id))}"
         asset.did = did
         # Check if it's already registered first!
         if self._aquarius.ddo_exists(did):
@@ -327,7 +326,7 @@ class OceanAssets:
                 erc20_addresses.append(
                     self.deploy_datatoken(
                         erc721_factory=erc721_factory,
-                        erc721_token=erc721_token,
+                        erc721_nft=erc721_nft,
                         erc20_data=erc20_token_data,
                         from_wallet=publisher_wallet,
                     )
@@ -383,7 +382,7 @@ class OceanAssets:
             data_proofs=[],
         )
 
-        erc721_token.set_metadata(chain_metadata, from_wallet=publisher_wallet)
+        erc721_nft.set_metadata(chain_metadata, from_wallet=publisher_wallet)
 
         # Fetch the asset on chain
         asset = self._aquarius.wait_for_asset(did)
@@ -424,7 +423,7 @@ class OceanAssets:
             )
 
         assert erc721_address, "nft_address is required for publishing a dataset asset."
-        erc721_token = ERC721Token(self._web3, erc721_address)
+        erc721_nft = ERC721NFT(self._web3, erc721_address)
 
         assert asset.chain_id == self._web3.eth.chain_id, "Chain id mismatch."
 
@@ -449,7 +448,7 @@ class OceanAssets:
             data_proofs=[],
         )
 
-        tx_result = erc721_token.set_metadata(
+        tx_result = erc721_nft.set_metadata(
             chain_metadata=chain_metadata, from_wallet=publisher_wallet
         )
 

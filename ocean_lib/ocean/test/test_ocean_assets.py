@@ -17,7 +17,7 @@ from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_token import ERC721Token
+from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.models_structures import CreateErc20Data, CreateERC721Data
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -162,7 +162,7 @@ def test_update_flags(publisher_ocean_instance, publisher_wallet, config):
     ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
 
     # Test compress & update flags
-    erc721_token = ERC721Token(publisher_ocean_instance.web3, ddo.nft_address)
+    erc721_nft = ERC721NFT(publisher_ocean_instance.web3, ddo.nft_address)
 
     _asset = publisher_ocean_instance.assets.update(
         asset=ddo,
@@ -171,8 +171,8 @@ def test_update_flags(publisher_ocean_instance, publisher_wallet, config):
         encrypt_flag=True,
     )
 
-    registered_token_event = erc721_token.get_event_log(
-        ERC721Token.EVENT_METADATA_UPDATED,
+    registered_token_event = erc721_nft.get_event_log(
+        ERC721NFT.EVENT_METADATA_UPDATED,
         _asset.event.get("block"),
         publisher_ocean_instance.web3.eth.block_number,
         None,
@@ -473,7 +473,7 @@ def test_plain_asset_multiple_datatokens(
 def test_plain_asset_multiple_services(
     publisher_ocean_instance, publisher_wallet, config
 ):
-    erc721_token, erc20_token = deploy_erc721_erc20(
+    erc721_nft, erc20_token = deploy_erc721_erc20(
         publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
     )
 
@@ -516,13 +516,13 @@ def test_plain_asset_multiple_services(
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         services=[access_service, compute_service],
-        erc721_address=erc721_token.address,
+        erc721_address=erc721_nft.address,
         deployed_erc20_tokens=[erc20_token],
     )
     assert ddo, "The asset is not created."
     assert ddo.nft["name"] == "NFT"
     assert ddo.nft["symbol"] == "NFTSYMBOL"
-    assert ddo.nft["address"] == erc721_token.address
+    assert ddo.nft["address"] == erc721_nft.address
     assert ddo.nft["owner"] == publisher_wallet.address
     assert ddo.datatokens[0]["name"] == "ERC20DT1"
     assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
@@ -532,7 +532,7 @@ def test_plain_asset_multiple_services(
 
 
 def test_encrypted_asset(publisher_ocean_instance, publisher_wallet, config):
-    erc721_token, erc20_token = deploy_erc721_erc20(
+    erc721_nft, erc20_token = deploy_erc721_erc20(
         publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
     )
 
@@ -544,14 +544,14 @@ def test_encrypted_asset(publisher_ocean_instance, publisher_wallet, config):
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=erc721_token.address,
+        erc721_address=erc721_nft.address,
         deployed_erc20_tokens=[erc20_token],
         encrypt_flag=True,
     )
     assert ddo, "The asset is not created."
     assert ddo.nft["name"] == "NFT"
     assert ddo.nft["symbol"] == "NFTSYMBOL"
-    assert ddo.nft["address"] == erc721_token.address
+    assert ddo.nft["address"] == erc721_nft.address
     assert ddo.nft["owner"] == publisher_wallet.address
     assert ddo.datatokens[0]["name"] == "ERC20DT1"
     assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
@@ -559,7 +559,7 @@ def test_encrypted_asset(publisher_ocean_instance, publisher_wallet, config):
 
 
 def test_compressed_asset(publisher_ocean_instance, publisher_wallet, config):
-    erc721_token, erc20_token = deploy_erc721_erc20(
+    erc721_nft, erc20_token = deploy_erc721_erc20(
         publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
     )
 
@@ -571,14 +571,14 @@ def test_compressed_asset(publisher_ocean_instance, publisher_wallet, config):
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=erc721_token.address,
+        erc721_address=erc721_nft.address,
         deployed_erc20_tokens=[erc20_token],
         compress_flag=True,
     )
     assert ddo, "The asset is not created."
     assert ddo.nft["name"] == "NFT"
     assert ddo.nft["symbol"] == "NFTSYMBOL"
-    assert ddo.nft["address"] == erc721_token.address
+    assert ddo.nft["address"] == erc721_nft.address
     assert ddo.nft["owner"] == publisher_wallet.address
     assert ddo.datatokens[0]["name"] == "ERC20DT1"
     assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
@@ -588,7 +588,7 @@ def test_compressed_asset(publisher_ocean_instance, publisher_wallet, config):
 def test_compressed_and_encrypted_asset(
     publisher_ocean_instance, publisher_wallet, config
 ):
-    erc721_token, erc20_token = deploy_erc721_erc20(
+    erc721_nft, erc20_token = deploy_erc721_erc20(
         publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
     )
 
@@ -600,7 +600,7 @@ def test_compressed_and_encrypted_asset(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=erc721_token.address,
+        erc721_address=erc721_nft.address,
         deployed_erc20_tokens=[erc20_token],
         encrypt_flag=True,
         compress_flag=True,
@@ -615,7 +615,7 @@ def test_compressed_and_encrypted_asset(
 
 
 def test_asset_creation_errors(publisher_ocean_instance, publisher_wallet, config):
-    erc721_token, erc20_token = deploy_erc721_erc20(
+    erc721_nft, erc20_token = deploy_erc721_erc20(
         publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
     )
 
@@ -641,7 +641,7 @@ def test_asset_creation_errors(publisher_ocean_instance, publisher_wallet, confi
                 metadata=metadata,
                 publisher_wallet=publisher_wallet,
                 encrypted_files=encrypted_files,
-                erc721_address=erc721_token.address,
+                erc721_address=erc721_nft.address,
                 deployed_erc20_tokens=[erc20_token],
                 encrypt_flag=True,
             )

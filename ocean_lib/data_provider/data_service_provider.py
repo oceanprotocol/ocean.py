@@ -153,7 +153,7 @@ class DataServiceProvider:
         }
 
         if compute_environment is not None:
-            payload["computeEnv"] = compute_environment
+            payload["environment"] = compute_environment
 
         if valid_until:
             payload["validUntil"] = valid_until
@@ -497,18 +497,21 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def get_c2d_address(provider_uri: str) -> Optional[str]:
+    def get_c2d_environments(provider_uri: str) -> Optional[str]:
         """
         Return the provider address
         """
         try:
-            provider_info = DataServiceProvider._http_method("get", provider_uri).json()
+            _, envs_endpoint = DataServiceProvider.build_c2d_environments_endpoint(
+                provider_uri
+            )
+            environments = DataServiceProvider._http_method("get", envs_endpoint).json()
 
-            return provider_info["computeAddress"]
+            return environments
         except requests.exceptions.RequestException:
             pass
 
-        return None
+        return []
 
     @staticmethod
     @enforce_types
@@ -608,6 +611,11 @@ class DataServiceProvider:
     @enforce_types
     def build_fileinfo(provider_uri: str) -> Tuple[str, str]:
         return DataServiceProvider.build_endpoint("fileinfo", provider_uri)
+
+    @staticmethod
+    @enforce_types
+    def build_c2d_environments_endpoint(provider_uri: str) -> Tuple[str, str]:
+        return DataServiceProvider.build_endpoint("computeEnvironments", provider_uri)
 
     @staticmethod
     @enforce_types
@@ -718,7 +726,7 @@ class DataServiceProvider:
                 "serviceId": dataset.service_id,
                 "transferTxId": dataset.transfer_tx_id,
             },
-            "computeEnv": compute_environment,
+            "environment": compute_environment,
             "algorithm": {},
             "signature": signature,
             "nonce": nonce,

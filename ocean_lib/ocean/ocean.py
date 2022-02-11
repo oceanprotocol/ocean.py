@@ -18,7 +18,7 @@ from ocean_lib.models.bpool import BPool
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_token import ERC721Token
+from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.models_structures import FixedData, PoolData, ProviderFees
@@ -107,7 +107,7 @@ class Ocean:
         return _to_wei(amount_in_ether=amount_in_ether, decimals=decimals)
 
     @enforce_types
-    def create_nft_token(
+    def create_erc721_nft(
         self,
         name: str,
         symbol: str,
@@ -115,7 +115,7 @@ class Ocean:
         token_uri: Optional[str] = "https://oceanprotocol.com/nft/",
         template_index: Optional[int] = 1,
         additional_erc20_deployer: Optional[str] = None,
-    ) -> ERC721Token:
+    ) -> ERC721NFT:
         """
         This method deploys a ERC721 token contract on the blockchain.
         Usage:
@@ -128,7 +128,7 @@ class Ocean:
                 block_confirmations=config.block_confirmations,
                 transaction_timeout=config.transaction_timeout,
             )
-            nft_token = ocean.create_nft_token("Dataset name", "dtsymbol", from_wallet=wallet)
+            erc721_nft = ocean.create_erc721_nft("Dataset name", "dtsymbol", from_wallet=wallet)
         ```
         :param name: ERC721 token name, str
         :param symbol: ERC721 token symbol, str
@@ -137,7 +137,7 @@ class Ocean:
         :param additional_erc20_deployer: Address of another ERC20 deployer, str
         :param token_uri: URL for ERC721 token, str
 
-        :return: `ERC721Token` instance
+        :return: `ERC721NFT` instance
         """
 
         if not additional_erc20_deployer:
@@ -151,17 +151,17 @@ class Ocean:
 
         address = nft_factory.get_token_address(tx_id)
         assert address, "new NFT token has no address"
-        token = ERC721Token(self.web3, address)
+        token = ERC721NFT(self.web3, address)
         return token
 
     @enforce_types
-    def get_nft_token(self, token_address: str) -> ERC721Token:
+    def get_nft_token(self, token_address: str) -> ERC721NFT:
         """
         :param token_address: Token contract address, str
-        :return: `ERC721Token` instance
+        :return: `ERC721NFT` instance
         """
 
-        return ERC721Token(self.web3, token_address)
+        return ERC721NFT(self.web3, token_address)
 
     @enforce_types
     def get_datatoken(self, token_address: str) -> ERC20Token:

@@ -76,6 +76,7 @@ assert erc20_token.balanceOf(alice_wallet.address) == max_amount
 ```
 
 As an alternative for publishing a NFT, a datatoken and a dispenser at once, you can use `create_nft_erc20_with_dispenser`.
+For the NFT creation, use `CreateERC721DataNoDeployer` named tuple, because the additional ERC20 deployer will automatically be set as the factory router.
 
 
 

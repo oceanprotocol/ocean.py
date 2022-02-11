@@ -151,18 +151,18 @@ def process_order(
         else publisher_wallet
     )
     erc20_token.mint(consumer_wallet.address, to_wei(10), minter)
+
+    environments = ocean_instance.compute.get_c2d_environments(service.service_endpoint)
+
     order_tx_id = ocean_instance.assets.pay_for_service(
         asset=asset,
         service=service,
         wallet=consumer_wallet,
         initialize_args={
-            # TODO: add a real compute environment once provider supports it
-            "compute_environment": "doesn't matter for now",
+            "compute_environment": environments[0]["id"],
             "valid_until": int((datetime.now() + timedelta(hours=1)).timestamp()),
         },
-        consumer_address=ocean_instance.compute.get_c2d_address(
-            service.service_endpoint
-        ),
+        consumer_address=environments[0]["consumerAddress"],
     )
 
     return order_tx_id, service
@@ -244,12 +244,14 @@ def run_compute_test(
             algorithm_and_userdata.userdata,
         )
 
+    service = dataset_and_userdata.asset.get_service(ServiceTypes.CLOUD_COMPUTE)
+    environments = ocean_instance.compute.get_c2d_environments(service.service_endpoint)
+
     # Start compute job
     job_id = ocean_instance.compute.start(
         consumer_wallet,
         dataset,
-        # TODO: add a real compute environment after implemented in provider
-        "TODO: add a real compute environment after implemented in provider",
+        environments[0]["id"],
         algorithm,
         algorithm_meta,
         algorithm_algocustomdata,
@@ -257,7 +259,7 @@ def run_compute_test(
     )
 
     status = ocean_instance.compute.status(
-        dataset_and_userdata.asset.did, job_id, consumer_wallet
+        dataset_and_userdata.asset, job_id, consumer_wallet
     )
     print(f"got job status: {status}")
 
@@ -266,7 +268,7 @@ def run_compute_test(
     ), f"something not right about the compute job, got status: {status}"
 
     status = ocean_instance.compute.stop(
-        dataset_and_userdata.asset.did, job_id, consumer_wallet
+        dataset_and_userdata.asset, job_id, consumer_wallet
     )
     print(f"got job status after requesting stop: {status}")
     assert status, f"something not right about the compute job, got status: {status}"
@@ -275,7 +277,7 @@ def run_compute_test(
         succeeded = False
         for _ in range(0, 200):
             status = ocean_instance.compute.status(
-                dataset_and_userdata.asset.did, job_id, consumer_wallet
+                dataset_and_userdata.asset, job_id, consumer_wallet
             )
             # wait until job is done, see:
             # https://github.com/oceanprotocol/operator-service/blob/main/API.md#status-description
@@ -286,7 +288,7 @@ def run_compute_test(
 
         assert succeeded, "compute job unsuccessful"
         result_file = ocean_instance.compute.result(
-            dataset_and_userdata.asset.did, job_id, 0, consumer_wallet
+            dataset_and_userdata.asset, job_id, 0, consumer_wallet
         )
         assert result_file is not None
         print(f"got job result file: {str(result_file)}")

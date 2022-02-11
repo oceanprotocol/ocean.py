@@ -9,7 +9,7 @@ from web3.main import Web3
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_token import ERC721Token
+from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.models_structures import (
     CreateErc20Data,
     CreateERC721DataNoDeployer,
@@ -81,9 +81,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert registered_event[0].event == "NFTCreated"
     assert registered_event[0].args.admin == publisher_wallet.address
     token_address = registered_event[0].args.newTokenAddress
-    erc721_token = ERC721Token(web3, token_address)
-    assert erc721_token.contract.caller.name() == "DT1"
-    assert erc721_token.symbol() == "DTSYMBOL"
+    erc721_nft = ERC721NFT(web3, token_address)
+    assert erc721_nft.contract.caller.name() == "DT1"
+    assert erc721_nft.symbol() == "DTSYMBOL"
 
     # Tests current NFT count
     current_nft_count = erc721_factory.get_current_nft_count()
@@ -94,13 +94,13 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
 
     # Tests get NFT template
-    nft_template_address = get_address_of_type(config, ERC721Token.CONTRACT_NAME, "1")
+    nft_template_address = get_address_of_type(config, ERC721NFT.CONTRACT_NAME, "1")
     nft_template = erc721_factory.get_nft_template(1)
     assert nft_template[0] == nft_template_address
     assert nft_template[1] is True
 
     # Tests creating successfully an ERC20 token
-    erc721_token.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
+    erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
     erc_create_data = CreateErc20Data(
         1,
         ["ERC20DT1", "ERC20DT1Symbol"],
@@ -113,7 +113,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         [to_wei("0.5"), 0],
         [b""],
     )
-    tx_result = erc721_token.create_erc20(erc_create_data, consumer_wallet)
+    tx_result = erc721_nft.create_erc20(erc_create_data, consumer_wallet)
     assert tx_result, "Failed to create ERC20 token."
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
     registered_token_event = erc721_factory.get_event_log(
@@ -178,7 +178,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert registered_nft_event[0].event == "NFTCreated"
     assert registered_nft_event[0].args.admin == publisher_wallet.address
     erc721_address2 = registered_nft_event[0].args.newTokenAddress
-    erc721_token2 = ERC721Token(web3, erc721_address2)
+    erc721_token2 = ERC721NFT(web3, erc721_address2)
     assert erc721_token2.contract.caller.name() == "72120Bundle"
     assert erc721_token2.symbol() == "72Bundle"
 
@@ -254,7 +254,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert registered_nft_event[0].event == "NFTCreated"
     assert registered_nft_event[0].args.admin == publisher_wallet.address
     erc721_token3 = registered_nft_event[0].args.newTokenAddress
-    erc721_token3 = ERC721Token(web3, erc721_token3)
+    erc721_token3 = ERC721NFT(web3, erc721_token3)
     assert erc721_token3.contract.caller.name() == "72120Bundle"
     assert erc721_token3.symbol() == "72Bundle"
 
@@ -304,7 +304,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         [to_wei("0.5"), to_wei("0.0005")],
         [b""],
     )
-    tx = erc721_token.create_erc20(erc_create_data, publisher_wallet)
+    tx = erc721_nft.create_erc20(erc_create_data, publisher_wallet)
     assert tx, "Failed to create ERC20 token."
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_fee_token_event = erc721_factory.get_event_log(
@@ -341,7 +341,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert registered_nft_event[0].event == "NFTCreated"
     assert registered_nft_event[0].args.admin == publisher_wallet.address
     erc721_address4 = registered_nft_event[0].args.newTokenAddress
-    erc721_token4 = ERC721Token(web3, erc721_address4)
+    erc721_token4 = ERC721NFT(web3, erc721_address4)
     assert erc721_token4.contract.caller.name() == "72120Bundle"
     assert erc721_token4.symbol() == "72Bundle"
 
@@ -395,7 +395,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert registered_nft_event[0].event == "NFTCreated"
     assert registered_nft_event[0].args.admin == publisher_wallet.address
     erc721_address5 = registered_nft_event[0].args.newTokenAddress
-    erc721_token5 = ERC721Token(web3, erc721_address5)
+    erc721_token5 = ERC721NFT(web3, erc721_address5)
     assert erc721_token5.contract.caller.name() == "72120Bundle"
     assert erc721_token5.symbol() == "72Bundle"
 
@@ -452,9 +452,9 @@ def test_start_multiple_order(
     assert registered_event[0].event == "NFTCreated"
     assert registered_event[0].args.admin == publisher_wallet.address
     token_address = registered_event[0].args.newTokenAddress
-    erc721_token = ERC721Token(web3, token_address)
-    assert erc721_token.contract.caller.name() == "DT1"
-    assert erc721_token.symbol() == "DTSYMBOL"
+    erc721_nft = ERC721NFT(web3, token_address)
+    assert erc721_nft.contract.caller.name() == "DT1"
+    assert erc721_nft.symbol() == "DTSYMBOL"
 
     # Tests current NFT count
     current_nft_count = erc721_factory.get_current_nft_count()
@@ -465,13 +465,13 @@ def test_start_multiple_order(
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
 
     # Tests get NFT template
-    nft_template_address = get_address_of_type(config, ERC721Token.CONTRACT_NAME, "1")
+    nft_template_address = get_address_of_type(config, ERC721NFT.CONTRACT_NAME, "1")
     nft_template = erc721_factory.get_nft_template(1)
     assert nft_template[0] == nft_template_address
     assert nft_template[1] is True
 
     # Tests creating successfully an ERC20 token
-    erc721_token.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
+    erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
     erc_create_data = CreateErc20Data(
         1,
         ["ERC20DT1", "ERC20DT1Symbol"],
@@ -484,7 +484,7 @@ def test_start_multiple_order(
         [to_wei("2"), 0],
         [b""],
     )
-    tx_result = erc721_token.create_erc20(erc_create_data, consumer_wallet)
+    tx_result = erc721_nft.create_erc20(erc_create_data, consumer_wallet)
     assert tx_result, "Failed to create ERC20 token."
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
     registered_token_event = erc721_factory.get_event_log(
@@ -651,8 +651,8 @@ def test_fail_create_erc20(
     assert registered_event[0].event == "NFTCreated"
     assert registered_event[0].args.admin == publisher_wallet.address
     token_address = registered_event[0].args.newTokenAddress
-    erc721_token = ERC721Token(web3, token_address)
-    erc721_token.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
+    erc721_nft = ERC721NFT(web3, token_address)
+    erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
 
     # Should fail to create a specific ERC20 Template if the index is ZERO
     erc_create_data = CreateErc20Data(
@@ -668,7 +668,7 @@ def test_fail_create_erc20(
         [b""],
     )
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_token.create_erc20(erc_create_data, consumer_wallet)
+        erc721_nft.create_erc20(erc_create_data, consumer_wallet)
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC20Factory: Template index "
@@ -689,7 +689,7 @@ def test_fail_create_erc20(
         [b""],
     )
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_token.create_erc20(erc_create_data, consumer_wallet)
+        erc721_nft.create_erc20(erc_create_data, consumer_wallet)
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC20Factory: Template index "
@@ -697,9 +697,9 @@ def test_fail_create_erc20(
     )
 
     # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
-    assert erc721_token.get_permissions(another_consumer_wallet.address)[1] is False
+    assert erc721_nft.get_permissions(another_consumer_wallet.address)[1] is False
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_token.create_erc20(erc_create_data, another_consumer_wallet)
+        erc721_nft.create_erc20(erc_create_data, another_consumer_wallet)
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT "
