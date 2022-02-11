@@ -18,7 +18,6 @@ from ocean_lib.models.models_structures import (
     CreateERC721DataNoDeployer,
     DispenserData,
     FixedData,
-    OrderData,
     PoolData,
 )
 from ocean_lib.web3_internal.wallet import Wallet
@@ -119,10 +118,6 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         - r, bytes
         - s, bytes
         """
-        # TODO: this will be handled in web3 py
-        if orders and isinstance(orders[0], OrderData):
-            orders = [tuple(o) for o in orders]
-
         return self.send_transaction("startMultipleTokenOrder", (orders,), from_wallet)
 
     def create_nft_with_erc20(
@@ -131,14 +126,6 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         erc_create_data: Union[dict, tuple, CreateErc20Data],
         from_wallet: Wallet,
     ) -> str:
-        # TODO: this will be handled in web3 py
-        if isinstance(nft_create_data, CreateERC721DataNoDeployer):
-            nft_create_data = tuple(nft_create_data)
-
-        # TODO: this will be handled in web3 py
-        if isinstance(erc_create_data, CreateErc20Data):
-            erc_create_data = tuple(erc_create_data)
-
         return self.send_transaction(
             "createNftWithErc20", (nft_create_data, erc_create_data), from_wallet
         )
@@ -150,18 +137,6 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         pool_data: Union[dict, tuple, PoolData],
         from_wallet: Wallet,
     ) -> str:
-        # TODO: this will be handled in web3 py
-        if isinstance(nft_create_data, CreateERC721DataNoDeployer):
-            nft_create_data = tuple(nft_create_data)
-
-        # TODO: this will be handled in web3 py
-        if isinstance(erc_create_data, CreateErc20Data):
-            erc_create_data = tuple(erc_create_data)
-
-        # TODO: this will be handled in web3 py
-        if isinstance(pool_data, PoolData):
-            pool_data = tuple(pool_data)
-
         return self.send_transaction(
             "createNftWithErc20WithPool",
             (nft_create_data, erc_create_data, pool_data),
@@ -175,18 +150,6 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         fixed_data: Union[dict, tuple, FixedData],
         from_wallet: Wallet,
     ) -> str:
-        # TODO: this will be handled in web3 py
-        if isinstance(nft_create_data, CreateERC721DataNoDeployer):
-            nft_create_data = tuple(nft_create_data)
-
-        # TODO: this will be handled in web3 py
-        if isinstance(erc_create_data, CreateErc20Data):
-            erc_create_data = tuple(erc_create_data)
-
-        # TODO: this will be handled in web3 py
-        if isinstance(fixed_data, FixedData):
-            fixed_data = tuple(fixed_data)
-
         return self.send_transaction(
             "createNftWithErc20WithFixedRate",
             (nft_create_data, erc_create_data, fixed_data),
@@ -200,18 +163,6 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         dispenser_data: Union[dict, tuple, DispenserData],
         from_wallet: Wallet,
     ) -> str:
-        # TODO: this will be handled in web3 py
-        if isinstance(nft_create_data, CreateERC721DataNoDeployer):
-            nft_create_data = tuple(nft_create_data)
-
-        # TODO: this will be handled in web3 py
-        if isinstance(erc_create_data, CreateErc20Data):
-            erc_create_data = tuple(erc_create_data)
-
-        # TODO: this will be handled in web3 py
-        if isinstance(dispenser_data, DispenserData):
-            dispenser_data = tuple(dispenser_data)
-
         return self.send_transaction(
             "createNftWithErc20WithDispenser",
             (nft_create_data, erc_create_data, dispenser_data),
