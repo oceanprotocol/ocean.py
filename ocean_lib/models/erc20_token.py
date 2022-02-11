@@ -114,10 +114,6 @@ class ERC20Token(ContractBase):
         provider_fees: Union[dict, tuple, ProviderFees],
         from_wallet: Wallet,
     ) -> str:
-        # TODO: will be fixed in web3.py
-        if isinstance(provider_fees, ProviderFees):
-            provider_fees = tuple(provider_fees)
-
         return self.send_transaction(
             "startOrder", (consumer, service_index, provider_fees), from_wallet
         )

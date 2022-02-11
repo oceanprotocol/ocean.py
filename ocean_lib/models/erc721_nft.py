@@ -77,19 +77,11 @@ class ERC721NFT(ContractBase):
         return self.send_transaction("setMetaDataState", (metadata_state,), from_wallet)
 
     def set_metadata(self, chain_metadata: ChainMetadata, from_wallet: Wallet) -> str:
-        # TODO: this will be handled in web3 py
-        if isinstance(chain_metadata, ChainMetadata):
-            chain_metadata = tuple(chain_metadata)
-
         return self.send_transaction("setMetaData", chain_metadata, from_wallet)
 
     def set_metadata_token_uri(
         self, chain_metadata: ChainMetadataWithTokenUri, from_wallet: Wallet
     ) -> str:
-        # TODO: this will be handled in web3 py
-        if isinstance(chain_metadata, ChainMetadataWithTokenUri):
-            chain_metadata = tuple(chain_metadata)
-
         return self.send_transaction(
             "setMetaDataAndTokenURI", (chain_metadata,), from_wallet
         )
