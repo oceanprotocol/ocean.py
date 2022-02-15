@@ -53,7 +53,12 @@ class FactoryRouter(BFactory):
     def is_approved_token(self, ocean_address: str) -> bool:
         return self.contract.caller.isApprovedToken(ocean_address)
 
-    @enforce_types
+    def is_ocean_token(self, ocean_address: str) -> bool:
+        return self.contract.caller.isOceanToken(ocean_address)
+
+    def get_min_vesting_period(self) -> int:
+        return self.contract.caller.getMinVestingPeriod()
+
     def stake_batch(
         self, stakes: List[Union[dict, tuple, Stakes]], from_wallet: Wallet
     ) -> str:
