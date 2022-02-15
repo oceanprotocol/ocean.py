@@ -17,7 +17,9 @@ from ocean_lib.models.models_structures import (
     FixedData,
     OrderData,
     PoolData,
+    ChainMetadata,
 )
+from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
@@ -442,6 +444,39 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert registered_dispenser_event[
         0
     ].args.datatokenAddress, "Invalid data token address by dispenser."
+
+    # Create a new erc721 with metadata in one single call and get address
+    metadata = ChainMetadata(
+        metadata_state=1,
+        metadata_decryptor_url="http://myprovider:8030",
+        metadata_decryptor_address="0x123",
+        flags=bytes(0),
+        data=Web3.toHex(text="my cool metadata."),
+        metadata_hash=create_checksum("my cool metadata."),
+        metadata_proofs=[],
+    )
+    tx = erc721_factory.create_nft_with_metadata(
+        nft_create_data, metadata, publisher_wallet
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_nft_event = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_NFT_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert registered_nft_event[0].event == "NFTCreated", "Cannot find NFTCreated event"
+    assert (
+        registered_nft_event[0].args.admin == publisher_wallet.address
+    ), "Invalid NFT owner!"
+    erc721_nft_address = registered_nft_event[0].args.newTokenAddress
+    erc721_nft = ERC721NFT(web3, erc721_nft_address)
+    assert (
+        erc721_nft.token_name() == "72120Bundle"
+    ), "NFT name doesn't match with the expected one."
+    metadata_info = erc721_nft.get_metadata()
+    assert metadata_info[3] is True
+    assert metadata_info[0] == "http://myprovider:8030"
 
 
 def test_start_multiple_order(

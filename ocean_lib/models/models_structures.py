@@ -169,19 +169,6 @@ MetadataProof = NamedTuple(
 )
 
 
-MetaData = NamedTuple(
-    "MetaData",
-    [
-        ("metadata_state", int),
-        ("metadata_decryptor_url", str),
-        ("metadata_decryptor_address", str),
-        ("flags", bytes),
-        ("data", bytes),
-        ("metadata_hash", bytes),
-        ("metadata_proofs", List[MetadataProof]),
-    ],
-)
-
 ChainMetadata = NamedTuple(
     "ChainMetadata",
     [

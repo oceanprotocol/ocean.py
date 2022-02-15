@@ -16,7 +16,7 @@ from ocean_lib.models.models_structures import (
     DispenserData,
     FixedData,
     PoolData,
-    MetaData,
+    ChainMetadata,
 )
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -170,7 +170,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     def create_nft_with_metadata(
         self,
         nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
-        metadata: Union[dict, tuple, MetaData],
+        metadata: Union[dict, tuple, ChainMetadata],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(

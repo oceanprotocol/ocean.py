@@ -16,6 +16,7 @@ from ocean_lib.exceptions import DataProviderException
 from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.models_structures import ConsumeFees
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.currency import to_wei
@@ -154,9 +155,17 @@ def process_order(
 
     environments = ocean_instance.compute.get_c2d_environments(service.service_endpoint)
 
+    # Consume fees
+    consume_fees = ConsumeFees(
+        consumer_market_fee_address=consumer_wallet.address,
+        consumer_market_fee_token=erc20_token.address,
+        consumer_market_fee_amount=0,
+    )
+
     order_tx_id = ocean_instance.assets.pay_for_service(
         asset=asset,
         service=service,
+        consume_fees=consume_fees,
         wallet=consumer_wallet,
         initialize_args={
             "compute_environment": environments[0]["id"],
