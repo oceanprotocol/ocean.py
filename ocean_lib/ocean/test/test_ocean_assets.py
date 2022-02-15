@@ -348,7 +348,14 @@ def test_plain_asset_with_one_datatoken(
 
     # Publisher deploys NFT contract
     tx = erc721_factory.deploy_erc721_contract(
-        ("NFT1", "NFTSYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
+        (
+            "NFT1",
+            "NFTSYMBOL",
+            1,
+            ZERO_ADDRESS,
+            ZERO_ADDRESS,
+            "https://oceanprotocol.com/nft/",
+        ),
         publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -402,7 +409,12 @@ def test_plain_asset_multiple_datatokens(
     )
 
     erc721_data = CreateERC721Data(
-        "NFT2", "NFT2SYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"
+        "NFT2",
+        "NFT2SYMBOL",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
     )
 
     tx = erc721_factory.deploy_erc721_contract(erc721_data, publisher_wallet)

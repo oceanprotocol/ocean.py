@@ -14,6 +14,7 @@ CreateERC721Data = NamedTuple(
         ("name", str),
         ("symbol", str),
         ("template_index", int),
+        ("additional_metadata_updater", str),
         ("additional_erc20_deployer", str),
         ("token_uri", str),
     ],
@@ -21,7 +22,13 @@ CreateERC721Data = NamedTuple(
 
 CreateERC721DataNoDeployer = NamedTuple(
     "CreateERC721DataNoDeployer",
-    [("name", str), ("symbol", str), ("template_index", int), ("token_uri", str)],
+    [
+        ("name", str),
+        ("symbol", str),
+        ("template_index", int),
+        ("additional_metadata_updater", str),
+        ("token_uri", str),
+    ],
 )
 
 CreateErc20Data = NamedTuple(
@@ -103,6 +110,15 @@ Operations = NamedTuple(
     ],
 )
 
+Stakes = NamedTuple(
+    "Stakes",
+    [
+        ("pool_address", str),
+        ("token_amount_in", int),
+        ("min_pool_amount_out", int),
+    ],
+)
+
 ProviderFees = NamedTuple(
     "ProviderFees",
     [
@@ -117,6 +133,15 @@ ProviderFees = NamedTuple(
     ],
 )
 
+ConsumeFees = NamedTuple(
+    "ConsumeFees",
+    [
+        ("consumer_market_fee_address", str),
+        ("consumer_market_fee_token", str),
+        ("consumer_market_fee_amount", int),
+    ],
+)
+
 OrderData = NamedTuple(
     "OrderData",
     [
@@ -124,6 +149,7 @@ OrderData = NamedTuple(
         ("consumer", str),
         ("service_index", int),
         ("provider_fees", ProviderFees),
+        ("consume_fees", ConsumeFees),
     ],
 )
 
@@ -133,12 +159,27 @@ OrderParams = NamedTuple(
         ("consumer", str),
         ("service_index", int),
         ("provider_fees", ProviderFees),
+        ("consume_fees", ConsumeFees),
     ],
 )
 
 MetadataProof = NamedTuple(
     "MetadataProof",
     [("validator_address", str), ("v", int), ("r", bytes), ("s", bytes)],
+)
+
+
+MetaData = NamedTuple(
+    "MetaData",
+    [
+        ("metadata_state", int),
+        ("metadata_decryptor_url", str),
+        ("metadata_decryptor_address", str),
+        ("flags", bytes),
+        ("data", bytes),
+        ("metadata_hash", bytes),
+        ("metadata_proofs", List[MetadataProof]),
+    ],
 )
 
 ChainMetadata = NamedTuple(

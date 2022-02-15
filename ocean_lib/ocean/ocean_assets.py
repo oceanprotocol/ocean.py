@@ -8,7 +8,7 @@ import json
 import logging
 import lzma
 import os
-from typing import List, Optional, Tuple, Type
+from typing import List, Optional, Tuple, Type, Union
 
 from enforce_typing import enforce_types
 from web3 import Web3
@@ -24,7 +24,11 @@ from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBa
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.models.models_structures import ChainMetadata, CreateErc20Data
+from ocean_lib.models.models_structures import (
+    ChainMetadata,
+    CreateErc20Data,
+    ConsumeFees,
+)
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.utils.utilities import create_checksum
@@ -229,6 +233,7 @@ class OceanAssets:
         erc721_symbol: Optional[str] = None,
         template_index: Optional[int] = 1,
         erc721_additional_erc_deployer: Optional[str] = None,
+        erc721_additional_metadata_updater: Optional[str] = None,
         erc721_uri: Optional[str] = None,
         erc20_tokens_data: Optional[List[CreateErc20Data]] = None,
         deployed_erc20_tokens: Optional[List[ERC20Token]] = None,
@@ -252,6 +257,7 @@ class OceanAssets:
         :param erc721_symbol: str symbol of ERC721 token  if creating a new one
         :param template_index: int template index of the ERC721 token, by default is 1.
         :param erc721_additional_erc_deployer: str address of an additional ERC20 deployer.
+        :param erc721_additional_metadata_updater: str address of an additional metadata updater.
         :param erc721_uri: str URL of the ERC721 token.
         :param erc20_tokens_data: list of ERC20CreateData necessary for deploying ERC20 tokens for different services.
         :param deployed_erc20_tokens: list of ERC20 tokens which are already deployed.
@@ -271,10 +277,20 @@ class OceanAssets:
             name = erc721_name or metadata["name"]
             symbol = erc721_symbol or name
             additional_erc20_deployer = erc721_additional_erc_deployer or ZERO_ADDRESS
+            additional_metadata_updater = (
+                erc721_additional_metadata_updater or ZERO_ADDRESS
+            )
             token_uri = erc721_uri or "https://oceanprotocol.com/nft/"
             # register on-chain
             tx_id = erc721_factory.deploy_erc721_contract(
-                (name, symbol, template_index, additional_erc20_deployer, token_uri),
+                (
+                    name,
+                    symbol,
+                    template_index,
+                    additional_erc20_deployer,
+                    additional_metadata_updater,
+                    token_uri,
+                ),
                 from_wallet=publisher_wallet,
             )
             tx_receipt = self._web3.eth.wait_for_transaction_receipt(tx_id)
@@ -525,6 +541,7 @@ class OceanAssets:
         self,
         asset: Asset,
         service: Service,
+        consume_fees: Union[tuple, dict, ConsumeFees],
         wallet: Wallet,
         initialize_args: Optional[dict] = None,
         consumer_address: Optional[str] = None,
@@ -565,6 +582,7 @@ class OceanAssets:
             consumer=consumer_address,
             service_index=asset.get_index_of_service(service),
             provider_fees=initialize_response.json()["providerFee"],
+            consume_fees=consume_fees,
             from_wallet=wallet,
         )
 

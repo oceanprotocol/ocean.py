@@ -49,6 +49,7 @@ erc721_data = CreateERC721Data(
     symbol="NFTSYMBOL",
     template_index=1,
     additional_erc20_deployer=ZERO_ADDRESS,
+    additional_metadata_updater=ZERO_ADDRESS,
     token_uri="https://oceanprotocol.com/nft/",
 )
 ```

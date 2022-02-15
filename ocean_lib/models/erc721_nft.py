@@ -57,6 +57,7 @@ class ERC721NFT(ContractBase):
         symbol: str,
         token_factory_address: str,
         additional_erc20_deployer: str,
+        additional_metadata_updater: str,
         token_uri: str,
         from_wallet: Wallet,
     ) -> str:
@@ -68,6 +69,7 @@ class ERC721NFT(ContractBase):
                 symbol,
                 token_factory_address,
                 additional_erc20_deployer,
+                additional_metadata_updater,
                 token_uri,
             ),
             from_wallet,

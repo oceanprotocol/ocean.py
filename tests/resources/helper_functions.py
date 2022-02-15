@@ -216,7 +216,14 @@ def deploy_erc721_erc20(
         web3, get_address_of_type(config, "ERC721Factory")
     )
     tx = erc721_factory.deploy_erc721_contract(
-        ("NFT", "NFTSYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
+        (
+            "NFT",
+            "NFTSYMBOL",
+            1,
+            ZERO_ADDRESS,
+            ZERO_ADDRESS,
+            "https://oceanprotocol.com/nft/",
+        ),
         from_wallet=erc721_publisher,
     )
     token_address = erc721_factory.get_token_address(tx)
@@ -315,9 +322,7 @@ def get_provider_fees() -> Dict[str, Any]:
     web3 = get_web3()
     provider_fee_amount = 0
     compute_env = None
-    provider_data = json.dumps(
-        {"environment": compute_env, "timeout": 0}, separators=(",", ":")
-    )
+    provider_data = json.dumps({"environment": compute_env}, separators=(",", ":"))
     provider_fee_address = provider_wallet.address
     provider_fee_token = os.environ.get("PROVIDER_FEE_TOKEN", ZERO_ADDRESS)
     valid_until = 0
