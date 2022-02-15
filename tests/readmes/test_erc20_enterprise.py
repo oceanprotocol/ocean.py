@@ -115,12 +115,14 @@ def test_erc20_enterprise_flow_with_dispenser():
         valid_until=1958133628,  # 2032
     )
 
-    initial_bob_balance = OCEAN_token.balanceOf(bob_wallet.address)
-    order_params = OrderParams(
+    consume_fees = ocean.build_consume_fees(
         bob_wallet.address,
-        1,
-        provider_fees,
+        erc20_enterprise_token.address,
+        0,
     )
+
+    initial_bob_balance = OCEAN_token.balanceOf(bob_wallet.address)
+    order_params = OrderParams(bob_wallet.address, 1, provider_fees, consume_fees)
 
     erc20_enterprise_token.buy_from_dispenser_and_order(
         order_params=order_params,
@@ -209,12 +211,13 @@ def test_erc20_enterprise_flow_with_fre():
         provider_fee_amount=0,
         valid_until=1958133628,  # 2032
     )
-
-    order_params = OrderParams(
+    consume_fees = ocean.build_consume_fees(
         bob_wallet.address,
-        1,
-        provider_fees,
+        erc20_enterprise_token.address,
+        ocean.to_wei(2),
     )
+
+    order_params = OrderParams(bob_wallet.address, 1, provider_fees, consume_fees)
 
     fre_params = (
         fixed_rate_exchange.address,

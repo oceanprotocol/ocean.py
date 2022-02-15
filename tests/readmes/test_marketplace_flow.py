@@ -102,9 +102,10 @@ def test_marketplace_flow_readme(tmp_path):
     )
     assert bpool.address
 
-    price_in_OCEAN = bpool.get_amount_in_exact_out(
+    prices = bpool.get_amount_in_exact_out(
         OCEAN_token.address, erc20_token.address, ocean.to_wei(1), ocean.to_wei("0.01")
     )
+    price_in_OCEAN = prices[0]
 
     formatted_price = pretty_ether_and_wei(price_in_OCEAN, "OCEAN")
     assert formatted_price

@@ -21,7 +21,12 @@ from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.models_structures import FixedData, PoolData, ProviderFees
+from ocean_lib.models.models_structures import (
+    FixedData,
+    PoolData,
+    ProviderFees,
+    ConsumeFees,
+)
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
@@ -352,3 +357,9 @@ class Ocean:
             valid_until,
             self.web3.toHex(self.web3.toBytes(text=provider_data)),
         )
+
+    @enforce_types
+    def build_consume_fees(
+        self, consume_fee_address: str, consume_fee_token: str, consume_fee_amount: int
+    ) -> ConsumeFees:
+        return ConsumeFees(consume_fee_address, consume_fee_token, consume_fee_amount)

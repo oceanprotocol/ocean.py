@@ -452,8 +452,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         metadata_decryptor_address="0x123",
         flags=bytes(0),
         data=Web3.toHex(text="my cool metadata."),
-        metadata_hash=create_checksum("my cool metadata."),
-        metadata_proofs=[],
+        data_hash=create_checksum("my cool metadata."),
+        data_proofs=[],
     )
     tx = erc721_factory.create_nft_with_metadata(
         nft_create_data, metadata, publisher_wallet
