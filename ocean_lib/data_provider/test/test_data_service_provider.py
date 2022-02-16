@@ -452,6 +452,8 @@ def test_encrypt_failure(config):
     with pytest.raises(DataProviderException):
         DataSP.encrypt([], config.provider_url)
 
+    DataSP.set_http_client(get_requests_session())
+
 
 def test_fileinfo_failure(config):
     """Tests successful fileinfo failures."""
@@ -471,6 +473,8 @@ def test_fileinfo_failure(config):
     with pytest.raises(DataProviderException):
         DataSP.fileinfo("0xabc", service)
 
+    DataSP.set_http_client(get_requests_session())
+
 
 def test_initialize_failure(config):
     """Tests initialize failures."""
@@ -489,6 +493,8 @@ def test_initialize_failure(config):
 
     with pytest.raises(DataProviderException):
         DataSP.initialize("0xabc", service, "0x")
+
+    DataSP.set_http_client(get_requests_session())
 
 
 def test_job_result_failure(config):
@@ -512,6 +518,8 @@ def test_job_result_failure(config):
     with pytest.raises(DataProviderException):
         DataSP.compute_job_result("0xabc", 0, service, wallet)
 
+    DataSP.set_http_client(get_requests_session())
+
 
 def test_check_asset_failure(config):
     """Tests check_asset_file_info failures."""
@@ -526,3 +534,5 @@ def test_check_asset_failure(config):
     DataSP.set_http_client(http_client)
 
     assert DataSP.check_asset_file_info("test", "", config.provider_url) is False
+
+    DataSP.set_http_client(get_requests_session())
