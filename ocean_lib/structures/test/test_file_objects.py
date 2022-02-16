@@ -2,6 +2,8 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import pytest
+
 from ocean_lib.structures.file_objects import FilesTypeFactory, IpfsFile, UrlFile
 
 
@@ -41,3 +43,6 @@ def test_filetype_factory():
     )
 
     assert factory_file.hash == "abc"
+
+    with pytest.raises(Exception):
+        factory_file = FilesTypeFactory({"type": "somethingelse"})

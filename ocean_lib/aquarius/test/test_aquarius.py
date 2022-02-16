@@ -83,3 +83,7 @@ def test_invalid_search_query(aquarius_instance):
     search_query = "not_a_dict"
     with pytest.raises(TypeError):
         aquarius_instance.query_search(search_query=search_query)
+
+
+def test_empty_responses(aquarius_instance):
+    assert aquarius_instance.get_asset_metadata("inexistent_ddo") == {}

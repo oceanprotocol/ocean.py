@@ -76,7 +76,7 @@ class Aquarius:
         return f"Asset DID {did} not found in Elasticsearch" not in str(response)
 
     @enforce_types
-    def get_asset_metadata(self, did: str) -> list:
+    def get_asset_metadata(self, did: str) -> dict:
         """
         Retrieve asset metadata for a given did.
 
@@ -87,7 +87,7 @@ class Aquarius:
         if response.status_code == 200:
             return response.json()
 
-        return []
+        return {}
 
     @enforce_types
     def query_search(self, search_query: dict) -> list:
