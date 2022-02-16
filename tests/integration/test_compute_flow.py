@@ -13,12 +13,12 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
 from ocean_lib.exceptions import DataProviderException
-from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.services.service import Service
 from ocean_lib.structures.abi_tuples import ConsumeFees
+from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import (

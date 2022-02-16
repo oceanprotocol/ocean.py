@@ -25,8 +25,8 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.config import Config
 from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
-from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
+from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
 
