@@ -335,9 +335,7 @@ class DataServiceProvider:
 
         try:
             job_info = json.loads(response.content.decode("utf-8"))
-            if isinstance(job_info, list):
-                return job_info[0]
-            return job_info
+            return job_info[0] if isinstance(job_info, list) else job_info
 
         except KeyError as err:
             logger.error(f"Failed to extract jobId from response: {err}")
@@ -460,8 +458,11 @@ class DataServiceProvider:
         )
         response = DataServiceProvider._http_method("get", compute_job_result_file_url)
 
+        if not response:
+            raise DataProviderException("No response on job result endpoint.")
+
         if response.status_code != 200:
-            raise Exception(response.content)
+            raise DataProviderException(response.content)
 
         return response.content
 
@@ -787,11 +788,12 @@ class DataServiceProvider:
     def check_asset_file_info(did: str, service_id: str, provider_uri: str) -> bool:
         if not did:
             return False
+
         _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
         data = {"did": did, "serviceId": service_id}
         response = requests.post(endpoint, json=data)
 
-        if response.status_code != 200:
+        if not response or response.status_code != 200:
             return False
 
         response = response.json()

@@ -13,11 +13,12 @@ from requests.models import Response
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
-from ocean_lib.exceptions import DataProviderException
+from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesTypeFactory
+from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import create_basics
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
@@ -25,25 +26,11 @@ from tests.resources.helper_functions import (
     get_publisher_ocean_instance,
 )
 from tests.resources.mocks.http_client_mock import (
+    TEST_SERVICE_ENDPOINTS,
     HttpClientEmptyMock,
     HttpClientEvilMock,
     HttpClientNiceMock,
 )
-
-TEST_SERVICE_ENDPOINTS = {
-    "computeDelete": ["DELETE", "/api/services/compute"],
-    "computeStart": ["POST", "/api/services/compute"],
-    "computeStatus": ["GET", "/api/services/compute"],
-    "computeStop": ["PUT", "/api/services/compute"],
-    "computeResult": ["GET", "/api/services/computeResult"],
-    "download": ["GET", "/api/services/download"],
-    "encrypt": ["POST", "/api/services/encrypt"],
-    "decrypt": ["POST", "/api/services/decrypt"],
-    "fileinfo": ["POST", "/api/services/fileinfo"],
-    "initialize": ["GET", "/api/services/initialize"],
-    "nonce": ["GET", "/api/services/nonce"],
-    "computeEnvironments": ["GET", "/api/services/computeEnvironments"],
-}
 
 
 @pytest.fixture
@@ -449,3 +436,93 @@ def test_check_single_file_info():
         {"url": "http://www.google.com"}, provider_uri="http://172.15.0.4:8030"
     )
     assert not DataSP.check_single_file_info({}, provider_uri="http://172.15.0.4:8030")
+
+
+def test_encrypt_failure(config):
+    """Tests encrypt failures."""
+    http_client = HttpClientEvilMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(OceanEncryptAssetUrlsError):
+        DataSP.encrypt([], config.provider_url)
+
+    http_client = HttpClientEmptyMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(DataProviderException):
+        DataSP.encrypt([], config.provider_url)
+
+
+def test_fileinfo_failure(config):
+    """Tests successful fileinfo failures."""
+    service = Mock(spec=Service)
+    service.service_endpoint = "http://172.15.0.4:8030"
+    service.id = "abc"
+
+    http_client = HttpClientEvilMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(DataProviderException):
+        DataSP.fileinfo("0xabc", service)
+
+    http_client = HttpClientEmptyMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(DataProviderException):
+        DataSP.fileinfo("0xabc", service)
+
+
+def test_initialize_failure(config):
+    """Tests initialize failures."""
+    service = Mock(spec=Service)
+    service.service_endpoint = "http://172.15.0.4:8030"
+    service.id = "abc"
+
+    http_client = HttpClientEvilMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(DataProviderException):
+        DataSP.initialize("0xabc", service, "0x")
+
+    http_client = HttpClientEmptyMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(DataProviderException):
+        DataSP.initialize("0xabc", service, "0x")
+
+
+def test_job_result_failure(config):
+    """Tests compute job result failures."""
+    service = Mock(spec=Service)
+    service.service_endpoint = "http://172.15.0.4:8030"
+    service.id = "abc"
+
+    wallet = Mock(spec=Wallet)
+    wallet.address = "none"
+
+    http_client = HttpClientEvilMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(DataProviderException):
+        DataSP.compute_job_result("0xabc", 0, service, wallet)
+
+    http_client = HttpClientEmptyMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(DataProviderException):
+        DataSP.compute_job_result("0xabc", 0, service, wallet)
+
+
+def test_check_asset_failure(config):
+    """Tests check_asset_file_info failures."""
+    assert DataSP.check_asset_file_info("", "", config.provider_url) is False
+
+    http_client = HttpClientEvilMock()
+    DataSP.set_http_client(http_client)
+
+    assert DataSP.check_asset_file_info("test", "", config.provider_url) is False
+
+    http_client = HttpClientEmptyMock()
+    DataSP.set_http_client(http_client)
+
+    assert DataSP.check_asset_file_info("test", "", config.provider_url) is False
