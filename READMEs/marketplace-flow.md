@@ -63,7 +63,7 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 Then in the same python console:
 ```python
 # Prepare data for ERC20 token
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 erc20_data = CreateErc20Data(
     template_index=1,
@@ -190,7 +190,7 @@ asset = ocean.assets.resolve(did)
 service = asset.get_service("access")
 
 # Consume fees
-from ocean_lib.models.models_structures import ConsumeFees
+from ocean_lib.structures.abi_tuples import ConsumeFees
 consume_fees = ConsumeFees(
     consumer_market_fee_address=bob_wallet.address,
     consumer_market_fee_token=erc20_token.address,

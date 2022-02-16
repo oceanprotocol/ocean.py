@@ -8,7 +8,7 @@ from typing import Union
 from enforce_typing import enforce_types
 
 from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.models.models_structures import DispenserData, OrderParams
+from ocean_lib.structures.abi_tuples import DispenserData, OrderParams
 from ocean_lib.web3_internal.wallet import Wallet
 
 

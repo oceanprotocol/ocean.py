@@ -9,14 +9,14 @@ from web3.datastructures import AttributeDict
 
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.models_structures import (
+from ocean_lib.structures.abi_tuples import (
+    ChainMetadata,
     CreateErc20Data,
     CreateERC721Data,
     CreateERC721DataNoDeployer,
     DispenserData,
     FixedData,
     PoolData,
-    ChainMetadata,
 )
 from ocean_lib.web3_internal.wallet import Wallet
 

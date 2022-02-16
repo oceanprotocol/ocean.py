@@ -6,8 +6,8 @@ import pytest
 from web3 import exceptions
 
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721Permissions, ERC721NFT
-from ocean_lib.models.models_structures import (
+from ocean_lib.models.erc721_nft import ERC721NFT, ERC721Permissions
+from ocean_lib.structures.abi_tuples import (
     ChainMetadata,
     ChainMetadataWithTokenUri,
     CreateErc20Data,

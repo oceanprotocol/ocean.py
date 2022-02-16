@@ -62,7 +62,7 @@ In the same python console:
 
 ```python
 # Prepare data for ERC20 token
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 DATA_erc20_data = CreateErc20Data(
     template_index=1,
@@ -260,7 +260,7 @@ algo_service = ALGO_asset.get_service("access")
 environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
 
 from datetime import datetime, timedelta
-from ocean_lib.models.models_structures import ConsumeFees
+from ocean_lib.structures.abi_tuples import ConsumeFees
 
 # Consume fees
 consume_fees = ConsumeFees(

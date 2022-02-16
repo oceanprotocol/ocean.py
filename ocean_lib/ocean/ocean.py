@@ -21,19 +21,19 @@ from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.models_structures import (
-    FixedData,
-    PoolData,
-    ProviderFees,
-    ConsumeFees,
-)
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
+from ocean_lib.structures.abi_tuples import (
+    ConsumeFees,
+    FixedData,
+    PoolData,
+    ProviderFees,
+)
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import DECIMALS_18
 from ocean_lib.web3_internal.currency import to_wei as _to_wei
-from ocean_lib.web3_internal.utils import split_signature, Signature
+from ocean_lib.web3_internal.utils import split_signature
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ocean")

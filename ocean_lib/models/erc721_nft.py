@@ -9,7 +9,7 @@ from enforce_typing import enforce_types
 
 from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.models.models_structures import (
+from ocean_lib.structures.abi_tuples import (
     ChainMetadata,
     ChainMetadataWithTokenUri,
     CreateErc20Data,

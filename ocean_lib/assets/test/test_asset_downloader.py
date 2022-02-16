@@ -12,7 +12,7 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.models_structures import ConsumeFees
+from ocean_lib.structures.abi_tuples import ConsumeFees
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import create_asset, create_basics, get_sample_ddo
 from tests.resources.helper_functions import deploy_erc721_erc20
