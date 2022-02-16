@@ -124,11 +124,18 @@ provider_fees = ocean.build_compute_provider_fees(
     valid_until=1958133628,  # 2032
 )
 
+consume_fees = ocean.build_consume_fees(
+    bob_wallet.address,
+    erc20_enterprise_token.address,
+    0,
+)
+
 initial_bob_balance = OCEAN_token.balanceOf(bob_wallet.address)
 order_params = OrderParams(
     bob_wallet.address,
     1,
     provider_fees,
+    consume_fees
 )
 
 # Bob gets 1 DT from dispenser and then startsOrder, while burning that DT
@@ -200,10 +207,17 @@ provider_fees = ocean.build_compute_provider_fees(
     valid_until=1958133628,  # 2032
 )
 
+consume_fees = ocean.build_consume_fees(
+    bob_wallet.address,
+    erc20_enterprise_token.address,
+    ocean.to_wei(2)
+)
+
 order_params = OrderParams(
     bob_wallet.address,
     1,
     provider_fees,
+    consume_fees
 )
 
 fre_params = (

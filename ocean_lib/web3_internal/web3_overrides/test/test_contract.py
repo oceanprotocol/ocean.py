@@ -12,7 +12,14 @@ from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFuncti
 
 def test_main(web3, config, nft_factory_address):
     factory = MyFactory(web3, nft_factory_address)
-    fn_args = ("NFT", "NFTS", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/")
+    fn_args = (
+        "NFT",
+        "NFTS",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
+    )
     contract_fn = getattr(factory.contract.functions, "deployERC721Contract")(*fn_args)
     custom_contract = CustomContractFunction(contract_fn)
 

@@ -11,7 +11,7 @@ from ocean_lib.agreements.file_objects import UrlFile
 from ocean_lib.assets.trusted_algorithms import add_publisher_trusted_algorithm
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.compute_input import ComputeInput
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.models.models_structures import CreateErc20Data, ConsumeFees
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.services.service import Service
@@ -214,10 +214,18 @@ def test_c2d_flow_readme():
 
     environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
 
+    # Consume fees
+    consume_fees = ConsumeFees(
+        consumer_market_fee_address=bob_wallet.address,
+        consumer_market_fee_token=DATA_datatoken.address,
+        consumer_market_fee_amount=0,
+    )
+
     # Pay for dataset
     DATA_order_tx_id = ocean.assets.pay_for_service(
         asset=DATA_asset,
         service=compute_service,
+        consume_fees=consume_fees,
         wallet=bob_wallet,
         initialize_args={
             "compute_environment": environments[0]["id"],
@@ -227,10 +235,18 @@ def test_c2d_flow_readme():
     )
     assert DATA_order_tx_id, "pay for dataset unsuccessful"
 
+    # Consume fees
+    consume_fees = ConsumeFees(
+        consumer_market_fee_address=bob_wallet.address,
+        consumer_market_fee_token=ALGO_datatoken.address,
+        consumer_market_fee_amount=0,
+    )
+
     # Pay for algorithm
     ALGO_order_tx_id = ocean.assets.pay_for_service(
         asset=ALGO_asset,
         service=algo_service,
+        consume_fees=consume_fees,
         wallet=bob_wallet,
         initialize_args={
             "valid_until": int((datetime.now() + timedelta(days=1)).timestamp())

@@ -32,7 +32,14 @@ def test_deploy_erc721_and_manage(
         web3, get_address_of_type(config, "ERC721Factory")
     )
     tx = erc721_factory.deploy_erc721_contract(
-        ("NFT", "SYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
+        (
+            "NFT",
+            "SYMBOL",
+            1,
+            ZERO_ADDRESS,
+            ZERO_ADDRESS,
+            "https://oceanprotocol.com/nft/",
+        ),
         factory_deployer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -258,7 +265,7 @@ def test_pool_ocean(
     assert swap_fees_event_args.oceanFeeAmount == 0
     assert (
         ocean_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFeeAddress)
     )
     assert dt_market_fee_balance == bpool.publish_market_fee(erc20_token.address)
 
@@ -290,7 +297,7 @@ def test_pool_ocean(
     assert to_wei("0.0001") == swap_fees_event_args.marketFeeAmount
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFeeAddress)
     )
 
     swap_event = bpool.get_event_log(
@@ -308,8 +315,8 @@ def test_pool_ocean(
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee)
-        == swap_fees_event_args.swapFeeAmount
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        == swap_fees_event_args.LPFeeAmount
     )
 
     # Tests publisher swaps some DT back to Ocean with swapExactAmountOut, check swap custom fees
@@ -337,7 +344,7 @@ def test_pool_ocean(
     swap_fees_event_args = swap_fees_event[0].args
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFeeAddress)
     )
 
     swap_event = bpool.get_event_log(
@@ -361,7 +368,7 @@ def test_pool_ocean(
     )
     assert (
         round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
-        == swap_fees_event_args.swapFeeAmount
+        == swap_fees_event_args.LPFeeAmount
     )
 
     # Tests publisher adds more liquidity with joinPool() (adding both tokens)
@@ -774,10 +781,10 @@ def test_pool_dai(
 
     swap_fees_event_args = swap_fees_event[0].args
 
-    assert swap_fees_event_args.tokenFees == dai_contract.address
+    assert swap_fees_event_args.tokenFeeAddress == dai_contract.address
     assert (
         dai_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFeeAddress)
     )
     assert dt_market_fee_balance == bpool.publish_market_fee(erc20_token.address)
 
@@ -805,7 +812,7 @@ def test_pool_dai(
     assert to_wei("0.0001") == swap_fees_event_args.marketFeeAmount
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFeeAddress)
     )
 
     swap_event = bpool.get_event_log(
@@ -823,8 +830,8 @@ def test_pool_dai(
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee)
-        == swap_fees_event_args.swapFeeAmount
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        == swap_fees_event_args.LPFeeAmount
     )
 
     # Tests publisher swaps some DT back to dai with swapExactAmountOut, check swap custom fees
@@ -849,7 +856,7 @@ def test_pool_dai(
     swap_fees_event_args = swap_fees_event[0].args
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFeeAddress)
     )
 
     swap_event = bpool.get_event_log(
@@ -873,7 +880,7 @@ def test_pool_dai(
     )
     assert (
         round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
-        == swap_fees_event_args.swapFeeAmount
+        == swap_fees_event_args.LPFeeAmount
     )
 
     # Tests publisher adds more liquidity with joinPool() (adding both tokens)
@@ -1292,10 +1299,10 @@ def test_pool_usdc(
 
     swap_fees_event_args = swap_fees_event[0].args
 
-    assert swap_fees_event_args.tokenFees == usdc_contract.address
+    assert swap_fees_event_args.tokenFeeAddress == usdc_contract.address
     assert (
         usdc_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFeeAddress)
     )
     assert dt_market_fee_balance == bpool.publish_market_fee(erc20_token.address)
 
@@ -1323,7 +1330,7 @@ def test_pool_usdc(
     assert to_wei("0.0001") == swap_fees_event_args.marketFeeAmount
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFeeAddress)
     )
 
     swap_event = bpool.get_event_log(
@@ -1341,8 +1348,8 @@ def test_pool_usdc(
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        swap_event_args.tokenAmountIn / (to_wei(1) / swap_fee)
-        == swap_fees_event_args.swapFeeAmount
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        == swap_fees_event_args.LPFeeAmount
     )
 
     # Tests publisher swaps some DT back to USDC with swapExactAmountOut, check swap custom fees
@@ -1367,7 +1374,7 @@ def test_pool_usdc(
     swap_fees_event_args = swap_fees_event[0].args
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFeeAddress)
     )
 
     swap_event = bpool.get_event_log(
@@ -1390,8 +1397,8 @@ def test_pool_usdc(
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        round(swap_event_args.tokenAmountIn / (to_wei(1) / swap_fee))
-        == swap_fees_event_args.swapFeeAmount
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        == swap_fees_event_args.LPFeeAmount
     )
 
     # Tests publisher adds more liquidity with joinPool() (adding both tokens)
@@ -1801,10 +1808,10 @@ def test_pool_usdc_flexible(
 
     swap_fees_event_args = swap_fees_event[0].args
 
-    assert swap_fees_event_args.tokenFees == usdc_contract.address
+    assert swap_fees_event_args.tokenFeeAddress == usdc_contract.address
     assert (
         usdc_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFeeAddress)
     )
     assert dt_market_fee_balance == bpool.publish_market_fee(erc20_token.address)
 
@@ -1832,7 +1839,7 @@ def test_pool_usdc_flexible(
     assert to_wei("0.0001") == swap_fees_event_args.marketFeeAmount
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFeeAddress)
     )
 
     swap_event = bpool.get_event_log(
@@ -1850,8 +1857,8 @@ def test_pool_usdc_flexible(
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        swap_event_args.tokenAmountIn / (to_wei(1) / swap_fee)
-        == swap_fees_event_args.swapFeeAmount
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        == swap_fees_event_args.LPFeeAmount
     )
 
     # Tests publisher swaps some DT back to USDC with swapExactAmountOut, check swap custom fees
@@ -1876,7 +1883,7 @@ def test_pool_usdc_flexible(
     swap_fees_event_args = swap_fees_event[0].args
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFeeAddress)
     )
 
     swap_event = bpool.get_event_log(
@@ -1899,8 +1906,8 @@ def test_pool_usdc_flexible(
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        round(swap_event_args.tokenAmountIn / (to_wei(1) / swap_fee))
-        == swap_fees_event_args.swapFeeAmount
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        == swap_fees_event_args.LPFeeAmount
     )
 
     # Tests publisher adds more liquidity with joinPool() (adding both tokens)
@@ -2300,10 +2307,10 @@ def test_pool_dai_flexible(
 
     swap_fees_event_args = swap_fees_event[0].args
 
-    assert swap_fees_event_args.tokenFees == dai_contract.address
+    assert swap_fees_event_args.tokenFeeAddress == dai_contract.address
     assert (
         dai_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFeeAddress)
     )
     assert dt_market_fee_balance == bpool.publish_market_fee(erc20_token.address)
 
@@ -2331,7 +2338,7 @@ def test_pool_dai_flexible(
     assert to_wei("0.0001") == swap_fees_event_args.marketFeeAmount
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFeeAddress)
     )
 
     swap_event = bpool.get_event_log(
@@ -2349,8 +2356,8 @@ def test_pool_dai_flexible(
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        swap_event_args.tokenAmountIn / (to_wei(1) / swap_fee)
-        == swap_fees_event_args.swapFeeAmount
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        == swap_fees_event_args.LPFeeAmount
     )
 
     # Tests publisher swaps some DT back to DAI with swapExactAmountOut, check swap custom fees
@@ -2375,7 +2382,7 @@ def test_pool_dai_flexible(
     swap_fees_event_args = swap_fees_event[0].args
     assert (
         dt_market_fee_balance + swap_fees_event_args.marketFeeAmount
-        == bpool.publish_market_fee(swap_fees_event_args.tokenFees)
+        == bpool.publish_market_fee(swap_fees_event_args.tokenFeeAddress)
     )
 
     swap_event = bpool.get_event_log(
@@ -2398,8 +2405,8 @@ def test_pool_dai_flexible(
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        round(swap_event_args.tokenAmountIn / (to_wei(1) / swap_fee))
-        == swap_fees_event_args.swapFeeAmount
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        == swap_fees_event_args.LPFeeAmount
     )
 
     # Tests publisher adds more liquidity with joinPool() (adding both tokens)

@@ -209,3 +209,170 @@ def test_buy_dt_batch(
     assert balance_ocean_after < balance_ocean_before
     assert balance_dt1 > 0
     assert balance_dt2 > 0
+
+
+def test_stake_batch(
+    web3,
+    config,
+    factory_router,
+    consumer_wallet,
+    factory_deployer_wallet,
+    another_consumer_wallet,
+):
+    nft_factory = ERC721FactoryContract(
+        web3=web3,
+        address=get_address_of_type(config, ERC721FactoryContract.CONTRACT_NAME),
+    )
+
+    ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
+    ocean_contract.approve(
+        get_address_of_type(config, ERC721FactoryContract.CONTRACT_NAME),
+        2**256 - 1,
+        factory_deployer_wallet,
+    )
+    ocean_contract.approve(
+        get_address_of_type(config, "Router"), 2**256 - 1, factory_deployer_wallet
+    )
+
+    nft_data = {
+        "name": "72120Bundle",
+        "symbol": "72Bundle",
+        "templateIndex": 1,
+        "tokenURI": "https://oceanprotocol.com/nft/",
+    }
+
+    erc_data = {
+        "templateIndex": 1,
+        "strings": ["ERC20B1", "ERC20DT1Symbol"],
+        "addresses": [
+            factory_deployer_wallet.address,
+            consumer_wallet.address,
+            factory_deployer_wallet.address,
+            ZERO_ADDRESS,
+        ],
+        "uints": [to_wei("1000000"), 0],
+        "bytess": [],
+    }
+
+    pool_data = {
+        "addresses": [
+            get_address_of_type(config, "Staking"),
+            get_address_of_type(config, "Ocean"),
+            get_address_of_type(config, ERC721FactoryContract.CONTRACT_NAME),
+            factory_deployer_wallet.address,
+            factory_deployer_wallet.address,
+            get_address_of_type(config, "poolTemplate"),
+        ],
+        "ssParams": [
+            to_wei("2"),
+            ocean_contract.decimals(),
+            to_wei("10000"),
+            2500000,
+            to_wei("2"),
+        ],
+        "swapFees": [to_wei("0.001"), to_wei("0.001")],
+    }
+
+    tx = nft_factory.create_nft_erc20_with_pool(
+        nft_data, erc_data, pool_data, factory_deployer_wallet
+    )
+
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_event = nft_factory.get_event_log(
+        "TokenCreated", tx_receipt.blockNumber, web3.eth.block_number, None
+    )
+    erc_token = registered_event[0]["args"]["newTokenAddress"]
+    erc_token_contract = ERC20Token(web3=web3, address=erc_token)
+    registered_event_pool = erc_token_contract.get_event_log(
+        FactoryRouter.EVENT_NEW_POOL,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    pool1 = registered_event_pool[0]["args"]["poolAddress"]
+
+    nft_data2 = {
+        "name": "72120Bundle",
+        "symbol": "72Bundle",
+        "templateIndex": 1,
+        "tokenURI": "https://oceanprotocol.com/nft2/",
+    }
+
+    erc_data2 = {
+        "templateIndex": 1,
+        "strings": ["ERC20B12", "ERC20DT1Symbol2"],
+        "addresses": [
+            factory_deployer_wallet.address,
+            consumer_wallet.address,
+            factory_deployer_wallet.address,
+            ZERO_ADDRESS,
+        ],
+        "uints": [to_wei("1000000"), 0],
+        "bytess": [],
+    }
+
+    pool_data2 = {
+        "addresses": [
+            get_address_of_type(config, "Staking"),
+            get_address_of_type(config, "Ocean"),
+            get_address_of_type(config, ERC721FactoryContract.CONTRACT_NAME),
+            factory_deployer_wallet.address,
+            factory_deployer_wallet.address,
+            get_address_of_type(config, "poolTemplate"),
+        ],
+        "ssParams": [
+            to_wei("1"),
+            ocean_contract.decimals(),
+            to_wei("10000"),
+            2500000,
+            to_wei("2"),
+        ],
+        "swapFees": [to_wei("0.001"), to_wei("0.001")],
+    }
+
+    tx = nft_factory.create_nft_erc20_with_pool(
+        nft_data2, erc_data2, pool_data2, factory_deployer_wallet
+    )
+
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_event = nft_factory.get_event_log(
+        "TokenCreated", tx_receipt.blockNumber, web3.eth.block_number, None
+    )
+    erc_token2 = registered_event[0]["args"]["newTokenAddress"]
+    erc_token_contract2 = ERC20Token(web3=web3, address=erc_token2)
+    registered_event_pool = erc_token_contract2.get_event_log(
+        FactoryRouter.EVENT_NEW_POOL,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    pool2 = registered_event_pool[0]["args"]["poolAddress"]
+
+    stake1 = {"poolAddress": pool1, "tokenAmountIn": to_wei("1"), "minPoolAmountOut": 0}
+
+    stake2 = {"poolAddress": pool2, "tokenAmountIn": to_wei("1"), "minPoolAmountOut": 0}
+    bpool_token1 = ERC20Token(web3, pool1)
+    bpool_token2 = ERC20Token(web3, pool2)
+
+    assert bpool_token1.balanceOf(consumer_wallet.address) == 0
+    assert bpool_token2.balanceOf(consumer_wallet.address) == 0
+
+    ocean_contract.approve(
+        get_address_of_type(config, ERC721FactoryContract.CONTRACT_NAME),
+        2**256 - 1,
+        consumer_wallet,
+    )
+    ocean_contract.approve(
+        get_address_of_type(config, "Router"), 2**256 - 1, consumer_wallet
+    )
+
+    balance_ocean_before = ocean_contract.balanceOf(consumer_wallet.address)
+    factory_router.stake_batch([stake1, stake2], consumer_wallet)
+    balance_ocean_after = ocean_contract.balanceOf(consumer_wallet.address)
+
+    balance_dt1 = bpool_token1.balanceOf(consumer_wallet.address)
+    balance_dt2 = bpool_token2.balanceOf(consumer_wallet.address)
+
+    assert balance_ocean_after < balance_ocean_before
+    assert balance_dt1 > 0
+    assert balance_dt2 > 0

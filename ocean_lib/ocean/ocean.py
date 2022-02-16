@@ -21,7 +21,12 @@ from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.models_structures import FixedData, PoolData, ProviderFees
+from ocean_lib.models.models_structures import (
+    FixedData,
+    PoolData,
+    ProviderFees,
+    ConsumeFees,
+)
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
@@ -115,6 +120,7 @@ class Ocean:
         token_uri: Optional[str] = "https://oceanprotocol.com/nft/",
         template_index: Optional[int] = 1,
         additional_erc20_deployer: Optional[str] = None,
+        additional_metadata_updater: Optional[str] = None,
     ) -> ERC721NFT:
         """
         This method deploys a ERC721 token contract on the blockchain.
@@ -143,9 +149,19 @@ class Ocean:
         if not additional_erc20_deployer:
             additional_erc20_deployer = ZERO_ADDRESS
 
+        if not additional_metadata_updater:
+            additional_metadata_updater = ZERO_ADDRESS
+
         nft_factory = self.get_nft_factory()
         tx_id = nft_factory.deploy_erc721_contract(
-            (name, symbol, template_index, additional_erc20_deployer, token_uri),
+            (
+                name,
+                symbol,
+                template_index,
+                additional_erc20_deployer,
+                additional_metadata_updater,
+                token_uri,
+            ),
             from_wallet=from_wallet,
         )
 
@@ -341,3 +357,9 @@ class Ocean:
             valid_until,
             self.web3.toHex(self.web3.toBytes(text=provider_data)),
         )
+
+    @enforce_types
+    def build_consume_fees(
+        self, consume_fee_address: str, consume_fee_token: str, consume_fee_amount: int
+    ) -> ConsumeFees:
+        return ConsumeFees(consume_fee_address, consume_fee_token, consume_fee_amount)

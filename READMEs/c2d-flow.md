@@ -260,11 +260,20 @@ algo_service = ALGO_asset.get_service("access")
 environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
 
 from datetime import datetime, timedelta
+from ocean_lib.models.models_structures import ConsumeFees
+
+# Consume fees
+consume_fees = ConsumeFees(
+    consumer_market_fee_address=bob_wallet.address,
+    consumer_market_fee_token=DATA_datatoken.address,
+    consumer_market_fee_amount=0,
+)
 
 # Pay for dataset for 1 day
 DATA_order_tx_id = ocean.assets.pay_for_service(
     asset=DATA_asset,
     service=compute_service,
+    consume_fees=consume_fees,
     wallet=bob_wallet,
     initialize_args={
         "compute_environment": environments[0]["id"],
@@ -274,10 +283,18 @@ DATA_order_tx_id = ocean.assets.pay_for_service(
 )
 print(f"Paid for dataset compute service, order tx id: {DATA_order_tx_id}")
 
+# Consume fees
+consume_fees = ConsumeFees(
+    consumer_market_fee_address=bob_wallet.address,
+    consumer_market_fee_token=ALGO_datatoken.address,
+    consumer_market_fee_amount=0,
+)
+
 # Pay for algorithm for 1 day
 ALGO_order_tx_id = ocean.assets.pay_for_service(
     asset=ALGO_asset,
     service=algo_service,
+    consume_fees=consume_fees,
     wallet=bob_wallet,
     initialize_args={
         "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
