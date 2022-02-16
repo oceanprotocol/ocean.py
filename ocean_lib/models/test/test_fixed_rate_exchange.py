@@ -185,8 +185,8 @@ def test_exchange_rate_creation(
         exchange_id,
         amount_dt_to_sell,
         no_limit,
-        ZERO_ADDRESS,
-        0,
+        consumer_wallet.address,
+        to_wei("0.1"),
         another_consumer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(receipt)
@@ -203,26 +203,15 @@ def test_exchange_rate_creation(
         event_log[0].args.baseTokenSwappedAmount
         - event_log[0].args.marketFeeAmount
         - event_log[0].args.oceanFeeAmount
+        - event_log[0].args.consumeMarketFeeAmount
         == event_log[0].args.datatokenSwappedAmount
-    )
-
-    # Do the same but using calc_base_in_given_out_dt
-    calculated_base_in = fixed_exchange.calc_base_in_given_out_dt(
-        exchange_id=exchange_id,
-        datatoken_amount=amount_dt_to_sell,
-        consume_market_swap_fee_amount=0,
-    )
-
-    assert (
-        calculated_base_in[FixedExchangeBaseInOutData.BASE_TOKEN_AMOUNT]
-        == event_log[0].args.datatokenSwappedAmount
-        + event_log[0].args.marketFeeAmount
-        + event_log[0].args.oceanFeeAmount
     )
 
     assert erc20.balanceOf(another_consumer_wallet.address) == amount_dt_to_sell
-    assert ocean_token.balanceOf(consumer_wallet.address) == 0
-
+    assert (
+        ocean_token.balanceOf(consumer_wallet.address)
+        > ocean_balance_publisher_before_swap
+    )
     # Test sell DT workflow
     erc20_dt_balance_consumer_before_swap = erc20.balanceOf(
         another_consumer_wallet.address

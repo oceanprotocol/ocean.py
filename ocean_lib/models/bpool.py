@@ -62,6 +62,10 @@ class BPool(BTokenBase):
         return self.events.SwapFeeChanged()
 
     @property
+    def event_SWAP_FEES(self):
+        return self.events.SWAP_FEES()
+
+    @property
     def event_PublishMarketFee(self):
         return self.events.PublishMarketFee()
 

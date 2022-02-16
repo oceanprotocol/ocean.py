@@ -38,6 +38,7 @@ def test_properties(web3, config, publisher_wallet):
     assert erc20.event_OrderStarted.abi["name"] == ERC20Token.EVENT_ORDER_STARTED
     assert erc20.event_MinterApproved.abi["name"] == ERC20Token.EVENT_MINTER_APPROVED
     assert erc20.event_OrderReused.abi["name"] == ERC20Token.EVENT_ORDER_REUSED
+    assert erc20.event_OrderExecuted.abi["name"] == ERC20Token.EVENT_ORDER_EXECUTED
     assert (
         erc20.event_PublishMarketFeeChanged.abi["name"]
         == ERC20Token.EVENT_PUBLISH_MARKET_FEE_CHANGED
@@ -272,6 +273,76 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         get_address_of_type(config, "OPFCommunityFeeCollector")
     ) == to_wei("1")
 
+    provider_message = Web3.solidityKeccak(
+        ["bytes32", "bytes"],
+        [tx_receipt.transactionHash, Web3.toHex(Web3.toBytes(text=provider_data))],
+    )
+    provider_signed = web3.eth.sign(provider_fee_address, data=provider_message)
+
+    message = Web3.solidityKeccak(
+        ["bytes"],
+        [Web3.toHex(Web3.toBytes(text="12345"))],
+    )
+    consumer_signed = web3.eth.sign(consumer_wallet.address, data=message)
+
+    erc20.order_executed(
+        tx_receipt.transactionHash,
+        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
+        provider_signature=provider_signed,
+        consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
+        consumer_signature=consumer_signed,
+        consumer=consumer_wallet.address,
+        from_wallet=publisher_wallet,
+    )
+    executed_event = erc20.get_event_log(
+        ERC20Token.EVENT_ORDER_EXECUTED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert executed_event[0].event == "OrderExecuted", "Cannot find OrderExecuted event"
+    assert executed_event[0].args.orderTxId == tx_receipt.transactionHash
+    assert executed_event[0].args.providerAddress == provider_fee_address
+
+    # Tests exceptions for order_executed
+    consumer_signed = web3.eth.sign(provider_fee_address, data=message)
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        erc20.order_executed(
+            tx_receipt.transactionHash,
+            provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
+            provider_signature=provider_signed,
+            consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
+            consumer_signature=consumer_signed,
+            consumer=consumer_wallet.address,
+            from_wallet=publisher_wallet,
+        )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert Consumer signature check failed"
+    )
+
+    message = Web3.solidityKeccak(
+        ["bytes"],
+        [Web3.toHex(Web3.toBytes(text="12345"))],
+    )
+    consumer_signed = web3.eth.sign(consumer_wallet.address, data=message)
+
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        erc20.order_executed(
+            tx_receipt.transactionHash,
+            provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
+            provider_signature=signed,
+            consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
+            consumer_signature=consumer_signed,
+            consumer=consumer_wallet.address,
+            from_wallet=publisher_wallet,
+        )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert Provider signature check failed"
+    )
+
+    # Tests reuses order
     erc20.reuse_order(
         tx_receipt.transactionHash,
         provider_fees=provider_fee,

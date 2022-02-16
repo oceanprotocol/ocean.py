@@ -52,6 +52,10 @@ class FixedRateExchange(ContractBase):
     EVENT_TOKEN_COLLECTED = "TokenCollected"
     EVENT_OCEAN_FEE_COLLECTED = "OceanFeeCollected"
     EVENT_MARKET_FEE_COLLECTED = "MarketFeeCollected"
+    EVENT_PUBLISH_MARKET_FEE = "PublishMarketFee"
+    EVENT_CONSUME_MARKET_FEE = "ConsumeMarketFee"
+    EVENT_LOG_SWAP_FEES = "SWAP_FEES"
+    EVENT_PUBLISH_MARKET_FEE_CHANGED = "PublishMarketFeeChanged"
 
     @property
     def event_ExchangeCreated(self):
@@ -82,6 +86,22 @@ class FixedRateExchange(ContractBase):
         return self.events.OceanFeeCollected()
 
     @property
+    def event_PublishMarketFee(self):
+        return self.events.PublishMarketFee()
+
+    @property
+    def event_ConsumeMarketFee(self):
+        return self.events.ConsumeMarketFee()
+
+    @property
+    def event_PublishMarketFeeChanged(self):
+        return self.events.PublishMarketFeeChanged()
+
+    @property
+    def event_SWAP_FEES(self):
+        return self.events.SWAP_FEES()
+
+    @property
     def event_MarketFeeCollected(self):
         return self.events.MarketFeeCollected()
 
@@ -94,6 +114,9 @@ class FixedRateExchange(ContractBase):
         return self.contract.caller.generateExchangeId(
             base_token, datatoken, exchange_owner
         )
+
+    def get_basetoken_out_price(self, exchange_id: bytes, dt_amount: int) -> int:
+        return self.contract.caller.getBaseTokenOutPrice(exchange_id, dt_amount)
 
     def calc_base_in_given_out_dt(
         self,
