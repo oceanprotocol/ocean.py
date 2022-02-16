@@ -6,7 +6,7 @@ import os
 
 from ocean_lib.agreements.file_objects import UrlFile
 from ocean_lib.example_config import ExampleConfig
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.models.models_structures import CreateErc20Data, ConsumeFees
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -102,9 +102,10 @@ def test_marketplace_flow_readme(tmp_path):
     )
     assert bpool.address
 
-    price_in_OCEAN = bpool.get_amount_in_exact_out(
+    prices = bpool.get_amount_in_exact_out(
         OCEAN_token.address, erc20_token.address, ocean.to_wei(1), ocean.to_wei("0.01")
     )
+    price_in_OCEAN = prices[0]
 
     formatted_price = pretty_ether_and_wei(price_in_OCEAN, "OCEAN")
     assert formatted_price
@@ -134,8 +135,15 @@ def test_marketplace_flow_readme(tmp_path):
         1
     ), "Bob didn't get 1.0 datatokens"
 
+    # Consume fees
+    consume_fees = ConsumeFees(
+        consumer_market_fee_address=bob_wallet.address,
+        consumer_market_fee_token=erc20_token.address,
+        consumer_market_fee_amount=0,
+    )
+
     service = asset.get_service("access")
-    order_tx_id = ocean.assets.pay_for_service(asset, service, bob_wallet)
+    order_tx_id = ocean.assets.pay_for_service(asset, service, consume_fees, bob_wallet)
 
     file_path = ocean.assets.download_asset(
         asset, bob_wallet, str(tmp_path), order_tx_id

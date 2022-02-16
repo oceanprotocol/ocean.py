@@ -74,6 +74,7 @@ def test_permissions(
             symbol="NN",
             token_factory_address=erc721_factory_address,
             additional_erc20_deployer=ZERO_ADDRESS,
+            additional_metadata_updater=ZERO_ADDRESS,
             token_uri="https://oceanprotocol.com/nft/",
             from_wallet=publisher_wallet,
         )

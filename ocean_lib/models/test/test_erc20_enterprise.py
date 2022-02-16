@@ -135,6 +135,11 @@ def test_buy_from_dispenser_and_order(
             valid_until,
             Web3.toHex(Web3.toBytes(text=provider_data)),
         ),
+        (
+            consume_fee_address,
+            mock_dai_contract.address,
+            0,
+        ),
     )
 
     opf_collector_address = get_address_of_type(config, "OPFCommunityFeeCollector")
@@ -151,6 +156,7 @@ def test_buy_from_dispenser_and_order(
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
+    assert erc20_enterprise_token.get_total_supply() == 0
 
     balance_opf_consume = mock_dai_contract.balanceOf(opf_collector_address)
 
@@ -303,6 +309,11 @@ def test_buy_from_fre_and_order(
             valid_until,
             Web3.toHex(Web3.toBytes(text=provider_data)),
         ),
+        (
+            consume_fee_address,
+            mock_dai_contract.address,
+            0,
+        ),
     )
 
     fre_params = (
@@ -328,6 +339,7 @@ def test_buy_from_fre_and_order(
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
+    assert erc20_enterprise_token.get_total_supply() == 0
 
     provider_fee_balance_after = mock_usdc_contract.balanceOf(
         another_consumer_wallet.address

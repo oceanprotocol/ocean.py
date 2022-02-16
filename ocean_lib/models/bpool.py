@@ -234,14 +234,14 @@ class BPool(BTokenBase):
 
     def get_amount_in_exact_out(
         self, token_in: str, token_out: str, token_amount_out: int, swap_market_fee: int
-    ) -> int:
+    ) -> list:
         return self.contract.caller.getAmountOutExactIn(
             token_in, token_out, token_amount_out, swap_market_fee
         )
 
     def get_amount_out_exact_in(
         self, token_in: str, token_out: str, token_amount_in: int, swap_market_fee: int
-    ) -> int:
+    ) -> list:
         return self.contract.caller.getAmountOutExactIn(
             token_in, token_out, token_amount_in, swap_market_fee
         )
