@@ -159,7 +159,7 @@ def test_exchange_rate_creation(
     # Buy should fail if price is too high
     with pytest.raises(exceptions.ContractLogicError) as err:
         fixed_exchange.buy_dt(
-            exchange_id, amount_dt_to_sell, 1, another_consumer_wallet
+            exchange_id, amount_dt_to_sell, 1, ZERO_ADDRESS, 0, another_consumer_wallet
         )
     assert (
         err.value.args[0]
@@ -182,7 +182,12 @@ def test_exchange_rate_creation(
     assert erc20_dt_balance_consumer_before_swap == 0
 
     receipt = fixed_exchange.buy_dt(
-        exchange_id, amount_dt_to_sell, no_limit, another_consumer_wallet
+        exchange_id,
+        amount_dt_to_sell,
+        no_limit,
+        ZERO_ADDRESS,
+        0,
+        another_consumer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(receipt)
 
@@ -203,7 +208,9 @@ def test_exchange_rate_creation(
 
     # Do the same but using calc_base_in_given_out_dt
     calculated_base_in = fixed_exchange.calc_base_in_given_out_dt(
-        exchange_id=exchange_id, datatoken_amount=amount_dt_to_sell
+        exchange_id=exchange_id,
+        datatoken_amount=amount_dt_to_sell,
+        consume_market_swap_fee_amount=0,
     )
 
     assert (
@@ -225,13 +232,17 @@ def test_exchange_rate_creation(
     )
     erc20_balance_before = erc20.balanceOf(consumer_wallet.address)
     ocean_balance_before = ocean_token.balanceOf(consumer_wallet.address)
-    fixed_exchange.sell_dt(exchange_id, amount_dt_to_sell, 0, consumer_wallet)
+    fixed_exchange.sell_dt(
+        exchange_id, amount_dt_to_sell, 0, ZERO_ADDRESS, 0, consumer_wallet
+    )
 
     # Base balance incremented as expect after selling data tokens
     assert (
         ocean_token.balanceOf(consumer_wallet.address)
         == fixed_exchange.calc_base_out_given_in_dt(
-            exchange_id=exchange_id, datatoken_amount=amount_dt_to_sell
+            exchange_id=exchange_id,
+            datatoken_amount=amount_dt_to_sell,
+            consume_market_swap_fee_amount=0,
         )[FixedExchangeBaseInOutData.BASE_TOKEN_AMOUNT]
         + ocean_balance_before
     )

@@ -96,24 +96,44 @@ class FixedRateExchange(ContractBase):
         )
 
     def calc_base_in_given_out_dt(
-        self, exchange_id: bytes, datatoken_amount: int
+        self,
+        exchange_id: bytes,
+        datatoken_amount: int,
+        consume_market_swap_fee_amount: int,
     ) -> tuple:
-        return self.contract.caller.calcBaseInGivenOutDT(exchange_id, datatoken_amount)
+        return self.contract.caller.calcBaseInGivenOutDT(
+            exchange_id, datatoken_amount, consume_market_swap_fee_amount
+        )
 
     def calc_base_out_given_in_dt(
-        self, exchange_id: bytes, datatoken_amount: int
+        self,
+        exchange_id: bytes,
+        datatoken_amount: int,
+        consume_market_swap_fee_amount: int,
     ) -> tuple:
-        return self.contract.caller.calcBaseOutGivenInDT(exchange_id, datatoken_amount)
+        return self.contract.caller.calcBaseOutGivenInDT(
+            exchange_id, datatoken_amount, consume_market_swap_fee_amount
+        )
 
     def buy_dt(
         self,
         exchange_id: bytes,
         datatoken_amount: int,
         max_base_token_amount: int,
+        consume_market_address: str,
+        consume_market_swap_fee_amount: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "buyDT", (exchange_id, datatoken_amount, max_base_token_amount), from_wallet
+            "buyDT",
+            (
+                exchange_id,
+                datatoken_amount,
+                max_base_token_amount,
+                consume_market_address,
+                consume_market_swap_fee_amount,
+            ),
+            from_wallet,
         )
 
     def sell_dt(
@@ -121,11 +141,19 @@ class FixedRateExchange(ContractBase):
         exchange_id: bytes,
         datatoken_amount: int,
         min_base_token_amount: int,
+        consume_market_address: str,
+        consume_market_swap_fee_amount: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "sellDT",
-            (exchange_id, datatoken_amount, min_base_token_amount),
+            (
+                exchange_id,
+                datatoken_amount,
+                min_base_token_amount,
+                consume_market_address,
+                consume_market_swap_fee_amount,
+            ),
             from_wallet,
         )
 
