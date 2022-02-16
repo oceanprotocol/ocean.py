@@ -2,6 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import pytest
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
@@ -218,3 +219,43 @@ def test_get_service():
         ddo.get_service(ServiceTypes.CLOUD_COMPUTE).as_dictionary()
         == expected_compute_service
     )
+
+
+def test_credentials():
+    ddo_dict = get_sample_ddo_with_compute_service()
+    ddo = Asset.from_dict(ddo_dict)
+    assert ddo.requires_address_credential
+    assert ddo.allowed_addresses == ["0x123", "0x456"]
+    assert ddo.denied_addresses == ["0x2222", "0x333"]
+
+    ddo.add_address_to_allow_list("0xaAA")
+    assert "0xaaa" in ddo.allowed_addresses
+    ddo.remove_address_from_allow_list("0xaAA")
+    assert "0xaaa" not in ddo.allowed_addresses
+
+    ddo.add_address_to_deny_list("0xaAA")
+    assert "0xaaa" in ddo.denied_addresses
+    ddo.remove_address_from_deny_list("0xaAA")
+    assert "0xaaa" not in ddo.denied_addresses
+
+
+def test_inexistent_removals():
+    ddo_dict = get_sample_ddo_with_compute_service()
+    del ddo_dict["services"][1]["compute"]["publisherTrustedAlgorithms"]
+    ddo = Asset.from_dict(ddo_dict)
+    compute_service = ddo.get_service("compute")
+
+    with pytest.raises(
+        ValueError, match="Algorithm notadid is not in trusted algorithms"
+    ):
+        ddo.remove_publisher_trusted_algorithm(compute_service, "notadid")
+
+    ddo_dict = get_sample_ddo_with_compute_service()
+    del ddo_dict["services"][1]["compute"]["publisherTrustedAlgorithmPublishers"]
+    ddo = Asset.from_dict(ddo_dict)
+    compute_service = ddo.get_service("compute")
+
+    with pytest.raises(
+        ValueError, match="Publisher notadid is not in trusted algorithm publishers"
+    ):
+        ddo.remove_publisher_trusted_algorithm_publisher(compute_service, "notadid")
