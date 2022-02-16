@@ -323,6 +323,9 @@ class BPool(BTokenBase):
         )
 
     @enforce_types
+    def get_max_out_ratio(self) -> int:
+        return self.contract.caller.MAX_OUT_RATIO()
+
     def join_pool(
         self, pool_amount_out: int, max_amounts_in: List[int], from_wallet: Wallet
     ) -> str:

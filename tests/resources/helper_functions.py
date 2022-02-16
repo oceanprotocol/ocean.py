@@ -26,6 +26,7 @@ from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
+from pytest import approx
 
 _NETWORK = "ganache"
 
@@ -348,3 +349,8 @@ def get_provider_fees() -> Dict[str, Any]:
     }
 
     return provider_fee
+
+
+def approx_from_wei(amount_a, amount_b) -> float:
+    """Helper function to compare amounts in wei with pytest approx function."""
+    return int(amount_a) / to_wei(1) == approx(int(amount_b) / to_wei(1))
