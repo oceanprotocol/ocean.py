@@ -93,7 +93,7 @@ DATA_metadata = {
 }
 
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.agreements.file_objects import UrlFile
+from ocean_lib.structures.file_objects import UrlFile
 DATA_url_file = UrlFile(
     url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 )
@@ -193,7 +193,7 @@ ALGO_metadata = {
 }
 
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.agreements.file_objects import UrlFile
+from ocean_lib.structures.file_objects import UrlFile
 ALGO_url_file = UrlFile(
     url="https://raw.githubusercontent.com/trentmc/branin/main/gpr.py"
 )
