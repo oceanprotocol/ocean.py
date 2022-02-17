@@ -4,19 +4,18 @@
 #
 
 import random
+import traceback
+from math import floor
 from time import time
 
 import pytest
 
-import traceback
-import logging
-
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.structures.abi_tuples import CreateErc20Data, PoolData
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
+from ocean_lib.structures.abi_tuples import CreateErc20Data, PoolData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from tests.resources.helper_functions import (
@@ -24,7 +23,6 @@ from tests.resources.helper_functions import (
     deploy_erc721_erc20,
     get_address_of_type,
 )
-from math import floor
 
 
 def _deploy_erc721_token(config, web3, factory_deployer_wallet, manager_wallet):
@@ -74,8 +72,7 @@ def get_random_max_token_amount_out(
     )
 
 
-# @pytest.mark.skip(reason="This test is slow and not needed in the CI")
-@pytest.mark.nosetup_all
+@pytest.mark.skip(reason="This test is slow and not needed in the CI")
 def test_fuzzing_pool_ocean(
     web3,
     config,
@@ -87,7 +84,7 @@ def test_fuzzing_pool_ocean(
 ):
     """Test the liquidity pool contract with random values."""
 
-    number_of_runs = 20
+    number_of_runs = 50
 
     errors = []
 
@@ -525,6 +522,32 @@ def test_fuzzing_pool_ocean(
             """
 
             errors.append([error, params])
+        finally:
+            final_datatoken_balance = erc20_token.balanceOf(publisher_wallet.address)
+            # sell all the datatokens before ending
+            if final_datatoken_balance > 0 and erc20_token and bpool:
+                tx = bpool.swap_exact_amount_in(
+                    [
+                        erc20_address,
+                        ocean_contract.address,
+                        another_consumer_wallet.address,
+                    ],
+                    [
+                        min(
+                            erc20_token.balanceOf(publisher_wallet.address),
+                            to_wei(
+                                from_wei(bpool.get_max_in_ratio())
+                                * from_wei(bpool.get_balance(erc20_address))
+                            ),
+                        ),
+                        1,
+                        to_wei("1000000000"),
+                        0,
+                    ],
+                    publisher_wallet,
+                )
+
+                web3.eth.wait_for_transaction_receipt(tx)
 
     # print errors
     for error in errors:
