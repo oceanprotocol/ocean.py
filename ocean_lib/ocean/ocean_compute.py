@@ -142,14 +142,3 @@ class OceanCompute:
         return self._data_provider.build_compute_endpoint(
             asset.get_service(ServiceTypes.CLOUD_COMPUTE).service_endpoint
         )
-
-    @enforce_types
-    def _get_compute_result_file_endpoint(
-        self, did: str, asset: Optional[Asset] = None
-    ) -> Tuple[str, str]:
-        if not asset:
-            asset = resolve_asset(did, self._config.metadata_cache_uri)
-
-        return self._data_provider.build_compute_result_file_endpoint(
-            asset.get_service(ServiceTypes.CLOUD_COMPUTE).service_endpoint
-        )

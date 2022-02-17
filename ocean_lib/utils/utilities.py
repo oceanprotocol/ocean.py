@@ -4,26 +4,13 @@
 #
 """Utilities class"""
 import hashlib
-import json
-import uuid
-from datetime import datetime
-from typing import Any, Dict, Tuple
+from typing import Tuple
 
 from enforce_typing import enforce_types
 from eth_account.datastructures import SignedMessage
 from eth_typing import HexStr
 from eth_typing.encoding import Primitives
 from web3.main import Web3
-
-
-@enforce_types
-def generate_new_id() -> str:
-    """
-    Generate a new id without prefix.
-
-    :return: Id, str
-    """
-    return uuid.uuid4().hex + uuid.uuid4().hex
 
 
 @enforce_types
@@ -95,24 +82,8 @@ def convert_to_text(data: bytes) -> str:
 
 
 @enforce_types
-def checksum(seed: Dict[str, Any]) -> str:
-    """Calculate the hash3_256."""
-    return hashlib.sha3_256(
-        (json.dumps(dict(sorted(seed.items(), reverse=False))).replace(" ", "")).encode(
-            "utf-8"
-        )
-    ).hexdigest()
-
-
-@enforce_types
 def create_checksum(text: str) -> str:
     """
     :return: str
     """
     return hashlib.sha256(text.encode("utf-8")).hexdigest()
-
-
-@enforce_types
-def get_timestamp() -> str:
-    """Return the current system timestamp."""
-    return f"{datetime.utcnow().replace(microsecond=0).isoformat()}Z"
