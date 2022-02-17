@@ -63,7 +63,14 @@ class OceanAssets:
         :param asset: Asset.
         :return: (bool, list) list of errors, empty if valid
         """
-        return self._aquarius.validate_asset(asset)
+        # Validation by Aquarius
+        validation_result, validation_errors = self._aquarius.validate_asset(asset)
+        if not validation_result:
+            msg = f"Asset has validation errors: {validation_errors}"
+            logger.error(msg)
+            raise ValueError(msg)
+
+        return validation_result, validation_errors
 
     def _add_defaults(
         self, services: list, datatoken: str, files: str, provider_uri: str
@@ -374,11 +381,7 @@ class OceanAssets:
             asset.add_service(service)
 
         # Validation by Aquarius
-        validation_result, validation_errors = self.validate(asset)
-        if not validation_result:
-            msg = f"Asset has validation errors: {validation_errors}"
-            logger.error(msg)
-            raise ValueError(msg)
+        self.validate(asset)
 
         document, flags, ddo_hash = self._encrypt_ddo(
             asset, provider_uri, encrypt_flag, compress_flag
