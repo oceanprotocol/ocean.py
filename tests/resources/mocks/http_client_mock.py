@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import inspect
@@ -8,6 +8,21 @@ from unittest.mock import Mock
 
 from requests.models import Response
 from requests.sessions import Session
+
+TEST_SERVICE_ENDPOINTS = {
+    "computeDelete": ["DELETE", "/api/services/compute"],
+    "computeStart": ["POST", "/api/services/compute"],
+    "computeStatus": ["GET", "/api/services/compute"],
+    "computeStop": ["PUT", "/api/services/compute"],
+    "computeResult": ["GET", "/api/services/computeResult"],
+    "download": ["GET", "/api/services/download"],
+    "encrypt": ["POST", "/api/services/encrypt"],
+    "decrypt": ["POST", "/api/services/decrypt"],
+    "fileinfo": ["POST", "/api/services/fileinfo"],
+    "initialize": ["GET", "/api/services/initialize"],
+    "nonce": ["GET", "/api/services/nonce"],
+    "computeEnvironments": ["GET", "/api/services/computeEnvironments"],
+}
 
 
 class HttpClientMockBase(Session):
@@ -25,7 +40,7 @@ class HttpClientMockBase(Session):
             the_response = Mock(spec=Response)
             the_response.status_code = 200
             the_response.json.return_value = {
-                "serviceEndpoints": {"nonce": ["GET", "/api/v1/nonce/endpoint"]}
+                "serviceEndpoints": TEST_SERVICE_ENDPOINTS
             }
             return the_response
 
@@ -57,6 +72,10 @@ class HttpClientEmptyMock(HttpClientMockBase):
 
     @staticmethod
     def post(*args, **kwargs):
+        return None
+
+    @staticmethod
+    def specific_get(*args, **kwargs):
         return None
 
 

@@ -1,41 +1,45 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
 """Ocean module."""
+import json
 import logging
+from decimal import Decimal
 from typing import Dict, List, Optional, Type, Union
 
 from enforce_typing import enforce_types
-from eth_utils import remove_0x_prefix
+from web3.datastructures import AttributeDict
+
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.data_token import DataToken
-from ocean_lib.models.dtfactory import DTFactory
+from ocean_lib.models.bpool import BPool
+from ocean_lib.models.dispenser import Dispenser
+from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.erc721_nft import ERC721NFT
+from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.metadata import MetadataContract
-from ocean_lib.models.order import Order
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
-from ocean_lib.ocean.ocean_exchange import OceanExchange
-from ocean_lib.ocean.ocean_pool import OceanPool
-from ocean_lib.ocean.util import (
-    get_bfactory_address,
-    get_contracts_addresses,
-    get_dtfactory_address,
-    get_ocean_token_address,
-    get_web3,
+from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
+from ocean_lib.structures.abi_tuples import (
+    ConsumeFees,
+    FixedData,
+    PoolData,
+    ProviderFees,
 )
-from ocean_lib.web3_internal.utils import get_network_name
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import DECIMALS_18
+from ocean_lib.web3_internal.currency import to_wei as _to_wei
+from ocean_lib.web3_internal.utils import split_signature
 from ocean_lib.web3_internal.wallet import Wallet
-from web3.datastructures import AttributeDict
 
 logger = logging.getLogger("ocean")
 
 
 class Ocean:
-
     """The Ocean class is the entry point into Ocean Protocol."""
 
     @enforce_types
@@ -75,13 +79,13 @@ class Ocean:
                 else "metadataStoreUri"
             )
             metadata_cache_uri = config.get(
-                cache_key, config.get("metadata_cache_uri", "http://localhost:5000")
+                cache_key, config.get("metadata_cache_uri", "http://172.15.0.5:5000")
             )
             config_dict = {
                 "eth-network": {"network": config.get("network", "")},
                 "resources": {
                     "metadata_cache_uri": metadata_cache_uri,
-                    "provider.url": config.get("providerUri", "http://localhost:8030"),
+                    "provider.url": config.get("providerUri", "http://172.15.0.4:8030"),
                 },
             }
             config = Config(options_dict=config_dict)
@@ -91,29 +95,8 @@ class Ocean:
         if not data_provider:
             data_provider = DataServiceProvider
 
-        network = get_network_name(web3=self.web3)
-        addresses = get_contracts_addresses(self.config.address_file, network)
-        self.assets = OceanAssets(
-            self.config,
-            self.web3,
-            data_provider,
-            addresses.get(MetadataContract.CONTRACT_NAME),
-        )
+        self.assets = OceanAssets(self.config, self.web3, data_provider)
         self.compute = OceanCompute(self.config, data_provider)
-
-        ocean_address = get_ocean_token_address(self.config.address_file, network)
-        self.pool = OceanPool(
-            self.web3,
-            ocean_address,
-            get_bfactory_address(self.config.address_file, network),
-            get_dtfactory_address(self.config.address_file, network),
-        )
-        self.exchange = OceanExchange(
-            self.web3,
-            ocean_address,
-            FixedRateExchange.configured_address(network, self.config.address_file),
-            self.config,
-        )
 
         logger.debug("Ocean instance initialized: ")
 
@@ -123,17 +106,24 @@ class Ocean:
         return get_ocean_token_address(self.config.address_file, web3=self.web3)
 
     @enforce_types
-    def create_data_token(
+    def to_wei(
+        self, amount_in_ether: Union[Decimal, str, int], decimals: int = DECIMALS_18
+    ):
+        return _to_wei(amount_in_ether=amount_in_ether, decimals=decimals)
+
+    @enforce_types
+    def create_erc721_nft(
         self,
         name: str,
         symbol: str,
         from_wallet: Wallet,
-        cap: int = DataToken.DEFAULT_CAP,
-        blob: str = "",
-    ) -> DataToken:
+        token_uri: Optional[str] = "https://oceanprotocol.com/nft/",
+        template_index: Optional[int] = 1,
+        additional_erc20_deployer: Optional[str] = None,
+        additional_metadata_updater: Optional[str] = None,
+    ) -> ERC721NFT:
         """
-        This method deploys a datatoken contract on the blockchain.
-
+        This method deploys a ERC721 token contract on the blockchain.
         Usage:
         ```python
             config = Config('config.ini')
@@ -144,78 +134,232 @@ class Ocean:
                 block_confirmations=config.block_confirmations,
                 transaction_timeout=config.transaction_timeout,
             )
-            datatoken = ocean.create_data_token("Dataset name", "dtsymbol", from_wallet=wallet)
+            erc721_nft = ocean.create_erc721_nft("Dataset name", "dtsymbol", from_wallet=wallet)
         ```
-
-        :param name: Datatoken name, str
-        :param symbol: Datatoken symbol, str
+        :param name: ERC721 token name, str
+        :param symbol: ERC721 token symbol, str
         :param from_wallet: wallet instance, wallet
-        :param cap: Amount of data tokens to create, denoted in wei, int
+        :param template_index: Template type of the token, int
+        :param additional_erc20_deployer: Address of another ERC20 deployer, str
+        :param token_uri: URL for ERC721 token, str
 
-        :return: `Datatoken` instance
+        :return: `ERC721NFT` instance
         """
 
-        dtfactory = self.get_dtfactory()
-        tx_id = dtfactory.createToken(blob, name, symbol, cap, from_wallet=from_wallet)
-        address = dtfactory.get_token_address(tx_id)
-        assert address, "new datatoken has no address"
-        dt = DataToken(self.web3, address)
-        return dt
+        if not additional_erc20_deployer:
+            additional_erc20_deployer = ZERO_ADDRESS
+
+        if not additional_metadata_updater:
+            additional_metadata_updater = ZERO_ADDRESS
+
+        nft_factory = self.get_nft_factory()
+        tx_id = nft_factory.deploy_erc721_contract(
+            (
+                name,
+                symbol,
+                template_index,
+                additional_erc20_deployer,
+                additional_metadata_updater,
+                token_uri,
+            ),
+            from_wallet=from_wallet,
+        )
+
+        address = nft_factory.get_token_address(tx_id)
+        assert address, "new NFT token has no address"
+        token = ERC721NFT(self.web3, address)
+        return token
 
     @enforce_types
-    def get_data_token(self, token_address: str) -> DataToken:
+    def get_nft_token(self, token_address: str) -> ERC721NFT:
         """
         :param token_address: Token contract address, str
-        :return: `Datatoken` instance
+        :return: `ERC721NFT` instance
         """
 
-        return DataToken(self.web3, token_address)
+        return ERC721NFT(self.web3, token_address)
 
     @enforce_types
-    def get_dtfactory(self, dtfactory_address: str = "") -> DTFactory:
+    def get_datatoken(self, token_address: str) -> ERC20Token:
         """
-        :param dtfactory_address: contract address, str
+        :param token_address: Token contract address, str
+        :return: `ERC20Token` instance
+        """
 
-        :return: `DTFactory` instance
+        return ERC20Token(self.web3, token_address)
+
+    @enforce_types
+    def get_nft_factory(self, nft_factory_address: str = "") -> ERC721FactoryContract:
         """
-        dtf_address = dtfactory_address or DTFactory.configured_address(
-            get_network_name(web3=self.web3), self.config.address_file
-        )
-        return DTFactory(self.web3, dtf_address)
+        :param nft_factory_address: contract address, str
+
+        :return: `ERC721FactoryContract` instance
+        """
+        if not nft_factory_address:
+            nft_factory_address = get_address_of_type(
+                self.config, ERC721FactoryContract.CONTRACT_NAME
+            )
+
+        return ERC721FactoryContract(self.web3, nft_factory_address)
 
     @enforce_types
     def get_user_orders(
-        self,
-        address: str,
-        datatoken: Optional[str] = None,
-        service_id: Optional[int] = None,
-    ) -> List[Order]:
+        self, address: str, datatoken: Optional[str] = None
+    ) -> List[AttributeDict]:
         """
         :return: List of orders `[Order]`
         """
-        dt = DataToken(self.web3, datatoken)
+        dt = ERC20Token(self.web3, datatoken)
         _orders = []
         for log in dt.get_start_order_logs(
             address, from_all_tokens=not bool(datatoken)
         ):
             a = dict(log.args.items())
             a["amount"] = int(log.args.amount)
-            a["marketFee"] = int(log.args.marketFee)
+            a["address"] = log.address
+            a["transactionHash"] = log.transactionHash
             a = AttributeDict(a.items())
 
-            # 'datatoken', 'amount', 'timestamp', 'transactionId', 'did', 'payer', 'consumer', 'serviceId', 'serviceType'
-            order = Order(
-                log.address,
-                a.amount,
-                a.timestamp,
-                log.transactionHash,
-                f"did:op:{remove_0x_prefix(log.address)}",
-                a.payer,
-                a.consumer,
-                a.serviceId,
-                None,
-            )
-            if service_id is None or order.serviceId == service_id:
-                _orders.append(order)
+            _orders.append(a)
 
         return _orders
+
+    @property
+    @enforce_types
+    def fixed_rate_exchange(self):
+        return FixedRateExchange(
+            self.web3, get_address_of_type(self.config, "FixedPrice")
+        )
+
+    @property
+    @enforce_types
+    def dispenser(self):
+        return Dispenser(self.web3, get_address_of_type(self.config, "Dispenser"))
+
+    @enforce_types
+    def create_fixed_rate(
+        self,
+        erc20_token: ERC20Token,
+        base_token: ERC20Token,
+        amount: int,
+        from_wallet: Wallet,
+    ) -> bytes:
+        fixed_price_address = get_address_of_type(self.config, "FixedPrice")
+        erc20_token.approve(fixed_price_address, amount, from_wallet)
+        addresses = [
+            base_token.address,
+            from_wallet.address,
+            from_wallet.address,
+            ZERO_ADDRESS,
+        ]
+        uints = [
+            erc20_token.decimals(),
+            base_token.decimals(),
+            self.to_wei("1"),
+            int(1e15),
+            0,
+        ]
+
+        fixed_rate_data = FixedData(
+            fixed_price_address=fixed_price_address, addresses=addresses, uints=uints
+        )
+
+        tx = erc20_token.create_fixed_rate(
+            fixed_data=fixed_rate_data, from_wallet=from_wallet
+        )
+        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
+        fixed_rate_event = erc20_token.get_event_log(
+            ERC721FactoryContract.EVENT_NEW_FIXED_RATE,
+            tx_receipt.blockNumber,
+            self.web3.eth.block_number,
+            None,
+        )
+        exchange_id = fixed_rate_event[0].args.exchangeId
+
+        return exchange_id
+
+    @property
+    @enforce_types
+    def factory_router(self):
+        return FactoryRouter(self.web3, get_address_of_type(self.config, "Router"))
+
+    @enforce_types
+    def create_pool(
+        self,
+        erc20_token: ERC20Token,
+        base_token: ERC20Token,
+        ss_params: List,
+        swap_fees: List,
+        from_wallet: Wallet,
+    ) -> BPool:
+        base_token.approve(
+            get_address_of_type(self.config, "Router"), self.to_wei("2000"), from_wallet
+        )
+
+        pool_data = PoolData(
+            ss_params,
+            swap_fees,
+            [
+                get_address_of_type(self.config, "Staking"),
+                base_token.address,
+                from_wallet.address,
+                from_wallet.address,
+                get_address_of_type(self.config, "OPFCommunityFeeCollector"),
+                get_address_of_type(self.config, "poolTemplate"),
+            ],
+        )
+
+        tx = erc20_token.deploy_pool(pool_data, from_wallet)
+        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
+        pool_event = self.factory_router.get_event_log(
+            ERC721FactoryContract.EVENT_NEW_POOL,
+            tx_receipt.blockNumber,
+            self.web3.eth.block_number,
+            None,
+        )
+
+        bpool_address = pool_event[0].args.poolAddress
+        bpool = BPool(self.web3, bpool_address)
+
+        return bpool
+
+    @enforce_types
+    def build_compute_provider_fees(
+        self,
+        provider_data: Union[str, dict],
+        provider_fee_address: str,
+        provider_fee_token: str,
+        provider_fee_amount: int,
+        valid_until: int,
+    ) -> ProviderFees:
+        if isinstance(provider_data, dict):
+            provider_data = json.dumps(provider_data, separators=(",", ":"))
+
+        message = self.web3.solidityKeccak(
+            ["bytes", "address", "address", "uint256", "uint256"],
+            [
+                self.web3.toHex(self.web3.toBytes(text=provider_data)),
+                provider_fee_address,
+                provider_fee_token,
+                provider_fee_amount,
+                valid_until,
+            ],
+        )
+        signed = self.web3.eth.sign(provider_fee_address, data=message)
+        signature = split_signature(signed)
+        return ProviderFees(
+            provider_fee_address,
+            provider_fee_token,
+            provider_fee_amount,
+            signature.v,
+            signature.r,
+            signature.s,
+            valid_until,
+            self.web3.toHex(self.web3.toBytes(text=provider_data)),
+        )
+
+    @enforce_types
+    def build_consume_fees(
+        self, consume_fee_address: str, consume_fee_token: str, consume_fee_amount: int
+    ) -> ConsumeFees:
+        return ConsumeFees(consume_fee_address, consume_fee_token, consume_fee_amount)

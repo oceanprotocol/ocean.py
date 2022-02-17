@@ -1,20 +1,20 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 from typing import Dict, Optional, Union
 
 from enforce_typing import enforce_types
-from ocean_lib.models.bfactory import BFactory
-from ocean_lib.models.dtfactory import DTFactory
+from web3 import WebsocketProvider
+from web3.main import Web3
+from web3.middleware import geth_poa_middleware
+
+from ocean_lib.config import Config
 from ocean_lib.web3_internal.contract_utils import (
     get_contracts_addresses as get_contracts_addresses_web3,
 )
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.web3_overrides.http_provider import CustomHTTPProvider
-from web3 import WebsocketProvider
-from web3.main import Web3
-from web3.middleware import geth_poa_middleware
 
 GANACHE_URL = "http://127.0.0.1:8545"
 
@@ -33,6 +33,7 @@ def get_web3(network_url: str) -> Web3:
     """
     provider = get_web3_connection_provider(network_url)
     web3 = Web3(provider)
+
     if web3.eth.chain_id == 4:
         web3.middleware_onion.inject(geth_poa_middleware, layer=0)
     return web3
@@ -73,26 +74,16 @@ def get_contracts_addresses(address_file: str, network: str) -> Dict[str, str]:
 
 
 @enforce_types
-def get_dtfactory_address(
-    address_file: str, network: Optional[str] = None, web3: Optional[Web3] = None
+def get_address_of_type(
+    config: Config, address_type: str, key: Optional[str] = None
 ) -> str:
-    """Returns the DTFactory address for given network or web3 instance
-    Requires either network name or web3 instance.
-    """
-    return DTFactory.configured_address(
-        network or get_network_name(web3=web3), address_file
-    )
-
-
-@enforce_types
-def get_bfactory_address(
-    address_file: str, network: Optional[str] = None, web3: Optional[Web3] = None
-) -> str:
-    """Returns the BFactory address for given network or web3 instance
-    Requires either network name or web3 instance.
-    """
-    return BFactory.configured_address(
-        network or get_network_name(web3=web3), address_file
+    addresses = get_contracts_addresses(config.address_file, config.network_name)
+    if address_type not in addresses.keys():
+        raise KeyError(f"{address_type} address is not set in the config file")
+    return (
+        addresses[address_type]
+        if not isinstance(addresses[address_type], dict)
+        else addresses[address_type].get(key, addresses[address_type]["1"])
     )
 
 

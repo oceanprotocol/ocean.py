@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -26,3 +26,7 @@ class VerifyTxFailed(Exception):
 
 class TransactionFailed(Exception):
     """Transaction has failed."""
+
+
+class DataProviderException(Exception):
+    """Exception from Provider endpoints."""

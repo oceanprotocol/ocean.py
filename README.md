@@ -1,5 +1,5 @@
 <!--
-Copyright 2021 Ocean Protocol Foundation
+Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
@@ -71,6 +71,18 @@ In this flow, a data asset is posted for sale in a marketplace, and purchased. I
 
 [Go to marketplace flow](READMEs/marketplace-flow.md)
 
+### Fixed Rate Exchange flow
+
+In this flow, a data asset is posted for sale at a fixed rate, and purchased.
+
+[Go to fixed rate exchange flow](READMEs/fixed-rate-exchange-flow.md)
+
+### Dispenser flow
+
+In this flow, a datatoken dispenser is created and datatokens are dispensed for free.
+
+[Go to dispenser flow](READMEs/dispenser-flow.md)
+
 ### Compute-to-Data flow
 
 This flow uses Ocean Compute-to-Data (c2d) to compute results from a dataset that never leaves the premises.
@@ -83,11 +95,14 @@ This flow uses Ocean Compute-to-Data (c2d) to compute results from a dataset tha
 - [Understand config parameters](READMEs/parameters.md) - envvars vs files
 - [Learn about off-chain services](READMEs/services.md) - Ocean Provider for data services, Aquarius metadata store
 - [Learn about wallets](READMEs/wallets.md) - on generating, storing, and accessing private keys
+- [Learn about the structures we use for ABI matching](READMEs/structures.md) - a review of the helpers we offer in dealing with ABI tuple parameters
 - [Get an overview of ocean.py](READMEs/overview.md) - key modules and functions
 
 ## 🦑 Development
 
 [Go to developers flow](READMEs/developers.md) if you want to further develop ocean.py.
+[Go to release process](READMEs/release-process.md) if you want to do a release.
+[Go to testing v4](READMEs/testing-v4.md) if you want to learn about v4 testing methods.
 
 ## 🏛 License
 

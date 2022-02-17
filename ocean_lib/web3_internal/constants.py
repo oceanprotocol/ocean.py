@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -15,24 +15,25 @@ GAS_LIMIT_DEFAULT = 1000000
 MIN_GAS_PRICE = 1000000000
 
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
+BLOB = "f8929916089218bdb4aa78c3ecd16633afd44b8aef89299160"
 
-MAX_UINT256 = 2 ** 256 - 1
+MAX_UINT256 = 2**256 - 1
 
-MAX_INT256 = 2 ** 255 - 1
-MIN_INT256 = 2 ** 255 * -1
+MAX_INT256 = 2**255 - 1
+MIN_INT256 = 2**255 * -1
 
 DEFAULT_NETWORK_NAME = "ganache"
 NETWORK_NAME_MAP = {
     1: "Mainnet",
     3: "Ropsten",
     4: "Rinkeby",
-    56: "Binance Smart Chain",
+    56: "BSC",
     137: "Polygon",
-    246: "Energy Web",
+    246: "EnergyWeb",
     1285: "Moonriver",
-    1287: "Moonbeam Alpha",
-    1337: "Ganache",
-    44787: "Celo Alfajores",
+    1287: "MoonbeamAlpha",
+    8996: "Ganache",
+    44787: "CeloAlfajores",
     80001: "Mumbai",
 }
 
@@ -47,7 +48,7 @@ BLOCK_NUMBER_POLL_INTERVAL = {
     246: 2.6,
     1285: 6.5,
     1287: 6.0,
-    1337: 2.5,
+    8996: 2.5,
     44787: 2.5,
     80001: 1.0,
 }

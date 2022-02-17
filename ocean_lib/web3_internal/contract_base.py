@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -12,14 +12,6 @@ import requests
 from enforce_typing import enforce_types
 from eth_typing import ChecksumAddress
 from hexbytes import HexBytes
-from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
-from ocean_lib.web3_internal.contract_utils import (
-    get_contract_definition,
-    get_contracts_addresses,
-    load_contract,
-)
-from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 from web3 import Web3
 from web3._utils.events import get_event_data
 from web3._utils.filters import construct_event_filter_params
@@ -28,6 +20,15 @@ from web3.contract import ContractEvent, ContractEvents
 from web3.datastructures import AttributeDict
 from web3.exceptions import MismatchedABI, ValidationError
 from websockets import ConnectionClosed
+
+from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
+from ocean_lib.web3_internal.contract_utils import (
+    get_contract_definition,
+    get_contracts_addresses,
+    load_contract,
+)
+from ocean_lib.web3_internal.wallet import Wallet
+from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 
 logger = logging.getLogger(__name__)
 
@@ -63,6 +64,7 @@ class ContractBase(object):
     def configured_address(cls, network: str, address_file: str) -> str:
         """Returns the contract addresses"""
         addresses = get_contracts_addresses(network, address_file)
+
         return addresses.get(cls.CONTRACT_NAME) if addresses else None
 
     @property
@@ -209,6 +211,11 @@ class ContractBase(object):
             callback, timeout_callback=timeout_callback, timeout=timeout, blocking=wait
         )
 
+    @staticmethod
+    @enforce_types
+    def get_gas_price(web3) -> int:
+        return int(web3.eth.gas_price * 1.1)
+
     @enforce_types
     def send_transaction(
         self,
@@ -231,6 +238,7 @@ class ContractBase(object):
             "from": from_wallet.address,
             "account_key": from_wallet.key,
             "chainId": self.web3.eth.chain_id,
+            "gasPrice": self.get_gas_price(self.web3),
         }
 
         gas_price = os.environ.get(ENV_GAS_PRICE, None)
@@ -261,7 +269,7 @@ class ContractBase(object):
     @enforce_types
     def deploy(cls, web3: Web3, deployer_wallet: Wallet, *args) -> str:
         """
-        Deploy the DataTokenTemplate and DTFactory contracts to the current network.
+        Deploy the ERCTokenTemplate contract to the current network.
 
         :param web3:
         :param deployer_wallet: Wallet instance
@@ -273,7 +281,7 @@ class ContractBase(object):
 
         _contract = web3.eth.contract(abi=_json["abi"], bytecode=_json["bytecode"])
         built_tx = _contract.constructor(*args).buildTransaction(
-            {"from": deployer_wallet.address}
+            {"from": deployer_wallet.address, "gasPrice": cls.get_gas_price(web3)}
         )
         if "chainId" not in built_tx:
             built_tx["chainId"] = web3.eth.chain_id

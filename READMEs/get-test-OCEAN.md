@@ -1,5 +1,5 @@
 <!--
-Copyright 2021 Ocean Protocol Foundation
+Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
@@ -9,25 +9,11 @@ As you develop on Ocean, you'll often need to use the OCEAN token. It's an ERC20
 
 Here, let's get some OCEAN for the Rinkeby testnet, and verify in Python that we have it.
 
-## Prerequisites
+### First steps
 
-- Linux/MacOS
-- Python 3.8.5+
-- Your own Infura id. To get one, go to https://infura.io/
-
-## Install ocean.py library
-
-In a new console:
-
-```console
-#Initialize virtual environment and activate it.
-python -m venv venv
-source venv/bin/activate
-
-#Install the ocean.py library. Install wheel first to avoid errors.
-pip install wheel
-pip install ocean-lib
-```
+To get started with this guide, please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+- [x] Setup : Prerequisites
+- [x] Setup : Install the library from v4 sources
 
 ## Create a new address / key
 

@@ -1,36 +1,36 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-
+import json
 from unittest.mock import Mock
 
+import ecies
 import pytest
-from ocean_lib.common.http_requests.requests_session import get_requests_session
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
-from ocean_lib.data_provider.data_service_provider import urljoin
-from ocean_lib.exceptions import OceanEncryptAssetUrlsError
 from requests.exceptions import InvalidURL
 from requests.models import Response
-from tests.resources.helper_functions import get_publisher_ocean_instance
+
+from ocean_lib.agreements.service_types import ServiceTypes
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
+from ocean_lib.data_provider.data_service_provider import urljoin
+from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
+from ocean_lib.http_requests.requests_session import get_requests_session
+from ocean_lib.models.compute_input import ComputeInput
+from ocean_lib.services.service import Service
+from ocean_lib.structures.file_objects import FilesTypeFactory
+from ocean_lib.web3_internal.wallet import Wallet
+from tests.resources.ddo_helpers import create_basics
+from tests.resources.helper_functions import (
+    deploy_erc721_erc20,
+    get_provider_fees,
+    get_publisher_ocean_instance,
+)
 from tests.resources.mocks.http_client_mock import (
+    TEST_SERVICE_ENDPOINTS,
     HttpClientEmptyMock,
     HttpClientEvilMock,
     HttpClientNiceMock,
 )
-
-TEST_SERVICE_ENDPOINTS = {
-    "computeDelete": ["DELETE", "/api/v1/services/compute"],
-    "computeStart": ["POST", "/api/v1/services/compute"],
-    "computeStatus": ["GET", "/api/v1/services/compute"],
-    "computeStop": ["PUT", "/api/v1/services/compute"],
-    "computeResult": ["GET", "/api/v1/services/computeResult"],
-    "download": ["GET", "/api/v1/services/download"],
-    "encrypt": ["POST", "/api/v1/services/encrypt"],
-    "fileinfo": ["POST", "/api/v1/services/fileinfo"],
-    "initialize": ["GET", "/api/v1/services/initialize"],
-    "nonce": ["GET", "/api/v1/services/nonce"],
-}
 
 
 @pytest.fixture
@@ -62,103 +62,218 @@ def test_set_http_client(with_nice_client):
     assert isinstance(DataSP.get_http_client(), HttpClientNiceMock)
 
 
-def test_encryption_fails(with_evil_client):
-    """Tests that asset encryption fails with OceanEncryptAssetUrlsError."""
-    encrypt_endpoint = "http://mock/encrypt/"
-    with pytest.raises(OceanEncryptAssetUrlsError):
-        DataSP.encrypt_files_dict(
-            [{"some_files": "files"}],
-            encrypt_endpoint,
-            "some_asset_id",
-            "some_publisher_address",
-            "some_signature",
-        )
-
-
-def test_nonce_fails(with_evil_client):
-    """Tests that nonce retrieved erroneously is set to None."""
-    assert DataSP.get_nonce("some_address", "http://localhost:8030") is None
-
-
-def test_order_requirements_fails(with_evil_client):
-    """Tests failure of order requirements from endpoint."""
-    assert (
-        DataSP.get_order_requirements(
+def test_initialize_fails(config):
+    """Tests failures of initialize endpoint."""
+    mock_service = Service(
+        service_id="some_service_id",
+        service_type="some_service_type",
+        service_endpoint="http://mock/",
+        datatoken="some_dt",
+        files="some_files",
+        timeout=0,
+    )
+    with pytest.raises(
+        InvalidURL, match=f"InvalidURL {mock_service.service_endpoint}."
+    ):
+        DataSP.initialize(
             "some_did",
-            "http://mock/",
+            mock_service,
             "some_consumer_address",
-            0,
-            "and_service_type",
-            "some_token_address",
             userdata={"test_dict_key": "test_dict_value"},
         )
-        is None
+
+    mock_service.service_endpoint = f"{config.provider_url}"
+    with pytest.raises(
+        DataProviderException,
+        match=f"Failed to get a response for request: initializeEndpoint={DataSP.build_initialize_endpoint(mock_service.service_endpoint)[1]}",
+    ) as err:
+        DataSP.initialize(
+            "some_did",
+            mock_service,
+            "some_consumer_address",
+            userdata={"test_dict_key": "test_dict_value"},
+        )
+    assert err.value.args[0].startswith(
+        "Failed to get a response for request: initializeEndpoint"
     )
 
 
-def test_start_compute_job_fails_empty(with_empty_client):
-    """Tests failure of compute job from endpoint with empty response."""
-    with pytest.raises(AssertionError):
+def test_start_compute_job_fails_empty(consumer_wallet, config):
+    """Tests failures of compute job from endpoint with empty response."""
+    mock_service = Service(
+        service_id="some_service_id",
+        service_type="compute",
+        service_endpoint="http://mock/",
+        datatoken="some_dt",
+        files="some_files",
+        timeout=0,
+        compute_values=dict(),
+    )
+    with pytest.raises(
+        InvalidURL, match=f"InvalidURL {mock_service.service_endpoint}."
+    ):
         DataSP.start_compute_job(
-            "some_did",
-            "http://mock/",
-            "some_consumer_address",
-            "some_signature",
-            0,
-            "some_tx_id",
-            algorithm_did="some_algo_did",
+            dataset_compute_service=mock_service,
+            consumer=consumer_wallet,
+            dataset=ComputeInput("some_did", "some_tx_id", "some_service_id"),
+            compute_environment="some_env",
+            algorithm=ComputeInput(
+                "another_did", "another_tx_id", "another_service_id"
+            ),
+        )
+    mock_service.service_endpoint = f"{config.provider_url}"
+    with pytest.raises(
+        DataProviderException,
+        match=f"Start Compute failed at the computeStartEndpoint {DataSP.build_compute_endpoint(mock_service.service_endpoint)[1]}",
+    ):
+        DataSP.start_compute_job(
+            dataset_compute_service=mock_service,
+            consumer=consumer_wallet,
+            dataset=ComputeInput("some_did", "some_tx_id", "some_service_id"),
+            compute_environment="some_env",
+            algorithm=ComputeInput(
+                "another_did", "another_tx_id", "another_service_id"
+            ),
         )
 
 
-def test_start_compute_job_fails_error_response(with_evil_client):
-    """Tests failure of compute job from endpoint with non-200 response."""
-    with pytest.raises(ValueError):
-        DataSP.start_compute_job(
-            "some_did",
-            "http://mock/",
-            "some_consumer_address",
-            "some_signature",
-            0,
-            "some_tx_id",
-            algorithm_did="some_algo_did",
-        )
-
-
-def test_send_compute_request_failure(with_evil_client):
+def test_send_compute_request_failure(with_evil_client, provider_wallet):
     """Tests failure of compute request from endpoint with non-200 response."""
     with pytest.raises(Exception):
         DataSP._send_compute_request(
-            "post",
-            "some_did",
-            "some_job_id",
-            "http://mock/",
-            "some_consumer_address",
-            "some_signature",
+            "post", "some_did", "some_job_id", "http://mock/", provider_wallet
         )
 
 
-def test_compute_job_result(with_nice_client):
-    """Tests successful compute job starting."""
-    result = DataSP.compute_job_result(
-        "some_did",
-        "some_job_id",
-        "http://mock",
-        "some_consumer_address",
-        "some_signature",
+def test_compute_job_result_fails(provider_wallet, config):
+    """Tests failure of compute job starting."""
+
+    mock_service = Service(
+        service_id="some_service_id",
+        service_type="some_service_type",
+        service_endpoint="http://mock",
+        datatoken="some_dt",
+        files="some_files",
+        timeout=0,
+        compute_values=dict(),
     )
-    assert result == {"good_job": "with_mock"}
+    with pytest.raises(
+        InvalidURL, match=f"InvalidURL {mock_service.service_endpoint}."
+    ):
+        DataSP.compute_job_result("some_job_id", 0, mock_service, provider_wallet)
 
 
-def test_delete_job_result(with_nice_client):
-    """Tests successful compute job deletion."""
-    result = DataSP.delete_compute_job(
-        "some_did",
-        "some_job_id",
-        "http://mock",
-        "some_consumer_address",
-        "some_signature",
+def test_delete_job_result(provider_wallet, config):
+    """Tests a failure & a success of compute job deletion."""
+    mock_service = Service(
+        service_id="some_service_id",
+        service_type="some_service_type",
+        service_endpoint="http://mock/",
+        datatoken="some_dt",
+        files="some_files",
+        timeout=0,
+        compute_values=dict(),
     )
-    assert result == {"good_job": "with_mock_delete"}
+
+    # Failure of compute job deletion.
+    with pytest.raises(
+        InvalidURL, match=f"InvalidURL {mock_service.service_endpoint}."
+    ):
+        DataSP.delete_compute_job(
+            "some_did", "some_job_id", mock_service, provider_wallet
+        )
+
+    # Success of compute job deletion.
+    mock_service.service_endpoint = f"{config.provider_url}"
+    DataSP.delete_compute_job("some_did", "some_job_id", mock_service, provider_wallet)
+
+
+def test_encrypt(web3, config, provider_wallet):
+    """Tests successful encrypt job."""
+    key = provider_wallet.private_key
+    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
+    file2_dict = {"type": "url", "url": "https://url.com/file2.csv", "method": "GET"}
+    file1 = FilesTypeFactory(file1_dict)
+    file2 = FilesTypeFactory(file2_dict)
+
+    # Encrypt file objects
+    result = DataSP.encrypt([file1, file2], config.provider_url)
+    encrypted_files = result.content.decode("utf-8")
+    assert result.status_code == 201
+    assert result.headers["Content-type"] == "text/plain"
+    assert encrypted_files.startswith("0x")
+
+    if isinstance(encrypted_files, str):
+        encrypted_files = web3.toBytes(hexstr=encrypted_files)
+    decrypted_document = ecies.decrypt(key, encrypted_files)
+    decrypted_document_string = decrypted_document.decode("utf-8")
+    assert decrypted_document_string == json.dumps(
+        [file1.to_dict(), file2.to_dict()], separators=(",", ":")
+    )
+
+    # Encrypt a simple string
+    test_string = "hello_world"
+    encrypt_result = DataSP.encrypt(test_string, config.provider_url)
+    encrypted_document = encrypt_result.content.decode("utf-8")
+    assert result.status_code == 201
+    assert result.headers["Content-type"] == "text/plain"
+    assert result.content.decode("utf-8").startswith("0x")
+
+    if isinstance(encrypted_document, str):
+        encrypted_document = web3.toBytes(hexstr=encrypted_document)
+    decrypted_document = ecies.decrypt(key, encrypted_document)
+    decrypted_document_string = decrypted_document.decode("utf-8")
+    assert decrypted_document_string == test_string
+
+
+def test_fileinfo(web3, config, publisher_wallet, publisher_ocean_instance):
+    erc721_nft, erc20_token = deploy_erc721_erc20(
+        web3, config, publisher_wallet, publisher_wallet
+    )
+    _, metadata, encrypted_files = create_basics(config, web3, DataSP)
+
+    ddo = publisher_ocean_instance.assets.create(
+        metadata=metadata,
+        publisher_wallet=publisher_wallet,
+        encrypted_files=encrypted_files,
+        erc721_address=erc721_nft.address,
+        deployed_erc20_tokens=[erc20_token],
+    )
+    access_service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
+
+    fileinfo_result = DataSP.fileinfo(ddo.did, access_service)
+    assert fileinfo_result.status_code == 200
+    files_info = fileinfo_result.json()
+    assert len(files_info) == 2
+    for file_index, file in enumerate(files_info):
+        assert file["index"] == file_index
+        assert file["valid"] is True
+        assert file["contentType"] == "text/html"
+
+
+def test_initialize(web3, config, publisher_wallet, publisher_ocean_instance):
+    erc721_nft, erc20_token = deploy_erc721_erc20(
+        web3, config, publisher_wallet, publisher_wallet
+    )
+    _, metadata, encrypted_files = create_basics(config, web3, DataSP)
+    ddo = publisher_ocean_instance.assets.create(
+        metadata=metadata,
+        publisher_wallet=publisher_wallet,
+        encrypted_files=encrypted_files,
+        erc721_address=erc721_nft.address,
+        deployed_erc20_tokens=[erc20_token],
+    )
+    access_service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
+
+    initialize_result = DataSP.initialize(
+        did=ddo.did,
+        service=access_service,
+        consumer_address=publisher_wallet.address,
+    )
+    assert initialize_result
+    assert initialize_result.status_code == 200
+    response_json = initialize_result.json()
+    assert response_json["providerFee"] == get_provider_fees()
 
 
 def test_invalid_file_name():
@@ -179,11 +294,12 @@ def test_expose_endpoints(config):
     ]
 
 
-def test_c2d_address(config):
+def test_c2d_environments(config):
     """Tests that a provider address exists on the DataServiceProvider."""
     provider_uri = DataSP.get_url(config)
-    c2d_address = DataSP.get_c2d_address(provider_uri)
-    assert c2d_address, "Failed to get provider address."
+    c2d_envs = DataSP.get_c2d_environments(provider_uri)
+    c2d_env_ids = [elem["id"] for elem in c2d_envs]
+    assert "ocean-compute" in c2d_env_ids, "ocean-compute env not found."
 
 
 def test_provider_address(config):
@@ -210,12 +326,10 @@ def test_get_root_uri():
     assert DataSP.get_root_uri(uri) == uri
     assert DataSP.get_root_uri("http://localhost:8030") == "http://localhost:8030"
     assert (
-        DataSP.get_root_uri("http://localhost:8030/api/v1/services/")
+        DataSP.get_root_uri("http://localhost:8030/api/services/")
         == "http://localhost:8030"
     )
-    assert (
-        DataSP.get_root_uri("http://localhost:8030/api/v1") == "http://localhost:8030"
-    )
+    assert DataSP.get_root_uri("http://localhost:8030/api") == "http://localhost:8030"
     assert (
         DataSP.get_root_uri("http://localhost:8030/services")
         == "http://localhost:8030/services"
@@ -225,12 +339,12 @@ def test_get_root_uri():
         == "http://localhost:8030"
     )
     assert (
-        DataSP.get_root_uri("http://localhost:8030/api/v2/services")
-        == "http://localhost:8030/api/v2/services"
+        DataSP.get_root_uri("http://localhost:8030/api/services")
+        == "http://localhost:8030"
     )
     assert (
-        DataSP.get_root_uri("http://localhost:8030/api/v2/services/")
-        == "http://localhost:8030/api/v2"
+        DataSP.get_root_uri("http://localhost:8030/api/services/")
+        == "http://localhost:8030"
     )
 
     assert not DataSP.is_valid_provider("thisIsNotAnURL")
@@ -254,7 +368,7 @@ def test_build_endpoint():
 
     def get_service_endpoints(_provider_uri=None):
         _endpoints = TEST_SERVICE_ENDPOINTS.copy()
-        _endpoints.update({"newEndpoint": ["GET", "/api/v1/services/newthing"]})
+        _endpoints.update({"newEndpoint": ["GET", "/api/services/newthing"]})
         return _endpoints
 
     original_func = DataSP.get_service_endpoints
@@ -265,7 +379,7 @@ def test_build_endpoint():
     method, endpnt = DataSP.build_endpoint("newEndpoint", provider_uri=uri)
     assert endpnt == urljoin(uri, endpoints["newEndpoint"][1])
 
-    uri = "http://localhost:8030/api/v1/services/newthing"
+    uri = "http://localhost:8030/api/services/newthing"
     method, endpnt = DataSP.build_endpoint("download", provider_uri=uri)
     assert method == endpoints["download"][0]
     assert endpnt == urljoin(DataSP.get_root_uri(uri), endpoints["download"][1])
@@ -311,3 +425,114 @@ def test_build_specific_endpoints(config):
     )
 
     DataSP.get_service_endpoints = original_func
+
+
+def test_check_single_file_info():
+    assert DataSP.check_single_file_info(
+        {"url": "http://www.google.com", "type": "url"},
+        provider_uri="http://172.15.0.4:8030",
+    )
+    assert not DataSP.check_single_file_info(
+        {"url": "http://www.google.com"}, provider_uri="http://172.15.0.4:8030"
+    )
+    assert not DataSP.check_single_file_info({}, provider_uri="http://172.15.0.4:8030")
+
+
+def test_encrypt_failure(config):
+    """Tests encrypt failures."""
+    http_client = HttpClientEvilMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(OceanEncryptAssetUrlsError):
+        DataSP.encrypt([], config.provider_url)
+
+    http_client = HttpClientEmptyMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(DataProviderException):
+        DataSP.encrypt([], config.provider_url)
+
+    DataSP.set_http_client(get_requests_session())
+
+
+def test_fileinfo_failure(config):
+    """Tests successful fileinfo failures."""
+    service = Mock(spec=Service)
+    service.service_endpoint = "http://172.15.0.4:8030"
+    service.id = "abc"
+
+    http_client = HttpClientEvilMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(DataProviderException):
+        DataSP.fileinfo("0xabc", service)
+
+    http_client = HttpClientEmptyMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(DataProviderException):
+        DataSP.fileinfo("0xabc", service)
+
+    DataSP.set_http_client(get_requests_session())
+
+
+def test_initialize_failure(config):
+    """Tests initialize failures."""
+    service = Mock(spec=Service)
+    service.service_endpoint = "http://172.15.0.4:8030"
+    service.id = "abc"
+
+    http_client = HttpClientEvilMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(DataProviderException):
+        DataSP.initialize("0xabc", service, "0x")
+
+    http_client = HttpClientEmptyMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(DataProviderException):
+        DataSP.initialize("0xabc", service, "0x")
+
+    DataSP.set_http_client(get_requests_session())
+
+
+def test_job_result_failure(config):
+    """Tests compute job result failures."""
+    service = Mock(spec=Service)
+    service.service_endpoint = "http://172.15.0.4:8030"
+    service.id = "abc"
+
+    wallet = Mock(spec=Wallet)
+    wallet.address = "none"
+
+    http_client = HttpClientEvilMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(DataProviderException):
+        DataSP.compute_job_result("0xabc", 0, service, wallet)
+
+    http_client = HttpClientEmptyMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(DataProviderException):
+        DataSP.compute_job_result("0xabc", 0, service, wallet)
+
+    DataSP.set_http_client(get_requests_session())
+
+
+def test_check_asset_failure(config):
+    """Tests check_asset_file_info failures."""
+    assert DataSP.check_asset_file_info("", "", config.provider_url) is False
+
+    http_client = HttpClientEvilMock()
+    DataSP.set_http_client(http_client)
+
+    assert DataSP.check_asset_file_info("test", "", config.provider_url) is False
+
+    http_client = HttpClientEmptyMock()
+    DataSP.set_http_client(http_client)
+
+    assert DataSP.check_asset_file_info("test", "", config.provider_url) is False
+
+    DataSP.set_http_client(get_requests_session())

@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -18,7 +18,7 @@ with open("README.md", encoding="utf8") as readme_file:
 # Installed by pip install ocean-lib
 # or pip install -e .
 install_requirements = [
-    "ocean-contracts==0.6.9",
+    "ocean-contracts==1.0.0a20",
     "coloredlogs",
     "pyopenssl",
     "PyJWT",  # not jwt
@@ -28,11 +28,12 @@ install_requirements = [
     "pycryptodomex",
     "tqdm",
     "pytz",
-    "web3==5.19.0",
+    "web3==5.28.0",
     "cryptography==3.3.2",
     "scipy",
     "enforce-typing==1.0.0.post1",
     "json-sempai==0.4.0",
+    "eciespy",
     # web3 requires eth-abi, requests, and more,
     # so those will be installed too.
     # See https://github.com/ethereum/web3.py/blob/master/setup.py
@@ -49,7 +50,6 @@ test_requirements = [
     "pylint",
     "pytest",
     "pytest-watch",
-    "tox",
 ]
 
 # Possibly required by developers of ocean-lib:
@@ -58,13 +58,13 @@ dev_requirements = [
     "pkginfo",
     "twine",
     "watchdog",
-    "flake8",
-    "isort",
-    "black==21.4b0",
+    "flake8==3.9.2",
+    "isort==5.10.1",
+    "black==22.1.0",
     "pre-commit",
     # for the following: maybe needed, maybe not
     "pytest",
-    "licenseheaders",
+    "licenseheaders==0.8.8",
     "pytest-env",
 ]
 
@@ -99,7 +99,7 @@ setup(
     url="https://github.com/oceanprotocol/ocean.py",
     # fmt: off
     # bumpversion.sh needs single-quotes
-    version='0.8.4',
+    version='0.8.5',
     # fmt: on
     zip_safe=False,
 )

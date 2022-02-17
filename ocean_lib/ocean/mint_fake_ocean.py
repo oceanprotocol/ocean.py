@@ -1,12 +1,12 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
 import os
 
 from ocean_lib.config import Config
-from ocean_lib.models.data_token import DataToken
+from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.ocean.util import get_web3
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import send_ether
@@ -33,13 +33,8 @@ def mint_fake_OCEAN(config: Config) -> None:
         transaction_timeout=config.transaction_timeout,
     )
 
-    OCEAN_token = DataToken(web3, address=network_addresses["development"]["Ocean"])
-
-    amt_distribute = to_wei(1000)
-
-    OCEAN_token.mint(
-        deployer_wallet.address, 2 * amt_distribute, from_wallet=deployer_wallet
-    )
+    OCEAN_token = ERC20Token(web3, address=network_addresses["development"]["Ocean"])
+    amt_distribute = to_wei("2000")
 
     for key_label in ["TEST_PRIVATE_KEY1", "TEST_PRIVATE_KEY2"]:
         key = os.environ.get(key_label)
@@ -56,5 +51,5 @@ def mint_fake_OCEAN(config: Config) -> None:
         if OCEAN_token.balanceOf(w.address) < amt_distribute:
             OCEAN_token.transfer(w.address, amt_distribute, from_wallet=deployer_wallet)
 
-        if get_ether_balance(web3, w.address) < to_wei(2):
-            send_ether(deployer_wallet, w.address, to_wei(4))
+        if get_ether_balance(web3, w.address) < to_wei("2"):
+            send_ether(deployer_wallet, w.address, to_wei("4"))

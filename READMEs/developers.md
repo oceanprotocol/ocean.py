@@ -1,5 +1,5 @@
 <!--
-Copyright 2021 Ocean Protocol Foundation
+Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
@@ -78,6 +78,8 @@ export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7
 
 In work console:
 ```console
+export OPERATOR_SERVICE_URL=https://c2d-dev.operator.oceanprotocol.com/
+
 #run a single test
 pytest ocean_lib/models/test/test_btoken.py::test_ERC20
 
@@ -87,11 +89,9 @@ pytest ocean_lib/models/test/test_btoken.py
 #run all tests
 pytest
 
-#run all tests, using CI tooling
-tox
 ```
 
-For envvars that aren't set, `pytest` uses values in `pytest.ini`, and `tox` uses values in `tox.ini`.
+For envvars that aren't set, `pytest` uses values in `pytest.ini`.
 
 Bonus: see the [appendix](developers.md#7-appendix-more-tests) for even more tests.
 

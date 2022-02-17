@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -9,8 +9,9 @@ import os
 from pathlib import Path
 from typing import Any, Dict, Optional, Union
 
-import artifacts
 from enforce_typing import enforce_types
+
+import artifacts
 from ocean_lib.integer import Integer
 from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.web3_internal.constants import GAS_LIMIT_DEFAULT
@@ -21,9 +22,9 @@ DEFAULT_NETWORK_URL = "http://localhost:8545"
 DEFAULT_BLOCK_CONFIRMATIONS = 1
 DEFAULT_NETWORK_NAME = "ganache"
 DEFAULT_ADDRESS_FILE = ""
-DEFAULT_METADATA_CACHE_URI = "http://localhost:5000"
+DEFAULT_METADATA_CACHE_URI = "http://172.15.0.5:5000"
 METADATA_CACHE_URI = "https://aquarius.oceanprotocol.com"
-DEFAULT_PROVIDER_URL = "http://localhost:8030"
+DEFAULT_PROVIDER_URL = "http://172.15.0.4:8030"
 DEFAULT_DOWNLOADS_PATH = "consume-downloads"
 DEFAULT_TRANSACTION_TIMEOUT = 10 * 60  # 10 minutes
 
@@ -38,8 +39,6 @@ NAME_AQUARIUS_URL = "aquarius.url"
 NAME_PROVIDER_URL = "provider.url"
 NAME_TRANSACTION_TIMEOUT = "transaction_timeout"
 
-NAME_DATA_TOKEN_FACTORY_ADDRESS = "dtfactory.address"
-NAME_BFACTORY_ADDRESS = "bfactory.address"
 NAME_OCEAN_ADDRESS = "OCEAN.address"
 
 NAME_PROVIDER_ADDRESS = "provider.address"
@@ -49,16 +48,6 @@ SECTION_ETH_NETWORK = "eth-network"
 SECTION_RESOURCES = "resources"
 
 environ_names_and_sections = {
-    NAME_DATA_TOKEN_FACTORY_ADDRESS: [
-        "DATA_TOKEN_FACTORY_ADDRESS",
-        "Data token factory address",
-        SECTION_ETH_NETWORK,
-    ],
-    NAME_BFACTORY_ADDRESS: [
-        "BFACTORY_ADDRESS",
-        "BPool factory address",
-        SECTION_ETH_NETWORK,
-    ],
     NAME_OCEAN_ADDRESS: ["OCEAN_ADDRESS", "OCEAN address", SECTION_ETH_NETWORK],
     NAME_NETWORK_URL: ["OCEAN_NETWORK_URL", "Network URL", SECTION_ETH_NETWORK],
     NAME_BLOCK_CONFIRMATIONS: [
@@ -134,8 +123,8 @@ class Config(configparser.ConfigParser):
         network = https://rinkeby.infura.io/v3/<your Infura project id>
 
         [resources]
-        metadata_cache_uri = http://localhost:5000
-        provider.url = http://localhost:8030
+        metadata_cache_uri = http://172.15.0.5:5000
+        provider.url = http://172.15.0.4:8030
         ```
         :param filename: Path of the config file, str.
         :param options_dict: Python dict with the config, dict.
@@ -273,7 +262,7 @@ class Config(configparser.ConfigParser):
     @property
     @enforce_types
     def chain_id(self) -> int:
-        """Chain ID of the ethereum network. (e.g.): 1337."""
+        """Chain ID of the EVM-compatible network. (e.g.): 8996."""
         return int(self.get(SECTION_ETH_NETWORK, NAME_CHAIN_ID))
 
     @property

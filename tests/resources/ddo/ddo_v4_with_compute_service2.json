@@ -1,0 +1,105 @@
+{
+  "@context": ["https://w3id.org/did/v1"],
+  "id": "did:op:ACce67694eD2848dd683c651Dab7Af823b7dd123",
+  "version": "4.0.0",
+  "chainId": 8996,
+  "nftAddress": "0xabc",
+  "metadata": {
+    "created": "2020-11-15T12:27:48Z",
+    "updated": "2021-05-17T21:58:02Z",
+    "description": "Sample description",
+    "name": "Sample asset",
+    "type": "dataset",
+    "author": "OPF",
+    "license": "https://market.oceanprotocol.com/terms"
+  },
+  "services": [
+    {
+      "id": "1",
+      "type": "access",
+      "files": "0x0000",
+      "name": "Download service",
+      "description": "Download service",
+      "datatokenAddress": "0x123",
+      "serviceEndpoint": "https://myprovider.com",
+      "timeout": 0
+    },
+    {
+      "id": "2",
+      "type": "compute",
+      "files": "0x0001",
+      "name": "Compute service",
+      "description": "Compute service",
+      "datatokenAddress": "0x124",
+      "serviceEndpoint": "https://myprovider.com",
+      "timeout": 3600,
+      "compute": {
+        "namespace": "ocean-compute",
+        "cpus": 2,
+        "gpus": 4,
+        "gpuType": "NVIDIA Tesla V100 GPU",
+        "memory": "128M",
+        "volumeSize": "2G",
+        "allowRawAlgorithm": false,
+        "allowNetworkAccess": true,
+        "publisherTrustedAlgorithmPublishers": ["0xabc"],
+        "publisherTrustedAlgorithms": [
+          {
+            "did": "did:op:123",
+            "filesChecksum":"5ce12db0cc7f13f963b1af3b5df7cab4fd3ffae16c8af7e6e416570d197dcc61",
+            "containerSectionChecksum": "002da04eb18978c38ec586b5a0584440efa0b6310518fdb64566c1152c14d5ba"
+          }
+        ]
+      }
+    }
+  ],
+  "credentials": {
+    "allow": [
+      {
+        "type": "address",
+        "values": ["0x123", "0x456"]
+      }
+    ],
+    "deny": [
+      {
+        "type": "address",
+        "values": ["0x2222", "0x333"]
+      }
+    ]
+  },
+  "nft": {
+    "address": "0x000000",
+    "name": "Ocean Protocol Asset v4",
+    "symbol": "OCEAN-A-v4",
+    "owner": "0x0000000",
+    "state": 0,
+    "created": "2000-10-31T01:30:00"
+  },
+
+  "datatokens": [
+    {
+      "address": "0x000000",
+      "name": "Datatoken 1",
+      "symbol": "DT-1",
+      "serviceId": "1"
+    },
+    {
+      "address": "0x000001",
+      "name": "Datatoken 2",
+      "symbol": "DT-2",
+      "serviceId": "2"
+    }
+  ],
+
+  "event": {
+    "tx": "0x8d127de58509be5dfac600792ad24cc9164921571d168bff2f123c7f1cb4b11c",
+    "block": 12831214,
+    "from": "0xAcca11dbeD4F863Bb3bC2336D3CE5BAC52aa1f83",
+    "contract": "0x1a4b70d8c9DcA47cD6D0Fb3c52BB8634CA1C0Fdf",
+    "datetime": "2000-10-31T01:30:00"
+  },
+
+  "stats": {
+    "consumes": 4
+  }
+}

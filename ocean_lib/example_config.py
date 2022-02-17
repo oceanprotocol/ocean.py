@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -8,6 +8,7 @@ import logging
 import os
 
 from enforce_typing import enforce_types
+
 from ocean_lib.config import (
     DEFAULT_METADATA_CACHE_URI,
     DEFAULT_PROVIDER_URL,
@@ -77,7 +78,7 @@ CONFIG_NETWORK_HELPER = {
         NAME_BLOCK_CONFIRMATIONS: 3,
         NAME_TRANSACTION_TIMEOUT: 60,
     },
-    1337: {
+    8996: {
         NAME_PROVIDER_URL: DEFAULT_PROVIDER_URL,
         NETWORK_NAME: "ganache",
         NAME_BLOCK_CONFIRMATIONS: 0,
@@ -116,7 +117,7 @@ def get_config_dict(chain_id: int) -> dict:
         {
             NAME_PROVIDER_URL: CONFIG_NETWORK_HELPER[chain_id][NAME_PROVIDER_URL],
             NAME_METADATA_CACHE_URI: METADATA_CACHE_URI
-            if chain_id != 1337
+            if chain_id != 8996
             else DEFAULT_METADATA_CACHE_URI,
         }
     )

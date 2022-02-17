@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -13,7 +13,7 @@ class ComputeInput:
     @enforce_types
     def __init__(
         self,
-        did: Optional[str],
+        did: str,
         transfer_tx_id: str,
         service_id: Union[str, int],
         userdata: Optional[Dict] = None,

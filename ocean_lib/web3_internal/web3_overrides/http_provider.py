@@ -1,12 +1,13 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 from typing import Any, Dict
 
 from enforce_typing import enforce_types
-from ocean_lib.web3_internal.web3_overrides.request import make_post_request
 from web3 import HTTPProvider
+
+from ocean_lib.web3_internal.web3_overrides.request import make_post_request
 
 
 class CustomHTTPProvider(HTTPProvider):
