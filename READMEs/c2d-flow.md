@@ -62,7 +62,7 @@ In the same python console:
 
 ```python
 # Prepare data for ERC20 token
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 DATA_erc20_data = CreateErc20Data(
     template_index=1,
@@ -93,7 +93,7 @@ DATA_metadata = {
 }
 
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.agreements.file_objects import UrlFile
+from ocean_lib.structures.file_objects import UrlFile
 DATA_url_file = UrlFile(
     url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 )
@@ -193,7 +193,7 @@ ALGO_metadata = {
 }
 
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.agreements.file_objects import UrlFile
+from ocean_lib.structures.file_objects import UrlFile
 ALGO_url_file = UrlFile(
     url="https://raw.githubusercontent.com/trentmc/branin/main/gpr.py"
 )
@@ -260,7 +260,7 @@ algo_service = ALGO_asset.get_service("access")
 environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
 
 from datetime import datetime, timedelta
-from ocean_lib.models.models_structures import ConsumeFees
+from ocean_lib.structures.abi_tuples import ConsumeFees
 
 # Consume fees
 consume_fees = ConsumeFees(

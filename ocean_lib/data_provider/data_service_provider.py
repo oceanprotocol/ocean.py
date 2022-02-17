@@ -25,8 +25,8 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.config import Config
 from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
-from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.compute_input import ComputeInput
+from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -335,9 +335,7 @@ class DataServiceProvider:
 
         try:
             job_info = json.loads(response.content.decode("utf-8"))
-            if isinstance(job_info, list):
-                return job_info[0]
-            return job_info
+            return job_info[0] if isinstance(job_info, list) else job_info
 
         except KeyError as err:
             logger.error(f"Failed to extract jobId from response: {err}")
@@ -460,8 +458,11 @@ class DataServiceProvider:
         )
         response = DataServiceProvider._http_method("get", compute_job_result_file_url)
 
+        if not response:
+            raise DataProviderException("No response on job result endpoint.")
+
         if response.status_code != 200:
-            raise Exception(response.content)
+            raise DataProviderException(response.content)
 
         return response.content
 
@@ -787,11 +788,12 @@ class DataServiceProvider:
     def check_asset_file_info(did: str, service_id: str, provider_uri: str) -> bool:
         if not did:
             return False
+
         _, endpoint = DataServiceProvider.build_fileinfo(provider_uri)
         data = {"did": did, "serviceId": service_id}
         response = requests.post(endpoint, json=data)
 
-        if response.status_code != 200:
+        if not response or response.status_code != 200:
             return False
 
         response = response.json()

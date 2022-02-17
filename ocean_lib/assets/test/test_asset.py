@@ -2,9 +2,12 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import pytest
 
+from ocean_lib.agreements.consumable import MalformedCredential
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.credentials import simplify_credential_to_address
 from ocean_lib.services.service import Service
 from tests.resources.ddo_helpers import (
     get_key_from_v4_sample_ddo,
@@ -218,3 +221,84 @@ def test_get_service():
         ddo.get_service(ServiceTypes.CLOUD_COMPUTE).as_dictionary()
         == expected_compute_service
     )
+
+
+def test_credentials():
+    ddo_dict = get_sample_ddo_with_compute_service()
+    ddo = Asset.from_dict(ddo_dict)
+    assert ddo.requires_address_credential
+    assert ddo.allowed_addresses == ["0x123", "0x456"]
+    assert ddo.denied_addresses == ["0x2222", "0x333"]
+
+    ddo.add_address_to_allow_list("0xaAA")
+    assert "0xaaa" in ddo.allowed_addresses
+    ddo.remove_address_from_allow_list("0xaAA")
+    assert "0xaaa" not in ddo.allowed_addresses
+    ddo.remove_address_from_allow_list("0xaAA")
+
+    ddo.add_address_to_deny_list("0xaAA")
+    assert "0xaaa" in ddo.denied_addresses
+    ddo.remove_address_from_deny_list("0xaAA")
+    assert "0xaaa" not in ddo.denied_addresses
+
+    assert ddo.validate_access({"type": "address", "value": "0x123"}) == 0
+    # not allowed
+    assert ddo.validate_access({"type": "address", "value": "0x444"}) == 3
+
+    ddo_dict = get_sample_ddo_with_compute_service()
+    del ddo_dict["credentials"]["allow"]
+    ddo = Asset.from_dict(ddo_dict)
+    assert ddo.validate_access({"type": "address", "value": "0x444"}) == 0
+    # specifically denied
+    assert ddo.validate_access({"type": "address", "value": "0x333"}) == 4
+
+    ddo_dict = get_sample_ddo_with_compute_service()
+    del ddo_dict["credentials"]["allow"][0]["values"]
+    ddo = Asset.from_dict(ddo_dict)
+    with pytest.raises(
+        MalformedCredential, match="No values key in the address credential"
+    ):
+        ddo.get_addresses_of_class("allow")
+
+    ddo_dict = get_sample_ddo_with_compute_service()
+    del ddo_dict["credentials"]
+    ddo = Asset.from_dict(ddo_dict)
+    ddo.remove_address_from_allow_list("0xAA")
+    ddo.add_address_to_allow_list("0xAA")
+
+    ddo_dict = get_sample_ddo_with_compute_service()
+    ddo_dict["credentials"]["allow"] = []
+    ddo = Asset.from_dict(ddo_dict)
+    ddo.remove_address_from_allow_list("0xAA")
+    ddo.add_address_to_allow_list("0xAA")
+
+
+def test_credential_simplification():
+    assert simplify_credential_to_address(None) is None
+    with pytest.raises(MalformedCredential, match="Received empty address."):
+        simplify_credential_to_address({"malformed": "no value"})
+    assert (
+        simplify_credential_to_address({"type": "address", "value": "0x11"}) == "0x11"
+    )
+
+
+def test_inexistent_removals():
+    ddo_dict = get_sample_ddo_with_compute_service()
+    del ddo_dict["services"][1]["compute"]["publisherTrustedAlgorithms"]
+    ddo = Asset.from_dict(ddo_dict)
+    compute_service = ddo.get_service("compute")
+
+    with pytest.raises(
+        ValueError, match="Algorithm notadid is not in trusted algorithms"
+    ):
+        ddo.remove_publisher_trusted_algorithm(compute_service, "notadid")
+
+    ddo_dict = get_sample_ddo_with_compute_service()
+    del ddo_dict["services"][1]["compute"]["publisherTrustedAlgorithmPublishers"]
+    ddo = Asset.from_dict(ddo_dict)
+    compute_service = ddo.get_service("compute")
+
+    with pytest.raises(
+        ValueError, match="Publisher notadid is not in trusted algorithm publishers"
+    ):
+        ddo.remove_publisher_trusted_algorithm_publisher(compute_service, "notadid")

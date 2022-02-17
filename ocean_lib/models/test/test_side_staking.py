@@ -8,8 +8,8 @@ from web3 import exceptions
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.models_structures import PoolData
 from ocean_lib.models.side_staking import SideStaking
+from ocean_lib.structures.abi_tuples import PoolData
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,

@@ -10,17 +10,17 @@ from typing import List, Optional, Union
 
 import requests
 
-from ocean_lib.agreements.file_objects import FilesTypeFactory, IpfsFile, UrlFile
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.trusted_algorithms import generate_trusted_algo_dict
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
+from ocean_lib.structures.abi_tuples import CreateErc20Data
+from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
+from ocean_lib.structures.file_objects import FilesTypeFactory, IpfsFile, UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet

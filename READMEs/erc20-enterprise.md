@@ -50,7 +50,7 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 In the Python console:
 ```python
 # Prepare data for ERC20 Enterprise token
-from ocean_lib.models.models_structures import CreateErc20Data, DispenserData, OrderParams
+from ocean_lib.structures.abi_tuples import CreateErc20Data, DispenserData, OrderParams
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 cap = ocean.to_wei(200)
@@ -154,7 +154,7 @@ In the Python console:
 ```python
 # Prepare data for ERC20 Enterprise token
 cap = ocean.to_wei(200)
-from ocean_lib.models.models_structures import CreateErc20Data, OrderParams
+from ocean_lib.structures.abi_tuples import CreateErc20Data, OrderParams
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 erc20_data = CreateErc20Data(
     template_index=2,  # this is the value for ERC20 Enterprise token

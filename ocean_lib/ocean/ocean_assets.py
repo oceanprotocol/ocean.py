@@ -24,13 +24,9 @@ from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBa
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.models.models_structures import (
-    ChainMetadata,
-    CreateErc20Data,
-    ConsumeFees,
-)
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
+from ocean_lib.structures.abi_tuples import ChainMetadata, ConsumeFees, CreateErc20Data
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei

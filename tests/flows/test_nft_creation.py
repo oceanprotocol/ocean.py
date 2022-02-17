@@ -7,8 +7,8 @@ from web3 import Web3, exceptions
 
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721Permissions, ERC721NFT
-from ocean_lib.models.models_structures import CreateErc20Data, CreateERC721Data
+from ocean_lib.models.erc721_nft import ERC721NFT, ERC721Permissions
+from ocean_lib.structures.abi_tuples import CreateErc20Data, CreateERC721Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import (

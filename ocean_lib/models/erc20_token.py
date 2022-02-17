@@ -10,12 +10,12 @@ from eth_account.messages import encode_defunct
 from eth_typing.encoding import HexStr
 from web3.main import Web3
 
-from ocean_lib.models.models_structures import (
+from ocean_lib.structures.abi_tuples import (
+    ConsumeFees,
     DispenserData,
     FixedData,
     PoolData,
     ProviderFees,
-    ConsumeFees,
 )
 from ocean_lib.utils.utilities import prepare_message_for_ecrecover_in_solidity
 from ocean_lib.web3_internal.contract_base import ContractBase

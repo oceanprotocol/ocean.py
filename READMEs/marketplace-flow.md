@@ -63,7 +63,7 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 Then in the same python console:
 ```python
 # Prepare data for ERC20 token
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 erc20_data = CreateErc20Data(
     template_index=1,
@@ -92,7 +92,7 @@ metadata = {
 }
 
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.agreements.file_objects import UrlFile
+from ocean_lib.structures.file_objects import UrlFile
 url_file = UrlFile(
     url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 )
@@ -190,7 +190,7 @@ asset = ocean.assets.resolve(did)
 service = asset.get_service("access")
 
 # Consume fees
-from ocean_lib.models.models_structures import ConsumeFees
+from ocean_lib.structures.abi_tuples import ConsumeFees
 consume_fees = ConsumeFees(
     consumer_market_fee_address=bob_wallet.address,
     consumer_market_fee_token=erc20_token.address,

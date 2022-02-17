@@ -4,12 +4,11 @@
 #
 import pytest
 
-from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.aquarius.aquarius import Aquarius
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.structures.abi_tuples import CreateErc20Data
+from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
@@ -75,9 +74,16 @@ def test_aqua_functions_for_single_ddo(
         resolved_asset_from_metadata_cache_uri.did == asset.did
     ), "Resolve asset function call is unsuccessful."
 
+    chain_metadata = aquarius_instance.get_asset_metadata(asset.did)
+    assert metadata == chain_metadata
+
 
 def test_invalid_search_query(aquarius_instance):
     """Tests query search with an invalid query."""
     search_query = "not_a_dict"
     with pytest.raises(TypeError):
         aquarius_instance.query_search(search_query=search_query)
+
+
+def test_empty_responses(aquarius_instance):
+    assert aquarius_instance.get_asset_metadata("inexistent_ddo") == {}

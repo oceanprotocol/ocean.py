@@ -5,13 +5,13 @@
 import os
 import shutil
 
-from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.models_structures import CreateErc20Data, ConsumeFees
 from ocean_lib.ocean.ocean_assets import OceanAssets
+from ocean_lib.structures.abi_tuples import ConsumeFees, CreateErc20Data
+from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
