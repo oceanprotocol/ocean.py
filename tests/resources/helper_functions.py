@@ -352,5 +352,5 @@ def get_provider_fees() -> Dict[str, Any]:
 
 
 def approx_from_wei(amount_a, amount_b) -> float:
-    """Helper function to compare amounts in wei with pytest approx function."""
+    """Helper function to compare amounts in wei with pytest approx function wirth a relative tolerance of 1e-6."""
     return int(amount_a) / to_wei(1) == approx(int(amount_b) / to_wei(1))
