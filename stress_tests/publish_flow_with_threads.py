@@ -166,8 +166,8 @@ if __name__ == "__main__":
     # Mint OCEAN
     mint_fake_OCEAN(config)
     assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-    assert bob_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-    assert tristan_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
+    assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "need ETH"
+    assert tristan_wallet.web3.eth.get_balance(tristan_wallet.address) > 0, "need ETH"
     threads = list()
 
     t1 = threading.Thread(
