@@ -14,7 +14,6 @@ from web3.main import Web3
 
 from ocean_lib.agreements.consumable import ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes, ServiceTypesNames
-from ocean_lib.assets.credentials import AddressCredential
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 logger = logging.getLogger(__name__)
@@ -191,9 +190,7 @@ class Service:
             return ConsumableCodes.CONNECTIVITY_FAIL
 
         # to be parameterized in the future, can implement other credential classes
-        manager = AddressCredential(asset)
-
-        if manager.requires_credential():
-            return manager.validate_access(credential)
+        if asset.requires_address_credential:
+            return asset.validate_access(credential)
 
         return ConsumableCodes.OK

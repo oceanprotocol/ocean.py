@@ -5,9 +5,9 @@
 import os
 
 from ocean_lib.example_config import ExampleConfig
-from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -93,6 +93,8 @@ def test_fre_flow_readme():
         exchange_id=exchange_id,
         datatoken_amount=ocean.to_wei(20),
         max_base_token_amount=ocean.to_wei(50),
+        consume_market_address=ZERO_ADDRESS,
+        consume_market_swap_fee_amount=0,
         from_wallet=bob_wallet,
     )
     assert tx_result, "failed buying data tokens at fixed rate for Bob"

@@ -10,12 +10,12 @@ from eth_account.messages import encode_defunct
 from eth_typing.encoding import HexStr
 from web3.main import Web3
 
-from ocean_lib.models.models_structures import (
+from ocean_lib.structures.abi_tuples import (
+    ConsumeFees,
     DispenserData,
     FixedData,
     PoolData,
     ProviderFees,
-    ConsumeFees,
 )
 from ocean_lib.utils.utilities import prepare_message_for_ecrecover_in_solidity
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -37,6 +37,7 @@ class ERC20Token(ContractBase):
 
     EVENT_ORDER_STARTED = "OrderStarted"
     EVENT_ORDER_REUSED = "OrderReused"
+    EVENT_ORDER_EXECUTED = "OrderExecuted"
     EVENT_PUBLISH_MARKET_FEE_CHANGED = "PublishMarketFeeChanged"
     EVENT_PUBLISH_MARKET_FEE = "PublishMarketFee"
     EVENT_CONSUME_MARKET_FEE = "ConsumeMarketFee"
@@ -53,6 +54,10 @@ class ERC20Token(ContractBase):
     @property
     def event_OrderReused(self):
         return self.events.OrderReused()
+
+    @property
+    def event_OrderExecuted(self):
+        return self.events.OrderExecuted()
 
     @property
     def event_PublishMarketFeeChanged(self):
@@ -213,6 +218,29 @@ class ERC20Token(ContractBase):
         return self.send_transaction(
             "finishMultipleOrder",
             (order_tx_ids, consumers, amounts, service_ids),
+            from_wallet,
+        )
+
+    def order_executed(
+        self,
+        order_tx_id: str,
+        provider_data: bytes,
+        provider_signature: bytes,
+        consumer_data: bytes,
+        consumer_signature: bytes,
+        consumer: str,
+        from_wallet: Wallet,
+    ) -> str:
+        return self.send_transaction(
+            "orderExecuted",
+            (
+                order_tx_id,
+                provider_data,
+                provider_signature,
+                consumer_data,
+                consumer_signature,
+                consumer,
+            ),
             from_wallet,
         )
 

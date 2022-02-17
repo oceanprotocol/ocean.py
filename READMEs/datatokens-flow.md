@@ -117,7 +117,7 @@ print(f"data NFT token symbol: {erc721_nft.symbol()}")
 In the same python console:
 ```python
 # Create ERC20 token related to the above NFT.
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 print("Create ERC20 datatoken: begin.")

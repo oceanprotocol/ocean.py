@@ -10,14 +10,14 @@ from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.models.models_structures import (
+from ocean_lib.structures.abi_tuples import (
+    ChainMetadata,
     CreateErc20Data,
     CreateERC721DataNoDeployer,
     DispenserData,
     FixedData,
     OrderData,
     PoolData,
-    ChainMetadata,
 )
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS

@@ -7,7 +7,7 @@ import os
 
 import pytest
 
-from ocean_lib.models.models_structures import ConsumeFees
+from ocean_lib.structures.abi_tuples import ConsumeFees
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_registered_asset_with_access_service
 from tests.resources.helper_functions import get_another_consumer_ocean_instance

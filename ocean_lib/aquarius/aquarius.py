@@ -48,24 +48,6 @@ class Aquarius:
         return cls(metadata_cache_uri)
 
     @enforce_types
-    def get_service_endpoint(self) -> str:
-        """
-        Retrieve the endpoint with the ddo for a given did.
-
-        :return: Return the url of the ddo location
-        """
-        return f"{self.base_url}/ddo/" + "{did}"
-
-    @enforce_types
-    def get_encrypt_endpoint(self) -> str:
-        """
-        Retrieve the endpoint for DDO encryption
-
-        :return: Return the url of the Aquarius ddo encryption endpoint
-        """
-        return f"{self.base_url}/ddo/encrypt"
-
-    @enforce_types
     def get_asset_ddo(self, did: str) -> Optional[Asset]:
         """
         Retrieve asset ddo for a given did.
@@ -94,7 +76,7 @@ class Aquarius:
         return f"Asset DID {did} not found in Elasticsearch" not in str(response)
 
     @enforce_types
-    def get_asset_metadata(self, did: str) -> list:
+    def get_asset_metadata(self, did: str) -> dict:
         """
         Retrieve asset metadata for a given did.
 
@@ -105,7 +87,7 @@ class Aquarius:
         if response.status_code == 200:
             return response.json()
 
-        return []
+        return {}
 
     @enforce_types
     def query_search(self, search_query: dict) -> list:
@@ -157,28 +139,6 @@ class Aquarius:
             return True, parsed_response
 
         return False, parsed_response
-
-    @enforce_types
-    def encrypt(self, text: str) -> bytes:
-        """
-        Encrypt the contents of an asset.
-
-        :return: Return the encrypted asset string.
-        """
-        try:
-            endpoint = self.get_encrypt_endpoint()
-            response = self.requests_session.post(
-                endpoint,
-                data=text,
-                headers={"content-type": "application/octet-stream"},
-            )
-
-            if response and response.status_code == 200:
-                return response.content
-            else:
-                raise ValueError("Failed to encrypt asset.")
-        except Exception:
-            raise ValueError("Failed to encrypt asset.")
 
     @enforce_types
     def wait_for_asset(self, did: str, timeout=30):

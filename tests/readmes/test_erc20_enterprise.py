@@ -1,18 +1,13 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
 import os
 
 from ocean_lib.example_config import ExampleConfig
-from ocean_lib.models.models_structures import (
-    CreateErc20Data,
-    DispenserData,
-    OrderParams,
-)
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.structures.abi_tuples import CreateErc20Data, DispenserData, OrderParams
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 

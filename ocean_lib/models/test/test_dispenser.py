@@ -6,7 +6,7 @@ import pytest
 from web3 import exceptions
 
 from ocean_lib.models.dispenser import Dispenser
-from ocean_lib.models.models_structures import DispenserData
+from ocean_lib.structures.abi_tuples import DispenserData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type

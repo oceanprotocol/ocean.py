@@ -2,6 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import pytest
 
 from ocean_lib.config import (
     DEFAULT_METADATA_CACHE_URI,
@@ -9,7 +10,7 @@ from ocean_lib.config import (
     METADATA_CACHE_URI,
     SECTION_ETH_NETWORK,
 )
-from ocean_lib.example_config import NETWORK_NAME, ExampleConfig
+from ocean_lib.example_config import NETWORK_NAME, ExampleConfig, get_config_dict
 
 
 def test_ganache_example_config(monkeypatch):
@@ -73,3 +74,10 @@ def test_moonbeam_alpha_example_config(monkeypatch):
         config.__dict__["_sections"][SECTION_ETH_NETWORK][NETWORK_NAME]
         == "moonbeamalpha"
     )
+
+
+def test_noconfig(monkeypatch):
+    """Tests the config fails with wrong chain id."""
+    monkeypatch.setenv("OCEAN_NETWORK_URL", "https://bad.network")
+    with pytest.raises(ValueError, match="could not be fetched!"):
+        get_config_dict(0)
