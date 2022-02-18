@@ -90,10 +90,6 @@ class Wallet:
         Wallet._last_tx_count = dict()
 
     @enforce_types
-    def __get_key(self) -> Optional[str]:
-        return self.private_key
-
-    @enforce_types
     def validate(self) -> bool:
         account = self.web3.eth.account.from_key(self.private_key)
         return account.address == self._address
