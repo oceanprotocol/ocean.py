@@ -52,7 +52,6 @@ class FixedRateExchange(ContractBase):
     EVENT_TOKEN_COLLECTED = "TokenCollected"
     EVENT_OCEAN_FEE_COLLECTED = "OceanFeeCollected"
     EVENT_MARKET_FEE_COLLECTED = "MarketFeeCollected"
-    EVENT_PUBLISH_MARKET_FEE = "PublishMarketFee"
     EVENT_CONSUME_MARKET_FEE = "ConsumeMarketFee"
     EVENT_LOG_SWAP_FEES = "SWAP_FEES"
     EVENT_PUBLISH_MARKET_FEE_CHANGED = "PublishMarketFeeChanged"
@@ -84,10 +83,6 @@ class FixedRateExchange(ContractBase):
     @property
     def event_OceanFeeCollected(self):
         return self.events.OceanFeeCollected()
-
-    @property
-    def event_PublishMarketFee(self):
-        return self.events.PublishMarketFee()
 
     @property
     def event_ConsumeMarketFee(self):
