@@ -74,3 +74,10 @@ class SideStaking(ContractBase):
 
     def get_vesting(self, datatoken: str, from_wallet: Wallet) -> str:
         return self.send_transaction("getVesting", (datatoken,), from_wallet)
+
+    def set_pool_swap_fee(
+        self, datatoken: str, pool_address: str, swap_fee: int, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "setPoolSwapFee", (datatoken, pool_address, swap_fee), from_wallet
+        )

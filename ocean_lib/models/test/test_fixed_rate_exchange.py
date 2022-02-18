@@ -53,6 +53,18 @@ def test_properties(web3, config):
         fixed_exchange.event_MarketFeeCollected.abi["name"]
         == FixedRateExchange.EVENT_MARKET_FEE_COLLECTED
     )
+    assert (
+        fixed_exchange.event_ConsumeMarketFee.abi["name"]
+        == FixedRateExchange.EVENT_CONSUME_MARKET_FEE
+    )
+    assert (
+        fixed_exchange.event_PublishMarketFeeChanged.abi["name"]
+        == FixedRateExchange.EVENT_PUBLISH_MARKET_FEE_CHANGED
+    )
+    assert (
+        fixed_exchange.event_SWAP_FEES.abi["name"]
+        == FixedRateExchange.EVENT_LOG_SWAP_FEES
+    )
 
 
 def test_exchange_rate_creation(

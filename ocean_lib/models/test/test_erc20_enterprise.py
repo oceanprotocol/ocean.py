@@ -210,7 +210,7 @@ def test_buy_from_fre_and_order(
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        uints=[18, 18, to_wei("1"), to_wei("1"), 1],
+        uints=[18, 18, to_wei("1"), to_wei("0.1"), 1],
     )
 
     tx = erc20_enterprise_token.create_fixed_rate(
