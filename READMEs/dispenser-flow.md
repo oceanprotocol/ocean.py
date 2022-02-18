@@ -44,8 +44,8 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 
 In the same python console:
 ```python
-from ocean_lib.models.models_structures import DispenserData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.structures.abi_tuples import DispenserData
 
 # Get the dispenser
 dispenser = ocean.dispenser

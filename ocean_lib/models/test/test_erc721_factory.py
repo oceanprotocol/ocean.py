@@ -10,7 +10,8 @@ from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.models.models_structures import (
+from ocean_lib.structures.abi_tuples import (
+    ChainMetadata,
     CreateErc20Data,
     CreateERC721DataNoDeployer,
     DispenserData,
@@ -18,6 +19,7 @@ from ocean_lib.models.models_structures import (
     OrderData,
     PoolData,
 )
+from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
@@ -68,7 +70,14 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
 
     tx = erc721_factory.deploy_erc721_contract(
-        ("DT1", "DTSYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
+        (
+            "DT1",
+            "DTSYMBOL",
+            1,
+            ZERO_ADDRESS,
+            ZERO_ADDRESS,
+            "https://oceanprotocol.com/nft/",
+        ),
         publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -88,7 +97,14 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     # Tests current NFT count
     current_nft_count = erc721_factory.get_current_nft_count()
     erc721_factory.deploy_erc721_contract(
-        ("DT2", "DTSYMBOL1", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
+        (
+            "DT2",
+            "DTSYMBOL1",
+            1,
+            ZERO_ADDRESS,
+            ZERO_ADDRESS,
+            "https://oceanprotocol.com/nft/",
+        ),
         publisher_wallet,
     )
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
@@ -146,6 +162,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         name="72120Bundle",
         symbol="72Bundle",
         template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
     )
 
@@ -428,6 +445,39 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         0
     ].args.datatokenAddress, "Invalid data token address by dispenser."
 
+    # Create a new erc721 with metadata in one single call and get address
+    metadata = ChainMetadata(
+        metadata_state=1,
+        metadata_decryptor_url="http://myprovider:8030",
+        metadata_decryptor_address="0x123",
+        flags=bytes(0),
+        data=Web3.toHex(text="my cool metadata."),
+        data_hash=create_checksum("my cool metadata."),
+        data_proofs=[],
+    )
+    tx = erc721_factory.create_nft_with_metadata(
+        nft_create_data, metadata, publisher_wallet
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_nft_event = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_NFT_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert registered_nft_event[0].event == "NFTCreated", "Cannot find NFTCreated event"
+    assert (
+        registered_nft_event[0].args.admin == publisher_wallet.address
+    ), "Invalid NFT owner!"
+    erc721_nft_address = registered_nft_event[0].args.newTokenAddress
+    erc721_nft = ERC721NFT(web3, erc721_nft_address)
+    assert (
+        erc721_nft.token_name() == "72120Bundle"
+    ), "NFT name doesn't match with the expected one."
+    metadata_info = erc721_nft.get_metadata()
+    assert metadata_info[3] is True
+    assert metadata_info[0] == "http://myprovider:8030"
+
 
 def test_start_multiple_order(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
@@ -439,7 +489,14 @@ def test_start_multiple_order(
     erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
 
     tx = erc721_factory.deploy_erc721_contract(
-        ("DT1", "DTSYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
+        (
+            "DT1",
+            "DTSYMBOL",
+            1,
+            ZERO_ADDRESS,
+            ZERO_ADDRESS,
+            "https://oceanprotocol.com/nft/",
+        ),
         publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -459,7 +516,14 @@ def test_start_multiple_order(
     # Tests current NFT count
     current_nft_count = erc721_factory.get_current_nft_count()
     erc721_factory.deploy_erc721_contract(
-        ("DT2", "DTSYMBOL1", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
+        (
+            "DT2",
+            "DTSYMBOL1",
+            1,
+            ZERO_ADDRESS,
+            ZERO_ADDRESS,
+            "https://oceanprotocol.com/nft/",
+        ),
         publisher_wallet,
     )
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
@@ -555,6 +619,11 @@ def test_start_multiple_order(
             0,
             provider_data,
         ),
+        (
+            consumer_wallet.address,
+            mock_dai_contract_address,
+            0,
+        ),
     )
 
     orders = [order_data, order_data]
@@ -638,7 +707,14 @@ def test_fail_create_erc20(
         "INSTANCE FROM ERC721FACTORY"
     )
     tx = erc721_factory.deploy_erc721_contract(
-        ("DT1", "DTSYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
+        (
+            "DT1",
+            "DTSYMBOL",
+            1,
+            ZERO_ADDRESS,
+            ZERO_ADDRESS,
+            "https://oceanprotocol.com/nft/",
+        ),
         publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)

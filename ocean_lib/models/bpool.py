@@ -8,7 +8,7 @@ from enforce_typing import enforce_types
 
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.btoken import BTokenBase
-from ocean_lib.models.models_structures import BPoolInitialized
+from ocean_lib.structures.abi_tuples import BPoolInitialized
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -21,6 +21,13 @@ class BPool(BTokenBase):
     EVENT_LOG_EXIT = "LOG_EXIT"
     EVENT_LOG_CALL = "LOG_CALL"
     EVENT_LOG_BPT = "LOG_BPT"
+    EVENT_LOG_BPT_SS = "LOG_BPT_SS"
+    EVENT_OPC_FEE = "OPCFee"
+    EVENT_SWAP_FEE_CHANGED = "SwapFeeChanged"
+    EVENT_PUBLISH_MARKET_FEE = "PublishMarketFee"
+    EVENT_CONSUME_MARKET_FEE = "ConsumeMarketFee"
+    EVENT_LOG_SWAP_FEES = "SWAP_FEES"
+    EVENT_PUBLISH_MARKET_FEE_CHANGED = "PublishMarketFeeChanged"
 
     @property
     def event_LOG_SWAP(self):
@@ -41,6 +48,34 @@ class BPool(BTokenBase):
     @property
     def event_LOG_BPT(self):
         return self.events.LOG_BPT()
+
+    @property
+    def event_LOG_BPT_SS(self):
+        return self.events.LOG_BPT_SS()
+
+    @property
+    def event_OPCFee(self):
+        return self.events.OPCFee()
+
+    @property
+    def event_SwapFeeChanged(self):
+        return self.events.SwapFeeChanged()
+
+    @property
+    def event_SWAP_FEES(self):
+        return self.events.SWAP_FEES()
+
+    @property
+    def event_PublishMarketFee(self):
+        return self.events.PublishMarketFee()
+
+    @property
+    def event_ConsumeMarketFee(self):
+        return self.events.ConsumeMarketFee()
+
+    @property
+    def event_PublishMarketFeeChanged(self):
+        return self.events.PublishMarketFeeChanged()
 
     def initialize(
         self,
@@ -129,11 +164,11 @@ class BPool(BTokenBase):
     def collect_market_fee(self, dst: str, from_wallet: Wallet) -> str:
         return self.send_transaction("collectMarketFee", (dst,), from_wallet)
 
-    def update_market_fee_collector(
-        self, new_collector: str, from_wallet: Wallet
+    def update_publish_market_fee(
+        self, new_collector: str, new_swap_fee: int, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "updateMarketFeeCollector", (new_collector,), from_wallet
+            "updatePublishMarketFee", (new_collector, new_swap_fee), from_wallet
         )
 
     def get_denormalized_weight(self, token_address: str) -> int:
@@ -234,14 +269,14 @@ class BPool(BTokenBase):
 
     def get_amount_in_exact_out(
         self, token_in: str, token_out: str, token_amount_out: int, swap_market_fee: int
-    ) -> int:
+    ) -> list:
         return self.contract.caller.getAmountOutExactIn(
             token_in, token_out, token_amount_out, swap_market_fee
         )
 
     def get_amount_out_exact_in(
         self, token_in: str, token_out: str, token_amount_in: int, swap_market_fee: int
-    ) -> int:
+    ) -> list:
         return self.contract.caller.getAmountOutExactIn(
             token_in, token_out, token_amount_in, swap_market_fee
         )

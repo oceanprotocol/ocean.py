@@ -62,7 +62,7 @@ In the same python console:
 
 ```python
 # Prepare data for ERC20 token
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 DATA_erc20_data = CreateErc20Data(
     template_index=1,
@@ -93,7 +93,7 @@ DATA_metadata = {
 }
 
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.agreements.file_objects import UrlFile
+from ocean_lib.structures.file_objects import UrlFile
 DATA_url_file = UrlFile(
     url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 )
@@ -193,7 +193,7 @@ ALGO_metadata = {
 }
 
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.agreements.file_objects import UrlFile
+from ocean_lib.structures.file_objects import UrlFile
 ALGO_url_file = UrlFile(
     url="https://raw.githubusercontent.com/trentmc/branin/main/gpr.py"
 )
@@ -260,11 +260,20 @@ algo_service = ALGO_asset.get_service("access")
 environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
 
 from datetime import datetime, timedelta
+from ocean_lib.structures.abi_tuples import ConsumeFees
+
+# Consume fees
+consume_fees = ConsumeFees(
+    consumer_market_fee_address=bob_wallet.address,
+    consumer_market_fee_token=DATA_datatoken.address,
+    consumer_market_fee_amount=0,
+)
 
 # Pay for dataset for 1 day
 DATA_order_tx_id = ocean.assets.pay_for_service(
     asset=DATA_asset,
     service=compute_service,
+    consume_fees=consume_fees,
     wallet=bob_wallet,
     initialize_args={
         "compute_environment": environments[0]["id"],
@@ -274,10 +283,18 @@ DATA_order_tx_id = ocean.assets.pay_for_service(
 )
 print(f"Paid for dataset compute service, order tx id: {DATA_order_tx_id}")
 
+# Consume fees
+consume_fees = ConsumeFees(
+    consumer_market_fee_address=bob_wallet.address,
+    consumer_market_fee_token=ALGO_datatoken.address,
+    consumer_market_fee_amount=0,
+)
+
 # Pay for algorithm for 1 day
 ALGO_order_tx_id = ocean.assets.pay_for_service(
     asset=ALGO_asset,
     service=algo_service,
+    consume_fees=consume_fees,
     wallet=bob_wallet,
     initialize_args={
         "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),

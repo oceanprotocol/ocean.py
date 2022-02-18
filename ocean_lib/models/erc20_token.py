@@ -10,7 +10,8 @@ from eth_account.messages import encode_defunct
 from eth_typing.encoding import HexStr
 from web3.main import Web3
 
-from ocean_lib.models.models_structures import (
+from ocean_lib.structures.abi_tuples import (
+    ConsumeFees,
     DispenserData,
     FixedData,
     PoolData,
@@ -35,6 +36,12 @@ class ERC20Token(ContractBase):
     BASE_MARKET_FEE_PERCENTAGE = BASE / 1000
 
     EVENT_ORDER_STARTED = "OrderStarted"
+    EVENT_ORDER_REUSED = "OrderReused"
+    EVENT_ORDER_EXECUTED = "OrderExecuted"
+    EVENT_PUBLISH_MARKET_FEE_CHANGED = "PublishMarketFeeChanged"
+    EVENT_PUBLISH_MARKET_FEE = "PublishMarketFee"
+    EVENT_CONSUME_MARKET_FEE = "ConsumeMarketFee"
+    EVENT_PROVIDER_FEE = "ProviderFee"
     EVENT_MINTER_PROPOSED = "MinterProposed"
     EVENT_MINTER_APPROVED = "MinterApproved"
     EVENT_NEW_POOL = "NewPool"
@@ -43,6 +50,30 @@ class ERC20Token(ContractBase):
     @property
     def event_OrderStarted(self):
         return self.events.OrderStarted()
+
+    @property
+    def event_OrderReused(self):
+        return self.events.OrderReused()
+
+    @property
+    def event_OrderExecuted(self):
+        return self.events.OrderExecuted()
+
+    @property
+    def event_PublishMarketFeeChanged(self):
+        return self.events.PublishMarketFeeChanged()
+
+    @property
+    def event_PublishMarketFee(self):
+        return self.events.PublishMarketFee()
+
+    @property
+    def event_ConsumeMarketFee(self):
+        return self.events.ConsumeMarketFee()
+
+    @property
+    def event_ProviderFee(self):
+        return self.events.ProviderFee()
 
     @property
     def event_MinterProposed(self):
@@ -93,6 +124,11 @@ class ERC20Token(ContractBase):
     def mint(self, account_address: str, value: int, from_wallet: Wallet) -> str:
         return self.send_transaction("mint", (account_address, value), from_wallet)
 
+    def check_provider_fee(
+        self, provider_fees: Union[tuple, dict, ProviderFees], from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction("checkProviderFee", (provider_fees,), from_wallet)
+
     @staticmethod
     def sign_provider_fees(
         provider_data: bytes,
@@ -112,10 +148,28 @@ class ERC20Token(ContractBase):
         consumer: str,
         service_index: int,
         provider_fees: Union[dict, tuple, ProviderFees],
+        consume_fees: Union[dict, tuple, ConsumeFees],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "startOrder", (consumer, service_index, provider_fees), from_wallet
+            "startOrder",
+            (consumer, service_index, provider_fees, consume_fees),
+            from_wallet,
+        )
+
+    def reuse_order(
+        self,
+        order_tx_id: str,
+        provider_fees: Union[tuple, dict, ProviderFees],
+        from_wallet: Wallet,
+    ) -> str:
+        return self.send_transaction(
+            "reuseOrder",
+            (
+                order_tx_id,
+                provider_fees,
+            ),
+            from_wallet,
         )
 
     def start_multiple_order(
@@ -164,6 +218,29 @@ class ERC20Token(ContractBase):
         return self.send_transaction(
             "finishMultipleOrder",
             (order_tx_ids, consumers, amounts, service_ids),
+            from_wallet,
+        )
+
+    def order_executed(
+        self,
+        order_tx_id: str,
+        provider_data: bytes,
+        provider_signature: bytes,
+        consumer_data: bytes,
+        consumer_signature: bytes,
+        consumer: str,
+        from_wallet: Wallet,
+    ) -> str:
+        return self.send_transaction(
+            "orderExecuted",
+            (
+                order_tx_id,
+                provider_data,
+                provider_signature,
+                consumer_data,
+                consumer_signature,
+                consumer,
+            ),
             from_wallet,
         )
 

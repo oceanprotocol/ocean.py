@@ -7,7 +7,7 @@ from typing import List, Union
 from enforce_typing import enforce_types
 
 from ocean_lib.models.bfactory import BFactory
-from ocean_lib.models.models_structures import Operations
+from ocean_lib.structures.abi_tuples import Operations, Stakes
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -44,6 +44,11 @@ class FactoryRouter(BFactory):
 
     def is_ocean_token(self, ocean_address: str) -> bool:
         return self.contract.caller.isOceanToken(ocean_address)
+
+    def stake_batch(
+        self, stakes: List[Union[dict, tuple, Stakes]], from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction("stakeBatch", (stakes,), from_wallet)
 
     def buy_dt_batch(
         self, operations: List[Union[dict, tuple, Operations]], from_wallet: Wallet

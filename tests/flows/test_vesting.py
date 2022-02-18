@@ -9,8 +9,8 @@ from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.models.models_structures import CreateErc20Data, PoolData
 from ocean_lib.models.side_staking import SideStaking
+from ocean_lib.structures.abi_tuples import CreateErc20Data, PoolData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
@@ -34,7 +34,14 @@ def test_main(
 
     # Tests deploy erc721
     tx = erc721_factory.deploy_erc721_contract(
-        ("NFT", "NFTS", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
+        (
+            "NFT",
+            "NFTS",
+            1,
+            ZERO_ADDRESS,
+            ZERO_ADDRESS,
+            "https://oceanprotocol.com/nft/",
+        ),
         publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -129,14 +136,15 @@ def test_main(
     )
     tx = erc20_token.deploy_pool(pool_data, consumer_wallet)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    pool_event = factory_router.get_event_log(
+    pool_event = erc20_token.get_event_log(
         ERC721FactoryContract.EVENT_NEW_POOL,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
     )
 
-    assert pool_event[0].event == "NewPool"
+    assert pool_event[0].event == "NewPool", "Cannot find NewPool event"
+    assert pool_event[0].args.ssContract == get_address_of_type(config, "Staking")
     bpool_address = pool_event[0].args.poolAddress
     bpool = BPool(web3, bpool_address)
     assert bpool.is_finalized() is True
@@ -165,7 +173,6 @@ def test_main(
     assert erc20_token.balanceOf(consumer_wallet.address) == 0
 
     # check if the vesting amount is correct
-
     side_staking = SideStaking(
         web3=web3, address=get_address_of_type(config, "Staking")
     )

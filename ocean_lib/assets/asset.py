@@ -18,7 +18,7 @@ logger = logging.getLogger("ddo")
 
 
 @enforce_types
-class Asset:
+class Asset(AddressCredential):
     """Asset class to create, import, export, validate Asset/DDO objects for V4."""
 
     @enforce_types
@@ -54,46 +54,39 @@ class Asset:
     @enforce_types
     def requires_address_credential(self) -> bool:
         """Checks if an address credential is required on this asset."""
-        manager = AddressCredential(self)
-        return manager.requires_credential()
+        return self.requires_credential()
 
     @property
     @enforce_types
     def allowed_addresses(self) -> list:
         """Lists addresses that are explicitly allowed in credentials."""
-        manager = AddressCredential(self)
-        return manager.get_addresses_of_class("allow")
+        return self.get_addresses_of_class("allow")
 
     @property
     @enforce_types
     def denied_addresses(self) -> list:
         """Lists addresses that are explicitly denied in credentials."""
-        manager = AddressCredential(self)
-        return manager.get_addresses_of_class("deny")
+        return self.get_addresses_of_class("deny")
 
     @enforce_types
     def add_address_to_allow_list(self, address: str) -> None:
         """Adds an address to allowed addresses list."""
-        manager = AddressCredential(self)
-        manager.add_address_to_access_class(address, "allow")
+        self.add_address_to_access_class(address, "allow")
 
     @enforce_types
     def add_address_to_deny_list(self, address: str) -> None:
         """Adds an address to the denied addresses list."""
-        manager = AddressCredential(self)
-        manager.add_address_to_access_class(address, "deny")
+        self.add_address_to_access_class(address, "deny")
 
     @enforce_types
     def remove_address_from_allow_list(self, address: str) -> None:
         """Removes address from allow list (if it exists)."""
-        manager = AddressCredential(self)
-        manager.remove_address_from_access_class(address, "allow")
+        self.remove_address_from_access_class(address, "allow")
 
     @enforce_types
     def remove_address_from_deny_list(self, address: str) -> None:
         """Removes address from deny list (if it exists)."""
-        manager = AddressCredential(self)
-        manager.remove_address_from_access_class(address, "deny")
+        self.remove_address_from_access_class(address, "deny")
 
     @classmethod
     @enforce_types

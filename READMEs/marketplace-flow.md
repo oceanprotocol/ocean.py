@@ -63,7 +63,7 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 Then in the same python console:
 ```python
 # Prepare data for ERC20 token
-from ocean_lib.models.models_structures import CreateErc20Data
+from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 erc20_data = CreateErc20Data(
     template_index=1,
@@ -92,7 +92,7 @@ metadata = {
 }
 
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.agreements.file_objects import UrlFile
+from ocean_lib.structures.file_objects import UrlFile
 url_file = UrlFile(
     url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 )
@@ -148,9 +148,10 @@ Now, you're the Marketplace operator. Here's how to get info about the data asse
 In the same Python console as before:
 
 ```python
-price_in_OCEAN = bpool.get_amount_in_exact_out(
+prices = bpool.get_amount_in_exact_out(
     OCEAN_token.address, erc20_token.address, ocean.to_wei(1), ocean.to_wei("0.01")
 )
+price_in_OCEAN = prices[0]
 
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 print(f"Price of 1 {erc20_token.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
@@ -191,11 +192,15 @@ fee_receiver = ZERO_ADDRESS # could also be market address
 asset = ocean.assets.resolve(did)
 service = asset.get_service("access")
 
-# Bob sends his datatoken to the service
-service = asset.get_service("access")
-order_tx_id = ocean.assets.pay_for_service(
-    asset, service, bob_wallet
+# Consume fees
+from ocean_lib.structures.abi_tuples import ConsumeFees
+consume_fees = ConsumeFees(
+    consumer_market_fee_address=bob_wallet.address,
+    consumer_market_fee_token=erc20_token.address,
+    consumer_market_fee_amount=0,
 )
+# Bob sends his datatoken to the service
+order_tx_id = ocean.assets.pay_for_service(asset, service, consume_fees, bob_wallet)
 print(f"order_tx_id = '{order_tx_id}'")
 
 # Bob downloads. If the connection breaks, Bob can request again by showing order_tx_id.

@@ -7,8 +7,8 @@ from web3 import Web3, exceptions
 
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721Permissions, ERC721NFT
-from ocean_lib.models.models_structures import CreateErc20Data, CreateERC721Data
+from ocean_lib.models.erc721_nft import ERC721NFT, ERC721Permissions
+from ocean_lib.structures.abi_tuples import CreateErc20Data, CreateERC721Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import (
@@ -33,6 +33,7 @@ def test_erc721_roles(
         symbol="NFTSYMBOL",
         template_index=1,
         additional_erc20_deployer=ZERO_ADDRESS,
+        additional_metadata_updater=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
     )
     tx = erc721_factory.deploy_erc721_contract(
@@ -177,6 +178,7 @@ def test_nonexistent_template_index(web3, config, publisher_wallet):
                 "DTSYMBOL",
                 non_existent_nft_template,
                 ZERO_ADDRESS,
+                ZERO_ADDRESS,
                 "https://oceanprotocol.com/nft/",
             ),
             from_wallet=publisher_wallet,
@@ -199,6 +201,7 @@ def test_successful_erc721_creation(web3, config, publisher_wallet):
         symbol="NFTSYMBOL",
         template_index=1,
         additional_erc20_deployer=ZERO_ADDRESS,
+        additional_metadata_updater=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
     )
     tx = erc721_factory.deploy_erc721_contract(
@@ -232,6 +235,7 @@ def test_nft_count(web3, config, publisher_wallet):
         symbol="NFTSYMBOL",
         template_index=1,
         additional_erc20_deployer=ZERO_ADDRESS,
+        additional_metadata_updater=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
     )
     current_nft_count = erc721_factory.get_current_nft_count()
@@ -263,6 +267,7 @@ def test_erc20_creation(
         symbol="NFTSYMBOL",
         template_index=1,
         additional_erc20_deployer=ZERO_ADDRESS,
+        additional_metadata_updater=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
     )
 

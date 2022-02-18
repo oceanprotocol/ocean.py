@@ -38,7 +38,15 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
     # test super-simple functionality of child
     factory = MyFactory(web3, nft_factory_address)
     factory.deploy_erc721_contract(
-        ("NFT", "NFTS", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"), alice_wallet
+        (
+            "NFT",
+            "NFTS",
+            1,
+            ZERO_ADDRESS,
+            ZERO_ADDRESS,
+            "https://oceanprotocol.com/nft/",
+        ),
+        alice_wallet,
     )
 
     # test attributes
@@ -99,5 +107,13 @@ def test_gas_price(web3, alice_wallet, nft_factory_address, monkeypatch):
     monkeypatch.setenv("GAS_PRICE", "1")
     factory = MyFactory(web3, nft_factory_address)
     assert factory.deploy_erc721_contract(
-        ("NFT", "NFTS", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"), alice_wallet
+        (
+            "NFT",
+            "NFTS",
+            1,
+            ZERO_ADDRESS,
+            ZERO_ADDRESS,
+            "https://oceanprotocol.com/nft/",
+        ),
+        alice_wallet,
     ), "The token could not be created by configuring the gas price env var."

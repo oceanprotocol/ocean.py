@@ -6,8 +6,8 @@ import pytest
 from web3 import exceptions
 
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721Permissions, ERC721NFT
-from ocean_lib.models.models_structures import (
+from ocean_lib.models.erc721_nft import ERC721NFT, ERC721Permissions
+from ocean_lib.structures.abi_tuples import (
     ChainMetadata,
     ChainMetadataWithTokenUri,
     CreateErc20Data,
@@ -74,6 +74,7 @@ def test_permissions(
             symbol="NN",
             token_factory_address=erc721_factory_address,
             additional_erc20_deployer=ZERO_ADDRESS,
+            additional_metadata_updater=ZERO_ADDRESS,
             token_uri="https://oceanprotocol.com/nft/",
             from_wallet=publisher_wallet,
         )

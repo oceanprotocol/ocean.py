@@ -50,7 +50,7 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 In the Python console:
 ```python
 # Prepare data for ERC20 Enterprise token
-from ocean_lib.models.models_structures import CreateErc20Data, DispenserData, OrderParams
+from ocean_lib.structures.abi_tuples import CreateErc20Data, DispenserData, OrderParams
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 cap = ocean.to_wei(200)
@@ -124,11 +124,18 @@ provider_fees = ocean.build_compute_provider_fees(
     valid_until=1958133628,  # 2032
 )
 
+consume_fees = ocean.build_consume_fees(
+    bob_wallet.address,
+    erc20_enterprise_token.address,
+    0,
+)
+
 initial_bob_balance = OCEAN_token.balanceOf(bob_wallet.address)
 order_params = OrderParams(
     bob_wallet.address,
     1,
     provider_fees,
+    consume_fees
 )
 
 # Bob gets 1 DT from dispenser and then startsOrder, while burning that DT
@@ -147,7 +154,7 @@ In the Python console:
 ```python
 # Prepare data for ERC20 Enterprise token
 cap = ocean.to_wei(200)
-from ocean_lib.models.models_structures import CreateErc20Data, OrderParams
+from ocean_lib.structures.abi_tuples import CreateErc20Data, OrderParams
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 erc20_data = CreateErc20Data(
     template_index=2,  # this is the value for ERC20 Enterprise token
@@ -200,10 +207,17 @@ provider_fees = ocean.build_compute_provider_fees(
     valid_until=1958133628,  # 2032
 )
 
+consume_fees = ocean.build_consume_fees(
+    bob_wallet.address,
+    erc20_enterprise_token.address,
+    ocean.to_wei(2)
+)
+
 order_params = OrderParams(
     bob_wallet.address,
     1,
     provider_fees,
+    consume_fees
 )
 
 fre_params = (

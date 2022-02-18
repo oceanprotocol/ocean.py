@@ -11,15 +11,19 @@ from unittest.mock import patch
 import eth_keys
 import pytest
 
-from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.models.models_structures import CreateErc20Data, CreateERC721Data
 from ocean_lib.services.service import Service
+from ocean_lib.structures.abi_tuples import (
+    ConsumeFees,
+    CreateErc20Data,
+    CreateERC721Data,
+)
+from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
@@ -329,10 +333,16 @@ def test_pay_for_service_insufficient_balance(
         block_confirmations=config.block_confirmations,
         transaction_timeout=config.transaction_timeout,
     )
+    # Consume fees
+    consume_fees = ConsumeFees(
+        consumer_market_fee_address=empty_wallet.address,
+        consumer_market_fee_token=erc20_token.address,
+        consumer_market_fee_amount=0,
+    )
 
     with pytest.raises(InsufficientBalance):
         publisher_ocean_instance.assets.pay_for_service(
-            asset, asset.get_service("access"), empty_wallet
+            asset, asset.get_service("access"), consume_fees, empty_wallet
         )
 
 
@@ -348,7 +358,14 @@ def test_plain_asset_with_one_datatoken(
 
     # Publisher deploys NFT contract
     tx = erc721_factory.deploy_erc721_contract(
-        ("NFT1", "NFTSYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
+        (
+            "NFT1",
+            "NFTSYMBOL",
+            1,
+            ZERO_ADDRESS,
+            ZERO_ADDRESS,
+            "https://oceanprotocol.com/nft/",
+        ),
         publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -402,7 +419,12 @@ def test_plain_asset_multiple_datatokens(
     )
 
     erc721_data = CreateERC721Data(
-        "NFT2", "NFT2SYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"
+        "NFT2",
+        "NFT2SYMBOL",
+        1,
+        ZERO_ADDRESS,
+        ZERO_ADDRESS,
+        "https://oceanprotocol.com/nft/",
     )
 
     tx = erc721_factory.deploy_erc721_contract(erc721_data, publisher_wallet)

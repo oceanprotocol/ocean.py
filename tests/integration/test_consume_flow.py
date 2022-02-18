@@ -5,13 +5,13 @@
 import os
 import shutil
 
-from ocean_lib.agreements.file_objects import FilesTypeFactory
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.models_structures import CreateErc20Data
 from ocean_lib.ocean.ocean_assets import OceanAssets
+from ocean_lib.structures.abi_tuples import ConsumeFees, CreateErc20Data
+from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
@@ -25,7 +25,14 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
 
     # Publisher deploys NFT contract
     tx = erc721_factory.deploy_erc721_contract(
-        ("NFT1", "NFTSYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
+        (
+            "NFT1",
+            "NFTSYMBOL",
+            1,
+            ZERO_ADDRESS,
+            ZERO_ADDRESS,
+            "https://oceanprotocol.com/nft/",
+        ),
         publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -109,11 +116,19 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
     assert response.status_code == 200
     assert response.json()["providerFee"]
 
+    # Consume fees
+    consume_fees = ConsumeFees(
+        consumer_market_fee_address=consumer_wallet.address,
+        consumer_market_fee_token=erc20_token.address,
+        consumer_market_fee_amount=0,
+    )
+
     # Start order for consumer
     tx_id = erc20_token.start_order(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
         provider_fees=response.json()["providerFee"],
+        consume_fees=consume_fees,
         from_wallet=consumer_wallet,
     )
 

@@ -12,7 +12,8 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_token import ERC721Token
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.models.models_structures import (
+from ocean_lib.structures.abi_tuples import (
+    ChainMetadata,
     CreateErc20Data,
     CreateERC721Data,
     CreateERC721DataNoDeployer,
@@ -166,6 +167,18 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return self.send_transaction(
             "createNftWithErc20WithDispenser",
             (nft_create_data, erc_create_data, dispenser_data),
+            from_wallet,
+        )
+
+    def create_nft_with_metadata(
+        self,
+        nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
+        metadata: Union[dict, tuple, ChainMetadata],
+        from_wallet: Wallet,
+    ) -> str:
+        return self.send_transaction(
+            "createNftWithMetaData",
+            (nft_create_data, metadata),
             from_wallet,
         )
 

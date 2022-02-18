@@ -9,7 +9,7 @@ from enforce_typing import enforce_types
 
 from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.models.models_structures import (
+from ocean_lib.structures.abi_tuples import (
     ChainMetadata,
     ChainMetadataWithTokenUri,
     CreateErc20Data,
@@ -57,6 +57,7 @@ class ERC721NFT(ContractBase):
         symbol: str,
         token_factory_address: str,
         additional_erc20_deployer: str,
+        additional_metadata_updater: str,
         token_uri: str,
         from_wallet: Wallet,
     ) -> str:
@@ -68,6 +69,7 @@ class ERC721NFT(ContractBase):
                 symbol,
                 token_factory_address,
                 additional_erc20_deployer,
+                additional_metadata_updater,
                 token_uri,
             ),
             from_wallet,

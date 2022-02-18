@@ -11,7 +11,7 @@ from web3.main import Web3
 from ocean_lib.models.erc20_token import ERC20Token, RolesERC20
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.models.models_structures import CreateErc20Data, ProviderFees
+from ocean_lib.structures.abi_tuples import ConsumeFees, CreateErc20Data, ProviderFees
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
@@ -33,6 +33,19 @@ def test_properties(web3, config, publisher_wallet):
     assert erc20.event_MinterProposed.abi["name"] == ERC20Token.EVENT_MINTER_PROPOSED
     assert erc20.event_OrderStarted.abi["name"] == ERC20Token.EVENT_ORDER_STARTED
     assert erc20.event_MinterApproved.abi["name"] == ERC20Token.EVENT_MINTER_APPROVED
+    assert erc20.event_OrderReused.abi["name"] == ERC20Token.EVENT_ORDER_REUSED
+    assert erc20.event_OrderExecuted.abi["name"] == ERC20Token.EVENT_ORDER_EXECUTED
+    assert (
+        erc20.event_PublishMarketFeeChanged.abi["name"]
+        == ERC20Token.EVENT_PUBLISH_MARKET_FEE_CHANGED
+    )
+    assert (
+        erc20.event_PublishMarketFee.abi["name"] == ERC20Token.EVENT_PUBLISH_MARKET_FEE
+    )
+    assert (
+        erc20.event_ConsumeMarketFee.abi["name"] == ERC20Token.EVENT_CONSUME_MARKET_FEE
+    )
+    assert erc20.event_ProviderFee.abi["name"] == ERC20Token.EVENT_PROVIDER_FEE
 
 
 def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
@@ -45,7 +58,14 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     publish_market_fee_amount = 5
 
     tx = erc721_factory.deploy_erc721_contract(
-        ("DT1", "DTSYMBOL", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
+        (
+            "DT1",
+            "DTSYMBOL",
+            1,
+            ZERO_ADDRESS,
+            ZERO_ADDRESS,
+            "https://oceanprotocol.com/nft/",
+        ),
         publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -65,7 +85,14 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     # Tests current NFT count
     current_nft_count = erc721_factory.get_current_nft_count()
     erc721_factory.deploy_erc721_contract(
-        ("DT2", "DTSYMBOL1", 1, ZERO_ADDRESS, "https://oceanprotocol.com/nft/"),
+        (
+            "DT2",
+            "DTSYMBOL1",
+            1,
+            ZERO_ADDRESS,
+            ZERO_ADDRESS,
+            "https://oceanprotocol.com/nft/",
+        ),
         publisher_wallet,
     )
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
@@ -222,18 +249,118 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         valid_until=0,
     )
 
-    erc20.start_order(
+    consume_fees = ConsumeFees(
+        consumer_market_fee_address=publisher_wallet.address,
+        consumer_market_fee_token=erc20.address,
+        consumer_market_fee_amount=0,
+    )
+
+    tx = erc20.start_order(
         consumer=consumer_wallet.address,
         service_index=1,
         provider_fees=provider_fee,
+        consume_fees=consume_fees,
         from_wallet=publisher_wallet,
     )
-
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     # Check erc20 balances
     assert erc20.balanceOf(publisher_wallet.address) == to_wei("9")
     assert erc20.balanceOf(
         get_address_of_type(config, "OPFCommunityFeeCollector")
     ) == to_wei("1")
+
+    provider_message = Web3.solidityKeccak(
+        ["bytes32", "bytes"],
+        [tx_receipt.transactionHash, Web3.toHex(Web3.toBytes(text=provider_data))],
+    )
+    provider_signed = web3.eth.sign(provider_fee_address, data=provider_message)
+
+    message = Web3.solidityKeccak(
+        ["bytes"],
+        [Web3.toHex(Web3.toBytes(text="12345"))],
+    )
+    consumer_signed = web3.eth.sign(consumer_wallet.address, data=message)
+
+    erc20.order_executed(
+        tx_receipt.transactionHash,
+        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
+        provider_signature=provider_signed,
+        consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
+        consumer_signature=consumer_signed,
+        consumer=consumer_wallet.address,
+        from_wallet=publisher_wallet,
+    )
+    executed_event = erc20.get_event_log(
+        ERC20Token.EVENT_ORDER_EXECUTED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert executed_event[0].event == "OrderExecuted", "Cannot find OrderExecuted event"
+    assert executed_event[0].args.orderTxId == tx_receipt.transactionHash
+    assert executed_event[0].args.providerAddress == provider_fee_address
+
+    # Tests exceptions for order_executed
+    consumer_signed = web3.eth.sign(provider_fee_address, data=message)
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        erc20.order_executed(
+            tx_receipt.transactionHash,
+            provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
+            provider_signature=provider_signed,
+            consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
+            consumer_signature=consumer_signed,
+            consumer=consumer_wallet.address,
+            from_wallet=publisher_wallet,
+        )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert Consumer signature check failed"
+    )
+
+    message = Web3.solidityKeccak(
+        ["bytes"],
+        [Web3.toHex(Web3.toBytes(text="12345"))],
+    )
+    consumer_signed = web3.eth.sign(consumer_wallet.address, data=message)
+
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        erc20.order_executed(
+            tx_receipt.transactionHash,
+            provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
+            provider_signature=signed,
+            consumer_data=Web3.toHex(Web3.toBytes(text="12345")),
+            consumer_signature=consumer_signed,
+            consumer=consumer_wallet.address,
+            from_wallet=publisher_wallet,
+        )
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert Provider signature check failed"
+    )
+
+    # Tests reuses order
+    erc20.reuse_order(
+        tx_receipt.transactionHash,
+        provider_fees=provider_fee,
+        from_wallet=publisher_wallet,
+    )
+    reused_event = erc20.get_event_log(
+        ERC20Token.EVENT_ORDER_REUSED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert reused_event[0].event == "OrderReused", "Cannot find OrderReused event"
+    assert reused_event[0].args.orderTxId == tx_receipt.transactionHash
+    assert reused_event[0].args.caller == publisher_wallet.address
+
+    provider_fee_event = erc20.get_event_log(
+        ERC20Token.EVENT_PROVIDER_FEE,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert provider_fee_event[0].event == "ProviderFee", "Cannot find ProviderFee event"
 
     # Set and get publishing market fee params
     erc20.set_publishing_market_fee(

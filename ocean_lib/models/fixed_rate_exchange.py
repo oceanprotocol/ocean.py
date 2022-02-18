@@ -52,6 +52,9 @@ class FixedRateExchange(ContractBase):
     EVENT_TOKEN_COLLECTED = "TokenCollected"
     EVENT_OCEAN_FEE_COLLECTED = "OceanFeeCollected"
     EVENT_MARKET_FEE_COLLECTED = "MarketFeeCollected"
+    EVENT_CONSUME_MARKET_FEE = "ConsumeMarketFee"
+    EVENT_LOG_SWAP_FEES = "SWAP_FEES"
+    EVENT_PUBLISH_MARKET_FEE_CHANGED = "PublishMarketFeeChanged"
 
     @property
     def event_ExchangeCreated(self):
@@ -82,6 +85,18 @@ class FixedRateExchange(ContractBase):
         return self.events.OceanFeeCollected()
 
     @property
+    def event_ConsumeMarketFee(self):
+        return self.events.ConsumeMarketFee()
+
+    @property
+    def event_PublishMarketFeeChanged(self):
+        return self.events.PublishMarketFeeChanged()
+
+    @property
+    def event_SWAP_FEES(self):
+        return self.events.SWAP_FEES()
+
+    @property
     def event_MarketFeeCollected(self):
         return self.events.MarketFeeCollected()
 
@@ -95,25 +110,48 @@ class FixedRateExchange(ContractBase):
             base_token, datatoken, exchange_owner
         )
 
+    def get_basetoken_out_price(self, exchange_id: bytes, dt_amount: int) -> int:
+        return self.contract.caller.getBaseTokenOutPrice(exchange_id, dt_amount)
+
     def calc_base_in_given_out_dt(
-        self, exchange_id: bytes, datatoken_amount: int
+        self,
+        exchange_id: bytes,
+        datatoken_amount: int,
+        consume_market_swap_fee_amount: int,
     ) -> tuple:
-        return self.contract.caller.calcBaseInGivenOutDT(exchange_id, datatoken_amount)
+        return self.contract.caller.calcBaseInGivenOutDT(
+            exchange_id, datatoken_amount, consume_market_swap_fee_amount
+        )
 
     def calc_base_out_given_in_dt(
-        self, exchange_id: bytes, datatoken_amount: int
+        self,
+        exchange_id: bytes,
+        datatoken_amount: int,
+        consume_market_swap_fee_amount: int,
     ) -> tuple:
-        return self.contract.caller.calcBaseOutGivenInDT(exchange_id, datatoken_amount)
+        return self.contract.caller.calcBaseOutGivenInDT(
+            exchange_id, datatoken_amount, consume_market_swap_fee_amount
+        )
 
     def buy_dt(
         self,
         exchange_id: bytes,
         datatoken_amount: int,
         max_base_token_amount: int,
+        consume_market_address: str,
+        consume_market_swap_fee_amount: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "buyDT", (exchange_id, datatoken_amount, max_base_token_amount), from_wallet
+            "buyDT",
+            (
+                exchange_id,
+                datatoken_amount,
+                max_base_token_amount,
+                consume_market_address,
+                consume_market_swap_fee_amount,
+            ),
+            from_wallet,
         )
 
     def sell_dt(
@@ -121,11 +159,19 @@ class FixedRateExchange(ContractBase):
         exchange_id: bytes,
         datatoken_amount: int,
         min_base_token_amount: int,
+        consume_market_address: str,
+        consume_market_swap_fee_amount: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "sellDT",
-            (exchange_id, datatoken_amount, min_base_token_amount),
+            (
+                exchange_id,
+                datatoken_amount,
+                min_base_token_amount,
+                consume_market_address,
+                consume_market_swap_fee_amount,
+            ),
             from_wallet,
         )
 
