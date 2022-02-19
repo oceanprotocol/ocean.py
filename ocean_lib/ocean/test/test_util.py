@@ -6,7 +6,7 @@
 import pytest
 
 from ocean_lib.ocean import util
-from ocean_lib.ocean.util import get_ocean_token_address
+from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 
 
 def test_get_web3_connection_provider(monkeypatch):
@@ -40,3 +40,8 @@ def test_get_ocean_token_address(config):
     address = get_ocean_token_address(config.address_file, "ganache")
     assert address[:2] == "0x", "It is not a token address."
     assert address == addresses["Ocean"]
+
+
+def test_get_address_of_type_failure(config):
+    with pytest.raises(KeyError):
+        get_address_of_type(config, "", "non-existent-key")

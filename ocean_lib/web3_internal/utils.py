@@ -4,20 +4,17 @@
 #
 import logging
 from collections import namedtuple
-from pathlib import Path
 from typing import Any, List, Optional
 
 from enforce_typing import enforce_types
 from eth_account.account import Account
-from eth_account.messages import encode_defunct
 from eth_keys import keys
-from eth_utils import big_endian_to_int, decode_hex
+from eth_utils import decode_hex
 from hexbytes.main import HexBytes
 from web3.main import Web3
 
 import artifacts
 from ocean_lib.web3_internal.constants import DEFAULT_NETWORK_NAME, NETWORK_NAME_MAP
-from ocean_lib.web3_internal.web3_overrides.signature import SignatureFix
 
 Signature = namedtuple("Signature", ("v", "r", "s"))
 
@@ -125,28 +122,6 @@ def get_chain_id(web3: Web3) -> int:
 
 
 @enforce_types
-def ec_recover(message: str, signed_message: str) -> str:
-    """
-    This method does not prepend the message with the prefix `\x19Ethereum Signed Message:\n32`.
-    The caller should add the prefix to the msg/hash before calling this if the signature was
-    produced for an ethereum-prefixed message.
-
-    :param message:
-    :param signed_message:
-    :return:
-    """
-    v, r, s = split_signature(Web3.toBytes(hexstr=signed_message))
-    signature_object = SignatureFix(vrs=(v, big_endian_to_int(r), big_endian_to_int(s)))
-    return Account.recoverHash(message, signature=signature_object.to_hex_v_hacked())
-
-
-@enforce_types
-def personal_ec_recover(message: str, signed_message: str) -> str:
-    prefixed_hash = encode_defunct(text=message)
-    return ec_recover(prefixed_hash, signed_message)
-
-
-@enforce_types
 def get_ether_balance(web3: Web3, address: str) -> int:
     """
     Get balance of an ethereum address.
@@ -155,8 +130,3 @@ def get_ether_balance(web3: Web3, address: str) -> int:
     :return: balance, int
     """
     return web3.eth.get_balance(address, block_identifier="latest")
-
-
-@enforce_types
-def get_artifacts_path() -> str:
-    return str(Path(artifacts.__file__).parent.expanduser().resolve())

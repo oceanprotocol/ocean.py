@@ -79,10 +79,6 @@ class Service:
             sd.pop("description", None),
         )
 
-    @classmethod
-    def from_json(cls, service_dict: Dict[str, Any]) -> "Service":
-        return cls.from_dict(service_dict)
-
     def get_trusted_algorithms(self) -> list:
         return self.compute_values.get("publisherTrustedAlgorithms", [])
 
