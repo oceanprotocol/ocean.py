@@ -4,6 +4,8 @@
 #
 import os
 
+import pytest
+
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
@@ -14,127 +16,130 @@ from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import create_basics, build_credentials_dict
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
-config = ExampleConfig.get_config()
-ocean = Ocean(config)
 
-# Create Alice's wallet
-alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
-alice_wallet = Wallet(
-    ocean.web3,
-    alice_private_key,
-    config.block_confirmations,
-    config.transaction_timeout,
-)
-assert alice_wallet.address
+@pytest.mark.skip(reason="This test is slow and not needed in the CI")
+def test_stressed_publish_flow():
+    config = ExampleConfig.get_config()
+    ocean = Ocean(config)
 
-# Mint OCEAN
-mint_fake_OCEAN(config)
-assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
+    # Create Alice's wallet
+    alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
+    alice_wallet = Wallet(
+        ocean.web3,
+        alice_private_key,
+        config.block_confirmations,
+        config.transaction_timeout,
+    )
+    assert alice_wallet.address
 
-for _ in range(1000):
-    erc721_nft, erc20_token = deploy_erc721_erc20(
-        ocean.web3, config, alice_wallet, alice_wallet
-    )
-    data_provider = DataServiceProvider
-    _, metadata, encrypted_files = create_basics(config, ocean.web3, data_provider)
+    # Mint OCEAN
+    mint_fake_OCEAN(config)
+    assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 
-    erc20_data = CreateErc20Data(
-        template_index=1,
-        strings=["Datatoken 1", "DT1"],
-        addresses=[
-            alice_wallet.address,
-            alice_wallet.address,
-            ZERO_ADDRESS,
-            get_address_of_type(config, "Ocean"),
-        ],
-        uints=[ocean.to_wei("0.5"), 0],
-        bytess=[b""],
-    )
-    # Send 1000 requests to Aquarius for creating a plain asset with ERC20 data
-    ddo = ocean.assets.create(
-        metadata=metadata,
-        publisher_wallet=alice_wallet,
-        encrypted_files=encrypted_files,
-        erc721_address=erc721_nft.address,
-        erc20_tokens_data=[erc20_data],
-    )
-    assert ddo, "The asset is not created."
-    assert ddo.nft["name"] == "NFT"
-    assert ddo.nft["symbol"] == "NFTSYMBOL"
-    assert ddo.nft["address"] == erc721_nft.address
-    assert ddo.nft["owner"] == alice_wallet.address
-    assert ddo.datatokens[0]["name"] == "Datatoken 1"
-    assert ddo.datatokens[0]["symbol"] == "DT1"
-    assert ddo.credentials == build_credentials_dict()
+    for _ in range(1000):
+        erc721_nft, erc20_token = deploy_erc721_erc20(
+            ocean.web3, config, alice_wallet, alice_wallet
+        )
+        data_provider = DataServiceProvider
+        _, metadata, encrypted_files = create_basics(config, ocean.web3, data_provider)
 
-# Send 1000 requests to Aquarius for creating a plain asset
-for _ in range(1000):
-    erc721_nft, erc20_token = deploy_erc721_erc20(
-        ocean.web3, config, alice_wallet, alice_wallet
-    )
-    data_provider = DataServiceProvider
-    _, metadata, encrypted_files = create_basics(config, ocean.web3, data_provider)
+        erc20_data = CreateErc20Data(
+            template_index=1,
+            strings=["Datatoken 1", "DT1"],
+            addresses=[
+                alice_wallet.address,
+                alice_wallet.address,
+                ZERO_ADDRESS,
+                get_address_of_type(config, "Ocean"),
+            ],
+            uints=[ocean.to_wei("0.5"), 0],
+            bytess=[b""],
+        )
+        # Send 1000 requests to Aquarius for creating a plain asset with ERC20 data
+        ddo = ocean.assets.create(
+            metadata=metadata,
+            publisher_wallet=alice_wallet,
+            encrypted_files=encrypted_files,
+            erc721_address=erc721_nft.address,
+            erc20_tokens_data=[erc20_data],
+        )
+        assert ddo, "The asset is not created."
+        assert ddo.nft["name"] == "NFT"
+        assert ddo.nft["symbol"] == "NFTSYMBOL"
+        assert ddo.nft["address"] == erc721_nft.address
+        assert ddo.nft["owner"] == alice_wallet.address
+        assert ddo.datatokens[0]["name"] == "Datatoken 1"
+        assert ddo.datatokens[0]["symbol"] == "DT1"
+        assert ddo.credentials == build_credentials_dict()
 
-    asset = ocean.assets.create(
-        metadata,
-        alice_wallet,
-        encrypted_files,
-        erc721_address=erc721_nft.address,
-        deployed_erc20_tokens=[erc20_token],
-    )
-    assert asset
-    assert asset.nft["name"] == "NFT"
-    assert asset.nft["symbol"] == "NFTSYMBOL"
-    assert asset.nft["address"] == erc721_nft.address
-    assert asset.nft["owner"] == alice_wallet.address
-    assert asset.datatokens[0]["name"] == "ERC20DT1"
-    assert asset.datatokens[0]["symbol"] == "ERC20DT1Symbol"
+    # Send 1000 requests to Aquarius for creating a plain asset
+    for _ in range(1000):
+        erc721_nft, erc20_token = deploy_erc721_erc20(
+            ocean.web3, config, alice_wallet, alice_wallet
+        )
+        data_provider = DataServiceProvider
+        _, metadata, encrypted_files = create_basics(config, ocean.web3, data_provider)
 
-# Send 1000 requests to Aquarius for creating an encrypted asset
-for _ in range(1000):
-    erc721_nft, erc20_token = deploy_erc721_erc20(
-        ocean.web3, config, alice_wallet, alice_wallet
-    )
-    data_provider = DataServiceProvider
-    _, metadata, encrypted_files = create_basics(config, ocean.web3, data_provider)
-    asset = ocean.assets.create(
-        metadata=metadata,
-        publisher_wallet=alice_wallet,
-        encrypted_files=encrypted_files,
-        erc721_address=erc721_nft.address,
-        deployed_erc20_tokens=[erc20_token],
-        encrypt_flag=True,
-    )
+        asset = ocean.assets.create(
+            metadata,
+            alice_wallet,
+            encrypted_files,
+            erc721_address=erc721_nft.address,
+            deployed_erc20_tokens=[erc20_token],
+        )
+        assert asset
+        assert asset.nft["name"] == "NFT"
+        assert asset.nft["symbol"] == "NFTSYMBOL"
+        assert asset.nft["address"] == erc721_nft.address
+        assert asset.nft["owner"] == alice_wallet.address
+        assert asset.datatokens[0]["name"] == "ERC20DT1"
+        assert asset.datatokens[0]["symbol"] == "ERC20DT1Symbol"
 
-    assert asset, "The asset is not created."
-    assert asset.nft["name"] == "NFT"
-    assert asset.nft["symbol"] == "NFTSYMBOL"
-    assert asset.nft["address"] == erc721_nft.address
-    assert asset.nft["owner"] == alice_wallet.address
-    assert asset.datatokens[0]["name"] == "ERC20DT1"
-    assert asset.datatokens[0]["symbol"] == "ERC20DT1Symbol"
-    assert asset.datatokens[0]["address"] == erc20_token.address
+    # Send 1000 requests to Aquarius for creating an encrypted asset
+    for _ in range(1000):
+        erc721_nft, erc20_token = deploy_erc721_erc20(
+            ocean.web3, config, alice_wallet, alice_wallet
+        )
+        data_provider = DataServiceProvider
+        _, metadata, encrypted_files = create_basics(config, ocean.web3, data_provider)
+        asset = ocean.assets.create(
+            metadata=metadata,
+            publisher_wallet=alice_wallet,
+            encrypted_files=encrypted_files,
+            erc721_address=erc721_nft.address,
+            deployed_erc20_tokens=[erc20_token],
+            encrypt_flag=True,
+        )
 
-# Send 1000 requests to Aquarius for creating a compressed asset
-for _ in range(1000):
-    erc721_nft, erc20_token = deploy_erc721_erc20(
-        ocean.web3, config, alice_wallet, alice_wallet
-    )
-    data_provider = DataServiceProvider
-    _, metadata, encrypted_files = create_basics(config, ocean.web3, data_provider)
-    ddo = ocean.assets.create(
-        metadata=metadata,
-        publisher_wallet=alice_wallet,
-        encrypted_files=encrypted_files,
-        erc721_address=erc721_nft.address,
-        deployed_erc20_tokens=[erc20_token],
-        compress_flag=True,
-    )
-    assert ddo, "The asset is not created."
-    assert ddo.nft["name"] == "NFT"
-    assert ddo.nft["symbol"] == "NFTSYMBOL"
-    assert ddo.nft["address"] == erc721_nft.address
-    assert ddo.nft["owner"] == alice_wallet.address
-    assert ddo.datatokens[0]["name"] == "ERC20DT1"
-    assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
-    assert ddo.datatokens[0]["address"] == erc20_token.address
+        assert asset, "The asset is not created."
+        assert asset.nft["name"] == "NFT"
+        assert asset.nft["symbol"] == "NFTSYMBOL"
+        assert asset.nft["address"] == erc721_nft.address
+        assert asset.nft["owner"] == alice_wallet.address
+        assert asset.datatokens[0]["name"] == "ERC20DT1"
+        assert asset.datatokens[0]["symbol"] == "ERC20DT1Symbol"
+        assert asset.datatokens[0]["address"] == erc20_token.address
+
+    # Send 1000 requests to Aquarius for creating a compressed asset
+    for _ in range(1000):
+        erc721_nft, erc20_token = deploy_erc721_erc20(
+            ocean.web3, config, alice_wallet, alice_wallet
+        )
+        data_provider = DataServiceProvider
+        _, metadata, encrypted_files = create_basics(config, ocean.web3, data_provider)
+        ddo = ocean.assets.create(
+            metadata=metadata,
+            publisher_wallet=alice_wallet,
+            encrypted_files=encrypted_files,
+            erc721_address=erc721_nft.address,
+            deployed_erc20_tokens=[erc20_token],
+            compress_flag=True,
+        )
+        assert ddo, "The asset is not created."
+        assert ddo.nft["name"] == "NFT"
+        assert ddo.nft["symbol"] == "NFTSYMBOL"
+        assert ddo.nft["address"] == erc721_nft.address
+        assert ddo.nft["owner"] == alice_wallet.address
+        assert ddo.datatokens[0]["name"] == "ERC20DT1"
+        assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
+        assert ddo.datatokens[0]["address"] == erc20_token.address
