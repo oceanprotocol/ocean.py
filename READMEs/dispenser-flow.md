@@ -44,12 +44,11 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 
 In the same python console:
 ```python
-from ocean_lib.models.dispenser import Dispenser
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.structures.abi_tuples import DispenserData
-from ocean_lib.ocean.util import get_address_of_type
 
 # Get the dispenser
-dispenser = Dispenser(ocean.web3, get_address_of_type(config, "Dispenser"))
+dispenser = ocean.dispenser
 
 max_amount = ocean.to_wei(50)
 dispenser_data = DispenserData(
@@ -75,5 +74,9 @@ dispenser.dispense_tokens(
 )
 assert erc20_token.balanceOf(alice_wallet.address) == max_amount
 ```
+
+As an alternative for publishing a NFT, a datatoken and a dispenser at once, you can use `create_nft_erc20_with_dispenser`.
+For the NFT creation, use `CreateERC721DataNoDeployer` named tuple, because the additional ERC20 deployer will automatically be set as the factory router.
+
 
 

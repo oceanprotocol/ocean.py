@@ -24,7 +24,10 @@ def test_asset_utils(web3):
     assert isinstance(ddo_dict, dict)
     assert ddo_dict["@context"] == ["https://w3id.org/did/v1"]
     context = ddo_dict["@context"]
-    assert ddo_dict["id"] == "did:op:ACce67694eD2848dd683c651Dab7Af823b7dd123"
+    assert (
+        ddo_dict["id"]
+        == "did:op:68a7f03e59c70d59607e3f0a536ed4d32e0599db07f587d66bd1221573d38c21"
+    )
     did = ddo_dict["id"]
     assert ddo_dict["version"] == "4.0.0"
     assert ddo_dict["chainId"] == web3.eth.chain_id

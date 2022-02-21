@@ -138,6 +138,9 @@ print(f"BPool address: {bpool.address}")
 
 ```
 
+As an alternative for publishing a NFT, a datatoken and a pool at once, you can use `create_nft_erc20_with_pool`.
+For the NFT creation, use `CreateERC721DataNoDeployer` named tuple, because the additional ERC20 deployer will automatically be set as the factory router.
+
 ## 4. Marketplace displays asset for sale
 
 Now, you're the Marketplace operator. Here's how to get info about the data asset.

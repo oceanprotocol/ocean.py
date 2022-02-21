@@ -58,6 +58,13 @@ def test_update_metadata(publisher_ocean_instance, publisher_wallet, config):
     new_metadata["updated"] = datetime.now().isoformat()
     ddo.metadata = new_metadata
 
+    with patch("ocean_lib.ocean.ocean_assets.ERC721FactoryContract.verify_nft") as mock:
+        mock.return_value = False
+        with pytest.raises(ContractNotFound):
+            _asset = publisher_ocean_instance.assets.update(
+                asset=ddo, publisher_wallet=publisher_wallet
+            )
+
     _asset = publisher_ocean_instance.assets.update(
         asset=ddo, publisher_wallet=publisher_wallet
     )
@@ -249,6 +256,13 @@ def test_ocean_assets_validate(publisher_ocean_instance):
     assert publisher_ocean_instance.assets.validate(
         ddo
     ), "asset should be valid, unless the schema changed."
+
+    ddo_dict = get_sample_ddo()
+    ddo_dict["id"] = "something not conformant"
+    ddo = Asset.from_dict(ddo_dict)
+
+    with pytest.raises(ValueError):
+        publisher_ocean_instance.assets.validate(ddo)
 
 
 def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet, config):

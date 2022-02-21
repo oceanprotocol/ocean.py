@@ -15,11 +15,9 @@ from hexbytes import HexBytes
 from web3 import Web3
 from web3._utils.events import get_event_data
 from web3._utils.filters import construct_event_filter_params
-from web3._utils.threads import Timeout
 from web3.contract import ContractEvent, ContractEvents
 from web3.datastructures import AttributeDict
 from web3.exceptions import MismatchedABI, ValidationError
-from websockets import ConnectionClosed
 
 from ocean_lib.web3_internal.constants import ENV_GAS_PRICE
 from ocean_lib.web3_internal.contract_utils import (
@@ -101,47 +99,6 @@ class ContractBase(object):
         :return: address, hex str
         """
         return Web3.toChecksumAddress(address)
-
-    @staticmethod
-    @enforce_types
-    def get_tx_receipt(
-        web3: Web3, tx_hash: Union[str, HexBytes], timeout: Optional[int] = 120
-    ) -> Optional[AttributeDict]:
-        """
-        Get the receipt of a tx.
-
-        :param tx_hash: hash of the transaction
-        :param timeout: int in seconds to wait for transaction receipt
-        :return: Tx receipt
-        """
-        try:
-            return web3.eth.wait_for_transaction_receipt(
-                HexBytes(tx_hash), timeout=timeout
-            )
-        except ValueError as e:
-            logger.error(f"Waiting for transaction receipt failed: {e}")
-            return None
-        except Timeout as e:
-            logger.info(f"Waiting for transaction receipt may have timed out: {e}.")
-            return None
-        except ConnectionClosed as e:
-            logger.info(
-                f"ConnectionClosed error waiting for transaction receipt failed: {e}."
-            )
-            raise
-        except Exception as e:
-            logger.info(f"Unknown error waiting for transaction receipt: {e}.")
-            raise
-
-    @enforce_types
-    def is_tx_successful(self, tx_hash: str) -> bool:
-        """Check if the transaction is successful.
-
-        :param tx_hash: hash of the transaction
-        :return: bool
-        """
-        receipt = self.get_tx_receipt(self.web3, tx_hash)
-        return bool(receipt and receipt.status == 1)
 
     @enforce_types
     def get_event_signature(self, event_name: str) -> str:

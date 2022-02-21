@@ -5,10 +5,8 @@
 import os
 
 from ocean_lib.example_config import ExampleConfig
-from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.structures.abi_tuples import CreateErc20Data, DispenserData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
@@ -65,7 +63,7 @@ def test_dispenser_flow_readme():
     assert erc20_token.symbol() == "ERC20DT1Symbol"
 
     # Get the dispenser
-    dispenser = Dispenser(ocean.web3, get_address_of_type(config, "Dispenser"))
+    dispenser = ocean.dispenser
 
     max_amount = ocean.to_wei(50)
     dispenser_data = DispenserData(

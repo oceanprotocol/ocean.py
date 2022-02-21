@@ -67,7 +67,6 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
     ), "The function createToken from the contract does not exist."
     assert "getCurrentTokenCount" in factory.function_names
     assert "getTokenTemplate" in factory.function_names
-    assert not factory.is_tx_successful("nohash")
     with pytest.raises(ValueError):
         assert factory.get_event_signature("noevent")
 
@@ -95,12 +94,6 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
 
     with pytest.raises(TypeError):
         ContractBase.getLogs(None)
-
-
-def test_static_functions(web3):
-    assert (
-        ContractBase.get_tx_receipt(web3, "nohash") is None
-    ), "The transaction receipt exists for the wrong hash."
 
 
 def test_gas_price(web3, alice_wallet, nft_factory_address, monkeypatch):
