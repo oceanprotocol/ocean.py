@@ -76,11 +76,6 @@ def marketplace_flow(ocean: Ocean, wallet: Wallet):
     ]
 
     swap_fees = [ocean.to_wei("0.01"), ocean.to_wei("0.01")]
-    print("Balance: ", erc20_token.balanceOf(wallet.address))
-    if erc20_token.balanceOf(wallet.address) == 0:
-        # Need to throw an error because in contracts you can mint only once
-        erc20_token.mint(wallet.address, ocean.to_wei("10"), wallet)
-        print("Balance after: ", erc20_token.balanceOf(wallet.address))
     bpool = ocean.create_pool(erc20_token, OCEAN_token, ss_params, swap_fees, wallet)
     assert bpool.address
 
