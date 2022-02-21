@@ -111,3 +111,6 @@ tx_result = ocean.fixed_rate_exchange.buy_dt(
 )
 assert tx_result, "failed buying datatokens at fixed rate for Bob"
 ```
+
+As an alternative for publishing a NFT, a datatoken and a fixed rate exchange at once, you can use `create_nft_erc20_with_fixed_rate`.
+For the NFT creation, use `CreateERC721DataNoDeployer` named tuple, because the additional ERC20 deployer will automatically be set as the factory router.

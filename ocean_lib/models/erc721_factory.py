@@ -6,7 +6,6 @@ from typing import Optional, Union
 
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
-
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.structures.abi_tuples import (
