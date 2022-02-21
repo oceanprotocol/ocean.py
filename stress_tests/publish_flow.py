@@ -42,7 +42,6 @@ def test_stressed_publish_flow():
         )
         data_provider = DataServiceProvider
         _, metadata, encrypted_files = create_basics(config, ocean.web3, data_provider)
-
         erc20_data = CreateErc20Data(
             template_index=1,
             strings=["Datatoken 1", "DT1"],
@@ -110,7 +109,6 @@ def test_stressed_publish_flow():
             deployed_erc20_tokens=[erc20_token],
             encrypt_flag=True,
         )
-
         assert asset, "The asset is not created."
         assert asset.nft["name"] == "NFT"
         assert asset.nft["symbol"] == "NFTSYMBOL"

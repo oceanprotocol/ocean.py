@@ -123,7 +123,6 @@ def test_publish_flow_with_threads():
     config = ExampleConfig.get_config()
     ocean = Ocean(config)
 
-    # Create Alice's wallet
     alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
     alice_wallet = Wallet(
         ocean.web3,
@@ -132,7 +131,6 @@ def test_publish_flow_with_threads():
         config.transaction_timeout,
     )
     assert alice_wallet.address
-
     bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
     bob_wallet = Wallet(
         ocean.web3,
@@ -141,7 +139,6 @@ def test_publish_flow_with_threads():
         config.transaction_timeout,
     )
     assert bob_wallet.address
-
     tristan_private_key = os.getenv("TEST_PRIVATE_KEY3")
     tristan_wallet = Wallet(
         ocean.web3,
@@ -150,13 +147,14 @@ def test_publish_flow_with_threads():
         config.transaction_timeout,
     )
     assert tristan_wallet.address
+
     # Mint OCEAN
     mint_fake_OCEAN(config)
     assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
     assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "need ETH"
     assert tristan_wallet.web3.eth.get_balance(tristan_wallet.address) > 0, "need ETH"
-    threads = list()
 
+    threads = list()
     t1 = threading.Thread(
         target=thread_function1,
         args=(
@@ -184,7 +182,6 @@ def test_publish_flow_with_threads():
     t1.start()
     t2.start()
     t3.start()
-
     for index, thread in enumerate(threads):
         print("Main    : before joining thread %d.", index)
         thread.join()

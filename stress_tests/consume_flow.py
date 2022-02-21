@@ -37,13 +37,11 @@ def test_stressed_consume_flow():
     # Mint OCEAN
     mint_fake_OCEAN(config)
     assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-
     erc721_nft, erc20_token = deploy_erc721_erc20(
         ocean.web3, config, alice_wallet, alice_wallet
     )
     data_provider = DataServiceProvider
     _, metadata, encrypted_files = create_basics(config, ocean.web3, data_provider)
-
     erc20_data = CreateErc20Data(
         template_index=1,
         strings=["Datatoken 1", "DT1"],
@@ -74,16 +72,12 @@ def test_stressed_consume_flow():
     assert ddo.credentials == build_credentials_dict()
 
     service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
-
-    # Initialize service
     response = data_provider.initialize(
         did=ddo.did, service=service, consumer_address=alice_wallet.address
     )
     assert response
     assert response.status_code == 200
     assert response.json()["providerFee"]
-
-    # Consume fees
     consume_fees = ConsumeFees(
         consumer_market_fee_address=alice_wallet.address,
         consumer_market_fee_token=erc20_token.address,
@@ -117,7 +111,6 @@ def test_stressed_consume_flow():
                     os.listdir(destination),
                 )
             )
-
         if not os.path.exists(destination):
             os.mkdir(destination)
 

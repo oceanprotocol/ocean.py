@@ -57,7 +57,6 @@ def test_stressed_pool_creation_flow():
 
         # Specify metadata and services, using the Branin test dataset
         date_created = "2021-12-28T10:55:11Z"
-
         metadata = {
             "created": date_created,
             "updated": date_created,
@@ -67,12 +66,10 @@ def test_stressed_pool_creation_flow():
             "author": "Trent",
             "license": "CC0: PublicDomain",
         }
-
         # ocean.py offers multiple file types, but a simple url file should be enough for this example
         url_file = UrlFile(
             url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
         )
-
         # Encrypt file(s) using provider
         encrypted_files = ocean.assets.encrypt_files([url_file])
 
@@ -95,7 +92,6 @@ def test_stressed_pool_creation_flow():
             2500000,
             ocean.to_wei(2000),
         ]
-
         swap_fees = [ocean.to_wei("0.01"), ocean.to_wei("0.01")]
         bpool = ocean.create_pool(
             erc20_token, OCEAN_token, ss_params, swap_fees, alice_wallet
@@ -109,6 +105,5 @@ def test_stressed_pool_creation_flow():
             ocean.to_wei("0.01"),
         )
         price_in_OCEAN = prices[0]
-
         formatted_price = pretty_ether_and_wei(price_in_OCEAN, "OCEAN")
         assert formatted_price

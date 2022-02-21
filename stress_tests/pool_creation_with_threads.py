@@ -38,7 +38,6 @@ def asset_displayed_on_sale(ocean: Ocean, wallet: Wallet):
 
     # Specify metadata and services, using the Branin test dataset
     date_created = "2021-12-28T10:55:11Z"
-
     metadata = {
         "created": date_created,
         "updated": date_created,
@@ -76,7 +75,6 @@ def asset_displayed_on_sale(ocean: Ocean, wallet: Wallet):
         2500000,
         ocean.to_wei(2000),
     ]
-
     swap_fees = [ocean.to_wei("0.01"), ocean.to_wei("0.01")]
     bpool = ocean.create_pool(erc20_token, OCEAN_token, ss_params, swap_fees, wallet)
     assert bpool.address
@@ -85,7 +83,6 @@ def asset_displayed_on_sale(ocean: Ocean, wallet: Wallet):
         OCEAN_token.address, erc20_token.address, ocean.to_wei(1), ocean.to_wei("0.01")
     )
     price_in_OCEAN = prices[0]
-
     formatted_price = pretty_ether_and_wei(price_in_OCEAN, "OCEAN")
     assert formatted_price
 
@@ -95,7 +92,6 @@ def test_pool_creation_flow_with_threads():
     config = ExampleConfig.get_config()
     ocean = Ocean(config)
 
-    # Create Alice's wallet
     alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
     alice_wallet = Wallet(
         ocean.web3,
@@ -104,7 +100,6 @@ def test_pool_creation_flow_with_threads():
         config.transaction_timeout,
     )
     assert alice_wallet.address
-
     bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
     bob_wallet = Wallet(
         ocean.web3,
@@ -113,7 +108,6 @@ def test_pool_creation_flow_with_threads():
         config.transaction_timeout,
     )
     assert bob_wallet.address
-
     tristan_private_key = os.getenv("TEST_PRIVATE_KEY3")
     tristan_wallet = Wallet(
         ocean.web3,
@@ -127,8 +121,8 @@ def test_pool_creation_flow_with_threads():
     assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
     assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "need ETH"
     assert tristan_wallet.web3.eth.get_balance(tristan_wallet.address) > 0, "need ETH"
-    threads = list()
 
+    threads = list()
     t1 = threading.Thread(
         target=asset_displayed_on_sale,
         args=(
@@ -156,7 +150,6 @@ def test_pool_creation_flow_with_threads():
     t1.start()
     t2.start()
     t3.start()
-
     for index, thread in enumerate(threads):
         print(f"Main    : before joining thread {index}.")
         thread.join()
