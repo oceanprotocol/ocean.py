@@ -6,6 +6,8 @@ import os
 import shutil
 import threading
 
+import pytest
+
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -127,59 +129,61 @@ def thread_function3(ocean, tristan_wallet, config):
     consume_flow(ocean, wallet=tristan_wallet, config=config)
 
 
-config = ExampleConfig.get_config()
-ocean = Ocean(config)
+@pytest.mark.skip(reason="This test is slow and not needed in the CI")
+def test_consume_flow_with_threads():
+    config = ExampleConfig.get_config()
+    ocean = Ocean(config)
 
-alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
-alice_wallet = Wallet(
-    ocean.web3,
-    alice_private_key,
-    config.block_confirmations,
-    config.transaction_timeout,
-)
-assert alice_wallet.address
-bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
-bob_wallet = Wallet(
-    ocean.web3,
-    bob_private_key,
-    config.block_confirmations,
-    config.transaction_timeout,
-)
-assert bob_wallet.address
-tristan_private_key = os.getenv("TEST_PRIVATE_KEY3")
-tristan_wallet = Wallet(
-    ocean.web3,
-    tristan_private_key,
-    config.block_confirmations,
-    config.transaction_timeout,
-)
-assert tristan_wallet.address
-# Mint OCEAN
-mint_fake_OCEAN(config)
-assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "need ETH"
-assert tristan_wallet.web3.eth.get_balance(tristan_wallet.address) > 0, "need ETH"
+    alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
+    alice_wallet = Wallet(
+        ocean.web3,
+        alice_private_key,
+        config.block_confirmations,
+        config.transaction_timeout,
+    )
+    assert alice_wallet.address
+    bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
+    bob_wallet = Wallet(
+        ocean.web3,
+        bob_private_key,
+        config.block_confirmations,
+        config.transaction_timeout,
+    )
+    assert bob_wallet.address
+    tristan_private_key = os.getenv("TEST_PRIVATE_KEY3")
+    tristan_wallet = Wallet(
+        ocean.web3,
+        tristan_private_key,
+        config.block_confirmations,
+        config.transaction_timeout,
+    )
+    assert tristan_wallet.address
+    # Mint OCEAN
+    mint_fake_OCEAN(config)
+    assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
+    assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "need ETH"
+    assert tristan_wallet.web3.eth.get_balance(tristan_wallet.address) > 0, "need ETH"
 
-threads = list()
-t1 = threading.Thread(
-    target=thread_function1,
-    args=(ocean, alice_wallet, config),
-)
-threads.append(t1)
-t2 = threading.Thread(
-    target=thread_function2,
-    args=(ocean, bob_wallet, config),
-)
-threads.append(t2)
-t3 = threading.Thread(
-    target=thread_function3,
-    args=(ocean, tristan_wallet, config),
-)
-threads.append(t3)
-t1.start()
-t2.start()
-t3.start()
-for index, thread in enumerate(threads):
-    print("Main    : before joining thread %d.", index)
-    thread.join()
-    print("Main    : thread %d done", index)
+    threads = list()
+    t1 = threading.Thread(
+        target=thread_function1,
+        args=(ocean, alice_wallet, config),
+    )
+    threads.append(t1)
+    t2 = threading.Thread(
+        target=thread_function2,
+        args=(ocean, bob_wallet, config),
+    )
+    threads.append(t2)
+    t3 = threading.Thread(
+        target=thread_function3,
+        args=(ocean, tristan_wallet, config),
+    )
+    threads.append(t3)
+    t1.start()
+    t2.start()
+    t3.start()
+    for index, thread in enumerate(threads):
+        print("Main    : before joining thread %d.", index)
+        thread.join()
+        print("Main    : thread %d done", index)
