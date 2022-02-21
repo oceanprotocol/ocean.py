@@ -88,73 +88,72 @@ def marketplace_flow(ocean: Ocean, wallet: Wallet):
     assert formatted_price
 
 
-if __name__ == "__main__":
-    config = ExampleConfig.get_config()
-    ocean = Ocean(config)
+config = ExampleConfig.get_config()
+ocean = Ocean(config)
 
-    # Create Alice's wallet
-    alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
-    alice_wallet = Wallet(
-        ocean.web3,
-        alice_private_key,
-        config.block_confirmations,
-        config.transaction_timeout,
-    )
-    assert alice_wallet.address
+# Create Alice's wallet
+alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
+alice_wallet = Wallet(
+    ocean.web3,
+    alice_private_key,
+    config.block_confirmations,
+    config.transaction_timeout,
+)
+assert alice_wallet.address
 
-    bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
-    bob_wallet = Wallet(
-        ocean.web3,
-        bob_private_key,
-        config.block_confirmations,
-        config.transaction_timeout,
-    )
-    assert bob_wallet.address
+bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
+bob_wallet = Wallet(
+    ocean.web3,
+    bob_private_key,
+    config.block_confirmations,
+    config.transaction_timeout,
+)
+assert bob_wallet.address
 
-    tristan_private_key = os.getenv("TEST_PRIVATE_KEY3")
-    tristan_wallet = Wallet(
-        ocean.web3,
-        tristan_private_key,
-        config.block_confirmations,
-        config.transaction_timeout,
-    )
-    assert tristan_wallet.address
-    # Mint OCEAN
-    mint_fake_OCEAN(config)
-    assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-    assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "need ETH"
-    assert tristan_wallet.web3.eth.get_balance(tristan_wallet.address) > 0, "need ETH"
-    threads = list()
+tristan_private_key = os.getenv("TEST_PRIVATE_KEY3")
+tristan_wallet = Wallet(
+    ocean.web3,
+    tristan_private_key,
+    config.block_confirmations,
+    config.transaction_timeout,
+)
+assert tristan_wallet.address
+# Mint OCEAN
+mint_fake_OCEAN(config)
+assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
+assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "need ETH"
+assert tristan_wallet.web3.eth.get_balance(tristan_wallet.address) > 0, "need ETH"
+threads = list()
 
-    t1 = threading.Thread(
-        target=marketplace_flow,
-        args=(
-            ocean,
-            alice_wallet,
-        ),
-    )
-    threads.append(t1)
-    t2 = threading.Thread(
-        target=marketplace_flow,
-        args=(
-            ocean,
-            bob_wallet,
-        ),
-    )
-    threads.append(t2)
-    t3 = threading.Thread(
-        target=marketplace_flow,
-        args=(
-            ocean,
-            tristan_wallet,
-        ),
-    )
-    threads.append(t3)
-    t1.start()
-    t2.start()
-    t3.start()
+t1 = threading.Thread(
+    target=marketplace_flow,
+    args=(
+        ocean,
+        alice_wallet,
+    ),
+)
+threads.append(t1)
+t2 = threading.Thread(
+    target=marketplace_flow,
+    args=(
+        ocean,
+        bob_wallet,
+    ),
+)
+threads.append(t2)
+t3 = threading.Thread(
+    target=marketplace_flow,
+    args=(
+        ocean,
+        tristan_wallet,
+    ),
+)
+threads.append(t3)
+t1.start()
+t2.start()
+t3.start()
 
-    for index, thread in enumerate(threads):
-        print(f"Main    : before joining thread {index}.")
-        thread.join()
-        print(f"Main    : thread {index} done")
+for index, thread in enumerate(threads):
+    print(f"Main    : before joining thread {index}.")
+    thread.join()
+    print(f"Main    : thread {index} done")
