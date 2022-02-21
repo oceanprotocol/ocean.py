@@ -64,15 +64,19 @@ def get_random_max_token_amount_out(
     return floor(
         random.uniform(0.001, 1)
         * min(
-            token_in.balanceOf(wallet_address)
-            * bpool.get_spot_price(token_in.address, token_out.address, 0)
-            / to_wei(1),
+            bpool.get_amount_out_exact_in(
+                token_in.address,
+                token_out.address,
+                token_in.balanceOf(wallet_address),
+                0,
+            )[0],
             max_out_ratio_limit,
         )
     )
 
 
 @pytest.mark.skip(reason="This test is slow and not needed in the CI")
+@pytest.mark.nosetup_all
 def test_fuzzing_pool_ocean(
     web3,
     config,
@@ -84,7 +88,7 @@ def test_fuzzing_pool_ocean(
 ):
     """Test the liquidity pool contract with random values."""
 
-    number_of_runs = 50
+    number_of_runs = 1000
 
     errors = []
 
