@@ -7,6 +7,7 @@ import threading
 
 import pytest
 
+from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
@@ -18,21 +19,21 @@ from tests.resources.ddo_helpers import create_basics, build_credentials_dict
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
-def _get_publishing_requirements(ocean: Ocean, wallet: Wallet):
+def _get_publishing_requirements(ocean: Ocean, wallet: Wallet, config: Config):
     erc721_nft, erc20_token = deploy_erc721_erc20(ocean.web3, config, wallet, wallet)
     data_provider = DataServiceProvider
     _, metadata, encrypted_files = create_basics(config, ocean.web3, data_provider)
     return erc721_nft, erc20_token, metadata, encrypted_files
 
 
-def thread_function1(ocean, wallet):
+def thread_function1(ocean, wallet, config):
     for _ in range(1000):
         (
             erc721_nft,
             erc20_token,
             metadata,
             encrypted_files,
-        ) = _get_publishing_requirements(ocean, wallet)
+        ) = _get_publishing_requirements(ocean, wallet, config)
 
         erc20_data = CreateErc20Data(
             template_index=1,
@@ -64,14 +65,14 @@ def thread_function1(ocean, wallet):
         assert ddo.credentials == build_credentials_dict()
 
 
-def thread_function2(ocean, wallet):
+def thread_function2(ocean, wallet, config):
     for _ in range(1000):
         (
             erc721_nft,
             erc20_token,
             metadata,
             encrypted_files,
-        ) = _get_publishing_requirements(ocean, wallet)
+        ) = _get_publishing_requirements(ocean, wallet, config)
         asset = ocean.assets.create(
             metadata=metadata,
             publisher_wallet=wallet,
@@ -91,14 +92,14 @@ def thread_function2(ocean, wallet):
         assert asset.datatokens[0]["address"] == erc20_token.address
 
 
-def thread_function3(ocean, wallet):
+def thread_function3(ocean, wallet, config):
     for _ in range(1000):
         (
             erc721_nft,
             erc20_token,
             metadata,
             encrypted_files,
-        ) = _get_publishing_requirements(ocean, wallet)
+        ) = _get_publishing_requirements(ocean, wallet, config)
         ddo = ocean.assets.create(
             metadata=metadata,
             publisher_wallet=wallet,
@@ -118,71 +119,60 @@ def thread_function3(ocean, wallet):
         assert ddo.datatokens[0]["address"] == erc20_token.address
 
 
-@pytest.mark.skip(reason="This test is slow and not needed in the CI")
-def test_publish_flow_with_threads():
-    config = ExampleConfig.get_config()
-    ocean = Ocean(config)
+config = ExampleConfig.get_config()
+ocean = Ocean(config)
 
-    alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
-    alice_wallet = Wallet(
-        ocean.web3,
-        alice_private_key,
-        config.block_confirmations,
-        config.transaction_timeout,
-    )
-    assert alice_wallet.address
-    bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
-    bob_wallet = Wallet(
-        ocean.web3,
-        bob_private_key,
-        config.block_confirmations,
-        config.transaction_timeout,
-    )
-    assert bob_wallet.address
-    tristan_private_key = os.getenv("TEST_PRIVATE_KEY3")
-    tristan_wallet = Wallet(
-        ocean.web3,
-        tristan_private_key,
-        config.block_confirmations,
-        config.transaction_timeout,
-    )
-    assert tristan_wallet.address
+alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
+alice_wallet = Wallet(
+    ocean.web3,
+    alice_private_key,
+    config.block_confirmations,
+    config.transaction_timeout,
+)
+assert alice_wallet.address
+bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
+bob_wallet = Wallet(
+    ocean.web3,
+    bob_private_key,
+    config.block_confirmations,
+    config.transaction_timeout,
+)
+assert bob_wallet.address
+tristan_private_key = os.getenv("TEST_PRIVATE_KEY3")
+tristan_wallet = Wallet(
+    ocean.web3,
+    tristan_private_key,
+    config.block_confirmations,
+    config.transaction_timeout,
+)
+assert tristan_wallet.address
 
-    # Mint OCEAN
-    mint_fake_OCEAN(config)
-    assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-    assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "need ETH"
-    assert tristan_wallet.web3.eth.get_balance(tristan_wallet.address) > 0, "need ETH"
+# Mint OCEAN
+mint_fake_OCEAN(config)
+assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
+assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "need ETH"
+assert tristan_wallet.web3.eth.get_balance(tristan_wallet.address) > 0, "need ETH"
 
-    threads = list()
-    t1 = threading.Thread(
-        target=thread_function1,
-        args=(
-            ocean,
-            alice_wallet,
-        ),
-    )
-    threads.append(t1)
-    t2 = threading.Thread(
-        target=thread_function2,
-        args=(
-            ocean,
-            bob_wallet,
-        ),
-    )
-    threads.append(t2)
-    t3 = threading.Thread(
-        target=thread_function3,
-        args=(
-            ocean,
-            tristan_wallet,
-        ),
-    )
-    threads.append(t3)
-    t1.start()
-    t2.start()
-    t3.start()
-    for index, thread in enumerate(threads):
-        print("Main    : before joining thread %d.", index)
-        thread.join()
-        print("Main    : thread %d done", index)
+threads = list()
+t1 = threading.Thread(
+    target=thread_function1,
+    args=(ocean, alice_wallet, config),
+)
+threads.append(t1)
+t2 = threading.Thread(
+    target=thread_function2,
+    args=(ocean, bob_wallet, config),
+)
+threads.append(t2)
+t3 = threading.Thread(
+    target=thread_function3,
+    args=(ocean, tristan_wallet, config),
+)
+threads.append(t3)
+t1.start()
+t2.start()
+t3.start()
+for index, thread in enumerate(threads):
+    print("Main    : before joining thread %d.", index)
+    thread.join()
+    print("Main    : thread %d done", index)

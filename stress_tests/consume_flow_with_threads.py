@@ -6,9 +6,8 @@ import os
 import shutil
 import threading
 
-import pytest
-
 from ocean_lib.agreements.service_types import ServiceTypes
+from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
@@ -20,58 +19,59 @@ from tests.resources.ddo_helpers import build_credentials_dict, create_basics
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
-def consume_flow(ocean: Ocean, wallet: Wallet):
-    erc721_nft, erc20_token = deploy_erc721_erc20(ocean.web3, config, wallet, wallet)
-    data_provider = DataServiceProvider
-    _, metadata, encrypted_files = create_basics(config, ocean.web3, data_provider)
+def consume_flow(ocean: Ocean, wallet: Wallet, config: Config):
+    for i in range(3000):
+        erc721_nft, erc20_token = deploy_erc721_erc20(
+            ocean.web3, config, wallet, wallet
+        )
+        data_provider = DataServiceProvider
+        _, metadata, encrypted_files = create_basics(config, ocean.web3, data_provider)
 
-    erc20_data = CreateErc20Data(
-        template_index=1,
-        strings=["Datatoken 1", "DT1"],
-        addresses=[
-            wallet.address,
-            wallet.address,
-            ZERO_ADDRESS,
-            get_address_of_type(config, "Ocean"),
-        ],
-        uints=[ocean.to_wei("0.5"), 0],
-        bytess=[b""],
-    )
-    # Send 1000 requests to Aquarius for creating a plain asset with ERC20 data
-    ddo = ocean.assets.create(
-        metadata=metadata,
-        publisher_wallet=wallet,
-        encrypted_files=encrypted_files,
-        erc721_address=erc721_nft.address,
-        erc20_tokens_data=[erc20_data],
-    )
-    assert ddo, "The asset is not created."
-    assert ddo.nft["name"] == "NFT"
-    assert ddo.nft["symbol"] == "NFTSYMBOL"
-    assert ddo.nft["address"] == erc721_nft.address
-    assert ddo.nft["owner"] == wallet.address
-    assert ddo.datatokens[0]["name"] == "Datatoken 1"
-    assert ddo.datatokens[0]["symbol"] == "DT1"
-    assert ddo.credentials == build_credentials_dict()
+        erc20_data = CreateErc20Data(
+            template_index=1,
+            strings=["Datatoken 1", "DT1"],
+            addresses=[
+                wallet.address,
+                wallet.address,
+                ZERO_ADDRESS,
+                get_address_of_type(config, "Ocean"),
+            ],
+            uints=[ocean.to_wei("0.5"), 0],
+            bytess=[b""],
+        )
+        ddo = ocean.assets.create(
+            metadata=metadata,
+            publisher_wallet=wallet,
+            encrypted_files=encrypted_files,
+            erc721_address=erc721_nft.address,
+            erc20_tokens_data=[erc20_data],
+        )
+        assert ddo, "The asset is not created."
+        assert ddo.nft["name"] == "NFT"
+        assert ddo.nft["symbol"] == "NFTSYMBOL"
+        assert ddo.nft["address"] == erc721_nft.address
+        assert ddo.nft["owner"] == wallet.address
+        assert ddo.datatokens[0]["name"] == "Datatoken 1"
+        assert ddo.datatokens[0]["symbol"] == "DT1"
+        assert ddo.credentials == build_credentials_dict()
 
-    service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
+        service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
 
-    # Initialize service
-    response = data_provider.initialize(
-        did=ddo.did, service=service, consumer_address=wallet.address
-    )
-    assert response
-    assert response.status_code == 200
-    assert response.json()["providerFee"]
+        # Initialize service
+        response = data_provider.initialize(
+            did=ddo.did, service=service, consumer_address=wallet.address
+        )
+        assert response
+        assert response.status_code == 200
+        assert response.json()["providerFee"]
 
-    # Consume fees
-    consume_fees = ConsumeFees(
-        consumer_market_fee_address=wallet.address,
-        consumer_market_fee_token=erc20_token.address,
-        consumer_market_fee_amount=0,
-    )
+        # Consume fees
+        consume_fees = ConsumeFees(
+            consumer_market_fee_address=wallet.address,
+            consumer_market_fee_token=erc20_token.address,
+            consumer_market_fee_amount=0,
+        )
 
-    for i in range(1000):
         erc20_token.mint(
             account_address=wallet.address,
             value=ocean.to_wei(i + 1),
@@ -115,82 +115,71 @@ def consume_flow(ocean: Ocean, wallet: Wallet):
         ), "The asset folder is empty."
 
 
-def thread_function1(ocean, alice_wallet):
-    consume_flow(ocean, wallet=alice_wallet)
+def thread_function1(ocean, alice_wallet, config):
+    consume_flow(ocean, wallet=alice_wallet, config=config)
 
 
-def thread_function2(ocean, bob_wallet):
-    consume_flow(ocean, wallet=bob_wallet)
+def thread_function2(ocean, bob_wallet, config):
+    consume_flow(ocean, wallet=bob_wallet, config=config)
 
 
-def thread_function3(ocean, tristan_wallet):
-    consume_flow(ocean, wallet=tristan_wallet)
+def thread_function3(ocean, tristan_wallet, config):
+    consume_flow(ocean, wallet=tristan_wallet, config=config)
 
 
-@pytest.mark.skip(reason="This test is slow and not needed in the CI")
-def test_consume_flow_with_threads():
-    config = ExampleConfig.get_config()
-    ocean = Ocean(config)
+config = ExampleConfig.get_config()
+ocean = Ocean(config)
 
-    alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
-    alice_wallet = Wallet(
-        ocean.web3,
-        alice_private_key,
-        config.block_confirmations,
-        config.transaction_timeout,
-    )
-    assert alice_wallet.address
-    bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
-    bob_wallet = Wallet(
-        ocean.web3,
-        bob_private_key,
-        config.block_confirmations,
-        config.transaction_timeout,
-    )
-    assert bob_wallet.address
-    tristan_private_key = os.getenv("TEST_PRIVATE_KEY3")
-    tristan_wallet = Wallet(
-        ocean.web3,
-        tristan_private_key,
-        config.block_confirmations,
-        config.transaction_timeout,
-    )
-    assert tristan_wallet.address
-    # Mint OCEAN
-    mint_fake_OCEAN(config)
-    assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-    assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "need ETH"
-    assert tristan_wallet.web3.eth.get_balance(tristan_wallet.address) > 0, "need ETH"
+alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
+alice_wallet = Wallet(
+    ocean.web3,
+    alice_private_key,
+    config.block_confirmations,
+    config.transaction_timeout,
+)
+assert alice_wallet.address
+bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
+bob_wallet = Wallet(
+    ocean.web3,
+    bob_private_key,
+    config.block_confirmations,
+    config.transaction_timeout,
+)
+assert bob_wallet.address
+tristan_private_key = os.getenv("TEST_PRIVATE_KEY3")
+tristan_wallet = Wallet(
+    ocean.web3,
+    tristan_private_key,
+    config.block_confirmations,
+    config.transaction_timeout,
+)
+assert tristan_wallet.address
+# Mint OCEAN
+mint_fake_OCEAN(config)
+assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
+assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "need ETH"
+assert tristan_wallet.web3.eth.get_balance(tristan_wallet.address) > 0, "need ETH"
 
-    threads = list()
-    t1 = threading.Thread(
-        target=thread_function1,
-        args=(
-            ocean,
-            alice_wallet,
-        ),
-    )
-    threads.append(t1)
-    t2 = threading.Thread(
-        target=thread_function2,
-        args=(
-            ocean,
-            bob_wallet,
-        ),
-    )
-    threads.append(t2)
-    t3 = threading.Thread(
-        target=thread_function3,
-        args=(
-            ocean,
-            tristan_wallet,
-        ),
-    )
-    threads.append(t3)
-    t1.start()
-    t2.start()
-    t3.start()
-    for index, thread in enumerate(threads):
-        print("Main    : before joining thread %d.", index)
-        thread.join()
-        print("Main    : thread %d done", index)
+threads = list()
+t1 = threading.Thread(
+    target=thread_function1,
+    args=(ocean, alice_wallet, config),
+)
+threads.append(t1)
+t2 = threading.Thread(
+    target=thread_function2,
+    args=(ocean, bob_wallet, config),
+)
+threads.append(t2)
+t3 = threading.Thread(
+    target=thread_function3,
+    args=(ocean, tristan_wallet, config),
+)
+threads.append(t3)
+t1.start()
+t2.start()
+t3.start()
+for index, thread in enumerate(threads):
+    print("Main    : before joining thread %d.", index)
+    thread.join()
+    print("Main    : thread %d done", index)
