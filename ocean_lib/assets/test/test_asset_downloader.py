@@ -18,6 +18,7 @@ from tests.resources.ddo_helpers import create_asset, create_basics, get_sample_
 from tests.resources.helper_functions import deploy_erc721_erc20
 
 
+@pytest.mark.unit
 def test_ocean_assets_download_failure(publisher_wallet):
     """Tests that downloading from an empty service raises an AssertionError."""
 
@@ -36,6 +37,7 @@ def test_ocean_assets_download_failure(publisher_wallet):
         )
 
 
+@pytest.mark.unit
 def test_invalid_provider_uri(publisher_wallet):
     """Tests with invalid provider URI that raise AssertionError."""
     ddo_dict = get_sample_ddo()
@@ -47,6 +49,7 @@ def test_invalid_provider_uri(publisher_wallet):
         )
 
 
+@pytest.mark.unit
 def test_invalid_state(publisher_wallet):
     """Tests different scenarios that raise AssetNotConsumable."""
     ddo_dict = get_sample_ddo()
@@ -71,6 +74,7 @@ def test_invalid_state(publisher_wallet):
         )
 
 
+@pytest.mark.integration
 def test_ocean_assets_download_indexes(
     publisher_wallet, config, publisher_ocean_instance, tmpdir
 ):
@@ -111,6 +115,7 @@ def test_ocean_assets_download_indexes(
         )
 
 
+@pytest.mark.integration
 def test_ocean_assets_download_destination_file(
     web3, config, tmpdir, publisher_wallet, publisher_ocean_instance
 ):

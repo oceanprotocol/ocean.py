@@ -23,6 +23,7 @@ from tests.resources.ddo_helpers import (
 )
 
 
+@pytest.mark.unit
 def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
     """Tests adding/removing trusted algorithms in the DDO metadata."""
     algorithm_ddo = get_sample_algorithm_ddo(filename="ddo_algorithm2.json")
@@ -90,6 +91,7 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
     assert len(new_publisher_trusted_algorithms) == 1
 
 
+@pytest.mark.unit
 def test_add_trusted_algorithm_no_compute_service(publisher_ocean_instance):
     """Tests if the DDO has or not a compute service."""
     algorithm_ddo = get_sample_algorithm_ddo("ddo_algorithm2.json")
@@ -102,12 +104,14 @@ def test_add_trusted_algorithm_no_compute_service(publisher_ocean_instance):
         )
 
 
+@pytest.mark.unit
 def test_fail_generate_trusted_algo_dict():
     """Tests if generate_trusted_algo_dict throws an AssertionError when all parameters are None."""
     with pytest.raises(TypeError):
         generate_trusted_algo_dict(None, None)
 
 
+@pytest.mark.unit
 def test_utilitary_functions_for_trusted_algorithm_publishers(publisher_ocean_instance):
     """Tests adding/removing trusted algorithms in the DDO metadata."""
     ddo = Asset.from_dict(get_sample_ddo_with_compute_service())
