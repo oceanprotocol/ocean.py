@@ -12,7 +12,7 @@ with the following alterations:
 
 ### 3. Alice publishes a dataset
 
-In Step #3 where Alice publishes a dataset, define the dataset like so:
+In Step #3 where Alice publishes a dataset, use [lena.png](https://en.wikipedia.org/wiki/Lenna):
 
 ```python
 # Specify metadata, using the lena.png image
@@ -36,7 +36,7 @@ DATA_url_file = UrlFile(
 
 ### 4. Alice publishes an algorithm
 
-In step #4 where Alice publishes an algorithm, define the algorithm like so:
+In step #4 where Alice publishes an algorithm, use a standard grayscale algorithm:
 
 ```python
 # Specify metadata, using the grayscale algorithm
