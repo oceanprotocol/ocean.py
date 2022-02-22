@@ -2,9 +2,12 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import pytest
+
 from ocean_lib.utils import utilities
 
 
+@pytest.mark.unit
 def test_convert():
     """Tests convert to string from utilities."""
     input_text = "my text"

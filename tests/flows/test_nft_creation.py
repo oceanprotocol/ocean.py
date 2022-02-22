@@ -18,6 +18,7 @@ from tests.resources.helper_functions import (
 )
 
 
+@pytest.mark.unit
 def test_erc721_roles(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
@@ -107,6 +108,7 @@ def test_erc721_roles(
     ]
 
 
+@pytest.mark.unit
 def test_properties(web3, config):
     """Tests the events' properties."""
 
@@ -130,6 +132,7 @@ def test_properties(web3, config):
     )
 
 
+@pytest.mark.unit
 def test_fail_create_erc20(web3, config, publisher_wallet):
     """Test erc20 creation fail"""
 
@@ -159,6 +162,7 @@ def test_fail_create_erc20(web3, config, publisher_wallet):
     )
 
 
+@pytest.mark.unit
 def test_nonexistent_template_index(web3, config, publisher_wallet):
     """Test erc721 non existent template creation fail"""
 
@@ -190,6 +194,7 @@ def test_nonexistent_template_index(web3, config, publisher_wallet):
     )
 
 
+@pytest.mark.unit
 def test_successful_erc721_creation(web3, config, publisher_wallet):
     """Test erc721 successful creation"""
 
@@ -224,6 +229,7 @@ def test_successful_erc721_creation(web3, config, publisher_wallet):
     assert owner_balance == 1
 
 
+@pytest.mark.unit
 def test_nft_count(web3, config, publisher_wallet):
     """Test  erc721 factory NFT count"""
 
@@ -243,6 +249,7 @@ def test_nft_count(web3, config, publisher_wallet):
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
 
 
+@pytest.mark.unit
 def test_nft_template(web3, config):
     """Tests get NFT template"""
 
@@ -254,6 +261,7 @@ def test_nft_template(web3, config):
     assert nft_template[1] is True
 
 
+@pytest.mark.unit
 def test_erc20_creation(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
@@ -325,6 +333,7 @@ def test_erc20_creation(
     )
 
 
+@pytest.mark.unit
 def test_erc20_mint_function(web3, config, publisher_wallet, consumer_wallet):
     """Test erc20 failed/successful mint function"""
 
@@ -359,6 +368,7 @@ def test_erc20_mint_function(web3, config, publisher_wallet, consumer_wallet):
     assert erc20.balanceOf(consumer_wallet.address) == 20
 
 
+@pytest.mark.unit
 def test_erc20_set_data(web3, config, publisher_wallet):
     """Test erc20 data set functions"""
 
@@ -389,6 +399,7 @@ def test_erc20_set_data(web3, config, publisher_wallet):
     assert Web3.toHex(res) == value
 
 
+@pytest.mark.unit
 def test_nft_owner_transfer(web3, config, publisher_wallet, consumer_wallet):
     """Test erc721 ownership transfer on token transfer"""
 

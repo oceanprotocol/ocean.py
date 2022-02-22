@@ -26,6 +26,7 @@ from ocean_lib.web3_internal.utils import split_signature
 from tests.resources.helper_functions import get_address_of_type
 
 
+@pytest.mark.unit
 def test_properties(web3, config):
     """Tests the events' properties."""
     erc721_factory_address = get_address_of_type(
@@ -62,6 +63,7 @@ def test_properties(web3, config):
     )
 
 
+@pytest.mark.unit
 def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet):
     """Tests the utils functions."""
     erc721_factory_address = get_address_of_type(
@@ -479,6 +481,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert metadata_info[0] == "http://myprovider:8030"
 
 
+@pytest.mark.unit
 def test_start_multiple_order(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
@@ -648,6 +651,7 @@ def test_start_multiple_order(
     assert erc20_token.balanceOf(erc20_token.get_payment_collector()) == dt_amount
 
 
+@pytest.mark.unit
 def test_fail_get_templates(web3, config):
     """Tests multiple failures for getting tokens' templates."""
     erc721_factory_address = get_address_of_type(
@@ -674,6 +678,7 @@ def test_fail_get_templates(web3, config):
     )
 
 
+@pytest.mark.unit
 def test_fail_create_erc20(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):

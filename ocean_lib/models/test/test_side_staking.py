@@ -18,6 +18,7 @@ from tests.resources.helper_functions import (
 )
 
 
+@pytest.mark.unit
 def test_side_staking(
     web3,
     config,

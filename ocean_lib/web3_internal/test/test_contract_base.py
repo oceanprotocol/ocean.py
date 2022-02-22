@@ -22,17 +22,20 @@ class MyFactory(ContractBase):
         return self.send_transaction("deployERC721Contract", erc721_data, from_wallet)
 
 
+@pytest.mark.unit
 def test_name_is_None(web3):
     with pytest.raises(AssertionError):
         # self.name will become None, triggering the error
         ContractBase(web3, None)
 
 
+@pytest.mark.unit
 def test_nochild(web3):
     with pytest.raises(AssertionError):
         ContractBase(web3, None)
 
 
+@pytest.mark.unit
 def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
 
     # test super-simple functionality of child
@@ -96,6 +99,7 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
         ContractBase.getLogs(None)
 
 
+@pytest.mark.unit
 def test_gas_price(web3, alice_wallet, nft_factory_address, monkeypatch):
     monkeypatch.setenv("GAS_PRICE", "1")
     factory = MyFactory(web3, nft_factory_address)

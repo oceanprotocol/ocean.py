@@ -2,6 +2,8 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import pytest
+
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
@@ -22,6 +24,7 @@ def _deploy_erc721_token(config, web3, factory_deployer_wallet, manager_wallet):
     return erc721_nft
 
 
+@pytest.mark.unit
 def test_deploy_erc721_and_manage(
     web3, config, factory_deployer_wallet, consumer_wallet, another_consumer_wallet
 ):
@@ -72,6 +75,7 @@ def test_deploy_erc721_and_manage(
     assert permissions[3] is True
 
 
+@pytest.mark.unit
 def test_pool_ocean(
     web3,
     config,
@@ -593,6 +597,7 @@ def test_pool_ocean(
     assert (bpool.publish_market_fee(ocean_contract.address) > 0) is True
 
 
+@pytest.mark.unit
 def test_pool_dai(
     web3,
     config,
@@ -1618,6 +1623,7 @@ def test_pool_usdc(
     assert (bpool.publish_market_fee(usdc_contract.address) > 0) is True
 
 
+@pytest.mark.unit
 def test_pool_usdc_flexible(
     web3,
     config,
@@ -2126,6 +2132,7 @@ def test_pool_usdc_flexible(
     assert (bpool.publish_market_fee(usdc_contract.address) > 0) is True
 
 
+@pytest.mark.unit
 def test_pool_dai_flexible(
     web3,
     config,

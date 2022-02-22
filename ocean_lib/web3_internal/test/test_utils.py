@@ -14,6 +14,7 @@ from ocean_lib.web3_internal.utils import (
 )
 
 
+@pytest.mark.unit
 def test_get_network_name(web3):
     assert get_network_name(1) == "mainnet"
     assert get_network_name(4) == "rinkeby"
@@ -25,10 +26,12 @@ def test_get_network_name(web3):
     assert get_network_name() == "ganache"
 
 
+@pytest.mark.unit
 def test_get_chain_id(web3):
     assert get_chain_id(web3) == 8996
 
 
+@pytest.mark.unit
 def test_generate_multi_value_hash(alice_address, alice_private_key):
     with pytest.raises(AssertionError):
         generate_multi_value_hash(["more", "types", "than"], ["values"])
@@ -40,6 +43,7 @@ def test_generate_multi_value_hash(alice_address, alice_private_key):
     assert tested == expected, "The tested address is not the expected one."
 
 
+@pytest.mark.unit
 def test_prepare_fixed_hash():
     expected = "0x5662cc8481d004c9aff44f15f3ed133dd54f9cfba0dbf850f69b1cbfc50145bf"
     assert (

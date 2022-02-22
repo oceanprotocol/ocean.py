@@ -4,6 +4,8 @@
 #
 import os
 
+import pytest
+
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.structures.abi_tuples import CreateErc20Data
@@ -11,6 +13,7 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
 
+@pytest.mark.unit
 def test_datatokens_flow_readme():
     """This test mirrors the datatokens-flow.md README.
     As such, it does not use the typical pytest fixtures.

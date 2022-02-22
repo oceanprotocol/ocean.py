@@ -2,10 +2,13 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import pytest
+
 from ocean_lib.models.erc721_nft import ERC721NFT
 from tests.resources.helper_functions import deploy_erc721_erc20
 
 
+@pytest.mark.unit
 def test_nft_factory(
     publisher_ocean_instance, publisher_wallet, consumer_wallet, config, web3
 ):

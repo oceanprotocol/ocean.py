@@ -10,6 +10,7 @@ from ocean_lib.web3_internal.test.test_contract_base import MyFactory
 from ocean_lib.web3_internal.web3_overrides.contract import CustomContractFunction
 
 
+@pytest.mark.unit
 def test_main(web3, config, nft_factory_address):
     factory = MyFactory(web3, nft_factory_address)
     fn_args = (

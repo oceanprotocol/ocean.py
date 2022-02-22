@@ -10,6 +10,7 @@ from eth_account.messages import encode_defunct
 from ocean_lib.web3_internal.wallet import Wallet
 
 
+@pytest.mark.unit
 def test_wallet_arguments(web3, config):
     """Tests that a wallet's arguments are correctly setup."""
     private_key = os.environ.get("TEST_PRIVATE_KEY1")

@@ -14,6 +14,7 @@ from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
 
 
+@pytest.mark.unit
 def test_init():
     """Tests initialisation of Aquarius objects."""
     aqua = Aquarius("http://something/api/aquarius/assets")
@@ -22,6 +23,7 @@ def test_init():
     ), "Different URL from the specified one."
 
 
+@pytest.mark.integration
 def test_aqua_functions_for_single_ddo(
     publisher_ocean_instance, aquarius_instance, publisher_wallet, config
 ):
@@ -78,6 +80,7 @@ def test_aqua_functions_for_single_ddo(
     assert metadata == chain_metadata
 
 
+@pytest.mark.unit
 def test_invalid_search_query(aquarius_instance):
     """Tests query search with an invalid query."""
     search_query = "not_a_dict"
@@ -85,5 +88,6 @@ def test_invalid_search_query(aquarius_instance):
         aquarius_instance.query_search(search_query=search_query)
 
 
+@pytest.mark.unit
 def test_empty_responses(aquarius_instance):
     assert aquarius_instance.get_asset_metadata("inexistent_ddo") == {}

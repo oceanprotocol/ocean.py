@@ -2,11 +2,13 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import pytest
 
 from ocean_lib.web3_internal.event_filter import EventFilter
 from tests.resources.helper_functions import deploy_erc721_erc20
 
 
+@pytest.mark.unit
 def test_transfer_event_filter(
     alice_ocean, config, alice_wallet, alice_address, bob_address
 ):
