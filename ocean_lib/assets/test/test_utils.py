@@ -17,6 +17,7 @@ from ocean_lib.assets.trusted_algorithms import (
     remove_publisher_trusted_algorithm_publisher,
 )
 from tests.resources.ddo_helpers import (
+    get_first_service_by_type,
     get_sample_algorithm_ddo,
     get_sample_ddo,
     get_sample_ddo_with_compute_service,
@@ -41,7 +42,7 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
         [algorithm_ddo], publisher_ocean_instance.config.metadata_cache_uri
     )
     assert len(publisher_trusted_algorithms) == 1
-    compute_service = ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
+    compute_service = get_first_service_by_type(ddo, ServiceTypes.CLOUD_COMPUTE)
     assert (
         compute_service.compute_values["publisherTrustedAlgorithms"]
         == publisher_trusted_algorithms
@@ -115,7 +116,7 @@ def test_fail_generate_trusted_algo_dict():
 def test_utilitary_functions_for_trusted_algorithm_publishers(publisher_ocean_instance):
     """Tests adding/removing trusted algorithms in the DDO metadata."""
     ddo = Asset.from_dict(get_sample_ddo_with_compute_service())
-    compute_service = ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
+    compute_service = get_first_service_by_type(ddo, ServiceTypes.CLOUD_COMPUTE)
     addr1 = publisher_ocean_instance.web3.eth.account.create().address
     compute_service.compute_values["publisherTrustedAlgorithmPublishers"] = [addr1]
 

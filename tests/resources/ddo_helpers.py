@@ -335,3 +335,8 @@ def wait_for_ddo(ocean, did, timeout=30):
             break
 
     return ddo
+
+
+def get_first_service_by_type(asset, service_type: str) -> Service:
+    """Return the first Service with the given service type."""
+    return next((service for service in asset.services if service.type == service_type))

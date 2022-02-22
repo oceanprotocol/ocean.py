@@ -22,6 +22,7 @@ from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import (
+    get_first_service_by_type,
     get_raw_algorithm,
     get_registered_algorithm_with_access_service,
     get_registered_asset_with_access_service,
@@ -142,7 +143,7 @@ def process_order(
 ) -> Tuple[str, Service]:
     """Helper function to process a compute order."""
     # Mint 10 datatokens to the consumer
-    service = asset.get_service(service_type)
+    service = get_first_service_by_type(asset, service_type)
     erc20_token = ERC20Token(ocean_instance.web3, service.datatoken)
 
     # for the "algorithm with different publisher fixture, consumer is minter
@@ -218,7 +219,7 @@ def run_compute_test(
     additional_datasets = []
     for asset_and_userdata in additional_datasets_and_userdata:
         service_type = ServiceTypes.ASSET_ACCESS
-        if not asset_and_userdata.asset.get_service(service_type):
+        if not get_first_service_by_type(asset_and_userdata.asset, service_type):
             service_type = ServiceTypes.CLOUD_COMPUTE
         _order_tx_id, _service = process_order(
             ocean_instance,
@@ -253,7 +254,9 @@ def run_compute_test(
             algorithm_and_userdata.userdata,
         )
 
-    service = dataset_and_userdata.asset.get_service(ServiceTypes.CLOUD_COMPUTE)
+    service = get_first_service_by_type(
+        dataset_and_userdata.asset, ServiceTypes.CLOUD_COMPUTE
+    )
     environments = ocean_instance.compute.get_c2d_environments(service.service_endpoint)
 
     # Start compute job

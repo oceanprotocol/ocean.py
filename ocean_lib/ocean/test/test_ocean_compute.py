@@ -11,7 +11,10 @@ from ocean_lib.assets.asset import Asset
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.ocean.ocean_compute import OceanCompute
-from tests.resources.ddo_helpers import get_sample_ddo_with_compute_service
+from tests.resources.ddo_helpers import (
+    get_first_service_by_type,
+    get_sample_ddo_with_compute_service,
+)
 
 
 @pytest.mark.unit
@@ -22,7 +25,7 @@ def test_get_service_endpoint():
     compute = OceanCompute(config, data_provider)
 
     ddo = Asset.from_dict(get_sample_ddo_with_compute_service())
-    compute_service = ddo.get_service(ServiceTypes.CLOUD_COMPUTE)
+    compute_service = get_first_service_by_type(ddo, ServiceTypes.CLOUD_COMPUTE)
     compute_service.service_endpoint = "http://localhost:8030"
 
     with patch("ocean_lib.ocean.ocean_compute.resolve_asset") as mock:

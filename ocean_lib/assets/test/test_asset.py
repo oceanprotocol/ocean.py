@@ -5,7 +5,6 @@
 import pytest
 
 from ocean_lib.agreements.consumable import MalformedCredential
-from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.credentials import simplify_credential_to_address
 from ocean_lib.services.service import Service
@@ -205,7 +204,7 @@ def test_add_service():
 
 
 @pytest.mark.unit
-def test_get_service():
+def test_get_service_by_id():
     """Tests retrieving services from the V4 DDO."""
     ddo_dict = get_sample_ddo_with_compute_service()
     ddo = Asset.from_dict(ddo_dict)
@@ -213,20 +212,12 @@ def test_get_service():
         key="services", file_name="ddo_v4_with_compute_service.json"
     )[0]
 
-    assert (
-        ddo.get_service(ServiceTypes.ASSET_ACCESS).as_dictionary()
-        == expected_access_service
-    )
     assert ddo.get_service_by_id("1").as_dictionary() == expected_access_service
 
     expected_compute_service = get_key_from_v4_sample_ddo(
         key="services", file_name="ddo_v4_with_compute_service.json"
     )[1]
     assert ddo.get_service_by_id("2").as_dictionary() == expected_compute_service
-    assert (
-        ddo.get_service(ServiceTypes.CLOUD_COMPUTE).as_dictionary()
-        == expected_compute_service
-    )
 
 
 @pytest.mark.unit

@@ -19,7 +19,7 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.wallet import Wallet
-from tests.resources.ddo_helpers import create_basics
+from tests.resources.ddo_helpers import create_basics, get_first_service_by_type
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
     get_provider_fees,
@@ -246,7 +246,7 @@ def test_fileinfo(web3, config, publisher_wallet, publisher_ocean_instance):
         erc721_address=erc721_nft.address,
         deployed_erc20_tokens=[erc20_token],
     )
-    access_service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
+    access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
     fileinfo_result = DataSP.fileinfo(ddo.did, access_service)
     assert fileinfo_result.status_code == 200
@@ -271,7 +271,7 @@ def test_initialize(web3, config, publisher_wallet, publisher_ocean_instance):
         erc721_address=erc721_nft.address,
         deployed_erc20_tokens=[erc20_token],
     )
-    access_service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
+    access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
     initialize_result = DataSP.initialize(
         did=ddo.did,
