@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import os
+import random
 import shutil
 import threading
 
@@ -15,19 +16,45 @@ from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.structures.abi_tuples import CreateErc20Data, ConsumeFees
+from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
-from tests.resources.ddo_helpers import build_credentials_dict, create_basics
+from tests.resources.ddo_helpers import build_credentials_dict
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
 def consume_flow(ocean: Ocean, wallet: Wallet, config: Config):
+    metadata = {
+        "created": "2020-11-15T12:27:48Z",
+        "updated": "2021-05-17T21:58:02Z",
+        "description": "Sample description",
+        "name": "Sample asset",
+        "type": "dataset",
+        "author": "OPF",
+        "license": "https://market.oceanprotocol.com/terms",
+    }
+    data_provider = DataServiceProvider
+    file1_url = "https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt"
+    file1_dict = {"type": "url", "url": file1_url, "method": "GET"}
+    file1 = FilesTypeFactory(file1_dict)
+    file2_url = "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml"
+    file2_dict = {"type": "url", "url": file2_url, "method": "GET"}
+    file2 = FilesTypeFactory(file2_dict)
+    file3_url = (
+        "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz"
+    )
+    file3_dict = {"type": "url", "url": file3_url, "method": "GET"}
+    file3 = FilesTypeFactory(file3_dict)
+    files = [file1, file2, file3]
+
     for i in range(3000):
         erc721_nft, erc20_token = deploy_erc721_erc20(
             ocean.web3, config, wallet, wallet
         )
-        data_provider = DataServiceProvider
-        _, metadata, encrypted_files = create_basics(config, ocean.web3, data_provider)
+        encrypt_response = data_provider.encrypt(
+            [random.choice(files)], config.provider_url
+        )
+        encrypted_files = encrypt_response.content.decode("utf-8")
 
         erc20_data = CreateErc20Data(
             template_index=1,
