@@ -229,7 +229,7 @@ def test_c2d_flow_readme():
         wallet=bob_wallet,
         initialize_args={
             "compute_environment": environments[0]["id"],
-            "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
+            "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp()),
         },
         consumer_address=environments[0]["consumerAddress"],
     )
@@ -249,7 +249,7 @@ def test_c2d_flow_readme():
         consume_fees=consume_fees,
         wallet=bob_wallet,
         initialize_args={
-            "valid_until": int((datetime.now() + timedelta(days=1)).timestamp())
+            "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp())
         },
         consumer_address=environments[0]["consumerAddress"],
     )

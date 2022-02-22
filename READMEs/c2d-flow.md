@@ -277,7 +277,7 @@ DATA_order_tx_id = ocean.assets.pay_for_service(
     wallet=bob_wallet,
     initialize_args={
         "compute_environment": environments[0]["id"],
-        "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
+        "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp()),
     },
     consumer_address=environments[0]["consumerAddress"],
 )
@@ -297,7 +297,7 @@ ALGO_order_tx_id = ocean.assets.pay_for_service(
     consume_fees=consume_fees,
     wallet=bob_wallet,
     initialize_args={
-        "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
+        "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp()),
     },
     consumer_address=environments[0]["consumerAddress"],
 )

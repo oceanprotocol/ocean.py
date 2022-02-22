@@ -169,7 +169,7 @@ def process_order(
         wallet=consumer_wallet,
         initialize_args={
             "compute_environment": environments[0]["id"],
-            "valid_until": int((datetime.now() + timedelta(hours=1)).timestamp()),
+            "valid_until": int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
         },
         consumer_address=environments[0]["consumerAddress"],
     )

@@ -55,7 +55,7 @@ def test_update_metadata(publisher_ocean_instance, publisher_wallet, config):
     # Update only metadata
     _description = "Updated description"
     new_metadata["description"] = _description
-    new_metadata["updated"] = datetime.now().isoformat()
+    new_metadata["updated"] = datetime.utcnow().isoformat()
     ddo.metadata = new_metadata
 
     with patch("ocean_lib.ocean.ocean_assets.ERC721FactoryContract.verify_nft") as mock:
@@ -146,7 +146,7 @@ def test_update_datatokens(publisher_ocean_instance, publisher_wallet, config):
     new_metadata = copy.deepcopy(_asset.metadata)
     _description = "Test delete datatoken"
     new_metadata["description"] = _description
-    new_metadata["updated"] = datetime.now().isoformat()
+    new_metadata["updated"] = datetime.utcnow().isoformat()
 
     removed_dt = new_asset.datatokens.pop()
 
