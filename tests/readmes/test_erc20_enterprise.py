@@ -4,6 +4,8 @@
 #
 import os
 
+import pytest
+
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
@@ -12,6 +14,7 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
 
+@pytest.mark.integration
 def test_erc20_enterprise_flow_with_dispenser():
     config = ExampleConfig.get_config()
     ocean = Ocean(config)
@@ -128,6 +131,7 @@ def test_erc20_enterprise_flow_with_dispenser():
     assert initial_bob_balance < increased_balance
 
 
+@pytest.mark.integration
 def test_erc20_enterprise_flow_with_fre():
     config = ExampleConfig.get_config()
     ocean = Ocean(config)

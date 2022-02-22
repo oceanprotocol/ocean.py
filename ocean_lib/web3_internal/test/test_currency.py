@@ -20,6 +20,7 @@ from ocean_lib.web3_internal.currency import (
 )
 
 
+@pytest.mark.unit
 def test_from_wei():
     """Test the from_wei function"""
     assert from_wei(0) == Decimal("0"), "Zero wei should equal zero ether"
@@ -55,6 +56,7 @@ def test_from_wei():
     ), "Conversion from wei to ether using decimals failed"
 
 
+@pytest.mark.unit
 def test_to_wei():
     """Test the to_wei function"""
     assert to_wei(Decimal("0")) == 0, "Zero ether (Decimal) should equal zero wei"
@@ -102,6 +104,7 @@ def test_to_wei():
     ), "Conversion from ether to wei using decimals failed"
 
 
+@pytest.mark.unit
 def test_ether_fmt():
     """Test the ether_fmt function"""
     assert (
@@ -127,6 +130,7 @@ def test_ether_fmt():
             assert ether_fmt(MAX_ETHER + 1)
 
 
+@pytest.mark.unit
 def test_pretty_ether():
     """Test the pretty_ether function.
     assert messages ommited for brevity."""
@@ -184,6 +188,7 @@ def test_pretty_ether():
             pretty_ether(MAX_ETHER + 1)
 
 
+@pytest.mark.unit
 def test_pretty_ether_and_wei():
     """Test the pretty_ether_and_wei function."""
     # Test with small value

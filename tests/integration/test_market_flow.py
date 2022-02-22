@@ -13,6 +13,7 @@ from tests.resources.ddo_helpers import get_registered_asset_with_access_service
 from tests.resources.helper_functions import get_another_consumer_ocean_instance
 
 
+@pytest.mark.integration
 @pytest.mark.parametrize("consumer_type", ["publisher", "another_user"])
 def test_market_flow(
     publisher_wallet,

@@ -258,7 +258,7 @@ def test_fileinfo(web3, config, publisher_wallet, publisher_ocean_instance):
         assert file["contentType"] == "text/html"
 
 
-@pytest.mark.integation
+@pytest.mark.integration
 def test_initialize(web3, config, publisher_wallet, publisher_ocean_instance):
     erc721_nft, erc20_token = deploy_erc721_erc20(
         web3, config, publisher_wallet, publisher_wallet

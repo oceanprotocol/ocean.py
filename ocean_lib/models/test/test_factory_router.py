@@ -2,6 +2,8 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import pytest
+
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.factory_router import FactoryRouter
@@ -10,22 +12,26 @@ from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
 
 
+@pytest.mark.unit
 def test_properties(factory_router):
     """Tests the events' properties."""
     assert factory_router.event_NewPool.abi["name"] == FactoryRouter.EVENT_NEW_POOL
 
 
+@pytest.mark.unit
 def test_is_ocean_token_mapping(config, factory_router):
     """Tests that Ocean token has been added to the mapping"""
     is_ocean_token = factory_router.is_ocean_token(get_address_of_type(config, "Ocean"))
     assert is_ocean_token is True
 
 
+@pytest.mark.unit
 def test_mapping_ss_contracts(config, factory_router):
     """Tests if ssContract address has been added to the mapping"""
     assert factory_router.is_ss_contract(get_address_of_type(config, "Staking")) is True
 
 
+@pytest.mark.unit
 def test_fixed_rate_mapping(config, factory_router):
     """Tests that fixedRateExchange address is added to the mapping"""
     assert (
@@ -34,6 +40,7 @@ def test_fixed_rate_mapping(config, factory_router):
     )
 
 
+@pytest.mark.unit
 def test_buy_dt_batch(
     web3,
     config,
@@ -211,6 +218,7 @@ def test_buy_dt_batch(
     assert balance_dt2 > 0
 
 
+@pytest.mark.unit
 def test_stake_batch(
     web3,
     config,
