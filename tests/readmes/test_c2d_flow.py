@@ -26,7 +26,7 @@ from ocean_lib.web3_internal.wallet import Wallet
     "dataset_name,dataset_url,algorithm_name,algorithm_url",
     [
         (
-            "Branin",
+            "branin",
             "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff",
             "gpr,",
             "https://raw.githubusercontent.com/trentmc/branin/main/gpr.py",
@@ -36,6 +36,12 @@ from ocean_lib.web3_internal.wallet import Wallet
             "https://raw.githubusercontent.com/oceanprotocol/ocean.py/issue705-image-processing-c2d-example/tests/resources/images/lena.png",
             "grayscale",
             "https://raw.githubusercontent.com/oceanprotocol/ocean.py/issue705-image-processing-c2d-example/tests/resources/algorithms/grayscale.py",
+        ),
+        (
+            "iris",
+            "https://www.openml.org/data/download/61/dataset_61_iris.arff",
+            "logistic regression",
+            "https://raw.githubusercontent.com/oceanprotocol/ocean.py/issue705-image-processing-c2d-example/tests/resources/algorithms/logistic_regression.py",
         ),
     ],
 )
