@@ -309,11 +309,11 @@ def test_download_fails(publisher_ocean_instance, publisher_wallet):
         mock.return_value = asset
         with pytest.raises(AssertionError):
             publisher_ocean_instance.assets.download_asset(
-                asset, publisher_wallet, "", "", index=-4
+                asset, asset.services[0], publisher_wallet, "", "", index=-4
             )
         with pytest.raises(TypeError):
             publisher_ocean_instance.assets.download_asset(
-                asset, publisher_wallet, "", "", index="string_index"
+                asset, asset.services[0], publisher_wallet, "", "", index="string_index"
             )
 
 

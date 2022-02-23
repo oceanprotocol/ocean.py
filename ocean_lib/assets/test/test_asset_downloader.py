@@ -36,6 +36,7 @@ def test_ocean_assets_download_failure(publisher_wallet):
     with pytest.raises(AssertionError):
         download_asset_files(
             ddo,
+            access_service,
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
@@ -50,7 +51,11 @@ def test_invalid_provider_uri(publisher_wallet):
 
     with pytest.raises(InvalidURL):
         download_asset_files(
-            ddo, publisher_wallet, "test_destination", "test_order_tx_id"
+            ddo,
+            ddo.services[0],
+            publisher_wallet,
+            "test_destination",
+            "test_order_tx_id",
         )
 
 
@@ -64,6 +69,7 @@ def test_invalid_state(publisher_wallet):
     with pytest.raises(AssetNotConsumable):
         download_asset_files(
             ddo,
+            ddo.services[0],
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
@@ -73,6 +79,7 @@ def test_invalid_state(publisher_wallet):
     with pytest.raises(AssetNotConsumable):
         download_asset_files(
             ddo,
+            ddo.services[0],
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
@@ -92,6 +99,7 @@ def test_ocean_assets_download_indexes(
     with pytest.raises(TypeError):
         download_asset_files(
             ddo,
+            ddo.services[0],
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
@@ -102,6 +110,7 @@ def test_ocean_assets_download_indexes(
     with pytest.raises(AssertionError):
         download_asset_files(
             ddo,
+            ddo.services[0],
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
@@ -113,6 +122,7 @@ def test_ocean_assets_download_indexes(
     with pytest.raises(AssertionError):
         download_asset_files(
             ddo,
+            ddo.services[0],
             publisher_wallet,
             str(tmpdir),
             "test_order_tx_id",
@@ -182,6 +192,8 @@ def ocean_assets_download_destination_file_helper(
     assert erc20_token.address in [order.address for order in orders]
     assert tx_id in [order.transactionHash.hex() for order in orders]
 
-    written_path = download_asset_files(ddo, publisher_wallet, tmpdir, tx_id)
+    written_path = download_asset_files(
+        ddo, access_service, publisher_wallet, tmpdir, tx_id
+    )
 
     assert os.path.exists(written_path)

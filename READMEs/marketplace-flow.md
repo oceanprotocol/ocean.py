@@ -206,6 +206,7 @@ print(f"order_tx_id = '{order_tx_id}'")
 # Bob downloads. If the connection breaks, Bob can request again by showing order_tx_id.
 file_path = ocean.assets.download_asset(
     asset=asset,
+    service=service,
     consumer_wallet=bob_wallet,
     destination='./',
     order_tx_id=order_tx_id

@@ -156,6 +156,7 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
 
     asset.download_asset(
         asset=ddo,
+        service=service,
         consumer_wallet=consumer_wallet,
         destination=destination,
         order_tx_id=tx_id,
