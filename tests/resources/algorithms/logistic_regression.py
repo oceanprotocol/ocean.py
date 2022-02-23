@@ -20,10 +20,35 @@ are colored according to their labels.
 # Modified by Ocean Protocol Foundation
 # License: BSD 3 clause
 
+import json
+import os
+
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn import datasets
 from sklearn.linear_model import LogisticRegression
+
+
+def get_input(local=False):
+    if local:
+        print("Reading local file lena.png.")
+
+        return "dataset_61_iris.arff"
+
+    dids = os.getenv("DIDS", None)
+
+    if not dids:
+        print("No DIDs found in environment. Aborting.")
+        return
+
+    dids = json.loads(dids)
+
+    for did in dids:
+        filename = f"data/inputs/{did}/0"  # 0 for metadata service
+        print(f"Reading asset file {filename}.")
+
+        return filename
+
 
 # import some data to play with
 iris = datasets.load_iris()
