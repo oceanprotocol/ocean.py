@@ -7,6 +7,8 @@ import pickle
 import time
 from datetime import datetime, timedelta
 
+import pytest
+
 from ocean_lib.assets.trusted_algorithms import add_publisher_trusted_algorithm
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.compute_input import ComputeInput
@@ -19,7 +21,17 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-def test_c2d_flow_readme():
+@pytest.mark.parametrize(
+    "dataset_metadata,dataset_url,algorithm_metadata,algorithm_url",
+    [
+        (
+            "Branin",
+            "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff",
+            "gpr, https://raw.githubusercontent.com/trentmc/branin/main/gpr.py",
+        )
+    ],
+)
+def test_c2d_flow_readme(dataset_name, dataset_url, algorithm_name, algorithm_url):
     """This test mirrors the c2d-flow.md README.
     As such, it does not use the typical pytest fixtures.
     """
@@ -68,17 +80,15 @@ def test_c2d_flow_readme():
     DATA_metadata = {
         "created": DATA_date_created,
         "updated": DATA_date_created,
-        "description": "Branin dataset",
-        "name": "Branin dataset",
+        "description": dataset_name,
+        "name": dataset_name,
         "type": "dataset",
         "author": "Trent",
         "license": "CC0: PublicDomain",
     }
 
     # ocean.py offers multiple file types, but a simple url file should be enough for this example
-    DATA_url_file = UrlFile(
-        url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-    )
+    DATA_url_file = UrlFile(url=dataset_url)
 
     # Encrypt file(s) using provider
     DATA_encrypted_files = ocean.assets.encrypt_files([DATA_url_file])
@@ -141,8 +151,8 @@ def test_c2d_flow_readme():
     ALGO_metadata = {
         "created": ALGO_date_created,
         "updated": ALGO_date_created,
-        "description": "gpr",
-        "name": "gpr",
+        "description": algorithm_name,
+        "name": algorithm_name,
         "type": "algorithm",
         "author": "Trent",
         "license": "CC0: PublicDomain",
@@ -160,9 +170,7 @@ def test_c2d_flow_readme():
     }
 
     # ocean.py offers multiple file types, but a simple url file should be enough for this example
-    ALGO_url_file = UrlFile(
-        url="https://raw.githubusercontent.com/trentmc/branin/main/gpr.py"
-    )
+    ALGO_url_file = UrlFile(url=algorithm_url)
 
     # Encrypt file(s) using provider
     ALGO_encrypted_files = ocean.assets.encrypt_files([ALGO_url_file])
@@ -291,6 +299,11 @@ def test_c2d_flow_readme():
             output = result
     assert output, "algorithm output not found"
 
-    # Unpickle the gaussian model result
+    if dataset_name == "Branin":
+        unpickle_gaussian_model_result(output)
+
+
+def unpickle_gaussian_model_result(output):
+    """Unpickle the gaussian model result"""
     model = pickle.loads(output)
     assert len(model) > 0, "unpickle result unsuccessful"
