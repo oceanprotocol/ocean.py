@@ -22,7 +22,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 
 @pytest.mark.parametrize(
-    "dataset_metadata,dataset_url,algorithm_metadata,algorithm_url",
+    "dataset_name,dataset_url,algorithm_name,algorithm_url",
     [
         (
             "Branin",
