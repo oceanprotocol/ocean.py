@@ -10,11 +10,8 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.trusted_algorithms import (
     add_publisher_trusted_algorithm,
-    add_publisher_trusted_algorithm_publisher,
     create_publisher_trusted_algorithms,
     generate_trusted_algo_dict,
-    remove_publisher_trusted_algorithm,
-    remove_publisher_trusted_algorithm_publisher,
 )
 from tests.resources.ddo_helpers import (
     get_first_service_by_type,
@@ -75,22 +72,6 @@ def test_utilitary_functions_for_trusted_algorithms(publisher_ocean_instance):
             ), "Added a different algorithm besides the existing ones."
         assert len(new_publisher_trusted_algorithms) == 2
 
-    # remove an existing algorithm to publisher_trusted_algorithms list
-    new_publisher_trusted_algorithms = remove_publisher_trusted_algorithm(
-        ddo, algorithm_ddo.did, publisher_ocean_instance.config.metadata_cache_uri
-    )
-
-    assert (
-        new_publisher_trusted_algorithms is not None
-    ), "Remove process of a trusted algorithm failed."
-    assert len(new_publisher_trusted_algorithms) == 1
-
-    # remove a trusted algorithm that does not belong to publisher_trusted_algorithms list
-    new_publisher_trusted_algorithms = remove_publisher_trusted_algorithm(
-        ddo, algorithm_ddo_v3.did, publisher_ocean_instance.config.metadata_cache_uri
-    )
-    assert len(new_publisher_trusted_algorithms) == 1
-
 
 @pytest.mark.unit
 def test_add_trusted_algorithm_no_compute_service(publisher_ocean_instance):
@@ -110,47 +91,3 @@ def test_fail_generate_trusted_algo_dict():
     """Tests if generate_trusted_algo_dict throws an AssertionError when all parameters are None."""
     with pytest.raises(TypeError):
         generate_trusted_algo_dict(None, None)
-
-
-@pytest.mark.unit
-def test_utilitary_functions_for_trusted_algorithm_publishers(publisher_ocean_instance):
-    """Tests adding/removing trusted algorithms in the DDO metadata."""
-    ddo = Asset.from_dict(get_sample_ddo_with_compute_service())
-    compute_service = get_first_service_by_type(ddo, ServiceTypes.CLOUD_COMPUTE)
-    addr1 = publisher_ocean_instance.web3.eth.account.create().address
-    compute_service.compute_values["publisherTrustedAlgorithmPublishers"] = [addr1]
-
-    addr2 = publisher_ocean_instance.web3.eth.account.create().address
-    # add a new trusted algorithm to the publisher_trusted_algorithms list
-    new_publisher_trusted_algo_publishers = add_publisher_trusted_algorithm_publisher(
-        ddo, addr2, publisher_ocean_instance.config.metadata_cache_uri
-    )
-
-    assert (
-        new_publisher_trusted_algo_publishers is not None
-    ), "Added a new trusted algorithm failed. The list is empty."
-    assert len(new_publisher_trusted_algo_publishers) == 2
-
-    # add an existing algorithm to publisher_trusted_algorithms list
-    new_publisher_trusted_algo_publishers = add_publisher_trusted_algorithm_publisher(
-        ddo, addr2.upper(), publisher_ocean_instance.config.metadata_cache_uri
-    )
-    assert len(new_publisher_trusted_algo_publishers) == 2
-
-    # remove an existing algorithm to publisher_trusted_algorithms list
-    new_publisher_trusted_algo_publishers = (
-        remove_publisher_trusted_algorithm_publisher(
-            ddo, addr2.upper(), publisher_ocean_instance.config.metadata_cache_uri
-        )
-    )
-
-    assert len(new_publisher_trusted_algo_publishers) == 1
-
-    addr3 = publisher_ocean_instance.web3.eth.account.create().address
-    # remove a trusted algorithm that does not belong to publisher_trusted_algorithms list
-    new_publisher_trusted_algo_publishers = (
-        remove_publisher_trusted_algorithm_publisher(
-            ddo, addr3, publisher_ocean_instance.config.metadata_cache_uri
-        )
-    )
-    assert len(new_publisher_trusted_algo_publishers) == 1

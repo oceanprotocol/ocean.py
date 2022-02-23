@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
-from typing import Any, Dict, List, Optional, Tuple, Type, Union
+from typing import Any, Dict, List, Optional, Type, Union
 
 from enforce_typing import enforce_types
 
@@ -131,14 +131,3 @@ class OceanCompute:
     @enforce_types
     def get_c2d_environments(self, service_endpoint: str) -> str:
         return DataServiceProvider.get_c2d_environments(service_endpoint)
-
-    @enforce_types
-    def _get_service_endpoint(
-        self, did: str, asset: Optional[Asset] = None
-    ) -> Tuple[str, str]:
-        if not asset:
-            asset = resolve_asset(did, self._config.metadata_cache_uri)
-
-        return self._data_provider.build_compute_endpoint(
-            asset.get_service(ServiceTypes.CLOUD_COMPUTE).service_endpoint
-        )

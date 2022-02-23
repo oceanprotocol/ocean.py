@@ -279,26 +279,3 @@ def test_credential_simplification():
     assert (
         simplify_credential_to_address({"type": "address", "value": "0x11"}) == "0x11"
     )
-
-
-@pytest.mark.unit
-def test_inexistent_removals():
-    ddo_dict = get_sample_ddo_with_compute_service()
-    del ddo_dict["services"][1]["compute"]["publisherTrustedAlgorithms"]
-    ddo = Asset.from_dict(ddo_dict)
-    compute_service = ddo.get_service("compute")
-
-    with pytest.raises(
-        ValueError, match="Algorithm notadid is not in trusted algorithms"
-    ):
-        ddo.remove_publisher_trusted_algorithm(compute_service, "notadid")
-
-    ddo_dict = get_sample_ddo_with_compute_service()
-    del ddo_dict["services"][1]["compute"]["publisherTrustedAlgorithmPublishers"]
-    ddo = Asset.from_dict(ddo_dict)
-    compute_service = ddo.get_service("compute")
-
-    with pytest.raises(
-        ValueError, match="Publisher notadid is not in trusted algorithm publishers"
-    ):
-        ddo.remove_publisher_trusted_algorithm_publisher(compute_service, "notadid")
