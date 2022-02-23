@@ -32,9 +32,9 @@ from ocean_lib.web3_internal.wallet import Wallet
         ),
         (
             "lena",
-            "https://raw.githubusercontent.com/oceanprotocol/ocena.py/issue705-image-processing-c2d-example/tests/resources/images/lena.png",
+            "https://github.com/oceanprotocol/ocean.py/blob/issue705-image-processing-c2d-example/tests/resources/images/lena.png",
             "grayscale",
-            "https://raw.githubusercontent.com/oceanprotocol/ocean.py/issue705-image-processing-c2d-example/tests/resources/algorithms/grayscale.py",
+            "https://github.com/oceanprotocol/ocean.py/blob/issue705-image-processing-c2d-example/tests/resources/algorithms/grayscale.py",
         ),
     ],
 )
