@@ -7,9 +7,6 @@ from unittest.mock import patch
 import pytest
 
 from ocean_lib.assets.asset import Asset
-from ocean_lib.assets.trusted_algorithms import (
-    add_publisher_trusted_algorithm_publisher,
-)
 from ocean_lib.services.service import Service
 from tests.resources.ddo_helpers import (
     get_sample_algorithm_ddo,
@@ -108,8 +105,8 @@ def test_utilitary_functions_for_trusted_algorithm_publishers(publisher_ocean_in
 
     addr2 = publisher_ocean_instance.web3.eth.account.create().address
     # add a new trusted algorithm to the publisher_trusted_algorithms list
-    new_publisher_trusted_algo_publishers = add_publisher_trusted_algorithm_publisher(
-        ddo, addr2, publisher_ocean_instance.config.metadata_cache_uri
+    new_publisher_trusted_algo_publishers = (
+        compute_service.add_publisher_trusted_algorithm_publisher(addr2)
     )
 
     assert (
@@ -118,8 +115,8 @@ def test_utilitary_functions_for_trusted_algorithm_publishers(publisher_ocean_in
     assert len(new_publisher_trusted_algo_publishers) == 2
 
     # add an existing algorithm to publisher_trusted_algorithms list
-    new_publisher_trusted_algo_publishers = add_publisher_trusted_algorithm_publisher(
-        ddo, addr2.upper(), publisher_ocean_instance.config.metadata_cache_uri
+    new_publisher_trusted_algo_publishers = (
+        compute_service.add_publisher_trusted_algorithm_publisher(addr2.upper())
     )
     assert len(new_publisher_trusted_algo_publishers) == 2
 

@@ -70,23 +70,3 @@ def add_publisher_trusted_algorithm(
     return compute_service.add_publisher_trusted_algorithm(
         algo_ddo, generated_trusted_algo_dict
     )
-
-
-@enforce_types
-def add_publisher_trusted_algorithm_publisher(
-    asset_or_did: Union[str, Asset], publisher_address: str, metadata_cache_uri: str
-) -> list:
-    """
-    :return: List of trusted algo publishers
-    """
-    if isinstance(asset_or_did, Asset):
-        asset = asset_or_did
-    else:
-        asset = resolve_asset(asset_or_did, metadata_cache_uri=metadata_cache_uri)
-
-    compute_service = asset.get_service("compute")
-    assert (
-        compute_service
-    ), "Cannot add trusted algorithm to this asset because it has no compute service."
-
-    return compute_service.add_publisher_trusted_algorithm_publisher(publisher_address)
