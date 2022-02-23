@@ -300,6 +300,7 @@ def test_c2d_flow_readme(dataset_name, dataset_url, algorithm_name, algorithm_ur
         print(f"Fetch result index {i}, type: {result_type}")
         result = ocean.compute.result(DATA_asset, job_id, i, bob_wallet)
         assert result, "result retrieval unsuccessful"
+        print(f"result index: {i}, type: {result_type}, contents: {result}")
 
         # Extract algorithm output
         if result_type == "output":
