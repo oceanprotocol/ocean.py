@@ -108,7 +108,11 @@ def test_update_datatokens(publisher_ocean_instance, publisher_wallet, config):
         publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
     )
 
-    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
+    file1_dict = {
+        "type": "url",
+        "url": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
+        "method": "GET",
+    }
     file1 = FilesTypeFactory(file1_dict)
     encrypted_files = publisher_ocean_instance.assets.encrypt_files([file1])
 

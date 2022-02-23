@@ -123,7 +123,7 @@ def create_asset(ocean, publisher, config, metadata=None, files=None):
     if not files:
         file1_dict = {
             "type": "url",
-            "url": "https://url.com/file1.csv",
+            "url": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
             "method": "GET",
         }
         file1 = FilesTypeFactory(file1_dict)
@@ -172,12 +172,12 @@ def create_basics(
     if files is None:
         file1_dict = {
             "type": "url",
-            "url": "https://url.com/file1.csv",
+            "url": "https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt",
             "method": "GET",
         }
         file2_dict = {
             "type": "url",
-            "url": "https://url.com/file2.csv",
+            "url": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
             "method": "GET",
         }
         file1 = FilesTypeFactory(file1_dict)

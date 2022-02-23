@@ -197,8 +197,16 @@ def test_delete_job_result(provider_wallet, config):
 def test_encrypt(web3, config, provider_wallet):
     """Tests successful encrypt job."""
     key = provider_wallet.private_key
-    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
-    file2_dict = {"type": "url", "url": "https://url.com/file2.csv", "method": "GET"}
+    file1_dict = {
+        "type": "url",
+        "url": "https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt",
+        "method": "GET",
+    }
+    file2_dict = {
+        "type": "url",
+        "url": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
+        "method": "GET",
+    }
     file1 = FilesTypeFactory(file1_dict)
     file2 = FilesTypeFactory(file2_dict)
 
