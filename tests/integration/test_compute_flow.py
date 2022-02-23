@@ -169,7 +169,7 @@ def process_order(
         wallet=consumer_wallet,
         initialize_args={
             "compute_environment": environments[0]["id"],
-            "valid_until": int((datetime.now() + timedelta(hours=1)).timestamp()),
+            "valid_until": int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
         },
         consumer_address=environments[0]["consumerAddress"],
     )
@@ -303,6 +303,7 @@ def run_compute_test(
         print(f"got job result file: {str(result_file)}")
 
 
+@pytest.mark.integration
 def test_compute_raw_algo(
     publisher_wallet,
     publisher_ocean_instance,
@@ -334,6 +335,7 @@ def test_compute_raw_algo(
         )
 
 
+@pytest.mark.integration
 def test_compute_registered_algo(
     publisher_wallet,
     publisher_ocean_instance,
@@ -351,6 +353,7 @@ def test_compute_registered_algo(
     )
 
 
+@pytest.mark.integration
 def test_compute_multi_inputs(
     publisher_wallet,
     publisher_ocean_instance,
@@ -372,6 +375,7 @@ def test_compute_multi_inputs(
     )
 
 
+@pytest.mark.integration
 def test_compute_trusted_algorithm(
     publisher_wallet,
     publisher_ocean_instance,
@@ -409,6 +413,7 @@ def test_compute_trusted_algorithm(
         )
 
 
+@pytest.mark.integration
 def test_compute_update_trusted_algorithm(
     publisher_wallet,
     publisher_ocean_instance,
@@ -456,6 +461,7 @@ def test_compute_update_trusted_algorithm(
         )
 
 
+@pytest.mark.integration
 def test_compute_trusted_publisher(
     publisher_wallet,
     publisher_ocean_instance,

@@ -12,6 +12,7 @@ from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
+@pytest.mark.unit
 def test_properties(web3, config):
     """Tests the events' properties."""
     dispenser_address = get_address_of_type(config, Dispenser.CONTRACT_NAME)
@@ -41,6 +42,7 @@ def test_properties(web3, config):
     )
 
 
+@pytest.mark.unit
 def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_wallet):
     """Tests the main flow of the Dispenser."""
 

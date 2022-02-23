@@ -13,6 +13,7 @@ from ocean_lib.config import (
 from ocean_lib.example_config import NETWORK_NAME, ExampleConfig, get_config_dict
 
 
+@pytest.mark.unit
 def test_ganache_example_config(monkeypatch):
     """Tests the config structure of ganache network."""
 
@@ -28,6 +29,7 @@ def test_ganache_example_config(monkeypatch):
     assert config.__dict__["_sections"][SECTION_ETH_NETWORK][NETWORK_NAME] == "ganache"
 
 
+@pytest.mark.unit
 def test_polygon_example_config(monkeypatch):
     """Tests the config structure of Polygon network."""
 
@@ -43,6 +45,7 @@ def test_polygon_example_config(monkeypatch):
     assert config.__dict__["_sections"][SECTION_ETH_NETWORK][NETWORK_NAME] == "polygon"
 
 
+@pytest.mark.unit
 def test_bsc_example_config(monkeypatch):
     """Tests the config structure of BSC network."""
 
@@ -58,6 +61,7 @@ def test_bsc_example_config(monkeypatch):
     assert config.__dict__["_sections"][SECTION_ETH_NETWORK][NETWORK_NAME] == "bsc"
 
 
+@pytest.mark.unit
 def test_moonbeam_alpha_example_config(monkeypatch):
     """Tests the config structure of Moonbeam Alpha network."""
 
@@ -76,6 +80,7 @@ def test_moonbeam_alpha_example_config(monkeypatch):
     )
 
 
+@pytest.mark.unit
 def test_noconfig(monkeypatch):
     """Tests the config fails with wrong chain id."""
     monkeypatch.setenv("OCEAN_NETWORK_URL", "https://bad.network")

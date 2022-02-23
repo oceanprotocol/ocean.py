@@ -20,6 +20,7 @@ from ocean_lib.ocean.util import GANACHE_URL
 from tests.resources.ddo_helpers import get_resource_path
 
 
+@pytest.mark.unit
 def test_metadataStoreUri_config_key():
     """Tests that the metadata_cache_uri config property can be set using the
     `metadataStoreUri` config dict key when created via the Ocean __init__"""
@@ -28,6 +29,7 @@ def test_metadataStoreUri_config_key():
     assert "http://ItWorked.com" == ocean_instance.config.metadata_cache_uri
 
 
+@pytest.mark.unit
 def test_metadataCacheUri_config_key():
     """Tests that the metadata_cache_uri config property can be set using the
     `metadataCacheUri` config dict key when created via the Ocean __init__"""
@@ -36,6 +38,7 @@ def test_metadataCacheUri_config_key():
     assert "http://ItWorked.com" == ocean_instance.config.metadata_cache_uri
 
 
+@pytest.mark.unit
 def test_config_filename_given_file_doesnt_exist():
     """Test creating a Config object.
     Setup: filename given, file doesn't exist
@@ -48,6 +51,7 @@ def test_config_filename_given_file_doesnt_exist():
         Config(filename=config_file_name)
 
 
+@pytest.mark.unit
 def test_config_filename_given_file_exists_malformed_content(monkeypatch, tmp_path):
     """Test creating a Config object.
     Setup: filename given, file exists, malformed content
@@ -60,6 +64,7 @@ def test_config_filename_given_file_exists_malformed_content(monkeypatch, tmp_pa
         Config()
 
 
+@pytest.mark.unit
 def test_config_filename_given_file_exists_wellformed_content():
     """Test creating a Config object.
     Setup: filename given, file exists, content is well-formed
@@ -73,6 +78,7 @@ def test_config_filename_given_file_exists_wellformed_content():
     assert isinstance(config.gas_limit, int)
 
 
+@pytest.mark.unit
 def test_config_filename_not_given_envvar_is_empty(monkeypatch):
     """Test creating a Config object.
     Setup: filename not given, envvar is empty
@@ -83,6 +89,7 @@ def test_config_filename_not_given_envvar_is_empty(monkeypatch):
         Config()
 
 
+@pytest.mark.unit
 def test_config_filename_not_given_file_doesnt_exist(monkeypatch):
     """Test creating a Config object.
     Setup: filename not given, default file doesn't exist
@@ -96,6 +103,7 @@ def test_config_filename_not_given_file_doesnt_exist(monkeypatch):
         Config()
 
 
+@pytest.mark.unit
 def test_config_filename_not_given_file_exists_malformed_content(monkeypatch, tmp_path):
     """Test creating a Config object.
     Setup: no filename given, default file exists, content is malformed
@@ -108,6 +116,7 @@ def test_config_filename_not_given_file_exists_malformed_content(monkeypatch, tm
         Config()
 
 
+@pytest.mark.unit
 def test_config_filename_not_given_file_exists_wellformed_content(monkeypatch):
     """Test creating a Config object.
     Setup: filename not given, default file exists, content is well-formed
@@ -131,6 +140,7 @@ def _create_malformed_conffile(tmp_path):
     return config_file_name
 
 
+@pytest.mark.unit
 def test_config_from_text_wellformed_content():
     """Tests creating Config object.
     Setup: from raw text, content is well-formed
@@ -144,6 +154,7 @@ def test_config_from_text_wellformed_content():
     assert config.metadata_cache_uri == "https://another-aqua.url"
 
 
+@pytest.mark.unit
 def test_config_from_text_malformed_content():
     """Tests creating Config object.
     Setup: from raw text, content is malformed
@@ -154,6 +165,7 @@ def test_config_from_text_malformed_content():
         Config(text=config_text)
 
 
+@pytest.mark.unit
 def test_metadata_cache_uri_set_via_config_options(caplog):
     """Tests the metadata_cache_uri property fallback logic when set via a config dict"""
     config_dict = {"resources": {"metadata_cache_uri": "https://custom-aqua.uri"}}
@@ -178,6 +190,7 @@ def test_metadata_cache_uri_set_via_config_options(caplog):
     )
 
 
+@pytest.mark.unit
 def test_metadata_cache_uri_set_via_env_vars(monkeypatch, caplog):
     """Tests the metadata_cache_uri property fallback logic when set via an environment variable"""
     ENV_METADATA_CACHE_URI = environ_names_and_sections[NAME_METADATA_CACHE_URI][0]
@@ -206,6 +219,7 @@ def test_metadata_cache_uri_set_via_env_vars(monkeypatch, caplog):
     )
 
 
+@pytest.mark.unit
 def test_address_file(monkeypatch):
     """Tests the Config.address_file property."""
     ENV_ADDRESS_FILE = environ_names_and_sections[NAME_ADDRESS_FILE][0]

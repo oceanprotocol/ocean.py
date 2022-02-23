@@ -4,6 +4,8 @@
 #
 import os
 
+import pytest
+
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
@@ -12,6 +14,7 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
 
+@pytest.mark.integration
 def test_dispenser_flow_readme():
     """This test mirrors the dispenser-flow.md README.
     As such, it does not use the typical pytest fixtures.

@@ -5,6 +5,8 @@
 import os
 import shutil
 
+import pytest
+
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.erc20_token import ERC20Token
@@ -17,6 +19,7 @@ from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
 
 
+@pytest.mark.integration
 def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
     erc721_factory_address = get_address_of_type(
         config, ERC721FactoryContract.CONTRACT_NAME

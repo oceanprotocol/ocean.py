@@ -36,6 +36,7 @@ from tests.resources.ddo_helpers import (
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
+@pytest.mark.integration
 def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wallet):
     """Test various paths for asset registration.
 
@@ -46,6 +47,7 @@ def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wal
     assert ocn.assets.resolve(invalid_did) is None
 
 
+@pytest.mark.integration
 def test_update_metadata(publisher_ocean_instance, publisher_wallet, config):
     """Test the update of metadata"""
     ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
@@ -55,7 +57,7 @@ def test_update_metadata(publisher_ocean_instance, publisher_wallet, config):
     # Update only metadata
     _description = "Updated description"
     new_metadata["description"] = _description
-    new_metadata["updated"] = datetime.now().isoformat()
+    new_metadata["updated"] = datetime.utcnow().isoformat()
     ddo.metadata = new_metadata
 
     with patch("ocean_lib.ocean.ocean_assets.ERC721FactoryContract.verify_nft") as mock:
@@ -77,6 +79,7 @@ def test_update_metadata(publisher_ocean_instance, publisher_wallet, config):
     assert _asset.metadata["updated"] == new_metadata["updated"]
 
 
+@pytest.mark.integration
 def test_update_credentials(publisher_ocean_instance, publisher_wallet, config):
     """Test that the credentials can be updated."""
     ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
@@ -96,6 +99,7 @@ def test_update_credentials(publisher_ocean_instance, publisher_wallet, config):
     assert _asset.credentials == _new_credentials, "Credentials were not updated."
 
 
+@pytest.mark.integration
 def test_update_datatokens(publisher_ocean_instance, publisher_wallet, config):
     """Test the update of datatokens"""
     ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
@@ -146,7 +150,7 @@ def test_update_datatokens(publisher_ocean_instance, publisher_wallet, config):
     new_metadata = copy.deepcopy(_asset.metadata)
     _description = "Test delete datatoken"
     new_metadata["description"] = _description
-    new_metadata["updated"] = datetime.now().isoformat()
+    new_metadata["updated"] = datetime.utcnow().isoformat()
 
     removed_dt = new_asset.datatokens.pop()
 
@@ -168,6 +172,7 @@ def test_update_datatokens(publisher_ocean_instance, publisher_wallet, config):
     assert _asset.services[0].datatoken == old_datatokens[0].get("address")
 
 
+@pytest.mark.integration
 def test_update_flags(publisher_ocean_instance, publisher_wallet, config):
     """Test the update of flags"""
     ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
@@ -192,6 +197,7 @@ def test_update_flags(publisher_ocean_instance, publisher_wallet, config):
     assert registered_token_event[0].args.get("flags") == bytes([3])
 
 
+@pytest.mark.integration
 def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet, config):
     """Tests that a created asset can be searched successfully."""
     identifier = str(uuid.uuid1()).replace("-", "")
@@ -248,6 +254,7 @@ def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet, config)
     )
 
 
+@pytest.mark.integration
 def test_ocean_assets_validate(publisher_ocean_instance):
     """Tests that the validate function returns an error for invalid metadata."""
     ddo_dict = get_sample_ddo()
@@ -265,6 +272,7 @@ def test_ocean_assets_validate(publisher_ocean_instance):
         publisher_ocean_instance.assets.validate(ddo)
 
 
+@pytest.mark.integration
 def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet, config):
     """Tests the creation of an algorithm DDO."""
     metadata = {
@@ -292,6 +300,7 @@ def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet, conf
     assert ddo, "DDO None. The ddo is not cached after the creation."
 
 
+@pytest.mark.unit
 def test_download_fails(publisher_ocean_instance, publisher_wallet):
     """Tests failures of assets download function."""
     with patch("ocean_lib.ocean.ocean_assets.OceanAssets.resolve") as mock:
@@ -307,6 +316,7 @@ def test_download_fails(publisher_ocean_instance, publisher_wallet):
             )
 
 
+@pytest.mark.integration
 def test_create_bad_metadata(publisher_ocean_instance, publisher_wallet, config):
     """Tests that we can't create the asset with plecos failure."""
     metadata = {
@@ -327,6 +337,7 @@ def test_create_bad_metadata(publisher_ocean_instance, publisher_wallet, config)
         create_asset(publisher_ocean_instance, publisher_wallet, config, metadata)
 
 
+@pytest.mark.unit
 def test_pay_for_service_insufficient_balance(
     publisher_ocean_instance, config, publisher_wallet
 ):
@@ -360,6 +371,7 @@ def test_pay_for_service_insufficient_balance(
         )
 
 
+@pytest.mark.integration
 def test_plain_asset_with_one_datatoken(
     publisher_ocean_instance, publisher_wallet, config
 ):
@@ -423,6 +435,7 @@ def test_plain_asset_with_one_datatoken(
     assert ddo.credentials == build_credentials_dict()
 
 
+@pytest.mark.integration
 def test_plain_asset_multiple_datatokens(
     publisher_ocean_instance, publisher_wallet, config
 ):
@@ -506,6 +519,7 @@ def test_plain_asset_multiple_datatokens(
     assert datatoken_names[1] == "Datatoken 3"
 
 
+@pytest.mark.integration
 def test_plain_asset_multiple_services(
     publisher_ocean_instance, publisher_wallet, config
 ):
@@ -567,6 +581,7 @@ def test_plain_asset_multiple_services(
     assert ddo.services[1].compute_values == compute_values
 
 
+@pytest.mark.integration
 def test_encrypted_asset(publisher_ocean_instance, publisher_wallet, config):
     erc721_nft, erc20_token = deploy_erc721_erc20(
         publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
@@ -594,6 +609,7 @@ def test_encrypted_asset(publisher_ocean_instance, publisher_wallet, config):
     assert ddo.datatokens[0]["address"] == erc20_token.address
 
 
+@pytest.mark.integration
 def test_compressed_asset(publisher_ocean_instance, publisher_wallet, config):
     erc721_nft, erc20_token = deploy_erc721_erc20(
         publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
@@ -621,6 +637,7 @@ def test_compressed_asset(publisher_ocean_instance, publisher_wallet, config):
     assert ddo.datatokens[0]["address"] == erc20_token.address
 
 
+@pytest.mark.integration
 def test_compressed_and_encrypted_asset(
     publisher_ocean_instance, publisher_wallet, config
 ):
@@ -650,6 +667,7 @@ def test_compressed_and_encrypted_asset(
     assert ddo.datatokens[0]["address"] == erc20_token.address
 
 
+@pytest.mark.unit
 def test_asset_creation_errors(publisher_ocean_instance, publisher_wallet, config):
     erc721_nft, erc20_token = deploy_erc721_erc20(
         publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
