@@ -29,7 +29,13 @@ from ocean_lib.web3_internal.wallet import Wallet
             "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff",
             "gpr,",
             "https://raw.githubusercontent.com/trentmc/branin/main/gpr.py",
-        )
+        ),
+        (
+            "lena",
+            "https://raw.githubusercontent.com/oceanprotocol/ocena.py/v4main/tests/resources/images/lena.png",
+            "grayscale",
+            "https://raw.githubusercontent.com/oceanprotocol/ocean.py/v4main/tests/resources/algorithms/grayscale.py",
+        ),
     ],
 )
 def test_c2d_flow_readme(dataset_name, dataset_url, algorithm_name, algorithm_url):
