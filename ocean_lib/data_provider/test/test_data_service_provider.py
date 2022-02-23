@@ -255,7 +255,7 @@ def test_fileinfo(web3, config, publisher_wallet, publisher_ocean_instance):
     for file_index, file in enumerate(files_info):
         assert file["index"] == file_index
         assert file["valid"] is True
-        assert file["contentType"] == "text/html"
+        assert file["contentType"] == "text/plain"
 
 
 @pytest.mark.integration
