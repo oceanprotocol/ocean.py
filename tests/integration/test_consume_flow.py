@@ -16,6 +16,7 @@ from ocean_lib.structures.abi_tuples import ConsumeFees, CreateErc20Data
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
+from tests.resources.ddo_helpers import get_first_service_by_type
 from tests.resources.helper_functions import get_address_of_type
 
 
@@ -101,7 +102,7 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
     assert ddo.datatokens[0]["name"] == "Datatoken 1"
     assert ddo.datatokens[0]["symbol"] == "DT1"
 
-    service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
+    service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
     erc20_token = ERC20Token(web3, ddo.datatokens[0]["address"])
 
     # Mint 50 ERC20 tokens in consumer wallet from publisher. Max cap = 100

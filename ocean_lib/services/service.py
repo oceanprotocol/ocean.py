@@ -86,12 +86,13 @@ class Service:
         return self.compute_values.get("publisherTrustedAlgorithmPublishers", [])
 
     # Not type provided due to circular imports
-    def add_publisher_trusted_algorithm(
-        self, algo_ddo, generated_trusted_algo_dict: list
-    ) -> list:
+    def add_publisher_trusted_algorithm(self, algo_ddo) -> list:
         """
         :return: List of trusted algos
         """
+        if self.type != ServiceTypes.CLOUD_COMPUTE:
+            raise AssertionError("Service is not compute type")
+
         initial_trusted_algos_v4 = self.get_trusted_algorithms()
 
         # remove algo_did if already in the list
@@ -100,6 +101,7 @@ class Service:
         ]
         initial_count = len(trusted_algos)
 
+        generated_trusted_algo_dict = algo_ddo.generate_trusted_algorithms()
         trusted_algos.append(generated_trusted_algo_dict)
 
         # update with the new list

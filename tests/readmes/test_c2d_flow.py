@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from ocean_lib.assets.trusted_algorithms import add_publisher_trusted_algorithm
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
@@ -183,9 +182,8 @@ def test_c2d_flow_readme():
     assert ALGO_asset.did, "create algorithm unsuccessful"
 
     # 4. Alice allows the algorithm for C2D for that data asset
-    add_publisher_trusted_algorithm(
-        DATA_asset, ALGO_asset.did, config.metadata_cache_uri
-    )
+    compute_service = DATA_asset.services[0]
+    compute_service.add_publisher_trusted_algorithm(ALGO_asset)
     DATA_asset = ocean.assets.update(DATA_asset, alice_wallet)
 
     # 5. Bob acquires datatokens for data and algorithm

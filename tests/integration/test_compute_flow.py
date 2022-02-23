@@ -11,7 +11,6 @@ from attr import dataclass
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
-from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
 from ocean_lib.exceptions import DataProviderException
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.erc20_token import ERC20Token
@@ -425,7 +424,7 @@ def test_compute_update_trusted_algorithm(
     algorithm,
     algorithm_with_different_publisher,
 ):
-    trusted_algo_list = create_publisher_trusted_algorithms([algorithm], "")
+    trusted_algo_list = [algorithm.generate_trusted_algorithms()]
     dataset_with_compute_service_generator.update_compute_values(
         trusted_algorithms=trusted_algo_list,
         trusted_algo_publishers=[],

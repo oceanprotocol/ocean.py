@@ -218,8 +218,8 @@ print(f"ALGO_asset did = '{ALGO_asset.did}'")
 
 In the same Python console:
 ```python
-from ocean_lib.assets.trusted_algorithms import add_publisher_trusted_algorithm
-add_publisher_trusted_algorithm(DATA_asset, ALGO_asset.did, config.metadata_cache_uri)
+compute_service = DATA_asset.services[0]
+compute_service.add_publisher_trusted_algorithm(ALGO_asset)
 DATA_asset = ocean.assets.update(DATA_asset, alice_wallet)
 ```
 
