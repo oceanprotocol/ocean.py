@@ -17,6 +17,7 @@ from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
+@pytest.mark.unit
 def test_properties(web3, config):
     """Tests the events' properties."""
     erc721_token_address = get_address_of_type(
@@ -36,6 +37,7 @@ def test_properties(web3, config):
     )
 
 
+@pytest.mark.unit
 def test_permissions(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
@@ -322,6 +324,7 @@ def test_permissions(
     assert erc721_nft.get_data(key=web3.keccak(text="FOO_KEY")) == b""
 
 
+@pytest.mark.unit
 def test_success_update_metadata(web3, config, publisher_wallet, consumer_wallet):
     """Tests updating the metadata flow."""
     erc721_nft = deploy_erc721_erc20(
@@ -464,6 +467,7 @@ def test_fails_update_metadata(web3, config, publisher_wallet, consumer_wallet):
     )
 
 
+@pytest.mark.unit
 def test_create_erc20(web3, config, publisher_wallet, consumer_wallet):
     """Tests calling create an ERC20 by the owner."""
     erc721_nft = deploy_erc721_erc20(
@@ -494,6 +498,7 @@ def test_create_erc20(web3, config, publisher_wallet, consumer_wallet):
     assert tx, "Could not create ERC20."
 
 
+@pytest.mark.unit
 def test_fail_creating_erc20(web3, config, publisher_wallet, consumer_wallet):
     """Tests failure for creating ERC20 token."""
     erc721_nft = deploy_erc721_erc20(
@@ -528,6 +533,7 @@ def test_fail_creating_erc20(web3, config, publisher_wallet, consumer_wallet):
     )
 
 
+@pytest.mark.unit
 def test_erc721_datatoken_functions(web3, config, publisher_wallet, consumer_wallet):
     """Tests ERC721 Template functions for ERC20 tokens."""
     erc721_nft, erc20_token = deploy_erc721_erc20(
@@ -635,6 +641,7 @@ def test_erc721_datatoken_functions(web3, config, publisher_wallet, consumer_wal
     assert erc20_token.balanceOf(account=consumer_wallet.address) == to_wei("0.4")
 
 
+@pytest.mark.unit
 def test_fail_transfer_function(web3, config, publisher_wallet, consumer_wallet):
     """Tests failure of using the transfer functions."""
     erc721_nft = deploy_erc721_erc20(

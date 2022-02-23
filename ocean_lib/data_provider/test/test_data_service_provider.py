@@ -62,6 +62,7 @@ def test_set_http_client(with_nice_client):
     assert isinstance(DataSP.get_http_client(), HttpClientNiceMock)
 
 
+@pytest.mark.unit
 def test_initialize_fails(config):
     """Tests failures of initialize endpoint."""
     mock_service = Service(
@@ -98,6 +99,7 @@ def test_initialize_fails(config):
     )
 
 
+@pytest.mark.unit
 def test_start_compute_job_fails_empty(consumer_wallet, config):
     """Tests failures of compute job from endpoint with empty response."""
     mock_service = Service(
@@ -137,6 +139,7 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
         )
 
 
+@pytest.mark.unit
 def test_send_compute_request_failure(with_evil_client, provider_wallet):
     """Tests failure of compute request from endpoint with non-200 response."""
     with pytest.raises(Exception):
@@ -145,6 +148,7 @@ def test_send_compute_request_failure(with_evil_client, provider_wallet):
         )
 
 
+@pytest.mark.unit
 def test_compute_job_result_fails(provider_wallet, config):
     """Tests failure of compute job starting."""
 
@@ -163,6 +167,7 @@ def test_compute_job_result_fails(provider_wallet, config):
         DataSP.compute_job_result("some_job_id", 0, mock_service, provider_wallet)
 
 
+@pytest.mark.unit
 def test_delete_job_result(provider_wallet, config):
     """Tests a failure & a success of compute job deletion."""
     mock_service = Service(
@@ -188,6 +193,7 @@ def test_delete_job_result(provider_wallet, config):
     DataSP.delete_compute_job("some_did", "some_job_id", mock_service, provider_wallet)
 
 
+@pytest.mark.integration
 def test_encrypt(web3, config, provider_wallet):
     """Tests successful encrypt job."""
     key = provider_wallet.private_key
@@ -226,6 +232,7 @@ def test_encrypt(web3, config, provider_wallet):
     assert decrypted_document_string == test_string
 
 
+@pytest.mark.integration
 def test_fileinfo(web3, config, publisher_wallet, publisher_ocean_instance):
     erc721_nft, erc20_token = deploy_erc721_erc20(
         web3, config, publisher_wallet, publisher_wallet
@@ -251,6 +258,7 @@ def test_fileinfo(web3, config, publisher_wallet, publisher_ocean_instance):
         assert file["contentType"] == "text/html"
 
 
+@pytest.mark.integration
 def test_initialize(web3, config, publisher_wallet, publisher_ocean_instance):
     erc721_nft, erc20_token = deploy_erc721_erc20(
         web3, config, publisher_wallet, publisher_wallet
@@ -276,6 +284,7 @@ def test_initialize(web3, config, publisher_wallet, publisher_ocean_instance):
     assert response_json["providerFee"] == get_provider_fees()
 
 
+@pytest.mark.unit
 def test_invalid_file_name():
     """Tests that no filename is returned if attachment headers are found."""
     response = Mock(spec=Response)
@@ -283,6 +292,7 @@ def test_invalid_file_name():
     assert DataSP._get_file_name(response) is None
 
 
+@pytest.mark.integration
 def test_expose_endpoints(config):
     """Tests that the DataServiceProvider exposes all service endpoints."""
     service_endpoints = TEST_SERVICE_ENDPOINTS
@@ -294,14 +304,16 @@ def test_expose_endpoints(config):
     ]
 
 
+@pytest.mark.integration
 def test_c2d_environments(config):
-    """Tests that a provider address exists on the DataServiceProvider."""
+    """Tests that the test ocean-compute env exists on the DataServiceProvider."""
     provider_uri = DataSP.get_url(config)
     c2d_envs = DataSP.get_c2d_environments(provider_uri)
     c2d_env_ids = [elem["id"] for elem in c2d_envs]
     assert "ocean-compute" in c2d_env_ids, "ocean-compute env not found."
 
 
+@pytest.mark.integration
 def test_provider_address(config):
     """Tests that a provider address exists on the DataServiceProvider."""
     provider_uri = DataSP.get_url(config)
@@ -309,6 +321,7 @@ def test_provider_address(config):
     assert provider_address, "Failed to get provider address."
 
 
+@pytest.mark.integration
 def test_provider_address_with_url():
     """Tests that a URL version of provider address exists on the DataServiceProvider."""
     p_ocean_instance = get_publisher_ocean_instance()
@@ -319,6 +332,7 @@ def test_provider_address_with_url():
     assert DataSP.get_provider_address("not a url") is None
 
 
+@pytest.mark.integration
 def test_get_root_uri():
     """Tests extraction of base URLs from various inputs."""
     uri = "https://provider.mainnet.oceanprotocol.com"
@@ -363,6 +377,7 @@ def test_get_root_uri():
         DataSP.get_root_uri("//")
 
 
+@pytest.mark.integration
 def test_build_endpoint():
     """Tests that service endpoints are correctly built from URL and service name."""
 
@@ -387,6 +402,7 @@ def test_build_endpoint():
     DataSP.get_service_endpoints = original_func
 
 
+@pytest.mark.integration
 def test_build_specific_endpoints(config):
     """Tests that a specific list of agreed endpoints is supported on the DataServiceProvider."""
     endpoints = TEST_SERVICE_ENDPOINTS
@@ -427,6 +443,7 @@ def test_build_specific_endpoints(config):
     DataSP.get_service_endpoints = original_func
 
 
+@pytest.mark.integration
 def test_check_single_file_info():
     assert DataSP.check_single_file_info(
         {"url": "http://www.google.com", "type": "url"},
@@ -438,6 +455,7 @@ def test_check_single_file_info():
     assert not DataSP.check_single_file_info({}, provider_uri="http://172.15.0.4:8030")
 
 
+@pytest.mark.unit
 def test_encrypt_failure(config):
     """Tests encrypt failures."""
     http_client = HttpClientEvilMock()
@@ -455,6 +473,7 @@ def test_encrypt_failure(config):
     DataSP.set_http_client(get_requests_session())
 
 
+@pytest.mark.unit
 def test_fileinfo_failure(config):
     """Tests successful fileinfo failures."""
     service = Mock(spec=Service)
@@ -476,6 +495,7 @@ def test_fileinfo_failure(config):
     DataSP.set_http_client(get_requests_session())
 
 
+@pytest.mark.unit
 def test_initialize_failure(config):
     """Tests initialize failures."""
     service = Mock(spec=Service)
@@ -497,6 +517,7 @@ def test_initialize_failure(config):
     DataSP.set_http_client(get_requests_session())
 
 
+@pytest.mark.unit
 def test_job_result_failure(config):
     """Tests compute job result failures."""
     service = Mock(spec=Service)
@@ -521,6 +542,7 @@ def test_job_result_failure(config):
     DataSP.set_http_client(get_requests_session())
 
 
+@pytest.mark.unit
 def test_check_asset_failure(config):
     """Tests check_asset_file_info failures."""
     assert DataSP.check_asset_file_info("", "", config.provider_url) is False

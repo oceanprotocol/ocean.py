@@ -7,6 +7,7 @@ import pytest
 from ocean_lib.structures.file_objects import FilesTypeFactory, IpfsFile, UrlFile
 
 
+@pytest.mark.unit
 def test_url_file():
     url_file = UrlFile(url="https://url.com")
     assert url_file.to_dict() == {"type": "url", "url": "https://url.com"}
@@ -19,11 +20,13 @@ def test_url_file():
     }
 
 
+@pytest.mark.unit
 def test_ipfs_file():
     ipfs_file = IpfsFile(hash="abc")
     assert ipfs_file.to_dict() == {"type": "ipfs", "hash": "abc"}
 
 
+@pytest.mark.unit
 def test_filetype_factory():
     factory_file = FilesTypeFactory(
         {

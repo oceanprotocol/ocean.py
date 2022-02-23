@@ -16,6 +16,7 @@ from tests.resources.ddo_helpers import (
 )
 
 
+@pytest.mark.unit
 def test_asset_utils(web3):
     """Tests the structure of a JSON format of the V4 Asset."""
     ddo_dict = get_sample_ddo()
@@ -121,6 +122,7 @@ def test_asset_utils(web3):
     assert ddo_v2.as_dictionary() == ddo_dict
 
 
+@pytest.mark.unit
 def test_add_service():
     """Tests adding a compute service."""
 
@@ -202,6 +204,7 @@ def test_add_service():
     )
 
 
+@pytest.mark.unit
 def test_get_service():
     """Tests retrieving services from the V4 DDO."""
     ddo_dict = get_sample_ddo_with_compute_service()
@@ -226,6 +229,7 @@ def test_get_service():
     )
 
 
+@pytest.mark.unit
 def test_credentials():
     ddo_dict = get_sample_ddo_with_compute_service()
     ddo = Asset.from_dict(ddo_dict)
@@ -276,6 +280,7 @@ def test_credentials():
     ddo.add_address_to_allow_list("0xAA")
 
 
+@pytest.mark.unit
 def test_credential_simplification():
     assert simplify_credential_to_address(None) is None
     with pytest.raises(MalformedCredential, match="Received empty address."):
@@ -285,6 +290,7 @@ def test_credential_simplification():
     )
 
 
+@pytest.mark.unit
 def test_inexistent_removals():
     ddo_dict = get_sample_ddo_with_compute_service()
     del ddo_dict["services"][1]["compute"]["publisherTrustedAlgorithms"]

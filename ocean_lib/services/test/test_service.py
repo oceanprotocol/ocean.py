@@ -11,6 +11,7 @@ from ocean_lib.services.service import Service
 from tests.resources.ddo_helpers import get_sample_ddo
 
 
+@pytest.mark.unit
 def test_service():
     """Tests that the get_cost function for ServiceAgreement returns the correct value."""
     ddo_dict = get_sample_ddo()

@@ -4,6 +4,8 @@
 #
 from threading import Event, Thread, current_thread
 
+import pytest
+
 from ocean_lib.web3_internal.constants import BLOCK_NUMBER_POLL_INTERVAL
 from ocean_lib.web3_internal.transactions import get_gas_price
 from ocean_lib.web3_internal.web3_overrides.utils import (
@@ -11,6 +13,7 @@ from ocean_lib.web3_internal.web3_overrides.utils import (
 )
 
 
+@pytest.mark.unit
 def test_block_confirmations(publisher_wallet, consumer_wallet):
     alice_wallet = publisher_wallet
     bob_address = consumer_wallet.address

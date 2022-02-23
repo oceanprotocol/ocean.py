@@ -7,6 +7,8 @@ import pickle
 import time
 from datetime import datetime, timedelta
 
+import pytest
+
 from ocean_lib.assets.trusted_algorithms import add_publisher_trusted_algorithm
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.compute_input import ComputeInput
@@ -19,6 +21,7 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
 
+@pytest.mark.integration
 def test_c2d_flow_readme():
     """This test mirrors the c2d-flow.md README.
     As such, it does not use the typical pytest fixtures.
@@ -229,7 +232,7 @@ def test_c2d_flow_readme():
         wallet=bob_wallet,
         initialize_args={
             "compute_environment": environments[0]["id"],
-            "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
+            "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp()),
         },
         consumer_address=environments[0]["consumerAddress"],
     )
@@ -249,7 +252,7 @@ def test_c2d_flow_readme():
         consume_fees=consume_fees,
         wallet=bob_wallet,
         initialize_args={
-            "valid_until": int((datetime.now() + timedelta(days=1)).timestamp())
+            "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp())
         },
         consumer_address=environments[0]["consumerAddress"],
     )

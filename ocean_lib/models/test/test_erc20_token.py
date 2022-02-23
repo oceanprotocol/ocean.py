@@ -18,6 +18,7 @@ from ocean_lib.web3_internal.utils import split_signature
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
+@pytest.mark.unit
 def test_properties(web3, config, publisher_wallet):
     """Tests the events' properties."""
     _, erc20 = deploy_erc721_erc20(
@@ -48,6 +49,7 @@ def test_properties(web3, config, publisher_wallet):
     assert erc20.event_ProviderFee.abi["name"] == ERC20Token.EVENT_PROVIDER_FEE
 
 
+@pytest.mark.unit
 def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     """Tests successful function calls"""
     erc721_factory_address = get_address_of_type(
@@ -424,6 +426,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     ) == initial_consumer_balance - to_wei("1")
 
 
+@pytest.mark.unit
 def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_router):
     """Tests revert statements in contracts functions"""
 

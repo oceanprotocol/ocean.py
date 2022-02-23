@@ -4,6 +4,8 @@
 #
 from unittest.mock import patch
 
+import pytest
+
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.config import Config
@@ -12,6 +14,7 @@ from ocean_lib.ocean.ocean_compute import OceanCompute
 from tests.resources.ddo_helpers import get_sample_ddo_with_compute_service
 
 
+@pytest.mark.unit
 def test_get_service_endpoint():
     data_provider = DataServiceProvider
     options_dict = {"resources": {"provider.url": "http://localhost:8030"}}

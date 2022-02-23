@@ -2,6 +2,8 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import pytest
+
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import (
     cancel_or_replace_transaction,
@@ -9,6 +11,7 @@ from ocean_lib.web3_internal.transactions import (
 )
 
 
+@pytest.mark.unit
 def test_chain_id_send_ether(alice_wallet, bob_address):
     """Tests if the chainId has the right value for send ether transactions."""
     receipt = send_ether(alice_wallet, bob_address, to_wei("1"))
@@ -20,6 +23,7 @@ def test_chain_id_send_ether(alice_wallet, bob_address):
     assert result, "The chain ID is not the right one."
 
 
+@pytest.mark.unit
 def test_chain_id_cancel_or_replace_transaction(alice_wallet, bob_address):
     """Tests if the chainId has the right value for cancelled tx."""
     receipt_cancelled = cancel_or_replace_transaction(alice_wallet, None)
@@ -32,12 +36,14 @@ def test_chain_id_cancel_or_replace_transaction(alice_wallet, bob_address):
     assert result_cancelled, "The chain ID is not the right one."
 
 
+@pytest.mark.unit
 def test_send_ether(alice_wallet, bob_address):
     assert send_ether(
         alice_wallet, bob_address, to_wei("1")
     ), "Send ether was unsuccessful."
 
 
+@pytest.mark.unit
 def test_cancel_or_replace_transaction(alice_wallet):
     assert cancel_or_replace_transaction(
         alice_wallet, None

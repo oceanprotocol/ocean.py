@@ -4,9 +4,12 @@
 #
 import json
 
+import pytest
+
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 
 
+@pytest.mark.unit
 def test_algorithm_metadata():
     algo_metadata = AlgorithmMetadata(
         {

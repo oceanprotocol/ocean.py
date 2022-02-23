@@ -257,7 +257,7 @@ class DataServiceProvider:
     @staticmethod
     @enforce_types
     def sign_message(wallet: Wallet, msg: str) -> Tuple[str, str]:
-        nonce = str(datetime.now().timestamp())
+        nonce = str(datetime.utcnow().timestamp())
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
         return nonce, sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
 

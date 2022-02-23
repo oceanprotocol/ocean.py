@@ -9,6 +9,7 @@ from ocean_lib.ocean import util
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
 
 
+@pytest.mark.unit
 def test_get_web3_connection_provider(monkeypatch):
     # GANACHE_URL
     provider = util.get_web3_connection_provider(util.GANACHE_URL)
@@ -31,6 +32,7 @@ def test_get_web3_connection_provider(monkeypatch):
     assert provider.endpoint_uri == "wss://bah.com"
 
 
+@pytest.mark.unit
 def test_get_ocean_token_address(config):
     addresses = util.get_contracts_addresses(config.address_file, "ganache")
     assert addresses
@@ -42,6 +44,7 @@ def test_get_ocean_token_address(config):
     assert address == addresses["Ocean"]
 
 
+@pytest.mark.unit
 def test_get_address_of_type_failure(config):
     with pytest.raises(KeyError):
         get_address_of_type(config, "", "non-existent-key")
