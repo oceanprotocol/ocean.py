@@ -1,4 +1,8 @@
 # -*- coding: utf-8 -*-
+#
+# Copyright 2022 Ocean Protocol Foundation
+# SPDX-License-Identifier: Apache-2.0
+#
 """
 =========================================================
 Logistic Regression 3-class Classifier
@@ -13,12 +17,13 @@ are colored according to their labels.
 
 # Code source: Gaël Varoquaux
 # Modified for documentation by Jaques Grobler
+# Modified by Ocean Protocol Foundation
 # License: BSD 3 clause
 
-import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.linear_model import LogisticRegression
+import numpy as np
 from sklearn import datasets
+from sklearn.linear_model import LogisticRegression
 
 # import some data to play with
 iris = datasets.load_iris()
