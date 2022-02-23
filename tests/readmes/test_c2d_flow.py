@@ -212,8 +212,8 @@ def test_c2d_flow_readme():
     DATA_asset = ocean.assets.resolve(DATA_did)
     ALGO_asset = ocean.assets.resolve(ALGO_did)
 
-    compute_service = DATA_asset.get_service("compute")
-    algo_service = ALGO_asset.get_service("access")
+    compute_service = DATA_asset.services[0]
+    algo_service = ALGO_asset.services[0]
 
     environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
 

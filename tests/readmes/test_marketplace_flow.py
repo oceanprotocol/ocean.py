@@ -88,7 +88,7 @@ def test_marketplace_flow_readme(tmp_path):
     did = asset.did  # did contains the datatoken address
     assert did
 
-    erc20_token = ocean.get_datatoken(asset.get_service("access").datatoken)
+    erc20_token = ocean.get_datatoken(asset.services[0].datatoken)
     OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 
     ss_params = [
@@ -145,7 +145,7 @@ def test_marketplace_flow_readme(tmp_path):
         consumer_market_fee_amount=0,
     )
 
-    service = asset.get_service("access")
+    service = asset.services[0]
     order_tx_id = ocean.assets.pay_for_service(asset, service, consume_fees, bob_wallet)
 
     file_path = ocean.assets.download_asset(

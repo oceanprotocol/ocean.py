@@ -121,7 +121,7 @@ Same for compression and you can use a combination of the two. E.g:
 In the following steps we will create a pool from the created token, in order to allow another user
 to order this access token.
 ```python
-erc20_token = ocean.get_datatoken(asset.get_service("access").datatoken)
+erc20_token = ocean.get_datatoken(asset.services[0].datatoken)
 OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 
 ss_params = [
@@ -190,7 +190,7 @@ assert erc20_token.balanceOf(bob_wallet.address) >= ocean.to_wei(
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 fee_receiver = ZERO_ADDRESS # could also be market address
 asset = ocean.assets.resolve(did)
-service = asset.get_service("access")
+service = asset.services[0]
 
 # Consume fees
 from ocean_lib.structures.abi_tuples import ConsumeFees

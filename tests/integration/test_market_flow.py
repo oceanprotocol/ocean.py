@@ -32,7 +32,7 @@ def test_market_flow(
     another_consumer_ocean = get_another_consumer_ocean_instance(use_provider_mock=True)
 
     asset = get_registered_asset_with_access_service(publisher_ocean, publisher_wallet)
-    service = asset.get_service("access")
+    service = asset.services[0]
     erc20_token = publisher_ocean.get_datatoken(service.datatoken)
 
     # Mint data tokens and assign to publisher
