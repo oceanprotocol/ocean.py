@@ -27,7 +27,8 @@ from ocean_lib.web3_internal.wallet import Wallet
         (
             "Branin",
             "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff",
-            "gpr, https://raw.githubusercontent.com/trentmc/branin/main/gpr.py",
+            "gpr,",
+            "https://raw.githubusercontent.com/trentmc/branin/main/gpr.py",
         )
     ],
 )
