@@ -7,6 +7,7 @@ import random
 import traceback
 from math import floor
 from time import time
+from decimal import *
 
 import pytest
 
@@ -47,7 +48,7 @@ def get_random_max_token_amount_in(
                 * from_wei(bpool.get_balance(token_in.address))
             ),
         )
-        * random.uniform(0.01, 1)
+        * Decimal(random.uniform(0.01, 1))
     )
 
 
@@ -62,7 +63,7 @@ def get_random_max_token_amount_out(
         from_wei(max_out_ratio) * from_wei(pool_token_out_balance)
     )
     return floor(
-        random.uniform(0.001, 1)
+        Decimal(random.uniform(0.001, 1))
         * min(
             bpool.get_amount_out_exact_in(
                 token_in.address,
@@ -75,7 +76,7 @@ def get_random_max_token_amount_out(
     )
 
 
-@pytest.mark.skip(reason="This test is slow and not needed in the CI")
+# @pytest.mark.skip(reason="This test is slow and not needed in the CI")
 @pytest.mark.nosetup_all
 def test_fuzzing_pool_ocean(
     web3,
@@ -88,7 +89,7 @@ def test_fuzzing_pool_ocean(
 ):
     """Test the liquidity pool contract with random values."""
 
-    number_of_runs = 1000
+    number_of_runs = 50
 
     errors = []
 
@@ -128,7 +129,7 @@ def test_fuzzing_pool_ocean(
             random.seed(time())
 
             # Tests consumer deploys a new erc20DT, assigning himself as minter
-            cap = web3.toWei(random.randint(100, 1000000), "ether")
+            cap = to_wei(random.randint(100, 1000000), 18)
 
             tx = erc721_nft.create_erc20(
                 CreateErc20Data(
@@ -157,8 +158,8 @@ def test_fuzzing_pool_ocean(
 
             assert erc20_token.get_permissions(consumer_wallet.address)[0] is True
 
-            swap_fee = web3.toWei(random.uniform(0.00001, 0.1), "ether")
-            swap_market_fee = web3.toWei(random.uniform(0.00001, 0.1), "ether")
+            swap_fee = to_wei(Decimal(random.uniform(0.00001, 0.1)), 18)
+            swap_market_fee = to_wei(Decimal(random.uniform(0.00001, 0.1)), 18)
 
             # Tests consumer calls deployPool(), we then check ocean and market fee"
             ocean_contract = ERC20Token(
@@ -166,7 +167,7 @@ def test_fuzzing_pool_ocean(
             )
             consumer_balance = ocean_contract.balanceOf(consumer_wallet.address)
             ss_OCEAN_init_liquidity = floor(
-                consumer_balance * random.uniform(0.000000001, 1)
+                consumer_balance * Decimal(random.uniform(0.000000001, 1))
             )
             ocean_contract.approve(
                 get_address_of_type(config, "Router"),
@@ -175,7 +176,9 @@ def test_fuzzing_pool_ocean(
             )
 
             # Random vesting amount capped to 10% of ss_OCEAN_init_liquidity
-            ss_DT_vest_amt = floor(random.uniform(0.001, 0.1) * ss_OCEAN_init_liquidity)
+            ss_DT_vest_amt = floor(
+                Decimal(random.uniform(0.001, 0.1)) * ss_OCEAN_init_liquidity
+            )
 
             min_vesting_period = factory_router.get_min_vesting_period()
 
@@ -183,7 +186,7 @@ def test_fuzzing_pool_ocean(
                 min_vesting_period, min_vesting_period * 1000
             )
 
-            ss_rate = web3.toWei(random.uniform(0.00001, 0.1), "ether")
+            ss_rate = to_wei(Decimal(random.uniform(0.00001, 0.1)), 18)
 
             pool_data = PoolData(
                 [
@@ -501,8 +504,14 @@ def test_fuzzing_pool_ocean(
 
             error = traceback.format_exc()
 
-            dt_balance = erc20_token.balanceOf(publisher_wallet.address)
-            ocean_balance = ocean_contract.balanceOf(publisher_wallet.address)
+            dt_balance = (
+                erc20_token.balanceOf(publisher_wallet.address) if erc20_token else 0
+            )
+            ocean_balance = (
+                ocean_contract.balanceOf(publisher_wallet.address)
+                if ocean_contract
+                else 0
+            )
 
             params = f"""
             Final balances:
@@ -552,6 +561,8 @@ def test_fuzzing_pool_ocean(
                 )
 
                 web3.eth.wait_for_transaction_receipt(tx)
+                last = erc20_token.balanceOf(publisher_wallet.address)
+                print(last)
 
     # print errors
     for error in errors:
