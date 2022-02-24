@@ -44,7 +44,7 @@ This is in beta state. If you run into problems, please open up a [new issue](/i
 pip install wheel
 pip install ocean-lib
 ```
-⚠️ For Mac users, if you encounter an issue with "Unsupported Architecture" , then run the installation command with ARCHFLAGS set: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [[Details](https://github.com/oceanprotocol/ocean.py/issues/486).]
+⚠️ Mac users: if you encounter an "Unsupported Architecture" issue, then install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [[Details](https://github.com/oceanprotocol/ocean.py/issues/486).]
 
 ## 🏄 Quickstart
 
