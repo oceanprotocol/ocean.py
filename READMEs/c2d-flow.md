@@ -325,7 +325,7 @@ In the same Python console, you can check the job status as many times as needed
 import time
 succeeded = False
 for _ in range(0, 200):
-    status = ocean.compute.status(DATA_asset, job_id, bob_wallet)
+    status = ocean.compute.status(DATA_asset, compute_service, job_id, bob_wallet)
     if status.get("dateFinished") and int(status["dateFinished"]) > 0:
         succeeded = True
         break
@@ -343,7 +343,7 @@ for i in range(len(status["results"])):
     result = None
     result_type = status["results"][i]["type"]
     print(f"Fetch result index {i}, type: {result_type}")
-    result = ocean.compute.result(DATA_asset, job_id, i, bob_wallet)
+    result = ocean.compute.result(DATA_asset, compute_service, job_id, i, bob_wallet)
     print(result)
     print("==========\n")
 

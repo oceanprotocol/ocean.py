@@ -270,7 +270,7 @@ def run_compute_test(
     )
 
     status = ocean_instance.compute.status(
-        dataset_and_userdata.asset, job_id, consumer_wallet
+        dataset_and_userdata.asset, service, job_id, consumer_wallet
     )
     print(f"got job status: {status}")
 
@@ -279,7 +279,7 @@ def run_compute_test(
     ), f"something not right about the compute job, got status: {status}"
 
     status = ocean_instance.compute.stop(
-        dataset_and_userdata.asset, job_id, consumer_wallet
+        dataset_and_userdata.asset, service, job_id, consumer_wallet
     )
     print(f"got job status after requesting stop: {status}")
     assert status, f"something not right about the compute job, got status: {status}"
@@ -288,7 +288,7 @@ def run_compute_test(
         succeeded = False
         for _ in range(0, 200):
             status = ocean_instance.compute.status(
-                dataset_and_userdata.asset, job_id, consumer_wallet
+                dataset_and_userdata.asset, service, job_id, consumer_wallet
             )
             # wait until job is done, see:
             # https://github.com/oceanprotocol/operator-service/blob/main/API.md#status-description
@@ -299,7 +299,7 @@ def run_compute_test(
 
         assert succeeded, "compute job unsuccessful"
         result_file = ocean_instance.compute.result(
-            dataset_and_userdata.asset, job_id, 0, consumer_wallet
+            dataset_and_userdata.asset, service, job_id, 0, consumer_wallet
         )
         assert result_file is not None
         print(f"got job result file: {str(result_file)}")

@@ -270,7 +270,7 @@ def test_c2d_flow_readme():
     # Wait until job is done
     succeeded = False
     for _ in range(0, 200):
-        status = ocean.compute.status(DATA_asset, job_id, bob_wallet)
+        status = ocean.compute.status(DATA_asset, compute_service, job_id, bob_wallet)
         if status.get("dateFinished") and int(status["dateFinished"]) > 0:
             print(f"Status = '{status}'")
             succeeded = True
@@ -284,7 +284,9 @@ def test_c2d_flow_readme():
         result = None
         result_type = status["results"][i]["type"]
         print(f"Fetch result index {i}, type: {result_type}")
-        result = ocean.compute.result(DATA_asset, job_id, i, bob_wallet)
+        result = ocean.compute.result(
+            DATA_asset, compute_service, job_id, i, bob_wallet
+        )
         assert result, "result retrieval unsuccessful"
 
         # Extract algorithm output
