@@ -74,9 +74,9 @@ Here are flows to try out, from simple to specific detailed variants.
 
 ## 🦑 Development
 
-[Go to developers flow](READMEs/developers.md) if you want to further develop ocean.py.
-[Go to release process](READMEs/release-process.md) if you want to do a release.
-[Go to testing v4](READMEs/testing-v4.md) if you want to learn about v4 testing methods.
+- **[Developers flow](READMEs/developers.md)** - to further develop ocean.py
+- [Release process](READMEs/release-process.md) - to do a new release of ocean.py
+- [Testing v4](READMEs/testing-v4.md) - to learn about Ocean v4 testing methods
 
 ## 🏛 License
 
