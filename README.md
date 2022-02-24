@@ -38,11 +38,7 @@ ocean.py is part of the [Ocean Protocol](https://www.oceanprotocol.com) toolset.
 This is in beta state and you can expect running into problems. If you run into them, please open up a [new issue](/issues).
 
 - [🏗 Installation](#-installation)
-- [🏄 Quickstart](#-quickstart)
-  - [Simple Flow](#simple-flow)
-  - [Marketplace Flow](#marketplace-flow)
-  - [Compute-to-Data Flow](#compute-to-data-flow)
-  - [Learn more](#learn-more)
+- [🏄 Quickstart](#-quickstart): simple flow, marketplace, compute-to-data, more
 - [🦑 Development](#-development)
 - [🏛 License](#-license)
 
