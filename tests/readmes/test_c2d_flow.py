@@ -314,11 +314,11 @@ def test_c2d_flow_readme(dataset_name, dataset_url, algorithm_name, algorithm_ur
             output = result
     assert output, "algorithm output not found"
 
-    if dataset_name == "Branin":
-        unpickle_gaussian_model_result(output)
+    if dataset_name == "branin" or dataset_name == "iris":
+        unpickle_result(output)
 
 
-def unpickle_gaussian_model_result(output):
+def unpickle_result(output):
     """Unpickle the gaussian model result"""
     model = pickle.loads(output)
     assert len(model) > 0, "unpickle result unsuccessful"
