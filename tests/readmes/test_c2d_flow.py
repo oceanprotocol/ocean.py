@@ -39,7 +39,7 @@ from ocean_lib.web3_internal.wallet import Wallet
         ),
         (
             "iris",
-            "https://www.openml.org/data/download/61/dataset_61_iris.arff",
+            "https://www.openml.org/data/get_csv/61/dataset_61_iris.arff",
             "logistic-regression",
             "https://raw.githubusercontent.com/oceanprotocol/ocean.py/issue705-image-processing-c2d-example/tests/resources/algorithms/logistic_regression.py",
         ),
