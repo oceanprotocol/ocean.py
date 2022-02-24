@@ -263,7 +263,8 @@ def test_fileinfo(web3, config, publisher_wallet, publisher_ocean_instance):
     for file_index, file in enumerate(files_info):
         assert file["index"] == file_index
         assert file["valid"] is True
-        assert file["contentType"] == "text/plain"
+        matches = "text/plain" if file_index == 0 else "text/xml"
+        assert file["contentType"] == matches
 
 
 @pytest.mark.integration

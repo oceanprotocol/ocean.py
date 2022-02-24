@@ -171,14 +171,6 @@ class Asset(AddressCredential):
         )
 
     @enforce_types
-    def get_service(self, service_type: str) -> Optional[Service]:
-        """Return first Service with the given service type.
-        Return None if service with the given service type not found."""
-        return next(
-            (service for service in self.services if service.type == service_type), None
-        )
-
-    @enforce_types
     def get_index_of_service(self, service: Service) -> int:
         """Return index of the given Service.
         Return None if service was not found."""
