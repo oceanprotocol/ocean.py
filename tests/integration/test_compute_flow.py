@@ -425,7 +425,11 @@ def test_compute_update_trusted_algorithm(
     algorithm_with_different_publisher,
 ):
     trusted_algo_list = [algorithm.generate_trusted_algorithms()]
-    dataset_with_compute_service_generator.update_compute_values(
+    compute_service = get_first_service_by_type(
+        dataset_with_compute_service_generator, "compute"
+    )
+
+    compute_service.update_compute_values(
         trusted_algorithms=trusted_algo_list,
         trusted_algo_publishers=[],
         allow_network_access=True,
