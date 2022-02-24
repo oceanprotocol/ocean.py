@@ -23,26 +23,17 @@ SPDX-License-Identifier: Apache-2.0
 
 With ocean.py, you can:
 
-- **Publish** data services: downloadable files or compute-to-data.
-  Ocean creates a new [ERC20](https://github.com/ethereum/EIPs/blob/7f4f0377730f5fc266824084188cc17cf246932e/EIPS/eip-20.md)
-  datatoken for each dataset / data service.
-- **Mint** datatokens for the service
-- **Sell** datatokens via an OCEAN-datatoken Balancer pool (for auto price discovery), or for a fixed price
-- **Stake** OCEAN on datatoken pools
-- **Consume** datatokens, to access the service
-- **Transfer** datatokens to another owner, and **all other ERC20 actions**
-  using [web3.py](https://web3py.readthedocs.io/en/stable/examples.html#working-with-an-erc20-token-contract) etc.
+- **Publish** data services: downloadable files or compute-to-data. Create an ERC721 **data NFT** for each service, and ERC20 **datatoken** for access (1.0 datatokens to access).
+- **Sell** datatokens via an OCEAN-datatoken Balancer pool (for auto price discovery), or for a fixed price. Sell data NFTs.
+- **Stake OCEAN** on datatoken pools
+- **Transfer** data NFTs & datatokens to another owner, and **all other ERC721 & ERC20 actions** using [web3.py](https://web3py.readthedocs.io), [Brownie](https://eth-brownie.readthedocs.io/en/latest/), etc.
 
 ocean.py is part of the [Ocean Protocol](https://www.oceanprotocol.com) toolset.
 
-This is in beta state and you can expect running into problems. If you run into them, please open up a [new issue](/issues).
+This is in beta state. If you run into problems, please open up a [new issue](/issues).
 
 - [🏗 Installation](#-installation)
-- [🏄 Quickstart](#-quickstart)
-  - [Simple Flow](#simple-flow)
-  - [Marketplace Flow](#marketplace-flow)
-  - [Compute-to-Data Flow](#compute-to-data-flow)
-  - [Learn more](#learn-more)
+- [🏄 Quickstart](#-quickstart): simple flow, marketplace, compute-to-data, more
 - [🦑 Development](#-development)
 - [🏛 License](#-license)
 
@@ -53,41 +44,17 @@ This is in beta state and you can expect running into problems. If you run into 
 pip install wheel
 pip install ocean-lib
 ```
-⚠️ For Mac users, if you encounter an issue with "Unsupported Architecture", see [this issue](https://github.com/oceanprotocol/ocean.py/issues/486) for an explanation and run the installation command with ARCHFLAGS set, like so:
-
-`ARCHFLAGS="-arch x86_64" pip install ocean-lib`
+⚠️ Mac users: if you encounter an "Unsupported Architecture" issue, then install including ARCHFLAGS: `ARCHFLAGS="-arch x86_64" pip install ocean-lib`. [[Details](https://github.com/oceanprotocol/ocean.py/issues/486).]
 
 ## 🏄 Quickstart
 
-### Simple Flow
+Here are flows to try out, from simple to specific detailed variants.
 
-This stripped-down flow shows the essence of Ocean: simply creating a datatoken.
-
-[Go to simple flow](READMEs/datatokens-flow.md)
-
-### Marketplace flow
-
-In this flow, a data asset is posted for sale in a marketplace, and purchased. It includes metadata and a datatoken pool.
-
-[Go to marketplace flow](READMEs/marketplace-flow.md)
-
-### Fixed Rate Exchange flow
-
-In this flow, a data asset is posted for sale at a fixed rate, and purchased.
-
-[Go to fixed rate exchange flow](READMEs/fixed-rate-exchange-flow.md)
-
-### Dispenser flow
-
-In this flow, a datatoken dispenser is created and datatokens are dispensed for free.
-
-[Go to dispenser flow](READMEs/dispenser-flow.md)
-
-### Compute-to-Data flow
-
-This flow uses Ocean Compute-to-Data (c2d) to compute results from a dataset that never leaves the premises.
-
-[Go to c2d flow](READMEs/c2d-flow.md)
+- **[Simple flow](READMEs/datatokens-flow.md)** - the essence of Ocean - creating a data NFT & datatoken.
+- **[Marketplace flow](READMEs/marketplace-flow.md)** - a data asset is posted for sale in a datatoken pool, then purchased. Includes metadata.
+- **[Fixed rate exchange flow](READMEs/fixed-rate-exchange-flow.md)** - a data asset is posted for sale at fixed rate, then purchased. 
+- **[Dispenser flow](READMEs/dispenser-flow.md)** - here, a datatoken dispenser is created and datatokens are dispensed for free.
+- **[Compute-to-data flow](READMEs/c2d-flow.md)** - uses C2D to build an AI model a dataset that never leaves the premises.
 
 ### Learn more
 
@@ -100,13 +67,13 @@ This flow uses Ocean Compute-to-Data (c2d) to compute results from a dataset tha
 
 ## 🦑 Development
 
-[Go to developers flow](READMEs/developers.md) if you want to further develop ocean.py.
-[Go to release process](READMEs/release-process.md) if you want to do a release.
-[Go to testing v4](READMEs/testing-v4.md) if you want to learn about v4 testing methods.
+- **[Developers flow](READMEs/developers.md)** - to further develop ocean.py
+- [Release process](READMEs/release-process.md) - to do a new release of ocean.py
+- [Testing v4](READMEs/testing-v4.md) - to learn about Ocean v4 testing methods
 
 ## 🏛 License
 
-    Copyright ((C)) 2021 Ocean Protocol Foundation
+    Copyright ((C)) 2022 Ocean Protocol Foundation
 
     Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
