@@ -57,7 +57,7 @@ pip install ocean-lib
 
 ### Simple Flow
 
-This stripped-down flow shows the essence of Ocean: simply creating a datatoken.
+This stripped-down flow shows the essence of Ocean: simply creating a data NFT & datatoken.
 
 [Go to simple flow](READMEs/datatokens-flow.md)
 
