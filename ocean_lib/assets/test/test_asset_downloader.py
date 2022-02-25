@@ -14,7 +14,12 @@ from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.structures.abi_tuples import ConsumeFees
 from ocean_lib.web3_internal.currency import to_wei
-from tests.resources.ddo_helpers import create_asset, create_basics, get_sample_ddo
+from tests.resources.ddo_helpers import (
+    create_asset,
+    create_basics,
+    get_first_service_by_type,
+    get_sample_ddo,
+)
 from tests.resources.helper_functions import deploy_erc721_erc20
 
 
@@ -24,13 +29,14 @@ def test_ocean_assets_download_failure(publisher_wallet):
 
     ddo_dict = get_sample_ddo()
     ddo = Asset.from_dict(ddo_dict)
-    access_service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
+    access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
     access_service.service_endpoint = None
     ddo.services[0] = access_service
 
     with pytest.raises(AssertionError):
         download_asset_files(
             ddo,
+            access_service,
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
@@ -45,7 +51,11 @@ def test_invalid_provider_uri(publisher_wallet):
 
     with pytest.raises(InvalidURL):
         download_asset_files(
-            ddo, publisher_wallet, "test_destination", "test_order_tx_id"
+            ddo,
+            ddo.services[0],
+            publisher_wallet,
+            "test_destination",
+            "test_order_tx_id",
         )
 
 
@@ -59,6 +69,7 @@ def test_invalid_state(publisher_wallet):
     with pytest.raises(AssetNotConsumable):
         download_asset_files(
             ddo,
+            ddo.services[0],
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
@@ -68,6 +79,7 @@ def test_invalid_state(publisher_wallet):
     with pytest.raises(AssetNotConsumable):
         download_asset_files(
             ddo,
+            ddo.services[0],
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
@@ -87,6 +99,7 @@ def test_ocean_assets_download_indexes(
     with pytest.raises(TypeError):
         download_asset_files(
             ddo,
+            ddo.services[0],
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
@@ -97,6 +110,7 @@ def test_ocean_assets_download_indexes(
     with pytest.raises(AssertionError):
         download_asset_files(
             ddo,
+            ddo.services[0],
             publisher_wallet,
             "test_destination",
             "test_order_tx_id",
@@ -108,6 +122,7 @@ def test_ocean_assets_download_indexes(
     with pytest.raises(AssertionError):
         download_asset_files(
             ddo,
+            ddo.services[0],
             publisher_wallet,
             str(tmpdir),
             "test_order_tx_id",
@@ -142,7 +157,7 @@ def ocean_assets_download_destination_file_helper(
         erc721_address=erc721_nft.address,
         deployed_erc20_tokens=[erc20_token],
     )
-    access_service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
+    access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
     erc20_token.mint(
         account_address=publisher_wallet.address,
@@ -177,6 +192,8 @@ def ocean_assets_download_destination_file_helper(
     assert erc20_token.address in [order.address for order in orders]
     assert tx_id in [order.transactionHash.hex() for order in orders]
 
-    written_path = download_asset_files(ddo, publisher_wallet, tmpdir, tx_id)
+    written_path = download_asset_files(
+        ddo, access_service, publisher_wallet, tmpdir, tx_id
+    )
 
     assert os.path.exists(written_path)

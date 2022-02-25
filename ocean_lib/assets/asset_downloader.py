@@ -9,10 +9,10 @@ from typing import Optional
 
 from enforce_typing import enforce_types
 
-from ocean_lib.agreements.consumable import ConsumableCodes, AssetNotConsumable
-from ocean_lib.agreements.service_types import ServiceTypes
+from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger(__name__)
@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 @enforce_types
 def download_asset_files(
     asset: Asset,
+    service: Service,
     consumer_wallet: Wallet,
     destination: str,
     order_tx_id: str,
@@ -30,6 +31,7 @@ def download_asset_files(
     """Download asset data file or result file from compute job.
 
     :param asset: Asset instance
+    :param service: Sevice instance
     :param provider_uri: Url of Provider, str
     :param consumer_wallet: Wallet instance of the consumer
     :param destination: Path, str
@@ -40,7 +42,6 @@ def download_asset_files(
     """
     data_provider = DataServiceProvider
 
-    service = asset.get_service(ServiceTypes.ASSET_ACCESS)
     if not service.service_endpoint:
         logger.error(
             'Consume asset failed, service definition is missing the "serviceEndpoint".'

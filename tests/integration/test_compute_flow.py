@@ -11,7 +11,6 @@ from attr import dataclass
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
-from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
 from ocean_lib.exceptions import DataProviderException
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.erc20_token import ERC20Token
@@ -22,6 +21,7 @@ from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import (
+    get_first_service_by_type,
     get_raw_algorithm,
     get_registered_algorithm_with_access_service,
     get_registered_asset_with_access_service,
@@ -142,7 +142,7 @@ def process_order(
 ) -> Tuple[str, Service]:
     """Helper function to process a compute order."""
     # Mint 10 datatokens to the consumer
-    service = asset.get_service(service_type)
+    service = get_first_service_by_type(asset, service_type)
     erc20_token = ERC20Token(ocean_instance.web3, service.datatoken)
 
     # for the "algorithm with different publisher fixture, consumer is minter
@@ -218,7 +218,7 @@ def run_compute_test(
     additional_datasets = []
     for asset_and_userdata in additional_datasets_and_userdata:
         service_type = ServiceTypes.ASSET_ACCESS
-        if not asset_and_userdata.asset.get_service(service_type):
+        if not get_first_service_by_type(asset_and_userdata.asset, service_type):
             service_type = ServiceTypes.CLOUD_COMPUTE
         _order_tx_id, _service = process_order(
             ocean_instance,
@@ -253,7 +253,9 @@ def run_compute_test(
             algorithm_and_userdata.userdata,
         )
 
-    service = dataset_and_userdata.asset.get_service(ServiceTypes.CLOUD_COMPUTE)
+    service = get_first_service_by_type(
+        dataset_and_userdata.asset, ServiceTypes.CLOUD_COMPUTE
+    )
     environments = ocean_instance.compute.get_c2d_environments(service.service_endpoint)
 
     # Start compute job
@@ -268,7 +270,7 @@ def run_compute_test(
     )
 
     status = ocean_instance.compute.status(
-        dataset_and_userdata.asset, job_id, consumer_wallet
+        dataset_and_userdata.asset, service, job_id, consumer_wallet
     )
     print(f"got job status: {status}")
 
@@ -277,7 +279,7 @@ def run_compute_test(
     ), f"something not right about the compute job, got status: {status}"
 
     status = ocean_instance.compute.stop(
-        dataset_and_userdata.asset, job_id, consumer_wallet
+        dataset_and_userdata.asset, service, job_id, consumer_wallet
     )
     print(f"got job status after requesting stop: {status}")
     assert status, f"something not right about the compute job, got status: {status}"
@@ -286,7 +288,7 @@ def run_compute_test(
         succeeded = False
         for _ in range(0, 200):
             status = ocean_instance.compute.status(
-                dataset_and_userdata.asset, job_id, consumer_wallet
+                dataset_and_userdata.asset, service, job_id, consumer_wallet
             )
             # wait until job is done, see:
             # https://github.com/oceanprotocol/operator-service/blob/main/API.md#status-description
@@ -297,7 +299,7 @@ def run_compute_test(
 
         assert succeeded, "compute job unsuccessful"
         result_file = ocean_instance.compute.result(
-            dataset_and_userdata.asset, job_id, 0, consumer_wallet
+            dataset_and_userdata.asset, service, job_id, 0, consumer_wallet
         )
         assert result_file is not None
         print(f"got job result file: {str(result_file)}")
@@ -422,8 +424,12 @@ def test_compute_update_trusted_algorithm(
     algorithm,
     algorithm_with_different_publisher,
 ):
-    trusted_algo_list = create_publisher_trusted_algorithms([algorithm], "")
-    dataset_with_compute_service_generator.update_compute_values(
+    trusted_algo_list = [algorithm.generate_trusted_algorithms()]
+    compute_service = get_first_service_by_type(
+        dataset_with_compute_service_generator, "compute"
+    )
+
+    compute_service.update_compute_values(
         trusted_algorithms=trusted_algo_list,
         trusted_algo_publishers=[],
         allow_network_access=True,

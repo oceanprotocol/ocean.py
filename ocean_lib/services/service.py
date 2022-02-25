@@ -8,7 +8,7 @@
 """
 import copy
 import logging
-from typing import Any, Dict, Optional
+from typing import Any, Dict, List, Optional
 
 from web3.main import Web3
 
@@ -86,12 +86,13 @@ class Service:
         return self.compute_values.get("publisherTrustedAlgorithmPublishers", [])
 
     # Not type provided due to circular imports
-    def add_publisher_trusted_algorithm(
-        self, algo_ddo, generated_trusted_algo_dict: list
-    ) -> list:
+    def add_publisher_trusted_algorithm(self, algo_ddo) -> list:
         """
         :return: List of trusted algos
         """
+        if self.type != ServiceTypes.CLOUD_COMPUTE:
+            raise AssertionError("Service is not compute type")
+
         initial_trusted_algos_v4 = self.get_trusted_algorithms()
 
         # remove algo_did if already in the list
@@ -100,6 +101,7 @@ class Service:
         ]
         initial_count = len(trusted_algos)
 
+        generated_trusted_algo_dict = algo_ddo.generate_trusted_algorithms()
         trusted_algos.append(generated_trusted_algo_dict)
 
         # update with the new list
@@ -190,3 +192,97 @@ class Service:
             return asset.validate_access(credential)
 
         return ConsumableCodes.OK
+
+    def remove_publisher_trusted_algorithm(self, algo_did: str) -> list:
+        """Returns a trusted algorithms list after removal."""
+        trusted_algorithms = self.get_trusted_algorithms()
+        if not trusted_algorithms:
+            raise ValueError(
+                f"Algorithm {algo_did} is not in trusted algorithms of this asset."
+            )
+        trusted_algorithms = [ta for ta in trusted_algorithms if ta["did"] != algo_did]
+        trusted_algo_publishers = self.get_trusted_algorithm_publishers()
+        self.update_compute_values(
+            trusted_algorithms,
+            trusted_algo_publishers,
+            allow_network_access=True,
+            allow_raw_algorithm=False,
+        )
+        assert (
+            self.compute_values["publisherTrustedAlgorithms"] == trusted_algorithms
+        ), "New trusted algorithm was not removed. Failed when updating the list of trusted algorithms. "
+
+        return trusted_algorithms
+
+    def remove_publisher_trusted_algorithm_publisher(
+        self, publisher_address: str
+    ) -> list:
+        """
+        :return: List of trusted algo publishers not containing `publisher_address`.
+        """
+        trusted_algorithm_publishers = [
+            tp.lower() for tp in self.get_trusted_algorithm_publishers()
+        ]
+        publisher_address = publisher_address.lower()
+        if not trusted_algorithm_publishers:
+            raise ValueError(
+                f"Publisher {publisher_address} is not in trusted algorithm publishers of this asset."
+            )
+
+        trusted_algorithm_publishers = [
+            tp for tp in trusted_algorithm_publishers if tp != publisher_address
+        ]
+        trusted_algorithms = self.get_trusted_algorithms()
+        self.update_compute_values(
+            trusted_algorithms, trusted_algorithm_publishers, True, False
+        )
+        assert (
+            self.compute_values["publisherTrustedAlgorithmPublishers"]
+            == trusted_algorithm_publishers
+        ), "New trusted algorithm publisher was not removed. Failed when updating the list of trusted algo publishers. "
+
+        return trusted_algorithm_publishers
+
+    def update_compute_values(
+        self,
+        trusted_algorithms: List,
+        trusted_algo_publishers: Optional[List],
+        allow_network_access: bool,
+        allow_raw_algorithm: bool,
+    ) -> None:
+        """Set the `trusted_algorithms` on the compute service.
+
+        - An assertion is raised if this asset has no compute service
+        - Updates the compute service in place
+        - Adds the trusted algorithms under privacy.publisherTrustedAlgorithms
+
+        :param trusted_algorithms: list of dicts, each dict contain the keys
+            ("containerSectionChecksum", "filesChecksum", "did")
+        :param trusted_algo_publishers: list of strings, addresses of trusted publishers
+        :param allow_network_access: bool -- set to True to allow network access to all the algorithms that belong to this dataset
+        :param allow_raw_algorithm: bool -- determine whether raw algorithms (i.e. unpublished) can be run on this dataset
+        :return: None
+        :raises AssertionError if this asset has no `ServiceTypes.CLOUD_COMPUTE` service
+        """
+        assert not trusted_algorithms or isinstance(trusted_algorithms, list)
+        assert (
+            self.type == ServiceTypes.CLOUD_COMPUTE is not None
+        ), "this asset does not have a compute service."
+
+        for ta in trusted_algorithms:
+            assert isinstance(
+                ta, dict
+            ), f"item in list of trusted_algorithms must be a dict, got {ta}"
+            assert (
+                "did" in ta
+            ), f"dict in list of trusted_algorithms is expected to have a `did` key, got {ta.keys()}."
+
+        if not self.compute_values:
+            self.compute_values = {}
+
+        self.compute_values["publisherTrustedAlgorithms"] = trusted_algorithms
+        self.compute_values[
+            "publisherTrustedAlgorithmPublishers"
+        ] = trusted_algo_publishers
+        self.compute_values["allowNetworkAccess"] = allow_network_access
+        self.compute_values["allowRawAlgorithm"] = allow_raw_algorithm
