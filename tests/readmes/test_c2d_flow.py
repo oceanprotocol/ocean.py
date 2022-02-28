@@ -2,12 +2,14 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import io
 import os
 import pickle
 import time
 from datetime import datetime, timedelta
 
 import pytest
+from PIL import Image
 
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.compute_input import ComputeInput
@@ -321,9 +323,17 @@ def test_c2d_flow_readme(
 
     if dataset_name == "branin" or dataset_name == "iris":
         unpickle_result(output)
+    else:
+        load_image(output)
 
 
-def unpickle_result(output):
+def unpickle_result(pickled):
     """Unpickle the gaussian model result"""
-    model = pickle.loads(output)
+    model = pickle.loads(pickled)
     assert len(model) > 0, "unpickle result unsuccessful"
+
+
+def load_image(image_bytes):
+    """Load the image result"""
+    image = Image.open(io.BytesIO(image_bytes))
+    assert image, "load image unsuccessful"
