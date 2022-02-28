@@ -25,7 +25,7 @@ import os
 import pickle
 import sys
 
-# Uncomment if running locally. g not included in oceanprotocol/algo_dockers:python-panda image
+# Uncomment if running locally. matplotlib not included in oceanprotocol/algo_dockers:python-panda image
 # import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
