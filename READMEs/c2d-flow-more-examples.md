@@ -152,3 +152,27 @@ ALGO_url_file = UrlFile(
     url="https://raw.githubusercontent.com/oceanprotocol/ocean.py/issue705-image-processing-c2d-example/tests/resources/algorithms/logistic_regression.py"
 )
 ```
+
+### Display and Save the Result
+
+Display the result:
+
+```python
+import matplotlib.pyplot as plt
+
+def plot(xx, yy, Z):
+    plt.figure(1, figsize=(4, 3))
+    plt.pcolormesh(xx, yy, Z, cmap=plt.cm.Paired)
+
+    plt.xlabel("Sepal length")
+    plt.ylabel("Sepal width")
+
+    plt.xlim(xx.min(), xx.max())
+    plt.ylim(yy.min(), yy.max())
+    plt.xticks(())
+    plt.yticks(())
+
+    plt.show()
+
+plot(xx, yy, Z, X, Y)
+```
