@@ -158,24 +158,20 @@ ALGO_url_file = UrlFile(
 Display the result:
 
 ```python
+import numpy as np
 import matplotlib.pyplot as plt
 
-def plot(Z):
-    h = 0.02  # step size in the mesh
-    xx, yy = np.meshgrid(np.arange(3.8, 8.4, h), np.arange(1.5, 4.9, h))
+h = 0.02  # step size in the mesh
+xx, yy = np.meshgrid(np.arange(3.8, 8.4, h), np.arange(1.5, 4.9, h))
 
-    plt.figure(1, figsize=(4, 3))
-    plt.pcolormesh(xx, yy, Z, cmap=plt.cm.Paired)
+plt.figure(1, figsize=(4, 3))
+plt.pcolormesh(xx, yy, model, cmap=plt.cm.Paired)
 
-    plt.xlabel("Sepal length")
-    plt.ylabel("Sepal width")
+plt.xlabel("Sepal length")
+plt.ylabel("Sepal width")
 
-    plt.xlim(xx.min(), xx.max())
-    plt.ylim(yy.min(), yy.max())
-    plt.xticks(())
-    plt.yticks(())
+plt.xlim(xx.min(), xx.max())
+plt.ylim(yy.min(), yy.max())
 
-    plt.show()
-
-plot(Z)
+plt.show()
 ```
