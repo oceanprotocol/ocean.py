@@ -56,7 +56,7 @@ ALGO_metadata = {
         "container": {
             "entrypoint": "python $ALGO",
             "image": "oceanprotocol/algo_dockers",
-            "tag": "python-branin", # This tag works with grayscale too
+            "tag": "python-branin", # This image provides all the dependencies of the grayscale.py algorithm
             "checksum": "44e10daa6637893f4276bb8d7301eb35306ece50f61ca34dcab550",
         },
     }
@@ -123,7 +123,7 @@ ALGO_metadata = {
         "container": {
             "entrypoint": "python $ALGO",
             "image": "oceanprotocol/algo_dockers",
-            "tag": "python-branin", # This tag works with logistic regression too
+            "tag": "python-panda", # This image provides all the dependencies of the logistic_regression.py algorithm
             "checksum": "44e10daa6637893f4276bb8d7301eb35306ece50f61ca34dcab550",
         },
     }
