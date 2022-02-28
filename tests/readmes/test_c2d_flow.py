@@ -22,29 +22,34 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 @pytest.mark.integration
 @pytest.mark.parametrize(
-    "dataset_name,dataset_url,algorithm_name,algorithm_url",
+    "dataset_name,dataset_url,algorithm_name,algorithm_url,algorithm_docker_tag",
     [
         (
             "branin",
-            "https://raw.githubusercontent.com/trentmc/branin/main/branin.arff",
+            "https://raw.githubusercontent.com/oceanprotocol/ocean.py/issue705-image-processing-c2d-example/tests/resources/datasets/branin.arff",
             "gpr,",
-            "https://raw.githubusercontent.com/trentmc/branin/main/gpr.py",
+            "https://raw.githubusercontent.com/oceanprotocol/ocean.py/issue705-image-processing-c2d-example/tests/resources/algorithms/gpr.py",
+            "python-branin",
         ),
         (
             "lena",
             "https://raw.githubusercontent.com/oceanprotocol/ocean.py/issue705-image-processing-c2d-example/tests/resources/images/lena.png",
             "grayscale",
             "https://raw.githubusercontent.com/oceanprotocol/ocean.py/issue705-image-processing-c2d-example/tests/resources/algorithms/grayscale.py",
+            "python-branin",
         ),
         (
             "iris",
-            "https://www.openml.org/data/get_csv/61/dataset_61_iris.arff",
+            "https://raw.githubusercontent.com/oceanprotocol/ocean.py/issue705-image-processing-c2d-example/tests/resources/datasets/dataset_61_iris.csv",
             "logistic-regression",
             "https://raw.githubusercontent.com/oceanprotocol/ocean.py/issue705-image-processing-c2d-example/tests/resources/algorithms/logistic_regression.py",
+            "python-panda",
         ),
     ],
 )
-def test_c2d_flow_readme(dataset_name, dataset_url, algorithm_name, algorithm_url):
+def test_c2d_flow_readme(
+    dataset_name, dataset_url, algorithm_name, algorithm_url, algorithm_docker_tag
+):
     """This test mirrors the c2d-flow.md README.
     As such, it does not use the typical pytest fixtures.
     """
@@ -176,7 +181,7 @@ def test_c2d_flow_readme(dataset_name, dataset_url, algorithm_name, algorithm_ur
             "container": {
                 "entrypoint": "python $ALGO",
                 "image": "oceanprotocol/algo_dockers",
-                "tag": "python-branin",
+                "tag": algorithm_docker_tag,
                 "checksum": "44e10daa6637893f4276bb8d7301eb35306ece50f61ca34dcab550",
             },
         },
