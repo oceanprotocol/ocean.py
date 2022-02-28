@@ -25,8 +25,7 @@ import os
 import pickle
 import sys
 
-# Uncomment if running locally. matplotlib not included in oceanprotocol/algo_dockers:python-panda image
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn import preprocessing
@@ -84,10 +83,9 @@ def run_linear_regression(local=False):
     # Put the result into a color plot
     Z = Z.reshape(xx.shape)
 
-    # Uncomment if running locally. matplotlib not included in oceanprotocol/algo_dockers:python-panda image
-    # if local:
-    #     print("Plotting results")
-    #     plot(xx, yy, Z, X, Y)
+    if local:
+        print("Plotting results")
+        plot(xx, yy, Z, X, Y)
 
     filename = "logistic_regression.pickle" if local else "/data/outputs/result"
     with open(filename, "wb") as pickle_file:
@@ -95,22 +93,21 @@ def run_linear_regression(local=False):
         pickle.dump(Z, pickle_file)
 
 
-# Uncomment if running locally. matplotlib not included in oceanprotocol/algo_dockers:python-panda image
-# def plot(xx, yy, Z, X, Y):
-#     plt.figure(1, figsize=(4, 3))
-#     plt.pcolormesh(xx, yy, Z, cmap=plt.cm.Paired)
+def plot(xx, yy, Z, X, Y):
+    plt.figure(1, figsize=(4, 3))
+    plt.pcolormesh(xx, yy, Z, cmap=plt.cm.Paired)
 
-#     # Plot also the training points
-#     plt.scatter(X.iloc[:, 0], X.iloc[:, 1], c=Y, edgecolors="k", cmap=plt.cm.Paired)
-#     plt.xlabel("Sepal length")
-#     plt.ylabel("Sepal width")
+    # Plot also the training points
+    plt.scatter(X.iloc[:, 0], X.iloc[:, 1], c=Y, edgecolors="k", cmap=plt.cm.Paired)
+    plt.xlabel("Sepal length")
+    plt.ylabel("Sepal width")
 
-#     plt.xlim(xx.min(), xx.max())
-#     plt.ylim(yy.min(), yy.max())
-#     plt.xticks(())
-#     plt.yticks(())
+    plt.xlim(xx.min(), xx.max())
+    plt.ylim(yy.min(), yy.max())
+    plt.xticks(())
+    plt.yticks(())
 
-#     plt.show()
+    plt.show()
 
 
 if __name__ == "__main__":
