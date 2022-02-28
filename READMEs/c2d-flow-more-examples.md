@@ -153,7 +153,7 @@ ALGO_url_file = UrlFile(
 )
 ```
 
-### Display and Save the Result
+### Display the Result
 
 Display the result:
 
