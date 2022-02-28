@@ -31,6 +31,7 @@ from tests.resources.ddo_helpers import (
     build_credentials_dict,
     create_asset,
     create_basics,
+    get_first_service_by_type,
     get_sample_ddo,
 )
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
@@ -312,11 +313,11 @@ def test_download_fails(publisher_ocean_instance, publisher_wallet):
         mock.return_value = asset
         with pytest.raises(AssertionError):
             publisher_ocean_instance.assets.download_asset(
-                asset, publisher_wallet, "", "", index=-4
+                asset, asset.services[0], publisher_wallet, "", "", index=-4
             )
         with pytest.raises(TypeError):
             publisher_ocean_instance.assets.download_asset(
-                asset, publisher_wallet, "", "", index="string_index"
+                asset, asset.services[0], publisher_wallet, "", "", index="string_index"
             )
 
 
@@ -371,7 +372,10 @@ def test_pay_for_service_insufficient_balance(
 
     with pytest.raises(InsufficientBalance):
         publisher_ocean_instance.assets.pay_for_service(
-            asset, asset.get_service("access"), consume_fees, empty_wallet
+            asset,
+            get_first_service_by_type(asset, "access"),
+            consume_fees,
+            empty_wallet,
         )
 
 

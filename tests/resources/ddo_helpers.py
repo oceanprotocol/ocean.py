@@ -12,7 +12,6 @@ import requests
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
-from ocean_lib.assets.trusted_algorithms import generate_trusted_algo_dict
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.ocean.ocean import Ocean
@@ -229,9 +228,7 @@ def get_registered_asset_with_compute_service(
     )
 
     for algorithm in trusted_algorithms:
-        compute_service.add_publisher_trusted_algorithm(
-            algorithm, generate_trusted_algo_dict(algorithm)
-        )
+        compute_service.add_publisher_trusted_algorithm(algorithm)
 
     for publisher in trusted_algorithm_publishers:
         compute_service.add_publisher_trusted_algorithm_publisher(publisher)
@@ -335,3 +332,8 @@ def wait_for_ddo(ocean, did, timeout=30):
             break
 
     return ddo
+
+
+def get_first_service_by_type(asset, service_type: str) -> Service:
+    """Return the first Service with the given service type."""
+    return next((service for service in asset.services if service.type == service_type))

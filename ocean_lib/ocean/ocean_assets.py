@@ -514,6 +514,7 @@ class OceanAssets:
     def download_asset(
         self,
         asset: Asset,
+        service: Service,
         consumer_wallet: Wallet,
         destination: str,
         order_tx_id: str,
@@ -525,13 +526,13 @@ class OceanAssets:
             assert isinstance(index, int), logger.error("index has to be an integer.")
             assert index >= 0, logger.error("index has to be 0 or a positive integer.")
 
-        service = asset.get_service(ServiceTypes.ASSET_ACCESS)
         assert (
             service and service.type == ServiceTypes.ASSET_ACCESS
         ), f"Service with type {ServiceTypes.ASSET_ACCESS} is not found."
 
         return download_asset_files(
             asset=asset,
+            service=service,
             consumer_wallet=consumer_wallet,
             destination=destination,
             order_tx_id=order_tx_id,
