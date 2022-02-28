@@ -19,7 +19,7 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.wallet import Wallet
-from tests.resources.ddo_helpers import create_basics
+from tests.resources.ddo_helpers import create_basics, get_first_service_by_type
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
     get_provider_fees,
@@ -197,8 +197,16 @@ def test_delete_job_result(provider_wallet, config):
 def test_encrypt(web3, config, provider_wallet):
     """Tests successful encrypt job."""
     key = provider_wallet.private_key
-    file1_dict = {"type": "url", "url": "https://url.com/file1.csv", "method": "GET"}
-    file2_dict = {"type": "url", "url": "https://url.com/file2.csv", "method": "GET"}
+    file1_dict = {
+        "type": "url",
+        "url": "https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt",
+        "method": "GET",
+    }
+    file2_dict = {
+        "type": "url",
+        "url": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
+        "method": "GET",
+    }
     file1 = FilesTypeFactory(file1_dict)
     file2 = FilesTypeFactory(file2_dict)
 
@@ -246,7 +254,7 @@ def test_fileinfo(web3, config, publisher_wallet, publisher_ocean_instance):
         erc721_address=erc721_nft.address,
         deployed_erc20_tokens=[erc20_token],
     )
-    access_service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
+    access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
     fileinfo_result = DataSP.fileinfo(ddo.did, access_service)
     assert fileinfo_result.status_code == 200
@@ -255,7 +263,8 @@ def test_fileinfo(web3, config, publisher_wallet, publisher_ocean_instance):
     for file_index, file in enumerate(files_info):
         assert file["index"] == file_index
         assert file["valid"] is True
-        assert file["contentType"] == "text/html"
+        matches = "text/plain" if file_index == 0 else "text/xml"
+        assert file["contentType"] == matches
 
 
 @pytest.mark.integration
@@ -271,7 +280,7 @@ def test_initialize(web3, config, publisher_wallet, publisher_ocean_instance):
         erc721_address=erc721_nft.address,
         deployed_erc20_tokens=[erc20_token],
     )
-    access_service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
+    access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
     initialize_result = DataSP.initialize(
         did=ddo.did,

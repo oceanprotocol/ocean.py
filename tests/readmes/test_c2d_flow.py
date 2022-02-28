@@ -9,7 +9,6 @@ from datetime import datetime, timedelta
 
 import pytest
 
-from ocean_lib.assets.trusted_algorithms import add_publisher_trusted_algorithm
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
@@ -202,9 +201,8 @@ def test_c2d_flow_readme(dataset_name, dataset_url, algorithm_name, algorithm_ur
     assert ALGO_asset.did, "create algorithm unsuccessful"
 
     # 4. Alice allows the algorithm for C2D for that data asset
-    add_publisher_trusted_algorithm(
-        DATA_asset, ALGO_asset.did, config.metadata_cache_uri
-    )
+    compute_service = DATA_asset.services[0]
+    compute_service.add_publisher_trusted_algorithm(ALGO_asset)
     DATA_asset = ocean.assets.update(DATA_asset, alice_wallet)
 
     # 5. Bob acquires datatokens for data and algorithm
@@ -231,8 +229,8 @@ def test_c2d_flow_readme(dataset_name, dataset_url, algorithm_name, algorithm_ur
     DATA_asset = ocean.assets.resolve(DATA_did)
     ALGO_asset = ocean.assets.resolve(ALGO_did)
 
-    compute_service = DATA_asset.get_service("compute")
-    algo_service = ALGO_asset.get_service("access")
+    compute_service = DATA_asset.services[0]
+    algo_service = ALGO_asset.services[0]
 
     environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
 
@@ -291,7 +289,7 @@ def test_c2d_flow_readme(dataset_name, dataset_url, algorithm_name, algorithm_ur
     # Wait until job is done
     succeeded = False
     for _ in range(0, 200):
-        status = ocean.compute.status(DATA_asset, job_id, bob_wallet)
+        status = ocean.compute.status(DATA_asset, compute_service, job_id, bob_wallet)
         if status.get("dateFinished") and int(status["dateFinished"]) > 0:
             print(f"Status = '{status}'")
             succeeded = True
@@ -305,7 +303,9 @@ def test_c2d_flow_readme(dataset_name, dataset_url, algorithm_name, algorithm_ur
         result = None
         result_type = status["results"][i]["type"]
         print(f"Fetch result index {i}, type: {result_type}")
-        result = ocean.compute.result(DATA_asset, job_id, i, bob_wallet)
+        result = ocean.compute.result(
+            DATA_asset, compute_service, job_id, i, bob_wallet
+        )
         assert result, "result retrieval unsuccessful"
         print(f"result index: {i}, type: {result_type}, contents: {result}")
 

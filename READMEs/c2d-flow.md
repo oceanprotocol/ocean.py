@@ -214,8 +214,8 @@ print(f"ALGO_asset did = '{ALGO_asset.did}'")
 
 In the same Python console:
 ```python
-from ocean_lib.assets.trusted_algorithms import add_publisher_trusted_algorithm
-add_publisher_trusted_algorithm(DATA_asset, ALGO_asset.did, config.metadata_cache_uri)
+compute_service = DATA_asset.services[0]
+compute_service.add_publisher_trusted_algorithm(ALGO_asset)
 DATA_asset = ocean.assets.update(DATA_asset, alice_wallet)
 ```
 
@@ -251,8 +251,8 @@ ALGO_did = ALGO_asset.did
 DATA_asset = ocean.assets.resolve(DATA_did)
 ALGO_asset = ocean.assets.resolve(ALGO_did)
 
-compute_service = DATA_asset.get_service("compute")
-algo_service = ALGO_asset.get_service("access")
+compute_service = DATA_asset.services[0]
+algo_service = ALGO_asset.services[0]
 environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
 
 from datetime import datetime, timedelta
@@ -321,7 +321,7 @@ In the same Python console, you can check the job status as many times as needed
 import time
 succeeded = False
 for _ in range(0, 200):
-    status = ocean.compute.status(DATA_asset, job_id, bob_wallet)
+    status = ocean.compute.status(DATA_asset, compute_service, job_id, bob_wallet)
     if status.get("dateFinished") and int(status["dateFinished"]) > 0:
         succeeded = True
         break
@@ -339,7 +339,7 @@ for i in range(len(status["results"])):
     result = None
     result_type = status["results"][i]["type"]
     print(f"Fetch result index {i}, type: {result_type}")
-    result = ocean.compute.result(DATA_asset, job_id, i, bob_wallet)
+    result = ocean.compute.result(DATA_asset, compute_service, job_id, i, bob_wallet)
     print(result)
     print("==========\n")
 
