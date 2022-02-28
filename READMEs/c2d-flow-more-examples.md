@@ -160,7 +160,10 @@ Display the result:
 ```python
 import matplotlib.pyplot as plt
 
-def plot(xx, yy, Z):
+def plot(Z):
+    h = 0.02  # step size in the mesh
+    xx, yy = np.meshgrid(np.arange(3.8, 8.4, h), np.arange(1.5, 4.9, h))
+
     plt.figure(1, figsize=(4, 3))
     plt.pcolormesh(xx, yy, Z, cmap=plt.cm.Paired)
 
@@ -174,5 +177,5 @@ def plot(xx, yy, Z):
 
     plt.show()
 
-plot(xx, yy, Z, X, Y)
+plot(Z)
 ```
