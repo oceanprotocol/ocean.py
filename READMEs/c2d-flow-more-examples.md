@@ -69,8 +69,25 @@ ALGO_url_file = UrlFile(
 )
 ```
 
+### Display and Save the Result
 
-TODO: View resulting image
+Display the image:
+
+```python
+from PIL import Image
+import io
+
+image = Image.open(io.BytesIO(result))
+image.show()
+```
+
+Save the image:
+
+```python
+f = open('lena-grayscale.png', 'wb')
+f.write(result)
+f.close()
+```
 
 ## Example 2: Logistic Regression for Classification
 
