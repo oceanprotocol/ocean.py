@@ -87,7 +87,7 @@ def asset_displayed_on_sale(ocean: Ocean, wallet: Wallet):
     assert formatted_price
 
 
-@pytest.mark.skip(reason="This test is slow and not needed in the CI")
+@pytest.mark.slow
 def test_pool_creation_with_threads():
     config = ExampleConfig.get_config()
     ocean = Ocean(config)

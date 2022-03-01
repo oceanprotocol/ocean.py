@@ -15,7 +15,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.structures.abi_tuples import CreateErc20Data, ConsumeFees
+from ocean_lib.structures.abi_tuples import ConsumeFees, CreateErc20Data
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
@@ -156,7 +156,7 @@ def thread_function3(ocean, tristan_wallet, config):
     consume_flow(ocean, wallet=tristan_wallet, config=config)
 
 
-@pytest.mark.skip(reason="This test is slow and not needed in the CI")
+@pytest.mark.slow
 def test_consume_flow_with_threads():
     config = ExampleConfig.get_config()
     ocean = Ocean(config)
