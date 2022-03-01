@@ -86,8 +86,8 @@ pytest ocean_lib/models/test/test_btoken.py::test_ERC20
 #run all tests in a file
 pytest ocean_lib/models/test/test_btoken.py
 
-#run all tests
-pytest
+#run all regular tests; see details on pytest markers to select specific suites
+pytest -m "not slow"
 
 ```
 
