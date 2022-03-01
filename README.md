@@ -55,29 +55,12 @@ pip install ocean-lib
 
 ## 🏄 Quickstart
 
-### Simple Flow
+Here are flows to try out, from simple to specific detailed variants.
 
-This stripped-down flow shows the essence of Ocean: simply creating a datatoken.
-
-[Go to simple flow](READMEs/datatokens-flow.md)
-
-### Marketplace flow
-
-In this flow, a data asset is posted for sale in a marketplace, and purchased. It includes metadata, and a datatoken pool for automated price discovery.
-
-[Go to marketplace flow](READMEs/marketplace-flow.md)
-
-### Fixed-Rate Exchange flow
-
-This flow uses a fixed (constant) price for datasets, not automated price discovery.
-
-[Go to fixed-rate exchange flow](READMEs/fixed-rate-exchange-flow.md)
-
-### Compute-to-Data flow
-
-This flow uses Ocean Compute-to-Data (c2d) to compute results from a dataset that never leaves the premises.
-
-[Go to c2d flow](READMEs/c2d-flow.md)
+- **[Simple flow](READMEs/datatokens-flow.md)** - the essence of Ocean - creating a data NFT & datatoken.
+- **[Marketplace flow](READMEs/marketplace-flow.md)** - a data asset is posted for sale in a datatoken pool, then purchased. Includes metadata.
+- **[Fixed rate exchange flow](READMEs/fixed-rate-exchange-flow.md)** - a data asset is posted for sale at fixed rate, then purchased. 
+- **[Compute-to-data flow](READMEs/c2d-flow.md)** - uses C2D to build an AI model a dataset that never leaves the premises.
 
 ### Learn more
 
