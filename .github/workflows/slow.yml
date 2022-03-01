@@ -5,7 +5,6 @@
 name: Ocean.py slow tests
 
 on:
-  on:
   schedule:
     - cron: '30 5 * * 2'
 
