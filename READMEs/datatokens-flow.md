@@ -59,8 +59,8 @@ pip3 install --no-cache-dir ../ocean.py/
 ## Set envvars
 ```console
 # Set envvars
-export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
-export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
+export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
+export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
 
 # Set the address file only for ganache
 export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
