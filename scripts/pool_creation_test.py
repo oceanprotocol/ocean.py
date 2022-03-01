@@ -16,7 +16,7 @@ from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-@pytest.mark.skip(reason="This test is slow and not needed in the CI")
+@pytest.mark.slow
 def test_stressed_pool_creation():
     config = ExampleConfig.get_config()
     ocean = Ocean(config)

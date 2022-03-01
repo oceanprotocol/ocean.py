@@ -13,11 +13,11 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
-from tests.resources.ddo_helpers import create_basics, build_credentials_dict
+from tests.resources.ddo_helpers import build_credentials_dict, create_basics
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
-@pytest.mark.skip(reason="This test is slow and not needed in the CI")
+@pytest.mark.slow
 def test_stressed_publish():
     config = ExampleConfig.get_config()
     ocean = Ocean(config)
