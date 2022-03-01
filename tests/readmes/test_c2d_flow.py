@@ -33,6 +33,23 @@ from ocean_lib.web3_internal.wallet import Wallet
             "https://raw.githubusercontent.com/oceanprotocol/ocean.py/issue705-image-processing-c2d-example/tests/resources/algorithms/gpr.py",
             "python-branin",
         ),
+    ],
+)
+def test_c2d_flow_readme(
+    dataset_name, dataset_url, algorithm_name, algorithm_url, algorithm_docker_tag
+):
+    """This test mirrors the c2d-flow.md README.
+    As such, it does not use the typical pytest fixtures.
+    """
+    c2d_flow_readme(
+        dataset_name, dataset_url, algorithm_name, algorithm_url, algorithm_docker_tag
+    )
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    "dataset_name,dataset_url,algorithm_name,algorithm_url,algorithm_docker_tag",
+    [
         (
             "lena",
             "https://raw.githubusercontent.com/oceanprotocol/ocean.py/issue705-image-processing-c2d-example/tests/resources/images/lena.png",
@@ -49,12 +66,21 @@ from ocean_lib.web3_internal.wallet import Wallet
         ),
     ],
 )
-def test_c2d_flow_readme(
+def test_c2d_flow_more_examples_readme(
     dataset_name, dataset_url, algorithm_name, algorithm_url, algorithm_docker_tag
 ):
-    """This test mirrors the c2d-flow.md README.
+    """This test mirrors the c2d-flow-more-examples.md README.
     As such, it does not use the typical pytest fixtures.
     """
+    c2d_flow_readme(
+        dataset_name, dataset_url, algorithm_name, algorithm_url, algorithm_docker_tag
+    )
+
+
+def c2d_flow_readme(
+    dataset_name, dataset_url, algorithm_name, algorithm_url, algorithm_docker_tag
+):
+    """This is a helper method that mirrors the c2d-flow.md README."""
 
     # 2. Alice publishes data asset with compute service
     config = ExampleConfig.get_config()
