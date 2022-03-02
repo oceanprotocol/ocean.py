@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-"""Defines NamedTuples `PoolData`, `BPoolData`, `BPoolInitialized`, `FixedData`,
+"""Defines NamedTuples `PoolData`, `FixedData`,
 `DispenserData`, `Operations`"""
 from enum import Enum
 from typing import List, NamedTuple
@@ -13,28 +13,6 @@ PoolData = NamedTuple(
     [("ss_params", List[int]), ("swap_fees", List[int]), ("addresses", List[str])],
 )
 
-BPoolData = NamedTuple(
-    "BPoolData",
-    [
-        ("tokens", List[str]),
-        ("ss_params", List[int]),
-        ("swap_fees", List[int]),
-        ("addresses", List[str]),
-    ],
-)
-
-BPoolInitialized = NamedTuple(
-    "BPoolInitialized",
-    [
-        ("controller", str),
-        ("factory", str),
-        ("swap_fees", List[int]),
-        ("public_swap", bool),
-        ("finalized", bool),
-        ("tokens", List[str]),
-        ("fee_collectors", List[str]),
-    ],
-)
 
 FixedData = NamedTuple(
     "FixedData",

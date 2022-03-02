@@ -8,7 +8,6 @@ from enforce_typing import enforce_types
 
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.btoken import BTokenBase
-from ocean_lib.structures.abi_tuples import BPoolInitialized
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -79,10 +78,28 @@ class BPool(BTokenBase):
 
     def initialize(
         self,
-        bpool_initialized: Union[list, tuple, BPoolInitialized],
+        controller: str,
+        factory: str,
+        swap_fees: List[int],
+        public_swap: bool,
+        finalized: bool,
+        tokens: List[str],
+        fee_collectors: List[str],
         from_wallet: Wallet,
     ) -> str:
-        return self.send_transaction("initialize", bpool_initialized, from_wallet)
+        return self.send_transaction(
+            "initialize",
+            (
+                controller,
+                factory,
+                swap_fees,
+                public_swap,
+                finalized,
+                tokens,
+                fee_collectors,
+            ),
+            from_wallet,
+        )
 
     def setup(
         self,
