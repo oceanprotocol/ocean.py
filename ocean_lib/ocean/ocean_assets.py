@@ -286,14 +286,12 @@ class OceanAssets:
             token_uri = erc721_uri or "https://oceanprotocol.com/nft/"
             # register on-chain
             tx_id = erc721_factory.deploy_erc721_contract(
-                (
-                    name,
-                    symbol,
-                    template_index,
-                    additional_erc20_deployer,
-                    additional_metadata_updater,
-                    token_uri,
-                ),
+                name=name,
+                symbol=symbol,
+                template_index=template_index,
+                additional_metadata_updater=additional_metadata_updater,
+                additional_erc20_deployer=additional_erc20_deployer,
+                token_uri=token_uri,
                 from_wallet=publisher_wallet,
             )
             tx_receipt = self._web3.eth.wait_for_transaction_receipt(tx_id)

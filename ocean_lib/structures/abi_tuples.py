@@ -8,29 +8,6 @@
 from enum import Enum
 from typing import List, NamedTuple
 
-CreateERC721Data = NamedTuple(
-    "CreateErc721Data",
-    [
-        ("name", str),
-        ("symbol", str),
-        ("template_index", int),
-        ("additional_metadata_updater", str),
-        ("additional_erc20_deployer", str),
-        ("token_uri", str),
-    ],
-)
-
-CreateERC721DataNoDeployer = NamedTuple(
-    "CreateERC721DataNoDeployer",
-    [
-        ("name", str),
-        ("symbol", str),
-        ("template_index", int),
-        ("additional_metadata_updater", str),
-        ("token_uri", str),
-    ],
-)
-
 CreateErc20Data = NamedTuple(
     "CreateErc20Data",
     [

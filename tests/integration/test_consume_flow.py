@@ -29,15 +29,13 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
 
     # Publisher deploys NFT contract
     tx = erc721_factory.deploy_erc721_contract(
-        (
-            "NFT1",
-            "NFTSYMBOL",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
-        publisher_wallet,
+        name="NFT1",
+        symbol="NFTSYMBOL",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(

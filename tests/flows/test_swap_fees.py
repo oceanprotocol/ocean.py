@@ -35,15 +35,13 @@ def test_deploy_erc721_and_manage(
         web3, get_address_of_type(config, "ERC721Factory")
     )
     tx = erc721_factory.deploy_erc721_contract(
-        (
-            "NFT",
-            "SYMBOL",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
-        factory_deployer_wallet,
+        name="NFT",
+        symbol="SYMBOL",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=factory_deployer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 

@@ -60,15 +60,13 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     publish_market_fee_amount = 5
 
     tx = erc721_factory.deploy_erc721_contract(
-        (
-            "DT1",
-            "DTSYMBOL",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
-        publisher_wallet,
+        name="DT1",
+        symbol="DTSYMBOL",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
@@ -87,15 +85,13 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     # Tests current NFT count
     current_nft_count = erc721_factory.get_current_nft_count()
     erc721_factory.deploy_erc721_contract(
-        (
-            "DT2",
-            "DTSYMBOL1",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
-        publisher_wallet,
+        name="DT2",
+        symbol="DTSYMBOL1",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
     )
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
 

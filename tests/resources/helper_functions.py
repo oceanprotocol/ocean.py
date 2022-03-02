@@ -216,14 +216,12 @@ def deploy_erc721_erc20(
         web3, get_address_of_type(config, "ERC721Factory")
     )
     tx = erc721_factory.deploy_erc721_contract(
-        (
-            "NFT",
-            "NFTSYMBOL",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
+        name="NFT",
+        symbol="NFTSYMBOL",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
         from_wallet=erc721_publisher,
     )
     token_address = erc721_factory.get_token_address(tx)

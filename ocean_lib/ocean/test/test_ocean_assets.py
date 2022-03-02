@@ -21,7 +21,6 @@ from ocean_lib.services.service import Service
 from ocean_lib.structures.abi_tuples import (
     ConsumeFees,
     CreateErc20Data,
-    CreateERC721Data,
 )
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -392,15 +391,13 @@ def test_plain_asset_with_one_datatoken(
 
     # Publisher deploys NFT contract
     tx = erc721_factory.deploy_erc721_contract(
-        (
-            "NFT1",
-            "NFTSYMBOL",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
-        publisher_wallet,
+        name="NFT1",
+        symbol="NFTSYMBOL",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
@@ -453,16 +450,15 @@ def test_plain_asset_multiple_datatokens(
         config, web3, data_provider
     )
 
-    erc721_data = CreateERC721Data(
-        "NFT2",
-        "NFT2SYMBOL",
-        1,
-        ZERO_ADDRESS,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
+    tx = erc721_factory.deploy_erc721_contract(
+        name="NFT2",
+        symbol="NFT2SYMBOL",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
     )
-
-    tx = erc721_factory.deploy_erc721_contract(erc721_data, publisher_wallet)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
         ERC721FactoryContract.EVENT_NFT_CREATED,
