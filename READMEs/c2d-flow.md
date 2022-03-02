@@ -91,7 +91,7 @@ DATA_metadata = {
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
 from ocean_lib.structures.file_objects import UrlFile
 DATA_url_file = UrlFile(
-    url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+    url="https://raw.githubusercontent.com/oceanprotocol/cdt-algorithms/add-examples/branin_and_gpr/branin.arff"
 )
 
 # Encrypt file(s) using provider
@@ -191,7 +191,7 @@ ALGO_metadata = {
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
 from ocean_lib.structures.file_objects import UrlFile
 ALGO_url_file = UrlFile(
-    url="https://raw.githubusercontent.com/trentmc/branin/main/gpr.py"
+    url="https://raw.githubusercontent.com/oceanprotocol/cdt-algorithms/add-examples/branin_and_gpr/gpr.py"
 )
 
 # Encrypt file(s) using provider

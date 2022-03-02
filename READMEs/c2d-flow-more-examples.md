@@ -30,7 +30,7 @@ DATA_metadata = {
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
 from ocean_lib.structures.file_objects import UrlFile
 DATA_url_file = UrlFile(
-    url="https://raw.githubusercontent.com/oceanprotocol/ocean.py/issue705-image-processing-c2d-example/tests/resources/images/lena.png"
+    url="https://raw.githubusercontent.com/oceanprotocol/cdt-algorithms/add-examples/lena_and_grayscale/lena.png"
 )
 ```
 
@@ -65,7 +65,7 @@ ALGO_metadata = {
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
 from ocean_lib.structures.file_objects import UrlFile
 ALGO_url_file = UrlFile(
-    url="https://raw.githubusercontent.com/oceanprotocol/ocean.py/issue705-image-processing-c2d-example/tests/resources/algorithms/grayscale.py"
+    url="https://raw.githubusercontent.com/oceanprotocol/cdt-algorithms/add-examples/lena_and_grayscale/grayscale.py"
 )
 ```
 
@@ -120,7 +120,7 @@ DATA_metadata = {
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
 from ocean_lib.structures.file_objects import UrlFile
 DATA_url_file = UrlFile(
-    url="https://www.openml.org/data/download/61/dataset_61_iris.arff"
+    url="https://raw.githubusercontent.com/oceanprotocol/cdt-algorithms/add-examples/iris_and_logisitc_regression/dataset_61_iris.csv"
 )
 ```
 
@@ -155,7 +155,7 @@ ALGO_metadata = {
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
 from ocean_lib.structures.file_objects import UrlFile
 ALGO_url_file = UrlFile(
-    url="https://raw.githubusercontent.com/oceanprotocol/ocean.py/issue705-image-processing-c2d-example/tests/resources/algorithms/logistic_regression.py"
+    url="https://raw.githubusercontent.com/oceanprotocol/cdt-algorithms/add-examples/iris_and_logisitc_regression/logistic_regression.py"
 )
 ```
 
