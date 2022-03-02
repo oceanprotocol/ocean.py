@@ -11,7 +11,6 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.structures.abi_tuples import (
-    CreateErc20Data,
     OrderData,
 )
 from ocean_lib.utils.utilities import create_checksum
@@ -110,19 +109,19 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
 
     # Tests creating successfully an ERC20 token
     erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
-    erc_create_data = CreateErc20Data(
-        1,
-        ["ERC20DT1", "ERC20DT1Symbol"],
-        [
+    tx_result = erc721_nft.create_erc20(
+        template_index=1,
+        strings=["ERC20DT1", "ERC20DT1Symbol"],
+        addresses=[
             publisher_wallet.address,
             consumer_wallet.address,
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        [to_wei("0.5"), 0],
-        [b""],
+        uints=[to_wei("0.5"), 0],
+        bytess=[b""],
+        from_wallet=consumer_wallet,
     )
-    tx_result = erc721_nft.create_erc20(erc_create_data, consumer_wallet)
     assert tx_result, "Failed to create ERC20 token."
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
     registered_token_event = erc721_factory.get_event_log(
@@ -293,19 +292,19 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     # Create ERC20 data token for fees.
     fee_address = "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9"
 
-    erc_create_data = CreateErc20Data(
-        1,
-        ["ERC20DT1P", "ERC20DT1SymbolP"],
-        [
+    tx = erc721_nft.create_erc20(
+        template_index=1,
+        strings=["ERC20DT1P", "ERC20DT1SymbolP"],
+        addresses=[
             publisher_wallet.address,
             consumer_wallet.address,
-            fee_address,
-            mock_dai_contract_address,
+            publisher_wallet.address,
+            ZERO_ADDRESS,
         ],
-        [to_wei("0.5"), to_wei("0.0005")],
-        [b""],
+        uints=[to_wei("0.5"), to_wei("0.0005")],
+        bytess=[b""],
+        from_wallet=publisher_wallet,
     )
-    tx = erc721_nft.create_erc20(erc_create_data, publisher_wallet)
     assert tx, "Failed to create ERC20 token."
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_fee_token_event = erc721_factory.get_event_log(
@@ -543,19 +542,19 @@ def test_start_multiple_order(
 
     # Tests creating successfully an ERC20 token
     erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
-    erc_create_data = CreateErc20Data(
-        1,
-        ["ERC20DT1", "ERC20DT1Symbol"],
-        [
+    tx_result = erc721_nft.create_erc20(
+        template_index=1,
+        strings=["ERC20DT1", "ERC20DT1Symbol"],
+        addresses=[
             publisher_wallet.address,
             consumer_wallet.address,
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        [to_wei("2"), 0],
-        [b""],
+        uints=[to_wei(2), 0],
+        bytess=[b""],
+        from_wallet=consumer_wallet,
     )
-    tx_result = erc721_nft.create_erc20(erc_create_data, consumer_wallet)
     assert tx_result, "Failed to create ERC20 token."
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
     registered_token_event = erc721_factory.get_event_log(
@@ -693,28 +692,6 @@ def test_fail_create_erc20(
     )
     erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
 
-    # Should fail to create an ERC20 calling the factory directly
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_factory.create_token(
-            (
-                1,
-                ["ERC20DT1", "ERC20DT1Symbol"],
-                [
-                    publisher_wallet.address,
-                    publisher_wallet.address,
-                    publisher_wallet.address,
-                    ZERO_ADDRESS,
-                ],
-                [to_wei(1), 0],
-                [b""],
-            ),
-            publisher_wallet,
-        )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721Factory: ONLY ERC721 "
-        "INSTANCE FROM ERC721FACTORY"
-    )
     tx = erc721_factory.deploy_erc721_contract(
         name="DT1",
         symbol="DTSYMBOL",
@@ -738,20 +715,20 @@ def test_fail_create_erc20(
     erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
 
     # Should fail to create a specific ERC20 Template if the index is ZERO
-    erc_create_data = CreateErc20Data(
-        0,
-        ["ERC20DT1", "ERC20DT1Symbol"],
-        [
-            publisher_wallet.address,
-            consumer_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        [to_wei("0.5"), 0],
-        [b""],
-    )
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_nft.create_erc20(erc_create_data, consumer_wallet)
+        erc721_nft.create_erc20(
+            template_index=0,
+            strings=["ERC20DT1", "ERC20DT1Symbol"],
+            addresses=[
+                publisher_wallet.address,
+                consumer_wallet.address,
+                publisher_wallet.address,
+                ZERO_ADDRESS,
+            ],
+            uints=[to_wei("0.5"), 0],
+            bytess=[b""],
+            from_wallet=consumer_wallet,
+        )
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC20Factory: Template index "
@@ -759,20 +736,20 @@ def test_fail_create_erc20(
     )
 
     # Should fail to create a specific ERC20 Template if the index doesn't exist
-    erc_create_data = CreateErc20Data(
-        3,
-        ["ERC20DT1", "ERC20DT1Symbol"],
-        [
-            publisher_wallet.address,
-            consumer_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        [to_wei("0.5"), 0],
-        [b""],
-    )
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_nft.create_erc20(erc_create_data, consumer_wallet)
+        erc721_nft.create_erc20(
+            template_index=3,
+            strings=["ERC20DT1", "ERC20DT1Symbol"],
+            addresses=[
+                publisher_wallet.address,
+                consumer_wallet.address,
+                publisher_wallet.address,
+                ZERO_ADDRESS,
+            ],
+            uints=[to_wei("0.5"), 0],
+            bytess=[b""],
+            from_wallet=consumer_wallet,
+        )
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC20Factory: Template index "
@@ -782,7 +759,19 @@ def test_fail_create_erc20(
     # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
     assert erc721_nft.get_permissions(another_consumer_wallet.address)[1] is False
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_nft.create_erc20(erc_create_data, another_consumer_wallet)
+        erc721_nft.create_erc20(
+            template_index=1,
+            strings=["ERC20DT1", "ERC20DT1Symbol"],
+            addresses=[
+                publisher_wallet.address,
+                consumer_wallet.address,
+                publisher_wallet.address,
+                ZERO_ADDRESS,
+            ],
+            uints=[to_wei("0.5"), 0],
+            bytess=[b""],
+            from_wallet=another_consumer_wallet,
+        )
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT "

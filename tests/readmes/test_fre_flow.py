@@ -9,7 +9,6 @@ import pytest
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -45,7 +44,7 @@ def test_fre_flow_readme():
     assert token_address
 
     # Prepare data for ERC20 token
-    erc20_data = CreateErc20Data(
+    erc20_token = erc721_nft.create_datatoken(
         template_index=1,
         strings=["Datatoken 1", "DT1"],
         addresses=[
@@ -56,9 +55,8 @@ def test_fre_flow_readme():
         ],
         uints=[ocean.to_wei(200), 0],
         bytess=[b""],
+        from_wallet=alice_wallet,
     )
-
-    erc20_token = erc721_nft.create_datatoken(erc20_data, alice_wallet)
     print(f"token_address = '{erc20_token.address}'")
 
     # Mint the datatokens

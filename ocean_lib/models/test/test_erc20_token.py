@@ -11,7 +11,7 @@ from web3.main import Web3
 from ocean_lib.models.erc20_token import ERC20Token, RolesERC20
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.structures.abi_tuples import ConsumeFees, CreateErc20Data, ProviderFees
+from ocean_lib.structures.abi_tuples import ConsumeFees, ProviderFees
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
@@ -103,19 +103,19 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
 
     # Tests creating successfully an ERC20 token
     erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
-    erc_create_data = CreateErc20Data(
-        1,
-        ["ERC20DT1", "ERC20DT1Symbol"],
-        [
+    tx_result = erc721_nft.create_erc20(
+        template_index=1,
+        strings=["ERC20DT1", "ERC20DT1Symbol"],
+        addresses=[
             publisher_wallet.address,
             consumer_wallet.address,
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        [to_wei("0.5"), 0],
-        [b""],
+        uints=[to_wei("0.5"), 0],
+        bytess=[b""],
+        from_wallet=consumer_wallet,
     )
-    tx_result = erc721_nft.create_erc20(erc_create_data, consumer_wallet)
     assert tx_result, "Failed to create ERC20 token."
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)

@@ -9,7 +9,7 @@ import pytest
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.structures.abi_tuples import CreateErc20Data, DispenserData
+from ocean_lib.structures.abi_tuples import DispenserData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -45,7 +45,7 @@ def test_dispenser_flow_readme():
 
     # Prepare data for ERC20 token
     cap = ocean.to_wei(100)
-    erc20_data = CreateErc20Data(
+    erc20_token = erc721_nft.create_datatoken(
         template_index=1,  # default value
         strings=["ERC20DT1", "ERC20DT1Symbol"],  # name & symbol for ERC20 token
         addresses=[
@@ -56,9 +56,7 @@ def test_dispenser_flow_readme():
         ],
         uints=[cap, 0],
         bytess=[b""],
-    )
-    erc20_token = erc721_nft.create_datatoken(
-        erc20_data=erc20_data, from_wallet=alice_wallet
+        from_wallet=alice_wallet,
     )
 
     assert erc20_token.address

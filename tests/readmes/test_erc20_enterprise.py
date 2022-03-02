@@ -9,7 +9,7 @@ import pytest
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.structures.abi_tuples import CreateErc20Data, DispenserData, OrderParams
+from ocean_lib.structures.abi_tuples import DispenserData, OrderParams
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -40,7 +40,7 @@ def test_erc20_enterprise_flow_with_dispenser():
 
     # Prepare data for ERC20 Enterprise token
     cap = ocean.to_wei(200)
-    erc20_data = CreateErc20Data(
+    erc20_enterprise_token = erc721_nft.create_datatoken(
         template_index=2,  # this is the value for ERC20 Enterprise token
         strings=[
             "ERC20DT1",
@@ -54,9 +54,7 @@ def test_erc20_enterprise_flow_with_dispenser():
         ],
         uints=[cap, 0],
         bytess=[b""],
-    )
-    erc20_enterprise_token = erc721_nft.create_datatoken(
-        erc20_data=erc20_data, from_wallet=alice_wallet
+        from_wallet=alice_wallet,
     )
 
     assert erc20_enterprise_token.address
@@ -157,7 +155,7 @@ def test_erc20_enterprise_flow_with_fre():
 
     # Prepare data for ERC20 Enterprise token
     cap = ocean.to_wei(200)
-    erc20_data = CreateErc20Data(
+    erc20_enterprise_token = erc721_nft.create_datatoken(
         template_index=2,  # this is the value for ERC20 Enterprise token
         strings=[
             "ERC20DT1",
@@ -171,9 +169,7 @@ def test_erc20_enterprise_flow_with_fre():
         ],
         uints=[cap, 0],
         bytess=[b""],
-    )
-    erc20_enterprise_token = erc721_nft.create_datatoken(
-        erc20_data=erc20_data, from_wallet=alice_wallet
+        from_wallet=alice_wallet,
     )
 
     assert erc20_enterprise_token.address

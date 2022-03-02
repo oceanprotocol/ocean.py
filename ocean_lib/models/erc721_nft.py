@@ -3,16 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enum import IntEnum
-from typing import List, Union
+from typing import List
 
 from enforce_typing import enforce_types
 
 from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.structures.abi_tuples import (
-    ChainMetadata,
-    ChainMetadataWithTokenUri,
-    CreateErc20Data,
+    MetadataProof,
 )
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
@@ -32,6 +30,7 @@ class ERC721NFT(ContractBase):
     EVENT_TOKEN_CREATED = "TokenCreated"
     EVENT_METADATA_CREATED = "MetadataCreated"
     EVENT_METADATA_UPDATED = "MetadataUpdated"
+    EVENT_METADATA_VALIDATED = "MetadataValidated"
     EVENT_TOKEN_URI_UPDATED = "TokenURIUpdate"
 
     @property
@@ -41,6 +40,10 @@ class ERC721NFT(ContractBase):
     @property
     def event_MetadataUpdated(self):
         return self.events.MetadataUpdated()
+
+    @property
+    def event_MetadataValidated(self):
+        return self.events.MetadataValidated()
 
     @property
     def event_TokenCreated(self):
@@ -78,23 +81,79 @@ class ERC721NFT(ContractBase):
     def set_metadata_state(self, metadata_state: int, from_wallet: Wallet):
         return self.send_transaction("setMetaDataState", (metadata_state,), from_wallet)
 
-    def set_metadata(self, chain_metadata: ChainMetadata, from_wallet: Wallet) -> str:
-        return self.send_transaction("setMetaData", chain_metadata, from_wallet)
-
-    def set_metadata_token_uri(
-        self, chain_metadata: ChainMetadataWithTokenUri, from_wallet: Wallet
+    def set_metadata(
+        self,
+        metadata_state: int,
+        metadata_decryptor_url: str,
+        metadata_decryptor_address: str,
+        flags: bytes,
+        data: bytes,
+        data_hash: bytes,
+        metadata_proofs: List[MetadataProof],
+        from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "setMetaDataAndTokenURI", (chain_metadata,), from_wallet
+            "setMetaData",
+            (
+                metadata_state,
+                metadata_decryptor_url,
+                metadata_decryptor_address,
+                flags,
+                data,
+                data_hash,
+                metadata_proofs,
+            ),
+            from_wallet,
+        )
+
+    def set_metadata_token_uri(
+        self,
+        metadata_state: int,
+        metadata_decryptor_url: str,
+        metadata_decryptor_address: str,
+        flags: bytes,
+        data: bytes,
+        data_hash: bytes,
+        token_id: int,
+        token_uri: str,
+        metadata_proofs: List[MetadataProof],
+        from_wallet: Wallet,
+    ) -> str:
+        return self.send_transaction(
+            "setMetaDataAndTokenURI",
+            (
+                (
+                    metadata_state,
+                    metadata_decryptor_url,
+                    metadata_decryptor_address,
+                    flags,
+                    data,
+                    data_hash,
+                    token_id,
+                    token_uri,
+                    metadata_proofs,
+                ),
+            ),
+            from_wallet,
         )
 
     def get_metadata(self) -> tuple:
         return self.contract.caller.getMetaData()
 
     def create_erc20(
-        self, erc_create_data: Union[dict, tuple, CreateErc20Data], from_wallet: Wallet
+        self,
+        template_index: int,
+        strings: List[str],
+        addresses: List[str],
+        uints: List[int],
+        bytess: List[bytes],
+        from_wallet: Wallet,
     ) -> str:
-        return self.send_transaction("createERC20", erc_create_data, from_wallet)
+        return self.send_transaction(
+            "createERC20",
+            (template_index, strings, addresses, uints, bytess),
+            from_wallet,
+        )
 
     def add_to_create_erc20_list(
         self, allowed_address: str, from_wallet: Wallet
@@ -215,11 +274,24 @@ class ERC721NFT(ContractBase):
         )
 
     def create_datatoken(
-        self, erc20_data: Union[CreateErc20Data, dict, tuple], from_wallet: Wallet
+        self,
+        template_index: int,
+        strings: List[str],
+        addresses: List[str],
+        uints: List[int],
+        bytess: List[bytes],
+        from_wallet: Wallet,
     ) -> ERC20Token:
         initial_list = self.get_tokens_list()
 
-        tx_id = self.create_erc20(erc20_data, from_wallet)
+        tx_id = self.create_erc20(
+            template_index=template_index,
+            strings=strings,
+            addresses=addresses,
+            uints=uints,
+            bytess=bytess,
+            from_wallet=from_wallet,
+        )
         self.web3.eth.wait_for_transaction_receipt(tx_id)
 
         new_elements = [
@@ -230,6 +302,6 @@ class ERC721NFT(ContractBase):
 
         return (
             ERC20Token(self.web3, new_elements[0])
-            if erc20_data.template_index == 1
+            if template_index == 1
             else ERC20Enterprise(self.web3, new_elements[0])
         )

@@ -12,7 +12,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.ocean.ocean_assets import OceanAssets
-from ocean_lib.structures.abi_tuples import ConsumeFees, CreateErc20Data
+from ocean_lib.structures.abi_tuples import ConsumeFees
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -69,27 +69,24 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
     encrypt_response = data_provider.encrypt(files, config.provider_url)
     encrypted_files = encrypt_response.content.decode("utf-8")
 
-    # Set ERC20 Data
-    erc20_data = CreateErc20Data(
-        template_index=1,
-        strings=["Datatoken 1", "DT1"],
-        addresses=[
-            publisher_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-            get_address_of_type(config, "Ocean"),
-        ],
-        uints=[to_wei("100"), 0],
-        bytess=[b""],
-    )
-
     # Publish a plain asset with one data token on chain
     ddo = asset.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_address,
-        erc20_tokens_data=[erc20_data],
+        erc20_templates=[1],
+        erc20_strings=[["Datatoken 1", "DT1"]],
+        erc20_addresses_list=[
+            [
+                publisher_wallet.address,
+                publisher_wallet.address,
+                ZERO_ADDRESS,
+                get_address_of_type(config, "Ocean"),
+            ]
+        ],
+        erc20_uints=[[to_wei("100"), 0]],
+        erc20_bytess=[[b""]],
     )
 
     assert ddo, "The asset is not created."

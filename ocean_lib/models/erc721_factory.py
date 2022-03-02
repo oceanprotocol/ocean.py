@@ -9,7 +9,6 @@ from web3.datastructures import AttributeDict
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.structures.abi_tuples import (
-    CreateErc20Data,
     MetadataProof,
 )
 from ocean_lib.web3_internal.wallet import Wallet
@@ -96,11 +95,6 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     def is_contract(self, account_address: str) -> bool:
         return self.contract.caller.isContract(account_address)
-
-    def create_token(
-        self, token_data: Union[list, dict, CreateErc20Data], from_wallet: Wallet
-    ) -> str:
-        return self.send_transaction("createToken", token_data, from_wallet)
 
     def get_current_token_count(self) -> int:
         return self.contract.caller.getCurrentTokenCount()

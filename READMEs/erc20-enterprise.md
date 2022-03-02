@@ -49,12 +49,12 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 
 In the Python console:
 ```python
-# Prepare data for ERC20 Enterprise token
-from ocean_lib.structures.abi_tuples import CreateErc20Data, DispenserData, OrderParams
+from ocean_lib.structures.abi_tuples import DispenserData, OrderParams
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 cap = ocean.to_wei(200)
-erc20_data = CreateErc20Data(
+
+erc20_enterprise_token = erc721_nft.create_datatoken(
     template_index=2,  # this is the value for ERC20 Enterprise token
     strings=[
         "ERC20DT1",
@@ -68,9 +68,7 @@ erc20_data = CreateErc20Data(
     ],
     uints=[cap, 0],
     bytess=[b""],
-)
-erc20_enterprise_token = erc721_nft.create_datatoken(
-    erc20_data=erc20_data, from_wallet=alice_wallet
+    from_wallet=alice_wallet,
 )
 print(f"ERC20 Enterprise address: {erc20_enterprise_token.address}")
 
@@ -152,11 +150,12 @@ assert initial_bob_balance < increased_balance
 
 In the Python console:
 ```python
-# Prepare data for ERC20 Enterprise token
-cap = ocean.to_wei(200)
-from ocean_lib.structures.abi_tuples import CreateErc20Data, OrderParams
+from ocean_lib.structures.abi_tuples import OrderParams
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-erc20_data = CreateErc20Data(
+
+cap = ocean.to_wei(200)
+
+erc20_enterprise_token = erc721_nft.create_datatoken(
     template_index=2,  # this is the value for ERC20 Enterprise token
     strings=[
         "ERC20DT1",
@@ -170,9 +169,7 @@ erc20_data = CreateErc20Data(
     ],
     uints=[cap, 0],
     bytess=[b""],
-)
-erc20_enterprise_token = erc721_nft.create_datatoken(
-    erc20_data=erc20_data, from_wallet=alice_wallet
+    from_wallet=alice_wallet,
 )
 print(f"ERC20 Enterprise address: {erc20_enterprise_token.address}")
 

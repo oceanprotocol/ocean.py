@@ -8,17 +8,6 @@
 from enum import Enum
 from typing import List, NamedTuple
 
-CreateErc20Data = NamedTuple(
-    "CreateErc20Data",
-    [
-        ("template_index", int),
-        ("strings", List[str]),
-        ("addresses", List[str]),
-        ("uints", List[int]),
-        ("bytess", List[bytes]),
-    ],
-)
-
 PoolData = NamedTuple(
     "PoolData",
     [("ss_params", List[int]), ("swap_fees", List[int]), ("addresses", List[str])],
@@ -143,33 +132,4 @@ OrderParams = NamedTuple(
 MetadataProof = NamedTuple(
     "MetadataProof",
     [("validator_address", str), ("v", int), ("r", bytes), ("s", bytes)],
-)
-
-
-ChainMetadata = NamedTuple(
-    "ChainMetadata",
-    [
-        ("metadata_state", int),
-        ("metadata_decryptor_url", str),
-        ("metadata_decryptor_address", str),
-        ("flags", bytes),
-        ("data", bytes),
-        ("data_hash", bytes),
-        ("data_proofs", List[MetadataProof]),
-    ],
-)
-
-ChainMetadataWithTokenUri = NamedTuple(
-    "ChainMetadataWithTokenUri",
-    [
-        ("metadata_state", int),
-        ("metadata_decryptor_url", str),
-        ("metadata_decryptor_address", str),
-        ("flags", bytes),
-        ("data", bytes),
-        ("data_hash", bytes),
-        ("token_id", int),
-        ("token_uri", str),
-        ("data_proofs", List[MetadataProof]),
-    ],
 )

@@ -9,7 +9,7 @@ import pytest
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.structures.abi_tuples import ConsumeFees, CreateErc20Data
+from ocean_lib.structures.abi_tuples import ConsumeFees
 from ocean_lib.structures.file_objects import UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
@@ -44,20 +44,6 @@ def test_marketplace_flow_readme(tmp_path):
     token_address = erc721_nft.address
     assert token_address
 
-    # Prepare data for ERC20 token
-    erc20_data = CreateErc20Data(
-        template_index=1,
-        strings=["Datatoken 1", "DT1"],
-        addresses=[
-            alice_wallet.address,
-            alice_wallet.address,
-            ZERO_ADDRESS,
-            ocean.OCEAN_address,
-        ],
-        uints=[ocean.to_wei(100000), 0],
-        bytess=[b""],
-    )
-
     # Specify metadata and services, using the Branin test dataset
     date_created = "2021-12-28T10:55:11Z"
 
@@ -82,7 +68,21 @@ def test_marketplace_flow_readme(tmp_path):
     # Publish asset with services on-chain.
     # The download (access service) is automatically created, but you can explore other options as well
     asset = ocean.assets.create(
-        metadata, alice_wallet, encrypted_files, erc20_tokens_data=[erc20_data]
+        metadata,
+        alice_wallet,
+        encrypted_files,
+        erc20_templates=[1],
+        erc20_strings=[["Datatoken 1", "DT1"]],
+        erc20_addresses_list=[
+            [
+                alice_wallet.address,
+                alice_wallet.address,
+                ZERO_ADDRESS,
+                ocean.OCEAN_address,
+            ]
+        ],
+        erc20_uints=[[ocean.to_wei(100000), 0]],
+        erc20_bytess=[[b""]],
     )
 
     did = asset.did  # did contains the datatoken address

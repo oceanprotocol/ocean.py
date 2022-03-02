@@ -14,7 +14,7 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.services.service import Service
-from ocean_lib.structures.abi_tuples import ConsumeFees, CreateErc20Data
+from ocean_lib.structures.abi_tuples import ConsumeFees
 from ocean_lib.structures.file_objects import UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
@@ -49,7 +49,7 @@ def test_c2d_flow_readme():
     assert DATA_nft_token.address
 
     # Publish the datatoken
-    DATA_erc20_data = CreateErc20Data(
+    DATA_datatoken = DATA_nft_token.create_datatoken(
         template_index=1,
         strings=["Datatoken 1", "DT1"],
         addresses=[
@@ -60,8 +60,8 @@ def test_c2d_flow_readme():
         ],
         uints=[ocean.to_wei(100000), 0],
         bytess=[b""],
+        from_wallet=alice_wallet,
     )
-    DATA_datatoken = DATA_nft_token.create_datatoken(DATA_erc20_data, alice_wallet)
     assert DATA_datatoken.address
 
     # Specify metadata and services, using the Branin test dataset
@@ -123,7 +123,7 @@ def test_c2d_flow_readme():
     assert ALGO_nft_token.address
 
     # Publish the datatoken
-    ALGO_erc20_data = CreateErc20Data(
+    ALGO_datatoken = ALGO_nft_token.create_datatoken(
         template_index=1,
         strings=["Datatoken 1", "DT1"],
         addresses=[
@@ -134,8 +134,9 @@ def test_c2d_flow_readme():
         ],
         uints=[ocean.to_wei(100000), 0],
         bytess=[b""],
+        from_wallet=alice_wallet,
     )
-    ALGO_datatoken = ALGO_nft_token.create_datatoken(ALGO_erc20_data, alice_wallet)
+    assert ALGO_datatoken.address
 
     # Specify metadata and services, using the Branin test dataset
     ALGO_date_created = "2021-12-28T10:55:11Z"

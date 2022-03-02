@@ -62,21 +62,7 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 
 Then in the same python console:
 ```python
-# Prepare data for ERC20 token
-from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-erc20_data = CreateErc20Data(
-    template_index=1,
-    strings=["Datatoken 1", "DT1"],
-    addresses=[
-        alice_wallet.address,
-        alice_wallet.address,
-        ZERO_ADDRESS,
-        ocean.OCEAN_address,
-    ],
-    uints=[ocean.to_wei(100000), 0],
-    bytess=[b""],
-)
 
 # Specify metadata and services, using the Branin test dataset
 date_created = "2021-12-28T10:55:11Z"
@@ -104,7 +90,21 @@ encrypted_files = ocean.assets.encrypt_files([url_file])
 # Publish asset with services on-chain.
 # The download (access service) is automatically created, but you can explore other options as well
 asset = ocean.assets.create(
-    metadata, alice_wallet, encrypted_files, erc20_tokens_data=[erc20_data]
+    metadata,
+    alice_wallet,
+    encrypted_files,
+    erc20_templates=[1],
+    erc20_strings=[["Datatoken 1", "DT1"]],
+    erc20_addresses_list=[
+        [
+            alice_wallet.address,
+            alice_wallet.address,
+            ZERO_ADDRESS,
+            ocean.OCEAN_address,
+        ]
+    ],
+    erc20_uints=[[ocean.to_wei(100000), 0]],
+    erc20_bytess=[[b""]],
 )
 
 did = asset.did  # did contains the datatoken address

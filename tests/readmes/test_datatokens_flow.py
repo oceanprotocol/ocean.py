@@ -8,7 +8,6 @@ import pytest
 
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -36,7 +35,7 @@ def test_datatokens_flow_readme():
     assert erc721_nft.symbol() == "dtsymbol"
 
     cap = ocean.to_wei(10)
-    erc20_data = CreateErc20Data(
+    erc20_token = erc721_nft.create_datatoken(
         template_index=1,  # default value
         strings=["ERC20DT1", "ERC20DT1Symbol"],  # name & symbol for ERC20 token
         addresses=[
@@ -47,8 +46,8 @@ def test_datatokens_flow_readme():
         ],
         uints=[cap, 0],
         bytess=[b""],
+        from_wallet=wallet,
     )
-    erc20_token = erc721_nft.create_datatoken(erc20_data=erc20_data, from_wallet=wallet)
 
     assert erc20_token.address
     assert erc20_token.token_name() == "ERC20DT1"

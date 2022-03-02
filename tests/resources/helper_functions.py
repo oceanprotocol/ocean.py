@@ -21,7 +21,6 @@ from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.ocean.util import get_web3 as util_get_web3
-from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
@@ -229,7 +228,7 @@ def deploy_erc721_erc20(
     if not erc20_minter:
         return erc721_nft
 
-    erc_create_data = CreateErc20Data(
+    tx_result = erc721_nft.create_erc20(
         template_index=template_index,
         strings=["ERC20DT1", "ERC20DT1Symbol"],
         addresses=[
@@ -240,8 +239,8 @@ def deploy_erc721_erc20(
         ],
         uints=[cap, 0],
         bytess=[b""],
+        from_wallet=erc721_publisher,
     )
-    tx_result = erc721_nft.create_erc20(erc_create_data, erc721_publisher)
     tx_receipt2 = web3.eth.wait_for_transaction_receipt(tx_result)
 
     registered_event2 = erc721_factory.get_event_log(

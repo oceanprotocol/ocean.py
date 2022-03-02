@@ -117,12 +117,13 @@ print(f"data NFT token symbol: {erc721_nft.symbol()}")
 In the same python console:
 ```python
 # Create ERC20 token related to the above NFT.
-from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 print("Create ERC20 datatoken: begin.")
 cap = ocean.to_wei(100)
-erc20_data = CreateErc20Data(
+
+nft_factory = ocean.get_nft_factory()
+erc20_token = erc721_nft.create_datatoken(
     template_index=1, # default value
     strings=["ERC20DT1", "ERC20DT1Symbol"], # name & symbol for ERC20 token
     addresses=[
@@ -132,10 +133,9 @@ erc20_data = CreateErc20Data(
         ZERO_ADDRESS, # publishing Market Fee Token
     ],
     uints=[cap, 0],
-    bytess=[b""]
+    bytess=[b""],
+    from_wallet=alice_wallet
 )
-nft_factory = ocean.get_nft_factory()
-erc20_token = erc721_nft.create_datatoken(erc20_data=erc20_data, from_wallet=alice_wallet)
 print(f"Created ERC20 datatoken: done. Its address is {erc20_token.address}")
 print(f"datatoken name: {erc20_token.token_name()}")
 print(f"datatoken symbol: {erc20_token.symbol()}")

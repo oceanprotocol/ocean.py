@@ -10,7 +10,7 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.side_staking import SideStaking
-from ocean_lib.structures.abi_tuples import CreateErc20Data, PoolData
+from ocean_lib.structures.abi_tuples import PoolData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
@@ -76,20 +76,19 @@ def test_main(
     assert permissions[3] is True
 
     # Tests consumer deploys an ERC20DT
-    erc_data = CreateErc20Data(
-        1,
-        ["ERC20DT1", "ERC20DT1Symbol"],
-        [
+    trx_erc_20 = erc721_nft.create_erc20(
+        template_index=1,
+        strings=["ERC20DT1", "ERC20DT1Symbol"],
+        addresses=[
             consumer_wallet.address,
             another_consumer_wallet.address,
             publisher_wallet.address,
             ZERO_ADDRESS,
         ],
-        [to_wei("0.05"), 0],
-        [b""],
+        uints=[to_wei("0.05"), 0],
+        bytess=[b""],
+        from_wallet=consumer_wallet,
     )
-
-    trx_erc_20 = erc721_nft.create_erc20(erc_data, consumer_wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(trx_erc_20)
     assert tx_receipt.status == 1

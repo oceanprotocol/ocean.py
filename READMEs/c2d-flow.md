@@ -61,10 +61,10 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 In the same python console:
 
 ```python
-# Prepare data for ERC20 token
-from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-DATA_erc20_data = CreateErc20Data(
+
+# Publish the datatoken
+DATA_datatoken = DATA_nft_token.create_datatoken(
     template_index=1,
     strings=["Datatoken 1", "DT1"],
     addresses=[
@@ -75,9 +75,8 @@ DATA_erc20_data = CreateErc20Data(
     ],
     uints=[ocean.to_wei(100000), 0],
     bytess=[b""],
+    from_wallet=alice_wallet,
 )
-
-DATA_datatoken = DATA_nft_token.create_datatoken(DATA_erc20_data, alice_wallet)
 print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
 
 # Specify metadata and services, using the Branin test dataset
@@ -154,7 +153,7 @@ ALGO_nft_token = ocean.create_erc721_nft("NFTToken1", "NFT1", alice_wallet)
 print(f"ALGO_nft_token address = '{ALGO_nft_token.address}'")
 
 # Publish the datatoken
-ALGO_erc20_data = CreateErc20Data(
+ALGO_datatoken = ALGO_nft_token.create_datatoken(
     template_index=1,
     strings=["Datatoken 1", "DT1"],
     addresses=[
@@ -165,8 +164,9 @@ ALGO_erc20_data = CreateErc20Data(
     ],
     uints=[ocean.to_wei(100000), 0],
     bytess=[b""],
+    from_wallet=alice_wallet,
 )
-ALGO_datatoken = ALGO_nft_token.create_datatoken(ALGO_erc20_data, alice_wallet)
+print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")
 
 # Specify metadata and services, using the Branin test dataset
 ALGO_date_created = "2021-12-28T10:55:11Z"

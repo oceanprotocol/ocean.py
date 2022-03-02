@@ -18,10 +18,7 @@ from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBa
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.services.service import Service
-from ocean_lib.structures.abi_tuples import (
-    ConsumeFees,
-    CreateErc20Data,
-)
+from ocean_lib.structures.abi_tuples import ConsumeFees
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -410,25 +407,23 @@ def test_plain_asset_with_one_datatoken(
     assert registered_event[0].args.admin == publisher_wallet.address
     erc721_address = registered_event[0].args.newTokenAddress
 
-    erc20_data = CreateErc20Data(
-        template_index=1,
-        strings=["Datatoken 1", "DT1"],
-        addresses=[
-            publisher_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-            get_address_of_type(config, "Ocean"),
-        ],
-        uints=[to_wei("0.5"), 0],
-        bytess=[b""],
-    )
-
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_address,
-        erc20_tokens_data=[erc20_data],
+        erc20_templates=[1],
+        erc20_strings=[["Datatoken 1", "DT1"]],
+        erc20_addresses_list=[
+            [
+                publisher_wallet.address,
+                publisher_wallet.address,
+                ZERO_ADDRESS,
+                get_address_of_type(config, "Ocean"),
+            ]
+        ],
+        erc20_uints=[[to_wei("0.5"), 0]],
+        erc20_bytess=[[b""]],
     )
     assert ddo, "The asset is not created."
     assert ddo.nft["name"] == "NFT1"
@@ -471,37 +466,29 @@ def test_plain_asset_multiple_datatokens(
     assert registered_event[0].args.admin == publisher_wallet.address
     erc721_address2 = registered_event[0].args.newTokenAddress
 
-    erc20_data1 = CreateErc20Data(
-        template_index=1,
-        strings=["Datatoken 2", "DT2"],
-        addresses=[
-            publisher_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-            get_address_of_type(config, "Ocean"),
-        ],
-        uints=[to_wei("0.5"), 0],
-        bytess=[b""],
-    )
-    erc20_data2 = CreateErc20Data(
-        template_index=1,
-        strings=["Datatoken 3", "DT3"],
-        addresses=[
-            publisher_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-            get_address_of_type(config, "Ocean"),
-        ],
-        uints=[to_wei("0.5"), 0],
-        bytess=[b""],
-    )
-
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_address2,
-        erc20_tokens_data=[erc20_data1, erc20_data2],
+        erc20_templates=[1, 1],
+        erc20_strings=[["Datatoken 2", "DT2"], ["Datatoken 3", "DT3"]],
+        erc20_addresses_list=[
+            [
+                publisher_wallet.address,
+                publisher_wallet.address,
+                ZERO_ADDRESS,
+                get_address_of_type(config, "Ocean"),
+            ],
+            [
+                publisher_wallet.address,
+                publisher_wallet.address,
+                ZERO_ADDRESS,
+                get_address_of_type(config, "Ocean"),
+            ],
+        ],
+        erc20_uints=[[to_wei("0.5"), 0], [to_wei("0.5"), 0]],
+        erc20_bytess=[[b""], [b""]],
     )
     assert ddo, "The asset is not created."
     assert ddo.nft["name"] == "NFT2"
