@@ -9,7 +9,6 @@ import pytest
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.structures.abi_tuples import DispenserData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -67,15 +66,14 @@ def test_dispenser_flow_readme():
     dispenser = ocean.dispenser
 
     max_amount = ocean.to_wei(50)
-    dispenser_data = DispenserData(
+    erc20_token.create_dispenser(
         dispenser_address=dispenser.address,
         max_balance=max_amount,
         max_tokens=max_amount,
         with_mint=True,
         allowed_swapper=ZERO_ADDRESS,
+        from_wallet=alice_wallet,
     )
-
-    erc20_token.create_dispenser(dispenser_data, from_wallet=alice_wallet)
 
     dispenser_status = dispenser.status(erc20_token.address)
     assert dispenser_status[0] is True

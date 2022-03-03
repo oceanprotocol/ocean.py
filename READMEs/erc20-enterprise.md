@@ -49,7 +49,7 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 
 In the Python console:
 ```python
-from ocean_lib.structures.abi_tuples import DispenserData, OrderParams
+from ocean_lib.structures.abi_tuples import OrderParams
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 cap = ocean.to_wei(200)
@@ -85,15 +85,13 @@ assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
 # Create & activate dispenser
 dispenser = ocean.dispenser
-dispenser_data = DispenserData(
+tx = erc20_enterprise_token.create_dispenser(
     dispenser_address=dispenser.address,
     allowed_swapper=ZERO_ADDRESS,
     max_balance=ocean.to_wei(50),
     with_mint=True,
     max_tokens=ocean.to_wei(50),
-)
-tx = erc20_enterprise_token.create_dispenser(
-    dispenser_data=dispenser_data, from_wallet=alice_wallet
+    from_wallet=alice_wallet,
 )
 assert tx, "Dispenser not created!"
 

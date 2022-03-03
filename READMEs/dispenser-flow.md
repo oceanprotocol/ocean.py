@@ -45,18 +45,18 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 In the same python console:
 ```python
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.structures.abi_tuples import DispenserData
 
 # Get the dispenser
 dispenser = ocean.dispenser
 
 max_amount = ocean.to_wei(50)
-dispenser_data = DispenserData(
+erc20_token.create_dispenser(
     dispenser_address=dispenser.address,
     max_balance=max_amount,
     max_tokens=max_amount,
     with_mint=True,
     allowed_swapper=ZERO_ADDRESS,
+    from_wallet=alice_wallet,
 )
 
 # Create dispenser

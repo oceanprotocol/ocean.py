@@ -3,21 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-"""Defines NamedTuples `Stakes`, `OrderData`, `OrderParams`
-`DispenserData`, `Operations`"""
+"""Defines NamedTuples `Stakes`, `OrderData`, `OrderParams`, `Operations`"""
 from enum import Enum
-from typing import List, NamedTuple
-
-DispenserData = NamedTuple(
-    "DispenserData",
-    [
-        ("dispenser_address", str),
-        ("max_tokens", int),
-        ("max_balance", int),
-        ("with_mint", bool),
-        ("allowed_swapper", str),
-    ],
-)
+from typing import NamedTuple
 
 
 class OperationType(Enum):

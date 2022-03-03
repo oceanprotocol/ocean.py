@@ -10,9 +10,6 @@ from eth_account.messages import encode_defunct
 from eth_typing.encoding import HexStr
 from web3.main import Web3
 
-from ocean_lib.structures.abi_tuples import (
-    DispenserData,
-)
 from ocean_lib.utils.utilities import prepare_message_for_ecrecover_in_solidity
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
@@ -125,9 +122,19 @@ class ERC20Token(ContractBase):
         )
 
     def create_dispenser(
-        self, dispenser_data: Union[dict, tuple, DispenserData], from_wallet: Wallet
+        self,
+        dispenser_address: str,
+        max_tokens: int,
+        max_balance: int,
+        with_mint: bool,
+        allowed_swapper: str,
+        from_wallet: Wallet,
     ) -> str:
-        return self.send_transaction("createDispenser", dispenser_data, from_wallet)
+        return self.send_transaction(
+            "createDispenser",
+            (dispenser_address, max_tokens, max_balance, with_mint, allowed_swapper),
+            from_wallet,
+        )
 
     def mint(self, account_address: str, value: int, from_wallet: Wallet) -> str:
         return self.send_transaction("mint", (account_address, value), from_wallet)

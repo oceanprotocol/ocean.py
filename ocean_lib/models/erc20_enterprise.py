@@ -8,7 +8,7 @@ from typing import Union
 from enforce_typing import enforce_types
 
 from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.structures.abi_tuples import DispenserData, OrderParams
+from ocean_lib.structures.abi_tuples import OrderParams
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -35,8 +35,3 @@ class ERC20Enterprise(ERC20Token):
         return self.send_transaction(
             "buyFromDispenserAndOrder", (order_params, dispenser_address), from_wallet
         )
-
-    def create_dispenser(
-        self, dispenser_data: Union[dict, tuple, DispenserData], from_wallet: Wallet
-    ) -> str:
-        return self.send_transaction("createDispenser", dispenser_data, from_wallet)

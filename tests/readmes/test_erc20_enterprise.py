@@ -9,7 +9,7 @@ import pytest
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.structures.abi_tuples import DispenserData, OrderParams
+from ocean_lib.structures.abi_tuples import OrderParams
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -74,15 +74,13 @@ def test_erc20_enterprise_flow_with_dispenser():
 
     # Bob gets 1 DT from dispenser and then startsOrder, while burning that DT
     dispenser = ocean.dispenser
-    dispenser_data = DispenserData(
+    tx = erc20_enterprise_token.create_dispenser(
         dispenser_address=dispenser.address,
         allowed_swapper=ZERO_ADDRESS,
         max_balance=ocean.to_wei(50),
         with_mint=True,
         max_tokens=ocean.to_wei(50),
-    )
-    tx = erc20_enterprise_token.create_dispenser(
-        dispenser_data=dispenser_data, from_wallet=alice_wallet
+        from_wallet=alice_wallet,
     )
     assert tx, "Dispenser not created!"
 
