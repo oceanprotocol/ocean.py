@@ -63,37 +63,14 @@ Stakes = NamedTuple(
     ],
 )
 
-ProviderFees = NamedTuple(
-    "ProviderFees",
-    [
-        ("provider_fee_address", str),
-        ("provider_fee_token", str),
-        ("provider_fee_amount", int),
-        ("v", str),
-        ("r", str),
-        ("s", str),
-        ("valid_until", int),
-        ("provider_data", bytes),
-    ],
-)
-
-ConsumeFees = NamedTuple(
-    "ConsumeFees",
-    [
-        ("consumer_market_fee_address", str),
-        ("consumer_market_fee_token", str),
-        ("consumer_market_fee_amount", int),
-    ],
-)
-
 OrderData = NamedTuple(
     "OrderData",
     [
         ("token_address", str),
         ("consumer", str),
         ("service_index", int),
-        ("provider_fees", ProviderFees),
-        ("consume_fees", ConsumeFees),
+        ("provider_fees", tuple),
+        ("consume_fees", tuple),
     ],
 )
 
@@ -102,8 +79,8 @@ OrderParams = NamedTuple(
     [
         ("consumer", str),
         ("service_index", int),
-        ("provider_fees", ProviderFees),
-        ("consume_fees", ConsumeFees),
+        ("provider_fees", tuple),
+        ("consume_fees", tuple),
     ],
 )
 

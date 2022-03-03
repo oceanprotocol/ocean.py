@@ -26,7 +26,6 @@ from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
-from ocean_lib.structures.abi_tuples import ConsumeFees
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei
@@ -561,7 +560,9 @@ class OceanAssets:
         self,
         asset: Asset,
         service: Service,
-        consume_fees: Union[tuple, dict, ConsumeFees],
+        consumer_market_fee_address: str,
+        consumer_market_fee_token: str,
+        consumer_market_fee_amount: int,
         wallet: Wallet,
         initialize_args: Optional[dict] = None,
         consumer_address: Optional[str] = None,
@@ -597,12 +598,22 @@ class OceanAssets:
             built_initialize_args.update(initialize_args)
 
         initialize_response = data_provider.initialize(**built_initialize_args)
+        provider_fees = initialize_response.json()["providerFee"]
 
         tx_id = dt.start_order(
             consumer=consumer_address,
             service_index=asset.get_index_of_service(service),
-            provider_fees=initialize_response.json()["providerFee"],
-            consume_fees=consume_fees,
+            provider_fee_address=provider_fees["providerFeeAddress"],
+            provider_fee_token=provider_fees["providerFeeToken"],
+            provider_fee_amount=provider_fees["providerFeeAmount"],
+            v=provider_fees["v"],
+            r=provider_fees["r"],
+            s=provider_fees["s"],
+            valid_until=provider_fees["validUntil"],
+            provider_data=provider_fees["providerData"],
+            consumer_market_fee_address=consumer_market_fee_address,
+            consumer_market_fee_token=consumer_market_fee_token,
+            consumer_market_fee_amount=consumer_market_fee_amount,
             from_wallet=wallet,
         )
 

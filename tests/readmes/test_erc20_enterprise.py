@@ -103,7 +103,7 @@ def test_erc20_enterprise_flow_with_dispenser():
     )
 
     # Prepare data for order
-    provider_fees = ocean.build_compute_provider_fees(
+    v, r, s, provider_data = ocean.build_compute_provider_fees(
         provider_data={"timeout": 0},
         provider_fee_address=alice_wallet.address,
         provider_fee_token=OCEAN_token.address,
@@ -111,14 +111,26 @@ def test_erc20_enterprise_flow_with_dispenser():
         valid_until=1958133628,  # 2032
     )
 
-    consume_fees = ocean.build_consume_fees(
-        bob_wallet.address,
-        erc20_enterprise_token.address,
-        0,
-    )
-
     initial_bob_balance = OCEAN_token.balanceOf(bob_wallet.address)
-    order_params = OrderParams(bob_wallet.address, 1, provider_fees, consume_fees)
+    order_params = OrderParams(
+        bob_wallet.address,
+        1,
+        (
+            alice_wallet.address,
+            OCEAN_token.address,
+            0,
+            v,
+            r,
+            s,
+            1958133628,
+            provider_data,
+        ),
+        (
+            bob_wallet.address,
+            erc20_enterprise_token.address,
+            0,
+        ),
+    )
 
     erc20_enterprise_token.buy_from_dispenser_and_order(
         order_params=order_params,
@@ -199,20 +211,33 @@ def test_erc20_enterprise_flow_with_fre():
     )
 
     # Prepare data for order
-    provider_fees = ocean.build_compute_provider_fees(
+    v, r, s, provider_data = ocean.build_compute_provider_fees(
         provider_data={"timeout": 0},
         provider_fee_address=alice_wallet.address,
         provider_fee_token=OCEAN_token.address,
         provider_fee_amount=0,
         valid_until=1958133628,  # 2032
     )
-    consume_fees = ocean.build_consume_fees(
-        bob_wallet.address,
-        erc20_enterprise_token.address,
-        ocean.to_wei(2),
-    )
 
-    order_params = OrderParams(bob_wallet.address, 1, provider_fees, consume_fees)
+    order_params = OrderParams(
+        bob_wallet.address,
+        1,
+        (
+            alice_wallet.address,
+            OCEAN_token.address,
+            0,
+            v,
+            r,
+            s,
+            1958133628,
+            provider_data,
+        ),
+        (
+            bob_wallet.address,
+            erc20_enterprise_token.address,
+            ocean.to_wei(2),
+        ),
+    )
 
     fre_params = (
         fixed_rate_exchange.address,

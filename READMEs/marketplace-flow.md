@@ -190,15 +190,15 @@ fee_receiver = ZERO_ADDRESS # could also be market address
 asset = ocean.assets.resolve(did)
 service = asset.services[0]
 
-# Consume fees
-from ocean_lib.structures.abi_tuples import ConsumeFees
-consume_fees = ConsumeFees(
+# Bob sends his datatoken to the service
+order_tx_id = ocean.assets.pay_for_service(
+    asset,
+    service,
     consumer_market_fee_address=bob_wallet.address,
     consumer_market_fee_token=erc20_token.address,
     consumer_market_fee_amount=0,
+    wallet=bob_wallet,
 )
-# Bob sends his datatoken to the service
-order_tx_id = ocean.assets.pay_for_service(asset, service, consume_fees, bob_wallet)
 print(f"order_tx_id = '{order_tx_id}'")
 
 # Bob downloads. If the connection breaks, Bob can request again by showing order_tx_id.

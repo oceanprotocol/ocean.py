@@ -11,7 +11,6 @@ from web3.main import Web3
 from ocean_lib.models.erc20_token import ERC20Token, RolesERC20
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.structures.abi_tuples import ConsumeFees, ProviderFees
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
@@ -235,7 +234,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     signed = web3.eth.sign(provider_fee_address, data=message)
     signature = split_signature(signed)
 
-    provider_fee = ProviderFees(
+    tx = erc20.start_order(
+        consumer=consumer_wallet.address,
+        service_index=1,
         provider_fee_address=provider_fee_address,
         provider_fee_token=provider_fee_token,
         provider_fee_amount=provider_fee_amount,
@@ -245,19 +246,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         r=signature.r,
         s=signature.s,
         valid_until=0,
-    )
-
-    consume_fees = ConsumeFees(
         consumer_market_fee_address=publisher_wallet.address,
         consumer_market_fee_token=erc20.address,
         consumer_market_fee_amount=0,
-    )
-
-    tx = erc20.start_order(
-        consumer=consumer_wallet.address,
-        service_index=1,
-        provider_fees=provider_fee,
-        consume_fees=consume_fees,
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -339,7 +330,15 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     # Tests reuses order
     erc20.reuse_order(
         tx_receipt.transactionHash,
-        provider_fees=provider_fee,
+        provider_fee_address=provider_fee_address,
+        provider_fee_token=provider_fee_token,
+        provider_fee_amount=provider_fee_amount,
+        v=signature.v,
+        r=signature.r,
+        s=signature.s,
+        valid_until=0,
+        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
+        # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
         from_wallet=publisher_wallet,
     )
     reused_event = erc20.get_event_log(

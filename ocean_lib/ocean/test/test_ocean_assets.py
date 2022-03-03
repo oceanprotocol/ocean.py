@@ -18,7 +18,6 @@ from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBa
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.services.service import Service
-from ocean_lib.structures.abi_tuples import ConsumeFees
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -359,19 +358,15 @@ def test_pay_for_service_insufficient_balance(
         block_confirmations=config.block_confirmations,
         transaction_timeout=config.transaction_timeout,
     )
-    # Consume fees
-    consume_fees = ConsumeFees(
-        consumer_market_fee_address=empty_wallet.address,
-        consumer_market_fee_token=erc20_token.address,
-        consumer_market_fee_amount=0,
-    )
 
     with pytest.raises(InsufficientBalance):
         publisher_ocean_instance.assets.pay_for_service(
             asset,
             get_first_service_by_type(asset, "access"),
-            consume_fees,
-            empty_wallet,
+            consumer_market_fee_address=empty_wallet.address,
+            consumer_market_fee_token=erc20_token.address,
+            consumer_market_fee_amount=0,
+            wallet=empty_wallet,
         )
 
 

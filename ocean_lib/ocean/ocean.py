@@ -25,10 +25,8 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
 from ocean_lib.structures.abi_tuples import (
-    ConsumeFees,
     FixedData,
     PoolData,
-    ProviderFees,
 )
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import DECIMALS_18
@@ -334,7 +332,7 @@ class Ocean:
         provider_fee_token: str,
         provider_fee_amount: int,
         valid_until: int,
-    ) -> ProviderFees:
+    ) -> tuple:
         if isinstance(provider_data, dict):
             provider_data = json.dumps(provider_data, separators=(",", ":"))
 
@@ -350,19 +348,10 @@ class Ocean:
         )
         signed = self.web3.eth.sign(provider_fee_address, data=message)
         signature = split_signature(signed)
-        return ProviderFees(
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
+
+        return (
             signature.v,
             signature.r,
             signature.s,
-            valid_until,
             self.web3.toHex(self.web3.toBytes(text=provider_data)),
         )
-
-    @enforce_types
-    def build_consume_fees(
-        self, consume_fee_address: str, consume_fee_token: str, consume_fee_amount: int
-    ) -> ConsumeFees:
-        return ConsumeFees(consume_fee_address, consume_fee_token, consume_fee_amount)

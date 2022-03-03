@@ -11,11 +11,9 @@ from eth_typing.encoding import HexStr
 from web3.main import Web3
 
 from ocean_lib.structures.abi_tuples import (
-    ConsumeFees,
     DispenserData,
     FixedData,
     PoolData,
-    ProviderFees,
 )
 from ocean_lib.utils.utilities import prepare_message_for_ecrecover_in_solidity
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -125,9 +123,31 @@ class ERC20Token(ContractBase):
         return self.send_transaction("mint", (account_address, value), from_wallet)
 
     def check_provider_fee(
-        self, provider_fees: Union[tuple, dict, ProviderFees], from_wallet: Wallet
+        self,
+        provider_fee_address: str,
+        provider_fee_token: str,
+        provider_fee_amount: int,
+        v: str,
+        r: str,
+        s: str,
+        valid_until: int,
+        provider_data: bytes,
+        from_wallet: Wallet,
     ) -> str:
-        return self.send_transaction("checkProviderFee", (provider_fees,), from_wallet)
+        return self.send_transaction(
+            "checkProviderFee",
+            (
+                provider_fee_address,
+                provider_fee_token,
+                provider_fee_amount,
+                v,
+                r,
+                s,
+                valid_until,
+                provider_data,
+            ),
+            from_wallet,
+        )
 
     @staticmethod
     def sign_provider_fees(
@@ -147,27 +167,70 @@ class ERC20Token(ContractBase):
         self,
         consumer: str,
         service_index: int,
-        provider_fees: Union[dict, tuple, ProviderFees],
-        consume_fees: Union[dict, tuple, ConsumeFees],
+        provider_fee_address: str,
+        provider_fee_token: str,
+        provider_fee_amount: int,
+        v: str,
+        r: str,
+        s: str,
+        valid_until: int,
+        provider_data: bytes,
+        consumer_market_fee_address: str,
+        consumer_market_fee_token: str,
+        consumer_market_fee_amount: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "startOrder",
-            (consumer, service_index, provider_fees, consume_fees),
+            (
+                consumer,
+                service_index,
+                (
+                    provider_fee_address,
+                    provider_fee_token,
+                    provider_fee_amount,
+                    v,
+                    r,
+                    s,
+                    valid_until,
+                    provider_data,
+                ),
+                (
+                    consumer_market_fee_address,
+                    consumer_market_fee_token,
+                    consumer_market_fee_amount,
+                ),
+            ),
             from_wallet,
         )
 
     def reuse_order(
         self,
         order_tx_id: str,
-        provider_fees: Union[tuple, dict, ProviderFees],
+        provider_fee_address: str,
+        provider_fee_token: str,
+        provider_fee_amount: int,
+        v: str,
+        r: str,
+        s: str,
+        valid_until: int,
+        provider_data: bytes,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "reuseOrder",
             (
                 order_tx_id,
-                provider_fees,
+                (
+                    provider_fee_address,
+                    provider_fee_token,
+                    provider_fee_amount,
+                    v,
+                    r,
+                    s,
+                    valid_until,
+                    provider_data,
+                ),
             ),
             from_wallet,
         )

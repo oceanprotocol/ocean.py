@@ -9,7 +9,6 @@ import pytest
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.structures.abi_tuples import ConsumeFees
 from ocean_lib.structures.file_objects import UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
@@ -138,15 +137,15 @@ def test_marketplace_flow_readme(tmp_path):
         1
     ), "Bob didn't get 1.0 datatokens"
 
-    # Consume fees
-    consume_fees = ConsumeFees(
+    service = asset.services[0]
+    order_tx_id = ocean.assets.pay_for_service(
+        asset,
+        service,
         consumer_market_fee_address=bob_wallet.address,
         consumer_market_fee_token=erc20_token.address,
         consumer_market_fee_amount=0,
+        wallet=bob_wallet,
     )
-
-    service = asset.services[0]
-    order_tx_id = ocean.assets.pay_for_service(asset, service, consume_fees, bob_wallet)
 
     file_path = ocean.assets.download_asset(
         asset, service, bob_wallet, str(tmp_path), order_tx_id
