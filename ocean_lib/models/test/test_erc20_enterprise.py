@@ -12,7 +12,7 @@ from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.structures.abi_tuples import DispenserData, FixedData
+from ocean_lib.structures.abi_tuples import DispenserData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
@@ -204,7 +204,7 @@ def test_buy_from_fre_and_order(
     )
     erc20_enterprise_token = ERC20Enterprise(web3, erc20_enterprise_token.address)
 
-    fixed_data = FixedData(
+    tx = erc20_enterprise_token.create_fixed_rate(
         fixed_price_address=fixed_rate_exchange.address,
         addresses=[
             mock_usdc_contract.address,
@@ -213,10 +213,7 @@ def test_buy_from_fre_and_order(
             ZERO_ADDRESS,
         ],
         uints=[18, 18, to_wei("1"), to_wei("0.1"), 1],
-    )
-
-    tx = erc20_enterprise_token.create_fixed_rate(
-        fixed_data=fixed_data, from_wallet=publisher_wallet
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)

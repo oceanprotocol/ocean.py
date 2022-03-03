@@ -24,7 +24,6 @@ from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
-from ocean_lib.structures.abi_tuples import FixedData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import DECIMALS_18
 from ocean_lib.web3_internal.currency import to_wei as _to_wei
@@ -258,12 +257,11 @@ class Ocean:
             0,
         ]
 
-        fixed_rate_data = FixedData(
-            fixed_price_address=fixed_price_address, addresses=addresses, uints=uints
-        )
-
         tx = erc20_token.create_fixed_rate(
-            fixed_data=fixed_rate_data, from_wallet=from_wallet
+            fixed_price_address=fixed_price_address,
+            addresses=addresses,
+            uints=uints,
+            from_wallet=from_wallet,
         )
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
         fixed_rate_event = erc20_token.get_event_log(
