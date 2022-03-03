@@ -13,7 +13,6 @@ from web3.main import Web3
 from ocean_lib.structures.abi_tuples import (
     DispenserData,
     FixedData,
-    PoolData,
 )
 from ocean_lib.utils.utilities import prepare_message_for_ecrecover_in_solidity
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -105,9 +104,15 @@ class ERC20Token(ContractBase):
         )
 
     def deploy_pool(
-        self, pool_data: Union[dict, tuple, PoolData], from_wallet: Wallet
+        self,
+        ss_params: List[int],
+        swap_fees: List[int],
+        addresses: List[str],
+        from_wallet: Wallet,
     ) -> str:
-        return self.send_transaction("deployPool", pool_data, from_wallet)
+        return self.send_transaction(
+            "deployPool", (ss_params, swap_fees, addresses), from_wallet
+        )
 
     def create_fixed_rate(
         self, fixed_data: Union[dict, tuple, FixedData], from_wallet: Wallet

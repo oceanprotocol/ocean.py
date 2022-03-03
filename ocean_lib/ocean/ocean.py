@@ -24,10 +24,7 @@ from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
-from ocean_lib.structures.abi_tuples import (
-    FixedData,
-    PoolData,
-)
+from ocean_lib.structures.abi_tuples import FixedData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import DECIMALS_18
 from ocean_lib.web3_internal.currency import to_wei as _to_wei
@@ -289,15 +286,15 @@ class Ocean:
         self,
         erc20_token: ERC20Token,
         base_token: ERC20Token,
-        ss_params: List,
-        swap_fees: List,
+        ss_params: List[int],
+        swap_fees: List[int],
         from_wallet: Wallet,
     ) -> BPool:
         base_token.approve(
             get_address_of_type(self.config, "Router"), self.to_wei("2000"), from_wallet
         )
 
-        pool_data = PoolData(
+        tx = erc20_token.deploy_pool(
             ss_params,
             swap_fees,
             [
@@ -308,9 +305,8 @@ class Ocean:
                 get_address_of_type(self.config, "OPFCommunityFeeCollector"),
                 get_address_of_type(self.config, "poolTemplate"),
             ],
+            from_wallet,
         )
-
-        tx = erc20_token.deploy_pool(pool_data, from_wallet)
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
         pool_event = self.factory_router.get_event_log(
             ERC721FactoryContract.EVENT_NEW_POOL,

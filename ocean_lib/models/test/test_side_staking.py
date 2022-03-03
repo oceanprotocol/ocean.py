@@ -9,7 +9,6 @@ from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.side_staking import SideStaking
-from ocean_lib.structures.abi_tuples import PoolData
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
@@ -76,7 +75,7 @@ def test_side_staking(
         consumer_wallet,
     )
 
-    pool_data = PoolData(
+    tx = erc20.deploy_pool(
         ss_params=[
             to_wei("1"),
             ocean_token.decimals(),
@@ -93,9 +92,8 @@ def test_side_staking(
             get_address_of_type(config, "OPFCommunityFeeCollector"),
             get_address_of_type(config, "poolTemplate"),
         ],
+        from_wallet=consumer_wallet,
     )
-
-    tx = erc20.deploy_pool(pool_data, consumer_wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     pool_event = factory_router.get_event_log(

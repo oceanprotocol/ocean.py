@@ -10,7 +10,6 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.side_staking import SideStaking
-from ocean_lib.structures.abi_tuples import PoolData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
@@ -114,7 +113,7 @@ def test_main(
         get_address_of_type(config, "Router"), to_wei("0.02"), consumer_wallet
     )
 
-    pool_data = PoolData(
+    tx = erc20_token.deploy_pool(
         [
             to_wei(1),
             ocean_contract.decimals(),
@@ -131,8 +130,8 @@ def test_main(
             get_address_of_type(config, "OPFCommunityFeeCollector"),
             get_address_of_type(config, "poolTemplate"),
         ],
+        consumer_wallet,
     )
-    tx = erc20_token.deploy_pool(pool_data, consumer_wallet)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     pool_event = erc20_token.get_event_log(
         ERC721FactoryContract.EVENT_NEW_POOL,
