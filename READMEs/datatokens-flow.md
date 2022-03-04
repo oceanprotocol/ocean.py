@@ -43,7 +43,7 @@ cd Desktop/
 git clone https://github.com/oceanprotocol/ocean.py.git
 git checkout v4main
 
-# Create your working directory. Copy artifacts.
+# Create your working directory.
 mkdir my_project
 cd my_project
 
