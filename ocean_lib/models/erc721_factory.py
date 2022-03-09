@@ -10,6 +10,7 @@ from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.structures.abi_tuples import (
     MetadataProof,
+    OrderData,
 )
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -108,7 +109,9 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     def template_count(self) -> int:
         return self.contract.caller.templateCount()
 
-    def start_multiple_token_order(self, orders: list, from_wallet: Wallet) -> str:
+    def start_multiple_token_order(
+        self, orders: List[OrderData], from_wallet: Wallet
+    ) -> str:
         """An order contains the following keys:
 
         - tokenAddress, str

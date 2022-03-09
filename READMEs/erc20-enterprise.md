@@ -49,7 +49,6 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 
 In the Python console:
 ```python
-from ocean_lib.structures.abi_tuples import OrderParams
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 cap = ocean.to_wei(200)
@@ -118,29 +117,22 @@ v, r, s, provider_data = ocean.build_compute_provider_fees(
 )
 
 initial_bob_balance = OCEAN_token.balanceOf(bob_wallet.address)
-order_params = OrderParams(
-    bob_wallet.address,
-    1,
-    (
-        alice_wallet.address,
-        OCEAN_token.address,
-        0,
-        v,
-        r,
-        s,
-        1958133628,
-        provider_data,
-    ),
-    (
-        bob_wallet.address,
-        erc20_enterprise_token.address,
-        0,
-    ),
-)
 
 # Bob gets 1 DT from dispenser and then startsOrder, while burning that DT
 erc20_enterprise_token.buy_from_dispenser_and_order(
-    order_params=order_params,
+    consumer=bob_wallet.address,
+    service_index=1,
+    provider_fee_address=alice_wallet.address,
+    provider_fee_token=OCEAN_token.address,
+    provider_fee_amount=0,
+    v=v,
+    r=r,
+    s=s,
+    valid_until=1958133628,
+    provider_data=provider_data,
+    consumer_market_fee_address=bob_wallet.address,
+    consumer_market_fee_token=erc20_enterprise_token.address,
+    consumer_market_fee_amount=0,
     dispenser_address=dispenser.address,
     from_wallet=alice_wallet,
 )
@@ -152,7 +144,6 @@ assert initial_bob_balance < increased_balance
 
 In the Python console:
 ```python
-from ocean_lib.structures.abi_tuples import OrderParams
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 cap = ocean.to_wei(200)
@@ -203,33 +194,6 @@ v, r, s, provider_data = ocean.build_compute_provider_fees(
     valid_until=1958133628,  # 2032
 )
 
-order_params = OrderParams(
-    bob_wallet.address,
-    1,
-    (
-        alice_wallet.address,
-        OCEAN_token.address,
-        0,
-        v,
-        r,
-        s,
-        1958133628,
-        provider_data,
-    ),
-    (
-        bob_wallet.address,
-        erc20_enterprise_token.address,
-        ocean.to_wei(2),
-    ),
-)
-
-fre_params = (
-    fixed_rate_exchange.address,
-    exchange_id,
-    ocean.to_wei(10),
-    ocean.to_wei("0.001"),  # 1e15 => 0.1%
-    bob_wallet.address,
-)
 erc20_enterprise_token.mint(alice_wallet.address, ocean.to_wei(20), alice_wallet)
 
 # Approve tokens
@@ -238,30 +202,42 @@ OCEAN_token.approve(
     amount=ocean.to_wei(1000),
     from_wallet=alice_wallet,
 )
-
-# Transfer some ERC20 Enterprise tokens to Bob for buying from the FRE
-erc20_enterprise_token.transfer(bob_wallet.address, ocean.to_wei(15), alice_wallet)
-OCEAN_token.approve(
-    spender=erc20_enterprise_token.address,
-    amount=ocean.to_wei(1000),
-    from_wallet=bob_wallet,
-)
-# Transfer some ERC20 Enterprise tokens to Bob for buying from the FRE
-erc20_enterprise_token.transfer(bob_wallet.address, ocean.to_wei(15), alice_wallet)
-OCEAN_token.approve(
-    spender=erc20_enterprise_token.address,
-    amount=ocean.to_wei(1000),
-    from_wallet=bob_wallet,
-)
+# Approve consume market fee tokens before starting order.
 erc20_enterprise_token.approve(
     spender=erc20_enterprise_token.address,
     amount=ocean.to_wei(1000),
+    from_wallet=alice_wallet
+)
+
+# Transfer some ERC20 Enterprise tokens to Bob for buying from the FRE
+erc20_enterprise_token.transfer(bob_wallet.address, ocean.to_wei(15), alice_wallet)
+OCEAN_token.approve(
+    spender=erc20_enterprise_token.address,
+    amount=ocean.to_wei(1000),
     from_wallet=bob_wallet,
 )
+
 tx_id = erc20_enterprise_token.buy_from_fre_and_order(
-    order_params=order_params, fre_params=fre_params, from_wallet=bob_wallet
+    consumer=bob_wallet.address,
+    service_index=1,
+    provider_fee_address=alice_wallet.address,
+    provider_fee_token=OCEAN_token.address,
+    provider_fee_amount=0,
+    v=v,
+    r=r,
+    s=s,
+    valid_until=1958133628,
+    provider_data=provider_data,
+    consumer_market_fee_address=bob_wallet.address,
+    consumer_market_fee_token=erc20_enterprise_token.address,
+    consumer_market_fee_amount=ocean.to_wei(2),
+    exchange_contract=fixed_rate_exchange.address,
+    exchange_id=exchange_id,
+    max_basetoken_amount=ocean.to_wei(10),
+    swap_market_fee=ocean.to_wei("0.001"),  # 1e15 => 0.1%
+    market_fee_address=bob_wallet.address,
+    from_wallet=alice_wallet,
 )
 tx_receipt = ocean.web3.eth.wait_for_transaction_receipt(tx_id)
 assert tx_receipt.status == 1, "failed buying data tokens from FRE."
-
 ```

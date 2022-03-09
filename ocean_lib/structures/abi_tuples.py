@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 
-"""Defines NamedTuples `Stakes`, `OrderData`, `OrderParams`, `Operations`"""
+"""Defines NamedTuples `Stakes`, `OrderData`, `Operations`"""
 from enum import Enum
 from typing import NamedTuple
 
@@ -51,15 +51,6 @@ OrderData = NamedTuple(
     ],
 )
 
-OrderParams = NamedTuple(
-    "OrderParams",
-    [
-        ("consumer", str),
-        ("service_index", int),
-        ("provider_fees", tuple),
-        ("consume_fees", tuple),
-    ],
-)
 
 MetadataProof = NamedTuple(
     "MetadataProof",
