@@ -114,23 +114,20 @@ def test_main(
     )
 
     tx = erc20_token.deploy_pool(
-        [
-            to_wei(1),
-            ocean_contract.decimals(),
-            initial_ocean_liq // 100 * 9,
-            2500000,
-            initial_ocean_liq,
-        ],
-        [to_wei("0.001"), to_wei("0.001")],
-        [
-            get_address_of_type(config, "Staking"),
-            ocean_contract.address,
-            consumer_wallet.address,
-            consumer_wallet.address,
-            get_address_of_type(config, "OPFCommunityFeeCollector"),
-            get_address_of_type(config, "poolTemplate"),
-        ],
-        consumer_wallet,
+        rate=to_wei(1),
+        basetoken_decimals=ocean_contract.decimals(),
+        vesting_amount=initial_ocean_liq // 100 * 9,
+        vested_blocks=2500000,
+        initial_liq=initial_ocean_liq,
+        lp_swap_fee=to_wei("0.001"),
+        market_swap_fee=to_wei("0.001"),
+        ss_contract=get_address_of_type(config, "Staking"),
+        basetoken_address=ocean_contract.address,
+        basetoken_sender=consumer_wallet.address,
+        publisher_address=consumer_wallet.address,
+        market_fee_collector=get_address_of_type(config, "OPFCommunityFeeCollector"),
+        pool_template_address=get_address_of_type(config, "poolTemplate"),
+        from_wallet=consumer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     pool_event = erc20_token.get_event_log(

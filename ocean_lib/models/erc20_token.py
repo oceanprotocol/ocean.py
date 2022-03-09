@@ -3,14 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enum import IntEnum
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 from enforce_typing import enforce_types
-from eth_account.messages import encode_defunct
-from eth_typing.encoding import HexStr
-from web3.main import Web3
-
-from ocean_lib.utils.utilities import prepare_message_for_ecrecover_in_solidity
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -84,41 +79,68 @@ class ERC20Token(ContractBase):
     def event_NewFixedRate(self):
         return self.events.NewFixedRate()
 
-    def initialize(
-        self,
-        strings: List[str],
-        addresses: List[str],
-        factory_addresses: List[str],
-        uints: List[int],
-        bytess: List[bytes],
-        from_wallet: Wallet,
-    ) -> str:
-        return self.send_transaction(
-            "initialize",
-            (strings, addresses, factory_addresses, uints, bytess),
-            from_wallet,
-        )
-
     def deploy_pool(
         self,
-        ss_params: List[int],
-        swap_fees: List[int],
-        addresses: List[str],
+        rate: int,
+        basetoken_decimals: int,
+        vesting_amount: int,
+        vested_blocks: int,
+        initial_liq: int,
+        lp_swap_fee: int,
+        market_swap_fee: int,
+        ss_contract: str,
+        basetoken_address: str,
+        basetoken_sender: str,
+        publisher_address: str,
+        market_fee_collector: str,
+        pool_template_address: str,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "deployPool", (ss_params, swap_fees, addresses), from_wallet
+            "deployPool",
+            (
+                [rate, basetoken_decimals, vesting_amount, vested_blocks, initial_liq],
+                [lp_swap_fee, market_swap_fee],
+                [
+                    ss_contract,
+                    basetoken_address,
+                    basetoken_sender,
+                    publisher_address,
+                    market_fee_collector,
+                    pool_template_address,
+                ],
+            ),
+            from_wallet,
         )
 
     def create_fixed_rate(
         self,
         fixed_price_address: str,
-        addresses: List[str],
-        uints: List[int],
+        basetoken_address: str,
+        owner: str,
+        market_fee_collector: str,
+        allowed_swapper: str,
+        basetoken_decimals: int,
+        datatoken_decimals: int,
+        fixed_rate: int,
+        market_fee: int,
+        with_mint: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "createFixedRate", (fixed_price_address, addresses, uints), from_wallet
+            "createFixedRate",
+            (
+                fixed_price_address,
+                [basetoken_address, owner, market_fee_collector, allowed_swapper],
+                [
+                    basetoken_decimals,
+                    datatoken_decimals,
+                    fixed_rate,
+                    market_fee,
+                    with_mint,
+                ],
+            ),
+            from_wallet,
         )
 
     def create_dispenser(
@@ -165,20 +187,6 @@ class ERC20Token(ContractBase):
             ),
             from_wallet,
         )
-
-    @staticmethod
-    def sign_provider_fees(
-        provider_data: bytes,
-        provider_fee_address: str,
-        provider_fee_token: str,
-        provider_fee_amount: int,
-        from_wallet: Wallet,
-    ) -> Tuple[HexStr, int, str, str]:
-        message = encode_defunct(
-            text=f"{provider_data}{provider_fee_address}{provider_fee_token}{provider_fee_amount}"
-        )
-        signed_message = Web3.eth.account.sign_message(message, from_wallet.private_key)
-        return prepare_message_for_ecrecover_in_solidity(signed_message)
 
     def start_order(
         self,
@@ -248,29 +256,6 @@ class ERC20Token(ContractBase):
                     valid_until,
                     provider_data,
                 ),
-            ),
-            from_wallet,
-        )
-
-    def start_multiple_order(
-        self,
-        consumers: List[str],
-        amounts: List[int],
-        service_ids: List[int],
-        mrkt_fee_collectors: List[str],
-        fee_tokens: List[str],
-        fee_amounts: List[int],
-        from_wallet: Wallet,
-    ) -> str:
-        return self.send_transaction(
-            "startMultipleOrder",
-            (
-                consumers,
-                amounts,
-                service_ids,
-                mrkt_fee_collectors,
-                fee_tokens,
-                fee_amounts,
             ),
             from_wallet,
         )

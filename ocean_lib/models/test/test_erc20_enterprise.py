@@ -195,13 +195,15 @@ def test_buy_from_fre_and_order(
 
     tx = erc20_enterprise_token.create_fixed_rate(
         fixed_price_address=fixed_rate_exchange.address,
-        addresses=[
-            mock_usdc_contract.address,
-            publisher_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[18, 18, to_wei("1"), to_wei("0.1"), 1],
+        basetoken_address=mock_usdc_contract.address,
+        owner=publisher_wallet.address,
+        market_fee_collector=publisher_wallet.address,
+        allowed_swapper=ZERO_ADDRESS,
+        basetoken_decimals=18,
+        datatoken_decimals=18,
+        fixed_rate=to_wei(1),
+        market_fee=to_wei("0.1"),
+        with_mint=1,
         from_wallet=publisher_wallet,
     )
 

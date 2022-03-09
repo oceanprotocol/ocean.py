@@ -122,16 +122,17 @@ to order this access token.
 erc20_token = ocean.get_datatoken(asset.services[0].datatoken)
 OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 
-ss_params = [
-    ocean.to_wei(1),
-    OCEAN_token.decimals(),
-    ocean.to_wei(10000),
-    2500000,
-    ocean.to_wei(2000)
-]
-
-swap_fees = [ocean.to_wei("0.01"), ocean.to_wei("0.01")]
-bpool = ocean.create_pool(erc20_token, OCEAN_token, ss_params, swap_fees, alice_wallet)
+bpool = ocean.create_pool(
+    erc20_token=erc20_token,
+    base_token=OCEAN_token,
+    rate=ocean.to_wei(1),
+    vesting_amount=ocean.to_wei(10000),
+    vested_blocks=2500000,
+    initial_liq=ocean.to_wei(2000),
+    lp_swap_fee=ocean.to_wei("0.01"),
+    market_swap_fee=ocean.to_wei("0.01"),
+    from_wallet=alice_wallet
+)
 print(f"BPool address: {bpool.address}")
 
 ```

@@ -67,24 +67,6 @@ def test_permissions(
 
     assert erc721_nft.token_uri(1) == "https://oceanprotocol.com/nft/"
 
-    # Tests failing to re-initialize the contract
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_nft.initialize(
-            owner=publisher_wallet.address,
-            name="NewName",
-            symbol="NN",
-            token_factory_address=erc721_factory_address,
-            additional_erc20_deployer=ZERO_ADDRESS,
-            additional_metadata_updater=ZERO_ADDRESS,
-            token_uri="https://oceanprotocol.com/nft/",
-            from_wallet=publisher_wallet,
-        )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721Template: token instance "
-        "already initialized"
-    )
-
     # Tests failing clearing permissions
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_nft.clean_permissions(from_wallet=another_consumer_wallet)

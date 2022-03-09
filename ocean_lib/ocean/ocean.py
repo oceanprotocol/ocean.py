@@ -243,24 +243,18 @@ class Ocean:
     ) -> bytes:
         fixed_price_address = get_address_of_type(self.config, "FixedPrice")
         erc20_token.approve(fixed_price_address, amount, from_wallet)
-        addresses = [
-            base_token.address,
-            from_wallet.address,
-            from_wallet.address,
-            ZERO_ADDRESS,
-        ]
-        uints = [
-            erc20_token.decimals(),
-            base_token.decimals(),
-            self.to_wei("1"),
-            int(1e15),
-            0,
-        ]
 
         tx = erc20_token.create_fixed_rate(
             fixed_price_address=fixed_price_address,
-            addresses=addresses,
-            uints=uints,
+            basetoken_address=base_token.address,
+            owner=from_wallet.address,
+            market_fee_collector=from_wallet.address,
+            allowed_swapper=ZERO_ADDRESS,
+            basetoken_decimals=base_token.decimals(),
+            datatoken_decimals=erc20_token.decimals(),
+            fixed_rate=self.to_wei(1),
+            market_fee=int(1e15),
+            with_mint=0,
             from_wallet=from_wallet,
         )
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
@@ -284,8 +278,12 @@ class Ocean:
         self,
         erc20_token: ERC20Token,
         base_token: ERC20Token,
-        ss_params: List[int],
-        swap_fees: List[int],
+        rate: int,
+        vesting_amount: int,
+        vested_blocks: int,
+        initial_liq: int,
+        lp_swap_fee: int,
+        market_swap_fee: int,
         from_wallet: Wallet,
     ) -> BPool:
         base_token.approve(
@@ -293,17 +291,22 @@ class Ocean:
         )
 
         tx = erc20_token.deploy_pool(
-            ss_params,
-            swap_fees,
-            [
-                get_address_of_type(self.config, "Staking"),
-                base_token.address,
-                from_wallet.address,
-                from_wallet.address,
-                get_address_of_type(self.config, "OPFCommunityFeeCollector"),
-                get_address_of_type(self.config, "poolTemplate"),
-            ],
-            from_wallet,
+            rate=rate,
+            basetoken_decimals=base_token.decimals(),
+            vesting_amount=vesting_amount,
+            vested_blocks=vested_blocks,
+            initial_liq=initial_liq,
+            lp_swap_fee=lp_swap_fee,
+            market_swap_fee=market_swap_fee,
+            ss_contract=get_address_of_type(self.config, "Staking"),
+            basetoken_address=base_token.address,
+            basetoken_sender=from_wallet.address,
+            publisher_address=from_wallet.address,
+            market_fee_collector=get_address_of_type(
+                self.config, "OPFCommunityFeeCollector"
+            ),
+            pool_template_address=get_address_of_type(self.config, "poolTemplate"),
+            from_wallet=from_wallet,
         )
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
         pool_event = self.factory_router.get_event_log(

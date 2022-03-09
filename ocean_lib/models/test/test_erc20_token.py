@@ -436,32 +436,6 @@ def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_rou
         cap=to_wei(publish_market_fee_amount),
     )
 
-    # Should fail to re-initialize the contracts
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.initialize(
-            strings=["ERC20DT1", "ERC20DT1Symbol"],
-            addresses=[
-                publisher_wallet.address,
-                consumer_wallet.address,
-                publisher_wallet.address,
-                ZERO_ADDRESS,
-            ],
-            factory_addresses=[
-                erc721.address,
-                get_address_of_type(config, "OPFCommunityFeeCollector"),
-                factory_router.address,
-            ],
-            uints=[to_wei("10"), 0],
-            bytess=[b""],
-            from_wallet=publisher_wallet,
-        ),
-
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: "
-        "token instance already initialized"
-    )
-
     # Should fail to mint if wallet is not a minter
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc20.mint(

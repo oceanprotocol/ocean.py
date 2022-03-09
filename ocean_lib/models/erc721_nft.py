@@ -53,31 +53,6 @@ class ERC721NFT(ContractBase):
     def event_TokenURIUpdate(self):
         return self.events.TokenURIUpdate()
 
-    def initialize(
-        self,
-        owner: str,
-        name: str,
-        symbol: str,
-        token_factory_address: str,
-        additional_erc20_deployer: str,
-        additional_metadata_updater: str,
-        token_uri: str,
-        from_wallet: Wallet,
-    ) -> str:
-        return self.send_transaction(
-            "initialize",
-            (
-                owner,
-                name,
-                symbol,
-                token_factory_address,
-                additional_erc20_deployer,
-                additional_metadata_updater,
-                token_uri,
-            ),
-            from_wallet,
-        )
-
     def set_metadata_state(self, metadata_state: int, from_wallet: Wallet):
         return self.send_transaction("setMetaDataState", (metadata_state,), from_wallet)
 

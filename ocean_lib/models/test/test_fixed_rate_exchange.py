@@ -92,13 +92,15 @@ def test_exchange_rate_creation(
 
     tx = erc20.create_fixed_rate(
         fixed_price_address=get_address_of_type(config, "FixedPrice"),
-        addresses=[
-            get_address_of_type(config, "Ocean"),
-            consumer_wallet.address,
-            another_consumer_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[18, 18, rate, market_fee, 0],
+        basetoken_address=get_address_of_type(config, "Ocean"),
+        owner=consumer_wallet.address,
+        market_fee_collector=another_consumer_wallet.address,
+        allowed_swapper=ZERO_ADDRESS,
+        basetoken_decimals=18,
+        datatoken_decimals=18,
+        fixed_rate=rate,
+        market_fee=market_fee,
+        with_mint=0,
         from_wallet=consumer_wallet,
     )
 

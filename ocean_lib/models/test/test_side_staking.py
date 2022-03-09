@@ -76,22 +76,19 @@ def test_side_staking(
     )
 
     tx = erc20.deploy_pool(
-        ss_params=[
-            to_wei("1"),
-            ocean_token.decimals(),
-            to_wei("0.5"),
-            vested_blocks,
-            initial_ocean_liquidity,
-        ],
-        swap_fees=[swap_fee, swap_market_fee],
-        addresses=[
-            get_address_of_type(config, "Staking"),
-            ocean_token.address,
-            consumer_wallet.address,
-            consumer_wallet.address,
-            get_address_of_type(config, "OPFCommunityFeeCollector"),
-            get_address_of_type(config, "poolTemplate"),
-        ],
+        rate=to_wei(1),
+        basetoken_decimals=ocean_token.decimals(),
+        vesting_amount=to_wei("0.5"),
+        vested_blocks=2500000,
+        initial_liq=initial_ocean_liquidity,
+        lp_swap_fee=swap_fee,
+        market_swap_fee=swap_market_fee,
+        ss_contract=get_address_of_type(config, "Staking"),
+        basetoken_address=ocean_token.address,
+        basetoken_sender=consumer_wallet.address,
+        publisher_address=consumer_wallet.address,
+        market_fee_collector=get_address_of_type(config, "OPFCommunityFeeCollector"),
+        pool_template_address=get_address_of_type(config, "poolTemplate"),
         from_wallet=consumer_wallet,
     )
 
