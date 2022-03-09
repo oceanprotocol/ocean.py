@@ -80,7 +80,7 @@ class DataServiceProvider:
 
         if not response or not hasattr(response, "status_code"):
             raise DataProviderException(
-                f"Failed to get a response for request: encryptEndpoint={encrypt_endpoint}, payload={payload}, response is {response.content}"
+                f"Failed to get a response for request: encryptEndpoint={encrypt_endpoint}, payload={payload}, response is {response}"
             )
 
         if response.status_code != 201:
@@ -114,7 +114,7 @@ class DataServiceProvider:
 
         if not response or not hasattr(response, "status_code"):
             raise DataProviderException(
-                f"Failed to get a response for request: fileinfoEndpoint={fileinfo_endpoint}, payload={payload}, response is {response.content}"
+                f"Failed to get a response for request: fileinfoEndpoint={fileinfo_endpoint}, payload={payload}, response is {response}"
             )
 
         if response.status_code != 200:
@@ -167,7 +167,7 @@ class DataServiceProvider:
         )
         if not response or not hasattr(response, "status_code"):
             raise DataProviderException(
-                f"Failed to get a response for request: initializeEndpoint={initialize_endpoint}, payload={payload}, response is {response.content}"
+                f"Failed to get a response for request: initializeEndpoint={initialize_endpoint}, payload={payload}, response is {response}"
             )
 
         if response.status_code != 200:
@@ -318,7 +318,7 @@ class DataServiceProvider:
         )
         if response is None:
             raise DataProviderException(
-                f"Failed to get a response for request: computeStartEndpoint={compute_endpoint}, payload={payload}, response is {response.content}"
+                f"Failed to get a response for request: computeStartEndpoint={compute_endpoint}, payload={payload}, response is {response}"
             )
 
         logger.debug(
