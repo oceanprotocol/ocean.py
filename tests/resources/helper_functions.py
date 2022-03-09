@@ -230,14 +230,14 @@ def deploy_erc721_erc20(
 
     tx_result = erc721_nft.create_erc20(
         template_index=template_index,
-        strings=["ERC20DT1", "ERC20DT1Symbol"],
-        addresses=[
-            erc20_minter.address,
-            erc721_publisher.address,
-            erc721_publisher.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[cap, 0],
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=erc20_minter.address,
+        datatoken_fee_manager=erc721_publisher.address,
+        datatoken_publishing_market_address=erc721_publisher.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=cap,
+        publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=erc721_publisher,
     )

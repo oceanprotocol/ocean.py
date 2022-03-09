@@ -50,14 +50,14 @@ def test_c2d_flow_readme():
     # Publish the datatoken
     DATA_datatoken = DATA_nft_token.create_datatoken(
         template_index=1,
-        strings=["Datatoken 1", "DT1"],
-        addresses=[
-            alice_wallet.address,
-            alice_wallet.address,
-            ZERO_ADDRESS,
-            ocean.OCEAN_address,
-        ],
-        uints=[ocean.to_wei(100000), 0],
+        datatoken_name="Datatoken 1",
+        datatoken_symbol="DT1",
+        datatoken_minter=alice_wallet.address,
+        datatoken_fee_manager=alice_wallet.address,
+        datatoken_publishing_market_address=ZERO_ADDRESS,
+        fee_token_address=ocean.OCEAN_address,
+        datatoken_cap=ocean.to_wei(100000),
+        publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=alice_wallet,
     )
@@ -124,14 +124,14 @@ def test_c2d_flow_readme():
     # Publish the datatoken
     ALGO_datatoken = ALGO_nft_token.create_datatoken(
         template_index=1,
-        strings=["Datatoken 1", "DT1"],
-        addresses=[
-            alice_wallet.address,
-            alice_wallet.address,
-            ZERO_ADDRESS,
-            ocean.OCEAN_address,
-        ],
-        uints=[ocean.to_wei(100000), 0],
+        datatoken_name="Datatoken 1",
+        datatoken_symbol="DT1",
+        datatoken_minter=alice_wallet.address,
+        datatoken_fee_manager=alice_wallet.address,
+        datatoken_publishing_market_address=ZERO_ADDRESS,
+        fee_token_address=ocean.OCEAN_address,
+        datatoken_cap=ocean.to_wei(100000),
+        publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=alice_wallet,
     )

@@ -474,14 +474,14 @@ def test_create_erc20(web3, config, publisher_wallet, consumer_wallet):
 
     tx = erc721_nft.create_erc20(
         template_index=1,
-        strings=["ERC20DT1", "ERC20DT1Symbol"],
-        addresses=[
-            publisher_wallet.address,
-            consumer_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[to_wei("0.5"), 0],
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=publisher_wallet.address,
+        datatoken_fee_manager=consumer_wallet.address,
+        datatoken_publishing_market_address=publisher_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=to_wei("0.5"),
+        publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=publisher_wallet,
     )
@@ -503,14 +503,14 @@ def test_fail_creating_erc20(web3, config, publisher_wallet, consumer_wallet):
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_nft.create_erc20(
             template_index=1,
-            strings=["ERC20DT1", "ERC20DT1Symbol"],
-            addresses=[
-                consumer_wallet.address,
-                consumer_wallet.address,
-                consumer_wallet.address,
-                ZERO_ADDRESS,
-            ],
-            uints=[to_wei("0.5"), 0],
+            datatoken_name="ERC20DT1",
+            datatoken_symbol="ERC20DT1Symbol",
+            datatoken_minter=publisher_wallet.address,
+            datatoken_fee_manager=consumer_wallet.address,
+            datatoken_publishing_market_address=publisher_wallet.address,
+            fee_token_address=ZERO_ADDRESS,
+            datatoken_cap=to_wei("0.5"),
+            publishing_market_fee_amount=0,
             bytess=[b""],
             from_wallet=consumer_wallet,
         )
@@ -594,14 +594,14 @@ def test_erc721_datatoken_functions(web3, config, publisher_wallet, consumer_wal
     )
     erc721_nft.create_erc20(
         template_index=1,
-        strings=["ERC20DT1", "ERC20DT1Symbol"],
-        addresses=[
-            publisher_wallet.address,
-            consumer_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[to_wei("0.5"), 0],
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=publisher_wallet.address,
+        datatoken_fee_manager=consumer_wallet.address,
+        datatoken_publishing_market_address=publisher_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=to_wei("0.5"),
+        publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
     )

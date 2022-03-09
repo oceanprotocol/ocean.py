@@ -42,17 +42,14 @@ def test_erc20_enterprise_flow_with_dispenser():
     cap = ocean.to_wei(200)
     erc20_enterprise_token = erc721_nft.create_datatoken(
         template_index=2,  # this is the value for ERC20 Enterprise token
-        strings=[
-            "ERC20DT1",
-            "ERC20DT1Symbol",
-        ],  # name & symbol for ERC20 Enterprise token
-        addresses=[
-            alice_wallet.address,  # minter address
-            alice_wallet.address,  # fee manager for this ERC20 Enterprise token
-            alice_wallet.address,  # publishing Market Address
-            ZERO_ADDRESS,  # publishing Market Fee Token
-        ],
-        uints=[cap, 0],
+        datatoken_name="ERC20DT1",  # name for ERC20 token
+        datatoken_symbol="ERC20DT1Symbol",  # symbol for ERC20 token
+        datatoken_minter=alice_wallet.address,  # minter address
+        datatoken_fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
+        datatoken_publishing_market_address=alice_wallet.address,  # publishing Market Address
+        fee_token_address=ZERO_ADDRESS,  # publishing Market Fee Token
+        datatoken_cap=cap,
+        publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=alice_wallet,
     )
@@ -167,17 +164,14 @@ def test_erc20_enterprise_flow_with_fre():
     cap = ocean.to_wei(200)
     erc20_enterprise_token = erc721_nft.create_datatoken(
         template_index=2,  # this is the value for ERC20 Enterprise token
-        strings=[
-            "ERC20DT1",
-            "ERC20DT1Symbol",
-        ],  # name & symbol for ERC20 Enterprise token
-        addresses=[
-            alice_wallet.address,  # minter address
-            alice_wallet.address,  # fee manager for this ERC20 Enterprise token
-            alice_wallet.address,  # publishing Market Address
-            ZERO_ADDRESS,  # publishing Market Fee Token
-        ],
-        uints=[cap, 0],
+        datatoken_name="ERC20DT1",  # name for ERC20 token
+        datatoken_symbol="ERC20DT1Symbol",  # symbol for ERC20 token
+        datatoken_minter=alice_wallet.address,  # minter address
+        datatoken_fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
+        datatoken_publishing_market_address=alice_wallet.address,  # publishing Market Address
+        fee_token_address=ZERO_ADDRESS,  # publishing Market Fee Token
+        datatoken_cap=cap,
+        publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=alice_wallet,
     )

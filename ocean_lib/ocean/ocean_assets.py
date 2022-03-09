@@ -117,17 +117,27 @@ class OceanAssets:
         erc721_factory: ERC721FactoryContract,
         erc721_nft: ERC721NFT,
         template_index: int,
-        strings: List[str],
-        addresses: List[str],
-        uints: List[int],
+        datatoken_name: str,
+        datatoken_symbol: str,
+        datatoken_minter: str,
+        datatoken_fee_manager: str,
+        datatoken_publishing_market_address: str,
+        fee_token_address: str,
+        datatoken_cap: int,
+        publishing_market_fee_amount: int,
         bytess: List[bytes],
         from_wallet: Wallet,
     ) -> str:
         tx_result = erc721_nft.create_erc20(
             template_index=template_index,
-            strings=strings,
-            addresses=addresses,
-            uints=uints,
+            datatoken_name=datatoken_name,
+            datatoken_symbol=datatoken_symbol,
+            datatoken_minter=datatoken_minter,
+            datatoken_fee_manager=datatoken_fee_manager,
+            datatoken_publishing_market_address=datatoken_publishing_market_address,
+            fee_token_address=fee_token_address,
+            datatoken_cap=datatoken_cap,
+            publishing_market_fee_amount=publishing_market_fee_amount,
             bytess=bytess,
             from_wallet=from_wallet,
         )
@@ -249,9 +259,14 @@ class OceanAssets:
         erc721_additional_metadata_updater: Optional[str] = None,
         erc721_uri: Optional[str] = None,
         erc20_templates: Optional[List[int]] = None,
-        erc20_strings: Optional[List[List[str]]] = None,
-        erc20_addresses_list: Optional[List[List[str]]] = None,
-        erc20_uints: Optional[List[List[int]]] = None,
+        erc20_names: Optional[List[str]] = None,
+        erc20_symbols: Optional[List[str]] = None,
+        erc20_minters: Optional[List[str]] = None,
+        erc20_fee_managers: Optional[List[str]] = None,
+        erc20_publishing_market_addresses: Optional[List[str]] = None,
+        fee_token_addresses: Optional[List[str]] = None,
+        erc20_cap_values: Optional[List[int]] = None,
+        publishing_fee_amounts: Optional[List[int]] = None,
         erc20_bytess: Optional[List[List[bytes]]] = None,
         deployed_erc20_tokens: Optional[List[ERC20Token]] = None,
         encrypt_flag: Optional[bool] = False,
@@ -276,11 +291,16 @@ class OceanAssets:
         :param erc721_additional_erc_deployer: str address of an additional ERC20 deployer.
         :param erc721_additional_metadata_updater: str address of an additional metadata updater.
         :param erc721_uri: str URL of the ERC721 token.
-        :param erc20_templates: list of templates indexes for deploying ERC20 tokens.
-        :param erc20_strings: list of arrays of strings for deploying ERC20 tokens (contains array of names & symbols for each ERC20 token).
-        :param erc20_addresses_list: list of arrays of addresses for deploying ERC20 tokens (contains array of minters, fee managers, markets' addresses, market tokens' addresses).
-        :param erc20_uints: list of arrays of uints for deploying ERC20 tokens (contains the cap & market fee for each ERC20 token).
-        :param erc20_bytess: list of arrays of bytes for deploying ERC20 tokens, default empty (currently not used, useful for future).
+        :param erc20_templates: list of templates indexes for deploying ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_names: list of names for ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_symbols: list of symbols for ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_minters: list of minters for ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_fee_managers: list of fee managers for ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_publishing_market_addresses: list of publishing market addresses for ERC20 tokens if deployed_erc20_tokens is None.
+        :param fee_token_addresses: list of fee tokens for ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_cap_values: list of cap values for ERC20 tokens if deployed_erc20_tokens is None.
+        :param publishing_fee_amounts: list of fee values for ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_bytess: list of arrays of bytes for deploying ERC20 tokens, default empty (currently not used, useful for future) if deployed_erc20_tokens is None.
         :param deployed_erc20_tokens: list of ERC20 tokens which are already deployed.
         :param encrypt_flag: bool for encryption of the DDO.
         :param compress_flag: bool for compression of the DDO.
@@ -363,9 +383,18 @@ class OceanAssets:
                         erc721_factory=erc721_factory,
                         erc721_nft=erc721_nft,
                         template_index=erc20_templates[erc20_data_counter],
-                        strings=erc20_strings[erc20_data_counter],
-                        addresses=erc20_addresses_list[erc20_data_counter],
-                        uints=erc20_uints[erc20_data_counter],
+                        datatoken_name=erc20_names[erc20_data_counter],
+                        datatoken_symbol=erc20_symbols[erc20_data_counter],
+                        datatoken_minter=erc20_minters[erc20_data_counter],
+                        datatoken_fee_manager=erc20_fee_managers[erc20_data_counter],
+                        datatoken_publishing_market_address=erc20_publishing_market_addresses[
+                            erc20_data_counter
+                        ],
+                        fee_token_address=fee_token_addresses[erc20_data_counter],
+                        datatoken_cap=erc20_cap_values[erc20_data_counter],
+                        publishing_market_fee_amount=publishing_fee_amounts[
+                            erc20_data_counter
+                        ],
                         bytess=erc20_bytess[erc20_data_counter],
                         from_wallet=publisher_wallet,
                     )

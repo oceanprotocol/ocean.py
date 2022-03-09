@@ -71,16 +71,14 @@ def test_marketplace_flow_readme(tmp_path):
         alice_wallet,
         encrypted_files,
         erc20_templates=[1],
-        erc20_strings=[["Datatoken 1", "DT1"]],
-        erc20_addresses_list=[
-            [
-                alice_wallet.address,
-                alice_wallet.address,
-                ZERO_ADDRESS,
-                ocean.OCEAN_address,
-            ]
-        ],
-        erc20_uints=[[ocean.to_wei(100000), 0]],
+        erc20_names=["Datatoken 1"],
+        erc20_symbols=["DT1"],
+        erc20_minters=[alice_wallet.address],
+        erc20_fee_managers=[alice_wallet.address],
+        erc20_publishing_market_addresses=[ZERO_ADDRESS],
+        fee_token_addresses=[ocean.OCEAN_address],
+        erc20_cap_values=[ocean.to_wei(100000)],
+        publishing_fee_amounts=[0],
         erc20_bytess=[[b""]],
     )
 

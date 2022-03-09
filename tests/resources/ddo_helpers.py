@@ -123,16 +123,14 @@ def create_asset(ocean, publisher, config, metadata=None, files=None):
         publisher,
         encrypted_files,
         erc20_templates=[1],
-        erc20_strings=[["Datatoken 1", "DT1"]],
-        erc20_addresses_list=[
-            [
-                publisher.address,
-                publisher.address,
-                ZERO_ADDRESS,
-                get_address_of_type(config, "Ocean"),
-            ]
-        ],
-        erc20_uints=[[ocean.to_wei(100), 0]],
+        erc20_names=["Datatoken 1"],
+        erc20_symbols=["DT1"],
+        erc20_minters=[publisher.address],
+        erc20_fee_managers=[publisher.address],
+        erc20_publishing_market_addresses=[ZERO_ADDRESS],
+        fee_token_addresses=[get_address_of_type(config, "Ocean")],
+        erc20_cap_values=[ocean.to_wei(100)],
+        publishing_fee_amounts=[0],
         erc20_bytess=[[b""]],
     )
 

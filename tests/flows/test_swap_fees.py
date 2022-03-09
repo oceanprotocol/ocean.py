@@ -95,14 +95,14 @@ def test_pool_ocean(
     cap = to_wei("100000")
     tx = erc721_nft.create_erc20(
         template_index=1,
-        strings=["ERC20DT1", "ERC20DT1Symbol"],
-        addresses=[
-            consumer_wallet.address,
-            factory_deployer_wallet.address,
-            consumer_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[cap, 0],
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=consumer_wallet.address,
+        datatoken_fee_manager=factory_deployer_wallet.address,
+        datatoken_publishing_market_address=consumer_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=cap,
+        publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
@@ -626,14 +626,14 @@ def test_pool_dai(
     cap = to_wei("1000")
     tx = erc721_nft.create_erc20(
         template_index=1,
-        strings=["ERC20DT1", "ERC20DT1Symbol"],
-        addresses=[
-            consumer_wallet.address,
-            factory_deployer_wallet.address,
-            consumer_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[cap, 0],
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=consumer_wallet.address,
+        datatoken_fee_manager=factory_deployer_wallet.address,
+        datatoken_publishing_market_address=consumer_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=cap,
+        publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
@@ -1139,14 +1139,14 @@ def test_pool_usdc(
     cap = to_wei("1000")
     tx = erc721_nft.create_erc20(
         template_index=1,
-        strings=["ERC20DT1", "ERC20DT1Symbol"],
-        addresses=[
-            consumer_wallet.address,
-            factory_deployer_wallet.address,
-            consumer_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[cap, 0],
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=consumer_wallet.address,
+        datatoken_fee_manager=factory_deployer_wallet.address,
+        datatoken_publishing_market_address=consumer_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=cap,
+        publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
@@ -1649,14 +1649,14 @@ def test_pool_usdc_flexible(
     cap = to_wei(1000)
     tx = erc721_nft.create_erc20(
         template_index=1,
-        strings=["ERC20DT1", "ERC20DT1Symbol"],
-        addresses=[
-            consumer_wallet.address,
-            factory_deployer_wallet.address,
-            consumer_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[cap, 0],
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=consumer_wallet.address,
+        datatoken_fee_manager=factory_deployer_wallet.address,
+        datatoken_publishing_market_address=consumer_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=cap,
+        publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
@@ -2154,14 +2154,14 @@ def test_pool_dai_flexible(
     cap = to_wei(1000)
     tx = erc721_nft.create_erc20(
         template_index=1,
-        strings=["ERC20DT1", "ERC20DT1Symbol"],
-        addresses=[
-            consumer_wallet.address,
-            factory_deployer_wallet.address,
-            consumer_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[cap, 0],
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=consumer_wallet.address,
+        datatoken_fee_manager=factory_deployer_wallet.address,
+        datatoken_publishing_market_address=consumer_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=cap,
+        publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
     )

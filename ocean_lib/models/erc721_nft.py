@@ -143,15 +143,31 @@ class ERC721NFT(ContractBase):
     def create_erc20(
         self,
         template_index: int,
-        strings: List[str],
-        addresses: List[str],
-        uints: List[int],
+        datatoken_name: str,
+        datatoken_symbol: str,
+        datatoken_minter: str,
+        datatoken_fee_manager: str,
+        datatoken_publishing_market_address: str,
+        fee_token_address: str,
+        datatoken_cap: int,
+        publishing_market_fee_amount: int,
         bytess: List[bytes],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "createERC20",
-            (template_index, strings, addresses, uints, bytess),
+            (
+                template_index,
+                [datatoken_name, datatoken_symbol],
+                [
+                    datatoken_minter,
+                    datatoken_fee_manager,
+                    datatoken_publishing_market_address,
+                    fee_token_address,
+                ],
+                [datatoken_cap, publishing_market_fee_amount],
+                bytess,
+            ),
             from_wallet,
         )
 
@@ -276,9 +292,14 @@ class ERC721NFT(ContractBase):
     def create_datatoken(
         self,
         template_index: int,
-        strings: List[str],
-        addresses: List[str],
-        uints: List[int],
+        datatoken_name: str,
+        datatoken_symbol: str,
+        datatoken_minter: str,
+        datatoken_fee_manager: str,
+        datatoken_publishing_market_address: str,
+        fee_token_address: str,
+        datatoken_cap: int,
+        publishing_market_fee_amount: int,
         bytess: List[bytes],
         from_wallet: Wallet,
     ) -> ERC20Token:
@@ -286,9 +307,14 @@ class ERC721NFT(ContractBase):
 
         tx_id = self.create_erc20(
             template_index=template_index,
-            strings=strings,
-            addresses=addresses,
-            uints=uints,
+            datatoken_name=datatoken_name,
+            datatoken_symbol=datatoken_symbol,
+            datatoken_minter=datatoken_minter,
+            datatoken_fee_manager=datatoken_fee_manager,
+            datatoken_publishing_market_address=datatoken_publishing_market_address,
+            fee_token_address=fee_token_address,
+            datatoken_cap=datatoken_cap,
+            publishing_market_fee_amount=publishing_market_fee_amount,
             bytess=bytess,
             from_wallet=from_wallet,
         )

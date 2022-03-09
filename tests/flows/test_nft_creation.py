@@ -254,14 +254,14 @@ def test_erc20_creation(
     erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
     tx_result = erc721_nft.create_erc20(
         template_index=1,
-        strings=["ERC20DT1", "ERC20DT1Symbol"],
-        addresses=[
-            publisher_wallet.address,
-            consumer_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[to_wei("0.5"), 0],
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=publisher_wallet.address,
+        datatoken_fee_manager=consumer_wallet.address,
+        datatoken_publishing_market_address=publisher_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=to_wei("0.5"),
+        publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
@@ -287,14 +287,14 @@ def test_erc20_creation(
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_nft.create_erc20(
             template_index=1,
-            strings=["ERC20DT1", "ERC20DT1Symbol"],
-            addresses=[
-                publisher_wallet.address,
-                consumer_wallet.address,
-                publisher_wallet.address,
-                ZERO_ADDRESS,
-            ],
-            uints=[to_wei("0.5"), 0],
+            datatoken_name="ERC20DT1",
+            datatoken_symbol="ERC20DT1Symbol",
+            datatoken_minter=publisher_wallet.address,
+            datatoken_fee_manager=consumer_wallet.address,
+            datatoken_publishing_market_address=publisher_wallet.address,
+            fee_token_address=ZERO_ADDRESS,
+            datatoken_cap=to_wei("0.5"),
+            publishing_market_fee_amount=0,
             bytess=[b""],
             from_wallet=another_consumer_wallet,
         )
@@ -399,14 +399,14 @@ def test_nft_owner_transfer(web3, config, publisher_wallet, consumer_wallet):
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721.create_erc20(
             template_index=1,
-            strings=["ERC20DT1", "ERC20DT1Symbol"],
-            addresses=[
-                publisher_wallet.address,
-                publisher_wallet.address,
-                publisher_wallet.address,
-                ZERO_ADDRESS,
-            ],
-            uints=[to_wei("0.5"), 0],
+            datatoken_name="ERC20DT1",
+            datatoken_symbol="ERC20DT1Symbol",
+            datatoken_minter=publisher_wallet.address,
+            datatoken_fee_manager=publisher_wallet.address,
+            datatoken_publishing_market_address=publisher_wallet.address,
+            fee_token_address=ZERO_ADDRESS,
+            datatoken_cap=to_wei("0.5"),
+            publishing_market_fee_amount=0,
             bytess=[b""],
             from_wallet=publisher_wallet,
         )
@@ -424,14 +424,14 @@ def test_nft_owner_transfer(web3, config, publisher_wallet, consumer_wallet):
     # NewOwner now owns the NFT, is already Manager by default and has all roles
     erc721.create_erc20(
         template_index=1,
-        strings=["ERC20DT1", "ERC20DT1Symbol"],
-        addresses=[
-            consumer_wallet.address,
-            consumer_wallet.address,
-            consumer_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[to_wei("0.5"), 0],
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=consumer_wallet.address,
+        datatoken_fee_manager=consumer_wallet.address,
+        datatoken_publishing_market_address=consumer_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=to_wei("0.5"),
+        publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
     )

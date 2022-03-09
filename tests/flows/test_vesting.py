@@ -77,14 +77,14 @@ def test_main(
     # Tests consumer deploys an ERC20DT
     trx_erc_20 = erc721_nft.create_erc20(
         template_index=1,
-        strings=["ERC20DT1", "ERC20DT1Symbol"],
-        addresses=[
-            consumer_wallet.address,
-            another_consumer_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[to_wei("0.05"), 0],
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=consumer_wallet.address,
+        datatoken_fee_manager=another_consumer_wallet.address,
+        datatoken_publishing_market_address=publisher_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=to_wei("0.05"),
+        publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
     )

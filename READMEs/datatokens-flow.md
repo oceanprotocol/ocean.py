@@ -125,14 +125,14 @@ cap = ocean.to_wei(100)
 nft_factory = ocean.get_nft_factory()
 erc20_token = erc721_nft.create_datatoken(
     template_index=1, # default value
-    strings=["ERC20DT1", "ERC20DT1Symbol"], # name & symbol for ERC20 token
-    addresses=[
-        alice_wallet.address, # minter address
-        alice_wallet.address, # fee manager for this ERC20 token
-        alice_wallet.address, # publishing Market Address
-        ZERO_ADDRESS, # publishing Market Fee Token
-    ],
-    uints=[cap, 0],
+    datatoken_name="ERC20DT1",  # name for ERC20 token
+    datatoken_symbol="ERC20DT1Symbol",  # symbol for ERC20 token
+    datatoken_minter=alice_wallet.address,  # minter address
+    datatoken_fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
+    datatoken_publishing_market_address=alice_wallet.address,  # publishing Market Address
+    fee_token_address=ZERO_ADDRESS,  # publishing Market Fee Token
+    datatoken_cap=cap,
+    publishing_market_fee_amount=0,
     bytess=[b""],
     from_wallet=alice_wallet
 )

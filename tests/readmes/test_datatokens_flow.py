@@ -37,14 +37,14 @@ def test_datatokens_flow_readme():
     cap = ocean.to_wei(10)
     erc20_token = erc721_nft.create_datatoken(
         template_index=1,  # default value
-        strings=["ERC20DT1", "ERC20DT1Symbol"],  # name & symbol for ERC20 token
-        addresses=[
-            wallet.address,  # minter address
-            wallet.address,  # fee manager for this ERC20 token
-            wallet.address,  # publishing Market Address
-            ZERO_ADDRESS,  # publishing Market Fee Token
-        ],
-        uints=[cap, 0],
+        datatoken_name="ERC20DT1",  # name for ERC20 token
+        datatoken_symbol="ERC20DT1Symbol",  # symbol for ERC20 token
+        datatoken_minter=wallet.address,  # minter address
+        datatoken_fee_manager=wallet.address,  # fee manager for this ERC20 token
+        datatoken_publishing_market_address=wallet.address,  # publishing Market Address
+        fee_token_address=ZERO_ADDRESS,  # publishing Market Fee Token
+        datatoken_cap=cap,
+        publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=wallet,
     )
