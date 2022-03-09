@@ -131,14 +131,14 @@ def test_side_staking(
     ocean_token.transfer(another_consumer_wallet.address, to_wei("10"), consumer_wallet)
 
     bpool.swap_exact_amount_in(
-        [ocean_token.address, erc20.address, publisher_wallet.address],
-        [
-            to_wei("1"),
-            to_wei("0"),
-            to_wei("1000000"),
-            0,
-        ],
-        another_consumer_wallet,
+        token_in=ocean_token.address,
+        token_out=erc20.address,
+        consume_market_fee=publisher_wallet.address,
+        token_amount_in=to_wei("1"),
+        min_amount_out=to_wei("0"),
+        max_price=to_wei("1000000"),
+        swap_market_fee=0,
+        from_wallet=another_consumer_wallet,
     )
 
     assert erc20.balanceOf(another_consumer_wallet.address) >= 0
@@ -150,14 +150,14 @@ def test_side_staking(
 
     receipt = web3.eth.wait_for_transaction_receipt(
         bpool.swap_exact_amount_in(
-            [erc20.address, ocean_token.address, publisher_wallet.address],
-            [
-                to_wei("0.01"),
-                to_wei("0.001"),
-                to_wei("100"),
-                0,
-            ],
-            another_consumer_wallet,
+            token_in=erc20.address,
+            token_out=ocean_token.address,
+            consume_market_fee=publisher_wallet.address,
+            token_amount_in=to_wei("0.01"),
+            min_amount_out=to_wei("0.001"),
+            max_price=to_wei("100"),
+            swap_market_fee=0,
+            from_wallet=another_consumer_wallet,
         )
     )
 

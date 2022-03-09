@@ -126,8 +126,13 @@ def test_marketplace_flow_readme(tmp_path):
     OCEAN_token.approve(bpool.address, ocean.to_wei("10000"), from_wallet=bob_wallet)
 
     bpool.swap_exact_amount_out(
-        [OCEAN_token.address, erc20_token.address, ZERO_ADDRESS],
-        [ocean.to_wei(10), ocean.to_wei(1), ocean.to_wei(10), 0],
+        token_in=OCEAN_token.address,
+        token_out=erc20_token.address,
+        consume_market_fee=ZERO_ADDRESS,
+        max_amount_in=ocean.to_wei(10),
+        token_amount_out=ocean.to_wei(1),
+        max_price=ocean.to_wei(10),
+        consume_swap_market_fee=0,
         from_wallet=bob_wallet,
     )
     assert erc20_token.balanceOf(bob_wallet.address) >= ocean.to_wei(

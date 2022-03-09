@@ -22,14 +22,38 @@ class BFactory(ContractBase):
 
     def new_bpool(
         self,
-        tokens: List[str],
-        ss_params: List[int],
-        swap_fees: List[int],
-        addresses: List[str],
+        datatoken_address: str,
+        basetoken_address: str,
+        rate: int,
+        basetoken_decimals: int,
+        vesting_amount: int,
+        vested_blocks: int,
+        initial_liq: int,
+        lp_swap_fee: int,
+        market_swap_fee: int,
+        controller: str,
+        basetoken_sender: str,
+        publisher_address: str,
+        market_fee_collector: str,
+        pool_template_address: str,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "newBPool", (tokens, ss_params, swap_fees, addresses), from_wallet
+            "newBPool",
+            (
+                [datatoken_address, basetoken_address],
+                [rate, basetoken_decimals, vesting_amount, vested_blocks, initial_liq],
+                [lp_swap_fee, market_swap_fee],
+                [
+                    controller,
+                    basetoken_address,
+                    basetoken_sender,
+                    publisher_address,
+                    market_fee_collector,
+                    pool_template_address,
+                ],
+            ),
+            from_wallet,
         )
 
     def is_pool_template(self, pool_template) -> bool:

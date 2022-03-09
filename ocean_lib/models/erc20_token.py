@@ -260,32 +260,6 @@ class ERC20Token(ContractBase):
             from_wallet,
         )
 
-    def finish_order(
-        self,
-        order_tx_id: str,
-        consumer: str,
-        amount: int,
-        service_id: int,
-        from_wallet: Wallet,
-    ) -> str:
-        return self.send_transaction(
-            "finishOrder", (order_tx_id, consumer, amount, service_id), from_wallet
-        )
-
-    def finish_multiple_order(
-        self,
-        order_tx_ids: List[str],
-        consumers: List[str],
-        amounts: List[int],
-        service_ids: List[int],
-        from_wallet: Wallet,
-    ) -> str:
-        return self.send_transaction(
-            "finishMultipleOrder",
-            (order_tx_ids, consumers, amounts, service_ids),
-            from_wallet,
-        )
-
     def order_executed(
         self,
         order_tx_id: str,

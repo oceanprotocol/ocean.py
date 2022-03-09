@@ -76,31 +76,6 @@ class BPool(BTokenBase):
     def event_PublishMarketFeeChanged(self):
         return self.events.PublishMarketFeeChanged()
 
-    def initialize(
-        self,
-        controller: str,
-        factory: str,
-        swap_fees: List[int],
-        public_swap: bool,
-        finalized: bool,
-        tokens: List[str],
-        fee_collectors: List[str],
-        from_wallet: Wallet,
-    ) -> str:
-        return self.send_transaction(
-            "initialize",
-            (
-                controller,
-                factory,
-                swap_fees,
-                public_swap,
-                finalized,
-                tokens,
-                fee_collectors,
-            ),
-            from_wallet,
-        )
-
     def setup(
         self,
         datatoken: str,
@@ -140,6 +115,10 @@ class BPool(BTokenBase):
 
     def publish_market_fee(self, address: str) -> int:
         return self.contract.caller.publishMarketFees(address)
+
+    def is_initialized(self) -> bool:
+        """Returns true if state is initialized."""
+        return self.contract.caller.isInitialized()
 
     def is_finalized(self) -> bool:
         """Returns true if state is finalized.
@@ -325,8 +304,13 @@ class BPool(BTokenBase):
 
     def swap_exact_amount_in(
         self,
-        token_in_out_market: List[str],
-        amounts_in_out_max_fee: List[int],
+        token_in: str,
+        token_out: str,
+        consume_market_fee: str,
+        token_amount_in: int,
+        min_amount_out: int,
+        max_price: int,
+        swap_market_fee: int,
         from_wallet: Wallet,
     ) -> str:
         """Trades an exact `tokenAmountIn` of `tokenIn` taken from the caller by
@@ -339,8 +323,13 @@ class BPool(BTokenBase):
         `spotPriceAfter <= maxPrice)`.
 
         Args:
-            token_in_out_market (List[str]): [tokenIn, tokenOut, marketFeeAddress]
-            amounts_in_out_max_fee (List[int]): [tokenAmountIn, minAmountOut, maxPrice, swapMarketFee]
+            token_in (str),
+            token_out (str),
+            consume_market_fee (str),
+            token_amount_in (int),
+            min_amount_out (int),
+            max_price (int),
+            swap_market_fee (int),
             from_wallet (Wallet): wallet to sign the transaction with
 
         Returns:
@@ -349,14 +338,22 @@ class BPool(BTokenBase):
         """
         return self.send_transaction(
             "swapExactAmountIn",
-            (token_in_out_market, amounts_in_out_max_fee),
+            (
+                [token_in, token_out, consume_market_fee],
+                [token_amount_in, min_amount_out, max_price, swap_market_fee],
+            ),
             from_wallet,
         )
 
     def swap_exact_amount_out(
         self,
-        token_in_out_market: List[str],
-        amounts_in_out_max_fee: List[int],
+        token_in: str,
+        token_out: str,
+        consume_market_fee: str,
+        max_amount_in: int,
+        token_amount_out: int,
+        max_price: int,
+        consume_swap_market_fee: int,
         from_wallet: Wallet,
     ) -> str:
         """Swaps as little as possible limited of `tokenIn` for `tokenAmountOut` of `tokenOut`.
@@ -368,8 +365,13 @@ class BPool(BTokenBase):
         `spotPriceAfter <= maxPrice)`.
 
         Args:
-            token_in_out_market (List[str]): [tokenIn, tokenOut, marketFeeAddress]
-            amounts_in_out_max_fee (List[int]): [maxAmountIn, tokenAmountOut, maxPrice, swapMarketFee]
+            token_in (str),
+            token_out (str),
+            consume_market_fee (str),
+            max_amount_in (int),
+            token_amount_out (int),
+            max_price (int),
+            consume_swap_market_fee (int),
             from_wallet (Wallet): wallet to sign the transaction with
 
         Returns:
@@ -378,14 +380,17 @@ class BPool(BTokenBase):
         """
         return self.send_transaction(
             "swapExactAmountOut",
-            (token_in_out_market, amounts_in_out_max_fee),
+            (
+                [token_in, token_out, consume_market_fee],
+                [max_amount_in, token_amount_out, max_price, consume_swap_market_fee],
+            ),
             from_wallet,
         )
 
     def join_swap_extern_amount_in(
         self,
-        tokenAmountIn: int,
-        minPoolAmountOut: int,
+        token_amount_in: int,
+        min_pool_amount_out: int,
         from_wallet: Wallet,
     ) -> str:
         """
@@ -394,14 +399,14 @@ class BPool(BTokenBase):
         """
         return self.send_transaction(
             "joinswapExternAmountIn",
-            (tokenAmountIn, minPoolAmountOut),
+            (token_amount_in, min_pool_amount_out),
             from_wallet,
         )
 
     def exit_swap_pool_amount_in(
         self,
-        poolAmountIn: int,
-        minAmountOut: int,
+        pool_amount_in: int,
+        min_amount_out: int,
         from_wallet: Wallet,
     ) -> str:
         """
@@ -410,6 +415,6 @@ class BPool(BTokenBase):
         """
         return self.send_transaction(
             "exitswapPoolAmountIn",
-            (poolAmountIn, minAmountOut),
+            (pool_amount_in, min_amount_out),
             from_wallet,
         )

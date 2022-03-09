@@ -196,9 +196,14 @@ def test_pool_ocean(
     publisher_ocean_balance = ocean_contract.balanceOf(publisher_wallet.address)
 
     tx = bpool.swap_exact_amount_in(
-        [ocean_contract.address, erc20_address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=ocean_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=to_wei("0.1"),
+        min_amount_out=to_wei("0.0001"),
+        max_price=to_wei("100"),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -229,9 +234,14 @@ def test_pool_ocean(
     ocean_market_fee_balance = bpool.publish_market_fee(ocean_contract.address)
 
     tx = bpool.swap_exact_amount_out(
-        [ocean_contract.address, erc20_address, another_consumer_wallet.address],
-        [to_wei("10"), to_wei("1"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=ocean_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei(10),
+        token_amount_out=to_wei(1),
+        max_price=to_wei(100),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -277,9 +287,14 @@ def test_pool_ocean(
     assert bpool.publish_market_fee(erc20_address) == 0
 
     tx = bpool.swap_exact_amount_in(
-        [erc20_address, ocean_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=ocean_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=to_wei("0.1"),
+        min_amount_out=to_wei("0.0001"),
+        max_price=to_wei("100"),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -326,9 +341,14 @@ def test_pool_ocean(
     assert bpool.community_fee(erc20_address) == 0
 
     tx = bpool.swap_exact_amount_out(
-        [erc20_token.address, ocean_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=ocean_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei("0.1"),
+        token_amount_out=to_wei("0.0001"),
+        max_price=to_wei(100),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -713,9 +733,14 @@ def test_pool_dai(
     publisher_dai_balance = dai_contract.balanceOf(publisher_wallet.address)
 
     tx = bpool.swap_exact_amount_in(
-        [dai_contract.address, erc20_address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=dai_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=to_wei("0.1"),
+        min_amount_out=to_wei("0.0001"),
+        max_price=to_wei("100"),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -745,9 +770,14 @@ def test_pool_dai(
     dai_market_fee_balance = bpool.publish_market_fee(dai_contract.address)
 
     tx = bpool.swap_exact_amount_out(
-        [dai_contract.address, erc20_address, another_consumer_wallet.address],
-        [to_wei("10"), to_wei("1"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=dai_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei(10),
+        token_amount_out=to_wei(1),
+        max_price=to_wei(100),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -788,9 +818,14 @@ def test_pool_dai(
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_in(
-        [erc20_address, dai_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=dai_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=to_wei("0.1"),
+        min_amount_out=to_wei("0.0001"),
+        max_price=to_wei("100"),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -834,9 +869,14 @@ def test_pool_dai(
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_out(
-        [erc20_token.address, dai_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=dai_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei("0.1"),
+        token_amount_out=to_wei("0.0001"),
+        max_price=to_wei(100),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1224,9 +1264,14 @@ def test_pool_usdc(
     publisher_usdc_balance = usdc_contract.balanceOf(publisher_wallet.address)
 
     tx = bpool.swap_exact_amount_in(
-        [usdc_contract.address, erc20_address, another_consumer_wallet.address],
-        [int(1e7), to_wei(1), to_wei(5), 0],
-        publisher_wallet,
+        token_in=usdc_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=int(1e7),
+        min_amount_out=to_wei(1),
+        max_price=to_wei(5),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1257,9 +1302,14 @@ def test_pool_usdc(
     usdc_market_fee_balance = bpool.publish_market_fee(usdc_contract.address)
 
     tx = bpool.swap_exact_amount_out(
-        [usdc_contract.address, erc20_address, another_consumer_wallet.address],
-        [to_wei(10), to_wei(1), to_wei(100), 0],
-        publisher_wallet,
+        token_in=usdc_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei(10),
+        token_amount_out=to_wei(1),
+        max_price=to_wei(100),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1301,9 +1351,14 @@ def test_pool_usdc(
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_in(
-        [erc20_address, usdc_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), int(1e4), int(2**256 - 1), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=usdc_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=to_wei("0.1"),
+        min_amount_out=int(1e4),
+        max_price=int(2**256 - 1),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1347,9 +1402,14 @@ def test_pool_usdc(
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_out(
-        [erc20_token.address, usdc_contract.address, another_consumer_wallet.address],
-        [to_wei(10), int(1e6), to_wei(1000000000000000), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=usdc_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei(10),
+        token_amount_out=int(1e6),
+        max_price=to_wei(1000000000000000),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1729,9 +1789,14 @@ def test_pool_usdc_flexible(
     publisher_usdc_balance = usdc_contract.balanceOf(publisher_wallet.address)
 
     tx = bpool.swap_exact_amount_in(
-        [usdc_contract.address, erc20_address, another_consumer_wallet.address],
-        [int(1e7), to_wei(1), to_wei(5), 0],
-        publisher_wallet,
+        token_in=usdc_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=int(1e7),
+        min_amount_out=to_wei(1),
+        max_price=to_wei(5),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1762,9 +1827,14 @@ def test_pool_usdc_flexible(
     usdc_market_fee_balance = bpool.publish_market_fee(usdc_contract.address)
 
     tx = bpool.swap_exact_amount_out(
-        [usdc_contract.address, erc20_address, another_consumer_wallet.address],
-        [to_wei(10), to_wei(1), to_wei(100), 0],
-        publisher_wallet,
+        token_in=usdc_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei(10),
+        token_amount_out=to_wei(1),
+        max_price=to_wei(100),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1806,9 +1876,14 @@ def test_pool_usdc_flexible(
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_in(
-        [erc20_address, usdc_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), int(1e4), int(2**256 - 1), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=usdc_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=to_wei("0.1"),
+        min_amount_out=int(1e4),
+        max_price=int(2**256 - 1),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1852,9 +1927,14 @@ def test_pool_usdc_flexible(
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_out(
-        [erc20_token.address, usdc_contract.address, another_consumer_wallet.address],
-        [to_wei(10), int(1e6), to_wei(1000000000000000), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=usdc_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei(10),
+        token_amount_out=int(1e6),
+        max_price=to_wei(1000000000000000),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -2232,9 +2312,14 @@ def test_pool_dai_flexible(
     publisher_dai_balance = dai_contract.balanceOf(publisher_wallet.address)
 
     tx = bpool.swap_exact_amount_in(
-        [dai_contract.address, erc20_address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=dai_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=to_wei("0.1"),
+        min_amount_out=to_wei("0.0001"),
+        max_price=to_wei("100"),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -2264,9 +2349,14 @@ def test_pool_dai_flexible(
     dai_market_fee_balance = bpool.publish_market_fee(dai_contract.address)
 
     tx = bpool.swap_exact_amount_out(
-        [dai_contract.address, erc20_address, another_consumer_wallet.address],
-        [to_wei(10), to_wei(1), to_wei(100), 0],
-        publisher_wallet,
+        token_in=dai_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei(10),
+        token_amount_out=to_wei(1),
+        max_price=to_wei(100),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -2307,9 +2397,14 @@ def test_pool_dai_flexible(
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_in(
-        [erc20_address, dai_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=dai_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=to_wei("0.1"),
+        min_amount_out=to_wei("0.0001"),
+        max_price=to_wei("100"),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -2353,9 +2448,14 @@ def test_pool_dai_flexible(
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_out(
-        [erc20_token.address, dai_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei(100), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=dai_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei("0.1"),
+        token_amount_out=to_wei("0.0001"),
+        max_price=to_wei(100),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
