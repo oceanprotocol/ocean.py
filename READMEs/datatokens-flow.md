@@ -26,9 +26,6 @@ cd barge
 # Clean up old containers (to be sure)
 docker system prune -a --volumes
 
-# make sure to use the dev version of the operator service URL, to match the barge provider
-export OPERATOR_SERVICE_URL=https://c2d-dev.operator.oceanprotocol.com/
-
 #run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
 ./start_ocean.sh  --with-provider2
 ```
