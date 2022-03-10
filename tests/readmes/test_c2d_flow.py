@@ -28,9 +28,9 @@ from ocean_lib.web3_internal.wallet import Wallet
     [
         (
             "branin",
-            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/add-examples/branin_and_gpr/branin.arff",
+            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff",
             "gpr,",
-            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/add-examples/branin_and_gpr/gpr.py",
+            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py",
             "python-branin",
         ),
     ],
@@ -52,16 +52,16 @@ def test_c2d_flow_readme(
     [
         (
             "lena",
-            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/add-examples/lena_and_grayscale/lena.png",
+            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/lena_and_grayscale/lena.png",
             "grayscale",
-            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/add-examples/lena_and_grayscale/grayscale.py",
+            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/lena_and_grayscale/grayscale.py",
             "python-branin",
         ),
         (
             "iris",
-            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/add-examples/iris_and_logisitc_regression/dataset_61_iris.csv",
+            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/iris_and_logisitc_regression/dataset_61_iris.csv",
             "logistic-regression",
-            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/add-examples/iris_and_logisitc_regression/logistic_regression.py",
+            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/iris_and_logisitc_regression/logistic_regression.py",
             "python-panda",
         ),
     ],
