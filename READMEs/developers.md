@@ -55,8 +55,9 @@ cd barge
 #clean up old containers (to be sure)
 docker system prune -a --volumes
 
-#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-./start_ocean.sh  --with-provider2
+# Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
+# The `--with-c2d` option tells barge to include the Compute-to-Data backend
+./start_ocean.sh --with-c2d
 ```
 
 (Or, [run services separately](services.md).)
@@ -78,8 +79,6 @@ export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7
 
 In work console:
 ```console
-export OPERATOR_SERVICE_URL=https://c2d-dev.operator.oceanprotocol.com/
-
 #run a single test
 pytest ocean_lib/models/test/test_btoken.py::test_ERC20
 

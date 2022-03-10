@@ -2,12 +2,14 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import io
 import os
 import pickle
 import time
 from datetime import datetime, timedelta
 
 import pytest
+from PIL import Image
 
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.compute_input import ComputeInput
@@ -21,10 +23,64 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 
 @pytest.mark.integration
-def test_c2d_flow_readme():
+@pytest.mark.parametrize(
+    "dataset_name,dataset_url,algorithm_name,algorithm_url,algorithm_docker_tag",
+    [
+        (
+            "branin",
+            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff",
+            "gpr,",
+            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py",
+            "python-branin",
+        ),
+    ],
+)
+def test_c2d_flow_readme(
+    dataset_name, dataset_url, algorithm_name, algorithm_url, algorithm_docker_tag
+):
     """This test mirrors the c2d-flow.md README.
     As such, it does not use the typical pytest fixtures.
     """
+    c2d_flow_readme(
+        dataset_name, dataset_url, algorithm_name, algorithm_url, algorithm_docker_tag
+    )
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    "dataset_name,dataset_url,algorithm_name,algorithm_url,algorithm_docker_tag",
+    [
+        (
+            "lena",
+            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/lena_and_grayscale/lena.png",
+            "grayscale",
+            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/lena_and_grayscale/grayscale.py",
+            "python-branin",
+        ),
+        (
+            "iris",
+            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/iris_and_logisitc_regression/dataset_61_iris.csv",
+            "logistic-regression",
+            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/iris_and_logisitc_regression/logistic_regression.py",
+            "python-panda",
+        ),
+    ],
+)
+def test_c2d_flow_more_examples_readme(
+    dataset_name, dataset_url, algorithm_name, algorithm_url, algorithm_docker_tag
+):
+    """This test mirrors the c2d-flow-more-examples.md README.
+    As such, it does not use the typical pytest fixtures.
+    """
+    c2d_flow_readme(
+        dataset_name, dataset_url, algorithm_name, algorithm_url, algorithm_docker_tag
+    )
+
+
+def c2d_flow_readme(
+    dataset_name, dataset_url, algorithm_name, algorithm_url, algorithm_docker_tag
+):
+    """This is a helper method that mirrors the c2d-flow.md README."""
 
     # 2. Alice publishes data asset with compute service
     config = ExampleConfig.get_config()
@@ -70,17 +126,15 @@ def test_c2d_flow_readme():
     DATA_metadata = {
         "created": DATA_date_created,
         "updated": DATA_date_created,
-        "description": "Branin dataset",
-        "name": "Branin dataset",
+        "description": dataset_name,
+        "name": dataset_name,
         "type": "dataset",
         "author": "Trent",
         "license": "CC0: PublicDomain",
     }
 
     # ocean.py offers multiple file types, but a simple url file should be enough for this example
-    DATA_url_file = UrlFile(
-        url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-    )
+    DATA_url_file = UrlFile(url=dataset_url)
 
     # Encrypt file(s) using provider
     DATA_encrypted_files = ocean.assets.encrypt_files([DATA_url_file])
@@ -143,8 +197,8 @@ def test_c2d_flow_readme():
     ALGO_metadata = {
         "created": ALGO_date_created,
         "updated": ALGO_date_created,
-        "description": "gpr",
-        "name": "gpr",
+        "description": algorithm_name,
+        "name": algorithm_name,
         "type": "algorithm",
         "author": "Trent",
         "license": "CC0: PublicDomain",
@@ -155,16 +209,14 @@ def test_c2d_flow_readme():
             "container": {
                 "entrypoint": "python $ALGO",
                 "image": "oceanprotocol/algo_dockers",
-                "tag": "python-branin",
+                "tag": algorithm_docker_tag,
                 "checksum": "44e10daa6637893f4276bb8d7301eb35306ece50f61ca34dcab550",
             },
         },
     }
 
     # ocean.py offers multiple file types, but a simple url file should be enough for this example
-    ALGO_url_file = UrlFile(
-        url="https://raw.githubusercontent.com/trentmc/branin/main/gpr.py"
-    )
+    ALGO_url_file = UrlFile(url=algorithm_url)
 
     # Encrypt file(s) using provider
     ALGO_encrypted_files = ocean.assets.encrypt_files([ALGO_url_file])
@@ -288,12 +340,26 @@ def test_c2d_flow_readme():
             DATA_asset, compute_service, job_id, i, bob_wallet
         )
         assert result, "result retrieval unsuccessful"
+        print(f"result index: {i}, type: {result_type}, contents: {result}")
 
         # Extract algorithm output
         if result_type == "output":
             output = result
     assert output, "algorithm output not found"
 
-    # Unpickle the gaussian model result
-    model = pickle.loads(output)
+    if dataset_name == "branin" or dataset_name == "iris":
+        unpickle_result(output)
+    else:
+        load_image(output)
+
+
+def unpickle_result(pickled):
+    """Unpickle the gaussian model result"""
+    model = pickle.loads(pickled)
     assert len(model) > 0, "unpickle result unsuccessful"
+
+
+def load_image(image_bytes):
+    """Load the image result"""
+    image = Image.open(io.BytesIO(image_bytes))
+    assert image, "load image unsuccessful"

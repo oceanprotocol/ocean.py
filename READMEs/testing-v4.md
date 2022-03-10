@@ -30,7 +30,7 @@ git checkout v4
 docker system prune -a --volumes
 
 # Run barge: start ganache for testing the contracts logic only
-./start_ocean.sh  --no-dashboard --no-aquarius --no-provider
+./start_ocean.sh  --no-dashboard --no-aquarius --no-elasticsearch --no-provider --no-ipfs
 ```
 
 ## Create artifacts/address.json locally

@@ -26,11 +26,9 @@ cd barge
 # Clean up old containers (to be sure)
 docker system prune -a --volumes
 
-# make sure to use the dev version of the operator service URL, to match the barge provider
-export OPERATOR_SERVICE_URL=https://c2d-dev.operator.oceanprotocol.com/
-
-#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-./start_ocean.sh  --with-provider2
+# Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
+# The `--with-c2d` option tells barge to include the Compute-to-Data backend
+./start_ocean.sh --with-c2d
 ```
 
 ## Install the library from v4 sources

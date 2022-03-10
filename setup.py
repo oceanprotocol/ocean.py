@@ -50,6 +50,7 @@ test_requirements = [
     "pylint",
     "pytest",
     "pytest-watch",
+    "Pillow",
 ]
 
 # Possibly required by developers of ocean-lib:
