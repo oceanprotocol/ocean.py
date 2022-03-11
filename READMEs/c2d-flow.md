@@ -73,7 +73,7 @@ DATA_erc20_data = CreateErc20Data(
     bytess=[b""],
 )
 
-DATA_datatoken = DATA_nft_token.create_datatoken(DATA_erc20_data, alice_wallet)
+DATA_datatoken = erc721_nft.create_datatoken(DATA_erc20_data, alice_wallet)
 print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
 
 # Specify metadata and services, using the Branin test dataset
@@ -123,7 +123,7 @@ DATA_asset = ocean.assets.create(
     publisher_wallet=alice_wallet,
     encrypted_files=DATA_encrypted_files,
     services=[DATA_compute_service],
-    erc721_address=DATA_nft_token.address,
+    erc721_address=erc721_nft.address,
     deployed_erc20_tokens=[DATA_datatoken],
 )
 
@@ -225,7 +225,7 @@ In the same Python console:
 ```python
 bob_wallet = Wallet(
     ocean.web3,
-    os.getenv('TEST_PRIVATE_KEY2'),
+    os.getenv("TEST_PRIVATE_KEY2"),
     config.block_confirmations,
     config.transaction_timeout,
 )
