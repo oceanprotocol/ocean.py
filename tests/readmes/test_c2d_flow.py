@@ -101,8 +101,10 @@ def c2d_flow_readme(
     assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 
     # Publish the data NFT token
-    DATA_nft_token = ocean.create_erc721_nft("NFTToken1", "NFT1", alice_wallet)
-    assert DATA_nft_token.address
+    erc721_nft = ocean.create_erc721_nft("NFTToken1", "NFT1", alice_wallet)
+    assert erc721_nft.address
+    assert erc721_nft.token_name()
+    assert erc721_nft.symbol()
 
     # Publish the datatoken
     DATA_erc20_data = CreateErc20Data(
@@ -117,7 +119,7 @@ def c2d_flow_readme(
         uints=[ocean.to_wei(100000), 0],
         bytess=[b""],
     )
-    DATA_datatoken = DATA_nft_token.create_datatoken(DATA_erc20_data, alice_wallet)
+    DATA_datatoken = erc721_nft.create_datatoken(DATA_erc20_data, alice_wallet)
     assert DATA_datatoken.address
 
     # Specify metadata and services, using the Branin test dataset
@@ -164,7 +166,7 @@ def c2d_flow_readme(
         publisher_wallet=alice_wallet,
         encrypted_files=DATA_encrypted_files,
         services=[DATA_compute_service],
-        erc721_address=DATA_nft_token.address,
+        erc721_address=erc721_nft.address,
         deployed_erc20_tokens=[DATA_datatoken],
     )
 
