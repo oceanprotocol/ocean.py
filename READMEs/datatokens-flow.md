@@ -51,7 +51,7 @@ source venv/bin/activate
 
 # Intermediary installation before PyPi release of V4. Install wheel first to avoid errors.
 pip3 install wheel
-pip3 install --no-cache-dir ../ocean.py/
+pip3 install --no-cache-dir ../
 ```
 
 ## Set envvars
