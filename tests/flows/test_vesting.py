@@ -149,7 +149,7 @@ def test_main(
     bpool_address = pool_event[0].args.poolAddress
     bpool = BPool(web3, bpool_address)
     assert bpool.is_finalized() is True
-    assert bpool.opc_fee() == 0
+    assert bpool.opc_fee() == to_wei("0.001")
     assert bpool.get_swap_fee() == to_wei("0.001")
     assert bpool.community_fee(get_address_of_type(config, "Ocean")) == 0
     assert bpool.community_fee(erc20_token.address) == 0
