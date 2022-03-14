@@ -71,8 +71,8 @@ In work console:
 export OCEAN_CONFIG_FILE=config.ini
 
 #set private keys of two accounts
-export TEST_PRIVATE_KEY1=0x5d75837394b078ce97bc289fa8d75e21000573520bfa7784a9d28ccaae602bf8
-export TEST_PRIVATE_KEY2=0xef4b441145c1d0f3b4bc6d61d29f5c6e502359481152f869247c7a4244d45209
+export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
+export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
 
 #needed to mint fake OCEAN for testing with ganache
 export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
@@ -88,8 +88,8 @@ pytest ocean_lib/models/test/test_btoken.py::test_ERC20
 #run all tests in a file
 pytest ocean_lib/models/test/test_btoken.py
 
-#run all tests
-pytest
+#run all regular tests; see details on pytest markers to select specific suites
+pytest -m "not slow"
 
 ```
 
