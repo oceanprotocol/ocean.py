@@ -34,6 +34,8 @@ jobs:
             [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" -a -f "$HOME/.ocean/ocean/c2d/ready" ] && break
             done
           ls -la "$HOME/.ocean/ocean-contracts/artifacts/"
+        env:
+          CONTRACTS_VERSION: v4_rc1
       - name: Install dependencies
         working-directory: ${{ github.workspace }}
         run: |
