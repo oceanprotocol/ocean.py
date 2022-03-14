@@ -26,11 +26,9 @@ cd barge
 # Clean up old containers (to be sure)
 docker system prune -a --volumes
 
-# make sure to use the dev version of the operator service URL, to match the barge provider
-export OPERATOR_SERVICE_URL=https://c2d-dev.operator.oceanprotocol.com/
-
-#run barge: start ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
-./start_ocean.sh  --with-provider2
+# Run barge: start Ganache, Provider, Aquarius; deploy contracts; update ~/.ocean
+# The `--with-c2d` option tells barge to include the Compute-to-Data backend
+./start_ocean.sh --with-c2d
 ```
 
 ## Install the library from v4 sources
@@ -43,7 +41,7 @@ cd Desktop/
 git clone https://github.com/oceanprotocol/ocean.py.git
 git checkout v4main
 
-# Create your working directory. Copy artifacts.
+# Create your working directory.
 mkdir my_project
 cd my_project
 
@@ -53,7 +51,7 @@ source venv/bin/activate
 
 # Intermediary installation before PyPi release of V4. Install wheel first to avoid errors.
 pip3 install wheel
-pip3 install --no-cache-dir ../ocean.py/
+pip3 install --no-cache-dir ../
 ```
 
 ## Set envvars
@@ -61,6 +59,9 @@ pip3 install --no-cache-dir ../ocean.py/
 # Set envvars
 export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
 export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
+
+# Needed to mint fake OCEAN for testing with ganache
+export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 
 # Set the address file only for ganache
 export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json

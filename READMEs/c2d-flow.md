@@ -17,11 +17,7 @@ Here are the steps:
 6. Bob starts a compute job
 7. Bob monitors logs / algorithm output
 
-This c2d flow example features a simple algorithm from the field of ML. Ocean c2d is not limited to ML datasets and algorithms, but it is one of the most common use cases. Besides the flow below, two other worked C2D flows are:
-
-TODO: Update these examples based on v4
-1. simple image processing at [ocean-lena](https://github.com/calina-c/ocean-lena/blob/main/c2d-flow.md)
-2. logistic regression for classification [blog post](https://medium.com/ravenprotocol/machine-learning-series-using-logistic-regression-for-classification-in-oceans-compute-to-data-18df49b6b165) with both GUI and CLI flows.
+This c2d flow example features a simple algorithm from the field of ML. Ocean c2d is not limited to ML datasets and algorithms, but it is one of the most common use cases. For examples using different datasets and algorithms, please see [c2d-flow-more-examples.md](https://github.com/oceanprotocol/ocean.py/blob/v4main/READMEs/c2d-flow-more-examples.md)
 
 Let's go through each step.
 
@@ -77,7 +73,7 @@ DATA_erc20_data = CreateErc20Data(
     bytess=[b""],
 )
 
-DATA_datatoken = DATA_nft_token.create_datatoken(DATA_erc20_data, alice_wallet)
+DATA_datatoken = erc721_nft.create_datatoken(DATA_erc20_data, alice_wallet)
 print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
 
 # Specify metadata and services, using the Branin test dataset
@@ -95,7 +91,7 @@ DATA_metadata = {
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
 from ocean_lib.structures.file_objects import UrlFile
 DATA_url_file = UrlFile(
-    url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+    url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
 )
 
 # Encrypt file(s) using provider
@@ -127,7 +123,7 @@ DATA_asset = ocean.assets.create(
     publisher_wallet=alice_wallet,
     encrypted_files=DATA_encrypted_files,
     services=[DATA_compute_service],
-    erc721_address=DATA_nft_token.address,
+    erc721_address=erc721_nft.address,
     deployed_erc20_tokens=[DATA_datatoken],
 )
 
@@ -195,7 +191,7 @@ ALGO_metadata = {
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
 from ocean_lib.structures.file_objects import UrlFile
 ALGO_url_file = UrlFile(
-    url="https://raw.githubusercontent.com/trentmc/branin/main/gpr.py"
+    url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py"
 )
 
 # Encrypt file(s) using provider
@@ -229,7 +225,7 @@ In the same Python console:
 ```python
 bob_wallet = Wallet(
     ocean.web3,
-    os.getenv('TEST_PRIVATE_KEY2'),
+    os.getenv("TEST_PRIVATE_KEY2"),
     config.block_confirmations,
     config.transaction_timeout,
 )
