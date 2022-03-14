@@ -2,11 +2,11 @@
 ## Copyright 2022 Ocean Protocol Foundation
 ## SPDX-License-Identifier: Apache-2.0
 ##
-name: Ocean.py tests
+name: Ocean.py slow tests
 
 on:
-  - push
-  - pull_request
+  schedule:
+    - cron: '30 5 * * 2'
 
 jobs:
   build:
@@ -34,8 +34,6 @@ jobs:
             [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" -a -f "$HOME/.ocean/ocean/c2d/ready" ] && break
             done
           ls -la "$HOME/.ocean/ocean-contracts/artifacts/"
-        env:
-          CONTRACTS_VERSION: v4_rc1
       - name: Install dependencies
         working-directory: ${{ github.workspace }}
         run: |
@@ -43,10 +41,4 @@ jobs:
           pip install -r requirements_dev.txt
       - name: Test with pytest
         run: |
-          coverage run --source ocean_lib -m py.test -m "not slow"
-          coverage report
-          coverage xml
-      - name: Publish code coverage
-        uses: paambaati/codeclimate-action@v2.7.5
-        env:
-          CC_TEST_REPORTER_ID: ${{secrets.CC_TEST_REPORTER_ID}}
+          py.test -m slow

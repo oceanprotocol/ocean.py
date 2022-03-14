@@ -235,7 +235,7 @@ class DataServiceProvider:
 
             if not response or not hasattr(response, "status_code"):
                 raise DataProviderException(
-                    f"Failed to get a response for request: downloadEndpoint={service_endpoint}, payload={payload}, response is {response}"
+                    f"Failed to get a response for request: downloadEndpoint={service_endpoint}, payload={payload}, response is {response.content}"
                 )
 
             if response.status_code != 200:

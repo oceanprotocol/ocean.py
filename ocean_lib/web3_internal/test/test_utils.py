@@ -36,9 +36,9 @@ def test_generate_multi_value_hash(alice_address, alice_private_key):
     with pytest.raises(AssertionError):
         generate_multi_value_hash(["more", "types", "than"], ["values"])
 
-    expected = "0xb0594251e54435c54e9b24ec910288bcd2759e0e4ed0c66248971045c2cab143"
+    expected = "0x88a01ece43955f72807bbe1969921b7f6d7c01413fc08bf795c9f6ee04bb0d60"
     assert alice_private_key == os.getenv("TEST_PRIVATE_KEY1")
-    assert alice_address == "0xA78deb2Fa79463945C247991075E2a0e98Ba7A09"
+    assert alice_address == "0x02354A1F160A3fd7ac8b02ee91F04104440B28E7"
     tested = generate_multi_value_hash(["address"], [alice_address]).hex()
     assert tested == expected, "The tested address is not the expected one."
 
