@@ -10,7 +10,6 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import build_credentials_dict, create_basics
@@ -42,25 +41,23 @@ def test_stressed_publish():
         )
         data_provider = DataServiceProvider
         _, metadata, encrypted_files = create_basics(config, ocean.web3, data_provider)
-        erc20_data = CreateErc20Data(
-            template_index=1,
-            strings=["Datatoken 1", "DT1"],
-            addresses=[
-                alice_wallet.address,
-                alice_wallet.address,
-                ZERO_ADDRESS,
-                get_address_of_type(config, "Ocean"),
-            ],
-            uints=[ocean.to_wei("0.5"), 0],
-            bytess=[b""],
-        )
+
         # Send 1000 requests to Aquarius for creating a plain asset with ERC20 data
         ddo = ocean.assets.create(
             metadata=metadata,
             publisher_wallet=alice_wallet,
             encrypted_files=encrypted_files,
             erc721_address=erc721_nft.address,
-            erc20_tokens_data=[erc20_data],
+            erc20_templates=[1],
+            erc20_names=["Datatoken 1"],
+            erc20_symbols=["DT1"],
+            erc20_minters=[alice_wallet.address],
+            erc20_fee_managers=[alice_wallet.address],
+            erc20_publishing_market_addresses=[ZERO_ADDRESS],
+            fee_token_addresses=[get_address_of_type(config, "Ocean")],
+            erc20_cap_values=[ocean.to_wei("0.5")],
+            publishing_fee_amounts=[0],
+            erc20_bytess=[[b""]],
         )
         assert ddo, "The asset is not created."
         assert ddo.nft["name"] == "NFT"

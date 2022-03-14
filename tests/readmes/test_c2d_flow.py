@@ -106,7 +106,7 @@ def c2d_flow_readme(
     assert erc721_nft.symbol()
 
     # Publish the datatoken
-    DATA_datatoken = DATA_nft_token.create_datatoken(
+    DATA_datatoken = erc721_nft.create_datatoken(
         template_index=1,
         datatoken_name="Datatoken 1",
         datatoken_symbol="DT1",
