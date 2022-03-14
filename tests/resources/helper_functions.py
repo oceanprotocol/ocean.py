@@ -282,7 +282,7 @@ def send_mock_usdc_to_address(
     mock_usdc = ERC20Token(web3, get_address_of_type(config, "MockUSDC"))
     initial_recipient_balance = mock_usdc.balanceOf(recipient)
 
-    if mock_usdc.balanceOf(factory_deployer) >= amount:
+    if mock_usdc.balanceOf(factory_deployer.address) >= amount:
         mock_usdc.transfer(recipient, amount, factory_deployer)
 
     return mock_usdc.balanceOf(recipient) - initial_recipient_balance
@@ -307,9 +307,7 @@ def transfer_ocean_if_balance_lte(
         <= min_balance & ocean_token.balanceOf(factory_deployer_wallet.address)
         >= amount_to_transfer
     ):
-        ocean_token.transfer(
-            recipient, to_wei("20000", "ether"), factory_deployer_wallet
-        )
+        ocean_token.transfer(recipient, to_wei("20000"), factory_deployer_wallet)
 
     return ocean_token.balanceOf(recipient) - initial_recipient_balance
 
