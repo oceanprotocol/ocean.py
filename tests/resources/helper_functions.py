@@ -53,36 +53,29 @@ def get_address_of_type(
 
 
 @enforce_types
-def get_publisher_wallet() -> Wallet:
+def get_wallet(index: int) -> Wallet:
     config = get_example_config()
     return Wallet(
         get_web3(),
-        private_key=os.environ.get("TEST_PRIVATE_KEY1"),
+        private_key=os.getenv(f"TEST_PRIVATE_KEY{index}"),
         block_confirmations=config.block_confirmations,
         transaction_timeout=config.transaction_timeout,
     )
+
+
+@enforce_types
+def get_publisher_wallet() -> Wallet:
+    return get_wallet(1)
 
 
 @enforce_types
 def get_consumer_wallet() -> Wallet:
-    config = get_example_config()
-    return Wallet(
-        get_web3(),
-        private_key=os.environ.get("TEST_PRIVATE_KEY2"),
-        block_confirmations=config.block_confirmations,
-        transaction_timeout=config.transaction_timeout,
-    )
+    return get_wallet(2)
 
 
 @enforce_types
 def get_another_consumer_wallet() -> Wallet:
-    config = get_example_config()
-    return Wallet(
-        get_web3(),
-        private_key=os.environ.get("TEST_PRIVATE_KEY3"),
-        block_confirmations=config.block_confirmations,
-        transaction_timeout=config.transaction_timeout,
-    )
+    return get_wallet(3)
 
 
 @enforce_types
