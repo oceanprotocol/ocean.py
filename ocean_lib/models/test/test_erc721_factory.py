@@ -650,7 +650,9 @@ def test_start_multiple_order(
     )
 
     assert erc20_token.balanceOf(consumer_wallet.address) == 0
-    assert erc20_token.balanceOf(erc20_token.get_payment_collector()) == dt_amount
+    assert erc20_token.balanceOf(erc20_token.get_payment_collector()) == (
+        dt_amount * 0.97
+    )
 
 
 @pytest.mark.unit

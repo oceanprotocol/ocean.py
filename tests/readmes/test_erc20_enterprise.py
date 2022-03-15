@@ -238,7 +238,7 @@ def test_erc20_enterprise_flow_with_fre():
         provider_data=provider_data,
         consumer_market_fee_address=bob_wallet.address,
         consumer_market_fee_token=erc20_enterprise_token.address,
-        consumer_market_fee_amount=ocean.to_wei(2),
+        consumer_market_fee_amount=0,
         exchange_contract=fixed_rate_exchange.address,
         exchange_id=exchange_id,
         max_basetoken_amount=ocean.to_wei(10),

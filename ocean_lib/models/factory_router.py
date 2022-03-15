@@ -42,8 +42,8 @@ class FactoryRouter(BFactory):
     def swap_ocean_fee(self) -> int:
         return self.contract.caller.swapOceanFee()
 
-    def is_ocean_token(self, ocean_address: str) -> bool:
-        return self.contract.caller.isOceanToken(ocean_address)
+    def is_approved_token(self, ocean_address: str) -> bool:
+        return self.contract.caller.isApprovedToken(ocean_address)
 
     def stake_batch(
         self, stakes: List[Union[dict, tuple, Stakes]], from_wallet: Wallet
