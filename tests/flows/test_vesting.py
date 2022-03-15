@@ -10,7 +10,6 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.side_staking import SideStaking
-from ocean_lib.structures.abi_tuples import CreateErc20Data, PoolData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
@@ -35,15 +34,13 @@ def test_main(
 
     # Tests deploy erc721
     tx = erc721_factory.deploy_erc721_contract(
-        (
-            "NFT",
-            "NFTS",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
-        publisher_wallet,
+        name="NFT",
+        symbol="NFTS",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
@@ -78,20 +75,19 @@ def test_main(
     assert permissions[3] is True
 
     # Tests consumer deploys an ERC20DT
-    erc_data = CreateErc20Data(
-        1,
-        ["ERC20DT1", "ERC20DT1Symbol"],
-        [
-            consumer_wallet.address,
-            another_consumer_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        [to_wei("0.05"), 0],
-        [b""],
+    trx_erc_20 = erc721_nft.create_erc20(
+        template_index=1,
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=consumer_wallet.address,
+        datatoken_fee_manager=another_consumer_wallet.address,
+        datatoken_publishing_market_address=publisher_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=to_wei("0.05"),
+        publishing_market_fee_amount=0,
+        bytess=[b""],
+        from_wallet=consumer_wallet,
     )
-
-    trx_erc_20 = erc721_nft.create_erc20(erc_data, consumer_wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(trx_erc_20)
     assert tx_receipt.status == 1
@@ -117,25 +113,22 @@ def test_main(
         get_address_of_type(config, "Router"), to_wei("0.02"), consumer_wallet
     )
 
-    pool_data = PoolData(
-        [
-            to_wei(1),
-            ocean_contract.decimals(),
-            initial_ocean_liq // 100 * 9,
-            2500000,
-            initial_ocean_liq,
-        ],
-        [to_wei("0.001"), to_wei("0.001")],
-        [
-            get_address_of_type(config, "Staking"),
-            ocean_contract.address,
-            consumer_wallet.address,
-            consumer_wallet.address,
-            get_address_of_type(config, "OPFCommunityFeeCollector"),
-            get_address_of_type(config, "poolTemplate"),
-        ],
+    tx = erc20_token.deploy_pool(
+        rate=to_wei(1),
+        basetoken_decimals=ocean_contract.decimals(),
+        vesting_amount=initial_ocean_liq // 100 * 9,
+        vested_blocks=2500000,
+        initial_liq=initial_ocean_liq,
+        lp_swap_fee=to_wei("0.001"),
+        market_swap_fee=to_wei("0.001"),
+        ss_contract=get_address_of_type(config, "Staking"),
+        basetoken_address=ocean_contract.address,
+        basetoken_sender=consumer_wallet.address,
+        publisher_address=consumer_wallet.address,
+        market_fee_collector=get_address_of_type(config, "OPFCommunityFeeCollector"),
+        pool_template_address=get_address_of_type(config, "poolTemplate"),
+        from_wallet=consumer_wallet,
     )
-    tx = erc20_token.deploy_pool(pool_data, consumer_wallet)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     pool_event = erc20_token.get_event_log(
         ERC721FactoryContract.EVENT_NEW_POOL,

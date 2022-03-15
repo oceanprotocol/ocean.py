@@ -57,23 +57,22 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 In the same python console:
 
 ```python
-# Prepare data for ERC20 token
-from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-DATA_erc20_data = CreateErc20Data(
-    template_index=1,
-    strings=["Datatoken 1", "DT1"],
-    addresses=[
-        alice_wallet.address,
-        alice_wallet.address,
-        ZERO_ADDRESS,
-        ocean.OCEAN_address,
-    ],
-    uints=[ocean.to_wei(100000), 0],
-    bytess=[b""],
-)
 
-DATA_datatoken = erc721_nft.create_datatoken(DATA_erc20_data, alice_wallet)
+# Publish the datatoken
+DATA_datatoken = DATA_nft_token.create_datatoken(
+    template_index=1,
+    datatoken_name="Datatoken 1",
+    datatoken_symbol="DT1",
+    datatoken_minter=alice_wallet.address,
+    datatoken_fee_manager=alice_wallet.address,
+    datatoken_publishing_market_address=ZERO_ADDRESS,
+    fee_token_address=ocean.OCEAN_address,
+    datatoken_cap=ocean.to_wei(100000),
+    publishing_market_fee_amount=0,
+    bytess=[b""],
+    from_wallet=alice_wallet,
+)
 print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
 
 # Specify metadata and services, using the Branin test dataset
@@ -150,19 +149,19 @@ ALGO_nft_token = ocean.create_erc721_nft("NFTToken1", "NFT1", alice_wallet)
 print(f"ALGO_nft_token address = '{ALGO_nft_token.address}'")
 
 # Publish the datatoken
-ALGO_erc20_data = CreateErc20Data(
+ALGO_datatoken = ALGO_nft_token.create_datatoken(
     template_index=1,
-    strings=["Datatoken 1", "DT1"],
-    addresses=[
-        alice_wallet.address,
-        alice_wallet.address,
-        ZERO_ADDRESS,
-        ocean.OCEAN_address,
-    ],
-    uints=[ocean.to_wei(100000), 0],
-    bytess=[b""],
+    datatoken_name="Datatoken 1",
+    datatoken_symbol="DT1",
+    datatoken_minter=alice_wallet.address,
+    datatoken_fee_manager=alice_wallet.address,
+    datatoken_publishing_market_address=ZERO_ADDRESS,
+    fee_token_address=ocean.OCEAN_address,
+    datatoken_cap=ocean.to_wei(100000),
+    publishing_market_fee_amount=0,
+    from_wallet=alice_wallet,
 )
-ALGO_datatoken = ALGO_nft_token.create_datatoken(ALGO_erc20_data, alice_wallet)
+print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")
 
 # Specify metadata and services, using the Branin test dataset
 ALGO_date_created = "2021-12-28T10:55:11Z"
@@ -256,20 +255,14 @@ algo_service = ALGO_asset.services[0]
 environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
 
 from datetime import datetime, timedelta
-from ocean_lib.structures.abi_tuples import ConsumeFees
-
-# Consume fees
-consume_fees = ConsumeFees(
-    consumer_market_fee_address=bob_wallet.address,
-    consumer_market_fee_token=DATA_datatoken.address,
-    consumer_market_fee_amount=0,
-)
 
 # Pay for dataset for 1 day
 DATA_order_tx_id = ocean.assets.pay_for_service(
     asset=DATA_asset,
     service=compute_service,
-    consume_fees=consume_fees,
+    consumer_market_fee_address=bob_wallet.address,
+    consumer_market_fee_token=DATA_datatoken.address,
+    consumer_market_fee_amount=0,
     wallet=bob_wallet,
     initialize_args={
         "compute_environment": environments[0]["id"],
@@ -279,18 +272,13 @@ DATA_order_tx_id = ocean.assets.pay_for_service(
 )
 print(f"Paid for dataset compute service, order tx id: {DATA_order_tx_id}")
 
-# Consume fees
-consume_fees = ConsumeFees(
-    consumer_market_fee_address=bob_wallet.address,
-    consumer_market_fee_token=ALGO_datatoken.address,
-    consumer_market_fee_amount=0,
-)
-
 # Pay for algorithm for 1 day
 ALGO_order_tx_id = ocean.assets.pay_for_service(
     asset=ALGO_asset,
     service=algo_service,
-    consume_fees=consume_fees,
+    consumer_market_fee_address=bob_wallet.address,
+    consumer_market_fee_token=ALGO_datatoken.address,
+    consumer_market_fee_amount=0,
     wallet=bob_wallet,
     initialize_args={
         "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp()),

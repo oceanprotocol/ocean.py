@@ -9,7 +9,6 @@ import pytest
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.structures.abi_tuples import ConsumeFees, CreateErc20Data
 from ocean_lib.structures.file_objects import UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
@@ -44,20 +43,6 @@ def test_marketplace_flow_readme(tmp_path):
     token_address = erc721_nft.address
     assert token_address
 
-    # Prepare data for ERC20 token
-    erc20_data = CreateErc20Data(
-        template_index=1,
-        strings=["Datatoken 1", "DT1"],
-        addresses=[
-            alice_wallet.address,
-            alice_wallet.address,
-            ZERO_ADDRESS,
-            ocean.OCEAN_address,
-        ],
-        uints=[ocean.to_wei(100000), 0],
-        bytess=[b""],
-    )
-
     # Specify metadata and services, using the Branin test dataset
     date_created = "2021-12-28T10:55:11Z"
 
@@ -82,7 +67,19 @@ def test_marketplace_flow_readme(tmp_path):
     # Publish asset with services on-chain.
     # The download (access service) is automatically created, but you can explore other options as well
     asset = ocean.assets.create(
-        metadata, alice_wallet, encrypted_files, erc20_tokens_data=[erc20_data]
+        metadata,
+        alice_wallet,
+        encrypted_files,
+        erc20_templates=[1],
+        erc20_names=["Datatoken 1"],
+        erc20_symbols=["DT1"],
+        erc20_minters=[alice_wallet.address],
+        erc20_fee_managers=[alice_wallet.address],
+        erc20_publishing_market_addresses=[ZERO_ADDRESS],
+        fee_token_addresses=[ocean.OCEAN_address],
+        erc20_cap_values=[ocean.to_wei(100000)],
+        publishing_fee_amounts=[0],
+        erc20_bytess=[[b""]],
     )
 
     did = asset.did  # did contains the datatoken address
@@ -91,17 +88,16 @@ def test_marketplace_flow_readme(tmp_path):
     erc20_token = ocean.get_datatoken(asset.services[0].datatoken)
     OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 
-    ss_params = [
-        ocean.to_wei(1),
-        OCEAN_token.decimals(),
-        ocean.to_wei(10000),
-        2500000,
-        ocean.to_wei(2000),
-    ]
-
-    swap_fees = [ocean.to_wei("0.01"), ocean.to_wei("0.01")]
     bpool = ocean.create_pool(
-        erc20_token, OCEAN_token, ss_params, swap_fees, alice_wallet
+        erc20_token=erc20_token,
+        base_token=OCEAN_token,
+        rate=ocean.to_wei(1),
+        vesting_amount=ocean.to_wei(10000),
+        vested_blocks=2500000,
+        initial_liq=ocean.to_wei(2000),
+        lp_swap_fee=ocean.to_wei("0.01"),
+        market_swap_fee=ocean.to_wei("0.01"),
+        from_wallet=alice_wallet,
     )
     assert bpool.address
 
@@ -130,23 +126,28 @@ def test_marketplace_flow_readme(tmp_path):
     OCEAN_token.approve(bpool.address, ocean.to_wei("10000"), from_wallet=bob_wallet)
 
     bpool.swap_exact_amount_out(
-        [OCEAN_token.address, erc20_token.address, ZERO_ADDRESS],
-        [ocean.to_wei(10), ocean.to_wei(1), ocean.to_wei(10), 0],
+        token_in=OCEAN_token.address,
+        token_out=erc20_token.address,
+        consume_market_fee=ZERO_ADDRESS,
+        max_amount_in=ocean.to_wei(10),
+        token_amount_out=ocean.to_wei(1),
+        max_price=ocean.to_wei(10),
+        consume_swap_market_fee=0,
         from_wallet=bob_wallet,
     )
     assert erc20_token.balanceOf(bob_wallet.address) >= ocean.to_wei(
         1
     ), "Bob didn't get 1.0 datatokens"
 
-    # Consume fees
-    consume_fees = ConsumeFees(
+    service = asset.services[0]
+    order_tx_id = ocean.assets.pay_for_service(
+        asset,
+        service,
         consumer_market_fee_address=bob_wallet.address,
         consumer_market_fee_token=erc20_token.address,
         consumer_market_fee_amount=0,
+        wallet=bob_wallet,
     )
-
-    service = asset.services[0]
-    order_tx_id = ocean.assets.pay_for_service(asset, service, consume_fees, bob_wallet)
 
     file_path = ocean.assets.download_asset(
         asset, service, bob_wallet, str(tmp_path), order_tx_id

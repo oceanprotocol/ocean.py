@@ -9,7 +9,6 @@ import pytest
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.structures.abi_tuples import CreateErc20Data, DispenserData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -45,20 +44,18 @@ def test_dispenser_flow_readme():
 
     # Prepare data for ERC20 token
     cap = ocean.to_wei(100)
-    erc20_data = CreateErc20Data(
-        template_index=1,  # default value
-        strings=["ERC20DT1", "ERC20DT1Symbol"],  # name & symbol for ERC20 token
-        addresses=[
-            alice_wallet.address,  # minter address
-            alice_wallet.address,  # fee manager for this ERC20 token
-            alice_wallet.address,  # publishing Market Address
-            ZERO_ADDRESS,  # publishing Market Fee Token
-        ],
-        uints=[cap, 0],
-        bytess=[b""],
-    )
     erc20_token = erc721_nft.create_datatoken(
-        erc20_data=erc20_data, from_wallet=alice_wallet
+        template_index=1,  # default value
+        datatoken_name="ERC20DT1",  # name for ERC20 token
+        datatoken_symbol="ERC20DT1Symbol",  # symbol for ERC20 token
+        datatoken_minter=alice_wallet.address,  # minter address
+        datatoken_fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
+        datatoken_publishing_market_address=alice_wallet.address,  # publishing Market Address
+        fee_token_address=ZERO_ADDRESS,  # publishing Market Fee Token
+        datatoken_cap=cap,
+        publishing_market_fee_amount=0,
+        bytess=[b""],
+        from_wallet=alice_wallet,
     )
 
     assert erc20_token.address
@@ -69,15 +66,14 @@ def test_dispenser_flow_readme():
     dispenser = ocean.dispenser
 
     max_amount = ocean.to_wei(50)
-    dispenser_data = DispenserData(
+    erc20_token.create_dispenser(
         dispenser_address=dispenser.address,
         max_balance=max_amount,
         max_tokens=max_amount,
         with_mint=True,
         allowed_swapper=ZERO_ADDRESS,
+        from_wallet=alice_wallet,
     )
-
-    erc20_token.create_dispenser(dispenser_data, from_wallet=alice_wallet)
 
     dispenser_status = dispenser.status(erc20_token.address)
     assert dispenser_status[0] is True

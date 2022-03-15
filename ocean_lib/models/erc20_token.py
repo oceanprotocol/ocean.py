@@ -3,21 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enum import IntEnum
-from typing import List, Optional, Tuple, Union
+from typing import List, Optional, Tuple
 
 from enforce_typing import enforce_types
-from eth_account.messages import encode_defunct
-from eth_typing.encoding import HexStr
-from web3.main import Web3
-
-from ocean_lib.structures.abi_tuples import (
-    ConsumeFees,
-    DispenserData,
-    FixedData,
-    PoolData,
-    ProviderFees,
-)
-from ocean_lib.utils.utilities import prepare_message_for_ecrecover_in_solidity
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -91,133 +79,184 @@ class ERC20Token(ContractBase):
     def event_NewFixedRate(self):
         return self.events.NewFixedRate()
 
-    def initialize(
+    def deploy_pool(
         self,
-        strings: List[str],
-        addresses: List[str],
-        factory_addresses: List[str],
-        uints: List[int],
-        bytess: List[bytes],
+        rate: int,
+        basetoken_decimals: int,
+        vesting_amount: int,
+        vested_blocks: int,
+        initial_liq: int,
+        lp_swap_fee: int,
+        market_swap_fee: int,
+        ss_contract: str,
+        basetoken_address: str,
+        basetoken_sender: str,
+        publisher_address: str,
+        market_fee_collector: str,
+        pool_template_address: str,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "initialize",
-            (strings, addresses, factory_addresses, uints, bytess),
+            "deployPool",
+            (
+                [rate, basetoken_decimals, vesting_amount, vested_blocks, initial_liq],
+                [lp_swap_fee, market_swap_fee],
+                [
+                    ss_contract,
+                    basetoken_address,
+                    basetoken_sender,
+                    publisher_address,
+                    market_fee_collector,
+                    pool_template_address,
+                ],
+            ),
             from_wallet,
         )
 
-    def deploy_pool(
-        self, pool_data: Union[dict, tuple, PoolData], from_wallet: Wallet
-    ) -> str:
-        return self.send_transaction("deployPool", pool_data, from_wallet)
-
     def create_fixed_rate(
-        self, fixed_data: Union[dict, tuple, FixedData], from_wallet: Wallet
+        self,
+        fixed_price_address: str,
+        basetoken_address: str,
+        owner: str,
+        market_fee_collector: str,
+        allowed_swapper: str,
+        basetoken_decimals: int,
+        datatoken_decimals: int,
+        fixed_rate: int,
+        market_fee: int,
+        with_mint: int,
+        from_wallet: Wallet,
     ) -> str:
-        return self.send_transaction("createFixedRate", fixed_data, from_wallet)
+        return self.send_transaction(
+            "createFixedRate",
+            (
+                fixed_price_address,
+                [basetoken_address, owner, market_fee_collector, allowed_swapper],
+                [
+                    basetoken_decimals,
+                    datatoken_decimals,
+                    fixed_rate,
+                    market_fee,
+                    with_mint,
+                ],
+            ),
+            from_wallet,
+        )
 
     def create_dispenser(
-        self, dispenser_data: Union[dict, tuple, DispenserData], from_wallet: Wallet
+        self,
+        dispenser_address: str,
+        max_tokens: int,
+        max_balance: int,
+        with_mint: bool,
+        allowed_swapper: str,
+        from_wallet: Wallet,
     ) -> str:
-        return self.send_transaction("createDispenser", dispenser_data, from_wallet)
+        return self.send_transaction(
+            "createDispenser",
+            (dispenser_address, max_tokens, max_balance, with_mint, allowed_swapper),
+            from_wallet,
+        )
 
     def mint(self, account_address: str, value: int, from_wallet: Wallet) -> str:
         return self.send_transaction("mint", (account_address, value), from_wallet)
 
     def check_provider_fee(
-        self, provider_fees: Union[tuple, dict, ProviderFees], from_wallet: Wallet
-    ) -> str:
-        return self.send_transaction("checkProviderFee", (provider_fees,), from_wallet)
-
-    @staticmethod
-    def sign_provider_fees(
-        provider_data: bytes,
+        self,
         provider_fee_address: str,
         provider_fee_token: str,
         provider_fee_amount: int,
+        v: str,
+        r: str,
+        s: str,
+        valid_until: int,
+        provider_data: bytes,
         from_wallet: Wallet,
-    ) -> Tuple[HexStr, int, str, str]:
-        message = encode_defunct(
-            text=f"{provider_data}{provider_fee_address}{provider_fee_token}{provider_fee_amount}"
+    ) -> str:
+        return self.send_transaction(
+            "checkProviderFee",
+            (
+                provider_fee_address,
+                provider_fee_token,
+                provider_fee_amount,
+                v,
+                r,
+                s,
+                valid_until,
+                provider_data,
+            ),
+            from_wallet,
         )
-        signed_message = Web3.eth.account.sign_message(message, from_wallet.private_key)
-        return prepare_message_for_ecrecover_in_solidity(signed_message)
 
     def start_order(
         self,
         consumer: str,
         service_index: int,
-        provider_fees: Union[dict, tuple, ProviderFees],
-        consume_fees: Union[dict, tuple, ConsumeFees],
+        provider_fee_address: str,
+        provider_fee_token: str,
+        provider_fee_amount: int,
+        v: str,
+        r: str,
+        s: str,
+        valid_until: int,
+        provider_data: bytes,
+        consumer_market_fee_address: str,
+        consumer_market_fee_token: str,
+        consumer_market_fee_amount: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "startOrder",
-            (consumer, service_index, provider_fees, consume_fees),
+            (
+                consumer,
+                service_index,
+                (
+                    provider_fee_address,
+                    provider_fee_token,
+                    provider_fee_amount,
+                    v,
+                    r,
+                    s,
+                    valid_until,
+                    provider_data,
+                ),
+                (
+                    consumer_market_fee_address,
+                    consumer_market_fee_token,
+                    consumer_market_fee_amount,
+                ),
+            ),
             from_wallet,
         )
 
     def reuse_order(
         self,
         order_tx_id: str,
-        provider_fees: Union[tuple, dict, ProviderFees],
+        provider_fee_address: str,
+        provider_fee_token: str,
+        provider_fee_amount: int,
+        v: str,
+        r: str,
+        s: str,
+        valid_until: int,
+        provider_data: bytes,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "reuseOrder",
             (
                 order_tx_id,
-                provider_fees,
+                (
+                    provider_fee_address,
+                    provider_fee_token,
+                    provider_fee_amount,
+                    v,
+                    r,
+                    s,
+                    valid_until,
+                    provider_data,
+                ),
             ),
-            from_wallet,
-        )
-
-    def start_multiple_order(
-        self,
-        consumers: List[str],
-        amounts: List[int],
-        service_ids: List[int],
-        mrkt_fee_collectors: List[str],
-        fee_tokens: List[str],
-        fee_amounts: List[int],
-        from_wallet: Wallet,
-    ) -> str:
-        return self.send_transaction(
-            "startMultipleOrder",
-            (
-                consumers,
-                amounts,
-                service_ids,
-                mrkt_fee_collectors,
-                fee_tokens,
-                fee_amounts,
-            ),
-            from_wallet,
-        )
-
-    def finish_order(
-        self,
-        order_tx_id: str,
-        consumer: str,
-        amount: int,
-        service_id: int,
-        from_wallet: Wallet,
-    ) -> str:
-        return self.send_transaction(
-            "finishOrder", (order_tx_id, consumer, amount, service_id), from_wallet
-        )
-
-    def finish_multiple_order(
-        self,
-        order_tx_ids: List[str],
-        consumers: List[str],
-        amounts: List[int],
-        service_ids: List[int],
-        from_wallet: Wallet,
-    ) -> str:
-        return self.send_transaction(
-            "finishMultipleOrder",
-            (order_tx_ids, consumers, amounts, service_ids),
             from_wallet,
         )
 

@@ -9,7 +9,6 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.side_staking import SideStaking
-from ocean_lib.structures.abi_tuples import CreateErc20Data, PoolData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
@@ -35,15 +34,13 @@ def test_deploy_erc721_and_manage(
         web3, get_address_of_type(config, "ERC721Factory")
     )
     tx = erc721_factory.deploy_erc721_contract(
-        (
-            "NFT",
-            "SYMBOL",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
-        factory_deployer_wallet,
+        name="NFT",
+        symbol="SYMBOL",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=factory_deployer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
@@ -97,19 +94,17 @@ def test_pool_ocean(
     # Tests consumer deploys a new erc20DT, assigning himself as minter
     cap = to_wei("100000")
     tx = erc721_nft.create_erc20(
-        CreateErc20Data(
-            1,
-            ["ERC20DT1", "ERC20DT1Symbol"],
-            [
-                consumer_wallet.address,
-                factory_deployer_wallet.address,
-                consumer_wallet.address,
-                ZERO_ADDRESS,
-            ],
-            [cap, 0],
-            [b""],
-        ),
-        consumer_wallet,
+        template_index=1,
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=consumer_wallet.address,
+        datatoken_fee_manager=factory_deployer_wallet.address,
+        datatoken_publishing_market_address=consumer_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=cap,
+        publishing_market_fee_amount=0,
+        bytess=[b""],
+        from_wallet=consumer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     event = erc721_factory.get_event_log(
@@ -134,25 +129,22 @@ def test_pool_ocean(
         get_address_of_type(config, "Router"), to_wei("10"), consumer_wallet
     )
 
-    pool_data = PoolData(
-        [
-            to_wei("1"),
-            ocean_contract.decimals(),
-            initial_ocean_liq,
-            2500000,
-            initial_ocean_liq,
-        ],
-        [to_wei("0.001"), to_wei("0.001")],
-        [
-            side_staking.address,
-            ocean_contract.address,
-            consumer_wallet.address,
-            consumer_wallet.address,
-            get_address_of_type(config, "OPFCommunityFeeCollector"),
-            get_address_of_type(config, "poolTemplate"),
-        ],
+    tx = erc20_token.deploy_pool(
+        rate=to_wei(1),
+        basetoken_decimals=ocean_contract.decimals(),
+        vesting_amount=initial_ocean_liq,
+        vested_blocks=2500000,
+        initial_liq=initial_ocean_liq,
+        lp_swap_fee=to_wei("0.001"),
+        market_swap_fee=to_wei("0.001"),
+        ss_contract=side_staking.address,
+        basetoken_address=ocean_contract.address,
+        basetoken_sender=consumer_wallet.address,
+        publisher_address=consumer_wallet.address,
+        market_fee_collector=get_address_of_type(config, "OPFCommunityFeeCollector"),
+        pool_template_address=get_address_of_type(config, "poolTemplate"),
+        from_wallet=consumer_wallet,
     )
-    tx = erc20_token.deploy_pool(pool_data, consumer_wallet)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     pool_event = factory_router.get_event_log(
         ERC721FactoryContract.EVENT_NEW_POOL,
@@ -204,9 +196,14 @@ def test_pool_ocean(
     publisher_ocean_balance = ocean_contract.balanceOf(publisher_wallet.address)
 
     tx = bpool.swap_exact_amount_in(
-        [ocean_contract.address, erc20_address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=ocean_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=to_wei("0.1"),
+        min_amount_out=to_wei("0.0001"),
+        max_price=to_wei("100"),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -237,9 +234,14 @@ def test_pool_ocean(
     ocean_market_fee_balance = bpool.publish_market_fee(ocean_contract.address)
 
     tx = bpool.swap_exact_amount_out(
-        [ocean_contract.address, erc20_address, another_consumer_wallet.address],
-        [to_wei("10"), to_wei("1"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=ocean_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei(10),
+        token_amount_out=to_wei(1),
+        max_price=to_wei(100),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -282,9 +284,14 @@ def test_pool_ocean(
     assert bpool.publish_market_fee(erc20_address) == 0
 
     tx = bpool.swap_exact_amount_in(
-        [erc20_address, ocean_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=ocean_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=to_wei("0.1"),
+        min_amount_out=to_wei("0.0001"),
+        max_price=to_wei("100"),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -328,9 +335,14 @@ def test_pool_ocean(
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_out(
-        [erc20_token.address, ocean_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=ocean_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei("0.1"),
+        token_amount_out=to_wei("0.0001"),
+        max_price=to_wei(100),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -624,19 +636,17 @@ def test_pool_dai(
     # Tests consumer deploys a new erc20DT, assigning himself as minter
     cap = to_wei("1000")
     tx = erc721_nft.create_erc20(
-        CreateErc20Data(
-            1,
-            ["ERC20DT1", "ERC20DT1Symbol"],
-            [
-                consumer_wallet.address,
-                factory_deployer_wallet.address,
-                consumer_wallet.address,
-                ZERO_ADDRESS,
-            ],
-            [cap, 0],
-            [b""],
-        ),
-        consumer_wallet,
+        template_index=1,
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=consumer_wallet.address,
+        datatoken_fee_manager=factory_deployer_wallet.address,
+        datatoken_publishing_market_address=consumer_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=cap,
+        publishing_market_fee_amount=0,
+        bytess=[b""],
+        from_wallet=consumer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     event = erc721_factory.get_event_log(
@@ -658,25 +668,22 @@ def test_pool_dai(
         get_address_of_type(config, "Router"), to_wei("10"), consumer_wallet
     )
 
-    pool_data = PoolData(
-        [
-            to_wei("1"),
-            dai_contract.decimals(),
-            initial_dai_liq,
-            2500000,
-            initial_dai_liq,
-        ],
-        [to_wei("0.001"), to_wei("0.001")],
-        [
-            side_staking.address,
-            dai_contract.address,
-            consumer_wallet.address,
-            consumer_wallet.address,
-            get_address_of_type(config, "OPFCommunityFeeCollector"),
-            get_address_of_type(config, "poolTemplate"),
-        ],
+    tx = erc20_token.deploy_pool(
+        rate=to_wei(1),
+        basetoken_decimals=dai_contract.decimals(),
+        vesting_amount=initial_dai_liq,
+        vested_blocks=2500000,
+        initial_liq=initial_dai_liq,
+        lp_swap_fee=to_wei("0.001"),
+        market_swap_fee=to_wei("0.001"),
+        ss_contract=side_staking.address,
+        basetoken_address=dai_contract.address,
+        basetoken_sender=consumer_wallet.address,
+        publisher_address=consumer_wallet.address,
+        market_fee_collector=get_address_of_type(config, "OPFCommunityFeeCollector"),
+        pool_template_address=get_address_of_type(config, "poolTemplate"),
+        from_wallet=consumer_wallet,
     )
-    tx = erc20_token.deploy_pool(pool_data, consumer_wallet)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     pool_event = factory_router.get_event_log(
         ERC721FactoryContract.EVENT_NEW_POOL,
@@ -720,9 +727,14 @@ def test_pool_dai(
     publisher_dai_balance = dai_contract.balanceOf(publisher_wallet.address)
 
     tx = bpool.swap_exact_amount_in(
-        [dai_contract.address, erc20_address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=dai_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=to_wei("0.1"),
+        min_amount_out=to_wei("0.0001"),
+        max_price=to_wei("100"),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -752,9 +764,14 @@ def test_pool_dai(
     dai_market_fee_balance = bpool.publish_market_fee(dai_contract.address)
 
     tx = bpool.swap_exact_amount_out(
-        [dai_contract.address, erc20_address, another_consumer_wallet.address],
-        [to_wei("10"), to_wei("1"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=dai_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei(10),
+        token_amount_out=to_wei(1),
+        max_price=to_wei(100),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -795,9 +812,14 @@ def test_pool_dai(
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_in(
-        [erc20_address, dai_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=dai_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=to_wei("0.1"),
+        min_amount_out=to_wei("0.0001"),
+        max_price=to_wei("100"),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -841,9 +863,14 @@ def test_pool_dai(
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_out(
-        [erc20_token.address, dai_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=dai_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei("0.1"),
+        token_amount_out=to_wei("0.0001"),
+        max_price=to_wei(100),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1139,19 +1166,17 @@ def test_pool_usdc(
     # Tests consumer deploys a new erc20DT, assigning himself as minter
     cap = to_wei("1000")
     tx = erc721_nft.create_erc20(
-        CreateErc20Data(
-            1,
-            ["ERC20DT1", "ERC20DT1Symbol"],
-            [
-                consumer_wallet.address,
-                factory_deployer_wallet.address,
-                consumer_wallet.address,
-                ZERO_ADDRESS,
-            ],
-            [cap, 0],
-            [b""],
-        ),
-        consumer_wallet,
+        template_index=1,
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=consumer_wallet.address,
+        datatoken_fee_manager=factory_deployer_wallet.address,
+        datatoken_publishing_market_address=consumer_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=cap,
+        publishing_market_fee_amount=0,
+        bytess=[b""],
+        from_wallet=consumer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     event = erc721_factory.get_event_log(
@@ -1173,25 +1198,22 @@ def test_pool_usdc(
         get_address_of_type(config, "Router"), to_wei(100), consumer_wallet
     )
 
-    pool_data = PoolData(
-        [
-            to_wei(1),
-            usdc_contract.decimals(),
-            initial_usdc_liq,
-            2500000,
-            initial_usdc_liq,
-        ],
-        [to_wei("0.001"), to_wei("0.001")],
-        [
-            side_staking.address,
-            usdc_contract.address,
-            consumer_wallet.address,
-            consumer_wallet.address,
-            get_address_of_type(config, "OPFCommunityFeeCollector"),
-            get_address_of_type(config, "poolTemplate"),
-        ],
+    tx = erc20_token.deploy_pool(
+        rate=to_wei(1),
+        basetoken_decimals=usdc_contract.decimals(),
+        vesting_amount=initial_usdc_liq,
+        vested_blocks=2500000,
+        initial_liq=initial_usdc_liq,
+        lp_swap_fee=to_wei("0.001"),
+        market_swap_fee=to_wei("0.001"),
+        ss_contract=side_staking.address,
+        basetoken_address=usdc_contract.address,
+        basetoken_sender=consumer_wallet.address,
+        publisher_address=consumer_wallet.address,
+        market_fee_collector=get_address_of_type(config, "OPFCommunityFeeCollector"),
+        pool_template_address=get_address_of_type(config, "poolTemplate"),
+        from_wallet=consumer_wallet,
     )
-    tx = erc20_token.deploy_pool(pool_data, consumer_wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     pool_event = factory_router.get_event_log(
@@ -1236,9 +1258,14 @@ def test_pool_usdc(
     publisher_usdc_balance = usdc_contract.balanceOf(publisher_wallet.address)
 
     tx = bpool.swap_exact_amount_in(
-        [usdc_contract.address, erc20_address, another_consumer_wallet.address],
-        [int(1e7), to_wei(1), to_wei(5), 0],
-        publisher_wallet,
+        token_in=usdc_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=int(1e7),
+        min_amount_out=to_wei(1),
+        max_price=to_wei(5),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1269,9 +1296,14 @@ def test_pool_usdc(
     usdc_market_fee_balance = bpool.publish_market_fee(usdc_contract.address)
 
     tx = bpool.swap_exact_amount_out(
-        [usdc_contract.address, erc20_address, another_consumer_wallet.address],
-        [to_wei(10), to_wei(1), to_wei(100), 0],
-        publisher_wallet,
+        token_in=usdc_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei(10),
+        token_amount_out=to_wei(1),
+        max_price=to_wei(100),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1313,9 +1345,14 @@ def test_pool_usdc(
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_in(
-        [erc20_address, usdc_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), int(1e4), int(2**256 - 1), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=usdc_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=to_wei("0.1"),
+        min_amount_out=int(1e4),
+        max_price=int(2**256 - 1),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1359,9 +1396,14 @@ def test_pool_usdc(
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_out(
-        [erc20_token.address, usdc_contract.address, another_consumer_wallet.address],
-        [to_wei(10), int(1e6), to_wei(1000000000000000), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=usdc_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei(10),
+        token_amount_out=int(1e6),
+        max_price=to_wei(1000000000000000),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1651,19 +1693,17 @@ def test_pool_usdc_flexible(
     # Tests consumer deploys a new erc20DT, assigning himself as minter
     cap = to_wei(1000)
     tx = erc721_nft.create_erc20(
-        CreateErc20Data(
-            1,
-            ["ERC20DT1", "ERC20DT1Symbol"],
-            [
-                consumer_wallet.address,
-                factory_deployer_wallet.address,
-                consumer_wallet.address,
-                ZERO_ADDRESS,
-            ],
-            [cap, 0],
-            [b""],
-        ),
-        consumer_wallet,
+        template_index=1,
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=consumer_wallet.address,
+        datatoken_fee_manager=factory_deployer_wallet.address,
+        datatoken_publishing_market_address=consumer_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=cap,
+        publishing_market_fee_amount=0,
+        bytess=[b""],
+        from_wallet=consumer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     event = erc721_factory.get_event_log(
@@ -1685,25 +1725,22 @@ def test_pool_usdc_flexible(
         get_address_of_type(config, "Router"), to_wei(10), consumer_wallet
     )
 
-    pool_data = PoolData(
-        [
-            to_wei(1),
-            usdc_contract.decimals(),
-            initial_usdc_liq,
-            2500000,
-            initial_usdc_liq,
-        ],
-        [to_wei("0.001"), to_wei("0.001")],
-        [
-            side_staking.address,
-            usdc_contract.address,
-            consumer_wallet.address,
-            consumer_wallet.address,
-            get_address_of_type(config, "OPFCommunityFeeCollector"),
-            get_address_of_type(config, "poolTemplate"),
-        ],
+    tx = erc20_token.deploy_pool(
+        rate=to_wei(1),
+        basetoken_decimals=usdc_contract.decimals(),
+        vesting_amount=initial_usdc_liq,
+        vested_blocks=2500000,
+        initial_liq=initial_usdc_liq,
+        lp_swap_fee=to_wei("0.001"),
+        market_swap_fee=to_wei("0.001"),
+        ss_contract=side_staking.address,
+        basetoken_address=usdc_contract.address,
+        basetoken_sender=consumer_wallet.address,
+        publisher_address=consumer_wallet.address,
+        market_fee_collector=get_address_of_type(config, "OPFCommunityFeeCollector"),
+        pool_template_address=get_address_of_type(config, "poolTemplate"),
+        from_wallet=consumer_wallet,
     )
-    tx = erc20_token.deploy_pool(pool_data, consumer_wallet)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     pool_event = factory_router.get_event_log(
         ERC721FactoryContract.EVENT_NEW_POOL,
@@ -1746,9 +1783,14 @@ def test_pool_usdc_flexible(
     publisher_usdc_balance = usdc_contract.balanceOf(publisher_wallet.address)
 
     tx = bpool.swap_exact_amount_in(
-        [usdc_contract.address, erc20_address, another_consumer_wallet.address],
-        [int(1e7), to_wei(1), to_wei(5), 0],
-        publisher_wallet,
+        token_in=usdc_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=int(1e7),
+        min_amount_out=to_wei(1),
+        max_price=to_wei(5),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1779,9 +1821,14 @@ def test_pool_usdc_flexible(
     usdc_market_fee_balance = bpool.publish_market_fee(usdc_contract.address)
 
     tx = bpool.swap_exact_amount_out(
-        [usdc_contract.address, erc20_address, another_consumer_wallet.address],
-        [to_wei(10), to_wei(1), to_wei(100), 0],
-        publisher_wallet,
+        token_in=usdc_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei(10),
+        token_amount_out=to_wei(1),
+        max_price=to_wei(100),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1823,9 +1870,14 @@ def test_pool_usdc_flexible(
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_in(
-        [erc20_address, usdc_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), int(1e4), int(2**256 - 1), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=usdc_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=to_wei("0.1"),
+        min_amount_out=int(1e4),
+        max_price=int(2**256 - 1),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -1869,9 +1921,14 @@ def test_pool_usdc_flexible(
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_out(
-        [erc20_token.address, usdc_contract.address, another_consumer_wallet.address],
-        [to_wei(10), int(1e6), to_wei(1000000000000000), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=usdc_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei(10),
+        token_amount_out=int(1e6),
+        max_price=to_wei(1000000000000000),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -2158,19 +2215,17 @@ def test_pool_dai_flexible(
     # Tests consumer deploys a new erc20DT, assigning himself as minter
     cap = to_wei(1000)
     tx = erc721_nft.create_erc20(
-        CreateErc20Data(
-            1,
-            ["ERC20DT1", "ERC20DT1Symbol"],
-            [
-                consumer_wallet.address,
-                factory_deployer_wallet.address,
-                consumer_wallet.address,
-                ZERO_ADDRESS,
-            ],
-            [cap, 0],
-            [b""],
-        ),
-        consumer_wallet,
+        template_index=1,
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=consumer_wallet.address,
+        datatoken_fee_manager=factory_deployer_wallet.address,
+        datatoken_publishing_market_address=consumer_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=cap,
+        publishing_market_fee_amount=0,
+        bytess=[b""],
+        from_wallet=consumer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     event = erc721_factory.get_event_log(
@@ -2192,19 +2247,22 @@ def test_pool_dai_flexible(
         get_address_of_type(config, "Router"), to_wei(10), consumer_wallet
     )
 
-    pool_data = PoolData(
-        [to_wei(1), 18, initial_dai_liq, 2500000, initial_dai_liq],
-        [to_wei("0.001"), to_wei("0.001")],
-        [
-            side_staking.address,
-            dai_contract.address,
-            consumer_wallet.address,
-            consumer_wallet.address,
-            get_address_of_type(config, "OPFCommunityFeeCollector"),
-            get_address_of_type(config, "poolTemplate"),
-        ],
+    tx = erc20_token.deploy_pool(
+        rate=to_wei(1),
+        basetoken_decimals=dai_contract.decimals(),
+        vesting_amount=initial_dai_liq,
+        vested_blocks=2500000,
+        initial_liq=initial_dai_liq,
+        lp_swap_fee=to_wei("0.001"),
+        market_swap_fee=to_wei("0.001"),
+        ss_contract=side_staking.address,
+        basetoken_address=dai_contract.address,
+        basetoken_sender=consumer_wallet.address,
+        publisher_address=consumer_wallet.address,
+        market_fee_collector=get_address_of_type(config, "OPFCommunityFeeCollector"),
+        pool_template_address=get_address_of_type(config, "poolTemplate"),
+        from_wallet=consumer_wallet,
     )
-    tx = erc20_token.deploy_pool(pool_data, consumer_wallet)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     pool_event = factory_router.get_event_log(
         ERC721FactoryContract.EVENT_NEW_POOL,
@@ -2248,9 +2306,14 @@ def test_pool_dai_flexible(
     publisher_dai_balance = dai_contract.balanceOf(publisher_wallet.address)
 
     tx = bpool.swap_exact_amount_in(
-        [dai_contract.address, erc20_address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=dai_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=to_wei("0.1"),
+        min_amount_out=to_wei("0.0001"),
+        max_price=to_wei("100"),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -2280,9 +2343,14 @@ def test_pool_dai_flexible(
     dai_market_fee_balance = bpool.publish_market_fee(dai_contract.address)
 
     tx = bpool.swap_exact_amount_out(
-        [dai_contract.address, erc20_address, another_consumer_wallet.address],
-        [to_wei(10), to_wei(1), to_wei(100), 0],
-        publisher_wallet,
+        token_in=dai_contract.address,
+        token_out=erc20_address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei(10),
+        token_amount_out=to_wei(1),
+        max_price=to_wei(100),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -2323,9 +2391,14 @@ def test_pool_dai_flexible(
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_in(
-        [erc20_address, dai_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei("100"), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=dai_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        token_amount_in=to_wei("0.1"),
+        min_amount_out=to_wei("0.0001"),
+        max_price=to_wei("100"),
+        swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -2369,9 +2442,14 @@ def test_pool_dai_flexible(
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_out(
-        [erc20_token.address, dai_contract.address, another_consumer_wallet.address],
-        [to_wei("0.1"), to_wei("0.0001"), to_wei(100), 0],
-        publisher_wallet,
+        token_in=erc20_address,
+        token_out=dai_contract.address,
+        consume_market_fee=another_consumer_wallet.address,
+        max_amount_in=to_wei("0.1"),
+        token_amount_out=to_wei("0.0001"),
+        max_price=to_wei(100),
+        consume_swap_market_fee=0,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)

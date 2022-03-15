@@ -11,7 +11,6 @@ from web3.main import Web3
 from ocean_lib.models.erc20_token import ERC20Token, RolesERC20
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.structures.abi_tuples import ConsumeFees, CreateErc20Data, ProviderFees
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
@@ -60,15 +59,13 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     publish_market_fee_amount = 5
 
     tx = erc721_factory.deploy_erc721_contract(
-        (
-            "DT1",
-            "DTSYMBOL",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
-        publisher_wallet,
+        name="DT1",
+        symbol="DTSYMBOL",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
@@ -87,15 +84,13 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     # Tests current NFT count
     current_nft_count = erc721_factory.get_current_nft_count()
     erc721_factory.deploy_erc721_contract(
-        (
-            "DT2",
-            "DTSYMBOL1",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
-        publisher_wallet,
+        name="DT2",
+        symbol="DTSYMBOL1",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
     )
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
 
@@ -107,19 +102,19 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
 
     # Tests creating successfully an ERC20 token
     erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
-    erc_create_data = CreateErc20Data(
-        1,
-        ["ERC20DT1", "ERC20DT1Symbol"],
-        [
-            publisher_wallet.address,
-            consumer_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        [to_wei("0.5"), 0],
-        [b""],
+    tx_result = erc721_nft.create_erc20(
+        template_index=1,
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=publisher_wallet.address,
+        datatoken_fee_manager=consumer_wallet.address,
+        datatoken_publishing_market_address=publisher_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=to_wei("0.5"),
+        publishing_market_fee_amount=0,
+        bytess=[b""],
+        from_wallet=consumer_wallet,
     )
-    tx_result = erc721_nft.create_erc20(erc_create_data, consumer_wallet)
     assert tx_result, "Failed to create ERC20 token."
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
@@ -239,7 +234,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     signed = web3.eth.sign(provider_fee_address, data=message)
     signature = split_signature(signed)
 
-    provider_fee = ProviderFees(
+    tx = erc20.start_order(
+        consumer=consumer_wallet.address,
+        service_index=1,
         provider_fee_address=provider_fee_address,
         provider_fee_token=provider_fee_token,
         provider_fee_amount=provider_fee_amount,
@@ -249,19 +246,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         r=signature.r,
         s=signature.s,
         valid_until=0,
-    )
-
-    consume_fees = ConsumeFees(
         consumer_market_fee_address=publisher_wallet.address,
         consumer_market_fee_token=erc20.address,
         consumer_market_fee_amount=0,
-    )
-
-    tx = erc20.start_order(
-        consumer=consumer_wallet.address,
-        service_index=1,
-        provider_fees=provider_fee,
-        consume_fees=consume_fees,
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -343,7 +330,15 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     # Tests reuses order
     erc20.reuse_order(
         tx_receipt.transactionHash,
-        provider_fees=provider_fee,
+        provider_fee_address=provider_fee_address,
+        provider_fee_token=provider_fee_token,
+        provider_fee_amount=provider_fee_amount,
+        v=signature.v,
+        r=signature.r,
+        s=signature.s,
+        valid_until=0,
+        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
+        # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
         from_wallet=publisher_wallet,
     )
     reused_event = erc20.get_event_log(
@@ -439,32 +434,6 @@ def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_rou
         erc721_publisher=publisher_wallet,
         erc20_minter=publisher_wallet,
         cap=to_wei(publish_market_fee_amount),
-    )
-
-    # Should fail to re-initialize the contracts
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20.initialize(
-            strings=["ERC20DT1", "ERC20DT1Symbol"],
-            addresses=[
-                publisher_wallet.address,
-                consumer_wallet.address,
-                publisher_wallet.address,
-                ZERO_ADDRESS,
-            ],
-            factory_addresses=[
-                erc721.address,
-                get_address_of_type(config, "OPFCommunityFeeCollector"),
-                factory_router.address,
-            ],
-            uints=[to_wei("10"), 0],
-            bytess=[b""],
-            from_wallet=publisher_wallet,
-        ),
-
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC20Template: "
-        "token instance already initialized"
     )
 
     # Should fail to mint if wallet is not a minter

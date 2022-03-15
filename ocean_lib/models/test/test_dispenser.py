@@ -6,7 +6,6 @@ import pytest
 from web3 import exceptions
 
 from ocean_lib.models.dispenser import Dispenser
-from ocean_lib.structures.abi_tuples import DispenserData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
@@ -54,15 +53,13 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
     )
 
     # Tests publisher creates a dispenser with minter role
-    dispenser_data = DispenserData(
+    tx = erc20_token.create_dispenser(
         dispenser_address=dispenser.address,
         max_balance=to_wei("1"),
         max_tokens=to_wei("1"),
         with_mint=True,
         allowed_swapper=ZERO_ADDRESS,
-    )
-    tx = erc20_token.create_dispenser(
-        dispenser_data=dispenser_data, from_wallet=publisher_wallet
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
@@ -149,16 +146,13 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
         web3, config, publisher_wallet, publisher_wallet, cap=to_wei("50")
     )
 
-    dispenser_data = DispenserData(
+    erc20_token.create_dispenser(
         dispenser_address=dispenser.address,
         max_balance=to_wei("1"),
         max_tokens=to_wei("1"),
         with_mint=False,
         allowed_swapper=ZERO_ADDRESS,
-    )
-
-    erc20_token.create_dispenser(
-        from_wallet=publisher_wallet, dispenser_data=dispenser_data
+        from_wallet=publisher_wallet,
     )
 
     # Tests consumer requests data tokens but they are not minted

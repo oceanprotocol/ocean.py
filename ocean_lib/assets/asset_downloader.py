@@ -32,7 +32,6 @@ def download_asset_files(
 
     :param asset: Asset instance
     :param service: Sevice instance
-    :param provider_uri: Url of Provider, str
     :param consumer_wallet: Wallet instance of the consumer
     :param destination: Path, str
     :param order_tx_id: hex str the transaction hash of the startOrder tx

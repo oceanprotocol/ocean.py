@@ -12,7 +12,6 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.ocean.ocean_assets import OceanAssets
-from ocean_lib.structures.abi_tuples import ConsumeFees, CreateErc20Data
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -29,15 +28,13 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
 
     # Publisher deploys NFT contract
     tx = erc721_factory.deploy_erc721_contract(
-        (
-            "NFT1",
-            "NFTSYMBOL",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
-        publisher_wallet,
+        name="NFT1",
+        symbol="NFTSYMBOL",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
@@ -71,27 +68,22 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
     encrypt_response = data_provider.encrypt(files, config.provider_url)
     encrypted_files = encrypt_response.content.decode("utf-8")
 
-    # Set ERC20 Data
-    erc20_data = CreateErc20Data(
-        template_index=1,
-        strings=["Datatoken 1", "DT1"],
-        addresses=[
-            publisher_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-            get_address_of_type(config, "Ocean"),
-        ],
-        uints=[to_wei("100"), 0],
-        bytess=[b""],
-    )
-
     # Publish a plain asset with one data token on chain
     ddo = asset.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_address,
-        erc20_tokens_data=[erc20_data],
+        erc20_templates=[1],
+        erc20_names=["Datatoken 1"],
+        erc20_symbols=["DT1"],
+        erc20_minters=[publisher_wallet.address],
+        erc20_fee_managers=[publisher_wallet.address],
+        erc20_publishing_market_addresses=[ZERO_ADDRESS],
+        fee_token_addresses=[get_address_of_type(config, "Ocean")],
+        erc20_cap_values=[to_wei(100)],
+        publishing_fee_amounts=[0],
+        erc20_bytess=[[b""]],
     )
 
     assert ddo, "The asset is not created."
@@ -119,20 +111,23 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
     assert response
     assert response.status_code == 200
     assert response.json()["providerFee"]
-
-    # Consume fees
-    consume_fees = ConsumeFees(
-        consumer_market_fee_address=consumer_wallet.address,
-        consumer_market_fee_token=erc20_token.address,
-        consumer_market_fee_amount=0,
-    )
+    provider_fees = response.json()["providerFee"]
 
     # Start order for consumer
     tx_id = erc20_token.start_order(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
-        provider_fees=response.json()["providerFee"],
-        consume_fees=consume_fees,
+        provider_fee_address=provider_fees["providerFeeAddress"],
+        provider_fee_token=provider_fees["providerFeeToken"],
+        provider_fee_amount=provider_fees["providerFeeAmount"],
+        v=provider_fees["v"],
+        r=provider_fees["r"],
+        s=provider_fees["s"],
+        valid_until=provider_fees["validUntil"],
+        provider_data=provider_fees["providerData"],
+        consumer_market_fee_address=consumer_wallet.address,
+        consumer_market_fee_token=erc20_token.address,
+        consumer_market_fee_amount=0,
         from_wallet=consumer_wallet,
     )
 

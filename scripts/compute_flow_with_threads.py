@@ -8,39 +8,36 @@ import threading
 import time
 from datetime import datetime, timedelta
 
-from ocean_lib.assets.trusted_algorithms import add_publisher_trusted_algorithm
-from ocean_lib.config import Config
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.services.service import Service
-from ocean_lib.structures.abi_tuples import ConsumeFees, CreateErc20Data
 from ocean_lib.structures.file_objects import UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-def compute_flow(ocean: Ocean, wallet: Wallet, config: Config):
+def compute_flow(ocean: Ocean, wallet: Wallet):
     for _ in range(1000):
         # Publish the data NFT token
         DATA_nft_token = ocean.create_erc721_nft("NFTToken1", "NFT1", wallet)
         assert DATA_nft_token.address
 
         # Publish the datatoken
-        DATA_erc20_data = CreateErc20Data(
+        DATA_datatoken = DATA_nft_token.create_datatoken(
             template_index=1,
-            strings=["Datatoken 1", "DT1"],
-            addresses=[
-                wallet.address,
-                wallet.address,
-                ZERO_ADDRESS,
-                ocean.OCEAN_address,
-            ],
-            uints=[ocean.to_wei(100000), 0],
+            datatoken_name="Datatoken 1",
+            datatoken_symbol="DT1",
+            datatoken_minter=wallet.address,
+            datatoken_fee_manager=wallet.address,
+            datatoken_publishing_market_address=ZERO_ADDRESS,
+            fee_token_address=ocean.OCEAN_address,
+            datatoken_cap=ocean.to_wei(100000),
+            publishing_market_fee_amount=0,
             bytess=[b""],
+            from_wallet=wallet,
         )
-        DATA_datatoken = DATA_nft_token.create_datatoken(DATA_erc20_data, wallet)
         assert DATA_datatoken.address
 
         # Specify metadata and services, using the Branin test dataset
@@ -98,23 +95,23 @@ def compute_flow(ocean: Ocean, wallet: Wallet, config: Config):
         # 3. Alice publishes algorithm
 
         # Publish the algorithm NFT token
-        ALGO_nft_token = ocean.create_erc721_nft("NFTToken1", "NFT1", wallet)
+        ALGO_nft_token = ocean.create_erc721_nft("NFTToken1", "NFT1", alice_wallet)
         assert ALGO_nft_token.address
 
-        # Publish the datatoken
-        ALGO_erc20_data = CreateErc20Data(
+        ALGO_datatoken = ALGO_nft_token.create_datatoken(
             template_index=1,
-            strings=["Datatoken 1", "DT1"],
-            addresses=[
-                wallet.address,
-                wallet.address,
-                ZERO_ADDRESS,
-                ocean.OCEAN_address,
-            ],
-            uints=[ocean.to_wei(100000), 0],
+            datatoken_name="Datatoken 1",
+            datatoken_symbol="DT1",
+            datatoken_minter=wallet.address,
+            datatoken_fee_manager=wallet.address,
+            datatoken_publishing_market_address=ZERO_ADDRESS,
+            fee_token_address=ocean.OCEAN_address,
+            datatoken_cap=ocean.to_wei(100000),
+            publishing_market_fee_amount=0,
             bytess=[b""],
+            from_wallet=wallet,
         )
-        ALGO_datatoken = ALGO_nft_token.create_datatoken(ALGO_erc20_data, wallet)
+        assert ALGO_datatoken.address
 
         # Specify metadata and services, using the Branin test dataset
         ALGO_date_created = "2021-12-28T10:55:11Z"
@@ -161,9 +158,8 @@ def compute_flow(ocean: Ocean, wallet: Wallet, config: Config):
         assert ALGO_asset.did, "create algorithm unsuccessful"
 
         # 4. Alice allows the algorithm for C2D for that data asset
-        add_publisher_trusted_algorithm(
-            DATA_asset, ALGO_asset.did, config.metadata_cache_uri
-        )
+        compute_service = DATA_asset.services[0]
+        compute_service.add_publisher_trusted_algorithm(ALGO_asset)
         DATA_asset = ocean.assets.update(DATA_asset, wallet)
 
         # 5. Bob acquires datatokens for data and algorithm
@@ -190,42 +186,32 @@ def compute_flow(ocean: Ocean, wallet: Wallet, config: Config):
             compute_service.service_endpoint
         )
 
-        # Consume fees
-        consume_fees = ConsumeFees(
-            consumer_market_fee_address=wallet.address,
-            consumer_market_fee_token=DATA_datatoken.address,
-            consumer_market_fee_amount=0,
-        )
-
         # Pay for dataset
         DATA_order_tx_id = ocean.assets.pay_for_service(
             asset=DATA_asset,
             service=compute_service,
-            consume_fees=consume_fees,
+            consumer_market_fee_address=wallet.address,
+            consumer_market_fee_token=DATA_datatoken.address,
+            consumer_market_fee_amount=0,
             wallet=wallet,
             initialize_args={
                 "compute_environment": environments[0]["id"],
-                "valid_until": int((datetime.now() + timedelta(days=1)).timestamp()),
+                "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp()),
             },
             consumer_address=environments[0]["consumerAddress"],
         )
         assert DATA_order_tx_id, "pay for dataset unsuccessful"
 
-        # Consume fees
-        consume_fees = ConsumeFees(
-            consumer_market_fee_address=wallet.address,
-            consumer_market_fee_token=ALGO_datatoken.address,
-            consumer_market_fee_amount=0,
-        )
-
         # Pay for algorithm
         ALGO_order_tx_id = ocean.assets.pay_for_service(
             asset=ALGO_asset,
             service=algo_service,
-            consume_fees=consume_fees,
+            consumer_market_fee_address=wallet.address,
+            consumer_market_fee_token=ALGO_datatoken.address,
+            consumer_market_fee_amount=0,
             wallet=wallet,
             initialize_args={
-                "valid_until": int((datetime.now() + timedelta(days=1)).timestamp())
+                "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp())
             },
             consumer_address=environments[0]["consumerAddress"],
         )
@@ -258,6 +244,7 @@ def compute_flow(ocean: Ocean, wallet: Wallet, config: Config):
         # Retrieve algorithm output and log files
         output = None
         for i in range(len(status["results"])):
+            result = None
             result_type = status["results"][i]["type"]
             print(f"Fetch result index {i}, type: {result_type}")
             result = ocean.compute.result(DATA_asset, job_id, i, wallet)
@@ -273,16 +260,16 @@ def compute_flow(ocean: Ocean, wallet: Wallet, config: Config):
         assert len(model) > 0, "unpickle result unsuccessful"
 
 
-def thread_function1(ocean, alice_wallet, config):
-    compute_flow(ocean, wallet=alice_wallet, config=config)
+def thread_function1(ocean, alice_wallet):
+    compute_flow(ocean, wallet=alice_wallet)
 
 
-def thread_function2(ocean, bob_wallet, config):
-    compute_flow(ocean, wallet=bob_wallet, config=config)
+def thread_function2(ocean, bob_wallet):
+    compute_flow(ocean, wallet=bob_wallet)
 
 
-def thread_function3(ocean, tristan_wallet, config):
-    compute_flow(ocean, wallet=tristan_wallet, config=config)
+def thread_function3(ocean, carol_wallet):
+    compute_flow(ocean, wallet=carol_wallet)
 
 
 config = ExampleConfig.get_config()
@@ -304,34 +291,34 @@ bob_wallet = Wallet(
     config.transaction_timeout,
 )
 assert bob_wallet.address
-tristan_private_key = os.getenv("TEST_PRIVATE_KEY3")
-tristan_wallet = Wallet(
+carol_private_key = os.getenv("TEST_PRIVATE_KEY3")
+carol_wallet = Wallet(
     ocean.web3,
-    tristan_private_key,
+    carol_private_key,
     config.block_confirmations,
     config.transaction_timeout,
 )
-assert tristan_wallet.address
+assert carol_wallet.address
 # Mint OCEAN
 mint_fake_OCEAN(config)
 assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "need ETH"
-assert tristan_wallet.web3.eth.get_balance(tristan_wallet.address) > 0, "need ETH"
+assert carol_wallet.web3.eth.get_balance(carol_wallet.address) > 0, "need ETH"
 
 threads = list()
 t1 = threading.Thread(
     target=thread_function1,
-    args=(ocean, alice_wallet, config),
+    args=(ocean, alice_wallet),
 )
 threads.append(t1)
 t2 = threading.Thread(
     target=thread_function2,
-    args=(ocean, bob_wallet, config),
+    args=(ocean, bob_wallet),
 )
 threads.append(t2)
 t3 = threading.Thread(
     target=thread_function3,
-    args=(ocean, tristan_wallet, config),
+    args=(ocean, carol_wallet),
 )
 threads.append(t3)
 t1.start()

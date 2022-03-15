@@ -7,12 +7,9 @@ import pytest
 from ocean_lib.aquarius.aquarius import Aquarius
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
-from tests.resources.ddo_helpers import create_basics
 from tests.resources.helper_functions import get_address_of_type
 
 
@@ -30,18 +27,6 @@ def test_aqua_functions_for_single_ddo(
     publisher_ocean_instance, aquarius_instance, publisher_wallet, config
 ):
     """Tests against single-ddo functions of Aquarius."""
-    erc20_data = CreateErc20Data(
-        template_index=1,
-        strings=["Datatoken 1", "DT1"],
-        addresses=[
-            publisher_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-            get_address_of_type(config, "Ocean"),
-        ],
-        uints=[to_wei("100"), 0],
-        bytess=[b""],
-    )
     metadata = {
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
@@ -64,7 +49,16 @@ def test_aqua_functions_for_single_ddo(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc20_tokens_data=[erc20_data],
+        erc20_templates=[1],
+        erc20_names=["Datatoken 1"],
+        erc20_symbols=["DT1"],
+        erc20_minters=[publisher_wallet.address],
+        erc20_fee_managers=[publisher_wallet.address],
+        erc20_publishing_market_addresses=[ZERO_ADDRESS],
+        fee_token_addresses=[get_address_of_type(config, "Ocean")],
+        erc20_cap_values=[to_wei(100)],
+        publishing_fee_amounts=[0],
+        erc20_bytess=[[b""]],
     )
 
     asset = aquarius_instance.wait_for_asset(ddo.did)

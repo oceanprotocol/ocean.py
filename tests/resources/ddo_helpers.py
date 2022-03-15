@@ -17,11 +17,9 @@ from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
-from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.structures.file_objects import FilesTypeFactory, IpfsFile, UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import deploy_erc721_erc20
 
@@ -95,19 +93,6 @@ def get_access_service(
 
 def create_asset(ocean, publisher, config, metadata=None, files=None):
     """Helper function for asset creation based on ddo_sa_sample.json."""
-    erc20_data = CreateErc20Data(
-        template_index=1,
-        strings=["Datatoken 1", "DT1"],
-        addresses=[
-            publisher.address,
-            publisher.address,
-            ZERO_ADDRESS,
-            get_address_of_type(config, "Ocean"),
-        ],
-        uints=[to_wei(100), 0],
-        bytess=[b""],
-    )
-
     if not metadata:
         metadata = {
             "created": "2020-11-15T12:27:48Z",
@@ -134,7 +119,19 @@ def create_asset(ocean, publisher, config, metadata=None, files=None):
     # Publish asset with services on-chain.
     # The download (access service) is automatically created
     asset = ocean.assets.create(
-        metadata, publisher, encrypted_files, erc20_tokens_data=[erc20_data]
+        metadata,
+        publisher,
+        encrypted_files,
+        erc20_templates=[1],
+        erc20_names=["Datatoken 1"],
+        erc20_symbols=["DT1"],
+        erc20_minters=[publisher.address],
+        erc20_fee_managers=[publisher.address],
+        erc20_publishing_market_addresses=[ZERO_ADDRESS],
+        fee_token_addresses=[get_address_of_type(config, "Ocean")],
+        erc20_cap_values=[ocean.to_wei(100)],
+        publishing_fee_amounts=[0],
+        erc20_bytess=[[b""]],
     )
 
     return asset

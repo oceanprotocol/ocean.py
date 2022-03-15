@@ -7,7 +7,6 @@ import os
 
 import pytest
 
-from ocean_lib.structures.abi_tuples import ConsumeFees
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_registered_asset_with_access_service
 from tests.resources.helper_functions import get_another_consumer_ocean_instance
@@ -47,14 +46,13 @@ def test_market_flow(
 
     # Place order for the download service
     if consumer_type == "publisher":
-        # Consume fees
-        consume_fees = ConsumeFees(
+        order_tx_id = consumer_ocean.assets.pay_for_service(
+            asset,
+            service,
             consumer_market_fee_address=consumer_wallet.address,
             consumer_market_fee_token=erc20_token.address,
             consumer_market_fee_amount=0,
-        )
-        order_tx_id = consumer_ocean.assets.pay_for_service(
-            asset, service, consume_fees, consumer_wallet
+            wallet=consumer_wallet,
         )
         asset_folder = consumer_ocean.assets.download_asset(
             asset,
@@ -64,17 +62,13 @@ def test_market_flow(
             order_tx_id,
         )
     else:
-        # Consume fees
-        consume_fees = ConsumeFees(
-            consumer_market_fee_address=another_consumer_wallet.address,
-            consumer_market_fee_token=erc20_token.address,
-            consumer_market_fee_amount=0,
-        )
         order_tx_id = consumer_ocean.assets.pay_for_service(
             asset,
             service,
-            consume_fees,
-            consumer_wallet,
+            consumer_market_fee_address=another_consumer_wallet.address,
+            consumer_market_fee_token=erc20_token.address,
+            consumer_market_fee_amount=0,
+            wallet=consumer_wallet,
             consumer_address=another_consumer_wallet.address,
         )
         asset_folder = consumer_ocean.assets.download_asset(

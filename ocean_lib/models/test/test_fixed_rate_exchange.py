@@ -13,7 +13,6 @@ from ocean_lib.models.fixed_rate_exchange import (
     FixedRateExchangeDetails,
     FixedRateExchangeFeesInfo,
 )
-from ocean_lib.structures.abi_tuples import FixedData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
@@ -90,17 +89,19 @@ def test_exchange_rate_creation(
     assert erc20.balanceOf(consumer_wallet.address) == cap
     number_of_exchanges_before = fixed_exchange.get_number_of_exchanges()
 
-    fixed_data = FixedData(
+    tx = erc20.create_fixed_rate(
         fixed_price_address=get_address_of_type(config, "FixedPrice"),
-        addresses=[
-            get_address_of_type(config, "Ocean"),
-            consumer_wallet.address,
-            another_consumer_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[18, 18, rate, market_fee, 0],
+        basetoken_address=get_address_of_type(config, "Ocean"),
+        owner=consumer_wallet.address,
+        market_fee_collector=another_consumer_wallet.address,
+        allowed_swapper=ZERO_ADDRESS,
+        basetoken_decimals=18,
+        datatoken_decimals=18,
+        fixed_rate=rate,
+        market_fee=market_fee,
+        with_mint=0,
+        from_wallet=consumer_wallet,
     )
-    tx = erc20.create_fixed_rate(fixed_data=fixed_data, from_wallet=consumer_wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 

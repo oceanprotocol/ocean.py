@@ -18,11 +18,6 @@ from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBa
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.services.service import Service
-from ocean_lib.structures.abi_tuples import (
-    ConsumeFees,
-    CreateErc20Data,
-    CreateERC721Data,
-)
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -363,19 +358,15 @@ def test_pay_for_service_insufficient_balance(
         block_confirmations=config.block_confirmations,
         transaction_timeout=config.transaction_timeout,
     )
-    # Consume fees
-    consume_fees = ConsumeFees(
-        consumer_market_fee_address=empty_wallet.address,
-        consumer_market_fee_token=erc20_token.address,
-        consumer_market_fee_amount=0,
-    )
 
     with pytest.raises(InsufficientBalance):
         publisher_ocean_instance.assets.pay_for_service(
             asset,
             get_first_service_by_type(asset, "access"),
-            consume_fees,
-            empty_wallet,
+            consumer_market_fee_address=empty_wallet.address,
+            consumer_market_fee_token=erc20_token.address,
+            consumer_market_fee_amount=0,
+            wallet=empty_wallet,
         )
 
 
@@ -392,15 +383,13 @@ def test_plain_asset_with_one_datatoken(
 
     # Publisher deploys NFT contract
     tx = erc721_factory.deploy_erc721_contract(
-        (
-            "NFT1",
-            "NFTSYMBOL",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
-        publisher_wallet,
+        name="NFT1",
+        symbol="NFTSYMBOL",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
@@ -413,25 +402,21 @@ def test_plain_asset_with_one_datatoken(
     assert registered_event[0].args.admin == publisher_wallet.address
     erc721_address = registered_event[0].args.newTokenAddress
 
-    erc20_data = CreateErc20Data(
-        template_index=1,
-        strings=["Datatoken 1", "DT1"],
-        addresses=[
-            publisher_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-            get_address_of_type(config, "Ocean"),
-        ],
-        uints=[to_wei("0.5"), 0],
-        bytess=[b""],
-    )
-
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_address,
-        erc20_tokens_data=[erc20_data],
+        erc20_templates=[1],
+        erc20_names=["Datatoken 1"],
+        erc20_symbols=["DT1"],
+        erc20_minters=[publisher_wallet.address],
+        erc20_fee_managers=[publisher_wallet.address],
+        erc20_publishing_market_addresses=[ZERO_ADDRESS],
+        fee_token_addresses=[get_address_of_type(config, "Ocean")],
+        erc20_cap_values=[to_wei("0.5")],
+        publishing_fee_amounts=[0],
+        erc20_bytess=[[b""]],
     )
     assert ddo, "The asset is not created."
     assert ddo.nft["name"] == "NFT1"
@@ -453,16 +438,15 @@ def test_plain_asset_multiple_datatokens(
         config, web3, data_provider
     )
 
-    erc721_data = CreateERC721Data(
-        "NFT2",
-        "NFT2SYMBOL",
-        1,
-        ZERO_ADDRESS,
-        ZERO_ADDRESS,
-        "https://oceanprotocol.com/nft/",
+    tx = erc721_factory.deploy_erc721_contract(
+        name="NFT2",
+        symbol="NFT2SYMBOL",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
     )
-
-    tx = erc721_factory.deploy_erc721_contract(erc721_data, publisher_wallet)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
         ERC721FactoryContract.EVENT_NFT_CREATED,
@@ -475,37 +459,24 @@ def test_plain_asset_multiple_datatokens(
     assert registered_event[0].args.admin == publisher_wallet.address
     erc721_address2 = registered_event[0].args.newTokenAddress
 
-    erc20_data1 = CreateErc20Data(
-        template_index=1,
-        strings=["Datatoken 2", "DT2"],
-        addresses=[
-            publisher_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-            get_address_of_type(config, "Ocean"),
-        ],
-        uints=[to_wei("0.5"), 0],
-        bytess=[b""],
-    )
-    erc20_data2 = CreateErc20Data(
-        template_index=1,
-        strings=["Datatoken 3", "DT3"],
-        addresses=[
-            publisher_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-            get_address_of_type(config, "Ocean"),
-        ],
-        uints=[to_wei("0.5"), 0],
-        bytess=[b""],
-    )
-
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_address2,
-        erc20_tokens_data=[erc20_data1, erc20_data2],
+        erc20_templates=[1, 1],
+        erc20_names=["Datatoken 2", "Datatoken 3"],
+        erc20_symbols=["DT2", "DT3"],
+        erc20_minters=[publisher_wallet.address, publisher_wallet.address],
+        erc20_fee_managers=[publisher_wallet.address, publisher_wallet.address],
+        erc20_publishing_market_addresses=[ZERO_ADDRESS, ZERO_ADDRESS],
+        fee_token_addresses=[
+            get_address_of_type(config, "Ocean"),
+            get_address_of_type(config, "Ocean"),
+        ],
+        erc20_cap_values=[to_wei("0.5"), to_wei("0.5")],
+        publishing_fee_amounts=[0, 0],
+        erc20_bytess=[[b""], [b""]],
     )
     assert ddo, "The asset is not created."
     assert ddo.nft["name"] == "NFT2"

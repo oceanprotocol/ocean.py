@@ -12,7 +12,6 @@ from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.structures.abi_tuples import DispenserData, FixedData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
@@ -38,15 +37,13 @@ def test_buy_from_dispenser_and_order(
     )
     erc20_enterprise_token = ERC20Enterprise(web3, erc20_enterprise_token.address)
 
-    dispenser_data = DispenserData(
+    tx = erc20_enterprise_token.create_dispenser(
         dispenser_address=dispenser.address,
         allowed_swapper=ZERO_ADDRESS,
         max_balance=to_wei("1"),
         with_mint=True,
         max_tokens=to_wei("1"),
-    )
-    tx = erc20_enterprise_token.create_dispenser(
-        dispenser_data=dispenser_data, from_wallet=publisher_wallet
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
@@ -123,33 +120,25 @@ def test_buy_from_dispenser_and_order(
     signed = web3.eth.sign(provider_fee_address, data=message)
     signature = split_signature(signed)
 
-    order_params = (
-        consume_fee_address,
-        1,
-        (
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
-            signature.v,
-            signature.r,
-            signature.s,
-            valid_until,
-            Web3.toHex(Web3.toBytes(text=provider_data)),
-        ),
-        (
-            consume_fee_address,
-            mock_dai_contract.address,
-            0,
-        ),
-    )
-
     opf_collector_address = get_address_of_type(config, "OPFCommunityFeeCollector")
 
     balance_opf_consume_before = mock_dai_contract.balanceOf(opf_collector_address)
     balance_publish_before = mock_usdc_contract.balanceOf(consumer_wallet.address)
 
     tx = erc20_enterprise_token.buy_from_dispenser_and_order(
-        order_params=order_params,
+        consumer=consume_fee_address,
+        service_index=1,
+        provider_fee_address=provider_fee_address,
+        provider_fee_token=provider_fee_token,
+        provider_fee_amount=provider_fee_amount,
+        v=signature.v,
+        r=signature.r,
+        s=signature.s,
+        valid_until=valid_until,
+        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
+        consumer_market_fee_address=consume_fee_address,
+        consumer_market_fee_token=mock_dai_contract.address,
+        consumer_market_fee_amount=0,
         dispenser_address=dispenser.address,
         from_wallet=publisher_wallet,
     )
@@ -196,19 +185,18 @@ def test_buy_from_fre_and_order(
     )
     erc20_enterprise_token = ERC20Enterprise(web3, erc20_enterprise_token.address)
 
-    fixed_data = FixedData(
-        fixed_price_address=fixed_rate_exchange.address,
-        addresses=[
-            mock_usdc_contract.address,
-            publisher_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[18, 18, to_wei("1"), to_wei("0.1"), 1],
-    )
-
     tx = erc20_enterprise_token.create_fixed_rate(
-        fixed_data=fixed_data, from_wallet=publisher_wallet
+        fixed_price_address=fixed_rate_exchange.address,
+        basetoken_address=mock_usdc_contract.address,
+        owner=publisher_wallet.address,
+        market_fee_collector=publisher_wallet.address,
+        allowed_swapper=ZERO_ADDRESS,
+        basetoken_decimals=18,
+        datatoken_decimals=18,
+        fixed_rate=to_wei(1),
+        market_fee=to_wei("0.1"),
+        with_mint=1,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -292,34 +280,6 @@ def test_buy_from_fre_and_order(
     signed = web3.eth.sign(provider_fee_address, data=message)
     signature = split_signature(signed)
 
-    order_params = (
-        another_consumer_wallet.address,
-        1,
-        (
-            publisher_wallet.address,
-            provider_fee_token,
-            provider_fee_amount,
-            signature.v,
-            signature.r,
-            signature.s,
-            valid_until,
-            Web3.toHex(Web3.toBytes(text=provider_data)),
-        ),
-        (
-            consume_fee_address,
-            mock_dai_contract.address,
-            0,
-        ),
-    )
-
-    fre_params = (
-        fixed_rate_exchange.address,
-        exchange_id,
-        to_wei("2.5"),
-        to_wei("0.001"),  # 1e15 => 0.1%
-        another_consumer_wallet.address,
-    )
-
     balance_consume_before = mock_dai_contract.balanceOf(consume_fee_address)
     balance_publish_before = mock_usdc_contract.balanceOf(consumer_wallet.address)
     provider_fee_balance_before = mock_usdc_contract.balanceOf(
@@ -327,7 +287,25 @@ def test_buy_from_fre_and_order(
     )
 
     tx = erc20_enterprise_token.buy_from_fre_and_order(
-        order_params=order_params, fre_params=fre_params, from_wallet=publisher_wallet
+        consumer=another_consumer_wallet.address,
+        service_index=1,
+        provider_fee_address=publisher_wallet.address,
+        provider_fee_token=provider_fee_token,
+        provider_fee_amount=provider_fee_amount,
+        v=signature.v,
+        r=signature.r,
+        s=signature.s,
+        valid_until=valid_until,
+        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
+        consumer_market_fee_address=consume_fee_address,
+        consumer_market_fee_token=mock_dai_contract.address,
+        consumer_market_fee_amount=0,
+        exchange_contract=fixed_rate_exchange.address,
+        exchange_id=exchange_id,
+        max_basetoken_amount=to_wei("2.5"),
+        swap_market_fee=to_wei("0.001"),  # 1e15 => 0.1%
+        market_fee_address=another_consumer_wallet.address,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)

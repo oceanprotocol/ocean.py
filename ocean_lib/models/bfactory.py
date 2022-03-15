@@ -2,11 +2,10 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import Union
+from typing import List
 
 from enforce_typing import enforce_types
 
-from ocean_lib.structures.abi_tuples import BPoolData
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -22,9 +21,40 @@ class BFactory(ContractBase):
         return self.events.BPoolCreated()
 
     def new_bpool(
-        self, bpool_data: Union[dict, tuple, BPoolData], from_wallet: Wallet
+        self,
+        datatoken_address: str,
+        basetoken_address: str,
+        rate: int,
+        basetoken_decimals: int,
+        vesting_amount: int,
+        vested_blocks: int,
+        initial_liq: int,
+        lp_swap_fee: int,
+        market_swap_fee: int,
+        controller: str,
+        basetoken_sender: str,
+        publisher_address: str,
+        market_fee_collector: str,
+        pool_template_address: str,
+        from_wallet: Wallet,
     ) -> str:
-        return self.send_transaction("newBPool", bpool_data, from_wallet)
+        return self.send_transaction(
+            "newBPool",
+            (
+                [datatoken_address, basetoken_address],
+                [rate, basetoken_decimals, vesting_amount, vested_blocks, initial_liq],
+                [lp_swap_fee, market_swap_fee],
+                [
+                    controller,
+                    basetoken_address,
+                    basetoken_sender,
+                    publisher_address,
+                    market_fee_collector,
+                    pool_template_address,
+                ],
+            ),
+            from_wallet,
+        )
 
     def is_pool_template(self, pool_template) -> bool:
         return self.contract.caller.isPoolTemplate(pool_template)

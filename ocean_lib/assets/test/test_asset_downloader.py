@@ -12,7 +12,6 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.structures.abi_tuples import ConsumeFees
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import (
     create_asset,
@@ -173,18 +172,20 @@ def ocean_assets_download_destination_file_helper(
 
     provider_fees = initialize_response.json()["providerFee"]
 
-    # Consume fees
-    consume_fees = ConsumeFees(
-        consumer_market_fee_address=publisher_wallet.address,
-        consumer_market_fee_token=erc20_token.address,
-        consumer_market_fee_amount=0,
-    )
-
     tx_id = erc20_token.start_order(
         consumer=publisher_wallet.address,
         service_index=ddo.get_index_of_service(access_service),
-        provider_fees=provider_fees,
-        consume_fees=consume_fees,
+        provider_fee_address=provider_fees["providerFeeAddress"],
+        provider_fee_token=provider_fees["providerFeeToken"],
+        provider_fee_amount=provider_fees["providerFeeAmount"],
+        v=provider_fees["v"],
+        r=provider_fees["r"],
+        s=provider_fees["s"],
+        valid_until=provider_fees["validUntil"],
+        provider_data=provider_fees["providerData"],
+        consumer_market_fee_address=publisher_wallet.address,
+        consumer_market_fee_token=erc20_token.address,
+        consumer_market_fee_amount=0,
         from_wallet=publisher_wallet,
     )
 

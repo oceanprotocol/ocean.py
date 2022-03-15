@@ -9,7 +9,6 @@ from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.side_staking import SideStaking
-from ocean_lib.structures.abi_tuples import PoolData
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
@@ -76,26 +75,22 @@ def test_side_staking(
         consumer_wallet,
     )
 
-    pool_data = PoolData(
-        ss_params=[
-            to_wei("1"),
-            ocean_token.decimals(),
-            to_wei("0.5"),
-            vested_blocks,
-            initial_ocean_liquidity,
-        ],
-        swap_fees=[swap_fee, swap_market_fee],
-        addresses=[
-            get_address_of_type(config, "Staking"),
-            ocean_token.address,
-            consumer_wallet.address,
-            consumer_wallet.address,
-            get_address_of_type(config, "OPFCommunityFeeCollector"),
-            get_address_of_type(config, "poolTemplate"),
-        ],
+    tx = erc20.deploy_pool(
+        rate=to_wei(1),
+        basetoken_decimals=ocean_token.decimals(),
+        vesting_amount=to_wei("0.5"),
+        vested_blocks=2500000,
+        initial_liq=initial_ocean_liquidity,
+        lp_swap_fee=swap_fee,
+        market_swap_fee=swap_market_fee,
+        ss_contract=get_address_of_type(config, "Staking"),
+        basetoken_address=ocean_token.address,
+        basetoken_sender=consumer_wallet.address,
+        publisher_address=consumer_wallet.address,
+        market_fee_collector=get_address_of_type(config, "OPFCommunityFeeCollector"),
+        pool_template_address=get_address_of_type(config, "poolTemplate"),
+        from_wallet=consumer_wallet,
     )
-
-    tx = erc20.deploy_pool(pool_data, consumer_wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     pool_event = factory_router.get_event_log(
@@ -136,14 +131,14 @@ def test_side_staking(
     ocean_token.transfer(another_consumer_wallet.address, to_wei("10"), consumer_wallet)
 
     bpool.swap_exact_amount_in(
-        [ocean_token.address, erc20.address, publisher_wallet.address],
-        [
-            to_wei("1"),
-            to_wei("0"),
-            to_wei("1000000"),
-            0,
-        ],
-        another_consumer_wallet,
+        token_in=ocean_token.address,
+        token_out=erc20.address,
+        consume_market_fee=publisher_wallet.address,
+        token_amount_in=to_wei("1"),
+        min_amount_out=to_wei("0"),
+        max_price=to_wei("1000000"),
+        swap_market_fee=0,
+        from_wallet=another_consumer_wallet,
     )
 
     assert erc20.balanceOf(another_consumer_wallet.address) >= 0
@@ -155,14 +150,14 @@ def test_side_staking(
 
     receipt = web3.eth.wait_for_transaction_receipt(
         bpool.swap_exact_amount_in(
-            [erc20.address, ocean_token.address, publisher_wallet.address],
-            [
-                to_wei("0.01"),
-                to_wei("0.001"),
-                to_wei("100"),
-                0,
-            ],
-            another_consumer_wallet,
+            token_in=erc20.address,
+            token_out=ocean_token.address,
+            consume_market_fee=publisher_wallet.address,
+            token_amount_in=to_wei("0.01"),
+            min_amount_out=to_wei("0.001"),
+            max_price=to_wei("100"),
+            swap_market_fee=0,
+            from_wallet=another_consumer_wallet,
         )
     )
 

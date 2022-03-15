@@ -21,7 +21,6 @@ from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.ocean.util import get_web3 as util_get_web3
-from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
@@ -216,14 +215,12 @@ def deploy_erc721_erc20(
         web3, get_address_of_type(config, "ERC721Factory")
     )
     tx = erc721_factory.deploy_erc721_contract(
-        (
-            "NFT",
-            "NFTSYMBOL",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
+        name="NFT",
+        symbol="NFTSYMBOL",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
         from_wallet=erc721_publisher,
     )
     token_address = erc721_factory.get_token_address(tx)
@@ -231,19 +228,19 @@ def deploy_erc721_erc20(
     if not erc20_minter:
         return erc721_nft
 
-    erc_create_data = CreateErc20Data(
+    tx_result = erc721_nft.create_erc20(
         template_index=template_index,
-        strings=["ERC20DT1", "ERC20DT1Symbol"],
-        addresses=[
-            erc20_minter.address,
-            erc721_publisher.address,
-            erc721_publisher.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[cap, 0],
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=erc20_minter.address,
+        datatoken_fee_manager=erc721_publisher.address,
+        datatoken_publishing_market_address=erc721_publisher.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=cap,
+        publishing_market_fee_amount=0,
         bytess=[b""],
+        from_wallet=erc721_publisher,
     )
-    tx_result = erc721_nft.create_erc20(erc_create_data, erc721_publisher)
     tx_receipt2 = web3.eth.wait_for_transaction_receipt(tx_result)
 
     registered_event2 = erc721_factory.get_event_log(

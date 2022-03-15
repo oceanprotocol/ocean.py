@@ -11,13 +11,7 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.structures.abi_tuples import (
-    ChainMetadata,
-    CreateErc20Data,
-    CreateERC721DataNoDeployer,
-    DispenserData,
-    FixedData,
     OrderData,
-    PoolData,
 )
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -72,15 +66,13 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
 
     tx = erc721_factory.deploy_erc721_contract(
-        (
-            "DT1",
-            "DTSYMBOL",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
-        publisher_wallet,
+        name="DT1",
+        symbol="DTSYMBOL",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
@@ -99,15 +91,13 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     # Tests current NFT count
     current_nft_count = erc721_factory.get_current_nft_count()
     erc721_factory.deploy_erc721_contract(
-        (
-            "DT2",
-            "DTSYMBOL1",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
-        publisher_wallet,
+        name="DT2",
+        symbol="DTSYMBOL1",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
     )
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
 
@@ -119,19 +109,19 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
 
     # Tests creating successfully an ERC20 token
     erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
-    erc_create_data = CreateErc20Data(
-        1,
-        ["ERC20DT1", "ERC20DT1Symbol"],
-        [
-            publisher_wallet.address,
-            consumer_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        [to_wei("0.5"), 0],
-        [b""],
+    tx_result = erc721_nft.create_erc20(
+        template_index=1,
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=publisher_wallet.address,
+        datatoken_fee_manager=consumer_wallet.address,
+        datatoken_publishing_market_address=publisher_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=to_wei("0.5"),
+        publishing_market_fee_amount=0,
+        bytess=[b""],
+        from_wallet=consumer_wallet,
     )
-    tx_result = erc721_nft.create_erc20(erc_create_data, consumer_wallet)
     assert tx_result, "Failed to create ERC20 token."
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
     registered_token_event = erc721_factory.get_event_log(
@@ -156,33 +146,25 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert erc721_factory.get_current_template_count() == 2
 
     erc20_token = ERC20Token(web3, erc20_address)
-    mock_dai_contract_address = get_address_of_type(config, "MockDAI")
     erc20_token.add_minter(consumer_wallet.address, publisher_wallet)
 
     # Tests creating NFT with ERC20 successfully
-    nft_create_data = CreateERC721DataNoDeployer(
-        name="72120Bundle",
-        symbol="72Bundle",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-    )
-
-    erc_create_data = CreateErc20Data(
-        strings=["ERC20B1", "ERC20DT1Symbol"],
-        template_index=1,
-        addresses=[
-            publisher_wallet.address,
-            consumer_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[to_wei("10"), 0],
-        bytess=[b""],
-    )
-
     tx = erc721_factory.create_nft_with_erc20(
-        nft_create_data, erc_create_data, publisher_wallet
+        nft_name="72120Bundle",
+        nft_symbol="72Bundle",
+        nft_template=1,
+        token_uri="https://oceanprotocol.com/nft/",
+        datatoken_template=1,
+        datatoken_name="ERC20B1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=publisher_wallet.address,
+        datatoken_fee_manager=consumer_wallet.address,
+        datatoken_publishing_market_address=publisher_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=to_wei(10),
+        publishing_market_fee_amount=0,
+        bytess=[b""],
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_nft_event = erc721_factory.get_event_log(
@@ -224,30 +206,22 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     erc20_token.approve(
         erc721_factory_address, initial_pool_liquidity, publisher_wallet
     )
-
-    erc_create_data_pool = CreateErc20Data(
-        strings=["ERC20WithPool", "ERC20P"],
-        template_index=1,
-        addresses=[
-            publisher_wallet.address,
-            consumer_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        uints=[to_wei("0.05"), 0],
+    tx = erc721_factory.create_nft_erc20_with_pool(
+        nft_name="72120Bundle",
+        nft_symbol="72Bundle",
+        nft_template=1,
+        token_uri="https://oceanprotocol.com/nft/",
+        datatoken_template=1,
+        datatoken_name="ERC20WithPool",
+        datatoken_symbol="ERC20P",
+        datatoken_minter=publisher_wallet.address,
+        datatoken_fee_manager=consumer_wallet.address,
+        datatoken_publishing_market_address=publisher_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=to_wei("0.05"),
+        publishing_market_fee_amount=0,
         bytess=[b""],
-    )
-
-    pool_data = PoolData(
-        addresses=[
-            side_staking_address,
-            erc20_address,
-            erc721_factory_address,
-            publisher_wallet.address,
-            consumer_wallet.address,
-            pool_template_address,
-        ],
-        ss_params=[
+        pool_ss_params=[
             to_wei("1"),
             erc20_token.decimals(),
             initial_pool_liquidity
@@ -257,9 +231,15 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
             initial_pool_liquidity,
         ],
         swap_fees=[to_wei("0.001"), to_wei("0.001")],
-    )
-    tx = erc721_factory.create_nft_erc20_with_pool(
-        nft_create_data, erc_create_data_pool, pool_data, publisher_wallet
+        pool_addresses=[
+            side_staking_address,
+            erc20_address,
+            erc721_factory_address,
+            publisher_wallet.address,
+            consumer_wallet.address,
+            pool_template_address,
+        ],
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_nft_event = erc721_factory.get_event_log(
@@ -311,19 +291,19 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     # Create ERC20 data token for fees.
     fee_address = "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9"
 
-    erc_create_data = CreateErc20Data(
-        1,
-        ["ERC20DT1P", "ERC20DT1SymbolP"],
-        [
-            publisher_wallet.address,
-            consumer_wallet.address,
-            fee_address,
-            mock_dai_contract_address,
-        ],
-        [to_wei("0.5"), to_wei("0.0005")],
-        [b""],
+    tx = erc721_nft.create_erc20(
+        template_index=1,
+        datatoken_name="ERC20DT1P",
+        datatoken_symbol="ERC20DT1SymbolP",
+        datatoken_minter=publisher_wallet.address,
+        datatoken_fee_manager=consumer_wallet.address,
+        datatoken_publishing_market_address=publisher_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=to_wei("0.5"),
+        publishing_market_fee_amount=to_wei("0.0005"),
+        bytess=[b""],
+        from_wallet=publisher_wallet,
     )
-    tx = erc721_nft.create_erc20(erc_create_data, publisher_wallet)
     assert tx, "Failed to create ERC20 token."
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_fee_token_event = erc721_factory.get_event_log(
@@ -335,18 +315,30 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert registered_fee_token_event, "Cannot find TokenCreated event."
     fee_erc20_address = registered_fee_token_event[0].args.newTokenAddress
 
-    fixed_rate_data = FixedData(
+    tx = erc721_factory.create_nft_erc20_with_fixed_rate(
+        nft_name="72120Bundle",
+        nft_symbol="72Bundle",
+        nft_template=1,
+        token_uri="https://oceanprotocol.com/nft/",
+        datatoken_template=1,
+        datatoken_name="ERC20WithPool",
+        datatoken_symbol="ERC20P",
+        datatoken_minter=publisher_wallet.address,
+        datatoken_fee_manager=consumer_wallet.address,
+        datatoken_publishing_market_address=publisher_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=to_wei("0.05"),
+        publishing_market_fee_amount=0,
+        bytess=[b""],
         fixed_price_address=fixed_rate_address,
-        addresses=[
+        fixed_rate_addresses=[
             fee_erc20_address,
             publisher_wallet.address,
             consumer_wallet.address,
             ZERO_ADDRESS,
         ],
-        uints=[18, 18, to_wei("1"), to_wei("0.001"), 0],
-    )
-    tx = erc721_factory.create_nft_erc20_with_fixed_rate(
-        nft_create_data, erc_create_data_pool, fixed_rate_data, publisher_wallet
+        fixed_rate_uints=[18, 18, to_wei("1"), to_wei("0.001"), 0],
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_nft_event = erc721_factory.get_event_log(
@@ -391,16 +383,28 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
 
     # Tests creating NFT with ERC20 and with Dispenser successfully.
     dispenser_address = get_address_of_type(config, Dispenser.CONTRACT_NAME)
-    dispenser_data = DispenserData(
-        dispenser_address=dispenser_address,
-        max_tokens=to_wei("1"),
-        max_balance=to_wei("1"),
-        with_mint=True,
-        allowed_swapper=ZERO_ADDRESS,
-    )
 
     tx = erc721_factory.create_nft_erc20_with_dispenser(
-        nft_create_data, erc_create_data_pool, dispenser_data, publisher_wallet
+        nft_name="72120Bundle",
+        nft_symbol="72Bundle",
+        nft_template=1,
+        token_uri="https://oceanprotocol.com/nft/",
+        datatoken_template=1,
+        datatoken_name="ERC20WithPool",
+        datatoken_symbol="ERC20P",
+        datatoken_minter=publisher_wallet.address,
+        datatoken_fee_manager=consumer_wallet.address,
+        datatoken_publishing_market_address=publisher_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=to_wei("0.05"),
+        publishing_market_fee_amount=0,
+        bytess=[b""],
+        dispenser_address=dispenser_address,
+        max_tokens=to_wei(1),
+        max_balance=to_wei(1),
+        with_mint=True,
+        allowed_swapper=ZERO_ADDRESS,
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_nft_event = erc721_factory.get_event_log(
@@ -448,17 +452,19 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     ].args.datatokenAddress, "Invalid data token address by dispenser."
 
     # Create a new erc721 with metadata in one single call and get address
-    metadata = ChainMetadata(
+    tx = erc721_factory.create_nft_with_metadata(
+        nft_name="72120Bundle",
+        nft_symbol="72Bundle",
+        nft_template=1,
+        token_uri="https://oceanprotocol.com/nft/",
         metadata_state=1,
         metadata_decryptor_url="http://myprovider:8030",
         metadata_decryptor_address="0x123",
         flags=bytes(0),
         data=Web3.toHex(text="my cool metadata."),
         data_hash=create_checksum("my cool metadata."),
-        data_proofs=[],
-    )
-    tx = erc721_factory.create_nft_with_metadata(
-        nft_create_data, metadata, publisher_wallet
+        metadata_proofs=[],
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_nft_event = erc721_factory.get_event_log(
@@ -492,15 +498,13 @@ def test_start_multiple_order(
     erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
 
     tx = erc721_factory.deploy_erc721_contract(
-        (
-            "DT1",
-            "DTSYMBOL",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
-        publisher_wallet,
+        name="DT1",
+        symbol="DTSYMBOL",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
@@ -519,15 +523,13 @@ def test_start_multiple_order(
     # Tests current NFT count
     current_nft_count = erc721_factory.get_current_nft_count()
     erc721_factory.deploy_erc721_contract(
-        (
-            "DT2",
-            "DTSYMBOL1",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
-        publisher_wallet,
+        name="DT2",
+        symbol="DTSYMBOL1",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
     )
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
 
@@ -539,19 +541,19 @@ def test_start_multiple_order(
 
     # Tests creating successfully an ERC20 token
     erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
-    erc_create_data = CreateErc20Data(
-        1,
-        ["ERC20DT1", "ERC20DT1Symbol"],
-        [
-            publisher_wallet.address,
-            consumer_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        [to_wei("2"), 0],
-        [b""],
+    tx_result = erc721_nft.create_erc20(
+        template_index=1,
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=publisher_wallet.address,
+        datatoken_fee_manager=consumer_wallet.address,
+        datatoken_publishing_market_address=publisher_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=to_wei(2),
+        publishing_market_fee_amount=0,
+        bytess=[b""],
+        from_wallet=consumer_wallet,
     )
-    tx_result = erc721_nft.create_erc20(erc_create_data, consumer_wallet)
     assert tx_result, "Failed to create ERC20 token."
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
     registered_token_event = erc721_factory.get_event_log(
@@ -691,38 +693,14 @@ def test_fail_create_erc20(
     )
     erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
 
-    # Should fail to create an ERC20 calling the factory directly
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_factory.create_token(
-            (
-                1,
-                ["ERC20DT1", "ERC20DT1Symbol"],
-                [
-                    publisher_wallet.address,
-                    publisher_wallet.address,
-                    publisher_wallet.address,
-                    ZERO_ADDRESS,
-                ],
-                [to_wei(1), 0],
-                [b""],
-            ),
-            publisher_wallet,
-        )
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERC721Factory: ONLY ERC721 "
-        "INSTANCE FROM ERC721FACTORY"
-    )
     tx = erc721_factory.deploy_erc721_contract(
-        (
-            "DT1",
-            "DTSYMBOL",
-            1,
-            ZERO_ADDRESS,
-            ZERO_ADDRESS,
-            "https://oceanprotocol.com/nft/",
-        ),
-        publisher_wallet,
+        name="DT1",
+        symbol="DTSYMBOL",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     registered_event = erc721_factory.get_event_log(
@@ -738,20 +716,20 @@ def test_fail_create_erc20(
     erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
 
     # Should fail to create a specific ERC20 Template if the index is ZERO
-    erc_create_data = CreateErc20Data(
-        0,
-        ["ERC20DT1", "ERC20DT1Symbol"],
-        [
-            publisher_wallet.address,
-            consumer_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        [to_wei("0.5"), 0],
-        [b""],
-    )
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_nft.create_erc20(erc_create_data, consumer_wallet)
+        erc721_nft.create_erc20(
+            template_index=0,
+            datatoken_name="ERC20DT1",
+            datatoken_symbol="ERC20DT1Symbol",
+            datatoken_minter=publisher_wallet.address,
+            datatoken_fee_manager=consumer_wallet.address,
+            datatoken_publishing_market_address=publisher_wallet.address,
+            fee_token_address=ZERO_ADDRESS,
+            datatoken_cap=to_wei("0.5"),
+            publishing_market_fee_amount=0,
+            bytess=[b""],
+            from_wallet=consumer_wallet,
+        )
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC20Factory: Template index "
@@ -759,20 +737,20 @@ def test_fail_create_erc20(
     )
 
     # Should fail to create a specific ERC20 Template if the index doesn't exist
-    erc_create_data = CreateErc20Data(
-        3,
-        ["ERC20DT1", "ERC20DT1Symbol"],
-        [
-            publisher_wallet.address,
-            consumer_wallet.address,
-            publisher_wallet.address,
-            ZERO_ADDRESS,
-        ],
-        [to_wei("0.5"), 0],
-        [b""],
-    )
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_nft.create_erc20(erc_create_data, consumer_wallet)
+        erc721_nft.create_erc20(
+            template_index=3,
+            datatoken_name="ERC20DT1",
+            datatoken_symbol="ERC20DT1Symbol",
+            datatoken_minter=publisher_wallet.address,
+            datatoken_fee_manager=consumer_wallet.address,
+            datatoken_publishing_market_address=publisher_wallet.address,
+            fee_token_address=ZERO_ADDRESS,
+            datatoken_cap=to_wei("0.5"),
+            publishing_market_fee_amount=0,
+            bytess=[b""],
+            from_wallet=consumer_wallet,
+        )
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC20Factory: Template index "
@@ -782,7 +760,19 @@ def test_fail_create_erc20(
     # Should fail to create a specific ERC20 Template if the user is not added on the ERC20 deployers list
     assert erc721_nft.get_permissions(another_consumer_wallet.address)[1] is False
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_nft.create_erc20(erc_create_data, another_consumer_wallet)
+        erc721_nft.create_erc20(
+            template_index=1,
+            datatoken_name="ERC20DT1",
+            datatoken_symbol="ERC20DT1Symbol",
+            datatoken_minter=publisher_wallet.address,
+            datatoken_fee_manager=consumer_wallet.address,
+            datatoken_publishing_market_address=publisher_wallet.address,
+            fee_token_address=ZERO_ADDRESS,
+            datatoken_cap=to_wei("0.5"),
+            publishing_market_fee_amount=0,
+            bytess=[b""],
+            from_wallet=another_consumer_wallet,
+        )
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT "

@@ -2,20 +2,15 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import Optional, Union
+from typing import Optional, List
 
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.structures.abi_tuples import (
-    ChainMetadata,
-    CreateErc20Data,
-    CreateERC721Data,
-    CreateERC721DataNoDeployer,
-    DispenserData,
-    FixedData,
-    PoolData,
+    MetadataProof,
+    OrderData,
 )
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -68,9 +63,27 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return bool(log and log[0].args.newTokenAddress == nft)
 
     def deploy_erc721_contract(
-        self, erc721_data: Union[dict, tuple, CreateERC721Data], from_wallet: Wallet
+        self,
+        name: str,
+        symbol: str,
+        template_index: int,
+        additional_metadata_updater: str,
+        additional_erc20_deployer: str,
+        token_uri: str,
+        from_wallet: Wallet,
     ):
-        return self.send_transaction("deployERC721Contract", erc721_data, from_wallet)
+        return self.send_transaction(
+            "deployERC721Contract",
+            (
+                name,
+                symbol,
+                template_index,
+                additional_metadata_updater,
+                additional_erc20_deployer,
+                token_uri,
+            ),
+            from_wallet,
+        )
 
     def get_current_nft_count(self) -> int:
         return self.contract.caller.getCurrentNFTCount()
@@ -84,11 +97,6 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     def is_contract(self, account_address: str) -> bool:
         return self.contract.caller.isContract(account_address)
 
-    def create_token(
-        self, token_data: Union[list, dict, CreateErc20Data], from_wallet: Wallet
-    ) -> str:
-        return self.send_transaction("createToken", token_data, from_wallet)
-
     def get_current_token_count(self) -> int:
         return self.contract.caller.getCurrentTokenCount()
 
@@ -101,7 +109,9 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     def template_count(self) -> int:
         return self.contract.caller.templateCount()
 
-    def start_multiple_token_order(self, orders: list, from_wallet: Wallet) -> str:
+    def start_multiple_token_order(
+        self, orders: List[OrderData], from_wallet: Wallet
+    ) -> str:
         """An order contains the following keys:
 
         - tokenAddress, str
@@ -119,62 +129,205 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     def create_nft_with_erc20(
         self,
-        nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
-        erc_create_data: Union[dict, tuple, CreateErc20Data],
+        nft_name: str,
+        nft_symbol: str,
+        nft_template: int,
+        token_uri: str,
+        datatoken_template: int,
+        datatoken_name: str,
+        datatoken_symbol: str,
+        datatoken_minter: str,
+        datatoken_fee_manager: str,
+        datatoken_publishing_market_address: str,
+        fee_token_address: str,
+        datatoken_cap: int,
+        publishing_market_fee_amount: int,
+        bytess: List[bytes],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "createNftWithErc20", (nft_create_data, erc_create_data), from_wallet
+            "createNftWithErc20",
+            (
+                (nft_name, nft_symbol, nft_template, token_uri),
+                (
+                    datatoken_template,
+                    [datatoken_name, datatoken_symbol],
+                    [
+                        datatoken_minter,
+                        datatoken_fee_manager,
+                        datatoken_publishing_market_address,
+                        fee_token_address,
+                    ],
+                    [datatoken_cap, publishing_market_fee_amount],
+                    bytess,
+                ),
+            ),
+            from_wallet,
         )
 
     def create_nft_erc20_with_pool(
         self,
-        nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
-        erc_create_data: Union[dict, tuple, CreateErc20Data],
-        pool_data: Union[dict, tuple, PoolData],
+        nft_name: str,
+        nft_symbol: str,
+        nft_template: int,
+        token_uri: str,
+        datatoken_template: int,
+        datatoken_name: str,
+        datatoken_symbol: str,
+        datatoken_minter: str,
+        datatoken_fee_manager: str,
+        datatoken_publishing_market_address: str,
+        fee_token_address: str,
+        datatoken_cap: int,
+        publishing_market_fee_amount: int,
+        bytess: List[bytes],
+        pool_ss_params: List[int],
+        swap_fees: List[int],
+        pool_addresses: List[str],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "createNftWithErc20WithPool",
-            (nft_create_data, erc_create_data, pool_data),
+            (
+                (nft_name, nft_symbol, nft_template, token_uri),
+                (
+                    datatoken_template,
+                    [datatoken_name, datatoken_symbol],
+                    [
+                        datatoken_minter,
+                        datatoken_fee_manager,
+                        datatoken_publishing_market_address,
+                        fee_token_address,
+                    ],
+                    [datatoken_cap, publishing_market_fee_amount],
+                    bytess,
+                ),
+                (pool_ss_params, swap_fees, pool_addresses),
+            ),
             from_wallet,
         )
 
     def create_nft_erc20_with_fixed_rate(
         self,
-        nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
-        erc_create_data: Union[dict, tuple, CreateErc20Data],
-        fixed_data: Union[dict, tuple, FixedData],
+        nft_name: str,
+        nft_symbol: str,
+        nft_template: int,
+        token_uri: str,
+        datatoken_template: int,
+        datatoken_name: str,
+        datatoken_symbol: str,
+        datatoken_minter: str,
+        datatoken_fee_manager: str,
+        datatoken_publishing_market_address: str,
+        fee_token_address: str,
+        datatoken_cap: int,
+        publishing_market_fee_amount: int,
+        bytess: List[bytes],
+        fixed_price_address: str,
+        fixed_rate_addresses: List[str],
+        fixed_rate_uints: List[int],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "createNftWithErc20WithFixedRate",
-            (nft_create_data, erc_create_data, fixed_data),
+            (
+                (nft_name, nft_symbol, nft_template, token_uri),
+                (
+                    datatoken_template,
+                    [datatoken_name, datatoken_symbol],
+                    [
+                        datatoken_minter,
+                        datatoken_fee_manager,
+                        datatoken_publishing_market_address,
+                        fee_token_address,
+                    ],
+                    [datatoken_cap, publishing_market_fee_amount],
+                    bytess,
+                ),
+                (fixed_price_address, fixed_rate_addresses, fixed_rate_uints),
+            ),
             from_wallet,
         )
 
     def create_nft_erc20_with_dispenser(
         self,
-        nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
-        erc_create_data: Union[dict, tuple, CreateErc20Data],
-        dispenser_data: Union[dict, tuple, DispenserData],
+        nft_name: str,
+        nft_symbol: str,
+        nft_template: int,
+        token_uri: str,
+        datatoken_template: int,
+        datatoken_name: str,
+        datatoken_symbol: str,
+        datatoken_minter: str,
+        datatoken_fee_manager: str,
+        datatoken_publishing_market_address: str,
+        fee_token_address: str,
+        datatoken_cap: int,
+        publishing_market_fee_amount: int,
+        bytess: List[bytes],
+        dispenser_address: str,
+        max_tokens: int,
+        max_balance: int,
+        with_mint: bool,
+        allowed_swapper: str,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "createNftWithErc20WithDispenser",
-            (nft_create_data, erc_create_data, dispenser_data),
+            (
+                (nft_name, nft_symbol, nft_template, token_uri),
+                (
+                    datatoken_template,
+                    [datatoken_name, datatoken_symbol],
+                    [
+                        datatoken_minter,
+                        datatoken_fee_manager,
+                        datatoken_publishing_market_address,
+                        fee_token_address,
+                    ],
+                    [datatoken_cap, publishing_market_fee_amount],
+                    bytess,
+                ),
+                (
+                    dispenser_address,
+                    max_tokens,
+                    max_balance,
+                    with_mint,
+                    allowed_swapper,
+                ),
+            ),
             from_wallet,
         )
 
     def create_nft_with_metadata(
         self,
-        nft_create_data: Union[dict, tuple, CreateERC721DataNoDeployer],
-        metadata: Union[dict, tuple, ChainMetadata],
+        nft_name: str,
+        nft_symbol: str,
+        nft_template: int,
+        token_uri: str,
+        metadata_state: int,
+        metadata_decryptor_url: str,
+        metadata_decryptor_address: str,
+        flags: bytes,
+        data: bytes,
+        data_hash: bytes,
+        metadata_proofs: List[MetadataProof],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "createNftWithMetaData",
-            (nft_create_data, metadata),
+            (
+                (nft_name, nft_symbol, nft_template, token_uri),
+                (
+                    metadata_state,
+                    metadata_decryptor_url,
+                    metadata_decryptor_address,
+                    flags,
+                    data,
+                    data_hash,
+                    metadata_proofs,
+                ),
+            ),
             from_wallet,
         )
 

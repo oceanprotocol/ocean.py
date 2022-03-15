@@ -118,25 +118,25 @@ print(f"data NFT token symbol: {erc721_nft.symbol()}")
 In the same python console:
 ```python
 # Create ERC20 token related to the above NFT.
-from ocean_lib.structures.abi_tuples import CreateErc20Data
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 print("Create ERC20 datatoken: begin.")
 cap = ocean.to_wei(100)
-erc20_data = CreateErc20Data(
-    template_index=1, # default value
-    strings=["ERC20DT1", "ERC20DT1Symbol"], # name & symbol for ERC20 token
-    addresses=[
-        alice_wallet.address, # minter address
-        alice_wallet.address, # fee manager for this ERC20 token
-        alice_wallet.address, # publishing Market Address
-        ZERO_ADDRESS, # publishing Market Fee Token
-    ],
-    uints=[cap, 0],
-    bytess=[b""]
-)
+
 nft_factory = ocean.get_nft_factory()
-erc20_token = erc721_nft.create_datatoken(erc20_data=erc20_data, from_wallet=alice_wallet)
+erc20_token = erc721_nft.create_datatoken(
+    template_index=1, # default value
+    datatoken_name="ERC20DT1",  # name for ERC20 token
+    datatoken_symbol="ERC20DT1Symbol",  # symbol for ERC20 token
+    datatoken_minter=alice_wallet.address,  # minter address
+    datatoken_fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
+    datatoken_publishing_market_address=alice_wallet.address,  # publishing Market Address
+    fee_token_address=ZERO_ADDRESS,  # publishing Market Fee Token
+    datatoken_cap=cap,
+    publishing_market_fee_amount=0,
+    bytess=[b""],
+    from_wallet=alice_wallet
+)
 print(f"Created ERC20 datatoken: done. Its address is {erc20_token.address}")
 print(f"datatoken name: {erc20_token.token_name()}")
 print(f"datatoken symbol: {erc20_token.symbol()}")
@@ -145,4 +145,3 @@ print(f"datatoken symbol: {erc20_token.symbol()}")
 Congrats, you've created your first Ocean datatoken! 🐋
 
 As an alternative for publishing a NFT and a datatoken at once, you can use `create_nft_with_erc20`.
-For the NFT creation, use `CreateERC721DataNoDeployer` named tuple, because the additional ERC20 deployer will automatically be set as the factory router.

@@ -16,7 +16,6 @@ from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.services.service import Service
-from ocean_lib.structures.abi_tuples import ConsumeFees, CreateErc20Data
 from ocean_lib.structures.file_objects import UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
@@ -107,19 +106,19 @@ def c2d_flow_readme(
     assert erc721_nft.symbol()
 
     # Publish the datatoken
-    DATA_erc20_data = CreateErc20Data(
+    DATA_datatoken = erc721_nft.create_datatoken(
         template_index=1,
-        strings=["Datatoken 1", "DT1"],
-        addresses=[
-            alice_wallet.address,
-            alice_wallet.address,
-            ZERO_ADDRESS,
-            ocean.OCEAN_address,
-        ],
-        uints=[ocean.to_wei(100000), 0],
+        datatoken_name="Datatoken 1",
+        datatoken_symbol="DT1",
+        datatoken_minter=alice_wallet.address,
+        datatoken_fee_manager=alice_wallet.address,
+        datatoken_publishing_market_address=ZERO_ADDRESS,
+        fee_token_address=ocean.OCEAN_address,
+        datatoken_cap=ocean.to_wei(100000),
+        publishing_market_fee_amount=0,
         bytess=[b""],
+        from_wallet=alice_wallet,
     )
-    DATA_datatoken = erc721_nft.create_datatoken(DATA_erc20_data, alice_wallet)
     assert DATA_datatoken.address
 
     # Specify metadata and services, using the Branin test dataset
@@ -179,19 +178,20 @@ def c2d_flow_readme(
     assert ALGO_nft_token.address
 
     # Publish the datatoken
-    ALGO_erc20_data = CreateErc20Data(
+    ALGO_datatoken = ALGO_nft_token.create_datatoken(
         template_index=1,
-        strings=["Datatoken 1", "DT1"],
-        addresses=[
-            alice_wallet.address,
-            alice_wallet.address,
-            ZERO_ADDRESS,
-            ocean.OCEAN_address,
-        ],
-        uints=[ocean.to_wei(100000), 0],
+        datatoken_name="Datatoken 1",
+        datatoken_symbol="DT1",
+        datatoken_minter=alice_wallet.address,
+        datatoken_fee_manager=alice_wallet.address,
+        datatoken_publishing_market_address=ZERO_ADDRESS,
+        fee_token_address=ocean.OCEAN_address,
+        datatoken_cap=ocean.to_wei(100000),
+        publishing_market_fee_amount=0,
         bytess=[b""],
+        from_wallet=alice_wallet,
     )
-    ALGO_datatoken = ALGO_nft_token.create_datatoken(ALGO_erc20_data, alice_wallet)
+    assert ALGO_datatoken.address
 
     # Specify metadata and services, using the Branin test dataset
     ALGO_date_created = "2021-12-28T10:55:11Z"
@@ -269,18 +269,13 @@ def c2d_flow_readme(
 
     environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
 
-    # Consume fees
-    consume_fees = ConsumeFees(
-        consumer_market_fee_address=bob_wallet.address,
-        consumer_market_fee_token=DATA_datatoken.address,
-        consumer_market_fee_amount=0,
-    )
-
     # Pay for dataset
     DATA_order_tx_id = ocean.assets.pay_for_service(
         asset=DATA_asset,
         service=compute_service,
-        consume_fees=consume_fees,
+        consumer_market_fee_address=bob_wallet.address,
+        consumer_market_fee_token=DATA_datatoken.address,
+        consumer_market_fee_amount=0,
         wallet=bob_wallet,
         initialize_args={
             "compute_environment": environments[0]["id"],
@@ -290,18 +285,13 @@ def c2d_flow_readme(
     )
     assert DATA_order_tx_id, "pay for dataset unsuccessful"
 
-    # Consume fees
-    consume_fees = ConsumeFees(
-        consumer_market_fee_address=bob_wallet.address,
-        consumer_market_fee_token=ALGO_datatoken.address,
-        consumer_market_fee_amount=0,
-    )
-
     # Pay for algorithm
     ALGO_order_tx_id = ocean.assets.pay_for_service(
         asset=ALGO_asset,
         service=algo_service,
-        consume_fees=consume_fees,
+        consumer_market_fee_address=bob_wallet.address,
+        consumer_market_fee_token=ALGO_datatoken.address,
+        consumer_market_fee_amount=0,
         wallet=bob_wallet,
         initialize_args={
             "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp())
