@@ -19,10 +19,12 @@ def test_properties(factory_router):
 
 
 @pytest.mark.unit
-def test_is_ocean_token_mapping(config, factory_router):
+def test_is_approved_token_mapping(config, factory_router):
     """Tests that Ocean token has been added to the mapping"""
-    is_ocean_token = factory_router.is_ocean_token(get_address_of_type(config, "Ocean"))
-    assert is_ocean_token is True
+    is_approved_token = factory_router.is_approved_token(
+        get_address_of_type(config, "Ocean")
+    )
+    assert is_approved_token is True
 
 
 @pytest.mark.unit

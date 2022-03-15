@@ -147,7 +147,6 @@ def test_buy_from_dispenser_and_order(
 
     balance_opf_consume_before = mock_dai_contract.balanceOf(opf_collector_address)
     balance_publish_before = mock_usdc_contract.balanceOf(consumer_wallet.address)
-    balance_opf_publish_before = mock_usdc_contract.balanceOf(opf_collector_address)
 
     tx = erc20_enterprise_token.buy_from_dispenser_and_order(
         order_params=order_params,
@@ -157,20 +156,13 @@ def test_buy_from_dispenser_and_order(
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
-    assert erc20_enterprise_token.get_total_supply() == 0
+    assert erc20_enterprise_token.get_total_supply() == to_wei("0.03")
 
     balance_opf_consume = mock_dai_contract.balanceOf(opf_collector_address)
-
     balance_publish = mock_usdc_contract.balanceOf(publish_fees[0])
-    balance_opf_publish = mock_usdc_contract.balanceOf(opf_collector_address)
-
-    expected_publish = publish_fees[2] - publish_fees[2] / 100
-    expected_opf_publish = publish_fees[2] / 100
 
     assert balance_opf_consume - balance_opf_consume_before == 0
-
-    assert balance_publish - balance_publish_before == expected_publish
-    assert balance_opf_publish - balance_opf_publish_before == expected_opf_publish
+    assert balance_publish - balance_publish_before == to_wei("2")
 
     assert (
         erc20_enterprise_token.balanceOf(erc20_enterprise_token.get_payment_collector())
@@ -328,11 +320,8 @@ def test_buy_from_fre_and_order(
         another_consumer_wallet.address,
     )
 
-    opf_collector_address = get_address_of_type(config, "OPFCommunityFeeCollector")
-
     balance_consume_before = mock_dai_contract.balanceOf(consume_fee_address)
     balance_publish_before = mock_usdc_contract.balanceOf(consumer_wallet.address)
-    balance_opf_publish_before = mock_usdc_contract.balanceOf(opf_collector_address)
     provider_fee_balance_before = mock_usdc_contract.balanceOf(
         another_consumer_wallet.address
     )
@@ -343,23 +332,18 @@ def test_buy_from_fre_and_order(
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
-    assert erc20_enterprise_token.get_total_supply() == 0
+    assert erc20_enterprise_token.get_total_supply() == to_wei("0.03")
 
     provider_fee_balance_after = mock_usdc_contract.balanceOf(
         another_consumer_wallet.address
     )
     balance_consume = mock_dai_contract.balanceOf(consume_fee_address)
     balance_publish = mock_usdc_contract.balanceOf(publish_fees[0])
-    balance_opf_publish = mock_usdc_contract.balanceOf(opf_collector_address)
-
-    expected_publish = publish_fees[2] - publish_fees[2] / 100
-    expected_opf_publish = publish_fees[2] / 100
 
     assert balance_consume - balance_consume_before == 0
     assert provider_fee_balance_after - provider_fee_balance_before == to_wei("0.001")
 
-    assert balance_publish - balance_publish_before == expected_publish
-    assert balance_opf_publish - balance_opf_publish_before == expected_opf_publish
+    assert balance_publish - balance_publish_before == to_wei("2")
 
     assert (
         erc20_enterprise_token.balanceOf(erc20_enterprise_token.get_payment_collector())

@@ -210,7 +210,7 @@ provider_fees = ocean.build_compute_provider_fees(
 consume_fees = ocean.build_consume_fees(
     bob_wallet.address,
     erc20_enterprise_token.address,
-    ocean.to_wei(2)
+    0
 )
 
 order_params = OrderParams(
