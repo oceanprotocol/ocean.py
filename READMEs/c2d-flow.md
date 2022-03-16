@@ -66,10 +66,10 @@ DATA_datatoken = DATA_nft_token.create_datatoken(
     datatoken_symbol="DT1",
     datatoken_minter=alice_wallet.address,
     datatoken_fee_manager=alice_wallet.address,
-    datatoken_publishing_market_address=ZERO_ADDRESS,
+    datatoken_publish_market_address=ZERO_ADDRESS,
     fee_token_address=ocean.OCEAN_address,
     datatoken_cap=ocean.to_wei(100000),
-    publishing_market_fee_amount=0,
+    publish_market_fee_amount=0,
     bytess=[b""],
     from_wallet=alice_wallet,
 )
@@ -155,10 +155,10 @@ ALGO_datatoken = ALGO_nft_token.create_datatoken(
     datatoken_symbol="DT1",
     datatoken_minter=alice_wallet.address,
     datatoken_fee_manager=alice_wallet.address,
-    datatoken_publishing_market_address=ZERO_ADDRESS,
+    datatoken_publish_market_address=ZERO_ADDRESS,
     fee_token_address=ocean.OCEAN_address,
     datatoken_cap=ocean.to_wei(100000),
-    publishing_market_fee_amount=0,
+    publish_market_fee_amount=0,
     from_wallet=alice_wallet,
 )
 print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")

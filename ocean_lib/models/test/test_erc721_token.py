@@ -5,7 +5,6 @@
 import pytest
 from web3 import exceptions
 
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT, ERC721Permissions
 from ocean_lib.web3_internal.constants import BLOB, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -41,9 +40,6 @@ def test_permissions(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
     """Tests permissions' functions."""
-    erc721_factory_address = get_address_of_type(
-        config=config, address_type=ERC721FactoryContract.CONTRACT_NAME
-    )
     erc721_nft = deploy_erc721_erc20(
         web3=web3, config=config, erc721_publisher=publisher_wallet
     )
@@ -460,10 +456,10 @@ def test_create_erc20(web3, config, publisher_wallet, consumer_wallet):
         datatoken_symbol="ERC20DT1Symbol",
         datatoken_minter=publisher_wallet.address,
         datatoken_fee_manager=consumer_wallet.address,
-        datatoken_publishing_market_address=publisher_wallet.address,
+        datatoken_publish_market_address=publisher_wallet.address,
         fee_token_address=ZERO_ADDRESS,
         datatoken_cap=to_wei("0.5"),
-        publishing_market_fee_amount=0,
+        publish_market_fee_amount=0,
         bytess=[b""],
         from_wallet=publisher_wallet,
     )
@@ -489,10 +485,10 @@ def test_fail_creating_erc20(web3, config, publisher_wallet, consumer_wallet):
             datatoken_symbol="ERC20DT1Symbol",
             datatoken_minter=publisher_wallet.address,
             datatoken_fee_manager=consumer_wallet.address,
-            datatoken_publishing_market_address=publisher_wallet.address,
+            datatoken_publish_market_address=publisher_wallet.address,
             fee_token_address=ZERO_ADDRESS,
             datatoken_cap=to_wei("0.5"),
-            publishing_market_fee_amount=0,
+            publish_market_fee_amount=0,
             bytess=[b""],
             from_wallet=consumer_wallet,
         )
@@ -580,10 +576,10 @@ def test_erc721_datatoken_functions(web3, config, publisher_wallet, consumer_wal
         datatoken_symbol="ERC20DT1Symbol",
         datatoken_minter=publisher_wallet.address,
         datatoken_fee_manager=consumer_wallet.address,
-        datatoken_publishing_market_address=publisher_wallet.address,
+        datatoken_publish_market_address=publisher_wallet.address,
         fee_token_address=ZERO_ADDRESS,
         datatoken_cap=to_wei("0.5"),
-        publishing_market_fee_amount=0,
+        publish_market_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
     )

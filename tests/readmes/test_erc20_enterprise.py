@@ -45,10 +45,10 @@ def test_erc20_enterprise_flow_with_dispenser():
         symbol="ERC20DT1Symbol",  # symbol for ERC20 token
         minter=alice_wallet.address,  # minter address
         fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
-        publishing_market_address=alice_wallet.address,  # publishing Market Address
-        publishing_market_fee_token=ZERO_ADDRESS,  # publishing Market Fee Token
+        publish_market_address=alice_wallet.address,  # publishing Market Address
+        publish_market_fee_token=ZERO_ADDRESS,  # publishing Market Fee Token
         cap=cap,
-        publishing_market_fee_amount=0,
+        publish_market_fee_amount=0,
         bytess=[b""],
         from_wallet=alice_wallet,
     )
@@ -160,10 +160,10 @@ def test_erc20_enterprise_flow_with_fre():
         symbol="ERC20DT1Symbol",  # symbol for ERC20 token
         minter=alice_wallet.address,  # minter address
         fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
-        publishing_market_address=alice_wallet.address,  # publishing Market Address
-        publishing_market_fee_token=ZERO_ADDRESS,  # publishing Market Fee Token
+        publish_market_address=alice_wallet.address,  # publishing Market Address
+        publish_market_fee_token=ZERO_ADDRESS,  # publishing Market Fee Token
         cap=cap,
-        publishing_market_fee_amount=0,
+        publish_market_fee_amount=0,
         bytess=[b""],
         from_wallet=alice_wallet,
     )

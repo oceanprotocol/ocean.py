@@ -50,10 +50,10 @@ def test_fre_flow_readme():
         symbol="DT1",
         minter=alice_wallet.address,
         fee_manager=alice_wallet.address,
-        publishing_market_address=ZERO_ADDRESS,
-        publishing_market_fee_token=ocean.OCEAN_address,
+        publish_market_address=ZERO_ADDRESS,
+        publish_market_fee_token=ocean.OCEAN_address,
         cap=ocean.to_wei(200),
-        publishing_market_fee_amount=0,
+        publish_market_fee_amount=0,
         bytess=[b""],
         from_wallet=alice_wallet,
     )

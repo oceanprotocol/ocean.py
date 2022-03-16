@@ -6,6 +6,7 @@ from enum import IntEnum
 from typing import List, Optional, Tuple
 
 from enforce_typing import enforce_types
+
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -338,7 +339,7 @@ class ERC20Token(ContractBase):
             "setPaymentCollector", (fee_collector_address,), from_wallet
         )
 
-    def get_publishing_market_fee(self) -> tuple:
+    def get_publish_market_fee(self) -> tuple:
         return self.contract.caller.getPublishingMarketFee()
 
     def set_publishing_market_fee(

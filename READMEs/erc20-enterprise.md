@@ -59,10 +59,10 @@ erc20_enterprise_token = erc721_nft.create_datatoken(
     datatoken_symbol="ERC20DT1Symbol",  # symbol for ERC20 token
     datatoken_minter=alice_wallet.address,  # minter address
     datatoken_fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
-    datatoken_publishing_market_address=alice_wallet.address,  # publishing Market Address
+    datatoken_publish_market_address=alice_wallet.address,  # publishing Market Address
     fee_token_address=ZERO_ADDRESS,  # publishing Market Fee Token
     datatoken_cap=cap,
-    publishing_market_fee_amount=0,
+    publish_market_fee_amount=0,
     bytess=[b""],
     from_wallet=alice_wallet,
 )
@@ -154,10 +154,10 @@ erc20_enterprise_token = erc721_nft.create_datatoken(
     datatoken_symbol="ERC20DT1Symbol",  # symbol for ERC20 token
     datatoken_minter=alice_wallet.address,  # minter address
     datatoken_fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
-    datatoken_publishing_market_address=alice_wallet.address,  # publishing Market Address
+    datatoken_publish_market_address=alice_wallet.address,  # publishing Market Address
     fee_token_address=ZERO_ADDRESS,  # publishing Market Fee Token
     datatoken_cap=cap,
-    publishing_market_fee_amount=0,
+    publish_market_fee_amount=0,
     bytess=[b""],
     from_wallet=alice_wallet,
 )

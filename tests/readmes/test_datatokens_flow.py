@@ -41,10 +41,10 @@ def test_datatokens_flow_readme():
         symbol="ERC20DT1Symbol",  # symbol for ERC20 token
         minter=wallet.address,  # minter address
         fee_manager=wallet.address,  # fee manager for this ERC20 token
-        publishing_market_address=wallet.address,  # publishing Market Address
-        publishing_market_fee_token=ZERO_ADDRESS,  # publishing Market Fee Token
+        publish_market_address=wallet.address,  # publishing Market Address
+        publish_market_fee_token=ZERO_ADDRESS,  # publishing Market Fee Token
         cap=cap,
-        publishing_market_fee_amount=0,
+        publish_market_fee_amount=0,
         bytess=[b""],
         from_wallet=wallet,
     )

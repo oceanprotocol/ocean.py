@@ -69,7 +69,7 @@ def test_buy_from_dispenser_and_order(
 
     consume_fee_amount = to_wei("2")
     consume_fee_address = consumer_wallet.address
-    erc20_enterprise_token.set_publishing_market_fee(
+    erc20_enterprise_token.set_publish_market_fee(
         publish_market_fee_address=consume_fee_address,
         publish_market_fee_token=mock_usdc_contract.address,
         publish_market_fee_amount=consume_fee_amount,

@@ -2,16 +2,14 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import Optional, List
+from typing import List, Optional
 
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
+
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.structures.abi_tuples import (
-    MetadataProof,
-    OrderData,
-)
+from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -138,10 +136,10 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         datatoken_symbol: str,
         datatoken_minter: str,
         datatoken_fee_manager: str,
-        datatoken_publishing_market_address: str,
+        datatoken_publish_market_address: str,
         fee_token_address: str,
         datatoken_cap: int,
-        publishing_market_fee_amount: int,
+        publish_market_fee_amount: int,
         bytess: List[bytes],
         from_wallet: Wallet,
     ) -> str:
@@ -155,10 +153,10 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                     [
                         datatoken_minter,
                         datatoken_fee_manager,
-                        datatoken_publishing_market_address,
+                        datatoken_publish_market_address,
                         fee_token_address,
                     ],
-                    [datatoken_cap, publishing_market_fee_amount],
+                    [datatoken_cap, publish_market_fee_amount],
                     bytess,
                 ),
             ),
@@ -176,10 +174,10 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         datatoken_symbol: str,
         datatoken_minter: str,
         datatoken_fee_manager: str,
-        datatoken_publishing_market_address: str,
+        datatoken_publish_market_address: str,
         fee_token_address: str,
         datatoken_cap: int,
-        publishing_market_fee_amount: int,
+        publish_market_fee_amount: int,
         bytess: List[bytes],
         pool_ss_params: List[int],
         swap_fees: List[int],
@@ -196,10 +194,10 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                     [
                         datatoken_minter,
                         datatoken_fee_manager,
-                        datatoken_publishing_market_address,
+                        datatoken_publish_market_address,
                         fee_token_address,
                     ],
-                    [datatoken_cap, publishing_market_fee_amount],
+                    [datatoken_cap, publish_market_fee_amount],
                     bytess,
                 ),
                 (pool_ss_params, swap_fees, pool_addresses),
@@ -218,10 +216,10 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         datatoken_symbol: str,
         datatoken_minter: str,
         datatoken_fee_manager: str,
-        datatoken_publishing_market_address: str,
+        datatoken_publish_market_address: str,
         fee_token_address: str,
         datatoken_cap: int,
-        publishing_market_fee_amount: int,
+        publish_market_fee_amount: int,
         bytess: List[bytes],
         fixed_price_address: str,
         fixed_rate_addresses: List[str],
@@ -238,10 +236,10 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                     [
                         datatoken_minter,
                         datatoken_fee_manager,
-                        datatoken_publishing_market_address,
+                        datatoken_publish_market_address,
                         fee_token_address,
                     ],
-                    [datatoken_cap, publishing_market_fee_amount],
+                    [datatoken_cap, publish_market_fee_amount],
                     bytess,
                 ),
                 (fixed_price_address, fixed_rate_addresses, fixed_rate_uints),
@@ -260,10 +258,10 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         datatoken_symbol: str,
         datatoken_minter: str,
         datatoken_fee_manager: str,
-        datatoken_publishing_market_address: str,
+        datatoken_publish_market_address: str,
         fee_token_address: str,
         datatoken_cap: int,
-        publishing_market_fee_amount: int,
+        publish_market_fee_amount: int,
         bytess: List[bytes],
         dispenser_address: str,
         max_tokens: int,
@@ -282,10 +280,10 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                     [
                         datatoken_minter,
                         datatoken_fee_manager,
-                        datatoken_publishing_market_address,
+                        datatoken_publish_market_address,
                         fee_token_address,
                     ],
-                    [datatoken_cap, publishing_market_fee_amount],
+                    [datatoken_cap, publish_market_fee_amount],
                     bytess,
                 ),
                 (

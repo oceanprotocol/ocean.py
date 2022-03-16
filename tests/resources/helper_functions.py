@@ -227,10 +227,10 @@ def deploy_erc721_erc20(
         symbol="ERC20DT1Symbol",
         minter=erc20_minter.address,
         fee_manager=erc721_publisher.address,
-        publishing_market_address=erc721_publisher.address,
-        publishing_market_fee_token=ZERO_ADDRESS,
+        publish_market_address=erc721_publisher.address,
+        publish_market_fee_token=ZERO_ADDRESS,
         cap=cap,
-        publishing_market_fee_amount=0,
+        publish_market_fee_amount=0,
         bytess=[b""],
         from_wallet=erc721_publisher,
     )
