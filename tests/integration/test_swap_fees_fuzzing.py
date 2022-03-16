@@ -16,7 +16,6 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-from ocean_lib.structures.abi_tuples import CreateErc20Data, PoolData
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from tests.resources.helper_functions import (
@@ -76,7 +75,6 @@ def get_random_max_token_amount_out(
     )
 
 
-# @pytest.mark.skip(reason="This test is slow and not needed in the CI")
 @pytest.mark.nosetup_all
 def test_fuzzing_pool_ocean(
     web3,
@@ -89,7 +87,8 @@ def test_fuzzing_pool_ocean(
 ):
     """Test the liquidity pool contract with random values."""
 
-    number_of_runs = 50
+    # This number could be raised to increase the fuzzing time
+    number_of_runs = 3
 
     errors = []
 
@@ -132,19 +131,17 @@ def test_fuzzing_pool_ocean(
             cap = to_wei(random.randint(100, 1000000), 18)
 
             tx = erc721_nft.create_erc20(
-                CreateErc20Data(
-                    1,
-                    ["ERC20DT1", "ERC20DT1Symbol"],
-                    [
-                        consumer_wallet.address,
-                        factory_deployer_wallet.address,
-                        consumer_wallet.address,
-                        ZERO_ADDRESS,
-                    ],
-                    [cap, 0],
-                    [b""],
-                ),
-                consumer_wallet,
+                template_index=1,
+                datatoken_name="ERC20DT1",
+                datatoken_symbol="ERC20DT1Symbol",
+                datatoken_minter=consumer_wallet.address,
+                datatoken_fee_manager=factory_deployer_wallet.address,
+                datatoken_publishing_market_address=consumer_wallet.address,
+                fee_token_address=ZERO_ADDRESS,
+                datatoken_cap=cap,
+                publishing_market_fee_amount=0,
+                bytess=[b""],
+                from_wallet=consumer_wallet,
             )
             tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
             event = erc721_factory.get_event_log(
@@ -188,26 +185,24 @@ def test_fuzzing_pool_ocean(
 
             ss_rate = to_wei(Decimal(random.uniform(0.00001, 0.1)), 18)
 
-            pool_data = PoolData(
-                [
-                    ss_rate,
-                    ocean_contract.decimals(),
-                    ss_DT_vest_amt,
-                    ss_DT_vested_blocks,
-                    ss_OCEAN_init_liquidity,
-                ],
-                [swap_fee, swap_market_fee],
-                [
-                    side_staking.address,
-                    ocean_contract.address,
-                    consumer_wallet.address,
-                    consumer_wallet.address,
-                    get_address_of_type(config, "OPFCommunityFeeCollector"),
-                    get_address_of_type(config, "poolTemplate"),
-                ],
+            tx = erc20_token.deploy_pool(
+                rate=ss_rate,
+                basetoken_decimals=ocean_contract.decimals(),
+                vesting_amount=ss_DT_vest_amt,
+                vested_blocks=ss_DT_vested_blocks,
+                initial_liq=ss_OCEAN_init_liquidity,
+                lp_swap_fee=swap_fee,
+                market_swap_fee=swap_market_fee,
+                ss_contract=side_staking.address,
+                basetoken_address=ocean_contract.address,
+                basetoken_sender=consumer_wallet.address,
+                publisher_address=consumer_wallet.address,
+                market_fee_collector=get_address_of_type(
+                    config, "OPFCommunityFeeCollector"
+                ),
+                pool_template_address=get_address_of_type(config, "poolTemplate"),
+                from_wallet=consumer_wallet,
             )
-
-            tx = erc20_token.deploy_pool(pool_data, consumer_wallet)
 
             tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
             pool_event = factory_router.get_event_log(
@@ -256,19 +251,16 @@ def test_fuzzing_pool_ocean(
             swap_in_one_amount_in = get_random_max_token_amount_in(
                 ocean_contract, bpool, publisher_wallet.address
             )
+
             tx = bpool.swap_exact_amount_in(
-                [
-                    ocean_contract.address,
-                    erc20_address,
-                    another_consumer_wallet.address,
-                ],
-                [
-                    swap_in_one_amount_in,
-                    1,
-                    to_wei("1000000000"),
-                    0,
-                ],
-                publisher_wallet,
+                token_in=ocean_contract.address,
+                token_out=erc20_address,
+                consume_market_fee=another_consumer_wallet.address,
+                token_amount_in=swap_in_one_amount_in,
+                min_amount_out=1,
+                max_price=to_wei("1000000000"),
+                swap_market_fee=0,
+                from_wallet=publisher_wallet,
             )
 
             tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -307,18 +299,14 @@ def test_fuzzing_pool_ocean(
             swap_out_one_balance = ocean_contract.balanceOf(publisher_wallet.address)
 
             tx = bpool.swap_exact_amount_out(
-                [
-                    ocean_contract.address,
-                    erc20_address,
-                    another_consumer_wallet.address,
-                ],
-                [
-                    swap_out_one_balance,  # max amount in
-                    swap_out_one_amount_out,
-                    to_wei("1000000"),
-                    0,
-                ],
-                publisher_wallet,
+                token_in=ocean_contract.address,
+                token_out=erc20_address,
+                consume_market_fee=another_consumer_wallet.address,
+                max_amount_in=swap_out_one_balance,
+                token_amount_out=swap_out_one_amount_out,
+                max_price=to_wei("1000000"),
+                consume_swap_market_fee=0,
+                from_wallet=publisher_wallet,
             )
 
             tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -373,18 +361,14 @@ def test_fuzzing_pool_ocean(
             )
 
             tx = bpool.swap_exact_amount_in(
-                [
-                    erc20_address,
-                    ocean_contract.address,
-                    another_consumer_wallet.address,
-                ],
-                [
-                    swap_in_two_amount_in,
-                    1,
-                    to_wei("1000000000"),
-                    0,
-                ],
-                publisher_wallet,
+                token_in=erc20_address,
+                token_out=ocean_contract.address,
+                consume_market_fee=another_consumer_wallet.address,
+                token_amount_in=swap_in_two_amount_in,
+                min_amount_out=1,
+                max_price=to_wei("1000000000"),
+                swap_market_fee=0,
+                from_wallet=publisher_wallet,
             )
 
             tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -446,18 +430,14 @@ def test_fuzzing_pool_ocean(
             swap_out_two_balance = erc20_token.balanceOf(publisher_wallet.address)
 
             tx = bpool.swap_exact_amount_out(
-                [
-                    erc20_token.address,
-                    ocean_contract.address,
-                    another_consumer_wallet.address,
-                ],
-                [
-                    swap_out_two_balance,
-                    swap_out_two_amount_out,
-                    to_wei("10000000"),
-                    0,
-                ],
-                publisher_wallet,
+                token_in=erc20_token.address,
+                token_out=ocean_contract.address,
+                consume_market_fee=another_consumer_wallet.address,
+                max_amount_in=swap_out_two_balance,
+                token_amount_out=swap_out_two_amount_out,
+                max_price=to_wei("10000000"),
+                consume_swap_market_fee=0,
+                from_wallet=publisher_wallet,
             )
 
             tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -540,24 +520,20 @@ def test_fuzzing_pool_ocean(
             # sell all the datatokens before ending
             if final_datatoken_balance > 0 and erc20_token and bpool:
                 tx = bpool.swap_exact_amount_in(
-                    [
-                        erc20_address,
-                        ocean_contract.address,
-                        another_consumer_wallet.address,
-                    ],
-                    [
-                        min(
-                            erc20_token.balanceOf(publisher_wallet.address),
-                            to_wei(
-                                from_wei(bpool.get_max_in_ratio())
-                                * from_wei(bpool.get_balance(erc20_address))
-                            ),
+                    token_in=erc20_address,
+                    token_out=ocean_contract.address,
+                    consume_market_fee=another_consumer_wallet.address,
+                    token_amount_in=min(
+                        erc20_token.balanceOf(publisher_wallet.address),
+                        to_wei(
+                            from_wei(bpool.get_max_in_ratio())
+                            * from_wei(bpool.get_balance(erc20_address))
                         ),
-                        1,
-                        to_wei("1000000000"),
-                        0,
-                    ],
-                    publisher_wallet,
+                    ),
+                    min_amount_out=1,
+                    max_price=to_wei("1000000000"),
+                    swap_market_fee=0,
+                    from_wallet=publisher_wallet,
                 )
 
                 web3.eth.wait_for_transaction_receipt(tx)
