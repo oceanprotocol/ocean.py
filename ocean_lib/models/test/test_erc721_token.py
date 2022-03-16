@@ -5,6 +5,7 @@
 import pytest
 from web3 import exceptions
 
+from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT, ERC721Permissions
 from ocean_lib.web3_internal.constants import BLOB, ZERO_ADDRESS
@@ -41,9 +42,6 @@ def test_permissions(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
     """Tests permissions' functions."""
-    erc721_factory_address = get_address_of_type(
-        config=config, address_type=ERC721FactoryContract.CONTRACT_NAME
-    )
     erc721_nft = deploy_erc721_erc20(
         web3=web3, config=config, erc721_publisher=publisher_wallet
     )
@@ -641,3 +639,122 @@ def test_fail_transfer_function(web3, config, publisher_wallet, consumer_wallet)
         == "execution reverted: VM Exception while processing transaction: revert ERC721: transfer caller is not "
         "owner nor approved"
     )
+
+
+def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet):
+    erc721_factory_address = get_address_of_type(
+        config, ERC721FactoryContract.CONTRACT_NAME
+    )
+    erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
+
+    tx = erc721_factory.deploy_erc721_contract(
+        name="NFT to TRANSFER",
+        symbol="NFTtT",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=consumer_wallet.address,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_event = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_NFT_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert registered_event[0].event == "NFTCreated"
+    assert registered_event[0].args.admin == publisher_wallet.address
+    token_address = registered_event[0].args.newTokenAddress
+    erc721_nft = ERC721NFT(web3, token_address)
+    assert erc721_nft.contract.caller.name() == "NFT to TRANSFER"
+    assert erc721_nft.symbol() == "NFTtT"
+
+    tx = erc721_nft.safe_transfer_from(
+        publisher_wallet.address,
+        consumer_wallet.address,
+        token_id=1,
+        from_wallet=publisher_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    transfer_event = erc721_nft.get_event_log(
+        ERC721FactoryContract.EVENT_TRANSFER,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert transfer_event[0].event == "Transfer"
+    assert transfer_event[0].args["from"] == publisher_wallet.address
+    assert transfer_event[0].args.to == consumer_wallet.address
+    assert erc721_nft.balance_of(consumer_wallet.address) == 1
+    assert erc721_nft.balance_of(publisher_wallet.address) == 0
+    assert erc721_nft.is_erc20_deployer(consumer_wallet.address) is True
+    assert erc721_nft.owner_of(1) == consumer_wallet.address
+
+    # Consumer is not the additional ERC20 deployer, but will be after the NFT transfer
+    tx = erc721_factory.deploy_erc721_contract(
+        name="NFT1",
+        symbol="NFT",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_event = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_NFT_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    token_address = registered_event[0].args.newTokenAddress
+    erc721_nft = ERC721NFT(web3, token_address)
+    tx = erc721_nft.safe_transfer_from(
+        publisher_wallet.address,
+        consumer_wallet.address,
+        token_id=1,
+        from_wallet=publisher_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    transfer_event = erc721_nft.get_event_log(
+        ERC721FactoryContract.EVENT_TRANSFER,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert transfer_event[0].event == "Transfer"
+    assert transfer_event[0].args["from"] == publisher_wallet.address
+    assert transfer_event[0].args.to == consumer_wallet.address
+    assert erc721_nft.is_erc20_deployer(consumer_wallet.address)
+
+    # Creates an ERC20
+    tx_result = erc721_nft.create_erc20(
+        template_index=1,
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=consumer_wallet.address,
+        datatoken_fee_manager=consumer_wallet.address,
+        datatoken_publishing_market_address=publisher_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=to_wei(200),
+        publishing_market_fee_amount=0,
+        bytess=[b""],
+        from_wallet=consumer_wallet,
+    )
+    assert tx_result, "Failed to create ERC20 token."
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
+    registered_token_event = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert registered_token_event, "Cannot find TokenCreated event."
+    erc20_address = registered_token_event[0].args.newTokenAddress
+    erc20_token = ERC20Token(web3, erc20_address)
+
+    assert erc20_token.is_minter(publisher_wallet.address) is False
+    erc20_token.add_minter(publisher_wallet.address, consumer_wallet)
+    erc20_token.mint(publisher_wallet.address, to_wei(20), publisher_wallet)
+    assert erc20_token.balanceOf(publisher_wallet.address) == to_wei(20)
