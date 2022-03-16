@@ -8,7 +8,7 @@ import json
 import logging
 import lzma
 import os
-from typing import List, Optional, Tuple, Type, Union
+from typing import List, Optional, Tuple, Type
 
 from enforce_typing import enforce_types
 from web3 import Web3
@@ -117,26 +117,26 @@ class OceanAssets:
         erc721_factory: ERC721FactoryContract,
         erc721_nft: ERC721NFT,
         template_index: int,
-        datatoken_name: str,
-        datatoken_symbol: str,
-        datatoken_minter: str,
-        datatoken_fee_manager: str,
-        datatoken_publishing_market_address: str,
-        fee_token_address: str,
-        datatoken_cap: int,
+        name: str,
+        symbol: str,
+        minter: str,
+        fee_manager: str,
+        publishing_market_address: str,
+        publishing_market_fee_token: str,
+        cap: int,
         publishing_market_fee_amount: int,
         bytess: List[bytes],
         from_wallet: Wallet,
     ) -> str:
         tx_result = erc721_nft.create_erc20(
             template_index=template_index,
-            datatoken_name=datatoken_name,
-            datatoken_symbol=datatoken_symbol,
-            datatoken_minter=datatoken_minter,
-            datatoken_fee_manager=datatoken_fee_manager,
-            datatoken_publishing_market_address=datatoken_publishing_market_address,
-            fee_token_address=fee_token_address,
-            datatoken_cap=datatoken_cap,
+            name=name,
+            symbol=symbol,
+            minter=minter,
+            fee_manager=fee_manager,
+            publishing_market_address=publishing_market_address,
+            publishing_market_fee_token=publishing_market_fee_token,
+            cap=cap,
             publishing_market_fee_amount=publishing_market_fee_amount,
             bytess=bytess,
             from_wallet=from_wallet,
@@ -254,7 +254,7 @@ class OceanAssets:
         erc721_address: Optional[str] = None,
         erc721_name: Optional[str] = None,
         erc721_symbol: Optional[str] = None,
-        template_index: Optional[int] = 1,
+        erc721_template_index: Optional[int] = 1,
         erc721_additional_erc_deployer: Optional[str] = None,
         erc721_additional_metadata_updater: Optional[str] = None,
         erc721_uri: Optional[str] = None,
@@ -264,9 +264,9 @@ class OceanAssets:
         erc20_minters: Optional[List[str]] = None,
         erc20_fee_managers: Optional[List[str]] = None,
         erc20_publishing_market_addresses: Optional[List[str]] = None,
-        fee_token_addresses: Optional[List[str]] = None,
-        erc20_cap_values: Optional[List[int]] = None,
-        publishing_fee_amounts: Optional[List[int]] = None,
+        erc20_publishing_market_fee_tokens: Optional[List[str]] = None,
+        erc20_caps: Optional[List[int]] = None,
+        erc20_publishing_market_fee_amounts: Optional[List[int]] = None,
         erc20_bytess: Optional[List[List[bytes]]] = None,
         deployed_erc20_tokens: Optional[List[ERC20Token]] = None,
         encrypt_flag: Optional[bool] = False,
@@ -287,7 +287,7 @@ class OceanAssets:
         asset will be associated with this ERC721 token address.
         :param erc721_name: str name of ERC721 token if creating a new one
         :param erc721_symbol: str symbol of ERC721 token  if creating a new one
-        :param template_index: int template index of the ERC721 token, by default is 1.
+        :param erc721_template_index: int template index of the ERC721 token, by default is 1.
         :param erc721_additional_erc_deployer: str address of an additional ERC20 deployer.
         :param erc721_additional_metadata_updater: str address of an additional metadata updater.
         :param erc721_uri: str URL of the ERC721 token.
@@ -297,9 +297,9 @@ class OceanAssets:
         :param erc20_minters: list of minters for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_fee_managers: list of fee managers for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_publishing_market_addresses: list of publishing market addresses for ERC20 tokens if deployed_erc20_tokens is None.
-        :param fee_token_addresses: list of fee tokens for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_cap_values: list of cap values for ERC20 tokens if deployed_erc20_tokens is None.
-        :param publishing_fee_amounts: list of fee values for ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_publishing_market_fee_tokens: list of fee tokens for ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_caps: list of cap values for ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_publishing_market_fee_amounts: list of fee values for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_bytess: list of arrays of bytes for deploying ERC20 tokens, default empty (currently not used, useful for future) if deployed_erc20_tokens is None.
         :param deployed_erc20_tokens: list of ERC20 tokens which are already deployed.
         :param encrypt_flag: bool for encryption of the DDO.
@@ -326,7 +326,7 @@ class OceanAssets:
             tx_id = erc721_factory.deploy_erc721_contract(
                 name=name,
                 symbol=symbol,
-                template_index=template_index,
+                template_index=erc721_template_index,
                 additional_metadata_updater=additional_metadata_updater,
                 additional_erc20_deployer=additional_erc20_deployer,
                 token_uri=token_uri,
@@ -383,16 +383,18 @@ class OceanAssets:
                         erc721_factory=erc721_factory,
                         erc721_nft=erc721_nft,
                         template_index=erc20_templates[erc20_data_counter],
-                        datatoken_name=erc20_names[erc20_data_counter],
-                        datatoken_symbol=erc20_symbols[erc20_data_counter],
-                        datatoken_minter=erc20_minters[erc20_data_counter],
-                        datatoken_fee_manager=erc20_fee_managers[erc20_data_counter],
-                        datatoken_publishing_market_address=erc20_publishing_market_addresses[
+                        name=erc20_names[erc20_data_counter],
+                        symbol=erc20_symbols[erc20_data_counter],
+                        minter=erc20_minters[erc20_data_counter],
+                        fee_manager=erc20_fee_managers[erc20_data_counter],
+                        publishing_market_address=erc20_publishing_market_addresses[
                             erc20_data_counter
                         ],
-                        fee_token_address=fee_token_addresses[erc20_data_counter],
-                        datatoken_cap=erc20_cap_values[erc20_data_counter],
-                        publishing_market_fee_amount=publishing_fee_amounts[
+                        publishing_market_fee_token=erc20_publishing_market_fee_tokens[
+                            erc20_data_counter
+                        ],
+                        cap=erc20_caps[erc20_data_counter],
+                        publishing_market_fee_amount=erc20_publishing_market_fee_amounts[
                             erc20_data_counter
                         ],
                         bytess=erc20_bytess[erc20_data_counter],

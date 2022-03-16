@@ -99,9 +99,9 @@ asset = ocean.assets.create(
     erc20_minters=[alice_wallet.address],
     erc20_fee_managers=[alice_wallet.address],
     erc20_publishing_market_addresses=[ZERO_ADDRESS],
-    fee_token_addresses=[ocean.OCEAN_address],
-    erc20_cap_values=[ocean.to_wei(100000)],
-    publishing_fee_amounts=[0],
+    erc20_publishing_market_fee_tokens=[ocean.OCEAN_address],
+    erc20_caps=[ocean.to_wei(100000)],
+    erc20_publishing_market_fee_amounts=[0],
     erc20_bytess=[[b""]],
 )
 

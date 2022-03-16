@@ -413,9 +413,9 @@ def test_plain_asset_with_one_datatoken(
         erc20_minters=[publisher_wallet.address],
         erc20_fee_managers=[publisher_wallet.address],
         erc20_publishing_market_addresses=[ZERO_ADDRESS],
-        fee_token_addresses=[get_address_of_type(config, "Ocean")],
-        erc20_cap_values=[to_wei("0.5")],
-        publishing_fee_amounts=[0],
+        erc20_publishing_market_fee_tokens=[get_address_of_type(config, "Ocean")],
+        erc20_caps=[to_wei("0.5")],
+        erc20_publishing_market_fee_amounts=[0],
         erc20_bytess=[[b""]],
     )
     assert ddo, "The asset is not created."
@@ -470,12 +470,12 @@ def test_plain_asset_multiple_datatokens(
         erc20_minters=[publisher_wallet.address, publisher_wallet.address],
         erc20_fee_managers=[publisher_wallet.address, publisher_wallet.address],
         erc20_publishing_market_addresses=[ZERO_ADDRESS, ZERO_ADDRESS],
-        fee_token_addresses=[
+        erc20_publishing_market_fee_tokens=[
             get_address_of_type(config, "Ocean"),
             get_address_of_type(config, "Ocean"),
         ],
-        erc20_cap_values=[to_wei("0.5"), to_wei("0.5")],
-        publishing_fee_amounts=[0, 0],
+        erc20_caps=[to_wei("0.5"), to_wei("0.5")],
+        erc20_publishing_market_fee_amounts=[0, 0],
         erc20_bytess=[[b""], [b""]],
     )
     assert ddo, "The asset is not created."

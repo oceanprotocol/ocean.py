@@ -9,9 +9,7 @@ from enforce_typing import enforce_types
 
 from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.structures.abi_tuples import (
-    MetadataProof,
-)
+from ocean_lib.structures.abi_tuples import MetadataProof
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -118,29 +116,29 @@ class ERC721NFT(ContractBase):
     def create_erc20(
         self,
         template_index: int,
-        datatoken_name: str,
-        datatoken_symbol: str,
-        datatoken_minter: str,
-        datatoken_fee_manager: str,
-        datatoken_publishing_market_address: str,
-        fee_token_address: str,
-        datatoken_cap: int,
+        name: str,
+        symbol: str,
+        minter: str,
+        fee_manager: str,
+        publishing_market_address: str,
+        publishing_market_fee_token: str,
+        cap: int,
         publishing_market_fee_amount: int,
         bytess: List[bytes],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "createERC20",
+            "c",
             (
                 template_index,
-                [datatoken_name, datatoken_symbol],
+                [name, symbol],
                 [
-                    datatoken_minter,
-                    datatoken_fee_manager,
-                    datatoken_publishing_market_address,
-                    fee_token_address,
+                    minter,
+                    fee_manager,
+                    publishing_market_address,
+                    publishing_market_fee_token,
                 ],
-                [datatoken_cap, publishing_market_fee_amount],
+                [cap, publishing_market_fee_amount],
                 bytess,
             ),
             from_wallet,
@@ -267,13 +265,13 @@ class ERC721NFT(ContractBase):
     def create_datatoken(
         self,
         template_index: int,
-        datatoken_name: str,
-        datatoken_symbol: str,
-        datatoken_minter: str,
-        datatoken_fee_manager: str,
-        datatoken_publishing_market_address: str,
-        fee_token_address: str,
-        datatoken_cap: int,
+        name: str,
+        symbol: str,
+        minter: str,
+        fee_manager: str,
+        publishing_market_address: str,
+        publishing_market_fee_token: str,
+        cap: int,
         publishing_market_fee_amount: int,
         bytess: List[bytes],
         from_wallet: Wallet,
@@ -282,13 +280,13 @@ class ERC721NFT(ContractBase):
 
         tx_id = self.create_erc20(
             template_index=template_index,
-            datatoken_name=datatoken_name,
-            datatoken_symbol=datatoken_symbol,
-            datatoken_minter=datatoken_minter,
-            datatoken_fee_manager=datatoken_fee_manager,
-            datatoken_publishing_market_address=datatoken_publishing_market_address,
-            fee_token_address=fee_token_address,
-            datatoken_cap=datatoken_cap,
+            name=name,
+            symbol=symbol,
+            minter=minter,
+            fee_manager=fee_manager,
+            publishing_market_address=publishing_market_address,
+            publishing_market_fee_token=publishing_market_fee_token,
+            cap=cap,
             publishing_market_fee_amount=publishing_market_fee_amount,
             bytess=bytess,
             from_wallet=from_wallet,

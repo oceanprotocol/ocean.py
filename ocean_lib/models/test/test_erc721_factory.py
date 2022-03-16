@@ -10,9 +10,7 @@ from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.structures.abi_tuples import (
-    OrderData,
-)
+from ocean_lib.structures.abi_tuples import OrderData
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -111,13 +109,13 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
     tx_result = erc721_nft.create_erc20(
         template_index=1,
-        datatoken_name="ERC20DT1",
-        datatoken_symbol="ERC20DT1Symbol",
-        datatoken_minter=publisher_wallet.address,
-        datatoken_fee_manager=consumer_wallet.address,
-        datatoken_publishing_market_address=publisher_wallet.address,
-        fee_token_address=ZERO_ADDRESS,
-        datatoken_cap=to_wei("0.5"),
+        name="ERC20DT1",
+        symbol="ERC20DT1Symbol",
+        minter=publisher_wallet.address,
+        fee_manager=consumer_wallet.address,
+        publishing_market_address=publisher_wallet.address,
+        publishing_market_fee_token=ZERO_ADDRESS,
+        cap=to_wei("0.5"),
         publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
@@ -289,17 +287,15 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     fixed_rate_address = get_address_of_type(config, "FixedPrice")
 
     # Create ERC20 data token for fees.
-    fee_address = "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9"
-
     tx = erc721_nft.create_erc20(
         template_index=1,
-        datatoken_name="ERC20DT1P",
-        datatoken_symbol="ERC20DT1SymbolP",
-        datatoken_minter=publisher_wallet.address,
-        datatoken_fee_manager=consumer_wallet.address,
-        datatoken_publishing_market_address=publisher_wallet.address,
-        fee_token_address=ZERO_ADDRESS,
-        datatoken_cap=to_wei("0.5"),
+        name="ERC20DT1P",
+        symbol="ERC20DT1SymbolP",
+        minter=publisher_wallet.address,
+        fee_manager=consumer_wallet.address,
+        publishing_market_address=publisher_wallet.address,
+        publishing_market_fee_token=ZERO_ADDRESS,
+        cap=to_wei("0.5"),
         publishing_market_fee_amount=to_wei("0.0005"),
         bytess=[b""],
         from_wallet=publisher_wallet,
@@ -543,13 +539,13 @@ def test_start_multiple_order(
     erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
     tx_result = erc721_nft.create_erc20(
         template_index=1,
-        datatoken_name="ERC20DT1",
-        datatoken_symbol="ERC20DT1Symbol",
-        datatoken_minter=publisher_wallet.address,
-        datatoken_fee_manager=consumer_wallet.address,
-        datatoken_publishing_market_address=publisher_wallet.address,
-        fee_token_address=ZERO_ADDRESS,
-        datatoken_cap=to_wei(2),
+        name="ERC20DT1",
+        symbol="ERC20DT1Symbol",
+        minter=publisher_wallet.address,
+        fee_manager=consumer_wallet.address,
+        publishing_market_address=publisher_wallet.address,
+        publishing_market_fee_token=ZERO_ADDRESS,
+        cap=to_wei(2),
         publishing_market_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
@@ -719,13 +715,13 @@ def test_fail_create_erc20(
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_nft.create_erc20(
             template_index=0,
-            datatoken_name="ERC20DT1",
-            datatoken_symbol="ERC20DT1Symbol",
-            datatoken_minter=publisher_wallet.address,
-            datatoken_fee_manager=consumer_wallet.address,
-            datatoken_publishing_market_address=publisher_wallet.address,
-            fee_token_address=ZERO_ADDRESS,
-            datatoken_cap=to_wei("0.5"),
+            name="ERC20DT1",
+            symbol="ERC20DT1Symbol",
+            minter=publisher_wallet.address,
+            fee_manager=consumer_wallet.address,
+            publishing_market_address=publisher_wallet.address,
+            publishing_market_fee_token=ZERO_ADDRESS,
+            cap=to_wei("0.5"),
             publishing_market_fee_amount=0,
             bytess=[b""],
             from_wallet=consumer_wallet,
@@ -740,13 +736,13 @@ def test_fail_create_erc20(
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_nft.create_erc20(
             template_index=3,
-            datatoken_name="ERC20DT1",
-            datatoken_symbol="ERC20DT1Symbol",
-            datatoken_minter=publisher_wallet.address,
-            datatoken_fee_manager=consumer_wallet.address,
-            datatoken_publishing_market_address=publisher_wallet.address,
-            fee_token_address=ZERO_ADDRESS,
-            datatoken_cap=to_wei("0.5"),
+            name="ERC20DT1",
+            symbol="ERC20DT1Symbol",
+            minter=publisher_wallet.address,
+            fee_manager=consumer_wallet.address,
+            publishing_market_address=publisher_wallet.address,
+            publishing_market_fee_token=ZERO_ADDRESS,
+            cap=to_wei("0.5"),
             publishing_market_fee_amount=0,
             bytess=[b""],
             from_wallet=consumer_wallet,
@@ -762,13 +758,13 @@ def test_fail_create_erc20(
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_nft.create_erc20(
             template_index=1,
-            datatoken_name="ERC20DT1",
-            datatoken_symbol="ERC20DT1Symbol",
-            datatoken_minter=publisher_wallet.address,
-            datatoken_fee_manager=consumer_wallet.address,
-            datatoken_publishing_market_address=publisher_wallet.address,
-            fee_token_address=ZERO_ADDRESS,
-            datatoken_cap=to_wei("0.5"),
+            name="ERC20DT1",
+            symbol="ERC20DT1Symbol",
+            minter=publisher_wallet.address,
+            fee_manager=consumer_wallet.address,
+            publishing_market_address=publisher_wallet.address,
+            publishing_market_fee_token=ZERO_ADDRESS,
+            cap=to_wei("0.5"),
             publishing_market_fee_amount=0,
             bytess=[b""],
             from_wallet=another_consumer_wallet,

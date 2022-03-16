@@ -128,9 +128,9 @@ def create_asset(ocean, publisher, config, metadata=None, files=None):
         erc20_minters=[publisher.address],
         erc20_fee_managers=[publisher.address],
         erc20_publishing_market_addresses=[ZERO_ADDRESS],
-        fee_token_addresses=[get_address_of_type(config, "Ocean")],
-        erc20_cap_values=[ocean.to_wei(100)],
-        publishing_fee_amounts=[0],
+        erc20_publishing_market_fee_tokens=[get_address_of_type(config, "Ocean")],
+        erc20_caps=[ocean.to_wei(100)],
+        erc20_publishing_market_fee_amounts=[0],
         erc20_bytess=[[b""]],
     )
 
