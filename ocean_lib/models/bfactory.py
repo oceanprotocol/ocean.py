@@ -26,7 +26,7 @@ class BFactory(ContractBase):
         basetoken_decimals: int,
         vesting_amount: int,
         vesting_blocks: int,
-        initial_liq: int,
+        basetoken_amount: int,
         lp_swap_fee: int,
         market_swap_fee: int,
         controller: str,
@@ -40,7 +40,13 @@ class BFactory(ContractBase):
             "newBPool",
             (
                 [datatoken_address, basetoken_address],
-                [rate, basetoken_decimals, vesting_amount, vesting_blocks, initial_liq],
+                [
+                    rate,
+                    basetoken_decimals,
+                    vesting_amount,
+                    vesting_blocks,
+                    basetoken_amount,
+                ],
                 [lp_swap_fee, market_swap_fee],
                 [
                     controller,

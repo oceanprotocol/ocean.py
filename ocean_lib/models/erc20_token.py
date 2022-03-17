@@ -86,7 +86,7 @@ class ERC20Token(ContractBase):
         basetoken_decimals: int,
         vesting_amount: int,
         vesting_blocks: int,
-        initial_liq: int,
+        basetoken_amount: int,
         lp_swap_fee: int,
         market_swap_fee: int,
         ss_contract: str,
@@ -100,7 +100,13 @@ class ERC20Token(ContractBase):
         return self.send_transaction(
             "deployPool",
             (
-                [rate, basetoken_decimals, vesting_amount, vesting_blocks, initial_liq],
+                [
+                    rate,
+                    basetoken_decimals,
+                    vesting_amount,
+                    vesting_blocks,
+                    basetoken_amount,
+                ],
                 [lp_swap_fee, market_swap_fee],
                 [
                     ss_contract,
