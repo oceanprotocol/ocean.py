@@ -339,7 +339,7 @@ class ERC20Token(ContractBase):
             "setPaymentCollector", (fee_collector_address,), from_wallet
         )
 
-    def get_publish_market_fee(self) -> tuple:
+    def get_publishing_market_fee(self) -> tuple:
         return self.contract.caller.getPublishingMarketFee()
 
     def set_publishing_market_fee(
