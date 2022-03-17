@@ -29,7 +29,6 @@ def test_side_staking(
 ):
     swap_fee = int(1e15)
     swap_market_fee = int(1e15)
-    vested_blocks = 2500000
     initial_ocean_liquidity = to_wei("10")
 
     side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
@@ -79,7 +78,7 @@ def test_side_staking(
         rate=to_wei(1),
         basetoken_decimals=ocean_token.decimals(),
         vesting_amount=to_wei("0.5"),
-        vested_blocks=2500000,
+        vesting_blocks=2500000,
         initial_liq=initial_ocean_liquidity,
         lp_swap_fee=swap_fee,
         market_swap_fee=swap_market_fee,

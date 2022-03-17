@@ -71,7 +71,7 @@ def asset_displayed_on_sale(ocean: Ocean, wallet: Wallet):
         base_token=OCEAN_token,
         rate=ocean.to_wei(1),
         vesting_amount=ocean.to_wei(10000),
-        vested_blocks=2500000,
+        vesting_blocks=2500000,
         initial_liq=ocean.to_wei(2000),
         lp_swap_fee=ocean.to_wei("0.01"),
         market_swap_fee=ocean.to_wei("0.01"),

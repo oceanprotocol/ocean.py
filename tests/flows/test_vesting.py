@@ -117,7 +117,7 @@ def test_main(
         rate=to_wei(1),
         basetoken_decimals=ocean_contract.decimals(),
         vesting_amount=initial_ocean_liq // 100 * 9,
-        vested_blocks=2500000,
+        vesting_blocks=2500000,
         initial_liq=initial_ocean_liq,
         lp_swap_fee=to_wei("0.001"),
         market_swap_fee=to_wei("0.001"),

@@ -2,8 +2,6 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import List
-
 from enforce_typing import enforce_types
 
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -27,7 +25,7 @@ class BFactory(ContractBase):
         rate: int,
         basetoken_decimals: int,
         vesting_amount: int,
-        vested_blocks: int,
+        vesting_blocks: int,
         initial_liq: int,
         lp_swap_fee: int,
         market_swap_fee: int,
@@ -42,7 +40,7 @@ class BFactory(ContractBase):
             "newBPool",
             (
                 [datatoken_address, basetoken_address],
-                [rate, basetoken_decimals, vesting_amount, vested_blocks, initial_liq],
+                [rate, basetoken_decimals, vesting_amount, vesting_blocks, initial_liq],
                 [lp_swap_fee, market_swap_fee],
                 [
                     controller,

@@ -228,11 +228,6 @@ class Ocean:
             self.web3, get_address_of_type(self.config, "FixedPrice")
         )
 
-    @property
-    @enforce_types
-    def dispenser(self):
-        return Dispenser(self.web3, get_address_of_type(self.config, "Dispenser"))
-
     @enforce_types
     def create_fixed_rate(
         self,
@@ -280,7 +275,7 @@ class Ocean:
         base_token: ERC20Token,
         rate: int,
         vesting_amount: int,
-        vested_blocks: int,
+        vesting_blocks: int,
         initial_liq: int,
         lp_swap_fee: int,
         market_swap_fee: int,
@@ -294,7 +289,7 @@ class Ocean:
             rate=rate,
             basetoken_decimals=base_token.decimals(),
             vesting_amount=vesting_amount,
-            vested_blocks=vested_blocks,
+            vesting_blocks=vesting_blocks,
             initial_liq=initial_liq,
             lp_swap_fee=lp_swap_fee,
             market_swap_fee=market_swap_fee,
