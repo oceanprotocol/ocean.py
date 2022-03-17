@@ -128,7 +128,7 @@ class ERC721NFT(ContractBase):
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "c",
+            "createERC20",
             (
                 template_index,
                 [name, symbol],
