@@ -241,11 +241,11 @@ class Ocean:
 
         tx = erc20_token.create_fixed_rate(
             fixed_price_address=fixed_price_address,
-            basetoken_address=base_token.address,
+            base_token_address=base_token.address,
             owner=from_wallet.address,
             market_fee_collector=from_wallet.address,
             allowed_swapper=ZERO_ADDRESS,
-            basetoken_decimals=base_token.decimals(),
+            base_token_decimals=base_token.decimals(),
             datatoken_decimals=erc20_token.decimals(),
             fixed_rate=self.to_wei(1),
             market_fee=int(1e15),
@@ -276,7 +276,7 @@ class Ocean:
         rate: int,
         vesting_amount: int,
         vesting_blocks: int,
-        basetoken_amount: int,
+        base_token_amount: int,
         lp_swap_fee: int,
         market_swap_fee: int,
         from_wallet: Wallet,
@@ -287,15 +287,15 @@ class Ocean:
 
         tx = erc20_token.deploy_pool(
             rate=rate,
-            basetoken_decimals=base_token.decimals(),
+            base_token_decimals=base_token.decimals(),
             vesting_amount=vesting_amount,
             vesting_blocks=vesting_blocks,
-            basetoken_amount=basetoken_amount,
+            base_token_amount=base_token_amount,
             lp_swap_fee=lp_swap_fee,
             market_swap_fee=market_swap_fee,
             ss_contract=get_address_of_type(self.config, "Staking"),
-            basetoken_address=base_token.address,
-            basetoken_sender=from_wallet.address,
+            base_token_address=base_token.address,
+            base_token_sender=from_wallet.address,
             publisher_address=from_wallet.address,
             market_fee_collector=get_address_of_type(
                 self.config, "OPFCommunityFeeCollector"

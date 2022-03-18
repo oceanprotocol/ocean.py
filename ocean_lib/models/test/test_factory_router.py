@@ -84,15 +84,15 @@ def test_buy_dt_batch(
         datatoken_publish_market_fee_amount=0,
         datatoken_bytess=[b""],
         pool_rate=to_wei("2"),
-        pool_basetoken_decimals=ocean_contract.decimals(),
+        pool_base_token_decimals=ocean_contract.decimals(),
         pool_vesting_amount=to_wei("10000"),
         pool_vesting_blocks=2500000,
-        pool_basetoken_amount=to_wei("2"),
+        pool_base_token_amount=to_wei("2"),
         pool_lp_swap_fee=to_wei("0.001"),
         pool_publish_market_swap_fee=to_wei("0.001"),
         pool_side_staking=get_address_of_type(config, "Staking"),
-        pool_basetoken=get_address_of_type(config, "Ocean"),
-        pool_basetoken_sender=get_address_of_type(
+        pool_base_token=get_address_of_type(config, "Ocean"),
+        pool_base_token_sender=get_address_of_type(
             config, ERC721FactoryContract.CONTRACT_NAME
         ),
         pool_publisher=factory_deployer_wallet.address,
@@ -131,15 +131,15 @@ def test_buy_dt_batch(
         datatoken_publish_market_fee_amount=0,
         datatoken_bytess=[b""],
         pool_rate=to_wei("1"),
-        pool_basetoken_decimals=ocean_contract.decimals(),
+        pool_base_token_decimals=ocean_contract.decimals(),
         pool_vesting_amount=to_wei("10000"),
         pool_vesting_blocks=2500000,
-        pool_basetoken_amount=to_wei("2"),
+        pool_base_token_amount=to_wei("2"),
         pool_lp_swap_fee=to_wei("0.001"),
         pool_publish_market_swap_fee=to_wei("0.001"),
         pool_side_staking=get_address_of_type(config, "Staking"),
-        pool_basetoken=get_address_of_type(config, "Ocean"),
-        pool_basetoken_sender=get_address_of_type(
+        pool_base_token=get_address_of_type(config, "Ocean"),
+        pool_base_token_sender=get_address_of_type(
             config, ERC721FactoryContract.CONTRACT_NAME
         ),
         pool_publisher=factory_deployer_wallet.address,
@@ -240,15 +240,15 @@ def test_stake_batch(
         datatoken_publish_market_fee_amount=0,
         datatoken_bytess=[b""],
         pool_rate=to_wei("2"),
-        pool_basetoken_decimals=ocean_contract.decimals(),
+        pool_base_token_decimals=ocean_contract.decimals(),
         pool_vesting_amount=to_wei("10000"),
         pool_vesting_blocks=2500000,
-        pool_basetoken_amount=to_wei("2"),
+        pool_base_token_amount=to_wei("2"),
         pool_lp_swap_fee=to_wei("0.001"),
         pool_publish_market_swap_fee=to_wei("0.001"),
         pool_side_staking=get_address_of_type(config, "Staking"),
-        pool_basetoken=get_address_of_type(config, "Ocean"),
-        pool_basetoken_sender=get_address_of_type(
+        pool_base_token=get_address_of_type(config, "Ocean"),
+        pool_base_token_sender=get_address_of_type(
             config, ERC721FactoryContract.CONTRACT_NAME
         ),
         pool_publisher=factory_deployer_wallet.address,
@@ -287,15 +287,15 @@ def test_stake_batch(
         datatoken_publish_market_fee_amount=0,
         datatoken_bytess=[b""],
         pool_rate=to_wei("1"),
-        pool_basetoken_decimals=ocean_contract.decimals(),
+        pool_base_token_decimals=ocean_contract.decimals(),
         pool_vesting_amount=to_wei("10000"),
         pool_vesting_blocks=2500000,
-        pool_basetoken_amount=to_wei("2"),
+        pool_base_token_amount=to_wei("2"),
         pool_lp_swap_fee=to_wei("0.001"),
         pool_publish_market_swap_fee=to_wei("0.001"),
         pool_side_staking=get_address_of_type(config, "Staking"),
-        pool_basetoken=get_address_of_type(config, "Ocean"),
-        pool_basetoken_sender=get_address_of_type(
+        pool_base_token=get_address_of_type(config, "Ocean"),
+        pool_base_token_sender=get_address_of_type(
             config, ERC721FactoryContract.CONTRACT_NAME
         ),
         pool_publisher=factory_deployer_wallet.address,

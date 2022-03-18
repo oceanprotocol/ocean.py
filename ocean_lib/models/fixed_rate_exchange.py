@@ -110,7 +110,7 @@ class FixedRateExchange(ContractBase):
             base_token, datatoken, exchange_owner
         )
 
-    def get_basetoken_out_price(self, exchange_id: bytes, dt_amount: int) -> int:
+    def get_base_token_out_price(self, exchange_id: bytes, dt_amount: int) -> int:
         return self.contract.caller.getBaseTokenOutPrice(exchange_id, dt_amount)
 
     def calc_base_in_given_out_dt(
