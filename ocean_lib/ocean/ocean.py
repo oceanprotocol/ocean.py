@@ -248,7 +248,7 @@ class Ocean:
             base_token_decimals=base_token.decimals(),
             datatoken_decimals=erc20_token.decimals(),
             fixed_rate=self.to_wei(1),
-            market_fee=int(1e15),
+            publish_market_fee=int(1e15),
             with_mint=0,
             from_wallet=from_wallet,
         )

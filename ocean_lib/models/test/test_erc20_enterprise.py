@@ -194,7 +194,7 @@ def test_buy_from_fre_and_order(
         base_token_decimals=18,
         datatoken_decimals=18,
         fixed_rate=to_wei(1),
-        market_fee=to_wei("0.1"),
+        publish_market_fee=to_wei("0.1"),
         with_mint=1,
         from_wallet=publisher_wallet,
     )

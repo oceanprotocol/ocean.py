@@ -130,7 +130,7 @@ class ERC20Token(ContractBase):
         base_token_decimals: int,
         datatoken_decimals: int,
         fixed_rate: int,
-        market_fee: int,
+        publish_market_fee: int,
         with_mint: int,
         from_wallet: Wallet,
     ) -> str:
@@ -148,7 +148,7 @@ class ERC20Token(ContractBase):
                     base_token_decimals,
                     datatoken_decimals,
                     fixed_rate,
-                    market_fee,
+                    publish_market_fee,
                     with_mint,
                 ],
             ),
