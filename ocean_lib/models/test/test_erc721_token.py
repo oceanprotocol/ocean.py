@@ -5,9 +5,14 @@
 import pytest
 from web3 import exceptions
 
-from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.bpool import BPool
+from ocean_lib.models.erc20_token import ERC20Token, MockERC20
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT, ERC721Permissions
+from ocean_lib.models.fixed_rate_exchange import (
+    FixedRateExchange,
+    FixedRateExchangeDetails,
+)
 from ocean_lib.web3_internal.constants import BLOB, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
@@ -641,7 +646,7 @@ def test_fail_transfer_function(web3, config, publisher_wallet, consumer_wallet)
     )
 
 
-def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet):
+def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet, factory_router):
     erc721_factory_address = get_address_of_type(
         config, ERC721FactoryContract.CONTRACT_NAME
     )
@@ -756,5 +761,190 @@ def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet):
 
     assert erc20_token.is_minter(publisher_wallet.address) is False
     erc20_token.add_minter(publisher_wallet.address, consumer_wallet)
-    erc20_token.mint(publisher_wallet.address, to_wei(20), publisher_wallet)
-    assert erc20_token.balanceOf(publisher_wallet.address) == to_wei(20)
+    assert (
+        erc20_token.get_permissions(publisher_wallet.address)[0] is True
+    )  # publisher is minter now
+
+    _, base_token = deploy_erc721_erc20(
+        web3, config, consumer_wallet, consumer_wallet, cap=to_wei(250)
+    )
+
+    # Make consumer the publish_market_fee_address instead of publisher
+    tx_result = erc20_token.set_publishing_market_fee(
+        consumer_wallet.address, base_token.address, to_wei(1), publisher_wallet
+    )
+
+    assert tx_result, "Failed to set the publish fee."
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
+    set_publishing_fee_event = erc20_token.get_event_log(
+        ERC20Token.EVENT_PUBLISH_MARKET_FEE_CHANGED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert set_publishing_fee_event, "Cannot find PublishMarketFeeChanged event."
+    publish_fees = erc20_token.get_publishing_market_fee()
+    assert publish_fees[0] == consumer_wallet.address
+    assert publish_fees[1] == base_token.address
+    assert publish_fees[2] == to_wei(1)
+
+    # The newest owner of the NFT (consumer wallet) has ERC20 deployer role & can deploy a pool, add/swap/remove liquidity
+    base_token.mint(consumer_wallet.address, to_wei(200), consumer_wallet)
+    assert base_token.balanceOf(consumer_wallet.address) == to_wei(200)
+    base_token.approve(factory_router.address, to_wei(10000), consumer_wallet)
+    tx = erc20_token.deploy_pool(
+        rate=to_wei(1),
+        basetoken_decimals=base_token.decimals(),
+        vesting_amount=to_wei(10),
+        vested_blocks=2500000,
+        initial_liq=to_wei(100),
+        lp_swap_fee=to_wei("0.003"),
+        market_swap_fee=to_wei("0.001"),
+        ss_contract=get_address_of_type(config, "Staking"),
+        basetoken_address=base_token.address,
+        basetoken_sender=consumer_wallet.address,
+        publisher_address=consumer_wallet.address,
+        market_fee_collector=consumer_wallet.address,
+        pool_template_address=get_address_of_type(config, "poolTemplate"),
+        from_wallet=consumer_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    pool_event = factory_router.get_event_log(
+        ERC721FactoryContract.EVENT_NEW_POOL,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert pool_event[0].event == "NewPool"
+    bpool_address = pool_event[0].args.poolAddress
+    bpool = BPool(web3, bpool_address)
+    assert bpool.is_finalized() is True
+    assert bpool.opc_fee() == to_wei("0.001")
+    assert bpool.get_swap_fee() == to_wei("0.003")
+    assert bpool.community_fee(base_token.address) == 0
+    assert bpool.community_fee(erc20_token.address) == 0
+    assert bpool.publish_market_fee(base_token.address) == 0
+    assert bpool.publish_market_fee(erc20_token.address) == 0
+
+    base_token.approve(bpool_address, to_wei(1000000), consumer_wallet)
+    tx = bpool.join_swap_extern_amount_in(
+        token_amount_in=to_wei(10),
+        min_pool_amount_out=to_wei(1),
+        from_wallet=consumer_wallet,
+    )
+
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    join_event = bpool.get_event_log(
+        BPool.EVENT_LOG_JOIN,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert join_event[0].args.caller == consumer_wallet.address
+    assert join_event[0].args.tokenIn == base_token.address
+    assert join_event[0].args.tokenAmountIn == to_wei(10)
+
+    bpt_event = bpool.get_event_log(
+        BPool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
+    )
+    assert bpt_event[0].args.bptAmount  # amount in pool shares
+    assert bpool.get_balance(base_token.address) == to_wei(100) + to_wei(10)
+
+    amount_out = bpool.get_amount_out_exact_in(
+        base_token.address, erc20_token.address, to_wei(20), to_wei("0.01")
+    )[0]
+    tx = bpool.swap_exact_amount_in(
+        token_in=base_token.address,
+        token_out=erc20_token.address,
+        consume_market_fee=consumer_wallet.address,
+        token_amount_in=to_wei(20),
+        min_amount_out=to_wei(5),
+        max_price=to_wei(1000000),
+        swap_market_fee=to_wei("0.01"),
+        from_wallet=consumer_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    swap_event = bpool.get_event_log(
+        BPool.EVENT_LOG_SWAP,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    assert swap_event[0].args.caller == consumer_wallet.address
+    assert swap_event[0].args.tokenIn == base_token.address
+    assert swap_event[0].args.tokenAmountIn == to_wei(20)
+    assert swap_event[0].args.tokenAmountOut == amount_out
+
+    tx = bpool.exit_swap_pool_amount_in(
+        pool_amount_in=bpt_event[0].args.bptAmount,
+        min_amount_out=to_wei(10),
+        from_wallet=consumer_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    exit_event = bpool.get_event_log(
+        BPool.EVENT_LOG_EXIT,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert exit_event[0].args.caller == consumer_wallet.address
+    assert exit_event[0].args.tokenOut == base_token.address
+
+    bpt_event = bpool.get_event_log(
+        BPool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
+    )
+    assert bpt_event[0].args.bptAmount  # amount in pool shares
+
+    # The newest owner of the NFT (consumer wallet) has ERC20 deployer role & can deploy a FRE, collect BT/DT, buy/sell DT
+    fixed_exchange = FixedRateExchange(web3, get_address_of_type(config, "FixedPrice"))
+    number_of_exchanges = fixed_exchange.get_number_of_exchanges()
+    tx = erc20_token.create_fixed_rate(
+        fixed_price_address=fixed_exchange.address,
+        basetoken_address=base_token.address,
+        owner=consumer_wallet.address,
+        market_fee_collector=consumer_wallet.address,
+        allowed_swapper=ZERO_ADDRESS,
+        basetoken_decimals=18,
+        datatoken_decimals=18,
+        fixed_rate=to_wei(1),
+        market_fee=to_wei("0.001"),
+        with_mint=0,
+        from_wallet=consumer_wallet,
+    )
+
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+
+    fre_event = erc20_token.get_event_log(
+        event_name=ERC721FactoryContract.EVENT_NEW_FIXED_RATE,
+        from_block=tx_receipt.blockNumber,
+        to_block=web3.eth.block_number,
+        filters=None,
+    )
+
+    assert fixed_exchange.get_number_of_exchanges() == number_of_exchanges + 1
+    assert fre_event[0].args.owner == consumer_wallet.address
+
+    exchange_id = fre_event[0].args.exchangeId
+
+    # Exchange should have supply and fees setup
+    exchange_details = fixed_exchange.get_exchange(exchange_id)
+    assert (
+        exchange_details[FixedRateExchangeDetails.EXCHANGE_OWNER]
+        == consumer_wallet.address
+    )
+    assert exchange_details[FixedRateExchangeDetails.DATATOKEN] == erc20_token.address
+    assert (
+        exchange_details[FixedRateExchangeDetails.DT_DECIMALS] == erc20_token.decimals()
+    )
+    assert exchange_details[FixedRateExchangeDetails.BASE_TOKEN] == base_token.address
+    assert (
+        exchange_details[FixedRateExchangeDetails.BT_DECIMALS] == base_token.decimals()
+    )
+    assert exchange_details[FixedRateExchangeDetails.FIXED_RATE] == to_wei(1)
+    assert exchange_details[FixedRateExchangeDetails.ACTIVE] is True
+    assert exchange_details[FixedRateExchangeDetails.DT_SUPPLY] == 0
+    assert exchange_details[FixedRateExchangeDetails.BT_SUPPLY] == 0
+    assert exchange_details[FixedRateExchangeDetails.DT_BALANCE] == 0
+    assert exchange_details[FixedRateExchangeDetails.BT_BALANCE] == 0
+    assert exchange_details[FixedRateExchangeDetails.WITH_MINT] is False

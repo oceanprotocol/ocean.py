@@ -12,7 +12,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 class RolesERC20(IntEnum):
     MINTER = 0
-    FEE_MANAGER = 1
+    PAYMENT_COLLECTOR = 1
 
 
 @enforce_types
@@ -27,7 +27,6 @@ class ERC20Token(ContractBase):
     EVENT_ORDER_REUSED = "OrderReused"
     EVENT_ORDER_EXECUTED = "OrderExecuted"
     EVENT_PUBLISH_MARKET_FEE_CHANGED = "PublishMarketFeeChanged"
-    EVENT_PUBLISH_MARKET_FEE = "PublishMarketFee"
     EVENT_CONSUME_MARKET_FEE = "ConsumeMarketFee"
     EVENT_PROVIDER_FEE = "ProviderFee"
     EVENT_MINTER_PROPOSED = "MinterProposed"
