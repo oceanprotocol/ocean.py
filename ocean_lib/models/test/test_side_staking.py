@@ -86,7 +86,9 @@ def test_side_staking(
         base_token_address=ocean_token.address,
         base_token_sender=consumer_wallet.address,
         publisher_address=consumer_wallet.address,
-        market_fee_collector=get_address_of_type(config, "OPFCommunityFeeCollector"),
+        publish_market_fee_collector=get_address_of_type(
+            config, "OPFCommunityFeeCollector"
+        ),
         pool_template_address=get_address_of_type(config, "poolTemplate"),
         from_wallet=consumer_wallet,
     )

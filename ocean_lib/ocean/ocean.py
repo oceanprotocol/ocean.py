@@ -243,7 +243,7 @@ class Ocean:
             fixed_price_address=fixed_price_address,
             base_token_address=base_token.address,
             owner=from_wallet.address,
-            market_fee_collector=from_wallet.address,
+            publish_market_fee_collector=from_wallet.address,
             allowed_swapper=ZERO_ADDRESS,
             base_token_decimals=base_token.decimals(),
             datatoken_decimals=erc20_token.decimals(),
@@ -297,7 +297,7 @@ class Ocean:
             base_token_address=base_token.address,
             base_token_sender=from_wallet.address,
             publisher_address=from_wallet.address,
-            market_fee_collector=get_address_of_type(
+            publish_market_fee_collector=get_address_of_type(
                 self.config, "OPFCommunityFeeCollector"
             ),
             pool_template_address=get_address_of_type(self.config, "poolTemplate"),
