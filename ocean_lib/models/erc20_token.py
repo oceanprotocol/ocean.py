@@ -6,6 +6,7 @@ from enum import IntEnum
 from typing import List, Optional, Tuple
 
 from enforce_typing import enforce_types
+
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -119,7 +120,6 @@ class ERC20Token(ContractBase):
         basetoken_address: str,
         owner: str,
         market_fee_collector: str,
-        allowed_swapper: str,
         basetoken_decimals: int,
         datatoken_decimals: int,
         fixed_rate: int,
@@ -131,7 +131,7 @@ class ERC20Token(ContractBase):
             "createFixedRate",
             (
                 fixed_price_address,
-                [basetoken_address, owner, market_fee_collector, allowed_swapper],
+                [basetoken_address, owner, market_fee_collector],
                 [
                     basetoken_decimals,
                     datatoken_decimals,
