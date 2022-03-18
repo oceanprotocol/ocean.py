@@ -204,7 +204,7 @@ def test_pool_ocean(
         token_amount_in=to_wei("0.1"),
         min_amount_out=to_wei("0.0001"),
         max_price=to_wei("100"),
-        swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -242,7 +242,7 @@ def test_pool_ocean(
         max_amount_in=to_wei(10),
         token_amount_out=to_wei(1),
         max_price=to_wei(100),
-        consume_swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -292,7 +292,7 @@ def test_pool_ocean(
         token_amount_in=to_wei("0.1"),
         min_amount_out=to_wei("0.0001"),
         max_price=to_wei("100"),
-        swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -343,7 +343,7 @@ def test_pool_ocean(
         max_amount_in=to_wei("0.1"),
         token_amount_out=to_wei("0.0001"),
         max_price=to_wei(100),
-        consume_swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -737,7 +737,7 @@ def test_pool_dai(
         token_amount_in=to_wei("0.1"),
         min_amount_out=to_wei("0.0001"),
         max_price=to_wei("100"),
-        swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -774,7 +774,7 @@ def test_pool_dai(
         max_amount_in=to_wei(10),
         token_amount_out=to_wei(1),
         max_price=to_wei(100),
-        consume_swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -822,7 +822,7 @@ def test_pool_dai(
         token_amount_in=to_wei("0.1"),
         min_amount_out=to_wei("0.0001"),
         max_price=to_wei("100"),
-        swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -873,7 +873,7 @@ def test_pool_dai(
         max_amount_in=to_wei("0.1"),
         token_amount_out=to_wei("0.0001"),
         max_price=to_wei(100),
-        consume_swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -1270,7 +1270,7 @@ def test_pool_usdc(
         token_amount_in=int(1e7),
         min_amount_out=to_wei(1),
         max_price=to_wei(5),
-        swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -1308,7 +1308,7 @@ def test_pool_usdc(
         max_amount_in=to_wei(10),
         token_amount_out=to_wei(1),
         max_price=to_wei(100),
-        consume_swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -1357,7 +1357,7 @@ def test_pool_usdc(
         token_amount_in=to_wei("0.1"),
         min_amount_out=int(1e4),
         max_price=int(2**256 - 1),
-        swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -1408,7 +1408,7 @@ def test_pool_usdc(
         max_amount_in=to_wei(10),
         token_amount_out=int(1e6),
         max_price=to_wei(1000000000000000),
-        consume_swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -1797,7 +1797,7 @@ def test_pool_usdc_flexible(
         token_amount_in=int(1e7),
         min_amount_out=to_wei(1),
         max_price=to_wei(5),
-        swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -1835,7 +1835,7 @@ def test_pool_usdc_flexible(
         max_amount_in=to_wei(10),
         token_amount_out=to_wei(1),
         max_price=to_wei(100),
-        consume_swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -1884,7 +1884,7 @@ def test_pool_usdc_flexible(
         token_amount_in=to_wei("0.1"),
         min_amount_out=int(1e4),
         max_price=int(2**256 - 1),
-        swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -1935,7 +1935,7 @@ def test_pool_usdc_flexible(
         max_amount_in=to_wei(10),
         token_amount_out=int(1e6),
         max_price=to_wei(1000000000000000),
-        consume_swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -2322,7 +2322,7 @@ def test_pool_dai_flexible(
         token_amount_in=to_wei("0.1"),
         min_amount_out=to_wei("0.0001"),
         max_price=to_wei("100"),
-        swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -2359,7 +2359,7 @@ def test_pool_dai_flexible(
         max_amount_in=to_wei(10),
         token_amount_out=to_wei(1),
         max_price=to_wei(100),
-        consume_swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -2407,7 +2407,7 @@ def test_pool_dai_flexible(
         token_amount_in=to_wei("0.1"),
         min_amount_out=to_wei("0.0001"),
         max_price=to_wei("100"),
-        swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 
@@ -2458,7 +2458,7 @@ def test_pool_dai_flexible(
         max_amount_in=to_wei("0.1"),
         token_amount_out=to_wei("0.0001"),
         max_price=to_wei(100),
-        consume_swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=publisher_wallet,
     )
 

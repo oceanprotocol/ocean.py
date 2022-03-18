@@ -28,7 +28,7 @@ def test_side_staking(
     factory_router,
 ):
     swap_fee = int(1e15)
-    swap_market_fee = int(1e15)
+    publish_market_swap_fee = int(1e15)
     initial_ocean_liquidity = to_wei("10")
 
     side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
@@ -81,7 +81,7 @@ def test_side_staking(
         vesting_blocks=2500000,
         base_token_amount=initial_ocean_liquidity,
         lp_swap_fee=swap_fee,
-        publish_market_swap_fee=swap_market_fee,
+        publish_market_swap_fee=publish_market_swap_fee,
         ss_contract=get_address_of_type(config, "Staking"),
         base_token_address=ocean_token.address,
         base_token_sender=consumer_wallet.address,
@@ -138,7 +138,7 @@ def test_side_staking(
         token_amount_in=to_wei("1"),
         min_amount_out=to_wei("0"),
         max_price=to_wei("1000000"),
-        swap_market_fee=0,
+        consume_market_swap_fee=0,
         from_wallet=another_consumer_wallet,
     )
 
@@ -157,7 +157,7 @@ def test_side_staking(
             token_amount_in=to_wei("0.01"),
             min_amount_out=to_wei("0.001"),
             max_price=to_wei("100"),
-            swap_market_fee=0,
+            consume_market_swap_fee=0,
             from_wallet=another_consumer_wallet,
         )
     )

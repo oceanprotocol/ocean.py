@@ -2,7 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import List, Union
+from typing import List
 
 from enforce_typing import enforce_types
 
@@ -264,17 +264,25 @@ class BPool(BTokenBase):
         return self.contract.caller.getSpotPrice(token_in, token_out)
 
     def get_amount_in_exact_out(
-        self, token_in: str, token_out: str, token_amount_out: int, swap_market_fee: int
+        self,
+        token_in: str,
+        token_out: str,
+        token_amount_out: int,
+        consume_market_swap_fee: int,
     ) -> list:
         return self.contract.caller.getAmountOutExactIn(
-            token_in, token_out, token_amount_out, swap_market_fee
+            token_in, token_out, token_amount_out, consume_market_swap_fee
         )
 
     def get_amount_out_exact_in(
-        self, token_in: str, token_out: str, token_amount_in: int, swap_market_fee: int
+        self,
+        token_in: str,
+        token_out: str,
+        token_amount_in: int,
+        consume_market_swap_fee: int,
     ) -> list:
         return self.contract.caller.getAmountOutExactIn(
-            token_in, token_out, token_amount_in, swap_market_fee
+            token_in, token_out, token_amount_in, consume_market_swap_fee
         )
 
     def join_pool(
@@ -310,7 +318,7 @@ class BPool(BTokenBase):
         token_amount_in: int,
         min_amount_out: int,
         max_price: int,
-        swap_market_fee: int,
+        consume_market_swap_fee: int,
         from_wallet: Wallet,
     ) -> str:
         """Trades an exact `tokenAmountIn` of `tokenIn` taken from the caller by
@@ -329,7 +337,7 @@ class BPool(BTokenBase):
             token_amount_in (int),
             min_amount_out (int),
             max_price (int),
-            swap_market_fee (int),
+            consume_market_swap_fee (int),
             from_wallet (Wallet): wallet to sign the transaction with
 
         Returns:
@@ -340,7 +348,7 @@ class BPool(BTokenBase):
             "swapExactAmountIn",
             (
                 [token_in, token_out, consume_market_fee],
-                [token_amount_in, min_amount_out, max_price, swap_market_fee],
+                [token_amount_in, min_amount_out, max_price, consume_market_swap_fee],
             ),
             from_wallet,
         )
@@ -353,7 +361,7 @@ class BPool(BTokenBase):
         max_amount_in: int,
         token_amount_out: int,
         max_price: int,
-        consume_swap_market_fee: int,
+        consume_market_swap_fee: int,
         from_wallet: Wallet,
     ) -> str:
         """Swaps as little as possible limited of `tokenIn` for `tokenAmountOut` of `tokenOut`.
@@ -371,7 +379,7 @@ class BPool(BTokenBase):
             max_amount_in (int),
             token_amount_out (int),
             max_price (int),
-            consume_swap_market_fee (int),
+            consume_market_swap_fee (int),
             from_wallet (Wallet): wallet to sign the transaction with
 
         Returns:
@@ -382,7 +390,7 @@ class BPool(BTokenBase):
             "swapExactAmountOut",
             (
                 [token_in, token_out, consume_market_fee],
-                [max_amount_in, token_amount_out, max_price, consume_swap_market_fee],
+                [max_amount_in, token_amount_out, max_price, consume_market_swap_fee],
             ),
             from_wallet,
         )

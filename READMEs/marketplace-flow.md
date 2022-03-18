@@ -181,7 +181,7 @@ bpool.swap_exact_amount_out(
     max_amount_in=ocean.to_wei(10),
     token_amount_out=ocean.to_wei(1),
     max_price=ocean.to_wei(10),
-    consume_swap_market_fee=0,
+    consume_market_swap_fee=0,
     from_wallet=bob_wallet,
 )
 assert erc20_token.balanceOf(bob_wallet.address) >= ocean.to_wei(

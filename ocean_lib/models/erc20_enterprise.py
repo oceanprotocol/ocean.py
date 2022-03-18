@@ -31,7 +31,7 @@ class ERC20Enterprise(ERC20Token):
         exchange_id: bytes,
         max_base_token_amount: int,
         swap_market_fee: int,
-        publish_market_fee_address: str,
+        swap_market_fee_address: str,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
@@ -61,7 +61,7 @@ class ERC20Enterprise(ERC20Token):
                     exchange_id,
                     max_base_token_amount,
                     swap_market_fee,
-                    publish_market_fee_address,
+                    swap_market_fee_address,
                 ),
             ),
             from_wallet,

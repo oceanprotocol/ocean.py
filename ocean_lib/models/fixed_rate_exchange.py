@@ -117,20 +117,20 @@ class FixedRateExchange(ContractBase):
         self,
         exchange_id: bytes,
         datatoken_amount: int,
-        swap_market_fee: int,
+        consume_market_swap_fee: int,
     ) -> tuple:
         return self.contract.caller.calcBaseInGivenOutDT(
-            exchange_id, datatoken_amount, swap_market_fee
+            exchange_id, datatoken_amount, consume_market_swap_fee
         )
 
     def calc_base_out_given_in_dt(
         self,
         exchange_id: bytes,
         datatoken_amount: int,
-        swap_market_fee: int,
+        consume_market_swap_fee: int,
     ) -> tuple:
         return self.contract.caller.calcBaseOutGivenInDT(
-            exchange_id, datatoken_amount, swap_market_fee
+            exchange_id, datatoken_amount, consume_market_swap_fee
         )
 
     def buy_dt(
@@ -139,7 +139,7 @@ class FixedRateExchange(ContractBase):
         datatoken_amount: int,
         max_base_token_amount: int,
         consume_market_address: str,
-        swap_market_fee: int,
+        consume_market_swap_fee: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
@@ -149,7 +149,7 @@ class FixedRateExchange(ContractBase):
                 datatoken_amount,
                 max_base_token_amount,
                 consume_market_address,
-                swap_market_fee,
+                consume_market_swap_fee,
             ),
             from_wallet,
         )
@@ -160,7 +160,7 @@ class FixedRateExchange(ContractBase):
         datatoken_amount: int,
         min_base_token_amount: int,
         consume_market_address: str,
-        swap_market_fee: int,
+        consume_market_swap_fee: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
@@ -170,7 +170,7 @@ class FixedRateExchange(ContractBase):
                 datatoken_amount,
                 min_base_token_amount,
                 consume_market_address,
-                swap_market_fee,
+                consume_market_swap_fee,
             ),
             from_wallet,
         )
