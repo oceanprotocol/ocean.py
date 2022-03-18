@@ -196,7 +196,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
 
     permissions = erc20.get_permissions(publisher_wallet.address)
     assert not permissions[RolesERC20.MINTER]
-    assert not permissions[RolesERC20.FEE_MANAGER]
+    assert not permissions[RolesERC20.PAYMENT_COLLECTOR]
 
     # User should succeed to call startOrder on a ERC20 without publishFees, consumeFeeAmount on top is ZERO
     # Get new tokens
