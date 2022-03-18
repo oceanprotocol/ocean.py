@@ -51,9 +51,9 @@ def test_c2d_flow_readme(
     [
         (
             "lena",
-            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/lena_and_grayscale/lena.png",
+            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/peppers_and_grayscale/peppers.tiff",
             "grayscale",
-            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/lena_and_grayscale/grayscale.py",
+            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/peppers_and_grayscale/grayscale.py",
             "python-branin",
         ),
         (

@@ -12,16 +12,16 @@ with the following alterations:
 
 ### 3. Alice publishes a dataset
 
-In Step #3 where Alice publishes a dataset, use [lena.png](https://en.wikipedia.org/wiki/Lenna):
+In Step #3 where Alice publishes a dataset, use [peppers.tiff](https://sipi.usc.edu/database/database.php?volume=misc&image=13#top):
 
 ```python
-# Specify metadata, using the lena.png image
+# Specify metadata, using the peppers.tiff image
 DATA_date_created = "2021-12-28T10:55:11Z"
 DATA_metadata = {
     "created": DATA_date_created,
     "updated": DATA_date_created,
-    "description": "lena image",
-    "name": "lena",
+    "description": "peppers image",
+    "name": "peppers",
     "type": "dataset",
     "author": "Trent",
     "license": "CC0: PublicDomain",
@@ -30,7 +30,7 @@ DATA_metadata = {
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
 from ocean_lib.structures.file_objects import UrlFile
 DATA_url_file = UrlFile(
-    url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/lena_and_grayscale/lena.png"
+    url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/peppers_and_grayscale/peppers.tiff"
 )
 ```
 
@@ -65,7 +65,7 @@ ALGO_metadata = {
 # ocean.py offers multiple file types, but a simple url file should be enough for this example
 from ocean_lib.structures.file_objects import UrlFile
 ALGO_url_file = UrlFile(
-    url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/lena_and_grayscale/grayscale.py"
+    url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/peppers_and_grayscale/grayscale.py"
 )
 ```
 
@@ -90,9 +90,7 @@ image.show()
 Save the image:
 
 ```python
-f = open('lena-grayscale.png', 'wb')
-f.write(result)
-f.close()
+image.save('grayscale.png')
 ```
 
 ## Example 2: Logistic Regression for Classification
@@ -105,7 +103,7 @@ with the following alterations:
 In Step #3 where Alice publishes a dataset, use the [Iris Flower Dataset](https://en.wikipedia.org/wiki/Iris_flower_data_set):
 
 ```python
-# Specify metadata, using the lena.png image
+# Specify metadata, using the iris dataset
 DATA_date_created = "2019-12-28T10:55:11Z"
 DATA_metadata = {
     "created": DATA_date_created,
