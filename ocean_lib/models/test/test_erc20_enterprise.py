@@ -221,7 +221,7 @@ def test_buy_from_fre_and_order(
             datatoken_amount=to_wei("1"),
             max_base_token_amount=to_wei("1"),
             consume_market_address=ZERO_ADDRESS,
-            consume_market_swap_fee_amount=0,
+            swap_market_fee=0,
             from_wallet=consumer_wallet,
         )
 

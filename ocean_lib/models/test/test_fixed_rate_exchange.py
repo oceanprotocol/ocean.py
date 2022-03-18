@@ -247,7 +247,7 @@ def test_exchange_rate_creation(
         == fixed_exchange.calc_base_out_given_in_dt(
             exchange_id=exchange_id,
             datatoken_amount=amount_dt_to_sell,
-            consume_market_swap_fee_amount=0,
+            swap_market_fee=0,
         )[FixedExchangeBaseInOutData.BASE_TOKEN_AMOUNT]
         + ocean_balance_before
     )
