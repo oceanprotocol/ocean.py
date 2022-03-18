@@ -120,7 +120,7 @@ def test_main(
         vesting_blocks=2500000,
         base_token_amount=initial_ocean_liq,
         lp_swap_fee=to_wei("0.001"),
-        market_swap_fee=to_wei("0.001"),
+        publish_market_swap_fee=to_wei("0.001"),
         ss_contract=get_address_of_type(config, "Staking"),
         base_token_address=ocean_contract.address,
         base_token_sender=consumer_wallet.address,

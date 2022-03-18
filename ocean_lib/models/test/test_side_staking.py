@@ -81,7 +81,7 @@ def test_side_staking(
         vesting_blocks=2500000,
         base_token_amount=initial_ocean_liquidity,
         lp_swap_fee=swap_fee,
-        market_swap_fee=swap_market_fee,
+        publish_market_swap_fee=swap_market_fee,
         ss_contract=get_address_of_type(config, "Staking"),
         base_token_address=ocean_token.address,
         base_token_sender=consumer_wallet.address,

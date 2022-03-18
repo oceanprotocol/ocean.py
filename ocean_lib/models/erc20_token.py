@@ -88,7 +88,7 @@ class ERC20Token(ContractBase):
         vesting_blocks: int,
         base_token_amount: int,
         lp_swap_fee: int,
-        market_swap_fee: int,
+        publish_market_swap_fee: int,
         ss_contract: str,
         base_token_address: str,
         base_token_sender: str,
@@ -107,7 +107,7 @@ class ERC20Token(ContractBase):
                     vesting_blocks,
                     base_token_amount,
                 ],
-                [lp_swap_fee, market_swap_fee],
+                [lp_swap_fee, publish_market_swap_fee],
                 [
                     ss_contract,
                     base_token_address,

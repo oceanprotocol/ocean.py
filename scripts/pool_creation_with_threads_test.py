@@ -74,7 +74,7 @@ def asset_displayed_on_sale(ocean: Ocean, wallet: Wallet):
         vesting_blocks=2500000,
         base_token_amount=ocean.to_wei(2000),
         lp_swap_fee=ocean.to_wei("0.01"),
-        market_swap_fee=ocean.to_wei("0.01"),
+        publish_market_swap_fee=ocean.to_wei("0.01"),
         from_wallet=wallet,
     )
     assert bpool.address

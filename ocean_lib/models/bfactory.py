@@ -28,7 +28,7 @@ class BFactory(ContractBase):
         vesting_blocks: int,
         base_token_amount: int,
         lp_swap_fee: int,
-        market_swap_fee: int,
+        publish_market_swap_fee: int,
         controller: str,
         base_token_sender: str,
         publisher_address: str,
@@ -47,7 +47,7 @@ class BFactory(ContractBase):
                     vesting_blocks,
                     base_token_amount,
                 ],
-                [lp_swap_fee, market_swap_fee],
+                [lp_swap_fee, publish_market_swap_fee],
                 [
                     controller,
                     base_token_address,
