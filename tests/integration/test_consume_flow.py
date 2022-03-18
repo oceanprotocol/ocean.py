@@ -125,9 +125,9 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet):
         s=provider_fees["s"],
         valid_until=provider_fees["validUntil"],
         provider_data=provider_fees["providerData"],
-        consumer_market_fee_address=consumer_wallet.address,
-        consumer_market_fee_token=erc20_token.address,
-        consumer_market_fee_amount=0,
+        consume_market_fee_address=consumer_wallet.address,
+        consume_market_fee_token=erc20_token.address,
+        consume_market_fee_amount=0,
         from_wallet=consumer_wallet,
     )
 

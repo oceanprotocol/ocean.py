@@ -363,9 +363,9 @@ def test_pay_for_service_insufficient_balance(
         publisher_ocean_instance.assets.pay_for_service(
             asset,
             get_first_service_by_type(asset, "access"),
-            consumer_market_fee_address=empty_wallet.address,
-            consumer_market_fee_token=erc20_token.address,
-            consumer_market_fee_amount=0,
+            consume_market_fee_address=empty_wallet.address,
+            consume_market_fee_token=erc20_token.address,
+            consume_market_fee_amount=0,
             wallet=empty_wallet,
         )
 

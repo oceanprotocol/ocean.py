@@ -207,9 +207,9 @@ class ERC20Token(ContractBase):
         s: str,
         valid_until: int,
         provider_data: bytes,
-        consumer_market_fee_address: str,
-        consumer_market_fee_token: str,
-        consumer_market_fee_amount: int,
+        consume_market_fee_address: str,
+        consume_market_fee_token: str,
+        consume_market_fee_amount: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
@@ -228,9 +228,9 @@ class ERC20Token(ContractBase):
                     provider_data,
                 ),
                 (
-                    consumer_market_fee_address,
-                    consumer_market_fee_token,
-                    consumer_market_fee_amount,
+                    consume_market_fee_address,
+                    consume_market_fee_token,
+                    consume_market_fee_amount,
                 ),
             ),
             from_wallet,

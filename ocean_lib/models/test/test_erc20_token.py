@@ -246,9 +246,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         r=signature.r,
         s=signature.s,
         valid_until=0,
-        consumer_market_fee_address=publisher_wallet.address,
-        consumer_market_fee_token=erc20.address,
-        consumer_market_fee_amount=0,
+        consume_market_fee_address=publisher_wallet.address,
+        consume_market_fee_token=erc20.address,
+        consume_market_fee_amount=0,
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)

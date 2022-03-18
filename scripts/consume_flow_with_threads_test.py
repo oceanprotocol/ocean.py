@@ -108,9 +108,9 @@ def consume_flow(ocean: Ocean, wallet: Wallet, config: Config):
             s=response.json()["providerFee"]["s"],
             valid_until=response.json()["providerFee"]["validUntil"],
             provider_data=response.json()["providerFee"]["providerData"],
-            consumer_market_fee_address=wallet.address,
-            consumer_market_fee_token=erc20_token.address,
-            consumer_market_fee_amount=0,
+            consume_market_fee_address=wallet.address,
+            consume_market_fee_token=erc20_token.address,
+            consume_market_fee_amount=0,
             from_wallet=wallet,
         )
         # Download file

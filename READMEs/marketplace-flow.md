@@ -198,9 +198,9 @@ service = asset.services[0]
 order_tx_id = ocean.assets.pay_for_service(
     asset,
     service,
-    consumer_market_fee_address=bob_wallet.address,
-    consumer_market_fee_token=erc20_token.address,
-    consumer_market_fee_amount=0,
+    consume_market_fee_address=bob_wallet.address,
+    consume_market_fee_token=erc20_token.address,
+    consume_market_fee_amount=0,
     wallet=bob_wallet,
 )
 print(f"order_tx_id = '{order_tx_id}'")

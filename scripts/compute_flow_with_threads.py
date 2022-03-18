@@ -190,9 +190,9 @@ def compute_flow(ocean: Ocean, wallet: Wallet):
         DATA_order_tx_id = ocean.assets.pay_for_service(
             asset=DATA_asset,
             service=compute_service,
-            consumer_market_fee_address=wallet.address,
-            consumer_market_fee_token=DATA_datatoken.address,
-            consumer_market_fee_amount=0,
+            consume_market_fee_address=wallet.address,
+            consume_market_fee_token=DATA_datatoken.address,
+            consume_market_fee_amount=0,
             wallet=wallet,
             initialize_args={
                 "compute_environment": environments[0]["id"],
@@ -206,9 +206,9 @@ def compute_flow(ocean: Ocean, wallet: Wallet):
         ALGO_order_tx_id = ocean.assets.pay_for_service(
             asset=ALGO_asset,
             service=algo_service,
-            consumer_market_fee_address=wallet.address,
-            consumer_market_fee_token=ALGO_datatoken.address,
-            consumer_market_fee_amount=0,
+            consume_market_fee_address=wallet.address,
+            consume_market_fee_token=ALGO_datatoken.address,
+            consume_market_fee_amount=0,
             wallet=wallet,
             initialize_args={
                 "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp())

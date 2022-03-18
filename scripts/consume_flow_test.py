@@ -122,9 +122,9 @@ def test_stressed_consume():
             s=response.json()["providerFee"]["s"],
             valid_until=response.json()["providerFee"]["validUntil"],
             provider_data=response.json()["providerFee"]["providerData"],
-            consumer_market_fee_address=alice_wallet.address,
-            consumer_market_fee_token=erc20_token.address,
-            consumer_market_fee_amount=0,
+            consume_market_fee_address=alice_wallet.address,
+            consume_market_fee_token=erc20_token.address,
+            consume_market_fee_amount=0,
             from_wallet=alice_wallet,
         )
 
