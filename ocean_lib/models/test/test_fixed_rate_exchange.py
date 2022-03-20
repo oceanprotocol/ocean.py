@@ -121,8 +121,7 @@ def test_exchange_rate_creation(
     # Generate exchange id works
     generated_exchange_id = fixed_exchange.generate_exchange_id(
         base_token=get_address_of_type(config, "Ocean"),
-        datatoken=erc20.address,
-        exchange_owner=consumer_wallet.address,
+        datatoken=erc20.address
     )
     assert generated_exchange_id == exchange_id
 

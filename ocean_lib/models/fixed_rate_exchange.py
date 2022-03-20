@@ -104,10 +104,10 @@ class FixedRateExchange(ContractBase):
         return self.contract.caller.getOPCFee(base_token)
 
     def generate_exchange_id(
-        self, base_token: str, datatoken: str, exchange_owner: str
+        self, base_token: str, datatoken: str
     ) -> bytes:
         return self.contract.caller.generateExchangeId(
-            base_token, datatoken, exchange_owner
+            base_token, datatoken
         )
 
     def get_basetoken_out_price(self, exchange_id: bytes, dt_amount: int) -> int:
