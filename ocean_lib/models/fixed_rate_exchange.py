@@ -103,12 +103,8 @@ class FixedRateExchange(ContractBase):
     def get_opc_fee(self, base_token: str) -> int:
         return self.contract.caller.getOPCFee(base_token)
 
-    def generate_exchange_id(
-        self, base_token: str, datatoken: str
-    ) -> bytes:
-        return self.contract.caller.generateExchangeId(
-            base_token, datatoken
-        )
+    def generate_exchange_id(self, base_token: str, datatoken: str) -> bytes:
+        return self.contract.caller.generateExchangeId(base_token, datatoken)
 
     def get_basetoken_out_price(self, exchange_id: bytes, dt_amount: int) -> int:
         return self.contract.caller.getBaseTokenOutPrice(exchange_id, dt_amount)
@@ -176,10 +172,24 @@ class FixedRateExchange(ContractBase):
         )
 
     def collect_bt(self, exchange_id: bytes, amount: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("collectBT", (exchange_id,amount,), from_wallet)
+        return self.send_transaction(
+            "collectBT",
+            (
+                exchange_id,
+                amount,
+            ),
+            from_wallet,
+        )
 
-    def collect_dt(self, exchange_id: bytes, amount: int,from_wallet: Wallet) -> str:
-        return self.send_transaction("collectDT", (exchange_id,amount,), from_wallet)
+    def collect_dt(self, exchange_id: bytes, amount: int, from_wallet: Wallet) -> str:
+        return self.send_transaction(
+            "collectDT",
+            (
+                exchange_id,
+                amount,
+            ),
+            from_wallet,
+        )
 
     def collect_market_fee(self, exchange_id: bytes, from_wallet: Wallet) -> str:
         return self.send_transaction("collectMarketFee", (exchange_id,), from_wallet)

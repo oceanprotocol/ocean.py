@@ -120,8 +120,7 @@ def test_exchange_rate_creation(
 
     # Generate exchange id works
     generated_exchange_id = fixed_exchange.generate_exchange_id(
-        base_token=get_address_of_type(config, "Ocean"),
-        datatoken=erc20.address
+        base_token=get_address_of_type(config, "Ocean"), datatoken=erc20.address
     )
     assert generated_exchange_id == exchange_id
 
@@ -270,7 +269,11 @@ def test_exchange_rate_creation(
 
     erc20_balance_before = erc20.balanceOf(erc20.get_payment_collector())
 
-    tx = fixed_exchange.collect_dt(exchange_id, exchange_details[FixedRateExchangeDetails.DT_SUPPLY], consumer_wallet)
+    tx = fixed_exchange.collect_dt(
+        exchange_id,
+        exchange_details[FixedRateExchangeDetails.DT_SUPPLY],
+        consumer_wallet,
+    )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     logs = fixed_exchange.get_event_log(
@@ -289,9 +292,11 @@ def test_exchange_rate_creation(
 
     bt_balance_before = ocean_token.balanceOf(erc20.get_payment_collector())
 
-    
-
-    tx = fixed_exchange.collect_bt(exchange_id, exchange_details[FixedRateExchangeDetails.BT_SUPPLY], consumer_wallet)
+    tx = fixed_exchange.collect_bt(
+        exchange_id,
+        exchange_details[FixedRateExchangeDetails.BT_SUPPLY],
+        consumer_wallet,
+    )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     logs = fixed_exchange.get_event_log(
