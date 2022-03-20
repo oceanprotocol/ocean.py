@@ -12,7 +12,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 class RolesERC20(IntEnum):
     MINTER = 0
-    PAYMENT_COLLECTOR = 1
+    PAYMENT_MANAGER = 1
 
 
 @enforce_types
