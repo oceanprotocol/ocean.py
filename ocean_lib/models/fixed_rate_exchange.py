@@ -175,11 +175,11 @@ class FixedRateExchange(ContractBase):
             from_wallet,
         )
 
-    def collect_bt(self, exchange_id: bytes, from_wallet: Wallet) -> str:
-        return self.send_transaction("collectBT", (exchange_id,), from_wallet)
+    def collect_bt(self, exchange_id: bytes, amount: int, from_wallet: Wallet) -> str:
+        return self.send_transaction("collectBT", (exchange_id,amount,), from_wallet)
 
-    def collect_dt(self, exchange_id: bytes, from_wallet: Wallet) -> str:
-        return self.send_transaction("collectDT", (exchange_id,), from_wallet)
+    def collect_dt(self, exchange_id: bytes, amount: int,from_wallet: Wallet) -> str:
+        return self.send_transaction("collectDT", (exchange_id,amount,), from_wallet)
 
     def collect_market_fee(self, exchange_id: bytes, from_wallet: Wallet) -> str:
         return self.send_transaction("collectMarketFee", (exchange_id,), from_wallet)
