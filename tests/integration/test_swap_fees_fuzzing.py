@@ -185,6 +185,7 @@ def test_fuzzing_pool_ocean(
 
             ss_rate = to_wei(Decimal(random.uniform(0.00001, 0.1)), 18)
 
+            # Deploy pool
             tx = erc20_token.deploy_pool(
                 rate=ss_rate,
                 basetoken_decimals=ocean_contract.decimals(),
