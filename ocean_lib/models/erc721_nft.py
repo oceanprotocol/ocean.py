@@ -62,7 +62,7 @@ class ERC721NFT(ContractBase):
         metadata_decryptor_address: str,
         flags: bytes,
         data: Union[str, bytes],
-        data_hash: str,
+        data_hash: Union[str, bytes],
         metadata_proofs: List[MetadataProof],
         from_wallet: Wallet,
     ) -> str:
@@ -88,7 +88,7 @@ class ERC721NFT(ContractBase):
         metadata_decryptor_address: str,
         flags: bytes,
         data: Union[str, bytes],
-        data_hash: str,
+        data_hash: Union[str, bytes],
         token_id: int,
         token_uri: str,
         metadata_proofs: List[MetadataProof],
