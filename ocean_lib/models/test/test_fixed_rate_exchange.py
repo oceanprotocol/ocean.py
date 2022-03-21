@@ -120,9 +120,7 @@ def test_exchange_rate_creation(
 
     # Generate exchange id works
     generated_exchange_id = fixed_exchange.generate_exchange_id(
-        base_token=get_address_of_type(config, "Ocean"),
-        datatoken=erc20.address,
-        exchange_owner=consumer_wallet.address,
+        base_token=get_address_of_type(config, "Ocean"), datatoken=erc20.address
     )
     assert generated_exchange_id == exchange_id
 
@@ -269,16 +267,13 @@ def test_exchange_rate_creation(
 
     # Fixed Rate Exchange owner withdraws DT balance
 
-    erc20_balance_before = erc20.balanceOf(consumer_wallet.address)
+    erc20_balance_before = erc20.balanceOf(erc20.get_payment_collector())
 
-    # Only owner can withdraw
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        fixed_exchange.collect_dt(exchange_id, another_consumer_wallet)
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert FixedRateExchange: invalid exchange owner"
+    tx = fixed_exchange.collect_dt(
+        exchange_id,
+        exchange_details[FixedRateExchangeDetails.DT_SUPPLY],
+        consumer_wallet,
     )
-    tx = fixed_exchange.collect_dt(exchange_id, consumer_wallet)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     logs = fixed_exchange.get_event_log(
@@ -289,22 +284,19 @@ def test_exchange_rate_creation(
     )
 
     assert (
-        erc20.balanceOf(consumer_wallet.address)
+        erc20.balanceOf(erc20.get_payment_collector())
         == erc20_balance_before + logs[0].args.amount
     )
 
     # Fixed Rate Exchange owner withdraws BT balance
 
-    bt_balance_before = ocean_token.balanceOf(consumer_wallet.address)
+    bt_balance_before = ocean_token.balanceOf(erc20.get_payment_collector())
 
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        fixed_exchange.collect_bt(exchange_id, another_consumer_wallet)
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert FixedRateExchange: invalid exchange owner"
+    tx = fixed_exchange.collect_bt(
+        exchange_id,
+        exchange_details[FixedRateExchangeDetails.BT_SUPPLY],
+        consumer_wallet,
     )
-
-    tx = fixed_exchange.collect_bt(exchange_id, consumer_wallet)
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     logs = fixed_exchange.get_event_log(
@@ -315,7 +307,7 @@ def test_exchange_rate_creation(
     )
 
     assert (
-        ocean_token.balanceOf(consumer_wallet.address)
+        ocean_token.balanceOf(erc20.get_payment_collector())
         == bt_balance_before + logs[0].args.amount
     )
 

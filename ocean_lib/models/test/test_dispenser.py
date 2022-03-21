@@ -184,17 +184,6 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
         from_wallet=consumer_wallet,
     )
 
-    # Tests consumer tries to withdraw all datatokens
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        dispenser.owner_withdraw(
-            datatoken=erc20_token.address, from_wallet=consumer_wallet
-        )
-
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert Invalid owner"
-    )
-
     # Tests publisher withdraws all datatokens
     dispenser.owner_withdraw(
         datatoken=erc20_token.address, from_wallet=publisher_wallet
