@@ -104,12 +104,8 @@ class FixedRateExchange(ContractBase):
         return self.contract.caller.getOPCFee(base_token)
 
     @enforce_types
-    def generate_exchange_id(
-        self, base_token: str, datatoken: str, exchange_owner: str
-    ) -> bytes:
-        return self.contract.caller.generateExchangeId(
-            base_token, datatoken, exchange_owner
-        )
+    def generate_exchange_id(self, base_token: str, datatoken: str) -> bytes:
+        return self.contract.caller.generateExchangeId(base_token, datatoken)
 
     @enforce_types
     def get_base_token_out_price(self, exchange_id: bytes, dt_amount: int) -> int:
@@ -182,12 +178,26 @@ class FixedRateExchange(ContractBase):
         )
 
     @enforce_types
-    def collect_bt(self, exchange_id: bytes, from_wallet: Wallet) -> str:
-        return self.send_transaction("collectBT", (exchange_id,), from_wallet)
+    def collect_bt(self, exchange_id: bytes, amount: int, from_wallet: Wallet) -> str:
+        return self.send_transaction(
+            "collectBT",
+            (
+                exchange_id,
+                amount,
+            ),
+            from_wallet,
+        )
 
     @enforce_types
-    def collect_dt(self, exchange_id: bytes, from_wallet: Wallet) -> str:
-        return self.send_transaction("collectDT", (exchange_id,), from_wallet)
+    def collect_dt(self, exchange_id: bytes, amount: int, from_wallet: Wallet) -> str:
+        return self.send_transaction(
+            "collectDT",
+            (
+                exchange_id,
+                amount,
+            ),
+            from_wallet,
+        )
 
     @enforce_types
     def collect_market_fee(self, exchange_id: bytes, from_wallet: Wallet) -> str:
