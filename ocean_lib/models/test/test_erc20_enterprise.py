@@ -145,7 +145,7 @@ def test_buy_from_dispenser_and_order(
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
-    assert erc20_enterprise_token.get_total_supply() == to_wei("0.03")
+    assert erc20_enterprise_token.get_total_supply() == to_wei("0")
 
     balance_opf_consume = mock_dai_contract.balanceOf(opf_collector_address)
     balance_publish = mock_usdc_contract.balanceOf(publish_fees[0])
@@ -309,7 +309,7 @@ def test_buy_from_fre_and_order(
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     assert tx_receipt.status == 1
-    assert erc20_enterprise_token.get_total_supply() == to_wei("0.03")
+    assert erc20_enterprise_token.get_total_supply() == to_wei("0")
 
     provider_fee_balance_after = mock_usdc_contract.balanceOf(
         another_consumer_wallet.address
