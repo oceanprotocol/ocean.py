@@ -30,6 +30,9 @@ class FactoryRouter(BFactory):
     def is_fixed_rate_contract(self, address: str) -> bool:
         return self.contract.caller.isFixedRateContract(address)
 
+    def get_min_vesting_period(self) -> int:
+        return self.contract.caller.getMinVestingPeriod()
+
     def factory(self):
         return self.contract.caller.factory()
 

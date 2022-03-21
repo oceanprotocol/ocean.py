@@ -11,6 +11,19 @@ from ocean_lib.web3_internal.wallet import Wallet
 @enforce_types
 class SideStaking(ContractBase):
     CONTRACT_NAME = "SideStaking"
+    EVENT_VESTING = "Vesting"
+    EVENT_VESTING_CREATED = "VestingCreated"
+
+    @property
+    def event_Vesting(self):
+        return self.events.Vesting()
+
+    @property
+    def event_VestingCreated(self):
+        return self.events.VestingCreated()
+
+    def get_available_vesting(self, datatoken: str) -> int:
+        return self.contract.caller.getAvailableVesting(datatoken)
 
     def get_datatoken_circulating_supply(self, datatoken: str) -> int:
         return self.contract.caller.getDatatokenCirculatingSupply(datatoken)
@@ -45,14 +58,8 @@ class SideStaking(ContractBase):
     def get_vesting_amount_so_far(self, datatoken: str) -> int:
         return self.contract.caller.getvestingAmountSoFar(datatoken)
 
-    def can_stake(self, datatoken: str, amount: int) -> bool:
-        return self.contract.caller.canStake(datatoken, amount)
-
     def stake(self, datatoken: str, amount: int, from_wallet: Wallet) -> str:
         return self.send_transaction("Stake", (datatoken, amount), from_wallet)
-
-    def can_unstake(self, datatoken: str, liquidity_pool_token_in: int) -> bool:
-        return self.contract.caller.canUnStake(datatoken, liquidity_pool_token_in)
 
     def unstake(
         self,
