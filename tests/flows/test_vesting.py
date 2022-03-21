@@ -18,19 +18,6 @@ from tests.resources.helper_functions import get_address_of_type, deploy_erc721_
 
 
 @pytest.mark.unit
-def test_properties(config, web3):
-    """Tests the events' properties."""
-    side_staking_address = get_address_of_type(config, "Staking")
-    side_staking = SideStaking(web3, side_staking_address)
-
-    assert side_staking.event_Vesting.abi["name"] == SideStaking.EVENT_VESTING
-    assert (
-        side_staking.event_VestingCreated.abi["name"]
-        == SideStaking.EVENT_VESTING_CREATED
-    )
-
-
-@pytest.mark.unit
 def test_main(
     web3,
     config,
@@ -158,8 +145,7 @@ def test_main(
     bpool_address = pool_event[0].args.poolAddress
     bpool = BPool(web3, bpool_address)
     assert bpool.is_finalized() is True
-    assert bpool.opc_fee() == 0
-    # TODO: add assert for publish market fee after contracts update merge
+    assert bpool.opc_fee() == to_wei("0.001")
     assert bpool.get_swap_fee() == to_wei("0.003")
     assert bpool.community_fee(get_address_of_type(config, "Ocean")) == 0
     assert bpool.community_fee(erc20_token.address) == 0
