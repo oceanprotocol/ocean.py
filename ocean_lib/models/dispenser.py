@@ -81,11 +81,9 @@ class Dispenser(ContractBase):
     def dispense_tokens(
         self, erc20_token: ERC20Token, amount: int, consumer_wallet: Wallet
     ):
-        tx = self.dispense(
+        self.dispense(
             datatoken=erc20_token.address,
             amount=amount,
             destination=consumer_wallet.address,
             from_wallet=consumer_wallet,
         )
-        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
-        assert tx_receipt.status == 1

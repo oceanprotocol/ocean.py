@@ -8,7 +8,7 @@ import json
 import logging
 import lzma
 import os
-from typing import List, Optional, Tuple, Type
+from typing import List, Optional, Tuple, Type, Union
 
 from enforce_typing import enforce_types
 from web3 import Web3
@@ -528,7 +528,6 @@ class OceanAssets:
             metadata_proofs=[],
             from_wallet=publisher_wallet,
         )
-        self._web3.eth.wait_for_transaction_receipt(tx_result)
 
         return self._aquarius.wait_for_asset_update(asset, tx_result)
 
@@ -574,7 +573,7 @@ class OceanAssets:
         service: Service,
         consumer_wallet: Wallet,
         destination: str,
-        order_tx_id: str,
+        order_tx_id: Union[str, bytes],
         index: Optional[int] = None,
         userdata: Optional[dict] = None,
     ) -> str:

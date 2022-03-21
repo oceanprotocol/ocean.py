@@ -313,7 +313,7 @@ class ERC721NFT(ContractBase):
     ) -> ERC20Token:
         initial_list = self.get_tokens_list()
 
-        tx_id = self.create_erc20(
+        self.create_erc20(
             template_index=template_index,
             name=name,
             symbol=symbol,
@@ -326,7 +326,6 @@ class ERC721NFT(ContractBase):
             bytess=bytess,
             from_wallet=from_wallet,
         )
-        self.web3.eth.wait_for_transaction_receipt(tx_id)
 
         new_elements = [
             item for item in self.get_tokens_list() if item not in initial_list

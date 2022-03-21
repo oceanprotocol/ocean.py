@@ -271,7 +271,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     consumer_signed = web3.eth.sign(consumer_wallet.address, data=message)
 
     erc20.order_executed(
-        tx_receipt.transactionHash,
+        order_tx_id=tx_receipt.transactionHash,
         provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
         provider_signature=provider_signed,
         consumer_data=Web3.toHex(Web3.toBytes(text="12345")),

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enum import IntEnum
-from typing import List
+from typing import List, Union
 
 from enforce_typing import enforce_types
 
@@ -288,8 +288,8 @@ class MockExchange(ContractBase):
         amount: int,
         deadline: int,
         v: int,
-        r: bytes,
-        s: bytes,
+        r: Union[str, bytes],
+        s: Union[str, bytes],
         from_wallet: Wallet,
     ):
         return self.send_transaction(

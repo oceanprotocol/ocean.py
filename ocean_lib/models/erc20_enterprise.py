@@ -2,6 +2,8 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from typing import Union
+
 from enforce_typing import enforce_types
 
 from ocean_lib.models.erc20_token import ERC20Token
@@ -20,10 +22,10 @@ class ERC20Enterprise(ERC20Token):
         provider_fee_token: str,
         provider_fee_amount: int,
         v: int,
-        r: str,
-        s: str,
+        r: Union[str, bytes],
+        s: Union[str, bytes],
         valid_until: int,
-        provider_data: str,
+        provider_data: Union[str, bytes],
         consume_market_fee_address: str,
         consume_market_fee_token: str,
         consume_market_fee_amount: int,
@@ -76,10 +78,10 @@ class ERC20Enterprise(ERC20Token):
         provider_fee_token: str,
         provider_fee_amount: int,
         v: int,
-        r: str,
-        s: str,
+        r: Union[str, bytes],
+        s: Union[str, bytes],
         valid_until: int,
-        provider_data: str,
+        provider_data: Union[str, bytes],
         consume_market_fee_address: str,
         consume_market_fee_token: str,
         consume_market_fee_amount: int,

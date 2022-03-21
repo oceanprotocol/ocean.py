@@ -2,7 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
@@ -372,8 +372,8 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         metadata_decryptor_url: str,
         metadata_decryptor_address: str,
         metadata_flags: bytes,
-        metadata_data: bytes,
-        metadata_data_hash: bytes,
+        metadata_data: Union[str, bytes],
+        metadata_data_hash: Union[str, bytes],
         metadata_proofs: List[MetadataProof],
         from_wallet: Wallet,
     ) -> str:
@@ -435,7 +435,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return [item.args.exchangeId for item in logs]
 
     @enforce_types
-    def get_token_address(self, tx_id: str):
+    def get_token_address(self, tx_id: Union[str, bytes]):
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_id)
         registered_event = self.get_event_log(
             event_name=ERC721FactoryContract.EVENT_NFT_CREATED,

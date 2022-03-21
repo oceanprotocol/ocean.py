@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enum import IntEnum
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from enforce_typing import enforce_types
 
@@ -183,10 +183,10 @@ class ERC20Token(ContractBase):
         provider_fee_token: str,
         provider_fee_amount: int,
         v: int,
-        r: str,
-        s: str,
+        r: Union[str, bytes],
+        s: Union[str, bytes],
         valid_until: int,
-        provider_data: str,
+        provider_data: Union[str, bytes],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
@@ -213,10 +213,10 @@ class ERC20Token(ContractBase):
         provider_fee_token: str,
         provider_fee_amount: int,
         v: int,
-        r: str,
-        s: str,
+        r: Union[str, bytes],
+        s: Union[str, bytes],
         valid_until: int,
-        provider_data: str,
+        provider_data: Union[str, bytes],
         consume_market_fee_address: str,
         consume_market_fee_token: str,
         consume_market_fee_amount: int,
@@ -249,15 +249,15 @@ class ERC20Token(ContractBase):
     @enforce_types
     def reuse_order(
         self,
-        order_tx_id: str,
+        order_tx_id: Union[str, bytes],
         provider_fee_address: str,
         provider_fee_token: str,
         provider_fee_amount: int,
         v: int,
-        r: str,
-        s: str,
+        r: Union[str, bytes],
+        s: Union[str, bytes],
         valid_until: int,
-        provider_data: str,
+        provider_data: Union[str, bytes],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
@@ -281,11 +281,11 @@ class ERC20Token(ContractBase):
     @enforce_types
     def order_executed(
         self,
-        order_tx_id: str,
-        provider_data: str,
-        provider_signature: bytes,
-        consumer_data: bytes,
-        consumer_signature: bytes,
+        order_tx_id: Union[str, bytes],
+        provider_data: Union[str, bytes],
+        provider_signature: Union[str, bytes],
+        consumer_data: Union[str, bytes],
+        consumer_signature: Union[str, bytes],
         consumer: str,
         from_wallet: Wallet,
     ) -> str:
@@ -430,8 +430,8 @@ class ERC20Token(ContractBase):
         value: int,
         deadline: int,
         v: int,
-        r: bytes,
-        s: bytes,
+        r: Union[str, bytes],
+        s: Union[str, bytes],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
