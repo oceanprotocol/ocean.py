@@ -200,7 +200,7 @@ def test_pool_ocean(
     tx = bpool.swap_exact_amount_in(
         token_in=ocean_contract.address,
         token_out=erc20_address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         token_amount_in=to_wei("0.1"),
         min_amount_out=to_wei("0.0001"),
         max_price=to_wei("100"),
@@ -238,7 +238,7 @@ def test_pool_ocean(
     tx = bpool.swap_exact_amount_out(
         token_in=ocean_contract.address,
         token_out=erc20_address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         max_amount_in=to_wei(10),
         token_amount_out=to_wei(1),
         max_price=to_wei(100),
@@ -288,7 +288,7 @@ def test_pool_ocean(
     tx = bpool.swap_exact_amount_in(
         token_in=erc20_address,
         token_out=ocean_contract.address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         token_amount_in=to_wei("0.1"),
         min_amount_out=to_wei("0.0001"),
         max_price=to_wei("100"),
@@ -339,7 +339,7 @@ def test_pool_ocean(
     tx = bpool.swap_exact_amount_out(
         token_in=erc20_address,
         token_out=ocean_contract.address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         max_amount_in=to_wei("0.1"),
         token_amount_out=to_wei("0.0001"),
         max_price=to_wei(100),
@@ -733,7 +733,7 @@ def test_pool_dai(
     tx = bpool.swap_exact_amount_in(
         token_in=dai_contract.address,
         token_out=erc20_address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         token_amount_in=to_wei("0.1"),
         min_amount_out=to_wei("0.0001"),
         max_price=to_wei("100"),
@@ -770,7 +770,7 @@ def test_pool_dai(
     tx = bpool.swap_exact_amount_out(
         token_in=dai_contract.address,
         token_out=erc20_address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         max_amount_in=to_wei(10),
         token_amount_out=to_wei(1),
         max_price=to_wei(100),
@@ -818,7 +818,7 @@ def test_pool_dai(
     tx = bpool.swap_exact_amount_in(
         token_in=erc20_address,
         token_out=dai_contract.address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         token_amount_in=to_wei("0.1"),
         min_amount_out=to_wei("0.0001"),
         max_price=to_wei("100"),
@@ -869,7 +869,7 @@ def test_pool_dai(
     tx = bpool.swap_exact_amount_out(
         token_in=erc20_address,
         token_out=dai_contract.address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         max_amount_in=to_wei("0.1"),
         token_amount_out=to_wei("0.0001"),
         max_price=to_wei(100),
@@ -1266,7 +1266,7 @@ def test_pool_usdc(
     tx = bpool.swap_exact_amount_in(
         token_in=usdc_contract.address,
         token_out=erc20_address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         token_amount_in=int(1e7),
         min_amount_out=to_wei(1),
         max_price=to_wei(5),
@@ -1304,7 +1304,7 @@ def test_pool_usdc(
     tx = bpool.swap_exact_amount_out(
         token_in=usdc_contract.address,
         token_out=erc20_address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         max_amount_in=to_wei(10),
         token_amount_out=to_wei(1),
         max_price=to_wei(100),
@@ -1353,7 +1353,7 @@ def test_pool_usdc(
     tx = bpool.swap_exact_amount_in(
         token_in=erc20_address,
         token_out=usdc_contract.address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         token_amount_in=to_wei("0.1"),
         min_amount_out=int(1e4),
         max_price=int(2**256 - 1),
@@ -1404,7 +1404,7 @@ def test_pool_usdc(
     tx = bpool.swap_exact_amount_out(
         token_in=erc20_address,
         token_out=usdc_contract.address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         max_amount_in=to_wei(10),
         token_amount_out=int(1e6),
         max_price=to_wei(1000000000000000),
@@ -1793,7 +1793,7 @@ def test_pool_usdc_flexible(
     tx = bpool.swap_exact_amount_in(
         token_in=usdc_contract.address,
         token_out=erc20_address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         token_amount_in=int(1e7),
         min_amount_out=to_wei(1),
         max_price=to_wei(5),
@@ -1831,7 +1831,7 @@ def test_pool_usdc_flexible(
     tx = bpool.swap_exact_amount_out(
         token_in=usdc_contract.address,
         token_out=erc20_address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         max_amount_in=to_wei(10),
         token_amount_out=to_wei(1),
         max_price=to_wei(100),
@@ -1880,7 +1880,7 @@ def test_pool_usdc_flexible(
     tx = bpool.swap_exact_amount_in(
         token_in=erc20_address,
         token_out=usdc_contract.address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         token_amount_in=to_wei("0.1"),
         min_amount_out=int(1e4),
         max_price=int(2**256 - 1),
@@ -1931,7 +1931,7 @@ def test_pool_usdc_flexible(
     tx = bpool.swap_exact_amount_out(
         token_in=erc20_address,
         token_out=usdc_contract.address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         max_amount_in=to_wei(10),
         token_amount_out=int(1e6),
         max_price=to_wei(1000000000000000),
@@ -2318,7 +2318,7 @@ def test_pool_dai_flexible(
     tx = bpool.swap_exact_amount_in(
         token_in=dai_contract.address,
         token_out=erc20_address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         token_amount_in=to_wei("0.1"),
         min_amount_out=to_wei("0.0001"),
         max_price=to_wei("100"),
@@ -2355,7 +2355,7 @@ def test_pool_dai_flexible(
     tx = bpool.swap_exact_amount_out(
         token_in=dai_contract.address,
         token_out=erc20_address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         max_amount_in=to_wei(10),
         token_amount_out=to_wei(1),
         max_price=to_wei(100),
@@ -2403,7 +2403,7 @@ def test_pool_dai_flexible(
     tx = bpool.swap_exact_amount_in(
         token_in=erc20_address,
         token_out=dai_contract.address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         token_amount_in=to_wei("0.1"),
         min_amount_out=to_wei("0.0001"),
         max_price=to_wei("100"),
@@ -2454,7 +2454,7 @@ def test_pool_dai_flexible(
     tx = bpool.swap_exact_amount_out(
         token_in=erc20_address,
         token_out=dai_contract.address,
-        consume_market_fee=another_consumer_wallet.address,
+        consume_market_fee_address=another_consumer_wallet.address,
         max_amount_in=to_wei("0.1"),
         token_amount_out=to_wei("0.0001"),
         max_price=to_wei(100),

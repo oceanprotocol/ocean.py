@@ -128,7 +128,7 @@ def test_marketplace_flow_readme(tmp_path):
     bpool.swap_exact_amount_out(
         token_in=OCEAN_token.address,
         token_out=erc20_token.address,
-        consume_market_fee=ZERO_ADDRESS,
+        consume_market_fee_address=ZERO_ADDRESS,
         max_amount_in=ocean.to_wei(10),
         token_amount_out=ocean.to_wei(1),
         max_price=ocean.to_wei(10),

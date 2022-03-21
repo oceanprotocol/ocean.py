@@ -303,8 +303,8 @@ def test_buy_from_fre_and_order(
         exchange_contract=fixed_rate_exchange.address,
         exchange_id=exchange_id,
         max_base_token_amount=to_wei("2.5"),
-        swap_market_fee=to_wei("0.001"),  # 1e15 => 0.1%
-        swap_market_fee_address=another_consumer_wallet.address,
+        consume_market_swap_fee=to_wei("0.001"),  # 1e15 => 0.1%
+        consume_market_swap_fee_address=another_consumer_wallet.address,
         from_wallet=publisher_wallet,
     )
 

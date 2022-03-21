@@ -134,7 +134,7 @@ def test_side_staking(
     bpool.swap_exact_amount_in(
         token_in=ocean_token.address,
         token_out=erc20.address,
-        consume_market_fee=publisher_wallet.address,
+        consume_market_fee_address=publisher_wallet.address,
         token_amount_in=to_wei("1"),
         min_amount_out=to_wei("0"),
         max_price=to_wei("1000000"),
@@ -153,7 +153,7 @@ def test_side_staking(
         bpool.swap_exact_amount_in(
             token_in=erc20.address,
             token_out=ocean_token.address,
-            consume_market_fee=publisher_wallet.address,
+            consume_market_fee_address=publisher_wallet.address,
             token_amount_in=to_wei("0.01"),
             min_amount_out=to_wei("0.001"),
             max_price=to_wei("100"),

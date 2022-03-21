@@ -349,7 +349,7 @@ class BPool(BTokenBase):
         self,
         token_in: str,
         token_out: str,
-        consume_market_fee: str,
+        consume_market_fee_address: str,
         token_amount_in: int,
         min_amount_out: int,
         max_price: int,
@@ -368,7 +368,7 @@ class BPool(BTokenBase):
         Args:
             token_in (str),
             token_out (str),
-            consume_market_fee (str),
+            consume_market_fee_address (str),
             token_amount_in (int),
             min_amount_out (int),
             max_price (int),
@@ -382,7 +382,7 @@ class BPool(BTokenBase):
         return self.send_transaction(
             "swapExactAmountIn",
             (
-                [token_in, token_out, consume_market_fee],
+                [token_in, token_out, consume_market_fee_address],
                 [token_amount_in, min_amount_out, max_price, consume_market_swap_fee],
             ),
             from_wallet,
@@ -393,7 +393,7 @@ class BPool(BTokenBase):
         self,
         token_in: str,
         token_out: str,
-        consume_market_fee: str,
+        consume_market_fee_address: str,
         max_amount_in: int,
         token_amount_out: int,
         max_price: int,
@@ -411,7 +411,7 @@ class BPool(BTokenBase):
         Args:
             token_in (str),
             token_out (str),
-            consume_market_fee (str),
+            consume_market_fee_address (str),
             max_amount_in (int),
             token_amount_out (int),
             max_price (int),
@@ -425,7 +425,7 @@ class BPool(BTokenBase):
         return self.send_transaction(
             "swapExactAmountOut",
             (
-                [token_in, token_out, consume_market_fee],
+                [token_in, token_out, consume_market_fee_address],
                 [max_amount_in, token_amount_out, max_price, consume_market_swap_fee],
             ),
             from_wallet,
