@@ -8,10 +8,10 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-@enforce_types
 class ERC20Enterprise(ERC20Token):
     CONTRACT_NAME = "ERC20TemplateEnterprise"
 
+    @enforce_types
     def buy_from_fre_and_order(
         self,
         consumer: str,
@@ -67,6 +67,7 @@ class ERC20Enterprise(ERC20Token):
             from_wallet,
         )
 
+    @enforce_types
     def buy_from_dispenser_and_order(
         self,
         consumer: str,

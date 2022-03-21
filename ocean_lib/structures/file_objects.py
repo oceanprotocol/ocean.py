@@ -7,13 +7,14 @@ from typing import Optional, Union
 from enforce_typing import enforce_types
 
 
-@enforce_types
 class UrlFile(object):
+    @enforce_types
     def __init__(self, url: str, method: Optional[str] = None) -> None:
         self.url = url
         self.method = method
         self.type = "url"
 
+    @enforce_types
     def to_dict(self) -> dict:
         result = {"type": self.type, "url": self.url}
 
@@ -23,12 +24,13 @@ class UrlFile(object):
         return result
 
 
-@enforce_types
 class IpfsFile(object):
+    @enforce_types
     def __init__(self, hash: str) -> None:
         self.hash = hash
         self.type = "ipfs"
 
+    @enforce_types
     def to_dict(self) -> dict:
         return {"type": self.type, "hash": self.hash}
 

@@ -34,10 +34,10 @@ from ocean_lib.web3_internal.wallet import Wallet
 logger = logging.getLogger("ocean")
 
 
-@enforce_types
 class OceanAssets:
     """Ocean asset class for V4."""
 
+    @enforce_types
     def __init__(
         self, config: Config, web3: Web3, data_provider: Type[DataServiceProvider]
     ) -> None:
@@ -55,6 +55,7 @@ class OceanAssets:
         self._downloads_path = downloads_path
         self._aquarius = Aquarius.get_instance(self._metadata_cache_uri)
 
+    @enforce_types
     def validate(self, asset: Asset) -> Tuple[bool, list]:
         """
         Validate that the asset is ok to be stored in aquarius.
@@ -71,6 +72,7 @@ class OceanAssets:
 
         return validation_result, validation_errors
 
+    @enforce_types
     def _add_defaults(
         self, services: list, datatoken: str, files: str, provider_uri: str
     ) -> list:
@@ -95,6 +97,7 @@ class OceanAssets:
         return services
 
     @staticmethod
+    @enforce_types
     def build_access_service(
         service_id: str,
         service_endpoint: str,
@@ -112,6 +115,7 @@ class OceanAssets:
             timeout=timeout,
         )
 
+    @enforce_types
     def deploy_datatoken(
         self,
         erc721_factory: ERC721FactoryContract,
@@ -154,11 +158,13 @@ class OceanAssets:
 
         return registered_token_event[0].args.newTokenAddress
 
+    @enforce_types
     def find_service_by_datatoken(self, datatoken: str, services: list) -> str:
         return next(
             (service.id for service in services if service.datatoken == datatoken), None
         )
 
+    @enforce_types
     def build_datatokens_list(
         self, services: list, deployed_erc20_tokens: list
     ) -> list:
@@ -179,6 +185,7 @@ class OceanAssets:
         return datatokens
 
     @staticmethod
+    @enforce_types
     def _encrypt_ddo(
         asset: Asset,
         provider_uri: str,
@@ -229,6 +236,7 @@ class OceanAssets:
         return document, flags, ddo_hash
 
     @staticmethod
+    @enforce_types
     def _assert_ddo_metadata(metadata: dict):
         assert isinstance(
             metadata, dict
@@ -243,6 +251,7 @@ class OceanAssets:
 
         assert "name" in metadata, "Must have name in metadata."
 
+    @enforce_types
     def create(
         self,
         metadata: dict,
@@ -458,6 +467,7 @@ class OceanAssets:
 
         return asset
 
+    @enforce_types
     def update(
         self,
         asset: Asset,

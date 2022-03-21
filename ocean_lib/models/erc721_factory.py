@@ -13,7 +13,6 @@ from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-@enforce_types
 class ERC721FactoryContract(ERCTokenFactoryBase):
     CONTRACT_NAME = "ERC721Factory"
     EVENT_NFT_CREATED = "NFTCreated"
@@ -52,6 +51,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     def event_DispenserCreated(self):
         return self.events.DispenserCreated()
 
+    @enforce_types
     def verify_nft(self, nft: str) -> bool:
         """Checks that a token was registered."""
         filter_args = {"newTokenAddress": nft}
@@ -60,6 +60,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         )
         return bool(log and log[0].args.newTokenAddress == nft)
 
+    @enforce_types
     def deploy_erc721_contract(
         self,
         name: str,
@@ -83,30 +84,39 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             from_wallet,
         )
 
+    @enforce_types
     def get_current_nft_count(self) -> int:
         return self.contract.caller.getCurrentNFTCount()
 
+    @enforce_types
     def get_nft_template(self, template_index: int) -> list:
         return self.contract.caller.getNFTTemplate(template_index)
 
+    @enforce_types
     def get_current_nft_template_count(self) -> int:
         return self.contract.caller.getCurrentNFTTemplateCount()
 
+    @enforce_types
     def is_contract(self, account_address: str) -> bool:
         return self.contract.caller.isContract(account_address)
 
+    @enforce_types
     def get_current_token_count(self) -> int:
         return self.contract.caller.getCurrentTokenCount()
 
+    @enforce_types
     def get_token_template(self, index: int) -> list:
         return self.contract.caller.getTokenTemplate(index)
 
+    @enforce_types
     def get_current_template_count(self) -> int:
         return self.contract.caller.getCurrentTemplateCount()
 
+    @enforce_types
     def template_count(self) -> int:
         return self.contract.caller.templateCount()
 
+    @enforce_types
     def start_multiple_token_order(
         self, orders: List[OrderData], from_wallet: Wallet
     ) -> str:
@@ -125,6 +135,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         """
         return self.send_transaction("startMultipleTokenOrder", (orders,), from_wallet)
 
+    @enforce_types
     def create_nft_with_erc20(
         self,
         nft_name: str,
@@ -163,6 +174,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             from_wallet,
         )
 
+    @enforce_types
     def create_nft_erc20_with_pool(
         self,
         nft_name: str,
@@ -235,6 +247,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             from_wallet,
         )
 
+    @enforce_types
     def create_nft_erc20_with_fixed_rate(
         self,
         nft_name: str,
@@ -297,6 +310,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             from_wallet,
         )
 
+    @enforce_types
     def create_nft_erc20_with_dispenser(
         self,
         nft_name: str,
@@ -347,6 +361,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             from_wallet,
         )
 
+    @enforce_types
     def create_nft_with_metadata(
         self,
         nft_name: str,
@@ -379,6 +394,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             from_wallet,
         )
 
+    @enforce_types
     def get_token_created_event(
         self, from_block: int, to_block: int, token_address: str
     ) -> [AttributeDict]:
@@ -393,6 +409,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
         return logs[0] if logs else None
 
+    @enforce_types
     def search_exchange_by_datatoken(
         self,
         fixed_rate_exchange: FixedRateExchange,
@@ -417,6 +434,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         )
         return [item.args.exchangeId for item in logs]
 
+    @enforce_types
     def get_token_address(self, tx_id: str):
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_id)
         registered_event = self.get_event_log(

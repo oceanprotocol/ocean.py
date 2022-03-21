@@ -8,7 +8,6 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-@enforce_types
 class BFactory(ContractBase):
     CONTRACT_NAME = "BFactory"
 
@@ -18,6 +17,7 @@ class BFactory(ContractBase):
     def event_BPoolCreated(self):
         return self.events.BPoolCreated()
 
+    @enforce_types
     def new_bpool(
         self,
         datatoken_address: str,

@@ -21,7 +21,6 @@ class ERC721Permissions(IntEnum):
     STORE = 3
 
 
-@enforce_types
 class ERC721NFT(ContractBase):
     CONTRACT_NAME = "ERC721Template"
 
@@ -51,9 +50,11 @@ class ERC721NFT(ContractBase):
     def event_TokenURIUpdate(self):
         return self.events.TokenURIUpdate()
 
+    @enforce_types
     def set_metadata_state(self, metadata_state: int, from_wallet: Wallet):
         return self.send_transaction("setMetaDataState", (metadata_state,), from_wallet)
 
+    @enforce_types
     def set_metadata(
         self,
         metadata_state: int,
@@ -79,6 +80,7 @@ class ERC721NFT(ContractBase):
             from_wallet,
         )
 
+    @enforce_types
     def set_metadata_token_uri(
         self,
         metadata_state: int,
@@ -110,9 +112,11 @@ class ERC721NFT(ContractBase):
             from_wallet,
         )
 
+    @enforce_types
     def get_metadata(self) -> tuple:
         return self.contract.caller.getMetaData()
 
+    @enforce_types
     def create_erc20(
         self,
         template_index: int,
@@ -144,6 +148,7 @@ class ERC721NFT(ContractBase):
             from_wallet,
         )
 
+    @enforce_types
     def add_to_create_erc20_list(
         self, allowed_address: str, from_wallet: Wallet
     ) -> str:
@@ -151,22 +156,27 @@ class ERC721NFT(ContractBase):
             "addToCreateERC20List", (allowed_address,), from_wallet
         )
 
+    @enforce_types
     def add_to_725_store_list(self, allowed_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction(
             "addTo725StoreList", (allowed_address,), from_wallet
         )
 
+    @enforce_types
     def add_to_metadata_list(self, allowed_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction(
             "addToMetadataList", (allowed_address,), from_wallet
         )
 
+    @enforce_types
     def add_manager(self, manager_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("addManager", (manager_address,), from_wallet)
 
+    @enforce_types
     def remove_manager(self, manager_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("removeManager", (manager_address,), from_wallet)
 
+    @enforce_types
     def execute_call(
         self, operation: int, to: str, value: int, data: bytes, from_wallet: Wallet
     ) -> str:
@@ -174,24 +184,31 @@ class ERC721NFT(ContractBase):
             "executeCall", (operation, to, value, data), from_wallet
         )
 
+    @enforce_types
     def set_new_data(self, key: bytes, value: bytes, from_wallet: Wallet) -> str:
         return self.send_transaction("setNewData", (key, value), from_wallet)
 
+    @enforce_types
     def set_data_erc20(self, key: bytes, value: bytes, from_wallet: Wallet) -> str:
         return self.send_transaction("setDataERC20", (key, value), from_wallet)
 
+    @enforce_types
     def set_data_v3(self, datatoken: str, value: bytes, from_wallet: Wallet) -> str:
         return self.send_transaction("setDataV3", (datatoken, value), from_wallet)
 
+    @enforce_types
     def get_data(self, key: bytes) -> bytes:
         return self.contract.caller.getData(key)
 
+    @enforce_types
     def token_uri(self, token_id: int) -> str:
         return self.contract.caller.tokenURI(token_id)
 
+    @enforce_types
     def wrap_v3_dt(self, datatoken: str, new_minter: str, from_wallet: Wallet) -> str:
         return self.send_transaction("wrapV3DT", (datatoken, new_minter), from_wallet)
 
+    @enforce_types
     def mint_v3_dt(
         self, datatoken: str, to_address: str, value: int, from_wallet: Wallet
     ) -> str:
@@ -199,12 +216,15 @@ class ERC721NFT(ContractBase):
             "mintV3DT", (datatoken, to_address, value), from_wallet
         )
 
+    @enforce_types
     def add_v3_minter(self, new_minter_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("addV3Minter", (new_minter_address,), from_wallet)
 
+    @enforce_types
     def remove_v3_minter(self, minter_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("removeV3Minter", (minter_address,), from_wallet)
 
+    @enforce_types
     def transfer_from(
         self, from_address: str, to_address: str, token_id: int, from_wallet: Wallet
     ) -> str:
@@ -212,6 +232,7 @@ class ERC721NFT(ContractBase):
             "transferFrom", (from_address, to_address, token_id), from_wallet
         )
 
+    @enforce_types
     def safe_transfer_from(
         self, from_address: str, to_address: str, token_id: int, from_wallet: Wallet
     ) -> str:
@@ -219,42 +240,55 @@ class ERC721NFT(ContractBase):
             "safeTransferFrom", (from_address, to_address, token_id), from_wallet
         )
 
+    @enforce_types
     def withdraw(self, from_wallet: Wallet):
         return self.send_transaction("withdrawETH", (), from_wallet)
 
+    @enforce_types
     def token_name(self) -> str:
         return self.contract.caller.name()
 
+    @enforce_types
     def symbol(self) -> str:
         return self.contract.caller.symbol()
 
+    @enforce_types
     def is_initialized(self) -> bool:
         return self.contract.caller.isInitialized()
 
+    @enforce_types
     def clean_permissions(self, from_wallet: Wallet) -> str:
         return self.send_transaction("cleanPermissions", (), from_wallet)
 
+    @enforce_types
     def get_address_length(self, array: List[str]) -> int:
         return self.contract.caller.getAddressLength(array)
 
+    @enforce_types
     def get_permissions(self, user: str) -> list:
         return self.contract.caller.getPermissions(user)
 
+    @enforce_types
     def balance_of(self, account: str) -> int:
         return self.contract.caller.balanceOf(account)
 
+    @enforce_types
     def owner_of(self, token_id: int) -> str:
         return self.contract.caller.ownerOf(token_id)
 
+    @enforce_types
     def get_tokens_list(self) -> list:
         return self.contract.caller.getTokensList()
 
+    @enforce_types
     def is_deployed(self, datatoken: str) -> bool:
         return self.contract.caller.isDeployed(datatoken)
 
+    @enforce_types
     def is_erc20_deployer(self, account: str) -> bool:
         return self.contract.caller.isERC20Deployer(account)
 
+    @enforce_types
     def set_token_uri(
         self, token_id: int, new_token_uri: str, from_wallet: Wallet
     ) -> str:
@@ -262,6 +296,7 @@ class ERC721NFT(ContractBase):
             "setTokenURI", (token_id, new_token_uri), from_wallet
         )
 
+    @enforce_types
     def create_datatoken(
         self,
         template_index: int,
