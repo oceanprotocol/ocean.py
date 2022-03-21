@@ -231,6 +231,7 @@ def test_vesting_progress(
     publisher_wallet,
     factory_router,
 ):
+    """Tests vesting progress after half of the vested passed blocks."""
     erc721_nft, erc20_token = deploy_erc721_erc20(
         web3, config, publisher_wallet, publisher_wallet, cap=to_wei(1000)
     )
