@@ -251,7 +251,8 @@ class OceanAssets:
 
         assert "name" in metadata, "Must have name in metadata."
 
-    @enforce_types
+    # Don't enforce types due to error:
+    # TypeError: Subscripted generics cannot be used with class and instance checks
     def create(
         self,
         metadata: dict,

@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enum import IntEnum
-from typing import List
+from typing import List, Union
 
 from enforce_typing import enforce_types
 
@@ -61,8 +61,8 @@ class ERC721NFT(ContractBase):
         metadata_decryptor_url: str,
         metadata_decryptor_address: str,
         flags: bytes,
-        data: bytes,
-        data_hash: bytes,
+        data: Union[str, bytes],
+        data_hash: str,
         metadata_proofs: List[MetadataProof],
         from_wallet: Wallet,
     ) -> str:
@@ -87,8 +87,8 @@ class ERC721NFT(ContractBase):
         metadata_decryptor_url: str,
         metadata_decryptor_address: str,
         flags: bytes,
-        data: bytes,
-        data_hash: bytes,
+        data: Union[str, bytes],
+        data_hash: str,
         token_id: int,
         token_uri: str,
         metadata_proofs: List[MetadataProof],
