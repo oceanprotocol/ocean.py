@@ -19,6 +19,7 @@ def consuming_market_wallet():
     return get_wallet(5)
 
 
+@pytest.mark.skip
 def test_fees(
     publisher_ocean_instance: Ocean,
     publisher_wallet: Wallet,

@@ -178,22 +178,22 @@ class ERC721NFT(ContractBase):
 
     @enforce_types
     def execute_call(
-        self, operation: int, to: str, value: int, data: bytes, from_wallet: Wallet
+        self, operation: int, to: str, value: int, data: str, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
             "executeCall", (operation, to, value, data), from_wallet
         )
 
     @enforce_types
-    def set_new_data(self, key: bytes, value: bytes, from_wallet: Wallet) -> str:
+    def set_new_data(self, key: bytes, value: str, from_wallet: Wallet) -> str:
         return self.send_transaction("setNewData", (key, value), from_wallet)
 
     @enforce_types
-    def set_data_erc20(self, key: bytes, value: bytes, from_wallet: Wallet) -> str:
+    def set_data_erc20(self, key: bytes, value: str, from_wallet: Wallet) -> str:
         return self.send_transaction("setDataERC20", (key, value), from_wallet)
 
     @enforce_types
-    def set_data_v3(self, datatoken: str, value: bytes, from_wallet: Wallet) -> str:
+    def set_data_v3(self, datatoken: str, value: str, from_wallet: Wallet) -> str:
         return self.send_transaction("setDataV3", (datatoken, value), from_wallet)
 
     @enforce_types

@@ -182,11 +182,11 @@ class ERC20Token(ContractBase):
         provider_fee_address: str,
         provider_fee_token: str,
         provider_fee_amount: int,
-        v: str,
+        v: int,
         r: str,
         s: str,
         valid_until: int,
-        provider_data: bytes,
+        provider_data: str,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
@@ -212,11 +212,11 @@ class ERC20Token(ContractBase):
         provider_fee_address: str,
         provider_fee_token: str,
         provider_fee_amount: int,
-        v: str,
+        v: int,
         r: str,
         s: str,
         valid_until: int,
-        provider_data: bytes,
+        provider_data: str,
         consume_market_fee_address: str,
         consume_market_fee_token: str,
         consume_market_fee_amount: int,
@@ -253,11 +253,11 @@ class ERC20Token(ContractBase):
         provider_fee_address: str,
         provider_fee_token: str,
         provider_fee_amount: int,
-        v: str,
+        v: int,
         r: str,
         s: str,
         valid_until: int,
-        provider_data: bytes,
+        provider_data: str,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
@@ -282,7 +282,7 @@ class ERC20Token(ContractBase):
     def order_executed(
         self,
         order_tx_id: str,
-        provider_data: bytes,
+        provider_data: str,
         provider_signature: bytes,
         consumer_data: bytes,
         consumer_signature: bytes,
@@ -353,7 +353,7 @@ class ERC20Token(ContractBase):
         )
 
     @enforce_types
-    def set_data(self, data: bytes, from_wallet: Wallet) -> str:
+    def set_data(self, data: str, from_wallet: Wallet) -> str:
         return self.send_transaction("setData", (data,), from_wallet)
 
     @enforce_types
