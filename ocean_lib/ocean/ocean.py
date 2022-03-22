@@ -228,11 +228,6 @@ class Ocean:
             self.web3, get_address_of_type(self.config, "FixedPrice")
         )
 
-    @property
-    @enforce_types
-    def dispenser(self):
-        return Dispenser(self.web3, get_address_of_type(self.config, "Dispenser"))
-
     @enforce_types
     def create_fixed_rate(
         self,
