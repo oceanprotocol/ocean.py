@@ -51,10 +51,6 @@ class ERC20Token(ContractBase):
         return self.events.PublishMarketFeeChanged()
 
     @property
-    def event_PublishMarketFee(self):
-        return self.events.PublishMarketFee()
-
-    @property
     def event_ConsumeMarketFee(self):
         return self.events.ConsumeMarketFee()
 
