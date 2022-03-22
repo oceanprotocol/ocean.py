@@ -2,16 +2,14 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from enum import IntEnum
+from enum import IntEnum, IntFlag
 from typing import List
 
 from enforce_typing import enforce_types
 
 from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.structures.abi_tuples import (
-    MetadataProof,
-)
+from ocean_lib.structures.abi_tuples import MetadataProof
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -21,6 +19,23 @@ class ERC721Permissions(IntEnum):
     DEPLOY_ERC20 = 1
     UPDATE_METADATA = 2
     STORE = 3
+
+
+class MetadataState(IntEnum):
+    ACTIVE = 0
+    END_OF_LIFE = 1
+    DEPRECATED = 2
+    REVOKED = 3
+    TEMPORARILY_DISABLED = 4
+
+
+class Flags(IntFlag):
+    PLAIN = 0
+    COMPRESSED = 1
+    ENCRYPTED = 2
+
+    def to_byte(self):
+        return self.to_bytes(1, "big")
 
 
 @enforce_types

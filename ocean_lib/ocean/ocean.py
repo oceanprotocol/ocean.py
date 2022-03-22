@@ -15,12 +15,14 @@ from web3.datastructures import AttributeDict
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.bpool import BPool
+from ocean_lib.models.btoken import BTokenBase
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
@@ -98,6 +100,11 @@ class Ocean:
     @enforce_types
     def OCEAN_address(self) -> str:
         return get_ocean_token_address(self.config.address_file, web3=self.web3)
+
+    @property
+    @enforce_types
+    def OCEAN_contract(self) -> ERC20Token:
+        return BTokenBase(self.web3, self.OCEAN_address)
 
     @enforce_types
     def to_wei(
@@ -228,6 +235,11 @@ class Ocean:
             self.web3, get_address_of_type(self.config, "FixedPrice")
         )
 
+    @property
+    @enforce_types
+    def staking(self):
+        return SideStaking(self.web3, get_address_of_type(self.config, "Staking"))
+
     @enforce_types
     def create_fixed_rate(
         self,
@@ -267,6 +279,11 @@ class Ocean:
     @enforce_types
     def factory_router(self) -> FactoryRouter:
         return FactoryRouter(self.web3, get_address_of_type(self.config, "Router"))
+
+    @property
+    @enforce_types
+    def pool_template_address(self) -> str:
+        return get_address_of_type(self.config, "poolTemplate")
 
     @enforce_types
     def create_pool(

@@ -10,7 +10,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 
 @enforce_types
 class SideStaking(ContractBase):
-    CONTRACT_NAME = "SideStaking"
+    CONTRACT_NAME = "Staking"
 
     def get_datatoken_circulating_supply(self, datatoken: str) -> int:
         return self.contract.caller.getDatatokenCirculatingSupply(datatoken)
