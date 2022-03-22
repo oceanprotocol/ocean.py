@@ -196,7 +196,6 @@ def test_buy_from_fre_and_order(
         fixed_rate=to_wei(1),
         market_fee=to_wei("0.1"),
         with_mint=1,
-        payment_collector=0,
         from_wallet=publisher_wallet,
     )
 
