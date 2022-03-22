@@ -10,9 +10,7 @@ from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.structures.abi_tuples import (
-    OrderData,
-)
+from ocean_lib.structures.abi_tuples import OrderData
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -341,6 +339,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
             consumer_wallet.address,
             ZERO_ADDRESS,
         ],
+        allowed_swapper=ZERO_ADDRESS,
         fixed_rate_uints=[18, 18, to_wei("1"), to_wei("0.001"), 0],
         from_wallet=publisher_wallet,
     )

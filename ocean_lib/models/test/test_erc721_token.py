@@ -821,7 +821,7 @@ def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet, factory_r
     bpool_address = pool_event[0].args.poolAddress
     bpool = BPool(web3, bpool_address)
     assert bpool.is_finalized() is True
-    assert bpool.opc_fee() == to_wei("0.001")
+    assert bpool.opc_fee() == to_wei("0.002")
     assert bpool.get_swap_fee() == to_wei("0.003")
     assert bpool.community_fee(base_token.address) == 0
     assert bpool.community_fee(erc20_token.address) == 0
@@ -1047,7 +1047,7 @@ def test_transfer_nft_with_erc20_pool_fre(
     bpool_address = pool_event[0].args.poolAddress
     bpool = BPool(web3, bpool_address)
     assert bpool.is_finalized() is True
-    assert bpool.opc_fee() == to_wei("0.001")
+    assert bpool.opc_fee() == to_wei("0.002")
     assert bpool.get_swap_fee() == to_wei("0.003")
     assert bpool.community_fee(base_token.address) == 0
     assert bpool.community_fee(erc20_token.address) == 0

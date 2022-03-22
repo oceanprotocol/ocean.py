@@ -2,16 +2,14 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import Optional, List
+from typing import List, Optional
 
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
+
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
-from ocean_lib.structures.abi_tuples import (
-    MetadataProof,
-    OrderData,
-)
+from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -227,6 +225,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         fee_token_address: str,
         datatoken_cap: int,
         publishing_market_fee_amount: int,
+        allowed_swapper: str,
         bytess: List[bytes],
         fixed_price_address: str,
         fixed_rate_addresses: List[str],
@@ -249,7 +248,12 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                     [datatoken_cap, publishing_market_fee_amount],
                     bytess,
                 ),
-                (fixed_price_address, fixed_rate_addresses, fixed_rate_uints),
+                (
+                    fixed_price_address,
+                    fixed_rate_addresses,
+                    allowed_swapper,
+                    fixed_rate_uints,
+                ),
             ),
             from_wallet,
         )
