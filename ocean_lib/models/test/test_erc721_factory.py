@@ -290,9 +290,6 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     # Tests creating NFT with ERC20 and with Fixed Rate Exchange successfully.
     fixed_rate_address = get_address_of_type(config, "FixedPrice")
 
-    # Create ERC20 data token for fees.
-    fee_address = "0xF9f2DB837b3db03Be72252fAeD2f6E0b73E428b9"
-
     tx = erc721_nft.create_erc20(
         template_index=1,
         datatoken_name="ERC20DT1P",
@@ -339,7 +336,6 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
             consumer_wallet.address,
             ZERO_ADDRESS,
         ],
-        allowed_swapper=ZERO_ADDRESS,
         fixed_rate_uints=[18, 18, to_wei("1"), to_wei("0.001"), 0],
         from_wallet=publisher_wallet,
     )

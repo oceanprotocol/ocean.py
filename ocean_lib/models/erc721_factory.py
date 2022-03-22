@@ -225,7 +225,6 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         fee_token_address: str,
         datatoken_cap: int,
         publishing_market_fee_amount: int,
-        allowed_swapper: str,
         bytess: List[bytes],
         fixed_price_address: str,
         fixed_rate_addresses: List[str],
@@ -251,7 +250,6 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                 (
                     fixed_price_address,
                     fixed_rate_addresses,
-                    allowed_swapper,
                     fixed_rate_uints,
                 ),
             ),
