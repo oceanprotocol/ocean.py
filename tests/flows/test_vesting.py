@@ -196,7 +196,7 @@ def test_main(
         None,
     )
     assert vesting_event[0].args.datatokenAddress == erc20_token.address
-    assert vesting_event[0].args.publisherAddress == consumer_wallet.address
+    assert vesting_event[0].args.publisherAddress == erc20_token.get_payment_collector()
     assert vesting_event[0].args.caller == consumer_wallet.address
 
     # 101 blocks passed, vesting started block = tx_receipt.blockNumber (deploy pool tx)
@@ -274,7 +274,10 @@ def test_vesting_progress(
     )
     assert vesting_created_event, "Cannot find event VestingCreated."
     assert vesting_created_event[0].args.datatokenAddress == erc20_token.address
-    assert vesting_created_event[0].args.publisherAddress == publisher_wallet.address
+    assert (
+        vesting_created_event[0].args.publisherAddress
+        == erc20_token.get_payment_collector()
+    )
     assert (
         vesting_created_event[0].args.vestingEndBlock
         == vested_blocks + tx_receipt.blockNumber
