@@ -174,11 +174,12 @@ def test_main(
     assert side_staking.get_vesting_amount(erc20_token.address) == vesting_amount
 
     # check if vesting is correct
+    dt_balance_before = erc20_token.balanceOf(erc20_token.get_payment_collector())
     available_vesting_before = side_staking.get_available_vesting(erc20_token.address)
 
     # advance 100 blocks to see if available vesting increased
-    for _ in range(100):
-        # send 1 wei
+    for _ in range(99):
+        # send dummy transactions to increase block count (not part of the actual functionality)
         send_ether(consumer_wallet, ZERO_ADDRESS, 1)
 
     available_vesting_after = side_staking.get_available_vesting(erc20_token.address)
@@ -197,13 +198,16 @@ def test_main(
     assert vesting_event[0].args.publisherAddress == erc20_token.get_payment_collector()
     assert vesting_event[0].args.caller == consumer_wallet.address
 
-    # 101 blocks passed, vesting started block = tx_receipt.blockNumber (deploy pool tx)
+    # 100 blocks passed, vesting started block = tx_receipt.blockNumber (deploy pool tx)
     assert vesting_event[0].args.amountVested == int(
-        (101 * vesting_amount)
+        (100 * vesting_amount)
         / (
             side_staking.get_vesting_end_block(erc20_token.address)
             - tx_receipt.blockNumber
         )
+    )
+    assert dt_balance_before < erc20_token.balanceOf(
+        erc20_token.get_payment_collector()
     )
 
 
@@ -282,33 +286,36 @@ def test_vesting_progress(
     assert vesting_created_event[0].args.totalVestingAmount == vesting_amount
 
     # check if vesting is correct
+    dt_balance_before = erc20_token.balanceOf(erc20_token.get_payment_collector())
     available_vesting_before = side_staking.get_available_vesting(erc20_token.address)
     assert available_vesting_before == 0
 
     # advance checkpoint_block blocks to see if available vesting increased
-    for checkpoint_block in checkpoint_blocks:
-        for _ in range(checkpoint_block):
-            # send 1 wei
-            send_ether(publisher_wallet, ZERO_ADDRESS, 1)
+    for block in range(checkpoint_blocks[-1]):
+        # send dummy transactions to increase block count (not part of the actual functionality)
+        send_ether(publisher_wallet, ZERO_ADDRESS, 1)
+        if block in checkpoint_blocks:
+            available_vesting_after = side_staking.get_available_vesting(
+                erc20_token.address
+            )
+            assert (
+                available_vesting_after > available_vesting_before
+            ), "Available vesting was not increased!"
+            tx_hash = side_staking.get_vesting(erc20_token.address, publisher_wallet)
+            tx_result = web3.eth.wait_for_transaction_receipt(tx_hash)
+            vesting_event = side_staking.get_event_log(
+                SideStaking.EVENT_VESTING,
+                tx_result.blockNumber,
+                web3.eth.block_number,
+                None,
+            )
+            assert vesting_event[0].args.datatokenAddress == erc20_token.address
+            assert vesting_event[0].args.publisherAddress == publisher_wallet.address
+            assert vesting_event[0].args.caller == publisher_wallet.address
 
-        available_vesting_after = side_staking.get_available_vesting(
-            erc20_token.address
-        )
-        assert (
-            available_vesting_after > available_vesting_before
-        ), "Available vesting was not increased!"
-        tx_hash = side_staking.get_vesting(erc20_token.address, publisher_wallet)
-        tx_result = web3.eth.wait_for_transaction_receipt(tx_hash)
-        vesting_event = side_staking.get_event_log(
-            SideStaking.EVENT_VESTING,
-            tx_result.blockNumber,
-            web3.eth.block_number,
-            None,
-        )
-        assert vesting_event[0].args.datatokenAddress == erc20_token.address
-        assert vesting_event[0].args.publisherAddress == publisher_wallet.address
-        assert vesting_event[0].args.caller == publisher_wallet.address
-
-        assert vesting_event[0].args.amountVested == int(
-            ((checkpoint_block + 1) * vesting_amount) / vested_blocks
-        )
+            assert vesting_event[0].args.amountVested == int(
+                ((block + 1) * vesting_amount) / vested_blocks
+            )
+            assert dt_balance_before < erc20_token.balanceOf(
+                erc20_token.get_payment_collector()
+            )
