@@ -228,6 +228,11 @@ class Ocean:
             self.web3, get_address_of_type(self.config, "FixedPrice")
         )
 
+    @property
+    @enforce_types
+    def dispenser(self):
+        return Dispenser(self.web3, get_address_of_type(self.config, "Dispenser"))
+
     @enforce_types
     def create_fixed_rate(
         self,
@@ -244,6 +249,7 @@ class Ocean:
             basetoken_address=base_token.address,
             owner=from_wallet.address,
             market_fee_collector=from_wallet.address,
+            allowed_swapper=ZERO_ADDRESS,
             basetoken_decimals=base_token.decimals(),
             datatoken_decimals=erc20_token.decimals(),
             fixed_rate=self.to_wei(1),
