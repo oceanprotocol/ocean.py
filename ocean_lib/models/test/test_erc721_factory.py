@@ -327,6 +327,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         fixed_price_base_token=fee_erc20_address,
         fixed_price_owner=publisher_wallet.address,
         fixed_price_publish_market_fee_collector=consumer_wallet.address,
+        fixed_price_allowed_swapper=ZERO_ADDRESS,
         fixed_price_base_token_decimals=18,
         fixed_price_datatoken_decimals=18,
         fixed_price_rate=to_wei("1"),

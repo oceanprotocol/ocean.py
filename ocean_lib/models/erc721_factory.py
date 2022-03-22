@@ -268,6 +268,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         fixed_price_base_token: str,
         fixed_price_owner: str,
         fixed_price_publish_market_fee_collector: str,
+        fixed_price_allowed_swapper: str,
         fixed_price_base_token_decimals: int,
         fixed_price_datatoken_decimals: int,
         fixed_price_rate: int,
@@ -297,6 +298,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                         fixed_price_base_token,
                         fixed_price_owner,
                         fixed_price_publish_market_fee_collector,
+                        fixed_price_allowed_swapper,
                     ],
                     [
                         fixed_price_base_token_decimals,
