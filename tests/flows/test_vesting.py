@@ -174,9 +174,7 @@ def test_main(
     assert side_staking.get_vesting_amount(erc20_token.address) == vesting_amount
 
     # check if vesting is correct
-    dt_balance_before = erc20_token.balanceOf(consumer_wallet.address)
     available_vesting_before = side_staking.get_available_vesting(erc20_token.address)
-    assert available_vesting_before == 0
 
     # advance 100 blocks to see if available vesting increased
     for _ in range(100):
@@ -207,7 +205,6 @@ def test_main(
             - tx_receipt.blockNumber
         )
     )
-    assert dt_balance_before < erc20_token.balanceOf(consumer_wallet.address)
 
 
 @pytest.mark.slow
@@ -285,7 +282,6 @@ def test_vesting_progress(
     assert vesting_created_event[0].args.totalVestingAmount == vesting_amount
 
     # check if vesting is correct
-    dt_balance_before = erc20_token.balanceOf(publisher_wallet.address)
     available_vesting_before = side_staking.get_available_vesting(erc20_token.address)
     assert available_vesting_before == 0
 
@@ -316,4 +312,3 @@ def test_vesting_progress(
         assert vesting_event[0].args.amountVested == int(
             ((checkpoint_block + 1) * vesting_amount) / vested_blocks
         )
-        assert dt_balance_before < erc20_token.balanceOf(publisher_wallet.address)
