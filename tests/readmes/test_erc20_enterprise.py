@@ -242,8 +242,8 @@ def test_erc20_enterprise_flow_with_fre():
         exchange_contract=fixed_rate_exchange.address,
         exchange_id=exchange_id,
         max_base_token_amount=ocean.to_wei(10),
-        swap_market_fee=ocean.to_wei("0.001"),  # 1e15 => 0.1%
-        swap_market_fee_address=bob_wallet.address,
+        consume_market_swap_fee=ocean.to_wei("0.001"),  # 1e15 => 0.1%
+        consume_market_swap_fee_address=bob_wallet.address,
         from_wallet=alice_wallet,
     )
     tx_receipt = ocean.web3.eth.wait_for_transaction_receipt(tx_id)
