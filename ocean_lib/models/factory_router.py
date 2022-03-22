@@ -24,26 +24,38 @@ class FactoryRouter(BFactory):
         """Gets a router owner address."""
         return self.contract.caller.routerOwner()
 
-    def is_pool_template(self, address: str) -> bool:
-        return self.contract.caller.isPoolTemplate(address)
-
-    def is_fixed_rate_contract(self, address: str) -> bool:
-        return self.contract.caller.isFixedRateContract(address)
-
     def factory(self):
         return self.contract.caller.factory()
-
-    def is_ss_contract(self, address: str):
-        return self.contract.caller.isSSContract(address)
-
-    def get_opc_fee(self, base_token: str) -> int:
-        return self.contract.caller.getOPCFee(base_token)
 
     def swap_ocean_fee(self) -> int:
         return self.contract.caller.swapOceanFee()
 
+    def swap_non_ocean_fee(self) -> int:
+        return self.contract.caller.swapNonOceanFee()
+
     def is_approved_token(self, ocean_address: str) -> bool:
         return self.contract.caller.isApprovedToken(ocean_address)
+
+    def is_ss_contract(self, address: str):
+        return self.contract.caller.isSSContract(address)
+
+    def is_fixed_rate_contract(self, address: str) -> bool:
+        return self.contract.caller.isFixedRateContract(address)
+
+    def is_dispenser_contract(self, address: str) -> bool:
+        return self.contract.caller.isDispenserContract(address)
+
+    def get_opc_fee(self, base_token: str) -> int:
+        return self.contract.caller.getOPCFee(base_token)
+
+    def get_opc_consume_fee(self) -> int:
+        return self.contract.caller.getOPCConsumeFee()
+
+    def get_opc_provider_fee(self) -> int:
+        return self.contract.caller.getOPCProviderFee()
+
+    def get_min_vesting_period(self) -> int:
+        return self.contract.caller.getMinVestingPeriod()
 
     def stake_batch(
         self, stakes: List[Union[dict, tuple, Stakes]], from_wallet: Wallet
