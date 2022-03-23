@@ -15,7 +15,6 @@ from web3.datastructures import AttributeDict
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.bpool import BPool
-from ocean_lib.models.btoken import BTokenBase
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
@@ -103,8 +102,8 @@ class Ocean:
 
     @property
     @enforce_types
-    def OCEAN_contract(self) -> ERC20Token:
-        return BTokenBase(self.web3, self.OCEAN_address)
+    def OCEAN_token(self) -> ERC20Token:
+        return ERC20Token(self.web3, self.OCEAN_address)
 
     @enforce_types
     def to_wei(
