@@ -40,9 +40,6 @@ def test_properties(web3, config, publisher_wallet):
         == ERC20Token.EVENT_PUBLISH_MARKET_FEE_CHANGED
     )
     assert (
-        erc20.event_PublishMarketFee.abi["name"] == ERC20Token.EVENT_PUBLISH_MARKET_FEE
-    )
-    assert (
         erc20.event_ConsumeMarketFee.abi["name"] == ERC20Token.EVENT_CONSUME_MARKET_FEE
     )
     assert erc20.event_ProviderFee.abi["name"] == ERC20Token.EVENT_PROVIDER_FEE
@@ -196,7 +193,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
 
     permissions = erc20.get_permissions(publisher_wallet.address)
     assert not permissions[RolesERC20.MINTER]
-    assert not permissions[RolesERC20.FEE_MANAGER]
+    assert not permissions[RolesERC20.PAYMENT_MANAGER]
 
     # User should succeed to call startOrder on a ERC20 without publishFees, consumeFeeAmount on top is ZERO
     # Get new tokens

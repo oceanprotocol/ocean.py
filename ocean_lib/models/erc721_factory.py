@@ -25,6 +25,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     EVENT_NEW_POOL = "NewPool"
     EVENT_NEW_FIXED_RATE = "NewFixedRate"
     EVENT_DISPENSER_CREATED = "DispenserCreated"
+    EVENT_TRANSFER = "Transfer"
 
     @property
     def event_NFTCreated(self):
@@ -53,6 +54,10 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     @property
     def event_DispenserCreated(self):
         return self.events.DispenserCreated()
+
+    @property
+    def event_Transfer(self):
+        return self.events.Transfer()
 
     def verify_nft(self, nft: str) -> bool:
         """Checks that a token was registered."""
