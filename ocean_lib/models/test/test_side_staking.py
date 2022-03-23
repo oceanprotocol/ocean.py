@@ -572,15 +572,15 @@ def test_side_staking_constant_rate(
 
     ocean_token.transfer(another_consumer_wallet.address, to_wei("50"), consumer_wallet)
 
-    bpool, erc20_token, _, _ = create_nft_erc20_with_pool(
-        web3=web3,
-        config=config,
-        publisher_wallet=publisher_wallet,
-        swap_fee=swap_fee,
-        swap_market_fee=swap_market_fee,
-        initial_pool_liquidity=initial_pool_liquidity,
-        token_cap=token_cap,
-        vesting_amount=0,
+    bpool, erc20_token, erc721_token, pool_token = create_nft_erc20_with_pool(
+        web3,
+        config,
+        publisher_wallet,
+        ocean_token,
+        swap_fee,
+        swap_market_fee,
+        initial_pool_liquidity,
+        token_cap,
     )
 
     ocean_token.approve(bpool.address, big_allowance, another_consumer_wallet)
@@ -638,6 +638,7 @@ def test_side_staking_over_datatoken_cap(
         web3,
         config,
         publisher_wallet,
+        ocean_token,
         swap_fee,
         swap_market_fee,
         initial_pool_liquidity,
