@@ -25,6 +25,8 @@ from tests.resources.helper_functions import (
     create_nft_erc20_with_pool,
 )
 
+BPOOL_FUZZING_TESTS_NBR_OF_RUNS = 1
+
 
 def _deploy_erc721_token(config, web3, factory_deployer_wallet, manager_wallet):
     erc721_nft = deploy_erc721_erc20(web3, config, factory_deployer_wallet)
@@ -79,16 +81,12 @@ def get_random_max_token_amount_out(
 def test_fuzzing_pool_ocean(
     web3,
     config,
-    factory_deployer_wallet,
     consumer_wallet,
     another_consumer_wallet,
     publisher_wallet,
     factory_router,
 ):
     """Test the liquidity pool contract with random values."""
-
-    # This number could be raised to increase the fuzzing time
-    number_of_runs = 3
 
     errors = []
 
@@ -108,7 +106,7 @@ def test_fuzzing_pool_ocean(
         swap_out_two_balance,
     ) = [0 for _ in range(13)]
 
-    for _ in range(number_of_runs):
+    for _ in range(BPOOL_FUZZING_TESTS_NBR_OF_RUNS):
         try:
             side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
 
@@ -266,9 +264,6 @@ def test_fuzzing_pool_ocean(
                 "SWAP_FEES", tx_receipt.blockNumber, web3.eth.block_number, None
             )
 
-            swap_fees_event_args = swap_fees_event[0].args
-
-            assert swap_fees_event_args.oceanFeeAmount == 0
             assert (
                 ocean_market_fee_balance + swap_fees_event_args.marketFeeAmount
                 == bpool.publish_market_fee(swap_fees_event_args.tokenFeeAddress)
