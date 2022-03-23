@@ -210,6 +210,7 @@ def test_main(
         erc20_token.get_payment_collector()
     )
 
+
 @pytest.mark.unit
 def test_vesting_progress(
     web3,
