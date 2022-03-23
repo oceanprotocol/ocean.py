@@ -210,8 +210,7 @@ def test_main(
         erc20_token.get_payment_collector()
     )
 
-
-@pytest.mark.slow
+@pytest.mark.unit
 def test_vesting_progress(
     web3,
     config,
@@ -229,7 +228,7 @@ def test_vesting_progress(
         get_address_of_type(config, "Router"), initial_ocean_liq, publisher_wallet
     )
     vested_blocks = factory_router.get_min_vesting_period()
-    percentages = [0.01, 0.1, 1]
+    percentages = [0.0002, 0.005, 0.01]
     checkpoint_blocks = list(map(lambda p: int((vested_blocks * p) / 100), percentages))
 
     vesting_amount = initial_ocean_liq // 100 * 9
@@ -291,31 +290,42 @@ def test_vesting_progress(
     assert available_vesting_before == 0
 
     # advance checkpoint_block blocks to see if available vesting increased
+    counter = 0
     for block in range(checkpoint_blocks[-1]):
         # send dummy transactions to increase block count (not part of the actual functionality)
         send_ether(publisher_wallet, ZERO_ADDRESS, 1)
-        if block in checkpoint_blocks:
-            available_vesting_after = side_staking.get_available_vesting(
-                erc20_token.address
-            )
-            assert (
-                available_vesting_after > available_vesting_before
-            ), "Available vesting was not increased!"
-            tx_hash = side_staking.get_vesting(erc20_token.address, publisher_wallet)
-            tx_result = web3.eth.wait_for_transaction_receipt(tx_hash)
-            vesting_event = side_staking.get_event_log(
-                SideStaking.EVENT_VESTING,
-                tx_result.blockNumber,
-                web3.eth.block_number,
-                None,
-            )
-            assert vesting_event[0].args.datatokenAddress == erc20_token.address
-            assert vesting_event[0].args.publisherAddress == publisher_wallet.address
-            assert vesting_event[0].args.caller == publisher_wallet.address
+        if block not in checkpoint_blocks:
+            continue
+        available_vesting_after = side_staking.get_available_vesting(
+            erc20_token.address
+        )
 
-            assert vesting_event[0].args.amountVested == int(
-                ((block + 1) * vesting_amount) / vested_blocks
-            )
-            assert dt_balance_before < erc20_token.balanceOf(
-                erc20_token.get_payment_collector()
-            )
+        amount_vested_so_far = side_staking.get_vesting_amount_so_far(
+            erc20_token.address
+        )
+        assert (
+            available_vesting_after > available_vesting_before
+        ), "Available vesting was not increased!"
+        tx_hash = side_staking.get_vesting(erc20_token.address, publisher_wallet)
+
+        # counter is used to count the number of times when get_vesting is called (it mints another block that change the formula)
+        counter += 1
+        tx_result = web3.eth.wait_for_transaction_receipt(tx_hash)
+        vesting_event = side_staking.get_event_log(
+            SideStaking.EVENT_VESTING,
+            tx_result.blockNumber,
+            web3.eth.block_number,
+            None,
+        )
+        assert vesting_event[0].args.datatokenAddress == erc20_token.address
+        assert vesting_event[0].args.publisherAddress == publisher_wallet.address
+        assert vesting_event[0].args.caller == publisher_wallet.address
+
+        assert (
+            vesting_event[0].args.amountVested
+            == int(((block + 1 + counter) * vesting_amount) / vested_blocks)
+            - amount_vested_so_far
+        )
+        assert dt_balance_before < erc20_token.balanceOf(
+            erc20_token.get_payment_collector()
+        )
