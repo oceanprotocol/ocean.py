@@ -425,6 +425,7 @@ def test_side_staking(
         == "execution reverted: VM Exception while processing transaction: revert ERR: Only pool can call this"
     )
 
+
 @pytest.mark.unit
 def test_side_staking_bot_consistency(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
