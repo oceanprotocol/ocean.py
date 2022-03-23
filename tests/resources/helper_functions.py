@@ -482,6 +482,30 @@ def wallet_exit_pool(web3, bpool, pool_token, wallet, amt: int = 0):
     )
 
 
+def wallet_exit_pool_one_side(
+    web3, bpool, base_token, pool_token, wallet, amt: int = 0
+):
+    """
+    Exit pool with one side with amt, if amt is 0, exit pool with max amount.
+    """
+    pool_token_out_balance = bpool.get_balance(
+        base_token.address
+    )  # pool base token balance
+    max_out_ratio = bpool.get_max_out_ratio()  # max ratio
+
+    max_out_ratio_limit = int(from_wei(max_out_ratio, "ether") * pool_token_out_balance)
+
+    web3.eth.wait_for_transaction_receipt(
+        bpool.exit_swap_pool_amount_in(
+            amt
+            if amt
+            else min(max_out_ratio_limit, pool_token.balanceOf(wallet.address)),
+            0,
+            wallet,
+        )
+    )
+
+
 def join_pool_one_side(web3, bpool, base_token, wallet, amt: int = 0):
     """
     Join 1ss pool with amt, if amt is 0, join pool with max amount.
