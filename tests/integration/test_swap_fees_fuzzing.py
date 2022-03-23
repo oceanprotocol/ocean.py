@@ -264,6 +264,8 @@ def test_fuzzing_pool_ocean(
                 "SWAP_FEES", tx_receipt.blockNumber, web3.eth.block_number, None
             )
 
+            swap_fees_event_args = swap_fees_event[0].args
+
             assert (
                 ocean_market_fee_balance + swap_fees_event_args.marketFeeAmount
                 == bpool.publish_market_fee(swap_fees_event_args.tokenFeeAddress)
