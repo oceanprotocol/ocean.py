@@ -92,6 +92,7 @@ def test_stressed_pool_creation():
             initial_liq=ocean.to_wei(2000),
             lp_swap_fee=ocean.to_wei("0.01"),
             market_swap_fee=ocean.to_wei("0.01"),
+            market_fee_collector=alice_wallet.address,
             from_wallet=alice_wallet,
         )
         assert bpool.address

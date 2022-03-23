@@ -75,6 +75,7 @@ def asset_displayed_on_sale(ocean: Ocean, wallet: Wallet):
         initial_liq=ocean.to_wei(2000),
         lp_swap_fee=ocean.to_wei("0.01"),
         market_swap_fee=ocean.to_wei("0.01"),
+        market_fee_collector=wallet.address,
         from_wallet=wallet,
     )
     assert bpool.address

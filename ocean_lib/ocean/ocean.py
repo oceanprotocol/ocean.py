@@ -295,6 +295,7 @@ class Ocean:
         initial_liq: int,
         lp_swap_fee: int,
         market_swap_fee: int,
+        market_fee_collector: str,
         from_wallet: Wallet,
     ) -> BPool:
         base_token.approve(
@@ -313,9 +314,7 @@ class Ocean:
             basetoken_address=base_token.address,
             basetoken_sender=from_wallet.address,
             publisher_address=from_wallet.address,
-            market_fee_collector=get_address_of_type(
-                self.config, "OPFCommunityFeeCollector"
-            ),
+            market_fee_collector=market_fee_collector,
             pool_template_address=get_address_of_type(self.config, "poolTemplate"),
             from_wallet=from_wallet,
         )
