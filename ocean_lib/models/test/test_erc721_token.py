@@ -13,6 +13,7 @@ from ocean_lib.models.fixed_rate_exchange import (
     FixedRateExchange,
     FixedRateExchangeDetails,
 )
+from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.web3_internal.constants import BLOB, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
@@ -647,7 +648,7 @@ def test_fail_transfer_function(web3, config, publisher_wallet, consumer_wallet)
 
 
 def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet, factory_router):
-    """Tests transferring the NFT before deploying an ERC20, a pool, a FRE."""
+    """Tests transferring the NFT before deploying an ERC20"""
     erc721_factory_address = get_address_of_type(
         config, ERC721FactoryContract.CONTRACT_NAME
     )
@@ -790,6 +791,44 @@ def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet, factory_r
     assert publish_fees[1] == base_token.address
     assert publish_fees[2] == to_wei(1)
 
+
+def test_nft_transfer_with_pool(
+    web3, config, publisher_wallet, consumer_wallet, factory_router
+):
+    """Tests transferring the NFT before deploying an ERC20, a pool."""
+    erc721_nft, erc20_token = deploy_erc721_erc20(
+        web3=web3,
+        config=config,
+        erc721_publisher=publisher_wallet,
+        erc20_minter=publisher_wallet,
+        cap=to_wei(200),
+    )
+
+    tx = erc721_nft.safe_transfer_from(
+        publisher_wallet.address,
+        consumer_wallet.address,
+        token_id=1,
+        from_wallet=publisher_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    transfer_event = erc721_nft.get_event_log(
+        ERC721FactoryContract.EVENT_TRANSFER,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert transfer_event[0].event == "Transfer"
+    assert transfer_event[0].args["from"] == publisher_wallet.address
+    assert transfer_event[0].args.to == consumer_wallet.address
+    assert erc721_nft.balance_of(consumer_wallet.address) == 1
+    assert erc721_nft.balance_of(publisher_wallet.address) == 0
+    assert erc721_nft.is_erc20_deployer(consumer_wallet.address) is True
+    assert erc721_nft.owner_of(1) == consumer_wallet.address
+
+    _, base_token = deploy_erc721_erc20(
+        web3, config, consumer_wallet, consumer_wallet, cap=to_wei(250)
+    )
+
     # The newest owner of the NFT (consumer wallet) can deploy a pool
     base_token.mint(consumer_wallet.address, to_wei(200), consumer_wallet)
     assert base_token.balanceOf(consumer_wallet.address) == to_wei(200)
@@ -898,20 +937,53 @@ def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet, factory_r
     )
     assert bpt_event[0].args.bptAmount  # amount in pool shares
 
+
+def test_nft_transfer_with_fre(web3, config, publisher_wallet, consumer_wallet):
+    """Tests transferring the NFT before deploying an ERC20, a FRE."""
+    erc721_nft, erc20_token = deploy_erc721_erc20(
+        web3=web3,
+        config=config,
+        erc721_publisher=publisher_wallet,
+        erc20_minter=publisher_wallet,
+        cap=to_wei(200),
+    )
+
+    tx = erc721_nft.safe_transfer_from(
+        publisher_wallet.address,
+        consumer_wallet.address,
+        token_id=1,
+        from_wallet=publisher_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    transfer_event = erc721_nft.get_event_log(
+        ERC721FactoryContract.EVENT_TRANSFER,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert transfer_event[0].event == "Transfer"
+    assert transfer_event[0].args["from"] == publisher_wallet.address
+    assert transfer_event[0].args.to == consumer_wallet.address
+    assert erc721_nft.balance_of(consumer_wallet.address) == 1
+    assert erc721_nft.balance_of(publisher_wallet.address) == 0
+    assert erc721_nft.is_erc20_deployer(consumer_wallet.address) is True
+    assert erc721_nft.owner_of(1) == consumer_wallet.address
+
+    OCEAN_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
     # The newest owner of the NFT (consumer wallet) has ERC20 deployer role & can deploy a FRE
     fixed_exchange = FixedRateExchange(web3, get_address_of_type(config, "FixedPrice"))
     number_of_exchanges = fixed_exchange.get_number_of_exchanges()
     tx = erc20_token.create_fixed_rate(
         fixed_price_address=fixed_exchange.address,
-        basetoken_address=base_token.address,
+        basetoken_address=OCEAN_token.address,
         owner=consumer_wallet.address,
         market_fee_collector=consumer_wallet.address,
         allowed_swapper=ZERO_ADDRESS,
-        basetoken_decimals=18,
-        datatoken_decimals=18,
+        basetoken_decimals=OCEAN_token.decimals(),
+        datatoken_decimals=erc20_token.decimals(),
         fixed_rate=to_wei(1),
         market_fee=to_wei("0.001"),
-        with_mint=0,
+        with_mint=1,
         from_wallet=consumer_wallet,
     )
 
@@ -939,17 +1011,49 @@ def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet, factory_r
     assert (
         exchange_details[FixedRateExchangeDetails.DT_DECIMALS] == erc20_token.decimals()
     )
-    assert exchange_details[FixedRateExchangeDetails.BASE_TOKEN] == base_token.address
+    assert exchange_details[FixedRateExchangeDetails.BASE_TOKEN] == OCEAN_token.address
     assert (
-        exchange_details[FixedRateExchangeDetails.BT_DECIMALS] == base_token.decimals()
+        exchange_details[FixedRateExchangeDetails.BT_DECIMALS] == OCEAN_token.decimals()
     )
     assert exchange_details[FixedRateExchangeDetails.FIXED_RATE] == to_wei(1)
     assert exchange_details[FixedRateExchangeDetails.ACTIVE] is True
-    assert exchange_details[FixedRateExchangeDetails.DT_SUPPLY] == 0
-    assert exchange_details[FixedRateExchangeDetails.BT_SUPPLY] == 0
     assert exchange_details[FixedRateExchangeDetails.DT_BALANCE] == 0
     assert exchange_details[FixedRateExchangeDetails.BT_BALANCE] == 0
-    assert exchange_details[FixedRateExchangeDetails.WITH_MINT] is False
+    assert exchange_details[FixedRateExchangeDetails.WITH_MINT] is True
+
+    erc20_token.approve(fixed_exchange.address, to_wei(100), consumer_wallet)
+    OCEAN_token.approve(fixed_exchange.address, to_wei(100), consumer_wallet)
+    amount_dt_bought = to_wei(2)
+    fixed_exchange.buy_dt(
+        exchange_id=exchange_id,
+        datatoken_amount=amount_dt_bought,
+        max_base_token_amount=to_wei(5),
+        consume_market_address=ZERO_ADDRESS,
+        consume_market_swap_fee_amount=0,
+        from_wallet=consumer_wallet,
+    )
+    assert (
+        fixed_exchange.get_dt_supply(exchange_id)
+        == exchange_details[FixedRateExchangeDetails.DT_SUPPLY] - amount_dt_bought
+    )
+    assert erc20_token.balanceOf(consumer_wallet.address) == amount_dt_bought
+    fixed_exchange.sell_dt(
+        exchange_id=exchange_id,
+        datatoken_amount=to_wei(2),
+        min_base_token_amount=to_wei(1),
+        consume_market_address=ZERO_ADDRESS,
+        consume_market_swap_fee_amount=0,
+        from_wallet=consumer_wallet,
+    )
+    assert (
+        fixed_exchange.get_dt_supply(exchange_id)
+        == exchange_details[FixedRateExchangeDetails.DT_SUPPLY] - amount_dt_bought
+    )
+    assert erc20_token.balanceOf(consumer_wallet.address) == 0
+    fixed_exchange.collect_dt(
+        exchange_id=exchange_id, amount=to_wei(1), from_wallet=consumer_wallet
+    )
+    assert erc20_token.balanceOf(consumer_wallet.address) == to_wei(1)
 
 
 def test_transfer_nft_with_erc20_pool_fre(

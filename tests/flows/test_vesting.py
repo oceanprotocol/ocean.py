@@ -330,3 +330,8 @@ def test_vesting_progress(
         assert dt_balance_before < erc20_token.balanceOf(
             erc20_token.get_payment_collector()
         )
+
+        assert (
+            erc20_token.balanceOf(erc20_token.get_payment_collector())
+            == vesting_event[0].args.amountVested + amount_vested_so_far
+        )
