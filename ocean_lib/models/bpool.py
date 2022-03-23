@@ -294,6 +294,7 @@ class BPool(BTokenBase):
             "rebind", (token_address, balance, weight), from_wallet
         )
 
+    @enforce_types
     def get_spot_price(
         self, token_in: str, token_out: str, consume_market_swap_fee
     ) -> int:
@@ -333,6 +334,10 @@ class BPool(BTokenBase):
     def get_max_in_ratio(self) -> int:
         return self.contract.caller.MAX_IN_RATIO()
 
+    @enforce_types
+    def get_min_fee(self) -> int:
+        return self.contract.caller.MIN_FEE()
+    
     @enforce_types
     def join_pool(
         self, pool_amount_out: int, max_amounts_in: List[int], from_wallet: Wallet

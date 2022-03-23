@@ -9,6 +9,7 @@ import os
 from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
+from eth_utils import from_wei
 import yaml
 from enforce_typing import enforce_types
 from web3 import Web3
@@ -446,3 +447,82 @@ def create_nft_erc20_with_pool(
     pool_token = ERC20Token(web3, pool_address)
 
     return bpool, erc20_token, erc721_token, pool_token
+
+
+def join_pool_with_max_base_token(bpool, web3, base_token, wallet, amt: int = 0):
+    """
+    Join pool with max base token if amt is 0. Otherwise join pool with amt base token.
+    """
+    pool_token_out_balance = bpool.get_balance(
+        base_token.address
+    )  # pool base token balance
+    max_out_ratio = bpool.get_max_out_ratio()  # max ratio
+
+    max_out_ratio_limit = int(from_wei(max_out_ratio, "ether") * pool_token_out_balance)
+
+    web3.eth.wait_for_transaction_receipt(
+        bpool.join_swap_extern_amount_in(
+            amt if amt else max_out_ratio_limit,
+            to_wei("0"),
+            wallet,
+        )
+    )
+
+
+def wallet_exit_pool(web3, bpool, pool_token, wallet, amt: int = 0):
+    """
+    Exit pool with amt, if amt is 0, exit pool with max amount.
+    """
+    web3.eth.wait_for_transaction_receipt(
+        bpool.exit_pool(
+            amt if amt else pool_token.balanceOf(wallet.address),
+            [to_wei("0"), to_wei("0")],
+            wallet,
+        )
+    )
+
+
+def join_pool_one_side(web3, bpool, base_token, wallet, amt: int = 0):
+    """
+    Join 1ss pool with amt, if amt is 0, join pool with max amount.
+    """
+    pool_token_out_balance = bpool.get_balance(
+        base_token.address
+    )  # pool base token balance
+    max_out_ratio = bpool.get_max_out_ratio()  # max ratio
+
+    max_out_ratio_limit = int(from_wei(max_out_ratio, "ether") * pool_token_out_balance)
+
+    web3.eth.wait_for_transaction_receipt(
+        bpool.join_swap_extern_amount_in(
+            amt if amt else max_out_ratio_limit,
+            to_wei("0"),
+            wallet,
+        )
+    )
+
+
+def swap_exact_amount_in_datatoken(bpool, datatoken, base_token, wallet, amt: int = 0):
+    bpool.swap_exact_amount_in(
+        datatoken.address,
+        base_token.address,
+        wallet.address,
+        amt,
+        to_wei("0"),
+        to_wei("100000"),
+        to_wei("0"),
+        wallet,
+    )
+
+
+def swap_exact_amount_in_base_token(bpool, datatoken, base_token, wallet, amt: int = 0):
+    bpool.swap_exact_amount_in(
+        base_token.address,
+        datatoken.address,
+        wallet.address,
+        amt,
+        to_wei("0"),
+        to_wei("100000"),
+        to_wei("0"),
+        wallet,
+    )

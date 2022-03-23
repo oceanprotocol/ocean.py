@@ -2,19 +2,27 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from re import I
+from eth_utils import from_wei
 import pytest
 from web3 import exceptions
 
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import (
+    create_nft_erc20_with_pool,
     deploy_erc721_erc20,
     get_address_of_type,
+    join_pool_one_side,
+    swap_exact_amount_in_base_token,
+    swap_exact_amount_in_datatoken,
     transfer_ocean_if_balance_lte,
+    wallet_exit_pool,
 )
 
 
@@ -392,3 +400,211 @@ def test_side_staking(
 
     # Get vesting should be callable by anyone
     side_staking.get_vesting(erc20.address, another_consumer_wallet)
+
+    # Only pool can call this function
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        side_staking.can_stake(erc20.address, 10)
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERR: Only pool can call this"
+    )
+
+    # Only pool can call this function
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        side_staking.stake(erc20.address, 10, consumer_wallet)
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERR: Only pool can call this"
+    )
+
+    # Only pool can call this function
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        side_staking.unstake(erc20.address, 10, 5, consumer_wallet)
+    assert (
+        err.value.args[0]
+        == "execution reverted: VM Exception while processing transaction: revert ERR: Only pool can call this"
+    )
+
+@pytest.mark.unit
+def test_side_staking_bot_consistency(
+    web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
+):
+    """
+    In this test we try to make a profit in base_token by joining the pool and swapping in different orders. We check that it's not possible
+    to make any profit an therefore steal from the pool.
+    """
+    # Test initial values and setups
+    initial_pool_liquidity = to_wei("50")
+    token_cap = to_wei("100")
+    swap_market_fee = to_wei("0.0001")
+    swap_fee = to_wei("0.0001")
+    big_allowance = to_wei("100000000")
+
+    ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
+
+    ocean_token.transfer(another_consumer_wallet.address, to_wei("50"), consumer_wallet)
+
+    bpool, erc20_token, erc721_token, pool_token = create_nft_erc20_with_pool(
+        web3,
+        config,
+        publisher_wallet,
+        swap_fee,
+        swap_market_fee,
+        initial_pool_liquidity,
+        token_cap,
+    )
+
+    ocean_token.approve(bpool.address, big_allowance, another_consumer_wallet)
+    erc20_token.approve(bpool.address, big_allowance, another_consumer_wallet)
+
+    # End test initial values and setups
+
+    initial_ocean_user_balance = ocean_token.balanceOf(another_consumer_wallet.address)
+    swap_exact_amount_in_base_token(
+        bpool, erc20_token, ocean_token, another_consumer_wallet, to_wei("20")
+    )
+    join_pool_one_side(web3, bpool, ocean_token, another_consumer_wallet)
+    wallet_exit_pool(web3, bpool, pool_token, another_consumer_wallet)
+    swap_exact_amount_in_datatoken(
+        bpool,
+        erc20_token,
+        ocean_token,
+        another_consumer_wallet,
+        erc20_token.balanceOf(another_consumer_wallet.address),
+    )
+
+    # Check that users hasn't made any profit
+    assert pool_token.balanceOf(another_consumer_wallet.address) == 0
+    assert erc20_token.balanceOf(another_consumer_wallet.address) == 0
+    assert (
+        ocean_token.balanceOf(another_consumer_wallet.address)
+        <= initial_ocean_user_balance
+    )
+
+    # Test in a different order
+    initial_ocean_user_balance = ocean_token.balanceOf(another_consumer_wallet.address)
+    swap_exact_amount_in_base_token(
+        bpool, erc20_token, ocean_token, another_consumer_wallet, to_wei("20")
+    )
+    join_pool_one_side(web3, bpool, ocean_token, another_consumer_wallet)
+    swap_exact_amount_in_datatoken(
+        bpool,
+        erc20_token,
+        ocean_token,
+        another_consumer_wallet,
+        erc20_token.balanceOf(another_consumer_wallet.address),
+    )
+    wallet_exit_pool(web3, bpool, pool_token, another_consumer_wallet)
+    swap_exact_amount_in_datatoken(
+        bpool,
+        erc20_token,
+        ocean_token,
+        another_consumer_wallet,
+        erc20_token.balanceOf(another_consumer_wallet.address),
+    )
+
+    # Check that users hasn't made any profit
+    assert pool_token.balanceOf(another_consumer_wallet.address) == 0
+    assert erc20_token.balanceOf(another_consumer_wallet.address) == 0
+    assert (
+        ocean_token.balanceOf(another_consumer_wallet.address)
+        <= initial_ocean_user_balance
+    )
+
+
+def test_side_staking_constant_rate(
+    web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
+):
+    """
+    In this test we test that the side staking bot keeps the same rate when the datatoken supply is less than the cap.
+    """
+    # Test initial values and setups
+    initial_pool_liquidity = to_wei("1")
+    token_cap = to_wei("5")
+    swap_market_fee = to_wei("0.0001")
+    swap_fee = to_wei("0.0001")
+    big_allowance = to_wei("100000000")
+
+    ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
+
+    ocean_token.transfer(another_consumer_wallet.address, to_wei("50"), consumer_wallet)
+
+    bpool, erc20_token, erc721_token, pool_token = create_nft_erc20_with_pool(
+        web3,
+        config,
+        publisher_wallet,
+        swap_fee,
+        swap_market_fee,
+        initial_pool_liquidity,
+        token_cap,
+    )
+
+    ocean_token.approve(bpool.address, big_allowance, another_consumer_wallet)
+    erc20_token.approve(bpool.address, big_allowance, another_consumer_wallet)
+
+    # End test initial values and setups
+
+    initial_spot_price_basetoken_datatoken = bpool.get_spot_price(
+        ocean_token.address, erc20_token.address, swap_market_fee
+    )
+    join_pool_one_side(web3, bpool, ocean_token, another_consumer_wallet, to_wei("0.5"))
+    final_spot_price_basetoken_datatoken = bpool.get_spot_price(
+        ocean_token.address, erc20_token.address, swap_market_fee
+    )
+
+    assert (
+        final_spot_price_basetoken_datatoken != initial_spot_price_basetoken_datatoken
+    )
+
+
+def test_side_staking_over_datatoken_cap(
+    web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
+):
+    """
+    In this test we test that the side staking bot works as espected when the datatoken supply is over the cap.
+    """
+    # Test initial values and setups
+    initial_pool_liquidity = to_wei("1")
+    token_cap = to_wei("5")
+    swap_market_fee = to_wei("0.0001")
+    swap_fee = to_wei("0.0001")
+    big_allowance = to_wei("100000000")
+
+    ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
+
+    ocean_token.transfer(another_consumer_wallet.address, to_wei("50"), consumer_wallet)
+
+    bpool, erc20_token, erc721_token, pool_token = create_nft_erc20_with_pool(
+        web3,
+        config,
+        publisher_wallet,
+        swap_fee,
+        swap_market_fee,
+        initial_pool_liquidity,
+        token_cap,
+    )
+
+    ocean_token.approve(bpool.address, big_allowance, another_consumer_wallet)
+    erc20_token.approve(bpool.address, big_allowance, another_consumer_wallet)
+
+    # End test initial values and setups
+
+    erc20_token_total_supply = erc20_token.get_total_supply()
+    assert erc20_token_total_supply == token_cap
+
+    # Fill the pool until the cap is reached
+    previous_pool_datatoken_balance = 0
+    while previous_pool_datatoken_balance != erc20_token.balanceOf(bpool.address):
+        previous_pool_datatoken_balance = erc20_token.balanceOf(bpool.address)
+        join_pool_one_side(
+            web3, bpool, ocean_token, another_consumer_wallet, to_wei("0.5")
+        )
+    join_pool_one_side(web3, bpool, ocean_token, another_consumer_wallet, to_wei("0.5"))
+
+    assert erc20_token.balanceOf(bpool.address) > to_wei("4")
+    assert erc20_token.balanceOf(bpool.address) < to_wei("5")
+
+    # From this point the test that the SS bot doesn't add more datatokens
+    max_erc20_pool_balance = erc20_token.balanceOf(bpool.address)
+    join_pool_one_side(web3, bpool, ocean_token, another_consumer_wallet, to_wei("0.5"))
+    assert erc20_token.balanceOf(bpool.address) == max_erc20_pool_balance
