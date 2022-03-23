@@ -427,7 +427,7 @@ def test_side_staking(
 
 
 @pytest.mark.unit
-def test_side_staking_bot_consistency(
+def test_side_staking_steal(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
     """
@@ -553,8 +553,18 @@ def test_side_staking_constant_rate(
         ocean_token.address, erc20_token.address, swap_market_fee
     )
 
+    # TODO: Is this assertion normal?
     assert (
         final_spot_price_basetoken_datatoken != initial_spot_price_basetoken_datatoken
+    )
+    # check that the spot price difference is less than 10%
+    assert (
+        abs(
+            final_spot_price_basetoken_datatoken
+            - initial_spot_price_basetoken_datatoken
+        )
+        / initial_spot_price_basetoken_datatoken
+        < 0.1
     )
 
 
@@ -609,3 +619,29 @@ def test_side_staking_over_datatoken_cap(
     max_erc20_pool_balance = erc20_token.balanceOf(bpool.address)
     join_pool_one_side(web3, bpool, ocean_token, another_consumer_wallet, to_wei("0.5"))
     assert erc20_token.balanceOf(bpool.address) == max_erc20_pool_balance
+
+    # Exit one side of the pool so that the ss removes some datatokens
+    while erc20_token.balanceOf(bpool.address) > to_wei("3"):
+        bpool.exit_swap_pool_amount_in(
+            pool_token.balanceOf(another_consumer_wallet.address) // 5,
+            0,
+            another_consumer_wallet,
+        )
+    pool_datatoken_balance_after_1s_exit = erc20_token.balanceOf(bpool.address)
+
+    # Check that the ss bot adds datatokens again
+    join_pool_one_side(web3, bpool, ocean_token, another_consumer_wallet, to_wei("0.5"))
+    assert erc20_token.balanceOf(bpool.address) >= pool_datatoken_balance_after_1s_exit
+
+    # Fill the pool again until the cap is reached
+    pool_datatoken_balance_to_fill = 0
+    while pool_datatoken_balance_to_fill != erc20_token.balanceOf(bpool.address):
+        pool_datatoken_balance_to_fill = erc20_token.balanceOf(bpool.address)
+        join_pool_one_side(
+            web3, bpool, ocean_token, another_consumer_wallet, to_wei("0.5")
+        )
+    join_pool_one_side(web3, bpool, ocean_token, another_consumer_wallet, to_wei("0.5"))
+
+    # Finally check that the bpool datatoken liquidity is close to the cap
+    assert erc20_token.balanceOf(bpool.address) > to_wei("4")
+    assert erc20_token.balanceOf(bpool.address) < to_wei("5")
