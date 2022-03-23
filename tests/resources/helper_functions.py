@@ -15,6 +15,7 @@ from web3 import Web3
 
 from ocean_lib.config import Config
 from ocean_lib.example_config import ExampleConfig
+from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
@@ -354,3 +355,96 @@ def get_provider_fees() -> Dict[str, Any]:
 def approx_from_wei(amount_a, amount_b) -> float:
     """Helper function to compare amounts in wei with pytest approx function wirth a relative tolerance of 1e-6."""
     return int(amount_a) / to_wei(1) == approx(int(amount_b) / to_wei(1))
+
+
+def create_nft_erc20_with_pool(
+    web3,
+    config,
+    publisher_wallet,
+    base_token,
+    swap_fee=to_wei("0.0001"),
+    swap_market_fee=to_wei("0.0001"),
+    initial_pool_liquidity=to_wei("100"),
+    token_cap=to_wei("150"),
+    vesting_amount=0,
+    vesting_blocks=2500000,
+    pool_initial_rate=to_wei("1"),
+):
+    erc721_factory_address = get_address_of_type(
+        config, ERC721FactoryContract.CONTRACT_NAME
+    )
+    erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
+    side_staking_address = get_address_of_type(config, "Staking")
+    pool_template_address = get_address_of_type(config, "poolTemplate")
+
+    base_token.approve(erc721_factory_address, initial_pool_liquidity, publisher_wallet)
+
+    tx = erc721_factory.create_nft_erc20_with_pool(
+        nft_name="72120Bundle",
+        nft_symbol="72Bundle",
+        nft_template=1,
+        token_uri="https://oceanprotocol.com/nft/",
+        datatoken_template=1,
+        datatoken_name="ERC20WithPool",
+        datatoken_symbol="ERC20P",
+        datatoken_minter=publisher_wallet.address,
+        datatoken_fee_manager=publisher_wallet.address,
+        datatoken_publishing_market_address=publisher_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=token_cap,
+        publishing_market_fee_amount=0,
+        bytess=[b""],
+        pool_ss_params=[
+            pool_initial_rate,  # rate
+            base_token.decimals(),
+            vesting_amount,  # vesting amount
+            vesting_blocks,  # vesting blocks
+            initial_pool_liquidity,  # initial liquidity
+        ],
+        swap_fees=[
+            swap_fee,
+            swap_market_fee,
+        ],  # [swapFee for lp providers, swapMarketFee for marketplace runner]
+        pool_addresses=[
+            side_staking_address,
+            base_token.address,
+            erc721_factory_address,
+            publisher_wallet.address,
+            publisher_wallet.address,
+            pool_template_address,
+        ],
+        from_wallet=publisher_wallet,
+    )
+
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_nft_event = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_NFT_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    erc721_token_address = registered_nft_event[0].args.newTokenAddress
+    erc721_token = ERC721NFT(web3, erc721_token_address)
+
+    registered_token_event = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    erc20_address = registered_token_event[0].args.newTokenAddress
+    erc20_token = ERC20Token(web3, erc20_address)
+
+    registered_pool_event = erc20_token.get_event_log(
+        ERC721FactoryContract.EVENT_NEW_POOL,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    pool_address = registered_pool_event[0].args.poolAddress
+    bpool = BPool(web3, pool_address)
+    pool_token = ERC20Token(web3, pool_address)
+
+    return bpool, erc20_token, erc721_token, pool_token
