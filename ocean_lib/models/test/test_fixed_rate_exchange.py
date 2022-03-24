@@ -271,7 +271,7 @@ def test_exchange_rate_creation(
 
     tx = fixed_exchange.collect_dt(
         exchange_id,
-        exchange_details[FixedRateExchangeDetails.DT_SUPPLY],
+        exchange_details[FixedRateExchangeDetails.DT_BALANCE],
         consumer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -289,12 +289,25 @@ def test_exchange_rate_creation(
     )
 
     # Fixed Rate Exchange owner withdraws BT balance
+    # Needs to buy because he sold all the DT amount and BT balance will be 0.
+    erc20.approve(fixed_exchange.address, to_wei(10), consumer_wallet)
 
+    fixed_exchange.buy_dt(
+        exchange_id,
+        to_wei(10),
+        no_limit,
+        consumer_wallet.address,
+        to_wei("0.1"),
+        another_consumer_wallet,
+    )
+    assert erc20.balanceOf(
+        another_consumer_wallet.address
+    ) == amount_dt_to_sell + to_wei(10)
     bt_balance_before = ocean_token.balanceOf(erc20.get_payment_collector())
 
     tx = fixed_exchange.collect_bt(
         exchange_id,
-        exchange_details[FixedRateExchangeDetails.BT_SUPPLY],
+        exchange_details[FixedRateExchangeDetails.BT_BALANCE],
         consumer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
