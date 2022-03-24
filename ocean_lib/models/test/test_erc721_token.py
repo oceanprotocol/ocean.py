@@ -831,6 +831,7 @@ def test_nft_transfer_with_pool(
 
     # The newest owner of the NFT (consumer wallet) can deploy a pool
     base_token.mint(consumer_wallet.address, to_wei(200), consumer_wallet)
+    initial_balance = base_token.balanceOf(consumer_wallet.address)
     assert base_token.balanceOf(consumer_wallet.address) == to_wei(200)
     base_token.approve(factory_router.address, to_wei(10000), consumer_wallet)
     tx = erc20_token.deploy_pool(
@@ -866,6 +867,9 @@ def test_nft_transfer_with_pool(
     assert bpool.community_fee(erc20_token.address) == 0
     assert bpool.publish_market_fee(base_token.address) == 0
     assert bpool.publish_market_fee(erc20_token.address) == 0
+    assert base_token.balanceOf(consumer_wallet.address) == initial_balance - to_wei(
+        100
+    )
 
     base_token.approve(bpool_address, to_wei(1000000), consumer_wallet)
     tx = bpool.join_swap_extern_amount_in(
@@ -890,6 +894,9 @@ def test_nft_transfer_with_pool(
     )
     assert bpt_event[0].args.bptAmount  # amount in pool shares
     assert bpool.get_balance(base_token.address) == to_wei(100) + to_wei(10)
+    assert base_token.balanceOf(consumer_wallet.address) == initial_balance - to_wei(
+        100
+    ) - to_wei(10)
 
     amount_out = bpool.get_amount_out_exact_in(
         base_token.address, erc20_token.address, to_wei(20), to_wei("0.01")
