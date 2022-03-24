@@ -44,11 +44,7 @@ pip install ocean-lib
 
 #set envvars
 export TEST_PRIVATE_KEY1=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
-
-#set the address file only for ganache
 export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
-
-#set network URL
 export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 
 #go into python
