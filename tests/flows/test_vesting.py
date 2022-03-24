@@ -206,8 +206,15 @@ def test_main(
             - tx_receipt.blockNumber
         )
     )
+    assert vesting_event[0].args.amountVested == side_staking.get_vesting_amount_so_far(
+        erc20_token.address
+    )
     assert dt_balance_before < erc20_token.balanceOf(
         erc20_token.get_payment_collector()
+    )
+    assert (
+        erc20_token.balanceOf(erc20_token.get_payment_collector())
+        == vesting_event[0].args.amountVested
     )
 
 
@@ -309,7 +316,8 @@ def test_vesting_progress(
         ), "Available vesting was not increased!"
         tx_hash = side_staking.get_vesting(erc20_token.address, publisher_wallet)
 
-        # counter is used to count the number of times when get_vesting is called (it mints another block that change the formula)
+        # counter is used to count the number of times when get_vesting is called
+        # (it mints another block that change the formula)
         counter += 1
         tx_result = web3.eth.wait_for_transaction_receipt(tx_hash)
         vesting_event = side_staking.get_event_log(
