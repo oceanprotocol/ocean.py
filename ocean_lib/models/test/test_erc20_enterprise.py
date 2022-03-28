@@ -70,9 +70,9 @@ def test_buy_from_dispenser_and_order(
     consume_fee_amount = to_wei("2")
     consume_fee_address = consumer_wallet.address
     erc20_enterprise_token.set_publishing_market_fee(
-        publish_market_fee_address=consume_fee_address,
-        publish_market_fee_token=mock_usdc_contract.address,
-        publish_market_fee_amount=consume_fee_amount,
+        publish_market_order_fee_collector=consume_fee_address,
+        publish_market_order_fee_fee_token=mock_usdc_contract.address,
+        publish_market_order_fee_amount=consume_fee_amount,
         from_wallet=publisher_wallet,
     )
     publish_fees = erc20_enterprise_token.get_publishing_market_fee()
@@ -194,7 +194,7 @@ def test_buy_from_fre_and_order(
         base_token_decimals=18,
         datatoken_decimals=18,
         fixed_rate=to_wei(1),
-        publish_market_fee=to_wei("0.1"),
+        publish_market_swap_fee_amount=to_wei("0.1"),
         with_mint=1,
         from_wallet=publisher_wallet,
     )
@@ -233,9 +233,9 @@ def test_buy_from_fre_and_order(
     consume_fee_amount = to_wei("2")
     consume_fee_address = consumer_wallet.address
     erc20_enterprise_token.set_publishing_market_fee(
-        publish_market_fee_address=consume_fee_address,
-        publish_market_fee_token=mock_usdc_contract.address,
-        publish_market_fee_amount=consume_fee_amount,
+        publish_market_order_fee_collector=consume_fee_address,
+        publish_market_order_fee_fee_token=mock_usdc_contract.address,
+        publish_market_order_fee_amount=consume_fee_amount,
         from_wallet=publisher_wallet,
     )
     publish_fees = erc20_enterprise_token.get_publishing_market_fee()

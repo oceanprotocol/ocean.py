@@ -76,7 +76,7 @@ def test_exchange_rate_creation(
     amount_dt_to_sell = to_wei("100")
     no_limit = to_wei("100000000000000000000")
     rate = to_wei("1")
-    publish_market_fee = int(1e15)  # 0.1%
+    publish_market_swap_fee = int(1e15)  # 0.1%
     ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
 
     fixed_exchange = FixedRateExchange(web3, get_address_of_type(config, "FixedPrice"))
@@ -98,7 +98,7 @@ def test_exchange_rate_creation(
         base_token_decimals=18,
         datatoken_decimals=18,
         fixed_rate=rate,
-        publish_market_fee=publish_market_fee,
+        publish_market_swap_fee_amount=publish_market_swap_fee,
         with_mint=0,
         from_wallet=consumer_wallet,
     )
@@ -150,7 +150,7 @@ def test_exchange_rate_creation(
     # Exchange should have supply and fees setup
     fee_info = fixed_exchange.get_fees_info(exchange_id)
 
-    assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE] == publish_market_fee
+    assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE] == publish_market_swap_fee
     assert (
         fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR]
         == another_consumer_wallet.address
@@ -317,7 +317,7 @@ def test_exchange_rate_creation(
 
     fee_info = fixed_exchange.get_fees_info(exchange_id)
 
-    assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE] == publish_market_fee
+    assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE] == publish_market_swap_fee
     assert (
         fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR]
         == another_consumer_wallet.address

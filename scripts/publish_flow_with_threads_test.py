@@ -45,7 +45,7 @@ def thread_function1(ocean, wallet, config):
             erc20_symbols=["DT1"],
             erc20_minters=[wallet.address],
             erc20_fee_managers=[wallet.address],
-            erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
+            erc20_publish_market_order_fee_collectors=[ZERO_ADDRESS],
             erc20_publish_market_order_fee_tokens=[
                 get_address_of_type(config, "Ocean")
             ],

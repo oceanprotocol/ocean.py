@@ -53,7 +53,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     )
     erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
 
-    publish_market_fee_amount = 5
+    cap = 5
 
     tx = erc721_factory.deploy_erc721_contract(
         name="DT1",
@@ -105,10 +105,10 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         symbol="ERC20DT1Symbol",
         minter=publisher_wallet.address,
         fee_manager=consumer_wallet.address,
-        publish_market_address=publisher_wallet.address,
-        publish_market_fee_token=ZERO_ADDRESS,
+        publish_market_order_fee_collector=publisher_wallet.address,
+        publish_market_order_fee_token=ZERO_ADDRESS,
         cap=to_wei("0.5"),
-        publish_market_fee_amount=0,
+        publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
@@ -138,7 +138,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         config=config,
         erc721_publisher=publisher_wallet,
         erc20_minter=publisher_wallet,
-        cap=to_wei(publish_market_fee_amount),
+        cap=to_wei(cap),
     )
 
     # Check erc20 params
@@ -146,7 +146,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     assert erc20.contract.caller.name() == "ERC20DT1"
     assert erc20.symbol() == "ERC20DT1Symbol"
     assert erc20.decimals() == 18
-    assert erc20.cap() == to_wei(publish_market_fee_amount)
+    assert erc20.cap() == to_wei(cap)
     assert erc20.get_erc721_address() == erc721.address
 
     # Check minter permissions
@@ -358,9 +358,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
 
     # Set and get publishing market fee params
     erc20.set_publishing_market_fee(
-        publish_market_fee_token=get_address_of_type(config, "MockUSDC"),
-        publish_market_fee_address=publisher_wallet.address,
-        publish_market_fee_amount=to_wei("1.2"),
+        publish_market_order_fee_token=get_address_of_type(config, "MockUSDC"),
+        publish_market_order_fee_collector=publisher_wallet.address,
+        publish_market_order_fee_amount=to_wei("1.2"),
         from_wallet=publisher_wallet,
     )
 
@@ -422,7 +422,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
 def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_router):
     """Tests revert statements in contracts functions"""
 
-    publish_market_fee_amount = 5
+    cap = 5
 
     # Create an ERC20 with publish Fees ( 5 USDC, going to publishMarketAddress)
     erc721, erc20 = deploy_erc721_erc20(
@@ -430,7 +430,7 @@ def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_rou
         config=config,
         erc721_publisher=publisher_wallet,
         erc20_minter=publisher_wallet,
-        cap=to_wei(publish_market_fee_amount),
+        cap=to_wei(cap),
     )
 
     # Should fail to mint if wallet is not a minter

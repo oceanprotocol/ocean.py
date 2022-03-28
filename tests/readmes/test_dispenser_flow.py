@@ -50,10 +50,10 @@ def test_dispenser_flow_readme():
         symbol="ERC20DT1Symbol",  # symbol for ERC20 token
         minter=alice_wallet.address,  # minter address
         fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
-        publish_market_address=alice_wallet.address,  # publishing Market Address
-        publish_market_fee_token=ZERO_ADDRESS,  # publishing Market Fee Token
+        publish_market_order_fee_collector=alice_wallet.address,  # publishing Market Address
+        publish_market_order_fee_token=ZERO_ADDRESS,  # publishing Market Fee Token
         cap=cap,
-        publish_market_fee_amount=0,
+        publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=alice_wallet,
     )

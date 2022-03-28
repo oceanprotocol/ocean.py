@@ -55,14 +55,14 @@ cap = ocean.to_wei(200)
 
 erc20_enterprise_token = erc721_nft.create_datatoken(
     template_index=2,  # this is the value for ERC20 Enterprise token
-    datatoken_name="ERC20DT1",  # name for ERC20 token
-    datatoken_symbol="ERC20DT1Symbol",  # symbol for ERC20 token
-    datatoken_minter=alice_wallet.address,  # minter address
-    datatoken_fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
-    datatoken_publish_market_order_fee_collector=alice_wallet.address,  # publishing Market Address
-    fee_token_address=ZERO_ADDRESS,  # publishing Market Fee Token
-    datatoken_cap=cap,
-    publish_market_fee_amount=0,
+    name="ERC20DT1",  # name for ERC20 token
+    symbol="ERC20DT1Symbol",  # symbol for ERC20 token
+    minter=alice_wallet.address,  # minter address
+    fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
+    publish_market_order_fee_collector=alice_wallet.address,  # publishing Market Address
+    publish_market_order_fee_token=ZERO_ADDRESS,  # publishing Market Fee Token
+    cap=cap,
+    publish_market_order_fee_amount=0,
     bytess=[b""],
     from_wallet=alice_wallet,
 )
@@ -94,9 +94,9 @@ assert tx, "Dispenser not created!"
 OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 consume_fee_amount = ocean.to_wei(2)
 erc20_enterprise_token.set_publishing_market_fee(
-    publish_market_fee_address=bob_wallet.address,
-    publish_market_fee_token=OCEAN_token.address,  # can be also USDC, DAI
-    publish_market_fee_amount=consume_fee_amount,
+    publish_market_order_fee_collector=bob_wallet.address,
+    publish_market_order_fee_token=OCEAN_token.address,  # can be also USDC, DAI
+    publish_market_order_fee_amount=consume_fee_amount,
     from_wallet=alice_wallet,
 )
 
@@ -150,14 +150,14 @@ cap = ocean.to_wei(200)
 
 erc20_enterprise_token = erc721_nft.create_datatoken(
     template_index=2,  # this is the value for ERC20 Enterprise token
-    datatoken_name="ERC20DT1",  # name for ERC20 token
-    datatoken_symbol="ERC20DT1Symbol",  # symbol for ERC20 token
-    datatoken_minter=alice_wallet.address,  # minter address
-    datatoken_fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
-    datatoken_publish_market_order_fee_collector=alice_wallet.address,  # publishing Market Address
-    fee_token_address=ZERO_ADDRESS,  # publishing Market Fee Token
-    datatoken_cap=cap,
-    publish_market_fee_amount=0,
+    name="ERC20DT1",  # name for ERC20 token
+    symbol="ERC20DT1Symbol",  # symbol for ERC20 token
+    minter=alice_wallet.address,  # minter address
+    fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
+    publish_market_order_fee_collector=alice_wallet.address,  # publishing Market Address
+    publish_market_order_fee_token=ZERO_ADDRESS,  # publishing Market Fee Token
+    cap=cap,
+    publish_market_order_fee_amount=0,
     bytess=[b""],
     from_wallet=alice_wallet,
 )

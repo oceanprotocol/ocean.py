@@ -463,10 +463,10 @@ def test_create_erc20(web3, config, publisher_wallet, consumer_wallet):
         symbol="ERC20DT1Symbol",
         minter=publisher_wallet.address,
         fee_manager=consumer_wallet.address,
-        publish_market_address=publisher_wallet.address,
-        publish_market_fee_token=ZERO_ADDRESS,
+        publish_market_order_fee_collector=publisher_wallet.address,
+        publish_market_order_fee_token=ZERO_ADDRESS,
         cap=to_wei("0.5"),
-        publish_market_fee_amount=0,
+        publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=publisher_wallet,
     )
@@ -492,10 +492,10 @@ def test_fail_creating_erc20(web3, config, publisher_wallet, consumer_wallet):
             symbol="ERC20DT1Symbol",
             minter=publisher_wallet.address,
             fee_manager=consumer_wallet.address,
-            publish_market_address=publisher_wallet.address,
-            publish_market_fee_token=ZERO_ADDRESS,
+            publish_market_order_fee_collector=publisher_wallet.address,
+            publish_market_order_fee_token=ZERO_ADDRESS,
             cap=to_wei("0.5"),
-            publish_market_fee_amount=0,
+            publish_market_order_fee_amount=0,
             bytess=[b""],
             from_wallet=consumer_wallet,
         )
@@ -583,10 +583,10 @@ def test_erc721_datatoken_functions(web3, config, publisher_wallet, consumer_wal
         symbol="ERC20DT1Symbol",
         minter=publisher_wallet.address,
         fee_manager=consumer_wallet.address,
-        publish_market_address=publisher_wallet.address,
-        publish_market_fee_token=ZERO_ADDRESS,
+        publish_market_order_fee_collector=publisher_wallet.address,
+        publish_market_order_fee_token=ZERO_ADDRESS,
         cap=to_wei("0.5"),
-        publish_market_fee_amount=0,
+        publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
@@ -771,7 +771,7 @@ def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet, factory_r
         web3, config, consumer_wallet, consumer_wallet, cap=to_wei(250)
     )
 
-    # Make consumer the publish_market_fee_address instead of publisher
+    # Make consumer the publish_market_order_fee_collector instead of publisher
     tx_result = erc20_token.set_publishing_market_fee(
         consumer_wallet.address, base_token.address, to_wei(1), publisher_wallet
     )

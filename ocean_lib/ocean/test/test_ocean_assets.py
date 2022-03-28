@@ -412,7 +412,7 @@ def test_plain_asset_with_one_datatoken(
         erc20_symbols=["DT1"],
         erc20_minters=[publisher_wallet.address],
         erc20_fee_managers=[publisher_wallet.address],
-        erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
+        erc20_publish_market_order_fee_collectors=[ZERO_ADDRESS],
         erc20_publish_market_order_fee_tokens=[get_address_of_type(config, "Ocean")],
         erc20_caps=[to_wei("0.5")],
         erc20_publish_market_order_fee_amounts=[0],
@@ -469,7 +469,7 @@ def test_plain_asset_multiple_datatokens(
         erc20_symbols=["DT2", "DT3"],
         erc20_minters=[publisher_wallet.address, publisher_wallet.address],
         erc20_fee_managers=[publisher_wallet.address, publisher_wallet.address],
-        erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS, ZERO_ADDRESS],
+        erc20_publish_market_order_fee_collectors=[ZERO_ADDRESS, ZERO_ADDRESS],
         erc20_publish_market_order_fee_tokens=[
             get_address_of_type(config, "Ocean"),
             get_address_of_type(config, "Ocean"),

@@ -62,14 +62,14 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 # Publish the datatoken
 DATA_datatoken = DATA_nft_token.create_datatoken(
     template_index=1,
-    datatoken_name="Datatoken 1",
-    datatoken_symbol="DT1",
-    datatoken_minter=alice_wallet.address,
-    datatoken_fee_manager=alice_wallet.address,
-    datatoken_publish_market_order_fee_collector=ZERO_ADDRESS,
-    fee_token_address=ocean.OCEAN_address,
-    datatoken_cap=ocean.to_wei(100000),
-    publish_market_fee_amount=0,
+    name="Datatoken 1",
+    symbol="DT1",
+    minter=alice_wallet.address,
+    fee_manager=alice_wallet.address,
+    publish_market_order_fee_collector=ZERO_ADDRESS,
+    publish_market_order_fee_token=ocean.OCEAN_address,
+    cap=ocean.to_wei(100000),
+    publish_market_order_fee_amount=0,
     bytess=[b""],
     from_wallet=alice_wallet,
 )
@@ -151,14 +151,15 @@ print(f"ALGO_nft_token address = '{ALGO_nft_token.address}'")
 # Publish the datatoken
 ALGO_datatoken = ALGO_nft_token.create_datatoken(
     template_index=1,
-    datatoken_name="Datatoken 1",
-    datatoken_symbol="DT1",
-    datatoken_minter=alice_wallet.address,
-    datatoken_fee_manager=alice_wallet.address,
-    datatoken_publish_market_order_fee_collector=ZERO_ADDRESS,
-    fee_token_address=ocean.OCEAN_address,
-    datatoken_cap=ocean.to_wei(100000),
-    publish_market_fee_amount=0,
+    name="Datatoken 1",
+    symbol="DT1",
+    minter=alice_wallet.address,
+    fee_manager=alice_wallet.address,
+    publish_market_order_fee_collector=ZERO_ADDRESS,
+    publish_market_order_fee_token=ocean.OCEAN_address,
+    cap=ocean.to_wei(100000),
+    publish_market_order_fee_amount=0,
+    bytess=[b""],
     from_wallet=alice_wallet,
 )
 print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")

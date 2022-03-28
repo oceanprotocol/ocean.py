@@ -126,7 +126,7 @@ class ERC20Token(ContractBase):
         base_token_decimals: int,
         datatoken_decimals: int,
         fixed_rate: int,
-        publish_market_fee: int,
+        publish_market_swap_fee_amount: int,
         with_mint: int,
         from_wallet: Wallet,
     ) -> str:
@@ -144,7 +144,7 @@ class ERC20Token(ContractBase):
                     base_token_decimals,
                     datatoken_decimals,
                     fixed_rate,
-                    publish_market_fee,
+                    publish_market_swap_fee_amount,
                     with_mint,
                 ],
             ),
@@ -374,17 +374,17 @@ class ERC20Token(ContractBase):
     @enforce_types
     def set_publishing_market_fee(
         self,
-        publish_market_fee_address: str,
-        publish_market_fee_token: str,
-        publish_market_fee_amount: int,
+        publish_market_order_fee_collector: str,
+        publish_market_order_fee_fee_token: str,
+        publish_market_order_fee_amount: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "setPublishingMarketFee",
             (
-                publish_market_fee_address,
-                publish_market_fee_token,
-                publish_market_fee_amount,
+                publish_market_order_fee_collector,
+                publish_market_order_fee_fee_token,
+                publish_market_order_fee_amount,
             ),
             from_wallet,
         )

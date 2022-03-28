@@ -53,7 +53,7 @@ def test_stressed_publish():
             erc20_symbols=["DT1"],
             erc20_minters=[alice_wallet.address],
             erc20_fee_managers=[alice_wallet.address],
-            erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
+            erc20_publish_market_order_fee_collectors=[ZERO_ADDRESS],
             erc20_publish_market_order_fee_tokens=[
                 get_address_of_type(config, "Ocean")
             ],
