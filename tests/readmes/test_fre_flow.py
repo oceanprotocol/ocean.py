@@ -50,7 +50,7 @@ def test_fre_flow_readme():
         symbol="DT1",
         minter=alice_wallet.address,
         fee_manager=alice_wallet.address,
-        publish_market_order_fee_collector=ZERO_ADDRESS,
+        publish_market_order_fee_address=ZERO_ADDRESS,
         publish_market_order_fee_token=ocean.OCEAN_address,
         cap=ocean.to_wei(200),
         publish_market_order_fee_amount=0,
@@ -94,8 +94,8 @@ def test_fre_flow_readme():
         exchange_id=exchange_id,
         datatoken_amount=ocean.to_wei(20),
         max_base_token_amount=ocean.to_wei(50),
-        consume_market_address=ZERO_ADDRESS,
-        consume_market_swap_fee=0,
+        consume_market_swap_fee_address=ZERO_ADDRESS,
+        consume_market_swap_fee_amount=0,
         from_wallet=bob_wallet,
     )
     assert tx_result, "failed buying data tokens at fixed rate for Bob"

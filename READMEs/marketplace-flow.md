@@ -98,7 +98,7 @@ asset = ocean.assets.create(
     erc20_symbols=["DT1"],
     erc20_minters=[alice_wallet.address],
     erc20_fee_managers=[alice_wallet.address],
-    erc20_publish_market_order_fee_collectors=[ZERO_ADDRESS],
+    erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
     erc20_publish_market_order_fee_tokens=[ocean.OCEAN_address],
     erc20_caps=[ocean.to_wei(100000)],
     erc20_publish_market_order_fee_amounts=[0],
@@ -177,11 +177,11 @@ OCEAN_token.approve(bpool.address, ocean.to_wei("10000"), from_wallet=bob_wallet
 bpool.swap_exact_amount_out(
     token_in=OCEAN_token.address,
     token_out=erc20_token.address,
-    consume_market_fee_address=ZERO_ADDRESS,
+    consume_market_swap_fee_address=ZERO_ADDRESS,
     max_amount_in=ocean.to_wei(10),
     token_amount_out=ocean.to_wei(1),
     max_price=ocean.to_wei(10),
-    consume_market_swap_fee=0,
+    consume_market_swap_fee_amount=0,
     from_wallet=bob_wallet,
 )
 assert erc20_token.balanceOf(bob_wallet.address) >= ocean.to_wei(
@@ -198,9 +198,9 @@ service = asset.services[0]
 order_tx_id = ocean.assets.pay_for_service(
     asset,
     service,
-    consume_market_fee_address=bob_wallet.address,
-    consume_market_fee_token=erc20_token.address,
-    consume_market_fee_amount=0,
+    consume_market_order_fee_address=bob_wallet.address,
+    consume_market_order_fee_token=erc20_token.address,
+    consume_market_order_fee_amount=0,
     wallet=bob_wallet,
 )
 print(f"order_tx_id = '{order_tx_id}'")

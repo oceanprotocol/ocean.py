@@ -228,7 +228,7 @@ def deploy_erc721_erc20(
         symbol="ERC20DT1Symbol",
         minter=erc20_minter.address,
         fee_manager=erc721_publisher.address,
-        publish_market_order_fee_collector=erc721_publisher.address,
+        publish_market_order_fee_address=erc721_publisher.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
         cap=cap,
         publish_market_order_fee_amount=0,

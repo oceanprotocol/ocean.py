@@ -105,7 +105,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         symbol="ERC20DT1Symbol",
         minter=publisher_wallet.address,
         fee_manager=consumer_wallet.address,
-        publish_market_order_fee_collector=publisher_wallet.address,
+        publish_market_order_fee_address=publisher_wallet.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
         cap=to_wei("0.5"),
         publish_market_order_fee_amount=0,
@@ -243,9 +243,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         r=signature.r,
         s=signature.s,
         valid_until=0,
-        consume_market_fee_address=publisher_wallet.address,
-        consume_market_fee_token=erc20.address,
-        consume_market_fee_amount=0,
+        consume_market_order_fee_address=publisher_wallet.address,
+        consume_market_order_fee_token=erc20.address,
+        consume_market_order_fee_amount=0,
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -359,7 +359,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     # Set and get publishing market fee params
     erc20.set_publishing_market_fee(
         publish_market_order_fee_token=get_address_of_type(config, "MockUSDC"),
-        publish_market_order_fee_collector=publisher_wallet.address,
+        publish_market_order_fee_address=publisher_wallet.address,
         publish_market_order_fee_amount=to_wei("1.2"),
         from_wallet=publisher_wallet,
     )

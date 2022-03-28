@@ -51,7 +51,7 @@ for _ in range(3000):
         symbol="DT1",
         minter=alice_wallet.address,
         fee_manager=alice_wallet.address,
-        publish_market_order_fee_collector=ZERO_ADDRESS,
+        publish_market_order_fee_address=ZERO_ADDRESS,
         publish_market_order_fee_token=ocean.OCEAN_address,
         cap=ocean.to_wei(100000),
         publish_market_order_fee_amount=0,
@@ -124,7 +124,7 @@ for _ in range(3000):
         symbol="DT1",
         minter=alice_wallet.address,
         fee_manager=alice_wallet.address,
-        publish_market_order_fee_collector=ZERO_ADDRESS,
+        publish_market_order_fee_address=ZERO_ADDRESS,
         publish_market_order_fee_token=ocean.OCEAN_address,
         cap=ocean.to_wei(100000),
         publish_market_order_fee_amount=0,
@@ -208,9 +208,9 @@ for _ in range(3000):
     DATA_order_tx_id = ocean.assets.pay_for_service(
         asset=DATA_asset,
         service=compute_service,
-        consume_market_fee_address=bob_wallet.address,
-        consume_market_fee_token=DATA_datatoken.address,
-        consume_market_fee_amount=0,
+        consume_market_order_fee_address=bob_wallet.address,
+        consume_market_order_fee_token=DATA_datatoken.address,
+        consume_market_order_fee_amount=0,
         wallet=bob_wallet,
         initialize_args={
             "compute_environment": environments[0]["id"],
@@ -224,9 +224,9 @@ for _ in range(3000):
     ALGO_order_tx_id = ocean.assets.pay_for_service(
         asset=ALGO_asset,
         service=algo_service,
-        consume_market_fee_address=bob_wallet.address,
-        consume_market_fee_token=ALGO_datatoken.address,
-        consume_market_fee_amount=0,
+        consume_market_order_fee_address=bob_wallet.address,
+        consume_market_order_fee_token=ALGO_datatoken.address,
+        consume_market_order_fee_amount=0,
         wallet=bob_wallet,
         initialize_args={
             "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp())

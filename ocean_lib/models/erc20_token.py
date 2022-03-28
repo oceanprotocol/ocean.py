@@ -212,9 +212,9 @@ class ERC20Token(ContractBase):
         s: Union[str, bytes],
         valid_until: int,
         provider_data: Union[str, bytes],
-        consume_market_fee_address: str,
-        consume_market_fee_token: str,
-        consume_market_fee_amount: int,
+        consume_market_order_fee_address: str,
+        consume_market_order_fee_token: str,
+        consume_market_order_fee_amount: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
@@ -233,9 +233,9 @@ class ERC20Token(ContractBase):
                     provider_data,
                 ),
                 (
-                    consume_market_fee_address,
-                    consume_market_fee_token,
-                    consume_market_fee_amount,
+                    consume_market_order_fee_address,
+                    consume_market_order_fee_token,
+                    consume_market_order_fee_amount,
                 ),
             ),
             from_wallet,
@@ -374,7 +374,7 @@ class ERC20Token(ContractBase):
     @enforce_types
     def set_publishing_market_fee(
         self,
-        publish_market_order_fee_collector: str,
+        publish_market_order_fee_address: str,
         publish_market_order_fee_fee_token: str,
         publish_market_order_fee_amount: int,
         from_wallet: Wallet,
@@ -382,7 +382,7 @@ class ERC20Token(ContractBase):
         return self.send_transaction(
             "setPublishingMarketFee",
             (
-                publish_market_order_fee_collector,
+                publish_market_order_fee_address,
                 publish_market_order_fee_fee_token,
                 publish_market_order_fee_amount,
             ),

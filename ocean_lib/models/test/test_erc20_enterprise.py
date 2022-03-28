@@ -70,7 +70,7 @@ def test_buy_from_dispenser_and_order(
     consume_fee_amount = to_wei("2")
     consume_fee_address = consumer_wallet.address
     erc20_enterprise_token.set_publishing_market_fee(
-        publish_market_order_fee_collector=consume_fee_address,
+        publish_market_order_fee_address=consume_fee_address,
         publish_market_order_fee_fee_token=mock_usdc_contract.address,
         publish_market_order_fee_amount=consume_fee_amount,
         from_wallet=publisher_wallet,
@@ -136,9 +136,9 @@ def test_buy_from_dispenser_and_order(
         s=signature.s,
         valid_until=valid_until,
         provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
-        consume_market_fee_address=consume_fee_address,
-        consume_market_fee_token=mock_dai_contract.address,
-        consume_market_fee_amount=0,
+        consume_market_order_fee_address=consume_fee_address,
+        consume_market_order_fee_token=mock_dai_contract.address,
+        consume_market_order_fee_amount=0,
         dispenser_address=dispenser.address,
         from_wallet=publisher_wallet,
     )
@@ -220,8 +220,8 @@ def test_buy_from_fre_and_order(
             exchange_id=exchange_id,
             datatoken_amount=to_wei("1"),
             max_base_token_amount=to_wei("1"),
-            consume_market_address=ZERO_ADDRESS,
-            consume_market_swap_fee=0,
+            consume_market_swap_fee_address=ZERO_ADDRESS,
+            consume_market_swap_fee_amount=0,
             from_wallet=consumer_wallet,
         )
 
@@ -233,7 +233,7 @@ def test_buy_from_fre_and_order(
     consume_fee_amount = to_wei("2")
     consume_fee_address = consumer_wallet.address
     erc20_enterprise_token.set_publishing_market_fee(
-        publish_market_order_fee_collector=consume_fee_address,
+        publish_market_order_fee_address=consume_fee_address,
         publish_market_order_fee_fee_token=mock_usdc_contract.address,
         publish_market_order_fee_amount=consume_fee_amount,
         from_wallet=publisher_wallet,
@@ -297,13 +297,13 @@ def test_buy_from_fre_and_order(
         s=signature.s,
         valid_until=valid_until,
         provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
-        consume_market_fee_address=consume_fee_address,
-        consume_market_fee_token=mock_dai_contract.address,
-        consume_market_fee_amount=0,
+        consume_market_order_fee_address=consume_fee_address,
+        consume_market_order_fee_token=mock_dai_contract.address,
+        consume_market_order_fee_amount=0,
         exchange_contract=fixed_rate_exchange.address,
         exchange_id=exchange_id,
         max_base_token_amount=to_wei("2.5"),
-        consume_market_swap_fee=to_wei("0.001"),  # 1e15 => 0.1%
+        consume_market_swap_fee_amount=to_wei("0.001"),  # 1e15 => 0.1%
         consume_market_swap_fee_address=another_consumer_wallet.address,
         from_wallet=publisher_wallet,
     )

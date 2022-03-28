@@ -31,7 +31,7 @@ def compute_flow(ocean: Ocean, wallet: Wallet):
             symbol="DT1",
             minter=wallet.address,
             fee_manager=wallet.address,
-            publish_market_order_fee_collector=ZERO_ADDRESS,
+            publish_market_order_fee_address=ZERO_ADDRESS,
             publish_market_order_fee_token=ocean.OCEAN_address,
             cap=ocean.to_wei(100000),
             publish_market_order_fee_amount=0,
@@ -104,7 +104,7 @@ def compute_flow(ocean: Ocean, wallet: Wallet):
             symbol="DT1",
             minter=wallet.address,
             fee_manager=wallet.address,
-            publish_market_order_fee_collector=ZERO_ADDRESS,
+            publish_market_order_fee_address=ZERO_ADDRESS,
             publish_market_order_fee_token=ocean.OCEAN_address,
             cap=ocean.to_wei(100000),
             publish_market_order_fee_amount=0,
@@ -190,9 +190,9 @@ def compute_flow(ocean: Ocean, wallet: Wallet):
         DATA_order_tx_id = ocean.assets.pay_for_service(
             asset=DATA_asset,
             service=compute_service,
-            consume_market_fee_address=wallet.address,
-            consume_market_fee_token=DATA_datatoken.address,
-            consume_market_fee_amount=0,
+            consume_market_order_fee_address=wallet.address,
+            consume_market_order_fee_token=DATA_datatoken.address,
+            consume_market_order_fee_amount=0,
             wallet=wallet,
             initialize_args={
                 "compute_environment": environments[0]["id"],
@@ -206,9 +206,9 @@ def compute_flow(ocean: Ocean, wallet: Wallet):
         ALGO_order_tx_id = ocean.assets.pay_for_service(
             asset=ALGO_asset,
             service=algo_service,
-            consume_market_fee_address=wallet.address,
-            consume_market_fee_token=ALGO_datatoken.address,
-            consume_market_fee_amount=0,
+            consume_market_order_fee_address=wallet.address,
+            consume_market_order_fee_token=ALGO_datatoken.address,
+            consume_market_order_fee_amount=0,
             wallet=wallet,
             initialize_args={
                 "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp())

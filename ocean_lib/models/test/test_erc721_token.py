@@ -463,7 +463,7 @@ def test_create_erc20(web3, config, publisher_wallet, consumer_wallet):
         symbol="ERC20DT1Symbol",
         minter=publisher_wallet.address,
         fee_manager=consumer_wallet.address,
-        publish_market_order_fee_collector=publisher_wallet.address,
+        publish_market_order_fee_address=publisher_wallet.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
         cap=to_wei("0.5"),
         publish_market_order_fee_amount=0,
@@ -492,7 +492,7 @@ def test_fail_creating_erc20(web3, config, publisher_wallet, consumer_wallet):
             symbol="ERC20DT1Symbol",
             minter=publisher_wallet.address,
             fee_manager=consumer_wallet.address,
-            publish_market_order_fee_collector=publisher_wallet.address,
+            publish_market_order_fee_address=publisher_wallet.address,
             publish_market_order_fee_token=ZERO_ADDRESS,
             cap=to_wei("0.5"),
             publish_market_order_fee_amount=0,
@@ -583,7 +583,7 @@ def test_erc721_datatoken_functions(web3, config, publisher_wallet, consumer_wal
         symbol="ERC20DT1Symbol",
         minter=publisher_wallet.address,
         fee_manager=consumer_wallet.address,
-        publish_market_order_fee_collector=publisher_wallet.address,
+        publish_market_order_fee_address=publisher_wallet.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
         cap=to_wei("0.5"),
         publish_market_order_fee_amount=0,
@@ -771,7 +771,7 @@ def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet, factory_r
         web3, config, consumer_wallet, consumer_wallet, cap=to_wei(250)
     )
 
-    # Make consumer the publish_market_order_fee_collector instead of publisher
+    # Make consumer the publish_market_order_fee_address instead of publisher
     tx_result = erc20_token.set_publishing_market_fee(
         consumer_wallet.address, base_token.address, to_wei(1), publisher_wallet
     )
@@ -858,11 +858,11 @@ def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet, factory_r
     tx = bpool.swap_exact_amount_in(
         token_in=base_token.address,
         token_out=erc20_token.address,
-        consume_market_fee=consumer_wallet.address,
+        consume_market_swap_fee_address=consumer_wallet.address,
         token_amount_in=to_wei(20),
         min_amount_out=to_wei(5),
         max_price=to_wei(1000000),
-        swap_market_fee=to_wei("0.01"),
+        consume_market_swap_fee_amount=to_wei("0.01"),
         from_wallet=consumer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)

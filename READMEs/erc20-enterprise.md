@@ -59,7 +59,7 @@ erc20_enterprise_token = erc721_nft.create_datatoken(
     symbol="ERC20DT1Symbol",  # symbol for ERC20 token
     minter=alice_wallet.address,  # minter address
     fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
-    publish_market_order_fee_collector=alice_wallet.address,  # publishing Market Address
+    publish_market_order_fee_address=alice_wallet.address,  # publishing Market Address
     publish_market_order_fee_token=ZERO_ADDRESS,  # publishing Market Fee Token
     cap=cap,
     publish_market_order_fee_amount=0,
@@ -94,7 +94,7 @@ assert tx, "Dispenser not created!"
 OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 consume_fee_amount = ocean.to_wei(2)
 erc20_enterprise_token.set_publishing_market_fee(
-    publish_market_order_fee_collector=bob_wallet.address,
+    publish_market_order_fee_address=bob_wallet.address,
     publish_market_order_fee_token=OCEAN_token.address,  # can be also USDC, DAI
     publish_market_order_fee_amount=consume_fee_amount,
     from_wallet=alice_wallet,
@@ -130,9 +130,9 @@ erc20_enterprise_token.buy_from_dispenser_and_order(
     s=s,
     valid_until=1958133628,
     provider_data=provider_data,
-    consume_market_fee_address=bob_wallet.address,
-    consume_market_fee_token=erc20_enterprise_token.address,
-    consume_market_fee_amount=0,
+    consume_market_order_fee_address=bob_wallet.address,
+    consume_market_order_fee_token=erc20_enterprise_token.address,
+    consume_market_order_fee_amount=0,
     dispenser_address=dispenser.address,
     from_wallet=alice_wallet,
 )
@@ -154,7 +154,7 @@ erc20_enterprise_token = erc721_nft.create_datatoken(
     symbol="ERC20DT1Symbol",  # symbol for ERC20 token
     minter=alice_wallet.address,  # minter address
     fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
-    publish_market_order_fee_collector=alice_wallet.address,  # publishing Market Address
+    publish_market_order_fee_address=alice_wallet.address,  # publishing Market Address
     publish_market_order_fee_token=ZERO_ADDRESS,  # publishing Market Fee Token
     cap=cap,
     publish_market_order_fee_amount=0,
@@ -228,13 +228,13 @@ tx_id = erc20_enterprise_token.buy_from_fre_and_order(
     s=s,
     valid_until=1958133628,
     provider_data=provider_data,
-    consume_market_fee_address=bob_wallet.address,
-    consume_market_fee_token=erc20_enterprise_token.address,
-    consume_market_fee_amount=0,
+    consume_market_order_fee_address=bob_wallet.address,
+    consume_market_order_fee_token=erc20_enterprise_token.address,
+    consume_market_order_fee_amount=0,
     exchange_contract=fixed_rate_exchange.address,
     exchange_id=exchange_id,
     max_base_token_amount=ocean.to_wei(10),
-    consume_market_swap_fee=ocean.to_wei("0.001"),  # 1e15 => 0.1%
+    consume_market_swap_fee_amount=ocean.to_wei("0.001"),  # 1e15 => 0.1%
     consume_market_swap_fee_address=bob_wallet.address,
     from_wallet=alice_wallet,
 )

@@ -81,7 +81,7 @@ def test_main(
         symbol="ERC20DT1Symbol",
         minter=consumer_wallet.address,
         fee_manager=another_consumer_wallet.address,
-        publish_market_order_fee_collector=publisher_wallet.address,
+        publish_market_order_fee_address=publisher_wallet.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
         cap=to_wei("0.05"),
         publish_market_order_fee_amount=0,

@@ -82,7 +82,7 @@ def test_stressed_consume():
             erc20_symbols=["DT1"],
             erc20_minters=[alice_wallet.address],
             erc20_fee_managers=[alice_wallet.address],
-            erc20_publish_market_order_fee_collectors=[ZERO_ADDRESS],
+            erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
             erc20_publish_market_order_fee_tokens=[
                 get_address_of_type(config, "Ocean")
             ],
@@ -124,9 +124,9 @@ def test_stressed_consume():
             s=response.json()["providerFee"]["s"],
             valid_until=response.json()["providerFee"]["validUntil"],
             provider_data=response.json()["providerFee"]["providerData"],
-            consume_market_fee_address=alice_wallet.address,
-            consume_market_fee_token=erc20_token.address,
-            consume_market_fee_amount=0,
+            consume_market_order_fee_address=alice_wallet.address,
+            consume_market_order_fee_token=erc20_token.address,
+            consume_market_order_fee_amount=0,
             from_wallet=alice_wallet,
         )
 

@@ -125,7 +125,7 @@ class OceanAssets:
         symbol: str,
         minter: str,
         fee_manager: str,
-        publish_market_order_fee_collector: str,
+        publish_market_order_fee_address: str,
         publish_market_order_fee_token: str,
         cap: int,
         publish_market_order_fee_amount: int,
@@ -138,7 +138,7 @@ class OceanAssets:
             symbol=symbol,
             minter=minter,
             fee_manager=fee_manager,
-            publish_market_order_fee_collector=publish_market_order_fee_collector,
+            publish_market_order_fee_address=publish_market_order_fee_address,
             publish_market_order_fee_token=publish_market_order_fee_token,
             cap=cap,
             publish_market_order_fee_amount=publish_market_order_fee_amount,
@@ -273,7 +273,7 @@ class OceanAssets:
         erc20_symbols: Optional[List[str]] = None,
         erc20_minters: Optional[List[str]] = None,
         erc20_fee_managers: Optional[List[str]] = None,
-        erc20_publish_market_order_fee_collectors: Optional[List[str]] = None,
+        erc20_publish_market_order_fee_addresses: Optional[List[str]] = None,
         erc20_publish_market_order_fee_tokens: Optional[List[str]] = None,
         erc20_caps: Optional[List[int]] = None,
         erc20_publish_market_order_fee_amounts: Optional[List[int]] = None,
@@ -306,7 +306,7 @@ class OceanAssets:
         :param erc20_symbols: list of symbols for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_minters: list of minters for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_fee_managers: list of fee managers for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_publish_market_order_fee_collectors: list of publishing market addresses for ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_publish_market_order_fee_addresses: list of publishing market addresses for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_publish_market_order_fee_tokens: list of fee tokens for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_caps: list of cap values for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_publish_market_order_fee_amounts: list of fee values for ERC20 tokens if deployed_erc20_tokens is None.
@@ -397,7 +397,7 @@ class OceanAssets:
                         symbol=erc20_symbols[erc20_data_counter],
                         minter=erc20_minters[erc20_data_counter],
                         fee_manager=erc20_fee_managers[erc20_data_counter],
-                        publish_market_order_fee_collector=erc20_publish_market_order_fee_collectors[
+                        publish_market_order_fee_address=erc20_publish_market_order_fee_addresses[
                             erc20_data_counter
                         ],
                         publish_market_order_fee_token=erc20_publish_market_order_fee_tokens[
@@ -601,9 +601,9 @@ class OceanAssets:
         self,
         asset: Asset,
         service: Service,
-        consume_market_fee_address: str,
-        consume_market_fee_token: str,
-        consume_market_fee_amount: int,
+        consume_market_order_fee_address: str,
+        consume_market_order_fee_token: str,
+        consume_market_order_fee_amount: int,
         wallet: Wallet,
         initialize_args: Optional[dict] = None,
         consumer_address: Optional[str] = None,
@@ -652,9 +652,9 @@ class OceanAssets:
             s=provider_fees["s"],
             valid_until=provider_fees["validUntil"],
             provider_data=provider_fees["providerData"],
-            consume_market_fee_address=consume_market_fee_address,
-            consume_market_fee_token=consume_market_fee_token,
-            consume_market_fee_amount=consume_market_fee_amount,
+            consume_market_order_fee_address=consume_market_order_fee_address,
+            consume_market_order_fee_token=consume_market_order_fee_token,
+            consume_market_order_fee_amount=consume_market_order_fee_amount,
             from_wallet=wallet,
         )
 

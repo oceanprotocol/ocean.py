@@ -105,8 +105,8 @@ tx_result = ocean.fixed_rate_exchange.buy_dt(
     exchange_id=exchange_id,
     datatoken_amount=ocean.to_wei(20),
     max_base_token_amount=ocean.to_wei(50),
-    consume_market_address=ZERO_ADDRESS,
-    consume_market_swap_fee=0,
+    consume_market_swap_fee_address=ZERO_ADDRESS,
+    consume_market_swap_fee_amount=0,
     from_wallet=bob_wallet,
 )
 assert tx_result, "failed buying datatokens at fixed rate for Bob"
