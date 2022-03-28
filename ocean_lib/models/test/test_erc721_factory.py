@@ -53,6 +53,10 @@ def test_properties(web3, config):
         erc721_factory.event_DispenserCreated.abi["name"]
         == ERC721FactoryContract.EVENT_DISPENSER_CREATED
     )
+    assert (
+        erc721_factory.event_Transfer.abi["name"]
+        == ERC721FactoryContract.EVENT_TRANSFER
+    )
 
 
 @pytest.mark.unit
