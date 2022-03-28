@@ -118,7 +118,7 @@ def test_pool_ocean(
 
     assert erc20_token.get_permissions(consumer_wallet.address)[0] is True
 
-    swap_fee = to_wei("0.001")
+    lp_swap_fee = to_wei("0.001")
     swap_market_fee = to_wei("0.001")
 
     # Tests consumer calls deployPool(), we then check ocean and market fee"
@@ -135,8 +135,8 @@ def test_pool_ocean(
         vesting_amount=initial_ocean_liq,
         vesting_blocks=2500000,
         base_token_amount=initial_ocean_liq,
-        lp_swap_fee=to_wei("0.001"),
-        publish_market_swap_fee=to_wei("0.001"),
+        lp_swap_fee_amount=to_wei("0.001"),
+        publish_market_swap_fee_amount=to_wei("0.001"),
         ss_contract=side_staking.address,
         base_token_address=ocean_contract.address,
         base_token_sender=consumer_wallet.address,
@@ -325,7 +325,7 @@ def test_pool_ocean(
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / lp_swap_fee))
         == swap_fees_event_args.LPFeeAmount
     )
 
@@ -379,7 +379,7 @@ def test_pool_ocean(
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / lp_swap_fee))
         == swap_fees_event_args.LPFeeAmount
     )
 
@@ -632,8 +632,8 @@ def test_pool_dai(
     erc721_nft = _deploy_erc721_token(
         config, web3, factory_deployer_wallet, consumer_wallet
     )
-    swap_fee = to_wei("0.001")
-    swap_market_fee = to_wei("0.001")
+    lp_swap_fee = to_wei("0.001")
+    publish_market_swap_fee = to_wei("0.001")
 
     # Tests consumer deploys a new erc20DT, assigning himself as minter
     cap = to_wei("1000")
@@ -676,8 +676,8 @@ def test_pool_dai(
         vesting_amount=initial_dai_liq,
         vesting_blocks=2500000,
         base_token_amount=initial_dai_liq,
-        lp_swap_fee=to_wei("0.001"),
-        publish_market_swap_fee=to_wei("0.001"),
+        lp_swap_fee_amount=to_wei("0.001"),
+        publish_market_swap_fee_amount=to_wei("0.001"),
         ss_contract=side_staking.address,
         base_token_address=dai_contract.address,
         base_token_sender=consumer_wallet.address,
@@ -851,11 +851,11 @@ def test_pool_dai(
         == publisher_dt_balance
     )
     assert (
-        swap_event_args.tokenAmountIn / (to_wei("1") / swap_market_fee)
+        swap_event_args.tokenAmountIn / (to_wei("1") / publish_market_swap_fee)
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / lp_swap_fee))
         == swap_fees_event_args.LPFeeAmount
     )
 
@@ -905,11 +905,11 @@ def test_pool_dai(
     )
 
     assert (
-        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_market_fee))
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / publish_market_swap_fee))
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / lp_swap_fee))
         == swap_fees_event_args.LPFeeAmount
     )
 
@@ -1129,7 +1129,7 @@ def test_pool_dai(
 
     # Tests Ocean and market fees were accounted for
     assert bpool.opc_fee() == to_wei("0.002")
-    assert bpool.get_swap_fee() == swap_market_fee
+    assert bpool.get_swap_fee() == publish_market_swap_fee
     assert (bpool.community_fee(erc20_token.address) > 0) is True
     assert (bpool.community_fee(dai_contract.address) > 0) is True
     assert (bpool.publish_market_fee(erc20_token.address) > 0) is True
@@ -1164,8 +1164,8 @@ def test_pool_usdc(
     erc721_nft = _deploy_erc721_token(
         config, web3, factory_deployer_wallet, consumer_wallet
     )
-    swap_fee = to_wei("0.001")
-    swap_market_fee = to_wei("0.001")
+    lp_swap_fee = to_wei("0.001")
+    publish_market_swap_fee = to_wei("0.001")
 
     # Tests consumer deploys a new erc20DT, assigning himself as minter
     cap = to_wei("1000")
@@ -1208,8 +1208,8 @@ def test_pool_usdc(
         vesting_amount=initial_usdc_liq,
         vesting_blocks=2500000,
         base_token_amount=initial_usdc_liq,
-        lp_swap_fee=to_wei("0.001"),
-        publish_market_swap_fee=to_wei("0.001"),
+        lp_swap_fee_amount=to_wei("0.001"),
+        publish_market_swap_fee_amount=to_wei("0.001"),
         ss_contract=side_staking.address,
         base_token_address=usdc_contract.address,
         base_token_sender=consumer_wallet.address,
@@ -1386,11 +1386,11 @@ def test_pool_usdc(
         == publisher_dt_balance
     )
     assert (
-        swap_event_args.tokenAmountIn / (to_wei(1) / swap_market_fee)
+        swap_event_args.tokenAmountIn / (to_wei(1) / publish_market_swap_fee)
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / lp_swap_fee))
         == swap_fees_event_args.LPFeeAmount
     )
 
@@ -1440,11 +1440,11 @@ def test_pool_usdc(
     )
 
     assert (
-        round(swap_event_args.tokenAmountIn / (to_wei(1) / swap_market_fee))
+        round(swap_event_args.tokenAmountIn / (to_wei(1) / publish_market_swap_fee))
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / lp_swap_fee))
         == swap_fees_event_args.LPFeeAmount
     )
 
@@ -1658,7 +1658,7 @@ def test_pool_usdc(
 
     # Tests Ocean and market fees were accounted for
     assert bpool.opc_fee() == to_wei("0.002")
-    assert bpool.get_swap_fee() == swap_market_fee
+    assert bpool.get_swap_fee() == publish_market_swap_fee
     assert (bpool.community_fee(erc20_token.address) > 0) is True
     assert (bpool.community_fee(usdc_contract.address) > 0) is True
     assert (bpool.publish_market_fee(erc20_token.address) > 0) is True
@@ -1693,8 +1693,8 @@ def test_pool_usdc_flexible(
     erc721_nft = _deploy_erc721_token(
         config, web3, factory_deployer_wallet, consumer_wallet
     )
-    swap_fee = to_wei("0.001")
-    swap_market_fee = to_wei("0.001")
+    lp_swap_fee = to_wei("0.001")
+    publish_market_swap_fee = to_wei("0.001")
 
     # Tests consumer deploys a new erc20DT, assigning himself as minter
     cap = to_wei(1000)
@@ -1737,8 +1737,8 @@ def test_pool_usdc_flexible(
         vesting_amount=initial_usdc_liq,
         vesting_blocks=2500000,
         base_token_amount=initial_usdc_liq,
-        lp_swap_fee=to_wei("0.001"),
-        publish_market_swap_fee=to_wei("0.001"),
+        lp_swap_fee_amount=to_wei("0.001"),
+        publish_market_swap_fee_amount=to_wei("0.001"),
         ss_contract=side_staking.address,
         base_token_address=usdc_contract.address,
         base_token_sender=consumer_wallet.address,
@@ -1913,11 +1913,11 @@ def test_pool_usdc_flexible(
         == publisher_dt_balance
     )
     assert (
-        swap_event_args.tokenAmountIn / (to_wei(1) / swap_market_fee)
+        swap_event_args.tokenAmountIn / (to_wei(1) / publish_market_swap_fee)
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / lp_swap_fee))
         == swap_fees_event_args.LPFeeAmount
     )
 
@@ -1967,11 +1967,11 @@ def test_pool_usdc_flexible(
     )
 
     assert (
-        round(swap_event_args.tokenAmountIn / (to_wei(1) / swap_market_fee))
+        round(swap_event_args.tokenAmountIn / (to_wei(1) / publish_market_swap_fee))
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / lp_swap_fee))
         == swap_fees_event_args.LPFeeAmount
     )
 
@@ -2184,7 +2184,7 @@ def test_pool_usdc_flexible(
 
     # Tests Ocean and market fees were accounted for
     assert bpool.opc_fee() == to_wei("0.002")
-    assert bpool.get_swap_fee() == swap_market_fee
+    assert bpool.get_swap_fee() == publish_market_swap_fee
     assert (bpool.community_fee(erc20_token.address) > 0) is True
     assert (bpool.community_fee(usdc_contract.address) > 0) is True
     assert (bpool.publish_market_fee(erc20_token.address) > 0) is True
@@ -2217,8 +2217,8 @@ def test_pool_dai_flexible(
     erc721_nft = _deploy_erc721_token(
         config, web3, factory_deployer_wallet, consumer_wallet
     )
-    swap_fee = to_wei("0.001")
-    swap_market_fee = to_wei("0.001")
+    lp_swap_fee = to_wei("0.001")
+    publish_market_swap_fee = to_wei("0.001")
 
     # Tests consumer deploys a new erc20DT, assigning himself as minter
     cap = to_wei(1000)
@@ -2261,8 +2261,8 @@ def test_pool_dai_flexible(
         vesting_amount=initial_dai_liq,
         vesting_blocks=2500000,
         base_token_amount=initial_dai_liq,
-        lp_swap_fee=to_wei("0.001"),
-        publish_market_swap_fee=to_wei("0.001"),
+        lp_swap_fee_amount=to_wei("0.001"),
+        publish_market_swap_fee_amount=to_wei("0.001"),
         ss_contract=side_staking.address,
         base_token_address=dai_contract.address,
         base_token_sender=consumer_wallet.address,
@@ -2436,11 +2436,11 @@ def test_pool_dai_flexible(
         == publisher_dt_balance
     )
     assert (
-        swap_event_args.tokenAmountIn / (to_wei(1) / swap_market_fee)
+        swap_event_args.tokenAmountIn / (to_wei(1) / publish_market_swap_fee)
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / lp_swap_fee))
         == swap_fees_event_args.LPFeeAmount
     )
 
@@ -2490,11 +2490,11 @@ def test_pool_dai_flexible(
     )
 
     assert (
-        round(swap_event_args.tokenAmountIn / (to_wei(1) / swap_market_fee))
+        round(swap_event_args.tokenAmountIn / (to_wei(1) / publish_market_swap_fee))
         == swap_fees_event_args.marketFeeAmount
     )
     assert (
-        round(swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee))
+        round(swap_event_args.tokenAmountIn / (to_wei("1") / lp_swap_fee))
         == swap_fees_event_args.LPFeeAmount
     )
 
@@ -2713,7 +2713,7 @@ def test_pool_dai_flexible(
 
     # Tests Ocean and market fees were accounted for
     assert bpool.opc_fee() == to_wei("0.002")
-    assert bpool.get_swap_fee() == swap_market_fee
+    assert bpool.get_swap_fee() == publish_market_swap_fee
     assert (bpool.community_fee(erc20_token.address) > 0) is True
     assert (bpool.community_fee(dai_contract.address) > 0) is True
     assert (bpool.publish_market_fee(erc20_token.address) > 0) is True

@@ -201,7 +201,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         pool_vesting_amount: int,
         pool_vesting_blocks: int,
         pool_base_token_amount: int,
-        pool_lp_swap_fee: int,
+        pool_lp_swap_fee_amount: int,
         pool_publish_market_swap_fee_amount: int,
         pool_side_staking: str,
         pool_base_token: str,
@@ -236,7 +236,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                         pool_base_token_amount,
                     ],
                     [
-                        pool_lp_swap_fee,
+                        pool_lp_swap_fee_amount,
                         pool_publish_market_swap_fee_amount,
                     ],
                     [

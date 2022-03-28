@@ -84,7 +84,7 @@ class BPool(BTokenBase):
         base_token: str,
         base_token_amount: int,
         base_token_weight: int,
-        swap_fee: int,
+        publish_market_swap_fee_amount: int,
         from_wallet: Wallet,
     ) -> str:
         tx_id = self.send_transaction(
@@ -96,7 +96,7 @@ class BPool(BTokenBase):
                 base_token,
                 base_token_amount,
                 base_token_weight,
-                swap_fee,
+                publish_market_swap_fee_amount,
             ),
             from_wallet,
             {"gas": balancer_constants.GASLIMIT_BFACTORY_NEWBPOOL},
@@ -174,10 +174,15 @@ class BPool(BTokenBase):
 
     @enforce_types
     def update_publish_market_fee(
-        self, new_collector: str, new_swap_fee: int, from_wallet: Wallet
+        self,
+        new_collector: str,
+        publish_market_swap_fee_amount: int,
+        from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "updatePublishMarketFee", (new_collector, new_swap_fee), from_wallet
+            "updatePublishMarketFee",
+            (new_collector, publish_market_swap_fee_amount),
+            from_wallet,
         )
 
     @enforce_types
@@ -238,11 +243,11 @@ class BPool(BTokenBase):
         return self.contract.caller.calcSingleInPoolOut(address, amount)
 
     @enforce_types
-    def set_swap_fee(self, swap_fee: int, from_wallet: Wallet) -> str:
+    def set_swap_fee(self, lp_swap_fee_amount: int, from_wallet: Wallet) -> str:
         """
         Caller must be controller. Pool must NOT be finalized.
         """
-        return self.send_transaction("setSwapFee", (swap_fee,), from_wallet)
+        return self.send_transaction("setSwapFee", (lp_swap_fee_amount,), from_wallet)
 
     @enforce_types
     def finalize(self, from_wallet: Wallet) -> str:
@@ -299,10 +304,10 @@ class BPool(BTokenBase):
         token_in: str,
         token_out: str,
         token_amount_out: int,
-        consume_market_swap_fee: int,
+        consume_market_swap_fee_amount: int,
     ) -> list:
         return self.contract.caller.getAmountOutExactIn(
-            token_in, token_out, token_amount_out, consume_market_swap_fee
+            token_in, token_out, token_amount_out, consume_market_swap_fee_amount
         )
 
     @enforce_types
@@ -311,10 +316,10 @@ class BPool(BTokenBase):
         token_in: str,
         token_out: str,
         token_amount_in: int,
-        consume_market_swap_fee: int,
+        consume_market_swap_fee_amount: int,
     ) -> list:
         return self.contract.caller.getAmountOutExactIn(
-            token_in, token_out, token_amount_in, consume_market_swap_fee
+            token_in, token_out, token_amount_in, consume_market_swap_fee_amount
         )
 
     @enforce_types

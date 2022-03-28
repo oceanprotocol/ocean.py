@@ -277,8 +277,8 @@ class Ocean:
         vesting_amount: int,
         vesting_blocks: int,
         base_token_amount: int,
-        lp_swap_fee: int,
-        publish_market_swap_fee: int,
+        lp_swap_fee_amount: int,
+        publish_market_swap_fee_amount: int,
         from_wallet: Wallet,
     ) -> BPool:
         base_token.approve(
@@ -291,8 +291,8 @@ class Ocean:
             vesting_amount=vesting_amount,
             vesting_blocks=vesting_blocks,
             base_token_amount=base_token_amount,
-            lp_swap_fee=lp_swap_fee,
-            publish_market_swap_fee=publish_market_swap_fee,
+            lp_swap_fee_amount=lp_swap_fee_amount,
+            publish_market_swap_fee_amount=publish_market_swap_fee_amount,
             ss_contract=get_address_of_type(self.config, "Staking"),
             base_token_address=base_token.address,
             base_token_sender=from_wallet.address,

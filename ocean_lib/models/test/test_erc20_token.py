@@ -162,7 +162,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
 
     # Should succeed to set new FeeCollector if feeManager
     erc20.set_payment_collector(
-        fee_collector_address=publisher_wallet.address, from_wallet=publisher_wallet
+        publish_market_order_fee_address=publisher_wallet.address,
+        from_wallet=publisher_wallet,
     )
 
     # Should succeed to removeMinter if erc20Deployer
@@ -448,7 +449,8 @@ def test_exceptions(web3, config, publisher_wallet, consumer_wallet, factory_rou
     #  Should fail to set new FeeCollector if not NFTOwner
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc20.set_payment_collector(
-            fee_collector_address=consumer_wallet.address, from_wallet=consumer_wallet
+            publish_market_order_fee_address=consumer_wallet.address,
+            from_wallet=consumer_wallet,
         )
     assert (
         err.value.args[0]

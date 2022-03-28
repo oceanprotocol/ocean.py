@@ -230,7 +230,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         * 9,  # max 10% vesting amount of the total cap
         pool_vesting_blocks=2500000,
         pool_base_token_amount=initial_pool_liquidity,
-        pool_lp_swap_fee=to_wei("0.001"),
+        pool_lp_swap_fee_amount=to_wei("0.001"),
         pool_publish_market_swap_fee_amount=to_wei("0.001"),
         pool_side_staking=side_staking_address,
         pool_base_token=erc20_address,

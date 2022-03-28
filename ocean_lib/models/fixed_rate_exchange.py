@@ -209,20 +209,28 @@ class FixedRateExchange(ContractBase):
 
     @enforce_types
     def update_market_fee_collector(
-        self, exchange_id: bytes, new_market_fee_collector: str, from_wallet: Wallet
+        self,
+        exchange_id: bytes,
+        publish_market_swap_fee_collector: str,
+        from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "updateMarketFeeCollector",
-            (exchange_id, new_market_fee_collector),
+            (exchange_id, publish_market_swap_fee_collector),
             from_wallet,
         )
 
     @enforce_types
     def update_market_fee(
-        self, exchange_id: bytes, new_market_fee: int, from_wallet: Wallet
+        self,
+        exchange_id: bytes,
+        publish_market_swap_fee_amount: int,
+        from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "updateMarketFee", (exchange_id, new_market_fee), from_wallet
+            "updateMarketFee",
+            (exchange_id, publish_market_swap_fee_amount),
+            from_wallet,
         )
 
     @enforce_types

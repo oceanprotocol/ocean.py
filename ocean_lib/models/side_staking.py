@@ -93,8 +93,12 @@ class SideStaking(ContractBase):
 
     @enforce_types
     def set_pool_swap_fee(
-        self, datatoken: str, pool_address: str, swap_fee: int, from_wallet: Wallet
+        self,
+        datatoken: str,
+        pool_address: str,
+        lp_swap_fee_amount: int,
+        from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
-            "setPoolSwapFee", (datatoken, pool_address, swap_fee), from_wallet
+            "setPoolSwapFee", (datatoken, pool_address, lp_swap_fee_amount), from_wallet
         )

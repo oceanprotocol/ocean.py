@@ -82,8 +82,8 @@ class ERC20Token(ContractBase):
         vesting_amount: int,
         vesting_blocks: int,
         base_token_amount: int,
-        lp_swap_fee: int,
-        publish_market_swap_fee: int,
+        lp_swap_fee_amount: int,
+        publish_market_swap_fee_amount: int,
         ss_contract: str,
         base_token_address: str,
         base_token_sender: str,
@@ -102,7 +102,7 @@ class ERC20Token(ContractBase):
                     vesting_blocks,
                     base_token_amount,
                 ],
-                [lp_swap_fee, publish_market_swap_fee],
+                [lp_swap_fee_amount, publish_market_swap_fee_amount],
                 [
                     ss_contract,
                     base_token_address,
@@ -361,10 +361,10 @@ class ERC20Token(ContractBase):
 
     @enforce_types
     def set_payment_collector(
-        self, fee_collector_address: str, from_wallet: Wallet
+        self, publish_market_order_fee_address: str, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "setPaymentCollector", (fee_collector_address,), from_wallet
+            "setPaymentCollector", (publish_market_order_fee_address,), from_wallet
         )
 
     @enforce_types
