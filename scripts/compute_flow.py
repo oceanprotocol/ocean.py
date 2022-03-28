@@ -15,6 +15,7 @@ from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
+from tests.resources.ddo_helpers import get_first_service_by_type
 
 config = ExampleConfig.get_config()
 ocean = Ocean(config)
@@ -199,8 +200,8 @@ for _ in range(3000):
     DATA_asset = ocean.assets.resolve(DATA_did)
     ALGO_asset = ocean.assets.resolve(ALGO_did)
 
-    compute_service = DATA_asset.get_service("compute")
-    algo_service = ALGO_asset.get_service("access")
+    compute_service = get_first_service_by_type(DATA_asset, "compute")
+    algo_service = get_first_service_by_type(ALGO_asset, "access")
 
     environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
 

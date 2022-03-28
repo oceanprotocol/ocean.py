@@ -18,7 +18,10 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
-from tests.resources.ddo_helpers import build_credentials_dict
+from tests.resources.ddo_helpers import (
+    build_credentials_dict,
+    get_first_service_by_type,
+)
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
@@ -83,7 +86,7 @@ def consume_flow(ocean: Ocean, wallet: Wallet, config: Config):
         assert ddo.datatokens[0]["symbol"] == "DT1"
         assert ddo.credentials == build_credentials_dict()
 
-        service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
+        service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
         # Initialize service
         response = data_provider.initialize(

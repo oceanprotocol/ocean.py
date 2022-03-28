@@ -13,6 +13,7 @@ from ocean_lib.structures.file_objects import UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 from ocean_lib.web3_internal.wallet import Wallet
+from tests.resources.ddo_helpers import get_first_service_by_type
 
 
 @pytest.mark.slow
@@ -80,7 +81,9 @@ def test_stressed_pool_creation():
         did = asset.did  # did contains the datatoken address
         assert did
 
-        erc20_token = ocean.get_datatoken(asset.get_service("access").datatoken)
+        erc20_token = ocean.get_datatoken(
+            get_first_service_by_type(asset, "access").datatoken
+        )
         OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 
         bpool = ocean.create_pool(
