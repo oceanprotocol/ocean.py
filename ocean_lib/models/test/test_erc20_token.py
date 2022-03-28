@@ -359,8 +359,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
 
     # Set and get publishing market fee params
     erc20.set_publishing_market_fee(
-        publish_market_order_fee_token=get_address_of_type(config, "MockUSDC"),
         publish_market_order_fee_address=publisher_wallet.address,
+        publish_market_order_fee_token=get_address_of_type(config, "MockUSDC"),
         publish_market_order_fee_amount=to_wei("1.2"),
         from_wallet=publisher_wallet,
     )

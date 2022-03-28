@@ -84,7 +84,7 @@ def test_erc20_enterprise_flow_with_dispenser():
     consume_fee_amount = ocean.to_wei(2)
     erc20_enterprise_token.set_publishing_market_fee(
         publish_market_order_fee_address=bob_wallet.address,
-        publish_market_order_fee_fee_token=OCEAN_token.address,  # can be also USDC, DAI
+        publish_market_order_fee_token=OCEAN_token.address,  # can be also USDC, DAI
         publish_market_order_fee_amount=consume_fee_amount,
         from_wallet=alice_wallet,
     )

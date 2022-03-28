@@ -375,7 +375,7 @@ class ERC20Token(ContractBase):
     def set_publishing_market_fee(
         self,
         publish_market_order_fee_address: str,
-        publish_market_order_fee_fee_token: str,
+        publish_market_order_fee_token: str,
         publish_market_order_fee_amount: int,
         from_wallet: Wallet,
     ) -> str:
@@ -383,7 +383,7 @@ class ERC20Token(ContractBase):
             "setPublishingMarketFee",
             (
                 publish_market_order_fee_address,
-                publish_market_order_fee_fee_token,
+                publish_market_order_fee_token,
                 publish_market_order_fee_amount,
             ),
             from_wallet,
