@@ -456,7 +456,7 @@ class BPool(BTokenBase):
         from_wallet: Wallet,
     ) -> str:
         """
-        Pay `poolAmountIn` pool shares into the poopool_template_addresspool_template_addressl, getting `tokenAmountOut`
+        Pay `poolAmountIn` pool shares into the pool, getting `tokenAmountOut`
         of the given token `tokenOut` out of the pool.
         """
         return self.send_transaction(
