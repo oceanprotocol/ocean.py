@@ -45,26 +45,6 @@ class SideStaking(ContractBase):
     def get_vesting_amount_so_far(self, datatoken: str) -> int:
         return self.contract.caller.getvestingAmountSoFar(datatoken)
 
-    def can_stake(self, datatoken: str, amount: int) -> bool:
-        return self.contract.caller.canStake(datatoken, amount)
-
-    def stake(self, datatoken: str, amount: int, from_wallet: Wallet) -> str:
-        return self.send_transaction("Stake", (datatoken, amount), from_wallet)
-
-    def can_unstake(self, datatoken: str, liquidity_pool_token_in: int) -> bool:
-        return self.contract.caller.canUnStake(datatoken, liquidity_pool_token_in)
-
-    def unstake(
-        self,
-        datatoken: str,
-        dt_amount_in: int,
-        pool_amount_out: int,
-        from_wallet: Wallet,
-    ) -> str:
-        return self.send_transaction(
-            "UnStake", (datatoken, dt_amount_in, pool_amount_out), from_wallet
-        )
-
     def notify_finalize(
         self, datatoken: str, decimals: int, from_wallet: Wallet
     ) -> str:
