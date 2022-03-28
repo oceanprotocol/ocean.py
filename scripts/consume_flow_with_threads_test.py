@@ -65,10 +65,12 @@ def consume_flow(ocean: Ocean, wallet: Wallet, config: Config):
             erc20_symbols=["DT1"],
             erc20_minters=[wallet.address],
             erc20_fee_managers=[wallet.address],
-            erc20_publish_market_addresses=[ZERO_ADDRESS],
-            erc20_publish_market_fee_tokens=[get_address_of_type(config, "Ocean")],
+            erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
+            erc20_publish_market_order_fee_tokens=[
+                get_address_of_type(config, "Ocean")
+            ],
             erc20_caps=[ocean.to_wei("0.5")],
-            erc20_publish_market_fee_amounts=[0],
+            erc20_publish_market_order_fee_amounts=[0],
             erc20_bytess=[[b""]],
         )
 

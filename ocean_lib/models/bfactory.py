@@ -32,7 +32,7 @@ class BFactory(ContractBase):
         controller: str,
         base_token_sender: str,
         publisher_address: str,
-        publish_market_fee_collector: str,
+        publish_market_swap_fee_collector: str,
         pool_template_address: str,
         from_wallet: Wallet,
     ) -> str:
@@ -53,7 +53,7 @@ class BFactory(ContractBase):
                     base_token_address,
                     base_token_sender,
                     publisher_address,
-                    publish_market_fee_collector,
+                    publish_market_swap_fee_collector,
                     pool_template_address,
                 ],
             ),

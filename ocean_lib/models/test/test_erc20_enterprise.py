@@ -189,7 +189,7 @@ def test_buy_from_fre_and_order(
         fixed_price_address=fixed_rate_exchange.address,
         base_token_address=mock_usdc_contract.address,
         owner=publisher_wallet.address,
-        publish_market_fee_collector=publisher_wallet.address,
+        publish_market_swap_fee_collector=publisher_wallet.address,
         allowed_swapper=ZERO_ADDRESS,
         base_token_decimals=18,
         datatoken_decimals=18,

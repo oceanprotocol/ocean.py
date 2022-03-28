@@ -273,10 +273,10 @@ class OceanAssets:
         erc20_symbols: Optional[List[str]] = None,
         erc20_minters: Optional[List[str]] = None,
         erc20_fee_managers: Optional[List[str]] = None,
-        erc20_publish_market_addresses: Optional[List[str]] = None,
-        erc20_publish_market_fee_tokens: Optional[List[str]] = None,
+        erc20_publish_market_order_fee_addresses: Optional[List[str]] = None,
+        erc20_publish_market_order_fee_tokens: Optional[List[str]] = None,
         erc20_caps: Optional[List[int]] = None,
-        erc20_publish_market_fee_amounts: Optional[List[int]] = None,
+        erc20_publish_market_order_fee_amounts: Optional[List[int]] = None,
         erc20_bytess: Optional[List[List[bytes]]] = None,
         deployed_erc20_tokens: Optional[List[ERC20Token]] = None,
         encrypt_flag: Optional[bool] = False,
@@ -306,10 +306,10 @@ class OceanAssets:
         :param erc20_symbols: list of symbols for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_minters: list of minters for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_fee_managers: list of fee managers for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_publish_market_addresses: list of publishing market addresses for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_publish_market_fee_tokens: list of fee tokens for ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_publish_market_order_fee_addresses: list of publishing market addresses for ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_publish_market_order_fee_tokens: list of fee tokens for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_caps: list of cap values for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_publish_market_fee_amounts: list of fee values for ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_publish_market_order_fee_amounts: list of fee values for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_bytess: list of arrays of bytes for deploying ERC20 tokens, default empty (currently not used, useful for future) if deployed_erc20_tokens is None.
         :param deployed_erc20_tokens: list of ERC20 tokens which are already deployed.
         :param encrypt_flag: bool for encryption of the DDO.
@@ -397,14 +397,14 @@ class OceanAssets:
                         symbol=erc20_symbols[erc20_data_counter],
                         minter=erc20_minters[erc20_data_counter],
                         fee_manager=erc20_fee_managers[erc20_data_counter],
-                        publish_market_address=erc20_publish_market_addresses[
+                        publish_market_address=erc20_publish_market_order_fee_addresses[
                             erc20_data_counter
                         ],
-                        publish_market_fee_token=erc20_publish_market_fee_tokens[
+                        publish_market_fee_token=erc20_publish_market_order_fee_tokens[
                             erc20_data_counter
                         ],
                         cap=erc20_caps[erc20_data_counter],
-                        publish_market_fee_amount=erc20_publish_market_fee_amounts[
+                        publish_market_fee_amount=erc20_publish_market_order_fee_amounts[
                             erc20_data_counter
                         ],
                         bytess=erc20_bytess[erc20_data_counter],

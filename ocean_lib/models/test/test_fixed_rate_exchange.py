@@ -93,7 +93,7 @@ def test_exchange_rate_creation(
         fixed_price_address=get_address_of_type(config, "FixedPrice"),
         base_token_address=get_address_of_type(config, "Ocean"),
         owner=consumer_wallet.address,
-        publish_market_fee_collector=another_consumer_wallet.address,
+        publish_market_swap_fee_collector=another_consumer_wallet.address,
         allowed_swapper=ZERO_ADDRESS,
         base_token_decimals=18,
         datatoken_decimals=18,

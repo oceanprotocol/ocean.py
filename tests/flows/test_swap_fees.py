@@ -141,7 +141,7 @@ def test_pool_ocean(
         base_token_address=ocean_contract.address,
         base_token_sender=consumer_wallet.address,
         publisher_address=consumer_wallet.address,
-        publish_market_fee_collector=get_address_of_type(
+        publish_market_swap_fee_collector=get_address_of_type(
             config, "OPFCommunityFeeCollector"
         ),
         pool_template_address=get_address_of_type(config, "poolTemplate"),
@@ -682,7 +682,7 @@ def test_pool_dai(
         base_token_address=dai_contract.address,
         base_token_sender=consumer_wallet.address,
         publisher_address=consumer_wallet.address,
-        publish_market_fee_collector=get_address_of_type(
+        publish_market_swap_fee_collector=get_address_of_type(
             config, "OPFCommunityFeeCollector"
         ),
         pool_template_address=get_address_of_type(config, "poolTemplate"),
@@ -1214,7 +1214,7 @@ def test_pool_usdc(
         base_token_address=usdc_contract.address,
         base_token_sender=consumer_wallet.address,
         publisher_address=consumer_wallet.address,
-        publish_market_fee_collector=get_address_of_type(
+        publish_market_swap_fee_collector=get_address_of_type(
             config, "OPFCommunityFeeCollector"
         ),
         pool_template_address=get_address_of_type(config, "poolTemplate"),
@@ -1743,7 +1743,7 @@ def test_pool_usdc_flexible(
         base_token_address=usdc_contract.address,
         base_token_sender=consumer_wallet.address,
         publisher_address=consumer_wallet.address,
-        publish_market_fee_collector=get_address_of_type(
+        publish_market_swap_fee_collector=get_address_of_type(
             config, "OPFCommunityFeeCollector"
         ),
         pool_template_address=get_address_of_type(config, "poolTemplate"),
@@ -2267,7 +2267,7 @@ def test_pool_dai_flexible(
         base_token_address=dai_contract.address,
         base_token_sender=consumer_wallet.address,
         publisher_address=consumer_wallet.address,
-        publish_market_fee_collector=get_address_of_type(
+        publish_market_swap_fee_collector=get_address_of_type(
             config, "OPFCommunityFeeCollector"
         ),
         pool_template_address=get_address_of_type(config, "poolTemplate"),

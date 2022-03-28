@@ -88,7 +88,7 @@ class ERC20Token(ContractBase):
         base_token_address: str,
         base_token_sender: str,
         publisher_address: str,
-        publish_market_fee_collector: str,
+        publish_market_swap_fee_collector: str,
         pool_template_address: str,
         from_wallet: Wallet,
     ) -> str:
@@ -108,7 +108,7 @@ class ERC20Token(ContractBase):
                     base_token_address,
                     base_token_sender,
                     publisher_address,
-                    publish_market_fee_collector,
+                    publish_market_swap_fee_collector,
                     pool_template_address,
                 ],
             ),
@@ -121,7 +121,7 @@ class ERC20Token(ContractBase):
         fixed_price_address: str,
         base_token_address: str,
         owner: str,
-        publish_market_fee_collector: str,
+        publish_market_swap_fee_collector: str,
         allowed_swapper: str,
         base_token_decimals: int,
         datatoken_decimals: int,
@@ -137,7 +137,7 @@ class ERC20Token(ContractBase):
                 [
                     base_token_address,
                     owner,
-                    publish_market_fee_collector,
+                    publish_market_swap_fee_collector,
                     allowed_swapper,
                 ],
                 [
