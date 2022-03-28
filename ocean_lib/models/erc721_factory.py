@@ -202,7 +202,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         pool_vesting_blocks: int,
         pool_base_token_amount: int,
         pool_lp_swap_fee: int,
-        pool_publish_market_swap_fee: int,
+        pool_publish_market_swap_fee_amount: int,
         pool_side_staking: str,
         pool_base_token: str,
         pool_base_token_sender: str,
@@ -237,7 +237,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                     ],
                     [
                         pool_lp_swap_fee,
-                        pool_publish_market_swap_fee,
+                        pool_publish_market_swap_fee_amount,
                     ],
                     [
                         pool_side_staking,
@@ -277,7 +277,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         fixed_price_base_token_decimals: int,
         fixed_price_datatoken_decimals: int,
         fixed_price_rate: int,
-        fixed_price_publish_market_fee: int,
+        fixed_price_publish_market_swap_fee_amount: int,
         fixed_price_with_mint: int,
         from_wallet: Wallet,
     ) -> str:
@@ -309,7 +309,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                         fixed_price_base_token_decimals,
                         fixed_price_datatoken_decimals,
                         fixed_price_rate,
-                        fixed_price_publish_market_fee,
+                        fixed_price_publish_market_swap_fee_amount,
                         fixed_price_with_mint,
                     ],
                 ),

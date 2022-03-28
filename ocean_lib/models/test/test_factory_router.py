@@ -89,7 +89,7 @@ def test_buy_dt_batch(
         pool_vesting_blocks=2500000,
         pool_base_token_amount=to_wei("2"),
         pool_lp_swap_fee=to_wei("0.001"),
-        pool_publish_market_swap_fee=to_wei("0.001"),
+        pool_publish_market_swap_fee_amount=to_wei("0.001"),
         pool_side_staking=get_address_of_type(config, "Staking"),
         pool_base_token=get_address_of_type(config, "Ocean"),
         pool_base_token_sender=get_address_of_type(
@@ -136,7 +136,7 @@ def test_buy_dt_batch(
         pool_vesting_blocks=2500000,
         pool_base_token_amount=to_wei("2"),
         pool_lp_swap_fee=to_wei("0.001"),
-        pool_publish_market_swap_fee=to_wei("0.001"),
+        pool_publish_market_swap_fee_amount=to_wei("0.001"),
         pool_side_staking=get_address_of_type(config, "Staking"),
         pool_base_token=get_address_of_type(config, "Ocean"),
         pool_base_token_sender=get_address_of_type(
@@ -245,7 +245,7 @@ def test_stake_batch(
         pool_vesting_blocks=2500000,
         pool_base_token_amount=to_wei("2"),
         pool_lp_swap_fee=to_wei("0.001"),
-        pool_publish_market_swap_fee=to_wei("0.001"),
+        pool_publish_market_swap_fee_amount=to_wei("0.001"),
         pool_side_staking=get_address_of_type(config, "Staking"),
         pool_base_token=get_address_of_type(config, "Ocean"),
         pool_base_token_sender=get_address_of_type(
@@ -292,7 +292,7 @@ def test_stake_batch(
         pool_vesting_blocks=2500000,
         pool_base_token_amount=to_wei("2"),
         pool_lp_swap_fee=to_wei("0.001"),
-        pool_publish_market_swap_fee=to_wei("0.001"),
+        pool_publish_market_swap_fee_amount=to_wei("0.001"),
         pool_side_staking=get_address_of_type(config, "Staking"),
         pool_base_token=get_address_of_type(config, "Ocean"),
         pool_base_token_sender=get_address_of_type(

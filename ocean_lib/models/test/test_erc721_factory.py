@@ -231,7 +231,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         pool_vesting_blocks=2500000,
         pool_base_token_amount=initial_pool_liquidity,
         pool_lp_swap_fee=to_wei("0.001"),
-        pool_publish_market_swap_fee=to_wei("0.001"),
+        pool_publish_market_swap_fee_amount=to_wei("0.001"),
         pool_side_staking=side_staking_address,
         pool_base_token=erc20_address,
         pool_base_token_sender=erc721_factory_address,
@@ -335,7 +335,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         fixed_price_base_token_decimals=18,
         fixed_price_datatoken_decimals=18,
         fixed_price_rate=to_wei("1"),
-        fixed_price_publish_market_fee=to_wei("0.001"),
+        fixed_price_publish_market_swap_fee_amount=to_wei("0.001"),
         fixed_price_with_mint=0,
         from_wallet=publisher_wallet,
     )
