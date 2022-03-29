@@ -10,7 +10,7 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.side_staking import SideStaking
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
 
@@ -151,8 +151,9 @@ def test_main(
     assert bpool.publish_market_fee(get_address_of_type(config, "Ocean")) == 0
     assert bpool.publish_market_fee(erc20_token.address) == 0
 
-    assert erc20_token.balanceOf(get_address_of_type(config, "Staking")) == to_wei(
-        "0.03"
+    assert (
+        erc20_token.balanceOf(get_address_of_type(config, "Staking"))
+        == MAX_UINT256 - initial_ocean_liq
     )
 
     # consumer fails to mint new erc20 token even if the minter
