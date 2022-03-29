@@ -28,15 +28,15 @@ This doesn't actually affect the pip release of the following steps. And if you'
 
 - Push the feature branch to GitHub.
 
-  `git push origin feature/bumpversion-to-v0.2.5"`
+  `git push origin feature/bumpversion-to-v1.2.5"`
 
-## Step 2: Merge changes to main branch
+## Step 2: Merge changes to v4main branch
 
 - Make a pull request from the just-pushed branch.
 
 - Wait for all the tests to pass!
 
-- Merge the pull request into the `main` branch.
+- Merge the pull request into the `v4main` branch.
 
 ## Step 3: Release
 
@@ -46,7 +46,7 @@ This doesn't actually affect the pip release of the following steps. And if you'
   - Click "Draft a new release".
   - For tag version, put something like `v1.2.5`
   - For release title, put the same value (like `v1.2.5`).
-  - For the target, select the `main` branch, or the just-merged commit.
+  - For the target, select the `v4main` branch, or the just-merged commit.
   - Describe the main changes. (In the future, these will come from the changelog.)
   - Click "Publish release".
 
