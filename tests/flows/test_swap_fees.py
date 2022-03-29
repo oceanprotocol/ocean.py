@@ -9,7 +9,7 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.side_staking import SideStaking
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS, MAX_UINT256
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
@@ -164,7 +164,9 @@ def test_pool_ocean(
     assert bpool.publish_market_fee(get_address_of_type(config, "Ocean")) == 0
     assert bpool.publish_market_fee(erc20_token.address) == 0
 
-    assert erc20_token.balanceOf(side_staking.address) == to_wei("99990")
+    assert (
+        erc20_token.balanceOf(side_staking.address) == MAX_UINT256 - initial_ocean_liq
+    )
 
     assert bpool.calc_pool_in_single_out(
         erc20_address, to_wei("1")
@@ -703,7 +705,7 @@ def test_pool_dai(
     assert bpool.publish_market_fee(dai_contract.address) == 0
     assert bpool.publish_market_fee(erc20_token.address) == 0
 
-    assert erc20_token.balanceOf(side_staking.address) == to_wei("990")
+    assert erc20_token.balanceOf(side_staking.address) == MAX_UINT256 - initial_dai_liq
 
     assert bpool.calc_pool_in_single_out(
         erc20_address, to_wei("1")
@@ -1234,7 +1236,7 @@ def test_pool_usdc(
     assert bpool.publish_market_fee(usdc_contract.address) == 0
     assert bpool.publish_market_fee(erc20_token.address) == 0
 
-    assert erc20_token.balanceOf(side_staking.address) == to_wei(120)
+    assert erc20_token.balanceOf(side_staking.address) == MAX_UINT256 - to_wei(880)
 
     assert bpool.calc_pool_in_single_out(erc20_address, to_wei(1)) // int(
         1e12
@@ -1760,7 +1762,7 @@ def test_pool_usdc_flexible(
     assert bpool.publish_market_fee(usdc_contract.address) == 0
     assert bpool.publish_market_fee(erc20_token.address) == 0
 
-    assert erc20_token.balanceOf(side_staking.address) == to_wei(120)
+    assert erc20_token.balanceOf(side_staking.address) == MAX_UINT256 - to_wei(880)
     assert bpool.calc_pool_in_single_out(erc20_address, to_wei(1)) // int(
         1e12
     ) == bpool.calc_pool_in_single_out(usdc_contract.address, int(1e6)) // int(1e12)
@@ -2282,7 +2284,7 @@ def test_pool_dai_flexible(
     assert bpool.publish_market_fee(dai_contract.address) == 0
     assert bpool.publish_market_fee(erc20_token.address) == 0
 
-    assert erc20_token.balanceOf(side_staking.address) == to_wei(990)
+    assert erc20_token.balanceOf(side_staking.address) == MAX_UINT256 - initial_dai_liq
 
     assert bpool.calc_pool_in_single_out(
         erc20_address, to_wei(1)

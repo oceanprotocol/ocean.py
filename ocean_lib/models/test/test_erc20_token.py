@@ -11,7 +11,7 @@ from web3.main import Web3
 from ocean_lib.models.erc20_token import ERC20Token, RolesERC20
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS, MAX_UINT256
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
@@ -133,21 +133,43 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     assert template[1] is True
 
     # Create an ERC20 with publish Fees ( 5 USDC, going to publishMarketAddress)
-    erc721, erc20 = deploy_erc721_erc20(
-        web3=web3,
-        config=config,
-        erc721_publisher=publisher_wallet,
-        erc20_minter=publisher_wallet,
-        cap=to_wei(publish_market_fee_amount),
+    tx = erc721_nft.create_erc20(
+        template_index=1,
+        datatoken_name="ERC20DT1",
+        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_minter=publisher_wallet.address,
+        datatoken_fee_manager=erc721_nft.address,
+        datatoken_publishing_market_address=publisher_wallet.address,
+        fee_token_address=ZERO_ADDRESS,
+        datatoken_cap=to_wei(1000),
+        publishing_market_fee_amount=to_wei(publish_market_fee_amount),
+        bytess=[b""],
+        from_wallet=publisher_wallet,
     )
+    tx_receipt2 = web3.eth.wait_for_transaction_receipt(tx)
+
+    registered_event2 = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt2.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    erc20_address = registered_event2[0].args.newTokenAddress
+
+    erc20 = ERC20Token(web3, erc20_address)
 
     # Check erc20 params
     assert erc20.get_id() == 1
     assert erc20.contract.caller.name() == "ERC20DT1"
     assert erc20.symbol() == "ERC20DT1Symbol"
     assert erc20.decimals() == 18
-    assert erc20.cap() == to_wei(publish_market_fee_amount)
-    assert erc20.get_erc721_address() == erc721.address
+    assert erc20.cap() == MAX_UINT256
+    # Check publish fee info
+    assert erc20.get_publishing_market_fee()[0] == publisher_wallet.address
+    assert erc20.get_publishing_market_fee()[1] == ZERO_ADDRESS
+    assert erc20.get_publishing_market_fee()[2] == to_wei(publish_market_fee_amount)
+    assert erc20.get_erc721_address() == erc721_nft.address
 
     # Check minter permissions
     assert erc20.get_permissions(publisher_wallet.address)[RolesERC20.MINTER]
@@ -186,7 +208,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
 
     erc20.set_data(data=value, from_wallet=publisher_wallet)
 
-    assert web3.toHex(erc721.get_data(key)) == value
+    assert web3.toHex(erc721_nft.get_data(key)) == value
 
     # Should succeed to call cleanPermissions if NFTOwner
     erc20.clean_permissions(from_wallet=publisher_wallet)
