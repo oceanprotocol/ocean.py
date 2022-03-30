@@ -40,6 +40,9 @@ def test_properties(web3, config, publisher_wallet):
         == ERC20Token.EVENT_PUBLISH_MARKET_FEE_CHANGED
     )
     assert (
+        erc20.event_PublishMarketFee.abi["name"] == ERC20Token.EVENT_PUBLISH_MARKET_FEE
+    )
+    assert (
         erc20.event_ConsumeMarketFee.abi["name"] == ERC20Token.EVENT_CONSUME_MARKET_FEE
     )
     assert erc20.event_ProviderFee.abi["name"] == ERC20Token.EVENT_PROVIDER_FEE

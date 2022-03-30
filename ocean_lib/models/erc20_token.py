@@ -27,6 +27,7 @@ class ERC20Token(ContractBase):
     EVENT_ORDER_REUSED = "OrderReused"
     EVENT_ORDER_EXECUTED = "OrderExecuted"
     EVENT_PUBLISH_MARKET_FEE_CHANGED = "PublishMarketFeeChanged"
+    EVENT_PUBLISH_MARKET_FEE = "PublishMarketFee"
     EVENT_CONSUME_MARKET_FEE = "ConsumeMarketFee"
     EVENT_PROVIDER_FEE = "ProviderFee"
     EVENT_MINTER_PROPOSED = "MinterProposed"
@@ -49,6 +50,10 @@ class ERC20Token(ContractBase):
     @property
     def event_PublishMarketFeeChanged(self):
         return self.events.PublishMarketFeeChanged()
+
+    @property
+    def event_PublishMarketFee(self):
+        return self.events.PublishMarketFee()
 
     @property
     def event_ConsumeMarketFee(self):
