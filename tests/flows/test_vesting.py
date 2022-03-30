@@ -6,9 +6,9 @@ import pytest
 from web3 import exceptions
 
 from ocean_lib.models.bpool import BPool
-from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.erc20_token import ERC20Token, RolesERC20
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721NFT
+from ocean_lib.models.erc721_nft import ERC721NFT, ERC721Permissions
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -17,23 +17,15 @@ from tests.resources.helper_functions import get_address_of_type, deploy_erc721_
 
 
 @pytest.mark.unit
-def test_main(
+def test_permission_to_deploy_erc20(
     web3,
     config,
-    consumer_wallet,
     publisher_wallet,
+    consumer_wallet,
     another_consumer_wallet,
-    factory_router,
-    side_staking,
+    erc721_factory,
 ):
-    """Tests main test flow."""
-
-    vesting_amount = to_wei(18)
-
-    erc721_factory = ERC721FactoryContract(
-        web3, get_address_of_type(config, "ERC721Factory")
-    )
-
+    """Tests permissions for ERC721 and check who has ERC20 deployer role."""
     # Tests deploy erc721
     tx = erc721_factory.deploy_erc721_contract(
         name="NFT",
@@ -63,6 +55,9 @@ def test_main(
 
     # Tests roles
     erc721_nft.add_manager(another_consumer_wallet.address, publisher_wallet)
+    permissions = erc721_nft.get_permissions(another_consumer_wallet.address)
+    assert permissions[ERC721Permissions.MANAGER] is True
+    assert permissions[ERC721Permissions.DEPLOY_ERC20] is False
 
     erc721_nft.add_to_create_erc20_list(
         consumer_wallet.address, another_consumer_wallet
@@ -72,11 +67,45 @@ def test_main(
 
     permissions = erc721_nft.get_permissions(consumer_wallet.address)
 
-    assert permissions[1] is True
-    assert permissions[2] is True
-    assert permissions[3] is True
+    assert permissions[ERC721Permissions.MANAGER] is False
+    assert permissions[ERC721Permissions.DEPLOY_ERC20] is True
+    assert permissions[ERC721Permissions.UPDATE_METADATA] is True
+    assert permissions[ERC721Permissions.STORE] is True
 
-    # Tests consumer deploys an ERC20DT
+
+@pytest.mark.unit
+def test_erc20_permissions(
+    web3,
+    config,
+    publisher_wallet,
+    consumer_wallet,
+    another_consumer_wallet,
+    erc721_factory,
+):
+    """Tests permissions for an ERC20 token."""
+    tx = erc721_factory.deploy_erc721_contract(
+        name="NFT",
+        symbol="NFTS",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        from_wallet=publisher_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_event = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_NFT_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert registered_event[0].event == "NFTCreated"
+    assert registered_event[0].args.admin == publisher_wallet.address
+    erc721_nft = ERC721NFT(web3=web3, address=registered_event[0].args.newTokenAddress)
+
+    erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
+    assert erc721_nft.is_erc20_deployer(consumer_wallet.address) is True
+
     trx_erc_20 = erc721_nft.create_erc20(
         template_index=1,
         name="ERC20DT1",
@@ -106,11 +135,78 @@ def test_main(
 
     # Tests permissions
     perms = erc20_token.get_permissions(consumer_wallet.address)
-    assert perms[0] is True
+    assert perms[RolesERC20.MINTER] is True
+    assert perms[RolesERC20.PAYMENT_MANAGER] is False
+
+    erc20_token.add_payment_manager(consumer_wallet.address, consumer_wallet)
+    perms = erc20_token.get_permissions(consumer_wallet.address)
+    assert perms[RolesERC20.PAYMENT_MANAGER] is True
+
+
+@pytest.mark.unit
+def test_minting_failed_after_deploying_pool(
+    web3, config, publisher_wallet, consumer_wallet, factory_router
+):
+    """Tests failure to mint new erc20 token even if consumer has the minter role after deploying a pool."""
+    erc721_nft, erc20_token = deploy_erc721_erc20(
+        web3,
+        config,
+        erc721_publisher=publisher_wallet,
+        erc20_minter=consumer_wallet,
+        cap=to_wei(1000),
+    )
+    erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
 
     # Tests consumer deploys pool and check market fee
     mint_fake_OCEAN(config)
     initial_ocean_liq = to_wei(200)
+    ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
+    ocean_contract.approve(factory_router.address, initial_ocean_liq, consumer_wallet)
+
+    erc20_token.deploy_pool(
+        rate=to_wei(1),
+        base_token_decimals=ocean_contract.decimals(),
+        vesting_amount=initial_ocean_liq // 100 * 9,
+        vesting_blocks=2500000,
+        base_token_amount=initial_ocean_liq,
+        lp_swap_fee_amount=to_wei("0.003"),
+        publish_market_swap_fee_amount=to_wei("0.001"),
+        ss_contract=get_address_of_type(config, "Staking"),
+        base_token_address=ocean_contract.address,
+        base_token_sender=consumer_wallet.address,
+        publisher_address=consumer_wallet.address,
+        publish_market_swap_fee_collector=get_address_of_type(
+            config, "OPFCommunityFeeCollector"
+        ),
+        pool_template_address=get_address_of_type(config, "poolTemplate"),
+        from_wallet=consumer_wallet,
+    )
+
+    # consumer fails to mint new erc20 token even if the minter
+    perms = erc20_token.get_permissions(consumer_wallet.address)
+    assert perms[RolesERC20.MINTER] is True
+
+    with pytest.raises(exceptions.ContractLogicError) as err:
+        erc20_token.mint(consumer_wallet.address, 1, consumer_wallet)
+        assert (
+            err.value.args[0]
+            == "execution reverted: VM Exception while processing transaction: revert DataTokenTemplate: cap exceeded"
+        )
+
+
+@pytest.mark.unit
+def test_vesting_main_flow(web3, config, consumer_wallet, factory_router, side_staking):
+    """Tests consumer deploys pool, checks fees and checks if vesting is correct after 100 blocks."""
+
+    erc721_nft, erc20_token = deploy_erc721_erc20(
+        web3, config, consumer_wallet, consumer_wallet, cap=to_wei(1000)
+    )
+
+    # Consumer deploys pool & checks fees
+    mint_fake_OCEAN(config)
+    vesting_amount = to_wei(18)
+    initial_ocean_liq = to_wei(200)
+
     ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
     ocean_contract.approve(factory_router.address, initial_ocean_liq, consumer_wallet)
 
@@ -151,24 +247,10 @@ def test_main(
     assert bpool.community_fee(erc20_token.address) == 0
     assert bpool.publish_market_fee(get_address_of_type(config, "Ocean")) == 0
     assert bpool.publish_market_fee(erc20_token.address) == 0
-
     assert (
         erc20_token.balanceOf(get_address_of_type(config, "Staking"))
         == MAX_UINT256 - initial_ocean_liq
     )
-
-    # consumer fails to mint new erc20 token even if the minter
-    perms = erc20_token.get_permissions(consumer_wallet.address)
-    assert perms[0] is True
-
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20_token.mint(consumer_wallet.address, 1, consumer_wallet)
-        assert (
-            err.value.args[0]
-            == "execution reverted: VM Exception while processing transaction: revert DataTokenTemplate: cap exceeded"
-        )
-
-    assert erc20_token.balanceOf(consumer_wallet.address) == 0
 
     # check if the vesting amount is correct
     assert side_staking.get_vesting_amount(erc20_token.address) == vesting_amount
@@ -214,7 +296,7 @@ def test_vesting_progress(
     factory_router,
     side_staking,
 ):
-    """Tests vesting progress after half of the vested passed blocks."""
+    """Tests vesting progress after some percentages of the vested passed blocks."""
     erc721_nft, erc20_token = deploy_erc721_erc20(
         web3, config, publisher_wallet, publisher_wallet, cap=to_wei(1000)
     )
@@ -230,17 +312,19 @@ def test_vesting_progress(
 
     tx = erc20_token.deploy_pool(
         rate=to_wei(1),
-        basetoken_decimals=ocean_contract.decimals(),
+        base_token_decimals=ocean_contract.decimals(),
         vesting_amount=vesting_amount,
-        vested_blocks=vested_blocks,
-        initial_liq=initial_ocean_liq,
-        lp_swap_fee=to_wei("0.003"),
-        market_swap_fee=to_wei("0.001"),
+        vesting_blocks=vested_blocks,
+        base_token_amount=initial_ocean_liq,
+        lp_swap_fee_amount=to_wei("0.003"),
+        publish_market_swap_fee_amount=to_wei("0.001"),
         ss_contract=get_address_of_type(config, "Staking"),
-        basetoken_address=ocean_contract.address,
-        basetoken_sender=publisher_wallet.address,
+        base_token_address=ocean_contract.address,
+        base_token_sender=publisher_wallet.address,
         publisher_address=publisher_wallet.address,
-        market_fee_collector=get_address_of_type(config, "OPFCommunityFeeCollector"),
+        publish_market_swap_fee_collector=get_address_of_type(
+            config, "OPFCommunityFeeCollector"
+        ),
         pool_template_address=get_address_of_type(config, "poolTemplate"),
         from_wallet=publisher_wallet,
     )
