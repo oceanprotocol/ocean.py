@@ -3,6 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from concurrent.futures import ThreadPoolExecutor
+
+import pytest
+
 from tests.readmes.test_c2d_flow import c2d_flow_readme
 
 
@@ -19,6 +22,7 @@ def concurrent_c2d(concurrent_flows: int, duration: int):
             )
 
 
+@pytest.mark.slow
 def test_concurrent_c2d():
     concurrent_flows_values = [1, 3, 20]
     reps = [3000, 1000, 50]
