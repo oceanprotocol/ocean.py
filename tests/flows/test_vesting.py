@@ -427,3 +427,198 @@ def test_vesting_progress(
             erc20_token.balanceOf(erc20_token.get_payment_collector())
             == vested_amount + amount_vested_so_far
         )
+
+
+@pytest.mark.unit
+def test_adding_liquidity_for_vesting(
+    web3, config, publisher_wallet, factory_router, side_staking
+):
+    """Tests adding liquidity does not affect the vesting amount."""
+    erc721_nft, erc20_token = deploy_erc721_erc20(
+        web3, config, publisher_wallet, publisher_wallet, cap=to_wei(1000)
+    )
+    mint_fake_OCEAN(config)
+    initial_ocean_liq = to_wei(200)
+    ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
+    ocean_contract.approve(factory_router.address, initial_ocean_liq, publisher_wallet)
+    vested_blocks = factory_router.get_min_vesting_period()
+
+    vesting_amount = initial_ocean_liq // 100 * 9
+
+    tx = erc20_token.deploy_pool(
+        rate=to_wei(1),
+        base_token_decimals=ocean_contract.decimals(),
+        vesting_amount=vesting_amount,
+        vesting_blocks=vested_blocks,
+        base_token_amount=initial_ocean_liq,
+        lp_swap_fee_amount=to_wei("0.003"),
+        publish_market_swap_fee_amount=to_wei("0.001"),
+        ss_contract=get_address_of_type(config, "Staking"),
+        base_token_address=ocean_contract.address,
+        base_token_sender=publisher_wallet.address,
+        publisher_address=publisher_wallet.address,
+        publish_market_swap_fee_collector=get_address_of_type(
+            config, "OPFCommunityFeeCollector"
+        ),
+        pool_template_address=get_address_of_type(config, "poolTemplate"),
+        from_wallet=publisher_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    pool_event = erc20_token.get_event_log(
+        ERC721FactoryContract.EVENT_NEW_POOL,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    assert pool_event[0].args.ssContract == side_staking.address
+    bpool = BPool(web3, pool_event[0].args.poolAddress)
+
+    # check if the vesting amount is correct
+    assert side_staking.get_vesting_amount(erc20_token.address) == vesting_amount
+
+    # check if vesting is correct
+    dt_balance_before = erc20_token.balanceOf(erc20_token.get_payment_collector())
+    available_vesting_before = side_staking.get_available_vesting(erc20_token.address)
+
+    # add liquidity to the pool & check events properly
+    ocean_contract.approve(bpool.address, to_wei(1000000), publisher_wallet)
+    tx = bpool.join_swap_extern_amount_in(
+        token_amount_in=to_wei(10),
+        min_pool_amount_out=to_wei(1),
+        from_wallet=publisher_wallet,
+    )
+
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    join_event = bpool.get_event_log(
+        BPool.EVENT_LOG_JOIN,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert join_event[0].args.caller == publisher_wallet.address
+    assert join_event[0].args.tokenIn == ocean_contract.address
+    assert join_event[0].args.tokenAmountIn == to_wei(10)
+
+    bpt_event = bpool.get_event_log(
+        BPool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
+    )
+    assert bpt_event[0].args.bptAmount  # amount in pool shares
+    assert bpool.get_balance(ocean_contract.address) == initial_ocean_liq + to_wei(10)
+
+    # advance 100 blocks to see if available vesting increased
+    for _ in range(99):
+        # send dummy transactions to increase block count (not part of the actual functionality)
+        send_ether(publisher_wallet, ZERO_ADDRESS, 1)
+
+    available_vesting_after = side_staking.get_available_vesting(erc20_token.address)
+    assert (
+        available_vesting_after > available_vesting_before
+    ), "Available vesting was not increased!"
+    tx_hash = side_staking.get_vesting(erc20_token.address, publisher_wallet)
+    vested_amount = side_staking.get_amount_vested_from_event(
+        tx_hash=tx_hash, erc20_token=erc20_token, from_wallet=publisher_wallet
+    )
+    # vesting amount does not show any modifications after adding liquidity
+    assert vested_amount == side_staking.get_vesting_amount_so_far(erc20_token.address)
+    assert dt_balance_before < erc20_token.balanceOf(
+        erc20_token.get_payment_collector()
+    )
+    assert erc20_token.balanceOf(erc20_token.get_payment_collector()) == vested_amount
+
+
+@pytest.mark.unit
+def test_removing_liquidity_for_vesting(
+    web3, config, publisher_wallet, factory_router, side_staking
+):
+    """Tests removing liquidity does not affect the vesting amount."""
+    erc721_nft, erc20_token = deploy_erc721_erc20(
+        web3, config, publisher_wallet, publisher_wallet, cap=to_wei(1000)
+    )
+    mint_fake_OCEAN(config)
+    initial_ocean_liq = to_wei(200)
+    ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
+    ocean_contract.approve(factory_router.address, initial_ocean_liq, publisher_wallet)
+    vested_blocks = factory_router.get_min_vesting_period()
+
+    vesting_amount = initial_ocean_liq // 100 * 9
+
+    tx = erc20_token.deploy_pool(
+        rate=to_wei(1),
+        base_token_decimals=ocean_contract.decimals(),
+        vesting_amount=vesting_amount,
+        vesting_blocks=vested_blocks,
+        base_token_amount=initial_ocean_liq,
+        lp_swap_fee_amount=to_wei("0.003"),
+        publish_market_swap_fee_amount=to_wei("0.001"),
+        ss_contract=get_address_of_type(config, "Staking"),
+        base_token_address=ocean_contract.address,
+        base_token_sender=publisher_wallet.address,
+        publisher_address=publisher_wallet.address,
+        publish_market_swap_fee_collector=get_address_of_type(
+            config, "OPFCommunityFeeCollector"
+        ),
+        pool_template_address=get_address_of_type(config, "poolTemplate"),
+        from_wallet=publisher_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    pool_event = erc20_token.get_event_log(
+        ERC721FactoryContract.EVENT_NEW_POOL,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    assert pool_event[0].args.ssContract == side_staking.address
+    bpool = BPool(web3, pool_event[0].args.poolAddress)
+
+    # check if the vesting amount is correct
+    assert side_staking.get_vesting_amount(erc20_token.address) == vesting_amount
+
+    # check if vesting is correct
+    dt_balance_before = erc20_token.balanceOf(erc20_token.get_payment_collector())
+    available_vesting_before = side_staking.get_available_vesting(erc20_token.address)
+
+    # remove liquidity to the pool & check events properly
+    ocean_contract.approve(bpool.address, to_wei(1000000), publisher_wallet)
+    bt_balance_before = bpool.get_balance(ocean_contract.address)
+    tx = bpool.exit_swap_pool_amount_in(
+        pool_amount_in=to_wei(1),
+        min_amount_out=to_wei(2),
+        from_wallet=publisher_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    exit_event = bpool.get_event_log(
+        BPool.EVENT_LOG_EXIT,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert exit_event[0].args.caller == publisher_wallet.address
+    assert exit_event[0].args.tokenOut == ocean_contract.address
+
+    bpt_event = bpool.get_event_log(
+        BPool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
+    )
+    assert bpt_event[0].args.bptAmount  # amount in pool shares
+    assert bt_balance_before > bpool.get_balance(ocean_contract.address)
+
+    # advance 100 blocks to see if available vesting increased
+    for _ in range(99):
+        # send dummy transactions to increase block count (not part of the actual functionality)
+        send_ether(publisher_wallet, ZERO_ADDRESS, 1)
+
+    available_vesting_after = side_staking.get_available_vesting(erc20_token.address)
+    assert (
+        available_vesting_after > available_vesting_before
+    ), "Available vesting was not increased!"
+    tx_hash = side_staking.get_vesting(erc20_token.address, publisher_wallet)
+    vested_amount = side_staking.get_amount_vested_from_event(
+        tx_hash=tx_hash, erc20_token=erc20_token, from_wallet=publisher_wallet
+    )
+    # vesting amount does not show any modifications after removing liquidity
+    assert vested_amount == side_staking.get_vesting_amount_so_far(erc20_token.address)
+    assert dt_balance_before < erc20_token.balanceOf(
+        erc20_token.get_payment_collector()
+    )
+    assert erc20_token.balanceOf(erc20_token.get_payment_collector()) == vested_amount
