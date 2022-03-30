@@ -84,11 +84,11 @@ def create_asset_with_pool(
         base_token=ocean.OCEAN_token,
         rate=ocean.to_wei(1),
         vesting_amount=ocean.to_wei(1000),
-        vested_blocks=ocean.factory_router().get_min_vesting_period(),
-        initial_liq=ocean.to_wei(1),
-        lp_swap_fee=lp_swap_fee,
-        market_swap_fee=publish_market_swap_fee,
-        market_fee_collector=publish_market_address,
+        vesting_blocks=ocean.factory_router.get_min_vesting_period(),
+        base_token_amount=ocean.to_wei(1),
+        lp_swap_fee_amount=lp_swap_fee,
+        publish_market_swap_fee_amount=publish_market_swap_fee,
+        publish_market_swap_fee_collector=publish_market_address,
         from_wallet=publisher,
     )
 
@@ -100,20 +100,26 @@ def test_pool_fees(
     publisher_wallet: Wallet,
     publish_market_wallet: Wallet,
 ):
+    opc_swap_fee = publisher_ocean_instance.to_wei("0.001")  # 0.1%
+    publish_market_swap_fee = publisher_ocean_instance.to_wei("0.001")  # 0.1%
+    lp_swap_fee = publisher_ocean_instance.to_wei("0.01")  # 1%
+
     asset, pool = create_asset_with_pool(
         ocean=publisher_ocean_instance,
         publisher=publisher_wallet,
         publish_market_address=publish_market_wallet.address,
         publish_market_order_fee_token=publisher_ocean_instance.OCEAN_address,
         publish_market_order_fee_amount=10,
-        publish_market_swap_fee=publisher_ocean_instance.to_wei("0.001"),  # 0.1%
-        lp_swap_fee=publisher_ocean_instance.to_wei("0.01"),  # 1%
+        publish_market_swap_fee=publish_market_swap_fee,
+        lp_swap_fee=lp_swap_fee,
     )
 
     datatoken_address = asset.get_service_by_index(0).datatoken
     assert pool.is_finalized() is True
-    assert pool.opc_fee() == publisher_ocean_instance.to_wei("0.001")
-    assert pool.get_swap_fee() == publisher_ocean_instance.to_wei("0.001")
+    assert pool.opc_fee(
+        pool.get_base_token_address()
+    ) == publisher_ocean_instance.to_wei("0.001")
+    assert pool.get_swap_fee() == lp_swap_fee
     assert pool.community_fee(publisher_ocean_instance.OCEAN_address) == 0
     assert pool.community_fee(datatoken_address) == 0
     assert pool.publish_market_fee(publisher_ocean_instance.OCEAN_address) == 0
