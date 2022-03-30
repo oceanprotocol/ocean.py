@@ -6,7 +6,7 @@ import json
 import logging
 import logging.config
 import os
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
 import yaml
@@ -190,6 +190,7 @@ def setup_logging(
         coloredlogs.install(level=default_level)
 
 
+@enforce_types
 def deploy_erc721_erc20(
     web3: Web3,
     config: Config,
@@ -197,7 +198,7 @@ def deploy_erc721_erc20(
     erc20_minter: Optional[Wallet] = None,
     cap: int = to_wei(100),
     template_index: Optional[int] = 1,
-):
+) -> Union[ERC721NFT, Tuple[ERC721NFT, ERC20Token]]:
     """Helper function to deploy an ERC721NFT using erc721_publisher Wallet
     and an ERC20Token data token with the newly ERC721NFT using erc20_minter Wallet
     if the wallet is provided.
@@ -223,14 +224,14 @@ def deploy_erc721_erc20(
 
     tx_result = erc721_nft.create_erc20(
         template_index=template_index,
-        datatoken_name="ERC20DT1",
-        datatoken_symbol="ERC20DT1Symbol",
-        datatoken_minter=erc20_minter.address,
-        datatoken_fee_manager=erc721_publisher.address,
-        datatoken_publishing_market_address=erc721_publisher.address,
-        fee_token_address=ZERO_ADDRESS,
-        datatoken_cap=cap,
-        publishing_market_fee_amount=0,
+        name="ERC20DT1",
+        symbol="ERC20DT1Symbol",
+        minter=erc20_minter.address,
+        fee_manager=erc721_publisher.address,
+        publish_market_order_fee_address=erc721_publisher.address,
+        publish_market_order_fee_token=ZERO_ADDRESS,
+        cap=cap,
+        publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=erc721_publisher,
     )
@@ -250,6 +251,7 @@ def deploy_erc721_erc20(
     return erc721_nft, erc20_token
 
 
+@enforce_types
 def get_non_existent_nft_template(
     erc721_factory: ERC721FactoryContract, check_first=20
 ) -> int:
@@ -264,6 +266,7 @@ def get_non_existent_nft_template(
     return -1
 
 
+@enforce_types
 def send_mock_usdc_to_address(
     web3: Web3, config: Config, recipient: str, amount: int
 ) -> int:
@@ -281,6 +284,7 @@ def send_mock_usdc_to_address(
     return mock_usdc.balanceOf(recipient) - initial_recipient_balance
 
 
+@enforce_types
 def transfer_ocean_if_balance_lte(
     web3: Web3,
     config: Config,
@@ -305,6 +309,7 @@ def transfer_ocean_if_balance_lte(
     return ocean_token.balanceOf(recipient) - initial_recipient_balance
 
 
+@enforce_types
 def get_provider_fees() -> Dict[str, Any]:
     provider_wallet = get_provider_wallet()
     web3 = get_web3()

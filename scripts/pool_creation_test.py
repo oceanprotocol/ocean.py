@@ -13,6 +13,7 @@ from ocean_lib.structures.file_objects import UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 from ocean_lib.web3_internal.wallet import Wallet
+from tests.resources.ddo_helpers import get_first_service_by_type
 
 
 @pytest.mark.slow
@@ -70,17 +71,19 @@ def test_stressed_pool_creation():
             erc20_symbols=["DT1"],
             erc20_minters=[alice_wallet.address],
             erc20_fee_managers=[alice_wallet.address],
-            erc20_publishing_market_addresses=[ZERO_ADDRESS],
-            fee_token_addresses=[ocean.OCEAN_address],
-            erc20_cap_values=[ocean.to_wei(100000)],
-            publishing_fee_amounts=[0],
+            erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
+            erc20_publish_market_order_fee_tokens=[ocean.OCEAN_address],
+            erc20_caps=[ocean.to_wei(100000)],
+            erc20_publish_market_order_fee_amounts=[0],
             erc20_bytess=[[b""]],
         )
 
         did = asset.did  # did contains the datatoken address
         assert did
 
-        erc20_token = ocean.get_datatoken(asset.get_service("access").datatoken)
+        erc20_token = ocean.get_datatoken(
+            get_first_service_by_type(asset, "access").datatoken
+        )
         OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 
         bpool = ocean.create_pool(
@@ -88,11 +91,11 @@ def test_stressed_pool_creation():
             base_token=OCEAN_token,
             rate=ocean.to_wei(1),
             vesting_amount=ocean.to_wei(10000),
-            vested_blocks=2500000,
-            initial_liq=ocean.to_wei(2000),
-            lp_swap_fee=ocean.to_wei("0.01"),
-            market_swap_fee=ocean.to_wei("0.01"),
-            market_fee_collector=alice_wallet.address,
+            vesting_blocks=2500000,
+            base_token_amount=ocean.to_wei(2000),
+            lp_swap_fee_amount=ocean.to_wei("0.01"),
+            publish_market_swap_fee_amount=ocean.to_wei("0.01"),
+            publish_market_swap_fee_collector=alice_wallet.address,
             from_wallet=alice_wallet,
         )
         assert bpool.address

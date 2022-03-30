@@ -35,7 +35,7 @@ jobs:
             done
           ls -la "$HOME/.ocean/ocean-contracts/artifacts/"
         env:
-          CONTRACTS_VERSION: v4_rc1
+          CONTRACTS_VERSION: v1.0.0-alpha.27
       - name: Install dependencies
         working-directory: ${{ github.workspace }}
         run: |

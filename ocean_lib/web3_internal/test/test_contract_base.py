@@ -12,12 +12,12 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-@enforce_types
 class MyFactory(ContractBase):
     CONTRACT_NAME = "ERC721Factory"
 
     # super-simple functionality, because our main point here is to
     # test ContractBase itself, not a child class.
+    @enforce_types
     def deploy_erc721_contract(self, erc721_data, from_wallet: Wallet):
         return self.send_transaction("deployERC721Contract", erc721_data, from_wallet)
 

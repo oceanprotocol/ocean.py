@@ -19,12 +19,13 @@ from ocean_lib.web3_internal.web3_overrides.utils import (
 )
 
 
-@enforce_types
 class CustomContractFunction:
+    @enforce_types
     def __init__(self, contract_function):
         """Initializes CustomContractFunction."""
         self._contract_function = contract_function
 
+    @enforce_types
     def transact(
         self,
         transaction: Dict[str, Any],

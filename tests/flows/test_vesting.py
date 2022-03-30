@@ -10,7 +10,7 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.side_staking import SideStaking
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
 
@@ -77,14 +77,14 @@ def test_main(
     # Tests consumer deploys an ERC20DT
     trx_erc_20 = erc721_nft.create_erc20(
         template_index=1,
-        datatoken_name="ERC20DT1",
-        datatoken_symbol="ERC20DT1Symbol",
-        datatoken_minter=consumer_wallet.address,
-        datatoken_fee_manager=another_consumer_wallet.address,
-        datatoken_publishing_market_address=publisher_wallet.address,
-        fee_token_address=ZERO_ADDRESS,
-        datatoken_cap=to_wei("0.05"),
-        publishing_market_fee_amount=0,
+        name="ERC20DT1",
+        symbol="ERC20DT1Symbol",
+        minter=consumer_wallet.address,
+        fee_manager=another_consumer_wallet.address,
+        publish_market_order_fee_address=publisher_wallet.address,
+        publish_market_order_fee_token=ZERO_ADDRESS,
+        cap=to_wei("0.05"),
+        publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
@@ -115,17 +115,19 @@ def test_main(
 
     tx = erc20_token.deploy_pool(
         rate=to_wei(1),
-        basetoken_decimals=ocean_contract.decimals(),
+        base_token_decimals=ocean_contract.decimals(),
         vesting_amount=initial_ocean_liq // 100 * 9,
-        vested_blocks=2500000,
-        initial_liq=initial_ocean_liq,
-        lp_swap_fee=to_wei("0.001"),
-        market_swap_fee=to_wei("0.001"),
+        vesting_blocks=2500000,
+        base_token_amount=initial_ocean_liq,
+        lp_swap_fee_amount=to_wei("0.001"),
+        publish_market_swap_fee_amount=to_wei("0.001"),
         ss_contract=get_address_of_type(config, "Staking"),
-        basetoken_address=ocean_contract.address,
-        basetoken_sender=consumer_wallet.address,
+        base_token_address=ocean_contract.address,
+        base_token_sender=consumer_wallet.address,
         publisher_address=consumer_wallet.address,
-        market_fee_collector=get_address_of_type(config, "OPFCommunityFeeCollector"),
+        publish_market_swap_fee_collector=get_address_of_type(
+            config, "OPFCommunityFeeCollector"
+        ),
         pool_template_address=get_address_of_type(config, "poolTemplate"),
         from_wallet=consumer_wallet,
     )
@@ -149,8 +151,9 @@ def test_main(
     assert bpool.publish_market_fee(get_address_of_type(config, "Ocean")) == 0
     assert bpool.publish_market_fee(erc20_token.address) == 0
 
-    assert erc20_token.balanceOf(get_address_of_type(config, "Staking")) == to_wei(
-        "0.03"
+    assert (
+        erc20_token.balanceOf(get_address_of_type(config, "Staking"))
+        == MAX_UINT256 - initial_ocean_liq
     )
 
     # consumer fails to mint new erc20 token even if the minter
