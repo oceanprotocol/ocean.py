@@ -73,8 +73,8 @@ ocean = Ocean(config)
 
 #create an ERC20 object of OCEAN token
 print(f"Address of OCEAN token: {ocean.OCEAN_address}")
-from ocean_lib.models.btoken import BToken #BToken is ERC20
-OCEAN_token = BToken(ocean.web3, ocean.OCEAN_address)
+from ocean_lib.models.erc20_token import ERC20Token
+OCEAN_token = ERC20Token(ocean.web3, ocean.OCEAN_address)
 
 #set wallet
 private_key = os.getenv('MY_TEST_KEY')
