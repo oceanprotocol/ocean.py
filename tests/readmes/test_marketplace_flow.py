@@ -75,10 +75,10 @@ def test_marketplace_flow_readme(tmp_path):
         erc20_symbols=["DT1"],
         erc20_minters=[alice_wallet.address],
         erc20_fee_managers=[alice_wallet.address],
-        erc20_publishing_market_addresses=[ZERO_ADDRESS],
-        fee_token_addresses=[ocean.OCEAN_address],
-        erc20_cap_values=[ocean.to_wei(100000)],
-        publishing_fee_amounts=[0],
+        erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
+        erc20_publish_market_order_fee_tokens=[ocean.OCEAN_address],
+        erc20_caps=[ocean.to_wei(100000)],
+        erc20_publish_market_order_fee_amounts=[0],
         erc20_bytess=[[b""]],
     )
 
@@ -93,10 +93,10 @@ def test_marketplace_flow_readme(tmp_path):
         base_token=OCEAN_token,
         rate=ocean.to_wei(1),
         vesting_amount=ocean.to_wei(10000),
-        vested_blocks=2500000,
-        initial_liq=ocean.to_wei(2000),
-        lp_swap_fee=ocean.to_wei("0.01"),
-        market_swap_fee=ocean.to_wei("0.01"),
+        vesting_blocks=2500000,
+        base_token_amount=ocean.to_wei(2000),
+        lp_swap_fee_amount=ocean.to_wei("0.01"),
+        publish_market_swap_fee_amount=ocean.to_wei("0.01"),
         from_wallet=alice_wallet,
     )
     assert bpool.address
@@ -128,11 +128,11 @@ def test_marketplace_flow_readme(tmp_path):
     bpool.swap_exact_amount_out(
         token_in=OCEAN_token.address,
         token_out=erc20_token.address,
-        consume_market_fee=ZERO_ADDRESS,
+        consume_market_swap_fee_address=ZERO_ADDRESS,
         max_amount_in=ocean.to_wei(10),
         token_amount_out=ocean.to_wei(1),
         max_price=ocean.to_wei(10),
-        consume_swap_market_fee=0,
+        consume_market_swap_fee_amount=0,
         from_wallet=bob_wallet,
     )
     assert erc20_token.balanceOf(bob_wallet.address) >= ocean.to_wei(
@@ -143,9 +143,9 @@ def test_marketplace_flow_readme(tmp_path):
     order_tx_id = ocean.assets.pay_for_service(
         asset,
         service,
-        consumer_market_fee_address=bob_wallet.address,
-        consumer_market_fee_token=erc20_token.address,
-        consumer_market_fee_amount=0,
+        consume_market_order_fee_address=bob_wallet.address,
+        consume_market_order_fee_token=erc20_token.address,
+        consume_market_order_fee_amount=0,
         wallet=bob_wallet,
     )
 

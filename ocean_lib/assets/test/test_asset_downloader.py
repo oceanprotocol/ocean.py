@@ -183,9 +183,9 @@ def ocean_assets_download_destination_file_helper(
         s=provider_fees["s"],
         valid_until=provider_fees["validUntil"],
         provider_data=provider_fees["providerData"],
-        consumer_market_fee_address=publisher_wallet.address,
-        consumer_market_fee_token=erc20_token.address,
-        consumer_market_fee_amount=0,
+        consume_market_order_fee_address=publisher_wallet.address,
+        consume_market_order_fee_token=erc20_token.address,
+        consume_market_order_fee_amount=0,
         from_wallet=publisher_wallet,
     )
 

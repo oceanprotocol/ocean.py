@@ -9,7 +9,6 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-@enforce_types
 class Dispenser(ContractBase):
     CONTRACT_NAME = "Dispenser"
 
@@ -44,9 +43,11 @@ class Dispenser(ContractBase):
     def event_OwnerWithdrawed(self):
         return self.events.OwnerWithdrawed()
 
+    @enforce_types
     def status(self, datatoken: str) -> tuple:
         return self.contract.caller.status(datatoken)
 
+    @enforce_types
     def activate(
         self, datatoken: str, max_tokens: int, max_balance: int, from_wallet: Wallet
     ) -> str:
@@ -64,6 +65,7 @@ class Dispenser(ContractBase):
             "setAllowedSwapper", (datatoken, new_allowed_swapper), from_wallet
         )
 
+    @enforce_types
     def dispense(
         self, datatoken: str, amount: int, destination: str, from_wallet: Wallet
     ) -> str:
@@ -71,17 +73,17 @@ class Dispenser(ContractBase):
             "dispense", (datatoken, amount, destination), from_wallet
         )
 
+    @enforce_types
     def owner_withdraw(self, datatoken: str, from_wallet: Wallet) -> str:
         return self.send_transaction("ownerWithdraw", (datatoken,), from_wallet)
 
+    @enforce_types
     def dispense_tokens(
         self, erc20_token: ERC20Token, amount: int, consumer_wallet: Wallet
     ):
-        tx = self.dispense(
+        self.dispense(
             datatoken=erc20_token.address,
             amount=amount,
             destination=consumer_wallet.address,
             from_wallet=consumer_wallet,
         )
-        tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
-        assert tx_receipt.status == 1
