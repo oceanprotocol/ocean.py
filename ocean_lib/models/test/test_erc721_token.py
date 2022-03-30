@@ -1048,7 +1048,7 @@ def test_nft_transfer_with_fre(web3, config, publisher_wallet, consumer_wallet):
         exchange_id=exchange_id,
         datatoken_amount=to_wei(2),
         min_base_token_amount=to_wei(1),
-        consume_market_address=ZERO_ADDRESS,
+        consume_market_swap_fee_address=ZERO_ADDRESS,
         consume_market_swap_fee_amount=0,
         from_wallet=consumer_wallet,
     )
