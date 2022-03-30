@@ -28,8 +28,8 @@ def test_side_staking(
     factory_deployer_wallet,
     factory_router,
 ):
-    swap_fee = int(1e15)
-    swap_market_fee = int(1e15)
+    lp_swap_fee = int(1e15)
+    publish_market_swap_fee = int(1e15)
     initial_ocean_liquidity = to_wei("10")
 
     side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
@@ -77,17 +77,19 @@ def test_side_staking(
 
     tx = erc20.deploy_pool(
         rate=to_wei(1),
-        basetoken_decimals=ocean_token.decimals(),
+        base_token_decimals=ocean_token.decimals(),
         vesting_amount=to_wei("0.5"),
-        vested_blocks=2500000,
-        initial_liq=initial_ocean_liquidity,
-        lp_swap_fee=swap_fee,
-        market_swap_fee=swap_market_fee,
+        vesting_blocks=2500000,
+        base_token_amount=initial_ocean_liquidity,
+        lp_swap_fee_amount=lp_swap_fee,
+        publish_market_swap_fee_amount=publish_market_swap_fee,
         ss_contract=get_address_of_type(config, "Staking"),
-        basetoken_address=ocean_token.address,
-        basetoken_sender=consumer_wallet.address,
+        base_token_address=ocean_token.address,
+        base_token_sender=consumer_wallet.address,
         publisher_address=consumer_wallet.address,
-        market_fee_collector=get_address_of_type(config, "OPFCommunityFeeCollector"),
+        publish_market_swap_fee_collector=get_address_of_type(
+            config, "OPFCommunityFeeCollector"
+        ),
         pool_template_address=get_address_of_type(config, "poolTemplate"),
         from_wallet=consumer_wallet,
     )
@@ -116,7 +118,7 @@ def test_side_staking(
         == MAX_UINT256 - initial_ocean_liquidity
     )
     assert bpool.opc_fee() == to_wei("0.001")
-    assert bpool.get_swap_fee() == swap_market_fee
+    assert bpool.get_swap_fee() == lp_swap_fee
     assert bpool.community_fee(ocean_token.address) == 0
     assert bpool.community_fee(erc20.address) == 0
     assert bpool.publish_market_fee(ocean_token.address) == 0
@@ -142,11 +144,11 @@ def test_side_staking(
     bpool.swap_exact_amount_in(
         token_in=ocean_token.address,
         token_out=erc20.address,
-        consume_market_fee=publisher_wallet.address,
+        consume_market_swap_fee_address=publisher_wallet.address,
         token_amount_in=to_wei("1"),
         min_amount_out=to_wei("0"),
         max_price=to_wei("1000000"),
-        swap_market_fee=0,
+        consume_market_swap_fee_amount=0,
         from_wallet=another_consumer_wallet,
     )
 
@@ -161,11 +163,11 @@ def test_side_staking(
         bpool.swap_exact_amount_in(
             token_in=erc20.address,
             token_out=ocean_token.address,
-            consume_market_fee=publisher_wallet.address,
+            consume_market_swap_fee_address=publisher_wallet.address,
             token_amount_in=to_wei("0.01"),
             min_amount_out=to_wei("0.001"),
             max_price=to_wei("100"),
-            swap_market_fee=0,
+            consume_market_swap_fee_amount=0,
             from_wallet=another_consumer_wallet,
         )
     )

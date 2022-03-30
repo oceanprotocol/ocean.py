@@ -54,13 +54,24 @@ export MY_TEST_KEY=0xaefd8bc8725c4b3d15fbe058d0f58f4d852e8caea2bf68e0f73acb1aeec
 
 The Ethereum address that gets computed from the example key is `0x281269C18376010B196a928c335E495bd05eC32F`.
 
-In Python, you'd create a wallet from this private key with a line like:
+In Python, you can create a wallet from this private key. Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps:
+- [x] Setup : Prerequisites
+- [x] Setup : Install the library from v4 sources
+
+First we need an Ocean instance:
+
+```python
+from ocean_lib.example_config import ExampleConfig
+from ocean_lib.ocean.ocean import Ocean
+config = ExampleConfig.get_config()
+ocean = Ocean(config)
+```
+
+Now we can create the wallet based on the private key defined in the previous steps.
 
 ```python
 import os
-import web3
 from ocean_lib.web3_internal.wallet import Wallet
-from ocean_lib.integer import Integer
 private_key = os.getenv('MY_TEST_KEY')
-wallet = Wallet(web3, private_key, 1, 600)
+wallet = Wallet(ocean.web3, private_key, 1, 600)
 ```

@@ -46,14 +46,14 @@ def test_fre_flow_readme():
     # Prepare data for ERC20 token
     erc20_token = erc721_nft.create_datatoken(
         template_index=1,
-        datatoken_name="Datatoken 1",
-        datatoken_symbol="DT1",
-        datatoken_minter=alice_wallet.address,
-        datatoken_fee_manager=alice_wallet.address,
-        datatoken_publishing_market_address=ZERO_ADDRESS,
-        fee_token_address=ocean.OCEAN_address,
-        datatoken_cap=ocean.to_wei(200),
-        publishing_market_fee_amount=0,
+        name="Datatoken 1",
+        symbol="DT1",
+        minter=alice_wallet.address,
+        fee_manager=alice_wallet.address,
+        publish_market_order_fee_address=ZERO_ADDRESS,
+        publish_market_order_fee_token=ocean.OCEAN_address,
+        cap=ocean.to_wei(200),
+        publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=alice_wallet,
     )
@@ -94,7 +94,7 @@ def test_fre_flow_readme():
         exchange_id=exchange_id,
         datatoken_amount=ocean.to_wei(20),
         max_base_token_amount=ocean.to_wei(50),
-        consume_market_address=ZERO_ADDRESS,
+        consume_market_swap_fee_address=ZERO_ADDRESS,
         consume_market_swap_fee_amount=0,
         from_wallet=bob_wallet,
     )

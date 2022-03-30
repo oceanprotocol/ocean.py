@@ -2,15 +2,12 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import List
-
 from enforce_typing import enforce_types
 
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-@enforce_types
 class BFactory(ContractBase):
     CONTRACT_NAME = "BFactory"
 
@@ -20,36 +17,43 @@ class BFactory(ContractBase):
     def event_BPoolCreated(self):
         return self.events.BPoolCreated()
 
+    @enforce_types
     def new_bpool(
         self,
         datatoken_address: str,
-        basetoken_address: str,
+        base_token_address: str,
         rate: int,
-        basetoken_decimals: int,
+        base_token_decimals: int,
         vesting_amount: int,
-        vested_blocks: int,
-        initial_liq: int,
-        lp_swap_fee: int,
-        market_swap_fee: int,
+        vesting_blocks: int,
+        base_token_amount: int,
+        lp_swap_fee_amount: int,
+        publish_market_swap_fee_amount: int,
         controller: str,
-        basetoken_sender: str,
+        base_token_sender: str,
         publisher_address: str,
-        market_fee_collector: str,
+        publish_market_swap_fee_collector: str,
         pool_template_address: str,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "newBPool",
             (
-                [datatoken_address, basetoken_address],
-                [rate, basetoken_decimals, vesting_amount, vested_blocks, initial_liq],
-                [lp_swap_fee, market_swap_fee],
+                [datatoken_address, base_token_address],
+                [
+                    rate,
+                    base_token_decimals,
+                    vesting_amount,
+                    vesting_blocks,
+                    base_token_amount,
+                ],
+                [lp_swap_fee_amount, publish_market_swap_fee_amount],
                 [
                     controller,
-                    basetoken_address,
-                    basetoken_sender,
+                    base_token_address,
+                    base_token_sender,
                     publisher_address,
-                    market_fee_collector,
+                    publish_market_swap_fee_collector,
                     pool_template_address,
                 ],
             ),

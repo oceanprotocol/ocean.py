@@ -49,9 +49,9 @@ def test_market_flow(
         order_tx_id = consumer_ocean.assets.pay_for_service(
             asset,
             service,
-            consumer_market_fee_address=consumer_wallet.address,
-            consumer_market_fee_token=erc20_token.address,
-            consumer_market_fee_amount=0,
+            consume_market_order_fee_address=consumer_wallet.address,
+            consume_market_order_fee_token=erc20_token.address,
+            consume_market_order_fee_amount=0,
             wallet=consumer_wallet,
         )
         asset_folder = consumer_ocean.assets.download_asset(
@@ -65,9 +65,9 @@ def test_market_flow(
         order_tx_id = consumer_ocean.assets.pay_for_service(
             asset,
             service,
-            consumer_market_fee_address=another_consumer_wallet.address,
-            consumer_market_fee_token=erc20_token.address,
-            consumer_market_fee_amount=0,
+            consume_market_order_fee_address=another_consumer_wallet.address,
+            consume_market_order_fee_token=erc20_token.address,
+            consume_market_order_fee_amount=0,
             wallet=consumer_wallet,
             consumer_address=another_consumer_wallet.address,
         )

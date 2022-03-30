@@ -157,9 +157,9 @@ def process_order(
     order_tx_id = ocean_instance.assets.pay_for_service(
         asset=asset,
         service=service,
-        consumer_market_fee_address=consumer_wallet.address,
-        consumer_market_fee_token=erc20_token.address,
-        consumer_market_fee_amount=0,
+        consume_market_order_fee_address=consumer_wallet.address,
+        consume_market_order_fee_token=erc20_token.address,
+        consume_market_order_fee_amount=0,
         wallet=consumer_wallet,
         initialize_args={
             "compute_environment": environments[0]["id"],

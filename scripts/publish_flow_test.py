@@ -53,10 +53,12 @@ def test_stressed_publish():
             erc20_symbols=["DT1"],
             erc20_minters=[alice_wallet.address],
             erc20_fee_managers=[alice_wallet.address],
-            erc20_publishing_market_addresses=[ZERO_ADDRESS],
-            fee_token_addresses=[get_address_of_type(config, "Ocean")],
-            erc20_cap_values=[ocean.to_wei("0.5")],
-            publishing_fee_amounts=[0],
+            erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
+            erc20_publish_market_order_fee_tokens=[
+                get_address_of_type(config, "Ocean")
+            ],
+            erc20_caps=[ocean.to_wei("0.5")],
+            erc20_publish_market_order_fee_amounts=[0],
             erc20_bytess=[[b""]],
         )
         assert ddo, "The asset is not created."

@@ -3,9 +3,10 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enum import IntEnum
-from typing import List, Optional, Tuple
+from typing import List, Optional, Tuple, Union
 
 from enforce_typing import enforce_types
+
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -15,7 +16,6 @@ class RolesERC20(IntEnum):
     PAYMENT_MANAGER = 1
 
 
-@enforce_types
 class ERC20Token(ContractBase):
     CONTRACT_NAME = "ERC20Template"
 
@@ -74,51 +74,59 @@ class ERC20Token(ContractBase):
     def event_NewFixedRate(self):
         return self.events.NewFixedRate()
 
+    @enforce_types
     def deploy_pool(
         self,
         rate: int,
-        basetoken_decimals: int,
+        base_token_decimals: int,
         vesting_amount: int,
-        vested_blocks: int,
-        initial_liq: int,
-        lp_swap_fee: int,
-        market_swap_fee: int,
+        vesting_blocks: int,
+        base_token_amount: int,
+        lp_swap_fee_amount: int,
+        publish_market_swap_fee_amount: int,
         ss_contract: str,
-        basetoken_address: str,
-        basetoken_sender: str,
+        base_token_address: str,
+        base_token_sender: str,
         publisher_address: str,
-        market_fee_collector: str,
+        publish_market_swap_fee_collector: str,
         pool_template_address: str,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "deployPool",
             (
-                [rate, basetoken_decimals, vesting_amount, vested_blocks, initial_liq],
-                [lp_swap_fee, market_swap_fee],
+                [
+                    rate,
+                    base_token_decimals,
+                    vesting_amount,
+                    vesting_blocks,
+                    base_token_amount,
+                ],
+                [lp_swap_fee_amount, publish_market_swap_fee_amount],
                 [
                     ss_contract,
-                    basetoken_address,
-                    basetoken_sender,
+                    base_token_address,
+                    base_token_sender,
                     publisher_address,
-                    market_fee_collector,
+                    publish_market_swap_fee_collector,
                     pool_template_address,
                 ],
             ),
             from_wallet,
         )
 
+    @enforce_types
     def create_fixed_rate(
         self,
         fixed_price_address: str,
-        basetoken_address: str,
+        base_token_address: str,
         owner: str,
-        market_fee_collector: str,
+        publish_market_swap_fee_collector: str,
         allowed_swapper: str,
-        basetoken_decimals: int,
+        base_token_decimals: int,
         datatoken_decimals: int,
         fixed_rate: int,
-        market_fee: int,
+        publish_market_swap_fee_amount: int,
         with_mint: int,
         from_wallet: Wallet,
     ) -> str:
@@ -126,18 +134,24 @@ class ERC20Token(ContractBase):
             "createFixedRate",
             (
                 fixed_price_address,
-                [basetoken_address, owner, market_fee_collector, allowed_swapper],
                 [
-                    basetoken_decimals,
+                    base_token_address,
+                    owner,
+                    publish_market_swap_fee_collector,
+                    allowed_swapper,
+                ],
+                [
+                    base_token_decimals,
                     datatoken_decimals,
                     fixed_rate,
-                    market_fee,
+                    publish_market_swap_fee_amount,
                     with_mint,
                 ],
             ),
             from_wallet,
         )
 
+    @enforce_types
     def create_dispenser(
         self,
         dispenser_address: str,
@@ -153,19 +167,21 @@ class ERC20Token(ContractBase):
             from_wallet,
         )
 
+    @enforce_types
     def mint(self, account_address: str, value: int, from_wallet: Wallet) -> str:
         return self.send_transaction("mint", (account_address, value), from_wallet)
 
+    @enforce_types
     def check_provider_fee(
         self,
         provider_fee_address: str,
         provider_fee_token: str,
         provider_fee_amount: int,
-        v: str,
-        r: str,
-        s: str,
+        v: int,
+        r: Union[str, bytes],
+        s: Union[str, bytes],
         valid_until: int,
-        provider_data: bytes,
+        provider_data: Union[str, bytes],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
@@ -183,6 +199,7 @@ class ERC20Token(ContractBase):
             from_wallet,
         )
 
+    @enforce_types
     def start_order(
         self,
         consumer: str,
@@ -190,14 +207,14 @@ class ERC20Token(ContractBase):
         provider_fee_address: str,
         provider_fee_token: str,
         provider_fee_amount: int,
-        v: str,
-        r: str,
-        s: str,
+        v: int,
+        r: Union[str, bytes],
+        s: Union[str, bytes],
         valid_until: int,
-        provider_data: bytes,
-        consumer_market_fee_address: str,
-        consumer_market_fee_token: str,
-        consumer_market_fee_amount: int,
+        provider_data: Union[str, bytes],
+        consume_market_order_fee_address: str,
+        consume_market_order_fee_token: str,
+        consume_market_order_fee_amount: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
@@ -216,25 +233,26 @@ class ERC20Token(ContractBase):
                     provider_data,
                 ),
                 (
-                    consumer_market_fee_address,
-                    consumer_market_fee_token,
-                    consumer_market_fee_amount,
+                    consume_market_order_fee_address,
+                    consume_market_order_fee_token,
+                    consume_market_order_fee_amount,
                 ),
             ),
             from_wallet,
         )
 
+    @enforce_types
     def reuse_order(
         self,
-        order_tx_id: str,
+        order_tx_id: Union[str, bytes],
         provider_fee_address: str,
         provider_fee_token: str,
         provider_fee_amount: int,
-        v: str,
-        r: str,
-        s: str,
+        v: int,
+        r: Union[str, bytes],
+        s: Union[str, bytes],
         valid_until: int,
-        provider_data: bytes,
+        provider_data: Union[str, bytes],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
@@ -255,13 +273,14 @@ class ERC20Token(ContractBase):
             from_wallet,
         )
 
+    @enforce_types
     def order_executed(
         self,
-        order_tx_id: str,
-        provider_data: bytes,
-        provider_signature: bytes,
-        consumer_data: bytes,
-        consumer_signature: bytes,
+        order_tx_id: Union[str, bytes],
+        provider_data: Union[str, bytes],
+        provider_signature: Union[str, bytes],
+        consumer_data: Union[str, bytes],
+        consumer_signature: Union[str, bytes],
         consumer: str,
         from_wallet: Wallet,
     ) -> str:
@@ -278,15 +297,19 @@ class ERC20Token(ContractBase):
             from_wallet,
         )
 
+    @enforce_types
     def transfer(self, to: str, amount: int, from_wallet: Wallet) -> str:
         return self.send_transaction("transfer", (to, amount), from_wallet)
 
+    @enforce_types
     def allowance(self, owner_address: str, spender_address: str) -> int:
         return self.contract.caller.allowance(owner_address, spender_address)
 
+    @enforce_types
     def approve(self, spender: str, amount: int, from_wallet: Wallet) -> str:
         return self.send_transaction("approve", (spender, amount), from_wallet)
 
+    @enforce_types
     def transferFrom(
         self, from_address: str, to_address: str, amount: int, from_wallet: Wallet
     ) -> str:
@@ -294,86 +317,107 @@ class ERC20Token(ContractBase):
             "transferFrom", (from_address, to_address, amount), from_wallet
         )
 
+    @enforce_types
     def burn(self, amount: int, from_wallet: Wallet) -> str:
         return self.send_transaction("burn", (amount,), from_wallet)
 
+    @enforce_types
     def burn_from(self, from_address: str, amount: int, from_wallet: Wallet) -> str:
         return self.send_transaction("burnFrom", (from_address, amount), from_wallet)
 
+    @enforce_types
     def is_minter(self, account: str) -> bool:
         return self.contract.caller.isMinter(account)
 
+    @enforce_types
     def add_minter(self, minter_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("addMinter", (minter_address,), from_wallet)
 
+    @enforce_types
     def remove_minter(self, minter_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("removeMinter", (minter_address,), from_wallet)
 
+    @enforce_types
     def add_payment_manager(self, fee_manager: str, from_wallet: Wallet) -> str:
         return self.send_transaction("addPaymentManager", (fee_manager,), from_wallet)
 
+    @enforce_types
     def remove_payment_manager(self, fee_manager: str, from_wallet: Wallet) -> str:
         return self.send_transaction(
             "removePaymentManager", (fee_manager,), from_wallet
         )
 
-    def set_data(self, data: bytes, from_wallet: Wallet) -> str:
+    @enforce_types
+    def set_data(self, data: str, from_wallet: Wallet) -> str:
         return self.send_transaction("setData", (data,), from_wallet)
 
+    @enforce_types
     def clean_permissions(self, from_wallet: Wallet) -> str:
         return self.send_transaction("cleanPermissions", (), from_wallet)
 
+    @enforce_types
     def clean_from_721(self, from_wallet: Wallet) -> str:
         return self.send_transaction("cleanFrom721", (), from_wallet)
 
+    @enforce_types
     def set_payment_collector(
-        self, fee_collector_address: str, from_wallet: Wallet
+        self, publish_market_order_fee_address: str, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "setPaymentCollector", (fee_collector_address,), from_wallet
+            "setPaymentCollector", (publish_market_order_fee_address,), from_wallet
         )
 
+    @enforce_types
     def get_publishing_market_fee(self) -> tuple:
         return self.contract.caller.getPublishingMarketFee()
 
+    @enforce_types
     def set_publishing_market_fee(
         self,
-        publish_market_fee_address: str,
-        publish_market_fee_token: str,
-        publish_market_fee_amount: int,
+        publish_market_order_fee_address: str,
+        publish_market_order_fee_token: str,
+        publish_market_order_fee_amount: int,
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
             "setPublishingMarketFee",
             (
-                publish_market_fee_address,
-                publish_market_fee_token,
-                publish_market_fee_amount,
+                publish_market_order_fee_address,
+                publish_market_order_fee_token,
+                publish_market_order_fee_amount,
             ),
             from_wallet,
         )
 
+    @enforce_types
     def get_id(self) -> int:
         return self.contract.caller.getId()
 
+    @enforce_types
     def token_name(self) -> str:
         return self.contract.caller.name()
 
+    @enforce_types
     def symbol(self) -> str:
         return self.contract.caller.symbol()
 
+    @enforce_types
     def get_erc721_address(self) -> str:
         return self.contract.caller.getERC721Address()
 
+    @enforce_types
     def decimals(self) -> int:
         return self.contract.caller.decimals()
 
+    @enforce_types
     def cap(self) -> int:
         return self.contract.caller.cap()
 
+    @enforce_types
     def is_initialized(self) -> bool:
         return self.contract.caller.isInitialized()
 
+    @enforce_types
     def permit(
         self,
         owner_address: str,
@@ -381,8 +425,8 @@ class ERC20Token(ContractBase):
         value: int,
         deadline: int,
         v: int,
-        r: bytes,
-        s: bytes,
+        r: Union[str, bytes],
+        s: Union[str, bytes],
         from_wallet: Wallet,
     ) -> str:
         return self.send_transaction(
@@ -391,33 +435,43 @@ class ERC20Token(ContractBase):
             from_wallet,
         )
 
+    @enforce_types
     def get_address_length(self, array: List[str]) -> int:
         return self.contract.caller.getAddressLength(array)
 
+    @enforce_types
     def get_uint_length(self, array: List[int]) -> int:
         return self.contract.caller.getUintLength(array)
 
+    @enforce_types
     def get_bytes_length(self, array: List[bytes]) -> int:
         return self.contract.caller.getBytesLength(array)
 
+    @enforce_types
     def get_payment_collector(self) -> str:
         return self.contract.caller.getPaymentCollector()
 
+    @enforce_types
     def balanceOf(self, account: str) -> int:
         return self.contract.caller.balanceOf(account)
 
+    @enforce_types
     def withdraw(self, from_wallet: Wallet):
         return self.send_transaction("withdrawETH", (), from_wallet)
 
+    @enforce_types
     def get_permissions(self, user: str) -> list:
         return self.contract.caller.getPermissions(user)
 
+    @enforce_types
     def permissions(self, user: str) -> list:
         return self.contract.caller.permissions(user)
 
+    @enforce_types
     def get_total_supply(self) -> int:
         return self.contract.caller.totalSupply()
 
+    @enforce_types
     def get_start_order_logs(
         self,
         consumer_address: Optional[str] = None,

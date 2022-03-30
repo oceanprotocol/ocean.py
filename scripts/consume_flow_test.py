@@ -16,7 +16,10 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
-from tests.resources.ddo_helpers import build_credentials_dict
+from tests.resources.ddo_helpers import (
+    build_credentials_dict,
+    get_first_service_by_type,
+)
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
@@ -82,10 +85,12 @@ def test_stressed_consume():
             erc20_symbols=["DT1"],
             erc20_minters=[alice_wallet.address],
             erc20_fee_managers=[alice_wallet.address],
-            erc20_publishing_market_addresses=[ZERO_ADDRESS],
-            fee_token_addresses=[get_address_of_type(config, "Ocean")],
-            erc20_cap_values=[ocean.to_wei("0.5")],
-            publishing_fee_amounts=[0],
+            erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
+            erc20_publish_market_order_fee_tokens=[
+                get_address_of_type(config, "Ocean")
+            ],
+            erc20_caps=[ocean.to_wei("0.5")],
+            erc20_publish_market_order_fee_amounts=[0],
             erc20_bytess=[[b""]],
         )
         assert ddo, "The asset is not created."
@@ -97,7 +102,7 @@ def test_stressed_consume():
         assert ddo.datatokens[0]["symbol"] == "DT1"
         assert ddo.credentials == build_credentials_dict()
 
-        service = ddo.get_service(ServiceTypes.ASSET_ACCESS)
+        service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
         response = data_provider.initialize(
             did=ddo.did, service=service, consumer_address=alice_wallet.address
         )
@@ -122,9 +127,9 @@ def test_stressed_consume():
             s=response.json()["providerFee"]["s"],
             valid_until=response.json()["providerFee"]["validUntil"],
             provider_data=response.json()["providerFee"]["providerData"],
-            consumer_market_fee_address=alice_wallet.address,
-            consumer_market_fee_token=erc20_token.address,
-            consumer_market_fee_amount=0,
+            consume_market_order_fee_address=alice_wallet.address,
+            consume_market_order_fee_token=erc20_token.address,
+            consume_market_order_fee_amount=0,
             from_wallet=alice_wallet,
         )
 
