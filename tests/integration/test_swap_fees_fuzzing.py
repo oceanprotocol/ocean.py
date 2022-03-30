@@ -33,7 +33,7 @@ def get_random_max_token_amount_in(
 ) -> int:
     """Returns a random amount of tokens of token_in that is less than the max_in_ratio_in of the pool and
     less than the balance of the wallet in the token_in"""
-    return floor(
+    result = floor(
         min(
             token_in.balanceOf(wallet_address),
             to_wei(
@@ -41,8 +41,10 @@ def get_random_max_token_amount_in(
                 * from_wei(bpool.get_balance(token_in.address))
             ),
         )
-        * Decimal(random.uniform(0.01, 1))
+        * Decimal(random.uniform(0, 1))
     )
+
+    return result if result > 0 else 1
 
 
 def get_random_max_token_amount_out(
@@ -55,8 +57,8 @@ def get_random_max_token_amount_out(
     max_out_ratio_limit = to_wei(
         from_wei(max_out_ratio) * from_wei(pool_token_out_balance)
     )
-    return floor(
-        Decimal(random.uniform(0.001, 1))
+    result = floor(
+        Decimal(random.uniform(0, 1))
         * min(
             bpool.get_amount_out_exact_in(
                 token_in.address,
@@ -67,6 +69,8 @@ def get_random_max_token_amount_out(
             max_out_ratio_limit,
         )
     )
+
+    return result if result > 0 else 1
 
 
 def test_fuzzing_pool_ocean(
@@ -80,7 +84,7 @@ def test_fuzzing_pool_ocean(
     """Test the liquidity pool contract with random values."""
 
     errors = []
-
+    big_allowance = 10**10
     (
         cap,
         swap_fee,
@@ -118,18 +122,23 @@ def test_fuzzing_pool_ocean(
 
             # Pool base_token inital liquidity
             ss_OCEAN_init_liquidity = floor(
-                consumer_balance * Decimal(random.uniform(0.000000001, 1))
+                consumer_balance * Decimal(random.uniform(0, 1))
+            )
+            ss_OCEAN_init_liquidity = (
+                ss_OCEAN_init_liquidity if ss_OCEAN_init_liquidity > 0 else 1
             )
 
             # Random vesting amount should be less than 10% of ss_OCEAN_init_liquidity
             ss_DT_vest_amt = floor(
-                Decimal(random.uniform(0.001, 0.1)) * ss_OCEAN_init_liquidity
+                Decimal(random.uniform(0, 0.1)) * ss_OCEAN_init_liquidity
             )
+            ss_DT_vest_amt = ss_DT_vest_amt if ss_DT_vest_amt > 0 else 1
+
             min_vesting_period = factory_router.get_min_vesting_period()
             ss_DT_vested_blocks = random.randint(
                 min_vesting_period, min_vesting_period * 1000
             )
-            ss_rate = to_wei(Decimal(random.uniform(0.00001, 3)), 18)
+            ss_rate = to_wei(Decimal(random.uniform(1 / 10**6, 10**4)), 18)
 
             bpool, erc20_token, _, _ = create_nft_erc20_with_pool(
                 web3=web3,
@@ -150,11 +159,6 @@ def test_fuzzing_pool_ocean(
                 == consumer_balance
             )
 
-            assert approx_from_wei(
-                cap - ss_OCEAN_init_liquidity * from_wei(ss_rate),
-                erc20_token.balanceOf(side_staking.address),
-            )
-
             assert ocean_token.balanceOf(bpool.address) == ss_OCEAN_init_liquidity
             assert erc20_token.balanceOf(publisher_wallet.address) == 0
 
@@ -162,12 +166,8 @@ def test_fuzzing_pool_ocean(
             publisher_ocean_balance = ocean_token.balanceOf(publisher_wallet.address)
 
             # Large approvals for the rest of tests
-            ocean_token.approve(
-                bpool.address, to_wei("1000000000000000"), publisher_wallet
-            )
-            erc20_token.approve(
-                bpool.address, to_wei("1000000000000000"), publisher_wallet
-            )
+            ocean_token.approve(bpool.address, to_wei(big_allowance), publisher_wallet)
+            erc20_token.approve(bpool.address, to_wei(big_allowance), publisher_wallet)
 
             swap_in_one_amount_in = get_random_max_token_amount_in(
                 ocean_token, bpool, publisher_wallet.address
@@ -268,7 +268,7 @@ def test_fuzzing_pool_ocean(
             # Tests publisher swaps some DT back to Ocean with swapExactAmountIn, check swap custom fees
             assert bpool.is_finalized() is True
 
-            erc20_token.approve(bpool.address, to_wei("1000"), publisher_wallet)
+            erc20_token.approve(bpool.address, to_wei(big_allowance), publisher_wallet)
             publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
             dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
@@ -332,7 +332,7 @@ def test_fuzzing_pool_ocean(
 
             # Tests publisher swaps some DT back to Ocean with swapExactAmountOut, check swap custom fees
 
-            erc20_token.approve(bpool.address, to_wei("1000"), publisher_wallet)
+            erc20_token.approve(bpool.address, to_wei(big_allowance), publisher_wallet)
             publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
             publisher_ocean_balance = ocean_token.balanceOf(publisher_wallet.address)
             dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
