@@ -119,17 +119,6 @@ def test_side_staking(
     # Side staking pool address should match the newly created pool
     assert side_staking.get_pool_address(erc20.address) == bpool_address
 
-    assert (
-        erc20.balanceOf(get_address_of_type(config, "Staking"))
-        == MAX_UINT256 - initial_ocean_liquidity
-    )
-    assert bpool.opc_fee() == to_wei("0.001")
-    assert bpool.get_swap_fee() == lp_swap_fee
-    assert bpool.community_fee(ocean_token.address) == 0
-    assert bpool.community_fee(erc20.address) == 0
-    assert bpool.publish_market_fee(ocean_token.address) == 0
-    assert bpool.publish_market_fee(erc20.address) == 0
-
     # Consumer fails to mints new erc20 tokens even if it's minter
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc20.mint(consumer_wallet.address, to_wei("1"), consumer_wallet)
@@ -434,10 +423,10 @@ def test_side_staking_steal(
     # Test initial values and setups
 
     # How to scale the "strategy" keep the same propotion (i.e. x2, x5 x10 all the following values):
-    initial_pool_liquidity_eth = 40 * 5000
-    token_cap_eth = 200 * 5000  # 1M
-    join_pool_step_eth = 20 * 5000
-    datatoken_buy_amount_basetoken_eth = 4 * 5000
+    initial_pool_liquidity_eth = 200000
+    token_cap_eth = 1  # doesnt matter
+    join_pool_step_eth = 20000
+    datatoken_buy_amount_basetoken_eth = 5000
     # ---------------------------------------------------------------------------------------------
 
     initial_pool_liquidity = to_wei(initial_pool_liquidity_eth)
@@ -454,18 +443,14 @@ def test_side_staking_steal(
         cap=to_wei(to_wei("1000000000")),
     )
 
-    erc20.mint(consumer_wallet.address, to_wei("100000000000"), publisher_wallet)
-    erc20.mint(publisher_wallet.address, to_wei("1000000000"), publisher_wallet)
-
-    # ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
-    ocean_token = erc20
-
-    initial_eth_balance = web3.eth.getBalance(consumer_wallet.address)
-    ocean_token.transfer(
-        another_consumer_wallet.address, to_wei("1000000000"), consumer_wallet
+    erc20.mint(
+        publisher_wallet.address, to_wei("10000000000000000000"), publisher_wallet
     )
 
-    bpool, erc20_token, erc721_token, pool_token = create_nft_erc20_with_pool(
+    # We use an erc20 as ocean to have unlimited balance
+    ocean_token = erc20
+
+    bpool, erc20_token, _, pool_token = create_nft_erc20_with_pool(
         web3,
         config,
         publisher_wallet,
@@ -479,21 +464,38 @@ def test_side_staking_steal(
     ocean_token.approve(bpool.address, big_allowance, another_consumer_wallet)
     erc20_token.approve(bpool.address, big_allowance, another_consumer_wallet)
 
+    erc20.transfer(
+        another_consumer_wallet.address,
+        erc20.balanceOf(publisher_wallet.address),
+        publisher_wallet,
+    )
+
     # End test initial values and setups
 
     initial_ocean_user_balance = ocean_token.balanceOf(another_consumer_wallet.address)
-    swap_exact_amount_in_base_token(
-        bpool,
-        erc20_token,
-        ocean_token,
-        another_consumer_wallet,
-        to_wei(datatoken_buy_amount_basetoken_eth),
-    )
+    spot_prices = []
 
-    # Fill the pool until the cap is reached
-    previous_pool_datatoken_balance = 0
-    while previous_pool_datatoken_balance != erc20_token.balanceOf(bpool.address):
-        previous_pool_datatoken_balance = erc20_token.balanceOf(bpool.address)
+    def add_spot_price():
+        spot_prices.append(
+            bpool.get_spot_price(
+                ocean_token.address, erc20_token.address, swap_market_fee
+            )
+        )
+
+    add_spot_price()
+    for _ in range(10):
+        swap_exact_amount_in_base_token(
+            bpool,
+            erc20_token,
+            ocean_token,
+            another_consumer_wallet,
+            to_wei(datatoken_buy_amount_basetoken_eth),
+        )
+        add_spot_price()
+
+    times = 2
+    amounts_out = []
+    for _ in range(times):
         join_pool_one_side(
             web3,
             bpool,
@@ -501,9 +503,14 @@ def test_side_staking_steal(
             another_consumer_wallet,
             to_wei(join_pool_step_eth),
         )
-    join_pool_one_side(
-        web3, bpool, ocean_token, another_consumer_wallet, to_wei(join_pool_step_eth)
-    )
+        amounts_out.append(
+            bpool.get_amount_out_exact_in(
+                erc20_token.address,
+                ocean_token.address,
+                erc20_token.balanceOf(another_consumer_wallet.address),
+                swap_market_fee,
+            )[0]
+        )
 
     swap_exact_amount_in_datatoken(
         bpool,
@@ -513,7 +520,7 @@ def test_side_staking_steal(
         erc20_token.balanceOf(another_consumer_wallet.address),
     )
 
-    while pool_token.balanceOf(another_consumer_wallet.address) > to_wei("1"):
+    while pool_token.balanceOf(another_consumer_wallet.address) > to_wei("50"):
         wallet_exit_pool_one_side(
             web3,
             bpool,
@@ -536,30 +543,18 @@ def test_side_staking_steal(
     assert pool_token.balanceOf(another_consumer_wallet.address) == 0
     assert erc20_token.balanceOf(another_consumer_wallet.address) == 0
 
-    final_eth_balance = web3.eth.getBalance(consumer_wallet.address)
-
-    profit = from_wei(
-        ocean_token.balanceOf(another_consumer_wallet.address)
-        - initial_ocean_user_balance,
-        "ether",
-    )
-    # assert (
-    #     # from_wei(initial_eth_balance - final_eth_balance, "ether") < 0.00005
-    # )  # eth spent ~ < 0.00004? seems wrong
-
-    # We are stealing from the pool :')
+    # Check that the the attacker is loosing money
     assert (
         ocean_token.balanceOf(another_consumer_wallet.address)
-        > initial_ocean_user_balance
+        < initial_ocean_user_balance
     )
-    assert profit > 37600  # OCEAN stolen
 
 
 def test_side_staking_constant_rate(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
     """
-    In this test we test that the side staking bot keeps the same rate when the datatoken supply is less than the cap.
+    In this test we test that the side staking bot keeps the same rate joining the pool one side
     """
     # Test initial values and setups
     initial_pool_liquidity = to_wei("1")
@@ -572,7 +567,7 @@ def test_side_staking_constant_rate(
 
     ocean_token.transfer(another_consumer_wallet.address, to_wei("50"), consumer_wallet)
 
-    bpool, erc20_token, erc721_token, pool_token = create_nft_erc20_with_pool(
+    bpool, erc20_token, _, _ = create_nft_erc20_with_pool(
         web3,
         config,
         publisher_wallet,
@@ -596,102 +591,13 @@ def test_side_staking_constant_rate(
     initial_spot_price_basetoken_datatoken = bpool.get_spot_price(
         ocean_token.address, erc20_token.address, swap_market_fee
     )
-    join_pool_one_side(web3, bpool, ocean_token, another_consumer_wallet, to_wei("0.5"))
-    join_pool_one_side(web3, bpool, ocean_token, another_consumer_wallet, to_wei("0.5"))
+    # join the pool max ratio
+    join_pool_one_side(web3, bpool, ocean_token, another_consumer_wallet)
     final_spot_price_basetoken_datatoken = bpool.get_spot_price(
         ocean_token.address, erc20_token.address, swap_market_fee
     )
 
-    # TODO: Is this assertion normal?
-    assert (
-        final_spot_price_basetoken_datatoken == initial_spot_price_basetoken_datatoken
+    # We check that the spot price is constant with a precision of 10^-10
+    assert int(final_spot_price_basetoken_datatoken / 10**8) == int(
+        initial_spot_price_basetoken_datatoken / 10**8
     )
-    # check that the spot price difference is less than 10%
-    assert (
-        abs(
-            final_spot_price_basetoken_datatoken
-            - initial_spot_price_basetoken_datatoken
-        )
-        / initial_spot_price_basetoken_datatoken
-        < 0.1
-    )
-
-
-def test_side_staking_over_datatoken_cap(
-    web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
-):
-    """
-    In this test we test that the side staking bot works as espected when the datatoken supply is over the cap.
-    """
-    # Test initial values and setups
-    initial_pool_liquidity = to_wei("1")
-    token_cap = to_wei("5")
-    swap_market_fee = to_wei("0.0001")
-    swap_fee = to_wei("0.0001")
-    big_allowance = to_wei("100000000")
-
-    ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
-
-    ocean_token.transfer(another_consumer_wallet.address, to_wei("50"), consumer_wallet)
-
-    bpool, erc20_token, erc721_token, pool_token = create_nft_erc20_with_pool(
-        web3,
-        config,
-        publisher_wallet,
-        ocean_token,
-        swap_fee,
-        swap_market_fee,
-        initial_pool_liquidity,
-        token_cap,
-    )
-
-    ocean_token.approve(bpool.address, big_allowance, another_consumer_wallet)
-    erc20_token.approve(bpool.address, big_allowance, another_consumer_wallet)
-
-    # End test initial values and setups
-
-    erc20_token_total_supply = erc20_token.get_total_supply()
-    assert erc20_token_total_supply == token_cap
-
-    # Fill the pool until the cap is reached
-    previous_pool_datatoken_balance = 0
-    while previous_pool_datatoken_balance != erc20_token.balanceOf(bpool.address):
-        previous_pool_datatoken_balance = erc20_token.balanceOf(bpool.address)
-        join_pool_one_side(
-            web3, bpool, ocean_token, another_consumer_wallet, to_wei("0.5")
-        )
-    join_pool_one_side(web3, bpool, ocean_token, another_consumer_wallet, to_wei("0.5"))
-
-    assert erc20_token.balanceOf(bpool.address) > to_wei("4")
-    assert erc20_token.balanceOf(bpool.address) < to_wei("5")
-
-    # From this point the test that the SS bot doesn't add more datatokens
-    max_erc20_pool_balance = erc20_token.balanceOf(bpool.address)
-    join_pool_one_side(web3, bpool, ocean_token, another_consumer_wallet, to_wei("0.5"))
-    assert erc20_token.balanceOf(bpool.address) == max_erc20_pool_balance
-
-    # Exit one side of the pool so that the ss removes some datatokens
-    while erc20_token.balanceOf(bpool.address) > to_wei("3"):
-        bpool.exit_swap_pool_amount_in(
-            pool_token.balanceOf(another_consumer_wallet.address) // 5,
-            0,
-            another_consumer_wallet,
-        )
-    pool_datatoken_balance_after_1s_exit = erc20_token.balanceOf(bpool.address)
-
-    # Check that the ss bot adds datatokens again
-    join_pool_one_side(web3, bpool, ocean_token, another_consumer_wallet, to_wei("0.5"))
-    assert erc20_token.balanceOf(bpool.address) >= pool_datatoken_balance_after_1s_exit
-
-    # Fill the pool again until the cap is reached
-    pool_datatoken_balance_to_fill = 0
-    while pool_datatoken_balance_to_fill != erc20_token.balanceOf(bpool.address):
-        pool_datatoken_balance_to_fill = erc20_token.balanceOf(bpool.address)
-        join_pool_one_side(
-            web3, bpool, ocean_token, another_consumer_wallet, to_wei("0.5")
-        )
-    join_pool_one_side(web3, bpool, ocean_token, another_consumer_wallet, to_wei("0.5"))
-
-    # Finally check that the bpool datatoken liquidity is close to the cap
-    assert erc20_token.balanceOf(bpool.address) > to_wei("4")
-    assert erc20_token.balanceOf(bpool.address) < to_wei("5")

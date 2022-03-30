@@ -540,11 +540,18 @@ def swap_exact_amount_in_datatoken(bpool, datatoken, base_token, wallet, amt: in
 
 
 def swap_exact_amount_in_base_token(bpool, datatoken, base_token, wallet, amt: int = 0):
+    pool_token_out_balance = bpool.get_balance(
+        base_token.address
+    )  # pool base token balance
+    max_out_ratio = bpool.get_max_out_ratio()  # max ratio
+
+    max_out_ratio_limit = int(from_wei(max_out_ratio, "ether") * pool_token_out_balance)
+
     bpool.swap_exact_amount_in(
         base_token.address,
         datatoken.address,
         wallet.address,
-        amt,
+        amt if amt else max_out_ratio_limit,
         to_wei("0"),
         to_wei("100000"),
         to_wei("0"),
