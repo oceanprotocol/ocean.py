@@ -14,7 +14,7 @@ class ComputeInput:
     def __init__(
         self,
         did: str,
-        transfer_tx_id: str,
+        transfer_tx_id: Union[str, bytes],
         service_id: Union[str, int],
         userdata: Optional[Dict] = None,
     ) -> None:

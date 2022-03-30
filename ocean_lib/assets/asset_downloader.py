@@ -5,7 +5,7 @@
 
 import logging
 import os
-from typing import Optional
+from typing import Optional, Union
 
 from enforce_typing import enforce_types
 
@@ -24,7 +24,7 @@ def download_asset_files(
     service: Service,
     consumer_wallet: Wallet,
     destination: str,
-    order_tx_id: str,
+    order_tx_id: Union[str, bytes],
     index: Optional[int] = None,
     userdata: Optional[dict] = None,
 ) -> str:
@@ -34,7 +34,7 @@ def download_asset_files(
     :param service: Sevice instance
     :param consumer_wallet: Wallet instance of the consumer
     :param destination: Path, str
-    :param order_tx_id: hex str the transaction hash of the startOrder tx
+    :param order_tx_id: hex str or hex bytes the transaction hash of the startOrder tx
     :param index: Index of the document that is going to be downloaded, Optional[int]
     :param userdata: Dict of additional data from user
     :return: asset folder path, str

@@ -190,7 +190,7 @@ class DataServiceProvider:
     def download(
         did: str,
         service: Any,  # Can not add Service typing due to enforce_type errors.
-        tx_id: str,
+        tx_id: Union[str, bytes],
         consumer_wallet: Wallet,
         destination_folder: Union[str, Path],
         index: Optional[int] = None,

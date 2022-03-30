@@ -16,7 +16,6 @@ from ocean_lib.utils.utilities import create_checksum
 logger = logging.getLogger("ddo")
 
 
-@enforce_types
 class Asset(AddressCredential):
     """Asset class to create, import, export, validate Asset/DDO objects for V4."""
 

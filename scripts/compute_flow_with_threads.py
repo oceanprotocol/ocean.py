@@ -16,6 +16,7 @@ from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
+from tests.resources.ddo_helpers import get_first_service_by_type
 
 
 def compute_flow(ocean: Ocean, wallet: Wallet):
@@ -27,14 +28,14 @@ def compute_flow(ocean: Ocean, wallet: Wallet):
         # Publish the datatoken
         DATA_datatoken = DATA_nft_token.create_datatoken(
             template_index=1,
-            datatoken_name="Datatoken 1",
-            datatoken_symbol="DT1",
-            datatoken_minter=wallet.address,
-            datatoken_fee_manager=wallet.address,
-            datatoken_publishing_market_address=ZERO_ADDRESS,
-            fee_token_address=ocean.OCEAN_address,
-            datatoken_cap=ocean.to_wei(100000),
-            publishing_market_fee_amount=0,
+            name="Datatoken 1",
+            symbol="DT1",
+            minter=wallet.address,
+            fee_manager=wallet.address,
+            publish_market_order_fee_address=ZERO_ADDRESS,
+            publish_market_order_fee_token=ocean.OCEAN_address,
+            cap=ocean.to_wei(100000),
+            publish_market_order_fee_amount=0,
             bytess=[b""],
             from_wallet=wallet,
         )
@@ -100,14 +101,14 @@ def compute_flow(ocean: Ocean, wallet: Wallet):
 
         ALGO_datatoken = ALGO_nft_token.create_datatoken(
             template_index=1,
-            datatoken_name="Datatoken 1",
-            datatoken_symbol="DT1",
-            datatoken_minter=wallet.address,
-            datatoken_fee_manager=wallet.address,
-            datatoken_publishing_market_address=ZERO_ADDRESS,
-            fee_token_address=ocean.OCEAN_address,
-            datatoken_cap=ocean.to_wei(100000),
-            publishing_market_fee_amount=0,
+            name="Datatoken 1",
+            symbol="DT1",
+            minter=wallet.address,
+            fee_manager=wallet.address,
+            publish_market_order_fee_address=ZERO_ADDRESS,
+            publish_market_order_fee_token=ocean.OCEAN_address,
+            cap=ocean.to_wei(100000),
+            publish_market_order_fee_amount=0,
             bytess=[b""],
             from_wallet=wallet,
         )
@@ -179,8 +180,8 @@ def compute_flow(ocean: Ocean, wallet: Wallet):
         DATA_asset = ocean.assets.resolve(DATA_did)
         ALGO_asset = ocean.assets.resolve(ALGO_did)
 
-        compute_service = DATA_asset.get_service("compute")
-        algo_service = ALGO_asset.get_service("access")
+        compute_service = get_first_service_by_type(DATA_asset, "compute")
+        algo_service = get_first_service_by_type(ALGO_asset, "access")
 
         environments = ocean.compute.get_c2d_environments(
             compute_service.service_endpoint
@@ -190,9 +191,9 @@ def compute_flow(ocean: Ocean, wallet: Wallet):
         DATA_order_tx_id = ocean.assets.pay_for_service(
             asset=DATA_asset,
             service=compute_service,
-            consumer_market_fee_address=wallet.address,
-            consumer_market_fee_token=DATA_datatoken.address,
-            consumer_market_fee_amount=0,
+            consume_market_order_fee_address=wallet.address,
+            consume_market_order_fee_token=DATA_datatoken.address,
+            consume_market_order_fee_amount=0,
             wallet=wallet,
             initialize_args={
                 "compute_environment": environments[0]["id"],
@@ -206,9 +207,9 @@ def compute_flow(ocean: Ocean, wallet: Wallet):
         ALGO_order_tx_id = ocean.assets.pay_for_service(
             asset=ALGO_asset,
             service=algo_service,
-            consumer_market_fee_address=wallet.address,
-            consumer_market_fee_token=ALGO_datatoken.address,
-            consumer_market_fee_amount=0,
+            consume_market_order_fee_address=wallet.address,
+            consume_market_order_fee_token=ALGO_datatoken.address,
+            consume_market_order_fee_amount=0,
             wallet=wallet,
             initialize_args={
                 "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp())

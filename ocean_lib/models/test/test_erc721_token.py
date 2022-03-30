@@ -6,7 +6,7 @@ import pytest
 from web3 import exceptions
 
 from ocean_lib.models.bpool import BPool
-from ocean_lib.models.erc20_token import ERC20Token, MockERC20
+from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT, ERC721Permissions
 from ocean_lib.models.fixed_rate_exchange import (
@@ -459,14 +459,14 @@ def test_create_erc20(web3, config, publisher_wallet, consumer_wallet):
 
     tx = erc721_nft.create_erc20(
         template_index=1,
-        datatoken_name="ERC20DT1",
-        datatoken_symbol="ERC20DT1Symbol",
-        datatoken_minter=publisher_wallet.address,
-        datatoken_fee_manager=consumer_wallet.address,
-        datatoken_publishing_market_address=publisher_wallet.address,
-        fee_token_address=ZERO_ADDRESS,
-        datatoken_cap=to_wei("0.5"),
-        publishing_market_fee_amount=0,
+        name="ERC20DT1",
+        symbol="ERC20DT1Symbol",
+        minter=publisher_wallet.address,
+        fee_manager=consumer_wallet.address,
+        publish_market_order_fee_address=publisher_wallet.address,
+        publish_market_order_fee_token=ZERO_ADDRESS,
+        cap=to_wei("0.5"),
+        publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=publisher_wallet,
     )
@@ -488,14 +488,14 @@ def test_fail_creating_erc20(web3, config, publisher_wallet, consumer_wallet):
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_nft.create_erc20(
             template_index=1,
-            datatoken_name="ERC20DT1",
-            datatoken_symbol="ERC20DT1Symbol",
-            datatoken_minter=publisher_wallet.address,
-            datatoken_fee_manager=consumer_wallet.address,
-            datatoken_publishing_market_address=publisher_wallet.address,
-            fee_token_address=ZERO_ADDRESS,
-            datatoken_cap=to_wei("0.5"),
-            publishing_market_fee_amount=0,
+            name="ERC20DT1",
+            symbol="ERC20DT1Symbol",
+            minter=publisher_wallet.address,
+            fee_manager=consumer_wallet.address,
+            publish_market_order_fee_address=publisher_wallet.address,
+            publish_market_order_fee_token=ZERO_ADDRESS,
+            cap=to_wei("0.5"),
+            publish_market_order_fee_amount=0,
             bytess=[b""],
             from_wallet=consumer_wallet,
         )
@@ -579,14 +579,14 @@ def test_erc721_datatoken_functions(web3, config, publisher_wallet, consumer_wal
     )
     erc721_nft.create_erc20(
         template_index=1,
-        datatoken_name="ERC20DT1",
-        datatoken_symbol="ERC20DT1Symbol",
-        datatoken_minter=publisher_wallet.address,
-        datatoken_fee_manager=consumer_wallet.address,
-        datatoken_publishing_market_address=publisher_wallet.address,
-        fee_token_address=ZERO_ADDRESS,
-        datatoken_cap=to_wei("0.5"),
-        publishing_market_fee_amount=0,
+        name="ERC20DT1",
+        symbol="ERC20DT1Symbol",
+        minter=publisher_wallet.address,
+        fee_manager=consumer_wallet.address,
+        publish_market_order_fee_address=publisher_wallet.address,
+        publish_market_order_fee_token=ZERO_ADDRESS,
+        cap=to_wei("0.5"),
+        publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
@@ -737,14 +737,14 @@ def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet, factory_r
     # Creates an ERC20
     tx_result = erc721_nft.create_erc20(
         template_index=1,
-        datatoken_name="ERC20DT1",
-        datatoken_symbol="ERC20DT1Symbol",
-        datatoken_minter=consumer_wallet.address,
-        datatoken_fee_manager=consumer_wallet.address,
-        datatoken_publishing_market_address=publisher_wallet.address,
-        fee_token_address=ZERO_ADDRESS,
-        datatoken_cap=to_wei(200),
-        publishing_market_fee_amount=0,
+        name="ERC20DT1",
+        symbol="ERC20DT1Symbol",
+        minter=consumer_wallet.address,
+        fee_manager=consumer_wallet.address,
+        publish_market_order_fee_address=publisher_wallet.address,
+        publish_market_order_fee_token=ZERO_ADDRESS,
+        cap=to_wei(200),
+        publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
@@ -771,7 +771,7 @@ def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet, factory_r
         web3, config, consumer_wallet, consumer_wallet, cap=to_wei(250)
     )
 
-    # Make consumer the publish_market_fee_address instead of publisher
+    # Make consumer the publish_market_order_fee_address instead of publisher
     tx_result = erc20_token.set_publishing_market_fee(
         consumer_wallet.address, base_token.address, to_wei(1), publisher_wallet
     )
@@ -796,17 +796,17 @@ def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet, factory_r
     base_token.approve(factory_router.address, to_wei(10000), consumer_wallet)
     tx = erc20_token.deploy_pool(
         rate=to_wei(1),
-        basetoken_decimals=base_token.decimals(),
+        base_token_decimals=base_token.decimals(),
         vesting_amount=to_wei(10),
-        vested_blocks=2500000,
-        initial_liq=to_wei(100),
-        lp_swap_fee=to_wei("0.003"),
-        market_swap_fee=to_wei("0.001"),
+        vesting_blocks=2500000,
+        base_token_amount=to_wei(100),
+        lp_swap_fee_amount=to_wei("0.003"),
+        publish_market_swap_fee_amount=to_wei("0.001"),
         ss_contract=get_address_of_type(config, "Staking"),
-        basetoken_address=base_token.address,
-        basetoken_sender=consumer_wallet.address,
+        base_token_address=base_token.address,
+        base_token_sender=consumer_wallet.address,
         publisher_address=consumer_wallet.address,
-        market_fee_collector=consumer_wallet.address,
+        publish_market_swap_fee_collector=publisher_wallet.address,
         pool_template_address=get_address_of_type(config, "poolTemplate"),
         from_wallet=consumer_wallet,
     )
@@ -858,11 +858,11 @@ def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet, factory_r
     tx = bpool.swap_exact_amount_in(
         token_in=base_token.address,
         token_out=erc20_token.address,
-        consume_market_fee=consumer_wallet.address,
+        consume_market_swap_fee_address=consumer_wallet.address,
         token_amount_in=to_wei(20),
         min_amount_out=to_wei(5),
         max_price=to_wei(1000000),
-        swap_market_fee=to_wei("0.01"),
+        consume_market_swap_fee_amount=to_wei("0.01"),
         from_wallet=consumer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -903,14 +903,14 @@ def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet, factory_r
     number_of_exchanges = fixed_exchange.get_number_of_exchanges()
     tx = erc20_token.create_fixed_rate(
         fixed_price_address=fixed_exchange.address,
-        basetoken_address=base_token.address,
+        base_token_address=base_token.address,
         owner=consumer_wallet.address,
-        market_fee_collector=consumer_wallet.address,
+        publish_market_swap_fee_collector=consumer_wallet.address,
         allowed_swapper=ZERO_ADDRESS,
-        basetoken_decimals=18,
+        base_token_decimals=18,
         datatoken_decimals=18,
         fixed_rate=to_wei(1),
-        market_fee=to_wei("0.001"),
+        publish_market_swap_fee_amount=to_wei("0.001"),
         with_mint=0,
         from_wallet=consumer_wallet,
     )
@@ -987,14 +987,14 @@ def test_transfer_nft_with_erc20_pool_fre(
     # Creates an ERC20
     tx_result = erc721_nft.create_erc20(
         template_index=1,
-        datatoken_name="ERC20DT1",
-        datatoken_symbol="ERC20DT1Symbol",
-        datatoken_minter=publisher_wallet.address,
-        datatoken_fee_manager=publisher_wallet.address,
-        datatoken_publishing_market_address=publisher_wallet.address,
-        fee_token_address=ZERO_ADDRESS,
-        datatoken_cap=to_wei(200),
-        publishing_market_fee_amount=0,
+        name="ERC20DT1",
+        symbol="ERC20DT1Symbol",
+        minter=publisher_wallet.address,
+        fee_manager=publisher_wallet.address,
+        publish_market_order_fee_address=publisher_wallet.address,
+        publish_market_order_fee_token=ZERO_ADDRESS,
+        cap=to_wei(200),
+        publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=publisher_wallet,
     )
@@ -1022,17 +1022,17 @@ def test_transfer_nft_with_erc20_pool_fre(
     base_token.approve(factory_router.address, to_wei(10000), publisher_wallet)
     tx = erc20_token.deploy_pool(
         rate=to_wei(1),
-        basetoken_decimals=base_token.decimals(),
+        base_token_decimals=base_token.decimals(),
         vesting_amount=to_wei(10),
-        vested_blocks=2500000,
-        initial_liq=to_wei(100),
-        lp_swap_fee=to_wei("0.003"),
-        market_swap_fee=to_wei("0.001"),
+        vesting_blocks=2500000,
+        base_token_amount=to_wei(100),
+        lp_swap_fee_amount=to_wei("0.003"),
+        publish_market_swap_fee_amount=to_wei("0.001"),
         ss_contract=get_address_of_type(config, "Staking"),
-        basetoken_address=base_token.address,
-        basetoken_sender=publisher_wallet.address,
+        base_token_address=base_token.address,
+        base_token_sender=publisher_wallet.address,
         publisher_address=publisher_wallet.address,
-        market_fee_collector=publisher_wallet.address,
+        publish_market_swap_fee_collector=publisher_wallet.address,
         pool_template_address=get_address_of_type(config, "poolTemplate"),
         from_wallet=publisher_wallet,
     )
@@ -1083,14 +1083,14 @@ def test_transfer_nft_with_erc20_pool_fre(
     number_of_exchanges = fixed_exchange.get_number_of_exchanges()
     tx = erc20_token.create_fixed_rate(
         fixed_price_address=fixed_exchange.address,
-        basetoken_address=base_token.address,
+        base_token_address=base_token.address,
         owner=publisher_wallet.address,
-        market_fee_collector=publisher_wallet.address,
+        publish_market_swap_fee_collector=publisher_wallet.address,
         allowed_swapper=ZERO_ADDRESS,
-        basetoken_decimals=18,
+        base_token_decimals=18,
         datatoken_decimals=18,
         fixed_rate=to_wei(1),
-        market_fee=to_wei("0.001"),
+        publish_market_swap_fee_amount=to_wei("0.001"),
         with_mint=0,
         from_wallet=publisher_wallet,
     )

@@ -34,10 +34,10 @@ from ocean_lib.web3_internal.wallet import Wallet
 logger = logging.getLogger("ocean")
 
 
-@enforce_types
 class OceanAssets:
     """Ocean asset class for V4."""
 
+    @enforce_types
     def __init__(
         self, config: Config, web3: Web3, data_provider: Type[DataServiceProvider]
     ) -> None:
@@ -55,6 +55,7 @@ class OceanAssets:
         self._downloads_path = downloads_path
         self._aquarius = Aquarius.get_instance(self._metadata_cache_uri)
 
+    @enforce_types
     def validate(self, asset: Asset) -> Tuple[bool, list]:
         """
         Validate that the asset is ok to be stored in aquarius.
@@ -71,6 +72,7 @@ class OceanAssets:
 
         return validation_result, validation_errors
 
+    @enforce_types
     def _add_defaults(
         self, services: list, datatoken: str, files: str, provider_uri: str
     ) -> list:
@@ -95,6 +97,7 @@ class OceanAssets:
         return services
 
     @staticmethod
+    @enforce_types
     def build_access_service(
         service_id: str,
         service_endpoint: str,
@@ -112,32 +115,33 @@ class OceanAssets:
             timeout=timeout,
         )
 
+    @enforce_types
     def deploy_datatoken(
         self,
         erc721_factory: ERC721FactoryContract,
         erc721_nft: ERC721NFT,
         template_index: int,
-        datatoken_name: str,
-        datatoken_symbol: str,
-        datatoken_minter: str,
-        datatoken_fee_manager: str,
-        datatoken_publishing_market_address: str,
-        fee_token_address: str,
-        datatoken_cap: int,
-        publishing_market_fee_amount: int,
+        name: str,
+        symbol: str,
+        minter: str,
+        fee_manager: str,
+        publish_market_order_fee_address: str,
+        publish_market_order_fee_token: str,
+        cap: int,
+        publish_market_order_fee_amount: int,
         bytess: List[bytes],
         from_wallet: Wallet,
     ) -> str:
         tx_result = erc721_nft.create_erc20(
             template_index=template_index,
-            datatoken_name=datatoken_name,
-            datatoken_symbol=datatoken_symbol,
-            datatoken_minter=datatoken_minter,
-            datatoken_fee_manager=datatoken_fee_manager,
-            datatoken_publishing_market_address=datatoken_publishing_market_address,
-            fee_token_address=fee_token_address,
-            datatoken_cap=datatoken_cap,
-            publishing_market_fee_amount=publishing_market_fee_amount,
+            name=name,
+            symbol=symbol,
+            minter=minter,
+            fee_manager=fee_manager,
+            publish_market_order_fee_address=publish_market_order_fee_address,
+            publish_market_order_fee_token=publish_market_order_fee_token,
+            cap=cap,
+            publish_market_order_fee_amount=publish_market_order_fee_amount,
             bytess=bytess,
             from_wallet=from_wallet,
         )
@@ -154,11 +158,13 @@ class OceanAssets:
 
         return registered_token_event[0].args.newTokenAddress
 
+    @enforce_types
     def find_service_by_datatoken(self, datatoken: str, services: list) -> str:
         return next(
             (service.id for service in services if service.datatoken == datatoken), None
         )
 
+    @enforce_types
     def build_datatokens_list(
         self, services: list, deployed_erc20_tokens: list
     ) -> list:
@@ -179,6 +185,7 @@ class OceanAssets:
         return datatokens
 
     @staticmethod
+    @enforce_types
     def _encrypt_ddo(
         asset: Asset,
         provider_uri: str,
@@ -229,6 +236,7 @@ class OceanAssets:
         return document, flags, ddo_hash
 
     @staticmethod
+    @enforce_types
     def _assert_ddo_metadata(metadata: dict):
         assert isinstance(
             metadata, dict
@@ -243,6 +251,8 @@ class OceanAssets:
 
         assert "name" in metadata, "Must have name in metadata."
 
+    # Don't enforce types due to error:
+    # TypeError: Subscripted generics cannot be used with class and instance checks
     def create(
         self,
         metadata: dict,
@@ -254,7 +264,7 @@ class OceanAssets:
         erc721_address: Optional[str] = None,
         erc721_name: Optional[str] = None,
         erc721_symbol: Optional[str] = None,
-        template_index: Optional[int] = 1,
+        erc721_template_index: Optional[int] = 1,
         erc721_additional_erc_deployer: Optional[str] = None,
         erc721_additional_metadata_updater: Optional[str] = None,
         erc721_uri: Optional[str] = None,
@@ -263,10 +273,10 @@ class OceanAssets:
         erc20_symbols: Optional[List[str]] = None,
         erc20_minters: Optional[List[str]] = None,
         erc20_fee_managers: Optional[List[str]] = None,
-        erc20_publishing_market_addresses: Optional[List[str]] = None,
-        fee_token_addresses: Optional[List[str]] = None,
-        erc20_cap_values: Optional[List[int]] = None,
-        publishing_fee_amounts: Optional[List[int]] = None,
+        erc20_publish_market_order_fee_addresses: Optional[List[str]] = None,
+        erc20_publish_market_order_fee_tokens: Optional[List[str]] = None,
+        erc20_caps: Optional[List[int]] = None,
+        erc20_publish_market_order_fee_amounts: Optional[List[int]] = None,
         erc20_bytess: Optional[List[List[bytes]]] = None,
         deployed_erc20_tokens: Optional[List[ERC20Token]] = None,
         encrypt_flag: Optional[bool] = False,
@@ -287,7 +297,7 @@ class OceanAssets:
         asset will be associated with this ERC721 token address.
         :param erc721_name: str name of ERC721 token if creating a new one
         :param erc721_symbol: str symbol of ERC721 token  if creating a new one
-        :param template_index: int template index of the ERC721 token, by default is 1.
+        :param erc721_template_index: int template index of the ERC721 token, by default is 1.
         :param erc721_additional_erc_deployer: str address of an additional ERC20 deployer.
         :param erc721_additional_metadata_updater: str address of an additional metadata updater.
         :param erc721_uri: str URL of the ERC721 token.
@@ -296,10 +306,10 @@ class OceanAssets:
         :param erc20_symbols: list of symbols for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_minters: list of minters for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_fee_managers: list of fee managers for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_publishing_market_addresses: list of publishing market addresses for ERC20 tokens if deployed_erc20_tokens is None.
-        :param fee_token_addresses: list of fee tokens for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_cap_values: list of cap values for ERC20 tokens if deployed_erc20_tokens is None.
-        :param publishing_fee_amounts: list of fee values for ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_publish_market_order_fee_addresses: list of publishing market addresses for ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_publish_market_order_fee_tokens: list of fee tokens for ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_caps: list of cap values for ERC20 tokens if deployed_erc20_tokens is None.
+        :param erc20_publish_market_order_fee_amounts: list of fee values for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_bytess: list of arrays of bytes for deploying ERC20 tokens, default empty (currently not used, useful for future) if deployed_erc20_tokens is None.
         :param deployed_erc20_tokens: list of ERC20 tokens which are already deployed.
         :param encrypt_flag: bool for encryption of the DDO.
@@ -326,7 +336,7 @@ class OceanAssets:
             tx_id = erc721_factory.deploy_erc721_contract(
                 name=name,
                 symbol=symbol,
-                template_index=template_index,
+                template_index=erc721_template_index,
                 additional_metadata_updater=additional_metadata_updater,
                 additional_erc20_deployer=additional_erc20_deployer,
                 token_uri=token_uri,
@@ -383,16 +393,18 @@ class OceanAssets:
                         erc721_factory=erc721_factory,
                         erc721_nft=erc721_nft,
                         template_index=erc20_templates[erc20_data_counter],
-                        datatoken_name=erc20_names[erc20_data_counter],
-                        datatoken_symbol=erc20_symbols[erc20_data_counter],
-                        datatoken_minter=erc20_minters[erc20_data_counter],
-                        datatoken_fee_manager=erc20_fee_managers[erc20_data_counter],
-                        datatoken_publishing_market_address=erc20_publishing_market_addresses[
+                        name=erc20_names[erc20_data_counter],
+                        symbol=erc20_symbols[erc20_data_counter],
+                        minter=erc20_minters[erc20_data_counter],
+                        fee_manager=erc20_fee_managers[erc20_data_counter],
+                        publish_market_order_fee_address=erc20_publish_market_order_fee_addresses[
                             erc20_data_counter
                         ],
-                        fee_token_address=fee_token_addresses[erc20_data_counter],
-                        datatoken_cap=erc20_cap_values[erc20_data_counter],
-                        publishing_market_fee_amount=publishing_fee_amounts[
+                        publish_market_order_fee_token=erc20_publish_market_order_fee_tokens[
+                            erc20_data_counter
+                        ],
+                        cap=erc20_caps[erc20_data_counter],
+                        publish_market_order_fee_amount=erc20_publish_market_order_fee_amounts[
                             erc20_data_counter
                         ],
                         bytess=erc20_bytess[erc20_data_counter],
@@ -456,6 +468,7 @@ class OceanAssets:
 
         return asset
 
+    @enforce_types
     def update(
         self,
         asset: Asset,
@@ -515,7 +528,6 @@ class OceanAssets:
             metadata_proofs=[],
             from_wallet=publisher_wallet,
         )
-        self._web3.eth.wait_for_transaction_receipt(tx_result)
 
         return self._aquarius.wait_for_asset_update(asset, tx_result)
 
@@ -561,7 +573,7 @@ class OceanAssets:
         service: Service,
         consumer_wallet: Wallet,
         destination: str,
-        order_tx_id: str,
+        order_tx_id: Union[str, bytes],
         index: Optional[int] = None,
         userdata: Optional[dict] = None,
     ) -> str:
@@ -589,9 +601,9 @@ class OceanAssets:
         self,
         asset: Asset,
         service: Service,
-        consumer_market_fee_address: str,
-        consumer_market_fee_token: str,
-        consumer_market_fee_amount: int,
+        consume_market_order_fee_address: str,
+        consume_market_order_fee_token: str,
+        consume_market_order_fee_amount: int,
         wallet: Wallet,
         initialize_args: Optional[dict] = None,
         consumer_address: Optional[str] = None,
@@ -640,9 +652,9 @@ class OceanAssets:
             s=provider_fees["s"],
             valid_until=provider_fees["validUntil"],
             provider_data=provider_fees["providerData"],
-            consumer_market_fee_address=consumer_market_fee_address,
-            consumer_market_fee_token=consumer_market_fee_token,
-            consumer_market_fee_amount=consumer_market_fee_amount,
+            consume_market_order_fee_address=consume_market_order_fee_address,
+            consume_market_order_fee_token=consume_market_order_fee_token,
+            consume_market_order_fee_amount=consume_market_order_fee_amount,
             from_wallet=wallet,
         )
 
