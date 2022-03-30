@@ -2,8 +2,12 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from typing import Tuple
+
 import pytest
 
+from ocean_lib.assets.asset import Asset
+from ocean_lib.models.bpool import BPool
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.structures.file_objects import UrlFile
 from ocean_lib.web3_internal.wallet import Wallet
@@ -32,7 +36,7 @@ def consume_market_wallet():
 # OPC Provider Fee
 
 
-def create_pool_with_fees(
+def create_asset_with_pool(
     ocean: Ocean,
     publisher: Wallet,
     publish_market_address: str,
@@ -40,7 +44,7 @@ def create_pool_with_fees(
     publish_market_order_fee_amount: int,
     publish_market_swap_fee: int,
     lp_swap_fee: int,
-):
+) -> Tuple[Asset, BPool]:
     metadata = {
         "created": "2020-11-15T12:27:48Z",
         "updated": "2021-05-17T21:58:02Z",
@@ -68,23 +72,19 @@ def create_pool_with_fees(
         erc20_symbols=["DT1"],
         erc20_minters=[publisher.address],
         erc20_fee_managers=[publisher.address],
-        erc20_publishing_market_addresses=[publish_market_address],
-        fee_token_addresses=[publish_market_order_fee_token],
-        erc20_cap_values=[ocean.to_wei(1_000)],
-        publishing_fee_amounts=[publish_market_order_fee_amount],
-        erc20_bytess=[b""],
-        encrypt_flag=True,
-        compress_flag=True,
+        erc20_publish_market_order_fee_addresses=[publish_market_address],
+        erc20_publish_market_order_fee_tokens=[publish_market_order_fee_token],
+        erc20_caps=[ocean.to_wei(1_000)],
+        erc20_publish_market_order_fee_amounts=[publish_market_order_fee_amount],
+        erc20_bytess=[[b""]],
     )
 
-    service = asset.get_service_by_index(0)
-    factory_router = ocean.factory_router()
-    return ocean.create_pool(
-        erc20_token=ocean.get_datatoken(service.datatoken),
+    pool = ocean.create_pool(
+        erc20_token=ocean.get_datatoken(asset.get_service_by_index(0).datatoken),
         base_token=ocean.OCEAN_token,
         rate=ocean.to_wei(1),
         vesting_amount=ocean.to_wei(1000),
-        vested_blocks=factory_router.get_min_vesting_period(),
+        vested_blocks=ocean.factory_router().get_min_vesting_period(),
         initial_liq=ocean.to_wei(1),
         lp_swap_fee=lp_swap_fee,
         market_swap_fee=publish_market_swap_fee,
@@ -92,14 +92,15 @@ def create_pool_with_fees(
         from_wallet=publisher,
     )
 
+    return asset, pool
 
-@pytest.mark.skip
+
 def test_pool_fees(
     publisher_ocean_instance: Ocean,
     publisher_wallet: Wallet,
     publish_market_wallet: Wallet,
 ):
-    pool = create_pool_with_fees(
+    asset, pool = create_asset_with_pool(
         ocean=publisher_ocean_instance,
         publisher=publisher_wallet,
         publish_market_address=publish_market_wallet.address,
@@ -108,6 +109,15 @@ def test_pool_fees(
         publish_market_swap_fee=publisher_ocean_instance.to_wei("0.001"),  # 0.1%
         lp_swap_fee=publisher_ocean_instance.to_wei("0.01"),  # 1%
     )
+
+    datatoken_address = asset.get_service_by_index(0).datatoken
+    assert pool.is_finalized() is True
+    assert pool.opc_fee() == publisher_ocean_instance.to_wei("0.001")
+    assert pool.get_swap_fee() == publisher_ocean_instance.to_wei("0.001")
+    assert pool.community_fee(publisher_ocean_instance.OCEAN_address) == 0
+    assert pool.community_fee(datatoken_address) == 0
+    assert pool.publish_market_fee(publisher_ocean_instance.OCEAN_address) == 0
+    assert pool.publish_market_fee(datatoken_address) == 0
 
     # Create asset with download service and compute service
 
