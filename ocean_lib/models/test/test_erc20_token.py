@@ -159,6 +159,10 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
 
     erc20 = ERC20Token(web3, erc20_address)
 
+    erc20_address = registered_event2[0].args.newTokenAddress
+
+    erc20 = ERC20Token(web3, erc20_address)
+
     # Check erc20 params
     assert erc20.get_id() == 1
     assert erc20.contract.caller.name() == "ERC20DT1"
