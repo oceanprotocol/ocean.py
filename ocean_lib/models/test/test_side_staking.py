@@ -9,6 +9,7 @@ from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.side_staking import SideStaking
+from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
@@ -29,7 +30,6 @@ def test_side_staking(
 ):
     swap_fee = int(1e15)
     swap_market_fee = int(1e15)
-    vested_blocks = 2500000
     initial_ocean_liquidity = to_wei("10")
 
     side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
@@ -111,14 +111,23 @@ def test_side_staking(
     # Side staking pool address should match the newly created pool
     assert side_staking.get_pool_address(erc20.address) == bpool_address
 
-    assert erc20.balanceOf(get_address_of_type(config, "Staking")) == to_wei("9990")
+    assert (
+        erc20.balanceOf(get_address_of_type(config, "Staking"))
+        == MAX_UINT256 - initial_ocean_liquidity
+    )
+    assert bpool.opc_fee() == to_wei("0.001")
+    assert bpool.get_swap_fee() == swap_market_fee
+    assert bpool.community_fee(ocean_token.address) == 0
+    assert bpool.community_fee(erc20.address) == 0
+    assert bpool.publish_market_fee(ocean_token.address) == 0
+    assert bpool.publish_market_fee(erc20.address) == 0
 
     # Consumer fails to mints new erc20 tokens even if it's minter
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc20.mint(consumer_wallet.address, to_wei("1"), consumer_wallet)
     assert (
         err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert DatatokenTemplate: cap exceeded"
+        == "execution reverted: VM Exception while processing transaction: revert"
     )
 
     # Another consumer buys some DT after burnIn period- exactAmountIn
