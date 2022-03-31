@@ -12,7 +12,7 @@ from ocean_lib.models.erc721_nft import ERC721NFT, ERC721Permissions
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
-from ocean_lib.web3_internal.transactions import send_ether
+from ocean_lib.web3_internal.transactions import send_ether, do_mine
 from tests.resources.helper_functions import get_address_of_type, deploy_erc721_erc20
 
 
@@ -427,6 +427,124 @@ def test_vesting_progress(
             erc20_token.balanceOf(erc20_token.get_payment_collector())
             == vested_amount + amount_vested_so_far
         )
+
+
+def test_vesting_publisher_exit_scam(
+    web3,
+    config,
+    publisher_wallet,
+    consumer_wallet,
+    another_consumer_wallet,
+    factory_router,
+    side_staking,
+):
+    """Tests publisher exit scam flow when the owner of the pool claimed the datatokens from vesting,
+    waits for others to add liquidity in his pool and then dumps the pool."""
+    erc721_nft, erc20_token = deploy_erc721_erc20(
+        web3, config, publisher_wallet, publisher_wallet, cap=to_wei(2000)
+    )
+
+    mint_fake_OCEAN(config)
+    vesting_amount = to_wei(18)
+    initial_ocean_liq = to_wei(200)
+
+    ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
+    ocean_contract.approve(factory_router.address, initial_ocean_liq, publisher_wallet)
+
+    tx = erc20_token.deploy_pool(
+        rate=to_wei(1),
+        base_token_decimals=ocean_contract.decimals(),
+        vesting_amount=initial_ocean_liq // 100 * 9,
+        vesting_blocks=2500000,
+        base_token_amount=initial_ocean_liq,
+        lp_swap_fee_amount=to_wei("0.003"),
+        publish_market_swap_fee_amount=to_wei("0.001"),
+        ss_contract=get_address_of_type(config, "Staking"),
+        base_token_address=ocean_contract.address,
+        base_token_sender=publisher_wallet.address,
+        publisher_address=publisher_wallet.address,
+        publish_market_swap_fee_collector=get_address_of_type(
+            config, "OPFCommunityFeeCollector"
+        ),
+        pool_template_address=get_address_of_type(config, "poolTemplate"),
+        from_wallet=publisher_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    pool_event = erc20_token.get_event_log(
+        ERC721FactoryContract.EVENT_NEW_POOL,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    bpool = BPool(web3, pool_event[0].args.poolAddress)
+
+    # check if the vesting amount is correct
+    assert side_staking.get_vesting_amount(erc20_token.address) == vesting_amount
+
+    # check if vesting is correct
+    dt_balance_before = erc20_token.balanceOf(erc20_token.get_payment_collector())
+    available_vesting_before = side_staking.get_available_vesting(erc20_token.address)
+
+    # advance 100 blocks to see if available vesting increased
+    for _ in range(99):
+        # send dummy transactions to increase block count (not part of the actual functionality)
+        send_ether(consumer_wallet, ZERO_ADDRESS, 1)
+
+    available_vesting_after = side_staking.get_available_vesting(erc20_token.address)
+    assert (
+        available_vesting_after > available_vesting_before
+    ), "Available vesting was not increased!"
+    side_staking.get_vesting(erc20_token.address, publisher_wallet)
+
+    # publisher receives the vested DTs after 100 mined blocks
+    assert publisher_wallet.address == erc20_token.get_payment_collector()
+    assert dt_balance_before < erc20_token.balanceOf(
+        erc20_token.get_payment_collector()
+    )
+    assert erc20_token.balanceOf(
+        erc20_token.get_payment_collector()
+    ) == side_staking.get_vesting_amount_so_far(erc20_token.address)
+
+    dt_pool_balance = bpool.get_balance(erc20_token.address)
+    pool_shares_before = (
+        bpool.balanceOf(publisher_wallet.address) / bpool.total_supply()
+    )
+    dt_percentage_before = pool_shares_before * bpool.get_balance(erc20_token.address)
+
+    # another users buy DTs from the publisher pool to boost the price
+    ocean_contract.approve(bpool.address, to_wei(1000000), another_consumer_wallet)
+    bpool.join_swap_extern_amount_in(
+        token_amount_in=ocean_contract.balanceOf(another_consumer_wallet.address)
+        // 100,
+        min_pool_amount_out=bpool.get_balance(ocean_contract.address) // 1000,
+        from_wallet=another_consumer_wallet,
+    )
+
+    ocean_contract.approve(bpool.address, to_wei(1000000), consumer_wallet)
+    bpool.join_swap_extern_amount_in(
+        token_amount_in=ocean_contract.balanceOf(consumer_wallet.address) // 100,
+        min_pool_amount_out=bpool.get_balance(ocean_contract.address) // 1000,
+        from_wallet=consumer_wallet,
+    )
+
+    # check for increasing DT amount for publisher
+    assert dt_pool_balance < bpool.get_balance(erc20_token.address)
+    assert dt_percentage_before < bpool.balanceOf(
+        publisher_wallet.address
+    ) / bpool.total_supply() * bpool.get_balance(erc20_token.address)
+    # other users have added liquidity, so the owner of the pool will have lower percentage
+    assert (
+        pool_shares_before
+        > bpool.balanceOf(publisher_wallet.address) / bpool.total_supply()
+    )
+
+    # exit pool dual side with profit for publisher
+    bpool.exit_pool(
+        pool_amount_in=bpool.balanceOf(publisher_wallet.address),
+        min_amounts_out=[to_wei(1), to_wei(1)],
+        from_wallet=publisher_wallet,
+    )
+    assert erc20_token.balanceOf(publisher_wallet.address) > initial_ocean_liq // 2
 
 
 @pytest.mark.unit

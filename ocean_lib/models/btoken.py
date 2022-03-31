@@ -73,3 +73,10 @@ class BTokenBase(ContractBase):
         :return: int
         """
         return self.contract.caller.allowance(src_address, dst_address)
+
+    @enforce_types
+    def total_supply(self) -> int:
+        """
+        :return: int
+        """
+        return self.contract.caller.totalSupply()
