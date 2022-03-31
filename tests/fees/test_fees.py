@@ -100,7 +100,7 @@ def test_pool_fees(
     publisher_wallet: Wallet,
     publish_market_wallet: Wallet,
 ):
-    opc_swap_fee = publisher_ocean_instance.to_wei("0.001")  # 0.1%
+    # opc_swap_fee = publisher_ocean_instance.to_wei("0.001")  # 0.1%
     publish_market_swap_fee = publisher_ocean_instance.to_wei("0.001")  # 0.1%
     lp_swap_fee = publisher_ocean_instance.to_wei("0.01")  # 1%
 
