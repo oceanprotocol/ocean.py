@@ -74,6 +74,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         additional_metadata_updater=ZERO_ADDRESS,
         additional_erc20_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
+        transferable=True,
+        owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -99,6 +101,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         additional_metadata_updater=ZERO_ADDRESS,
         additional_erc20_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
+        transferable=True,
+        owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
@@ -503,6 +507,8 @@ def test_start_multiple_order(
         additional_metadata_updater=ZERO_ADDRESS,
         additional_erc20_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
+        transferable=True,
+        owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -528,6 +534,8 @@ def test_start_multiple_order(
         additional_metadata_updater=ZERO_ADDRESS,
         additional_erc20_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
+        transferable=True,
+        owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
     assert erc721_factory.get_current_nft_count() == current_nft_count + 1
@@ -699,6 +707,8 @@ def test_fail_create_erc20(
         additional_metadata_updater=ZERO_ADDRESS,
         additional_erc20_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
+        transferable=True,
+        owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)

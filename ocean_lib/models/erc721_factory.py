@@ -74,6 +74,8 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         additional_metadata_updater: str,
         additional_erc20_deployer: str,
         token_uri: str,
+        transferable: bool,
+        owner: str,
         from_wallet: Wallet,
     ):
         return self.send_transaction(
@@ -85,6 +87,8 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                 additional_metadata_updater,
                 additional_erc20_deployer,
                 token_uri,
+                transferable,
+                owner,
             ),
             from_wallet,
         )
