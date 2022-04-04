@@ -193,36 +193,12 @@ class ERC721NFT(ContractBase):
         return self.send_transaction("setDataERC20", (key, value), from_wallet)
 
     @enforce_types
-    def set_data_v3(self, datatoken: str, value: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("setDataV3", (datatoken, value), from_wallet)
-
-    @enforce_types
     def get_data(self, key: bytes) -> bytes:
         return self.contract.caller.getData(key)
 
     @enforce_types
     def token_uri(self, token_id: int) -> str:
         return self.contract.caller.tokenURI(token_id)
-
-    @enforce_types
-    def wrap_v3_dt(self, datatoken: str, new_minter: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("wrapV3DT", (datatoken, new_minter), from_wallet)
-
-    @enforce_types
-    def mint_v3_dt(
-        self, datatoken: str, to_address: str, value: int, from_wallet: Wallet
-    ) -> str:
-        return self.send_transaction(
-            "mintV3DT", (datatoken, to_address, value), from_wallet
-        )
-
-    @enforce_types
-    def add_v3_minter(self, new_minter_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("addV3Minter", (new_minter_address,), from_wallet)
-
-    @enforce_types
-    def remove_v3_minter(self, minter_address: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("removeV3Minter", (minter_address,), from_wallet)
 
     @enforce_types
     def transfer_from(
