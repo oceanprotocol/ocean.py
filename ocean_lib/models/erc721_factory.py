@@ -6,7 +6,9 @@ from typing import List, Optional, Union
 
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
+from web3.exceptions import BadFunctionCallOutput
 
+from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
@@ -57,13 +59,14 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return self.events.Transfer()
 
     @enforce_types
-    def verify_nft(self, nft: str) -> bool:
+    def verify_nft(self, nft_address: str) -> bool:
         """Checks that a token was registered."""
-        filter_args = {"newTokenAddress": nft}
-        log = self.get_event_log(
-            self.EVENT_NFT_CREATED, 0, self.web3.eth.block_number, filter_args
-        )
-        return bool(log and log[0].args.newTokenAddress == nft)
+        data_nft_contract = ERC721NFT(self.web3, nft_address)
+        try:
+            data_nft_contract.get_id()
+            return True
+        except BadFunctionCallOutput:
+            return False
 
     @enforce_types
     def deploy_erc721_contract(
