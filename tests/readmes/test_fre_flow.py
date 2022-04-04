@@ -104,14 +104,16 @@ def test_fre_flow_readme():
     # for a certain data token address (e.g. erc20_token.address).
     datatoken_address = erc20_token.address
     nft_factory = ocean.get_nft_factory()
-    logs = nft_factory.search_exchange_by_datatoken(
+    exchange_ids = nft_factory.search_exchange_by_datatoken(
         ocean.fixed_rate_exchange,
         datatoken_address,
         exchange_owner=alice_wallet.address,
     )
-    assert logs, f"No exchange has {datatoken_address} address."
-    assert len(logs) == 1
+    assert (
+        exchange_ids
+    ), f"No exchanges found. datatoken_address = {datatoken_address}, exchange_owner = {alice_wallet.address}."
+    assert len(exchange_ids) == 1
 
-    exchange_id = logs[0]
+    exchange_id = exchange_ids[0]
     assert exchange_id
     assert isinstance(exchange_id, bytes)
