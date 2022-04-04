@@ -44,12 +44,9 @@ def test_properties(web3, config):
 
 @pytest.mark.unit
 def test_permissions(
-    web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
+    web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet, erc721_nft
 ):
     """Tests permissions' functions."""
-    erc721_nft = deploy_erc721_erc20(
-        web3=web3, config=config, erc721_publisher=publisher_wallet
-    )
     assert erc721_nft.contract.caller.name() == "NFT"
     assert erc721_nft.symbol() == "NFTSYMBOL"
     assert erc721_nft.balance_of(account=publisher_wallet.address) == 1
@@ -309,11 +306,10 @@ def test_permissions(
 
 
 @pytest.mark.unit
-def test_success_update_metadata(web3, config, publisher_wallet, consumer_wallet):
+def test_success_update_metadata(
+    web3, config, publisher_wallet, consumer_wallet, erc721_nft
+):
     """Tests updating the metadata flow."""
-    erc721_nft = deploy_erc721_erc20(
-        web3=web3, config=config, erc721_publisher=publisher_wallet
-    )
     assert (
         erc721_nft.get_permissions(user=consumer_wallet.address)[
             ERC721Permissions.UPDATE_METADATA
@@ -414,11 +410,10 @@ def test_success_update_metadata(web3, config, publisher_wallet, consumer_wallet
     assert metadata_info[0] == "http://foourl"
 
 
-def test_fails_update_metadata(web3, config, publisher_wallet, consumer_wallet):
+def test_fails_update_metadata(
+    web3, config, publisher_wallet, consumer_wallet, erc721_nft
+):
     """Tests failure of calling update metadata function when the role of the user is not METADATA UPDATER."""
-    erc721_nft = deploy_erc721_erc20(
-        web3=web3, config=config, erc721_publisher=publisher_wallet
-    )
     assert (
         erc721_nft.get_permissions(user=consumer_wallet.address)[
             ERC721Permissions.UPDATE_METADATA
@@ -445,11 +440,8 @@ def test_fails_update_metadata(web3, config, publisher_wallet, consumer_wallet):
 
 
 @pytest.mark.unit
-def test_create_erc20(web3, config, publisher_wallet, consumer_wallet):
+def test_create_erc20(web3, config, publisher_wallet, consumer_wallet, erc721_nft):
     """Tests calling create an ERC20 by the owner."""
-    erc721_nft = deploy_erc721_erc20(
-        web3=web3, config=config, erc721_publisher=publisher_wallet
-    )
     assert (
         erc721_nft.get_permissions(user=publisher_wallet.address)[
             ERC721Permissions.DEPLOY_ERC20
@@ -474,11 +466,10 @@ def test_create_erc20(web3, config, publisher_wallet, consumer_wallet):
 
 
 @pytest.mark.unit
-def test_fail_creating_erc20(web3, config, publisher_wallet, consumer_wallet):
+def test_fail_creating_erc20(
+    web3, config, publisher_wallet, consumer_wallet, erc721_nft
+):
     """Tests failure for creating ERC20 token."""
-    erc721_nft = deploy_erc721_erc20(
-        web3=web3, config=config, erc721_publisher=publisher_wallet
-    )
     assert (
         erc721_nft.get_permissions(consumer_wallet.address)[
             ERC721Permissions.DEPLOY_ERC20
@@ -507,14 +498,10 @@ def test_fail_creating_erc20(web3, config, publisher_wallet, consumer_wallet):
 
 
 @pytest.mark.unit
-def test_erc721_datatoken_functions(web3, config, publisher_wallet, consumer_wallet):
+def test_erc721_datatoken_functions(
+    web3, config, publisher_wallet, consumer_wallet, erc721_nft, erc20_token
+):
     """Tests ERC721 Template functions for ERC20 tokens."""
-    erc721_nft, erc20_token = deploy_erc721_erc20(
-        web3=web3,
-        config=config,
-        erc721_publisher=publisher_wallet,
-        erc20_minter=publisher_wallet,
-    )
     assert len(erc721_nft.get_tokens_list()) == 1
     assert erc721_nft.is_deployed(datatoken=erc20_token.address) is True
 
@@ -613,11 +600,10 @@ def test_erc721_datatoken_functions(web3, config, publisher_wallet, consumer_wal
 
 
 @pytest.mark.unit
-def test_fail_transfer_function(web3, config, publisher_wallet, consumer_wallet):
+def test_fail_transfer_function(
+    web3, config, publisher_wallet, consumer_wallet, erc721_nft
+):
     """Tests failure of using the transfer functions."""
-    erc721_nft = deploy_erc721_erc20(
-        web3=web3, config=config, erc721_publisher=publisher_wallet
-    )
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_nft.transfer_from(
             from_address=publisher_wallet.address,
@@ -646,12 +632,10 @@ def test_fail_transfer_function(web3, config, publisher_wallet, consumer_wallet)
     )
 
 
-def test_transfer_nft(web3, config, publisher_wallet, consumer_wallet, factory_router):
+def test_transfer_nft(
+    web3, config, publisher_wallet, consumer_wallet, factory_router, erc721_factory
+):
     """Tests transferring the NFT before deploying an ERC20, a pool, a FRE."""
-    erc721_factory_address = get_address_of_type(
-        config, ERC721FactoryContract.CONTRACT_NAME
-    )
-    erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
 
     tx = erc721_factory.deploy_erc721_contract(
         name="NFT to TRANSFER",

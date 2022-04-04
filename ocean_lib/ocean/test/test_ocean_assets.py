@@ -29,7 +29,7 @@ from tests.resources.ddo_helpers import (
     get_first_service_by_type,
     get_sample_ddo,
 )
-from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
+from tests.resources.helper_functions import get_address_of_type
 
 
 @pytest.mark.integration
@@ -96,13 +96,12 @@ def test_update_credentials(publisher_ocean_instance, publisher_wallet, config):
 
 
 @pytest.mark.integration
-def test_update_datatokens(publisher_ocean_instance, publisher_wallet, config):
+def test_update_datatokens(
+    publisher_ocean_instance, publisher_wallet, config, erc20_token
+):
     """Test the update of datatokens"""
     ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
     data_provider = DataServiceProvider
-    _, erc20_token = deploy_erc721_erc20(
-        publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
-    )
 
     file1_dict = {
         "type": "url",
@@ -339,13 +338,9 @@ def test_create_bad_metadata(publisher_ocean_instance, publisher_wallet, config)
 
 @pytest.mark.unit
 def test_pay_for_service_insufficient_balance(
-    publisher_ocean_instance, config, publisher_wallet
+    publisher_ocean_instance, config, publisher_wallet, erc20_token
 ):
     """Tests if balance is lower than the purchased amount."""
-    _, erc20_token = deploy_erc721_erc20(
-        publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
-    )
-
     ddo_dict = copy.deepcopy(get_sample_ddo())
     ddo_dict["services"][0]["datatokenAddress"] = erc20_token.address
     asset = Asset.from_dict(ddo_dict)
@@ -500,12 +495,8 @@ def test_plain_asset_multiple_datatokens(
 
 @pytest.mark.integration
 def test_plain_asset_multiple_services(
-    publisher_ocean_instance, publisher_wallet, config
+    publisher_ocean_instance, publisher_wallet, config, erc721_nft, erc20_token
 ):
-    erc721_nft, erc20_token = deploy_erc721_erc20(
-        publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
-    )
-
     web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
     _, metadata, encrypted_files = create_basics(config, web3, data_provider)
@@ -561,11 +552,9 @@ def test_plain_asset_multiple_services(
 
 
 @pytest.mark.integration
-def test_encrypted_asset(publisher_ocean_instance, publisher_wallet, config):
-    erc721_nft, erc20_token = deploy_erc721_erc20(
-        publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
-    )
-
+def test_encrypted_asset(
+    publisher_ocean_instance, publisher_wallet, config, erc721_nft, erc20_token
+):
     web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
     _, metadata, encrypted_files = create_basics(config, web3, data_provider)
@@ -589,11 +578,9 @@ def test_encrypted_asset(publisher_ocean_instance, publisher_wallet, config):
 
 
 @pytest.mark.integration
-def test_compressed_asset(publisher_ocean_instance, publisher_wallet, config):
-    erc721_nft, erc20_token = deploy_erc721_erc20(
-        publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
-    )
-
+def test_compressed_asset(
+    publisher_ocean_instance, publisher_wallet, config, erc721_nft, erc20_token
+):
     web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
     _, metadata, encrypted_files = create_basics(config, web3, data_provider)
@@ -618,12 +605,8 @@ def test_compressed_asset(publisher_ocean_instance, publisher_wallet, config):
 
 @pytest.mark.integration
 def test_compressed_and_encrypted_asset(
-    publisher_ocean_instance, publisher_wallet, config
+    publisher_ocean_instance, publisher_wallet, config, erc721_nft, erc20_token
 ):
-    erc721_nft, erc20_token = deploy_erc721_erc20(
-        publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
-    )
-
     web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
     _, metadata, encrypted_files = create_basics(config, web3, data_provider)
@@ -647,11 +630,9 @@ def test_compressed_and_encrypted_asset(
 
 
 @pytest.mark.unit
-def test_asset_creation_errors(publisher_ocean_instance, publisher_wallet, config):
-    erc721_nft, erc20_token = deploy_erc721_erc20(
-        publisher_ocean_instance.web3, config, publisher_wallet, publisher_wallet
-    )
-
+def test_asset_creation_errors(
+    publisher_ocean_instance, publisher_wallet, config, erc721_nft, erc20_token
+):
     web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
     _, metadata, encrypted_files = create_basics(config, web3, data_provider)
