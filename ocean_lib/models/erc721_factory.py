@@ -5,8 +5,10 @@
 from typing import List, Optional, Union
 
 from enforce_typing import enforce_types
-from web3.datastructures import AttributeDict
+from web3.exceptions import BadFunctionCallOutput
 
+from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
@@ -57,13 +59,14 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return self.events.Transfer()
 
     @enforce_types
-    def verify_nft(self, nft: str) -> bool:
+    def verify_nft(self, nft_address: str) -> bool:
         """Checks that a token was registered."""
-        filter_args = {"newTokenAddress": nft}
-        log = self.get_event_log(
-            self.EVENT_NFT_CREATED, 0, self.web3.eth.block_number, filter_args
-        )
-        return bool(log and log[0].args.newTokenAddress == nft)
+        data_nft_contract = ERC721NFT(self.web3, nft_address)
+        try:
+            data_nft_contract.get_id()
+            return True
+        except BadFunctionCallOutput:
+            return False
 
     @enforce_types
     def deploy_erc721_contract(
@@ -74,6 +77,8 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         additional_metadata_updater: str,
         additional_erc20_deployer: str,
         token_uri: str,
+        transferable: bool,
+        owner: str,
         from_wallet: Wallet,
     ):
         return self.send_transaction(
@@ -85,6 +90,8 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                 additional_metadata_updater,
                 additional_erc20_deployer,
                 token_uri,
+                transferable,
+                owner,
             ),
             from_wallet,
         )
@@ -147,6 +154,8 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         nft_symbol: str,
         nft_template: int,
         nft_token_uri: str,
+        nft_transferable: bool,
+        nft_owner: str,
         datatoken_template: int,
         datatoken_name: str,
         datatoken_symbol: str,
@@ -162,7 +171,14 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return self.send_transaction(
             "createNftWithErc20",
             (
-                (nft_name, nft_symbol, nft_template, nft_token_uri),
+                (
+                    nft_name,
+                    nft_symbol,
+                    nft_template,
+                    nft_token_uri,
+                    nft_transferable,
+                    nft_owner,
+                ),
                 (
                     datatoken_template,
                     [datatoken_name, datatoken_symbol],
@@ -186,6 +202,8 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         nft_symbol: str,
         nft_template: int,
         nft_token_uri: str,
+        nft_transferable: bool,
+        nft_owner: str,
         datatoken_template: int,
         datatoken_name: str,
         datatoken_symbol: str,
@@ -214,7 +232,14 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return self.send_transaction(
             "createNftWithErc20WithPool",
             (
-                (nft_name, nft_symbol, nft_template, nft_token_uri),
+                (
+                    nft_name,
+                    nft_symbol,
+                    nft_template,
+                    nft_token_uri,
+                    nft_transferable,
+                    nft_owner,
+                ),
                 (
                     datatoken_template,
                     [datatoken_name, datatoken_symbol],
@@ -259,6 +284,8 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         nft_symbol: str,
         nft_template: int,
         nft_token_uri: str,
+        nft_transferable: bool,
+        nft_owner: str,
         datatoken_template: int,
         datatoken_name: str,
         datatoken_symbol: str,
@@ -284,7 +311,14 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return self.send_transaction(
             "createNftWithErc20WithFixedRate",
             (
-                (nft_name, nft_symbol, nft_template, nft_token_uri),
+                (
+                    nft_name,
+                    nft_symbol,
+                    nft_template,
+                    nft_token_uri,
+                    nft_transferable,
+                    nft_owner,
+                ),
                 (
                     datatoken_template,
                     [datatoken_name, datatoken_symbol],
@@ -324,6 +358,8 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         nft_symbol: str,
         nft_template: int,
         nft_token_uri: str,
+        nft_transferable: bool,
+        nft_owner: str,
         datatoken_template: int,
         datatoken_name: str,
         datatoken_symbol: str,
@@ -344,7 +380,14 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return self.send_transaction(
             "createNftWithErc20WithDispenser",
             (
-                (nft_name, nft_symbol, nft_template, nft_token_uri),
+                (
+                    nft_name,
+                    nft_symbol,
+                    nft_template,
+                    nft_token_uri,
+                    nft_transferable,
+                    nft_owner,
+                ),
                 (
                     datatoken_template,
                     [datatoken_name, datatoken_symbol],
@@ -375,6 +418,8 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         nft_symbol: str,
         nft_template: int,
         nft_token_uri: str,
+        nft_transferable: bool,
+        nft_owner: str,
         metadata_state: int,
         metadata_decryptor_url: str,
         metadata_decryptor_address: str,
@@ -387,7 +432,14 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return self.send_transaction(
             "createNftWithMetaData",
             (
-                (nft_name, nft_symbol, nft_template, nft_token_uri),
+                (
+                    nft_name,
+                    nft_symbol,
+                    nft_template,
+                    nft_token_uri,
+                    nft_transferable,
+                    nft_owner,
+                ),
                 (
                     metadata_state,
                     metadata_decryptor_url,
@@ -402,44 +454,24 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         )
 
     @enforce_types
-    def get_token_created_event(
-        self, from_block: int, to_block: int, token_address: str
-    ) -> [AttributeDict]:
-        """Retrieves event log of token registration."""
-        filter_params = {"newTokenAddress": token_address}
-        logs = self.get_event_log(
-            self.EVENT_TOKEN_CREATED,
-            from_block=from_block,
-            to_block=to_block,
-            filters=filter_params,
-        )
-
-        return logs[0] if logs else None
-
-    @enforce_types
     def search_exchange_by_datatoken(
         self,
         fixed_rate_exchange: FixedRateExchange,
         datatoken: str,
         exchange_owner: Optional[str] = None,
     ) -> list:
-        token_created_log = self.get_token_created_event(
-            from_block=0, to_block=self.web3.eth.block_number, token_address=datatoken
+        datatoken_contract = ERC20Token(self.web3, datatoken)
+        exchange_addresses_and_ids = datatoken_contract.get_fixed_rates()
+        return (
+            exchange_addresses_and_ids
+            if exchange_owner is None
+            else [
+                exchange_address_and_id
+                for exchange_address_and_id in exchange_addresses_and_ids
+                if fixed_rate_exchange.get_exchange(exchange_address_and_id[1])[0]
+                == exchange_owner
+            ]
         )
-        assert (
-            token_created_log
-        ), f"No token with '{datatoken}' address was created before."
-        from_block = token_created_log.blockNumber
-        filter_args = {"dataToken": datatoken}
-        if exchange_owner:
-            filter_args["exchangeOwner"] = exchange_owner
-        logs = fixed_rate_exchange.get_event_logs(
-            event_name="ExchangeCreated",
-            from_block=from_block,
-            to_block=self.web3.eth.block_number,
-            filters=filter_args,
-        )
-        return [item.args.exchangeId for item in logs]
 
     @enforce_types
     def get_token_address(self, tx_id: Union[str, bytes]):

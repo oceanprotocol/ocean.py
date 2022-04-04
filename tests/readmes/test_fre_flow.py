@@ -100,18 +100,23 @@ def test_fre_flow_readme():
     )
     assert tx_result, "failed buying data tokens at fixed rate for Bob"
 
-    # Search for exchange_id from a specific block retrieved at 3rd step
-    # for a certain data token address (e.g. erc20_token.address).
+    # Get a list exchange addresses and ids with a given datatoken and exchange owner.
     datatoken_address = erc20_token.address
     nft_factory = ocean.get_nft_factory()
-    logs = nft_factory.search_exchange_by_datatoken(
+    exchange_addresses_and_ids = nft_factory.search_exchange_by_datatoken(
         ocean.fixed_rate_exchange,
         datatoken_address,
         exchange_owner=alice_wallet.address,
     )
-    assert logs, f"No exchange has {datatoken_address} address."
-    assert len(logs) == 1
+    assert (
+        exchange_addresses_and_ids
+    ), f"No exchanges found. datatoken_address = {datatoken_address}, exchange_owner = {alice_wallet.address}."
+    assert len(exchange_addresses_and_ids) == 1
 
-    exchange_id = logs[0]
+    exchange_address = exchange_addresses_and_ids[0][0]
+    assert exchange_address
+    assert isinstance(exchange_address, str)
+
+    exchange_id = exchange_addresses_and_ids[0][1]
     assert exchange_id
     assert isinstance(exchange_id, bytes)
