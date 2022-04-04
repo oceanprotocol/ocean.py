@@ -154,6 +154,8 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         nft_symbol: str,
         nft_template: int,
         nft_token_uri: str,
+        nft_transferable: bool,
+        nft_owner: str,
         datatoken_template: int,
         datatoken_name: str,
         datatoken_symbol: str,
@@ -169,7 +171,14 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return self.send_transaction(
             "createNftWithErc20",
             (
-                (nft_name, nft_symbol, nft_template, nft_token_uri),
+                (
+                    nft_name,
+                    nft_symbol,
+                    nft_template,
+                    nft_token_uri,
+                    nft_transferable,
+                    nft_owner,
+                ),
                 (
                     datatoken_template,
                     [datatoken_name, datatoken_symbol],
@@ -193,6 +202,8 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         nft_symbol: str,
         nft_template: int,
         nft_token_uri: str,
+        nft_transferable: bool,
+        nft_owner: str,
         datatoken_template: int,
         datatoken_name: str,
         datatoken_symbol: str,
@@ -221,7 +232,14 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return self.send_transaction(
             "createNftWithErc20WithPool",
             (
-                (nft_name, nft_symbol, nft_template, nft_token_uri),
+                (
+                    nft_name,
+                    nft_symbol,
+                    nft_template,
+                    nft_token_uri,
+                    nft_transferable,
+                    nft_owner,
+                ),
                 (
                     datatoken_template,
                     [datatoken_name, datatoken_symbol],
@@ -266,6 +284,8 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         nft_symbol: str,
         nft_template: int,
         nft_token_uri: str,
+        nft_transferable: bool,
+        nft_owner: str,
         datatoken_template: int,
         datatoken_name: str,
         datatoken_symbol: str,
@@ -291,7 +311,14 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return self.send_transaction(
             "createNftWithErc20WithFixedRate",
             (
-                (nft_name, nft_symbol, nft_template, nft_token_uri),
+                (
+                    nft_name,
+                    nft_symbol,
+                    nft_template,
+                    nft_token_uri,
+                    nft_transferable,
+                    nft_owner,
+                ),
                 (
                     datatoken_template,
                     [datatoken_name, datatoken_symbol],
@@ -331,6 +358,8 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         nft_symbol: str,
         nft_template: int,
         nft_token_uri: str,
+        nft_transferable: bool,
+        nft_owner: str,
         datatoken_template: int,
         datatoken_name: str,
         datatoken_symbol: str,
@@ -351,7 +380,14 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return self.send_transaction(
             "createNftWithErc20WithDispenser",
             (
-                (nft_name, nft_symbol, nft_template, nft_token_uri),
+                (
+                    nft_name,
+                    nft_symbol,
+                    nft_template,
+                    nft_token_uri,
+                    nft_transferable,
+                    nft_owner,
+                ),
                 (
                     datatoken_template,
                     [datatoken_name, datatoken_symbol],
@@ -382,6 +418,8 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         nft_symbol: str,
         nft_template: int,
         nft_token_uri: str,
+        nft_transferable: bool,
+        nft_owner: str,
         metadata_state: int,
         metadata_decryptor_url: str,
         metadata_decryptor_address: str,
@@ -394,7 +432,14 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         return self.send_transaction(
             "createNftWithMetaData",
             (
-                (nft_name, nft_symbol, nft_template, nft_token_uri),
+                (
+                    nft_name,
+                    nft_symbol,
+                    nft_template,
+                    nft_token_uri,
+                    nft_transferable,
+                    nft_owner,
+                ),
                 (
                     metadata_state,
                     metadata_decryptor_url,
