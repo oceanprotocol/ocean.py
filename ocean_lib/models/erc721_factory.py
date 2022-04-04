@@ -5,7 +5,6 @@
 from typing import List, Optional, Union
 
 from enforce_typing import enforce_types
-from web3.datastructures import AttributeDict
 from web3.exceptions import BadFunctionCallOutput
 
 from ocean_lib.models.erc721_nft import ERC721NFT
@@ -452,21 +451,6 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
             ),
             from_wallet,
         )
-
-    @enforce_types
-    def get_token_created_event(
-        self, from_block: int, to_block: int, token_address: str
-    ) -> [AttributeDict]:
-        """Retrieves event log of token registration."""
-        filter_params = {"newTokenAddress": token_address}
-        logs = self.get_event_log(
-            self.EVENT_TOKEN_CREATED,
-            from_block=from_block,
-            to_block=to_block,
-            filters=filter_params,
-        )
-
-        return logs[0] if logs else None
 
     @enforce_types
     def search_exchange_by_datatoken(
