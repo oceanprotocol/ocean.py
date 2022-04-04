@@ -241,6 +241,10 @@ class ERC721NFT(ContractBase):
         return self.contract.caller.getAddressLength(array)
 
     @enforce_types
+    def get_id(self) -> int:
+        return self.contract.caller.getId()
+
+    @enforce_types
     def get_permissions(self, user: str) -> list:
         return self.contract.caller.getPermissions(user)
 
