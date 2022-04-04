@@ -20,6 +20,8 @@ def test_main(web3, config, nft_factory_address):
         ZERO_ADDRESS,
         ZERO_ADDRESS,
         "https://oceanprotocol.com/nft/",
+        True,
+        web3.eth.accounts[0],
     )
     contract_fn = getattr(factory.contract.functions, "deployERC721Contract")(*fn_args)
     custom_contract = CustomContractFunction(contract_fn)
