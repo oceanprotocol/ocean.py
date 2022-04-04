@@ -475,23 +475,29 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         datatoken: str,
         exchange_owner: Optional[str] = None,
     ) -> list:
-        token_created_log = self.get_token_created_event(
-            from_block=0, to_block=self.web3.eth.block_number, token_address=datatoken
+        exchange_ids = fixed_rate_exchange.get_exchanges()
+        exchange_ids_and_details = {
+            exchange_id: fixed_rate_exchange.get_exchange(exchange_id)
+            for exchange_id in exchange_ids
+        }
+        exchange_ids_and_details_by_datatoken = {
+            exchange_id: exchange_details
+            for (exchange_id, exchange_details) in exchange_ids_and_details.items()
+            if exchange_details[1] == datatoken
+        }
+
+        return (
+            exchange_ids_and_details_by_datatoken.keys()
+            if exchange_owner is None
+            else [
+                exchange_id
+                for (
+                    exchange_id,
+                    exchange_details,
+                ) in exchange_ids_and_details_by_datatoken.items()
+                if exchange_details[0] == exchange_owner
+            ]
         )
-        assert (
-            token_created_log
-        ), f"No token with '{datatoken}' address was created before."
-        from_block = token_created_log.blockNumber
-        filter_args = {"dataToken": datatoken}
-        if exchange_owner:
-            filter_args["exchangeOwner"] = exchange_owner
-        logs = fixed_rate_exchange.get_event_logs(
-            event_name="ExchangeCreated",
-            from_block=from_block,
-            to_block=self.web3.eth.block_number,
-            filters=filter_args,
-        )
-        return [item.args.exchangeId for item in logs]
 
     @enforce_types
     def get_token_address(self, tx_id: Union[str, bytes]):
