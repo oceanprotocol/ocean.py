@@ -7,6 +7,7 @@ from typing import List, Optional, Union
 from enforce_typing import enforce_types
 from web3.exceptions import BadFunctionCallOutput
 
+from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
@@ -459,27 +460,16 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         datatoken: str,
         exchange_owner: Optional[str] = None,
     ) -> list:
-        exchange_ids = fixed_rate_exchange.get_exchanges()
-        exchange_ids_and_details = {
-            exchange_id: fixed_rate_exchange.get_exchange(exchange_id)
-            for exchange_id in exchange_ids
-        }
-        exchange_ids_and_details_by_datatoken = {
-            exchange_id: exchange_details
-            for (exchange_id, exchange_details) in exchange_ids_and_details.items()
-            if exchange_details[1] == datatoken
-        }
-
+        datatoken_contract = ERC20Token(self.web3, datatoken)
+        exchange_addresses_and_ids = datatoken_contract.get_fixed_rates()
         return (
-            exchange_ids_and_details_by_datatoken.keys()
+            exchange_addresses_and_ids
             if exchange_owner is None
             else [
-                exchange_id
-                for (
-                    exchange_id,
-                    exchange_details,
-                ) in exchange_ids_and_details_by_datatoken.items()
-                if exchange_details[0] == exchange_owner
+                exchange_address_and_id
+                for exchange_address_and_id in exchange_addresses_and_ids
+                if fixed_rate_exchange.get_exchange(exchange_address_and_id[1])[0]
+                == exchange_owner
             ]
         )
 
