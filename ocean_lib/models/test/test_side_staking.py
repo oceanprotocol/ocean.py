@@ -388,30 +388,6 @@ def test_side_staking(
     # Get vesting should be callable by anyone
     side_staking.get_vesting(erc20.address, another_consumer_wallet)
 
-    # Only pool can call this function
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        side_staking.can_stake(erc20.address, 10)
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERR: Only pool can call this"
-    )
-
-    # Only pool can call this function
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        side_staking.stake(erc20.address, 10, consumer_wallet)
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERR: Only pool can call this"
-    )
-
-    # Only pool can call this function
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        side_staking.unstake(erc20.address, 10, 5, consumer_wallet)
-    assert (
-        err.value.args[0]
-        == "execution reverted: VM Exception while processing transaction: revert ERR: Only pool can call this"
-    )
-
 
 @pytest.mark.unit
 def test_side_staking_steal(
