@@ -12,7 +12,7 @@ from ocean_lib.models.erc721_nft import ERC721NFT, ERC721Permissions
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
-from ocean_lib.web3_internal.transactions import send_ether, do_mine
+from ocean_lib.web3_internal.transactions import send_ether
 from tests.resources.helper_functions import get_address_of_type, deploy_erc721_erc20
 
 
