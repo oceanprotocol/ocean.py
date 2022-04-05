@@ -337,7 +337,7 @@ class BPool(BTokenBase):
     @enforce_types
     def get_min_fee(self) -> int:
         return self.contract.caller.MIN_FEE()
-    
+
     @enforce_types
     def join_pool(
         self, pool_amount_out: int, max_amounts_in: List[int], from_wallet: Wallet
