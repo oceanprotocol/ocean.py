@@ -558,12 +558,6 @@ def test_side_staking_constant_rate(
     erc20_token.approve(bpool.address, big_allowance, another_consumer_wallet)
 
     # End test initial values and setups
-
-    # Check remaining datatokens in SS contract
-    # assert erc20_token.balanceOf(get_address_of_type(config, "Staking")) == to_wei(
-    #     "400"
-    # )
-
     initial_spot_price_basetoken_datatoken = bpool.get_spot_price(
         ocean_token.address, erc20_token.address, swap_market_fee
     )
