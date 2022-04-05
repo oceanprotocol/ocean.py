@@ -176,11 +176,11 @@ def test_fuzzing_pool_ocean(
             tx = bpool.swap_exact_amount_in(
                 token_in=ocean_token.address,
                 token_out=erc20_token.address,
-                consume_market_fee=another_consumer_wallet.address,
+                consume_market_swap_fee_address=another_consumer_wallet.address,
                 token_amount_in=swap_in_one_amount_in,
                 min_amount_out=1,
                 max_price=to_wei("1000000000"),
-                swap_market_fee=0,
+                consume_market_swap_fee_amount=0,
                 from_wallet=publisher_wallet,
             )
 
@@ -222,11 +222,11 @@ def test_fuzzing_pool_ocean(
             tx = bpool.swap_exact_amount_out(
                 token_in=ocean_token.address,
                 token_out=erc20_token.address,
-                consume_market_fee=another_consumer_wallet.address,
+                consume_market_swap_fee_address=another_consumer_wallet.address,
                 max_amount_in=swap_out_one_balance,
                 token_amount_out=swap_out_one_amount_out,
                 max_price=to_wei("1000000"),
-                consume_swap_market_fee=0,
+                consume_market_swap_fee_amount=0,
                 from_wallet=publisher_wallet,
             )
 
@@ -279,11 +279,11 @@ def test_fuzzing_pool_ocean(
             tx = bpool.swap_exact_amount_in(
                 token_in=erc20_token.address,
                 token_out=ocean_token.address,
-                consume_market_fee=another_consumer_wallet.address,
+                consume_market_swap_fee_address=another_consumer_wallet.address,
                 token_amount_in=swap_in_two_amount_in,
                 min_amount_out=1,
                 max_price=to_wei("1000000000"),
-                swap_market_fee=0,
+                consume_market_swap_fee_amount=0,
                 from_wallet=publisher_wallet,
             )
 
@@ -345,11 +345,11 @@ def test_fuzzing_pool_ocean(
             tx = bpool.swap_exact_amount_out(
                 token_in=erc20_token.address,
                 token_out=ocean_token.address,
-                consume_market_fee=another_consumer_wallet.address,
+                consume_market_swap_fee_address=another_consumer_wallet.address,
                 max_amount_in=swap_out_two_balance,
                 token_amount_out=swap_out_two_amount_out,
                 max_price=to_wei("10000000"),
-                consume_swap_market_fee=0,
+                consume_market_swap_fee_amount=0,
                 from_wallet=publisher_wallet,
             )
 
@@ -433,7 +433,7 @@ def test_fuzzing_pool_ocean(
                 tx = bpool.swap_exact_amount_in(
                     token_in=erc20_token.address,
                     token_out=ocean_token.address,
-                    consume_market_fee=another_consumer_wallet.address,
+                    consume_market_swap_fee_address=another_consumer_wallet.address,
                     token_amount_in=min(
                         erc20_token.balanceOf(publisher_wallet.address),
                         to_wei(
@@ -443,7 +443,7 @@ def test_fuzzing_pool_ocean(
                     ),
                     min_amount_out=1,
                     max_price=to_wei("1000000000"),
-                    swap_market_fee=0,
+                    consume_market_swap_fee_amount=0,
                     from_wallet=publisher_wallet,
                 )
 

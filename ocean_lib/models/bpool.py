@@ -310,7 +310,7 @@ class BPool(BTokenBase):
         consume_market_swap_fee_amount: int,
     ) -> list:
         return self.contract.caller.getAmountInExactOut(
-            token_in, token_out, token_amount_out, swap_market_fee
+            token_in, token_out, token_amount_out, consume_market_swap_fee_amount
         )
 
     @enforce_types

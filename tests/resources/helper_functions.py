@@ -383,36 +383,34 @@ def create_nft_erc20_with_pool(
         nft_name="72120Bundle",
         nft_symbol="72Bundle",
         nft_template=1,
-        token_uri="https://oceanprotocol.com/nft/",
+        nft_token_uri="https://oceanprotocol.com/nft/",
         datatoken_template=1,
         datatoken_name="ERC20WithPool",
         datatoken_symbol="ERC20P",
         datatoken_minter=publisher_wallet.address,
         datatoken_fee_manager=publisher_wallet.address,
-        datatoken_publishing_market_address=publisher_wallet.address,
-        fee_token_address=ZERO_ADDRESS,
+        datatoken_publish_market_order_fee_address=publisher_wallet.address,
+        datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
         datatoken_cap=token_cap,
-        publishing_market_fee_amount=0,
-        bytess=[b""],
-        pool_ss_params=[
-            pool_initial_rate,  # rate
-            base_token.decimals(),
-            vesting_amount,  # vesting amount
-            vesting_blocks,  # vesting blocks
-            initial_pool_liquidity,  # initial liquidity
-        ],
-        swap_fees=[
-            swap_fee,
-            swap_market_fee,
-        ],  # [swapFee for lp providers, swapMarketFee for marketplace runner]
-        pool_addresses=[
-            side_staking_address,
-            base_token.address,
-            erc721_factory_address,
-            publisher_wallet.address,
-            publisher_wallet.address,
-            pool_template_address,
-        ],
+        datatoken_publish_market_order_fee_amount=0,
+        datatoken_bytess=[b""],
+        pool_rate=pool_initial_rate,
+        pool_base_token_decimals=base_token.decimals(),
+        pool_vesting_amount=vesting_amount,
+        pool_vesting_blocks=vesting_blocks,
+        pool_base_token_amount=initial_pool_liquidity,
+        pool_lp_swap_fee_amount=swap_fee,
+        pool_publish_market_swap_fee_amount=swap_market_fee,
+        pool_side_staking=side_staking_address,
+        pool_base_token=base_token.address,
+        pool_base_token_sender=get_address_of_type(
+            config, ERC721FactoryContract.CONTRACT_NAME
+        ),
+        pool_publisher=publisher_wallet.address,
+        pool_publish_market_swap_fee_collector=publisher_wallet.address,
+        pool_template_address=pool_template_address,
+        nft_transferable=True,
+        nft_owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
 
