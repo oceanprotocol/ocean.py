@@ -48,6 +48,8 @@ def test_main(network, alice_wallet, alice_ocean, nft_factory_address, web3):
             ZERO_ADDRESS,
             ZERO_ADDRESS,
             "https://oceanprotocol.com/nft/",
+            True,
+            alice_wallet.address,
         ),
         alice_wallet,
     )
@@ -111,6 +113,8 @@ def test_gas_price(web3, alice_wallet, nft_factory_address, monkeypatch):
             ZERO_ADDRESS,
             ZERO_ADDRESS,
             "https://oceanprotocol.com/nft/",
+            True,
+            alice_wallet.address,
         ),
         alice_wallet,
     ), "The token could not be created by configuring the gas price env var."

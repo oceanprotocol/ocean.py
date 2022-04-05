@@ -389,6 +389,8 @@ def test_plain_asset_with_one_datatoken(
         additional_metadata_updater=ZERO_ADDRESS,
         additional_erc20_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
+        transferable=True,
+        owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -445,6 +447,8 @@ def test_plain_asset_multiple_datatokens(
         additional_metadata_updater=ZERO_ADDRESS,
         additional_erc20_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
+        transferable=True,
+        owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)

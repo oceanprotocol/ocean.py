@@ -268,6 +268,8 @@ class OceanAssets:
         erc721_additional_erc_deployer: Optional[str] = None,
         erc721_additional_metadata_updater: Optional[str] = None,
         erc721_uri: Optional[str] = None,
+        erc721_transferable: Optional[bool] = None,
+        erc721_owner: Optional[str] = None,
         erc20_templates: Optional[List[int]] = None,
         erc20_names: Optional[List[str]] = None,
         erc20_symbols: Optional[List[str]] = None,
@@ -332,6 +334,8 @@ class OceanAssets:
                 erc721_additional_metadata_updater or ZERO_ADDRESS
             )
             token_uri = erc721_uri or "https://oceanprotocol.com/nft/"
+            transferable = erc721_transferable or True
+            owner = erc721_owner or publisher_wallet.address
             # register on-chain
             tx_id = erc721_factory.deploy_erc721_contract(
                 name=name,
@@ -340,6 +344,8 @@ class OceanAssets:
                 additional_metadata_updater=additional_metadata_updater,
                 additional_erc20_deployer=additional_erc20_deployer,
                 token_uri=token_uri,
+                transferable=transferable,
+                owner=owner,
                 from_wallet=publisher_wallet,
             )
             tx_receipt = self._web3.eth.wait_for_transaction_receipt(tx_id)

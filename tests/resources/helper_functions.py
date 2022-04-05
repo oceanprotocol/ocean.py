@@ -215,6 +215,8 @@ def deploy_erc721_erc20(
         additional_metadata_updater=ZERO_ADDRESS,
         additional_erc20_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
+        transferable=True,
+        owner=erc721_publisher.address,
         from_wallet=erc721_publisher,
     )
     token_address = erc721_factory.get_token_address(tx)

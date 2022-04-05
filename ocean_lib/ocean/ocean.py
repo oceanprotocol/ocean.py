@@ -121,6 +121,8 @@ class Ocean:
         template_index: Optional[int] = 1,
         additional_erc20_deployer: Optional[str] = None,
         additional_metadata_updater: Optional[str] = None,
+        transferable: bool = True,
+        owner: Optional[str] = None,
     ) -> ERC721NFT:
         """
         This method deploys a ERC721 token contract on the blockchain.
@@ -153,6 +155,7 @@ class Ocean:
             additional_metadata_updater = ZERO_ADDRESS
 
         nft_factory = self.get_nft_factory()
+
         tx_id = nft_factory.deploy_erc721_contract(
             name=name,
             symbol=symbol,
@@ -160,6 +163,8 @@ class Ocean:
             additional_metadata_updater=additional_metadata_updater,
             additional_erc20_deployer=additional_erc20_deployer,
             token_uri=token_uri,
+            transferable=transferable,
+            owner=owner if owner is not None else from_wallet.address,
             from_wallet=from_wallet,
         )
 

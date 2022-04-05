@@ -457,6 +457,18 @@ class ERC20Token(ContractBase):
         return self.contract.caller.getPaymentCollector()
 
     @enforce_types
+    def get_pools(self) -> List[str]:
+        return self.contract.caller.getPools()
+
+    @enforce_types
+    def get_fixed_rates(self) -> List[Tuple[str, bytes]]:
+        return self.contract.caller.getFixedRates()
+
+    @enforce_types
+    def get_dispensers(self) -> List[str]:
+        return self.contract.caller.getDispensers()
+
+    @enforce_types
     def balanceOf(self, account: str) -> int:
         return self.contract.caller.balanceOf(account)
 
