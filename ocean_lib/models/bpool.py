@@ -295,8 +295,12 @@ class BPool(BTokenBase):
         )
 
     @enforce_types
-    def get_spot_price(self, token_in: str, token_out: str) -> int:
-        return self.contract.caller.getSpotPrice(token_in, token_out)
+    def get_spot_price(
+        self, token_in: str, token_out: str, consume_market_swap_fee
+    ) -> int:
+        return self.contract.caller.getSpotPrice(
+            token_in, token_out, consume_market_swap_fee
+        )
 
     @enforce_types
     def get_amount_in_exact_out(
@@ -306,7 +310,7 @@ class BPool(BTokenBase):
         token_amount_out: int,
         consume_market_swap_fee_amount: int,
     ) -> list:
-        return self.contract.caller.getAmountOutExactIn(
+        return self.contract.caller.getAmountInExactOut(
             token_in, token_out, token_amount_out, consume_market_swap_fee_amount
         )
 
@@ -321,6 +325,18 @@ class BPool(BTokenBase):
         return self.contract.caller.getAmountOutExactIn(
             token_in, token_out, token_amount_in, consume_market_swap_fee_amount
         )
+
+    @enforce_types
+    def get_max_out_ratio(self) -> int:
+        return self.contract.caller.MAX_OUT_RATIO()
+
+    @enforce_types
+    def get_max_in_ratio(self) -> int:
+        return self.contract.caller.MAX_IN_RATIO()
+
+    @enforce_types
+    def get_min_fee(self) -> int:
+        return self.contract.caller.MIN_FEE()
 
     @enforce_types
     def join_pool(
