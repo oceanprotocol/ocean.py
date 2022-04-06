@@ -9,8 +9,7 @@ from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.side_staking import SideStaking
-from ocean_lib.web3_internal.constants import MAX_UINT256
-from ocean_lib.web3_internal.currency import to_wei
+from ocean_lib.web3_internal.currency import MAX_WEI, to_wei
 from tests.resources.helper_functions import (
     create_nft_erc20_with_pool,
     deploy_erc721_erc20,
@@ -394,34 +393,29 @@ def test_side_staking_steal(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
     """
-    In this test we try to steal basetoken from the pull
+    In this test we try to steal base token from the pool
     """
     # Test initial values and setups
-
-    # How to scale the "strategy" keep the same propotion (i.e. x2, x5 x10 all the following values):
     initial_pool_liquidity_eth = 200000
-    token_cap_eth = 1  # doesnt matter
+    token_cap_doesnt_matter = 1
     join_pool_step_eth = 20000
     datatoken_buy_amount_basetoken_eth = 5000
-    # ---------------------------------------------------------------------------------------------
 
     initial_pool_liquidity = to_wei(initial_pool_liquidity_eth)
-    token_cap = to_wei(token_cap_eth)
+    token_cap = to_wei(token_cap_doesnt_matter)
     swap_market_fee = to_wei("0.0001")
     swap_fee = to_wei("0.0001")
-    big_allowance = to_wei("10000000000000000")
+    big_allowance = MAX_WEI
 
     _, erc20 = deploy_erc721_erc20(
         web3=web3,
         config=config,
         erc721_publisher=publisher_wallet,
         erc20_minter=publisher_wallet,
-        cap=to_wei(to_wei("1000000000")),
+        cap=token_cap_doesnt_matter,
     )
 
-    erc20.mint(
-        publisher_wallet.address, to_wei("10000000000000000000"), publisher_wallet
-    )
+    erc20.mint(publisher_wallet.address, MAX_WEI, publisher_wallet)
 
     # We use an erc20 as ocean to have unlimited balance
     ocean_token = erc20
@@ -449,16 +443,7 @@ def test_side_staking_steal(
     # End test initial values and setups
 
     initial_ocean_user_balance = ocean_token.balanceOf(another_consumer_wallet.address)
-    spot_prices = []
 
-    def add_spot_price():
-        spot_prices.append(
-            bpool.get_spot_price(
-                ocean_token.address, erc20_token.address, swap_market_fee
-            )
-        )
-
-    add_spot_price()
     for _ in range(10):
         swap_exact_amount_in_base_token(
             bpool,
@@ -467,7 +452,6 @@ def test_side_staking_steal(
             another_consumer_wallet,
             to_wei(datatoken_buy_amount_basetoken_eth),
         )
-        add_spot_price()
 
     times = 2
     amounts_out = []
