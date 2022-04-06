@@ -12,6 +12,7 @@ from typing import Any, Dict, Optional, Tuple, Union
 import coloredlogs
 import yaml
 from enforce_typing import enforce_types
+from pytest import approx
 from web3 import Web3
 
 from ocean_lib.config import Config
@@ -24,12 +25,11 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.ocean.util import get_web3 as util_get_web3
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import send_ether
+from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.utils import split_signature
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
-from pytest import approx
 
 _NETWORK = "ganache"
 
@@ -474,3 +474,113 @@ def create_nft_erc20_with_pool(
     pool_token = ERC20Token(web3, pool_address)
 
     return bpool, erc20_token, erc721_token, pool_token
+
+
+def join_pool_with_max_base_token(bpool, web3, base_token, wallet, amt: int = 0):
+    """
+    Join pool with max base token if amt is 0. Otherwise join pool with amt base token.
+    """
+    pool_token_out_balance = bpool.get_balance(
+        base_token.address
+    )  # pool base token balance
+    max_out_ratio = bpool.get_max_out_ratio()  # max ratio
+
+    max_out_ratio_limit = int(from_wei(max_out_ratio) * pool_token_out_balance)
+
+    web3.eth.wait_for_transaction_receipt(
+        bpool.join_swap_extern_amount_in(
+            amt if amt else max_out_ratio_limit,
+            to_wei("0"),
+            wallet,
+        )
+    )
+
+
+def wallet_exit_pool(web3, bpool, pool_token, wallet, amt: int = 0):
+    """
+    Exit pool with amt, if amt is 0, exit pool with max amount.
+    """
+    web3.eth.wait_for_transaction_receipt(
+        bpool.exit_pool(
+            amt if amt else pool_token.balanceOf(wallet.address),
+            [to_wei("0"), to_wei("0")],
+            wallet,
+        )
+    )
+
+
+def wallet_exit_pool_one_side(
+    web3, bpool, base_token, pool_token, wallet, amt: int = 0
+):
+    """
+    Exit pool with one side with amt, if amt is 0, exit pool with max amount.
+    """
+    pool_token_out_balance = bpool.get_balance(
+        base_token.address
+    )  # pool base token balance
+    max_out_ratio = bpool.get_max_out_ratio()  # max ratio
+
+    max_out_ratio_limit = int(from_wei(max_out_ratio) * pool_token_out_balance)
+
+    web3.eth.wait_for_transaction_receipt(
+        bpool.exit_swap_pool_amount_in(
+            amt
+            if amt
+            else min(max_out_ratio_limit, pool_token.balanceOf(wallet.address)),
+            0,
+            wallet,
+        )
+    )
+
+
+def join_pool_one_side(web3, bpool, base_token, wallet, amt: int = 0):
+    """
+    Join 1ss pool with amt, if amt is 0, join pool with max amount.
+    """
+    pool_token_out_balance = bpool.get_balance(
+        base_token.address
+    )  # pool base token balance
+    max_out_ratio = bpool.get_max_out_ratio()  # max ratio
+
+    max_out_ratio_limit = int(from_wei(max_out_ratio) * pool_token_out_balance)
+
+    web3.eth.wait_for_transaction_receipt(
+        bpool.join_swap_extern_amount_in(
+            amt if amt else max_out_ratio_limit,
+            to_wei("0"),
+            wallet,
+        )
+    )
+
+
+def swap_exact_amount_in_datatoken(bpool, datatoken, base_token, wallet, amt: int = 0):
+    bpool.swap_exact_amount_in(
+        datatoken.address,
+        base_token.address,
+        wallet.address,
+        amt,
+        to_wei("0"),
+        to_wei("100000"),
+        to_wei("0"),
+        wallet,
+    )
+
+
+def swap_exact_amount_in_base_token(bpool, datatoken, base_token, wallet, amt: int = 0):
+    pool_token_out_balance = bpool.get_balance(
+        base_token.address
+    )  # pool base token balance
+    max_out_ratio = bpool.get_max_out_ratio()  # max ratio
+
+    max_out_ratio_limit = int(from_wei(max_out_ratio) * pool_token_out_balance)
+
+    bpool.swap_exact_amount_in(
+        base_token.address,
+        datatoken.address,
+        wallet.address,
+        amt if amt else max_out_ratio_limit,
+        to_wei("0"),
+        to_wei("100000"),
+        to_wei("0"),
+        wallet,
+    )
