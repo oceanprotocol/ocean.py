@@ -644,6 +644,8 @@ def test_transfer_nft(
         additional_metadata_updater=ZERO_ADDRESS,
         additional_erc20_deployer=consumer_wallet.address,
         token_uri="https://oceanprotocol.com/nft/",
+        transferable=True,
+        owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -689,6 +691,8 @@ def test_transfer_nft(
         additional_metadata_updater=ZERO_ADDRESS,
         additional_erc20_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
+        transferable=True,
+        owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -952,6 +956,8 @@ def test_transfer_nft_with_erc20_pool_fre(
         additional_metadata_updater=ZERO_ADDRESS,
         additional_erc20_deployer=consumer_wallet.address,
         token_uri="https://oceanprotocol.com/nft/",
+        transferable=True,
+        owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)

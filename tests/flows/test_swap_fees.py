@@ -40,6 +40,8 @@ def test_deploy_erc721_and_manage(
         additional_metadata_updater=ZERO_ADDRESS,
         additional_erc20_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
+        transferable=True,
+        owner=factory_deployer_wallet.address,
         from_wallet=factory_deployer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
