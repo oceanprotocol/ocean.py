@@ -6,6 +6,7 @@ import json
 import logging
 import logging.config
 import os
+import secrets
 from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
@@ -24,6 +25,7 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.ocean.util import get_web3 as util_get_web3
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.utils import split_signature
 from ocean_lib.web3_internal.wallet import Wallet
@@ -124,6 +126,32 @@ def get_ganache_wallet():
         )
 
     return None
+
+
+@enforce_types
+def generate_wallet() -> Wallet:
+    """Generates wallets on the fly with funds."""
+    web3 = get_web3()
+    config = get_example_config()
+    secret = secrets.token_hex(32)
+    private_key = "0x" + secret
+
+    generated_wallet = Wallet(
+        web3,
+        private_key=private_key,
+        block_confirmations=config.block_confirmations,
+        transaction_timeout=config.transaction_timeout,
+    )
+    assert generated_wallet.private_key == private_key
+    deployer_wallet = get_factory_deployer_wallet("ganache")
+    send_ether(deployer_wallet, generated_wallet.address, to_wei(3))
+
+    ocn = Ocean(config)
+    OCEAN_token = ERC20Token(web3, address=ocn.OCEAN_address)
+    OCEAN_token.transfer(
+        generated_wallet.address, to_wei(50), from_wallet=deployer_wallet
+    )
+    return generated_wallet
 
 
 @enforce_types
