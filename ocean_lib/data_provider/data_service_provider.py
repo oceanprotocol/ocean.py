@@ -269,7 +269,6 @@ class DataServiceProvider:
             [Web3.toHex(Web3.toBytes(text=f"{msg}{nonce}"))],
         )
         return nonce, sign_hash(encode_defunct(message_hash), wallet)
-        
 
     @staticmethod
     # @enforce_types omitted due to subscripted generics error
