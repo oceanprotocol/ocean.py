@@ -17,9 +17,12 @@ from unittest.mock import Mock
 import requests
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
+from eth_keys import KeyAPI
+from eth_keys.backends import NativeECCBackend
 from requests.exceptions import InvalidURL
 from requests.models import PreparedRequest, Response
 from requests.sessions import Session
+from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.config import Config
@@ -31,6 +34,7 @@ from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger(__name__)
+keys = KeyAPI(NativeECCBackend)
 
 
 class DataServiceProvider:
@@ -259,7 +263,23 @@ class DataServiceProvider:
     def sign_message(wallet: Wallet, msg: str) -> Tuple[str, str]:
         nonce = str(datetime.utcnow().timestamp())
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
-        return nonce, sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
+        keys_pk = keys.PrivateKey(wallet.key)
+        message_hash = Web3.solidityKeccak(
+            ["bytes"],
+            [Web3.toHex(Web3.toBytes(text=f"{msg}{nonce}"))],
+        )
+        prefix = "\x19Ethereum Signed Message:\n32"
+        signable_hash = Web3.solidityKeccak(
+            ["bytes", "bytes"], [Web3.toBytes(text=prefix), Web3.toBytes(message_hash)]
+        )
+        prefix = "\x19Ethereum Signed Message:\n32"
+        signed = keys.ecdsa_sign(message_hash=signable_hash, private_key=keys_pk)
+        v = str(Web3.toHex(Web3.toBytes(signed.v)))
+        r = str(Web3.toHex(Web3.toBytes(signed.r).rjust(32, b"\0")))
+        s = str(Web3.toHex(Web3.toBytes(signed.s).rjust(32, b"\0")))
+        signature = "0x" + r[2:] + s[2:] + v[2:]
+        # return nonce, sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
+        return nonce, signature
 
     @staticmethod
     # @enforce_types omitted due to subscripted generics error
