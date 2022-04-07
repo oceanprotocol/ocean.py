@@ -263,7 +263,7 @@ class DataServiceProvider:
     def sign_message(wallet: Wallet, msg: str) -> Tuple[str, str]:
         nonce = str(datetime.utcnow().timestamp())
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
-        keys_pk = keys.PrivateKey(wallet.key)
+        keys_pk = keys.PrivateKey(wallet.private_key)
         message_hash = Web3.solidityKeccak(
             ["bytes"],
             [Web3.toHex(Web3.toBytes(text=f"{msg}{nonce}"))],
