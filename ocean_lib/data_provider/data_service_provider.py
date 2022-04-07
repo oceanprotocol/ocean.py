@@ -268,21 +268,8 @@ class DataServiceProvider:
             ["bytes"],
             [Web3.toHex(Web3.toBytes(text=f"{msg}{nonce}"))],
         )
-        signature = Web3.eth.sign(wallet.address,message_hash)
-        # prefix = "\x19Ethereum Signed Message:\n32"
-        # signable_hash = Web3.solidityKeccak(
-        #    ["bytes", "bytes"], [Web3.toBytes(text=prefix), Web3.toBytes(message_hash)]
-        #)
-        #prefix = "\x19Ethereum Signed Message:\n32"
+        return nonce, sign_hash(encode_defunct(message_hash), wallet)
         
-        #signed = keys.ecdsa_sign(message_hash=signable_hash, private_key=keys_pk)
-        #v = str(Web3.toHex(Web3.toBytes(signed.v)))
-        #r = str(Web3.toHex(Web3.toBytes(signed.r).rjust(32, b"\0")))
-        #s = str(Web3.toHex(Web3.toBytes(signed.s).rjust(32, b"\0")))
-        #signature = "0x" + r[2:] + s[2:] + v[2:]
-        
-        # return nonce, sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
-        return nonce, signature
 
     @staticmethod
     # @enforce_types omitted due to subscripted generics error
