@@ -2,8 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import os
-import threading
+from concurrent.futures import ThreadPoolExecutor
 
 import pytest
 
@@ -13,11 +12,12 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.structures.file_objects import UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
-from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import get_first_service_by_type
+from tests.resources.helper_functions import generate_wallet
 
 
-def asset_displayed_on_sale(ocean: Ocean, wallet: Wallet):
+def asset_displayed_on_sale(ocean: Ocean):
+    wallet = generate_wallet()
     erc721_nft = ocean.create_erc721_nft("NFTToken1", "NFT1", wallet)
     token_address = erc721_nft.address
     assert token_address
@@ -90,69 +90,18 @@ def asset_displayed_on_sale(ocean: Ocean, wallet: Wallet):
     assert formatted_price
 
 
-@pytest.mark.slow
-def test_pool_creation_with_threads():
+def concurrent_pool_creation(concurrent_flows: int, duration: int):
     config = ExampleConfig.get_config()
     ocean = Ocean(config)
-    alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
-    alice_wallet = Wallet(
-        ocean.web3,
-        alice_private_key,
-        config.block_confirmations,
-        config.transaction_timeout,
-    )
-    assert alice_wallet.address
-    bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
-    bob_wallet = Wallet(
-        ocean.web3,
-        bob_private_key,
-        config.block_confirmations,
-        config.transaction_timeout,
-    )
-    assert bob_wallet.address
-    carol_private_key = os.getenv("TEST_PRIVATE_KEY3")
-    carol_wallet = Wallet(
-        ocean.web3,
-        carol_private_key,
-        config.block_confirmations,
-        config.transaction_timeout,
-    )
-    assert carol_wallet.address
-    # Mint OCEAN
     mint_fake_OCEAN(config)
-    assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-    assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "need ETH"
-    assert carol_wallet.web3.eth.get_balance(carol_wallet.address) > 0, "need ETH"
+    with ThreadPoolExecutor(max_workers=concurrent_flows) as executor:
+        for _ in range(concurrent_flows * duration):
+            executor.submit(asset_displayed_on_sale, ocean)
 
-    threads = list()
-    t1 = threading.Thread(
-        target=asset_displayed_on_sale,
-        args=(
-            ocean,
-            alice_wallet,
-        ),
-    )
-    threads.append(t1)
-    t2 = threading.Thread(
-        target=asset_displayed_on_sale,
-        args=(
-            ocean,
-            bob_wallet,
-        ),
-    )
-    threads.append(t2)
-    t3 = threading.Thread(
-        target=asset_displayed_on_sale,
-        args=(
-            ocean,
-            carol_wallet,
-        ),
-    )
-    threads.append(t3)
-    t1.start()
-    t2.start()
-    t3.start()
-    for index, thread in enumerate(threads):
-        print(f"Main    : before joining thread {index}.")
-        thread.join()
-        print(f"Main    : thread {index} done")
+
+@pytest.mark.slow
+def test_concurrent_pool_creation():
+    concurrent_flows_values = [1, 3, 20]
+    reps = [3000, 1000, 50]
+    for counter in range(len(concurrent_flows_values)):
+        concurrent_pool_creation(concurrent_flows_values[counter], reps[counter])
