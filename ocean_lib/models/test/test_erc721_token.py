@@ -15,7 +15,7 @@ from ocean_lib.models.fixed_rate_exchange import (
 )
 from ocean_lib.web3_internal.constants import BLOB, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
-from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
+from tests.resources.helper_functions import get_address_of_type
 
 
 @pytest.mark.unit
@@ -52,18 +52,15 @@ def test_permissions(
     assert erc721_nft.balance_of(account=publisher_wallet.address) == 1
 
     # Tests if the NFT was initialized
-    assert erc721_nft.is_initialized() is True
+    assert erc721_nft.is_initialized()
 
     # Tests adding a manager successfully
     erc721_nft.add_manager(
         manager_address=consumer_wallet.address, from_wallet=publisher_wallet
     )
-    assert (
-        erc721_nft.get_permissions(user=consumer_wallet.address)[
-            ERC721Permissions.MANAGER
-        ]
-        is True
-    )
+    assert erc721_nft.get_permissions(user=consumer_wallet.address)[
+        ERC721Permissions.MANAGER
+    ]
 
     assert erc721_nft.token_uri(1) == "https://oceanprotocol.com/nft/"
 
@@ -82,18 +79,12 @@ def test_permissions(
     erc721_nft.add_to_create_erc20_list(
         allowed_address=another_consumer_wallet.address, from_wallet=publisher_wallet
     )
-    assert (
-        erc721_nft.get_permissions(user=publisher_wallet.address)[
-            ERC721Permissions.DEPLOY_ERC20
-        ]
-        is True
-    )
-    assert (
-        erc721_nft.get_permissions(user=another_consumer_wallet.address)[
-            ERC721Permissions.DEPLOY_ERC20
-        ]
-        is True
-    )
+    assert erc721_nft.get_permissions(user=publisher_wallet.address)[
+        ERC721Permissions.DEPLOY_ERC20
+    ]
+    assert erc721_nft.get_permissions(user=another_consumer_wallet.address)[
+        ERC721Permissions.DEPLOY_ERC20
+    ]
     # Still is not the NFT owner, cannot clear permissions then
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_nft.clean_permissions(from_wallet=another_consumer_wallet)
@@ -104,40 +95,33 @@ def test_permissions(
 
     erc721_nft.clean_permissions(from_wallet=publisher_wallet)
 
-    assert (
+    assert not (
         erc721_nft.get_permissions(user=publisher_wallet.address)[
             ERC721Permissions.DEPLOY_ERC20
         ]
-        is False
     )
-    assert (
+    assert not (
         erc721_nft.get_permissions(user=consumer_wallet.address)[
             ERC721Permissions.MANAGER
         ]
-        is False
     )
-    assert (
+    assert not (
         erc721_nft.get_permissions(user=another_consumer_wallet.address)[
             ERC721Permissions.DEPLOY_ERC20
         ]
-        is False
     )
 
     # Tests failing adding a new manager by another user different from the NFT owner
     erc721_nft.add_manager(
         manager_address=publisher_wallet.address, from_wallet=publisher_wallet
     )
-    assert (
-        erc721_nft.get_permissions(user=publisher_wallet.address)[
-            ERC721Permissions.MANAGER
-        ]
-        is True
-    )
-    assert (
+    assert erc721_nft.get_permissions(user=publisher_wallet.address)[
+        ERC721Permissions.MANAGER
+    ]
+    assert not (
         erc721_nft.get_permissions(user=consumer_wallet.address)[
             ERC721Permissions.MANAGER
         ]
-        is False
     )
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_nft.add_manager(
@@ -147,43 +131,35 @@ def test_permissions(
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC721Template: not NFTOwner"
     )
-    assert (
+    assert not (
         erc721_nft.get_permissions(user=another_consumer_wallet.address)[
             ERC721Permissions.MANAGER
         ]
-        is False
     )
 
     # Tests removing manager
     erc721_nft.add_manager(
         manager_address=consumer_wallet.address, from_wallet=publisher_wallet
     )
-    assert (
-        erc721_nft.get_permissions(user=consumer_wallet.address)[
-            ERC721Permissions.MANAGER
-        ]
-        is True
-    )
+    assert erc721_nft.get_permissions(user=consumer_wallet.address)[
+        ERC721Permissions.MANAGER
+    ]
     erc721_nft.remove_manager(
         manager_address=consumer_wallet.address, from_wallet=publisher_wallet
     )
-    assert (
+    assert not (
         erc721_nft.get_permissions(user=consumer_wallet.address)[
             ERC721Permissions.MANAGER
         ]
-        is False
     )
 
     # Tests failing removing a manager if it has not the NFT owner role
     erc721_nft.add_manager(
         manager_address=consumer_wallet.address, from_wallet=publisher_wallet
     )
-    assert (
-        erc721_nft.get_permissions(user=consumer_wallet.address)[
-            ERC721Permissions.MANAGER
-        ]
-        is True
-    )
+    assert erc721_nft.get_permissions(user=consumer_wallet.address)[
+        ERC721Permissions.MANAGER
+    ]
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_nft.remove_manager(
             manager_address=publisher_wallet.address, from_wallet=consumer_wallet
@@ -192,39 +168,31 @@ def test_permissions(
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC721Template: not NFTOwner"
     )
-    assert (
-        erc721_nft.get_permissions(user=publisher_wallet.address)[
-            ERC721Permissions.MANAGER
-        ]
-        is True
-    )
+    assert erc721_nft.get_permissions(user=publisher_wallet.address)[
+        ERC721Permissions.MANAGER
+    ]
 
     # Tests removing the NFT owner from the manager role
     erc721_nft.remove_manager(
         manager_address=publisher_wallet.address, from_wallet=publisher_wallet
     )
-    assert (
+    assert not (
         erc721_nft.get_permissions(user=publisher_wallet.address)[
             ERC721Permissions.MANAGER
         ]
-        is False
     )
     erc721_nft.add_manager(
         manager_address=publisher_wallet.address, from_wallet=publisher_wallet
     )
-    assert (
-        erc721_nft.get_permissions(user=publisher_wallet.address)[
-            ERC721Permissions.MANAGER
-        ]
-        is True
-    )
+    assert erc721_nft.get_permissions(user=publisher_wallet.address)[
+        ERC721Permissions.MANAGER
+    ]
 
     # Tests failing calling execute_call function if the user is not manager
-    assert (
+    assert not (
         erc721_nft.get_permissions(user=another_consumer_wallet.address)[
             ERC721Permissions.MANAGER
         ]
-        is False
     )
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_nft.execute_call(
@@ -240,12 +208,9 @@ def test_permissions(
     )
 
     # Tests calling execute_call with a manager role
-    assert (
-        erc721_nft.get_permissions(user=publisher_wallet.address)[
-            ERC721Permissions.MANAGER
-        ]
-        is True
-    )
+    assert erc721_nft.get_permissions(user=publisher_wallet.address)[
+        ERC721Permissions.MANAGER
+    ]
     tx = erc721_nft.execute_call(
         operation=0,
         to=consumer_wallet.address,
@@ -259,12 +224,9 @@ def test_permissions(
     erc721_nft.add_to_725_store_list(
         allowed_address=consumer_wallet.address, from_wallet=publisher_wallet
     )
-    assert (
-        erc721_nft.get_permissions(user=consumer_wallet.address)[
-            ERC721Permissions.STORE
-        ]
-        is True
-    )
+    assert erc721_nft.get_permissions(user=consumer_wallet.address)[
+        ERC721Permissions.STORE
+    ]
     erc721_nft.set_new_data(
         key=web3.keccak(text="ARBITRARY_KEY"),
         value=web3.toHex(text="SomeData"),
@@ -273,11 +235,10 @@ def test_permissions(
     assert erc721_nft.get_data(key=web3.keccak(text="ARBITRARY_KEY")) == b"SomeData"
 
     # Tests failing setting new data if user has not STORE UPDATER role.
-    assert (
+    assert not (
         erc721_nft.get_permissions(user=another_consumer_wallet.address)[
             ERC721Permissions.STORE
         ]
-        is False
     )
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_nft.set_new_data(
@@ -310,17 +271,16 @@ def test_success_update_metadata(
     web3, config, publisher_wallet, consumer_wallet, erc721_nft
 ):
     """Tests updating the metadata flow."""
-    assert (
+    assert not (
         erc721_nft.get_permissions(user=consumer_wallet.address)[
             ERC721Permissions.UPDATE_METADATA
         ]
-        is False
     )
     erc721_nft.add_to_metadata_list(
         allowed_address=consumer_wallet.address, from_wallet=publisher_wallet
     )
     metadata_info = erc721_nft.get_metadata()
-    assert metadata_info[3] is False
+    assert not metadata_info[3]
 
     tx = erc721_nft.set_metadata(
         metadata_state=1,
@@ -343,7 +303,7 @@ def test_success_update_metadata(
     assert create_metadata_event[0].args.decryptorUrl == "http://myprovider:8030"
 
     metadata_info = erc721_nft.get_metadata()
-    assert metadata_info[3] is True
+    assert metadata_info[3]
     assert metadata_info[0] == "http://myprovider:8030"
 
     tx = erc721_nft.set_metadata(
@@ -367,7 +327,7 @@ def test_success_update_metadata(
     assert update_metadata_event[0].args.decryptorUrl == "http://foourl"
 
     metadata_info = erc721_nft.get_metadata()
-    assert metadata_info[3] is True
+    assert metadata_info[3]
     assert metadata_info[0] == "http://foourl"
 
     # Update tokenURI and set metadata in one call
@@ -406,7 +366,7 @@ def test_success_update_metadata(
     assert update_metadata_event[0].args.decryptorUrl == "http://foourl"
 
     metadata_info = erc721_nft.get_metadata()
-    assert metadata_info[3] is True
+    assert metadata_info[3]
     assert metadata_info[0] == "http://foourl"
 
 
@@ -414,11 +374,10 @@ def test_fails_update_metadata(
     web3, config, publisher_wallet, consumer_wallet, erc721_nft
 ):
     """Tests failure of calling update metadata function when the role of the user is not METADATA UPDATER."""
-    assert (
+    assert not (
         erc721_nft.get_permissions(user=consumer_wallet.address)[
             ERC721Permissions.UPDATE_METADATA
         ]
-        is False
     )
 
     with pytest.raises(exceptions.ContractLogicError) as err:
@@ -442,12 +401,9 @@ def test_fails_update_metadata(
 @pytest.mark.unit
 def test_create_erc20(web3, config, publisher_wallet, consumer_wallet, erc721_nft):
     """Tests calling create an ERC20 by the owner."""
-    assert (
-        erc721_nft.get_permissions(user=publisher_wallet.address)[
-            ERC721Permissions.DEPLOY_ERC20
-        ]
-        is True
-    )
+    assert erc721_nft.get_permissions(user=publisher_wallet.address)[
+        ERC721Permissions.DEPLOY_ERC20
+    ]
 
     tx = erc721_nft.create_erc20(
         template_index=1,
@@ -470,11 +426,10 @@ def test_fail_creating_erc20(
     web3, config, publisher_wallet, consumer_wallet, erc721_nft
 ):
     """Tests failure for creating ERC20 token."""
-    assert (
+    assert not (
         erc721_nft.get_permissions(consumer_wallet.address)[
             ERC721Permissions.DEPLOY_ERC20
         ]
-        is False
     )
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_nft.create_erc20(
@@ -503,12 +458,9 @@ def test_erc721_datatoken_functions(
 ):
     """Tests ERC721 Template functions for ERC20 tokens."""
     assert len(erc721_nft.get_tokens_list()) == 1
-    assert erc721_nft.is_deployed(datatoken=erc20_token.address) is True
+    assert erc721_nft.is_deployed(datatoken=erc20_token.address)
 
-    erc721_token_v2 = deploy_erc721_erc20(
-        web3=web3, config=config, erc721_publisher=publisher_wallet
-    )
-    assert erc721_token_v2.is_deployed(datatoken=consumer_wallet.address) is False
+    assert not erc721_nft.is_deployed(datatoken=consumer_wallet.address)
     tx = erc721_nft.set_token_uri(
         token_id=1,
         new_token_uri="https://newurl.com/nft/",
@@ -558,12 +510,9 @@ def test_erc721_datatoken_functions(
     )
     assert erc721_nft.balance_of(account=publisher_wallet.address) == 0
     assert erc721_nft.owner_of(token_id=1) == consumer_wallet.address
-    assert (
-        erc721_nft.get_permissions(user=consumer_wallet.address)[
-            ERC721Permissions.DEPLOY_ERC20
-        ]
-        is True
-    )
+    assert erc721_nft.get_permissions(user=consumer_wallet.address)[
+        ERC721Permissions.DEPLOY_ERC20
+    ]
     erc721_nft.create_erc20(
         template_index=1,
         name="ERC20DT1",
@@ -633,7 +582,13 @@ def test_fail_transfer_function(
 
 
 def test_transfer_nft(
-    web3, config, publisher_wallet, consumer_wallet, factory_router, erc721_factory
+    web3,
+    config,
+    publisher_wallet,
+    consumer_wallet,
+    factory_router,
+    erc721_factory,
+    publisher_ocean_instance,
 ):
     """Tests transferring the NFT before deploying an ERC20, a pool, a FRE."""
 
@@ -680,7 +635,7 @@ def test_transfer_nft(
     assert transfer_event[0].args.to == consumer_wallet.address
     assert erc721_nft.balance_of(consumer_wallet.address) == 1
     assert erc721_nft.balance_of(publisher_wallet.address) == 0
-    assert erc721_nft.is_erc20_deployer(consumer_wallet.address) is True
+    assert erc721_nft.is_erc20_deployer(consumer_wallet.address)
     assert erc721_nft.owner_of(1) == consumer_wallet.address
 
     # Consumer is not the additional ERC20 deployer, but will be after the NFT transfer
@@ -748,20 +703,19 @@ def test_transfer_nft(
     erc20_address = registered_token_event[0].args.newTokenAddress
     erc20_token = ERC20Token(web3, erc20_address)
 
-    assert erc20_token.is_minter(publisher_wallet.address) is False
-    assert erc20_token.is_minter(consumer_wallet.address) is True
+    assert not erc20_token.is_minter(publisher_wallet.address)
+    assert erc20_token.is_minter(consumer_wallet.address)
     erc20_token.add_minter(publisher_wallet.address, consumer_wallet)
-    assert (
-        erc20_token.get_permissions(publisher_wallet.address)[0] is True
-    )  # publisher is minter now
+    assert erc20_token.get_permissions(publisher_wallet.address)[
+        0
+    ]  # publisher is minter now
 
-    _, base_token = deploy_erc721_erc20(
-        web3, config, consumer_wallet, consumer_wallet, cap=to_wei(250)
-    )
+    ocean_token = ERC20Token(web3, publisher_ocean_instance.OCEAN_address)
+    ocean_token.approve(factory_router.address, to_wei(10000), consumer_wallet)
 
     # Make consumer the publish_market_order_fee_address instead of publisher
     tx_result = erc20_token.set_publishing_market_fee(
-        consumer_wallet.address, base_token.address, to_wei(1), publisher_wallet
+        consumer_wallet.address, ocean_token.address, to_wei(1), publisher_wallet
     )
 
     assert tx_result, "Failed to set the publish fee."
@@ -775,23 +729,20 @@ def test_transfer_nft(
     assert set_publishing_fee_event, "Cannot find PublishMarketFeeChanged event."
     publish_fees = erc20_token.get_publishing_market_fee()
     assert publish_fees[0] == consumer_wallet.address
-    assert publish_fees[1] == base_token.address
+    assert publish_fees[1] == ocean_token.address
     assert publish_fees[2] == to_wei(1)
 
     # The newest owner of the NFT (consumer wallet) can deploy a pool
-    base_token.mint(consumer_wallet.address, to_wei(200), consumer_wallet)
-    assert base_token.balanceOf(consumer_wallet.address) == to_wei(200)
-    base_token.approve(factory_router.address, to_wei(10000), consumer_wallet)
     tx = erc20_token.deploy_pool(
         rate=to_wei(1),
-        base_token_decimals=base_token.decimals(),
+        base_token_decimals=ocean_token.decimals(),
         vesting_amount=to_wei(10),
         vesting_blocks=2500000,
         base_token_amount=to_wei(100),
         lp_swap_fee_amount=to_wei("0.003"),
         publish_market_swap_fee_amount=to_wei("0.001"),
         ss_contract=get_address_of_type(config, "Staking"),
-        base_token_address=base_token.address,
+        base_token_address=ocean_token.address,
         base_token_sender=consumer_wallet.address,
         publisher_address=consumer_wallet.address,
         publish_market_swap_fee_collector=publisher_wallet.address,
@@ -808,15 +759,15 @@ def test_transfer_nft(
     assert pool_event[0].event == "NewPool"
     bpool_address = pool_event[0].args.poolAddress
     bpool = BPool(web3, bpool_address)
-    assert bpool.is_finalized() is True
-    assert bpool.opc_fee() == to_wei("0.002")
+    assert bpool.is_finalized()
+    assert bpool.opc_fee() == to_wei("0.001")
     assert bpool.get_swap_fee() == to_wei("0.003")
-    assert bpool.community_fee(base_token.address) == 0
+    assert bpool.community_fee(ocean_token.address) == 0
     assert bpool.community_fee(erc20_token.address) == 0
-    assert bpool.publish_market_fee(base_token.address) == 0
+    assert bpool.publish_market_fee(ocean_token.address) == 0
     assert bpool.publish_market_fee(erc20_token.address) == 0
 
-    base_token.approve(bpool_address, to_wei(1000000), consumer_wallet)
+    ocean_token.approve(bpool_address, to_wei(1000000), consumer_wallet)
     tx = bpool.join_swap_extern_amount_in(
         token_amount_in=to_wei(10),
         min_pool_amount_out=to_wei(1),
@@ -831,20 +782,20 @@ def test_transfer_nft(
         None,
     )
     assert join_event[0].args.caller == consumer_wallet.address
-    assert join_event[0].args.tokenIn == base_token.address
+    assert join_event[0].args.tokenIn == ocean_token.address
     assert join_event[0].args.tokenAmountIn == to_wei(10)
 
     bpt_event = bpool.get_event_log(
         BPool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
     assert bpt_event[0].args.bptAmount  # amount in pool shares
-    assert bpool.get_balance(base_token.address) == to_wei(100) + to_wei(10)
+    assert bpool.get_balance(ocean_token.address) == to_wei(100) + to_wei(10)
 
     amount_out = bpool.get_amount_out_exact_in(
-        base_token.address, erc20_token.address, to_wei(20), to_wei("0.01")
+        ocean_token.address, erc20_token.address, to_wei(20), to_wei("0.01")
     )[0]
     tx = bpool.swap_exact_amount_in(
-        token_in=base_token.address,
+        token_in=ocean_token.address,
         token_out=erc20_token.address,
         consume_market_swap_fee_address=consumer_wallet.address,
         token_amount_in=to_wei(20),
@@ -862,7 +813,7 @@ def test_transfer_nft(
     )
 
     assert swap_event[0].args.caller == consumer_wallet.address
-    assert swap_event[0].args.tokenIn == base_token.address
+    assert swap_event[0].args.tokenIn == ocean_token.address
     assert swap_event[0].args.tokenAmountIn == to_wei(20)
     assert swap_event[0].args.tokenAmountOut == amount_out
 
@@ -879,7 +830,7 @@ def test_transfer_nft(
         None,
     )
     assert exit_event[0].args.caller == consumer_wallet.address
-    assert exit_event[0].args.tokenOut == base_token.address
+    assert exit_event[0].args.tokenOut == ocean_token.address
 
     bpt_event = bpool.get_event_log(
         BPool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
@@ -891,12 +842,12 @@ def test_transfer_nft(
     number_of_exchanges = fixed_exchange.get_number_of_exchanges()
     tx = erc20_token.create_fixed_rate(
         fixed_price_address=fixed_exchange.address,
-        base_token_address=base_token.address,
+        base_token_address=ocean_token.address,
         owner=consumer_wallet.address,
         publish_market_swap_fee_collector=consumer_wallet.address,
         allowed_swapper=ZERO_ADDRESS,
-        base_token_decimals=18,
-        datatoken_decimals=18,
+        base_token_decimals=ocean_token.decimals(),
+        datatoken_decimals=erc20_token.decimals(),
         fixed_rate=to_wei(1),
         publish_market_swap_fee_amount=to_wei("0.001"),
         with_mint=0,
@@ -927,27 +878,29 @@ def test_transfer_nft(
     assert (
         exchange_details[FixedRateExchangeDetails.DT_DECIMALS] == erc20_token.decimals()
     )
-    assert exchange_details[FixedRateExchangeDetails.BASE_TOKEN] == base_token.address
+    assert exchange_details[FixedRateExchangeDetails.BASE_TOKEN] == ocean_token.address
     assert (
-        exchange_details[FixedRateExchangeDetails.BT_DECIMALS] == base_token.decimals()
+        exchange_details[FixedRateExchangeDetails.BT_DECIMALS] == ocean_token.decimals()
     )
     assert exchange_details[FixedRateExchangeDetails.FIXED_RATE] == to_wei(1)
-    assert exchange_details[FixedRateExchangeDetails.ACTIVE] is True
+    assert exchange_details[FixedRateExchangeDetails.ACTIVE]
     assert exchange_details[FixedRateExchangeDetails.DT_SUPPLY] == 0
     assert exchange_details[FixedRateExchangeDetails.BT_SUPPLY] == 0
     assert exchange_details[FixedRateExchangeDetails.DT_BALANCE] == 0
     assert exchange_details[FixedRateExchangeDetails.BT_BALANCE] == 0
-    assert exchange_details[FixedRateExchangeDetails.WITH_MINT] is False
+    assert not exchange_details[FixedRateExchangeDetails.WITH_MINT]
 
 
 def test_transfer_nft_with_erc20_pool_fre(
-    web3, config, publisher_wallet, consumer_wallet, factory_router
+    web3,
+    config,
+    publisher_wallet,
+    consumer_wallet,
+    factory_router,
+    publisher_ocean_instance,
+    erc721_factory,
 ):
     """Tests transferring the NFT after deploying an ERC20, a pool, a FRE."""
-    erc721_factory_address = get_address_of_type(
-        config, ERC721FactoryContract.CONTRACT_NAME
-    )
-    erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
 
     tx = erc721_factory.deploy_erc721_contract(
         name="NFT to TRANSFER",
@@ -1000,26 +953,22 @@ def test_transfer_nft_with_erc20_pool_fre(
     erc20_address = registered_token_event[0].args.newTokenAddress
     erc20_token = ERC20Token(web3, erc20_address)
 
-    assert erc20_token.is_minter(publisher_wallet.address) is True
+    assert erc20_token.is_minter(publisher_wallet.address)
 
-    _, base_token = deploy_erc721_erc20(
-        web3, config, publisher_wallet, publisher_wallet, cap=to_wei(250)
-    )
+    ocean_token = ERC20Token(web3, publisher_ocean_instance.OCEAN_address)
 
     # The owner of the NFT (publisher wallet) has ERC20 deployer role & can deploy a pool
-    base_token.mint(publisher_wallet.address, to_wei(200), publisher_wallet)
-    assert base_token.balanceOf(publisher_wallet.address) == to_wei(200)
-    base_token.approve(factory_router.address, to_wei(10000), publisher_wallet)
+    ocean_token.approve(factory_router.address, to_wei(10000), publisher_wallet)
     tx = erc20_token.deploy_pool(
         rate=to_wei(1),
-        base_token_decimals=base_token.decimals(),
+        base_token_decimals=ocean_token.decimals(),
         vesting_amount=to_wei(10),
         vesting_blocks=2500000,
         base_token_amount=to_wei(100),
         lp_swap_fee_amount=to_wei("0.003"),
         publish_market_swap_fee_amount=to_wei("0.001"),
         ss_contract=get_address_of_type(config, "Staking"),
-        base_token_address=base_token.address,
+        base_token_address=ocean_token.address,
         base_token_sender=publisher_wallet.address,
         publisher_address=publisher_wallet.address,
         publish_market_swap_fee_collector=publisher_wallet.address,
@@ -1036,15 +985,15 @@ def test_transfer_nft_with_erc20_pool_fre(
     assert pool_event[0].event == "NewPool"
     bpool_address = pool_event[0].args.poolAddress
     bpool = BPool(web3, bpool_address)
-    assert bpool.is_finalized() is True
-    assert bpool.opc_fee() == to_wei("0.002")
+    assert bpool.is_finalized()
+    assert bpool.opc_fee() == to_wei("0.001")
     assert bpool.get_swap_fee() == to_wei("0.003")
-    assert bpool.community_fee(base_token.address) == 0
+    assert bpool.community_fee(ocean_token.address) == 0
     assert bpool.community_fee(erc20_token.address) == 0
-    assert bpool.publish_market_fee(base_token.address) == 0
+    assert bpool.publish_market_fee(ocean_token.address) == 0
     assert bpool.publish_market_fee(erc20_token.address) == 0
 
-    base_token.approve(bpool_address, to_wei(1000000), publisher_wallet)
+    ocean_token.approve(bpool_address, to_wei(1000000), publisher_wallet)
     tx = bpool.join_swap_extern_amount_in(
         token_amount_in=to_wei(10),
         min_pool_amount_out=to_wei(1),
@@ -1059,26 +1008,26 @@ def test_transfer_nft_with_erc20_pool_fre(
         None,
     )
     assert join_event[0].args.caller == publisher_wallet.address
-    assert join_event[0].args.tokenIn == base_token.address
+    assert join_event[0].args.tokenIn == ocean_token.address
     assert join_event[0].args.tokenAmountIn == to_wei(10)
 
     bpt_event = bpool.get_event_log(
         BPool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
     assert bpt_event[0].args.bptAmount  # amount in pool shares
-    assert bpool.get_balance(base_token.address) == to_wei(100) + to_wei(10)
+    assert bpool.get_balance(ocean_token.address) == to_wei(100) + to_wei(10)
 
     # The owner of the NFT (publisher wallet) has ERC20 deployer role & can deploy a FRE
     fixed_exchange = FixedRateExchange(web3, get_address_of_type(config, "FixedPrice"))
     number_of_exchanges = fixed_exchange.get_number_of_exchanges()
     tx = erc20_token.create_fixed_rate(
         fixed_price_address=fixed_exchange.address,
-        base_token_address=base_token.address,
+        base_token_address=ocean_token.address,
         owner=publisher_wallet.address,
         publish_market_swap_fee_collector=publisher_wallet.address,
         allowed_swapper=ZERO_ADDRESS,
-        base_token_decimals=18,
-        datatoken_decimals=18,
+        base_token_decimals=ocean_token.decimals(),
+        datatoken_decimals=erc20_token.decimals(),
         fixed_rate=to_wei(1),
         publish_market_swap_fee_amount=to_wei("0.001"),
         with_mint=0,
@@ -1108,17 +1057,17 @@ def test_transfer_nft_with_erc20_pool_fre(
     assert (
         exchange_details[FixedRateExchangeDetails.DT_DECIMALS] == erc20_token.decimals()
     )
-    assert exchange_details[FixedRateExchangeDetails.BASE_TOKEN] == base_token.address
+    assert exchange_details[FixedRateExchangeDetails.BASE_TOKEN] == ocean_token.address
     assert (
-        exchange_details[FixedRateExchangeDetails.BT_DECIMALS] == base_token.decimals()
+        exchange_details[FixedRateExchangeDetails.BT_DECIMALS] == ocean_token.decimals()
     )
     assert exchange_details[FixedRateExchangeDetails.FIXED_RATE] == to_wei(1)
-    assert exchange_details[FixedRateExchangeDetails.ACTIVE] is True
+    assert exchange_details[FixedRateExchangeDetails.ACTIVE]
     assert exchange_details[FixedRateExchangeDetails.DT_SUPPLY] == 0
     assert exchange_details[FixedRateExchangeDetails.BT_SUPPLY] == 0
     assert exchange_details[FixedRateExchangeDetails.DT_BALANCE] == 0
     assert exchange_details[FixedRateExchangeDetails.BT_BALANCE] == 0
-    assert exchange_details[FixedRateExchangeDetails.WITH_MINT] is False
+    assert not exchange_details[FixedRateExchangeDetails.WITH_MINT]
 
     tx = erc721_nft.safe_transfer_from(
         publisher_wallet.address,
@@ -1138,12 +1087,12 @@ def test_transfer_nft_with_erc20_pool_fre(
     assert transfer_event[0].args.to == consumer_wallet.address
     assert erc721_nft.balance_of(consumer_wallet.address) == 1
     assert erc721_nft.balance_of(publisher_wallet.address) == 0
-    assert erc721_nft.is_erc20_deployer(consumer_wallet.address) is True
+    assert erc721_nft.is_erc20_deployer(consumer_wallet.address)
     assert erc721_nft.owner_of(1) == consumer_wallet.address
     permissions = erc20_token.get_permissions(consumer_wallet.address)
-    assert permissions[0] is False  # the newest owner is not the minter
+    assert not permissions[0]  # the newest owner is not the minter
     erc20_token.add_minter(consumer_wallet.address, consumer_wallet)
-    assert erc20_token.permissions(consumer_wallet.address)[0] is True
+    assert erc20_token.permissions(consumer_wallet.address)[0]
 
     # Consumer wallet is not the publish market fee collector
     with pytest.raises(exceptions.ContractLogicError) as err:
@@ -1161,4 +1110,4 @@ def test_transfer_nft_with_erc20_pool_fre(
         exchange_details[FixedRateExchangeDetails.EXCHANGE_OWNER]
         == publisher_wallet.address
     )
-    assert exchange_details[FixedRateExchangeDetails.ACTIVE] is True
+    assert exchange_details[FixedRateExchangeDetails.ACTIVE]

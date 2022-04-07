@@ -12,7 +12,6 @@ from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.currency import MAX_WEI, to_wei
 from tests.resources.helper_functions import (
     create_nft_erc20_with_pool,
-    deploy_erc721_erc20,
     get_address_of_type,
     join_pool_one_side,
     swap_exact_amount_in_base_token,

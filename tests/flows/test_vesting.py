@@ -72,9 +72,9 @@ def test_main(
 
     permissions = erc721_nft.get_permissions(consumer_wallet.address)
 
-    assert permissions[1] is True
-    assert permissions[2] is True
-    assert permissions[3] is True
+    assert permissions[1]
+    assert permissions[2]
+    assert permissions[3]
 
     # Tests consumer deploys an ERC20DT
     trx_erc_20 = erc721_nft.create_erc20(
@@ -160,7 +160,7 @@ def test_main(
 
     # consumer fails to mint new erc20 token even if the minter
     perms = erc20_token.get_permissions(consumer_wallet.address)
-    assert perms[0] is True
+    assert perms[0]
 
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc20_token.mint(consumer_wallet.address, 1, consumer_wallet)
