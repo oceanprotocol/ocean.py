@@ -6,15 +6,18 @@ import json
 import logging
 import logging.config
 import os
+import secrets
 from typing import Any, Dict, Optional, Tuple, Union
 
 import coloredlogs
 import yaml
 from enforce_typing import enforce_types
+from pytest import approx
 from web3 import Web3
 
 from ocean_lib.config import Config
 from ocean_lib.example_config import ExampleConfig
+from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
@@ -22,7 +25,8 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.ocean.util import get_web3 as util_get_web3
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
+from ocean_lib.web3_internal.transactions import send_ether
+from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.utils import split_signature
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
@@ -125,6 +129,32 @@ def get_ganache_wallet():
 
 
 @enforce_types
+def generate_wallet() -> Wallet:
+    """Generates wallets on the fly with funds."""
+    web3 = get_web3()
+    config = get_example_config()
+    secret = secrets.token_hex(32)
+    private_key = "0x" + secret
+
+    generated_wallet = Wallet(
+        web3,
+        private_key=private_key,
+        block_confirmations=config.block_confirmations,
+        transaction_timeout=config.transaction_timeout,
+    )
+    assert generated_wallet.private_key == private_key
+    deployer_wallet = get_factory_deployer_wallet("ganache")
+    send_ether(deployer_wallet, generated_wallet.address, to_wei(3))
+
+    ocn = Ocean(config)
+    OCEAN_token = ERC20Token(web3, address=ocn.OCEAN_address)
+    OCEAN_token.transfer(
+        generated_wallet.address, to_wei(50), from_wallet=deployer_wallet
+    )
+    return generated_wallet
+
+
+@enforce_types
 def get_publisher_ocean_instance(use_provider_mock=False) -> Ocean:
     config = ExampleConfig.get_config()
     data_provider = DataProviderMock if use_provider_mock else None
@@ -215,6 +245,8 @@ def deploy_erc721_erc20(
         additional_metadata_updater=ZERO_ADDRESS,
         additional_erc20_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
+        transferable=True,
+        owner=erc721_publisher.address,
         from_wallet=erc721_publisher,
     )
     token_address = erc721_factory.get_token_address(tx)
@@ -346,3 +378,209 @@ def get_provider_fees() -> Dict[str, Any]:
     }
 
     return provider_fee
+
+
+def approx_from_wei(amount_a, amount_b) -> float:
+    """Helper function to compare amounts in wei with pytest approx function with a relative tolerance of 1e-6."""
+    return int(amount_a) / to_wei(1) == approx(int(amount_b) / to_wei(1))
+
+
+def create_nft_erc20_with_pool(
+    web3,
+    config,
+    publisher_wallet,
+    base_token,
+    swap_fee=to_wei("0.0001"),
+    swap_market_fee=to_wei("0.0001"),
+    initial_pool_liquidity=to_wei("100"),
+    token_cap=to_wei("150"),
+    vesting_amount=0,
+    vesting_blocks=2500000,
+    pool_initial_rate=to_wei("1"),
+):
+    erc721_factory_address = get_address_of_type(
+        config, ERC721FactoryContract.CONTRACT_NAME
+    )
+    erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
+    side_staking_address = get_address_of_type(config, "Staking")
+    pool_template_address = get_address_of_type(config, "poolTemplate")
+
+    base_token.approve(erc721_factory_address, initial_pool_liquidity, publisher_wallet)
+
+    tx = erc721_factory.create_nft_erc20_with_pool(
+        nft_name="72120Bundle",
+        nft_symbol="72Bundle",
+        nft_template=1,
+        nft_token_uri="https://oceanprotocol.com/nft/",
+        datatoken_template=1,
+        datatoken_name="ERC20WithPool",
+        datatoken_symbol="ERC20P",
+        datatoken_minter=publisher_wallet.address,
+        datatoken_fee_manager=publisher_wallet.address,
+        datatoken_publish_market_order_fee_address=publisher_wallet.address,
+        datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
+        datatoken_cap=token_cap,
+        datatoken_publish_market_order_fee_amount=0,
+        datatoken_bytess=[b""],
+        pool_rate=pool_initial_rate,
+        pool_base_token_decimals=base_token.decimals(),
+        pool_vesting_amount=vesting_amount,
+        pool_vesting_blocks=vesting_blocks,
+        pool_base_token_amount=initial_pool_liquidity,
+        pool_lp_swap_fee_amount=swap_fee,
+        pool_publish_market_swap_fee_amount=swap_market_fee,
+        pool_side_staking=side_staking_address,
+        pool_base_token=base_token.address,
+        pool_base_token_sender=get_address_of_type(
+            config, ERC721FactoryContract.CONTRACT_NAME
+        ),
+        pool_publisher=publisher_wallet.address,
+        pool_publish_market_swap_fee_collector=publisher_wallet.address,
+        pool_template_address=pool_template_address,
+        nft_transferable=True,
+        nft_owner=publisher_wallet.address,
+        from_wallet=publisher_wallet,
+    )
+
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_nft_event = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_NFT_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    erc721_token_address = registered_nft_event[0].args.newTokenAddress
+    erc721_token = ERC721NFT(web3, erc721_token_address)
+
+    registered_token_event = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    erc20_address = registered_token_event[0].args.newTokenAddress
+    erc20_token = ERC20Token(web3, erc20_address)
+
+    registered_pool_event = erc20_token.get_event_log(
+        ERC721FactoryContract.EVENT_NEW_POOL,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    pool_address = registered_pool_event[0].args.poolAddress
+    bpool = BPool(web3, pool_address)
+    pool_token = ERC20Token(web3, pool_address)
+
+    return bpool, erc20_token, erc721_token, pool_token
+
+
+def join_pool_with_max_base_token(bpool, web3, base_token, wallet, amt: int = 0):
+    """
+    Join pool with max base token if amt is 0. Otherwise join pool with amt base token.
+    """
+    pool_token_out_balance = bpool.get_balance(
+        base_token.address
+    )  # pool base token balance
+    max_out_ratio = bpool.get_max_out_ratio()  # max ratio
+
+    max_out_ratio_limit = int(from_wei(max_out_ratio) * pool_token_out_balance)
+
+    web3.eth.wait_for_transaction_receipt(
+        bpool.join_swap_extern_amount_in(
+            amt if amt else max_out_ratio_limit,
+            to_wei("0"),
+            wallet,
+        )
+    )
+
+
+def wallet_exit_pool(web3, bpool, pool_token, wallet, amt: int = 0):
+    """
+    Exit pool with amt, if amt is 0, exit pool with max amount.
+    """
+    web3.eth.wait_for_transaction_receipt(
+        bpool.exit_pool(
+            amt if amt else pool_token.balanceOf(wallet.address),
+            [to_wei("0"), to_wei("0")],
+            wallet,
+        )
+    )
+
+
+def wallet_exit_pool_one_side(
+    web3, bpool, base_token, pool_token, wallet, amt: int = 0
+):
+    """
+    Exit pool with one side with amt, if amt is 0, exit pool with max amount.
+    """
+    pool_token_out_balance = bpool.get_balance(
+        base_token.address
+    )  # pool base token balance
+    max_out_ratio = bpool.get_max_out_ratio()  # max ratio
+
+    max_out_ratio_limit = int(from_wei(max_out_ratio) * pool_token_out_balance)
+
+    web3.eth.wait_for_transaction_receipt(
+        bpool.exit_swap_pool_amount_in(
+            amt
+            if amt
+            else min(max_out_ratio_limit, pool_token.balanceOf(wallet.address)),
+            0,
+            wallet,
+        )
+    )
+
+
+def join_pool_one_side(web3, bpool, base_token, wallet, amt: int = 0):
+    """
+    Join 1ss pool with amt, if amt is 0, join pool with max amount.
+    """
+    pool_token_out_balance = bpool.get_balance(
+        base_token.address
+    )  # pool base token balance
+    max_out_ratio = bpool.get_max_out_ratio()  # max ratio
+
+    max_out_ratio_limit = int(from_wei(max_out_ratio) * pool_token_out_balance)
+
+    web3.eth.wait_for_transaction_receipt(
+        bpool.join_swap_extern_amount_in(
+            amt if amt else max_out_ratio_limit,
+            to_wei("0"),
+            wallet,
+        )
+    )
+
+
+def swap_exact_amount_in_datatoken(bpool, datatoken, base_token, wallet, amt: int = 0):
+    bpool.swap_exact_amount_in(
+        datatoken.address,
+        base_token.address,
+        wallet.address,
+        amt,
+        to_wei("0"),
+        to_wei("100000"),
+        to_wei("0"),
+        wallet,
+    )
+
+
+def swap_exact_amount_in_base_token(bpool, datatoken, base_token, wallet, amt: int = 0):
+    pool_token_out_balance = bpool.get_balance(
+        base_token.address
+    )  # pool base token balance
+    max_out_ratio = bpool.get_max_out_ratio()  # max ratio
+
+    max_out_ratio_limit = int(from_wei(max_out_ratio) * pool_token_out_balance)
+
+    bpool.swap_exact_amount_in(
+        base_token.address,
+        datatoken.address,
+        wallet.address,
+        amt if amt else max_out_ratio_limit,
+        to_wei("0"),
+        to_wei("100000"),
+        to_wei("0"),
+        wallet,
+    )

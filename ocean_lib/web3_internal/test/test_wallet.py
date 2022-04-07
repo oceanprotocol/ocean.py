@@ -7,7 +7,11 @@ import os
 import pytest
 from eth_account.messages import encode_defunct
 
+from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.web3_internal.currency import to_wei
+from ocean_lib.web3_internal.utils import get_ether_balance
 from ocean_lib.web3_internal.wallet import Wallet
+from tests.resources.helper_functions import generate_wallet
 
 
 @pytest.mark.unit
@@ -49,3 +53,30 @@ def test_wallet_arguments(web3, config):
             block_confirmations=config.block_confirmations,
             transaction_timeout=config.transaction_timeout,
         )
+
+
+def test_generating_wallets(web3, publisher_ocean_instance):
+    generated_wallet = generate_wallet()
+    assert generated_wallet.address, "Wallet has not an address."
+    assert get_ether_balance(web3, generated_wallet.address) == to_wei(3)
+
+    OCEAN_token = ERC20Token(web3, address=publisher_ocean_instance.OCEAN_address)
+    assert OCEAN_token.balanceOf(generated_wallet.address) == to_wei(50)
+
+    env_key_labels = [
+        "TEST_PRIVATE_KEY1",
+        "TEST_PRIVATE_KEY2",
+        "TEST_PRIVATE_KEY3",
+        "TEST_PRIVATE_KEY4",
+        "TEST_PRIVATE_KEY5",
+        "TEST_PRIVATE_KEY6",
+        "TEST_PRIVATE_KEY7",
+        "TEST_PRIVATE_KEY8",
+        "FACTORY_DEPLOYER_PRIVATE_KEY",
+        "PROVIDER_PRIVATE_KEY",
+    ]
+    env_private_keys = []
+    for key_label in env_key_labels:
+        key = os.environ.get(key_label)
+        env_private_keys.append(key)
+    assert generated_wallet.private_key not in env_private_keys
