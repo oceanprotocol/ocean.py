@@ -292,7 +292,6 @@ def test_vesting_publisher_exit_scam(
     )
 
     mint_fake_OCEAN(config)
-    vesting_amount = to_wei(18)
     initial_ocean_liq = to_wei(200)
     pmt_collector = erc20_token.get_payment_collector()
 
@@ -306,8 +305,6 @@ def test_vesting_publisher_exit_scam(
         from_wallet=publisher_wallet,
     )
 
-    # check if the vesting amount is correct
-    assert side_staking.get_vesting_amount(erc20_token.address) == vesting_amount
     dt_balance_before = erc20_token.balanceOf(pmt_collector)
 
     # advance 10 blocks to see if available vesting increased
@@ -374,7 +371,6 @@ def test_adding_liquidity_for_vesting(
     mint_fake_OCEAN(config)
     initial_ocean_liq = to_wei(200)
     ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
-    vesting_amount = initial_ocean_liq // 100 * 9
     pmt_collector = erc20_token.get_payment_collector()
 
     bpool = _deploy_ocean_pool(
@@ -385,8 +381,6 @@ def test_adding_liquidity_for_vesting(
         from_wallet=publisher_wallet,
     )
 
-    # check if the vesting amount is correct
-    assert side_staking.get_vesting_amount(erc20_token.address) == vesting_amount
     dt_balance_before = erc20_token.balanceOf(pmt_collector)
 
     # add liquidity to the pool & check events properly
@@ -438,7 +432,6 @@ def test_removing_liquidity_for_vesting(
     mint_fake_OCEAN(config)
     initial_ocean_liq = to_wei(200)
     ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
-    vesting_amount = initial_ocean_liq // 100 * 9
     pmt_collector = erc20_token.get_payment_collector()
 
     bpool = _deploy_ocean_pool(
@@ -448,9 +441,6 @@ def test_removing_liquidity_for_vesting(
         web3=web3,
         from_wallet=publisher_wallet,
     )
-
-    # check if the vesting amount is correct
-    assert side_staking.get_vesting_amount(erc20_token.address) == vesting_amount
 
     # check if vesting is correct
     dt_balance_before = erc20_token.balanceOf(pmt_collector)
