@@ -13,7 +13,7 @@ from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
+from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
@@ -92,8 +92,18 @@ def distribute_base_token(
         )
 
 
+def convert_base_token_to_equivalent_datatoken(
+    base_token: ERC20Token,
+    amount: int,
+) -> int:
+    """Datatokens have 18 decimals, even when base token decimals is different
+    Given rate == 1, this converts from base tokens to equivalent datatokens
+    """
+    return to_wei(from_wei(amount, base_token.decimals()))
+
+
 @pytest.mark.unit
-@pytest.mark.parametrize("base_token_name", ["Ocean", "MockDAI"])
+@pytest.mark.parametrize("base_token_name", ["Ocean", "MockDAI", "MockUSDC"])
 def test_pool(
     web3,
     config,
@@ -164,8 +174,14 @@ def test_pool(
         0
     )  # TODO: Increase consume market swap fee to non-zero amount
 
-    initial_base_token_amount = to_wei("10")
-    base_token.approve(factory_router.address, to_wei("10"), publisher_wallet)
+    initial_base_token_amount = to_wei("10", base_token.decimals())
+    initial_datatoken_amount = convert_base_token_to_equivalent_datatoken(
+        base_token, initial_base_token_amount
+    )
+
+    base_token.approve(
+        factory_router.address, to_wei("10", base_token.decimals()), publisher_wallet
+    )
 
     tx = erc20_token.deploy_pool(
         rate=to_wei(1),
@@ -221,12 +237,15 @@ def test_pool(
 
     assert (
         erc20_token.balanceOf(side_staking.address)
-        == MAX_UINT256 - initial_base_token_amount
+        == MAX_UINT256 - initial_datatoken_amount
     )
 
+    # TODO: fix this for USDC
     assert bpool.calc_pool_in_single_out(
         erc20_address, to_wei("1")
-    ) == bpool.calc_pool_in_single_out(base_token.address, to_wei("1"))
+    ) == bpool.calc_pool_in_single_out(
+        base_token.address, to_wei("1", base_token.decimals())
+    )
     assert bpool.calc_pool_out_single_in(
         erc20_address, to_wei("1")
     ) == bpool.calc_pool_out_single_in(base_token.address, to_wei("1"))
