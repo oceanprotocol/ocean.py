@@ -430,7 +430,6 @@ def test_removing_liquidity_for_vesting(
         web3, config, publisher_wallet, publisher_wallet, cap=to_wei(1000)
     )
     mint_fake_OCEAN(config)
-    initial_ocean_liq = to_wei(200)
     ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
     pmt_collector = erc20_token.get_payment_collector()
 
