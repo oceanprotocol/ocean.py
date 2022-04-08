@@ -405,9 +405,8 @@ def test_start_order(
     # Approve publisher to burn
     erc20_token.approve(publisher_wallet.address, to_wei("10"), consumer_wallet)
 
-    assert erc20_token.allowance(
-        consumer_wallet.address, publisher_wallet.address
-    ) == to_wei("10")
+    allowance = erc20_token.allowance(consumer_wallet.address, publisher_wallet.address)
+    assert allowance == to_wei("10")
     erc20_token.burn_from(consumer_wallet.address, to_wei("2"), publisher_wallet)
 
     assert erc20_token.get_total_supply() == initial_total_supply - to_wei("2")

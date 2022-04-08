@@ -206,3 +206,18 @@ def erc20_enterprise_token(web3, config, erc721_nft, publisher_wallet, erc721_fa
     erc20_address = registered_event[0].args.newTokenAddress
 
     return ERC20Enterprise(web3, erc20_address)
+
+
+@pytest.fixture
+def publisher_addr():
+    return get_publisher_wallet().address
+
+
+@pytest.fixture
+def consumer_addr():
+    return get_consumer_wallet().address
+
+
+@pytest.fixture
+def another_consumer_addr():
+    return get_another_consumer_wallet().address
