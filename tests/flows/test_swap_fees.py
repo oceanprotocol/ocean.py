@@ -2,15 +2,19 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from typing import List
+
 import pytest
 
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
+from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
+from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
@@ -74,17 +78,45 @@ def test_deploy_erc721_and_manage(
     assert permissions[3] is True
 
 
+def distribute_base_token(
+    base_token: ERC20Token,
+    recipients: List[str],
+    from_wallet: Wallet,
+    amount_in_ether: int = 20,
+) -> ERC20Token:
+    for recipient in recipients:
+        base_token.transfer(
+            recipient,
+            to_wei(amount_in_ether, base_token.decimals()),
+            from_wallet,
+        )
+
+
 @pytest.mark.unit
-def test_pool_ocean(
+@pytest.mark.parametrize("base_token_name", ["Ocean"])
+def test_pool(
     web3,
     config,
     factory_deployer_wallet,
     consumer_wallet,
     another_consumer_wallet,
     publisher_wallet,
-    factory_router,
+    base_token_name: str,
 ):
-    """Tests pool with ocean token and market fee 0.1%"""
+    """
+    Tests pool with OCEAN, DAI, and USDC as base token and market fee 0.1%
+    OCEAN is an approved base token with 18 decimals (OPC Fee = 0.1%)
+    DAI is a non-approved base token with 18 decimals (OPC Fee = 0.2%)
+    USDC is a non-approved base token with 6 decimals (OPC Fee = 0.2%)
+    """
+    base_token = ERC20Token(web3, get_address_of_type(config, base_token_name))
+    distribute_base_token(
+        base_token=base_token,
+        recipients=[publisher_wallet.address, consumer_wallet.address],
+        from_wallet=factory_deployer_wallet,
+    )
+
+    factory_router = FactoryRouter(web3, get_address_of_type(config, "Router"))
     erc721_factory = ERC721FactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
     )
@@ -93,8 +125,10 @@ def test_pool_ocean(
         config, web3, factory_deployer_wallet, publisher_wallet
     )
 
+    # Datatoken cap is hardcoded to MAX_WEI in contract regardles of what is passed.
+    cap_doesnt_matter = to_wei("100000")
+
     # Tests publisher deploys a new erc20DT, assigning himself as minter
-    cap = to_wei("100000")
     tx = erc721_nft.create_erc20(
         template_index=1,
         name="ERC20DT1",
@@ -103,7 +137,7 @@ def test_pool_ocean(
         fee_manager=factory_deployer_wallet.address,
         publish_market_order_fee_address=publisher_wallet.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=cap,
+        cap=cap_doesnt_matter,
         publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=publisher_wallet,
@@ -120,27 +154,24 @@ def test_pool_ocean(
 
     assert erc20_token.get_permissions(publisher_wallet.address)[0] is True
 
+    # Tests publisher calls deployPool(), we then check base token balance and fees"
+
     lp_swap_fee = to_wei("0.001")
     publish_market_swap_fee = to_wei("0.001")
 
-    # Tests publisher calls deployPool(), we then check ocean and market fee"
-
-    initial_ocean_liq = to_wei("10")
-    ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
-    ocean_contract.approve(
-        get_address_of_type(config, "Router"), to_wei("10"), publisher_wallet
-    )
+    initial_base_token_amount = to_wei("10")
+    base_token.approve(factory_router.address, to_wei("10"), publisher_wallet)
 
     tx = erc20_token.deploy_pool(
         rate=to_wei(1),
-        base_token_decimals=ocean_contract.decimals(),
-        vesting_amount=initial_ocean_liq,
+        base_token_decimals=base_token.decimals(),
+        vesting_amount=initial_base_token_amount,
         vesting_blocks=2500000,
-        base_token_amount=initial_ocean_liq,
+        base_token_amount=initial_base_token_amount,
         lp_swap_fee_amount=lp_swap_fee,
         publish_market_swap_fee_amount=publish_market_swap_fee,
         ss_contract=side_staking.address,
-        base_token_address=ocean_contract.address,
+        base_token_address=base_token.address,
         base_token_sender=publisher_wallet.address,
         publisher_address=publisher_wallet.address,
         publish_market_swap_fee_collector=get_address_of_type(
@@ -161,48 +192,44 @@ def test_pool_ocean(
     bpool_address = pool_event[0].args.poolAddress
     bpool = BPool(web3, bpool_address)
     assert bpool.is_finalized() is True
-    assert bpool.opc_fee() == to_wei("0.001")
+    if factory_router.is_approved_token(base_token.address):
+        assert bpool.opc_fee() == to_wei("0.001")
+    else:
+        assert bpool.opc_fee() == to_wei("0.002")
     assert bpool.get_swap_fee() == to_wei("0.001")
-    assert bpool.community_fee(get_address_of_type(config, "Ocean")) == 0
+    assert bpool.community_fee(base_token.address) == 0
     assert bpool.community_fee(erc20_token.address) == 0
-    assert bpool.publish_market_fee(get_address_of_type(config, "Ocean")) == 0
+    assert bpool.publish_market_fee(base_token.address) == 0
     assert bpool.publish_market_fee(erc20_token.address) == 0
 
     assert (
-        erc20_token.balanceOf(side_staking.address) == MAX_UINT256 - initial_ocean_liq
+        erc20_token.balanceOf(side_staking.address)
+        == MAX_UINT256 - initial_base_token_amount
     )
 
     assert bpool.calc_pool_in_single_out(
         erc20_address, to_wei("1")
-    ) == bpool.calc_pool_in_single_out(
-        get_address_of_type(config, "Ocean"), to_wei("1")
-    )
+    ) == bpool.calc_pool_in_single_out(base_token.address, to_wei("1"))
     assert bpool.calc_pool_out_single_in(
         erc20_address, to_wei("1")
-    ) == bpool.calc_pool_out_single_in(
-        get_address_of_type(config, "Ocean"), to_wei("1")
-    )
+    ) == bpool.calc_pool_out_single_in(base_token.address, to_wei("1"))
     assert bpool.calc_single_in_pool_out(
         erc20_address, to_wei("1")
-    ) == bpool.calc_single_in_pool_out(
-        get_address_of_type(config, "Ocean"), to_wei("1")
-    )
+    ) == bpool.calc_single_in_pool_out(base_token.address, to_wei("1"))
     assert bpool.calc_single_out_pool_in(
         erc20_address, to_wei("1")
-    ) == bpool.calc_single_out_pool_in(
-        get_address_of_type(config, "Ocean"), to_wei("1")
-    )
+    ) == bpool.calc_single_out_pool_in(base_token.address, to_wei("1"))
     # Tests consumer buys some DT - exactAmountIn
 
-    assert ocean_contract.balanceOf(bpool.address) == to_wei("10")
-    ocean_contract.approve(bpool_address, to_wei("10"), consumer_wallet)
+    assert base_token.balanceOf(bpool.address) == to_wei("10")
+    base_token.approve(bpool_address, to_wei("10"), consumer_wallet)
 
     assert erc20_token.balanceOf(consumer_wallet.address) == 0
     consumer_dt_balance = erc20_token.balanceOf(consumer_wallet.address)
-    consumer_ocean_balance = ocean_contract.balanceOf(consumer_wallet.address)
+    consumer_ocean_balance = base_token.balanceOf(consumer_wallet.address)
 
     tx = bpool.swap_exact_amount_in(
-        token_in=ocean_contract.address,
+        token_in=base_token.address,
         token_out=erc20_address,
         consume_market_swap_fee_address=another_consumer_wallet.address,
         token_amount_in=to_wei("0.1"),
@@ -224,8 +251,7 @@ def test_pool_ocean(
 
     # Check swap balances
     assert (
-        ocean_contract.balanceOf(consumer_wallet.address)
-        + swap_event_args.tokenAmountIn
+        base_token.balanceOf(consumer_wallet.address) + swap_event_args.tokenAmountIn
         == consumer_ocean_balance
     )
     assert (
@@ -235,12 +261,12 @@ def test_pool_ocean(
 
     # Tests consumer buys some DT - exactAmountOut
     consumer_dt_balance = erc20_token.balanceOf(consumer_wallet.address)
-    consumer_ocean_balance = ocean_contract.balanceOf(consumer_wallet.address)
+    consumer_ocean_balance = base_token.balanceOf(consumer_wallet.address)
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
-    ocean_market_fee_balance = bpool.publish_market_fee(ocean_contract.address)
+    ocean_market_fee_balance = bpool.publish_market_fee(base_token.address)
 
     tx = bpool.swap_exact_amount_out(
-        token_in=ocean_contract.address,
+        token_in=base_token.address,
         token_out=erc20_address,
         consume_market_swap_fee_address=another_consumer_wallet.address,
         max_amount_in=to_wei(10),
@@ -259,8 +285,7 @@ def test_pool_ocean(
     swap_event_args = swap_fee_event[0].args
 
     assert (
-        ocean_contract.balanceOf(consumer_wallet.address)
-        + swap_event_args.tokenAmountIn
+        base_token.balanceOf(consumer_wallet.address) + swap_event_args.tokenAmountIn
         == consumer_ocean_balance
     )
     assert (
@@ -291,7 +316,7 @@ def test_pool_ocean(
 
     tx = bpool.swap_exact_amount_in(
         token_in=erc20_address,
-        token_out=ocean_contract.address,
+        token_out=base_token.address,
         consume_market_swap_fee_address=another_consumer_wallet.address,
         token_amount_in=to_wei("0.1"),
         min_amount_out=to_wei("0.0001"),
@@ -337,12 +362,12 @@ def test_pool_ocean(
 
     erc20_token.approve(bpool_address, to_wei("1000"), consumer_wallet)
     consumer_dt_balance = erc20_token.balanceOf(consumer_wallet.address)
-    consumer_ocean_balance = ocean_contract.balanceOf(consumer_wallet.address)
+    consumer_ocean_balance = base_token.balanceOf(consumer_wallet.address)
     dt_market_fee_balance = bpool.publish_market_fee(erc20_token.address)
 
     tx = bpool.swap_exact_amount_out(
         token_in=erc20_address,
-        token_out=ocean_contract.address,
+        token_out=base_token.address,
         consume_market_swap_fee_address=another_consumer_wallet.address,
         max_amount_in=to_wei("0.1"),
         token_amount_out=to_wei("0.0001"),
@@ -375,7 +400,7 @@ def test_pool_ocean(
     )
     assert (
         consumer_ocean_balance + swap_event_args.tokenAmountOut
-        == ocean_contract.balanceOf(consumer_wallet.address)
+        == base_token.balanceOf(consumer_wallet.address)
     )
 
     assert (
@@ -403,7 +428,7 @@ def test_pool_ocean(
     )
 
     assert join_pool_event[0].args.tokenIn == erc20_token.address
-    assert join_pool_event[1].args.tokenIn == ocean_contract.address
+    assert join_pool_event[1].args.tokenIn == base_token.address
 
     assert to_wei("0.01") == bpool.balanceOf(consumer_wallet.address)
     assert ss_contract_bpt_balance == bpool.balanceOf(
@@ -413,13 +438,13 @@ def test_pool_ocean(
         get_address_of_type(config, "Staking")
     )
 
-    # Tests consumer adds more liquidity with joinswapExternAmountIn (only OCEAN)
+    # Tests publisher adds more liquidity with joinswapExternAmountIn (only OCEAN)
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
     ss_contract_dt_balance = erc20_token.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
     dt_balance_before_join = side_staking.get_datatoken_balance(erc20_token.address)
 
-    ocean_contract.approve(bpool_address, to_wei("1000"), publisher_wallet)
+    base_token.approve(bpool_address, to_wei("1000"), publisher_wallet)
 
     tx = bpool.join_swap_extern_amount_in(to_wei("1"), to_wei("0.01"), publisher_wallet)
 
@@ -428,7 +453,7 @@ def test_pool_ocean(
         bpool.EVENT_LOG_JOIN, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
-    assert join_pool_event[0].args.tokenIn == ocean_contract.address
+    assert join_pool_event[0].args.tokenIn == base_token.address
     assert join_pool_event[1].args.tokenIn == erc20_token.address
     assert join_pool_event[0].args.tokenAmountIn == to_wei("1")
     side_staking_amount_in = ss_contract_dt_balance - erc20_token.balanceOf(
@@ -455,9 +480,9 @@ def test_pool_ocean(
     )
     assert erc20_token.balanceOf(publisher_wallet.address) == publisher_dt_balance
 
-    # Tests consumer removes liquidity with ExitPool, receiving both tokens
+    # Tests publisher removes liquidity with ExitPool, receiving both tokens
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
-    publisher_ocean_balance = ocean_contract.balanceOf(publisher_wallet.address)
+    publisher_ocean_balance = base_token.balanceOf(publisher_wallet.address)
     ss_contract_dt_balance = erc20_token.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
 
@@ -475,7 +500,7 @@ def test_pool_ocean(
     )
 
     assert exit_event[0].args.tokenOut == erc20_token.address
-    assert exit_event[1].args.tokenOut == ocean_contract.address
+    assert exit_event[1].args.tokenOut == base_token.address
 
     assert exit_event[
         0
@@ -484,7 +509,7 @@ def test_pool_ocean(
     )
     assert exit_event[
         1
-    ].args.tokenAmountOut + publisher_ocean_balance == ocean_contract.balanceOf(
+    ].args.tokenAmountOut + publisher_ocean_balance == base_token.balanceOf(
         publisher_wallet.address
     )
 
@@ -504,7 +529,7 @@ def test_pool_ocean(
     # Tests publisher removes liquidity with exitswapPoolAmountIn, receiving only OCEAN tokens
 
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
-    publisher_ocean_balance = ocean_contract.balanceOf(publisher_wallet.address)
+    publisher_ocean_balance = base_token.balanceOf(publisher_wallet.address)
     ss_contract_dt_balance = erc20_token.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
     dt_balance_before_exit = side_staking.get_datatoken_balance(erc20_token.address)
@@ -524,12 +549,12 @@ def test_pool_ocean(
     )
 
     assert exit_event[0].args.caller == publisher_wallet.address
-    assert exit_event[0].args.tokenOut == ocean_contract.address
+    assert exit_event[0].args.tokenOut == base_token.address
     assert exit_event[1].args.tokenOut == erc20_token.address
 
     assert exit_event[
         0
-    ].args.tokenAmountOut + publisher_ocean_balance == ocean_contract.balanceOf(
+    ].args.tokenAmountOut + publisher_ocean_balance == base_token.balanceOf(
         publisher_wallet.address
     )
     assert (
@@ -552,7 +577,7 @@ def test_pool_ocean(
     # publisher removes liquidity with exitswapPoolAmountIn, receiving only DT tokens
 
     publisher_dt_balance = erc20_token.balanceOf(publisher_wallet.address)
-    publisher_ocean_balance = ocean_contract.balanceOf(publisher_wallet.address)
+    publisher_ocean_balance = base_token.balanceOf(publisher_wallet.address)
     ss_contract_dt_balance = erc20_token.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
     dt_balance_before_exit = side_staking.get_datatoken_balance(erc20_token.address)
@@ -578,12 +603,12 @@ def test_pool_ocean(
         bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
     assert exit_event[0].args.caller == publisher_wallet.address
-    assert exit_event[0].args.tokenOut == ocean_contract.address
+    assert exit_event[0].args.tokenOut == base_token.address
     assert exit_event[1].args.tokenOut == erc20_token.address
 
     assert exit_event[
         0
-    ].args.tokenAmountOut + publisher_ocean_balance == ocean_contract.balanceOf(
+    ].args.tokenAmountOut + publisher_ocean_balance == base_token.balanceOf(
         publisher_wallet.address
     )
     assert (
@@ -604,10 +629,10 @@ def test_pool_ocean(
     # Tests no ocean and market fees were accounted for
     assert bpool.opc_fee() == to_wei("0.001")
     assert bpool.get_swap_fee() == publish_market_swap_fee
-    assert bpool.community_fee(ocean_contract.address) > 0
+    assert bpool.community_fee(base_token.address) > 0
     assert bpool.community_fee(erc20_token.address) > 0
     assert (bpool.publish_market_fee(erc20_token.address) > 0) is True
-    assert (bpool.publish_market_fee(ocean_contract.address) > 0) is True
+    assert (bpool.publish_market_fee(base_token.address) > 0) is True
 
 
 @pytest.mark.unit
