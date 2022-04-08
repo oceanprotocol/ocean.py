@@ -109,8 +109,8 @@ class BPool(BTokenBase):
         return self.contract.caller.isPublicSwap()
 
     @enforce_types
-    def opc_fee(self, base_token: str) -> int:
-        return self.contract.caller.getOPCFee(base_token)
+    def opc_fee(self) -> int:
+        return self.contract.caller.getOPCFee()
 
     @enforce_types
     def community_fee(self, address: str) -> int:
