@@ -325,17 +325,9 @@ For the purpose of this tutorial, let us choose the second option.
 
 ```python
 # Retrieve algorithm output and log files
-for i in range(len(status["results"])):
-    result = None
-    result_type = status["results"][i]["type"]
-    print(f"Fetch result index {i}, type: {result_type}")
-    result = ocean.compute.result(DATA_asset, compute_service, job_id, i, bob_wallet)
-    print(result)
-    print("==========\n")
-
-    # Extract algorithm output
-    if result_type == "output":
-        output = result
+output = ocean.compute.compute_job_result_output(
+    DATA_asset, compute_service, job_id, bob_wallet
+)
 
 import pickle
 model = pickle.loads(output)  # the gaussian model result
