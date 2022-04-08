@@ -309,8 +309,7 @@ def run_compute_test(
                 output = result
 
         assert succeeded, "compute job unsuccessful"
-        assert output is not None
-        print(f"got job result file: {str(output)}")
+        
 
 
 @pytest.mark.integration
