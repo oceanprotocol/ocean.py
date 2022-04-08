@@ -333,7 +333,7 @@ def c2d_flow_readme(
             DATA_asset, compute_service, job_id, i, bob_wallet
         )
         print(result)
-        if status["results"][i]["filesize"]>0:
+        if status["results"][i]["filesize"] > 0:
             assert result, "result retrieval unsuccessful"
         print(f"result index: {i}, type: {result_type}, contents: {result}")
 

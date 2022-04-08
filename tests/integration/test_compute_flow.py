@@ -301,7 +301,7 @@ def run_compute_test(
                 dataset_and_userdata.asset, service, job_id, i, consumer_wallet
             )
             print(result)
-            if status["results"][i]["filesize"]>0:
+            if status["results"][i]["filesize"] > 0:
                 assert result, "result retrieval unsuccessful"
             print(f"result index: {i}, type: {result_type}, contents: {result}")
             # Extract algorithm output
