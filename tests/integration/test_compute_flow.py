@@ -291,6 +291,7 @@ def run_compute_test(
                 break
             time.sleep(5)
 
+        print(f"got status: {status}")
         assert succeeded, "compute job unsuccessful"
         result_file = ocean_instance.compute.result(
             dataset_and_userdata.asset, service, job_id, 0, consumer_wallet
