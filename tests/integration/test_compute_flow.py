@@ -292,12 +292,23 @@ def run_compute_test(
             time.sleep(5)
 
         print(f"got status: {status}")
+        output = None
+        for i in range(len(status["results"])):
+            result = None
+            result_type = status["results"][i]["type"]
+            print(f"Fetch result index {i}, type: {result_type}")
+            result = ocean_instance.compute.result(
+                dataset_and_userdata.asset, service, job_id, i, consumer_wallet
+            )
+            print(result)
+            print(f"result index: {i}, type: {result_type}, contents: {result}")
+            # Extract algorithm output
+            if result_type == "output":
+                output = result
+
         assert succeeded, "compute job unsuccessful"
-        result_file = ocean_instance.compute.result(
-            dataset_and_userdata.asset, service, job_id, 0, consumer_wallet
-        )
-        assert result_file is not None
-        print(f"got job result file: {str(result_file)}")
+        assert output is not None
+        print(f"got job result file: {str(output)}")
 
 
 @pytest.mark.integration
