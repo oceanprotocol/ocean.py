@@ -18,6 +18,10 @@ class BFactory(ContractBase):
         return self.events.BPoolCreated()
 
     @enforce_types
+    def opc_collector(self) -> str:
+        return self.contract.caller.opcCollector()
+
+    @enforce_types
     def new_bpool(
         self,
         datatoken_address: str,

@@ -165,6 +165,14 @@ class BPool(BTokenBase):
         return self.contract.caller.getFinalTokens()
 
     @enforce_types
+    def get_opc_collector(self) -> str:
+        return self.contract.caller._opcCollector()
+
+    @enforce_types
+    def get_publish_market_collector(self) -> str:
+        return self.contract.caller._publishMarketCollector()
+
+    @enforce_types
     def collect_opc(self, dst: str, from_wallet: Wallet) -> str:
         return self.send_transaction("collectOPC", (dst,), from_wallet)
 
@@ -209,6 +217,10 @@ class BPool(BTokenBase):
     @enforce_types
     def get_swap_fee(self) -> int:
         return self.contract.caller.getSwapFee()
+
+    @enforce_types
+    def get_market_fee(self) -> int:
+        return self.contract.caller.getMarketFee()
 
     @enforce_types
     def get_controller(self) -> str:
