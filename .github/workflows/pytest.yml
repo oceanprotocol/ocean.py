@@ -39,6 +39,7 @@ jobs:
           PROVIDER_VERSION: refactor_signatures
           AQUARIUS_VERSION: refactor_signatures
           OPERATOR_SERVICE_VERSION: refactor_signatures
+          POD_CONFIGURATION_VERSION: refactor_signatures
       - name: Install dependencies
         working-directory: ${{ github.workspace }}
         run: |
