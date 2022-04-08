@@ -468,11 +468,12 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
-    def compute_job_result_output(
+    def compute_job_result_logs(
         asset: Any,
         job_id: str,
         dataset_compute_service: Any,
         consumer: Wallet,
+        log_type="output",
     ) -> Dict[str, Any]:
         """
 
@@ -485,7 +486,7 @@ class DataServiceProvider:
         status = DataServiceProvider.compute_job_status(
             asset.did, job_id, dataset_compute_service, consumer
         )
-        output = None
+        function_result = []
         for i in range(len(status["results"])):
             result = None
             result_type = status["results"][i]["type"]
@@ -495,10 +496,10 @@ class DataServiceProvider:
             assert result, "result retrieval unsuccessful"
 
             # Extract algorithm output
-            if result_type == "output":
-                output = result
+            if result_type == log_type:
+                function_result.append(result)
 
-        return output
+        return function_result
 
     @staticmethod
     @enforce_types

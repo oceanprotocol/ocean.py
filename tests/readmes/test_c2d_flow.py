@@ -324,9 +324,9 @@ def c2d_flow_readme(
     assert succeeded, "compute job unsuccessful"
 
     # Retrieve algorithm output and log files
-    output = ocean.compute.compute_job_result_output(
+    output = ocean.compute.compute_job_result_logs(
         DATA_asset, compute_service, job_id, bob_wallet
-    )
+    )[0]
     assert output, "algorithm output not found"
 
     if dataset_name == "branin" or dataset_name == "iris":

@@ -112,8 +112,13 @@ class OceanCompute:
         return result
 
     @enforce_types
-    def compute_job_result_output(
-        self, asset: Asset, service: Service, job_id: str, wallet: Wallet
+    def compute_job_result_logs(
+        self,
+        asset: Asset,
+        service: Service,
+        job_id: str,
+        wallet: Wallet,
+        log_type="output",
     ) -> Dict[str, Any]:
         """
         Gets job output if exists.
@@ -124,8 +129,8 @@ class OceanCompute:
         :param wallet: Wallet instance
         :return: dict the results/logs urls for an existing compute job, keys are (did, urls, logs)
         """
-        result = self._data_provider.compute_job_result_output(
-            asset, job_id, service, wallet
+        result = self._data_provider.compute_job_result_logs(
+            asset, job_id, service, wallet, log_type
         )
 
         return result
