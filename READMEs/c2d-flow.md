@@ -320,7 +320,8 @@ for _ in range(0, 200):
 This will output the status of the current job.
 Here is a list of possible results: [Operator Service Status description](https://github.com/oceanprotocol/operator-service/blob/main/API.md#status-description).
 
-Once the returned status dictionary contains the `dateFinished` key, Bob can retrieve the job results.
+Once the returned status dictionary contains the `dateFinished` key, Bob can retrieve the job results using ocean.compute.result or, more specifically, just the output if the job was successful.
+For the purpose of this tutorial, let us choose the second option.
 
 ```python
 # Retrieve algorithm output and log files

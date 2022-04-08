@@ -468,6 +468,40 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
+    def compute_job_result_output(
+        asset: Any,
+        job_id: str,
+        dataset_compute_service: Any,
+        consumer: Wallet,
+    ) -> Dict[str, Any]:
+        """
+
+        :param job_id: str id of compute job that was returned from `start_compute_job`
+        :param dataset_compute_service:
+        :param consumer: Wallet of the consumer's account
+
+        :return: dict of job_id to result urls.
+        """
+        status = DataServiceProvider.compute_job_status(
+            asset.did, job_id, dataset_compute_service, consumer
+        )
+        output = None
+        for i in range(len(status["results"])):
+            result = None
+            result_type = status["results"][i]["type"]
+            result = DataServiceProvider.compute_job_result(
+                job_id, i, dataset_compute_service, consumer
+            )
+            assert result, "result retrieval unsuccessful"
+
+            # Extract algorithm output
+            if result_type == "output":
+                output = result
+
+        return output
+
+    @staticmethod
+    @enforce_types
     def _remove_slash(path: str) -> str:
         if path.endswith("/"):
             path = path[:-1]
