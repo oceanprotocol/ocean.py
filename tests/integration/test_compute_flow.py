@@ -309,7 +309,6 @@ def run_compute_test(
                 output = result
 
         assert succeeded, "compute job unsuccessful"
-        
 
 
 @pytest.mark.integration
