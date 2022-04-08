@@ -40,8 +40,8 @@ def test_permission_to_deploy_erc20(
     # Tests roles
     erc721_nft.add_manager(another_consumer_wallet.address, publisher_wallet)
     permissions = erc721_nft.get_permissions(another_consumer_wallet.address)
-    assert permissions[ERC721Permissions.MANAGER] is True
-    assert permissions[ERC721Permissions.DEPLOY_ERC20] is False
+    assert permissions[ERC721Permissions.MANAGER]
+    assert not permissions[ERC721Permissions.DEPLOY_ERC20]
 
     erc721_nft.add_to_create_erc20_list(
         consumer_wallet.address, another_consumer_wallet
@@ -51,10 +51,10 @@ def test_permission_to_deploy_erc20(
 
     permissions = erc721_nft.get_permissions(consumer_wallet.address)
 
-    assert permissions[ERC721Permissions.MANAGER] is False
-    assert permissions[ERC721Permissions.DEPLOY_ERC20] is True
-    assert permissions[ERC721Permissions.UPDATE_METADATA] is True
-    assert permissions[ERC721Permissions.STORE] is True
+    assert not permissions[ERC721Permissions.MANAGER]
+    assert permissions[ERC721Permissions.DEPLOY_ERC20]
+    assert permissions[ERC721Permissions.UPDATE_METADATA]
+    assert permissions[ERC721Permissions.STORE]
 
 
 @pytest.mark.unit
@@ -149,45 +149,6 @@ def test_minting_failed_after_deploying_pool(
 
 
 @pytest.mark.unit
-def test_pool_creation_fails_for_incorrect_vesting_period(
-    web3, config, consumer_wallet, factory_router, side_staking
-):
-    """Tests failure of the pool creation for a lower vesting period."""
-
-    erc721_nft, erc20_token = deploy_erc721_erc20(
-        web3, config, consumer_wallet, consumer_wallet, cap=to_wei(1000)
-    )
-    initial_ocean_liq = to_wei(200)
-
-    ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
-    ocean_contract.approve(factory_router.address, initial_ocean_liq, consumer_wallet)
-
-    with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20_token.deploy_pool(
-            rate=to_wei(1),
-            base_token_decimals=ocean_contract.decimals(),
-            vesting_amount=initial_ocean_liq // 100 * 9,
-            vesting_blocks=100,
-            base_token_amount=initial_ocean_liq,
-            lp_swap_fee_amount=to_wei("0.003"),
-            publish_market_swap_fee_amount=to_wei("0.001"),
-            ss_contract=get_address_of_type(config, "Staking"),
-            base_token_address=ocean_contract.address,
-            base_token_sender=consumer_wallet.address,
-            publisher_address=consumer_wallet.address,
-            publish_market_swap_fee_collector=get_address_of_type(
-                config, "OPFCommunityFeeCollector"
-            ),
-            pool_template_address=get_address_of_type(config, "poolTemplate"),
-            from_wallet=consumer_wallet,
-        )
-        assert (
-            err.value.args[0]
-            == "execution reverted: VM Exception while processing transaction: revert ERC20Template: Vesting period too low. See FactoryRouter.minVestingPeriodInBlocks"
-        )
-
-
-@pytest.mark.unit
 def test_vesting_main_flow(web3, config, consumer_wallet, factory_router, side_staking):
     """Tests consumer deploys pool, checks fees and checks if vesting is correct after 100 blocks."""
 
@@ -202,7 +163,7 @@ def test_vesting_main_flow(web3, config, consumer_wallet, factory_router, side_s
     pmt_collector = erc20_token.get_payment_collector()
 
     block_before_deploying_pool = web3.eth.block_number
-    bpool = _deploy_ocean_pool(
+    _ = _deploy_ocean_pool(
         erc20_token=erc20_token,
         factory_router=factory_router,
         config=config,
@@ -210,13 +171,6 @@ def test_vesting_main_flow(web3, config, consumer_wallet, factory_router, side_s
         from_wallet=consumer_wallet,
     )
     block_deployed_pool = block_before_deploying_pool + 2
-    assert bpool.is_finalized()
-    assert bpool.opc_fee() == to_wei("0.001")
-    assert bpool.get_swap_fee() == to_wei("0.003")
-    assert bpool.community_fee(get_address_of_type(config, "Ocean")) == 0
-    assert bpool.community_fee(erc20_token.address) == 0
-    assert bpool.publish_market_fee(get_address_of_type(config, "Ocean")) == 0
-    assert bpool.publish_market_fee(erc20_token.address) == 0
     assert (
         erc20_token.balanceOf(get_address_of_type(config, "Staking"))
         == MAX_UINT256 - initial_ocean_liq
@@ -230,9 +184,7 @@ def test_vesting_main_flow(web3, config, consumer_wallet, factory_router, side_s
     available_vesting_before = side_staking.get_available_vesting(erc20_token.address)
 
     # advance 5 blocks to see if available vesting increased
-    for _ in range(4):
-        # send dummy transactions to increase block count (not part of the actual functionality)
-        send_ether(consumer_wallet, ZERO_ADDRESS, 1)
+    _advance_blocks(num_blocks=5, from_wallet=consumer_wallet)
 
     available_vesting_after = side_staking.get_available_vesting(erc20_token.address)
     assert (
@@ -274,14 +226,13 @@ def test_vesting_progress(
     vesting_amount = initial_ocean_liq // 100 * 9
 
     block_before_deploying_pool = web3.eth.block_number
-    bpool = _deploy_ocean_pool(
+    _ = _deploy_ocean_pool(
         erc20_token=erc20_token,
         factory_router=factory_router,
         config=config,
         web3=web3,
         from_wallet=publisher_wallet,
     )
-    assert bpool.is_finalized()
 
     # check if vesting is correct
     # it needs 2 blocks further, one for deploying pool & one for web3 call wait for tx receipt
@@ -292,8 +243,7 @@ def test_vesting_progress(
         vesting_amount=vesting_amount,
     )
     dt_balance_before = erc20_token.balanceOf(erc20_token.get_payment_collector())
-    available_vesting_before = side_staking.get_available_vesting(erc20_token.address)
-    assert available_vesting_before == 0
+    assert side_staking.get_available_vesting(erc20_token.address) == 0
 
     # advance checkpoint_block blocks to see if available vesting increased
     counter = 0
@@ -302,12 +252,6 @@ def test_vesting_progress(
         send_ether(publisher_wallet, ZERO_ADDRESS, 1)
         if block not in checkpoint_blocks:
             continue
-        available_vesting_after = side_staking.get_available_vesting(
-            erc20_token.address
-        )
-        assert (
-            available_vesting_after > available_vesting_before
-        ), "Available vesting was not increased!"
         amount_vested_so_far = side_staking.get_vesting_amount_so_far(
             erc20_token.address
         )
@@ -364,20 +308,10 @@ def test_vesting_publisher_exit_scam(
 
     # check if the vesting amount is correct
     assert side_staking.get_vesting_amount(erc20_token.address) == vesting_amount
-
-    # check if vesting is correct
     dt_balance_before = erc20_token.balanceOf(pmt_collector)
-    available_vesting_before = side_staking.get_available_vesting(erc20_token.address)
 
     # advance 10 blocks to see if available vesting increased
-    for _ in range(9):
-        # send dummy transactions to increase block count (not part of the actual functionality)
-        send_ether(consumer_wallet, ZERO_ADDRESS, 1)
-
-    available_vesting_after = side_staking.get_available_vesting(erc20_token.address)
-    assert (
-        available_vesting_after > available_vesting_before
-    ), "Available vesting was not increased!"
+    _advance_blocks(num_blocks=10, from_wallet=consumer_wallet)
     side_staking.get_vesting(erc20_token.address, publisher_wallet)
 
     # publisher receives the vested DTs after 100 mined blocks
@@ -453,10 +387,7 @@ def test_adding_liquidity_for_vesting(
 
     # check if the vesting amount is correct
     assert side_staking.get_vesting_amount(erc20_token.address) == vesting_amount
-
-    # check if vesting is correct
     dt_balance_before = erc20_token.balanceOf(pmt_collector)
-    available_vesting_before = side_staking.get_available_vesting(erc20_token.address)
 
     # add liquidity to the pool & check events properly
     ocean_contract.approve(bpool.address, to_wei(1000000), publisher_wallet)
@@ -484,14 +415,8 @@ def test_adding_liquidity_for_vesting(
     assert bpool.get_balance(ocean_contract.address) == initial_ocean_liq + to_wei(10)
 
     # advance 3 blocks to see if available vesting increased
-    for _ in range(2):
-        # send dummy transactions to increase block count (not part of the actual functionality)
-        send_ether(publisher_wallet, ZERO_ADDRESS, 1)
+    _advance_blocks(num_blocks=3, from_wallet=publisher_wallet)
 
-    available_vesting_after = side_staking.get_available_vesting(erc20_token.address)
-    assert (
-        available_vesting_after > available_vesting_before
-    ), "Available vesting was not increased!"
     tx_hash = side_staking.get_vesting(erc20_token.address, publisher_wallet)
     vested_amount = side_staking.get_amount_vested_from_event(
         tx_hash=tx_hash, erc20_token=erc20_token, from_wallet=publisher_wallet
@@ -529,7 +454,6 @@ def test_removing_liquidity_for_vesting(
 
     # check if vesting is correct
     dt_balance_before = erc20_token.balanceOf(pmt_collector)
-    available_vesting_before = side_staking.get_available_vesting(erc20_token.address)
 
     # remove liquidity to the pool & check events properly
     ocean_contract.approve(bpool.address, to_wei(1000000), publisher_wallet)
@@ -556,14 +480,8 @@ def test_removing_liquidity_for_vesting(
     assert bt_balance_before > bpool.get_balance(ocean_contract.address)
 
     # advance 3 blocks to see if available vesting increased
-    for _ in range(2):
-        # send dummy transactions to increase block count (not part of the actual functionality)
-        send_ether(publisher_wallet, ZERO_ADDRESS, 1)
+    _advance_blocks(num_blocks=3, from_wallet=publisher_wallet)
 
-    available_vesting_after = side_staking.get_available_vesting(erc20_token.address)
-    assert (
-        available_vesting_after > available_vesting_before
-    ), "Available vesting was not increased!"
     tx_hash = side_staking.get_vesting(erc20_token.address, publisher_wallet)
     vested_amount = side_staking.get_amount_vested_from_event(
         tx_hash=tx_hash, erc20_token=erc20_token, from_wallet=publisher_wallet
@@ -635,3 +553,9 @@ def _deploy_erc721_contract(erc721_factory, web3, from_wallet):
     assert registered_event[0].args.admin == from_wallet.address
 
     return ERC721NFT(web3=web3, address=registered_event[0].args.newTokenAddress)
+
+
+def _advance_blocks(num_blocks, from_wallet):
+    for _ in range(num_blocks - 1):
+        # send dummy transactions to increase block count
+        send_ether(from_wallet, ZERO_ADDRESS, 1)
