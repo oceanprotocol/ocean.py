@@ -44,24 +44,24 @@ def format_units(amount_in_wei: int, decimals: int = DECIMALS_18) -> Decimal:
     # Coerce to Decimal because Web3.fromWei can return int 0
     units_dec = Decimal(10) ** abs(decimals)
     quantize_dec = Decimal(10) ** -abs(decimals)
-    unit = next((name for name, dec in units.items() if dec == units_dec))
-    amount_in_ether = Decimal(Web3.fromWei(amount_in_wei, unit))
+    unit_name = next((name for name, dec in units.items() if dec == units_dec))
+    amount_in_ether = Decimal(Web3.fromWei(amount_in_wei, unit_name))
     return amount_in_ether.quantize(quantize_dec, context=ETHEREUM_DECIMAL_CONTEXT)
 
 
 @enforce_types
-def parse_units(amount: Union[Decimal, str, int], units: int = DECIMALS_18) -> int:
+def parse_units(amount: Union[Decimal, str, int], decimals: int = DECIMALS_18) -> int:
     """
     Convert token amount to wei from ether, quantized to the specified number of decimal places
     float input is purposfully not supported
     """
-    amount = normalize_and_validate_ether(amount, units)
-    units_dec = Decimal(10) ** abs(units)
-    quantize_dec = Decimal(10) ** -abs(units)
-    units = next((name for name, dec in units.items() if dec == units_dec))
+    amount = normalize_and_validate_ether(amount, decimals)
+    units_dec = Decimal(10) ** abs(decimals)
+    quantize_dec = Decimal(10) ** -abs(decimals)
+    unit_name = next((name for name, dec in units.items() if dec == units_dec))
     return Web3.toWei(
         amount.quantize(quantize_dec, context=ETHEREUM_DECIMAL_CONTEXT),
-        units,
+        unit_name,
     )
 
 
