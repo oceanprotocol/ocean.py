@@ -19,6 +19,9 @@ from ocean_lib.web3_internal.currency import (
     to_wei,
 )
 
+USDT_DECIMALS = 6
+MAX_USDT = Decimal(MAX_WEI).scaleb(-USDT_DECIMALS, context=ETHEREUM_DECIMAL_CONTEXT)
+
 
 @pytest.mark.unit
 def test_from_wei():
@@ -44,7 +47,6 @@ def test_from_wei():
         with localcontext(ETHEREUM_DECIMAL_CONTEXT):
             from_wei(MAX_WEI + 1)
 
-    USDT_DECIMALS = 6
     assert from_wei(0, USDT_DECIMALS) == Decimal(
         "0"
     ), "Zero wei of USDT should equal zero ether of USDT"
@@ -55,6 +57,7 @@ def test_from_wei():
         "1.123456"
     ), "Conversion from wei to ether using decimals failed"
     assert from_wei(5278_020000, USDT_DECIMALS) == Decimal("5278.02")
+    assert from_wei(MAX_WEI, USDT_DECIMALS) == MAX_USDT
 
 
 @pytest.mark.unit
@@ -93,7 +96,6 @@ def test_to_wei():
         with localcontext(ETHEREUM_DECIMAL_CONTEXT):
             to_wei(MAX_ETHER + 1)
 
-    USDT_DECIMALS = 6
     assert (
         to_wei("0", USDT_DECIMALS) == 0
     ), "Zero ether of USDT should equal zero wei of USDT"
@@ -104,6 +106,7 @@ def test_to_wei():
         to_wei("1.123456789123456789", USDT_DECIMALS) == 1_123456
     ), "Conversion from ether to wei using decimals failed"
     assert to_wei("5278.02", USDT_DECIMALS) == 5278_020000
+    assert to_wei(MAX_USDT, USDT_DECIMALS) == MAX_WEI
 
 
 @pytest.mark.unit
