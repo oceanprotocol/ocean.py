@@ -6,6 +6,7 @@ from decimal import ROUND_DOWN, Context, Decimal, localcontext
 from typing import Union
 
 from enforce_typing import enforce_types
+from eth_utils.units import units
 from web3.main import Web3
 
 from ocean_lib.web3_internal.constants import MAX_UINT256
@@ -41,9 +42,11 @@ MAX_ETHER = Decimal(MAX_WEI).scaleb(-18, context=ETHEREUM_DECIMAL_CONTEXT)
 def from_wei(amount_in_wei: int, decimals: int = DECIMALS_18) -> Decimal:
     """Convert token amount from wei to ether, quantized to the specified number of decimal places."""
     # Coerce to Decimal because Web3.fromWei can return int 0
-    amount_in_ether = Decimal(Web3.fromWei(amount_in_wei, "ether"))
-    decimal_places = Decimal(10) ** -abs(decimals)
-    return amount_in_ether.quantize(decimal_places, context=ETHEREUM_DECIMAL_CONTEXT)
+    units_dec = Decimal(10) ** abs(decimals)
+    quantize_dec = Decimal(10) ** -abs(decimals)
+    unit = next((name for name, dec in units.items() if dec == units_dec))
+    amount_in_ether = Decimal(Web3.fromWei(amount_in_wei, unit))
+    return amount_in_ether.quantize(quantize_dec, context=ETHEREUM_DECIMAL_CONTEXT)
 
 
 @enforce_types
@@ -55,10 +58,12 @@ def to_wei(
     float input is purposfully not supported
     """
     amount_in_ether = normalize_and_validate_ether(amount_in_ether)
-    decimal_places = Decimal(10) ** -abs(decimals)
+    units_dec = Decimal(10) ** abs(decimals)
+    quantize_dec = Decimal(10) ** -abs(decimals)
+    unit = next((name for name, dec in units.items() if dec == units_dec))
     return Web3.toWei(
-        amount_in_ether.quantize(decimal_places, context=ETHEREUM_DECIMAL_CONTEXT),
-        "ether",
+        amount_in_ether.quantize(quantize_dec, context=ETHEREUM_DECIMAL_CONTEXT),
+        unit,
     )
 
 
