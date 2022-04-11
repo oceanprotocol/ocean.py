@@ -57,7 +57,7 @@ def to_wei(
     Convert token amount to wei from ether, quantized to the specified number of decimal places
     float input is purposfully not supported
     """
-    amount_in_ether = normalize_and_validate_ether(amount_in_ether)
+    amount_in_ether = normalize_and_validate_ether(amount_in_ether, decimals)
     units_dec = Decimal(10) ** abs(decimals)
     quantize_dec = Decimal(10) ** -abs(decimals)
     unit = next((name for name, dec in units.items() if dec == units_dec))
@@ -214,14 +214,18 @@ def moneyfmt(value, places=2, curr="", sep=",", dp=".", pos="", neg="-", trailne
 
 
 @enforce_types
-def normalize_and_validate_ether(amount_in_ether: Union[Decimal, str, int]) -> Decimal:
+def normalize_and_validate_ether(
+    amount_in_ether: Union[Decimal, str, int], decimals: int = DECIMALS_18
+) -> Decimal:
     """Returns an amount in ether, encoded as a Decimal
     Takes Decimal, str, or int as input. Purposefully does not support float."""
     if isinstance(amount_in_ether, str) or isinstance(amount_in_ether, int):
         amount_in_ether = Decimal(amount_in_ether)
 
-    if abs(amount_in_ether) > MAX_ETHER:
-        raise ValueError("Token abs(amount_in_ether) exceeds MAX_ETHER.")
+    if abs(amount_in_ether) > Decimal(MAX_WEI).scaleb(
+        -decimals, context=ETHEREUM_DECIMAL_CONTEXT
+    ):
+        raise ValueError("Token amount exceeds maximum.")
 
     return amount_in_ether
 
