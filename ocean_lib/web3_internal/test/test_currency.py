@@ -48,12 +48,13 @@ def test_from_wei():
     assert from_wei(0, USDT_DECIMALS) == Decimal(
         "0"
     ), "Zero wei of USDT should equal zero ether of USDT"
-    assert from_wei(123456789_123456789, USDT_DECIMALS) == Decimal(
+    assert from_wei(123456, USDT_DECIMALS) == Decimal(
         "0.123456"
     ), "Conversion from wei to ether using decimals failed"
-    assert from_wei(1123456789_123456789, USDT_DECIMALS) == Decimal(
+    assert from_wei(1_123456, USDT_DECIMALS) == Decimal(
         "1.123456"
     ), "Conversion from wei to ether using decimals failed"
+    assert from_wei(5278_020000, USDT_DECIMALS) == Decimal("5278.02")
 
 
 @pytest.mark.unit
@@ -97,11 +98,12 @@ def test_to_wei():
         to_wei("0", USDT_DECIMALS) == 0
     ), "Zero ether of USDT should equal zero wei of USDT"
     assert (
-        to_wei("0.123456789123456789", USDT_DECIMALS) == 123456000_000000000
+        to_wei("0.123456789123456789", USDT_DECIMALS) == 123456
     ), "Conversion from ether to wei using decimals failed"
     assert (
-        to_wei("1.123456789123456789", USDT_DECIMALS) == 1_123456000_000000000
+        to_wei("1.123456789123456789", USDT_DECIMALS) == 1_123456
     ), "Conversion from ether to wei using decimals failed"
+    assert to_wei("5278.02", USDT_DECIMALS) == 5278_020000
 
 
 @pytest.mark.unit
