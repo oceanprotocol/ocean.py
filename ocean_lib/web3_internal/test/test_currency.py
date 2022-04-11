@@ -13,7 +13,9 @@ from ocean_lib.web3_internal.currency import (
     MIN_ETHER,
     MIN_WEI,
     ether_fmt,
+    format_units,
     from_wei,
+    parse_units,
     pretty_ether,
     pretty_ether_and_wei,
     to_wei,
@@ -47,17 +49,21 @@ def test_from_wei():
         with localcontext(ETHEREUM_DECIMAL_CONTEXT):
             from_wei(MAX_WEI + 1)
 
-    assert from_wei(0, USDT_DECIMALS) == Decimal(
+
+@pytest.mark.unit
+def test_format_units():
+    """Test the format_units function"""
+    assert format_units(0, USDT_DECIMALS) == Decimal(
         "0"
     ), "Zero wei of USDT should equal zero ether of USDT"
-    assert from_wei(123456, USDT_DECIMALS) == Decimal(
+    assert format_units(123456, USDT_DECIMALS) == Decimal(
         "0.123456"
     ), "Conversion from wei to ether using decimals failed"
-    assert from_wei(1_123456, USDT_DECIMALS) == Decimal(
+    assert format_units(1_123456, USDT_DECIMALS) == Decimal(
         "1.123456"
     ), "Conversion from wei to ether using decimals failed"
-    assert from_wei(5278_020000, USDT_DECIMALS) == Decimal("5278.02")
-    assert from_wei(MAX_WEI, USDT_DECIMALS) == MAX_USDT
+    assert format_units(5278_020000, USDT_DECIMALS) == Decimal("5278.02")
+    assert format_units(MAX_WEI, USDT_DECIMALS) == MAX_USDT
 
 
 @pytest.mark.unit
@@ -96,17 +102,21 @@ def test_to_wei():
         with localcontext(ETHEREUM_DECIMAL_CONTEXT):
             to_wei(MAX_ETHER + 1)
 
+
+@pytest.mark.unit
+def test_parse_units():
+    """Test the parse_units function"""
     assert (
-        to_wei("0", USDT_DECIMALS) == 0
+        parse_units("0", USDT_DECIMALS) == 0
     ), "Zero ether of USDT should equal zero wei of USDT"
     assert (
-        to_wei("0.123456789123456789", USDT_DECIMALS) == 123456
+        parse_units("0.123456789123456789", USDT_DECIMALS) == 123456
     ), "Conversion from ether to wei using decimals failed"
     assert (
-        to_wei("1.123456789123456789", USDT_DECIMALS) == 1_123456
+        parse_units("1.123456789123456789", USDT_DECIMALS) == 1_123456
     ), "Conversion from ether to wei using decimals failed"
-    assert to_wei("5278.02", USDT_DECIMALS) == 5278_020000
-    assert to_wei(MAX_USDT, USDT_DECIMALS) == MAX_WEI
+    assert parse_units("5278.02", USDT_DECIMALS) == 5278_020000
+    assert parse_units(MAX_USDT, USDT_DECIMALS) == MAX_WEI
 
 
 @pytest.mark.unit
