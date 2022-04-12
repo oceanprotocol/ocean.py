@@ -8,7 +8,7 @@ from web3 import exceptions
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
-from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
+from tests.resources.helper_functions import get_address_of_type
 
 
 @pytest.mark.unit
@@ -42,15 +42,18 @@ def test_properties(web3, config):
 
 
 @pytest.mark.unit
-def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_wallet):
+def test_main(
+    web3,
+    config,
+    publisher_wallet,
+    consumer_wallet,
+    factory_deployer_wallet,
+    erc20_token,
+):
     """Tests the main flow of the Dispenser."""
 
     # get the dispenser
     dispenser = Dispenser(web3, get_address_of_type(config, "Dispenser"))
-
-    _, erc20_token = deploy_erc721_erc20(
-        web3, config, publisher_wallet, publisher_wallet, cap=to_wei("50")
-    )
 
     # Tests publisher creates a dispenser with minter role
     tx = erc20_token.create_dispenser(
@@ -140,11 +143,14 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_deployer_
         == "execution reverted: VM Exception while processing transaction: revert Invalid owner"
     )
 
-    # Tests publisher creates a dispenser without minter role
 
-    _, erc20_token = deploy_erc721_erc20(
-        web3, config, publisher_wallet, publisher_wallet, cap=to_wei("50")
-    )
+def test_dispenser_creation_without_minter(
+    web3, config, publisher_wallet, consumer_wallet, erc20_token
+):
+    """Tests dispenser creation without a minter role."""
+
+    # get the dispenser
+    dispenser = Dispenser(web3, get_address_of_type(config, "Dispenser"))
 
     erc20_token.create_dispenser(
         dispenser_address=dispenser.address,

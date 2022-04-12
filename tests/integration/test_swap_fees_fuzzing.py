@@ -20,7 +20,6 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from tests.resources.helper_functions import (
     approx_from_wei,
-    deploy_erc721_erc20,
     get_address_of_type,
     create_nft_erc20_with_pool,
 )

@@ -8,8 +8,11 @@ import os
 import pytest
 
 from ocean_lib.aquarius.aquarius import Aquarius
+from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.erc721_nft import ERC721NFT
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.currency import from_wei, to_wei
@@ -134,3 +137,98 @@ def erc721_factory(web3, config):
 @pytest.fixture
 def provider_wallet(web3, config):
     return get_provider_wallet()
+
+
+@pytest.fixture
+def erc721_factory(web3, config):
+    return ERC721FactoryContract(web3, get_address_of_type(config, "ERC721Factory"))
+
+
+@pytest.fixture
+def erc721_nft(web3, config, publisher_wallet, erc721_factory):
+    tx = erc721_factory.deploy_erc721_contract(
+        name="NFT",
+        symbol="NFTSYMBOL",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        transferable=True,
+        owner=publisher_wallet.address,
+        from_wallet=publisher_wallet,
+    )
+    token_address = erc721_factory.get_token_address(tx)
+    return ERC721NFT(web3, token_address)
+
+
+@pytest.fixture
+def erc20_token(web3, config, erc721_nft, publisher_wallet, erc721_factory):
+    tx_result = erc721_nft.create_erc20(
+        template_index=1,
+        name="ERC20DT1",
+        symbol="ERC20DT1Symbol",
+        minter=publisher_wallet.address,
+        fee_manager=publisher_wallet.address,
+        publish_market_order_fee_address=publisher_wallet.address,
+        publish_market_order_fee_token=ZERO_ADDRESS,
+        cap=to_wei(100),
+        publish_market_order_fee_amount=0,
+        bytess=[b""],
+        from_wallet=publisher_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
+
+    registered_event = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    erc20_address = registered_event[0].args.newTokenAddress
+
+    return ERC20Token(web3, erc20_address)
+
+
+@pytest.fixture
+def erc20_enterprise_token(web3, config, erc721_nft, publisher_wallet, erc721_factory):
+    tx_result = erc721_nft.create_erc20(
+        template_index=2,
+        name="ERC20DT1",
+        symbol="ERC20DT1Symbol",
+        minter=publisher_wallet.address,
+        fee_manager=publisher_wallet.address,
+        publish_market_order_fee_address=publisher_wallet.address,
+        publish_market_order_fee_token=ZERO_ADDRESS,
+        cap=to_wei(100),
+        publish_market_order_fee_amount=0,
+        bytess=[b""],
+        from_wallet=publisher_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
+
+    registered_event = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    erc20_address = registered_event[0].args.newTokenAddress
+
+    return ERC20Enterprise(web3, erc20_address)
+
+
+@pytest.fixture
+def publisher_addr():
+    return get_publisher_wallet().address
+
+
+@pytest.fixture
+def consumer_addr():
+    return get_consumer_wallet().address
+
+
+@pytest.fixture
+def another_consumer_addr():
+    return get_another_consumer_wallet().address
