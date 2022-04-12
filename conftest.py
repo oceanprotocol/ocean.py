@@ -12,8 +12,9 @@ from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.models.factory_router import FactoryRouter
+from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import get_ether_balance
@@ -121,6 +122,16 @@ def factory_deployer_wallet():
 @pytest.fixture
 def factory_router(web3, config):
     return FactoryRouter(web3, get_address_of_type(config, "Router"))
+
+
+@pytest.fixture
+def side_staking(web3, config):
+    return SideStaking(web3=web3, address=get_address_of_type(config, "Staking"))
+
+
+@pytest.fixture
+def erc721_factory(web3, config):
+    return ERC721FactoryContract(web3, get_address_of_type(config, "ERC721Factory"))
 
 
 @pytest.fixture
