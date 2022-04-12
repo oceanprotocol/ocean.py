@@ -22,7 +22,12 @@ from ocean_lib.web3_internal.currency import (
 )
 
 USDT_DECIMALS = 6
+MIN_USDT = Decimal("0.000001")
 MAX_USDT = Decimal(MAX_WEI).scaleb(-USDT_DECIMALS, context=ETHEREUM_DECIMAL_CONTEXT)
+
+SEVEN_DECIMALS = 7
+MIN_SEVEN = Decimal("0.0000001")
+MAX_SEVEN = Decimal(MAX_WEI).scaleb(-SEVEN_DECIMALS, context=ETHEREUM_DECIMAL_CONTEXT)
 
 
 @pytest.mark.unit
@@ -53,22 +58,22 @@ def test_from_wei():
 @pytest.mark.unit
 def test_format_units():
     """Test the format_units function"""
-    assert format_units(0, USDT_DECIMALS) == Decimal(
-        "0"
-    ), "Zero wei of USDT should equal zero ether of USDT"
-    assert format_units(123456, USDT_DECIMALS) == Decimal(
-        "0.123456"
-    ), "Conversion from wei to ether using decimals failed"
-    assert format_units(1_123456, USDT_DECIMALS) == Decimal(
-        "1.123456"
-    ), "Conversion from wei to ether using decimals failed"
+    assert format_units(0, USDT_DECIMALS) == Decimal("0")
+    assert format_units(123456, USDT_DECIMALS) == Decimal("0.123456")
+    assert format_units(1_123456, USDT_DECIMALS) == Decimal("1.123456")
     assert format_units(5278_020000, USDT_DECIMALS) == Decimal("5278.02")
+    assert format_units(MIN_WEI, USDT_DECIMALS) == MIN_USDT
     assert format_units(MAX_WEI, USDT_DECIMALS) == MAX_USDT
 
     with pytest.raises(ValueError):
         # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_WEI
         with localcontext(ETHEREUM_DECIMAL_CONTEXT):
             format_units(MAX_WEI + 1, USDT_DECIMALS)
+
+    assert format_units(12345, SEVEN_DECIMALS) == Decimal("0.0012345")
+    assert format_units(111_1234567, SEVEN_DECIMALS) == Decimal("111.1234567")
+    assert format_units(MIN_WEI, SEVEN_DECIMALS) == MIN_SEVEN
+    assert format_units(MAX_WEI, SEVEN_DECIMALS) == MAX_SEVEN
 
 
 @pytest.mark.unit
@@ -111,22 +116,24 @@ def test_to_wei():
 @pytest.mark.unit
 def test_parse_units():
     """Test the parse_units function"""
-    assert (
-        parse_units("0", USDT_DECIMALS) == 0
-    ), "Zero ether of USDT should equal zero wei of USDT"
-    assert (
-        parse_units("0.123456789123456789", USDT_DECIMALS) == 123456
-    ), "Conversion from ether to wei using decimals failed"
-    assert (
-        parse_units("1.123456789123456789", USDT_DECIMALS) == 1_123456
-    ), "Conversion from ether to wei using decimals failed"
+    assert parse_units("0", USDT_DECIMALS) == 0
+    assert parse_units("0.123456789123456789", USDT_DECIMALS) == 123456
+    assert parse_units("1.123456789123456789", USDT_DECIMALS) == 1_123456
     assert parse_units("5278.02", USDT_DECIMALS) == 5278_020000
+    assert parse_units(MIN_USDT, USDT_DECIMALS) == MIN_WEI
     assert parse_units(MAX_USDT, USDT_DECIMALS) == MAX_WEI
 
     with pytest.raises(ValueError):
         # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_USDT
         with localcontext(ETHEREUM_DECIMAL_CONTEXT):
             to_wei(MAX_USDT + 1, USDT_DECIMALS)
+
+    assert parse_units("0", SEVEN_DECIMALS) == 0
+    assert parse_units("0.123456789", SEVEN_DECIMALS) == 1234567
+    assert parse_units("1.123456789", SEVEN_DECIMALS) == 1_1234567
+    assert parse_units("5278.02", SEVEN_DECIMALS) == 5278_0200000
+    assert parse_units(MIN_SEVEN, SEVEN_DECIMALS) == MIN_WEI
+    assert parse_units(MAX_SEVEN, SEVEN_DECIMALS) == MAX_WEI
 
 
 @pytest.mark.unit

@@ -44,6 +44,10 @@ UNITS = [
     "szabo",
     "finney",
     "ether",
+    "kether",
+    "mether",
+    "gether",
+    "tether",
 ]
 
 
@@ -51,13 +55,21 @@ UNITS = [
 def format_units(amount: int, unit_name: Union[str, int] = DECIMALS_18) -> Decimal:
     """Convert token amount EVM-compatible integer to a formatted unit."""
     # Coerce to Decimal because Web3.fromWei can return int 0
-    amount_in_ether = Decimal(Web3.fromWei(amount, "ether"))
-    num_decimals = UNITS.index(unit_name) if isinstance(unit_name, str) else unit_name
-    divisor = Decimal(10) ** -(DECIMALS_18 - num_decimals)
-    quantize_decimals = Decimal(10) ** -abs(num_decimals)
+    num_decimals = (
+        UNITS.index(unit_name) * 3 if isinstance(unit_name, str) else unit_name
+    )
+
+    if amount == 0:
+        return Decimal(0)
+
+    if amount < MIN_WEI or amount > MAX_WEI:
+        raise ValueError("value must be between 1 and 2**256 - 1")
+
+    unit_value = Decimal(10) ** num_decimals
+
     with localcontext(ETHEREUM_DECIMAL_CONTEXT):
-        amount_in_unit = amount_in_ether / divisor
-        return amount_in_unit.quantize(quantize_decimals)
+        decimal_amount = Decimal(value=amount)
+        return decimal_amount / unit_value
 
 
 @enforce_types
