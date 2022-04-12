@@ -23,33 +23,30 @@ def test_permission_to_deploy_erc20(
     publisher_wallet,
     consumer_wallet,
     another_consumer_wallet,
+    publisher_addr,
+    consumer_addr,
+    another_consumer_addr,
     erc721_factory,
+    erc721_nft,
 ):
     """Tests permissions for ERC721 and check who has ERC20 deployer role."""
-    # Tests deploy erc721
-    erc721_nft = _deploy_erc721_contract(
-        erc721_factory=erc721_factory, web3=web3, from_wallet=publisher_wallet
-    )
-
     symbol = erc721_nft.symbol()
-    assert symbol == "NFTS"
+    assert symbol == "NFTSYMBOL"
 
-    owner_balance = erc721_nft.contract.caller.balanceOf(publisher_wallet.address)
+    owner_balance = erc721_nft.contract.caller.balanceOf(publisher_addr)
     assert owner_balance == 1
 
     # Tests roles
-    erc721_nft.add_manager(another_consumer_wallet.address, publisher_wallet)
-    permissions = erc721_nft.get_permissions(another_consumer_wallet.address)
+    erc721_nft.add_manager(another_consumer_addr, publisher_wallet)
+    permissions = erc721_nft.get_permissions(another_consumer_addr)
     assert permissions[ERC721Permissions.MANAGER]
     assert not permissions[ERC721Permissions.DEPLOY_ERC20]
 
-    erc721_nft.add_to_create_erc20_list(
-        consumer_wallet.address, another_consumer_wallet
-    )
-    erc721_nft.add_to_metadata_list(consumer_wallet.address, another_consumer_wallet)
-    erc721_nft.add_to_725_store_list(consumer_wallet.address, another_consumer_wallet)
+    erc721_nft.add_to_create_erc20_list(consumer_addr, another_consumer_wallet)
+    erc721_nft.add_to_metadata_list(consumer_addr, another_consumer_wallet)
+    erc721_nft.add_to_725_store_list(consumer_addr, another_consumer_wallet)
 
-    permissions = erc721_nft.get_permissions(consumer_wallet.address)
+    permissions = erc721_nft.get_permissions(consumer_addr)
 
     assert not permissions[ERC721Permissions.MANAGER]
     assert permissions[ERC721Permissions.DEPLOY_ERC20]
@@ -63,24 +60,24 @@ def test_erc20_permissions(
     config,
     publisher_wallet,
     consumer_wallet,
+    publisher_addr,
+    consumer_addr,
+    another_consumer_addr,
     another_consumer_wallet,
     erc721_factory,
+    erc721_nft,
 ):
     """Tests permissions for an ERC20 token."""
-    erc721_nft = _deploy_erc721_contract(
-        erc721_factory=erc721_factory, web3=web3, from_wallet=publisher_wallet
-    )
-
-    erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
-    assert erc721_nft.is_erc20_deployer(consumer_wallet.address)
+    erc721_nft.add_to_create_erc20_list(consumer_addr, publisher_wallet)
+    assert erc721_nft.is_erc20_deployer(consumer_addr)
 
     trx_erc_20 = erc721_nft.create_erc20(
         template_index=1,
         name="ERC20DT1",
         symbol="ERC20DT1Symbol",
-        minter=consumer_wallet.address,
-        fee_manager=another_consumer_wallet.address,
-        publish_market_order_fee_address=publisher_wallet.address,
+        minter=consumer_addr,
+        fee_manager=another_consumer_addr,
+        publish_market_order_fee_address=publisher_addr,
         publish_market_order_fee_token=ZERO_ADDRESS,
         cap=to_wei(1000),
         publish_market_order_fee_amount=0,
@@ -102,18 +99,18 @@ def test_erc20_permissions(
     erc20_token = ERC20Token(web3=web3, address=dt_address)
 
     # Tests permissions
-    perms = erc20_token.get_permissions(consumer_wallet.address)
+    perms = erc20_token.get_permissions(consumer_addr)
     assert perms[RolesERC20.MINTER]
     assert not perms[RolesERC20.PAYMENT_MANAGER]
 
-    erc20_token.add_payment_manager(consumer_wallet.address, consumer_wallet)
-    perms = erc20_token.get_permissions(consumer_wallet.address)
+    erc20_token.add_payment_manager(consumer_addr, consumer_wallet)
+    perms = erc20_token.get_permissions(consumer_addr)
     assert perms[RolesERC20.PAYMENT_MANAGER]
 
 
 @pytest.mark.unit
 def test_minting_failed_after_deploying_pool(
-    web3, config, publisher_wallet, consumer_wallet, factory_router
+    web3, config, publisher_wallet, consumer_wallet, consumer_addr, factory_router
 ):
     """Tests failure to mint new erc20 token even if consumer has the minter role after deploying a pool."""
     erc721_nft, erc20_token = deploy_erc721_erc20(
@@ -123,7 +120,7 @@ def test_minting_failed_after_deploying_pool(
         erc20_minter=consumer_wallet,
         cap=to_wei(1000),
     )
-    erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
+    erc721_nft.add_to_create_erc20_list(consumer_addr, publisher_wallet)
 
     # Tests consumer deploys pool and check market fee
     mint_fake_OCEAN(config)
@@ -137,11 +134,11 @@ def test_minting_failed_after_deploying_pool(
     )
 
     # consumer fails to mint new erc20 token even if the minter
-    perms = erc20_token.get_permissions(consumer_wallet.address)
+    perms = erc20_token.get_permissions(consumer_addr)
     assert perms[RolesERC20.MINTER]
 
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20_token.mint(consumer_wallet.address, 1, consumer_wallet)
+        erc20_token.mint(consumer_addr, 1, consumer_wallet)
         assert (
             err.value.args[0]
             == "execution reverted: VM Exception while processing transaction: revert DataTokenTemplate: cap exceeded"
@@ -282,6 +279,9 @@ def test_vesting_publisher_exit_scam(
     publisher_wallet,
     consumer_wallet,
     another_consumer_wallet,
+    publisher_addr,
+    consumer_addr,
+    another_consumer_addr,
     factory_router,
     side_staking,
 ):
@@ -312,30 +312,27 @@ def test_vesting_publisher_exit_scam(
     side_staking.get_vesting(erc20_token.address, publisher_wallet)
 
     # publisher receives the vested DTs after 100 mined blocks
-    assert publisher_wallet.address == pmt_collector
+    assert publisher_addr == pmt_collector
     assert dt_balance_before < erc20_token.balanceOf(pmt_collector)
     assert erc20_token.balanceOf(
         pmt_collector
     ) == side_staking.get_vesting_amount_so_far(erc20_token.address)
 
     dt_pool_balance = bpool.get_balance(erc20_token.address)
-    pool_shares_before = (
-        bpool.balanceOf(publisher_wallet.address) / bpool.total_supply()
-    )
+    pool_shares_before = bpool.balanceOf(publisher_addr) / bpool.total_supply()
     dt_percentage_before = pool_shares_before * bpool.get_balance(erc20_token.address)
 
     # another users buy DTs from the publisher pool to boost the price
     ocean_contract.approve(bpool.address, to_wei(1000000), another_consumer_wallet)
     bpool.join_swap_extern_amount_in(
-        token_amount_in=ocean_contract.balanceOf(another_consumer_wallet.address)
-        // 100,
+        token_amount_in=ocean_contract.balanceOf(another_consumer_addr) // 100,
         min_pool_amount_out=bpool.get_balance(ocean_contract.address) // 1000,
         from_wallet=another_consumer_wallet,
     )
 
     ocean_contract.approve(bpool.address, to_wei(1000000), consumer_wallet)
     bpool.join_swap_extern_amount_in(
-        token_amount_in=ocean_contract.balanceOf(consumer_wallet.address) // 100,
+        token_amount_in=ocean_contract.balanceOf(consumer_addr) // 100,
         min_pool_amount_out=bpool.get_balance(ocean_contract.address) // 1000,
         from_wallet=consumer_wallet,
     )
@@ -343,26 +340,23 @@ def test_vesting_publisher_exit_scam(
     # check for increasing DT amount for publisher
     assert dt_pool_balance < bpool.get_balance(erc20_token.address)
     assert dt_percentage_before < bpool.balanceOf(
-        publisher_wallet.address
+        publisher_addr
     ) / bpool.total_supply() * bpool.get_balance(erc20_token.address)
     # other users have added liquidity, so the owner of the pool will have lower percentage
-    assert (
-        pool_shares_before
-        > bpool.balanceOf(publisher_wallet.address) / bpool.total_supply()
-    )
+    assert pool_shares_before > bpool.balanceOf(publisher_addr) / bpool.total_supply()
 
     # exit pool dual side with profit for publisher
     bpool.exit_pool(
-        pool_amount_in=bpool.balanceOf(publisher_wallet.address),
+        pool_amount_in=bpool.balanceOf(publisher_addr),
         min_amounts_out=[to_wei(1), to_wei(1)],
         from_wallet=publisher_wallet,
     )
-    assert erc20_token.balanceOf(publisher_wallet.address) > initial_ocean_liq // 2
+    assert erc20_token.balanceOf(publisher_addr) > initial_ocean_liq // 2
 
 
 @pytest.mark.unit
 def test_adding_liquidity_for_vesting(
-    web3, config, publisher_wallet, factory_router, side_staking
+    web3, config, publisher_wallet, publisher_addr, factory_router, side_staking
 ):
     """Tests adding liquidity does not affect the vesting amount."""
     erc721_nft, erc20_token = deploy_erc721_erc20(
@@ -398,7 +392,7 @@ def test_adding_liquidity_for_vesting(
         web3.eth.block_number,
         None,
     )
-    assert join_event[0].args.caller == publisher_wallet.address
+    assert join_event[0].args.caller == publisher_addr
     assert join_event[0].args.tokenIn == ocean_contract.address
     assert join_event[0].args.tokenAmountIn == to_wei(10)
 
@@ -423,7 +417,7 @@ def test_adding_liquidity_for_vesting(
 
 @pytest.mark.unit
 def test_removing_liquidity_for_vesting(
-    web3, config, publisher_wallet, factory_router, side_staking
+    web3, config, publisher_wallet, publisher_addr, factory_router, side_staking
 ):
     """Tests removing liquidity does not affect the vesting amount."""
     erc721_nft, erc20_token = deploy_erc721_erc20(
@@ -459,7 +453,7 @@ def test_removing_liquidity_for_vesting(
         web3.eth.block_number,
         None,
     )
-    assert exit_event[0].args.caller == publisher_wallet.address
+    assert exit_event[0].args.caller == publisher_addr
     assert exit_event[0].args.tokenOut == ocean_contract.address
 
     bpt_event = bpool.get_event_log(
@@ -517,31 +511,6 @@ def _deploy_ocean_pool(erc20_token, factory_router, config, web3, from_wallet) -
     assert pool_event[0].args.poolAddress, "Pool not created."
 
     return BPool(web3, pool_event[0].args.poolAddress)
-
-
-def _deploy_erc721_contract(erc721_factory, web3, from_wallet):
-    tx = erc721_factory.deploy_erc721_contract(
-        name="NFT",
-        symbol="NFTS",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_erc20_deployer=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=from_wallet.address,
-        from_wallet=from_wallet,
-    )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = erc721_factory.get_event_log(
-        ERC721FactoryContract.EVENT_NFT_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert registered_event[0].event == "NFTCreated"
-    assert registered_event[0].args.admin == from_wallet.address
-
-    return ERC721NFT(web3=web3, address=registered_event[0].args.newTokenAddress)
 
 
 def _advance_blocks(num_blocks, from_wallet):
