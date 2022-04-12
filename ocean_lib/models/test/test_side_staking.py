@@ -24,6 +24,19 @@ from tests.resources.helper_functions import (
 
 
 @pytest.mark.unit
+def test_properties(config, web3):
+    """Tests the events' properties."""
+    side_staking_address = get_address_of_type(config, "Staking")
+    side_staking = SideStaking(web3, side_staking_address)
+
+    assert side_staking.event_Vesting.abi["name"] == SideStaking.EVENT_VESTING
+    assert (
+        side_staking.event_VestingCreated.abi["name"]
+        == SideStaking.EVENT_VESTING_CREATED
+    )
+
+
+@pytest.mark.unit
 def test_side_staking(
     web3,
     config,
