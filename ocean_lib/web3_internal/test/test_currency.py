@@ -65,6 +65,11 @@ def test_format_units():
     assert format_units(5278_020000, USDT_DECIMALS) == Decimal("5278.02")
     assert format_units(MAX_WEI, USDT_DECIMALS) == MAX_USDT
 
+    with pytest.raises(ValueError):
+        # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_WEI
+        with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+            format_units(MAX_WEI + 1, USDT_DECIMALS)
+
 
 @pytest.mark.unit
 def test_to_wei():
@@ -117,6 +122,11 @@ def test_parse_units():
     ), "Conversion from ether to wei using decimals failed"
     assert parse_units("5278.02", USDT_DECIMALS) == 5278_020000
     assert parse_units(MAX_USDT, USDT_DECIMALS) == MAX_WEI
+
+    with pytest.raises(ValueError):
+        # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_USDT
+        with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+            to_wei(MAX_USDT + 1, USDT_DECIMALS)
 
 
 @pytest.mark.unit
