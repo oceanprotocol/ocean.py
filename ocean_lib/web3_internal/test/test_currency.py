@@ -70,6 +70,18 @@ def test_format_units():
         with localcontext(ETHEREUM_DECIMAL_CONTEXT):
             format_units(MAX_WEI + 1, USDT_DECIMALS)
 
+    assert format_units(0, "mwei") == Decimal("0")
+    assert format_units(123456, "mwei") == Decimal("0.123456")
+    assert format_units(1_123456, "mwei") == Decimal("1.123456")
+    assert format_units(5278_020000, "mwei") == Decimal("5278.02")
+    assert format_units(MIN_WEI, "mwei") == MIN_USDT
+    assert format_units(MAX_WEI, "mwei") == MAX_USDT
+
+    with pytest.raises(ValueError):
+        # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_WEI
+        with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+            format_units(MAX_WEI + 1, "mwei")
+
     assert format_units(12345, SEVEN_DECIMALS) == Decimal("0.0012345")
     assert format_units(111_1234567, SEVEN_DECIMALS) == Decimal("111.1234567")
     assert format_units(MIN_WEI, SEVEN_DECIMALS) == MIN_SEVEN
@@ -127,6 +139,18 @@ def test_parse_units():
         # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_USDT
         with localcontext(ETHEREUM_DECIMAL_CONTEXT):
             parse_units(MAX_USDT + 1, USDT_DECIMALS)
+
+    assert parse_units("0", "mwei") == 0
+    assert parse_units("0.123456789123456789", "mwei") == 123456
+    assert parse_units("1.123456789123456789", "mwei") == 1_123456
+    assert parse_units("5278.02", "mwei") == 5278_020000
+    assert parse_units(MIN_USDT, "mwei") == MIN_WEI
+    assert parse_units(MAX_USDT, "mwei") == MAX_WEI
+
+    with pytest.raises(ValueError):
+        # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_USDT
+        with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+            parse_units(MAX_USDT + 1, "mwei")
 
     assert parse_units("0", SEVEN_DECIMALS) == 0
     assert parse_units("0.123456789", SEVEN_DECIMALS) == 1234567
