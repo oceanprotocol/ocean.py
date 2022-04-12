@@ -6,7 +6,6 @@ from decimal import ROUND_DOWN, Context, Decimal, localcontext
 from typing import Union
 
 from enforce_typing import enforce_types
-from web3.main import Web3
 
 from ocean_lib.web3_internal.constants import MAX_UINT256
 
@@ -68,8 +67,7 @@ def format_units(amount: int, unit_name: Union[str, int] = DECIMALS_18) -> Decim
     unit_value = Decimal(10) ** num_decimals
 
     with localcontext(ETHEREUM_DECIMAL_CONTEXT):
-        decimal_amount = Decimal(value=amount)
-        return decimal_amount / unit_value
+        return Decimal(amount) / unit_value
 
 
 @enforce_types
@@ -80,17 +78,19 @@ def parse_units(
     Convert token amount from a formatted unit to an EVM-compatible integer.
     float input is purposfully not supported
     """
-    num_decimals = UNITS.index(unit_name) if isinstance(unit_name, str) else unit_name
-    amount = normalize_and_validate_unit(amount, num_decimals)
-    quantize_decimals = Decimal(10) ** -abs(num_decimals)
-    amount_in_wei = Web3.toWei(
-        amount.quantize(quantize_decimals, context=ETHEREUM_DECIMAL_CONTEXT), "ether"
+    num_decimals = (
+        UNITS.index(unit_name) * 3 if isinstance(unit_name, str) else unit_name
     )
-    divisor = 10 ** (DECIMALS_18 - num_decimals)
+
+    decimal_amount = normalize_and_validate_unit(amount, num_decimals)
+
+    if decimal_amount == Decimal(0):
+        return 0
+
+    unit_value = Decimal(10) ** num_decimals
 
     with localcontext(ETHEREUM_DECIMAL_CONTEXT):
-        amount_in_unit = amount_in_wei / divisor
-        return int(amount_in_unit)
+        return int(decimal_amount * unit_value)
 
 
 @enforce_types

@@ -126,7 +126,7 @@ def test_parse_units():
     with pytest.raises(ValueError):
         # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_USDT
         with localcontext(ETHEREUM_DECIMAL_CONTEXT):
-            to_wei(MAX_USDT + 1, USDT_DECIMALS)
+            parse_units(MAX_USDT + 1, USDT_DECIMALS)
 
     assert parse_units("0", SEVEN_DECIMALS) == 0
     assert parse_units("0.123456789", SEVEN_DECIMALS) == 1234567
