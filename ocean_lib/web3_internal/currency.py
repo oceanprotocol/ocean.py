@@ -6,7 +6,6 @@ from decimal import ROUND_DOWN, Context, Decimal, localcontext
 from typing import Union
 
 from enforce_typing import enforce_types
-from web3.main import Web3
 
 from ocean_lib.web3_internal.constants import MAX_UINT256
 
@@ -36,30 +35,89 @@ MIN_ETHER = Decimal("0.000000000000000001")
 """The maximum possible token amount on Ethereum-compatible blockchains, denoted in ether"""
 MAX_ETHER = Decimal(MAX_WEI).scaleb(-18, context=ETHEREUM_DECIMAL_CONTEXT)
 
+UNITS = [
+    "wei",
+    "kwei",
+    "mwei",
+    "gwei",
+    "szabo",
+    "finney",
+    "ether",
+    "kether",
+    "mether",
+    "gether",
+    "tether",
+]
+
 
 @enforce_types
-def from_wei(amount_in_wei: int, decimals: int = DECIMALS_18) -> Decimal:
-    """Convert token amount from wei to ether, quantized to the specified number of decimal places."""
+def format_units(amount: int, unit_name: Union[str, int] = DECIMALS_18) -> Decimal:
+    """Convert token amount EVM-compatible integer to a formatted unit."""
     # Coerce to Decimal because Web3.fromWei can return int 0
-    amount_in_ether = Decimal(Web3.fromWei(amount_in_wei, "ether"))
-    decimal_places = Decimal(10) ** -abs(decimals)
-    return amount_in_ether.quantize(decimal_places, context=ETHEREUM_DECIMAL_CONTEXT)
+    num_decimals = (
+        UNITS.index(unit_name) * 3 if isinstance(unit_name, str) else unit_name
+    )
+
+    if amount == 0:
+        return Decimal(0)
+
+    if amount < MIN_WEI or amount > MAX_WEI:
+        raise ValueError("value must be between 1 and 2**256 - 1")
+
+    unit_value = Decimal(10) ** num_decimals
+
+    with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+        return Decimal(amount) / unit_value
 
 
 @enforce_types
-def to_wei(
-    amount_in_ether: Union[Decimal, str, int], decimals: int = DECIMALS_18
+def parse_units(
+    amount: Union[Decimal, str, int], unit_name: Union[str, int] = DECIMALS_18
 ) -> int:
     """
-    Convert token amount to wei from ether, quantized to the specified number of decimal places
+    Convert token amount from a formatted unit to an EVM-compatible integer.
     float input is purposfully not supported
     """
-    amount_in_ether = normalize_and_validate_ether(amount_in_ether)
-    decimal_places = Decimal(10) ** -abs(decimals)
-    return Web3.toWei(
-        amount_in_ether.quantize(decimal_places, context=ETHEREUM_DECIMAL_CONTEXT),
-        "ether",
+    num_decimals = (
+        UNITS.index(unit_name) * 3 if isinstance(unit_name, str) else unit_name
     )
+
+    decimal_amount = normalize_and_validate_unit(amount, num_decimals)
+
+    if decimal_amount == Decimal(0):
+        return 0
+
+    unit_value = Decimal(10) ** num_decimals
+
+    with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+        return int(decimal_amount * unit_value)
+
+
+@enforce_types
+def normalize_and_validate_unit(
+    amount: Union[Decimal, str, int], decimals: int = DECIMALS_18
+) -> Decimal:
+    """Returns an amount in ether, encoded as a Decimal
+    Takes Decimal, str, or int as input. Purposefully does not support float."""
+    if isinstance(amount, str) or isinstance(amount, int):
+        amount = Decimal(amount)
+
+    if abs(amount) > Decimal(MAX_WEI).scaleb(
+        -decimals, context=ETHEREUM_DECIMAL_CONTEXT
+    ):
+        raise ValueError("Token amount exceeds maximum.")
+
+    return amount
+
+
+@enforce_types
+def from_wei(amount_in_wei: int) -> Decimal:
+    return format_units(amount_in_wei, DECIMALS_18)
+
+
+@enforce_types
+def to_wei(amount_in_ether: Union[Decimal, str, int]) -> int:
+    return parse_units(amount_in_ether, DECIMALS_18)
 
 
 @enforce_types
@@ -100,7 +158,7 @@ def pretty_ether(
     pretty_ether("123456789012") == "123B"
     pretty_ether("1234567890123") == "1.23e+12"
     """
-    amount_in_ether = normalize_and_validate_ether(amount_in_ether)
+    amount_in_ether = normalize_and_validate_unit(amount_in_ether)
     with localcontext(ETHEREUM_DECIMAL_CONTEXT) as context:
 
         # Reduce to 3 significant figures
@@ -147,7 +205,7 @@ def ether_fmt(
     ticker: str = "",
 ) -> str:
     """Convert ether amount to a formatted string."""
-    amount_in_ether = normalize_and_validate_ether(amount_in_ether)
+    amount_in_ether = normalize_and_validate_unit(amount_in_ether)
     with localcontext(ETHEREUM_DECIMAL_CONTEXT):
         return (
             moneyfmt(amount_in_ether, decimals) + " " + ticker
@@ -206,19 +264,6 @@ def moneyfmt(value, places=2, curr="", sep=",", dp=".", pos="", neg="-", trailne
     build(curr)
     build(neg if sign else pos)
     return "".join(reversed(result))
-
-
-@enforce_types
-def normalize_and_validate_ether(amount_in_ether: Union[Decimal, str, int]) -> Decimal:
-    """Returns an amount in ether, encoded as a Decimal
-    Takes Decimal, str, or int as input. Purposefully does not support float."""
-    if isinstance(amount_in_ether, str) or isinstance(amount_in_ether, int):
-        amount_in_ether = Decimal(amount_in_ether)
-
-    if abs(amount_in_ether) > MAX_ETHER:
-        raise ValueError("Token abs(amount_in_ether) exceeds MAX_ETHER.")
-
-    return amount_in_ether
 
 
 @enforce_types
