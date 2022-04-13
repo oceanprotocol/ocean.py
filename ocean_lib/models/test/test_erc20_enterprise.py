@@ -9,33 +9,27 @@ from web3 import exceptions
 from web3.main import Web3
 
 from ocean_lib.models.dispenser import Dispenser
-from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
-from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
+from tests.resources.helper_functions import get_address_of_type
 
 
 @pytest.mark.unit
 def test_buy_from_dispenser_and_order(
-    web3, config, publisher_wallet, consumer_wallet, factory_deployer_wallet
+    web3,
+    config,
+    publisher_wallet,
+    consumer_wallet,
+    factory_deployer_wallet,
+    erc20_enterprise_token,
 ):
     """Tests buy_from_dispenser_and_order function of the ERC20 Enterprise"""
     mock_usdc_contract = ERC20Token(web3, get_address_of_type(config, "MockUSDC"))
     mock_dai_contract = ERC20Token(web3, get_address_of_type(config, "MockDAI"))
     dispenser = Dispenser(web3, get_address_of_type(config, "Dispenser"))
-
-    _, erc20_enterprise_token = deploy_erc721_erc20(
-        web3=web3,
-        config=config,
-        erc721_publisher=publisher_wallet,
-        erc20_minter=publisher_wallet,
-        cap=to_wei("100"),
-        template_index=2,
-    )
-    erc20_enterprise_token = ERC20Enterprise(web3, erc20_enterprise_token.address)
 
     tx = erc20_enterprise_token.create_dispenser(
         dispenser_address=dispenser.address,
@@ -167,6 +161,7 @@ def test_buy_from_fre_and_order(
     consumer_wallet,
     factory_deployer_wallet,
     another_consumer_wallet,
+    erc20_enterprise_token,
 ):
     """Tests buy_from_fre_and_order function of the ERC20 Enterprise"""
     mock_usdc_contract = ERC20Token(web3, get_address_of_type(config, "MockUSDC"))
@@ -174,16 +169,6 @@ def test_buy_from_fre_and_order(
     fixed_rate_exchange = FixedRateExchange(
         web3, get_address_of_type(config, "FixedPrice")
     )
-
-    _, erc20_enterprise_token = deploy_erc721_erc20(
-        web3=web3,
-        config=config,
-        erc721_publisher=publisher_wallet,
-        erc20_minter=publisher_wallet,
-        cap=to_wei("100"),
-        template_index=2,
-    )
-    erc20_enterprise_token = ERC20Enterprise(web3, erc20_enterprise_token.address)
 
     tx = erc20_enterprise_token.create_fixed_rate(
         fixed_price_address=fixed_rate_exchange.address,

@@ -15,7 +15,7 @@ from ocean_lib.models.fixed_rate_exchange import (
 )
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
-from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
+from tests.resources.helper_functions import get_address_of_type
 
 
 @pytest.mark.unit
@@ -69,7 +69,15 @@ def test_properties(web3, config):
 
 @pytest.mark.unit
 def test_exchange_rate_creation(
-    web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
+    web3,
+    config,
+    publisher_wallet,
+    consumer_wallet,
+    another_consumer_wallet,
+    consumer_addr,
+    another_consumer_addr,
+    erc721_nft,
+    erc20_token,
 ):
     """Test exchange with baseToken(OCEAN) 18 Decimals and dataToken 18 Decimals, RATE = 1"""
     cap = to_wei("100000")
@@ -77,35 +85,32 @@ def test_exchange_rate_creation(
     no_limit = to_wei("100000000000000000000")
     rate = to_wei("1")
     publish_market_swap_fee = int(1e15)  # 0.1%
+    pmt_collector = erc20_token.get_payment_collector()
     ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
 
     fixed_exchange = FixedRateExchange(web3, get_address_of_type(config, "FixedPrice"))
 
-    erc721, erc20 = deploy_erc721_erc20(
-        web3, config, consumer_wallet, consumer_wallet, cap
-    )
-
-    erc20.mint(consumer_wallet.address, cap, consumer_wallet)
-    assert erc20.balanceOf(consumer_wallet.address) == cap
+    erc20_token.mint(consumer_addr, cap, publisher_wallet)
+    assert erc20_token.balanceOf(consumer_addr) == cap
     number_of_exchanges_before = fixed_exchange.get_number_of_exchanges()
 
-    tx = erc20.create_fixed_rate(
+    tx = erc20_token.create_fixed_rate(
         fixed_price_address=get_address_of_type(config, "FixedPrice"),
         base_token_address=get_address_of_type(config, "Ocean"),
-        owner=consumer_wallet.address,
-        publish_market_swap_fee_collector=another_consumer_wallet.address,
+        owner=consumer_addr,
+        publish_market_swap_fee_collector=another_consumer_addr,
         allowed_swapper=ZERO_ADDRESS,
         base_token_decimals=18,
         datatoken_decimals=18,
         fixed_rate=rate,
         publish_market_swap_fee_amount=publish_market_swap_fee,
         with_mint=0,
-        from_wallet=consumer_wallet,
+        from_wallet=publisher_wallet,
     )
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
-    registered_event = erc20.get_event_log(
+    registered_event = erc20_token.get_event_log(
         event_name=ERC721FactoryContract.EVENT_NEW_FIXED_RATE,
         from_block=tx_receipt.blockNumber,
         to_block=web3.eth.block_number,
@@ -113,14 +118,14 @@ def test_exchange_rate_creation(
     )
 
     assert fixed_exchange.get_number_of_exchanges() == (number_of_exchanges_before + 1)
-    assert registered_event[0].args.owner == consumer_wallet.address
+    assert registered_event[0].args.owner == consumer_addr
     assert len(fixed_exchange.get_exchanges()) == (number_of_exchanges_before + 1)
 
     exchange_id = registered_event[0].args.exchangeId
 
     # Generate exchange id works
     generated_exchange_id = fixed_exchange.generate_exchange_id(
-        base_token=get_address_of_type(config, "Ocean"), datatoken=erc20.address
+        base_token=get_address_of_type(config, "Ocean"), datatoken=erc20_token.address
     )
     assert generated_exchange_id == exchange_id
 
@@ -141,7 +146,7 @@ def test_exchange_rate_creation(
 
     # Consumer_wallet approves how many DT tokens wants to sell
     # Consumer_wallet only approves an exact amount so we can check supply etc later in the test
-    erc20.approve(fixed_exchange.address, amount_dt_to_sell, consumer_wallet)
+    erc20_token.approve(fixed_exchange.address, amount_dt_to_sell, consumer_wallet)
     # Another_consumer_wallet approves a big amount so that we don't need to re-approve during test
     ocean_token.approve(
         fixed_exchange.address, to_wei("1000000"), another_consumer_wallet
@@ -153,7 +158,7 @@ def test_exchange_rate_creation(
     assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE] == publish_market_swap_fee
     assert (
         fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR]
-        == another_consumer_wallet.address
+        == another_consumer_addr
     )
     # token is approved, so 0.001
     assert fee_info[FixedRateExchangeFeesInfo.OPC_FEE] == to_wei("0.001")
@@ -181,16 +186,14 @@ def test_exchange_rate_creation(
     )
 
     ocean_token.transfer(
-        another_consumer_wallet.address,
-        ocean_token.balanceOf(consumer_wallet.address),
+        another_consumer_addr,
+        ocean_token.balanceOf(consumer_addr),
         consumer_wallet,
     )
 
     # Test buy DT workflow
-    ocean_balance_publisher_before_swap = ocean_token.balanceOf(consumer_wallet.address)
-    erc20_dt_balance_consumer_before_swap = erc20.balanceOf(
-        another_consumer_wallet.address
-    )
+    ocean_balance_publisher_before_swap = ocean_token.balanceOf(consumer_addr)
+    erc20_dt_balance_consumer_before_swap = erc20_token.balanceOf(another_consumer_addr)
 
     assert ocean_balance_publisher_before_swap == 0
     assert erc20_dt_balance_consumer_before_swap == 0
@@ -199,7 +202,7 @@ def test_exchange_rate_creation(
         exchange_id,
         amount_dt_to_sell,
         no_limit,
-        consumer_wallet.address,
+        consumer_addr,
         to_wei("0.1"),
         another_consumer_wallet,
     )
@@ -221,27 +224,22 @@ def test_exchange_rate_creation(
         == event_log[0].args.datatokenSwappedAmount
     )
 
-    assert erc20.balanceOf(another_consumer_wallet.address) == amount_dt_to_sell
-    assert (
-        ocean_token.balanceOf(consumer_wallet.address)
-        > ocean_balance_publisher_before_swap
-    )
+    assert erc20_token.balanceOf(another_consumer_addr) == amount_dt_to_sell
+    assert ocean_token.balanceOf(consumer_addr) > ocean_balance_publisher_before_swap
     # Test sell DT workflow
-    erc20_dt_balance_consumer_before_swap = erc20.balanceOf(
-        another_consumer_wallet.address
-    )
-    erc20.approve(
+    erc20_dt_balance_consumer_before_swap = erc20_token.balanceOf(another_consumer_addr)
+    erc20_token.approve(
         fixed_exchange.address, erc20_dt_balance_consumer_before_swap, consumer_wallet
     )
-    erc20_balance_before = erc20.balanceOf(consumer_wallet.address)
-    ocean_balance_before = ocean_token.balanceOf(consumer_wallet.address)
+    erc20_balance_before = erc20_token.balanceOf(consumer_addr)
+    ocean_balance_before = ocean_token.balanceOf(consumer_addr)
     fixed_exchange.sell_dt(
         exchange_id, amount_dt_to_sell, 0, ZERO_ADDRESS, 0, consumer_wallet
     )
 
     # Base balance incremented as expect after selling data tokens
     assert (
-        ocean_token.balanceOf(consumer_wallet.address)
+        ocean_token.balanceOf(consumer_addr)
         == fixed_exchange.calc_base_out_given_in_dt(
             exchange_id=exchange_id,
             datatoken_amount=amount_dt_to_sell,
@@ -251,8 +249,7 @@ def test_exchange_rate_creation(
     )
 
     assert (
-        erc20.balanceOf(consumer_wallet.address)
-        == erc20_balance_before - amount_dt_to_sell
+        erc20_token.balanceOf(consumer_addr) == erc20_balance_before - amount_dt_to_sell
     )
 
     exchange_details = fixed_exchange.get_exchange(exchange_id)
@@ -267,11 +264,11 @@ def test_exchange_rate_creation(
 
     # Fixed Rate Exchange owner withdraws DT balance
 
-    erc20_balance_before = erc20.balanceOf(erc20.get_payment_collector())
+    erc20_balance_before = erc20_token.balanceOf(pmt_collector)
 
     tx = fixed_exchange.collect_dt(
         exchange_id,
-        exchange_details[FixedRateExchangeDetails.DT_SUPPLY],
+        exchange_details[FixedRateExchangeDetails.DT_BALANCE],
         consumer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -284,17 +281,30 @@ def test_exchange_rate_creation(
     )
 
     assert (
-        erc20.balanceOf(erc20.get_payment_collector())
+        erc20_token.balanceOf(pmt_collector)
         == erc20_balance_before + logs[0].args.amount
     )
 
     # Fixed Rate Exchange owner withdraws BT balance
+    # Needs to buy because he sold all the DT amount and BT balance will be 0.
+    erc20_token.approve(fixed_exchange.address, to_wei(10), consumer_wallet)
 
-    bt_balance_before = ocean_token.balanceOf(erc20.get_payment_collector())
+    fixed_exchange.buy_dt(
+        exchange_id,
+        to_wei(10),
+        no_limit,
+        consumer_addr,
+        to_wei("0.1"),
+        another_consumer_wallet,
+    )
+    assert erc20_token.balanceOf(another_consumer_addr) == amount_dt_to_sell + to_wei(
+        10
+    )
+    bt_balance_before = ocean_token.balanceOf(pmt_collector)
 
     tx = fixed_exchange.collect_bt(
         exchange_id,
-        exchange_details[FixedRateExchangeDetails.BT_SUPPLY],
+        exchange_details[FixedRateExchangeDetails.BT_BALANCE],
         consumer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -307,20 +317,19 @@ def test_exchange_rate_creation(
     )
 
     assert (
-        ocean_token.balanceOf(erc20.get_payment_collector())
-        == bt_balance_before + logs[0].args.amount
+        ocean_token.balanceOf(pmt_collector) == bt_balance_before + logs[0].args.amount
     )
 
     # Exchange should have fees available and claimable
     # Market fee collector bt balance
-    bt_balance_before = ocean_token.balanceOf(another_consumer_wallet.address)
+    bt_balance_before = ocean_token.balanceOf(another_consumer_addr)
 
     fee_info = fixed_exchange.get_fees_info(exchange_id)
 
     assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE] == publish_market_swap_fee
     assert (
         fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR]
-        == another_consumer_wallet.address
+        == another_consumer_addr
     )
     assert fee_info[FixedRateExchangeFeesInfo.OPC_FEE] == to_wei("0.001")
     assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE] > 0
@@ -329,7 +338,7 @@ def test_exchange_rate_creation(
     fixed_exchange.collect_market_fee(exchange_id, another_consumer_wallet)
 
     assert (
-        ocean_token.balanceOf(another_consumer_wallet.address)
+        ocean_token.balanceOf(another_consumer_addr)
         == bt_balance_before + fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE]
     )
 
@@ -337,7 +346,7 @@ def test_exchange_rate_creation(
     # Only market fee collector should be able to update market_fee_collector
     with pytest.raises(exceptions.ContractLogicError) as err:
         fixed_exchange.update_market_fee_collector(
-            exchange_id, consumer_wallet.address, consumer_wallet
+            exchange_id, consumer_addr, consumer_wallet
         )
     assert (
         err.value.args[0]
@@ -345,14 +354,14 @@ def test_exchange_rate_creation(
     )
 
     fixed_exchange.update_market_fee_collector(
-        exchange_id, consumer_wallet.address, another_consumer_wallet
+        exchange_id, consumer_addr, another_consumer_wallet
     )
 
     # Deactive exchange should work
-    fixed_exchange.toggle_exchange_state(exchange_id, consumer_wallet)
+    fixed_exchange.toggle_exchange_state(exchange_id, publisher_wallet)
     assert not fixed_exchange.is_active(exchange_id)
-    fixed_exchange.toggle_exchange_state(exchange_id, consumer_wallet)
+    fixed_exchange.toggle_exchange_state(exchange_id, publisher_wallet)
 
     # Set exchange rate exchange should work
-    fixed_exchange.set_rate(exchange_id, to_wei("1.1"), consumer_wallet)
+    fixed_exchange.set_rate(exchange_id, to_wei("1.1"), publisher_wallet)
     assert fixed_exchange.get_rate(exchange_id) == to_wei("1.1")
