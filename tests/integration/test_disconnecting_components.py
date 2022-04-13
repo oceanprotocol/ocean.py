@@ -14,7 +14,22 @@ from ocean_lib.structures.file_objects import FilesTypeFactory
 exception_flag = 0
 
 
-def _consume(provider_url):
+def test_with_wrong_provider(config, caplog):
+    with patch("ocean_lib.config.Config.provider_url") as mock:
+        mock.return_value = DEFAULT_PROVIDER_URL
+        updating_thread = threading.Thread(
+            target=_update_with_wrong_component,
+            args=(mock,),
+        )
+        updating_thread.start()
+        _iterative_encrypt(mock)
+        updating_thread.join()
+
+        assert "Asset urls encrypted successfully" in caplog.text
+        assert exception_flag == 1
+
+
+def _encrypt(provider_url):
     global exception_flag
     file_url = "https://foo.txt"
     file_dict = {"type": "url", "url": file_url, "method": "GET"}
@@ -26,30 +41,15 @@ def _consume(provider_url):
         DataServiceProvider.encrypt(files, provider_url)
     except requests.exceptions.InvalidURL as err:
         exception_flag = 1
-        assert err.args[0] == "InvalidURL http://fooprovider.com."
+        assert err.args[0] == "InvalidURL http://foourl.com."
 
 
-def _iterative_consume(mock):
+def _iterative_encrypt(mock):
     for _ in range(5):
-        _consume(mock.return_value)
+        _encrypt(mock.return_value)
         time.sleep(1)
 
 
-def _update_with_wrong_provider(mock):
+def _update_with_wrong_component(mock):
     time.sleep(2)
-    mock.return_value = "http://fooprovider.com"
-
-
-def test_with_wrong_provider(web3, config, publisher_wallet, consumer_wallet, caplog):
-    with patch("ocean_lib.config.Config.provider_url") as mock:
-        mock.return_value = DEFAULT_PROVIDER_URL
-        updating_thread = threading.Thread(
-            target=_update_with_wrong_provider,
-            args=(mock,),
-        )
-        updating_thread.start()
-        _iterative_consume(mock)
-        updating_thread.join()
-
-        assert "Asset urls encrypted successfully" in caplog.text
-        assert exception_flag == 1
+    mock.return_value = "http://foourl.com"
