@@ -21,7 +21,6 @@ from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import create_basics, get_first_service_by_type
 from tests.resources.helper_functions import (
-    deploy_erc721_erc20,
     get_provider_fees,
     get_publisher_ocean_instance,
 )
@@ -241,10 +240,9 @@ def test_encrypt(web3, config, provider_wallet):
 
 
 @pytest.mark.integration
-def test_fileinfo(web3, config, publisher_wallet, publisher_ocean_instance):
-    erc721_nft, erc20_token = deploy_erc721_erc20(
-        web3, config, publisher_wallet, publisher_wallet
-    )
+def test_fileinfo(
+    web3, config, publisher_wallet, publisher_ocean_instance, erc721_nft, erc20_token
+):
     _, metadata, encrypted_files = create_basics(config, web3, DataSP)
 
     ddo = publisher_ocean_instance.assets.create(
@@ -268,10 +266,9 @@ def test_fileinfo(web3, config, publisher_wallet, publisher_ocean_instance):
 
 
 @pytest.mark.integration
-def test_initialize(web3, config, publisher_wallet, publisher_ocean_instance):
-    erc721_nft, erc20_token = deploy_erc721_erc20(
-        web3, config, publisher_wallet, publisher_wallet
-    )
+def test_initialize(
+    web3, config, publisher_wallet, publisher_ocean_instance, erc721_nft, erc20_token
+):
     _, metadata, encrypted_files = create_basics(config, web3, DataSP)
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,

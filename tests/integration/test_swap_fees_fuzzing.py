@@ -5,24 +5,17 @@
 
 import random
 import traceback
+from decimal import Decimal
 from math import floor
 from time import time
-from decimal import *
-
-import pytest
 
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.side_staking import SideStaking
-from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from tests.resources.helper_functions import (
     approx_from_wei,
-    deploy_erc721_erc20,
-    get_address_of_type,
     create_nft_erc20_with_pool,
+    get_address_of_type,
 )
 
 BPOOL_FUZZING_TESTS_NBR_OF_RUNS = 1
@@ -103,16 +96,14 @@ def test_fuzzing_pool_ocean(
 
     for _ in range(BPOOL_FUZZING_TESTS_NBR_OF_RUNS):
         try:
-            side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
-
             # Seed random number generator
             random.seed(time())
 
             # Max number of datatokens that can be minted and added to the liquidity pool
-            cap = to_wei(random.randint(100, 1000000), 18)
+            cap = to_wei(random.randint(100, 1000000))
 
-            swap_fee = to_wei(Decimal(random.uniform(0.00001, 0.1)), 18)
-            swap_market_fee = to_wei(Decimal(random.uniform(0.00001, 0.1)), 18)
+            swap_fee = to_wei(Decimal(random.uniform(0.00001, 0.1)))
+            swap_market_fee = to_wei(Decimal(random.uniform(0.00001, 0.1)))
 
             # Tests consumer calls deployPool(), we then check ocean and market fee"
             ocean_token = ERC20Token(
@@ -138,7 +129,7 @@ def test_fuzzing_pool_ocean(
             ss_DT_vested_blocks = random.randint(
                 min_vesting_period, min_vesting_period * 1000
             )
-            ss_rate = to_wei(Decimal(random.uniform(1 / 10**6, 10**4)), 18)
+            ss_rate = to_wei(Decimal(random.uniform(1 / 10**6, 10**4)))
 
             bpool, erc20_token, _, _ = create_nft_erc20_with_pool(
                 web3=web3,
@@ -393,7 +384,7 @@ def test_fuzzing_pool_ocean(
                 swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee),
                 swap_fees_event_args.LPFeeAmount,
             )
-        except:
+        except Exception:
 
             error = traceback.format_exc()
 
