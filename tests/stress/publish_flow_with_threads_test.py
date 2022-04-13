@@ -23,15 +23,6 @@ def _get_publishing_requirements(ocean: Ocean, wallet: Wallet, config: Config):
     return erc721_nft, erc20_token, metadata, encrypted_files
 
 
-def concurrent_publish_flow(concurrent_flows: int, duration: int):
-    config = ExampleConfig.get_config()
-    ocean = Ocean(config)
-    mint_fake_OCEAN(config)
-    with ThreadPoolExecutor(max_workers=concurrent_flows) as executor:
-        for _ in range(concurrent_flows * duration):
-            executor.submit(publish_flow, ocean, config)
-
-
 def publish_flow(ocean: Ocean, config: Config):
     wallet = generate_wallet()
     (
@@ -60,9 +51,18 @@ def publish_flow(ocean: Ocean, config: Config):
     assert asset.datatokens[0]["address"] == erc20_token.address
 
 
+def concurrent_publish_flow(concurrent_flows: int, repetitions: int):
+    config = ExampleConfig.get_config()
+    ocean = Ocean(config)
+    mint_fake_OCEAN(config)
+    with ThreadPoolExecutor(max_workers=concurrent_flows) as executor:
+        for _ in range(concurrent_flows * repetitions):
+            executor.submit(publish_flow, ocean, config)
+
+
 @pytest.mark.slow
-def test_concurrent_pool_creation():
-    concurrent_flows_values = [1, 3, 20]
-    reps = [3000, 1000, 50]
-    for counter in range(len(concurrent_flows_values)):
-        concurrent_publish_flow(concurrent_flows_values[counter], reps[counter])
+@pytest.mark.parametrize(
+    ["concurrent_flows", "repetitions"], [(1, 3000), (3, 1000), (20, 50)]
+)
+def test_concurrent_pool_creation(concurrent_flows, repetitions):
+    concurrent_publish_flow(concurrent_flows, repetitions)

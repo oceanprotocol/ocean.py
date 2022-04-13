@@ -90,18 +90,16 @@ def asset_displayed_on_sale(ocean: Ocean):
     assert formatted_price
 
 
-def concurrent_pool_creation(concurrent_flows: int, duration: int):
+def concurrent_pool_creation(concurrent_flows: int, repetitions: int):
     config = ExampleConfig.get_config()
     ocean = Ocean(config)
     mint_fake_OCEAN(config)
     with ThreadPoolExecutor(max_workers=concurrent_flows) as executor:
-        for _ in range(concurrent_flows * duration):
+        for _ in range(concurrent_flows * repetitions):
             executor.submit(asset_displayed_on_sale, ocean)
 
 
 @pytest.mark.slow
-def test_concurrent_pool_creation():
-    concurrent_flows_values = [1, 3, 20]
-    reps = [3000, 1000, 50]
-    for counter in range(len(concurrent_flows_values)):
-        concurrent_pool_creation(concurrent_flows_values[counter], reps[counter])
+@pytest.mark.parametrize(["concurrent_flows", "repetitions"], [(1, 3000)])
+def test_concurrent_pool_creation(concurrent_flows, repetitions):
+    concurrent_pool_creation(concurrent_flows, repetitions)

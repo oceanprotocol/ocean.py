@@ -147,18 +147,18 @@ def consume_flow(ocean: Ocean, config: Config):
     ), "The asset folder is empty."
 
 
-def concurrent_consume_flow(concurrent_flows: int, duration: int):
+def concurrent_consume_flow(concurrent_flows: int, repetitions: int):
     config = ExampleConfig.get_config()
     ocean = Ocean(config)
     mint_fake_OCEAN(config)
     with ThreadPoolExecutor(max_workers=concurrent_flows) as executor:
-        for _ in range(concurrent_flows * duration):
+        for _ in range(concurrent_flows * repetitions):
             executor.submit(consume_flow, ocean, config)
 
 
 @pytest.mark.slow
-def test_concurrent_pool_creation():
-    concurrent_flows_values = [1, 3, 20]
-    reps = [3000, 1000, 50]
-    for counter in range(len(concurrent_flows_values)):
-        concurrent_consume_flow(concurrent_flows_values[counter], reps[counter])
+@pytest.mark.parametrize(
+    ["concurrent_flows", "repetitions"], [(1, 3000), (3, 1000), (20, 50)]
+)
+def test_concurrent_pool_creation(concurrent_flows, repetitions):
+    concurrent_consume_flow(concurrent_flows, repetitions)
