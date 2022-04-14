@@ -25,8 +25,8 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.ocean.util import get_web3 as util_get_web3
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import DECIMALS_18, format_units, from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
-from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.utils import split_signature
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
@@ -381,8 +381,15 @@ def get_provider_fees() -> Dict[str, Any]:
 
 
 def approx_from_wei(amount_a, amount_b) -> float:
-    """Helper function to compare amounts in wei with pytest approx function with a relative tolerance of 1e-6."""
-    return int(amount_a) / to_wei(1) == approx(int(amount_b) / to_wei(1))
+    """Helper function to compare token amounts in wei with pytest approx function with a relative tolerance of 1e-6."""
+    return approx_format_units(amount_a, DECIMALS_18, amount_b, DECIMALS_18)
+
+
+def approx_format_units(amount_a, unit_name_a, amount_b, unit_name_b) -> float:
+    """Helper function to compare token amounts where decimals != 18, with pytest approx function with a relative tolerance of 1e-6."""
+    return float(format_units(amount_a, unit_name_a)) == approx(
+        float(format_units(amount_b, unit_name_b))
+    )
 
 
 def create_nft_erc20_with_pool(
