@@ -158,7 +158,7 @@ def concurrent_consume_flow(concurrent_flows: int, repetitions: int):
 
 @pytest.mark.slow
 @pytest.mark.parametrize(
-    ["concurrent_flows", "repetitions"], [(1, 3000), (3, 1000), (20, 50)]
+    ["concurrent_flows", "repetitions"], [(1, 300), (3, 100), (20, 5)]
 )
-def test_concurrent_pool_creation(concurrent_flows, repetitions):
+def test_concurrent_consume_flow(concurrent_flows, repetitions):
     concurrent_consume_flow(concurrent_flows, repetitions)
