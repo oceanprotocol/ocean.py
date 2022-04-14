@@ -400,8 +400,6 @@ def buy_dt_exact_amount_in(
         consume_market_swap_fee,
     )
 
-    return dt_out
-
 
 def buy_dt_exact_amount_out(
     web3: Web3,
@@ -409,7 +407,6 @@ def buy_dt_exact_amount_out(
     consume_market_swap_fee_address: str,
     consume_market_swap_fee: int,
     consumer_wallet: Wallet,
-    dt_out: int,
 ):
     """Tests consumer buys some DT - exactAmountOut"""
     bt = ERC20Token(web3, bpool.get_base_token_address())
@@ -425,6 +422,8 @@ def buy_dt_exact_amount_out(
     opc_fee_dt_balance = bpool.community_fee(dt.address)
     consume_market_fee_bt_balance = bt.balanceOf(consume_market_swap_fee_address)
     consume_market_fee_dt_balance = dt.balanceOf(consume_market_swap_fee_address)
+
+    dt_out = to_wei("1")
 
     (
         bt_amount_in,
@@ -632,7 +631,7 @@ def test_pool(
 
     bt.approve(bpool.address, parse_units("10", bt.decimals()), consumer_wallet)
 
-    dt_out = buy_dt_exact_amount_in(
+    buy_dt_exact_amount_in(
         web3,
         bpool,
         another_consumer_wallet.address,
@@ -646,7 +645,6 @@ def test_pool(
         another_consumer_wallet.address,
         consume_market_swap_fee,
         consumer_wallet,
-        dt_out,
     )
 
     import pdb
