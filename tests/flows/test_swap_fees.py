@@ -6,7 +6,9 @@ from decimal import Decimal
 from typing import List
 
 import pytest
+from web3 import Web3
 
+from ocean_lib.config import Config
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
@@ -108,15 +110,153 @@ def base_token_to_datatoken(
     return to_wei(format_units(base_token_amount, base_token_decimals))
 
 
+def calc_methods(web3: Web3, bpool: BPool):
+    bt = ERC20Token(web3, bpool.get_base_token_address())
+    dt = ERC20Token(web3, bpool.get_datatoken_address())
+
+    bt_amount = parse_units("100", bt.decimals())
+    dt_amount = base_token_to_datatoken(bt_amount, bt.decimals())
+
+    # "PT out" is equal when calculated using "DT in" or "BT in", regardless of BT decimals
+    pool_out_dt_in = bpool.calc_pool_out_single_in(dt.address, dt_amount)
+    pool_out_bt_in = bpool.calc_pool_out_single_in(bt.address, bt_amount)
+    assert pool_out_dt_in == pool_out_bt_in
+
+    # "PT in" is approx when calculated using "DT out" or "BT out", when BT decimals != 18
+    pool_in_dt_out = bpool.calc_pool_in_single_out(dt.address, dt_amount)
+    pool_in_bt_out = bpool.calc_pool_in_single_out(bt.address, bt_amount)
+    assert approx_from_wei(pool_in_dt_out, pool_in_bt_out)
+
+    pt_amount = to_wei("5")
+
+    # "DT in" and "BT in" are approx when BT decimals != 18
+    dt_in_pool_out = bpool.calc_single_in_pool_out(dt.address, pt_amount)
+    bt_in_pool_out = bpool.calc_single_in_pool_out(bt.address, pt_amount)
+    assert approx_format_units(
+        dt_in_pool_out,
+        dt.decimals(),
+        bt_in_pool_out,
+        bt.decimals(),
+    )
+
+    # "DT out" and "BT out" are approx when BT decimals != 18
+    dt_out_pool_in = bpool.calc_single_out_pool_in(dt.address, pt_amount)
+    bt_out_pool_in = bpool.calc_single_out_pool_in(bt.address, pt_amount)
+    assert approx_format_units(
+        dt_out_pool_in,
+        dt.decimals(),
+        bt_out_pool_in,
+        bt.decimals(),
+    )
+
+
+def buy_dt_exact_amount_in(
+    web3: Web3,
+    bpool: BPool,
+    consume_market_swap_fee_address: str,
+    consume_market_swap_fee: int,
+    consumer_wallet: Wallet,
+):
+    """Tests consumer buys some DT - exactAmountIn"""
+    bt = ERC20Token(web3, bpool.get_base_token_address())
+    dt = ERC20Token(web3, bpool.get_datatoken_address())
+
+    consumer_dt_balance = dt.balanceOf(consumer_wallet.address)
+    consumer_bt_balance = bt.balanceOf(consumer_wallet.address)
+    publish_market_fee_dt_balance = bpool.publish_market_fee(dt.address)
+    publish_market_fee_bt_balance = bpool.publish_market_fee(bt.address)
+    opc_fee_dt_balance = bpool.community_fee(dt.address)
+    opc_fee_bt_balance = bpool.community_fee(bt.address)
+
+    bt_in = parse_units("1", bt.decimals())
+
+    (
+        dt_amount_out,
+        lp_fee_amount,
+        opc_fee_amount,
+        publish_market_swap_fee_amount,
+        consume_market_swap_fee_amount,
+    ) = bpool.get_amount_out_exact_in(
+        token_in=bt.address,
+        token_out=dt.address,
+        token_amount_in=bt_in,
+        consume_market_swap_fee_amount=consume_market_swap_fee,
+    )
+
+    bt_in_unit = format_units(bt_in, bt.decimals())
+
+    expected_lp_swap_fee_amount = bt_in_unit * from_wei(bpool.get_swap_fee())
+    expected_opc_swap_fee_amount = bt_in_unit * from_wei(bpool.opc_fee())
+    expected_publish_market_swap_fee_amount = bt_in_unit * from_wei(
+        bpool.get_market_fee()
+    )
+    expected_consume_market_swap_fee_amount = bt_in_unit * from_wei(
+        consume_market_swap_fee
+    )
+
+    assert format_units(lp_fee_amount, bt.decimals()) == expected_lp_swap_fee_amount
+    assert format_units(opc_fee_amount, bt.decimals()) == expected_opc_swap_fee_amount
+    assert (
+        format_units(publish_market_swap_fee_amount, bt.decimals())
+        == expected_publish_market_swap_fee_amount
+    )
+    assert (
+        format_units(consume_market_swap_fee_amount, bt.decimals())
+        == expected_consume_market_swap_fee_amount
+    )
+
+    slippage = Decimal("0.01")
+    min_amount_out = to_wei(bt_in_unit - (bt_in_unit * slippage))
+    max_price_impact = Decimal("0.01")
+    spot_price_before = bpool.get_spot_price(
+        bt.address, dt.address, consume_market_swap_fee
+    )
+    max_price = to_wei(spot_price_before + (spot_price_before * max_price_impact))
+
+    tx = bpool.swap_exact_amount_in(
+        token_in=bt.address,
+        token_out=dt.address,
+        consume_market_swap_fee_address=consume_market_swap_fee_address,
+        token_amount_in=bt_in,
+        min_amount_out=min_amount_out,
+        max_price=max_price,
+        consume_market_swap_fee_amount=consume_market_swap_fee,
+        from_wallet=consumer_wallet,
+    )
+
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+
+    assert (dt.balanceOf(consumer_wallet.address) > 0) is True
+
+    swap_fee_event = bpool.get_event_log(
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
+    )
+
+    swap_event_args = swap_fee_event[0].args
+
+    # Check swap balances
+    assert (
+        bt.balanceOf(consumer_wallet.address) + swap_event_args.tokenAmountIn
+        == consumer_bt_balance
+    )
+    assert (
+        dt.balanceOf(consumer_wallet.address)
+        == consumer_dt_balance + swap_event_args.tokenAmountOut
+    )
+
+    # TODO: Assert that appropraiate amount of fees were sent to LPs, Publish market, community and consume market.
+    # TODO Consider using "expected" vars defined above.
+
+
 @pytest.mark.unit
 @pytest.mark.parametrize("base_token_name", ["Ocean", "MockDAI", "MockUSDC"])
 def test_pool(
-    web3,
-    config,
-    factory_deployer_wallet,
-    consumer_wallet,
-    another_consumer_wallet,
-    publisher_wallet,
+    web3: Web3,
+    config: Config,
+    factory_deployer_wallet: Wallet,
+    consumer_wallet: Wallet,
+    another_consumer_wallet: Wallet,
+    publisher_wallet: Wallet,
     base_token_name: str,
 ):
     """
@@ -240,123 +380,67 @@ def test_pool(
     # TODO: Assert that consume market fee collector also has 0.
 
     assert dt.balanceOf(side_staking.address) == MAX_UINT256 - initial_datatoken_amount
-
-    bt_amount = parse_units("100", bt.decimals())
-    dt_amount = base_token_to_datatoken(bt_amount, bt.decimals())
-
-    # "PT out" is equal when calculated using "DT in" or "BT in", regardless of BT decimals
-    pool_out_dt_in = bpool.calc_pool_out_single_in(dt.address, dt_amount)
-    pool_out_bt_in = bpool.calc_pool_out_single_in(bt.address, bt_amount)
-    assert pool_out_dt_in == pool_out_bt_in
-
-    # "PT in" is approx when calculated using "DT out" or "BT out", when BT decimals != 18
-    pool_in_dt_out = bpool.calc_pool_in_single_out(dt.address, dt_amount)
-    pool_in_bt_out = bpool.calc_pool_in_single_out(bt.address, bt_amount)
-    assert approx_from_wei(pool_in_dt_out, pool_in_bt_out)
-
-    pt_amount = to_wei("5")
-
-    # "DT in" and "BT in" are approx when BT decimals != 18
-    dt_in_pool_out = bpool.calc_single_in_pool_out(dt.address, pt_amount)
-    bt_in_pool_out = bpool.calc_single_in_pool_out(bt.address, pt_amount)
-    assert approx_format_units(
-        dt_in_pool_out,
-        dt.decimals(),
-        bt_in_pool_out,
-        bt.decimals(),
-    )
-
-    # "DT out" and "BT out" are approx when BT decimals != 18
-    dt_out_pool_in = bpool.calc_single_out_pool_in(dt.address, pt_amount)
-    bt_out_pool_in = bpool.calc_single_out_pool_in(bt.address, pt_amount)
-    assert approx_format_units(
-        dt_out_pool_in,
-        dt.decimals(),
-        bt_out_pool_in,
-        bt.decimals(),
-    )
-
-    # Tests consumer buys some DT - exactAmountIn
-
     assert bt.balanceOf(bpool.address) == initial_base_token_amount
-    bt.approve(bpool_address, parse_units("10", bt.decimals()), consumer_wallet)
-
     assert dt.balanceOf(consumer_wallet.address) == 0
-    consumer_dt_balance = dt.balanceOf(consumer_wallet.address)
-    consumer_bt_balance = bt.balanceOf(consumer_wallet.address)
 
-    amount_in = parse_units("1", bt.decimals())
-    amount_in_unit = format_units(amount_in, bt.decimals())
+    calc_methods(web3, bpool)
 
-    (
-        amount_out,
-        lp_fee_amount,
-        opc_fee_amount,
-        publish_market_swap_fee_amount,
-        consume_market_swap_fee_amount,
-    ) = bpool.get_amount_out_exact_in(
-        token_in=bt.address,
-        token_out=dt.address,
-        token_amount_in=amount_in,
-        consume_market_swap_fee_amount=consume_market_swap_fee,
+    bt.approve(bpool.address, parse_units("10", bt.decimals()), consumer_wallet)
+
+    buy_dt_exact_amount_in(
+        web3,
+        bpool,
+        another_consumer_wallet.address,
+        consume_market_swap_fee,
+        consumer_wallet,
     )
 
-    assert format_units(lp_fee_amount, bt.decimals()) == amount_in_unit * from_wei(
-        lp_swap_fee
-    )
-    assert format_units(opc_fee_amount, bt.decimals()) == amount_in_unit * from_wei(
-        bpool.opc_fee()
-    )
-    assert format_units(
-        publish_market_swap_fee_amount, bt.decimals()
-    ) == amount_in_unit * from_wei(publish_market_swap_fee)
-    assert format_units(
-        consume_market_swap_fee_amount, bt.decimals()
-    ) == amount_in_unit * from_wei(consume_market_swap_fee)
-
-    slippage = Decimal("0.01")
-    price_impact = Decimal("0.01")
-
-    tx = bpool.swap_exact_amount_in(
-        token_in=bt.address,
-        token_out=dt.address,
-        consume_market_swap_fee_address=another_consumer_wallet.address,
-        token_amount_in=amount_in,
-        min_amount_out=to_wei(amount_in_unit - (amount_in_unit * slippage)),
-        max_price=to_wei(amount_out + (amount_out * price_impact)),
-        consume_market_swap_fee_amount=consume_market_swap_fee,
-        from_wallet=consumer_wallet,
-    )
-
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-
-    assert (dt.balanceOf(consumer_wallet.address) > 0) is True
-
-    swap_fee_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
-    )
-
-    swap_event_args = swap_fee_event[0].args
-
-    # Check swap balances
-    assert (
-        bt.balanceOf(consumer_wallet.address) + swap_event_args.tokenAmountIn
-        == consumer_bt_balance
-    )
-    assert (
-        dt.balanceOf(consumer_wallet.address)
-        == consumer_dt_balance + swap_event_args.tokenAmountOut
-    )
-
-    # TODO: Assert that appropraiate amount of fees were sent to LPs, Publish market, community and consume market.
+    # buy_dt_exact_amount_out(web3, bpool, another_consumer_wallet.address, consume_market_swap_fee, consumer_wallet)
 
     # Tests consumer buys some DT - exactAmountOut
+
     consumer_dt_balance = dt.balanceOf(consumer_wallet.address)
     consumer_bt_balance = bt.balanceOf(consumer_wallet.address)
     publish_market_fee_dt_balance = bpool.publish_market_fee(dt.address)
     publish_market_fee_bt_balance = bpool.publish_market_fee(bt.address)
     opc_fee_dt_balance = bpool.community_fee(dt.address)
     opc_fee_bt_balance = bpool.community_fee(bt.address)
+
+    dt_out = parse_units("1", bt.decimals())
+    dt_out_unit = format_units(dt_out, bt.decimals())
+
+    (
+        bt_amount_in,
+        lp_fee_amount,
+        opc_fee_amount,
+        publish_market_swap_fee_amount,
+        consume_market_swap_fee_amount,
+    ) = bpool.get_amount_in_exact_out(
+        token_in=bt.address,
+        token_out=dt.address,
+        token_amount_out=dt_out,
+        consume_market_swap_fee_amount=consume_market_swap_fee,
+    )
+
+    expected_lp_swap_fee_amount = bt_amount_in * from_wei(lp_swap_fee)
+    expected_opc_swap_fee_amount = bt_amount_in * from_wei(bpool.opc_fee())
+    expected_publish_market_swap_fee_amount = bt_amount_in * from_wei(
+        publish_market_swap_fee
+    )
+    expected_consume_market_swap_fee_amount = bt_amount_in * from_wei(
+        consume_market_swap_fee
+    )
+
+    assert format_units(lp_fee_amount, bt.decimals()) == expected_lp_swap_fee_amount
+    assert format_units(opc_fee_amount, bt.decimals()) == expected_opc_swap_fee_amount
+    assert (
+        format_units(publish_market_swap_fee_amount, bt.decimals())
+        == expected_publish_market_swap_fee_amount
+    )
+    assert (
+        format_units(consume_market_swap_fee_amount, bt.decimals())
+        == expected_consume_market_swap_fee_amount
+    )
 
     tx = bpool.swap_exact_amount_out(
         token_in=bt.address,
