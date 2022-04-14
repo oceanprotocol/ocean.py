@@ -34,12 +34,6 @@ jobs:
             [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" -a -f "$HOME/.ocean/ocean/c2d/ready" ] && break
             done
           ls -la "$HOME/.ocean/ocean-contracts/artifacts/"
-        env:
-          CONTRACTS_VERSION: v1.0.0-alpha.28
-          PROVIDER_VERSION: refactor_signatures
-          AQUARIUS_VERSION: refactor_signatures
-          OPERATOR_SERVICE_VERSION: refactor_signatures
-          POD_CONFIGURATION_VERSION: refactor_signatures
       - name: Install dependencies
         working-directory: ${{ github.workspace }}
         run: |
