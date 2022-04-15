@@ -1,0 +1,191 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IDispenser",
+  "sourceName": "contracts/interfaces/IDispenser.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "datatoken",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "maxTokens",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "maxBalance",
+          "type": "uint256"
+        }
+      ],
+      "name": "activate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "datatoken",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "maxTokens",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "maxBalance",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "allowedSwapper",
+          "type": "address"
+        }
+      ],
+      "name": "create",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "datatoken",
+          "type": "address"
+        }
+      ],
+      "name": "deactivate",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "datatoken",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "destination",
+          "type": "address"
+        }
+      ],
+      "name": "dispense",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getId",
+      "outputs": [
+        {
+          "internalType": "uint8",
+          "name": "",
+          "type": "uint8"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "datatoken",
+          "type": "address"
+        }
+      ],
+      "name": "ownerWithdraw",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "datatoken",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "newAllowedSwapper",
+          "type": "address"
+        }
+      ],
+      "name": "setAllowedSwapper",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "datatoken",
+          "type": "address"
+        }
+      ],
+      "name": "status",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "active",
+          "type": "bool"
+        },
+        {
+          "internalType": "address",
+          "name": "owner",
+          "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "isMinter",
+          "type": "bool"
+        },
+        {
+          "internalType": "uint256",
+          "name": "maxTokens",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "maxBalance",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "balance",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

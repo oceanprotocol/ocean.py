@@ -1,0 +1,253 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "ERC20Roles",
+  "sourceName": "contracts/utils/ERC20Roles.sol",
+  "abi": [
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "signer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "blockNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "AddedMinter",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "signer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "blockNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "AddedPaymentManager",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "signer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "blockNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "CleanedPermissions",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "signer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "blockNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "RemovedMinter",
+      "type": "event"
+    },
+    {
+      "anonymous": false,
+      "inputs": [
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        },
+        {
+          "indexed": true,
+          "internalType": "address",
+          "name": "signer",
+          "type": "address"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "timestamp",
+          "type": "uint256"
+        },
+        {
+          "indexed": false,
+          "internalType": "uint256",
+          "name": "blockNumber",
+          "type": "uint256"
+        }
+      ],
+      "name": "RemovedPaymentManager",
+      "type": "event"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "name": "authERC20",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "user",
+          "type": "address"
+        }
+      ],
+      "name": "getPermissions",
+      "outputs": [
+        {
+          "components": [
+            {
+              "internalType": "bool",
+              "name": "minter",
+              "type": "bool"
+            },
+            {
+              "internalType": "bool",
+              "name": "paymentManager",
+              "type": "bool"
+            }
+          ],
+          "internalType": "struct ERC20Roles.RolesERC20",
+          "name": "",
+          "type": "tuple"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "account",
+          "type": "address"
+        }
+      ],
+      "name": "isMinter",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "permissions",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "minter",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "paymentManager",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x608060405234801561001057600080fd5b50610226806100206000396000f3fe608060405234801561001057600080fd5b506004361061004c5760003560e01c806301e8820814610051578063160a792514610099578063aa271e1a14610116578063ef867ff414610152575b600080fd5b61007d61005f3660046101a7565b60006020819052908152604090205460ff8082169161010090041682565b6040805192151583529015156020830152015b60405180910390f35b6100f76100a73660046101a7565b6040805180820190915260008082526020820152506001600160a01b03166000908152602081815260409182902082518084019093525460ff808216151584526101009091041615159082015290565b6040805182511515815260209283015115159281019290925201610090565b6101426101243660046101a7565b6001600160a01b031660009081526020819052604090205460ff1690565b6040519015158152602001610090565b6101656101603660046101d7565b61017d565b6040516001600160a01b039091168152602001610090565b6001818154811061018d57600080fd5b6000918252602090912001546001600160a01b0316905081565b6000602082840312156101b957600080fd5b81356001600160a01b03811681146101d057600080fd5b9392505050565b6000602082840312156101e957600080fd5b503591905056fea264697066735822122044aa54be0ffb67e15ae2fae902e125819209c60f7a7922a76fc152a1524ccfcf64736f6c634300080c0033",
+  "deployedBytecode": "0x608060405234801561001057600080fd5b506004361061004c5760003560e01c806301e8820814610051578063160a792514610099578063aa271e1a14610116578063ef867ff414610152575b600080fd5b61007d61005f3660046101a7565b60006020819052908152604090205460ff8082169161010090041682565b6040805192151583529015156020830152015b60405180910390f35b6100f76100a73660046101a7565b6040805180820190915260008082526020820152506001600160a01b03166000908152602081815260409182902082518084019093525460ff808216151584526101009091041615159082015290565b6040805182511515815260209283015115159281019290925201610090565b6101426101243660046101a7565b6001600160a01b031660009081526020819052604090205460ff1690565b6040519015158152602001610090565b6101656101603660046101d7565b61017d565b6040516001600160a01b039091168152602001610090565b6001818154811061018d57600080fd5b6000918252602090912001546001600160a01b0316905081565b6000602082840312156101b957600080fd5b81356001600160a01b03811681146101d057600080fd5b9392505050565b6000602082840312156101e957600080fd5b503591905056fea264697066735822122044aa54be0ffb67e15ae2fae902e125819209c60f7a7922a76fc152a1524ccfcf64736f6c634300080c0033",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

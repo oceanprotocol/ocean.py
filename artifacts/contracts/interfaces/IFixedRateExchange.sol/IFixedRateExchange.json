@@ -19,6 +19,16 @@
           "internalType": "uint256",
           "name": "maxBaseTokenAmount",
           "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "consumeMarketAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "consumeMarketSwapFeeAmount",
+          "type": "uint256"
         }
       ],
       "name": "buyDT",
@@ -37,6 +47,11 @@
           "internalType": "uint256",
           "name": "datatokenAmount",
           "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "consumeMarketSwapFeeAmount",
+          "type": "uint256"
         }
       ],
       "name": "calcBaseInGivenOutDT",
@@ -48,7 +63,46 @@
         },
         {
           "internalType": "uint256",
-          "name": "baseTokenAmountBeforeFee",
+          "name": "oceanFeeAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "publishMarketFeeAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "consumeMarketFeeAmount",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "exchangeId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "datatokenAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "consumeMarketSwapFeeAmount",
+          "type": "uint256"
+        }
+      ],
+      "name": "calcBaseOutGivenInDT",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "baseTokenAmount",
           "type": "uint256"
         },
         {
@@ -58,11 +112,52 @@
         },
         {
           "internalType": "uint256",
-          "name": "marketFeeAmount",
+          "name": "publishMarketFeeAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "consumeMarketFeeAmount",
           "type": "uint256"
         }
       ],
       "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "exchangeId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "collectBT",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "exchangeId",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "amount",
+          "type": "uint256"
+        }
+      ],
+      "name": "collectDT",
+      "outputs": [],
+      "stateMutability": "nonpayable",
       "type": "function"
     },
     {
@@ -273,6 +368,16 @@
         {
           "internalType": "uint256",
           "name": "minBaseTokenAmount",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "consumeMarketAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "consumeMarketSwapFeeAmount",
           "type": "uint256"
         }
       ],

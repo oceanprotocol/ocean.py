@@ -1,0 +1,55 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IV3Factory",
+  "sourceName": "contracts/interfaces/IV3Factory.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "controller",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "datatokenAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "baseTokenAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "publisherAddress",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "burnInEndBlock",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "ssParams",
+          "type": "uint256[]"
+        }
+      ],
+      "name": "newBPool",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "bpool",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}

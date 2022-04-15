@@ -52,6 +52,11 @@ source venv/bin/activate
 # Intermediary installation before PyPi release of V4. Install wheel first to avoid errors.
 pip3 install wheel
 pip3 install --no-cache-dir ../
+
+# Install contract artifacts
+cd ~/Desktop/ocean.py
+
+env VIRTUAL_ENV=my_project/venv/ bash artifacts/install.sh
 ```
 
 ## Set envvars

@@ -1,0 +1,596 @@
+{
+  "_format": "hh-sol-artifact-1",
+  "contractName": "IFactory",
+  "sourceName": "contracts/interfaces/IFactory.sol",
+  "abi": [
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "ERC721address",
+          "type": "address"
+        }
+      ],
+      "name": "addToERC721Registry",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "symbol",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "templateIndex",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "tokenURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bool",
+              "name": "transferable",
+              "type": "bool"
+            },
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct IFactory.NftCreateData",
+          "name": "_NftCreateData",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "templateIndex",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string[]",
+              "name": "strings",
+              "type": "string[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "addresses",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "uints",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "bytes[]",
+              "name": "bytess",
+              "type": "bytes[]"
+            }
+          ],
+          "internalType": "struct IFactory.ErcCreateData",
+          "name": "_ErcCreateData",
+          "type": "tuple"
+        }
+      ],
+      "name": "createNftWithErc20",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "symbol",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "templateIndex",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "tokenURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bool",
+              "name": "transferable",
+              "type": "bool"
+            },
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct IFactory.NftCreateData",
+          "name": "_NftCreateData",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "templateIndex",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string[]",
+              "name": "strings",
+              "type": "string[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "addresses",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "uints",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "bytes[]",
+              "name": "bytess",
+              "type": "bytes[]"
+            }
+          ],
+          "internalType": "struct IFactory.ErcCreateData",
+          "name": "_ErcCreateData",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "dispenserAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxTokens",
+              "type": "uint256"
+            },
+            {
+              "internalType": "uint256",
+              "name": "maxBalance",
+              "type": "uint256"
+            },
+            {
+              "internalType": "bool",
+              "name": "withMint",
+              "type": "bool"
+            },
+            {
+              "internalType": "address",
+              "name": "allowedSwapper",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct IFactory.DispenserData",
+          "name": "_DispenserData",
+          "type": "tuple"
+        }
+      ],
+      "name": "createNftWithErc20WithDispenser",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "symbol",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "templateIndex",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "tokenURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bool",
+              "name": "transferable",
+              "type": "bool"
+            },
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct IFactory.NftCreateData",
+          "name": "_NftCreateData",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "templateIndex",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string[]",
+              "name": "strings",
+              "type": "string[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "addresses",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "uints",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "bytes[]",
+              "name": "bytess",
+              "type": "bytes[]"
+            }
+          ],
+          "internalType": "struct IFactory.ErcCreateData",
+          "name": "_ErcCreateData",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "address",
+              "name": "fixedPriceAddress",
+              "type": "address"
+            },
+            {
+              "internalType": "address[]",
+              "name": "addresses",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "uints",
+              "type": "uint256[]"
+            }
+          ],
+          "internalType": "struct IFactory.FixedData",
+          "name": "_FixedData",
+          "type": "tuple"
+        }
+      ],
+      "name": "createNftWithErc20WithFixedRate",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "components": [
+            {
+              "internalType": "string",
+              "name": "name",
+              "type": "string"
+            },
+            {
+              "internalType": "string",
+              "name": "symbol",
+              "type": "string"
+            },
+            {
+              "internalType": "uint256",
+              "name": "templateIndex",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string",
+              "name": "tokenURI",
+              "type": "string"
+            },
+            {
+              "internalType": "bool",
+              "name": "transferable",
+              "type": "bool"
+            },
+            {
+              "internalType": "address",
+              "name": "owner",
+              "type": "address"
+            }
+          ],
+          "internalType": "struct IFactory.NftCreateData",
+          "name": "_NftCreateData",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256",
+              "name": "templateIndex",
+              "type": "uint256"
+            },
+            {
+              "internalType": "string[]",
+              "name": "strings",
+              "type": "string[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "addresses",
+              "type": "address[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "uints",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "bytes[]",
+              "name": "bytess",
+              "type": "bytes[]"
+            }
+          ],
+          "internalType": "struct IFactory.ErcCreateData",
+          "name": "_ErcCreateData",
+          "type": "tuple"
+        },
+        {
+          "components": [
+            {
+              "internalType": "uint256[]",
+              "name": "ssParams",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "uint256[]",
+              "name": "swapFees",
+              "type": "uint256[]"
+            },
+            {
+              "internalType": "address[]",
+              "name": "addresses",
+              "type": "address[]"
+            }
+          ],
+          "internalType": "struct IFactory.PoolData",
+          "name": "_PoolData",
+          "type": "tuple"
+        }
+      ],
+      "name": "createNftWithErc20WithPool",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "_templateIndex",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string[]",
+          "name": "strings",
+          "type": "string[]"
+        },
+        {
+          "internalType": "address[]",
+          "name": "addresses",
+          "type": "address[]"
+        },
+        {
+          "internalType": "uint256[]",
+          "name": "uints",
+          "type": "uint256[]"
+        },
+        {
+          "internalType": "bytes[]",
+          "name": "bytess",
+          "type": "bytes[]"
+        }
+      ],
+      "name": "createToken",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "token",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "erc20dt",
+          "type": "address"
+        }
+      ],
+      "name": "erc20List",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "ERC721address",
+          "type": "address"
+        }
+      ],
+      "name": "erc721List",
+      "outputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "string",
+          "name": "_name",
+          "type": "string"
+        },
+        {
+          "internalType": "string",
+          "name": "_symbol",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "_minter",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_cap",
+          "type": "uint256"
+        },
+        {
+          "internalType": "string",
+          "name": "blob",
+          "type": "string"
+        },
+        {
+          "internalType": "address",
+          "name": "collector",
+          "type": "address"
+        }
+      ],
+      "name": "initialize",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "isInitialized",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    }
+  ],
+  "bytecode": "0x",
+  "deployedBytecode": "0x",
+  "linkReferences": {},
+  "deployedLinkReferences": {}
+}
