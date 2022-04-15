@@ -285,13 +285,15 @@ def check_balances_and_fees(
     )
 
     # Check bpool balances
-    assert (
-        bpool.get_balance(fee_token.address)
-        == bpool_fee_token_balance_before
+    assert approx_format_units(
+        bpool.get_balance(fee_token.address),
+        fee_token.decimals(),
+        bpool_fee_token_balance_before
         + swap_fee_event_args.tokenAmountIn
         - swap_fees_event_args.marketFeeAmount
         - swap_fees_event_args.oceanFeeAmount
-        - swap_fees_event_args.consumeMarketFeeAmount
+        - swap_fees_event_args.consumeMarketFeeAmount,
+        fee_token.decimals(),
     )
     assert (
         bpool.get_balance(not_token.address)
