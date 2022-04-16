@@ -345,7 +345,7 @@ def buy_dt_exact_amount_in(
     consume_market_fee_bt_balance = bt.balanceOf(consume_market_swap_fee_address)
     consume_market_fee_dt_balance = dt.balanceOf(consume_market_swap_fee_address)
 
-    bt_in = parse_units("1", bt.decimals())
+    bt_in = parse_units("10", bt.decimals())
 
     (
         dt_out,
@@ -1077,7 +1077,7 @@ def test_pool(
 
     calc_methods(web3, bpool)
 
-    bt.approve(bpool.address, parse_units("10", bt.decimals()), consumer_wallet)
+    bt.approve(bpool.address, parse_units("1000", bt.decimals()), consumer_wallet)
 
     buy_dt_exact_amount_in(
         web3,
@@ -1098,6 +1098,14 @@ def test_pool(
     dt.approve(bpool_address, to_wei("1000"), consumer_wallet)
 
     buy_bt_exact_amount_in(
+        web3,
+        bpool,
+        another_consumer_wallet.address,
+        consume_market_swap_fee,
+        consumer_wallet,
+    )
+
+    buy_bt_exact_amount_out(
         web3,
         bpool,
         another_consumer_wallet.address,
