@@ -110,7 +110,7 @@ def base_token_to_datatoken(
     return to_wei(format_units(base_token_amount, base_token_decimals))
 
 
-def calc_methods(web3: Web3, bpool: BPool):
+def check_calc_methods(web3: Web3, bpool: BPool):
     bt = ERC20Token(web3, bpool.get_base_token_address())
     dt = ERC20Token(web3, bpool.get_datatoken_address())
 
@@ -719,7 +719,7 @@ def join_pool_deposit_bt_only(
     web3: Web3,
     bpool: BPool,
     side_staking: SideStaking,
-    publisher_wallet: Wallet,  # TODO: Rename to wallet
+    wallet: Wallet,
 ):
     """Tests publisher adds more liquidity with joinswapExternAmountIn
     depositing only base tokens"""
@@ -730,14 +730,14 @@ def join_pool_deposit_bt_only(
     bt = ERC20Token(web3, bpool.get_base_token_address())
     dt = ERC20Token(web3, bpool.get_datatoken_address())
 
-    publisher_dt_balance = dt.balanceOf(publisher_wallet.address)
+    publisher_dt_balance = dt.balanceOf(wallet.address)
     ss_contract_dt_balance = dt.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
     dt_balance_before_join = side_staking.get_datatoken_balance(dt.address)
 
-    bt.approve(bpool.address, to_wei("1000"), publisher_wallet)
+    bt.approve(bpool.address, to_wei("1000"), wallet)
 
-    tx = bpool.join_swap_extern_amount_in(to_wei("1"), to_wei("0.01"), publisher_wallet)
+    tx = bpool.join_swap_extern_amount_in(to_wei("1"), to_wei("0.01"), wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     join_pool_event = bpool.get_event_log(
@@ -767,30 +767,28 @@ def join_pool_deposit_bt_only(
     assert bpt_event[0].args.bptAmount + ss_contract_bpt_balance == bpool.balanceOf(
         side_staking.address
     )
-    assert dt.balanceOf(publisher_wallet.address) == publisher_dt_balance
+    assert dt.balanceOf(wallet.address) == publisher_dt_balance
 
 
 def exit_pool_both_tokens(
     web3: Web3,
     bpool: BPool,
     side_staking: SideStaking,
-    publisher_wallet: Wallet,  # TODO rename to wallet
+    wallet: Wallet,
 ):
     """Tests publisher removes liquidity with ExitPool, receiving both tokens"""
     bt = ERC20Token(web3, bpool.get_base_token_address())
     dt = ERC20Token(web3, bpool.get_datatoken_address())
 
-    publisher_dt_balance = dt.balanceOf(publisher_wallet.address)
-    publisher_bt_balance = bt.balanceOf(publisher_wallet.address)
+    publisher_dt_balance = dt.balanceOf(wallet.address)
+    publisher_bt_balance = bt.balanceOf(wallet.address)
     ss_contract_dt_balance = dt.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
 
-    publisher_bpt_balance = bpool.balanceOf(publisher_wallet.address)
+    publisher_bpt_balance = bpool.balanceOf(wallet.address)
     dt_balance_before_exit = side_staking.get_datatoken_balance(dt.address)
 
-    tx = bpool.exit_pool(
-        to_wei("0.5"), [to_wei("0.001"), to_wei("0.001")], publisher_wallet
-    )
+    tx = bpool.exit_pool(to_wei("0.5"), [to_wei("0.001"), to_wei("0.001")], wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
@@ -802,17 +800,14 @@ def exit_pool_both_tokens(
     assert exit_event[1].args.tokenOut == bt.address
 
     assert exit_event[0].args.tokenAmountOut + publisher_dt_balance == dt.balanceOf(
-        publisher_wallet.address
+        wallet.address
     )
     assert exit_event[1].args.tokenAmountOut + publisher_bt_balance == bt.balanceOf(
-        publisher_wallet.address
+        wallet.address
     )
 
     assert side_staking.get_datatoken_balance(dt.address) == dt_balance_before_exit
-    assert (
-        bpool.balanceOf(publisher_wallet.address) + to_wei("0.5")
-        == publisher_bpt_balance
-    )
+    assert bpool.balanceOf(wallet.address) + to_wei("0.5") == publisher_bpt_balance
 
     assert ss_contract_bpt_balance == bpool.balanceOf(side_staking.address)
 
@@ -823,39 +818,37 @@ def exit_pool_receive_bt_only(
     web3: Web3,
     bpool: BPool,
     side_staking: SideStaking,
-    publisher_wallet: Wallet,
+    wallet: Wallet,
 ):
     """Tests publisher removes liquidity with exitswapPoolAmountIn,
     receiving only base tokens"""
     bt = ERC20Token(web3, bpool.get_base_token_address())
     dt = ERC20Token(web3, bpool.get_datatoken_address())
 
-    publisher_dt_balance = dt.balanceOf(publisher_wallet.address)
-    publisher_bt_balance = bt.balanceOf(publisher_wallet.address)
+    publisher_dt_balance = dt.balanceOf(wallet.address)
+    publisher_bt_balance = bt.balanceOf(wallet.address)
     ss_contract_dt_balance = dt.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
     dt_balance_before_exit = side_staking.get_datatoken_balance(dt.address)
 
-    publisher_bpt_balance = bpool.balanceOf(publisher_wallet.address)
+    publisher_bpt_balance = bpool.balanceOf(wallet.address)
 
-    tx = bpool.exit_swap_pool_amount_in(
-        to_wei("0.05"), to_wei("0.005"), publisher_wallet
-    )
+    tx = bpool.exit_swap_pool_amount_in(to_wei("0.05"), to_wei("0.005"), wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
-    assert dt.balanceOf(publisher_wallet.address) == publisher_dt_balance
+    assert dt.balanceOf(wallet.address) == publisher_dt_balance
 
     exit_event = bpool.get_event_log(
         bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
-    assert exit_event[0].args.caller == publisher_wallet.address
+    assert exit_event[0].args.caller == wallet.address
     assert exit_event[0].args.tokenOut == bt.address
     assert exit_event[1].args.tokenOut == dt.address
 
     assert exit_event[0].args.tokenAmountOut + publisher_bt_balance == bt.balanceOf(
-        publisher_wallet.address
+        wallet.address
     )
 
     # TODO This looks odd.  This method claims to remove bt only, but then
@@ -866,9 +859,7 @@ def exit_pool_receive_bt_only(
         == dt_balance_before_exit + exit_event[1].args.tokenAmountOut
     )
 
-    assert publisher_bpt_balance == bpool.balanceOf(publisher_wallet.address) + to_wei(
-        "0.05"
-    )
+    assert publisher_bpt_balance == bpool.balanceOf(wallet.address) + to_wei("0.05")
 
     assert ss_contract_bpt_balance == bpool.balanceOf(side_staking.address) + to_wei(
         "0.05"
@@ -883,7 +874,7 @@ def exit_pool_receive_dt_only(
     web3: Web3,
     bpool: BPool,
     side_staking: SideStaking,
-    publisher_wallet: Wallet,  # TODO rename to wallet
+    wallet: Wallet,  # TODO rename to wallet
 ):
     """publisher removes liquidity with exitswapPoolAmountIn,
     receiving only datatokens
@@ -891,46 +882,42 @@ def exit_pool_receive_dt_only(
     bt = ERC20Token(web3, bpool.get_base_token_address())
     dt = ERC20Token(web3, bpool.get_datatoken_address())
 
-    publisher_dt_balance = dt.balanceOf(publisher_wallet.address)
-    publisher_bt_balance = bt.balanceOf(publisher_wallet.address)
+    publisher_dt_balance = dt.balanceOf(wallet.address)
+    publisher_bt_balance = bt.balanceOf(wallet.address)
     ss_contract_dt_balance = dt.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
     dt_balance_before_exit = side_staking.get_datatoken_balance(dt.address)
-    publisher_bpt_balance = bpool.balanceOf(publisher_wallet.address)
+    publisher_bpt_balance = bpool.balanceOf(wallet.address)
 
-    tx = bpool.exit_swap_pool_amount_in(
-        to_wei("0.05"), to_wei("0.005"), publisher_wallet
-    )
+    tx = bpool.exit_swap_pool_amount_in(to_wei("0.05"), to_wei("0.005"), wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    assert dt.balanceOf(publisher_wallet.address) == publisher_dt_balance
+    assert dt.balanceOf(wallet.address) == publisher_dt_balance
 
     bpt_event = bpool.get_event_log(
         bpool.EVENT_LOG_BPT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
 
     assert (
-        bpool.balanceOf(publisher_wallet.address)
+        bpool.balanceOf(wallet.address)
         == publisher_bpt_balance - bpt_event[0].args.bptAmount
     )
 
     exit_event = bpool.get_event_log(
         bpool.EVENT_LOG_EXIT, tx_receipt.blockNumber, web3.eth.block_number, None
     )
-    assert exit_event[0].args.caller == publisher_wallet.address
+    assert exit_event[0].args.caller == wallet.address
     assert exit_event[0].args.tokenOut == bt.address
     assert exit_event[1].args.tokenOut == dt.address
 
     assert exit_event[0].args.tokenAmountOut + publisher_bt_balance == bt.balanceOf(
-        publisher_wallet.address
+        wallet.address
     )
     assert (
         side_staking.get_datatoken_balance(dt.address)
         == dt_balance_before_exit + exit_event[1].args.tokenAmountOut
     )
-    assert publisher_bpt_balance == bpool.balanceOf(publisher_wallet.address) + to_wei(
-        "0.05"
-    )
+    assert publisher_bpt_balance == bpool.balanceOf(wallet.address) + to_wei("0.05")
 
     assert ss_contract_bpt_balance == bpool.balanceOf(side_staking.address) + to_wei(
         "0.05"
@@ -1075,7 +1062,7 @@ def test_pool(
     assert bt.balanceOf(bpool.address) == initial_base_token_amount
     assert dt.balanceOf(consumer_wallet.address) == 0
 
-    calc_methods(web3, bpool)
+    check_calc_methods(web3, bpool)
 
     bt.approve(bpool.address, parse_units("1000", bt.decimals()), consumer_wallet)
 
@@ -1117,35 +1104,35 @@ def test_pool(
         web3,
         bpool,
         side_staking,
-        consumer_wallet,  # TODO: Why consumer when other joins are publisher
+        consumer_wallet,
     )
 
     join_pool_deposit_bt_only(
         web3,
         bpool,
         side_staking,
-        publisher_wallet,
+        consumer_wallet,
     )
 
     exit_pool_both_tokens(
         web3,
         bpool,
         side_staking,
-        publisher_wallet,
+        consumer_wallet,
     )
 
     exit_pool_receive_bt_only(
         web3,
         bpool,
         side_staking,
-        publisher_wallet,
+        consumer_wallet,
     )
 
     exit_pool_receive_dt_only(
         web3,
         bpool,
         side_staking,
-        publisher_wallet,
+        consumer_wallet,
     )
 
     # Tests no ocean and market fees were accounted for
