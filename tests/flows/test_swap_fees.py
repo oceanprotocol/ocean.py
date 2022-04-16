@@ -691,7 +691,7 @@ def join_pool_both_tokens(
     web3: Web3,
     bpool: BPool,
     side_staking: SideStaking,
-    consumer_wallet: Wallet,  # TODO rename to wallet
+    wallet: Wallet,
 ):
     bt = ERC20Token(web3, bpool.get_base_token_address())
     dt = ERC20Token(web3, bpool.get_datatoken_address())
@@ -699,7 +699,7 @@ def join_pool_both_tokens(
     ss_contract_dt_balance = dt.balanceOf(side_staking.address)
     ss_contract_bpt_balance = bpool.balanceOf(side_staking.address)
 
-    tx = bpool.join_pool(to_wei("0.01"), [to_wei("50"), to_wei("50")], consumer_wallet)
+    tx = bpool.join_pool(to_wei("0.01"), [to_wei("50"), to_wei("50")], wallet)
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
@@ -710,9 +710,9 @@ def join_pool_both_tokens(
     assert join_pool_event[0].args.tokenIn == dt.address
     assert join_pool_event[1].args.tokenIn == bt.address
 
-    assert to_wei("0.01") == bpool.balanceOf(consumer_wallet.address)
-    assert ss_contract_bpt_balance == bpool.balanceOf(side_staking.address)
+    assert to_wei("0.01") == bpool.balanceOf(wallet.address)
     assert ss_contract_dt_balance == dt.balanceOf(side_staking.address)
+    assert ss_contract_bpt_balance == bpool.balanceOf(side_staking.address)
 
 
 def join_pool_deposit_bt_only(
