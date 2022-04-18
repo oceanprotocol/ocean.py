@@ -16,7 +16,7 @@ from tests.resources.helper_functions import (
     join_pool_one_side,
     swap_exact_amount_in_base_token,
     swap_exact_amount_in_datatoken,
-    transfer_ocean_if_balance_lte,
+    transfer_base_token_if_balance_lte,
     wallet_exit_pool,
     wallet_exit_pool_one_side,
 )
@@ -64,18 +64,18 @@ def test_side_staking(
     assert side_staking.get_datatoken_circulating_supply(erc20_token.address) == 0
 
     # Transfer ocean if needed
-    transfer_ocean_if_balance_lte(
+    transfer_base_token_if_balance_lte(
         web3=web3,
-        config=config,
+        base_token_address=ocean_token.address,
         factory_deployer_wallet=factory_deployer_wallet,
         recipient=publisher_wallet.address,
         min_balance=0,
         amount_to_transfer=to_wei("20000"),
     )
 
-    transfer_ocean_if_balance_lte(
+    transfer_base_token_if_balance_lte(
         web3=web3,
-        config=config,
+        base_token_address=ocean_token.address,
         factory_deployer_wallet=factory_deployer_wallet,
         recipient=another_consumer_wallet.address,
         min_balance=to_wei("1000"),

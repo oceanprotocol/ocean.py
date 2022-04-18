@@ -317,9 +317,9 @@ def send_mock_usdc_to_address(
 
 
 @enforce_types
-def transfer_ocean_if_balance_lte(
+def transfer_base_token_if_balance_lte(
     web3: Web3,
-    config: Config,
+    base_token_address: str,
     factory_deployer_wallet: Wallet,
     recipient: str,
     min_balance: int,
@@ -329,16 +329,16 @@ def transfer_ocean_if_balance_lte(
     is less or equal to min_balance and factory_deployer_wallet has enough ocean balance to send.
     Returns the transferred ocean amount.
     """
-    ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
-    initial_recipient_balance = ocean_token.balanceOf(recipient)
+    base_token = ERC20Token(web3, base_token_address)
+    initial_recipient_balance = base_token.balanceOf(recipient)
     if (
         initial_recipient_balance
-        <= min_balance & ocean_token.balanceOf(factory_deployer_wallet.address)
+        <= min_balance & base_token.balanceOf(factory_deployer_wallet.address)
         >= amount_to_transfer
     ):
-        ocean_token.transfer(recipient, to_wei("20000"), factory_deployer_wallet)
+        base_token.transfer(recipient, amount_to_transfer, factory_deployer_wallet)
 
-    return ocean_token.balanceOf(recipient) - initial_recipient_balance
+    return base_token.balanceOf(recipient) - initial_recipient_balance
 
 
 @enforce_types
@@ -385,10 +385,13 @@ def approx_from_wei(amount_a, amount_b) -> float:
     return approx_format_units(amount_a, DECIMALS_18, amount_b, DECIMALS_18)
 
 
-def approx_format_units(amount_a, unit_name_a, amount_b, unit_name_b) -> float:
+def approx_format_units(
+    amount_a, unit_name_a, amount_b, unit_name_b, rel=1e-6
+) -> float:
     """Helper function to compare token amounts where decimals != 18, with pytest approx function with a relative tolerance of 1e-6."""
     return float(format_units(amount_a, unit_name_a)) == approx(
-        float(format_units(amount_b, unit_name_b))
+        float(format_units(amount_b, unit_name_b)),
+        rel=rel,
     )
 
 
