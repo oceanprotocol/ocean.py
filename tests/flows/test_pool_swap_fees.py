@@ -13,7 +13,7 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.side_staking import SideStaking
-from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
+from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.currency import format_units, from_wei, parse_units, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import (
@@ -62,7 +62,7 @@ def test_pool_swap_fees(
     DAI is a non-approved base token with 18 decimals (OPC Fee = 0.2%)
     USDC is a non-approved base token with 6 decimals (OPC Fee = 0.2%)
     """
-    testing_pool_swap_fees(
+    pool_swap_fees(
         web3=web3,
         config=config,
         base_token_deployer_wallet=factory_deployer_wallet,
@@ -76,7 +76,7 @@ def test_pool_swap_fees(
     )
 
 
-def testing_pool_swap_fees(
+def pool_swap_fees(
     web3: Web3,
     config: Config,
     base_token_deployer_wallet: Wallet,
@@ -108,41 +108,7 @@ def testing_pool_swap_fees(
         amount_to_transfer=parse_units("500", bt.decimals()),
     )
 
-    factory_router = FactoryRouter(web3, get_address_of_type(config, "Router"))
-    erc721_factory = ERC721FactoryContract(
-        web3, get_address_of_type(config, "ERC721Factory")
-    )
-    side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
-    erc721_nft = deploy_erc721_erc20(web3, config, publisher_wallet)
-
-    # Datatoken cap is hardcoded to MAX_WEI in contract regardles of what is passed.
-    cap_doesnt_matter = to_wei("100000")
-
-    # Tests publisher deploys a new erc20 datatoken
-    tx = erc721_nft.create_erc20(
-        template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
-        minter=publisher_wallet.address,
-        fee_manager=publisher_wallet.address,
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=cap_doesnt_matter,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        from_wallet=publisher_wallet,
-    )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    event = erc721_factory.get_event_log(
-        erc721_nft.EVENT_TOKEN_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    erc20_address = event[0].args.newTokenAddress
-    dt = ERC20Token(web3, erc20_address)
-
-    assert dt.get_permissions(publisher_wallet.address)[0] is True
+    _, dt = deploy_erc721_erc20(web3, config, publisher_wallet, publisher_wallet)
 
     # Tests publisher calls deployPool(), we then check base token balance and fees
 
@@ -152,8 +118,10 @@ def testing_pool_swap_fees(
 
     initial_base_token_amount = parse_units("1000", bt.decimals())
 
+    factory_router = FactoryRouter(web3, get_address_of_type(config, "Router"))
     bt.approve(factory_router.address, initial_base_token_amount, publisher_wallet)
 
+    side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
     tx = dt.deploy_pool(
         rate=to_wei(1),
         base_token_decimals=bt.decimals(),
