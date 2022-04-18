@@ -17,9 +17,12 @@ from unittest.mock import Mock
 import requests
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
+from eth_keys import KeyAPI
+from eth_keys.backends import NativeECCBackend
 from requests.exceptions import InvalidURL
 from requests.models import PreparedRequest, Response
 from requests.sessions import Session
+from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.config import Config
@@ -31,6 +34,7 @@ from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger(__name__)
+keys = KeyAPI(NativeECCBackend)
 
 
 class DataServiceProvider:
@@ -259,7 +263,11 @@ class DataServiceProvider:
     def sign_message(wallet: Wallet, msg: str) -> Tuple[str, str]:
         nonce = str(datetime.utcnow().timestamp())
         print(f"signing message with nonce {nonce}: {msg}, account={wallet.address}")
-        return nonce, sign_hash(encode_defunct(text=f"{msg}{nonce}"), wallet)
+        message_hash = Web3.solidityKeccak(
+            ["bytes"],
+            [Web3.toBytes(text=f"{msg}{nonce}")],
+        )
+        return nonce, sign_hash(encode_defunct(message_hash), wallet)
 
     @staticmethod
     # @enforce_types omitted due to subscripted generics error

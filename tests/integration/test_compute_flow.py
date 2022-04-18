@@ -291,7 +291,25 @@ def run_compute_test(
                 break
             time.sleep(5)
 
+        print(f"got status: {status}")
+        output = None
+        for i in range(len(status["results"])):
+            result = None
+            result_type = status["results"][i]["type"]
+            print(f"Fetch result index {i}, type: {result_type}")
+            result = ocean_instance.compute.result(
+                dataset_and_userdata.asset, service, job_id, i, consumer_wallet
+            )
+            print(result)
+            if status["results"][i]["filesize"] > 0:
+                assert result, "result retrieval unsuccessful"
+            print(f"result index: {i}, type: {result_type}, contents: {result}")
+            # Extract algorithm output
+            if result_type == "output":
+                output = result
+
         assert succeeded, "compute job unsuccessful"
+
         log_file = ocean_instance.compute.compute_job_result_logs(
             dataset_and_userdata.asset, service, job_id, consumer_wallet, "algorithmLog"
         )

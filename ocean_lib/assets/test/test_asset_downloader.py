@@ -19,7 +19,6 @@ from tests.resources.ddo_helpers import (
     get_first_service_by_type,
     get_sample_ddo,
 )
-from tests.resources.helper_functions import deploy_erc721_erc20
 
 
 @pytest.mark.unit
@@ -131,22 +130,37 @@ def test_ocean_assets_download_indexes(
 
 @pytest.mark.integration
 def test_ocean_assets_download_destination_file(
-    web3, config, tmpdir, publisher_wallet, publisher_ocean_instance
+    web3,
+    config,
+    tmpdir,
+    publisher_wallet,
+    publisher_ocean_instance,
+    erc721_nft,
+    erc20_token,
 ):
     """Convert tmpdir: py._path.local.LocalPath to str, satisfy enforce-typing."""
     ocean_assets_download_destination_file_helper(
-        web3, config, str(tmpdir), publisher_wallet, publisher_ocean_instance
+        web3,
+        config,
+        str(tmpdir),
+        publisher_wallet,
+        publisher_ocean_instance,
+        erc721_nft,
+        erc20_token,
     )
 
 
 def ocean_assets_download_destination_file_helper(
-    web3, config, tmpdir, publisher_wallet, publisher_ocean_instance
+    web3,
+    config,
+    tmpdir,
+    publisher_wallet,
+    publisher_ocean_instance,
+    erc721_nft,
+    erc20_token,
 ):
     """Downloading to an existing directory."""
     data_provider = DataServiceProvider
-    erc721_nft, erc20_token = deploy_erc721_erc20(
-        web3, config, publisher_wallet, publisher_wallet, cap=to_wei("100")
-    )
 
     _, metadata, encrypted_files = create_basics(config, web3, data_provider)
     ddo = publisher_ocean_instance.assets.create(
