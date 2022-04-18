@@ -43,7 +43,7 @@ from tests.resources.helper_functions import (
         ("MockUSDC", "0.1", "0.1", "0.1"),
     ],
 )
-def test_pool(
+def test_pool_swap_fees(
     web3: Web3,
     config: Config,
     factory_deployer_wallet: Wallet,
@@ -62,7 +62,7 @@ def test_pool(
     DAI is a non-approved base token with 18 decimals (OPC Fee = 0.2%)
     USDC is a non-approved base token with 6 decimals (OPC Fee = 0.2%)
     """
-    _test_pool(
+    test_pool(
         web3,
         config,
         factory_deployer_wallet,
@@ -76,7 +76,7 @@ def test_pool(
     )
 
 
-def _test_pool(
+def test_pool(
     web3: Web3,
     config: Config,
     base_token_deployer_wallet: Wallet,
