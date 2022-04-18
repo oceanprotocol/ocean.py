@@ -37,6 +37,10 @@ from tests.resources.helper_functions import (
         ("Ocean", "0.003", "0.004", "0.005"),
         ("MockDAI", "0.003", "0.004", "0.005"),
         ("MockUSDC", "0.003", "0.004", "0.005"),
+        # Max fees
+        ("Ocean", "0.1", "0.1", "0.1"),
+        ("MockDAI", "0.1", "0.1", "0.1"),
+        ("MockUSDC", "0.1", "0.1", "0.1"),
     ],
 )
 def test_pool(
@@ -53,6 +57,7 @@ def test_pool(
 ):
     """
     Tests pool swap fees with OCEAN, DAI, and USDC as base token
+
     OCEAN is an approved base token with 18 decimals (OPC Fee = 0.1%)
     DAI is a non-approved base token with 18 decimals (OPC Fee = 0.2%)
     USDC is a non-approved base token with 6 decimals (OPC Fee = 0.2%)
@@ -857,7 +862,7 @@ def check_balances_and_fees(
         - swap_fees_event_args.marketFeeAmount
         - swap_fees_event_args.oceanFeeAmount,
         fee_token.decimals(),
-        rel=1e-4,
+        rel=1e-3,
     )
 
     assert (
