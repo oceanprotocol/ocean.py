@@ -712,7 +712,7 @@ def check_fee_amounts(
     )
 
     assert approx_format_units(
-        lp_fee_amount, decimals, expected_lp_swap_fee_amount, decimals
+        lp_fee_amount, decimals, expected_lp_swap_fee_amount, decimals, rel=1e5
     )
     assert approx_format_units(
         opc_fee_amount, decimals, expected_opc_swap_fee_amount, decimals, rel=1e5
@@ -722,6 +722,7 @@ def check_fee_amounts(
         decimals,
         expected_publish_market_swap_fee_amount,
         decimals,
+        rel=1e5,
     )
     assert approx_format_units(
         consume_market_swap_fee_amount,
