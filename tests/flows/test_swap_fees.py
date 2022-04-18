@@ -205,11 +205,16 @@ def test_pool(
     assert bpool.publish_market_fee(bt.address) == 0
     assert bpool.publish_market_fee(dt.address) == 0
 
+    # Verify side staking bot holds all datatokens, minus the initial DT amount
     initial_datatoken_amount = base_token_to_datatoken(
         initial_base_token_amount, bt.decimals()
     )
     assert dt.balanceOf(side_staking.address) == MAX_UINT256 - initial_datatoken_amount
+
+    # Verify pool contains initial base token amount
     assert bt.balanceOf(bpool.address) == initial_base_token_amount
+
+    # Verify consumer starts with 0 datatokens
     assert dt.balanceOf(consumer_wallet.address) == 0
 
     check_calc_methods(web3, bpool)
@@ -745,10 +750,10 @@ def check_balances_and_fees(
     consume_market_swap_fee_address: str,
     consume_market_swap_fee: int,
 ):
+    # Get LOG_SWAP event
     log_swap_event = bpool.get_event_log(
         bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
     )
-
     log_swap_event_args = log_swap_event[0].args
 
     bt = ERC20Token(web3, bpool.get_base_token_address())
@@ -778,12 +783,13 @@ def check_balances_and_fees(
         == consumer_out_token_balance
     )
 
+    # Get LOG_SWAP_FEES event
     swap_fees_event = bpool.get_event_log(
         bpool.EVENT_LOG_SWAP_FEES, tx_receipt.blockNumber, web3.eth.block_number, None
     )
-
     swap_fees_event_args = swap_fees_event[0].args
 
+    # Assign "fee" token and "not"-fee token.
     # Fees are denominated in the token coming into the pool
     if swap_fees_event_args.tokenFeeAddress == bt.address:
         fee_token = bt
@@ -808,6 +814,7 @@ def check_balances_and_fees(
         bpool_fee_token_balance_before = bpool_dt_balance_before
         bpool_not_token_balance_before = bpool_bt_balance_before
 
+    # Get current fee balances
     publish_fee_balance = bpool.publish_market_fee(fee_token.address)
     publish_not_balance = bpool.publish_market_fee(not_token.address)
     opc_fee_balance = bpool.community_fee(fee_token.address)

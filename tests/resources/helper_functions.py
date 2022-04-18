@@ -380,14 +380,16 @@ def get_provider_fees() -> Dict[str, Any]:
 
 
 def approx_from_wei(amount_a, amount_b) -> float:
-    """Helper function to compare token amounts in wei with pytest approx function with a relative tolerance of 1e-6."""
+    """Helper function to compare token amounts in wei
+    with pytest approx function with a relative tolerance of 1e-6."""
     return approx_format_units(amount_a, DECIMALS_18, amount_b, DECIMALS_18)
 
 
 def approx_format_units(
     amount_a, unit_name_a, amount_b, unit_name_b, rel=1e-6
 ) -> float:
-    """Helper function to compare token amounts where decimals != 18, with pytest approx function with a relative tolerance of 1e-6."""
+    """Helper function to compare token amounts where decimals != 18
+    with pytest approx function with a relative tolerance of 1e-6."""
     return float(format_units(amount_a, unit_name_a)) == approx(
         float(format_units(amount_b, unit_name_b)),
         rel=rel,
