@@ -802,8 +802,6 @@ def test_pool(
 
     assert dt.get_permissions(publisher_wallet.address)[0] is True
 
-    # TODO: Consider checking order fee amounts are correct
-
     # Tests publisher calls deployPool(), we then check base token balance and fees
 
     publish_market_swap_fee = to_wei(publish_market_swap_fee)
