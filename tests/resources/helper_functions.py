@@ -332,9 +332,8 @@ def transfer_base_token_if_balance_lte(
     base_token = ERC20Token(web3, base_token_address)
     initial_recipient_balance = base_token.balanceOf(recipient)
     if (
-        initial_recipient_balance
-        <= min_balance & base_token.balanceOf(factory_deployer_wallet.address)
-        >= amount_to_transfer
+        initial_recipient_balance <= min_balance
+        and base_token.balanceOf(factory_deployer_wallet.address) >= amount_to_transfer
     ):
         base_token.transfer(recipient, amount_to_transfer, factory_deployer_wallet)
 

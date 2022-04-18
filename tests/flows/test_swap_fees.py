@@ -165,7 +165,7 @@ def check_fee_amounts(
         lp_fee_amount, decimals, expected_lp_swap_fee_amount, decimals
     )
     assert approx_format_units(
-        opc_fee_amount, decimals, expected_opc_swap_fee_amount, decimals
+        opc_fee_amount, decimals, expected_opc_swap_fee_amount, decimals, rel=1e5
     )
     assert approx_format_units(
         publish_market_swap_fee_amount,
@@ -178,6 +178,7 @@ def check_fee_amounts(
         decimals,
         expected_consume_market_swap_fee_amount,
         decimals,
+        rel=1e5,
     )
 
 
@@ -726,7 +727,17 @@ def buy_bt_exact_amount_out(
 
 
 @pytest.mark.unit
-@pytest.mark.parametrize("base_token_name", ["Ocean", "MockDAI", "MockUSDC"])
+@pytest.mark.parametrize(
+    "base_token_name, publish_market_swap_fee, consume_market_swap_fee, lp_swap_fee",
+    [
+        ("Ocean", "0", "0", "0.0001"),
+        ("Ocean", "0.003", "0.004", "0.005"),
+        ("MockDAI", "0", "0", "0.0001"),
+        ("MockDAI", "0.003", "0.004", "0.005"),
+        ("MockUSDC", "0", "0", "0.0001"),
+        ("MockUSDC", "0.003", "0.004", "0.005"),
+    ],
+)
 def test_pool(
     web3: Web3,
     config: Config,
@@ -735,6 +746,9 @@ def test_pool(
     another_consumer_wallet: Wallet,
     publisher_wallet: Wallet,
     base_token_name: str,
+    publish_market_swap_fee: str,
+    consume_market_swap_fee: str,
+    lp_swap_fee: str,
 ):
     """
     Tests pool with OCEAN, DAI, and USDC as base token and market fee 0.1%
@@ -804,14 +818,11 @@ def test_pool(
 
     # Tests publisher calls deployPool(), we then check base token balance and fees
 
-    lp_swap_fee = to_wei("0.003")
-    publish_market_swap_fee = to_wei("0.004")
-    consume_market_swap_fee = to_wei("0.006")
+    publish_market_swap_fee = to_wei(publish_market_swap_fee)
+    consume_market_swap_fee = to_wei(consume_market_swap_fee)
+    lp_swap_fee = to_wei(lp_swap_fee)
 
     initial_base_token_amount = parse_units("1000", bt.decimals())
-    initial_datatoken_amount = base_token_to_datatoken(
-        initial_base_token_amount, bt.decimals()
-    )
 
     bt.approve(factory_router.address, initial_base_token_amount, publisher_wallet)
 
@@ -867,6 +878,9 @@ def test_pool(
     assert bpool.publish_market_fee(dt.address) == 0
     # TODO: Assert that consume market fee collector also has 0.
 
+    initial_datatoken_amount = base_token_to_datatoken(
+        initial_base_token_amount, bt.decimals()
+    )
     assert dt.balanceOf(side_staking.address) == MAX_UINT256 - initial_datatoken_amount
     assert bt.balanceOf(bpool.address) == initial_base_token_amount
     assert dt.balanceOf(consumer_wallet.address) == 0
