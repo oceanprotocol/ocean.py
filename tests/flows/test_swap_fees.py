@@ -62,21 +62,21 @@ def test_pool_swap_fees(
     DAI is a non-approved base token with 18 decimals (OPC Fee = 0.2%)
     USDC is a non-approved base token with 6 decimals (OPC Fee = 0.2%)
     """
-    test_pool(
-        web3,
-        config,
-        factory_deployer_wallet,
-        consumer_wallet,
-        another_consumer_wallet,
-        publisher_wallet,
-        base_token_name,
-        publish_market_swap_fee,
-        consume_market_swap_fee,
-        lp_swap_fee,
+    testing_pool_swap_fees(
+        web3=web3,
+        config=config,
+        base_token_deployer_wallet=factory_deployer_wallet,
+        consumer_wallet=consumer_wallet,
+        consume_market_swap_fee_collector=another_consumer_wallet,
+        publisher_wallet=publisher_wallet,
+        base_token_name=base_token_name,
+        publish_market_swap_fee=publish_market_swap_fee,
+        consume_market_swap_fee=consume_market_swap_fee,
+        lp_swap_fee=lp_swap_fee,
     )
 
 
-def test_pool(
+def testing_pool_swap_fees(
     web3: Web3,
     config: Config,
     base_token_deployer_wallet: Wallet,
