@@ -320,21 +320,14 @@ for _ in range(0, 200):
 This will output the status of the current job.
 Here is a list of possible results: [Operator Service Status description](https://github.com/oceanprotocol/operator-service/blob/main/API.md#status-description).
 
-Once the returned status dictionary contains the `dateFinished` key, Bob can retrieve the job results.
+Once the returned status dictionary contains the `dateFinished` key, Bob can retrieve the job results using ocean.compute.result or, more specifically, just the output if the job was successful.
+For the purpose of this tutorial, let us choose the second option.
 
 ```python
 # Retrieve algorithm output and log files
-for i in range(len(status["results"])):
-    result = None
-    result_type = status["results"][i]["type"]
-    print(f"Fetch result index {i}, type: {result_type}")
-    result = ocean.compute.result(DATA_asset, compute_service, job_id, i, bob_wallet)
-    print(result)
-    print("==========\n")
-
-    # Extract algorithm output
-    if result_type == "output":
-        output = result
+output = ocean.compute.compute_job_result_logs(
+    DATA_asset, compute_service, job_id, bob_wallet
+)[0]
 
 import pickle
 model = pickle.loads(output)  # the gaussian model result
