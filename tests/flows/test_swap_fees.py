@@ -308,18 +308,6 @@ def check_balances_and_fees(
     )
     assert consume_not_balance == consume_not_token_balance_before
 
-    # bppol_fee_balance_unit = format_units(bpool_fee_balance, fee_token.decimals())
-    # bpool_fee_token_balance_before_unit = format_units(bpool_fee_token_balance_before, fee_token.decimals())
-    # tokenAmountIn_unit = format_units(log_swap_event_args.tokenAmountIn, fee_token.decimals())
-    # marketFeeAmount_unit = format_units(swap_fees_event_args.marketFeeAmount, fee_token.decimals())
-    # oceanFeeAmount_unit = format_units(swap_fees_event_args.oceanFeeAmount, fee_token.decimals())
-    # consumeMarketFeeAmount_unit = format_units(swap_fees_event_args.consumeMarketFeeAmount, fee_token.decimals())
-    # calc = format_units(bpool_fee_token_balance_before
-    #     + log_swap_event_args.tokenAmountIn
-    #     - swap_fees_event_args.marketFeeAmount
-    #     - swap_fees_event_args.oceanFeeAmount, fee_token.decimals())
-    # import pdb; pdb.set_trace()
-
     assert approx_format_units(
         bpool_fee_balance,
         fee_token.decimals(),
