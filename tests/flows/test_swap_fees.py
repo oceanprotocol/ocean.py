@@ -739,7 +739,7 @@ def test_pool(
     lp_swap_fee: str,
 ):
     """
-    Tests pool with OCEAN, DAI, and USDC as base token and market fee 0.1%
+    Tests pool swap fees with OCEAN, DAI, and USDC as base token
     OCEAN is an approved base token with 18 decimals (OPC Fee = 0.1%)
     DAI is a non-approved base token with 18 decimals (OPC Fee = 0.2%)
     USDC is a non-approved base token with 6 decimals (OPC Fee = 0.2%)
