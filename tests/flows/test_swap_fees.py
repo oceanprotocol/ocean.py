@@ -204,7 +204,6 @@ def test_pool(
     assert bpool.community_fee(dt.address) == 0
     assert bpool.publish_market_fee(bt.address) == 0
     assert bpool.publish_market_fee(dt.address) == 0
-    # TODO: Assert that consume market fee collector also has 0.
 
     initial_datatoken_amount = base_token_to_datatoken(
         initial_base_token_amount, bt.decimals()
