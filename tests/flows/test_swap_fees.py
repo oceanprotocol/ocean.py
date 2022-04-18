@@ -29,11 +29,13 @@ from tests.resources.helper_functions import (
 @pytest.mark.parametrize(
     "base_token_name, publish_market_swap_fee, consume_market_swap_fee, lp_swap_fee",
     [
+        # Min fees
         ("Ocean", "0", "0", "0.0001"),
-        ("Ocean", "0.003", "0.004", "0.005"),
         ("MockDAI", "0", "0", "0.0001"),
-        ("MockDAI", "0.003", "0.004", "0.005"),
         ("MockUSDC", "0", "0", "0.0001"),
+        # Happy path
+        ("Ocean", "0.003", "0.004", "0.005"),
+        ("MockDAI", "0.003", "0.004", "0.005"),
         ("MockUSDC", "0.003", "0.004", "0.005"),
     ],
 )
