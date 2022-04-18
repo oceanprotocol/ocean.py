@@ -320,22 +320,22 @@ def send_mock_usdc_to_address(
 def transfer_base_token_if_balance_lte(
     web3: Web3,
     base_token_address: str,
-    factory_deployer_wallet: Wallet,
+    from_wallet: Wallet,
     recipient: str,
     min_balance: int,
     amount_to_transfer: int,
 ) -> int:
     """Helper function to send an arbitrary amount of ocean to recipient address if recipient's ocean balance
-    is less or equal to min_balance and factory_deployer_wallet has enough ocean balance to send.
+    is less or equal to min_balance and from_wallet has enough ocean balance to send.
     Returns the transferred ocean amount.
     """
     base_token = ERC20Token(web3, base_token_address)
     initial_recipient_balance = base_token.balanceOf(recipient)
     if (
         initial_recipient_balance <= min_balance
-        and base_token.balanceOf(factory_deployer_wallet.address) >= amount_to_transfer
+        and base_token.balanceOf(from_wallet.address) >= amount_to_transfer
     ):
-        base_token.transfer(recipient, amount_to_transfer, factory_deployer_wallet)
+        base_token.transfer(recipient, amount_to_transfer, from_wallet)
 
     return base_token.balanceOf(recipient) - initial_recipient_balance
 

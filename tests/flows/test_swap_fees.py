@@ -55,12 +55,38 @@ def test_pool(
     DAI is a non-approved base token with 18 decimals (OPC Fee = 0.2%)
     USDC is a non-approved base token with 6 decimals (OPC Fee = 0.2%)
     """
+    _test_pool(
+        web3,
+        config,
+        factory_deployer_wallet,
+        consumer_wallet,
+        another_consumer_wallet,
+        publisher_wallet,
+        base_token_name,
+        publish_market_swap_fee,
+        consume_market_swap_fee,
+        lp_swap_fee,
+    )
+
+
+def _test_pool(
+    web3: Web3,
+    config: Config,
+    base_token_deployer_wallet: Wallet,
+    consumer_wallet: Wallet,
+    consume_market_swap_fee_collector: Wallet,
+    publisher_wallet: Wallet,
+    base_token_name: str,
+    publish_market_swap_fee: str,
+    consume_market_swap_fee: str,
+    lp_swap_fee: str,
+):
     bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
 
     transfer_base_token_if_balance_lte(
         web3=web3,
         base_token_address=bt.address,
-        factory_deployer_wallet=factory_deployer_wallet,
+        from_wallet=base_token_deployer_wallet,
         recipient=publisher_wallet.address,
         min_balance=parse_units("1500", bt.decimals()),
         amount_to_transfer=parse_units("1500", bt.decimals()),
@@ -69,7 +95,7 @@ def test_pool(
     transfer_base_token_if_balance_lte(
         web3=web3,
         base_token_address=bt.address,
-        factory_deployer_wallet=factory_deployer_wallet,
+        from_wallet=base_token_deployer_wallet,
         recipient=consumer_wallet.address,
         min_balance=parse_units("500", bt.decimals()),
         amount_to_transfer=parse_units("500", bt.decimals()),
@@ -91,7 +117,7 @@ def test_pool(
         name="ERC20DT1",
         symbol="ERC20DT1Symbol",
         minter=publisher_wallet.address,
-        fee_manager=factory_deployer_wallet.address,
+        fee_manager=publisher_wallet.address,
         publish_market_order_fee_address=publisher_wallet.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
         cap=cap_doesnt_matter,
@@ -187,7 +213,7 @@ def test_pool(
     buy_dt_exact_amount_in(
         web3,
         bpool,
-        another_consumer_wallet.address,
+        consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
         "1",
@@ -196,7 +222,7 @@ def test_pool(
     buy_dt_exact_amount_out(
         web3,
         bpool,
-        another_consumer_wallet.address,
+        consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
         "2",
@@ -207,7 +233,7 @@ def test_pool(
     buy_bt_exact_amount_in(
         web3,
         bpool,
-        another_consumer_wallet.address,
+        consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
         "1",
@@ -216,7 +242,7 @@ def test_pool(
     buy_bt_exact_amount_out(
         web3,
         bpool,
-        another_consumer_wallet.address,
+        consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
         "1",

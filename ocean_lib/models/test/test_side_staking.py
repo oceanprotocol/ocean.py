@@ -67,7 +67,7 @@ def test_side_staking(
     transfer_base_token_if_balance_lte(
         web3=web3,
         base_token_address=ocean_token.address,
-        factory_deployer_wallet=factory_deployer_wallet,
+        from_wallet=factory_deployer_wallet,
         recipient=publisher_wallet.address,
         min_balance=0,
         amount_to_transfer=to_wei("20000"),
@@ -76,7 +76,7 @@ def test_side_staking(
     transfer_base_token_if_balance_lte(
         web3=web3,
         base_token_address=ocean_token.address,
-        factory_deployer_wallet=factory_deployer_wallet,
+        from_wallet=factory_deployer_wallet,
         recipient=another_consumer_wallet.address,
         min_balance=to_wei("1000"),
         amount_to_transfer=to_wei("1000"),
