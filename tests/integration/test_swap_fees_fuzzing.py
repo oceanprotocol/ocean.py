@@ -287,7 +287,7 @@ def test_fuzzing_pool_ocean(
             swap_fees_event_args = swap_fees_event[0].args
 
             assert approx_from_wei(
-                swap_market_fee * swap_in_two_amount_in / to_wei(1),
+                to_wei(from_wei(swap_market_fee) * from_wei(swap_in_two_amount_in)),
                 swap_fees_event_args.marketFeeAmount,
             )
 
@@ -312,12 +312,14 @@ def test_fuzzing_pool_ocean(
             )
 
             assert approx_from_wei(
-                swap_event_args.tokenAmountIn / (to_wei(1) / swap_market_fee),
+                to_wei(
+                    from_wei(swap_event_args.tokenAmountIn) * from_wei(swap_market_fee)
+                ),
                 swap_fees_event_args.marketFeeAmount,
             )
 
             assert approx_from_wei(
-                swap_event_args.tokenAmountIn / (to_wei(1) / swap_fee),
+                to_wei(from_wei(swap_event_args.tokenAmountIn) * from_wei(swap_fee)),
                 swap_fees_event_args.LPFeeAmount,
             )
 
@@ -376,12 +378,14 @@ def test_fuzzing_pool_ocean(
             )
 
             assert approx_from_wei(
-                swap_event_args.tokenAmountIn / (to_wei("1") / swap_market_fee),
+                to_wei(
+                    from_wei(swap_event_args.tokenAmountIn) * from_wei(swap_market_fee)
+                ),
                 swap_fees_event_args.marketFeeAmount,
             )
 
             assert approx_from_wei(
-                swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee),
+                to_wei(from_wei(swap_event_args.tokenAmountIn) * from_wei(swap_fee)),
                 swap_fees_event_args.LPFeeAmount,
             )
         except Exception:

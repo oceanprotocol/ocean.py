@@ -116,9 +116,7 @@ def test_pool_fees(
 
     datatoken_address = asset.get_service_by_index(0).datatoken
     assert pool.is_finalized() is True
-    assert pool.opc_fee(
-        pool.get_base_token_address()
-    ) == publisher_ocean_instance.to_wei("0.001")
+    assert pool.opc_fee() == publisher_ocean_instance.to_wei("0.001")
     assert pool.get_swap_fee() == lp_swap_fee
     assert pool.community_fee(publisher_ocean_instance.OCEAN_address) == 0
     assert pool.community_fee(datatoken_address) == 0
