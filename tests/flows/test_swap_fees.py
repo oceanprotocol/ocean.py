@@ -223,258 +223,6 @@ def test_pool(
     )
 
 
-def base_token_to_datatoken(
-    base_token_amount: int,
-    base_token_decimals: int,
-) -> int:
-    """Datatokens have 18 decimals, even when base token decimals is different
-    Given rate == 1, this converts from base tokens to equivalent datatokens
-    """
-    return to_wei(format_units(base_token_amount, base_token_decimals))
-
-
-def check_calc_methods(web3: Web3, bpool: BPool):
-    bt = ERC20Token(web3, bpool.get_base_token_address())
-    dt = ERC20Token(web3, bpool.get_datatoken_address())
-
-    bt_amount = parse_units("100", bt.decimals())
-    dt_amount = base_token_to_datatoken(bt_amount, bt.decimals())
-
-    # "PT out" is equal when calculated using "DT in" or "BT in", regardless of BT decimals
-    pool_out_dt_in = bpool.calc_pool_out_single_in(dt.address, dt_amount)
-    pool_out_bt_in = bpool.calc_pool_out_single_in(bt.address, bt_amount)
-    assert pool_out_dt_in == pool_out_bt_in
-
-    # "PT in" is approx when calculated using "DT out" or "BT out", when BT decimals != 18
-    pool_in_dt_out = bpool.calc_pool_in_single_out(dt.address, dt_amount)
-    pool_in_bt_out = bpool.calc_pool_in_single_out(bt.address, bt_amount)
-    assert approx_from_wei(pool_in_dt_out, pool_in_bt_out)
-
-    pt_amount = to_wei("5")
-
-    # "DT in" and "BT in" are approx when BT decimals != 18
-    dt_in_pool_out = bpool.calc_single_in_pool_out(dt.address, pt_amount)
-    bt_in_pool_out = bpool.calc_single_in_pool_out(bt.address, pt_amount)
-    assert approx_format_units(
-        dt_in_pool_out,
-        dt.decimals(),
-        bt_in_pool_out,
-        bt.decimals(),
-    )
-
-    # "DT out" and "BT out" are approx when BT decimals != 18
-    dt_out_pool_in = bpool.calc_single_out_pool_in(dt.address, pt_amount)
-    bt_out_pool_in = bpool.calc_single_out_pool_in(bt.address, pt_amount)
-    assert approx_format_units(
-        dt_out_pool_in,
-        dt.decimals(),
-        bt_out_pool_in,
-        bt.decimals(),
-    )
-
-
-def check_fee_amounts(
-    bpool: BPool,
-    amount_in: int,
-    decimals: int,
-    lp_fee_amount: int,
-    opc_fee_amount: int,
-    publish_market_swap_fee_amount: int,
-    consume_market_swap_fee_amount: int,
-    consume_market_swap_fee: int,
-):
-    amount_in_unit = format_units(amount_in, decimals)
-
-    expected_lp_swap_fee_amount = parse_units(
-        amount_in_unit * from_wei(bpool.get_swap_fee()), decimals
-    )
-    expected_opc_swap_fee_amount = parse_units(
-        amount_in_unit * from_wei(bpool.opc_fee()), decimals
-    )
-    expected_publish_market_swap_fee_amount = parse_units(
-        amount_in_unit * from_wei(bpool.get_market_fee()), decimals
-    )
-    expected_consume_market_swap_fee_amount = parse_units(
-        amount_in_unit * from_wei(consume_market_swap_fee), decimals
-    )
-
-    assert approx_format_units(
-        lp_fee_amount, decimals, expected_lp_swap_fee_amount, decimals
-    )
-    assert approx_format_units(
-        opc_fee_amount, decimals, expected_opc_swap_fee_amount, decimals, rel=1e5
-    )
-    assert approx_format_units(
-        publish_market_swap_fee_amount,
-        decimals,
-        expected_publish_market_swap_fee_amount,
-        decimals,
-    )
-    assert approx_format_units(
-        consume_market_swap_fee_amount,
-        decimals,
-        expected_consume_market_swap_fee_amount,
-        decimals,
-        rel=1e5,
-    )
-
-
-def check_balances_and_fees(
-    web3: Web3,
-    bpool: BPool,
-    tx_receipt,
-    consumer_bt_balance_before: int,
-    consumer_dt_balance_before: int,
-    consumer_address: str,
-    bpool_bt_balance_before: int,
-    bpool_dt_balance_before: int,
-    publish_market_swap_fee_bt_balance_before: int,
-    publish_market_swap_fee_dt_balance_before: int,
-    opc_swap_fee_bt_balance_before: int,
-    opc_swap_fee_dt_balance_before: int,
-    consume_market_swap_fee_bt_balance_before: int,
-    consume_market_swap_fee_dt_balance_before: int,
-    consume_market_swap_fee_address: str,
-    consume_market_swap_fee: int,
-):
-    log_swap_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
-    )
-
-    log_swap_event_args = log_swap_event[0].args
-
-    bt = ERC20Token(web3, bpool.get_base_token_address())
-    dt = ERC20Token(web3, bpool.get_datatoken_address())
-
-    consumer_bt_balance = bt.balanceOf(consumer_address)
-    consumer_dt_balance = dt.balanceOf(consumer_address)
-
-    if log_swap_event_args.tokenIn == bt.address:
-        consumer_in_token_balance_before = consumer_bt_balance_before
-        consumer_in_token_balance = consumer_bt_balance
-        consumer_out_token_balance_before = consumer_dt_balance_before
-        consumer_out_token_balance = consumer_dt_balance
-    else:
-        consumer_in_token_balance_before = consumer_dt_balance_before
-        consumer_in_token_balance = consumer_dt_balance
-        consumer_out_token_balance_before = consumer_bt_balance_before
-        consumer_out_token_balance = consumer_bt_balance
-
-    # Check LOG_SWAP event
-    assert (
-        consumer_in_token_balance + log_swap_event_args.tokenAmountIn
-        == consumer_in_token_balance_before
-    )
-    assert (
-        consumer_out_token_balance_before + log_swap_event_args.tokenAmountOut
-        == consumer_out_token_balance
-    )
-
-    swap_fees_event = bpool.get_event_log(
-        bpool.EVENT_LOG_SWAP_FEES, tx_receipt.blockNumber, web3.eth.block_number, None
-    )
-
-    swap_fees_event_args = swap_fees_event[0].args
-
-    # Fees are denominated in the token coming into the pool
-    if swap_fees_event_args.tokenFeeAddress == bt.address:
-        fee_token = bt
-        not_token = dt
-        publish_fee_balance_before = publish_market_swap_fee_bt_balance_before
-        publish_not_balance_before = publish_market_swap_fee_dt_balance_before
-        opc_fee_balance_before = opc_swap_fee_bt_balance_before
-        opc_not_balance_before = opc_swap_fee_dt_balance_before
-        consume_fee_token_balance_before = consume_market_swap_fee_bt_balance_before
-        consume_not_token_balance_before = consume_market_swap_fee_dt_balance_before
-        bpool_fee_token_balance_before = bpool_bt_balance_before
-        bpool_not_token_balance_before = bpool_dt_balance_before
-    else:
-        fee_token = dt
-        not_token = bt
-        publish_fee_balance_before = publish_market_swap_fee_dt_balance_before
-        publish_not_balance_before = publish_market_swap_fee_bt_balance_before
-        opc_fee_balance_before = opc_swap_fee_dt_balance_before
-        opc_not_balance_before = opc_swap_fee_bt_balance_before
-        consume_fee_token_balance_before = consume_market_swap_fee_dt_balance_before
-        consume_not_token_balance_before = consume_market_swap_fee_bt_balance_before
-        bpool_fee_token_balance_before = bpool_dt_balance_before
-        bpool_not_token_balance_before = bpool_bt_balance_before
-
-    publish_fee_balance = bpool.publish_market_fee(fee_token.address)
-    publish_not_balance = bpool.publish_market_fee(not_token.address)
-    opc_fee_balance = bpool.community_fee(fee_token.address)
-    opc_not_balance = bpool.community_fee(not_token.address)
-    consume_fee_balance = fee_token.balanceOf(consume_market_swap_fee_address)
-    consume_not_balance = not_token.balanceOf(consume_market_swap_fee_address)
-    bpool_fee_balance = bpool.get_balance(fee_token.address)
-    bpool_not_balance = bpool.get_balance(not_token.address)
-
-    # Check SWAP_FEES event
-    assert (
-        publish_fee_balance_before + swap_fees_event_args.marketFeeAmount
-        == bpool.publish_market_fee(fee_token.address)
-    )
-    assert publish_not_balance_before == bpool.publish_market_fee(not_token.address)
-    assert (
-        opc_fee_balance_before + swap_fees_event_args.oceanFeeAmount
-        == bpool.community_fee(fee_token.address)
-    )
-    assert opc_not_balance_before == bpool.community_fee(not_token.address)
-    assert (
-        consume_fee_token_balance_before + swap_fees_event_args.consumeMarketFeeAmount
-        == fee_token.balanceOf(consume_market_swap_fee_address)
-    )
-    assert consume_not_token_balance_before == not_token.balanceOf(
-        consume_market_swap_fee_address
-    )
-
-    # Check balances
-    assert (
-        publish_fee_balance
-        == publish_fee_balance_before + swap_fees_event_args.marketFeeAmount
-    )
-    assert publish_not_balance == publish_not_balance_before
-    assert (
-        opc_fee_balance == opc_fee_balance_before + swap_fees_event_args.oceanFeeAmount
-    )
-    assert opc_not_balance == opc_not_balance_before
-    assert (
-        consume_fee_balance
-        == consume_fee_token_balance_before
-        + swap_fees_event_args.consumeMarketFeeAmount
-    )
-    assert consume_not_balance == consume_not_token_balance_before
-
-    assert approx_format_units(
-        bpool_fee_balance,
-        fee_token.decimals(),
-        bpool_fee_token_balance_before
-        + log_swap_event_args.tokenAmountIn
-        - swap_fees_event_args.marketFeeAmount
-        - swap_fees_event_args.oceanFeeAmount,
-        fee_token.decimals(),
-        rel=1e-4,
-    )
-
-    assert (
-        bpool_not_balance
-        == bpool_not_token_balance_before - log_swap_event_args.tokenAmountOut
-    )
-
-    check_fee_amounts(
-        bpool,
-        log_swap_event_args.tokenAmountIn,
-        fee_token.decimals(),
-        swap_fees_event_args.LPFeeAmount,
-        swap_fees_event_args.oceanFeeAmount,
-        swap_fees_event_args.marketFeeAmount,
-        swap_fees_event_args.consumeMarketFeeAmount,
-        consume_market_swap_fee,
-    )
-
-    return log_swap_event_args.tokenAmountIn
-
-
 def buy_dt_exact_amount_in(
     web3: Web3,
     bpool: BPool,
@@ -849,3 +597,255 @@ def buy_bt_exact_amount_out(
     )
 
     assert dt_in == dt_in_actual
+
+
+def base_token_to_datatoken(
+    base_token_amount: int,
+    base_token_decimals: int,
+) -> int:
+    """Datatokens have 18 decimals, even when base token decimals is different
+    Given rate == 1, this converts from base tokens to equivalent datatokens
+    """
+    return to_wei(format_units(base_token_amount, base_token_decimals))
+
+
+def check_calc_methods(web3: Web3, bpool: BPool):
+    bt = ERC20Token(web3, bpool.get_base_token_address())
+    dt = ERC20Token(web3, bpool.get_datatoken_address())
+
+    bt_amount = parse_units("100", bt.decimals())
+    dt_amount = base_token_to_datatoken(bt_amount, bt.decimals())
+
+    # "PT out" is equal when calculated using "DT in" or "BT in", regardless of BT decimals
+    pool_out_dt_in = bpool.calc_pool_out_single_in(dt.address, dt_amount)
+    pool_out_bt_in = bpool.calc_pool_out_single_in(bt.address, bt_amount)
+    assert pool_out_dt_in == pool_out_bt_in
+
+    # "PT in" is approx when calculated using "DT out" or "BT out", when BT decimals != 18
+    pool_in_dt_out = bpool.calc_pool_in_single_out(dt.address, dt_amount)
+    pool_in_bt_out = bpool.calc_pool_in_single_out(bt.address, bt_amount)
+    assert approx_from_wei(pool_in_dt_out, pool_in_bt_out)
+
+    pt_amount = to_wei("5")
+
+    # "DT in" and "BT in" are approx when BT decimals != 18
+    dt_in_pool_out = bpool.calc_single_in_pool_out(dt.address, pt_amount)
+    bt_in_pool_out = bpool.calc_single_in_pool_out(bt.address, pt_amount)
+    assert approx_format_units(
+        dt_in_pool_out,
+        dt.decimals(),
+        bt_in_pool_out,
+        bt.decimals(),
+    )
+
+    # "DT out" and "BT out" are approx when BT decimals != 18
+    dt_out_pool_in = bpool.calc_single_out_pool_in(dt.address, pt_amount)
+    bt_out_pool_in = bpool.calc_single_out_pool_in(bt.address, pt_amount)
+    assert approx_format_units(
+        dt_out_pool_in,
+        dt.decimals(),
+        bt_out_pool_in,
+        bt.decimals(),
+    )
+
+
+def check_fee_amounts(
+    bpool: BPool,
+    amount_in: int,
+    decimals: int,
+    lp_fee_amount: int,
+    opc_fee_amount: int,
+    publish_market_swap_fee_amount: int,
+    consume_market_swap_fee_amount: int,
+    consume_market_swap_fee: int,
+):
+    amount_in_unit = format_units(amount_in, decimals)
+
+    expected_lp_swap_fee_amount = parse_units(
+        amount_in_unit * from_wei(bpool.get_swap_fee()), decimals
+    )
+    expected_opc_swap_fee_amount = parse_units(
+        amount_in_unit * from_wei(bpool.opc_fee()), decimals
+    )
+    expected_publish_market_swap_fee_amount = parse_units(
+        amount_in_unit * from_wei(bpool.get_market_fee()), decimals
+    )
+    expected_consume_market_swap_fee_amount = parse_units(
+        amount_in_unit * from_wei(consume_market_swap_fee), decimals
+    )
+
+    assert approx_format_units(
+        lp_fee_amount, decimals, expected_lp_swap_fee_amount, decimals
+    )
+    assert approx_format_units(
+        opc_fee_amount, decimals, expected_opc_swap_fee_amount, decimals, rel=1e5
+    )
+    assert approx_format_units(
+        publish_market_swap_fee_amount,
+        decimals,
+        expected_publish_market_swap_fee_amount,
+        decimals,
+    )
+    assert approx_format_units(
+        consume_market_swap_fee_amount,
+        decimals,
+        expected_consume_market_swap_fee_amount,
+        decimals,
+        rel=1e5,
+    )
+
+
+def check_balances_and_fees(
+    web3: Web3,
+    bpool: BPool,
+    tx_receipt,
+    consumer_bt_balance_before: int,
+    consumer_dt_balance_before: int,
+    consumer_address: str,
+    bpool_bt_balance_before: int,
+    bpool_dt_balance_before: int,
+    publish_market_swap_fee_bt_balance_before: int,
+    publish_market_swap_fee_dt_balance_before: int,
+    opc_swap_fee_bt_balance_before: int,
+    opc_swap_fee_dt_balance_before: int,
+    consume_market_swap_fee_bt_balance_before: int,
+    consume_market_swap_fee_dt_balance_before: int,
+    consume_market_swap_fee_address: str,
+    consume_market_swap_fee: int,
+):
+    log_swap_event = bpool.get_event_log(
+        bpool.EVENT_LOG_SWAP, tx_receipt.blockNumber, web3.eth.block_number, None
+    )
+
+    log_swap_event_args = log_swap_event[0].args
+
+    bt = ERC20Token(web3, bpool.get_base_token_address())
+    dt = ERC20Token(web3, bpool.get_datatoken_address())
+
+    consumer_bt_balance = bt.balanceOf(consumer_address)
+    consumer_dt_balance = dt.balanceOf(consumer_address)
+
+    if log_swap_event_args.tokenIn == bt.address:
+        consumer_in_token_balance_before = consumer_bt_balance_before
+        consumer_in_token_balance = consumer_bt_balance
+        consumer_out_token_balance_before = consumer_dt_balance_before
+        consumer_out_token_balance = consumer_dt_balance
+    else:
+        consumer_in_token_balance_before = consumer_dt_balance_before
+        consumer_in_token_balance = consumer_dt_balance
+        consumer_out_token_balance_before = consumer_bt_balance_before
+        consumer_out_token_balance = consumer_bt_balance
+
+    # Check LOG_SWAP event
+    assert (
+        consumer_in_token_balance + log_swap_event_args.tokenAmountIn
+        == consumer_in_token_balance_before
+    )
+    assert (
+        consumer_out_token_balance_before + log_swap_event_args.tokenAmountOut
+        == consumer_out_token_balance
+    )
+
+    swap_fees_event = bpool.get_event_log(
+        bpool.EVENT_LOG_SWAP_FEES, tx_receipt.blockNumber, web3.eth.block_number, None
+    )
+
+    swap_fees_event_args = swap_fees_event[0].args
+
+    # Fees are denominated in the token coming into the pool
+    if swap_fees_event_args.tokenFeeAddress == bt.address:
+        fee_token = bt
+        not_token = dt
+        publish_fee_balance_before = publish_market_swap_fee_bt_balance_before
+        publish_not_balance_before = publish_market_swap_fee_dt_balance_before
+        opc_fee_balance_before = opc_swap_fee_bt_balance_before
+        opc_not_balance_before = opc_swap_fee_dt_balance_before
+        consume_fee_token_balance_before = consume_market_swap_fee_bt_balance_before
+        consume_not_token_balance_before = consume_market_swap_fee_dt_balance_before
+        bpool_fee_token_balance_before = bpool_bt_balance_before
+        bpool_not_token_balance_before = bpool_dt_balance_before
+    else:
+        fee_token = dt
+        not_token = bt
+        publish_fee_balance_before = publish_market_swap_fee_dt_balance_before
+        publish_not_balance_before = publish_market_swap_fee_bt_balance_before
+        opc_fee_balance_before = opc_swap_fee_dt_balance_before
+        opc_not_balance_before = opc_swap_fee_bt_balance_before
+        consume_fee_token_balance_before = consume_market_swap_fee_dt_balance_before
+        consume_not_token_balance_before = consume_market_swap_fee_bt_balance_before
+        bpool_fee_token_balance_before = bpool_dt_balance_before
+        bpool_not_token_balance_before = bpool_bt_balance_before
+
+    publish_fee_balance = bpool.publish_market_fee(fee_token.address)
+    publish_not_balance = bpool.publish_market_fee(not_token.address)
+    opc_fee_balance = bpool.community_fee(fee_token.address)
+    opc_not_balance = bpool.community_fee(not_token.address)
+    consume_fee_balance = fee_token.balanceOf(consume_market_swap_fee_address)
+    consume_not_balance = not_token.balanceOf(consume_market_swap_fee_address)
+    bpool_fee_balance = bpool.get_balance(fee_token.address)
+    bpool_not_balance = bpool.get_balance(not_token.address)
+
+    # Check SWAP_FEES event
+    assert (
+        publish_fee_balance_before + swap_fees_event_args.marketFeeAmount
+        == bpool.publish_market_fee(fee_token.address)
+    )
+    assert publish_not_balance_before == bpool.publish_market_fee(not_token.address)
+    assert (
+        opc_fee_balance_before + swap_fees_event_args.oceanFeeAmount
+        == bpool.community_fee(fee_token.address)
+    )
+    assert opc_not_balance_before == bpool.community_fee(not_token.address)
+    assert (
+        consume_fee_token_balance_before + swap_fees_event_args.consumeMarketFeeAmount
+        == fee_token.balanceOf(consume_market_swap_fee_address)
+    )
+    assert consume_not_token_balance_before == not_token.balanceOf(
+        consume_market_swap_fee_address
+    )
+
+    # Check balances
+    assert (
+        publish_fee_balance
+        == publish_fee_balance_before + swap_fees_event_args.marketFeeAmount
+    )
+    assert publish_not_balance == publish_not_balance_before
+    assert (
+        opc_fee_balance == opc_fee_balance_before + swap_fees_event_args.oceanFeeAmount
+    )
+    assert opc_not_balance == opc_not_balance_before
+    assert (
+        consume_fee_balance
+        == consume_fee_token_balance_before
+        + swap_fees_event_args.consumeMarketFeeAmount
+    )
+    assert consume_not_balance == consume_not_token_balance_before
+
+    assert approx_format_units(
+        bpool_fee_balance,
+        fee_token.decimals(),
+        bpool_fee_token_balance_before
+        + log_swap_event_args.tokenAmountIn
+        - swap_fees_event_args.marketFeeAmount
+        - swap_fees_event_args.oceanFeeAmount,
+        fee_token.decimals(),
+        rel=1e-4,
+    )
+
+    assert (
+        bpool_not_balance
+        == bpool_not_token_balance_before - log_swap_event_args.tokenAmountOut
+    )
+
+    check_fee_amounts(
+        bpool,
+        log_swap_event_args.tokenAmountIn,
+        fee_token.decimals(),
+        swap_fees_event_args.LPFeeAmount,
+        swap_fees_event_args.oceanFeeAmount,
+        swap_fees_event_args.marketFeeAmount,
+        swap_fees_event_args.consumeMarketFeeAmount,
+        consume_market_swap_fee,
+    )
+
+    return log_swap_event_args.tokenAmountIn
