@@ -501,6 +501,57 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
 
 
 @pytest.mark.unit
+def test_deploy_erc721_and_manage(
+    web3, config, factory_deployer_wallet, consumer_wallet, another_consumer_wallet
+):
+    """
+    Owner deploys a new ERC721 NFT
+    """
+    erc721_factory = ERC721FactoryContract(
+        web3, get_address_of_type(config, "ERC721Factory")
+    )
+    tx = erc721_factory.deploy_erc721_contract(
+        name="NFT",
+        symbol="SYMBOL",
+        template_index=1,
+        additional_metadata_updater=ZERO_ADDRESS,
+        additional_erc20_deployer=ZERO_ADDRESS,
+        token_uri="https://oceanprotocol.com/nft/",
+        transferable=True,
+        owner=factory_deployer_wallet.address,
+        from_wallet=factory_deployer_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+
+    event = erc721_factory.get_event_log(
+        erc721_factory.EVENT_NFT_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    assert event
+
+    token_address = event[0].args.newTokenAddress
+    erc721_nft = ERC721NFT(web3, token_address)
+
+    assert erc721_nft.balance_of(factory_deployer_wallet.address) == 1
+
+    erc721_nft.add_manager(another_consumer_wallet.address, factory_deployer_wallet)
+    erc721_nft.add_to_725_store_list(consumer_wallet.address, factory_deployer_wallet)
+    erc721_nft.add_to_create_erc20_list(
+        consumer_wallet.address, factory_deployer_wallet
+    )
+    erc721_nft.add_to_metadata_list(consumer_wallet.address, factory_deployer_wallet)
+
+    permissions = erc721_nft.get_permissions(consumer_wallet.address)
+
+    assert permissions[1] is True
+    assert permissions[2] is True
+    assert permissions[3] is True
+
+
+@pytest.mark.unit
 def test_start_multiple_order(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):

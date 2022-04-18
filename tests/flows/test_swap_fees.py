@@ -11,7 +11,6 @@ from ocean_lib.config import Config
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
@@ -26,64 +25,202 @@ from tests.resources.helper_functions import (
 )
 
 
-def _deploy_erc721_token(config, web3, factory_deployer_wallet, manager_wallet):
-    erc721_nft = deploy_erc721_erc20(web3, config, factory_deployer_wallet)
-
-    erc721_nft.add_to_725_store_list(manager_wallet.address, factory_deployer_wallet)
-    erc721_nft.add_to_create_erc20_list(manager_wallet.address, factory_deployer_wallet)
-    erc721_nft.add_to_metadata_list(manager_wallet.address, factory_deployer_wallet)
-    return erc721_nft
-
-
 @pytest.mark.unit
-def test_deploy_erc721_and_manage(
-    web3, config, factory_deployer_wallet, consumer_wallet, another_consumer_wallet
+@pytest.mark.parametrize(
+    "base_token_name, publish_market_swap_fee, consume_market_swap_fee, lp_swap_fee",
+    [
+        ("Ocean", "0", "0", "0.0001"),
+        ("Ocean", "0.003", "0.004", "0.005"),
+        ("MockDAI", "0", "0", "0.0001"),
+        ("MockDAI", "0.003", "0.004", "0.005"),
+        ("MockUSDC", "0", "0", "0.0001"),
+        ("MockUSDC", "0.003", "0.004", "0.005"),
+    ],
+)
+def test_pool(
+    web3: Web3,
+    config: Config,
+    factory_deployer_wallet: Wallet,
+    consumer_wallet: Wallet,
+    another_consumer_wallet: Wallet,
+    publisher_wallet: Wallet,
+    base_token_name: str,
+    publish_market_swap_fee: str,
+    consume_market_swap_fee: str,
+    lp_swap_fee: str,
 ):
     """
-    Owner deploys a new ERC721 NFT
+    Tests pool swap fees with OCEAN, DAI, and USDC as base token
+    OCEAN is an approved base token with 18 decimals (OPC Fee = 0.1%)
+    DAI is a non-approved base token with 18 decimals (OPC Fee = 0.2%)
+    USDC is a non-approved base token with 6 decimals (OPC Fee = 0.2%)
     """
+    bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
+
+    transfer_base_token_if_balance_lte(
+        web3=web3,
+        base_token_address=bt.address,
+        factory_deployer_wallet=factory_deployer_wallet,
+        recipient=publisher_wallet.address,
+        min_balance=parse_units("1500", bt.decimals()),
+        amount_to_transfer=parse_units("1500", bt.decimals()),
+    )
+
+    transfer_base_token_if_balance_lte(
+        web3=web3,
+        base_token_address=bt.address,
+        factory_deployer_wallet=factory_deployer_wallet,
+        recipient=consumer_wallet.address,
+        min_balance=parse_units("500", bt.decimals()),
+        amount_to_transfer=parse_units("500", bt.decimals()),
+    )
+
+    factory_router = FactoryRouter(web3, get_address_of_type(config, "Router"))
     erc721_factory = ERC721FactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
     )
-    tx = erc721_factory.deploy_erc721_contract(
-        name="NFT",
-        symbol="SYMBOL",
+    side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
+    erc721_nft = deploy_erc721_erc20(web3, config, publisher_wallet)
+
+    # Datatoken cap is hardcoded to MAX_WEI in contract regardles of what is passed.
+    cap_doesnt_matter = to_wei("100000")
+
+    # Tests publisher deploys a new erc20 datatoken
+    tx = erc721_nft.create_erc20(
         template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_erc20_deployer=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=factory_deployer_wallet.address,
-        from_wallet=factory_deployer_wallet,
+        name="ERC20DT1",
+        symbol="ERC20DT1Symbol",
+        minter=publisher_wallet.address,
+        fee_manager=factory_deployer_wallet.address,
+        publish_market_order_fee_address=publisher_wallet.address,
+        publish_market_order_fee_token=ZERO_ADDRESS,
+        cap=cap_doesnt_matter,
+        publish_market_order_fee_amount=0,
+        bytess=[b""],
+        from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-
     event = erc721_factory.get_event_log(
-        erc721_factory.EVENT_NFT_CREATED,
+        erc721_nft.EVENT_TOKEN_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    erc20_address = event[0].args.newTokenAddress
+    dt = ERC20Token(web3, erc20_address)
+
+    assert dt.get_permissions(publisher_wallet.address)[0] is True
+
+    # Tests publisher calls deployPool(), we then check base token balance and fees
+
+    publish_market_swap_fee = to_wei(publish_market_swap_fee)
+    consume_market_swap_fee = to_wei(consume_market_swap_fee)
+    lp_swap_fee = to_wei(lp_swap_fee)
+
+    initial_base_token_amount = parse_units("1000", bt.decimals())
+
+    bt.approve(factory_router.address, initial_base_token_amount, publisher_wallet)
+
+    tx = dt.deploy_pool(
+        rate=to_wei(1),
+        base_token_decimals=bt.decimals(),
+        vesting_amount=initial_base_token_amount,
+        vesting_blocks=2500000,
+        base_token_amount=initial_base_token_amount,
+        lp_swap_fee_amount=lp_swap_fee,
+        publish_market_swap_fee_amount=publish_market_swap_fee,
+        ss_contract=side_staking.address,
+        base_token_address=bt.address,
+        base_token_sender=publisher_wallet.address,
+        publisher_address=publisher_wallet.address,
+        publish_market_swap_fee_collector=publisher_wallet.address,
+        pool_template_address=get_address_of_type(config, "poolTemplate"),
+        from_wallet=publisher_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    pool_event = factory_router.get_event_log(
+        ERC721FactoryContract.EVENT_NEW_POOL,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
     )
 
-    assert event
+    assert pool_event[0].event == "NewPool"
+    bpool_address = pool_event[0].args.poolAddress
+    bpool = BPool(web3, bpool_address)
+    assert bpool.is_finalized() is True
 
-    token_address = event[0].args.newTokenAddress
-    erc721_nft = ERC721NFT(web3, token_address)
-
-    assert erc721_nft.balance_of(factory_deployer_wallet.address) == 1
-
-    erc721_nft.add_manager(another_consumer_wallet.address, factory_deployer_wallet)
-    erc721_nft.add_to_725_store_list(consumer_wallet.address, factory_deployer_wallet)
-    erc721_nft.add_to_create_erc20_list(
-        consumer_wallet.address, factory_deployer_wallet
+    # Verify fee collectors are configured correctly
+    assert bpool.get_opc_collector() == factory_router.opc_collector()
+    assert bpool.get_opc_collector() == get_address_of_type(
+        config, "OPFCommunityFeeCollector"
     )
-    erc721_nft.add_to_metadata_list(consumer_wallet.address, factory_deployer_wallet)
+    assert bpool.get_publish_market_collector() == publisher_wallet.address
 
-    permissions = erc721_nft.get_permissions(consumer_wallet.address)
+    # Verify fees are configured correctly
+    if factory_router.is_approved_token(bt.address):
+        assert bpool.opc_fee() == to_wei("0.001")
+    else:
+        assert bpool.opc_fee() == to_wei("0.002")
+    assert bpool.opc_fee() == factory_router.get_opc_fee(bt.address)
+    assert bpool.get_swap_fee() == lp_swap_fee
+    assert bpool.get_market_fee() == publish_market_swap_fee
 
-    assert permissions[1] is True
-    assert permissions[2] is True
-    assert permissions[3] is True
+    # Verify 0 fees have been collected so far
+    assert bpool.community_fee(bt.address) == 0
+    assert bpool.community_fee(dt.address) == 0
+    assert bpool.publish_market_fee(bt.address) == 0
+    assert bpool.publish_market_fee(dt.address) == 0
+    # TODO: Assert that consume market fee collector also has 0.
+
+    initial_datatoken_amount = base_token_to_datatoken(
+        initial_base_token_amount, bt.decimals()
+    )
+    assert dt.balanceOf(side_staking.address) == MAX_UINT256 - initial_datatoken_amount
+    assert bt.balanceOf(bpool.address) == initial_base_token_amount
+    assert dt.balanceOf(consumer_wallet.address) == 0
+
+    check_calc_methods(web3, bpool)
+
+    bt.approve(bpool.address, parse_units("1000", bt.decimals()), consumer_wallet)
+
+    buy_dt_exact_amount_in(
+        web3,
+        bpool,
+        another_consumer_wallet.address,
+        consume_market_swap_fee,
+        consumer_wallet,
+        "1",
+    )
+
+    buy_dt_exact_amount_out(
+        web3,
+        bpool,
+        another_consumer_wallet.address,
+        consume_market_swap_fee,
+        consumer_wallet,
+        "2",
+    )
+
+    dt.approve(bpool_address, to_wei("1000"), consumer_wallet)
+
+    buy_bt_exact_amount_in(
+        web3,
+        bpool,
+        another_consumer_wallet.address,
+        consume_market_swap_fee,
+        consumer_wallet,
+        "1",
+    )
+
+    buy_bt_exact_amount_out(
+        web3,
+        bpool,
+        another_consumer_wallet.address,
+        consume_market_swap_fee,
+        consumer_wallet,
+        "1",
+    )
 
 
 def base_token_to_datatoken(
@@ -712,203 +849,3 @@ def buy_bt_exact_amount_out(
     )
 
     assert dt_in == dt_in_actual
-
-
-@pytest.mark.unit
-@pytest.mark.parametrize(
-    "base_token_name, publish_market_swap_fee, consume_market_swap_fee, lp_swap_fee",
-    [
-        ("Ocean", "0", "0", "0.0001"),
-        ("Ocean", "0.003", "0.004", "0.005"),
-        ("MockDAI", "0", "0", "0.0001"),
-        ("MockDAI", "0.003", "0.004", "0.005"),
-        ("MockUSDC", "0", "0", "0.0001"),
-        ("MockUSDC", "0.003", "0.004", "0.005"),
-    ],
-)
-def test_pool(
-    web3: Web3,
-    config: Config,
-    factory_deployer_wallet: Wallet,
-    consumer_wallet: Wallet,
-    another_consumer_wallet: Wallet,
-    publisher_wallet: Wallet,
-    base_token_name: str,
-    publish_market_swap_fee: str,
-    consume_market_swap_fee: str,
-    lp_swap_fee: str,
-):
-    """
-    Tests pool swap fees with OCEAN, DAI, and USDC as base token
-    OCEAN is an approved base token with 18 decimals (OPC Fee = 0.1%)
-    DAI is a non-approved base token with 18 decimals (OPC Fee = 0.2%)
-    USDC is a non-approved base token with 6 decimals (OPC Fee = 0.2%)
-    """
-    bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
-
-    transfer_base_token_if_balance_lte(
-        web3=web3,
-        base_token_address=bt.address,
-        factory_deployer_wallet=factory_deployer_wallet,
-        recipient=publisher_wallet.address,
-        min_balance=parse_units("1500", bt.decimals()),
-        amount_to_transfer=parse_units("1500", bt.decimals()),
-    )
-
-    transfer_base_token_if_balance_lte(
-        web3=web3,
-        base_token_address=bt.address,
-        factory_deployer_wallet=factory_deployer_wallet,
-        recipient=consumer_wallet.address,
-        min_balance=parse_units("500", bt.decimals()),
-        amount_to_transfer=parse_units("500", bt.decimals()),
-    )
-
-    factory_router = FactoryRouter(web3, get_address_of_type(config, "Router"))
-    erc721_factory = ERC721FactoryContract(
-        web3, get_address_of_type(config, "ERC721Factory")
-    )
-    side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
-    erc721_nft = _deploy_erc721_token(
-        config, web3, factory_deployer_wallet, publisher_wallet
-    )
-
-    # Datatoken cap is hardcoded to MAX_WEI in contract regardles of what is passed.
-    cap_doesnt_matter = to_wei("100000")
-
-    # Tests publisher deploys a new erc20 datatoken
-    tx = erc721_nft.create_erc20(
-        template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
-        minter=publisher_wallet.address,
-        fee_manager=factory_deployer_wallet.address,
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=cap_doesnt_matter,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        from_wallet=publisher_wallet,
-    )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    event = erc721_factory.get_event_log(
-        erc721_nft.EVENT_TOKEN_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    erc20_address = event[0].args.newTokenAddress
-    dt = ERC20Token(web3, erc20_address)
-
-    assert dt.get_permissions(publisher_wallet.address)[0] is True
-
-    # Tests publisher calls deployPool(), we then check base token balance and fees
-
-    publish_market_swap_fee = to_wei(publish_market_swap_fee)
-    consume_market_swap_fee = to_wei(consume_market_swap_fee)
-    lp_swap_fee = to_wei(lp_swap_fee)
-
-    initial_base_token_amount = parse_units("1000", bt.decimals())
-
-    bt.approve(factory_router.address, initial_base_token_amount, publisher_wallet)
-
-    tx = dt.deploy_pool(
-        rate=to_wei(1),
-        base_token_decimals=bt.decimals(),
-        vesting_amount=initial_base_token_amount,
-        vesting_blocks=2500000,
-        base_token_amount=initial_base_token_amount,
-        lp_swap_fee_amount=lp_swap_fee,
-        publish_market_swap_fee_amount=publish_market_swap_fee,
-        ss_contract=side_staking.address,
-        base_token_address=bt.address,
-        base_token_sender=publisher_wallet.address,
-        publisher_address=publisher_wallet.address,
-        publish_market_swap_fee_collector=publisher_wallet.address,
-        pool_template_address=get_address_of_type(config, "poolTemplate"),
-        from_wallet=publisher_wallet,
-    )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    pool_event = factory_router.get_event_log(
-        ERC721FactoryContract.EVENT_NEW_POOL,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-
-    assert pool_event[0].event == "NewPool"
-    bpool_address = pool_event[0].args.poolAddress
-    bpool = BPool(web3, bpool_address)
-    assert bpool.is_finalized() is True
-
-    # Verify fee collectors are configured correctly
-    assert bpool.get_opc_collector() == factory_router.opc_collector()
-    assert bpool.get_opc_collector() == get_address_of_type(
-        config, "OPFCommunityFeeCollector"
-    )
-    assert bpool.get_publish_market_collector() == publisher_wallet.address
-
-    # Verify fees are configured correctly
-    if factory_router.is_approved_token(bt.address):
-        assert bpool.opc_fee() == to_wei("0.001")
-    else:
-        assert bpool.opc_fee() == to_wei("0.002")
-    assert bpool.opc_fee() == factory_router.get_opc_fee(bt.address)
-    assert bpool.get_swap_fee() == lp_swap_fee
-    assert bpool.get_market_fee() == publish_market_swap_fee
-
-    # Verify 0 fees have been collected so far
-    assert bpool.community_fee(bt.address) == 0
-    assert bpool.community_fee(dt.address) == 0
-    assert bpool.publish_market_fee(bt.address) == 0
-    assert bpool.publish_market_fee(dt.address) == 0
-    # TODO: Assert that consume market fee collector also has 0.
-
-    initial_datatoken_amount = base_token_to_datatoken(
-        initial_base_token_amount, bt.decimals()
-    )
-    assert dt.balanceOf(side_staking.address) == MAX_UINT256 - initial_datatoken_amount
-    assert bt.balanceOf(bpool.address) == initial_base_token_amount
-    assert dt.balanceOf(consumer_wallet.address) == 0
-
-    check_calc_methods(web3, bpool)
-
-    bt.approve(bpool.address, parse_units("1000", bt.decimals()), consumer_wallet)
-
-    buy_dt_exact_amount_in(
-        web3,
-        bpool,
-        another_consumer_wallet.address,
-        consume_market_swap_fee,
-        consumer_wallet,
-        "1",
-    )
-
-    buy_dt_exact_amount_out(
-        web3,
-        bpool,
-        another_consumer_wallet.address,
-        consume_market_swap_fee,
-        consumer_wallet,
-        "2",
-    )
-
-    dt.approve(bpool_address, to_wei("1000"), consumer_wallet)
-
-    buy_bt_exact_amount_in(
-        web3,
-        bpool,
-        another_consumer_wallet.address,
-        consume_market_swap_fee,
-        consumer_wallet,
-        "1",
-    )
-
-    buy_bt_exact_amount_out(
-        web3,
-        bpool,
-        another_consumer_wallet.address,
-        consume_market_swap_fee,
-        consumer_wallet,
-        "1",
-    )
