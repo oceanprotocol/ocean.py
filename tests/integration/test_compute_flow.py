@@ -310,6 +310,12 @@ def run_compute_test(
 
         assert succeeded, "compute job unsuccessful"
 
+        log_file = ocean_instance.compute.compute_job_result_logs(
+            dataset_and_userdata.asset, service, job_id, consumer_wallet, "algorithmLog"
+        )
+        assert log_file is not None
+        print(f"got algo log file: {str(log_file)}")
+
 
 @pytest.mark.integration
 def test_compute_raw_algo(
