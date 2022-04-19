@@ -17,6 +17,7 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from tests.resources.ddo_helpers import get_first_service_by_type
 from tests.resources.helper_functions import generate_wallet
 
 
@@ -28,9 +29,9 @@ def c2d_flow_readme(
     algorithm_url,
     algorithm_docker_tag,
 ):
-    wallet = generate_wallet()
+    consumer_wallet = publisher_wallet = generate_wallet()
     # Publish the data NFT token
-    erc721_nft = ocean.create_erc721_nft("NFTToken1", "NFT1", wallet)
+    erc721_nft = ocean.create_erc721_nft("NFTToken1", "NFT1", publisher_wallet)
     assert erc721_nft.address
     assert erc721_nft.token_name()
     assert erc721_nft.symbol()
@@ -40,14 +41,14 @@ def c2d_flow_readme(
         template_index=1,
         name="Datatoken 1",
         symbol="DT1",
-        minter=wallet.address,
-        fee_manager=wallet.address,
+        minter=publisher_wallet.address,
+        fee_manager=publisher_wallet.address,
         publish_market_order_fee_address=ZERO_ADDRESS,
         publish_market_order_fee_token=ocean.OCEAN_address,
         cap=ocean.to_wei(100000),
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=wallet,
+        from_wallet=publisher_wallet,
     )
     assert DATA_datatoken.address
 
@@ -92,7 +93,7 @@ def c2d_flow_readme(
     # Publish asset with compute service on-chain.
     DATA_asset = ocean.assets.create(
         metadata=DATA_metadata,
-        publisher_wallet=wallet,
+        publisher_wallet=publisher_wallet,
         encrypted_files=DATA_encrypted_files,
         services=[DATA_compute_service],
         erc721_address=erc721_nft.address,
@@ -102,7 +103,7 @@ def c2d_flow_readme(
     assert DATA_asset.did, "create dataset with compute service unsuccessful"
 
     # Publish the algorithm NFT token
-    ALGO_nft_token = ocean.create_erc721_nft("NFTToken1", "NFT1", wallet)
+    ALGO_nft_token = ocean.create_erc721_nft("NFTToken1", "NFT1", publisher_wallet)
     assert ALGO_nft_token.address
 
     # Publish the datatoken
@@ -110,14 +111,14 @@ def c2d_flow_readme(
         template_index=1,
         name="Datatoken 1",
         symbol="DT1",
-        minter=wallet.address,
-        fee_manager=wallet.address,
+        minter=publisher_wallet.address,
+        fee_manager=publisher_wallet.address,
         publish_market_order_fee_address=ZERO_ADDRESS,
         publish_market_order_fee_token=ocean.OCEAN_address,
         cap=ocean.to_wei(100000),
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=wallet,
+        from_wallet=publisher_wallet,
     )
     assert ALGO_datatoken.address
 
@@ -155,7 +156,7 @@ def c2d_flow_readme(
     # The download (access service) is automatically created, but you can explore other options as well
     ALGO_asset = ocean.assets.create(
         metadata=ALGO_metadata,
-        publisher_wallet=wallet,
+        publisher_wallet=publisher_wallet,
         encrypted_files=ALGO_encrypted_files,
         erc721_address=ALGO_nft_token.address,
         deployed_erc20_tokens=[ALGO_datatoken],
@@ -165,10 +166,10 @@ def c2d_flow_readme(
 
     compute_service = DATA_asset.services[0]
     compute_service.add_publisher_trusted_algorithm(ALGO_asset)
-    DATA_asset = ocean.assets.update(DATA_asset, wallet)
+    DATA_asset = ocean.assets.update(DATA_asset, publisher_wallet)
 
-    DATA_datatoken.mint(wallet.address, ocean.to_wei(5), wallet)
-    ALGO_datatoken.mint(wallet.address, ocean.to_wei(5), wallet)
+    DATA_datatoken.mint(consumer_wallet.address, ocean.to_wei(5), publisher_wallet)
+    ALGO_datatoken.mint(consumer_wallet.address, ocean.to_wei(5), publisher_wallet)
 
     # Convenience variables
     DATA_did = DATA_asset.did
@@ -178,8 +179,8 @@ def c2d_flow_readme(
     DATA_asset = ocean.assets.resolve(DATA_did)
     ALGO_asset = ocean.assets.resolve(ALGO_did)
 
-    compute_service = DATA_asset.services[0]
-    algo_service = ALGO_asset.services[0]
+    compute_service = get_first_service_by_type(DATA_asset, "compute")
+    algo_service = get_first_service_by_type(ALGO_asset, "access")
 
     environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
 
@@ -187,10 +188,10 @@ def c2d_flow_readme(
     DATA_order_tx_id = ocean.assets.pay_for_service(
         asset=DATA_asset,
         service=compute_service,
-        consume_market_order_fee_address=wallet.address,
+        consume_market_order_fee_address=consumer_wallet.address,
         consume_market_order_fee_token=DATA_datatoken.address,
         consume_market_order_fee_amount=0,
-        wallet=wallet,
+        wallet=consumer_wallet,
         initialize_args={
             "compute_environment": environments[0]["id"],
             "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp()),
@@ -203,10 +204,10 @@ def c2d_flow_readme(
     ALGO_order_tx_id = ocean.assets.pay_for_service(
         asset=ALGO_asset,
         service=algo_service,
-        consume_market_order_fee_address=wallet.address,
+        consume_market_order_fee_address=consumer_wallet.address,
         consume_market_order_fee_token=ALGO_datatoken.address,
         consume_market_order_fee_amount=0,
-        wallet=wallet,
+        wallet=consumer_wallet,
         initialize_args={
             "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp())
         },
@@ -218,7 +219,7 @@ def c2d_flow_readme(
     DATA_compute_input = ComputeInput(DATA_did, DATA_order_tx_id, compute_service.id)
     ALGO_compute_input = ComputeInput(ALGO_did, ALGO_order_tx_id, algo_service.id)
     job_id = ocean.compute.start(
-        consumer_wallet=wallet,
+        consumer_wallet=consumer_wallet,
         dataset=DATA_compute_input,
         compute_environment=environments[0]["id"],
         algorithm=ALGO_compute_input,
@@ -228,7 +229,9 @@ def c2d_flow_readme(
     # Wait until job is done
     succeeded = False
     for _ in range(0, 200):
-        status = ocean.compute.status(DATA_asset, compute_service, job_id, wallet)
+        status = ocean.compute.status(
+            DATA_asset, compute_service, job_id, consumer_wallet
+        )
         if status.get("dateFinished") and Decimal(status["dateFinished"]) > 0:
             print(f"Status = '{status}'")
             succeeded = True
@@ -241,7 +244,9 @@ def c2d_flow_readme(
     for i in range(len(status["results"])):
         result_type = status["results"][i]["type"]
         print(f"Fetch result index {i}, type: {result_type}")
-        result = ocean.compute.result(DATA_asset, compute_service, job_id, i, wallet)
+        result = ocean.compute.result(
+            DATA_asset, compute_service, job_id, i, consumer_wallet
+        )
         assert result, "result retrieval unsuccessful"
         print(f"result index: {i}, type: {result_type}, contents: {result}")
 
@@ -276,8 +281,6 @@ def concurrent_c2d(concurrent_flows: int, repetitions: int):
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize(
-    ["concurrent_flows", "repetitions"], [(1, 300), (3, 100), (20, 5)]
-)
+@pytest.mark.parametrize(["concurrent_flows", "repetitions"], [(1, 2), (3, 1), (5, 5)])
 def test_concurrent_c2d(concurrent_flows, repetitions):
     concurrent_c2d(concurrent_flows, repetitions)

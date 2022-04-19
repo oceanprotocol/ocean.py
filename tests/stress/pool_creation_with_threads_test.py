@@ -17,8 +17,8 @@ from tests.resources.helper_functions import generate_wallet
 
 
 def asset_displayed_on_sale(ocean: Ocean):
-    wallet = generate_wallet()
-    erc721_nft = ocean.create_erc721_nft("NFTToken1", "NFT1", wallet)
+    publisher_wallet = generate_wallet()
+    erc721_nft = ocean.create_erc721_nft("NFTToken1", "NFT1", publisher_wallet)
     token_address = erc721_nft.address
     assert token_address
 
@@ -46,14 +46,14 @@ def asset_displayed_on_sale(ocean: Ocean):
     # The download (access service) is automatically created, but you can explore other options as well
     asset = ocean.assets.create(
         metadata=metadata,
-        publisher_wallet=wallet,
+        publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_nft.address,
         erc20_templates=[1],
         erc20_names=["Datatoken 1"],
         erc20_symbols=["DT1"],
-        erc20_minters=[wallet.address],
-        erc20_fee_managers=[wallet.address],
+        erc20_minters=[publisher_wallet.address],
+        erc20_fee_managers=[publisher_wallet.address],
         erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
         erc20_publish_market_order_fee_tokens=[ocean.OCEAN_address],
         erc20_caps=[ocean.to_wei(100000)],
@@ -78,7 +78,7 @@ def asset_displayed_on_sale(ocean: Ocean):
         base_token_amount=ocean.to_wei(2000),
         lp_swap_fee_amount=ocean.to_wei("0.01"),
         publish_market_swap_fee_amount=ocean.to_wei("0.01"),
-        from_wallet=wallet,
+        from_wallet=publisher_wallet,
     )
     assert bpool.address
 
@@ -100,8 +100,6 @@ def concurrent_pool_creation(concurrent_flows: int, repetitions: int):
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize(
-    ["concurrent_flows", "repetitions"], [(1, 300), (3, 100), (20, 5)]
-)
+@pytest.mark.parametrize(["concurrent_flows", "repetitions"], [(1, 2), (3, 1), (5, 5)])
 def test_concurrent_pool_creation(concurrent_flows, repetitions):
     concurrent_pool_creation(concurrent_flows, repetitions)

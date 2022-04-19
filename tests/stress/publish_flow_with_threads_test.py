@@ -24,16 +24,16 @@ def _get_publishing_requirements(ocean: Ocean, wallet: Wallet, config: Config):
 
 
 def publish_flow(ocean: Ocean, config: Config):
-    wallet = generate_wallet()
+    publisher_wallet = generate_wallet()
     (
         erc721_nft,
         erc20_token,
         metadata,
         encrypted_files,
-    ) = _get_publishing_requirements(ocean, wallet, config)
+    ) = _get_publishing_requirements(ocean, publisher_wallet, config)
     asset = ocean.assets.create(
         metadata=metadata,
-        publisher_wallet=wallet,
+        publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_nft.address,
         deployed_erc20_tokens=[erc20_token],
@@ -45,7 +45,7 @@ def publish_flow(ocean: Ocean, config: Config):
     assert asset.nft["name"] == "NFT"
     assert asset.nft["symbol"] == "NFTSYMBOL"
     assert asset.nft["address"] == erc721_nft.address
-    assert asset.nft["owner"] == wallet.address
+    assert asset.nft["owner"] == publisher_wallet.address
     assert asset.datatokens[0]["name"] == "ERC20DT1"
     assert asset.datatokens[0]["symbol"] == "ERC20DT1Symbol"
     assert asset.datatokens[0]["address"] == erc20_token.address
@@ -61,8 +61,6 @@ def concurrent_publish_flow(concurrent_flows: int, repetitions: int):
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize(
-    ["concurrent_flows", "repetitions"], [(1, 300), (3, 100), (20, 5)]
-)
+@pytest.mark.parametrize(["concurrent_flows", "repetitions"], [(1, 2), (3, 1), (5, 5)])
 def test_concurrent_publish_flow(concurrent_flows, repetitions):
     concurrent_publish_flow(concurrent_flows, repetitions)
