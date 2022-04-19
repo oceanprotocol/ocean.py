@@ -324,22 +324,9 @@ def c2d_flow_readme(
     assert succeeded, "compute job unsuccessful"
 
     # Retrieve algorithm output and log files
-    output = None
-    for i in range(len(status["results"])):
-        result = None
-        result_type = status["results"][i]["type"]
-        print(f"Fetch result index {i}, type: {result_type}")
-        result = ocean.compute.result(
-            DATA_asset, compute_service, job_id, i, bob_wallet
-        )
-        print(result)
-        if status["results"][i]["filesize"] > 0:
-            assert result, "result retrieval unsuccessful"
-        print(f"result index: {i}, type: {result_type}, contents: {result}")
-
-        # Extract algorithm output
-        if result_type == "output":
-            output = result
+    output = ocean.compute.compute_job_result_logs(
+        DATA_asset, compute_service, job_id, bob_wallet
+    )[0]
     assert output, "algorithm output not found"
 
     if dataset_name == "branin" or dataset_name == "iris":
