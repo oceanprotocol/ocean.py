@@ -56,7 +56,7 @@ def test_exchange_swap_fees(
     DAI is a non-approved base token with 18 decimals (OPC Fee = 0.2%)
     USDC is a non-approved base token with 6 decimals (OPC Fee = 0.2%)
     """
-    testing_exchange_swap_fees(
+    exchange_swap_fees(
         web3=web3,
         config=config,
         base_token_deployer_wallet=factory_deployer_wallet,
@@ -69,7 +69,7 @@ def test_exchange_swap_fees(
     )
 
 
-def testing_exchange_swap_fees(
+def exchange_swap_fees(
     web3: Web3,
     config: Config,
     base_token_deployer_wallet: Wallet,
