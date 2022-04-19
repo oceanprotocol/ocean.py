@@ -7,8 +7,6 @@ from web3 import Web3
 
 from ocean_lib.config import Config
 from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -20,7 +18,6 @@ from tests.resources.helper_functions import (
 )
 
 
-@pytest.mark.skip
 @pytest.mark.unit
 @pytest.mark.parametrize(
     "base_token_name, publish_market_swap_fee, consume_market_swap_fee",
@@ -114,16 +111,15 @@ def exchange_swap_fees(
         allowed_swapper=ZERO_ADDRESS,
         base_token_decimals=bt.decimals(),
         datatoken_decimals=dt.decimals(),
-        fixed_rate=1,
+        fixed_rate=to_wei(1),
         publish_market_swap_fee_amount=publish_market_swap_fee,
         with_mint=1,
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
-    factory_router = FactoryRouter(web3, get_address_of_type(config, "Router"))
-    exchange_event = factory_router.get_event_log(
-        ERC721FactoryContract.EVENT_NEW_FIXED_RATE,
+    exchange_event = dt.get_event_log(
+        dt.EVENT_NEW_FIXED_RATE,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,

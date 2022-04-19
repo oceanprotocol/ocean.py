@@ -10,7 +10,6 @@ from web3 import Web3
 from ocean_lib.config import Config
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import MAX_UINT256
@@ -155,8 +154,8 @@ def pool_swap_fees(
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    pool_event = factory_router.get_event_log(
-        ERC721FactoryContract.EVENT_NEW_POOL,
+    pool_event = dt.get_event_log(
+        dt.EVENT_NEW_POOL,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
