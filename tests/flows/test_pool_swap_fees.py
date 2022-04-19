@@ -14,7 +14,13 @@ from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import MAX_UINT256
-from ocean_lib.web3_internal.currency import format_units, from_wei, parse_units, to_wei
+from ocean_lib.web3_internal.currency import (
+    MAX_WEI,
+    format_units,
+    from_wei,
+    parse_units,
+    to_wei,
+)
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import (
     approx_format_units,
@@ -27,20 +33,26 @@ from tests.resources.helper_functions import (
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "base_token_name, publish_market_swap_fee, consume_market_swap_fee, lp_swap_fee",
+    "base_token_name, publish_market_swap_fee, consume_market_swap_fee, lp_swap_fee, rate",
     [
         # Min fees
-        ("Ocean", "0", "0", "0.0001"),
-        ("MockDAI", "0", "0", "0.0001"),
-        ("MockUSDC", "0", "0", "0.0001"),
+        ("Ocean", "0", "0", "0.0001", "1"),
+        ("MockDAI", "0", "0", "0.0001", "1"),
+        ("MockUSDC", "0", "0", "0.0001", "1"),
         # Happy path
-        ("Ocean", "0.003", "0.005", "0.01"),
-        ("MockDAI", "0.003", "0.005", "0.01"),
-        ("MockUSDC", "0.003", "0.005", "0.01"),
+        ("Ocean", "0.003", "0.005", "0.01", "1"),
+        ("MockDAI", "0.003", "0.005", "0.01", "1"),
+        ("MockUSDC", "0.003", "0.005", "0.01", "1"),
         # Max fees
-        ("Ocean", "0.1", "0.1", "0.1"),
-        ("MockDAI", "0.1", "0.1", "0.1"),
-        ("MockUSDC", "0.1", "0.1", "0.1"),
+        ("Ocean", "0.1", "0.1", "0.1", "1"),
+        ("MockDAI", "0.1", "0.1", "0.1", "1"),
+        ("MockUSDC", "0.1", "0.1", "0.1", "1"),
+        # Min rate. Rate must be > 1e12 wei (not equal)
+        ("Ocean", "0.003", "0.005", "0.01", "0.000001000000000001"),
+        ("MockUSDC", "0.003", "0.005", "0.01", "0.000001000000000001"),
+        # High rate. There is no maximum
+        ("Ocean", "0.003", "0.005", "0.01", "1000"),
+        ("MockUSDC", "0.003", "0.005", "0.01", "1000"),
     ],
 )
 def test_pool_swap_fees(
@@ -54,6 +66,7 @@ def test_pool_swap_fees(
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     lp_swap_fee: str,
+    rate: str,
 ):
     """
     Tests pool swap fees with OCEAN, DAI, and USDC as base token
@@ -73,6 +86,7 @@ def test_pool_swap_fees(
         publish_market_swap_fee=publish_market_swap_fee,
         consume_market_swap_fee=consume_market_swap_fee,
         lp_swap_fee=lp_swap_fee,
+        rate=rate,
     )
 
 
@@ -87,6 +101,7 @@ def pool_swap_fees(
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     lp_swap_fee: str,
+    rate: str,
 ):
     bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
 
@@ -119,11 +134,12 @@ def pool_swap_fees(
     initial_base_token_amount = parse_units("1000", bt.decimals())
 
     factory_router = FactoryRouter(web3, get_address_of_type(config, "Router"))
-    bt.approve(factory_router.address, initial_base_token_amount, publisher_wallet)
+    bt.approve(factory_router.address, MAX_WEI, publisher_wallet)
 
     side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
+    rate_in_wei = to_wei(rate)
     tx = dt.deploy_pool(
-        rate=to_wei(1),
+        rate=rate_in_wei,
         base_token_decimals=bt.decimals(),
         vesting_amount=initial_base_token_amount,
         vesting_blocks=2500000,
@@ -175,7 +191,7 @@ def pool_swap_fees(
 
     # Verify side staking bot holds all datatokens, minus the initial DT amount
     initial_datatoken_amount = base_token_to_datatoken(
-        initial_base_token_amount, bt.decimals()
+        initial_base_token_amount, bt.decimals(), rate_in_wei
     )
     assert dt.balanceOf(side_staking.address) == MAX_UINT256 - initial_datatoken_amount
 
@@ -185,9 +201,11 @@ def pool_swap_fees(
     # Verify consumer starts with 0 datatokens
     assert dt.balanceOf(consumer_wallet.address) == 0
 
-    check_calc_methods(web3, bpool)
+    check_calc_methods(web3, bpool, rate_in_wei)
 
-    bt.approve(bpool.address, parse_units("1000", bt.decimals()), consumer_wallet)
+    bt.approve(bpool.address, MAX_WEI, consumer_wallet)
+
+    one_base_token = parse_units("1", bt.decimals())
 
     buy_dt_exact_amount_in(
         web3,
@@ -195,7 +213,7 @@ def pool_swap_fees(
         consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
-        "1",
+        one_base_token,
     )
 
     buy_dt_exact_amount_out(
@@ -204,10 +222,10 @@ def pool_swap_fees(
         consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
-        "2",
+        base_token_to_datatoken(one_base_token * 2, bt.decimals(), rate_in_wei),
     )
 
-    dt.approve(bpool_address, to_wei("1000"), consumer_wallet)
+    dt.approve(bpool_address, MAX_WEI, consumer_wallet)
 
     buy_bt_exact_amount_in(
         web3,
@@ -215,7 +233,7 @@ def pool_swap_fees(
         consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
-        "1",
+        base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
     )
 
     buy_bt_exact_amount_out(
@@ -224,7 +242,7 @@ def pool_swap_fees(
         consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
-        "1",
+        one_base_token,
     )
 
 
@@ -234,7 +252,7 @@ def buy_dt_exact_amount_in(
     consume_market_swap_fee_address: str,
     consume_market_swap_fee: int,
     consumer_wallet: Wallet,
-    bt_in_unit: str,
+    bt_in: int,
 ):
     """Tests consumer buys some DT - exactAmountIn"""
     bt = ERC20Token(web3, bpool.get_base_token_address())
@@ -250,8 +268,6 @@ def buy_dt_exact_amount_in(
     opc_fee_dt_balance = bpool.community_fee(dt.address)
     consume_market_fee_bt_balance = bt.balanceOf(consume_market_swap_fee_address)
     consume_market_fee_dt_balance = dt.balanceOf(consume_market_swap_fee_address)
-
-    bt_in = parse_units(bt_in_unit, bt.decimals())
 
     (
         dt_out,
@@ -277,10 +293,10 @@ def buy_dt_exact_amount_in(
         consume_market_swap_fee,
     )
 
-    slippage = Decimal("0.01")
+    slippage = Decimal("0.01")  # 1%
     dt_out_unit = from_wei(dt_out)
     min_amount_out = to_wei(dt_out_unit - (dt_out_unit * slippage))
-    max_price_impact = Decimal("0.01")
+    max_price_impact = Decimal("0.01")  # 1%
     spot_price_before = bpool.get_spot_price(
         bt.address, dt.address, consume_market_swap_fee
     )
@@ -327,7 +343,7 @@ def buy_dt_exact_amount_out(
     consume_market_swap_fee_address: str,
     consume_market_swap_fee: int,
     consumer_wallet: Wallet,
-    dt_out_unit: str,
+    dt_out: int,
 ):
     """Tests consumer buys some DT - exactAmountOut"""
     bt = ERC20Token(web3, bpool.get_base_token_address())
@@ -343,8 +359,6 @@ def buy_dt_exact_amount_out(
     opc_fee_dt_balance = bpool.community_fee(dt.address)
     consume_market_fee_bt_balance = bt.balanceOf(consume_market_swap_fee_address)
     consume_market_fee_dt_balance = dt.balanceOf(consume_market_swap_fee_address)
-
-    dt_out = to_wei(dt_out_unit)
 
     (
         bt_in,
@@ -370,10 +384,10 @@ def buy_dt_exact_amount_out(
         consume_market_swap_fee,
     )
 
-    slippage = Decimal("0.01")
+    slippage = Decimal("0.01")  # 1%
     bt_in_unit = format_units(bt_in, bt.decimals())
     max_amount_in = parse_units(bt_in_unit + (bt_in_unit * slippage), bt.decimals())
-    max_price_impact = Decimal("0.01")
+    max_price_impact = Decimal("0.01")  # 1%
     spot_price_before = bpool.get_spot_price(
         bt.address, dt.address, consume_market_swap_fee
     )
@@ -420,7 +434,7 @@ def buy_bt_exact_amount_in(
     consume_market_swap_fee_address: str,
     consume_market_swap_fee: int,
     consumer_wallet: Wallet,
-    dt_in_unit: str,
+    dt_in: int,
 ):
     """Tests consumer buys some BT - exactAmountIn"""
     bt = ERC20Token(web3, bpool.get_base_token_address())
@@ -436,8 +450,6 @@ def buy_bt_exact_amount_in(
     opc_fee_dt_balance = bpool.community_fee(dt.address)
     consume_market_fee_bt_balance = bt.balanceOf(consume_market_swap_fee_address)
     consume_market_fee_dt_balance = dt.balanceOf(consume_market_swap_fee_address)
-
-    dt_in = to_wei(dt_in_unit)
 
     (
         bt_out,
@@ -463,10 +475,10 @@ def buy_bt_exact_amount_in(
         consume_market_swap_fee,
     )
 
-    slippage = Decimal("0.01")
+    slippage = Decimal("0.01")  # 1%
     bt_out_unit = format_units(bt_out)
     min_amount_out = parse_units(bt_out_unit - (bt_out_unit * slippage))
-    max_price_impact = Decimal("0.01")
+    max_price_impact = Decimal("0.01")  # 1%
     spot_price_before = bpool.get_spot_price(
         dt.address, bt.address, consume_market_swap_fee
     )
@@ -515,7 +527,7 @@ def buy_bt_exact_amount_out(
     consume_market_swap_fee_address: str,
     consume_market_swap_fee: int,
     consumer_wallet: Wallet,
-    bt_out_unit: str,
+    bt_out: int,
 ):
     """Tests consumer buys some DT - exactAmountOut"""
     bt = ERC20Token(web3, bpool.get_base_token_address())
@@ -531,8 +543,6 @@ def buy_bt_exact_amount_out(
     opc_fee_dt_balance = bpool.community_fee(dt.address)
     consume_market_fee_bt_balance = bt.balanceOf(consume_market_swap_fee_address)
     consume_market_fee_dt_balance = dt.balanceOf(consume_market_swap_fee_address)
-
-    bt_out = parse_units(bt_out_unit, bt.decimals())
 
     (
         dt_in,
@@ -558,10 +568,10 @@ def buy_bt_exact_amount_out(
         consume_market_swap_fee,
     )
 
-    slippage = Decimal("0.01")
+    slippage = Decimal("0.01")  # 1%
     dt_in_unit = from_wei(dt_in)
     max_amount_in = to_wei(dt_in_unit + (dt_in_unit * slippage))
-    max_price_impact = Decimal("0.01")
+    max_price_impact = Decimal("0.01")  # 1%
     spot_price_before = bpool.get_spot_price(
         dt.address, bt.address, consume_market_swap_fee
     )
@@ -607,19 +617,36 @@ def buy_bt_exact_amount_out(
 def base_token_to_datatoken(
     base_token_amount: int,
     base_token_decimals: int,
+    rate: int,
 ) -> int:
-    """Datatokens have 18 decimals, even when base token decimals is different
-    Given rate == 1, this converts from base tokens to equivalent datatokens
+    """Convert base tokens to equivalent datatokens, accounting for differences
+    in decimals and exchange rate.
+
+    Datatokens have 18 decimals, even when base token decimals are not 18.
     """
-    return to_wei(format_units(base_token_amount, base_token_decimals))
+    return to_wei(format_units(base_token_amount, base_token_decimals) * from_wei(rate))
 
 
-def check_calc_methods(web3: Web3, bpool: BPool):
+def datatoken_to_base_token(
+    datatoken_amount: int,
+    base_token_decimals: int,
+    rate: int,
+) -> int:
+    """
+    Convert datatokens to equivalent base tokens, accounting for differences
+    in decimals and exchange rate.
+
+    Datatokens have 18 decimals, even when base token decimals are not 18.
+    """
+    return parse_units(from_wei(datatoken_amount) / from_wei(rate), base_token_decimals)
+
+
+def check_calc_methods(web3: Web3, bpool: BPool, rate: int):
     bt = ERC20Token(web3, bpool.get_base_token_address())
     dt = ERC20Token(web3, bpool.get_datatoken_address())
 
     bt_amount = parse_units("100", bt.decimals())
-    dt_amount = base_token_to_datatoken(bt_amount, bt.decimals())
+    dt_amount = base_token_to_datatoken(bt_amount, bt.decimals(), rate)
 
     # "PT out" is equal when calculated using "DT in" or "BT in", regardless of BT decimals
     pool_out_dt_in = bpool.calc_pool_out_single_in(dt.address, dt_amount)
@@ -636,21 +663,23 @@ def check_calc_methods(web3: Web3, bpool: BPool):
     # "DT in" and "BT in" are approx when BT decimals != 18
     dt_in_pool_out = bpool.calc_single_in_pool_out(dt.address, pt_amount)
     bt_in_pool_out = bpool.calc_single_in_pool_out(bt.address, pt_amount)
+    bt_in_pool_out_as_dt = base_token_to_datatoken(bt_in_pool_out, bt.decimals(), rate)
     assert approx_format_units(
         dt_in_pool_out,
         dt.decimals(),
-        bt_in_pool_out,
-        bt.decimals(),
+        bt_in_pool_out_as_dt,
+        dt.decimals(),
     )
 
     # "DT out" and "BT out" are approx when BT decimals != 18
     dt_out_pool_in = bpool.calc_single_out_pool_in(dt.address, pt_amount)
     bt_out_pool_in = bpool.calc_single_out_pool_in(bt.address, pt_amount)
+    bt_out_pool_in_as_dt = base_token_to_datatoken(bt_out_pool_in, bt.decimals(), rate)
     assert approx_format_units(
         dt_out_pool_in,
         dt.decimals(),
-        bt_out_pool_in,
-        bt.decimals(),
+        bt_out_pool_in_as_dt,
+        dt.decimals(),
     )
 
 
