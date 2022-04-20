@@ -49,9 +49,9 @@ def test_from_wei():
         from_wei(MAX_WEI) == MAX_ETHER
     ), "Conversion from maximum wei to maximum ether failed."
 
-    with pytest.raises(ValueError):
-        # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_ETHER
-        with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+    # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_ETHER
+    with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+        with pytest.raises(ValueError):
             from_wei(MAX_WEI + 1)
 
 
@@ -65,9 +65,9 @@ def test_format_units():
     assert format_units(MIN_WEI, USDT_DECIMALS) == MIN_USDT
     assert format_units(MAX_WEI, USDT_DECIMALS) == MAX_USDT
 
-    with pytest.raises(ValueError):
-        # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_WEI
-        with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+    # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_WEI
+    with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+        with pytest.raises(ValueError):
             format_units(MAX_WEI + 1, USDT_DECIMALS)
 
     assert format_units(0, "mwei") == Decimal("0")
@@ -77,9 +77,9 @@ def test_format_units():
     assert format_units(MIN_WEI, "mwei") == MIN_USDT
     assert format_units(MAX_WEI, "mwei") == MAX_USDT
 
-    with pytest.raises(ValueError):
-        # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_WEI
-        with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+    # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_WEI
+    with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+        with pytest.raises(ValueError):
             format_units(MAX_WEI + 1, "mwei")
 
     assert format_units(12345, SEVEN_DECIMALS) == Decimal("0.0012345")
@@ -119,9 +119,9 @@ def test_to_wei():
         to_wei(MAX_ETHER) == MAX_WEI
     ), "Conversion from maximum ether to maximum wei failed."
 
-    with pytest.raises(ValueError):
-        # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_ETHER
-        with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+    # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_ETHER
+    with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+        with pytest.raises(ValueError):
             to_wei(MAX_ETHER + 1)
 
 
@@ -135,9 +135,9 @@ def test_parse_units():
     assert parse_units(MIN_USDT, USDT_DECIMALS) == MIN_WEI
     assert parse_units(MAX_USDT, USDT_DECIMALS) == MAX_WEI
 
-    with pytest.raises(ValueError):
-        # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_USDT
-        with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+    # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_USDT
+    with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+        with pytest.raises(ValueError):
             parse_units(MAX_USDT + 1, USDT_DECIMALS)
 
     assert parse_units("0", "mwei") == 0
@@ -147,9 +147,9 @@ def test_parse_units():
     assert parse_units(MIN_USDT, "mwei") == MIN_WEI
     assert parse_units(MAX_USDT, "mwei") == MAX_WEI
 
-    with pytest.raises(ValueError):
-        # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_USDT
-        with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+    # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_USDT
+    with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+        with pytest.raises(ValueError):
             parse_units(MAX_USDT + 1, "mwei")
 
     assert parse_units("0", SEVEN_DECIMALS) == 0
@@ -180,9 +180,9 @@ def test_ether_fmt():
         == "115,792,089,237,316,195,423,570,985,008,687,907,853,269,984,665,640,564,039,457.584007913129639935"
     ), "Should have 78 digits, commas, 18 decimal places, no ticker symbol"
 
-    with pytest.raises(ValueError):
-        # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_ETHER
-        with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+    # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_ETHER
+    with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+        with pytest.raises(ValueError):
             assert ether_fmt(MAX_ETHER + 1)
 
 
@@ -238,9 +238,9 @@ def test_pretty_ether():
     assert pretty_ether("1234567890123") == "1.23e+12"
     assert pretty_ether("12345678901234") == "1.23e+13"
     assert pretty_ether(MAX_ETHER) == "1.15e+59"
-    with pytest.raises(ValueError):
-        # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_ETHER
-        with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+    # Use ETHEREUM_DECIMAL_CONTEXT when performing arithmetic on MAX_ETHER
+    with localcontext(ETHEREUM_DECIMAL_CONTEXT):
+        with pytest.raises(ValueError):
             pretty_ether(MAX_ETHER + 1)
 
 

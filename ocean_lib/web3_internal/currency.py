@@ -6,6 +6,7 @@ from decimal import ROUND_DOWN, Context, Decimal, localcontext
 from typing import Union
 
 from enforce_typing import enforce_types
+from eth_utils.currency import units
 
 from ocean_lib.web3_internal.constants import MAX_UINT256
 
@@ -35,29 +36,14 @@ MIN_ETHER = Decimal("0.000000000000000001")
 """The maximum possible token amount on Ethereum-compatible blockchains, denoted in ether"""
 MAX_ETHER = Decimal(MAX_WEI).scaleb(-18, context=ETHEREUM_DECIMAL_CONTEXT)
 
-UNITS = [
-    "wei",
-    "kwei",
-    "mwei",
-    "gwei",
-    "szabo",
-    "finney",
-    "ether",
-    "kether",
-    "mether",
-    "gether",
-    "tether",
-]
-
 
 @enforce_types
 def format_units(amount: int, unit_name: Union[str, int] = DECIMALS_18) -> Decimal:
     """Convert token amount EVM-compatible integer to a formatted unit."""
     # Coerce to Decimal because Web3.fromWei can return int 0
     num_decimals = (
-        UNITS.index(unit_name) * 3 if isinstance(unit_name, str) else unit_name
+        int(units[unit_name].log10()) if isinstance(unit_name, str) else unit_name
     )
-
     if amount == 0:
         return Decimal(0)
 
@@ -79,7 +65,7 @@ def parse_units(
     float input is purposfully not supported
     """
     num_decimals = (
-        UNITS.index(unit_name) * 3 if isinstance(unit_name, str) else unit_name
+        int(units[unit_name].log10()) if isinstance(unit_name, str) else unit_name
     )
 
     decimal_amount = normalize_and_validate_unit(amount, num_decimals)
