@@ -258,14 +258,12 @@ def pool_swap_fees(
         dt.balanceOf(consume_market_swap_fee_collector.address)
     )
 
-    assert publish_market_fee_bt_balance_after == 0
-    assert publish_market_fee_dt_balance_after == 0
-    assert opc_fee_bt_balance_after == 0
-    assert opc_fee_dt_balance_after == 0
-    assert consume_market_fee_bt_balance_after == 0
-    assert consume_market_fee_dt_balance_after == 0
-
-    # import pdb; pdb.set_trace()
+    assert publish_market_fee_bt_balance_after == publish_market_fee_bt_balance_before
+    assert publish_market_fee_dt_balance_after == publish_market_fee_dt_balance_before
+    assert opc_fee_bt_balance_after == opc_fee_bt_balance_before
+    assert opc_fee_dt_balance_after == opc_fee_dt_balance_before
+    assert consume_market_fee_bt_balance_after == consume_market_fee_bt_balance_before
+    assert consume_market_fee_dt_balance_after == consume_market_fee_dt_balance_before
 
     one_base_token = parse_units("1", bt.decimals())
 
