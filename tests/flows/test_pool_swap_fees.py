@@ -161,10 +161,9 @@ def pool_swap_fees(
         None,
     )
 
-    assert pool_event[0].event == "NewPool"
     bpool_address = pool_event[0].args.poolAddress
     bpool = BPool(web3, bpool_address)
-    assert bpool.is_finalized() is True
+    assert bpool.is_finalized()
 
     # Verify fee collectors are configured correctly
     assert bpool.get_opc_collector() == factory_router.opc_collector()
@@ -663,22 +662,18 @@ def check_calc_methods(web3: Web3, bpool: BPool, rate: int):
     dt_in_pool_out = bpool.calc_single_in_pool_out(dt.address, pt_amount)
     bt_in_pool_out = bpool.calc_single_in_pool_out(bt.address, pt_amount)
     bt_in_pool_out_as_dt = base_token_to_datatoken(bt_in_pool_out, bt.decimals(), rate)
-    assert approx_format_units(
+    assert approx_from_wei(
         dt_in_pool_out,
-        dt.decimals(),
         bt_in_pool_out_as_dt,
-        dt.decimals(),
     )
 
     # "DT out" and "BT out" are approx when BT decimals != 18
     dt_out_pool_in = bpool.calc_single_out_pool_in(dt.address, pt_amount)
     bt_out_pool_in = bpool.calc_single_out_pool_in(bt.address, pt_amount)
     bt_out_pool_in_as_dt = base_token_to_datatoken(bt_out_pool_in, bt.decimals(), rate)
-    assert approx_format_units(
+    assert approx_from_wei(
         dt_out_pool_in,
-        dt.decimals(),
         bt_out_pool_in_as_dt,
-        dt.decimals(),
     )
 
 
