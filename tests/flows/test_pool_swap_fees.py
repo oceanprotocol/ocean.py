@@ -243,6 +243,70 @@ def pool_swap_fees(
         one_base_token,
     )
 
+    # Circumvent publish market, consume market, and ocean community swap fees using join/exit
+
+    consumer_bt_balance_before = format_units(
+        bt.balanceOf(consumer_wallet.address), bt.decimals()
+    )
+    consumer_dt_balance_before = from_wei(dt.balanceOf(consumer_wallet.address))
+    consumer_pt_balance_before = from_wei(bpool.balanceOf(consumer_wallet.address))
+
+    publish_market_fee_bt_balance_before = format_units(
+        bpool.publish_market_fee(bt.address), bt.decimals()
+    )
+    publish_market_fee_dt_balance_before = from_wei(
+        bpool.publish_market_fee(dt.address)
+    )
+    opc_fee_bt_balance_before = format_units(
+        bpool.community_fee(bt.address), bt.decimals()
+    )
+    opc_fee_dt_balance_before = from_wei(bpool.community_fee(dt.address))
+    consume_market_fee_bt_balance_before = format_units(
+        bt.balanceOf(consume_market_swap_fee_collector.address), bt.decimals()
+    )
+    consume_market_fee_dt_balance_before = from_wei(
+        dt.balanceOf(consume_market_swap_fee_collector.address)
+    )
+
+    tx = bpool.join_swap_extern_amount_in(
+        parse_units("1", bt.decimals()) * 2, 0, consumer_wallet
+    )
+
+    consumer_pt_balance_after_join = from_wei(bpool.balanceOf(consumer_wallet.address))
+    tx = bpool.exit_pool(
+        to_wei(consumer_pt_balance_after_join), [0, 0], consumer_wallet
+    )
+
+    consumer_bt_balance_after = format_units(
+        bt.balanceOf(consumer_wallet.address), bt.decimals()
+    )
+    consumer_dt_balance_after = from_wei(dt.balanceOf(consumer_wallet.address))
+    consumer_pt_balance_after = from_wei(bpool.balanceOf(consumer_wallet.address))
+
+    publish_market_fee_bt_balance_after = format_units(
+        bpool.publish_market_fee(bt.address), bt.decimals()
+    )
+    publish_market_fee_dt_balance_after = from_wei(bpool.publish_market_fee(dt.address))
+    opc_fee_bt_balance_after = format_units(
+        bpool.community_fee(bt.address), bt.decimals()
+    )
+    opc_fee_dt_balance_after = from_wei(bpool.community_fee(dt.address))
+    consume_market_fee_bt_balance_after = format_units(
+        bt.balanceOf(consume_market_swap_fee_collector.address), bt.decimals()
+    )
+    consume_market_fee_dt_balance_after = from_wei(
+        dt.balanceOf(consume_market_swap_fee_collector.address)
+    )
+
+    assert publish_market_fee_bt_balance_after == 0
+    assert publish_market_fee_dt_balance_after == 0
+    assert opc_fee_bt_balance_after == 0
+    assert opc_fee_dt_balance_after == 0
+    assert consume_market_fee_bt_balance_after == 0
+    assert consume_market_fee_dt_balance_after == 0
+
+    # import pdb; pdb.set_trace()
+
 
 def buy_dt_exact_amount_in(
     web3: Web3,
