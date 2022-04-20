@@ -199,6 +199,10 @@ def pool_swap_fees(
     # Verify consumer starts with 0 datatokens
     assert dt.balanceOf(consumer_wallet.address) == 0
 
+    check_calc_methods(web3, bpool, rate_in_wei)
+
+    bt.approve(bpool.address, MAX_WEI, consumer_wallet)
+
     # Circumvent publish market, consume market, and ocean community swap fees using join/exit
 
     consumer_bt_balance_before = format_units(
@@ -262,10 +266,6 @@ def pool_swap_fees(
     assert consume_market_fee_dt_balance_after == 0
 
     # import pdb; pdb.set_trace()
-
-    check_calc_methods(web3, bpool, rate_in_wei)
-
-    bt.approve(bpool.address, MAX_WEI, consumer_wallet)
 
     one_base_token = parse_units("1", bt.decimals())
 
