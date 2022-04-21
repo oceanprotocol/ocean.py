@@ -28,7 +28,7 @@ from tests.resources.helper_functions import (
 )
 
 
-def consume_flow(ocean: Ocean, config: Config):
+def consume_flow(ocean: Ocean, config: Config, tmpdir):
     consumer_wallet = publisher_wallet = generate_wallet()
     metadata = {
         "created": "2020-11-15T12:27:48Z",
@@ -110,7 +110,7 @@ def consume_flow(ocean: Ocean, config: Config):
         from_wallet=consumer_wallet,
     )
     # Download file
-    destination = _create_downloads_path(config)
+    destination = _create_downloads_path(tmpdir)
 
     ocean.assets.download_asset(
         asset=ddo,
@@ -124,23 +124,23 @@ def consume_flow(ocean: Ocean, config: Config):
     ), "The asset folder is empty."
 
 
-def concurrent_consume_flow(concurrent_flows: int, repetitions: int):
+def concurrent_consume_flow(concurrent_flows: int, repetitions: int, tmpdir):
     config = ExampleConfig.get_config()
     ocean = Ocean(config)
     mint_fake_OCEAN(config)
     with ThreadPoolExecutor(max_workers=concurrent_flows) as executor:
         for _ in range(concurrent_flows * repetitions):
-            executor.submit(consume_flow, ocean, config)
+            executor.submit(consume_flow, ocean, config, tmpdir)
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize(["concurrent_flows", "repetitions"], [(1, 2), (3, 1), (5, 5)])
-def test_concurrent_consume_flow(concurrent_flows, repetitions):
-    concurrent_consume_flow(concurrent_flows, repetitions)
+def test_concurrent_consume_flow(concurrent_flows, repetitions, tmpdir):
+    concurrent_consume_flow(concurrent_flows, repetitions, tmpdir)
 
 
-def _create_downloads_path(config):
-    destination = config.downloads_path
+def _create_downloads_path(tmpdir):
+    destination = tmpdir
     if not os.path.isabs(destination):
         destination = os.path.abspath(destination)
 
