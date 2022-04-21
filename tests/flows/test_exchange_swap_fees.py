@@ -385,82 +385,6 @@ def sell_dt_and_verify_swap_fees(
     )
 
 
-def collect_bt_or_dt_and_verify_balances(
-    token_address: str,
-    web3: Web3,
-    exchange: FixedRateExchange,
-    exchange_id: bytes,
-    from_wallet: Wallet,
-):
-    """Collet BT or Collect DT and verify balances"""
-    exchange_info = exchange.get_exchange(exchange_id)
-    dt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.DATATOKEN])
-    publish_market = dt.get_payment_collector()
-
-    if token_address == dt.address:
-        token = dt
-        balance_index = FixedRateExchangeDetails.DT_BALANCE
-        method = exchange.collect_dt
-    else:
-        token = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
-        balance_index = FixedRateExchangeDetails.BT_BALANCE
-        method = exchange.collect_bt
-
-    exchange_token_balance_before = exchange_info[balance_index]
-
-    publish_market_token_balance_before = token.balanceOf(publish_market)
-
-    method(exchange_id, exchange_token_balance_before, from_wallet)
-
-    exchange_info = exchange.get_exchange(exchange_id)
-    exchange_token_balance_after = exchange_info[balance_index]
-
-    publish_market_token_balance_after = token.balanceOf(publish_market)
-
-    assert exchange_token_balance_after == 0
-    assert (
-        publish_market_token_balance_before + exchange_token_balance_before
-        == publish_market_token_balance_after
-    )
-
-
-def collect_fee_and_verify_balances(
-    balance_index: int,
-    web3: Web3,
-    exchange: FixedRateExchange,
-    exchange_id: bytes,
-    from_wallet: Wallet,
-):
-    """Collet publish market swap fees or ocean community swap fees and verify balances"""
-    exchange_info = exchange.get_exchange(exchange_id)
-    bt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
-
-    fees_info = exchange.get_fees_info(exchange_id)
-    exchange_fee_balance_before = fees_info[balance_index]
-
-    if balance_index == FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE:
-        method = exchange.collect_market_fee
-        fee_collector = fees_info[FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR]
-    else:
-        method = exchange.collect_ocean_fee
-        fee_collector = exchange.opc_collector()
-
-    fee_collector_bt_balance_before = bt.balanceOf(fee_collector)
-
-    method(exchange_id, from_wallet)
-
-    fees_info = exchange.get_fees_info(exchange_id)
-    exchange_fee_balance_after = fees_info[balance_index]
-
-    fee_collector_bt_balance_after = bt.balanceOf(fee_collector)
-
-    assert exchange_fee_balance_after == 0
-    assert (
-        fee_collector_bt_balance_before + exchange_fee_balance_before
-        == fee_collector_bt_balance_after
-    )
-
-
 def check_balances_and_fees(
     web3: Web3,
     exchange: FixedRateExchange,
@@ -567,4 +491,80 @@ def check_balances_and_fees(
     assert (
         consume_market_fee_bt_balance_before + swapped_event_args.consumeMarketFeeAmount
         == consume_market_fee_bt_balance_after
+    )
+
+
+def collect_bt_or_dt_and_verify_balances(
+    token_address: str,
+    web3: Web3,
+    exchange: FixedRateExchange,
+    exchange_id: bytes,
+    from_wallet: Wallet,
+):
+    """Collet BT or Collect DT and verify balances"""
+    exchange_info = exchange.get_exchange(exchange_id)
+    dt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.DATATOKEN])
+    publish_market = dt.get_payment_collector()
+
+    if token_address == dt.address:
+        token = dt
+        balance_index = FixedRateExchangeDetails.DT_BALANCE
+        method = exchange.collect_dt
+    else:
+        token = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
+        balance_index = FixedRateExchangeDetails.BT_BALANCE
+        method = exchange.collect_bt
+
+    exchange_token_balance_before = exchange_info[balance_index]
+
+    publish_market_token_balance_before = token.balanceOf(publish_market)
+
+    method(exchange_id, exchange_token_balance_before, from_wallet)
+
+    exchange_info = exchange.get_exchange(exchange_id)
+    exchange_token_balance_after = exchange_info[balance_index]
+
+    publish_market_token_balance_after = token.balanceOf(publish_market)
+
+    assert exchange_token_balance_after == 0
+    assert (
+        publish_market_token_balance_before + exchange_token_balance_before
+        == publish_market_token_balance_after
+    )
+
+
+def collect_fee_and_verify_balances(
+    balance_index: int,
+    web3: Web3,
+    exchange: FixedRateExchange,
+    exchange_id: bytes,
+    from_wallet: Wallet,
+):
+    """Collet publish market swap fees or ocean community swap fees and verify balances"""
+    exchange_info = exchange.get_exchange(exchange_id)
+    bt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
+
+    fees_info = exchange.get_fees_info(exchange_id)
+    exchange_fee_balance_before = fees_info[balance_index]
+
+    if balance_index == FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE:
+        method = exchange.collect_market_fee
+        fee_collector = fees_info[FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR]
+    else:
+        method = exchange.collect_ocean_fee
+        fee_collector = exchange.opc_collector()
+
+    fee_collector_bt_balance_before = bt.balanceOf(fee_collector)
+
+    method(exchange_id, from_wallet)
+
+    fees_info = exchange.get_fees_info(exchange_id)
+    exchange_fee_balance_after = fees_info[balance_index]
+
+    fee_collector_bt_balance_after = bt.balanceOf(fee_collector)
+
+    assert exchange_fee_balance_after == 0
+    assert (
+        fee_collector_bt_balance_before + exchange_fee_balance_before
+        == fee_collector_bt_balance_after
     )
