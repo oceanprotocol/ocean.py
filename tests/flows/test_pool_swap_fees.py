@@ -360,6 +360,9 @@ def pool_swap_fees(
         one_base_token,
     )
 
+    # TODO: Collect publish market swap fees
+    # TODO Collect ocean community fees
+
 
 def buy_dt_exact_amount_in(
     web3: Web3,

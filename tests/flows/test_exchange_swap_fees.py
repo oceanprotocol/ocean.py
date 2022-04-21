@@ -218,6 +218,20 @@ def exchange_swap_fees(
         base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
     )
 
+    collect_bt(
+        web3,
+        exchange,
+        exchange_id,
+        consumer_wallet,
+    )
+
+    # TODO: Collect dt
+    # TODO: Collect market fee
+    # TODO: Collect ocean fee
+
+    # TODO: exchange without mint
+    # TODO: update market fee
+
 
 def base_token_to_datatoken(
     base_token_amount: int,
@@ -346,6 +360,35 @@ def sell_dt_and_verify_swap_fees(
     )
 
 
+def collect_bt(
+    web3: Web3,
+    exchange: FixedRateExchange,
+    exchange_id: bytes,
+    from_wallet: Wallet,
+):
+    exchange_info = exchange.get_exchange(exchange_id)
+    bt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
+    dt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.DATATOKEN])
+
+    publish_market = dt.get_payment_collector()
+
+    exchange_bt_balance_before = exchange_info[FixedRateExchangeDetails.BT_BALANCE]
+
+    publish_market_bt_balance_before = bt.balanceOf(publish_market)
+
+    exchange.collect_bt(exchange_id, exchange_bt_balance_before, from_wallet)
+
+    exchange_bt_balance_after = exchange_info[FixedRateExchangeDetails.BT_BALANCE]
+
+    publish_market_bt_balance_after = bt.balanceOf(publish_market)
+
+    assert exchange_bt_balance_after == 0
+    assert (
+        publish_market_bt_balance_before + exchange_bt_balance_before
+        == publish_market_bt_balance_after
+    )
+
+
 def check_balances_and_fees(
     web3: Web3,
     exchange: FixedRateExchange,
@@ -376,17 +419,6 @@ def check_balances_and_fees(
         exchange.EVENT_SWAPPED, tx_receipt.blockNumber, web3.eth.block_number, None
     )
     swapped_event_args = swapped_event[0].args
-
-    # event Swapped(
-    #     bytes32 indexed exchangeId,
-    #     address indexed by,
-    #     uint256 baseTokenSwappedAmount,
-    #     uint256 datatokenSwappedAmount,
-    #     address tokenOutAddress,
-    #     uint256 marketFeeAmount,
-    #     uint256 oceanFeeAmount,
-    #     uint256 consumeMarketFeeAmount
-    # );
 
     # Assign "in" token and "out" token
     if swapped_event_args.tokenOutAddress == dt.address:
