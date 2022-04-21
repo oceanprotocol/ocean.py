@@ -48,6 +48,7 @@ from tests.resources.helper_functions import (
         ("MockDAI", "0.1", "0.1", "0.1", "1"),
         ("MockUSDC", "0.1", "0.1", "0.1", "1"),
         # Min rate. Rate must be > 1e12 wei (not equal)
+        # TODO: Reenable these tests
         # ("Ocean", "0.003", "0.005", "0.01", "0.000001000000000001"),
         # ("MockUSDC", "0.003", "0.005", "0.01", "0.000001000000000001"),
         # High rate. There is no maximum
