@@ -236,8 +236,23 @@ def exchange_swap_fees(
         consumer_wallet,
     )
 
-    # TODO: Collect market fee
-    # TODO: Collect ocean fee
+    # Collect market fee
+    collect_fee_and_verify_balances(
+        FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE,
+        web3,
+        exchange,
+        exchange_id,
+        consumer_wallet,
+    )
+
+    # Collect ocean fee
+    collect_fee_and_verify_balances(
+        FixedRateExchangeFeesInfo.OCEAN_FEE_AVAILABLE,
+        web3,
+        exchange,
+        exchange_id,
+        consumer_wallet,
+    )
 
     # TODO: exchange without mint
     # TODO: update market fee
@@ -406,6 +421,43 @@ def collect_bt_or_dt_and_verify_balances(
     assert (
         publish_market_token_balance_before + exchange_token_balance_before
         == publish_market_token_balance_after
+    )
+
+
+def collect_fee_and_verify_balances(
+    balance_index: int,
+    web3: Web3,
+    exchange: FixedRateExchange,
+    exchange_id: bytes,
+    from_wallet: Wallet,
+):
+    """Collet publish market swap fees or ocean community swap fees and verify balances"""
+    exchange_info = exchange.get_exchange(exchange_id)
+    bt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
+
+    fees_info = exchange.get_fees_info(exchange_id)
+    exchange_fee_balance_before = fees_info[balance_index]
+
+    if balance_index == FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE:
+        method = exchange.collect_market_fee
+        fee_collector = fees_info[FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR]
+    else:
+        method = exchange.collect_ocean_fee
+        fee_collector = exchange.opc_collector()
+
+    fee_collector_bt_balance_before = bt.balanceOf(fee_collector)
+
+    method(exchange_id, from_wallet)
+
+    fees_info = exchange.get_fees_info(exchange_id)
+    exchange_fee_balance_after = fees_info[balance_index]
+
+    fee_collector_bt_balance_after = bt.balanceOf(fee_collector)
+
+    assert exchange_fee_balance_after == 0
+    assert (
+        fee_collector_bt_balance_before + exchange_fee_balance_before
+        == fee_collector_bt_balance_after
     )
 
 
