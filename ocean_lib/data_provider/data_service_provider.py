@@ -234,7 +234,7 @@ class DataServiceProvider:
                 consumer_wallet, did
             )
             response = DataServiceProvider._http_method(
-                "get", url=download_endpoint, params=payload
+                "get", url=download_endpoint, params=payload, stream=True, timeout=3
             )
 
             if not response or not hasattr(response, "status_code"):
@@ -677,7 +677,7 @@ class DataServiceProvider:
         """
         if response.status_code == 200:
             with open(os.path.join(destination_folder, file_name), "wb") as f:
-                for chunk in response.iter_content(chunk_size=None):
+                for chunk in response.iter_content(chunk_size=4096):
                     f.write(chunk)
             logger.info(f"Saved downloaded file in {f.name}")
         else:
