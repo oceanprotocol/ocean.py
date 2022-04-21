@@ -195,8 +195,9 @@ def pool_swap_fees(
     )
     assert dt.balanceOf(side_staking.address) == MAX_UINT256 - initial_datatoken_amount
 
-    # Verify pool contains initial base token amount
+    # Verify pool balances
     assert bt.balanceOf(bpool.address) == initial_base_token_amount
+    assert dt.balanceOf(bpool.address) == initial_datatoken_amount
 
     # Verify consumer starts with 0 datatokens
     assert dt.balanceOf(consumer_wallet.address) == 0
@@ -277,6 +278,8 @@ def pool_swap_fees(
         dt.balanceOf(consume_market_swap_fee_collector.address)
     )
 
+    assert consumer_pt_balance_before == consumer_pt_balance_after
+
     assert publish_market_fee_bt_balance_after == publish_market_fee_bt_balance_before
     assert publish_market_fee_dt_balance_after == publish_market_fee_dt_balance_before
     assert opc_fee_bt_balance_after == opc_fee_bt_balance_before
@@ -321,41 +324,41 @@ def pool_swap_fees(
 
     one_base_token = parse_units("1", bt.decimals())
 
-    # buy_dt_exact_amount_in(
-    #     web3,
-    #     bpool,
-    #     consume_market_swap_fee_collector.address,
-    #     consume_market_swap_fee,
-    #     consumer_wallet,
-    #     one_base_token,
-    # )
+    buy_dt_exact_amount_in(
+        web3,
+        bpool,
+        consume_market_swap_fee_collector.address,
+        consume_market_swap_fee,
+        consumer_wallet,
+        one_base_token,
+    )
 
-    # buy_dt_exact_amount_out(
-    #     web3,
-    #     bpool,
-    #     consume_market_swap_fee_collector.address,
-    #     consume_market_swap_fee,
-    #     consumer_wallet,
-    #     base_token_to_datatoken(one_base_token * 2, bt.decimals(), rate_in_wei),
-    # )
+    buy_dt_exact_amount_out(
+        web3,
+        bpool,
+        consume_market_swap_fee_collector.address,
+        consume_market_swap_fee,
+        consumer_wallet,
+        base_token_to_datatoken(one_base_token * 2, bt.decimals(), rate_in_wei),
+    )
 
-    # buy_bt_exact_amount_in(
-    #     web3,
-    #     bpool,
-    #     consume_market_swap_fee_collector.address,
-    #     consume_market_swap_fee,
-    #     consumer_wallet,
-    #     base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
-    # )
+    buy_bt_exact_amount_in(
+        web3,
+        bpool,
+        consume_market_swap_fee_collector.address,
+        consume_market_swap_fee,
+        consumer_wallet,
+        base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
+    )
 
-    # buy_bt_exact_amount_out(
-    #     web3,
-    #     bpool,
-    #     consume_market_swap_fee_collector.address,
-    #     consume_market_swap_fee,
-    #     consumer_wallet,
-    #     one_base_token,
-    # )
+    buy_bt_exact_amount_out(
+        web3,
+        bpool,
+        consume_market_swap_fee_collector.address,
+        consume_market_swap_fee,
+        consumer_wallet,
+        one_base_token,
+    )
 
 
 def buy_dt_exact_amount_in(
@@ -729,28 +732,18 @@ def buy_bt_exact_amount_out(
 def base_token_to_datatoken(
     base_token_amount: int,
     base_token_decimals: int,
-    rate: int,
+    rate_in_wei: int,
 ) -> int:
     """Convert base tokens to equivalent datatokens, accounting for differences
     in decimals and exchange rate.
 
-    Datatokens have 18 decimals, even when base token decimals are not 18.
-    """
-    return to_wei(format_units(base_token_amount, base_token_decimals) * from_wei(rate))
+    When creating a pool, the rate is the initial # of datatokens per base token.
 
-
-def datatoken_to_base_token(
-    datatoken_amount: int,
-    base_token_decimals: int,
-    rate: int,
-) -> int:
+    Datatokens always have 18 decimals, even when the base tokens don't.
     """
-    Convert datatokens to equivalent base tokens, accounting for differences
-    in decimals and exchange rate.
-
-    Datatokens have 18 decimals, even when base token decimals are not 18.
-    """
-    return parse_units(from_wei(datatoken_amount) / from_wei(rate), base_token_decimals)
+    return to_wei(
+        format_units(base_token_amount, base_token_decimals) * from_wei(rate_in_wei)
+    )
 
 
 def check_calc_methods(web3: Web3, bpool: BPool, rate: int):

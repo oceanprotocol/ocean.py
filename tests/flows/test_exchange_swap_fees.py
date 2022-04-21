@@ -15,9 +15,14 @@ from ocean_lib.models.fixed_rate_exchange import (
 )
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import MAX_WEI, parse_units, to_wei
+from ocean_lib.web3_internal.currency import (
+    MAX_WEI,
+    format_units,
+    from_wei,
+    parse_units,
+    to_wei,
+)
 from ocean_lib.web3_internal.wallet import Wallet
-from tests.flows.test_pool_swap_fees import base_token_to_datatoken
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
     transfer_base_token_if_balance_lte,
@@ -40,6 +45,12 @@ from tests.resources.helper_functions import (
         ("Ocean", "0.1", "0.1", "1"),
         ("MockDAI", "0.1", "0.1", "1"),
         ("MockUSDC", "0.1", "0.1", "1"),
+        # Min rate. Rate must be => 1e10 wei
+        ("Ocean", "0.003", "0.005", "0.000000010000000000"),
+        ("MockUSDC", "0.003", "0.005", "0.000000010000000000"),
+        # High rate. There is no maximum
+        ("Ocean", "0.003", "0.005", "1000"),
+        ("MockUSDC", "0.003", "0.005", "1000"),
     ],
 )
 def test_exchange_swap_fees(
@@ -103,8 +114,8 @@ def exchange_swap_fees(
         base_token_address=bt.address,
         from_wallet=base_token_deployer_wallet,
         recipient=consumer_wallet.address,
-        min_balance=parse_units("500", bt.decimals()),
-        amount_to_transfer=parse_units("500", bt.decimals()),
+        min_balance=parse_units("1500", bt.decimals()),
+        amount_to_transfer=parse_units("1500", bt.decimals()),
     )
 
     _, dt = deploy_erc721_erc20(web3, config, publisher_wallet, publisher_wallet)
@@ -205,6 +216,23 @@ def exchange_swap_fees(
         consume_market_swap_fee,
         consumer_wallet,
         base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
+    )
+
+
+def base_token_to_datatoken(
+    base_token_amount: int,
+    base_token_decimals: int,
+    rate_in_wei: int,
+) -> int:
+    """Convert base tokens to equivalent datatokens, accounting for differences
+    in decimals and exchange rate.
+
+    When creating an exchange, the rate is the price of 1 datatoken in base tokens.
+
+    Datatokens always have 18 decimals, even when the base tokens don't.
+    """
+    return to_wei(
+        format_units(base_token_amount, base_token_decimals) / from_wei(rate_in_wei)
     )
 
 
