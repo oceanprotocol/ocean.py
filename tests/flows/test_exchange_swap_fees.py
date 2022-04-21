@@ -218,14 +218,24 @@ def exchange_swap_fees(
         base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
     )
 
-    collect_bt(
+    # Collect BT
+    collect_bt_or_dt_and_verify_balances(
+        bt.address,
         web3,
         exchange,
         exchange_id,
         consumer_wallet,
     )
 
-    # TODO: Collect dt
+    # Collect DT
+    collect_bt_or_dt_and_verify_balances(
+        dt.address,
+        web3,
+        exchange,
+        exchange_id,
+        consumer_wallet,
+    )
+
     # TODO: Collect market fee
     # TODO: Collect ocean fee
 
@@ -360,32 +370,42 @@ def sell_dt_and_verify_swap_fees(
     )
 
 
-def collect_bt(
+def collect_bt_or_dt_and_verify_balances(
+    token_address: str,
     web3: Web3,
     exchange: FixedRateExchange,
     exchange_id: bytes,
     from_wallet: Wallet,
 ):
+    """Collet BT or Collect DT and verify balances"""
     exchange_info = exchange.get_exchange(exchange_id)
-    bt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
     dt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.DATATOKEN])
-
     publish_market = dt.get_payment_collector()
 
-    exchange_bt_balance_before = exchange_info[FixedRateExchangeDetails.BT_BALANCE]
+    if token_address == dt.address:
+        token = dt
+        balance_index = FixedRateExchangeDetails.DT_BALANCE
+        method = exchange.collect_dt
+    else:
+        token = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
+        balance_index = FixedRateExchangeDetails.BT_BALANCE
+        method = exchange.collect_bt
 
-    publish_market_bt_balance_before = bt.balanceOf(publish_market)
+    exchange_token_balance_before = exchange_info[balance_index]
 
-    exchange.collect_bt(exchange_id, exchange_bt_balance_before, from_wallet)
+    publish_market_token_balance_before = token.balanceOf(publish_market)
 
-    exchange_bt_balance_after = exchange_info[FixedRateExchangeDetails.BT_BALANCE]
+    method(exchange_id, exchange_token_balance_before, from_wallet)
 
-    publish_market_bt_balance_after = bt.balanceOf(publish_market)
+    exchange_info = exchange.get_exchange(exchange_id)
+    exchange_token_balance_after = exchange_info[balance_index]
 
-    assert exchange_bt_balance_after == 0
+    publish_market_token_balance_after = token.balanceOf(publish_market)
+
+    assert exchange_token_balance_after == 0
     assert (
-        publish_market_bt_balance_before + exchange_bt_balance_before
-        == publish_market_bt_balance_after
+        publish_market_token_balance_before + exchange_token_balance_before
+        == publish_market_token_balance_after
     )
 
 
