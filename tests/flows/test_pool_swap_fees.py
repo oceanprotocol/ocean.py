@@ -293,6 +293,10 @@ def pool_swap_fees(
         f"opc fee: {format_units(swap_ocean_fee, bt.decimals())},\t"
         f"publish market fee: {format_units(swap_publish_market_fee, bt.decimals())},\t"
         f"consume market fee: {format_units(swap_consume_market_fee, bt.decimals())},\t"
+        f"bt balance before: {consumer_bt_balance_before},\t"
+        f"bt balance after: {consumer_bt_balance_before - format_units(swap_bt_in, bt.decimals())},\t"
+        f"dt balance before: {consumer_dt_balance_before},\t"
+        f"dt balance after: {consumer_dt_balance_before + from_wei(swap_dt_out)},\t"
     )
     logger.warning(
         f"Join/Exit:\n"
@@ -302,6 +306,10 @@ def pool_swap_fees(
         f"opc fee: {opc_fee_bt_balance_after - opc_fee_bt_balance_before},\t"
         f"publish market fee: {publish_market_fee_bt_balance_after - publish_market_fee_bt_balance_before},\t"
         f"consume market fee: {consume_market_fee_bt_balance_after - consume_market_fee_bt_balance_before},\t"
+        f"bt balance before: {consumer_bt_balance_before},\t"
+        f"bt balance after: {consumer_bt_balance_after},\t"
+        f"dt balance before: {consumer_dt_balance_before},\t"
+        f"dt balance after: {consumer_dt_balance_after},\t"
     )
 
     # import pdb; pdb.set_trace()
