@@ -2,6 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import logging
 from decimal import Decimal
 
 import pytest
@@ -47,8 +48,8 @@ from tests.resources.helper_functions import (
         ("MockDAI", "0.1", "0.1", "0.1", "1"),
         ("MockUSDC", "0.1", "0.1", "0.1", "1"),
         # Min rate. Rate must be > 1e12 wei (not equal)
-        ("Ocean", "0.003", "0.005", "0.01", "0.000001000000000001"),
-        ("MockUSDC", "0.003", "0.005", "0.01", "0.000001000000000001"),
+        # ("Ocean", "0.003", "0.005", "0.01", "0.000001000000000001"),
+        # ("MockUSDC", "0.003", "0.005", "0.01", "0.000001000000000001"),
         # High rate. There is no maximum
         ("Ocean", "0.003", "0.005", "0.01", "1000"),
         ("MockUSDC", "0.003", "0.005", "0.01", "1000"),
@@ -201,7 +202,9 @@ def pool_swap_fees(
 
     check_calc_methods(web3, bpool, rate_in_wei)
 
+    # Grant infinite approvals to pool
     bt.approve(bpool.address, MAX_WEI, consumer_wallet)
+    dt.approve(bpool_address, MAX_WEI, consumer_wallet)
 
     # Circumvent publish market, consume market, and ocean community swap fees using join/exit
 
@@ -228,9 +231,24 @@ def pool_swap_fees(
         dt.balanceOf(consume_market_swap_fee_collector.address)
     )
 
-    tx = bpool.join_swap_extern_amount_in(
-        parse_units("1", bt.decimals()) * 2, 0, consumer_wallet
+    # Get the spot price (the price in BT to purchase 1 DT)
+    spot_price = bpool.get_spot_price(bt.address, dt.address, consume_market_swap_fee)
+
+    # Using join/exit to perform a swap requires 2x starting capital.
+    swap_bt_in = spot_price
+    join_bt_in = spot_price * 2
+
+    (
+        swap_dt_out,
+        swap_lp_fee,
+        swap_ocean_fee,
+        swap_publish_market_fee,
+        swap_consume_market_fee,
+    ) = bpool.get_amount_out_exact_in(
+        bt.address, dt.address, swap_bt_in, consume_market_swap_fee
     )
+
+    tx = bpool.join_swap_extern_amount_in(join_bt_in, 0, consumer_wallet)
 
     consumer_pt_balance_after_join = from_wei(bpool.balanceOf(consumer_wallet.address))
     tx = bpool.exit_pool(
@@ -265,45 +283,70 @@ def pool_swap_fees(
     assert consume_market_fee_bt_balance_after == consume_market_fee_bt_balance_before
     assert consume_market_fee_dt_balance_after == consume_market_fee_dt_balance_before
 
+    logger = logging.getLogger(__name__)
+    logger.warning(f"Spot Price: {format_units(spot_price, bt.decimals())} BT for 1 DT")
+    logger.warning(
+        f"Swap:\n"
+        f"bt in: {format_units(swap_bt_in, bt.decimals())},\t"
+        f"dt out: {from_wei(swap_dt_out)},\t"
+        f"lp fee: {format_units(swap_lp_fee, bt.decimals())},\t"
+        f"opc fee: {format_units(swap_ocean_fee, bt.decimals())},\t"
+        f"publish market fee: {format_units(swap_publish_market_fee, bt.decimals())},\t"
+        f"consume market fee: {format_units(swap_consume_market_fee, bt.decimals())},\t"
+    )
+    logger.warning(
+        f"Join/Exit:\n"
+        f"bt in: {format_units(join_bt_in, bt.decimals())},\t"
+        f"dt out: {consumer_dt_balance_after - consumer_dt_balance_before},\t"
+        f"lp fee: ??????\t"
+        f"opc fee: {opc_fee_bt_balance_after - opc_fee_bt_balance_before},\t"
+        f"publish market fee: {publish_market_fee_bt_balance_after - publish_market_fee_bt_balance_before},\t"
+        f"consume market fee: {consume_market_fee_bt_balance_after - consume_market_fee_bt_balance_before},\t"
+    )
+
+    # import pdb; pdb.set_trace()
+
+    assert swap_dt_out <= to_wei(consumer_dt_balance_after) - to_wei(
+        consumer_dt_balance_before
+    )
+
     one_base_token = parse_units("1", bt.decimals())
 
-    buy_dt_exact_amount_in(
-        web3,
-        bpool,
-        consume_market_swap_fee_collector.address,
-        consume_market_swap_fee,
-        consumer_wallet,
-        one_base_token,
-    )
+    # buy_dt_exact_amount_in(
+    #     web3,
+    #     bpool,
+    #     consume_market_swap_fee_collector.address,
+    #     consume_market_swap_fee,
+    #     consumer_wallet,
+    #     one_base_token,
+    # )
 
-    buy_dt_exact_amount_out(
-        web3,
-        bpool,
-        consume_market_swap_fee_collector.address,
-        consume_market_swap_fee,
-        consumer_wallet,
-        base_token_to_datatoken(one_base_token * 2, bt.decimals(), rate_in_wei),
-    )
+    # buy_dt_exact_amount_out(
+    #     web3,
+    #     bpool,
+    #     consume_market_swap_fee_collector.address,
+    #     consume_market_swap_fee,
+    #     consumer_wallet,
+    #     base_token_to_datatoken(one_base_token * 2, bt.decimals(), rate_in_wei),
+    # )
 
-    dt.approve(bpool_address, MAX_WEI, consumer_wallet)
+    # buy_bt_exact_amount_in(
+    #     web3,
+    #     bpool,
+    #     consume_market_swap_fee_collector.address,
+    #     consume_market_swap_fee,
+    #     consumer_wallet,
+    #     base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
+    # )
 
-    buy_bt_exact_amount_in(
-        web3,
-        bpool,
-        consume_market_swap_fee_collector.address,
-        consume_market_swap_fee,
-        consumer_wallet,
-        base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
-    )
-
-    buy_bt_exact_amount_out(
-        web3,
-        bpool,
-        consume_market_swap_fee_collector.address,
-        consume_market_swap_fee,
-        consumer_wallet,
-        one_base_token,
-    )
+    # buy_bt_exact_amount_out(
+    #     web3,
+    #     bpool,
+    #     consume_market_swap_fee_collector.address,
+    #     consume_market_swap_fee,
+    #     consumer_wallet,
+    #     one_base_token,
+    # )
 
 
 def buy_dt_exact_amount_in(
@@ -702,6 +745,7 @@ def datatoken_to_base_token(
 
 
 def check_calc_methods(web3: Web3, bpool: BPool, rate: int):
+    # TODO: Move this to a different file. Unrelated to swap fees.
     bt = ERC20Token(web3, bpool.get_base_token_address())
     dt = ERC20Token(web3, bpool.get_datatoken_address())
 
