@@ -256,8 +256,39 @@ def exchange_swap_fees(
         consumer_wallet,
     )
 
+    # Update market fee
+    new_publish_market_swap_fee = to_wei("0.02")
+    exchange.update_market_fee(
+        exchange_id, new_publish_market_swap_fee, publisher_wallet
+    )
+    fees_info = exchange.get_fees_info(exchange_id)
+    assert (
+        fees_info[FixedRateExchangeFeesInfo.MARKET_FEE] == new_publish_market_swap_fee
+    )
+
+    buy_or_sell_dt_and_verify_balances_swap_fees(
+        "buy",
+        base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
+        web3,
+        exchange,
+        exchange_id,
+        consume_market_swap_fee_collector.address,
+        consume_market_swap_fee,
+        consumer_wallet,
+    )
+
+    buy_or_sell_dt_and_verify_balances_swap_fees(
+        "sell",
+        base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
+        web3,
+        exchange,
+        exchange_id,
+        consume_market_swap_fee_collector.address,
+        consume_market_swap_fee,
+        consumer_wallet,
+    )
+
     # TODO: exchange without mint
-    # TODO: update market fee
 
 
 def base_token_to_datatoken(
