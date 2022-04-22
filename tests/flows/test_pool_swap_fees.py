@@ -2,7 +2,6 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import logging
 from decimal import Decimal
 
 import pytest
@@ -207,120 +206,6 @@ def pool_swap_fees(
     # Grant infinite approvals to pool
     bt.approve(bpool.address, MAX_WEI, consumer_wallet)
     dt.approve(bpool_address, MAX_WEI, consumer_wallet)
-
-    # Circumvent publish market, consume market, and ocean community swap fees using join/exit
-
-    consumer_bt_balance_before = format_units(
-        bt.balanceOf(consumer_wallet.address), bt.decimals()
-    )
-    consumer_dt_balance_before = from_wei(dt.balanceOf(consumer_wallet.address))
-    consumer_pt_balance_before = from_wei(bpool.balanceOf(consumer_wallet.address))
-
-    publish_market_fee_bt_balance_before = format_units(
-        bpool.publish_market_fee(bt.address), bt.decimals()
-    )
-    publish_market_fee_dt_balance_before = from_wei(
-        bpool.publish_market_fee(dt.address)
-    )
-    opc_fee_bt_balance_before = format_units(
-        bpool.community_fee(bt.address), bt.decimals()
-    )
-    opc_fee_dt_balance_before = from_wei(bpool.community_fee(dt.address))
-    consume_market_fee_bt_balance_before = format_units(
-        bt.balanceOf(consume_market_swap_fee_collector.address), bt.decimals()
-    )
-    consume_market_fee_dt_balance_before = from_wei(
-        dt.balanceOf(consume_market_swap_fee_collector.address)
-    )
-
-    # Get the spot price (the price in BT to purchase 1 DT)
-    spot_price = bpool.get_spot_price(bt.address, dt.address, consume_market_swap_fee)
-
-    # Using join/exit to perform a swap requires 2x starting capital.
-    swap_bt_in = spot_price
-    join_bt_in = spot_price * 2
-
-    (
-        swap_dt_out,
-        swap_lp_fee,
-        swap_ocean_fee,
-        swap_publish_market_fee,
-        swap_consume_market_fee,
-    ) = bpool.get_amount_out_exact_in(
-        bt.address, dt.address, swap_bt_in, consume_market_swap_fee
-    )
-
-    tx = bpool.join_swap_extern_amount_in(join_bt_in, 0, consumer_wallet)
-
-    consumer_pt_balance_after_join = from_wei(bpool.balanceOf(consumer_wallet.address))
-    tx = bpool.exit_pool(
-        to_wei(consumer_pt_balance_after_join), [0, 0], consumer_wallet
-    )
-
-    consumer_bt_balance_after = format_units(
-        bt.balanceOf(consumer_wallet.address), bt.decimals()
-    )
-    consumer_dt_balance_after = from_wei(dt.balanceOf(consumer_wallet.address))
-    consumer_pt_balance_after = from_wei(bpool.balanceOf(consumer_wallet.address))
-
-    publish_market_fee_bt_balance_after = format_units(
-        bpool.publish_market_fee(bt.address), bt.decimals()
-    )
-    publish_market_fee_dt_balance_after = from_wei(bpool.publish_market_fee(dt.address))
-    opc_fee_bt_balance_after = format_units(
-        bpool.community_fee(bt.address), bt.decimals()
-    )
-    opc_fee_dt_balance_after = from_wei(bpool.community_fee(dt.address))
-    consume_market_fee_bt_balance_after = format_units(
-        bt.balanceOf(consume_market_swap_fee_collector.address), bt.decimals()
-    )
-    consume_market_fee_dt_balance_after = from_wei(
-        dt.balanceOf(consume_market_swap_fee_collector.address)
-    )
-
-    assert consumer_pt_balance_before == consumer_pt_balance_after
-
-    assert publish_market_fee_bt_balance_after == publish_market_fee_bt_balance_before
-    assert publish_market_fee_dt_balance_after == publish_market_fee_dt_balance_before
-    assert opc_fee_bt_balance_after == opc_fee_bt_balance_before
-    assert opc_fee_dt_balance_after == opc_fee_dt_balance_before
-    assert consume_market_fee_bt_balance_after == consume_market_fee_bt_balance_before
-    assert consume_market_fee_dt_balance_after == consume_market_fee_dt_balance_before
-
-    logger = logging.getLogger(__name__)
-    logger.warning(f"Spot Price: {format_units(spot_price, bt.decimals())} BT for 1 DT")
-    logger.warning(
-        f"Swap:\n"
-        f"bt in: {format_units(swap_bt_in, bt.decimals())},\t"
-        f"dt out: {from_wei(swap_dt_out)},\t"
-        f"lp fee: {format_units(swap_lp_fee, bt.decimals())},\t"
-        f"opc fee: {format_units(swap_ocean_fee, bt.decimals())},\t"
-        f"publish market fee: {format_units(swap_publish_market_fee, bt.decimals())},\t"
-        f"consume market fee: {format_units(swap_consume_market_fee, bt.decimals())},\t"
-        f"bt balance before: {consumer_bt_balance_before},\t"
-        f"bt balance after: {consumer_bt_balance_before - format_units(swap_bt_in, bt.decimals())},\t"
-        f"dt balance before: {consumer_dt_balance_before},\t"
-        f"dt balance after: {consumer_dt_balance_before + from_wei(swap_dt_out)},\t"
-    )
-    logger.warning(
-        f"Join/Exit:\n"
-        f"bt in: {format_units(join_bt_in, bt.decimals())},\t"
-        f"dt out: {consumer_dt_balance_after - consumer_dt_balance_before},\t"
-        f"lp fee: ??????\t"
-        f"opc fee: {opc_fee_bt_balance_after - opc_fee_bt_balance_before},\t"
-        f"publish market fee: {publish_market_fee_bt_balance_after - publish_market_fee_bt_balance_before},\t"
-        f"consume market fee: {consume_market_fee_bt_balance_after - consume_market_fee_bt_balance_before},\t"
-        f"bt balance before: {consumer_bt_balance_before},\t"
-        f"bt balance after: {consumer_bt_balance_after},\t"
-        f"dt balance before: {consumer_dt_balance_before},\t"
-        f"dt balance after: {consumer_dt_balance_after},\t"
-    )
-
-    # import pdb; pdb.set_trace()
-
-    assert swap_dt_out <= to_wei(consumer_dt_balance_after) - to_wei(
-        consumer_dt_balance_before
-    )
 
     one_base_token = parse_units("1", bt.decimals())
 
