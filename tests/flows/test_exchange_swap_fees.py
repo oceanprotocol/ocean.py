@@ -31,26 +31,29 @@ from tests.resources.helper_functions import (
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "base_token_name, publish_market_swap_fee, consume_market_swap_fee, rate",
+    "base_token_name, publish_market_swap_fee, consume_market_swap_fee, rate, with_mint",
     [
         # Min fees
-        ("Ocean", "0", "0", "1"),
-        ("MockDAI", "0", "0", "1"),
-        ("MockUSDC", "0", "0", "1"),
+        ("Ocean", "0", "0", "1", 1),
+        ("MockDAI", "0", "0", "1", 1),
+        ("MockUSDC", "0", "0", "1", 1),
         # Happy path
-        ("Ocean", "0.003", "0.005", "1"),
-        ("MockDAI", "0.003", "0.005", "1"),
-        ("MockUSDC", "0.003", "0.005", "1"),
+        ("Ocean", "0.003", "0.005", "1", 1),
+        ("MockDAI", "0.003", "0.005", "1", 1),
+        ("MockUSDC", "0.003", "0.005", "1", 1),
         # Max fees
-        ("Ocean", "0.1", "0.1", "1"),
-        ("MockDAI", "0.1", "0.1", "1"),
-        ("MockUSDC", "0.1", "0.1", "1"),
+        ("Ocean", "0.1", "0.1", "1", 1),
+        ("MockDAI", "0.1", "0.1", "1", 1),
+        ("MockUSDC", "0.1", "0.1", "1", 1),
         # Min rate. Rate must be => 1e10 wei
-        ("Ocean", "0.003", "0.005", "0.000000010000000000"),
-        ("MockUSDC", "0.003", "0.005", "0.000000010000000000"),
+        ("Ocean", "0.003", "0.005", "0.000000010000000000", 1),
+        ("MockUSDC", "0.003", "0.005", "0.000000010000000000", 1),
         # High rate. There is no maximum
-        ("Ocean", "0.003", "0.005", "1000"),
-        ("MockUSDC", "0.003", "0.005", "1000"),
+        ("Ocean", "0.003", "0.005", "1000", 1),
+        ("MockUSDC", "0.003", "0.005", "1000", 1),
+        # with_mint = 0
+        ("Ocean", "0.003", "0.005", "1", 0),
+        ("MockUSDC", "0.003", "0.005", "1", 0),
     ],
 )
 def test_exchange_swap_fees(
@@ -64,6 +67,7 @@ def test_exchange_swap_fees(
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     rate: str,
+    with_mint: int,
 ):
     """
     Tests fixed rate exchange swap fees with OCEAN, DAI, and USDC as base token
@@ -83,6 +87,7 @@ def test_exchange_swap_fees(
         publish_market_swap_fee=publish_market_swap_fee,
         consume_market_swap_fee=consume_market_swap_fee,
         rate=rate,
+        with_mint=with_mint,
     )
 
 
@@ -97,6 +102,7 @@ def exchange_swap_fees(
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     rate: str,
+    with_mint: int,
 ):
     bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
 
@@ -135,7 +141,7 @@ def exchange_swap_fees(
         datatoken_decimals=dt.decimals(),
         fixed_rate=rate_in_wei,
         publish_market_swap_fee_amount=publish_market_swap_fee,
-        with_mint=1,
+        with_mint=with_mint,
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
@@ -188,13 +194,27 @@ def exchange_swap_fees(
     # Verify that rate is configured correctly
     assert exchange.get_rate(exchange_id) == rate_in_wei
 
-    # Verify that the exchange holds all datatokens and 0 base tokens
-    assert exchange.get_dt_supply(exchange_id) == dt.cap()
-    assert exchange.get_bt_supply(exchange_id) == 0
+    details = exchange.get_exchange(exchange_id)
 
-    # Grant infinite approvals to fixed rate exchange
+    # Verify exchange starting balance and supply.
+    assert details[FixedRateExchangeDetails.BT_BALANCE] == 0
+    assert details[FixedRateExchangeDetails.DT_BALANCE] == 0
+    assert details[FixedRateExchangeDetails.BT_SUPPLY] == 0
+    if with_mint == 1:
+        assert details[FixedRateExchangeDetails.DT_SUPPLY] == dt.cap()
+    else:
+        assert details[FixedRateExchangeDetails.DT_SUPPLY] == 0
+
+    # Grant infinite approvals for exchange to spend consumer's BT and DT
     dt.approve(exchange.address, MAX_WEI, consumer_wallet)
     bt.approve(exchange.address, MAX_WEI, consumer_wallet)
+
+    # if the exchange cannot mint it's own datatokens,
+    # Mint datatokens to publisher and
+    # Grant infinite approval for exchange to spend publisher's datatokens
+    if with_mint != 1:
+        dt.mint(publisher_wallet.address, MAX_WEI, publisher_wallet)
+        dt.approve(exchange.address, MAX_WEI, publisher_wallet)
 
     one_base_token = parse_units("1", bt.decimals())
 
