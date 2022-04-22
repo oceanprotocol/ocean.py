@@ -325,6 +325,9 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
+    # Get exchange info again
+    exchange_info = exchange.get_exchange(exchange_id)
+
     # Get balances after swap
     consumer_bt_balance_after = bt.balanceOf(consumer_wallet.address)
     consumer_dt_balance_after = dt.balanceOf(consumer_wallet.address)
