@@ -198,24 +198,26 @@ def exchange_swap_fees(
 
     one_base_token = parse_units("1", bt.decimals())
 
-    buy_dt_and_verify_swap_fees(
+    buy_or_sell_dt_and_verify_balances_swap_fees(
+        "buy",
+        base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
         web3,
         exchange,
         exchange_id,
         consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
-        base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
     )
 
-    sell_dt_and_verify_swap_fees(
+    buy_or_sell_dt_and_verify_balances_swap_fees(
+        "sell",
+        base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
         web3,
         exchange,
         exchange_id,
         consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
-        base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
     )
 
     # Collect BT
@@ -275,19 +277,21 @@ def base_token_to_datatoken(
     )
 
 
-def buy_dt_and_verify_swap_fees(
+def buy_or_sell_dt_and_verify_balances_swap_fees(
+    buy_or_sell: str,
+    dt_amount: int,
     web3: Web3,
     exchange: FixedRateExchange,
     exchange_id: bytes,
     consume_market_swap_fee_address: str,
     consume_market_swap_fee: int,
     consumer_wallet: Wallet,
-    dt_amount: int,
 ):
     exchange_info = exchange.get_exchange(exchange_id)
     bt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
     dt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.DATATOKEN])
 
+    # Get balances before swap
     consumer_bt_balance_before = bt.balanceOf(consumer_wallet.address)
     consumer_dt_balance_before = dt.balanceOf(consumer_wallet.address)
     exchange_bt_balance_before = exchange_info[FixedRateExchangeDetails.BT_BALANCE]
@@ -303,110 +307,27 @@ def buy_dt_and_verify_swap_fees(
     ]
     consume_market_fee_bt_balance_before = bt.balanceOf(consume_market_swap_fee_address)
 
-    tx = exchange.buy_dt(
+    if buy_or_sell == "buy":
+        method = exchange.buy_dt
+        minmax_base_token = MAX_WEI
+    else:
+        method = exchange.sell_dt
+        minmax_base_token = 0
+
+    # Buy or Sell DT
+    tx = method(
         exchange_id,
         dt_amount,
-        MAX_WEI,
+        minmax_base_token,
         consume_market_swap_fee_address,
         consume_market_swap_fee,
         consumer_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
-    check_balances_and_fees(
-        web3,
-        exchange,
-        exchange_id,
-        tx_receipt,
-        consumer_wallet.address,
-        consume_market_swap_fee_address,
-        consumer_bt_balance_before,
-        consumer_dt_balance_before,
-        exchange_bt_balance_before,
-        exchange_dt_balance_before,
-        publish_market_fee_bt_balance_before,
-        opc_fee_bt_balance_before,
-        consume_market_fee_bt_balance_before,
-    )
-
-
-def sell_dt_and_verify_swap_fees(
-    web3: Web3,
-    exchange: FixedRateExchange,
-    exchange_id: bytes,
-    consume_market_swap_fee_address: str,
-    consume_market_swap_fee: int,
-    consumer_wallet: Wallet,
-    dt_amount: int,
-):
-    exchange_info = exchange.get_exchange(exchange_id)
-    bt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
-    dt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.DATATOKEN])
-
-    consumer_bt_balance_before = bt.balanceOf(consumer_wallet.address)
-    consumer_dt_balance_before = dt.balanceOf(consumer_wallet.address)
-    exchange_bt_balance_before = exchange_info[FixedRateExchangeDetails.BT_BALANCE]
-    exchange_dt_balance_before = exchange_info[FixedRateExchangeDetails.DT_BALANCE]
-
-    exchange_fees_info = exchange.get_fees_info(exchange_id)
-
-    publish_market_fee_bt_balance_before = exchange_fees_info[
-        FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE
-    ]
-    opc_fee_bt_balance_before = exchange_fees_info[
-        FixedRateExchangeFeesInfo.OCEAN_FEE_AVAILABLE
-    ]
-    consume_market_fee_bt_balance_before = bt.balanceOf(consume_market_swap_fee_address)
-
-    tx = exchange.sell_dt(
-        exchange_id,
-        dt_amount,
-        0,
-        consume_market_swap_fee_address,
-        consume_market_swap_fee,
-        consumer_wallet,
-    )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-
-    check_balances_and_fees(
-        web3,
-        exchange,
-        exchange_id,
-        tx_receipt,
-        consumer_wallet.address,
-        consume_market_swap_fee_address,
-        consumer_bt_balance_before,
-        consumer_dt_balance_before,
-        exchange_bt_balance_before,
-        exchange_dt_balance_before,
-        publish_market_fee_bt_balance_before,
-        opc_fee_bt_balance_before,
-        consume_market_fee_bt_balance_before,
-    )
-
-
-def check_balances_and_fees(
-    web3: Web3,
-    exchange: FixedRateExchange,
-    exchange_id: bytes,
-    tx_receipt,
-    consumer_address: str,
-    consume_market_swap_fee_address: str,
-    consumer_bt_balance_before: int,
-    consumer_dt_balance_before: int,
-    exchange_bt_balance_before: int,
-    exchange_dt_balance_before: int,
-    publish_market_fee_bt_balance_before: int,
-    opc_fee_bt_balance_before: int,
-    consume_market_fee_bt_balance_before: int,
-):
-    exchange_info = exchange.get_exchange(exchange_id)
-    bt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
-    dt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.DATATOKEN])
-
-    # Get current balances
-    consumer_bt_balance_after = bt.balanceOf(consumer_address)
-    consumer_dt_balance_after = dt.balanceOf(consumer_address)
+    # Get balances after swap
+    consumer_bt_balance_after = bt.balanceOf(consumer_wallet.address)
+    consumer_dt_balance_after = dt.balanceOf(consumer_wallet.address)
     exchange_bt_balance_after = exchange_info[FixedRateExchangeDetails.BT_BALANCE]
     exchange_dt_balance_after = exchange_info[FixedRateExchangeDetails.DT_BALANCE]
 
