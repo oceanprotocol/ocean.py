@@ -247,6 +247,9 @@ def pool_swap_fees(
 
     # TODO: Collect publish market swap fees
     # TODO Collect ocean community fees
+    # TODO Change LP swap fee with bpool.set_swap_fee
+    # TODO Change payment collector dt.set_payment_collector
+    # TODO Change publish market swap fee using dt.set_publishing_market_fee
 
 
 def buy_dt_exact_amount_in(
