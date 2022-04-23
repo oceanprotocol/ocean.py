@@ -12,7 +12,6 @@ from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.side_staking import SideStaking
-from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.currency import (
     MAX_WEI,
     format_units,
@@ -24,6 +23,7 @@ from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import (
     approx_format_units,
     approx_from_wei,
+    base_token_to_datatoken,
     deploy_erc721_erc20,
     get_address_of_type,
     transfer_base_token_if_balance_lte,
@@ -32,7 +32,7 @@ from tests.resources.helper_functions import (
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "base_token_name, publish_market_swap_fee, consume_market_swap_fee, lp_swap_fee, rate",
+    "base_token_name, publish_market_swap_fee, consume_market_swap_fee, lp_swap_fee, dt_per_bt",
     [
         # Min fees
         ("Ocean", "0", "0", "0.0001", "1"),
@@ -66,7 +66,7 @@ def test_pool_swap_fees(
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     lp_swap_fee: str,
-    rate: str,
+    dt_per_bt: str,
 ):
     """
     Tests pool swap fees with OCEAN, DAI, and USDC as base token
@@ -86,7 +86,7 @@ def test_pool_swap_fees(
         publish_market_swap_fee=publish_market_swap_fee,
         consume_market_swap_fee=consume_market_swap_fee,
         lp_swap_fee=lp_swap_fee,
-        rate=rate,
+        dt_per_bt=dt_per_bt,
     )
 
 
@@ -101,7 +101,7 @@ def pool_swap_fees(
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     lp_swap_fee: str,
-    rate: str,
+    dt_per_bt: str,
 ):
     bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
 
@@ -137,9 +137,9 @@ def pool_swap_fees(
     bt.approve(factory_router.address, MAX_WEI, publisher_wallet)
 
     side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
-    rate_in_wei = to_wei(rate)
+    dt_per_bt_in_wei = to_wei(dt_per_bt)
     tx = dt.deploy_pool(
-        rate=rate_in_wei,
+        rate=dt_per_bt_in_wei,
         base_token_decimals=bt.decimals(),
         vesting_amount=initial_base_token_amount,
         vesting_blocks=2500000,
@@ -190,9 +190,9 @@ def pool_swap_fees(
 
     # Verify side staking bot holds all datatokens, minus the initial DT amount
     initial_datatoken_amount = base_token_to_datatoken(
-        initial_base_token_amount, bt.decimals(), rate_in_wei
+        initial_base_token_amount, bt.decimals(), dt_per_bt_in_wei
     )
-    assert dt.balanceOf(side_staking.address) == MAX_UINT256 - initial_datatoken_amount
+    assert dt.balanceOf(side_staking.address) == MAX_WEI - initial_datatoken_amount
 
     # Verify pool balances
     assert bt.balanceOf(bpool.address) == initial_base_token_amount
@@ -201,7 +201,7 @@ def pool_swap_fees(
     # Verify consumer starts with 0 datatokens
     assert dt.balanceOf(consumer_wallet.address) == 0
 
-    check_calc_methods(web3, bpool, rate_in_wei)
+    check_calc_methods(web3, bpool, dt_per_bt_in_wei)
 
     # Grant infinite approvals to pool
     bt.approve(bpool.address, MAX_WEI, consumer_wallet)
@@ -224,7 +224,7 @@ def pool_swap_fees(
         consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
-        base_token_to_datatoken(one_base_token * 2, bt.decimals(), rate_in_wei),
+        base_token_to_datatoken(one_base_token * 2, bt.decimals(), dt_per_bt_in_wei),
     )
 
     buy_bt_exact_amount_in(
@@ -233,7 +233,7 @@ def pool_swap_fees(
         consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
-        base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
+        base_token_to_datatoken(one_base_token, bt.decimals(), dt_per_bt_in_wei),
     )
 
     buy_bt_exact_amount_out(
@@ -617,30 +617,13 @@ def buy_bt_exact_amount_out(
     assert dt_in == dt_in_actual
 
 
-def base_token_to_datatoken(
-    base_token_amount: int,
-    base_token_decimals: int,
-    rate_in_wei: int,
-) -> int:
-    """Convert base tokens to equivalent datatokens, accounting for differences
-    in decimals and exchange rate.
-
-    When creating a pool, the rate is the initial # of datatokens per base token.
-
-    Datatokens always have 18 decimals, even when the base tokens don't.
-    """
-    return to_wei(
-        format_units(base_token_amount, base_token_decimals) * from_wei(rate_in_wei)
-    )
-
-
-def check_calc_methods(web3: Web3, bpool: BPool, rate: int):
+def check_calc_methods(web3: Web3, bpool: BPool, dt_per_bt_in_wei: int):
     # TODO: Move this to a different file. Unrelated to swap fees.
     bt = ERC20Token(web3, bpool.get_base_token_address())
     dt = ERC20Token(web3, bpool.get_datatoken_address())
 
     bt_amount = parse_units("100", bt.decimals())
-    dt_amount = base_token_to_datatoken(bt_amount, bt.decimals(), rate)
+    dt_amount = base_token_to_datatoken(bt_amount, bt.decimals(), dt_per_bt_in_wei)
 
     # "PT out" is equal when calculated using "DT in" or "BT in", regardless of BT decimals
     pool_out_dt_in = bpool.calc_pool_out_single_in(dt.address, dt_amount)
@@ -657,7 +640,9 @@ def check_calc_methods(web3: Web3, bpool: BPool, rate: int):
     # "DT in" and "BT in" are approx when BT decimals != 18
     dt_in_pool_out = bpool.calc_single_in_pool_out(dt.address, pt_amount)
     bt_in_pool_out = bpool.calc_single_in_pool_out(bt.address, pt_amount)
-    bt_in_pool_out_as_dt = base_token_to_datatoken(bt_in_pool_out, bt.decimals(), rate)
+    bt_in_pool_out_as_dt = base_token_to_datatoken(
+        bt_in_pool_out, bt.decimals(), dt_per_bt_in_wei
+    )
     assert approx_from_wei(
         dt_in_pool_out,
         bt_in_pool_out_as_dt,
@@ -666,7 +651,9 @@ def check_calc_methods(web3: Web3, bpool: BPool, rate: int):
     # "DT out" and "BT out" are approx when BT decimals != 18
     dt_out_pool_in = bpool.calc_single_out_pool_in(dt.address, pt_amount)
     bt_out_pool_in = bpool.calc_single_out_pool_in(bt.address, pt_amount)
-    bt_out_pool_in_as_dt = base_token_to_datatoken(bt_out_pool_in, bt.decimals(), rate)
+    bt_out_pool_in_as_dt = base_token_to_datatoken(
+        bt_out_pool_in, bt.decimals(), dt_per_bt_in_wei
+    )
     assert approx_from_wei(
         dt_out_pool_in,
         bt_out_pool_in_as_dt,

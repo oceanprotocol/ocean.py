@@ -379,6 +379,28 @@ def get_provider_fees() -> Dict[str, Any]:
     return provider_fee
 
 
+def base_token_to_datatoken(
+    base_token_amount: int,
+    base_token_decimals: int,
+    datatokens_per_base_token: int,
+) -> int:
+    """Convert base tokens to equivalent datatokens, accounting for differences
+    in decimals and exchange rate.
+
+    When creating a pool, the "rate" argument is the datatokens per base token,
+    and can be passed directly into this function.
+
+    When creating an exchange, the "rate" argument is the base tokens per datatoken,
+    so it needs to be inverted before passing into this function.
+
+    Datatokens always have 18 decimals, even when the base tokens don't.
+    """
+    return to_wei(
+        format_units(base_token_amount, base_token_decimals)
+        * from_wei(datatokens_per_base_token)
+    )
+
+
 def approx_from_wei(amount_a, amount_b) -> float:
     """Helper function to compare token amounts in wei
     with pytest approx function with a relative tolerance of 1e-6."""

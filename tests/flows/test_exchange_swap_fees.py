@@ -2,6 +2,8 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from decimal import Decimal
+
 import pytest
 from web3 import Web3
 
@@ -15,15 +17,10 @@ from ocean_lib.models.fixed_rate_exchange import (
 )
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import (
-    MAX_WEI,
-    format_units,
-    from_wei,
-    parse_units,
-    to_wei,
-)
+from ocean_lib.web3_internal.currency import MAX_WEI, parse_units, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import (
+    base_token_to_datatoken,
     deploy_erc721_erc20,
     transfer_base_token_if_balance_lte,
 )
@@ -31,7 +28,7 @@ from tests.resources.helper_functions import (
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "base_token_name, publish_market_swap_fee, consume_market_swap_fee, rate, with_mint",
+    "base_token_name, publish_market_swap_fee, consume_market_swap_fee, bt_per_dt, with_mint",
     [
         # Min fees
         ("Ocean", "0", "0", "1", 1),
@@ -66,7 +63,7 @@ def test_exchange_swap_fees(
     base_token_name: str,
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
-    rate: str,
+    bt_per_dt: str,
     with_mint: int,
 ):
     """
@@ -86,7 +83,7 @@ def test_exchange_swap_fees(
         base_token_name=base_token_name,
         publish_market_swap_fee=publish_market_swap_fee,
         consume_market_swap_fee=consume_market_swap_fee,
-        rate=rate,
+        bt_per_dt=bt_per_dt,
         with_mint=with_mint,
     )
 
@@ -101,7 +98,7 @@ def exchange_swap_fees(
     base_token_name: str,
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
-    rate: str,
+    bt_per_dt: str,
     with_mint: int,
 ):
     bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
@@ -130,7 +127,7 @@ def exchange_swap_fees(
     consume_market_swap_fee = to_wei(consume_market_swap_fee)
 
     fixed_price_address = get_address_of_type(config, "FixedPrice")
-    rate_in_wei = to_wei(rate)
+    bt_per_dt_in_wei = to_wei(bt_per_dt)
     tx = dt.create_fixed_rate(
         fixed_price_address=fixed_price_address,
         base_token_address=bt.address,
@@ -139,7 +136,7 @@ def exchange_swap_fees(
         allowed_swapper=ZERO_ADDRESS,
         base_token_decimals=bt.decimals(),
         datatoken_decimals=dt.decimals(),
-        fixed_rate=rate_in_wei,
+        fixed_rate=bt_per_dt_in_wei,
         publish_market_swap_fee_amount=publish_market_swap_fee,
         with_mint=with_mint,
         from_wallet=publisher_wallet,
@@ -192,7 +189,7 @@ def exchange_swap_fees(
     assert ocean_fee_available == 0
 
     # Verify that rate is configured correctly
-    assert exchange.get_rate(exchange_id) == rate_in_wei
+    assert exchange.get_rate(exchange_id) == bt_per_dt_in_wei
 
     details = exchange.get_exchange(exchange_id)
 
@@ -217,10 +214,11 @@ def exchange_swap_fees(
         dt.approve(exchange.address, MAX_WEI, publisher_wallet)
 
     one_base_token = parse_units("1", bt.decimals())
+    dt_per_bt_in_wei = to_wei(Decimal(1) / Decimal(bt_per_dt))
 
     buy_or_sell_dt_and_verify_balances_swap_fees(
         "buy",
-        base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
+        base_token_to_datatoken(one_base_token, bt.decimals(), dt_per_bt_in_wei),
         web3,
         exchange,
         exchange_id,
@@ -231,7 +229,7 @@ def exchange_swap_fees(
 
     buy_or_sell_dt_and_verify_balances_swap_fees(
         "sell",
-        base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
+        base_token_to_datatoken(one_base_token, bt.decimals(), dt_per_bt_in_wei),
         web3,
         exchange,
         exchange_id,
@@ -288,7 +286,7 @@ def exchange_swap_fees(
 
     buy_or_sell_dt_and_verify_balances_swap_fees(
         "buy",
-        base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
+        base_token_to_datatoken(one_base_token, bt.decimals(), dt_per_bt_in_wei),
         web3,
         exchange,
         exchange_id,
@@ -299,32 +297,13 @@ def exchange_swap_fees(
 
     buy_or_sell_dt_and_verify_balances_swap_fees(
         "sell",
-        base_token_to_datatoken(one_base_token, bt.decimals(), rate_in_wei),
+        base_token_to_datatoken(one_base_token, bt.decimals(), dt_per_bt_in_wei),
         web3,
         exchange,
         exchange_id,
         consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
-    )
-
-    # TODO: exchange without mint
-
-
-def base_token_to_datatoken(
-    base_token_amount: int,
-    base_token_decimals: int,
-    rate_in_wei: int,
-) -> int:
-    """Convert base tokens to equivalent datatokens, accounting for differences
-    in decimals and exchange rate.
-
-    When creating an exchange, the rate is the price of 1 datatoken in base tokens.
-
-    Datatokens always have 18 decimals, even when the base tokens don't.
-    """
-    return to_wei(
-        format_units(base_token_amount, base_token_decimals) / from_wei(rate_in_wei)
     )
 
 
@@ -360,16 +339,16 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
 
     if buy_or_sell == "buy":
         method = exchange.buy_dt
-        minmax_base_token = MAX_WEI
+        min_or_max_base_token = MAX_WEI
     else:
         method = exchange.sell_dt
-        minmax_base_token = 0
+        min_or_max_base_token = 0
 
     # Buy or Sell DT
     tx = method(
         exchange_id,
         dt_amount,
-        minmax_base_token,
+        min_or_max_base_token,
         consume_market_swap_fee_address,
         consume_market_swap_fee,
         consumer_wallet,
