@@ -529,19 +529,6 @@ def join_pool_with_max_base_token(bpool, web3, base_token, wallet, amt: int = 0)
     )
 
 
-def wallet_exit_pool(web3, bpool, pool_token, wallet, amt: int = 0):
-    """
-    Exit pool with amt, if amt is 0, exit pool with max amount.
-    """
-    web3.eth.wait_for_transaction_receipt(
-        bpool.exit_pool(
-            amt if amt else pool_token.balanceOf(wallet.address),
-            [to_wei("0"), to_wei("0")],
-            wallet,
-        )
-    )
-
-
 def wallet_exit_pool_one_side(
     web3, bpool, base_token, pool_token, wallet, amt: int = 0
 ):

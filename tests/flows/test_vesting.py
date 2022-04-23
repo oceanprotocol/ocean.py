@@ -13,7 +13,7 @@ from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import send_ether
-from tests.resources.helper_functions import get_address_of_type, deploy_erc721_erc20
+from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
 
 @pytest.mark.unit
@@ -292,7 +292,7 @@ def test_vesting_publisher_exit_scam(
     )
 
     mint_fake_OCEAN(config)
-    initial_ocean_liq = to_wei(200)
+    # initial_ocean_liq = to_wei(200)
     pmt_collector = erc20_token.get_payment_collector()
 
     ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
@@ -345,13 +345,14 @@ def test_vesting_publisher_exit_scam(
     # other users have added liquidity, so the owner of the pool will have lower percentage
     assert pool_shares_before > bpool.balanceOf(publisher_addr) / bpool.total_supply()
 
+    # TODO: Commented because exit_pool contract method removed
     # exit pool dual side with profit for publisher
-    bpool.exit_pool(
-        pool_amount_in=bpool.balanceOf(publisher_addr),
-        min_amounts_out=[to_wei(1), to_wei(1)],
-        from_wallet=publisher_wallet,
-    )
-    assert erc20_token.balanceOf(publisher_addr) > initial_ocean_liq // 2
+    # bpool.exit_pool(
+    #     pool_amount_in=bpool.balanceOf(publisher_addr),
+    #     min_amounts_out=[to_wei(1), to_wei(1)],
+    #     from_wallet=publisher_wallet,
+    # )
+    # assert erc20_token.balanceOf(publisher_addr) > initial_ocean_liq // 2
 
 
 @pytest.mark.unit

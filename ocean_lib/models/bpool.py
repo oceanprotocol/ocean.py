@@ -351,33 +351,6 @@ class BPool(BTokenBase):
         return self.contract.caller.MIN_FEE()
 
     @enforce_types
-    def join_pool(
-        self, pool_amount_out: int, max_amounts_in: List[int], from_wallet: Wallet
-    ) -> str:
-        """
-        Join the pool, getting `poolAmountOut` pool tokens. This will pull some
-        of each of the currently trading tokens in the pool, meaning you must
-        have called `approve` for each token for this pool. These values are
-        limited by the array of `maxAmountsIn` in the order of the pool tokens.
-        """
-        return self.send_transaction(
-            "joinPool", (pool_amount_out, max_amounts_in), from_wallet
-        )
-
-    @enforce_types
-    def exit_pool(
-        self, pool_amount_in: int, min_amounts_out: List[int], from_wallet: Wallet
-    ) -> str:
-        """
-        Exit the pool, paying `poolAmountIn` pool tokens and getting some of
-        each of the currently trading tokens in return. These values are
-        limited by the array of `minAmountsOut` in the order of the pool tokens.
-        """
-        return self.send_transaction(
-            "exitPool", (pool_amount_in, min_amounts_out), from_wallet
-        )
-
-    @enforce_types
     def swap_exact_amount_in(
         self,
         token_in: str,
