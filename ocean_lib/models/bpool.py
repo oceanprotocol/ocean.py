@@ -173,12 +173,12 @@ class BPool(BTokenBase):
         return self.contract.caller._publishMarketCollector()
 
     @enforce_types
-    def collect_opc(self, dst: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("collectOPC", (dst,), from_wallet)
+    def collect_opc(self, from_wallet: Wallet) -> str:
+        return self.send_transaction("collectOPC", (), from_wallet)
 
     @enforce_types
-    def collect_market_fee(self, dst: str, from_wallet: Wallet) -> str:
-        return self.send_transaction("collectMarketFee", (dst,), from_wallet)
+    def collect_market_fee(self, from_wallet: Wallet) -> str:
+        return self.send_transaction("collectMarketFee", (), from_wallet)
 
     @enforce_types
     def update_publish_market_fee(

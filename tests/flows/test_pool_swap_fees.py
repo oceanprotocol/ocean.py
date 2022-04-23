@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from decimal import Decimal
+from typing import Callable
 
 import pytest
 from web3 import Web3
@@ -245,8 +246,14 @@ def pool_swap_fees(
         one_base_token,
     )
 
-    # TODO: Collect publish market swap fees
-    # TODO Collect ocean community fees
+    # Collect publish market swap fees
+    collect_fee_and_verify_balances(
+        bpool.collect_market_fee, web3, bpool, publisher_wallet
+    )
+
+    # Collect OPC swap fees
+    collect_fee_and_verify_balances(bpool.collect_opc, web3, bpool, publisher_wallet)
+
     # TODO Change LP swap fee with bpool.set_swap_fee
     # TODO Change payment collector dt.set_payment_collector
     # TODO Change publish market swap fee using dt.set_publishing_market_fee
@@ -866,3 +873,52 @@ def check_balances_and_fees(
     )
 
     return log_swap_event_args.tokenAmountIn
+
+
+def collect_fee_and_verify_balances(
+    method: Callable,
+    web3: Web3,
+    bpool: BPool,
+    wallet: Wallet,
+):
+    bt = ERC20Token(web3, bpool.get_base_token_address())
+    dt = ERC20Token(web3, bpool.get_datatoken_address())
+
+    if method == bpool.collect_market_fee:
+        fee_collector = bpool.get_publish_market_collector()
+        event_name = bpool.EVENT_PUBLISH_MARKET_FEE
+        get_bpool_fee_balance = bpool.publish_market_fee
+    else:
+        fee_collector = bpool.get_opc_collector()
+        event_name = bpool.EVENT_OPC_FEE
+        get_bpool_fee_balance = bpool.community_fee
+
+    fee_collector_bt_balance_before = bt.balanceOf(fee_collector)
+    fee_collector_dt_balance_before = dt.balanceOf(fee_collector)
+
+    tx = method(wallet)
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+
+    fee_collector_bt_balance_after = bt.balanceOf(fee_collector)
+    fee_collector_dt_balance_after = dt.balanceOf(fee_collector)
+
+    events = bpool.get_event_log(
+        event_name, tx_receipt.blockNumber, web3.eth.block_number, None
+    )
+    if events[0].args.token == bt.address:
+        bt_args = events[0].args
+        dt_args = events[1].args
+    else:
+        bt_args = events[1].args
+        dt_args = events[0].args
+
+    assert (
+        fee_collector_bt_balance_before + bt_args.amount
+        == fee_collector_bt_balance_after
+    )
+    assert (
+        fee_collector_dt_balance_before + dt_args.amount
+        == fee_collector_dt_balance_after
+    )
+    assert get_bpool_fee_balance(bt.address) == 0
+    assert get_bpool_fee_balance(dt.address) == 0
