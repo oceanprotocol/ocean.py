@@ -37,7 +37,6 @@ from tests.resources.helper_functions import (
     [
         # Min fees
         ("Ocean", "0", "0", "0.0001", "1"),
-        ("MockDAI", "0", "0", "0.0001", "1"),
         ("MockUSDC", "0", "0", "0.0001", "1"),
         # Happy path
         ("Ocean", "0.003", "0.005", "0.01", "1"),
@@ -45,7 +44,6 @@ from tests.resources.helper_functions import (
         ("MockUSDC", "0.003", "0.005", "0.01", "1"),
         # Max fees
         ("Ocean", "0.1", "0.1", "0.1", "1"),
-        ("MockDAI", "0.1", "0.1", "0.1", "1"),
         ("MockUSDC", "0.1", "0.1", "0.1", "1"),
         # Min rate. Rate must be > 1e12 wei (not equal)
         ("Ocean", "0.003", "0.005", "0.01", "0.000001000000000001"),
@@ -245,6 +243,30 @@ def pool_swap_fees(
         one_base_token,
     )
 
+    # Change LP swap fee
+    new_lp_swap_fee = to_wei("0.06")
+    side_staking.set_pool_swap_fee(
+        dt.address, bpool.address, new_lp_swap_fee, publisher_wallet
+    )
+
+    # Update publish market fee and fee collector
+    new_publish_market_swap_fee_collector = consume_market_swap_fee_collector.address
+    new_publish_market_swap_fee = to_wei("0.09")
+    bpool.update_publish_market_fee(
+        new_publish_market_swap_fee_collector,
+        new_publish_market_swap_fee,
+        publisher_wallet,
+    )
+
+    buy_dt_exact_amount_in(
+        web3,
+        bpool,
+        consume_market_swap_fee_collector.address,
+        consume_market_swap_fee,
+        consumer_wallet,
+        one_base_token,
+    )
+
     # Collect publish market swap fees
     collect_fee_and_verify_balances(
         bpool.collect_market_fee, web3, bpool, publisher_wallet
@@ -252,10 +274,6 @@ def pool_swap_fees(
 
     # Collect OPC swap fees
     collect_fee_and_verify_balances(bpool.collect_opc, web3, bpool, publisher_wallet)
-
-    # TODO Change LP swap fee with bpool.set_swap_fee
-    # TODO Change payment collector dt.set_payment_collector
-    # TODO Change publish market swap fee using dt.set_publishing_market_fee
 
 
 def buy_dt_exact_amount_in(

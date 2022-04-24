@@ -32,7 +32,6 @@ from tests.resources.helper_functions import (
     [
         # Min fees
         ("Ocean", "0", "0", "1", 1),
-        ("MockDAI", "0", "0", "1", 1),
         ("MockUSDC", "0", "0", "1", 1),
         # Happy path
         ("Ocean", "0.003", "0.005", "1", 1),
@@ -40,7 +39,6 @@ from tests.resources.helper_functions import (
         ("MockUSDC", "0.003", "0.005", "1", 1),
         # Max fees
         ("Ocean", "0.1", "0.1", "1", 1),
-        ("MockDAI", "0.1", "0.1", "1", 1),
         ("MockUSDC", "0.1", "0.1", "1", 1),
         # Min rate. Rate must be => 1e10 wei
         ("Ocean", "0.003", "0.005", "0.000000010000000000", 1),
@@ -256,6 +254,36 @@ def exchange_swap_fees(
         consumer_wallet,
     )
 
+    # Update publish market swap fee
+    new_publish_market_swap_fee = to_wei("0.09")
+    exchange.update_market_fee(
+        exchange_id, new_publish_market_swap_fee, publisher_wallet
+    )
+    fees_info = exchange.get_fees_info(exchange_id)
+    assert (
+        fees_info[FixedRateExchangeFeesInfo.MARKET_FEE] == new_publish_market_swap_fee
+    )
+
+    # Increase rate (base tokens per datatoken) by 1
+    new_dt_per_bt_in_wei = bt_per_dt_in_wei + to_wei("1")
+    exchange.set_rate(exchange_id, new_dt_per_bt_in_wei, publisher_wallet)
+
+    buy_or_sell_dt_and_verify_balances_swap_fees(
+        "buy",
+        base_token_to_datatoken(one_base_token, bt.decimals(), new_dt_per_bt_in_wei),
+        web3,
+        exchange,
+        exchange_id,
+        consume_market_swap_fee_collector.address,
+        consume_market_swap_fee,
+        consumer_wallet,
+    )
+
+    # Update market fee collector to be the consumer
+    exchange.update_market_fee_collector(
+        exchange_id, consumer_wallet.address, publisher_wallet
+    )
+
     # Collect market fee
     collect_fee_and_verify_balances(
         FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE,
@@ -271,38 +299,6 @@ def exchange_swap_fees(
         web3,
         exchange,
         exchange_id,
-        consumer_wallet,
-    )
-
-    # Update market fee
-    new_publish_market_swap_fee = to_wei("0.02")
-    exchange.update_market_fee(
-        exchange_id, new_publish_market_swap_fee, publisher_wallet
-    )
-    fees_info = exchange.get_fees_info(exchange_id)
-    assert (
-        fees_info[FixedRateExchangeFeesInfo.MARKET_FEE] == new_publish_market_swap_fee
-    )
-
-    buy_or_sell_dt_and_verify_balances_swap_fees(
-        "buy",
-        base_token_to_datatoken(one_base_token, bt.decimals(), dt_per_bt_in_wei),
-        web3,
-        exchange,
-        exchange_id,
-        consume_market_swap_fee_collector.address,
-        consume_market_swap_fee,
-        consumer_wallet,
-    )
-
-    buy_or_sell_dt_and_verify_balances_swap_fees(
-        "sell",
-        base_token_to_datatoken(one_base_token, bt.decimals(), dt_per_bt_in_wei),
-        web3,
-        exchange,
-        exchange_id,
-        consume_market_swap_fee_collector.address,
-        consume_market_swap_fee,
         consumer_wallet,
     )
 
