@@ -243,11 +243,12 @@ def pool_swap_fees(
         one_base_token,
     )
 
-    # Change LP swap fee
+    # Update LP swap fee
     new_lp_swap_fee = to_wei("0.06")
     side_staking.set_pool_swap_fee(
         dt.address, bpool.address, new_lp_swap_fee, publisher_wallet
     )
+    assert bpool.get_swap_fee() == new_lp_swap_fee
 
     # Update publish market fee and fee collector
     new_publish_market_swap_fee_collector = consume_market_swap_fee_collector.address
@@ -257,6 +258,8 @@ def pool_swap_fees(
         new_publish_market_swap_fee,
         publisher_wallet,
     )
+    assert bpool.get_publish_market_collector() == new_publish_market_swap_fee_collector
+    assert bpool.get_market_fee() == new_publish_market_swap_fee
 
     buy_dt_exact_amount_in(
         web3,

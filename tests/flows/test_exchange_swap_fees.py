@@ -17,7 +17,7 @@ from ocean_lib.models.fixed_rate_exchange import (
 )
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import MAX_WEI, parse_units, to_wei
+from ocean_lib.web3_internal.currency import MAX_WEI, from_wei, parse_units, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import (
     base_token_to_datatoken,
@@ -265,9 +265,11 @@ def exchange_swap_fees(
     )
 
     # Increase rate (base tokens per datatoken) by 1
-    new_dt_per_bt_in_wei = bt_per_dt_in_wei + to_wei("1")
-    exchange.set_rate(exchange_id, new_dt_per_bt_in_wei, publisher_wallet)
+    new_bt_per_dt_in_wei = bt_per_dt_in_wei + to_wei("1")
+    exchange.set_rate(exchange_id, new_bt_per_dt_in_wei, publisher_wallet)
+    assert exchange.get_rate(exchange_id) == new_bt_per_dt_in_wei
 
+    new_dt_per_bt_in_wei = to_wei(Decimal(1) / from_wei(new_bt_per_dt_in_wei))
     buy_or_sell_dt_and_verify_balances_swap_fees(
         "buy",
         base_token_to_datatoken(one_base_token, bt.decimals(), new_dt_per_bt_in_wei),
@@ -280,8 +282,15 @@ def exchange_swap_fees(
     )
 
     # Update market fee collector to be the consumer
+    new_market_fee_collector = consumer_wallet.address
     exchange.update_market_fee_collector(
-        exchange_id, consumer_wallet.address, publisher_wallet
+        exchange_id, new_market_fee_collector, publisher_wallet
+    )
+    assert (
+        exchange.get_fees_info(exchange_id)[
+            FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR
+        ]
+        == new_market_fee_collector
     )
 
     # Collect market fee
