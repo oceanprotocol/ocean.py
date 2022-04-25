@@ -83,21 +83,6 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     assert erc721_nft.contract.caller.name() == "DT1"
     assert erc721_nft.symbol() == "DTSYMBOL"
 
-    # Tests current NFT count
-    current_nft_count = erc721_factory.get_current_nft_count()
-    erc721_factory.deploy_erc721_contract(
-        name="DT2",
-        symbol="DTSYMBOL1",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_erc20_deployer=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_wallet.address,
-        from_wallet=publisher_wallet,
-    )
-    assert erc721_factory.get_current_nft_count() == current_nft_count + 1
-
     # Tests get NFT template
     nft_template_address = get_address_of_type(config, ERC721NFT.CONTRACT_NAME, "1")
     nft_template = erc721_factory.get_nft_template(1)
