@@ -9,16 +9,16 @@ from web3 import exceptions
 from web3.main import Web3
 
 from ocean_lib.models.erc20_token import ERC20Token, RolesERC20
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
+from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
+from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import get_address_of_type
 
 
 @pytest.mark.unit
-def test_properties(web3, config, publisher_wallet, erc20_token):
+def test_properties(erc20_token):
     """Tests the events' properties."""
     assert erc20_token.event_NewPool.abi["name"] == ERC20Token.EVENT_NEW_POOL
     assert erc20_token.event_NewFixedRate.abi["name"] == ERC20Token.EVENT_NEW_FIXED_RATE
@@ -49,157 +49,88 @@ def test_properties(web3, config, publisher_wallet, erc20_token):
 
 
 @pytest.mark.unit
-def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
+def test_main(
+    web3: Web3,
+    publisher_wallet: Wallet,
+    consumer_wallet: Wallet,
+    erc721_nft: ERC721NFT,
+    erc20_token: ERC20Token,
+):
     """Tests successful function calls"""
-    erc721_factory_address = get_address_of_type(
-        config, ERC721FactoryContract.CONTRACT_NAME
-    )
-    erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
-
-    publish_market_order_fee = 5
-
-    tx = erc721_factory.deploy_erc721_contract(
-        name="DT1",
-        symbol="DTSYMBOL",
-        template_index=1,
-        additional_metadata_updater=ZERO_ADDRESS,
-        additional_erc20_deployer=ZERO_ADDRESS,
-        token_uri="https://oceanprotocol.com/nft/",
-        transferable=True,
-        owner=publisher_wallet.address,
-        from_wallet=publisher_wallet,
-    )
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = erc721_factory.get_event_log(
-        ERC721FactoryContract.EVENT_NFT_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert registered_event[0].event == "NFTCreated"
-    assert registered_event[0].args.admin == publisher_wallet.address
-    token_address = registered_event[0].args.newTokenAddress
-    erc721_nft = ERC721NFT(web3, token_address)
-    assert erc721_nft.contract.caller.name() == "DT1"
-    assert erc721_nft.symbol() == "DTSYMBOL"
-
-    # Tests creating successfully an ERC20 token
-    erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
-    tx_result = erc721_nft.create_erc20(
-        template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
-        minter=publisher_wallet.address,
-        fee_manager=consumer_wallet.address,
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=to_wei(5),  # ERC20 cap is always MAX_UINT256
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
-        from_wallet=consumer_wallet,
-    )
-    assert tx_result, "Failed to create ERC20 token."
-
-    tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
-    registered_token_event = erc721_factory.get_event_log(
-        ERC721FactoryContract.EVENT_TOKEN_CREATED,
-        tx_receipt.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-    assert registered_token_event, "Cannot find TokenCreated event."
-
-    # Tests templateCount function (one of them should be the Enterprise template)
-    assert erc721_factory.template_count() == 2
-
-    # Tests ERC20 token template list
-    erc20_template_address = get_address_of_type(config, ERC20Token.CONTRACT_NAME, "1")
-    template = erc721_factory.get_token_template(1)
-    assert template[0] == erc20_template_address
-    assert template[1] is True
-
-    # Create an ERC20 with order fees ( 5 USDC, going to publishMarketAddress)
-    tx = erc721_nft.create_erc20(
-        template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
-        minter=publisher_wallet.address,
-        fee_manager=erc721_nft.address,
-        publish_market_order_fee_address=publisher_wallet.address,
-        publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=to_wei(1000),  # ERC20 cap is always MAX_UINT256
-        publish_market_order_fee_amount=to_wei(publish_market_order_fee),
-        bytess=[b""],
-        from_wallet=publisher_wallet,
-    )
-    tx_receipt2 = web3.eth.wait_for_transaction_receipt(tx)
-
-    registered_event2 = erc721_factory.get_event_log(
-        ERC721FactoryContract.EVENT_TOKEN_CREATED,
-        tx_receipt2.blockNumber,
-        web3.eth.block_number,
-        None,
-    )
-
-    erc20_address = registered_event2[0].args.newTokenAddress
-    erc20 = ERC20Token(web3, erc20_address)
 
     # Check erc20 params
-    assert erc20.get_id() == 1
-    assert erc20.contract.caller.name() == "ERC20DT1"
-    assert erc20.symbol() == "ERC20DT1Symbol"
-    assert erc20.decimals() == 18
-    assert erc20.cap() == MAX_UINT256
-    # Check publish fee info
-    assert erc20.get_publishing_market_fee()[0] == publisher_wallet.address
-    assert erc20.get_publishing_market_fee()[1] == ZERO_ADDRESS
-    assert erc20.get_publishing_market_fee()[2] == to_wei(publish_market_order_fee)
-    assert erc20.get_erc721_address() == erc721_nft.address
+    assert erc20_token.get_id() == 1
+    assert erc20_token.contract.caller.name() == "ERC20DT1"
+    assert erc20_token.symbol() == "ERC20DT1Symbol"
+    assert erc20_token.decimals() == 18
+    assert erc20_token.cap() == MAX_UINT256
 
-    # Check minter permissions
-    assert erc20.get_permissions(publisher_wallet.address)[RolesERC20.MINTER]
-    assert erc20.is_minter(publisher_wallet.address)
+    # Check erc721 address
+    assert erc20_token.get_erc721_address() == erc721_nft.address
 
     # Check that the erc20Token contract is initialized
-    assert erc20.is_initialized()
+    assert erc20_token.is_initialized()
 
-    # Should succeed to mint 1 ERC20Token to user2
-    erc20.mint(consumer_wallet.address, 1, publisher_wallet)
-    assert erc20.balanceOf(consumer_wallet.address) == 1
+    # Check publish market payment collector
+    assert erc20_token.get_payment_collector() == publisher_wallet.address
 
-    # Should succeed to set new FeeCollector if feeManager
-    erc20.set_payment_collector(
-        publish_market_order_fee_address=publisher_wallet.address,
+    # Set payment collector to consumer
+    erc20_token.set_payment_collector(
+        publish_market_order_fee_address=consumer_wallet.address,
         from_wallet=publisher_wallet,
     )
+    assert erc20_token.get_payment_collector() == consumer_wallet.address
+
+    # Check minter permissions
+    assert erc20_token.get_permissions(publisher_wallet.address)[RolesERC20.MINTER]
+    assert erc20_token.is_minter(publisher_wallet.address)
+
+    # Mint ERC20Token to user2 from publisher
+    erc20_token.mint(consumer_wallet.address, 1, publisher_wallet)
+    assert erc20_token.balanceOf(consumer_wallet.address) == 1
+
+    # Add minter
+    assert not erc20_token.get_permissions(consumer_wallet.address)[RolesERC20.MINTER]
+    erc20_token.add_minter(consumer_wallet.address, publisher_wallet)
+    assert erc20_token.get_permissions(consumer_wallet.address)[RolesERC20.MINTER]
+
+    # Mint ERC20Token to user2 from consumer
+    erc20_token.mint(consumer_wallet.address, 1, consumer_wallet)
+    assert erc20_token.balanceOf(consumer_wallet.address) == 2
 
     # Should succeed to removeMinter if erc20Deployer
-    erc20.remove_minter(
-        minter_address=consumer_wallet.address, from_wallet=publisher_wallet
-    )
+    erc20_token.remove_minter(consumer_wallet.address, publisher_wallet)
+    assert not erc20_token.get_permissions(consumer_wallet.address)[RolesERC20.MINTER]
 
     # Should succeed to addFeeManager if erc20Deployer (permission to deploy the erc20Contract at 721 level)
-    erc20.add_payment_manager(
-        fee_manager=consumer_wallet.address, from_wallet=publisher_wallet
-    )
+    assert not erc20_token.get_permissions(consumer_wallet.address)[
+        RolesERC20.PAYMENT_MANAGER
+    ]
+    erc20_token.add_payment_manager(consumer_wallet.address, publisher_wallet)
+    assert erc20_token.get_permissions(consumer_wallet.address)[
+        RolesERC20.PAYMENT_MANAGER
+    ]
 
     # Should succeed to removeFeeManager if erc20Deployer
-    erc20.remove_payment_manager(
+    erc20_token.remove_payment_manager(
         fee_manager=consumer_wallet.address, from_wallet=publisher_wallet
     )
+    assert not erc20_token.get_permissions(consumer_wallet.address)[
+        RolesERC20.PAYMENT_MANAGER
+    ]
 
     # Should succeed to setData if erc20Deployer
     value = web3.toHex(text="SomeData")
-    key = web3.keccak(hexstr=erc20.address)
+    key = web3.keccak(hexstr=erc20_token.address)
 
-    erc20.set_data(data=value, from_wallet=publisher_wallet)
+    erc20_token.set_data(data=value, from_wallet=publisher_wallet)
 
     assert web3.toHex(erc721_nft.get_data(key)) == value
 
     # Should succeed to call cleanPermissions if NFTOwner
-    erc20.clean_permissions(from_wallet=publisher_wallet)
+    erc20_token.clean_permissions(from_wallet=publisher_wallet)
 
-    permissions = erc20.get_permissions(publisher_wallet.address)
+    permissions = erc20_token.get_permissions(publisher_wallet.address)
     assert not permissions[RolesERC20.MINTER]
     assert not permissions[RolesERC20.PAYMENT_MANAGER]
 
@@ -422,9 +353,7 @@ def test_start_order(
 
 
 @pytest.mark.unit
-def test_exceptions(
-    web3, config, publisher_wallet, consumer_wallet, factory_router, erc20_token
-):
+def test_exceptions(web3, consumer_wallet, erc20_token):
     """Tests revert statements in contracts functions"""
 
     # Should fail to mint if wallet is not a minter

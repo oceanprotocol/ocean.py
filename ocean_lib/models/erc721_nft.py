@@ -175,9 +175,25 @@ class ERC721NFT(ContractBase):
         )
 
     @enforce_types
+    def remove_from_create_erc20_list(
+        self, allowed_address: str, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "removeFromCreateERC20List", (allowed_address,), from_wallet
+        )
+
+    @enforce_types
     def add_to_725_store_list(self, allowed_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction(
             "addTo725StoreList", (allowed_address,), from_wallet
+        )
+
+    @enforce_types
+    def remove_from_725_store_list(
+        self, allowed_address: str, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "removeFromCreateERC20List", (allowed_address,), from_wallet
         )
 
     @enforce_types
@@ -187,12 +203,33 @@ class ERC721NFT(ContractBase):
         )
 
     @enforce_types
+    def remove_from_metadata_list(
+        self, allowed_address: str, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "removeFromMetadataList", (allowed_address,), from_wallet
+        )
+
+    @enforce_types
     def add_manager(self, manager_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("addManager", (manager_address,), from_wallet)
 
     @enforce_types
     def remove_manager(self, manager_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("removeManager", (manager_address,), from_wallet)
+
+    @enforce_types
+    def add_multiple_users_to_roles(
+        self, addresses: List[str], roles: List[ERC721Permissions], from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "addMultipleUsersToRoles",
+            (
+                addresses,
+                roles,
+            ),
+            from_wallet,
+        )
 
     @enforce_types
     def execute_call(

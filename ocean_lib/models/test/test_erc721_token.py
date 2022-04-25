@@ -3,8 +3,9 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
-from web3 import exceptions
+from web3 import Web3, exceptions
 
+from ocean_lib.config import Config
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
@@ -13,9 +14,9 @@ from ocean_lib.models.fixed_rate_exchange import (
     FixedRateExchange,
     FixedRateExchangeDetails,
 )
-from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-from ocean_lib.web3_internal.constants import BLOB, ZERO_ADDRESS, MAX_UINT256
+from ocean_lib.web3_internal.constants import BLOB, MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
+from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import get_address_of_type
 
 
@@ -46,7 +47,6 @@ def test_properties(web3, config):
 @pytest.mark.unit
 def test_permissions(
     web3,
-    config,
     publisher_wallet,
     consumer_wallet,
     another_consumer_wallet,
@@ -237,15 +237,51 @@ def test_permissions(
     assert erc721_nft.get_data(key=web3.keccak(text="FOO_KEY")) == b""
 
 
+def test_add_and_remove_permissions(
+    publisher_wallet: Wallet, consumer_wallet: Wallet, erc721_nft: ERC721NFT
+):
+    # Assert consumer has no permissions
+    permissions = erc721_nft.get_permissions(consumer_wallet.address)
+    assert not permissions[ERC721Permissions.MANAGER]
+    assert not permissions[ERC721Permissions.DEPLOY_ERC20]
+    assert not permissions[ERC721Permissions.UPDATE_METADATA]
+    assert not permissions[ERC721Permissions.STORE]
+
+    # Grant consumer all permissions, one by one
+    erc721_nft.add_manager(consumer_wallet.address, publisher_wallet)
+    erc721_nft.add_to_725_store_list(consumer_wallet.address, publisher_wallet)
+    erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
+    erc721_nft.add_to_metadata_list(consumer_wallet.address, publisher_wallet)
+
+    # Assert consumer has all permissions
+    permissions = erc721_nft.get_permissions(consumer_wallet.address)
+    assert permissions[ERC721Permissions.MANAGER]
+    assert permissions[ERC721Permissions.DEPLOY_ERC20]
+    assert permissions[ERC721Permissions.UPDATE_METADATA]
+    assert permissions[ERC721Permissions.STORE]
+
+    # Revoke all consumer permissions, one by one
+    erc721_nft.remove_manager(consumer_wallet.address, publisher_wallet)
+    erc721_nft.remove_from_725_store_list(consumer_wallet.address, publisher_wallet)
+    erc721_nft.remove_from_create_erc20_list(consumer_wallet.address, publisher_wallet)
+    erc721_nft.remove_from_metadata_list(consumer_wallet.address, publisher_wallet)
+
+    # Assert consumer has no permissions
+    permissions = erc721_nft.get_permissions(consumer_wallet.address)
+    assert not permissions[ERC721Permissions.MANAGER]
+    assert not permissions[ERC721Permissions.DEPLOY_ERC20]
+    assert not permissions[ERC721Permissions.UPDATE_METADATA]
+    assert not permissions[ERC721Permissions.STORE]
+
+
 @pytest.mark.unit
 def test_success_update_metadata(
-    web3,
-    config,
-    publisher_wallet,
-    consumer_wallet,
-    publisher_addr,
-    consumer_addr,
-    erc721_nft,
+    web3: Web3,
+    publisher_wallet: Wallet,
+    consumer_wallet: Wallet,
+    publisher_addr: str,
+    consumer_addr: str,
+    erc721_nft: ERC721NFT,
 ):
     """Tests updating the metadata flow."""
     assert not (
@@ -346,10 +382,14 @@ def test_success_update_metadata(
     assert metadata_info[3]
     assert metadata_info[0] == "http://foourl"
 
+    # Consumer self-revokes permission to update metadata
+    erc721_nft.remove_from_metadata_list(consumer_wallet.address, consumer_wallet)
+    assert not erc721_nft.get_permissions(consumer_wallet.address)[
+        ERC721Permissions.UPDATE_METADATA
+    ]
 
-def test_fails_update_metadata(
-    web3, config, consumer_wallet, consumer_addr, erc721_nft
-):
+
+def test_fails_update_metadata(web3, consumer_wallet, consumer_addr, erc721_nft):
     """Tests failure of calling update metadata function when the role of the user is not METADATA UPDATER."""
     assert not (
         erc721_nft.get_permissions(user=consumer_addr)[
@@ -377,7 +417,12 @@ def test_fails_update_metadata(
 
 @pytest.mark.unit
 def test_create_erc20(
-    web3, config, publisher_wallet, publisher_addr, consumer_addr, erc721_nft
+    web3: Web3,
+    publisher_wallet: Wallet,
+    publisher_addr,
+    consumer_addr,
+    erc721_nft: ERC721NFT,
+    erc721_factory: ERC721FactoryContract,
 ):
     """Tests calling create an ERC20 by the owner."""
     assert erc721_nft.get_permissions(user=publisher_addr)[
@@ -399,10 +444,118 @@ def test_create_erc20(
     )
     assert tx, "Could not create ERC20."
 
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_token_event = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert registered_token_event, "Cannot find TokenCreated event."
+
+
+def test_create_erc20_with_usdc_order_fee(
+    web3: Web3,
+    config: Config,
+    publisher_wallet: Wallet,
+    erc721_nft: ERC721NFT,
+    erc721_factory: ERC721FactoryContract,
+):
+    """Create an ERC20 with order fees ( 5 USDC, going to publishMarketAddress)"""
+    usdc = ERC20Token(web3, get_address_of_type(config, "MockUSDC"))
+    publish_market_order_fee_amount_in_wei = to_wei(5)
+    tx = erc721_nft.create_erc20(
+        template_index=1,
+        name="ERC20DT1",
+        symbol="ERC20DT1Symbol",
+        minter=publisher_wallet.address,
+        fee_manager=publisher_wallet.address,
+        publish_market_order_fee_address=publisher_wallet.address,
+        publish_market_order_fee_token=usdc.address,
+        cap=to_wei(1000),  # ERC20 cap is always MAX_UINT256
+        publish_market_order_fee_amount=publish_market_order_fee_amount_in_wei,
+        bytess=[b""],
+        from_wallet=publisher_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+
+    event = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    erc20_address = event[0].args.newTokenAddress
+    erc20 = ERC20Token(web3, erc20_address)
+
+    # Check publish fee info
+    (
+        publish_market_order_fee_address,
+        publish_market_order_fee_token,
+        publish_market_order_fee_amount,
+    ) = erc20.get_publishing_market_fee()
+    assert publish_market_order_fee_address == publisher_wallet.address
+    assert publish_market_order_fee_token == usdc.address
+    assert publish_market_order_fee_amount == publish_market_order_fee_amount_in_wei
+
+
+@pytest.mark.unit
+def test_create_erc20_with_non_owner(
+    web3: Web3,
+    publisher_wallet: Wallet,
+    consumer_wallet: Wallet,
+    erc721_nft: ERC721NFT,
+    erc721_factory: ERC721FactoryContract,
+):
+    """Tests creating an ERC20 token by wallet other than nft owner"""
+
+    # Assert consumer cannot create ERC20
+    assert not erc721_nft.get_permissions(consumer_wallet.address)[
+        ERC721Permissions.DEPLOY_ERC20
+    ]
+
+    # Grant consumer permission to create ERC20
+    erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
+    assert erc721_nft.get_permissions(consumer_wallet.address)[
+        ERC721Permissions.DEPLOY_ERC20
+    ]
+
+    # Consumer creates ERC20
+    tx = erc721_nft.create_erc20(
+        template_index=1,
+        name="ERC20DT1",
+        symbol="ERC20DT1Symbol",
+        minter=publisher_wallet.address,
+        fee_manager=publisher_wallet.address,
+        publish_market_order_fee_address=publisher_wallet.address,
+        publish_market_order_fee_token=ZERO_ADDRESS,
+        cap=to_wei(5),  # ERC20 cap is always MAX_UINT256
+        publish_market_order_fee_amount=0,
+        bytess=[b""],
+        from_wallet=consumer_wallet,
+    )
+    assert tx, "Failed to create ERC20 token."
+
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    registered_token_event = erc721_factory.get_event_log(
+        ERC721FactoryContract.EVENT_TOKEN_CREATED,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+    assert registered_token_event, "Cannot find TokenCreated event."
+
+    # Consumer self-revokes permission to create ERC20
+    erc721_nft.remove_from_create_erc20_list(consumer_wallet.address, consumer_wallet)
+    assert not erc721_nft.get_permissions(consumer_wallet.address)[
+        ERC721Permissions.DEPLOY_ERC20
+    ]
+
 
 @pytest.mark.unit
 def test_fail_creating_erc20(
-    web3, config, consumer_wallet, publisher_addr, consumer_addr, erc721_nft
+    consumer_wallet, publisher_addr, consumer_addr, erc721_nft
 ):
     """Tests failure for creating ERC20 token."""
     assert not (
@@ -432,7 +585,6 @@ def test_fail_creating_erc20(
 @pytest.mark.unit
 def test_erc721_datatoken_functions(
     web3,
-    config,
     publisher_wallet,
     consumer_wallet,
     publisher_addr,
@@ -532,7 +684,7 @@ def test_erc721_datatoken_functions(
 
 @pytest.mark.unit
 def test_fail_transfer_function(
-    web3, config, consumer_wallet, publisher_addr, consumer_addr, erc721_nft
+    consumer_wallet, publisher_addr, consumer_addr, erc721_nft
 ):
     """Tests failure of using the transfer functions."""
     with pytest.raises(exceptions.ContractLogicError) as err:
