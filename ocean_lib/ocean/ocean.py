@@ -254,7 +254,7 @@ class Ocean:
 
     @property
     @enforce_types
-    def staking(self):
+    def side_staking(self):
         return SideStaking(self.web3, get_address_of_type(self.config, "Staking"))
 
     @enforce_types
