@@ -249,9 +249,9 @@ def test_add_and_remove_permissions(
 
     # Grant consumer all permissions, one by one
     erc721_nft.add_manager(consumer_wallet.address, publisher_wallet)
-    erc721_nft.add_to_725_store_list(consumer_wallet.address, publisher_wallet)
     erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
     erc721_nft.add_to_metadata_list(consumer_wallet.address, publisher_wallet)
+    erc721_nft.add_to_725_store_list(consumer_wallet.address, publisher_wallet)
 
     # Assert consumer has all permissions
     permissions = erc721_nft.get_permissions(consumer_wallet.address)
@@ -262,9 +262,9 @@ def test_add_and_remove_permissions(
 
     # Revoke all consumer permissions, one by one
     erc721_nft.remove_manager(consumer_wallet.address, publisher_wallet)
-    erc721_nft.remove_from_725_store_list(consumer_wallet.address, publisher_wallet)
     erc721_nft.remove_from_create_erc20_list(consumer_wallet.address, publisher_wallet)
     erc721_nft.remove_from_metadata_list(consumer_wallet.address, publisher_wallet)
+    erc721_nft.remove_from_725_store_list(consumer_wallet.address, publisher_wallet)
 
     # Assert consumer has no permissions
     permissions = erc721_nft.get_permissions(consumer_wallet.address)
