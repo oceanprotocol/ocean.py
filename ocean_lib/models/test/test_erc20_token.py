@@ -83,12 +83,6 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
     assert erc721_nft.contract.caller.name() == "DT1"
     assert erc721_nft.symbol() == "DTSYMBOL"
 
-    # Tests get NFT template
-    nft_template_address = get_address_of_type(config, ERC721NFT.CONTRACT_NAME, "1")
-    nft_template = erc721_factory.get_nft_template(1)
-    assert nft_template[0] == nft_template_address
-    assert nft_template[1] is True
-
     # Tests creating successfully an ERC20 token
     erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
     tx_result = erc721_nft.create_erc20(
