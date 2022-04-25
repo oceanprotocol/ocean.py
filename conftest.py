@@ -14,7 +14,6 @@ from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.side_staking import SideStaking
-from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
@@ -26,6 +25,8 @@ from tests.resources.helper_functions import (
     get_consumer_wallet,
     get_example_config,
     get_factory_deployer_wallet,
+    get_file1,
+    get_file2,
     get_ganache_wallet,
     get_provider_wallet,
     get_publisher_ocean_instance,
@@ -232,21 +233,9 @@ def another_consumer_addr():
 
 @pytest.fixture
 def file1():
-    file1_dict = {
-        "type": "url",
-        "url": "https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt",
-        "method": "GET",
-    }
-
-    return FilesTypeFactory(file1_dict)
+    return get_file1()
 
 
 @pytest.fixture
 def file2():
-    file2_dict = {
-        "type": "url",
-        "url": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
-        "method": "GET",
-    }
-
-    return FilesTypeFactory(file2_dict)
+    return get_file2()
