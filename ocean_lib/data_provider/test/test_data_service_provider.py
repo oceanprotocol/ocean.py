@@ -17,7 +17,6 @@ from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsErr
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.services.service import Service
-from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import create_basics, get_first_service_by_type
 from tests.resources.helper_functions import (
@@ -193,22 +192,9 @@ def test_delete_job_result(provider_wallet, config):
 
 
 @pytest.mark.integration
-def test_encrypt(web3, config, provider_wallet):
+def test_encrypt(web3, config, provider_wallet, file1, file2):
     """Tests successful encrypt job."""
     key = provider_wallet.private_key
-    file1_dict = {
-        "type": "url",
-        "url": "https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt",
-        "method": "GET",
-    }
-    file2_dict = {
-        "type": "url",
-        "url": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
-        "method": "GET",
-    }
-    file1 = FilesTypeFactory(file1_dict)
-    file2 = FilesTypeFactory(file2_dict)
-
     # Encrypt file objects
     result = DataSP.encrypt([file1, file2], config.provider_url)
     encrypted_files = result.content.decode("utf-8")

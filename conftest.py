@@ -12,9 +12,10 @@ from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.side_staking import SideStaking
+from ocean_lib.structures.file_objects import FilesTypeFactory
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from ocean_lib.web3_internal.utils import get_ether_balance
@@ -140,11 +141,6 @@ def provider_wallet(web3, config):
 
 
 @pytest.fixture
-def erc721_factory(web3, config):
-    return ERC721FactoryContract(web3, get_address_of_type(config, "ERC721Factory"))
-
-
-@pytest.fixture
 def erc721_nft(web3, config, publisher_wallet, erc721_factory):
     tx = erc721_factory.deploy_erc721_contract(
         name="NFT",
@@ -232,3 +228,25 @@ def consumer_addr():
 @pytest.fixture
 def another_consumer_addr():
     return get_another_consumer_wallet().address
+
+
+@pytest.fixture
+def file1():
+    file1_dict = {
+        "type": "url",
+        "url": "https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt",
+        "method": "GET",
+    }
+
+    return FilesTypeFactory(file1_dict)
+
+
+@pytest.fixture
+def file2():
+    file2_dict = {
+        "type": "url",
+        "url": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
+        "method": "GET",
+    }
+
+    return FilesTypeFactory(file2_dict)
