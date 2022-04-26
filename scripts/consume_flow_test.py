@@ -145,7 +145,7 @@ def test_stressed_consume():
                 )
             )
         if not os.path.exists(destination):
-            os.mkdir(destination)
+            os.makedirs(destination)
         assert len(os.listdir(destination)) == 0
         ocean.assets.download_asset(
             asset=ddo,

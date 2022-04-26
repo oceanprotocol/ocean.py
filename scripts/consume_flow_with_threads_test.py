@@ -131,7 +131,7 @@ def consume_flow(ocean: Ocean, wallet: Wallet, config: Config):
             )
 
         if not os.path.exists(destination):
-            os.mkdir(destination)
+            os.makedirs(destination)
 
         assert len(os.listdir(destination)) == 0
 

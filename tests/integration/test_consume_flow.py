@@ -187,7 +187,7 @@ def test_consume_flow(
         )
 
     if not os.path.exists(destination):
-        os.mkdir(destination)
+        os.makedirs(destination)
 
     assert len(os.listdir(destination)) == 0
 

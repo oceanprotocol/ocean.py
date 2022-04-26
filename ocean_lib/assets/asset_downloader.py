@@ -63,7 +63,7 @@ def download_asset_files(
 
     asset_folder = os.path.join(destination, f"datafile.{asset.did}.{service.id}")
     if not os.path.exists(asset_folder):
-        os.mkdir(asset_folder)
+        os.makedirs(asset_folder)
 
     data_provider.download(
         did=asset.did,
