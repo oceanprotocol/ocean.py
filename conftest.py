@@ -31,6 +31,7 @@ from tests.resources.helper_functions import (
     get_provider_wallet,
     get_publisher_ocean_instance,
     get_publisher_wallet,
+    get_wallet,
     get_web3,
     setup_logging,
 )
@@ -114,6 +115,16 @@ def consumer_wallet():
 @pytest.fixture
 def another_consumer_wallet():
     return get_another_consumer_wallet()
+
+
+@pytest.fixture
+def publish_market_wallet():
+    return get_wallet(4)
+
+
+@pytest.fixture
+def consume_market_wallet():
+    return get_wallet(5)
 
 
 @pytest.fixture

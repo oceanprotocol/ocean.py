@@ -24,19 +24,8 @@ from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import get_first_service_by_type
 from tests.resources.helper_functions import (
     get_address_of_type,
-    get_wallet,
     transfer_base_token_if_balance_lte,
 )
-
-
-@pytest.fixture
-def publish_market_wallet():
-    return get_wallet(4)
-
-
-@pytest.fixture
-def consume_market_wallet():
-    return get_wallet(5)
 
 
 @pytest.mark.unit
