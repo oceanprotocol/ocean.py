@@ -18,7 +18,6 @@ from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBa
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.services.service import Service
-from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
@@ -97,19 +96,13 @@ def test_update_credentials(publisher_ocean_instance, publisher_wallet, config):
 
 @pytest.mark.integration
 def test_update_datatokens(
-    publisher_ocean_instance, publisher_wallet, config, erc20_token
+    publisher_ocean_instance, publisher_wallet, config, erc20_token, file2
 ):
     """Test the update of datatokens"""
     ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
     data_provider = DataServiceProvider
 
-    file1_dict = {
-        "type": "url",
-        "url": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
-        "method": "GET",
-    }
-    file1 = FilesTypeFactory(file1_dict)
-    encrypted_files = publisher_ocean_instance.assets.encrypt_files([file1])
+    encrypted_files = publisher_ocean_instance.assets.encrypt_files([file2])
 
     # Add new existing datatoken with service
     old_asset = copy.deepcopy(ddo)

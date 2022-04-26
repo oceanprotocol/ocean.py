@@ -21,7 +21,7 @@ from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.structures.file_objects import FilesTypeFactory, IpfsFile, UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
-from tests.resources.helper_functions import deploy_erc721_erc20
+from tests.resources.helper_functions import deploy_erc721_erc20, get_file1, get_file2
 
 
 def get_resource_path(dir_name, file_name):
@@ -166,19 +166,7 @@ def create_basics(
     }
 
     if files is None:
-        file1_dict = {
-            "type": "url",
-            "url": "https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt",
-            "method": "GET",
-        }
-        file2_dict = {
-            "type": "url",
-            "url": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml",
-            "method": "GET",
-        }
-        file1 = FilesTypeFactory(file1_dict)
-        file2 = FilesTypeFactory(file2_dict)
-        files = [file1, file2]
+        files = [get_file1(), get_file2()]
 
     # Encrypt file objects
     encrypt_response = data_provider.encrypt(files, config.provider_url)
