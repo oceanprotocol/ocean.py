@@ -14,7 +14,6 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.ocean.ocean_assets import OceanAssets
-from ocean_lib.structures.file_objects import UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import parse_units, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
@@ -44,6 +43,7 @@ def test_consume_flow(
     base_token_name: str,
     publish_market_order_fee: str,
     erc721_nft: ERC721NFT,
+    file1,
 ):
     bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
 
@@ -68,10 +68,7 @@ def test_consume_flow(
         "author": "OPF",
         "license": "https://market.oceanprotocol.com/terms",
     }
-    file = UrlFile(
-        "https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt"
-    )
-    files = [file]
+    files = [file1]
 
     # Encrypt file objects
     encrypt_response = data_provider.encrypt(files, config.provider_url)

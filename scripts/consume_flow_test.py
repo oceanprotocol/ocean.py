@@ -20,7 +20,12 @@ from tests.resources.ddo_helpers import (
     build_credentials_dict,
     get_first_service_by_type,
 )
-from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
+from tests.resources.helper_functions import (
+    deploy_erc721_erc20,
+    get_address_of_type,
+    get_file1,
+    get_file2,
+)
 
 
 @pytest.mark.slow
@@ -48,18 +53,12 @@ def test_stressed_consume():
         "license": "https://market.oceanprotocol.com/terms",
     }
     data_provider = DataServiceProvider
-    file1_url = "https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt"
-    file1_dict = {"type": "url", "url": file1_url, "method": "GET"}
-    file1 = FilesTypeFactory(file1_dict)
-    file2_url = "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml"
-    file2_dict = {"type": "url", "url": file2_url, "method": "GET"}
-    file2 = FilesTypeFactory(file2_dict)
     file3_url = (
         "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz"
     )
     file3_dict = {"type": "url", "url": file3_url, "method": "GET"}
     file3 = FilesTypeFactory(file3_dict)
-    files = [file1, file2, file3]
+    files = [get_file1(), get_file2(), file3]
 
     for i in range(3000):
         # Encrypt file objects

@@ -7,7 +7,6 @@ import pytest
 from ocean_lib.aquarius.aquarius import Aquarius
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
-from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
@@ -24,7 +23,7 @@ def test_init():
 
 @pytest.mark.integration
 def test_aqua_functions_for_single_ddo(
-    publisher_ocean_instance, aquarius_instance, publisher_wallet, config
+    publisher_ocean_instance, aquarius_instance, publisher_wallet, config, file1
 ):
     """Tests against single-ddo functions of Aquarius."""
     metadata = {
@@ -37,12 +36,6 @@ def test_aqua_functions_for_single_ddo(
         "license": "https://market.oceanprotocol.com/terms",
     }
 
-    file1_dict = {
-        "type": "url",
-        "url": "https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt",
-        "method": "GET",
-    }
-    file1 = FilesTypeFactory(file1_dict)
     encrypted_files = publisher_ocean_instance.assets.encrypt_files([file1])
 
     ddo = publisher_ocean_instance.assets.create(
