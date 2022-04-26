@@ -95,6 +95,7 @@ Use the `exchange_id` for buying at fixed rate.
 
 ```python
 # Approve tokens for Bob
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 fixed_price_address = ocean.fixed_rate_exchange.address
 erc20_token.approve(fixed_price_address, ocean.to_wei(100), bob_wallet)
 OCEAN_token.approve(fixed_price_address, ocean.to_wei(100), bob_wallet)
