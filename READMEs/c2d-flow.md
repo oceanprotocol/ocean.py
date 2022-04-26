@@ -60,7 +60,7 @@ In the same python console:
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 # Publish the datatoken
-DATA_datatoken = DATA_nft_token.create_datatoken(
+DATA_datatoken = erc721_nft.create_datatoken(
     template_index=1,
     name="Datatoken 1",
     symbol="DT1",

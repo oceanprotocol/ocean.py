@@ -51,6 +51,7 @@ test_requirements = [
     "pytest",
     "pytest-watch",
     "Pillow",
+    "mkcodes==0.1.1",
 ]
 
 # Possibly required by developers of ocean-lib:

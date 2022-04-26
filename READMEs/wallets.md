@@ -49,7 +49,7 @@ ocean.py suppports direct loading of the private key. Use an envvar that you cop
 Here's an example key. From your console:
 
 ```console
-export MY_TEST_KEY=0xaefd8bc8725c4b3d15fbe058d0f58f4d852e8caea2bf68e0f73acb1aeec19baa
+export TEST_PRIVATE_KEY1=0xaefd8bc8725c4b3d15fbe058d0f58f4d852e8caea2bf68e0f73acb1aeec19baa
 ```
 
 The Ethereum address that gets computed from the example key is `0x281269C18376010B196a928c335E495bd05eC32F`.
@@ -72,6 +72,6 @@ Now we can create the wallet based on the private key defined in the previous st
 ```python
 import os
 from ocean_lib.web3_internal.wallet import Wallet
-private_key = os.getenv('MY_TEST_KEY')
+private_key = os.getenv('TEST_PRIVATE_KEY1')
 wallet = Wallet(ocean.web3, private_key, 1, 600)
 ```
