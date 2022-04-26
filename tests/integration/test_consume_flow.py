@@ -26,7 +26,6 @@ from tests.resources.helper_functions import (
 
 
 @pytest.mark.integration
-@pytest.mark.skip
 @pytest.mark.parametrize(
     "base_token_name, publish_market_order_fee",
     [
@@ -100,7 +99,7 @@ def test_consume_flow(
     )
 
     assert asset, "The asset is not created."
-    assert asset.nft["name"] == "NFT1"
+    assert asset.nft["name"] == "NFT"
     assert asset.nft["symbol"] == "NFTSYMBOL"
     assert asset.nft["address"] == erc721_nft.address
     assert asset.nft["owner"] == publisher_wallet.address
