@@ -605,3 +605,13 @@ def get_file2():
     }
 
     return FilesTypeFactory(file2_dict)
+
+
+def get_file3():
+    file3_dict = {
+        "type": "url",
+        "url": "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz",
+        "method": "GET",
+    }
+
+    return FilesTypeFactory(file3_dict)

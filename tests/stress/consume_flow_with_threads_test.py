@@ -28,7 +28,7 @@ from tests.resources.helper_functions import (
 )
 
 
-def consume_flow(ocean: Ocean, config: Config, tmpdir):
+def consume_flow(ocean: Ocean, config: Config, tmpdir, files):
     consumer_wallet = publisher_wallet = generate_wallet()
     metadata = {
         "created": "2020-11-15T12:27:48Z",
@@ -40,7 +40,6 @@ def consume_flow(ocean: Ocean, config: Config, tmpdir):
         "license": "https://market.oceanprotocol.com/terms",
     }
     data_provider = DataServiceProvider
-    files = _create_files()
 
     erc721_nft, erc20_token = deploy_erc721_erc20(
         ocean.web3, config, publisher_wallet, publisher_wallet
@@ -124,19 +123,22 @@ def consume_flow(ocean: Ocean, config: Config, tmpdir):
     ), "The asset folder is empty."
 
 
-def concurrent_consume_flow(concurrent_flows: int, repetitions: int, tmpdir):
+def concurrent_consume_flow(concurrent_flows: int, repetitions: int, tmpdir, files):
     config = ExampleConfig.get_config()
     ocean = Ocean(config)
     mint_fake_OCEAN(config)
     with ThreadPoolExecutor(max_workers=concurrent_flows) as executor:
         for _ in range(concurrent_flows * repetitions):
-            executor.submit(consume_flow, ocean, config, tmpdir)
+            executor.submit(consume_flow, ocean, config, tmpdir, files)
 
 
 @pytest.mark.slow
 @pytest.mark.parametrize(["concurrent_flows", "repetitions"], [(1, 2), (3, 1), (5, 5)])
-def test_concurrent_consume_flow(concurrent_flows, repetitions, tmpdir):
-    concurrent_consume_flow(concurrent_flows, repetitions, tmpdir)
+def test_concurrent_consume_flow(
+    concurrent_flows, repetitions, tmpdir, file1, file2, file3
+):
+    files = [file1, file2, file3]
+    concurrent_consume_flow(concurrent_flows, repetitions, tmpdir, files)
 
 
 def _create_downloads_path(tmpdir):
@@ -157,20 +159,3 @@ def _create_downloads_path(tmpdir):
     assert len(os.listdir(destination)) == 0
 
     return destination
-
-
-def _create_files():
-    file1_url = "https://raw.githubusercontent.com/tbertinmahieux/MSongsDB/master/Tasks_Demos/CoverSongs/shs_dataset_test.txt"
-    file1_dict = {"type": "url", "url": file1_url, "method": "GET"}
-    file1 = FilesTypeFactory(file1_dict)
-    file2_url = "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz-rss.xml"
-    file2_dict = {"type": "url", "url": file2_url, "method": "GET"}
-    file2 = FilesTypeFactory(file2_dict)
-    file3_url = (
-        "https://dumps.wikimedia.org/enwiki/latest/enwiki-latest-abstract10.xml.gz"
-    )
-    file3_dict = {"type": "url", "url": file3_url, "method": "GET"}
-    file3 = FilesTypeFactory(file3_dict)
-    files = [file1, file2, file3]
-
-    return files
