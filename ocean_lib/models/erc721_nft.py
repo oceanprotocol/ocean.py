@@ -193,7 +193,7 @@ class ERC721NFT(ContractBase):
         self, allowed_address: str, from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
-            "removeFromCreateERC20List", (allowed_address,), from_wallet
+            "removeFrom725StoreList", (allowed_address,), from_wallet
         )
 
     @enforce_types
