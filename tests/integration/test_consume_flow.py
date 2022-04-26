@@ -14,53 +14,23 @@ from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.structures.file_objects import IpfsFile, UrlFile
-from ocean_lib.web3_internal.currency import MAX_WEI, parse_units, to_wei
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
+from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import get_first_service_by_type
-from tests.resources.helper_functions import (
-    get_address_of_type,
-    transfer_base_token_if_balance_lte,
-)
 
 
 @pytest.mark.integration
-@pytest.mark.parametrize(
-    "base_token_name, publish_market_order_fee, consume_market_order_fee",
-    [
-        ("Ocean", "5", "0"),
-        ("MockDAI", "5", "0"),
-        ("MockUSDC", "5", "0"),
-    ],
-)
 def test_consume_flow(
     web3: Web3,
     config: Config,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
-    provider_wallet: Wallet,
-    factory_deployer_wallet: Wallet,
-    base_token_name: str,
-    publish_market_order_fee: str,
-    consume_market_order_fee: str,
     erc721_nft: ERC721NFT,
     file1: Union[UrlFile, IpfsFile],
-    factory_router: FactoryRouter,
 ):
-    bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
-
-    # Send base tokens to the consumer so they can pay for fees
-    transfer_base_token_if_balance_lte(
-        web3=web3,
-        base_token_address=bt.address,
-        from_wallet=factory_deployer_wallet,
-        recipient=consumer_wallet.address,
-        min_balance=parse_units("1500", bt.decimals()),
-        amount_to_transfer=parse_units("1500", bt.decimals()),
-    )
-
     data_provider = DataServiceProvider
     ocean_assets = OceanAssets(config, web3, data_provider)
     metadata = {
@@ -79,7 +49,6 @@ def test_consume_flow(
     encrypted_files = encrypt_response.content.decode("utf-8")
 
     # Publish a plain asset with one data token on chain
-    publish_market_order_fee = parse_units(publish_market_order_fee, bt.decimals())
     asset = ocean_assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
@@ -90,10 +59,10 @@ def test_consume_flow(
         erc20_symbols=["DT1"],
         erc20_minters=[publisher_wallet.address],
         erc20_fee_managers=[publisher_wallet.address],
-        erc20_publish_market_order_fee_addresses=[publisher_wallet.address],
-        erc20_publish_market_order_fee_tokens=[bt.address],
+        erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
+        erc20_publish_market_order_fee_tokens=[ZERO_ADDRESS],
         erc20_caps=[to_wei(100)],  # Doesn't matter, DT cap is always MAX_WEI
-        erc20_publish_market_order_fee_amounts=[publish_market_order_fee],
+        erc20_publish_market_order_fee_amounts=[0],
         erc20_bytess=[[b""]],
     )
 
@@ -115,14 +84,6 @@ def test_consume_flow(
         from_wallet=publisher_wallet,
     )
 
-    # Check balances
-    publisher_bt_balance_before = bt.balanceOf(publisher_wallet.address)
-    publisher_dt_balance_before = dt.balanceOf(publisher_wallet.address)
-    consumer_bt_balance_before = bt.balanceOf(consumer_wallet.address)
-    consumer_dt_balance_before = dt.balanceOf(consumer_wallet.address)
-    provider_bt_balance_before = bt.balanceOf(provider_wallet.address)
-    provider_dt_balance_before = dt.balanceOf(provider_wallet.address)
-
     # Initialize service
     response = data_provider.initialize(
         did=asset.did, service=service, consumer_address=consumer_wallet.address
@@ -132,11 +93,7 @@ def test_consume_flow(
     assert response.json()["providerFee"]
     provider_fees = response.json()["providerFee"]
 
-    # Grant datatoken infinite approval to spend consumer's base tokens
-    bt.approve(dt.address, MAX_WEI, consumer_wallet)
-
     # Start order for consumer
-    consume_market_order_fee = parse_units(consume_market_order_fee, bt.decimals())
     tx_id = dt.start_order(
         consumer=consumer_wallet.address,
         service_index=asset.get_index_of_service(service),
@@ -148,42 +105,11 @@ def test_consume_flow(
         s=provider_fees["s"],
         valid_until=provider_fees["validUntil"],
         provider_data=provider_fees["providerData"],
-        consume_market_order_fee_address=consumer_wallet.address,
-        consume_market_order_fee_token=bt.address,
-        consume_market_order_fee_amount=consume_market_order_fee,
+        consume_market_order_fee_address=ZERO_ADDRESS,
+        consume_market_order_fee_token=ZERO_ADDRESS,
+        consume_market_order_fee_amount=0,
         from_wallet=consumer_wallet,
     )
-
-    # Get balances
-    publisher_bt_balance_after_order = bt.balanceOf(publisher_wallet.address)
-    publisher_dt_balance_after_order = dt.balanceOf(publisher_wallet.address)
-    consumer_bt_balance_after_order = bt.balanceOf(consumer_wallet.address)
-    consumer_dt_balance_after_order = dt.balanceOf(consumer_wallet.address)
-    provider_bt_balance_after_order = bt.balanceOf(provider_wallet.address)
-    provider_dt_balance_after_order = dt.balanceOf(provider_wallet.address)
-
-    # Get order fee amount
-    publish_market_order_fee_amount = dt.get_publishing_market_fee()[2]
-
-    one_datatoken = to_wei(1)
-    ocean_community_order_fee = factory_router.get_opc_consume_fee()
-
-    # Check balances
-    assert (
-        publisher_bt_balance_before + publish_market_order_fee_amount
-        == publisher_bt_balance_after_order
-    )
-    assert (
-        publisher_dt_balance_before + one_datatoken - ocean_community_order_fee
-        == publisher_dt_balance_after_order
-    )
-    assert (
-        consumer_bt_balance_before - publish_market_order_fee_amount
-        == consumer_bt_balance_after_order
-    )
-    assert consumer_dt_balance_before - one_datatoken == consumer_dt_balance_after_order
-    assert provider_bt_balance_before == provider_bt_balance_after_order
-    assert provider_dt_balance_before == provider_dt_balance_after_order
 
     # Download file
     destination = config.downloads_path
@@ -214,19 +140,3 @@ def test_consume_flow(
     assert len(
         os.listdir(os.path.join(destination, os.listdir(destination)[0]))
     ) == len(files), "The asset folder is empty."
-
-    # Get balances
-    publisher_bt_balance_after_download = bt.balanceOf(publisher_wallet.address)
-    publisher_dt_balance_after_download = dt.balanceOf(publisher_wallet.address)
-    consumer_bt_balance_after_download = bt.balanceOf(consumer_wallet.address)
-    consumer_dt_balance_after_download = dt.balanceOf(consumer_wallet.address)
-    provider_bt_balance_after_download = bt.balanceOf(provider_wallet.address)
-    provider_dt_balance_after_download = dt.balanceOf(provider_wallet.address)
-
-    # Check balances and provider fees
-    assert publisher_bt_balance_after_order == publisher_bt_balance_after_download
-    assert publisher_dt_balance_after_order == publisher_dt_balance_after_download
-    assert consumer_bt_balance_after_order == consumer_bt_balance_after_download
-    assert consumer_dt_balance_after_order == consumer_dt_balance_after_download
-    assert provider_bt_balance_after_order == provider_bt_balance_after_download
-    assert provider_dt_balance_after_order == provider_dt_balance_after_download
