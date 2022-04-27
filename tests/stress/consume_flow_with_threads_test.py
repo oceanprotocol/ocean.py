@@ -133,7 +133,9 @@ def concurrent_consume_flow(concurrent_flows: int, repetitions: int, tmpdir, fil
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize(["concurrent_flows", "repetitions"], [(1, 2), (3, 1), (5, 5)])
+@pytest.mark.parametrize(
+    ["concurrent_flows", "repetitions"], [(1, 300), (3, 100), (20, 5)]
+)
 def test_concurrent_consume_flow(
     concurrent_flows, repetitions, tmpdir, file1, file2, file3
 ):

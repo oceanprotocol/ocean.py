@@ -281,6 +281,8 @@ def concurrent_c2d(concurrent_flows: int, repetitions: int):
 
 
 @pytest.mark.slow
-@pytest.mark.parametrize(["concurrent_flows", "repetitions"], [(1, 2), (3, 1), (5, 5)])
+@pytest.mark.parametrize(
+    ["concurrent_flows", "repetitions"], [(1, 300), (3, 100), (20, 5)]
+)
 def test_concurrent_c2d(concurrent_flows, repetitions):
     concurrent_c2d(concurrent_flows, repetitions)
