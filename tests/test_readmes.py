@@ -43,7 +43,7 @@ def test_script_execution(script, monkeypatch):
             prerequisite = pathlib.Path(
                 __file__, "..", "generated-readmes/test_datatokens-flow.py"
             )
-            result = runpy.run_path(prerequisite, run_name="__main__")
+            result = runpy.run_path(str(prerequisite), run_name="__main__")
             for key in [
                 "os",
                 "Wallet",
@@ -55,4 +55,4 @@ def test_script_execution(script, monkeypatch):
             ]:
                 globs[key] = result[key]
 
-    runpy.run_path(script, run_name="__main__", init_globals=globs)
+    runpy.run_path(str(script), run_name="__main__", init_globals=globs)
