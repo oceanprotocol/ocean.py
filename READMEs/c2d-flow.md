@@ -17,8 +17,6 @@ Here are the steps:
 6. Bob starts a compute job
 7. Bob monitors logs / algorithm output
 
-This c2d flow example features a simple algorithm from the field of ML. Ocean c2d is not limited to ML datasets and algorithms, but it is one of the most common use cases. For examples using different datasets and algorithms, please see [c2d-flow-more-examples.md](https://github.com/oceanprotocol/ocean.py/blob/v4main/READMEs/c2d-flow-more-examples.md)
-
 Let's go through each step.
 
 ## 1. Setup
@@ -137,9 +135,6 @@ You can use one of the standard [Ocean algo_dockers images](https://github.com/o
 Use the image name and tag in the `container` part of the algorithm metadata.
 This docker image needs to have basic support for dependency installation e.g. in the case of Python, OS-level library installations, pip installations etc.
 Take a look at the [Ocean tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/) to learn more about docker image publishing.
-
-Please note that this example features a simple Python algorithm. If you publish an algorithm in another language, make sure you have an appropriate container to run it, including dependencies.
-You can find more information about how to do this in the [Ocean tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/).
 
 In the same Python console:
 
@@ -358,3 +353,9 @@ pyplot.show() # or pyplot.savefig("test.png") to save the plot as a .png file in
 You should see something like this:
 
 ![test](https://user-images.githubusercontent.com/4101015/134895548-82e8ede8-d0db-433a-b37e-694de390bca3.png)
+
+This c2d flow example features a simple algorithm from the field of ML. Ocean c2d is not limited to ML datasets and algorithms, but it is one of the most common use cases.
+For examples using different datasets and algorithms, please see [c2d-flow-more-examples.md](https://github.com/oceanprotocol/ocean.py/blob/v4main/READMEs/c2d-flow-more-examples.md)
+
+This example also features a simple Python algorithm. If you publish an algorithm in another language, make sure you have an appropriate container to run it, including dependencies.
+You can find more information about how to do this in the [Ocean tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/).

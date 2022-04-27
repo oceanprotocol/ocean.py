@@ -12,15 +12,17 @@ scripts = pathlib.Path(__file__, "..", "generated-readmes").resolve().glob("*.py
 
 @pytest.mark.parametrize("script", scripts)
 def test_script_execution(script, monkeypatch):
+    # README generation command:
     # mkcodes --github --output tests/generated-readmes/test_{name}.py READMEs
-    if "developers" in script.name or "datatokens-flow" in script.name:
-        # developers flow does not contain Python snippets, but mostly console
-        # and samples; it should be skipped
-        # datatokens-flow is skipped because it is run as a prerequisite
-        return
 
-    if "c2d-flow-more" in script.name:
-        # TODO: this SHOULD stay in the readme flow
+    if (
+        "developers" in script.name
+        or "datatokens-flow" in script.name
+        or "c2d-flow-more-examples" in script.name
+    ):
+        # developers.md skipped because it does not have end-to-end Python snippets, just console
+        # datatokens-flow.md skipped because it is run as a prerequisite for the others, so it is tested implicitly
+        # c2d-flow-more-examples skipped because it can not be parsed separately from c2d-flow
         return
 
     if "parameters" in script.name:

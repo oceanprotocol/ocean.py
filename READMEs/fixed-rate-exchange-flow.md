@@ -62,13 +62,7 @@ print(f"bob_wallet.address = '{bob_wallet.address}'")
 assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
 OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
-```
-
-If the `exchange_id` is not provided yet, here is the fix.
-It is important to create an `exchange_id` only one time per exchange.
-
-```python
-#Create exchange_id for a new exchange
+# Create exchange_id for a new exchange
 exchange_id = ocean.create_fixed_rate(
     erc20_token=erc20_token,
     base_token=OCEAN_token,
