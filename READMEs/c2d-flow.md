@@ -308,10 +308,11 @@ In the same Python console, you can check the job status as many times as needed
 ```python
 # Wait until job is done
 import time
+from decimal import Decimal
 succeeded = False
 for _ in range(0, 200):
     status = ocean.compute.status(DATA_asset, compute_service, job_id, bob_wallet)
-    if status.get("dateFinished") and int(status["dateFinished"]) > 0:
+    if status.get("dateFinished") and Decimal(status["dateFinished"]) > 0:
         succeeded = True
         break
     time.sleep(5)

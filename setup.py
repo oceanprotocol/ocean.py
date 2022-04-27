@@ -51,6 +51,7 @@ test_requirements = [
     "pytest",
     "pytest-watch",
     "Pillow",
+    "matplotlib",
     "mkcodes==0.1.1",
 ]
 
