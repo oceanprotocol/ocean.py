@@ -71,20 +71,6 @@ exchange_id = ocean.create_fixed_rate(
 )
 ```
 
-If `exchange_id` has been created before or there are other
-exchanges for a certain datatoken, it can be searched by
-providing the datatoken address.
-
-```python
-# Get a list exchange addresses and ids with a given datatoken and exchange owner.
-datatoken_address = erc20_token.address
-nft_factory = ocean.get_nft_factory()
-exchange_addresses_and_ids = nft_factory.search_exchange_by_datatoken(ocean.fixed_rate_exchange, datatoken_address)
-# Optional: Filtering by the exchange owner.
-exchange_addresses_and_ids = nft_factory.search_exchange_by_datatoken(ocean.fixed_rate_exchange, datatoken_address, alice_wallet.address)
-print(exchange_addresses_and_ids)
-```
-
 Use the `exchange_id` for buying at fixed rate.
 
 ```python
@@ -106,3 +92,18 @@ assert tx_result, "failed buying datatokens at fixed rate for Bob"
 ```
 
 As an alternative for publishing a NFT, a datatoken and a fixed rate exchange at once, you can use `create_nft_erc20_with_fixed_rate`.
+
+If you already created the `exchange_id`, then you can reuse it.
+If an exchange has been created before or there are other
+exchanges for a certain datatoken, it can be searched by
+providing the datatoken address.
+```python
+# Get a list exchange addresses and ids with a given datatoken and exchange owner.
+datatoken_address = erc20_token.address
+nft_factory = ocean.get_nft_factory()
+exchange_addresses_and_ids = nft_factory.search_exchange_by_datatoken(ocean.fixed_rate_exchange, datatoken_address)
+# Optional: Filtering by the exchange owner.
+exchange_addresses_and_ids = nft_factory.search_exchange_by_datatoken(ocean.fixed_rate_exchange, datatoken_address, alice_wallet.address)
+print(exchange_addresses_and_ids)
+```
+
