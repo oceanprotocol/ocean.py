@@ -5,6 +5,9 @@ SPDX-License-Identifier: Apache-2.0
 
 # Compute-to-Data (C2D) Flow - More Examples
 
+Please note that these code snippets are not automatically tested, so they might be out of date. Always refer to the main
+[c2d-flow README](https://github.com/oceanprotocol/ocean.py/blob/v4main/READMEs/c2d-flow.md) for the latest fully tested c2d flow.
+
 ## Example 1: Image Processing
 
 Run the [c2d-flow README](https://github.com/oceanprotocol/ocean.py/blob/v4main/READMEs/c2d-flow.md)
@@ -73,9 +76,7 @@ ALGO_url_file = UrlFile(
 
 Install dependencies:
 
-```console
-pip install Pillow
-```
+`pip install Pillow`
 
 Display the image:
 
@@ -161,9 +162,7 @@ ALGO_url_file = UrlFile(
 
 Install dependencies:
 
-```console
-pip install numpy, matplotlib
-```
+`pip install numpy, matplotlib`
 
 Display the result:
 
