@@ -22,30 +22,6 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-@pytest.mark.integration
-@pytest.mark.parametrize(
-    "dataset_name,dataset_url,algorithm_name,algorithm_url,algorithm_docker_tag",
-    [
-        (
-            "branin",
-            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff",
-            "gpr,",
-            "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py",
-            "python-branin",
-        ),
-    ],
-)
-def test_c2d_flow_readme(
-    dataset_name, dataset_url, algorithm_name, algorithm_url, algorithm_docker_tag
-):
-    """This test mirrors the c2d-flow.md README.
-    As such, it does not use the typical pytest fixtures.
-    """
-    c2d_flow_readme(
-        dataset_name, dataset_url, algorithm_name, algorithm_url, algorithm_docker_tag
-    )
-
-
 @pytest.mark.slow
 @pytest.mark.parametrize(
     "dataset_name,dataset_url,algorithm_name,algorithm_url,algorithm_docker_tag",

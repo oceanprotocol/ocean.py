@@ -50,6 +50,7 @@ from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 dispenser = ocean.dispenser
 
 max_amount = ocean.to_wei(50)
+# Create dispenser
 erc20_token.create_dispenser(
     dispenser_address=dispenser.address,
     max_balance=max_amount,
@@ -58,9 +59,6 @@ erc20_token.create_dispenser(
     allowed_swapper=ZERO_ADDRESS,
     from_wallet=alice_wallet,
 )
-
-# Create dispenser
-erc20_token.create_dispenser(dispenser_data, from_wallet=alice_wallet)
 
 dispenser_status = dispenser.status(erc20_token.address)
 assert dispenser_status[0] is True

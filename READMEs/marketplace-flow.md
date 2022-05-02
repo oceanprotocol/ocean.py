@@ -110,10 +110,6 @@ print(f"did = '{did}'")
 
 ```
 
-In order to encrypt the entire asset, when using a private market or metadata cache, use the encrypt keyword.
-Same for compression and you can use a combination of the two. E.g:
-`asset = ocean.assets.create(..., encrypt_flag=True)` or `asset = ocean.assets.create(..., compress_flag=True)`
-
 ## 3. Creation of datatoken liquidity pool
 
 In the following steps we will create a pool from the created token, in order to allow another user
@@ -137,7 +133,6 @@ print(f"BPool address: {bpool.address}")
 
 ```
 
-As an alternative for publishing a NFT, a datatoken and a pool at once, you can use `create_nft_erc20_with_pool`.
 ## 4. Marketplace displays asset for sale
 
 Now, you're the Marketplace operator. Here's how to get info about the data asset.
@@ -244,3 +239,9 @@ _Note_. The file is in ARFF format, used by some AI/ML tools. In this case there
 -3.9286,0.0000,206.1783
 ...
 ```
+
+Note on asset encryption: In order to encrypt the entire asset, when using a private market or metadata cache, use the encrypt keyword.
+Same for compression and you can use a combination of the two. E.g:
+`asset = ocean.assets.create(..., encrypt_flag=True)` or `asset = ocean.assets.create(..., compress_flag=True)`
+
+As an alternative for publishing a NFT, a datatoken and a pool at once, you can use `create_nft_erc20_with_pool`.
