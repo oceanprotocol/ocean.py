@@ -55,6 +55,7 @@ def test_wallet_arguments(web3, config):
         )
 
 
+@pytest.mark.unit
 def test_generating_wallets(web3, publisher_ocean_instance):
     generated_wallet = generate_wallet()
     assert generated_wallet.address, "Wallet has not an address."

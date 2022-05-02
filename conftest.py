@@ -33,6 +33,7 @@ from tests.resources.helper_functions import (
     get_publisher_wallet,
     get_web3,
     setup_logging,
+    get_file3,
 )
 
 _NETWORK = "ganache"
@@ -239,3 +240,8 @@ def file1():
 @pytest.fixture
 def file2():
     return get_file2()
+
+
+@pytest.fixture
+def file3():
+    return get_file3()

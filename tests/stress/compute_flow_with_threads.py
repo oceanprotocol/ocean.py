@@ -2,10 +2,13 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import os
 import pickle
 import time
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime, timedelta
+from decimal import Decimal
+
+import pytest
 
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.compute_input import ComputeInput
@@ -14,50 +17,38 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import get_first_service_by_type
+from tests.resources.helper_functions import generate_wallet
 
-config = ExampleConfig.get_config()
-ocean = Ocean(config)
 
-alice_private_key = os.getenv("TEST_PRIVATE_KEY1")
-alice_wallet = Wallet(
-    ocean.web3,
-    alice_private_key,
-    config.block_confirmations,
-    config.transaction_timeout,
-)
-assert alice_wallet.address
-bob_wallet = Wallet(
-    ocean.web3,
-    os.getenv("TEST_PRIVATE_KEY2"),
-    config.block_confirmations,
-    config.transaction_timeout,
-)
-assert bob_wallet.address
-
-for _ in range(3000):
-    mint_fake_OCEAN(config)
-    assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-    assert bob_wallet.web3.eth.get_balance(bob_wallet.address) > 0, "need ETH"
-
+def c2d_flow_readme(
+    ocean,
+    dataset_name,
+    dataset_url,
+    algorithm_name,
+    algorithm_url,
+    algorithm_docker_tag,
+):
+    consumer_wallet = publisher_wallet = generate_wallet()
     # Publish the data NFT token
-    DATA_nft_token = ocean.create_erc721_nft("NFTToken1", "NFT1", alice_wallet)
-    assert DATA_nft_token.address
+    erc721_nft = ocean.create_erc721_nft("NFTToken1", "NFT1", publisher_wallet)
+    assert erc721_nft.address
+    assert erc721_nft.token_name()
+    assert erc721_nft.symbol()
 
     # Publish the datatoken
-    DATA_datatoken = DATA_nft_token.create_datatoken(
+    DATA_datatoken = erc721_nft.create_datatoken(
         template_index=1,
         name="Datatoken 1",
         symbol="DT1",
-        minter=alice_wallet.address,
-        fee_manager=alice_wallet.address,
+        minter=publisher_wallet.address,
+        fee_manager=publisher_wallet.address,
         publish_market_order_fee_address=ZERO_ADDRESS,
         publish_market_order_fee_token=ocean.OCEAN_address,
         cap=ocean.to_wei(100000),
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=alice_wallet,
+        from_wallet=publisher_wallet,
     )
     assert DATA_datatoken.address
 
@@ -67,17 +58,15 @@ for _ in range(3000):
     DATA_metadata = {
         "created": DATA_date_created,
         "updated": DATA_date_created,
-        "description": "Branin dataset",
-        "name": "Branin dataset",
+        "description": dataset_name,
+        "name": dataset_name,
         "type": "dataset",
         "author": "Trent",
         "license": "CC0: PublicDomain",
     }
 
     # ocean.py offers multiple file types, but a simple url file should be enough for this example
-    DATA_url_file = UrlFile(
-        url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-    )
+    DATA_url_file = UrlFile(url=dataset_url)
 
     # Encrypt file(s) using provider
     DATA_encrypted_files = ocean.assets.encrypt_files([DATA_url_file])
@@ -104,33 +93,32 @@ for _ in range(3000):
     # Publish asset with compute service on-chain.
     DATA_asset = ocean.assets.create(
         metadata=DATA_metadata,
-        publisher_wallet=alice_wallet,
+        publisher_wallet=publisher_wallet,
         encrypted_files=DATA_encrypted_files,
         services=[DATA_compute_service],
-        erc721_address=DATA_nft_token.address,
+        erc721_address=erc721_nft.address,
         deployed_erc20_tokens=[DATA_datatoken],
     )
 
     assert DATA_asset.did, "create dataset with compute service unsuccessful"
 
-    # 3. Alice publishes algorithm
-
     # Publish the algorithm NFT token
-    ALGO_nft_token = ocean.create_erc721_nft("NFTToken1", "NFT1", alice_wallet)
+    ALGO_nft_token = ocean.create_erc721_nft("NFTToken1", "NFT1", publisher_wallet)
     assert ALGO_nft_token.address
 
+    # Publish the datatoken
     ALGO_datatoken = ALGO_nft_token.create_datatoken(
         template_index=1,
         name="Datatoken 1",
         symbol="DT1",
-        minter=alice_wallet.address,
-        fee_manager=alice_wallet.address,
+        minter=publisher_wallet.address,
+        fee_manager=publisher_wallet.address,
         publish_market_order_fee_address=ZERO_ADDRESS,
         publish_market_order_fee_token=ocean.OCEAN_address,
         cap=ocean.to_wei(100000),
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=alice_wallet,
+        from_wallet=publisher_wallet,
     )
     assert ALGO_datatoken.address
 
@@ -140,8 +128,8 @@ for _ in range(3000):
     ALGO_metadata = {
         "created": ALGO_date_created,
         "updated": ALGO_date_created,
-        "description": "gpr",
-        "name": "gpr",
+        "description": algorithm_name,
+        "name": algorithm_name,
         "type": "algorithm",
         "author": "Trent",
         "license": "CC0: PublicDomain",
@@ -152,16 +140,14 @@ for _ in range(3000):
             "container": {
                 "entrypoint": "python $ALGO",
                 "image": "oceanprotocol/algo_dockers",
-                "tag": "python-branin",
+                "tag": algorithm_docker_tag,
                 "checksum": "44e10daa6637893f4276bb8d7301eb35306ece50f61ca34dcab550",
             },
         },
     }
 
     # ocean.py offers multiple file types, but a simple url file should be enough for this example
-    ALGO_url_file = UrlFile(
-        url="https://raw.githubusercontent.com/trentmc/branin/main/gpr.py"
-    )
+    ALGO_url_file = UrlFile(url=algorithm_url)
 
     # Encrypt file(s) using provider
     ALGO_encrypted_files = ocean.assets.encrypt_files([ALGO_url_file])
@@ -170,7 +156,7 @@ for _ in range(3000):
     # The download (access service) is automatically created, but you can explore other options as well
     ALGO_asset = ocean.assets.create(
         metadata=ALGO_metadata,
-        publisher_wallet=alice_wallet,
+        publisher_wallet=publisher_wallet,
         encrypted_files=ALGO_encrypted_files,
         erc721_address=ALGO_nft_token.address,
         deployed_erc20_tokens=[ALGO_datatoken],
@@ -178,19 +164,12 @@ for _ in range(3000):
 
     assert ALGO_asset.did, "create algorithm unsuccessful"
 
-    # 4. Alice allows the algorithm for C2D for that data asset
     compute_service = DATA_asset.services[0]
     compute_service.add_publisher_trusted_algorithm(ALGO_asset)
-    DATA_asset = ocean.assets.update(DATA_asset, alice_wallet)
+    DATA_asset = ocean.assets.update(DATA_asset, publisher_wallet)
 
-    # 5. Bob acquires datatokens for data and algorithm
-
-    # Alice mints DATA datatokens and ALGO datatokens to Bob.
-    # Alternatively, Bob might have bought these in a market.
-    DATA_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
-    ALGO_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
-
-    # 6. Bob starts a compute job
+    DATA_datatoken.mint(consumer_wallet.address, ocean.to_wei(5), publisher_wallet)
+    ALGO_datatoken.mint(consumer_wallet.address, ocean.to_wei(5), publisher_wallet)
 
     # Convenience variables
     DATA_did = DATA_asset.did
@@ -209,10 +188,10 @@ for _ in range(3000):
     DATA_order_tx_id = ocean.assets.pay_for_service(
         asset=DATA_asset,
         service=compute_service,
-        consume_market_order_fee_address=bob_wallet.address,
+        consume_market_order_fee_address=consumer_wallet.address,
         consume_market_order_fee_token=DATA_datatoken.address,
         consume_market_order_fee_amount=0,
-        wallet=bob_wallet,
+        wallet=consumer_wallet,
         initialize_args={
             "compute_environment": environments[0]["id"],
             "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp()),
@@ -225,10 +204,10 @@ for _ in range(3000):
     ALGO_order_tx_id = ocean.assets.pay_for_service(
         asset=ALGO_asset,
         service=algo_service,
-        consume_market_order_fee_address=bob_wallet.address,
+        consume_market_order_fee_address=consumer_wallet.address,
         consume_market_order_fee_token=ALGO_datatoken.address,
         consume_market_order_fee_amount=0,
-        wallet=bob_wallet,
+        wallet=consumer_wallet,
         initialize_args={
             "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp())
         },
@@ -240,7 +219,7 @@ for _ in range(3000):
     DATA_compute_input = ComputeInput(DATA_did, DATA_order_tx_id, compute_service.id)
     ALGO_compute_input = ComputeInput(ALGO_did, ALGO_order_tx_id, algo_service.id)
     job_id = ocean.compute.start(
-        consumer_wallet=bob_wallet,
+        consumer_wallet=consumer_wallet,
         dataset=DATA_compute_input,
         compute_environment=environments[0]["id"],
         algorithm=ALGO_compute_input,
@@ -250,8 +229,10 @@ for _ in range(3000):
     # Wait until job is done
     succeeded = False
     for _ in range(0, 200):
-        status = ocean.compute.status(DATA_asset, job_id, bob_wallet)
-        if status.get("dateFinished") and int(status["dateFinished"]) > 0:
+        status = ocean.compute.status(
+            DATA_asset, compute_service, job_id, consumer_wallet
+        )
+        if status.get("dateFinished") and Decimal(status["dateFinished"]) > 0:
             print(f"Status = '{status}'")
             succeeded = True
             break
@@ -261,17 +242,47 @@ for _ in range(3000):
     # Retrieve algorithm output and log files
     output = None
     for i in range(len(status["results"])):
-        result = None
         result_type = status["results"][i]["type"]
         print(f"Fetch result index {i}, type: {result_type}")
-        result = ocean.compute.result(DATA_asset, job_id, i, bob_wallet)
+        result = ocean.compute.result(
+            DATA_asset, compute_service, job_id, i, consumer_wallet
+        )
         assert result, "result retrieval unsuccessful"
+        print(f"result index: {i}, type: {result_type}, contents: {result}")
 
         # Extract algorithm output
         if result_type == "output":
             output = result
     assert output, "algorithm output not found"
+    unpickle_result(output)
 
-    # Unpickle the gaussian model result
-    model = pickle.loads(output)
+
+def unpickle_result(pickled):
+    """Unpickle the gaussian model result"""
+    model = pickle.loads(pickled)
     assert len(model) > 0, "unpickle result unsuccessful"
+
+
+def concurrent_c2d(concurrent_flows: int, repetitions: int):
+    config = ExampleConfig.get_config()
+    ocean = Ocean(config)
+    mint_fake_OCEAN(config)
+    with ThreadPoolExecutor(max_workers=concurrent_flows) as executor:
+        for _ in range(concurrent_flows * repetitions):
+            executor.submit(
+                c2d_flow_readme,
+                ocean,
+                "brainin",
+                "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff",
+                "gpr",
+                "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py",
+                "python-brain",
+            )
+
+
+@pytest.mark.slow
+@pytest.mark.parametrize(
+    ["concurrent_flows", "repetitions"], [(1, 300), (3, 100), (20, 5)]
+)
+def test_concurrent_c2d(concurrent_flows, repetitions):
+    concurrent_c2d(concurrent_flows, repetitions)
