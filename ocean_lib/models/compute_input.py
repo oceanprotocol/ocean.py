@@ -2,10 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-
-
-from typing import Dict, Optional, Union
-
+from typing import Dict, Optional, Union, Any
 from enforce_typing import enforce_types
 
 
@@ -13,33 +10,35 @@ class ComputeInput:
     @enforce_types
     def __init__(
         self,
-        did: str,
-        service_id: Union[str, int],
+        asset: Any,  # Asset
+        service: Any,  # Service
         transfer_tx_id: Union[str, bytes] = None,
         userdata: Optional[Dict] = None,
     ) -> None:
         """Initialise and validate arguments."""
-        assert (
-            did and service_id is not None
-        ), f"bad argument values: did={did}, transfer_ts_id={transfer_tx_id}, service_id={service_id}"
+        assert asset and service is not None, "bad argument values."
 
         if userdata:
             assert isinstance(userdata, dict), "Userdata must be a dictionary."
 
-        self.did = did
+        self.asset = asset
+        self.did = asset.did
         self.transfer_tx_id = transfer_tx_id
-        self.service_id = service_id
+        self.service = service
+        self.service_id = service.id
         self.userdata = userdata
 
     @enforce_types
     def as_dictionary(self) -> Dict[str, Union[str, Dict]]:
         res = {
             "documentId": self.did,
-            "transferTxId": self.transfer_tx_id,
             "serviceId": self.service_id,
         }
 
         if self.userdata:
             res["userdata"] = self.userdata
+
+        if self.transfer_tx_id:
+            res["transferTxId"] = self.transfer_tx_id
 
         return res

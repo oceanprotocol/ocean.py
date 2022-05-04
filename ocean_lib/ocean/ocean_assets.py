@@ -667,7 +667,6 @@ class OceanAssets:
         self,
         datasets,
         algorithm_data,
-        service_endpoint,
         compute_environment,
         valid_until,
         consume_market_order_fee_address: str,
@@ -679,34 +678,75 @@ class OceanAssets:
         data_provider = DataServiceProvider
 
         initialize_response = data_provider.initialize_compute(
-            datasets,
-            algorithm_data,
-            service_endpoint,
+            [x.as_dictionary() for x in datasets],
+            algorithm_data.as_dictionary(),
+            datasets[0].service.service_endpoint,
             consumer_address,
             compute_environment,
             valid_until,
         )
-        # provider_fees = initialize_response.json()["providerFee"]
 
-        # TODO: start order for each dataset if providerFee exist
-        tx_id = dt.start_order(
-            consumer=consumer_address,
-            service_index=asset.get_index_of_service(service),
-            provider_fee_address=provider_fees["providerFeeAddress"],
-            provider_fee_token=provider_fees["providerFeeToken"],
-            provider_fee_amount=provider_fees["providerFeeAmount"],
-            v=provider_fees["v"],
-            r=provider_fees["r"],
-            s=provider_fees["s"],
-            valid_until=provider_fees["validUntil"],
-            provider_data=provider_fees["providerData"],
-            consume_market_order_fee_address=consume_market_order_fee_address,
-            consume_market_order_fee_token=consume_market_order_fee_token,
-            consume_market_order_fee_amount=consume_market_order_fee_amount,
-            from_wallet=wallet,
+        result = initialize_response.json()
+        for i, item in enumerate(result["datasets"]):
+            self._enrich_from_initialize_response(
+                datasets[i],
+                item,
+                consume_market_order_fee_address,
+                consume_market_order_fee_token,
+                consume_market_order_fee_amount,
+                wallet,
+                consumer_address,
+            )
+
+        self._enrich_from_initialize_response(
+            algorithm_data,
+            result["algorithm"],
+            consume_market_order_fee_address,
+            consume_market_order_fee_token,
+            consume_market_order_fee_amount,
+            wallet,
+            consumer_address,
         )
 
-        return tx_id
+        return datasets, algorithm_data
+
+    @enforce_types
+    def _enrich_from_initialize_response(
+        self,
+        dataset,
+        item: dict,
+        consume_market_order_fee_address: str,
+        consume_market_order_fee_token: str,
+        consume_market_order_fee_amount: int,
+        wallet: Wallet,
+        consumer_address: Optional[str] = None,
+    ):
+        if item.get("providerFee"):
+            provider_fees = item["providerFee"]
+
+        valid_order = item.get("valid_order")
+
+        if valid_order:
+            dataset.transfer_tx_id = valid_order
+            return
+        else:
+            dt = ERC20Token(self._web3, dataset.service.datatoken)
+            dataset.transfer_tx_id = dt.start_order(
+                consumer=consumer_address,
+                service_index=dataset.asset.get_index_of_service(dataset.service),
+                provider_fee_address=provider_fees["providerFeeAddress"],
+                provider_fee_token=provider_fees["providerFeeToken"],
+                provider_fee_amount=provider_fees["providerFeeAmount"],
+                v=provider_fees["v"],
+                r=provider_fees["r"],
+                s=provider_fees["s"],
+                valid_until=provider_fees["validUntil"],
+                provider_data=provider_fees["providerData"],
+                consume_market_order_fee_address=consume_market_order_fee_address,
+                consume_market_order_fee_token=consume_market_order_fee_token,
+                consume_market_order_fee_amount=consume_market_order_fee_amount,
+                from_wallet=wallet,
+            )
 
     @enforce_types
     def encrypt_files(self, files: list):

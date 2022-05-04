@@ -159,8 +159,8 @@ def run_compute_test(
     )
     datasets = [
         ComputeInput(
-            dataset_and_userdata.asset.did,
-            compute_service.id,
+            dataset_and_userdata.asset,
+            compute_service,
             userdata=dataset_and_userdata.userdata,
         )
     ]
@@ -175,8 +175,8 @@ def run_compute_test(
 
         datasets.append(
             ComputeInput(
-                asset_and_userdata.asset.did,
-                _service.id,
+                asset_and_userdata.asset,
+                _service,
                 userdata=asset_and_userdata.userdata,
             )
         )
@@ -184,16 +184,15 @@ def run_compute_test(
     # Order algo download service (aka. access service)
     algorithm = None
     if algorithm_and_userdata:
-        _service = get_first_service_by_type(
+        algo_service = get_first_service_by_type(
             algorithm_and_userdata.asset, ServiceTypes.ASSET_ACCESS
         )
         algorithm = ComputeInput(
-            algorithm_and_userdata.asset.did,
-            _service.id,
+            algorithm_and_userdata.asset,
+            algo_service,
             userdata=algorithm_and_userdata.userdata,
         )
 
-    datasets = [x.as_dictionary() for x in datasets]
     service = get_first_service_by_type(
         dataset_and_userdata.asset, ServiceTypes.CLOUD_COMPUTE
     )
@@ -201,6 +200,7 @@ def run_compute_test(
     environments = ocean_instance.compute.get_c2d_environments(service.service_endpoint)
 
     erc20_token = ERC20Token(ocean_instance.web3, service.datatoken)
+    algo_token = ERC20Token(ocean_instance.web3, algo_service.datatoken)
 
     # for the "algorithm with different publisher fixture, consumer is minter
     minter = (
@@ -209,11 +209,12 @@ def run_compute_test(
         else publisher_wallet
     )
     erc20_token.mint(consumer_wallet.address, to_wei(10), minter)
+    # TODO: mint additional datasets too
+    algo_token.mint(consumer_wallet.address, to_wei(10), publisher_wallet)
 
-    ocean_instance.assets.pay_for_compute_service(
+    datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
         datasets,
-        algorithm.as_dictionary(),
-        service.service_endpoint,
+        algorithm,
         consumer_address=environments[0]["consumerAddress"],
         compute_environment=environments[0]["id"],
         valid_until=int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
@@ -222,8 +223,6 @@ def run_compute_test(
         consume_market_order_fee_amount=0,
         wallet=consumer_wallet,
     )
-
-    # TODO: update transferTxId in datasets and algo
 
     # Start compute job
     job_id = ocean_instance.compute.start(
