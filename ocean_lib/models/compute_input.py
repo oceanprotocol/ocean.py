@@ -2,7 +2,8 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import Dict, Optional, Union, Any
+from typing import Any, Dict, Optional, Union
+
 from enforce_typing import enforce_types
 
 
