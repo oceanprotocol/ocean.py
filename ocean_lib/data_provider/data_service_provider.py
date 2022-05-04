@@ -214,6 +214,10 @@ class DataServiceProvider:
         )
 
         if not response or not hasattr(response, "status_code"):
+            if isinstance(response, Response) and response.status_code == 400:
+                error = response.json().get("error", "unknown error")
+                raise DataProviderException(f"initializeComputeEndpoint: {error}")
+
             raise DataProviderException(
                 f"Failed to get a response for request: initializeComputeEndpoint={initialize_compute_endpoint}, payload={payload}, response is {response}"
             )
