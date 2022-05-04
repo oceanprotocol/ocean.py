@@ -603,7 +603,7 @@ class OceanAssets:
         )
 
     @enforce_types
-    def pay_for_service(
+    def pay_for_access_service(
         self,
         asset: Asset,
         service: Service,
@@ -611,7 +611,6 @@ class OceanAssets:
         consume_market_order_fee_token: str,
         consume_market_order_fee_amount: int,
         wallet: Wallet,
-        initialize_args: Optional[dict] = None,
         consumer_address: Optional[str] = None,
     ):
         dt = ERC20Token(self._web3, service.datatoken)
@@ -635,18 +634,63 @@ class OceanAssets:
 
         data_provider = DataServiceProvider
 
-        built_initialize_args = {
+        initialize_args = {
             "did": asset.did,
             "service": service,
             "consumer_address": consumer_address,
         }
 
-        if initialize_args:
-            built_initialize_args.update(initialize_args)
-
-        initialize_response = data_provider.initialize(**built_initialize_args)
+        initialize_response = data_provider.initialize(**initialize_args)
         provider_fees = initialize_response.json()["providerFee"]
 
+        tx_id = dt.start_order(
+            consumer=consumer_address,
+            service_index=asset.get_index_of_service(service),
+            provider_fee_address=provider_fees["providerFeeAddress"],
+            provider_fee_token=provider_fees["providerFeeToken"],
+            provider_fee_amount=provider_fees["providerFeeAmount"],
+            v=provider_fees["v"],
+            r=provider_fees["r"],
+            s=provider_fees["s"],
+            valid_until=provider_fees["validUntil"],
+            provider_data=provider_fees["providerData"],
+            consume_market_order_fee_address=consume_market_order_fee_address,
+            consume_market_order_fee_token=consume_market_order_fee_token,
+            consume_market_order_fee_amount=consume_market_order_fee_amount,
+            from_wallet=wallet,
+        )
+
+        return tx_id
+
+    @enforce_types
+    def pay_for_compute_service(
+        self,
+        datasets,
+        algorithm_data,
+        service_endpoint,
+        compute_environment,
+        valid_until,
+        userdata,
+        consume_market_order_fee_address: str,
+        consume_market_order_fee_token: str,
+        consume_market_order_fee_amount: int,
+        wallet: Wallet,
+        consumer_address: Optional[str] = None,
+    ):
+        data_provider = DataServiceProvider
+
+        initialize_response = data_provider.initialize_compute(
+            datasets,
+            algorithm_data,
+            service_endpoint,
+            consumer_address,
+            compute_environment,
+            valid_until,
+            userdata,
+        )
+        # provider_fees = initialize_response.json()["providerFee"]
+
+        # TODO: start order for each dataset if providerFee exist
         tx_id = dt.start_order(
             consumer=consumer_address,
             service_index=asset.get_index_of_service(service),
