@@ -171,7 +171,7 @@ def run_compute_test(
         if not get_first_service_by_type(asset_and_userdata.asset, service_type):
             service_type = ServiceTypes.CLOUD_COMPUTE
 
-        _service = get_first_service_by_type(asset_and_userdata, service_type)
+        _service = get_first_service_by_type(asset_and_userdata.asset, service_type)
 
         datasets.append(
             ComputeInput(
@@ -180,6 +180,15 @@ def run_compute_test(
                 userdata=asset_and_userdata.userdata,
             )
         )
+
+        _erc20_token = ERC20Token(ocean_instance.web3, _service.datatoken)
+        # for the "algorithm with different publisher fixture, consumer is minter
+        minter = (
+            consumer_wallet
+            if _erc20_token.is_minter(consumer_wallet.address)
+            else publisher_wallet
+        )
+        _erc20_token.mint(consumer_wallet.address, to_wei(10), minter)
 
     # Order algo download service (aka. access service)
     algorithm = None
@@ -192,15 +201,21 @@ def run_compute_test(
             algo_service,
             userdata=algorithm_and_userdata.userdata,
         )
+        # for the "algorithm with different publisher fixture, consumer is minter
+        algo_token = ERC20Token(ocean_instance.web3, algo_service.datatoken)
+        algo_minter = (
+            consumer_wallet
+            if algo_token.is_minter(consumer_wallet.address)
+            else publisher_wallet
+        )
+        algo_token.mint(consumer_wallet.address, to_wei(10), algo_minter)
 
     service = get_first_service_by_type(
         dataset_and_userdata.asset, ServiceTypes.CLOUD_COMPUTE
     )
 
     environments = ocean_instance.compute.get_c2d_environments(service.service_endpoint)
-
     erc20_token = ERC20Token(ocean_instance.web3, service.datatoken)
-    algo_token = ERC20Token(ocean_instance.web3, algo_service.datatoken)
 
     # for the "algorithm with different publisher fixture, consumer is minter
     minter = (
@@ -210,7 +225,6 @@ def run_compute_test(
     )
     erc20_token.mint(consumer_wallet.address, to_wei(10), minter)
     # TODO: mint additional datasets too
-    algo_token.mint(consumer_wallet.address, to_wei(10), publisher_wallet)
 
     datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
         datasets,

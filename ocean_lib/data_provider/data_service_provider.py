@@ -212,6 +212,7 @@ class DataServiceProvider:
             data=json.dumps(payload),
             headers={"content-type": "application/json"},
         )
+
         if not response or not hasattr(response, "status_code"):
             raise DataProviderException(
                 f"Failed to get a response for request: initializeComputeEndpoint={initialize_compute_endpoint}, payload={payload}, response is {response}"
