@@ -132,45 +132,6 @@ def dataset_with_access_service(publisher_wallet, publisher_ocean_instance):
     return asset
 
 
-def process_order(
-    ocean_instance: Ocean,
-    publisher_wallet: Wallet,
-    consumer_wallet: Wallet,
-    asset: Asset,
-    service_type: str,
-) -> Tuple[str, Service]:
-    """Helper function to process a compute order."""
-    # Mint 10 datatokens to the consumer
-    service = get_first_service_by_type(asset, service_type)
-    erc20_token = ERC20Token(ocean_instance.web3, service.datatoken)
-
-    # for the "algorithm with different publisher fixture, consumer is minter
-    minter = (
-        consumer_wallet
-        if erc20_token.is_minter(consumer_wallet.address)
-        else publisher_wallet
-    )
-    erc20_token.mint(consumer_wallet.address, to_wei(10), minter)
-
-    environments = ocean_instance.compute.get_c2d_environments(service.service_endpoint)
-
-    order_tx_id = ocean_instance.assets.pay_for_service(
-        asset=asset,
-        service=service,
-        consume_market_order_fee_address=consumer_wallet.address,
-        consume_market_order_fee_token=erc20_token.address,
-        consume_market_order_fee_amount=0,
-        wallet=consumer_wallet,
-        initialize_args={
-            "compute_environment": environments[0]["id"],
-            "valid_until": int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
-        },
-        consumer_address=environments[0]["consumerAddress"],
-    )
-
-    return order_tx_id, service
-
-
 @dataclass
 class AssetAndUserdata:
     asset: Asset
@@ -193,74 +154,86 @@ def run_compute_test(
         algorithm_and_userdata or algorithm_meta
     ), "either algorithm_and_userdata or algorithm_meta must be provided."
 
-    # Order dataset with compute service
-    dataset_tx_id, compute_service = process_order(
-        ocean_instance,
-        publisher_wallet,
-        consumer_wallet,
-        dataset_and_userdata.asset,
-        ServiceTypes.CLOUD_COMPUTE,
+    compute_service = get_first_service_by_type(
+        dataset_and_userdata.asset, ServiceTypes.CLOUD_COMPUTE
     )
-    dataset = ComputeInput(
-        dataset_and_userdata.asset.did,
-        dataset_tx_id,
-        compute_service.id,
-        dataset_and_userdata.userdata,
-    )
+    datasets = [
+        ComputeInput(
+            dataset_and_userdata.asset.did,
+            compute_service.id,
+            userdata=dataset_and_userdata.userdata,
+        )
+    ]
 
-    # Order additional datasets
-    additional_datasets = []
+    # build additional datasets
     for asset_and_userdata in additional_datasets_and_userdata:
         service_type = ServiceTypes.ASSET_ACCESS
         if not get_first_service_by_type(asset_and_userdata.asset, service_type):
             service_type = ServiceTypes.CLOUD_COMPUTE
-        _order_tx_id, _service = process_order(
-            ocean_instance,
-            publisher_wallet,
-            consumer_wallet,
-            asset_and_userdata.asset,
-            service_type,
-        )
-        additional_datasets.append(
+
+        _service = get_first_service_by_type(asset_and_userdata, service_type)
+
+        datasets.append(
             ComputeInput(
                 asset_and_userdata.asset.did,
-                _order_tx_id,
                 _service.id,
-                asset_and_userdata.userdata,
+                userdata=asset_and_userdata.userdata,
             )
         )
 
     # Order algo download service (aka. access service)
     algorithm = None
     if algorithm_and_userdata:
-        algo_tx_id, algo_download_service = process_order(
-            ocean_instance,
-            publisher_wallet,
-            consumer_wallet,
-            algorithm_and_userdata.asset,
-            ServiceTypes.ASSET_ACCESS,
+        _service = get_first_service_by_type(
+            algorithm_and_userdata.asset, ServiceTypes.ASSET_ACCESS
         )
         algorithm = ComputeInput(
             algorithm_and_userdata.asset.did,
-            algo_tx_id,
-            algo_download_service.id,
-            algorithm_and_userdata.userdata,
+            _service.id,
+            userdata=algorithm_and_userdata.userdata,
         )
 
+    datasets = [x.as_dictionary() for x in datasets]
     service = get_first_service_by_type(
         dataset_and_userdata.asset, ServiceTypes.CLOUD_COMPUTE
     )
+
     environments = ocean_instance.compute.get_c2d_environments(service.service_endpoint)
+
+    erc20_token = ERC20Token(ocean_instance.web3, service.datatoken)
+
+    # for the "algorithm with different publisher fixture, consumer is minter
+    minter = (
+        consumer_wallet
+        if erc20_token.is_minter(consumer_wallet.address)
+        else publisher_wallet
+    )
+    erc20_token.mint(consumer_wallet.address, to_wei(10), minter)
+
+    ocean_instance.assets.pay_for_compute_service(
+        datasets,
+        algorithm.as_dictionary(),
+        service.service_endpoint,
+        consumer_address=environments[0]["consumerAddress"],
+        compute_environment=environments[0]["id"],
+        valid_until=int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
+        consume_market_order_fee_address=consumer_wallet.address,
+        consume_market_order_fee_token=erc20_token.address,
+        consume_market_order_fee_amount=0,
+        wallet=consumer_wallet,
+    )
+
+    # TODO: update transferTxId in datasets and algo
 
     # Start compute job
     job_id = ocean_instance.compute.start(
         consumer_wallet,
-        dataset,
+        datasets[0],
         environments[0]["id"],
         algorithm,
         algorithm_meta,
         algorithm_algocustomdata,
-        additional_datasets,
+        datasets[1:],
     )
 
     status = ocean_instance.compute.status(

@@ -670,7 +670,6 @@ class OceanAssets:
         service_endpoint,
         compute_environment,
         valid_until,
-        userdata,
         consume_market_order_fee_address: str,
         consume_market_order_fee_token: str,
         consume_market_order_fee_amount: int,
@@ -686,7 +685,6 @@ class OceanAssets:
             consumer_address,
             compute_environment,
             valid_until,
-            userdata,
         )
         # provider_fees = initialize_response.json()["providerFee"]
 

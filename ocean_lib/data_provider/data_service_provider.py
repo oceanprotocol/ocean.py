@@ -190,26 +190,27 @@ class DataServiceProvider:
         consumer_address: str,
         compute_environment: str,
         valid_until: int,
-        userdata: Optional[Dict] = None,
     ) -> Response:
-        _, initialize_compute_endpoint = DataServiceProvider.build_initialize_endpoint(
-            service_endpoint
-        )
+        (
+            _,
+            initialize_compute_endpoint,
+        ) = DataServiceProvider.build_initialize_compute_endpoint(service_endpoint)
 
         payload = {
             "datasets": datasets,
             "algorithm": algorithm_data,
-            "computeEnvironment": compute_environment,
-            "validUntil": valid_until,
+            "compute": {
+                "env": compute_environment,
+                "validUntil": valid_until,
+            },
             "consumerAddress": consumer_address,
         }
 
-        if userdata is not None:
-            userdata = json.dumps(userdata)
-            payload["userdata"] = userdata
-
         response = DataServiceProvider._http_method(
-            "get", url=initialize_compute_endpoint, params=payload
+            "post",
+            initialize_compute_endpoint,
+            data=json.dumps(payload),
+            headers={"content-type": "application/json"},
         )
         if not response or not hasattr(response, "status_code"):
             raise DataProviderException(

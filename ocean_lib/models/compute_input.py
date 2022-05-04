@@ -14,13 +14,13 @@ class ComputeInput:
     def __init__(
         self,
         did: str,
-        transfer_tx_id: Union[str, bytes],
         service_id: Union[str, int],
+        transfer_tx_id: Union[str, bytes] = None,
         userdata: Optional[Dict] = None,
     ) -> None:
         """Initialise and validate arguments."""
         assert (
-            did and transfer_tx_id and service_id is not None
+            did and service_id is not None
         ), f"bad argument values: did={did}, transfer_ts_id={transfer_tx_id}, service_id={service_id}"
 
         if userdata:
