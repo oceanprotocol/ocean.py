@@ -27,4 +27,4 @@ def test_algorithm_metadata():
     )
 
     assert algo_metadata.is_valid()
-    assert "rawcode" in json.loads(algo_metadata.as_json_str())
+    assert "rawcode" in json.loads(algo_metadata.as_json_str())["meta"]

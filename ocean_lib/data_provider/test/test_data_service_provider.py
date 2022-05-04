@@ -11,6 +11,7 @@ from requests.exceptions import InvalidURL
 from requests.models import Response
 
 from ocean_lib.agreements.service_types import ServiceTypes
+from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
@@ -109,17 +110,17 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
         timeout=0,
         compute_values=dict(),
     )
+
+    mock_asset = Asset()
     with pytest.raises(
         InvalidURL, match=f"InvalidURL {mock_service.service_endpoint}."
     ):
         DataSP.start_compute_job(
             dataset_compute_service=mock_service,
             consumer=consumer_wallet,
-            dataset=ComputeInput("some_did", "some_tx_id", "some_service_id"),
+            dataset=ComputeInput(mock_asset, mock_service, "tx_id"),
             compute_environment="some_env",
-            algorithm=ComputeInput(
-                "another_did", "another_tx_id", "another_service_id"
-            ),
+            algorithm=ComputeInput(Asset(), mock_service, "tx_id"),
         )
     mock_service.service_endpoint = f"{config.provider_url}"
     with pytest.raises(
@@ -129,11 +130,9 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
         DataSP.start_compute_job(
             dataset_compute_service=mock_service,
             consumer=consumer_wallet,
-            dataset=ComputeInput("some_did", "some_tx_id", "some_service_id"),
+            dataset=ComputeInput(Asset(), mock_service, "tx"),
             compute_environment="some_env",
-            algorithm=ComputeInput(
-                "another_did", "another_tx_id", "another_service_id"
-            ),
+            algorithm=ComputeInput(Asset(), mock_service, "tx"),
         )
 
 
