@@ -184,45 +184,30 @@ def c2d_flow_readme(
 
     environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
 
+    DATA_compute_input = ComputeInput(DATA_did, compute_service.id)
+    ALGO_compute_input = ComputeInput(ALGO_did, algo_service.id)
+
     # Pay for dataset
-    DATA_order_tx_id = ocean.assets.pay_for_service(
-        asset=DATA_asset,
-        service=compute_service,
+    datasets, algorithm = ocean.assets.pay_for_compute_service(
+        datasets=[DATA_compute_input],
+        algorithm_data=ALGO_compute_input,
         consume_market_order_fee_address=consumer_wallet.address,
         consume_market_order_fee_token=DATA_datatoken.address,
         consume_market_order_fee_amount=0,
         wallet=consumer_wallet,
-        initialize_args={
-            "compute_environment": environments[0]["id"],
-            "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp()),
-        },
+        compute_environment=environments[0]["id"],
+        valid_until=int((datetime.utcnow() + timedelta(days=1)).timestamp()),
         consumer_address=environments[0]["consumerAddress"],
     )
-    assert DATA_order_tx_id, "pay for dataset unsuccessful"
-
-    # Pay for algorithm
-    ALGO_order_tx_id = ocean.assets.pay_for_service(
-        asset=ALGO_asset,
-        service=algo_service,
-        consume_market_order_fee_address=consumer_wallet.address,
-        consume_market_order_fee_token=ALGO_datatoken.address,
-        consume_market_order_fee_amount=0,
-        wallet=consumer_wallet,
-        initialize_args={
-            "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp())
-        },
-        consumer_address=environments[0]["consumerAddress"],
-    )
-    assert ALGO_order_tx_id, "pay for algorithm unsuccessful"
+    assert datasets, "pay for dataset unsuccessful"
+    assert algorithm, "pay for algorithm unsuccessful"
 
     # Start compute job
-    DATA_compute_input = ComputeInput(DATA_did, DATA_order_tx_id, compute_service.id)
-    ALGO_compute_input = ComputeInput(ALGO_did, ALGO_order_tx_id, algo_service.id)
     job_id = ocean.compute.start(
         consumer_wallet=consumer_wallet,
-        dataset=DATA_compute_input,
+        dataset=datasets[0],
         compute_environment=environments[0]["id"],
-        algorithm=ALGO_compute_input,
+        algorithm=algorithm,
     )
     assert job_id, "start compute unsuccessful"
 

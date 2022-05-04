@@ -251,47 +251,32 @@ algo_service = ALGO_asset.services[0]
 environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
 
 from datetime import datetime, timedelta
+from ocean_lib.models.compute_input import ComputeInput
 
-# Pay for dataset for 1 day
-DATA_order_tx_id = ocean.assets.pay_for_service(
-    asset=DATA_asset,
-    service=compute_service,
+DATA_compute_input = ComputeInput(DATA_asset, compute_service)
+ALGO_compute_input = ComputeInput(ALGO_asset, algo_service)
+
+# Pay for dataset and algo for 1 day
+datasets, algorithm = ocean.assets.pay_for_compute_service(
+    datasets=[DATA_compute_input],
+    algorithm_data=ALGO_compute_input,
     consume_market_order_fee_address=bob_wallet.address,
     consume_market_order_fee_token=DATA_datatoken.address,
     consume_market_order_fee_amount=0,
     wallet=bob_wallet,
-    initialize_args={
-        "compute_environment": environments[0]["id"],
-        "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp()),
-    },
+    compute_environment=environments[0]["id"],
+    valid_until=int((datetime.utcnow() + timedelta(days=1)).timestamp()),
     consumer_address=environments[0]["consumerAddress"],
 )
-print(f"Paid for dataset compute service, order tx id: {DATA_order_tx_id}")
-
-# Pay for algorithm for 1 day
-ALGO_order_tx_id = ocean.assets.pay_for_service(
-    asset=ALGO_asset,
-    service=algo_service,
-    consume_market_order_fee_address=bob_wallet.address,
-    consume_market_order_fee_token=ALGO_datatoken.address,
-    consume_market_order_fee_amount=0,
-    wallet=bob_wallet,
-    initialize_args={
-        "valid_until": int((datetime.utcnow() + timedelta(days=1)).timestamp()),
-    },
-    consumer_address=environments[0]["consumerAddress"],
-)
-print(f"Paid for algorithm access service, order tx id: {ALGO_order_tx_id}")
+assert datasets, "pay for dataset unsuccessful"
+assert algorithm, "pay for algorithm unsuccessful"
 
 # Start compute job
-from ocean_lib.models.compute_input import ComputeInput
-DATA_compute_input = ComputeInput(DATA_did, DATA_order_tx_id, compute_service.id)
-ALGO_compute_input = ComputeInput(ALGO_did, ALGO_order_tx_id, algo_service.id)
 job_id = ocean.compute.start(
     consumer_wallet=bob_wallet,
-    dataset=DATA_compute_input,
+    dataset=datasets[0],
     compute_environment=environments[0]["id"],
-    algorithm=ALGO_compute_input,
+    algorithm=algorithm,
 )
 print(f"Started compute job with id: {job_id}")
 ```
