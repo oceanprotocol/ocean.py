@@ -849,7 +849,7 @@ class DataServiceProvider:
             if algorithm_custom_data:
                 payload["algorithm"]["algocustomdata"] = algorithm_custom_data
         else:
-            payload["algorithm"]["meta"] = algorithm_meta.as_dictionary()
+            payload["algorithm"] = algorithm_meta.as_dictionary()
 
         return payload
 

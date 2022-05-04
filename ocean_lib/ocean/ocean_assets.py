@@ -698,17 +698,20 @@ class OceanAssets:
                 consumer_address,
             )
 
-        self._enrich_from_initialize_response(
-            algorithm_data,
-            result["algorithm"],
-            consume_market_order_fee_address,
-            consume_market_order_fee_token,
-            consume_market_order_fee_amount,
-            wallet,
-            consumer_address,
-        )
+        if "algorithm" in result:
+            self._enrich_from_initialize_response(
+                algorithm_data,
+                result["algorithm"],
+                consume_market_order_fee_address,
+                consume_market_order_fee_token,
+                consume_market_order_fee_amount,
+                wallet,
+                consumer_address,
+            )
 
-        return datasets, algorithm_data
+            return datasets, algorithm_data
+
+        return datasets, None
 
     @enforce_types
     def _enrich_from_initialize_response(

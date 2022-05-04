@@ -222,7 +222,7 @@ def run_compute_test(
 
     datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
         datasets,
-        algorithm,
+        algorithm if algorithm else algorithm_meta,
         consumer_address=environments[0]["consumerAddress"],
         compute_environment=environments[0]["id"],
         valid_until=int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
