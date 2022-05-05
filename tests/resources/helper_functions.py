@@ -50,11 +50,12 @@ def get_address_of_type(
     addresses = get_contracts_addresses(config.address_file, _NETWORK)
     if address_type not in addresses.keys():
         raise KeyError(f"{address_type} address is not set in the config file")
-    return (
+    address = (
         addresses[address_type]
         if not isinstance(addresses[address_type], dict)
         else addresses[address_type].get(key, addresses[address_type]["1"])
     )
+    return Web3.toChecksumAddress(address)
 
 
 @enforce_types
