@@ -319,18 +319,12 @@ def test_side_staking(
     side_staking.get_vesting(erc20_token.address, another_consumer_wallet)
 
 
-# TODO: Reassess if this makes sense now that join/exit pool methods are removed.
-@pytest.mark.skip(
-    "TODO: Reassess if this makes sense now that join/exit pool methods are removed."
-)
 @pytest.mark.unit
 def test_side_staking_steal(
     web3,
     config,
     publisher_wallet,
-    consumer_wallet,
     another_consumer_wallet,
-    erc721_nft,
     erc20_token,
 ):
     """
@@ -423,13 +417,8 @@ def test_side_staking_steal(
             pool_token.balanceOf(another_consumer_wallet.address) // 5,
         )
 
-    # wallet_exit_pool(web3, bpool, pool_token, another_consumer_wallet)
-    swap_exact_amount_in_datatoken(
-        bpool,
-        erc20_token2,
-        ocean_token,
-        another_consumer_wallet,
-        erc20_token2.balanceOf(another_consumer_wallet.address),
+    wallet_exit_pool_one_side(
+        web3, bpool, ocean_token, pool_token, another_consumer_wallet
     )
 
     # Check that users hasn't made any profit
