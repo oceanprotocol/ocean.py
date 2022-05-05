@@ -727,8 +727,9 @@ class OceanAssets:
         if item.get("providerFee"):
             provider_fees = item["providerFee"]
 
-        valid_order = item.get("valid_order")
+        valid_order = item.get("validOrder")
 
+        # TODO: reuseOrder if valid_order and no provider fees
         if valid_order:
             dataset.transfer_tx_id = valid_order
             return
