@@ -11,7 +11,7 @@ from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT, ERC721Permissions
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import from_wei, to_wei
+from ocean_lib.web3_internal.currency import MAX_WEI, from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
@@ -349,7 +349,19 @@ def test_vesting_publisher_exit_scam(
         > bpool.balanceOf(publisher_wallet.address) / bpool.total_supply()
     )
 
-    # Publisher attempts to rugpull, removing as much liquidity as possible
+    # Publisher attempts to rugpull, selling vested datatokens and removing as much liquidity as possible
+    erc20_token.approve(bpool.address, MAX_WEI, publisher_wallet)
+    bpool.swap_exact_amount_in(
+        erc20_token.address,
+        ocean_contract.address,
+        ZERO_ADDRESS,
+        erc20_token.balanceOf(publisher_wallet.address),
+        0,
+        MAX_WEI,
+        0,
+        publisher_wallet,
+    )
+
     max_ocean_out = to_wei(
         from_wei(ocean_contract.balanceOf(bpool.address))
         * from_wei(bpool.get_max_out_ratio())
