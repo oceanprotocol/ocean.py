@@ -11,7 +11,7 @@ from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT, ERC721Permissions
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
+from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
 from tests.resources.helper_functions import deploy_erc721_erc20, get_address_of_type
 
@@ -279,23 +279,21 @@ def test_vesting_publisher_exit_scam(
     publisher_wallet,
     consumer_wallet,
     another_consumer_wallet,
-    publisher_addr,
     consumer_addr,
     another_consumer_addr,
     factory_router,
     side_staking,
 ):
-    """Tests publisher exit scam flow when the owner of the pool claimed the datatokens from vesting,
-    waits for others to add liquidity in his pool and then dumps the pool."""
+    """Tests publisher exit scam flow when the publisher claims datatokens from vesting,
+    waits for others to add liquidity to the pool and then dumps the pool."""
     erc721_nft, erc20_token = deploy_erc721_erc20(
         web3, config, publisher_wallet, publisher_wallet, cap=to_wei(2000)
     )
 
     mint_fake_OCEAN(config)
-    # initial_ocean_liq = to_wei(200)
-    pmt_collector = erc20_token.get_payment_collector()
 
     ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
+    publisher_init_ocean_balance = ocean_contract.balanceOf(publisher_wallet.address)
 
     bpool = _deploy_ocean_pool(
         erc20_token=erc20_token,
@@ -305,24 +303,27 @@ def test_vesting_publisher_exit_scam(
         from_wallet=publisher_wallet,
     )
 
-    dt_balance_before = erc20_token.balanceOf(pmt_collector)
+    # Assert publisher starts with 0 datatokens
+    publisher_dt_balance_before = erc20_token.balanceOf(publisher_wallet.address)
+    assert publisher_dt_balance_before == 0
 
     # advance 10 blocks to see if available vesting increased
     _advance_blocks(num_blocks=10, from_wallet=consumer_wallet)
     side_staking.get_vesting(erc20_token.address, publisher_wallet)
 
     # publisher receives the vested DTs after 100 mined blocks
-    assert publisher_addr == pmt_collector
-    assert dt_balance_before < erc20_token.balanceOf(pmt_collector)
+    assert publisher_dt_balance_before < erc20_token.balanceOf(publisher_wallet.address)
     assert erc20_token.balanceOf(
-        pmt_collector
+        publisher_wallet.address
     ) == side_staking.get_vesting_amount_so_far(erc20_token.address)
 
-    dt_pool_balance = bpool.get_balance(erc20_token.address)
-    pool_shares_before = bpool.balanceOf(publisher_addr) / bpool.total_supply()
+    pool_dt_balance = bpool.get_balance(erc20_token.address)
+    pool_shares_before = (
+        bpool.balanceOf(publisher_wallet.address) / bpool.total_supply()
+    )
     dt_percentage_before = pool_shares_before * bpool.get_balance(erc20_token.address)
 
-    # another users buy DTs from the publisher pool to boost the price
+    # Other users stake OCEAN into the pool
     ocean_contract.approve(bpool.address, to_wei(1000000), another_consumer_wallet)
     bpool.join_swap_extern_amount_in(
         token_amount_in=ocean_contract.balanceOf(another_consumer_addr) // 100,
@@ -338,21 +339,36 @@ def test_vesting_publisher_exit_scam(
     )
 
     # check for increasing DT amount for publisher
-    assert dt_pool_balance < bpool.get_balance(erc20_token.address)
+    assert pool_dt_balance < bpool.get_balance(erc20_token.address)
     assert dt_percentage_before < bpool.balanceOf(
-        publisher_addr
+        publisher_wallet.address
     ) / bpool.total_supply() * bpool.get_balance(erc20_token.address)
     # other users have added liquidity, so the owner of the pool will have lower percentage
-    assert pool_shares_before > bpool.balanceOf(publisher_addr) / bpool.total_supply()
+    assert (
+        pool_shares_before
+        > bpool.balanceOf(publisher_wallet.address) / bpool.total_supply()
+    )
 
-    # TODO: Commented because exit_pool contract method removed
-    # exit pool dual side with profit for publisher
-    # bpool.exit_pool(
-    #     pool_amount_in=bpool.balanceOf(publisher_addr),
-    #     min_amounts_out=[to_wei(1), to_wei(1)],
-    #     from_wallet=publisher_wallet,
-    # )
-    # assert erc20_token.balanceOf(publisher_addr) > initial_ocean_liq // 2
+    # Publisher attempts to rugpull, removing as much liquidity as possible
+    max_ocean_out = to_wei(
+        from_wei(ocean_contract.balanceOf(bpool.address))
+        * from_wei(bpool.get_max_out_ratio())
+    ) - to_wei(1)
+    max_pool_in = min(
+        bpool.calc_pool_in_single_out(ocean_contract.address, max_ocean_out),
+        bpool.balanceOf(publisher_wallet.address),
+    )
+    bpool.exit_swap_pool_amount_in(
+        pool_amount_in=max_pool_in,
+        min_amount_out=to_wei(0),
+        from_wallet=publisher_wallet,
+    )
+
+    # Assert that publisher has less OCEAN than they started with
+    assert (
+        ocean_contract.balanceOf(publisher_wallet.address)
+        < publisher_init_ocean_balance
+    )
 
 
 @pytest.mark.unit
