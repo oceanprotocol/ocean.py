@@ -170,6 +170,7 @@ def run_compute_test(
     algorithm_algocustomdata: Optional[dict] = None,
     additional_datasets_and_userdata: List[AssetAndUserdata] = [],
     with_result=False,
+    reuse_order=False,
 ):
     """Helper function to bootstrap compute job creation and status checking."""
     assert (
@@ -220,12 +221,13 @@ def run_compute_test(
     environments = ocean_instance.compute.get_c2d_environments(service.service_endpoint)
     erc20_token = ERC20Token(ocean_instance.web3, service.datatoken)
 
+    time_difference = timedelta(hours=1) if not reuse_order else timedelta(seconds=30)
     datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
         datasets,
         algorithm if algorithm else algorithm_meta,
         consumer_address=environments[0]["consumerAddress"],
         compute_environment=environments[0]["id"],
-        valid_until=int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
+        valid_until=int((datetime.utcnow() + time_difference).timestamp()),
         consume_market_order_fee_address=consumer_wallet.address,
         consume_market_order_fee_token=erc20_token.address,
         consume_market_order_fee_amount=0,
@@ -280,8 +282,11 @@ def run_compute_test(
         assert log_file is not None
         print(f"got algo log file: {str(log_file)}")
 
+        prev_dt_tx_id = datasets[0].transfer_tx_id
+        prev_algo_tx_id = algorithm.transfer_tx_id
+
         # retry initialize but all orders are already valid
-        datasets_upd, algorithm_upd = ocean_instance.assets.pay_for_compute_service(
+        datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
             datasets,
             algorithm if algorithm else algorithm_meta,
             consumer_address=environments[0]["consumerAddress"],
@@ -294,8 +299,40 @@ def run_compute_test(
         )
 
         # transferTxId was not updated
-        assert datasets_upd == datasets
-        assert algorithm_upd == algorithm
+        assert datasets[0].transfer_tx_id == prev_dt_tx_id
+        assert algorithm.transfer_tx_id == prev_algo_tx_id
+
+    if reuse_order:
+        prev_dt_tx_id = datasets[0].transfer_tx_id
+        prev_algo_tx_id = algorithm.transfer_tx_id
+        # ensure order expires
+        time.sleep(31)
+        datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
+            datasets,
+            algorithm if algorithm else algorithm_meta,
+            consumer_address=environments[0]["consumerAddress"],
+            compute_environment=environments[0]["id"],
+            valid_until=int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
+            consume_market_order_fee_address=consumer_wallet.address,
+            consume_market_order_fee_token=erc20_token.address,
+            consume_market_order_fee_amount=0,
+            wallet=consumer_wallet,
+        )
+
+        assert datasets[0].transfer_tx_id != prev_dt_tx_id
+        assert algorithm.transfer_tx_id != prev_algo_tx_id
+
+        job_id = ocean_instance.compute.start(
+            consumer_wallet,
+            datasets[0],
+            environments[0]["id"],
+            algorithm,
+            algorithm_meta,
+            algorithm_algocustomdata,
+            datasets[1:],
+        )
+
+        assert job_id, "can not reuse order"
 
 
 @pytest.mark.integration
@@ -345,6 +382,25 @@ def test_compute_registered_algo(
         consumer_wallet=consumer_wallet,
         dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
         algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+    )
+
+
+@pytest.mark.integration
+def test_compute_reuse_order(
+    publisher_wallet,
+    publisher_ocean_instance,
+    consumer_wallet,
+    dataset_with_compute_service,
+    algorithm,
+):
+    """Tests that a compute job with a registered algorithm starts properly."""
+    run_compute_test(
+        ocean_instance=publisher_ocean_instance,
+        publisher_wallet=publisher_wallet,
+        consumer_wallet=consumer_wallet,
+        dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
+        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+        reuse_order=True,
     )
 
 

@@ -724,14 +724,27 @@ class OceanAssets:
         wallet: Wallet,
         consumer_address: Optional[str] = None,
     ):
-        if item.get("providerFee"):
-            provider_fees = item["providerFee"]
-
+        provider_fees = item.get("providerFee")
         valid_order = item.get("validOrder")
 
-        # TODO: reuseOrder if valid_order and no provider fees
-        if valid_order:
+        if valid_order and not provider_fees:
             dataset.transfer_tx_id = valid_order
+            return
+        elif valid_order and provider_fees:
+            dt = ERC20Token(self._web3, dataset.service.datatoken)
+            tx_id = dt.reuse_order(
+                valid_order,
+                provider_fee_address=provider_fees["providerFeeAddress"],
+                provider_fee_token=provider_fees["providerFeeToken"],
+                provider_fee_amount=provider_fees["providerFeeAmount"],
+                v=provider_fees["v"],
+                r=provider_fees["r"],
+                s=provider_fees["s"],
+                valid_until=provider_fees["validUntil"],
+                provider_data=provider_fees["providerData"],
+                from_wallet=wallet,
+            )
+            dataset.transfer_tx_id = tx_id
             return
         else:
             dt = ERC20Token(self._web3, dataset.service.datatoken)
