@@ -4,6 +4,7 @@
 #
 
 import pytest
+from web3 import Web3
 
 from ocean_lib.ocean import util
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address
@@ -40,8 +41,17 @@ def test_get_ocean_token_address(config):
     assert "Ocean" in addresses
 
     address = get_ocean_token_address(config.address_file, "ganache")
-    assert address[:2] == "0x", "It is not a token address."
-    assert address == addresses["Ocean"]
+    assert Web3.isChecksumAddress(address), "It is not a checksum token address."
+    assert address == Web3.toChecksumAddress(addresses["Ocean"])
+
+
+@pytest.mark.unit
+def test_get_address_by_type(config):
+    addresses = util.get_contracts_addresses(config.address_file, "ganache")
+
+    address = get_address_of_type(config, "Ocean")
+    assert Web3.isChecksumAddress(address), "It is not a checksum token address."
+    assert address == Web3.toChecksumAddress(addresses["Ocean"])
 
 
 @pytest.mark.unit
