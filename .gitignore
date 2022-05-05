@@ -11,6 +11,7 @@ ocean_lib.egg-info/
 /contracts/
 /interfaces/
 /reports/
+/tests/generated-readmes/test*
 
 .coverage
 .tox/

@@ -57,32 +57,30 @@ Now, let's confirm that we hold the OCEAN, from Python.
 
 In a bash console:
 
-```console
-export OCEAN_NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
-export MY_TEST_KEY=<your private key>
-```
+`export OCEAN_NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>`
+`export TEST_PRIVATE_KEY1=<your private key>`
 
 In a Python console:
 
 ```python
-#setup
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.ocean import Ocean
 config = ExampleConfig.get_config()
 ocean = Ocean(config)
 
-#create an ERC20 object of OCEAN token
+# create an ERC20 object of OCEAN token
 print(f"Address of OCEAN token: {ocean.OCEAN_address}")
 from ocean_lib.models.erc20_token import ERC20Token
 OCEAN_token = ERC20Token(ocean.web3, ocean.OCEAN_address)
 
-#set wallet
-private_key = os.getenv('MY_TEST_KEY')
+# set wallet
+import os
+private_key = os.getenv('TEST_PRIVATE_KEY1')
 from ocean_lib.web3_internal.wallet import Wallet
 wallet = Wallet(ocean.web3, private_key, config.block_confirmations, config.transaction_timeout)
 print(f"Address of your account: {wallet.address}")
 
-#get balance
+# get balance
 OCEAN_balance_in_wei = OCEAN_token.balanceOf(wallet.address)
 from ocean_lib.web3_internal.currency import from_wei
 OCEAN_balance_in_ether = from_wei(OCEAN_balance_in_wei)

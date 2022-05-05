@@ -27,6 +27,7 @@ from tests.resources.helper_functions import (
     get_factory_deployer_wallet,
     get_file1,
     get_file2,
+    get_file3,
     get_ganache_wallet,
     get_provider_wallet,
     get_publisher_ocean_instance,
@@ -250,3 +251,8 @@ def file1():
 @pytest.fixture
 def file2():
     return get_file2()
+
+
+@pytest.fixture
+def file3():
+    return get_file3()
