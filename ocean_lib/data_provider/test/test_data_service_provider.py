@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
+from datetime import datetime, timedelta
 from unittest.mock import Mock
 
 import ecies
@@ -412,6 +413,9 @@ def test_build_specific_endpoints(config):
     assert DataSP.build_initialize_endpoint(provider_uri)[1] == urljoin(
         base_uri, endpoints["initialize"][1]
     )
+    assert DataSP.build_initialize_compute_endpoint(provider_uri)[1] == urljoin(
+        base_uri, endpoints["initializeCompute"][1]
+    )
     assert DataSP.build_encrypt_endpoint(provider_uri)[1] == urljoin(
         base_uri, endpoints["encrypt"][1]
     )
@@ -504,6 +508,47 @@ def test_initialize_failure(config):
 
     with pytest.raises(DataProviderException):
         DataSP.initialize("0xabc", service, "0x")
+
+    DataSP.set_http_client(get_requests_session())
+
+
+@pytest.mark.unit
+def test_initialize_compute_failure(config):
+    """Tests initialize_compute failures."""
+    service = Mock(spec=Service)
+    service.service_endpoint = "http://172.15.0.4:8030"
+    service.id = "abc"
+
+    asset = Mock(spec=Asset)
+    asset.did = "0x0"
+    compute_input = ComputeInput(asset, service)
+
+    http_client = HttpClientEvilMock()
+    DataSP.set_http_client(http_client)
+    valid_until = int((datetime.utcnow() + timedelta(days=1)).timestamp())
+
+    with pytest.raises(DataProviderException, match="Initialize compute failed"):
+        DataSP.initialize_compute(
+            [compute_input.as_dictionary()],
+            [compute_input.as_dictionary()],
+            service.service_endpoint,
+            "0x0",
+            "test",
+            valid_until,
+        )
+
+    http_client = HttpClientEmptyMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(DataProviderException, match="Failed to get a response"):
+        DataSP.initialize_compute(
+            [compute_input.as_dictionary()],
+            [compute_input.as_dictionary()],
+            service.service_endpoint,
+            "0x0",
+            "test",
+            valid_until,
+        )
 
     DataSP.set_http_client(get_requests_session())
 

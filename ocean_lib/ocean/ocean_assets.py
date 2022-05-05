@@ -677,6 +677,9 @@ class OceanAssets:
     ):
         data_provider = DataServiceProvider
 
+        if not consumer_address:
+            consumer_address = wallet.address
+
         initialize_response = data_provider.initialize_compute(
             [x.as_dictionary() for x in datasets],
             algorithm_data.as_dictionary(),
