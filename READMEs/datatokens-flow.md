@@ -37,7 +37,6 @@ In a new console:
 
 ```console
 # Grab ocean.py repo
-cd Desktop/
 git clone https://github.com/oceanprotocol/ocean.py.git
 git checkout v4main
 
