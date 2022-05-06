@@ -54,13 +54,12 @@ from hashlib import sha256
 web3 = ocean.web3
 
 field_name:bytes = b"fav_color"
-field_val = b"blue"
+field_val:bytes = b"blue"
 
 alice_private_key = alice_wallet.private_key.encode("utf-8")
 
 #have a unique private key for each field; only Alice knows all
-h:str = sha256(alice_private_key + field_name).hexdigest()
-h = h[:32] #first 32 bytes
+h:str = sha256(alice_private_key + field_name).hexdigest()[:32]
 h:bytes = h.encode("utf-8") 
 field_privkey = eth_keys.keys.PrivateKey(h)
 
@@ -73,10 +72,21 @@ erc721_nft.set_new_data(field_name, field_val_encr.hex(), alice_wallet)
 
 ## 4. Give Dapp permission to view data
 
-FIXME
+```python
+# Dapp's wallet
+dapp_private_key = os.getenv('TEST_PRIVATE_KEY2')
+dapp_wallet = Wallet(ocean.web3, dapp_private_key, config.block_confirmations, config.transaction_timeout)
+print(f"dapp_wallet.address = '{dapp_wallet.address}'")
+
+# Dapp creates a tx requesting access, that Alice signs
+key:bytes = f"fav_color:{dapp_wallet.address}".encode("utf-8")
+value_in:hex = b"blue".hex()
+erc721_nft.set_new_data(key, value_in, alice_wallet)
+```
 
 ## 5. Dapp retrieves value from data NFT
 
 ```python
-value_out:hex = erc721_nft.get_data(field_name)
+field_val_encr2:hex = erc721_nft.get_data(field_name)
 print(f"Found that {field_name} = {value_out}")
+```

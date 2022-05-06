@@ -42,15 +42,15 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 
 ```python
 key:bytes = b"fav_color"
-value_in:hex = b"blue".hex()
-erc721_nft.set_new_data(key, value_in, alice_wallet)
+value:hex = b"blue".hex()
+erc721_nft.set_new_data(key, value, alice_wallet)
 ```
 
 ## 4. Retrieve value from data NFT
 
 ```python
-value_out:hex = erc721_nft.get_data(key)
-print(f"Found that {key} = {value_out}")
+value2:hex = erc721_nft.get_data(key)
+print(f"Found that {key} = {value2}")
 ```
 
 That's it! Note the simplicity. All data was stored and retrieved from on-chain. We don't need Ocean Provider or Ocean Aquarius for these use cases (though the latter can help for fast querying & retrieval).
