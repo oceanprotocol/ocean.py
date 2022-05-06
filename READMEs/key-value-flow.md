@@ -53,7 +53,7 @@ value_out:hex = erc721_nft.get_data(key)
 print(f"Found that {key} = {value_out}")
 ```
 
-That's it! Note the simplicity of what just happened. All data was stored and retrieved on-chain. We don't need Ocean Provider or Ocean Aquarius for these use cases (though the latter can help for fast querying & retrieval).
+That's it! Note the simplicity. All data was stored and retrieved from on-chain. We don't need Ocean Provider or Ocean Aquarius for these use cases (though the latter can help for fast querying & retrieval).
 
 We can also encrypt the data. The [personal data NFTs quickstart](READMEs/pdnfts-flow.md) shows an example.
 

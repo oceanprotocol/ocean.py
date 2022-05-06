@@ -45,7 +45,11 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 
 ## 3. Add encrypted key-value pair to data NFT
 
-FIXME
+```python
+key:bytes = b"fav_color"
+value_in:hex = b"blue".hex()
+erc721_nft.set_new_data(key, value_in, alice_wallet)
+```
 
 ## 4. Give Dapp permission to view data
 
@@ -53,4 +57,6 @@ FIXME
 
 ## 5. Dapp retrieves value from data NFT
 
-FIXME
+```python
+value_out:hex = erc721_nft.get_data(key)
+print(f"Found that {key} = {value_out}")
