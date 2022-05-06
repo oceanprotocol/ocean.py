@@ -73,15 +73,36 @@ erc721_nft.set_new_data(field_name, field_val_encr.hex(), alice_wallet)
 ## 4. Give Dapp permission to view data
 
 ```python
+# setup
+from ocean_lib.web3_internal.web3_overrides.utils import \
+    wait_for_transaction_receipt_and_block_confirmations
+chain_id = get_chain_id(web3)
+block_number_poll_interval = BLOCK_NUMBER_POLL_INTERVAL[chain_id]
+
 # Dapp's wallet
 dapp_private_key = os.getenv('TEST_PRIVATE_KEY2')
 dapp_wallet = Wallet(ocean.web3, dapp_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"dapp_wallet.address = '{dapp_wallet.address}'")
 
 # Dapp creates a tx requesting access, that Alice signs
-key:bytes = f"fav_color:{dapp_wallet.address}".encode("utf-8")
-value_in:hex = b"blue".hex()
-erc721_nft.set_new_data(key, value_in, alice_wallet)
+field2_name:bytes = f"fav_color:can_access:{dapp_wallet.address}".encode("utf-8")
+field2_val:hex = b"True".hex()
+
+raw_tx = erc721_nft.build_tx("setNewData", (field2_name, field2_val))
+
+# Dapp gets Alice to sign
+signed_tx = alice_wallet.sign_tx(raw_tx)
+
+# Dapp sends off tx
+tx_hash = web3.eth.send_raw_transaction(signed_tx) 
+
+# Dapp waits until tx done (blocking)
+chain_id = get_chain_id(web3)
+wait_for_transaction_receipt_and_block_confirmations(
+  web3, tx_hash, block_confirmations,
+  block_number_poll_interval, transaction_timeout)
+
+
 ```
 
 ## 5. Dapp retrieves value from data NFT
