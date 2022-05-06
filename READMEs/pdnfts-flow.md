@@ -45,10 +45,32 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 
 ## 3. Add encrypted key-value pair to data NFT
 
+We use 'field_name' not 'key' for key-value pair, to avoid confusion with the encrypt/decrypt symmetric key.
+
 ```python
-key:bytes = b"fav_color"
-value_in:hex = b"blue".hex()
-erc721_nft.set_new_data(key, value_in, alice_wallet)
+import coincurve
+import eth_keys
+from ecies import encrypt, decrypt
+from hashlib import sha256
+web3 = ocean.web3
+
+field_name:bytes = b"fav_color"
+field_val = b"blue"
+
+alice_private_key = alice_wallet.private_key.encode("utf-8")
+
+#have a unique private key for each field; only Alice knows all
+h:str = sha256(alice_private_key + field_name).hexdigest()
+h = h[:32] #first 32 bytes
+h:bytes = h.encode("utf-8") 
+field_privkey = eth_keys.keys.PrivateKey(h)
+
+field_pubkey = field_privkey.public_key
+
+field_val_encr:bytes = encrypt(field_pubkey.to_hex(), field_val)
+field_val_encr:hex = field_val_encr.decode("ascii")
+
+erc721_nft.set_new_data(field_name, field_val_encr, alice_wallet)
 ```
 
 ## 4. Give Dapp permission to view data
@@ -58,5 +80,5 @@ FIXME
 ## 5. Dapp retrieves value from data NFT
 
 ```python
-value_out:hex = erc721_nft.get_data(key)
-print(f"Found that {key} = {value_out}")
+value_out:hex = erc721_nft.get_data(field_name)
+print(f"Found that {field_name} = {value_out}")
