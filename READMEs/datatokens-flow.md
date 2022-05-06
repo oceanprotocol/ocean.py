@@ -36,11 +36,11 @@ docker system prune -a --volumes
 In a new console:
 
 ```console
-# Grab ocean.py repo
+# Grab ocean.py repo. Note: when V4's in PyPi, this will change
 git clone https://github.com/oceanprotocol/ocean.py.git
 git checkout v4main
 
-# Create your working directory.
+# Create your working directory
 mkdir my_project
 cd my_project
 
@@ -48,8 +48,10 @@ cd my_project
 python3 -m venv venv
 source venv/bin/activate
 
-# Intermediary installation before PyPi release of V4. Install wheel first to avoid errors.
+# Avoid errors for the step that follows
 pip3 install wheel
+
+# Install. Note: when V4's in PyPi, this will change
 pip3 install --no-cache-dir ../
 ```
 
