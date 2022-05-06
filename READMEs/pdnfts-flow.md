@@ -45,13 +45,22 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 
 ## 3. Alice adds data to Data NFT
 
+First, play with get & set non-encrypted data
 ```python
-# Now, set some data at arbitrary key. Uses ERC725.
-erc721_nft.set_new_data(b"fav_color", "blue".encode("utf-8").hex(), alice_wallet)
+key1:bytes = b"fav_color"
+value1_in:hex = b"blue".hex()
+erc721_nft.set_new_data(key1, value1_in, alice_wallet)
+value1_out:hex = erc721_nft.get_data(key1)
+print(f"Found that {key1} = {value1_out}")
+```
 
-# Get the data
-fav_color = erc721_nft.get_data(b"fav_color").decode("ascii")
-print(f"Found that fav_color = {fav_color}")
+Now, let's do it encrypted
+```python
+key2:bytes = b"fav_food"
+value2_in:hex = b"jello".hex()
+erc721_nft.set_new_data(key2, value2_in, alice_wallet)
+value2_out:hex = erc721_nft.get_data(key2)
+print(f"Found that {key2} = {value2_out}")
 ```
 
 ## 4. Alice shares PDNFT data to BobDapp
