@@ -48,7 +48,6 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 We use 'field_name' not 'key' for key-value pair, to avoid confusion with the encrypt/decrypt symmetric key.
 
 ```python
-import coincurve
 import eth_keys
 from ecies import encrypt, decrypt
 from hashlib import sha256
@@ -68,9 +67,8 @@ field_privkey = eth_keys.keys.PrivateKey(h)
 field_pubkey = field_privkey.public_key
 
 field_val_encr:bytes = encrypt(field_pubkey.to_hex(), field_val)
-field_val_encr:hex = field_val_encr.decode("ascii")
 
-erc721_nft.set_new_data(field_name, field_val_encr, alice_wallet)
+erc721_nft.set_new_data(field_name, field_val_encr.hex(), alice_wallet)
 ```
 
 ## 4. Give Dapp permission to view data
