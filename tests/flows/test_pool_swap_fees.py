@@ -648,7 +648,6 @@ def buy_bt_exact_amount_out(
 
 
 def check_calc_methods(web3: Web3, bpool: BPool, dt_per_bt_in_wei: int):
-    # TODO: Move this to a different file. Unrelated to swap fees.
     bt = ERC20Token(web3, bpool.get_base_token_address())
     dt = ERC20Token(web3, bpool.get_datatoken_address())
 
