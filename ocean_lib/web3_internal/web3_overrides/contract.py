@@ -124,7 +124,9 @@ def transact_with_contract_function(
         account_key = transaction["account_key"]
         tx.pop("account_key")
 
-    #do_send = kwargs.get_value('do_send', True) 
+    do_sign_and_send = kwargs.get_value('do_sign_and_send', True) 
+    if not do_sign_and_send:
+        return tx
 
     if account_key:
         wallet = Wallet(
@@ -137,7 +139,6 @@ def transact_with_contract_function(
         logging.debug(
             f"sending raw tx: function: {function_name}, tx hash: {tx.hex()}"
         )
-        
         tx_hash = web3.eth.send_raw_transaction(tx)
     else:
         tx_hash = web3.eth.send_transaction(tx)

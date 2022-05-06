@@ -72,6 +72,8 @@ erc721_nft.set_new_data(field_name, field_val_encr.hex(), alice_wallet)
 
 ## 4. Give Dapp permission to view data
 
+The Dapp has permission if "fav_color:can_access:<Dapp_addr>" is True. To set this key/value pair, the Dapp creates the tx, gets Alice to sign it, then sends it off.
+
 ```python
 # setup
 from ocean_lib.web3_internal.web3_overrides.utils import \
@@ -88,21 +90,20 @@ print(f"dapp_wallet.address = '{dapp_wallet.address}'")
 field2_name:bytes = f"fav_color:can_access:{dapp_wallet.address}".encode("utf-8")
 field2_val:hex = b"True".hex()
 
-raw_tx = erc721_nft.build_tx("setNewData", (field2_name, field2_val))
+raw_tx = erc721_nft.set_new_data(
+  "setNewData", (field2_name, field2_val, {"do_sign_and_send": False}))
 
 # Dapp gets Alice to sign
 signed_tx = alice_wallet.sign_tx(raw_tx)
 
-# Dapp sends off tx
+# Dapp sends off tx, waits until done
 tx_hash = web3.eth.send_raw_transaction(signed_tx) 
-
-# Dapp waits until tx done (blocking)
 chain_id = get_chain_id(web3)
 wait_for_transaction_receipt_and_block_confirmations(
   web3, tx_hash, block_confirmations,
   block_number_poll_interval, transaction_timeout)
 
-
+# Now, the Dapp officially has permission!
 ```
 
 ## 5. Dapp retrieves value from data NFT
