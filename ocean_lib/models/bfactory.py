@@ -2,8 +2,6 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import List
-
 from enforce_typing import enforce_types
 
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -12,7 +10,7 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 class BFactory(ContractBase):
     CONTRACT_NAME = "BFactory"
 
-    EVENT_BFACTORY_CREATED = "BPoolCreated"
+    EVENT_BPOOL_CREATED = "BPoolCreated"
     EVENT_POOL_TEMPLATE_ADDED = "PoolTemplateAdded"
     EVENT_POOL_TEMPLATE_REMOVED = "PoolTemplateRemoved"
 
@@ -35,7 +33,3 @@ class BFactory(ContractBase):
     @enforce_types
     def is_pool_template(self, pool_template) -> bool:
         return self.contract.caller.isPoolTemplate(pool_template)
-
-    @enforce_types
-    def get_pool_templates(self) -> List[str]:
-        return self.contract.caller.getPoolTemplates()

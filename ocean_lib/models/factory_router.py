@@ -16,26 +16,26 @@ class FactoryRouter(BFactory):
     EVENT_NEW_POOL = "NewPool"
 
     @property
-    def router_owner(self) -> str:
-        """Gets a router owner address."""
-        return self.contract.caller.routerOwner()
-
-    @property
-    def factory(self):
-        return self.contract.caller.factory()
-
-    @property
-    def swap_ocean_fee(self):
-        return self.contract.caller.swapOceanFee()
-
-    @property
     @enforce_types
     def event_NewPool(self):
         return self.events.NewPool()
 
     @enforce_types
-    def is_pool_template(self, address: str) -> bool:
-        return self.contract.caller.isPoolTemplate(address)
+    def router_owner(self) -> str:
+        """Gets a router owner address."""
+        return self.contract.caller.routerOwner()
+
+    @enforce_types
+    def factory(self):
+        return self.contract.caller.factory()
+
+    @enforce_types
+    def swap_ocean_fee(self):
+        return self.contract.caller.swapOceanFee()
+
+    @enforce_types
+    def swap_non_ocean_fee(self):
+        return self.contract.caller.swapNonOceanFee()
 
     @enforce_types
     def is_approved_token(self, address: str) -> bool:
@@ -68,10 +68,6 @@ class FactoryRouter(BFactory):
     @enforce_types
     def get_min_vesting_period(self) -> int:
         return self.contract.caller.getMinVestingPeriod()
-
-    @enforce_types
-    def is_ocean_token(self, ocean_address: str) -> bool:
-        return self.contract.caller.isOceanToken(ocean_address)
 
     @enforce_types
     def stake_batch(

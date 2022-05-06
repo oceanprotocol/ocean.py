@@ -3,53 +3,135 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+from web3 import Web3
 
+from ocean_lib.config import Config
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
+from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import get_address_of_type
 
 
 @pytest.mark.unit
-def test_properties(factory_router):
+def test_properties(factory_router: FactoryRouter):
     """Tests the events' properties."""
+    # Factory Router Events
     assert factory_router.event_NewPool.abi["name"] == FactoryRouter.EVENT_NEW_POOL
-
-
-@pytest.mark.unit
-def test_is_approved_token_mapping(config, factory_router):
-    """Tests that Ocean token has been added to the mapping"""
-    is_approved_token = factory_router.is_approved_token(
-        get_address_of_type(config, "Ocean")
-    )
-    assert is_approved_token is True
-
-
-@pytest.mark.unit
-def test_mapping_ss_contracts(config, factory_router):
-    """Tests if ssContract address has been added to the mapping"""
-    assert factory_router.is_ss_contract(get_address_of_type(config, "Staking")) is True
-
-
-@pytest.mark.unit
-def test_fixed_rate_mapping(config, factory_router):
-    """Tests that fixedRateExchange address is added to the mapping"""
+    # BFactory Events
     assert (
-        factory_router.is_fixed_rate_contract(get_address_of_type(config, "FixedPrice"))
-        is True
+        factory_router.event_BPoolCreated.abi["name"]
+        == FactoryRouter.EVENT_BPOOL_CREATED
     )
+    assert (
+        factory_router.event_PoolTemplateAdded.abi["name"]
+        == FactoryRouter.EVENT_POOL_TEMPLATE_ADDED
+    )
+    assert (
+        factory_router.event_PoolTemplateRemoved.abi["name"]
+        == FactoryRouter.EVENT_POOL_TEMPLATE_REMOVED
+    )
+
+
+# BFactory methods
+
+
+@pytest.mark.unit
+def test_opc_collector(config: Config, factory_router: FactoryRouter):
+    assert factory_router.opc_collector() == get_address_of_type(
+        config, "OPFCommunityFeeCollector"
+    )
+
+
+@pytest.mark.unit
+def test_is_pool_template(config: Config, factory_router: FactoryRouter):
+    assert factory_router.is_pool_template(get_address_of_type(config, "poolTemplate"))
+
+
+# FactoryRouter methods
+
+
+@pytest.mark.unit
+def test_router_owner(factory_router: FactoryRouter):
+    assert Web3.isChecksumAddress(factory_router.router_owner())
+
+
+@pytest.mark.unit
+def test_factory(config: Config, factory_router: FactoryRouter):
+    assert factory_router.factory() == get_address_of_type(config, "ERC721Factory")
+
+
+@pytest.mark.unit
+def test_swap_ocean_fee(factory_router: FactoryRouter):
+    assert factory_router.swap_ocean_fee() == to_wei("0.001")
+
+
+@pytest.mark.unit
+def test_swap_non_ocean_fee(factory_router: FactoryRouter):
+    assert factory_router.swap_non_ocean_fee() == to_wei("0.002")
+
+
+@pytest.mark.unit
+def test_is_approved_token(config: Config, factory_router: FactoryRouter):
+    """Tests that Ocean token has been added to the mapping"""
+    assert factory_router.is_approved_token(get_address_of_type(config, "Ocean"))
+    assert not (factory_router.is_approved_token(ZERO_ADDRESS))
+
+
+@pytest.mark.unit
+def test_is_ss_contract(config: Config, factory_router: FactoryRouter):
+    """Tests if ssContract address has been added to the mapping"""
+    assert factory_router.is_ss_contract(get_address_of_type(config, "Staking"))
+
+
+@pytest.mark.unit
+def test_is_fixed_rate_contract(config: Config, factory_router: FactoryRouter):
+    """Tests that fixedRateExchange address is added to the mapping"""
+    assert factory_router.is_fixed_rate_contract(
+        get_address_of_type(config, "FixedPrice")
+    )
+
+
+@pytest.mark.unit
+def test_is_dispenser_contract(config: Config, factory_router: FactoryRouter):
+    assert factory_router.is_dispenser_contract(
+        get_address_of_type(config, "Dispenser")
+    )
+
+
+@pytest.mark.unit
+def test_get_opc_fee(config: Config, factory_router: FactoryRouter):
+    assert factory_router.get_opc_fee(get_address_of_type(config, "Ocean")) == to_wei(
+        "0.001"
+    )
+    assert factory_router.get_opc_fee(ZERO_ADDRESS) == to_wei("0.002")
+
+
+@pytest.mark.unit
+def test_get_opc_consume_fee(factory_router: FactoryRouter):
+    assert factory_router.get_opc_consume_fee() == to_wei("0.03")
+
+
+@pytest.mark.unit
+def test_get_opc_provider_fee(factory_router: FactoryRouter):
+    assert factory_router.get_opc_provider_fee() == to_wei("0")
+
+
+@pytest.mark.unit
+def test_get_min_vesting_period(factory_router: FactoryRouter):
+    assert factory_router.get_min_vesting_period() == 2426000
 
 
 @pytest.mark.unit
 def test_buy_dt_batch(
-    web3,
-    config,
-    factory_router,
-    consumer_wallet,
-    factory_deployer_wallet,
-    another_consumer_wallet,
+    web3: Web3,
+    config: Config,
+    factory_router: FactoryRouter,
+    consumer_wallet: Wallet,
+    factory_deployer_wallet: Wallet,
+    another_consumer_wallet: Wallet,
 ):
     """Tests that a batch of tokens is successfully bought through the buy_dt_batch function"""
 
@@ -206,12 +288,11 @@ def test_buy_dt_batch(
 
 @pytest.mark.unit
 def test_stake_batch(
-    web3,
-    config,
-    factory_router,
-    consumer_wallet,
-    factory_deployer_wallet,
-    another_consumer_wallet,
+    web3: Web3,
+    config: Config,
+    factory_router: FactoryRouter,
+    consumer_wallet: Wallet,
+    factory_deployer_wallet: Wallet,
 ):
     nft_factory = ERC721FactoryContract(
         web3=web3,
