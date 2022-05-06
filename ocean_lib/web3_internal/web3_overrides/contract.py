@@ -108,7 +108,7 @@ def transact_with_contract_function(
         3. Retry failed transactions (when txn_receipt.status indicates failure)
         4. Network-dependent timeout
     """
-    transact_transaction = prepare_transaction(
+    tx = prepare_transaction(
         address,
         web3,
         fn_identifier=function_name,
@@ -122,29 +122,33 @@ def transact_with_contract_function(
     account_key = None
     if transaction and "account_key" in transaction:
         account_key = transaction["account_key"]
-        transact_transaction.pop("account_key")
+        tx.pop("account_key")
+
+    #do_send = kwargs.get_value('do_send', True) 
 
     if account_key:
-        raw_tx = Wallet(
+        wallet = Wallet(
             web3,
             private_key=account_key,
             block_confirmations=Integer(block_confirmations),
             transaction_timeout=Integer(transaction_timeout),
-        ).sign_tx(transact_transaction)
-        logging.debug(
-            f"sending raw tx: function: {function_name}, tx hash: {raw_tx.hex()}"
         )
-        txn_hash = web3.eth.send_raw_transaction(raw_tx)
+        tx = wallet.sign_tx(tx)
+        logging.debug(
+            f"sending raw tx: function: {function_name}, tx hash: {tx.hex()}"
+        )
+        
+        tx_hash = web3.eth.send_raw_transaction(tx)
     else:
-        txn_hash = web3.eth.send_transaction(transact_transaction)
+        tx_hash = web3.eth.send_transaction(tx)
 
     chain_id = get_chain_id(web3)
     block_number_poll_interval = BLOCK_NUMBER_POLL_INTERVAL[chain_id]
     wait_for_transaction_receipt_and_block_confirmations(
         web3,
-        txn_hash,
+        tx_hash,
         block_confirmations,
         block_number_poll_interval,
         transaction_timeout,
     )
-    return txn_hash
+    return tx_hash
