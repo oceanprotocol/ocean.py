@@ -45,8 +45,6 @@ Please refer to [datatokens-flow](datatokens-flow.md) and complete the following
 
 ## 3. Add encrypted key-value pair to data NFT
 
-We use 'field_name' not 'key' for key-value pair, to avoid confusion with the encrypt/decrypt symmetric key.
-
 ```python
 import eth_keys
 from ecies import encrypt, decrypt
@@ -69,6 +67,8 @@ field_val_encr:bytes = encrypt(field_pubkey.to_hex(), field_val)
 
 erc721_nft.set_new_data(field_name, field_val_encr.hex(), alice_wallet)
 ```
+
+Note: We used 'field_name' not 'key' for key-value pair, to avoid confusion with the encrypt/decrypt symmetric key.
 
 ## 4. Give Dapp permission to view data
 
