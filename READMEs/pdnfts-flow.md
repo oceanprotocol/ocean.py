@@ -7,43 +7,39 @@ SPDX-License-Identifier: Apache-2.0
 
 Ocean data NFTs can store data encrypted on-chain. Call it a "personal data NFT (PDNFT)" if it's personal data. Here, we show how to leverage PDNFTs to securely share user profile info with dapps.
 
-The basic idea:
-
-- The PDNFT stores data in the NFT, encrypted with a new symmetric key
-- To share data to BobDapp, Alice securely shares the symmetric key
-
 Here are the steps:
 
 1. Setup
-2. Publish data NFT
-3. Add _encrypted_ key-value pair to data NFT
-4. Give Dapp permission to view data
-5. Dapp retrieves value from data NFT
+2. Alice publishes data NFT
+3. Alice adds key-value pair to data NFT. Encrypt value with symmetric_key
+4. Dapp requests access and shares public_key. Public channel ok.
+5. Alice shares symmetric_key to Dapp, encrypted with Dapp's public_key. Public channel ok.
+6. Dapp decrypts symmetric_key, then decrypts original value
 
+Key details:
+
+- Alice can reconstruct symmetric_key anytime via digitally signing. (Therefore works with HW wallets.)
+- Public channels may be: (a) writing a new key-value pair on NFT, (b) direct messaging within the browser (c) anything else.
 
 ## 1. Setup
 
-### First steps
+From [datatokens-flow](datatokens-flow.md), do:
+- [x] 1. Setup : Prerequisites
+- [x] 1. Setup : Download barge and run services
+- [x] 1. Setup : Install the library from v4 sources
 
-To get started with this guide, please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
-- [x] Setup : Prerequisites
-- [x] Setup : Download barge and run services
-- [x] Setup : Install the library from v4 sources
-
-### Set envvars
-
-Set the required enviroment variables as described in [datatokens-flow](datatokens-flow.md):
-- [x] Setup : Set envvars
+And:
+- [x] 1. Setup : Set envvars
 
 
-## 2. Publish data NFT
+## 2. Alice publishes data NFT
 
-In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
+In the console where you set envvars, do the following.
 
-Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+From [datatokens-flow](datatokens-flow.md), do:
 - [x] 2.1 Create an ERC721 data NFT
 
-## 3. Add encrypted key-value pair to data NFT
+## 3. Alice adds key-value pair to data NFT. Encrypt value with symmetric_key
 
 ```python
 import eth_keys
@@ -54,25 +50,14 @@ web3 = ocean.web3
 field_name:bytes = b"fav_color"
 field_val:bytes = b"blue"
 
-alice_private_key = alice_wallet.private_key.encode("utf-8")
+symmetric_key = alice_sign(erc721_nft.address + field_name) #FIXME
 
-#have a unique private key for each field; only Alice knows all
-h:str = sha256(alice_private_key + field_name).hexdigest()[:32]
-h:bytes = h.encode("utf-8") 
-field_privkey = eth_keys.keys.PrivateKey(h)
-
-field_pubkey = field_privkey.public_key
-
-field_val_encr:bytes = encrypt(field_pubkey.to_hex(), field_val)
+field_val_encr:bytes = encrypt(symmetric_key, field_val)
 
 erc721_nft.set_new_data(field_name, field_val_encr.hex(), alice_wallet)
 ```
 
-Note: We used 'field_name' not 'key' for key-value pair, to avoid confusion with the encrypt/decrypt symmetric key.
-
-## 4. Give Dapp permission to view data
-
-The Dapp has permission if "fav_color:can_access:<Dapp_addr>" is True. To set this key/value pair, the Dapp creates the tx, gets Alice to sign it, then sends it off.
+## 4. Dapp requests access and provides public_key. Public channel ok
 
 ```python
 # setup
@@ -85,30 +70,15 @@ block_number_poll_interval = BLOCK_NUMBER_POLL_INTERVAL[chain_id]
 dapp_private_key = os.getenv('TEST_PRIVATE_KEY2')
 dapp_wallet = Wallet(ocean.web3, dapp_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"dapp_wallet.address = '{dapp_wallet.address}'")
+print(f"dapp_wallet.public_key = '{dapp_wallet.public_key}'")
 
-# Dapp creates a tx requesting access, that Alice signs
-field2_name:bytes = f"fav_color:can_access:{dapp_wallet.address}".encode("utf-8")
-field2_val:hex = b"True".hex()
-
-raw_tx = erc721_nft.set_new_data(
-  "setNewData", (field2_name, field2_val, {"do_sign_and_send": False}))
-
-# Dapp gets Alice to sign
-signed_tx = alice_wallet.sign_tx(raw_tx)
-
-# Dapp sends off tx, waits until done
-tx_hash = web3.eth.send_raw_transaction(signed_tx) 
-chain_id = get_chain_id(web3)
-wait_for_transaction_receipt_and_block_confirmations(
-  web3, tx_hash, block_confirmations,
-  block_number_poll_interval, transaction_timeout)
-
-# Now, the Dapp officially has permission!
+# Assume here that Dapp has sent Alice the public_key via public channel
 ```
 
-## 5. Dapp retrieves value from data NFT
+## 5. Alice shares symmetric_key to Dapp, encrypted with Dapp's public_key. Public channel ok
 
-```python
-field_val_encr2:hex = erc721_nft.get_data(field_name)
-print(f"Found that {field_name} = {value_out}")
-```
+FIXME
+
+## 6. Dapp decrypts symmetric_key, then decrypts original value
+
+FIXME
