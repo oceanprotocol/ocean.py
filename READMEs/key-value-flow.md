@@ -18,24 +18,19 @@ Here are the steps:
 
 ## 1. Setup
 
-### First steps
+From [datatokens-flow](datatokens-flow.md), do:
+- [x] 1. Setup : Prerequisites
+- [x] 1. Setup : Download barge and run services
+- [x] 1. Setup : Install the library from v4 sources
 
-To get started with this guide, please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
-- [x] Setup : Prerequisites
-- [x] Setup : Download barge and run services
-- [x] Setup : Install the library from v4 sources
-
-### Set envvars
-
-Set the required enviroment variables as described in [datatokens-flow](datatokens-flow.md):
-- [x] Setup : Set envvars
-
+And:
+- [x] 1. Setup : Set envvars
 
 ## 2. Publish data NFT
 
-In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
+In the console where you set envvars, do the following.
 
-Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+From [datatokens-flow](datatokens-flow.md), do:
 - [x] 2.1 Create an ERC721 data NFT
 
 ## 3. Add key-value pair to data NFT
