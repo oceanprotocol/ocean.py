@@ -77,8 +77,8 @@ dapp_public_key = keys.PrivateKey(decode_hex(dapp_private_key)).public_key
 
 ```python
 from ecies import encrypt as asymmetric_encrypt
-symkey_name = profiledata_name + ':for:' + dapp_wallet.address
-symkey_val_encr = asymmetric_encrypt(dapp_wallet.public_key, symkey)
+symkey_name = profiledata_name.decode('utf-8') + ':for:' + dapp_wallet.address
+symkey_val_encr = asymmetric_encrypt(dapp_public_key, symkey)
 erc721_nft.set_new_data(symkey_name, symkey_val, alice_wallet)
 ```
 
@@ -89,7 +89,7 @@ erc721_nft.set_new_data(symkey_name, symkey_val, alice_wallet)
 from cryptography.fernet import Fernet
 from ecies import decrypt as asymmetric_decrypt
 
-symkey_name = profiledata_name + ':for:' + dapp_wallet.address
+symkey_name = profiledata_name.decode('utf-8') + ':for:' + dapp_wallet.address
 symkey_val_encr = erc721_nft.get_data(symkey_name)
 symkey = asymmetric_decrypt(dapp_wallet.private_key, symkey_val_encr)
 
