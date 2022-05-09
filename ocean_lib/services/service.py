@@ -30,6 +30,7 @@ class Service:
         datatoken: Optional[str],
         files: Optional[str],
         timeout: Optional[int],
+        additional_information: Optional[str],
         compute_values: Optional[Dict[str, Any]] = None,
         name: Optional[str] = None,
         description: Optional[str] = None,
@@ -44,6 +45,7 @@ class Service:
         self.compute_values = compute_values
         self.name = name
         self.description = description
+        self.additional_information = additional_information
 
         if not name or not description:
             service_to_default_name = {
@@ -74,6 +76,7 @@ class Service:
             sd.pop("datatokenAddress", None),
             sd.pop("files", None),
             sd.pop("timeout", None),
+            sd.pop("additionalInformation", None),
             sd.pop("compute", None),
             sd.pop("name", None),
             sd.pop("description", None),
@@ -158,6 +161,8 @@ class Service:
             values["name"] = self.name
         if self.description is not None:
             values["description"] = self.description
+        if self.additional_information is not None:
+            values["additionalInformation"] = self.additional_information
 
         for key, value in values.items():
             if isinstance(value, object) and hasattr(value, "as_dictionary"):
