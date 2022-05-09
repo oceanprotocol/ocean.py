@@ -37,6 +37,7 @@ def test_script_execution(script, monkeypatch):
         "erc20-enterprise",
         "fixed-rate-exchange-flow",
         "marketplace-flow",
+        "consume-flow",
     ]
 
     globs = {}

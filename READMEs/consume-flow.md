@@ -5,20 +5,15 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Marketplace Flow
 
-This quickstart describes a batteries-included flow including using off-chain services for metadata (Aquarius).
+This quickstart describes a batteries-included flow including using off-chain services for metadata (Aquarius) and consuming datasets (Provider).
 
-For pool creation, it is used as base token, OCEAN token.
-The base token can be changed into something else, such as USDC, DAI etc., but
-it will require an extra fee.
-
-It focuses on Alice's experience as a publisher, and Bob's experience as a buyer.
+It focuses on Alice's experience as a publisher, and Bob's experience as a consumer.
 
 Here are the steps:
 
 1.  Setup
 2.  Alice publishes data asset
-3.  Market displays the asset for sale
-4.  Bob buys data asset
+3.  Bob downloads it
 
 Let's go through each step.
 
@@ -30,27 +25,6 @@ To get started with this guide, please refer to [datatokens-flow](datatokens-flo
 - [x] Setup : Prerequisites
 - [x] Setup : Download barge and run services
 - [x] Setup : Install the library from v4 sources
-
-### Run Ocean Market service
-
-In a new console:
-
-```console
-#install
-git clone https://github.com/oceanprotocol/market.git
-cd market
-npm install
-
-#run Ocean Market app
-npm start
-```
-
-Check out the Ocean Market webapp at http://localhost:8000.
-
-Ocean Market is a graphical interface to the backend smart contracts and Ocean services (Aquarius, Provider). The following steps will interface to the backend in a different fashion: using the command-line / console, and won't need Ocean Market. But it's good to understand there are multiple views.
-### Set envvars
-
-Set the required enviroment variables as described in [datatokens-flow](datatokens-flow.md):
 - [x] Setup : Set envvars
 
 ## 2. Publish Data NFT & Datatoken
@@ -110,47 +84,9 @@ print(f"did = '{did}'")
 
 ```
 
-## 3. Creation of datatoken liquidity pool
-
-In the following steps we will create a pool from the created token, in order to allow another user
-to order this access token.
-```python
-erc20_token = ocean.get_datatoken(asset.services[0].datatoken)
-OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
-
-bpool = ocean.create_pool(
-    erc20_token=erc20_token,
-    base_token=OCEAN_token,
-    rate=ocean.to_wei(1),
-    vesting_amount=ocean.to_wei(10000),
-    vesting_blocks=2500000,
-    base_token_amount=ocean.to_wei(2000),
-    lp_swap_fee_amount=ocean.to_wei("0.01"),
-    publish_market_swap_fee_amount=ocean.to_wei("0.01"),
-    from_wallet=alice_wallet
-)
-print(f"BPool address: {bpool.address}")
-
-```
-
-## 4. Marketplace displays asset for sale
-
-Now, you're the Marketplace operator. Here's how to get info about the data asset.
-
-In the same Python console as before:
-
-```python
-prices = bpool.get_amount_in_exact_out(
-    OCEAN_token.address, erc20_token.address, ocean.to_wei(1), ocean.to_wei("0.01")
-)
-price_in_OCEAN = prices[0]
-
-from ocean_lib.web3_internal.currency import pretty_ether_and_wei
-print(f"Price of 1 {erc20_token.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
-```
-
-## 5. Bob buys data asset, and downloads it
-Now, you're Bob the data buyer.
+## 3. Bob buys data asset, and downloads it
+Now, you're Bob the data consumer.
+In usual cases, Bob buys the dataset but here, let's have Alice send hhim some tokens directly.
 
 In the same Python console as before:
 
@@ -164,29 +100,20 @@ print(f"bob_wallet.address = '{bob_wallet.address}'")
 assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
 # Verify that Bob has ganache OCEAN
+OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
 
-# Bob buys 1.0 datatokens - the amount needed to buy the dataset.
-OCEAN_token.approve(bpool.address, ocean.to_wei("10000"), from_wallet=bob_wallet)
-
-bpool.swap_exact_amount_out(
-    token_in=OCEAN_token.address,
-    token_out=erc20_token.address,
-    consume_market_swap_fee_address=ZERO_ADDRESS,
-    max_amount_in=ocean.to_wei(10),
-    token_amount_out=ocean.to_wei(1),
-    max_price=ocean.to_wei(10),
-    consume_market_swap_fee_amount=0,
-    from_wallet=bob_wallet,
+# Mint 1 ERC20 token in consumer wallet from publisher, instead of performing a buy.
+erc20_token = ocean.get_datatoken(asset.datatokens[0]["address"])
+erc20_token.mint(
+    account_address=bob_wallet.address,
+    value=ocean.to_wei("1"),
+    from_wallet=alice_wallet,
 )
-assert erc20_token.balanceOf(bob_wallet.address) >= ocean.to_wei(
-    1
-), "Bob didn't get 1.0 datatokens"
 
 # Bob points to the service object
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 fee_receiver = ZERO_ADDRESS # could also be market address
-asset = ocean.assets.resolve(did)
 service = asset.services[0]
 
 # Bob sends his datatoken to the service
@@ -199,13 +126,47 @@ order_tx_id = ocean.assets.pay_for_service(
     wallet=bob_wallet,
 )
 print(f"order_tx_id = '{order_tx_id}'")
+
+# Bob downloads. If the connection breaks, Bob can request again by showing order_tx_id.
+file_path = ocean.assets.download_asset(
+    asset=asset,
+    service=service,
+    consumer_wallet=bob_wallet,
+    destination='./',
+    order_tx_id=order_tx_id
+)
+print(f"file_path = '{file_path}'") #e.g. datafile.0xAf07...
 ```
 
-Congrats! Bob can now use the order_tx_id to consume the data asset.
-For more details on consuming assets, check the **[Consume flow](READMEs/consume-flow.md)
+In console:
+
+```
+#verify that the file is downloaded
+cd my_project/datafile.did:op:0xAf07...
+ls branin.arff
+```
+
+Congrats to Bob for buying and consuming a data asset!
+
+_Note_. The file is in ARFF format, used by some AI/ML tools. In this case there are two input variables (x0, x1) and one output.
+
+```
+% 1. Title: Branin Function
+% 3. Number of instances: 225
+% 6. Number of attributes: 2
+
+@relation branin
+
+@attribute 'x0' numeric
+@attribute 'x1' numeric
+@attribute 'y' numeric
+
+@data
+-5.0000,0.0000,308.1291
+-3.9286,0.0000,206.1783
+...
+```
 
 Note on asset encryption: In order to encrypt the entire asset, when using a private market or metadata cache, use the encrypt keyword.
 Same for compression and you can use a combination of the two. E.g:
 `asset = ocean.assets.create(..., encrypt_flag=True)` or `asset = ocean.assets.create(..., compress_flag=True)`
-
-As an alternative for publishing a NFT, a datatoken and a pool at once, you can use `create_nft_erc20_with_pool`.
