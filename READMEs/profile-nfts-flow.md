@@ -66,10 +66,11 @@ erc721_nft.set_new_data(
 There are various ways to compute public_key, and for Alice to get it. Here, the Dapp computes public_key from its private_key, then shares with Alice client-side.
 
 ```python
-# Dapp's wallet
+from eth_keys import keys
+from eth_utils import decode_hex
+
 dapp_private_key = os.getenv('TEST_PRIVATE_KEY2')
-dapp_wallet = Wallet(ocean.web3, dapp_private_key, config.block_confirmations, config.transaction_timeout)
-dapp_public_key = dapp_wallet.public_key
+dapp_public_key = keys.PrivateKey(decode_hex(dapp_private_key)).public_key
 ```
 
 ## 5. Alice encrypts symkey with Dapp's public key and shares to Dapp
