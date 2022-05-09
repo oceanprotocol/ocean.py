@@ -191,6 +191,11 @@ class DataServiceProvider:
         compute_environment: str,
         valid_until: int,
     ) -> Response:
+        """This function initializes compute services.
+
+        To determine the Provider instance that will be called, we rely on the first dataset.
+        The first dataset is also required to have a compute service.
+        """
         (
             _,
             initialize_compute_endpoint,

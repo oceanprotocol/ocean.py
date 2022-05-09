@@ -138,12 +138,12 @@ class AssetAndUserdata:
 
 
 def _mint_and_build_compute_input(
-    dataset_and_userdata,
-    service_type,
-    publisher_wallet,
-    consumer_wallet,
-    ocean_instance,
-):
+    dataset_and_userdata: AssetAndUserdata,
+    service_type: str,
+    publisher_wallet: Wallet,
+    consumer_wallet: Wallet,
+    ocean_instance: Ocean,
+) -> ComputeInput:
     service = get_first_service_by_type(dataset_and_userdata.asset, service_type)
     erc20_token = ERC20Token(ocean_instance.web3, service.datatoken)
     minter = (
@@ -306,7 +306,7 @@ def run_compute_test(
         prev_dt_tx_id = datasets[0].transfer_tx_id
         prev_algo_tx_id = algorithm.transfer_tx_id
         # ensure order expires
-        time.sleep(31)
+        time.sleep(time_difference.seconds + 1)
         datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
             datasets,
             algorithm if algorithm else algorithm_meta,
