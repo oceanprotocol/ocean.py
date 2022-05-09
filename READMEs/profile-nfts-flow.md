@@ -44,6 +44,8 @@ web3 = ocean.web3
 profiledata_name:bytes = b"fav_color"
 profiledata_val:bytes = b"blue"
 
+#Alice and only Alice can compute this key anytime. It's hardware wallet
+# friendly, since it only needs her digital signature, not private key
 symkey = hash(alice_sign(erc721_nft.address + profiledata_name))
 
 profiledata_val_encr:bytes = Fernet(symkey).encrypt(profiledata_val)
