@@ -2,17 +2,20 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import Any, Dict, Optional, Union
+from typing import Dict, Optional, Union
 
 from enforce_typing import enforce_types
+
+from ocean_lib.assets.asset import Asset
+from ocean_lib.services.service import Service
 
 
 class ComputeInput:
     @enforce_types
     def __init__(
         self,
-        asset: Any,  # Asset
-        service: Any,  # Service
+        asset: Asset,
+        service: Service,
         transfer_tx_id: Union[str, bytes] = None,
         userdata: Optional[Dict] = None,
     ) -> None:
