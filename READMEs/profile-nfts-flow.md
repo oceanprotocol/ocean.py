@@ -51,11 +51,9 @@ profiledata_val:bytes = b"blue"
 # The digital signature will be unique to this data nft and field name.
 
 nft_addr = erc721_nft.address.encode('utf-8')
-message = encode_defunct(text=hash(nft_addr + profiledata_name).hexdigest())
-signed1 = sign(message, private_key=alice_wallet.private_key)
-signed2 = signed1.signature.hex().encode('ascii')
-signed3 = b64encode(signed2)
-symkey = signed3[:43] + b'='
+msg = encode_defunct(text=hash(nft_addr + profiledata_name).hexdigest())
+signed_msg = sign(msg, private_key=alice_wallet.private_key)
+symkey = b64encode(signed_msg.signature.hex().encode('ascii'))[:43] + b'='
 
 profiledata_val_encr:bytes = Fernet(symkey).encrypt(profiledata_val)
 
