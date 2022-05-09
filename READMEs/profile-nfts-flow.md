@@ -39,18 +39,28 @@ From [datatokens-flow](datatokens-flow.md), do:
 ```python
 from cryptography.fernet import Fernet
 from hashlib import sha256 as hash
-web3 = ocean.web3
+from eth_account.messages import encode_defunct
+sign = ocean.web3.eth.account.sign_message
+from base64 import b64encode
 
 profiledata_name:bytes = b"fav_color"
 profiledata_val:bytes = b"blue"
 
-#Alice and only Alice can compute this key anytime. It's hardware wallet
-# friendly, since it only needs her digital signature, not private key
-symkey = hash(alice_sign(erc721_nft.address + profiledata_name))
+#Alice, and only Alice, can compute this key anytime. It's hardware wallet
+# friendly, since it only needs her digital signature, not her private key.
+# The digital signature will be unique to this data nft and field name.
+
+nft_addr = erc721_nft.address.encode('utf-8')
+message = encode_defunct(text=hash(nft_addr + profiledata_name).hexdigest())
+signed1 = sign(message, private_key=alice_wallet.private_key)
+signed2 = signed1.signature.hex().encode('ascii')
+signed3 = b64encode(signed2)
+symkey = signed3[:43] + b'='
 
 profiledata_val_encr:bytes = Fernet(symkey).encrypt(profiledata_val)
 
-erc721_nft.set_new_data(profiledata_name, profiledata_val_encr.hex(), alice_wallet)
+erc721_nft.set_new_data(
+  profiledata_name, profiledata_val_encr.hex(), alice_wallet)
 ```
 
 ## 4. Alice gets Dapp's public_key
