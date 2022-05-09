@@ -30,10 +30,10 @@ class Service:
         datatoken: Optional[str],
         files: Optional[str],
         timeout: Optional[int],
-        additional_information: Optional[Dict[str, Any]] = None,
         compute_values: Optional[Dict[str, Any]] = None,
         name: Optional[str] = None,
         description: Optional[str] = None,
+        additional_information: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Initialize NFT Service instance."""
         self.id = service_id
@@ -45,9 +45,10 @@ class Service:
         self.compute_values = compute_values
         self.name = name
         self.description = description
+        self.additional_information = None
 
-        self.additional_information = {}
         if additional_information:
+            self.additional_information = {}
             self._reserved_names = ["id", "type", "serviceEndpoint"]
             for name, value in additional_information.items():
                 if name not in self._reserved_names:
@@ -82,10 +83,10 @@ class Service:
             sd.pop("datatokenAddress", None),
             sd.pop("files", None),
             sd.pop("timeout", None),
-            sd.pop("additionalInformation", None),
             sd.pop("compute", None),
             sd.pop("name", None),
             sd.pop("description", None),
+            sd.pop("additionalInformation", None),
         )
 
     def get_trusted_algorithms(self) -> list:
@@ -168,8 +169,8 @@ class Service:
         if self.description is not None:
             values["description"] = self.description
 
-        additional_information = {}
         if self.additional_information is not None:
+            additional_information = {}
             for key, value in self.additional_information.items():
                 if isinstance(value, object) and hasattr(value, "as_dictionary"):
                     value = value.as_dictionary()
