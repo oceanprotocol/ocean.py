@@ -68,7 +68,6 @@ Here are flows to try out, from simple to specific detailed variants.
 
 - **[Developers flow](READMEs/developers.md)** - to further develop ocean.py
 - [Release process](READMEs/release-process.md) - to do a new release of ocean.py
-- [Testing v4](READMEs/testing-v4.md) - to learn about Ocean v4 testing methods
 
 ## 🏛 License
 
