@@ -20,7 +20,7 @@ def test_service():
     """Tests that the get_cost function for ServiceAgreement returns the correct value."""
     ddo_dict = get_sample_ddo()
     service_dict = ddo_dict["services"][0]
-    service_dict["additionalInformation"] = "Sample DDO"
+    service_dict["additionalInformation"] = {"message": "Sample DDO"}
     sa = Service.from_dict(service_dict)
 
     assert sa.id == "1"
@@ -28,7 +28,7 @@ def test_service():
     assert sa.type == "access"
     assert sa.service_endpoint == "https://myprovider.com"
     assert sa.datatoken == "0x123"
-    assert sa.additional_information == "Sample DDO"
+    assert sa.additional_information == {"message": "Sample DDO"}
 
     assert sa.as_dictionary() == {
         "id": "1",
@@ -39,7 +39,7 @@ def test_service():
         "timeout": 0,
         "name": "Download service",
         "description": "Download service",
-        "additionalInformation": "Sample DDO",
+        "additionalInformation": {"message": "Sample DDO"},
     }
 
     ddo_dict = get_sample_ddo()
