@@ -69,7 +69,7 @@ erc721_nft.set_new_data(profiledata_name_hash, profiledata_val_encr_hex, alice_w
 
 ## 4. Alice gets Dapp's public_key
 
-There are various ways to compute public_key, and for Alice to get it. Here, the Dapp computes public_key from its private_key, then shares with Alice client-side.
+There are various ways to compute public_key, and for Alice to get it (see Appendix). Here, the Dapp computes public_key from its private_key, then shares with Alice client-side within the script.
 
 ```python
 from eth_keys import keys
@@ -82,6 +82,8 @@ dapp_address = dapp_private_key_obj.public_key.to_address() #str
 ```
 
 ## 5. Alice encrypts symkey with Dapp's public key and shares to Dapp
+
+There are various ways for Alice to share the encrypted symkey to the Dapp (see Appendix). Here, Alice writes a new key-value pair on the same data NFT. This approach allows the Dapp to access the info in future sessions without extra work.
 
 ```python
 from ecies import encrypt as asymmetric_encrypt
@@ -118,7 +120,7 @@ print(f"Dapp found profiledata {profiledata_name} = {profiledata_val2}")
 
 ## Appendix
 
-Step 4 mentioned various ways to compute public_key and for Alice to get it. Here are more options.
+Step 4 gave one way for Alice to get the Dapp's public key; step 5 gave one way for the Dapp to get the encrypted symkey. Here are more options.
 
 On computing public keys:
 - If you have the private_key, you can compute the public_key (used above)
@@ -128,10 +130,14 @@ On computing public keys:
 Possible ways for Alice to get Dapp's public key:
 - Alice auto-computes from any of Dapp's previous txs.
 - Alice retrieves it from a public-ish registry or api, e.g. etherscan
-- Dapp computes it from private_key or from past tx, then shares. Sharing could be directly client-side or over a public channel. Specific examples:
-  - Client-side: in a script - like above. However, this is better suited for demos than useful dapps.
-  - Client-side: in a browser with Metamask - [example by FELToken](https://betterprogramming.pub/exchanging-encrypted-data-on-blockchain-using-metamask-a2e65a9a896c). This is a very good choice for Dapps.
-  - Public channel: write a new key-value pair on the same data NFT
+- Dapp computes it from private_key or from past tx, then shares.
+
+Possible ways for Alice to share an encrypted symkey, or for Dapp to share public_key:
+- Directly client-side
+  - Client-side: in a browser with Metamask - [example by FELToken](https://betterprogramming.pub/exchanging-encrypted-data-on-blockchain-using-metamask-a2e65a9a896c). This is a good choice because it does no on-chain txs.
+  - Client-side: in a script. Like done in step 4 above for public key
+- Over a public channel: 
+  - Public channel: write a new key-value pair on the same data NFT. Like done in step 5 above for encrypted symkey. This is a good choice because the Dapp can access the info in future sessions without extra work.
   - Public channel: a new data NFT for each message
   - Public channel: traditional: http, email, or any messaging medium
   
