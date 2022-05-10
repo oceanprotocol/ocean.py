@@ -26,7 +26,6 @@ From [datatokens-flow](datatokens-flow.md), do:
 And:
 - [x] 1. Setup : Set envvars
 
-
 ## 2. Alice publishes data NFT
 
 In the console where you set envvars, do the following.
@@ -39,27 +38,33 @@ From [datatokens-flow](datatokens-flow.md), do:
 ```python
 #imports
 from cryptography.fernet import Fernet
-from hashlib import sha256 as hash
+from hashlib import sha256
 from eth_account.messages import encode_defunct
 sign = ocean.web3.eth.account.sign_message
+keccak = ocean.web3.keccak
 from base64 import b64encode
 
-#Key-value pair, with value in plaintext
-profiledata_name:bytes = b"fav_color"
-profiledata_val:bytes = b"blue"
+#Key-value pair
+profiledata_name = "fav_color"
+profiledata_val = "blue"
 
-#Choose a symkey that:
-# - only Alice can compute: a function of her private key
-# - is hardware wallet friendly: uses Alice's digital signature not priv. key
+#Prep key for setter. Contract/ERC725 requires keccak256 hash
+profiledata_name_hash = keccak(text=profiledata_name)
+
+#Choose a symkey where:
 # - sharing it unlocks only this field: make unique to this data nft & field
-nft_addr = erc721_nft.address.encode('utf-8')
-msg = encode_defunct(text=hash(nft_addr + profiledata_name).hexdigest())
+# - only Alice can compute it: make it a function of her private key
+# - is hardware wallet friendly: uses Alice's digital signature not private key
+preimage = erc721_nft.address + profiledata_name
+msg = encode_defunct(text=sha256(preimage.encode('utf-8')).hexdigest())
 signed_msg = sign(msg, private_key=alice_wallet.private_key)
-symkey = b64encode(signed_msg.signature.hex().encode('ascii'))[:43] + b'='
+symkey = b64encode(signed_msg.signature.hex().encode('ascii'))[:43] + b'=' #bytes
 
-#Symmetrically encrypt, and store it
-profiledata_val_encr:bytes = Fernet(symkey).encrypt(profiledata_val)
-erc721_nft.set_new_data(profiledata_name, profiledata_val_encr.hex(), alice_wallet)
+#Prep value for setter
+profiledata_val_encr_hex = Fernet(symkey).encrypt(profiledata_val.encode('utf-8')).hex()
+
+#set
+erc721_nft.set_new_data(profiledata_name_hash, profiledata_val_encr_hex, alice_wallet)
 ```
 
 ## 4. Alice gets Dapp's public_key
@@ -71,20 +76,24 @@ from eth_keys import keys
 from eth_utils import decode_hex
 
 dapp_private_key = os.getenv('TEST_PRIVATE_KEY2')
-dapp_public_key = str(keys.PrivateKey(decode_hex(dapp_private_key)).public_key)
+dapp_private_key_obj = keys.PrivateKey(decode_hex(dapp_private_key))
+dapp_public_key = str(dapp_private_key_obj.public_key) #str
+dapp_address = dapp_private_key_obj.public_key.to_address() #str
 ```
 
 ## 5. Alice encrypts symkey with Dapp's public key and shares to Dapp
 
 ```python
 from ecies import encrypt as asymmetric_encrypt
-web3 = ocean.web3
 
-symkey_name = (profiledata_name.decode('utf-8') + ':for:' + dapp_wallet.address[:10]) #str
-symkey_val_encr = str(asymmetric_encrypt(dapp_public_key, symkey)) #str
+symkey_name = (profiledata_name + ':for:' + dapp_address[:10]) #str
+symkey_name_hash = keccak(text=symkey_name)
+
+symkey_val_encr = asymmetric_encrypt(dapp_public_key, symkey) #bytes
+symkey_val_encr_hex = symkey_val_encr.hex() #hex
 
 # arg types: key=bytes32, value=bytes, wallet=wallet
-erc721_nft.set_new_data(symkey_name.encode('utf-8'), symkey_val_encr.encode('utf-8'), alice_wallet)
+erc721_nft.set_new_data(symkey_name_hash, symkey_val_encr_hex, alice_wallet)
 ```
 
 ## 6. Dapp decrypts symkey, then decrypts original 'value'
@@ -93,12 +102,14 @@ erc721_nft.set_new_data(symkey_name.encode('utf-8'), symkey_val_encr.encode('utf
 from cryptography.fernet import Fernet
 from ecies import decrypt as asymmetric_decrypt
 
-#symkey_name = (Dapp would set it like above)
-symkey_val_encr = erc721_nft.get_data(symkey_name)
-symkey = asymmetric_decrypt(dapp_wallet.private_key, symkey_val_encr)
+#symkey_name, symkey_name_hash = (Dapp would set like above)
+symkey_val_encr_hex2 = erc721_nft.get_data(symkey_name_hash)
+symkey2 = asymmetric_decrypt(dapp_wallet.private_key, symkey_val_encr_hex2)
 
-profiledata_val_encr = erc721_nft.get_data(profiledata_name)
-profiledata_val = Fernet(symkey).decrypt(profiledata_val_encr) #symmetric
+profiledata_val_encr_hex2 = erc721_nft.get_data(profiledata_name_hash)
+profiledata_val2 = Fernet(symkey).decrypt(profiledata_val_encr_hex2)
+
+print("Dapp found profiledata {profiledata_name} = {profiledata_val2}")
 ```
 
 
