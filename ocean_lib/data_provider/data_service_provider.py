@@ -184,8 +184,8 @@ class DataServiceProvider:
     @staticmethod
     @enforce_types
     def initialize_compute(
-        datasets,
-        algorithm_data,
+        datasets: List[Dict[str, Any]],
+        algorithm_data: Dict[str, Any],
         service_endpoint,
         consumer_address: str,
         compute_environment: str,
