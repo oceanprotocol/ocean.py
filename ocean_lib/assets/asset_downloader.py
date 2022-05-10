@@ -53,8 +53,9 @@ def download_asset_files(
         assert isinstance(index, int), logger.error("index has to be an integer.")
         assert index >= 0, logger.error("index has to be 0 or a positive integer.")
 
-    consumable_result = service.is_consumable(
+    consumable_result = is_consumable(
         asset,
+        service,
         {"type": "address", "value": consumer_wallet.address},
         with_connectivity_check=True,
     )
@@ -75,3 +76,26 @@ def download_asset_files(
         userdata=userdata,
     )
     return asset_folder
+
+
+@enforce_types
+def is_consumable(
+    asset: Asset,
+    service: Service,
+    credential: Optional[dict] = None,
+    with_connectivity_check: bool = True,
+) -> bool:
+    """Checks whether an asset is consumable and returns a ConsumableCode."""
+    if asset.is_disabled:
+        return ConsumableCodes.ASSET_DISABLED
+
+    if with_connectivity_check and not DataServiceProvider.check_asset_file_info(
+        asset.did, service.id, service.service_endpoint
+    ):
+        return ConsumableCodes.CONNECTIVITY_FAIL
+
+    # to be parameterized in the future, can implement other credential classes
+    if asset.requires_address_credential:
+        return asset.validate_access(credential)
+
+    return ConsumableCodes.OK
