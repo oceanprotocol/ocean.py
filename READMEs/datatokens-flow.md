@@ -147,4 +147,4 @@ print(f"datatoken symbol: {erc20_token.symbol()}")
 
 Congrats, you've created your first Ocean datatoken! 🐋
 
-As an alternative for publishing a NFT and a datatoken at once, you can use `create_nft_with_erc20`.
+As an alternative for publishing an NFT and a datatoken at once, you can use `create_nft_with_erc20`.
