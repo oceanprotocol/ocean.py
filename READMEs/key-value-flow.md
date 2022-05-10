@@ -42,7 +42,7 @@ value = "blue"
 
 #prep key-value to set
 key_hash = ocean.web3.keccak(text=key) #contract needs keccak256 hash
-value_hex = value.encode('utf-8').hex()  #set_new_data() needs hex
+value_hex = value.encode('utf-8').hex() #set_new_data() needs hex
 
 #set
 erc721_nft.set_new_data(key_hash, value_hex, alice_wallet)
@@ -58,6 +58,6 @@ print(f"Found that {key} = {value2}")
 
 That's it! Note the simplicity. All data was stored and retrieved from on-chain. We don't need Ocean Provider or Ocean Aquarius for these use cases (though the latter can help for fast querying & retrieval).
 
-We can also encrypt the data. The [personal data NFTs quickstart](READMEs/pdnfts-flow.md) shows an example.
+We can also encrypt the data. Other quickstarts explore this.
 
 Under the hood, it uses [ERC725](https://erc725alliance.org/), which augments ERC721 with a well-defined way to set and get key-value pairs.
