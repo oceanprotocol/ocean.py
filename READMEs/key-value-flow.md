@@ -36,15 +36,23 @@ From [datatokens-flow](datatokens-flow.md), do:
 ## 3. Add key-value pair to data NFT
 
 ```python
-key:bytes = b"fav_color"
-value:hex = b"blue".hex()
-erc721_nft.set_new_data(key, value, alice_wallet)
+#key-value
+key = "fav_color"
+value = "blue"
+
+#prep key-value to set
+key_hash = ocean.web3.keccak(text=key) #contract needs keccak256 hash
+value_hex = value.encode('utf-8').hex()  #set_new_data() needs hex
+
+#set
+erc721_nft.set_new_data(key_hash, value_hex, alice_wallet)
 ```
 
 ## 4. Retrieve value from data NFT
 
 ```python
-value2:hex = erc721_nft.get_data(key)
+value2_hex = erc721_nft.get_data(key_hash)
+value2 = value2_hex.decode('ascii')
 print(f"Found that {key} = {value2}")
 ```
 

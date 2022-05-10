@@ -59,8 +59,7 @@ symkey = b64encode(signed_msg.signature.hex().encode('ascii'))[:43] + b'='
 
 #Symmetrically encrypt, and store it
 profiledata_val_encr:bytes = Fernet(symkey).encrypt(profiledata_val)
-erc721_nft.set_new_data(
-  profiledata_name, profiledata_val_encr.hex(), alice_wallet)
+erc721_nft.set_new_data(profiledata_name, profiledata_val_encr.hex(), alice_wallet)
 ```
 
 ## 4. Alice gets Dapp's public_key
@@ -79,9 +78,13 @@ dapp_public_key = str(keys.PrivateKey(decode_hex(dapp_private_key)).public_key)
 
 ```python
 from ecies import encrypt as asymmetric_encrypt
-symkey_name = (profiledata_name.decode('utf-8') + ':for:' + dapp_wallet.address[:10]).encode('utf-8')
-symkey_val_encr = asymmetric_encrypt(dapp_public_key, symkey)
-erc721_nft.set_new_data(symkey_name, symkey_val_encr, alice_wallet)
+web3 = ocean.web3
+
+symkey_name = (profiledata_name.decode('utf-8') + ':for:' + dapp_wallet.address[:10]) #str
+symkey_val_encr = str(asymmetric_encrypt(dapp_public_key, symkey)) #str
+
+# arg types: key=bytes32, value=bytes, wallet=wallet
+erc721_nft.set_new_data(symkey_name.encode('utf-8'), symkey_val_encr.encode('utf-8'), alice_wallet)
 ```
 
 ## 6. Dapp decrypts symkey, then decrypts original 'value'
