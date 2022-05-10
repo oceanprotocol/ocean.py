@@ -112,7 +112,7 @@ symkey2 = asymmetric_decrypt(dapp_private_key, symkey_val_encr_bytes2)
 profiledata_val_encr_hex2 = erc721_nft.get_data(profiledata_name_hash)
 profiledata_val2 = Fernet(symkey).decrypt(profiledata_val_encr_hex2)
 
-print("Dapp found profiledata {profiledata_name} = {profiledata_val2}")
+print(f"Dapp found profiledata {profiledata_name} = {profiledata_val2}")
 ```
 
 
