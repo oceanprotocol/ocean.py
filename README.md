@@ -55,8 +55,8 @@ Here are flows to try out, from simple to specific detailed variants.
 - **[Fixed rate exchange flow](READMEs/fixed-rate-exchange-flow.md)** - a data asset is posted for sale at fixed rate, then purchased. 
 - **[Dispenser flow](READMEs/dispenser-flow.md)** - here, a datatoken dispenser is created and datatokens are dispensed for free.
 - **[Compute-to-data flow](READMEs/c2d-flow.md)** - uses C2D to build an AI model a dataset that never leaves the premises.
-- **[Key-value database](READMEs/key-value-flow.md)** - use data NFTs to store arbitrary key-value pairs on-chain
-- **[Profile NFTs](READMEs/profile-nfts-flow.md)** - share user profile data privately with dapps
+- **[Key-value database](READMEs/key-value-flow.md)** - use data NFTs to store arbitrary key-value pairs on-chain.
+- **[Profile NFTs](READMEs/profile-nfts-flow.md)** - enable "login with Web3" where Dapp can access private user profile data.
 
 ### Learn more
 
