@@ -125,11 +125,14 @@ On computing public keys:
 - Hardware wallets don't expose private_keys. And, while they do expose a _root_ public_key, you shouldn't publicly share those because it lets anyone see all your wallets
 - However, you _can_ compute anyone's public_key from any tx. This is a general solution. Conveniently, Etherscan shows it too.
 
-Then, possible ways for Alice to get Dapp's public key:
+Possible ways for Alice to get Dapp's public key:
 - Alice auto-computes from any of Dapp's previous txs.
 - Alice retrieves it from a public-ish registry or api, e.g. etherscan
-- Dapp computes it from private_key or from past tx, then shares. Sharing could be directly client-side or over a public channel.
-  - Client-side could be in a script (used above) or in a browser (typical Dapp).
-  - Possible public channels: write a new key-value pair on this NFT; new data NFT for this message; http, email, or any messaging medium
+- Dapp computes it from private_key or from past tx, then shares. Sharing could be directly client-side or over a public channel. Specific examples:
+  - Client-side: in a script - like above. However, this is better suited for demos than useful dapps.
+  - Client-side: in a browser with Metamask - [example by FELToken](https://betterprogramming.pub/exchanging-encrypted-data-on-blockchain-using-metamask-a2e65a9a896c). This is a very good choice for Dapps.
+  - Public channel: write a new key-value pair on the same data NFT
+  - Public channel: a new data NFT for each message
+  - Public channel: traditional: http, email, or any messaging medium
   
 
