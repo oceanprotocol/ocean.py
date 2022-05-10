@@ -5,7 +5,7 @@ SPDX-License-Identifier: Apache-2.0
 
 # Quickstart: Profile NFTs
 
-This is a flow showing: share user profile data privately with dapps, via Ocean Data NFTs.
+This is a flow showing how to do "login with Web3" with the help of Ocean data NFTs. In this flow, a dapp is not only connected to the user's wallet, but it can access profile data that the user has privately shared to it.
 
 Here are the steps:
 
