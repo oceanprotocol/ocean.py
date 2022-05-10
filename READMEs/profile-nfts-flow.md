@@ -14,7 +14,7 @@ Here are the steps:
 3. Alice adds key-value pair to data NFT. 'value' encrypted with a symmetric key 'symkey'
 4. Alice gets Dapp's public_key
 5. Alice encrypts symkey with Dapp's public key and shares to Dapp
-6. Dapp decrypts symkey, then decrypts original 'value'
+6. Dapp gets & decrypts symkey, then gets & decrypts original 'value'
 
 ## 1. Setup
 
@@ -98,7 +98,7 @@ symkey_val_encr_hex = symkey_val_encr.hex() #hex
 erc721_nft.set_new_data(symkey_name_hash, symkey_val_encr_hex, alice_wallet)
 ```
 
-## 6. Dapp decrypts symkey, then decrypts original 'value'
+## 6. Dapp gets & decrypts symkey, then gets & decrypts original 'value'
 
 ```python
 from ecies import decrypt as asymmetric_decrypt
@@ -109,7 +109,8 @@ symkey2 = asymmetric_decrypt(dapp_private_key, symkey_val_encr2)
 
 #profiledata_name_hash = <Dapp would set like above>
 profiledata_val_encr_hex2 = erc721_nft.get_data(profiledata_name_hash)
-profiledata_val2 = Fernet(symkey).decrypt(profiledata_val_encr_hex2)
+profiledata_val2_bytes = Fernet(symkey).decrypt(profiledata_val_encr_hex2)
+profiledata_val2 = profiledata_val2_bytes.decode('utf-8')
 
 print(f"Dapp found profiledata {profiledata_name} = {profiledata_val2}")
 ```
