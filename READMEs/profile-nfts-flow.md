@@ -37,19 +37,18 @@ From [datatokens-flow](datatokens-flow.md), do:
 
 ```python
 #imports
-from cryptography.fernet import Fernet
-from hashlib import sha256
-from eth_account.messages import encode_defunct
-sign = ocean.web3.eth.account.sign_message
-keccak = ocean.web3.keccak
 from base64 import b64encode
+from cryptography.fernet import Fernet
+from eth_account.messages import encode_defunct
+from hashlib import sha256
+web3 = ocean.web3
 
 #Key-value pair
 profiledata_name = "fav_color"
 profiledata_val = "blue"
 
 #Prep key for setter. Contract/ERC725 requires keccak256 hash
-profiledata_name_hash = keccak(text=profiledata_name)
+profiledata_name_hash = web3.keccak(text=profiledata_name)
 
 #Choose a symkey where:
 # - sharing it unlocks only this field: make unique to this data nft & field
@@ -57,7 +56,7 @@ profiledata_name_hash = keccak(text=profiledata_name)
 # - is hardware wallet friendly: uses Alice's digital signature not private key
 preimage = erc721_nft.address + profiledata_name
 msg = encode_defunct(text=sha256(preimage.encode('utf-8')).hexdigest())
-signed_msg = sign(msg, private_key=alice_wallet.private_key)
+signed_msg = web3.eth.account.sign_message(msg, private_key=alice_wallet.private_key)
 symkey = b64encode(signed_msg.signature.hex().encode('ascii'))[:43] + b'=' #bytes
 
 #Prep value for setter
@@ -89,10 +88,9 @@ There are various ways for Alice to share the encrypted symkey to the Dapp (see 
 from ecies import encrypt as asymmetric_encrypt
 
 symkey_name = (profiledata_name + ':for:' + dapp_address[:10]) #str
-symkey_name_hash = keccak(text=symkey_name)
+symkey_name_hash = web3.keccak(text=symkey_name)
 
 symkey_val_encr = asymmetric_encrypt(dapp_public_key, symkey) #bytes
-assert asymmetric_decrypt(dapp_private_key, symkey_val_encr) == symkey
 
 symkey_val_encr_hex = symkey_val_encr.hex() #hex
 
