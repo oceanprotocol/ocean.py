@@ -17,7 +17,7 @@ from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.aquarius import Aquarius
 from ocean_lib.assets.asset import Asset
-from ocean_lib.assets.asset_downloader import download_asset_files
+from ocean_lib.assets.asset_downloader import download_asset_files, is_consumable
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
@@ -628,8 +628,8 @@ class OceanAssets:
                 f"requires {pretty_ether_and_wei(1, dt.symbol())}."
             )
 
-        consumable_result = service.is_consumable(
-            asset, {"type": "address", "value": wallet.address}
+        consumable_result = is_consumable(
+            asset, service, {"type": "address", "value": wallet.address}
         )
         if consumable_result != ConsumableCodes.OK:
             raise AssetNotConsumable(consumable_result)
