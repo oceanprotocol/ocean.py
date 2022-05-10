@@ -90,6 +90,8 @@ symkey_name = (profiledata_name + ':for:' + dapp_address[:10]) #str
 symkey_name_hash = keccak(text=symkey_name)
 
 symkey_val_encr = asymmetric_encrypt(dapp_public_key, symkey) #bytes
+assert asymmetric_decrypt(dapp_private_key, symkey_val_encr) == symkey
+
 symkey_val_encr_hex = symkey_val_encr.hex() #hex
 
 # arg types: key=bytes32, value=bytes, wallet=wallet
@@ -99,16 +101,13 @@ erc721_nft.set_new_data(symkey_name_hash, symkey_val_encr_hex, alice_wallet)
 ## 6. Dapp decrypts symkey, then decrypts original 'value'
 
 ```python
-from cryptography.fernet import Fernet
 from ecies import decrypt as asymmetric_decrypt
 
-#symkey_name, symkey_name_hash = (Dapp would set like above)
+#symkey_name_hash = <Dapp would set like above>
 symkey_val_encr_hex2 = erc721_nft.get_data(symkey_name_hash).hex() #hex
-symkey_val_encr_bytes2 = symkey_val_encr_hex2.encode('utf-8') #bytes
+symkey2 = asymmetric_decrypt(dapp_private_key, symkey_val_encr2)
 
-# args: (str or bytes, bytes)
-symkey2 = asymmetric_decrypt(dapp_private_key, symkey_val_encr_bytes2)
-
+#profiledata_name_hash = <Dapp would set like above>
 profiledata_val_encr_hex2 = erc721_nft.get_data(profiledata_name_hash)
 profiledata_val2 = Fernet(symkey).decrypt(profiledata_val_encr_hex2)
 
