@@ -103,8 +103,11 @@ from cryptography.fernet import Fernet
 from ecies import decrypt as asymmetric_decrypt
 
 #symkey_name, symkey_name_hash = (Dapp would set like above)
-symkey_val_encr_hex2 = erc721_nft.get_data(symkey_name_hash)
-symkey2 = asymmetric_decrypt(dapp_wallet.private_key, symkey_val_encr_hex2)
+symkey_val_encr_hex2 = erc721_nft.get_data(symkey_name_hash).hex() #hex
+symkey_val_encr_bytes2 = symkey_val_encr_hex2.encode('utf-8') #bytes
+
+# args: (str or bytes, bytes)
+symkey2 = asymmetric_decrypt(dapp_private_key, symkey_val_encr_bytes2)
 
 profiledata_val_encr_hex2 = erc721_nft.get_data(profiledata_name_hash)
 profiledata_val2 = Fernet(symkey).decrypt(profiledata_val_encr_hex2)
