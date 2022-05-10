@@ -115,6 +115,11 @@ print(f"did = '{did}'")
 In the following steps we will create a pool from the created token, in order to allow another user
 to order this access token.
 ```python
+
+# Mint OCEAN
+from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
+mint_fake_OCEAN(config)
+
 erc20_token = ocean.get_datatoken(asset.services[0].datatoken)
 OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 

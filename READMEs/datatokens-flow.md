@@ -97,11 +97,6 @@ alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
 alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
-# Mint OCEAN
-from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-mint_fake_OCEAN(config)
-assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-
 # Publish an NFT token
 print("Create ERC721 data NFT: begin.")
 erc721_nft = ocean.create_erc721_nft('NFTToken1', 'NFT1', alice_wallet)
