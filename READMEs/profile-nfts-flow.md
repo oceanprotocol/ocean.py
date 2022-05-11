@@ -104,7 +104,7 @@ erc721_nft.set_new_data(symkey_name_hash, symkey_val_encr_hex, alice_wallet)
 from ecies import decrypt as asymmetric_decrypt
 
 #symkey_name_hash = <Dapp would set like above>
-symkey_val_encr_hex2 = erc721_nft.get_data(symkey_name_hash).hex() #hex
+symkey_val_encr2 = erc721_nft.get_data(symkey_name_hash)
 symkey2 = asymmetric_decrypt(dapp_private_key, symkey_val_encr2)
 
 #profiledata_name_hash = <Dapp would set like above>
