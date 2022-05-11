@@ -262,8 +262,6 @@ datasets, algorithm = ocean.assets.pay_for_compute_service(
     datasets=[DATA_compute_input],
     algorithm_data=ALGO_compute_input,
     consume_market_order_fee_address=bob_wallet.address,
-    consume_market_order_fee_token=DATA_datatoken.address,
-    consume_market_order_fee_amount=0,
     wallet=bob_wallet,
     compute_environment=environments[0]["id"],
     valid_until=int((datetime.utcnow() + timedelta(days=1)).timestamp()),

@@ -672,8 +672,6 @@ class OceanAssets:
         compute_environment: str,
         valid_until: int,
         consume_market_order_fee_address: str,
-        consume_market_order_fee_token: str,
-        consume_market_order_fee_amount: int,
         wallet: Wallet,
         consumer_address: Optional[str] = None,
     ):
@@ -697,8 +695,8 @@ class OceanAssets:
                 datasets[i],
                 item,
                 consume_market_order_fee_address,
-                consume_market_order_fee_token,
-                consume_market_order_fee_amount,
+                datasets[i].consume_market_order_fee_token,
+                datasets[i].consume_market_order_fee_amount,
                 wallet,
                 consumer_address,
             )
@@ -708,8 +706,8 @@ class OceanAssets:
                 algorithm_data,
                 result["algorithm"],
                 consume_market_order_fee_address,
-                consume_market_order_fee_token,
-                consume_market_order_fee_amount,
+                datasets[i].consume_market_order_fee_token,
+                datasets[i].consume_market_order_fee_amount,
                 wallet,
                 consumer_address,
             )

@@ -192,8 +192,6 @@ def c2d_flow_readme(
         datasets=[DATA_compute_input],
         algorithm_data=ALGO_compute_input,
         consume_market_order_fee_address=consumer_wallet.address,
-        consume_market_order_fee_token=DATA_datatoken.address,
-        consume_market_order_fee_amount=0,
         wallet=consumer_wallet,
         compute_environment=environments[0]["id"],
         valid_until=int((datetime.utcnow() + timedelta(days=1)).timestamp()),

@@ -8,6 +8,7 @@ from enforce_typing import enforce_types
 
 from ocean_lib.assets.asset import Asset
 from ocean_lib.services.service import Service
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 
 class ComputeInput:
@@ -18,6 +19,8 @@ class ComputeInput:
         service: Service,
         transfer_tx_id: Union[str, bytes] = None,
         userdata: Optional[Dict] = None,
+        consume_market_order_fee_token: Optional[str] = None,
+        consume_market_order_fee_amount: Optional[int] = None,
     ) -> None:
         """Initialise and validate arguments."""
         assert asset and service is not None, "bad argument values."
@@ -31,6 +34,14 @@ class ComputeInput:
         self.service = service
         self.service_id = service.id
         self.userdata = userdata
+        self.consume_market_order_fee_token = (
+            consume_market_order_fee_token
+            if consume_market_order_fee_token
+            else ZERO_ADDRESS
+        )
+        self.consume_market_order_fee_amount = (
+            consume_market_order_fee_amount if consume_market_order_fee_amount else 0
+        )
 
     @enforce_types
     def as_dictionary(self) -> Dict[str, Union[str, Dict]]:

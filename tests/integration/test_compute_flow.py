@@ -157,6 +157,8 @@ def _mint_and_build_compute_input(
         dataset_and_userdata.asset,
         service,
         userdata=dataset_and_userdata.userdata,
+        consume_market_order_fee_token=erc20_token.address,
+        consume_market_order_fee_amount=0,
     )
 
 
@@ -219,7 +221,6 @@ def run_compute_test(
     )
 
     environments = ocean_instance.compute.get_c2d_environments(service.service_endpoint)
-    erc20_token = ERC20Token(ocean_instance.web3, service.datatoken)
 
     time_difference = timedelta(hours=1) if not reuse_order else timedelta(seconds=30)
     datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
@@ -229,8 +230,6 @@ def run_compute_test(
         compute_environment=environments[0]["id"],
         valid_until=int((datetime.utcnow() + time_difference).timestamp()),
         consume_market_order_fee_address=consumer_wallet.address,
-        consume_market_order_fee_token=erc20_token.address,
-        consume_market_order_fee_amount=0,
         wallet=consumer_wallet,
     )
 
@@ -293,8 +292,6 @@ def run_compute_test(
             compute_environment=environments[0]["id"],
             valid_until=int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
             consume_market_order_fee_address=consumer_wallet.address,
-            consume_market_order_fee_token=erc20_token.address,
-            consume_market_order_fee_amount=0,
             wallet=consumer_wallet,
         )
 
@@ -314,8 +311,6 @@ def run_compute_test(
             compute_environment=environments[0]["id"],
             valid_until=int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
             consume_market_order_fee_address=consumer_wallet.address,
-            consume_market_order_fee_token=erc20_token.address,
-            consume_market_order_fee_amount=0,
             wallet=consumer_wallet,
         )
 
