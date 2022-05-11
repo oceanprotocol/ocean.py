@@ -706,8 +706,8 @@ class OceanAssets:
                 algorithm_data,
                 result["algorithm"],
                 consume_market_order_fee_address,
-                datasets[i].consume_market_order_fee_token,
-                datasets[i].consume_market_order_fee_amount,
+                algorithm_data.consume_market_order_fee_token,
+                algorithm_data.consume_market_order_fee_amount,
                 wallet,
                 consumer_address,
             )
