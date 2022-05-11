@@ -530,7 +530,7 @@ def test_initialize_compute_failure(config):
     with pytest.raises(DataProviderException, match="Initialize compute failed"):
         DataSP.initialize_compute(
             [compute_input.as_dictionary()],
-            [compute_input.as_dictionary()],
+            compute_input.as_dictionary(),
             service.service_endpoint,
             "0x0",
             "test",
@@ -543,7 +543,7 @@ def test_initialize_compute_failure(config):
     with pytest.raises(DataProviderException, match="Failed to get a response"):
         DataSP.initialize_compute(
             [compute_input.as_dictionary()],
-            [compute_input.as_dictionary()],
+            compute_input.as_dictionary(),
             service.service_endpoint,
             "0x0",
             "test",

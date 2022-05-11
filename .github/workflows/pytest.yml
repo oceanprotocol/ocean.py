@@ -27,6 +27,8 @@ jobs:
           ref: v4
       - name: Run Barge
         working-directory: ${{ github.workspace }}/barge
+        env:
+          PROVIDER_VERSION: v4main
         run: |
           bash -x start_ocean.sh --no-dashboard 2>&1 --with-provider2 --with-rbac --with-c2d > start_ocean.log &
           for i in $(seq 1 50); do
