@@ -28,8 +28,7 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.config import Config
 from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
-from ocean_lib.models.compute_input import ComputeInput
-from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
+from ocean_lib.models.compute_input import ComputeInput, RawAlgoComputeInput
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -330,7 +329,7 @@ class DataServiceProvider:
         dataset: ComputeInput,
         compute_environment: str,
         algorithm: Optional[ComputeInput] = None,
-        algorithm_meta: Optional[AlgorithmMetadata] = None,
+        algorithm_meta: Optional[RawAlgoComputeInput] = None,
         algorithm_custom_data: Optional[str] = None,
         input_datasets: Optional[List[ComputeInput]] = None,
     ) -> Dict[str, Any]:
@@ -344,7 +343,7 @@ class DataServiceProvider:
         :param dataset: ComputeInput dataset with a compute service
         :param compute_environment: str compute environment id
         :param algorithm: ComputeInput algorithm witha download service.
-        :param algorithm_meta: AlgorithmMetadata algorithm metadata
+        :param algorithm_meta: RawAlgoComputeInput containing algorithm metadata
         :param algorithm_custom_data: dict customizable algo parameters (ie. no of iterations, etc)
         :param input_datasets: List[ComputeInput] additional input datasets
         :return job_info dict
@@ -363,7 +362,7 @@ class DataServiceProvider:
             dataset=dataset,
             compute_environment=compute_environment,
             algorithm=algorithm,
-            algorithm_meta=algorithm_meta,
+            algorithm_meta=algorithm_meta.as_dictionary(),
             algorithm_custom_data=algorithm_custom_data,
             input_datasets=input_datasets,
         )
@@ -791,7 +790,7 @@ class DataServiceProvider:
         dataset: ComputeInput,
         compute_environment: str,
         algorithm: Optional[ComputeInput] = None,
-        algorithm_meta: Optional[AlgorithmMetadata] = None,
+        algorithm_meta: Optional[RawAlgoComputeInput] = None,
         algorithm_custom_data: Optional[str] = None,
         input_datasets: Optional[List[ComputeInput]] = None,
     ) -> Dict[str, Any]:
@@ -800,8 +799,8 @@ class DataServiceProvider:
         ), "either an algorithm did or an algorithm meta must be provided."
 
         if algorithm_meta:
-            assert isinstance(algorithm_meta, AlgorithmMetadata), (
-                f"expecting a AlgorithmMetadata type "
+            assert isinstance(algorithm_meta, RawAlgoComputeInput), (
+                f"expecting a RawAlgoComputeInput type "
                 f"for `algorithm_meta`, got {type(algorithm_meta)}"
             )
 

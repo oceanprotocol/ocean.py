@@ -14,9 +14,8 @@ from ocean_lib.assets.asset_downloader import is_consumable
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.compute_input import ComputeInput
+from ocean_lib.models.compute_input import ComputeInput, RawAlgoComputeInput
 from ocean_lib.services.service import Service
-from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ocean")
@@ -41,7 +40,7 @@ class OceanCompute:
         dataset: ComputeInput,
         compute_environment: str,
         algorithm: Optional[ComputeInput] = None,
-        algorithm_meta: Optional[AlgorithmMetadata] = None,
+        algorithm_meta: Optional[RawAlgoComputeInput] = None,
         algorithm_algocustomdata: Optional[dict] = None,
         additional_datasets: List[ComputeInput] = [],
     ) -> str:

@@ -12,10 +12,9 @@ from attr import dataclass
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.exceptions import DataProviderException
-from ocean_lib.models.compute_input import ComputeInput
+from ocean_lib.models.compute_input import ComputeInput, RawAlgoComputeInput
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import (
@@ -168,7 +167,7 @@ def run_compute_test(
     consumer_wallet: Wallet,
     dataset_and_userdata: AssetAndUserdata,
     algorithm_and_userdata: Optional[AssetAndUserdata] = None,
-    algorithm_meta: Optional[AlgorithmMetadata] = None,
+    algorithm_meta: Optional[RawAlgoComputeInput] = None,
     algorithm_algocustomdata: Optional[dict] = None,
     additional_datasets_and_userdata: List[AssetAndUserdata] = [],
     with_result=False,
@@ -347,7 +346,7 @@ def test_compute_raw_algo(
         dataset_and_userdata=AssetAndUserdata(
             dataset_with_compute_service_allow_raw_algo, None
         ),
-        algorithm_meta=raw_algorithm,
+        algorithm_meta=RawAlgoComputeInput(raw_algorithm),
     )
 
     with pytest.raises(
@@ -358,7 +357,7 @@ def test_compute_raw_algo(
             publisher_wallet=publisher_wallet,
             consumer_wallet=consumer_wallet,
             dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
-            algorithm_meta=raw_algorithm,
+            algorithm_meta=RawAlgoComputeInput(raw_algorithm),
         )
 
 

@@ -21,13 +21,12 @@ from ocean_lib.assets.asset_downloader import download_asset_files, is_consumabl
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
-from ocean_lib.models.compute_input import ComputeInput
+from ocean_lib.models.compute_input import ComputeInput, RawAlgoComputeInput
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
-from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei
@@ -668,7 +667,7 @@ class OceanAssets:
     def pay_for_compute_service(
         self,
         datasets: List[ComputeInput],
-        algorithm_data: Union[ComputeInput, AlgorithmMetadata],
+        algorithm_data: Union[ComputeInput, RawAlgoComputeInput],
         compute_environment: str,
         valid_until: int,
         consume_market_order_fee_address: str,
