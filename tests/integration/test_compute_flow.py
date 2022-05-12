@@ -4,7 +4,7 @@
 #
 import time
 from datetime import datetime, timedelta
-from typing import List, Optional, Tuple
+from typing import List, Optional
 
 import pytest
 from attr import dataclass
@@ -15,7 +15,6 @@ from ocean_lib.exceptions import DataProviderException
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
@@ -132,19 +131,21 @@ def dataset_with_access_service(publisher_wallet, publisher_ocean_instance):
     return asset
 
 
-def process_order(
-    ocean_instance: Ocean,
+@dataclass
+class AssetAndUserdata:
+    asset: Asset
+    userdata: Optional[dict]
+
+
+def _mint_and_build_compute_input(
+    dataset_and_userdata: AssetAndUserdata,
+    service_type: str,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
-    asset: Asset,
-    service_type: str,
-) -> Tuple[str, Service]:
-    """Helper function to process a compute order."""
-    # Mint 10 datatokens to the consumer
-    service = get_first_service_by_type(asset, service_type)
+    ocean_instance: Ocean,
+) -> ComputeInput:
+    service = get_first_service_by_type(dataset_and_userdata.asset, service_type)
     erc20_token = ERC20Token(ocean_instance.web3, service.datatoken)
-
-    # for the "algorithm with different publisher fixture, consumer is minter
     minter = (
         consumer_wallet
         if erc20_token.is_minter(consumer_wallet.address)
@@ -152,29 +153,13 @@ def process_order(
     )
     erc20_token.mint(consumer_wallet.address, to_wei(10), minter)
 
-    environments = ocean_instance.compute.get_c2d_environments(service.service_endpoint)
-
-    order_tx_id = ocean_instance.assets.pay_for_service(
-        asset=asset,
-        service=service,
-        consume_market_order_fee_address=consumer_wallet.address,
+    return ComputeInput(
+        dataset_and_userdata.asset,
+        service,
+        userdata=dataset_and_userdata.userdata,
         consume_market_order_fee_token=erc20_token.address,
         consume_market_order_fee_amount=0,
-        wallet=consumer_wallet,
-        initialize_args={
-            "compute_environment": environments[0]["id"],
-            "valid_until": int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
-        },
-        consumer_address=environments[0]["consumerAddress"],
     )
-
-    return order_tx_id, service
-
-
-@dataclass
-class AssetAndUserdata:
-    asset: Asset
-    userdata: Optional[dict]
 
 
 def run_compute_test(
@@ -187,80 +172,76 @@ def run_compute_test(
     algorithm_algocustomdata: Optional[dict] = None,
     additional_datasets_and_userdata: List[AssetAndUserdata] = [],
     with_result=False,
+    reuse_order=False,
 ):
     """Helper function to bootstrap compute job creation and status checking."""
     assert (
         algorithm_and_userdata or algorithm_meta
     ), "either algorithm_and_userdata or algorithm_meta must be provided."
 
-    # Order dataset with compute service
-    dataset_tx_id, compute_service = process_order(
-        ocean_instance,
-        publisher_wallet,
-        consumer_wallet,
-        dataset_and_userdata.asset,
-        ServiceTypes.CLOUD_COMPUTE,
-    )
-    dataset = ComputeInput(
-        dataset_and_userdata.asset.did,
-        dataset_tx_id,
-        compute_service.id,
-        dataset_and_userdata.userdata,
-    )
+    datasets = [
+        _mint_and_build_compute_input(
+            dataset_and_userdata,
+            ServiceTypes.CLOUD_COMPUTE,
+            publisher_wallet,
+            consumer_wallet,
+            ocean_instance,
+        )
+    ]
 
-    # Order additional datasets
-    additional_datasets = []
+    # build additional datasets
     for asset_and_userdata in additional_datasets_and_userdata:
         service_type = ServiceTypes.ASSET_ACCESS
         if not get_first_service_by_type(asset_and_userdata.asset, service_type):
             service_type = ServiceTypes.CLOUD_COMPUTE
-        _order_tx_id, _service = process_order(
-            ocean_instance,
-            publisher_wallet,
-            consumer_wallet,
-            asset_and_userdata.asset,
-            service_type,
-        )
-        additional_datasets.append(
-            ComputeInput(
-                asset_and_userdata.asset.did,
-                _order_tx_id,
-                _service.id,
-                asset_and_userdata.userdata,
+
+        datasets.append(
+            _mint_and_build_compute_input(
+                asset_and_userdata,
+                service_type,
+                publisher_wallet,
+                consumer_wallet,
+                ocean_instance,
             )
         )
 
     # Order algo download service (aka. access service)
     algorithm = None
     if algorithm_and_userdata:
-        algo_tx_id, algo_download_service = process_order(
-            ocean_instance,
+        algorithm = _mint_and_build_compute_input(
+            algorithm_and_userdata,
+            ServiceTypes.ASSET_ACCESS,
             publisher_wallet,
             consumer_wallet,
-            algorithm_and_userdata.asset,
-            ServiceTypes.ASSET_ACCESS,
-        )
-        algorithm = ComputeInput(
-            algorithm_and_userdata.asset.did,
-            algo_tx_id,
-            algo_download_service.id,
-            algorithm_and_userdata.userdata,
+            ocean_instance,
         )
 
     service = get_first_service_by_type(
         dataset_and_userdata.asset, ServiceTypes.CLOUD_COMPUTE
     )
+
     environments = ocean_instance.compute.get_c2d_environments(service.service_endpoint)
+
+    time_difference = timedelta(hours=1) if not reuse_order else timedelta(seconds=30)
+    datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
+        datasets,
+        algorithm if algorithm else algorithm_meta,
+        consumer_address=environments[0]["consumerAddress"],
+        compute_environment=environments[0]["id"],
+        valid_until=int((datetime.utcnow() + time_difference).timestamp()),
+        consume_market_order_fee_address=consumer_wallet.address,
+        wallet=consumer_wallet,
+    )
 
     # Start compute job
     job_id = ocean_instance.compute.start(
         consumer_wallet,
-        dataset,
+        datasets[0],
         environments[0]["id"],
         algorithm,
         algorithm_meta,
         algorithm_algocustomdata,
-        additional_datasets,
+        datasets[1:],
     )
 
     status = ocean_instance.compute.status(
@@ -292,22 +273,6 @@ def run_compute_test(
             time.sleep(5)
 
         print(f"got status: {status}")
-        output = None
-        for i in range(len(status["results"])):
-            result = None
-            result_type = status["results"][i]["type"]
-            print(f"Fetch result index {i}, type: {result_type}")
-            result = ocean_instance.compute.result(
-                dataset_and_userdata.asset, service, job_id, i, consumer_wallet
-            )
-            print(result)
-            if status["results"][i]["filesize"] > 0:
-                assert result, "result retrieval unsuccessful"
-            print(f"result index: {i}, type: {result_type}, contents: {result}")
-            # Extract algorithm output
-            if result_type == "output":
-                output = result
-
         assert succeeded, "compute job unsuccessful"
 
         log_file = ocean_instance.compute.compute_job_result_logs(
@@ -315,6 +280,54 @@ def run_compute_test(
         )
         assert log_file is not None
         print(f"got algo log file: {str(log_file)}")
+
+        prev_dt_tx_id = datasets[0].transfer_tx_id
+        prev_algo_tx_id = algorithm.transfer_tx_id
+
+        # retry initialize but all orders are already valid
+        datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
+            datasets,
+            algorithm if algorithm else algorithm_meta,
+            consumer_address=environments[0]["consumerAddress"],
+            compute_environment=environments[0]["id"],
+            valid_until=int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
+            consume_market_order_fee_address=consumer_wallet.address,
+            wallet=consumer_wallet,
+        )
+
+        # transferTxId was not updated
+        assert datasets[0].transfer_tx_id == prev_dt_tx_id
+        assert algorithm.transfer_tx_id == prev_algo_tx_id
+
+    if reuse_order:
+        prev_dt_tx_id = datasets[0].transfer_tx_id
+        prev_algo_tx_id = algorithm.transfer_tx_id
+        # ensure order expires
+        time.sleep(time_difference.seconds + 1)
+        datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
+            datasets,
+            algorithm if algorithm else algorithm_meta,
+            consumer_address=environments[0]["consumerAddress"],
+            compute_environment=environments[0]["id"],
+            valid_until=int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
+            consume_market_order_fee_address=consumer_wallet.address,
+            wallet=consumer_wallet,
+        )
+
+        assert datasets[0].transfer_tx_id != prev_dt_tx_id
+        assert algorithm.transfer_tx_id != prev_algo_tx_id
+
+        job_id = ocean_instance.compute.start(
+            consumer_wallet,
+            datasets[0],
+            environments[0]["id"],
+            algorithm,
+            algorithm_meta,
+            algorithm_algocustomdata,
+            datasets[1:],
+        )
+
+        assert job_id, "can not reuse order"
 
 
 @pytest.mark.integration
@@ -364,6 +377,25 @@ def test_compute_registered_algo(
         consumer_wallet=consumer_wallet,
         dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
         algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+    )
+
+
+@pytest.mark.integration
+def test_compute_reuse_order(
+    publisher_wallet,
+    publisher_ocean_instance,
+    consumer_wallet,
+    dataset_with_compute_service,
+    algorithm,
+):
+    """Tests that a compute job with a registered algorithm starts properly."""
+    run_compute_test(
+        ocean_instance=publisher_ocean_instance,
+        publisher_wallet=publisher_wallet,
+        consumer_wallet=consumer_wallet,
+        dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
+        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+        reuse_order=True,
     )
 
 
