@@ -330,7 +330,7 @@ def test_create_bad_metadata(publisher_ocean_instance, publisher_wallet, config)
 
 
 @pytest.mark.unit
-def test_pay_for_service_insufficient_balance(
+def test_pay_for_access_service_insufficient_balance(
     publisher_ocean_instance, config, publisher_wallet, erc20_token
 ):
     """Tests if balance is lower than the purchased amount."""
@@ -348,7 +348,7 @@ def test_pay_for_service_insufficient_balance(
     )
 
     with pytest.raises(InsufficientBalance):
-        publisher_ocean_instance.assets.pay_for_service(
+        publisher_ocean_instance.assets.pay_for_access_service(
             asset,
             get_first_service_by_type(asset, "access"),
             consume_market_order_fee_address=empty_wallet.address,

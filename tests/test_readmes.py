@@ -37,6 +37,8 @@ def test_script_execution(script, monkeypatch):
         "erc20-enterprise",
         "fixed-rate-exchange-flow",
         "marketplace-flow",
+        "key-value-flow",
+        "profile-nfts-flow",
         "consume-flow",
     ]
 

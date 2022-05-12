@@ -141,9 +141,7 @@ class DataServiceProvider:
         did: str,
         service: Any,  # Can not add Service typing due to enforce_type errors.
         consumer_address: str,
-        compute_environment: Optional[str] = None,
         userdata: Optional[Dict] = None,
-        valid_until: Optional[int] = 0,
     ) -> Response:
 
         _, initialize_endpoint = DataServiceProvider.build_initialize_endpoint(
@@ -155,12 +153,6 @@ class DataServiceProvider:
             "serviceId": service.id,
             "consumerAddress": consumer_address,
         }
-
-        if compute_environment is not None:
-            payload["environment"] = compute_environment
-
-        if valid_until:
-            payload["validUntil"] = valid_until
 
         if userdata is not None:
             userdata = json.dumps(userdata)
@@ -185,6 +177,67 @@ class DataServiceProvider:
         logger.info(
             f"Service initialized successfully"
             f" initializeEndpoint {initialize_endpoint}"
+        )
+
+        return response
+
+    @staticmethod
+    @enforce_types
+    def initialize_compute(
+        datasets: List[Dict[str, Any]],
+        algorithm_data: Dict[str, Any],
+        service_endpoint,
+        consumer_address: str,
+        compute_environment: str,
+        valid_until: int,
+    ) -> Response:
+        """This function initializes compute services.
+
+        To determine the Provider instance that will be called, we rely on the first dataset.
+        The first dataset is also required to have a compute service.
+        """
+        (
+            _,
+            initialize_compute_endpoint,
+        ) = DataServiceProvider.build_initialize_compute_endpoint(service_endpoint)
+
+        payload = {
+            "datasets": datasets,
+            "algorithm": algorithm_data,
+            "compute": {
+                "env": compute_environment,
+                "validUntil": valid_until,
+            },
+            "consumerAddress": consumer_address,
+        }
+
+        response = DataServiceProvider._http_method(
+            "post",
+            initialize_compute_endpoint,
+            data=json.dumps(payload),
+            headers={"content-type": "application/json"},
+        )
+
+        if not response or not hasattr(response, "status_code"):
+            if isinstance(response, Response) and response.status_code == 400:
+                error = response.json().get("error", "unknown error")
+                raise DataProviderException(f"initializeComputeEndpoint: {error}")
+
+            raise DataProviderException(
+                f"Failed to get a response for request: initializeComputeEndpoint={initialize_compute_endpoint}, payload={payload}, response is {response}"
+            )
+
+        if response.status_code != 200:
+            msg = (
+                f"Initialize compute failed at the initializeEndpoint "
+                f"{initialize_compute_endpoint}, reason {response.text}, status {response.status_code}"
+            )
+            logger.error(msg)
+            raise DataProviderException(msg)
+
+        logger.info(
+            f"Service initialized successfully"
+            f" initializeComputeEndpoint {initialize_compute_endpoint}"
         )
 
         return response
@@ -638,6 +691,11 @@ class DataServiceProvider:
 
     @staticmethod
     @enforce_types
+    def build_initialize_compute_endpoint(provider_uri: str) -> Tuple[str, str]:
+        return DataServiceProvider.build_endpoint("initializeCompute", provider_uri)
+
+    @staticmethod
+    @enforce_types
     def build_download_endpoint(provider_uri: str) -> Tuple[str, str]:
         return DataServiceProvider.build_endpoint("download", provider_uri)
 
@@ -796,7 +854,7 @@ class DataServiceProvider:
             if algorithm_custom_data:
                 payload["algorithm"]["algocustomdata"] = algorithm_custom_data
         else:
-            payload["algorithm"]["meta"] = algorithm_meta.as_dictionary()
+            payload["algorithm"] = algorithm_meta.as_dictionary()
 
         return payload
 

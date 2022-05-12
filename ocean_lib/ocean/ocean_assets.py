@@ -17,15 +17,17 @@ from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.aquarius import Aquarius
 from ocean_lib.assets.asset import Asset
-from ocean_lib.assets.asset_downloader import download_asset_files
+from ocean_lib.assets.asset_downloader import download_asset_files, is_consumable
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
+from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
+from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei
@@ -603,7 +605,7 @@ class OceanAssets:
         )
 
     @enforce_types
-    def pay_for_service(
+    def pay_for_access_service(
         self,
         asset: Asset,
         service: Service,
@@ -611,7 +613,6 @@ class OceanAssets:
         consume_market_order_fee_token: str,
         consume_market_order_fee_amount: int,
         wallet: Wallet,
-        initialize_args: Optional[dict] = None,
         consumer_address: Optional[str] = None,
     ):
         dt = ERC20Token(self._web3, service.datatoken)
@@ -627,24 +628,21 @@ class OceanAssets:
                 f"requires {pretty_ether_and_wei(1, dt.symbol())}."
             )
 
-        consumable_result = service.is_consumable(
-            asset, {"type": "address", "value": wallet.address}
+        consumable_result = is_consumable(
+            asset, service, {"type": "address", "value": wallet.address}
         )
         if consumable_result != ConsumableCodes.OK:
             raise AssetNotConsumable(consumable_result)
 
         data_provider = DataServiceProvider
 
-        built_initialize_args = {
+        initialize_args = {
             "did": asset.did,
             "service": service,
             "consumer_address": consumer_address,
         }
 
-        if initialize_args:
-            built_initialize_args.update(initialize_args)
-
-        initialize_response = data_provider.initialize(**built_initialize_args)
+        initialize_response = data_provider.initialize(**initialize_args)
         provider_fees = initialize_response.json()["providerFee"]
 
         tx_id = dt.start_order(
@@ -665,6 +663,111 @@ class OceanAssets:
         )
 
         return tx_id
+
+    @enforce_types
+    def pay_for_compute_service(
+        self,
+        datasets: List[ComputeInput],
+        algorithm_data: Union[ComputeInput, AlgorithmMetadata],
+        compute_environment: str,
+        valid_until: int,
+        consume_market_order_fee_address: str,
+        wallet: Wallet,
+        consumer_address: Optional[str] = None,
+    ):
+        data_provider = DataServiceProvider
+
+        if not consumer_address:
+            consumer_address = wallet.address
+
+        initialize_response = data_provider.initialize_compute(
+            [x.as_dictionary() for x in datasets],
+            algorithm_data.as_dictionary(),
+            datasets[0].service.service_endpoint,
+            consumer_address,
+            compute_environment,
+            valid_until,
+        )
+
+        result = initialize_response.json()
+        for i, item in enumerate(result["datasets"]):
+            self._start_or_reuse_order_based_on_initialize_response(
+                datasets[i],
+                item,
+                consume_market_order_fee_address,
+                datasets[i].consume_market_order_fee_token,
+                datasets[i].consume_market_order_fee_amount,
+                wallet,
+                consumer_address,
+            )
+
+        if "algorithm" in result:
+            self._start_or_reuse_order_based_on_initialize_response(
+                algorithm_data,
+                result["algorithm"],
+                consume_market_order_fee_address,
+                algorithm_data.consume_market_order_fee_token,
+                algorithm_data.consume_market_order_fee_amount,
+                wallet,
+                consumer_address,
+            )
+
+            return datasets, algorithm_data
+
+        return datasets, None
+
+    @enforce_types
+    def _start_or_reuse_order_based_on_initialize_response(
+        self,
+        asset_compute_input: ComputeInput,
+        item: dict,
+        consume_market_order_fee_address: str,
+        consume_market_order_fee_token: str,
+        consume_market_order_fee_amount: int,
+        wallet: Wallet,
+        consumer_address: Optional[str] = None,
+    ):
+        provider_fees = item.get("providerFee")
+        valid_order = item.get("validOrder")
+
+        if valid_order and not provider_fees:
+            asset_compute_input.transfer_tx_id = valid_order
+            return
+
+        service = asset_compute_input.service
+        dt = ERC20Token(self._web3, service.datatoken)
+
+        if valid_order and provider_fees:
+            asset_compute_input.transfer_tx_id = dt.reuse_order(
+                valid_order,
+                provider_fee_address=provider_fees["providerFeeAddress"],
+                provider_fee_token=provider_fees["providerFeeToken"],
+                provider_fee_amount=provider_fees["providerFeeAmount"],
+                v=provider_fees["v"],
+                r=provider_fees["r"],
+                s=provider_fees["s"],
+                valid_until=provider_fees["validUntil"],
+                provider_data=provider_fees["providerData"],
+                from_wallet=wallet,
+            )
+            return
+
+        asset_compute_input.transfer_tx_id = dt.start_order(
+            consumer=consumer_address,
+            service_index=asset_compute_input.asset.get_index_of_service(service),
+            provider_fee_address=provider_fees["providerFeeAddress"],
+            provider_fee_token=provider_fees["providerFeeToken"],
+            provider_fee_amount=provider_fees["providerFeeAmount"],
+            v=provider_fees["v"],
+            r=provider_fees["r"],
+            s=provider_fees["s"],
+            valid_until=provider_fees["validUntil"],
+            provider_data=provider_fees["providerData"],
+            consume_market_order_fee_address=consume_market_order_fee_address,
+            consume_market_order_fee_token=consume_market_order_fee_token,
+            consume_market_order_fee_amount=consume_market_order_fee_amount,
+            from_wallet=wallet,
+        )
 
     @enforce_types
     def encrypt_files(self, files: list):
