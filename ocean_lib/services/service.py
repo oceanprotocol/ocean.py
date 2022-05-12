@@ -12,9 +12,7 @@ from typing import Any, Dict, List, Optional
 
 from web3.main import Web3
 
-from ocean_lib.agreements.consumable import ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes, ServiceTypesNames
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 logger = logging.getLogger(__name__)
 
@@ -194,27 +192,6 @@ class Service:
             values[key] = value
 
         return values
-
-    def is_consumable(
-        self,
-        asset,
-        credential: Optional[dict] = None,
-        with_connectivity_check: bool = True,
-    ) -> bool:
-        """Checks whether an asset is consumable and returns a ConsumableCode."""
-        if asset.is_disabled:
-            return ConsumableCodes.ASSET_DISABLED
-
-        if with_connectivity_check and not DataServiceProvider.check_asset_file_info(
-            asset.did, self.id, self.service_endpoint
-        ):
-            return ConsumableCodes.CONNECTIVITY_FAIL
-
-        # to be parameterized in the future, can implement other credential classes
-        if asset.requires_address_credential:
-            return asset.validate_access(credential)
-
-        return ConsumableCodes.OK
 
     def remove_publisher_trusted_algorithm(self, algo_did: str) -> list:
         """Returns a trusted algorithms list after removal."""

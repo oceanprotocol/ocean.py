@@ -3,6 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
+from datetime import datetime, timedelta
 from unittest.mock import Mock
 
 import ecies
@@ -11,6 +12,7 @@ from requests.exceptions import InvalidURL
 from requests.models import Response
 
 from ocean_lib.agreements.service_types import ServiceTypes
+from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider as DataSP
 from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
@@ -109,17 +111,17 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
         timeout=0,
         compute_values=dict(),
     )
+
+    mock_asset = Asset()
     with pytest.raises(
         InvalidURL, match=f"InvalidURL {mock_service.service_endpoint}."
     ):
         DataSP.start_compute_job(
             dataset_compute_service=mock_service,
             consumer=consumer_wallet,
-            dataset=ComputeInput("some_did", "some_tx_id", "some_service_id"),
+            dataset=ComputeInput(mock_asset, mock_service, "tx_id"),
             compute_environment="some_env",
-            algorithm=ComputeInput(
-                "another_did", "another_tx_id", "another_service_id"
-            ),
+            algorithm=ComputeInput(Asset(), mock_service, "tx_id"),
         )
     mock_service.service_endpoint = f"{config.provider_url}"
     with pytest.raises(
@@ -129,11 +131,9 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
         DataSP.start_compute_job(
             dataset_compute_service=mock_service,
             consumer=consumer_wallet,
-            dataset=ComputeInput("some_did", "some_tx_id", "some_service_id"),
+            dataset=ComputeInput(Asset(), mock_service, "tx"),
             compute_environment="some_env",
-            algorithm=ComputeInput(
-                "another_did", "another_tx_id", "another_service_id"
-            ),
+            algorithm=ComputeInput(Asset(), mock_service, "tx"),
         )
 
 
@@ -413,6 +413,9 @@ def test_build_specific_endpoints(config):
     assert DataSP.build_initialize_endpoint(provider_uri)[1] == urljoin(
         base_uri, endpoints["initialize"][1]
     )
+    assert DataSP.build_initialize_compute_endpoint(provider_uri)[1] == urljoin(
+        base_uri, endpoints["initializeCompute"][1]
+    )
     assert DataSP.build_encrypt_endpoint(provider_uri)[1] == urljoin(
         base_uri, endpoints["encrypt"][1]
     )
@@ -505,6 +508,47 @@ def test_initialize_failure(config):
 
     with pytest.raises(DataProviderException):
         DataSP.initialize("0xabc", service, "0x")
+
+    DataSP.set_http_client(get_requests_session())
+
+
+@pytest.mark.unit
+def test_initialize_compute_failure(config):
+    """Tests initialize_compute failures."""
+    service = Mock(spec=Service)
+    service.service_endpoint = "http://172.15.0.4:8030"
+    service.id = "abc"
+
+    asset = Mock(spec=Asset)
+    asset.did = "0x0"
+    compute_input = ComputeInput(asset, service)
+
+    http_client = HttpClientEvilMock()
+    DataSP.set_http_client(http_client)
+    valid_until = int((datetime.utcnow() + timedelta(days=1)).timestamp())
+
+    with pytest.raises(DataProviderException, match="Initialize compute failed"):
+        DataSP.initialize_compute(
+            [compute_input.as_dictionary()],
+            compute_input.as_dictionary(),
+            service.service_endpoint,
+            "0x0",
+            "test",
+            valid_until,
+        )
+
+    http_client = HttpClientEmptyMock()
+    DataSP.set_http_client(http_client)
+
+    with pytest.raises(DataProviderException, match="Failed to get a response"):
+        DataSP.initialize_compute(
+            [compute_input.as_dictionary()],
+            compute_input.as_dictionary(),
+            service.service_endpoint,
+            "0x0",
+            "test",
+            valid_until,
+        )
 
     DataSP.set_http_client(get_requests_session())
 

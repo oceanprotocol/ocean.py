@@ -2,8 +2,6 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from unittest.mock import patch
-
 import pytest
 
 from ocean_lib.assets.asset import Asset
@@ -47,22 +45,6 @@ def test_service():
     del service_dict["type"]
     with pytest.raises(IndexError):
         Service.from_dict(service_dict)
-
-    ddo_dict = get_sample_ddo()
-    asset = Asset.from_dict(ddo_dict)
-    with patch(
-        "ocean_lib.services.service.DataServiceProvider.check_asset_file_info"
-    ) as mock:
-        mock.return_value = False
-        assert sa.is_consumable(asset, {}, True) == 2
-
-    with patch(
-        "ocean_lib.services.service.DataServiceProvider.check_asset_file_info"
-    ) as mock:
-        mock.return_value = True
-        assert (
-            sa.is_consumable(asset, {"type": "address", "value": "0xdddd"}, True) == 3
-        )
 
 
 @pytest.mark.unit

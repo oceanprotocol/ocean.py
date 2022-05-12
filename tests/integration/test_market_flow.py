@@ -46,7 +46,7 @@ def test_market_flow(
 
     # Place order for the download service
     if consumer_type == "publisher":
-        order_tx_id = consumer_ocean.assets.pay_for_service(
+        order_tx_id = consumer_ocean.assets.pay_for_access_service(
             asset,
             service,
             consume_market_order_fee_address=consumer_wallet.address,
@@ -62,7 +62,7 @@ def test_market_flow(
             order_tx_id,
         )
     else:
-        order_tx_id = consumer_ocean.assets.pay_for_service(
+        order_tx_id = consumer_ocean.assets.pay_for_access_service(
             asset,
             service,
             consume_market_order_fee_address=another_consumer_wallet.address,

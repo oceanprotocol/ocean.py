@@ -37,15 +37,17 @@ class AlgorithmMetadata:
     @enforce_types
     def as_dictionary(self) -> Dict[str, Any]:
         return {
-            "url": self.url,
-            "rawcode": self.rawcode,
-            "language": self.language,
-            "format": self.format,
-            "version": self.version,
-            "container": {
-                "entrypoint": self.container_entry_point,
-                "image": self.container_image,
-                "tag": self.container_tag,
-                "checksum": self.container_checksum,
-            },
+            "meta": {
+                "url": self.url,
+                "rawcode": self.rawcode,
+                "language": self.language,
+                "format": self.format,
+                "version": self.version,
+                "container": {
+                    "entrypoint": self.container_entry_point,
+                    "image": self.container_image,
+                    "tag": self.container_tag,
+                    "checksum": self.container_checksum,
+                },
+            }
         }
