@@ -117,7 +117,7 @@ fee_receiver = ZERO_ADDRESS # could also be market address
 service = asset.services[0]
 
 # Bob sends his datatoken to the service
-order_tx_id = ocean.assets.pay_for_service(
+order_tx_id = ocean.assets.pay_for_access_service(
     asset,
     service,
     consume_market_order_fee_address=bob_wallet.address,
