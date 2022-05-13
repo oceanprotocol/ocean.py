@@ -25,7 +25,7 @@ In your working directory, create a file `config.ini` and fill it with the follo
 
     [resources]
     metadata_cache_uri = https://aquarius.oceanprotocol.com
-    provider.url = https://provider.rinkeby.oceanprotocol.com
+    provider.url = https://v4.provider.rinkeby.oceanprotocol.com
 
 Ensure that envvars don't override the config file values:
 
