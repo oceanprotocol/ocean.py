@@ -31,49 +31,49 @@ logging.basicConfig(level=logging.INFO)
 
 CONFIG_NETWORK_HELPER = {
     1: {
-        NAME_PROVIDER_URL: "https://provider.mainnet.oceanprotocol.com",
+        NAME_PROVIDER_URL: "https://v4.provider.mainnet.oceanprotocol.com",
         NETWORK_NAME: "mainnet",
         NAME_BLOCK_CONFIRMATIONS: 1,
         NAME_TRANSACTION_TIMEOUT: 10 * 60,
     },
     3: {
-        NAME_PROVIDER_URL: "https://provider.ropsten.oceanprotocol.com",
+        NAME_PROVIDER_URL: "https://v4.provider.ropsten.oceanprotocol.com",
         NETWORK_NAME: "ropsten",
         NAME_BLOCK_CONFIRMATIONS: 1,
         NAME_TRANSACTION_TIMEOUT: 10 * 60,
     },
     4: {
-        NAME_PROVIDER_URL: "https://provider.rinkeby.oceanprotocol.com",
+        NAME_PROVIDER_URL: "https://v4.provider.rinkeby.oceanprotocol.com",
         NETWORK_NAME: "rinkeby",
         NAME_BLOCK_CONFIRMATIONS: 1,
         NAME_TRANSACTION_TIMEOUT: 10 * 60,
     },
     56: {
-        NAME_PROVIDER_URL: "https://provider.bsc.oceanprotocol.com",
+        NAME_PROVIDER_URL: "https://v4.provider.bsc.oceanprotocol.com",
         NETWORK_NAME: "bsc",
         NAME_BLOCK_CONFIRMATIONS: 1,
         NAME_TRANSACTION_TIMEOUT: 10 * 60,
     },
     137: {
-        NAME_PROVIDER_URL: "https://provider.polygon.oceanprotocol.com",
+        NAME_PROVIDER_URL: "https://v4.provider.polygon.oceanprotocol.com",
         NETWORK_NAME: "polygon",
         NAME_BLOCK_CONFIRMATIONS: 15,
         NAME_TRANSACTION_TIMEOUT: 10 * 60,
     },
     246: {
-        NAME_PROVIDER_URL: "https://provider.energyweb.oceanprotocol.com",
+        NAME_PROVIDER_URL: "https://v4.provider.energyweb.oceanprotocol.com",
         NETWORK_NAME: "energyweb",
         NAME_BLOCK_CONFIRMATIONS: 3,
         NAME_TRANSACTION_TIMEOUT: 60,
     },
     1285: {
-        NAME_PROVIDER_URL: "https://provider.moonriver.oceanprotocol.com",
+        NAME_PROVIDER_URL: "https://v4.provider.moonriver.oceanprotocol.com",
         NETWORK_NAME: "moonriver",
         NAME_BLOCK_CONFIRMATIONS: 3,
         NAME_TRANSACTION_TIMEOUT: 60,
     },
     1287: {
-        NAME_PROVIDER_URL: "https://provider.moonbeamalpha.oceanprotocol.com",
+        NAME_PROVIDER_URL: "https://v4.provider.moonbase.oceanprotocol.com",
         NETWORK_NAME: "moonbeamalpha",
         NAME_BLOCK_CONFIRMATIONS: 3,
         NAME_TRANSACTION_TIMEOUT: 60,
@@ -91,7 +91,7 @@ CONFIG_NETWORK_HELPER = {
         NAME_TRANSACTION_TIMEOUT: 60,
     },
     80001: {
-        NAME_PROVIDER_URL: "https://provider.mumbai.oceanprotocol.com",
+        NAME_PROVIDER_URL: "https://v4.provider.mumbai.oceanprotocol.com",
         NETWORK_NAME: "mumbai",
         NAME_BLOCK_CONFIRMATIONS: 1,
     },
