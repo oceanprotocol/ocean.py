@@ -6,6 +6,7 @@
 """Storage module."""
 import os
 
+from enforce_typing import enforce_types
 from requests.models import Response
 
 from ocean_lib.config import Config
@@ -16,6 +17,8 @@ class StorageProvider:
 
     requests_session = get_requests_session()
 
+    @staticmethod
+    @enforce_types
     def upload(object_to_upload: bytes, storage_url: str) -> Response:
 
         response = StorageProvider.requests_session.post(
@@ -25,6 +28,8 @@ class StorageProvider:
         )
         return response
 
+    @staticmethod
+    @enforce_types
     def download(cid: str) -> Response:
         url = f"https://{cid}.ipfs.dweb.link/"
         response = StorageProvider.requests_session.get(
