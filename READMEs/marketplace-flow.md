@@ -154,7 +154,7 @@ from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 print(f"Price of 1 {erc20_token.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
 ```
 
-## 5. Bob buys data asset, and downloads it
+## 5. Bob buys data asset
 Now, you're Bob the data buyer.
 
 In the same Python console as before:

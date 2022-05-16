@@ -3,9 +3,9 @@ Copyright 2022 Ocean Protocol Foundation
 SPDX-License-Identifier: Apache-2.0
 -->
 
-# Quickstart: Marketplace Flow
+# Quickstart: Consume Flow
 
-This quickstart describes a batteries-included flow including using off-chain services for metadata (Aquarius) and consuming datasets (Provider).
+This quickstart describes how data is consumed / downloaded, including metadata.
 
 It focuses on Alice's experience as a publisher, and Bob's experience as a consumer.
 
@@ -84,7 +84,7 @@ print(f"did = '{did}'")
 
 ```
 
-## 3. Bob buys data asset, and downloads it
+## 3. Bob downloads the dataset
 Now, you're Bob the data consumer.
 In usual cases, Bob buys the dataset but here, let's have Alice send hhim some tokens directly.
 
@@ -103,7 +103,7 @@ assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
 assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
 
-# Mint 1 ERC20 token in consumer wallet from publisher, instead of performing a buy.
+# Mint 1 ERC20 token in consumer wallet from publisher
 erc20_token = ocean.get_datatoken(asset.datatokens[0]["address"])
 erc20_token.mint(
     account_address=bob_wallet.address,
