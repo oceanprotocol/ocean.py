@@ -17,11 +17,11 @@ def test_script_execution(script, monkeypatch):
 
     if (
         "developers" in script.name
-        or "datatokens-flow" in script.name
+        or "data-nfts-and-datatokens-flow" in script.name
         or "c2d-flow-more-examples" in script.name
     ):
         # developers.md skipped because it does not have end-to-end Python snippets, just console
-        # datatokens-flow.md skipped because it is run as a prerequisite for the others, so it is tested implicitly
+        # data-nfts-and-datatokens-flow.md skipped because it is run as a prerequisite for the others, so it is tested implicitly
         # c2d-flow-more-examples skipped because it can not be parsed separately from c2d-flow
         return
 
@@ -32,7 +32,6 @@ def test_script_execution(script, monkeypatch):
 
     runs_with_prerequisites = [
         "c2d-flow",
-        "datatokens-flow",
         "dispenser-flow",
         "erc20-enterprise",
         "fixed-rate-exchange-flow",
@@ -46,7 +45,9 @@ def test_script_execution(script, monkeypatch):
     for item in runs_with_prerequisites:
         if item in script.name:
             prerequisite = pathlib.Path(
-                __file__, "..", "generated-readmes/test_datatokens-flow.py"
+                __file__,
+                "..",
+                "generated-readmes/test_data-nfts-and-datatokens-flow.py",
             )
             result = runpy.run_path(str(prerequisite), run_name="__main__")
             for key in [

@@ -26,7 +26,7 @@ Let's go through each step.
 
 ### First steps
 
-To get started with this guide, please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+To get started with this guide, please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
 - [x] Setup : Prerequisites
 - [x] Setup : Download barge and run services
 - [x] Setup : Install the library from v4 sources
@@ -50,14 +50,14 @@ Check out the Ocean Market webapp at http://localhost:8000.
 Ocean Market is a graphical interface to the backend smart contracts and Ocean services (Aquarius, Provider). The following steps will interface to the backend in a different fashion: using the command-line / console, and won't need Ocean Market. But it's good to understand there are multiple views.
 ### Set envvars
 
-Set the required enviroment variables as described in [datatokens-flow](datatokens-flow.md):
+Set the required enviroment variables as described in [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md):
 - [x] Setup : Set envvars
 
 ## 2. Publish Data NFT & Datatoken
 
 In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
 
-Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
 - [x] 2.1 Create an ERC721 data NFT
 
 Then in the same python console:
