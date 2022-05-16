@@ -37,6 +37,7 @@ NAME_BLOCK_CONFIRMATIONS = "block_confirmations"
 NAME_METADATA_CACHE_URI = "metadata_cache_uri"
 NAME_AQUARIUS_URL = "aquarius.url"
 NAME_PROVIDER_URL = "provider.url"
+NAME_STORAGE_URL = "storage.url"
 NAME_TRANSACTION_TIMEOUT = "transaction_timeout"
 
 NAME_OCEAN_ADDRESS = "OCEAN.address"
@@ -290,6 +291,11 @@ class Config(configparser.ConfigParser):
         Ethereum address of service provider
         """
         return self.get(SECTION_RESOURCES, NAME_PROVIDER_ADDRESS)
+
+    @property
+    @enforce_types
+    def storage_url(self) -> str:
+        return self.get(SECTION_RESOURCES, NAME_STORAGE_URL)
 
     @property
     @enforce_types
