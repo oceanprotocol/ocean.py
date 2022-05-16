@@ -17,11 +17,12 @@ def test_script_execution(script, monkeypatch):
 
     if (
         "developers" in script.name
+        or "publish-flow" in script.name
         or "data-nfts-and-datatokens-flow" in script.name
         or "c2d-flow-more-examples" in script.name
     ):
         # developers.md skipped because it does not have end-to-end Python snippets, just console
-        # data-nfts-and-datatokens-flow.md skipped because it is run as a prerequisite for the others, so it is tested implicitly
+        # data-nfts-and-datatokens-flow.md and publish-flow skipped because it they run as prerequisites for the others, so they are tested implicitly
         # c2d-flow-more-examples skipped because it can not be parsed separately from c2d-flow
         return
 
@@ -72,9 +73,13 @@ def test_script_execution(script, monkeypatch):
                 "..",
                 "generated-readmes/test_publish-flow.py",
             )
-            result = runpy.run_path(str(prerequisite), run_name="__main__")
+            result = runpy.run_path(
+                str(prerequisite), run_name="__main__", init_globals=globs
+            )
             for key in [
                 "asset",
+                "ZERO_ADDRESS",
+                "did",
             ]:
                 globs[key] = result[key]
 
