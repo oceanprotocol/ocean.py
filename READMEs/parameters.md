@@ -21,8 +21,8 @@ First, in console:
 
 ```console
 export OCEAN_NETWORK_URL=https://rinkeby.infura.io/v3/<your Infura project id>
-export METADATA_CACHE_URI=https://aquarius.rinkeby.oceanprotocol.com
-export PROVIDER_URL=https://provider.rinkeby.oceanprotocol.com
+export METADATA_CACHE_URI=https://v4.aquarius.oceanprotocol.com
+export PROVIDER_URL=https://v4.provider.rinkeby.oceanprotocol.com
 ```
 
 Then, do the following in Python. The `Ocean` constructor takes a `dict`, which in turn is set by envvars.
@@ -58,8 +58,8 @@ First, in your working directory, create `config.ini` file and fill as follows:
     network = https://rinkeby.infura.io/v3/<your infura project id>
 
     [resources]
-    metadata_cache_uri = https://aquarius.rinkeby.oceanprotocol.com
-    provider.url = https://provider.rinkeby.oceanprotocol.com
+    metadata_cache_uri = https://v4.aquarius.oceanprotocol.com
+    provider.url = https://v4.provider.rinkeby.oceanprotocol.com
 ```
 
 Then, in Python:
