@@ -61,4 +61,21 @@ def test_script_execution(script, monkeypatch):
             ]:
                 globs[key] = result[key]
 
+    runs_with_publish = [
+        "marketplace-flow",
+        "consume-flow",
+    ]
+    for item in runs_with_publish:
+        if item in script.name:
+            prerequisite = pathlib.Path(
+                __file__,
+                "..",
+                "generated-readmes/test_publish-flow.py",
+            )
+            result = runpy.run_path(str(prerequisite), run_name="__main__")
+            for key in [
+                "asset",
+            ]:
+                globs[key] = result[key]
+
     runpy.run_path(str(script), run_name="__main__", init_globals=globs)
