@@ -46,11 +46,7 @@ class Service:
         self.additional_information = None
 
         if additional_information:
-            self.additional_information = {}
-            self._reserved_names = ["id", "type", "serviceEndpoint"]
-            for name, value in additional_information.items():
-                if name not in self._reserved_names:
-                    self.additional_information[name] = value
+            self.additional_information = additional_information
 
         if not name or not description:
             service_to_default_name = {
@@ -168,17 +164,7 @@ class Service:
             values["description"] = self.description
 
         if self.additional_information is not None:
-            additional_information = {}
-            for key, value in self.additional_information.items():
-                if isinstance(value, object) and hasattr(value, "as_dictionary"):
-                    value = value.as_dictionary()
-                elif isinstance(value, list):
-                    value = [
-                        v.as_dictionary() if hasattr(v, "as_dictionary") else v
-                        for v in value
-                    ]
-                additional_information[key] = value
-            values["additionalInformation"] = additional_information
+            values["additionalInformation"] = self.additional_information
 
         for key, value in values.items():
             if isinstance(value, object) and hasattr(value, "as_dictionary"):

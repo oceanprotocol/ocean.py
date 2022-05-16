@@ -48,6 +48,38 @@ def test_service():
 
 
 @pytest.mark.unit
+def test_additional_information():
+    """Tests a complex structure of additional information key."""
+    ddo_dict = get_sample_ddo()
+    service_dict = ddo_dict["services"][0]
+    service_dict["additionalInformation"] = [
+        "foo_info1",
+        {"key1": "value1", "key2": ["value2", "value3"]},
+    ]
+    sa = Service.from_dict(service_dict)
+
+    assert sa.additional_information == [
+        "foo_info1",
+        {"key1": "value1", "key2": ["value2", "value3"]},
+    ]
+
+    assert sa.as_dictionary() == {
+        "id": "1",
+        "type": "access",
+        "serviceEndpoint": "https://myprovider.com",
+        "datatokenAddress": "0x123",
+        "files": "0x0000",
+        "timeout": 0,
+        "name": "Download service",
+        "description": "Download service",
+        "additionalInformation": [
+            "foo_info1",
+            {"key1": "value1", "key2": ["value2", "value3"]},
+        ],
+    }
+
+
+@pytest.mark.unit
 def test_trusted_algo_functions(publisher_ocean_instance):
     algorithm_ddo = get_sample_algorithm_ddo(filename="ddo_algorithm2.json")
     algorithm_ddo.did = "did:op:123"
