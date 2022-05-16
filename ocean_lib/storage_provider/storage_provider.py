@@ -15,24 +15,25 @@ from ocean_lib.http_requests.requests_session import get_requests_session
 class StorageProvider:
     """StorageProvider class."""
 
-    requests_session = get_requests_session()
+    def __init__(self, config: Config) -> None:
+        self.config = config
+        self.storage_url = self.config.storage_url
+        self.requests_session = get_requests_session()
 
-    @staticmethod
     @enforce_types
-    def upload(object_to_upload: bytes, storage_url: str) -> Response:
+    def upload(self, object_to_upload: bytes) -> Response:
 
-        response = StorageProvider.requests_session.post(
-            storage_url,
+        response = self.requests_session.post(
+            self.storage_url,
             data={"file": object_to_upload},
             headers={"Authorization": "Bearer " + os.environ["WEB3_STORAGE_TOKEN"]},
         )
         return response
 
-    @staticmethod
     @enforce_types
     def download(cid: str) -> Response:
         url = f"https://{cid}.ipfs.dweb.link/"
-        response = StorageProvider.requests_session.get(
+        response = self.requests_session.get(
             url, timeout=20
         )
         return response        
