@@ -18,6 +18,7 @@ def test_service():
     """Tests that the get_cost function for ServiceAgreement returns the correct value."""
     ddo_dict = get_sample_ddo()
     service_dict = ddo_dict["services"][0]
+    service_dict["additionalInformation"] = {"message": "Sample DDO"}
     sa = Service.from_dict(service_dict)
 
     assert sa.id == "1"
@@ -25,6 +26,7 @@ def test_service():
     assert sa.type == "access"
     assert sa.service_endpoint == "https://myprovider.com"
     assert sa.datatoken == "0x123"
+    assert sa.additional_information == {"message": "Sample DDO"}
 
     assert sa.as_dictionary() == {
         "id": "1",
@@ -35,6 +37,7 @@ def test_service():
         "timeout": 0,
         "name": "Download service",
         "description": "Download service",
+        "additionalInformation": {"message": "Sample DDO"},
     }
 
     ddo_dict = get_sample_ddo()
@@ -42,6 +45,46 @@ def test_service():
     del service_dict["type"]
     with pytest.raises(IndexError):
         Service.from_dict(service_dict)
+
+
+@pytest.mark.unit
+def test_additional_information():
+    """Tests a complex structure of additional information key."""
+    ddo_dict = get_sample_ddo()
+    service_dict = ddo_dict["services"][0]
+    service_dict["additionalInformation"] = {
+        "message": "Sample DDO",
+        "some_list": ["a", "b", "c"],
+        "nested_dict": {"some_key": "value"},
+    }
+    sa = Service.from_dict(service_dict)
+
+    assert sa.additional_information == {
+        "message": "Sample DDO",
+        "some_list": ["a", "b", "c"],
+        "nested_dict": {"some_key": "value"},
+    }
+    assert sa.additional_information["message"] == "Sample DDO"
+    assert sa.additional_information["some_list"][0] == "a"
+    assert sa.additional_information["some_list"][1] == "b"
+    assert sa.additional_information["some_list"][2] == "c"
+    assert sa.additional_information["nested_dict"]["some_key"] == "value"
+
+    assert sa.as_dictionary() == {
+        "id": "1",
+        "type": "access",
+        "serviceEndpoint": "https://myprovider.com",
+        "datatokenAddress": "0x123",
+        "files": "0x0000",
+        "timeout": 0,
+        "name": "Download service",
+        "description": "Download service",
+        "additionalInformation": {
+            "message": "Sample DDO",
+            "some_list": ["a", "b", "c"],
+            "nested_dict": {"some_key": "value"},
+        },
+    }
 
 
 @pytest.mark.unit
