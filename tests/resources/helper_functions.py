@@ -529,13 +529,13 @@ def join_pool_one_side(web3, bpool, base_token, wallet, amt: int = 0):
     pool_token_out_balance = bpool.get_balance(
         base_token.address
     )  # pool base token balance
-    max_out_ratio = bpool.get_max_in_ratio()  # max ratio
+    max_in_ratio = bpool.get_max_in_ratio()  # max ratio
 
-    max_out_ratio_limit = int(from_wei(max_out_ratio) * pool_token_out_balance)
+    max_in_ratio_limit = int(from_wei(max_in_ratio) * pool_token_out_balance)
 
     web3.eth.wait_for_transaction_receipt(
         bpool.join_swap_extern_amount_in(
-            amt if amt else max_out_ratio_limit,
+            amt if amt else max_in_ratio_limit,
             to_wei("0"),
             wallet,
         )
