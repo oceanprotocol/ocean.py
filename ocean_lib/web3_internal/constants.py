@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -16,10 +16,10 @@ MIN_GAS_PRICE = 1000000000
 
 ZERO_ADDRESS = "0x0000000000000000000000000000000000000000"
 
-MAX_UINT256 = 2 ** 256 - 1
+MAX_UINT256 = 2**256 - 1
 
-MAX_INT256 = 2 ** 255 - 1
-MIN_INT256 = 2 ** 255 * -1
+MAX_INT256 = 2**255 - 1
+MIN_INT256 = 2**255 * -1
 
 DEFAULT_NETWORK_NAME = "ganache"
 NETWORK_NAME_MAP = {

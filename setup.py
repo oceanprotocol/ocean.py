@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -58,13 +58,12 @@ dev_requirements = [
     "pkginfo",
     "twine",
     "watchdog",
-    "flake8",
-    "isort",
-    "black==22.3.0",
+    "flake8==3.9.2",
+    "isort==5.10.1",
+    "black==22.1.0",
+    "licenseheaders==v0.8.8",
     "pre-commit",
-    # for the following: maybe needed, maybe not
     "pytest",
-    "licenseheaders",
     "pytest-env",
 ]
 

@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 from ocean_lib.models import balancer_constants
@@ -90,7 +90,7 @@ def test_complete_flow(
         maxAmountIn=to_wei(2),
         tokenOut_address=DT_address,
         tokenAmountOut=to_wei(1),
-        maxPrice=2 ** 255,
+        maxPrice=2**255,
         from_wallet=bob_wallet,
     )
 
@@ -121,7 +121,7 @@ def test_complete_flow(
         tokenAmountIn=to_wei(1),
         tokenOut_address=OCEAN_address,
         minAmountOut=to_wei("0.0001"),
-        maxPrice=2 ** 255,
+        maxPrice=2**255,
         from_wallet=alice_wallet,
     )
 

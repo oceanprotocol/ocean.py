@@ -1,8 +1,9 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+
 from ocean_lib.common.aquarius.aquarius import Aquarius
 from tests.resources.ddo_helpers import wait_for_ddo
 from tests.resources.helper_functions import get_publisher_wallet

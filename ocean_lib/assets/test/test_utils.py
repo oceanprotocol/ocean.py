@@ -1,10 +1,11 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 from unittest.mock import patch
 
 import pytest
+
 from ocean_lib.assets.did import DID
 from ocean_lib.assets.trusted_algorithms import (
     add_publisher_trusted_algorithm,

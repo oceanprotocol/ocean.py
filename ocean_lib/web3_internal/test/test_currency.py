@@ -1,10 +1,11 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 from decimal import Decimal, localcontext
 
 import pytest
+
 from ocean_lib.web3_internal.currency import (
     ETHEREUM_DECIMAL_CONTEXT,
     MAX_ETHER,

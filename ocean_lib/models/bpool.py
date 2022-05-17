@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
@@ -8,12 +8,13 @@ from typing import Optional, Tuple
 
 from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
+from web3.datastructures import AttributeDict
+from web3.main import Web3
+
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.btoken import BToken
 from ocean_lib.web3_internal.currency import from_wei
 from ocean_lib.web3_internal.wallet import Wallet
-from web3.datastructures import AttributeDict
-from web3.main import Web3
 
 logger = logging.getLogger(__name__)
 

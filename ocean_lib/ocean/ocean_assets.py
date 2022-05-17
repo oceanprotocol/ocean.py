@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -14,6 +14,8 @@ from typing import Optional, Tuple, Type, Union
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
 from eth_utils import add_0x_prefix, remove_0x_prefix
+from web3.main import Web3
+
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.asset_downloader import download_asset_files
 from ocean_lib.assets.asset_resolver import resolve_asset
@@ -43,7 +45,6 @@ from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
-from web3.main import Web3
 
 logger = logging.getLogger("ocean")
 

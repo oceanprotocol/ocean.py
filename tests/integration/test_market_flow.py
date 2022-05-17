@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -7,6 +7,7 @@ import os
 
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.common.agreements.service_types import ServiceTypes
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_metadata, get_registered_ddo
@@ -19,7 +20,6 @@ from tests.resources.helper_functions import (
     get_publisher_wallet,
     mint_tokens_and_wait,
 )
-from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 
 
 def test_market_flow():

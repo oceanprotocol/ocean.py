@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -10,7 +10,6 @@ import os
 import re
 from collections import namedtuple
 from decimal import Decimal
-from datetime import datetime
 from json import JSONDecodeError
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple, Union
@@ -19,6 +18,10 @@ from unittest.mock import Mock
 import requests
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
+from requests.exceptions import InvalidURL
+from requests.models import PreparedRequest, Response
+from requests.sessions import Session
+
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.config import Config
@@ -28,9 +31,6 @@ from ocean_lib.ocean.env_constants import ENV_PROVIDER_API_VERSION
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import sign_hash
 from ocean_lib.web3_internal.wallet import Wallet
-from requests.exceptions import InvalidURL
-from requests.models import PreparedRequest, Response
-from requests.sessions import Session
 
 logger = logging.getLogger(__name__)
 

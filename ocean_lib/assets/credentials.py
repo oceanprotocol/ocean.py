@@ -1,10 +1,11 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 from typing import Optional
 
 from enforce_typing import enforce_types
+
 from ocean_lib.common.agreements.consumable import ConsumableCodes, MalformedCredential
 
 

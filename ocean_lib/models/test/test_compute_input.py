@@ -1,8 +1,9 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import pytest
+
 from ocean_lib.models.compute_input import ComputeInput
 
 

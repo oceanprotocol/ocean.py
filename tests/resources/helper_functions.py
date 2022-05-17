@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -11,6 +11,7 @@ import time
 import coloredlogs
 import yaml
 from enforce_typing import enforce_types
+
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.ocean.ocean import Ocean

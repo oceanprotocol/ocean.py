@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 """DID Resolver module."""
@@ -10,10 +10,11 @@ import logging
 from typing import Optional
 
 from enforce_typing import enforce_types
+from web3.main import Web3
+
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
 from ocean_lib.models.data_token import DataToken
-from web3.main import Web3
 
 logger = logging.getLogger("keeper")
 

@@ -1,10 +1,11 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import os.path
 
 import pytest
+
 from ocean_lib.config import (
     NAME_ADDRESS_FILE,
     NAME_AQUARIUS_URL,
@@ -13,9 +14,9 @@ from ocean_lib.config import (
     deprecated_environ_names,
     environ_names_and_sections,
 )
-from ocean_lib.ocean.util import GANACHE_URL
 from ocean_lib.ocean.env_constants import ENV_CONFIG_FILE
 from ocean_lib.ocean.ocean import Ocean
+from ocean_lib.ocean.util import GANACHE_URL
 from tests.resources.ddo_helpers import get_resource_path
 
 

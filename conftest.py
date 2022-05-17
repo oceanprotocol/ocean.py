@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
@@ -7,6 +7,7 @@ import os
 import uuid
 
 import pytest
+
 from ocean_lib.common.aquarius.aquarius_provider import AquariusProvider
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether

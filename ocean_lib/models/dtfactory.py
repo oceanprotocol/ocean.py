@@ -1,14 +1,15 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
 
 from enforce_typing import enforce_types
-from ocean_lib.web3_internal.contract_base import ContractBase
-from ocean_lib.web3_internal.wallet import Wallet
 from web3.datastructures import AttributeDict
 from web3.logs import DISCARD
+
+from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.web3_internal.wallet import Wallet
 
 
 class DTFactory(ContractBase):

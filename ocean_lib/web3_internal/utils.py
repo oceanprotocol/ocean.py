@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
@@ -7,16 +7,17 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Any, List, Optional
 
-import artifacts
 from enforce_typing import enforce_types
 from eth_account.account import Account
 from eth_account.messages import encode_defunct
 from eth_keys import keys
 from eth_utils import big_endian_to_int, decode_hex
 from hexbytes.main import HexBytes
+from web3.main import Web3
+
+import artifacts
 from ocean_lib.web3_internal.constants import DEFAULT_NETWORK_NAME, NETWORK_NAME_MAP
 from ocean_lib.web3_internal.web3_overrides.signature import SignatureFix
-from web3.main import Web3
 
 Signature = namedtuple("Signature", ("v", "r", "s"))
 

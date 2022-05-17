@@ -1,12 +1,12 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
 import pytest
+
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_exchange import OceanExchange
-
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei, to_wei
 from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
