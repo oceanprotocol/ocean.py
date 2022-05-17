@@ -529,7 +529,7 @@ def join_pool_one_side(web3, bpool, base_token, wallet, amt: int = 0):
     pool_token_out_balance = bpool.get_balance(
         base_token.address
     )  # pool base token balance
-    max_out_ratio = bpool.get_max_out_ratio()  # max ratio
+    max_out_ratio = bpool.get_max_in_ratio()  # max ratio
 
     max_out_ratio_limit = int(from_wei(max_out_ratio) * pool_token_out_balance)
 
