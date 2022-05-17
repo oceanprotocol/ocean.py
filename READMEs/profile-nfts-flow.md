@@ -18,7 +18,7 @@ Here are the steps:
 
 ## 1. Setup
 
-From [datatokens-flow](datatokens-flow.md), do:
+From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] 1. Setup : Prerequisites
 - [x] 1. Setup : Download barge and run services
 - [x] 1. Setup : Install the library from v4 sources
@@ -30,7 +30,7 @@ And:
 
 In the console where you set envvars, do the following.
 
-From [datatokens-flow](datatokens-flow.md), do:
+From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 - [x] 2.1 Create an ERC721 data NFT
 
 ## 3. Alice adds key-value pair to data NFT. 'value' encrypted with a symmetric key 'symkey'
@@ -134,9 +134,9 @@ Possible ways for Alice to share an encrypted symkey, or for Dapp to share publi
 - Directly client-side
   - Client-side: in a browser with Metamask - [example by FELToken](https://betterprogramming.pub/exchanging-encrypted-data-on-blockchain-using-metamask-a2e65a9a896c). This is a good choice because it does no on-chain txs.
   - Client-side: in a script. Like done in step 4 above for public key
-- Over a public channel: 
+- Over a public channel:
   - Public channel: write a new key-value pair on the same data NFT. Like done in step 5 above for encrypted symkey. This is a good choice because the Dapp can access the info in future sessions without extra work.
   - Public channel: a new data NFT for each message
   - Public channel: traditional: http, email, or any messaging medium
-  
+
 
