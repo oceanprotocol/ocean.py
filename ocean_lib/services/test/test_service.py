@@ -52,16 +52,23 @@ def test_additional_information():
     """Tests a complex structure of additional information key."""
     ddo_dict = get_sample_ddo()
     service_dict = ddo_dict["services"][0]
-    service_dict["additionalInformation"] = [
-        "foo_info1",
-        {"key1": "value1", "key2": ["value2", "value3"]},
-    ]
+    service_dict["additionalInformation"] = {
+        "message": "Sample DDO",
+        "some_list": ["a", "b", "c"],
+        "nested_dict": {"some_key": "value"},
+    }
     sa = Service.from_dict(service_dict)
 
-    assert sa.additional_information == [
-        "foo_info1",
-        {"key1": "value1", "key2": ["value2", "value3"]},
-    ]
+    assert sa.additional_information == {
+        "message": "Sample DDO",
+        "some_list": ["a", "b", "c"],
+        "nested_dict": {"some_key": "value"},
+    }
+    assert sa.additional_information["message"] == "Sample DDO"
+    assert sa.additional_information["some_list"][0] == "a"
+    assert sa.additional_information["some_list"][1] == "b"
+    assert sa.additional_information["some_list"][2] == "c"
+    assert sa.additional_information["nested_dict"]["some_key"] == "value"
 
     assert sa.as_dictionary() == {
         "id": "1",
@@ -72,10 +79,11 @@ def test_additional_information():
         "timeout": 0,
         "name": "Download service",
         "description": "Download service",
-        "additionalInformation": [
-            "foo_info1",
-            {"key1": "value1", "key2": ["value2", "value3"]},
-        ],
+        "additionalInformation": {
+            "message": "Sample DDO",
+            "some_list": ["a", "b", "c"],
+            "nested_dict": {"some_key": "value"},
+        },
     }
 
 
