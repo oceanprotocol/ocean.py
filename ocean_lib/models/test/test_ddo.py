@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import lzma
@@ -7,6 +7,9 @@ import uuid
 
 import pytest
 from eth_utils import add_0x_prefix, remove_0x_prefix
+from web3.logs import DISCARD
+from web3.main import Web3
+
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.credentials import AddressCredential
 from ocean_lib.common.agreements.consumable import ConsumableCodes, MalformedCredential
@@ -17,8 +20,6 @@ from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.utils.utilities import checksum
 from tests.resources.ddo_helpers import get_resource_path
 from tests.resources.helper_functions import get_consumer_wallet, get_publisher_wallet
-from web3.logs import DISCARD
-from web3.main import Web3
 
 
 def get_ddo_sample(datatoken_address):

@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import time
@@ -8,6 +8,7 @@ from unittest.mock import patch
 
 import pytest
 from eth_utils import add_0x_prefix
+
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.did import DID, did_to_id
 from ocean_lib.common.agreements.consumable import ConsumableCodes

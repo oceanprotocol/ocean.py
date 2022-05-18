@@ -1,12 +1,15 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
-from typing import Optional, Tuple, Union, List
+from typing import List, Optional, Tuple, Union
 
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
+from web3.exceptions import ValidationError
+from web3.logs import DISCARD
+from web3.main import Web3
 
 from ocean_lib.config import Config
 from ocean_lib.exceptions import InsufficientBalance, VerifyTxFailed
@@ -16,9 +19,6 @@ from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.util import get_dtfactory_address
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
 from ocean_lib.web3_internal.wallet import Wallet
-from web3.exceptions import ValidationError
-from web3.logs import DISCARD
-from web3.main import Web3
 
 
 class OceanExchange:

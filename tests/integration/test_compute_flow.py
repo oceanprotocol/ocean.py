@@ -1,10 +1,12 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import time
 
 import pytest
+from web3.logs import DISCARD
+
 from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.models.compute_input import ComputeInput
@@ -27,7 +29,6 @@ from tests.resources.helper_functions import (
     get_publisher_ocean_instance,
     get_publisher_wallet,
 )
-from web3.logs import DISCARD
 
 
 class Setup:

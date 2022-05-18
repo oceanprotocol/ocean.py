@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 """
@@ -11,6 +11,8 @@
 import secrets
 
 import pytest
+from web3 import Web3
+
 from ocean_lib.assets.did import (
     DID,
     OCEAN_PREFIX,
@@ -19,7 +21,6 @@ from ocean_lib.assets.did import (
     did_to_id_bytes,
     id_to_did,
 )
-from web3 import Web3
 
 TEST_SERVICE_TYPE = "ocean-meta-storage"
 TEST_SERVICE_URL = "http://localhost:8005"

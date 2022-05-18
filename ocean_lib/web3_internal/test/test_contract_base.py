@@ -1,14 +1,15 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
 import pytest
 from enforce_typing import enforce_types
+from web3.contract import ContractCaller
+
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
-from web3.contract import ContractCaller
 
 
 @enforce_types

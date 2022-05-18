@@ -1,15 +1,16 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
 import json
 import os
 
+from requests.models import PreparedRequest
+
 from ocean_lib.common.agreements.service_types import ServiceTypes
 from ocean_lib.common.http_requests.requests_session import get_requests_session
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider, logger
-from requests.models import PreparedRequest
 
 
 class DataProviderMock(DataServiceProvider):

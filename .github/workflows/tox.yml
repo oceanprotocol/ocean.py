@@ -1,5 +1,5 @@
 ##
-## Copyright 2021 Ocean Protocol Foundation
+## Copyright 2022 Ocean Protocol Foundation
 ## SPDX-License-Identifier: Apache-2.0
 ##
 name: Ocean.py tests
@@ -24,6 +24,7 @@ jobs:
         with:
           repository: "oceanprotocol/barge"
           path: 'barge'
+          ref: v3
       - name: Run Barge
         working-directory: ${{ github.workspace }}/barge
         env:

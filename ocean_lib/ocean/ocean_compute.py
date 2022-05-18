@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
@@ -7,6 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple, Type, Union
 
 from enforce_typing import enforce_types
 from eth_account.messages import encode_defunct
+
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.assets.trusted_algorithms import create_publisher_trusted_algorithms

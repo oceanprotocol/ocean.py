@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 """
@@ -22,11 +22,11 @@ GASLIMIT_BFACTORY_NEWMPOOL = 5000000  # from ref above
 
 # from contracts/BConst.sol
 # FIXME: grab info directly from contract
-BCONST_BONE = 10 ** 18
+BCONST_BONE = 10**18
 BCONST_MIN_WEIGHT = BCONST_BONE  # Enforced in BPool.sol
 BCONST_MAX_WEIGHT = BCONST_BONE * 50  # ""
 BCONST_MAX_TOTAL_WEIGHT = BCONST_BONE * 50  # ""
-BCONST_MIN_BALANCE = int(BCONST_BONE / 10 ** 12)  # "". value is 10**6
+BCONST_MIN_BALANCE = int(BCONST_BONE / 10**12)  # "". value is 10**6
 
 INIT_WEIGHT_DT = to_wei(9)
 INIT_WEIGHT_OCEAN = to_wei(1)

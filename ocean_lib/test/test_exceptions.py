@@ -1,11 +1,12 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import uuid
 from unittest.mock import patch
 
 import pytest
+
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS

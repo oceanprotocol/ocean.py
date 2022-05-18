@@ -1,14 +1,15 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 from unittest.mock import patch
 
 import pytest
+from web3.exceptions import TimeExhausted
+
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.web3_internal.currency import to_wei
-from web3.exceptions import TimeExhausted
 
 
 def test_data_token_creation(web3, alice_wallet, dtfactory_address):

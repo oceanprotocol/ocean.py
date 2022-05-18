@@ -1,11 +1,14 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import logging
 from decimal import Decimal
 
 from enforce_typing import enforce_types
+from scipy.interpolate import interp1d
+from web3.main import Web3
+
 from ocean_lib.exceptions import InsufficientBalance, VerifyTxFailed
 from ocean_lib.models import balancer_constants
 from ocean_lib.models.bfactory import BFactory
@@ -15,8 +18,6 @@ from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.dtfactory import DTFactory
 from ocean_lib.web3_internal.currency import from_wei, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
-from scipy.interpolate import interp1d
-from web3.main import Web3
 
 logger = logging.getLogger(__name__)
 
@@ -321,7 +322,7 @@ class OceanPool:
             maxAmountIn=max_OCEAN_amount,  # ""
             tokenOut_address=dtoken_address,  # leaving pool
             tokenAmountOut=amount,  # ""
-            maxPrice=2 ** 255,  # here we limit by max_num_OCEAN, not price
+            maxPrice=2**255,  # here we limit by max_num_OCEAN, not price
             from_wallet=from_wallet,
         )
 
@@ -356,7 +357,7 @@ class OceanPool:
             tokenAmountIn=amount,  # ""
             tokenOut_address=self.ocean_address,  # leaving pool
             minAmountOut=min_OCEAN_amount,  # ""
-            maxPrice=2 ** 255,  # here we limit by max_num_OCEAN, not price
+            maxPrice=2**255,  # here we limit by max_num_OCEAN, not price
             from_wallet=from_wallet,
         )
 

@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
@@ -8,12 +8,13 @@ import time
 from unittest.mock import patch
 
 import pytest
+from web3.exceptions import TimeExhausted, TransactionNotFound
+
 from ocean_lib.assets.asset import V3Asset
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_resource_path
-from web3.exceptions import TimeExhausted, TransactionNotFound
 
 
 def test_ERC20(alice_ocean, alice_wallet, alice_address, bob_wallet, bob_address):

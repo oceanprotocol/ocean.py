@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 """
@@ -12,6 +12,7 @@ from typing import Any, Dict, Optional
 from urllib.parse import urlparse
 
 from enforce_typing import enforce_types
+
 from ocean_lib.common.agreements.service_types import ServiceTypes, ServiceTypesIndices
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 

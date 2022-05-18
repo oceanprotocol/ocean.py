@@ -1,5 +1,5 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
@@ -9,6 +9,8 @@ from typing import Dict, List, Optional, Type, Union
 
 from enforce_typing import enforce_types
 from eth_utils import remove_0x_prefix
+from web3.datastructures import AttributeDict
+
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.data_token import DataToken
@@ -29,7 +31,6 @@ from ocean_lib.ocean.util import (
 )
 from ocean_lib.web3_internal.utils import get_network_name
 from ocean_lib.web3_internal.wallet import Wallet
-from web3.datastructures import AttributeDict
 
 logger = logging.getLogger("ocean")
 

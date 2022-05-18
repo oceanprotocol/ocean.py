@@ -1,11 +1,12 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+from web3.exceptions import ValidationError
+
 from ocean_lib.models.data_token import DataToken
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.web3_internal.currency import from_wei, to_wei
-from web3.exceptions import ValidationError
 
 
 def run_failing_tx(contract, fn, *args):

@@ -1,13 +1,13 @@
 #
-# Copyright 2021 Ocean Protocol Foundation
+# Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
 
 from ocean_lib.config import (
     DEFAULT_METADATA_CACHE_URI,
     DEFAULT_PROVIDER_URL,
-    SECTION_ETH_NETWORK,
     METADATA_CACHE_URI,
+    SECTION_ETH_NETWORK,
 )
 from ocean_lib.example_config import NETWORK_NAME, ExampleConfig
 
