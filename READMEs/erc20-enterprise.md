@@ -108,13 +108,45 @@ OCEAN_token.approve(
 )
 
 # Prepare data for order
-v, r, s, provider_data = ocean.build_compute_provider_fees(
-    provider_data={"timeout": 0},
-    provider_fee_address=alice_wallet.address,
-    provider_fee_token=OCEAN_token.address,
-    provider_fee_amount=0,
-    valid_until=1958133628,  # 2032
+date_created = "2021-12-28T10:55:11Z"
+
+metadata = {
+    "created": date_created,
+    "updated": date_created,
+    "description": "Branin dataset",
+    "name": "Branin dataset",
+    "type": "dataset",
+    "author": "Trent",
+    "license": "CC0: PublicDomain",
+}
+
+# ocean.py offers multiple file types, but a simple url file should be enough for this example
+from ocean_lib.structures.file_objects import UrlFile
+url_file = UrlFile(
+    url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
 )
+
+# Encrypt file(s) using provider
+encrypted_files = ocean.assets.encrypt_files([url_file])
+
+# Retrieve provider fee
+(
+    provider_fee_address,
+    provider_fee_token,
+    provider_fee_amount,
+    v,
+    r,
+    s,
+    valid_until,
+    provider_data,
+) = ocean.retrieve_provider_fees(
+    metadata=metadata,
+    publisher_wallet=alice_wallet,
+    encrypted_files=encrypted_files,
+    erc721_nft=erc721_nft,
+    erc20_token=erc20_enterprise_token
+)
+
 
 initial_bob_balance = OCEAN_token.balanceOf(bob_wallet.address)
 
@@ -186,12 +218,43 @@ exchange_id = ocean.create_fixed_rate(
 )
 
 # Prepare data for order
-v, r, s, provider_data = ocean.build_compute_provider_fees(
-    provider_data={"timeout": 0},
-    provider_fee_address=alice_wallet.address,
-    provider_fee_token=OCEAN_token.address,
-    provider_fee_amount=0,
-    valid_until=1958133628,  # 2032
+date_created = "2021-12-28T10:55:11Z"
+
+metadata = {
+    "created": date_created,
+    "updated": date_created,
+    "description": "Branin dataset",
+    "name": "Branin dataset",
+    "type": "dataset",
+    "author": "Trent",
+    "license": "CC0: PublicDomain",
+}
+
+# ocean.py offers multiple file types, but a simple url file should be enough for this example
+from ocean_lib.structures.file_objects import UrlFile
+url_file = UrlFile(
+    url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
+)
+
+# Encrypt file(s) using provider
+encrypted_files = ocean.assets.encrypt_files([url_file])
+
+# Retrieve provider fee
+(
+    provider_fee_address,
+    provider_fee_token,
+    provider_fee_amount,
+    v,
+    r,
+    s,
+    valid_until,
+    provider_data,
+) = ocean.retrieve_provider_fees(
+    metadata=metadata,
+    publisher_wallet=alice_wallet,
+    encrypted_files=encrypted_files,
+    erc721_nft=erc721_nft,
+    erc20_token=erc20_enterprise_token
 )
 
 erc20_enterprise_token.mint(alice_wallet.address, ocean.to_wei(20), alice_wallet)
@@ -220,13 +283,13 @@ OCEAN_token.approve(
 tx_id = erc20_enterprise_token.buy_from_fre_and_order(
     consumer=bob_wallet.address,
     service_index=1,
-    provider_fee_address=alice_wallet.address,
-    provider_fee_token=OCEAN_token.address,
-    provider_fee_amount=0,
+    provider_fee_address=provider_fee_address,
+    provider_fee_token=provider_fee_token,
+    provider_fee_amount=provider_fee_amount,
     v=v,
     r=r,
     s=s,
-    valid_until=1958133628,
+    valid_until=valid_until,
     provider_data=provider_data,
     consume_market_order_fee_address=bob_wallet.address,
     consume_market_order_fee_token=erc20_enterprise_token.address,

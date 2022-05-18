@@ -2,18 +2,17 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
-
 import pytest
 from web3 import exceptions
-from web3.main import Web3
 
+from ocean_lib.agreements.service_types import ServiceTypes
+from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
-from ocean_lib.web3_internal.utils import split_signature
+from tests.resources.ddo_helpers import create_basics, get_first_service_by_type
 from tests.resources.helper_functions import get_address_of_type
 
 
@@ -24,7 +23,9 @@ def test_buy_from_dispenser_and_order(
     publisher_wallet,
     consumer_wallet,
     factory_deployer_wallet,
+    erc721_nft,
     erc20_enterprise_token,
+    publisher_ocean_instance,
 ):
     """Tests buy_from_dispenser_and_order function of the ERC20 Enterprise"""
     mock_usdc_contract = ERC20Token(web3, get_address_of_type(config, "MockUSDC"))
@@ -95,24 +96,22 @@ def test_buy_from_dispenser_and_order(
         from_wallet=publisher_wallet,
     )
 
-    provider_fee_address = publisher_wallet.address
-    provider_fee_token = mock_dai_contract.address
-    provider_fee_amount = 0
-    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
-    valid_until = 1958133628  # 2032
-
-    message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256", "uint256"],
-        [
-            Web3.toHex(Web3.toBytes(text=provider_data)),
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
-            valid_until,
-        ],
+    data_provider = DataServiceProvider
+    _, metadata, encrypted_files = create_basics(config, web3, data_provider)
+    ddo = publisher_ocean_instance.assets.create(
+        metadata=metadata,
+        publisher_wallet=publisher_wallet,
+        encrypted_files=encrypted_files,
+        erc721_address=erc721_nft.address,
+        deployed_erc20_tokens=[erc20_enterprise_token],
     )
-    signed = web3.eth.sign(provider_fee_address, data=message)
-    signature = split_signature(signed)
+    access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
+
+    initialize_response = data_provider.initialize(
+        ddo.did, access_service, consumer_address=publisher_wallet.address
+    )
+    initialize_data = initialize_response.json()
+    provider_fees = initialize_data["providerFee"]
 
     opf_collector_address = get_address_of_type(config, "OPFCommunityFeeCollector")
 
@@ -122,14 +121,14 @@ def test_buy_from_dispenser_and_order(
     tx = erc20_enterprise_token.buy_from_dispenser_and_order(
         consumer=consume_fee_address,
         service_index=1,
-        provider_fee_address=provider_fee_address,
-        provider_fee_token=provider_fee_token,
-        provider_fee_amount=provider_fee_amount,
-        v=signature.v,
-        r=signature.r,
-        s=signature.s,
-        valid_until=valid_until,
-        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
+        provider_fee_address=provider_fees["providerFeeAddress"],
+        provider_fee_token=provider_fees["providerFeeToken"],
+        provider_fee_amount=provider_fees["providerFeeAmount"],
+        v=provider_fees["v"],
+        r=provider_fees["r"],
+        s=provider_fees["s"],
+        valid_until=provider_fees["validUntil"],
+        provider_data=provider_fees["providerData"],
         consume_market_order_fee_address=consume_fee_address,
         consume_market_order_fee_token=mock_dai_contract.address,
         consume_market_order_fee_amount=0,
@@ -161,7 +160,9 @@ def test_buy_from_fre_and_order(
     consumer_wallet,
     factory_deployer_wallet,
     another_consumer_wallet,
+    erc721_nft,
     erc20_enterprise_token,
+    publisher_ocean_instance,
 ):
     """Tests buy_from_fre_and_order function of the ERC20 Enterprise"""
     mock_usdc_contract = ERC20Token(web3, get_address_of_type(config, "MockUSDC"))
@@ -245,25 +246,22 @@ def test_buy_from_fre_and_order(
         amount=consume_fee_amount,
         from_wallet=publisher_wallet,
     )
-
-    provider_fee_address = publisher_wallet.address
-    provider_fee_token = mock_dai_contract.address
-    provider_fee_amount = 0
-    provider_data = json.dumps({"timeout": 0}, separators=(",", ":"))
-    valid_until = 1958133628  # 2032
-
-    message = Web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256", "uint256"],
-        [
-            Web3.toHex(Web3.toBytes(text=provider_data)),
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
-            valid_until,
-        ],
+    data_provider = DataServiceProvider
+    _, metadata, encrypted_files = create_basics(config, web3, data_provider)
+    ddo = publisher_ocean_instance.assets.create(
+        metadata=metadata,
+        publisher_wallet=publisher_wallet,
+        encrypted_files=encrypted_files,
+        erc721_address=erc721_nft.address,
+        deployed_erc20_tokens=[erc20_enterprise_token],
     )
-    signed = web3.eth.sign(provider_fee_address, data=message)
-    signature = split_signature(signed)
+    access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
+
+    initialize_response = data_provider.initialize(
+        ddo.did, access_service, consumer_address=publisher_wallet.address
+    )
+    initialize_data = initialize_response.json()
+    provider_fees = initialize_data["providerFee"]
 
     balance_consume_before = mock_dai_contract.balanceOf(consume_fee_address)
     balance_publish_before = mock_usdc_contract.balanceOf(consumer_wallet.address)
@@ -274,14 +272,14 @@ def test_buy_from_fre_and_order(
     tx = erc20_enterprise_token.buy_from_fre_and_order(
         consumer=another_consumer_wallet.address,
         service_index=1,
-        provider_fee_address=publisher_wallet.address,
-        provider_fee_token=provider_fee_token,
-        provider_fee_amount=provider_fee_amount,
-        v=signature.v,
-        r=signature.r,
-        s=signature.s,
-        valid_until=valid_until,
-        provider_data=Web3.toHex(Web3.toBytes(text=provider_data)),
+        provider_fee_address=provider_fees["providerFeeAddress"],
+        provider_fee_token=provider_fees["providerFeeToken"],
+        provider_fee_amount=provider_fees["providerFeeAmount"],
+        v=provider_fees["v"],
+        r=provider_fees["r"],
+        s=provider_fees["s"],
+        valid_until=provider_fees["validUntil"],
+        provider_data=provider_fees["providerData"],
         consume_market_order_fee_address=consume_fee_address,
         consume_market_order_fee_token=mock_dai_contract.address,
         consume_market_order_fee_amount=0,
