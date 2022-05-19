@@ -491,7 +491,4 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
 
     @enforce_types
     def check_nft(self, nft_address: str) -> bool:
-        import pdb
-
-        pdb.set_trace()
         return self.contract.caller.erc721List(nft_address) == nft_address
