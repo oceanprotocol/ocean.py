@@ -55,7 +55,7 @@ class FactoryRouter(BFactory):
 
     @enforce_types
     def get_opc_collector(self) -> str:
-        return self.contract.callser.getOPCCollector()
+        return self.contract.caller.getOPCCollector()
 
     @enforce_types
     def get_opc_fee(self, base_token: str) -> int:
