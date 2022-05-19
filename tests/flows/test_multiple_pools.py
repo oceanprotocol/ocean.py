@@ -23,7 +23,6 @@ from tests.flows.test_exchange_swap_fees import (
 )
 from tests.resources.helper_functions import (
     base_token_to_datatoken,
-    deploy_erc721_erc20,
     transfer_base_token_if_balance_lte,
 )
 
@@ -35,11 +34,13 @@ def test_create_pool_and_exchange(
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
     another_consumer_wallet: Wallet,
+    erc20_token: ERC20Token,
 ):
     """
     Test interactions between pools, exchange, and dispenser.
     """
     bt = ERC20Token(web3, get_address_of_type(config, "Ocean"))
+    dt = erc20_token
 
     transfer_base_token_if_balance_lte(
         web3=web3,
@@ -58,8 +59,6 @@ def test_create_pool_and_exchange(
         min_balance=parse_units("1500", bt.decimals()),
         amount_to_transfer=parse_units("1500", bt.decimals()),
     )
-
-    _, dt = deploy_erc721_erc20(web3, config, publisher_wallet, publisher_wallet)
 
     # Create Pool
     publish_market_swap_fee = to_wei("0.003")

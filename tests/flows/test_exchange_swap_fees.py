@@ -21,7 +21,6 @@ from ocean_lib.web3_internal.currency import MAX_WEI, from_wei, parse_units, to_
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import (
     base_token_to_datatoken,
-    deploy_erc721_erc20,
     transfer_base_token_if_balance_lte,
 )
 
@@ -59,6 +58,7 @@ def test_exchange_swap_fees(
     another_consumer_wallet: Wallet,
     publisher_wallet: Wallet,
     base_token_name: str,
+    erc20_token: ERC20Token,
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     bt_per_dt: str,
@@ -79,6 +79,7 @@ def test_exchange_swap_fees(
         consume_market_swap_fee_collector=another_consumer_wallet,
         publisher_wallet=publisher_wallet,
         base_token_name=base_token_name,
+        datatoken=erc20_token,
         publish_market_swap_fee=publish_market_swap_fee,
         consume_market_swap_fee=consume_market_swap_fee,
         bt_per_dt=bt_per_dt,
@@ -94,12 +95,14 @@ def exchange_swap_fees(
     consume_market_swap_fee_collector: Wallet,
     publisher_wallet: Wallet,
     base_token_name: str,
+    datatoken: ERC20Token,
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     bt_per_dt: str,
     with_mint: int,
 ):
     bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
+    dt = datatoken
 
     transfer_base_token_if_balance_lte(
         web3=web3,
@@ -118,8 +121,6 @@ def exchange_swap_fees(
         min_balance=parse_units("1500", bt.decimals()),
         amount_to_transfer=parse_units("1500", bt.decimals()),
     )
-
-    _, dt = deploy_erc721_erc20(web3, config, publisher_wallet, publisher_wallet)
 
     publish_market_swap_fee = to_wei(publish_market_swap_fee)
     consume_market_swap_fee = to_wei(consume_market_swap_fee)

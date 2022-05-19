@@ -25,7 +25,6 @@ from tests.resources.helper_functions import (
     approx_format_units,
     approx_from_wei,
     base_token_to_datatoken,
-    deploy_erc721_erc20,
     get_address_of_type,
     transfer_base_token_if_balance_lte,
 )
@@ -61,6 +60,7 @@ def test_pool_swap_fees(
     another_consumer_wallet: Wallet,
     publisher_wallet: Wallet,
     base_token_name: str,
+    erc20_token: ERC20Token,
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     lp_swap_fee: str,
@@ -81,6 +81,7 @@ def test_pool_swap_fees(
         consume_market_swap_fee_collector=another_consumer_wallet,
         publisher_wallet=publisher_wallet,
         base_token_name=base_token_name,
+        datatoken=erc20_token,
         publish_market_swap_fee=publish_market_swap_fee,
         consume_market_swap_fee=consume_market_swap_fee,
         lp_swap_fee=lp_swap_fee,
@@ -96,12 +97,14 @@ def pool_swap_fees(
     consume_market_swap_fee_collector: Wallet,
     publisher_wallet: Wallet,
     base_token_name: str,
+    datatoken: ERC20Token,
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     lp_swap_fee: str,
     dt_per_bt: str,
 ):
     bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
+    dt = datatoken
 
     transfer_base_token_if_balance_lte(
         web3=web3,
@@ -120,8 +123,6 @@ def pool_swap_fees(
         min_balance=parse_units("500", bt.decimals()),
         amount_to_transfer=parse_units("500", bt.decimals()),
     )
-
-    _, dt = deploy_erc721_erc20(web3, config, publisher_wallet, publisher_wallet)
 
     # Tests publisher calls deployPool(), we then check base token balance and fees
 
