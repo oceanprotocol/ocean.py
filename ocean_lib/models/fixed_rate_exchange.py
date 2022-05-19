@@ -100,7 +100,7 @@ class FixedRateExchange(ContractBase):
         return self.events.MarketFeeCollected()
 
     @enforce_types
-    def get_router(self) -> str:
+    def router(self) -> str:
         return self.contract.caller.router()
 
     @enforce_types

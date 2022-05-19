@@ -19,6 +19,7 @@ from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import MAX_WEI, from_wei, parse_units, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
+from tests.resources.ddo_helpers import get_opc_collector_address_from_exchange
 from tests.resources.helper_functions import (
     base_token_to_datatoken,
     transfer_base_token_if_balance_lte,
@@ -508,7 +509,7 @@ def collect_fee_and_verify_balances(
         fee_collector = fees_info[FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR]
     else:
         method = exchange.collect_ocean_fee
-        fee_collector = exchange.opc_collector()
+        fee_collector = get_opc_collector_address_from_exchange(exchange)
 
     fee_collector_bt_balance_before = bt.balanceOf(fee_collector)
 

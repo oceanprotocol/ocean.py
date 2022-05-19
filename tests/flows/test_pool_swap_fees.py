@@ -21,6 +21,7 @@ from ocean_lib.web3_internal.currency import (
     to_wei,
 )
 from ocean_lib.web3_internal.wallet import Wallet
+from tests.resources.ddo_helpers import get_opc_collector_address_from_pool
 from tests.resources.helper_functions import (
     approx_format_units,
     approx_from_wei,
@@ -166,9 +167,9 @@ def pool_swap_fees(
     assert bpool.is_finalized()
 
     # Verify fee collectors are configured correctly
-    assert FactoryRouter(
-        web3, ERC20Token(web3, bpool.get_datatoken_address()).router()
-    ).get_opc_collector() == get_address_of_type(config, "OPFCommunityFeeCollector")
+    get_opc_collector_address_from_pool(bpool) == get_address_of_type(
+        config, "OPFCommunityFeeCollector"
+    )
     assert bpool.get_publish_market_collector() == publisher_wallet.address
 
     # Verify fees are configured correctly
@@ -908,7 +909,7 @@ def collect_fee_and_verify_balances(
         event_name = bpool.EVENT_PUBLISH_MARKET_FEE
         get_bpool_fee_balance = bpool.publish_market_fee
     else:
-        fee_collector = bpool.get_opc_collector()
+        fee_collector = get_opc_collector_address_from_pool(bpool)
         event_name = bpool.EVENT_OPC_FEE
         get_bpool_fee_balance = bpool.community_fee
 
