@@ -110,6 +110,11 @@ def test_get_opc_fee(config: Config, factory_router: FactoryRouter):
 
 
 @pytest.mark.unit
+def test_get_opc_fees(factory_router: FactoryRouter):
+    assert factory_router.get_opc_fees() == [to_wei("0.001"), to_wei("0.002")]
+
+
+@pytest.mark.unit
 def test_get_opc_consume_fee(factory_router: FactoryRouter):
     assert factory_router.get_opc_consume_fee() == to_wei("0.03")
 

@@ -27,9 +27,5 @@ class BFactory(ContractBase):
         return self.events.PoolTemplateRemoved()
 
     @enforce_types
-    def opc_collector(self) -> str:
-        return self.contract.caller.opcCollector()
-
-    @enforce_types
     def is_pool_template(self, pool_template) -> bool:
         return self.contract.caller.isPoolTemplate(pool_template)

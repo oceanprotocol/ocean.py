@@ -100,10 +100,6 @@ class FixedRateExchange(ContractBase):
         return self.events.MarketFeeCollected()
 
     @enforce_types
-    def opc_collector(self) -> str:
-        return self.contract.caller.opcCollector()
-
-    @enforce_types
     def get_opc_fee(self, base_token: str) -> int:
         return self.contract.caller.getOPCFee(base_token)
 

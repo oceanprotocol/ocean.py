@@ -165,10 +165,6 @@ class BPool(BTokenBase):
         return self.contract.caller.getFinalTokens()
 
     @enforce_types
-    def get_opc_collector(self) -> str:
-        return self.contract.caller._opcCollector()
-
-    @enforce_types
     def get_publish_market_collector(self) -> str:
         return self.contract.caller._publishMarketCollector()
 

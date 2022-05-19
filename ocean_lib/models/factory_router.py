@@ -2,7 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import List, Union
+from typing import List, Tuple, Union
 
 from enforce_typing import enforce_types
 
@@ -26,15 +26,15 @@ class FactoryRouter(BFactory):
         return self.contract.caller.routerOwner()
 
     @enforce_types
-    def factory(self):
+    def factory(self) -> str:
         return self.contract.caller.factory()
 
     @enforce_types
-    def swap_ocean_fee(self):
+    def swap_ocean_fee(self) -> int:
         return self.contract.caller.swapOceanFee()
 
     @enforce_types
-    def swap_non_ocean_fee(self):
+    def swap_non_ocean_fee(self) -> int:
         return self.contract.caller.swapNonOceanFee()
 
     @enforce_types
@@ -54,8 +54,17 @@ class FactoryRouter(BFactory):
         return self.contract.caller.isDispenserContract(address)
 
     @enforce_types
+    def get_opc_collector(self) -> str:
+        return self.contract.callser.getOPCCollector()
+
+    @enforce_types
     def get_opc_fee(self, base_token: str) -> int:
         return self.contract.caller.getOPCFee(base_token)
+
+    @enforce_types
+    def get_opc_fees(self) -> Tuple[int, int]:
+        """Gets OP Community Fees for approved tokens and non approved tokens"""
+        return self.contract.caller.getOPCFees()
 
     @enforce_types
     def get_opc_consume_fee(self) -> int:
