@@ -484,3 +484,14 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         )
 
         return registered_event[0].args.newTokenAddress
+
+    @enforce_types
+    def check_datatoken(self, datatoken_address: str) -> bool:
+        return self.contract.caller.erc20List(datatoken_address)
+
+    @enforce_types
+    def check_nft(self, nft_address: str) -> bool:
+        import pdb
+
+        pdb.set_trace()
+        return self.contract.caller.erc721List(nft_address) == nft_address
