@@ -534,6 +534,7 @@ def test_start_multiple_order(
     erc721_nft = ERC721NFT(web3, token_address)
     assert erc721_nft.contract.caller.name() == "DT1"
     assert erc721_nft.symbol() == "DTSYMBOL"
+    assert erc721_factory.check_nft(token_address)
 
     # Tests current NFT count
     current_nft_count = erc721_factory.get_current_nft_count()
@@ -593,6 +594,9 @@ def test_start_multiple_order(
 
     # Tests current token template (one of them should be the Enterprise template)
     assert erc721_factory.get_current_template_count() == 2
+
+    # Tests erc20 can be checked as deployed by the factory
+    assert erc721_factory.check_datatoken(erc20_address)
 
     # Tests starting multiple token orders successfully
     erc20_token = ERC20Token(web3, erc20_address)
