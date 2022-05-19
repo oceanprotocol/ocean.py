@@ -31,6 +31,7 @@ class Service:
         compute_values: Optional[Dict[str, Any]] = None,
         name: Optional[str] = None,
         description: Optional[str] = None,
+        additional_information: Optional[Dict[str, Any]] = None,
     ) -> None:
         """Initialize NFT Service instance."""
         self.id = service_id
@@ -42,6 +43,10 @@ class Service:
         self.compute_values = compute_values
         self.name = name
         self.description = description
+        self.additional_information = None
+
+        if additional_information:
+            self.additional_information = additional_information
 
         if not name or not description:
             service_to_default_name = {
@@ -75,6 +80,7 @@ class Service:
             sd.pop("compute", None),
             sd.pop("name", None),
             sd.pop("description", None),
+            sd.pop("additionalInformation", None),
         )
 
     def get_trusted_algorithms(self) -> list:
@@ -156,6 +162,9 @@ class Service:
             values["name"] = self.name
         if self.description is not None:
             values["description"] = self.description
+
+        if self.additional_information is not None:
+            values["additionalInformation"] = self.additional_information
 
         for key, value in values.items():
             if isinstance(value, object) and hasattr(value, "as_dictionary"):

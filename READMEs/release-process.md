@@ -56,6 +56,3 @@ This doesn't actually affect the pip release of the following steps. And if you'
 
 - Check PyPI for the new release at <https://pypi.org/project/ocean-lib/>
 
-- Go through the [simple quickstart](datatokens-flow.md), ensure it works.
-
-- Go through the [marketplace quickstart](marketplace-flow.md), ensure it works.

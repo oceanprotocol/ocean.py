@@ -36,10 +36,6 @@ docker system prune -a --volumes
 In a new console:
 
 ```console
-# Grab ocean.py repo. Note: when V4's in PyPi, this will change
-git clone https://github.com/oceanprotocol/ocean.py.git
-git checkout v4main
-
 # Create your working directory
 mkdir my_project
 cd my_project
@@ -51,8 +47,8 @@ source venv/bin/activate
 # Avoid errors for the step that follows
 pip3 install wheel
 
-# Install. Note: when V4's in PyPi, this will change
-pip3 install --no-cache-dir ../
+# Install Ocean library. Allow pre-releases to get the latest v4 version.
+pip3 install --pre ocean-lib
 ```
 
 ## Set envvars
@@ -100,11 +96,6 @@ from ocean_lib.web3_internal.wallet import Wallet
 alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
 alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"alice_wallet.address = '{alice_wallet.address}'")
-
-# Mint OCEAN
-from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-mint_fake_OCEAN(config)
-assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 
 # Publish an NFT token
 print("Create ERC721 data NFT: begin.")
