@@ -40,7 +40,7 @@ def test_properties(factory_router: FactoryRouter):
 
 @pytest.mark.unit
 def test_opc_collector(config: Config, factory_router: FactoryRouter):
-    assert factory_router.opc_collector() == get_address_of_type(
+    assert factory_router.get_opc_collector() == get_address_of_type(
         config, "OPFCommunityFeeCollector"
     )
 

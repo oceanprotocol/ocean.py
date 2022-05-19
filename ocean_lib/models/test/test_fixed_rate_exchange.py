@@ -7,7 +7,6 @@ from web3 import exceptions
 
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import (
     FixedExchangeBaseInOutData,
     FixedRateExchange,
@@ -16,6 +15,7 @@ from ocean_lib.models.fixed_rate_exchange import (
 )
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
+from tests.resources.ddo_helpers import get_opc_collector_address_from_exchange
 from tests.resources.helper_functions import get_address_of_type
 
 
@@ -165,9 +165,9 @@ def test_exchange_rate_creation(
     assert fee_info[FixedRateExchangeFeesInfo.OCEAN_FEE_AVAILABLE] == 0
 
     # Check OPC fee collector
-    assert FactoryRouter(
-        web3, fixed_exchange.get_router()
-    ).get_opc_collector() == get_address_of_type(config, "OPFCommunityFeeCollector")
+    get_opc_collector_address_from_exchange(fixed_exchange) == get_address_of_type(
+        config, "OPFCommunityFeeCollector"
+    )
 
     # Get exchange info
     # Get swapOceanFee
