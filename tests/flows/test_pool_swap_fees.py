@@ -165,10 +165,9 @@ def pool_swap_fees(
     assert bpool.is_finalized()
 
     # Verify fee collectors are configured correctly
-    assert bpool.get_opc_collector() == factory_router.opc_collector()
-    assert bpool.get_opc_collector() == get_address_of_type(
-        config, "OPFCommunityFeeCollector"
-    )
+    assert FactoryRouter(
+        web3, ERC20Token(web3, bpool.get_datatoken_address()).router()
+    ).get_opc_collector() == get_address_of_type(config, "OPFCommunityFeeCollector")
     assert bpool.get_publish_market_collector() == publisher_wallet.address
 
     # Verify fees are configured correctly

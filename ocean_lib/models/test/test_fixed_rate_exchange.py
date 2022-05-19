@@ -7,6 +7,7 @@ from web3 import exceptions
 
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import (
     FixedExchangeBaseInOutData,
     FixedRateExchange,
@@ -76,7 +77,6 @@ def test_exchange_rate_creation(
     another_consumer_wallet,
     consumer_addr,
     another_consumer_addr,
-    erc721_nft,
     erc20_token,
 ):
     """Test exchange with baseToken(OCEAN) 18 Decimals and dataToken 18 Decimals, RATE = 1"""
@@ -154,7 +154,6 @@ def test_exchange_rate_creation(
 
     # Exchange should have supply and fees setup
     fee_info = fixed_exchange.get_fees_info(exchange_id)
-
     assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE] == publish_market_swap_fee
     assert (
         fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR]
@@ -164,6 +163,11 @@ def test_exchange_rate_creation(
     assert fee_info[FixedRateExchangeFeesInfo.OPC_FEE] == to_wei("0.001")
     assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE] == 0
     assert fee_info[FixedRateExchangeFeesInfo.OCEAN_FEE_AVAILABLE] == 0
+
+    # Check OPC fee collector
+    assert FactoryRouter(
+        web3, fixed_exchange.get_router()
+    ).get_opc_collector() == get_address_of_type(config, "OPFCommunityFeeCollector")
 
     # Get exchange info
     # Get swapOceanFee

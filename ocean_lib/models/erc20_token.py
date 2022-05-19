@@ -80,6 +80,10 @@ class ERC20Token(ContractBase):
         return self.events.NewFixedRate()
 
     @enforce_types
+    def router(self) -> str:
+        return self.contract.caller.router()
+
+    @enforce_types
     def deploy_pool(
         self,
         rate: int,

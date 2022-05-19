@@ -166,10 +166,6 @@ def exchange_swap_fees(
 
     # Verify fee collectors are configured correctly
     factory_router = FactoryRouter(web3, get_address_of_type(config, "Router"))
-    assert exchange.opc_collector() == factory_router.opc_collector()
-    assert exchange.opc_collector() == get_address_of_type(
-        config, "OPFCommunityFeeCollector"
-    )
     assert market_fee_collector == publisher_wallet.address
 
     # Verify fees are configured correctly
