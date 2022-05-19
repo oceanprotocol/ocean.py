@@ -45,9 +45,6 @@ In your project folder (i.e. my_project from `Install the library` step) and in 
 Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
 - [x] 2.1 Create an ERC721 data NFT
 
-Then, please refer to [publish-flow](publish-flow.md) and complete the following steps :
-- [x] 2. Publish Dataset
-
 ## 3. Dispenser Flow
 
 In the Python console:
@@ -70,6 +67,18 @@ erc20_enterprise_token = erc721_nft.create_datatoken(
     from_wallet=alice_wallet,
 )
 print(f"ERC20 Enterprise address: {erc20_enterprise_token.address}")
+
+```
+Then, please refer to [publish-flow](publish-flow.md) to generate your metadata and encrypted files.
+Asset creation will be based on the deployment of ERC20 Enterprise token like this:
+
+```python
+asset = ocean.assets.create(
+    metadata,
+    alice_wallet,
+    encrypted_files,
+    deployed_erc20_tokens=[erc20_enterprise_token]
+)
 
 bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
 bob_wallet = Wallet(
@@ -122,11 +131,8 @@ OCEAN_token.approve(
     valid_until,
     provider_data,
 ) = ocean.retrieve_provider_fees(
-    metadata=metadata,
-    publisher_wallet=alice_wallet,
-    encrypted_files=encrypted_files,
-    erc721_nft=erc721_nft,
-    erc20_token=erc20_enterprise_token
+    asset=asset,
+    publisher_wallet=alice_wallet
 )
 
 
@@ -177,6 +183,18 @@ erc20_enterprise_token = erc721_nft.create_datatoken(
 )
 print(f"ERC20 Enterprise address: {erc20_enterprise_token.address}")
 
+```
+Then, please refer to [publish-flow](publish-flow.md) to generate your metadata and encrypted files.
+Asset creation will be based on the deployment of ERC20 Enterprise token like this:
+
+```python
+asset = ocean.assets.create(
+    metadata,
+    alice_wallet,
+    encrypted_files,
+    deployed_erc20_tokens=[erc20_enterprise_token]
+)
+
 bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
 bob_wallet = Wallet(
     ocean.web3,
@@ -211,11 +229,8 @@ exchange_id = ocean.create_fixed_rate(
     valid_until,
     provider_data,
 ) = ocean.retrieve_provider_fees(
-    metadata=metadata,
-    publisher_wallet=alice_wallet,
-    encrypted_files=encrypted_files,
-    erc721_nft=erc721_nft,
-    erc20_token=erc20_enterprise_token
+    asset=asset,
+    publisher_wallet=alice_wallet
 )
 
 erc20_enterprise_token.mint(alice_wallet.address, ocean.to_wei(20), alice_wallet)

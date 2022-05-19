@@ -11,6 +11,7 @@ from typing import Dict, List, Optional, Type, Union, Any
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
 
+from ocean_lib.assets.asset import Asset
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.bpool import BPool
@@ -333,26 +334,12 @@ class Ocean:
         return bpool
 
     @enforce_types
-    def retrieve_provider_fees(
-        self,
-        metadata: dict,
-        publisher_wallet: Wallet,
-        encrypted_files: Any,
-        erc721_nft: ERC721NFT,
-        erc20_token: ERC20Token,
-    ) -> tuple:
+    def retrieve_provider_fees(self, asset: Asset, publisher_wallet: Wallet) -> tuple:
         data_provider = DataServiceProvider
-        ddo = self.assets.create(
-            metadata=metadata,
-            publisher_wallet=publisher_wallet,
-            encrypted_files=encrypted_files,
-            erc721_address=erc721_nft.address,
-            deployed_erc20_tokens=[erc20_token],
-        )
-        access_service = ddo.services[0]
+        access_service = asset.services[0]
 
         initialize_response = data_provider.initialize(
-            ddo.did, access_service, consumer_address=publisher_wallet.address
+            asset.did, access_service, consumer_address=publisher_wallet.address
         )
         initialize_data = initialize_response.json()
         provider_fees = initialize_data["providerFee"]

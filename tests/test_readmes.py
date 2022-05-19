@@ -65,6 +65,7 @@ def test_script_execution(script, monkeypatch):
     runs_with_publish = [
         "marketplace-flow",
         "consume-flow",
+        "erc20-enterprise",
     ]
     for item in runs_with_publish:
         if item in script.name:
