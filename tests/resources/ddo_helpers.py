@@ -193,7 +193,13 @@ def get_registered_asset_with_compute_service(
     web3 = ocean_instance.web3
     config = ocean_instance.config
     data_provider = DataServiceProvider
-    _, metadata, encrypted_files = create_basics(config, web3, data_provider)
+
+    arff_file = UrlFile(
+        url="https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/branin.arff"
+    )
+    _, metadata, encrypted_files = create_basics(
+        config, web3, data_provider, files=[arff_file]
+    )
 
     # Set the compute values for compute service
     compute_values = {
@@ -244,9 +250,9 @@ def get_registered_algorithm_with_access_service(
             "format": "docker-image",
             "version": "0.1",
             "container": {
-                "entrypoint": "node $ALGO",
-                "image": "ubuntu",
-                "tag": "latest",
+                "entrypoint": "python $ALGO",
+                "image": "oceanprotocol/algo_dockers",
+                "tag": "python-branin",
                 "checksum": "44e10daa6637893f4276bb8d7301eb35306ece50f61ca34dcab550",
             },
         }
@@ -256,7 +262,7 @@ def get_registered_algorithm_with_access_service(
     algorithm_file = FilesTypeFactory(
         {
             "type": "url",
-            "url": "https://raw.githubusercontent.com/oceanprotocol/test-algorithm/master/javascript/algo.js",
+            "url": "https://raw.githubusercontent.com/oceanprotocol/c2d-examples/main/branin_and_gpr/gpr.py",
             "method": "GET",
         }
     )
