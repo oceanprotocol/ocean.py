@@ -81,6 +81,8 @@ def test_script_execution(script, monkeypatch):
                 "asset",
                 "ZERO_ADDRESS",
                 "did",
+                "metadata",
+                "encrypted_files",
             ]:
                 globs[key] = result[key]
 
