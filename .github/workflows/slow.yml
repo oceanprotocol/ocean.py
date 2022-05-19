@@ -43,8 +43,7 @@ jobs:
       - name: Test with pytest
         run: |
           py.test -m slow
-          slack_api:
-      - name: Slack notify via api
+      - name: Slack notify via webhook
         uses: up9cloud/action-notify@master
         if: cancelled() == false
         env:
