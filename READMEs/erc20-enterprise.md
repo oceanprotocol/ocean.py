@@ -45,6 +45,9 @@ In your project folder (i.e. my_project from `Install the library` step) and in 
 Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
 - [x] 2.1 Create an ERC721 data NFT
 
+Then, please refer to [publish-flow](publish-flow.md) and complete the following steps :
+- [x] 2. Publish Dataset
+
 ## 3. Dispenser Flow
 
 In the Python console:
@@ -108,27 +111,6 @@ OCEAN_token.approve(
 )
 
 # Prepare data for order
-date_created = "2021-12-28T10:55:11Z"
-
-metadata = {
-    "created": date_created,
-    "updated": date_created,
-    "description": "Branin dataset",
-    "name": "Branin dataset",
-    "type": "dataset",
-    "author": "Trent",
-    "license": "CC0: PublicDomain",
-}
-
-# ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.structures.file_objects import UrlFile
-url_file = UrlFile(
-    url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-)
-
-# Encrypt file(s) using provider
-encrypted_files = ocean.assets.encrypt_files([url_file])
-
 # Retrieve provider fee
 (
     provider_fee_address,
@@ -218,27 +200,6 @@ exchange_id = ocean.create_fixed_rate(
 )
 
 # Prepare data for order
-date_created = "2021-12-28T10:55:11Z"
-
-metadata = {
-    "created": date_created,
-    "updated": date_created,
-    "description": "Branin dataset",
-    "name": "Branin dataset",
-    "type": "dataset",
-    "author": "Trent",
-    "license": "CC0: PublicDomain",
-}
-
-# ocean.py offers multiple file types, but a simple url file should be enough for this example
-from ocean_lib.structures.file_objects import UrlFile
-url_file = UrlFile(
-    url="https://raw.githubusercontent.com/trentmc/branin/main/branin.arff"
-)
-
-# Encrypt file(s) using provider
-encrypted_files = ocean.assets.encrypt_files([url_file])
-
 # Retrieve provider fee
 (
     provider_fee_address,
