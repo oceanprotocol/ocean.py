@@ -22,19 +22,6 @@ from tests.resources.helper_functions import (
 
 
 @pytest.mark.unit
-def test_properties(config, web3):
-    """Tests the events' properties."""
-    side_staking_address = get_address_of_type(config, "Staking")
-    side_staking = SideStaking(web3, side_staking_address)
-
-    assert side_staking.event_Vesting.abi["name"] == SideStaking.EVENT_VESTING
-    assert (
-        side_staking.event_VestingCreated.abi["name"]
-        == SideStaking.EVENT_VESTING_CREATED
-    )
-
-
-@pytest.mark.unit
 def test_side_staking(
     web3,
     config,
@@ -53,10 +40,6 @@ def test_side_staking(
 
     ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
 
-    # Initial vesting should be 0 and last vested block two
-    assert side_staking.get_vesting_amount_so_far(erc20_token.address) == 0
-    assert side_staking.get_vesting_last_block(erc20_token.address) == 0
-    assert side_staking.get_vesting_end_block(erc20_token.address) == 0
     assert side_staking.get_base_token_balance(erc20_token.address) == 0
 
     # Datatoken initial circulating supply should be 0
@@ -121,7 +104,6 @@ def test_side_staking(
         side_staking.get_publisher_address(erc20_token.address)
         == publisher_wallet.address
     )
-    assert side_staking.get_vesting_amount(erc20_token.address) == to_wei("0.5")
 
     assert pool_event[0].event == "NewPool"
     bpool_address = pool_event[0].args.poolAddress
@@ -197,10 +179,7 @@ def test_side_staking(
         ocean_token.balanceOf(another_consumer_wallet.address) > initial_ocean_balance
     )
 
-    #  Another consumer adds more liquidity with joinPool() (adding both tokens)
-
     # Publisher adds more liquidity with joinswapExternAmountIn
-
     ss_contract_dt_balance = erc20_token.balanceOf(
         get_address_of_type(config, "Staking")
     )
@@ -315,9 +294,6 @@ def test_side_staking(
         get_address_of_type(config, "Staking")
     )
 
-    # Get vesting should be callable by anyone
-    side_staking.get_vesting(erc20_token.address, another_consumer_wallet)
-
 
 @pytest.mark.unit
 def test_side_staking_steal(
@@ -422,7 +398,6 @@ def test_side_staking_steal(
     )
 
     # Check that users hasn't made any profit
-    assert pool_token.balanceOf(another_consumer_wallet.address) == 0
     assert erc20_token2.balanceOf(another_consumer_wallet.address) == 0
 
     # Check that the the attacker is loosing money

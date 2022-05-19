@@ -36,12 +36,7 @@ docker system prune -a --volumes
 In a new console:
 
 ```console
-# Grab ocean.py repo
-cd Desktop/
-git clone https://github.com/oceanprotocol/ocean.py.git
-git checkout v4main
-
-# Create your working directory.
+# Create your working directory
 mkdir my_project
 cd my_project
 
@@ -49,9 +44,11 @@ cd my_project
 python3 -m venv venv
 source venv/bin/activate
 
-# Intermediary installation before PyPi release of V4. Install wheel first to avoid errors.
+# Avoid errors for the step that follows
 pip3 install wheel
-pip3 install --no-cache-dir ../
+
+# Install Ocean library. Allow pre-releases to get the latest v4 version.
+pip3 install --pre ocean-lib
 ```
 
 ## Set envvars
@@ -59,9 +56,6 @@ pip3 install --no-cache-dir ../
 # Set envvars
 export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
 export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
-
-# Needed to mint fake OCEAN for testing with ganache
-export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
 
 # Set the address file only for ganache
 export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
@@ -100,11 +94,6 @@ alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
 alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
-# Mint OCEAN
-from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-mint_fake_OCEAN(config)
-assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
-
 # Publish an NFT token
 print("Create ERC721 data NFT: begin.")
 erc721_nft = ocean.create_erc721_nft('NFTToken1', 'NFT1', alice_wallet)
@@ -112,6 +101,8 @@ print(f"Created ERC721 token: done. Its address is {erc721_nft.address}")
 print(f"data NFT token name: {erc721_nft.token_name()}")
 print(f"data NFT token symbol: {erc721_nft.symbol()}")
 ```
+
+Congrats, you've created your first Ocean data NFT!
 
 ### 2.2 Create an erc20 datatoken from the data NFT
 
@@ -144,4 +135,4 @@ print(f"datatoken symbol: {erc20_token.symbol()}")
 
 Congrats, you've created your first Ocean datatoken! 🐋
 
-As an alternative for publishing a NFT and a datatoken at once, you can use `create_nft_with_erc20`.
+As an alternative for publishing an NFT and a datatoken at once, you can use `create_nft_with_erc20`.

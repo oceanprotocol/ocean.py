@@ -2,8 +2,6 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from unittest.mock import patch
-
 import pytest
 
 from ocean_lib.assets.asset import Asset
@@ -20,6 +18,7 @@ def test_service():
     """Tests that the get_cost function for ServiceAgreement returns the correct value."""
     ddo_dict = get_sample_ddo()
     service_dict = ddo_dict["services"][0]
+    service_dict["additionalInformation"] = {"message": "Sample DDO"}
     sa = Service.from_dict(service_dict)
 
     assert sa.id == "1"
@@ -27,6 +26,7 @@ def test_service():
     assert sa.type == "access"
     assert sa.service_endpoint == "https://myprovider.com"
     assert sa.datatoken == "0x123"
+    assert sa.additional_information == {"message": "Sample DDO"}
 
     assert sa.as_dictionary() == {
         "id": "1",
@@ -37,6 +37,7 @@ def test_service():
         "timeout": 0,
         "name": "Download service",
         "description": "Download service",
+        "additionalInformation": {"message": "Sample DDO"},
     }
 
     ddo_dict = get_sample_ddo()
@@ -45,21 +46,45 @@ def test_service():
     with pytest.raises(IndexError):
         Service.from_dict(service_dict)
 
-    ddo_dict = get_sample_ddo()
-    asset = Asset.from_dict(ddo_dict)
-    with patch(
-        "ocean_lib.services.service.DataServiceProvider.check_asset_file_info"
-    ) as mock:
-        mock.return_value = False
-        assert sa.is_consumable(asset, {}, True) == 2
 
-    with patch(
-        "ocean_lib.services.service.DataServiceProvider.check_asset_file_info"
-    ) as mock:
-        mock.return_value = True
-        assert (
-            sa.is_consumable(asset, {"type": "address", "value": "0xdddd"}, True) == 3
-        )
+@pytest.mark.unit
+def test_additional_information():
+    """Tests a complex structure of additional information key."""
+    ddo_dict = get_sample_ddo()
+    service_dict = ddo_dict["services"][0]
+    service_dict["additionalInformation"] = {
+        "message": "Sample DDO",
+        "some_list": ["a", "b", "c"],
+        "nested_dict": {"some_key": "value"},
+    }
+    sa = Service.from_dict(service_dict)
+
+    assert sa.additional_information == {
+        "message": "Sample DDO",
+        "some_list": ["a", "b", "c"],
+        "nested_dict": {"some_key": "value"},
+    }
+    assert sa.additional_information["message"] == "Sample DDO"
+    assert sa.additional_information["some_list"][0] == "a"
+    assert sa.additional_information["some_list"][1] == "b"
+    assert sa.additional_information["some_list"][2] == "c"
+    assert sa.additional_information["nested_dict"]["some_key"] == "value"
+
+    assert sa.as_dictionary() == {
+        "id": "1",
+        "type": "access",
+        "serviceEndpoint": "https://myprovider.com",
+        "datatokenAddress": "0x123",
+        "files": "0x0000",
+        "timeout": 0,
+        "name": "Download service",
+        "description": "Download service",
+        "additionalInformation": {
+            "message": "Sample DDO",
+            "some_list": ["a", "b", "c"],
+            "nested_dict": {"some_key": "value"},
+        },
+    }
 
 
 @pytest.mark.unit

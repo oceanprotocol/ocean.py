@@ -52,7 +52,7 @@ Here's an example key. From your console:
 
 The Ethereum address that gets computed from the example key is `0x281269C18376010B196a928c335E495bd05eC32F`.
 
-In Python, you can create a wallet from this private key. Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps:
+In Python, you can create a wallet from this private key. Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps:
 - [x] Setup : Prerequisites
 - [x] Setup : Install the library from v4 sources
 

@@ -10,6 +10,7 @@ from enforce_typing import enforce_types
 from ocean_lib.agreements.consumable import AssetNotConsumable, ConsumableCodes
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
+from ocean_lib.assets.asset_downloader import is_consumable
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
@@ -52,8 +53,9 @@ class OceanCompute:
             ServiceTypes.CLOUD_COMPUTE == service.type
         ), "service at serviceId is not of type compute service."
 
-        consumable_result = service.is_consumable(
+        consumable_result = is_consumable(
             asset,
+            service,
             {"type": "address", "value": consumer_wallet.address},
             with_connectivity_check=True,
         )

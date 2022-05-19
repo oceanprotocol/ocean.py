@@ -24,21 +24,21 @@ Let's go through each step.
 
 ### First steps
 
-To get started with this guide, please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+To get started with this guide, please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
 - [x] Setup : Prerequisites
 - [x] Setup : Download barge and run services
 - [x] Setup : Install the library from v4 sources
 
 ### Set envvars
 
-Set the required enviroment variables as described in [datatokens-flow](datatokens-flow.md):
+Set the required enviroment variables as described in [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md):
 - [x] Setup : Set envvars
 
 ## 2. Alice publishes Data NFT & Datatoken
 
 In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
 
-Please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
 - [x] 2.1 Create an ERC721 data NFT
 - [x] 2.2 Create an erc20 datatoken from the data NFT
 

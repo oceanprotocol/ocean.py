@@ -11,7 +11,7 @@ Here, let's get some OCEAN for the Rinkeby testnet, and verify in Python that we
 
 ### First steps
 
-To get started with this guide, please refer to [datatokens-flow](datatokens-flow.md) and complete the following steps :
+To get started with this guide, please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
 - [x] Setup : Prerequisites
 - [x] Setup : Install the library from v4 sources
 

@@ -7,6 +7,7 @@ name: Ocean.py slow tests
 on:
   schedule:
     - cron: '30 5 * * 2'
+  workflow_dispatch:
 
 jobs:
   build:
@@ -42,3 +43,9 @@ jobs:
       - name: Test with pytest
         run: |
           py.test -m slow
+      - name: Slack notify via webhook
+        uses: up9cloud/action-notify@master
+        if: cancelled() == false
+        env:
+          GITHUB_JOB_STATUS: ${{ job.status }}
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
