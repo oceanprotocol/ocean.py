@@ -74,7 +74,7 @@ from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
 
 erc20_token = ocean.get_datatoken(asset.services[0].datatoken)
-OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
+OCEAN_token = ocean.OCEAN_token
 
 bpool = ocean.create_pool(
     erc20_token=erc20_token,

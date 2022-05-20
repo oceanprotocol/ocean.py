@@ -713,7 +713,6 @@ def test_fail_transfer_function(
 
 def test_transfer_nft(
     web3,
-    config,
     publisher_wallet,
     consumer_wallet,
     publisher_addr,
@@ -839,7 +838,7 @@ def test_transfer_nft(
     erc20_token.add_minter(publisher_addr, consumer_wallet)
     assert erc20_token.get_permissions(publisher_addr)[0]  # publisher is minter now
 
-    ocean_token = ERC20Token(web3, publisher_ocean_instance.OCEAN_address)
+    ocean_token = publisher_ocean_instance.OCEAN_token
     ocean_token.approve(factory_router.address, to_wei(10000), consumer_wallet)
 
     # Make consumer the publish_market_order_fee_address instead of publisher
@@ -865,6 +864,7 @@ def test_transfer_nft(
 def test_nft_transfer_with_pool(
     web3,
     config,
+    ocean_token,
     publisher_wallet,
     consumer_wallet,
     factory_router,
@@ -896,7 +896,6 @@ def test_nft_transfer_with_pool(
     assert erc721_nft.is_erc20_deployer(consumer_wallet.address) is True
     assert erc721_nft.owner_of(1) == consumer_wallet.address
 
-    ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
     ocean_token.approve(factory_router.address, to_wei(10000), consumer_wallet)
 
     tx = erc20_token.deploy_pool(
@@ -1005,6 +1004,7 @@ def test_nft_transfer_with_pool(
 def test_nft_transfer_with_fre(
     web3,
     config,
+    ocean_token,
     publisher_wallet,
     consumer_wallet,
     erc721_nft,
@@ -1034,7 +1034,6 @@ def test_nft_transfer_with_fre(
     assert erc721_nft.is_erc20_deployer(consumer_wallet.address) is True
     assert erc721_nft.owner_of(1) == consumer_wallet.address
 
-    ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
     # The newest owner of the NFT (consumer wallet) has ERC20 deployer role & can deploy a FRE
     fixed_exchange = FixedRateExchange(web3, get_address_of_type(config, "FixedPrice"))
     number_of_exchanges = fixed_exchange.get_number_of_exchanges()
@@ -1184,7 +1183,7 @@ def test_transfer_nft_with_erc20_pool_fre(
 
     assert erc20_token.is_minter(publisher_addr)
 
-    ocean_token = ERC20Token(web3, publisher_ocean_instance.OCEAN_address)
+    ocean_token = publisher_ocean_instance.OCEAN_token
 
     # The owner of the NFT (publisher wallet) has ERC20 deployer role & can deploy a pool
     ocean_token.approve(factory_router.address, to_wei(10000), publisher_wallet)

@@ -149,7 +149,7 @@ def generate_wallet() -> Wallet:
     send_ether(deployer_wallet, generated_wallet.address, to_wei(3))
 
     ocn = Ocean(config)
-    OCEAN_token = ERC20Token(web3, address=ocn.OCEAN_address)
+    OCEAN_token = ocn.OCEAN_token
     OCEAN_token.transfer(
         generated_wallet.address, to_wei(50), from_wallet=deployer_wallet
     )

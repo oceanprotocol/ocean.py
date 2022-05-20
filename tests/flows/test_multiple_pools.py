@@ -30,6 +30,7 @@ from tests.resources.helper_functions import (
 def test_create_pool_and_exchange(
     web3: Web3,
     config: Config,
+    ocean_token: ERC20Token,
     factory_deployer_wallet: Wallet,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
@@ -39,7 +40,7 @@ def test_create_pool_and_exchange(
     """
     Test interactions between pools, exchange, and dispenser.
     """
-    bt = ERC20Token(web3, get_address_of_type(config, "Ocean"))
+    bt = ocean_token
     dt = erc20_token
 
     transfer_base_token_if_balance_lte(

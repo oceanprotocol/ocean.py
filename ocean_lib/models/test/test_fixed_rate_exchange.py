@@ -5,7 +5,6 @@
 import pytest
 from web3 import exceptions
 
-from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.fixed_rate_exchange import (
     FixedExchangeBaseInOutData,
@@ -73,6 +72,7 @@ def test_properties(web3, config):
 def test_exchange_rate_creation(
     web3,
     config,
+    ocean_token,
     publisher_wallet,
     consumer_wallet,
     another_consumer_wallet,
@@ -87,7 +87,6 @@ def test_exchange_rate_creation(
     rate = to_wei("1")
     publish_market_swap_fee = int(1e15)  # 0.1%
     pmt_collector = erc20_token.get_payment_collector()
-    ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
 
     fixed_exchange = FixedRateExchange(web3, get_address_of_type(config, "FixedPrice"))
 
@@ -97,7 +96,7 @@ def test_exchange_rate_creation(
 
     tx = erc20_token.create_fixed_rate(
         fixed_price_address=get_address_of_type(config, "FixedPrice"),
-        base_token_address=get_address_of_type(config, "Ocean"),
+        base_token_address=ocean_token.address,
         owner=consumer_addr,
         publish_market_swap_fee_collector=another_consumer_addr,
         allowed_swapper=ZERO_ADDRESS,
@@ -126,7 +125,7 @@ def test_exchange_rate_creation(
 
     # Generate exchange id works
     generated_exchange_id = fixed_exchange.generate_exchange_id(
-        base_token=get_address_of_type(config, "Ocean"), datatoken=erc20_token.address
+        base_token=ocean_token.address, datatoken=erc20_token.address
     )
     assert generated_exchange_id == exchange_id
 

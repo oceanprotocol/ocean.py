@@ -95,7 +95,7 @@ def get_access_service(
     )
 
 
-def create_asset(ocean, publisher, config, metadata=None, files=None):
+def create_asset(ocean, publisher, metadata=None, files=None):
     """Helper function for asset creation based on ddo_sa_sample.json."""
     if not metadata:
         metadata = {
@@ -132,7 +132,7 @@ def create_asset(ocean, publisher, config, metadata=None, files=None):
         erc20_minters=[publisher.address],
         erc20_fee_managers=[publisher.address],
         erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        erc20_publish_market_order_fee_tokens=[get_address_of_type(config, "Ocean")],
+        erc20_publish_market_order_fee_tokens=[ocean.OCEAN_address],
         erc20_publish_market_order_fee_amounts=[0],
         erc20_bytess=[[b""]],
     )
@@ -179,7 +179,7 @@ def create_basics(
 
 
 def get_registered_asset_with_access_service(ocean_instance, publisher_wallet):
-    return create_asset(ocean_instance, publisher_wallet, ocean_instance.config)
+    return create_asset(ocean_instance, publisher_wallet)
 
 
 def get_registered_asset_with_compute_service(
@@ -267,7 +267,6 @@ def get_registered_algorithm_with_access_service(
     return create_asset(
         ocean_instance,
         publisher_wallet,
-        ocean_instance.config,
         metadata=metadata,
         files=[algorithm_file],
     )

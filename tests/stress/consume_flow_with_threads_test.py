@@ -15,17 +15,12 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
-from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import (
     build_credentials_dict,
     get_first_service_by_type,
 )
-from tests.resources.helper_functions import (
-    deploy_erc721_erc20,
-    get_address_of_type,
-    generate_wallet,
-)
+from tests.resources.helper_functions import deploy_erc721_erc20, generate_wallet
 
 
 def consume_flow(ocean: Ocean, config: Config, tmpdir, files):
@@ -60,7 +55,7 @@ def consume_flow(ocean: Ocean, config: Config, tmpdir, files):
         erc20_minters=[publisher_wallet.address],
         erc20_fee_managers=[publisher_wallet.address],
         erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        erc20_publish_market_order_fee_tokens=[get_address_of_type(config, "Ocean")],
+        erc20_publish_market_order_fee_tokens=[ocean.OCEAN_address],
         erc20_publish_market_order_fee_amounts=[0],
         erc20_bytess=[[b""]],
     )

@@ -57,7 +57,7 @@ print(f"bob_wallet.address = '{bob_wallet.address}'")
 assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
 # Verify that Bob has ganache OCEAN
-OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
+OCEAN_token = ocean.OCEAN_token
 assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
 
 # Mint 1 ERC20 token in consumer wallet from publisher

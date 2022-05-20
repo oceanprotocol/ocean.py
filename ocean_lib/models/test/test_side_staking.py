@@ -6,7 +6,6 @@ import pytest
 from web3 import exceptions
 
 from ocean_lib.models.bpool import BPool
-from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.currency import MAX_WEI, to_wei
@@ -25,6 +24,7 @@ from tests.resources.helper_functions import (
 def test_side_staking(
     web3,
     config,
+    ocean_token,
     publisher_wallet,
     another_consumer_wallet,
     factory_deployer_wallet,
@@ -37,8 +37,6 @@ def test_side_staking(
     initial_ocean_liquidity = to_wei("10")
 
     side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
-
-    ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
 
     assert side_staking.get_base_token_balance(erc20_token.address) == 0
 
@@ -403,7 +401,12 @@ def test_side_staking_steal(
 
 
 def test_side_staking_constant_rate(
-    web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
+    web3,
+    config,
+    ocean_token,
+    publisher_wallet,
+    consumer_wallet,
+    another_consumer_wallet,
 ):
     """
     In this test we test that the side staking bot keeps the same rate joining the pool one side
@@ -413,8 +416,6 @@ def test_side_staking_constant_rate(
     swap_market_fee = to_wei("0.0001")
     swap_fee = to_wei("0.0001")
     big_allowance = to_wei("100000000")
-
-    ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
 
     ocean_token.transfer(another_consumer_wallet.address, to_wei("50"), consumer_wallet)
 

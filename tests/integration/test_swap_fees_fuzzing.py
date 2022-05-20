@@ -12,11 +12,7 @@ from time import time
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.web3_internal.currency import from_wei, to_wei
-from tests.resources.helper_functions import (
-    approx_from_wei,
-    create_nft_erc20_with_pool,
-    get_address_of_type,
-)
+from tests.resources.helper_functions import approx_from_wei, create_nft_erc20_with_pool
 
 BPOOL_FUZZING_TESTS_NBR_OF_RUNS = 1
 
@@ -69,10 +65,10 @@ def get_random_max_token_amount_out(
 def test_fuzzing_pool_ocean(
     web3,
     config,
+    ocean_token,
     consumer_wallet,
     another_consumer_wallet,
     publisher_wallet,
-    factory_router,
 ):
     """Test the liquidity pool contract with random values."""
 
@@ -100,9 +96,6 @@ def test_fuzzing_pool_ocean(
             swap_market_fee = to_wei(Decimal(random.uniform(0.00001, 0.1)))
 
             # Tests consumer calls deployPool(), we then check ocean and market fee"
-            ocean_token = ERC20Token(
-                web3=web3, address=get_address_of_type(config, "Ocean")
-            )
             consumer_balance = ocean_token.balanceOf(consumer_wallet.address)
 
             # Pool base_token inital liquidity

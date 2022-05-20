@@ -2,7 +2,6 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
 import os
 
 import pytest
@@ -43,7 +42,7 @@ setup_logging()
 
 
 @pytest.fixture(autouse=True)
-def setup_all(request, config, web3):
+def setup_all(request, config, web3, ocean_token):
     # a test can skip setup_all() via decorator "@pytest.mark.nosetup_all"
     if "nosetup_all" in request.keywords:
         return
@@ -57,16 +56,11 @@ def setup_all(request, config, web3):
     if not os.path.exists(addresses_file):
         return
 
-    with open(addresses_file) as f:
-        network_addresses = json.load(f)
-
     print(f"sender: {wallet.key}, {wallet.address}, {wallet.keys_str()}")
     print(f"sender balance: {from_wei(get_ether_balance(web3, wallet.address))}")
     assert get_ether_balance(web3, wallet.address) >= to_wei(
         "10"
     ), "Ether balance less than 10."
-
-    OCEAN_token = ERC20Token(web3, address=network_addresses["development"]["Ocean"])
 
     amt_distribute = to_wei("1000")
 
@@ -74,8 +68,8 @@ def setup_all(request, config, web3):
         if get_ether_balance(web3, w.address) < to_wei("2"):
             send_ether(wallet, w.address, to_wei("4"))
 
-        if OCEAN_token.balanceOf(w.address) < to_wei("100"):
-            OCEAN_token.transfer(w.address, amt_distribute, from_wallet=wallet)
+        if ocean_token.balanceOf(w.address) < to_wei("100"):
+            ocean_token.transfer(w.address, amt_distribute, from_wallet=wallet)
 
 
 @pytest.fixture
@@ -131,6 +125,16 @@ def consume_market_wallet():
 @pytest.fixture
 def factory_deployer_wallet():
     return get_factory_deployer_wallet(_NETWORK)
+
+
+@pytest.fixture
+def ocean_address(config) -> str:
+    return get_address_of_type(config, "Ocean")
+
+
+@pytest.fixture
+def ocean_token(web3, ocean_address) -> ERC20Token:
+    return ERC20Token(web3, ocean_address)
 
 
 @pytest.fixture

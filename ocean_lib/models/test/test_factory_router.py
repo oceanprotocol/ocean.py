@@ -80,9 +80,11 @@ def test_swap_non_ocean_fee(factory_router: FactoryRouter):
 
 
 @pytest.mark.unit
-def test_is_approved_token(config: Config, factory_router: FactoryRouter):
+def test_is_approved_token(
+    config: Config, factory_router: FactoryRouter, ocean_address: str
+):
     """Tests that Ocean token has been added to the mapping"""
-    assert factory_router.is_approved_token(get_address_of_type(config, "Ocean"))
+    assert factory_router.is_approved_token(ocean_address)
     assert not (factory_router.is_approved_token(ZERO_ADDRESS))
 
 
@@ -108,11 +110,8 @@ def test_is_dispenser_contract(config: Config, factory_router: FactoryRouter):
 
 
 @pytest.mark.unit
-def test_get_opc_fee(config: Config, factory_router: FactoryRouter):
-    assert (
-        factory_router.get_opc_fee(get_address_of_type(config, "Ocean"))
-        == OPC_SWAP_FEE_APPROVED
-    )
+def test_get_opc_fee(config: Config, factory_router: FactoryRouter, ocean_address: str):
+    assert factory_router.get_opc_fee(ocean_address) == OPC_SWAP_FEE_APPROVED
     assert factory_router.get_opc_fee(ZERO_ADDRESS) == OPC_SWAP_FEE_NOT_APPROVED
 
 
@@ -138,6 +137,7 @@ def test_get_opc_provider_fee(factory_router: FactoryRouter):
 def test_buy_dt_batch(
     web3: Web3,
     config: Config,
+    ocean_token: ERC20Token,
     factory_router: FactoryRouter,
     consumer_wallet: Wallet,
     factory_deployer_wallet: Wallet,
@@ -150,13 +150,12 @@ def test_buy_dt_batch(
         address=get_address_of_type(config, ERC721FactoryContract.CONTRACT_NAME),
     )
 
-    ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
-    ocean_contract.approve(
+    ocean_token.approve(
         get_address_of_type(config, ERC721FactoryContract.CONTRACT_NAME),
         2**256 - 1,
         factory_deployer_wallet,
     )
-    ocean_contract.approve(
+    ocean_token.approve(
         get_address_of_type(config, "Router"), 2**256 - 1, factory_deployer_wallet
     )
 
@@ -177,12 +176,12 @@ def test_buy_dt_batch(
         datatoken_publish_market_order_fee_amount=0,
         datatoken_bytess=[b""],
         pool_rate=to_wei("2"),
-        pool_base_token_decimals=ocean_contract.decimals(),
+        pool_base_token_decimals=ocean_token.decimals(),
         pool_base_token_amount=to_wei("2"),
         pool_lp_swap_fee_amount=to_wei("0.001"),
         pool_publish_market_swap_fee_amount=to_wei("0.001"),
         pool_side_staking=get_address_of_type(config, "Staking"),
-        pool_base_token=get_address_of_type(config, "Ocean"),
+        pool_base_token=ocean_token.address,
         pool_base_token_sender=get_address_of_type(
             config, ERC721FactoryContract.CONTRACT_NAME
         ),
@@ -223,12 +222,12 @@ def test_buy_dt_batch(
         datatoken_publish_market_order_fee_amount=0,
         datatoken_bytess=[b""],
         pool_rate=to_wei("1"),
-        pool_base_token_decimals=ocean_contract.decimals(),
+        pool_base_token_decimals=ocean_token.decimals(),
         pool_base_token_amount=to_wei("2"),
         pool_lp_swap_fee_amount=to_wei("0.001"),
         pool_publish_market_swap_fee_amount=to_wei("0.001"),
         pool_side_staking=get_address_of_type(config, "Staking"),
-        pool_base_token=get_address_of_type(config, "Ocean"),
+        pool_base_token=ocean_token.address,
         pool_base_token_sender=get_address_of_type(
             config, ERC721FactoryContract.CONTRACT_NAME
         ),
@@ -256,7 +255,7 @@ def test_buy_dt_batch(
         "exchangeIds": web3.keccak(0x00),
         "source": pool1,
         "operation": 0,
-        "tokenIn": get_address_of_type(config, "Ocean"),
+        "tokenIn": ocean_token.address,
         "amountsIn": to_wei("1"),
         "tokenOut": erc_token,
         "amountsOut": to_wei("0.1"),
@@ -269,7 +268,7 @@ def test_buy_dt_batch(
         "exchangeIds": web3.keccak(0x00),
         "source": pool2,
         "operation": 0,
-        "tokenIn": get_address_of_type(config, "Ocean"),
+        "tokenIn": ocean_token.address,
         "amountsIn": to_wei("1"),
         "tokenOut": erc_token2,
         "amountsOut": to_wei("0.1"),
@@ -278,9 +277,9 @@ def test_buy_dt_batch(
         "marketFeeAddress": another_consumer_wallet.address,
     }
 
-    balance_ocean_before = ocean_contract.balanceOf(factory_deployer_wallet.address)
+    balance_ocean_before = ocean_token.balanceOf(factory_deployer_wallet.address)
     factory_router.buy_dt_batch([op1, op2], factory_deployer_wallet)
-    balance_ocean_after = ocean_contract.balanceOf(factory_deployer_wallet.address)
+    balance_ocean_after = ocean_token.balanceOf(factory_deployer_wallet.address)
 
     balance_dt1 = erc_token_contract.balanceOf(factory_deployer_wallet.address)
     balance_dt2 = erc_token_contract2.balanceOf(factory_deployer_wallet.address)
@@ -294,6 +293,7 @@ def test_buy_dt_batch(
 def test_stake_batch(
     web3: Web3,
     config: Config,
+    ocean_token: ERC20Token,
     factory_router: FactoryRouter,
     consumer_wallet: Wallet,
     factory_deployer_wallet: Wallet,
@@ -303,13 +303,12 @@ def test_stake_batch(
         address=get_address_of_type(config, ERC721FactoryContract.CONTRACT_NAME),
     )
 
-    ocean_contract = ERC20Token(web3=web3, address=get_address_of_type(config, "Ocean"))
-    ocean_contract.approve(
+    ocean_token.approve(
         get_address_of_type(config, ERC721FactoryContract.CONTRACT_NAME),
         2**256 - 1,
         factory_deployer_wallet,
     )
-    ocean_contract.approve(
+    ocean_token.approve(
         get_address_of_type(config, "Router"), 2**256 - 1, factory_deployer_wallet
     )
 
@@ -330,12 +329,12 @@ def test_stake_batch(
         datatoken_publish_market_order_fee_amount=0,
         datatoken_bytess=[b""],
         pool_rate=to_wei("2"),
-        pool_base_token_decimals=ocean_contract.decimals(),
+        pool_base_token_decimals=ocean_token.decimals(),
         pool_base_token_amount=to_wei("2"),
         pool_lp_swap_fee_amount=to_wei("0.001"),
         pool_publish_market_swap_fee_amount=to_wei("0.001"),
         pool_side_staking=get_address_of_type(config, "Staking"),
-        pool_base_token=get_address_of_type(config, "Ocean"),
+        pool_base_token=ocean_token.address,
         pool_base_token_sender=get_address_of_type(
             config, ERC721FactoryContract.CONTRACT_NAME
         ),
@@ -376,12 +375,12 @@ def test_stake_batch(
         datatoken_publish_market_order_fee_amount=0,
         datatoken_bytess=[b""],
         pool_rate=to_wei("1"),
-        pool_base_token_decimals=ocean_contract.decimals(),
+        pool_base_token_decimals=ocean_token.decimals(),
         pool_base_token_amount=to_wei("2"),
         pool_lp_swap_fee_amount=to_wei("0.001"),
         pool_publish_market_swap_fee_amount=to_wei("0.001"),
         pool_side_staking=get_address_of_type(config, "Staking"),
-        pool_base_token=get_address_of_type(config, "Ocean"),
+        pool_base_token=ocean_token.address,
         pool_base_token_sender=get_address_of_type(
             config, ERC721FactoryContract.CONTRACT_NAME
         ),
@@ -414,18 +413,18 @@ def test_stake_batch(
     assert bpool_token1.balanceOf(consumer_wallet.address) == 0
     assert bpool_token2.balanceOf(consumer_wallet.address) == 0
 
-    ocean_contract.approve(
+    ocean_token.approve(
         get_address_of_type(config, ERC721FactoryContract.CONTRACT_NAME),
         2**256 - 1,
         consumer_wallet,
     )
-    ocean_contract.approve(
+    ocean_token.approve(
         get_address_of_type(config, "Router"), 2**256 - 1, consumer_wallet
     )
 
-    balance_ocean_before = ocean_contract.balanceOf(consumer_wallet.address)
+    balance_ocean_before = ocean_token.balanceOf(consumer_wallet.address)
     factory_router.stake_batch([stake1, stake2], consumer_wallet)
-    balance_ocean_after = ocean_contract.balanceOf(consumer_wallet.address)
+    balance_ocean_after = ocean_token.balanceOf(consumer_wallet.address)
 
     balance_dt1 = bpool_token1.balanceOf(consumer_wallet.address)
     balance_dt2 = bpool_token2.balanceOf(consumer_wallet.address)
