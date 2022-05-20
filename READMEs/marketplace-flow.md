@@ -63,14 +63,6 @@ Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md
 Then, please refer to [publish-flow](publish-flow.md) and complete the following steps :
 - [x] 2. Publish Dataset
 
-
-The asset metadata stored on-chain is encrypted and compressed by default.
-It is encouraged that publishers encrypt asset metadata so that the asset can
-be "forgotten" and therefore be GDPR compliant.
-To disable encryption, use `asset = ocean.assets.create(..., encrypt_flag=False)`.
-To disable compression, use`asset = ocean.assets.create(..., compress_flag=False)`.
-It is possible to disable both encryption and compression, if desired.
-
 ## 3. Creation of datatoken liquidity pool
 
 In the following steps we will create a pool from the created token, in order to allow another user
