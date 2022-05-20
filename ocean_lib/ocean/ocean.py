@@ -6,7 +6,7 @@
 """Ocean module."""
 import logging
 from decimal import Decimal
-from typing import Dict, List, Optional, Type, Union, Any
+from typing import Dict, List, Optional, Type, Union
 
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
@@ -89,10 +89,10 @@ class Ocean:
         self.web3 = get_web3(self.config.network_url)
 
         if not data_provider:
-            data_provider = DataServiceProvider
+            self.data_provider = DataServiceProvider
 
-        self.assets = OceanAssets(self.config, self.web3, data_provider)
-        self.compute = OceanCompute(self.config, data_provider)
+        self.assets = OceanAssets(self.config, self.web3, self.data_provider)
+        self.compute = OceanCompute(self.config, self.data_provider)
 
         logger.debug("Ocean instance initialized: ")
 
@@ -335,10 +335,9 @@ class Ocean:
 
     @enforce_types
     def retrieve_provider_fees(self, asset: Asset, publisher_wallet: Wallet) -> tuple:
-        data_provider = DataServiceProvider
-        access_service = asset.services[0]
 
-        initialize_response = data_provider.initialize(
+        access_service = asset.services[0]
+        initialize_response = self.data_provider.initialize(
             asset.did, access_service, consumer_address=publisher_wallet.address
         )
         initialize_data = initialize_response.json()
