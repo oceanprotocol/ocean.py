@@ -12,7 +12,7 @@ class BTokenBase(BConst):
     CONTRACT_NAME = "BTokenBase"
 
     @enforce_types
-    def name(self) -> str:
+    def token_name(self) -> str:
         return self.contract.caller.name()
 
     @enforce_types
