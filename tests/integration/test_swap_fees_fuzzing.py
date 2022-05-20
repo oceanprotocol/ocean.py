@@ -79,12 +79,9 @@ def test_fuzzing_pool_ocean(
     errors = []
     big_allowance = 10**10
     (
-        cap,
         swap_fee,
         swap_market_fee,
         ss_rate,
-        ss_DT_vest_amt,
-        ss_DT_vested_blocks,
         ss_OCEAN_init_liquidity,
         swap_in_one_amount_in,
         swap_out_one_amount_out,
@@ -98,9 +95,6 @@ def test_fuzzing_pool_ocean(
         try:
             # Seed random number generator
             random.seed(time())
-
-            # Max number of datatokens that can be minted and added to the liquidity pool
-            cap = to_wei(random.randint(100, 1000000))
 
             swap_fee = to_wei(Decimal(random.uniform(0.00001, 0.1)))
             swap_market_fee = to_wei(Decimal(random.uniform(0.00001, 0.1)))
@@ -119,16 +113,6 @@ def test_fuzzing_pool_ocean(
                 ss_OCEAN_init_liquidity if ss_OCEAN_init_liquidity > 0 else 1
             )
 
-            # Random vesting amount should be less than 10% of ss_OCEAN_init_liquidity
-            ss_DT_vest_amt = floor(
-                Decimal(random.uniform(0, 0.1)) * ss_OCEAN_init_liquidity
-            )
-            ss_DT_vest_amt = ss_DT_vest_amt if ss_DT_vest_amt > 0 else 1
-
-            min_vesting_period = factory_router.get_min_vesting_period()
-            ss_DT_vested_blocks = random.randint(
-                min_vesting_period, min_vesting_period * 1000
-            )
             ss_rate = to_wei(Decimal(random.uniform(1 / 10**6, 10**4)))
 
             bpool, erc20_token, _, _ = create_nft_erc20_with_pool(
@@ -139,9 +123,6 @@ def test_fuzzing_pool_ocean(
                 swap_fee=swap_fee,
                 swap_market_fee=swap_market_fee,
                 initial_pool_liquidity=ss_OCEAN_init_liquidity,
-                token_cap=cap,
-                vesting_amount=ss_DT_vest_amt,
-                vesting_blocks=ss_DT_vested_blocks,
                 pool_initial_rate=ss_rate,
             )
 
@@ -401,12 +382,9 @@ def test_fuzzing_pool_ocean(
             ocean: {ocean_balance} {from_wei(ocean_balance)}
 
             Values
-            cap: {cap} {from_wei(cap)}
             swap_fee: {swap_fee} {from_wei(swap_fee)}
             swap_market_fee: {swap_market_fee} {from_wei(swap_market_fee)}
             ss_rate: {ss_rate}
-            ss_DT_vest_amt: {ss_DT_vest_amt} {from_wei(ss_DT_vest_amt)}
-            ss_DT_vested_blocks: {ss_DT_vested_blocks}
             ss_OCEAN_init_liquidity: {ss_OCEAN_init_liquidity} {from_wei(ss_OCEAN_init_liquidity)}
             swap_in_one_amount_in: {swap_in_one_amount_in} {from_wei(swap_in_one_amount_in)}
             swap_out_one_amount_out: {swap_out_one_amount_out} {from_wei(swap_out_one_amount_out)}

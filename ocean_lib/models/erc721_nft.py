@@ -10,6 +10,7 @@ from enforce_typing import enforce_types
 from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.structures.abi_tuples import MetadataProof
+from ocean_lib.web3_internal.constants import MAX_INT256
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -126,7 +127,6 @@ class ERC721NFT(ContractBase):
         fee_manager: str,
         publish_market_order_fee_address: str,
         publish_market_order_fee_token: str,
-        cap: int,
         publish_market_order_fee_amount: int,
         bytess: List[bytes],
         from_wallet: Wallet,
@@ -142,7 +142,7 @@ class ERC721NFT(ContractBase):
                     publish_market_order_fee_address,
                     publish_market_order_fee_token,
                 ],
-                [cap, publish_market_order_fee_amount],
+                [MAX_INT256, publish_market_order_fee_amount],
                 bytess,
             ),
             from_wallet,
@@ -286,7 +286,6 @@ class ERC721NFT(ContractBase):
         fee_manager: str,
         publish_market_order_fee_address: str,
         publish_market_order_fee_token: str,
-        cap: int,
         publish_market_order_fee_amount: int,
         bytess: List[bytes],
         from_wallet: Wallet,
@@ -301,7 +300,6 @@ class ERC721NFT(ContractBase):
             fee_manager=fee_manager,
             publish_market_order_fee_address=publish_market_order_fee_address,
             publish_market_order_fee_token=publish_market_order_fee_token,
-            cap=cap,
             publish_market_order_fee_amount=publish_market_order_fee_amount,
             bytess=bytess,
             from_wallet=from_wallet,

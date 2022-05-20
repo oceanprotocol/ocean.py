@@ -110,7 +110,6 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         fee_manager=consumer_wallet.address,
         publish_market_order_fee_address=publisher_wallet.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=to_wei(5),  # ERC20 cap is always MAX_UINT256
         publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
@@ -144,7 +143,6 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, factory_router):
         fee_manager=erc721_nft.address,
         publish_market_order_fee_address=publisher_wallet.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=to_wei(1000),  # ERC20 cap is always MAX_UINT256
         publish_market_order_fee_amount=to_wei(publish_market_order_fee),
         bytess=[b""],
         from_wallet=publisher_wallet,

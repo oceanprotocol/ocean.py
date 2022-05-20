@@ -115,7 +115,6 @@ In the same python console:
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 print("Create ERC20 datatoken: begin.")
-cap = ocean.to_wei(100)
 
 nft_factory = ocean.get_nft_factory()
 erc20_token = erc721_nft.create_datatoken(
@@ -126,7 +125,6 @@ erc20_token = erc721_nft.create_datatoken(
     fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
     publish_market_order_fee_address=alice_wallet.address,  # publishing Market Address
     publish_market_order_fee_token=ZERO_ADDRESS,  # publishing Market Fee Token
-    cap=cap,
     publish_market_order_fee_amount=0,
     bytess=[b""],
     from_wallet=alice_wallet

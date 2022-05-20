@@ -61,7 +61,6 @@ def consume_flow(ocean: Ocean, config: Config, tmpdir, files):
         erc20_fee_managers=[publisher_wallet.address],
         erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
         erc20_publish_market_order_fee_tokens=[get_address_of_type(config, "Ocean")],
-        erc20_caps=[ocean.to_wei("0.5")],
         erc20_publish_market_order_fee_amounts=[0],
         erc20_bytess=[[b""]],
     )
