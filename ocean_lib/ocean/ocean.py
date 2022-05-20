@@ -24,6 +24,7 @@ from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
+from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import DECIMALS_18
 from ocean_lib.web3_internal.currency import format_units as _format_units
@@ -334,9 +335,10 @@ class Ocean:
         return bpool
 
     @enforce_types
-    def retrieve_provider_fees(self, asset: Asset, publisher_wallet: Wallet) -> tuple:
+    def retrieve_provider_fees(
+        self, asset: Asset, access_service: Service, publisher_wallet: Wallet
+    ) -> tuple:
 
-        access_service = asset.services[0]
         initialize_response = DataServiceProvider.initialize(
             asset.did, access_service, consumer_address=publisher_wallet.address
         )

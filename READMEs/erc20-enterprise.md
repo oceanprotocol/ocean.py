@@ -79,6 +79,7 @@ asset = ocean.assets.create(
     encrypted_files,
     deployed_erc20_tokens=[erc20_enterprise_token]
 )
+access_service = asset.services[0]
 
 bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
 bob_wallet = Wallet(
@@ -132,6 +133,7 @@ OCEAN_token.approve(
     provider_data,
 ) = ocean.retrieve_provider_fees(
     asset=asset,
+    access_service=access_service,
     publisher_wallet=alice_wallet
 )
 
@@ -194,6 +196,7 @@ asset = ocean.assets.create(
     encrypted_files,
     deployed_erc20_tokens=[erc20_enterprise_token]
 )
+access_service = asset.services[0]
 
 bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
 bob_wallet = Wallet(
@@ -230,6 +233,7 @@ exchange_id = ocean.create_fixed_rate(
     provider_data,
 ) = ocean.retrieve_provider_fees(
     asset=asset,
+    access_service=access_service,
     publisher_wallet=alice_wallet
 )
 
