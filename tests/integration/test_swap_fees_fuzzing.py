@@ -89,7 +89,7 @@ def test_fuzzing_pool_ocean(
         swap_in_two_amount_in,
         swap_out_two_amount_out,
         swap_out_two_balance,
-    ) = [0 for _ in range(13)]
+    ) = [0 for _ in range(10)]
 
     for _ in range(BPOOL_FUZZING_TESTS_NBR_OF_RUNS):
         try:
