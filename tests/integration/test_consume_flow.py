@@ -4,7 +4,6 @@
 #
 import os
 import shutil
-from typing import Union
 
 import pytest
 from web3 import Web3
@@ -15,7 +14,7 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.ocean.ocean_assets import OceanAssets
-from ocean_lib.structures.file_objects import IpfsFile, UrlFile
+from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
@@ -29,7 +28,7 @@ def test_consume_flow(
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
     erc721_nft: ERC721NFT,
-    file1: Union[UrlFile, IpfsFile],
+    file1: FilesType,
 ):
     data_provider = DataServiceProvider
     ocean_assets = OceanAssets(config, web3, data_provider)

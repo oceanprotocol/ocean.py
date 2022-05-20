@@ -6,7 +6,7 @@ import json
 import os
 import pathlib
 import time
-from typing import List, Optional, Union
+from typing import List, Optional
 
 import requests
 
@@ -22,7 +22,7 @@ from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.structures.file_objects import FilesTypeFactory, IpfsFile, UrlFile
+from ocean_lib.structures.file_objects import FilesType, FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import deploy_erc721_erc20, get_file1, get_file2
@@ -145,7 +145,7 @@ def create_basics(
     web3,
     data_provider,
     asset_type: str = "dataset",
-    files: Optional[List[Union[UrlFile, IpfsFile]]] = None,
+    files: Optional[List[FilesType]] = None,
 ):
     """Helper for asset creation, based on ddo_sa_sample.json
 

@@ -4,7 +4,7 @@
 #
 import json
 from datetime import datetime, timedelta
-from typing import Any, Dict, Union
+from typing import Any, Dict
 
 import pytest
 from eth_keys import KeyAPI
@@ -18,7 +18,7 @@ from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.ocean_assets import OceanAssets
-from ocean_lib.structures.file_objects import IpfsFile, UrlFile
+from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.currency import MAX_WEI, parse_units, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import get_first_service_by_type
@@ -62,7 +62,7 @@ def test_start_order_fees(
     publish_market_wallet: Wallet,
     consume_market_wallet: Wallet,
     erc721_nft: ERC721NFT,
-    file1: Union[UrlFile, IpfsFile],
+    file1: FilesType,
     factory_router: FactoryRouter,
     base_token_name: str,
     publish_market_order_fee_in_unit: str,
