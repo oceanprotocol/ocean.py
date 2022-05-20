@@ -89,10 +89,10 @@ class Ocean:
         self.web3 = get_web3(self.config.network_url)
 
         if not data_provider:
-            self.data_provider = DataServiceProvider
+            data_provider = DataServiceProvider
 
-        self.assets = OceanAssets(self.config, self.web3, self.data_provider)
-        self.compute = OceanCompute(self.config, self.data_provider)
+        self.assets = OceanAssets(self.config, self.web3, data_provider)
+        self.compute = OceanCompute(self.config, data_provider)
 
         logger.debug("Ocean instance initialized: ")
 
@@ -337,7 +337,7 @@ class Ocean:
     def retrieve_provider_fees(self, asset: Asset, publisher_wallet: Wallet) -> tuple:
 
         access_service = asset.services[0]
-        initialize_response = self.data_provider.initialize(
+        initialize_response = DataServiceProvider.initialize(
             asset.did, access_service, consumer_address=publisher_wallet.address
         )
         initialize_data = initialize_response.json()
