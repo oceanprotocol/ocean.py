@@ -12,7 +12,7 @@ from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
-from ocean_lib.web3_internal.constants import MAX_INT256
+from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -188,7 +188,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                         datatoken_publish_market_order_fee_address,
                         datatoken_publish_market_order_fee_token,
                     ],
-                    [MAX_INT256, datatoken_publish_market_order_fee_amount],
+                    [MAX_UINT256, datatoken_publish_market_order_fee_amount],
                     datatoken_bytess,
                 ),
             ),
@@ -246,7 +246,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                         datatoken_publish_market_order_fee_address,
                         datatoken_publish_market_order_fee_token,
                     ],
-                    [MAX_INT256, datatoken_publish_market_order_fee_amount],
+                    [MAX_UINT256, datatoken_publish_market_order_fee_amount],
                     datatoken_bytess,
                 ),
                 (
@@ -326,7 +326,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                         datatoken_publish_market_order_fee_address,
                         datatoken_publish_market_order_fee_token,
                     ],
-                    [MAX_INT256, datatoken_publish_market_order_fee_amount],
+                    [MAX_UINT256, datatoken_publish_market_order_fee_amount],
                     datatoken_bytess,
                 ),
                 (
@@ -394,7 +394,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                         datatoken_publish_market_order_fee_address,
                         datatoken_publish_market_order_fee_token,
                     ],
-                    [MAX_INT256, datatoken_publish_market_order_fee_amount],
+                    [MAX_UINT256, datatoken_publish_market_order_fee_amount],
                     datatoken_bytess,
                 ),
                 (
