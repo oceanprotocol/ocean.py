@@ -79,8 +79,6 @@ class ERC20Token(ContractBase):
         self,
         rate: int,
         base_token_decimals: int,
-        vesting_amount: int,
-        vesting_blocks: int,
         base_token_amount: int,
         lp_swap_fee_amount: int,
         publish_market_swap_fee_amount: int,
@@ -98,8 +96,10 @@ class ERC20Token(ContractBase):
                 [
                     rate,
                     base_token_decimals,
-                    vesting_amount,
-                    vesting_blocks,
+                    base_token_amount
+                    // 100
+                    * 9,  # max 10% vesting amount of the total cap
+                    2500000,
                     base_token_amount,
                 ],
                 [lp_swap_fee_amount, publish_market_swap_fee_amount],

@@ -56,7 +56,6 @@ def asset_displayed_on_sale(ocean: Ocean):
         erc20_fee_managers=[publisher_wallet.address],
         erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
         erc20_publish_market_order_fee_tokens=[ocean.OCEAN_address],
-        erc20_caps=[ocean.to_wei(100000)],
         erc20_publish_market_order_fee_amounts=[0],
         erc20_bytess=[[b""]],
     )
@@ -73,8 +72,6 @@ def asset_displayed_on_sale(ocean: Ocean):
         erc20_token=erc20_token,
         base_token=OCEAN_token,
         rate=ocean.to_wei(1),
-        vesting_amount=ocean.to_wei(10000),
-        vesting_blocks=2500000,
         base_token_amount=ocean.to_wei(2000),
         lp_swap_fee_amount=ocean.to_wei("0.01"),
         publish_market_swap_fee_amount=ocean.to_wei("0.01"),

@@ -12,6 +12,7 @@ from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
+from ocean_lib.web3_internal.constants import MAX_INT256
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -163,7 +164,6 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         datatoken_fee_manager: str,
         datatoken_publish_market_order_fee_address: str,
         datatoken_publish_market_order_fee_token: str,
-        datatoken_cap: int,
         datatoken_publish_market_order_fee_amount: int,
         datatoken_bytess: List[bytes],
         from_wallet: Wallet,
@@ -188,7 +188,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                         datatoken_publish_market_order_fee_address,
                         datatoken_publish_market_order_fee_token,
                     ],
-                    [datatoken_cap, datatoken_publish_market_order_fee_amount],
+                    [MAX_INT256, datatoken_publish_market_order_fee_amount],
                     datatoken_bytess,
                 ),
             ),
@@ -211,13 +211,10 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         datatoken_fee_manager: str,
         datatoken_publish_market_order_fee_address: str,
         datatoken_publish_market_order_fee_token: str,
-        datatoken_cap: int,
         datatoken_publish_market_order_fee_amount: int,
         datatoken_bytess: List[bytes],
         pool_rate: int,
         pool_base_token_decimals: int,
-        pool_vesting_amount: int,
-        pool_vesting_blocks: int,
         pool_base_token_amount: int,
         pool_lp_swap_fee_amount: int,
         pool_publish_market_swap_fee_amount: int,
@@ -249,15 +246,17 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                         datatoken_publish_market_order_fee_address,
                         datatoken_publish_market_order_fee_token,
                     ],
-                    [datatoken_cap, datatoken_publish_market_order_fee_amount],
+                    [MAX_INT256, datatoken_publish_market_order_fee_amount],
                     datatoken_bytess,
                 ),
                 (
                     [
                         pool_rate,
                         pool_base_token_decimals,
-                        pool_vesting_amount,
-                        pool_vesting_blocks,
+                        pool_base_token_amount
+                        // 100
+                        * 9,  # max 10% vesting amount of the total cap
+                        2500000,
                         pool_base_token_amount,
                     ],
                     [
@@ -293,7 +292,6 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         datatoken_fee_manager: str,
         datatoken_publish_market_order_fee_address: str,
         datatoken_publish_market_order_fee_token: str,
-        datatoken_cap: int,
         datatoken_publish_market_order_fee_amount: int,
         datatoken_bytess: List[bytes],
         fixed_price_address: str,
@@ -328,7 +326,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                         datatoken_publish_market_order_fee_address,
                         datatoken_publish_market_order_fee_token,
                     ],
-                    [datatoken_cap, datatoken_publish_market_order_fee_amount],
+                    [MAX_INT256, datatoken_publish_market_order_fee_amount],
                     datatoken_bytess,
                 ),
                 (
@@ -367,7 +365,6 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         datatoken_fee_manager: str,
         datatoken_publish_market_order_fee_address: str,
         datatoken_publish_market_order_fee_token: str,
-        datatoken_cap: int,
         datatoken_publish_market_order_fee_amount: int,
         datatoken_bytess: List[bytes],
         dispenser_address: str,
@@ -397,7 +394,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                         datatoken_publish_market_order_fee_address,
                         datatoken_publish_market_order_fee_token,
                     ],
-                    [datatoken_cap, datatoken_publish_market_order_fee_amount],
+                    [MAX_INT256, datatoken_publish_market_order_fee_amount],
                     datatoken_bytess,
                 ),
                 (

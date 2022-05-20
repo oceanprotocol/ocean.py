@@ -51,8 +51,6 @@ In the Python console:
 ```python
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
-cap = ocean.to_wei(200)
-
 erc20_enterprise_token = erc721_nft.create_datatoken(
     template_index=2,  # this is the value for ERC20 Enterprise token
     name="ERC20DT1",  # name for ERC20 token
@@ -61,7 +59,6 @@ erc20_enterprise_token = erc721_nft.create_datatoken(
     fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
     publish_market_order_fee_address=alice_wallet.address,  # publishing Market Address
     publish_market_order_fee_token=ZERO_ADDRESS,  # publishing Market Fee Token
-    cap=cap,
     publish_market_order_fee_amount=0,
     bytess=[b""],
     from_wallet=alice_wallet,
@@ -146,8 +143,6 @@ In the Python console:
 ```python
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
-cap = ocean.to_wei(200)
-
 erc20_enterprise_token = erc721_nft.create_datatoken(
     template_index=2,  # this is the value for ERC20 Enterprise token
     name="ERC20DT1",  # name for ERC20 token
@@ -156,7 +151,6 @@ erc20_enterprise_token = erc721_nft.create_datatoken(
     fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
     publish_market_order_fee_address=alice_wallet.address,  # publishing Market Address
     publish_market_order_fee_token=ZERO_ADDRESS,  # publishing Market Fee Token
-    cap=cap,
     publish_market_order_fee_amount=0,
     bytess=[b""],
     from_wallet=alice_wallet,

@@ -129,7 +129,6 @@ class OceanAssets:
         fee_manager: str,
         publish_market_order_fee_address: str,
         publish_market_order_fee_token: str,
-        cap: int,
         publish_market_order_fee_amount: int,
         bytess: List[bytes],
         from_wallet: Wallet,
@@ -142,7 +141,6 @@ class OceanAssets:
             fee_manager=fee_manager,
             publish_market_order_fee_address=publish_market_order_fee_address,
             publish_market_order_fee_token=publish_market_order_fee_token,
-            cap=cap,
             publish_market_order_fee_amount=publish_market_order_fee_amount,
             bytess=bytess,
             from_wallet=from_wallet,
@@ -279,7 +277,6 @@ class OceanAssets:
         erc20_fee_managers: Optional[List[str]] = None,
         erc20_publish_market_order_fee_addresses: Optional[List[str]] = None,
         erc20_publish_market_order_fee_tokens: Optional[List[str]] = None,
-        erc20_caps: Optional[List[int]] = None,
         erc20_publish_market_order_fee_amounts: Optional[List[int]] = None,
         erc20_bytess: Optional[List[List[bytes]]] = None,
         deployed_erc20_tokens: Optional[List[ERC20Token]] = None,
@@ -312,7 +309,6 @@ class OceanAssets:
         :param erc20_fee_managers: list of fee managers for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_publish_market_order_fee_addresses: list of publishing market addresses for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_publish_market_order_fee_tokens: list of fee tokens for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_caps: list of cap values for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_publish_market_order_fee_amounts: list of fee values for ERC20 tokens if deployed_erc20_tokens is None.
         :param erc20_bytess: list of arrays of bytes for deploying ERC20 tokens, default empty (currently not used, useful for future) if deployed_erc20_tokens is None.
         :param deployed_erc20_tokens: list of ERC20 tokens which are already deployed.
@@ -411,7 +407,6 @@ class OceanAssets:
                         publish_market_order_fee_token=erc20_publish_market_order_fee_tokens[
                             erc20_data_counter
                         ],
-                        cap=erc20_caps[erc20_data_counter],
                         publish_market_order_fee_amount=erc20_publish_market_order_fee_amounts[
                             erc20_data_counter
                         ],

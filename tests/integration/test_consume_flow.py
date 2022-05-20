@@ -79,7 +79,6 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet, file1):
         erc20_fee_managers=[publisher_wallet.address],
         erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
         erc20_publish_market_order_fee_tokens=[get_address_of_type(config, "Ocean")],
-        erc20_caps=[to_wei(100)],
         erc20_publish_market_order_fee_amounts=[0],
         erc20_bytess=[[b""]],
     )
@@ -95,7 +94,7 @@ def test_consume_flow(web3, config, publisher_wallet, consumer_wallet, file1):
     service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
     erc20_token = ERC20Token(web3, ddo.datatokens[0]["address"])
 
-    # Mint 50 ERC20 tokens in consumer wallet from publisher. Max cap = 100
+    # Mint 50 ERC20 tokens in consumer wallet from publisher.
     erc20_token.mint(
         account_address=consumer_wallet.address,
         value=to_wei("50"),

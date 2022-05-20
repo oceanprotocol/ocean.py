@@ -33,9 +33,6 @@ class FactoryRouter(BFactory):
     def is_fixed_rate_contract(self, address: str) -> bool:
         return self.contract.caller.isFixedRateContract(address)
 
-    def get_min_vesting_period(self) -> int:
-        return self.contract.caller.getMinVestingPeriod()
-
     @property
     def factory(self):
         return self.contract.caller.factory()
@@ -59,10 +56,6 @@ class FactoryRouter(BFactory):
     @enforce_types
     def is_ocean_token(self, ocean_address: str) -> bool:
         return self.contract.caller.isOceanToken(ocean_address)
-
-    @enforce_types
-    def get_min_vesting_period(self) -> int:
-        return self.contract.caller.getMinVestingPeriod()
 
     @enforce_types
     def stake_batch(
