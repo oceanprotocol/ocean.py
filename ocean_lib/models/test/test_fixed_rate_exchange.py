@@ -13,6 +13,7 @@ from ocean_lib.models.fixed_rate_exchange import (
     FixedRateExchangeDetails,
     FixedRateExchangeFeesInfo,
 )
+from ocean_lib.models.test.test_factory_router import OPC_SWAP_FEE_APPROVED
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.ddo_helpers import get_opc_collector_address_from_exchange
@@ -160,7 +161,7 @@ def test_exchange_rate_creation(
         == another_consumer_addr
     )
     # token is approved, so 0.001
-    assert fee_info[FixedRateExchangeFeesInfo.OPC_FEE] == to_wei("0.001")
+    assert fee_info[FixedRateExchangeFeesInfo.OPC_FEE] == OPC_SWAP_FEE_APPROVED
     assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE] == 0
     assert fee_info[FixedRateExchangeFeesInfo.OCEAN_FEE_AVAILABLE] == 0
 

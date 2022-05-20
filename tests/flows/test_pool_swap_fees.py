@@ -13,6 +13,10 @@ from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.side_staking import SideStaking
+from ocean_lib.models.test.test_factory_router import (
+    OPC_SWAP_FEE_APPROVED,
+    OPC_SWAP_FEE_NOT_APPROVED,
+)
 from ocean_lib.web3_internal.currency import (
     MAX_WEI,
     format_units,
@@ -172,10 +176,10 @@ def pool_swap_fees(
 
     # Verify fees are configured correctly
     if factory_router.is_approved_token(bt.address):
-        assert bpool.opc_fee() == to_wei("0.001")
+        assert bpool.get_opc_fee() == OPC_SWAP_FEE_APPROVED
     else:
-        assert bpool.opc_fee() == to_wei("0.002")
-    assert bpool.opc_fee() == factory_router.get_opc_fee(bt.address)
+        assert bpool.get_opc_fee() == OPC_SWAP_FEE_NOT_APPROVED
+    assert bpool.get_opc_fee() == factory_router.get_opc_fee(bt.address)
     assert bpool.get_swap_fee() == lp_swap_fee
     assert bpool.get_market_fee() == publish_market_swap_fee
 
@@ -704,7 +708,7 @@ def check_fee_amounts(
         amount_in_unit * from_wei(bpool.get_swap_fee()), decimals
     )
     expected_opc_swap_fee_amount = parse_units(
-        amount_in_unit * from_wei(bpool.opc_fee()), decimals
+        amount_in_unit * from_wei(bpool.get_opc_fee()), decimals
     )
     expected_publish_market_swap_fee_amount = parse_units(
         amount_in_unit * from_wei(bpool.get_market_fee()), decimals

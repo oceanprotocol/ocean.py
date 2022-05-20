@@ -15,6 +15,10 @@ from ocean_lib.models.fixed_rate_exchange import (
     FixedRateExchangeDetails,
     FixedRateExchangeFeesInfo,
 )
+from ocean_lib.models.test.test_factory_router import (
+    OPC_SWAP_FEE_APPROVED,
+    OPC_SWAP_FEE_NOT_APPROVED,
+)
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import MAX_WEI, from_wei, parse_units, to_wei
@@ -172,9 +176,9 @@ def exchange_swap_fees(
 
     # Verify fees are configured correctly
     if factory_router.is_approved_token(bt.address):
-        assert opc_fee == to_wei("0.001")
+        assert opc_fee == OPC_SWAP_FEE_APPROVED
     else:
-        assert opc_fee == to_wei("0.002")
+        assert opc_fee == OPC_SWAP_FEE_NOT_APPROVED
     assert exchange.get_opc_fee(bt.address) == opc_fee
     assert exchange.get_opc_fee(bt.address) == factory_router.get_opc_fee(bt.address)
     assert exchange.get_market_fee(exchange_id) == publish_market_swap_fee

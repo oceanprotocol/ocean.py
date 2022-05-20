@@ -14,6 +14,12 @@ from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import get_address_of_type
 
+# Constants copied from FactoryRouter.sol, used for testing purposes
+OPC_SWAP_FEE_APPROVED = to_wei("0.001")  # 0.1%
+OPC_SWAP_FEE_NOT_APPROVED = to_wei("0.002")  # 0.2%
+OPC_CONSUME_FEE = to_wei("0.03")  # 0.03 DT
+OPC_PROVIDER_FEE = to_wei("0")  # 0%
+
 
 @pytest.mark.unit
 def test_properties(factory_router: FactoryRouter):
@@ -65,12 +71,12 @@ def test_factory(config: Config, factory_router: FactoryRouter):
 
 @pytest.mark.unit
 def test_swap_ocean_fee(factory_router: FactoryRouter):
-    assert factory_router.swap_ocean_fee() == to_wei("0.001")
+    assert factory_router.swap_ocean_fee() == OPC_SWAP_FEE_APPROVED
 
 
 @pytest.mark.unit
 def test_swap_non_ocean_fee(factory_router: FactoryRouter):
-    assert factory_router.swap_non_ocean_fee() == to_wei("0.002")
+    assert factory_router.swap_non_ocean_fee() == OPC_SWAP_FEE_NOT_APPROVED
 
 
 @pytest.mark.unit
@@ -103,25 +109,29 @@ def test_is_dispenser_contract(config: Config, factory_router: FactoryRouter):
 
 @pytest.mark.unit
 def test_get_opc_fee(config: Config, factory_router: FactoryRouter):
-    assert factory_router.get_opc_fee(get_address_of_type(config, "Ocean")) == to_wei(
-        "0.001"
+    assert (
+        factory_router.get_opc_fee(get_address_of_type(config, "Ocean"))
+        == OPC_SWAP_FEE_APPROVED
     )
-    assert factory_router.get_opc_fee(ZERO_ADDRESS) == to_wei("0.002")
+    assert factory_router.get_opc_fee(ZERO_ADDRESS) == OPC_SWAP_FEE_NOT_APPROVED
 
 
 @pytest.mark.unit
 def test_get_opc_fees(factory_router: FactoryRouter):
-    assert factory_router.get_opc_fees() == [to_wei("0.001"), to_wei("0.002")]
+    assert factory_router.get_opc_fees() == [
+        OPC_SWAP_FEE_APPROVED,
+        OPC_SWAP_FEE_NOT_APPROVED,
+    ]
 
 
 @pytest.mark.unit
 def test_get_opc_consume_fee(factory_router: FactoryRouter):
-    assert factory_router.get_opc_consume_fee() == to_wei("0.03")
+    assert factory_router.get_opc_consume_fee() == OPC_CONSUME_FEE
 
 
 @pytest.mark.unit
 def test_get_opc_provider_fee(factory_router: FactoryRouter):
-    assert factory_router.get_opc_provider_fee() == to_wei("0")
+    assert factory_router.get_opc_provider_fee() == OPC_PROVIDER_FEE
 
 
 @pytest.mark.unit

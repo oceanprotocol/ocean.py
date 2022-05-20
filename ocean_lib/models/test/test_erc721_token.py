@@ -14,6 +14,7 @@ from ocean_lib.models.fixed_rate_exchange import (
     FixedRateExchange,
     FixedRateExchangeDetails,
 )
+from ocean_lib.models.test.test_factory_router import OPC_SWAP_FEE_APPROVED
 from ocean_lib.web3_internal.constants import BLOB, MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
@@ -923,7 +924,7 @@ def test_nft_transfer_with_pool(
     bpool_address = pool_event[0].args.poolAddress
     bpool = BPool(web3, bpool_address)
     assert bpool.is_finalized()
-    assert bpool.opc_fee() == to_wei("0.001")
+    assert bpool.get_opc_fee() == OPC_SWAP_FEE_APPROVED
     assert bpool.get_swap_fee() == to_wei("0.003")
     assert bpool.community_fee(ocean_token.address) == 0
     assert bpool.community_fee(erc20_token.address) == 0
@@ -1212,7 +1213,7 @@ def test_transfer_nft_with_erc20_pool_fre(
     bpool_address = pool_event[0].args.poolAddress
     bpool = BPool(web3, bpool_address)
     assert bpool.is_finalized()
-    assert bpool.opc_fee() == to_wei("0.001")
+    assert bpool.get_opc_fee() == OPC_SWAP_FEE_APPROVED
     assert bpool.get_swap_fee() == to_wei("0.003")
     assert bpool.community_fee(ocean_token.address) == 0
     assert bpool.community_fee(erc20_token.address) == 0
