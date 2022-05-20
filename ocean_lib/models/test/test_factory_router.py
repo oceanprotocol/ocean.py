@@ -45,13 +45,6 @@ def test_properties(factory_router: FactoryRouter):
 
 
 @pytest.mark.unit
-def test_opc_collector(config: Config, factory_router: FactoryRouter):
-    assert factory_router.get_opc_collector() == get_address_of_type(
-        config, "OPFCommunityFeeCollector"
-    )
-
-
-@pytest.mark.unit
 def test_is_pool_template(config: Config, factory_router: FactoryRouter):
     assert factory_router.is_pool_template(get_address_of_type(config, "poolTemplate"))
 
@@ -131,6 +124,13 @@ def test_get_opc_consume_fee(factory_router: FactoryRouter):
 @pytest.mark.unit
 def test_get_opc_provider_fee(factory_router: FactoryRouter):
     assert factory_router.get_opc_provider_fee() == OPC_PROVIDER_FEE
+
+
+@pytest.mark.unit
+def test_opc_collector(config: Config, factory_router: FactoryRouter):
+    assert factory_router.get_opc_collector() == get_address_of_type(
+        config, "OPFCommunityFeeCollector"
+    )
 
 
 @pytest.mark.unit
