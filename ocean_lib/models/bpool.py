@@ -433,3 +433,45 @@ class BPool(BTokenBase):
     @enforce_types
     def get_opc_fee(self) -> int:
         return self.contract.caller.getOPCFee()
+
+    @enforce_types
+    def calc_in_given_out(
+        self,
+        token_in: str,
+        token_out: str,
+        amount_out: int,
+        consume_market_swap_fee: int,
+    ) -> Tuple[int, int, Tuple[int, int, int, int]]:
+        """
+        :return: [amountIn, amountAddedToPool, [LPFee, OPCFee, publishMarketFee, consumeMarketFee]]
+        :rtype: Tuple[int, int, Tuple[int, int, int, int]]
+        """
+        return self.contract.caller.calcInGivenOut(
+            [
+                self.get_balance(token_in),
+                self.get_denormalized_weight(token_in),
+                self.get_balance(token_out),
+                self.get_denormalized_weight(token_out),
+            ],
+            amount_out,
+            consume_market_swap_fee,
+        )
+
+    @enforce_types
+    def calc_out_given_in(
+        self, token_in: str, token_out: str, amount_in: int, consume_market_swap_fee
+    ) -> Tuple[int, int, Tuple[int, int, int, int]]:
+        """
+        :return: [amountOut, amountAddedToPool, [LPFee, OPCFee, publishMarketFee, consumeMarketFee]]
+        :rtype: Tuple[int, int, Tuple[int, int, int, int]]
+        """
+        return self.contract.caller.calcOutGivenIn(
+            [
+                self.get_balance(token_in),
+                self.get_denormalized_weight(token_in),
+                self.get_balance(token_out),
+                self.get_denormalized_weight(token_out),
+            ],
+            amount_in,
+            consume_market_swap_fee,
+        )

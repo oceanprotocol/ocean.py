@@ -2,6 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
+import logging
 from decimal import Decimal
 from typing import Callable
 
@@ -33,6 +34,8 @@ from tests.resources.helper_functions import (
     get_address_of_type,
     transfer_base_token_if_balance_lte,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @pytest.mark.unit
@@ -116,8 +119,8 @@ def pool_swap_fees(
         base_token_address=bt.address,
         from_wallet=base_token_deployer_wallet,
         recipient=publisher_wallet.address,
-        min_balance=parse_units("1500", bt.decimals()),
-        amount_to_transfer=parse_units("1500", bt.decimals()),
+        min_balance=parse_units("15000", bt.decimals()),
+        amount_to_transfer=parse_units("15000", bt.decimals()),
     )
 
     transfer_base_token_if_balance_lte(
@@ -125,8 +128,8 @@ def pool_swap_fees(
         base_token_address=bt.address,
         from_wallet=base_token_deployer_wallet,
         recipient=consumer_wallet.address,
-        min_balance=parse_units("500", bt.decimals()),
-        amount_to_transfer=parse_units("500", bt.decimals()),
+        min_balance=parse_units("5000", bt.decimals()),
+        amount_to_transfer=parse_units("5000", bt.decimals()),
     )
 
     # Tests publisher calls deployPool(), we then check base token balance and fees
@@ -135,7 +138,7 @@ def pool_swap_fees(
     consume_market_swap_fee = to_wei(consume_market_swap_fee)
     lp_swap_fee = to_wei(lp_swap_fee)
 
-    initial_base_token_amount = parse_units("1000", bt.decimals())
+    initial_base_token_amount = parse_units("10000", bt.decimals())
 
     factory_router = FactoryRouter(web3, get_address_of_type(config, "Router"))
     bt.approve(factory_router.address, MAX_WEI, publisher_wallet)
@@ -208,7 +211,7 @@ def pool_swap_fees(
     bt.approve(bpool.address, MAX_WEI, consumer_wallet)
     dt.approve(bpool_address, MAX_WEI, consumer_wallet)
 
-    one_base_token = parse_units("1", bt.decimals())
+    one_hundred_base_tokens = parse_units("100", bt.decimals())
 
     buy_dt_exact_amount_in(
         web3,
@@ -216,7 +219,7 @@ def pool_swap_fees(
         consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
-        one_base_token,
+        one_hundred_base_tokens,
     )
 
     buy_dt_exact_amount_out(
@@ -225,7 +228,9 @@ def pool_swap_fees(
         consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
-        base_token_to_datatoken(one_base_token * 2, bt.decimals(), dt_per_bt_in_wei),
+        base_token_to_datatoken(
+            one_hundred_base_tokens * 2, bt.decimals(), dt_per_bt_in_wei
+        ),
     )
 
     buy_bt_exact_amount_in(
@@ -234,7 +239,9 @@ def pool_swap_fees(
         consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
-        base_token_to_datatoken(one_base_token, bt.decimals(), dt_per_bt_in_wei),
+        base_token_to_datatoken(
+            one_hundred_base_tokens, bt.decimals(), dt_per_bt_in_wei
+        ),
     )
 
     buy_bt_exact_amount_out(
@@ -243,7 +250,7 @@ def pool_swap_fees(
         consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
-        one_base_token,
+        one_hundred_base_tokens,
     )
 
     # Update LP swap fee
@@ -270,7 +277,7 @@ def pool_swap_fees(
         consume_market_swap_fee_collector.address,
         consume_market_swap_fee,
         consumer_wallet,
-        one_base_token,
+        one_hundred_base_tokens,
     )
 
     # Collect publish market swap fees
@@ -944,3 +951,121 @@ def collect_fee_and_verify_balances(
     )
     assert get_bpool_fee_balance(bt.address) == 0
     assert get_bpool_fee_balance(dt.address) == 0
+
+
+def test_swap_calculations(
+    web3: Web3,
+    config: Config,
+    factory_deployer_wallet: Wallet,
+    publisher_wallet: Wallet,
+    erc20_token: ERC20Token,
+):
+    bt = ERC20Token(web3, get_address_of_type(config, "Ocean"))
+    dt = erc20_token
+
+    transfer_base_token_if_balance_lte(
+        web3=web3,
+        base_token_address=bt.address,
+        from_wallet=factory_deployer_wallet,
+        recipient=publisher_wallet.address,
+        min_balance=parse_units("1500", bt.decimals()),
+        amount_to_transfer=parse_units("1500", bt.decimals()),
+    )
+
+    publish_market_swap_fee = to_wei("0.003")
+    consume_market_swap_fee = to_wei("0.005")
+    lp_swap_fee = to_wei("0.01")
+
+    initial_base_token_amount = parse_units("1000", bt.decimals())
+
+    factory_router = FactoryRouter(web3, get_address_of_type(config, "Router"))
+    bt.approve(factory_router.address, MAX_WEI, publisher_wallet)
+
+    side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
+    dt_per_bt_in_wei = to_wei("1")
+    tx = dt.deploy_pool(
+        rate=dt_per_bt_in_wei,
+        base_token_decimals=bt.decimals(),
+        base_token_amount=initial_base_token_amount,
+        lp_swap_fee_amount=lp_swap_fee,
+        publish_market_swap_fee_amount=publish_market_swap_fee,
+        ss_contract=side_staking.address,
+        base_token_address=bt.address,
+        base_token_sender=publisher_wallet.address,
+        publisher_address=publisher_wallet.address,
+        publish_market_swap_fee_collector=publisher_wallet.address,
+        pool_template_address=get_address_of_type(config, "poolTemplate"),
+        from_wallet=publisher_wallet,
+    )
+    tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
+    pool_event = dt.get_event_log(
+        dt.EVENT_NEW_POOL,
+        tx_receipt.blockNumber,
+        web3.eth.block_number,
+        None,
+    )
+
+    bpool_address = pool_event[0].args.poolAddress
+    bpool = BPool(web3, bpool_address)
+
+    amount_in = to_wei(100)
+
+    (
+        cigo_amount_in,
+        cigo_amount_added_to_pool,
+        (
+            cigo_lp_fee_amount,
+            cigo_opc_fee_amount,
+            cigo_publish_market_fee_amount,
+            cigo_consume_market_fee_amount,
+        ),
+    ) = bpool.calc_in_given_out(
+        bt.address, dt.address, amount_in, consume_market_swap_fee
+    )
+
+    (
+        cogi_amount_out,
+        cogi_amount_added_to_pool,
+        (
+            cogi_lp_fee_amount,
+            cogi_opc_fee_amount,
+            cogi_publish_market_fee_amount,
+            cogi_consume_market_fee_amount,
+        ),
+    ) = bpool.calc_out_given_in(
+        bt.address, dt.address, cigo_amount_in, consume_market_swap_fee
+    )
+
+    logger.warning(
+        f"amount_in = {from_wei(amount_in)}\n"
+        f"cigo_amount_in = {from_wei(cigo_amount_in)}\n"
+        f"cigo_amount_added_to_pool = {from_wei(cigo_amount_added_to_pool)}\n"
+        f"cigo_lp_fee_amount = {from_wei(cigo_lp_fee_amount)}\n"
+        f"cigo_opc_fee_amount = {from_wei(cigo_opc_fee_amount)}\n"
+        f"cigo_publish_market_fee_amount = {from_wei(cigo_publish_market_fee_amount)}\n"
+        f"cigo_consume_market_fee_amount = {from_wei(cigo_consume_market_fee_amount)}\n"
+        f"cogi_amount_out = {from_wei(cogi_amount_out)}\n"
+        f"cogi_amount_added_to_pool = {from_wei(cogi_amount_added_to_pool)}\n"
+        f"cogi_lp_fee_amount = {from_wei(cogi_lp_fee_amount)}\n"
+        f"cogi_opc_fee_amount = {from_wei(cogi_opc_fee_amount)}\n"
+        f"cogi_publish_market_fee_amount = {from_wei(cogi_publish_market_fee_amount)}\n"
+        f"cogi_consume_market_fee_amount = {from_wei(cogi_consume_market_fee_amount)}\n"
+    )
+
+    assert cogi_amount_out == amount_in
+
+    # The following assertions fail currently
+    assert (
+        cigo_amount_added_to_pool
+        == cigo_amount_in
+        - cigo_opc_fee_amount
+        - cigo_publish_market_fee_amount
+        - cigo_consume_market_fee_amount
+    )
+    assert (
+        cogi_amount_added_to_pool
+        == cigo_amount_in
+        - cogi_opc_fee_amount
+        - cogi_publish_market_fee_amount
+        - cogi_consume_market_fee_amount
+    )
