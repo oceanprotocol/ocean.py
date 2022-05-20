@@ -81,8 +81,6 @@ def test_create_pool_and_exchange(
     tx = dt.deploy_pool(
         rate=dt_per_bt_in_wei,
         base_token_decimals=bt.decimals(),
-        vesting_amount=initial_base_token_amount,
-        vesting_blocks=2500000,
         base_token_amount=initial_base_token_amount,
         lp_swap_fee_amount=lp_swap_fee,
         publish_market_swap_fee_amount=publish_market_swap_fee,

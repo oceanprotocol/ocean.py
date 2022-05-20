@@ -114,7 +114,6 @@ def test_start_order_fees(
         erc20_fee_managers=[publisher_wallet.address],
         erc20_publish_market_order_fee_addresses=[publish_market_wallet.address],
         erc20_publish_market_order_fee_tokens=[bt.address],
-        erc20_caps=[to_wei(100)],  # Doesn't matter, DT cap is always MAX_WEI
         erc20_publish_market_order_fee_amounts=[publish_market_order_fee],
         erc20_bytess=[[b""]],
     )
@@ -122,7 +121,7 @@ def test_start_order_fees(
     service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
     dt = ERC20Token(web3, asset.datatokens[0]["address"])
 
-    # Mint 50 ERC20 tokens in consumer wallet from publisher. Max cap = 100
+    # Mint 50 ERC20 tokens in consumer wallet from publisher.
     dt.mint(
         account_address=consumer_wallet.address,
         value=to_wei("50"),

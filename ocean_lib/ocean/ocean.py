@@ -308,8 +308,6 @@ class Ocean:
         erc20_token: ERC20Token,
         base_token: ERC20Token,
         rate: int,
-        vesting_amount: int,
-        vesting_blocks: int,
         base_token_amount: int,
         lp_swap_fee_amount: int,
         publish_market_swap_fee_amount: int,
@@ -323,8 +321,6 @@ class Ocean:
         tx = erc20_token.deploy_pool(
             rate=rate,
             base_token_decimals=base_token.decimals(),
-            vesting_amount=vesting_amount,
-            vesting_blocks=vesting_blocks,
             base_token_amount=base_token_amount,
             lp_swap_fee_amount=lp_swap_fee_amount,
             publish_market_swap_fee_amount=publish_market_swap_fee_amount,

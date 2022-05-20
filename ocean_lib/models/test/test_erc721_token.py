@@ -437,7 +437,6 @@ def test_create_erc20(
         fee_manager=consumer_addr,
         publish_market_order_fee_address=publisher_addr,
         publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=to_wei("0.5"),
         publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=publisher_wallet,
@@ -472,7 +471,6 @@ def test_create_erc20_with_usdc_order_fee(
         fee_manager=publisher_wallet.address,
         publish_market_order_fee_address=publisher_wallet.address,
         publish_market_order_fee_token=usdc.address,
-        cap=to_wei(1000),  # ERC20 cap is always MAX_UINT256
         publish_market_order_fee_amount=publish_market_order_fee_amount_in_wei,
         bytess=[b""],
         from_wallet=publisher_wallet,
@@ -530,7 +528,6 @@ def test_create_erc20_with_non_owner(
         fee_manager=publisher_wallet.address,
         publish_market_order_fee_address=publisher_wallet.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=to_wei(5),  # ERC20 cap is always MAX_UINT256
         publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
@@ -570,7 +567,6 @@ def test_fail_creating_erc20(
             fee_manager=consumer_addr,
             publish_market_order_fee_address=publisher_addr,
             publish_market_order_fee_token=ZERO_ADDRESS,
-            cap=to_wei("0.5"),
             publish_market_order_fee_amount=0,
             bytess=[b""],
             from_wallet=consumer_wallet,
@@ -657,7 +653,6 @@ def test_erc721_datatoken_functions(
         fee_manager=consumer_addr,
         publish_market_order_fee_address=publisher_addr,
         publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=to_wei("0.5"),
         publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
@@ -822,7 +817,6 @@ def test_transfer_nft(
         fee_manager=consumer_addr,
         publish_market_order_fee_address=publisher_addr,
         publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=to_wei(200),
         publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
@@ -902,12 +896,11 @@ def test_nft_transfer_with_pool(
     assert erc721_nft.owner_of(1) == consumer_wallet.address
 
     ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
+    ocean_token.approve(factory_router.address, to_wei(10000), consumer_wallet)
 
     tx = erc20_token.deploy_pool(
         rate=to_wei(1),
         base_token_decimals=ocean_token.decimals(),
-        vesting_amount=to_wei(10),
-        vesting_blocks=2500000,
         base_token_amount=to_wei(100),
         lp_swap_fee_amount=to_wei("0.003"),
         publish_market_swap_fee_amount=to_wei("0.001"),
@@ -1172,7 +1165,6 @@ def test_transfer_nft_with_erc20_pool_fre(
         fee_manager=publisher_addr,
         publish_market_order_fee_address=publisher_addr,
         publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=to_wei(200),
         publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=publisher_wallet,
@@ -1198,8 +1190,6 @@ def test_transfer_nft_with_erc20_pool_fre(
     tx = erc20_token.deploy_pool(
         rate=to_wei(1),
         base_token_decimals=ocean_token.decimals(),
-        vesting_amount=to_wei(10),
-        vesting_blocks=2500000,
         base_token_amount=to_wei(100),
         lp_swap_fee_amount=to_wei("0.003"),
         publish_market_swap_fee_amount=to_wei("0.001"),

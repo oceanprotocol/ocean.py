@@ -80,7 +80,7 @@ def test_exchange_rate_creation(
     erc20_token,
 ):
     """Test exchange with baseToken(OCEAN) 18 Decimals and dataToken 18 Decimals, RATE = 1"""
-    cap = to_wei("100000")
+    amount = to_wei("100000")
     amount_dt_to_sell = to_wei("100")
     no_limit = to_wei("100000000000000000000")
     rate = to_wei("1")
@@ -90,8 +90,8 @@ def test_exchange_rate_creation(
 
     fixed_exchange = FixedRateExchange(web3, get_address_of_type(config, "FixedPrice"))
 
-    erc20_token.mint(consumer_addr, cap, publisher_wallet)
-    assert erc20_token.balanceOf(consumer_addr) == cap
+    erc20_token.mint(consumer_addr, amount, publisher_wallet)
+    assert erc20_token.balanceOf(consumer_addr) == amount
     number_of_exchanges_before = fixed_exchange.get_number_of_exchanges()
 
     tx = erc20_token.create_fixed_rate(

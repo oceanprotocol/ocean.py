@@ -228,7 +228,6 @@ def deploy_erc721_erc20(
     config: Config,
     erc721_publisher: Wallet,
     erc20_minter: Optional[Wallet] = None,
-    cap: int = to_wei(100),
     template_index: Optional[int] = 1,
 ) -> Union[ERC721NFT, Tuple[ERC721NFT, ERC20Token]]:
     """Helper function to deploy an ERC721NFT using erc721_publisher Wallet
@@ -264,7 +263,6 @@ def deploy_erc721_erc20(
         fee_manager=erc721_publisher.address,
         publish_market_order_fee_address=erc721_publisher.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=cap,
         publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=erc721_publisher,
@@ -428,9 +426,6 @@ def create_nft_erc20_with_pool(
     swap_fee=to_wei("0.0001"),
     swap_market_fee=to_wei("0.0001"),
     initial_pool_liquidity=to_wei("100"),
-    token_cap=to_wei("150"),
-    vesting_amount=0,
-    vesting_blocks=2500000,
     pool_initial_rate=to_wei("1"),
 ):
     erc721_factory_address = get_address_of_type(
@@ -454,13 +449,10 @@ def create_nft_erc20_with_pool(
         datatoken_fee_manager=publisher_wallet.address,
         datatoken_publish_market_order_fee_address=publisher_wallet.address,
         datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
-        datatoken_cap=token_cap,
         datatoken_publish_market_order_fee_amount=0,
         datatoken_bytess=[b""],
         pool_rate=pool_initial_rate,
         pool_base_token_decimals=base_token.decimals(),
-        pool_vesting_amount=vesting_amount,
-        pool_vesting_blocks=vesting_blocks,
         pool_base_token_amount=initial_pool_liquidity,
         pool_lp_swap_fee_amount=swap_fee,
         pool_publish_market_swap_fee_amount=swap_market_fee,

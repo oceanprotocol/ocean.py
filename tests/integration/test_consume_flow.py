@@ -61,7 +61,6 @@ def test_consume_flow(
         erc20_fee_managers=[publisher_wallet.address],
         erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
         erc20_publish_market_order_fee_tokens=[ZERO_ADDRESS],
-        erc20_caps=[to_wei(100)],  # Doesn't matter, DT cap is always MAX_WEI
         erc20_publish_market_order_fee_amounts=[0],
         erc20_bytess=[[b""]],
     )

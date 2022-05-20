@@ -125,11 +125,6 @@ def test_get_opc_provider_fee(factory_router: FactoryRouter):
 
 
 @pytest.mark.unit
-def test_get_min_vesting_period(factory_router: FactoryRouter):
-    assert factory_router.get_min_vesting_period() == 2426000
-
-
-@pytest.mark.unit
 def test_buy_dt_batch(
     web3: Web3,
     config: Config,
@@ -169,13 +164,10 @@ def test_buy_dt_batch(
         datatoken_fee_manager=consumer_wallet.address,
         datatoken_publish_market_order_fee_address=factory_deployer_wallet.address,
         datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
-        datatoken_cap=to_wei("1000000"),
         datatoken_publish_market_order_fee_amount=0,
         datatoken_bytess=[b""],
         pool_rate=to_wei("2"),
         pool_base_token_decimals=ocean_contract.decimals(),
-        pool_vesting_amount=to_wei("10000"),
-        pool_vesting_blocks=2500000,
         pool_base_token_amount=to_wei("2"),
         pool_lp_swap_fee_amount=to_wei("0.001"),
         pool_publish_market_swap_fee_amount=to_wei("0.001"),
@@ -218,13 +210,10 @@ def test_buy_dt_batch(
         datatoken_fee_manager=consumer_wallet.address,
         datatoken_publish_market_order_fee_address=factory_deployer_wallet.address,
         datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
-        datatoken_cap=to_wei("1000000"),
         datatoken_publish_market_order_fee_amount=0,
         datatoken_bytess=[b""],
         pool_rate=to_wei("1"),
         pool_base_token_decimals=ocean_contract.decimals(),
-        pool_vesting_amount=to_wei("10000"),
-        pool_vesting_blocks=2500000,
         pool_base_token_amount=to_wei("2"),
         pool_lp_swap_fee_amount=to_wei("0.001"),
         pool_publish_market_swap_fee_amount=to_wei("0.001"),
@@ -328,13 +317,10 @@ def test_stake_batch(
         datatoken_fee_manager=consumer_wallet.address,
         datatoken_publish_market_order_fee_address=factory_deployer_wallet.address,
         datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
-        datatoken_cap=to_wei("1000000"),
         datatoken_publish_market_order_fee_amount=0,
         datatoken_bytess=[b""],
         pool_rate=to_wei("2"),
         pool_base_token_decimals=ocean_contract.decimals(),
-        pool_vesting_amount=to_wei("10000"),
-        pool_vesting_blocks=2500000,
         pool_base_token_amount=to_wei("2"),
         pool_lp_swap_fee_amount=to_wei("0.001"),
         pool_publish_market_swap_fee_amount=to_wei("0.001"),
@@ -377,13 +363,10 @@ def test_stake_batch(
         datatoken_fee_manager=consumer_wallet.address,
         datatoken_publish_market_order_fee_address=factory_deployer_wallet.address,
         datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
-        datatoken_cap=to_wei("1000000"),
         datatoken_publish_market_order_fee_amount=0,
         datatoken_bytess=[b""],
         pool_rate=to_wei("1"),
         pool_base_token_decimals=ocean_contract.decimals(),
-        pool_vesting_amount=to_wei("10000"),
-        pool_vesting_blocks=2500000,
         pool_base_token_amount=to_wei("2"),
         pool_lp_swap_fee_amount=to_wei("0.001"),
         pool_publish_market_swap_fee_amount=to_wei("0.001"),

@@ -73,8 +73,6 @@ def test_side_staking(
     tx = erc20_token.deploy_pool(
         rate=to_wei(1),
         base_token_decimals=ocean_token.decimals(),
-        vesting_amount=to_wei("0.5"),
-        vesting_blocks=2500000,
         base_token_amount=initial_ocean_liquidity,
         lp_swap_fee_amount=lp_swap_fee,
         publish_market_swap_fee_amount=publish_market_swap_fee,
@@ -308,12 +306,10 @@ def test_side_staking_steal(
     """
     # Test initial values and setups
     initial_pool_liquidity_eth = 200000
-    token_cap_doesnt_matter = 1
     join_pool_step_eth = 20000
     datatoken_buy_amount_basetoken_eth = 5000
 
     initial_pool_liquidity = to_wei(initial_pool_liquidity_eth)
-    token_cap = to_wei(token_cap_doesnt_matter)
     swap_market_fee = to_wei("0.0001")
     swap_fee = to_wei("0.0001")
     big_allowance = MAX_WEI
@@ -331,7 +327,6 @@ def test_side_staking_steal(
         swap_fee,
         swap_market_fee,
         initial_pool_liquidity,
-        token_cap,
     )
 
     ocean_token.approve(bpool.address, big_allowance, another_consumer_wallet)
@@ -415,7 +410,6 @@ def test_side_staking_constant_rate(
     """
     # Test initial values and setups
     initial_pool_liquidity = to_wei("1")
-    token_cap = to_wei("5")
     swap_market_fee = to_wei("0.0001")
     swap_fee = to_wei("0.0001")
     big_allowance = to_wei("100000000")
@@ -432,7 +426,6 @@ def test_side_staking_constant_rate(
         swap_fee,
         swap_market_fee,
         initial_pool_liquidity,
-        token_cap,
     )
 
     ocean_token.approve(bpool.address, big_allowance, another_consumer_wallet)

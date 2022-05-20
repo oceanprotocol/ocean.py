@@ -75,10 +75,6 @@ class FactoryRouter(BFactory):
         return self.contract.caller.getOPCProviderFee()
 
     @enforce_types
-    def get_min_vesting_period(self) -> int:
-        return self.contract.caller.getMinVestingPeriod()
-
-    @enforce_types
     def stake_batch(
         self, stakes: List[Union[dict, tuple, Stakes]], from_wallet: Wallet
     ) -> str:
