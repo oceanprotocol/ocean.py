@@ -2,20 +2,21 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import List
+from typing import List, Tuple
 
 from enforce_typing import enforce_types
 
-from ocean_lib.models import balancer_constants
+from ocean_lib.models.bconst import BConst
 from ocean_lib.models.btoken import BTokenBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-class BPool(BTokenBase):
+class BPool(BTokenBase, BConst):
     CONTRACT_NAME = "BPool"
 
     EVENT_LOG_SWAP = "LOG_SWAP"
     EVENT_LOG_JOIN = "LOG_JOIN"
+    EVENT_LOG_SETUP = "LOG_SETUP"
     EVENT_LOG_EXIT = "LOG_EXIT"
     EVENT_LOG_CALL = "LOG_CALL"
     EVENT_LOG_BPT = "LOG_BPT"
@@ -26,6 +27,7 @@ class BPool(BTokenBase):
     EVENT_CONSUME_MARKET_FEE = "ConsumeMarketFee"
     EVENT_LOG_SWAP_FEES = "SWAP_FEES"
     EVENT_PUBLISH_MARKET_FEE_CHANGED = "PublishMarketFeeChanged"
+    EVENT_GULPED = "Gulped"
 
     @property
     def event_LOG_SWAP(self):
@@ -34,6 +36,10 @@ class BPool(BTokenBase):
     @property
     def event_LOG_JOIN(self):
         return self.events.LOG_JOIN()
+
+    @property
+    def event_LOG_SETUP(self):
+        return self.events.LOG_SETUP()
 
     @property
     def event_LOG_EXIT(self):
@@ -75,55 +81,26 @@ class BPool(BTokenBase):
     def event_PublishMarketFeeChanged(self):
         return self.events.PublishMarketFeeChanged()
 
-    @enforce_types
-    def setup(
-        self,
-        datatoken: str,
-        datatoken_amount: int,
-        datatoken_weight: int,
-        base_token: str,
-        base_token_amount: int,
-        base_token_weight: int,
-        publish_market_swap_fee_amount: int,
-        from_wallet: Wallet,
-    ) -> str:
-        tx_id = self.send_transaction(
-            "setup",
-            (
-                datatoken,
-                datatoken_amount,
-                datatoken_weight,
-                base_token,
-                base_token_amount,
-                base_token_weight,
-                publish_market_swap_fee_amount,
-            ),
-            from_wallet,
-            {"gas": balancer_constants.GASLIMIT_BFACTORY_NEWBPOOL},
-        )
-
-        return tx_id
+    @property
+    def event_Gulped(self):
+        return self.events.Gulped()
 
     @enforce_types
-    def is_public_pool(self) -> bool:
-        return self.contract.caller.isPublicSwap()
+    def get_publish_market_collector(self) -> str:
+        return self.contract.caller._publishMarketCollector()
 
     @enforce_types
-    def get_opc_fee(self) -> int:
-        return self.contract.caller.getOPCFee()
-
-    @enforce_types
-    def community_fee(self, address: str) -> int:
-        return self.contract.caller.communityFees(address)
-
-    @enforce_types
-    def publish_market_fee(self, address: str) -> int:
-        return self.contract.caller.publishMarketFees(address)
+    def get_id(self) -> int:
+        return self.contract.caller.getId()
 
     @enforce_types
     def is_initialized(self) -> bool:
         """Returns true if state is initialized."""
         return self.contract.caller.isInitialized()
+
+    @enforce_types
+    def is_public_swap(self) -> bool:
+        return self.contract.caller.isPublicSwap()
 
     @enforce_types
     def is_finalized(self) -> bool:
@@ -165,12 +142,24 @@ class BPool(BTokenBase):
         return self.contract.caller.getFinalTokens()
 
     @enforce_types
-    def get_publish_market_collector(self) -> str:
-        return self.contract.caller._publishMarketCollector()
-
-    @enforce_types
     def collect_opc(self, from_wallet: Wallet) -> str:
         return self.send_transaction("collectOPC", (), from_wallet)
+
+    @enforce_types
+    def get_current_opc_fees(self) -> Tuple[List[str], List[int]]:
+        """Get the current amount of fees which can be withdrawned by OPC
+
+        :return: List of token addresses and List of amounts
+        """
+        return self.contract.caller.getCurrentOPCFees()
+
+    @enforce_types
+    def get_current_market_fees(self) -> Tuple[List[str], List[int]]:
+        """Get the current amount of fees which can be withdrawned by _publishMarketCollector
+
+        :return: List of token addresses and List of amounts
+        """
+        return self.contract.caller.getCurrentMarketFees()
 
     @enforce_types
     def collect_market_fee(self, from_wallet: Wallet) -> str:
@@ -235,72 +224,11 @@ class BPool(BTokenBase):
         return self.contract.caller.getBaseTokenAddress()
 
     @enforce_types
-    def calc_pool_in_single_out(self, address: str, amount: int):
-        return self.contract.caller.calcPoolInSingleOut(address, amount)
-
-    @enforce_types
-    def calc_pool_out_single_in(self, address: str, amount: int):
-        return self.contract.caller.calcPoolOutSingleIn(address, amount)
-
-    @enforce_types
-    def calc_single_out_pool_in(self, address: str, amount: int):
-        return self.contract.caller.calcSingleOutPoolIn(address, amount)
-
-    @enforce_types
-    def calc_single_in_pool_out(self, address: str, amount: int):
-        return self.contract.caller.calcSingleInPoolOut(address, amount)
-
-    @enforce_types
     def set_swap_fee(self, lp_swap_fee_amount: int, from_wallet: Wallet) -> str:
         """
         Caller must be controller. Pool must NOT be finalized.
         """
         return self.send_transaction("setSwapFee", (lp_swap_fee_amount,), from_wallet)
-
-    @enforce_types
-    def finalize(self, from_wallet: Wallet) -> str:
-        """
-        This makes the pool **finalized**. This is a one-way transition. `bind`,
-        `rebind`, `unbind`, `setSwapFee` and `setPublicSwap` will all throw
-        `ERR_IS_FINALIZED` after pool is finalized. This also switches
-        `isSwapPublic` to true.
-        """
-        return self.send_transaction("finalize", (), from_wallet)
-
-    @enforce_types
-    def bind(
-        self, token_address: str, balance: int, weight: int, from_wallet: Wallet
-    ) -> str:
-        """
-        Binds the token with address `token`. Tokens will be pushed/pulled from
-        caller to adjust match new balance. Token must not already be bound.
-        `balance` must be a valid balance and denorm must be a valid denormalized
-        weight. `bind` creates the token record and then calls `rebind` for
-        updating pool weights and token transfers.
-
-        Possible errors:
-        -`ERR_NOT_CONTROLLER` -- caller is not the controller
-        -`ERR_IS_BOUND` -- T is already bound
-        -`ERR_IS_FINALIZED` -- isFinalized() is true
-        -`ERR_ERC20_FALSE` -- ERC20 token returned false
-        -`ERR_MAX_TOKENS` -- Only 8 tokens are allowed per pool
-        -unspecified error thrown by token
-        """
-        return self.send_transaction(
-            "bind", (token_address, balance, weight), from_wallet
-        )
-
-    @enforce_types
-    def rebind(
-        self, token_address: str, balance: int, weight: int, from_wallet: Wallet
-    ) -> str:
-        """
-        Changes the parameters of an already-bound token. Performs the same
-        validation on the parameters.
-        """
-        return self.send_transaction(
-            "rebind", (token_address, balance, weight), from_wallet
-        )
 
     @enforce_types
     def get_spot_price(
@@ -333,18 +261,6 @@ class BPool(BTokenBase):
         return self.contract.caller.getAmountOutExactIn(
             token_in, token_out, token_amount_in, consume_market_swap_fee_amount
         )
-
-    @enforce_types
-    def get_max_out_ratio(self) -> int:
-        return self.contract.caller.MAX_OUT_RATIO()
-
-    @enforce_types
-    def get_max_in_ratio(self) -> int:
-        return self.contract.caller.MAX_IN_RATIO()
-
-    @enforce_types
-    def get_min_fee(self) -> int:
-        return self.contract.caller.MIN_FEE()
 
     @enforce_types
     def swap_exact_amount_in(
@@ -476,3 +392,45 @@ class BPool(BTokenBase):
             (pool_amount_in, min_amount_out),
             from_wallet,
         )
+
+    @enforce_types
+    def calc_single_out_pool_in(self, address: str, amount: int):
+        return self.contract.caller.calcSingleOutPoolIn(address, amount)
+
+    @enforce_types
+    def calc_pool_in_single_out(self, address: str, amount: int):
+        return self.contract.caller.calcPoolInSingleOut(address, amount)
+
+    @enforce_types
+    def calc_single_in_pool_out(self, address: str, amount: int):
+        return self.contract.caller.calcSingleInPoolOut(address, amount)
+
+    @enforce_types
+    def calc_pool_out_single_in(self, address: str, amount: int):
+        return self.contract.caller.calcPoolOutSingleIn(address, amount)
+
+    @enforce_types
+    def gulp(self, address: str, from_wallet: Wallet):
+        return self.send_transaction(
+            "gulp",
+            (address),
+            from_wallet,
+        )
+
+    # BMath.sol
+
+    @enforce_types
+    def swap_publish_market_fee(self) -> int:
+        return self.contract.caller._swapPublishMarketFee()
+
+    @enforce_types
+    def community_fee(self, address: str) -> int:
+        return self.contract.caller.communityFees(address)
+
+    @enforce_types
+    def publish_market_fee(self, address: str) -> int:
+        return self.contract.caller.publishMarketFees(address)
+
+    @enforce_types
+    def get_opc_fee(self) -> int:
+        return self.contract.caller.getOPCFee()

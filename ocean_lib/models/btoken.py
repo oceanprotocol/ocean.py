@@ -12,6 +12,10 @@ class BTokenBase(ContractBase):
     CONTRACT_NAME = "BTokenBase"
 
     @enforce_types
+    def name(self) -> str:
+        return self.contract.caller.name()
+
+    @enforce_types
     def symbol(self) -> str:
         return self.contract.caller.symbol()
 
