@@ -6,12 +6,11 @@ from typing import List, Tuple
 
 from enforce_typing import enforce_types
 
-from ocean_lib.models.bconst import BConst
 from ocean_lib.models.btoken import BTokenBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-class BPool(BTokenBase, BConst):
+class BPool(BTokenBase):
     CONTRACT_NAME = "BPool"
 
     EVENT_LOG_SWAP = "LOG_SWAP"

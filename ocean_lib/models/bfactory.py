@@ -4,10 +4,10 @@
 #
 from enforce_typing import enforce_types
 
-from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.models.bconst import BConst
 
 
-class BFactory(ContractBase):
+class BFactory(BConst):
     CONTRACT_NAME = "BFactory"
 
     EVENT_BPOOL_CREATED = "BPoolCreated"

@@ -4,11 +4,11 @@
 #
 from enforce_typing import enforce_types
 
-from ocean_lib.web3_internal.contract_base import ContractBase
+from ocean_lib.models.bconst import BConst
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-class BTokenBase(ContractBase):
+class BTokenBase(BConst):
     CONTRACT_NAME = "BTokenBase"
 
     @enforce_types
