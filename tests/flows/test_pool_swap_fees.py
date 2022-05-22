@@ -1011,19 +1011,6 @@ def test_swap_calculations(
     amount_in = to_wei(100)
 
     (
-        cigo_amount_in,
-        cigo_amount_added_to_pool,
-        (
-            cigo_lp_fee_amount,
-            cigo_opc_fee_amount,
-            cigo_publish_market_fee_amount,
-            cigo_consume_market_fee_amount,
-        ),
-    ) = bpool.calc_in_given_out(
-        bt.address, dt.address, amount_in, consume_market_swap_fee
-    )
-
-    (
         cogi_amount_out,
         cogi_amount_added_to_pool,
         (
@@ -1033,28 +1020,45 @@ def test_swap_calculations(
             cogi_consume_market_fee_amount,
         ),
     ) = bpool.calc_out_given_in(
-        bt.address, dt.address, cigo_amount_in, consume_market_swap_fee
+        bt.address, dt.address, amount_in, consume_market_swap_fee
+    )
+
+    # `calc_in_given_out` using the "out" amount calculated by `calc_out_given_in`
+    (
+        cigo_amount_in,
+        cigo_amount_added_to_pool,
+        (
+            cigo_lp_fee_amount,
+            cigo_opc_fee_amount,
+            cigo_publish_market_fee_amount,
+            cigo_consume_market_fee_amount,
+        ),
+    ) = bpool.calc_in_given_out(
+        bt.address, dt.address, cogi_amount_out, consume_market_swap_fee
     )
 
     logger.warning(
+        f"\n"
         f"amount_in = {from_wei(amount_in)}\n"
-        f"cigo_amount_in = {from_wei(cigo_amount_in)}\n"
-        f"cigo_amount_added_to_pool = {from_wei(cigo_amount_added_to_pool)}\n"
-        f"cigo_lp_fee_amount = {from_wei(cigo_lp_fee_amount)}\n"
-        f"cigo_opc_fee_amount = {from_wei(cigo_opc_fee_amount)}\n"
-        f"cigo_publish_market_fee_amount = {from_wei(cigo_publish_market_fee_amount)}\n"
-        f"cigo_consume_market_fee_amount = {from_wei(cigo_consume_market_fee_amount)}\n"
         f"cogi_amount_out = {from_wei(cogi_amount_out)}\n"
         f"cogi_amount_added_to_pool = {from_wei(cogi_amount_added_to_pool)}\n"
         f"cogi_lp_fee_amount = {from_wei(cogi_lp_fee_amount)}\n"
         f"cogi_opc_fee_amount = {from_wei(cogi_opc_fee_amount)}\n"
         f"cogi_publish_market_fee_amount = {from_wei(cogi_publish_market_fee_amount)}\n"
         f"cogi_consume_market_fee_amount = {from_wei(cogi_consume_market_fee_amount)}\n"
+        f"cigo_amount_in = {from_wei(cigo_amount_in)}\n"
+        f"cigo_amount_added_to_pool = {from_wei(cigo_amount_added_to_pool)}\n"
+        f"cigo_lp_fee_amount = {from_wei(cigo_lp_fee_amount)}\n"
+        f"cigo_opc_fee_amount = {from_wei(cigo_opc_fee_amount)}\n"
+        f"cigo_publish_market_fee_amount = {from_wei(cigo_publish_market_fee_amount)}\n"
+        f"cigo_consume_market_fee_amount = {from_wei(cigo_consume_market_fee_amount)}\n"
     )
 
-    assert cogi_amount_out == amount_in
+    assert cigo_amount_in == amount_in
 
-    # The following assertions fail currently
+    # Amount added to the pool should equal the amount_in minus the opc fee,
+    # publish fee, and consume fee. LP fee is not subtracted because it's
+    # absorbed into the pool, thus making the pool tokens more valuable.
     assert (
         cigo_amount_added_to_pool
         == cigo_amount_in
