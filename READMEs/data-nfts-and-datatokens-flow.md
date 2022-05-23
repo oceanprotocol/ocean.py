@@ -57,9 +57,6 @@ pip3 install --pre ocean-lib
 export TEST_PRIVATE_KEY1=0x8467415bb2ba7c91084d932276214b11a3dd9bdb2930fefa194b666dd8020b99
 export TEST_PRIVATE_KEY2=0x1d751ded5a32226054cd2e71261039b65afb9ee1c746d055dd699b1150a5befc
 
-# Needed to mint fake OCEAN for testing with ganache
-export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58
-
 # Set the address file only for ganache
 export ADDRESS_FILE=~/.ocean/ocean-contracts/artifacts/address.json
 
@@ -115,7 +112,6 @@ In the same python console:
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 print("Create ERC20 datatoken: begin.")
-cap = ocean.to_wei(100)
 
 nft_factory = ocean.get_nft_factory()
 erc20_token = erc721_nft.create_datatoken(
@@ -126,7 +122,6 @@ erc20_token = erc721_nft.create_datatoken(
     fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
     publish_market_order_fee_address=alice_wallet.address,  # publishing Market Address
     publish_market_order_fee_token=ZERO_ADDRESS,  # publishing Market Fee Token
-    cap=cap,
     publish_market_order_fee_amount=0,
     bytess=[b""],
     from_wallet=alice_wallet

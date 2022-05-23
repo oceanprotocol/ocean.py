@@ -39,9 +39,13 @@ Then, please refer to [publish-flow](publish-flow.md) and complete the following
 
 ## 3. Bob downloads the dataset
 Now, you're Bob the data consumer.
-In usual cases, Bob buys the dataset but here, let's have Alice send hhim some tokens directly.
+In usual cases, Bob buys the dataset but here, let's have Alice send him some tokens directly.
 
-In the same Python console as before:
+Needed to mint fake OCEAN for testing with ganache:
+
+`export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f019bc74b8f4389df2837a58`
+
+Then, in the same console:
 
 ```python
 # Bob's wallet

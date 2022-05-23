@@ -41,7 +41,6 @@ def test_fees(
         datatoken_fee_manager=publisher_wallet.address,
         datatoken_publishing_market_address=publishing_market_wallet.address,
         fee_token_address=publisher_ocean_instance.OCEAN_address,
-        datatoken_cap=publisher_ocean_instance.to_wei(1_410_000_000),
         publishing_market_fee_amount=10,
         bytess=[b""],
         from_wallet=publisher_wallet,

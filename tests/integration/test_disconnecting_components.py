@@ -76,7 +76,6 @@ def _create_ddo(ocean, publisher):
             erc20_fee_managers=[publisher.address],
             erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
             erc20_publish_market_order_fee_tokens=ocean.OCEAN_address,
-            erc20_caps=[ocean.to_wei(100)],
             erc20_publish_market_order_fee_amounts=[0],
             erc20_bytess=[[b""]],
         )

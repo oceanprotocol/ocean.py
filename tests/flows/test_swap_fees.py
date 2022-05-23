@@ -94,7 +94,6 @@ def test_pool_ocean(
     )
 
     # Tests consumer deploys a new erc20DT, assigning himself as minter
-    cap = to_wei("100000")
     tx = erc721_nft.create_erc20(
         template_index=1,
         name="ERC20DT1",
@@ -103,7 +102,6 @@ def test_pool_ocean(
         fee_manager=factory_deployer_wallet.address,
         publish_market_order_fee_address=consumer_wallet.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=cap,
         publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
@@ -134,8 +132,6 @@ def test_pool_ocean(
     tx = erc20_token.deploy_pool(
         rate=to_wei(1),
         base_token_decimals=ocean_contract.decimals(),
-        vesting_amount=initial_ocean_liq,
-        vesting_blocks=2500000,
         base_token_amount=initial_ocean_liq,
         lp_swap_fee_amount=lp_swap_fee,
         publish_market_swap_fee_amount=publish_market_swap_fee,
@@ -570,7 +566,6 @@ def test_pool_dai(
     publish_market_swap_fee = to_wei("0.001")
 
     # Tests consumer deploys a new erc20DT, assigning himself as minter
-    cap = to_wei("1000")
     tx = erc721_nft.create_erc20(
         template_index=1,
         name="ERC20DT1",
@@ -579,7 +574,6 @@ def test_pool_dai(
         fee_manager=factory_deployer_wallet.address,
         publish_market_order_fee_address=consumer_wallet.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=cap,
         publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
@@ -607,8 +601,6 @@ def test_pool_dai(
     tx = erc20_token.deploy_pool(
         rate=to_wei(1),
         base_token_decimals=dai_contract.decimals(),
-        vesting_amount=initial_dai_liq,
-        vesting_blocks=2500000,
         base_token_amount=initial_dai_liq,
         lp_swap_fee_amount=lp_swap_fee,
         publish_market_swap_fee_amount=publish_market_swap_fee,
@@ -1030,7 +1022,6 @@ def test_pool_usdc(
     publish_market_swap_fee = to_wei("0.001")
 
     # Tests consumer deploys a new erc20DT, assigning himself as minter
-    cap = to_wei("1000")
     tx = erc721_nft.create_erc20(
         template_index=1,
         name="ERC20DT1",
@@ -1039,7 +1030,6 @@ def test_pool_usdc(
         fee_manager=factory_deployer_wallet.address,
         publish_market_order_fee_address=consumer_wallet.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=cap,
         publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
@@ -1067,8 +1057,6 @@ def test_pool_usdc(
     tx = erc20_token.deploy_pool(
         rate=to_wei(1),
         base_token_decimals=usdc_contract.decimals(),
-        vesting_amount=initial_usdc_liq,
-        vesting_blocks=2500000,
         base_token_amount=initial_usdc_liq,
         lp_swap_fee_amount=lp_swap_fee,
         publish_market_swap_fee_amount=publish_market_swap_fee,
@@ -1490,7 +1478,6 @@ def test_pool_usdc_flexible(
     publish_market_swap_fee = to_wei("0.001")
 
     # Tests consumer deploys a new erc20DT, assigning himself as minter
-    cap = to_wei(1000)
     tx = erc721_nft.create_erc20(
         template_index=1,
         name="ERC20DT1",
@@ -1499,7 +1486,6 @@ def test_pool_usdc_flexible(
         fee_manager=factory_deployer_wallet.address,
         publish_market_order_fee_address=consumer_wallet.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=cap,
         publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
@@ -1527,8 +1513,6 @@ def test_pool_usdc_flexible(
     tx = erc20_token.deploy_pool(
         rate=to_wei(1),
         base_token_decimals=usdc_contract.decimals(),
-        vesting_amount=initial_usdc_liq,
-        vesting_blocks=2500000,
         base_token_amount=initial_usdc_liq,
         lp_swap_fee_amount=lp_swap_fee,
         publish_market_swap_fee_amount=publish_market_swap_fee,
@@ -1945,7 +1929,6 @@ def test_pool_dai_flexible(
     publish_market_swap_fee = to_wei("0.001")
 
     # Tests consumer deploys a new erc20DT, assigning himself as minter
-    cap = to_wei(1000)
     tx = erc721_nft.create_erc20(
         template_index=1,
         name="ERC20DT1",
@@ -1954,7 +1937,6 @@ def test_pool_dai_flexible(
         fee_manager=factory_deployer_wallet.address,
         publish_market_order_fee_address=consumer_wallet.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
-        cap=cap,
         publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=consumer_wallet,
@@ -1982,8 +1964,6 @@ def test_pool_dai_flexible(
     tx = erc20_token.deploy_pool(
         rate=to_wei(1),
         base_token_decimals=dai_contract.decimals(),
-        vesting_amount=initial_dai_liq,
-        vesting_blocks=2500000,
         base_token_amount=initial_dai_liq,
         lp_swap_fee_amount=lp_swap_fee,
         publish_market_swap_fee_amount=publish_market_swap_fee,
