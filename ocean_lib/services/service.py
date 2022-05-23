@@ -52,7 +52,7 @@ class Service:
                 ConsumeParameters.from_dict(cp_dict) for cp_dict in consume_parameters
             ]
         except AttributeError:
-            raise TypeError("ConsumeParameters should be a list of dictionaries.")
+            raise TypeError("ConsumerParameters should be a list of dictionaries.")
 
         if additional_information:
             self.additional_information = additional_information
