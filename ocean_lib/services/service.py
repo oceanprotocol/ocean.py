@@ -7,6 +7,7 @@
     To handle service items in a DDO record
 """
 import copy
+import distutils
 import logging
 from typing import Any, Dict, List, Optional
 
@@ -32,6 +33,7 @@ class Service:
         name: Optional[str] = None,
         description: Optional[str] = None,
         additional_information: Optional[Dict[str, Any]] = None,
+        consume_parameters: List[Optional[Dict[str, Any]]] = None,
     ) -> None:
         """Initialize NFT Service instance."""
         self.id = service_id
@@ -44,6 +46,13 @@ class Service:
         self.name = name
         self.description = description
         self.additional_information = None
+
+        try:
+            self.consume_parameters = [
+                ConsumeParameters.from_dict(cp_dict) for cp_dict in consume_parameters
+            ]
+        except AttributeError:
+            raise TypeError("ConsumeParameters should be a list of dictionaries.")
 
         if additional_information:
             self.additional_information = additional_information
@@ -81,6 +90,7 @@ class Service:
             sd.pop("name", None),
             sd.pop("description", None),
             sd.pop("additionalInformation", None),
+            sd.pop("consumeParameters", None),
         )
 
     def get_trusted_algorithms(self) -> list:
@@ -150,6 +160,8 @@ class Service:
             "datatokenAddress": self.datatoken,
             "serviceEndpoint": self.service_endpoint,
             "timeout": self.timeout,
+            "additionalInformation": self.additional_information,
+            "consumeParameters": self.consume_parameters,
         }
 
         if self.type == "compute":
@@ -162,9 +174,6 @@ class Service:
             values["name"] = self.name
         if self.description is not None:
             values["description"] = self.description
-
-        if self.additional_information is not None:
-            values["additionalInformation"] = self.additional_information
 
         for key, value in values.items():
             if isinstance(value, object) and hasattr(value, "as_dictionary"):
@@ -272,3 +281,59 @@ class Service:
         ] = trusted_algo_publishers
         self.compute_values["allowNetworkAccess"] = allow_network_access
         self.compute_values["allowRawAlgorithm"] = allow_raw_algorithm
+
+
+class ConsumeParameters:
+    def __init__(
+        self,
+        name: str,
+        type: Optional[str] = None,
+        label: Optional[str] = None,
+        required: Optional[bool] = False,
+        default: Optional[str] = None,
+        description: Optional[str] = None,
+    ) -> None:
+        self.name = name
+        self.type = type
+        self.label = label
+        self.required = required
+        self.default = default
+        self.description = description
+
+    @classmethod
+    def from_dict(cls, consume_parameters_dict: Dict[str, Any]) -> "ConsumeParameters":
+        """Create a ConsumeParameters object from a JSON string."""
+        sd = copy.deepcopy(consume_parameters_dict)
+        required = sd["required"] if "required" in sd else None
+        if required is not None:
+            required = (
+                distutils.util.strtobool(sd["required"])
+                if isinstance(sd["required"], str)
+                else required
+            )
+
+        return cls(
+            sd.pop("name", None),
+            sd.pop("type", None),
+            sd.pop("label", None),
+            required,
+            sd.pop("default", None),
+            sd.pop("description", None),
+        )
+
+    def as_dictionary(self) -> Dict[str, Any]:
+        """Return the consume parameters object as a python dictionary."""
+
+        result = {}
+        for attr_name in [
+            "name",
+            "type",
+            "label",
+            "required",
+            "default",
+            "description",
+        ]:
+            if getattr(self, attr_name) is not None:
+                result[attr_name] = getattr(self, attr_name)
+
+        return result

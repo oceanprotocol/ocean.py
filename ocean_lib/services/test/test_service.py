@@ -19,6 +19,7 @@ def test_service():
     ddo_dict = get_sample_ddo()
     service_dict = ddo_dict["services"][0]
     service_dict["additionalInformation"] = {"message": "Sample DDO"}
+    service_dict["consumeParameters"] = [{"name": "some_key", "required": True}]
     sa = Service.from_dict(service_dict)
 
     assert sa.id == "1"
@@ -38,6 +39,7 @@ def test_service():
         "name": "Download service",
         "description": "Download service",
         "additionalInformation": {"message": "Sample DDO"},
+        "consumeParameters": [{"name": "some_key", "required": True}],
     }
 
     ddo_dict = get_sample_ddo()
@@ -45,6 +47,20 @@ def test_service():
     del service_dict["type"]
     with pytest.raises(IndexError):
         Service.from_dict(service_dict)
+
+    ddo_dict = get_sample_ddo()
+    service_dict = ddo_dict["services"][0]
+    service_dict["consumeParameters"] = "not a list"
+    with pytest.raises(TypeError):
+        sa = Service.from_dict(service_dict)
+
+    service_dict["consumeParameters"] = ["not a dict"]
+    with pytest.raises(TypeError):
+        sa = Service.from_dict(service_dict)
+
+    service_dict["consumeParameters"] = True
+    with pytest.raises(TypeError):
+        sa = Service.from_dict(service_dict)
 
 
 @pytest.mark.unit
