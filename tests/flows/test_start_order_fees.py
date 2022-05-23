@@ -3,9 +3,8 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
-from ast import Tuple
 from datetime import datetime, timedelta
-from typing import Any, Dict
+from typing import Any, Dict, Tuple
 
 import pytest
 from eth_keys import KeyAPI
@@ -88,7 +87,7 @@ def test_start_order_fees(
         publish_market_order_fee_in_unit, bt.decimals()
     )
 
-    (asset, service, dt,) = create_asset_with_order_fee(
+    asset, service, dt = create_asset_with_order_fee(
         web3=web3,
         config=config,
         file=file1,
@@ -298,4 +297,4 @@ def create_asset_with_order_fee(
     service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
     dt = ERC20Token(web3, asset.datatokens[0]["address"])
 
-    return (asset, service, dt)
+    return asset, service, dt
