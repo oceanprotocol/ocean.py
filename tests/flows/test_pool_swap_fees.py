@@ -1039,7 +1039,7 @@ def test_swap_calculations(
         bt.address, dt.address, cogi_amount_out, consume_market_swap_fee
     )
 
-    logger.warning(
+    logger.info(
         f"\n"
         f"amount_in = {format_units(amount_in, bt.decimals())}\n"
         f"cogi_amount_out = {format_units(cogi_amount_out, dt.decimals())}\n"
