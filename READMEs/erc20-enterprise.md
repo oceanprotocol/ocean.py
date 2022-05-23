@@ -62,6 +62,7 @@ erc20_enterprise_token = erc721_nft.create_datatoken(
     publish_market_order_fee_amount=0,
     bytess=[b""],
     from_wallet=alice_wallet,
+    cap=ocean.to_wei(50)
 )
 print(f"ERC20 Enterprise address: {erc20_enterprise_token.address}")
 
@@ -154,6 +155,7 @@ erc20_enterprise_token = erc721_nft.create_datatoken(
     publish_market_order_fee_amount=0,
     bytess=[b""],
     from_wallet=alice_wallet,
+    cap=ocean.to_wei(50)
 )
 print(f"ERC20 Enterprise address: {erc20_enterprise_token.address}")
 
