@@ -307,7 +307,7 @@ class ConsumeParameters:
         required = sd["required"] if "required" in sd else None
         if required is not None:
             required = (
-                distutils.util.strtobool(sd["required"])
+                bool(distutils.util.strtobool(sd["required"]))
                 if isinstance(sd["required"], str)
                 else required
             )
@@ -334,6 +334,9 @@ class ConsumeParameters:
             "description",
         ]:
             if getattr(self, attr_name) is not None:
+                if attr_name == "required":
+                    result["required"] = bool(self.required)
+
                 result[attr_name] = getattr(self, attr_name)
 
         return result

@@ -5,7 +5,7 @@
 import pytest
 
 from ocean_lib.assets.asset import Asset
-from ocean_lib.services.service import Service
+from ocean_lib.services.service import ConsumeParameters, Service
 from tests.resources.ddo_helpers import (
     get_sample_algorithm_ddo,
     get_sample_ddo,
@@ -62,6 +62,10 @@ def test_service():
     with pytest.raises(TypeError):
         sa = Service.from_dict(service_dict)
 
+    service_dict["consumeParameters"] = None
+    with pytest.raises(TypeError):
+        sa = Service.from_dict(service_dict)
+
 
 @pytest.mark.unit
 def test_additional_information():
@@ -101,6 +105,37 @@ def test_additional_information():
             "nested_dict": {"some_key": "value"},
         },
     }
+
+
+@pytest.mark.unit
+def test_consume_parameters():
+    """Tests the Consume Parameters key/object."""
+    cp_dict = {
+        "name": "test_key",
+        "type": "string",
+        "label": "test_key_label",
+        "required": True,
+        "default": "value",
+        "description": "this is a test key",
+    }
+
+    cp_object = ConsumeParameters.from_dict(cp_dict)
+    assert cp_object.as_dictionary() == cp_dict
+
+    cp_dict = {
+        "name": "test_key",
+    }
+
+    cp_object = ConsumeParameters.from_dict(cp_dict)
+    assert cp_object.as_dictionary() == cp_dict
+
+    cp_dict = {
+        "name": "test_key",
+        "required": "false",  # explicitly false, not missing
+    }
+
+    cp_object = ConsumeParameters.from_dict(cp_dict)
+    assert cp_object.as_dictionary() == {"name": "test_key", "required": False}
 
 
 @pytest.mark.unit
