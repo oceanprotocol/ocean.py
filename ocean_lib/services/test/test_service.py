@@ -62,10 +62,6 @@ def test_service():
     with pytest.raises(TypeError):
         sa = Service.from_dict(service_dict)
 
-    service_dict["consumerParameters"] = None
-    with pytest.raises(TypeError):
-        sa = Service.from_dict(service_dict)
-
 
 @pytest.mark.unit
 def test_additional_information():

@@ -9,6 +9,7 @@
 import copy
 import distutils
 import logging
+import re
 from typing import Any, Dict, List, Optional
 
 from web3.main import Web3
@@ -46,13 +47,16 @@ class Service:
         self.name = name
         self.description = description
         self.additional_information = None
+        self.consumer_parameters = None
 
-        try:
-            self.consumer_parameters = [
-                ConsumerParameters.from_dict(cp_dict) for cp_dict in consumer_parameters
-            ]
-        except AttributeError:
-            raise TypeError("ConsumerParameters should be a list of dictionaries.")
+        if consumer_parameters:
+            try:
+                self.consumer_parameters = [
+                    ConsumerParameters.from_dict(cp_dict)
+                    for cp_dict in consumer_parameters
+                ]
+            except AttributeError:
+                raise TypeError("ConsumerParameters should be a list of dictionaries.")
 
         if additional_information:
             self.additional_information = additional_information
@@ -152,18 +156,26 @@ class Service:
 
     def as_dictionary(self) -> Dict[str, Any]:
         """Return the service as a python dictionary."""
-
-        values = {
-            "id": self.id,
-            "type": self.type,
-            "files": self.files,
-            "datatokenAddress": self.datatoken,
-            "serviceEndpoint": self.service_endpoint,
-            "timeout": self.timeout,
-            "additionalInformation": self.additional_information,
-            "consumerParameters": self.consumer_parameters,
+        # camelCase to snake case dict, matching the dict value to the attribute name
+        key_names = {
+            x: re.sub("([A-Z]+)", r"_\1", x).lower()
+            for x in [
+                "id",
+                "type",
+                "files",
+                "datatokenAddress",
+                "serviceEndpoint",
+                "timeout",
+                "additionalInformation",
+                "consumerParameters",
+            ]
         }
 
+        key_names["datatokenAddress"] = "datatoken"
+
+        optional_keys = ["additionalInformation", "consumerParameters"]
+
+        values = {}
         if self.type == "compute":
             if "compute" in self.compute_values:
                 values.update(self.compute_values)
@@ -175,7 +187,9 @@ class Service:
         if self.description is not None:
             values["description"] = self.description
 
-        for key, value in values.items():
+        for key, attr_name in key_names.items():
+            value = getattr(self, attr_name)
+
             if isinstance(value, object) and hasattr(value, "as_dictionary"):
                 value = value.as_dictionary()
             elif isinstance(value, list):
@@ -183,6 +197,9 @@ class Service:
                     v.as_dictionary() if hasattr(v, "as_dictionary") else v
                     for v in value
                 ]
+
+            if key in optional_keys and value is None:
+                continue
 
             values[key] = value
 
