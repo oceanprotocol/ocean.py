@@ -5,7 +5,7 @@
 import pytest
 
 from ocean_lib.assets.asset import Asset
-from ocean_lib.services.service import ConsumeParameters, Service
+from ocean_lib.services.service import ConsumerParameters, Service
 from tests.resources.ddo_helpers import (
     get_sample_algorithm_ddo,
     get_sample_ddo,
@@ -19,7 +19,7 @@ def test_service():
     ddo_dict = get_sample_ddo()
     service_dict = ddo_dict["services"][0]
     service_dict["additionalInformation"] = {"message": "Sample DDO"}
-    service_dict["consumeParameters"] = [{"name": "some_key", "required": True}]
+    service_dict["consumerParameters"] = [{"name": "some_key", "required": True}]
     sa = Service.from_dict(service_dict)
 
     assert sa.id == "1"
@@ -39,7 +39,7 @@ def test_service():
         "name": "Download service",
         "description": "Download service",
         "additionalInformation": {"message": "Sample DDO"},
-        "consumeParameters": [{"name": "some_key", "required": True}],
+        "consumerParameters": [{"name": "some_key", "required": True}],
     }
 
     ddo_dict = get_sample_ddo()
@@ -50,19 +50,19 @@ def test_service():
 
     ddo_dict = get_sample_ddo()
     service_dict = ddo_dict["services"][0]
-    service_dict["consumeParameters"] = "not a list"
+    service_dict["consumerParameters"] = "not a list"
     with pytest.raises(TypeError):
         sa = Service.from_dict(service_dict)
 
-    service_dict["consumeParameters"] = ["not a dict"]
+    service_dict["consumerParameters"] = ["not a dict"]
     with pytest.raises(TypeError):
         sa = Service.from_dict(service_dict)
 
-    service_dict["consumeParameters"] = True
+    service_dict["consumerParameters"] = True
     with pytest.raises(TypeError):
         sa = Service.from_dict(service_dict)
 
-    service_dict["consumeParameters"] = None
+    service_dict["consumerParameters"] = None
     with pytest.raises(TypeError):
         sa = Service.from_dict(service_dict)
 
@@ -108,8 +108,8 @@ def test_additional_information():
 
 
 @pytest.mark.unit
-def test_consume_parameters():
-    """Tests the Consume Parameters key/object."""
+def test_consumer_parameters():
+    """Tests the Consumer Parameters key/object."""
     cp_dict = {
         "name": "test_key",
         "type": "string",
@@ -119,14 +119,14 @@ def test_consume_parameters():
         "description": "this is a test key",
     }
 
-    cp_object = ConsumeParameters.from_dict(cp_dict)
+    cp_object = ConsumerParameters.from_dict(cp_dict)
     assert cp_object.as_dictionary() == cp_dict
 
     cp_dict = {
         "name": "test_key",
     }
 
-    cp_object = ConsumeParameters.from_dict(cp_dict)
+    cp_object = ConsumerParameters.from_dict(cp_dict)
     assert cp_object.as_dictionary() == cp_dict
 
     cp_dict = {
@@ -134,7 +134,7 @@ def test_consume_parameters():
         "required": "false",  # explicitly false, not missing
     }
 
-    cp_object = ConsumeParameters.from_dict(cp_dict)
+    cp_object = ConsumerParameters.from_dict(cp_dict)
     assert cp_object.as_dictionary() == {"name": "test_key", "required": False}
 
 

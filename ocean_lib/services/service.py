@@ -33,7 +33,7 @@ class Service:
         name: Optional[str] = None,
         description: Optional[str] = None,
         additional_information: Optional[Dict[str, Any]] = None,
-        consume_parameters: List[Optional[Dict[str, Any]]] = None,
+        consumer_parameters: List[Optional[Dict[str, Any]]] = None,
     ) -> None:
         """Initialize NFT Service instance."""
         self.id = service_id
@@ -48,8 +48,8 @@ class Service:
         self.additional_information = None
 
         try:
-            self.consume_parameters = [
-                ConsumeParameters.from_dict(cp_dict) for cp_dict in consume_parameters
+            self.consumer_parameters = [
+                ConsumerParameters.from_dict(cp_dict) for cp_dict in consumer_parameters
             ]
         except AttributeError:
             raise TypeError("ConsumerParameters should be a list of dictionaries.")
@@ -90,7 +90,7 @@ class Service:
             sd.pop("name", None),
             sd.pop("description", None),
             sd.pop("additionalInformation", None),
-            sd.pop("consumeParameters", None),
+            sd.pop("consumerParameters", None),
         )
 
     def get_trusted_algorithms(self) -> list:
@@ -161,7 +161,7 @@ class Service:
             "serviceEndpoint": self.service_endpoint,
             "timeout": self.timeout,
             "additionalInformation": self.additional_information,
-            "consumeParameters": self.consume_parameters,
+            "consumerParameters": self.consumer_parameters,
         }
 
         if self.type == "compute":
@@ -283,7 +283,7 @@ class Service:
         self.compute_values["allowRawAlgorithm"] = allow_raw_algorithm
 
 
-class ConsumeParameters:
+class ConsumerParameters:
     def __init__(
         self,
         name: str,
@@ -301,9 +301,11 @@ class ConsumeParameters:
         self.description = description
 
     @classmethod
-    def from_dict(cls, consume_parameters_dict: Dict[str, Any]) -> "ConsumeParameters":
-        """Create a ConsumeParameters object from a JSON string."""
-        sd = copy.deepcopy(consume_parameters_dict)
+    def from_dict(
+        cls, consumer_parameters_dict: Dict[str, Any]
+    ) -> "ConsumerParameters":
+        """Create a ConsumerParameters object from a JSON string."""
+        sd = copy.deepcopy(consumer_parameters_dict)
         required = sd["required"] if "required" in sd else None
         if required is not None:
             required = (

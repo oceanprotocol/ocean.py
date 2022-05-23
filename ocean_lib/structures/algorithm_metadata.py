@@ -7,7 +7,7 @@ from typing import Any, Dict
 
 from enforce_typing import enforce_types
 
-from ocean_lib.services.service import ConsumeParameters
+from ocean_lib.services.service import ConsumerParameters
 
 
 class AlgorithmMetadata:
@@ -26,10 +26,10 @@ class AlgorithmMetadata:
         self.container_tag = container.get("tag", "")
         self.container_checksum = container.get("checksum", "")
 
-        consume_parameters = metadata_dict.get("consumerParameters", [])
+        consumer_parameters = metadata_dict.get("consumerParameters", [])
         try:
-            self.consume_parameters = [
-                ConsumeParameters.from_dict(cp_dict) for cp_dict in consume_parameters
+            self.consumer_parameters = [
+                ConsumerParameters.from_dict(cp_dict) for cp_dict in consumer_parameters
             ]
         except AttributeError:
             raise TypeError("ConsumerParameters should be a list of dictionaries.")
@@ -61,8 +61,8 @@ class AlgorithmMetadata:
             }
         }
 
-        if self.consume_parameters:
-            consume_parameters = [x.as_dictionary() for x in self.consume_parameters]
-            result["meta"]["consumerParameters"] = consume_parameters
+        if self.consumer_parameters:
+            consumer_parameters = [x.as_dictionary() for x in self.consumer_parameters]
+            result["meta"]["consumerParameters"] = consumer_parameters
 
         return result
