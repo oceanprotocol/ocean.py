@@ -167,33 +167,64 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         datatoken_publish_market_order_fee_amount: int,
         datatoken_bytess: List[bytes],
         from_wallet: Wallet,
+        datatoken_cap: Optional[int] = None,
     ) -> str:
-        return self.send_transaction(
-            "createNftWithErc20",
-            (
+        if datatoken_template == 2 and datatoken_cap:
+            return self.send_transaction(
+                "createNftWithErc20",
                 (
-                    nft_name,
-                    nft_symbol,
-                    nft_template,
-                    nft_token_uri,
-                    nft_transferable,
-                    nft_owner,
+                    (
+                        nft_name,
+                        nft_symbol,
+                        nft_template,
+                        nft_token_uri,
+                        nft_transferable,
+                        nft_owner,
+                    ),
+                    (
+                        datatoken_template,
+                        [datatoken_name, datatoken_symbol],
+                        [
+                            datatoken_minter,
+                            datatoken_fee_manager,
+                            datatoken_publish_market_order_fee_address,
+                            datatoken_publish_market_order_fee_token,
+                        ],
+                        [datatoken_cap, datatoken_publish_market_order_fee_amount],
+                        datatoken_bytess,
+                    ),
                 ),
+                from_wallet,
+            )
+        elif datatoken_template == 2 and not datatoken_cap:
+            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+        else:
+            return self.send_transaction(
+                "createNftWithErc20",
                 (
-                    datatoken_template,
-                    [datatoken_name, datatoken_symbol],
-                    [
-                        datatoken_minter,
-                        datatoken_fee_manager,
-                        datatoken_publish_market_order_fee_address,
-                        datatoken_publish_market_order_fee_token,
-                    ],
-                    [MAX_INT256, datatoken_publish_market_order_fee_amount],
-                    datatoken_bytess,
+                    (
+                        nft_name,
+                        nft_symbol,
+                        nft_template,
+                        nft_token_uri,
+                        nft_transferable,
+                        nft_owner,
+                    ),
+                    (
+                        datatoken_template,
+                        [datatoken_name, datatoken_symbol],
+                        [
+                            datatoken_minter,
+                            datatoken_fee_manager,
+                            datatoken_publish_market_order_fee_address,
+                            datatoken_publish_market_order_fee_token,
+                        ],
+                        [MAX_INT256, datatoken_publish_market_order_fee_amount],
+                        datatoken_bytess,
+                    ),
                 ),
-            ),
-            from_wallet,
-        )
+                from_wallet,
+            )
 
     @enforce_types
     def create_nft_erc20_with_pool(
@@ -225,56 +256,110 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         pool_publish_market_swap_fee_collector: str,
         pool_template_address: str,
         from_wallet: Wallet,
+        datatoken_cap: Optional[int] = None,
     ) -> str:
-        return self.send_transaction(
-            "createNftWithErc20WithPool",
-            (
+        if datatoken_template == 2 and datatoken_cap:
+            return self.send_transaction(
+                "createNftWithErc20WithPool",
                 (
-                    nft_name,
-                    nft_symbol,
-                    nft_template,
-                    nft_token_uri,
-                    nft_transferable,
-                    nft_owner,
+                    (
+                        nft_name,
+                        nft_symbol,
+                        nft_template,
+                        nft_token_uri,
+                        nft_transferable,
+                        nft_owner,
+                    ),
+                    (
+                        datatoken_template,
+                        [datatoken_name, datatoken_symbol],
+                        [
+                            datatoken_minter,
+                            datatoken_fee_manager,
+                            datatoken_publish_market_order_fee_address,
+                            datatoken_publish_market_order_fee_token,
+                        ],
+                        [datatoken_cap, datatoken_publish_market_order_fee_amount],
+                        datatoken_bytess,
+                    ),
+                    (
+                        [
+                            pool_rate,
+                            pool_base_token_decimals,
+                            pool_base_token_amount
+                            // 100
+                            * 9,  # max 10% vesting amount of the total cap
+                            2500000,
+                            pool_base_token_amount,
+                        ],
+                        [
+                            pool_lp_swap_fee_amount,
+                            pool_publish_market_swap_fee_amount,
+                        ],
+                        [
+                            pool_side_staking,
+                            pool_base_token,
+                            pool_base_token_sender,
+                            pool_publisher,
+                            pool_publish_market_swap_fee_collector,
+                            pool_template_address,
+                        ],
+                    ),
                 ),
+                from_wallet,
+            )
+        elif datatoken_template == 2 and not datatoken_cap:
+            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+        else:
+            return self.send_transaction(
+                "createNftWithErc20WithPool",
                 (
-                    datatoken_template,
-                    [datatoken_name, datatoken_symbol],
-                    [
-                        datatoken_minter,
-                        datatoken_fee_manager,
-                        datatoken_publish_market_order_fee_address,
-                        datatoken_publish_market_order_fee_token,
-                    ],
-                    [MAX_INT256, datatoken_publish_market_order_fee_amount],
-                    datatoken_bytess,
+                    (
+                        nft_name,
+                        nft_symbol,
+                        nft_template,
+                        nft_token_uri,
+                        nft_transferable,
+                        nft_owner,
+                    ),
+                    (
+                        datatoken_template,
+                        [datatoken_name, datatoken_symbol],
+                        [
+                            datatoken_minter,
+                            datatoken_fee_manager,
+                            datatoken_publish_market_order_fee_address,
+                            datatoken_publish_market_order_fee_token,
+                        ],
+                        [MAX_INT256, datatoken_publish_market_order_fee_amount],
+                        datatoken_bytess,
+                    ),
+                    (
+                        [
+                            pool_rate,
+                            pool_base_token_decimals,
+                            pool_base_token_amount
+                            // 100
+                            * 9,  # max 10% vesting amount of the total cap
+                            2500000,
+                            pool_base_token_amount,
+                        ],
+                        [
+                            pool_lp_swap_fee_amount,
+                            pool_publish_market_swap_fee_amount,
+                        ],
+                        [
+                            pool_side_staking,
+                            pool_base_token,
+                            pool_base_token_sender,
+                            pool_publisher,
+                            pool_publish_market_swap_fee_collector,
+                            pool_template_address,
+                        ],
+                    ),
                 ),
-                (
-                    [
-                        pool_rate,
-                        pool_base_token_decimals,
-                        pool_base_token_amount
-                        // 100
-                        * 9,  # max 10% vesting amount of the total cap
-                        2500000,
-                        pool_base_token_amount,
-                    ],
-                    [
-                        pool_lp_swap_fee_amount,
-                        pool_publish_market_swap_fee_amount,
-                    ],
-                    [
-                        pool_side_staking,
-                        pool_base_token,
-                        pool_base_token_sender,
-                        pool_publisher,
-                        pool_publish_market_swap_fee_collector,
-                        pool_template_address,
-                    ],
-                ),
-            ),
-            from_wallet,
-        )
+                from_wallet,
+            )
 
     @enforce_types
     def create_nft_erc20_with_fixed_rate(
@@ -305,49 +390,96 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         fixed_price_publish_market_swap_fee_amount: int,
         fixed_price_with_mint: int,
         from_wallet: Wallet,
+        datatoken_cap: Optional[int] = None,
     ) -> str:
-        return self.send_transaction(
-            "createNftWithErc20WithFixedRate",
-            (
+        if datatoken_template == 2 and datatoken_cap:
+            return self.send_transaction(
+                "createNftWithErc20WithFixedRate",
                 (
-                    nft_name,
-                    nft_symbol,
-                    nft_template,
-                    nft_token_uri,
-                    nft_transferable,
-                    nft_owner,
+                    (
+                        nft_name,
+                        nft_symbol,
+                        nft_template,
+                        nft_token_uri,
+                        nft_transferable,
+                        nft_owner,
+                    ),
+                    (
+                        datatoken_template,
+                        [datatoken_name, datatoken_symbol],
+                        [
+                            datatoken_minter,
+                            datatoken_fee_manager,
+                            datatoken_publish_market_order_fee_address,
+                            datatoken_publish_market_order_fee_token,
+                        ],
+                        [MAX_INT256, datatoken_publish_market_order_fee_amount],
+                        datatoken_bytess,
+                    ),
+                    (
+                        fixed_price_address,
+                        [
+                            fixed_price_base_token,
+                            fixed_price_owner,
+                            fixed_price_publish_market_swap_fee_collector,
+                            fixed_price_allowed_swapper,
+                        ],
+                        [
+                            fixed_price_base_token_decimals,
+                            fixed_price_datatoken_decimals,
+                            fixed_price_rate,
+                            fixed_price_publish_market_swap_fee_amount,
+                            fixed_price_with_mint,
+                        ],
+                    ),
                 ),
+                from_wallet,
+            )
+        elif datatoken_template == 2 and not datatoken_cap:
+            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+        else:
+            return self.send_transaction(
+                "createNftWithErc20WithFixedRate",
                 (
-                    datatoken_template,
-                    [datatoken_name, datatoken_symbol],
-                    [
-                        datatoken_minter,
-                        datatoken_fee_manager,
-                        datatoken_publish_market_order_fee_address,
-                        datatoken_publish_market_order_fee_token,
-                    ],
-                    [MAX_INT256, datatoken_publish_market_order_fee_amount],
-                    datatoken_bytess,
+                    (
+                        nft_name,
+                        nft_symbol,
+                        nft_template,
+                        nft_token_uri,
+                        nft_transferable,
+                        nft_owner,
+                    ),
+                    (
+                        datatoken_template,
+                        [datatoken_name, datatoken_symbol],
+                        [
+                            datatoken_minter,
+                            datatoken_fee_manager,
+                            datatoken_publish_market_order_fee_address,
+                            datatoken_publish_market_order_fee_token,
+                        ],
+                        [MAX_INT256, datatoken_publish_market_order_fee_amount],
+                        datatoken_bytess,
+                    ),
+                    (
+                        fixed_price_address,
+                        [
+                            fixed_price_base_token,
+                            fixed_price_owner,
+                            fixed_price_publish_market_swap_fee_collector,
+                            fixed_price_allowed_swapper,
+                        ],
+                        [
+                            fixed_price_base_token_decimals,
+                            fixed_price_datatoken_decimals,
+                            fixed_price_rate,
+                            fixed_price_publish_market_swap_fee_amount,
+                            fixed_price_with_mint,
+                        ],
+                    ),
                 ),
-                (
-                    fixed_price_address,
-                    [
-                        fixed_price_base_token,
-                        fixed_price_owner,
-                        fixed_price_publish_market_swap_fee_collector,
-                        fixed_price_allowed_swapper,
-                    ],
-                    [
-                        fixed_price_base_token_decimals,
-                        fixed_price_datatoken_decimals,
-                        fixed_price_rate,
-                        fixed_price_publish_market_swap_fee_amount,
-                        fixed_price_with_mint,
-                    ],
-                ),
-            ),
-            from_wallet,
-        )
+                from_wallet,
+            )
 
     @enforce_types
     def create_nft_erc20_with_dispenser(
@@ -373,40 +505,78 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         dispenser_with_mint: bool,
         dispenser_allowed_swapper: str,
         from_wallet: Wallet,
+        datatoken_cap: Optional[int] = None,
     ) -> str:
-        return self.send_transaction(
-            "createNftWithErc20WithDispenser",
-            (
+        if datatoken_template == 2 and datatoken_cap:
+            return self.send_transaction(
+                "createNftWithErc20WithDispenser",
                 (
-                    nft_name,
-                    nft_symbol,
-                    nft_template,
-                    nft_token_uri,
-                    nft_transferable,
-                    nft_owner,
+                    (
+                        nft_name,
+                        nft_symbol,
+                        nft_template,
+                        nft_token_uri,
+                        nft_transferable,
+                        nft_owner,
+                    ),
+                    (
+                        datatoken_template,
+                        [datatoken_name, datatoken_symbol],
+                        [
+                            datatoken_minter,
+                            datatoken_fee_manager,
+                            datatoken_publish_market_order_fee_address,
+                            datatoken_publish_market_order_fee_token,
+                        ],
+                        [datatoken_cap, datatoken_publish_market_order_fee_amount],
+                        datatoken_bytess,
+                    ),
+                    (
+                        dispenser_address,
+                        dispenser_max_tokens,
+                        dispenser_max_balance,
+                        dispenser_with_mint,
+                        dispenser_allowed_swapper,
+                    ),
                 ),
+                from_wallet,
+            )
+        elif datatoken_template == 2 and not datatoken_cap:
+            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+        else:
+            return self.send_transaction(
+                "createNftWithErc20WithDispenser",
                 (
-                    datatoken_template,
-                    [datatoken_name, datatoken_symbol],
-                    [
-                        datatoken_minter,
-                        datatoken_fee_manager,
-                        datatoken_publish_market_order_fee_address,
-                        datatoken_publish_market_order_fee_token,
-                    ],
-                    [MAX_INT256, datatoken_publish_market_order_fee_amount],
-                    datatoken_bytess,
+                    (
+                        nft_name,
+                        nft_symbol,
+                        nft_template,
+                        nft_token_uri,
+                        nft_transferable,
+                        nft_owner,
+                    ),
+                    (
+                        datatoken_template,
+                        [datatoken_name, datatoken_symbol],
+                        [
+                            datatoken_minter,
+                            datatoken_fee_manager,
+                            datatoken_publish_market_order_fee_address,
+                            datatoken_publish_market_order_fee_token,
+                        ],
+                        [MAX_INT256, datatoken_publish_market_order_fee_amount],
+                        datatoken_bytess,
+                    ),
+                    (
+                        dispenser_address,
+                        dispenser_max_tokens,
+                        dispenser_max_balance,
+                        dispenser_with_mint,
+                        dispenser_allowed_swapper,
+                    ),
                 ),
-                (
-                    dispenser_address,
-                    dispenser_max_tokens,
-                    dispenser_max_balance,
-                    dispenser_with_mint,
-                    dispenser_allowed_swapper,
-                ),
-            ),
-            from_wallet,
-        )
+                from_wallet,
+            )
 
     @enforce_types
     def create_nft_with_metadata(
