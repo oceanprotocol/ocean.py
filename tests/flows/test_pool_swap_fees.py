@@ -953,14 +953,16 @@ def collect_fee_and_verify_balances(
     assert get_bpool_fee_balance(dt.address) == 0
 
 
+@pytest.mark.parametrize("base_token_name", ["Ocean", "MockDAI", "MockUSDC"])
 def test_swap_calculations(
     web3: Web3,
     config: Config,
     factory_deployer_wallet: Wallet,
     publisher_wallet: Wallet,
     erc20_token: ERC20Token,
+    base_token_name: str,
 ):
-    bt = ERC20Token(web3, get_address_of_type(config, "Ocean"))
+    bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
     dt = erc20_token
 
     transfer_base_token_if_balance_lte(
@@ -1008,7 +1010,7 @@ def test_swap_calculations(
     bpool_address = pool_event[0].args.poolAddress
     bpool = BPool(web3, bpool_address)
 
-    amount_in = to_wei(100)
+    amount_in = parse_units(100, bt.decimals())
 
     (
         cogi_amount_out,
@@ -1039,19 +1041,19 @@ def test_swap_calculations(
 
     logger.warning(
         f"\n"
-        f"amount_in = {from_wei(amount_in)}\n"
-        f"cogi_amount_out = {from_wei(cogi_amount_out)}\n"
-        f"cogi_amount_added_to_pool = {from_wei(cogi_amount_added_to_pool)}\n"
-        f"cogi_lp_fee_amount = {from_wei(cogi_lp_fee_amount)}\n"
-        f"cogi_opc_fee_amount = {from_wei(cogi_opc_fee_amount)}\n"
-        f"cogi_publish_market_fee_amount = {from_wei(cogi_publish_market_fee_amount)}\n"
-        f"cogi_consume_market_fee_amount = {from_wei(cogi_consume_market_fee_amount)}\n"
-        f"cigo_amount_in = {from_wei(cigo_amount_in)}\n"
-        f"cigo_amount_added_to_pool = {from_wei(cigo_amount_added_to_pool)}\n"
-        f"cigo_lp_fee_amount = {from_wei(cigo_lp_fee_amount)}\n"
-        f"cigo_opc_fee_amount = {from_wei(cigo_opc_fee_amount)}\n"
-        f"cigo_publish_market_fee_amount = {from_wei(cigo_publish_market_fee_amount)}\n"
-        f"cigo_consume_market_fee_amount = {from_wei(cigo_consume_market_fee_amount)}\n"
+        f"amount_in = {format_units(amount_in, bt.decimals())}\n"
+        f"cogi_amount_out = {format_units(cogi_amount_out, dt.decimals())}\n"
+        f"cogi_amount_added_to_pool = {format_units(cogi_amount_added_to_pool, bt.decimals())}\n"
+        f"cogi_lp_fee_amount = {format_units(cogi_lp_fee_amount, bt.decimals())}\n"
+        f"cogi_opc_fee_amount = {format_units(cogi_opc_fee_amount, bt.decimals())}\n"
+        f"cogi_publish_market_fee_amount = {format_units(cogi_publish_market_fee_amount, bt.decimals())}\n"
+        f"cogi_consume_market_fee_amount = {format_units(cogi_consume_market_fee_amount, bt.decimals())}\n"
+        f"cigo_amount_in = {format_units(cigo_amount_in, bt.decimals())}\n"
+        f"cigo_amount_added_to_pool = {format_units(cigo_amount_added_to_pool, bt.decimals())}\n"
+        f"cigo_lp_fee_amount = {format_units(cigo_lp_fee_amount, bt.decimals())}\n"
+        f"cigo_opc_fee_amount = {format_units(cigo_opc_fee_amount, bt.decimals())}\n"
+        f"cigo_publish_market_fee_amount = {format_units(cigo_publish_market_fee_amount, bt.decimals())}\n"
+        f"cigo_consume_market_fee_amount = {format_units(cigo_consume_market_fee_amount, bt.decimals())}\n"
     )
 
     assert cigo_amount_in == amount_in
