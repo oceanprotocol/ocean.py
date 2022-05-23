@@ -7,9 +7,9 @@
     To handle service items in a DDO record
 """
 import copy
-import distutils
 import logging
 import re
+from distutils.util import strtobool
 from typing import Any, Dict, List, Optional
 
 from web3.main import Web3
@@ -326,7 +326,7 @@ class ConsumerParameters:
         required = sd["required"] if "required" in sd else None
         if required is not None:
             required = (
-                bool(distutils.util.strtobool(sd["required"]))
+                bool(strtobool(sd["required"]))
                 if isinstance(sd["required"], str)
                 else required
             )
