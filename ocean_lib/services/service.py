@@ -12,6 +12,7 @@ import re
 from distutils.util import strtobool
 from typing import Any, Dict, List, Optional
 
+from enforce_typing import enforce_types
 from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes, ServiceTypesNames
@@ -309,6 +310,7 @@ class ConsumerParameters:
         required: Optional[bool] = False,
         default: Optional[str] = None,
         description: Optional[str] = None,
+        options: Optional[List[str]] = None,
     ) -> None:
         self.name = name
         self.type = type
@@ -316,6 +318,11 @@ class ConsumerParameters:
         self.required = required
         self.default = default
         self.description = description
+
+        if options is not None and not isinstance(options, list):
+            raise TypeError("Options should be a list")
+
+        self.options = options
 
     @classmethod
     def from_dict(
@@ -338,8 +345,10 @@ class ConsumerParameters:
             required,
             sd.pop("default", None),
             sd.pop("description", None),
+            sd.pop("options", None),
         )
 
+    @enforce_types
     def as_dictionary(self) -> Dict[str, Any]:
         """Return the consume parameters object as a python dictionary."""
 
@@ -351,6 +360,7 @@ class ConsumerParameters:
             "required",
             "default",
             "description",
+            "options",
         ]:
             if getattr(self, attr_name) is not None:
                 if attr_name == "required":

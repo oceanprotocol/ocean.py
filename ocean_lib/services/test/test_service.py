@@ -113,6 +113,7 @@ def test_consumer_parameters():
         "required": True,
         "default": "value",
         "description": "this is a test key",
+        "options": ["a", "b"],
     }
 
     cp_object = ConsumerParameters.from_dict(cp_dict)
@@ -132,6 +133,10 @@ def test_consumer_parameters():
 
     cp_object = ConsumerParameters.from_dict(cp_dict)
     assert cp_object.as_dictionary() == {"name": "test_key", "required": False}
+
+    cp_dict["options"] = "not an array"
+    with pytest.raises(TypeError):
+        cp_object = ConsumerParameters.from_dict(cp_dict)
 
 
 @pytest.mark.unit
