@@ -35,7 +35,7 @@ class Service:
         name: Optional[str] = None,
         description: Optional[str] = None,
         additional_information: Optional[Dict[str, Any]] = None,
-        consumer_parameters: List[Optional[Dict[str, Any]]] = None,
+        consumer_parameters: Optional[List[Dict[str, Any]]] = None,
     ) -> None:
         """Initialize NFT Service instance."""
         self.id = service_id
@@ -161,6 +161,8 @@ class Service:
         key_names = {
             x: re.sub("([A-Z]+)", r"_\1", x).lower()
             for x in [
+                "name",
+                "description",
                 "id",
                 "type",
                 "files",
@@ -174,7 +176,12 @@ class Service:
 
         key_names["datatokenAddress"] = "datatoken"
 
-        optional_keys = ["additionalInformation", "consumerParameters"]
+        optional_keys = [
+            "name",
+            "description",
+            "additionalInformation",
+            "consumerParameters",
+        ]
 
         values = {}
         if self.type == "compute":
@@ -182,11 +189,6 @@ class Service:
                 values.update(self.compute_values)
             else:
                 values["compute"] = self.compute_values
-
-        if self.name is not None:
-            values["name"] = self.name
-        if self.description is not None:
-            values["description"] = self.description
 
         for key, attr_name in key_names.items():
             value = getattr(self, attr_name)
@@ -363,9 +365,6 @@ class ConsumerParameters:
             "options",
         ]:
             if getattr(self, attr_name) is not None:
-                if attr_name == "required":
-                    result["required"] = bool(self.required)
-
                 result[attr_name] = getattr(self, attr_name)
 
         return result
