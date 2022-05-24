@@ -301,14 +301,14 @@ X0_vec = numpy.linspace(-5., 10., 15)
 X1_vec = numpy.linspace(0., 15., 15)
 X0, X1 = numpy.meshgrid(X0_vec, X1_vec)
 b, c, t = 0.12918450914398066, 1.5915494309189535, 0.039788735772973836
-u = X1 - b*X0**2 + c*X0 - 6
-r = 10.*(1. - t) * numpy.cos(X0) + 10
-Z = u**2 + r
+u = X1 - b * X0 ** 2 + c * X0 - 6
+r = 10. * (1. - t) * numpy.cos(X0) + 10
+Z = u ** 2 + r
 
 fig, ax = pyplot.subplots(subplot_kw={"projection": "3d"})
 ax.scatter(X0, X1, model, c="r", label="model")
 pyplot.title("Data + model")
-pyplot.show() # or pyplot.savefig("test.png") to save the plot as a .png file instead
+pyplot.show()  # or pyplot.savefig("test.png") to save the plot as a .png file instead
 ```
 
 You should see something like this:

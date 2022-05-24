@@ -103,7 +103,7 @@ In the same python console:
 
 nft_factory = ocean.get_nft_factory()
 erc20_token = erc721_nft.create_datatoken(
-    template_index=1, # default value
+    template_index=1,  # default value
     name="ERC20DT1",  # name for ERC20 token
     symbol="ERC20DT1Symbol",  # symbol for ERC20 token
     from_wallet=alice_wallet
@@ -119,20 +119,20 @@ You can combine creating a data NFT and datatoken into a single call: `ocean.cre
 
 To learn more about some of the objects you created, here are some examples.
 ```python
-#config
+# config
 print(f"config.network_url = '{config.network_url}'")
 print(f"config.block_confirmations = {config.block_confirmations.value}")
 print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
 print(f"config.provider_url = '{config.provider_url}'")
 
-#wallet
+# wallet
 print(f"alice_wallet.address = '{alice_wallet.address}'")
 
-#data NFT
+# data NFT
 print(f"data NFT token name: {erc721_nft.token_name()}")
 print(f"data NFT token symbol: {erc721_nft.symbol()}")
 
-#datatoken
+# datatoken
 print(f"datatoken name: {erc20_token.token_name()}")
 print(f"datatoken symbol: {erc20_token.symbol()}")
 ```

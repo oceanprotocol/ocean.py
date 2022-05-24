@@ -87,7 +87,6 @@ bpool = ocean.create_pool(
     from_wallet=alice_wallet
 )
 print(f"BPool address: {bpool.address}")
-
 ```
 
 ## 4. Marketplace displays asset for sale
@@ -142,7 +141,7 @@ assert erc20_token.balanceOf(bob_wallet.address) >= ocean.to_wei(
 
 # Bob points to the service object
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-fee_receiver = ZERO_ADDRESS # could also be market address
+fee_receiver = ZERO_ADDRESS  # could also be market address
 asset = ocean.assets.resolve(did)
 service = asset.services[0]
 
