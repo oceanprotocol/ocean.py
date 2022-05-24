@@ -130,45 +130,27 @@ class ERC721NFT(ContractBase):
         publish_market_order_fee_amount: int,
         bytess: List[bytes],
         from_wallet: Wallet,
-        cap: Optional[int] = None,
+        datatoken_cap: Optional[int] = None,
     ) -> str:
-
-        if template_index == 2 and cap:
-            return self.send_transaction(
-                "createERC20",
-                (
-                    template_index,
-                    [name, symbol],
-                    [
-                        minter,
-                        fee_manager,
-                        publish_market_order_fee_address,
-                        publish_market_order_fee_token,
-                    ],
-                    [cap, publish_market_order_fee_amount],
-                    bytess,
-                ),
-                from_wallet,
-            )
-        elif template_index == 2 and not cap:
+        if template_index == 2 and not datatoken_cap:
             raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
-        else:
-            return self.send_transaction(
-                "createERC20",
-                (
-                    template_index,
-                    [name, symbol],
-                    [
-                        minter,
-                        fee_manager,
-                        publish_market_order_fee_address,
-                        publish_market_order_fee_token,
-                    ],
-                    [MAX_INT256, publish_market_order_fee_amount],
-                    bytess,
-                ),
-                from_wallet,
-            )
+        datatoken_cap = datatoken_cap if template_index == 2 else MAX_INT256
+        return self.send_transaction(
+            "createERC20",
+            (
+                template_index,
+                [name, symbol],
+                [
+                    minter,
+                    fee_manager,
+                    publish_market_order_fee_address,
+                    publish_market_order_fee_token,
+                ],
+                [datatoken_cap, publish_market_order_fee_amount],
+                bytess,
+            ),
+            from_wallet,
+        )
 
     @enforce_types
     def add_to_create_erc20_list(
@@ -311,39 +293,26 @@ class ERC721NFT(ContractBase):
         publish_market_order_fee_amount: int,
         bytess: List[bytes],
         from_wallet: Wallet,
-        cap: Optional[int] = None,
+        datatoken_cap: Optional[int] = None,
     ) -> ERC20Token:
         initial_list = self.get_tokens_list()
 
-        if template_index == 2 and cap:
-            self.create_erc20(
-                template_index=template_index,
-                name=name,
-                symbol=symbol,
-                minter=minter,
-                fee_manager=fee_manager,
-                publish_market_order_fee_address=publish_market_order_fee_address,
-                publish_market_order_fee_token=publish_market_order_fee_token,
-                publish_market_order_fee_amount=publish_market_order_fee_amount,
-                bytess=bytess,
-                from_wallet=from_wallet,
-                cap=cap,
-            )
-        elif template_index == 2 and not cap:
+        if template_index == 2 and not datatoken_cap:
             raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
-        else:
-            self.create_erc20(
-                template_index=template_index,
-                name=name,
-                symbol=symbol,
-                minter=minter,
-                fee_manager=fee_manager,
-                publish_market_order_fee_address=publish_market_order_fee_address,
-                publish_market_order_fee_token=publish_market_order_fee_token,
-                publish_market_order_fee_amount=publish_market_order_fee_amount,
-                bytess=bytess,
-                from_wallet=from_wallet,
-            )
+        datatoken_cap = datatoken_cap if template_index == 2 else None
+        self.create_erc20(
+            template_index=template_index,
+            name=name,
+            symbol=symbol,
+            minter=minter,
+            fee_manager=fee_manager,
+            publish_market_order_fee_address=publish_market_order_fee_address,
+            publish_market_order_fee_token=publish_market_order_fee_token,
+            publish_market_order_fee_amount=publish_market_order_fee_amount,
+            bytess=bytess,
+            from_wallet=from_wallet,
+            datatoken_cap=datatoken_cap,
+        )
 
         new_elements = [
             item for item in self.get_tokens_list() if item not in initial_list

@@ -200,7 +200,7 @@ def erc20_enterprise_token(web3, config, erc721_nft, publisher_wallet, erc721_fa
         publish_market_order_fee_amount=0,
         bytess=[b""],
         from_wallet=publisher_wallet,
-        cap=to_wei(100),
+        datatoken_cap=to_wei(100),
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
 
