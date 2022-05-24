@@ -3,14 +3,14 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enum import IntEnum
-from typing import List, Union
+from typing import List, Optional, Union
 
 from enforce_typing import enforce_types
 
 from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.structures.abi_tuples import MetadataProof
-from ocean_lib.web3_internal.constants import MAX_INT256
+from ocean_lib.web3_internal.constants import MAX_INT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -282,28 +282,51 @@ class ERC721NFT(ContractBase):
         template_index: int,
         name: str,
         symbol: str,
-        minter: str,
-        fee_manager: str,
-        publish_market_order_fee_address: str,
-        publish_market_order_fee_token: str,
-        publish_market_order_fee_amount: int,
-        bytess: List[bytes],
         from_wallet: Wallet,
+        minter: Optional[str] = None,
+        fee_manager: Optional[str] = None,
+        publish_market_order_fee_address: Optional[str] = None,
+        publish_market_order_fee_token: Optional[str] = None,
+        publish_market_order_fee_amount: Optional[int] = None,
+        bytess: Optional[List[bytes]] = None,
     ) -> ERC20Token:
         initial_list = self.get_tokens_list()
 
-        self.create_erc20(
-            template_index=template_index,
-            name=name,
-            symbol=symbol,
-            minter=minter,
-            fee_manager=fee_manager,
-            publish_market_order_fee_address=publish_market_order_fee_address,
-            publish_market_order_fee_token=publish_market_order_fee_token,
-            publish_market_order_fee_amount=publish_market_order_fee_amount,
-            bytess=bytess,
-            from_wallet=from_wallet,
-        )
+        local_values = locals().copy()
+        create_args = {
+            lv_index: local_values[lv_index]
+            for lv_index in [
+                "template_index",
+                "name",
+                "symbol",
+                "from_wallet",
+                "minter",
+                "fee_manager",
+                "publish_market_order_fee_address",
+                "publish_market_order_fee_token",
+                "publish_market_order_fee_amount",
+                "bytess",
+            ]
+        }
+
+        for default_attribute in [
+            "minter",
+            "fee_manager",
+            "publish_market_order_fee_address",
+        ]:
+            if create_args[default_attribute] is None:
+                create_args[default_attribute] = from_wallet.address
+
+        if publish_market_order_fee_token is None:
+            create_args["publish_market_order_fee_token"] = ZERO_ADDRESS
+
+        if publish_market_order_fee_token is None:
+            create_args["publish_market_order_fee_amount"] = 0
+
+        if bytess is None:
+            create_args["bytess"] = [b""]
+
+        self.create_erc20(**create_args)
 
         new_elements = [
             item for item in self.get_tokens_list() if item not in initial_list

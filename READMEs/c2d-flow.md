@@ -56,19 +56,11 @@ Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md
 In the same python console:
 
 ```python
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-
 # Publish the datatoken
 DATA_datatoken = erc721_nft.create_datatoken(
     template_index=1,
     name="Datatoken 1",
     symbol="DT1",
-    minter=alice_wallet.address,
-    fee_manager=alice_wallet.address,
-    publish_market_order_fee_address=ZERO_ADDRESS,
-    publish_market_order_fee_token=ocean.OCEAN_address,
-    publish_market_order_fee_amount=0,
-    bytess=[b""],
     from_wallet=alice_wallet,
 )
 print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
@@ -141,12 +133,6 @@ ALGO_datatoken = ALGO_nft_token.create_datatoken(
     template_index=1,
     name="Datatoken 1",
     symbol="DT1",
-    minter=alice_wallet.address,
-    fee_manager=alice_wallet.address,
-    publish_market_order_fee_address=ZERO_ADDRESS,
-    publish_market_order_fee_token=ocean.OCEAN_address,
-    publish_market_order_fee_amount=0,
-    bytess=[b""],
     from_wallet=alice_wallet,
 )
 print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")
@@ -336,7 +322,7 @@ For examples using different datasets and algorithms, please see [c2d-flow-more-
 In the "publish algorithm" step, to replace the sample algorithm with another one:
 
 - Use one of the standard [Ocean algo_dockers images](https://github.com/oceanprotocol/algo_dockers) or publish a custom docker image.
-- Use the image name and tag in the `container` part of the algorithm metadata. 
+- Use the image name and tag in the `container` part of the algorithm metadata.
 - The image must have basic support for installing dependencies. E.g. "pip" for the case of Python. You can use other languages, of course.
 - More info: https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/)
 

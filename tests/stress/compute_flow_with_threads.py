@@ -16,7 +16,6 @@ from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import UrlFile
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.ddo_helpers import get_first_service_by_type
 from tests.resources.helper_functions import generate_wallet
 
@@ -41,12 +40,6 @@ def c2d_flow_readme(
         template_index=1,
         name="Datatoken 1",
         symbol="DT1",
-        minter=publisher_wallet.address,
-        fee_manager=publisher_wallet.address,
-        publish_market_order_fee_address=ZERO_ADDRESS,
-        publish_market_order_fee_token=ocean.OCEAN_address,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
         from_wallet=publisher_wallet,
     )
     assert DATA_datatoken.address
@@ -110,12 +103,6 @@ def c2d_flow_readme(
         template_index=1,
         name="Datatoken 1",
         symbol="DT1",
-        minter=publisher_wallet.address,
-        fee_manager=publisher_wallet.address,
-        publish_market_order_fee_address=ZERO_ADDRESS,
-        publish_market_order_fee_token=ocean.OCEAN_address,
-        publish_market_order_fee_amount=0,
-        bytess=[b""],
         from_wallet=publisher_wallet,
     )
     assert ALGO_datatoken.address
