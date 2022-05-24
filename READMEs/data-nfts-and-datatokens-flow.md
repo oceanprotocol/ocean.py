@@ -102,7 +102,6 @@ In the same python console:
 # Create ERC20 token related to the above NFT.
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
-nft_factory = ocean.get_nft_factory()
 erc20_token = erc721_nft.create_datatoken(
     template_index=1, # default value
     name="ERC20DT1",  # name for ERC20 token
