@@ -87,7 +87,7 @@ def test_start_order_fees(
         publish_market_order_fee_in_unit, bt.decimals()
     )
 
-    asset, service, dt = create_asset_with_order_fee(
+    asset, service, dt = create_asset_with_order_fee_and_timeout(
         web3=web3,
         config=config,
         file=file1,
@@ -251,16 +251,32 @@ def get_provider_fees(
     return provider_fee
 
 
-def create_asset_with_order_fee(
-    web3,
-    config,
-    file,
-    erc721_nft,
-    publisher_wallet,
-    publish_market_order_fee_address,
-    publish_market_order_fee_token,
-    publish_market_order_fee_amount,
+def create_asset_with_order_fee_and_timeout(
+    web3: Web3,
+    config: Config,
+    file: FilesType,
+    erc721_nft: ERC721NFT,
+    publisher_wallet: Wallet,
+    publish_market_order_fee_address: str,
+    publish_market_order_fee_token: str,
+    publish_market_order_fee_amount: int,
+    timeout: int,
 ) -> Tuple[Asset, Service, ERC20Token]:
+
+    # Create datatoken with order fee
+    datatoken = erc721_nft.create_datatoken(
+        template_index=1,
+        name="Datatoken 1",
+        symbol="DT1",
+        minter=publisher_wallet.address,
+        fee_manager=publisher_wallet.address,
+        publish_market_order_fee_address=publish_market_order_fee_address,
+        publish_market_order_fee_token=publish_market_order_fee_token,
+        publish_market_order_fee_amount=publish_market_order_fee_amount,
+        bytess=[b""],
+        from_wallet=publisher_wallet,
+    )
+
     data_provider = DataServiceProvider
     ocean_assets = OceanAssets(config, web3, data_provider)
     metadata = {
@@ -277,21 +293,23 @@ def create_asset_with_order_fee(
     encrypt_response = data_provider.encrypt([file], config.provider_url)
     encrypted_files = encrypt_response.content.decode("utf-8")
 
-    # Publish a plain asset with one data token on chain
+    # Create service with timeout
+    service = Service(
+        service_id="5",
+        service_type=ServiceTypes.ASSET_ACCESS,
+        service_endpoint=data_provider.get_url(config),
+        datatoken=datatoken.address,
+        files=encrypted_files,
+        timeout=timeout,
+    )
+
+    # Publish asset
     asset = ocean_assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        encrypted_files=encrypted_files,
+        services=[service],
         erc721_address=erc721_nft.address,
-        erc20_templates=[1],
-        erc20_names=["Datatoken 1"],
-        erc20_symbols=["DT1"],
-        erc20_minters=[publisher_wallet.address],
-        erc20_fee_managers=[publisher_wallet.address],
-        erc20_publish_market_order_fee_addresses=[publish_market_order_fee_address],
-        erc20_publish_market_order_fee_tokens=[publish_market_order_fee_token],
-        erc20_publish_market_order_fee_amounts=[publish_market_order_fee_amount],
-        erc20_bytess=[[b""]],
+        deployed_erc20_tokens=[datatoken],
     )
 
     service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
