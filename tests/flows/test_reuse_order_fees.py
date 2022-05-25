@@ -40,11 +40,11 @@ from tests.resources.helper_functions import (
         # Min fees
         (
             "Ocean",
-            "0.000000000000000001",
-            "0.000000000000000001",
-            "0.000000000000000001",
+            "0.000000000000000001",  # 1 wei
+            "0.000000000000000001",  # 1 wei
+            "0.000000000000000001",  # 1 wei
         ),
-        ("MockUSDC", "0.000001", "0.000001", "0.000001"),
+        ("MockUSDC", "0.000001", "0.000001", "0.000001"),  # Smallest USDC amounts
         # Large fees
         ("Ocean", "500", "600", "700"),
         ("MockUSDC", "500", "600", "700"),
@@ -139,10 +139,11 @@ def test_reuse_order_fees(
     )
 
     # Reuse order where:
-    #     Order fees: valid
+    #     Order: valid
     #     Provider fees: valid
     # Simulate valid provider fees by setting them to 0
     reuse_order_with_mock_provider_fees(
+        True,
         "0",
         publish_market_order_fee,
         consume_market_order_fee,
@@ -159,10 +160,11 @@ def test_reuse_order_fees(
     )
 
     # Reuse order where:
-    #     Order fees: valid
+    #     Order: valid
     #     Provider fees: expired
     # Simulate expired provider fees by setting them to non-zero
     reuse_order_with_mock_provider_fees(
+        True,
         provider_fee,
         publish_market_order_fee,
         consume_market_order_fee,
@@ -182,10 +184,11 @@ def test_reuse_order_fees(
     sleep(6)
 
     # Reuse order where:
-    #     Order fees: expired
+    #     Order: expired
     #     Provider fees: valid
     # Simulate valid provider fees by setting them to 0
     reuse_order_with_mock_provider_fees(
+        False,
         provider_fee,
         publish_market_order_fee,
         consume_market_order_fee,
@@ -202,10 +205,11 @@ def test_reuse_order_fees(
     )
 
     # Reuse order where:
-    #     Order fees: expired
+    #     Order: expired
     #     Provider fees: expired
     # Simulate expired provider fees by setting them to non-zero
     reuse_order_with_mock_provider_fees(
+        False,
         provider_fee,
         publish_market_order_fee,
         consume_market_order_fee,
@@ -223,6 +227,7 @@ def test_reuse_order_fees(
 
 
 def reuse_order_with_mock_provider_fees(
+    order_is_valid: bool,
     provider_fee_in_unit: str,
     publish_market_order_fee: int,
     consume_market_order_fee: int,
@@ -300,30 +305,38 @@ def reuse_order_with_mock_provider_fees(
 
     # Check balances
     assert publisher_bt_balance_before == publisher_bt_balance_after
-    assert (
-        publisher_dt_balance_before + one_datatoken - ocean_community_order_fee
-        == publisher_dt_balance_after
-    )
-    assert (
-        publish_market_bt_balance_before + publish_market_order_fee
-        == publish_market_bt_balance_after
-    )
     assert publish_market_dt_balance_before == publish_market_dt_balance_after
-    assert (
-        consume_market_bt_balance_before + consume_market_order_fee
-        == consume_market_bt_balance_after
-    )
     assert consume_market_dt_balance_before == consume_market_dt_balance_after
-    assert (
-        consumer_bt_balance_before
-        - publish_market_order_fee
-        - consume_market_order_fee
-        - provider_fee
-        == consumer_bt_balance_after
-    )
-    assert consumer_dt_balance_before - one_datatoken == consumer_dt_balance_after
     assert provider_bt_balance_before + provider_fee == provider_bt_balance_after
     assert provider_dt_balance_before == provider_dt_balance_after
+
+    if order_is_valid:
+        assert publisher_dt_balance_before == publisher_dt_balance_after
+        assert publish_market_bt_balance_before == publish_market_bt_balance_after
+        assert consume_market_bt_balance_before == consume_market_bt_balance_after
+        assert consumer_bt_balance_before - provider_fee == consumer_bt_balance_after
+        assert consumer_dt_balance_before == consumer_dt_balance_after
+    else:
+        assert (
+            publisher_dt_balance_before + one_datatoken - ocean_community_order_fee
+            == publisher_dt_balance_after
+        )
+        assert (
+            publish_market_bt_balance_before + publish_market_order_fee
+            == publish_market_bt_balance_after
+        )
+        assert (
+            consume_market_bt_balance_before + consume_market_order_fee
+            == consume_market_bt_balance_after
+        )
+        assert (
+            consumer_bt_balance_before
+            - publish_market_order_fee
+            - consume_market_order_fee
+            - provider_fee
+            == consumer_bt_balance_after
+        )
+        assert consumer_dt_balance_before - one_datatoken == consumer_dt_balance_after
 
 
 def get_provider_fees(

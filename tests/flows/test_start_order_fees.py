@@ -44,11 +44,11 @@ from tests.resources.helper_functions import (
         # Min fees
         (
             "Ocean",
-            "0.000000000000000001",
-            "0.000000000000000001",
-            "0.000000000000000001",
+            "0.000000000000000001",  # 1 wei
+            "0.000000000000000001",  # 1 wei
+            "0.000000000000000001",  # 1 wei
         ),
-        ("MockUSDC", "0.000001", "0.000001", "0.000001"),
+        ("MockUSDC", "0.000001", "0.000001", "0.000001"),  # Smallest USDC amounts
         # Large fees
         ("Ocean", "500", "600", "700"),
         ("MockUSDC", "500", "600", "700"),
@@ -96,6 +96,7 @@ def test_start_order_fees(
         publish_market_order_fee_address=publish_market_wallet.address,
         publish_market_order_fee_token=bt.address,
         publish_market_order_fee_amount=publish_market_order_fee,
+        timeout=3600,
     )
 
     # Mint 50 ERC20 tokens in consumer wallet from publisher.
