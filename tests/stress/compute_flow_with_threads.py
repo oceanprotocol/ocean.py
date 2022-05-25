@@ -37,9 +37,8 @@ def c2d_flow_readme(
 
     # Publish the datatoken
     DATA_datatoken = erc721_nft.create_datatoken(
-        template_index=1,
-        name="Datatoken 1",
-        symbol="DT1",
+        "Datatoken 1",
+        "DT1",
         from_wallet=publisher_wallet,
     )
     assert DATA_datatoken.address
@@ -100,9 +99,8 @@ def c2d_flow_readme(
 
     # Publish the datatoken
     ALGO_datatoken = ALGO_nft_token.create_datatoken(
-        template_index=1,
-        name="Datatoken 1",
-        symbol="DT1",
+        "Datatoken 1",
+        "DT1",
         from_wallet=publisher_wallet,
     )
     assert ALGO_datatoken.address

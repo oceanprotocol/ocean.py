@@ -279,15 +279,15 @@ class ERC721NFT(ContractBase):
     @enforce_types
     def create_datatoken(
         self,
-        template_index: int,
         name: str,
         symbol: str,
         from_wallet: Wallet,
+        template_index: Optional[int] = 1,
         minter: Optional[str] = None,
         fee_manager: Optional[str] = None,
         publish_market_order_fee_address: Optional[str] = None,
         publish_market_order_fee_token: Optional[str] = None,
-        publish_market_order_fee_amount: Optional[int] = None,
+        publish_market_order_fee_amount: Optional[int] = 0,
         bytess: Optional[List[bytes]] = None,
     ) -> ERC20Token:
         initial_list = self.get_tokens_list()
@@ -319,9 +319,6 @@ class ERC721NFT(ContractBase):
 
         if publish_market_order_fee_token is None:
             create_args["publish_market_order_fee_token"] = ZERO_ADDRESS
-
-        if publish_market_order_fee_token is None:
-            create_args["publish_market_order_fee_amount"] = 0
 
         if bytess is None:
             create_args["bytess"] = [b""]

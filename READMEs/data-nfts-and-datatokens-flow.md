@@ -102,12 +102,7 @@ In the same python console:
 # Create ERC20 token related to the above NFT.
 
 nft_factory = ocean.get_nft_factory()
-erc20_token = erc721_nft.create_datatoken(
-    template_index=1,  # default value
-    name="ERC20DT1",  # name for ERC20 token
-    symbol="ERC20DT1Symbol",  # symbol for ERC20 token
-    from_wallet=alice_wallet
-)
+erc20_token = erc721_nft.create_datatoken("ERC20DT1", "ERC20DT1Symbol", from_wallet=alice_wallet)
 print(f"Created ERC20 datatoken. Its address is {erc20_token.address}")
 ```
 
