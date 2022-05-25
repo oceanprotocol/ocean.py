@@ -77,7 +77,6 @@ asset = ocean.assets.create(
 
 did = asset.did  # did contains the datatoken address
 print(f"did = '{did}'")
-
 ```
 
 Note on asset encryption: In order to encrypt the entire asset, when using a private market or metadata cache, use the encrypt keyword.
