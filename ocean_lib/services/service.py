@@ -307,19 +307,17 @@ class ConsumerParameters:
     def __init__(
         self,
         name: str,
-        type: Optional[str] = None,
-        label: Optional[str] = None,
-        required: Optional[bool] = False,
-        default: Optional[str] = None,
-        description: Optional[str] = None,
+        type: str,
+        label: str,
+        required: bool,
+        default: str,
+        description: str,
         options: Optional[List[str]] = None,
     ) -> None:
-        self.name = name
-        self.type = type
-        self.label = label
-        self.required = required
-        self.default = default
-        self.description = description
+
+        fn_args = locals().copy()
+        for attr_name in ConsumerParameters.required_attrs():
+            setattr(self, attr_name, fn_args[attr_name])
 
         if options is not None and not isinstance(options, list):
             raise TypeError("Options should be a list")
@@ -332,21 +330,25 @@ class ConsumerParameters:
     ) -> "ConsumerParameters":
         """Create a ConsumerParameters object from a JSON string."""
         sd = copy.deepcopy(consumer_parameters_dict)
-        required = sd["required"] if "required" in sd else None
-        if required is not None:
-            required = (
-                bool(strtobool(sd["required"]))
-                if isinstance(sd["required"], str)
-                else required
+        missing_attributes = [
+            x for x in ConsumerParameters.required_attrs() if x not in sd.keys()
+        ]
+
+        if missing_attributes:
+            raise TypeError(
+                "ConsumerParameters is missing the keys "
+                + ", ".join(missing_attributes)
             )
 
+        required = sd["required"] if "required" in sd else None
+
         return cls(
-            sd.pop("name", None),
-            sd.pop("type", None),
-            sd.pop("label", None),
-            required,
-            sd.pop("default", None),
-            sd.pop("description", None),
+            sd["name"],
+            sd["type"],
+            sd["label"],
+            bool(strtobool(required)) if isinstance(required, str) else required,
+            sd["default"],
+            sd["description"],
             sd.pop("options", None),
         )
 
@@ -354,17 +356,24 @@ class ConsumerParameters:
     def as_dictionary(self) -> Dict[str, Any]:
         """Return the consume parameters object as a python dictionary."""
 
-        result = {}
-        for attr_name in [
+        result = {
+            attr_name: getattr(self, attr_name)
+            for attr_name in ConsumerParameters.required_attrs()
+        }
+
+        if self.options is not None:
+            result["options"] = self.options
+
+        return result
+
+    @staticmethod
+    @enforce_types
+    def required_attrs():
+        return [
             "name",
             "type",
             "label",
             "required",
             "default",
             "description",
-            "options",
-        ]:
-            if getattr(self, attr_name) is not None:
-                result[attr_name] = getattr(self, attr_name)
-
-        return result
+        ]

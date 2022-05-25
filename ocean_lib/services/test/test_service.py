@@ -19,7 +19,17 @@ def test_service():
     ddo_dict = get_sample_ddo()
     service_dict = ddo_dict["services"][0]
     service_dict["additionalInformation"] = {"message": "Sample DDO"}
-    service_dict["consumerParameters"] = [{"name": "some_key", "required": True}]
+
+    cp_dict = {
+        "name": "some_key",
+        "type": "string",
+        "label": "test_key_label",
+        "required": True,
+        "default": "value",
+        "description": "this is a test key",
+    }
+
+    service_dict["consumerParameters"] = [cp_dict]
     sa = Service.from_dict(service_dict)
 
     assert sa.id == "1"
@@ -39,7 +49,7 @@ def test_service():
         "name": "Download service",
         "description": "Download service",
         "additionalInformation": {"message": "Sample DDO"},
-        "consumerParameters": [{"name": "some_key", "required": True}],
+        "consumerParameters": [cp_dict],
     }
 
     ddo_dict = get_sample_ddo()
@@ -119,23 +129,22 @@ def test_consumer_parameters():
     cp_object = ConsumerParameters.from_dict(cp_dict)
     assert cp_object.as_dictionary() == cp_dict
 
-    cp_dict = {
-        "name": "test_key",
-    }
-
+    cp_dict.pop("options")
     cp_object = ConsumerParameters.from_dict(cp_dict)
     assert cp_object.as_dictionary() == cp_dict
 
-    cp_dict = {
-        "name": "test_key",
-        "required": "false",  # explicitly false, not missing
-    }
-
+    cp_dict["required"] = "false"  # explicitly false, not missing
     cp_object = ConsumerParameters.from_dict(cp_dict)
-    assert cp_object.as_dictionary() == {"name": "test_key", "required": False}
+    assert cp_object.as_dictionary()["required"] is False
 
     cp_dict["options"] = "not an array"
     with pytest.raises(TypeError):
+        cp_object = ConsumerParameters.from_dict(cp_dict)
+
+    cp_dict.pop("options")
+    cp_dict.pop("type")
+    cp_dict.pop("label")
+    with pytest.raises(TypeError, match="is missing the keys type, label"):
         cp_object = ConsumerParameters.from_dict(cp_dict)
 
 
