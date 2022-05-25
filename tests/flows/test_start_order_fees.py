@@ -23,7 +23,10 @@ from ocean_lib.services.service import Service
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.currency import MAX_WEI, parse_units, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
-from tests.resources.ddo_helpers import get_first_service_by_type
+from tests.resources.ddo_helpers import (
+    get_first_service_by_type,
+    get_opc_collector_address_from_erc20,
+)
 from tests.resources.helper_functions import (
     get_address_of_type,
     transfer_base_token_if_balance_lte,
@@ -106,6 +109,8 @@ def test_start_order_fees(
         from_wallet=publisher_wallet,
     )
 
+    opc_collector_address = get_opc_collector_address_from_erc20(dt)
+
     # Get balances
     publisher_bt_balance_before = bt.balanceOf(publisher_wallet.address)
     publisher_dt_balance_before = dt.balanceOf(publisher_wallet.address)
@@ -117,6 +122,8 @@ def test_start_order_fees(
     consumer_dt_balance_before = dt.balanceOf(consumer_wallet.address)
     provider_bt_balance_before = bt.balanceOf(provider_wallet.address)
     provider_dt_balance_before = dt.balanceOf(provider_wallet.address)
+    opc_bt_balance_before = bt.balanceOf(opc_collector_address)
+    opc_dt_balance_before = dt.balanceOf(opc_collector_address)
 
     # Get provider fees
     provider_fee = parse_units(provider_fee_in_unit, bt.decimals())
@@ -164,6 +171,8 @@ def test_start_order_fees(
     consumer_dt_balance_after = dt.balanceOf(consumer_wallet.address)
     provider_bt_balance_after = bt.balanceOf(provider_wallet.address)
     provider_dt_balance_after = dt.balanceOf(provider_wallet.address)
+    opc_bt_balance_after = bt.balanceOf(opc_collector_address)
+    opc_dt_balance_after = dt.balanceOf(opc_collector_address)
 
     # Get order fee amount
     publish_market_order_fee_amount = dt.get_publishing_market_fee()[2]
@@ -201,6 +210,8 @@ def test_start_order_fees(
     assert consumer_dt_balance_before - one_datatoken == consumer_dt_balance_after
     assert provider_bt_balance_before + provider_fee == provider_bt_balance_after
     assert provider_dt_balance_before == provider_dt_balance_after
+    assert opc_bt_balance_before == opc_bt_balance_after
+    assert opc_dt_balance_before + ocean_community_order_fee == opc_dt_balance_after
 
 
 def get_provider_fees(

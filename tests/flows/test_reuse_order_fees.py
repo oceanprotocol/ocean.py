@@ -15,11 +15,11 @@ from web3 import Web3
 from ocean_lib.config import Config
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.currency import MAX_WEI, parse_units, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.flows.test_start_order_fees import create_asset_with_order_fee_and_timeout
+from tests.resources.ddo_helpers import get_opc_collector_address_from_erc20
 from tests.resources.helper_functions import (
     get_address_of_type,
     transfer_base_token_if_balance_lte,
@@ -28,26 +28,21 @@ from tests.resources.helper_functions import (
 
 @pytest.mark.unit
 @pytest.mark.parametrize(
-    "base_token_name, publish_market_order_fee_in_unit, consume_market_order_fee_in_unit, provider_fee_in_unit",
+    "base_token_name, provider_fee_in_unit",
     [
         # Small fees
-        ("Ocean", "5", "6", "7"),
-        ("MockDAI", "5", "6", "7"),
-        ("MockUSDC", "5", "6", "7"),
+        ("Ocean", "7"),
+        ("MockDAI", "7"),
+        ("MockUSDC", "7"),
         # Zero fees
-        ("Ocean", "0", "0", "0"),
-        ("MockUSDC", "0", "0", "0"),
+        ("Ocean", "0"),
+        ("MockUSDC", "0"),
         # Min fees
-        (
-            "Ocean",
-            "0.000000000000000001",  # 1 wei
-            "0.000000000000000001",  # 1 wei
-            "0.000000000000000001",  # 1 wei
-        ),
-        ("MockUSDC", "0.000001", "0.000001", "0.000001"),  # Smallest USDC amounts
+        ("Ocean", "0.000000000000000001"),  # Smallest OCEAN amount
+        ("MockUSDC", "0.000001"),  # Smallest USDC amount
         # Large fees
-        ("Ocean", "500", "600", "700"),
-        ("MockUSDC", "500", "600", "700"),
+        ("Ocean", "700"),
+        ("MockUSDC", "700"),
     ],
 )
 def test_reuse_order_fees(
@@ -61,10 +56,7 @@ def test_reuse_order_fees(
     consume_market_wallet: Wallet,
     erc721_nft: ERC721NFT,
     file1: FilesType,
-    factory_router: FactoryRouter,
     base_token_name: str,
-    publish_market_order_fee_in_unit: str,
-    consume_market_order_fee_in_unit: str,
     provider_fee_in_unit: str,
 ):
     bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
@@ -75,12 +67,8 @@ def test_reuse_order_fees(
         base_token_address=bt.address,
         from_wallet=factory_deployer_wallet,
         recipient=consumer_wallet.address,
-        min_balance=parse_units("2000", bt.decimals()),
-        amount_to_transfer=parse_units("2000", bt.decimals()),
-    )
-
-    publish_market_order_fee = parse_units(
-        publish_market_order_fee_in_unit, bt.decimals()
+        min_balance=parse_units("4000", bt.decimals()),
+        amount_to_transfer=parse_units("4000", bt.decimals()),
     )
 
     # Publish asset, service, and datatoken. Orders expire after 5 seconds
@@ -92,7 +80,7 @@ def test_reuse_order_fees(
         publisher_wallet=publisher_wallet,
         publish_market_order_fee_address=publish_market_wallet.address,
         publish_market_order_fee_token=bt.address,
-        publish_market_order_fee_amount=publish_market_order_fee,
+        publish_market_order_fee_amount=parse_units("10", bt.decimals()),
         timeout=5,
     )
 
@@ -118,9 +106,6 @@ def test_reuse_order_fees(
     bt.approve(dt.address, MAX_WEI, consumer_wallet)
 
     # Start order: pay order fees and provider fees
-    consume_market_order_fee = parse_units(
-        consume_market_order_fee_in_unit, bt.decimals()
-    )
     start_order_tx_id = dt.start_order(
         consumer=consumer_wallet.address,
         service_index=asset.get_index_of_service(service),
@@ -134,7 +119,7 @@ def test_reuse_order_fees(
         provider_data=provider_fees["providerData"],
         consume_market_order_fee_address=consume_market_wallet.address,
         consume_market_order_fee_token=bt.address,
-        consume_market_order_fee_amount=consume_market_order_fee,
+        consume_market_order_fee_amount=parse_units("10", bt.decimals()),
         from_wallet=consumer_wallet,
     )
 
@@ -143,20 +128,16 @@ def test_reuse_order_fees(
     #     Provider fees: valid
     # Simulate valid provider fees by setting them to 0
     reuse_order_with_mock_provider_fees(
-        True,
-        "0",
-        publish_market_order_fee,
-        consume_market_order_fee,
-        start_order_tx_id,
-        bt,
-        dt,
-        publisher_wallet,
-        publish_market_wallet,
-        consume_market_wallet,
-        consumer_wallet,
-        provider_wallet,
-        web3,
-        factory_router,
+        provider_fee_in_unit="0",
+        start_order_tx_id=start_order_tx_id,
+        bt=bt,
+        dt=dt,
+        publisher_wallet=publisher_wallet,
+        publish_market_wallet=publish_market_wallet,
+        consume_market_wallet=consume_market_wallet,
+        consumer_wallet=consumer_wallet,
+        provider_wallet=provider_wallet,
+        web3=web3,
     )
 
     # Reuse order where:
@@ -164,20 +145,16 @@ def test_reuse_order_fees(
     #     Provider fees: expired
     # Simulate expired provider fees by setting them to non-zero
     reuse_order_with_mock_provider_fees(
-        True,
-        provider_fee,
-        publish_market_order_fee,
-        consume_market_order_fee,
-        start_order_tx_id,
-        bt,
-        dt,
-        publisher_wallet,
-        publish_market_wallet,
-        consume_market_wallet,
-        consumer_wallet,
-        provider_wallet,
-        web3,
-        factory_router,
+        provider_fee_in_unit=provider_fee_in_unit,
+        start_order_tx_id=start_order_tx_id,
+        bt=bt,
+        dt=dt,
+        publisher_wallet=publisher_wallet,
+        publish_market_wallet=publish_market_wallet,
+        consume_market_wallet=consume_market_wallet,
+        consumer_wallet=consumer_wallet,
+        provider_wallet=provider_wallet,
+        web3=web3,
     )
 
     # Sleep for 6 seconds, long enough for order to expire
@@ -188,20 +165,16 @@ def test_reuse_order_fees(
     #     Provider fees: valid
     # Simulate valid provider fees by setting them to 0
     reuse_order_with_mock_provider_fees(
-        False,
-        provider_fee,
-        publish_market_order_fee,
-        consume_market_order_fee,
-        start_order_tx_id,
-        bt,
-        dt,
-        publisher_wallet,
-        publish_market_wallet,
-        consume_market_wallet,
-        consumer_wallet,
-        provider_wallet,
-        web3,
-        factory_router,
+        provider_fee_in_unit="0",
+        start_order_tx_id=start_order_tx_id,
+        bt=bt,
+        dt=dt,
+        publisher_wallet=publisher_wallet,
+        publish_market_wallet=publish_market_wallet,
+        consume_market_wallet=consume_market_wallet,
+        consumer_wallet=consumer_wallet,
+        provider_wallet=provider_wallet,
+        web3=web3,
     )
 
     # Reuse order where:
@@ -209,28 +182,21 @@ def test_reuse_order_fees(
     #     Provider fees: expired
     # Simulate expired provider fees by setting them to non-zero
     reuse_order_with_mock_provider_fees(
-        False,
-        provider_fee,
-        publish_market_order_fee,
-        consume_market_order_fee,
-        start_order_tx_id,
-        bt,
-        dt,
-        publisher_wallet,
-        publish_market_wallet,
-        consume_market_wallet,
-        consumer_wallet,
-        provider_wallet,
-        web3,
-        factory_router,
+        provider_fee_in_unit=provider_fee_in_unit,
+        start_order_tx_id=start_order_tx_id,
+        bt=bt,
+        dt=dt,
+        publisher_wallet=publisher_wallet,
+        publish_market_wallet=publish_market_wallet,
+        consume_market_wallet=consume_market_wallet,
+        consumer_wallet=consumer_wallet,
+        provider_wallet=provider_wallet,
+        web3=web3,
     )
 
 
 def reuse_order_with_mock_provider_fees(
-    order_is_valid: bool,
     provider_fee_in_unit: str,
-    publish_market_order_fee: int,
-    consume_market_order_fee: int,
     start_order_tx_id: str,
     bt: ERC20Token,
     dt: ERC20Token,
@@ -240,9 +206,10 @@ def reuse_order_with_mock_provider_fees(
     consumer_wallet: Wallet,
     provider_wallet: Wallet,
     web3: Web3,
-    factory_router: FactoryRouter,
 ):
     """Call reuse_order, and verify the balances/fees are correct"""
+
+    opc_collector_address = get_opc_collector_address_from_erc20(dt)
 
     # Get balances before reuse_order
     publisher_bt_balance_before = bt.balanceOf(publisher_wallet.address)
@@ -255,6 +222,8 @@ def reuse_order_with_mock_provider_fees(
     consumer_dt_balance_before = dt.balanceOf(consumer_wallet.address)
     provider_bt_balance_before = bt.balanceOf(provider_wallet.address)
     provider_dt_balance_before = dt.balanceOf(provider_wallet.address)
+    opc_bt_balance_before = bt.balanceOf(opc_collector_address)
+    opc_dt_balance_before = dt.balanceOf(opc_collector_address)
 
     # Mock provider fees
     provider_fee = parse_units(provider_fee_in_unit, bt.decimals())
@@ -292,51 +261,22 @@ def reuse_order_with_mock_provider_fees(
     consumer_dt_balance_after = dt.balanceOf(consumer_wallet.address)
     provider_bt_balance_after = bt.balanceOf(provider_wallet.address)
     provider_dt_balance_after = dt.balanceOf(provider_wallet.address)
-
-    # Get order fee amount
-    publish_market_order_fee_amount = dt.get_publishing_market_fee()[2]
-    assert publish_market_order_fee_amount == publish_market_order_fee
-
-    # Get Ocean community fee amount
-    ocean_community_order_fee = factory_router.get_opc_consume_fee()
-    assert ocean_community_order_fee == to_wei("0.03")
-
-    one_datatoken = to_wei(1)
+    opc_bt_balance_after = bt.balanceOf(opc_collector_address)
+    opc_dt_balance_after = dt.balanceOf(opc_collector_address)
 
     # Check balances
     assert publisher_bt_balance_before == publisher_bt_balance_after
+    assert publisher_dt_balance_before == publisher_dt_balance_after
+    assert publish_market_bt_balance_before == publish_market_bt_balance_after
     assert publish_market_dt_balance_before == publish_market_dt_balance_after
+    assert consume_market_bt_balance_before == consume_market_bt_balance_after
     assert consume_market_dt_balance_before == consume_market_dt_balance_after
+    assert consumer_bt_balance_before - provider_fee == consumer_bt_balance_after
+    assert consumer_dt_balance_before == consumer_dt_balance_after
     assert provider_bt_balance_before + provider_fee == provider_bt_balance_after
     assert provider_dt_balance_before == provider_dt_balance_after
-
-    if order_is_valid:
-        assert publisher_dt_balance_before == publisher_dt_balance_after
-        assert publish_market_bt_balance_before == publish_market_bt_balance_after
-        assert consume_market_bt_balance_before == consume_market_bt_balance_after
-        assert consumer_bt_balance_before - provider_fee == consumer_bt_balance_after
-        assert consumer_dt_balance_before == consumer_dt_balance_after
-    else:
-        assert (
-            publisher_dt_balance_before + one_datatoken - ocean_community_order_fee
-            == publisher_dt_balance_after
-        )
-        assert (
-            publish_market_bt_balance_before + publish_market_order_fee
-            == publish_market_bt_balance_after
-        )
-        assert (
-            consume_market_bt_balance_before + consume_market_order_fee
-            == consume_market_bt_balance_after
-        )
-        assert (
-            consumer_bt_balance_before
-            - publish_market_order_fee
-            - consume_market_order_fee
-            - provider_fee
-            == consumer_bt_balance_after
-        )
-        assert consumer_dt_balance_before - one_datatoken == consumer_dt_balance_after
+    assert opc_bt_balance_before == opc_bt_balance_after
+    assert opc_dt_balance_before == opc_dt_balance_after
 
 
 def get_provider_fees(
