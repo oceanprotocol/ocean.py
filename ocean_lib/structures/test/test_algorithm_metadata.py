@@ -23,7 +23,16 @@ def test_algorithm_metadata():
                 "tag": "latest",
                 "checksum": "44e10daa6637893f4276bb8d7301eb35306ece50f61ca34dcab550",
             },
-            "consumerParameters": [{"name": "some_key", "required": True}],
+            "consumerParameters": [
+                {
+                    "name": "some_key",
+                    "type": "string",
+                    "label": "test_key_label",
+                    "required": True,
+                    "default": "value",
+                    "description": "this is a test key",
+                }
+            ],
         }
     )
 
