@@ -57,7 +57,7 @@ In the same python console:
 
 ```python
 # Publish the datatoken
-DATA_datatoken = erc721_nft.create_datatoken("Datatoken 1", "DT1", from_wallet=alice_wallet)
+DATA_datatoken = erc721_nft.create_datatoken("DATA 1", "D1", from_wallet=alice_wallet)
 print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
 
 # Specify metadata and services, using the Branin test dataset
@@ -124,7 +124,7 @@ ALGO_nft_token = ocean.create_erc721_nft("NFTToken1", "NFT1", alice_wallet)
 print(f"ALGO_nft_token address = '{ALGO_nft_token.address}'")
 
 # Publish the datatoken
-ALGO_datatoken = ALGO_nft_token.create_datatoken("Datatoken 1", "DT1", from_wallet=alice_wallet)
+ALGO_datatoken = ALGO_nft_token.create_datatoken("ALGO 1", "A1", from_wallet=alice_wallet)
 print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")
 
 # Specify metadata and services, using the Branin test dataset

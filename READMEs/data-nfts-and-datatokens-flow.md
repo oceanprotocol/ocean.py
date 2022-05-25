@@ -101,7 +101,7 @@ In the same python console:
 ```python
 # Create ERC20 token related to the above NFT.
 
-erc20_token = erc721_nft.create_datatoken("ERC20DT1", "ERC20DT1Symbol", from_wallet=alice_wallet)
+erc20_token = erc721_nft.create_datatoken("Datatoken 1", "DT1", from_wallet=alice_wallet)
 print(f"Created ERC20 datatoken. Its address is {erc20_token.address}")
 ```
 
