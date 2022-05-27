@@ -1068,7 +1068,7 @@ def test_swap_calculations(
     )
     assert (
         cogi_amount_added_to_pool
-        == cigo_amount_in
+        == amount_in
         - cogi_opc_fee_amount
         - cogi_publish_market_fee_amount
         - cogi_consume_market_fee_amount
