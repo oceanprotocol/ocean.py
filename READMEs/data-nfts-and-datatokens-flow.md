@@ -31,6 +31,15 @@ docker system prune -a --volumes
 ./start_ocean.sh --with-c2d
 ```
 
+When running barge with c2d enabled, use the following bash script to wait until
+the `artifacts` directory and `address.json` file are successfully created and c2d is fully deployed:
+```console
+for i in $(seq 1 50); do
+    sleep 5
+    [ -f "$HOME/.ocean/ocean-contracts/artifacts/ready" -a -f "$HOME/.ocean/ocean/c2d/ready" ] && break
+    done
+```
+
 ## Install the library from v4 sources
 
 In a new console:

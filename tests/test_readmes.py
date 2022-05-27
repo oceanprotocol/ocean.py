@@ -13,7 +13,7 @@ scripts = pathlib.Path(__file__, "..", "generated-readmes").resolve().glob("*.py
 @pytest.mark.parametrize("script", scripts)
 def test_script_execution(script, monkeypatch):
     # README generation command:
-    # mkcodes --github --output tests/generated-readmes/test_{name}.py READMEs
+    # mkcodes --github --output tests/generated-readmes/test_{name}.{ext} READMEs
 
     if (
         "developers" in script.name

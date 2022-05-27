@@ -97,8 +97,8 @@ print(f"file_path = '{file_path}'")  # e.g. datafile.0xAf07...
 
 In console:
 
-```
-#verify that the file is downloaded
+```console
+# verify that the file is downloaded
 cd my_project/datafile.did:op:0xAf07...
 ls branin.arff
 ```
@@ -107,7 +107,7 @@ Congrats to Bob for buying and consuming a data asset!
 
 _Note_. The file is in ARFF format, used by some AI/ML tools. In this case there are two input variables (x0, x1) and one output.
 
-```
+```console
 % 1. Title: Branin Function
 % 3. Number of instances: 225
 % 6. Number of attributes: 2
