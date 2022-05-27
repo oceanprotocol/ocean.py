@@ -1054,7 +1054,7 @@ def test_swap_calculations(
         f"cigo_consume_market_fee_amount = {format_units(cigo_consume_market_fee_amount, bt.decimals())}\n"
     )
 
-    assert cigo_amount_in == amount_in
+    assert approx_format_units(cigo_amount_in, bt.decimals(), amount_in, bt.decimals())
 
     # Amount added to the pool should equal the amount_in minus the opc fee,
     # publish fee, and consume fee. LP fee is not subtracted because it's
