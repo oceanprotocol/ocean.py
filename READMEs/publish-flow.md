@@ -77,7 +77,6 @@ asset = ocean.assets.create(
 
 did = asset.did  # did contains the datatoken address
 print(f"did = '{did}'")
-
 ```
 
 The asset metadata stored on-chain is encrypted and compressed by default.

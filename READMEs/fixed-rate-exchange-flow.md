@@ -46,7 +46,7 @@ Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md
 
 In the same python console:
 ```python
-#Mint the datatokens
+# Mint the datatokens
 erc20_token.mint(alice_wallet.address, ocean.to_wei(100), alice_wallet)
 ```
 

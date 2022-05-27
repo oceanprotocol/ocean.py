@@ -82,24 +82,15 @@ from ocean_lib.ocean.ocean import Ocean
 config = ExampleConfig.get_config()
 ocean = Ocean(config)
 
-print(f"config.network_url = '{config.network_url}'")
-print(f"config.block_confirmations = {config.block_confirmations.value}")
-print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
-print(f"config.provider_url = '{config.provider_url}'")
-
 # Create Alice's wallet
 import os
 from ocean_lib.web3_internal.wallet import Wallet
 alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
 alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
-print(f"alice_wallet.address = '{alice_wallet.address}'")
 
 # Publish an NFT token
-print("Create ERC721 data NFT: begin.")
 erc721_nft = ocean.create_erc721_nft('NFTToken1', 'NFT1', alice_wallet)
-print(f"Created ERC721 token: done. Its address is {erc721_nft.address}")
-print(f"data NFT token name: {erc721_nft.token_name()}")
-print(f"data NFT token symbol: {erc721_nft.symbol()}")
+print(f"Created ERC721 data NFT. Its address is {erc721_nft.address}")
 ```
 
 Congrats, you've created your first Ocean data NFT!
@@ -109,28 +100,33 @@ Congrats, you've created your first Ocean data NFT!
 In the same python console:
 ```python
 # Create ERC20 token related to the above NFT.
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
-print("Create ERC20 datatoken: begin.")
-
-nft_factory = ocean.get_nft_factory()
-erc20_token = erc721_nft.create_datatoken(
-    template_index=1, # default value
-    name="ERC20DT1",  # name for ERC20 token
-    symbol="ERC20DT1Symbol",  # symbol for ERC20 token
-    minter=alice_wallet.address,  # minter address
-    fee_manager=alice_wallet.address,  # fee manager for this ERC20 token
-    publish_market_order_fee_address=alice_wallet.address,  # publishing Market Address
-    publish_market_order_fee_token=ZERO_ADDRESS,  # publishing Market Fee Token
-    publish_market_order_fee_amount=0,
-    bytess=[b""],
-    from_wallet=alice_wallet
-)
-print(f"Created ERC20 datatoken: done. Its address is {erc20_token.address}")
-print(f"datatoken name: {erc20_token.token_name()}")
-print(f"datatoken symbol: {erc20_token.symbol()}")
+erc20_token = erc721_nft.create_datatoken("Datatoken 1", "DT1", from_wallet=alice_wallet)
+print(f"Created ERC20 datatoken. Its address is {erc20_token.address}")
 ```
 
 Congrats, you've created your first Ocean datatoken! 🐋
 
-As an alternative for publishing an NFT and a datatoken at once, you can use `create_nft_with_erc20`.
+## 3. Tips and tricks
+
+You can combine creating a data NFT and datatoken into a single call: `ocean.create_nft_with_erc20()`.
+
+To learn more about some of the objects you created, here are some examples.
+```python
+# config
+print(f"config.network_url = '{config.network_url}'")
+print(f"config.block_confirmations = {config.block_confirmations.value}")
+print(f"config.metadata_cache_uri = '{config.metadata_cache_uri}'")
+print(f"config.provider_url = '{config.provider_url}'")
+
+# wallet
+print(f"alice_wallet.address = '{alice_wallet.address}'")
+
+# data NFT
+print(f"data NFT token name: {erc721_nft.token_name()}")
+print(f"data NFT token symbol: {erc721_nft.symbol()}")
+
+# datatoken
+print(f"datatoken name: {erc20_token.token_name()}")
+print(f"datatoken symbol: {erc20_token.symbol()}")
+```

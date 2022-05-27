@@ -36,17 +36,17 @@ From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
 ## 3. Add key-value pair to data NFT
 
 ```python
-#Key-value pair
+# Key-value pair
 key = "fav_color"
 value = "blue"
 
-#prep key for setter
-key_hash = ocean.web3.keccak(text=key) #Contract/ERC725 requires keccak256 hash
+# prep key for setter
+key_hash = ocean.web3.keccak(text=key)  # Contract/ERC725 requires keccak256 hash
 
-#prep value for setter
-value_hex = value.encode('utf-8').hex() #set_new_data() needs hex
+# prep value for setter
+value_hex = value.encode('utf-8').hex()  # set_new_data() needs hex
 
-#set
+# set
 erc721_nft.set_new_data(key_hash, value_hex, alice_wallet)
 ```
 

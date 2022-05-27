@@ -70,7 +70,7 @@ erc20_token.mint(
 
 # Bob points to the service object
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-fee_receiver = ZERO_ADDRESS # could also be market address
+fee_receiver = ZERO_ADDRESS  # could also be market address
 service = asset.services[0]
 
 # Bob sends his datatoken to the service
@@ -92,7 +92,7 @@ file_path = ocean.assets.download_asset(
     destination='./',
     order_tx_id=order_tx_id
 )
-print(f"file_path = '{file_path}'") #e.g. datafile.0xAf07...
+print(f"file_path = '{file_path}'")  # e.g. datafile.0xAf07...
 ```
 
 In console:
