@@ -12,6 +12,8 @@ from typing import Any, Dict, Optional, Tuple, Union
 import coloredlogs
 import yaml
 from enforce_typing import enforce_types
+from eth_keys import KeyAPI
+from eth_keys.backends import NativeECCBackend
 from pytest import approx
 from web3 import Web3
 
@@ -28,7 +30,6 @@ from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import DECIMALS_18, format_units, from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
-from ocean_lib.web3_internal.utils import split_signature
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 
@@ -341,41 +342,52 @@ def transfer_base_token_if_balance_lte(
 
 
 @enforce_types
-def get_provider_fees() -> Dict[str, Any]:
-    provider_wallet = get_provider_wallet()
-    web3 = get_web3()
-    provider_fee_amount = 0
-    compute_env = None
-    provider_data = json.dumps({"environment": compute_env}, separators=(",", ":"))
-    provider_fee_address = provider_wallet.address
-    provider_fee_token = os.environ.get("PROVIDER_FEE_TOKEN", ZERO_ADDRESS)
-    valid_until = 0
+def get_provider_fees(
+    web3: Web3,
+    provider_wallet: Wallet,
+    provider_fee_token: str,
+    provider_fee_amount: int,
+    valid_until: int,
+    compute_env: str = None,
+) -> Dict[str, Any]:
+    """Copied and adapted from
+    https://github.com/oceanprotocol/provider/blob/b9eb303c3470817d11b3bba01a49f220953ed963/ocean_provider/utils/provider_fees.py#L22-L74
 
-    message = Web3.solidityKeccak(
+    Keep this in sync with the corresponding provider fee logic when it changes!
+    """
+    provider_fee_address = provider_wallet.address
+
+    provider_data = json.dumps({"environment": compute_env}, separators=(",", ":"))
+    message_hash = web3.solidityKeccak(
         ["bytes", "address", "address", "uint256", "uint256"],
         [
-            Web3.toHex(Web3.toBytes(text=provider_data)),
+            web3.toHex(web3.toBytes(text=provider_data)),
             provider_fee_address,
             provider_fee_token,
             provider_fee_amount,
             valid_until,
         ],
     )
-    signed = web3.eth.sign(provider_fee_address, data=message)
-    signature = split_signature(signed)
+
+    keys = KeyAPI(NativeECCBackend)
+    pk = keys.PrivateKey(Web3.toBytes(hexstr=provider_wallet.key))
+    prefix = "\x19Ethereum Signed Message:\n32"
+    signable_hash = web3.solidityKeccak(
+        ["bytes", "bytes"], [web3.toBytes(text=prefix), web3.toBytes(message_hash)]
+    )
+    signed = keys.ecdsa_sign(message_hash=signable_hash, private_key=pk)
 
     provider_fee = {
         "providerFeeAddress": provider_fee_address,
         "providerFeeToken": provider_fee_token,
         "providerFeeAmount": provider_fee_amount,
-        "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
+        "providerData": web3.toHex(web3.toBytes(text=provider_data)),
         # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
-        "v": signature.v,
-        "r": signature.r,
-        "s": signature.s,
-        "validUntil": 0,
+        "v": (signed.v + 27) if signed.v <= 1 else signed.v,
+        "r": web3.toHex(web3.toBytes(signed.r).rjust(32, b"\0")),
+        "s": web3.toHex(web3.toBytes(signed.s).rjust(32, b"\0")),
+        "validUntil": valid_until,
     }
-
     return provider_fee
 
 

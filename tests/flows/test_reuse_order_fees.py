@@ -2,14 +2,10 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-import json
 from datetime import datetime, timedelta
 from time import sleep
-from typing import Any, Dict
 
 import pytest
-from eth_keys import KeyAPI
-from eth_keys.backends import NativeECCBackend
 from web3 import Web3
 
 from ocean_lib.config import Config
@@ -22,6 +18,7 @@ from tests.flows.test_start_order_fees import create_asset_with_order_fee_and_ti
 from tests.resources.ddo_helpers import get_opc_collector_address_from_erc20
 from tests.resources.helper_functions import (
     get_address_of_type,
+    get_provider_fees,
     transfer_base_token_if_balance_lte,
 )
 
@@ -277,52 +274,3 @@ def reuse_order_with_mock_provider_fees(
     assert provider_dt_balance_before == provider_dt_balance_after
     assert opc_bt_balance_before == opc_bt_balance_after
     assert opc_dt_balance_before == opc_dt_balance_after
-
-
-def get_provider_fees(
-    web3: Web3,
-    provider_wallet: Wallet,
-    provider_fee_token: str,
-    provider_fee_amount: int,
-    valid_until: int,
-    compute_env: str = None,
-) -> Dict[str, Any]:
-    """Copied and adapted from
-    https://github.com/oceanprotocol/provider/blob/b9eb303c3470817d11b3bba01a49f220953ed963/ocean_provider/utils/provider_fees.py#L22-L74
-
-    Keep this in sync with the corresponding provider fee logic when it changes!
-    """
-    provider_fee_address = provider_wallet.address
-
-    provider_data = json.dumps({"environment": compute_env}, separators=(",", ":"))
-    message_hash = web3.solidityKeccak(
-        ["bytes", "address", "address", "uint256", "uint256"],
-        [
-            web3.toHex(web3.toBytes(text=provider_data)),
-            provider_fee_address,
-            provider_fee_token,
-            provider_fee_amount,
-            valid_until,
-        ],
-    )
-
-    keys = KeyAPI(NativeECCBackend)
-    pk = keys.PrivateKey(Web3.toBytes(hexstr=provider_wallet.key))
-    prefix = "\x19Ethereum Signed Message:\n32"
-    signable_hash = web3.solidityKeccak(
-        ["bytes", "bytes"], [web3.toBytes(text=prefix), web3.toBytes(message_hash)]
-    )
-    signed = keys.ecdsa_sign(message_hash=signable_hash, private_key=pk)
-
-    provider_fee = {
-        "providerFeeAddress": provider_fee_address,
-        "providerFeeToken": provider_fee_token,
-        "providerFeeAmount": provider_fee_amount,
-        "providerData": web3.toHex(web3.toBytes(text=provider_data)),
-        # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
-        "v": (signed.v + 27) if signed.v <= 1 else signed.v,
-        "r": web3.toHex(web3.toBytes(signed.r).rjust(32, b"\0")),
-        "s": web3.toHex(web3.toBytes(signed.s).rjust(32, b"\0")),
-        "validUntil": valid_until,
-    }
-    return provider_fee

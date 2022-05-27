@@ -19,6 +19,7 @@ from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsErr
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.services.service import Service
+from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import create_basics, get_first_service_by_type
 from tests.resources.helper_functions import (
@@ -253,7 +254,13 @@ def test_fileinfo(
 
 @pytest.mark.integration
 def test_initialize(
-    web3, config, publisher_wallet, publisher_ocean_instance, erc721_nft, erc20_token
+    web3,
+    config,
+    publisher_wallet,
+    publisher_ocean_instance,
+    provider_wallet,
+    erc721_nft,
+    erc20_token,
 ):
     _, metadata, encrypted_files = create_basics(config, web3, DataSP)
     ddo = publisher_ocean_instance.assets.create(
@@ -273,7 +280,13 @@ def test_initialize(
     assert initialize_result
     assert initialize_result.status_code == 200
     response_json = initialize_result.json()
-    assert response_json["providerFee"] == get_provider_fees()
+    assert response_json["providerFee"] == get_provider_fees(
+        web3,
+        provider_wallet,
+        ZERO_ADDRESS,
+        0,
+        0,
+    )
 
 
 @pytest.mark.unit
