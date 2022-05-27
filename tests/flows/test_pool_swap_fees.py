@@ -874,15 +874,13 @@ def check_balances_and_fees(
     )
     assert consume_not_balance == consume_not_token_balance_before
 
-    assert approx_format_units(
-        bpool_fee_balance,
-        fee_token.decimals(),
-        bpool_fee_token_balance_before
+    assert (
+        bpool_fee_balance
+        == bpool_fee_token_balance_before
         + log_swap_event_args.tokenAmountIn
         - swap_fees_event_args.marketFeeAmount
-        - swap_fees_event_args.oceanFeeAmount,
-        fee_token.decimals(),
-        rel=1e-3,
+        - swap_fees_event_args.oceanFeeAmount
+        - swap_fees_event_args.consumeMarketFeeAmount
     )
 
     assert (
