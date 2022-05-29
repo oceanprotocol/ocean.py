@@ -7,7 +7,7 @@ from typing import Any, Dict
 
 from enforce_typing import enforce_types
 
-from ocean_lib.services.service import ConsumerParameters
+from ocean_lib.services.consumer_parameters import ConsumerParameters
 
 
 class AlgorithmMetadata:
