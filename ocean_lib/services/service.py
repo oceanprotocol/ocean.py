@@ -329,9 +329,9 @@ class ConsumerParameters:
         cls, consumer_parameters_dict: Dict[str, Any]
     ) -> "ConsumerParameters":
         """Create a ConsumerParameters object from a JSON string."""
-        sd = copy.deepcopy(consumer_parameters_dict)
+        cpd = copy.deepcopy(consumer_parameters_dict)
         missing_attributes = [
-            x for x in ConsumerParameters.required_attrs() if x not in sd.keys()
+            x for x in ConsumerParameters.required_attrs() if x not in cpd.keys()
         ]
 
         if missing_attributes:
@@ -340,16 +340,16 @@ class ConsumerParameters:
                 + ", ".join(missing_attributes)
             )
 
-        required = sd["required"] if "required" in sd else None
+        required = cpd["required"] if "required" in cpd else None
 
         return cls(
-            sd["name"],
-            sd["type"],
-            sd["label"],
+            cpd["name"],
+            cpd["type"],
+            cpd["label"],
             bool(strtobool(required)) if isinstance(required, str) else required,
-            sd["default"],
-            sd["description"],
-            sd.pop("options", None),
+            cpd["default"],
+            cpd["description"],
+            cpd.pop("options", None),
         )
 
     @enforce_types
