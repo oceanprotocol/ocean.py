@@ -47,7 +47,7 @@ In Python, import and configure the components / services:
 import os
 from ocean_lib.config import Config
 
-#configure the components
+# configure the components
 config = Config(os.getenv('OCEAN_CONFIG_FILE'))
 ```
 

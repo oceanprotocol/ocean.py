@@ -56,21 +56,8 @@ Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md
 In the same python console:
 
 ```python
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-
 # Publish the datatoken
-DATA_datatoken = erc721_nft.create_datatoken(
-    template_index=1,
-    name="Datatoken 1",
-    symbol="DT1",
-    minter=alice_wallet.address,
-    fee_manager=alice_wallet.address,
-    publish_market_order_fee_address=ZERO_ADDRESS,
-    publish_market_order_fee_token=ocean.OCEAN_address,
-    publish_market_order_fee_amount=0,
-    bytess=[b""],
-    from_wallet=alice_wallet,
-)
+DATA_datatoken = erc721_nft.create_datatoken("DATA 1", "D1", from_wallet=alice_wallet)
 print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
 
 # Specify metadata and services, using the Branin test dataset
@@ -129,13 +116,6 @@ print(f"DATA_asset did = '{DATA_asset.did}'")
 
 ## 4. Alice publishes an algorithm
 
-For this step, there are some prerequisites needed. If you want to replace the sample algorithm with an algorithm of your choosing, you will need to do some dependency management.
-You can use one of the standard [Ocean algo_dockers images](https://github.com/oceanprotocol/algo_dockers) or publish a custom docker image.
-
-Use the image name and tag in the `container` part of the algorithm metadata.
-This docker image needs to have basic support for dependency installation e.g. in the case of Python, OS-level library installations, pip installations etc.
-Take a look at the [Ocean tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/) to learn more about docker image publishing.
-
 In the same Python console:
 
 ```python
@@ -144,18 +124,7 @@ ALGO_nft_token = ocean.create_erc721_nft("NFTToken1", "NFT1", alice_wallet)
 print(f"ALGO_nft_token address = '{ALGO_nft_token.address}'")
 
 # Publish the datatoken
-ALGO_datatoken = ALGO_nft_token.create_datatoken(
-    template_index=1,
-    name="Datatoken 1",
-    symbol="DT1",
-    minter=alice_wallet.address,
-    fee_manager=alice_wallet.address,
-    publish_market_order_fee_address=ZERO_ADDRESS,
-    publish_market_order_fee_token=ocean.OCEAN_address,
-    publish_market_order_fee_amount=0,
-    bytess=[b""],
-    from_wallet=alice_wallet,
-)
+ALGO_datatoken = ALGO_nft_token.create_datatoken("ALGO 1", "A1", from_wallet=alice_wallet)
 print(f"ALGO_datatoken address = '{ALGO_datatoken.address}'")
 
 # Specify metadata and services, using the Branin test dataset
@@ -322,14 +291,14 @@ X0_vec = numpy.linspace(-5., 10., 15)
 X1_vec = numpy.linspace(0., 15., 15)
 X0, X1 = numpy.meshgrid(X0_vec, X1_vec)
 b, c, t = 0.12918450914398066, 1.5915494309189535, 0.039788735772973836
-u = X1 - b*X0**2 + c*X0 - 6
-r = 10.*(1. - t) * numpy.cos(X0) + 10
-Z = u**2 + r
+u = X1 - b * X0 ** 2 + c * X0 - 6
+r = 10. * (1. - t) * numpy.cos(X0) + 10
+Z = u ** 2 + r
 
 fig, ax = pyplot.subplots(subplot_kw={"projection": "3d"})
 ax.scatter(X0, X1, model, c="r", label="model")
 pyplot.title("Data + model")
-pyplot.show() # or pyplot.savefig("test.png") to save the plot as a .png file instead
+pyplot.show()  # or pyplot.savefig("test.png") to save the plot as a .png file instead
 ```
 
 You should see something like this:
@@ -340,13 +309,17 @@ You should see something like this:
 This c2d flow example features a simple algorithm from the field of ML. Ocean c2d is not limited to ML datasets and algorithms, but it is one of the most common use cases.
 For examples using different datasets and algorithms, please see [c2d-flow-more-examples.md](https://github.com/oceanprotocol/ocean.py/blob/v4main/READMEs/c2d-flow-more-examples.md)
 
-This example also features a simple Python algorithm. If you publish an algorithm in another language, make sure you have an appropriate container to run it, including dependencies.
-You can find more information about how to do this in the [Ocean tutorials](https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/).
+In the "publish algorithm" step, to replace the sample algorithm with another one:
+
+- Use one of the standard [Ocean algo_dockers images](https://github.com/oceanprotocol/algo_dockers) or publish a custom docker image.
+- Use the image name and tag in the `container` part of the algorithm metadata.
+- The image must have basic support for installing dependencies. E.g. "pip" for the case of Python. You can use other languages, of course.
+- More info: https://docs.oceanprotocol.com/tutorials/compute-to-data-algorithms/)
 
 The function to `pay_for_compute_service` automates order starting, order reusing and performs all the necessary Provider and on-chain requests.
 It modifies the contents of the given ComputeInput as follows:
 
-- if the dataset/algorithm contains a `transfer_tx_id` property, it will try to reuse that previous transfer id. If provider fees have expired but the order is still valid, then the order is reused on-chain.
-- if the dataset/algorithm does not contain a `transfer_tx_id` or the order has expired (based on the Provider's response), then one new order will be created.
+- If the dataset/algorithm contains a `transfer_tx_id` property, it will try to reuse that previous transfer id. If provider fees have expired but the order is still valid, then the order is reused on-chain.
+- If the dataset/algorithm does not contain a `transfer_tx_id` or the order has expired (based on the Provider's response), then one new order will be created.
 
 This means you can reuse the same ComputeInput and you don't need to regenerate it everytime it is sent to `pay_for_compute_service`. This step makes sure you are not paying unnecessary or duplicated fees.
