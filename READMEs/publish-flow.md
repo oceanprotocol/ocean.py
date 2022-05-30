@@ -79,6 +79,9 @@ did = asset.did  # did contains the datatoken address
 print(f"did = '{did}'")
 ```
 
-Note on asset encryption: In order to encrypt the entire asset, when using a private market or metadata cache, use the encrypt keyword.
-Same for compression and you can use a combination of the two. E.g:
-`asset = ocean.assets.create(..., encrypt_flag=True)` or `asset = ocean.assets.create(..., compress_flag=True)`
+The asset metadata stored on-chain is encrypted and compressed by default.
+It is encouraged that publishers encrypt asset metadata so that the asset can
+be "forgotten" and therefore be GDPR compliant.
+To disable encryption, use `asset = ocean.assets.create(..., encrypt_flag=False)`.
+To disable compression, use`asset = ocean.assets.create(..., compress_flag=False)`.
+It is possible to disable both encryption and compression, if desired.

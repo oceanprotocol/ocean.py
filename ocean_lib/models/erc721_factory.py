@@ -12,7 +12,7 @@ from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
-from ocean_lib.web3_internal.constants import MAX_INT256
+from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.wallet import Wallet
 
 
@@ -171,7 +171,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
             raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
-        datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_INT256
+        datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
         return self.send_transaction(
             "createNftWithErc20",
             (
@@ -233,7 +233,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
             raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
-        datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_INT256
+        datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
         return self.send_transaction(
             "createNftWithErc20WithPool",
             (
@@ -317,7 +317,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
             raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
-        datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_INT256
+        datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
         return self.send_transaction(
             "createNftWithErc20WithFixedRate",
             (
@@ -389,7 +389,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
             raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
-        datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_INT256
+        datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
         return self.send_transaction(
             "createNftWithErc20WithDispenser",
             (

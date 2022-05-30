@@ -21,6 +21,7 @@ from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
+from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
@@ -101,6 +102,11 @@ class Ocean:
     @enforce_types
     def OCEAN_address(self) -> str:
         return get_ocean_token_address(self.config.address_file, web3=self.web3)
+
+    @property
+    @enforce_types
+    def OCEAN_token(self) -> ERC20Token:
+        return ERC20Token(self.web3, self.OCEAN_address)
 
     @enforce_types
     def to_wei(self, amount_in_ether: Union[Decimal, str, int]):
@@ -246,6 +252,11 @@ class Ocean:
             self.web3, get_address_of_type(self.config, "FixedPrice")
         )
 
+    @property
+    @enforce_types
+    def side_staking(self):
+        return SideStaking(self.web3, get_address_of_type(self.config, "Staking"))
+
     @enforce_types
     def create_fixed_rate(
         self,
@@ -283,8 +294,13 @@ class Ocean:
 
     @property
     @enforce_types
-    def factory_router(self):
+    def factory_router(self) -> FactoryRouter:
         return FactoryRouter(self.web3, get_address_of_type(self.config, "Router"))
+
+    @property
+    @enforce_types
+    def pool_template_address(self) -> str:
+        return get_address_of_type(self.config, "poolTemplate")
 
     @enforce_types
     def create_pool(
@@ -295,6 +311,7 @@ class Ocean:
         base_token_amount: int,
         lp_swap_fee_amount: int,
         publish_market_swap_fee_amount: int,
+        publish_market_swap_fee_collector: str,
         from_wallet: Wallet,
     ) -> BPool:
         base_token.approve(
@@ -311,9 +328,7 @@ class Ocean:
             base_token_address=base_token.address,
             base_token_sender=from_wallet.address,
             publisher_address=from_wallet.address,
-            publish_market_swap_fee_collector=get_address_of_type(
-                self.config, "OPFCommunityFeeCollector"
-            ),
+            publish_market_swap_fee_collector=publish_market_swap_fee_collector,
             pool_template_address=get_address_of_type(self.config, "poolTemplate"),
             from_wallet=from_wallet,
         )

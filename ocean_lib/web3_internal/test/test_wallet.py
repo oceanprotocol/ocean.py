@@ -7,7 +7,6 @@ import os
 import pytest
 from eth_account.messages import encode_defunct
 
-from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import get_ether_balance
 from ocean_lib.web3_internal.wallet import Wallet
@@ -61,7 +60,7 @@ def test_generating_wallets(web3, publisher_ocean_instance):
     assert generated_wallet.address, "Wallet has not an address."
     assert get_ether_balance(web3, generated_wallet.address) == to_wei(3)
 
-    OCEAN_token = ERC20Token(web3, address=publisher_ocean_instance.OCEAN_address)
+    OCEAN_token = publisher_ocean_instance.OCEAN_token
     assert OCEAN_token.balanceOf(generated_wallet.address) == to_wei(50)
 
     env_key_labels = [

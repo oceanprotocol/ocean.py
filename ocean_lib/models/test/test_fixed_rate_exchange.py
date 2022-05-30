@@ -5,7 +5,6 @@
 import pytest
 from web3 import exceptions
 
-from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.fixed_rate_exchange import (
     FixedExchangeBaseInOutData,
@@ -13,8 +12,10 @@ from ocean_lib.models.fixed_rate_exchange import (
     FixedRateExchangeDetails,
     FixedRateExchangeFeesInfo,
 )
+from ocean_lib.models.test.test_factory_router import OPC_SWAP_FEE_APPROVED
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
+from tests.resources.ddo_helpers import get_opc_collector_address_from_exchange
 from tests.resources.helper_functions import get_address_of_type
 
 
@@ -71,32 +72,31 @@ def test_properties(web3, config):
 def test_exchange_rate_creation(
     web3,
     config,
+    ocean_token,
     publisher_wallet,
     consumer_wallet,
     another_consumer_wallet,
     consumer_addr,
     another_consumer_addr,
-    erc721_nft,
     erc20_token,
 ):
     """Test exchange with baseToken(OCEAN) 18 Decimals and dataToken 18 Decimals, RATE = 1"""
-    cap = to_wei("100000")
+    amount = to_wei("100000")
     amount_dt_to_sell = to_wei("100")
     no_limit = to_wei("100000000000000000000")
     rate = to_wei("1")
     publish_market_swap_fee = int(1e15)  # 0.1%
     pmt_collector = erc20_token.get_payment_collector()
-    ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
 
     fixed_exchange = FixedRateExchange(web3, get_address_of_type(config, "FixedPrice"))
 
-    erc20_token.mint(consumer_addr, cap, publisher_wallet)
-    assert erc20_token.balanceOf(consumer_addr) == cap
+    erc20_token.mint(consumer_addr, amount, publisher_wallet)
+    assert erc20_token.balanceOf(consumer_addr) == amount
     number_of_exchanges_before = fixed_exchange.get_number_of_exchanges()
 
     tx = erc20_token.create_fixed_rate(
         fixed_price_address=get_address_of_type(config, "FixedPrice"),
-        base_token_address=get_address_of_type(config, "Ocean"),
+        base_token_address=ocean_token.address,
         owner=consumer_addr,
         publish_market_swap_fee_collector=another_consumer_addr,
         allowed_swapper=ZERO_ADDRESS,
@@ -125,7 +125,7 @@ def test_exchange_rate_creation(
 
     # Generate exchange id works
     generated_exchange_id = fixed_exchange.generate_exchange_id(
-        base_token=get_address_of_type(config, "Ocean"), datatoken=erc20_token.address
+        base_token=ocean_token.address, datatoken=erc20_token.address
     )
     assert generated_exchange_id == exchange_id
 
@@ -154,16 +154,20 @@ def test_exchange_rate_creation(
 
     # Exchange should have supply and fees setup
     fee_info = fixed_exchange.get_fees_info(exchange_id)
-
     assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE] == publish_market_swap_fee
     assert (
         fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_COLLECTOR]
         == another_consumer_addr
     )
     # token is approved, so 0.001
-    assert fee_info[FixedRateExchangeFeesInfo.OPC_FEE] == to_wei("0.001")
+    assert fee_info[FixedRateExchangeFeesInfo.OPC_FEE] == OPC_SWAP_FEE_APPROVED
     assert fee_info[FixedRateExchangeFeesInfo.MARKET_FEE_AVAILABLE] == 0
     assert fee_info[FixedRateExchangeFeesInfo.OCEAN_FEE_AVAILABLE] == 0
+
+    # Check OPC fee collector
+    get_opc_collector_address_from_exchange(fixed_exchange) == get_address_of_type(
+        config, "OPFCommunityFeeCollector"
+    )
 
     # Get exchange info
     # Get swapOceanFee

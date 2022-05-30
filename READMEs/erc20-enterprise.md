@@ -83,7 +83,7 @@ tx = erc20_enterprise_token.create_dispenser(
 )
 assert tx, "Dispenser not created!"
 
-OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
+OCEAN_token = ocean.OCEAN_token
 consume_fee_amount = ocean.to_wei(2)
 erc20_enterprise_token.set_publishing_market_fee(
     publish_market_order_fee_address=bob_wallet.address,
@@ -160,7 +160,7 @@ assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 
 # Bob buys 1 DT from the FRE and then startsOrder, while burning that DT
 fixed_rate_exchange = ocean.fixed_rate_exchange
-OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
+OCEAN_token = ocean.OCEAN_token
 
 exchange_id = ocean.create_fixed_rate(
     erc20_token=erc20_enterprise_token,

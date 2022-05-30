@@ -189,8 +189,8 @@ class OceanAssets:
     def _encrypt_ddo(
         asset: Asset,
         provider_uri: str,
-        encrypt_flag: Optional[bool] = False,
-        compress_flag: Optional[bool] = False,
+        encrypt_flag: Optional[bool] = True,
+        compress_flag: Optional[bool] = True,
     ):
         # Process the DDO
         asset_dict = asset.as_dictionary()
@@ -280,8 +280,8 @@ class OceanAssets:
         erc20_publish_market_order_fee_amounts: Optional[List[int]] = None,
         erc20_bytess: Optional[List[List[bytes]]] = None,
         deployed_erc20_tokens: Optional[List[ERC20Token]] = None,
-        encrypt_flag: Optional[bool] = False,
-        compress_flag: Optional[bool] = False,
+        encrypt_flag: Optional[bool] = True,
+        compress_flag: Optional[bool] = True,
     ) -> Optional[Asset]:
         """Register an asset on-chain.
 
@@ -477,8 +477,8 @@ class OceanAssets:
         asset: Asset,
         publisher_wallet: Wallet,
         provider_uri: Optional[str] = None,
-        encrypt_flag: Optional[bool] = False,
-        compress_flag: Optional[bool] = False,
+        encrypt_flag: Optional[bool] = True,
+        compress_flag: Optional[bool] = True,
     ) -> Optional[Asset]:
         """Update an asset on-chain.
 

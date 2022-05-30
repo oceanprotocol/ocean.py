@@ -63,7 +63,6 @@ Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md
 Then, please refer to [publish-flow](publish-flow.md) and complete the following steps :
 - [x] 2. Publish Dataset
 
-
 ## 3. Creation of datatoken liquidity pool
 
 In the following steps we will create a pool from the created token, in order to allow another user
@@ -75,7 +74,7 @@ from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
 
 erc20_token = ocean.get_datatoken(asset.services[0].datatoken)
-OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
+OCEAN_token = ocean.OCEAN_token
 
 bpool = ocean.create_pool(
     erc20_token=erc20_token,
@@ -84,6 +83,7 @@ bpool = ocean.create_pool(
     base_token_amount=ocean.to_wei(2000),
     lp_swap_fee_amount=ocean.to_wei("0.01"),
     publish_market_swap_fee_amount=ocean.to_wei("0.01"),
+    publish_market_swap_fee_collector=alice_wallet.address,
     from_wallet=alice_wallet
 )
 print(f"BPool address: {bpool.address}")

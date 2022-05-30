@@ -12,11 +12,7 @@ from time import time
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.web3_internal.currency import from_wei, to_wei
-from tests.resources.helper_functions import (
-    approx_from_wei,
-    create_nft_erc20_with_pool,
-    get_address_of_type,
-)
+from tests.resources.helper_functions import approx_from_wei, create_nft_erc20_with_pool
 
 BPOOL_FUZZING_TESTS_NBR_OF_RUNS = 1
 
@@ -69,10 +65,10 @@ def get_random_max_token_amount_out(
 def test_fuzzing_pool_ocean(
     web3,
     config,
+    ocean_token,
     consumer_wallet,
     another_consumer_wallet,
     publisher_wallet,
-    factory_router,
 ):
     """Test the liquidity pool contract with random values."""
 
@@ -100,9 +96,6 @@ def test_fuzzing_pool_ocean(
             swap_market_fee = to_wei(Decimal(random.uniform(0.00001, 0.1)))
 
             # Tests consumer calls deployPool(), we then check ocean and market fee"
-            ocean_token = ERC20Token(
-                web3=web3, address=get_address_of_type(config, "Ocean")
-            )
             consumer_balance = ocean_token.balanceOf(consumer_wallet.address)
 
             # Pool base_token inital liquidity
@@ -268,7 +261,7 @@ def test_fuzzing_pool_ocean(
             swap_fees_event_args = swap_fees_event[0].args
 
             assert approx_from_wei(
-                swap_market_fee * swap_in_two_amount_in / to_wei(1),
+                to_wei(from_wei(swap_market_fee) * from_wei(swap_in_two_amount_in)),
                 swap_fees_event_args.marketFeeAmount,
             )
 
@@ -293,12 +286,14 @@ def test_fuzzing_pool_ocean(
             )
 
             assert approx_from_wei(
-                swap_event_args.tokenAmountIn / (to_wei(1) / swap_market_fee),
+                to_wei(
+                    from_wei(swap_event_args.tokenAmountIn) * from_wei(swap_market_fee)
+                ),
                 swap_fees_event_args.marketFeeAmount,
             )
 
             assert approx_from_wei(
-                swap_event_args.tokenAmountIn / (to_wei(1) / swap_fee),
+                to_wei(from_wei(swap_event_args.tokenAmountIn) * from_wei(swap_fee)),
                 swap_fees_event_args.LPFeeAmount,
             )
 
@@ -357,12 +352,14 @@ def test_fuzzing_pool_ocean(
             )
 
             assert approx_from_wei(
-                swap_event_args.tokenAmountIn / (to_wei("1") / swap_market_fee),
+                to_wei(
+                    from_wei(swap_event_args.tokenAmountIn) * from_wei(swap_market_fee)
+                ),
                 swap_fees_event_args.marketFeeAmount,
             )
 
             assert approx_from_wei(
-                swap_event_args.tokenAmountIn / (to_wei("1") / swap_fee),
+                to_wei(from_wei(swap_event_args.tokenAmountIn) * from_wei(swap_fee)),
                 swap_fees_event_args.LPFeeAmount,
             )
         except Exception:

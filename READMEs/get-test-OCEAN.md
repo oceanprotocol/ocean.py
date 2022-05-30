@@ -70,8 +70,7 @@ ocean = Ocean(config)
 
 # create an ERC20 object of OCEAN token
 print(f"Address of OCEAN token: {ocean.OCEAN_address}")
-from ocean_lib.models.erc20_token import ERC20Token
-OCEAN_token = ERC20Token(ocean.web3, ocean.OCEAN_address)
+OCEAN_token = ocean.OCEAN_token
 
 # set wallet
 import os

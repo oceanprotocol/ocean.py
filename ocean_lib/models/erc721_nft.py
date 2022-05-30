@@ -2,7 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from enum import IntEnum
+from enum import IntEnum, IntFlag
 from typing import List, Optional, Union
 
 from enforce_typing import enforce_types
@@ -10,7 +10,7 @@ from enforce_typing import enforce_types
 from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.structures.abi_tuples import MetadataProof
-from ocean_lib.web3_internal.constants import MAX_INT256, ZERO_ADDRESS
+from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -22,6 +22,24 @@ class ERC721Permissions(IntEnum):
     STORE = 3
 
 
+class MetadataState(IntEnum):
+    ACTIVE = 0
+    END_OF_LIFE = 1
+    DEPRECATED = 2
+    REVOKED = 3
+    TEMPORARILY_DISABLED = 4
+
+
+class Flags(IntFlag):
+    PLAIN = 0
+    COMPRESSED = 1
+    ENCRYPTED = 2
+
+    def to_byte(self):
+        return self.to_bytes(1, "big")
+
+
+@enforce_types
 class ERC721NFT(ContractBase):
     CONTRACT_NAME = "ERC721Template"
 
@@ -134,7 +152,7 @@ class ERC721NFT(ContractBase):
     ) -> str:
         if template_index == 2 and not datatoken_cap:
             raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
-        datatoken_cap = datatoken_cap if template_index == 2 else MAX_INT256
+        datatoken_cap = datatoken_cap if template_index == 2 else MAX_UINT256
         return self.send_transaction(
             "createERC20",
             (
@@ -161,9 +179,25 @@ class ERC721NFT(ContractBase):
         )
 
     @enforce_types
+    def remove_from_create_erc20_list(
+        self, allowed_address: str, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "removeFromCreateERC20List", (allowed_address,), from_wallet
+        )
+
+    @enforce_types
     def add_to_725_store_list(self, allowed_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction(
             "addTo725StoreList", (allowed_address,), from_wallet
+        )
+
+    @enforce_types
+    def remove_from_725_store_list(
+        self, allowed_address: str, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "removeFrom725StoreList", (allowed_address,), from_wallet
         )
 
     @enforce_types
@@ -173,12 +207,33 @@ class ERC721NFT(ContractBase):
         )
 
     @enforce_types
+    def remove_from_metadata_list(
+        self, allowed_address: str, from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "removeFromMetadataList", (allowed_address,), from_wallet
+        )
+
+    @enforce_types
     def add_manager(self, manager_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("addManager", (manager_address,), from_wallet)
 
     @enforce_types
     def remove_manager(self, manager_address: str, from_wallet: Wallet) -> str:
         return self.send_transaction("removeManager", (manager_address,), from_wallet)
+
+    @enforce_types
+    def add_multiple_users_to_roles(
+        self, addresses: List[str], roles: List[ERC721Permissions], from_wallet: Wallet
+    ) -> str:
+        return self.send_transaction(
+            "addMultipleUsersToRoles",
+            (
+                addresses,
+                roles,
+            ),
+            from_wallet,
+        )
 
     @enforce_types
     def execute_call(
@@ -280,7 +335,6 @@ class ERC721NFT(ContractBase):
             "setTokenURI", (token_id, new_token_uri), from_wallet
         )
 
-    @enforce_types
     def create_datatoken(
         self,
         name: str,

@@ -19,7 +19,6 @@ from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import (
     build_credentials_dict,
@@ -28,7 +27,6 @@ from tests.resources.ddo_helpers import (
     get_first_service_by_type,
     get_sample_ddo,
 )
-from tests.resources.helper_functions import get_address_of_type
 
 
 @pytest.mark.integration
@@ -43,9 +41,9 @@ def test_register_asset(publisher_ocean_instance, publisher_wallet, consumer_wal
 
 
 @pytest.mark.integration
-def test_update_metadata(publisher_ocean_instance, publisher_wallet, config):
+def test_update_metadata(publisher_ocean_instance, publisher_wallet):
     """Test the update of metadata"""
-    ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
+    ddo = create_asset(publisher_ocean_instance, publisher_wallet)
 
     new_metadata = copy.deepcopy(ddo.metadata)
 
@@ -75,9 +73,9 @@ def test_update_metadata(publisher_ocean_instance, publisher_wallet, config):
 
 
 @pytest.mark.integration
-def test_update_credentials(publisher_ocean_instance, publisher_wallet, config):
+def test_update_credentials(publisher_ocean_instance, publisher_wallet):
     """Test that the credentials can be updated."""
-    ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
+    ddo = create_asset(publisher_ocean_instance, publisher_wallet)
 
     # Update credentials
     _new_credentials = {
@@ -99,7 +97,7 @@ def test_update_datatokens(
     publisher_ocean_instance, publisher_wallet, config, erc20_token, file2
 ):
     """Test the update of datatokens"""
-    ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
+    ddo = create_asset(publisher_ocean_instance, publisher_wallet)
     data_provider = DataServiceProvider
 
     encrypted_files = publisher_ocean_instance.assets.encrypt_files([file2])
@@ -165,9 +163,9 @@ def test_update_datatokens(
 
 
 @pytest.mark.integration
-def test_update_flags(publisher_ocean_instance, publisher_wallet, config):
+def test_update_flags(publisher_ocean_instance, publisher_wallet):
     """Test the update of flags"""
-    ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
+    ddo = create_asset(publisher_ocean_instance, publisher_wallet)
 
     # Test compress & update flags
     erc721_nft = ERC721NFT(publisher_ocean_instance.web3, ddo.nft_address)
@@ -190,7 +188,7 @@ def test_update_flags(publisher_ocean_instance, publisher_wallet, config):
 
 
 @pytest.mark.integration
-def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet, config):
+def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet):
     """Tests that a created asset can be searched successfully."""
     identifier = str(uuid.uuid1()).replace("-", "")
     metadata = {
@@ -207,7 +205,7 @@ def test_ocean_assets_search(publisher_ocean_instance, publisher_wallet, config)
         len(publisher_ocean_instance.assets.search(identifier)) == 0
     ), "Asset search failed."
 
-    create_asset(publisher_ocean_instance, publisher_wallet, config, metadata)
+    create_asset(publisher_ocean_instance, publisher_wallet, metadata)
 
     time.sleep(1)  # apparently changes are not instantaneous
     assert (
@@ -265,7 +263,7 @@ def test_ocean_assets_validate(publisher_ocean_instance):
 
 
 @pytest.mark.integration
-def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet, config):
+def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet):
     """Tests the creation of an algorithm DDO."""
     metadata = {
         "created": "2020-11-15T12:27:48Z",
@@ -288,7 +286,7 @@ def test_ocean_assets_algorithm(publisher_ocean_instance, publisher_wallet, conf
         },
     }
 
-    ddo = create_asset(publisher_ocean_instance, publisher_wallet, config, metadata)
+    ddo = create_asset(publisher_ocean_instance, publisher_wallet, metadata)
     assert ddo, "DDO None. The ddo is not cached after the creation."
 
 
@@ -309,7 +307,7 @@ def test_download_fails(publisher_ocean_instance, publisher_wallet):
 
 
 @pytest.mark.integration
-def test_create_bad_metadata(publisher_ocean_instance, publisher_wallet, config):
+def test_create_bad_metadata(publisher_ocean_instance, publisher_wallet):
     """Tests that we can't create the asset with plecos failure."""
     metadata = {
         "created": "2020-11-15T12:27:48Z",
@@ -321,12 +319,12 @@ def test_create_bad_metadata(publisher_ocean_instance, publisher_wallet, config)
         "license": "https://market.oceanprotocol.com/terms",
     }
     with pytest.raises(AssertionError):
-        create_asset(publisher_ocean_instance, publisher_wallet, config, metadata)
+        create_asset(publisher_ocean_instance, publisher_wallet, metadata)
 
     metadata["name"] = "Sample asset"
     metadata.pop("type")
     with pytest.raises(AssertionError):
-        create_asset(publisher_ocean_instance, publisher_wallet, config, metadata)
+        create_asset(publisher_ocean_instance, publisher_wallet, metadata)
 
 
 @pytest.mark.unit
@@ -403,7 +401,7 @@ def test_plain_asset_with_one_datatoken(
         erc20_minters=[publisher_wallet.address],
         erc20_fee_managers=[publisher_wallet.address],
         erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        erc20_publish_market_order_fee_tokens=[get_address_of_type(config, "Ocean")],
+        erc20_publish_market_order_fee_tokens=[publisher_ocean_instance.OCEAN_address],
         erc20_publish_market_order_fee_amounts=[0],
         erc20_bytess=[[b""]],
     )
@@ -462,8 +460,8 @@ def test_plain_asset_multiple_datatokens(
         erc20_fee_managers=[publisher_wallet.address, publisher_wallet.address],
         erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS, ZERO_ADDRESS],
         erc20_publish_market_order_fee_tokens=[
-            get_address_of_type(config, "Ocean"),
-            get_address_of_type(config, "Ocean"),
+            publisher_ocean_instance.OCEAN_address,
+            publisher_ocean_instance.OCEAN_address,
         ],
         erc20_publish_market_order_fee_amounts=[0, 0],
         erc20_bytess=[[b""], [b""]],
