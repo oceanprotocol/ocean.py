@@ -23,8 +23,23 @@ def test_algorithm_metadata():
                 "tag": "latest",
                 "checksum": "44e10daa6637893f4276bb8d7301eb35306ece50f61ca34dcab550",
             },
+            "consumerParameters": [
+                {
+                    "name": "some_key",
+                    "type": "string",
+                    "label": "test_key_label",
+                    "required": True,
+                    "default": "value",
+                    "description": "this is a test key",
+                }
+            ],
         }
     )
 
     assert algo_metadata.is_valid()
     assert "rawcode" in json.loads(algo_metadata.as_json_str())["meta"]
+
+    assert (
+        algo_metadata.as_dictionary()["meta"]["consumerParameters"][0]["name"]
+        == "some_key"
+    )

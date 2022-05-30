@@ -7,6 +7,8 @@ from typing import Any, Dict
 
 from enforce_typing import enforce_types
 
+from ocean_lib.services.consumer_parameters import ConsumerParameters
+
 
 class AlgorithmMetadata:
     @enforce_types
@@ -24,6 +26,14 @@ class AlgorithmMetadata:
         self.container_tag = container.get("tag", "")
         self.container_checksum = container.get("checksum", "")
 
+        consumer_parameters = metadata_dict.get("consumerParameters", [])
+        try:
+            self.consumer_parameters = [
+                ConsumerParameters.from_dict(cp_dict) for cp_dict in consumer_parameters
+            ]
+        except AttributeError:
+            raise TypeError("ConsumerParameters should be a list of dictionaries.")
+
     @enforce_types
     def is_valid(self) -> bool:
         return bool(
@@ -36,12 +46,11 @@ class AlgorithmMetadata:
 
     @enforce_types
     def as_dictionary(self) -> Dict[str, Any]:
-        return {
+        result = {
             "meta": {
                 "url": self.url,
                 "rawcode": self.rawcode,
                 "language": self.language,
-                "format": self.format,
                 "version": self.version,
                 "container": {
                     "entrypoint": self.container_entry_point,
@@ -51,3 +60,9 @@ class AlgorithmMetadata:
                 },
             }
         }
+
+        if self.consumer_parameters:
+            consumer_parameters = [x.as_dictionary() for x in self.consumer_parameters]
+            result["meta"]["consumerParameters"] = consumer_parameters
+
+        return result

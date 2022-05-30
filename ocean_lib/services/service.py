@@ -8,11 +8,13 @@
 """
 import copy
 import logging
+import re
 from typing import Any, Dict, List, Optional
 
 from web3.main import Web3
 
 from ocean_lib.agreements.service_types import ServiceTypes, ServiceTypesNames
+from ocean_lib.services.consumer_parameters import ConsumerParameters
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +34,7 @@ class Service:
         name: Optional[str] = None,
         description: Optional[str] = None,
         additional_information: Optional[Dict[str, Any]] = None,
+        consumer_parameters: Optional[List[Dict[str, Any]]] = None,
     ) -> None:
         """Initialize NFT Service instance."""
         self.id = service_id
@@ -44,6 +47,16 @@ class Service:
         self.name = name
         self.description = description
         self.additional_information = None
+        self.consumer_parameters = None
+
+        if consumer_parameters:
+            try:
+                self.consumer_parameters = [
+                    ConsumerParameters.from_dict(cp_dict)
+                    for cp_dict in consumer_parameters
+                ]
+            except AttributeError:
+                raise TypeError("ConsumerParameters should be a list of dictionaries.")
 
         if additional_information:
             self.additional_information = additional_information
@@ -81,6 +94,7 @@ class Service:
             sd.pop("name", None),
             sd.pop("description", None),
             sd.pop("additionalInformation", None),
+            sd.pop("consumerParameters", None),
         )
 
     def get_trusted_algorithms(self) -> list:
@@ -142,31 +156,42 @@ class Service:
 
     def as_dictionary(self) -> Dict[str, Any]:
         """Return the service as a python dictionary."""
-
-        values = {
-            "id": self.id,
-            "type": self.type,
-            "files": self.files,
-            "datatokenAddress": self.datatoken,
-            "serviceEndpoint": self.service_endpoint,
-            "timeout": self.timeout,
+        # camelCase to snake case dict, matching the dict value to the attribute name
+        key_names = {
+            x: re.sub("([A-Z]+)", r"_\1", x).lower()
+            for x in [
+                "name",
+                "description",
+                "id",
+                "type",
+                "files",
+                "datatokenAddress",
+                "serviceEndpoint",
+                "timeout",
+                "additionalInformation",
+                "consumerParameters",
+            ]
         }
 
+        key_names["datatokenAddress"] = "datatoken"
+
+        optional_keys = [
+            "name",
+            "description",
+            "additionalInformation",
+            "consumerParameters",
+        ]
+
+        values = {}
         if self.type == "compute":
             if "compute" in self.compute_values:
                 values.update(self.compute_values)
             else:
                 values["compute"] = self.compute_values
 
-        if self.name is not None:
-            values["name"] = self.name
-        if self.description is not None:
-            values["description"] = self.description
+        for key, attr_name in key_names.items():
+            value = getattr(self, attr_name)
 
-        if self.additional_information is not None:
-            values["additionalInformation"] = self.additional_information
-
-        for key, value in values.items():
             if isinstance(value, object) and hasattr(value, "as_dictionary"):
                 value = value.as_dictionary()
             elif isinstance(value, list):
@@ -174,6 +199,9 @@ class Service:
                     v.as_dictionary() if hasattr(v, "as_dictionary") else v
                     for v in value
                 ]
+
+            if key in optional_keys and value is None:
+                continue
 
             values[key] = value
 
