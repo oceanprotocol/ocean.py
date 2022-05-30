@@ -167,7 +167,11 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         datatoken_publish_market_order_fee_amount: int,
         datatoken_bytess: List[bytes],
         from_wallet: Wallet,
+        datatoken_cap: Optional[int] = None,
     ) -> str:
+        if datatoken_template == 2 and not datatoken_cap:
+            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+        datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
         return self.send_transaction(
             "createNftWithErc20",
             (
@@ -188,7 +192,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                         datatoken_publish_market_order_fee_address,
                         datatoken_publish_market_order_fee_token,
                     ],
-                    [MAX_UINT256, datatoken_publish_market_order_fee_amount],
+                    [datatoken_cap, datatoken_publish_market_order_fee_amount],
                     datatoken_bytess,
                 ),
             ),
@@ -225,7 +229,11 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         pool_publish_market_swap_fee_collector: str,
         pool_template_address: str,
         from_wallet: Wallet,
+        datatoken_cap: Optional[int] = None,
     ) -> str:
+        if datatoken_template == 2 and not datatoken_cap:
+            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+        datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
         return self.send_transaction(
             "createNftWithErc20WithPool",
             (
@@ -246,7 +254,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                         datatoken_publish_market_order_fee_address,
                         datatoken_publish_market_order_fee_token,
                     ],
-                    [MAX_UINT256, datatoken_publish_market_order_fee_amount],
+                    [datatoken_cap, datatoken_publish_market_order_fee_amount],
                     datatoken_bytess,
                 ),
                 (
@@ -305,7 +313,11 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         fixed_price_publish_market_swap_fee_amount: int,
         fixed_price_with_mint: int,
         from_wallet: Wallet,
+        datatoken_cap: Optional[int] = None,
     ) -> str:
+        if datatoken_template == 2 and not datatoken_cap:
+            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+        datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
         return self.send_transaction(
             "createNftWithErc20WithFixedRate",
             (
@@ -326,7 +338,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                         datatoken_publish_market_order_fee_address,
                         datatoken_publish_market_order_fee_token,
                     ],
-                    [MAX_UINT256, datatoken_publish_market_order_fee_amount],
+                    [datatoken_cap, datatoken_publish_market_order_fee_amount],
                     datatoken_bytess,
                 ),
                 (
@@ -373,7 +385,11 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         dispenser_with_mint: bool,
         dispenser_allowed_swapper: str,
         from_wallet: Wallet,
+        datatoken_cap: Optional[int] = None,
     ) -> str:
+        if datatoken_template == 2 and not datatoken_cap:
+            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+        datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
         return self.send_transaction(
             "createNftWithErc20WithDispenser",
             (
@@ -394,7 +410,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
                         datatoken_publish_market_order_fee_address,
                         datatoken_publish_market_order_fee_token,
                     ],
-                    [MAX_UINT256, datatoken_publish_market_order_fee_amount],
+                    [datatoken_cap, datatoken_publish_market_order_fee_amount],
                     datatoken_bytess,
                 ),
                 (

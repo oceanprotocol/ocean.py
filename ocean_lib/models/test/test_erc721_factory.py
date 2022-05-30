@@ -787,3 +787,123 @@ def test_fail_create_erc20(
         == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT "
         "ERC20DEPLOYER_ROLE"
     )
+
+
+@pytest.mark.unit
+def test_datatoken_cap(
+    web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
+):
+    erc721_factory_address = get_address_of_type(
+        config, ERC721FactoryContract.CONTRACT_NAME
+    )
+    erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
+
+    # create NFT with ERC20
+    with pytest.raises(Exception, match="Cap is needed for ERC20 Enterprise"):
+        erc721_factory.create_nft_with_erc20(
+            nft_name="72120Bundle",
+            nft_symbol="72Bundle",
+            nft_template=1,
+            nft_token_uri="https://oceanprotocol.com/nft/",
+            nft_transferable=True,
+            nft_owner=publisher_wallet.address,
+            datatoken_template=2,
+            datatoken_name="ERC20B1",
+            datatoken_symbol="ERC20EntDT1Symbol",
+            datatoken_minter=publisher_wallet.address,
+            datatoken_fee_manager=consumer_wallet.address,
+            datatoken_publish_market_order_fee_address=publisher_wallet.address,
+            datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
+            datatoken_publish_market_order_fee_amount=0,
+            datatoken_bytess=[b""],
+            from_wallet=publisher_wallet,
+        )
+
+    # create NFT with ERC20 and pool
+    initial_pool_liquidity = to_wei("0.02")
+
+    with pytest.raises(Exception, match="Cap is needed for ERC20 Enterprise"):
+        erc721_factory.create_nft_erc20_with_pool(
+            nft_name="72120Bundle",
+            nft_symbol="72Bundle",
+            nft_template=1,
+            nft_token_uri="https://oceanprotocol.com/nft/",
+            nft_transferable=True,
+            nft_owner=publisher_wallet.address,
+            datatoken_template=2,
+            datatoken_name="ERC20EnterpriseWithPool",
+            datatoken_symbol="ERC20EP",
+            datatoken_minter=publisher_wallet.address,
+            datatoken_fee_manager=consumer_wallet.address,
+            datatoken_publish_market_order_fee_address=publisher_wallet.address,
+            datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
+            datatoken_publish_market_order_fee_amount=0,
+            datatoken_bytess=[b""],
+            pool_rate=to_wei("1"),
+            pool_base_token_decimals=10,
+            pool_base_token_amount=initial_pool_liquidity,
+            pool_lp_swap_fee_amount=to_wei("0.001"),
+            pool_publish_market_swap_fee_amount=to_wei("0.001"),
+            pool_side_staking=ZERO_ADDRESS,
+            pool_base_token=ZERO_ADDRESS,
+            pool_base_token_sender=erc721_factory_address,
+            pool_publisher=publisher_wallet.address,
+            pool_publish_market_swap_fee_collector=consumer_wallet.address,
+            pool_template_address=ZERO_ADDRESS,
+            from_wallet=publisher_wallet,
+        )
+
+    with pytest.raises(Exception, match="Cap is needed for ERC20 Enterprise"):
+        erc721_factory.create_nft_erc20_with_fixed_rate(
+            nft_name="72120Bundle",
+            nft_symbol="72Bundle",
+            nft_template=1,
+            nft_token_uri="https://oceanprotocol.com/nft/",
+            nft_transferable=True,
+            nft_owner=publisher_wallet.address,
+            datatoken_template=2,
+            datatoken_name="ERC20WithFRE",
+            datatoken_symbol="ERC20EFRE",
+            datatoken_minter=publisher_wallet.address,
+            datatoken_fee_manager=consumer_wallet.address,
+            datatoken_publish_market_order_fee_address=publisher_wallet.address,
+            datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
+            datatoken_publish_market_order_fee_amount=0,
+            datatoken_bytess=[b""],
+            fixed_price_address=ZERO_ADDRESS,
+            fixed_price_base_token=ZERO_ADDRESS,
+            fixed_price_owner=publisher_wallet.address,
+            fixed_price_publish_market_swap_fee_collector=consumer_wallet.address,
+            fixed_price_allowed_swapper=ZERO_ADDRESS,
+            fixed_price_base_token_decimals=18,
+            fixed_price_datatoken_decimals=18,
+            fixed_price_rate=to_wei("1"),
+            fixed_price_publish_market_swap_fee_amount=to_wei("0.001"),
+            fixed_price_with_mint=0,
+            from_wallet=publisher_wallet,
+        )
+
+    with pytest.raises(Exception, match="Cap is needed for ERC20 Enterprise"):
+        erc721_factory.create_nft_erc20_with_dispenser(
+            nft_name="72120Bundle",
+            nft_symbol="72Bundle",
+            nft_template=1,
+            nft_token_uri="https://oceanprotocol.com/nft/",
+            nft_transferable=True,
+            nft_owner=publisher_wallet.address,
+            datatoken_template=2,
+            datatoken_name="ERC20WithDispenser",
+            datatoken_symbol="ERC20ED",
+            datatoken_minter=publisher_wallet.address,
+            datatoken_fee_manager=consumer_wallet.address,
+            datatoken_publish_market_order_fee_address=publisher_wallet.address,
+            datatoken_publish_market_order_fee_token=ZERO_ADDRESS,
+            datatoken_publish_market_order_fee_amount=0,
+            datatoken_bytess=[b""],
+            dispenser_address=ZERO_ADDRESS,
+            dispenser_max_tokens=to_wei(1),
+            dispenser_max_balance=to_wei(1),
+            dispenser_with_mint=True,
+            dispenser_allowed_swapper=ZERO_ADDRESS,
+            from_wallet=publisher_wallet,
+        )

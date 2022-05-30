@@ -453,6 +453,52 @@ def test_create_erc20(
     )
     assert registered_token_event, "Cannot find TokenCreated event."
 
+    with pytest.raises(Exception, match="Cap is needed for ERC20 Enterprise"):
+        erc721_nft.create_erc20(
+            template_index=2,
+            name="ERC20EnterpriseDT1",
+            symbol="ERC20EenterpriseDT1Symbol",
+            minter=publisher_addr,
+            fee_manager=consumer_addr,
+            publish_market_order_fee_address=publisher_addr,
+            publish_market_order_fee_token=ZERO_ADDRESS,
+            publish_market_order_fee_amount=0,
+            bytess=[b""],
+            from_wallet=publisher_wallet,
+        )
+
+    with pytest.raises(Exception, match="Cap is needed for ERC20 Enterprise"):
+        erc721_nft.create_datatoken(
+            template_index=2,
+            name="ERC20EnterpriseDT1",
+            symbol="ERC20EenterpriseDT1Symbol",
+            from_wallet=publisher_wallet,
+        )
+
+    tx = erc721_nft.create_erc20(
+        template_index=2,
+        name="ERC20EnterpriseDT1",
+        symbol="ERC20EnterpriseDT1Symbol",
+        minter=publisher_addr,
+        fee_manager=consumer_addr,
+        publish_market_order_fee_address=publisher_addr,
+        publish_market_order_fee_token=ZERO_ADDRESS,
+        publish_market_order_fee_amount=0,
+        bytess=[b""],
+        from_wallet=publisher_wallet,
+        datatoken_cap=to_wei("0.1"),
+    )
+    assert tx, "Could not create ERC20 Enterprise."
+
+    tx = erc721_nft.create_datatoken(
+        template_index=2,
+        name="ERC20EnterpriseDT1",
+        symbol="ERC20EenterpriseDT1Symbol",
+        datatoken_cap=to_wei("0.1"),
+        from_wallet=publisher_wallet,
+    )
+    assert tx, "Could not create ERC20 Enterprise using create_datatoken."
+
 
 def test_create_erc20_with_usdc_order_fee(
     web3: Web3,

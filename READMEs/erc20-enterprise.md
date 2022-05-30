@@ -56,6 +56,7 @@ erc20_enterprise_token = erc721_nft.create_datatoken(
     symbol="ERC20DT1Symbol",  # symbol for ERC20 token
     template_index=2,  # this is the value for ERC20 Enterprise token
     from_wallet=alice_wallet,
+    datatoken_cap=ocean.to_wei(50)
 )
 print(f"ERC20 Enterprise address: {erc20_enterprise_token.address}")
 
@@ -142,6 +143,7 @@ erc20_enterprise_token = erc721_nft.create_datatoken(
     symbol="ERC20DT1Symbol",  # symbol for ERC20 token
     template_index=2,  # this is the value for ERC20 Enterprise token
     from_wallet=alice_wallet,
+    datatoken_cap=ocean.to_wei(50)
 )
 print(f"ERC20 Enterprise address: {erc20_enterprise_token.address}")
 

@@ -148,7 +148,11 @@ class ERC721NFT(ContractBase):
         publish_market_order_fee_amount: int,
         bytess: List[bytes],
         from_wallet: Wallet,
+        datatoken_cap: Optional[int] = None,
     ) -> str:
+        if template_index == 2 and not datatoken_cap:
+            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+        datatoken_cap = datatoken_cap if template_index == 2 else MAX_UINT256
         return self.send_transaction(
             "createERC20",
             (
@@ -160,7 +164,7 @@ class ERC721NFT(ContractBase):
                     publish_market_order_fee_address,
                     publish_market_order_fee_token,
                 ],
-                [MAX_UINT256, publish_market_order_fee_amount],
+                [datatoken_cap, publish_market_order_fee_amount],
                 bytess,
             ),
             from_wallet,
@@ -343,6 +347,7 @@ class ERC721NFT(ContractBase):
         publish_market_order_fee_token: Optional[str] = None,
         publish_market_order_fee_amount: Optional[int] = 0,
         bytess: Optional[List[bytes]] = None,
+        datatoken_cap: Optional[int] = None,
     ) -> ERC20Token:
         initial_list = self.get_tokens_list()
 
@@ -376,6 +381,12 @@ class ERC721NFT(ContractBase):
 
         if bytess is None:
             create_args["bytess"] = [b""]
+
+        if template_index == 2 and not datatoken_cap:
+            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+
+        if template_index == 2:
+            create_args["datatoken_cap"] = datatoken_cap
 
         self.create_erc20(**create_args)
 
