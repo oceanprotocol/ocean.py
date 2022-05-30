@@ -15,6 +15,7 @@ from ocean_lib.assets.asset import Asset
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.bpool import BPool
+from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.dispenser import Dispenser
 from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
@@ -26,6 +27,7 @@ from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
 from ocean_lib.services.service import Service
+from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import DECIMALS_18
 from ocean_lib.web3_internal.currency import format_units as _format_units
@@ -366,3 +368,25 @@ class Ocean:
             provider_fees["validUntil"],
             provider_fees["providerData"],
         )
+
+    @enforce_types
+    def retrieve_provider_fees_for_compute(
+        self,
+        datasets: List[ComputeInput],
+        algorithm_data: Union[ComputeInput, AlgorithmMetadata],
+        consumer_address: str,
+        compute_environment: str,
+        valid_until: int,
+    ) -> tuple:
+
+        initialize_compute_response = DataServiceProvider.initialize_compute(
+            [x.as_dictionary() for x in datasets],
+            algorithm_data.as_dictionary(),
+            datasets[0].service.service_endpoint,
+            consumer_address,
+            compute_environment,
+            valid_until,
+        )
+
+        # TODO: maybe we should adjust this in some way?
+        return initialize_compute_response.json()

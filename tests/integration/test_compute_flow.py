@@ -171,8 +171,7 @@ def run_compute_test(
     algorithm_meta: Optional[AlgorithmMetadata] = None,
     algorithm_algocustomdata: Optional[dict] = None,
     additional_datasets_and_userdata: List[AssetAndUserdata] = [],
-    with_result=False,
-    reuse_order=False,
+    scenarios: Optional[List[str]] = None,
 ):
     """Helper function to bootstrap compute job creation and status checking."""
     assert (
@@ -222,7 +221,24 @@ def run_compute_test(
 
     environments = ocean_instance.compute.get_c2d_environments(service.service_endpoint)
 
-    time_difference = timedelta(hours=1) if not reuse_order else timedelta(seconds=30)
+    time_difference = (
+        timedelta(hours=1) if "reuse_order" not in scenarios else timedelta(seconds=30)
+    )
+
+    if "just_fees" in scenarios:
+        fees_response = ocean_instance.retrieve_provider_fees_for_compute(
+            datasets,
+            algorithm if algorithm else algorithm_meta,
+            consumer_address=environments[0]["consumerAddress"],
+            compute_environment=environments[0]["id"],
+            valid_until=int((datetime.utcnow() + time_difference).timestamp()),
+        )
+
+        assert "algorithm" in fees_response
+        assert len(fees_response["datasets"]) == 1
+
+        return
+
     datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
         datasets,
         algorithm if algorithm else algorithm_meta,
@@ -259,7 +275,7 @@ def run_compute_test(
     print(f"got job status after requesting stop: {status}")
     assert status, f"something not right about the compute job, got status: {status}"
 
-    if with_result:
+    if "with_result" in scenarios:
         succeeded = False
         for _ in range(0, 200):
             status = ocean_instance.compute.status(
@@ -304,7 +320,7 @@ def run_compute_test(
         assert datasets[0].transfer_tx_id == prev_dt_tx_id
         assert algorithm.transfer_tx_id == prev_algo_tx_id
 
-    if reuse_order:
+    if "reuse_order" in scenarios:
         prev_dt_tx_id = datasets[0].transfer_tx_id
         prev_algo_tx_id = algorithm.transfer_tx_id
         # ensure order expires
@@ -400,7 +416,7 @@ def test_compute_reuse_order(
         consumer_wallet=consumer_wallet,
         dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
         algorithm_and_userdata=AssetAndUserdata(algorithm, None),
-        reuse_order=True,
+        scenarios=["reuse_order"],
     )
 
 
@@ -496,7 +512,7 @@ def test_compute_update_trusted_algorithm(
         consumer_wallet=consumer_wallet,
         dataset_and_userdata=AssetAndUserdata(updated_dataset, None),
         algorithm_and_userdata=AssetAndUserdata(algorithm, None),
-        with_result=True,
+        scenarios=["with_result"],
     )
 
     # Expect to fail when non-trusted algorithm is used
@@ -512,7 +528,7 @@ def test_compute_update_trusted_algorithm(
             algorithm_and_userdata=AssetAndUserdata(
                 algorithm_with_different_publisher, None
             ),
-            with_result=True,
+            scenarios=["with_result"],
         )
 
 
@@ -551,3 +567,22 @@ def test_compute_trusted_publisher(
                 algorithm_with_different_publisher, None
             ),
         )
+
+
+@pytest.mark.integration
+def test_compute_just_provider_fees(
+    publisher_wallet,
+    publisher_ocean_instance,
+    consumer_wallet,
+    dataset_with_compute_service,
+    algorithm,
+):
+    """Tests that the correct compute provider fees are calculated."""
+    run_compute_test(
+        ocean_instance=publisher_ocean_instance,
+        publisher_wallet=publisher_wallet,
+        consumer_wallet=consumer_wallet,
+        dataset_and_userdata=AssetAndUserdata(dataset_with_compute_service, None),
+        algorithm_and_userdata=AssetAndUserdata(algorithm, None),
+        scenarios=["just_fees"],
+    )
