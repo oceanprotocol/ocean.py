@@ -327,10 +327,10 @@ class ERC721NFT(ContractBase):
 
         if bytess is None:
             create_args["bytess"] = [b""]
-            
+
         if template_index == 2 and not datatoken_cap:
             raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
-        
+
         if template_index == 2:
             create_args["datatoken_cap"] = datatoken_cap
 
