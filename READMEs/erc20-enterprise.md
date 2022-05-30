@@ -60,6 +60,19 @@ erc20_enterprise_token = erc721_nft.create_datatoken(
 )
 print(f"ERC20 Enterprise address: {erc20_enterprise_token.address}")
 
+```
+Then, please refer to [publish-flow](publish-flow.md) to generate your metadata and encrypted files.
+Asset creation will be based on the deployment of ERC20 Enterprise token like this:
+
+```python
+asset = ocean.assets.create(
+    metadata,
+    alice_wallet,
+    encrypted_files,
+    deployed_erc20_tokens=[erc20_enterprise_token]
+)
+access_service = asset.services[0]
+
 bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
 bob_wallet = Wallet(
     ocean.web3,
@@ -100,13 +113,22 @@ OCEAN_token.approve(
 )
 
 # Prepare data for order
-v, r, s, provider_data = ocean.build_compute_provider_fees(
-    provider_data={"timeout": 0},
-    provider_fee_address=alice_wallet.address,
-    provider_fee_token=OCEAN_token.address,
-    provider_fee_amount=0,
-    valid_until=1958133628,  # 2032
+# Retrieve provider fee
+(
+    provider_fee_address,
+    provider_fee_token,
+    provider_fee_amount,
+    v,
+    r,
+    s,
+    valid_until,
+    provider_data,
+) = ocean.retrieve_provider_fees(
+    asset=asset,
+    access_service=access_service,
+    publisher_wallet=alice_wallet
 )
+
 
 initial_bob_balance = OCEAN_token.balanceOf(bob_wallet.address)
 
@@ -114,13 +136,13 @@ initial_bob_balance = OCEAN_token.balanceOf(bob_wallet.address)
 erc20_enterprise_token.buy_from_dispenser_and_order(
     consumer=bob_wallet.address,
     service_index=1,
-    provider_fee_address=alice_wallet.address,
-    provider_fee_token=OCEAN_token.address,
-    provider_fee_amount=0,
+    provider_fee_address=provider_fee_address,
+    provider_fee_token=provider_fee_token,
+    provider_fee_amount=provider_fee_amount,
     v=v,
     r=r,
     s=s,
-    valid_until=1958133628,
+    valid_until=valid_until,
     provider_data=provider_data,
     consume_market_order_fee_address=bob_wallet.address,
     consume_market_order_fee_token=erc20_enterprise_token.address,
@@ -147,6 +169,19 @@ erc20_enterprise_token = erc721_nft.create_datatoken(
 )
 print(f"ERC20 Enterprise address: {erc20_enterprise_token.address}")
 
+```
+Then, please refer to [publish-flow](publish-flow.md) to generate your metadata and encrypted files.
+Asset creation will be based on the deployment of ERC20 Enterprise token like this:
+
+```python
+asset = ocean.assets.create(
+    metadata,
+    alice_wallet,
+    encrypted_files,
+    deployed_erc20_tokens=[erc20_enterprise_token]
+)
+access_service = asset.services[0]
+
 bob_private_key = os.getenv("TEST_PRIVATE_KEY2")
 bob_wallet = Wallet(
     ocean.web3,
@@ -170,12 +205,20 @@ exchange_id = ocean.create_fixed_rate(
 )
 
 # Prepare data for order
-v, r, s, provider_data = ocean.build_compute_provider_fees(
-    provider_data={"timeout": 0},
-    provider_fee_address=alice_wallet.address,
-    provider_fee_token=OCEAN_token.address,
-    provider_fee_amount=0,
-    valid_until=1958133628,  # 2032
+# Retrieve provider fee
+(
+    provider_fee_address,
+    provider_fee_token,
+    provider_fee_amount,
+    v,
+    r,
+    s,
+    valid_until,
+    provider_data,
+) = ocean.retrieve_provider_fees(
+    asset=asset,
+    access_service=access_service,
+    publisher_wallet=alice_wallet
 )
 
 erc20_enterprise_token.mint(alice_wallet.address, ocean.to_wei(20), alice_wallet)
@@ -204,13 +247,13 @@ OCEAN_token.approve(
 tx_id = erc20_enterprise_token.buy_from_fre_and_order(
     consumer=bob_wallet.address,
     service_index=1,
-    provider_fee_address=alice_wallet.address,
-    provider_fee_token=OCEAN_token.address,
-    provider_fee_amount=0,
+    provider_fee_address=provider_fee_address,
+    provider_fee_token=provider_fee_token,
+    provider_fee_amount=provider_fee_amount,
     v=v,
     r=r,
     s=s,
-    valid_until=1958133628,
+    valid_until=valid_until,
     provider_data=provider_data,
     consume_market_order_fee_address=bob_wallet.address,
     consume_market_order_fee_token=erc20_enterprise_token.address,

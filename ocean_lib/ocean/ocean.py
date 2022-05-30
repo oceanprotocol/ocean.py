@@ -4,7 +4,6 @@
 #
 
 """Ocean module."""
-import json
 import logging
 from decimal import Decimal
 from typing import Dict, List, Optional, Type, Union
@@ -12,6 +11,7 @@ from typing import Dict, List, Optional, Type, Union
 from enforce_typing import enforce_types
 from web3.datastructures import AttributeDict
 
+from ocean_lib.assets.asset import Asset
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.bpool import BPool
@@ -25,13 +25,13 @@ from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.ocean.ocean_compute import OceanCompute
 from ocean_lib.ocean.util import get_address_of_type, get_ocean_token_address, get_web3
+from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import DECIMALS_18
 from ocean_lib.web3_internal.currency import format_units as _format_units
 from ocean_lib.web3_internal.currency import from_wei as _from_wei
 from ocean_lib.web3_internal.currency import parse_units as _parse_units
 from ocean_lib.web3_internal.currency import to_wei as _to_wei
-from ocean_lib.web3_internal.utils import split_signature
 from ocean_lib.web3_internal.wallet import Wallet
 
 logger = logging.getLogger("ocean")
@@ -346,33 +346,23 @@ class Ocean:
         return bpool
 
     @enforce_types
-    def build_compute_provider_fees(
-        self,
-        provider_data: Union[str, dict],
-        provider_fee_address: str,
-        provider_fee_token: str,
-        provider_fee_amount: int,
-        valid_until: int,
+    def retrieve_provider_fees(
+        self, asset: Asset, access_service: Service, publisher_wallet: Wallet
     ) -> tuple:
-        if isinstance(provider_data, dict):
-            provider_data = json.dumps(provider_data, separators=(",", ":"))
 
-        message = self.web3.solidityKeccak(
-            ["bytes", "address", "address", "uint256", "uint256"],
-            [
-                self.web3.toHex(self.web3.toBytes(text=provider_data)),
-                provider_fee_address,
-                provider_fee_token,
-                provider_fee_amount,
-                valid_until,
-            ],
+        initialize_response = DataServiceProvider.initialize(
+            asset.did, access_service, consumer_address=publisher_wallet.address
         )
-        signed = self.web3.eth.sign(provider_fee_address, data=message)
-        signature = split_signature(signed)
+        initialize_data = initialize_response.json()
+        provider_fees = initialize_data["providerFee"]
 
         return (
-            signature.v,
-            signature.r,
-            signature.s,
-            self.web3.toHex(self.web3.toBytes(text=provider_data)),
+            provider_fees["providerFeeAddress"],
+            provider_fees["providerFeeToken"],
+            provider_fees["providerFeeAmount"],
+            provider_fees["v"],
+            provider_fees["r"],
+            provider_fees["s"],
+            provider_fees["validUntil"],
+            provider_fees["providerData"],
         )
