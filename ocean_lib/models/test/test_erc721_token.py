@@ -13,8 +13,7 @@ from ocean_lib.models.fixed_rate_exchange import (
     FixedRateExchange,
     FixedRateExchangeDetails,
 )
-from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
-from ocean_lib.web3_internal.constants import BLOB, ZERO_ADDRESS, MAX_UINT256
+from ocean_lib.web3_internal.constants import BLOB, MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import get_address_of_type
 
@@ -397,6 +396,52 @@ def test_create_erc20(
         from_wallet=publisher_wallet,
     )
     assert tx, "Could not create ERC20."
+
+    with pytest.raises(Exception, match="Cap is needed for ERC20 Enterprise"):
+        erc721_nft.create_erc20(
+            template_index=2,
+            name="ERC20EnterpriseDT1",
+            symbol="ERC20EenterpriseDT1Symbol",
+            minter=publisher_addr,
+            fee_manager=consumer_addr,
+            publish_market_order_fee_address=publisher_addr,
+            publish_market_order_fee_token=ZERO_ADDRESS,
+            publish_market_order_fee_amount=0,
+            bytess=[b""],
+            from_wallet=publisher_wallet,
+        )
+
+    with pytest.raises(Exception, match="Cap is needed for ERC20 Enterprise"):
+        erc721_nft.create_datatoken(
+            template_index=2,
+            name="ERC20EnterpriseDT1",
+            symbol="ERC20EenterpriseDT1Symbol",
+            from_wallet=publisher_wallet,
+        )
+
+    tx = erc721_nft.create_erc20(
+        template_index=2,
+        name="ERC20EnterpriseDT1",
+        symbol="ERC20EnterpriseDT1Symbol",
+        minter=publisher_addr,
+        fee_manager=consumer_addr,
+        publish_market_order_fee_address=publisher_addr,
+        publish_market_order_fee_token=ZERO_ADDRESS,
+        publish_market_order_fee_amount=0,
+        bytess=[b""],
+        from_wallet=publisher_wallet,
+        datatoken_cap=to_wei("0.1"),
+    )
+    assert tx, "Could not create ERC20 Enterprise."
+
+    tx = erc721_nft.create_datatoken(
+        template_index=2,
+        name="ERC20EnterpriseDT1",
+        symbol="ERC20EenterpriseDT1Symbol",
+        datatoken_cap=to_wei("0.1"),
+        from_wallet=publisher_wallet,
+    )
+    assert tx, "Could not create ERC20 Enterprise using create_datatoken."
 
 
 @pytest.mark.unit
