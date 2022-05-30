@@ -178,6 +178,9 @@ def run_compute_test(
         algorithm_and_userdata or algorithm_meta
     ), "either algorithm_and_userdata or algorithm_meta must be provided."
 
+    if not scenarios:
+        scenarios = []
+
     datasets = [
         _mint_and_build_compute_input(
             dataset_and_userdata,
