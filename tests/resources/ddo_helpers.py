@@ -6,19 +6,23 @@ import json
 import os
 import pathlib
 import time
-from typing import List, Optional, Union
+from typing import List, Optional
 
 import requests
 
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.models.bpool import BPool
+from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.factory_router import FactoryRouter
+from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
-from ocean_lib.structures.file_objects import FilesTypeFactory, IpfsFile, UrlFile
+from ocean_lib.structures.file_objects import FilesType, FilesTypeFactory, UrlFile
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.helper_functions import deploy_erc721_erc20, get_file1, get_file2
@@ -91,7 +95,7 @@ def get_access_service(
     )
 
 
-def create_asset(ocean, publisher, config, metadata=None, files=None):
+def create_asset(ocean, publisher, metadata=None, files=None):
     """Helper function for asset creation based on ddo_sa_sample.json."""
     if not metadata:
         metadata = {
@@ -128,7 +132,7 @@ def create_asset(ocean, publisher, config, metadata=None, files=None):
         erc20_minters=[publisher.address],
         erc20_fee_managers=[publisher.address],
         erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        erc20_publish_market_order_fee_tokens=[get_address_of_type(config, "Ocean")],
+        erc20_publish_market_order_fee_tokens=[ocean.OCEAN_address],
         erc20_publish_market_order_fee_amounts=[0],
         erc20_bytess=[[b""]],
     )
@@ -141,7 +145,7 @@ def create_basics(
     web3,
     data_provider,
     asset_type: str = "dataset",
-    files: Optional[List[Union[UrlFile, IpfsFile]]] = None,
+    files: Optional[List[FilesType]] = None,
 ):
     """Helper for asset creation, based on ddo_sa_sample.json
 
@@ -175,7 +179,7 @@ def create_basics(
 
 
 def get_registered_asset_with_access_service(ocean_instance, publisher_wallet):
-    return create_asset(ocean_instance, publisher_wallet, ocean_instance.config)
+    return create_asset(ocean_instance, publisher_wallet)
 
 
 def get_registered_asset_with_compute_service(
@@ -269,7 +273,6 @@ def get_registered_algorithm_with_access_service(
     return create_asset(
         ocean_instance,
         publisher_wallet,
-        ocean_instance.config,
         metadata=metadata,
         files=[algorithm_file],
     )
@@ -327,3 +330,17 @@ def wait_for_ddo(ocean, did, timeout=30):
 def get_first_service_by_type(asset, service_type: str) -> Service:
     """Return the first Service with the given service type."""
     return next((service for service in asset.services if service.type == service_type))
+
+
+def get_opc_collector_address_from_pool(pool: BPool) -> str:
+    return FactoryRouter(
+        pool.web3, ERC20Token(pool.web3, pool.get_datatoken_address()).router()
+    ).get_opc_collector()
+
+
+def get_opc_collector_address_from_exchange(exchange: FixedRateExchange) -> str:
+    return FactoryRouter(exchange.web3, exchange.router()).get_opc_collector()
+
+
+def get_opc_collector_address_from_erc20(erc20_token: ERC20Token) -> str:
+    return FactoryRouter(erc20_token.web3, erc20_token.router()).get_opc_collector()

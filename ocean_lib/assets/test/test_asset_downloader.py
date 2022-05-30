@@ -112,7 +112,7 @@ def test_invalid_state(publisher_wallet):
 
 @pytest.mark.integration
 def test_ocean_assets_download_indexes(
-    publisher_wallet, config, publisher_ocean_instance, tmpdir
+    publisher_wallet, publisher_ocean_instance, tmpdir
 ):
     """Tests different values of indexes that raise AssertionError."""
 
@@ -142,7 +142,7 @@ def test_ocean_assets_download_indexes(
         )
 
     index = 4
-    ddo = create_asset(publisher_ocean_instance, publisher_wallet, config)
+    ddo = create_asset(publisher_ocean_instance, publisher_wallet)
     with pytest.raises(AssertionError):
         download_asset_files(
             ddo,

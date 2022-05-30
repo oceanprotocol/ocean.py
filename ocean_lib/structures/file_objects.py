@@ -2,12 +2,20 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from typing import Optional, Union
+from abc import abstractmethod
+from typing import Optional, Protocol
 
 from enforce_typing import enforce_types
 
 
-class UrlFile(object):
+class FilesType(Protocol):
+    @enforce_types
+    @abstractmethod
+    def to_dict(self) -> dict:
+        raise NotImplementedError
+
+
+class UrlFile(FilesType):
     @enforce_types
     def __init__(self, url: str, method: Optional[str] = None) -> None:
         self.url = url
@@ -24,7 +32,7 @@ class UrlFile(object):
         return result
 
 
-class IpfsFile(object):
+class IpfsFile(FilesType):
     @enforce_types
     def __init__(self, hash: str) -> None:
         self.hash = hash
@@ -36,7 +44,7 @@ class IpfsFile(object):
 
 
 @enforce_types
-def FilesTypeFactory(file_obj: dict) -> Union[UrlFile, IpfsFile]:
+def FilesTypeFactory(file_obj: dict) -> FilesType:
     """Factory Method"""
     if file_obj["type"] == "url":
         return UrlFile(file_obj["url"], file_obj["method"])

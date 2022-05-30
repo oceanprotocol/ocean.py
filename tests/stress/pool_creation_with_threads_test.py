@@ -66,7 +66,7 @@ def asset_displayed_on_sale(ocean: Ocean):
     erc20_token = ocean.get_datatoken(
         get_first_service_by_type(asset, "access").datatoken
     )
-    OCEAN_token = ocean.get_datatoken(ocean.OCEAN_address)
+    OCEAN_token = ocean.OCEAN_token
 
     bpool = ocean.create_pool(
         erc20_token=erc20_token,
@@ -75,6 +75,7 @@ def asset_displayed_on_sale(ocean: Ocean):
         base_token_amount=ocean.to_wei(2000),
         lp_swap_fee_amount=ocean.to_wei("0.01"),
         publish_market_swap_fee_amount=ocean.to_wei("0.01"),
+        publish_market_swap_fee_collector=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
     assert bpool.address

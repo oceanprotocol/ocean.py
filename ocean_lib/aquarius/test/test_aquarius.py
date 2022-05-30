@@ -8,8 +8,6 @@ from ocean_lib.aquarius.aquarius import Aquarius
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_resolver import resolve_asset
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
-from tests.resources.helper_functions import get_address_of_type
 
 
 @pytest.mark.unit
@@ -48,7 +46,7 @@ def test_aqua_functions_for_single_ddo(
         erc20_minters=[publisher_wallet.address],
         erc20_fee_managers=[publisher_wallet.address],
         erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        erc20_publish_market_order_fee_tokens=[get_address_of_type(config, "Ocean")],
+        erc20_publish_market_order_fee_tokens=[publisher_ocean_instance.OCEAN_address],
         erc20_publish_market_order_fee_amounts=[0],
         erc20_bytess=[[b""]],
     )

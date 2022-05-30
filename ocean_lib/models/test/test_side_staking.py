@@ -6,7 +6,6 @@ import pytest
 from web3 import exceptions
 
 from ocean_lib.models.bpool import BPool
-from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.currency import MAX_WEI, to_wei
@@ -16,7 +15,7 @@ from tests.resources.helper_functions import (
     join_pool_one_side,
     swap_exact_amount_in_base_token,
     swap_exact_amount_in_datatoken,
-    transfer_ocean_if_balance_lte,
+    transfer_base_token_if_balance_lte,
     wallet_exit_pool_one_side,
 )
 
@@ -25,6 +24,7 @@ from tests.resources.helper_functions import (
 def test_side_staking(
     web3,
     config,
+    ocean_token,
     publisher_wallet,
     another_consumer_wallet,
     factory_deployer_wallet,
@@ -38,27 +38,25 @@ def test_side_staking(
 
     side_staking = SideStaking(web3, get_address_of_type(config, "Staking"))
 
-    ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
-
     assert side_staking.get_base_token_balance(erc20_token.address) == 0
 
     # Datatoken initial circulating supply should be 0
     assert side_staking.get_datatoken_circulating_supply(erc20_token.address) == 0
 
     # Transfer ocean if needed
-    transfer_ocean_if_balance_lte(
+    transfer_base_token_if_balance_lte(
         web3=web3,
-        config=config,
-        factory_deployer_wallet=factory_deployer_wallet,
+        base_token_address=ocean_token.address,
+        from_wallet=factory_deployer_wallet,
         recipient=publisher_wallet.address,
         min_balance=0,
         amount_to_transfer=to_wei("20000"),
     )
 
-    transfer_ocean_if_balance_lte(
+    transfer_base_token_if_balance_lte(
         web3=web3,
-        config=config,
-        factory_deployer_wallet=factory_deployer_wallet,
+        base_token_address=ocean_token.address,
+        from_wallet=factory_deployer_wallet,
         recipient=another_consumer_wallet.address,
         min_balance=to_wei("1000"),
         amount_to_transfer=to_wei("1000"),
@@ -298,9 +296,7 @@ def test_side_staking_steal(
     web3,
     config,
     publisher_wallet,
-    consumer_wallet,
     another_consumer_wallet,
-    erc721_nft,
     erc20_token,
 ):
     """
@@ -389,6 +385,11 @@ def test_side_staking_steal(
             another_consumer_wallet,
             pool_token.balanceOf(another_consumer_wallet.address) // 5,
         )
+
+    wallet_exit_pool_one_side(
+        web3, bpool, ocean_token, pool_token, another_consumer_wallet
+    )
+
     # Check that users hasn't made any profit
     assert erc20_token2.balanceOf(another_consumer_wallet.address) == 0
 
@@ -400,7 +401,12 @@ def test_side_staking_steal(
 
 
 def test_side_staking_constant_rate(
-    web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
+    web3,
+    config,
+    ocean_token,
+    publisher_wallet,
+    consumer_wallet,
+    another_consumer_wallet,
 ):
     """
     In this test we test that the side staking bot keeps the same rate joining the pool one side
@@ -410,8 +416,6 @@ def test_side_staking_constant_rate(
     swap_market_fee = to_wei("0.0001")
     swap_fee = to_wei("0.0001")
     big_allowance = to_wei("100000000")
-
-    ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
 
     ocean_token.transfer(another_consumer_wallet.address, to_wei("50"), consumer_wallet)
 

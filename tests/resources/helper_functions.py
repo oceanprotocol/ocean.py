@@ -12,6 +12,8 @@ from typing import Any, Dict, Optional, Tuple, Union
 import coloredlogs
 import yaml
 from enforce_typing import enforce_types
+from eth_keys import KeyAPI
+from eth_keys.backends import NativeECCBackend
 from pytest import approx
 from web3 import Web3
 
@@ -26,9 +28,8 @@ from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.ocean.util import get_web3 as util_get_web3
 from ocean_lib.structures.file_objects import FilesTypeFactory
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import from_wei, to_wei
+from ocean_lib.web3_internal.currency import DECIMALS_18, format_units, from_wei, to_wei
 from ocean_lib.web3_internal.transactions import send_ether
-from ocean_lib.web3_internal.utils import split_signature
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.mocks.data_provider_mock import DataProviderMock
 
@@ -149,7 +150,7 @@ def generate_wallet() -> Wallet:
     send_ether(deployer_wallet, generated_wallet.address, to_wei(3))
 
     ocn = Ocean(config)
-    OCEAN_token = ERC20Token(web3, address=ocn.OCEAN_address)
+    OCEAN_token = ocn.OCEAN_token
     OCEAN_token.transfer(
         generated_wallet.address, to_wei(50), from_wallet=deployer_wallet
     )
@@ -317,72 +318,116 @@ def send_mock_usdc_to_address(
 
 
 @enforce_types
-def transfer_ocean_if_balance_lte(
+def transfer_base_token_if_balance_lte(
     web3: Web3,
-    config: Config,
-    factory_deployer_wallet: Wallet,
+    base_token_address: str,
+    from_wallet: Wallet,
     recipient: str,
     min_balance: int,
     amount_to_transfer: int,
 ) -> int:
     """Helper function to send an arbitrary amount of ocean to recipient address if recipient's ocean balance
-    is less or equal to min_balance and factory_deployer_wallet has enough ocean balance to send.
+    is less or equal to min_balance and from_wallet has enough ocean balance to send.
     Returns the transferred ocean amount.
     """
-    ocean_token = ERC20Token(web3, get_address_of_type(config, "Ocean"))
-    initial_recipient_balance = ocean_token.balanceOf(recipient)
+    base_token = ERC20Token(web3, base_token_address)
+    initial_recipient_balance = base_token.balanceOf(recipient)
     if (
-        initial_recipient_balance
-        <= min_balance & ocean_token.balanceOf(factory_deployer_wallet.address)
-        >= amount_to_transfer
+        initial_recipient_balance <= min_balance
+        and base_token.balanceOf(from_wallet.address) >= amount_to_transfer
     ):
-        ocean_token.transfer(recipient, to_wei("20000"), factory_deployer_wallet)
+        base_token.transfer(recipient, amount_to_transfer, from_wallet)
 
-    return ocean_token.balanceOf(recipient) - initial_recipient_balance
+    return base_token.balanceOf(recipient) - initial_recipient_balance
 
 
 @enforce_types
-def get_provider_fees() -> Dict[str, Any]:
-    provider_wallet = get_provider_wallet()
-    web3 = get_web3()
-    provider_fee_amount = 0
-    compute_env = None
-    provider_data = json.dumps({"environment": compute_env}, separators=(",", ":"))
-    provider_fee_address = provider_wallet.address
-    provider_fee_token = os.environ.get("PROVIDER_FEE_TOKEN", ZERO_ADDRESS)
-    valid_until = 0
+def get_provider_fees(
+    web3: Web3,
+    provider_wallet: Wallet,
+    provider_fee_token: str,
+    provider_fee_amount: int,
+    valid_until: int,
+    compute_env: str = None,
+) -> Dict[str, Any]:
+    """Copied and adapted from
+    https://github.com/oceanprotocol/provider/blob/b9eb303c3470817d11b3bba01a49f220953ed963/ocean_provider/utils/provider_fees.py#L22-L74
 
-    message = Web3.solidityKeccak(
+    Keep this in sync with the corresponding provider fee logic when it changes!
+    """
+    provider_fee_address = provider_wallet.address
+
+    provider_data = json.dumps({"environment": compute_env}, separators=(",", ":"))
+    message_hash = web3.solidityKeccak(
         ["bytes", "address", "address", "uint256", "uint256"],
         [
-            Web3.toHex(Web3.toBytes(text=provider_data)),
+            web3.toHex(web3.toBytes(text=provider_data)),
             provider_fee_address,
             provider_fee_token,
             provider_fee_amount,
             valid_until,
         ],
     )
-    signed = web3.eth.sign(provider_fee_address, data=message)
-    signature = split_signature(signed)
+
+    keys = KeyAPI(NativeECCBackend)
+    pk = keys.PrivateKey(Web3.toBytes(hexstr=provider_wallet.key))
+    prefix = "\x19Ethereum Signed Message:\n32"
+    signable_hash = web3.solidityKeccak(
+        ["bytes", "bytes"], [web3.toBytes(text=prefix), web3.toBytes(message_hash)]
+    )
+    signed = keys.ecdsa_sign(message_hash=signable_hash, private_key=pk)
 
     provider_fee = {
         "providerFeeAddress": provider_fee_address,
         "providerFeeToken": provider_fee_token,
         "providerFeeAmount": provider_fee_amount,
-        "providerData": Web3.toHex(Web3.toBytes(text=provider_data)),
+        "providerData": web3.toHex(web3.toBytes(text=provider_data)),
         # make it compatible with last openzepellin https://github.com/OpenZeppelin/openzeppelin-contracts/pull/1622
-        "v": signature.v,
-        "r": signature.r,
-        "s": signature.s,
-        "validUntil": 0,
+        "v": (signed.v + 27) if signed.v <= 1 else signed.v,
+        "r": web3.toHex(web3.toBytes(signed.r).rjust(32, b"\0")),
+        "s": web3.toHex(web3.toBytes(signed.s).rjust(32, b"\0")),
+        "validUntil": valid_until,
     }
-
     return provider_fee
 
 
+def base_token_to_datatoken(
+    base_token_amount: int,
+    base_token_decimals: int,
+    datatokens_per_base_token: int,
+) -> int:
+    """Convert base tokens to equivalent datatokens, accounting for differences
+    in decimals and exchange rate.
+
+    When creating a pool, the "rate" argument is the datatokens per base token,
+    and can be passed directly into this function.
+
+    When creating an exchange, the "rate" argument is the base tokens per datatoken,
+    so it needs to be inverted before passing into this function.
+
+    Datatokens always have 18 decimals, even when the base tokens don't.
+    """
+    return to_wei(
+        format_units(base_token_amount, base_token_decimals)
+        * from_wei(datatokens_per_base_token)
+    )
+
+
 def approx_from_wei(amount_a, amount_b) -> float:
-    """Helper function to compare amounts in wei with pytest approx function with a relative tolerance of 1e-6."""
-    return int(amount_a) / to_wei(1) == approx(int(amount_b) / to_wei(1))
+    """Helper function to compare token amounts in wei
+    with pytest approx function with a relative tolerance of 1e-6."""
+    return approx_format_units(amount_a, DECIMALS_18, amount_b, DECIMALS_18)
+
+
+def approx_format_units(
+    amount_a, unit_name_a, amount_b, unit_name_b, rel=1e-6
+) -> float:
+    """Helper function to compare token amounts where decimals != 18
+    with pytest approx function with a relative tolerance of 1e-6."""
+    return float(format_units(amount_a, unit_name_a)) == approx(
+        float(format_units(amount_b, unit_name_b)),
+        rel=rel,
+    )
 
 
 def create_nft_erc20_with_pool(

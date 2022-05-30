@@ -5,19 +5,17 @@
 import pytest
 
 from ocean_lib.models.erc721_nft import ERC721NFT
-from tests.resources.helper_functions import deploy_erc721_erc20
 
 
 @pytest.mark.unit
 def test_nft_factory(
-    publisher_ocean_instance, publisher_wallet, consumer_wallet, config, web3
+    erc721_nft, erc20_token, publisher_ocean_instance, publisher_wallet
 ):
     ocn = publisher_ocean_instance
     assert ocn.get_nft_factory()
 
-    erc721, erc20 = deploy_erc721_erc20(web3, config, publisher_wallet, consumer_wallet)
-    assert ocn.get_nft_token(erc721.address).address == erc721.address
-    assert ocn.get_datatoken(erc20.address).address == erc20.address
+    assert ocn.get_nft_token(erc721_nft.address).address == erc721_nft.address
+    assert ocn.get_datatoken(erc20_token.address).address == erc20_token.address
 
     created_nft = ocn.create_erc721_nft(
         name="TEST",
