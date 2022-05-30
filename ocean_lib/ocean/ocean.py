@@ -388,5 +388,4 @@ class Ocean:
             valid_until,
         )
 
-        # TODO: maybe we should adjust this in some way?
         return initialize_compute_response.json()
