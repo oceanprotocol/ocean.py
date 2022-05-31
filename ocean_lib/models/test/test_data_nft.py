@@ -79,10 +79,10 @@ def test_permissions(
         allowed_address=another_consumer_addr, from_wallet=publisher_wallet
     )
     assert data_nft.get_permissions(user=publisher_addr)[
-        DataNFTPermissions.DEPLOY_ERC20
+        DataNFTPermissions.DEPLOY_DATATOKEN
     ]
     assert data_nft.get_permissions(user=another_consumer_addr)[
-        DataNFTPermissions.DEPLOY_ERC20
+        DataNFTPermissions.DEPLOY_DATATOKEN
     ]
     # Still is not the NFT owner, cannot clear permissions then
     with pytest.raises(exceptions.ContractLogicError) as err:
@@ -95,14 +95,14 @@ def test_permissions(
     data_nft.clean_permissions(from_wallet=publisher_wallet)
 
     assert not (
-        data_nft.get_permissions(user=publisher_addr)[DataNFTPermissions.DEPLOY_ERC20]
+        data_nft.get_permissions(user=publisher_addr)[DataNFTPermissions.DEPLOY_DATATOKEN]
     )
     assert not (
         data_nft.get_permissions(user=consumer_addr)[DataNFTPermissions.MANAGER]
     )
     assert not (
         data_nft.get_permissions(user=another_consumer_addr)[
-            DataNFTPermissions.DEPLOY_ERC20
+            DataNFTPermissions.DEPLOY_DATATOKEN
         ]
     )
 
@@ -231,7 +231,7 @@ def test_add_and_remove_permissions(
     # Assert consumer has no permissions
     permissions = data_nft.get_permissions(consumer_wallet.address)
     assert not permissions[DataNFTPermissions.MANAGER]
-    assert not permissions[DataNFTPermissions.DEPLOY_ERC20]
+    assert not permissions[DataNFTPermissions.DEPLOY_DATATOKEN]
     assert not permissions[DataNFTPermissions.UPDATE_METADATA]
     assert not permissions[DataNFTPermissions.STORE]
 
@@ -244,7 +244,7 @@ def test_add_and_remove_permissions(
     # Assert consumer has all permissions
     permissions = data_nft.get_permissions(consumer_wallet.address)
     assert permissions[DataNFTPermissions.MANAGER]
-    assert permissions[DataNFTPermissions.DEPLOY_ERC20]
+    assert permissions[DataNFTPermissions.DEPLOY_DATATOKEN]
     assert permissions[DataNFTPermissions.UPDATE_METADATA]
     assert permissions[DataNFTPermissions.STORE]
 
@@ -257,7 +257,7 @@ def test_add_and_remove_permissions(
     # Assert consumer has no permissions
     permissions = data_nft.get_permissions(consumer_wallet.address)
     assert not permissions[DataNFTPermissions.MANAGER]
-    assert not permissions[DataNFTPermissions.DEPLOY_ERC20]
+    assert not permissions[DataNFTPermissions.DEPLOY_DATATOKEN]
     assert not permissions[DataNFTPermissions.UPDATE_METADATA]
     assert not permissions[DataNFTPermissions.STORE]
 
@@ -410,7 +410,7 @@ def test_create_erc20(
 ):
     """Tests calling create an ERC20 by the owner."""
     assert data_nft.get_permissions(user=publisher_addr)[
-        DataNFTPermissions.DEPLOY_ERC20
+        DataNFTPermissions.DEPLOY_DATATOKEN
     ]
 
     tx = data_nft.create_erc20(
@@ -436,11 +436,11 @@ def test_create_erc20(
     )
     assert registered_token_event, "Cannot find TokenCreated event."
 
-    with pytest.raises(Exception, match="Cap is needed for ERC20 Enterprise"):
+    with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
         data_nft.create_erc20(
             template_index=2,
-            name="ERC20EnterpriseDT1",
-            symbol="ERC20EenterpriseDT1Symbol",
+            name="DatatokenEnterpriseDT1",
+            symbol="DatatokenEnterpriseDT1Symbol",
             minter=publisher_addr,
             fee_manager=consumer_addr,
             publish_market_order_fee_address=publisher_addr,
@@ -450,18 +450,18 @@ def test_create_erc20(
             from_wallet=publisher_wallet,
         )
 
-    with pytest.raises(Exception, match="Cap is needed for ERC20 Enterprise"):
+    with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
         data_nft.create_datatoken(
             template_index=2,
-            name="ERC20EnterpriseDT1",
-            symbol="ERC20EenterpriseDT1Symbol",
+            name="DatatokenEnterpriseDT1",
+            symbol="DatattokenEnterpriseDT1Symbol",
             from_wallet=publisher_wallet,
         )
 
     tx = data_nft.create_erc20(
         template_index=2,
-        name="ERC20EnterpriseDT1",
-        symbol="ERC20EnterpriseDT1Symbol",
+        name="DatatokenEnterpriseDT1",
+        symbol="DatatokenEnterpriseDT1Symbol",
         minter=publisher_addr,
         fee_manager=consumer_addr,
         publish_market_order_fee_address=publisher_addr,
@@ -471,16 +471,16 @@ def test_create_erc20(
         from_wallet=publisher_wallet,
         datatoken_cap=to_wei("0.1"),
     )
-    assert tx, "Could not create ERC20 Enterprise."
+    assert tx, "Could not create datatoken Enterprise."
 
     tx = data_nft.create_datatoken(
         template_index=2,
-        name="ERC20EnterpriseDT1",
-        symbol="ERC20EenterpriseDT1Symbol",
+        name="DatatokenEnterpriseDT1",
+        symbol="DatatokenEnterpriseDT1Symbol",
         datatoken_cap=to_wei("0.1"),
         from_wallet=publisher_wallet,
     )
-    assert tx, "Could not create ERC20 Enterprise using create_datatoken."
+    assert tx, "Could not create datatoken Enterprise using create_datatoken."
 
 
 def test_create_erc20_with_usdc_order_fee(
@@ -540,13 +540,13 @@ def test_create_erc20_with_non_owner(
 
     # Assert consumer cannot create ERC20
     assert not data_nft.get_permissions(consumer_wallet.address)[
-        DataNFTPermissions.DEPLOY_ERC20
+        DataNFTPermissions.DEPLOY_DATATOKEN
     ]
 
     # Grant consumer permission to create ERC20
     data_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
     assert data_nft.get_permissions(consumer_wallet.address)[
-        DataNFTPermissions.DEPLOY_ERC20
+        DataNFTPermissions.DEPLOY_DATATOKEN
     ]
 
     # Consumer creates ERC20
@@ -576,7 +576,7 @@ def test_create_erc20_with_non_owner(
     # Consumer self-revokes permission to create ERC20
     data_nft.remove_from_create_erc20_list(consumer_wallet.address, consumer_wallet)
     assert not data_nft.get_permissions(consumer_wallet.address)[
-        DataNFTPermissions.DEPLOY_ERC20
+        DataNFTPermissions.DEPLOY_DATATOKEN
     ]
 
 
@@ -584,7 +584,7 @@ def test_create_erc20_with_non_owner(
 def test_fail_creating_erc20(consumer_wallet, publisher_addr, consumer_addr, data_nft):
     """Tests failure for creating ERC20 token."""
     assert not (
-        data_nft.get_permissions(consumer_addr)[DataNFTPermissions.DEPLOY_ERC20]
+        data_nft.get_permissions(consumer_addr)[DataNFTPermissions.DEPLOY_DATATOKEN]
     )
     with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.create_erc20(
@@ -670,7 +670,7 @@ def test_erc721_datatoken_functions(
     )
     assert data_nft.balance_of(account=publisher_addr) == 0
     assert data_nft.owner_of(token_id=1) == consumer_addr
-    assert data_nft.get_permissions(user=consumer_addr)[DataNFTPermissions.DEPLOY_ERC20]
+    assert data_nft.get_permissions(user=consumer_addr)[DataNFTPermissions.DEPLOY_DATATOKEN]
     data_nft.create_erc20(
         template_index=1,
         name="ERC20DT1",

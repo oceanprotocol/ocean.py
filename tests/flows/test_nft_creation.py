@@ -70,7 +70,7 @@ def test_data_nft_roles(
         DataNFTPermissions.MANAGER
     ]
     assert not data_nft.get_permissions(another_consumer_wallet.address)[
-        DataNFTPermissions.DEPLOY_ERC20
+        DataNFTPermissions.DEPLOY_DATATOKEN
     ]
     assert not data_nft.get_permissions(another_consumer_wallet.address)[
         DataNFTPermissions.UPDATE_METADATA
@@ -85,7 +85,7 @@ def test_data_nft_roles(
 
     # Test rest of add roles functions with newly added manager
     assert data_nft.get_permissions(another_consumer_wallet.address)[
-        DataNFTPermissions.DEPLOY_ERC20
+        DataNFTPermissions.DEPLOY_DATATOKEN
     ]
     assert data_nft.get_permissions(another_consumer_wallet.address)[
         DataNFTPermissions.UPDATE_METADATA

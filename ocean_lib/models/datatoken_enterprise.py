@@ -10,7 +10,7 @@ from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-class ERC20Enterprise(Datatoken):
+class DatatokenEnterprise(Datatoken):
     CONTRACT_NAME = "ERC20TemplateEnterprise"
 
     @enforce_types

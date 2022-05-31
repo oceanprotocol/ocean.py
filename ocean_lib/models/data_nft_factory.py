@@ -170,7 +170,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
-            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
         datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
         return self.send_transaction(
             "createNftWithErc20",
@@ -232,7 +232,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
-            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
         datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
         return self.send_transaction(
             "createNftWithErc20WithPool",
@@ -316,7 +316,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
-            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
         datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
         return self.send_transaction(
             "createNftWithErc20WithFixedRate",
@@ -388,7 +388,7 @@ class DataNFTFactoryContract(ERC721TokenFactoryBase):
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
-            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
         datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
         return self.send_transaction(
             "createNftWithErc20WithDispenser",

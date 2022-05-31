@@ -795,7 +795,7 @@ def test_datatoken_cap(
     data_nft_factory = DataNFTFactoryContract(web3, data_nft_factory_address)
 
     # create NFT with ERC20
-    with pytest.raises(Exception, match="Cap is needed for ERC20 Enterprise"):
+    with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
         data_nft_factory.create_nft_with_erc20(
             nft_name="72120Bundle",
             nft_symbol="72Bundle",
@@ -818,7 +818,7 @@ def test_datatoken_cap(
     # create NFT with ERC20 and pool
     initial_pool_liquidity = to_wei("0.02")
 
-    with pytest.raises(Exception, match="Cap is needed for ERC20 Enterprise"):
+    with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
         data_nft_factory.create_nft_erc20_with_pool(
             nft_name="72120Bundle",
             nft_symbol="72Bundle",
@@ -827,7 +827,7 @@ def test_datatoken_cap(
             nft_transferable=True,
             nft_owner=publisher_wallet.address,
             datatoken_template=2,
-            datatoken_name="ERC20EnterpriseWithPool",
+            datatoken_name="DatatokenEnterpriseWithPool",
             datatoken_symbol="ERC20EP",
             datatoken_minter=publisher_wallet.address,
             datatoken_fee_manager=consumer_wallet.address,
@@ -849,7 +849,7 @@ def test_datatoken_cap(
             from_wallet=publisher_wallet,
         )
 
-    with pytest.raises(Exception, match="Cap is needed for ERC20 Enterprise"):
+    with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
         data_nft_factory.create_nft_erc20_with_fixed_rate(
             nft_name="72120Bundle",
             nft_symbol="72Bundle",
@@ -879,7 +879,7 @@ def test_datatoken_cap(
             from_wallet=publisher_wallet,
         )
 
-    with pytest.raises(Exception, match="Cap is needed for ERC20 Enterprise"):
+    with pytest.raises(Exception, match="Cap is needed for Datatoken Enterprise"):
         data_nft_factory.create_nft_erc20_with_dispenser(
             nft_name="72120Bundle",
             nft_symbol="72Bundle",
