@@ -153,12 +153,12 @@ class Ocean:
             )
             data_nft = ocean.create_data_nft("Dataset name", "dtsymbol", from_wallet=wallet)
         ```
-        :param name: ERC721 token name, str
-        :param symbol: ERC721 token symbol, str
+        :param name: data NFT token name, str
+        :param symbol: data NFT token symbol, str
         :param from_wallet: wallet instance, wallet
         :param template_index: Template type of the token, int
         :param additional_erc20_deployer: Address of another ERC20 deployer, str
-        :param token_uri: URL for ERC721 token, str
+        :param token_uri: URL for the data NFT token, str
 
         :return: `DataNFT` instance
         """
