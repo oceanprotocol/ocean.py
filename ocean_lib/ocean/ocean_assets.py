@@ -263,7 +263,7 @@ class OceanAssets:
         data_nft_name: Optional[str] = None,
         data_nft_symbol: Optional[str] = None,
         data_nft_template_index: Optional[int] = 1,
-        data_nft_additional_erc20_deployer: Optional[str] = None,
+        data_nft_additional_datatoken_deployer: Optional[str] = None,
         data_nft_additional_metadata_updater: Optional[str] = None,
         data_nft_uri: Optional[str] = None,
         data_nft_transferable: Optional[bool] = None,
@@ -297,7 +297,7 @@ class OceanAssets:
         :param data_nft_name: str name of data NFT token if creating a new one
         :param data_nft_symbol: str symbol of data NFT token  if creating a new one
         :param data_nft_template_index: int template index of the data NFT token, by default is 1.
-        :param data_nft_additional_erc20_deployer: str address of an additional ERC20 deployer.
+        :param data_nft_additional_datatoken_deployer: str address of an additional ERC20 deployer.
         :param data_nft_additional_metadata_updater: str address of an additional metadata updater.
         :param data_nft_uri: str URL of the data NFT token.
         :param datatoken_templates: list of templates indexes for deploying datatokens if deployed_datatokens is None.
@@ -327,8 +327,8 @@ class OceanAssets:
         if not data_nft_address:
             name = data_nft_name or metadata["name"]
             symbol = data_nft_symbol or name
-            additional_erc20_deployer = (
-                data_nft_additional_erc20_deployer or ZERO_ADDRESS
+            additional_datatoken_deployer = (
+                data_nft_additional_datatoken_deployer or ZERO_ADDRESS
             )
             additional_metadata_updater = (
                 data_nft_additional_metadata_updater or ZERO_ADDRESS
@@ -342,7 +342,7 @@ class OceanAssets:
                 symbol=symbol,
                 template_index=data_nft_template_index,
                 additional_metadata_updater=additional_metadata_updater,
-                additional_erc20_deployer=additional_erc20_deployer,
+                additional_datatoken_deployer=additional_datatoken_deployer,
                 token_uri=token_uri,
                 transferable=transferable,
                 owner=owner,

@@ -73,7 +73,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         symbol="DTSYMBOL",
         template_index=1,
         additional_metadata_updater=ZERO_ADDRESS,
-        additional_erc20_deployer=ZERO_ADDRESS,
+        additional_datatoken_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
         owner=publisher_wallet.address,
@@ -100,7 +100,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         symbol="DTSYMBOL1",
         template_index=1,
         additional_metadata_updater=ZERO_ADDRESS,
-        additional_erc20_deployer=ZERO_ADDRESS,
+        additional_datatoken_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
         owner=publisher_wallet.address,
@@ -223,7 +223,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         nft_transferable=True,
         nft_owner=publisher_wallet.address,
         datatoken_template=1,
-        datatoken_name="ERC20WithPool",
+        datatoken_name="DTWithPool",
         datatoken_symbol="DTP",
         datatoken_minter=publisher_wallet.address,
         datatoken_fee_manager=consumer_wallet.address,
@@ -271,7 +271,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert registered_token_event, "Cannot find TokenCreated event."
     datatoken_address3 = registered_token_event[0].args.newTokenAddress
     datatoken3 = Datatoken(web3, datatoken_address3)
-    assert datatoken3.contract.caller.name() == "ERC20WithPool"
+    assert datatoken3.contract.caller.name() == "DTWithPool"
     assert datatoken3.symbol() == "DTP"
 
     registered_pool_event = datatoken3.get_event_log(
@@ -323,7 +323,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         nft_transferable=True,
         nft_owner=publisher_wallet.address,
         datatoken_template=1,
-        datatoken_name="ERC20WithPool",
+        datatoken_name="DTWithPool",
         datatoken_symbol="DTP",
         datatoken_minter=publisher_wallet.address,
         datatoken_fee_manager=consumer_wallet.address,
@@ -370,7 +370,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert registered_token_event, "Cannot find TokenCreated event."
     datatoken_address4 = registered_token_event[0].args.newTokenAddress
     datatoken4 = Datatoken(web3, datatoken_address4)
-    assert datatoken4.contract.caller.name() == "ERC20WithPool"
+    assert datatoken4.contract.caller.name() == "DTWithPool"
     assert datatoken4.symbol() == "DTP"
 
     registered_fixed_rate_event = datatoken4.get_event_log(
@@ -395,7 +395,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         nft_transferable=True,
         nft_owner=publisher_wallet.address,
         datatoken_template=1,
-        datatoken_name="ERC20WithPool",
+        datatoken_name="DTWithPool",
         datatoken_symbol="DTP",
         datatoken_minter=publisher_wallet.address,
         datatoken_fee_manager=consumer_wallet.address,
@@ -433,11 +433,11 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         None,
     )
 
-    # Verify if the ERC20 token was created.
+    # Verify if the datatoken was created.
     assert registered_token_event, "Cannot find TokenCreated event."
     datatoken_address5 = registered_token_event[0].args.newTokenAddress
     datatoken5 = Datatoken(web3, datatoken_address5)
-    assert datatoken5.contract.caller.name() == "ERC20WithPool"
+    assert datatoken5.contract.caller.name() == "DTWithPool"
     assert datatoken5.symbol() == "DTP"
 
     dispenser = Dispenser(web3, dispenser_address)
@@ -508,7 +508,7 @@ def test_start_multiple_order(
         symbol="DTSYMBOL",
         template_index=1,
         additional_metadata_updater=ZERO_ADDRESS,
-        additional_erc20_deployer=ZERO_ADDRESS,
+        additional_datatoken_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
         owner=publisher_wallet.address,
@@ -536,7 +536,7 @@ def test_start_multiple_order(
         symbol="DTSYMBOL1",
         template_index=1,
         additional_metadata_updater=ZERO_ADDRESS,
-        additional_erc20_deployer=ZERO_ADDRESS,
+        additional_datatoken_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
         owner=publisher_wallet.address,
@@ -589,7 +589,7 @@ def test_start_multiple_order(
     # Tests current token template (one of them should be the Enterprise template)
     assert data_nft_factory.get_current_template_count() == 2
 
-    # Tests erc20 can be checked as deployed by the factory
+    # Tests datatoken can be checked as deployed by the factory
     assert data_nft_factory.check_datatoken(datatoken_address)
 
     # Tests starting multiple token orders successfully
@@ -711,7 +711,7 @@ def test_fail_create_erc20(
         symbol="DTSYMBOL",
         template_index=1,
         additional_metadata_updater=ZERO_ADDRESS,
-        additional_erc20_deployer=ZERO_ADDRESS,
+        additional_datatoken_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
         owner=publisher_wallet.address,

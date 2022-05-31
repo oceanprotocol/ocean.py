@@ -164,7 +164,7 @@ def data_nft(web3, publisher_wallet, data_nft_factory):
         symbol="NFTSYMBOL",
         template_index=1,
         additional_metadata_updater=ZERO_ADDRESS,
-        additional_erc20_deployer=ZERO_ADDRESS,
+        additional_datatoken_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
         owner=publisher_wallet.address,

@@ -75,7 +75,7 @@ def test_consume_flow(
     service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
     dt = Datatoken(web3, asset.datatokens[0]["address"])
 
-    # Mint 50 ERC20 tokens in consumer wallet from publisher. Max cap = 100
+    # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(
         account_address=consumer_wallet.address,
         value=to_wei("50"),

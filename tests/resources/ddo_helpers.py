@@ -342,5 +342,5 @@ def get_opc_collector_address_from_exchange(exchange: FixedRateExchange) -> str:
     return FactoryRouter(exchange.web3, exchange.router()).get_opc_collector()
 
 
-def get_opc_collector_address_from_erc20(datatoken: Datatoken) -> str:
+def get_opc_collector_address_from_datatoken(datatoken: Datatoken) -> str:
     return FactoryRouter(datatoken.web3, datatoken.router()).get_opc_collector()

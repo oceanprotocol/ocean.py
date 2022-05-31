@@ -31,7 +31,7 @@ def test_data_nft_roles(
         name="NFT",
         symbol="NFTSYMBOL",
         template_index=1,
-        additional_erc20_deployer=ZERO_ADDRESS,
+        additional_datatoken_deployer=ZERO_ADDRESS,
         additional_metadata_updater=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
@@ -145,7 +145,7 @@ def test_nonexistent_template_index(web3, config, publisher_wallet):
             name="DT1",
             symbol="DTSYMBOL",
             template_index=non_existent_nft_template,
-            additional_erc20_deployer=ZERO_ADDRESS,
+            additional_datatoken_deployer=ZERO_ADDRESS,
             additional_metadata_updater=ZERO_ADDRESS,
             token_uri="https://oceanprotocol.com/nft/",
             transferable=True,
@@ -170,7 +170,7 @@ def test_successful_data_nft_creation(web3, config, publisher_wallet):
         name="NFT",
         symbol="NFTSYMBOL",
         template_index=1,
-        additional_erc20_deployer=ZERO_ADDRESS,
+        additional_datatoken_deployer=ZERO_ADDRESS,
         additional_metadata_updater=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
@@ -206,7 +206,7 @@ def test_nft_count(web3, config, publisher_wallet):
         name="NFT",
         symbol="NFTSYMBOL",
         template_index=1,
-        additional_erc20_deployer=ZERO_ADDRESS,
+        additional_datatoken_deployer=ZERO_ADDRESS,
         additional_metadata_updater=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
@@ -241,7 +241,7 @@ def test_datatoken_creation(
         name="NFT",
         symbol="NFTSYMBOL",
         template_index=1,
-        additional_erc20_deployer=ZERO_ADDRESS,
+        additional_datatoken_deployer=ZERO_ADDRESS,
         additional_metadata_updater=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
@@ -286,9 +286,9 @@ def test_datatoken_creation(
     permissions = datatoken.get_permissions(publisher_wallet.address)
 
     assert permissions[0], "Not a minter"
-    assert tx_result, "Error creating ERC20 token."
+    assert tx_result, "Error creating datatoken."
 
-    # Tests failed creation of ERC20
+    # Tests failed creation of datatoken
     with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.create_erc20(
             template_index=1,
@@ -313,7 +313,7 @@ def test_datatoken_creation(
 def test_datatoken_mint_function(
     web3, config, publisher_wallet, consumer_wallet, datatoken
 ):
-    """Test erc20 failed/successful mint function"""
+    """Test datatoken failed/successful mint function"""
     datatoken.mint(publisher_wallet.address, 10, publisher_wallet)
     datatoken.mint(consumer_wallet.address, 20, publisher_wallet)
 
