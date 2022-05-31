@@ -269,7 +269,7 @@ def create_asset_with_order_fee_and_timeout(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         services=[service],
-        erc721_address=data_nft.address,
+        data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
     )
 

@@ -35,7 +35,7 @@ def publish_flow(ocean: Ocean, config: Config):
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=data_nft.address,
+        data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
         encrypt_flag=True,
         compress_flag=True,

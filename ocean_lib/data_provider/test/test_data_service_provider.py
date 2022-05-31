@@ -236,7 +236,7 @@ def test_fileinfo(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=data_nft.address,
+        data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
     )
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
@@ -267,7 +267,7 @@ def test_initialize(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=data_nft.address,
+        data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
     )
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)

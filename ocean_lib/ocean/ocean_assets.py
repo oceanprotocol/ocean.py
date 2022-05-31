@@ -259,15 +259,15 @@ class OceanAssets:
         services: Optional[list] = None,
         credentials: Optional[dict] = None,
         provider_uri: Optional[str] = None,
-        erc721_address: Optional[str] = None,
-        erc721_name: Optional[str] = None,
-        erc721_symbol: Optional[str] = None,
-        erc721_template_index: Optional[int] = 1,
-        erc721_additional_erc_deployer: Optional[str] = None,
-        erc721_additional_metadata_updater: Optional[str] = None,
-        erc721_uri: Optional[str] = None,
-        erc721_transferable: Optional[bool] = None,
-        erc721_owner: Optional[str] = None,
+        data_nft_address: Optional[str] = None,
+        data_nft_name: Optional[str] = None,
+        data_nft_symbol: Optional[str] = None,
+        data_nft_template_index: Optional[int] = 1,
+        data_nft_additional_erc20_deployer: Optional[str] = None,
+        data_nft_additional_metadata_updater: Optional[str] = None,
+        data_nft_uri: Optional[str] = None,
+        data_nft_transferable: Optional[bool] = None,
+        data_nft_owner: Optional[str] = None,
         erc20_templates: Optional[List[int]] = None,
         erc20_names: Optional[List[str]] = None,
         erc20_symbols: Optional[List[str]] = None,
@@ -292,14 +292,14 @@ class OceanAssets:
         :param credentials: credentials dict necessary for the asset.
         :param provider_uri: str URL of service provider. This will be used as base to
         construct the serviceEndpoint for the `access` (download) service
-        :param erc721_address: hex str the address of the ERC721 token. The new
-        asset will be associated with this ERC721 token address.
-        :param erc721_name: str name of ERC721 token if creating a new one
-        :param erc721_symbol: str symbol of ERC721 token  if creating a new one
-        :param erc721_template_index: int template index of the ERC721 token, by default is 1.
-        :param erc721_additional_erc_deployer: str address of an additional ERC20 deployer.
-        :param erc721_additional_metadata_updater: str address of an additional metadata updater.
-        :param erc721_uri: str URL of the ERC721 token.
+        :param data_nft_address: hex str the address of the data NFT token. The new
+        asset will be associated with this data NFT token address.
+        :param data_nft_name: str name of data NFT token if creating a new one
+        :param data_nft_symbol: str symbol of data NFT token  if creating a new one
+        :param data_nft_template_index: int template index of the data NFT token, by default is 1.
+        :param data_nft_additional_erc20_deployer: str address of an additional ERC20 deployer.
+        :param data_nft_additional_metadata_updater: str address of an additional metadata updater.
+        :param data_nft_uri: str URL of the data NFT token.
         :param erc20_templates: list of templates indexes for deploying ERC20 tokens if deployed_datatokens is None.
         :param erc20_names: list of names for ERC20 tokens if deployed_datatokens is None.
         :param erc20_symbols: list of symbols for ERC20 tokens if deployed_datatokens is None.
@@ -324,21 +324,23 @@ class OceanAssets:
         )
         data_nft_factory = DataNFTFactoryContract(self._web3, address)
 
-        if not erc721_address:
-            name = erc721_name or metadata["name"]
-            symbol = erc721_symbol or name
-            additional_erc20_deployer = erc721_additional_erc_deployer or ZERO_ADDRESS
-            additional_metadata_updater = (
-                erc721_additional_metadata_updater or ZERO_ADDRESS
+        if not data_nft_address:
+            name = data_nft_name or metadata["name"]
+            symbol = data_nft_symbol or name
+            additional_erc20_deployer = (
+                data_nft_additional_erc20_deployer or ZERO_ADDRESS
             )
-            token_uri = erc721_uri or "https://oceanprotocol.com/nft/"
-            transferable = erc721_transferable or True
-            owner = erc721_owner or publisher_wallet.address
+            additional_metadata_updater = (
+                data_nft_additional_metadata_updater or ZERO_ADDRESS
+            )
+            token_uri = data_nft_uri or "https://oceanprotocol.com/nft/"
+            transferable = data_nft_transferable or True
+            owner = data_nft_owner or publisher_wallet.address
             # register on-chain
             tx_id = data_nft_factory.deploy_erc721_contract(
                 name=name,
                 symbol=symbol,
-                template_index=erc721_template_index,
+                template_index=data_nft_template_index,
                 additional_metadata_updater=additional_metadata_updater,
                 additional_erc20_deployer=additional_erc20_deployer,
                 token_uri=token_uri,
@@ -353,8 +355,8 @@ class OceanAssets:
                 self._web3.eth.block_number,
                 None,
             )
-            erc721_address = registered_event[0].args.newTokenAddress
-            data_nft = DataNFT(self._web3, erc721_address)
+            data_nft_address = registered_event[0].args.newTokenAddress
+            data_nft = DataNFT(self._web3, data_nft_address)
             if not data_nft:
                 logger.warning("Creating new NFT failed.")
                 return None
@@ -363,13 +365,15 @@ class OceanAssets:
             )
         else:
             # verify nft address
-            if not data_nft_factory.verify_nft(erc721_address):
+            if not data_nft_factory.verify_nft(data_nft_address):
                 raise ContractNotFound(
-                    f"NFT address {erc721_address} is not found in the DataNFTFactory events."
+                    f"NFT address {data_nft_address} is not found in the DataNFTFactory events."
                 )
 
-        assert erc721_address, "nft_address is required for publishing a dataset asset."
-        data_nft = DataNFT(self._web3, erc721_address)
+        assert (
+            data_nft_address
+        ), "nft_address is required for publishing a dataset asset."
+        data_nft = DataNFT(self._web3, data_nft_address)
 
         # Create a DDO object
         asset = Asset()
@@ -442,7 +446,7 @@ class OceanAssets:
                 services=services, deployed_datatokens=deployed_datatokens
             )
 
-        asset.nft_address = erc721_address
+        asset.nft_address = data_nft_address
         asset.datatokens = datatokens
 
         for service in services:
@@ -499,16 +503,18 @@ class OceanAssets:
             self._config, DataNFTFactoryContract.CONTRACT_NAME
         )
         data_nft_factory = DataNFTFactoryContract(self._web3, address)
-        erc721_address = asset.nft_address
+        data_nft_address = asset.nft_address
 
         # Verify nft address
-        if not data_nft_factory.verify_nft(erc721_address):
+        if not data_nft_factory.verify_nft(data_nft_address):
             raise ContractNotFound(
-                f"NFT address {erc721_address} is not found in the DataNFTFactory events."
+                f"NFT address {data_nft_address} is not found in the DataNFTFactory events."
             )
 
-        assert erc721_address, "nft_address is required for publishing a dataset asset."
-        data_nft = DataNFT(self._web3, erc721_address)
+        assert (
+            data_nft_address
+        ), "nft_address is required for publishing a dataset asset."
+        data_nft = DataNFT(self._web3, data_nft_address)
 
         assert asset.chain_id == self._web3.eth.chain_id, "Chain id mismatch."
 

@@ -14,8 +14,8 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.bpool import BPool
-from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean import Ocean
@@ -231,7 +231,7 @@ def get_registered_asset_with_compute_service(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         services=[compute_service],
-        erc721_address=data_nft.address,
+        data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
         encrypt_flag=True,
         compress_flag=True,

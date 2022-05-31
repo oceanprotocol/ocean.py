@@ -185,8 +185,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert registered_nft_event, "Cannot find NFTCreated event."
     assert registered_nft_event[0].event == "NFTCreated"
     assert registered_nft_event[0].args.admin == publisher_wallet.address
-    erc721_address2 = registered_nft_event[0].args.newTokenAddress
-    data_nft_token2 = DataNFT(web3, erc721_address2)
+    data_nft_address2 = registered_nft_event[0].args.newTokenAddress
+    data_nft_token2 = DataNFT(web3, data_nft_address2)
     assert data_nft_token2.contract.caller.name() == "72120Bundle"
     assert data_nft_token2.symbol() == "72Bundle"
 
@@ -352,8 +352,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert registered_nft_event, "Cannot find NFTCreated event."
     assert registered_nft_event[0].event == "NFTCreated"
     assert registered_nft_event[0].args.admin == publisher_wallet.address
-    erc721_address4 = registered_nft_event[0].args.newTokenAddress
-    data_nft_token4 = DataNFT(web3, erc721_address4)
+    data_nft_address4 = registered_nft_event[0].args.newTokenAddress
+    data_nft_token4 = DataNFT(web3, data_nft_address4)
     assert data_nft_token4.contract.caller.name() == "72120Bundle"
     assert data_nft_token4.symbol() == "72Bundle"
 
@@ -419,8 +419,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert registered_nft_event, "Cannot find NFTCreated event."
     assert registered_nft_event[0].event == "NFTCreated"
     assert registered_nft_event[0].args.admin == publisher_wallet.address
-    erc721_address5 = registered_nft_event[0].args.newTokenAddress
-    data_nft_token5 = DataNFT(web3, erc721_address5)
+    data_nft_address5 = registered_nft_event[0].args.newTokenAddress
+    data_nft_token5 = DataNFT(web3, data_nft_address5)
     assert data_nft_token5.contract.caller.name() == "72120Bundle"
     assert data_nft_token5.symbol() == "72Bundle"
 

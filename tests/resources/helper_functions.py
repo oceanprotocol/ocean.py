@@ -227,11 +227,11 @@ def setup_logging(
 def deploy_erc721_erc20(
     web3: Web3,
     config: Config,
-    erc721_publisher: Wallet,
+    data_nft_publisher: Wallet,
     erc20_minter: Optional[Wallet] = None,
     template_index: Optional[int] = 1,
 ) -> Union[DataNFT, Tuple[DataNFT, Datatoken]]:
-    """Helper function to deploy an DataNFT using erc721_publisher Wallet
+    """Helper function to deploy an DataNFT using data_nft_publisher Wallet
     and an Datatoken data token with the newly DataNFT using erc20_minter Wallet
     if the wallet is provided.
     :rtype: Union[DataNFT, Tuple[DataNFT, Datatoken]]
@@ -248,8 +248,8 @@ def deploy_erc721_erc20(
         additional_erc20_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
-        owner=erc721_publisher.address,
-        from_wallet=erc721_publisher,
+        owner=data_nft_publisher.address,
+        from_wallet=data_nft_publisher,
     )
     token_address = data_nft_factory.get_token_address(tx)
     data_nft = DataNFT(web3, token_address)
@@ -261,12 +261,12 @@ def deploy_erc721_erc20(
         name="ERC20DT1",
         symbol="ERC20DT1Symbol",
         minter=erc20_minter.address,
-        fee_manager=erc721_publisher.address,
-        publish_market_order_fee_address=erc721_publisher.address,
+        fee_manager=data_nft_publisher.address,
+        publish_market_order_fee_address=data_nft_publisher.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
         publish_market_order_fee_amount=0,
         bytess=[b""],
-        from_wallet=erc721_publisher,
+        from_wallet=data_nft_publisher,
     )
     tx_receipt2 = web3.eth.wait_for_transaction_receipt(tx_result)
 

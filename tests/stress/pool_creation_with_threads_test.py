@@ -48,7 +48,7 @@ def asset_displayed_on_sale(ocean: Ocean):
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=data_nft.address,
+        data_nft_address=data_nft.address,
         erc20_templates=[1],
         erc20_names=["Datatoken 1"],
         erc20_symbols=["DT1"],
