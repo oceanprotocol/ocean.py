@@ -9,14 +9,14 @@ from web3.exceptions import BadFunctionCallOutput
 
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
+from ocean_lib.models.erc721_token_factory_base import ERC721TokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-class DataNFTFactoryContract(ERCTokenFactoryBase):
+class DataNFTFactoryContract(ERC721TokenFactoryBase):
     CONTRACT_NAME = "ERC721Factory"
     EVENT_NFT_CREATED = "NFTCreated"
     EVENT_TOKEN_CREATED = "TokenCreated"
