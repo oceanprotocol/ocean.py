@@ -8,9 +8,9 @@ import pytest
 
 from ocean_lib.aquarius.aquarius import Aquarius
 from ocean_lib.models.data_nft import DataNFT
+from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
-from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -197,9 +197,9 @@ def datatoken(web3, data_nft, publisher_wallet, data_nft_factory):
         None,
     )
 
-    erc20_address = registered_event[0].args.newTokenAddress
+    dt_address = registered_event[0].args.newTokenAddress
 
-    return Datatoken(web3, erc20_address)
+    return Datatoken(web3, dt_address)
 
 
 @pytest.fixture
@@ -226,9 +226,9 @@ def datatoken_enterprise_token(web3, data_nft, publisher_wallet, data_nft_factor
         None,
     )
 
-    erc20_address = registered_event[0].args.newTokenAddress
+    dt_address = registered_event[0].args.newTokenAddress
 
-    return DatatokenEnterprise(web3, erc20_address)
+    return DatatokenEnterprise(web3, dt_address)
 
 
 @pytest.fixture

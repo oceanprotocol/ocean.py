@@ -228,11 +228,11 @@ def deploy_erc721_erc20(
     web3: Web3,
     config: Config,
     data_nft_publisher: Wallet,
-    erc20_minter: Optional[Wallet] = None,
+    datatoken_minter: Optional[Wallet] = None,
     template_index: Optional[int] = 1,
 ) -> Union[DataNFT, Tuple[DataNFT, Datatoken]]:
     """Helper function to deploy an DataNFT using data_nft_publisher Wallet
-    and an Datatoken data token with the newly DataNFT using erc20_minter Wallet
+    and an Datatoken data token with the newly DataNFT using datatoken_minter Wallet
     if the wallet is provided.
     :rtype: Union[DataNFT, Tuple[DataNFT, Datatoken]]
     """
@@ -253,14 +253,14 @@ def deploy_erc721_erc20(
     )
     token_address = data_nft_factory.get_token_address(tx)
     data_nft = DataNFT(web3, token_address)
-    if not erc20_minter:
+    if not datatoken_minter:
         return data_nft
 
     tx_result = data_nft.create_erc20(
         template_index=template_index,
         name="ERC20DT1",
         symbol="ERC20DT1Symbol",
-        minter=erc20_minter.address,
+        minter=datatoken_minter.address,
         fee_manager=data_nft_publisher.address,
         publish_market_order_fee_address=data_nft_publisher.address,
         publish_market_order_fee_token=ZERO_ADDRESS,
@@ -277,9 +277,9 @@ def deploy_erc721_erc20(
         None,
     )
 
-    erc20_address = registered_event2[0].args.newTokenAddress
+    datatoken_address = registered_event2[0].args.newTokenAddress
 
-    datatoken = Datatoken(web3, erc20_address)
+    datatoken = Datatoken(web3, datatoken_address)
 
     return data_nft, datatoken
 
@@ -500,8 +500,8 @@ def create_nft_erc20_with_pool(
         None,
     )
 
-    erc20_address = registered_token_event[0].args.newTokenAddress
-    datatoken = Datatoken(web3, erc20_address)
+    datatoken_address = registered_token_event[0].args.newTokenAddress
+    datatoken = Datatoken(web3, datatoken_address)
 
     registered_pool_event = datatoken.get_event_log(
         DataNFTFactoryContract.EVENT_NEW_POOL,

@@ -268,15 +268,15 @@ class OceanAssets:
         data_nft_uri: Optional[str] = None,
         data_nft_transferable: Optional[bool] = None,
         data_nft_owner: Optional[str] = None,
-        erc20_templates: Optional[List[int]] = None,
-        erc20_names: Optional[List[str]] = None,
-        erc20_symbols: Optional[List[str]] = None,
-        erc20_minters: Optional[List[str]] = None,
-        erc20_fee_managers: Optional[List[str]] = None,
-        erc20_publish_market_order_fee_addresses: Optional[List[str]] = None,
-        erc20_publish_market_order_fee_tokens: Optional[List[str]] = None,
-        erc20_publish_market_order_fee_amounts: Optional[List[int]] = None,
-        erc20_bytess: Optional[List[List[bytes]]] = None,
+        datatoken_templates: Optional[List[int]] = None,
+        datatoken_names: Optional[List[str]] = None,
+        datatoken_symbols: Optional[List[str]] = None,
+        datatoken_minters: Optional[List[str]] = None,
+        datatoken_fee_managers: Optional[List[str]] = None,
+        datatoken_publish_market_order_fee_addresses: Optional[List[str]] = None,
+        datatoken_publish_market_order_fee_tokens: Optional[List[str]] = None,
+        datatoken_publish_market_order_fee_amounts: Optional[List[int]] = None,
+        datatoken_bytess: Optional[List[List[bytes]]] = None,
         deployed_datatokens: Optional[List[Datatoken]] = None,
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
@@ -300,16 +300,16 @@ class OceanAssets:
         :param data_nft_additional_erc20_deployer: str address of an additional ERC20 deployer.
         :param data_nft_additional_metadata_updater: str address of an additional metadata updater.
         :param data_nft_uri: str URL of the data NFT token.
-        :param erc20_templates: list of templates indexes for deploying ERC20 tokens if deployed_datatokens is None.
-        :param erc20_names: list of names for ERC20 tokens if deployed_datatokens is None.
-        :param erc20_symbols: list of symbols for ERC20 tokens if deployed_datatokens is None.
-        :param erc20_minters: list of minters for ERC20 tokens if deployed_datatokens is None.
-        :param erc20_fee_managers: list of fee managers for ERC20 tokens if deployed_datatokens is None.
-        :param erc20_publish_market_order_fee_addresses: list of publishing market addresses for ERC20 tokens if deployed_datatokens is None.
-        :param erc20_publish_market_order_fee_tokens: list of fee tokens for ERC20 tokens if deployed_datatokens is None.
-        :param erc20_publish_market_order_fee_amounts: list of fee values for ERC20 tokens if deployed_datatokens is None.
-        :param erc20_bytess: list of arrays of bytes for deploying ERC20 tokens, default empty (currently not used, useful for future) if deployed_datatokens is None.
-        :param deployed_datatokens: list of ERC20 tokens which are already deployed.
+        :param datatoken_templates: list of templates indexes for deploying datatokens if deployed_datatokens is None.
+        :param datatoken_names: list of names for datatokens if deployed_datatokens is None.
+        :param datatoken_symbols: list of symbols for datatokens if deployed_datatokens is None.
+        :param datatoken_minters: list of minters for datatokens if deployed_datatokens is None.
+        :param datatoken_fee_managers: list of fee managers for datatokens if deployed_datatokens is None.
+        :param datatoken_publish_market_order_fee_addresses: list of publishing market addresses for datatokens if deployed_datatokens is None.
+        :param datatoken_publish_market_order_fee_tokens: list of fee tokens for datatokens if deployed_datatokens is None.
+        :param datatoken_publish_market_order_fee_amounts: list of fee values for datatokens if deployed_datatokens is None.
+        :param datatoken_bytess: list of arrays of bytes for deploying datatokens, default empty (currently not used, useful for future) if deployed_datatokens is None.
+        :param deployed_datatokens: list of datatokens which are already deployed.
         :param encrypt_flag: bool for encryption of the DDO.
         :param compress_flag: bool for compression of the DDO.
         :return: DDO instance
@@ -393,43 +393,43 @@ class OceanAssets:
 
         asset.credentials = credentials if credentials else {"allow": [], "deny": []}
 
-        erc20_addresses = []
+        datatoken_addresses = []
         services = services or []
         deployed_datatokens = deployed_datatokens or []
         if not deployed_datatokens:
-            for erc20_data_counter in range(len(erc20_templates)):
-                erc20_addresses.append(
+            for datatoken_data_counter in range(len(datatoken_templates)):
+                datatoken_addresses.append(
                     self.deploy_datatoken(
                         data_nft_factory=data_nft_factory,
                         data_nft=data_nft,
-                        template_index=erc20_templates[erc20_data_counter],
-                        name=erc20_names[erc20_data_counter],
-                        symbol=erc20_symbols[erc20_data_counter],
-                        minter=erc20_minters[erc20_data_counter],
-                        fee_manager=erc20_fee_managers[erc20_data_counter],
-                        publish_market_order_fee_address=erc20_publish_market_order_fee_addresses[
-                            erc20_data_counter
+                        template_index=datatoken_templates[datatoken_data_counter],
+                        name=datatoken_names[datatoken_data_counter],
+                        symbol=datatoken_symbols[datatoken_data_counter],
+                        minter=datatoken_minters[datatoken_data_counter],
+                        fee_manager=datatoken_fee_managers[datatoken_data_counter],
+                        publish_market_order_fee_address=datatoken_publish_market_order_fee_addresses[
+                            datatoken_data_counter
                         ],
-                        publish_market_order_fee_token=erc20_publish_market_order_fee_tokens[
-                            erc20_data_counter
+                        publish_market_order_fee_token=datatoken_publish_market_order_fee_tokens[
+                            datatoken_data_counter
                         ],
-                        publish_market_order_fee_amount=erc20_publish_market_order_fee_amounts[
-                            erc20_data_counter
+                        publish_market_order_fee_amount=datatoken_publish_market_order_fee_amounts[
+                            datatoken_data_counter
                         ],
-                        bytess=erc20_bytess[erc20_data_counter],
+                        bytess=datatoken_bytess[datatoken_data_counter],
                         from_wallet=publisher_wallet,
                     )
                 )
                 logger.info(
                     f"Successfully created datatoken with address "
-                    f"{erc20_addresses[-1]}."
+                    f"{datatoken_addresses[-1]}."
                 )
             if not services:
-                for erc20_address in erc20_addresses:
+                for datatoken_address in datatoken_addresses:
                     services = self._add_defaults(
-                        services, erc20_address, encrypted_files, provider_uri
+                        services, datatoken_address, encrypted_files, provider_uri
                     )
-            for datatoken_address in erc20_addresses:
+            for datatoken_address in datatoken_addresses:
                 deployed_datatokens.append(Datatoken(self._web3, datatoken_address))
 
             datatokens = self.build_datatokens_list(

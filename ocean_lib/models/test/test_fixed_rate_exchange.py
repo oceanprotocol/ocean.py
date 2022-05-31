@@ -197,10 +197,12 @@ def test_exchange_rate_creation(
 
     # Test buy DT workflow
     ocean_balance_publisher_before_swap = ocean_token.balanceOf(consumer_addr)
-    erc20_dt_balance_consumer_before_swap = datatoken.balanceOf(another_consumer_addr)
+    datatoken_dt_balance_consumer_before_swap = datatoken.balanceOf(
+        another_consumer_addr
+    )
 
     assert ocean_balance_publisher_before_swap == 0
-    assert erc20_dt_balance_consumer_before_swap == 0
+    assert datatoken_dt_balance_consumer_before_swap == 0
 
     receipt = fixed_exchange.buy_dt(
         exchange_id,
@@ -231,11 +233,15 @@ def test_exchange_rate_creation(
     assert datatoken.balanceOf(another_consumer_addr) == amount_dt_to_sell
     assert ocean_token.balanceOf(consumer_addr) > ocean_balance_publisher_before_swap
     # Test sell DT workflow
-    erc20_dt_balance_consumer_before_swap = datatoken.balanceOf(another_consumer_addr)
-    datatoken.approve(
-        fixed_exchange.address, erc20_dt_balance_consumer_before_swap, consumer_wallet
+    datatoken_dt_balance_consumer_before_swap = datatoken.balanceOf(
+        another_consumer_addr
     )
-    erc20_balance_before = datatoken.balanceOf(consumer_addr)
+    datatoken.approve(
+        fixed_exchange.address,
+        datatoken_dt_balance_consumer_before_swap,
+        consumer_wallet,
+    )
+    datatoken_balance_before = datatoken.balanceOf(consumer_addr)
     ocean_balance_before = ocean_token.balanceOf(consumer_addr)
     fixed_exchange.sell_dt(
         exchange_id, amount_dt_to_sell, 0, ZERO_ADDRESS, 0, consumer_wallet
@@ -253,7 +259,8 @@ def test_exchange_rate_creation(
     )
 
     assert (
-        datatoken.balanceOf(consumer_addr) == erc20_balance_before - amount_dt_to_sell
+        datatoken.balanceOf(consumer_addr)
+        == datatoken_balance_before - amount_dt_to_sell
     )
 
     exchange_details = fixed_exchange.get_exchange(exchange_id)
@@ -268,7 +275,7 @@ def test_exchange_rate_creation(
 
     # Fixed Rate Exchange owner withdraws DT balance
 
-    erc20_balance_before = datatoken.balanceOf(pmt_collector)
+    dt_balance_before = datatoken.balanceOf(pmt_collector)
 
     tx = fixed_exchange.collect_dt(
         exchange_id,
@@ -284,9 +291,7 @@ def test_exchange_rate_creation(
         filters=None,
     )
 
-    assert (
-        datatoken.balanceOf(pmt_collector) == erc20_balance_before + logs[0].args.amount
-    )
+    assert datatoken.balanceOf(pmt_collector) == dt_balance_before + logs[0].args.amount
 
     # Fixed Rate Exchange owner withdraws BT balance
     # Needs to buy because he sold all the DT amount and BT balance will be 0.

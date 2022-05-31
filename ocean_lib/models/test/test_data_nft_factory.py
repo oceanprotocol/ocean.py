@@ -137,21 +137,23 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         None,
     )
     assert registered_token_event, "Cannot find TokenCreated event."
-    erc20_address = registered_token_event[0].args.newTokenAddress
+    datatoken_address = registered_token_event[0].args.newTokenAddress
 
     # Tests templateCount function (one of them should be the Enterprise template)
     assert data_nft_factory.template_count() == 2
 
-    # Tests ERC20 token template list
-    erc20_template_address = get_address_of_type(config, Datatoken.CONTRACT_NAME, "1")
+    # Tests datatoken template list
+    datatoken_template_address = get_address_of_type(
+        config, Datatoken.CONTRACT_NAME, "1"
+    )
     template = data_nft_factory.get_token_template(1)
-    assert template[0] == erc20_template_address
+    assert template[0] == datatoken_template_address
     assert template[1] is True
 
     # Tests current token template (one of them should be the Enterprise template)
     assert data_nft_factory.get_current_template_count() == 2
 
-    datatoken = Datatoken(web3, erc20_address)
+    datatoken = Datatoken(web3, datatoken_address)
     datatoken.add_minter(consumer_wallet.address, publisher_wallet)
 
     # Tests creating NFT with ERC20 successfully
@@ -199,8 +201,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
 
     # Verify if the ERC20 token was created.
     assert registered_token_event, "Cannot find TokenCreated event."
-    erc20_address2 = registered_token_event[0].args.newTokenAddress
-    datatoken2 = Datatoken(web3, erc20_address2)
+    datatoken_address2 = registered_token_event[0].args.newTokenAddress
+    datatoken2 = Datatoken(web3, datatoken_address2)
     assert datatoken2.contract.caller.name() == "ERC20B1"
     assert datatoken2.symbol() == "ERC20DT1Symbol"
 
@@ -235,7 +237,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         pool_lp_swap_fee_amount=to_wei("0.001"),
         pool_publish_market_swap_fee_amount=to_wei("0.001"),
         pool_side_staking=side_staking_address,
-        pool_base_token=erc20_address,
+        pool_base_token=datatoken_address,
         pool_base_token_sender=data_nft_factory_address,
         pool_publisher=publisher_wallet.address,
         pool_publish_market_swap_fee_collector=consumer_wallet.address,
@@ -267,8 +269,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
 
     # Verify if the ERC20 token was created.
     assert registered_token_event, "Cannot find TokenCreated event."
-    erc20_address3 = registered_token_event[0].args.newTokenAddress
-    datatoken3 = Datatoken(web3, erc20_address3)
+    datatoken_address3 = registered_token_event[0].args.newTokenAddress
+    datatoken3 = Datatoken(web3, datatoken_address3)
     assert datatoken3.contract.caller.name() == "ERC20WithPool"
     assert datatoken3.symbol() == "ERC20P"
 
@@ -311,7 +313,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         None,
     )
     assert registered_fee_token_event, "Cannot find TokenCreated event."
-    fee_erc20_address = registered_fee_token_event[0].args.newTokenAddress
+    fee_datatoken_address = registered_fee_token_event[0].args.newTokenAddress
 
     tx = data_nft_factory.create_nft_erc20_with_fixed_rate(
         nft_name="72120Bundle",
@@ -330,7 +332,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         datatoken_publish_market_order_fee_amount=0,
         datatoken_bytess=[b""],
         fixed_price_address=fixed_rate_address,
-        fixed_price_base_token=fee_erc20_address,
+        fixed_price_base_token=fee_datatoken_address,
         fixed_price_owner=publisher_wallet.address,
         fixed_price_publish_market_swap_fee_collector=consumer_wallet.address,
         fixed_price_allowed_swapper=ZERO_ADDRESS,
@@ -366,8 +368,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
 
     # Verify if the ERC20 token was created.
     assert registered_token_event, "Cannot find TokenCreated event."
-    erc20_address4 = registered_token_event[0].args.newTokenAddress
-    datatoken4 = Datatoken(web3, erc20_address4)
+    datatoken_address4 = registered_token_event[0].args.newTokenAddress
+    datatoken4 = Datatoken(web3, datatoken_address4)
     assert datatoken4.contract.caller.name() == "ERC20WithPool"
     assert datatoken4.symbol() == "ERC20P"
 
@@ -433,8 +435,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
 
     # Verify if the ERC20 token was created.
     assert registered_token_event, "Cannot find TokenCreated event."
-    erc20_address5 = registered_token_event[0].args.newTokenAddress
-    datatoken5 = Datatoken(web3, erc20_address5)
+    datatoken_address5 = registered_token_event[0].args.newTokenAddress
+    datatoken5 = Datatoken(web3, datatoken_address5)
     assert datatoken5.contract.caller.name() == "ERC20WithPool"
     assert datatoken5.symbol() == "ERC20P"
 
@@ -571,25 +573,27 @@ def test_start_multiple_order(
         None,
     )
     assert registered_token_event, "Cannot find TokenCreated event."
-    erc20_address = registered_token_event[0].args.newTokenAddress
+    datatoken_address = registered_token_event[0].args.newTokenAddress
 
     # Tests templateCount function (one of them should be the Enterprise template)
     assert data_nft_factory.template_count() == 2
 
-    # Tests ERC20 token template list
-    erc20_template_address = get_address_of_type(config, Datatoken.CONTRACT_NAME, "1")
+    # Tests datatoken template list
+    datatoken_template_address = get_address_of_type(
+        config, Datatoken.CONTRACT_NAME, "1"
+    )
     template = data_nft_factory.get_token_template(1)
-    assert template[0] == erc20_template_address
+    assert template[0] == datatoken_template_address
     assert template[1] is True
 
     # Tests current token template (one of them should be the Enterprise template)
     assert data_nft_factory.get_current_template_count() == 2
 
     # Tests erc20 can be checked as deployed by the factory
-    assert data_nft_factory.check_datatoken(erc20_address)
+    assert data_nft_factory.check_datatoken(datatoken_address)
 
     # Tests starting multiple token orders successfully
-    datatoken = Datatoken(web3, erc20_address)
+    datatoken = Datatoken(web3, datatoken_address)
     dt_amount = to_wei("2")
     mock_dai_contract_address = get_address_of_type(config, "MockDAI")
     assert datatoken.balanceOf(consumer_wallet.address) == 0
@@ -622,7 +626,7 @@ def test_start_multiple_order(
     signature = split_signature(signed)
 
     order_data = OrderData(
-        erc20_address,
+        datatoken_address,
         consumer_wallet.address,
         1,
         (

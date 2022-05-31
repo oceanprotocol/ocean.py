@@ -397,15 +397,17 @@ def test_plain_asset_with_one_datatoken(
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         data_nft_address=data_nft_address,
-        erc20_templates=[1],
-        erc20_names=["Datatoken 1"],
-        erc20_symbols=["DT1"],
-        erc20_minters=[publisher_wallet.address],
-        erc20_fee_managers=[publisher_wallet.address],
-        erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        erc20_publish_market_order_fee_tokens=[publisher_ocean_instance.OCEAN_address],
-        erc20_publish_market_order_fee_amounts=[0],
-        erc20_bytess=[[b""]],
+        datatoken_templates=[1],
+        datatoken_names=["Datatoken 1"],
+        datatoken_symbols=["DT1"],
+        datatoken_minters=[publisher_wallet.address],
+        datatoken_fee_managers=[publisher_wallet.address],
+        datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
+        datatoken_publish_market_order_fee_tokens=[
+            publisher_ocean_instance.OCEAN_address
+        ],
+        datatoken_publish_market_order_fee_amounts=[0],
+        datatoken_bytess=[[b""]],
     )
     assert ddo, "The asset is not created."
     assert ddo.nft["name"] == "NFT1"
@@ -455,18 +457,18 @@ def test_plain_asset_multiple_datatokens(
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         data_nft_address=data_nft_address2,
-        erc20_templates=[1, 1],
-        erc20_names=["Datatoken 2", "Datatoken 3"],
-        erc20_symbols=["DT2", "DT3"],
-        erc20_minters=[publisher_wallet.address, publisher_wallet.address],
-        erc20_fee_managers=[publisher_wallet.address, publisher_wallet.address],
-        erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS, ZERO_ADDRESS],
-        erc20_publish_market_order_fee_tokens=[
+        datatoken_templates=[1, 1],
+        datatoken_names=["Datatoken 2", "Datatoken 3"],
+        datatoken_symbols=["DT2", "DT3"],
+        datatoken_minters=[publisher_wallet.address, publisher_wallet.address],
+        datatoken_fee_managers=[publisher_wallet.address, publisher_wallet.address],
+        datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS, ZERO_ADDRESS],
+        datatoken_publish_market_order_fee_tokens=[
             publisher_ocean_instance.OCEAN_address,
             publisher_ocean_instance.OCEAN_address,
         ],
-        erc20_publish_market_order_fee_amounts=[0, 0],
-        erc20_bytess=[[b""], [b""]],
+        datatoken_publish_market_order_fee_amounts=[0, 0],
+        datatoken_bytess=[[b""], [b""]],
     )
     assert ddo, "The asset is not created."
     assert ddo.nft["name"] == "NFT2"

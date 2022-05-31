@@ -485,7 +485,7 @@ def test_create_erc20(
     assert tx, "Could not create datatoken Enterprise using create_datatoken."
 
 
-def test_create_erc20_with_usdc_order_fee(
+def test_create_datatoken_with_usdc_order_fee(
     web3: Web3,
     config: Config,
     publisher_wallet: Wallet,
@@ -516,22 +516,22 @@ def test_create_erc20_with_usdc_order_fee(
         None,
     )
 
-    erc20_address = event[0].args.newTokenAddress
-    erc20 = Datatoken(web3, erc20_address)
+    dt_address = event[0].args.newTokenAddress
+    dt = Datatoken(web3, dt_address)
 
     # Check publish fee info
     (
         publish_market_order_fee_address,
         publish_market_order_fee_token,
         publish_market_order_fee_amount,
-    ) = erc20.get_publishing_market_fee()
+    ) = dt.get_publishing_market_fee()
     assert publish_market_order_fee_address == publisher_wallet.address
     assert publish_market_order_fee_token == usdc.address
     assert publish_market_order_fee_amount == publish_market_order_fee_amount_in_wei
 
 
 @pytest.mark.unit
-def test_create_erc20_with_non_owner(
+def test_create_datatoken_with_non_owner(
     web3: Web3,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
@@ -859,8 +859,8 @@ def test_transfer_nft(
         None,
     )
     assert registered_token_event, "Cannot find TokenCreated event."
-    erc20_address = registered_token_event[0].args.newTokenAddress
-    datatoken = Datatoken(web3, erc20_address)
+    datatoken_address = registered_token_event[0].args.newTokenAddress
+    datatoken = Datatoken(web3, datatoken_address)
 
     assert not datatoken.is_minter(publisher_addr)
     assert datatoken.is_minter(consumer_addr)
@@ -1207,8 +1207,8 @@ def test_transfer_nft_with_erc20_pool_fre(
         None,
     )
     assert registered_token_event, "Cannot find TokenCreated event."
-    erc20_address = registered_token_event[0].args.newTokenAddress
-    datatoken = Datatoken(web3, erc20_address)
+    datatoken_address = registered_token_event[0].args.newTokenAddress
+    datatoken = Datatoken(web3, datatoken_address)
 
     assert datatoken.is_minter(publisher_addr)
 
