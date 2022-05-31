@@ -228,7 +228,7 @@ def test_encrypt(web3, config, provider_wallet, file1, file2):
 
 @pytest.mark.integration
 def test_fileinfo(
-    web3, config, publisher_wallet, publisher_ocean_instance, erc721_nft, erc20_token
+    web3, config, publisher_wallet, publisher_ocean_instance, erc721_nft, datatoken
 ):
     _, metadata, encrypted_files = create_basics(config, web3, DataSP)
 
@@ -237,7 +237,7 @@ def test_fileinfo(
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_nft.address,
-        deployed_erc20_tokens=[erc20_token],
+        deployed_datatokens=[datatoken],
     )
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
@@ -260,7 +260,7 @@ def test_initialize(
     publisher_ocean_instance,
     provider_wallet,
     erc721_nft,
-    erc20_token,
+    datatoken,
 ):
     _, metadata, encrypted_files = create_basics(config, web3, DataSP)
     ddo = publisher_ocean_instance.assets.create(
@@ -268,7 +268,7 @@ def test_initialize(
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_nft.address,
-        deployed_erc20_tokens=[erc20_token],
+        deployed_datatokens=[datatoken],
     )
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 

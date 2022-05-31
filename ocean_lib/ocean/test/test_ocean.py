@@ -8,14 +8,12 @@ from ocean_lib.models.erc721_nft import ERC721NFT
 
 
 @pytest.mark.unit
-def test_nft_factory(
-    erc721_nft, erc20_token, publisher_ocean_instance, publisher_wallet
-):
+def test_nft_factory(erc721_nft, datatoken, publisher_ocean_instance, publisher_wallet):
     ocn = publisher_ocean_instance
     assert ocn.get_nft_factory()
 
     assert ocn.get_nft_token(erc721_nft.address).address == erc721_nft.address
-    assert ocn.get_datatoken(erc20_token.address).address == erc20_token.address
+    assert ocn.get_datatoken(datatoken.address).address == datatoken.address
 
     created_nft = ocn.create_erc721_nft(
         name="TEST",

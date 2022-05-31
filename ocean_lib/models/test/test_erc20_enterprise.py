@@ -8,8 +8,8 @@ import pytest
 from web3 import exceptions
 from web3.main import Web3
 
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
-from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -27,8 +27,8 @@ def test_buy_from_dispenser_and_order(
     erc20_enterprise_token,
 ):
     """Tests buy_from_dispenser_and_order function of the ERC20 Enterprise"""
-    mock_usdc_contract = ERC20Token(web3, get_address_of_type(config, "MockUSDC"))
-    mock_dai_contract = ERC20Token(web3, get_address_of_type(config, "MockDAI"))
+    mock_usdc_contract = Datatoken(web3, get_address_of_type(config, "MockUSDC"))
+    mock_dai_contract = Datatoken(web3, get_address_of_type(config, "MockDAI"))
     dispenser = Dispenser(web3, get_address_of_type(config, "Dispenser"))
 
     tx = erc20_enterprise_token.create_dispenser(
@@ -164,8 +164,8 @@ def test_buy_from_fre_and_order(
     erc20_enterprise_token,
 ):
     """Tests buy_from_fre_and_order function of the ERC20 Enterprise"""
-    mock_usdc_contract = ERC20Token(web3, get_address_of_type(config, "MockUSDC"))
-    mock_dai_contract = ERC20Token(web3, get_address_of_type(config, "MockDAI"))
+    mock_usdc_contract = Datatoken(web3, get_address_of_type(config, "MockUSDC"))
+    mock_dai_contract = Datatoken(web3, get_address_of_type(config, "MockDAI"))
     fixed_rate_exchange = FixedRateExchange(
         web3, get_address_of_type(config, "FixedPrice")
     )

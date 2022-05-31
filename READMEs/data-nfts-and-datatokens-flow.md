@@ -110,8 +110,8 @@ In the same python console:
 ```python
 # Create ERC20 token related to the above NFT.
 
-erc20_token = erc721_nft.create_datatoken("Datatoken 1", "DT1", from_wallet=alice_wallet)
-print(f"Created ERC20 datatoken. Its address is {erc20_token.address}")
+datatoken = erc721_nft.create_datatoken("Datatoken 1", "DT1", from_wallet=alice_wallet)
+print(f"Created ERC20 datatoken. Its address is {datatoken.address}")
 ```
 
 Congrats, you've created your first Ocean datatoken! 🐋
@@ -136,6 +136,6 @@ print(f"data NFT token name: {erc721_nft.token_name()}")
 print(f"data NFT token symbol: {erc721_nft.symbol()}")
 
 # datatoken
-print(f"datatoken name: {erc20_token.token_name()}")
-print(f"datatoken symbol: {erc20_token.symbol()}")
+print(f"datatoken name: {datatoken.token_name()}")
+print(f"datatoken symbol: {datatoken.symbol()}")
 ```

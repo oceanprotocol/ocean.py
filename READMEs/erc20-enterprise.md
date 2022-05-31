@@ -69,7 +69,7 @@ asset = ocean.assets.create(
     metadata,
     alice_wallet,
     encrypted_files,
-    deployed_erc20_tokens=[erc20_enterprise_token]
+    deployed_datatokens=[erc20_enterprise_token]
 )
 access_service = asset.services[0]
 
@@ -178,7 +178,7 @@ asset = ocean.assets.create(
     metadata,
     alice_wallet,
     encrypted_files,
-    deployed_erc20_tokens=[erc20_enterprise_token]
+    deployed_datatokens=[erc20_enterprise_token]
 )
 access_service = asset.services[0]
 
@@ -198,7 +198,7 @@ fixed_rate_exchange = ocean.fixed_rate_exchange
 OCEAN_token = ocean.OCEAN_token
 
 exchange_id = ocean.create_fixed_rate(
-    erc20_token=erc20_enterprise_token,
+    datatoken=erc20_enterprise_token,
     base_token=OCEAN_token,
     amount=ocean.to_wei(25),
     from_wallet=alice_wallet,

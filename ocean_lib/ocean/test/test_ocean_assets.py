@@ -94,7 +94,7 @@ def test_update_credentials(publisher_ocean_instance, publisher_wallet):
 
 @pytest.mark.integration
 def test_update_datatokens(
-    publisher_ocean_instance, publisher_wallet, config, erc20_token, file2
+    publisher_ocean_instance, publisher_wallet, config, datatoken, file2
 ):
     """Test the update of datatokens"""
     ddo = create_asset(publisher_ocean_instance, publisher_wallet)
@@ -108,16 +108,16 @@ def test_update_datatokens(
         service_id="3",
         service_type=ServiceTypes.ASSET_ACCESS,
         service_endpoint=data_provider.get_url(config),
-        datatoken=erc20_token.address,
+        datatoken=datatoken.address,
         files=encrypted_files,
         timeout=0,
     )
 
     ddo.datatokens.append(
         {
-            "address": erc20_token.address,
-            "name": erc20_token.contract.caller.name(),
-            "symbol": erc20_token.symbol(),
+            "address": datatoken.address,
+            "name": datatoken.contract.caller.name(),
+            "symbol": datatoken.symbol(),
             "serviceId": access_service.id,
         }
     )
@@ -130,10 +130,10 @@ def test_update_datatokens(
 
     assert len(_asset.datatokens) == len(old_asset.datatokens) + 1
     assert len(_asset.services) == len(old_asset.services) + 1
-    assert _asset.datatokens[1].get("address") == erc20_token.address
+    assert _asset.datatokens[1].get("address") == datatoken.address
     assert _asset.datatokens[0].get("address") == old_asset.datatokens[0].get("address")
     assert _asset.services[0].datatoken == old_asset.datatokens[0].get("address")
-    assert _asset.services[1].datatoken == erc20_token.address
+    assert _asset.services[1].datatoken == datatoken.address
 
     # Delete datatoken
     new_asset = new_metadata = copy.deepcopy(_asset)
@@ -329,11 +329,11 @@ def test_create_bad_metadata(publisher_ocean_instance, publisher_wallet):
 
 @pytest.mark.unit
 def test_pay_for_access_service_insufficient_balance(
-    publisher_ocean_instance, config, publisher_wallet, erc20_token
+    publisher_ocean_instance, config, publisher_wallet, datatoken
 ):
     """Tests if balance is lower than the purchased amount."""
     ddo_dict = copy.deepcopy(get_sample_ddo())
-    ddo_dict["services"][0]["datatokenAddress"] = erc20_token.address
+    ddo_dict["services"][0]["datatokenAddress"] = datatoken.address
     asset = Asset.from_dict(ddo_dict)
 
     empty_account = publisher_ocean_instance.web3.eth.account.create()
@@ -350,7 +350,7 @@ def test_pay_for_access_service_insufficient_balance(
             asset,
             get_first_service_by_type(asset, "access"),
             consume_market_order_fee_address=empty_wallet.address,
-            consume_market_order_fee_token=erc20_token.address,
+            consume_market_order_fee_token=datatoken.address,
             consume_market_order_fee_amount=0,
             wallet=empty_wallet,
         )
@@ -488,7 +488,7 @@ def test_plain_asset_multiple_datatokens(
 
 @pytest.mark.integration
 def test_plain_asset_multiple_services(
-    publisher_ocean_instance, publisher_wallet, config, erc721_nft, erc20_token
+    publisher_ocean_instance, publisher_wallet, config, erc721_nft, datatoken
 ):
     web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
@@ -498,7 +498,7 @@ def test_plain_asset_multiple_services(
         service_id="0",
         service_type=ServiceTypes.ASSET_ACCESS,
         service_endpoint=data_provider.get_url(config),
-        datatoken=erc20_token.address,
+        datatoken=datatoken.address,
         files=encrypted_files,
         timeout=0,
     )
@@ -518,7 +518,7 @@ def test_plain_asset_multiple_services(
         service_id="1",
         service_type=ServiceTypes.CLOUD_COMPUTE,
         service_endpoint=data_provider.get_url(config),
-        datatoken=erc20_token.address,
+        datatoken=datatoken.address,
         files=encrypted_files,
         timeout=3600,
         compute_values=compute_values,
@@ -530,7 +530,7 @@ def test_plain_asset_multiple_services(
         encrypted_files=encrypted_files,
         services=[access_service, compute_service],
         erc721_address=erc721_nft.address,
-        deployed_erc20_tokens=[erc20_token],
+        deployed_datatokens=[datatoken],
     )
     assert ddo, "The asset is not created."
     assert ddo.nft["name"] == "NFT"
@@ -539,14 +539,14 @@ def test_plain_asset_multiple_services(
     assert ddo.nft["owner"] == publisher_wallet.address
     assert ddo.datatokens[0]["name"] == "ERC20DT1"
     assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
-    assert ddo.datatokens[0]["address"] == erc20_token.address
+    assert ddo.datatokens[0]["address"] == datatoken.address
     assert ddo.credentials == build_credentials_dict()
     assert ddo.services[1].compute_values == compute_values
 
 
 @pytest.mark.integration
 def test_encrypted_asset(
-    publisher_ocean_instance, publisher_wallet, config, erc721_nft, erc20_token
+    publisher_ocean_instance, publisher_wallet, config, erc721_nft, datatoken
 ):
     web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
@@ -557,7 +557,7 @@ def test_encrypted_asset(
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_nft.address,
-        deployed_erc20_tokens=[erc20_token],
+        deployed_datatokens=[datatoken],
         encrypt_flag=True,
     )
     assert ddo, "The asset is not created."
@@ -567,12 +567,12 @@ def test_encrypted_asset(
     assert ddo.nft["owner"] == publisher_wallet.address
     assert ddo.datatokens[0]["name"] == "ERC20DT1"
     assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
-    assert ddo.datatokens[0]["address"] == erc20_token.address
+    assert ddo.datatokens[0]["address"] == datatoken.address
 
 
 @pytest.mark.integration
 def test_compressed_asset(
-    publisher_ocean_instance, publisher_wallet, config, erc721_nft, erc20_token
+    publisher_ocean_instance, publisher_wallet, config, erc721_nft, datatoken
 ):
     web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
@@ -583,7 +583,7 @@ def test_compressed_asset(
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_nft.address,
-        deployed_erc20_tokens=[erc20_token],
+        deployed_datatokens=[datatoken],
         compress_flag=True,
     )
     assert ddo, "The asset is not created."
@@ -593,12 +593,12 @@ def test_compressed_asset(
     assert ddo.nft["owner"] == publisher_wallet.address
     assert ddo.datatokens[0]["name"] == "ERC20DT1"
     assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
-    assert ddo.datatokens[0]["address"] == erc20_token.address
+    assert ddo.datatokens[0]["address"] == datatoken.address
 
 
 @pytest.mark.integration
 def test_compressed_and_encrypted_asset(
-    publisher_ocean_instance, publisher_wallet, config, erc721_nft, erc20_token
+    publisher_ocean_instance, publisher_wallet, config, erc721_nft, datatoken
 ):
     web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
@@ -609,7 +609,7 @@ def test_compressed_and_encrypted_asset(
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         erc721_address=erc721_nft.address,
-        deployed_erc20_tokens=[erc20_token],
+        deployed_datatokens=[datatoken],
         encrypt_flag=True,
         compress_flag=True,
     )
@@ -619,12 +619,12 @@ def test_compressed_and_encrypted_asset(
     assert ddo.nft["owner"] == publisher_wallet.address
     assert ddo.datatokens[0]["name"] == "ERC20DT1"
     assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
-    assert ddo.datatokens[0]["address"] == erc20_token.address
+    assert ddo.datatokens[0]["address"] == datatoken.address
 
 
 @pytest.mark.unit
 def test_asset_creation_errors(
-    publisher_ocean_instance, publisher_wallet, config, erc721_nft, erc20_token
+    publisher_ocean_instance, publisher_wallet, config, erc721_nft, datatoken
 ):
     web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
@@ -637,7 +637,7 @@ def test_asset_creation_errors(
             publisher_wallet=publisher_wallet,
             encrypted_files=encrypted_files,
             erc721_address=some_random_address,
-            deployed_erc20_tokens=[erc20_token],
+            deployed_datatokens=[datatoken],
             encrypt_flag=True,
         )
 
@@ -649,6 +649,6 @@ def test_asset_creation_errors(
                 publisher_wallet=publisher_wallet,
                 encrypted_files=encrypted_files,
                 erc721_address=erc721_nft.address,
-                deployed_erc20_tokens=[erc20_token],
+                deployed_datatokens=[datatoken],
                 encrypt_flag=True,
             )

@@ -12,7 +12,7 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.ocean_assets import OceanAssets
@@ -72,7 +72,7 @@ def test_start_order_fees(
     consume_market_order_fee_in_unit: str,
     provider_fee_in_unit: str,
 ):
-    bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
+    bt = Datatoken(web3, get_address_of_type(config, base_token_name))
 
     # Send base tokens to the consumer so they can pay for fees
     transfer_base_token_if_balance_lte(
@@ -222,7 +222,7 @@ def create_asset_with_order_fee_and_timeout(
     publish_market_order_fee_token: str,
     publish_market_order_fee_amount: int,
     timeout: int,
-) -> Tuple[Asset, Service, ERC20Token]:
+) -> Tuple[Asset, Service, Datatoken]:
 
     # Create datatoken with order fee
     datatoken = erc721_nft.create_datatoken(
@@ -270,10 +270,10 @@ def create_asset_with_order_fee_and_timeout(
         publisher_wallet=publisher_wallet,
         services=[service],
         erc721_address=erc721_nft.address,
-        deployed_erc20_tokens=[datatoken],
+        deployed_datatokens=[datatoken],
     )
 
     service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
-    dt = ERC20Token(web3, asset.datatokens[0]["address"])
+    dt = Datatoken(web3, asset.datatokens[0]["address"])
 
     return asset, service, dt

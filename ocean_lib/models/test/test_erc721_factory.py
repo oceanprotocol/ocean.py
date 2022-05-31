@@ -6,8 +6,8 @@ import pytest
 from web3 import exceptions
 from web3.main import Web3
 
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
-from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.structures.abi_tuples import OrderData
@@ -142,7 +142,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert erc721_factory.template_count() == 2
 
     # Tests ERC20 token template list
-    erc20_template_address = get_address_of_type(config, ERC20Token.CONTRACT_NAME, "1")
+    erc20_template_address = get_address_of_type(config, Datatoken.CONTRACT_NAME, "1")
     template = erc721_factory.get_token_template(1)
     assert template[0] == erc20_template_address
     assert template[1] is True
@@ -150,8 +150,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     # Tests current token template (one of them should be the Enterprise template)
     assert erc721_factory.get_current_template_count() == 2
 
-    erc20_token = ERC20Token(web3, erc20_address)
-    erc20_token.add_minter(consumer_wallet.address, publisher_wallet)
+    datatoken = Datatoken(web3, erc20_address)
+    datatoken.add_minter(consumer_wallet.address, publisher_wallet)
 
     # Tests creating NFT with ERC20 successfully
     tx = erc721_factory.create_nft_with_erc20(
@@ -199,19 +199,17 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     # Verify if the ERC20 token was created.
     assert registered_token_event, "Cannot find TokenCreated event."
     erc20_address2 = registered_token_event[0].args.newTokenAddress
-    erc20_token2 = ERC20Token(web3, erc20_address2)
-    assert erc20_token2.contract.caller.name() == "ERC20B1"
-    assert erc20_token2.symbol() == "ERC20DT1Symbol"
+    datatoken2 = Datatoken(web3, erc20_address2)
+    assert datatoken2.contract.caller.name() == "ERC20B1"
+    assert datatoken2.symbol() == "ERC20DT1Symbol"
 
     # Tests creating NFT with ERC20 and with Pool successfully.
     side_staking_address = get_address_of_type(config, "Staking")
     pool_template_address = get_address_of_type(config, "poolTemplate")
     initial_pool_liquidity = to_wei("0.02")
 
-    erc20_token.mint(publisher_wallet.address, initial_pool_liquidity, publisher_wallet)
-    erc20_token.approve(
-        erc721_factory_address, initial_pool_liquidity, publisher_wallet
-    )
+    datatoken.mint(publisher_wallet.address, initial_pool_liquidity, publisher_wallet)
+    datatoken.approve(erc721_factory_address, initial_pool_liquidity, publisher_wallet)
     tx = erc721_factory.create_nft_erc20_with_pool(
         nft_name="72120Bundle",
         nft_symbol="72Bundle",
@@ -229,7 +227,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         datatoken_publish_market_order_fee_amount=0,
         datatoken_bytess=[b""],
         pool_rate=to_wei("1"),
-        pool_base_token_decimals=erc20_token.decimals(),
+        pool_base_token_decimals=datatoken.decimals(),
         pool_base_token_amount=initial_pool_liquidity,
         pool_lp_swap_fee_amount=to_wei("0.001"),
         pool_publish_market_swap_fee_amount=to_wei("0.001"),
@@ -267,11 +265,11 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     # Verify if the ERC20 token was created.
     assert registered_token_event, "Cannot find TokenCreated event."
     erc20_address3 = registered_token_event[0].args.newTokenAddress
-    erc20_token3 = ERC20Token(web3, erc20_address3)
-    assert erc20_token3.contract.caller.name() == "ERC20WithPool"
-    assert erc20_token3.symbol() == "ERC20P"
+    datatoken3 = Datatoken(web3, erc20_address3)
+    assert datatoken3.contract.caller.name() == "ERC20WithPool"
+    assert datatoken3.symbol() == "ERC20P"
 
-    registered_pool_event = erc20_token3.get_event_log(
+    registered_pool_event = datatoken3.get_event_log(
         ERC721FactoryContract.EVENT_NEW_POOL,
         tx_receipt.blockNumber,
         web3.eth.block_number,
@@ -281,7 +279,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     # Verify if the pool was created.
     assert registered_pool_event, "Cannot find NewPool event."
     pool_address = registered_pool_event[0].args.poolAddress
-    pool_token = ERC20Token(web3, pool_address)
+    pool_token = Datatoken(web3, pool_address)
 
     assert pool_token.balanceOf(publisher_wallet.address) > 0, "Invalid pool share."
 
@@ -366,11 +364,11 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     # Verify if the ERC20 token was created.
     assert registered_token_event, "Cannot find TokenCreated event."
     erc20_address4 = registered_token_event[0].args.newTokenAddress
-    erc20_token4 = ERC20Token(web3, erc20_address4)
-    assert erc20_token4.contract.caller.name() == "ERC20WithPool"
-    assert erc20_token4.symbol() == "ERC20P"
+    datatoken4 = Datatoken(web3, erc20_address4)
+    assert datatoken4.contract.caller.name() == "ERC20WithPool"
+    assert datatoken4.symbol() == "ERC20P"
 
-    registered_fixed_rate_event = erc20_token4.get_event_log(
+    registered_fixed_rate_event = datatoken4.get_event_log(
         ERC721FactoryContract.EVENT_NEW_FIXED_RATE,
         tx_receipt.blockNumber,
         web3.eth.block_number,
@@ -433,9 +431,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     # Verify if the ERC20 token was created.
     assert registered_token_event, "Cannot find TokenCreated event."
     erc20_address5 = registered_token_event[0].args.newTokenAddress
-    erc20_token5 = ERC20Token(web3, erc20_address5)
-    assert erc20_token5.contract.caller.name() == "ERC20WithPool"
-    assert erc20_token5.symbol() == "ERC20P"
+    datatoken5 = Datatoken(web3, erc20_address5)
+    assert datatoken5.contract.caller.name() == "ERC20WithPool"
+    assert datatoken5.symbol() == "ERC20P"
 
     dispenser = Dispenser(web3, dispenser_address)
 
@@ -576,7 +574,7 @@ def test_start_multiple_order(
     assert erc721_factory.template_count() == 2
 
     # Tests ERC20 token template list
-    erc20_template_address = get_address_of_type(config, ERC20Token.CONTRACT_NAME, "1")
+    erc20_template_address = get_address_of_type(config, Datatoken.CONTRACT_NAME, "1")
     template = erc721_factory.get_token_template(1)
     assert template[0] == erc20_template_address
     assert template[1] is True
@@ -588,18 +586,18 @@ def test_start_multiple_order(
     assert erc721_factory.check_datatoken(erc20_address)
 
     # Tests starting multiple token orders successfully
-    erc20_token = ERC20Token(web3, erc20_address)
+    datatoken = Datatoken(web3, erc20_address)
     dt_amount = to_wei("2")
     mock_dai_contract_address = get_address_of_type(config, "MockDAI")
-    assert erc20_token.balanceOf(consumer_wallet.address) == 0
+    assert datatoken.balanceOf(consumer_wallet.address) == 0
 
-    erc20_token.add_minter(consumer_wallet.address, publisher_wallet)
-    erc20_token.mint(consumer_wallet.address, dt_amount, consumer_wallet)
-    assert erc20_token.balanceOf(consumer_wallet.address) == dt_amount
+    datatoken.add_minter(consumer_wallet.address, publisher_wallet)
+    datatoken.mint(consumer_wallet.address, dt_amount, consumer_wallet)
+    assert datatoken.balanceOf(consumer_wallet.address) == dt_amount
 
-    erc20_token.approve(erc721_factory_address, dt_amount, consumer_wallet)
+    datatoken.approve(erc721_factory_address, dt_amount, consumer_wallet)
 
-    erc20_token.set_payment_collector(another_consumer_wallet.address, publisher_wallet)
+    datatoken.set_payment_collector(another_consumer_wallet.address, publisher_wallet)
 
     provider_fee_token = mock_dai_contract_address
     provider_fee_amount = 0
@@ -647,8 +645,8 @@ def test_start_multiple_order(
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
-    registered_erc20_start_order_event = erc20_token.get_event_log(
-        ERC20Token.EVENT_ORDER_STARTED,
+    registered_erc20_start_order_event = datatoken.get_event_log(
+        Datatoken.EVENT_ORDER_STARTED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -659,10 +657,8 @@ def test_start_multiple_order(
         registered_erc20_start_order_event[0].args.consumer == consumer_wallet.address
     )
 
-    assert erc20_token.balanceOf(consumer_wallet.address) == 0
-    assert erc20_token.balanceOf(erc20_token.get_payment_collector()) == (
-        dt_amount * 0.97
-    )
+    assert datatoken.balanceOf(consumer_wallet.address) == 0
+    assert datatoken.balanceOf(datatoken.get_payment_collector()) == (dt_amount * 0.97)
 
 
 @pytest.mark.unit
@@ -673,7 +669,7 @@ def test_fail_get_templates(web3, config):
     )
     erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
 
-    # Should fail to get the ERC20token template if index = 0
+    # Should fail to get the Datatoken template if index = 0
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_factory.get_token_template(0)
     assert (
@@ -682,7 +678,7 @@ def test_fail_get_templates(web3, config):
         "Template index doesnt exist"
     )
 
-    # Should fail to get the ERC20token template if index > templateCount
+    # Should fail to get the Datatoken template if index > templateCount
     with pytest.raises(exceptions.ContractLogicError) as err:
         erc721_factory.get_token_template(3)
     assert (

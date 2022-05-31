@@ -11,7 +11,7 @@ from web3 import Web3
 
 from ocean_lib.config import Config
 from ocean_lib.models.bpool import BPool
-from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.models.test.test_factory_router import (
@@ -68,7 +68,7 @@ def test_pool_swap_fees(
     another_consumer_wallet: Wallet,
     publisher_wallet: Wallet,
     base_token_name: str,
-    erc20_token: ERC20Token,
+    datatoken: Datatoken,
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     lp_swap_fee: str,
@@ -89,7 +89,7 @@ def test_pool_swap_fees(
         consume_market_swap_fee_collector=another_consumer_wallet,
         publisher_wallet=publisher_wallet,
         base_token_name=base_token_name,
-        datatoken=erc20_token,
+        datatoken=datatoken,
         publish_market_swap_fee=publish_market_swap_fee,
         consume_market_swap_fee=consume_market_swap_fee,
         lp_swap_fee=lp_swap_fee,
@@ -105,13 +105,13 @@ def pool_swap_fees(
     consume_market_swap_fee_collector: Wallet,
     publisher_wallet: Wallet,
     base_token_name: str,
-    datatoken: ERC20Token,
+    datatoken: Datatoken,
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     lp_swap_fee: str,
     dt_per_bt: str,
 ):
-    bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
+    bt = Datatoken(web3, get_address_of_type(config, base_token_name))
     dt = datatoken
 
     transfer_base_token_if_balance_lte(
@@ -298,8 +298,8 @@ def buy_dt_exact_amount_in(
     bt_in: int,
 ):
     """Tests consumer buys some DT - exactAmountIn"""
-    bt = ERC20Token(web3, bpool.get_base_token_address())
-    dt = ERC20Token(web3, bpool.get_datatoken_address())
+    bt = Datatoken(web3, bpool.get_base_token_address())
+    dt = Datatoken(web3, bpool.get_datatoken_address())
 
     consumer_bt_balance = bt.balanceOf(consumer_wallet.address)
     consumer_dt_balance = dt.balanceOf(consumer_wallet.address)
@@ -389,8 +389,8 @@ def buy_dt_exact_amount_out(
     dt_out: int,
 ):
     """Tests consumer buys some DT - exactAmountOut"""
-    bt = ERC20Token(web3, bpool.get_base_token_address())
-    dt = ERC20Token(web3, bpool.get_datatoken_address())
+    bt = Datatoken(web3, bpool.get_base_token_address())
+    dt = Datatoken(web3, bpool.get_datatoken_address())
 
     consumer_bt_balance = bt.balanceOf(consumer_wallet.address)
     consumer_dt_balance = dt.balanceOf(consumer_wallet.address)
@@ -480,8 +480,8 @@ def buy_bt_exact_amount_in(
     dt_in: int,
 ):
     """Tests consumer buys some BT - exactAmountIn"""
-    bt = ERC20Token(web3, bpool.get_base_token_address())
-    dt = ERC20Token(web3, bpool.get_datatoken_address())
+    bt = Datatoken(web3, bpool.get_base_token_address())
+    dt = Datatoken(web3, bpool.get_datatoken_address())
 
     consumer_bt_balance = bt.balanceOf(consumer_wallet.address)
     consumer_dt_balance = dt.balanceOf(consumer_wallet.address)
@@ -573,8 +573,8 @@ def buy_bt_exact_amount_out(
     bt_out: int,
 ):
     """Tests consumer buys some DT - exactAmountOut"""
-    bt = ERC20Token(web3, bpool.get_base_token_address())
-    dt = ERC20Token(web3, bpool.get_datatoken_address())
+    bt = Datatoken(web3, bpool.get_base_token_address())
+    dt = Datatoken(web3, bpool.get_datatoken_address())
 
     consumer_bt_balance = bt.balanceOf(consumer_wallet.address)
     consumer_dt_balance = dt.balanceOf(consumer_wallet.address)
@@ -658,8 +658,8 @@ def buy_bt_exact_amount_out(
 
 
 def check_calc_methods(web3: Web3, bpool: BPool, dt_per_bt_in_wei: int):
-    bt = ERC20Token(web3, bpool.get_base_token_address())
-    dt = ERC20Token(web3, bpool.get_datatoken_address())
+    bt = Datatoken(web3, bpool.get_base_token_address())
+    dt = Datatoken(web3, bpool.get_datatoken_address())
 
     bt_amount = parse_units("100", bt.decimals())
     dt_amount = base_token_to_datatoken(bt_amount, bt.decimals(), dt_per_bt_in_wei)
@@ -770,8 +770,8 @@ def check_balances_and_fees(
     )
     log_swap_event_args = log_swap_event[0].args
 
-    bt = ERC20Token(web3, bpool.get_base_token_address())
-    dt = ERC20Token(web3, bpool.get_datatoken_address())
+    bt = Datatoken(web3, bpool.get_base_token_address())
+    dt = Datatoken(web3, bpool.get_datatoken_address())
 
     consumer_bt_balance = bt.balanceOf(consumer_address)
     consumer_dt_balance = dt.balanceOf(consumer_address)
@@ -908,8 +908,8 @@ def collect_fee_and_verify_balances(
     bpool: BPool,
     wallet: Wallet,
 ):
-    bt = ERC20Token(web3, bpool.get_base_token_address())
-    dt = ERC20Token(web3, bpool.get_datatoken_address())
+    bt = Datatoken(web3, bpool.get_base_token_address())
+    dt = Datatoken(web3, bpool.get_datatoken_address())
 
     if method == bpool.collect_market_fee:
         fee_collector = bpool.get_publish_market_collector()
@@ -957,11 +957,11 @@ def test_swap_calculations(
     config: Config,
     factory_deployer_wallet: Wallet,
     publisher_wallet: Wallet,
-    erc20_token: ERC20Token,
+    datatoken: Datatoken,
     base_token_name: str,
 ):
-    bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
-    dt = erc20_token
+    bt = Datatoken(web3, get_address_of_type(config, base_token_name))
+    dt = datatoken
 
     transfer_base_token_if_balance_lte(
         web3=web3,

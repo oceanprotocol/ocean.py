@@ -11,7 +11,7 @@ from web3 import Web3
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.structures.file_objects import FilesType
@@ -73,7 +73,7 @@ def test_consume_flow(
     assert asset.datatokens[0]["symbol"] == "DT1"
 
     service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
-    dt = ERC20Token(web3, asset.datatokens[0]["address"])
+    dt = Datatoken(web3, asset.datatokens[0]["address"])
 
     # Mint 50 ERC20 tokens in consumer wallet from publisher. Max cap = 100
     dt.mint(

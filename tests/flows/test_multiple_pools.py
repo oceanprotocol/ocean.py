@@ -10,7 +10,7 @@ from web3.exceptions import ContractLogicError
 
 from ocean_lib.config import Config
 from ocean_lib.models.bpool import BPool
-from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.side_staking import SideStaking
@@ -30,18 +30,18 @@ from tests.resources.helper_functions import (
 def test_create_pool_and_exchange(
     web3: Web3,
     config: Config,
-    ocean_token: ERC20Token,
+    ocean_token: Datatoken,
     factory_deployer_wallet: Wallet,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
     another_consumer_wallet: Wallet,
-    erc20_token: ERC20Token,
+    datatoken: Datatoken,
 ):
     """
     Test interactions between pools, exchange, and dispenser.
     """
     bt = ocean_token
-    dt = erc20_token
+    dt = datatoken
 
     transfer_base_token_if_balance_lte(
         web3=web3,

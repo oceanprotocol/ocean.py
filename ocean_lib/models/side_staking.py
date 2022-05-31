@@ -3,9 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 from enforce_typing import enforce_types
-from eth_typing import HexStr
 
-from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 

@@ -22,7 +22,7 @@ from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.compute_input import ComputeInput
-from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.ocean.util import get_address_of_type
@@ -165,21 +165,19 @@ class OceanAssets:
         )
 
     @enforce_types
-    def build_datatokens_list(
-        self, services: list, deployed_erc20_tokens: list
-    ) -> list:
+    def build_datatokens_list(self, services: list, deployed_datatokens: list) -> list:
         datatokens = []
         # (1-n) service per datatoken, 1 datatoken per service
-        for erc20_token in deployed_erc20_tokens:
+        for datatoken in deployed_datatokens:
             datatokens = datatokens + [
                 {
-                    "address": erc20_token.address,
-                    "name": erc20_token.contract.caller.name(),
-                    "symbol": erc20_token.symbol(),
+                    "address": datatoken.address,
+                    "name": datatoken.contract.caller.name(),
+                    "symbol": datatoken.symbol(),
                     "serviceId": service.id,
                 }
                 for service in services
-                if service.datatoken == erc20_token.address
+                if service.datatoken == datatoken.address
             ]
 
         return datatokens
@@ -279,7 +277,7 @@ class OceanAssets:
         erc20_publish_market_order_fee_tokens: Optional[List[str]] = None,
         erc20_publish_market_order_fee_amounts: Optional[List[int]] = None,
         erc20_bytess: Optional[List[List[bytes]]] = None,
-        deployed_erc20_tokens: Optional[List[ERC20Token]] = None,
+        deployed_datatokens: Optional[List[Datatoken]] = None,
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
     ) -> Optional[Asset]:
@@ -302,16 +300,16 @@ class OceanAssets:
         :param erc721_additional_erc_deployer: str address of an additional ERC20 deployer.
         :param erc721_additional_metadata_updater: str address of an additional metadata updater.
         :param erc721_uri: str URL of the ERC721 token.
-        :param erc20_templates: list of templates indexes for deploying ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_names: list of names for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_symbols: list of symbols for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_minters: list of minters for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_fee_managers: list of fee managers for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_publish_market_order_fee_addresses: list of publishing market addresses for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_publish_market_order_fee_tokens: list of fee tokens for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_publish_market_order_fee_amounts: list of fee values for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_bytess: list of arrays of bytes for deploying ERC20 tokens, default empty (currently not used, useful for future) if deployed_erc20_tokens is None.
-        :param deployed_erc20_tokens: list of ERC20 tokens which are already deployed.
+        :param erc20_templates: list of templates indexes for deploying ERC20 tokens if deployed_datatokens is None.
+        :param erc20_names: list of names for ERC20 tokens if deployed_datatokens is None.
+        :param erc20_symbols: list of symbols for ERC20 tokens if deployed_datatokens is None.
+        :param erc20_minters: list of minters for ERC20 tokens if deployed_datatokens is None.
+        :param erc20_fee_managers: list of fee managers for ERC20 tokens if deployed_datatokens is None.
+        :param erc20_publish_market_order_fee_addresses: list of publishing market addresses for ERC20 tokens if deployed_datatokens is None.
+        :param erc20_publish_market_order_fee_tokens: list of fee tokens for ERC20 tokens if deployed_datatokens is None.
+        :param erc20_publish_market_order_fee_amounts: list of fee values for ERC20 tokens if deployed_datatokens is None.
+        :param erc20_bytess: list of arrays of bytes for deploying ERC20 tokens, default empty (currently not used, useful for future) if deployed_datatokens is None.
+        :param deployed_datatokens: list of ERC20 tokens which are already deployed.
         :param encrypt_flag: bool for encryption of the DDO.
         :param compress_flag: bool for compression of the DDO.
         :return: DDO instance
@@ -389,8 +387,8 @@ class OceanAssets:
 
         erc20_addresses = []
         services = services or []
-        deployed_erc20_tokens = deployed_erc20_tokens or []
-        if not deployed_erc20_tokens:
+        deployed_datatokens = deployed_datatokens or []
+        if not deployed_datatokens:
             for erc20_data_counter in range(len(erc20_templates)):
                 erc20_addresses.append(
                     self.deploy_datatoken(
@@ -423,23 +421,21 @@ class OceanAssets:
                     services = self._add_defaults(
                         services, erc20_address, encrypted_files, provider_uri
                     )
-            for erc20_token_address in erc20_addresses:
-                deployed_erc20_tokens.append(
-                    ERC20Token(self._web3, erc20_token_address)
-                )
+            for datatoken_address in erc20_addresses:
+                deployed_datatokens.append(Datatoken(self._web3, datatoken_address))
 
             datatokens = self.build_datatokens_list(
-                services=services, deployed_erc20_tokens=deployed_erc20_tokens
+                services=services, deployed_datatokens=deployed_datatokens
             )
         else:
             if not services:
-                for erc20_token in deployed_erc20_tokens:
+                for datatoken in deployed_datatokens:
                     services = self._add_defaults(
-                        services, erc20_token.address, encrypted_files, provider_uri
+                        services, datatoken.address, encrypted_files, provider_uri
                     )
 
             datatokens = self.build_datatokens_list(
-                services=services, deployed_erc20_tokens=deployed_erc20_tokens
+                services=services, deployed_datatokens=deployed_datatokens
             )
 
         asset.nft_address = erc721_address
@@ -610,7 +606,7 @@ class OceanAssets:
         wallet: Wallet,
         consumer_address: Optional[str] = None,
     ):
-        dt = ERC20Token(self._web3, service.datatoken)
+        dt = Datatoken(self._web3, service.datatoken)
         balance = dt.balanceOf(wallet.address)
 
         if not consumer_address:
@@ -730,7 +726,7 @@ class OceanAssets:
             return
 
         service = asset_compute_input.service
-        dt = ERC20Token(self._web3, service.datatoken)
+        dt = Datatoken(self._web3, service.datatoken)
 
         if valid_order and provider_fees:
             asset_compute_input.transfer_tx_id = dt.reuse_order(

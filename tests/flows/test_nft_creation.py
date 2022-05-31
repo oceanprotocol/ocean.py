@@ -5,11 +5,10 @@
 import pytest
 from web3 import Web3, exceptions
 
-from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT, ERC721Permissions
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
-from ocean_lib.web3_internal.currency import to_wei
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
     get_address_of_type,
@@ -285,9 +284,9 @@ def test_erc20_creation(
 
     erc20_address = registered_event2[0].args.newTokenAddress
 
-    erc20_token = ERC20Token(web3, erc20_address)
+    datatoken = Datatoken(web3, erc20_address)
 
-    permissions = erc20_token.get_permissions(publisher_wallet.address)
+    permissions = datatoken.get_permissions(publisher_wallet.address)
 
     assert permissions[0], "Not a minter"
     assert tx_result, "Error creating ERC20 token."
@@ -315,18 +314,18 @@ def test_erc20_creation(
 
 @pytest.mark.unit
 def test_erc20_mint_function(
-    web3, config, publisher_wallet, consumer_wallet, erc20_token
+    web3, config, publisher_wallet, consumer_wallet, datatoken
 ):
     """Test erc20 failed/successful mint function"""
-    erc20_token.mint(publisher_wallet.address, 10, publisher_wallet)
-    erc20_token.mint(consumer_wallet.address, 20, publisher_wallet)
+    datatoken.mint(publisher_wallet.address, 10, publisher_wallet)
+    datatoken.mint(consumer_wallet.address, 20, publisher_wallet)
 
-    assert erc20_token.balanceOf(publisher_wallet.address) == 10
-    assert erc20_token.balanceOf(consumer_wallet.address) == 20
+    assert datatoken.balanceOf(publisher_wallet.address) == 10
+    assert datatoken.balanceOf(consumer_wallet.address) == 20
 
     # Tests failed mint
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20_token.mint(publisher_wallet.address, 10, consumer_wallet)
+        datatoken.mint(publisher_wallet.address, 10, consumer_wallet)
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT MINTER"
@@ -338,24 +337,24 @@ def test_erc20_mint_function(
     erc20_2.mint(publisher_wallet.address, 10, consumer_wallet)
     erc20_2.mint(consumer_wallet.address, 20, consumer_wallet)
 
-    assert erc20_token.balanceOf(publisher_wallet.address) == 10
-    assert erc20_token.balanceOf(consumer_wallet.address) == 20
+    assert datatoken.balanceOf(publisher_wallet.address) == 10
+    assert datatoken.balanceOf(consumer_wallet.address) == 20
 
 
 @pytest.mark.unit
-def test_erc20_set_data(web3, config, publisher_wallet, erc721_nft, erc20_token):
+def test_erc20_set_data(web3, config, publisher_wallet, erc721_nft, datatoken):
     """Test erc20 data set functions"""
 
     """This is a special metadata, it's callable only from the erc20Token contract and
     can be done only by who has deployERC20 rights(rights to create new erc20 token contract)
     the value is stored into the 725Y standard with a predefined key which is the erc20Token address"""
 
-    key = Web3.keccak(hexstr=erc20_token.address)
+    key = Web3.keccak(hexstr=datatoken.address)
 
     value = Web3.toHex(text="SomeData")
 
     assert Web3.toHex(erc721_nft.get_data(key)) == "0x"
-    erc20_token.set_data(value, publisher_wallet)
+    datatoken.set_data(value, publisher_wallet)
 
     assert Web3.toHex(erc721_nft.get_data(key)) == value
     """This one is the generic version of updating data into the key-value story.
@@ -371,7 +370,7 @@ def test_erc20_set_data(web3, config, publisher_wallet, erc721_nft, erc20_token)
 
 @pytest.mark.unit
 def test_nft_owner_transfer(
-    web3, config, publisher_wallet, consumer_wallet, erc721_nft, erc20_token
+    web3, config, publisher_wallet, consumer_wallet, erc721_nft, datatoken
 ):
     """Test erc721 ownership transfer on token transfer"""
 
@@ -410,7 +409,7 @@ def test_nft_owner_transfer(
         == "execution reverted: VM Exception while processing transaction: revert ERC721Template: NOT ERC20DEPLOYER_ROLE"
     )
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc20_token.mint(publisher_wallet.address, 10, publisher_wallet)
+        datatoken.mint(publisher_wallet.address, 10, publisher_wallet)
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC20Template: NOT MINTER"
@@ -429,8 +428,8 @@ def test_nft_owner_transfer(
         bytess=[b""],
         from_wallet=consumer_wallet,
     )
-    erc20_token.add_minter(consumer_wallet.address, consumer_wallet)
+    datatoken.add_minter(consumer_wallet.address, consumer_wallet)
 
-    erc20_token.mint(consumer_wallet.address, 20, consumer_wallet)
+    datatoken.mint(consumer_wallet.address, 20, consumer_wallet)
 
-    assert erc20_token.balanceOf(consumer_wallet.address) == 20
+    assert datatoken.balanceOf(consumer_wallet.address) == 20

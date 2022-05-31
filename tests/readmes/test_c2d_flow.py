@@ -134,7 +134,7 @@ def c2d_flow_readme(
         encrypted_files=DATA_encrypted_files,
         services=[DATA_compute_service],
         erc721_address=erc721_nft.address,
-        deployed_erc20_tokens=[DATA_datatoken],
+        deployed_datatokens=[DATA_datatoken],
     )
 
     assert DATA_asset.did, "create dataset with compute service unsuccessful"
@@ -190,7 +190,7 @@ def c2d_flow_readme(
         publisher_wallet=alice_wallet,
         encrypted_files=ALGO_encrypted_files,
         erc721_address=ALGO_nft_token.address,
-        deployed_erc20_tokens=[ALGO_datatoken],
+        deployed_datatokens=[ALGO_datatoken],
     )
 
     assert ALGO_asset.did, "create algorithm unsuccessful"

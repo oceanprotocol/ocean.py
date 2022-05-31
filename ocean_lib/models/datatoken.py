@@ -11,12 +11,12 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-class RolesERC20(IntEnum):
+class DatatokenRoles(IntEnum):
     MINTER = 0
     PAYMENT_MANAGER = 1
 
 
-class ERC20Token(ContractBase):
+class Datatoken(ContractBase):
     CONTRACT_NAME = "ERC20Template"
 
     BASE = 10**18
@@ -518,9 +518,9 @@ class ERC20Token(ContractBase):
         return logs
 
 
-class MockERC20(ERC20Token):
+class MockERC20(Datatoken):
     CONTRACT_NAME = "MockERC20"
 
 
-class MockOcean(ERC20Token):
+class MockOcean(Datatoken):
     CONTRACT_NAME = "MockOcean"

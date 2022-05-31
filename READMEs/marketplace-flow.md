@@ -73,11 +73,11 @@ to order this access token.
 from ocean_lib.ocean.mint_fake_ocean import mint_fake_OCEAN
 mint_fake_OCEAN(config)
 
-erc20_token = ocean.get_datatoken(asset.services[0].datatoken)
+datatoken = ocean.get_datatoken(asset.services[0].datatoken)
 OCEAN_token = ocean.OCEAN_token
 
 bpool = ocean.create_pool(
-    erc20_token=erc20_token,
+    datatoken=datatoken,
     base_token=OCEAN_token,
     rate=ocean.to_wei(1),
     base_token_amount=ocean.to_wei(2000),
@@ -97,12 +97,12 @@ In the same Python console as before:
 
 ```python
 prices = bpool.get_amount_in_exact_out(
-    OCEAN_token.address, erc20_token.address, ocean.to_wei(1), ocean.to_wei("0.01")
+    OCEAN_token.address, datatoken.address, ocean.to_wei(1), ocean.to_wei("0.01")
 )
 price_in_OCEAN = prices[0]
 
 from ocean_lib.web3_internal.currency import pretty_ether_and_wei
-print(f"Price of 1 {erc20_token.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
+print(f"Price of 1 {datatoken.symbol()} is {pretty_ether_and_wei(price_in_OCEAN, 'OCEAN')}")
 ```
 
 ## 5. Bob buys data asset
@@ -127,7 +127,7 @@ OCEAN_token.approve(bpool.address, ocean.to_wei("10000"), from_wallet=bob_wallet
 
 bpool.swap_exact_amount_out(
     token_in=OCEAN_token.address,
-    token_out=erc20_token.address,
+    token_out=datatoken.address,
     consume_market_swap_fee_address=ZERO_ADDRESS,
     max_amount_in=ocean.to_wei(10),
     token_amount_out=ocean.to_wei(1),
@@ -135,7 +135,7 @@ bpool.swap_exact_amount_out(
     consume_market_swap_fee_amount=0,
     from_wallet=bob_wallet,
 )
-assert erc20_token.balanceOf(bob_wallet.address) >= ocean.to_wei(
+assert datatoken.balanceOf(bob_wallet.address) >= ocean.to_wei(
     1
 ), "Bob didn't get 1.0 datatokens"
 
@@ -150,7 +150,7 @@ order_tx_id = ocean.assets.pay_for_access_service(
     asset,
     service,
     consume_market_order_fee_address=bob_wallet.address,
-    consume_market_order_fee_token=erc20_token.address,
+    consume_market_order_fee_token=datatoken.address,
     consume_market_order_fee_amount=0,
     wallet=bob_wallet,
 )

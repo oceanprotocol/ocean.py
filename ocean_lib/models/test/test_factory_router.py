@@ -6,7 +6,7 @@ import pytest
 from web3 import Web3
 
 from ocean_lib.config import Config
-from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -137,7 +137,7 @@ def test_opc_collector(config: Config, factory_router: FactoryRouter):
 def test_buy_dt_batch(
     web3: Web3,
     config: Config,
-    ocean_token: ERC20Token,
+    ocean_token: Datatoken,
     factory_router: FactoryRouter,
     consumer_wallet: Wallet,
     factory_deployer_wallet: Wallet,
@@ -196,7 +196,7 @@ def test_buy_dt_batch(
         "TokenCreated", tx_receipt.blockNumber, web3.eth.block_number, None
     )
     erc_token = registered_event[0]["args"]["newTokenAddress"]
-    erc_token_contract = ERC20Token(web3=web3, address=erc_token)
+    erc_token_contract = Datatoken(web3=web3, address=erc_token)
     registered_event_pool = erc_token_contract.get_event_log(
         FactoryRouter.EVENT_NEW_POOL,
         tx_receipt.blockNumber,
@@ -242,7 +242,7 @@ def test_buy_dt_batch(
         "TokenCreated", tx_receipt.blockNumber, web3.eth.block_number, None
     )
     erc_token2 = registered_event[0]["args"]["newTokenAddress"]
-    erc_token_contract2 = ERC20Token(web3=web3, address=erc_token2)
+    erc_token_contract2 = Datatoken(web3=web3, address=erc_token2)
     registered_event_pool = erc_token_contract2.get_event_log(
         FactoryRouter.EVENT_NEW_POOL,
         tx_receipt.blockNumber,
@@ -293,7 +293,7 @@ def test_buy_dt_batch(
 def test_stake_batch(
     web3: Web3,
     config: Config,
-    ocean_token: ERC20Token,
+    ocean_token: Datatoken,
     factory_router: FactoryRouter,
     consumer_wallet: Wallet,
     factory_deployer_wallet: Wallet,
@@ -349,7 +349,7 @@ def test_stake_batch(
         "TokenCreated", tx_receipt.blockNumber, web3.eth.block_number, None
     )
     erc_token = registered_event[0]["args"]["newTokenAddress"]
-    erc_token_contract = ERC20Token(web3=web3, address=erc_token)
+    erc_token_contract = Datatoken(web3=web3, address=erc_token)
     registered_event_pool = erc_token_contract.get_event_log(
         FactoryRouter.EVENT_NEW_POOL,
         tx_receipt.blockNumber,
@@ -395,7 +395,7 @@ def test_stake_batch(
         "TokenCreated", tx_receipt.blockNumber, web3.eth.block_number, None
     )
     erc_token2 = registered_event[0]["args"]["newTokenAddress"]
-    erc_token_contract2 = ERC20Token(web3=web3, address=erc_token2)
+    erc_token_contract2 = Datatoken(web3=web3, address=erc_token2)
     registered_event_pool = erc_token_contract2.get_event_log(
         FactoryRouter.EVENT_NEW_POOL,
         tx_receipt.blockNumber,
@@ -407,8 +407,8 @@ def test_stake_batch(
     stake1 = {"poolAddress": pool1, "tokenAmountIn": to_wei("1"), "minPoolAmountOut": 0}
 
     stake2 = {"poolAddress": pool2, "tokenAmountIn": to_wei("1"), "minPoolAmountOut": 0}
-    bpool_token1 = ERC20Token(web3, pool1)
-    bpool_token2 = ERC20Token(web3, pool2)
+    bpool_token1 = Datatoken(web3, pool1)
+    bpool_token2 = Datatoken(web3, pool2)
 
     assert bpool_token1.balanceOf(consumer_wallet.address) == 0
     assert bpool_token2.balanceOf(consumer_wallet.address) == 0

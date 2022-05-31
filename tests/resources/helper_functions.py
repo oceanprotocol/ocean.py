@@ -20,7 +20,7 @@ from web3 import Web3
 from ocean_lib.config import Config
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.bpool import BPool
-from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.ocean.ocean import Ocean
@@ -230,11 +230,11 @@ def deploy_erc721_erc20(
     erc721_publisher: Wallet,
     erc20_minter: Optional[Wallet] = None,
     template_index: Optional[int] = 1,
-) -> Union[ERC721NFT, Tuple[ERC721NFT, ERC20Token]]:
+) -> Union[ERC721NFT, Tuple[ERC721NFT, Datatoken]]:
     """Helper function to deploy an ERC721NFT using erc721_publisher Wallet
-    and an ERC20Token data token with the newly ERC721NFT using erc20_minter Wallet
+    and an Datatoken data token with the newly ERC721NFT using erc20_minter Wallet
     if the wallet is provided.
-    :rtype: Union[ERC721NFT, Tuple[ERC721NFT, ERC20Token]]
+    :rtype: Union[ERC721NFT, Tuple[ERC721NFT, Datatoken]]
     """
 
     erc721_factory = ERC721FactoryContract(
@@ -279,9 +279,9 @@ def deploy_erc721_erc20(
 
     erc20_address = registered_event2[0].args.newTokenAddress
 
-    erc20_token = ERC20Token(web3, erc20_address)
+    datatoken = Datatoken(web3, erc20_address)
 
-    return erc721_nft, erc20_token
+    return erc721_nft, datatoken
 
 
 @enforce_types
@@ -308,7 +308,7 @@ def send_mock_usdc_to_address(
     """
     factory_deployer = get_factory_deployer_wallet(config.network_name)
 
-    mock_usdc = ERC20Token(web3, get_address_of_type(config, "MockUSDC"))
+    mock_usdc = Datatoken(web3, get_address_of_type(config, "MockUSDC"))
     initial_recipient_balance = mock_usdc.balanceOf(recipient)
 
     if mock_usdc.balanceOf(factory_deployer.address) >= amount:
@@ -330,7 +330,7 @@ def transfer_base_token_if_balance_lte(
     is less or equal to min_balance and from_wallet has enough ocean balance to send.
     Returns the transferred ocean amount.
     """
-    base_token = ERC20Token(web3, base_token_address)
+    base_token = Datatoken(web3, base_token_address)
     initial_recipient_balance = base_token.balanceOf(recipient)
     if (
         initial_recipient_balance <= min_balance
@@ -499,9 +499,9 @@ def create_nft_erc20_with_pool(
     )
 
     erc20_address = registered_token_event[0].args.newTokenAddress
-    erc20_token = ERC20Token(web3, erc20_address)
+    datatoken = Datatoken(web3, erc20_address)
 
-    registered_pool_event = erc20_token.get_event_log(
+    registered_pool_event = datatoken.get_event_log(
         ERC721FactoryContract.EVENT_NEW_POOL,
         tx_receipt.blockNumber,
         web3.eth.block_number,
@@ -510,9 +510,9 @@ def create_nft_erc20_with_pool(
 
     pool_address = registered_pool_event[0].args.poolAddress
     bpool = BPool(web3, pool_address)
-    pool_token = ERC20Token(web3, pool_address)
+    pool_token = Datatoken(web3, pool_address)
 
-    return bpool, erc20_token, erc721_token, pool_token
+    return bpool, datatoken, erc721_token, pool_token
 
 
 def join_pool_with_max_base_token(bpool, web3, base_token, wallet, amt: int = 0):

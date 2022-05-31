@@ -7,8 +7,8 @@ import os
 import pytest
 
 from ocean_lib.aquarius.aquarius import Aquarius
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.erc20_enterprise import ERC20Enterprise
-from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.factory_router import FactoryRouter
@@ -133,8 +133,8 @@ def ocean_address(config) -> str:
 
 
 @pytest.fixture
-def ocean_token(web3, ocean_address) -> ERC20Token:
-    return ERC20Token(web3, ocean_address)
+def ocean_token(web3, ocean_address) -> Datatoken:
+    return Datatoken(web3, ocean_address)
 
 
 @pytest.fixture
@@ -175,7 +175,7 @@ def erc721_nft(web3, publisher_wallet, erc721_factory):
 
 
 @pytest.fixture
-def erc20_token(web3, erc721_nft, publisher_wallet, erc721_factory):
+def datatoken(web3, erc721_nft, publisher_wallet, erc721_factory):
     tx_result = erc721_nft.create_erc20(
         template_index=1,
         name="ERC20DT1",
@@ -199,7 +199,7 @@ def erc20_token(web3, erc721_nft, publisher_wallet, erc721_factory):
 
     erc20_address = registered_event[0].args.newTokenAddress
 
-    return ERC20Token(web3, erc20_address)
+    return Datatoken(web3, erc20_address)
 
 
 @pytest.fixture

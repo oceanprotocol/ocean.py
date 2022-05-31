@@ -51,7 +51,7 @@ dispenser = ocean.dispenser
 
 max_amount = ocean.to_wei(50)
 # Create dispenser
-erc20_token.create_dispenser(
+datatoken.create_dispenser(
     dispenser_address=dispenser.address,
     max_balance=max_amount,
     max_tokens=max_amount,
@@ -60,17 +60,17 @@ erc20_token.create_dispenser(
     from_wallet=alice_wallet,
 )
 
-dispenser_status = dispenser.status(erc20_token.address)
+dispenser_status = dispenser.status(datatoken.address)
 assert dispenser_status[0] is True
 assert dispenser_status[1] == alice_wallet.address
 assert dispenser_status[2] is True
 
-initial_balance = erc20_token.balanceOf(alice_wallet.address)
+initial_balance = datatoken.balanceOf(alice_wallet.address)
 assert initial_balance == 0
 dispenser.dispense_tokens(
-    erc20_token=erc20_token, amount=max_amount, consumer_wallet=alice_wallet
+    datatoken=datatoken, amount=max_amount, consumer_wallet=alice_wallet
 )
-assert erc20_token.balanceOf(alice_wallet.address) == max_amount
+assert datatoken.balanceOf(alice_wallet.address) == max_amount
 ```
 
 As an alternative for publishing a NFT, a datatoken and a dispenser at once, you can use `create_nft_erc20_with_dispenser`.

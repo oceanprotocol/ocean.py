@@ -7,8 +7,8 @@ from typing import List, Optional, Union
 
 from enforce_typing import enforce_types
 
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.erc20_enterprise import ERC20Enterprise
-from ocean_lib.models.erc20_token import ERC20Token
 from ocean_lib.structures.abi_tuples import MetadataProof
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
@@ -348,7 +348,7 @@ class ERC721NFT(ContractBase):
         publish_market_order_fee_amount: Optional[int] = 0,
         bytess: Optional[List[bytes]] = None,
         datatoken_cap: Optional[int] = None,
-    ) -> ERC20Token:
+    ) -> Datatoken:
         initial_list = self.get_tokens_list()
 
         local_values = locals().copy()
@@ -397,7 +397,7 @@ class ERC721NFT(ContractBase):
         assert len(new_elements) == 1, "new data token has no address"
 
         return (
-            ERC20Token(self.web3, new_elements[0])
+            Datatoken(self.web3, new_elements[0])
             if template_index == 1
             else ERC20Enterprise(self.web3, new_elements[0])
         )

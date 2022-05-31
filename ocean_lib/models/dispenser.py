@@ -4,7 +4,7 @@
 #
 from enforce_typing import enforce_types
 
-from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
@@ -79,10 +79,10 @@ class Dispenser(ContractBase):
 
     @enforce_types
     def dispense_tokens(
-        self, erc20_token: ERC20Token, amount: int, consumer_wallet: Wallet
+        self, datatoken: Datatoken, amount: int, consumer_wallet: Wallet
     ):
         self.dispense(
-            datatoken=erc20_token.address,
+            datatoken=datatoken.address,
             amount=amount,
             destination=consumer_wallet.address,
             from_wallet=consumer_wallet,

@@ -9,7 +9,7 @@ import pytest
 from web3 import Web3
 
 from ocean_lib.config import Config
-from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.currency import MAX_WEI, parse_units, to_wei
@@ -56,7 +56,7 @@ def test_reuse_order_fees(
     base_token_name: str,
     provider_fee_in_unit: str,
 ):
-    bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
+    bt = Datatoken(web3, get_address_of_type(config, base_token_name))
 
     # Send base tokens to the consumer so they can pay for fees
     transfer_base_token_if_balance_lte(
@@ -195,8 +195,8 @@ def test_reuse_order_fees(
 def reuse_order_with_mock_provider_fees(
     provider_fee_in_unit: str,
     start_order_tx_id: str,
-    bt: ERC20Token,
-    dt: ERC20Token,
+    bt: Datatoken,
+    dt: Datatoken,
     publisher_wallet: Wallet,
     publish_market_wallet: Wallet,
     consume_market_wallet: Wallet,
