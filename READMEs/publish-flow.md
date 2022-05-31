@@ -27,7 +27,7 @@ To get started with this guide, please refer to [data-nfts-and-datatokens-flow](
 In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
 
 Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
-- [x] 2.1 Create an ERC721 data NFT
+- [x] 2.1 Create a data NFT
 
 ## 2. Publish Dataset
 

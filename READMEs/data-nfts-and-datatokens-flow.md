@@ -75,7 +75,7 @@ export OCEAN_NETWORK_URL=http://127.0.0.1:8545
 
 ## 2. Publish Data NFT & Datatoken
 
-### 2.1 Create an ERC721 data NFT
+### 2.1 Create a data NFT
 
 Open a new console and run python console with the command:
 ```console
@@ -99,19 +99,19 @@ alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations,
 
 # Publish an NFT token
 data_nft = ocean.create_data_nft('NFTToken1', 'NFT1', alice_wallet)
-print(f"Created ERC721 data NFT. Its address is {data_nft.address}")
+print(f"Created data NFT. Its address is {data_nft.address}")
 ```
 
 Congrats, you've created your first Ocean data NFT!
 
-### 2.2 Create an erc20 datatoken from the data NFT
+### 2.2 Create a datatoken from the data NFT
 
 In the same python console:
 ```python
-# Create ERC20 token related to the above NFT.
+# Create datatoken related to the above NFT.
 
 datatoken = data_nft.create_datatoken("Datatoken 1", "DT1", from_wallet=alice_wallet)
-print(f"Created ERC20 datatoken. Its address is {datatoken.address}")
+print(f"Created datatoken. Its address is {datatoken.address}")
 ```
 
 Congrats, you've created your first Ocean datatoken! 🐋

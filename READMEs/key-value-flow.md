@@ -31,7 +31,7 @@ And:
 In the console where you set envvars, do the following.
 
 From [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md), do:
-- [x] 2.1 Create an ERC721 data NFT
+- [x] 2.1 Create a data NFT
 
 ## 3. Add key-value pair to data NFT
 
