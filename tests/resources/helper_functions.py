@@ -21,8 +21,8 @@ from ocean_lib.config import Config
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.data_nft import DataNFT
-from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.ocean.util import get_web3 as util_get_web3
@@ -447,7 +447,9 @@ def create_nft_erc20_with_pool(
     side_staking_address = get_address_of_type(config, "Staking")
     pool_template_address = get_address_of_type(config, "poolTemplate")
 
-    base_token.approve(data_nft_factory_address, initial_pool_liquidity, publisher_wallet)
+    base_token.approve(
+        data_nft_factory_address, initial_pool_liquidity, publisher_wallet
+    )
 
     tx = data_nft_factory.create_nft_erc20_with_pool(
         nft_name="72120Bundle",

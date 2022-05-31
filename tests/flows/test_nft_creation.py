@@ -6,8 +6,8 @@ import pytest
 from web3 import Web3, exceptions
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTPermissions
-from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
@@ -118,7 +118,8 @@ def test_properties(web3, config):
         == DataNFTFactoryContract.EVENT_TOKEN_CREATED
     )
     assert (
-        data_nft_factory.event_NewPool.abi["name"] == DataNFTFactoryContract.EVENT_NEW_POOL
+        data_nft_factory.event_NewPool.abi["name"]
+        == DataNFTFactoryContract.EVENT_NEW_POOL
     )
     assert (
         data_nft_factory.event_NewFixedRate.abi["name"]
