@@ -34,7 +34,7 @@ def test_script_execution(script, monkeypatch):
     runs_with_prerequisites = [
         "c2d-flow",
         "dispenser-flow",
-        "erc20-enterprise",
+        "datatoken-enterprise",
         "fixed-rate-exchange-flow",
         "marketplace-flow",
         "key-value-flow",
@@ -57,15 +57,15 @@ def test_script_execution(script, monkeypatch):
                 "config",
                 "ocean",
                 "alice_wallet",
-                "erc721_nft",
-                "erc20_token",
+                "data_nft",
+                "datatoken",
             ]:
                 globs[key] = result[key]
 
     runs_with_publish = [
         "marketplace-flow",
         "consume-flow",
-        "erc20-enterprise",
+        "datatoken-enterprise",
     ]
     for item in runs_with_publish:
         if item in script.name:

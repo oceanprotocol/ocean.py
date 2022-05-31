@@ -6,7 +6,7 @@ import json
 import os
 
 from ocean_lib.config import Config
-from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_web3
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.transactions import send_ether
@@ -33,7 +33,7 @@ def mint_fake_OCEAN(config: Config) -> None:
         transaction_timeout=config.transaction_timeout,
     )
 
-    OCEAN_token = ERC20Token(web3, address=network_addresses["development"]["Ocean"])
+    OCEAN_token = Datatoken(web3, address=network_addresses["development"]["Ocean"])
     amt_distribute = to_wei("2000")
 
     for key_label in ["TEST_PRIVATE_KEY1", "TEST_PRIVATE_KEY2", "TEST_PRIVATE_KEY3"]:

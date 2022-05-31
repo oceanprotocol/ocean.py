@@ -6,8 +6,8 @@ import pytest
 from web3 import Web3
 
 from ocean_lib.config import Config
-from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -137,7 +137,7 @@ def test_opc_collector(config: Config, factory_router: FactoryRouter):
 def test_buy_dt_batch(
     web3: Web3,
     config: Config,
-    ocean_token: ERC20Token,
+    ocean_token: Datatoken,
     factory_router: FactoryRouter,
     consumer_wallet: Wallet,
     factory_deployer_wallet: Wallet,
@@ -145,13 +145,13 @@ def test_buy_dt_batch(
 ):
     """Tests that a batch of tokens is successfully bought through the buy_dt_batch function"""
 
-    nft_factory = ERC721FactoryContract(
+    nft_factory = DataNFTFactoryContract(
         web3=web3,
-        address=get_address_of_type(config, ERC721FactoryContract.CONTRACT_NAME),
+        address=get_address_of_type(config, DataNFTFactoryContract.CONTRACT_NAME),
     )
 
     ocean_token.approve(
-        get_address_of_type(config, ERC721FactoryContract.CONTRACT_NAME),
+        get_address_of_type(config, DataNFTFactoryContract.CONTRACT_NAME),
         2**256 - 1,
         factory_deployer_wallet,
     )
@@ -183,7 +183,7 @@ def test_buy_dt_batch(
         pool_side_staking=get_address_of_type(config, "Staking"),
         pool_base_token=ocean_token.address,
         pool_base_token_sender=get_address_of_type(
-            config, ERC721FactoryContract.CONTRACT_NAME
+            config, DataNFTFactoryContract.CONTRACT_NAME
         ),
         pool_publisher=factory_deployer_wallet.address,
         pool_publish_market_swap_fee_collector=factory_deployer_wallet.address,
@@ -196,7 +196,7 @@ def test_buy_dt_batch(
         "TokenCreated", tx_receipt.blockNumber, web3.eth.block_number, None
     )
     erc_token = registered_event[0]["args"]["newTokenAddress"]
-    erc_token_contract = ERC20Token(web3=web3, address=erc_token)
+    erc_token_contract = Datatoken(web3=web3, address=erc_token)
     registered_event_pool = erc_token_contract.get_event_log(
         FactoryRouter.EVENT_NEW_POOL,
         tx_receipt.blockNumber,
@@ -229,7 +229,7 @@ def test_buy_dt_batch(
         pool_side_staking=get_address_of_type(config, "Staking"),
         pool_base_token=ocean_token.address,
         pool_base_token_sender=get_address_of_type(
-            config, ERC721FactoryContract.CONTRACT_NAME
+            config, DataNFTFactoryContract.CONTRACT_NAME
         ),
         pool_publisher=factory_deployer_wallet.address,
         pool_publish_market_swap_fee_collector=factory_deployer_wallet.address,
@@ -242,7 +242,7 @@ def test_buy_dt_batch(
         "TokenCreated", tx_receipt.blockNumber, web3.eth.block_number, None
     )
     erc_token2 = registered_event[0]["args"]["newTokenAddress"]
-    erc_token_contract2 = ERC20Token(web3=web3, address=erc_token2)
+    erc_token_contract2 = Datatoken(web3=web3, address=erc_token2)
     registered_event_pool = erc_token_contract2.get_event_log(
         FactoryRouter.EVENT_NEW_POOL,
         tx_receipt.blockNumber,
@@ -293,18 +293,18 @@ def test_buy_dt_batch(
 def test_stake_batch(
     web3: Web3,
     config: Config,
-    ocean_token: ERC20Token,
+    ocean_token: Datatoken,
     factory_router: FactoryRouter,
     consumer_wallet: Wallet,
     factory_deployer_wallet: Wallet,
 ):
-    nft_factory = ERC721FactoryContract(
+    nft_factory = DataNFTFactoryContract(
         web3=web3,
-        address=get_address_of_type(config, ERC721FactoryContract.CONTRACT_NAME),
+        address=get_address_of_type(config, DataNFTFactoryContract.CONTRACT_NAME),
     )
 
     ocean_token.approve(
-        get_address_of_type(config, ERC721FactoryContract.CONTRACT_NAME),
+        get_address_of_type(config, DataNFTFactoryContract.CONTRACT_NAME),
         2**256 - 1,
         factory_deployer_wallet,
     )
@@ -336,7 +336,7 @@ def test_stake_batch(
         pool_side_staking=get_address_of_type(config, "Staking"),
         pool_base_token=ocean_token.address,
         pool_base_token_sender=get_address_of_type(
-            config, ERC721FactoryContract.CONTRACT_NAME
+            config, DataNFTFactoryContract.CONTRACT_NAME
         ),
         pool_publisher=factory_deployer_wallet.address,
         pool_publish_market_swap_fee_collector=factory_deployer_wallet.address,
@@ -349,7 +349,7 @@ def test_stake_batch(
         "TokenCreated", tx_receipt.blockNumber, web3.eth.block_number, None
     )
     erc_token = registered_event[0]["args"]["newTokenAddress"]
-    erc_token_contract = ERC20Token(web3=web3, address=erc_token)
+    erc_token_contract = Datatoken(web3=web3, address=erc_token)
     registered_event_pool = erc_token_contract.get_event_log(
         FactoryRouter.EVENT_NEW_POOL,
         tx_receipt.blockNumber,
@@ -382,7 +382,7 @@ def test_stake_batch(
         pool_side_staking=get_address_of_type(config, "Staking"),
         pool_base_token=ocean_token.address,
         pool_base_token_sender=get_address_of_type(
-            config, ERC721FactoryContract.CONTRACT_NAME
+            config, DataNFTFactoryContract.CONTRACT_NAME
         ),
         pool_publisher=factory_deployer_wallet.address,
         pool_publish_market_swap_fee_collector=factory_deployer_wallet.address,
@@ -395,7 +395,7 @@ def test_stake_batch(
         "TokenCreated", tx_receipt.blockNumber, web3.eth.block_number, None
     )
     erc_token2 = registered_event[0]["args"]["newTokenAddress"]
-    erc_token_contract2 = ERC20Token(web3=web3, address=erc_token2)
+    erc_token_contract2 = Datatoken(web3=web3, address=erc_token2)
     registered_event_pool = erc_token_contract2.get_event_log(
         FactoryRouter.EVENT_NEW_POOL,
         tx_receipt.blockNumber,
@@ -407,14 +407,14 @@ def test_stake_batch(
     stake1 = {"poolAddress": pool1, "tokenAmountIn": to_wei("1"), "minPoolAmountOut": 0}
 
     stake2 = {"poolAddress": pool2, "tokenAmountIn": to_wei("1"), "minPoolAmountOut": 0}
-    bpool_token1 = ERC20Token(web3, pool1)
-    bpool_token2 = ERC20Token(web3, pool2)
+    bpool_token1 = Datatoken(web3, pool1)
+    bpool_token2 = Datatoken(web3, pool2)
 
     assert bpool_token1.balanceOf(consumer_wallet.address) == 0
     assert bpool_token2.balanceOf(consumer_wallet.address) == 0
 
     ocean_token.approve(
-        get_address_of_type(config, ERC721FactoryContract.CONTRACT_NAME),
+        get_address_of_type(config, DataNFTFactoryContract.CONTRACT_NAME),
         2**256 - 1,
         consumer_wallet,
     )

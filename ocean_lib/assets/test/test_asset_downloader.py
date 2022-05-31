@@ -161,8 +161,8 @@ def test_ocean_assets_download_destination_file(
     tmpdir,
     publisher_wallet,
     publisher_ocean_instance,
-    erc721_nft,
-    erc20_token,
+    data_nft,
+    datatoken,
 ):
     """Convert tmpdir: py._path.local.LocalPath to str, satisfy enforce-typing."""
     ocean_assets_download_destination_file_helper(
@@ -171,8 +171,8 @@ def test_ocean_assets_download_destination_file(
         str(tmpdir),
         publisher_wallet,
         publisher_ocean_instance,
-        erc721_nft,
-        erc20_token,
+        data_nft,
+        datatoken,
     )
 
 
@@ -182,8 +182,8 @@ def ocean_assets_download_destination_file_helper(
     tmpdir,
     publisher_wallet,
     publisher_ocean_instance,
-    erc721_nft,
-    erc20_token,
+    data_nft,
+    datatoken,
 ):
     """Downloading to an existing directory."""
     data_provider = DataServiceProvider
@@ -193,12 +193,12 @@ def ocean_assets_download_destination_file_helper(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=erc721_nft.address,
-        deployed_erc20_tokens=[erc20_token],
+        erc721_address=data_nft.address,
+        deployed_datatokens=[datatoken],
     )
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)
 
-    erc20_token.mint(
+    datatoken.mint(
         account_address=publisher_wallet.address,
         value=to_wei("50"),
         from_wallet=publisher_wallet,
@@ -212,7 +212,7 @@ def ocean_assets_download_destination_file_helper(
 
     provider_fees = initialize_response.json()["providerFee"]
 
-    tx_id = erc20_token.start_order(
+    tx_id = datatoken.start_order(
         consumer=publisher_wallet.address,
         service_index=ddo.get_index_of_service(access_service),
         provider_fee_address=provider_fees["providerFeeAddress"],
@@ -224,13 +224,13 @@ def ocean_assets_download_destination_file_helper(
         valid_until=provider_fees["validUntil"],
         provider_data=provider_fees["providerData"],
         consume_market_order_fee_address=publisher_wallet.address,
-        consume_market_order_fee_token=erc20_token.address,
+        consume_market_order_fee_token=datatoken.address,
         consume_market_order_fee_amount=0,
         from_wallet=publisher_wallet,
     )
 
     orders = publisher_ocean_instance.get_user_orders(publisher_wallet.address)
-    assert erc20_token.address in [order.address for order in orders]
+    assert datatoken.address in [order.address for order in orders]
     assert tx_id in [order.transactionHash.hex() for order in orders]
 
     written_path = download_asset_files(

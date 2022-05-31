@@ -9,7 +9,7 @@ from enforce_typing import enforce_types
 from ocean_lib.web3_internal.contract_base import ContractBase
 
 
-class ERCTokenFactoryBase(ABC, ContractBase):
+class ERC721TokenFactoryBase(ABC, ContractBase):
     @enforce_types
     def get_current_token_count(self) -> int:
         return self.contract.caller.getCurrentTokenCount()

@@ -36,7 +36,7 @@ def consume_flow(ocean: Ocean, config: Config, tmpdir, files):
     }
     data_provider = DataServiceProvider
 
-    erc721_nft, erc20_token = deploy_erc721_erc20(
+    data_nft, datatoken = deploy_erc721_erc20(
         ocean.web3, config, publisher_wallet, publisher_wallet
     )
     encrypt_response = data_provider.encrypt(
@@ -48,7 +48,7 @@ def consume_flow(ocean: Ocean, config: Config, tmpdir, files):
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=erc721_nft.address,
+        erc721_address=data_nft.address,
         erc20_templates=[1],
         erc20_names=["Datatoken 1"],
         erc20_symbols=["DT1"],
@@ -63,7 +63,7 @@ def consume_flow(ocean: Ocean, config: Config, tmpdir, files):
     assert ddo, "The asset is not created."
     assert ddo.nft["name"] == "NFT"
     assert ddo.nft["symbol"] == "NFTSYMBOL"
-    assert ddo.nft["address"] == erc721_nft.address
+    assert ddo.nft["address"] == data_nft.address
     assert ddo.nft["owner"] == publisher_wallet.address
     assert ddo.datatokens[0]["name"] == "Datatoken 1"
     assert ddo.datatokens[0]["symbol"] == "DT1"
@@ -79,14 +79,14 @@ def consume_flow(ocean: Ocean, config: Config, tmpdir, files):
     assert response.status_code == 200
     assert response.json()["providerFee"]
 
-    erc20_token.mint(
+    datatoken.mint(
         account_address=consumer_wallet.address,
         value=ocean.to_wei(20),
         from_wallet=publisher_wallet,
     )
     # Start order for consumer
     provider_fees = response.json()["providerFee"]
-    tx_id = erc20_token.start_order(
+    tx_id = datatoken.start_order(
         consumer=consumer_wallet.address,
         service_index=ddo.get_index_of_service(service),
         provider_fee_address=provider_fees["providerFeeAddress"],
@@ -98,7 +98,7 @@ def consume_flow(ocean: Ocean, config: Config, tmpdir, files):
         valid_until=provider_fees["validUntil"],
         provider_data=provider_fees["providerData"],
         consume_market_order_fee_address=consumer_wallet.address,
-        consume_market_order_fee_token=erc20_token.address,
+        consume_market_order_fee_token=datatoken.address,
         consume_market_order_fee_amount=0,
         from_wallet=consumer_wallet,
     )

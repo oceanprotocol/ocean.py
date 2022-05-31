@@ -76,13 +76,13 @@ def c2d_flow_readme(
     assert alice_wallet.web3.eth.get_balance(alice_wallet.address) > 0, "need ETH"
 
     # Publish the data NFT token
-    erc721_nft = ocean.create_erc721_nft("NFTToken1", "NFT1", alice_wallet)
-    assert erc721_nft.address
-    assert erc721_nft.token_name()
-    assert erc721_nft.symbol()
+    data_nft = ocean.create_data_nft("NFTToken1", "NFT1", alice_wallet)
+    assert data_nft.address
+    assert data_nft.token_name()
+    assert data_nft.symbol()
 
     # Publish the datatoken
-    DATA_datatoken = erc721_nft.create_datatoken(
+    DATA_datatoken = data_nft.create_datatoken(
         "Datatoken 1",
         "DT1",
         from_wallet=alice_wallet,
@@ -133,8 +133,8 @@ def c2d_flow_readme(
         publisher_wallet=alice_wallet,
         encrypted_files=DATA_encrypted_files,
         services=[DATA_compute_service],
-        erc721_address=erc721_nft.address,
-        deployed_erc20_tokens=[DATA_datatoken],
+        erc721_address=data_nft.address,
+        deployed_datatokens=[DATA_datatoken],
     )
 
     assert DATA_asset.did, "create dataset with compute service unsuccessful"
@@ -142,7 +142,7 @@ def c2d_flow_readme(
     # 3. Alice publishes algorithm
 
     # Publish the algorithm NFT token
-    ALGO_nft_token = ocean.create_erc721_nft("NFTToken1", "NFT1", alice_wallet)
+    ALGO_nft_token = ocean.create_data_nft("NFTToken1", "NFT1", alice_wallet)
     assert ALGO_nft_token.address
 
     # Publish the datatoken
@@ -190,7 +190,7 @@ def c2d_flow_readme(
         publisher_wallet=alice_wallet,
         encrypted_files=ALGO_encrypted_files,
         erc721_address=ALGO_nft_token.address,
-        deployed_erc20_tokens=[ALGO_datatoken],
+        deployed_datatokens=[ALGO_datatoken],
     )
 
     assert ALGO_asset.did, "create algorithm unsuccessful"

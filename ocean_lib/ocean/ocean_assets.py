@@ -22,9 +22,9 @@ from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.compute_input import ComputeInput
-from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721NFT
+from ocean_lib.models.data_nft import DataNFT
+from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
@@ -120,8 +120,8 @@ class OceanAssets:
     @enforce_types
     def deploy_datatoken(
         self,
-        erc721_factory: ERC721FactoryContract,
-        erc721_nft: ERC721NFT,
+        data_nft_factory: DataNFTFactoryContract,
+        data_nft: DataNFT,
         template_index: int,
         name: str,
         symbol: str,
@@ -133,7 +133,7 @@ class OceanAssets:
         bytess: List[bytes],
         from_wallet: Wallet,
     ) -> str:
-        tx_result = erc721_nft.create_erc20(
+        tx_result = data_nft.create_erc20(
             template_index=template_index,
             name=name,
             symbol=symbol,
@@ -148,8 +148,8 @@ class OceanAssets:
         assert tx_result, "Failed to create ERC20 token."
 
         tx_receipt = self._web3.eth.wait_for_transaction_receipt(tx_result)
-        registered_token_event = erc721_factory.get_event_log(
-            ERC721FactoryContract.EVENT_TOKEN_CREATED,
+        registered_token_event = data_nft_factory.get_event_log(
+            DataNFTFactoryContract.EVENT_TOKEN_CREATED,
             tx_receipt.blockNumber,
             self._web3.eth.block_number,
             None,
@@ -165,21 +165,19 @@ class OceanAssets:
         )
 
     @enforce_types
-    def build_datatokens_list(
-        self, services: list, deployed_erc20_tokens: list
-    ) -> list:
+    def build_datatokens_list(self, services: list, deployed_datatokens: list) -> list:
         datatokens = []
         # (1-n) service per datatoken, 1 datatoken per service
-        for erc20_token in deployed_erc20_tokens:
+        for datatoken in deployed_datatokens:
             datatokens = datatokens + [
                 {
-                    "address": erc20_token.address,
-                    "name": erc20_token.contract.caller.name(),
-                    "symbol": erc20_token.symbol(),
+                    "address": datatoken.address,
+                    "name": datatoken.contract.caller.name(),
+                    "symbol": datatoken.symbol(),
                     "serviceId": service.id,
                 }
                 for service in services
-                if service.datatoken == erc20_token.address
+                if service.datatoken == datatoken.address
             ]
 
         return datatokens
@@ -279,13 +277,13 @@ class OceanAssets:
         erc20_publish_market_order_fee_tokens: Optional[List[str]] = None,
         erc20_publish_market_order_fee_amounts: Optional[List[int]] = None,
         erc20_bytess: Optional[List[List[bytes]]] = None,
-        deployed_erc20_tokens: Optional[List[ERC20Token]] = None,
+        deployed_datatokens: Optional[List[Datatoken]] = None,
         encrypt_flag: Optional[bool] = True,
         compress_flag: Optional[bool] = True,
     ) -> Optional[Asset]:
         """Register an asset on-chain.
 
-        Creating/deploying a ERC721NFT contract and in the Metadata store (Aquarius).
+        Creating/deploying a DataNFT contract and in the Metadata store (Aquarius).
 
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
         :param publisher_wallet: Wallet of the publisher registering this asset.
@@ -302,16 +300,16 @@ class OceanAssets:
         :param erc721_additional_erc_deployer: str address of an additional ERC20 deployer.
         :param erc721_additional_metadata_updater: str address of an additional metadata updater.
         :param erc721_uri: str URL of the ERC721 token.
-        :param erc20_templates: list of templates indexes for deploying ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_names: list of names for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_symbols: list of symbols for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_minters: list of minters for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_fee_managers: list of fee managers for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_publish_market_order_fee_addresses: list of publishing market addresses for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_publish_market_order_fee_tokens: list of fee tokens for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_publish_market_order_fee_amounts: list of fee values for ERC20 tokens if deployed_erc20_tokens is None.
-        :param erc20_bytess: list of arrays of bytes for deploying ERC20 tokens, default empty (currently not used, useful for future) if deployed_erc20_tokens is None.
-        :param deployed_erc20_tokens: list of ERC20 tokens which are already deployed.
+        :param erc20_templates: list of templates indexes for deploying ERC20 tokens if deployed_datatokens is None.
+        :param erc20_names: list of names for ERC20 tokens if deployed_datatokens is None.
+        :param erc20_symbols: list of symbols for ERC20 tokens if deployed_datatokens is None.
+        :param erc20_minters: list of minters for ERC20 tokens if deployed_datatokens is None.
+        :param erc20_fee_managers: list of fee managers for ERC20 tokens if deployed_datatokens is None.
+        :param erc20_publish_market_order_fee_addresses: list of publishing market addresses for ERC20 tokens if deployed_datatokens is None.
+        :param erc20_publish_market_order_fee_tokens: list of fee tokens for ERC20 tokens if deployed_datatokens is None.
+        :param erc20_publish_market_order_fee_amounts: list of fee values for ERC20 tokens if deployed_datatokens is None.
+        :param erc20_bytess: list of arrays of bytes for deploying ERC20 tokens, default empty (currently not used, useful for future) if deployed_datatokens is None.
+        :param deployed_datatokens: list of ERC20 tokens which are already deployed.
         :param encrypt_flag: bool for encryption of the DDO.
         :param compress_flag: bool for compression of the DDO.
         :return: DDO instance
@@ -321,8 +319,10 @@ class OceanAssets:
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(self._config)
 
-        address = get_address_of_type(self._config, ERC721FactoryContract.CONTRACT_NAME)
-        erc721_factory = ERC721FactoryContract(self._web3, address)
+        address = get_address_of_type(
+            self._config, DataNFTFactoryContract.CONTRACT_NAME
+        )
+        data_nft_factory = DataNFTFactoryContract(self._web3, address)
 
         if not erc721_address:
             name = erc721_name or metadata["name"]
@@ -335,7 +335,7 @@ class OceanAssets:
             transferable = erc721_transferable or True
             owner = erc721_owner or publisher_wallet.address
             # register on-chain
-            tx_id = erc721_factory.deploy_erc721_contract(
+            tx_id = data_nft_factory.deploy_erc721_contract(
                 name=name,
                 symbol=symbol,
                 template_index=erc721_template_index,
@@ -347,35 +347,37 @@ class OceanAssets:
                 from_wallet=publisher_wallet,
             )
             tx_receipt = self._web3.eth.wait_for_transaction_receipt(tx_id)
-            registered_event = erc721_factory.get_event_log(
-                ERC721FactoryContract.EVENT_NFT_CREATED,
+            registered_event = data_nft_factory.get_event_log(
+                DataNFTFactoryContract.EVENT_NFT_CREATED,
                 tx_receipt.blockNumber,
                 self._web3.eth.block_number,
                 None,
             )
             erc721_address = registered_event[0].args.newTokenAddress
-            erc721_nft = ERC721NFT(self._web3, erc721_address)
-            if not erc721_nft:
+            data_nft = DataNFT(self._web3, erc721_address)
+            if not data_nft:
                 logger.warning("Creating new NFT failed.")
                 return None
             logger.info(
-                f"Successfully created NFT with address " f"{erc721_nft.address}."
+                f"Successfully created NFT with address " f"{data_nft.address}."
             )
         else:
             # verify nft address
-            if not erc721_factory.verify_nft(erc721_address):
+            if not data_nft_factory.verify_nft(erc721_address):
                 raise ContractNotFound(
-                    f"NFT address {erc721_address} is not found in the ERC721Factory events."
+                    f"NFT address {erc721_address} is not found in the DataNFTFactory events."
                 )
 
         assert erc721_address, "nft_address is required for publishing a dataset asset."
-        erc721_nft = ERC721NFT(self._web3, erc721_address)
+        data_nft = DataNFT(self._web3, erc721_address)
 
         # Create a DDO object
         asset = Asset()
 
         # Generating the did and adding to the ddo.
-        did = f"did:op:{create_checksum(erc721_nft.address + str(self._web3.eth.chain_id))}"
+        did = (
+            f"did:op:{create_checksum(data_nft.address + str(self._web3.eth.chain_id))}"
+        )
         asset.did = did
         # Check if it's already registered first!
         if self._aquarius.ddo_exists(did):
@@ -389,13 +391,13 @@ class OceanAssets:
 
         erc20_addresses = []
         services = services or []
-        deployed_erc20_tokens = deployed_erc20_tokens or []
-        if not deployed_erc20_tokens:
+        deployed_datatokens = deployed_datatokens or []
+        if not deployed_datatokens:
             for erc20_data_counter in range(len(erc20_templates)):
                 erc20_addresses.append(
                     self.deploy_datatoken(
-                        erc721_factory=erc721_factory,
-                        erc721_nft=erc721_nft,
+                        data_nft_factory=data_nft_factory,
+                        data_nft=data_nft,
                         template_index=erc20_templates[erc20_data_counter],
                         name=erc20_names[erc20_data_counter],
                         symbol=erc20_symbols[erc20_data_counter],
@@ -423,23 +425,21 @@ class OceanAssets:
                     services = self._add_defaults(
                         services, erc20_address, encrypted_files, provider_uri
                     )
-            for erc20_token_address in erc20_addresses:
-                deployed_erc20_tokens.append(
-                    ERC20Token(self._web3, erc20_token_address)
-                )
+            for datatoken_address in erc20_addresses:
+                deployed_datatokens.append(Datatoken(self._web3, datatoken_address))
 
             datatokens = self.build_datatokens_list(
-                services=services, deployed_erc20_tokens=deployed_erc20_tokens
+                services=services, deployed_datatokens=deployed_datatokens
             )
         else:
             if not services:
-                for erc20_token in deployed_erc20_tokens:
+                for datatoken in deployed_datatokens:
                     services = self._add_defaults(
-                        services, erc20_token.address, encrypted_files, provider_uri
+                        services, datatoken.address, encrypted_files, provider_uri
                     )
 
             datatokens = self.build_datatokens_list(
-                services=services, deployed_erc20_tokens=deployed_erc20_tokens
+                services=services, deployed_datatokens=deployed_datatokens
             )
 
         asset.nft_address = erc721_address
@@ -455,7 +455,7 @@ class OceanAssets:
             asset, provider_uri, encrypt_flag, compress_flag
         )
 
-        erc721_nft.set_metadata(
+        data_nft.set_metadata(
             metadata_state=0,
             metadata_decryptor_url=provider_uri,
             metadata_decryptor_address=publisher_wallet.address,
@@ -495,18 +495,20 @@ class OceanAssets:
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(self._config)
 
-        address = get_address_of_type(self._config, ERC721FactoryContract.CONTRACT_NAME)
-        erc721_factory = ERC721FactoryContract(self._web3, address)
+        address = get_address_of_type(
+            self._config, DataNFTFactoryContract.CONTRACT_NAME
+        )
+        data_nft_factory = DataNFTFactoryContract(self._web3, address)
         erc721_address = asset.nft_address
 
         # Verify nft address
-        if not erc721_factory.verify_nft(erc721_address):
+        if not data_nft_factory.verify_nft(erc721_address):
             raise ContractNotFound(
-                f"NFT address {erc721_address} is not found in the ERC721Factory events."
+                f"NFT address {erc721_address} is not found in the DataNFTFactory events."
             )
 
         assert erc721_address, "nft_address is required for publishing a dataset asset."
-        erc721_nft = ERC721NFT(self._web3, erc721_address)
+        data_nft = DataNFT(self._web3, erc721_address)
 
         assert asset.chain_id == self._web3.eth.chain_id, "Chain id mismatch."
 
@@ -521,7 +523,7 @@ class OceanAssets:
             asset, provider_uri, encrypt_flag, compress_flag
         )
 
-        tx_result = erc721_nft.set_metadata(
+        tx_result = data_nft.set_metadata(
             metadata_state=0,
             metadata_decryptor_url=provider_uri,
             metadata_decryptor_address=publisher_wallet.address,
@@ -610,7 +612,7 @@ class OceanAssets:
         wallet: Wallet,
         consumer_address: Optional[str] = None,
     ):
-        dt = ERC20Token(self._web3, service.datatoken)
+        dt = Datatoken(self._web3, service.datatoken)
         balance = dt.balanceOf(wallet.address)
 
         if not consumer_address:
@@ -730,7 +732,7 @@ class OceanAssets:
             return
 
         service = asset_compute_input.service
-        dt = ERC20Token(self._web3, service.datatoken)
+        dt = Datatoken(self._web3, service.datatoken)
 
         if valid_order and provider_fees:
             asset_compute_input.transfer_tx_id = dt.reuse_order(

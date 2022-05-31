@@ -7,17 +7,17 @@ from typing import List, Optional, Union
 
 from enforce_typing import enforce_types
 
-from ocean_lib.models.erc20_enterprise import ERC20Enterprise
-from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.datatoken_enterprise import DatatokenEnterprise
 from ocean_lib.structures.abi_tuples import MetadataProof
 from ocean_lib.web3_internal.constants import MAX_UINT256, ZERO_ADDRESS
 from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-class ERC721Permissions(IntEnum):
+class DataNFTPermissions(IntEnum):
     MANAGER = 0
-    DEPLOY_ERC20 = 1
+    DEPLOY_DATATOKEN = 1
     UPDATE_METADATA = 2
     STORE = 3
 
@@ -40,7 +40,7 @@ class Flags(IntFlag):
 
 
 @enforce_types
-class ERC721NFT(ContractBase):
+class DataNFT(ContractBase):
     CONTRACT_NAME = "ERC721Template"
 
     EVENT_TOKEN_CREATED = "TokenCreated"
@@ -151,7 +151,7 @@ class ERC721NFT(ContractBase):
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if template_index == 2 and not datatoken_cap:
-            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
         datatoken_cap = datatoken_cap if template_index == 2 else MAX_UINT256
         return self.send_transaction(
             "createERC20",
@@ -224,7 +224,7 @@ class ERC721NFT(ContractBase):
 
     @enforce_types
     def add_multiple_users_to_roles(
-        self, addresses: List[str], roles: List[ERC721Permissions], from_wallet: Wallet
+        self, addresses: List[str], roles: List[DataNFTPermissions], from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
             "addMultipleUsersToRoles",
@@ -348,7 +348,7 @@ class ERC721NFT(ContractBase):
         publish_market_order_fee_amount: Optional[int] = 0,
         bytess: Optional[List[bytes]] = None,
         datatoken_cap: Optional[int] = None,
-    ) -> ERC20Token:
+    ) -> Datatoken:
         initial_list = self.get_tokens_list()
 
         local_values = locals().copy()
@@ -383,7 +383,7 @@ class ERC721NFT(ContractBase):
             create_args["bytess"] = [b""]
 
         if template_index == 2 and not datatoken_cap:
-            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
 
         if template_index == 2:
             create_args["datatoken_cap"] = datatoken_cap
@@ -397,7 +397,7 @@ class ERC721NFT(ContractBase):
         assert len(new_elements) == 1, "new data token has no address"
 
         return (
-            ERC20Token(self.web3, new_elements[0])
+            Datatoken(self.web3, new_elements[0])
             if template_index == 1
-            else ERC20Enterprise(self.web3, new_elements[0])
+            else DatatokenEnterprise(self.web3, new_elements[0])
         )

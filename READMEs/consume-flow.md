@@ -61,8 +61,8 @@ OCEAN_token = ocean.OCEAN_token
 assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
 
 # Mint 1 ERC20 token in consumer wallet from publisher
-erc20_token = ocean.get_datatoken(asset.datatokens[0]["address"])
-erc20_token.mint(
+datatoken = ocean.get_datatoken(asset.datatokens[0]["address"])
+datatoken.mint(
     account_address=bob_wallet.address,
     value=ocean.to_wei("1"),
     from_wallet=alice_wallet,
@@ -78,7 +78,7 @@ order_tx_id = ocean.assets.pay_for_access_service(
     asset,
     service,
     consume_market_order_fee_address=bob_wallet.address,
-    consume_market_order_fee_token=erc20_token.address,
+    consume_market_order_fee_token=datatoken.address,
     consume_market_order_fee_amount=0,
     wallet=bob_wallet,
 )

@@ -16,10 +16,10 @@ from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.compute_input import ComputeInput
+from ocean_lib.models.data_nft import DataNFT
+from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
-from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.side_staking import SideStaking
@@ -107,8 +107,8 @@ class Ocean:
 
     @property
     @enforce_types
-    def OCEAN_token(self) -> ERC20Token:
-        return ERC20Token(self.web3, self.OCEAN_address)
+    def OCEAN_token(self) -> Datatoken:
+        return Datatoken(self.web3, self.OCEAN_address)
 
     @enforce_types
     def to_wei(self, amount_in_ether: Union[Decimal, str, int]):
@@ -127,7 +127,7 @@ class Ocean:
         return _format_units(amount, units)
 
     @enforce_types
-    def create_erc721_nft(
+    def create_data_nft(
         self,
         name: str,
         symbol: str,
@@ -138,7 +138,7 @@ class Ocean:
         additional_metadata_updater: Optional[str] = None,
         transferable: bool = True,
         owner: Optional[str] = None,
-    ) -> ERC721NFT:
+    ) -> DataNFT:
         """
         This method deploys a ERC721 token contract on the blockchain.
         Usage:
@@ -151,16 +151,16 @@ class Ocean:
                 block_confirmations=config.block_confirmations,
                 transaction_timeout=config.transaction_timeout,
             )
-            erc721_nft = ocean.create_erc721_nft("Dataset name", "dtsymbol", from_wallet=wallet)
+            data_nft = ocean.create_data_nft("Dataset name", "dtsymbol", from_wallet=wallet)
         ```
-        :param name: ERC721 token name, str
-        :param symbol: ERC721 token symbol, str
+        :param name: data NFT token name, str
+        :param symbol: data NFT token symbol, str
         :param from_wallet: wallet instance, wallet
         :param template_index: Template type of the token, int
         :param additional_erc20_deployer: Address of another ERC20 deployer, str
-        :param token_uri: URL for ERC721 token, str
+        :param token_uri: URL for the data NFT token, str
 
-        :return: `ERC721NFT` instance
+        :return: `DataNFT` instance
         """
 
         if not additional_erc20_deployer:
@@ -185,40 +185,40 @@ class Ocean:
 
         address = nft_factory.get_token_address(tx_id)
         assert address, "new NFT token has no address"
-        token = ERC721NFT(self.web3, address)
+        token = DataNFT(self.web3, address)
         return token
 
     @enforce_types
-    def get_nft_token(self, token_address: str) -> ERC721NFT:
+    def get_nft_token(self, token_address: str) -> DataNFT:
         """
         :param token_address: Token contract address, str
-        :return: `ERC721NFT` instance
+        :return: `DataNFT` instance
         """
 
-        return ERC721NFT(self.web3, token_address)
+        return DataNFT(self.web3, token_address)
 
     @enforce_types
-    def get_datatoken(self, token_address: str) -> ERC20Token:
+    def get_datatoken(self, token_address: str) -> Datatoken:
         """
         :param token_address: Token contract address, str
-        :return: `ERC20Token` instance
+        :return: `Datatoken` instance
         """
 
-        return ERC20Token(self.web3, token_address)
+        return Datatoken(self.web3, token_address)
 
     @enforce_types
-    def get_nft_factory(self, nft_factory_address: str = "") -> ERC721FactoryContract:
+    def get_nft_factory(self, nft_factory_address: str = "") -> DataNFTFactoryContract:
         """
         :param nft_factory_address: contract address, str
 
-        :return: `ERC721FactoryContract` instance
+        :return: `DataNFTFactoryContract` instance
         """
         if not nft_factory_address:
             nft_factory_address = get_address_of_type(
-                self.config, ERC721FactoryContract.CONTRACT_NAME
+                self.config, DataNFTFactoryContract.CONTRACT_NAME
             )
 
-        return ERC721FactoryContract(self.web3, nft_factory_address)
+        return DataNFTFactoryContract(self.web3, nft_factory_address)
 
     @enforce_types
     def get_user_orders(
@@ -227,7 +227,7 @@ class Ocean:
         """
         :return: List of orders `[Order]`
         """
-        dt = ERC20Token(self.web3, datatoken)
+        dt = Datatoken(self.web3, datatoken)
         _orders = []
         for log in dt.get_start_order_logs(
             address, from_all_tokens=not bool(datatoken)
@@ -262,30 +262,30 @@ class Ocean:
     @enforce_types
     def create_fixed_rate(
         self,
-        erc20_token: ERC20Token,
-        base_token: ERC20Token,
+        datatoken: Datatoken,
+        base_token: Datatoken,
         amount: int,
         from_wallet: Wallet,
     ) -> bytes:
         fixed_price_address = get_address_of_type(self.config, "FixedPrice")
-        erc20_token.approve(fixed_price_address, amount, from_wallet)
+        datatoken.approve(fixed_price_address, amount, from_wallet)
 
-        tx = erc20_token.create_fixed_rate(
+        tx = datatoken.create_fixed_rate(
             fixed_price_address=fixed_price_address,
             base_token_address=base_token.address,
             owner=from_wallet.address,
             publish_market_swap_fee_collector=from_wallet.address,
             allowed_swapper=ZERO_ADDRESS,
             base_token_decimals=base_token.decimals(),
-            datatoken_decimals=erc20_token.decimals(),
+            datatoken_decimals=datatoken.decimals(),
             fixed_rate=self.to_wei(1),
             publish_market_swap_fee_amount=int(1e15),
             with_mint=0,
             from_wallet=from_wallet,
         )
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
-        fixed_rate_event = erc20_token.get_event_log(
-            ERC721FactoryContract.EVENT_NEW_FIXED_RATE,
+        fixed_rate_event = datatoken.get_event_log(
+            DataNFTFactoryContract.EVENT_NEW_FIXED_RATE,
             tx_receipt.blockNumber,
             self.web3.eth.block_number,
             None,
@@ -307,8 +307,8 @@ class Ocean:
     @enforce_types
     def create_pool(
         self,
-        erc20_token: ERC20Token,
-        base_token: ERC20Token,
+        datatoken: Datatoken,
+        base_token: Datatoken,
         rate: int,
         base_token_amount: int,
         lp_swap_fee_amount: int,
@@ -320,7 +320,7 @@ class Ocean:
             get_address_of_type(self.config, "Router"), self.to_wei("2000"), from_wallet
         )
 
-        tx = erc20_token.deploy_pool(
+        tx = datatoken.deploy_pool(
             rate=rate,
             base_token_decimals=base_token.decimals(),
             base_token_amount=base_token_amount,
@@ -336,7 +336,7 @@ class Ocean:
         )
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
         pool_event = self.factory_router.get_event_log(
-            ERC721FactoryContract.EVENT_NEW_POOL,
+            DataNFTFactoryContract.EVENT_NEW_POOL,
             tx_receipt.blockNumber,
             self.web3.eth.block_number,
             None,

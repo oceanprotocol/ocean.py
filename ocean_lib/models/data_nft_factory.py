@@ -7,16 +7,16 @@ from typing import List, Optional, Union
 from enforce_typing import enforce_types
 from web3.exceptions import BadFunctionCallOutput
 
-from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.models.erc721_nft import ERC721NFT
-from ocean_lib.models.erc_token_factory_base import ERCTokenFactoryBase
+from ocean_lib.models.data_nft import DataNFT
+from ocean_lib.models.datatoken import Datatoken
+from ocean_lib.models.erc721_token_factory_base import ERC721TokenFactoryBase
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.structures.abi_tuples import MetadataProof, OrderData
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-class ERC721FactoryContract(ERCTokenFactoryBase):
+class DataNFTFactoryContract(ERC721TokenFactoryBase):
     CONTRACT_NAME = "ERC721Factory"
     EVENT_NFT_CREATED = "NFTCreated"
     EVENT_TOKEN_CREATED = "TokenCreated"
@@ -62,7 +62,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     @enforce_types
     def verify_nft(self, nft_address: str) -> bool:
         """Checks that a token was registered."""
-        data_nft_contract = ERC721NFT(self.web3, nft_address)
+        data_nft_contract = DataNFT(self.web3, nft_address)
         try:
             data_nft_contract.get_id()
             return True
@@ -170,7 +170,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
-            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
         datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
         return self.send_transaction(
             "createNftWithErc20",
@@ -232,7 +232,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
-            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
         datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
         return self.send_transaction(
             "createNftWithErc20WithPool",
@@ -316,7 +316,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
-            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
         datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
         return self.send_transaction(
             "createNftWithErc20WithFixedRate",
@@ -388,7 +388,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         datatoken_cap: Optional[int] = None,
     ) -> str:
         if datatoken_template == 2 and not datatoken_cap:
-            raise Exception("Cap is needed for ERC20 Enterprise token deployment.")
+            raise Exception("Cap is needed for Datatoken Enterprise token deployment.")
         datatoken_cap = datatoken_cap if datatoken_template == 2 else MAX_UINT256
         return self.send_transaction(
             "createNftWithErc20WithDispenser",
@@ -473,7 +473,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
         datatoken: str,
         exchange_owner: Optional[str] = None,
     ) -> list:
-        datatoken_contract = ERC20Token(self.web3, datatoken)
+        datatoken_contract = Datatoken(self.web3, datatoken)
         exchange_addresses_and_ids = datatoken_contract.get_fixed_rates()
         return (
             exchange_addresses_and_ids
@@ -490,7 +490,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     def get_token_address(self, tx_id: Union[str, bytes]):
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_id)
         registered_event = self.get_event_log(
-            event_name=ERC721FactoryContract.EVENT_NFT_CREATED,
+            event_name=DataNFTFactoryContract.EVENT_NFT_CREATED,
             from_block=tx_receipt.blockNumber,
             to_block=self.web3.eth.block_number,
             filters=None,

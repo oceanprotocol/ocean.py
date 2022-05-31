@@ -32,17 +32,17 @@ def test_market_flow(
 
     asset = get_registered_asset_with_access_service(publisher_ocean, publisher_wallet)
     service = asset.services[0]
-    erc20_token = publisher_ocean.get_datatoken(service.datatoken)
+    datatoken = publisher_ocean.get_datatoken(service.datatoken)
 
     # Mint data tokens and assign to publisher
-    erc20_token.mint(
+    datatoken.mint(
         account_address=publisher_wallet.address,
         value=to_wei(50),
         from_wallet=publisher_wallet,
     )
 
     # Give the consumer some datatokens so they can order the service
-    erc20_token.transfer(consumer_wallet.address, to_wei(10), publisher_wallet)
+    datatoken.transfer(consumer_wallet.address, to_wei(10), publisher_wallet)
 
     # Place order for the download service
     if consumer_type == "publisher":
@@ -50,7 +50,7 @@ def test_market_flow(
             asset,
             service,
             consume_market_order_fee_address=consumer_wallet.address,
-            consume_market_order_fee_token=erc20_token.address,
+            consume_market_order_fee_token=datatoken.address,
             consume_market_order_fee_amount=0,
             wallet=consumer_wallet,
         )
@@ -66,7 +66,7 @@ def test_market_flow(
             asset,
             service,
             consume_market_order_fee_address=another_consumer_wallet.address,
-            consume_market_order_fee_token=erc20_token.address,
+            consume_market_order_fee_token=datatoken.address,
             consume_market_order_fee_amount=0,
             wallet=consumer_wallet,
             consumer_address=another_consumer_wallet.address,
@@ -81,22 +81,20 @@ def test_market_flow(
 
     assert len(os.listdir(asset_folder)) >= 1, "The asset folder is empty."
 
-    orders = consumer_ocean.get_user_orders(
-        consumer_wallet.address, erc20_token.address
-    )
+    orders = consumer_ocean.get_user_orders(consumer_wallet.address, datatoken.address)
     assert (
         orders
-    ), f"no orders found using the order history: datatoken {erc20_token.address}, consumer {consumer_wallet.address}"
+    ), f"no orders found using the order history: datatoken {datatoken.address}, consumer {consumer_wallet.address}"
 
     orders = consumer_ocean.get_user_orders(
         consumer_wallet.address,
-        consumer_ocean.web3.toChecksumAddress(erc20_token.address),
+        consumer_ocean.web3.toChecksumAddress(datatoken.address),
     )
     assert (
         orders
-    ), f"no orders found using the order history: datatoken {erc20_token.address}, consumer {consumer_wallet.address}"
+    ), f"no orders found using the order history: datatoken {datatoken.address}, consumer {consumer_wallet.address}"
 
     orders = consumer_ocean.get_user_orders(consumer_wallet.address)
     assert (
         orders
-    ), f"no orders found using the order history: datatoken {erc20_token.address}, consumer {consumer_wallet.address}"
+    ), f"no orders found using the order history: datatoken {datatoken.address}, consumer {consumer_wallet.address}"

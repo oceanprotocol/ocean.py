@@ -18,8 +18,8 @@ from tests.resources.helper_functions import generate_wallet
 
 def asset_displayed_on_sale(ocean: Ocean):
     publisher_wallet = generate_wallet()
-    erc721_nft = ocean.create_erc721_nft("NFTToken1", "NFT1", publisher_wallet)
-    token_address = erc721_nft.address
+    data_nft = ocean.create_data_nft("NFTToken1", "NFT1", publisher_wallet)
+    token_address = data_nft.address
     assert token_address
 
     # Specify metadata and services, using the Branin test dataset
@@ -48,7 +48,7 @@ def asset_displayed_on_sale(ocean: Ocean):
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=erc721_nft.address,
+        erc721_address=data_nft.address,
         erc20_templates=[1],
         erc20_names=["Datatoken 1"],
         erc20_symbols=["DT1"],
@@ -63,13 +63,13 @@ def asset_displayed_on_sale(ocean: Ocean):
     did = asset.did  # did contains the datatoken address
     assert did
 
-    erc20_token = ocean.get_datatoken(
+    datatoken = ocean.get_datatoken(
         get_first_service_by_type(asset, "access").datatoken
     )
     OCEAN_token = ocean.OCEAN_token
 
     bpool = ocean.create_pool(
-        erc20_token=erc20_token,
+        datatoken=datatoken,
         base_token=OCEAN_token,
         rate=ocean.to_wei(1),
         base_token_amount=ocean.to_wei(2000),
@@ -81,7 +81,7 @@ def asset_displayed_on_sale(ocean: Ocean):
     assert bpool.address
 
     prices = bpool.get_amount_in_exact_out(
-        OCEAN_token.address, erc20_token.address, ocean.to_wei(1), ocean.to_wei("0.01")
+        OCEAN_token.address, datatoken.address, ocean.to_wei(1), ocean.to_wei("0.01")
     )
     price_in_OCEAN = prices[0]
     formatted_price = pretty_ether_and_wei(price_in_OCEAN, "OCEAN")

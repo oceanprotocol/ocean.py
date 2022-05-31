@@ -11,8 +11,8 @@ from web3 import Web3
 from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
-from ocean_lib.models.erc20_token import ERC20Token
-from ocean_lib.models.erc721_nft import ERC721NFT
+from ocean_lib.models.data_nft import DataNFT
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -27,7 +27,7 @@ def test_consume_flow(
     config: Config,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
-    erc721_nft: ERC721NFT,
+    data_nft: DataNFT,
     file1: FilesType,
 ):
     data_provider = DataServiceProvider
@@ -52,7 +52,7 @@ def test_consume_flow(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=erc721_nft.address,
+        erc721_address=data_nft.address,
         erc20_templates=[1],
         erc20_names=["Datatoken 1"],
         erc20_symbols=["DT1"],
@@ -67,13 +67,13 @@ def test_consume_flow(
     assert asset, "The asset is not created."
     assert asset.nft["name"] == "NFT"
     assert asset.nft["symbol"] == "NFTSYMBOL"
-    assert asset.nft["address"] == erc721_nft.address
+    assert asset.nft["address"] == data_nft.address
     assert asset.nft["owner"] == publisher_wallet.address
     assert asset.datatokens[0]["name"] == "Datatoken 1"
     assert asset.datatokens[0]["symbol"] == "DT1"
 
     service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
-    dt = ERC20Token(web3, asset.datatokens[0]["address"])
+    dt = Datatoken(web3, asset.datatokens[0]["address"])
 
     # Mint 50 ERC20 tokens in consumer wallet from publisher. Max cap = 100
     dt.mint(

@@ -47,7 +47,7 @@ Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md
 In the same python console:
 ```python
 # Mint the datatokens
-erc20_token.mint(alice_wallet.address, ocean.to_wei(100), alice_wallet)
+datatoken.mint(alice_wallet.address, ocean.to_wei(100), alice_wallet)
 ```
 
 ## 4. Bob buys at fixed rate datatokens
@@ -64,7 +64,7 @@ assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 OCEAN_token = ocean.OCEAN_token
 # Create exchange_id for a new exchange
 exchange_id = ocean.create_fixed_rate(
-    erc20_token=erc20_token,
+    datatoken=datatoken,
     base_token=OCEAN_token,
     amount=ocean.to_wei(100),
     from_wallet=alice_wallet,
@@ -77,7 +77,7 @@ Use the `exchange_id` for buying at fixed rate.
 # Approve tokens for Bob
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 fixed_price_address = ocean.fixed_rate_exchange.address
-erc20_token.approve(fixed_price_address, ocean.to_wei(100), bob_wallet)
+datatoken.approve(fixed_price_address, ocean.to_wei(100), bob_wallet)
 OCEAN_token.approve(fixed_price_address, ocean.to_wei(100), bob_wallet)
 
 tx_result = ocean.fixed_rate_exchange.buy_dt(
@@ -99,7 +99,7 @@ exchanges for a certain datatoken, it can be searched by
 providing the datatoken address.
 ```python
 # Get a list exchange addresses and ids with a given datatoken and exchange owner.
-datatoken_address = erc20_token.address
+datatoken_address = datatoken.address
 nft_factory = ocean.get_nft_factory()
 exchange_addresses_and_ids = nft_factory.search_exchange_by_datatoken(ocean.fixed_rate_exchange, datatoken_address)
 # Optional: Filtering by the exchange owner.

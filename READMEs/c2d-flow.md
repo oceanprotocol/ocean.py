@@ -57,7 +57,7 @@ In the same python console:
 
 ```python
 # Publish the datatoken
-DATA_datatoken = erc721_nft.create_datatoken("DATA 1", "D1", from_wallet=alice_wallet)
+DATA_datatoken = data_nft.create_datatoken("DATA 1", "D1", from_wallet=alice_wallet)
 print(f"DATA_datatoken address = '{DATA_datatoken.address}'")
 
 # Specify metadata and services, using the Branin test dataset
@@ -107,8 +107,8 @@ DATA_asset = ocean.assets.create(
     publisher_wallet=alice_wallet,
     encrypted_files=DATA_encrypted_files,
     services=[DATA_compute_service],
-    erc721_address=erc721_nft.address,
-    deployed_erc20_tokens=[DATA_datatoken],
+    erc721_address=data_nft.address,
+    deployed_datatokens=[DATA_datatoken],
 )
 
 print(f"DATA_asset did = '{DATA_asset.did}'")
@@ -120,7 +120,7 @@ In the same Python console:
 
 ```python
 # Publish the algorithm NFT token
-ALGO_nft_token = ocean.create_erc721_nft("NFTToken1", "NFT1", alice_wallet)
+ALGO_nft_token = ocean.create_data_nft("NFTToken1", "NFT1", alice_wallet)
 print(f"ALGO_nft_token address = '{ALGO_nft_token.address}'")
 
 # Publish the datatoken
@@ -167,7 +167,7 @@ ALGO_asset = ocean.assets.create(
     publisher_wallet=alice_wallet,
     encrypted_files=ALGO_encrypted_files,
     erc721_address=ALGO_nft_token.address,
-    deployed_erc20_tokens=[ALGO_datatoken],
+    deployed_datatokens=[ALGO_datatoken],
 )
 
 print(f"ALGO_asset did = '{ALGO_asset.did}'")

@@ -13,7 +13,7 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.exceptions import DataProviderException
 from ocean_lib.models.compute_input import ComputeInput
-from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
 from ocean_lib.web3_internal.currency import to_wei
@@ -145,19 +145,19 @@ def _mint_and_build_compute_input(
     ocean_instance: Ocean,
 ) -> ComputeInput:
     service = get_first_service_by_type(dataset_and_userdata.asset, service_type)
-    erc20_token = ERC20Token(ocean_instance.web3, service.datatoken)
+    datatoken = Datatoken(ocean_instance.web3, service.datatoken)
     minter = (
         consumer_wallet
-        if erc20_token.is_minter(consumer_wallet.address)
+        if datatoken.is_minter(consumer_wallet.address)
         else publisher_wallet
     )
-    erc20_token.mint(consumer_wallet.address, to_wei(10), minter)
+    datatoken.mint(consumer_wallet.address, to_wei(10), minter)
 
     return ComputeInput(
         dataset_and_userdata.asset,
         service,
         userdata=dataset_and_userdata.userdata,
-        consume_market_order_fee_token=erc20_token.address,
+        consume_market_order_fee_token=datatoken.address,
         consume_market_order_fee_amount=0,
     )
 

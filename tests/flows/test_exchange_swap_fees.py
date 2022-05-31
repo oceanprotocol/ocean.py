@@ -8,7 +8,7 @@ import pytest
 from web3 import Web3
 
 from ocean_lib.config import Config
-from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import (
     FixedRateExchange,
@@ -63,7 +63,7 @@ def test_exchange_swap_fees(
     another_consumer_wallet: Wallet,
     publisher_wallet: Wallet,
     base_token_name: str,
-    erc20_token: ERC20Token,
+    datatoken: Datatoken,
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     bt_per_dt: str,
@@ -84,7 +84,7 @@ def test_exchange_swap_fees(
         consume_market_swap_fee_collector=another_consumer_wallet,
         publisher_wallet=publisher_wallet,
         base_token_name=base_token_name,
-        datatoken=erc20_token,
+        datatoken=datatoken,
         publish_market_swap_fee=publish_market_swap_fee,
         consume_market_swap_fee=consume_market_swap_fee,
         bt_per_dt=bt_per_dt,
@@ -100,13 +100,13 @@ def exchange_swap_fees(
     consume_market_swap_fee_collector: Wallet,
     publisher_wallet: Wallet,
     base_token_name: str,
-    datatoken: ERC20Token,
+    datatoken: Datatoken,
     publish_market_swap_fee: str,
     consume_market_swap_fee: str,
     bt_per_dt: str,
     with_mint: int,
 ):
-    bt = ERC20Token(web3, get_address_of_type(config, base_token_name))
+    bt = Datatoken(web3, get_address_of_type(config, base_token_name))
     dt = datatoken
 
     transfer_base_token_if_balance_lte(
@@ -325,8 +325,8 @@ def buy_or_sell_dt_and_verify_balances_swap_fees(
     consumer_wallet: Wallet,
 ):
     exchange_info = exchange.get_exchange(exchange_id)
-    bt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
-    dt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.DATATOKEN])
+    bt = Datatoken(web3, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
+    dt = Datatoken(web3, exchange_info[FixedRateExchangeDetails.DATATOKEN])
 
     # Get balances before swap
     consumer_bt_balance_before = bt.balanceOf(consumer_wallet.address)
@@ -464,7 +464,7 @@ def collect_bt_or_dt_and_verify_balances(
 ):
     """Collet BT or Collect DT and verify balances"""
     exchange_info = exchange.get_exchange(exchange_id)
-    dt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.DATATOKEN])
+    dt = Datatoken(web3, exchange_info[FixedRateExchangeDetails.DATATOKEN])
     publish_market = dt.get_payment_collector()
 
     if token_address == dt.address:
@@ -472,7 +472,7 @@ def collect_bt_or_dt_and_verify_balances(
         balance_index = FixedRateExchangeDetails.DT_BALANCE
         method = exchange.collect_dt
     else:
-        token = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
+        token = Datatoken(web3, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
         balance_index = FixedRateExchangeDetails.BT_BALANCE
         method = exchange.collect_bt
 
@@ -503,7 +503,7 @@ def collect_fee_and_verify_balances(
 ):
     """Collet publish market swap fees or ocean community swap fees and verify balances"""
     exchange_info = exchange.get_exchange(exchange_id)
-    bt = ERC20Token(web3, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
+    bt = Datatoken(web3, exchange_info[FixedRateExchangeDetails.BASE_TOKEN])
 
     fees_info = exchange.get_fees_info(exchange_id)
     exchange_fee_balance_before = fees_info[balance_index]

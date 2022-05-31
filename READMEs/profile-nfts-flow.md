@@ -50,7 +50,7 @@ alice_private_key = os.getenv('TEST_PRIVATE_KEY1')
 alice_wallet = Wallet(ocean.web3, alice_private_key, config.block_confirmations, config.transaction_timeout)
 
 # Publish an NFT token. Note "transferable=False"
-erc721_nft = ocean.create_erc721_nft('NFTToken1', 'NFT1', alice_wallet, transferable=False)
+data_nft = ocean.create_data_nft('NFTToken1', 'NFT1', alice_wallet, transferable=False)
 ```
 
 ## 3. Alice adds key-value pair to data NFT. 'value' encrypted with a symmetric key 'symkey'
@@ -74,7 +74,7 @@ profiledata_name_hash = web3.keccak(text=profiledata_name)
 # - sharing it unlocks only this field: make unique to this data nft & field
 # - only Alice can compute it: make it a function of her private key
 # - is hardware wallet friendly: uses Alice's digital signature not private key
-preimage = erc721_nft.address + profiledata_name
+preimage = data_nft.address + profiledata_name
 msg = encode_defunct(text=sha256(preimage.encode('utf-8')).hexdigest())
 signed_msg = web3.eth.account.sign_message(msg, private_key=alice_wallet.private_key)
 symkey = b64encode(signed_msg.signature.hex().encode('ascii'))[:43] + b'='  # bytes
@@ -83,7 +83,7 @@ symkey = b64encode(signed_msg.signature.hex().encode('ascii'))[:43] + b'='  # by
 profiledata_val_encr_hex = Fernet(symkey).encrypt(profiledata_val.encode('utf-8')).hex()
 
 # set
-erc721_nft.set_new_data(profiledata_name_hash, profiledata_val_encr_hex, alice_wallet)
+data_nft.set_new_data(profiledata_name_hash, profiledata_val_encr_hex, alice_wallet)
 ```
 
 ## 4. Alice gets Dapp's public_key
@@ -115,7 +115,7 @@ symkey_val_encr = asymmetric_encrypt(dapp_public_key, symkey)  # bytes
 symkey_val_encr_hex = symkey_val_encr.hex()  # hex
 
 # arg types: key=bytes32, value=bytes, wallet=wallet
-erc721_nft.set_new_data(symkey_name_hash, symkey_val_encr_hex, alice_wallet)
+data_nft.set_new_data(symkey_name_hash, symkey_val_encr_hex, alice_wallet)
 ```
 
 ## 6. Dapp gets & decrypts symkey, then gets & decrypts original 'value'
@@ -124,11 +124,11 @@ erc721_nft.set_new_data(symkey_name_hash, symkey_val_encr_hex, alice_wallet)
 from ecies import decrypt as asymmetric_decrypt
 
 # symkey_name_hash = <Dapp would set like above>
-symkey_val_encr2 = erc721_nft.get_data(symkey_name_hash)
+symkey_val_encr2 = data_nft.get_data(symkey_name_hash)
 symkey2 = asymmetric_decrypt(dapp_private_key, symkey_val_encr2)
 
 # profiledata_name_hash = <Dapp would set like above>
-profiledata_val_encr_hex2 = erc721_nft.get_data(profiledata_name_hash)
+profiledata_val_encr_hex2 = data_nft.get_data(profiledata_name_hash)
 profiledata_val2_bytes = Fernet(symkey).decrypt(profiledata_val_encr_hex2)
 profiledata_val2 = profiledata_val2_bytes.decode('utf-8')
 

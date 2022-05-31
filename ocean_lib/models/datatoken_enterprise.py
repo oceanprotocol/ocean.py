@@ -6,11 +6,11 @@ from typing import Union
 
 from enforce_typing import enforce_types
 
-from ocean_lib.models.erc20_token import ERC20Token
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-class ERC20Enterprise(ERC20Token):
+class DatatokenEnterprise(Datatoken):
     CONTRACT_NAME = "ERC20TemplateEnterprise"
 
     @enforce_types

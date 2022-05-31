@@ -83,10 +83,10 @@ export FACTORY_DEPLOYER_PRIVATE_KEY=0xc594c6e5def4bab63ac29eed19a134c130388f74f0
 In work console:
 ```console
 #run a single test
-pytest ocean_lib/models/test/test_erc721_factory.py::test_start_multiple_order
+pytest ocean_lib/models/test/test_data_nft_factory.py::test_start_multiple_order
 
 #run all tests in a file
-pytest ocean_lib/models/test/test_erc721_factory.py
+pytest ocean_lib/models/test/test_data_nft_factory.py
 
 #run all regular tests; see details on pytest markers to select specific suites
 pytest -m "not slow"
