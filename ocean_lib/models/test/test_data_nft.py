@@ -8,8 +8,8 @@ from web3 import Web3, exceptions
 from ocean_lib.config import Config
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.data_nft import DataNFT, DataNFTPermissions
-from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.fixed_rate_exchange import (
     FixedRateExchange,
     FixedRateExchangeDetails,
@@ -95,7 +95,9 @@ def test_permissions(
     data_nft.clean_permissions(from_wallet=publisher_wallet)
 
     assert not (
-        data_nft.get_permissions(user=publisher_addr)[DataNFTPermissions.DEPLOY_DATATOKEN]
+        data_nft.get_permissions(user=publisher_addr)[
+            DataNFTPermissions.DEPLOY_DATATOKEN
+        ]
     )
     assert not (
         data_nft.get_permissions(user=consumer_addr)[DataNFTPermissions.MANAGER]
@@ -670,7 +672,9 @@ def test_erc721_datatoken_functions(
     )
     assert data_nft.balance_of(account=publisher_addr) == 0
     assert data_nft.owner_of(token_id=1) == consumer_addr
-    assert data_nft.get_permissions(user=consumer_addr)[DataNFTPermissions.DEPLOY_DATATOKEN]
+    assert data_nft.get_permissions(user=consumer_addr)[
+        DataNFTPermissions.DEPLOY_DATATOKEN
+    ]
     data_nft.create_erc20(
         template_index=1,
         name="ERC20DT1",

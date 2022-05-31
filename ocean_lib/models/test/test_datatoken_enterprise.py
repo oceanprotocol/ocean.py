@@ -148,7 +148,9 @@ def test_buy_from_dispenser_and_order(
     assert balance_publish - balance_publish_before == to_wei("2")
 
     assert (
-        datatoken_enterprise_token.balanceOf(datatoken_enterprise_token.get_payment_collector())
+        datatoken_enterprise_token.balanceOf(
+            datatoken_enterprise_token.get_payment_collector()
+        )
         == 0
     )
 
@@ -309,6 +311,8 @@ def test_buy_from_fre_and_order(
     assert balance_publish - balance_publish_before == to_wei("2")
 
     assert (
-        datatoken_enterprise_token.balanceOf(datatoken_enterprise_token.get_payment_collector())
+        datatoken_enterprise_token.balanceOf(
+            datatoken_enterprise_token.get_payment_collector()
+        )
         == 0
     )

@@ -7,9 +7,9 @@ from web3 import exceptions
 from web3.main import Web3
 
 from ocean_lib.models.data_nft import DataNFT
+from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
-from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.structures.abi_tuples import OrderData
 from ocean_lib.utils.utilities import create_checksum
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -43,7 +43,8 @@ def test_properties(web3, config):
         == DataNFTFactoryContract.EVENT_TEMPLATE20_ADDED
     )
     assert (
-        data_nft_factory.event_NewPool.abi["name"] == DataNFTFactoryContract.EVENT_NEW_POOL
+        data_nft_factory.event_NewPool.abi["name"]
+        == DataNFTFactoryContract.EVENT_NEW_POOL
     )
     assert (
         data_nft_factory.event_NewFixedRate.abi["name"]
@@ -209,7 +210,9 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     initial_pool_liquidity = to_wei("0.02")
 
     datatoken.mint(publisher_wallet.address, initial_pool_liquidity, publisher_wallet)
-    datatoken.approve(data_nft_factory_address, initial_pool_liquidity, publisher_wallet)
+    datatoken.approve(
+        data_nft_factory_address, initial_pool_liquidity, publisher_wallet
+    )
     tx = data_nft_factory.create_nft_erc20_with_pool(
         nft_name="72120Bundle",
         nft_symbol="72Bundle",

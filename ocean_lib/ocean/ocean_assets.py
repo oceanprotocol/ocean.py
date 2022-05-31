@@ -23,8 +23,8 @@ from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
-from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
@@ -319,7 +319,9 @@ class OceanAssets:
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(self._config)
 
-        address = get_address_of_type(self._config, DataNFTFactoryContract.CONTRACT_NAME)
+        address = get_address_of_type(
+            self._config, DataNFTFactoryContract.CONTRACT_NAME
+        )
         data_nft_factory = DataNFTFactoryContract(self._web3, address)
 
         if not erc721_address:
@@ -493,7 +495,9 @@ class OceanAssets:
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(self._config)
 
-        address = get_address_of_type(self._config, DataNFTFactoryContract.CONTRACT_NAME)
+        address = get_address_of_type(
+            self._config, DataNFTFactoryContract.CONTRACT_NAME
+        )
         data_nft_factory = DataNFTFactoryContract(self._web3, address)
         erc721_address = asset.nft_address
 
