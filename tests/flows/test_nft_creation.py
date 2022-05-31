@@ -7,7 +7,7 @@ from web3 import Web3, exceptions
 
 from ocean_lib.models.data_nft import DataNFT, DataNFTPermissions
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
@@ -24,10 +24,10 @@ def test_data_nft_roles(
 
     # NFT Owner is also added as manager when deploying (first time), if transferred that doesn't apply
 
-    erc721_factory = ERC721FactoryContract(
+    data_nft_factory = DataNFTFactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
     )
-    tx = erc721_factory.deploy_erc721_contract(
+    tx = data_nft_factory.deploy_erc721_contract(
         name="NFT",
         symbol="NFTSYMBOL",
         template_index=1,
@@ -39,13 +39,13 @@ def test_data_nft_roles(
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = erc721_factory.get_event_log(
-        event_name=ERC721FactoryContract.EVENT_NFT_CREATED,
+    registered_event = data_nft_factory.get_event_log(
+        event_name=DataNFTFactoryContract.EVENT_NFT_CREATED,
         from_block=tx_receipt.blockNumber,
         to_block=web3.eth.block_number,
         filters=None,
     )
-    assert registered_event[0].event == ERC721FactoryContract.EVENT_NFT_CREATED
+    assert registered_event[0].event == DataNFTFactoryContract.EVENT_NFT_CREATED
     assert registered_event[0].args.admin == publisher_wallet.address
     token_address = registered_event[0].args.newTokenAddress
     data_nft = DataNFT(web3, token_address)
@@ -106,23 +106,23 @@ def test_data_nft_roles(
 def test_properties(web3, config):
     """Tests the events' properties."""
 
-    erc721_factory = ERC721FactoryContract(
+    data_nft_factory = DataNFTFactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
     )
     assert (
-        erc721_factory.event_NFTCreated.abi["name"]
-        == ERC721FactoryContract.EVENT_NFT_CREATED
+        data_nft_factory.event_NFTCreated.abi["name"]
+        == DataNFTFactoryContract.EVENT_NFT_CREATED
     )
     assert (
-        erc721_factory.event_TokenCreated.abi["name"]
-        == ERC721FactoryContract.EVENT_TOKEN_CREATED
+        data_nft_factory.event_TokenCreated.abi["name"]
+        == DataNFTFactoryContract.EVENT_TOKEN_CREATED
     )
     assert (
-        erc721_factory.event_NewPool.abi["name"] == ERC721FactoryContract.EVENT_NEW_POOL
+        data_nft_factory.event_NewPool.abi["name"] == DataNFTFactoryContract.EVENT_NEW_POOL
     )
     assert (
-        erc721_factory.event_NewFixedRate.abi["name"]
-        == ERC721FactoryContract.EVENT_NEW_FIXED_RATE
+        data_nft_factory.event_NewFixedRate.abi["name"]
+        == DataNFTFactoryContract.EVENT_NEW_FIXED_RATE
     )
 
 
@@ -130,17 +130,17 @@ def test_properties(web3, config):
 def test_nonexistent_template_index(web3, config, publisher_wallet):
     """Test erc721 non existent template creation fail"""
 
-    erc721_factory = ERC721FactoryContract(
+    data_nft_factory = DataNFTFactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
     )
 
     non_existent_nft_template = get_non_existent_nft_template(
-        erc721_factory, check_first=10
+        data_nft_factory, check_first=10
     )
     assert non_existent_nft_template >= 0, "Non existent NFT template not found."
 
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_factory.deploy_erc721_contract(
+        data_nft_factory.deploy_erc721_contract(
             name="DT1",
             symbol="DTSYMBOL",
             template_index=non_existent_nft_template,
@@ -159,13 +159,13 @@ def test_nonexistent_template_index(web3, config, publisher_wallet):
 
 
 @pytest.mark.unit
-def test_successful_erc721_creation(web3, config, publisher_wallet):
-    """Test erc721 successful creation"""
+def test_successful_data_nft_creation(web3, config, publisher_wallet):
+    """Test data NFT successful creation"""
 
-    erc721_factory = ERC721FactoryContract(
+    data_nft_factory = DataNFTFactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
     )
-    tx = erc721_factory.deploy_erc721_contract(
+    tx = data_nft_factory.deploy_erc721_contract(
         name="NFT",
         symbol="NFTSYMBOL",
         template_index=1,
@@ -177,13 +177,13 @@ def test_successful_erc721_creation(web3, config, publisher_wallet):
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = erc721_factory.get_event_log(
-        event_name=ERC721FactoryContract.EVENT_NFT_CREATED,
+    registered_event = data_nft_factory.get_event_log(
+        event_name=DataNFTFactoryContract.EVENT_NFT_CREATED,
         from_block=tx_receipt.blockNumber,
         to_block=web3.eth.block_number,
         filters=None,
     )
-    assert registered_event[0].event == ERC721FactoryContract.EVENT_NFT_CREATED
+    assert registered_event[0].event == DataNFTFactoryContract.EVENT_NFT_CREATED
     assert registered_event[0].args.admin == publisher_wallet.address
     token_address = registered_event[0].args.newTokenAddress
     data_nft = DataNFT(web3, token_address)
@@ -197,11 +197,11 @@ def test_successful_erc721_creation(web3, config, publisher_wallet):
 def test_nft_count(web3, config, publisher_wallet):
     """Test  erc721 factory NFT count"""
 
-    erc721_factory = ERC721FactoryContract(
+    data_nft_factory = DataNFTFactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
     )
-    current_nft_count = erc721_factory.get_current_nft_count()
-    erc721_factory.deploy_erc721_contract(
+    current_nft_count = data_nft_factory.get_current_nft_count()
+    data_nft_factory.deploy_erc721_contract(
         name="NFT",
         symbol="NFTSYMBOL",
         template_index=1,
@@ -212,17 +212,17 @@ def test_nft_count(web3, config, publisher_wallet):
         owner=publisher_wallet.address,
         from_wallet=publisher_wallet,
     )
-    assert erc721_factory.get_current_nft_count() == current_nft_count + 1
+    assert data_nft_factory.get_current_nft_count() == current_nft_count + 1
 
 
 @pytest.mark.unit
 def test_nft_template(web3, config):
     """Tests get NFT template"""
 
-    erc721_factory = ERC721FactoryContract(
+    data_nft_factory = DataNFTFactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
     )
-    nft_template = erc721_factory.get_nft_template(1)
+    nft_template = data_nft_factory.get_nft_template(1)
     assert nft_template[0] == get_address_of_type(config, "ERC721Template")
     assert nft_template[1] is True
 
@@ -233,10 +233,10 @@ def test_erc20_creation(
 ):
     """Test erc20 successful creation with owner assigned as minter"""
 
-    erc721_factory = ERC721FactoryContract(
+    data_nft_factory = DataNFTFactoryContract(
         web3, get_address_of_type(config, "ERC721Factory")
     )
-    tx = erc721_factory.deploy_erc721_contract(
+    tx = data_nft_factory.deploy_erc721_contract(
         name="NFT",
         symbol="NFTSYMBOL",
         template_index=1,
@@ -248,8 +248,8 @@ def test_erc20_creation(
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = erc721_factory.get_event_log(
-        event_name=ERC721FactoryContract.EVENT_NFT_CREATED,
+    registered_event = data_nft_factory.get_event_log(
+        event_name=DataNFTFactoryContract.EVENT_NFT_CREATED,
         from_block=tx_receipt.blockNumber,
         to_block=web3.eth.block_number,
         filters=None,
@@ -271,8 +271,8 @@ def test_erc20_creation(
     )
     tx_receipt2 = web3.eth.wait_for_transaction_receipt(tx_result)
 
-    registered_event2 = erc721_factory.get_event_log(
-        event_name=ERC721FactoryContract.EVENT_TOKEN_CREATED,
+    registered_event2 = data_nft_factory.get_event_log(
+        event_name=DataNFTFactoryContract.EVENT_TOKEN_CREATED,
         from_block=tx_receipt2.blockNumber,
         to_block=web3.eth.block_number,
         filters=None,

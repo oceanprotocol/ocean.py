@@ -6,7 +6,7 @@ import pytest
 from web3 import exceptions
 
 from ocean_lib.models.bpool import BPool
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.currency import MAX_WEI, to_wei
 from tests.resources.helper_functions import (
@@ -87,7 +87,7 @@ def test_side_staking(
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     pool_event = factory_router.get_event_log(
-        ERC721FactoryContract.EVENT_NEW_POOL,
+        DataNFTFactoryContract.EVENT_NEW_POOL,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,

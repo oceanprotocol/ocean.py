@@ -16,7 +16,7 @@ from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-class ERC721FactoryContract(ERCTokenFactoryBase):
+class DataNFTFactoryContract(ERCTokenFactoryBase):
     CONTRACT_NAME = "ERC721Factory"
     EVENT_NFT_CREATED = "NFTCreated"
     EVENT_TOKEN_CREATED = "TokenCreated"
@@ -490,7 +490,7 @@ class ERC721FactoryContract(ERCTokenFactoryBase):
     def get_token_address(self, tx_id: Union[str, bytes]):
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx_id)
         registered_event = self.get_event_log(
-            event_name=ERC721FactoryContract.EVENT_NFT_CREATED,
+            event_name=DataNFTFactoryContract.EVENT_NFT_CREATED,
             from_block=tx_receipt.blockNumber,
             to_block=self.web3.eth.block_number,
             filters=None,

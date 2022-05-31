@@ -24,7 +24,7 @@ from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBa
 from ocean_lib.models.compute_input import ComputeInput
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
@@ -120,7 +120,7 @@ class OceanAssets:
     @enforce_types
     def deploy_datatoken(
         self,
-        erc721_factory: ERC721FactoryContract,
+        data_nft_factory: DataNFTFactoryContract,
         data_nft: DataNFT,
         template_index: int,
         name: str,
@@ -148,8 +148,8 @@ class OceanAssets:
         assert tx_result, "Failed to create ERC20 token."
 
         tx_receipt = self._web3.eth.wait_for_transaction_receipt(tx_result)
-        registered_token_event = erc721_factory.get_event_log(
-            ERC721FactoryContract.EVENT_TOKEN_CREATED,
+        registered_token_event = data_nft_factory.get_event_log(
+            DataNFTFactoryContract.EVENT_TOKEN_CREATED,
             tx_receipt.blockNumber,
             self._web3.eth.block_number,
             None,
@@ -319,8 +319,8 @@ class OceanAssets:
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(self._config)
 
-        address = get_address_of_type(self._config, ERC721FactoryContract.CONTRACT_NAME)
-        erc721_factory = ERC721FactoryContract(self._web3, address)
+        address = get_address_of_type(self._config, DataNFTFactoryContract.CONTRACT_NAME)
+        data_nft_factory = DataNFTFactoryContract(self._web3, address)
 
         if not erc721_address:
             name = erc721_name or metadata["name"]
@@ -333,7 +333,7 @@ class OceanAssets:
             transferable = erc721_transferable or True
             owner = erc721_owner or publisher_wallet.address
             # register on-chain
-            tx_id = erc721_factory.deploy_erc721_contract(
+            tx_id = data_nft_factory.deploy_erc721_contract(
                 name=name,
                 symbol=symbol,
                 template_index=erc721_template_index,
@@ -345,8 +345,8 @@ class OceanAssets:
                 from_wallet=publisher_wallet,
             )
             tx_receipt = self._web3.eth.wait_for_transaction_receipt(tx_id)
-            registered_event = erc721_factory.get_event_log(
-                ERC721FactoryContract.EVENT_NFT_CREATED,
+            registered_event = data_nft_factory.get_event_log(
+                DataNFTFactoryContract.EVENT_NFT_CREATED,
                 tx_receipt.blockNumber,
                 self._web3.eth.block_number,
                 None,
@@ -361,9 +361,9 @@ class OceanAssets:
             )
         else:
             # verify nft address
-            if not erc721_factory.verify_nft(erc721_address):
+            if not data_nft_factory.verify_nft(erc721_address):
                 raise ContractNotFound(
-                    f"NFT address {erc721_address} is not found in the ERC721Factory events."
+                    f"NFT address {erc721_address} is not found in the DataNFTFactory events."
                 )
 
         assert erc721_address, "nft_address is required for publishing a dataset asset."
@@ -394,7 +394,7 @@ class OceanAssets:
             for erc20_data_counter in range(len(erc20_templates)):
                 erc20_addresses.append(
                     self.deploy_datatoken(
-                        erc721_factory=erc721_factory,
+                        data_nft_factory=data_nft_factory,
                         data_nft=data_nft,
                         template_index=erc20_templates[erc20_data_counter],
                         name=erc20_names[erc20_data_counter],
@@ -493,14 +493,14 @@ class OceanAssets:
         if not provider_uri:
             provider_uri = DataServiceProvider.get_url(self._config)
 
-        address = get_address_of_type(self._config, ERC721FactoryContract.CONTRACT_NAME)
-        erc721_factory = ERC721FactoryContract(self._web3, address)
+        address = get_address_of_type(self._config, DataNFTFactoryContract.CONTRACT_NAME)
+        data_nft_factory = DataNFTFactoryContract(self._web3, address)
         erc721_address = asset.nft_address
 
         # Verify nft address
-        if not erc721_factory.verify_nft(erc721_address):
+        if not data_nft_factory.verify_nft(erc721_address):
             raise ContractNotFound(
-                f"NFT address {erc721_address} is not found in the ERC721Factory events."
+                f"NFT address {erc721_address} is not found in the DataNFTFactory events."
             )
 
         assert erc721_address, "nft_address is required for publishing a dataset asset."

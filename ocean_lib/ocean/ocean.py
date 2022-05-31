@@ -18,7 +18,7 @@ from ocean_lib.models.bpool import BPool
 from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.dispenser import Dispenser
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.models.side_staking import SideStaking
@@ -205,18 +205,18 @@ class Ocean:
         return Datatoken(self.web3, token_address)
 
     @enforce_types
-    def get_nft_factory(self, nft_factory_address: str = "") -> ERC721FactoryContract:
+    def get_nft_factory(self, nft_factory_address: str = "") -> DataNFTFactoryContract:
         """
         :param nft_factory_address: contract address, str
 
-        :return: `ERC721FactoryContract` instance
+        :return: `DataNFTFactoryContract` instance
         """
         if not nft_factory_address:
             nft_factory_address = get_address_of_type(
-                self.config, ERC721FactoryContract.CONTRACT_NAME
+                self.config, DataNFTFactoryContract.CONTRACT_NAME
             )
 
-        return ERC721FactoryContract(self.web3, nft_factory_address)
+        return DataNFTFactoryContract(self.web3, nft_factory_address)
 
     @enforce_types
     def get_user_orders(
@@ -283,7 +283,7 @@ class Ocean:
         )
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
         fixed_rate_event = datatoken.get_event_log(
-            ERC721FactoryContract.EVENT_NEW_FIXED_RATE,
+            DataNFTFactoryContract.EVENT_NEW_FIXED_RATE,
             tx_receipt.blockNumber,
             self.web3.eth.block_number,
             None,
@@ -334,7 +334,7 @@ class Ocean:
         )
         tx_receipt = self.web3.eth.wait_for_transaction_receipt(tx)
         pool_event = self.factory_router.get_event_log(
-            ERC721FactoryContract.EVENT_NEW_POOL,
+            DataNFTFactoryContract.EVENT_NEW_POOL,
             tx_receipt.blockNumber,
             self.web3.eth.block_number,
             None,

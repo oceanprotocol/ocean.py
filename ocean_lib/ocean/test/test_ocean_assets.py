@@ -16,7 +16,7 @@ from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.data_nft import DataNFT
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.services.service import Service
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
@@ -53,7 +53,7 @@ def test_update_metadata(publisher_ocean_instance, publisher_wallet):
     new_metadata["updated"] = datetime.utcnow().isoformat()
     ddo.metadata = new_metadata
 
-    with patch("ocean_lib.ocean.ocean_assets.ERC721FactoryContract.verify_nft") as mock:
+    with patch("ocean_lib.ocean.ocean_assets.DataNFTFactoryContract.verify_nft") as mock:
         mock.return_value = False
         with pytest.raises(ContractNotFound):
             _asset = publisher_ocean_instance.assets.update(
@@ -363,12 +363,12 @@ def test_plain_asset_with_one_datatoken(
     web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
 
-    erc721_factory, metadata, encrypted_files = create_basics(
+    data_nft_factory, metadata, encrypted_files = create_basics(
         config, web3, data_provider
     )
 
     # Publisher deploys NFT contract
-    tx = erc721_factory.deploy_erc721_contract(
+    tx = data_nft_factory.deploy_erc721_contract(
         name="NFT1",
         symbol="NFTSYMBOL",
         template_index=1,
@@ -380,8 +380,8 @@ def test_plain_asset_with_one_datatoken(
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = erc721_factory.get_event_log(
-        ERC721FactoryContract.EVENT_NFT_CREATED,
+    registered_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_NFT_CREATED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -421,11 +421,11 @@ def test_plain_asset_multiple_datatokens(
 ):
     web3 = publisher_ocean_instance.web3
     data_provider = DataServiceProvider
-    erc721_factory, metadata, encrypted_files = create_basics(
+    data_nft_factory, metadata, encrypted_files = create_basics(
         config, web3, data_provider
     )
 
-    tx = erc721_factory.deploy_erc721_contract(
+    tx = data_nft_factory.deploy_erc721_contract(
         name="NFT2",
         symbol="NFT2SYMBOL",
         template_index=1,
@@ -437,8 +437,8 @@ def test_plain_asset_multiple_datatokens(
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = erc721_factory.get_event_log(
-        ERC721FactoryContract.EVENT_NFT_CREATED,
+    registered_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_NFT_CREATED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,

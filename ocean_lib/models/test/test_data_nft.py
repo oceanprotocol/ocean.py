@@ -9,7 +9,7 @@ from ocean_lib.config import Config
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.data_nft import DataNFT, DataNFTPermissions
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.fixed_rate_exchange import (
     FixedRateExchange,
     FixedRateExchangeDetails,
@@ -406,7 +406,7 @@ def test_create_erc20(
     publisher_addr,
     consumer_addr,
     data_nft: DataNFT,
-    erc721_factory: ERC721FactoryContract,
+    data_nft_factory: DataNFTFactoryContract,
 ):
     """Tests calling create an ERC20 by the owner."""
     assert data_nft.get_permissions(user=publisher_addr)[
@@ -428,8 +428,8 @@ def test_create_erc20(
     assert tx, "Could not create ERC20."
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_token_event = erc721_factory.get_event_log(
-        ERC721FactoryContract.EVENT_TOKEN_CREATED,
+    registered_token_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -488,7 +488,7 @@ def test_create_erc20_with_usdc_order_fee(
     config: Config,
     publisher_wallet: Wallet,
     data_nft: DataNFT,
-    erc721_factory: ERC721FactoryContract,
+    data_nft_factory: DataNFTFactoryContract,
 ):
     """Create an ERC20 with order fees ( 5 USDC, going to publishMarketAddress)"""
     usdc = Datatoken(web3, get_address_of_type(config, "MockUSDC"))
@@ -507,8 +507,8 @@ def test_create_erc20_with_usdc_order_fee(
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
-    event = erc721_factory.get_event_log(
-        ERC721FactoryContract.EVENT_TOKEN_CREATED,
+    event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -534,7 +534,7 @@ def test_create_erc20_with_non_owner(
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
     data_nft: DataNFT,
-    erc721_factory: ERC721FactoryContract,
+    data_nft_factory: DataNFTFactoryContract,
 ):
     """Tests creating an ERC20 token by wallet other than nft owner"""
 
@@ -565,8 +565,8 @@ def test_create_erc20_with_non_owner(
     assert tx, "Failed to create ERC20 token."
 
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_token_event = erc721_factory.get_event_log(
-        ERC721FactoryContract.EVENT_TOKEN_CREATED,
+    registered_token_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -743,12 +743,12 @@ def test_transfer_nft(
     publisher_addr,
     consumer_addr,
     factory_router,
-    erc721_factory,
+    data_nft_factory,
     publisher_ocean_instance,
 ):
     """Tests transferring the NFT before deploying an ERC20, a pool, a FRE."""
 
-    tx = erc721_factory.deploy_erc721_contract(
+    tx = data_nft_factory.deploy_erc721_contract(
         name="NFT to TRANSFER",
         symbol="NFTtT",
         template_index=1,
@@ -760,8 +760,8 @@ def test_transfer_nft(
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = erc721_factory.get_event_log(
-        ERC721FactoryContract.EVENT_NFT_CREATED,
+    registered_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_NFT_CREATED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -781,7 +781,7 @@ def test_transfer_nft(
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     transfer_event = data_nft.get_event_log(
-        ERC721FactoryContract.EVENT_TRANSFER,
+        DataNFTFactoryContract.EVENT_TRANSFER,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -795,7 +795,7 @@ def test_transfer_nft(
     assert data_nft.owner_of(1) == consumer_addr
 
     # Consumer is not the additional ERC20 deployer, but will be after the NFT transfer
-    tx = erc721_factory.deploy_erc721_contract(
+    tx = data_nft_factory.deploy_erc721_contract(
         name="NFT1",
         symbol="NFT",
         template_index=1,
@@ -807,8 +807,8 @@ def test_transfer_nft(
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = erc721_factory.get_event_log(
-        ERC721FactoryContract.EVENT_NFT_CREATED,
+    registered_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_NFT_CREATED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -823,7 +823,7 @@ def test_transfer_nft(
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     transfer_event = data_nft.get_event_log(
-        ERC721FactoryContract.EVENT_TRANSFER,
+        DataNFTFactoryContract.EVENT_TRANSFER,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -848,8 +848,8 @@ def test_transfer_nft(
     )
     assert tx_result, "Failed to create ERC20 token."
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
-    registered_token_event = erc721_factory.get_event_log(
-        ERC721FactoryContract.EVENT_TOKEN_CREATED,
+    registered_token_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -908,7 +908,7 @@ def test_nft_transfer_with_pool(
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     transfer_event = data_nft.get_event_log(
-        ERC721FactoryContract.EVENT_TRANSFER,
+        DataNFTFactoryContract.EVENT_TRANSFER,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -939,7 +939,7 @@ def test_nft_transfer_with_pool(
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     pool_event = factory_router.get_event_log(
-        ERC721FactoryContract.EVENT_NEW_POOL,
+        DataNFTFactoryContract.EVENT_NEW_POOL,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -1046,7 +1046,7 @@ def test_nft_transfer_with_fre(
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     transfer_event = data_nft.get_event_log(
-        ERC721FactoryContract.EVENT_TRANSFER,
+        DataNFTFactoryContract.EVENT_TRANSFER,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -1079,7 +1079,7 @@ def test_nft_transfer_with_fre(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     fre_event = datatoken.get_event_log(
-        event_name=ERC721FactoryContract.EVENT_NEW_FIXED_RATE,
+        event_name=DataNFTFactoryContract.EVENT_NEW_FIXED_RATE,
         from_block=tx_receipt.blockNumber,
         to_block=web3.eth.block_number,
         filters=None,
@@ -1152,11 +1152,11 @@ def test_transfer_nft_with_erc20_pool_fre(
     consumer_addr,
     factory_router,
     publisher_ocean_instance,
-    erc721_factory,
+    data_nft_factory,
 ):
     """Tests transferring the NFT after deploying an ERC20, a pool, a FRE."""
 
-    tx = erc721_factory.deploy_erc721_contract(
+    tx = data_nft_factory.deploy_erc721_contract(
         name="NFT to TRANSFER",
         symbol="NFTtT",
         template_index=1,
@@ -1168,8 +1168,8 @@ def test_transfer_nft_with_erc20_pool_fre(
         from_wallet=publisher_wallet,
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
-    registered_event = erc721_factory.get_event_log(
-        ERC721FactoryContract.EVENT_NFT_CREATED,
+    registered_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_NFT_CREATED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -1196,8 +1196,8 @@ def test_transfer_nft_with_erc20_pool_fre(
     )
     assert tx_result, "Failed to create ERC20 token."
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx_result)
-    registered_token_event = erc721_factory.get_event_log(
-        ERC721FactoryContract.EVENT_TOKEN_CREATED,
+    registered_token_event = data_nft_factory.get_event_log(
+        DataNFTFactoryContract.EVENT_TOKEN_CREATED,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -1228,7 +1228,7 @@ def test_transfer_nft_with_erc20_pool_fre(
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     pool_event = factory_router.get_event_log(
-        ERC721FactoryContract.EVENT_NEW_POOL,
+        DataNFTFactoryContract.EVENT_NEW_POOL,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,
@@ -1288,7 +1288,7 @@ def test_transfer_nft_with_erc20_pool_fre(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     fre_event = datatoken.get_event_log(
-        event_name=ERC721FactoryContract.EVENT_NEW_FIXED_RATE,
+        event_name=DataNFTFactoryContract.EVENT_NEW_FIXED_RATE,
         from_block=tx_receipt.blockNumber,
         to_block=web3.eth.block_number,
         filters=None,
@@ -1325,7 +1325,7 @@ def test_transfer_nft_with_erc20_pool_fre(
     )
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
     transfer_event = data_nft.get_event_log(
-        ERC721FactoryContract.EVENT_TRANSFER,
+        DataNFTFactoryContract.EVENT_TRANSFER,
         tx_receipt.blockNumber,
         web3.eth.block_number,
         None,

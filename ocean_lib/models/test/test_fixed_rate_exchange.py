@@ -5,7 +5,7 @@
 import pytest
 from web3 import exceptions
 
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.fixed_rate_exchange import (
     FixedExchangeBaseInOutData,
     FixedRateExchange,
@@ -111,7 +111,7 @@ def test_exchange_rate_creation(
     tx_receipt = web3.eth.wait_for_transaction_receipt(tx)
 
     registered_event = datatoken.get_event_log(
-        event_name=ERC721FactoryContract.EVENT_NEW_FIXED_RATE,
+        event_name=DataNFTFactoryContract.EVENT_NEW_FIXED_RATE,
         from_block=tx_receipt.blockNumber,
         to_block=web3.eth.block_number,
         filters=None,

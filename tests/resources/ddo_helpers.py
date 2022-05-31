@@ -15,7 +15,7 @@ from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.bpool import BPool
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.models.erc721_factory import ERC721FactoryContract
+from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean import Ocean
@@ -153,10 +153,10 @@ def create_basics(
     :param asset_type: used to populate metadata.type, optionally set to "algorithm"
     :param files: list of file objects creates with FilesTypeFactory
     """
-    erc721_factory_address = get_address_of_type(
-        config, ERC721FactoryContract.CONTRACT_NAME
+    data_nft_factory_address = get_address_of_type(
+        config, DataNFTFactoryContract.CONTRACT_NAME
     )
-    erc721_factory = ERC721FactoryContract(web3, erc721_factory_address)
+    data_nft_factory = DataNFTFactoryContract(web3, data_nft_factory_address)
 
     metadata = {
         "created": "2020-11-15T12:27:48Z",
@@ -175,7 +175,7 @@ def create_basics(
     encrypt_response = data_provider.encrypt(files, config.provider_url)
     encrypted_files = encrypt_response.content.decode("utf-8")
 
-    return erc721_factory, metadata, encrypted_files
+    return data_nft_factory, metadata, encrypted_files
 
 
 def get_registered_asset_with_access_service(ocean_instance, publisher_wallet):
