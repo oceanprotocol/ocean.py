@@ -46,8 +46,8 @@ def publish_flow(ocean: Ocean, config: Config):
     assert asset.nft["symbol"] == "NFTSYMBOL"
     assert asset.nft["address"] == data_nft.address
     assert asset.nft["owner"] == publisher_wallet.address
-    assert asset.datatokens[0]["name"] == "ERC20DT1"
-    assert asset.datatokens[0]["symbol"] == "ERC20DT1Symbol"
+    assert asset.datatokens[0]["name"] == "DT1"
+    assert asset.datatokens[0]["symbol"] == "DT1Symbol"
     assert asset.datatokens[0]["address"] == datatoken.address
 
 

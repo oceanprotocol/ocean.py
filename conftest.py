@@ -178,8 +178,8 @@ def data_nft(web3, publisher_wallet, data_nft_factory):
 def datatoken(web3, data_nft, publisher_wallet, data_nft_factory):
     tx_result = data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=publisher_wallet.address,
         fee_manager=publisher_wallet.address,
         publish_market_order_fee_address=publisher_wallet.address,
@@ -206,8 +206,8 @@ def datatoken(web3, data_nft, publisher_wallet, data_nft_factory):
 def datatoken_enterprise_token(web3, data_nft, publisher_wallet, data_nft_factory):
     tx_result = data_nft.create_erc20(
         template_index=2,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=publisher_wallet.address,
         fee_manager=publisher_wallet.address,
         publish_market_order_fee_address=publisher_wallet.address,

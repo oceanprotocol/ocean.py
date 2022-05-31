@@ -6,8 +6,8 @@ import pytest
 from web3 import Web3
 
 from ocean_lib.config import Config
-from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.currency import to_wei
@@ -167,8 +167,8 @@ def test_buy_dt_batch(
         nft_transferable=True,
         nft_owner=factory_deployer_wallet.address,
         datatoken_template=1,
-        datatoken_name="ERC20B1",
-        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_name="DTB1",
+        datatoken_symbol="DT1Symbol",
         datatoken_minter=factory_deployer_wallet.address,
         datatoken_fee_manager=consumer_wallet.address,
         datatoken_publish_market_order_fee_address=factory_deployer_wallet.address,
@@ -213,8 +213,8 @@ def test_buy_dt_batch(
         nft_transferable=True,
         nft_owner=factory_deployer_wallet.address,
         datatoken_template=1,
-        datatoken_name="ERC20B12",
-        datatoken_symbol="ERC20DT1Symbol2",
+        datatoken_name="DTB12",
+        datatoken_symbol="DT1Symbol2",
         datatoken_minter=factory_deployer_wallet.address,
         datatoken_fee_manager=consumer_wallet.address,
         datatoken_publish_market_order_fee_address=factory_deployer_wallet.address,
@@ -320,8 +320,8 @@ def test_stake_batch(
         nft_transferable=True,
         nft_owner=factory_deployer_wallet.address,
         datatoken_template=1,
-        datatoken_name="ERC20B1",
-        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_name="DTB1",
+        datatoken_symbol="DT1Symbol",
         datatoken_minter=factory_deployer_wallet.address,
         datatoken_fee_manager=consumer_wallet.address,
         datatoken_publish_market_order_fee_address=factory_deployer_wallet.address,
@@ -366,8 +366,8 @@ def test_stake_batch(
         nft_transferable=True,
         nft_owner=factory_deployer_wallet.address,
         datatoken_template=1,
-        datatoken_name="ERC20B12",
-        datatoken_symbol="ERC20DT1Symbol2",
+        datatoken_name="DTB12",
+        datatoken_symbol="DT1Symbol2",
         datatoken_minter=factory_deployer_wallet.address,
         datatoken_fee_manager=consumer_wallet.address,
         datatoken_publish_market_order_fee_address=factory_deployer_wallet.address,

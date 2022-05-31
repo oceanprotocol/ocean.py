@@ -260,8 +260,8 @@ def test_datatoken_creation(
     data_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
     tx_result = data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=publisher_wallet.address,
         fee_manager=consumer_wallet.address,
         publish_market_order_fee_address=publisher_wallet.address,
@@ -292,8 +292,8 @@ def test_datatoken_creation(
     with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.create_erc20(
             template_index=1,
-            name="ERC20DT1",
-            symbol="ERC20DT1Symbol",
+            name="DT1",
+            symbol="DT1Symbol",
             minter=publisher_wallet.address,
             fee_manager=consumer_wallet.address,
             publish_market_order_fee_address=publisher_wallet.address,
@@ -393,8 +393,8 @@ def test_nft_owner_transfer(
     with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.create_erc20(
             template_index=1,
-            name="ERC20DT1",
-            symbol="ERC20DT1Symbol",
+            name="DT1",
+            symbol="DT1Symbol",
             minter=publisher_wallet.address,
             fee_manager=publisher_wallet.address,
             publish_market_order_fee_address=publisher_wallet.address,
@@ -417,8 +417,8 @@ def test_nft_owner_transfer(
     # NewOwner now owns the NFT, is already Manager by default and has all roles
     data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=consumer_wallet.address,
         fee_manager=consumer_wallet.address,
         publish_market_order_fee_address=consumer_wallet.address,

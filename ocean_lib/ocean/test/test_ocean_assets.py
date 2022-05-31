@@ -541,8 +541,8 @@ def test_plain_asset_multiple_services(
     assert ddo.nft["symbol"] == "NFTSYMBOL"
     assert ddo.nft["address"] == data_nft.address
     assert ddo.nft["owner"] == publisher_wallet.address
-    assert ddo.datatokens[0]["name"] == "ERC20DT1"
-    assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
+    assert ddo.datatokens[0]["name"] == "DT1"
+    assert ddo.datatokens[0]["symbol"] == "DT1Symbol"
     assert ddo.datatokens[0]["address"] == datatoken.address
     assert ddo.credentials == build_credentials_dict()
     assert ddo.services[1].compute_values == compute_values
@@ -569,8 +569,8 @@ def test_encrypted_asset(
     assert ddo.nft["symbol"] == "NFTSYMBOL"
     assert ddo.nft["address"] == data_nft.address
     assert ddo.nft["owner"] == publisher_wallet.address
-    assert ddo.datatokens[0]["name"] == "ERC20DT1"
-    assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
+    assert ddo.datatokens[0]["name"] == "DT1"
+    assert ddo.datatokens[0]["symbol"] == "DT1Symbol"
     assert ddo.datatokens[0]["address"] == datatoken.address
 
 
@@ -595,8 +595,8 @@ def test_compressed_asset(
     assert ddo.nft["symbol"] == "NFTSYMBOL"
     assert ddo.nft["address"] == data_nft.address
     assert ddo.nft["owner"] == publisher_wallet.address
-    assert ddo.datatokens[0]["name"] == "ERC20DT1"
-    assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
+    assert ddo.datatokens[0]["name"] == "DT1"
+    assert ddo.datatokens[0]["symbol"] == "DT1Symbol"
     assert ddo.datatokens[0]["address"] == datatoken.address
 
 
@@ -621,8 +621,8 @@ def test_compressed_and_encrypted_asset(
     assert ddo.nft["name"] == "NFT"
     assert ddo.nft["symbol"] == "NFTSYMBOL"
     assert ddo.nft["owner"] == publisher_wallet.address
-    assert ddo.datatokens[0]["name"] == "ERC20DT1"
-    assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
+    assert ddo.datatokens[0]["name"] == "DT1"
+    assert ddo.datatokens[0]["symbol"] == "DT1Symbol"
     assert ddo.datatokens[0]["address"] == datatoken.address
 
 

@@ -417,8 +417,8 @@ def test_create_erc20(
 
     tx = data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=publisher_addr,
         fee_manager=consumer_addr,
         publish_market_order_fee_address=publisher_addr,
@@ -497,8 +497,8 @@ def test_create_datatoken_with_usdc_order_fee(
     publish_market_order_fee_amount_in_wei = to_wei(5)
     tx = data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=publisher_wallet.address,
         fee_manager=publisher_wallet.address,
         publish_market_order_fee_address=publisher_wallet.address,
@@ -554,8 +554,8 @@ def test_create_datatoken_with_non_owner(
     # Consumer creates ERC20
     tx = data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=publisher_wallet.address,
         fee_manager=publisher_wallet.address,
         publish_market_order_fee_address=publisher_wallet.address,
@@ -591,8 +591,8 @@ def test_fail_creating_erc20(consumer_wallet, publisher_addr, consumer_addr, dat
     with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.create_erc20(
             template_index=1,
-            name="ERC20DT1",
-            symbol="ERC20DT1Symbol",
+            name="DT1",
+            symbol="DT1Symbol",
             minter=publisher_addr,
             fee_manager=consumer_addr,
             publish_market_order_fee_address=publisher_addr,
@@ -677,8 +677,8 @@ def test_erc721_datatoken_functions(
     ]
     data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=publisher_addr,
         fee_manager=consumer_addr,
         publish_market_order_fee_address=publisher_addr,
@@ -840,8 +840,8 @@ def test_transfer_nft(
     # Creates an ERC20
     tx_result = data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=consumer_addr,
         fee_manager=consumer_addr,
         publish_market_order_fee_address=publisher_addr,
@@ -1188,8 +1188,8 @@ def test_transfer_nft_with_erc20_pool_fre(
     # Creates an ERC20
     tx_result = data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=publisher_addr,
         fee_manager=publisher_addr,
         publish_market_order_fee_address=publisher_addr,

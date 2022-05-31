@@ -258,8 +258,8 @@ def deploy_erc721_erc20(
 
     tx_result = data_nft.create_erc20(
         template_index=template_index,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=datatoken_minter.address,
         fee_manager=data_nft_publisher.address,
         publish_market_order_fee_address=data_nft_publisher.address,
@@ -458,7 +458,7 @@ def create_nft_erc20_with_pool(
         nft_token_uri="https://oceanprotocol.com/nft/",
         datatoken_template=1,
         datatoken_name="ERC20WithPool",
-        datatoken_symbol="ERC20P",
+        datatoken_symbol="DTP",
         datatoken_minter=publisher_wallet.address,
         datatoken_fee_manager=publisher_wallet.address,
         datatoken_publish_market_order_fee_address=publisher_wallet.address,

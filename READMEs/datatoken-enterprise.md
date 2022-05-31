@@ -52,8 +52,8 @@ In the Python console:
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 datatoken_enterprise_token = data_nft.create_datatoken(
-    name="ERC20DT1",  # name for ERC20 token
-    symbol="ERC20DT1Symbol",  # symbol for ERC20 token
+    name="DT1Name",  # name for datatoken
+    symbol="DT1Symbol",  # symbol for datatoken
     template_index=2,  # this is the value for Datatoken Enterprise token
     from_wallet=alice_wallet,
     datatoken_cap=ocean.to_wei(50)
@@ -161,8 +161,8 @@ In the Python console:
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 datatoken_enterprise_token = data_nft.create_datatoken(
-    name="ERC20DT1",  # name for ERC20 token
-    symbol="ERC20DT1Symbol",  # symbol for ERC20 token
+    name="DT1Name",  # name for datatoken
+    symbol="DT1Symbol",  # symbol for datatoken
     template_index=2,  # this is the value for Datatoken Enterprise token
     from_wallet=alice_wallet,
     datatoken_cap=ocean.to_wei(50)

@@ -118,8 +118,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     data_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
     tx_result = data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=publisher_wallet.address,
         fee_manager=consumer_wallet.address,
         publish_market_order_fee_address=publisher_wallet.address,
@@ -165,8 +165,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         nft_transferable=True,
         nft_owner=publisher_wallet.address,
         datatoken_template=1,
-        datatoken_name="ERC20B1",
-        datatoken_symbol="ERC20DT1Symbol",
+        datatoken_name="DTB1",
+        datatoken_symbol="DT1Symbol",
         datatoken_minter=publisher_wallet.address,
         datatoken_fee_manager=consumer_wallet.address,
         datatoken_publish_market_order_fee_address=publisher_wallet.address,
@@ -203,8 +203,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     assert registered_token_event, "Cannot find TokenCreated event."
     datatoken_address2 = registered_token_event[0].args.newTokenAddress
     datatoken2 = Datatoken(web3, datatoken_address2)
-    assert datatoken2.contract.caller.name() == "ERC20B1"
-    assert datatoken2.symbol() == "ERC20DT1Symbol"
+    assert datatoken2.contract.caller.name() == "DTB1"
+    assert datatoken2.symbol() == "DT1Symbol"
 
     # Tests creating NFT with ERC20 and with Pool successfully.
     side_staking_address = get_address_of_type(config, "Staking")
@@ -224,7 +224,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         nft_owner=publisher_wallet.address,
         datatoken_template=1,
         datatoken_name="ERC20WithPool",
-        datatoken_symbol="ERC20P",
+        datatoken_symbol="DTP",
         datatoken_minter=publisher_wallet.address,
         datatoken_fee_manager=consumer_wallet.address,
         datatoken_publish_market_order_fee_address=publisher_wallet.address,
@@ -272,7 +272,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     datatoken_address3 = registered_token_event[0].args.newTokenAddress
     datatoken3 = Datatoken(web3, datatoken_address3)
     assert datatoken3.contract.caller.name() == "ERC20WithPool"
-    assert datatoken3.symbol() == "ERC20P"
+    assert datatoken3.symbol() == "DTP"
 
     registered_pool_event = datatoken3.get_event_log(
         DataNFTFactoryContract.EVENT_NEW_POOL,
@@ -294,8 +294,8 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     # Create ERC20 data token for fees.
     tx = data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1P",
-        symbol="ERC20DT1SymbolP",
+        name="DT1P",
+        symbol="DT1SymbolP",
         minter=publisher_wallet.address,
         fee_manager=consumer_wallet.address,
         publish_market_order_fee_address=publisher_wallet.address,
@@ -324,7 +324,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         nft_owner=publisher_wallet.address,
         datatoken_template=1,
         datatoken_name="ERC20WithPool",
-        datatoken_symbol="ERC20P",
+        datatoken_symbol="DTP",
         datatoken_minter=publisher_wallet.address,
         datatoken_fee_manager=consumer_wallet.address,
         datatoken_publish_market_order_fee_address=publisher_wallet.address,
@@ -371,7 +371,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     datatoken_address4 = registered_token_event[0].args.newTokenAddress
     datatoken4 = Datatoken(web3, datatoken_address4)
     assert datatoken4.contract.caller.name() == "ERC20WithPool"
-    assert datatoken4.symbol() == "ERC20P"
+    assert datatoken4.symbol() == "DTP"
 
     registered_fixed_rate_event = datatoken4.get_event_log(
         DataNFTFactoryContract.EVENT_NEW_FIXED_RATE,
@@ -396,7 +396,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
         nft_owner=publisher_wallet.address,
         datatoken_template=1,
         datatoken_name="ERC20WithPool",
-        datatoken_symbol="ERC20P",
+        datatoken_symbol="DTP",
         datatoken_minter=publisher_wallet.address,
         datatoken_fee_manager=consumer_wallet.address,
         datatoken_publish_market_order_fee_address=publisher_wallet.address,
@@ -438,7 +438,7 @@ def test_main(web3, config, publisher_wallet, consumer_wallet, another_consumer_
     datatoken_address5 = registered_token_event[0].args.newTokenAddress
     datatoken5 = Datatoken(web3, datatoken_address5)
     assert datatoken5.contract.caller.name() == "ERC20WithPool"
-    assert datatoken5.symbol() == "ERC20P"
+    assert datatoken5.symbol() == "DTP"
 
     dispenser = Dispenser(web3, dispenser_address)
 
@@ -554,8 +554,8 @@ def test_start_multiple_order(
     data_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
     tx_result = data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=publisher_wallet.address,
         fee_manager=consumer_wallet.address,
         publish_market_order_fee_address=publisher_wallet.address,
@@ -734,8 +734,8 @@ def test_fail_create_erc20(
     with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.create_erc20(
             template_index=0,
-            name="ERC20DT1",
-            symbol="ERC20DT1Symbol",
+            name="DT1",
+            symbol="DT1Symbol",
             minter=publisher_wallet.address,
             fee_manager=consumer_wallet.address,
             publish_market_order_fee_address=publisher_wallet.address,
@@ -754,8 +754,8 @@ def test_fail_create_erc20(
     with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.create_erc20(
             template_index=3,
-            name="ERC20DT1",
-            symbol="ERC20DT1Symbol",
+            name="DT1",
+            symbol="DT1Symbol",
             minter=publisher_wallet.address,
             fee_manager=consumer_wallet.address,
             publish_market_order_fee_address=publisher_wallet.address,
@@ -775,8 +775,8 @@ def test_fail_create_erc20(
     with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.create_erc20(
             template_index=1,
-            name="ERC20DT1",
-            symbol="ERC20DT1Symbol",
+            name="DT1",
+            symbol="DT1Symbol",
             minter=publisher_wallet.address,
             fee_manager=consumer_wallet.address,
             publish_market_order_fee_address=publisher_wallet.address,
@@ -811,8 +811,8 @@ def test_datatoken_cap(
             nft_transferable=True,
             nft_owner=publisher_wallet.address,
             datatoken_template=2,
-            datatoken_name="ERC20B1",
-            datatoken_symbol="ERC20EntDT1Symbol",
+            datatoken_name="DTB1",
+            datatoken_symbol="EntDT1Symbol",
             datatoken_minter=publisher_wallet.address,
             datatoken_fee_manager=consumer_wallet.address,
             datatoken_publish_market_order_fee_address=publisher_wallet.address,
@@ -835,7 +835,7 @@ def test_datatoken_cap(
             nft_owner=publisher_wallet.address,
             datatoken_template=2,
             datatoken_name="DatatokenEnterpriseWithPool",
-            datatoken_symbol="ERC20EP",
+            datatoken_symbol="DTEP",
             datatoken_minter=publisher_wallet.address,
             datatoken_fee_manager=consumer_wallet.address,
             datatoken_publish_market_order_fee_address=publisher_wallet.address,
@@ -865,8 +865,8 @@ def test_datatoken_cap(
             nft_transferable=True,
             nft_owner=publisher_wallet.address,
             datatoken_template=2,
-            datatoken_name="ERC20WithFRE",
-            datatoken_symbol="ERC20EFRE",
+            datatoken_name="DTWithFRE",
+            datatoken_symbol="FTEFRE",
             datatoken_minter=publisher_wallet.address,
             datatoken_fee_manager=consumer_wallet.address,
             datatoken_publish_market_order_fee_address=publisher_wallet.address,
@@ -895,8 +895,8 @@ def test_datatoken_cap(
             nft_transferable=True,
             nft_owner=publisher_wallet.address,
             datatoken_template=2,
-            datatoken_name="ERC20WithDispenser",
-            datatoken_symbol="ERC20ED",
+            datatoken_name="DTWithDispenser",
+            datatoken_symbol="DTED",
             datatoken_minter=publisher_wallet.address,
             datatoken_fee_manager=consumer_wallet.address,
             datatoken_publish_market_order_fee_address=publisher_wallet.address,

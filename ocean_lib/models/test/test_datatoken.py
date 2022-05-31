@@ -54,8 +54,8 @@ def test_main(
 
     # Check erc20 params
     assert datatoken.get_id() == 1
-    assert datatoken.contract.caller.name() == "ERC20DT1"
-    assert datatoken.symbol() == "ERC20DT1Symbol"
+    assert datatoken.contract.caller.name() == "DT1"
+    assert datatoken.symbol() == "DT1Symbol"
     assert datatoken.decimals() == 18
     assert datatoken.cap() == MAX_UINT256
 
