@@ -18,8 +18,8 @@ from tests.resources.helper_functions import generate_wallet
 
 def asset_displayed_on_sale(ocean: Ocean):
     publisher_wallet = generate_wallet()
-    erc721_nft = ocean.create_erc721_nft("NFTToken1", "NFT1", publisher_wallet)
-    token_address = erc721_nft.address
+    data_nft = ocean.create_data_nft("NFTToken1", "NFT1", publisher_wallet)
+    token_address = data_nft.address
     assert token_address
 
     # Specify metadata and services, using the Branin test dataset
@@ -48,7 +48,7 @@ def asset_displayed_on_sale(ocean: Ocean):
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=erc721_nft.address,
+        erc721_address=data_nft.address,
         erc20_templates=[1],
         erc20_names=["Datatoken 1"],
         erc20_symbols=["DT1"],

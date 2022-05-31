@@ -57,7 +57,7 @@ def test_script_execution(script, monkeypatch):
                 "config",
                 "ocean",
                 "alice_wallet",
-                "erc721_nft",
+                "data_nft",
                 "datatoken",
             ]:
                 globs[key] = result[key]

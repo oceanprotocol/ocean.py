@@ -36,7 +36,7 @@ def consume_flow(ocean: Ocean, config: Config, tmpdir, files):
     }
     data_provider = DataServiceProvider
 
-    erc721_nft, datatoken = deploy_erc721_erc20(
+    data_nft, datatoken = deploy_erc721_erc20(
         ocean.web3, config, publisher_wallet, publisher_wallet
     )
     encrypt_response = data_provider.encrypt(
@@ -48,7 +48,7 @@ def consume_flow(ocean: Ocean, config: Config, tmpdir, files):
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=erc721_nft.address,
+        erc721_address=data_nft.address,
         erc20_templates=[1],
         erc20_names=["Datatoken 1"],
         erc20_symbols=["DT1"],
@@ -63,7 +63,7 @@ def consume_flow(ocean: Ocean, config: Config, tmpdir, files):
     assert ddo, "The asset is not created."
     assert ddo.nft["name"] == "NFT"
     assert ddo.nft["symbol"] == "NFTSYMBOL"
-    assert ddo.nft["address"] == erc721_nft.address
+    assert ddo.nft["address"] == data_nft.address
     assert ddo.nft["owner"] == publisher_wallet.address
     assert ddo.datatokens[0]["name"] == "Datatoken 1"
     assert ddo.datatokens[0]["symbol"] == "DT1"

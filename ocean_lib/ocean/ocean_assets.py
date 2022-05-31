@@ -22,9 +22,9 @@ from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.compute_input import ComputeInput
+from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.ocean.util import get_address_of_type
 from ocean_lib.services.service import Service
 from ocean_lib.structures.algorithm_metadata import AlgorithmMetadata
@@ -121,7 +121,7 @@ class OceanAssets:
     def deploy_datatoken(
         self,
         erc721_factory: ERC721FactoryContract,
-        erc721_nft: ERC721NFT,
+        data_nft: DataNFT,
         template_index: int,
         name: str,
         symbol: str,
@@ -133,7 +133,7 @@ class OceanAssets:
         bytess: List[bytes],
         from_wallet: Wallet,
     ) -> str:
-        tx_result = erc721_nft.create_erc20(
+        tx_result = data_nft.create_erc20(
             template_index=template_index,
             name=name,
             symbol=symbol,
@@ -283,7 +283,7 @@ class OceanAssets:
     ) -> Optional[Asset]:
         """Register an asset on-chain.
 
-        Creating/deploying a ERC721NFT contract and in the Metadata store (Aquarius).
+        Creating/deploying a DataNFT contract and in the Metadata store (Aquarius).
 
         :param metadata: dict conforming to the Metadata accepted by Ocean Protocol.
         :param publisher_wallet: Wallet of the publisher registering this asset.
@@ -352,12 +352,12 @@ class OceanAssets:
                 None,
             )
             erc721_address = registered_event[0].args.newTokenAddress
-            erc721_nft = ERC721NFT(self._web3, erc721_address)
-            if not erc721_nft:
+            data_nft = DataNFT(self._web3, erc721_address)
+            if not data_nft:
                 logger.warning("Creating new NFT failed.")
                 return None
             logger.info(
-                f"Successfully created NFT with address " f"{erc721_nft.address}."
+                f"Successfully created NFT with address " f"{data_nft.address}."
             )
         else:
             # verify nft address
@@ -367,13 +367,15 @@ class OceanAssets:
                 )
 
         assert erc721_address, "nft_address is required for publishing a dataset asset."
-        erc721_nft = ERC721NFT(self._web3, erc721_address)
+        data_nft = DataNFT(self._web3, erc721_address)
 
         # Create a DDO object
         asset = Asset()
 
         # Generating the did and adding to the ddo.
-        did = f"did:op:{create_checksum(erc721_nft.address + str(self._web3.eth.chain_id))}"
+        did = (
+            f"did:op:{create_checksum(data_nft.address + str(self._web3.eth.chain_id))}"
+        )
         asset.did = did
         # Check if it's already registered first!
         if self._aquarius.ddo_exists(did):
@@ -393,7 +395,7 @@ class OceanAssets:
                 erc20_addresses.append(
                     self.deploy_datatoken(
                         erc721_factory=erc721_factory,
-                        erc721_nft=erc721_nft,
+                        data_nft=data_nft,
                         template_index=erc20_templates[erc20_data_counter],
                         name=erc20_names[erc20_data_counter],
                         symbol=erc20_symbols[erc20_data_counter],
@@ -451,7 +453,7 @@ class OceanAssets:
             asset, provider_uri, encrypt_flag, compress_flag
         )
 
-        erc721_nft.set_metadata(
+        data_nft.set_metadata(
             metadata_state=0,
             metadata_decryptor_url=provider_uri,
             metadata_decryptor_address=publisher_wallet.address,
@@ -502,7 +504,7 @@ class OceanAssets:
             )
 
         assert erc721_address, "nft_address is required for publishing a dataset asset."
-        erc721_nft = ERC721NFT(self._web3, erc721_address)
+        data_nft = DataNFT(self._web3, erc721_address)
 
         assert asset.chain_id == self._web3.eth.chain_id, "Chain id mismatch."
 
@@ -517,7 +519,7 @@ class OceanAssets:
             asset, provider_uri, encrypt_flag, compress_flag
         )
 
-        tx_result = erc721_nft.set_metadata(
+        tx_result = data_nft.set_metadata(
             metadata_state=0,
             metadata_decryptor_url=provider_uri,
             metadata_decryptor_address=publisher_wallet.address,

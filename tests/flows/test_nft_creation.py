@@ -5,9 +5,9 @@
 import pytest
 from web3 import Web3, exceptions
 
+from ocean_lib.models.data_nft import DataNFT, DataNFTPermissions
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721NFT, ERC721Permissions
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from tests.resources.helper_functions import (
     deploy_erc721_erc20,
@@ -17,7 +17,7 @@ from tests.resources.helper_functions import (
 
 
 @pytest.mark.unit
-def test_erc721_roles(
+def test_data_nft_roles(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
     """Test erc721 implicit and explicit role assignments  as well as removing them"""
@@ -48,61 +48,57 @@ def test_erc721_roles(
     assert registered_event[0].event == ERC721FactoryContract.EVENT_NFT_CREATED
     assert registered_event[0].args.admin == publisher_wallet.address
     token_address = registered_event[0].args.newTokenAddress
-    erc721_nft = ERC721NFT(web3, token_address)
+    data_nft = DataNFT(web3, token_address)
 
     # Publisher should be a manager
-    assert erc721_nft.get_permissions(publisher_wallet.address)[
-        ERC721Permissions.MANAGER
+    assert data_nft.get_permissions(publisher_wallet.address)[
+        DataNFTPermissions.MANAGER
     ]
 
     # Consumer address should't be manager
-    assert not erc721_nft.get_permissions(consumer_wallet.address)[
-        ERC721Permissions.MANAGER
+    assert not data_nft.get_permissions(consumer_wallet.address)[
+        DataNFTPermissions.MANAGER
     ]
 
-    erc721_nft.add_manager(consumer_wallet.address, publisher_wallet)
+    data_nft.add_manager(consumer_wallet.address, publisher_wallet)
 
     # Consumer now should be manager
-    assert erc721_nft.get_permissions(consumer_wallet.address)[
-        ERC721Permissions.MANAGER
-    ]
+    assert data_nft.get_permissions(consumer_wallet.address)[DataNFTPermissions.MANAGER]
 
     # Check the rest of roles for another_consumer_wallet
-    assert not erc721_nft.get_permissions(another_consumer_wallet.address)[
-        ERC721Permissions.MANAGER
+    assert not data_nft.get_permissions(another_consumer_wallet.address)[
+        DataNFTPermissions.MANAGER
     ]
-    assert not erc721_nft.get_permissions(another_consumer_wallet.address)[
-        ERC721Permissions.DEPLOY_ERC20
+    assert not data_nft.get_permissions(another_consumer_wallet.address)[
+        DataNFTPermissions.DEPLOY_ERC20
     ]
-    assert not erc721_nft.get_permissions(another_consumer_wallet.address)[
-        ERC721Permissions.UPDATE_METADATA
+    assert not data_nft.get_permissions(another_consumer_wallet.address)[
+        DataNFTPermissions.UPDATE_METADATA
     ]
-    assert not erc721_nft.get_permissions(another_consumer_wallet.address)[
-        ERC721Permissions.STORE
+    assert not data_nft.get_permissions(another_consumer_wallet.address)[
+        DataNFTPermissions.STORE
     ]
 
-    erc721_nft.add_to_create_erc20_list(
-        another_consumer_wallet.address, consumer_wallet
-    )
-    erc721_nft.add_to_725_store_list(another_consumer_wallet.address, consumer_wallet)
-    erc721_nft.add_to_metadata_list(another_consumer_wallet.address, consumer_wallet)
+    data_nft.add_to_create_erc20_list(another_consumer_wallet.address, consumer_wallet)
+    data_nft.add_to_725_store_list(another_consumer_wallet.address, consumer_wallet)
+    data_nft.add_to_metadata_list(another_consumer_wallet.address, consumer_wallet)
 
     # Test rest of add roles functions with newly added manager
-    assert erc721_nft.get_permissions(another_consumer_wallet.address)[
-        ERC721Permissions.DEPLOY_ERC20
+    assert data_nft.get_permissions(another_consumer_wallet.address)[
+        DataNFTPermissions.DEPLOY_ERC20
     ]
-    assert erc721_nft.get_permissions(another_consumer_wallet.address)[
-        ERC721Permissions.UPDATE_METADATA
+    assert data_nft.get_permissions(another_consumer_wallet.address)[
+        DataNFTPermissions.UPDATE_METADATA
     ]
-    assert erc721_nft.get_permissions(another_consumer_wallet.address)[
-        ERC721Permissions.STORE
+    assert data_nft.get_permissions(another_consumer_wallet.address)[
+        DataNFTPermissions.STORE
     ]
 
     # Remove the manager
-    erc721_nft.remove_manager(consumer_wallet.address, publisher_wallet)
+    data_nft.remove_manager(consumer_wallet.address, publisher_wallet)
 
-    assert not erc721_nft.get_permissions(consumer_wallet.address)[
-        ERC721Permissions.MANAGER
+    assert not data_nft.get_permissions(consumer_wallet.address)[
+        DataNFTPermissions.MANAGER
     ]
 
 
@@ -190,10 +186,10 @@ def test_successful_erc721_creation(web3, config, publisher_wallet):
     assert registered_event[0].event == ERC721FactoryContract.EVENT_NFT_CREATED
     assert registered_event[0].args.admin == publisher_wallet.address
     token_address = registered_event[0].args.newTokenAddress
-    erc721_nft = ERC721NFT(web3, token_address)
-    owner_balance = erc721_nft.balance_of(publisher_wallet.address)
-    assert erc721_nft.contract.caller.name() == "NFT"
-    assert erc721_nft.symbol() == "NFTSYMBOL"
+    data_nft = DataNFT(web3, token_address)
+    owner_balance = data_nft.balance_of(publisher_wallet.address)
+    assert data_nft.contract.caller.name() == "NFT"
+    assert data_nft.symbol() == "NFTSYMBOL"
     assert owner_balance == 1
 
 
@@ -259,9 +255,9 @@ def test_erc20_creation(
         filters=None,
     )
     token_address = registered_event[0].args.newTokenAddress
-    erc721_nft = ERC721NFT(web3, token_address)
-    erc721_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
-    tx_result = erc721_nft.create_erc20(
+    data_nft = DataNFT(web3, token_address)
+    data_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
+    tx_result = data_nft.create_erc20(
         template_index=1,
         name="ERC20DT1",
         symbol="ERC20DT1Symbol",
@@ -293,7 +289,7 @@ def test_erc20_creation(
 
     # Tests failed creation of ERC20
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_nft.create_erc20(
+        data_nft.create_erc20(
             template_index=1,
             name="ERC20DT1",
             symbol="ERC20DT1Symbol",
@@ -342,7 +338,7 @@ def test_erc20_mint_function(
 
 
 @pytest.mark.unit
-def test_erc20_set_data(web3, config, publisher_wallet, erc721_nft, datatoken):
+def test_erc20_set_data(web3, config, publisher_wallet, data_nft, datatoken):
     """Test erc20 data set functions"""
 
     """This is a special metadata, it's callable only from the erc20Token contract and
@@ -353,46 +349,46 @@ def test_erc20_set_data(web3, config, publisher_wallet, erc721_nft, datatoken):
 
     value = Web3.toHex(text="SomeData")
 
-    assert Web3.toHex(erc721_nft.get_data(key)) == "0x"
+    assert Web3.toHex(data_nft.get_data(key)) == "0x"
     datatoken.set_data(value, publisher_wallet)
 
-    assert Web3.toHex(erc721_nft.get_data(key)) == value
+    assert Web3.toHex(data_nft.get_data(key)) == value
     """This one is the generic version of updating data into the key-value story.
     Only users with 'store' permission can do that.
     NOTE: in this function the key is chosen by the caller."""
 
-    erc721_nft.set_new_data(Web3.keccak(text="arbitrary text"), value, publisher_wallet)
+    data_nft.set_new_data(Web3.keccak(text="arbitrary text"), value, publisher_wallet)
 
-    res = erc721_nft.get_data(Web3.keccak(text="arbitrary text"))
+    res = data_nft.get_data(Web3.keccak(text="arbitrary text"))
 
     assert Web3.toHex(res) == value
 
 
 @pytest.mark.unit
 def test_nft_owner_transfer(
-    web3, config, publisher_wallet, consumer_wallet, erc721_nft, datatoken
+    web3, config, publisher_wallet, consumer_wallet, data_nft, datatoken
 ):
     """Test erc721 ownership transfer on token transfer"""
 
-    assert erc721_nft.owner_of(1) == publisher_wallet.address
+    assert data_nft.owner_of(1) == publisher_wallet.address
 
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_nft.transfer_from(
+        data_nft.transfer_from(
             consumer_wallet.address, publisher_wallet.address, 1, publisher_wallet
         )
     assert (
         err.value.args[0]
         == "execution reverted: VM Exception while processing transaction: revert ERC721: transfer of token that is not own"
     )
-    erc721_nft.transfer_from(
+    data_nft.transfer_from(
         publisher_wallet.address, consumer_wallet.address, 1, publisher_wallet
     )
 
-    assert erc721_nft.balance_of(publisher_wallet.address) == 0
-    assert erc721_nft.owner_of(1) == consumer_wallet.address
+    assert data_nft.balance_of(publisher_wallet.address) == 0
+    assert data_nft.owner_of(1) == consumer_wallet.address
     # Owner is not NFT owner anymore, nor has any other role, neither older users
     with pytest.raises(exceptions.ContractLogicError) as err:
-        erc721_nft.create_erc20(
+        data_nft.create_erc20(
             template_index=1,
             name="ERC20DT1",
             symbol="ERC20DT1Symbol",
@@ -416,7 +412,7 @@ def test_nft_owner_transfer(
     )
 
     # NewOwner now owns the NFT, is already Manager by default and has all roles
-    erc721_nft.create_erc20(
+    data_nft.create_erc20(
         template_index=1,
         name="ERC20DT1",
         symbol="ERC20DT1Symbol",

@@ -9,8 +9,8 @@ import pytest
 from web3 import Web3
 
 from ocean_lib.config import Config
+from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.currency import MAX_WEI, parse_units, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
@@ -51,7 +51,7 @@ def test_reuse_order_fees(
     factory_deployer_wallet: Wallet,
     publish_market_wallet: Wallet,
     consume_market_wallet: Wallet,
-    erc721_nft: ERC721NFT,
+    data_nft: DataNFT,
     file1: FilesType,
     base_token_name: str,
     provider_fee_in_unit: str,
@@ -73,7 +73,7 @@ def test_reuse_order_fees(
         web3=web3,
         config=config,
         file=file1,
-        erc721_nft=erc721_nft,
+        data_nft=data_nft,
         publisher_wallet=publisher_wallet,
         publish_market_order_fee_address=publish_market_wallet.address,
         publish_market_order_fee_token=bt.address,

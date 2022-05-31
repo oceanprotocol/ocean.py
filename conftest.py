@@ -7,10 +7,10 @@ import os
 import pytest
 
 from ocean_lib.aquarius.aquarius import Aquarius
+from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.erc20_enterprise import ERC20Enterprise
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.side_staking import SideStaking
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
@@ -158,7 +158,7 @@ def provider_wallet():
 
 
 @pytest.fixture
-def erc721_nft(web3, publisher_wallet, erc721_factory):
+def data_nft(web3, publisher_wallet, erc721_factory):
     tx = erc721_factory.deploy_erc721_contract(
         name="NFT",
         symbol="NFTSYMBOL",
@@ -171,12 +171,12 @@ def erc721_nft(web3, publisher_wallet, erc721_factory):
         from_wallet=publisher_wallet,
     )
     token_address = erc721_factory.get_token_address(tx)
-    return ERC721NFT(web3, token_address)
+    return DataNFT(web3, token_address)
 
 
 @pytest.fixture
-def datatoken(web3, erc721_nft, publisher_wallet, erc721_factory):
-    tx_result = erc721_nft.create_erc20(
+def datatoken(web3, data_nft, publisher_wallet, erc721_factory):
+    tx_result = data_nft.create_erc20(
         template_index=1,
         name="ERC20DT1",
         symbol="ERC20DT1Symbol",
@@ -203,8 +203,8 @@ def datatoken(web3, erc721_nft, publisher_wallet, erc721_factory):
 
 
 @pytest.fixture
-def erc20_enterprise_token(web3, erc721_nft, publisher_wallet, erc721_factory):
-    tx_result = erc721_nft.create_erc20(
+def erc20_enterprise_token(web3, data_nft, publisher_wallet, erc721_factory):
+    tx_result = data_nft.create_erc20(
         template_index=2,
         name="ERC20DT1",
         symbol="ERC20DT1Symbol",

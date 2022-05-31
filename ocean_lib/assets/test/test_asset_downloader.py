@@ -161,7 +161,7 @@ def test_ocean_assets_download_destination_file(
     tmpdir,
     publisher_wallet,
     publisher_ocean_instance,
-    erc721_nft,
+    data_nft,
     datatoken,
 ):
     """Convert tmpdir: py._path.local.LocalPath to str, satisfy enforce-typing."""
@@ -171,7 +171,7 @@ def test_ocean_assets_download_destination_file(
         str(tmpdir),
         publisher_wallet,
         publisher_ocean_instance,
-        erc721_nft,
+        data_nft,
         datatoken,
     )
 
@@ -182,7 +182,7 @@ def ocean_assets_download_destination_file_helper(
     tmpdir,
     publisher_wallet,
     publisher_ocean_instance,
-    erc721_nft,
+    data_nft,
     datatoken,
 ):
     """Downloading to an existing directory."""
@@ -193,7 +193,7 @@ def ocean_assets_download_destination_file_helper(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=erc721_nft.address,
+        erc721_address=data_nft.address,
         deployed_datatokens=[datatoken],
     )
     access_service = get_first_service_by_type(ddo, ServiceTypes.ASSET_ACCESS)

@@ -12,8 +12,8 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.config import Config
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
+from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
-from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.ocean.ocean_assets import OceanAssets
 from ocean_lib.services.service import Service
@@ -64,7 +64,7 @@ def test_start_order_fees(
     factory_deployer_wallet: Wallet,
     publish_market_wallet: Wallet,
     consume_market_wallet: Wallet,
-    erc721_nft: ERC721NFT,
+    data_nft: DataNFT,
     file1: FilesType,
     factory_router: FactoryRouter,
     base_token_name: str,
@@ -92,7 +92,7 @@ def test_start_order_fees(
         web3=web3,
         config=config,
         file=file1,
-        erc721_nft=erc721_nft,
+        data_nft=data_nft,
         publisher_wallet=publisher_wallet,
         publish_market_order_fee_address=publish_market_wallet.address,
         publish_market_order_fee_token=bt.address,
@@ -216,7 +216,7 @@ def create_asset_with_order_fee_and_timeout(
     web3: Web3,
     config: Config,
     file: FilesType,
-    erc721_nft: ERC721NFT,
+    data_nft: DataNFT,
     publisher_wallet: Wallet,
     publish_market_order_fee_address: str,
     publish_market_order_fee_token: str,
@@ -225,7 +225,7 @@ def create_asset_with_order_fee_and_timeout(
 ) -> Tuple[Asset, Service, Datatoken]:
 
     # Create datatoken with order fee
-    datatoken = erc721_nft.create_datatoken(
+    datatoken = data_nft.create_datatoken(
         template_index=1,
         name="Datatoken 1",
         symbol="DT1",
@@ -269,7 +269,7 @@ def create_asset_with_order_fee_and_timeout(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         services=[service],
-        erc721_address=erc721_nft.address,
+        erc721_address=data_nft.address,
         deployed_datatokens=[datatoken],
     )
 

@@ -17,16 +17,16 @@ from tests.resources.helper_functions import deploy_erc721_erc20, generate_walle
 
 
 def _get_publishing_requirements(ocean: Ocean, wallet: Wallet, config: Config):
-    erc721_nft, datatoken = deploy_erc721_erc20(ocean.web3, config, wallet, wallet)
+    data_nft, datatoken = deploy_erc721_erc20(ocean.web3, config, wallet, wallet)
     data_provider = DataServiceProvider
     _, metadata, encrypted_files = create_basics(config, ocean.web3, data_provider)
-    return erc721_nft, datatoken, metadata, encrypted_files
+    return data_nft, datatoken, metadata, encrypted_files
 
 
 def publish_flow(ocean: Ocean, config: Config):
     publisher_wallet = generate_wallet()
     (
-        erc721_nft,
+        data_nft,
         datatoken,
         metadata,
         encrypted_files,
@@ -35,7 +35,7 @@ def publish_flow(ocean: Ocean, config: Config):
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=erc721_nft.address,
+        erc721_address=data_nft.address,
         deployed_datatokens=[datatoken],
         encrypt_flag=True,
         compress_flag=True,
@@ -44,7 +44,7 @@ def publish_flow(ocean: Ocean, config: Config):
     assert asset, "The asset is not created."
     assert asset.nft["name"] == "NFT"
     assert asset.nft["symbol"] == "NFTSYMBOL"
-    assert asset.nft["address"] == erc721_nft.address
+    assert asset.nft["address"] == data_nft.address
     assert asset.nft["owner"] == publisher_wallet.address
     assert asset.datatokens[0]["name"] == "ERC20DT1"
     assert asset.datatokens[0]["symbol"] == "ERC20DT1Symbol"

@@ -15,7 +15,7 @@ from ocean_lib.web3_internal.contract_base import ContractBase
 from ocean_lib.web3_internal.wallet import Wallet
 
 
-class ERC721Permissions(IntEnum):
+class DataNFTPermissions(IntEnum):
     MANAGER = 0
     DEPLOY_ERC20 = 1
     UPDATE_METADATA = 2
@@ -40,7 +40,7 @@ class Flags(IntFlag):
 
 
 @enforce_types
-class ERC721NFT(ContractBase):
+class DataNFT(ContractBase):
     CONTRACT_NAME = "ERC721Template"
 
     EVENT_TOKEN_CREATED = "TokenCreated"
@@ -224,7 +224,7 @@ class ERC721NFT(ContractBase):
 
     @enforce_types
     def add_multiple_users_to_roles(
-        self, addresses: List[str], roles: List[ERC721Permissions], from_wallet: Wallet
+        self, addresses: List[str], roles: List[DataNFTPermissions], from_wallet: Wallet
     ) -> str:
         return self.send_transaction(
             "addMultipleUsersToRoles",

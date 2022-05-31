@@ -8,8 +8,8 @@ import pytest
 from web3 import exceptions
 from web3.main import Web3
 
+from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken, DatatokenRoles
-from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.web3_internal.constants import MAX_UINT256
 from ocean_lib.web3_internal.currency import to_wei
 from ocean_lib.web3_internal.utils import split_signature
@@ -47,7 +47,7 @@ def test_main(
     web3: Web3,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
-    erc721_nft: ERC721NFT,
+    data_nft: DataNFT,
     datatoken: Datatoken,
 ):
     """Tests successful function calls"""
@@ -60,7 +60,7 @@ def test_main(
     assert datatoken.cap() == MAX_UINT256
 
     # Check erc721 address
-    assert datatoken.get_erc721_address() == erc721_nft.address
+    assert datatoken.get_erc721_address() == data_nft.address
 
     # Check that the Datatoken contract is initialized
     assert datatoken.is_initialized()
@@ -119,7 +119,7 @@ def test_main(
 
     datatoken.set_data(data=value, from_wallet=publisher_wallet)
 
-    assert web3.toHex(erc721_nft.get_data(key)) == value
+    assert web3.toHex(data_nft.get_data(key)) == value
 
     # Should succeed to call cleanPermissions if NFTOwner
     datatoken.clean_permissions(from_wallet=publisher_wallet)
@@ -130,7 +130,7 @@ def test_main(
 
 
 def test_start_order(
-    web3, config, publisher_wallet, consumer_wallet, erc721_nft, datatoken
+    web3, config, publisher_wallet, consumer_wallet, data_nft, datatoken
 ):
     """Tests startOrder functionality without publish fees, consume fees."""
     # Mint erc20 tokens to use

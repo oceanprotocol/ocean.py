@@ -51,7 +51,7 @@ In the Python console:
 ```python
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
-erc20_enterprise_token = erc721_nft.create_datatoken(
+erc20_enterprise_token = data_nft.create_datatoken(
     name="ERC20DT1",  # name for ERC20 token
     symbol="ERC20DT1Symbol",  # symbol for ERC20 token
     template_index=2,  # this is the value for ERC20 Enterprise token
@@ -160,7 +160,7 @@ In the Python console:
 ```python
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
-erc20_enterprise_token = erc721_nft.create_datatoken(
+erc20_enterprise_token = data_nft.create_datatoken(
     name="ERC20DT1",  # name for ERC20 token
     symbol="ERC20DT1Symbol",  # symbol for ERC20 token
     template_index=2,  # this is the value for ERC20 Enterprise token

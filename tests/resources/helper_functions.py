@@ -20,9 +20,9 @@ from web3 import Web3
 from ocean_lib.config import Config
 from ocean_lib.example_config import ExampleConfig
 from ocean_lib.models.bpool import BPool
+from ocean_lib.models.data_nft import DataNFT
 from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.erc721_factory import ERC721FactoryContract
-from ocean_lib.models.erc721_nft import ERC721NFT
 from ocean_lib.ocean.ocean import Ocean
 from ocean_lib.ocean.util import get_contracts_addresses
 from ocean_lib.ocean.util import get_web3 as util_get_web3
@@ -230,11 +230,11 @@ def deploy_erc721_erc20(
     erc721_publisher: Wallet,
     erc20_minter: Optional[Wallet] = None,
     template_index: Optional[int] = 1,
-) -> Union[ERC721NFT, Tuple[ERC721NFT, Datatoken]]:
-    """Helper function to deploy an ERC721NFT using erc721_publisher Wallet
-    and an Datatoken data token with the newly ERC721NFT using erc20_minter Wallet
+) -> Union[DataNFT, Tuple[DataNFT, Datatoken]]:
+    """Helper function to deploy an DataNFT using erc721_publisher Wallet
+    and an Datatoken data token with the newly DataNFT using erc20_minter Wallet
     if the wallet is provided.
-    :rtype: Union[ERC721NFT, Tuple[ERC721NFT, Datatoken]]
+    :rtype: Union[DataNFT, Tuple[DataNFT, Datatoken]]
     """
 
     erc721_factory = ERC721FactoryContract(
@@ -252,11 +252,11 @@ def deploy_erc721_erc20(
         from_wallet=erc721_publisher,
     )
     token_address = erc721_factory.get_token_address(tx)
-    erc721_nft = ERC721NFT(web3, token_address)
+    data_nft = DataNFT(web3, token_address)
     if not erc20_minter:
-        return erc721_nft
+        return data_nft
 
-    tx_result = erc721_nft.create_erc20(
+    tx_result = data_nft.create_erc20(
         template_index=template_index,
         name="ERC20DT1",
         symbol="ERC20DT1Symbol",
@@ -281,7 +281,7 @@ def deploy_erc721_erc20(
 
     datatoken = Datatoken(web3, erc20_address)
 
-    return erc721_nft, datatoken
+    return data_nft, datatoken
 
 
 @enforce_types
@@ -488,8 +488,8 @@ def create_nft_erc20_with_pool(
         web3.eth.block_number,
         None,
     )
-    erc721_token_address = registered_nft_event[0].args.newTokenAddress
-    erc721_token = ERC721NFT(web3, erc721_token_address)
+    data_nft_token_address = registered_nft_event[0].args.newTokenAddress
+    data_nft_token = DataNFT(web3, data_nft_token_address)
 
     registered_token_event = erc721_factory.get_event_log(
         ERC721FactoryContract.EVENT_TOKEN_CREATED,
@@ -512,7 +512,7 @@ def create_nft_erc20_with_pool(
     bpool = BPool(web3, pool_address)
     pool_token = Datatoken(web3, pool_address)
 
-    return bpool, datatoken, erc721_token, pool_token
+    return bpool, datatoken, data_nft_token, pool_token
 
 
 def join_pool_with_max_base_token(bpool, web3, base_token, wallet, amt: int = 0):

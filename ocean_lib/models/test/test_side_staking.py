@@ -29,7 +29,7 @@ def test_side_staking(
     another_consumer_wallet,
     factory_deployer_wallet,
     factory_router,
-    erc721_nft,
+    data_nft,
     datatoken,
 ):
     lp_swap_fee = int(1e15)
