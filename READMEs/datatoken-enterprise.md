@@ -43,7 +43,7 @@ Set the required enviroment variables as described in [data-nfts-and-datatokens-
 In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
 
 Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
-- [x] 2.1 Create an ERC721 data NFT
+- [x] 2.1 Create a data NFT
 
 ## 3. Dispenser Flow
 
@@ -52,8 +52,8 @@ In the Python console:
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 datatoken_enterprise_token = data_nft.create_datatoken(
-    name="ERC20DT1",  # name for ERC20 token
-    symbol="ERC20DT1Symbol",  # symbol for ERC20 token
+    name="DT1Name",  # name for datatoken
+    symbol="DT1Symbol",  # symbol for datatoken
     template_index=2,  # this is the value for Datatoken Enterprise token
     from_wallet=alice_wallet,
     datatoken_cap=ocean.to_wei(50)
@@ -161,8 +161,8 @@ In the Python console:
 from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 
 datatoken_enterprise_token = data_nft.create_datatoken(
-    name="ERC20DT1",  # name for ERC20 token
-    symbol="ERC20DT1Symbol",  # symbol for ERC20 token
+    name="DT1Name",  # name for datatoken
+    symbol="DT1Symbol",  # symbol for datatoken
     template_index=2,  # this is the value for Datatoken Enterprise token
     from_wallet=alice_wallet,
     datatoken_cap=ocean.to_wei(50)

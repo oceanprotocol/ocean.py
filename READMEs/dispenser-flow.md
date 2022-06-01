@@ -37,8 +37,8 @@ Set the required enviroment variables as described in [data-nfts-and-datatokens-
 In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
 
 Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
-- [x] 2.1 Create an ERC721 data NFT
-- [x] 2.2 Create an ERC20 datatoken from the data NFT
+- [x] 2.1 Create a data NFT
+- [x] 2.2 Create a datatoken from the data NFT
 
 ### 3. Dispenser creation & activation
 

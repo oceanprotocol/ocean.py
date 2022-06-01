@@ -14,8 +14,8 @@ from ocean_lib.agreements.service_types import ServiceTypes
 from ocean_lib.assets.asset import Asset
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.models.bpool import BPool
-from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.data_nft_factory import DataNFTFactoryContract
+from ocean_lib.models.datatoken import Datatoken
 from ocean_lib.models.factory_router import FactoryRouter
 from ocean_lib.models.fixed_rate_exchange import FixedRateExchange
 from ocean_lib.ocean.ocean import Ocean
@@ -126,15 +126,15 @@ def create_asset(ocean, publisher, metadata=None, files=None):
         metadata,
         publisher,
         encrypted_files,
-        erc20_templates=[1],
-        erc20_names=["Datatoken 1"],
-        erc20_symbols=["DT1"],
-        erc20_minters=[publisher.address],
-        erc20_fee_managers=[publisher.address],
-        erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        erc20_publish_market_order_fee_tokens=[ocean.OCEAN_address],
-        erc20_publish_market_order_fee_amounts=[0],
-        erc20_bytess=[[b""]],
+        datatoken_templates=[1],
+        datatoken_names=["Datatoken 1"],
+        datatoken_symbols=["DT1"],
+        datatoken_minters=[publisher.address],
+        datatoken_fee_managers=[publisher.address],
+        datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
+        datatoken_publish_market_order_fee_tokens=[ocean.OCEAN_address],
+        datatoken_publish_market_order_fee_amounts=[0],
+        datatoken_bytess=[[b""]],
     )
 
     return asset
@@ -231,7 +231,7 @@ def get_registered_asset_with_compute_service(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         services=[compute_service],
-        erc721_address=data_nft.address,
+        data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
         encrypt_flag=True,
         compress_flag=True,
@@ -342,5 +342,5 @@ def get_opc_collector_address_from_exchange(exchange: FixedRateExchange) -> str:
     return FactoryRouter(exchange.web3, exchange.router()).get_opc_collector()
 
 
-def get_opc_collector_address_from_erc20(datatoken: Datatoken) -> str:
+def get_opc_collector_address_from_datatoken(datatoken: Datatoken) -> str:
     return FactoryRouter(datatoken.web3, datatoken.router()).get_opc_collector()

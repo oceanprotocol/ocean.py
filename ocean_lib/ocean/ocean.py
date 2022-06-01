@@ -134,7 +134,7 @@ class Ocean:
         from_wallet: Wallet,
         token_uri: Optional[str] = "https://oceanprotocol.com/nft/",
         template_index: Optional[int] = 1,
-        additional_erc20_deployer: Optional[str] = None,
+        additional_datatoken_deployer: Optional[str] = None,
         additional_metadata_updater: Optional[str] = None,
         transferable: bool = True,
         owner: Optional[str] = None,
@@ -157,14 +157,14 @@ class Ocean:
         :param symbol: data NFT token symbol, str
         :param from_wallet: wallet instance, wallet
         :param template_index: Template type of the token, int
-        :param additional_erc20_deployer: Address of another ERC20 deployer, str
+        :param additional_datatoken_deployer: Address of another ERC20 deployer, str
         :param token_uri: URL for the data NFT token, str
 
         :return: `DataNFT` instance
         """
 
-        if not additional_erc20_deployer:
-            additional_erc20_deployer = ZERO_ADDRESS
+        if not additional_datatoken_deployer:
+            additional_datatoken_deployer = ZERO_ADDRESS
 
         if not additional_metadata_updater:
             additional_metadata_updater = ZERO_ADDRESS
@@ -176,7 +176,7 @@ class Ocean:
             symbol=symbol,
             template_index=template_index,
             additional_metadata_updater=additional_metadata_updater,
-            additional_erc20_deployer=additional_erc20_deployer,
+            additional_datatoken_deployer=additional_datatoken_deployer,
             token_uri=token_uri,
             transferable=transferable,
             owner=owner if owner is not None else from_wallet.address,

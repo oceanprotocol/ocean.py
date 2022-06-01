@@ -40,15 +40,17 @@ def test_aqua_functions_for_single_ddo(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc20_templates=[1],
-        erc20_names=["Datatoken 1"],
-        erc20_symbols=["DT1"],
-        erc20_minters=[publisher_wallet.address],
-        erc20_fee_managers=[publisher_wallet.address],
-        erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        erc20_publish_market_order_fee_tokens=[publisher_ocean_instance.OCEAN_address],
-        erc20_publish_market_order_fee_amounts=[0],
-        erc20_bytess=[[b""]],
+        datatoken_templates=[1],
+        datatoken_names=["Datatoken 1"],
+        datatoken_symbols=["DT1"],
+        datatoken_minters=[publisher_wallet.address],
+        datatoken_fee_managers=[publisher_wallet.address],
+        datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
+        datatoken_publish_market_order_fee_tokens=[
+            publisher_ocean_instance.OCEAN_address
+        ],
+        datatoken_publish_market_order_fee_amounts=[0],
+        datatoken_bytess=[[b""]],
     )
 
     asset = aquarius_instance.wait_for_asset(ddo.did)

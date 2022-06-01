@@ -375,7 +375,7 @@ def test_plain_asset_with_one_datatoken(
         symbol="NFTSYMBOL",
         template_index=1,
         additional_metadata_updater=ZERO_ADDRESS,
-        additional_erc20_deployer=ZERO_ADDRESS,
+        additional_datatoken_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
         owner=publisher_wallet.address,
@@ -390,27 +390,29 @@ def test_plain_asset_with_one_datatoken(
     )
     assert registered_event[0].event == "NFTCreated"
     assert registered_event[0].args.admin == publisher_wallet.address
-    erc721_address = registered_event[0].args.newTokenAddress
+    data_nft_address = registered_event[0].args.newTokenAddress
 
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=erc721_address,
-        erc20_templates=[1],
-        erc20_names=["Datatoken 1"],
-        erc20_symbols=["DT1"],
-        erc20_minters=[publisher_wallet.address],
-        erc20_fee_managers=[publisher_wallet.address],
-        erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        erc20_publish_market_order_fee_tokens=[publisher_ocean_instance.OCEAN_address],
-        erc20_publish_market_order_fee_amounts=[0],
-        erc20_bytess=[[b""]],
+        data_nft_address=data_nft_address,
+        datatoken_templates=[1],
+        datatoken_names=["Datatoken 1"],
+        datatoken_symbols=["DT1"],
+        datatoken_minters=[publisher_wallet.address],
+        datatoken_fee_managers=[publisher_wallet.address],
+        datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
+        datatoken_publish_market_order_fee_tokens=[
+            publisher_ocean_instance.OCEAN_address
+        ],
+        datatoken_publish_market_order_fee_amounts=[0],
+        datatoken_bytess=[[b""]],
     )
     assert ddo, "The asset is not created."
     assert ddo.nft["name"] == "NFT1"
     assert ddo.nft["symbol"] == "NFTSYMBOL"
-    assert ddo.nft["address"] == erc721_address
+    assert ddo.nft["address"] == data_nft_address
     assert ddo.nft["owner"] == publisher_wallet.address
     assert ddo.datatokens[0]["name"] == "Datatoken 1"
     assert ddo.datatokens[0]["symbol"] == "DT1"
@@ -432,7 +434,7 @@ def test_plain_asset_multiple_datatokens(
         symbol="NFT2SYMBOL",
         template_index=1,
         additional_metadata_updater=ZERO_ADDRESS,
-        additional_erc20_deployer=ZERO_ADDRESS,
+        additional_datatoken_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
         owner=publisher_wallet.address,
@@ -448,30 +450,30 @@ def test_plain_asset_multiple_datatokens(
 
     assert registered_event[0].event == "NFTCreated"
     assert registered_event[0].args.admin == publisher_wallet.address
-    erc721_address2 = registered_event[0].args.newTokenAddress
+    data_nft_address2 = registered_event[0].args.newTokenAddress
 
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=erc721_address2,
-        erc20_templates=[1, 1],
-        erc20_names=["Datatoken 2", "Datatoken 3"],
-        erc20_symbols=["DT2", "DT3"],
-        erc20_minters=[publisher_wallet.address, publisher_wallet.address],
-        erc20_fee_managers=[publisher_wallet.address, publisher_wallet.address],
-        erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS, ZERO_ADDRESS],
-        erc20_publish_market_order_fee_tokens=[
+        data_nft_address=data_nft_address2,
+        datatoken_templates=[1, 1],
+        datatoken_names=["Datatoken 2", "Datatoken 3"],
+        datatoken_symbols=["DT2", "DT3"],
+        datatoken_minters=[publisher_wallet.address, publisher_wallet.address],
+        datatoken_fee_managers=[publisher_wallet.address, publisher_wallet.address],
+        datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS, ZERO_ADDRESS],
+        datatoken_publish_market_order_fee_tokens=[
             publisher_ocean_instance.OCEAN_address,
             publisher_ocean_instance.OCEAN_address,
         ],
-        erc20_publish_market_order_fee_amounts=[0, 0],
-        erc20_bytess=[[b""], [b""]],
+        datatoken_publish_market_order_fee_amounts=[0, 0],
+        datatoken_bytess=[[b""], [b""]],
     )
     assert ddo, "The asset is not created."
     assert ddo.nft["name"] == "NFT2"
     assert ddo.nft["symbol"] == "NFT2SYMBOL"
-    assert ddo.nft["address"] == erc721_address2
+    assert ddo.nft["address"] == data_nft_address2
     assert ddo.nft["owner"] == publisher_wallet.address
     assert ddo.datatokens[0]["name"] == "Datatoken 2"
     assert ddo.datatokens[0]["symbol"] == "DT2"
@@ -531,7 +533,7 @@ def test_plain_asset_multiple_services(
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
         services=[access_service, compute_service],
-        erc721_address=data_nft.address,
+        data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
     )
     assert ddo, "The asset is not created."
@@ -539,8 +541,8 @@ def test_plain_asset_multiple_services(
     assert ddo.nft["symbol"] == "NFTSYMBOL"
     assert ddo.nft["address"] == data_nft.address
     assert ddo.nft["owner"] == publisher_wallet.address
-    assert ddo.datatokens[0]["name"] == "ERC20DT1"
-    assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
+    assert ddo.datatokens[0]["name"] == "DT1"
+    assert ddo.datatokens[0]["symbol"] == "DT1Symbol"
     assert ddo.datatokens[0]["address"] == datatoken.address
     assert ddo.credentials == build_credentials_dict()
     assert ddo.services[1].compute_values == compute_values
@@ -558,7 +560,7 @@ def test_encrypted_asset(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=data_nft.address,
+        data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
         encrypt_flag=True,
     )
@@ -567,8 +569,8 @@ def test_encrypted_asset(
     assert ddo.nft["symbol"] == "NFTSYMBOL"
     assert ddo.nft["address"] == data_nft.address
     assert ddo.nft["owner"] == publisher_wallet.address
-    assert ddo.datatokens[0]["name"] == "ERC20DT1"
-    assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
+    assert ddo.datatokens[0]["name"] == "DT1"
+    assert ddo.datatokens[0]["symbol"] == "DT1Symbol"
     assert ddo.datatokens[0]["address"] == datatoken.address
 
 
@@ -584,7 +586,7 @@ def test_compressed_asset(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=data_nft.address,
+        data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
         compress_flag=True,
     )
@@ -593,8 +595,8 @@ def test_compressed_asset(
     assert ddo.nft["symbol"] == "NFTSYMBOL"
     assert ddo.nft["address"] == data_nft.address
     assert ddo.nft["owner"] == publisher_wallet.address
-    assert ddo.datatokens[0]["name"] == "ERC20DT1"
-    assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
+    assert ddo.datatokens[0]["name"] == "DT1"
+    assert ddo.datatokens[0]["symbol"] == "DT1Symbol"
     assert ddo.datatokens[0]["address"] == datatoken.address
 
 
@@ -610,7 +612,7 @@ def test_compressed_and_encrypted_asset(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=data_nft.address,
+        data_nft_address=data_nft.address,
         deployed_datatokens=[datatoken],
         encrypt_flag=True,
         compress_flag=True,
@@ -619,8 +621,8 @@ def test_compressed_and_encrypted_asset(
     assert ddo.nft["name"] == "NFT"
     assert ddo.nft["symbol"] == "NFTSYMBOL"
     assert ddo.nft["owner"] == publisher_wallet.address
-    assert ddo.datatokens[0]["name"] == "ERC20DT1"
-    assert ddo.datatokens[0]["symbol"] == "ERC20DT1Symbol"
+    assert ddo.datatokens[0]["name"] == "DT1"
+    assert ddo.datatokens[0]["symbol"] == "DT1Symbol"
     assert ddo.datatokens[0]["address"] == datatoken.address
 
 
@@ -638,7 +640,7 @@ def test_asset_creation_errors(
             metadata=metadata,
             publisher_wallet=publisher_wallet,
             encrypted_files=encrypted_files,
-            erc721_address=some_random_address,
+            data_nft_address=some_random_address,
             deployed_datatokens=[datatoken],
             encrypt_flag=True,
         )
@@ -650,7 +652,7 @@ def test_asset_creation_errors(
                 metadata=metadata,
                 publisher_wallet=publisher_wallet,
                 encrypted_files=encrypted_files,
-                erc721_address=data_nft.address,
+                data_nft_address=data_nft.address,
                 deployed_datatokens=[datatoken],
                 encrypt_flag=True,
             )

@@ -417,8 +417,8 @@ def test_create_erc20(
 
     tx = data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=publisher_addr,
         fee_manager=consumer_addr,
         publish_market_order_fee_address=publisher_addr,
@@ -485,7 +485,7 @@ def test_create_erc20(
     assert tx, "Could not create datatoken Enterprise using create_datatoken."
 
 
-def test_create_erc20_with_usdc_order_fee(
+def test_create_datatoken_with_usdc_order_fee(
     web3: Web3,
     config: Config,
     publisher_wallet: Wallet,
@@ -497,8 +497,8 @@ def test_create_erc20_with_usdc_order_fee(
     publish_market_order_fee_amount_in_wei = to_wei(5)
     tx = data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=publisher_wallet.address,
         fee_manager=publisher_wallet.address,
         publish_market_order_fee_address=publisher_wallet.address,
@@ -516,22 +516,22 @@ def test_create_erc20_with_usdc_order_fee(
         None,
     )
 
-    erc20_address = event[0].args.newTokenAddress
-    erc20 = Datatoken(web3, erc20_address)
+    dt_address = event[0].args.newTokenAddress
+    dt = Datatoken(web3, dt_address)
 
     # Check publish fee info
     (
         publish_market_order_fee_address,
         publish_market_order_fee_token,
         publish_market_order_fee_amount,
-    ) = erc20.get_publishing_market_fee()
+    ) = dt.get_publishing_market_fee()
     assert publish_market_order_fee_address == publisher_wallet.address
     assert publish_market_order_fee_token == usdc.address
     assert publish_market_order_fee_amount == publish_market_order_fee_amount_in_wei
 
 
 @pytest.mark.unit
-def test_create_erc20_with_non_owner(
+def test_create_datatoken_with_non_owner(
     web3: Web3,
     publisher_wallet: Wallet,
     consumer_wallet: Wallet,
@@ -554,8 +554,8 @@ def test_create_erc20_with_non_owner(
     # Consumer creates ERC20
     tx = data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=publisher_wallet.address,
         fee_manager=publisher_wallet.address,
         publish_market_order_fee_address=publisher_wallet.address,
@@ -591,8 +591,8 @@ def test_fail_creating_erc20(consumer_wallet, publisher_addr, consumer_addr, dat
     with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.create_erc20(
             template_index=1,
-            name="ERC20DT1",
-            symbol="ERC20DT1Symbol",
+            name="DT1",
+            symbol="DT1Symbol",
             minter=publisher_addr,
             fee_manager=consumer_addr,
             publish_market_order_fee_address=publisher_addr,
@@ -677,8 +677,8 @@ def test_erc721_datatoken_functions(
     ]
     data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=publisher_addr,
         fee_manager=consumer_addr,
         publish_market_order_fee_address=publisher_addr,
@@ -757,7 +757,7 @@ def test_transfer_nft(
         symbol="NFTtT",
         template_index=1,
         additional_metadata_updater=ZERO_ADDRESS,
-        additional_erc20_deployer=consumer_addr,
+        additional_datatoken_deployer=consumer_addr,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
         owner=publisher_addr,
@@ -804,7 +804,7 @@ def test_transfer_nft(
         symbol="NFT",
         template_index=1,
         additional_metadata_updater=ZERO_ADDRESS,
-        additional_erc20_deployer=ZERO_ADDRESS,
+        additional_datatoken_deployer=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
         owner=publisher_addr,
@@ -840,8 +840,8 @@ def test_transfer_nft(
     # Creates an ERC20
     tx_result = data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=consumer_addr,
         fee_manager=consumer_addr,
         publish_market_order_fee_address=publisher_addr,
@@ -859,8 +859,8 @@ def test_transfer_nft(
         None,
     )
     assert registered_token_event, "Cannot find TokenCreated event."
-    erc20_address = registered_token_event[0].args.newTokenAddress
-    datatoken = Datatoken(web3, erc20_address)
+    datatoken_address = registered_token_event[0].args.newTokenAddress
+    datatoken = Datatoken(web3, datatoken_address)
 
     assert not datatoken.is_minter(publisher_addr)
     assert datatoken.is_minter(consumer_addr)
@@ -1165,7 +1165,7 @@ def test_transfer_nft_with_erc20_pool_fre(
         symbol="NFTtT",
         template_index=1,
         additional_metadata_updater=ZERO_ADDRESS,
-        additional_erc20_deployer=consumer_addr,
+        additional_datatoken_deployer=consumer_addr,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
         owner=publisher_addr,
@@ -1188,8 +1188,8 @@ def test_transfer_nft_with_erc20_pool_fre(
     # Creates an ERC20
     tx_result = data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=publisher_addr,
         fee_manager=publisher_addr,
         publish_market_order_fee_address=publisher_addr,
@@ -1207,8 +1207,8 @@ def test_transfer_nft_with_erc20_pool_fre(
         None,
     )
     assert registered_token_event, "Cannot find TokenCreated event."
-    erc20_address = registered_token_event[0].args.newTokenAddress
-    datatoken = Datatoken(web3, erc20_address)
+    datatoken_address = registered_token_event[0].args.newTokenAddress
+    datatoken = Datatoken(web3, datatoken_address)
 
     assert datatoken.is_minter(publisher_addr)
 

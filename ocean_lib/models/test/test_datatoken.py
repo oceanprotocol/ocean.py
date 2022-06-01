@@ -52,14 +52,14 @@ def test_main(
 ):
     """Tests successful function calls"""
 
-    # Check erc20 params
+    # Check datatoken params
     assert datatoken.get_id() == 1
-    assert datatoken.contract.caller.name() == "ERC20DT1"
-    assert datatoken.symbol() == "ERC20DT1Symbol"
+    assert datatoken.contract.caller.name() == "DT1"
+    assert datatoken.symbol() == "DT1Symbol"
     assert datatoken.decimals() == 18
     assert datatoken.cap() == MAX_UINT256
 
-    # Check erc721 address
+    # Check data NFT address
     assert datatoken.get_erc721_address() == data_nft.address
 
     # Check that the Datatoken contract is initialized
@@ -133,7 +133,7 @@ def test_start_order(
     web3, config, publisher_wallet, consumer_wallet, data_nft, datatoken
 ):
     """Tests startOrder functionality without publish fees, consume fees."""
-    # Mint erc20 tokens to use
+    # Mint datatokens to use
     datatoken.mint(consumer_wallet.address, to_wei("10"), publisher_wallet)
     datatoken.mint(publisher_wallet.address, to_wei("10"), publisher_wallet)
 

@@ -52,16 +52,16 @@ def test_consume_flow(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
         encrypted_files=encrypted_files,
-        erc721_address=data_nft.address,
-        erc20_templates=[1],
-        erc20_names=["Datatoken 1"],
-        erc20_symbols=["DT1"],
-        erc20_minters=[publisher_wallet.address],
-        erc20_fee_managers=[publisher_wallet.address],
-        erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-        erc20_publish_market_order_fee_tokens=[ZERO_ADDRESS],
-        erc20_publish_market_order_fee_amounts=[0],
-        erc20_bytess=[[b""]],
+        data_nft_address=data_nft.address,
+        datatoken_templates=[1],
+        datatoken_names=["Datatoken 1"],
+        datatoken_symbols=["DT1"],
+        datatoken_minters=[publisher_wallet.address],
+        datatoken_fee_managers=[publisher_wallet.address],
+        datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
+        datatoken_publish_market_order_fee_tokens=[ZERO_ADDRESS],
+        datatoken_publish_market_order_fee_amounts=[0],
+        datatoken_bytess=[[b""]],
     )
 
     assert asset, "The asset is not created."
@@ -75,7 +75,7 @@ def test_consume_flow(
     service = get_first_service_by_type(asset, ServiceTypes.ASSET_ACCESS)
     dt = Datatoken(web3, asset.datatokens[0]["address"])
 
-    # Mint 50 ERC20 tokens in consumer wallet from publisher. Max cap = 100
+    # Mint 50 datatokens in consumer wallet from publisher. Max cap = 100
     dt.mint(
         account_address=consumer_wallet.address,
         value=to_wei("50"),

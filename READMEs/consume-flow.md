@@ -32,7 +32,7 @@ To get started with this guide, please refer to [data-nfts-and-datatokens-flow](
 In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
 
 Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
-- [x] 2.1 Create an ERC721 data NFT
+- [x] 2.1 Create a data NFT
 
 Then, please refer to [publish-flow](publish-flow.md) and complete the following steps :
 - [x] 2. Publish Dataset
@@ -60,7 +60,7 @@ assert ocean.web3.eth.get_balance(bob_wallet.address) > 0, "need ganache ETH"
 OCEAN_token = ocean.OCEAN_token
 assert OCEAN_token.balanceOf(bob_wallet.address) > 0, "need ganache OCEAN"
 
-# Mint 1 ERC20 token in consumer wallet from publisher
+# Mint 1 datatoken in consumer wallet from publisher
 datatoken = ocean.get_datatoken(asset.datatokens[0]["address"])
 datatoken.mint(
     account_address=bob_wallet.address,

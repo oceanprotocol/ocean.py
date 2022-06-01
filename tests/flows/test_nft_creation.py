@@ -31,7 +31,7 @@ def test_data_nft_roles(
         name="NFT",
         symbol="NFTSYMBOL",
         template_index=1,
-        additional_erc20_deployer=ZERO_ADDRESS,
+        additional_datatoken_deployer=ZERO_ADDRESS,
         additional_metadata_updater=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
@@ -145,7 +145,7 @@ def test_nonexistent_template_index(web3, config, publisher_wallet):
             name="DT1",
             symbol="DTSYMBOL",
             template_index=non_existent_nft_template,
-            additional_erc20_deployer=ZERO_ADDRESS,
+            additional_datatoken_deployer=ZERO_ADDRESS,
             additional_metadata_updater=ZERO_ADDRESS,
             token_uri="https://oceanprotocol.com/nft/",
             transferable=True,
@@ -170,7 +170,7 @@ def test_successful_data_nft_creation(web3, config, publisher_wallet):
         name="NFT",
         symbol="NFTSYMBOL",
         template_index=1,
-        additional_erc20_deployer=ZERO_ADDRESS,
+        additional_datatoken_deployer=ZERO_ADDRESS,
         additional_metadata_updater=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
@@ -206,7 +206,7 @@ def test_nft_count(web3, config, publisher_wallet):
         name="NFT",
         symbol="NFTSYMBOL",
         template_index=1,
-        additional_erc20_deployer=ZERO_ADDRESS,
+        additional_datatoken_deployer=ZERO_ADDRESS,
         additional_metadata_updater=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
@@ -229,7 +229,7 @@ def test_nft_template(web3, config):
 
 
 @pytest.mark.unit
-def test_erc20_creation(
+def test_datatoken_creation(
     web3, config, publisher_wallet, consumer_wallet, another_consumer_wallet
 ):
     """Test erc20 successful creation with owner assigned as minter"""
@@ -241,7 +241,7 @@ def test_erc20_creation(
         name="NFT",
         symbol="NFTSYMBOL",
         template_index=1,
-        additional_erc20_deployer=ZERO_ADDRESS,
+        additional_datatoken_deployer=ZERO_ADDRESS,
         additional_metadata_updater=ZERO_ADDRESS,
         token_uri="https://oceanprotocol.com/nft/",
         transferable=True,
@@ -260,8 +260,8 @@ def test_erc20_creation(
     data_nft.add_to_create_erc20_list(consumer_wallet.address, publisher_wallet)
     tx_result = data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=publisher_wallet.address,
         fee_manager=consumer_wallet.address,
         publish_market_order_fee_address=publisher_wallet.address,
@@ -279,21 +279,21 @@ def test_erc20_creation(
         filters=None,
     )
 
-    erc20_address = registered_event2[0].args.newTokenAddress
+    datatoken_address = registered_event2[0].args.newTokenAddress
 
-    datatoken = Datatoken(web3, erc20_address)
+    datatoken = Datatoken(web3, datatoken_address)
 
     permissions = datatoken.get_permissions(publisher_wallet.address)
 
     assert permissions[0], "Not a minter"
-    assert tx_result, "Error creating ERC20 token."
+    assert tx_result, "Error creating datatoken."
 
-    # Tests failed creation of ERC20
+    # Tests failed creation of datatoken
     with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.create_erc20(
             template_index=1,
-            name="ERC20DT1",
-            symbol="ERC20DT1Symbol",
+            name="DT1",
+            symbol="DT1Symbol",
             minter=publisher_wallet.address,
             fee_manager=consumer_wallet.address,
             publish_market_order_fee_address=publisher_wallet.address,
@@ -310,10 +310,10 @@ def test_erc20_creation(
 
 
 @pytest.mark.unit
-def test_erc20_mint_function(
+def test_datatoken_mint_function(
     web3, config, publisher_wallet, consumer_wallet, datatoken
 ):
-    """Test erc20 failed/successful mint function"""
+    """Test datatoken failed/successful mint function"""
     datatoken.mint(publisher_wallet.address, 10, publisher_wallet)
     datatoken.mint(consumer_wallet.address, 20, publisher_wallet)
 
@@ -329,17 +329,19 @@ def test_erc20_mint_function(
     )
 
     # Test with another minter
-    _, erc20_2 = deploy_erc721_erc20(web3, config, publisher_wallet, consumer_wallet)
+    _, datatoken_2 = deploy_erc721_erc20(
+        web3, config, publisher_wallet, consumer_wallet
+    )
 
-    erc20_2.mint(publisher_wallet.address, 10, consumer_wallet)
-    erc20_2.mint(consumer_wallet.address, 20, consumer_wallet)
+    datatoken_2.mint(publisher_wallet.address, 10, consumer_wallet)
+    datatoken_2.mint(consumer_wallet.address, 20, consumer_wallet)
 
     assert datatoken.balanceOf(publisher_wallet.address) == 10
     assert datatoken.balanceOf(consumer_wallet.address) == 20
 
 
 @pytest.mark.unit
-def test_erc20_set_data(web3, config, publisher_wallet, data_nft, datatoken):
+def test_datatoken_set_data(web3, config, publisher_wallet, data_nft, datatoken):
     """Test erc20 data set functions"""
 
     """This is a special metadata, it's callable only from the erc20Token contract and
@@ -391,8 +393,8 @@ def test_nft_owner_transfer(
     with pytest.raises(exceptions.ContractLogicError) as err:
         data_nft.create_erc20(
             template_index=1,
-            name="ERC20DT1",
-            symbol="ERC20DT1Symbol",
+            name="DT1",
+            symbol="DT1Symbol",
             minter=publisher_wallet.address,
             fee_manager=publisher_wallet.address,
             publish_market_order_fee_address=publisher_wallet.address,
@@ -415,8 +417,8 @@ def test_nft_owner_transfer(
     # NewOwner now owns the NFT, is already Manager by default and has all roles
     data_nft.create_erc20(
         template_index=1,
-        name="ERC20DT1",
-        symbol="ERC20DT1Symbol",
+        name="DT1",
+        symbol="DT1Symbol",
         minter=consumer_wallet.address,
         fee_manager=consumer_wallet.address,
         publish_market_order_fee_address=consumer_wallet.address,

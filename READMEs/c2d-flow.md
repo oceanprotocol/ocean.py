@@ -49,7 +49,7 @@ Set the required enviroment variables as described in [data-nfts-and-datatokens-
 In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
 
 Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
-- [x] 2.1 Create an ERC721 data NFT
+- [x] 2.1 Create a data NFT
 
 ## 3. Alice publishes a dataset
 
@@ -107,7 +107,7 @@ DATA_asset = ocean.assets.create(
     publisher_wallet=alice_wallet,
     encrypted_files=DATA_encrypted_files,
     services=[DATA_compute_service],
-    erc721_address=data_nft.address,
+    data_nft_address=data_nft.address,
     deployed_datatokens=[DATA_datatoken],
 )
 
@@ -166,7 +166,7 @@ ALGO_asset = ocean.assets.create(
     metadata=ALGO_metadata,
     publisher_wallet=alice_wallet,
     encrypted_files=ALGO_encrypted_files,
-    erc721_address=ALGO_nft_token.address,
+    data_nft_address=ALGO_nft_token.address,
     deployed_datatokens=[ALGO_datatoken],
 )
 

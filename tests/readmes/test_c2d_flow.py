@@ -133,7 +133,7 @@ def c2d_flow_readme(
         publisher_wallet=alice_wallet,
         encrypted_files=DATA_encrypted_files,
         services=[DATA_compute_service],
-        erc721_address=data_nft.address,
+        data_nft_address=data_nft.address,
         deployed_datatokens=[DATA_datatoken],
     )
 
@@ -189,7 +189,7 @@ def c2d_flow_readme(
         metadata=ALGO_metadata,
         publisher_wallet=alice_wallet,
         encrypted_files=ALGO_encrypted_files,
-        erc721_address=ALGO_nft_token.address,
+        data_nft_address=ALGO_nft_token.address,
         deployed_datatokens=[ALGO_datatoken],
     )
 

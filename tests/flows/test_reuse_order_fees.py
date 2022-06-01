@@ -15,7 +15,7 @@ from ocean_lib.structures.file_objects import FilesType
 from ocean_lib.web3_internal.currency import MAX_WEI, parse_units, to_wei
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.flows.test_start_order_fees import create_asset_with_order_fee_and_timeout
-from tests.resources.ddo_helpers import get_opc_collector_address_from_erc20
+from tests.resources.ddo_helpers import get_opc_collector_address_from_datatoken
 from tests.resources.helper_functions import (
     get_address_of_type,
     get_provider_fees,
@@ -206,7 +206,7 @@ def reuse_order_with_mock_provider_fees(
 ):
     """Call reuse_order, and verify the balances/fees are correct"""
 
-    opc_collector_address = get_opc_collector_address_from_erc20(dt)
+    opc_collector_address = get_opc_collector_address_from_datatoken(dt)
 
     # Get balances before reuse_order
     publisher_bt_balance_before = bt.balanceOf(publisher_wallet.address)

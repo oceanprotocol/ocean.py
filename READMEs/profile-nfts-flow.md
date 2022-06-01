@@ -28,7 +28,7 @@ And:
 
 ## 2. Alice publishes data NFT
 
-We create an ERC721 data NFT like in Simple Flow, except we set `transferable=False` (and skip print statements).
+We create a data NFT like in Simple Flow, except we set `transferable=False` (and skip print statements).
 
 In the terminal where you set envvars:
 

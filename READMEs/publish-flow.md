@@ -27,7 +27,7 @@ To get started with this guide, please refer to [data-nfts-and-datatokens-flow](
 In your project folder (i.e. my_project from `Install the library` step) and in the work console where you set envvars, run the following:
 
 Please refer to [data-nfts-and-datatokens-flow](data-nfts-and-datatokens-flow.md) and complete the following steps :
-- [x] 2.1 Create an ERC721 data NFT
+- [x] 2.1 Create a data NFT
 
 ## 2. Publish Dataset
 
@@ -64,15 +64,15 @@ asset = ocean.assets.create(
     metadata,
     alice_wallet,
     encrypted_files,
-    erc20_templates=[1],
-    erc20_names=["Datatoken 1"],
-    erc20_symbols=["DT1"],
-    erc20_minters=[alice_wallet.address],
-    erc20_fee_managers=[alice_wallet.address],
-    erc20_publish_market_order_fee_addresses=[ZERO_ADDRESS],
-    erc20_publish_market_order_fee_tokens=[ocean.OCEAN_address],
-    erc20_publish_market_order_fee_amounts=[0],
-    erc20_bytess=[[b""]],
+    datatoken_templates=[1],
+    datatoken_names=["Datatoken 1"],
+    datatoken_symbols=["DT1"],
+    datatoken_minters=[alice_wallet.address],
+    datatoken_fee_managers=[alice_wallet.address],
+    datatoken_publish_market_order_fee_addresses=[ZERO_ADDRESS],
+    datatoken_publish_market_order_fee_tokens=[ocean.OCEAN_address],
+    datatoken_publish_market_order_fee_amounts=[0],
+    datatoken_bytess=[[b""]],
 )
 
 did = asset.did  # did contains the datatoken address
