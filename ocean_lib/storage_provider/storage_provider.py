@@ -4,13 +4,17 @@
 #
 
 """Storage module."""
+import logging
 import os
 
 from enforce_typing import enforce_types
 from requests.models import Response
 
 from ocean_lib.config import Config
+from ocean_lib.exceptions import StorageProviderException
 from ocean_lib.http_requests.requests_session import get_requests_session
+
+logger = logging.getLogger(__name__)
 
 class StorageProvider:
     """StorageProvider class."""
@@ -28,6 +32,25 @@ class StorageProvider:
             data={"file": object_to_upload},
             headers={"Authorization": "Bearer " + os.environ["WEB3_STORAGE_TOKEN"]},
         )
+
+        if not hasattr(response, "status_code"):
+            raise StorageProviderException(
+                f"Failed to get a response for request: storageEndpoint={self.storage_url}, response is {response}"
+            )
+
+        if response.status_code != 200:
+            msg = (
+                f"Upload file failed at the storageEndpoint "
+                f"{self.storage_url}, reason {response.text}, status {response.status_code}"
+            )
+            logger.error(msg)
+            raise StorageProviderException
+
+        logger.info(
+            f"Asset urls encrypted successfully, encrypted urls str: {response.text},"
+            f" encryptedEndpoint {self.storage_url}"
+        )
+
         return response
 
     @enforce_types

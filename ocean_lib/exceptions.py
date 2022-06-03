@@ -30,3 +30,6 @@ class TransactionFailed(Exception):
 
 class DataProviderException(Exception):
     """Exception from Provider endpoints."""
+
+class StorageProviderException(Exception):
+    """Exception from Storage endpoints."""
