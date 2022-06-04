@@ -54,9 +54,16 @@ class StorageProvider:
         return response
 
     @enforce_types
-    def download(cid: str) -> Response:
-        url = f"https://{cid}.ipfs.dweb.link/"
-        response = self.requests_session.get(
-            url, timeout=20
-        )
-        return response        
+    def download(cid: str, provider) -> Response:
+        match provider:
+            case "web3.storage":
+                url = f"https://{cid}.ipfs.dweb.link/"
+                response = self.requests_session.get(
+                    url, timeout=20
+                )
+            case "estuary":
+                url = f'https://dweb.link/ipfs/{cid}'
+                response = requests.get(url, allow_redirects=True)  # to get content
+                with open(cid, 'wb') as f:
+                    f.write(response.content)
+        return response
