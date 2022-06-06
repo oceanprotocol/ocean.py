@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import time
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import List, Optional
 
 import pytest
@@ -234,7 +234,7 @@ def run_compute_test(
             algorithm if algorithm else algorithm_meta,
             consumer_address=environments[0]["consumerAddress"],
             compute_environment=environments[0]["id"],
-            valid_until=int((datetime.utcnow() + time_difference).timestamp()),
+            duration=time_difference.seconds,
         )
 
         assert "algorithm" in fees_response
@@ -247,7 +247,7 @@ def run_compute_test(
         algorithm if algorithm else algorithm_meta,
         consumer_address=environments[0]["consumerAddress"],
         compute_environment=environments[0]["id"],
-        valid_until=int((datetime.utcnow() + time_difference).timestamp()),
+        duration=time_difference.seconds,
         consume_market_order_fee_address=consumer_wallet.address,
         wallet=consumer_wallet,
     )
@@ -314,7 +314,7 @@ def run_compute_test(
             algorithm if algorithm else algorithm_meta,
             consumer_address=environments[0]["consumerAddress"],
             compute_environment=environments[0]["id"],
-            valid_until=int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
+            duration=timedelta(hours=1).seconds,
             consume_market_order_fee_address=consumer_wallet.address,
             wallet=consumer_wallet,
         )
@@ -333,7 +333,7 @@ def run_compute_test(
             algorithm if algorithm else algorithm_meta,
             consumer_address=environments[0]["consumerAddress"],
             compute_environment=environments[0]["id"],
-            valid_until=int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
+            duration=timedelta(hours=1).seconds,
             consume_market_order_fee_address=consumer_wallet.address,
             wallet=consumer_wallet,
         )

@@ -189,7 +189,7 @@ class DataServiceProvider:
         service_endpoint,
         consumer_address: str,
         compute_environment: str,
-        valid_until: int,
+        duration: int,
     ) -> Response:
         """This function initializes compute services.
 
@@ -206,7 +206,7 @@ class DataServiceProvider:
             "algorithm": algorithm_data,
             "compute": {
                 "env": compute_environment,
-                "validUntil": valid_until,
+                "duration": duration,
             },
             "consumerAddress": consumer_address,
         }

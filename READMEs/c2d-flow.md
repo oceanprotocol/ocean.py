@@ -218,7 +218,7 @@ compute_service = DATA_asset.services[0]
 algo_service = ALGO_asset.services[0]
 environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
 
-from datetime import datetime, timedelta
+from datetime import timedelta
 from ocean_lib.models.compute_input import ComputeInput
 
 DATA_compute_input = ComputeInput(DATA_asset, compute_service)
@@ -231,7 +231,7 @@ datasets, algorithm = ocean.assets.pay_for_compute_service(
     consume_market_order_fee_address=bob_wallet.address,
     wallet=bob_wallet,
     compute_environment=environments[0]["id"],
-    valid_until=int((datetime.utcnow() + timedelta(days=1)).timestamp()),
+    duration=timedelta(days=1).seconds,
     consumer_address=environments[0]["consumerAddress"],
 )
 assert datasets, "pay for dataset unsuccessful"

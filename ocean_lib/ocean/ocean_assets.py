@@ -673,7 +673,7 @@ class OceanAssets:
         datasets: List[ComputeInput],
         algorithm_data: Union[ComputeInput, AlgorithmMetadata],
         compute_environment: str,
-        valid_until: int,
+        duration: int,
         consume_market_order_fee_address: str,
         wallet: Wallet,
         consumer_address: Optional[str] = None,
@@ -689,7 +689,7 @@ class OceanAssets:
             datasets[0].service.service_endpoint,
             consumer_address,
             compute_environment,
-            valid_until,
+            duration,
         )
 
         result = initialize_response.json()

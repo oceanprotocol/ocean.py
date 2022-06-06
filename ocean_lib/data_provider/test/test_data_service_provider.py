@@ -3,7 +3,7 @@
 # SPDX-License-Identifier: Apache-2.0
 #
 import json
-from datetime import datetime, timedelta
+from datetime import timedelta
 from unittest.mock import Mock
 
 import ecies
@@ -18,8 +18,8 @@ from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
+from ocean_lib.ocean.util import get_ocean_token_address
 from ocean_lib.services.service import Service
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import create_basics, get_first_service_by_type
 from tests.resources.helper_functions import (
@@ -283,7 +283,7 @@ def test_initialize(
     assert response_json["providerFee"] == get_provider_fees(
         web3,
         provider_wallet,
-        ZERO_ADDRESS,
+        get_ocean_token_address(config.address_file),
         0,
         0,
     )
@@ -538,7 +538,7 @@ def test_initialize_compute_failure(config):
 
     http_client = HttpClientEvilMock()
     DataSP.set_http_client(http_client)
-    valid_until = int((datetime.utcnow() + timedelta(days=1)).timestamp())
+    duration = timedelta(days=1).seconds
 
     with pytest.raises(DataProviderException, match="Initialize compute failed"):
         DataSP.initialize_compute(
@@ -547,7 +547,7 @@ def test_initialize_compute_failure(config):
             service.service_endpoint,
             "0x0",
             "test",
-            valid_until,
+            duration,
         )
 
     http_client = HttpClientEmptyMock()
@@ -560,7 +560,7 @@ def test_initialize_compute_failure(config):
             service.service_endpoint,
             "0x0",
             "test",
-            valid_until,
+            duration,
         )
 
     DataSP.set_http_client(get_requests_session())

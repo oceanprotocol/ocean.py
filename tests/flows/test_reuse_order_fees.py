@@ -2,7 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from datetime import datetime, timedelta
+from datetime import timedelta
 from time import sleep
 
 import pytest
@@ -90,7 +90,7 @@ def test_reuse_order_fees(
 
     # Mock non-zero provider fees (simulate first time paying provider fees)
     provider_fee = parse_units(provider_fee_in_unit, bt.decimals())
-    valid_until = int((datetime.utcnow() + timedelta(seconds=10)).timestamp())
+    valid_until = timedelta(seconds=10).seconds
     provider_fees = get_provider_fees(
         web3,
         provider_wallet,
@@ -224,7 +224,7 @@ def reuse_order_with_mock_provider_fees(
 
     # Mock provider fees
     provider_fee = parse_units(provider_fee_in_unit, bt.decimals())
-    valid_until = int((datetime.utcnow() + timedelta(seconds=10)).timestamp())
+    valid_until = timedelta(seconds=10).seconds
     provider_fees = get_provider_fees(
         web3,
         provider_wallet,

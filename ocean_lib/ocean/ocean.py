@@ -376,7 +376,7 @@ class Ocean:
         algorithm_data: Union[ComputeInput, AlgorithmMetadata],
         consumer_address: str,
         compute_environment: str,
-        valid_until: int,
+        duration: int,
     ) -> tuple:
 
         initialize_compute_response = DataServiceProvider.initialize_compute(
@@ -385,7 +385,7 @@ class Ocean:
             datasets[0].service.service_endpoint,
             consumer_address,
             compute_environment,
-            valid_until,
+            duration,
         )
 
         return initialize_compute_response.json()

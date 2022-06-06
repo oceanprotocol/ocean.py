@@ -6,7 +6,7 @@ import io
 import os
 import pickle
 import time
-from datetime import datetime, timedelta
+from datetime import timedelta
 from decimal import Decimal
 
 import pytest
@@ -239,7 +239,7 @@ def c2d_flow_readme(
         consume_market_order_fee_address=bob_wallet.address,
         wallet=bob_wallet,
         compute_environment=environments[0]["id"],
-        valid_until=int((datetime.utcnow() + timedelta(days=1)).timestamp()),
+        duration=timedelta(days=1).seconds,
         consumer_address=environments[0]["consumerAddress"],
     )
     assert datasets, "pay for dataset unsuccessful"

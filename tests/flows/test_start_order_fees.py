@@ -2,7 +2,7 @@
 # Copyright 2022 Ocean Protocol Foundation
 # SPDX-License-Identifier: Apache-2.0
 #
-from datetime import datetime, timedelta
+from datetime import timedelta
 from typing import Tuple
 
 import pytest
@@ -125,7 +125,7 @@ def test_start_order_fees(
 
     # Get provider fees
     provider_fee = parse_units(provider_fee_in_unit, bt.decimals())
-    valid_for_two_hours = int((datetime.utcnow() + timedelta(hours=2)).timestamp())
+    valid_for_two_hours = timedelta(hours=2).seconds
     provider_fees = get_provider_fees(
         web3,
         provider_wallet,
