@@ -9,6 +9,7 @@ import os
 
 from enforce_typing import enforce_types
 from requests.models import Response
+import requests
 
 from ocean_lib.config import Config
 from ocean_lib.exceptions import StorageProviderException
@@ -23,13 +24,15 @@ class StorageProvider:
         self.config = config
         self.storage_url = self.config.storage_url
         self.requests_session = get_requests_session()
+        self.payload_key = {"estuary" : "files", "web3_storage" : "data"}
+        self.payload_dict_key = {"estuary" : "data", "web3_storage" : "file"}
 
     @enforce_types
-    def upload(self, object_to_upload: bytes) -> Response:
+    def upload(self, object_to_upload: bytes, provider: str ="web3.storage") -> Response:
 
         response = self.requests_session.post(
             self.storage_url,
-            data={"file": object_to_upload},
+            files={self.payload_dict_key[provider]: object_to_upload},
             headers={"Authorization": "Bearer " + os.environ["STORAGE_TOKEN"]},
         )
 
