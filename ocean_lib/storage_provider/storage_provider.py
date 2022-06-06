@@ -30,7 +30,7 @@ class StorageProvider:
         response = self.requests_session.post(
             self.storage_url,
             data={"file": object_to_upload},
-            headers={"Authorization": "Bearer " + os.environ["WEB3_STORAGE_TOKEN"]},
+            headers={"Authorization": "Bearer " + os.environ["STORAGE_TOKEN"]},
         )
 
         if not hasattr(response, "status_code"):
@@ -54,16 +54,15 @@ class StorageProvider:
         return response
 
     @enforce_types
-    def download(cid: str, provider) -> Response:
-        match provider:
-            case "web3.storage":
-                url = f"https://{cid}.ipfs.dweb.link/"
-                response = self.requests_session.get(
-                    url, timeout=20
-                )
-            case "estuary":
-                url = f'https://dweb.link/ipfs/{cid}'
-                response = requests.get(url, allow_redirects=True)  # to get content
-                with open(cid, 'wb') as f:
-                    f.write(response.content)
+    def download(cid: str, provider: str ="web3.storage") -> Response:
+        if provider == "web3.storage":
+            url = f"https://{cid}.ipfs.dweb.link/"
+            response = self.requests_session.get(
+                url, timeout=20
+            )
+        elif provider == "estuary":
+            url = f'https://dweb.link/ipfs/{cid}'
+            response = requests.get(url, allow_redirects=True)  # to get content
+            with open(cid, 'wb') as f:
+                f.write(response.content)
         return response
