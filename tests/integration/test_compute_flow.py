@@ -222,7 +222,9 @@ def run_compute_test(
         dataset_and_userdata.asset, ServiceTypes.CLOUD_COMPUTE
     )
 
-    environments = ocean_instance.compute.get_c2d_environments(service.service_endpoint)
+    free_c2d_env = ocean_instance.compute.get_free_c2d_environment(
+        service.service_endpoint
+    )
 
     time_difference = (
         timedelta(hours=1) if "reuse_order" not in scenarios else timedelta(seconds=30)
@@ -232,8 +234,8 @@ def run_compute_test(
         fees_response = ocean_instance.retrieve_provider_fees_for_compute(
             datasets,
             algorithm if algorithm else algorithm_meta,
-            consumer_address=environments[0]["consumerAddress"],
-            compute_environment=environments[0]["id"],
+            consumer_address=free_c2d_env["consumerAddress"],
+            compute_environment=free_c2d_env["id"],
             valid_until=int((datetime.utcnow() + time_difference).timestamp()),
         )
 
@@ -245,8 +247,8 @@ def run_compute_test(
     datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
         datasets,
         algorithm if algorithm else algorithm_meta,
-        consumer_address=environments[0]["consumerAddress"],
-        compute_environment=environments[0]["id"],
+        consumer_address=free_c2d_env["consumerAddress"],
+        compute_environment=free_c2d_env["id"],
         valid_until=int((datetime.utcnow() + time_difference).timestamp()),
         consume_market_order_fee_address=consumer_wallet.address,
         wallet=consumer_wallet,
@@ -256,7 +258,7 @@ def run_compute_test(
     job_id = ocean_instance.compute.start(
         consumer_wallet,
         datasets[0],
-        environments[0]["id"],
+        free_c2d_env["id"],
         algorithm,
         algorithm_meta,
         algorithm_algocustomdata,
@@ -312,8 +314,8 @@ def run_compute_test(
         datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
             datasets,
             algorithm if algorithm else algorithm_meta,
-            consumer_address=environments[0]["consumerAddress"],
-            compute_environment=environments[0]["id"],
+            consumer_address=free_c2d_env["consumerAddress"],
+            compute_environment=free_c2d_env["id"],
             valid_until=int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
             consume_market_order_fee_address=consumer_wallet.address,
             wallet=consumer_wallet,
@@ -331,8 +333,8 @@ def run_compute_test(
         datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
             datasets,
             algorithm if algorithm else algorithm_meta,
-            consumer_address=environments[0]["consumerAddress"],
-            compute_environment=environments[0]["id"],
+            consumer_address=free_c2d_env["consumerAddress"],
+            compute_environment=free_c2d_env["id"],
             valid_until=int((datetime.utcnow() + timedelta(hours=1)).timestamp()),
             consume_market_order_fee_address=consumer_wallet.address,
             wallet=consumer_wallet,
@@ -344,7 +346,7 @@ def run_compute_test(
         job_id = ocean_instance.compute.start(
             consumer_wallet,
             datasets[0],
-            environments[0]["id"],
+            free_c2d_env["id"],
             algorithm,
             algorithm_meta,
             algorithm_algocustomdata,

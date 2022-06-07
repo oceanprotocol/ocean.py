@@ -14,7 +14,7 @@ Here are the steps:
 3. Alice publishes algorithm
 4. Alice allows the algorithm for C2D for that data asset
 5. Bob acquires datatokens for data and algorithm
-6. Bob starts a compute job
+6. Bob starts a compute job using a free C2d environment (no provider fees)
 7. Bob monitors logs / algorithm output
 8. Tips and tricks
 
@@ -200,9 +200,10 @@ DATA_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
 ALGO_datatoken.mint(bob_wallet.address, ocean.to_wei(5), alice_wallet)
 ```
 
-## 7. Bob starts a compute job
+## 7. Bob starts a compute job using a free C2D environment
 
 Only inputs needed: DATA_did, ALGO_did. Everything else can get computed as needed.
+For demo purposes, we will use the free C2D environment, which requires no provider fees.
 
 In the same Python console:
 ```python
@@ -216,7 +217,7 @@ ALGO_asset = ocean.assets.resolve(ALGO_did)
 
 compute_service = DATA_asset.services[0]
 algo_service = ALGO_asset.services[0]
-environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
+free_c2d_env = ocean.compute.get_free_c2d_environment(compute_service.service_endpoint)
 
 from datetime import datetime, timedelta
 from ocean_lib.models.compute_input import ComputeInput
@@ -230,9 +231,9 @@ datasets, algorithm = ocean.assets.pay_for_compute_service(
     algorithm_data=ALGO_compute_input,
     consume_market_order_fee_address=bob_wallet.address,
     wallet=bob_wallet,
-    compute_environment=environments[0]["id"],
+    compute_environment=free_c2d_env["id"],
     valid_until=int((datetime.utcnow() + timedelta(days=1)).timestamp()),
-    consumer_address=environments[0]["consumerAddress"],
+    consumer_address=free_c2d_env["consumerAddress"],
 )
 assert datasets, "pay for dataset unsuccessful"
 assert algorithm, "pay for algorithm unsuccessful"
@@ -241,7 +242,7 @@ assert algorithm, "pay for algorithm unsuccessful"
 job_id = ocean.compute.start(
     consumer_wallet=bob_wallet,
     dataset=datasets[0],
-    compute_environment=environments[0]["id"],
+    compute_environment=free_c2d_env["id"],
     algorithm=algorithm,
 )
 print(f"Started compute job with id: {job_id}")
@@ -323,3 +324,7 @@ It modifies the contents of the given ComputeInput as follows:
 - If the dataset/algorithm does not contain a `transfer_tx_id` or the order has expired (based on the Provider's response), then one new order will be created.
 
 This means you can reuse the same ComputeInput and you don't need to regenerate it everytime it is sent to `pay_for_compute_service`. This step makes sure you are not paying unnecessary or duplicated fees.
+
+If you wish to upgrade the compute resources, you can use any (paid) C2d environment.
+Inspect the results of `ocean.ocean_compute.get_c2d_environments(service.service_endpoint)` and `ocean.retrieve_provider_fees_for_compute(datasets, algorithm_data, consumer_address, compute_environment, duration)` for a preview of what you will pay.
+Don't forget to handle any minting, allowance or approvals on the desired token to ensure transactions pass.
