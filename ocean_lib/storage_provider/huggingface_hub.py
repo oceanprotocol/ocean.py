@@ -3,15 +3,12 @@ from pathlib import Path
 
 from huggingface_hub import HfApi, create_repo, upload_file
 
-from huggingface_hub.constants import REPO_TYPES
-
 def upload_to_hf_hub(
     object_path,
     object_name,
     object_type='model',
     use_auth_token=True,
     exist_ok=True,
-    # model_config=None,
 ):
 
     token = os.environ["HF_TOKEN"]
@@ -29,14 +26,15 @@ def upload_to_hf_hub(
     repo_id = f'{org}/{object_name}'
     repo_url = f'https://huggingface.co/{org}/{object_name}'
 
-    create_repo(repo_id=object_name,
+    repo = create_repo(repo_id=object_name,
                 repo_type=object_type,
                 exist_ok=exist_ok)
 
     repo_url = upload_file(
                     path_or_fileobj=object_path, 
                     path_in_repo=path_name, 
-                    repo_id=repo_id
+                    repo_id=repo_id,
+                    repo_type=object_type,
                     )
 
     return repo_url
