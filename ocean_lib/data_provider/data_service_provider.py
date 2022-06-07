@@ -71,6 +71,13 @@ class DataServiceProvider:
         exception_type=DataProviderException,
     ):
         if not response or not hasattr(response, "status_code"):
+            if isinstance(response, Response) and response.status_code == 400:
+                error = response.json().get("error", None)
+                if error is None:
+                    error = response.json().get("errors", "unknown error")
+
+                raise DataProviderException(f"{endpoint_name} failed: {error}")
+
             raise DataProviderException(
                 f"Failed to get a response for request: {endpoint_name}={endpoint}, payload={payload}, response is {response}"
             )
@@ -80,7 +87,7 @@ class DataServiceProvider:
 
         if response.status_code not in success_codes:
             msg = (
-                f"request failed at the {endpoint_name}"
+                f"request failed at the {endpoint_name} "
                 f"{endpoint}, reason {response.text}, status {response.status_code}"
             )
             logger.error(msg)
@@ -225,22 +232,9 @@ class DataServiceProvider:
             headers={"content-type": "application/json"},
         )
 
-        if not response or not hasattr(response, "status_code"):
-            if isinstance(response, Response) and response.status_code == 400:
-                error = response.json().get("error", "unknown error")
-                raise DataProviderException(f"initializeComputeEndpoint: {error}")
-
-            raise DataProviderException(
-                f"Failed to get a response for request: initializeComputeEndpoint={initialize_compute_endpoint}, payload={payload}, response is {response}"
-            )
-
-        if response.status_code != 200:
-            msg = (
-                f"Initialize compute failed at the initializeEndpoint "
-                f"{initialize_compute_endpoint}, reason {response.text}, status {response.status_code}"
-            )
-            logger.error(msg)
-            raise DataProviderException(msg)
+        DataServiceProvider.check_response(
+            response, "initializeComputeEndpoint", initialize_compute_endpoint, payload
+        )
 
         logger.info(
             f"Service initialized successfully"
