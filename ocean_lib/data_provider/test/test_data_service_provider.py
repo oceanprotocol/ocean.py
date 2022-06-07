@@ -127,7 +127,7 @@ def test_start_compute_job_fails_empty(consumer_wallet, config):
     mock_service.service_endpoint = f"{config.provider_url}"
     with pytest.raises(
         DataProviderException,
-        match=f"Start Compute failed at the computeStartEndpoint {DataSP.build_compute_endpoint(mock_service.service_endpoint)[1]}",
+        match=f"Failed to get a response for request: computeStartEndpoint={DataSP.build_compute_endpoint(mock_service.service_endpoint)[1]}",
     ):
         DataSP.start_compute_job(
             dataset_compute_service=mock_service,
