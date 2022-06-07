@@ -814,3 +814,28 @@ class OceanAssets:
             consume_market_order_fee_amount=consume_market_order_fee_amount,
             from_wallet=wallet,
         )
+
+    @enforce_types
+    def encrypt_files(self, files: list):
+        data_provider = DataServiceProvider
+
+        encrypt_response = data_provider.encrypt(files, self._config.provider_url)
+
+        return encrypt_response.content.decode("utf-8")
+
+    @enforce_types
+    def encrypt_and_store_files(self, files: list):
+        data_provider = DataServiceProvider
+        storage_provider = StorageProvider(self._config)
+        files = files[0]
+        with open(files.path, "rb") as f:
+            files = f.read()
+
+        encrypt_response = data_provider.encrypt(files, self._config.provider_url)
+        storage_response = storage_provider.upload(encrypt_response.content)
+        cid = storage_response.json()['cid']
+        ipfs_file = IpfsFile(cid)
+
+        encrypt_response = data_provider.encrypt([ipfs_file], self._config.provider_url)
+
+        return encrypt_response.content.decode("utf-8")
