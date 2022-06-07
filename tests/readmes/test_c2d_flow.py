@@ -223,7 +223,9 @@ def c2d_flow_readme(
     compute_service = DATA_asset.services[0]
     algo_service = ALGO_asset.services[0]
 
-    environments = ocean.compute.get_c2d_environments(compute_service.service_endpoint)
+    free_c2d_env = ocean.compute.get_free_c2d_environment(
+        compute_service.service_endpoint
+    )
 
     DATA_compute_input = ComputeInput(DATA_asset, compute_service)
     ALGO_compute_input = ComputeInput(ALGO_asset, algo_service)
@@ -234,9 +236,9 @@ def c2d_flow_readme(
         algorithm_data=ALGO_compute_input,
         consume_market_order_fee_address=bob_wallet.address,
         wallet=bob_wallet,
-        compute_environment=environments[0]["id"],
+        compute_environment=free_c2d_env["id"],
         valid_until=int((datetime.utcnow() + timedelta(days=1)).timestamp()),
-        consumer_address=environments[0]["consumerAddress"],
+        consumer_address=free_c2d_env["consumerAddress"],
     )
     assert datasets, "pay for dataset unsuccessful"
     assert algorithm, "pay for algorithm unsuccessful"
@@ -245,7 +247,7 @@ def c2d_flow_readme(
     job_id = ocean.compute.start(
         consumer_wallet=bob_wallet,
         dataset=datasets[0],
-        compute_environment=environments[0]["id"],
+        compute_environment=free_c2d_env["id"],
         algorithm=algorithm,
     )
     assert job_id, "start compute unsuccessful"
