@@ -3,10 +3,14 @@ from pathlib import Path
 
 from huggingface_hub import HfApi, create_repo, upload_file
 
+from huggingface_hub.constants import REPO_TYPES
+
 def upload_to_hf_hub(
     object_path,
-    commit_message='Add model',
+    object_name,
+    object_type='model',
     use_auth_token=True,
+    exist_ok=True,
     # model_config=None,
 ):
 
@@ -19,18 +23,19 @@ def upload_to_hf_hub(
             "token as the `use_auth_token` argument."
         )
 
-    object_name = Path(object_path).name
+    path_name = Path(object_path).name
 
     org = HfApi().whoami(token)['name']
-    repo_name = 'test-model5'
-    repo_id = f'{org}/{repo_name}'
-    repo_url = f'https://huggingface.co/{org}/{repo_name}'
+    repo_id = f'{org}/{object_name}'
+    repo_url = f'https://huggingface.co/{org}/{object_name}'
 
-    create_repo(name="test-model5")
+    create_repo(repo_id=object_name,
+                repo_type=object_type,
+                exist_ok=exist_ok)
 
     repo_url = upload_file(
                     path_or_fileobj=object_path, 
-                    path_in_repo=object_name, 
+                    path_in_repo=path_name, 
                     repo_id=repo_id
                     )
 

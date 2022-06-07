@@ -32,7 +32,14 @@ class StorageProvider:
         self.payload_key = {"estuary" : "data", "web3_storage" : "file"}
 
     @enforce_types
-    def upload(self, object_path: str) -> Response:
+    def upload(
+        self, 
+        object_path: str, 
+        object_name: str, 
+        object_type: str = "model",
+        exist_ok = True
+        ) -> Response:
+        
         path = Path(object_path)
         with open(path, "rb") as f:
             object_to_upload = f.read()
@@ -65,7 +72,8 @@ class StorageProvider:
             return response
 
         elif self.storage_type == "huggingface":
-            upload_to_hf_hub(object_path)
+            repo_url = upload_to_hf_hub(object_path, object_name, object_type, exist_ok=exist_ok)
+            return repo_url
 
     @enforce_types
     def download(cid: str) -> Response:
