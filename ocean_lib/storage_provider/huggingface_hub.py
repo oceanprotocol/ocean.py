@@ -1,40 +1,68 @@
 import os
 from pathlib import Path
 
-from huggingface_hub import HfApi, create_repo, upload_file
+from huggingface_hub import cached_download, create_repo, HfApi, hf_hub_url, list_repo_files, upload_file
 
-def upload_to_hf_hub(
-    object_path,
-    object_name,
-    object_type='model',
-    use_auth_token=True,
-    exist_ok=True,
-):
+MODEL_EXTENSIONS = [".pth", ".bin"]
 
-    token = os.environ["HF_TOKEN"]
+def get_model_files(file_list):
+    files = []
+    for extension in MODEL_EXTENSIONS:
+        for fil in file_list:
+            if fil.endswith(extension):
+                files.append(fil)
+    return files
 
-    if token is None:
-        raise ValueError(
-            "You must login to the Hugging Face hub on this computer by typing `transformers-cli login` and "
-            "entering your credentials to use `use_auth_token=True`. Alternatively, you can pass your own "
-            "token as the `use_auth_token` argument."
-        )
+class HuggingFaceHub:
+    """HuggingFace class."""
 
-    path_name = Path(object_path).name
+    def __init__(self) -> None:
+        token = os.environ["HF_TOKEN"]
 
-    org = HfApi().whoami(token)['name']
-    repo_id = f'{org}/{object_name}'
-    repo_url = f'https://huggingface.co/{org}/{object_name}'
+        if token is None:
+            raise ValueError(
+                "You must login to the Hugging Face hub on this computer by typing `transformers-cli login` and "
+                "entering your credentials to use `use_auth_token=True`. Alternatively, you can pass your own "
+                "token as the `use_auth_token` argument."
+            )
 
-    repo = create_repo(repo_id=object_name,
-                repo_type=object_type,
-                exist_ok=exist_ok)
+        self.user = HfApi().whoami(token)['name']
 
-    repo_url = upload_file(
-                    path_or_fileobj=object_path, 
-                    path_in_repo=path_name, 
-                    repo_id=repo_id,
+    def upload(
+        self,
+        object_path: str,
+        object_name: str,
+        object_type: str = 'model',
+        use_auth_token=True,
+        exist_ok=True,
+    ) -> str:
+        path_name = Path(object_path).name
+
+        repo_id = f'{self.user}/{object_name}'
+        repo_url = f'https://huggingface.co/{self.user}/{object_name}'
+
+        repo = create_repo(repo_id=object_name,
                     repo_type=object_type,
-                    )
+                    exist_ok=exist_ok)
 
-    return repo_url
+        repo_url = upload_file(
+                        path_or_fileobj=object_path, 
+                        path_in_repo=path_name, 
+                        repo_id=repo_id,
+                        repo_type=object_type,
+                        )
+
+        return repo_url
+
+    def download(self, object_name: str, object_type: str = 'model'):
+        repo_id = f'{self.user}/{object_name}'
+        repo_files = list_repo_files(repo_id, repo_type=object_type)
+        if object_type == 'model':
+            print('repo_files')
+            object_files = get_model_files(repo_files)
+            print(object_files)
+        assert len(object_files) == 1, f"Too many model files in repo ({len(object_files)} files)"
+
+        url = hf_hub_url(repo_id, object_files[0])
+
+        return cached_download(url)
