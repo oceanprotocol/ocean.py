@@ -18,8 +18,8 @@ from ocean_lib.data_provider.data_service_provider import urljoin
 from ocean_lib.exceptions import DataProviderException, OceanEncryptAssetUrlsError
 from ocean_lib.http_requests.requests_session import get_requests_session
 from ocean_lib.models.compute_input import ComputeInput
+from ocean_lib.ocean.util import get_ocean_token_address
 from ocean_lib.services.service import Service
-from ocean_lib.web3_internal.constants import ZERO_ADDRESS
 from ocean_lib.web3_internal.wallet import Wallet
 from tests.resources.ddo_helpers import create_basics, get_first_service_by_type
 from tests.resources.helper_functions import (
@@ -283,7 +283,7 @@ def test_initialize(
     assert response_json["providerFee"] == get_provider_fees(
         web3,
         provider_wallet,
-        ZERO_ADDRESS,
+        get_ocean_token_address(config.address_file),
         0,
         0,
     )
