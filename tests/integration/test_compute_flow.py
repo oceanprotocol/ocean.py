@@ -329,16 +329,21 @@ def run_compute_test(
         prev_dt_tx_id = datasets[0].transfer_tx_id
         prev_algo_tx_id = algorithm.transfer_tx_id
         # ensure order expires
-        time.sleep(time_difference.seconds + 1)
-        datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
-            datasets,
-            algorithm if algorithm else algorithm_meta,
-            consumer_address=free_c2d_env["consumerAddress"],
-            compute_environment=free_c2d_env["id"],
-            duration=timedelta(hours=1).seconds,
-            consume_market_order_fee_address=consumer_wallet.address,
-            wallet=consumer_wallet,
-        )
+        timeout = time.time() + (30 * 5)
+        while True:
+            datasets, algorithm = ocean_instance.assets.pay_for_compute_service(
+                datasets,
+                algorithm if algorithm else algorithm_meta,
+                consumer_address=free_c2d_env["consumerAddress"],
+                compute_environment=free_c2d_env["id"],
+                duration=timedelta(hours=1).seconds,
+                consume_market_order_fee_address=consumer_wallet.address,
+                wallet=consumer_wallet,
+            )
+            if time.time() > timeout or datasets[0].transfer_tx_id != prev_dt_tx_id:
+                break
+
+            time.sleep(3)
 
         assert datasets[0].transfer_tx_id != prev_dt_tx_id
         assert algorithm.transfer_tx_id != prev_algo_tx_id
