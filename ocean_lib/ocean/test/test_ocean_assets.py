@@ -451,7 +451,7 @@ def test_plain_asset_multiple_datatokens(
     ddo = publisher_ocean_instance.assets.create(
         metadata=metadata,
         publisher_wallet=publisher_wallet,
-        files=files,
+        files=[files, files],
         data_nft_address=data_nft_address2,
         datatoken_templates=[1, 1],
         datatoken_names=["Datatoken 2", "Datatoken 3"],

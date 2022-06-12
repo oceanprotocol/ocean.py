@@ -19,6 +19,7 @@ from ocean_lib.aquarius import Aquarius
 from ocean_lib.assets.asset import Asset
 from ocean_lib.assets.asset_downloader import download_asset_files, is_consumable
 from ocean_lib.config import Config
+from ocean_lib.data_provider.data_encryptor import DataEncryptor
 from ocean_lib.data_provider.data_service_provider import DataServiceProvider
 from ocean_lib.exceptions import AquariusError, ContractNotFound, InsufficientBalance
 from ocean_lib.models.compute_input import ComputeInput
@@ -108,16 +109,12 @@ class OceanAssets:
         files: List[FilesType],
         timeout: Optional[int] = 3600,
     ) -> Service:
-        encrypted_files = self.encrypt_files(
-            files, datatoken, ServiceTypes.ASSET_ACCESS
-        )
-
         return Service(
             service_id=service_id,
             service_type=ServiceTypes.ASSET_ACCESS,
             service_endpoint=service_endpoint,
             datatoken=datatoken,
-            files=encrypted_files,
+            files=files,
             timeout=timeout,
         )
 
@@ -217,7 +214,7 @@ class OceanAssets:
         if encrypt_flag and not compress_flag:
             flags = bytes([2])
             # Encrypt DDO
-            encrypt_response = DataServiceProvider.encrypt(
+            encrypt_response = DataEncryptor.encrypt(
                 objects_to_encrypt=ddo_string, provider_uri=provider_uri
             )
             document = encrypt_response.text
@@ -229,7 +226,7 @@ class OceanAssets:
         compressed_document = lzma.compress(ddo_bytes)
 
         # Encrypt DDO
-        encrypt_response = DataServiceProvider.encrypt(
+        encrypt_response = DataEncryptor.encrypt(
             objects_to_encrypt=compressed_document, provider_uri=provider_uri
         )
 
@@ -400,6 +397,29 @@ class OceanAssets:
         datatoken_addresses = []
         services = services or []
         deployed_datatokens = deployed_datatokens or []
+
+        if datatoken_names and len(datatoken_names) > 1:
+            assert len(files) == len(
+                datatoken_names
+            ), "Files structure should be a list of files for each datatoken."
+
+        if len(datatoken_addresses) > 1:
+            assert len(files) == len(
+                datatoken_addresses
+            ), "Files structure should be a list of files for each datatoken."
+
+        if len(deployed_datatokens) > 1:
+            assert len(files) == len(
+                deployed_datatokens
+            ), "Files structure should be a list of files for each datatoken."
+
+        if (
+            len(datatoken_addresses) == 1
+            or len(deployed_datatokens) == 1
+            or (datatoken_names and len(datatoken_names) == 1)
+        ) and not isinstance(files[0], list):
+            files = [files]
+
         if not deployed_datatokens:
             for datatoken_data_counter in range(len(datatoken_templates)):
                 datatoken_addresses.append(
@@ -429,11 +449,11 @@ class OceanAssets:
                     f"{datatoken_addresses[-1]}."
                 )
             if not services:
-                for datatoken_address in datatoken_addresses:
+                for i, datatoken_address in enumerate(datatoken_addresses):
                     services = self._add_defaults(
-                        services, datatoken_address, files, provider_uri
+                        services, datatoken_address, files[i], provider_uri
                     )
-            for datatoken_address in datatoken_addresses:
+            for i, datatoken_address in enumerate(datatoken_addresses):
                 deployed_datatokens.append(Datatoken(self._web3, datatoken_address))
 
             datatokens = self.build_datatokens_list(
@@ -441,9 +461,9 @@ class OceanAssets:
             )
         else:
             if not services:
-                for datatoken in deployed_datatokens:
+                for i, datatoken in enumerate(deployed_datatokens):
                     services = self._add_defaults(
-                        services, datatoken.address, files, provider_uri
+                        services, datatoken.address, files[i], provider_uri
                     )
 
             datatokens = self.build_datatokens_list(
@@ -775,15 +795,3 @@ class OceanAssets:
             consume_market_order_fee_amount=consume_market_order_fee_amount,
             from_wallet=wallet,
         )
-
-    @enforce_types
-    def encrypt_files(self, files: List[FilesType], datatoken: str, service_type: str):
-        data_provider = DataServiceProvider
-        files = list(map(lambda file: file.to_dict(), files))
-
-        encrypt_response = data_provider.encrypt(
-            {"datatokenAddress": datatoken, "type": service_type, "files": files},
-            self._config.provider_url,
-        )
-
-        return encrypt_response.content.decode("utf-8")
